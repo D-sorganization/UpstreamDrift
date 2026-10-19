@@ -57,20 +57,20 @@ $$\text{Reserve Share} = \frac{\sum_t \sum_c |r_c(t)|}{\sum_t \sum_c |\tau_c(t)|
 ### Qualification Gate
 
 A lift is classified as **`qualified`** only when its reserve share is strictly below
-5% ($< 0.05$).  Otherwise, it is classified as **`unqualified`** with the exact reserve
+5% ($< 0.05$). Otherwise, it is classified as **`unqualified`** with the exact reserve
 share reported.
 
 ---
 
 ## Lift Status Summary
 
-| Lift | Status | Classification | Reserve Share | Reason / Notes |
-| :--- | :--- | :--- | :---: | :--- |
-| **Squat** | `complete` | `unqualified` | **56.8%** | Passing Hicks residual gate; leg joint moments exceed physiological muscle capacity, requiring reserve actuators |
-| **Bench Press** | `unavailable` | `unqualified` | — | Blocked on LIFT-5 same-input bundle (#11745) and barbell records |
-| **Deadlift** | `unavailable` | `unqualified` | — | Blocked on LIFT-5 same-input bundle (#11745) and barbell records |
-| **Snatch** | `unavailable` | `unqualified` | — | Blocked on LIFT-5 same-input bundle (#11745) and barbell records |
-| **Clean & Jerk** | `unavailable` | `unqualified` | — | Blocked on LIFT-5 same-input bundle (#11745) and barbell records |
+| Lift             | Status        | Classification | Reserve Share | Reason / Notes                                                                                                   |
+| :--------------- | :------------ | :------------- | :-----------: | :--------------------------------------------------------------------------------------------------------------- |
+| **Squat**        | `complete`    | `unqualified`  |   **57.0%**   | Passing Hicks residual gate; leg joint moments exceed physiological muscle capacity, requiring reserve actuators |
+| **Bench Press**  | `unavailable` | `unqualified`  |       —       | Blocked on LIFT-5 same-input bundle (#11745) and barbell records                                                 |
+| **Deadlift**     | `unavailable` | `unqualified`  |       —       | Blocked on LIFT-5 same-input bundle (#11745) and barbell records                                                 |
+| **Snatch**       | `unavailable` | `unqualified`  |       —       | Blocked on LIFT-5 same-input bundle (#11745) and barbell records                                                 |
+| **Clean & Jerk** | `unavailable` | `unqualified`  |       —       | Blocked on LIFT-5 same-input bundle (#11745) and barbell records                                                 |
 
 ---
 
@@ -79,51 +79,52 @@ share reported.
 ### Motion Window and Phase Labeling
 
 The back squat bundle (`back_squat_bundle.npz`, 0.2 s duration, 41 frames at stride 5) is a partial engine window located entirely at the deep squat bottom. The lifter begins at:
-- `hip_flexion_r`: $119.97^\circ$ (pinned at model bound $120.0^\circ$)
+
+- `hip_flexion_r`: $119.95^\circ$ (pinned at model bound $120.0^\circ$)
 - `hip_flexion_l`: $120.00^\circ$ (pinned at model bound $120.0^\circ$)
-- `knee_angle_r`: $109.76^\circ$
-- `knee_angle_l`: $109.49^\circ$
+- `knee_angle_r`: $109.73^\circ$
+- `knee_angle_l`: $109.43^\circ$
 
 Because the motion remains in deep flexion throughout ($> 100^\circ$ knee angle) and never approaches standing ($< 25^\circ$), it does not cover standard standing, descent, ascent, or lockout phases. The pipeline derives phase segments directly from kinematics and reports the single honest segment:
 
-| Phase | Quadriceps Act (Mean) | Gluteals Act (Mean) | Hamstrings Act (Mean) | Quadriceps Force (Pk N) | Gluteals Force (Pk N) | Hamstrings Force (Pk N) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Bottom (engine window 0.0–0.2 s)** | 0.780 | 0.360 | 0.409 | 4561.8 | 1157.0 | 2145.9 |
+| Phase                                | Quadriceps Act (Mean) | Gluteals Act (Mean) | Hamstrings Act (Mean) | Quadriceps Force (Pk N) | Gluteals Force (Pk N) | Hamstrings Force (Pk N) |
+| :----------------------------------- | :-------------------: | :-----------------: | :-------------------: | :---------------------: | :-------------------: | :---------------------: |
+| **Bottom (engine window 0.0–0.2 s)** |         0.782         |        0.360        |         0.409         |         4559.5          |        1156.4         |         2145.2          |
 
 ### Per-Group Summary Across the Motion Window
 
-| Muscle Group | Muscles | Peak Activation | Mean Activation | Peak Force (N) | Mean Force (N) |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Quadriceps** | 8 | 1.000 | 0.780 | 4561.8 | 1927.6 |
-| **Gluteals** | 18 | 1.000 | 0.360 | 1157.0 | 345.5 |
-| **Hamstrings** | 8 | 1.000 | 0.409 | 2145.9 | 440.2 |
-| **Erector Spinae** | 0 | — | — | — | — |
-| **Deltoids** | 0 | — | — | — | — |
-| **Trapezius** | 0 | — | — | — | — |
-| **Triceps** | 0 | — | — | — | — |
+| Muscle Group       | Muscles | Peak Activation | Mean Activation | Peak Force (N) | Mean Force (N) |
+| :----------------- | :-----: | :-------------: | :-------------: | :------------: | :------------: |
+| **Quadriceps**     |    8    |      1.000      |      0.782      |     4559.5     |     1929.6     |
+| **Gluteals**       |   18    |      1.000      |      0.360      |     1156.4     |     344.8      |
+| **Hamstrings**     |    8    |      1.000      |      0.409      |     2145.2     |     444.3      |
+| **Erector Spinae** |    0    |        —        |        —        |       —        |       —        |
+| **Deltoids**       |    0    |        —        |        —        |       —        |       —        |
+| **Trapezius**      |    0    |        —        |        —        |       —        |       —        |
+| **Triceps**        |    0    |        —        |        —        |       —        |       —        |
 
-*Numerical sanity check: Moment balance residual error $< 1.14 \times 10^{-13}\text{ N m}$ holds by construction because reserve actuators close any remainder in the static optimization solve; this is not evidence of physical acceptance.*
+_Numerical sanity check: Moment balance residual error $< 1.14 \times 10^{-13}\text{ N m}$ holds by construction because reserve actuators close any remainder in the static optimization solve; this is not evidence of physical acceptance._
 
 ### Leg Coordinate Breakdown (Demands, Capacities, and Reserves)
 
-At frame 0, the hip extension demand is $-219.96\text{ N m}$ (right) and $-381.92\text{ N m}$ (left) against physiological active extensor capacities of $-204.64\text{ N m}$ and $-200.02\text{ N m}$ at full activation, requiring substantial reserve actuator assistance.
+At frame 0, the hip extension demand is $-222.16\text{ N m}$ (right) and $-381.00\text{ N m}$ (left) against physiological active extensor capacities of $-204.67\text{ N m}$ and $-200.03\text{ N m}$ at full activation, requiring substantial reserve actuator assistance.
 
-| Coordinate | ID Demand Frame 0 (N·m) | ID Demand Mean (N·m) | Active Capacity Neg (Mean N·m) | Active Capacity Pos (Mean N·m) | Passive Moment (Mean N·m) | Reserve Mean (N·m) | Reserve Peak (N·m) | Reserve Share |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `hip_flexion_r` | -219.96 | 360.36 | -204.64 | +75.07 | -28.26 | 203.54 | 272.41 | 56.5% |
-| `hip_flexion_l` | -381.92 | 315.76 | -200.02 | +63.09 | -31.74 | 174.30 | 238.50 | 55.2% |
-| `hip_adduction_r` | -125.17 | 51.54 | -106.49 | +360.94 | +15.45 | 109.54 | 136.09 | 212.6% |
-| `hip_adduction_l` | -134.36 | 58.93 | -103.64 | +350.18 | +18.32 | 100.28 | 169.76 | 170.2% |
-| `hip_rotation_r` | +152.12 | 92.90 | -37.14 | +197.95 | +26.43 | 92.86 | 172.61 | 100.0% |
-| `hip_rotation_l` | +156.48 | 97.46 | -35.39 | +199.38 | +23.06 | 94.04 | 155.67 | 96.5% |
-| `knee_angle_r` | -214.72 | 116.63 | -187.16 | +218.17 | +4.49 | 18.18 | 39.89 | 15.6% |
-| `knee_angle_l` | -52.97 | 168.11 | -178.57 | +211.43 | +5.97 | 52.29 | 98.45 | 31.1% |
-| `ankle_angle_r` | -47.98 | 84.76 | -277.16 | +72.30 | -28.35 | 0.00 | 0.00 | 0.0% |
-| `ankle_angle_l` | -73.20 | 94.31 | -276.40 | +71.75 | -29.04 | 0.15 | 1.57 | 0.2% |
-| `subtalar_angle_r` | -12.81 | 18.74 | -45.57 | +83.17 | +4.26 | 0.02 | 0.05 | 0.1% |
-| `subtalar_angle_l` | -10.21 | 30.79 | -45.31 | +82.89 | +4.37 | 0.49 | 5.98 | 1.6% |
-| `mtp_angle_r` | -0.04 | 0.04 | -4.38 | +7.40 | +0.16 | 0.05 | 0.09 | 116.5% |
-| `mtp_angle_l` | -0.04 | 0.04 | -4.39 | +7.39 | +0.16 | 0.90 | 7.48 | 2253.6% |
+| Coordinate         | ID Demand Frame 0 (N·m) | ID Demand Mean (N·m) | Active Capacity Neg (Mean N·m) | Active Capacity Pos (Mean N·m) | Passive Moment (Mean N·m) | Reserve Mean (N·m) | Reserve Peak (N·m) | Reserve Share |
+| :----------------- | :---------------------: | :------------------: | :----------------------------: | :----------------------------: | :-----------------------: | :----------------: | :----------------: | :-----------: |
+| `hip_flexion_r`    |         -222.16         |        357.24        |            -204.67             |             +75.05             |          -28.26           |       202.34       |       270.08       |     56.6%     |
+| `hip_flexion_l`    |         -381.00         |        321.01        |            -200.03             |             +63.10             |          -31.76           |       177.26       |       237.95       |     55.2%     |
+| `hip_adduction_r`  |         -125.34         |        50.91         |            -106.52             |            +360.92             |          +15.45           |       107.96       |       134.86       |    212.1%     |
+| `hip_adduction_l`  |         -134.90         |        58.31         |            -103.56             |            +350.20             |          +18.33           |       102.48       |       169.39       |    175.8%     |
+| `hip_rotation_r`   |         +151.88         |        92.14         |             -37.14             |            +197.86             |          +26.40           |       93.04        |       167.15       |    101.0%     |
+| `hip_rotation_l`   |         +157.70         |        97.27         |             -35.40             |            +199.48             |          +23.10           |       93.64        |       154.47       |     96.3%     |
+| `knee_angle_r`     |         -214.07         |        126.73        |            -187.05             |            +218.27             |           +4.50           |       21.38        |       43.46        |     16.9%     |
+| `knee_angle_l`     |         -53.11          |        159.54        |            -178.39             |            +211.49             |           +6.00           |       50.15        |       98.92        |     31.4%     |
+| `ankle_angle_r`    |         -48.26          |        84.70         |            -277.33             |             +72.32             |          -28.31           |        0.00        |        0.00        |     0.0%      |
+| `ankle_angle_l`    |         -72.73          |        94.62         |            -276.59             |             +71.83             |          -28.94           |        0.15        |        1.58        |     0.2%      |
+| `subtalar_angle_r` |         -12.82          |        18.77         |             -45.58             |             +83.20             |           +4.25           |        0.02        |        0.05        |     0.1%      |
+| `subtalar_angle_l` |         -10.40          |        30.85         |             -45.33             |             +82.93             |           +4.36           |        0.49        |        6.42        |     1.6%      |
+| `mtp_angle_r`      |          -0.04          |         0.04         |             -4.38              |             +7.40              |           +0.16           |        0.05        |        0.09        |    115.0%     |
+| `mtp_angle_l`      |          -0.04          |         0.04         |             -4.40              |             +7.39              |           +0.16           |        0.90        |        7.35        |    2250.8%    |
 
 **Primary Reserve Drivers:** `hip_flexion_r`, `hip_flexion_l`, `hip_adduction_r`, `hip_adduction_l`.
 
@@ -136,35 +137,40 @@ Both `hip_flexion_r` and `hip_flexion_l` sit at the model upper range bound of $
 ### Ground Shear Asymmetry and Hip vs Knee Torque Split
 
 At frame 0, total sagittal extension demand ($\tau_{\text{hip}} + \tau_{\text{knee}}$) is virtually identical across both legs:
-- **Right Leg:** $-219.96 + (-214.72) = -434.68\text{ N m}$
-- **Left Leg:** $-381.92 + (-52.97) = -434.89\text{ N m}$ (agreement within 0.05%)
-- **Vertical Ground Reactions:** $1139.24\text{ N}$ (right) vs $1131.02\text{ N}$ (left)
 
-The large hip-extension asymmetry ($-220.0\text{ N m}$ right vs $-381.9\text{ N m}$ left) is driven by the anterior-posterior ground shear force:
-- **Left Foot:** $+208.96\text{ N}$ (forward shear)
-- **Right Foot:** $-127.35\text{ N}$ (backward shear)
-- **Shear Differential:** $336.31\text{ N}$
+- **Right Leg:** $-222.16 + (-214.07) = -436.23\text{ N m}$
+- **Left Leg:** $-381.00 + (-53.11) = -434.11\text{ N m}$ (agreement within 0.5%)
+- **Vertical Ground Reactions:** $1142.99\text{ N}$ (right) vs $1128.94\text{ N}$ (left)
 
-Because the knee is anterior to the ankle and the hip is posterior in a deep squat, forward ground shear ($+F_x$) produces a clockwise moment about the knee (assisting extension, reducing required internal knee moment from $-214.7\text{ N m}$ to $-53.0\text{ N m}$) while shifting the ground reaction force line of action forward relative to the hip (increasing internal hip extension demand from $-220.0\text{ N m}$ to $-381.9\text{ N m}$).
+The large hip-extension asymmetry ($-222.2\text{ N m}$ right vs $-381.0\text{ N m}$ left) is driven by the anterior-posterior ground shear force:
+
+- **Left Foot:** $+207.67\text{ N}$ (forward shear)
+- **Right Foot:** $-125.01\text{ N}$ (backward shear)
+- **Shear Differential:** $332.68\text{ N}$
+
+Because the knee is anterior to the ankle and the hip is posterior in a deep squat, forward ground shear ($+F_x$) produces a clockwise moment about the knee (assisting extension, reducing required internal knee moment from $-214.1\text{ N m}$ to $-53.1\text{ N m}$) while shifting the ground reaction force line of action forward relative to the hip (increasing internal hip extension demand from $-222.2\text{ N m}$ to $-381.0\text{ N m}$).
 
 ### Solver Comparison: Static Optimization vs MocoInverse
 
-| Solver | Formulation | Convergence | Reserve Share | Wall Clock (s) | Status / Notes |
-| :--- | :--- | :---: | :---: | :---: | :--- |
-| **StaticOptimization** | Per-frame QP, rigid tendon Millard | Converged | **56.8%** | 54.1 s | Evaluated across 41 frames; reserves required to resolve physiological deficits |
-| **MocoInverse** | Direct collocation (Hermite-Simpson, DGF2016) | Unconverged | — | 143.0 s | Completed 20 iterations (`Maximum_Iterations_Exceeded`), objective $142,168$ |
+| Solver                 | Formulation                                   | Convergence | Reserve Share | Wall Clock (s) | Status / Notes                                                                  |
+| :--------------------- | :-------------------------------------------- | :---------: | :-----------: | :------------: | :------------------------------------------------------------------------------ |
+| **StaticOptimization** | Per-frame QP, rigid tendon Millard            |  Converged  |   **57.0%**   |     54.1 s     | Evaluated across 41 frames; reserves required to resolve physiological deficits |
+| **MocoInverse**        | Direct collocation (Hermite-Simpson, DGF2016) | Unconverged |       —       |    143.0 s     | Completed 20 iterations (`Maximum_Iterations_Exceeded`), objective $142,168$    |
 
 ---
 
 ## Evidence Plots
 
 ### 1. Muscle Group Activations
+
 ![Back Squat Activations](squat_muscle_activations_by_phase.png)
 
 ### 2. Muscle Group Forces
+
 ![Back Squat Forces](squat_muscle_forces_by_phase.png)
 
 ### 3. Joint Moment Balance and Reserve Loads
+
 ![Back Squat Moments and Reserves](squat_joint_moments_and_reserves.png)
 
 ---

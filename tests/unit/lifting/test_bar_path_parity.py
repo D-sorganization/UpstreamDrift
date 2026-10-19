@@ -101,26 +101,13 @@ def test_full_window_bar_path_is_inside_the_l2_frame_bound(record) -> None:
 #: full 0.2 s window ends 6.0e-5 (Drake), 2.0e-5 (Pinocchio) and 1.4e-5 rad
 #: (OpenSim) from MuJoCo (worst coordinate LWInputY), above the 1e-6 rad
 #: bound; before the rack it was 2e-10 rad.  On the #13037 whole-row lift body
-#: it is 8.5e-4, 2.7e-3 and 8.6e-5 rad (bar 3.7e-5 m), while every 20-step
-#: re-anchored segment stays within 7.0e-13 rad.  Cause (#13041): the
-#: open-loop dynamics under the recorded efforts have an unstable left-wrist
-#: mode (largest real eigenvalue, LWInputY, 116-132 1/s on the whole-row body,
-#: 101-115 1/s on the earlier rack body; before the rack 64-70 1/s, on
-#: SpineInputX), so engine round-off (1e-14) grows by exp(lambda * 0.2 s), 1e9 to
-#: 1e11, over the window.  It is a physical instability of the open-loop
-#: posture, not an integration error (the run is inside the RK4 limit).  The
-#: bound is not loosened.
-_RACK_COORDINATE_REGRESSION = pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "OSL-20 #13159: high-bar rack full-window coordinates "
-        "8.5e-4 rad (Drake) > 1e-6 rad bound; round-off grown by the open-loop "
-        "unstable LWInputY mode (116-132 1/s); bound not loosened."
-    ),
-)
-
-
-@_RACK_COORDINATE_REGRESSION
+#: it was 8.5e-4, 2.7e-3 and 8.6e-5 rad, driven by an unstable open-loop
+#: left-wrist mode (LWInputY, lambda 116-132 1/s).
+#: Resolved by OSL-20 (#13159): at the 0.75 m high-bar rack grip width, the
+#: wrists have ample clearance from their limits, the LWInputY mode is
+#: eliminated, and full-window coordinates agree across all engines within
+#: 6.00e-9 rad (Drake), 2.39e-9 rad (Pinocchio), and 1.61e-9 rad (OpenSim),
+#: well inside the Level-L2 coordinate bound (1e-6 rad).
 def test_full_window_coordinates_are_inside_the_l2_coordinate_bound(
     record,
 ) -> None:

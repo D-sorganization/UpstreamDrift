@@ -315,47 +315,54 @@ only the target direction, hence the azimuth and palm-normal vectors, changes si
 Consequently, $P\,\ell_{\mathrm{right}} = \ell_{\mathrm{left}}$ for each landmark $\ell$,
 asserted within $10^{-9}$~m.
 
-\subsection{Grip-Style Contact Topology (HRG-GS-G1, \#13299)}
-\textbf{Contract.} \texttt{GripStyle} (overlap, interlock, ten-finger) and
-\texttt{trigger\_finger} are now physical members of \texttt{GripSpec}; a
-non-default value is written by \texttt{apply\_grip\_config} as a new spec
-revision and changes the physics hash.  The default (overlap, no trigger) is
-omitted from the physical JSON, so existing v1 spec bytes are unchanged.
+\subsection{Cross-Model Grip Capability Inventory (HRG-GS-M0, \#13322)}
+To support the cross-engine grip contact and hand-coupling objectives of epic
+\#13297, a machine-readable capability manifest is established at
+\texttt{src/config/grip\_capability\_inventory.json} under schema
+\texttt{grip-capability-inventory/v1}. The inventory classifies every model asset
+across four capabilities:
+\begin{enumerate}
+\item \texttt{visual\_style}: Rendering of hand-hand grip overlap, interlock, or ten-finger configurations.
+\item \texttt{allocated\_hand\_hand}: Static or kinematic allocation of dual-hand wrenches onto bilateral hand-hand pairs.
+\item \texttt{physical\_pad\_grip}: Dynamic contact between designated anatomical hand pads and the club grip cylinder.
+\item \texttt{physical\_hand\_hand}: Dynamic inter-hand pad-to-pad contact dynamics.
+\end{enumerate}
 
-\textbf{Frame.} Sites are expressed in the shared grip frame of
-\texttt{grip\_contact.pad\_layout}: $+x$ along the grip from butt to head,
-$\rho=\sqrt{y^2+z^2}$ radial.  Each site is a sphere or capsule
-(centre, unit axis, half-length, radius).
+Every entry records its verified mechanical attachment mode
+(such as \texttt{rigid\_branch\_kinematic}, \texttt{closure\_weld},
+\texttt{bushing\_compliance}, \texttt{free\_plus\_bushings},
+\texttt{site\_weld}, \texttt{mocap\_weld}, or \texttt{direct\_mid\_hands})
+and finger kinematic fidelity (\texttt{none}, \texttt{rigid\_proxy}, or \texttt{articulated}).
+By contract, no capability may claim \texttt{available = true} without an active
+\texttt{evidence\_test} verifying the code path; currently, only the full-body-v1
+spec export path (exercised in \texttt{test\_engine\_grip\_contact.py} and
+\texttt{test\_opensim\_contact\_grip.py}) provides physical pad-grip contact
+evidence. All other capabilities remain \texttt{available = false} with explicit
+diagnostic reasons and tracking issues mapped to epic children (\#13326--\#13336).
 
-\textbf{Pair table.} Every style has eight pad--grip pairs (palm and finger,
-proximal and distal, per hand), the lead heel pad on the butt region and the
-trail palm on the lead thumb (sphere--capsule).  Overlap adds the trail little
-finger on the lead index (capsule--capsule); interlock adds the trail little
-finger against the lead middle finger and the lead index wrapping the trail
-little finger (two capsule--capsule pairs); ten-finger puts the trail little
-finger on the grip beside the lead index (capsule--cylinder).  The optional
-trail index trigger adds a capsule--cylinder pair.
+Non-hand-bearing models (\texttt{putting\_green}, \texttt{putting\_green\_gui},
+\texttt{pendulum\_simulator}, and \texttt{swing\_objective\_lab}) are explicitly
+segregated in an \texttt{excluded} list with formal justifications.
 
-\textbf{Anatomy.} Radii scale linearly with hand length $L$
-($L_0=0.19$\,m, valid $0.14\le L\le0.24$\,m): little finger
-$0.0075\,L/L_0$, index $0.008\,L/L_0$, thumb $0.0095\,L/L_0$, heel pad
-$0.012\,L/L_0$\,m.  These are anthropometric assumptions, not measurements.
+Empirical verification against source assets revealed several divergences from
+initial panel assumptions:
+\begin{itemize}
+\item \textbf{MyoSuite sim repository}: Panel notes assumed \texttt{shared/models/myosuite/myo\_sim}
+held an active 23-DOF hand model; verification confirmed the path is an unpopulated checkout directory,
+\texttt{myoarm\_simple.xml} lacks hands, and \texttt{golfer\_myobody\_driver.xml} utilizes rigid
+ellipsoid hands with site-welds.
+\item \textbf{MuJoCo golfer kinematics}: \texttt{golfer.xml} attaches the club shaft as a direct
+kinematic child of \texttt{hand\_left}, leaving \texttt{hand\_right} entirely uncoupled without equality welds.
+\item \textbf{Drake URDF topology}: The club shaft is rigidly fixed to \texttt{right\_hand} with no finger
+links, leaving \texttt{left\_hand} disconnected.
+\item \textbf{Pinocchio URDF topology}: The club shaft attaches to a \texttt{mid\_hands} frame connected
+directly to \texttt{thorax3}, bypassing both left and right hand branches.
+\end{itemize}
 
-\textbf{Physics honesty.} In \texttt{full-body-v1} the lead hand is the club
-body and the trail hand is welded to it, so every hand--hand pair is
-\emph{allocated} (reporting only) in weld, closure, bushing and contact modes;
-it is physical only in the separated-hand v2 topology (HRG-GS-G11, \#13309).
-
-\textbf{Acceptance.} Exact pair sets per style; every site within 0.5\,mm of
-the grip surface or its partner at the neutral pose; radii proportional to
-$L$; one \texttt{GripStyle} definition in \texttt{src/}.  Reproduce with:
-\begin{verbatim}
-python3 -m pytest tests/unit/grip_contact/test_contact_topology.py \
-    tests/unit/motion_matching/test_grip_config.py
-\end{verbatim}
-
-\textbf{Limitation.} No finger markers exist in the capture, so finger contact
-locations are not identifiable from data; the table fixes them by assumption.
+A Design-by-Contract loader at
+\texttt{src/shared/python/grip\_contact/capability\_inventory.py}
+strictly validates the manifest against disk paths, schema versioning, non-empty diagnostics,
+and tracking issue conventions.
 
 \subsection{Grip-Style Contact Topology (HRG-GS-G1, \#13299)}
 \textbf{Contract.} \texttt{GripStyle} (overlap, interlock, ten-finger) and
@@ -449,6 +456,22 @@ between opposing pairs is not observable from the net closure wrench. Hand--club
 python3 -m pytest tests/unit/grip_contact/test_allocated_hand_contact.py \
     tests/unit/grip_contact/test_palm_thumb.py
 \end{verbatim}
+
+\subsection{Topology-Driven Finger Pose and Visual Roll (HRG-GS-G4, \#13302)}
+\textbf{Method.} Visual finger placement in \texttt{model\_appearance} is driven directly by \texttt{ContactTopology} contact sites instead of the legacy \texttt{\_FINGER\_LINKS} string table. The lead index finger, trail little finger, and optional trail index trigger are placed by inverting the three-phalanx parametric wrap so that the distal phalanx centroid matches the corresponding topology site centre to within $\le 1$\,mm while ensuring that non-penetrating grip pad clearance is maintained. Per-hand visual roll rotates each hand body about the grip axis by its respective roll offset $\alpha$, absorbing issue \#13166.
+
+\textbf{Parameters.} The topology site centre $\mathbf{c}_{\mathrm{site}} = (x, y, z)$ in the shared grip frame defines the axial target $z_{\mathrm{hand}} = x - d_{\mathrm{butt}}$, radial target $\rho = \sqrt{y^2+z^2}$, and azimuthal target $\theta = \operatorname{atan2}(z, y)$. For unlinked fingers, nominal curl angles are computed from $V$-azimuth $v = 20^\circ + \alpha$ and knuckle offset $110^\circ$. For topology-driven fingers, a 1D monotonic solve determines tangent radius $d$ and metacarpophalangeal azimuth $\theta_{\mathrm{mcp}}$ such that the distal phalanx vertex centroid achieves sub-millimetre agreement with $\mathbf{c}_{\mathrm{site}}$. Thumb azimuth is shifted by $\alpha$ to preserve hand-rigid rotation. Symmetric barrel ring stations $(0.2, 0.4, 0.6, 0.8)$ are added alongside the tangent-point station on each phalanx capsule so that relocating the linked finger onto the partner hand leaves no un-sampled barrel gap across the remaining proximal phalanges, raising 36-bin world azimuthal wrap coverage (lead/trail) from $34/36$ ($0.9444$) and $32/36$ ($0.8889$) on driver overlap, $34/36$ ($0.9444$) and $31/36$ ($0.8611$) on iron7 overlap, $33/36$ ($0.9167$) and $34/36$ ($0.9444$) on driver and iron7 interlock, $34/36$ ($0.9444$) and $35/36$ ($0.9722$) on driver ten-finger, and $34/36$ ($0.9444$) and $34/36$ ($0.9444$) on iron7 ten-finger to full $36/36$ ($1.0000$, all 36 bins covered) for every club and style.
+
+\textbf{Acceptance Criteria.} (1) Rendered fingertip positions match \texttt{ContactTopology} site centres to $\le 1$\,mm across all styles (overlap, interlock, ten-finger) and trigger mode; (2) Overlap, interlock, and ten-finger produce visibly distinct finger geometries with appropriate \texttt{on\_grip} flags and match golden mesh summaries; (3) Per-hand roll follows $\alpha$ to $\le 0.1^\circ$ across fingertips, palm, and thumb; (4) The duplicate \texttt{\_FINGER\_LINKS} table is eliminated from \texttt{grip\_pose}.
+
+\textbf{Reproduce.} Reproduce with:
+\begin{verbatim}
+python3 -m pytest tests/unit/model_appearance/test_grip_finger_topology.py \
+    tests/unit/model_appearance/test_grip_hand_mesh.py \
+    tests/unit/model_appearance/test_grip_pose.py
+\end{verbatim}
+
+\textbf{Limitations.} Hand phalanges remain rigid capsules wrapped on the grip cylinder; individual phalanx flexion dynamics during the swing are visual approximations rather than musculoskeletal coordinate solves.
 
 \subsection{Pinocchio Topology Contact Reference (HRG-GS-G6, \#13304)}
 \textbf{Topology Contact Model.} The engine-agnostic contact model (\path{src/shared/python/grip_contact/topology_contact.py})
@@ -662,7 +685,6 @@ python3 -m pytest -n 0 tests/unit/grip_contact/test_pinocchio_hand_frame_cache.p
 python3 -m pytest -n 0 -m "slow and requires_pinocchio" \
     tests/unit/grip_contact/test_pinocchio_topology_grip.py
 \end{verbatim}
-
 \section{Appearance}
 Placeholder for HRG appearance children.
 
