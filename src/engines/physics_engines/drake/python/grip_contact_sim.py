@@ -150,11 +150,29 @@ class ClubInHands(FreeClubPlantMixin):
         pose = self.plant.EvalBodyPoseInWorld(self.context, self.club)
         return np.array(pose.rotation().matrix()), np.array(pose.translation())
 
-    def wrenches(self) -> dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]]:
-        """Per hand: force on the club, moment about the grip origin, pad normals."""
+    def wrenches(
+        self,
+    ) -> dict[str, tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
+        """Per hand: force on the club, moment about the grip origin, pad normals, pad tangentials.
+
+        Returns:
+            Dictionary mapping hand side ('L', 'R') to:
+            - force: (3,) net force on the club in world frame [N]
+            - moment: (3,) net moment about the grip origin in world frame [N*m]
+            - pad_normal: (pad_count,) compressive normal force per pad [N]
+            - pad_tangential: (pad_count,) tangential friction force magnitude per pad [N]
+        """
         rot, origin = self.club_pose()
         grip_origin = {s: origin + rot @ self._offsets[s][:3, 3] for s in SIDES}
-        out = {s: [np.zeros(3), np.zeros(3), np.zeros(self.pad_count)] for s in SIDES}
+        out = {
+            s: [
+                np.zeros(3),
+                np.zeros(3),
+                np.zeros(self.pad_count),
+                np.zeros(self.pad_count),
+            ]
+            for s in SIDES
+        }
         results = self.plant.get_contact_results_output_port().Eval(self.context)
         club_index = self.club.index()
         for n in range(results.num_point_pair_contacts()):
@@ -171,8 +189,21 @@ class ClubInHands(FreeClubPlantMixin):
             out[side][1] += cross3(
                 np.array(info.contact_point()) - grip_origin[side], force
             )
-            out[side][2][k] = float(np.linalg.norm(force))  # total, normal + friction
-        return {s: (v[0], v[1], v[2]) for s, v in out.items()}
+            # Contact normal pointing into the club (compressive direction)
+            n_raw = np.array(pair.nhat_BA_W)
+            if info.bodyB_index() == club_index:
+                n_into_club = -n_raw
+            else:
+                n_into_club = n_raw
+            n_len = float(np.linalg.norm(n_into_club))
+            if n_len > 1e-12:
+                n_into_club = n_into_club / n_len
+            f_norm = max(0.0, float(np.dot(force, n_into_club)))
+            f_tang_vec = force - f_norm * n_into_club
+            f_tang = float(np.linalg.norm(f_tang_vec))
+            out[side][2][k] += f_norm
+            out[side][3][k] += f_tang
+        return {s: (v[0], v[1], v[2], v[3]) for s, v in out.items()}
 
     def frame_poses(self) -> dict[str, tuple[np.ndarray, np.ndarray]]:
         """World pose of each hand grip frame and each club grip frame."""
@@ -260,6 +291,7 @@ def simulate_grip_contact(
     )
     wrench, hand_pose, club_pose = start_simulation(simulator, float(times[0]), x0)
     normal: dict[str, list] = {s: [] for s in SIDES}
+    tangential: dict[str, list] = {s: [] for s in SIDES}
     club_rot = []
     for t in times:
         if t > times[0]:
@@ -267,10 +299,11 @@ def simulate_grip_contact(
         sim.set_hand(kin.state(*source(float(t))))
         sim.set_club(continuous_state(simulator))
         poses = sim.frame_poses()
-        for s, (force, moment, pad_force) in sim.wrenches().items():
+        for s, (force, moment, pad_normal, pad_tang) in sim.wrenches().items():
             wrench[s][0].append(force)
             wrench[s][1].append(moment)
-            normal[s].append(pad_force)
+            normal[s].append(pad_normal)
+            tangential[s].append(pad_tang)
             hand_pose[s][0].append(poses[f"hand_{s}"][0])
             hand_pose[s][1].append(poses[f"hand_{s}"][1])
             club_pose[s][0].append(poses[f"club_{s}"][0])
@@ -296,7 +329,13 @@ def simulate_grip_contact(
         },
     )
     axial, roll = slip_from_frames(arrays["h"], arrays["c"])
-    return ContactRun(series, {s: np.array(normal[s]) for s in SIDES}, roll, axial)
+    return ContactRun(
+        series,
+        {s: np.array(normal[s]) for s in SIDES},
+        roll,
+        axial,
+        tangential_force_n={s: np.array(tangential[s]) for s in SIDES},
+    )
 
 
 __all__ = ["ClubInHands", "simulate_grip_contact"]

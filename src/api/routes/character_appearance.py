@@ -17,18 +17,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from src.api.services.character_appearance_service import (
-    appearance_library,
-    appearance_sidecar_filename,
-    build_appearance,
-    grip_revision_summary,
-)
-from src.shared.python.motion_matching.execution.grip_selection import (
-    GripOverrides,
-)
-
 from ..models.requests import CharacterSpecRequest
-from .character_builder import _compile
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -126,10 +115,14 @@ def _build(
     spec_sha256: str | None = None
     preset_id: str | None = None
     if request.character is not None:
+        from .character_builder import _compile
+
         compiled = _compile(request.character)
         spec_sha256 = compiled.sha256
         preset_id = compiled.preset_id
     try:
+        from src.api.services.character_appearance_service import build_appearance
+
         document = build_appearance(_choices(request), spec_sha256)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -139,6 +132,8 @@ def _build(
 @router.get("/character-builder/appearance/library")
 def get_appearance_library() -> dict[str, Any]:
     """List skin tones, clothing presets, finishes and every named material."""
+    from src.api.services.character_appearance_service import appearance_library
+
     return appearance_library()
 
 
@@ -156,6 +151,10 @@ def build_character_appearance(request: CharacterAppearanceRequest) -> dict[str,
 )
 def export_character_appearance(request: CharacterAppearanceRequest) -> Response:
     """Export the picked appearance as a downloadable JSON sidecar."""
+    from src.api.services.character_appearance_service import (
+        appearance_sidecar_filename,
+    )
+
     document, spec_sha256, preset_id = _build(request)
     filename = appearance_sidecar_filename(
         document, preset_id=preset_id, spec_sha256=spec_sha256
@@ -201,6 +200,12 @@ def build_grip_revision(request: GripRevisionRequest) -> dict[str, Any]:
     A physical pick returns the new revision's hashes and ``refit_required``;
     picture-only picks leave ``physics_spec_sha256`` equal to the parent's.
     """
+    from src.api.services.character_appearance_service import grip_revision_summary
+    from src.shared.python.motion_matching.execution.grip_selection import (
+        GripOverrides,
+    )
+    from .character_builder import _compile
+
     picks = request.model_dump(exclude={"character"}, exclude_none=True)
     try:
         compiled = _compile(
