@@ -24,7 +24,10 @@ require_opensim()
 
 from src.engines.physics_engines.opensim.python.grip_contact_osim_sim import (
     ContactGripSimulator,
+    calibrated_site_foundation,
+    pad_normal_force_n,
     simulate_grip_contact,
+    write_calibration_mesh,
 )
 from src.engines.physics_engines.pinocchio.python import (
     grip_contact_sim as pin_sim,
@@ -33,6 +36,7 @@ from src.shared.python.grip_contact import (
     GripInterface,
     load_coordinate_swing,
 )
+from src.shared.python.grip_contact.bushing_law import BushingState
 from src.shared.python.grip_contact.contact_topology import (
     GripStyle,
     contact_topology,
@@ -45,16 +49,16 @@ from src.shared.python.grip_contact.parity import (
 from src.shared.python.grip_contact.topology_contact import (
     TopologyContactModel,
     build_topology_model,
+    topology_pair_wrench,
 )
 from src.shared.python.motion_matching.grip_contract import GripSpec
 
-# Every case integrates OpenSim and Pinocchio stiff contact (~20-60 s on a loaded
-# host), so the whole module is slow; pure law checks live elsewhere.
+# Full-model runs integrate OpenSim and Pinocchio stiff contact (~20-60 s on a
+# loaded host) and carry @pytest.mark.slow; the single-pair sliding probe runs
+# in the default fast unit lane.
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.requires_opensim,
-    pytest.mark.requires_pinocchio,
-    pytest.mark.slow,
 ]
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -81,6 +85,95 @@ def _setup(
     topo = contact_topology(gspec)
     topo_model = build_topology_model(interface, topo, squeeze_per_hand_n=SQUEEZE)
     return spec_bytes, spec, names, swing, interface, topo_model
+
+
+def test_single_pair_sliding_friction_matches_shared_law(tmp_path: Path) -> None:
+    """Single topology sphere on grip cylinder matches shared law normal stiffness and sliding friction within 5%."""
+    osim = require_opensim()
+    _, _, _, _, _, topo_model = _setup(style=GripStyle.OVERLAP)
+    site = topo_model.topology.site("lead_palm_proximal")
+    grip_r = topo_model.cylinder.radius_m
+    ef = calibrated_site_foundation(topo_model, site.radius_m, grip_r, count=1)
+    mesh = write_calibration_mesh(ef, tmp_path)
+
+    # 1. Normal force and normal tangent stiffness at operating preload
+    d0 = ef.preload_penetration_m
+    f0 = pad_normal_force_n(ef, mesh, d0)
+    assert f0 == pytest.approx(ef.force_per_pad_n, rel=1e-2)
+    h = 5.0e-5
+    tangent = (
+        pad_normal_force_n(ef, mesh, d0 + h) - pad_normal_force_n(ef, mesh, d0 - h)
+    ) / (2.0 * h)
+    assert tangent == pytest.approx(topo_model.law.stiffness_n_m, rel=0.05)
+
+    # 2. Imposed tangential slip velocity sweep (1e-4 to 1.0 m/s) along cylinder axis
+    model = osim.Model()
+    model.setGravity(osim.Vec3(0.0, 0.0, 0.0))
+    body = osim.Body("pad", 0.5, osim.Vec3(0), osim.Inertia(1e-3))
+    model.addBody(body)
+    joint = osim.FreeJoint(
+        "free",
+        model.getGround(),
+        osim.Vec3(0),
+        osim.Vec3(0),
+        body,
+        osim.Vec3(0),
+        osim.Vec3(0),
+    )
+    model.addJoint(joint)
+    model.addContactGeometry(
+        osim.ContactSphere(site.radius_m, osim.Vec3(0), body, "pad")
+    )
+    model.addContactGeometry(
+        osim.ContactMesh(
+            str(mesh), osim.Vec3(0), osim.Vec3(0), model.getGround(), "grip"
+        )
+    )
+    force = osim.ElasticFoundationForce()
+    force.setName("pad_force")
+    force.addGeometry("pad")
+    force.addGeometry("grip")
+    force.setStiffness(ef.stiffness_n_m3)
+    force.setDissipation(ef.dissipation_s_m)
+    force.setStaticFriction(ef.static_friction)
+    force.setDynamicFriction(ef.dynamic_friction)
+    force.setViscousFriction(ef.viscous_friction)
+    force.setTransitionVelocity(ef.transition_velocity_m_s)
+    model.addForce(force)
+
+    state = model.initSystem()
+    coords = model.updCoordinateSet()
+    coords.get("free_coord_4").setValue(state, grip_r + site.radius_m - d0)
+
+    speeds = np.geomspace(1.0e-4, 1.0, 17)
+    ft_ref_list: list[float] = []
+    ft_osim_list: list[float] = []
+    club_state = BushingState(np.eye(3), np.zeros(3), np.zeros(3), np.zeros(3))
+    for v_slip in speeds:
+        coords.get("free_coord_5").setSpeedValue(state, float(v_slip))
+        model.realizeDynamics(state)
+        rec = force.getRecordValues(state)
+        ft_osim_list.append(abs(float(rec.get(2))))
+        hand_state = BushingState(
+            np.eye(3), np.zeros(3), np.array([float(v_slip), 0.0, 0.0]), np.zeros(3)
+        )
+        pw = topology_pair_wrench(
+            topo_model, "lead_palm_proximal_grip", hand_state, club_state
+        )
+        ft_ref_list.append(pw.tangential_force_mag_n)
+
+    ft_ref = np.asarray(ft_ref_list, dtype=float)
+    ft_osim = np.asarray(ft_osim_list, dtype=float)
+    peak_ref = float(np.max(ft_ref))
+    peak_cand = float(np.max(ft_osim))
+    peak_err = abs(peak_cand - peak_ref) / peak_ref
+    rms_err = float(np.sqrt(np.mean((ft_osim - ft_ref) ** 2))) / peak_ref
+    assert peak_err <= PEAK_TOLERANCE, (
+        f"Single-pair sliding peak error {peak_err * 100:.3f}% > {PEAK_TOLERANCE * 100:.1f}%"
+    )
+    assert rms_err <= PEAK_TOLERANCE, (
+        f"Single-pair sliding RMS error {rms_err * 100:.3f}% > {PEAK_TOLERANCE * 100:.1f}%"
+    )
 
 
 def _check_pair_traces(run: Any, topo_model: TopologyContactModel) -> None:
@@ -134,6 +227,9 @@ def _check_parity_versus_pinocchio(
     return errors
 
 
+@pytest.mark.slow
+@pytest.mark.timeout(300)
+@pytest.mark.requires_pinocchio
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -163,6 +259,9 @@ def test_opensim_topology_static_hold_fast(style: GripStyle) -> None:
     _check_parity_versus_pinocchio(run_osim, run_pin, f"hold_fast_{style.value}")
 
 
+@pytest.mark.slow
+@pytest.mark.timeout(300)
+@pytest.mark.requires_pinocchio
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -192,6 +291,9 @@ def test_opensim_topology_swing_replay_fast(style: GripStyle) -> None:
     _check_parity_versus_pinocchio(run_osim, run_pin, f"swing_fast_{style.value}")
 
 
+@pytest.mark.slow
+@pytest.mark.timeout(300)
+@pytest.mark.requires_pinocchio
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -221,6 +323,9 @@ def test_opensim_topology_static_hold_slow(style: GripStyle) -> None:
     _check_parity_versus_pinocchio(run_osim, run_pin, f"hold_slow_{style.value}")
 
 
+@pytest.mark.slow
+@pytest.mark.timeout(300)
+@pytest.mark.requires_pinocchio
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )

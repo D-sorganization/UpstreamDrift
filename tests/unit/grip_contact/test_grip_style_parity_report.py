@@ -667,10 +667,11 @@ _DETERMINATE_ENGINE_CASES = [
         ],
         id="mujoco-ten_finger-swing",
     ),
-    # OpenSim (G7): passes overlap and interlock on 0.04 s static hold;
-    # ten_finger 0.04 s hold and all three 0.04 s swings exceed determinate
-    # net_force / net_moment_com tolerances under OpenSim ElasticFoundationForce
-    # discretized 5-sphere capsule chains.
+    # OpenSim (G7/G7b): passes overlap and interlock on 0.04 s hold and swing
+    # (and 0.10 s hold and swing, plus ten_finger 0.10 s hold);
+    # ten_finger 0.04 s hold and swing exceed 2.0% RMS on determinate net_force
+    # due to the 5-sphere ElasticFoundationForce capsule chain versus single-point
+    # capsule_capsule pitch-couple moment arm on trail_little_finger_grip.
     pytest.param(
         "opensim",
         GripStyle.OVERLAP,
@@ -695,10 +696,10 @@ _DETERMINATE_ENGINE_CASES = [
                 strict=True,
                 raises=AssertionError,
                 reason=(
-                    "OpenSim ten_finger 0.04 s hold determinate net_force RMS is 9.872% "
-                    "(peak 0.969%) and net_moment_com peak is 17.798% (RMS 4.629%) > "
-                    "5.0% peak / 2.0% RMS tolerance due to 5-sphere ElasticFoundationForce "
-                    "start-up transient"
+                    "OpenSim ten_finger 0.04 s hold determinate net_force RMS is 2.599% "
+                    "(peak 2.412%, net_moment_com peak 0.833% / RMS 0.741%) > 2.0% RMS_TOLERANCE "
+                    "during 5-sphere ElasticFoundationForce capsule settling "
+                    "(settles to 1.731% RMS over 0.10 s)"
                 ),
             ),
         ],
@@ -708,36 +709,14 @@ _DETERMINATE_ENGINE_CASES = [
         "opensim",
         GripStyle.OVERLAP,
         "swing",
-        marks=[
-            pytest.mark.requires_opensim,
-            pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "OpenSim overlap 0.04 s swing determinate net_force peak is 319.750% "
-                    "(RMS 91.599%) and net_moment_com peak is 283.332% (RMS 83.529%) > "
-                    "5.0% peak / 2.0% RMS tolerance under discretized mesh ElasticFoundationForce"
-                ),
-            ),
-        ],
+        marks=[pytest.mark.requires_opensim],
         id="opensim-overlap-swing",
     ),
     pytest.param(
         "opensim",
         GripStyle.INTERLOCK,
         "swing",
-        marks=[
-            pytest.mark.requires_opensim,
-            pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "OpenSim interlock 0.04 s swing determinate net_force peak is 319.750% "
-                    "(RMS 91.599%) and net_moment_com peak is 283.332% (RMS 83.529%) > "
-                    "5.0% peak / 2.0% RMS tolerance under discretized mesh ElasticFoundationForce"
-                ),
-            ),
-        ],
+        marks=[pytest.mark.requires_opensim],
         id="opensim-interlock-swing",
     ),
     pytest.param(
@@ -750,9 +729,11 @@ _DETERMINATE_ENGINE_CASES = [
                 strict=True,
                 raises=AssertionError,
                 reason=(
-                    "OpenSim ten_finger 0.04 s swing determinate net_force peak is 5995.091% "
-                    "(RMS 1334.628%) and net_moment_com peak is 7842.167% (RMS 1731.903%) > "
-                    "5.0% peak / 2.0% RMS tolerance under 5-sphere ElasticFoundationForce"
+                    "OpenSim ten_finger 0.04 s swing determinate net_force RMS is 5.070% "
+                    "(peak 0.290%) and net_moment_com RMS is 2.918% (peak 0.833%) > 2.0% "
+                    "RMS_TOLERANCE due to 5-sphere ElasticFoundationForce capsule chain "
+                    "versus single-point capsule_capsule pitch-couple moment arm on "
+                    "trail_little_finger_grip (4.856% / 4.437% RMS over 0.10 s)"
                 ),
             ),
         ],
