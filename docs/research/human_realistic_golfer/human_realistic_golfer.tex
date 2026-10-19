@@ -445,6 +445,85 @@ python3 -m pytest tests/unit/grip_contact/test_topology_contact.py \
     tests/unit/grip_contact/test_pinocchio_topology_grip.py
 \end{verbatim}
 
+\subsection{Model Grip Binding Contract (HRG-GS-M1, \#13323)}
+\textbf{Data Types and Protocol.} The engine-agnostic binding contract (\path{src/shared/python/grip_contact/binding.py})
+decouples model-specific body hierarchies from the canonical \texttt{ContactTopology} $\mathcal{T}$ (HRG-GS-G1, \#13299),
+the G6 physical contact evaluator (\texttt{topology\_side\_wrench}, \#13304), and the G3 allocated hand--hand reporter
+(\texttt{allocate\_hand\_hand\_from\_closure}, \#13301). It defines three frozen records and a structural protocol:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \texttt{SiteBinding}: maps a topology site identifier $s \in \mathcal{S}$ to a model body identifier $B$, a homogeneous
+transform ${}^{B}T_{s} \in \mathrm{SE}(3)$ ($4\times 4$), and a representation tag $\mathrm{rep} \in \{\texttt{rigid\_proxy}, \texttt{phalange}\}$.
+\item \texttt{HandClubBinding}: binds a model asset (\texttt{model\_id}, \texttt{model\_hash}, \texttt{handedness} $\in \{\texttt{right}, \texttt{left}\}$,
+\texttt{attachment\_mode}, \texttt{club\_body} $B_c$, \texttt{lead\_hand\_body} $B_{\mathrm{lead}}$, \texttt{trail\_hand\_body} $B_{\mathrm{trail}}$)
+to a tuple of \texttt{SiteBinding} entries, an explicit \texttt{unavailable\_sites} mapping ($s \mapsto \text{reason}$), and optional club grip frame
+transforms ${}^{B_c}T_{F_{\mathrm{club},\sigma}}$ ($\sigma \in \{\mathrm{L}, \mathrm{R}\}$).
+\item \texttt{GripCapabilities}: declares supported \texttt{attachment\_modes}, \texttt{supports\_physical\_pairs},
+\texttt{supports\_wrench\_application}, and \texttt{native\_contact}.
+\item \texttt{ModelGripAdapter} (and its optional re-export \texttt{GripProvider} in \path{src/engines/protocols.py}):
+exposes \texttt{capabilities()}, \texttt{resolve\_binding(topology)}, \texttt{sample\_states(binding)} returning $4\times 4$ world poses
+(\texttt{BodyStates}), and \texttt{apply\_wrenches(wrenches)}.
+\end{itemize}
+
+\textbf{Coordinate Frames.} Given body world pose ${}^{W}T_{B} = (R_{B}, p_{B}) \in \mathrm{SE}(3)$ and site binding
+${}^{B}T_{s} = (R_{Bs}, p_{Bs})$, the world pose of site $s$ is ${}^{W}T_{s} = {}^{W}T_{B}\,{}^{B}T_{s}$.
+With $p_{\mathrm{hand}}(s,\sigma)$ denoting the site's position in the hand grip frame $F_{\mathrm{hand},\sigma}$ from
+\texttt{map\_site\_to\_hand\_frame}, the implied hand grip frame offset on body $B$ is:
+\begin{equation}
+{}^{B}T_{F_{\mathrm{hand},\sigma}}(s) = {}^{B}T_{s} \begin{bmatrix} I_3 & -p_{\mathrm{hand}}(s,\sigma) \\ 0^{\top} & 1 \end{bmatrix}
+= \begin{bmatrix} R_{Bs} & p_{Bs} - R_{Bs}\,p_{\mathrm{hand}}(s,\sigma) \\ 0^{\top} & 1 \end{bmatrix}.
+\end{equation}
+For rigid-proxy hands where ${}^{B}T_{s} = {}^{B}T_{F_{\mathrm{hand},\sigma}} \begin{bmatrix} I_3 & p_{\mathrm{hand}}(s,\sigma) \\ 0^{\top} & 1 \end{bmatrix}$,
+all sites on hand $\sigma$ recover the identical frame ${}^{W}T_{F_{\mathrm{hand},\sigma}} = {}^{W}T_{B}\,{}^{B}T_{F_{\mathrm{hand},\sigma}}$
+and are evaluated in a single call to \texttt{topology\_side\_wrench}.
+
+\textbf{Equations: Body-Wrench Assembly and Virtual Work.} Let $\mathcal{P}_{\mathrm{phys}}$ be the set of active physical
+hand--grip pairs. Each pair $i \in \mathcal{P}_{\mathrm{phys}}$ connects site $s_i$ on hand body $B(s_i)$ to the club body $B_c$,
+producing contact point $p_{c,i}$, hand force $f_{a,i}$ and moment $m_{a,i}$ about frame origin $p_{a,i}$, and club force
+$f_{b,i} = -f_{a,i}$ and moment $m_{b,i}$ about frame origin $p_{b,i}$. \texttt{GripStepReport.body\_wrenches()} transports
+each pair wrench to the respective body origins $p_{B(s_i)}$ and $p_{B_c}$, excluding all allocated pairs:
+\begin{align}
+F_{B} &= \sum_{i \in \mathcal{P}_{\mathrm{phys}} : B(s_i) = B} f_{a,i}, \quad
+M_{B} = \sum_{i \in \mathcal{P}_{\mathrm{phys}} : B(s_i) = B} \left[ m_{a,i} + (p_{a,i} - p_{B}) \times f_{a,i} \right], \\
+F_{B_c} &= \sum_{i \in \mathcal{P}_{\mathrm{phys}}} f_{b,i}, \quad
+M_{B_c} = \sum_{i \in \mathcal{P}_{\mathrm{phys}}} \left[ m_{b,i} + (p_{b,i} - p_{B_c}) \times f_{b,i} \right].
+\end{align}
+By construction, action--reaction holds across all bound bodies:
+\begin{equation}
+F_{B_c} + \sum_{B \in \mathcal{B}_{\mathrm{hand}}} F_{B} = \sum_{i \in \mathcal{P}_{\mathrm{phys}}} (f_{b,i} + f_{a,i}) = 0.
+\end{equation}
+Under any virtual rigid twist $\mathcal{V}_c = (v_{B_c}, \omega_{B_c})$ applied to the club body (with contact point velocity
+$v_{c,i} = v_{B_c} + \omega_{B_c} \times (p_{c,i} - p_{B_c})$ and zero spin couple at static evaluation), the virtual power
+computed from the assembled club body wrench equals the sum of pairwise contact powers identically:
+\begin{equation}
+P_{\mathrm{club}} = F_{B_c} \cdot v_{B_c} + M_{B_c} \cdot \omega_{B_c}
+= \sum_{i \in \mathcal{P}_{\mathrm{phys}}} \left[ f_{b,i} \cdot v_{B_c} + \left((p_{c,i} - p_{B_c}) \times f_{b,i}\right) \cdot \omega_{B_c} \right]
+= \sum_{i \in \mathcal{P}_{\mathrm{phys}}} f_{b,i} \cdot v_{c,i}.
+\end{equation}
+
+\textbf{Invariants and Acceptance Criteria.}
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item Pre-step validation (\texttt{validate\_binding}): $100\%$ of missing-body, unmapped physical site, and unsupported attachment-mode
+cases raise \texttt{SchemaFeatureUnavailableError} before evaluation or stepping.
+\item Rotation and transform invariants: $\|R^{\top} R - I_3\|_{\max} \le 10^{-9}$, $|\det(R) - 1| \le 10^{-9}$, bottom row $[0,0,0,1]$ within $10^{-9}$,
+unique site IDs, and disjoint bound versus unavailable site sets.
+\item Action--reaction residual $\left\|\sum_{B} F_{B}\right\|_2 \le 10^{-12}$\,N and virtual-work residual
+$|P_{\mathrm{club}} - \sum_i f_{b,i} \cdot v_{c,i}| \le 10^{-12}$\,W.
+\item Allocated hand--hand pairs are labelled \texttt{"allocated"}, never enter \texttt{body\_wrenches()} or \texttt{apply\_wrenches()},
+and report \texttt{NaN} with a non-empty reason (never $0$) when no closure wrench is supplied; separated physical sites evaluate to true $0.0$.
+\item \texttt{PinocchioGripAdapter} (\path{src/engines/physics_engines/pinocchio/python/grip_binding_adapter.py}) reproduces
+\texttt{topology\_side\_wrench} to $\le 10^{-12}$\,N across overlap, interlock, and ten-finger styles.
+\item Law of Demeter AST gate: maximum attribute chain depth $\le 2$ dots, function length $\le 100$ lines, and parameters $\le 8$.
+\end{enumerate}
+
+\textbf{Limitations.} Rigid hand bodies (\texttt{representation="rigid\_proxy"}) carry fixed finger-shaped contact proxies and cannot
+represent active finger articulation or intrinsic muscle recruitment. Where hands are welded to the club or to each other, hand--hand
+pairs remain allocated equivalents (reporting only, governed by an explicit prior) rather than identified biological forces.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_grip_binding.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
