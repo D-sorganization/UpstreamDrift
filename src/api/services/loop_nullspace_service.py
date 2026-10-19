@@ -412,7 +412,7 @@ def run(
     facade = _collaborator("facade")
     plot_model_payload = _collaborator("plot_model_payload")
 
-    report = facade.analyze(
+    report: dict[str, Any] = facade.analyze(
         trajectory,
         engine,
         request.preset,
