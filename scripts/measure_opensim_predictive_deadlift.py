@@ -131,6 +131,7 @@ def _parse_solve_log(log_path: Path) -> dict[str, Any]:
     cv: float | None = None
     unscaled_cv: float | None = None
     wall_clock: float | None = None
+    last_inf_pr: float | None = None
 
     m_iter = re.search(r"Number of Iterations\.\.\.\.:\s+(\d+)", text)
     if m_iter:
@@ -166,19 +167,20 @@ def _parse_solve_log(log_path: Path) -> dict[str, Any]:
             last = iter_matches[-1]
             iterations = int(last.group(1))
             objective = float(last.group(2))
-            cv = float(last.group(3))
+            last_inf_pr = float(last.group(3))
             status = "Timeout_Interrupted"
-            if wall_clock is None:
-                wall_clock = 7200.0
 
     return {
         "converged": converged,
         "solver_status": status,
-        "iterations": iterations if iterations is not None else 0,
-        "objective": objective if objective is not None else float("nan"),
-        "constraint_violation": cv if cv is not None else float("nan"),
+        "iterations": iterations,
+        "objective": objective,
+        "constraint_violation": cv,
         "unscaled_constraint_violation": unscaled_cv,
-        "wall_clock_s": wall_clock if wall_clock is not None else 0.0,
+        # IPOPT prints no final block when the run is killed: report the last
+        # iterate's primal infeasibility (inf_pr) under its own name instead.
+        "last_iterate_inf_pr": last_inf_pr,
+        "wall_clock_s": wall_clock,
     }
 
 
@@ -242,11 +244,11 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 - **Actuation:** `CoordinateActuator`s (1000 N·m optimal force) on free coordinates; pelvis residuals (optimal force 1, weight 100); muscles removed
 - **Solver Status:** `{stage1.get("solver_status", "unknown")}`
 - **Converged:** `{stage1.get("converged", False)}`
-- **Iterations:** {stage1.get("iterations", 0)}
+- **Iterations:** {stage1.get("iterations")}
 - **Objective:** {stage1.get("objective", float("nan"))}
-- **Scaled Constraint Violation:** {stage1.get("constraint_violation", float("nan"))}
-- **Wall Clock Time:** {stage1.get("wall_clock_s", 0.0):.2f} s
-- **Total Weight (m g):** {receipt.get("total_weight_n", 0.0):.2f} N
+- **Scaled Constraint Violation:** {stage1.get("constraint_violation")} (last-iterate inf_pr: {stage1.get("last_iterate_inf_pr")})
+- **Wall Clock Time:** {stage1.get("wall_clock_s")} s
+- **Total Weight (m g):** {receipt.get("total_weight_n")} N
 - **Residual Peak:** {receipt.get("residual_peak_n")} N
 - **Residual RMS:** {receipt.get("residual_rms_n")} N
 - **Residual Ratio:** {receipt.get("residual_ratio")}
@@ -302,10 +304,9 @@ def run_stage1_solve(
     # Enhance summary from parsed log
     parsed = _parse_solve_log(log_file)
     summary["iterations"] = parsed["iterations"]
-    if not np.isnan(parsed["objective"]):
-        summary["objective"] = parsed["objective"]
-    if not np.isnan(parsed["constraint_violation"]):
-        summary["constraint_violation"] = parsed["constraint_violation"]
+    for key in ("objective", "constraint_violation", "last_iterate_inf_pr"):
+        if parsed[key] is not None:
+            summary[key] = parsed[key]
     summary["unscaled_constraint_violation"] = parsed.get(
         "unscaled_constraint_violation"
     )
@@ -353,10 +354,9 @@ def _run_stage2_if_converged(
         )
     parsed2 = _parse_solve_log(stage2_log)
     stage2_summary["iterations"] = parsed2["iterations"]
-    if not np.isnan(parsed2["objective"]):
-        stage2_summary["objective"] = parsed2["objective"]
-    if not np.isnan(parsed2["constraint_violation"]):
-        stage2_summary["constraint_violation"] = parsed2["constraint_violation"]
+    for key in ("objective", "constraint_violation", "last_iterate_inf_pr"):
+        if parsed2[key] is not None:
+            stage2_summary[key] = parsed2[key]
     stage2_solution = stage2_summary.pop("solution", None)
     if stage2_solution is not None:
         sto2_path = out_dir / "predictive_solution_stage2.sto"

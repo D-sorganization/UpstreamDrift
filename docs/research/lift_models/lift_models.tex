@@ -1802,7 +1802,7 @@ To address the primal infeasibility observed in initial exploratory attempts, fi
 \item \textbf{Step~2 (\texttt{stage1\_r2.log}): Smooth-Step Physical Guess.} Seeding Hermite--Simpson collocation states and speeds with smooth-step polynomial interpolation avoided IPOPT restoration phase entirely, dropping unscaled constraint violation to $487.59$ and scaled constraint violation below unity to $0.719$ (objective $1.93$ in 100 iterations, $211.5\,\mathrm{s}$ in IPOPT).
 \item \textbf{Step~3 (\texttt{stage1\_r3.log}): Pelvis Residual Actuators.} Adding floating-base residual actuators with weight 100 permitted transient dynamic forces during ground contact initialization (100 iterations, objective $1.08 \times 10^6$, scaled violation $44.28$, unscaled violation $7224$, $175.0\,\mathrm{s}$ in IPOPT).
 \item \textbf{Step~4 (\texttt{stage1\_r4.log}): Joint Torque Capacity.} Raising actuator torque capacity from $500\,\mathrm{N\cdot m}$ to $1000\,\mathrm{N\cdot m}$ accommodated large joint extension requirements for the $180\,\mathrm{kg}$ lifter-plus-barbell system, reducing scaled constraint violation by $10\times$ from $44.28$ down to $4.856$ (unscaled $4985$; objective $1.95 \times 10^6$ in 100 iterations, $234.8\,\mathrm{s}$ in IPOPT).
-\item \textbf{Step~5 (\texttt{stage1\_torque.log}): Deep Solve to 1056 Iterations.} Extending the solve up to 3000 iterations in the foreground with a $7200\,\mathrm{s}$ timeout reached iteration 1056. The objective dropped monotonically by over $97\times$ from $1.95 \times 10^6$ down to $20{,}049.78$, primal infeasibility reached $362$ at iteration 1048 ($654$ at iteration 1056), and dual infeasibility dropped by $6\times$ from $1.45 \times 10^8$ to $2.39 \times 10^7$.
+\item \textbf{Step~5 (\texttt{stage1\_torque.log}): Extended Solve.} With up to 3000 iterations allowed in the foreground under a $7200\,\mathrm{s}$ \texttt{timeout}, the solve was killed at iteration 1056. From the log: iteration~0 has objective $0$ and primal infeasibility $5.55\times10^{4}$; iteration~1048 reaches primal infeasibility $362$; iteration~1056 has objective $2.00\times10^{4}$, primal infeasibility $654$ and dual infeasibility $2.39\times10^{7}$. The large dual infeasibility indicates poor problem scaling (residual controls with optimal force 1 against $1000\,\mathrm{N\,m}$ joint actuators); this stage is not converged.
 \end{enumerate}
 
 Because Stage~1 reached the wall-clock timeout ($7200\,\mathrm{s}$) before achieving numerical convergence tolerance, Stage~2 (muscle-driven) was not run. Predictive kinematic metrics are recorded as \textit{infeasible} and omitted from forward-dynamics comparison. Bundle kinematics computed dynamically from \texttt{deadlift\_bundle.npz} ($80\,\mathrm{kg}$, $1.78\,\mathrm{m}$ reference lifter) provide the ground-truth benchmark. All predictive results are explicitly classified as \textbf{exploratory}.
@@ -1824,14 +1824,14 @@ Stage 1 Solver Status & --- & \textit{unavailable}\textsuperscript{*} & Timeout\
 Stage 1 Converged & --- & \textit{unavailable}\textsuperscript{*} & False & --- \\
 Stage 1 Iterations & --- & \textit{unavailable}\textsuperscript{*} & 1056 & --- \\
 Stage 1 Objective & --- & \textit{unavailable}\textsuperscript{*} & 20049.78 & --- \\
-Stage 1 Scaled Constraint Viol. & --- & \textit{unavailable}\textsuperscript{*} & 654.00 & --- \\
-Stage 1 Wall Clock & --- & \textit{unavailable}\textsuperscript{*} & 7200.00 & $\mathrm{s}$ \\
+Stage 1 Last-Iterate Primal Infeasibility (\texttt{inf\_pr}) & --- & \textit{unavailable}\textsuperscript{*} & 654 & --- \\
+Stage 1 Wall Clock & --- & \textit{unavailable}\textsuperscript{*} & killed at the 7200\,s \texttt{timeout} & --- \\
 Stage 2 Muscle Solve & --- & \textit{unavailable}\textsuperscript{*} & \textit{not run}\textsuperscript{\ddag} & --- \\
 \bottomrule
 \end{tabular}
 \par\vspace{2pt}\raggedright\scriptsize
 \textsuperscript{*}Tracked OpenSim solution is unavailable: no OSL-3 deadlift IK/ID receipts on main yet (OSL-3 \#13041 is still open).\\
-\textsuperscript{\dag}Predictive kinematics omitted: solution terminated at an infeasible iterate (constraint violation $654.00$).\\
+\textsuperscript{\dag}Predictive kinematics omitted: solution terminated at an infeasible iterate (last-iterate primal infeasibility $654$; IPOPT printed no final constraint-violation block).\\
 \textsuperscript{\ddag}Stage~2 muscle-driven solve is conditioned on Stage~1 convergence and was not executed.
 \end{table}
 

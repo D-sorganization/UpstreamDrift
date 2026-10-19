@@ -30,31 +30,31 @@
       "bar_final_height_m": {
         "bundle_kinematics": 0.9094192166845657,
         "predictive": null,
-        "reason": "infeasible iterate (constraint violation 654.0)",
+        "reason": "solve did not converge (Timeout_Interrupted)",
         "unit": "m"
       },
       "bar_start_height_m": {
         "bundle_kinematics": 0.43201984819805705,
         "predictive": null,
-        "reason": "infeasible iterate (constraint violation 654.0)",
+        "reason": "solve did not converge (Timeout_Interrupted)",
         "unit": "m"
       },
       "bar_vertical_rise_m": {
         "bundle_kinematics": 0.47739936848650866,
         "predictive": null,
-        "reason": "infeasible iterate (constraint violation 654.0)",
+        "reason": "solve did not converge (Timeout_Interrupted)",
         "unit": "m"
       },
       "lift_duration_s": {
         "bundle_kinematics": 2.0,
         "predictive": null,
-        "reason": "infeasible iterate (constraint violation 654.0)",
+        "reason": "solve did not converge (Timeout_Interrupted)",
         "unit": "s"
       },
       "peak_vertical_velocity_m_s": {
         "bundle_kinematics": 0.5605000335510915,
         "predictive": null,
-        "reason": "infeasible iterate (constraint violation 654.0)",
+        "reason": "solve did not converge (Timeout_Interrupted)",
         "unit": "m/s"
       }
     },
@@ -63,12 +63,13 @@
       "status": "unavailable"
     }
   },
-  "constraint_violation": 654.0,
+  "constraint_violation": null,
   "converged": false,
   "exploratory": true,
   "foot_contact": "6_SmoothSphereHalfSpaceForce_spheres",
   "height_m": 1.78,
   "iterations": 1056,
+  "last_iterate_inf_pr": 654.0,
   "lift": "deadlift",
   "mesh_intervals": 15,
   "model": "RajagopalLaiUhlrich2023_deadlift",
@@ -79,24 +80,25 @@
   "residual_ratio": null,
   "residual_rms_n": null,
   "solver_status": "Timeout_Interrupted",
-  "source_commit": "b286f0ddd34cbcf238685137ef7241d17f9158bd",
+  "source_commit": "7ba64232916f57c7fb4e226a4f00fc385bce0956",
   "stage1_torque": {
     "actuation_mode": "torque",
-    "constraint_violation": 654.0,
+    "constraint_violation": null,
     "converged": false,
     "iterations": 1056,
+    "last_iterate_inf_pr": 654.0,
     "objective": 20049.777,
     "solver_status": "Timeout_Interrupted",
     "unscaled_constraint_violation": null,
-    "wall_clock_s": 7200.0
+    "wall_clock_s": null
   },
   "stage2_muscle": {
     "reason": "Stage 1 torque-driven solve did not converge (Timeout_Interrupted)",
     "status": "not run"
   },
-  "total_script_wall_clock_s": 0.057252367958426476,
+  "total_script_wall_clock_s": 0.048201099038124084,
   "total_weight_n": 1765.197,
-  "wall_clock_s": 7200.0,
+  "wall_clock_s": null,
   "welded_joints": [
     "acromial_l",
     "acromial_r",
