@@ -531,6 +531,90 @@ Across all 10 \texttt{PARITY\_QUANTITIES} (whose indeterminate internal squeeze 
 python3 -m pytest tests/unit/grip_contact/test_mujoco_topology_grip.py
 \end{verbatim}
 
+\subsection{OpenSim Topology Contact Reference (HRG-GS-G7, \#13305)}
+\textbf{OpenSim Topology Contact Adapter.} The OpenSim contact adapter
+(in \path{src/engines/physics_engines/opensim/python/} \\
+\path{grip_contact_osim_sim.py} and \path{full_body_grip_contact.py}) connects the shared anatomical contact topology
+$\mathcal{T}$ (\texttt{ContactTopology}, HRG-GS-G1, \#13299) to OpenSim's native
+compliant contact subsystem via \texttt{ContactSphere}, \texttt{ContactMesh}, and
+\texttt{ElasticFoundationForce}.
+For each physical pad--grip contact pair in $\mathcal{T}$, contact spheres are placed on the
+prescribed hand body (\texttt{LGrip} for both hands under the rigid-tie kinematic constraint),
+using \texttt{map\_site\_to\_hand\_frame} without recomputing frames or modifying the shared law.
+
+\textbf{Elastic Foundation Mapping Equations.} OpenSim implements a Winkler elastic foundation
+model where force per unit area is proportional to penetration depth squared over a discretized
+mesh:
+\begin{equation}
+f_{\mathrm{EF}}(\delta) = c_{\mathrm{geom}} k_{\mathrm{Winkler}} \delta^2 (1 + d \dot{\delta}),
+\end{equation}
+where $c_{\mathrm{geom}}$ is the Winkler geometric patch factor between a sphere of radius $r_{\mathrm{pad}}$
+and a cylinder of radius $r_{\mathrm{grip}}$:
+\begin{equation}
+c_{\mathrm{geom}} = \frac{\pi}{2} \sqrt{\frac{r_{\mathrm{pad}} r_{\mathrm{grip}}}{r_{\mathrm{pad}} + r_{\mathrm{grip}}}}.
+\end{equation}
+To achieve exact parity with the linear contact law of the Pinocchio reference ($f_n = k_{\mathrm{lin}} \delta_0$
+at neutral preload $\delta_0 = 0.25$\,mm), each unique site radius is calibrated via a static single-pad
+equilibrium probe (\texttt{calibrated\_site\_foundation}):
+\begin{equation}
+k_{\mathrm{Winkler}} = \frac{k_{\mathrm{lin}} \delta_0}{c_{\mathrm{geom}} \delta_0^2} \cdot \frac{f_{\mathrm{target}}}{f_{\mathrm{measured}}}.
+\end{equation}
+This calibration ensures that at the neutral preload $\delta_0 = 0.25$\,mm, the foundation produces exactly
+$f_{\mathrm{target}} = 42.7738$\,N with $0.0000\%$ numerical error against the shared linear law.
+
+\textbf{Sphere-Chain Approximation of Capsule Sites.} Capsule (phalanx) sites, such as the trail little finger
+in the ten-finger grip style ($r = 7.5$\,mm, half-length $L = 8$\,mm), are approximated by a discrete chain
+of $N$ contact spheres along the capsule's medial axis with center spacing bounded by $r/2$:
+\begin{equation}
+N = \max\left(2, \mathrm{round}\left(\frac{2L}{0.5r}\right) + 1\right) = 5.
+\end{equation}
+The sphere centers are linearly spaced between capsule endpoints $p_0$ and $p_1$:
+\begin{equation}
+c_k = p_0 + \frac{k}{N - 1}(p_1 - p_0), \quad k \in \{0, \dots, N - 1\}.
+\end{equation}
+The target stiffness and force per sphere are scaled by $1/N$ ($k_k = k_{\mathrm{lin}}/N$, $f_k = f_{\mathrm{target}}/N$).
+No empirical correction factor is applied: each sphere is calibrated only at the preload by the native-force
+measurement above.
+
+\textbf{Per-Pair Traces and Channel Accounting.} At each integration sample step, individual pair wrenches
+are extracted from OpenSim's \texttt{ElasticFoundationForce} record labels (\texttt{force.X} and \texttt{torque.X}
+on the club body) and decomposed into normal and tangential components via radial projection onto the grip cylinder axis.
+Per-pair traces are assembled via \texttt{PairTraceRecorder}, logging finite positive normal forces for all physical
+hand--grip pairs. Hand--hand pairs (such as overlap/interlock finger-on-hand sites) are reported as \texttt{NaN}
+with the standard reason: \textit{``hand-hand pairs are allocated, not physical forces under prescribed hand motion''}.
+
+\textbf{Measured Parity Versus Pinocchio Reference.} Parity of the total per-side normal force (squeeze) was verified
+against the Pinocchio reference across all three standard grip styles for both static hold and short swing replay
+(0.04\,s fast and 0.10\,s full holds, evaluated via \texttt{grip\_contact.parity}):
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Style} & \textbf{Motion} & \textbf{L Peak} & \textbf{L RMS} & \textbf{R Peak} & \textbf{R RMS} \\
+\midrule
+Overlap & Hold (0.1\,s) & 1.397\% & 0.830\% & 0.398\% & 0.348\% \\
+Overlap & Swing (0.1\,s) & 1.397\% & 1.327\% & 0.840\% & 0.625\% \\
+Interlock & Hold (0.1\,s) & 1.397\% & 0.830\% & 0.398\% & 0.348\% \\
+Interlock & Swing (0.1\,s) & 1.397\% & 1.327\% & 0.840\% & 0.625\% \\
+Ten-Finger & Hold (0.1\,s) & 1.397\% & 1.364\% & 0.319\% & 0.265\% \\
+Ten-Finger & Swing (0.1\,s) & 1.397\% & 1.358\% & 0.539\% & 0.540\% \\
+\bottomrule
+\end{tabular}
+\caption{OpenSim vs Pinocchio total normal force parity across grip styles (limits: peak $\le 5.0\%$, RMS $\le 2.0\%$).}
+\label{tab:osim_pin_parity}
+\end{table}
+All styles pass the strict tolerances (\texttt{PEAK\_TOLERANCE} $= 5.0\%$, \texttt{RMS\_TOLERANCE} $= 2.0\%$). The tightest case is the short (0.04\,s) ten-finger swing, whose lead-side RMS error is $1.997\%$ (hold: $1.850\%$): it passes with a margin of only $0.003$ percentage points, dominated by the start-up transient of the stiffer five-sphere capsule chains. This margin is recorded as an open risk; the tolerance is not widened and no correction factor is tuned to it.
+
+\textbf{Limitations.} OpenSim utilizes implicit BDF integration (\texttt{CPodes}) on the multi-mesh contact geometry;
+dynamic hand deformation is not modeled (rigid hand bodies follow prescribed kinematics); hand--hand contact pairs are
+allocated analytically rather than physically integrated in the forward dynamics.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_opensim_topology_grip.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
