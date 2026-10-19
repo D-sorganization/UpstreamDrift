@@ -966,6 +966,61 @@ def build_humanoid_urdf(
 # ---------------------------------------------------------------------------
 
 
+def ensure_revolute_joint_actuators(plant: MultibodyPlant) -> int:
+    """Add one actuator per single-DOF joint when the URDF omits transmissions.
+
+    The canonical generated golfer URDF lists revolute joints but no
+    ``<transmission>`` blocks, so Drake's parser leaves ``num_actuators() == 0``.
+    ``simulate_with_coefficients`` sizes ``theta`` for the 19 internal revolute
+    DOFs (``nv - 6`` floating root). This helper retrofits joint actuators in
+    plant joint-index order so the torque polynomial port can connect.
+
+    Returns:
+        ``plant.num_actuators()`` after any retrofit (unchanged when already
+        actuated).
+
+    Raises:
+        TypeError: if ``plant`` does not expose Drake joint queries.
+        ValueError: if the retrofit count disagrees with ``nv - 6``.
+    """
+    get_joint = getattr(plant, "get_joint", None)
+    add_actuator = getattr(plant, "AddJointActuator", None)
+    if not callable(get_joint) or not callable(add_actuator):
+        msg = "plant must expose get_joint and AddJointActuator"
+        raise TypeError(msg)
+
+    n_existing = int(plant.num_actuators())
+    if n_existing > 0:
+        return n_existing
+
+    from pydrake.multibody.tree import JointIndex  # noqa: PLC0415
+
+    added = 0
+    for index in range(int(plant.num_joints())):
+        joint = get_joint(JointIndex(index))
+        if int(joint.num_velocities()) != 1:
+            continue
+        add_actuator(f"{joint.name()}_motor", joint)
+        added += 1
+
+    n_actuators = int(plant.num_actuators())
+    expected = max(int(plant.num_velocities()) - 6, 0)
+    if expected > 0 and n_actuators != expected:
+        msg = (
+            "revolute joint actuator retrofit produced "
+            f"{n_actuators} actuators but plant has nv={plant.num_velocities()} "
+            f"(expected {expected} actuated DOFs)"
+        )
+        raise ValueError(msg)
+    if added != n_actuators:  # pragma: no cover - Drake invariant
+        msg = (
+            f"actuator count mismatch after retrofit: added={added}, "
+            f"plant.num_actuators()={n_actuators}"
+        )
+        raise RuntimeError(msg)
+    return n_actuators
+
+
 def load_humanoid_into_plant(
     plant: MultibodyPlant,
     urdf_path: Path | str | None = None,
@@ -1001,6 +1056,7 @@ def load_humanoid_into_plant(
     if not models:  # pragma: no cover - Drake raises before reaching here
         msg = f"Drake Parser returned no model instances for {path}"
         raise RuntimeError(msg)
+    ensure_revolute_joint_actuators(plant)
     return models[0]
 
 
