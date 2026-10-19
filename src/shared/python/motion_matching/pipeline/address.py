@@ -782,7 +782,7 @@ def calibrated_address_summary(
         if isinstance(document, Mapping)
         else {"available": False, "reason": "no specification for club sole"}
     )
-    if club_sole.get("available"):
+    if club_sole.get("available") and isinstance(document, Mapping):
         assert_club_sole_at_ground(kin, address.q, document, lane.ground)
 
     return {
