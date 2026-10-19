@@ -820,7 +820,7 @@
         "recorder",
         "advanced_analysis"
       ],
-      "order": 33,
+      "order": 56,
       "web": {
         "mode": "native-window"
       }
