@@ -528,5 +528,5 @@ def evaluate_opensim_lift_kinetics(
             reserve_share=muscle_res.get("reserve_share"),
             reason=muscle_res.get("reason", ""),
         )
-    except Exception as exc:  # noqa: BLE001
+    except (RuntimeError, ValueError, OSError) as exc:
         return _unqualified_kinetics(spec, f"Muscle kinetics failed: {exc}")

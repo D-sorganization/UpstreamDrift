@@ -407,7 +407,7 @@ def _run_moco_eval(
             mesh_interval=0.02,
             max_iterations=20,
         )
-    except Exception as exc:  # noqa: BLE001
+    except (RuntimeError, ValueError) as exc:  # OpenSim raises RuntimeError
         logger.warning("Moco pilot failed: %s", exc)
         return {
             "solver": "opensim.MocoInverse",

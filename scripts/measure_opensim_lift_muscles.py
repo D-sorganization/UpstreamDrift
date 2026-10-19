@@ -375,7 +375,7 @@ def main(argv: list[str] | None = None) -> int:
             timeout=30,
         )
         logger.info("Formatted %s with prettier@3", out_file)
-    except Exception as exc:  # noqa: BLE001
+    except (subprocess.SubprocessError, OSError) as exc:
         logger.warning("Could not run prettier: %s", exc)
 
     return 0
