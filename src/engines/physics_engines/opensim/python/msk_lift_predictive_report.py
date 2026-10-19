@@ -93,7 +93,7 @@ def replay_bar_path_fk(model: Any, states_table: Any) -> tuple[np.ndarray, np.nd
         label = states_table.getColumnLabel(i)
         if label.endswith("/value"):
             c_name = label.split("/")[-2]
-            if cset.has(c_name):
+            if cset.contains(c_name):
                 col_indices[c_name] = i
 
     mat = states_table.getMatrix()
@@ -151,8 +151,13 @@ def _extract_residual_metrics(
 
 def _extract_bar_kinematics(study: Any, solution: Any) -> dict[str, float]:
     """Replay FK from states table and return kinematic metrics."""
+    # The rep holds the processed model (welds applied, muscles replaced); FK
+    # replays on a copy of it, since the rep itself exposes no initSystem().
+    # The rep must outlive the copy: a temporary rep leaves a dangling model.
+    osim = import_opensim()
     rep = study.getProblem().createRep()
-    times, bar_pos = replay_bar_path_fk(rep, solution.exportToStatesTable())
+    model = osim.Model(rep.getModelBase())
+    times, bar_pos = replay_bar_path_fk(model, solution.exportToStatesTable())
     start_h = float(bar_pos[0, 1])
     final_h = float(bar_pos[-1, 1])
     rise = float(final_h - start_h)

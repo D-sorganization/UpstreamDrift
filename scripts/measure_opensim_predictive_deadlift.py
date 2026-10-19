@@ -342,6 +342,31 @@ def run_stage1_solve(
     return summary
 
 
+def stage2_guess_from_stage1(study2: Any, stage1_solution: Any) -> Any:
+    """Muscle-study guess seeded from the torque-driven stage-1 solution.
+
+    The two problems differ (torque actuators vs muscles, activation states),
+    so the stage-1 trajectory cannot be the guess directly.  The guess keeps
+    stage 1's time grid, its coordinate states, and every control both
+    problems share (the pelvis residuals and lumbar actuators); muscle
+    activations and excitations keep the solver's default guess.
+    """
+    from src.shared.python.engine_core.opensim_runtime import import_opensim
+
+    osim = import_opensim()
+    solver = osim.MocoCasADiSolver.safeDownCast(study2.updSolver())
+    guess = solver.createGuess()
+    guess.resampleWithNumTimes(stage1_solution.getNumTimes())
+    guess.setTime(stage1_solution.getTime())
+    guess.insertStatesTrajectory(stage1_solution.exportToStatesTable(), True)
+    stage1_controls = set(stage1_solution.getControlNames())
+    for name in guess.getControlNames():
+        if name in stage1_controls:
+            values = stage1_solution.getControl(name).to_numpy()
+            guess.setControl(name, osim.Vector(values))
+    return guess
+
+
 def _run_stage2_if_converged(
     stage1_summary: dict[str, Any],
     stage1_solution: Any,
@@ -378,9 +403,10 @@ def _run_stage2_if_converged(
         **residual,
     )
     study2, _ = build_predictive_deadlift_study(cfg_stage2)
+    guess2 = stage2_guess_from_stage1(study2, stage1_solution)
     with _capture_output_to_file(stage2_log):
         stage2_summary = solve_predictive_deadlift(
-            cfg_stage2, study=study2, initial_guess=stage1_solution
+            cfg_stage2, study=study2, initial_guess=guess2
         )
     parsed2 = _parse_solve_log(stage2_log)
     stage2_summary["iterations"] = parsed2["iterations"]

@@ -473,3 +473,63 @@ def test_residual_force_norm_includes_tz() -> None:
 
     peak, _rms, _ratio, _assisted = _extract_residual_metrics(_Solution(), 1.0, 100.0)
     assert peak == pytest.approx(50.0)
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.slow
+def test_bar_kinematics_replays_on_the_processed_model() -> None:
+    """FK replay runs on a solved trajectory (it crashed on a MocoProblemRep)."""
+    pytest.importorskip("opensim")
+    import numpy as np
+
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
+        _extract_bar_kinematics,
+    )
+
+    config = PredictiveDeadliftConfig(mesh_intervals=3, max_iterations=1)
+    study, _meta = build_predictive_deadlift_study(config)
+    solution = study.solve()
+    solution.unseal()
+    metrics = _extract_bar_kinematics(study, solution)
+    assert set(metrics) == {
+        "bar_start_height_m",
+        "bar_final_height_m",
+        "bar_vertical_rise_m",
+        "peak_vertical_velocity_m_s",
+        "duration_s",
+    }
+    assert all(np.isfinite(v) for v in metrics.values())
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.slow
+def test_stage2_guess_is_built_from_stage1_states() -> None:
+    """The muscle study's guess carries stage 1's grid, states and shared controls."""
+    pytest.importorskip("opensim")
+    import importlib
+
+    import numpy as np
+
+    mod = importlib.import_module("scripts.measure_opensim_predictive_deadlift")
+    study1, _ = build_predictive_deadlift_study(
+        PredictiveDeadliftConfig(mesh_intervals=3, max_iterations=1)
+    )
+    stage1 = study1.solve()
+    stage1.unseal()
+    study2, _ = build_predictive_deadlift_study(
+        PredictiveDeadliftConfig(
+            actuation_mode="muscle", mesh_intervals=3, max_iterations=1
+        )
+    )
+    guess = mod.stage2_guess_from_stage1(study2, stage1)
+    assert guess.getNumTimes() == stage1.getNumTimes()
+    np.testing.assert_allclose(guess.getTime().to_numpy(), stage1.getTime().to_numpy())
+    name = next(n for n in stage1.getStateNames() if n.endswith("pelvis_ty/value"))
+    np.testing.assert_allclose(
+        guess.getState(name).to_numpy(), stage1.getState(name).to_numpy()
+    )
+    shared = "/forceset/residual_pelvis_ty"
+    np.testing.assert_allclose(
+        guess.getControl(shared).to_numpy(), stage1.getControl(shared).to_numpy()
+    )
+    assert any("activation" in n for n in guess.getStateNames())
