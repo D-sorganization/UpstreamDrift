@@ -326,6 +326,53 @@ def _evaluate_hand_hand_pair(
     )
 
 
+def _evaluate_single_topology_pair(
+    pair: ContactPair,
+    topology: ContactTopology,
+    hand_states: Mapping[str, BushingState],
+    club: BushingState | RigidBodyState,
+    law: ContactParameters,
+    patch: float,
+    spin_transition_rad_s: float,
+) -> TopologyPairResult:
+    """Evaluate a single hand-grip or hand-hand topology pair."""
+    site_a = topology.site(pair.site_a)
+    st_a = hand_states[site_a.hand]
+    r_grip = topology.grip_radius_m
+
+    if pair.is_hand_grip:
+        if site_a.primitive == "sphere":
+            pen, fn, ft, fc, mc, cp, n = _evaluate_hand_grip_sphere(
+                site_a, st_a, club, r_grip, law, patch, spin_transition_rad_s
+            )
+        else:
+            pen, fn, ft, fc, mc, cp, n = _evaluate_hand_grip_capsule(
+                site_a, st_a, club, r_grip, law, patch, spin_transition_rad_s
+            )
+
+        return TopologyPairResult(
+            pair_name=pair.name,
+            is_hand_grip=True,
+            is_hand_hand=False,
+            penetration_m=pen,
+            normal_force_mag_n=fn,
+            tangential_force_mag_n=ft,
+            force_club_n=fc,
+            moment_club_nm=mc,
+            force_a_n=-fc,
+            force_b_n=fc,
+            contact_point_m=cp,
+            normal=n,
+            allocated_label=pair.allocated_label,
+        )
+
+    site_b = topology.site(pair.site_b)
+    st_b = hand_states[site_b.hand]
+    return _evaluate_hand_hand_pair(
+        pair, site_a, site_b, st_a, st_b, law, patch, spin_transition_rad_s
+    )
+
+
 def evaluate_topology_wrenches(
     topology: ContactTopology,
     hands: Mapping[str, BushingState],
@@ -381,52 +428,25 @@ def evaluate_topology_wrenches(
 
     for pair in topology.pairs:
         site_a = topology.site(pair.site_a)
-        st_a = hand_states[site_a.hand]
-
-        # Calculate patch radius
         if patch_radius_m is None:
             r_eff = 1.0 / (1.0 / site_a.radius_m + 1.0 / r_grip)
             patch = math.sqrt(2.0 * r_eff * DEFAULT_PRELOAD_M)
         else:
             patch = patch_radius_m
 
-        if pair.is_hand_grip:
-            if site_a.primitive == "sphere":
-                pen, fn, ft, fc, mc, cp, n = _evaluate_hand_grip_sphere(
-                    site_a, st_a, club, r_grip, law, patch, spin_transition_rad_s
-                )
-            else:
-                pen, fn, ft, fc, mc, cp, n = _evaluate_hand_grip_capsule(
-                    site_a, st_a, club, r_grip, law, patch, spin_transition_rad_s
-                )
+        res = _evaluate_single_topology_pair(
+            pair, topology, hand_states, club, law, patch, spin_transition_rad_s
+        )
+        results[pair.name] = res
 
-            res = TopologyPairResult(
-                pair_name=pair.name,
-                is_hand_grip=True,
-                is_hand_hand=False,
-                penetration_m=pen,
-                normal_force_mag_n=fn,
-                tangential_force_mag_n=ft,
-                force_club_n=fc,
-                moment_club_nm=mc,
-                force_a_n=-fc,
-                force_b_n=fc,
-                contact_point_m=cp,
-                normal=n,
-                allocated_label=pair.allocated_label,
-            )
-            results[pair.name] = res
-            f_club_total += fc
-            m_club_total += mc
+        if pair.is_hand_grip:
+            f_club_total += res.force_club_n
+            m_club_total += res.moment_club_nm
             hf, hm = hand_wrenches[site_a.hand]
-            hand_wrenches[site_a.hand] = (hf + fc, hm + mc)
-        else:
-            site_b = topology.site(pair.site_b)
-            st_b = hand_states[site_b.hand]
-            res = _evaluate_hand_hand_pair(
-                pair, site_a, site_b, st_a, st_b, law, patch, spin_transition_rad_s
+            hand_wrenches[site_a.hand] = (
+                hf + res.force_club_n,
+                hm + res.moment_club_nm,
             )
-            results[pair.name] = res
 
     # Map L and R aliases for hand wrenches
     hand_wrenches["L"] = hand_wrenches["lead"]
@@ -507,57 +527,39 @@ def hold_state(sim: TopologyClubInHands, q: np.ndarray) -> tuple[Any, np.ndarray
     return (lambda _t: (q, still)), y
 
 
-def simulate_topology_contact(
-    spec_bytes: bytes,
+def _setup_initial_sim_state(
+    sim: TopologyClubInHands,
     swing: CoordinateSwing,
-    topology: ContactTopology | None = None,
-    law: ContactParameters | None = None,
-    interface: GripInterface | None = None,
-    tolerances: IntegratorTolerances | None = None,
-    t_end_s: float | None = None,
-    hold: bool = False,
-) -> TopologyContactRun:
-    """Integrate free-flyer club under ContactTopology contact law.
-
-    Raises:
-        RuntimeError: If numerical integration fails.
-    """
-    tol = tolerances or IntegratorTolerances()
-    spec = json.loads(spec_bytes)
-    interface = interface or GripInterface.from_spec(spec)
-    topo = topology or contact_topology()
-    contact_law = law or default_contact_parameters()
-    sim = TopologyClubInHands(spec, list(swing.names), interface, topo, contact_law)
-
-    times = swing.time_s
-    if t_end_s is not None:
-        times = times[times <= t_end_s + 1e-12]
-
+    times: np.ndarray,
+    hold: bool,
+) -> tuple[Any, np.ndarray]:
+    """Return hand kinematics source and initial club state vector."""
     if hold:
-        source, y0 = hold_state(sim, np.asarray(swing.q[0], float))
-    else:
-        spline = CoordinateSpline(swing.time_s, swing.q)
-        source = spline.evaluate
-        weld0 = sim.kinematics.state(*source(float(times[0])))
-        y0 = bushing._initial_state(weld0, sim._pin)  # noqa: SLF001
-        y0[7:10] = weld0.rotation.T @ weld0.velocity_m_s
-        y0[10:13] = weld0.rotation.T @ weld0.omega_rad_s
+        return hold_state(sim, np.asarray(swing.q[0], float))
+    spline = CoordinateSpline(swing.time_s, swing.q)
+    source = spline.evaluate
+    weld0 = sim.kinematics.state(*source(float(times[0])))
+    y0 = bushing._initial_state(weld0, sim._pin)  # noqa: SLF001
+    y0[7:10] = weld0.rotation.T @ weld0.velocity_m_s
+    y0[10:13] = weld0.rotation.T @ weld0.omega_rad_s
+    return source, y0
 
-    sol = solve_ivp(
-        lambda t, y: sim.derivatives(t, y, source),
-        (float(times[0]), float(times[-1])),
-        y0,
-        method="Radau",
-        t_eval=times,
-        rtol=tol.rtol,
-        atol=tol.atol,
-        max_step=tol.max_step_s,
-    )
-    if not sol.success:
-        raise RuntimeError(
-            f"pinocchio topology contact integration failed: {sol.message}"
-        )
 
+def _accumulate_topology_traces(
+    sim: TopologyClubInHands,
+    times: np.ndarray,
+    sol_y: np.ndarray,
+    source: Any,
+    topo: ContactTopology,
+) -> tuple[
+    dict[str, tuple[np.ndarray, np.ndarray]],
+    dict[str, tuple[np.ndarray, np.ndarray]],
+    dict[str, tuple[np.ndarray, np.ndarray]],
+    np.ndarray,
+    dict[str, np.ndarray],
+    dict[str, np.ndarray],
+]:
+    """Accumulate kinematics and contact forces over evaluated time steps."""
     wrench: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
     hand_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
     club_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
@@ -570,7 +572,7 @@ def simulate_topology_contact(
             pair_traces_list[p.allocated_label] = []
 
     for k, t in enumerate(times):
-        y = sol.y[:, k]
+        y = sol_y[:, k]
         hands, frames, pair_res, _ = sim.wrenches(float(t), y, source)
         for s in SIDES:
             hand_role = "lead" if s == "L" else "trail"
@@ -602,13 +604,72 @@ def simulate_topology_contact(
         name: {s: (np.array(d[s][0]), np.array(d[s][1])) for s in SIDES}
         for name, d in (("w", wrench), ("h", hand_pose), ("c", club_pose))
     }
-    series = GripKineticsSeries.from_frames(
-        ENGINE,
-        times,
+    pair_traces_arr = {k: np.array(v) for k, v in pair_traces_list.items()}
+    pair_normal_arr = {k: np.array(v) for k, v in pair_normal_list.items()}
+    return (
         arrays["w"],
         arrays["h"],
         arrays["c"],
         np.array(club_rot),
+        pair_traces_arr,
+        pair_normal_arr,
+    )
+
+
+def simulate_topology_contact(
+    spec_bytes: bytes,
+    swing: CoordinateSwing,
+    topology: ContactTopology | None = None,
+    law: ContactParameters | None = None,
+    interface: GripInterface | None = None,
+    tolerances: IntegratorTolerances | None = None,
+    t_end_s: float | None = None,
+    hold: bool = False,
+) -> TopologyContactRun:
+    """Integrate free-flyer club under ContactTopology contact law.
+
+    Raises:
+        RuntimeError: If numerical integration fails.
+    """
+    tol = tolerances or IntegratorTolerances()
+    spec = json.loads(spec_bytes)
+    interface = interface or GripInterface.from_spec(spec)
+    topo = topology or contact_topology()
+    contact_law = law or default_contact_parameters()
+    sim = TopologyClubInHands(spec, list(swing.names), interface, topo, contact_law)
+
+    times = swing.time_s
+    if t_end_s is not None:
+        times = times[times <= t_end_s + 1e-12]
+
+    source, y0 = _setup_initial_sim_state(sim, swing, times, hold)
+
+    sol = solve_ivp(
+        lambda t, y: sim.derivatives(t, y, source),
+        (float(times[0]), float(times[-1])),
+        y0,
+        method="Radau",
+        t_eval=times,
+        rtol=tol.rtol,
+        atol=tol.atol,
+        max_step=tol.max_step_s,
+    )
+    if not sol.success:
+        raise RuntimeError(
+            f"pinocchio topology contact integration failed: {sol.message}"
+        )
+
+    w_arr, h_arr, c_arr, rot_arr, traces_arr, normals_arr = _accumulate_topology_traces(
+        sim, times, sol.y, source, topo
+    )
+
+    series = GripKineticsSeries.from_frames(
+        ENGINE,
+        times,
+        w_arr,
+        h_arr,
+        c_arr,
+        rot_arr,
         metadata={
             "integrator": "SciPy solve_ivp Radau, error controlled",
             "rtol": tol.rtol,
@@ -618,7 +679,7 @@ def simulate_topology_contact(
             "style": topo.style.value,
         },
     )
-    axial, roll = slip_from_frames(arrays["h"], arrays["c"])
+    axial, roll = slip_from_frames(h_arr, c_arr)
 
     normal_force_per_side: dict[str, np.ndarray] = {}
     for s in SIDES:
@@ -630,19 +691,16 @@ def simulate_topology_contact(
         ]
         if side_pairs:
             normal_force_per_side[s] = np.column_stack(
-                [np.array(pair_normal_list[p]) for p in side_pairs]
+                [normals_arr[p] for p in side_pairs]
             )
         else:
             normal_force_per_side[s] = np.zeros((len(times), 0))
-
-    pair_traces_arr = {k: np.array(v) for k, v in pair_traces_list.items()}
-    pair_normal_arr = {k: np.array(v) for k, v in pair_normal_list.items()}
 
     return TopologyContactRun(
         series=series,
         normal_force_n=normal_force_per_side,
         roll_slip_rad=roll,
         axial_slip_m=axial,
-        pair_traces=pair_traces_arr,
-        pair_normal_force_n=pair_normal_arr,
+        pair_traces=traces_arr,
+        pair_normal_force_n=normals_arr,
     )
