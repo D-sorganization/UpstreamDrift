@@ -143,10 +143,11 @@ def test_synthetic_capture_to_augmented_markers_to_scaled_model_and_ik() -> None
         assert len(frame.q) > 0
         assert all(np.isfinite(q_val) for q_val in frame.q)
 
-    # 5. Acceptance criterion 2: Evidence level labelled model-conditioned
-    assert result.evidence_level == "model-conditioned"
-    assert obs.metadata.get("evidence_level") == "model-conditioned"
-    assert obs.source_provenance.get("generator") == "opencap-marker-augmenter"
+    # 5. Acceptance criterion 2: Evidence level labelled synthetic on fallback
+    assert result.evidence_level == "synthetic"
+    assert obs.metadata.get("evidence_level") == "synthetic"
+    assert obs.source_provenance.get("evidence_level") == "synthetic"
+    assert obs.source_provenance.get("generator") == "geometric-offsets"
     assert obs.metadata.get("source") == "opencap_marker_augmenter"
 
     # 6. Acceptance criterion 3: TensorFlow still not imported
@@ -183,4 +184,67 @@ def test_pipeline_with_marker_trajectory_input() -> None:
     )
     assert result.num_frames == 3
     assert len(result.joint_trajectory.frames) == 3
-    assert result.evidence_level == "model-conditioned"
+    assert result.evidence_level == "synthetic"
+    assert result.augmented_observations.metadata.get("evidence_level") == "synthetic"
+
+
+def test_pipeline_model_conditioned_with_real_sidecar_launcher() -> None:
+    """Verify that when real sidecar execution occurs, output is model-conditioned."""
+    from unittest.mock import MagicMock
+    from src.motion_capture.opencap_ingest.launcher import (
+        OpenCapLauncher,
+        OpenCapLaunchResult,
+    )
+    from src.shared.python.motion_pipeline.contracts import (
+        CanonicalObservationFrame,
+        Marker,
+    )
+    from src.shared.python.motion_pipeline.sources.opencap_session import OpenCapSession
+
+    kpts_arr, names = _generate_synthetic_triangulated_capture(n_frames=3, fps=30.0)
+
+    # Fake observations with all 43 markers from real sidecar
+    fake_obs = CanonicalObservations(
+        id="real-sidecar-obs",
+        frames=[
+            CanonicalObservationFrame(
+                timestamp=f * 0.033,
+                markers={
+                    m: Marker(name=m, x=0.1, y=0.5, z=0.2)
+                    for m in OPENCAP_AUGMENTED_MARKERS
+                },
+            )
+            for f in range(3)
+        ],
+        marker_set_name=OPENCAP_MARKER_SET_NAME,
+        metadata={"evidence_level": "model-conditioned"},
+        source_provenance={
+            "evidence_level": "model-conditioned",
+            "generator": "opencap-marker-augmenter",
+        },
+    )
+    fake_session = OpenCapSession(
+        trial="trial1",
+        trials=["trial1"],
+        observations=fake_obs,
+        kinematics=None,
+        model_file=None,
+        subject=MagicMock(),
+    )
+    fake_launcher = MagicMock(spec=OpenCapLauncher)
+    fake_launcher.launch.return_value = OpenCapLaunchResult(
+        success=True,
+        return_code=0,
+        session=fake_session,
+        used_real_opencap=True,
+    )
+
+    augmenter = OpenCapMarkerAugmenter(
+        OpenCapAugmenterConfig(runner_type="subprocess", synthetic_fallback=False),
+        launcher=fake_launcher,
+    )
+    obs = augmenter.augment((kpts_arr, names))
+
+    assert obs.metadata.get("evidence_level") == "model-conditioned"
+    assert obs.source_provenance.get("evidence_level") == "model-conditioned"
+    assert obs.source_provenance.get("generator") == "opencap-marker-augmenter"

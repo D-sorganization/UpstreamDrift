@@ -75,10 +75,9 @@ def _load_mujoco():
 def _mujoco_reference(mj):
     """MuJoCo ID/drift/ZTCF/ZVCF built from MuJoCo's own M, bias and g.
 
-    ``mj_forward``/``mj_inverse`` also add MuJoCo's constraint-solver forces
-    (joint-limit rows are active on this fixture), which are not part of the
-    rigid-body equation ``M a + C v + g = tau`` that the other engines
-    expose, so the comparison uses the MuJoCo mass matrix and bias directly.
+    With the phantom world-fused contact on the double pendulum fixture fixed
+    (#12989), MuJoCo's native compute_drift_acceleration() and
+    compute_inverse_dynamics() match these unconstrained references directly.
     """
     mass = mj.compute_mass_matrix()
     bias = mj.compute_bias_forces()
@@ -273,3 +272,17 @@ def test_multibody_forces_constructor_is_the_real_api() -> None:
         assert "MakeMultibodyForces" not in path.read_text(
             encoding="utf-8", errors="ignore"
         ), path
+
+
+def test_mujoco_native_api_matches_reference() -> None:
+    """#12989: MuJoCo native ID, drift, and ZTCF match reference on double pendulum."""
+    mj = _load_mujoco()
+    ref = _mujoco_reference(mj)
+    np.testing.assert_allclose(
+        mj.compute_inverse_dynamics(_QACC), ref["id"], atol=_ATOL
+    )
+    np.testing.assert_allclose(
+        mj.compute_drift_acceleration(), ref["drift"], atol=_ATOL
+    )
+    np.testing.assert_allclose(mj.compute_ztcf(_Q, _V), ref["drift"], atol=_ATOL)
+    np.testing.assert_allclose(mj.compute_contact_forces(), np.zeros(3), atol=_ATOL)

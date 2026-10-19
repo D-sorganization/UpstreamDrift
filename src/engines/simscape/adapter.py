@@ -225,6 +225,11 @@ class SimscapeAdapter:
         return self._lifecycle.is_loaded()
 
     @property
+    def is_initialized(self) -> bool:
+        """Return ``True`` if engine is initialized with a loaded model."""
+        return self.model_loaded
+
+    @property
     def joint_names(self) -> tuple[str, ...]:
         """Return the joint-name tuple discovered at load time."""
         return self._joint_names

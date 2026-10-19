@@ -555,7 +555,6 @@ def simulate_with_coefficients(
 
     # ---- 5. Run the sim ------------------------------------------------
     simulator = api.simulator_cls(diagram, diagram_context)
-    simulator.set_publish_every_time_step(False)
     simulator.Initialize()
 
     grid = _sample_grid(opts.simulation_time_s, opts.sample_rate_hz)

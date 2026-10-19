@@ -559,7 +559,6 @@ def _autodiff_simulate_and_cost(  # noqa: C901
         # Default: explicit RK3.
         simulator = Simulator_[AutoDiffXd](plant_ad, context)
 
-    simulator.set_publish_every_time_step(False)
     simulator.Initialize()
 
     # Lazily compute body-frame for grip pose extraction.
@@ -963,7 +962,6 @@ def _final_rmse_float_plant(
         return float("nan")
     grip_body = plant_float.GetBodyByName(grip_body_name)
     sim = Simulator(plant_float, context)
-    sim.set_publish_every_time_step(False)
     sim.Initialize()
     sse = 0.0
     for idx, t_target in enumerate(target_time):

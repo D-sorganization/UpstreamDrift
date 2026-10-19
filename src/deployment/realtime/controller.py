@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import logging
+import math
 import threading
 import time
 from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -48,6 +49,9 @@ class RobotConfig:
         communication_type: Communication protocol.
         ip_address: Robot IP address (if networked).
         port: Communication port.
+        fk_callback: Optional forward kinematics callback mapping joint positions to points.
+        fk_velocity_callback: Optional callback mapping (positions, velocities) to Cartesian velocity.
+        contact_surface_area_cm2: Optional contact surface area for pressure conversion (cm²).
     """
 
     name: str
@@ -60,11 +64,24 @@ class RobotConfig:
     communication_type: CommunicationType = CommunicationType.SIMULATION
     ip_address: str = "127.0.0.1"
     port: int = 5000
+    fk_callback: Callable[[NDArray[np.floating]], Any] | None = None
+    fk_velocity_callback: (
+        Callable[[NDArray[np.floating], NDArray[np.floating]], Any] | None
+    ) = None
+    contact_surface_area_cm2: float | None = None
 
     def __post_init__(self) -> None:
-        """Set default joint names if not provided."""
+        """Set default joint names and validate configurations."""
         if not self.joint_names:
             self.joint_names = [f"joint_{i}" for i in range(self.n_joints)]
+        if self.contact_surface_area_cm2 is not None:
+            if (
+                not math.isfinite(self.contact_surface_area_cm2)
+                or self.contact_surface_area_cm2 <= 0
+            ):
+                raise ValueError(
+                    "contact_surface_area_cm2 must be a positive finite float"
+                )
 
 
 @dataclass

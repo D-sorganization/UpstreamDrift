@@ -138,6 +138,39 @@ def test_augmenter_fails_closed_when_sidecar_absent(
         augmenter.augment((kpt_arr, names))
 
 
+def test_augmenter_fails_closed_per_runner_type(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.motion_capture.opencap_ingest.launcher import OpenCapLauncher
+
+    # Case 1: runner_type="subprocess", python is missing but docker is present -> must fail closed
+    monkeypatch.setattr(OpenCapLauncher, "find_opencap_python", lambda env: None)
+    monkeypatch.setattr(OpenCapLauncher, "is_docker_available", lambda: True)
+
+    kpt_arr, names = _synthetic_15_keypoints(3)
+    augmenter = OpenCapMarkerAugmenter(
+        OpenCapAugmenterConfig(runner_type="subprocess", synthetic_fallback=False)
+    )
+    with pytest.raises(
+        OpenCapSidecarNotFoundError, match="opencap-core sidecar is not installed"
+    ):
+        augmenter.augment((kpt_arr, names))
+
+    # Case 2: runner_type="docker", docker is missing but python is present -> must fail closed
+    monkeypatch.setattr(
+        OpenCapLauncher, "find_opencap_python", lambda env: "/usr/bin/python"
+    )
+    monkeypatch.setattr(OpenCapLauncher, "is_docker_available", lambda: False)
+
+    augmenter = OpenCapMarkerAugmenter(
+        OpenCapAugmenterConfig(runner_type="docker", synthetic_fallback=False)
+    )
+    with pytest.raises(
+        OpenCapSidecarNotFoundError, match="opencap-core sidecar is not installed"
+    ):
+        augmenter.augment((kpt_arr, names))
+
+
 def test_augmenter_synthetic_fallback() -> None:
     kpt_arr, names = _synthetic_15_keypoints(4)
     augmenter = OpenCapMarkerAugmenter(OpenCapAugmenterConfig(synthetic_fallback=True))
@@ -146,8 +179,91 @@ def test_augmenter_synthetic_fallback() -> None:
     assert isinstance(obs, CanonicalObservations)
     assert len(obs.frames) == 4
     assert obs.marker_set_name == OPENCAP_MARKER_SET_NAME
+    assert obs.metadata.get("evidence_level") == "synthetic"
+    assert obs.source_provenance.get("evidence_level") == "synthetic"
+    assert obs.source_provenance.get("generator") == "geometric-offsets"
+
+
+def test_augmenter_invokes_sidecar_launcher() -> None:
+    from unittest.mock import MagicMock
+    from src.motion_capture.opencap_ingest.launcher import (
+        OpenCapLauncher,
+        OpenCapLaunchResult,
+    )
+    from src.shared.python.motion_pipeline.sources.opencap_session import OpenCapSession
+
+    kpt_arr, names = _synthetic_15_keypoints(3)
+    fake_obs = CanonicalObservations(
+        id="mock-sidecar-obs",
+        frames=[
+            CanonicalObservationFrame(
+                timestamp=0.0,
+                markers={
+                    m: Marker(name=m, x=0.1, y=0.2, z=0.3)
+                    for m in OPENCAP_AUGMENTED_MARKERS
+                },
+            )
+        ],
+        marker_set_name=OPENCAP_MARKER_SET_NAME,
+        metadata={"evidence_level": "model-conditioned"},
+        source_provenance={
+            "evidence_level": "model-conditioned",
+            "generator": "opencap-marker-augmenter",
+        },
+    )
+    fake_session = OpenCapSession(
+        trial="trial1",
+        trials=["trial1"],
+        observations=fake_obs,
+        kinematics=None,
+        model_file=None,
+        subject=MagicMock(),
+    )
+    fake_launcher = MagicMock(spec=OpenCapLauncher)
+    fake_launcher.launch.return_value = OpenCapLaunchResult(
+        success=True,
+        return_code=0,
+        session=fake_session,
+        used_real_opencap=True,
+    )
+
+    augmenter = OpenCapMarkerAugmenter(
+        OpenCapAugmenterConfig(runner_type="subprocess"),
+        launcher=fake_launcher,
+    )
+    obs = augmenter.augment((kpt_arr, names))
+
+    assert fake_launcher.launch.called
     assert obs.metadata.get("evidence_level") == "model-conditioned"
     assert obs.source_provenance.get("evidence_level") == "model-conditioned"
+    assert obs.source_provenance.get("generator") == "opencap-marker-augmenter"
+
+
+def test_augmenter_dry_run_never_stamps_model_conditioned() -> None:
+    kpt_arr, names = _synthetic_15_keypoints(3)
+    augmenter = OpenCapMarkerAugmenter(
+        OpenCapAugmenterConfig(dry_run=True, runner_type="subprocess")
+    )
+    obs = augmenter.augment((kpt_arr, names))
+
+    assert obs.metadata.get("evidence_level") != "model-conditioned"
+    assert obs.source_provenance.get("evidence_level") != "model-conditioned"
+    assert obs.metadata.get("evidence_level") == "synthetic"
+    assert obs.source_provenance.get("evidence_level") == "synthetic"
+    assert obs.source_provenance.get("generator") == "geometric-offsets"
+
+
+def test_repro_issue_12971() -> None:
+    """Exact repro from issue #12971: neither configuration should yield model-conditioned."""
+    kp = {"left_hip": np.zeros((3, 3)), "right_hip": np.ones((3, 3))}
+    for cfg in (
+        OpenCapAugmenterConfig(synthetic_fallback=True),
+        OpenCapAugmenterConfig(dry_run=True, runner_type="subprocess"),
+    ):
+        provenance = OpenCapMarkerAugmenter(cfg).augment(kp).source_provenance
+        assert provenance.get("evidence_level") != "model-conditioned"
+        assert provenance.get("evidence_level") == "synthetic"
+        assert provenance.get("generator") == "geometric-offsets"
 
 
 def test_augmented_markers_contain_all_43_laiuhlrich2022_markers() -> None:
@@ -242,7 +358,8 @@ def test_run_opencap_pipeline_from_keypoints() -> None:
     )
 
     assert isinstance(result, OpenCapPipelineResult)
-    assert result.evidence_level == "model-conditioned"
+    assert result.evidence_level == "synthetic"
+    assert result.augmented_observations.metadata.get("evidence_level") == "synthetic"
     assert result.marker_set_name == OPENCAP_MARKER_SET_NAME
     assert result.num_frames == 5
     assert len(result.augmented_observations.frames) == 5
