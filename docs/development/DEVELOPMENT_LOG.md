@@ -2639,6 +2639,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13298 · Unify Grip Frames Across Model_Appearance and Grip_Contact, Fix Drake Contact Normal Recording
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13298
+- **Branch:** fix/13298-grip-frame-unify
+- **PR:** #13318
+- **Paths:** see #13318
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`24633553`; collated from changes/13298-unify-grip-frames-across-model-appearanc.md)
+- **Summary:** Unify grip frames across model_appearance and grip_contact, fix Drake contact normal recording
+- **Next step:** Shipped in PR #13318.
+
 ### DL-#13322 · Add Cross-Model Grip Capability Inventory Manifest, DbC Loader, and Verification Suite
 
 - **State:** shipped
