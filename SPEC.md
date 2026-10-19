@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13443 | kinetics parity for all registered lifts |
 | 2026-10-19 | #13312 | Align default engine models to canonical golfer and raise KeyError on unknown body in compute_jacobian |
 | 2026-10-19 | #13441 | Declare websockets for realtime Python backend and document Qualisys C3D/TRC export path in formats.md |
 | 2026-10-19 | #13440 | Add dated NM addendum superseding sealed golfer u_dim=5 records after #12608 |
