@@ -295,6 +295,42 @@ def _read_osl4_qualification() -> dict[str, Any]:
     }
 
 
+def _min_acceleration_bound(
+    model: Any,
+    targets: Any,
+    reactions: Any,
+    qdd_norms: np.ndarray,
+    muscle_names: list[str],
+    forces: np.ndarray,
+) -> tuple[float, dict[str, Any]]:
+    """Mass above L5/S1 and the bound record at the least-accelerated frame."""
+    min_k = int(np.argmin(qdd_norms))
+    body_set = model.getBodySet()
+    m_above = sum(
+        body_set.get(name).getMass()
+        for name in _UPPER_BODY_NAMES
+        if body_set.contains(name)
+    )
+    w_above_val = m_above * GRAVITY_FLOAT
+
+    crossing = muscles_crossing_joint(model, "back")
+    crossing_force = float(
+        sum(forces[min_k, muscle_names.index(m)] for m in crossing if m in muscle_names)
+    )
+    real_squat_info = build_real_squat_bound_record(
+        frame_idx=min_k,
+        time_s=float(targets.time_s[min_k]),
+        qdd_norm=float(qdd_norms[min_k]),
+        w_above=w_above_val,
+        c_pelvis=float(reactions.l5s1_comp_n[min_k]),
+        c_torso=float(reactions.l5s1_torso_comp_n[min_k]),
+        crossing_force=crossing_force,
+        crossing_count=len(crossing),
+    )
+
+    return float(m_above), real_squat_info
+
+
 def evaluate_lift_joint_reactions(
     lift: str,
     *,
@@ -335,32 +371,8 @@ def evaluate_lift_joint_reactions(
         jr_model, coord_names, ik, targets, basis.muscle_names, solve.forces
     )
 
-    min_k = int(np.argmin(qdd_norms))
-    body_set = build.model.getBodySet()
-    m_above = sum(
-        body_set.get(name).getMass()
-        for name in _UPPER_BODY_NAMES
-        if body_set.contains(name)
-    )
-    w_above_val = m_above * GRAVITY_FLOAT
-
-    crossing = muscles_crossing_joint(build.model, "back")
-    crossing_force = float(
-        sum(
-            solve.forces[min_k, basis.muscle_names.index(m)]
-            for m in crossing
-            if m in basis.muscle_names
-        )
-    )
-    real_squat_info = build_real_squat_bound_record(
-        frame_idx=min_k,
-        time_s=float(targets.time_s[min_k]),
-        qdd_norm=float(qdd_norms[min_k]),
-        w_above=w_above_val,
-        c_pelvis=float(reactions.l5s1_comp_n[min_k]),
-        c_torso=float(reactions.l5s1_torso_comp_n[min_k]),
-        crossing_force=crossing_force,
-        crossing_count=len(crossing),
+    m_above, real_squat_info = _min_acceleration_bound(
+        build.model, targets, reactions, qdd_norms, basis.muscle_names, solve.forces
     )
 
     bw_n = targets.body_mass_kg * GRAVITY_FLOAT
