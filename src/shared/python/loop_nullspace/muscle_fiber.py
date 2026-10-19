@@ -66,7 +66,7 @@ from dataclasses import dataclass
 from functools import cached_property
 
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 from scipy.optimize import linprog
 
 from src.shared.python.loop_nullspace.evidence import Array
@@ -160,7 +160,7 @@ class FibreHull:
     hit-and-run well posed there.
     """
 
-    free: Array
+    free: NDArray[np.intp]
     particular: Array
     basis: Array
 
@@ -442,8 +442,10 @@ class ActivationFiber:
         box = FeasibleSet.from_rows(
             d,
             [
-                FeasibleRow(g, float(h), f"box{i}", _BOX_HYPOTHESIS, "torque")
-                for i, (g, h) in enumerate(zip(rows, bounds, strict=True))
+                FeasibleRow(
+                    rows[i], float(bounds[i]), f"box{i}", _BOX_HYPOTHESIS, "torque"
+                )
+                for i in range(rows.shape[0])
             ],
         )
         chain = hit_and_run(
