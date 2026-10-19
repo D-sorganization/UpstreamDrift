@@ -9,13 +9,16 @@ Precedence, highest first, the same rule as the appearance colours
 
 Two kinds of pick are kept apart:
 
-* **Physical** picks change the hands' orientation and place on the shaft:
-  the rotation about the shaft (``alpha``), the palm diagonal (``psi``), the
-  set angle (``gamma``), the lead hand's depth and the hand spacing.  They mint
-  a new spec revision through
-  :func:`~.grip_rotation.apply_grip_config` and are **never** written to an
-  ``.appearance.json`` sidecar; the revision needs a refit.
-* **Visual** picks (``style``, the lead thumb) only change the picture.  They go
+* **Physical** picks change the hands' orientation, place on the shaft, or
+  contact topology: the rotation about the shaft (``alpha``), the palm diagonal
+  (``psi``), the set angle (``gamma``), the lead hand's depth, the hand spacing
+  and ``grip_style`` (since HRG-GS-G1, #13299 / #13346).  They mint a new spec
+  revision through :func:`~.grip_rotation.apply_grip_config` and are **never**
+  written to an ``.appearance.json`` sidecar; the revision needs a refit.  When
+  ``grip_style`` is the only physical pick and equals the document's current
+  physical style (default ``overlap``), it is a no-op and the v1 bytes stay
+  identical.
+* **Visual** picks (the lead thumb offset) only change the picture.  They go
   in the sidecar's ``grip`` block and never move ``physics_spec_sha256``.
 """
 
@@ -39,7 +42,6 @@ from src.shared.python.motion_matching.grip_contract import (
     GRIP_STRENGTH_PRESETS_DEG,
     NAMED_GRIP_PRESETS,
     GripSpec,
-    HandAngles,
     from_grip_rotation,
     named_grip_preset,
 )
@@ -48,7 +50,7 @@ NAMED_PRESET_CHOICES = tuple(NAMED_GRIP_PRESETS)
 GRIP_PRESET_CHOICES = (*GRIP_STRENGTH_PRESETS_DEG, *NAMED_PRESET_CHOICES)
 GRIP_STYLE_CHOICES = tuple(s.value for s in GripStyle)
 #: The only keys a sidecar's ``grip`` block may carry (visual values).
-VISUAL_KEYS = ("style", "lead_thumb_offset_deg")
+VISUAL_KEYS = ("lead_thumb_offset_deg",)
 #: pick name -> (hand, angle) of the physical hand angles.
 _HAND_PICKS = {
     "lead_shaft_rotation": ("lead", "alpha_deg"),
@@ -62,19 +64,18 @@ _SHARED_PICKS = {
     "lead_below_butt": "lead_below_butt_m",
     "hand_spacing": "hand_spacing_m",
 }
-PHYSICAL_PICKS = ("preset", *_HAND_PICKS, *_SHARED_PICKS)
-VISUAL_PICKS = ("grip_style", "grip_thumb_offset_deg")
+PHYSICAL_PICKS = ("preset", *_HAND_PICKS, *_SHARED_PICKS, "grip_style")
+VISUAL_PICKS = ("grip_thumb_offset_deg",)
 
 
 @dataclass(frozen=True)
 class GripOverrides:
     """Explicit grip picks; ``None`` leaves a field to the lower layers.
 
-    ``preset`` names a grip strength (``weak``, ``neutral``, ``strong``) and
-    sets both hands to that strength at the published neutral palm diagonal and
-    set angle; an explicit hand pick then wins over it.  Rotations about the
-    shaft (``*_shaft_rotation``, positive is stronger), palm diagonals and set
-    angles are degrees, depth and spacing metres.
+    ``preset`` names a grip strength (``weak``, ``neutral``, ``strong``) or
+    a named preset and sets both hands; an explicit hand pick then wins over
+    it.  ``grip_style`` is physical (selects the contact topology since G1).
+    ``grip_thumb_offset_deg`` is visual (picture only).
     """
 
     preset: str | None = None
@@ -86,7 +87,7 @@ class GripOverrides:
     trail_set_angle: float | None = None
     lead_below_butt: float | None = None
     hand_spacing: float | None = None
-    grip_style: str | None = None  # visual
+    grip_style: str | None = None  # physical (selects contact topology)
     grip_thumb_offset_deg: float | None = None  # visual
 
     def __post_init__(self) -> None:
@@ -141,6 +142,24 @@ class GripOverrides:
         return bool(self.visual)
 
 
+def _document_physical_style(
+    document: Mapping[str, Any] | GripSpec | GripStyle | str | None = None,
+) -> GripStyle:
+    """Resolve the physical ``GripStyle`` of a spec document or ``GripSpec``."""
+    if document is None:
+        return GripStyle.OVERLAP
+    if isinstance(document, GripStyle):
+        return document
+    if isinstance(document, GripSpec):
+        return document.style
+    if isinstance(document, str):
+        return GripStyle(document)
+    if isinstance(document, Mapping):
+        cfg = (document.get("subject") or {}).get("grip_config") or {}
+        return GripStyle(cfg.get("style", GripStyle.OVERLAP.value))
+    raise TypeError(f"unsupported document type for physical style: {type(document)!r}")
+
+
 def check_sidecar_grip(block: Mapping[str, Any]) -> None:
     """Refuse a sidecar ``grip`` block that carries a physical value.
 
@@ -150,11 +169,44 @@ def check_sidecar_grip(block: Mapping[str, Any]) -> None:
     if moved:
         raise ValueError(
             f"the appearance sidecar may hold only visual grip values "
-            f"{list(VISUAL_KEYS)}, but it carries {moved}: strength, palm "
-            "diagonal, set angle, depth and hand spacing are physical and make a "
-            "new model revision (--grip-preset and the other grip flags of "
-            "spec_builder); they need a refit"
+            f"{list(VISUAL_KEYS)}, but it carries {moved}: style, strength, "
+            "palm diagonal, set angle, depth and hand spacing are physical and "
+            "make a new model revision (--grip-preset, --grip-style and the "
+            "other grip flags of spec_builder); they need a refit"
         )
+
+
+def migrate_sidecar_grip(
+    block: Mapping[str, Any] | None,
+    document: Mapping[str, Any] | GripSpec | GripStyle | str | None = None,
+) -> dict[str, Any]:
+    """Validate a sidecar ``grip`` block and migrate a legacy read-only ``style``.
+
+    Compares any legacy ``grip.style`` with the physical
+    ``subject.grip_config.style`` (default ``overlap``), raising ``ValueError``
+    naming both values if they disagree and dropping ``style`` on agreement.
+    """
+    if block is None:
+        return {}
+    require(isinstance(block, Mapping), "sidecar grip block must be a mapping")
+    cleaned = dict(block)
+    other_moved = sorted(set(cleaned) - set(VISUAL_KEYS) - {"style"})
+    if other_moved:
+        check_sidecar_grip(cleaned)
+    if "style" in cleaned:
+        raw_legacy = cleaned.pop("style")
+        legacy = (
+            raw_legacy.value if isinstance(raw_legacy, GripStyle) else str(raw_legacy)
+        )
+        physical = _document_physical_style(document).value
+        if legacy not in GRIP_STYLE_CHOICES or legacy != physical:
+            raise ValueError(
+                f"legacy sidecar grip.style={legacy!r} disagrees with physical "
+                f"subject.grip_config.style={physical!r}; grip_style is a "
+                "physical pick and sidecar and physical style can never disagree"
+            )
+    check_sidecar_grip(cleaned)
+    return cleaned
 
 
 def document_grip(document: Mapping[str, Any]) -> GripSpec | None:
@@ -187,6 +239,19 @@ def _determines_both_hands(picks: GripOverrides) -> bool:
     return all(getattr(picks, name) is not None for name in _HAND_PICKS)
 
 
+def _has_effective_physical_change(
+    document: Mapping[str, Any], overrides: GripOverrides
+) -> bool:
+    """True when ``overrides`` changes any physical grip parameter on ``document``."""
+    if not overrides.has_physical:
+        return False
+    if set(overrides.physical) - {"grip_style"}:
+        return True
+    return overrides.grip_style is not None and GripStyle(
+        overrides.grip_style
+    ) is not _document_physical_style(document)
+
+
 def _with_hand_picks(grip: GripSpec, overrides: GripOverrides) -> GripSpec:
     hands = {"lead": grip.lead, "trail": grip.trail}
     for pick, (hand, angle) in _HAND_PICKS.items():
@@ -195,22 +260,23 @@ def _with_hand_picks(grip: GripSpec, overrides: GripOverrides) -> GripSpec:
             hands[hand] = replace(hands[hand], **{angle: float(value)})
     depth = overrides.lead_below_butt
     spacing = overrides.hand_spacing
+    style = (
+        grip.style if overrides.grip_style is None else GripStyle(overrides.grip_style)
+    )
     return replace(
         grip,
         lead=hands["lead"],
         trail=hands["trail"],
         lead_below_butt_m=grip.lead_below_butt_m if depth is None else float(depth),
         hand_spacing_m=grip.hand_spacing_m if spacing is None else float(spacing),
+        style=style,
     )
 
 
-def _with_visual(grip: GripSpec, style: Any, thumb: Any) -> GripSpec:
-    out = grip
-    if style is not None:
-        out = replace(out, style=GripStyle(style))
-    if thumb is not None:
-        out = replace(out, lead_thumb_offset_deg=float(thumb))
-    return out
+def _with_visual(grip: GripSpec, thumb: Any) -> GripSpec:
+    if thumb is None:
+        return grip
+    return replace(grip, lead_thumb_offset_deg=float(thumb))
 
 
 def _apply_named_preset(grip: GripSpec, name: str) -> GripSpec:
@@ -240,17 +306,15 @@ def resolve_grip(
     """The grip a build renders: picks, then the document, then the defaults.
 
     ``document`` is the spec's grip (default: a default :class:`GripSpec`) and
-    ``sidecar_grip`` the sidecar's visual block (a physical key raises
-    ``ValueError``).  Pure: nothing is read from the environment or the disk.
-    Postcondition: a validated :class:`GripSpec`.
+    ``sidecar_grip`` the sidecar's visual block (a physical key or a disagreeing
+    legacy ``style`` raises ``ValueError``).  Pure: nothing is read from the
+    environment or the disk.  Postcondition: a validated :class:`GripSpec`.
     """
     picks = overrides or GripOverrides()
     grip = document if document is not None else GripSpec()
     if sidecar_grip:
-        check_sidecar_grip(sidecar_grip)
-        grip = _with_visual(
-            grip, sidecar_grip.get("style"), sidecar_grip.get("lead_thumb_offset_deg")
-        )
+        migrated = migrate_sidecar_grip(sidecar_grip, grip)
+        grip = _with_visual(grip, migrated.get("lead_thumb_offset_deg"))
     if picks.preset is not None:
         if picks.preset in NAMED_GRIP_PRESETS:
             grip = _apply_named_preset(grip, picks.preset)
@@ -258,7 +322,7 @@ def resolve_grip(
             hand = GripSpec.preset(picks.preset)
             grip = replace(grip, lead=hand.lead, trail=hand.trail)
     grip = _with_hand_picks(grip, picks)
-    return _with_visual(grip, picks.grip_style, picks.grip_thumb_offset_deg)
+    return _with_visual(grip, picks.grip_thumb_offset_deg)
 
 
 def apply_grip_selection(
@@ -270,38 +334,37 @@ def apply_grip_selection(
 ) -> tuple[dict[str, Any], GripSpec | None]:
     """``(document, grip)`` with the picks resolved against ``document``.
 
-    A physical pick returns a new GR2 revision
+    A physical pick that changes the configuration returns a new GR2 revision
     (:func:`apply_grip_config`, ``spec_revision`` set, a refit needed).  Visual
-    picks alone return an unchanged copy: ``physics_spec_sha256`` does not move.
-    ``grip`` is ``None`` only for picture-only picks on a document whose fitted
-    hands are not a golf grip.  ``ValueError`` if a physical pick has to start
-    from such a fit and does not name every angle of both hands: give a
-    ``preset`` or all six angles.
-
-    ``provenance`` controls the recorded ``subject.grip_provenance`` source
-    for physical parameters (defaults to :data:`photo_estimate` for named
-    presets with ``user_declared`` overrides, or ``user_declared`` for standard
-    presets and explicit picks).
+    picks alone (or picking the unchanged default style) return an unchanged
+    copy: ``physics_spec_sha256`` does not move.
     """
     require(isinstance(overrides, GripOverrides), "overrides must be GripOverrides")
-    if sidecar_grip is not None:
-        check_sidecar_grip(sidecar_grip)
-    base = document_grip(document)
+    migrated = (
+        migrate_sidecar_grip(sidecar_grip, document)
+        if sidecar_grip is not None
+        else None
+    )
+    effective_physical = _has_effective_physical_change(document, overrides)
+    non_style_physical = bool(set(overrides.physical) - {"grip_style"})
+    has_config = (document.get("subject") or {}).get("grip_config") is not None
+    if effective_physical and not non_style_physical and not has_config:
+        base: GripSpec | None = GripSpec(handedness=subject_handedness(document))
+    else:
+        base = document_grip(document)
     if base is None:
-        if overrides.has_physical and not _determines_both_hands(overrides):
+        if non_style_physical and not _determines_both_hands(overrides):
             raise ValueError(
                 "the document's fitted hand rotation is not a golf grip the "
                 "picks can adjust (outside the strength or palm ranges): pick a "
                 "grip preset, or give the shaft rotation, palm diagonal and set "
                 "angle of both hands"
             )
-        if not overrides.has_physical:
+        if not effective_physical:
             return {**document}, None
         base = GripSpec(handedness=subject_handedness(document))
-    grip = resolve_grip(overrides, base, sidecar_grip)
-    if overrides.has_physical:
-        # ``grip`` carries the style pick too: since HRG-GS-G1 the style is a
-        # physical parameter (it selects the contact topology).
+    grip = resolve_grip(overrides, base, migrated)
+    if effective_physical:
         prov = (
             provenance
             if provenance is not None
@@ -318,7 +381,6 @@ def apply_grip_selection(
 def visual_grip_block(grip: GripSpec) -> dict[str, Any]:
     """The sidecar ``grip`` block of ``grip``: visual values only."""
     return {
-        "style": grip.style.value,
         "lead_thumb_offset_deg": grip.lead_thumb_offset_deg,
     }
 
@@ -335,8 +397,6 @@ def apply_visual_picks(
     out = dict(appearance)
     block = dict(out.get("grip", {}))
     check_sidecar_grip(block)
-    if overrides.grip_style is not None:
-        block["style"] = overrides.grip_style
     if overrides.grip_thumb_offset_deg is not None:
         block["lead_thumb_offset_deg"] = float(overrides.grip_thumb_offset_deg)
     if block:
@@ -350,8 +410,9 @@ def refuse_physical_in_sidecar(overrides: GripOverrides) -> None:
         raise ValueError(
             f"{sorted(overrides.physical)} change the hands' physics, so they "
             "cannot be applied as a picture-only (appearance) choice: build a "
-            "new model revision with spec_builder (--grip-preset and the other "
-            "grip flags), refit it, then export from that revision's receipt"
+            "new model revision with spec_builder (--grip-preset, --grip-style "
+            "and the other grip flags), refit it, then export from that "
+            "revision's receipt"
         )
 
 
@@ -393,26 +454,33 @@ _FLAGS: tuple[tuple[str, str, type, str], ...] = (
 
 
 def add_grip_arguments(parser: argparse.ArgumentParser, *, physical: bool) -> None:
-    """The grip flags (HRG-GR4).  ``physical`` False keeps only ``--grip-style``.
+    """The grip flags (HRG-GR4).  ``physical`` False keeps only visual flags.
 
     Precedence: a flag, then the document, then the defaults.  Physical flags
-    make a new model revision that needs a refit; ``--grip-style`` is
-    picture-only.
+    (including ``--grip-style`` since HRG-GS-G1) make a new model revision that
+    needs a refit; ``--grip-thumb-offset-deg`` is picture-only.
     """
     group = parser.add_argument_group(
         "grip",
-        "golf grip; physical flags make a new model revision (refit needed), "
-        "--grip-style is picture-only",
+        "golf grip; physical flags (including --grip-style) make a new model "
+        "revision (refit needed), --grip-thumb-offset-deg is picture-only",
     )
+    group.add_argument(
+        "--grip-thumb-offset-deg",
+        dest="grip_thumb_offset_deg",
+        type=float,
+        default=None,
+        help="lead thumb azimuth offset from shaft top, degrees (picture only; no refit)",
+    )
+    if not physical:
+        return
     group.add_argument(
         "--grip-style",
         default=None,
         choices=GRIP_STYLE_CHOICES,
         help="how the little finger of the trail hand sits: overlap, interlock "
-        "or ten_finger (picture only; no refit)",
+        "or ten_finger (physical: selects contact topology; refit needed)",
     )
-    if not physical:
-        return
     group.add_argument(
         "--grip-preset",
         default=None,
@@ -426,6 +494,11 @@ def add_grip_arguments(parser: argparse.ArgumentParser, *, physical: bool) -> No
 
 def overrides_from_args(args: argparse.Namespace) -> GripOverrides:
     """:class:`GripOverrides` of parsed arguments (missing flags are ``None``)."""
-    names = ("preset", *(dest for _f, dest, _k, _t in _FLAGS), "grip_style")
+    names = (
+        "preset",
+        *(dest for _f, dest, _k, _t in _FLAGS),
+        "grip_style",
+        "grip_thumb_offset_deg",
+    )
     picks = {n: getattr(args, f"grip_{n}" if n == "preset" else n, None) for n in names}
     return GripOverrides(**picks)

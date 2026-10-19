@@ -124,14 +124,28 @@
         "grip_thumb_offset_deg": 20.0
       },
       "expected": {
-        "grip": null,
+        "grip": {
+          "lead": {
+            "alpha_deg": 0.0,
+            "psi_deg": 40.0,
+            "gamma_deg": 0.0
+          },
+          "trail": {
+            "alpha_deg": 0.0,
+            "psi_deg": 40.0,
+            "gamma_deg": 0.0
+          },
+          "lead_below_butt_m": 0.032,
+          "hand_spacing_m": 0.0762,
+          "handedness": "right",
+          "style": "interlock"
+        },
         "sidecar_grip": {
-          "style": "interlock",
           "lead_thumb_offset_deg": 20.0
         },
-        "refit_required": false,
-        "driver_physics_spec_sha256": "296bdc363b3f68cbfba3a651efc45e818b3946331802e8fa113a650eb973537f",
-        "character_physics_spec_sha256": "d7b5b93bcfc9bb619d8c8d01d83f192bb0d9d55f19dd507668158e575ab8df45"
+        "refit_required": true,
+        "driver_physics_spec_sha256": "98bd6b2e79578602c99bc5572423380d3cfb553307f5ef1d2298f8c4861d976b",
+        "character_physics_spec_sha256": "0ec1ec964086d35b6cf7c9d646dfbb8605bc2f8dc1283bd54c2afa4787dd378c"
       }
     },
     {
@@ -157,9 +171,7 @@
           "handedness": "right",
           "style": "ten_finger"
         },
-        "sidecar_grip": {
-          "style": "ten_finger"
-        },
+        "sidecar_grip": {},
         "refit_required": true,
         "driver_physics_spec_sha256": "7d4ec26a36045e2f3b389720af20ad1a7bc3d9ae2f66b2c808d36f425c46cfc7",
         "character_physics_spec_sha256": "437130450f22acbfef2cc3f58af8799bbef4ae05c2522b00c1c3e99356222081"

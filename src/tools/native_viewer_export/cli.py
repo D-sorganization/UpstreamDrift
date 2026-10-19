@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from functools import partial
 import json
@@ -31,7 +31,7 @@ from src.shared.python.model_appearance.schema import (
 from src.shared.python.motion_matching.execution.grip_selection import (
     add_grip_arguments,
     apply_visual_picks,
-    check_sidecar_grip,
+    migrate_sidecar_grip,
     overrides_from_args,
     refuse_physical_in_sidecar,
 )
@@ -267,7 +267,10 @@ def add_appearance_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
-def load_appearance_document(path: Path) -> dict[str, Any]:
+def load_appearance_document(
+    path: Path,
+    document: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
     """Parse an appearance-v1 document file (``ValueError`` if unreadable/invalid)."""
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -276,7 +279,13 @@ def load_appearance_document(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(f"--appearance {path} must hold a JSON object")
     if "grip" in data:
-        check_sidecar_grip(data["grip"])  # a clear message before the schema's
+        if not isinstance(data["grip"], Mapping):
+            raise ValueError(f"--appearance {path} 'grip' must be a JSON object")
+        migrated = migrate_sidecar_grip(data["grip"], document)
+        if migrated:
+            data["grip"] = migrated
+        else:
+            data.pop("grip")
     document_from_dict(data)  # validates (fail closed)
     return data
 

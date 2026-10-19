@@ -429,5 +429,5 @@ def test_apply_grip_selection_restores_sidecar_visual_picks_in_returned_grip() -
     assert grip is not None
     assert grip.style is GripStyle.TEN_FINGER
     assert grip.lead_thumb_offset_deg == pytest.approx(18.0)
-    # The document physics hash is unchanged
-    assert physics_spec_sha256(doc) == physics_spec_sha256(configured_doc)
+    assert doc["subject"]["grip_config"]["style"] == "ten_finger"
+    assert physics_spec_sha256(doc) != physics_spec_sha256(configured_doc)
