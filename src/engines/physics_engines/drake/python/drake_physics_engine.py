@@ -555,8 +555,8 @@ class DrakePhysicsEngine(BasePhysicsEngine):
                     self.plant.get_body(i).name()
                     for i in range(self.plant.num_bodies())
                 ]
-            except Exception:
-                pass
+            except (RuntimeError, ValueError, IndexError):
+                logger.debug("Could not enumerate Drake bodies", exc_info=True)
         return []
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:

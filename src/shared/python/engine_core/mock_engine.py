@@ -22,6 +22,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.core.constants import GRAVITY
+from src.shared.python.engine_core.model_contracts import REQUIRED_GOLFER_BODIES
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -277,16 +278,11 @@ class MockPhysicsEngine:
             raise ValueError("q must be provided")
         return np.zeros(self.compute_mass_matrix().shape[0])
 
+    def compute_contact_forces(self) -> np.ndarray:
+        return np.zeros(3)
+
     def get_body_names(self) -> list[str]:
-        return [
-            "pelvis",
-            "forearm_left",
-            "forearm_right",
-            "hand_left",
-            "hand_right",
-            "club_shaft",
-            "club_head",
-        ]
+        return list(REQUIRED_GOLFER_BODIES)
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         n_v = int(self.num_v) if self.num_v is not None else self.num_joints
