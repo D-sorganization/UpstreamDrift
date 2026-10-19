@@ -616,6 +616,88 @@ u_x \cdot u_{\mathrm{exp}} \ge 0.999999.
 python3 -m pytest tests/unit/grip_contact/test_grip_binding_manifests.py
 \end{verbatim}
 
+\subsection{Topology-Driven Finger Pose and Visual Roll (HRG-GS-G4, \#13302)}
+\textbf{Method.} Visual finger placement in \texttt{model\_appearance} is driven directly by \texttt{ContactTopology} contact sites instead of the legacy \texttt{\_FINGER\_LINKS} string table. The lead index finger, trail little finger, and optional trail index trigger are placed by inverting the three-phalanx parametric wrap so that the distal phalanx centroid matches the corresponding topology site centre to within $\le 1$\,mm while ensuring that non-penetrating grip pad clearance is maintained. Per-hand visual roll rotates each hand body about the grip axis by its respective roll offset $\alpha$, absorbing issue \#13166.
+
+\textbf{Parameters.} The topology site centre $\mathbf{c}_{\mathrm{site}} = (x, y, z)$ in the shared grip frame defines the axial target $z_{\mathrm{hand}} = x - d_{\mathrm{butt}}$, radial target $\rho = \sqrt{y^2+z^2}$, and azimuthal target $\theta = \operatorname{atan2}(z, y)$. For unlinked fingers, nominal curl angles are computed from $V$-azimuth $v = 20^\circ + \alpha$ and knuckle offset $110^\circ$. For topology-driven fingers, a 1D monotonic solve determines tangent radius $d$ and metacarpophalangeal azimuth $\theta_{\mathrm{mcp}}$ such that the distal phalanx vertex centroid achieves sub-millimetre agreement with $\mathbf{c}_{\mathrm{site}}$. Thumb azimuth is shifted by $\alpha$ to preserve hand-rigid rotation. Symmetric barrel ring stations $(0.2, 0.4, 0.6, 0.8)$ are added alongside the tangent-point station on each phalanx capsule so that relocating the linked finger onto the partner hand leaves no un-sampled barrel gap across the remaining proximal phalanges, raising 36-bin world azimuthal wrap coverage (lead/trail) from $34/36$ ($0.9444$) and $32/36$ ($0.8889$) on driver overlap, $34/36$ ($0.9444$) and $31/36$ ($0.8611$) on iron7 overlap, $33/36$ ($0.9167$) and $34/36$ ($0.9444$) on driver and iron7 interlock, $34/36$ ($0.9444$) and $35/36$ ($0.9722$) on driver ten-finger, and $34/36$ ($0.9444$) and $34/36$ ($0.9444$) on iron7 ten-finger to full $36/36$ ($1.0000$, all 36 bins covered) for every club and style.
+
+\textbf{Acceptance Criteria.} (1) Rendered fingertip positions match \texttt{ContactTopology} site centres to $\le 1$\,mm across all styles (overlap, interlock, ten-finger) and trigger mode; (2) Overlap, interlock, and ten-finger produce visibly distinct finger geometries with appropriate \texttt{on\_grip} flags and match golden mesh summaries; (3) Per-hand roll follows $\alpha$ to $\le 0.1^\circ$ across fingertips, palm, and thumb; (4) The duplicate \texttt{\_FINGER\_LINKS} table is eliminated from \texttt{grip\_pose}.
+
+\textbf{Reproduce.} Reproduce with:
+\begin{verbatim}
+python3 -m pytest tests/unit/model_appearance/test_grip_finger_topology.py \
+    tests/unit/model_appearance/test_grip_hand_mesh.py \
+    tests/unit/model_appearance/test_grip_pose.py
+\end{verbatim}
+
+\textbf{Limitations.} Hand phalanges remain rigid capsules wrapped on the grip cylinder; individual phalanx flexion dynamics during the swing are visual approximations rather than musculoskeletal coordinate solves.
+
+\subsection{Named Grip Presets (HRG-GS-G5, \#13303)}
+\textbf{Method.} Three historical and coaching consensus two-handed grip presets
+---\texttt{palmer\_overlap}, \texttt{woods\_interlock}, and
+\texttt{ten\_finger}---are formalised over \texttt{GripSpec}, parameterising
+inter-hand linking style, golf angles ($\alpha, \psi, \gamma$) for both hands,
+hand spacing, and trigger-finger extension. The numeric values are
+\texttt{photo\_estimate} assumptions, not measurements; no image is committed
+in the repository. Every parameter records \texttt{photo\_estimate} provenance
+in \texttt{subject.grip\_provenance}, distinguishing photo-estimate assumptions
+from direct kinetic or marker measurements.
+
+\textbf{Parameters.} The panel-consensus starting values and actually consulted
+qualitative sources are:
+\begin{itemize}[nosep]
+  \item \textbf{Palmer Overlap}: \texttt{GripStyle.OVERLAP}, lead
+    $\alpha=+12^{\circ}$, $\psi=45^{\circ}$, $\gamma=0^{\circ}$; trail
+    $\alpha=+12^{\circ}$, $\psi=35^{\circ}$, $\gamma=0^{\circ}$; spacing
+    $0.074$\,m; trigger finger on. Qualitative source: golf.com's published
+    excerpt from the book \emph{Arnold Palmer: American Hero}. Palmer describes
+    an overlap grip, both Vs pointing at the right shoulder seam (strong-ish),
+    the right lifeline folding over the left thumb, a slight right-index trigger,
+    and a palm-finger hold for the left hand. Evidence still requirement: face-on
+    high-speed camera still required at address showing the trail index trigger
+    finger extended down the shaft, the lead thumb nested in the trail thenar pocket,
+    and the trail little finger riding over the lead index knuckle.
+  \item \textbf{Woods Interlock}: \texttt{GripStyle.INTERLOCK}, lead
+    $\alpha=+2^{\circ}$, $\psi=38^{\circ}$, $\gamma=0^{\circ}$; trail
+    $\alpha=+2^{\circ}$, $\psi=34^{\circ}$, $\gamma=0^{\circ}$; spacing
+    $0.069$\,m; trigger finger off. Qualitative source: an interlock grip seen
+    in published photos of Tiger Woods: a neutral lead hand with about 2 to 2.5
+    knuckles showing, the trail little finger hooked between the lead index and
+    middle fingers, and the right palm over the left thumb. Evidence still
+    requirement: face-on high-speed camera still required at address showing
+    the trail little finger deeply interlocked between the lead index and middle
+    fingers, 2 to 2.5 knuckles visible on the lead hand, and the right palm
+    covering the left thumb.
+  \item \textbf{Ten-Finger}: \texttt{GripStyle.TEN\_FINGER}, lead
+    $\alpha=+5^{\circ}$, $\psi=40^{\circ}$, $\gamma=0^{\circ}$; trail
+    $\alpha=+5^{\circ}$, $\psi=32^{\circ}$, $\gamma=0^{\circ}$; spacing
+    $0.090$\,m; trigger finger off. Qualitative source: general instructional
+    description with no named person: all ten digits making direct contact with
+    the grip cylinder without overlap or interlock, mild rotation (+5$^{\circ}$ on
+    both hands), lead palm diagonal 40$^{\circ}$, trail finger diagonal 32$^{\circ}$,
+    90\,mm hand spacing, and no trigger-finger separation. Evidence still
+    requirement: face-on camera still required at address showing all eight fingers
+    and two thumbs directly contacting the grip wrapper, with the trail little
+    finger flush adjacent to the lead index finger without overlap or interlock.
+\end{itemize}
+
+\textbf{Acceptance.} Presets load across CLI (\texttt{--grip-preset}), desktop
+(\texttt{CharacterBuilderModel}) and web API surfaces (\texttt{/api/character-builder/grip}),
+round-tripping through \texttt{apply\_grip\_config} with provenance
+\texttt{photo\_estimate}, never \texttt{measured}. All angles remain strictly
+within the GR1 anatomical bounds. Feature parity registry entry
+\texttt{tools.character\_builder\_grip} is updated. Reproduce with:
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_named_presets.py \
+    tests/unit/motion_matching/test_grip_selection.py
+\end{verbatim}
+
+\textbf{Limitation.} Numeric values are \texttt{photo\_estimate} assumptions,
+not measurements, and no image is committed in the repository. Starting angles
+and spacing represent photographic pose estimations rather than dynamic
+motion-capture measurements; individual grip variations across club selections
+or swing phases are unmodelled.
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
