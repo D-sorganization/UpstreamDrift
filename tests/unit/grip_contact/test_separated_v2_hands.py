@@ -60,7 +60,9 @@ from src.shared.python.grip_contact.topology_contact import (
     PairTraceRecorder,
     TopologyContactModel,
     TopologyHandHandWrench,
+    build_topology_model,
     contact_transition_fraction,
+    topology_hand_hand_pair_wrench,
     topology_hand_hand_wrenches,
     topology_pair_wrench,
     topology_side_wrench,
@@ -271,9 +273,11 @@ def test_default_contact_mode_still_rejects_hand_hand_pairs(
     v1_driver_spec: dict,
 ) -> None:
     """Default mode='contact' preserves the G6 contract rejecting hand-hand pairs."""
+    assert not hasattr(TopologyContactModel, "from_Spec")
+    assert not hasattr(TopologyContactModel, "hand_hand_pair_primitives")
     interface = GripInterface.from_spec(v1_driver_spec)
     topo = contact_topology(GripSpec(style=GripStyle.OVERLAP))
-    model = TopologyContactModel.from_Spec(topo, interface)
+    model = build_topology_model(interface, topology=topo)
     st_l = BushingState(
         np.asarray(interface.left.rotation, float),
         np.asarray(interface.left.position_m, float),
@@ -310,7 +314,7 @@ def test_separated_v2_hand_hand_physics_contracts(
     """Zero force at separation, unilateral normal, friction cone, and action-reaction <= 1e-9 N."""
     interface = GripInterface.from_spec(v1_driver_spec)
     topo = contact_topology(GripSpec(style=style))
-    model = TopologyContactModel.from_Spec(topo, interface)
+    model = build_topology_model(interface, topology=topo)
 
     st_l_neutral = BushingState(
         np.asarray(interface.left.rotation, float),
@@ -340,8 +344,17 @@ def test_separated_v2_hand_hand_physics_contracts(
     assert set(hh_active.pairs) == {p.name for p in topo.hand_hand_pairs()}
     mu = float(model.parameters.static_friction)
 
+    role_frames = {"lead": st_l_neutral, "trail": st_r_sliding}
     for pair in topo.hand_hand_pairs():
         pw = hh_active.pairs[pair.name]
+        fa = role_frames[topo.site(pair.site_a).hand]
+        fb = role_frames[topo.site(pair.site_b).hand]
+        direct_pw = topology_hand_hand_pair_wrench(
+            model, pair, fa, fb, mode="separated_v2"
+        )
+        np.testing.assert_allclose(pw.force_n, direct_pw.force_n, atol=1.0e-15)
+        np.testing.assert_allclose(pw.moment_nm, direct_pw.moment_nm, atol=1.0e-15)
+        assert pw.normal_force_n == pytest.approx(direct_pw.normal_force_n, abs=1.0e-15)
         assert pw.normal_force_n > 0.0, (
             f"{pair.name} must be in compression at neutral pose"
         )
@@ -410,10 +423,85 @@ def test_identifiability_note_present_in_code_and_spec(
 
 
 @pytest.mark.unit
+def test_hrg_tex_g11_has_no_private_hashes_or_paths() -> None:
+    """G11 subsection of human_realistic_golfer.tex contains no private capture hashes or paths."""
+    import re
+
+    tex_path = ROOT / "docs/research/human_realistic_golfer/human_realistic_golfer.tex"
+    tex = tex_path.read_text(encoding="utf-8")
+    start = tex.index(r"\subsection{Separated Hands and Physical Hand--Hand Contact")
+    end = tex.index(r"\subsection{Model Grip Binding Contract", start)
+    g11_sec = tex[start:end]
+    assert (
+        "the private best-fit driver capture (hash recorded in the private receipt)"
+        in g11_sec
+    )
+    assert "bundle SHA256" not in g11_sec
+    assert "spec SHA256" not in g11_sec
+    assert re.search(r"\b[0-9a-f]{8,64}\b", g11_sec) is None
+    assert re.search(r"/home/", g11_sec) is None
+
+
+def _write_grip_receipt(
+    out_path_str: str,
+    *,
+    time_s: np.ndarray,
+    dt_s: float,
+    net_force_err: object,
+    net_moment_err: object,
+    pair_normal_forces: dict[str, np.ndarray],
+    max_action_reaction_error_n: float,
+    bundle_sha256: str = "",
+    spec_sha256: str = "",
+) -> dict:
+    """Build and optionally write the G11 acceptance receipt outside the repository."""
+    n_samples = int(time_s.size)
+    n_steps = max(0, n_samples - 1)
+    pair_summary: dict[str, dict[str, float | int | bool]] = {}
+    for pname, fn_arr in pair_normal_forces.items():
+        arr = np.asarray(fn_arr, dtype=float)
+        frac = contact_transition_fraction(arr)
+        active = arr > 0.0
+        transitions = (
+            int(np.count_nonzero(active[1:] != active[:-1])) if arr.size >= 2 else 0
+        )
+        pair_summary[pname] = {
+            "peak_normal_force_n": float(np.max(arr)),
+            "transition_count": transitions,
+            "step_count": n_steps,
+            "transition_fraction": float(frac),
+            "passes_chatter": bool(frac < CHATTER_TOLERANCE),
+        }
+
+    receipt = {
+        "issue": 13309,
+        "sample_count": n_samples,
+        "step_count": n_steps,
+        "dt_s": float(dt_s),
+        "duration_s": float(time_s[-1] - time_s[0]),
+        "bundle_sha256": bundle_sha256,
+        "spec_sha256": spec_sha256,
+        "net_force": net_force_err.to_dict(),  # type: ignore[attr-defined]
+        "net_moment_com": net_moment_err.to_dict(),  # type: ignore[attr-defined]
+        "max_action_reaction_error_n": float(max_action_reaction_error_n),
+        "pairs": pair_summary,
+    }
+    if out_path_str:
+        out_path = Path(out_path_str).resolve()
+        if ROOT in out_path.parents or out_path == ROOT:
+            raise ValueError(
+                f"UD_GRIP_RECEIPT_OUT must point outside the repository ({ROOT}), got {out_path}"
+            )
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    return receipt
+
+
+@pytest.mark.unit
 @pytest.mark.requires_pinocchio
 @pytest.mark.timeout(600)
 def test_synthetic_swing_separated_v2_closure_wrench_and_no_chatter(
-    v1_driver_spec: dict, v2_separated_spec: dict
+    v1_driver_spec: dict, v2_separated_spec: dict, tmp_path: Path
 ) -> None:
     """Synthetic committed swing: separated-hand v2 matches v1 wrench within 5%/2% with <1% chatter."""
     pytest.importorskip("pinocchio")
@@ -493,10 +581,11 @@ def test_synthetic_swing_separated_v2_closure_wrench_and_no_chatter(
     )
 
     errors = parity_errors(sep_run.series, ref_series)
+    m_err = sep_run.net_moment_com_error(ref_series)
     assert errors["net_force"].peak_error <= PEAK_TOLERANCE
     assert errors["net_force"].rms_error <= RMS_TOLERANCE
-    assert sep_run.net_moment_com_error(ref_series).peak_error <= PEAK_TOLERANCE
-    assert sep_run.net_moment_com_error(ref_series).rms_error <= RMS_TOLERANCE
+    assert m_err.peak_error <= PEAK_TOLERANCE
+    assert m_err.rms_error <= RMS_TOLERANCE
 
     # No chatter: per-pair normal-force sign changes occur in < 1% of steps
     for pair_name, fn_series in sep_run.pair_normal_force_n.items():
@@ -507,6 +596,24 @@ def test_synthetic_swing_separated_v2_closure_wrench_and_no_chatter(
 
     # Action-reaction <= 1e-9 N at every sample
     assert sep_run.max_action_reaction_error_n <= ACTION_REACTION_TOL_N
+
+    receipt_file = tmp_path / "synthetic_receipt.json"
+    receipt = _write_grip_receipt(
+        str(receipt_file),
+        time_s=time_s,
+        dt_s=0.001,
+        net_force_err=errors["net_force"],
+        net_moment_err=m_err,
+        pair_normal_forces=dict(sep_run.pair_normal_force_n),
+        max_action_reaction_error_n=sep_run.max_action_reaction_error_n,
+    )
+    assert receipt_file.is_file()
+    loaded = json.loads(receipt_file.read_text(encoding="utf-8"))
+    assert loaded["sample_count"] == n_steps
+    assert loaded["step_count"] == n_steps - 1
+    assert loaded["net_force"]["passes"] is True
+    assert loaded["net_moment_com"]["passes"] is True
+    assert "trail_palm_lead_thumb" in receipt["pairs"]
 
 
 @pytest.mark.unit
@@ -530,12 +637,21 @@ def test_best_fit_swing_separated_v2_acceptance() -> None:
             "are not present on disk"
         )
 
+    import hashlib
+
     from src.engines.physics_engines.pinocchio.python.grip_bushing import (
+        SeparatedHandsKinematics,
+        _build_se3_hand_source,
         simulate_grip_bushing,
         simulate_separated_v2_grip,
     )
+    from src.shared.python.grip_contact import CoordinateSpline
 
-    v1_spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    bundle_sha = hashlib.sha256(bundle_path.read_bytes()).hexdigest()
+    spec_bytes = spec_path.read_bytes()
+    spec_sha = hashlib.sha256(spec_bytes).hexdigest()
+
+    v1_spec = json.loads(spec_bytes.decode("utf-8"))
     locs = segment_boundary_locations(v1_spec)
     v2_base = derive_full_body_v2_spec(
         v1_spec, locs, provenance="HRG-GS-G11 best-fit v2"
@@ -562,20 +678,57 @@ def test_best_fit_swing_separated_v2_acceptance() -> None:
     swing_v2 = CoordinateSwing(names=order2, time_s=time_s, q=q_v2, sha256="1" * 64)
     interface = GripInterface.from_spec(v1_spec)
 
+    v1_spec_bytes = json.dumps(v1_spec).encode("utf-8")
+    v2_sep_bytes = json.dumps(v2_sep).encode("utf-8")
     ref_series = simulate_grip_bushing(
-        json.dumps(v1_spec).encode("utf-8"),
+        v1_spec_bytes,
         swing_v1,
         interface=interface,
     )
     sep_run = simulate_separated_v2_grip(
-        json.dumps(v2_sep).encode("utf-8"),
+        v2_sep_bytes,
         swing_v2,
         interface=interface,
         style=GripStyle.OVERLAP,
     )
 
+    # Also evaluate interlock hand-hand pairs on the same separated-v2 hand trajectory
+    # so the receipt records every hand-hand pair reported in the HRG table.
+    kin = SeparatedHandsKinematics(v2_sep, order2)
+    spline = CoordinateSpline(time_s, q_v2)
+    hand_eval = _build_se3_hand_source(kin, spline, time_s)
+    interlock_topo = contact_topology(GripSpec(style=GripStyle.INTERLOCK))
+    interlock_model = build_topology_model(interface, topology=interlock_topo)
+    all_pair_normal: dict[str, np.ndarray] = dict(sep_run.pair_normal_force_n)
+    missing_hh = [
+        p for p in interlock_topo.hand_hand_pairs() if p.name not in all_pair_normal
+    ]
+    for p in missing_hh:
+        all_pair_normal[p.name] = np.zeros(time_s.size, dtype=float)
+    for k, t_val in enumerate(time_s):
+        hs = hand_eval(float(t_val))
+        hh_il = topology_hand_hand_wrenches(
+            interlock_model, hs["L"], hs["R"], mode="separated_v2"
+        )
+        for p in missing_hh:
+            all_pair_normal[p.name][k] = hh_il.pairs[p.name].normal_force_n
+
     errs = parity_errors(sep_run.series, ref_series)
     m_err = sep_run.net_moment_com_error(ref_series)
+
+    receipt_out = os.environ.get("UD_GRIP_RECEIPT_OUT", "").strip()
+    _write_grip_receipt(
+        receipt_out,
+        time_s=time_s,
+        dt_s=dt_s,
+        net_force_err=errs["net_force"],
+        net_moment_err=m_err,
+        pair_normal_forces=all_pair_normal,
+        max_action_reaction_error_n=sep_run.max_action_reaction_error_n,
+        bundle_sha256=bundle_sha,
+        spec_sha256=spec_sha,
+    )
+
     assert errs["net_force"].peak_error <= PEAK_TOLERANCE, (
         f"net_force peak error {errs['net_force'].peak_error:.4%} > {PEAK_TOLERANCE:.1%}"
     )
@@ -589,7 +742,7 @@ def test_best_fit_swing_separated_v2_acceptance() -> None:
         f"net_moment_com RMS error {m_err.rms_error:.4%} > {RMS_TOLERANCE:.1%}"
     )
 
-    for pair_name, fn_series in sep_run.pair_normal_force_n.items():
+    for pair_name, fn_series in all_pair_normal.items():
         frac = contact_transition_fraction(fn_series)
         assert frac < CHATTER_TOLERANCE, (
             f"pair {pair_name} transition fraction {frac:.4%} >= {CHATTER_TOLERANCE:.1%}"
