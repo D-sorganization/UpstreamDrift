@@ -14,6 +14,8 @@ Tolerances (derived):
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -25,6 +27,8 @@ from src.shared.python.loop_nullspace.manifold_continuation import (
     local_chart,
     predictor_corrector_step,
 )
+
+pytestmark = pytest.mark.unit
 
 TOL = 1e-12
 
@@ -122,7 +126,7 @@ def test_rank_zero_at_the_crossing_is_reported_not_hidden() -> None:
 
 
 def test_local_chart_preconditions() -> None:
-    good = {"variable_scale": np.ones(2), "tol": TOL}
+    good: dict[str, Any] = {"variable_scale": np.ones(2), "tol": TOL}
     u = np.array([1.0, 0.0])
     with pytest.raises(TypeError):
         local_chart("f", _circle_j, u, **good)  # type: ignore[arg-type]
@@ -242,10 +246,10 @@ def test_fold_is_passed_without_a_rank_change() -> None:
         heading = out.chart.u_base - chart.u_base
         chart = out.chart
         points.append(chart.u_base)
-    pts = np.array(points)
-    assert pts[:, 0].min() < 0.05
-    assert pts[-1, 1] > 0.5
-    assert pts[:, 0].argmin() not in (0, len(pts) - 1)
+    u1 = [float(p[0]) for p in points]
+    assert min(u1) < 0.05
+    assert points[-1][1] > 0.5
+    assert u1.index(min(u1)) not in (0, len(u1) - 1)
 
 
 def test_rank_drop_counterexample_raises() -> None:
@@ -286,7 +290,7 @@ def test_non_convergence_within_max_iter_raises() -> None:
 def test_step_preconditions() -> None:
     chart = _chart()
     d = np.array([0.0, 1.0])
-    kw = {"tol": TOL, "max_iter": 10}
+    kw: dict[str, Any] = {"tol": TOL, "max_iter": 10}
     with pytest.raises(TypeError):
         predictor_corrector_step("chart", d, 0.1, _circle_f, _circle_j, **kw)  # type: ignore[arg-type]
     with pytest.raises(TypeError):
@@ -309,7 +313,8 @@ def test_step_preconditions() -> None:
         predictor_corrector_step(
             chart, d, 0.1, _circle_f, _circle_j, tol=0.0, max_iter=10
         )
-    for bad_iter in (0, -1, 2.5):
+    bad_iters: tuple[Any, ...] = (0, -1, 2.5)
+    for bad_iter in bad_iters:
         with pytest.raises(ValueError, match="max_iter"):
             predictor_corrector_step(
                 chart, d, 0.1, _circle_f, _circle_j, tol=TOL, max_iter=bad_iter
