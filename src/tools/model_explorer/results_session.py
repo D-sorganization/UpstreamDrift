@@ -38,85 +38,113 @@ FrameSource = MarkerFrameSource | PoseFrameSource
 _KNOWN_ENGINES = ("mujoco", "drake", "pinocchio", "opensim", "myosuite", "simscape")
 
 
+_IGNORED_ENGINE_VALUES = frozenset({"unknown", "engine"})
+
+
+def _normalized_engine(value: object) -> str | None:
+    """Lower-case engine name, or ``None`` for empty or placeholder values."""
+    if not value:
+        return None
+    text = str(value).strip().lower()
+    if not text or text in _IGNORED_ENGINE_VALUES:
+        return None
+    return text
+
+
+def _npz_text(data: Any, key: str) -> str | None:
+    """Engine name stored as a scalar (or first element) under ``key``."""
+    val = data[key]
+    return _normalized_engine(val.item() if getattr(val, "ndim", 0) == 0 else val[0])
+
+
+def _json_engine(text: str, *keys: str, metadata: bool = False) -> str | None:
+    """First engine name under ``keys`` in a JSON object.
+
+    With ``metadata=True`` a nested ``metadata.engine`` is the last resort.
+    """
+    try:
+        document = json.loads(text)
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(document, dict):
+        return None
+    candidates = [document.get(key) for key in keys]
+    nested = document.get("metadata")
+    if metadata and isinstance(nested, dict):
+        candidates.append(nested.get("engine"))
+    for candidate in candidates:
+        if isinstance(candidate, str) and (found := _normalized_engine(candidate)):
+            return found
+    return None
+
+
+def _engine_from_npz(target: Path) -> str | None:
+    """Engine recorded inside an ``.npz`` archive, in order of authority."""
+    try:
+        with np.load(target, allow_pickle=False) as data:
+            files = set(data.files)
+            if "engine" in files and (found := _npz_text(data, "engine")):
+                return found
+            if "manifest_json" in files and (
+                found := _json_engine(
+                    str(data["manifest_json"]), "engine", metadata=True
+                )
+            ):
+                return found
+            if "manifest" in files and (
+                found := _json_engine(
+                    str(data["manifest"]), "engine", "reference_engine"
+                )
+            ):
+                return found
+            if "backend" in files:
+                return _npz_text(data, "backend")
+    except (OSError, ValueError):
+        return None
+    return None
+
+
+def _engine_from_receipt(target: Path) -> str | None:
+    """Engine recorded in a sibling receipt JSON next to the archive."""
+    for candidate in (target.with_suffix(".json"), target.parent / "receipt.json"):
+        if not candidate.is_file():
+            continue
+        try:
+            text = candidate.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        found = _json_engine(text, "engine", "backend")
+        if found is not None:
+            return found
+    return None
+
+
+def _engine_in_name(name: str) -> str | None:
+    """A known engine name appearing as a ``_``/``-`` separated token."""
+    for part in name.lower().replace("-", "_").split("_"):
+        if part in _KNOWN_ENGINES:
+            return part
+    return None
+
+
 def detect_engine_from_archive(path: str | Path) -> str | None:
-    """Extract engine name from an archive's contents, receipts, or metadata."""
+    """Extract engine name from an archive's contents, receipts, or metadata.
+
+    Sources are consulted in order: ``.npz`` keys (``engine``,
+    ``manifest_json``, ``manifest``, ``backend``), a sibling receipt JSON, then
+    a known engine token in the file stem or parent folder name. Placeholder
+    values (``unknown``/``engine``) never count.
+    """
     target = Path(path)
     if not target.is_file():
         return None
-
-    # 1. Inspect npz keys
-    if target.suffix.lower() == ".npz":
-        try:
-            with np.load(target, allow_pickle=False) as data:
-                files = set(data.files)
-                if "engine" in files:
-                    val = data["engine"]
-                    raw = (
-                        str(val.item() if getattr(val, "ndim", 0) == 0 else val[0])
-                        .strip()
-                        .lower()
-                    )
-                    if raw and raw not in ("unknown", "engine"):
-                        return raw
-                if "manifest_json" in files:
-                    try:
-                        manifest = json.loads(str(data["manifest_json"]))
-                        eng = manifest.get("engine") or manifest.get(
-                            "metadata", {}
-                        ).get("engine")
-                        if eng and str(eng).strip().lower() not in (
-                            "unknown",
-                            "engine",
-                        ):
-                            return str(eng).strip().lower()
-                    except (ValueError, TypeError):
-                        pass
-                if "manifest" in files:
-                    try:
-                        manifest = json.loads(str(data["manifest"]))
-                        eng = manifest.get("engine") or manifest.get("reference_engine")
-                        if eng and str(eng).strip().lower() not in (
-                            "unknown",
-                            "engine",
-                        ):
-                            return str(eng).strip().lower()
-                    except (ValueError, TypeError):
-                        pass
-                if "backend" in files:
-                    val = data["backend"]
-                    raw = (
-                        str(val.item() if getattr(val, "ndim", 0) == 0 else val[0])
-                        .strip()
-                        .lower()
-                    )
-                    if raw and raw not in ("unknown", "engine"):
-                        return raw
-        except (OSError, ValueError):
-            pass
-
-    # 2. Sibling receipt JSON
-    for receipt_candidate in (
-        target.with_suffix(".json"),
-        target.parent / "receipt.json",
-    ):
-        if receipt_candidate.is_file():
-            try:
-                receipt = json.loads(receipt_candidate.read_text(encoding="utf-8"))
-                eng = receipt.get("engine") or receipt.get("backend")
-                if eng and str(eng).strip().lower() not in ("unknown", "engine"):
-                    return str(eng).strip().lower()
-            except (ValueError, OSError):
-                pass
-
-    # 3. Known engine names in stem or parent folder
-    for part in target.stem.lower().replace("-", "_").split("_"):
-        if part in _KNOWN_ENGINES:
-            return part
-    for part in target.parent.name.lower().replace("-", "_").split("_"):
-        if part in _KNOWN_ENGINES:
-            return part
-
-    return None
+    if target.suffix.lower() == ".npz" and (found := _engine_from_npz(target)):
+        return found
+    found = _engine_from_receipt(target)
+    if found is not None:
+        return found
+    parent = target.parent
+    return _engine_in_name(target.stem) or _engine_in_name(parent.name)
 
 
 class ResultsSession:
