@@ -121,19 +121,58 @@ The strict xfail against the deadlift bounds still fails, so it stays.
 The run stays at eight RK4 substeps: |z| 2.37 (amplification 0.53), inside
 the 2.785 limit.
 
+## Barbell Bundle and OpenSim IK/ID (OSL-3, #13041)
+
+`snatch_barbell_bundle.npz` (SHA-256 `24c7e8e4c140e2e3a52047851fd460e07e871dc17573e96414b6a493e9d4dacc`)
+packages the snatch pull window with the LIFT-4 barbell body and load,
+built by `scripts/generate_barbell_squat_evidence.py --lift snatch --part bundle`
+from `snatch_bundle.npz`.
+
+### Bar-Hold Metrics (Provenance)
+
+The barbell hold re-tracks the snatch pull standing pose with the bar carried by the hands:
+- **Bar deviation:** 162.03 mm (0.16203 m) against the reference trajectory.
+- **Left hand force:** peak magnitude 1073.52 N (mean [−13.62, −17.79, 635.96] N),
+  peak torque magnitude 59.00 Nm.
+- **Right hand force:** peak magnitude 1414.29 N (mean [96.76, −13.31, 734.45] N),
+  peak torque magnitude 59.00 Nm.
+
+### OpenSim Inverse Kinematics and Inverse Dynamics Receipt
+
+The OpenSim IK/ID receipt (`docs/development/lifting/evidence/opensim_ik_id/receipts.json`)
+is measured with real OpenSim 4.6 and the RajagopalLaiUhlrich2023 model over 41 frames
+(stride 5):
+- **Marker kinematics:** RMS error 0.0089 m (0.89 cm, within 0.0200 m threshold),
+  maximum marker error 0.0579 m (exceeds 0.0400 m threshold due to the bar marker).
+  The kinematics fails the best-practice marker gate (`within_best_practice = False`).
+- **Segment angles:** sagittal segment-angle RMS error 0.0095 rad (0.54°, well within
+  the 0.0349 rad / 2.0° threshold).
+- **Arm reach:** Left hand reach miss 7.68 µm (7.6825e-6 m), right hand reach miss
+  7.57 µm (7.5725e-6 m), well within the 1.0 mm reach bound.
+- **Coordinate range violations:** `pro_sup_l` (18 frames, min −0.00037 rad, range
+  [0.0, 2.09] rad) and `pro_sup_r` (18 frames, min −0.00038 rad, range [0.0, 2.09] rad).
+- **Hicks residual gate:** peak external force 3102.39 N; force threshold 155.12 N
+  (5% of peak external force); moment threshold 27.10 Nm (1% of COM height × peak external force).
+  The residual gate fails for both forces and moments:
+  - Pelvis force: peak $t_x$ 463.57 N (RMS 188.08 N), peak $t_y$ 290.28 N (RMS 61.66 N),
+    peak $t_z$ 148.30 N (RMS 62.19 N); max force 463.57 N vs 155.12 N threshold (`forces_within = False`).
+  - Pelvis moment: peak tilt 202.60 Nm (RMS 85.61 Nm), peak list 89.87 Nm (RMS 33.33 Nm),
+    peak rotation 92.32 Nm (RMS 40.71 Nm); max moment 202.60 Nm vs 27.10 Nm threshold (`moments_within = False`).
+- The residual gate failures are strictly xfailed in `tests/unit/lifting/test_opensim_lift_ik_id.py`
+  with measured numbers; gates are not loosened.
+
 ## Limitations
 
 - **Pull window only.** The turnover and catch frames of the full-body IK are
   not credible (see above). Fixing this needs a full-body catch that the
   model's ankle and arm ranges can reach.
-- **No OpenSim IK/ID.** The bundle is not registered in
-  `SAME_INPUT_LIFT_BUNDLES`. The OpenSim IK/ID needs a LIFT-4 barbell record,
-  and this bundle has none; the deadlift and clean bundles are unregistered
-  for the same reason. The measured result of `opensim_lift_ik_id` on this
-  bundle is "IK/ID setup failed: bundle carries no barbell record".
-- **Hand-held bar.** The bar is held on the club `Grip` frame with no barbell
-  body or load (LIFT-4, #11744). The full-body spec is the golf spec, as for
-  the back squat.
+- **Hand-held bar in plain bundle.** In `snatch_bundle.npz` the bar is held
+  on the club `Grip` frame with no barbell body or load (LIFT-4, #11744);
+  `snatch_barbell_bundle.npz` provides the barbell body and load and is
+  registered in `SAME_INPUT_LIFT_BUNDLES`.
+- **OpenSim residual gate.** OpenSim inverse dynamics fails the Hicks residual
+  gate (forces 463.57 N vs 155.12 N, moments 202.60 Nm vs 27.10 Nm).
+  Results are software receipts, not physical acceptance.
 - **Scaled bar offset.** The bar offset is scaled to the model's arm hang
   (0.689).
 - **Provenance pin.** The bundle and `bar_path_parity.json` are regenerated
@@ -147,4 +186,6 @@ the 2.785 limit.
 ```bash
 MUJOCO_GL=egl python3 scripts/generate_lift_bundle.py --lift snatch
 MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py --lift snatch
+python3 scripts/generate_barbell_squat_evidence.py --lift snatch --part bundle --source-commit <sha>
+MUJOCO_GL=egl python3 scripts/measure_opensim_lift_ik_id.py
 ```
