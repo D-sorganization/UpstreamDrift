@@ -168,11 +168,12 @@ def _hand_interface_transforms(
 def _try_import_opensim() -> Any | None:
     """Import ``opensim`` if available as a real runtime module."""
     try:
-        import opensim as osim
+        from src.shared.python.engine_core.opensim_runtime import import_opensim
 
+        osim = import_opensim()
         if hasattr(osim, "Model"):
             return osim
-    except ImportError:
+    except (ImportError, RuntimeError, OSError):
         pass
     return None
 

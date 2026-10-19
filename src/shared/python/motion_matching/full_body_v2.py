@@ -476,6 +476,36 @@ def _move_hand_solids(
     target_body.setdefault("solids", []).extend(moved)
 
 
+def _splice_v2_separated_elements(
+    out: dict[str, Any], left_body: dict[str, Any], free_joint: dict[str, Any]
+) -> None:
+    """Insert left_body, free_joint, and free coordinates into upper-body slices."""
+    counts = dict(out["upper_body_counts"])
+    n_bodies = int(counts["bodies"])
+    n_joints = int(counts["joints"])
+    n_coords = int(counts["coordinates"])
+    out["bodies"] = [
+        *out["bodies"][:n_bodies],
+        left_body,
+        *out["bodies"][n_bodies:],
+    ]
+    out["joints"] = [
+        *out["joints"][:n_joints],
+        free_joint,
+        *out["joints"][n_joints:],
+    ]
+    out["coordinate_order"] = [
+        *out["coordinate_order"][:n_coords],
+        *CLUB_FREE_COORDINATES,
+        *out["coordinate_order"][n_coords:],
+    ]
+    counts["bodies"] = n_bodies + 1
+    counts["joints"] = n_joints + 1
+    counts["coordinates"] = n_coords + len(CLUB_FREE_COORDINATES)
+    out["upper_body_counts"] = counts
+    out["passive_coordinates"] = list(CLUB_FREE_COORDINATES)
+
+
 def separate_v2_hands(v2_spec: Mapping[str, Any]) -> dict[str, Any]:
     """Separate ``LHandBody`` and ``RHandStandoff`` from the bare club in a ``full-body-v2`` document.
 
@@ -533,30 +563,7 @@ def separate_v2_hands(v2_spec: Mapping[str, Any]) -> dict[str, Any]:
         if frame["body"] == club_name and frame["name"] == "Grip_LeftHand":
             frame["body"] = LEFT_HAND_BODY
 
-    counts = dict(out["upper_body_counts"])
-    n_bodies = int(counts["bodies"])
-    n_joints = int(counts["joints"])
-    n_coords = int(counts["coordinates"])
-    out["bodies"] = [
-        *out["bodies"][:n_bodies],
-        left_body,
-        *out["bodies"][n_bodies:],
-    ]
-    out["joints"] = [
-        *out["joints"][:n_joints],
-        free_joint,
-        *out["joints"][n_joints:],
-    ]
-    out["coordinate_order"] = [
-        *out["coordinate_order"][:n_coords],
-        *CLUB_FREE_COORDINATES,
-        *out["coordinate_order"][n_coords:],
-    ]
-    counts["bodies"] = n_bodies + 1
-    counts["joints"] = n_joints + 1
-    counts["coordinates"] = n_coords + len(CLUB_FREE_COORDINATES)
-    out["upper_body_counts"] = counts
-    out["passive_coordinates"] = list(CLUB_FREE_COORDINATES)
+    _splice_v2_separated_elements(out, left_body, free_joint)
 
     g_left, g_right = interface.left.matrix(), interface.right.matrix()
     out["grip_bushing"] = {

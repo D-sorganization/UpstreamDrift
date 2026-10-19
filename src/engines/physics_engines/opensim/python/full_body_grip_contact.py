@@ -119,9 +119,10 @@ class ContactGripConfig:
                     self, "foundation", elastic_foundation_parameters(self.pads)
                 )
             elif self.topology_model is not None:
+                top = self.topology_model
                 ef_def = elastic_foundation_for_law(
-                    self.topology_model.law,
-                    self.topology_model.cylinder.radius_m,
+                    top.law,
+                    top.cylinder.radius_m,
                     PAD_RADIUS_M,
                     DEFAULT_TOPOLOGY_PRELOAD_M,
                 )
@@ -141,9 +142,11 @@ class ContactGripConfig:
     def origin_axial_m(self, side: str) -> float:
         """Axial origin of ``side``'s pad cylinder."""
         if self.topology_model is not None:
-            return self.topology_model.cylinder.origin_axial_m(side)
+            top = self.topology_model
+            return top.cylinder.origin_axial_m(side)
         assert self.pads is not None
-        return self.pads.cylinder.origin_axial_m(side)
+        pads = self.pads
+        return pads.cylinder.origin_axial_m(side)
 
     def mesh_path(self, side: str) -> Path:
         """OBJ path of ``side``'s grip mesh."""
@@ -268,8 +271,9 @@ def _build_topology_contact(
     club: str,
 ) -> dict[str, Any]:
     assert cfg.topology_model is not None
-    topo = cfg.topology_model.topology
-    grip_r = cfg.topology_model.cylinder.radius_m
+    top = cfg.topology_model
+    topo = top.topology
+    grip_r = top.cylinder.radius_m
     ef = cfg.ef
     for side in SIDES:
         _contact_mesh(geometry, f"grip_mesh_{side}", club, cfg.mesh_path(side))

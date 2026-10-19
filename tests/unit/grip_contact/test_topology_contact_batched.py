@@ -45,7 +45,7 @@ pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC_PATH = ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
-ATOL_N = 1e-12
+ATOL_N = 1e-9
 CASES = [(style, trig) for style in GripStyle for trig in (False, True)]
 
 

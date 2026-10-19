@@ -321,34 +321,14 @@ def torsional_moment_kernel(
     return ops.where(load_pos, -limit * ops.tanh(omega_n / transition_rad_s), zero)
 
 
-def contact_law_kernel(
+def _prepare_kernel_arrays(
     penetration_m: Any,
     normal_velocity_m_s: Any,
     tangential_velocity_m_s: Any,
-    params: ContactKernelParams | ContactParameters,
-    spin_rate_rad_s: Any = 0.0,
-    *,
-    xp: Any = np,
-) -> ContactKernelResult:
-    """Pure array-namespace kernel for the qualified Hunt-Crossley / Stribeck / spin law.
-
-    Evaluates normal force, tangential friction force, and torsional spin moment
-    without Python branching on traced values (uses ``ops.where``).
-
-    Sign conventions:
-    - ``penetration_m`` ($\\delta$): positive when penetrating, $\\le 0$ when separated.
-    - ``normal_velocity_m_s`` ($v_n = \\hat{n} \\cdot v_{\\mathrm{rel}} = -\\dot{\\delta}$):
-      negative when approaching/deepening, positive when separating.
-    - ``tangential_velocity_m_s`` ($v_t$): scalar slip velocity/speed of shape ``S``
-      or 3-vector slip velocity in the contact plane of shape ``(*S, 3)``.
-    - ``spin_rate_rad_s`` ($\\omega_n = \\hat{n} \\cdot \\omega_{\\mathrm{rel}}$):
-      normal relative angular velocity [rad/s].
-
-    Non-differentiable points:
-    1. Contact onset at $\\delta = 0$ (and damping liftoff at $1 - c v_n = 0$).
-    2. Zero tangential speed at $v_t = 0$ ($\\|v_t\\|_2 = 0$).
-    3. Stick/slip transition knee around $|v_t| \\sim v_{\\mathrm{tr}}$.
-    """
+    spin_rate_rad_s: Any,
+    xp: Any,
+) -> tuple[Any, Any, Any, Any, Any, Any, bool, Any]:
+    """Coerce kernel inputs to either scalar fast-path or array-namespace tensors."""
     if (
         xp is np
         and isinstance(penetration_m, _SCALAR_TYPES)
@@ -394,6 +374,40 @@ def contact_law_kernel(
         zero = xp.zeros_like(delta)
         is_vec = v_t.ndim == delta.ndim + 1
         zero_vt = xp.zeros_like(v_t) if is_vec else zero
+    return ops, delta, v_n, v_t, omega_n, zero, is_vec, zero_vt
+
+
+def contact_law_kernel(
+    penetration_m: Any,
+    normal_velocity_m_s: Any,
+    tangential_velocity_m_s: Any,
+    params: ContactKernelParams | ContactParameters,
+    spin_rate_rad_s: Any = 0.0,
+    *,
+    xp: Any = np,
+) -> ContactKernelResult:
+    """Pure array-namespace kernel for the qualified Hunt-Crossley / Stribeck / spin law.
+
+    Evaluates normal force, tangential friction force, and torsional spin moment
+    without Python branching on traced values (uses ``ops.where``).
+
+    Sign conventions:
+    - ``penetration_m`` ($\\delta$): positive when penetrating, $\\le 0$ when separated.
+    - ``normal_velocity_m_s`` ($v_n = \\hat{n} \\cdot v_{\\mathrm{rel}} = -\\dot{\\delta}$):
+      negative when approaching/deepening, positive when separating.
+    - ``tangential_velocity_m_s`` ($v_t$): scalar slip velocity/speed of shape ``S``
+      or 3-vector slip velocity in the contact plane of shape ``(*S, 3)``.
+    - ``spin_rate_rad_s`` ($\\omega_n = \\hat{n} \\cdot \\omega_{\\mathrm{rel}}$):
+      normal relative angular velocity [rad/s].
+
+    Non-differentiable points:
+    1. Contact onset at $\\delta = 0$ (and damping liftoff at $1 - c v_n = 0$).
+    2. Zero tangential speed at $v_t = 0$ ($\\|v_t\\|_2 = 0$).
+    3. Stick/slip transition knee around $|v_t| \\sim v_{\\mathrm{tr}}$.
+    """
+    ops, delta, v_n, v_t, omega_n, zero, is_vec, zero_vt = _prepare_kernel_arrays(
+        penetration_m, normal_velocity_m_s, tangential_velocity_m_s, spin_rate_rad_s, xp
+    )
 
     active_contact = delta > 0.0
     delta_pos = ops.where(active_contact, delta, 0.0)

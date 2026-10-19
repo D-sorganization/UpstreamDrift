@@ -402,8 +402,9 @@ class ContactGripSimulator(BushingGripSimulator):
     def _tie_topology_right_hand(self, tie: np.ndarray) -> None:
         assert self.topology_model is not None
         osim = self._osim
-        topo = self.topology_model.topology
-        grip_r = self.topology_model.cylinder.radius_m
+        top = self.topology_model
+        topo = top.topology
+        grip_r = top.cylinder.radius_m
         hand = self._model.getBodySet().get("LGrip")
         for pair in self.topology_model.physical_grip_pairs("R"):
             site = topo.site(pair.site_a)
@@ -565,8 +566,9 @@ class ContactGripSimulator(BushingGripSimulator):
         r2: np.ndarray,
     ) -> tuple[np.ndarray, TopologySideWrench]:
         assert self.topology_model is not None
+        top = self.topology_model
         axis = r2[:, 0]
-        grip_r = self.topology_model.cylinder.radius_m
+        grip_r = top.cylinder.radius_m
         axis_offset = np.array([0.0, 0.0, -grip_r if side == "L" else grip_r])
         axis_point = p2 + r2 @ axis_offset
         total_f = np.zeros(3)

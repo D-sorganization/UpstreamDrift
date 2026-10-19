@@ -335,7 +335,8 @@ class ClubInHands:
         if self.topology_model is None or self._stepped == active:
             return
         scale = TOPOLOGY_STEP_SCALE if active else (1.0 / TOPOLOGY_STEP_SCALE)
-        self.model.opt.impratio *= scale
+        opt = self.model.opt
+        opt.impratio *= scale
         self.model.pair_solreffriction[:, 0] *= scale
         self._stepped = active
 
@@ -623,7 +624,9 @@ class ClubInHands:
     ) -> Callable[[tuple[str, int], float], float]:
         if self.topology_model is None:
             assert self.pads is not None
-            k_pad = self.pads.law.stiffness_n_m
+            pads = self.pads
+            law = pads.law
+            k_pad = law.stiffness_n_m
             return lambda _key, depth: k_pad * depth
         hands = self.hold_pose(q)
         club = self.club_state_now()
