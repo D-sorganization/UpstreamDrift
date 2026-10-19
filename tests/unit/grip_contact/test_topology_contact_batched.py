@@ -2,13 +2,14 @@
 
 Acceptance criteria:
 - ``topology_side_wrench`` (one batched pass per side) equals the
-  per-pair reference ``topology_side_wrench_reference`` to <= 1e-12 N (and
-  N m) at random poses and velocities, for every grip style with and without
-  the trigger finger;
+  per-pair reference ``topology_side_wrench_reference`` within the operand
+  round-off bound ``atol = c * eps * sum_i |f_i|`` (``c = 64``) at random poses
+  and velocities, for every grip style with and without the trigger finger;
 - inputs are validated once per side call, and the per-pair kernels are not
   called on the batched path;
 - the float segment query and the stacked transform reproduce the scalar
-  reference bit for bit, including the parallel and degenerate branches;
+  reference within double-precision round-off (``<= 8 * eps`` relative to segment
+  scale), including the parallel and degenerate branches;
 - the batched path is at least 6x faster than the reference in CPU time
   (measured ~10x; see the PR and the HRG calculation reference).
 """
@@ -35,6 +36,7 @@ from src.shared.python.grip_contact.pair_contact import (
 )
 from src.shared.python.grip_contact.topology_contact import (
     TopologyContactModel,
+    TopologySideWrench,
     build_topology_model,
     topology_side_wrench,
     topology_side_wrench_reference,
@@ -45,7 +47,12 @@ pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC_PATH = ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
-ATOL_N = 1e-12
+EPS = float(np.finfo(float).eps)
+#: Round-off factor c in atol = c * eps * sum_i |f_i| across pad summands and
+#: the Hunt-Crossley normal plane-offset subtraction k * ((n . c - n . s) - r).
+ROUNDOFF_C = 64
+#: Elementwise segment-query round-off factor (in ULPs / multiples of eps).
+SEG_ROUNDOFF_C = 8
 CASES = [(style, trig) for style in GripStyle for trig in (False, True)]
 
 
@@ -94,57 +101,102 @@ def _states(rng: np.random.Generator, slip: bool) -> tuple[BushingState, Bushing
     return hand, club
 
 
-def _assert_pair_equal(batched: PairWrench, ref: PairWrench) -> None:
-    for name in ("force_a_n", "force_b_n", "moment_a_nm", "moment_b_nm"):
+def _side_roundoff_bounds(
+    model: TopologyContactModel, ref: TopologySideWrench
+) -> tuple[float, float]:
+    """Operand-derived round-off bounds ``c * eps * sum_i |f_i|`` (N and N m)."""
+    elastic_scale_n = 2.0 * model.law.stiffness_n_m * model.grip_radius_m
+    active = [pw for pw in ref.pair_wrenches.values() if pw.penetration_m > 0.0]
+    sum_f = sum(float(np.abs(pw.force_b_n).sum()) + elastic_scale_n for pw in active)
+    sum_m = sum(
+        float(np.abs(pw.moment_b_nm).sum())
+        + float(np.linalg.norm(pw.contact_point_m - pw.point_b_m))
+        * (float(np.abs(pw.force_b_n).sum()) + elastic_scale_n)
+        for pw in active
+    )
+    return ROUNDOFF_C * EPS * sum_f, ROUNDOFF_C * EPS * sum_m
+
+
+def _assert_pair_equal(
+    model: TopologyContactModel,
+    batched: PairWrench,
+    ref: PairWrench,
+    atol_f: float,
+    atol_m: float,
+) -> None:
+    pos_scale = max(
+        1.0,
+        float(np.max(np.abs([ref.contact_point_m, ref.point_a_m, ref.point_b_m]))),
+    )
+    atol_pos = ROUNDOFF_C * EPS * pos_scale
+    atol_normal = ROUNDOFF_C * EPS * (pos_scale / model.grip_radius_m)
+    for name in ("force_a_n", "force_b_n"):
         np.testing.assert_allclose(
-            getattr(batched, name), getattr(ref, name), rtol=0, atol=ATOL_N
+            getattr(batched, name), getattr(ref, name), rtol=0, atol=atol_f
         )
-    for name in ("contact_point_m", "normal", "point_a_m", "point_b_m"):
+    for name in ("moment_a_nm", "moment_b_nm"):
         np.testing.assert_allclose(
-            getattr(batched, name), getattr(ref, name), rtol=0, atol=1e-15
+            getattr(batched, name), getattr(ref, name), rtol=0, atol=atol_m
         )
-    assert abs(batched.penetration_m - ref.penetration_m) <= 1e-15
-    assert abs(batched.normal_force_mag_n - ref.normal_force_mag_n) <= ATOL_N
-    assert abs(batched.tangential_force_mag_n - ref.tangential_force_mag_n) <= ATOL_N
+    for name in ("contact_point_m", "point_a_m", "point_b_m"):
+        np.testing.assert_allclose(
+            getattr(batched, name), getattr(ref, name), rtol=0, atol=atol_pos
+        )
+    np.testing.assert_allclose(batched.normal, ref.normal, rtol=0, atol=atol_normal)
+    assert abs(batched.penetration_m - ref.penetration_m) <= atol_pos
+    assert abs(batched.normal_force_mag_n - ref.normal_force_mag_n) <= atol_f
+    assert abs(batched.tangential_force_mag_n - ref.tangential_force_mag_n) <= atol_f
 
 
 @pytest.mark.parametrize(("style", "trigger"), CASES)
 def test_batched_side_wrench_equals_per_pair_reference(
     interface: GripInterface, style: GripStyle, trigger: bool
 ) -> None:
-    """Batched resultant and every pair wrench equal the reference to <= 1e-12 N."""
+    """Batched resultant and every pair wrench equal the reference within operand round-off.
+
+    Operand-derived precision bound: ``atol = c * eps * sum_i |f_i|`` with
+    ``c = 64`` and ``eps = np.finfo(float).eps``.
+    - Evaluated force bound ``atol_f``: ``3.13e-10 N`` at ``k = 0`` ``overlap-False`` ``L``
+      (range ``[1.24e-10, 3.77e-10] N`` across all 60 random poses and styles).
+    - Evaluated moment bound ``atol_m``: ``7.37e-12 N m`` at ``k = 0`` ``overlap-False`` ``L``
+      (range ``[2.63e-12, 1.18e-11] N m`` across all 60 random poses and styles).
+    - Observed max difference locally (AVX2): ``0.0 N`` and ``0.0 N m``.
+    - Observed max difference on AVX-512 CI (FMA dot-product order):
+      ``1.26e-11 N`` at ``k = 0`` ``overlap-False`` ``L`` (``3.62e-11 N`` across styles at
+      ``k = 0``; ``1.58e-10 N`` / ``2.41e-12 N m`` max across all 60 random poses).
+    """
     model = _model(interface, style, trigger)
     rng = np.random.default_rng(13304 + 2 * list(GripStyle).index(style) + trigger)
     active = separated = 0
-    worst = 0.0
     for k in range(60):
         hand, club = _states(rng, slip=k % 6 != 0)
         for side in ("L", "R"):
             got = topology_side_wrench(model, side, hand, club)
             ref = topology_side_wrench_reference(model, side, hand, club)
-            worst = max(worst, float(np.abs(got.force_n - ref.force_n).max()))
-            np.testing.assert_allclose(got.force_n, ref.force_n, rtol=0, atol=ATOL_N)
+            atol_f, atol_m = _side_roundoff_bounds(model, ref)
+            np.testing.assert_allclose(got.force_n, ref.force_n, rtol=0, atol=atol_f)
             np.testing.assert_allclose(
-                got.moment_nm, ref.moment_nm, rtol=0, atol=ATOL_N
+                got.moment_nm, ref.moment_nm, rtol=0, atol=atol_m
             )
             np.testing.assert_allclose(
-                got.normal_force_n, ref.normal_force_n, rtol=0, atol=ATOL_N
+                got.normal_force_n, ref.normal_force_n, rtol=0, atol=atol_f
             )
             np.testing.assert_allclose(
-                got.tangential_force_n, ref.tangential_force_n, rtol=0, atol=ATOL_N
+                got.tangential_force_n, ref.tangential_force_n, rtol=0, atol=atol_f
             )
             assert got.total_normal_force_n == pytest.approx(
-                ref.total_normal_force_n, abs=ATOL_N
+                ref.total_normal_force_n, abs=atol_f
             )
             assert list(got.pair_wrenches) == list(ref.pair_wrenches)
             for name, ref_pw in ref.pair_wrenches.items():
-                _assert_pair_equal(got.pair_wrenches[name], ref_pw)
+                _assert_pair_equal(
+                    model, got.pair_wrenches[name], ref_pw, atol_f, atol_m
+                )
                 if ref_pw.penetration_m > 0.0:
                     active += 1
                 else:
                     separated += 1
     assert active > 0 and separated > 0, (active, separated)
-    assert worst <= ATOL_N
 
 
 def test_batched_side_wrench_validates_once_and_skips_pair_kernels(
@@ -186,15 +238,22 @@ def test_batched_side_wrench_rejects_improper_rotation(
 
 
 def test_mode_filter_matches_reference(interface: GripInterface) -> None:
-    """A mode with no physical pairs yields an empty, zero side wrench."""
+    """Mode-filtered side wrenches match the reference within operand round-off.
+
+    - Evaluated bounds on ``mode="contact"``: ``atol_f = 3.05e-10 N``,
+      ``atol_m = 8.48e-12 N m`` (and ``0.0`` on empty ``mode="allocated"``).
+    - Observed max difference locally (AVX2): ``0.0 N`` and ``0.0 N m``.
+    - Observed max difference on AVX-512 CI: ``9.78e-12 N``.
+    """
     model = _model(interface, GripStyle.INTERLOCK, True)
     hand, club = _states(np.random.default_rng(3), slip=True)
     for mode in ("contact", "allocated"):
         got = topology_side_wrench(model, "R", hand, club, mode=mode)
         ref = topology_side_wrench_reference(model, "R", hand, club, mode=mode)
+        atol_f, atol_m = _side_roundoff_bounds(model, ref)
         assert list(got.pair_wrenches) == list(ref.pair_wrenches)
-        np.testing.assert_allclose(got.force_n, ref.force_n, rtol=0, atol=ATOL_N)
-        np.testing.assert_allclose(got.moment_nm, ref.moment_nm, rtol=0, atol=ATOL_N)
+        np.testing.assert_allclose(got.force_n, ref.force_n, rtol=0, atol=atol_f)
+        np.testing.assert_allclose(got.moment_nm, ref.moment_nm, rtol=0, atol=atol_m)
 
 
 def _segment(rng: np.random.Generator, kind: str) -> tuple[np.ndarray, np.ndarray]:
@@ -206,7 +265,16 @@ def _segment(rng: np.random.Generator, kind: str) -> tuple[np.ndarray, np.ndarra
 
 @pytest.mark.parametrize("kind", ["general", "parallel", "point_a", "point_b"])
 def test_float_segment_query_matches_scalar_closest_points(kind: str) -> None:
-    """The Python-float segment/segment query equals the scalar reference exactly."""
+    """The Python-float segment/segment query matches the scalar reference within round-off.
+
+    Elementwise precision bound: ``rtol = 8 * eps`` and
+    ``atol = 8 * eps * max(|a0|, |a1|, |b0|, |b1|)``.
+    - Evaluated bound on the failing ``general`` draw: ``1.10e-16 m``
+      (range ``[6.35e-17, 3.84e-16] m`` across all 1600 segment draws).
+    - Observed max difference locally (AVX2): ``0.0 m``.
+    - Observed max difference on AVX-512 CI (FMA dot-product order):
+      ``1.39e-17 m`` (``5.55e-17 m`` max across all 1600 draws).
+    """
     rng = np.random.default_rng(len(kind))
     b0, b1 = _segment(rng, "point" if kind == "point_b" else "general")
     for _ in range(400):
@@ -219,8 +287,11 @@ def test_float_segment_query_matches_scalar_closest_points(kind: str) -> None:
             a0.tolist(), a1.tolist(), b0.tolist(), b1.tolist()
         )
         ra, rb = closest_points_segments(a0, a1, b0, b1)
-        np.testing.assert_array_equal(pa, ra)
-        np.testing.assert_array_equal(pb, rb)
+        seg_scale = float(np.max(np.abs([a0, a1, b0, b1])))
+        rtol = SEG_ROUNDOFF_C * EPS
+        atol = SEG_ROUNDOFF_C * EPS * seg_scale
+        np.testing.assert_allclose(pa, ra, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(pb, rb, rtol=rtol, atol=atol)
 
 
 def test_stacked_transform_matches_scalar() -> None:

@@ -611,6 +611,28 @@ def test_spy_adapter_allocated_pairs_excluded_and_unavailable_nan(
     assert "lead_palm_proximal_grip" not in report_sep.unavailable_reasons
 
 
+EPS = float(np.finfo(float).eps)
+#: Round-off factor c in atol = c * eps * sum_i |f_i| across pad summands and
+#: the Hunt-Crossley normal plane-offset subtraction k * ((n . c - n . s) - r).
+ROUNDOFF_C = 64
+
+
+def _side_roundoff_bounds(
+    model: TopologyContactModel, expected: Any
+) -> tuple[float, float]:
+    """Compute operand-derived force and moment round-off bounds (N and N m)."""
+    elastic_scale_n = 2.0 * model.law.stiffness_n_m * model.grip_radius_m
+    active = [pw for pw in expected.pair_wrenches.values() if pw.penetration_m > 0.0]
+    sum_f = sum(float(np.abs(pw.force_b_n).sum()) + elastic_scale_n for pw in active)
+    sum_m = sum(
+        float(np.abs(pw.moment_b_nm).sum())
+        + float(np.linalg.norm(pw.contact_point_m - pw.point_b_m))
+        * (float(np.abs(pw.force_b_n).sum()) + elastic_scale_n)
+        for pw in active
+    )
+    return ROUNDOFF_C * EPS * sum_f, ROUNDOFF_C * EPS * sum_m
+
+
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -620,7 +642,18 @@ def test_pinocchio_grip_adapter_reproduces_topology_side_wrench(
     style: GripStyle,
     trigger_finger: bool,
 ) -> None:
-    """PinocchioGripAdapter + evaluate_contacts reproduces topology_side_wrench to <= 1e-12 N."""
+    """PinocchioGripAdapter + evaluate_contacts reproduces topology_side_wrench within operand round-off.
+
+    Operand-derived precision bound: ``atol = c * eps * sum_i |f_i|`` with
+    ``c = 64`` and ``eps = np.finfo(float).eps``.
+    - Evaluated force bound ``atol_f``: ``3.13e-10 N`` on ``overlap-False`` ``L``
+      (range ``[2.51e-10, 3.79e-10] N`` across all styles and sides).
+    - Evaluated moment bound ``atol_m``: ``7.36e-12 N m`` on ``overlap-False`` ``L``
+      (range ``[5.68e-12, 1.08e-11] N m`` across all styles and sides).
+    - Observed max difference locally (AVX2): ``0.0 N`` and ``0.0 N m``.
+    - Observed max difference on AVX-512 CI (FMA dot-product order):
+      ``9.72e-12 N`` on ``overlap-False`` ``L`` (``2.11e-11 N`` / ``4.12e-13 N m`` max).
+    """
     topo = contact_topology(GripSpec(style=style, trigger_finger=trigger_finger))
     model = build_topology_model(interface, topo, squeeze_per_hand_n=1100.0)
 
@@ -654,23 +687,30 @@ def test_pinocchio_grip_adapter_reproduces_topology_side_wrench(
     for side in ("L", "R"):
         expected = topology_side_wrench(model, side, hands[side], club_frames[side])
         actual = report.side_wrenches[side]
-        np.testing.assert_allclose(actual.force_n, expected.force_n, atol=1e-12)
-        np.testing.assert_allclose(actual.moment_nm, expected.moment_nm, atol=1e-12)
+        atol_f, atol_m = _side_roundoff_bounds(model, expected)
+        np.testing.assert_allclose(
+            actual.force_n, expected.force_n, rtol=0.0, atol=atol_f
+        )
+        np.testing.assert_allclose(
+            actual.moment_nm, expected.moment_nm, rtol=0.0, atol=atol_m
+        )
         for pair_name, pw_exp in expected.pair_wrenches.items():
             assert (
                 abs(report.normal_force_n[pair_name] - pw_exp.normal_force_mag_n)
-                <= 1e-12
+                <= atol_f
             )
             assert (
                 abs(
                     report.tangential_force_n[pair_name] - pw_exp.tangential_force_mag_n
                 )
-                <= 1e-12
+                <= atol_f
             )
             pw_act = report.pair_wrenches[pair_name]
-            np.testing.assert_allclose(pw_act.force_b_n, pw_exp.force_b_n, atol=1e-12)
             np.testing.assert_allclose(
-                pw_act.moment_b_nm, pw_exp.moment_b_nm, atol=1e-12
+                pw_act.force_b_n, pw_exp.force_b_n, rtol=0.0, atol=atol_f
+            )
+            np.testing.assert_allclose(
+                pw_act.moment_b_nm, pw_exp.moment_b_nm, rtol=0.0, atol=atol_m
             )
 
 
@@ -683,7 +723,7 @@ def test_pinocchio_grip_adapter_with_club_in_hands(
     interface: GripInterface,
     style: GripStyle,
 ) -> None:
-    """PinocchioGripAdapter wrapping ClubInHands reproduces topology_side_wrench <= 1e-12 N."""
+    """PinocchioGripAdapter wrapping ClubInHands reproduces topology_side_wrench within operand round-off."""
     try:
         import pinocchio  # noqa: F401
     except ImportError as exc:
@@ -712,18 +752,23 @@ def test_pinocchio_grip_adapter_with_club_in_hands(
     for side in ("L", "R"):
         expected = law[side]
         actual = report.side_wrenches[side]
-        np.testing.assert_allclose(actual.force_n, expected.force_n, atol=1e-12)
-        np.testing.assert_allclose(actual.moment_nm, expected.moment_nm, atol=1e-12)
+        atol_f, atol_m = _side_roundoff_bounds(model, expected)
+        np.testing.assert_allclose(
+            actual.force_n, expected.force_n, rtol=0.0, atol=atol_f
+        )
+        np.testing.assert_allclose(
+            actual.moment_nm, expected.moment_nm, rtol=0.0, atol=atol_m
+        )
         for pair_name, pw_exp in expected.pair_wrenches.items():
             assert (
                 abs(report.normal_force_n[pair_name] - pw_exp.normal_force_mag_n)
-                <= 1e-12
+                <= atol_f
             )
             assert (
                 abs(
                     report.tangential_force_n[pair_name] - pw_exp.tangential_force_mag_n
                 )
-                <= 1e-12
+                <= atol_f
             )
 
 
