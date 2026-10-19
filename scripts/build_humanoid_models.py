@@ -68,9 +68,13 @@ if str(REPO_ROOT) not in sys.path:
 shared_python = REPO_ROOT / "src" / "shared" / "python"
 if str(shared_python) not in sys.path:
     sys.path.insert(0, str(shared_python))
-src_path = REPO_ROOT / "src"
-if str(src_path) not in sys.path:
-    sys.path.insert(0, str(src_path))
+# ``src`` must precede ``src/shared/python`` (and any inherited PYTHONPATH
+# entry) so ``tools.model_converter`` resolves to ``src/tools`` rather than
+# the unrelated ``src/shared/python/tools`` package (#12985).
+src_path = str(REPO_ROOT / "src")
+while src_path in sys.path:
+    sys.path.remove(src_path)
+sys.path.insert(0, src_path)
 
 #: All engines this orchestrator knows about, in canonical order.
 ENGINES: tuple[str, ...] = ("drake", "pinocchio", "mujoco", "opensim")
