@@ -15,6 +15,9 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from src.engines.physics_engines.opensim.python.msk_lift_ik_id import (
+    RESIDUAL_MOMENT_FRACTION,
+)
 from src.shared.python.contracts import require
 from src.shared.python.engine_core.opensim_runtime import import_opensim
 from src.shared.python.motion_matching.same_input import InputBundle
@@ -109,11 +112,20 @@ def replay_bar_path_fk(model: Any, states_table: Any) -> tuple[np.ndarray, np.nd
     Returns (times, bar_positions) where bar_positions has shape (N, 3).
     In OpenSim ground coordinates: X is forward, Y is vertical, Z is right.
     """
+    times, positions, _com_heights = _replay_states(model, states_table)
+    return times, positions
+
+
+def _replay_states(
+    model: Any, states_table: Any
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Replay a states table: times, bar positions (N, 3), whole-model COM heights."""
     state = model.initSystem()
     bar_body = model.getBodySet().get("barbell")
     times = np.array(states_table.getIndependentColumn(), dtype=float)
     n_times = len(times)
     positions = np.zeros((n_times, 3), dtype=float)
+    com_heights = np.zeros(n_times, dtype=float)
 
     cset = model.getCoordinateSet()
     col_indices: dict[str, int] = {}
@@ -136,8 +148,9 @@ def replay_bar_path_fk(model: Any, states_table: Any) -> tuple[np.ndarray, np.nd
         positions[step, 0] = pos.get(0)
         positions[step, 1] = pos.get(1)
         positions[step, 2] = pos.get(2)
+        com_heights[step] = model.calcMassCenterPosition(state).get(1)
 
-    return times, positions
+    return times, positions, com_heights
 
 
 def _extract_residual_metrics(
@@ -177,6 +190,52 @@ def _extract_residual_metrics(
     return None, None, None, None
 
 
+def residual_moment_metrics(
+    solution: Any, residual_optimal_force_n: float
+) -> tuple[float | None, float | None]:
+    """Peak and RMS (N m) of the rotational pelvis residual moment norm.
+
+    The rotational residuals share the translational optimal force, so a
+    control of 1 is ``residual_optimal_force_n`` newton-metres. Returns
+    ``(None, None)`` when the solution has no rotational residual columns.
+    """
+    try:
+        ctable = solution.exportToControlsTable()
+        labels = [ctable.getColumnLabel(i) for i in range(ctable.getNumColumns())]
+        cols = [
+            i
+            for i, lab in enumerate(labels)
+            if any(
+                lab.endswith(f"residual_pelvis_{axis}")
+                for axis in ("tilt", "list", "rotation")
+            )
+        ]
+        if cols:
+            mat = ctable.getMatrix().to_numpy()
+            m_norm = np.linalg.norm(mat[:, cols] * residual_optimal_force_n, axis=1)
+            return float(np.max(m_norm)), float(np.sqrt(np.mean(m_norm**2)))
+    except (RuntimeError, ValueError, IndexError) as exc:
+        logger.warning("Could not extract residual moments from solution: %s", exc)
+    return None, None
+
+
+def residual_moment_gate(
+    moment_peak_nm: float | None, com_height_m: float | None, total_weight_n: float
+) -> dict[str, float | bool | None]:
+    """Compare the peak residual moment with the OSL-3 Hicks moment limit.
+
+    The limit is ``RESIDUAL_MOMENT_FRACTION`` of COM height times total
+    weight (Hicks et al. 2015), the same fraction as the OSL-3 IK/ID gate.
+    Without a COM height or a moment the limit and verdict are ``None``.
+    """
+    require(total_weight_n > 0.0, f"total_weight_n must be positive: {total_weight_n}")
+    if com_height_m is None:
+        return {"residual_moment_limit_nm": None, "residual_moment_within_limit": None}
+    limit = RESIDUAL_MOMENT_FRACTION * com_height_m * total_weight_n
+    within = None if moment_peak_nm is None else bool(moment_peak_nm <= limit)
+    return {"residual_moment_limit_nm": limit, "residual_moment_within_limit": within}
+
+
 def _extract_bar_kinematics(study: Any, solution: Any) -> dict[str, float]:
     """Replay FK from states table and return kinematic metrics."""
     # The rep holds the processed model (welds applied, muscles replaced); FK
@@ -185,7 +244,7 @@ def _extract_bar_kinematics(study: Any, solution: Any) -> dict[str, float]:
     osim = import_opensim()
     rep = study.getProblem().createRep()
     model = osim.Model(rep.getModelBase())
-    times, bar_pos = replay_bar_path_fk(model, solution.exportToStatesTable())
+    times, bar_pos, com_heights = _replay_states(model, solution.exportToStatesTable())
     start_h = float(bar_pos[0, 1])
     final_h = float(bar_pos[-1, 1])
     rise = float(final_h - start_h)
@@ -199,6 +258,7 @@ def _extract_bar_kinematics(study: Any, solution: Any) -> dict[str, float]:
         "bar_vertical_rise_m": rise,
         "peak_vertical_velocity_m_s": peak_v,
         "duration_s": dur,
+        "com_height_m": float(np.mean(com_heights)),
     }
 
 

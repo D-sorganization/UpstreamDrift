@@ -36,6 +36,8 @@ from src.engines.physics_engines.opensim.python.msk_lift_predictive_report impor
     build_comparison_table,
     compute_bundle_metrics,
     replay_bar_path_fk,
+    residual_moment_gate,
+    residual_moment_metrics,
 )
 from src.engines.physics_engines.opensim.python.musculoskeletal_solvers import (
     _moco_weld_joints,
@@ -669,6 +671,9 @@ def solve_predictive_deadlift(
     res_peak, res_rms, res_ratio, res_assisted = _extract_residual_metrics(
         solution, tot_weight, config.residual_optimal_force_n()
     )
+    moment_peak, moment_rms = residual_moment_metrics(
+        solution, config.residual_optimal_force_n()
+    )
 
     record: dict[str, Any] = {
         "exploratory": config.exploratory,
@@ -685,6 +690,8 @@ def solve_predictive_deadlift(
         "residual_rms_n": res_rms,
         "residual_ratio": res_ratio,
         "residual_assisted": res_assisted,
+        "residual_moment_peak_nm": moment_peak,
+        "residual_moment_rms_nm": moment_rms,
     }
 
     if converged:
@@ -692,6 +699,10 @@ def solve_predictive_deadlift(
             record.update(_extract_bar_kinematics(study, solution))
         except (RuntimeError, ValueError) as exc:
             logger.warning("FK replay failed on converged solution: %s", exc)
+    gate = residual_moment_gate(moment_peak, record.get("com_height_m"), tot_weight)
+    record.update(gate)
+    if gate["residual_moment_within_limit"] is False:
+        record["residual_assisted"] = True
 
     return record
 
@@ -722,6 +733,14 @@ def format_predictive_receipt(
         "residual_rms_n": solve_summary.get("residual_rms_n"),
         "residual_ratio": solve_summary.get("residual_ratio"),
         "residual_assisted": solve_summary.get("residual_assisted"),
+        "residual_optimal_force_n": config.residual_optimal_force_n(),
+        "residual_effort_weight": config.residual_effort_weight,
+        "residual_moment_peak_nm": solve_summary.get("residual_moment_peak_nm"),
+        "residual_moment_rms_nm": solve_summary.get("residual_moment_rms_nm"),
+        "residual_moment_limit_nm": solve_summary.get("residual_moment_limit_nm"),
+        "residual_moment_within_limit": solve_summary.get(
+            "residual_moment_within_limit"
+        ),
         "converged": solve_summary.get("converged", False),
         "solver_status": solve_summary.get("solver_status", "unknown"),
         "iterations": solve_summary.get("iterations"),

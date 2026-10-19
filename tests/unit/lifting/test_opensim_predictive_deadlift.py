@@ -12,6 +12,7 @@ Verifies:
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -28,6 +29,30 @@ from src.engines.physics_engines.opensim.python.msk_lift_predictive_report impor
 )
 
 pytestmark = pytest.mark.unit
+
+
+def _fake_solution(labels: list[str], controls: Any) -> Any:
+    """A MocoSolution stand-in whose controls table holds ``controls``."""
+
+    class _Matrix:
+        def to_numpy(self) -> Any:
+            return controls
+
+    class _Table:
+        def getNumColumns(self) -> int:  # noqa: N802 - OpenSim API name
+            return len(labels)
+
+        def getColumnLabel(self, i: int) -> str:  # noqa: N802 - OpenSim API name
+            return labels[i]
+
+        def getMatrix(self) -> _Matrix:  # noqa: N802 - OpenSim API name
+            return _Matrix()
+
+    class _Solution:
+        def exportToControlsTable(self) -> _Table:  # noqa: N802 - OpenSim API name
+            return _Table()
+
+    return _Solution()
 
 
 # -------------------------------------------------------------------------
@@ -250,6 +275,15 @@ def test_format_predictive_receipt() -> None:
     assert "residual_rms_n" in receipt
     assert "residual_ratio" in receipt
     assert "residual_assisted" in receipt
+    assert receipt["residual_optimal_force_n"] == cfg.residual_optimal_force_n()
+    assert receipt["residual_effort_weight"] == cfg.residual_effort_weight
+    for key in (
+        "residual_moment_peak_nm",
+        "residual_moment_rms_nm",
+        "residual_moment_limit_nm",
+        "residual_moment_within_limit",
+    ):
+        assert key in receipt
 
 
 @pytest.mark.requires_opensim
@@ -319,31 +353,15 @@ def test_residual_metrics_multiply_controls_by_optimal_force() -> None:
 
     controls = np.array([[0.3, 0.4, 0.0], [0.0, 0.0, 0.0]])
 
-    class _Matrix:
-        def to_numpy(self) -> np.ndarray:
-            return controls
+    labels = [
+        "/forceset/residual_pelvis_tx",
+        "/forceset/residual_pelvis_ty",
+        "/forceset/residual_pelvis_tilt",
+    ]
 
-    class _Table:
-        labels = [
-            "/forceset/residual_pelvis_tx",
-            "/forceset/residual_pelvis_ty",
-            "/forceset/residual_pelvis_tilt",
-        ]
-
-        def getNumColumns(self) -> int:  # noqa: N802 - OpenSim API name
-            return len(self.labels)
-
-        def getColumnLabel(self, i: int) -> str:  # noqa: N802 - OpenSim API name
-            return self.labels[i]
-
-        def getMatrix(self) -> _Matrix:  # noqa: N802 - OpenSim API name
-            return _Matrix()
-
-    class _Solution:
-        def exportToControlsTable(self) -> _Table:  # noqa: N802 - OpenSim API name
-            return _Table()
-
-    peak, rms, ratio, assisted = _extract_residual_metrics(_Solution(), 1000.0, 200.0)
+    peak, rms, ratio, assisted = _extract_residual_metrics(
+        _fake_solution(labels, controls), 1000.0, 200.0
+    )
     assert peak == pytest.approx(0.5 * 200.0)
     assert rms == pytest.approx(np.sqrt(0.5) * 0.5 * 200.0)
     assert ratio == pytest.approx(rms / 1000.0)
@@ -449,31 +467,15 @@ def test_residual_force_norm_includes_tz() -> None:
 
     controls = np.array([[0.3, 0.0, 0.4]])
 
-    class _Matrix:
-        def to_numpy(self) -> np.ndarray:
-            return controls
+    labels = [
+        "/forceset/residual_pelvis_tx",
+        "/forceset/residual_pelvis_ty",
+        "/forceset/residual_pelvis_tz",
+    ]
 
-    class _Table:
-        labels = [
-            "/forceset/residual_pelvis_tx",
-            "/forceset/residual_pelvis_ty",
-            "/forceset/residual_pelvis_tz",
-        ]
-
-        def getNumColumns(self) -> int:  # noqa: N802 - OpenSim API name
-            return len(self.labels)
-
-        def getColumnLabel(self, i: int) -> str:  # noqa: N802 - OpenSim API name
-            return self.labels[i]
-
-        def getMatrix(self) -> _Matrix:  # noqa: N802 - OpenSim API name
-            return _Matrix()
-
-    class _Solution:
-        def exportToControlsTable(self) -> _Table:  # noqa: N802 - OpenSim API name
-            return _Table()
-
-    peak, _rms, _ratio, _assisted = _extract_residual_metrics(_Solution(), 1.0, 100.0)
+    peak, _rms, _ratio, _assisted = _extract_residual_metrics(
+        _fake_solution(labels, controls), 1.0, 100.0
+    )
     assert peak == pytest.approx(50.0)
 
 
@@ -499,6 +501,7 @@ def test_bar_kinematics_replays_on_the_processed_model() -> None:
         "bar_vertical_rise_m",
         "peak_vertical_velocity_m_s",
         "duration_s",
+        "com_height_m",
     }
     assert all(np.isfinite(v) for v in metrics.values())
 
@@ -561,3 +564,58 @@ def test_tracked_row_follows_the_osl3_receipt(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     assert tracked_opensim_record(receipt)["status"] == "not compared"
+
+
+def test_residual_moments_are_reported_in_newton_metres() -> None:
+    """The rotational pelvis residuals are reported, never dropped."""
+    import numpy as np
+
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
+        residual_moment_metrics,
+    )
+
+    labels = [
+        "/forceset/residual_pelvis_tilt",
+        "/forceset/residual_pelvis_list",
+        "/forceset/residual_pelvis_rotation",
+        "/forceset/residual_pelvis_tx",
+    ]
+    controls = np.array([[0.3, 0.4, 0.0, 9.0], [0.0, 0.0, 0.0, 9.0]])
+    peak, rms = residual_moment_metrics(_fake_solution(labels, controls), 100.0)
+    assert peak == pytest.approx(50.0)
+    assert rms == pytest.approx(np.sqrt(0.5) * 50.0)
+
+
+def test_residual_moments_unavailable_without_rotational_columns() -> None:
+    """No rotational residual columns give None, not zero."""
+    import numpy as np
+
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
+        residual_moment_metrics,
+    )
+
+    labels = ["/forceset/residual_pelvis_tx"]
+    solution = _fake_solution(labels, np.array([[0.1]]))
+    assert residual_moment_metrics(solution, 100.0) == (None, None)
+
+
+def test_residual_moment_gate_uses_the_hicks_fraction() -> None:
+    """The moment limit is the OSL-3 Hicks fraction of COM height times weight."""
+    from src.engines.physics_engines.opensim.python.msk_lift_ik_id import (
+        RESIDUAL_MOMENT_FRACTION,
+    )
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
+        residual_moment_gate,
+    )
+
+    gate = residual_moment_gate(30.0, 0.9, 1000.0)
+    assert gate["residual_moment_limit_nm"] == pytest.approx(
+        RESIDUAL_MOMENT_FRACTION * 0.9 * 1000.0
+    )
+    assert gate["residual_moment_within_limit"] is False
+    assert residual_moment_gate(5.0, 0.9, 1000.0)["residual_moment_within_limit"]
+    unknown = residual_moment_gate(5.0, None, 1000.0)
+    assert unknown["residual_moment_limit_nm"] is None
+    assert unknown["residual_moment_within_limit"] is None
+    with pytest.raises(ValueError):
+        residual_moment_gate(5.0, 0.9, 0.0)

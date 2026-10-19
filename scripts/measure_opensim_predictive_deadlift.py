@@ -247,7 +247,7 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 ## Result Status: Exploratory
 
 ### Stage 1: Torque-Driven Solve
-- **Actuation:** `CoordinateActuator`s (1000 N·m optimal force) on free coordinates; pelvis residuals (optimal force 1, weight 100); muscles removed
+- **Actuation:** `CoordinateActuator`s on free coordinates; six pelvis residuals (optimal force {receipt.get("residual_optimal_force_n")}, effort weight {receipt.get("residual_effort_weight")}); muscles removed
 - **Solver Status:** `{stage1.get("solver_status", "unknown")}`
 - **Converged:** `{stage1.get("converged", False)}`
 - **Iterations:** {stage1.get("iterations")}
@@ -258,6 +258,8 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 - **Residual Peak:** {receipt.get("residual_peak_n")} N
 - **Residual RMS:** {receipt.get("residual_rms_n")} N
 - **Residual Ratio:** {receipt.get("residual_ratio")}
+- **Residual Moment Peak:** {receipt.get("residual_moment_peak_nm")} N·m (RMS {receipt.get("residual_moment_rms_nm")} N·m)
+- **Residual Moment Limit (1 % COM height × m g):** {receipt.get("residual_moment_limit_nm")} N·m (within: {receipt.get("residual_moment_within_limit")})
 - **Residual Assisted:** {receipt.get("residual_assisted")}
 
 ### Stage 2: Muscle-Driven Solve
