@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 import logging
 from pathlib import Path
@@ -487,6 +487,7 @@ class PipelineContext:
     engine: str
     log: logging.Logger
     t_start: float
+    neural_receipt: dict[str, Any] | None = None
 
 
 def _init_pipeline(args: argparse.Namespace) -> PipelineContext:
@@ -1166,6 +1167,7 @@ def _ground_support_receipt(
             kin=kin,
             q_ref=q_ref,
             elapsed_s=time.perf_counter() - ctx.t_start,
+            neural=ctx.neural_receipt,
         )
     )
 
@@ -1332,11 +1334,27 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     return CalibratedRun(ctx, lane, base_spec, labels, cal_res, provenance)
 
 
+def _neural_receipt_from_args(args: argparse.Namespace) -> dict[str, Any]:
+    """Resolve neural CLI flags through the motion-matching controller (#12970)."""
+    from src.tools.motion_matching.neural_cli import (
+        build_neural_receipt,
+        enforce_neural_gate,
+        prepare_ground_support_neural,
+    )
+
+    request, disposition = prepare_ground_support_neural(args)
+    enforce_neural_gate(disposition)
+    return build_neural_receipt(request, disposition)
+
+
 def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
     """Return the calibrated address report (``foot_progression`` included).
 
     Adds ``hip_coordinates_deg``: the six hip coordinates at the calibrated
     address, so a coordinate at its range limit is visible in the report.
+
+    The address stage runs no neural inference and writes no receipt, so the
+    neural disposition (#12970) is resolved only by :func:`run_pipeline`.
     """
     cal_res = calibrate_run(args).cal_res
     report = cal_res.address_report
@@ -1357,9 +1375,10 @@ def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
 @precondition(lambda args: args is not None, "args must not be None")
 def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     """Execute the full-body ground support matching pipeline."""
+    neural_receipt = _neural_receipt_from_args(args)
     run = calibrate_run(args)
     ctx, lane, base_spec, labels, cal_res = (
-        run.ctx,
+        replace(run.ctx, neural_receipt=neural_receipt),
         run.lane,
         run.base_spec,
         run.labels,

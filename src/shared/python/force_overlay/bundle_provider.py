@@ -41,6 +41,7 @@ from src.shared.python.force_overlay.conversions import joint_torque_wrench
 from src.shared.python.force_overlay.grip_frame import grip_wrenches_and_metadata
 from src.shared.python.grip_contact.contact_topology import (
     ContactTopology,
+    coerce_contact_topology,
     contact_topology,
 )
 from src.shared.python.grip_contact.palm_thumb import (
@@ -329,16 +330,7 @@ class BundleOverlayProvider:
         for name in ("closure_wrench", "club_frame_world"):
             if not callable(getattr(source, name, None)):
                 raise TypeError(f"source must provide {name}(...)")
-        if topology is None:
-            topo = contact_topology()
-        elif isinstance(topology, GripSpec):
-            topo = contact_topology(topology)
-        elif isinstance(topology, ContactTopology):
-            topo = topology
-        else:
-            raise TypeError(
-                f"topology must be ContactTopology or GripSpec, got {type(topology).__name__}"
-            )
+        topo = coerce_contact_topology(topology)
         self._allocated_contacts = (source, topo, float(static_friction))
         return self
 

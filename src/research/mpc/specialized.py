@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -37,6 +38,47 @@ class CentroidalState:
     contact_forces: dict[str, NDArray[np.floating]]
 
 
+_DEFAULT_CENTROIDAL_MASS_KG = 50.0
+_MIN_CENTROIDAL_CONTACTS = 1
+_MAX_CENTROIDAL_CONTACTS = 4
+
+
+def _default_contact_positions(n_contacts: int) -> list[NDArray[np.floating]]:
+    """World-frame contact points spread along y at fixed x (biped default)."""
+    if n_contacts < _MIN_CENTROIDAL_CONTACTS or n_contacts > _MAX_CENTROIDAL_CONTACTS:
+        raise ValueError(
+            f"n_contacts must be in [{_MIN_CENTROIDAL_CONTACTS}, "
+            f"{_MAX_CENTROIDAL_CONTACTS}], got {n_contacts}"
+        )
+    if n_contacts == 1:
+        return [np.array([0.1, 0.0, 0.0])]
+    positions: list[NDArray[np.floating]] = []
+    for i in range(n_contacts):
+        y = 0.1 * (1.0 - 2.0 * i / (n_contacts - 1))
+        positions.append(np.array([0.1, y, 0.0]))
+    return positions
+
+
+def _resolve_mass_from_model(model: Any) -> float:
+    """Read total mass from the engine when exposed; else use the legacy default."""
+    get_total_mass = getattr(model, "get_total_mass", None)
+    if callable(get_total_mass):
+        mass = float(get_total_mass())
+        _validate_centroidal_mass(mass)
+        return mass
+    for attr in ("total_mass", "mass"):
+        if hasattr(model, attr):
+            mass = float(getattr(model, attr))
+            _validate_centroidal_mass(mass)
+            return mass
+    return _DEFAULT_CENTROIDAL_MASS_KG
+
+
+def _validate_centroidal_mass(mass: float) -> None:
+    if not math.isfinite(mass) or mass <= 0.0:
+        raise ValueError(f"mass must be finite and positive, got {mass}")
+
+
 class CentroidalMPC(ModelPredictiveController):
     """MPC using centroidal dynamics for locomotion.
 
@@ -45,7 +87,10 @@ class CentroidalMPC(ModelPredictiveController):
     for fast locomotion planning.
 
     The state is: [com_x, com_y, com_z, com_vx, com_vy, com_vz, Lx, Ly, Lz]
-    Controls are contact forces at each foot.
+    Controls are 3-D contact forces at each of ``n_contacts`` points (1--4).
+
+    Mass defaults to ``get_total_mass()``, ``total_mass``, or ``mass`` on the
+    engine when present; otherwise 50 kg. Call ``set_mass`` to override.
     """
 
     def __init__(
@@ -61,10 +106,18 @@ class CentroidalMPC(ModelPredictiveController):
             model: Physics engine.
             horizon: Prediction horizon.
             dt: Timestep.
-            n_contacts: Number of contact points (feet).
+            n_contacts: Number of contact points (1--4, e.g. feet or hands+feet).
         """
         if model is None:
             raise ValueError("model must be provided")
+        if (
+            n_contacts < _MIN_CENTROIDAL_CONTACTS
+            or n_contacts > _MAX_CENTROIDAL_CONTACTS
+        ):
+            raise ValueError(
+                f"n_contacts must be in [{_MIN_CENTROIDAL_CONTACTS}, "
+                f"{_MAX_CENTROIDAL_CONTACTS}], got {n_contacts}"
+            )
         super().__init__(model, horizon, dt)
 
         # Centroidal state dimension: 9 (com pos, vel, ang momentum)
@@ -75,14 +128,10 @@ class CentroidalMPC(ModelPredictiveController):
         self._n_u = 3 * n_contacts
 
         # Physical parameters
-        self._mass = 50.0  # kg
+        self._mass = _resolve_mass_from_model(model)
         self._gravity = np.array([0, 0, -GRAVITY])
 
-        # Contact positions (updated from model)
-        self._contact_positions: list[NDArray[np.floating]] = [
-            np.array([0.1, 0.1, 0.0]),
-            np.array([0.1, -0.1, 0.0]),
-        ]
+        self._contact_positions = _default_contact_positions(n_contacts)
 
         # Friction cone constraint
         self._friction_coef = 0.5
@@ -119,8 +168,9 @@ class CentroidalMPC(ModelPredictiveController):
         """Set robot mass.
 
         Args:
-            mass: Robot mass in kg.
+            mass: Robot mass in kg (must be finite and positive).
         """
+        _validate_centroidal_mass(mass)
         self._mass = mass
 
     def update_contact_positions(
@@ -130,8 +180,13 @@ class CentroidalMPC(ModelPredictiveController):
         """Update contact point positions.
 
         Args:
-            positions: List of contact positions in world frame.
+            positions: Exactly ``n_contacts`` positions in the world frame.
         """
+        if len(positions) != self._n_contacts:
+            raise ValueError(
+                f"expected {self._n_contacts} contact positions "
+                f"(n_contacts={self._n_contacts}), got {len(positions)}"
+            )
         self._contact_positions = positions
 
     def _dynamics(

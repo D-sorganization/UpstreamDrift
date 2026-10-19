@@ -140,6 +140,46 @@ Indicative ranges, quoted from the cited sources as recalled for this record
   the shoulder across the 0.65→0.7 blend, peaking at 4.64 m/s at 2.69 s:
   the blend is a bar-placement model, not jerk dynamics.
 
+## Barbell Bundle and OpenSim IK/ID (OSL-3, #13041)
+
+`clean_and_jerk_barbell_bundle.npz` (SHA-256 `0b5221ff7cc3b7128be609428a9681e7f0cc4398f38a7c8e0c35163d0beb45aa`)
+packages the clean and jerk pull window with the LIFT-4 barbell body and load,
+built by `scripts/generate_barbell_squat_evidence.py --lift clean_and_jerk --part bundle`
+from `clean_and_jerk_bundle.npz`.
+
+### Bar-Hold Metrics (Provenance)
+
+The barbell hold re-tracks the clean standing pose with the bar carried by the hands:
+- **Bar deviation:** 116.02 mm (0.11602 m) against the reference trajectory.
+- **Left hand force:** peak magnitude 1364.72 N (mean [25.12, −0.93, 845.98] N),
+  peak torque magnitude 7.38 Nm.
+- **Right hand force:** peak magnitude 1387.04 N (mean [22.45, −1.11, 851.21] N),
+  peak torque magnitude 7.38 Nm.
+
+### OpenSim Inverse Kinematics and Inverse Dynamics Receipt
+
+The OpenSim IK/ID receipt (`docs/development/lifting/evidence/opensim_ik_id/receipts.json`)
+is measured with real OpenSim 4.6 and the RajagopalLaiUhlrich2023 model over 41 frames
+(stride 5):
+- **Marker kinematics:** RMS error 0.0198 m (1.98 cm, within 0.0200 m threshold),
+  maximum marker error 0.1612 m (exceeds 0.0400 m threshold due to the bar marker).
+  The kinematics fails the best-practice marker gate (`within_best_practice = False`).
+- **Segment angles:** sagittal segment-angle RMS error 0.0220 rad (1.26°, well within
+  the 0.0349 rad / 2.0° threshold).
+- **Arm reach:** Left hand reach miss 6.43 µm (6.4341e-6 m), right hand reach miss
+  6.02 µm (6.0187e-6 m), well within the 1.0 mm reach bound.
+- **Coordinate range violations:** `pro_sup_l` (40 frames, min −0.00227 rad, range
+  [0.0, 2.09] rad) and `pro_sup_r` (40 frames, min −0.00209 rad, range [0.0, 2.09] rad).
+- **Hicks residual gate:** peak external force 4462.06 N; force threshold 223.10 N
+  (5% of peak external force); moment threshold 38.77 Nm (1% of COM height × peak external force).
+  The residual gate fails for both forces and moments:
+  - Pelvis force: peak $t_x$ 458.52 N (RMS 92.66 N), peak $t_y$ 257.66 N (RMS 63.79 N),
+    peak $t_z$ 17.99 N (RMS 4.94 N); max force 458.52 N vs 223.10 N threshold (`forces_within = False`).
+  - Pelvis moment: peak tilt 259.03 Nm (RMS 80.19 Nm), peak list 7.92 Nm (RMS 4.89 Nm),
+    peak rotation 21.71 Nm (RMS 6.01 Nm); max moment 259.03 Nm vs 38.77 Nm threshold (`moments_within = False`).
+- The residual gate failures are strictly xfailed in `tests/unit/lifting/test_opensim_lift_ik_id.py`
+  with measured numbers; gates are not loosened.
+
 ## Limitations
 
 - The engine window covers the knee pass of the first pull only. The rack,
@@ -148,8 +188,12 @@ Indicative ranges, quoted from the cited sources as recalled for this record
 - Rack and catch IK fail the deadlift bounds (strict xfail above). A forward
   front-rack bar offset in the Tools planar model would let the hands reach
   the rack; it is not attempted here.
-- Hand-held bar on the club `Grip` frame; no barbell body or load (LIFT-4,
-  #11744). Not in `SAME_INPUT_LIFT_BUNDLES`; no OpenSim IK/ID.
+- In `clean_and_jerk_bundle.npz` the bar is held on the club `Grip` frame;
+  `clean_and_jerk_barbell_bundle.npz` adds the LIFT-4 barbell body and load
+  and is registered in `SAME_INPUT_LIFT_BUNDLES`.
+- OpenSim inverse dynamics fails the Hicks residual gate (forces 458.52 N vs
+  223.10 N, moments 259.03 Nm vs 38.77 Nm). Results are software receipts,
+  not physical acceptance.
 - The optimizer omits the Coriolis terms (max |qd| 6.26 rad/s, above its
   2 rad/s slow-movement assumption), so its joint torques are indicative.
 - Bar offset scaled to the model's arm hang (0.816).
@@ -159,4 +203,6 @@ Indicative ranges, quoted from the cited sources as recalled for this record
 ```bash
 MUJOCO_GL=egl python3 scripts/generate_lift_bundle.py --lift clean_and_jerk
 MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py --lift clean_and_jerk
+python3 scripts/generate_barbell_squat_evidence.py --lift clean_and_jerk --part bundle --source-commit <sha>
+MUJOCO_GL=egl python3 scripts/measure_opensim_lift_ik_id.py
 ```

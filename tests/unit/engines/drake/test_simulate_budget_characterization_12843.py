@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import dataclasses
 import sys
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -365,9 +366,38 @@ def test_mocked_simulate_golden_outputs(_no_urdf_load: MagicMock) -> None:
     assert out.meta["num_positions"] == _N_Q
     assert out.meta["basis"] == "power"
     assert out.duration_s > 0.0
-    simulator.set_publish_every_time_step.assert_called_once_with(False)
+    simulator.set_publish_every_time_step.assert_not_called()
     simulator.Initialize.assert_called_once()
     assert simulator.AdvanceTo.call_count == n - 1
+
+
+@pytest.mark.unit
+def test_simulate_runs_on_simulator_without_publish_setter_13391(
+    _no_urdf_load: MagicMock,
+) -> None:
+    """Reviewed Drake builds (1.57/1.58) dropped ``set_publish_every_time_step``.
+
+    Drake's ``Simulator`` already defaults to no per-step publish, so the
+    rollout must not depend on the removed setter (#13391).
+    """
+    mocks, _plant, simulator = _make_env()
+    del simulator.set_publish_every_time_step
+    with patch.dict(sys.modules, mocks):
+        out = simulate_with_coefficients(_theta(), _opts())
+    assert out.time.shape == (5,)
+    simulator.Initialize.assert_called_once()
+
+
+@pytest.mark.unit
+def test_drake_motion_matching_never_calls_removed_publish_setter_13391() -> None:
+    """Guard every Drake motion-matching module against the removed API."""
+    package_dir = Path(sim_mod.__file__).resolve().parent
+    offenders = [
+        path.name
+        for path in sorted(package_dir.glob("*.py"))
+        if "set_publish_every_time_step" in path.read_text(encoding="utf-8")
+    ]
+    assert offenders == []
 
 
 @pytest.mark.unit
