@@ -70,6 +70,20 @@ ZERO_CONSTRAINED_COORDS = (
     "lumbar_rotation",
 )
 
+#: Every floating-base coordinate gets a residual.  The out-of-plane ones
+#: (list, rotation, tz) are held at zero by the phase bounds, so without an
+#: actuator their equations of motion can only balance if every lateral load
+#: (the one-handed bar weld, asymmetric contact) cancels exactly, which made
+#: stage 1 dynamically infeasible (OSL-7, #13044).
+PELVIS_RESIDUAL_COORDINATES = (
+    "pelvis_tilt",
+    "pelvis_list",
+    "pelvis_rotation",
+    "pelvis_tx",
+    "pelvis_ty",
+    "pelvis_tz",
+)
+
 TORQUE_ACTUATED_COORDINATES = (
     "hip_flexion_r",
     "hip_adduction_r",
@@ -193,9 +207,7 @@ def create_predictive_deadlift_spec(config: PredictiveDeadliftConfig) -> dict[st
             "lumbar_bend",
             "lumbar_rot",
             *[f"torque_{c}" for c in TORQUE_ACTUATED_COORDINATES],
-            "residual_pelvis_tilt",
-            "residual_pelvis_tx",
-            "residual_pelvis_ty",
+            *[f"residual_{c}" for c in PELVIS_RESIDUAL_COORDINATES],
         ]
     else:
         actuators = [
@@ -203,9 +215,7 @@ def create_predictive_deadlift_spec(config: PredictiveDeadliftConfig) -> dict[st
             "lumbar_bending",
             "lumbar_rotation",
             "80_rajagopal_lower_limb_muscles",
-            "residual_pelvis_tilt",
-            "residual_pelvis_tx",
-            "residual_pelvis_ty",
+            *[f"residual_{c}" for c in PELVIS_RESIDUAL_COORDINATES],
         ]
     return {
         "exploratory": config.exploratory,
@@ -283,7 +293,7 @@ def _add_pelvis_residuals(model: Any, optimal_force_n: float) -> list[str]:
         raise ValueError(f"optimal_force_n must be positive: {optimal_force_n}")
     osim = import_opensim()
     added: list[str] = []
-    for coord in ("pelvis_tilt", "pelvis_tx", "pelvis_ty"):
+    for coord in PELVIS_RESIDUAL_COORDINATES:
         ca = osim.CoordinateActuator(coord)
         ca.setName(f"residual_{coord}")
         ca.setOptimalForce(optimal_force_n)
@@ -524,7 +534,7 @@ def build_predictive_deadlift_study(
 
     effort = osim.MocoControlGoal("effort")
     effort.setWeight(config.effort_weight)
-    for coord in ("pelvis_tilt", "pelvis_tx", "pelvis_ty"):
+    for coord in PELVIS_RESIDUAL_COORDINATES:
         effort.setWeightForControl(
             f"/forceset/residual_{coord}", config.residual_effort_weight
         )

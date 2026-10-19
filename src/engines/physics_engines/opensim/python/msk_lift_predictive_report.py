@@ -122,17 +122,23 @@ def _extract_residual_metrics(
     try:
         ctable = solution.exportToControlsTable()
         labels = [ctable.getColumnLabel(i) for i in range(ctable.getNumColumns())]
-        tx_idx = next(
-            (i for i, label in enumerate(labels) if "residual_pelvis_tx" in label), None
-        )
-        ty_idx = next(
-            (i for i, label in enumerate(labels) if "residual_pelvis_ty" in label), None
-        )
+        idx = {
+            axis: next(
+                (
+                    i
+                    for i, lab in enumerate(labels)
+                    if f"residual_pelvis_t{axis}" in lab
+                ),
+                None,
+            )
+            for axis in "xyz"
+        }
         mat = ctable.getMatrix().to_numpy()
-        if tx_idx is not None and ty_idx is not None:
-            fx = mat[:, tx_idx] * residual_optimal_force_n
-            fy = mat[:, ty_idx] * residual_optimal_force_n
-            f_norm = np.sqrt(fx**2 + fy**2)
+        if idx["x"] is not None and idx["y"] is not None:
+            # Force norm over every translational residual present (tz is
+            # absent from solutions predating the six-coordinate residuals).
+            cols = [i for i in idx.values() if i is not None]
+            f_norm = np.linalg.norm(mat[:, cols] * residual_optimal_force_n, axis=1)
             peak = float(np.max(f_norm))
             rms = float(np.sqrt(np.mean(f_norm**2)))
             ratio = float(rms / total_weight_n)

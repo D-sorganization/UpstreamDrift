@@ -415,3 +415,61 @@ def test_load_guess_rejects_missing_file(tmp_path: Path) -> None:
     mod = importlib.import_module("scripts.measure_opensim_predictive_deadlift")
     with pytest.raises(ValueError, match="not found"):
         mod._load_guess(tmp_path / "absent.sto")
+
+
+def test_residuals_cover_every_pelvis_coordinate() -> None:
+    """Out-of-plane pelvis DOFs held at zero still need an actuator (#13044)."""
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive import (
+        PELVIS_RESIDUAL_COORDINATES,
+        ZERO_CONSTRAINED_COORDS,
+        create_predictive_deadlift_spec,
+    )
+
+    pelvis = {f"pelvis_{c}" for c in ("tilt", "list", "rotation", "tx", "ty", "tz")}
+    assert set(PELVIS_RESIDUAL_COORDINATES) == pelvis
+    held = {c for c in ZERO_CONSTRAINED_COORDS if c.startswith("pelvis_")}
+    assert held <= set(PELVIS_RESIDUAL_COORDINATES)
+    for mode in ("torque", "muscle"):
+        spec = create_predictive_deadlift_spec(
+            PredictiveDeadliftConfig(actuation_mode=mode)
+        )
+        for c in pelvis:
+            assert f"residual_{c}" in spec["actuators"]
+
+
+def test_residual_force_norm_includes_tz() -> None:
+    """The lateral residual counts toward the reported residual force."""
+    import numpy as np
+
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
+        _extract_residual_metrics,
+    )
+
+    controls = np.array([[0.3, 0.0, 0.4]])
+
+    class _Matrix:
+        def to_numpy(self) -> np.ndarray:
+            return controls
+
+    class _Table:
+        labels = [
+            "/forceset/residual_pelvis_tx",
+            "/forceset/residual_pelvis_ty",
+            "/forceset/residual_pelvis_tz",
+        ]
+
+        def getNumColumns(self) -> int:  # noqa: N802 - OpenSim API name
+            return len(self.labels)
+
+        def getColumnLabel(self, i: int) -> str:  # noqa: N802 - OpenSim API name
+            return self.labels[i]
+
+        def getMatrix(self) -> _Matrix:  # noqa: N802 - OpenSim API name
+            return _Matrix()
+
+    class _Solution:
+        def exportToControlsTable(self) -> _Table:  # noqa: N802 - OpenSim API name
+            return _Table()
+
+    peak, _rms, _ratio, _assisted = _extract_residual_metrics(_Solution(), 1.0, 100.0)
+    assert peak == pytest.approx(50.0)
