@@ -19,6 +19,9 @@ from src.config.launcher_manifest_loader import (
 )
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 
+pytestmark = pytest.mark.unit
+
+
 # =============================================================================
 # Fixtures
 # =============================================================================

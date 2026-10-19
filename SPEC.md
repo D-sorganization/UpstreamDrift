@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13361 | fix(ui): include physical style in resolveGrip to resolve red main on frontend-tests |
+| 2026-10-19 | #13358 | fix(launcher): renumber jaxsim_dashboard to order 105 to resolve duplicate tile order 33 |
+| 2026-10-19 | #13359 | fix(data_io): make c3d_loader resilient to sidekick.lab.bio test pollution |
+| 2026-10-19 | #13320 | Engine-agnostic grip-style contact topology: GripStyle and trigger finger join the physical GripSpec; per-style contact pair tables with anatomy scaling.; generalised shared contact law: sphere-capsule and capsule-capsule |
 | 2026-10-19 | #13341 | test_check_windows_deps no longer races real engine imports against a 3s wait; the probe is tested synchronously with optional engines forced absent |
 | 2026-10-19 | #13269 | Route web launcher to /tools/spine-viewer, update Ch68 manual and ignore licensed_assets |
 | 2026-10-19 | #13288 | Compute muscle forces and activations for barbell squat (OSL-4) |
