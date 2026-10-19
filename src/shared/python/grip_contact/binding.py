@@ -360,7 +360,7 @@ class ModelGripAdapter(Protocol):
         """Resolve a :class:`HandClubBinding` for ``topology``."""
         ...
 
-    def sample_states(self, binding: HandClubBinding) -> BodyStates:
+    def sample_states(self, binding: HandClubBinding) -> Mapping[str, Any]:
         """Sample current 4x4 world poses (and optional velocities) for bound bodies."""
         ...
 

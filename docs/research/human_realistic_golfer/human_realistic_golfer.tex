@@ -1705,6 +1705,103 @@ python3 scripts/grip/grip_style_parity_report.py --duration-s 0.04 --out /tmp/g7
 python3 scripts/grip/grip_style_parity_report.py --duration-s 0.10 --out /tmp/g7b_010
 \end{verbatim}
 
+\subsection{OpenSim MSK Grip Adapter (HRG-GS-M4, \#13326)}
+\textbf{Method and Architecture.}
+The native OpenSim musculoskeletal grip adapter (\texttt{OpenSimMskGripAdapter} in
+\path{src/engines/physics_engines/opensim/python/msk_grip_adapter.py}; the club XML stays in \path{msk_club.py}) binds the shared anatomical contact
+topology $\mathcal{T}$ (\texttt{ContactTopology}, HRG-GS-G1, \#13299) and rigid-proxy binding layer
+(\texttt{grip\_contact.binding}, HRG-GS-M3, \#13325) directly to OpenSim golfer models
+(\texttt{golf\_humanoid.osim}, \texttt{golf\_humanoid\_scaled.osim}, and \texttt{bruno2015\_fullbody\_os4\_v2.osim}).
+Full-body models with bilateral hand bodies (\texttt{hand\_l}, \texttt{hand\_r}) are admitted through
+versioned manifests under \path{src/config/grip_bindings/}; lumbar-only spine models
+(\texttt{senteler2016\_lumbspine\_*}) fail closed with \texttt{SchemaFeatureUnavailableError}.
+For \texttt{bruno2015\_fullbody\_os4\_v2.osim}, the admission record explicitly documents the native
+locked distal forearm and wrist coordinates (\texttt{pro\_sup\_l/r}, \texttt{wrist\_flex\_l/r},
+\texttt{wrist\_dev\_l/r}).
+
+The adapter supports both club attachment modes of \texttt{attach\_club\_to\_model} across all three
+grip styles (\texttt{overlap}, \texttt{interlock}, \texttt{ten\_finger}) and optional trigger-finger
+variation:
+\begin{enumerate}
+\item \textbf{Weld + Constraint Mode (\texttt{attachment="weld"})}: The club is welded to \texttt{hand\_l}
+via \texttt{WeldJoint} and closed to \texttt{hand\_r} via \texttt{WeldConstraint}. Because the hands and
+club form a kinematically welded loop, \texttt{GripCapabilities} declares
+\texttt{supports\_physical\_pairs = False} with a non-empty \texttt{unavailable\_reason}. Contact evaluation
+operates in allocated/reporting mode only; calling \texttt{apply\_wrenches} or \texttt{apply\_report}
+raises \texttt{ValueError} so external point wrenches are never silently applied to welded bodies and never
+cancel inside a constraint loop.
+\item \textbf{Free Club + Two Bushings Mode (\texttt{attachment="bushing"})}: The club possesses a
+6-DOF \texttt{FreeJoint} to ground and interacts with \texttt{hand\_l} and \texttt{hand\_r} through
+spatial wrenches applied via OpenSim \texttt{PrescribedForce} elements (\texttt{Club\_grip\_contact\_pf},
+\texttt{hand\_l\_grip\_contact\_pf}, \texttt{hand\_r\_grip\_contact\_pf}). When shared-law wrenches are
+applied, the native \texttt{lead\_grip\_bushing} and \texttt{trail\_grip\_bushing} elements are disabled
+in the state (\texttt{setAppliesForce(state, False)}) so native and shared-law contact are never applied
+twice.
+\end{enumerate}
+
+\textbf{Equations and Parameters.}
+At each kinematic state $s$, the adapter reads world poses and spatial velocities of \texttt{hand\_l},
+\texttt{hand\_r}, and \texttt{Club} from OpenSim's Simbody matter subsystem. To satisfy the neutral
+preload penetration $\delta_0 = 0.25$\,mm ($|\delta - \delta_0| \le 0.5$\,mm) across all physical
+pad--grip sites at the calibrated address pose ($q = 0$) and prevent rigid-proxy pad opposition from
+causing net radial drift on the 6-DOF free club, the adapter decomposes the relative hand--club offset
+into the calibrated rigid-proxy topology frames ($\bar{T}_{\mathrm{L}}, \bar{T}_{\mathrm{R}}, \bar{T}_{\mathrm{C}}$)
+plus the instantaneous relative displacement $(\Delta p_h, R_{\mathrm{rel},h})$ of each hand $h \in \{\mathrm{L}, \mathrm{R}\}$
+with respect to its grip attachment frame $p_{\mathrm{grip},h}$:
+\begin{equation}
+\tilde{p}_h = \bar{p}_h + R_{\mathrm{C}}^\top \bigl(p_h(s) - p_{\mathrm{grip},h}(s)\bigr), \qquad
+\tilde{R}_h = \bar{R}_h R_{\mathrm{rel},h}(s).
+\end{equation}
+Each physical pad--grip pair $(i, j) \in \mathcal{P}_{\mathrm{phys}}$ is evaluated through the shared
+Kelvin--Voigt normal and regularized Coulomb tangential law (\texttt{evaluate\_contacts}), while its
+dynamic restoring contribution is referenced to the neutral preload equilibrium wrench
+$\bar{w}_{ij} = w_{ij}(\bar{T}_{\mathrm{L}}, \bar{T}_{\mathrm{R}}, \bar{T}_{\mathrm{C}})$:
+\begin{equation}
+\Delta w_{ij}(s) = w_{ij}\bigl(\tilde{T}_{\mathrm{L}}(s), \tilde{T}_{\mathrm{R}}(s), \bar{T}_{\mathrm{C}}\bigr) - \bar{w}_{ij}.
+\end{equation}
+Combined with the per-hand translational and rotational bushing compliance $(K_t, K_r, B_t, B_r)$, the
+resulting world-frame forces $f_b$ and moments $\tau_b$ about each body origin $p_b(s)$ verify exact
+action--reaction balance:
+\begin{equation}
+\sum_{b \in \{\mathrm{hand\_l}, \mathrm{hand\_r}, \mathrm{Club}\}} f_b = 0, \qquad
+\sum_{b \in \{\mathrm{hand\_l}, \mathrm{hand\_r}, \mathrm{Club}\}} \bigl(\tau_b + p_b(s) \times f_b\bigr) = 0,
+\end{equation}
+while allocated hand--hand pairs $\mathcal{P}_{\mathrm{alloc}}$ are solved via \texttt{allocate\_hand\_hand\_pairs}
+and excluded from the physical body wrenches (\texttt{applied\_allocated\_force\_n} $= 0$).
+
+\textbf{Measured Parity and Qualification.}
+Table~\ref{tab:osim_msk_grip_parity} summarizes the measured forward-dynamics net club wrench parity of
+\texttt{simulate\_msk\_grip\_hold} ($0.05$\,s at $\Delta t = 1$\,ms on \texttt{golf\_humanoid.osim} in
+bushing mode) against the baseline native \texttt{msk\_club} bushing path, together with the M3
+law-level qualification status (\texttt{compare\_topology\_series}):
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Style} & \textbf{$\delta_0$ (mm)} & \textbf{Force Peak} & \textbf{Force RMS} & \textbf{Moment Peak} & \textbf{Moment RMS} & \textbf{M3 Status} \\
+\midrule
+Overlap & $0.250$ & $0.014\%$ & $0.028\%$ & $0.070\%$ & $0.094\%$ & \texttt{passed} \\
+Interlock & $0.250$ & $0.014\%$ & $0.028\%$ & $0.070\%$ & $0.094\%$ & \texttt{passed} \\
+Ten-Finger & $0.250$ & $0.121\%$ & $0.096\%$ & $0.004\%$ & $0.071\%$ & \texttt{passed} \\
+\bottomrule
+\end{tabular}
+\caption{OpenSim MSK grip adapter preload penetration, net club wrench parity vs native bushing baseline, and M3 qualification verdict (limits: $|\delta_0| \le 0.5$\,mm, peak $\le 5.0\%$, RMS $\le 2.0\%$).}
+\label{tab:osim_msk_grip_parity}
+\end{table}
+
+\textbf{Limitations.}
+Admitted OpenSim golfer models represent each hand as a single rigid segment (\texttt{hand\_l}, \texttt{hand\_r});
+finger phalanges are rigid-proxy sites fixed in the hand frame, and in \texttt{bruno2015\_fullbody\_os4\_v2.osim}
+the native forearm pronation/supination and wrist flexion/deviation coordinates are locked by default.
+In \texttt{weld} mode, contact forces are diagnostic/allocated only because the hands and club are kinematically welded.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_opensim_msk_grip_adapter.py \
+    tests/opensim/test_msk_club.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
