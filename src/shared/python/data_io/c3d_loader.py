@@ -39,22 +39,16 @@ def _ensure_bio_paths() -> None:
                 mod.__path__.append(local_bio)
 
 
-def _is_populated_bio_submodule(
-    submodule_name: str, mod: types.ModuleType | None
-) -> bool:
-    """Return True if mod is a valid, populated instance of the bio submodule."""
-    if mod is None:
-        return False
-    if submodule_name == "c3d_reader":
-        return hasattr(mod, "C3DDataReader")
-    if submodule_name == "_c3d_marker_set":
-        return hasattr(mod, "MarkerSet")
-    return True
-
-
 def _load_bio_submodule(submodule_name: str) -> types.ModuleType:
     """Load a submodule of sidekick.lab.bio, resilient to Tools tree pollution (#13348)."""
     _ensure_bio_paths()
+
+    def _is_valid(m: Any) -> bool:
+        if submodule_name == "c3d_reader":
+            return hasattr(m, "C3DDataReader")
+        if submodule_name == "_c3d_marker_set":
+            return hasattr(m, "MarkerSet")
+        return True
 
     full_src_name = f"{_BIO_PACKAGE}.{submodule_name}"
     aliases = (
@@ -64,21 +58,21 @@ def _load_bio_submodule(submodule_name: str) -> types.ModuleType:
     )
     for name in aliases:
         mod = sys.modules.get(name)
-        if mod is not None and _is_populated_bio_submodule(submodule_name, mod):
+        if mod is not None and _is_valid(mod):
             return mod
 
     try:
         mod = importlib.import_module(full_src_name)
-        if _is_populated_bio_submodule(submodule_name, mod):
+        if _is_valid(mod):
             return mod
-    except ModuleNotFoundError:
+    except (ModuleNotFoundError, ImportError):
         pass
 
     try:
         mod = importlib.import_module(f"sidekick.lab.bio.{submodule_name}")
-        if _is_populated_bio_submodule(submodule_name, mod):
+        if _is_valid(mod):
             return mod
-    except ModuleNotFoundError:
+    except (ModuleNotFoundError, ImportError):
         pass
 
     file_path = (
