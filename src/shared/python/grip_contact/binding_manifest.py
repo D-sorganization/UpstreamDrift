@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from typing import Any, Final
+from typing import Any, Final, Literal
 
 import numpy as np
 
@@ -116,6 +116,14 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
     for k, v in unavail.items():
         _require_non_empty_str(k, "unavailable_sites key")
         _require_non_empty_str(v, f"unavailable_sites[{k!r}] reason")
+
+    if "segment_map" in manifest:
+        seg_map = manifest["segment_map"]
+        if not isinstance(seg_map, Mapping):
+            raise TypeError("segment_map must be a Mapping")
+        for s_key, b_val in seg_map.items():
+            _require_non_empty_str(s_key, "segment_map key")
+            _require_non_empty_str(b_val, f"segment_map[{s_key!r}] body")
 
     grip_axis = manifest.get("grip_axis", manifest.get("shaft_axis"))
     if grip_axis is not None:
@@ -226,6 +234,46 @@ def _resolve_club_grip_frames(interface_or_resolver: Any) -> dict[str, np.ndarra
     return {}
 
 
+def _resolve_callable_sites(
+    topology: ContactTopology,
+    resolver: Any,
+    *,
+    lead_hand_body: str,
+    trail_hand_body: str,
+    unavail: Mapping[str, str],
+    seg_map: Mapping[str, str],
+) -> tuple[SiteBinding, ...]:
+    sites_list: list[SiteBinding] = []
+    for site in topology.sites:
+        if site.name in unavail:
+            continue
+        is_lead = site.hand == "lead"
+        rep: Literal["rigid_proxy", "phalange"]
+        if site.name in seg_map:
+            b_id = str(seg_map[site.name])
+            rep = "phalange"
+        else:
+            b_id = lead_hand_body if is_lead else trail_hand_body
+            rep = "rigid_proxy"
+        try:
+            res = resolver(site.name)
+        except TypeError:
+            res = resolver(site)
+        if isinstance(res, SiteBinding):
+            sites_list.append(res)
+        else:
+            mat = _validate_transform_4x4(res, f"resolver({site.name!r})")
+            sites_list.append(
+                SiteBinding(
+                    site_id=site.name,
+                    body_id=b_id,
+                    body_to_site=mat,
+                    representation=rep,
+                )
+            )
+    return tuple(sites_list)
+
+
 def binding_from_manifest(
     manifest: Mapping[str, Any],
     topology: ContactTopology,
@@ -255,33 +303,19 @@ def binding_from_manifest(
     lead_hand_body = str(manifest["lead_hand_body"])
     trail_hand_body = str(manifest["trail_hand_body"])
     unavail = dict(manifest.get("unavailable_sites", {}))
+    seg_map = dict(manifest.get("segment_map", {}))
 
     club_grip_frames = _resolve_club_grip_frames(interface_or_resolver)
 
     if callable(interface_or_resolver):
-        sites_list: list[SiteBinding] = []
-        for site in topology.sites:
-            if site.name in unavail:
-                continue
-            is_lead = site.hand == "lead"
-            b_id = lead_hand_body if is_lead else trail_hand_body
-            try:
-                res = interface_or_resolver(site.name)
-            except TypeError:
-                res = interface_or_resolver(site)
-            if isinstance(res, SiteBinding):
-                sites_list.append(res)
-            else:
-                mat = _validate_transform_4x4(res, f"resolver({site.name!r})")
-                sites_list.append(
-                    SiteBinding(
-                        site_id=site.name,
-                        body_id=b_id,
-                        body_to_site=mat,
-                        representation="rigid_proxy",
-                    )
-                )
-        resolved_sites = tuple(sites_list)
+        resolved_sites = _resolve_callable_sites(
+            topology,
+            interface_or_resolver,
+            lead_hand_body=lead_hand_body,
+            trail_hand_body=trail_hand_body,
+            unavail=unavail,
+            seg_map=seg_map,
+        )
     else:
         raw_sites = bind_rigid_hand_sites(
             topology,
@@ -289,7 +323,22 @@ def binding_from_manifest(
             trail_hand_body=trail_hand_body,
             handedness=handedness,
         )
-        resolved_sites = tuple(s for s in raw_sites if s.site_id not in unavail)
+        filtered: list[SiteBinding] = []
+        for s in raw_sites:
+            if s.site_id in unavail:
+                continue
+            if s.site_id in seg_map:
+                filtered.append(
+                    SiteBinding(
+                        site_id=s.site_id,
+                        body_id=str(seg_map[s.site_id]),
+                        body_to_site=s.body_to_site,
+                        representation="phalange",
+                    )
+                )
+            else:
+                filtered.append(s)
+        resolved_sites = tuple(filtered)
 
     binding = HandClubBinding(
         model_id=model_id,
