@@ -545,6 +545,20 @@ class DrakePhysicsEngine(BasePhysicsEngine):
                 total += np.asarray(wrench.force_n)
         return total
 
+    def get_body_names(self) -> list[str]:
+        """Get names of all bodies in the Drake MultibodyPlant."""
+        if not hasattr(self, "plant") or self.plant is None:
+            return []
+        if hasattr(self.plant, "num_bodies") and hasattr(self.plant, "get_body"):
+            try:
+                return [
+                    self.plant.get_body(i).name()
+                    for i in range(self.plant.num_bodies())
+                ]
+            except (RuntimeError, ValueError, IndexError):
+                logger.debug("Could not enumerate Drake bodies", exc_info=True)
+        return []
+
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
         if body_name is None:
@@ -552,12 +566,23 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         if not self.plant_context:
             return None
 
+        if hasattr(self.plant, "HasBodyNamed") and not self.plant.HasBodyNamed(
+            body_name
+        ):
+            valid_bodies = self.get_body_names()
+            raise KeyError(
+                f"Body '{body_name}' not found in Drake model. Valid bodies: {valid_bodies}"
+            )
+
         # Find body frame
         try:
             body = self.plant.GetBodyByName(body_name)
             frame = body.body_frame()
-        except (RuntimeError, ValueError, OSError):
-            return None
+        except (RuntimeError, ValueError, OSError) as exc:
+            valid_bodies = self.get_body_names()
+            raise KeyError(
+                f"Body '{body_name}' not found in Drake model. Valid bodies: {valid_bodies}"
+            ) from exc
 
         # CalcJacobianSpatialVelocity
         # J_spatial (6 x nq)? Or (6 x nv). Drake supports nv.

@@ -41,16 +41,6 @@ SIMPLE_LINKS = {
     "left_foot": "left_ankle",
     "right_foot": "right_ankle",
 }
-DRAKE_LINKS = {
-    "pelvis": "mid_hip",
-    "upper_torso_hub": "neck",
-    "left_upper_arm": "left_shoulder",
-    "left_forearm": "left_elbow",
-    "left_hand": "left_wrist",
-    "right_upper_arm": "right_shoulder",
-    "right_forearm": "right_elbow",
-    "right_hand": "right_wrist",
-}
 HUMAN_LINKS = {
     "Pelvis": "mid_hip",
     "Neck": "neck",
@@ -81,8 +71,10 @@ URDF_PRESETS = {
         GOLFER_LINKS,
     ),
     "drake_golfer": (
+        # Generated from the same canonical spec as the Pinocchio golfer
+        # (#12985), so it shares the canonical link names.
         "src/engines/physics_engines/drake/models/generated/golfer.urdf",
-        DRAKE_LINKS,
+        GOLFER_LINKS,
     ),
     "simple_humanoid": (
         "src/shared/python/model_generation/library/bundled/simple_humanoid/humanoid.urdf",

@@ -22,10 +22,13 @@ import sys
 import tempfile
 from pathlib import Path
 
-# Ensure repository root is in sys.path
+# Ensure repository root and src are in sys.path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+SRC_ROOT = REPO_ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 from tools.model_converter.matlab_exporter import export_matlab_parameters
 from tools.model_converter.mjcf_exporter import export_mjcf
@@ -79,6 +82,17 @@ DEFAULT_MATLAB_OUT: Path = (
     / "InitModelParameters.m"
 )
 
+DEFAULT_DRAKE_URDF_OUT: Path = (
+    REPO_ROOT
+    / "src"
+    / "engines"
+    / "physics_engines"
+    / "drake"
+    / "models"
+    / "generated"
+    / "golfer.urdf"
+)
+
 logger = logging.getLogger("build_models")
 
 
@@ -87,6 +101,7 @@ def build_models(
     urdf_out: Path = DEFAULT_URDF_OUT,
     mjcf_out: Path = DEFAULT_MJCF_OUT,
     matlab_out: Path = DEFAULT_MATLAB_OUT,
+    drake_urdf_out: Path | None = None,
     *,
     check: bool = False,
     validate_only: bool = False,
@@ -133,11 +148,15 @@ def build_models(
             export_matlab_parameters(model, tmp_matlab)
 
             drift_found = False
-            for gen_path, target_path, desc in (
+            targets = [
                 (tmp_urdf, urdf_out, "URDF"),
                 (tmp_mjcf, mjcf_out, "MJCF"),
                 (tmp_matlab, matlab_out, "Simscape Parameters"),
-            ):
+            ]
+            if drake_urdf_out is not None:
+                targets.append((tmp_urdf, drake_urdf_out, "Drake URDF"))
+
+            for gen_path, target_path, desc in targets:
                 if not target_path.exists():
                     logger.error("FAIL: %s missing at %s", desc, target_path)
                     drift_found = True
@@ -165,6 +184,10 @@ def build_models(
     export_urdf(model, urdf_out)
     logger.info("Wrote URDF -> %s", urdf_out)
 
+    if drake_urdf_out is not None:
+        export_urdf(model, drake_urdf_out)
+        logger.info("Wrote Drake URDF -> %s", drake_urdf_out)
+
     export_mjcf(model, mjcf_out)
     logger.info("Wrote MJCF -> %s", mjcf_out)
 
@@ -191,6 +214,12 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         default=DEFAULT_URDF_OUT,
         help="Output path for golfer.urdf",
+    )
+    parser.add_argument(
+        "--drake-urdf-out",
+        type=Path,
+        default=DEFAULT_DRAKE_URDF_OUT,
+        help="Output path for Drake golfer.urdf",
     )
     parser.add_argument(
         "--mjcf-out",
@@ -231,6 +260,7 @@ def main(argv: list[str] | None = None) -> int:
     return build_models(
         canonical_yaml=args.canonical_yaml,
         urdf_out=args.urdf_out,
+        drake_urdf_out=args.drake_urdf_out,
         mjcf_out=args.mjcf_out,
         matlab_out=args.matlab_out,
         check=args.check,

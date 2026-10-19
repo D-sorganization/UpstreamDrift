@@ -595,6 +595,7 @@
 {"path": "engine_core/finite_difference.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/interfaces.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/mock_engine.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
+{"path": "engine_core/model_contracts.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/mujoco_compat.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/opensim_runtime.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/plugin_registry.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}

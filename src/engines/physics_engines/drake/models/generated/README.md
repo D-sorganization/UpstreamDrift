@@ -1,11 +1,10 @@
 # Drake — generated models
 
 This directory holds **machine-generated** model files for the Drake
-physics engine. Files here are produced from the shared anthropometric
-YAML at `shared/models/golf_humanoid_dimensions.yaml` (owned by issue
-#4093) by the generator at
-`src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py`
-(owned by issue #4108).
+physics engine. Files here are produced from the canonical biomechanical
+specification at `src/engines/physics_engines/pinocchio/models/spec/golfer_canonical.yaml`
+by the cross-engine builder at `src/tools/model_converter/build_models.py`
+and `scripts/build_humanoid_models.py` (Issue #12985).
 
 ## Do not hand-edit
 
