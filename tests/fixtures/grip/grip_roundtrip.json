@@ -154,14 +154,15 @@
           },
           "lead_below_butt_m": 0.032,
           "hand_spacing_m": 0.0762,
-          "handedness": "right"
+          "handedness": "right",
+          "style": "ten_finger"
         },
         "sidecar_grip": {
           "style": "ten_finger"
         },
         "refit_required": true,
-        "driver_physics_spec_sha256": "9c10c7e4bc260b08258ea88bd39abf2995deedfc31a3b64c05609966030a5359",
-        "character_physics_spec_sha256": "35d8bbb9e4ef8a2bdfb825bbe0a419da665389e2d15e15a30a83a6492876066a"
+        "driver_physics_spec_sha256": "7d4ec26a36045e2f3b389720af20ad1a7bc3d9ae2f66b2c808d36f425c46cfc7",
+        "character_physics_spec_sha256": "437130450f22acbfef2cc3f58af8799bbef4ae05c2522b00c1c3e99356222081"
       }
     }
   ],

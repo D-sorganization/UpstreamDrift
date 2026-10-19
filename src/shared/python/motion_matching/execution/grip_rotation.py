@@ -98,6 +98,7 @@ GRIP_PARAMETERS = tuple(
     [f"{hand}.{angle}" for hand in ("lead", "trail") for angle in HandAngles.FIELDS]
     + ["lead_below_butt_m", "hand_spacing_m"]
 )
+_OPTIONAL_GRIP_PARAMETERS = ("style", "trigger_finger")
 _CLUB_SUFFIX = "Clubface Vector"
 #: Solids of the club body that sit on a hand: (name suffix, hand).
 _LEAD_SOLIDS = ("/LHand", "/LHandStandoff")
@@ -109,7 +110,8 @@ def _provenance(value: str | Mapping[str, str]) -> dict[str, str]:
     if isinstance(value, str):
         value = dict.fromkeys(GRIP_PARAMETERS, value)
     else:
-        unknown = sorted(set(value) - set(GRIP_PARAMETERS))
+        allowed = set(GRIP_PARAMETERS) | set(_OPTIONAL_GRIP_PARAMETERS)
+        unknown = sorted(set(value) - allowed)
         if unknown:
             raise ValueError(f"unknown grip provenance parameters: {unknown}")
         value = {**dict.fromkeys(GRIP_PARAMETERS, "user_declared"), **value}
@@ -175,7 +177,11 @@ def grip_spec_of(document: Mapping[str, Any]) -> GripSpec:
     if cfg is None:
         raise ValueError("document carries no subject.grip_config")
     visual = document.get("visual_hints", {}).get("grip", {})
-    style = GripStyle(visual["style"]) if "style" in visual else GripStyle.OVERLAP
+    raw_style = cfg.get("style", visual.get("style", GripStyle.OVERLAP.value))
+    style = GripStyle(raw_style)
+    trigger_finger = bool(
+        cfg.get("trigger_finger", visual.get("trigger_finger", False))
+    )
     thumb = visual.get("lead_thumb_offset_deg")
     extra: dict[str, float] = {}
     if thumb is not None:
@@ -187,16 +193,20 @@ def grip_spec_of(document: Mapping[str, Any]) -> GripSpec:
         hand_spacing_m=cfg["hand_spacing_m"],
         handedness=cfg["handedness"],
         style=style,
+        trigger_finger=trigger_finger,
         **extra,
     )
 
 
 def _set_visual(out: dict[str, Any], grip: GripSpec) -> None:
     hints = out.setdefault("visual_hints", {})
-    hints["grip"] = {
+    visual_grip: dict[str, Any] = {
         "style": grip.style.value,
         "lead_thumb_offset_deg": grip.lead_thumb_offset_deg,
     }
+    if grip.trigger_finger:
+        visual_grip["trigger_finger"] = True
+    hints["grip"] = visual_grip
 
 
 def apply_grip_config(

@@ -44,6 +44,7 @@ from src.shared.python.core.handedness import (
     trail_side,
     validate_handedness,
 )
+from src.shared.python.grip_contact.contact_topology import GripStyle as GripStyle
 
 #: Nominal point of the hand body (metres, hand frame) that sits on the grip:
 #: about 6 cm distal to the wrist origin along the hand's ``-y``.  The OSV-9
@@ -84,14 +85,6 @@ class Hand(str, Enum):
 
     LEAD = "lead"
     TRAIL = "trail"
-
-
-class GripStyle(str, Enum):
-    """How the little finger of the trail hand relates to the lead hand."""
-
-    OVERLAP = "overlap"
-    INTERLOCK = "interlock"
-    TEN_FINGER = "ten_finger"
 
 
 _FINGER_LINKS: dict[GripStyle, tuple[str, ...]] = {
