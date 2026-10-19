@@ -442,3 +442,33 @@ def test_topology_site_map_routing() -> None:
         (Hand.LEAD, "index"): "lead_index",
         (Hand.TRAIL, "little"): "trail_little_finger",
     }
+
+
+@pytest.mark.parametrize("style", list(GripStyle))
+@pytest.mark.parametrize("radius", [0.0105, 0.011409, 0.0118, 0.014])
+def test_topology_hands_cover_all_azimuth_bins_across_club_grip_radii(
+    style: GripStyle,
+    radius: float,
+) -> None:
+    """Every hand and grip style covers all 36 ten-degree azimuth bins around the grip.
+
+    When the overlap or interlock topology moves the linked finger onto the
+    partner hand's site at azimuth 0 deg, the remaining fingers' proximal and
+    middle phalanges must still sample the full barrel arc around the grip
+    without leaving 10-degree azimuth gaps on thinner club grips (e.g. iron7).
+    """
+    from src.shared.python.model_appearance.club_assembly import GRIP_BUTT_RADIUS_M
+
+    for hand in (Hand.LEAD, Hand.TRAIL):
+        baked = build_grip_hand_mesh(hand, grip_radius_m=radius, style=style)
+        xy = baked.mesh.vertices[:, :2]
+        radial = np.linalg.norm(xy, axis=1)
+        near = radial < max(GRIP_BUTT_RADIUS_M, radius) + 0.03
+        ref = xy[np.argmax(radial)] / radial.max()
+        other = np.array([-ref[1], ref[0]])
+        az = np.degrees(np.arctan2(xy[near] @ other, xy[near] @ ref)) % 360.0
+        bins = set((az // 10).astype(int)) & set(range(36))
+        assert len(bins) == 36, (
+            f"{style.value} {hand.value} r={radius}: covered {len(bins)}/36 bins, "
+            f"missing {sorted(set(range(36)) - bins)}"
+        )
