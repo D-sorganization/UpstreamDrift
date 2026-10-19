@@ -1816,8 +1816,31 @@ Triceps & 0 & --- & --- & --- & ---\\
 \end{tabular}
 \end{center}
 The upper-body and trunk muscle groups are absent in the Rajagopal 80-muscle lower-limb model
-and are driven by coordinate actuators. The remaining four lifts (bench press, deadlift,
-snatch, clean and jerk) are reported as \texttt{unavailable} pending barbell bundles and IK/ID receipts.
+and are driven by coordinate actuators.
+
+\paragraph{Per-Lift Muscle and Residual Summary.}
+The table below summarizes muscle evaluation and residual gate metrics across all five barbell lifts from \texttt{receipts.json}:
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{\begin{tabular}{lcccccccc}
+\toprule
+Lift & Status & Classification & Window (s) & Mean Reserve & Peak Reserve & Pelvis Force (N, vs Hicks) & Pelvis Moment (N\,m, vs Hicks) & Within / Outside\\
+\midrule
+Squat & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 56.9\% & 67.7\% & 23.70 (vs 146.93) & 12.02 (vs 18.64) & Within\\
+Deadlift & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 17.3\% & 20.2\% & 288.23 (vs 110.92) & 147.88 (vs 18.28) & Outside\\
+Bench Press & \texttt{unavailable} & \texttt{unqualified} & unavailable & unavailable & unavailable & unavailable & unavailable & unavailable\\
+Snatch & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 37.7\% & 71.3\% & 463.57 (vs 155.12) & 202.60 (vs 27.10) & Outside\\
+Clean \& Jerk & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 38.9\% & 58.5\% & 458.52 (vs 223.10) & 259.03 (vs 38.77) & Outside\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+\subparagraph{Evaluation Findings and Limitations.}
+Three plain findings apply to this evaluation:
+\begin{enumerate}
+\item The analyzed window is the 0.2\,s LIFT-5 engine window from the setup, so it covers the start of the pull only, not the whole lift and not the jerk.
+\item Every lift is \texttt{unqualified}, and deadlift, snatch, and clean and jerk also fail the Hicks residual gate.
+\item Bench press is unavailable (no supine IK).
+\end{enumerate}
 
 \paragraph{Coordinate Breakdown and Ground Shear Asymmetry.}
 At frame~0, total sagittal extension demand ($\tau_\text{hip} + \tau_\text{knee}$) is virtually
@@ -1848,6 +1871,91 @@ QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
     python3 scripts/measure_opensim_lift_muscles.py \
     --out docs/development/lifting/evidence/opensim_muscles/receipts.json
 \end{verbatim}
+
+\subsection{Predictive Moco Deadlift (OSL-7, Issue \#13044)}\label{sec:opensim-predictive-deadlift}
+
+\paragraph{Formulation and Problem Specification.}
+Issue \#13044 implements a direct-collocation predictive dynamic simulation of the barbell deadlift
+using OpenSim Moco with the \texttt{RajagopalLaiUhlrich2023} full-body model. Arm joints
+(\texttt{acromial}, \texttt{elbow}, \texttt{radioulnar}, and \texttt{radius\_hand} bilaterally) are welded in
+a hang pose, and distal foot joints (\texttt{mtp} and \texttt{subtalar}) are rigidly welded via
+\texttt{ModOpReplaceJointsWithWelds}, reducing multibody state coordinates to sagittal degrees of freedom.
+A $100\,\mathrm{kg}$ barbell is carried at the hands, and foot-ground interaction is represented by six smooth
+contact spheres (\texttt{SmoothSphereHalfSpaceForce}) per foot.
+
+To ensure computational tractability and physical feasibility, a two-stage solve strategy with iterative formulation refinements is implemented:
+\begin{enumerate}
+\item \textbf{Stage~1 (Torque-Driven):} Lower-limb muscles are removed (\texttt{ModOpRemoveMuscles}), and
+bilateral torque actuators (\texttt{CoordinateActuator}s with $1000\,\mathrm{N\cdot m}$ optimal force) drive
+hip flexion, adduction, rotation, knee angle, ankle angle, and lumbar coordinates. Pelvis residual actuators
+(\texttt{CoordinateActuator}s on \texttt{pelvis\_tilt}, \texttt{pelvis\_tx}, \texttt{pelvis\_ty}) with optimal force $1\,\mathrm{N}$,
+control bounds $\pm 3530.4\,\mathrm{N}$ ($\pm 2mg$), and effort weight 100 prevent artificial dynamic lock during early iterations.
+\item \textbf{Stage~2 (Muscle-Driven):} If Stage~1 converges to numerical tolerance, Stage~2 evaluates the
+muscle-driven problem using 80 Rajagopal-family lower-limb muscle-tendon units with rigid tendons
+(\texttt{ModOpIgnoreTendonCompliance}) and smooth De~Groote--Fregly 2016 muscle dynamics
+(\texttt{ModOpReplaceMusclesWithDeGrooteFregly2016}), initialized from the Stage~1 solution trajectory.
+\end{enumerate}
+
+The optimal control problem minimizes total control effort:
+\begin{equation}
+\min_{\mathbf{u}} \int_{0}^{t_f} \left( \sum_{k=1}^{N_u} w_k u_k^2(t) \right) \,\mathrm{d}t
+\end{equation}
+where $w_k = 1$ for joint actuators and $w_k = 100$ for pelvis residual actuators, subject to multibody system dynamics, kinematic joint bounds, foot-ground contact, and boundary conditions:
+\begin{align}
+\mathbf{q}(0) &\in \mathcal{Q}_\text{setup},\quad \dot{\mathbf{q}}(0) = \mathbf{0}, \\
+\mathbf{q}(t_f) &\in \mathcal{Q}_\text{lockout},\quad \dot{\mathbf{q}}(t_f) = \mathbf{0}, \\
+t_f &\in [0.5,\, 3.0]\,\mathrm{s}.
+\end{align}
+Setup and lockout poses are derived through kinematic forward simulation and 1-D root finding on contact sphere floor penetration ($1$--$5\,\mathrm{mm}$ penetration), and the solver is seeded using a smooth-step interpolation trajectory $S(\tau) = 3\tau^2 - 2\tau^3$ with zero initial and terminal velocities. Transcription uses Hermite--Simpson collocation with 15 mesh intervals (31 collocation points).
+
+\paragraph{Iterative Formulation Progression and Optimization Results.}
+To address the primal infeasibility observed in initial exploratory attempts, five progressive formulation runs were systematically executed and logged:
+\begin{enumerate}
+\item \textbf{Step~1 (\texttt{stage1\_r1.log}): Consistent Start and End Poses.} Replacing independent kinematic bounding boxes with root-solved floor-contact poses reduced unscaled constraint violation from $4.31 \times 10^7$ down to $9.68 \times 10^3$ ($>4400\times$ drop; scaled constraint violation $1.542$; objective $4.40$ in 100 iterations, $194.8\,\mathrm{s}$ in IPOPT).
+\item \textbf{Step~2 (\texttt{stage1\_r2.log}): Smooth-Step Physical Guess.} Seeding Hermite--Simpson collocation states and speeds with smooth-step polynomial interpolation avoided IPOPT restoration phase entirely, dropping unscaled constraint violation to $487.59$ and scaled constraint violation below unity to $0.719$ (objective $1.93$ in 100 iterations, $211.5\,\mathrm{s}$ in IPOPT).
+\item \textbf{Step~3 (\texttt{stage1\_r3.log}): Pelvis Residual Actuators.} Adding floating-base residual actuators with weight 100 permitted transient dynamic forces during ground contact initialization (100 iterations, objective $1.08 \times 10^6$, scaled violation $44.28$, unscaled violation $7224$, $175.0\,\mathrm{s}$ in IPOPT).
+\item \textbf{Step~4 (\texttt{stage1\_r4.log}): Joint Torque Capacity.} Raising actuator torque capacity from $500\,\mathrm{N\cdot m}$ to $1000\,\mathrm{N\cdot m}$ accommodated large joint extension requirements for the $180\,\mathrm{kg}$ lifter-plus-barbell system, reducing scaled constraint violation by $10\times$ from $44.28$ down to $4.856$ (unscaled $4985$; objective $1.95 \times 10^6$ in 100 iterations, $234.8\,\mathrm{s}$ in IPOPT).
+\item \textbf{Step~5 (\texttt{stage1\_torque.log}): Extended Solve.} With up to 3000 iterations allowed in the foreground under a $7200\,\mathrm{s}$ \texttt{timeout}, the solve was killed at iteration 1056. From the log: iteration~0 has objective $0$ and primal infeasibility $5.55\times10^{4}$; iteration~1048 reaches primal infeasibility $362$; iteration~1056 has objective $2.00\times10^{4}$, primal infeasibility $654$ and dual infeasibility $2.39\times10^{7}$. The large dual infeasibility indicates poor problem scaling (residual controls with optimal force 1 against $1000\,\mathrm{N\,m}$ joint actuators); this stage is not converged.
+\end{enumerate}
+
+Because Stage~1 reached the wall-clock timeout ($7200\,\mathrm{s}$) before achieving numerical convergence tolerance, Stage~2 (muscle-driven) was not run. Predictive kinematic metrics are recorded as \textit{infeasible} and omitted from forward-dynamics comparison. Bundle kinematics computed dynamically from \texttt{deadlift\_bundle.npz} ($80\,\mathrm{kg}$, $1.78\,\mathrm{m}$ reference lifter) provide the ground-truth benchmark. All predictive results are explicitly classified as \textbf{exploratory}.
+
+\begin{table}[h!]
+\centering\footnotesize\setlength{\tabcolsep}{6pt}
+\caption{Deadlift Kinematic and Performance Comparison: Bundle Kinematics vs Predictive Moco Baseline}\label{tab:predictive-deadlift-comparison}
+\begin{tabular}{lcccc}
+\toprule
+Quantity & Bundle Kinematics & Tracked OpenSim Solution & Predictive Moco Solution & Unit \\
+\midrule
+Bar Start Height & 0.432 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
+Bar Final Height & 0.909 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
+Bar Vertical Rise & 0.477 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
+Peak Vertical Velocity & 0.561 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m\,s^{-1}}$ \\
+Lift Duration & 2.00 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{s}$ \\
+\midrule
+Stage 1 Solver Status & --- & \textit{unavailable}\textsuperscript{*} & Timeout\_Interrupted & --- \\
+Stage 1 Converged & --- & \textit{unavailable}\textsuperscript{*} & False & --- \\
+Stage 1 Iterations & --- & \textit{unavailable}\textsuperscript{*} & 1056 & --- \\
+Stage 1 Objective & --- & \textit{unavailable}\textsuperscript{*} & 20049.78 & --- \\
+Stage 1 Last-Iterate Primal Infeasibility (\texttt{inf\_pr}) & --- & \textit{unavailable}\textsuperscript{*} & 654 & --- \\
+Stage 1 Wall Clock & --- & \textit{unavailable}\textsuperscript{*} & killed at the 7200\,s \texttt{timeout} & --- \\
+Stage 2 Muscle Solve & --- & \textit{unavailable}\textsuperscript{*} & \textit{not run}\textsuperscript{\ddag} & --- \\
+\bottomrule
+\end{tabular}
+\par\vspace{2pt}\raggedright\scriptsize
+\textsuperscript{*}Tracked OpenSim solution is unavailable: no OSL-3 deadlift IK/ID receipts on main yet (OSL-3 \#13041 is still open).\\
+\textsuperscript{\dag}Predictive kinematics omitted: solution terminated at an infeasible iterate (last-iterate primal infeasibility $654$; IPOPT printed no final constraint-violation block).\\
+\textsuperscript{\ddag}Stage~2 muscle-driven solve is conditioned on Stage~1 convergence and was not executed.
+\end{table}
+
+\paragraph{Reproduction Command.}
+\begin{verbatim}
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
+    python3 scripts/measure_opensim_predictive_deadlift.py \
+    --mesh-intervals 15 --max-iterations 3000 \
+    --out-dir docs/development/lifting/evidence/opensim_predictive
+\end{verbatim}
+
 
 \subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
 \paragraph{Planar Pull.} The previous Tools snatch configuration ran from

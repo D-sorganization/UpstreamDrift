@@ -2652,6 +2652,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13392 · Fix(Pinocchio): CMB-11 Parity Evaluates the Full Neutral Coordinate Set
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13392
+- **Branch:** merged via #13397
+- **PR:** #13397
+- **Paths:** see #13397
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`7da2a46d`; collated from changes/13392-fix-pinocchio-cmb-11-parity-evaluates-th.md)
+- **Summary:** fix(pinocchio): CMB-11 parity evaluates the full neutral coordinate set
+- **Next step:** Shipped in PR #13397.
+
+### DL-#13303 · Named Grip Presets: Palmer Overlap, Woods Interlock, Ten-Finger With Photo_Estimate Provenance (HRG-GS-G5)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13303
+- **Branch:** merged via #13343
+- **PR:** #13343
+- **Paths:** see #13343
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`fc49cd6e`; collated from changes/13303-named-grip-presets-palmer-overlap-woods.md)
+- **Summary:** Named grip presets: Palmer overlap, Woods interlock, ten-finger with photo_estimate provenance (HRG-GS-G5)
+- **Next step:** Shipped in PR #13343.
+
 ### DL-#13260 · Add Run Study Panel and Worker Across PyQt and React Spine Viewers
 
 - **State:** shipped

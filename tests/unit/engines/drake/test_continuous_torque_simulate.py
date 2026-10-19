@@ -41,6 +41,9 @@ from src.engines.physics_engines.drake.python.simulate_with_coefficients import 
     simulate_with_coefficients,
     synthesize_target_from_coefficients,
 )
+from src.engines.physics_engines.drake.python.motion_matching.simulate import (
+    _resolve_n_actuators,
+)
 from src.shared.python.math_utils.quaternion import rotmat_to_quat
 from src.shared.python.motion_matching.piecewise_polynomial import (
     bernstein_to_power_matrix,
@@ -371,22 +374,41 @@ def test_get_drake_canonical_joint_map() -> None:
 # --------------------------------------------------------------------------- #
 
 
+# Every pydrake module the simulate path imports. Already-imported submodules
+# resolve from the sys.modules cache, so hiding only ``"pydrake"`` is not
+# enough to simulate a missing runtime on a host with Drake installed (#13416).
+_PYDRAKE_IMPORTS = (
+    "pydrake",
+    "pydrake.multibody",
+    "pydrake.multibody.plant",
+    "pydrake.systems",
+    "pydrake.systems.analysis",
+    "pydrake.systems.framework",
+    "pydrake.systems.primitives",
+)
+
+
+def _hidden_pydrake_modules() -> dict[str, None]:
+    """Return a ``sys.modules`` patch that makes every pydrake import fail."""
+    loaded = [
+        name for name in sys.modules if name == "pydrake" or name.startswith("pydrake.")
+    ]
+    return dict.fromkeys((*_PYDRAKE_IMPORTS, *loaded))
+
+
 def test_is_drake_available_probe() -> None:
     """is_drake_available returns a boolean reflecting pydrake installation."""
     result = is_drake_available()
     assert isinstance(result, bool)
 
-    with patch.dict(sys.modules, {"pydrake": None}):
+    with patch.dict(sys.modules, _hidden_pydrake_modules()):
         assert is_drake_available() is False
 
 
 def test_simulate_with_coefficients_missing_runtime_raises_import_error() -> None:
     """When Drake is unavailable, simulate_with_coefficients raises clean ImportError."""
     theta = np.zeros(19 * COEFFS_PER_JOINT)
-    with patch(
-        "src.engines.physics_engines.drake.python.motion_matching.simulate.is_drake_available",
-        return_value=False,
-    ):
+    with patch.dict(sys.modules, _hidden_pydrake_modules()):
         with pytest.raises(
             ImportError, match="Drake runtime \\(pydrake\\) is required"
         ):
@@ -580,7 +602,10 @@ def test_live_drake_continuous_torque_rollout() -> None:
 
     load_humanoid_into_plant(plant, urdf)
     plant.Finalize()
-    n_act = int(plant.num_actuators())
+    # The generated golfer URDF declares no transmissions, so size theta the
+    # way simulate_with_coefficients does rather than by num_actuators() (#13416).
+    n_act = _resolve_n_actuators(plant)
+    assert n_act > 0
 
     theta = np.zeros(n_act * COEFFS_PER_JOINT)
     theta[0] = 5.0
