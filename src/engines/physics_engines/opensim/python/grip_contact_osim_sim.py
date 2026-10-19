@@ -80,7 +80,7 @@ from src.shared.python.motion_matching.contact_law import ContactParameters
 ENGINE = "opensim_contact"
 CONTACT_INTEGRATOR = "CPodes"
 CONTACT_ACCURACY = 1e-4
-TOPOLOGY_CONTACT_ACCURACY = 1e-6
+TOPOLOGY_CONTACT_ACCURACY = 5e-8
 _SIDES = (("L", "left"), ("R", "right"))
 CALIBRATION_HALF_LENGTH_M = 0.02
 _GRAVITY_M_S2 = 9.80665
@@ -583,8 +583,10 @@ class ContactGripSimulator(BushingGripSimulator):
             fn_pair = 0.0
             ft_vec = np.zeros(3)
             pen_max = 0.0
-            last_u_rad = np.array([0.0, 0.0, 1.0])
-            last_rel = np.zeros(3)
+            rel_weighted = np.zeros(3)
+            u_rad_weighted = np.zeros(3)
+            rel_mean = np.zeros(3)
+            u_rad_mean = np.zeros(3)
             for force, i_f, i_t, local_pos, sphere_r, d0 in entries:
                 rec = force.getRecordValues(state)
                 f = np.array([rec.get(i_f + j) for j in range(3)])
@@ -598,8 +600,8 @@ class ContactGripSimulator(BushingGripSimulator):
                 u_rad = (
                     radial / norm_rad if norm_rad > 1e-12 else np.array([0.0, 0.0, 1.0])
                 )
-                last_u_rad = u_rad
-                last_rel = rel
+                rel_mean += rel
+                u_rad_mean += u_rad
                 fn_raw = max(0.0, -float(f @ u_rad))
                 f_tang_k = f - (-fn_raw) * u_rad
                 pen_phys = max(0.0, sphere_r + grip_r - norm_rad)
@@ -615,20 +617,28 @@ class ContactGripSimulator(BushingGripSimulator):
                 fn_pair += fn_k
                 ft_vec += f_tang_k
                 pen_max = max(pen_max, pen_phys)
+                rel_weighted += fn_k * rel
+                u_rad_weighted += fn_k * u_rad
 
             ft_mag = float(np.linalg.norm(ft_vec))
             total_f += f_pair
             total_t += t_pair
             normal_forces.append(fn_pair)
             tangential_forces.append(ft_mag)
-            contact_pt = axis_point + (axis @ last_rel) * axis + last_u_rad * grip_r
+            eff_rel = (
+                rel_weighted / fn_pair if fn_pair > 1e-12 else rel_mean / len(entries)
+            )
+            eff_u = u_rad_weighted if fn_pair > 1e-12 else u_rad_mean
+            norm_u = float(np.linalg.norm(eff_u))
+            eff_u_rad = eff_u / norm_u if norm_u > 1e-12 else np.array([0.0, 0.0, 1.0])
+            contact_pt = axis_point + (axis @ eff_rel) * axis + eff_u_rad * grip_r
             pw = PairWrench(
                 force_a_n=-f_pair,
                 moment_a_nm=np.zeros(3),
                 force_b_n=f_pair,
                 moment_b_nm=t_pair,
                 contact_point_m=contact_pt,
-                normal=-last_u_rad,
+                normal=-eff_u_rad,
                 penetration_m=pen_max,
                 point_a_m=p1,
                 point_b_m=p2,

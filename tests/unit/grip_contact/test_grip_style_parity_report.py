@@ -643,11 +643,14 @@ _DETERMINATE_ENGINE_CASES = [
         marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-swing",
     ),
-    # OpenSim (G7/G7b): passes overlap and interlock on 0.04 s hold and swing
-    # (and 0.10 s hold and swing, plus ten_finger 0.10 s hold);
-    # ten_finger 0.04 s hold and swing exceed 2.0% RMS on determinate net_force
-    # due to the 5-sphere ElasticFoundationForce capsule chain versus single-point
-    # capsule_capsule pitch-couple moment arm on trail_little_finger_grip.
+    # OpenSim (G7/G7b): passes overlap and interlock on 0.04 s and 0.10 s hold
+    # and swing, passes ten_finger on 0.10 s hold (1.716% / 0.467% RMS) and
+    # 0.10 s swing (1.922% / 0.845% RMS), and passes ten_finger net_moment_com
+    # on 0.04 s hold (0.000% peak / 0.705% RMS) and 0.04 s swing (0.000% peak /
+    # 0.930% RMS); ten_finger 0.04 s hold and swing exceed 2.0% RMS only on
+    # determinate net_force (2.588% and 2.605% RMS) during the initial 0.02 s
+    # micro-slip settling window (where radially balanced preload makes peak_ref
+    # 3.489 N / 4.100 N).
     pytest.param(
         "opensim",
         GripStyle.OVERLAP,
@@ -672,10 +675,10 @@ _DETERMINATE_ENGINE_CASES = [
                 strict=True,
                 raises=AssertionError,
                 reason=(
-                    "OpenSim ten_finger 0.04 s hold determinate net_force RMS is 2.599% "
-                    "(peak 2.412%, net_moment_com peak 0.833% / RMS 0.741%) > 2.0% RMS_TOLERANCE "
-                    "during 5-sphere ElasticFoundationForce capsule settling "
-                    "(settles to 1.731% RMS over 0.10 s)"
+                    "OpenSim ten_finger 0.04 s hold determinate net_force RMS is 2.588% "
+                    "(peak 2.395%; net_moment_com passes at 0.000% peak / 0.705% RMS) > 2.0% "
+                    "RMS_TOLERANCE during initial micro-slip settling and step-1 capsule "
+                    "closest-point transition (settles to 1.716% / 0.467% RMS over 0.10 s)"
                 ),
             ),
         ],
@@ -705,11 +708,10 @@ _DETERMINATE_ENGINE_CASES = [
                 strict=True,
                 raises=AssertionError,
                 reason=(
-                    "OpenSim ten_finger 0.04 s swing determinate net_force RMS is 5.070% "
-                    "(peak 0.290%) and net_moment_com RMS is 2.918% (peak 0.833%) > 2.0% "
-                    "RMS_TOLERANCE due to 5-sphere ElasticFoundationForce capsule chain "
-                    "versus single-point capsule_capsule pitch-couple moment arm on "
-                    "trail_little_finger_grip (4.856% / 4.437% RMS over 0.10 s)"
+                    "OpenSim ten_finger 0.04 s swing determinate net_force RMS is 2.605% "
+                    "(peak 2.499%; net_moment_com passes at 0.000% peak / 0.930% RMS) > 2.0% "
+                    "RMS_TOLERANCE during initial micro-slip settling and step-1 capsule "
+                    "closest-point transition (passes over 0.10 s at 1.922% / 0.845% RMS)"
                 ),
             ),
         ],

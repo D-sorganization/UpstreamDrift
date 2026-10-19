@@ -176,6 +176,49 @@ def test_single_pair_sliding_friction_matches_shared_law(tmp_path: Path) -> None
     )
 
 
+def test_capsule_site_zero_static_mesh_bias_and_cop_reporting() -> None:
+    """Capsule sites have ring-aligned meshes (zero static tangential bias at t=0) and report CoP."""
+    spec_bytes, _, names, swing, interface, topo_model = _setup(
+        style=GripStyle.TEN_FINGER
+    )
+    q_hold = np.tile(np.asarray(swing.q[0], float), (5, 1))
+    sim = ContactGripSimulator(
+        spec_bytes,
+        names,
+        np.asarray(swing.time_s[:5], float),
+        q_hold,
+        interface=interface,
+        topology_model=topo_model,
+    )
+    sim._model.realizeDynamics(sim._state)  # noqa: SLF001
+    sample_l = sim._side_sample(sim._state, "left")  # noqa: SLF001
+    sample_r = sim._side_sample(sim._state, "right")  # noqa: SLF001
+    sw_l = sample_l["side_wrench"]
+    sw_r = sample_r["side_wrench"]
+    pw_cap = sw_r.pair_wrenches["ten_finger_little_finger_grip"]
+
+    # 1. Zero static tangential force bias (< 1e-4 N) and exact preload normal force at t=0
+    assert pw_cap.tangential_force_mag_n < 1.0e-4, (
+        f"Capsule site has spurious static tangential force {pw_cap.tangential_force_mag_n:.6f} N at t=0"
+    )
+    target_fn = topo_model.law.stiffness_n_m * 0.00025
+    assert pw_cap.normal_force_mag_n == pytest.approx(target_fn, abs=1.0e-3)
+    f_net_0 = float(np.linalg.norm(sw_l.force_n + sw_r.force_n))
+    assert f_net_0 < 1.0e-3, (
+        f"Static net force residual at t=0 is {f_net_0:.6f} N (expected < 1e-3 N)"
+    )
+
+    # 2. Reported contact point sits at capsule axial midpoint (-36.9582 mm), not distal endpoint p1 (-28.9582 mm)
+    r_club = sample_r["club_bstate"].rotation
+    p_club = sample_r["club_bstate"].position_m
+    cp_in_club = r_club.T @ (pw_cap.contact_point_m - p_club)
+    site_cap = topo_model.topology.site("trail_little_finger")
+    from src.shared.python.grip_contact.topology_contact import map_site_to_hand_frame
+
+    mapped_cap = map_site_to_hand_frame(topo_model.topology, site_cap, "R")
+    assert cp_in_club[0] == pytest.approx(mapped_cap.centre_m[0], abs=1.0e-4)
+
+
 def _check_pair_traces(run: Any, topo_model: TopologyContactModel) -> None:
     """Verify physical pairs are finite and hand-hand pairs are NaN with reasons."""
     assert run.pair_normal_force_n is not None
