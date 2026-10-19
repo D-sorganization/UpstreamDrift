@@ -37,11 +37,7 @@ class ContactRun:
     normal_force_n: Mapping[str, np.ndarray]
     roll_slip_rad: Mapping[str, np.ndarray]
     axial_slip_m: Mapping[str, np.ndarray]
-    pair_normal_force_n: Mapping[str, np.ndarray] | None = None
-    pair_tangential_force_n: Mapping[str, np.ndarray] | None = None
-    channel_reasons: Mapping[str, str] | None = None
-    hand_states: Mapping[str, list[Any]] | None = None
-    club_states: Mapping[str, list[Any]] | None = None
+    tangential_force_n: Mapping[str, np.ndarray] | None = None
 
     @property
     def squeeze_n(self) -> dict[str, np.ndarray]:
@@ -56,12 +52,10 @@ class ContactRun:
             extra[f"normal_force_{s}_n"] = np.asarray(self.normal_force_n[s])
             extra[f"roll_slip_{s}_rad"] = np.asarray(self.roll_slip_rad[s])
             extra[f"axial_slip_{s}_m"] = np.asarray(self.axial_slip_m[s])
-        if self.pair_normal_force_n is not None:
-            for k, v in self.pair_normal_force_n.items():
-                extra[f"pair_normal_force_n:{k}"] = np.asarray(v)
-        if self.pair_tangential_force_n is not None:
-            for k, v in self.pair_tangential_force_n.items():
-                extra[f"pair_tangential_force_n:{k}"] = np.asarray(v)
+            if self.tangential_force_n is not None and s in self.tangential_force_n:
+                extra[f"tangential_force_{s}_n"] = np.asarray(
+                    self.tangential_force_n[s]
+                )
         np.savez_compressed(path.with_suffix(".contact.npz"), **extra)
 
     @classmethod
@@ -69,23 +63,18 @@ class ContactRun:
         """Read a run written by :meth:`save_npz`."""
         series = GripKineticsSeries.load_npz(path)
         with np.load(path.with_suffix(".contact.npz"), allow_pickle=False) as data:
-            pair_normal = {
-                k[len("pair_normal_force_n:") :]: np.asarray(data[k])
-                for k in data.files
-                if k.startswith("pair_normal_force_n:")
-            }
-            pair_tangential = {
-                k[len("pair_tangential_force_n:") :]: np.asarray(data[k])
-                for k in data.files
-                if k.startswith("pair_tangential_force_n:")
-            }
+            has_tang = all(f"tangential_force_{s}_n" in data for s in SIDES)
+            tangential = (
+                {s: np.asarray(data[f"tangential_force_{s}_n"]) for s in SIDES}
+                if has_tang
+                else None
+            )
             return cls(
                 series,
                 {s: np.asarray(data[f"normal_force_{s}_n"]) for s in SIDES},
                 {s: np.asarray(data[f"roll_slip_{s}_rad"]) for s in SIDES},
                 {s: np.asarray(data[f"axial_slip_{s}_m"]) for s in SIDES},
-                pair_normal_force_n=pair_normal or None,
-                pair_tangential_force_n=pair_tangential or None,
+                tangential_force_n=tangential,
             )
 
 

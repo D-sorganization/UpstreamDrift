@@ -715,7 +715,7 @@
     },
     {
       "feature_id": "tools.character_builder_grip",
-      "title": "Grip presets and sliders (weak, neutral, strong; rotation, palm diagonal, spacing, style)",
+      "title": "Grip presets and sliders (weak, neutral, strong, Palmer overlap, Woods interlock, ten-finger; rotation, palm diagonal, spacing, style)",
       "status": "parity",
       "pyqt": "src/tools/character_builder/gui.py",
       "api": "src/api/routes/character_appearance.py",
@@ -724,7 +724,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "HRG-GR4 (#13205), HRG-A2 (#13166). One resolver (src/shared/python/motion_matching/execution/grip_selection.py) with the override, document, default precedence of the appearance colours. Physical picks (strength preset, rotation about the shaft, palm diagonal, set angle, depth, hand spacing) make a new spec revision through apply_grip_config and need a refit; they are never written to the .appearance.json sidecar. Picture-only picks (style, lead thumb, visual grip strength, lead roll offset, trail roll offset) go in the sidecar's grip block and leave physics_spec_sha256 unchanged. The desktop Grip group, the web GripControls and POST /api/character-builder/grip are held equal to the Python resolver by tests/fixtures/grip/grip_roundtrip.json. The CLI flags live in spec_builder (physical) and native_viewer_export (picture-only; a physical flag is refused).",
+      "notes": "HRG-GR4 (#13205), HRG-A2 (#13166), HRG-GS-G5 (#13303). One resolver (src/shared/python/motion_matching/execution/grip_selection.py) with the override, document, default precedence of the appearance colours. Physical picks (strength presets weak/neutral/strong, named presets palmer_overlap, woods_interlock, ten_finger with photo_estimate provenance; rotation about the shaft, palm diagonal, set angle, depth, hand spacing) make a new spec revision through apply_grip_config and need a refit; they are never written to the .appearance.json sidecar. Picture-only picks (style, lead thumb, visual grip strength, lead roll offset, trail roll offset) go in the sidecar's grip block and leave physics_spec_sha256 unchanged. The desktop Grip group, the web GripControls and POST /api/character-builder/grip are held equal to the Python resolver by tests/fixtures/grip/grip_roundtrip.json. The CLI flags live in spec_builder (physical) and native_viewer_export (picture-only; a physical flag is refused).",
       "id": "tools.character_builder_grip"
     },
     {
@@ -976,6 +976,20 @@
       ],
       "notes": "The GUI runs the canonical CLI in a cancellable managed subprocess. The Python solver delegates impact and flight to shared UpstreamDrift physics.",
       "id": "tools.shot_pattern_analysis"
+    },
+    {
+      "feature_id": "tools.spine_study",
+      "title": "Segmental spine study execution and model asset selection",
+      "status": "parity",
+      "pyqt": "src/tools/spine_viewer/gui.py",
+      "api": "src/api/routes/spine_viewer.py",
+      "web": "ui/src/pages/SpineViewer.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "SPN-17c (#13260): Run Study panel on both PyQt and React surfaces. Allows configuring and executing spine studies (model: synthetic fixture or licensed asset with admission status from the assets service, coupling law, swing source) through the background study runner API (/tools/spine-viewer/studies), polling the job to completion, and opening the resulting receipt.",
+      "id": "tools.spine_study"
     },
     {
       "feature_id": "tools.spine_viewer",
@@ -1591,7 +1605,7 @@
     {
       "id": "spine_viewer",
       "title": "Spine Viewer",
-      "description": "Read-only per-level spinal load heatmaps from hash-verified study receipts; always shows scientific status and distribution source. Install: pip install upstream-drift[gui-tools]",
+      "description": "Per-level spinal load heatmaps and study runner with model asset selection, coupling laws, and hash-verified study receipts; always shows scientific status and distribution source. Install: pip install upstream-drift[gui-tools]",
       "path": "src/tools/spine_viewer/__main__.py",
       "launch_target": "src/tools/spine_viewer/__main__.py",
       "category": "tool",
@@ -3291,9 +3305,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "eb564e4c2961c6963c0331621f8a69907d47b7dffaf7673ae448cbde3a679852",
-    "src/config/launcher_manifest.json": "25db68381d3ed142a31ccf4f1d71be285fb58ec8cee1228e0cadd41b700280be",
-    "src/config/feature_parity.json": "ca8044bcd49f191f3004084f6105eaf0783dbea579ca989459cbb6e8d79ef00d",
+    "src/config/models.yaml": "7c868b0c444389fad39bdd30469abd32439f5bd11b9b5019c941ac0049e0763c",
+    "src/config/launcher_manifest.json": "26337829a1de75576be220e293c6d4f012f97303c0639401a8d902e76c418f37",
+    "src/config/feature_parity.json": "16da3586691a3c05c88df5482f1fe309976dcbdbe6dc21c816cb8706b1d0d1cb",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

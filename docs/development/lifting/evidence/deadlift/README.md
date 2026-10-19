@@ -97,6 +97,46 @@ The coordinate gate now passes, and its strict xfail in
 `tests/unit/lifting/test_pull_bar_path_parity.py` is removed (source commit
 `33abf79c`).
 
+## Barbell Bundle and OpenSim IK/ID (OSL-3, #13041)
+
+`deadlift_barbell_bundle.npz` (SHA-256 `a8483a3771b844f7ec652e839fd64337d6f806b82d26f0fcc7ba8bf3a19bac40`)
+packages the conventional deadlift with the LIFT-4 barbell body and load,
+built by `scripts/generate_barbell_squat_evidence.py --lift deadlift --part bundle`
+from `deadlift_bundle.npz`.
+
+### Bar-Hold Metrics (Provenance)
+
+The barbell hold re-tracks the standing pose with the bar carried by the hands:
+- **Bar deviation:** 35.95 mm (0.03595 m) against the reference trajectory.
+- **Left hand force:** peak magnitude 614.05 N (mean [34.07, 1.11, 456.98] N),
+  peak torque magnitude 4.71 Nm.
+- **Right hand force:** peak magnitude 618.50 N (mean [42.98, 1.61, 459.50] N),
+  peak torque magnitude 4.71 Nm.
+
+### OpenSim Inverse Kinematics and Inverse Dynamics Receipt
+
+The OpenSim IK/ID receipt (`docs/development/lifting/evidence/opensim_ik_id/receipts.json`)
+is measured with real OpenSim 4.6 and the RajagopalLaiUhlrich2023 model over 41 frames
+(stride 5):
+- **Marker kinematics:** RMS error 0.0112 m (1.12 cm, within the 0.0200 m threshold),
+  maximum marker error 0.0390 m (within the 0.0400 m threshold). The kinematics
+  satisfies the best-practice marker gate (`within_best_practice = True`).
+- **Segment angles:** sagittal segment-angle RMS error 0.0158 rad (0.91°, well within
+  the 0.0349 rad / 2.0° threshold).
+- **Arm reach:** Left hand reach miss 7.11 µm (7.1098e-6 m), right hand reach miss
+  6.91 µm (6.9120e-6 m), well within the 1.0 mm reach bound.
+- **Coordinate range violations:** `pro_sup_l` (40 frames, min −0.00065 rad, range
+  [0.0, 2.09] rad) and `pro_sup_r` (40 frames, min −0.00057 rad, range [0.0, 2.09] rad).
+- **Hicks residual gate:** peak external force 2218.39 N; force threshold 110.92 N
+  (5% of peak external force); moment threshold 18.28 Nm (1% of COM height × peak external force).
+  The residual gate fails for both forces and moments:
+  - Pelvis force: peak $t_x$ 166.99 N (RMS 26.76 N), peak $t_y$ 288.23 N (RMS 45.19 N),
+    peak $t_z$ 5.51 N (RMS 1.25 N); max force 288.23 N vs 110.92 N threshold (`forces_within = False`).
+  - Pelvis moment: peak tilt 147.88 Nm (RMS 26.54 Nm), peak list 9.88 Nm (RMS 2.80 Nm),
+    peak rotation 2.77 Nm (RMS 1.84 Nm); max moment 147.88 Nm vs 18.28 Nm threshold (`moments_within = False`).
+- The residual gate failures are strictly xfailed in `tests/unit/lifting/test_opensim_lift_ik_id.py`
+  with measured numbers; gates are not loosened.
+
 ## Literature Comparison (Evidence, Not Tuning Targets)
 
 Indicative ranges, quoted from the cited sources as recalled for this record
@@ -124,16 +164,21 @@ Indicative ranges, quoted from the cited sources as recalled for this record
 
 ## Limitations
 
-- Hand-held bar: the bar is the club's `Grip` frame with the left hand moved
-  to the grip width; there is no barbell body, load or plate contact in the
-  dynamics (LIFT-4, #11744).
+- Hand-held bar: in `deadlift_bundle.npz` the bar is the club's `Grip` frame
+  with the left hand moved to the grip width; `deadlift_barbell_bundle.npz`
+  adds the LIFT-4 barbell body and load.
 - Bar offset scaled to the model's arm hang (0.799), so the setup is high
   (see above). The optimizer's own bar model is unchanged.
 - Golf full-body spec (asymmetric arm chain) as for the back squat.
+- OpenSim inverse dynamics fails the Hicks residual gate (forces 288.23 N vs
+  110.92 N, moments 147.88 Nm vs 18.28 Nm). Results are software receipts,
+  not physical acceptance.
 
 ## Regenerate
 
 ```bash
 MUJOCO_GL=egl python3 scripts/generate_lift_bundle.py --lift deadlift
 MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py --lift deadlift
+python3 scripts/generate_barbell_squat_evidence.py --lift deadlift --part bundle --source-commit <sha>
+MUJOCO_GL=egl python3 scripts/measure_opensim_lift_ik_id.py
 ```

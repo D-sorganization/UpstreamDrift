@@ -93,3 +93,11 @@ def study_factory(tmp_path: Path) -> Callable[..., Path]:
         return write_study(tmp_path / f"study{next(counter)}", **kwargs)  # type: ignore[arg-type]
 
     return make
+
+
+@pytest.fixture(autouse=True)
+def _isolated_study_root(tmp_path_factory, monkeypatch):
+    """Keep every spine-viewer test out of the repository's data/spine_studies."""
+    monkeypatch.setenv(
+        "UPSTREAMDRIFT_SPINE_STUDY_ROOT", str(tmp_path_factory.mktemp("study_root"))
+    )
