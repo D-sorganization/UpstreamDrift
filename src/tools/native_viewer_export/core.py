@@ -407,17 +407,22 @@ class OverlayFeed:
 
             build = build_glyphs
         frame = self._frame(index)
-        palm = tuple(w for w in frame.wrenches if w.label == PALM_THUMB_LABEL)
-        if palm:
+        allocated = tuple(
+            w
+            for w in frame.wrenches
+            if w.label == PALM_THUMB_LABEL
+            or (w.label.startswith("external:") and w.label.endswith("_allocated"))
+        )
+        if allocated:
             frame = replace(
-                frame, wrenches=tuple(w for w in frame.wrenches if w not in palm)
+                frame, wrenches=tuple(w for w in frame.wrenches if w not in allocated)
             )
         if not (self.show_force and self.show_torque):
             frame = restrict_frame(
                 frame, show_force=self.show_force, show_torque=self.show_torque
             )
-        if palm and self.show_palm_thumb:
-            frame = replace(frame, wrenches=(*frame.wrenches, *palm))
+        if allocated and self.show_palm_thumb:
+            frame = replace(frame, wrenches=(*frame.wrenches, *allocated))
         return build(frame, self.style)
 
     def axial_at(self, index: int) -> Any:
@@ -437,8 +442,20 @@ class OverlayFeed:
         if glyphs is None:
             return ""
         text = legend_text(glyphs)
-        if any(a.label == PALM_THUMB_LABEL for a in glyphs.arrows):
-            text += " | Palm-thumb force: allocated (not measured)"
+        allocated_arrows = [
+            a
+            for a in glyphs.arrows
+            if a.label == PALM_THUMB_LABEL
+            or (a.label.startswith("external:") and a.label.endswith("_allocated"))
+        ]
+        if allocated_arrows:
+            if (
+                len(allocated_arrows) == 1
+                and allocated_arrows[0].label == PALM_THUMB_LABEL
+            ):
+                text += " | Palm-thumb force: allocated (not measured)"
+            else:
+                text += " | Hand-hand contact force: allocated (not measured)"
         return text
 
 

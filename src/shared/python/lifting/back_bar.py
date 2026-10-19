@@ -97,25 +97,35 @@ class BackBarGeometry:
             ValueError: As :meth:`from_standard`.
         """
         rack = record.get("rack")
+        grip_width = record.get("grip_width_m")
         return cls.from_standard(
             str(record["lift"]),
             height_m=float(record["height_m"]),
             rack=None if rack is None else RACKS[rack["name"]],
+            grip_width_m=None if grip_width is None else float(grip_width),
         )
 
     @classmethod
     def from_standard(
-        cls, lift: str, *, height_m: float, rack: BackRack | None = None
+        cls,
+        lift: str,
+        *,
+        height_m: float,
+        rack: BackRack | None = None,
+        grip_width_m: float | None = None,
     ) -> BackBarGeometry:
         """Read the geometry of *lift* from the parity standard.
 
         ``rack`` (OSL-17, #13131) places the bar on that trunk landmark
-        instead of the standard's start-pose bar position.
+        instead of the standard's start-pose bar position.  ``grip_width_m``
+        (OSL-19 #13158, OSL-20 #13159) sets the palm-centre separation; if
+        ``None``, uses ``rack.grip_width_m`` when present, otherwise the
+        standard's grip width.
 
         Raises:
             TypeError: If *rack* is neither ``None`` nor a :class:`BackRack`.
-            ValueError: If *lift* is not the back squat or *height_m* is not
-                positive and finite.
+            ValueError: If *lift* is not the back squat, *height_m* is not
+                positive and finite, or *grip_width_m* is not positive and finite.
         """
         if rack is not None and not isinstance(rack, BackRack):
             raise TypeError("rack must be a BackRack or None")
@@ -125,6 +135,16 @@ class BackBarGeometry:
             )
         if not (math.isfinite(height_m) and height_m > 0.0):
             raise ValueError(f"height_m must be positive and finite: {height_m!r}")
+        if grip_width_m is not None:
+            if not (math.isfinite(grip_width_m) and grip_width_m > 0.0):
+                raise ValueError(
+                    f"grip_width_m must be positive and finite: {grip_width_m!r}"
+                )
+            width = float(grip_width_m)
+        elif rack is not None and rack.grip_width_m is not None:
+            width = float(rack.grip_width_m)
+        else:
+            width = lift_spec.lift_grip(lift).width_m
         scale = height_m / lift_spec.standard_height_m()
         x, y, z = (
             scale * v for v in lift_spec.lift_via_pose(lift, "start").bar_position_m
@@ -132,7 +152,7 @@ class BackBarGeometry:
         return cls(
             lift=lift,
             height_m=float(height_m),
-            grip_width_m=lift_spec.lift_grip(lift).width_m,
+            grip_width_m=width,
             bar_axis=lift_spec.bar_axis(),
             start_bar_position_m=(x, y, z),
             rack=rack,

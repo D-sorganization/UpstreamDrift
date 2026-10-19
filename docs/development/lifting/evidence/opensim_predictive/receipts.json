@@ -80,7 +80,7 @@
   "residual_ratio": null,
   "residual_rms_n": null,
   "solver_status": "Timeout_Interrupted",
-  "source_commit": "7ba64232916f57c7fb4e226a4f00fc385bce0956",
+  "source_commit": "b4b64683bee4ba65fe64ba0b27aa95db4baeab1c",
   "stage1_torque": {
     "actuation_mode": "torque",
     "constraint_violation": null,
@@ -96,7 +96,7 @@
     "reason": "Stage 1 torque-driven solve did not converge (Timeout_Interrupted)",
     "status": "not run"
   },
-  "total_script_wall_clock_s": 0.048201099038124084,
+  "total_script_wall_clock_s": 0.0276438930304721,
   "total_weight_n": 1765.197,
   "wall_clock_s": null,
   "welded_joints": [

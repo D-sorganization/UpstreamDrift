@@ -27,28 +27,57 @@ version -- is a miss; a failed or cancelled run is never cached.
 from __future__ import annotations
 
 import hashlib
+import importlib
 import json
 import logging
+import sys
 import threading
 from collections import OrderedDict
 from collections.abc import Callable, Mapping
-from typing import Any, NamedTuple, Protocol
+from typing import TYPE_CHECKING, Any, NamedTuple, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from src.shared.python.loop_nullspace import facade, registry
-from src.shared.python.loop_nullspace.facade import (
-    AnalysisOptions,
-    EngineContext,
-    TrajectoryInput,
-)
-from src.shared.python.loop_nullspace.plot_model_decisions import plot_model_payload
-from src.shared.python.loop_nullspace.sensitivity_options import (
-    disturbance_from_dict,
-    option_catalogue,
-)
+from src.shared.python.loop_nullspace import registry
+
+if TYPE_CHECKING:
+    from src.shared.python.loop_nullspace.facade import (
+        AnalysisOptions,
+        EngineContext,
+        TrajectoryInput,
+    )
 
 logger = logging.getLogger(__name__)
+
+# Heavy collaborators are resolved on first use so importing this service (and
+# the route that mounts it) stays inside the API startup budget (#12901). They
+# remain module attributes -- ``facade`` and ``plot_model_payload`` -- so a
+# caller or test can still substitute them on this module (PEP 562).
+_LAZY_ATTRIBUTES: dict[str, tuple[str, str | None]] = {
+    "facade": ("src.shared.python.loop_nullspace.facade", None),
+    "plot_model_payload": (
+        "src.shared.python.loop_nullspace.plot_model_decisions",
+        "plot_model_payload",
+    ),
+}
+
+
+def __getattr__(name: str) -> Any:
+    """Import a deferred collaborator on first access and cache it here."""
+    try:
+        module_name, attribute = _LAZY_ATTRIBUTES[name]
+    except KeyError:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from None
+    module = importlib.import_module(module_name)
+    value = module if attribute is None else getattr(module, attribute)
+    globals()[name] = value
+    return value
+
+
+def _collaborator(name: str) -> Any:
+    """The current binding of a deferred collaborator (honours substitution)."""
+    return getattr(sys.modules[__name__], name)
+
 
 __all__ = [
     "MAX_FRAMES",
@@ -120,6 +149,10 @@ class SensitivityOptions(BaseModel):
 
     def to_kwargs(self) -> dict[str, Any]:
         """``AnalysisOptions`` keyword arguments (``ValueError`` if invalid)."""
+        from src.shared.python.loop_nullspace.sensitivity_options import (
+            disturbance_from_dict,
+        )
+
         specs = [disturbance_from_dict(d.model_dump()) for d in self.disturbance_spec]
         out: dict[str, Any] = {
             "disturbance_spec": specs,
@@ -147,6 +180,8 @@ class LoopNullspaceOptions(BaseModel):
 
     def to_analysis_options(self) -> AnalysisOptions:
         """The facade options (``ValueError`` on an invalid combination)."""
+        from src.shared.python.loop_nullspace.facade import AnalysisOptions
+
         base = self.model_dump(exclude={"sensitivity"})
         if self.sensitivity is None:
             return AnalysisOptions(**base)
@@ -329,6 +364,8 @@ def presets() -> list[dict[str, str]]:
 
 def sensitivity_catalogue() -> dict[str, Any]:
     """The allowed sensitivity options (``sensitivity_options.option_catalogue``)."""
+    from src.shared.python.loop_nullspace.sensitivity_options import option_catalogue
+
     return option_catalogue()
 
 
@@ -345,6 +382,7 @@ def public_partial(
     in_progress = partial.get("report")
     if in_progress is not None:
         try:
+            plot_model_payload = _collaborator("plot_model_payload")
             shown["plot_model"] = plot_model_payload(in_progress, preset=preset)
         except (ValueError, TypeError):
             logger.info("partial result cannot yet produce a plot model")
@@ -371,7 +409,10 @@ def run(
     if hit is not None:
         return hit
     trajectory, engine = _source(request.source_id).load(request)
-    report = facade.analyze(
+    facade = _collaborator("facade")
+    plot_model_payload = _collaborator("plot_model_payload")
+
+    report: dict[str, Any] = facade.analyze(
         trajectory,
         engine,
         request.preset,
