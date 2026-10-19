@@ -48,6 +48,7 @@ from src.engines.physics_engines.opensim.python.msk_lift_muscle_report import (
     LiftSolveResults,
     compute_squat_diagnostics,
     format_squat_solution,
+    load_ik_id_residual_status,
     unavailable_lift_record,
 )
 from src.engines.physics_engines.opensim.python.musculoskeletal_graft import SIDES
@@ -184,13 +185,19 @@ def reserve_share(tau: np.ndarray, reserves: np.ndarray) -> float:
 
 
 def classify_lift_reserves(
-    share: float, threshold: float = RESERVE_SHARE_THRESHOLD
+    share: float,
+    threshold: float = RESERVE_SHARE_THRESHOLD,
+    *,
+    residual_gate_passed: bool = True,
 ) -> str:
     """Classify a lift as ``qualified`` or ``unqualified``.
 
-    A lift is qualified only when reserve share is strictly below threshold.
+    A lift is qualified only when reserve share is strictly below threshold
+    AND the IK/ID residual gate passed.
     """
     require(threshold > 0.0, "threshold must be positive")
+    if not residual_gate_passed:
+        return "unqualified"
     return "qualified" if share < threshold else "unqualified"
 
 
@@ -340,8 +347,15 @@ def detect_motion_phases(
                 label = f"bottom (engine window {t_start:.1f}-{t_end:.1f} s)"
                 return [(label, t_start, t_end)]
 
-    # Fallback to standard phase fractions only when motion covers full cycle
     duration = t_end - t_start
+    if lift in ("deadlift", "snatch", "clean_and_jerk"):
+        # The partial 0.2 s engine window covers the pull only (knee pass),
+        # not the full cycle (floor setup, lockout, catch, jerk, etc.).
+        if duration <= 0.5:
+            label = f"pull (engine window {t_start:.1f}-{t_end:.1f} s)"
+            return [(label, t_start, t_end)]
+
+    # Fallback to standard phase fractions only when motion covers full cycle
     phases = lift_phases(lift)
     segments = []
     for i, phase in enumerate(phases):
@@ -435,6 +449,7 @@ def _run_lift_ik_id(
 
 
 def _prepare_scratch_assets(
+    lift: str,
     build_model: Any,
     ik: ikid.IKResult,
     targets: LiftTargets,
@@ -444,10 +459,10 @@ def _prepare_scratch_assets(
         work_dir = scratch_dir
         work_dir.mkdir(parents=True, exist_ok=True)
     else:
-        work_dir = Path(tempfile.mkdtemp(prefix="opensim_lift_muscles_squat_"))
+        work_dir = Path(tempfile.mkdtemp(prefix=f"opensim_lift_muscles_{lift}_"))
 
     actuated_model = _prepare_actuated_model(build_model)
-    model_path = work_dir / "squat_msk.osim"
+    model_path = work_dir / f"{lift}_msk.osim"
     actuated_model.printToXML(str(model_path))
 
     coords_dict = {name: ik.q[:, j] for j, name in enumerate(ik.coordinates)}
@@ -464,6 +479,8 @@ def _solve_lift_frames(
     inverse: ikid.IDResult,
     leg_indices: list[int],
     time_s: np.ndarray,
+    *,
+    residual_gate_passed: bool = True,
 ) -> LiftSolveResults:
     n_frames = len(time_s)
     n_muscles = len(basis.muscles)
@@ -510,7 +527,9 @@ def _solve_lift_frames(
     mean_share = float(np.mean(frame_reserve_shares))
     peak_share = float(np.max(frame_reserve_shares))
     total_share = float(np.sum(np.abs(reserves)) / np.sum(np.abs(tau_targets)))
-    classification = classify_lift_reserves(total_share)
+    classification = classify_lift_reserves(
+        total_share, residual_gate_passed=residual_gate_passed
+    )
 
     return LiftSolveResults(
         activations=activations,
@@ -538,12 +557,19 @@ def evaluate_lift_muscles(
 ) -> dict[str, Any]:
     """Compute muscle activations, forces, and reserve shares for *lift*.
 
-    Generic across all barbell lifts.  For lifts lacking an IK/ID bundle,
-    returns an honest ``unavailable`` record.
+    Generic across all barbell lifts. For lifts lacking an IK/ID bundle or
+    supine posture, returns an honest ``unavailable`` record.
     """
     require(lift in LIFTS, f"unknown lift {lift!r}; choose from {list(LIFTS)}")
 
-    if lift != "squat":
+    if lift == "bench_press":
+        return unavailable_lift_record(
+            lift,
+            "bench press IK does not pose a supine lifter; standing posture on bench is unphysical",
+        )
+
+    bundle_path = SAME_INPUT_LIFT_BUNDLES.get(lift)
+    if bundle_path is None or not bundle_path.is_file():
         return unavailable_lift_record(
             lift,
             f"no LIFT-5 same-input bundle is registered for {lift!r} in "
@@ -556,9 +582,14 @@ def evaluate_lift_muscles(
             "Native OpenSim runtime is not available in current environment",
         )
 
+    residual_status = load_ik_id_residual_status(lift)
+    residual_gate_passed = (
+        residual_status["forces_within"] and residual_status["moments_within"]
+    )
+
     targets, build, ik, inverse = _run_lift_ik_id(lift, stride)
     model_path, coords_path, loads_xml = _prepare_scratch_assets(
-        build.model, ik, targets, scratch_dir
+        lift, build.model, ik, targets, scratch_dir
     )
 
     # Setup MuscleBasis with rigid-tendon Millard muscles
@@ -567,7 +598,14 @@ def evaluate_lift_muscles(
     leg_coords = leg_coordinates()
     leg_indices = [ik.coordinates.index(c) for c in leg_coords]
 
-    solve = _solve_lift_frames(basis, ik, inverse, leg_indices, targets.time_s)
+    solve = _solve_lift_frames(
+        basis,
+        ik,
+        inverse,
+        leg_indices,
+        targets.time_s,
+        residual_gate_passed=residual_gate_passed,
+    )
     major_groups = _summarize_groups(
         solve.activations, solve.forces, basis.muscle_names
     )
@@ -576,7 +614,7 @@ def evaluate_lift_muscles(
         solve.activations,
         solve.forces,
         basis.muscle_names,
-        "squat",
+        lift,
         coordinate_names=ik.coordinates,
         q=ik.q,
     )
@@ -603,4 +641,5 @@ def evaluate_lift_muscles(
         diag,
         moco_record,
         RAJAGOPAL_MODEL_CITATION,
+        residual_status=residual_status,
     )

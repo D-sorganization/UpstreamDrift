@@ -6,14 +6,21 @@ and asymmetry analysis for lift muscle evaluations (OSL-4, #13042).
 
 from __future__ import annotations
 
+import json
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
 from src.shared.python.lifting.bundle_targets import LiftTargets
+
+IK_ID_RECEIPTS_PATH = (
+    Path(__file__).resolve().parents[5]
+    / "docs/development/lifting/evidence/opensim_ik_id/receipts.json"
+)
 
 
 @dataclass(frozen=True)
@@ -58,6 +65,7 @@ def unavailable_lift_record(lift: str, reason: str) -> dict[str, Any]:
         "reserve_share": None,
         "mean_reserve_share": None,
         "peak_reserve_share": None,
+        "residual_status": None,
         "window_start_s": None,
         "window_end_s": None,
         "duration_s": None,
@@ -71,6 +79,41 @@ def unavailable_lift_record(lift: str, reason: str) -> dict[str, Any]:
         "major_groups": None,
         "phases": None,
         "moco": None,
+    }
+
+
+def load_ik_id_residual_status(
+    lift: str,
+    receipts_path: Path | None = None,
+) -> dict[str, Any]:
+    """Load measured pelvis residuals and Hicks limits from the IK/ID receipt."""
+    path = receipts_path or IK_ID_RECEIPTS_PATH
+    if not path.is_file():
+        raise FileNotFoundError(f"IK/ID receipts file not found: {path}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    lift_id = data["lifts"][lift]["ik_id"]["id"]
+    gate = lift_id["residual_gate"]
+    residuals = lift_id["residuals"]
+    peak_force = max(
+        float(residuals["pelvis_tx"]["max_abs"]),
+        float(residuals["pelvis_ty"]["max_abs"]),
+        float(residuals["pelvis_tz"]["max_abs"]),
+    )
+    peak_moment = max(
+        float(residuals["pelvis_tilt"]["max_abs"]),
+        float(residuals["pelvis_list"]["max_abs"]),
+        float(residuals["pelvis_rotation"]["max_abs"]),
+    )
+    return {
+        "forces_within": bool(gate["forces_within"]),
+        "moments_within": bool(gate["moments_within"]),
+        "measured_pelvis_residual_force_n": round(peak_force, 4),
+        "hicks_force_limit_n": round(float(gate["max_force_n"]), 4),
+        "measured_pelvis_residual_moment_nm": round(peak_moment, 4),
+        "hicks_moment_limit_nm": round(float(gate["max_moment_nm"]), 4),
+        "reference": str(
+            gate.get("reference", "Hicks et al. 2015, J Biomech Eng 137:020905")
+        ),
     }
 
 
@@ -278,8 +321,15 @@ def format_squat_solution(
     diag: SquatDiagnostics,
     moco_record: dict[str, Any],
     citation: str,
+    *,
+    residual_status: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Assemble the complete solution dictionary for the back squat."""
+    """Assemble the complete solution dictionary for a barbell lift."""
+    status = (
+        residual_status
+        if residual_status is not None
+        else load_ik_id_residual_status(lift)
+    )
     return {
         "lift": lift,
         "status": "complete",
@@ -288,6 +338,7 @@ def format_squat_solution(
         "reserve_share": solve.total_share,
         "mean_reserve_share": solve.mean_share,
         "peak_reserve_share": solve.peak_share,
+        "residual_status": status,
         "window_start_s": float(targets.time_s[0]),
         "window_end_s": float(targets.time_s[-1]),
         "duration_s": round(float(targets.time_s[-1] - targets.time_s[0]), 4),
@@ -310,3 +361,9 @@ def format_squat_solution(
         "moco": moco_record,
         "citation": citation,
     }
+
+
+# Backwards-compatible aliases for lift-agnostic reporting
+format_lift_solution = format_squat_solution
+compute_lift_diagnostics = compute_squat_diagnostics
+LiftDiagnostics = SquatDiagnostics
