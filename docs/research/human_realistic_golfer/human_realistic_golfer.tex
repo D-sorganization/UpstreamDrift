@@ -788,6 +788,71 @@ All five admitted MuJoCo humanoid MJCFs represent each hand as a single rigid bo
 python3 -m pytest tests/unit/grip_contact/test_mujoco_humanoid_grip_adapter.py
 \end{verbatim}
 
+\subsection{MuJoCo Grip Laboratory: Phalanx-Mapped Hand--Hand Contact (HRG-GS-M6, \#13328)}
+\textbf{Method and Segment-Mapped Phalanx Manifests.}
+The MuJoCo Shadow/Allegro grip laboratory (\path{src/engines/physics_engines/mujoco/python/grip_lab_adapter.py}) wraps the bilateral hand scene builder (\path{src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_grip_modelling_xml.py}) into the shared \texttt{ModelGripAdapter} contract across two multi-fingered robotic hand pairs around a free $6$-DOF cylindrical handle (\texttt{cylinder\_object}) driven by mocap palm welds (\texttt{lh\_mocap}, \texttt{rh\_mocap}):
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \texttt{mujoco\_shadow\_hand\_lab} (\path{src/config/grip_bindings/mujoco_shadow_hand_lab.json}): bilateral 24-DOF Shadow Dexterous Hand scene (\texttt{lh\_palm}, \texttt{rh\_palm});
+\item \texttt{mujoco\_allegro\_hand\_lab} (\path{src/config/grip_bindings/mujoco_allegro_hand_lab.json}): bilateral 16-DOF Wonik Allegro Hand scene (\texttt{lh\_palm}, \texttt{rh\_palm}).
+\end{enumerate}
+Each laboratory model is explicitly designated as \emph{a contact fixture, not a qualified golfer}. If the local hand MJCF/mesh assets are absent, \texttt{check\_hand\_assets\_available} fails closed by raising \texttt{SchemaFeatureUnavailableError} without network downloads.
+Unlike the rigid-proxy humanoid manifests (M5), both laboratory \texttt{grip-binding/v1} manifests declare \texttt{attachment\_mode = "separated\_v2"} and provide a bijection \texttt{segment\_map} mapping every canonical \texttt{ContactTopology} site ($14$ sites for \texttt{trigger\_finger=False}, $15$ sites for \texttt{trigger\_finger=True}) to a \textbf{distinct} articulated phalanx or palm sub-body (\texttt{representation="phalange"} on every \texttt{SiteBinding}). At calibration pose $\mathbf{q}_0$, \texttt{MuJoCoGripLabAdapter} records the hand-root-to-phalanx relative transform $T_{H_{\sigma} \to B_i}^{0} \in \mathrm{SE}(3)$ for each phalanx body $B_i$ on hand $\sigma \in \{\mathrm{L}, \mathrm{R}\}$. During articulated evaluation ($\mathbf{q} \neq \mathbf{q}_0$, \texttt{frozen\_fingers=False}), the live phalanx deflection $\Delta T_{B_i}(\mathbf{q}) = T_{H_{\sigma} \to B_i}(\mathbf{q})\,\left(T_{H_{\sigma} \to B_i}^{0}\right)^{-1}$ updates the world site frame:
+\begin{equation}
+T_{W \to s}(\mathbf{q}) = T_{W \to H_{\sigma}} \, \Delta T_{B_i}(\mathbf{q}) \, T_{B_i \to s}.
+\end{equation}
+In frozen-finger mode (\texttt{frozen\_fingers=True}), all finger joint coordinates are locked to $\mathbf{q} = \mathbf{q}_0$ ($\Delta T_{B_i}(\mathbf{q}_0) = I_4$), reducing the phalanx kinematics exactly to the rigid-proxy hand frame $T_{W \to H_{\sigma}}$.
+
+\textbf{Equations for Physical Hand--Hand Contact on Phalanges.}
+Because the two hands and their articulated phalanges are separate rigid bodies in \texttt{separated\_v2} mode, all active hand--hand topology pairs $\mathcal{P}_{\mathrm{hh}}$---namely \texttt{trail\_palm\_lead\_thumb} (all styles), \texttt{overlap\_little\_finger\_lead\_index} (\texttt{overlap}), \texttt{interlock\_little\_finger\_lead\_middle} and \texttt{interlock\_lead\_index\_wrap} (\texttt{interlock}), alongside the direct hand--grip pair \texttt{ten\_finger\_little\_finger\_grip} (\texttt{ten\_finger})---are evaluated as \textbf{physical} contacts (\texttt{pair\_labels[p] = "physical"}, \texttt{applied\_allocated\_force\_n() = 0.0}) via the shared G2 primitive kernels (\texttt{sphere\_capsule}, \texttt{capsule\_sphere}, and \texttt{capsule\_capsule} in \path{src/shared/python/grip_contact/pair_contact.py}) invoked through \texttt{topology\_hand\_hand\_pair\_wrench} (\path{src/shared/python/grip_contact/topology_contact.py}).
+For a hand--hand pair $p = (s_a, s_b)$ with world site states $(\mathbf{p}_a, \mathbf{v}_a, \boldsymbol{\omega}_a)$ on phalanx $B_a$ and $(\mathbf{p}_b, \mathbf{v}_b, \boldsymbol{\omega}_b)$ on phalanx $B_b$, closest primitive points $(\mathbf{c}_a, \mathbf{c}_b)$, signed separation $g = d - (r_a + r_b)$, and unit normal $\hat{\mathbf{n}}$ from $B_a$ toward $B_b$, the penetration depth and compression rate under nominal inter-hand preload $\delta_0 = F_{\mathrm{hh},0} / k_n$ ($F_{\mathrm{hh},0} = \alpha_{\mathrm{hh}} F_{\mathrm{sq}}$) are:
+\begin{equation}
+\delta = \max(0, -g + \delta_0), \qquad \dot{\delta} = -\hat{\mathbf{n}} \cdot (\mathbf{v}_b(\mathbf{c}_b) - \mathbf{v}_a(\mathbf{c}_a)).
+\end{equation}
+The unilateral Hunt--Crossley normal force, regularised Coulomb--viscous tangential force, and equal-and-opposite phalanx body wrenches transferred to body origins $\mathbf{x}_{B_a}, \mathbf{x}_{B_b}$ are:
+\begin{equation}
+f_n = \begin{cases} \max\!\left(0,\, k_n \delta^p + c_n \delta^p \dot{\delta}\right), & \delta > 0, \\ 0, & \delta \le 0, \end{cases}
+\qquad
+\mathbf{f}_t = -\left(\mu_s \tanh\!\left(\frac{\|\mathbf{v}_t\|}{v_{\mathrm{tr}}}\right) + \mu_v \|\mathbf{v}_t\|\right) f_n \frac{\mathbf{v}_t}{\|\mathbf{v}_t\|},
+\end{equation}
+\begin{equation}
+\mathbf{F}_{B_a} = -f_n \hat{\mathbf{n}} + \mathbf{f}_t = -\mathbf{F}_{B_b}, \qquad
+\mathbf{M}_{B_a} = \mathbf{m}_s + (\mathbf{c}_a - \mathbf{x}_{B_a}) \times \mathbf{F}_{B_a}, \qquad
+\mathbf{M}_{B_b} = -\mathbf{m}_s + (\mathbf{c}_b - \mathbf{x}_{B_b}) \times \mathbf{F}_{B_b}.
+\end{equation}
+Hence at every contact midpoint $\mathbf{c}$, $\mathbf{F}_{B_a} + \mathbf{F}_{B_b} = \mathbf{0}$ and $\mathbf{M}_{B_a}(\mathbf{c}) + \mathbf{M}_{B_b}(\mathbf{c}) = \mathbf{0}$.
+In \texttt{contact\_mode="shared"}, \texttt{build\_grip\_lab\_mjcf} sets \texttt{contype="0" conaffinity="0"} on all geoms and strips MJCF \texttt{<contact>} pairs so MuJoCo's native collision detector generates zero grip contacts (\texttt{capabilities().native\_contact = False}, \texttt{supports\_physical\_pairs = True}, \texttt{supports\_wrench\_application = True}), and \texttt{apply\_wrenches} writes the COM-transferred wrenches into \texttt{data.xfrc\_applied}. In \texttt{contact\_mode="native"}, native MJCF collision geoms remain active (\texttt{native\_contact = True}, \texttt{supports\_wrench\_application = False}) and \texttt{apply\_wrenches} raises \texttt{SchemaFeatureUnavailableError}, preventing double application of native and shared contact on any pair.
+
+\textbf{Parameters and Measured Numbers.}
+With nominal squeeze $F_{\mathrm{sq}} = 1100.0\,\mathrm{N}$ per hand, contact stiffness $k_n = 4.5 \times 10^{4}\,\mathrm{N/m}$, exponent $p = 1.5$, damping $c_n = 1.2 \times 10^{2}\,\mathrm{N\cdot s/m}$, friction coefficients $\mu_s = 0.85$ and $\mu_v = 0.05\,\mathrm{s/m}$, and sample step $\Delta t = 0.002\,\mathrm{s}$ ($21$ steps over $0.04\,\mathrm{s}$), Table~\ref{tab:hrg-gs-m6-lab} reports the measured site counts, physical hand--hand normal forces at calibration ($f_{n,0}$) and after $+15\,\mathrm{mm}$ lead-thumb phalanx articulation ($f_{n,\mathrm{art}}$), global action--reaction residuals, and frozen-finger M3 parity errors against \texttt{PinocchioGripAdapter} and \texttt{law\_level\_series}. At separation ($\|\Delta \mathbf{p}\| = 0.707\,\mathrm{m}$), all normal, tangential, and spin components equal exact $0.0\,\mathrm{N}$; under receding velocity ($v_{\mathrm{rec}} = 25\,\mathrm{m/s}$), normal forces remain strictly unilateral ($f_n \ge 0.0\,\mathrm{N}$) and tangential forces satisfy $\|\mathbf{f}_t\| \le (\mu_s + \mu_v \|\mathbf{v}_t\|) f_n$.
+
+\begin{table}[h!]
+\centering
+\caption{Measured Phalanx-Mapped Hand--Hand Contact Forces, Action--Reaction Residuals, and Frozen-Finger M3 Parity in the MuJoCo Grip Laboratory (HRG-GS-M6, \#13328).}
+\label{tab:hrg-gs-m6-lab}
+\small
+\begin{tabular}{llrrrrrr}
+\toprule
+Model ID & Style & Sites & Pairs & Hand--Hand $f_{n,0}$ (N) & Thumb-Art.\ $f_n$ (N) & $\|\sum \mathbf{F}_{\mathrm{xfrc}}\|$ (N) & Frozen Max $\varepsilon_{\mathrm{peak}} / \varepsilon_{\mathrm{rms}}$ \\
+\midrule
+\texttt{mujoco\_shadow\_hand\_lab} & \texttt{overlap} & $15$ & $12$ & $42.774$ & $0.000$ & $2.66 \times 10^{-15}$ & $0.00 \times 10^{0} / 0.00 \times 10^{0}$ \\
+\texttt{mujoco\_shadow\_hand\_lab} & \texttt{interlock} & $15$ & $13$ & $42.774$ & $0.000$ & $1.07 \times 10^{-14}$ & $0.00 \times 10^{0} / 0.00 \times 10^{0}$ \\
+\texttt{mujoco\_shadow\_hand\_lab} & \texttt{ten\_finger} & $15$ & $12$ & $42.774$ & $0.000$ & $1.43 \times 10^{-14}$ & $0.00 \times 10^{0} / 0.00 \times 10^{0}$ \\
+\texttt{mujoco\_allegro\_hand\_lab} & \texttt{overlap} & $15$ & $12$ & $42.774$ & $0.000$ & $7.32 \times 10^{-15}$ & $0.00 \times 10^{0} / 0.00 \times 10^{0}$ \\
+\texttt{mujoco\_allegro\_hand\_lab} & \texttt{interlock} & $15$ & $13$ & $42.774$ & $0.000$ & $8.88 \times 10^{-16}$ & $0.00 \times 10^{0} / 0.00 \times 10^{0}$ \\
+\texttt{mujoco\_allegro\_hand\_lab} & \texttt{ten\_finger} & $15$ & $12$ & $42.774$ & $0.000$ & $7.16 \times 10^{-15}$ & $0.00 \times 10^{0} / 0.00 \times 10^{0}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Limitations.}
+The Shadow and Allegro grip laboratory is \emph{a contact fixture, not a qualified golfer}: its palms are driven by mocap welds around an isolated cylindrical handle without a torso, shoulder, or arm kinematic chain, and the anthropomorphic Allegro hand maps its four fingers across index, middle, ring, and little-finger topology sites using proximal/medial/distal links for distinct phalanx resolution.
+
+\textbf{Reproduction Commands.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_mujoco_grip_lab_adapter.py
+python3 -m pytest tests/unit/grip_contact/test_grip_binding_manifests.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
