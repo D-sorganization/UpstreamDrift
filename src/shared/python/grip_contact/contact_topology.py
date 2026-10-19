@@ -15,7 +15,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
@@ -851,4 +851,21 @@ def contact_topology(
         hand_length_m=hand_anatomy.hand_length_m,
         sites=tuple(sites),
         pairs=pairs,
+    )
+
+
+def coerce_contact_topology(
+    topology: ContactTopology | GripSpec | None = None,
+) -> ContactTopology:
+    """Resolve a :class:`ContactTopology` from an instance, a :class:`GripSpec`, or default."""
+    from src.shared.python.motion_matching.grip_contract import GripSpec
+
+    if topology is None:
+        return contact_topology()
+    if isinstance(topology, GripSpec):
+        return contact_topology(topology)
+    if isinstance(topology, ContactTopology):
+        return topology
+    raise TypeError(
+        f"topology must be ContactTopology or GripSpec, got {type(topology).__name__}"
     )
