@@ -30,7 +30,7 @@ from src.shared.python.motion_matching.execution.grip_selection import (
 )
 from src.shared.python.motion_matching.grip_contract import (
     GRIP_STRENGTH_PRESETS_DEG,
-    grip_spec_to_physical,
+    NAMED_GRIP_PRESETS,
 )
 from src.shared.python.model_appearance.schema import physics_spec_sha256
 
@@ -90,6 +90,9 @@ def appearance_library() -> dict[str, Any]:
         "glove": list(GLOVE_CHOICES),
         "grip": {
             "presets": dict(GRIP_STRENGTH_PRESETS_DEG),
+            "named_presets": {
+                name: p.to_library_dict() for name, p in NAMED_GRIP_PRESETS.items()
+            },
             "styles": list(GRIP_STYLE_CHOICES),
         },
         "headwear": list(HEADWEAR),
@@ -228,8 +231,13 @@ def grip_revision_summary(
     """
     document, grip = apply_grip_selection(character.document, overrides)
     revised = compile_with_grip(character, overrides)
+    physical_config = (
+        document.get("subject", {}).get("grip_config")
+        if overrides.has_physical
+        else None
+    )
     return {
-        "grip": None if grip is None else grip_spec_to_physical(grip),
+        "grip": physical_config,
         "visual": None if grip is None else visual_grip_block(grip),
         "spec_sha256": revised.sha256,
         "physics_spec_sha256": physics_spec_sha256(document),
