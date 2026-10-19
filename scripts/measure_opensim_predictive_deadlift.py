@@ -291,22 +291,44 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
     logger.info("Saved %s", readme_path)
 
 
+def _load_guess(path: Path) -> Any:
+    """Load a saved Moco trajectory to warm-start a solve.
+
+    Raises:
+        ValueError: If *path* is not an existing file.
+    """
+    if not Path(path).is_file():
+        raise ValueError(f"guess trajectory not found: {path}")
+    from src.shared.python.engine_core.opensim_runtime import import_opensim
+
+    return import_opensim().MocoTrajectory(str(path))
+
+
 def run_stage1_solve(
     config: PredictiveDeadliftConfig,
     log_file: Path,
+    guess_path: Path | None = None,
 ) -> dict[str, Any]:
-    """Execute Stage 1 torque-driven solve with stdout/stderr captured to log_file."""
+    """Execute Stage 1 torque-driven solve with stdout/stderr captured to log_file.
+
+    With *guess_path*, the solve is warm-started from that saved trajectory
+    (for example an unconverged earlier run) instead of the smooth-step guess;
+    the summary records the path under ``warm_start``.
+    """
     logger.info("Building Stage 1 torque-driven study...")
     study, meta = build_predictive_deadlift_study(config)
+    initial_guess = None if guess_path is None else _load_guess(guess_path)
 
     logger.info("Solving Stage 1 with Moco (log -> %s)...", log_file)
     with _capture_output_to_file(log_file):
         summary = solve_predictive_deadlift(
             config,
             study=study,
+            initial_guess=initial_guess,
             setup_pose=meta.get("setup_pose"),
             lockout_pose=meta.get("lockout_pose"),
         )
+    summary["warm_start"] = None if guess_path is None else str(guess_path)
 
     # Enhance summary from parsed log
     parsed = _parse_solve_log(log_file)
@@ -400,6 +422,7 @@ def run_measurement(
     from_log: Path | None = None,
     residual: dict[str, float] | None = None,
     solver: dict[str, str] | None = None,
+    stage1_guess: Path | None = None,
 ) -> dict[str, Any]:
     """Execute staged predictive deadlift measurement and generate honest evidence."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -433,7 +456,7 @@ def run_measurement(
         stage1_summary["actuation_mode"] = "torque"
         stage1_solution = None
     else:
-        stage1_summary = run_stage1_solve(cfg_stage1, stage1_log)
+        stage1_summary = run_stage1_solve(cfg_stage1, stage1_log, stage1_guess)
         stage1_solution = stage1_summary.pop("solution", None)
 
     # Save Stage 1 solution file if available
@@ -498,6 +521,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--dynamics-mode", choices=("explicit", "implicit"), default="explicit"
     )
+    parser.add_argument(
+        "--stage1-guess",
+        type=Path,
+        default=None,
+        help="Warm-start stage 1 from a saved .sto trajectory",
+    )
     args = parser.parse_args(argv)
 
     out_dir = args.out_dir
@@ -521,6 +550,7 @@ def main(argv: list[str] | None = None) -> int:
             "finite_difference_scheme": args.fd_scheme,
             "multibody_dynamics_mode": args.dynamics_mode,
         },
+        stage1_guess=args.stage1_guess,
     )
     return 0
 

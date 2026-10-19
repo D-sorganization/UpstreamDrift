@@ -11,6 +11,8 @@ Verifies:
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from src.engines.physics_engines.opensim.python.msk_lift_predictive import (
@@ -370,3 +372,46 @@ def test_source_commit_falls_back_to_env_without_git(
     assert mod._git("rev-parse", "HEAD") == "abc123"
     monkeypatch.delenv("UPSTREAMDRIFT_SOURCE_COMMIT")
     assert mod._git("rev-parse", "HEAD") is None
+
+
+def test_stage1_guess_warm_starts_the_solve(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A saved trajectory becomes the stage-1 initial guess and is recorded."""
+    import importlib
+
+    mod = importlib.import_module("scripts.measure_opensim_predictive_deadlift")
+    sto = tmp_path / "prior.sto"
+    sto.write_text("stub", encoding="utf-8")
+    seen: dict[str, object] = {}
+    monkeypatch.setattr(mod, "_load_guess", lambda path: ("guess", path))
+    monkeypatch.setattr(
+        mod, "build_predictive_deadlift_study", lambda cfg: ("study", {})
+    )
+
+    def _solve(config: object, **kwargs: object) -> dict[str, object]:
+        seen.update(kwargs)
+        return {}
+
+    monkeypatch.setattr(mod, "solve_predictive_deadlift", _solve)
+    monkeypatch.setattr(
+        mod,
+        "_parse_solve_log",
+        lambda path: dict.fromkeys(
+            ("iterations", "objective", "constraint_violation", "last_iterate_inf_pr")
+        ),
+    )
+    summary = mod.run_stage1_solve(
+        PredictiveDeadliftConfig(), tmp_path / "s1.log", guess_path=sto
+    )
+    assert seen["initial_guess"] == ("guess", sto)
+    assert summary["warm_start"] == str(sto)
+
+
+def test_load_guess_rejects_missing_file(tmp_path: Path) -> None:
+    """A missing warm-start trajectory is an error, never a silent cold start."""
+    import importlib
+
+    mod = importlib.import_module("scripts.measure_opensim_predictive_deadlift")
+    with pytest.raises(ValueError, match="not found"):
+        mod._load_guess(tmp_path / "absent.sto")
