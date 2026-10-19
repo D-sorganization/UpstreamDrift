@@ -74,10 +74,14 @@ def _shade_phases(
     solution: dict[str, Any],
     t_start: float,
     t_end: float,
+    lift: str = "squat",
 ) -> None:
     phase_dict = solution.get("phases") or {}
-    if len(phase_dict) == 1 and "bottom" in list(phase_dict.keys())[0]:
-        seg_label = list(phase_dict.keys())[0]
+    first_key = list(phase_dict.keys())[0] if phase_dict else ""
+    if len(phase_dict) == 1 and (
+        "bottom" in first_key or "pull" in first_key or "engine window" in first_key
+    ):
+        seg_label = first_key
         ax.axvspan(t_start, t_end, color="#FED7AA", alpha=0.35)
         y_top = ax.get_ylim()[1]
         ax.text(
@@ -97,7 +101,7 @@ def _shade_phases(
             },
         )
     else:
-        phases = lift_phases("squat")
+        phases = lift_phases(lift)
         for p_idx, p in enumerate(phases):
             t_p0 = t_start + p.t_frac * (t_end - t_start)
             t_p1 = (
@@ -131,6 +135,8 @@ def _plot_activations(solution: dict[str, Any], out_path: Path) -> Path:
     activations = np.asarray(solution["activations"])
     muscle_names = solution["muscle_names"]
     name_to_idx = {name: i for i, name in enumerate(muscle_names)}
+    lift = solution.get("lift", "squat")
+    title_lift = "Back Squat" if lift == "squat" else lift.replace("_", " ").title()
 
     fig, ax = plt.subplots(figsize=(8, 4.5), dpi=130)
     for group_name, col in (
@@ -153,12 +159,12 @@ def _plot_activations(solution: dict[str, Any], out_path: Path) -> Path:
     ax.set_xlabel("Time (s)", fontsize=10)
     ax.set_ylabel("Activation [0, 1]", fontsize=10)
     ax.set_title(
-        "Back Squat: Muscle Group Activations (Engine Window 0.0-0.2 s)",
+        f"{title_lift}: Muscle Group Activations (Engine Window {t_start:.1f}-{t_end:.1f} s)",
         fontsize=11,
         fontweight="bold",
     )
     ax.set_ylim(-0.02, 1.05)
-    _shade_phases(ax, solution, t_start, t_end)
+    _shade_phases(ax, solution, t_start, t_end, lift=lift)
     ax.legend(loc="lower right", framealpha=0.9, fontsize=9)
     ax.grid(True, ls=":", alpha=0.6)
     plt.tight_layout()
@@ -174,6 +180,8 @@ def _plot_forces(solution: dict[str, Any], out_path: Path) -> Path:
     forces = np.asarray(solution["forces"])
     muscle_names = solution["muscle_names"]
     name_to_idx = {name: i for i, name in enumerate(muscle_names)}
+    lift = solution.get("lift", "squat")
+    title_lift = "Back Squat" if lift == "squat" else lift.replace("_", " ").title()
 
     fig, ax = plt.subplots(figsize=(8, 4.5), dpi=130)
     for group_name, col in (
@@ -196,11 +204,11 @@ def _plot_forces(solution: dict[str, Any], out_path: Path) -> Path:
     ax.set_xlabel("Time (s)", fontsize=10)
     ax.set_ylabel("Muscle Force (N)", fontsize=10)
     ax.set_title(
-        "Back Squat: Total Muscle Force per Group (Engine Window 0.0-0.2 s)",
+        f"{title_lift}: Total Muscle Force per Group (Engine Window {t_start:.1f}-{t_end:.1f} s)",
         fontsize=11,
         fontweight="bold",
     )
-    _shade_phases(ax, solution, t_start, t_end)
+    _shade_phases(ax, solution, t_start, t_end, lift=lift)
     ax.legend(loc="upper left", framealpha=0.9, fontsize=9)
     ax.grid(True, ls=":", alpha=0.6)
     plt.tight_layout()
@@ -216,6 +224,8 @@ def _plot_moments_and_reserves(solution: dict[str, Any], out_path: Path) -> Path
     tau_targets = np.asarray(solution["tau_targets"])
     tau_muscles = np.asarray(solution["tau_muscles"])
     reserves = np.asarray(solution["reserves"])
+    lift = solution.get("lift", "squat")
+    title_lift = "Back Squat" if lift == "squat" else lift.replace("_", " ").title()
 
     total_demand = np.sum(np.abs(tau_targets), axis=1)
     total_muscle = np.sum(np.abs(tau_muscles), axis=1)
@@ -249,11 +259,11 @@ def _plot_moments_and_reserves(solution: dict[str, Any], out_path: Path) -> Path
     ax.set_xlabel("Time (s)", fontsize=10)
     ax.set_ylabel("Joint Moment Magnitude (N m)", fontsize=10)
     ax.set_title(
-        f"Back Squat: Leg Moment Balance and Reserve Actuator Load (Share: {solution['reserve_share']:.1%})",
+        f"{title_lift}: Leg Moment Balance and Reserve Actuator Load (Share: {solution['reserve_share']:.1%})",
         fontsize=11,
         fontweight="bold",
     )
-    _shade_phases(ax, solution, t_start, t_end)
+    _shade_phases(ax, solution, t_start, t_end, lift=lift)
     ax.legend(loc="upper right", framealpha=0.9, fontsize=9)
     ax.grid(True, ls=":", alpha=0.6)
     plt.tight_layout()
@@ -263,16 +273,16 @@ def _plot_moments_and_reserves(solution: dict[str, Any], out_path: Path) -> Path
     return out_path
 
 
-def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
-    """Generate phase-resolved PNG plots under 300 KB each."""
+def _render_lift_plots(solution: dict[str, Any], lift: str, out_dir: Path) -> list[str]:
+    """Generate phase-resolved PNG plots under 300 KB each for *lift*."""
     out_dir.mkdir(parents=True, exist_ok=True)
     generated = [
         _plot_activations(
-            solution, out_dir / "squat_muscle_activations_by_phase.png"
+            solution, out_dir / f"{lift}_muscle_activations_by_phase.png"
         ).name,
-        _plot_forces(solution, out_dir / "squat_muscle_forces_by_phase.png").name,
+        _plot_forces(solution, out_dir / f"{lift}_muscle_forces_by_phase.png").name,
         _plot_moments_and_reserves(
-            solution, out_dir / "squat_joint_moments_and_reserves.png"
+            solution, out_dir / f"{lift}_joint_moments_and_reserves.png"
         ).name,
     ]
 
@@ -287,6 +297,11 @@ def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
     return generated
 
 
+def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
+    """Backwards-compatible alias for rendering squat plots."""
+    return _render_lift_plots(solution, "squat", out_dir)
+
+
 def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
     """Evaluate muscle activations and forces for all five lifts."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -295,8 +310,8 @@ def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
     for lift in LIFTS:
         logger.info("Evaluating muscles for %s...", lift)
         res = evaluate_lift_muscles(lift, stride=stride, run_moco=True)
-        if lift == "squat" and res["status"] == "complete":
-            _render_squat_plots(res, out_dir)
+        if res["status"] == "complete":
+            _render_lift_plots(res, lift, out_dir)
             receipts[lift] = {
                 "lift": lift,
                 "status": "complete",
@@ -304,6 +319,7 @@ def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
                 "reserve_share": res["reserve_share"],
                 "mean_reserve_share": res["mean_reserve_share"],
                 "peak_reserve_share": res["peak_reserve_share"],
+                "residual_status": res["residual_status"],
                 "reserve_share_threshold": RESERVE_SHARE_THRESHOLD,
                 "window_start_s": res["window_start_s"],
                 "window_end_s": res["window_end_s"],
@@ -328,6 +344,9 @@ def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
                 "classification": "unqualified",
                 "reason": res.get("reason", "unknown reason"),
                 "reserve_share": None,
+                "mean_reserve_share": None,
+                "peak_reserve_share": None,
+                "residual_status": res.get("residual_status"),
                 "window_start_s": None,
                 "window_end_s": None,
                 "duration_s": None,
@@ -351,15 +370,125 @@ def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
     }
 
 
+LIFT_DISPLAY_NAMES: dict[str, str] = {
+    "squat": "Squat",
+    "deadlift": "Deadlift",
+    "bench_press": "Bench Press",
+    "snatch": "Snatch",
+    "clean_and_jerk": "Clean & Jerk",
+}
+
+
+def render_per_lift_table(receipt: dict[str, Any]) -> str:
+    """Render a markdown summary table for all barbell lifts from receipts."""
+    lifts_data: dict[str, Any] = receipt.get("lifts", receipt)
+    ordered_keys = [lift for lift in LIFTS if lift in lifts_data]
+    extra_keys = [lift for lift in lifts_data if lift not in ordered_keys]
+    target_lifts = ordered_keys + extra_keys
+    if not target_lifts:
+        target_lifts = list(lifts_data.keys())
+
+    header = (
+        "| Lift | Status | Classification | Window (s) | Mean Reserve Share | "
+        "Peak Reserve Share | Pelvis Residual Force (N, vs Hicks) | "
+        "Pelvis Residual Moment (N·m, vs Hicks) | Within / Outside |"
+    )
+    separator = "| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |"
+    rows: list[str] = [header, separator]
+
+    for lift in target_lifts:
+        rec = lifts_data.get(lift)
+        if not isinstance(rec, dict):
+            rec = {}
+        name = LIFT_DISPLAY_NAMES.get(lift, lift.replace("_", " ").title())
+        status = rec.get("status")
+        status_str = f"`{status}`" if status else "unavailable"
+        classification = rec.get("classification")
+        class_str = f"`{classification}`" if classification else "unavailable"
+
+        w_start = rec.get("window_start_s")
+        w_end = rec.get("window_end_s")
+        if w_start is not None and w_end is not None:
+            window_str = f"{w_start:.1f}–{w_end:.1f}"
+        else:
+            window_str = "unavailable"
+
+        mean_share = rec.get("mean_reserve_share")
+        if mean_share is None and isinstance(rec.get("reserve_share"), (int, float)):
+            mean_share = rec.get("reserve_share")
+        mean_str = (
+            f"{mean_share * 100:.1f}%" if mean_share is not None else "unavailable"
+        )
+
+        peak_share = rec.get("peak_reserve_share")
+        peak_str = (
+            f"{peak_share * 100:.1f}%" if peak_share is not None else "unavailable"
+        )
+
+        res = rec.get("residual_status")
+        if (
+            isinstance(res, dict)
+            and res.get("measured_pelvis_residual_force_n") is not None
+            and res.get("hicks_force_limit_n") is not None
+        ):
+            meas_f = float(res["measured_pelvis_residual_force_n"])
+            lim_f = float(res["hicks_force_limit_n"])
+            force_str = f"{meas_f:.2f} (vs {lim_f:.2f})"
+        else:
+            force_str = "unavailable"
+
+        if (
+            isinstance(res, dict)
+            and res.get("measured_pelvis_residual_moment_nm") is not None
+            and res.get("hicks_moment_limit_nm") is not None
+        ):
+            meas_m = float(res["measured_pelvis_residual_moment_nm"])
+            lim_m = float(res["hicks_moment_limit_nm"])
+            moment_str = f"{meas_m:.2f} (vs {lim_m:.2f})"
+        else:
+            moment_str = "unavailable"
+
+        if (
+            isinstance(res, dict)
+            and res.get("forces_within") is not None
+            and res.get("moments_within") is not None
+        ):
+            within_str = (
+                "Within"
+                if (res["forces_within"] and res["moments_within"])
+                else "Outside"
+            )
+        else:
+            within_str = "unavailable"
+
+        rows.append(
+            f"| {name} | {status_str} | {class_str} | {window_str} | {mean_str} | "
+            f"{peak_str} | {force_str} | {moment_str} | {within_str} |"
+        )
+
+    return "\n".join(rows)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=DEFAULT_RECEIPT)
     parser.add_argument("--stride", type=int, default=5)
+    parser.add_argument(
+        "--table", action="store_true", help="Print Markdown summary table"
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     out_file = args.out
     out_dir = out_file.parent
+
+    if args.table:
+        if not out_file.is_file():
+            logger.error("Receipts file not found: %s", out_file)
+            return 1
+        data = json.loads(out_file.read_text(encoding="utf-8"))
+        print(render_per_lift_table(data))
+        return 0
 
     record = measure(stride=args.stride, out_dir=out_dir)
 

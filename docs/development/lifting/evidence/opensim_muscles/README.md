@@ -64,13 +64,21 @@ share reported.
 
 ## Lift Status Summary
 
-| Lift             | Status        | Classification | Reserve Share | Reason / Notes                                                                                                   |
-| :--------------- | :------------ | :------------- | :-----------: | :--------------------------------------------------------------------------------------------------------------- |
-| **Squat**        | `complete`    | `unqualified`  |   **57.0%**   | Passing Hicks residual gate; leg joint moments exceed physiological muscle capacity, requiring reserve actuators |
-| **Bench Press**  | `unavailable` | `unqualified`  |       —       | Blocked on LIFT-5 same-input bundle (#11745) and barbell records                                                 |
-| **Deadlift**     | `unavailable` | `unqualified`  |       —       | Blocked on LIFT-5 same-input bundle (#11745) and barbell records                                                 |
-| **Snatch**       | `unavailable` | `unqualified`  |       —       | Blocked on LIFT-5 same-input bundle (#11745) and barbell records                                                 |
-| **Clean & Jerk** | `unavailable` | `unqualified`  |       —       | Blocked on LIFT-5 same-input bundle (#11745) and barbell records                                                 |
+The table below is generated directly from `receipts.json` via `scripts/measure_opensim_lift_muscles.py`:
+
+| Lift | Status | Classification | Window (s) | Mean Reserve Share | Peak Reserve Share | Pelvis Residual Force (N, vs Hicks) | Pelvis Residual Moment (N·m, vs Hicks) | Within / Outside |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Squat | `complete` | `unqualified` | 0.0–0.2 | 56.9% | 67.7% | 23.70 (vs 146.93) | 12.02 (vs 18.64) | Within |
+| Deadlift | `complete` | `unqualified` | 0.0–0.2 | 17.3% | 20.2% | 288.23 (vs 110.92) | 147.88 (vs 18.28) | Outside |
+| Bench Press | `unavailable` | `unqualified` | unavailable | unavailable | unavailable | unavailable | unavailable | unavailable |
+| Snatch | `complete` | `unqualified` | 0.0–0.2 | 37.7% | 71.3% | 463.57 (vs 155.12) | 202.60 (vs 27.10) | Outside |
+| Clean & Jerk | `complete` | `unqualified` | 0.0–0.2 | 38.9% | 58.5% | 458.52 (vs 223.10) | 259.03 (vs 38.77) | Outside |
+
+### Plain Assessment Statements
+
+- **Partial Engine Window:** The analyzed window is the 0.2 s LIFT-5 engine window from the setup, so it covers the start of the pull only, not the whole lift and not the jerk.
+- **Qualification and Residuals:** Every lift is `unqualified`, and deadlift, snatch and clean-and-jerk also fail the Hicks residual gate.
+- **Bench Press Status:** Bench press is unavailable (no supine IK).
 
 ---
 
@@ -161,17 +169,29 @@ Because the knee is anterior to the ankle and the hip is posterior in a deep squ
 
 ## Evidence Plots
 
-### 1. Muscle Group Activations
+### 1. Back Squat
 
-![Back Squat Activations](squat_muscle_activations_by_phase.png)
+- **Muscle Activations:** ![Back Squat Activations](squat_muscle_activations_by_phase.png)
+- **Muscle Forces:** ![Back Squat Forces](squat_muscle_forces_by_phase.png)
+- **Joint Moments and Reserves:** ![Back Squat Moments and Reserves](squat_joint_moments_and_reserves.png)
 
-### 2. Muscle Group Forces
+### 2. Deadlift
 
-![Back Squat Forces](squat_muscle_forces_by_phase.png)
+- **Muscle Activations:** ![Deadlift Activations](deadlift_muscle_activations_by_phase.png)
+- **Muscle Forces:** ![Deadlift Forces](deadlift_muscle_forces_by_phase.png)
+- **Joint Moments and Reserves:** ![Deadlift Moments and Reserves](deadlift_joint_moments_and_reserves.png)
 
-### 3. Joint Moment Balance and Reserve Loads
+### 3. Snatch
 
-![Back Squat Moments and Reserves](squat_joint_moments_and_reserves.png)
+- **Muscle Activations:** ![Snatch Activations](snatch_muscle_activations_by_phase.png)
+- **Muscle Forces:** ![Snatch Forces](snatch_muscle_forces_by_phase.png)
+- **Joint Moments and Reserves:** ![Snatch Moments and Reserves](snatch_joint_moments_and_reserves.png)
+
+### 4. Clean & Jerk
+
+- **Muscle Activations:** ![Clean & Jerk Activations](clean_and_jerk_muscle_activations_by_phase.png)
+- **Muscle Forces:** ![Clean & Jerk Forces](clean_and_jerk_muscle_forces_by_phase.png)
+- **Joint Moments and Reserves:** ![Clean & Jerk Moments and Reserves](clean_and_jerk_joint_moments_and_reserves.png)
 
 ---
 
