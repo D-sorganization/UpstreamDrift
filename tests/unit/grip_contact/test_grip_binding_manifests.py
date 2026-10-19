@@ -28,9 +28,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from src.shared.python.grip_contact.binding import (
-    HandClubBinding,
-    SiteBinding,
+from src.shared.python.grip_contact.binding import HandClubBinding, SiteBinding
+from src.shared.python.grip_contact.binding_manifest import (
     binding_from_manifest,
     validate_manifest,
     validate_resolved_binding,

@@ -57,12 +57,8 @@ from src.shared.python.motion_matching.full_body_schema import (
 )
 
 __all__ = [
-    "AXIAL_BOUNDS_M",
-    "AXIS_ALIGNMENT_TOL",
     "KNOWN_ATTACHMENT_MODES",
-    "MANIFEST_SCHEMA",
     "PAIR_LABELS",
-    "RADIAL_BOUNDS_M",
     "ROTATION_TOLERANCE",
     "SITE_REPRESENTATIONS",
     "BodyStates",
@@ -75,12 +71,9 @@ __all__ = [
     "SiteRepresentation",
     "apply_report",
     "bind_rigid_hand_sites",
-    "binding_from_manifest",
     "evaluate_contacts",
     "site_transform_in_hand_frame",
     "validate_binding",
-    "validate_manifest",
-    "validate_resolved_binding",
 ]
 
 ROTATION_TOLERANCE: Final[float] = 1e-9
@@ -540,17 +533,6 @@ def validate_binding(
                     model_id,
                     f"physical site {s_name!r} (pair {pair.name!r}) has no binding and is not listed unavailable",
                 )
-
-
-from src.shared.python.grip_contact.binding_manifest import (
-    AXIAL_BOUNDS_M,
-    AXIS_ALIGNMENT_TOL,
-    MANIFEST_SCHEMA,
-    RADIAL_BOUNDS_M,
-    binding_from_manifest,
-    validate_manifest,
-    validate_resolved_binding,
-)
 
 
 @dataclass(frozen=True)
