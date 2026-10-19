@@ -49,12 +49,12 @@ from src.shared.python.core.handedness import (
     trail_side,
     validate_handedness,
 )
+from src.shared.python.grip_contact.contact_topology import GripStyle as GripStyle
 from src.shared.python.model_appearance.grip_pose import (
     LEAD_BELOW_BUTT_M,
     NATIVE_HAND_SPACING_M,
     PALM_DIAGONAL_DEG,
     GripPose,
-    GripStyle,
     require_fields_in_range,
 )
 from src.shared.python.motion_matching.anthropometric_geometry import (
@@ -197,15 +197,22 @@ class GripSpec:
     lead: HandAngles = field(default_factory=HandAngles)
     trail: HandAngles = field(default_factory=HandAngles)
     style: GripStyle = GripStyle.OVERLAP
+    trigger_finger: bool = False
     lead_below_butt_m: float = LEAD_BELOW_BUTT_M
     hand_spacing_m: float = NATIVE_HAND_SPACING_M
     handedness: Handedness = DEFAULT_HANDEDNESS
-    #: Visual only (HRG-GR2): never reaches the physics hash with ``style``.
+    #: Visual only: never reaches the physics hash.
     lead_thumb_offset_deg: float = _DEFAULT_THUMB_DEG
 
     def __post_init__(self) -> None:
         require(isinstance(self.lead, HandAngles), "lead must be a HandAngles")
         require(isinstance(self.trail, HandAngles), "trail must be a HandAngles")
+        if not isinstance(self.style, GripStyle):
+            raise TypeError(f"style must be a GripStyle, got {self.style!r}")
+        if not isinstance(self.trigger_finger, bool):
+            raise TypeError(
+                f"trigger_finger must be a bool, got {self.trigger_finger!r}"
+            )
         validate_handedness(self.handedness)
         self.pose()  # validates the shared values and the V azimuth range
 
@@ -327,7 +334,7 @@ def resolve_visual_pose(
 
 def grip_spec_to_physical(grip: GripSpec) -> dict[str, Any]:
     """JSON form of the physical part of ``grip`` (full double precision)."""
-    return {
+    out: dict[str, Any] = {
         "lead": {
             "alpha_deg": grip.lead.alpha_deg,
             "psi_deg": grip.lead.psi_deg,
@@ -342,3 +349,8 @@ def grip_spec_to_physical(grip: GripSpec) -> dict[str, Any]:
         "hand_spacing_m": grip.hand_spacing_m,
         "handedness": grip.handedness,
     }
+    if grip.style is not GripStyle.OVERLAP:
+        out["style"] = grip.style.value
+    if grip.trigger_finger:
+        out["trigger_finger"] = True
+    return out
