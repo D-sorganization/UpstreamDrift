@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13279 | Add Run Study panel and worker across PyQt and React spine viewers |
+| 2026-10-19 | #13404 | add barbell bundles and OpenSim IK/ID receipts for remaining lifts |
 | 2026-10-19 | #13338 | Drive finger pose from contact topology with per-hand roll, absorbing #13166 |
 | 2026-10-19 | #13395 | Drop the removed Simulator.set_publish_every_time_step call from Drake simulate and fit_swing_autodiff; Drake already defaults to no per-step publish |
 | 2026-10-19 | #13394 | Move the MOSAIC analytic-vs-finite-difference wall-clock speedup claim to the benchmark lane; unit lane asserts it deterministically via an injected clock and regressor-evaluation counts |
