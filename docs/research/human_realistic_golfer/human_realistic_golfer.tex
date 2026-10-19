@@ -824,7 +824,7 @@ python3 -m pytest tests/unit/grip_contact/test_grip_style_parity_report.py
 \item \textbf{Immutability of Defaults:} When \texttt{separate\_hands=False} (default), \texttt{v1} and \texttt{v2} bytes and SHA256 digests are untouched. When \texttt{separate\_hands=True}, \texttt{FullBodyPinocchioModel} (\path{src/engines/physics_engines/pinocchio/python/native_model.py}) builds the tree with zero bilateral weld constraints (\texttt{len(constraints) == 0}) and couples both hands to the bare club through the shared retention law.
 \end{itemize}
 
-\textbf{Frames, Equations, and Physical Hand--Hand Contact Law.} Let $\mathbf{T}_{W,L}(t) = (\mathbf{R}_L, \mathbf{p}_L)$ and $\mathbf{T}_{W,R}(t) = (\mathbf{R}_R, \mathbf{p}_R)$ denote the world poses of the lead and trail hand grip frames evaluated by Pinocchio forward kinematics along the left-wrist (\texttt{LHandBody}) and right-wrist (\texttt{RHandStandoff}) chains, with spatial velocities $(\mathbf{v}_L, \boldsymbol{\omega}_L)$ and $(\mathbf{v}_R, \boldsymbol{\omega}_R)$. Each hand applies a retention wrench $\mathbf{w}_s^{\mathrm{club}} = (\mathbf{F}_s^{\mathrm{club}}, \mathbf{M}_s^{\mathrm{club}})$ ($s \in \{L, R\}$) to the free bare club via the shared 6-axis compliance law. Simultaneously, in \texttt{mode="separated\_v2"} (\path{src/shared/python/grip_contact/topology_contact.py}, \texttt{topology\_hand\_hand\_wrenches}), every active hand--hand pair $p \in \mathcal{P}_{\mathrm{HH}}(\text{style})$ (\texttt{trail\_palm\_lead\_thumb} in all styles; \texttt{overlap\_little\_finger\_lead\_index} in \texttt{overlap}; \texttt{interlock\_little\_finger\_lead\_middle} and \texttt{interlock\_lead\_index\_wrap} in \texttt{interlock}) is evaluated from the two independent hand states using the shared \texttt{pair\_contact} primitives (\texttt{sphere\_capsule}, \texttt{capsule\_capsule}, and oriented \texttt{capsule\_sphere}):
+\textbf{Frames, Equations, and Physical Hand--Hand Contact Law.} Let $\mathbf{T}_{W,L}(t) = (\mathbf{R}_L, \mathbf{p}_L)$ and $\mathbf{T}_{W,R}(t) = (\mathbf{R}_R, \mathbf{p}_R)$ denote the world poses of the lead and trail hand grip frames evaluated by Pinocchio forward kinematics along the left-wrist (\texttt{LHandBody}) and right-wrist (\texttt{RHandStandoff}) chains, with spatial velocities $(\mathbf{v}_L, \boldsymbol{\omega}_L)$ and $(\mathbf{v}_R, \boldsymbol{\omega}_R)$. Each hand applies a retention wrench $\mathbf{w}_s^{\mathrm{club}} = (\mathbf{F}_s^{\mathrm{club}}, \mathbf{M}_s^{\mathrm{club}})$ ($s \in \{L, R\}$) to the free bare club via the shared 6-axis compliance law. Simultaneously, in \texttt{mode="separated\_v2"} (\path{src/shared/python/grip_contact/topology_contact.py}, \texttt{topology\_hand\_hand\_wrenches} looping over the single per-pair evaluator \texttt{topology\_hand\_hand\_pair\_wrench}), every active hand--hand pair $p \in \mathcal{P}_{\mathrm{HH}}(\text{style})$ (\texttt{trail\_palm\_lead\_thumb} in all styles; \texttt{overlap\_little\_finger\_lead\_index} in \texttt{overlap}; \texttt{interlock\_little\_finger\_lead\_middle} and \texttt{interlock\_lead\_index\_wrap} in \texttt{interlock}) is evaluated from the two independent hand states using the shared \texttt{pair\_contact} primitives (\texttt{sphere\_capsule}, \texttt{capsule\_capsule}, and oriented \texttt{capsule\_sphere}):
 \begin{equation}
 f_{n,p} = \max\!\bigl(0,\; k_n \delta_p^{3/2}(1 + c_n \dot{\delta}_p)\bigr), \qquad
 \mathbf{f}_{t,p} = -\mu f_{n,p}\tanh\!\left(\frac{\|\mathbf{v}_{t,p}\|}{v_{\mathrm{tr}}}\right)\frac{\mathbf{v}_{t,p}}{\|\mathbf{v}_{t,p}\| + \epsilon}, \qquad
@@ -847,7 +847,7 @@ satisfying exact action--reaction balance $\mathbf{F}_{\mathrm{lead}} + \mathbf{
 \item \emph{Independent World-Frame Euclidean Hand Splines (Rejected):} Interpolating $\mathbf{p}_L(t)$ and $\mathbf{p}_R(t)$ with independent world-frame cubic splines while projecting $\mathbf{R}_L(t)$ onto $\mathrm{SO}(3)$ via $\tfrac{1}{2}\mathbf{R}(3\mathbf{I} - \mathbf{R}^\top\mathbf{R})$ introduced sub-sample lever-arm mismatch between the two hands at impact, inflating the pointwise moment error to $15.44\%$.
 \end{enumerate}
 
-\textbf{Measured Acceptance on Best-Fit and Synthetic Swings.} On the private best-fit driver swing ($1{,}815$ frames, $\Delta t = 0.001\text{ s}$, duration $1.814\text{ s}$; bundle SHA256 \texttt{bfa1a9a86cc84c8c...55cdfe91}, spec SHA256 \texttt{d1829abf69ca4fae...97560b296}), migrating $\mathbf{q}_{\mathrm{v1}}(t) \to \mathbf{q}_{\mathrm{v2}}(t)$ via \texttt{TrunkMigrator.migrate\_coordinates} and integrating the separated-hand \texttt{v2} model via \texttt{simulate\_separated\_v2\_grip} yields Table~\ref{tab:g11_separated_v2_acceptance}:
+\textbf{Measured Acceptance on Best-Fit and Synthetic Swings.} On the private best-fit driver capture (hash recorded in the private receipt) ($1{,}815$ samples, $1{,}814$ steps, $\Delta t = 0.001\text{ s}$, duration $1.814\text{ s}$), migrating $\mathbf{q}_{\mathrm{v1}}(t) \to \mathbf{q}_{\mathrm{v2}}(t)$ via \texttt{TrunkMigrator.migrate\_coordinates} and integrating the separated-hand \texttt{v2} model via \texttt{simulate\_separated\_v2\_grip} yields Table~\ref{tab:g11_separated_v2_acceptance}:
 
 \begin{table}[htbp]
 \centering
@@ -856,15 +856,15 @@ satisfying exact action--reaction balance $\mathbf{F}_{\mathrm{lead}} + \mathbf{
 \toprule
 \textbf{Dataset} & \textbf{Quantity / Pair} & \textbf{Ref.\ Peak} & \textbf{Cand.\ Peak} & \textbf{Peak Err.\ (\%)} & \textbf{RMS Err.\ (\%)} & \textbf{Chatter (\%)} & \textbf{Gate} \\
 \midrule
-Best-Fit ($1.814\text{ s}$) & \texttt{net\_force} ($\text{N}$) & $947.01$ & $953.13$ & $0.646\%$ & $0.196\%$ & --- & pass ($\le 5\% / 2\%$) \\
-Best-Fit ($1.814\text{ s}$) & \texttt{net\_moment\_com} ($\text{N}\cdot\text{m}$) & $124.19$ & $124.59$ & $0.323\%$ & $0.041\%$ & --- & pass ($\le 5\% / 2\%$) \\
-Best-Fit ($1.814\text{ s}$) & \texttt{trail\_palm\_lead\_thumb} ($f_n$, $\text{N}$) & --- & $53.39$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
-Best-Fit ($1.814\text{ s}$) & \texttt{overlap\_little\_finger\_lead\_index} ($f_n$, $\text{N}$) & --- & $17.85$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
-Best-Fit ($1.814\text{ s}$) & \texttt{interlock\_little\_finger\_lead\_middle} ($f_n$, $\text{N}$) & --- & $23.62$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
-Best-Fit ($1.814\text{ s}$) & \texttt{interlock\_lead\_index\_wrap} ($f_n$, $\text{N}$) & --- & $15.72$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{net\_force} ($\text{N}$) & $914.32$ & $916.75$ & $0.266\%$ & $0.233\%$ & --- & pass ($\le 5\% / 2\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{net\_moment\_com} ($\text{N}\cdot\text{m}$) & $471.76$ & $478.37$ & $1.399\%$ & $1.142\%$ & --- & pass ($\le 5\% / 2\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{trail\_palm\_lead\_thumb} ($f_n$, $\text{N}$) & --- & $42.67$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{overlap\_little\_finger\_lead\_index} ($f_n$, $\text{N}$) & --- & $42.67$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{interlock\_little\_finger\_lead\_middle} ($f_n$, $\text{N}$) & --- & $42.67$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{interlock\_lead\_index\_wrap} ($f_n$, $\text{N}$) & --- & $42.67$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
 \bottomrule
 \end{tabular}
-\caption{Measured separated-hand \texttt{full-body-v2} acceptance on the best-fit driver swing (aggregate statistics only; action--reaction residual $\le 1.0 \times 10^{-15}\text{ N}$ across all steps).}
+\caption{Measured separated-hand \texttt{full-body-v2} acceptance on the private best-fit driver capture (hash recorded in the private receipt) (aggregate statistics only; action--reaction residual $0.000\text{ N}$ across all $1{,}815$ samples).}
 \label{tab:g11_separated_v2_acceptance}
 \end{table}
 
@@ -877,7 +877,8 @@ Best-Fit ($1.814\text{ s}$) & \texttt{interlock\_lead\_index\_wrap} ($f_n$, $\te
 \textbf{Reproduction Commands.}
 \begin{verbatim}
 python3 -m pytest tests/unit/grip_contact/test_separated_v2_hands.py
-UD_BEST_FIT_BUNDLE=/path/to/driver.npz UD_BEST_FIT_SPEC=/path/to/full_body_spec_hipcal_scaled.json \
+UD_BEST_FIT_BUNDLE=/path/to/bundle.npz UD_BEST_FIT_SPEC=/path/to/spec.json \
+  UD_GRIP_RECEIPT_OUT=/tmp/g11_receipt.json \
   python3 -m pytest tests/unit/grip_contact/test_separated_v2_hands.py -k test_best_fit_swing
 \end{verbatim}
 
