@@ -246,6 +246,12 @@
     "0c0717ecb9dc17bdf02982c3308eac3e3984cb0dcd5baa828a8efc4578ddc606": 2,
     "0c1ba2ee8b0c050ba3b5d00d8104fb4694444667a10adda3915cbbddd545b2d5": 2,
     "0c390681f616c55bfa13ea593b6cb5d2eef605e14ac042998523607e9739acc6": 2,
+    "0c39c0a5f4af12795abf0c2a1f2eba031b4fbe955d0dfbf8f19796fcf227429f": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "0c3e70de3a92ab62a11ed965ce66fb9a5d4a5542da3deb6fce7d18c820da5079": 2,
     "0c3ea2c67c16213974a71d10612c9de9e312cb9ae56310710bbc45b08f491c38": 2,
     "0c821bd8510e78a01648c750fcdca9ecaa1522ab221e1089d599b71b91ecb6d6": 2,
@@ -496,6 +502,12 @@
     "18f15c916fdc7eadb15df101f860e7b0df93ca3e8d4e8fbe9f0d300c836e1569": 2,
     "1908c804bcf73118a351340083546c92bddce010d95b4d4b07be6009b19b4fdb": 2,
     "1927d6d53e4b7a12dfd6eca8adceb6ee4ce2dca7dd78888d6ef3dbb9206b185d": 2,
+    "192873c915cca42bbfa306eaab2a6001efd057c7938c13c4c9e7e1f34e40d5a3": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "19451cb1fe23dc58a538c2e800d237e31208dbe7ee43d14bd136a0ba4a0da855": 2,
     "194c970ad551702eeda960ee34d75d6206c3af79406d475d308a6996fb049ad1": 2,
     "1955d5888de83414ba7377ff481e951321f6d8ad80fd4727f1ad672cbe46948a": 2,
@@ -690,6 +702,12 @@
     "22ce93fc0593c17cb9b090cc5af3a28f471ed452795a96792d5d922adde06846": 2,
     "22e6040d6c560552bc1f6758feebfb3926b234afb3f911b3153b21d99d07fc7e": 3,
     "22f85c8ec3bf9fa069d3dcaec4ebcad94c05b5e7874f7e19a6cb7c322e15aa71": 2,
+    "22f9c33c8a3bdc9c7252d2cf1010fcaf18ca0627de20e3ecdb9fccd874d88664": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "231224af64ffeb30c04adfa9a042ecde09cef262fca3ffa124bdfe5cdef836b8": 2,
     "231b1855cd7b80bbfc1e24373cdfa726fde0254bd963b08db72ba82a26c1e18b": 2,
     "231efe260a18b9d1cd746ed969c7d33bd00e8f649a5693d19c57568bd86e6091": 2,
@@ -753,6 +771,12 @@
     "266af636d7f84eedb2d86647a7c276bce8b8ffe06d0eada28ea1b3fc61080912": 2,
     "26770c479a4a556b0eb6ddc606f5f6486dfc4027fa92c5a67214733b1a8354c2": 2,
     "268c4aaaddc1d595a68d78839180877e2442c5fa65d4b8d5014ce84106bc93af": 2,
+    "26a56e5fa9245121092a32ba85cc30cf3b44f7cf7e94ed4046bbf0d1bd4a6aad": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "26a9854a9bd06df34b2942897152b555c06e1fc50c4b6cd95f27e48253a332b9": 2,
     "26b60bc4dd87c0d8a34972d7a6c2674ea7d8190770b6ac4f6e6767386240fd3a": 3,
     "26be5d670cd50b8778a90bedd8274d57502fc9964fe0bd15ddbcfa301d6b5b83": 2,
@@ -1191,11 +1215,23 @@
     "3bf177897c3f658c3cca37a94760f4715a69af2088d316d8f0224cd0dc9f6312": 2,
     "3bfbe7ec1f6af09b0427c648cb909cc77500b36334c0cdd7d9402b24d0f7e358": 3,
     "3c0163cae429ffabb7cb4dd51717486631b2010755952d59c5ac6fc9ec604475": 2,
+    "3c0bc9f57b9ed7948481a98bff6ddedde63f48be37c48782ac63100cad198994": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "3c13b64b2766c70e8d1a983fcccf3386891dee0b89a7ddc2db4d22428d594a20": 2,
     "3c24511924f5eb077e98f3759de94b27c3c6d5f7739d521fd0e87444f8053f1d": 2,
     "3c3472f9b08b04d7e86ed531977f7c9309c590b997782952a50d16293ce1c050": 2,
     "3c4920368adccbcb979a22b2874e6617229e5c22926d93d49dea9de7e18357fa": 2,
     "3c4b152580adb7e6cff04347286db90ec5f9c0e800456c195eef521248582d79": 2,
+    "3c558b4a2e61bdedae20c225e3ae094c7b1759f8bced9bd2d17880a57994d73d": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "3c59ba7595738ee4351a805c9c4b55f8ad0dba5d7d5faeee5a1562412bc83c43": 2,
     "3c878436cd26e5e7ca2f8e916e49739ff90ddde8452f92db8d39911d444f6256": 2,
     "3c8e1547fba9338247698f2428f3b7e9850d2bcf345c3f7a2202a077ceb88dca": 2,
@@ -1231,6 +1267,12 @@
     "3e03801984ace32e4e1d7e02d0c620ca67ab32a5864e68c1d8ab248a5bb628af": 2,
     "3e20f5c90c2e263da76b7cebcb4db90bd91ca7ad7348da901332146fe1b1b8db": 2,
     "3e2bbde53905bbfb3b8df41e7ae762e80645c4b0291e2db404be4ac13a244c92": 2,
+    "3e3da7155ba4fbb0caf4fe7ed60016cbd1cf12a7a1d760c3c8a225f3edf798a4": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "3e40f8689bb142382cd4eed81a2200d7d495e853d20a11bc63cc5e8457cbb990": 2,
     "3e419d8bd8353679b7dbcaf78eba4a0938da4319767961c927fdcf8ff624b77e": 2,
     "3e4687c4e4572237d94e08bba792bb838ca42fe8c3875fcbba57a905afe8c1c9": 2,
@@ -1384,6 +1426,12 @@
     "44a389f63bc98d54e43dd5eeeeb9dc76490c301840746fb830bb1c543cfc4839": 3,
     "44ac5508f6191d84c7b6a3caed9919c0241448d9888cce86bf73ccbe5211d939": 2,
     "44b60caf4b4557a0f65eb668ae60212f412454ddf2f8a2b7bdf4525a0bc633b8": 2,
+    "44b9880405b626e0e61d3d2dbbbe4f446ee30e164f25630dfc510b13102f9114": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "44b9f708b53cedef66b3973d5d1c726cd72b6a9296f14fbdabeff6e714e4fb10": 2,
     "44c633eadf5bd07de83f563c3716214866adfd299793caca77f72153db285695": 2,
     "44ccb2ee6519f3071b8d40bf5e0aa8c2d1aa2731f817cf09a07425ff5f47d9fb": 2,
@@ -1423,6 +1471,12 @@
     "462f09bd32577dc55cbf66ae41bd5060587432043812c7f896aba61b076c637a": 2,
     "464ca981a3d123781a8ca245794a21279858b2a4e8caf120bdaba7291d0ab3bc": 2,
     "465bbe82f44a36f47ad2836ffd81ad333571edac015cca6b3ec2cfcd3bd67fe4": 2,
+    "4661ab22bd93de8995bc7938994d7360669d70fad9a625f7b4898cc4678ef296": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "466dbd6fdbf1b125df52ecf78449722810f1f2ee2f0720f4ef894d454589f8b3": 2,
     "4684851cd3a7350c8a2855277e35387583ebf53fa350f82f8e7a369a786a5b38": 2,
     "4698be9e307655a9dad8b526eb523a1b6308e2779afd07a4ace511cdad59b1b6": 2,
@@ -1456,6 +1510,12 @@
     "481deb24f6ed40c23f4478958c9cb0b7e08149b4e63fde995f072ac50d2467dc": 2,
     "482c3d3d86714fd4668500dc05a6f3a71dc1c733df7db791175122db415eca13": 2,
     "482dadf5325d6798f2e141a47cedf17e8c37452d9b81c166829715f37cb40725": 2,
+    "4833058efcf0cddc6b43cb51a17b617dd71327824896c0e978913261e7a1aa87": {
+      "issue": "#13297",
+      "max_occurrences": 3,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "4849090611510323f5a691a0bdb72a4a34c485fa824efe5ec426cd09037c4d09": 2,
     "485b36f0e0cad45f97d222220b1973e772a9186aa81728a23e1541831b7d69a5": 2,
     "486fd94dfd57dd371b24c1f0c74bddc0afe7087ef187737e42ea617c87b2c50b": 2,
@@ -1482,6 +1542,12 @@
     "49c90deb2414a86403a21b1cd3512c31bc26d0176436b6b7bc38a5fcae32c4c2": 2,
     "49e244ad4c18a1ba139c1f3b8cde9cc05bddbf245fa40f5c3c77d209b4a0c55e": 2,
     "49e7ad89b071be844527061559a6081360e06594ec801ee493fd50597a5137f0": 2,
+    "49eace3d0b44e36476bea54e393b4fbdea7eca3f31b508509a051de2813e2dc0": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "49fc12f8e18738248ba289711da73389f16e958a42c5518f483ae6d21af08201": 2,
     "4a27e54411004aaf645b5a6526ac711e1809eac4f959cab633658a922e5784f0": 2,
     "4a2d7c886ebb11931a12b1768ebde6f7ce203b4389003dc89cb9b72ea8732b0b": 2,
@@ -1646,6 +1712,12 @@
     "50fb07a6dfed732953cf6f876d6123544b07c06c163131ac13e6382ba57f9cda": 3,
     "50fefda76e308f03e6152a93d68369a3a3fcba655d205c630ac4bf00bc113d09": 2,
     "51032de67c68ab26869a7122633180f7bc98324e65ed8a180d421ba63f56f89b": 2,
+    "51162f366f9c7835d6052e3b686b624ce975eefa2261e8c3693212ac70e0642c": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "511c2c2bc50b9d24d65d73bf714816c156330adb6f0b7d3f93385ee41cd0a271": 2,
     "513fae8a4eed821ef74ae151c15ac8766e361600616c91157d7733cf87de270d": 2,
     "5143edd900983213f5c5afa031445afdfb25629e48898140d40c76c40f819cd3": 2,
@@ -1685,6 +1757,12 @@
     "533493d3a70d3858e644e2b7e0103fc981b3899f7facdc108c2c5f92747415b9": 2,
     "534cf7025adc04d8afc5d387e0d736b50edd556a1cff93b0b055063562ac6124": 2,
     "534f94361cea93db740bb2af769a6180272b7555e0b19fb1b5175025ae3bc6c2": 2,
+    "535f84e778160ac431df9509e7f1371cda46bebbf22e805bf8462ff957cfdaa7": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "53635a1ea248d69899bbd8e6016508586f45e74b7f2d7175e1b1c187e12db67d": 2,
     "53723d817f6c5cb65061368c7fec78a7bc6fa894d439b40e006591fb0dc502a5": 2,
     "5373080b11c28ce54894657329d2f172bc20df3acc2c7f7dd686c6190864b48e": 2,
@@ -1789,6 +1867,12 @@
     "58716973c3085676c4f4abe983157a217991abcaf50da7aef3db7f5829922a6e": 2,
     "5878b4f12979f28b31187a759e3b8e7a511eee43abe66334958505b191ff6c3b": 2,
     "587b06fdd8bcf39ed54aba7adab86a7b662a591c21a1a3b68cf9a20038ffc3fa": 2,
+    "58876af959ac535ebf31c89e50f507eebd62b625e53683e52caf11d2120a3ec3": {
+      "issue": "#13297",
+      "max_occurrences": 3,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "58bb94dcc7884769fff79511f3092f1069637d740fe2cff9bf4dd31160ced633": 3,
     "58c7730ddb854c0f66a8e57c7fe8df6450a4d82dfe0a220993246b20427798d2": 2,
     "58ced70ece07925179262cad390e4dbc9f4ed465f8d2e12f9c90c50088259891": 2,
@@ -1814,6 +1898,12 @@
     "59af869f6730cce72fb0460f01ec50965a5f1737eda96dcf377d4f136c296cdb": 2,
     "59b2536741191470ef087204a1291041832d1f701eac0554543045ce46fb69ac": 2,
     "59bd889a1b259e32130937dc1af3e0b6fb430ff4c09a94b709d47e3a5ad39ccf": 2,
+    "59be33f0cb21a05097b7168c1952093bbc045c4d0e52491ba14d511d94194042": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "59c448f41c93b6e70ce782bde19565330fbfd1563f1e1783452ede28c3f07a22": 2,
     "59c793c372c76d9a7bbaa54b9c9bd6ac04b85115671d269b5050d254b46c065e": 2,
     "59d343b232a0ff822bfd6460aadb0d6ead8cc3ca63b47ab7d77c38a73004b846": 2,
@@ -1920,6 +2010,12 @@
     "5e75e61c2907b271abaa48bbfdce6c38326335b56623cbd52959d2a3c7f23ae4": 2,
     "5e7e4845e5dae4dc071c394cb86eba728829b1f62b1f2b1ea4c00d52695580e5": 2,
     "5e958b5278da7b7be0e306c18aa8d88d46ce6e873d5c16cf1218ff5379010ac1": 2,
+    "5ea96bcf9831965c1737a3d3e5d8bf94d18521a99aa368c9d129823183791802": {
+      "issue": "#13297",
+      "max_occurrences": 3,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "5eab1a6e8eac6e55b8da8620f2a0a2ef0dc11131a7096551118e1ade679311ed": 2,
     "5ec8f9ccb5d606e06e551014ce2005b583c2e2f23f8113f0b64143cb93ecca7e": 3,
     "5eced2dd8e35934b510c6a6c4ac454e4e2409a32f951b0f3be397f9a182c130b": 2,
@@ -2135,6 +2231,12 @@
     "68a2e9eaf971b940378c583f4b7f2264c8c59407e7a218babf8035ada1118952": 2,
     "68c2813f39e6877895ef8ee811d0c8fe0b0901c6f2fb3af08ad74adcaa579774": 2,
     "68c755159b67957eb54a3b420970107f6a1a938f085acf86c80af052c30f6ae0": 2,
+    "68e1356b9ce041d6f0504fcb7bcd164a98f66b0491d800f44f69d8b0115cac03": {
+      "issue": "#13297",
+      "max_occurrences": 5,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "68f4edb3ed484112a8f6eee319ad80455fee78308deb65f8c82d183193d680c8": 2,
     "68f5724a3bcc16518a1eb349624ce533d924505bf0e449635600a5f0a8c0f3ed": 2,
     "68fe1e1de9e73f34f97a381e2d1e74e631365430036eedb49f538156c9eaadd8": 2,
@@ -2186,6 +2288,12 @@
     },
     "6b7acb2be190640ee3e7298cc44c72222d0b1d109a5a2439576369bbf3341545": 2,
     "6b878ac806e2d3f8063f913f09c53d89b314aa5e99553485a57cfe6736d9c28b": 2,
+    "6b99df178f3da00758f5dc1d203cdd9397e107706d131dffd2fbba74d26471e0": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "6b9bdff8e88d5f2e08bd11b2dddbcc5a0a26e6563f300d670c512d8939b7011e": 2,
     "6bea490e8ffdb75bebcbe8ab1fa757b1a0c611643bb63c2a61874ff0a47d08fa": 2,
     "6bf9986847566861945ae4af81b582db20896ad92a10cac7c3cf9cb34b01e70a": 2,
@@ -2201,6 +2309,12 @@
     "6c824cedbdbe798b3aba065e4b07a158af5ab096c838281db882fcc9857f23f3": 2,
     "6c8af5800b719eb19ec72b013804d139333da98972cb16c80bc2f08bda099f43": 2,
     "6c8f2d4b783557fd1ec03db619e84e4ad0a09a15b898aac377b1f75a29fcd137": 3,
+    "6c9ebce12af176ce804b5dcc1e99b923cd5f585a4614a22164e82675b0e1aa5d": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "6ca32c683f742187d2b950708dfd6e15fe3d4b579a3985411301fab0871f3488": 2,
     "6cb0cd8e0bffa45c944126bf42ab960aff75cece23a50474e46341e4332428e7": 2,
     "6cc4e28fcccdc17941f7465c85db6a9b1d529ed1dedfb34426342174f9793824": 3,
@@ -2459,6 +2573,12 @@
     "788be85a3f7a9c5cd30569d65c304baa9f879cb101b6a9daa606eace572128cf": 4,
     "78a1002415c963ddf32d0f0cd2819383b2f22db3659d6da47a680489ae93e8e4": 2,
     "78a1ca210bd6137f54f3df9c6eb20793b8398a104cf14f0461e2fd3b904ffe51": 2,
+    "78a36122ce695ee430b944ede7e8b06853484f3d115ed12a1364dbdb55742b29": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "78a57626576734e46736f63f9e48861488d24e0b604076d347fbb04a220e0f22": 2,
     "78bd9bc646a17d85449ef36634fe5790d3cb10c21ef2202551710a05007346e6": 2,
     "78c172568b1ff61777210d43fe02b1454852b6b452a7e12113a73f71f7845c14": 2,
@@ -2548,6 +2668,12 @@
     "7d437e24de380d644d8d36ab1933823159151e8e7aaf75d3b24eea99fbe8ffc6": 2,
     "7d4ab506e2cca6f16eccf8aaeb7881e62ddfeec438ab548d5926145267fc3352": 2,
     "7d554cbe8dce74ca02fbcd20d0e1a6824b40b36fd3400cf570f230233a71b5ce": 2,
+    "7d5ba4d513e68c3c8a31b33b6c6c19a1c323a07a366b5dcdce602eb796595b1b": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "7d6f23bc6ead5054ce19791a449bc422d5e469af9cc7e1a0597ce490f6496f8d": 2,
     "7d6f852e7d7d6b3890352381d5449558a8fa3c4682457870aa83ffa14b8048a1": 2,
     "7d891825c3983448ce51e2064dba2dee618f7e019f87df948edbef29274635cc": 2,
@@ -2560,6 +2686,12 @@
     "7e160de54e6d634519719e48a84c32dddc8eaa7af6fc44b733714306c297fbde": 2,
     "7e25ac334d599fec910eee0bdbbc4cc4289131994a7b5db0864e856156c5ad02": 2,
     "7e4730a3ceb4e6732b3390007dbc371cc40a16603e4a2951950fdf32b65434fa": 2,
+    "7e48ee5b3704704f492231ea780bf5cb28c50a8e311f76e772d1336a9fa6f611": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "7e6420a64b88e4a2065554a33cb90dc46d5d3020bc5b2d1bc470fdb4266b50b2": 2,
     "7e6e2e608b8445233aa7757c73397c58c75c45d9251a44d68576e3511064ac18": 2,
     "7e726918c0dbff050739e33eae2a6a607e7813cc544a505593be2141bbd310cb": 2,
@@ -2616,6 +2748,12 @@
     "817f2691d1aecdc25ffac6f42e15896481ec8da6c651df8e98c15d05bae40ccb": 2,
     "81865ddbb635c3d94f88628e35761909a05ecca70ac1ff186bd0a5a210389221": 2,
     "81ac3ddef0805ff826187c39c806aaf5f1f3fcf567c2ec1974fb2a985aefd3d1": 2,
+    "81b9ca51b3a3b0a995efccabcf845cb9c62a26787dcd9eeb74234dd558618adc": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "81c8c3cdc9694341a7ee912e110bad54dcd933b4d3d199abe898eac2388a3ac5": 2,
     "81d209b39ac6104bf840b2d497dc525faa4fa56c715d36ed3ee469b02685781e": 2,
     "81defbb3260255f38a2b0fcf7bc3523d1267ba276a1c07cc8749cd950782b02d": 2,
@@ -2652,7 +2790,19 @@
     "8329bf244ade7015724320edf0e78f42a59907c55a38e1d340e216f12702a615": 2,
     "8370fea598a1fe7d8c2d123f4cfbe38bf63e9f23c86bc9c2906d8920b7e18449": 2,
     "837d04f953c6eb15f3055f8f186d1e9f5e52ae637dedd7309d7d02136f62c8ff": 2,
+    "8384996997d73010d418a39592d92b5df380b1b6fd2c41d11307d497cf9bb546": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "8386af5012cfa306c6814fa9e013084e72a0f42d28b3738ebc32483c0d207c5c": 2,
+    "83945bad2a7f98e113ebd56f83dda088225a2d7ba59964564555d5043af140f6": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "839c2f7a38672f1ae472fb3172aae9e199875af8d5b2499c1df0d1232204928d": 2,
     "83a8f0e893d7d3455ad23b851db4695c9de389395cdfee36ada887ef3b6c532b": 2,
     "83b58fb41c776dc153ee38a68337483b6371d5bbeab2736ad9beacdfa40fd7f9": 2,
@@ -2660,6 +2810,12 @@
     "83fa9fb5c27e9f6185b7c944e333ebc6e2204ec665743f2bc8b6c07dc47bbcc6": 2,
     "840723cbfe72ae1f867fee46a7bb1c9038bc1818724c487a8bc013ba75a547c7": 2,
     "840a3541a4a7b10c22e7ff0c38b66c9daae0c4092c31b02789ac3ee43f9b93f7": 2,
+    "840f68eb740e061c6e562d8be0ab6bcae10d1238a70eb65e0198af0fc573d49b": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "841050a7f6d987d349289aa6dee244bb80ad1521833a2b15609f18e3813c1ecf": 2,
     "84350925fc9a63f6528e1b8aa9b2992790ea55ed194da3c262502f8cf431b93c": 2,
     "84413044ab24685ad0514a0716ccc9cc67f39c5c4f81e8a5a8196ef38bf75f6f": 2,
@@ -2683,6 +2839,12 @@
     "84cb90ef9682886d9e32a59b4d9498d25fdd5f3e70e3eb77cf93ef6fc06279f2": 2,
     "84d1fc340ae20108b6379d3d2bd82fa41105e9c0cc5f9e979b9a524df71b00c4": 2,
     "84d206b37a39fa0a1f6f680a5bf2771e65d138107ea1645730684e3148971c2f": 2,
+    "84ef25856e2bacb6f4189b005270df3bfbacc680cadb61ad45013be757c69798": {
+      "issue": "#13297",
+      "max_occurrences": 3,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "84fc8fae10ba046db47be24d98716ae97393d0c9eefae5538234a1a8af7f4dd1": 2,
     "850b2ad13fe379c599fa82d47b4c38a9b7e40cff7f8fa575254731e7f14f9c70": 2,
     "851be6de654cf39edc42a431e6f8ca215c50c949481abd91a9c1fb3f6e5f3d75": 2,
@@ -2711,6 +2873,12 @@
     "8668428c320d599e84bd4c1a11e40976fc29a88b150501c73f203fc255dca056": 2,
     "86840803195106eab1395ecb2f96caaf47c44128f7fb225bb962e721d7b2e430": 2,
     "8692c090a3d8fff96d28fa0e9464a19e5d004c1cf6dec7968d2e6fb43d16c05f": 2,
+    "8694b6d35368ebb6713afebdf76a265dc9aff4037b4282935877c1654ff1249a": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "869acf0aed3fb1fe83a95c40d7c7390e7277f92b7941b92c2f1770d114ef9532": 2,
     "86cac2d1db3c8fcbd4c2dcf6027df252568938f4240722d701159e982c78c4b6": 2,
     "86d0b156b8822fd2fca2038db4c8ff256228648333b2f4134dc4deb6b26e7a8a": 3,
@@ -2722,6 +2890,12 @@
     "86f43231d10fb6978e506fa50687d39ba6617c2b1a06033cbf6cf0dc32432e7c": 2,
     "87058f92a1cfe153e6fa2866f7f954e988eed52a7d79ae6f96456205bb5ef6b4": 3,
     "87250d4d7010d0f46d3857b3d776d4d9c275276443353b6cc06f345795e1cee8": 2,
+    "873689bbe7f66c5610ec3db7928ef535bbd6918112e66371f3e1e01f163f3bef": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "8736a1bc31d43461f3f78da85d7f4c360b1b0d401dea1058fe2ef933e59a3aee": 2,
     "8740fb482f0a708b03d7d8f8dbce67a30d70e855cff8e89044a099fcb7c88c23": 2,
     "8748322367910413778827b44538ef128497ab9beb634da04d6d0ce5c2b5b9ce": 2,
@@ -2729,6 +2903,12 @@
     "876835795b2f08b920339df25397003905197ad298648d2a0ec9bf3b94dcdb59": 2,
     "878ed51415207f510256a655e398e7b728081f1a8b04703fbbd8e06077bb890a": 2,
     "87a0a8ac4eb5b81c50fed9bc20cdca675584c5138be8df60cb410c1f5db705ec": 2,
+    "87bc1538487d80feacf6748a91e9a7d80151ae191a98c498656f4fb4f2312286": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "87c58391295d52076019cdd00e11bfadfaba837f3e4ab91ce4732079d1507e00": 2,
     "87d04274deb6db973d2291531570f1bdceb12c8222c11fb009312e97707df2c1": 2,
     "87d045659c1abaac4d657b3d96a414de431fa5362064311ce77fedc83874101a": 2,
@@ -2815,6 +2995,12 @@
     "8b8de8a0573852bd294cfeed76ac706ae325e322e3a5136e298030b57ad29984": 2,
     "8b91bf8d3a1e356ca83a29289031521759fa7daee3895dfd41a4b9269b7ffc15": 2,
     "8b9982dc7b1bbb13a6a5a82c2b7201021e46cac7e4589748bf2c97bbd222ffcd": 4,
+    "8bab32d8976db22e594b6856891345704628c28a89f0543286218fc9f01b8d06": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "8babd811c85aa5aab0a26732e22fc8be5544f0fcdb549943d8acc2317a4db1f7": 2,
     "8baebe00ceaf5b25e7e305d408a0c72d9e08f7fc8a4d19a31fda940d1feba79d": 2,
     "8bb83ff68b188d6d648109aff721b5509d18b361e1cf9524cee8550a96066e71": 2,
@@ -2922,6 +3108,12 @@
     "90fa577bfd864cb8d9ed1b66dd651045f71ae8820e4e7dbf38db7c9ed89c6e3a": 2,
     "91153c327c09e18bb4f1f55fa4f9ec746808c1f58e6f73b2019ce0aa92f0e71f": 2,
     "912ad46176bbc984f2cd85a500abcbb32366457e924122188b7415e62a79db3f": 2,
+    "9137d117da27b49f6f05cd28096a54b3ae64024abdc5b87474ddb702a6cf8144": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "915a539d889794d65eda2598910898d87a50553dfad984fd7b3c439eb86ca61c": 3,
     "91644c12e5800fed871d2ee2e7b124f78a841455212dff20d47f543024dbb495": 2,
     "91819716453c93f0d83ae4e485fc2794d3cf6f919b527bb758c37a2063b36795": 2,
@@ -2993,6 +3185,12 @@
     "95110c9950df6a9220fe42af45cebce0ba5b7e309b7668887b4635aff6dbe34b": 2,
     "952d3f7c17f31c581092c6200a7c4d5807327ca41d3d88220f96442b526224eb": 3,
     "953f114df11a2b0fa956b546f26b19971c1809b6eea797ff1e03236149d2ef81": 2,
+    "9548da6799dee45904bc458de6dd3d70a709af2183f19fa89722012ddd3a5ef4": {
+      "issue": "#13297",
+      "max_occurrences": 3,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "954ada233d1a7bad8fac44b5a714797b3f168cee0a2a4eb8493281b77aa1863a": 2,
     "9551fb59e030fef2623832f32b99436645ab9a7f674297dd9f4b2c769e0512a5": 2,
     "9554052a0d5d4881694115e9a4c2efb63a9b17af7a18097c3dabd85f537d1253": 2,
@@ -3043,12 +3241,24 @@
     "97dc9ac1787ddda164b2af6492791db5250e7b5f860636def4355fceb8ec7243": 2,
     "97de3f85f351fbf4cec70435ae91ddc3d1cb4c090edeac46829e836f3b56c57f": 2,
     "97e161c1557b3ca371b9335c7acf3479261e07a93a38fbef113cb3baafde4872": 2,
+    "980da35bcce74c805b53eda1f4d4a14d359af15316471a7a617f771b444dc3c1": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "9812345122827b0263e95a37991828643bb5935b84b5cc93e697e4923fb56421": 3,
     "98192bff47f1c6e53f73dc72297a9f034b1ece3685e9c2720a70b4a4277d307b": 3,
     "982c7225a174e61351d213b870df548bbca4974cd3f9e1a8e27557f35715a477": 2,
     "983878b4c67a9f5a93ff16e3f76d386e85cb0690b19ff735fd3a09c9cd1179d7": 2,
     "9839b24a349571ef33ca1835dd90e75432c24f3f694c114059544edd1d5c7eaf": 2,
     "983e952b24ac7ec14f29c8e4b5412a2bbc62956b78330753d64c535f9723d887": 2,
+    "9853628aabebdb7707dd954850130d8fa27d507dc1b1f4c7eb262d17c7287f6b": {
+      "issue": "#13297",
+      "max_occurrences": 3,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "985bfcd3998fede8883ff19717293262263b00c384ab9d605a53726f439a13ba": 2,
     "986fe51f94f056064f3df4f2762c1ed63a8eef48a0817ece96a6d80b6148eb58": 2,
     "9881a38ba9c259784c7f18e7b0ef97d9573c2e813b4508577f1f64614546cbf6": 2,
@@ -3146,6 +3356,12 @@
     "9c3a4aa68bcec749495f57914df894f269b53eac11574cf7d19fcbbb80a5363a": 2,
     "9c56da02f972ebfe35d0cfb9f6dc2ee7356582d3a9551104f1c481c8ac31b1da": 2,
     "9c64f10868f2615dff8fa801e085c07416d87a08bb2efb2172889d8ec7a2e1f9": 2,
+    "9c8ce884cc87d6d47014dfdedd6100406e12dcaad5ccbf883687fd887d5f311f": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "9c9427ca674887e44fa71d9c805d29f1bd30113433471afbc44feeaec1b648bb": 2,
     "9c9d81468b4d999f4e6b14742e5f7b801e2a3d328ad6b6ff1a6cecba2ac3e1b6": 3,
     "9c9f4d7efc09e02c432a190ca7bcd65e3329796ccb15e3d4776aa0253cb0fb9d": 2,
@@ -3160,6 +3376,12 @@
     "9cea4ce04a52aa9673af7ba93b96f9c50b6763d6783ec1ed0262cb60d204045e": 2,
     "9cf19cf3a8bfd630f9c9a8786b43db215daeb9953757bf167caea4dec8aa6eee": 2,
     "9cfa390f2a0fecf6af66e0a3b9d6a13348ce4f6990e54fd88de06e435556d135": 2,
+    "9cfc6fdab427f645c7f27af8068db0c47311a8dd8af682a27197bad95601c5b8": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "9cfd588307b2a23f6753b528eeb812d3761adf6eaaaee60f982accb64a6d5764": {
       "issue": "#7617",
       "max_occurrences": 2,
@@ -3262,6 +3484,12 @@
       "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
     },
     "a167fa12c3dadcffcae89c2786e8cbb5e52ac5b2ad8a7873cda9ca9ffe4bb959": 2,
+    "a170e995673ffae3c28e43085f19252976c99e44b841fef16b24c1bd3c7f818b": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "a18dc756bc7abf6dea0d8fd0e45f3084e342ea90720e7a21eb304d9d5dd50feb": 2,
     "a19bbd826b384bead43ca4fd2f975737f9a25e3cd44059143e0e4fe8935d9a5b": 2,
     "a1ab69fd8ddb16f7089a95a112318aecb7adf2d87f4b12e82217db03a467c6e4": 2,
@@ -3411,6 +3639,12 @@
     "a8ceed85019e0c568dc8943a736e599620a0b7d88e7053768855dfff0b71163e": 2,
     "a8d7b73c4018b0f8cfd6fc7388e410c7994067f25795a0a6c0b140586e7c0c5e": 2,
     "a8f4262efd64887da09e273244e4151b988e9a8f3c93ac7b222c69f7108eec94": 2,
+    "a8f8ede8422d1adb478080a669829418cf1649255aa6f4695e25b09a29b2b21c": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "a8f9a531febb30ce884ecd8588a0533c3d9c734cc6964369abd716eaac55e6d9": 2,
     "a910cc26a3b62e404e24a5a77ff87534a9adfe52cf74f4338bf327cf57536337": {
       "issue": "#7617",
@@ -3498,6 +3732,12 @@
     "ac152c7b4dd995f4d421e8bac07837dacbdc7de9833531a47f1de1cd251b48b6": 2,
     "ac184acecd1d947d88a3fc75eb3d49bb352c54fb705f36662f0f6f1053ad7c65": 2,
     "ac18d96037f2589f9ea7ef200f1bdad04616ffaf0aec1b5484b9a4396c8f6e10": 2,
+    "ac264ceb207635d4722cead2d8405bea3f5e6c7c1c0601fe1cef1a2434c99cff": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "ac3cbc081e79cd61bcbe593b483f44dfd069eb46c997f303cd86544e53f5fa4e": 2,
     "ac3cc586289121718f37c91b9cd5cd8949881ee1c549fa8c74c261700d608ab9": 4,
     "ac60323c2ef4db4b354f193642dba26303b92f077fd4cd1aeff66555fed1accb": 2,
@@ -3510,6 +3750,12 @@
     "ac96b4a76958895b67664507a04e23a1f4a2ef09b9e0d56e75ad54047375139c": 2,
     "acad92001e4c4b2b5b620021fe5701ec4fc5c25d86cc5be1ed3d095be805323f": 2,
     "acb151a0f9b3d13eebfaec6b4ee9ab048f535718364f1835c11ac0bd91cc81ac": 8,
+    "acb5d599b1ebb12f401827a040ff3ded089fe875832eb313ef03b1fc73e0bcfc": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "acb68e9105678359f55ba7560229cd9bf7c90fb480c5f0fa8179cf984e49e1c6": 2,
     "acbf54e768fa590a61fbab77a0bd7ce9ac53e4614146939422eef83bb12ad648": 2,
     "acc153ad335f1317d8ecfb2bd3ed4c0b7086d7ff3a0af5054d3852b7273b0abe": 2,
@@ -3606,6 +3852,12 @@
     "b0a794942f74fedba2bbc8cf1669d8f60e6a8d45403276a6a27db3ef6a923c6c": 2,
     "b0ab2cf6243d03a1f8d70d93455eccacbf96d456ee6c0bae32ad1e9f340f0fd6": 2,
     "b0ac465ac7f9b00cb4e7d60ef90377aea80c38f8f2c5f87f0e566a2875008666": 2,
+    "b0b20e2421ed50d20e45ab4b514d9d4bf1b1504e70f560a5ec0d65704978dc5b": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "b0bae86c68cd23659a7382ccc138b2c8175cd46772c84e5424c49d1c642c15eb": 2,
     "b0c3d5f792e85bd89df6f79374b4f3d65941bce53aab2d906115accc281679e4": 2,
     "b10565ccb86aa0a82af408497e2941055b8d316b58ad972a390b22e0838b2160": 2,
@@ -3616,6 +3868,12 @@
     "b13333c388f02150c3e092a41b8f2a3c9bb57681b46f2fba9db8851be219d837": 2,
     "b133c47f58adbf0d24559781aa4512d238b1fecec47ee476aa0a81f031f51024": 3,
     "b13abe883229a72b177585732081f5249f972e3f54356be9a4b8f836492360a0": 2,
+    "b13ac3dcdbfec4d0c20c6365200882b9e797f02d9addfbdfc4ffae68397f3c70": {
+      "issue": "#13297",
+      "max_occurrences": 4,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "b142197c9b261d93e3fb98e4e24e4acc44e1f254ae0f515aad622a413afc1665": 2,
     "b1789d7448563dbbaf96357b4999da2d634f5364480f94130b2b47b8e1da11c2": 2,
     "b17b153f7f7cb741bda39f8b2d26194e5d4953bed3decd4b66f35338a7752e5a": 2,
@@ -3755,6 +4013,12 @@
     "b8b4e3f683620aa6dac10721deb171344adba2a96a5b1038f856eeb9f75d56f6": 2,
     "b8d7aba2388c025d02dd4123e6e578004b5edab461722443c7817ed9bff380ec": 2,
     "b8ea40d2f2a5bb9a429be9816f3423cc88c2fbec4226d05545f247f3f2659ef6": 2,
+    "b8f5aa78e4ea44106d4add43899c3b72370aec5a577b61d1f6227b63163cfa40": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "b9008203c75a764778bee4caa2c405f021c7b335694200c738cd0267161000c3": 2,
     "b903a332a480ac4f40c1d6514f2321b451ff26470ccccd7642ba5ac1d814df4c": 2,
     "b904d36389b1f18668c3c1588f985784ee04f6a2ea5c6e89f351e8c761828961": 2,
@@ -3770,6 +4034,12 @@
     "b99d856e640d40e7904f3b752f528ed221fd3e0131231fd1d5e12ebe89dcb458": 2,
     "b9a94e7e543aee6287c41d36203159790138bff331540df8917527e24f83dd17": 2,
     "b9b3b8378b4349f20dd008f43a6651b483318acdd3a6cff27a3c7f0872e2565a": 2,
+    "b9c554867d5452aa47346979b83612fbc8c90d9c0d6c533adaf821e6ca637369": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "b9c820f84c738b05ee478a8ce7d6734263387c926e90502455669ba4cd8050b8": 2,
     "b9c94cd7a3948339948541ce4036cf6726d8c449f76c52affce78fb958165545": 2,
     "b9ca7bc16d9f575d99cb262ea26c463ff1c1d61f8b8a69a3168699cd3ec6eeec": 3,
@@ -3880,6 +4150,12 @@
     "beae79c90121ebd54629786f6becaecf6ca381ab467d29ecf36e254c24cc4245": 2,
     "beb2e5af3048774b0235f396c3820772422abffa92966c8f7f865e789a34ee80": 2,
     "beb7dc146019f056838045d6f84ebcc1cca417bb36dae1a2b138eb2da77546ff": 2,
+    "bebc6a8db3ccfb85dc1a1c0bccffd182338056b45785f2a15c28779a692594a1": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "bee995a68e393ce1f4932e26f9b6a70102a13f15e7d39292a0103a04ebeeb8b4": 2,
     "bee9f0b464359bf03858dee267207099e1b83f09943214340c5b012141768886": 2,
     "beec97b5d5daf9535faab86f3690a40cb99deab41ef6494926427803314381ef": 2,
@@ -3918,6 +4194,12 @@
     "c093f11444ead7dfe0c61c3b994bbf1fe56f71e29201d9d3727974124d42eba1": 2,
     "c0a4ddc907547ed45bcfc6c492390c0a4fed4a8767fcc7045de1b7228bfb3714": 2,
     "c0ae995c77ef63159dae56de2959ee4e4917ad36ad7eddb0d3950ad886128fcc": 2,
+    "c0b45b8046988beef3d11e89ee4f3ab8af6954251d7952d277495b0701e9b363": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "c0c0e6297ccbb1ec6d43380db8a3624a32c512a9a5f69c7fd467fa9eeb1c2650": 2,
     "c0d8208850473393530635c10bb857da8e4545d4192dfd5ca939a98c0df36a4d": 2,
     "c0ddec784855159d29fa3d487add88519a1f7263efdc730da81849a011c9831a": 2,
@@ -3972,6 +4254,12 @@
     "c2a578a4d045fa9524c9026734c9806eef8b46f9dbca943cb0deaa1de6c5809e": 2,
     "c2b23783958f3e7d8809e0142dad36db71cb3e7322dadbc9f4b5a8971d5d8590": 2,
     "c2b9096e9389572eb6e831878d6a6141b314afbcafb2faf3c40516ede3c3b7ff": 2,
+    "c2c599bb9d5d0bc88972dd13025db9feb8c5f21b0ebdf267287de65e43068632": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "c2d68a08ae257a63d9844afbb54ff217b9a8b19789c59dbdd95b4a09b423ab5e": 2,
     "c2f4b78b1baab6d3743383d8e9e4d683cf03e0c7fdee907a28c842802df3e8e1": 3,
     "c2f60304a9ab17dedd48f00018992e641aeb9b7877bedaf3a04f195b846f1c91": 2,
@@ -4155,6 +4443,12 @@
     "cb84e6898619ca8a12b593b55a4ed86c06a3e89f96e135f180fc93af785434a0": 2,
     "cb886ebe0e70bfc6a3ddc54c8319a2530f3923b75b5d507823c8a2c59d54095f": 2,
     "cb8b6bc110c7c67923f3611cd5dd6fed403cb7215fcad3775876e247b9b3a9d5": 2,
+    "cba5d9075b23f5e880dabac9fcb9281c78262c62ea9dd7c7270eeea9afe3857b": {
+      "issue": "#13297",
+      "max_occurrences": 3,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "cba89c7d8b6613336b69f86cb2368a464c850825044580f6c55a8fc60dd93540": 2,
     "cba8e6783d01f6a46c166a53b4d302135f0aafbe1432c9e074ad0a40637f52ed": 2,
     "cbb49c88b374c7683e9b6c7da38f905e5534e770eb9961422059a63c1a0abdbc": 2,
@@ -4171,6 +4465,12 @@
     "cc1e633ec5761aa60ab53aa315397f5af0d3dc974ef09672a1781be4906221cd": 2,
     "cc21c1328b8d635fe79dd5602bf1a51749ccf10a0b2915e4d88acfd775f5bc7d": 2,
     "cc5e8d99df8e3aaa23390be5c34ee1410e1554e83d6ed6ec453a7d93070660b3": 2,
+    "cc6a434dc6e8e545881d8b028065582a45b454ccfa26f54974682dfc93c2607f": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "cc6b926073cce306304f57b9d322cd51da55e358863a430bf5e67d7ac213b46c": 2,
     "cc7a5c35fceeb2d90a2db62c0121744c314c46ee9bf029b9858c82de3d5d3f3d": 2,
     "cc8c59f7a4295de2eccace7be90b764e68cbaa3a175a49a84a87a002255e2b37": 3,
@@ -4196,6 +4496,12 @@
     "cd94891d7fbd5ccd0b7ca503de08bba0f44b94840657fa0366f127c43a56fc22": 2,
     "cd9db82af65efbcbacded06dd17db0597dfc6af55c1c8812bb88e9beae3c4ed3": 2,
     "cda937db37d2cd5537a67d1e9f1b1772c326da44e94e39d2385130191521128f": 2,
+    "cdbe5458f90bf784db65e9d2eb20531402c39f9a85d0615f5eb7d13dc813f39c": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "cdc038b72b62a3d81044cd34bae9dccc6fb126c681f9e0e25054d8aad1842d30": 2,
     "cdc9636140c895c930a96fc14355d643d64ad5c1850e1e1ae3efed2585dfb6a0": 3,
     "cdc9855fb87e65300017ee2d26d868efb14bf4695d88f0a1a9b603199db166eb": 2,
@@ -4486,6 +4792,12 @@
     "db5661234d672bec5c30c8b838b172d4a66ce0eeaf29b34312ff70cac35e9295": 2,
     "db585c4fda86ae8f9fd47a9875d5fe1cf7e8eb317183322953ab4db4a8a26b86": 2,
     "db632823392393931cbd1ef2902e8b61e2b8dfd8b116e0b022da94fdf86c1a1b": 2,
+    "db66fa16ce7334e7a2f913be99fac4c6339da9d9c54d2f9a1271926f9547c1bd": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "db671a8bf25ea6b72ea27f947edd3f899ec44a17d28b1fcc03bb41cd5db293f2": 2,
     "db73249121d42d82b777271f0b640e4f64eaa75d422d377f69905c325d6e8247": 2,
     "db7799276f732d466e0b6727175acd41bdd77e413b4b5e5e401a5719f7813467": 2,
@@ -4495,6 +4807,12 @@
     "dbf6f874e1338a8191cdd174ab94b5a4a9b16ca80aa760e435b9f03bfa89f7d1": 2,
     "dbfa2e999daf9e0afe2b00a3df24a8e3e239dcc62be9f20ec5b378625a2087c2": 2,
     "dc0f1b78dd12c2a1cc972fddb1758feb6d80b4ee80341c0bfc865e15c08b427e": 2,
+    "dc2a3451ff85781e586c1bac3a5657a3be4ab5a2180cd75237e48b5b1dd0b5df": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "dc2fdd52956459b546081d694e00297374d9393926a74fe5d7f3e0dddeca0f12": 2,
     "dc31292041f7212851e15f5cbbfe930426491b6952b5f54a3ee070e77a0f5a8d": 2,
     "dc38710450ca43cc3310203b1e5a1587938e9d4114fafd8f17509721dd5929e5": 2,
@@ -4503,6 +4821,12 @@
     "dc556c38410d90d3202fd166115ce88f738e42e015c4aab609bc5042c84ad11a": 2,
     "dc5c81153e9eb3f0dd51c4fa90d73e905477ecfc51d5e1acbc014c16d7f69886": 2,
     "dc62b934f12528aa952bf84cffe3a8a08bed05920917c87fdfff8ffce0e04824": 2,
+    "dc693e737415116092ad5e7199671fea8566f80c060e8e4c062a28aa50e8e6b6": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "dc70e331c0b059dc8ff5b3935728babeda314439ddf29a97aca8591cc86001fa": {
       "issue": "#7617",
       "max_occurrences": 2,
@@ -4549,6 +4873,12 @@
       "max_occurrences": 2,
       "owner": "@core",
       "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
+    "ddbb27852865d66673b341b9aa9f24afac37e03d54303d3f6144089b7113fb51": {
+      "issue": "#13297",
+      "max_occurrences": 3,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
     },
     "ddbe21231bb87fe6062ccc3fc249fae36051b43a14ce89c37ca5156536eacf70": 2,
     "ddca82cd86ee0ade2b78daa9fc1f0bb34377f67a16eec3689d450392d813121a": 2,
@@ -4601,6 +4931,12 @@
     "e0bb8810c9f0e7f6ba1c7a99754a8f29e3d822d678ee11adf40dbbaed2cb3788": 2,
     "e0c61302d8662d28c3eb7cdcbd1f321b624099435751e20351784ba7420dae75": 2,
     "e0c911da3ccf643bad2861d8ab277255dccec2547d742cd2d216659498ae2633": 2,
+    "e0ee5a9ab31c550a6df7d274c36978411b98cf20b675f940d8c819c9d3139a6a": {
+      "issue": "#13297",
+      "max_occurrences": 3,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "e0eeee3542bcf45dac57098220745c095a258a2bd6c45d060749d0a660f43f57": 2,
     "e0fe7582bb237ed39090da160f400b91e10c0f6952b91094c066830897bc2f94": 2,
     "e10a2d78c369a2e5a47093625d1c74f49adadaf37dded2bca1cdb313f8f632a3": 2,
@@ -4682,6 +5018,12 @@
     "e4f528bf3cd75441976ad026d32a5035687fab600fd0a989d08d54f4b71636f6": 4,
     "e5022de02ff0894269dee543ff8f7877cb2e4d4aaeadb068e60147cce35f40b2": 2,
     "e50d278c9a6f5f7bd8fb3f837769dfee00dd20009988ea94bff96f372cc4d2a8": 2,
+    "e51a79e670321124c085b816083c729444c1257abc839d5c8ec6e9f3d2b59d26": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "e52233264093d359c56daf323f28cd13437431367c7eea4904a695b64471b9a4": 2,
     "e5293f31fb35dd095a39e7b652e35fb8b9bf10c820eeddc464bfa6186faffc09": 2,
     "e53387f8837f1a636ba8b1dce8252caa9bd2b050c8bd2a738f88cb7d40c8c3f6": 3,
@@ -4775,6 +5117,12 @@
     "ea3d723f534c86185da39d58b9f8cd1a48453f4926657e3be7cdb9850567566e": 2,
     "ea51d13207777bbd40955d96f1f8580cf5584226e62d07ccbb60104f9f2ec336": 2,
     "ea61c7bcb73140f49c45bb128be6064cd2f2460ae124016615d71ef66e3bb28e": 4,
+    "ea7cfd349aef098e0516f99d8d019c736b626c8924365fe5309b091afe445248": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "ea88a56319afd006eb238426bc290f05073a42d7c72abb19468f78c696388075": 2,
     "ea8aa25afc7175ddac50946d9c371a7b79a83e68e71bc24aadc3016e509f66f2": 2,
     "ea8cf876fdbf4927bc7584dc15829da1d42105c94d70d6ecdc7493159f568afa": 2,
@@ -4843,6 +5191,12 @@
     "ed7051fa29b353a6940bf7bb66ab8eacb3c552b9520ba3b96417c229079706ba": 2,
     "ed73c40d83810f4be4e0f08bf79c8a17ce386c0e5bfd520b526f413318e34e11": 3,
     "ed73f06be0f62f2006dd3d7236dc57870314d9764d8f76111833d186e8b42c15": 2,
+    "ed74201247c00d98e2b033b6c2c1108bed0f46f0d88b5e18b846dc41ebf0dc98": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "ed747ca5b48b70df5372d9f1b874c9f60a270a4e915e5dd12abf23087fcb354a": 2,
     "ed91cc6dbe27ea73b3b7ae32b2339ae595fe7f8f7db906954751b361423418d9": 2,
     "eda72659471c24119fbf6c82dd446086d47f65e63852ad03f5be2a90353cabba": 2,
@@ -4885,10 +5239,22 @@
     "ef4dfbf0df6c886a6c31c859a469b68a82f31d833a0e41ee17617cdca9682767": 2,
     "ef89b61ad07dddc806d4c3a55bbd14e4c1293a11921af8305631bb2c0aa78d06": 2,
     "ef9cd141dc985e9e80080ce841a29d4818d37d56300b3375e35c1cac0f74bc85": 2,
+    "efb05cae71c420d480145955a5429211f98da0d92c19605505e951eb9b2b37ec": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "efbb53264c5a15582a4237670e2f4bb64a3dfa15ee76b79215333c07739f2146": 2,
     "efbf85954d612eeb1c6aaa2f169610e00e931f947cfabb2b8f0c87b3cc4cb80d": 2,
     "efec852b0682c87dcba81d9d0d5eef36c3c4bdb7b9d4a6bae79e06d59184dd27": 2,
     "f007a6edbaa07fddc0f8fc979c8d7c06545e8e851e79ecdfe327ad81f6feebf9": 2,
+    "f00af36e94cd77813822e22bbf22555e406271a49f8498a228084793f6a6e492": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "f00e90c82b591f6f431c7955d6226ad9400d1837de822109deb29b722710d6fa": 2,
     "f02e1e47a07afcd724c7a2856075c717048b6e4c4be6751edab2e4f1115a1b9f": 2,
     "f02f496184269e691249c9d1c8042ea409c800bedd234ea6c845f15cdce44732": 2,
@@ -4929,6 +5295,12 @@
     "f1d56d2e456723973ad3342a0bff3d6e8b8132666da219a1dfff5b1d18f6d429": 2,
     "f1e4e41ceb7c52c7d2fe76c19b5c5a2a31b4d30f4bc0eefeefdb95a4db8c6048": 2,
     "f213abb57892e2f5c46b90e91e5fa535fdabf697a5359c95e15c37beb2352c3c": 2,
+    "f22435ecb6be264fb4ee2541dbe9d58891144e77411bc5bc2d057eb2bd772371": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "f2301acf9e5dd6b0ee4cb25a1a721092484c2eae7e5cd99efd42fe7a3716807f": 2,
     "f252d21097dc6b45ff9c69203a5c5d31560a9d239ee34e2639cc803bbcec2023": 2,
     "f2594fbb897b0d4d88c4e133f4b45b16e8fd0e99adcf2c5e1ffbe67390132223": 2,
@@ -4940,6 +5312,12 @@
     "f2c98758b38dcb83c6580cec872e10c9cc1dc3c79d35a306a1cea7714d8138e9": 2,
     "f2d7e5bdfe09015a9c166571b8d3b8cdb72e748b0576f2a78458c1f4b97aadf3": 2,
     "f2d949c3cce3950548e5f4d343b4c7eb7a72d6d205f43c4cc6f798764d47d410": 2,
+    "f2d98dd273ee5c83505579ef312d204e72972603828f9d8f152762fe159b0b55": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "f2e3fb79b77852ef822870924ebb9c25018fb346852e158897b1585c6c8b9bde": 2,
     "f2efb0d367cd504527b807b3dde766111cb601c87e2f14b36531abc7409e201f": 2,
     "f2f97949bd2384d99f3c2749b73fbf43c00b0b62636b36d989d8cb931ec478a1": 3,
@@ -5010,6 +5388,12 @@
     "f5dd7fcb3bb224e6196ea0860fe1f8ecfe28558bec933e8e93f27041f7cb1a48": 2,
     "f5ddf766fe7af997d8e80c55e5b1641dbb5a85a142fa980545f84cba16e966d3": 2,
     "f5e9ed8c0169a695dafdb62b779026986c55eebf454b8f8ecdb527976c33d568": 2,
+    "f5ecfe2af22db8e77fc087a1d0bc9143d8ce5bde8a6e315b1414383c84cd0675": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "f5f07bcc24d968a668006cb3c3c8360dcbdbc3a08a57c5ec4a7342323af571e6": 2,
     "f5f4d784f3df2250187f6132a8464170ef7183fb3a4c141409afef5f6d5960a5": 2,
     "f5ffcbbbefa6be276bb6a9b78b9077c6909031131ac46ed8d10effa5045c4a0f": 2,
@@ -5144,6 +5528,12 @@
     "fc0509f9d3c2905dbb848193833567b3420bda24970fd332f0a6c7edc2a92740": 2,
     "fc190161df8bc19bd942188e18762049d6491ffbd455e0b605029bef505938eb": 2,
     "fc260aae4c3255a37f807d9f487b926ac04937cba44cfaab32e09b33815d9e2f": 2,
+    "fc4585b83531a06570d7d5610eb95ca2827eb94be3c672c2e7a3b0086a6cf24c": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "fc4e236c605e4dce05edead0343a3ad12d9d2f2750b315403a0e26970e77abdd": 2,
     "fc5944d64dc8d20cf07c7c1549044c0c3349c42f07b53c00f0a33aecbee1d149": 2,
     "fc652e7972c659c5af882e8ace191c90fdab3336c02bad31f5402f45aaca4b97": 2,
@@ -5163,6 +5553,12 @@
     "fce3170b554f1de848f3405a501db319e0bc405fe57f9a734c300602243043da": 2,
     "fcf041da2d771af1ba87cae04ba89a1822a72aa9de4c7d1f9268259c723e550c": 2,
     "fcfd3777e0658458e84584e3e1a92fb7bfa971c92959b5c5cdf956c6ad1bd4ad": 2,
+    "fd0a2125038c7ab0432e12c695ad68fc784562713595be4cbe904b61385d5a9c": {
+      "issue": "#13297",
+      "max_occurrences": 2,
+      "owner": "@motion",
+      "reason": "HRG-GS bilateral grip contact adapter cross-engine binding duplication"
+    },
     "fd17f84d70de48cf5f761dc05dad23a61ca9b144e3566b0457f1054dee57a17f": 2,
     "fd19c42de8dde46ee9299b9de89252d08cd70a8cb8077fe754a88c69178b5cb8": 2,
     "fd2cf751a81bd0c42f168094210e4048ef9f81c4b719063cb71a5cc62bdd33fa": 2,
