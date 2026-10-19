@@ -191,7 +191,8 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         self.grip_preset_combo = QtWidgets.QComboBox()
         self.grip_preset_combo.addItem("From the model", None)
         for name in GRIP_PRESET_CHOICES:
-            self.grip_preset_combo.addItem(name.title(), name)
+            label = name.replace("_", " ").title() if "_" in name else name.title()
+            self.grip_preset_combo.addItem(label, name)
         self.grip_preset_combo.currentIndexChanged.connect(self._on_grip_preset)
         form.addRow("Grip Strength", self.grip_preset_combo)
         self.grip_spins: dict[str, QtWidgets.QDoubleSpinBox] = {}
@@ -243,6 +244,10 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         try:
             for name, spin in self.grip_spins.items():
                 spin.setValue(_GRIP_VALUE[name](grip))
+            if "grip_style" not in self.model.grip_picks():
+                idx = self.grip_style_combo.findData(grip.style.value)
+                if idx >= 0:
+                    self.grip_style_combo.setCurrentIndex(idx)
         finally:
             self._syncing = was
 
