@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13418 | Fix three Drake continuous-torque tests that failed with pydrake installed: hide every cached pydrake module and size the live theta via _resolve_n_actuators |
+| 2026-10-19 | #13277 | Add scripts/ci/shared_buildkit.py: idempotent, flock-serialised manager for one persistent GC-bounded BuildKit builder per host (create/upgrade/repair, cold-build fallback) |
+| 2026-10-19 | #13406 | Predictive Moco simulation of deadlift lift (OSL-7) |
 | 2026-10-19 | #13397 | fix(pinocchio): CMB-11 parity evaluates the full neutral coordinate set |
 | 2026-10-19 | #13343 | Named grip presets: Palmer overlap, Woods interlock, ten-finger with photo_estimate provenance (HRG-GS-G5) |
 | 2026-10-19 | #13279 | Add Run Study panel and worker across PyQt and React spine viewers |
