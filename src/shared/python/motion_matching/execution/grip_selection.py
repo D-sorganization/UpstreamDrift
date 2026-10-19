@@ -265,9 +265,7 @@ def resolve_grip(
     grip = document if document is not None else GripSpec()
     if sidecar_grip:
         effective_style = (
-            picks.grip_style
-            if picks.grip_style is not None
-            else grip.style.value
+            picks.grip_style if picks.grip_style is not None else grip.style.value
         )
         check_sidecar_grip(sidecar_grip, physical_style=effective_style)
         if sidecar_grip.get("lead_thumb_offset_deg") is not None:

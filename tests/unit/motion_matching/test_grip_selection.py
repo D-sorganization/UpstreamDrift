@@ -198,7 +198,9 @@ def test_a_fit_outside_the_golf_ranges_needs_a_full_pick() -> None:
     with pytest.raises(ValueError, match="not a golf grip"):
         apply_grip_selection(DRIVER, GripOverrides(lead_palm_diagonal=45.0))
     # Picture-only pick returns unchanged document and None grip
-    doc_vis, grip_vis = apply_grip_selection(DRIVER, GripOverrides(grip_thumb_offset_deg=20.0))
+    doc_vis, grip_vis = apply_grip_selection(
+        DRIVER, GripOverrides(grip_thumb_offset_deg=20.0)
+    )
     assert grip_vis is None and doc_vis["subject"] == DRIVER["subject"]
     # Style-only pick mints a revision on DRIVER
     document, grip = apply_grip_selection(DRIVER, GripOverrides(grip_style="interlock"))
