@@ -89,11 +89,11 @@ function Slider({
 }
 
 /**
- * Grip presets and sliders (HRG-GR4, #13205).
+ * Grip presets and sliders (HRG-GR4, #13205, #13346).
  *
- * Strength, palm diagonal and spacing are physical: the Build button asks the
- * server for the new model revision (hashes), which needs a refit. The style
- * and the lead thumb are picture-only and go in the appearance export.
+ * Strength, palm diagonal, spacing and style are physical: the Build button asks
+ * the server for the new model revision (hashes), which needs a refit. The lead
+ * thumb is picture-only and goes in the appearance export.
  */
 export function GripControls({ picks, onChange, character }: GripControlsProps) {
   const [revision, setRevision] = useState<GripRevision | null>(null);
@@ -159,7 +159,7 @@ export function GripControls({ picks, onChange, character }: GripControlsProps) 
       ))}
       <div>
         <label htmlFor="grip-style" className="block text-xs font-semibold text-gray-300 mb-1">
-          Grip Style (Picture Only)
+          Grip Style
         </label>
         <select
           id="grip-style"
@@ -185,8 +185,8 @@ export function GripControls({ picks, onChange, character }: GripControlsProps) 
         onChange={(v) => set({ grip_thumb_offset_deg: v })}
       />
       <p className="text-xs text-gray-400">
-        Strength, palm diagonal and spacing change the physics: they make a new model revision
-        that needs a refit. Style and thumb change the picture only.
+        Strength, palm diagonal, spacing and style change the physics: they make a new model revision
+        that needs a refit. Lead thumb changes the picture only.
       </p>
       <button
         type="button"

@@ -209,7 +209,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         for name in GRIP_STYLE_CHOICES:
             self.grip_style_combo.addItem(name, name)
         self.grip_style_combo.currentIndexChanged.connect(self._on_grip_style)
-        form.addRow("Grip Style (Picture Only)", self.grip_style_combo)
+        form.addRow("Grip Style", self.grip_style_combo)
         self.grip_thumb_spin = QtWidgets.QDoubleSpinBox()
         self.grip_thumb_spin.setRange(0.0, 45.0)
         self.grip_thumb_spin.setObjectName("grip_grip_thumb_offset_deg")
@@ -224,8 +224,8 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         form.addRow(reset)
         form.addRow(
             QtWidgets.QLabel(
-                "Strength, palm diagonal and spacing change the physics: they make "
-                "a new model revision that needs a refit."
+                "Strength, palm diagonal, spacing and style change the physics: they "
+                "make a new model revision that needs a refit."
             )
         )
         return group

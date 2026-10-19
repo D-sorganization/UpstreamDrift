@@ -45,7 +45,6 @@ _CHOICE_FIELDS = (
     "top_color",
     "bottom_color",
     "glove",
-    "grip_style",
     "grip_thumb_offset_deg",
     "name",
 )
@@ -88,9 +87,6 @@ class CharacterAppearanceRequest(BaseModel):
     glove: Literal["none", "lead", "trail", "both"] | None = Field(
         None,
         description="Golf glove by role; the lead hand is the left of a right-hander",
-    )
-    grip_style: Literal["overlap", "interlock", "ten_finger"] | None = Field(
-        None, description="Grip style (picture only): overlap, interlock, ten_finger"
     )
     grip_thumb_offset_deg: float | None = Field(
         None, ge=0.0, le=45.0, description="Lead thumb offset, degrees (picture only)"
@@ -174,8 +170,9 @@ class GripRevisionRequest(BaseModel):
     values turn a hand about the shaft (positive is stronger); the
     ``*_palm_diagonal`` values set where the shaft crosses the palm; the
     ``*_set_angle`` values the angle at the wrist; ``lead_below_butt`` and
-    ``hand_spacing`` are metres.  ``grip_style`` and ``grip_thumb_offset_deg``
-    are picture-only.
+    ``hand_spacing`` are metres; ``grip_style`` selects the contact topology.
+    These are physical and make a new model revision (refit needed).
+    ``grip_thumb_offset_deg`` is picture-only.
     """
 
     character: CharacterSpecRequest | None = None

@@ -6,11 +6,11 @@
  * the defaults) and the same split between two kinds of pick.
  *
  * - Physical picks (strength preset, rotation about the shaft, palm diagonal,
- *   set angle, depth, hand spacing) change the model's physics. They are sent
- *   to `/api/character-builder/grip` and make a new model revision that needs
- *   a refit. They are never part of the appearance export.
- * - Visual picks (style, lead thumb) are picture-only and go in the
- *   `.appearance.json` sidecar's `grip` block.
+ *   set angle, depth, hand spacing, grip style) change the model's physics.
+ *   They are sent to `/api/character-builder/grip` and make a new model
+ *   revision that needs a refit. They are never part of the appearance export.
+ * - Visual picks (lead thumb, roll/strength offsets) are picture-only and go
+ *   in the `.appearance.json` sidecar's `grip` block.
  *
  * `tests/fixtures/grip/grip_roundtrip.json` holds the resolved grips both
  * sides must produce. The Python resolver is the authority for ranges: the
@@ -54,10 +54,10 @@ export interface PhysicalGripPicks {
   trail_set_angle?: number;
   lead_below_butt?: number;
   hand_spacing?: number;
+  grip_style?: GripStyle;
 }
 
 export interface VisualGripPicks {
-  grip_style?: GripStyle;
   grip_thumb_offset_deg?: number;
 }
 
@@ -81,6 +81,7 @@ const PHYSICAL_KEYS: ReadonlyArray<keyof PhysicalGripPicks> = [
   'trail_set_angle',
   'lead_below_butt',
   'hand_spacing',
+  'grip_style',
 ];
 
 const RANGES = {
@@ -150,12 +151,6 @@ export function resolveGrip(picks: GripPicks, base: PhysicalGrip = DEFAULT_GRIP)
 /** The sidecar `grip` block of the visual picks (only the picked keys). */
 export function visualGripBlock(picks: VisualGripPicks): Record<string, number | string> {
   const block: Record<string, number | string> = {};
-  if (picks.grip_style !== undefined) {
-    if (!GRIP_STYLES.includes(picks.grip_style)) {
-      throw new Error(`grip style must be one of ${GRIP_STYLES.join(', ')}, got ${picks.grip_style}`);
-    }
-    block.style = picks.grip_style;
-  }
   if (picks.grip_thumb_offset_deg !== undefined) {
     const t = picks.grip_thumb_offset_deg;
     if (!Number.isFinite(t) || t < 0 || t > 45) {

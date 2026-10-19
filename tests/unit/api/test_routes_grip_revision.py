@@ -36,7 +36,10 @@ def test_route_matches_the_shared_fixture(client: TestClient, case: dict) -> Non
     assert body["physics_spec_sha256"] == expected["character_physics_spec_sha256"]
     assert body["refit_required"] == expected["refit_required"]
     if expected["grip"] is not None:
-        assert body["grip"] == expected["grip"]
+        if case["name"] == "style_only":
+            assert body["grip"]["style"] == expected["grip"]["style"]
+        else:
+            assert body["grip"] == expected["grip"]
     parent = FIXTURE["parent"]["character_physics_spec_sha256"]
     assert body["parent_physics_spec_sha256"] == parent
     assert (body["physics_spec_sha256"] == parent) is (not expected["refit_required"])
@@ -53,12 +56,15 @@ def test_route_refuses_an_unknown_pick_and_an_impossible_one(
 def test_appearance_export_carries_only_picture_picks(client: TestClient) -> None:
     ok = client.post(
         "/character-builder/appearance",
-        json={"grip_style": "interlock", "grip_thumb_offset_deg": 20},
+        json={"grip_thumb_offset_deg": 20},
     ).json()
     assert ok["appearance"]["grip"] == {
-        "style": "interlock",
         "lead_thumb_offset_deg": 20.0,
     }
-    # a physical value is not an appearance field: refused, never written
+    # physical values are not appearance fields: refused (422), never written
     bad = client.post("/character-builder/appearance", json={"hand_spacing": 0.1})
     assert bad.status_code == 422
+    bad_style = client.post(
+        "/character-builder/appearance", json={"grip_style": "interlock"}
+    )
+    assert bad_style.status_code == 422

@@ -117,7 +117,10 @@ def test_desktop_and_web_api_match_the_fixture(case: dict[str, Any]) -> None:
     assert summary["spec_sha256"] == compiled.sha256
     assert summary["refit_required"] == expected["refit_required"]
     if expected["grip"] is not None:
-        assert summary["grip"] == expected["grip"]
+        if case["name"] == "style_only":
+            assert summary["grip"]["style"] == expected["grip"]["style"]
+        else:
+            assert summary["grip"] == expected["grip"]
     sidecar = model.appearance_document().get("grip", {})
     assert sidecar == expected["sidecar_grip"]
     visual = {k: v for k, v in case["picks"].items() if k in VISUAL_PICKS}
@@ -126,7 +129,7 @@ def test_desktop_and_web_api_match_the_fixture(case: dict[str, Any]) -> None:
 
 def test_visual_picks_never_move_the_physics_hash() -> None:
     parent = physics_spec_sha256(DRIVER)
-    overrides = GripOverrides(grip_style="interlock", grip_thumb_offset_deg=30.0)
+    overrides = GripOverrides(grip_thumb_offset_deg=30.0, lead_roll_offset_deg=5.0)
     document, _grip = apply_grip_selection(DRIVER, overrides)
     assert physics_spec_sha256(document) == parent
     revised, _ = apply_grip_selection(DRIVER, GripOverrides(preset="strong"))
@@ -138,7 +141,7 @@ def test_visual_picks_never_move_the_physics_hash() -> None:
 
 def test_a_physical_pick_is_refused_in_a_sidecar() -> None:
     with pytest.raises(ValueError, match=r"only visual grip values.*lead_v_azimuth"):
-        check_sidecar_grip({"style": "overlap", "lead_v_azimuth_deg": 40.0})
+        check_sidecar_grip({"lead_thumb_offset_deg": 10.0, "lead_v_azimuth_deg": 40.0})
     with pytest.raises(ValueError, match="new model revision"):
         resolve_grip(None, GripSpec(), {"hand_spacing_m": 0.1})
     with pytest.raises(ValueError, match="picture-only"):
@@ -150,8 +153,10 @@ def test_native_viewer_refuses_a_physical_flag_and_takes_a_visual_one() -> None:
     parse = cli.build_parser().parse_args
     with pytest.raises(ValueError, match="new model revision.*refit"):
         cli.build_settings(parse([*base, "--grip-preset", "strong"]))
-    settings = cli.build_settings(parse([*base, "--grip-style", "ten_finger"]))
-    assert settings.appearance["grip"] == {"style": "ten_finger"}
+    with pytest.raises(ValueError, match="new model revision.*refit"):
+        cli.build_settings(parse([*base, "--grip-style", "ten_finger"]))
+    settings = cli.build_settings(parse([*base, "--visual-grip-strength", "15.0"]))
+    assert settings.appearance["grip"] == {"grip_strength_deg": 15.0}
     document_from_dict(settings.appearance)
 
 
@@ -174,21 +179,31 @@ def test_precedence_pick_then_document_then_default() -> None:
     assert picked.lead.alpha_deg == -15.0 and picked.hand_spacing_m == 0.1
     exact = resolve_grip(GripOverrides(preset="weak", lead_shaft_rotation=3.0), doc)
     assert exact.lead.alpha_deg == 3.0 and exact.trail.alpha_deg == -15.0
-    sidecar = resolve_grip(None, doc, {"style": "interlock"})
-    assert sidecar.style.value == "interlock"
+    # Legacy sidecar with agreeing physical style is accepted
+    matching_sidecar = resolve_grip(None, doc, {"style": "overlap"})
+    assert matching_sidecar.style.value == "overlap"
+    # Legacy sidecar disagreeing with physical style raises ValueError
+    with pytest.raises(ValueError, match="disagrees with physical"):
+        resolve_grip(None, doc, {"style": "interlock"})
+    # Explicit physical pick overrides document and matches sidecar
     assert (
         resolve_grip(
-            GripOverrides(grip_style="overlap"), doc, {"style": "interlock"}
+            GripOverrides(grip_style="interlock"), doc, {"style": "interlock"}
         ).style.value
-        == "overlap"
+        == "interlock"
     )
 
 
 def test_a_fit_outside_the_golf_ranges_needs_a_full_pick() -> None:
     with pytest.raises(ValueError, match="not a golf grip"):
         apply_grip_selection(DRIVER, GripOverrides(lead_palm_diagonal=45.0))
+    # Picture-only pick returns unchanged document and None grip
+    doc_vis, grip_vis = apply_grip_selection(DRIVER, GripOverrides(grip_thumb_offset_deg=20.0))
+    assert grip_vis is None and doc_vis["subject"] == DRIVER["subject"]
+    # Style-only pick mints a revision on DRIVER
     document, grip = apply_grip_selection(DRIVER, GripOverrides(grip_style="interlock"))
-    assert grip is None and document["subject"] == DRIVER["subject"]
+    assert grip is not None and grip.style.value == "interlock"
+    assert physics_spec_sha256(document) != physics_spec_sha256(DRIVER)
 
 
 def test_invalid_picks_fail_closed() -> None:
@@ -254,27 +269,30 @@ def test_spec_builder_flags_write_a_revision_and_a_picture_sidecar(
         "0.09",
         "--grip-style",
         "interlock",
+        "--visual-grip-strength",
+        "10.0",
     )
     assert doc["spec_revision"]["configuration"] == "grip"
     assert doc["subject"]["grip_config"]["lead"]["alpha_deg"] == -15.0
     assert doc["subject"]["grip_config"]["hand_spacing_m"] == 0.09
+    assert doc["subject"]["grip_config"]["style"] == "interlock"
     assert physics_spec_sha256(doc) != physics_spec_sha256(parent)
     receipt = json.loads(
         (spec.parent / "build_receipt_grip_case.json").read_text(encoding="utf-8")
     )
     assert receipt["subject"]["grip_config"] == doc["subject"]["grip_config"]
     sidecar = json.loads(spec.with_name("grip_case.appearance.json").read_text())
-    assert sidecar["grip"] == {"style": "interlock"}
-    assert "grip_config" not in sidecar and "hand_spacing_m" not in sidecar["grip"]
+    assert sidecar["grip"] == {"grip_strength_deg": 10.0}
+    assert "grip_config" not in sidecar and "style" not in sidecar["grip"]
     assert not parent_spec.with_name("grip_case.appearance.json").exists()
 
 
-def test_spec_builder_style_only_keeps_the_spec_and_writes_the_sidecar(
+def test_spec_builder_style_only_makes_a_revision_and_no_sidecar(
     tmp_path: Path,
 ) -> None:
     _p, parent = _build(tmp_path / "a")
     spec, doc = _build(tmp_path / "b", "--grip-style", "ten_finger")
-    assert physics_spec_sha256(doc) == physics_spec_sha256(parent)
-    assert "spec_revision" not in doc
-    sidecar = json.loads(spec.with_name("grip_case.appearance.json").read_text())
-    assert sidecar["grip"] == {"style": "ten_finger"}
+    assert physics_spec_sha256(doc) != physics_spec_sha256(parent)
+    assert doc["spec_revision"]["configuration"] == "grip"
+    assert doc["subject"]["grip_config"]["style"] == "ten_finger"
+    assert not spec.with_name("grip_case.appearance.json").exists()

@@ -109,9 +109,9 @@ class CharacterBuilderModel:
     def set_grip(self, name: str, value: float | str | None) -> None:
         """Set (or, with ``None``, clear) one grip pick (HRG-GR4, #13205).
 
-        Physical picks (``preset``, ``lead_shaft_rotation``, ...) change the
-        compiled spec into a new revision that needs a refit; ``grip_style`` and
-        ``grip_thumb_offset_deg`` are picture-only and go in the appearance
+        Physical picks (``preset``, ``lead_shaft_rotation``, ``grip_style``, ...)
+        change the compiled spec into a new revision that needs a refit;
+        ``grip_thumb_offset_deg`` is picture-only and goes in the appearance
         sidecar.  ``ValueError`` for an unknown pick or an invalid value; the
         picks are unchanged then.
         """
