@@ -20,7 +20,7 @@
     "date": "2026-10-18",
     "method": "native_urdf_grip_frames"
   },
-  "attachment_mode": "contact",
+  "attachment_mode": "weld",
   "club_body": "club_shaft",
   "lead_hand_body": "lead_hand",
   "trail_hand_body": "trail_hand",

@@ -286,11 +286,55 @@ def test_manifest_validates_and_resolves_all_sites(
     validate_resolved_binding(binding, topology)
 
 
-def test_adapter_fk_velocity_sampling_and_joint_force_mapping(
+def test_capabilities_declare_weld_only_and_reject_physical_contact_mode(
+    overlap_topology: ContactTopology,
+) -> None:
+    """Req 1: Capabilities declare supports_physical_pairs=False and attachment_modes=('weld',);
+    requesting physical contact mode raises SchemaFeatureUnavailableError naming thorax2_to_thorax3.
+    """
+    _require_pinocchio()
+    from src.engines.physics_engines.pinocchio.python.native_golfer_grip_adapter import (
+        NativePinocchioGolferGripAdapter,
+    )
+    from src.shared.python.grip_contact.binding import validate_binding
+    from src.shared.python.grip_contact.contact_topology import PHYSICAL_HAND_GRIP_MODES
+    from src.shared.python.motion_matching.full_body_schema import (
+        SchemaFeatureUnavailableError,
+    )
+
+    adapter = NativePinocchioGolferGripAdapter()
+    caps = adapter.capabilities()
+    assert caps.supports_physical_pairs is False
+    assert caps.attachment_modes == ("weld",)
+    for phys_mode in PHYSICAL_HAND_GRIP_MODES:
+        assert phys_mode not in caps.attachment_modes
+
+    binding = adapter.resolve_binding(overlap_topology)
+    assert binding.attachment_mode == "weld"
+    validate_binding(overlap_topology, binding, caps)
+
+    for phys_mode in PHYSICAL_HAND_GRIP_MODES:
+        phys_binding = replace(binding, attachment_mode=phys_mode)
+        with pytest.raises(
+            SchemaFeatureUnavailableError, match="thorax2_to_thorax3"
+        ) as exc_info:
+            validate_binding(overlap_topology, phys_binding, caps)
+        assert phys_mode in str(exc_info.value)
+
+        with pytest.raises(
+            SchemaFeatureUnavailableError, match="thorax2_to_thorax3"
+        ) as exc_resolve:
+            adapter.resolve_binding(overlap_topology, attachment_mode=phys_mode)
+        assert phys_mode in str(exc_resolve.value)
+
+
+def test_adapter_fk_velocity_sampling_allocated_reporting_and_shared_joint_refusal(
     overlap_topology: ContactTopology,
     overlap_model: TopologyContactModel,
 ) -> None:
-    """Adapter samples FK + LOCAL_WORLD_ALIGNED velocities and maps wrenches to pin.Force."""
+    """Req 2: Hand/club pad pairs are evaluated at FK states as allocated reporting channels,
+    never enter apply_wrenches, and apply_wrenches refuses wrenches on bodies sharing a parent joint.
+    """
     pin = _require_pinocchio()
     from src.engines.physics_engines.pinocchio.python.native_golfer_grip_adapter import (
         NativePinocchioGolferGripAdapter,
@@ -323,22 +367,48 @@ def test_adapter_fk_velocity_sampling_and_joint_force_mapping(
         np.testing.assert_allclose(v_ang, f_vel.angular, atol=1e-12)
 
     report = evaluate_contacts(overlap_model, binding, states)
-    apply_report(adapter, report)
+    # Every hand-grip pair is evaluated kinematically and labelled allocated (and external:<pair>_allocated)
+    for pair in overlap_topology.hand_grip_pairs():
+        assert report.pair_labels[pair.name] == "allocated"
+        assert report.allocated_labels[pair.name] == pair.allocated_label
+        assert report.allocated_labels[pair.name] == f"external:{pair.name}_allocated"
+        assert np.isfinite(report.normal_force_n[pair.name])
+        assert np.isfinite(report.tangential_force_n[pair.name])
+        assert np.isfinite(report.spin_moment_nm[pair.name])
+        assert report.normal_force_n[pair.name] > 0.0
 
-    # Verify per-frame pin.Force and joint force vector
-    frame_forces = adapter.frame_joint_forces
-    assert set(frame_forces.keys()) == {
-        binding.club_body,
-        binding.lead_hand_body,
-        binding.trail_hand_body,
+    # Allocated pairs never enter pair_wrenches, body_wrenches(), or apply_wrenches
+    assert len(report.pair_wrenches) == 0
+    assert report.body_wrenches() == {}
+    assert report.applied_allocated_force_n() == 0.0
+    apply_report(adapter, report)
+    assert adapter.applied_wrenches == {}
+    assert adapter.frame_joint_forces == {}
+
+    # apply_wrenches must refuse a physical pair wrench for bodies sharing one parent joint
+    cancelling_pair_wrenches = {
+        binding.lead_hand_body: (
+            np.array([120.0, -45.0, 30.0]),
+            np.array([2.0, -1.0, 0.5]),
+        ),
+        binding.club_body: (
+            np.array([-120.0, 45.0, -30.0]),
+            np.array([-2.0, 1.0, -0.5]),
+        ),
     }
-    for f_obj in frame_forces.values():
-        assert isinstance(f_obj, pin.Force)
-    # Equal-and-opposite physical wrenches on the welded hand+club frames sum to zero on parentJoint
-    parent_jid = int(model.frames[model.getFrameId(binding.club_body)].parentJoint)
-    net_joint_force = adapter.joint_forces[parent_jid]
-    np.testing.assert_allclose(net_joint_force.linear, np.zeros(3), atol=1e-11)
-    np.testing.assert_allclose(net_joint_force.angular, np.zeros(3), atol=1e-11)
+    with pytest.raises(ValueError, match="thorax2_to_thorax3"):
+        adapter.apply_wrenches(cancelling_pair_wrenches)
+
+    # Also refuses a wrench on a single welded grip body sharing thorax2_to_thorax3 with club_shaft
+    with pytest.raises(ValueError, match="thorax2_to_thorax3"):
+        adapter.apply_wrenches(
+            {
+                binding.trail_hand_body: (
+                    np.array([50.0, 0.0, 0.0]),
+                    np.zeros(3),
+                )
+            }
+        )
 
 
 def test_allocated_force_applied_is_zero_and_guard_blocks_tampering(
@@ -350,6 +420,7 @@ def test_allocated_force_applied_is_zero_and_guard_blocks_tampering(
     from src.engines.physics_engines.pinocchio.python.native_golfer_grip_adapter import (
         NativePinocchioGolferGripAdapter,
     )
+    from src.shared.python.grip_contact.topology_contact import topology_pair_wrench
 
     adapter = NativePinocchioGolferGripAdapter()
     binding = adapter.resolve_binding(overlap_topology)
@@ -370,6 +441,7 @@ def test_allocated_force_applied_is_zero_and_guard_blocks_tampering(
     report = evaluate_contacts(overlap_model, binding, states, closure=closure_stub)
     for hh in overlap_topology.hand_hand_pairs():
         assert report.pair_labels[hh.name] == "allocated"
+        assert report.allocated_labels[hh.name] == hh.allocated_label
         assert np.isfinite(report.normal_force_n[hh.name])
         assert report.normal_force_n[hh.name] > 0.0
 
@@ -377,10 +449,17 @@ def test_allocated_force_applied_is_zero_and_guard_blocks_tampering(
     apply_report(adapter, report)
 
     # Tamper with report by inserting an allocated pair into pair_wrenches
-    phys_pw = next(iter(report.pair_wrenches.values()))
+    lead_pose = states[binding.lead_hand_body]
+    b_lead = BushingState(lead_pose[:3, :3], lead_pose[:3, 3], np.zeros(3), np.zeros(3))
+    sample_pw = topology_pair_wrench(
+        overlap_model,
+        overlap_topology.hand_grip_pairs()[0],
+        b_lead,
+        b_lead,
+        mode="contact",
+    )
     alloc_name = overlap_topology.hand_hand_pairs()[0].name
-    tampered_pw = dict(report.pair_wrenches)
-    tampered_pw[alloc_name] = phys_pw
+    tampered_pw = {alloc_name: sample_pw}
     tampered_report = replace(report, pair_wrenches=tampered_pw)
     assert tampered_report.applied_allocated_force_n() > 0.0
     with pytest.raises(ValueError, match="allocated"):
@@ -392,7 +471,9 @@ def test_m3_harness_hold_trajectory_passes_against_law_level_series(
     overlap_topology: ContactTopology,
     overlap_model: TopologyContactModel,
 ) -> None:
-    """AC 4: On a 0.04 s prescribed hold trajectory, evaluate_contacts passes M3 parity vs law_level_series."""
+    """Req 3: On a 0.04 s prescribed hold trajectory, kinematic pair evaluation matches
+    law_level_series at the same states as an allocated reporting-channel check.
+    """
     pin = _require_pinocchio()
     from src.engines.physics_engines.pinocchio.python.native_golfer_grip_adapter import (
         NativePinocchioGolferGripAdapter,
@@ -400,6 +481,7 @@ def test_m3_harness_hold_trajectory_passes_against_law_level_series(
 
     adapter = NativePinocchioGolferGripAdapter()
     binding = adapter.resolve_binding(overlap_topology)
+    assert binding.attachment_mode == "weld"
 
     model = adapter.model
     q_hold = pin.neutral(model).copy()
@@ -415,6 +497,7 @@ def test_m3_harness_hold_trajectory_passes_against_law_level_series(
         states = adapter.sample_states(binding)
         rep = evaluate_contacts(overlap_model, binding, states)
         assert rep.applied_allocated_force_n() == 0.0
+        assert rep.body_wrenches() == {}
         apply_report(adapter, rep)
         reports.append(rep)
 
@@ -446,6 +529,7 @@ def test_m3_harness_hold_trajectory_passes_against_law_level_series(
         club_seq,
         times,
         mapping_hash=m_hash,
+        mode="weld",
     )
 
     parity = compare_topology_series(reference_series, candidate_series)
@@ -457,6 +541,34 @@ def test_m3_harness_hold_trajectory_passes_against_law_level_series(
         assert ch_res.error is not None
         assert ch_res.error.peak_error <= PEAK_TOLERANCE
         assert ch_res.error.rms_error <= RMS_TOLERANCE
+
+    # Verify every hand-grip pad pair is checked in allocated_channels as a reporting channel
+    for pair in overlap_topology.hand_grip_pairs():
+        for kind in ("normal", "tangential", "spin"):
+            ch_key = f"{kind}:{pair.name}"
+            assert ch_key in parity.allocated_channels
+            alloc_res = parity.allocated_channels[ch_key]
+            assert alloc_res.label == "allocated"
+            assert alloc_res.status == "passed", (
+                f"Reporting channel {ch_key} failed: {alloc_res}"
+            )
+            assert alloc_res.passed is True
+            assert alloc_res.error is not None
+            assert alloc_res.error.peak_error <= PEAK_TOLERANCE
+            assert alloc_res.error.rms_error <= RMS_TOLERANCE
+
+    # Physical-mode reference series cannot pass against the welded adapter's allocated series
+    physical_ref_series = law_level_series(
+        overlap_model,
+        hand_seq,
+        club_seq,
+        times,
+        mapping_hash=m_hash,
+        mode="contact",
+    )
+    phys_parity = compare_topology_series(physical_ref_series, candidate_series)
+    assert phys_parity.status == "unavailable"
+    assert phys_parity.passed is False
 
 
 def _attribute_chain_depth(node: ast.AST) -> int:

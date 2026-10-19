@@ -7,8 +7,10 @@ Thin adapter connecting the native Pinocchio golfer model (built with
   :mod:`src.shared.python.grip_contact.binding_manifest`.
 - Samples 4x4 world poses via ``pinocchio.framesForwardKinematics`` and frame
   velocities via ``pinocchio.getFrameVelocity`` in ``LOCAL_WORLD_ALIGNED``.
-- Maps externally applied body wrenches (world force and moment about frame
-  origin) to ``pinocchio.Force`` objects on the parent joints.
+- Evaluates hand/club pad pairs at FK states as allocated reporting channels
+  (``attachment_modes=("weld",)``, ``supports_physical_pairs=False``) and
+  refuses physical pair wrenches on bodies that share a single welded parent
+  joint (``thorax2_to_thorax3``).
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ from src.shared.python.grip_contact.binding import (
     BodyStates,
     GripCapabilities,
     HandClubBinding,
+    validate_binding,
 )
 from src.shared.python.grip_contact.binding_manifest import (
     binding_from_manifest,
@@ -104,6 +107,69 @@ def _compute_club_grip_frames(
     }
 
 
+def _frame_parent_joint(model: Any, frame_name: str) -> tuple[int, str]:
+    """Return ``(parent_joint_id, parent_joint_name)`` for ``frame_name`` in ``model``."""
+    fid = int(model.getFrameId(frame_name))
+    frames = model.frames
+    frame_obj = frames[fid]
+    jid = int(frame_obj.parentJoint)
+    names = model.names
+    return jid, str(names[jid])
+
+
+def _shared_grip_joint_reason(
+    model: Any,
+    club_body: str,
+    lead_body: str,
+    trail_body: str,
+) -> str | None:
+    """Return a reason naming the shared parent joint when grip bodies are welded together."""
+    c_jid, c_jname = _frame_parent_joint(model, club_body)
+    l_jid, l_jname = _frame_parent_joint(model, lead_body)
+    t_jid, _ = _frame_parent_joint(model, trail_body)
+    if c_jid == l_jid or c_jid == t_jid or l_jid == t_jid:
+        shared_name = c_jname if c_jid in (l_jid, t_jid) else l_jname
+        return (
+            f"{lead_body}, {trail_body}, and {club_body} are rigidly welded "
+            f"to mid_hands on shared joint {shared_name}"
+        )
+    return None
+
+
+def _reject_shared_parent_joint_wrenches(
+    model: Any,
+    wrench_bodies: tuple[str, ...],
+    grip_bodies: tuple[str, ...],
+) -> None:
+    """Raise ``ValueError`` if ``wrench_bodies`` share a parent joint with each other or grip bodies."""
+    if not wrench_bodies:
+        return
+    grip_joints: dict[int, list[str]] = {}
+    for g_body in grip_bodies:
+        if model.existFrame(g_body):
+            jid, _ = _frame_parent_joint(model, g_body)
+            grip_joints.setdefault(jid, []).append(g_body)
+
+    seen_joints: dict[int, str] = {}
+    for body_id in wrench_bodies:
+        if not model.existFrame(body_id):
+            continue
+        jid, jname = _frame_parent_joint(model, body_id)
+        if jid in seen_joints:
+            other = seen_joints[jid]
+            raise ValueError(
+                f"Cannot apply physical pair wrench across bodies {other!r} and "
+                f"{body_id!r} that share parent joint {jname!r} (cancelling no-op)"
+            )
+        seen_joints[jid] = body_id
+        shared_grip = [b for b in grip_joints.get(jid, []) if b != body_id]
+        if shared_grip:
+            raise ValueError(
+                f"Cannot apply physical pair wrench to {body_id!r}: shares parent "
+                f"joint {jname!r} with welded grip bodies {shared_grip}"
+            )
+
+
 def _map_world_wrench_to_joint_force(
     pin_mod: Any,
     model: Any,
@@ -166,6 +232,12 @@ class NativePinocchioGolferGripAdapter:
         self._data = resolved_model.createData()
         self._club_grip_frames = _compute_club_grip_frames(
             pin_mod,
+            resolved_model,
+            self._club_body,
+            self._lead_hand_body,
+            self._trail_hand_body,
+        )
+        self._shared_joint_reason = _shared_grip_joint_reason(
             resolved_model,
             self._club_body,
             self._lead_hand_body,
@@ -248,10 +320,18 @@ class NativePinocchioGolferGripAdapter:
         self._pin.framesForwardKinematics(self._model, self._data, self._q)
 
     def capabilities(self) -> GripCapabilities:
-        """Return declared capabilities for the native Pinocchio golfer adapter."""
+        """Return declared capabilities for the native Pinocchio golfer adapter.
+
+        In the ``hands="separate"`` URDF, ``lead_hand``, ``trail_hand``, and
+        ``club_shaft`` are all fixed (rigidly welded) to ``mid_hands`` on the
+        single parent joint ``thorax2_to_thorax3`` with no kinematic loop
+        closure (``"closure"``) and no compliant bushing (``"bushing"``). Only
+        ``attachment_modes=("weld",)`` with ``supports_physical_pairs=False``
+        is physically honest: pad pairs are allocated reporting channels only.
+        """
         return GripCapabilities(
-            attachment_modes=("contact", "contact_v1"),
-            supports_physical_pairs=True,
+            attachment_modes=("weld",),
+            supports_physical_pairs=False,
             supports_wrench_application=True,
             native_contact=False,
             available_bodies=(
@@ -259,14 +339,24 @@ class NativePinocchioGolferGripAdapter:
                 self._lead_hand_body,
                 self._trail_hand_body,
             ),
+            unavailable_reason=self._shared_joint_reason,
         )
 
-    def resolve_binding(self, topology: ContactTopology) -> HandClubBinding:
+    def resolve_binding(
+        self,
+        topology: ContactTopology,
+        *,
+        attachment_mode: str | None = None,
+    ) -> HandClubBinding:
         """Resolve a :class:`HandClubBinding` via the ``pinocchio_native_golfer`` manifest."""
-        binding = binding_from_manifest(
-            self._manifest, topology, self._club_grip_frames
+        manifest = (
+            self._manifest
+            if attachment_mode is None
+            else {**self._manifest, "attachment_mode": attachment_mode}
         )
+        binding = binding_from_manifest(manifest, topology, self._club_grip_frames)
         validate_resolved_binding(binding, topology, self._club_grip_frames)
+        validate_binding(topology, binding, self.capabilities())
         return binding
 
     def sample_states(self, binding: HandClubBinding) -> BodyStates:
@@ -302,15 +392,17 @@ class NativePinocchioGolferGripAdapter:
     def apply_wrenches(
         self, wrenches: Mapping[str, tuple[np.ndarray, np.ndarray]]
     ) -> None:
-        """Map external frame wrenches to ``pinocchio.Force`` objects on parent joints."""
+        """Map external frame wrenches to ``pinocchio.Force`` objects on parent joints.
+
+        Raises:
+            ValueError: if ``wrenches`` targets bodies that share a single
+                parent joint (e.g. ``lead_hand``, ``trail_hand``, and
+                ``club_shaft`` welded on ``thorax2_to_thorax3``), preventing a
+                cancelling physical-pair no-op from passing silently.
+        """
         if not isinstance(wrenches, Mapping):
             raise TypeError("wrenches must be a Mapping")
-        pin_mod = self._pin
-        n_joints = int(self._model.njoints)
-        joint_fext = [pin_mod.Force.Zero() for _ in range(n_joints)]
-        per_frame_forces: dict[str, Any] = {}
         cleaned: dict[str, tuple[np.ndarray, np.ndarray]] = {}
-
         for body_id, pair in wrenches.items():
             f_arr = np.asarray(pair[0], dtype=float)
             m_arr = np.asarray(pair[1], dtype=float)
@@ -319,6 +411,18 @@ class NativePinocchioGolferGripAdapter:
             if m_arr.shape != (3,) or not bool(np.isfinite(m_arr).all()):
                 raise ValueError(f"moment for {body_id!r} must be a finite 3-vector")
             cleaned[body_id] = (f_arr.copy(), m_arr.copy())
+
+        _reject_shared_parent_joint_wrenches(
+            self._model,
+            tuple(cleaned.keys()),
+            (self._club_body, self._lead_hand_body, self._trail_hand_body),
+        )
+
+        pin_mod = self._pin
+        n_joints = int(self._model.njoints)
+        joint_fext = [pin_mod.Force.Zero() for _ in range(n_joints)]
+        per_frame_forces: dict[str, Any] = {}
+        for body_id, (f_arr, m_arr) in cleaned.items():
             if self._model.existFrame(body_id):
                 jid, f_joint = _map_world_wrench_to_joint_force(
                     pin_mod, self._model, self._data, body_id, f_arr, m_arr

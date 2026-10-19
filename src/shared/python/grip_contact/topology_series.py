@@ -676,8 +676,9 @@ def law_level_series(
 
     for p in topo.pairs:
         is_phys = p.is_hand_grip and mode in p.physical_modes
+        is_eval = p.is_hand_grip and (is_phys or mode in p.allocated_modes)
         labels[p.name] = "physical" if is_phys else "allocated"
-        if is_phys:
+        if is_eval:
             pair_normal[p.name] = np.zeros(n, dtype=float)
             pair_tangential[p.name] = np.zeros(n, dtype=float)
             pair_spin[p.name] = np.zeros(n, dtype=float)
@@ -689,18 +690,20 @@ def law_level_series(
 
     force_src = {s: np.zeros((n, 3), dtype=float) for s in SIDES}
     moment_src = {s: np.zeros((n, 3), dtype=float) for s in SIDES}
+    eval_mode = mode if any(mode in p.physical_modes for p in topo.pairs) else "contact"
 
     for k in range(n):
         for s in SIDES:
             sw = topology_side_wrench(
-                topology_model, s, hands[s][k], clubs[s][k], mode=mode
+                topology_model, s, hands[s][k], clubs[s][k], mode=eval_mode
             )
             force_src[s][k] = sw.force_n
             moment_src[s][k] = sw.moment_nm
             for pname, pw in sw.pair_wrenches.items():
-                pair_normal[pname][k] = float(pw.normal_force_mag_n)
-                pair_tangential[pname][k] = float(pw.tangential_force_mag_n)
-                pair_spin[pname][k] = _spin_magnitude_nm(pw)
+                if pname in pair_normal and pname not in reasons:
+                    pair_normal[pname][k] = float(pw.normal_force_mag_n)
+                    pair_tangential[pname][k] = float(pw.tangential_force_mag_n)
+                    pair_spin[pname][k] = _spin_magnitude_nm(pw)
 
     resolved_hash = (
         mapping_hash
