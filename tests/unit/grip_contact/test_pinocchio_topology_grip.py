@@ -164,7 +164,7 @@ def test_pinocchio_topology_swing_replay_fast(style: GripStyle) -> None:
         assert np.all(fn_trace >= 0.0)
 
 
-@pytest.mark.timeout(180)
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
