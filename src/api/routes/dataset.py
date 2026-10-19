@@ -18,10 +18,15 @@ Design by Contract:
 
 from __future__ import annotations
 
+import re
+import uuid
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import get_engine_manager, get_logger
@@ -42,6 +47,47 @@ if TYPE_CHECKING:
     from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 router = APIRouter(prefix="/dataset", tags=["dataset"])
+
+_DATASET_ID_RE = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
+
+_EXPORT_MEDIA_TYPES: dict[str, str] = {
+    "hdf5": "application/x-hdf5",
+    "h5": "application/x-hdf5",
+    "sqlite": "application/x-sqlite3",
+    "db": "application/x-sqlite3",
+    "csv": "text/csv",
+    "json": "application/json",
+    "mat": "application/x-matlab-data",
+    "c3d": "application/octet-stream",
+}
+
+
+@dataclass
+class DatasetRecord:
+    """Server-side record mapping an opaque dataset_id to its export."""
+
+    dataset_id: str
+    name: str
+    export_path: Path
+    export_format: str
+    rows: int
+    columns: list[str]
+    created_at: str
+    dataset: Any = None
+
+
+_DATASET_STORE: dict[str, DatasetRecord] = {}
+
+
+def _register_dataset_record(record: DatasetRecord) -> None:
+    """Register a generated dataset record server-side."""
+    _DATASET_STORE[record.dataset_id] = record
+
+
+def _get_dataset_record(dataset_id: str) -> DatasetRecord | None:
+    """Retrieve a dataset record by opaque identifier."""
+    return _DATASET_STORE.get(dataset_id)
+
 
 # Allow-listed roots for swing-capture import (read) and dataset exports (write).
 # Capture files may only be read from, and generated datasets may only be written to,
@@ -160,13 +206,22 @@ class DatasetGenerationRequest(BaseModel):
 
 
 class DatasetGenerationResponse(BaseModel):
-    """Response model for dataset generation."""
+    """Response model for dataset generation.
 
-    status: str
-    num_samples: int
-    total_frames: int
-    export_path: str
-    export_format: str
+    Carries the backend generation status along with the metadata fields
+    expected by the UI GenerateResult contract (issue #12967).
+    """
+
+    status: str = "success"
+    dataset_id: str = Field(..., description="Unique opaque dataset identifier")
+    name: str = Field(..., description="Human-readable dataset name")
+    rows: int = Field(..., description="Total row/frame count across all samples")
+    columns: list[str] = Field(..., description="Recorded column/channel names")
+    created_at: str = Field(..., description="ISO 8601 creation timestamp")
+    num_samples: int = Field(..., description="Number of simulation samples")
+    total_frames: int = Field(..., description="Total frames across all samples")
+    export_path: str = Field(..., description="Filesystem path of the export")
+    export_format: str = Field(..., description="Export format identifier")
 
 
 class SwingImportRequest(BaseModel):
@@ -230,6 +285,43 @@ class FeatureExecuteRequest(BaseModel):
 # ---- Endpoints ----
 
 
+def _extract_dataset_columns(dataset: Any) -> list[str]:
+    """Derive column headers from a generated dataset."""
+    if hasattr(dataset, "columns") and dataset.columns:
+        return list(dataset.columns)
+    if hasattr(dataset, "samples") and dataset.samples:
+        sample = dataset.samples[0]
+        n_q = (
+            sample.positions.shape[1]
+            if hasattr(sample, "positions")
+            and hasattr(sample.positions, "ndim")
+            and sample.positions.ndim > 1
+            else len(getattr(dataset, "joint_names", []))
+        )
+        n_v = (
+            sample.velocities.shape[1]
+            if hasattr(sample, "velocities")
+            and hasattr(sample.velocities, "ndim")
+            and sample.velocities.ndim > 1
+            else len(getattr(dataset, "joint_names", []))
+        )
+        cols = ["time"]
+        joint_names = getattr(dataset, "joint_names", [])
+        if joint_names and len(joint_names) == n_q:
+            cols.extend([f"q_{j}" for j in joint_names])
+            cols.extend([f"v_{j}" for j in joint_names])
+            cols.extend([f"a_{j}" for j in joint_names])
+            cols.extend([f"tau_{j}" for j in joint_names])
+        else:
+            cols.extend([f"q_{i}" for i in range(n_q)])
+            cols.extend([f"v_{i}" for i in range(n_v)])
+            cols.extend([f"a_{i}" for i in range(n_v)])
+            cols.extend([f"tau_{i}" for i in range(n_v)])
+        cols.append("kinetic_energy")
+        return cols
+    return ["time", "positions", "velocities", "accelerations", "torques"]
+
+
 @router.post("/generate", response_model=DatasetGenerationResponse)
 async def generate_dataset(
     request: DatasetGenerationRequest,
@@ -281,10 +373,42 @@ async def generate_dataset(
             dataset, safe_output, format=request.export_format
         )
 
+        dataset_id = f"ds_{uuid.uuid4().hex[:12]}"
+        name = Path(request.output_path).stem or f"dataset_{dataset_id}"
+        total_frames = int(getattr(dataset, "total_frames", 0))
+        num_samples = int(getattr(dataset, "num_samples", 0))
+        rows = total_frames
+        columns = _extract_dataset_columns(dataset)
+
+        creation_time = getattr(dataset, "creation_time", None)
+        if isinstance(creation_time, (int, float)):
+            created_at = datetime.fromtimestamp(
+                creation_time, tz=timezone.utc
+            ).isoformat()
+        else:
+            created_at = datetime.now(timezone.utc).isoformat()
+
+        record = DatasetRecord(
+            dataset_id=dataset_id,
+            name=name,
+            export_path=Path(output_path),
+            export_format=request.export_format,
+            rows=rows,
+            columns=columns,
+            created_at=created_at,
+            dataset=dataset,
+        )
+        _register_dataset_record(record)
+
         return DatasetGenerationResponse(
             status="success",
-            num_samples=dataset.num_samples,
-            total_frames=dataset.total_frames,
+            dataset_id=dataset_id,
+            name=name,
+            rows=rows,
+            columns=columns,
+            created_at=created_at,
+            num_samples=num_samples,
+            total_frames=total_frames,
             export_path=str(output_path),
             export_format=request.export_format,
         )
@@ -581,3 +705,136 @@ async def get_export_formats() -> list[dict[str, str]]:
         {"format": "json", "description": "JSON (small datasets, configuration)"},
         {"format": "c3d", "description": "C3D motion capture format (ezc3d required)"},
     ]
+
+
+def _require_opaque_dataset_id(dataset_id: str) -> None:
+    """Precondition: ``dataset_id`` is an opaque token with no path syntax.
+
+    Raises:
+        HTTPException 400: If the identifier is malformed or attempts traversal.
+    """
+    if (
+        not isinstance(dataset_id, str)
+        or not _DATASET_ID_RE.match(dataset_id)
+        or any(sep in dataset_id for sep in ("/", "\\", ".."))
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid dataset_id: must be an opaque alphanumeric identifier",
+        )
+
+
+def _converted_export_path(record: Any, dataset_id: str, req_format: str) -> Path:
+    """The export path for ``req_format``, converting the dataset when needed.
+
+    Raises:
+        HTTPException 400: If ``req_format`` is not a supported export format.
+    """
+    export_path = Path(record.export_path)
+    if req_format == record.export_format or record.dataset is None:
+        return export_path
+    from src.shared.python.data_io._dataset_export_mixin import _DatasetExportMixin
+
+    target = export_path.parent / f"{record.name}_{dataset_id}"
+    try:
+        new_export = _DatasetExportMixin().export(
+            record.dataset, target, format=req_format
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported export format: {req_format}",
+        ) from exc
+    return Path(new_export)
+
+
+def _first_csv_in(directory: Path, dataset_id: str) -> Path:
+    """The CSV to stream from a directory export (e.g. one file per sample).
+
+    Raises:
+        HTTPException 404: If the directory holds no CSV file.
+    """
+    named = directory / f"{dataset_id}.csv"
+    if named.is_file():
+        return named
+    for pattern in ("sample_*.csv", "*.csv"):
+        candidates = sorted(directory.glob(pattern))
+        if candidates:
+            return candidates[0]
+    raise HTTPException(
+        status_code=404,
+        detail="Exported file not found in dataset directory",
+    )
+
+
+def _export_file_to_serve(export_path: Path, dataset_id: str, req_format: str) -> Path:
+    """The concrete file behind an export path (file, directory or bare stem).
+
+    Raises:
+        HTTPException 404: If no exported file exists on disk.
+    """
+    if export_path.is_file():
+        return export_path
+    if export_path.is_dir():
+        return _first_csv_in(export_path, dataset_id)
+    ext = f".{req_format}" if not req_format.startswith(".") else req_format
+    candidate = export_path.with_suffix(ext)
+    if candidate.is_file():
+        return candidate
+    raise HTTPException(
+        status_code=404,
+        detail="Exported dataset file does not exist on disk",
+    )
+
+
+@router.get("/export/{dataset_id}")
+async def export_dataset(
+    dataset_id: str,
+    format: str | None = None,
+) -> FileResponse:
+    """Stream an exported dataset file.
+
+    Design by Contract:
+        Preconditions:
+            - ``dataset_id`` must be an opaque alphanumeric token mapped server-side.
+            - Path traversal characters ('/', '\\', '..') are strictly rejected.
+        Postconditions:
+            - The streamed file exists and is strictly contained under an
+              allow-listed export root.
+
+    Args:
+        dataset_id: Opaque dataset identifier generated at creation.
+        format: Optional export format override.
+
+    Returns:
+        FileResponse streaming the exported dataset file.
+
+    Raises:
+        HTTPException 400: If ``dataset_id`` is malformed or attempts traversal.
+        HTTPException 404: If ``dataset_id`` is not found or file is missing.
+    """
+    _require_opaque_dataset_id(dataset_id)
+
+    record = _get_dataset_record(dataset_id)
+    if record is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Dataset '{dataset_id}' not found",
+        )
+
+    req_format = (format or record.export_format).lower()
+    export_path = _converted_export_path(record, dataset_id, req_format)
+    file_to_serve = _export_file_to_serve(export_path, dataset_id, req_format)
+
+    # Postcondition validation: ensure file_to_serve is contained under allowed roots
+    safe_file = resolve_contained_path(file_to_serve, _dataset_output_roots())
+
+    ext = safe_file.suffix.lstrip(".").lower() or req_format
+    media_type = _EXPORT_MEDIA_TYPES.get(ext, "application/octet-stream")
+    download_filename = f"{dataset_id}.{ext}"
+
+    return FileResponse(
+        str(safe_file),
+        media_type=media_type,
+        filename=download_filename,
+    )

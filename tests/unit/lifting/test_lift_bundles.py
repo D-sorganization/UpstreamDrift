@@ -47,24 +47,29 @@ pytestmark = pytest.mark.unit
 # #13041 (issuecomment-6243170509).  On the OSL-17 high-bar rack (#13131) the
 # whole-row body gives ankle_r 4.89 mm (rack on the earlier body 3.53 mm), so
 # that snapshot is re-derived again with the same rounding.
+# OSL-19/20 (#13158, #13159): at the 0.75 m high-bar rack grip width,
+# ankle_r reaches 4.97 mm (re-derived to 0.0050 m), bar 0.11 mm (re-derived
+# to 0.0002 m) and closure 9.86e-7 m (re-derived to 1.0e-6 m) under the same
+# 0.1 mm rounding rule; all other landmarks remain within prior bounds.
 IK_RESIDUAL_THRESHOLDS_M = {
     "ankle_l": 0.0057,
-    "ankle_r": 0.0049,
+    "ankle_r": 0.0050,
     "knee_l": 0.0152,
     "knee_r": 0.0225,
     "hip_l": 0.0178,
     "hip_r": 0.0094,
     "shoulder_l": 0.0196,
     "shoulder_r": 0.0151,
-    "bar": 0.0001,
+    "bar": 0.0002,
 }
 #: OSL-17 (#13131): racking the bar on the cited high-bar position puts the
 #: elbows near their -150 deg bound and the left wrist on its 25 deg bound, so
 #: the arm solve trades the grip weld against the bar target.  The standing
 #: pose (frame 0) closes to 2.911e-7 m (17 of 151 frames above the earlier
 #: 6.4e-8 m); 300 tracking iterations leave it unchanged and 1000 standing
-#: iterations raise it to 4.725e-7 m.  Evidence on #13131.
-CLOSURE_THRESHOLD_M = 3.0e-7
+#: iterations raise it to 4.725e-7 m.  Evidence on #13131.  OSL-19 (#13158):
+#: at the 0.75 m grip width, closure reaches 9.86e-7 m (re-derived to 1.0e-6 m).
+CLOSURE_THRESHOLD_M = 1.0e-6
 FOOT_PENETRATION_THRESHOLD_M = 7.0e-4
 #: Committed bar-loaded bundle size bound (bytes).  OSL-16 (#13104): a loaded
 #: bundle records its 0.25 ms hold efforts (``hold_efforts``, 4 per step) so

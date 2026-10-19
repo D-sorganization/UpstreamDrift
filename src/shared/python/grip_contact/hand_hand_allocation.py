@@ -39,7 +39,7 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
 
@@ -49,6 +49,7 @@ from src.shared.python.grip_contact.contact_topology import (
     ContactPair,
     ContactSite,
     ContactTopology,
+    coerce_contact_topology,
     contact_topology,
 )
 from src.shared.python.grip_contact.pair_contact import (
@@ -60,11 +61,7 @@ from src.shared.python.grip_contact.pair_contact import (
 from src.shared.python.motion_matching.full_body_schema import (
     SchemaFeatureUnavailableError,
 )
-
-if TYPE_CHECKING:
-    # Annotation only: grip_contract imports model_appearance.grip_pose, which
-    # imports this package, so a module-level import closes an import cycle.
-    from src.shared.python.motion_matching.grip_contract import GripSpec
+from src.shared.python.motion_matching.grip_contract import GripSpec
 
 METHOD = "allocation"
 #: Legacy overlay wrench label of the drawn palm-thumb normal force.
@@ -397,7 +394,7 @@ def equal_split_prior(
     topology: ContactTopology | GripSpec | None = None,
 ) -> AllocationPrior:
     """Construct an equal-split allocation prior for a topology's hand-hand pairs."""
-    topo = _resolve_topology(topology)
+    topo = coerce_contact_topology(topology)
     pairs = topo.hand_hand_pairs()
     n_pairs = len(pairs)
     if n_pairs == 0:
@@ -432,17 +429,7 @@ def _resolve_topology(
     topology: ContactTopology | GripSpec | None,
 ) -> ContactTopology:
     """The topology to allocate over (the default spec's when ``None``)."""
-    if topology is None:
-        return contact_topology()
-    if isinstance(topology, ContactTopology):
-        return topology
-    from src.shared.python.motion_matching.grip_contract import GripSpec
-
-    if isinstance(topology, GripSpec):
-        return contact_topology(topology)
-    raise TypeError(
-        f"topology must be ContactTopology or GripSpec, got {type(topology).__name__}"
-    )
+    return coerce_contact_topology(topology)
 
 
 def _resolve_prior(

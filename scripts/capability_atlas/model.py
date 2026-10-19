@@ -25,11 +25,20 @@ SOURCES = (
 Graph = dict[str, Any]
 
 
+def _is_safe_child(candidate: Path, root: Path) -> bool:
+    resolved_candidate = candidate.resolve()
+    resolved_root = root.resolve()
+    if resolved_candidate.is_relative_to(resolved_root):
+        return True
+    vendor_root = (root / "vendor" / "ud-tools").resolve()
+    return resolved_candidate.is_relative_to(vendor_root)
+
+
 def tile_path(root: Path, target: str) -> str:
     """Resolve Tools targets; virtual/external entries link to their registration."""
     path = target.replace("tools://", "vendor/ud-tools/")
     candidate = root / path
-    if candidate.is_file() and candidate.resolve().is_relative_to(root.resolve()):
+    if candidate.is_file() and _is_safe_child(candidate, root):
         return path
     return SOURCES[0]
 
@@ -114,7 +123,7 @@ def source_path(root: Path, value: str) -> None:
     path = root / value
     if Path(value).is_absolute() or ".." in Path(value).parts:
         raise ValueError(f"Unsafe evidence path: {value}")
-    if not path.exists() or not path.resolve().is_relative_to(root.resolve()):
+    if not path.exists() or not _is_safe_child(path, root):
         raise ValueError(
             f"Missing evidence path: {value}; initialize pinned submodules"
         )

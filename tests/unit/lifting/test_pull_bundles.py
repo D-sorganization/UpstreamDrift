@@ -6,6 +6,11 @@ held in the hands at the standard's grip width, and a 0.2 s MuJoCo tracking
 window centred on the knee pass.  The IK thresholds are the residuals measured
 when the committed bundles were generated, rounded up to 0.1 mm; they are
 recorded evidence, not tuning targets.
+
+The snatch and the clean and jerk solve the whole lift, so their thresholds
+are whole-lift maxima set by phases after the window (the catches, the rack
+and the jerk).  Whether the full-body IK can follow those phases is a
+separate strict xfail against the unchanged deadlift bounds for each.
 """
 
 from __future__ import annotations
@@ -48,16 +53,21 @@ IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
         "shoulder_r": 0.0046,
         "bar": 0.0029,
     },
+    # Whole-lift maxima of the full clean and jerk (Tools #5662), set by the
+    # front-squat catch, the jerk and the overhead phases (after the window):
+    # see _CLEAN_AND_JERK_RACK_AND_JERK below.  The first-pull-only bundle's
+    # snapshot (ankle_l 3.8 ... bar 1.2 mm) is replaced because the solution
+    # now covers the whole lift; measurements on #11745.
     "clean_and_jerk": {
-        "ankle_l": 0.0038,
-        "ankle_r": 0.0029,
-        "knee_l": 0.0035,
-        "knee_r": 0.0110,
-        "hip_l": 0.0084,
-        "hip_r": 0.0060,
-        "shoulder_l": 0.0042,
-        "shoulder_r": 0.0031,
-        "bar": 0.0012,
+        "ankle_l": 0.0716,
+        "ankle_r": 0.0744,
+        "knee_l": 0.0698,
+        "knee_r": 0.0664,
+        "hip_l": 0.0566,
+        "hip_r": 0.0577,
+        "shoulder_l": 0.0273,
+        "shoulder_r": 0.0297,
+        "bar": 0.0565,
     },
     # Whole-lift maxima, set by the turnover and the catch (0.50-0.77 of the
     # lift, after the window): see _SNATCH_CATCH below.  #13037: shoulder_r
@@ -82,14 +92,30 @@ IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
 # #13037 lift body (8.94e-5 and 3.29e-5 m): #13041 (issuecomment-6243170509).
 CLOSURE_THRESHOLD_M: dict[str, float] = {
     "deadlift": 9.0e-5,
-    "clean_and_jerk": 3.3e-5,
+    "clean_and_jerk": 3.9e-4,  # 3.80e-4 m, whole lift (#11745)
     "snatch": 2.4e-4,  # 1.75e-4 -> 2.35e-4 m on the #13037 lift body
 }
 FOOT_PENETRATION_THRESHOLD_M: dict[str, float] = {
     "deadlift": 7.0e-4,
-    "clean_and_jerk": 7.0e-4,
+    "clean_and_jerk": 2.6e-3,  # 2.55 mm, whole lift (#11745)
     "snatch": 2.1e-3,
 }
+_CLEAN_AND_JERK_RACK_AND_JERK = pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "Measured clean-and-jerk IK (#11745): the setup, the first pull "
+        "(0-0.20 of the lift) and the 0.693-0.893 s window are deadlift class "
+        "(worst knee_r 11.1 mm, bar 1.15 mm, feet 0.69 mm) and so is the "
+        "overhead recovery (0.85-1.0: hip_l 8.0 mm, bar 0.78 mm), but the "
+        "full-body model cannot follow the turnover (legs 31-40 mm, bar "
+        "39.1 mm at 0.20-0.30), the planar front-squat catch (legs 49-74 mm, "
+        "feet 2.55 mm into the ground at 0.30-0.55), the front rack (bar "
+        "56 mm, shoulders 27-30 mm at 0.30-0.70: the planar rack bar sits at "
+        "the shoulder joints, which the hands cannot reach at the 0.6 m grip) "
+        "or the power-jerk catch (legs 19-29 mm at 0.70-0.85).  The deadlift "
+        "bounds are not loosened."
+    ),
+)
 _SNATCH_CATCH = pytest.mark.xfail(
     strict=True,
     reason=(
@@ -253,6 +279,39 @@ def test_lift_hands_rejects_an_unknown_lift() -> None:
 @_SNATCH_CATCH
 def test_snatch_whole_lift_ik_meets_the_deadlift_bounds() -> None:
     ik = InputBundle.load(recipe("snatch").bundle_path).provenance["ik"]
+    for label, limit in IK_RESIDUAL_THRESHOLDS_M["deadlift"].items():
+        assert ik["max_residual_m"][label] <= limit, label
+    assert ik["min_sphere_height_m"] >= -FOOT_PENETRATION_THRESHOLD_M["deadlift"]
+
+
+def test_clean_and_jerk_solution_racks_then_locks_the_bar_overhead() -> None:
+    """The recorded solution is the whole lift with the phase-correct bar.
+
+    Heights are the optimizer's own (ankle origin, ``up``): the bar hangs one
+    arm length below the shoulder at the setup, sits on it (front rack) at the
+    standard's rack catch and is one arm length above it at the lockout.
+    """
+    from src.shared.python.lifting.lift_spec import lift_phases
+
+    prov = InputBundle.load(recipe("clean_and_jerk").bundle_path).provenance
+    solution = SagittalSolution.from_record(prov["sagittal_solution"])
+    lengths = np.asarray(solution.source["segment_lengths_m"], dtype=float)
+    arm = float(solution.source["arm_length_m"])
+    shoulder = np.cos(solution.segment_angles_rad) @ lengths
+    frac = solution.time_s / solution.time_s[-1]
+    phases = {p.name: p.t_frac for p in lift_phases("clean_and_jerk")}
+    catch = int(np.argmin(np.abs(frac - phases["rack_catch"])))
+    bar = solution.bar_m[:, 1]
+    assert bar[0] == pytest.approx(shoulder[0] - arm)
+    assert bar[catch] == pytest.approx(shoulder[catch])
+    assert bar[-1] == pytest.approx(shoulder[-1] + arm)
+    overhead = frac >= phases["overhead_catch"]
+    np.testing.assert_allclose(bar[overhead], shoulder[overhead] + arm, atol=1e-12)
+
+
+@_CLEAN_AND_JERK_RACK_AND_JERK
+def test_clean_and_jerk_whole_lift_ik_meets_the_deadlift_bounds() -> None:
+    ik = InputBundle.load(recipe("clean_and_jerk").bundle_path).provenance["ik"]
     for label, limit in IK_RESIDUAL_THRESHOLDS_M["deadlift"].items():
         assert ik["max_residual_m"][label] <= limit, label
     assert ik["min_sphere_height_m"] >= -FOOT_PENETRATION_THRESHOLD_M["deadlift"]

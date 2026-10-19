@@ -66,6 +66,15 @@ class JaxSimBackend:
         return self._model_name
 
     @property
+    def is_initialized(self) -> bool:
+        """Return True when a model is loaded in JaxSim."""
+        return (
+            self._model is not None
+            and self._data is not None
+            and self._apis is not None
+        )
+
+    @property
     def convention(self) -> FloatingBaseConvention:
         """Return the suite-normalized floating-base convention."""
 
