@@ -305,8 +305,9 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
 
         theta1 = float(self._pendulum_state.theta1)
         theta2 = float(self._pendulum_state.theta2)
-        l1 = self.dynamics.parameters.upper_segment.length_m
-        l2 = self.dynamics.parameters.lower_segment.length_m
+        parameters = self.dynamics.parameters
+        l1 = parameters.upper_segment.length_m
+        l2 = parameters.lower_segment.length_m
         abs2 = theta1 + theta2
 
         if body in {"wrist", "arm"}:

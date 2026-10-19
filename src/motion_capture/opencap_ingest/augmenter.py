@@ -337,8 +337,9 @@ class OpenCapMarkerAugmenter:
         """Augment input 3-D keypoints into 43 LaiUhlrich2022 anatomical markers."""
         kpt_dict, times = self._extract_keypoints(keypoints, fps)
 
-        runner = self.config.runner_type.lower()
-        if runner == "synthetic" or self.config.synthetic_fallback:
+        config = self.config
+        runner = config.runner_type.lower()
+        if runner == "synthetic" or config.synthetic_fallback:
             return self._synthesize_markers(kpt_dict, times)
 
         sidecar_py = OpenCapLauncher.find_opencap_python(self.config.sidecar_env)
