@@ -18,6 +18,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13355 · Fix(Ui): Include Physical Style in resolveGrip to Resolve Red Main on Frontend-Tests
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13355
+- **Branch:** fix/main-grip-selection-style
+- **PR:** #13361
+- **Paths:** see #13361
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`3e195a56`; collated from changes/13355-fix-grip-selection-style.md)
+- **Summary:** fix(ui): include physical style in resolveGrip to resolve red main on frontend-tests
+- **Next step:** Merge the PR.
+
+### DL-#13350 · Fix(Launcher): Renumber Jaxsim_Dashboard to Order 105 to Resolve Duplicate Tile Order 33
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13350
+- **Branch:** fix/13350-launcher-tile-order
+- **PR:** #13358
+- **Paths:** see #13358
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`deec5362`; collated from changes/13350-renumber-jaxsim-dashboard.md)
+- **Summary:** fix(launcher): renumber jaxsim_dashboard to order 105 to resolve duplicate tile order 33
+- **Next step:** Merge the PR.
+
+### DL-#13348 · Fix(Data_Io): Make C3d_Loader Resilient to Sidekick.Lab.Bio Test Pollution
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13348
+- **Branch:** fix/13348-c3d-marker-set-import
+- **PR:** #13359
+- **Paths:** see #13359
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`100b1885`; collated from changes/13348-c3d-loader-bio-resilience.md)
+- **Summary:** fix(data_io): make c3d_loader resilient to sidekick.lab.bio test pollution
+- **Next step:** Merge the PR.
+
 ### DL-#13001 · Reject Unauthenticated Diagnostics in Remote Mode, Redact Absolute Repo Root, and Measure Runtime Probes
 
 - **State:** in_review
