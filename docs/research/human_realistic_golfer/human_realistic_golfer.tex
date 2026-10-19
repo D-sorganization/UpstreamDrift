@@ -729,6 +729,8 @@ Model ID & $\|\mathbf{F}_{\mathrm{weld}}\|$ (N) & $\|\mathbf{M}_{\mathrm{weld}}\
 \end{tabular}
 \end{table}
 
+\textbf{Friction-Cone Reading of the Allocation.} On \texttt{mujoco\_upper\_body\_swing} and \texttt{mujoco\_full\_body\_swing} the equal-split allocation of the weld wrench is almost purely tangential ($f_n \approx 0$\,N, $f_t \approx 1150$--$1208$\,N on \texttt{trail\_palm\_lead\_thumb} and \texttt{overlap\_little\_finger\_lead\_index}), so the reported friction-cone ratio $\|f_t\|/(\mu f_n)$ is far above 1. These allocated equivalents therefore could not be carried by the named finger pairs as unilateral Coulomb contact; this characterises the weld models' closure demand, not a contact force, and is reported rather than clipped.
+
 \textbf{Limitations.}
 All five admitted MuJoCo humanoid MJCFs represent each hand as a single rigid body (or fixed finger proxy group without articulated phalangeal DOFs), so site bindings use \texttt{representation="rigid\_proxy"}. In the default welded topology, hand--grip and hand--hand forces are reporting/allocated channels rather than dynamically independent contact forces unless \texttt{attachment\_redesign} is explicitly enabled.
 
