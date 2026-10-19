@@ -20,6 +20,9 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from pathlib import Path
+from types import MappingProxyType
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -45,6 +48,11 @@ Array = NDArray[np.float64]
 # Engines whose same-input adapter extracts the grip wrench from the KKT
 # multiplier.  Others report the hand wrench as unavailable.
 GRIP_ENGINES: tuple[str, ...] = ("mujoco", "drake")
+ENGINE_MODULES: Mapping[str, str] = MappingProxyType(
+    {"drake": "pydrake", "pinocchio": "pinocchio", "opensim": "opensim"}
+)
+DEFAULT_STRIDE: int = 20
+_REPO: Path = Path(__file__).resolve().parents[4]
 FEET: tuple[str, ...] = ("left", "right")
 _GRIP_FAILURES = (ValueError, ArithmeticError, RuntimeError, np.linalg.LinAlgError)
 # Reference point for the breakdown's CoM-moment fields, which are discarded.
@@ -169,3 +177,150 @@ def kinetics_differences(
         a.grip.couple_at_midpoint_nm, b.grip.couple_at_midpoint_nm
     )
     return out
+
+
+def lift_evidence_dir(lift: str, repo_root: Path | None = None) -> Path:
+    """Directory holding evidence artifacts for *lift*.
+
+    Raises:
+        ValueError: For a non-string or empty lift name.
+    """
+    if not isinstance(lift, str) or not lift:
+        raise ValueError("lift must be a non-empty string")
+    root = _REPO if repo_root is None else repo_root
+    dir_name = "back_squat" if lift in ("squat", "back_squat") else lift
+    return root / f"docs/development/lifting/evidence/{dir_name}"
+
+
+def lift_kinetics_record_path(lift: str, repo_root: Path | None = None) -> Path:
+    """Path to the committed kinetics_parity.json for *lift*."""
+    return lift_evidence_dir(lift, repo_root) / "kinetics_parity.json"
+
+
+def lift_kinetics_bundle_path(lift: str) -> Path | None:
+    """Path to the same-input bundle for *lift* kinetics parity.
+
+    Returns ``None`` when the lift is unregistered in ``SAME_INPUT_LIFT_BUNDLES``.
+
+    Raises:
+        ValueError: For a non-string or empty lift name.
+    """
+    if not isinstance(lift, str) or not lift:
+        raise ValueError("lift must be a non-empty string")
+    from src.shared.python.lifting.bundles import (
+        BACK_SQUAT_BUNDLE,
+        SAME_INPUT_LIFT_BUNDLES,
+    )
+
+    if lift in ("squat", "back_squat"):
+        if SAME_INPUT_LIFT_BUNDLES.get("squat") is None:
+            return None
+        return BACK_SQUAT_BUNDLE
+    return SAME_INPUT_LIFT_BUNDLES.get(lift)
+
+
+def worst_kinetics_differences(
+    reference: Sequence[KineticsSample], other: Sequence[KineticsSample]
+) -> dict[str, Any]:
+    """Largest absolute difference per quantity across all sample pairs."""
+    worst: dict[str, Any] = {}
+    for ref, oth in zip(reference, other, strict=True):
+        for key, gap in kinetics_differences(ref, oth).items():
+            if gap is None:
+                worst.setdefault(key, None)
+            else:
+                worst[key] = max(worst.get(key) or 0.0, gap)
+    reasons = {s.grip.unavailable_reason for s in other if s.grip.unavailable_reason}
+    if reasons:
+        worst["grip_unavailable_reason"] = sorted(reasons)[0]
+    return worst
+
+
+def kinetics_sample_values(sample: KineticsSample) -> dict[str, Any]:
+    """Values dictionary of one reference sample for scale and inspection."""
+    grip = sample.grip
+    return {
+        "index": sample.index,
+        "time_s": sample.time_s,
+        "grf_left_n": sample.per_foot["left"].force_n.tolist(),
+        "grf_right_n": sample.per_foot["right"].force_n.tolist(),
+        "grf_net_n": sample.net.force_n.tolist(),
+        "cop_net_m": None if sample.net.cop_m is None else sample.net.cop_m.tolist(),
+        "grip_net_force_n": None
+        if grip.net_force_n is None
+        else list(grip.net_force_n),
+    }
+
+
+def evaluate_lift_kinetics_parity(
+    bundle: InputBundle,
+    *,
+    stride: int = DEFAULT_STRIDE,
+    source_commit: str = "",
+    reference_engine: str = "mujoco",
+    generator: str = "scripts/measure_lift_kinetics_parity.py",
+    bundle_rel_path: str = "",
+) -> dict[str, Any]:
+    """Evaluate cross-engine kinetics parity for *bundle* at *stride* states.
+
+    Raises:
+        ValueError: If stride < 1 or bundle is empty.
+    """
+    import importlib
+
+    if stride < 1:
+        raise ValueError(f"stride must be a positive integer, got {stride}")
+    indices = list(range(0, bundle.steps + 1, stride))
+    reference = bundle_kinetics(reference_engine, bundle, indices)
+    engines: dict[str, Any] = {}
+    for engine, module in ENGINE_MODULES.items():
+        try:
+            importlib.import_module(module)
+        except (ImportError, OSError) as exc:
+            engines[engine] = {"unavailable": True, "reason": f"{module}: {exc}"}
+            continue
+        engines[engine] = worst_kinetics_differences(
+            reference, bundle_kinetics(engine, bundle, indices)
+        )
+    return {
+        "lift": bundle.provenance.get("lift"),
+        "bundle": bundle_rel_path,
+        "bundle_spec_sha256": bundle.spec_sha256,
+        "indices": indices,
+        "reference_engine": reference_engine,
+        "source_commit": source_commit,
+        "generator": generator,
+        "mujoco_values": [kinetics_sample_values(s) for s in reference],
+        "max_difference_from_mujoco": engines,
+    }
+
+
+def unavailable_kinetics_parity_record(
+    lift: str,
+    reason: str,
+    *,
+    source_commit: str = "",
+    generator: str = "scripts/measure_lift_kinetics_parity.py",
+) -> dict[str, Any]:
+    """Shape of an unavailable kinetics parity record (never zero).
+
+    Raises:
+        ValueError: For a non-string or empty lift or reason.
+    """
+    if not isinstance(lift, str) or not lift:
+        raise ValueError("lift must be a non-empty string")
+    if not isinstance(reason, str) or not reason:
+        raise ValueError("reason must be a non-empty string")
+    return {
+        "status": "unavailable",
+        "lift": lift,
+        "reason": reason,
+        "bundle": None,
+        "bundle_spec_sha256": None,
+        "indices": [],
+        "reference_engine": "mujoco",
+        "source_commit": source_commit,
+        "generator": generator,
+        "mujoco_values": [],
+        "max_difference_from_mujoco": {},
+    }

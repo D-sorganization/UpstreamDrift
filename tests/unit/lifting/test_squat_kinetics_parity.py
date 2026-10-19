@@ -20,13 +20,20 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.shared.python.lifting.bundles import BACK_SQUAT_BUNDLE
+from src.shared.python.lifting.bundles import (
+    BACK_SQUAT_BUNDLE,
+    SAME_INPUT_LIFT_BUNDLES,
+)
 from src.shared.python.lifting.kinetics_parity import (
     GRIP_ENGINES,
     KineticsSample,
     bundle_kinetics,
     kinetics_differences,
+    lift_kinetics_bundle_path,
+    lift_kinetics_record_path,
+    unavailable_kinetics_parity_record,
 )
+from src.shared.python.lifting.pack_audit.names import LIFTS
 from src.shared.python.motion_matching.same_input import InputBundle
 
 pytestmark = pytest.mark.unit
@@ -38,7 +45,7 @@ RECORD = (
 ATOL = 1e-6  # N or N m
 RTOL = 1e-8
 COP_ATOL_M = 1e-8
-FRAMES = (0, 100, 200)  # window start, squat bottom, window end
+FRAMES = (0, 100, 200)  # window start, mid, window end
 ENGINES = ("drake", "pinocchio", "opensim")
 _MODULE = {
     "mujoco": "mujoco",
@@ -86,15 +93,28 @@ def mujoco_samples(bundle) -> list[KineticsSample]:
     return bundle_kinetics("mujoco", bundle, FRAMES)
 
 
-def test_committed_record_is_inside_the_tolerances(bundle) -> None:
+@pytest.mark.parametrize("lift", LIFTS)
+def test_committed_record_is_inside_the_tolerances(lift: str) -> None:
     """The full-window record (every 20th state, all engines) meets the bounds."""
-    record = json.loads(RECORD.read_text(encoding="utf-8"))
+    record_path = lift_kinetics_record_path(lift)
+    assert record_path.is_file(), f"parity record {record_path} must exist"
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    bundle_path = lift_kinetics_bundle_path(lift)
+    assert bundle_path is not None, f"bundle for {lift} must be registered"
+    bundle = InputBundle.load(bundle_path)
     assert record["bundle_spec_sha256"] == bundle.spec_sha256
     assert record["indices"] == list(range(0, bundle.steps + 1, 20))
     assert len(record["source_commit"]) == 40
     values = record["mujoco_values"]
     grf_scale = max(np.abs(v["grf_net_n"]).max() for v in values)
-    grip_scale = max(np.abs(v["grip_net_force_n"]).max() for v in values)
+    grip_scale = max(
+        (
+            np.abs(v["grip_net_force_n"]).max()
+            for v in values
+            if v["grip_net_force_n"] is not None
+        ),
+        default=1.0,
+    )
     engines = record["max_difference_from_mujoco"]
     assert set(engines) == {"drake", "pinocchio", "opensim"}
     for engine in ("drake", "pinocchio"):
@@ -104,15 +124,51 @@ def test_committed_record_is_inside_the_tolerances(bundle) -> None:
             assert diff["reason"], engine
             continue
         for key in ("left", "right", "net"):
-            assert diff[f"grf_force_{key}_n"] <= ATOL + RTOL * grf_scale, engine
-            assert diff[f"free_moment_{key}_nm"] <= ATOL + RTOL * grf_scale, engine
-            assert diff[f"cop_{key}_m"] <= COP_ATOL_M, engine
+            if diff[f"grf_force_{key}_n"] is not None:
+                assert diff[f"grf_force_{key}_n"] <= ATOL + RTOL * grf_scale, (
+                    lift,
+                    engine,
+                    key,
+                )
+            if diff[f"free_moment_{key}_nm"] is not None:
+                assert diff[f"free_moment_{key}_nm"] <= ATOL + RTOL * grf_scale, (
+                    lift,
+                    engine,
+                    key,
+                )
+            if diff[f"cop_{key}_m"] is not None:
+                assert diff[f"cop_{key}_m"] <= COP_ATOL_M, (lift, engine, key)
         if engine in GRIP_ENGINES:
             for key in ("hand_left_force_n", "hand_right_force_n", "grip_net_force_n"):
-                assert diff[key] <= ATOL + RTOL * grip_scale, (engine, key)
+                if diff[key] is not None:
+                    assert diff[key] <= ATOL + RTOL * grip_scale, (lift, engine, key)
+            if diff.get("grip_couple_nm") is not None:
+                assert diff["grip_couple_nm"] <= ATOL + RTOL * grip_scale, (
+                    lift,
+                    engine,
+                )
         else:
             assert diff["grip_net_force_n"] is None
-            assert diff["grip_unavailable_reason"], engine
+            assert diff["grip_unavailable_reason"], (lift, engine)
+
+
+def test_unregistered_lift_has_unavailable_record(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.shared.python.lifting import bundles as bundles_mod
+
+    unregistered = dict(SAME_INPUT_LIFT_BUNDLES)
+    unregistered["squat"] = None
+    monkeypatch.setattr(bundles_mod, "SAME_INPUT_LIFT_BUNDLES", unregistered)
+    assert lift_kinetics_bundle_path("squat") is None
+    record = unavailable_kinetics_parity_record(
+        "squat", "no registered bundle in SAME_INPUT_LIFT_BUNDLES for squat"
+    )
+    assert record["status"] == "unavailable"
+    assert record["lift"] == "squat"
+    assert "SAME_INPUT_LIFT_BUNDLES" in record["reason"]
+    assert record["bundle"] is None
+    assert record["max_difference_from_mujoco"] == {}
 
 
 def test_grip_engines_are_the_kkt_engines() -> None:
@@ -133,9 +189,15 @@ def test_rejects_indices_outside_the_bundle(bundle) -> None:
 
 @pytest.mark.integration
 @pytest.mark.requires_mujoco
-def test_mujoco_feet_carry_the_lifter(mujoco_samples, bundle) -> None:
-    for sample in mujoco_samples:
-        assert sample.time_s == pytest.approx(sample.index * bundle.dt_s)
+@pytest.mark.parametrize("lift", ("squat", "deadlift", "snatch", "clean_and_jerk"))
+def test_mujoco_standing_feet_carry_the_lifter(lift: str) -> None:
+    pytest.importorskip("mujoco")
+    path = lift_kinetics_bundle_path(lift)
+    assert path is not None
+    loaded = InputBundle.load(path)
+    samples = bundle_kinetics("mujoco", loaded, FRAMES)
+    for sample in samples:
+        assert sample.time_s == pytest.approx(sample.index * loaded.dt_s)
         for foot in ("left", "right"):
             reaction = sample.per_foot[foot]
             assert reaction.in_contact
@@ -145,41 +207,96 @@ def test_mujoco_feet_carry_the_lifter(mujoco_samples, bundle) -> None:
 
 
 @pytest.mark.integration
+@pytest.mark.requires_mujoco
+def test_mujoco_bench_press_contact_schedule() -> None:
+    pytest.importorskip("mujoco")
+    path = lift_kinetics_bundle_path("bench_press")
+    assert path is not None
+    loaded = InputBundle.load(path)
+    samples = bundle_kinetics("mujoco", loaded, FRAMES)
+    assert samples[0].per_foot["left"].in_contact
+    assert samples[0].per_foot["right"].in_contact
+    assert samples[0].net.force_n[2] > 0.0
+    # Bench press feet leave the floor later during the press
+    assert not samples[1].per_foot["left"].in_contact
+    assert not samples[2].per_foot["left"].in_contact
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("lift", LIFTS)
 @pytest.mark.parametrize("engine", ENGINES)
-def test_ground_reaction_matches_mujoco(mujoco_samples, bundle, engine) -> None:
+def test_ground_reaction_matches_mujoco(lift: str, engine: str) -> None:
     _require_real_engine(engine)
-    for ref, other in zip(
-        mujoco_samples, bundle_kinetics(engine, bundle, FRAMES), strict=True
-    ):
+    path = lift_kinetics_bundle_path(lift)
+    assert path is not None
+    loaded = InputBundle.load(path)
+    ref_samples = bundle_kinetics("mujoco", loaded, FRAMES)
+    oth_samples = bundle_kinetics(engine, loaded, FRAMES)
+    for ref, other in zip(ref_samples, oth_samples, strict=True):
         diff = kinetics_differences(ref, other)
         scale = float(np.abs(ref.net.force_n).max())
         bound = ATOL + RTOL * scale
         for key in ("left", "right", "net"):
-            assert diff[f"grf_force_{key}_n"] <= bound, (engine, ref.index, diff)
-            assert diff[f"free_moment_{key}_nm"] <= bound, (engine, ref.index, diff)
-            assert diff[f"cop_{key}_m"] <= COP_ATOL_M, (engine, ref.index, diff)
+            if diff[f"grf_force_{key}_n"] is not None:
+                assert diff[f"grf_force_{key}_n"] <= bound, (
+                    lift,
+                    engine,
+                    ref.index,
+                    diff,
+                )
+            if diff[f"free_moment_{key}_nm"] is not None:
+                assert diff[f"free_moment_{key}_nm"] <= bound, (
+                    lift,
+                    engine,
+                    ref.index,
+                    diff,
+                )
+            if diff[f"cop_{key}_m"] is not None:
+                assert diff[f"cop_{key}_m"] <= COP_ATOL_M, (
+                    lift,
+                    engine,
+                    ref.index,
+                    diff,
+                )
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize("lift", LIFTS)
 @pytest.mark.requires_drake
-def test_drake_hand_wrench_matches_mujoco(mujoco_samples, bundle) -> None:
+def test_drake_hand_wrench_matches_mujoco(lift: str) -> None:
     _require_real_engine("drake")
-    for ref, other in zip(
-        mujoco_samples, bundle_kinetics("drake", bundle, FRAMES), strict=True
-    ):
+    path = lift_kinetics_bundle_path(lift)
+    assert path is not None
+    loaded = InputBundle.load(path)
+    ref_samples = bundle_kinetics("mujoco", loaded, FRAMES)
+    drake_samples = bundle_kinetics("drake", loaded, FRAMES)
+    for ref, other in zip(ref_samples, drake_samples, strict=True):
         diff = kinetics_differences(ref, other)
-        scale = float(np.abs(np.asarray(ref.grip.net_force_n)).max())
+        ref_force = ref.grip.net_force_n
+        scale = (
+            float(np.abs(np.asarray(ref_force)).max()) if ref_force is not None else 1.0
+        )
         bound = ATOL + RTOL * scale
         for key in ("hand_left_force_n", "hand_right_force_n", "grip_net_force_n"):
-            assert diff[key] <= bound, (ref.index, key, diff[key])
-        assert diff["grip_couple_nm"] <= bound, (ref.index, diff["grip_couple_nm"])
+            if diff[key] is not None:
+                assert diff[key] <= bound, (lift, ref.index, key, diff[key])
+        if diff["grip_couple_nm"] is not None:
+            assert diff["grip_couple_nm"] <= bound, (
+                lift,
+                ref.index,
+                diff["grip_couple_nm"],
+            )
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize("lift", LIFTS)
 @pytest.mark.requires_pinocchio
-def test_pinocchio_hand_wrench_is_unavailable_with_a_reason(bundle) -> None:
+def test_pinocchio_hand_wrench_is_unavailable_with_a_reason(lift: str) -> None:
     _require_real_engine("pinocchio")
-    (sample,) = bundle_kinetics("pinocchio", bundle, (0,))
+    path = lift_kinetics_bundle_path(lift)
+    assert path is not None
+    loaded = InputBundle.load(path)
+    (sample,) = bundle_kinetics("pinocchio", loaded, (0,))
     assert sample.grip.split_method == "unavailable"
     assert sample.grip.net_force_n is None
     assert "pinocchio" in sample.grip.unavailable_reason
