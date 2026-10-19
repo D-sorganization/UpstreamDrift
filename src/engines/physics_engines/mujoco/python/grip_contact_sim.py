@@ -47,7 +47,11 @@ from src.shared.python.grip_contact.contact_topology import (
     pair_surface_gap_m,
 )
 from src.shared.python.grip_contact.pad_contact import PadContactModel, grip_axis
-from src.shared.python.grip_contact.pair_contact import PairWrench
+from src.shared.python.grip_contact.pair_contact import (
+    ContactCapsule,
+    PairWrench,
+    capsule_line_nodes,
+)
 from src.shared.python.grip_contact.parity import GripKineticsSeries
 from src.shared.python.grip_contact.topology_contact import (
     PairTraceRecorder,
@@ -69,11 +73,43 @@ TOPOLOGY_IMPEDANCE = 0.001
 TOPOLOGY_IMPRATIO_STATIC = 0.95
 TOPOLOGY_FRICTION_TIME_STATIC_S = 1.9e-5
 TOPOLOGY_STEP_SCALE = 1000.0
-PARALLEL_CAPSULE_SIN2_TOL = 1.0e-10
 
 
 def _nums(values: Any) -> str:
     return " ".join(format(float(v), ".17g") for v in values)
+
+
+def line_node_geom_name(site: str, node: int) -> str:
+    """MJCF geom name of axial line-contact node ``node`` of capsule ``site``."""
+    return f"{site}_node{node}"
+
+
+def _site_node_geoms(
+    topo: Any, site: str, side: str
+) -> tuple[tuple[str, ...], tuple[tuple[np.ndarray, float], ...]]:
+    """Geom names and (hand-frame centre, radius) spheres of one topology site.
+
+    A sphere site is one sphere.  A capsule site is the shared axial
+    line-contact quadrature (#13308): one sphere per
+    :func:`~src.shared.python.grip_contact.pair_contact.capsule_line_nodes`
+    node, each paired with the grip under the site's calibrated ``solref``,
+    so their summed native contacts integrate the penetration along the
+    capsule exactly as the shared law does.  A native capsule-cylinder
+    contact would instead snap between the overlap centre and an endpoint.
+    """
+    mapped = map_site_to_hand_frame(topo, site, side)
+    if mapped.primitive == "sphere":
+        return (mapped.name,), ((np.asarray(mapped.centre_m, float), mapped.radius_m),)
+    if mapped.primitive == "capsule":
+        p0, p1 = mapped.endpoints_m
+        nodes = capsule_line_nodes(
+            ContactCapsule(
+                np.asarray(p0, float), np.asarray(p1, float), mapped.radius_m
+            )
+        )
+        names = tuple(line_node_geom_name(mapped.name, j) for j in range(len(nodes)))
+        return names, tuple((n.center_m, n.radius_m) for n in nodes)
+    raise ValueError(f"unsupported primitive {mapped.primitive!r}")
 
 
 def _topology_bodies_and_pairs(
@@ -94,30 +130,25 @@ def _topology_bodies_and_pairs(
     for side in sides:
         geoms: list[str] = []
         for k, pair in enumerate(topo_model.physical_grip_pairs(side)):
-            mapped = map_site_to_hand_frame(topo, pair.site_a, side)
-            if mapped.primitive == "sphere":
-                geoms.append(
-                    f'<geom name="{mapped.name}" type="sphere" '
-                    f'size="{mapped.radius_m:.17g}" pos="{_nums(mapped.centre_m)}" '
-                    f'contype="0" conaffinity="0" mass="0"/>'
-                )
-            elif mapped.primitive == "capsule":
-                p0, p1 = mapped.endpoints_m
-                geoms.append(
-                    f'<geom name="{mapped.name}" type="capsule" '
-                    f'size="{mapped.radius_m:.17g}" fromto="{_nums(p0)} {_nums(p1)}" '
-                    f'contype="0" conaffinity="0" mass="0"/>'
-                )
-            else:
-                raise ValueError(f"unsupported primitive {mapped.primitive!r}")
+            names, spheres = _site_node_geoms(topo, pair.site_a, side)
             ref = solref.get((side, k)) or solref[pair.name]
-            pairs.append(
-                f'<pair geom1="{mapped.name}" geom2="grip" condim="6" '
-                f'friction="{mu:.17g} {mu:.17g} {torsional:.17g} 1e-5 1e-5" '
-                f'solref="{ref[0]:.17g} {ref[1]:.17g}" '
-                f'solreffriction="{friction_time_s:.17g} 1" '
-                f'solimp="{TOPOLOGY_IMPEDANCE} {TOPOLOGY_IMPEDANCE} 0.001 0.5 2"/>'
-            )
+            # MuJoCo's regularised friction gain is per contact row: N node rows
+            # at one contact's time constant resist slip ~N times as hard as the
+            # shared line law, so each node row is N times slower (#13308).
+            node_friction_time_s = friction_time_s * len(names)
+            for name, (centre, radius) in zip(names, spheres, strict=True):
+                geoms.append(
+                    f'<geom name="{name}" type="sphere" '
+                    f'size="{radius:.17g}" pos="{_nums(centre)}" '
+                    f'contype="0" conaffinity="0" mass="0"/>'
+                )
+                pairs.append(
+                    f'<pair geom1="{name}" geom2="grip" condim="6" '
+                    f'friction="{mu:.17g} {mu:.17g} {torsional:.17g} 1e-5 1e-5" '
+                    f'solref="{ref[0]:.17g} {ref[1]:.17g}" '
+                    f'solreffriction="{node_friction_time_s:.17g} 1" '
+                    f'solimp="{TOPOLOGY_IMPEDANCE} {TOPOLOGY_IMPEDANCE} 0.001 0.5 2"/>'
+                )
         bodies.append(
             f'<body name="hand_{side}"><freejoint name="hand_{side}_free"/>'
             f'<inertial pos="0 0 0" mass="{HAND_MASS_KG}" diaginertia="10 10 10"/>'
@@ -363,37 +394,16 @@ class ClubInHands:
         self._hand = {s: int(self.model.body(f"hand_{s}").id) for s in self.pad_sides}
         self._offsets = {s: self.interface.frame(s).matrix() for s in SIDES}
         self._pad_geom: dict[int, tuple[str, int]] = {}
-        self._grip_geom_id = int(self.model.geom("grip").id)
-        self._capsule_geoms: list[tuple[int, float]] = []
         if self.topology_model is not None:
+            topo = self.topology_model.topology
             for s in self.pad_sides:
                 for k, pair in enumerate(self.topology_model.physical_grip_pairs(s)):
-                    gid = int(self.model.geom(pair.site_a).id)
-                    self._pad_geom[gid] = (s, k)
-                    mapped = map_site_to_hand_frame(
-                        self.topology_model.topology, pair.site_a, s
-                    )
-                    if mapped.primitive == "capsule":
-                        self._capsule_geoms.append((gid, mapped.half_length_m))
+                    for name in _site_node_geoms(topo, pair.site_a, s)[0]:
+                        self._pad_geom[int(self.model.geom(name).id)] = (s, k)
         else:
             for s in self.pad_sides:
                 for k in range(self.pad_count):
                     self._pad_geom[int(self.model.geom(f"pad_{s}{k}").id)] = (s, k)
-
-    def _sync_parallel_capsules(self) -> None:
-        """Match shared closest_points_segments midpoint convention when sin^2(theta) < 1e-10."""
-        if not self._capsule_geoms:
-            return
-        mj, m, d = self._mj, self.model, self.data
-        mj.mj_kinematics(m, d)
-        ax_grip = d.geom_xmat[self._grip_geom_id].reshape(3, 3)[:, 2]
-        for gid, half_len in self._capsule_geoms:
-            ax_cap = d.geom_xmat[gid].reshape(3, 3)[:, 2]
-            dot = float(ax_cap @ ax_grip)
-            if max(1.0 - dot * dot, 0.0) < PARALLEL_CAPSULE_SIN2_TOL:
-                m.geom_size[gid, 1] = 1.0e-9
-            else:
-                m.geom_size[gid, 1] = half_len
 
     # ------------------------------------------------------------ placement
     def _set_free(self, body: int, rot: np.ndarray, pos: np.ndarray) -> None:
@@ -626,7 +636,6 @@ class ClubInHands:
         """Normal force and penetration of every pad/site contact after ``mj_forward``."""
         mj, m, d = self._mj, self.model, self.data
         self._set_step_scaling(False)
-        self._sync_parallel_capsules()
         mj.mj_forward(m, d)
         res = np.zeros(6)
         force: dict[tuple[str, int], float] = {}
@@ -708,13 +717,11 @@ class ClubInHands:
         for _ in range(steps):
             t = float(d.time)
             self.place_hands(t, velocity_time=t + 0.5 * dt)
-            self._sync_parallel_capsules()
             mj.mj_step(m, d)
 
     def sample(self) -> ContactSample:
         """Exact hand pose at the current time, forward, and the contact wrench."""
         hands = self.place_hands(float(self.data.time))
-        self._sync_parallel_capsules()
         self._mj.mj_forward(self.model, self.data)
         return self.read(hands)
 
