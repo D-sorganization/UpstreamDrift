@@ -10,7 +10,11 @@ import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-from src.learning.imitation._base import ImitationLearner, TrainingConfig
+from src.learning.imitation._base import (
+    ImitationLearner,
+    TrainingConfig,
+    validated_state_action_pairs,
+)
 from src.learning.imitation.dataset import DemonstrationDataset
 
 from src.learning.imitation._mlp import (
@@ -147,19 +151,9 @@ class GAIL(ImitationLearner):
             ValueError: If ``dataset`` is empty or ``validation_split`` is
                 outside ``[0, 1)``.
         """
-        if dataset is None:
-            raise ValueError("dataset must be provided")
-        if not 0.0 <= validation_split < 1.0:
-            raise ValueError(
-                f"validation_split must be in [0, 1), got {validation_split}"
-            )
-        expert_states, expert_actions = dataset.to_state_action_pairs()
-
-        if len(expert_states) == 0:
-            raise ValueError("Dataset has no state-action pairs")
-
-        expert_states = np.asarray(expert_states, dtype=float)
-        expert_actions = np.asarray(expert_actions, dtype=float)
+        expert_states, expert_actions = validated_state_action_pairs(
+            dataset, validation_split
+        )
 
         n_total = len(expert_states)
         n_val = int(n_total * validation_split)

@@ -23,6 +23,32 @@ except ImportError:
 from src.learning.imitation.dataset import DemonstrationDataset
 
 
+def validated_state_action_pairs(
+    dataset: DemonstrationDataset | None, validation_split: float
+) -> tuple[NDArray[np.floating], NDArray[np.floating]]:
+    """Float state-action pairs for training, after checking preconditions.
+
+    Args:
+        dataset: Demonstration dataset to flatten.
+        validation_split: Fraction held out for validation; must be in ``[0, 1)``.
+
+    Returns:
+        ``(observations, actions)`` as float arrays with at least one row.
+
+    Raises:
+        ValueError: If ``dataset`` is missing or empty, or ``validation_split``
+            is outside ``[0, 1)``.
+    """
+    if dataset is None:
+        raise ValueError("dataset must be provided")
+    if not 0.0 <= validation_split < 1.0:
+        raise ValueError(f"validation_split must be in [0, 1), got {validation_split}")
+    observations, actions = dataset.to_state_action_pairs()
+    if len(observations) == 0:
+        raise ValueError("Dataset has no state-action pairs")
+    return np.asarray(observations, dtype=float), np.asarray(actions, dtype=float)
+
+
 @dataclass
 class TrainingConfig:
     """Configuration for imitation learning training.

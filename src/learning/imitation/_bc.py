@@ -13,7 +13,11 @@ import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-from src.learning.imitation._base import ImitationLearner, TrainingConfig
+from src.learning.imitation._base import (
+    ImitationLearner,
+    TrainingConfig,
+    validated_state_action_pairs,
+)
 from src.learning.imitation._mlp import (
     _adam_step,
     _build_mlp,
@@ -24,6 +28,21 @@ from src.learning.imitation._mlp import (
 from src.learning.imitation.dataset import DemonstrationDataset
 
 logger = logging.getLogger(__name__)
+
+
+def _warn_if_loss_stalled(train_loss: list[float]) -> None:
+    """Postcondition check: warn when training did not cut the loss by 1 %."""
+    if len(train_loss) < 2:
+        return
+    initial_loss, final_loss = train_loss[0], train_loss[-1]
+    if initial_loss > 0 and final_loss >= initial_loss * 0.99:
+        msg = (
+            f"Training did not decrease loss significantly: "
+            f"initial loss {initial_loss:.4f}, final loss {final_loss:.4f}."
+        )
+        logger.warning(msg)
+        # stacklevel=3 points at the caller of train(), as before the split.
+        warnings.warn(msg, UserWarning, stacklevel=3)
 
 
 class BehaviorCloning(ImitationLearner):
@@ -134,19 +153,7 @@ class BehaviorCloning(ImitationLearner):
         Raises:
             ValueError: If dataset is invalid or validation_split is out of bounds.
         """
-        if dataset is None:
-            raise ValueError("dataset must be provided")
-        if not 0.0 <= validation_split < 1.0:
-            raise ValueError(
-                f"validation_split must be in [0, 1), got {validation_split}"
-            )
-        observations, actions = dataset.to_state_action_pairs()
-
-        if len(observations) == 0:
-            raise ValueError("Dataset has no state-action pairs")
-
-        observations = np.asarray(observations, dtype=float)
-        actions = np.asarray(actions, dtype=float)
+        observations, actions = validated_state_action_pairs(dataset, validation_split)
 
         # Split data
         n = len(observations)
@@ -209,18 +216,7 @@ class BehaviorCloning(ImitationLearner):
             history["train_loss"].append(train_loss)
             history["val_loss"].append(val_loss)
 
-        # Postcondition: warn if training did not decrease loss by a margin
-        if len(history["train_loss"]) >= 2:
-            initial_loss = history["train_loss"][0]
-            final_loss = history["train_loss"][-1]
-            if initial_loss > 0 and final_loss >= initial_loss * 0.99:
-                msg = (
-                    f"Training did not decrease loss significantly: "
-                    f"initial loss {initial_loss:.4f}, final loss {final_loss:.4f}."
-                )
-                logger.warning(msg)
-                warnings.warn(msg, UserWarning, stacklevel=2)
-
+        _warn_if_loss_stalled(history["train_loss"])
         self._training_history = history
         return history
 
