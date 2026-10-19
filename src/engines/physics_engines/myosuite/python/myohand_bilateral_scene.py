@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import xml.etree.ElementTree as StdET
+import xml.etree.ElementTree as StdET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only; parse via DefusedET
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path

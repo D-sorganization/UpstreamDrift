@@ -749,3 +749,36 @@ def test_adapter_ast_budgets_and_lod() -> None:
             assert n_params <= 8, (
                 f"{ADAPTER_PY.name}:{node.name} has {n_params} params > 8"
             )
+
+
+def test_xml_parsing_uses_defusedxml_in_grip_adapters() -> None:
+    """XML parsing in grip adapters and bilateral scene uses DefusedET and marks stdlib ET build-only."""
+    expected_comment = (
+        "# noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml"
+        "  # build-only; parse via DefusedET"
+    )
+    targets = (
+        ROOT / "src/engines/physics_engines/mujoco/python/grip_lab_adapter.py",
+        ROOT / "src/engines/physics_engines/mujoco/python/humanoid_grip_adapter.py",
+        ROOT / "src/engines/physics_engines/myosuite/python/myohand_bilateral_scene.py",
+    )
+    for path in targets:
+        text = path.read_text(encoding="utf-8")
+        assert "import defusedxml.ElementTree as DefusedET" in text, path.name
+        for line in text.splitlines():
+            if line.startswith("import xml.etree.ElementTree"):
+                assert expected_comment in line, (
+                    f"{path.name}: missing build-only nosemgrep comment on {line!r}"
+                )
+        tree = ast.parse(text, filename=str(path))
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id in ("ET", "StdET")
+            ):
+                assert node.func.attr not in ("fromstring", "parse"), (
+                    f"{path.name}:{node.lineno}: must not call "
+                    f"{node.func.value.id}.{node.func.attr}"
+                )
