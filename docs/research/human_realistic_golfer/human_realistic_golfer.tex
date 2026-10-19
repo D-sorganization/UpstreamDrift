@@ -510,7 +510,7 @@ python3 -m pytest tests/unit/grip_contact/test_topology_contact.py \
     tests/unit/grip_contact/test_pinocchio_topology_grip.py
 \end{verbatim}
 
-\subsection{Batched One-Side Contact Evaluation (HRG-GS-G6 Follow-Up)}
+\subsection{Batched One-Side Contact Evaluation (HRG-GS-G6 Follow-Up, \#13384)}
 \textbf{Purpose.} \texttt{topology\_side\_wrench} sits inside every Radau right-hand-side call of the Pinocchio adapter
 (about 3{,}400 calls per $0.04$\,s window), and the per-pair path cost about $1.4$\,ms per side: each pair re-ran the DbC
 checks and about 100 small-array numpy operations. The law, its parameters and its tolerances are unchanged; only the

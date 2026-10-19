@@ -1,4 +1,4 @@
-"""Batched one-side evaluation of the sphere/capsule-on-grip law (#13304 follow-up).
+"""Batched one-side evaluation of the sphere/capsule-on-grip law (#13384, #13304 follow-up).
 
 :func:`side_rows_wrench` evaluates every hand-site/grip pair of one side in one
 pass, with inputs validated once by the caller.  The per-pair kernels in

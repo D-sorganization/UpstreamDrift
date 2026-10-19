@@ -1,4 +1,4 @@
-"""Batched topology contact law equals the per-pair reference (#13304 follow-up).
+"""Batched topology contact law equals the per-pair reference (#13384, #13304 follow-up).
 
 Acceptance criteria:
 - ``topology_side_wrench`` (one batched pass per side) equals the
