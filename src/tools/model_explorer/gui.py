@@ -50,6 +50,7 @@ except ImportError:
 from .model_source import model_as_urdf
 from .results_playback_host import ResultsPlaybackHostMixin
 from .results_session import ResultsSession
+from .segment_manager import SegmentManager
 from .segment_panel import SegmentPanel
 from .urdf_builder import URDFBuilder
 from .visualization_widget import VisualizationWidget
@@ -78,6 +79,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.urdf_builder = URDFBuilder()
+        self.segment_manager = SegmentManager()
         self.current_file_path: Path | None = None
         self._notepad_window: Any | None = None
         self._results: ResultsSession | None = None
@@ -104,6 +106,9 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         self._setup_status_bar()
         self._setup_menu_bar()
         self._connect_signals()
+
+        self.playback_bar = self.visualization_widget.playback_bar
+        self.playback_bar.scrubbed.connect(self.scrub_results)
 
         self.destroyed.connect(lambda: self.cleanup())
 
@@ -171,11 +176,17 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         """
         return self._inner
 
+    @property
+    def viewport(self) -> VisualizationWidget:
+        """The 3D visualization viewport widget."""
+        return self.visualization_widget
+
     # ---- segment signal handlers --------------------------------------
 
     def _on_segment_added(self, segment_data: dict) -> None:
         try:
             self.urdf_builder.add_segment(segment_data)
+            self.segment_manager.add_segment(segment_data)
             self.visualization_widget.update_visualization(self.urdf_builder.get_urdf())
             self.segment_added.emit(segment_data)
             self.status_bar.showMessage(f"Added segment: {segment_data['name']}")
@@ -187,6 +198,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def _on_segment_removed(self, segment_name: str) -> None:
         try:
             self.urdf_builder.remove_segment(segment_name)
+            self.segment_manager.remove_segment(segment_name)
             self.visualization_widget.update_visualization(self.urdf_builder.get_urdf())
             self.segment_removed.emit(segment_name)
             self.status_bar.showMessage(f"Removed segment: {segment_name}")
@@ -198,6 +210,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def _on_segment_modified(self, segment_data: dict) -> None:
         try:
             self.urdf_builder.modify_segment(segment_data)
+            self.segment_manager.modify_segment(segment_data)
             self.visualization_widget.update_visualization(self.urdf_builder.get_urdf())
             self.status_bar.showMessage(f"Modified segment: {segment_data['name']}")
             logger.info(f"Segment modified: {segment_data['name']}")
@@ -210,6 +223,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def new_urdf(self) -> None:
         """Reset the URDF builder and viewport."""
         self.urdf_builder.clear()
+        self.segment_manager.clear()
         self.segment_panel.clear()
         self.visualization_widget.clear()
         self.current_file_path = None
@@ -382,31 +396,69 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
             logger.error(f"Error saving URDF: {e}")
             QMessageBox.critical(self, "Error", f"Failed to save URDF: {e}")
 
-    def export_for_engine(self, engine: str, default_filename: str) -> None:
-        """Export the current URDF, optimised for ``engine``.
+    def export_for_engine(
+        self,
+        engine: str,
+        default_filename: str = "",
+        file_path: str | Path | None = None,
+    ) -> str:
+        """Export the current model, optimised for ``engine``.
 
-        Currently exports a generic URDF (Drake / Pinocchio / MuJoCo all
-        accept it). The hook exists so engine-specific tag emission can
-        be added in one place later.
+        Converts the active model to an engine-specific format:
+        - MuJoCo: MJCF XML
+        - Drake: Drake-optimized URDF (xmlns:drake, collision filter groups)
+        - Pinocchio: Pinocchio-optimized URDF
+
+        Args:
+            engine: Target physics engine ('MuJoCo', 'Drake', 'Pinocchio').
+            default_filename: Optional default filename for the save dialog.
+            file_path: Optional explicit output path to bypass dialog.
+
+        Returns:
+            The exported model content as a string.
+
+        Raises:
+            ValueError: If ``engine`` is not one of the supported engines.
         """
-        from PyQt6.QtWidgets import QFileDialog
+        if not engine or engine.lower() not in ("mujoco", "drake", "pinocchio"):
+            raise ValueError(f"Unsupported engine: {engine}")
 
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            f"Export for {engine}",
-            default_filename,
-            "URDF Files (*.urdf);;XML Files (*.xml)",
+        urdf_content = (
+            self.visualization_widget.urdf_content or self.urdf_builder.get_urdf()
         )
-        if not file_path:
-            return
-        try:
-            urdf_content = self.urdf_builder.get_urdf()
-            Path(file_path).write_text(urdf_content, encoding="utf-8")
-            self.status_bar.showMessage(f"Exported for {engine}: {file_path}")
-            logger.info(f"{engine} export saved to: {file_path}")
-        except (FileNotFoundError, OSError) as e:
-            logger.error(f"Error exporting for {engine}: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to export for {engine}: {e}")
+
+        export_data = self.segment_manager.export_for_engine(
+            engine, urdf_content=urdf_content
+        )
+        content = str(export_data.get("content", ""))
+
+        save_path: Path | None = None
+        if file_path is not None:
+            save_path = Path(file_path)
+        elif default_filename:
+            from PyQt6.QtWidgets import QFileDialog
+
+            chosen, _ = QFileDialog.getSaveFileName(
+                self,
+                f"Export for {engine}",
+                default_filename,
+                "URDF Files (*.urdf);;XML Files (*.xml);;All Files (*)",
+            )
+            if chosen:
+                save_path = Path(chosen)
+
+        if save_path is not None:
+            try:
+                save_path.write_text(content, encoding="utf-8")
+                self.status_bar.showMessage(f"Exported for {engine}: {save_path}")
+                logger.info(f"{engine} export saved to: {save_path}")
+            except (FileNotFoundError, OSError) as e:
+                logger.error(f"Error exporting for {engine}: {e}")
+                QMessageBox.critical(
+                    self, "Error", f"Failed to export for {engine}: {e}"
+                )
+
+        return content
 
     # ---- Tools menu actions -------------------------------------------
 
@@ -490,7 +542,26 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         """Move the playback cursor; ``ValueError`` if out of range or unloaded."""
         if self._results is None:
             raise ValueError("no results loaded: no frame to scrub")
+        if not (0 <= index < self._results.frame_count):
+            raise ValueError(
+                f"frame {index} is outside the results (0..{self._results.frame_count - 1})"
+            )
         self._results.scrub(index)
+        assert 0 <= self._results.current_frame < self._results.frame_count, (
+            "postcondition failed: current_frame out of range"
+        )
+        if hasattr(self, "playback_bar") and self.playback_bar is not None:
+            self.playback_bar.show_frame(index)
+        if (
+            self._results.markers is not None
+            and hasattr(self, "visualization_widget")
+            and hasattr(self.visualization_widget, "set_markers")
+        ):
+            self.visualization_widget.set_markers(self._results.markers[index])
+        if self.playback_panel is not None and hasattr(
+            self.playback_panel, "show_frame"
+        ):
+            self.playback_panel.show_frame(index)
         self.status_bar.showMessage(
             f"Frame {index + 1}/{self._results.frame_count} "
             f"(t = {self._results.current_time_s:.3f} s)"
@@ -537,6 +608,8 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
 
     def cleanup(self) -> None:
         """Release any resources held by the widget. Idempotent."""
+        if hasattr(self, "playback_bar") and self.playback_bar is not None:
+            self.playback_bar.stop()
         self._discard_results()
         # No long-lived background resources today; the visualization
         # widget owns its own GL context which Qt tears down with the
@@ -656,7 +729,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def _setup_export_menu(self, export_menu: Any) -> None:
         export_mujoco_action = QAction("Export for MuJoCo", self)
         export_mujoco_action.triggered.connect(
-            lambda: self.export_for_engine("MuJoCo", "golf_robot_mujoco.urdf")
+            lambda: self.export_for_engine("MuJoCo", "golf_robot_mujoco.xml")
         )
         export_menu.addAction(export_mujoco_action)
 

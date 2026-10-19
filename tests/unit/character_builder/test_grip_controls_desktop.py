@@ -59,6 +59,8 @@ def test_style_is_picture_only_and_lands_in_the_sidecar(widget) -> None:
 
 
 def test_a_refused_pick_shows_the_message_and_changes_nothing(widget) -> None:
+    # Lead alpha -60 is a valid lead V (-40 deg, the G4 range floor) but leaves
+    # the untouched trail hand 60 deg stronger, outside the trail-offset range.
     widget.grip_spins["lead_shaft_rotation"].setValue(-60.0)
     assert widget.model.grip_picks() == {}
-    assert "lead_v_azimuth_deg" in widget.status.text()
+    assert "trail_v_offset_deg" in widget.status.text()
