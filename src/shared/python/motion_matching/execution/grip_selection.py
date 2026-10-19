@@ -300,8 +300,8 @@ def apply_grip_selection(
         base = GripSpec(handedness=subject_handedness(document))
     grip = resolve_grip(overrides, base, sidecar_grip)
     if overrides.has_physical:
-        physical_picks = GripOverrides(**overrides.physical)
-        physical_grip = resolve_grip(physical_picks, base)
+        # ``grip`` carries the style pick too: since HRG-GS-G1 the style is a
+        # physical parameter (it selects the contact topology).
         prov = (
             provenance
             if provenance is not None
@@ -311,7 +311,7 @@ def apply_grip_selection(
                 else "user_declared"
             )
         )
-        return apply_grip_config(document, physical_grip, provenance=prov), grip
+        return apply_grip_config(document, grip, provenance=prov), grip
     return {**document}, grip
 
 
