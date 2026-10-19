@@ -551,6 +551,44 @@ u_x \cdot u_{\mathrm{exp}} \ge 0.999999.
 python3 -m pytest tests/unit/grip_contact/test_grip_binding_manifests.py
 \end{verbatim}
 
+\subsection{Cross-Model Grip Qualification Harness (HRG-GS-M3, \#13325)}
+\textbf{Series Definition and Resampling.}
+The engine-agnostic qualification series \texttt{TopologyKineticsSeries} (\path{src/shared/python/grip_contact/topology_series.py}) records a topology grip run on the shared $\Delta t = 2\,\mathrm{ms}$ sample cadence (\texttt{FIXTURE\_DT\_S} $= 0.002\,\mathrm{s}$):
+\begin{itemize}[leftmargin=*,noitemsep]
+\item Monotonic sample times $t \in \R^N$ ($t_{k+1} > t_k$, $N \ge 2$);
+\item Per-pair normal force $f_{n,p}(t) \in \R^N$, tangential friction force $f_{t,p}(t) \in \R^N$, and torsional spin moment $m_{s,p}(t) \in \R^N$ for each topology pair $p \in \mathcal{P}$;
+\item Per-hand resultant club wrench $F_{\sigma}(t) \in \R^{N\times 3}$ and $M_{\sigma}(t) \in \R^{N\times 3}$ for $\sigma \in \{\mathrm{L}, \mathrm{R}\}$;
+\item Explicit pair labels $\ell_p \in \{\texttt{"physical"}, \texttt{"allocated"}\}$, provenance identifiers (\texttt{engine}, \texttt{model\_id}, \texttt{mapping\_hash}), and an unavailability reason map $\mathcal{R}$ (\texttt{channel\_reasons});
+\item Physical guard \texttt{applied\_allocated\_force\_n} $= 0.0\,\mathrm{N}$, verifying via \texttt{GripStepReport.applied\_allocated\_force\_n()} and \texttt{apply\_report()} that allocated hand--hand channels never enter external body wrench application.
+\end{itemize}
+Both constructors---\texttt{from\_contact\_run(run, topology\_model, *, engine, mapping\_hash)} and \texttt{from\_step\_reports(times, reports, ...)}---resample trajectories recorded on arbitrary solver steps onto the uniform $2\,\mathrm{ms}$ grid $t_k = t_0 + k\Delta t$ via piecewise-linear interpolation while strictly preserving \texttt{NaN} unavailability markers. Design-by-Contract preconditions enforce a bijection between \texttt{NaN}-bearing channels and non-empty entries in \texttt{channel\_reasons}: no \texttt{NaN} channel may lack a reason, and no finite channel may carry a reason.
+
+\textbf{Law-Level Reference Qualification.}
+The helper \texttt{law\_level\_series(topology\_model, hand\_frames\_seq, club\_frames\_seq, times)} evaluates the shared contact law (\texttt{topology\_side\_wrench}) directly on identical prescribed hand and club site trajectories, providing the exact law-level reference against which the G6 Pinocchio topology contact simulation is qualified before forward-dynamics engine comparisons.
+
+\textbf{Three-State Availability Envelope, Metrics, and Tolerances.}
+In \path{src/shared/python/grip_contact/parity.py}, \texttt{compare\_topology\_series(reference, candidate)} evaluates each channel $x(t)$ against $x_{\mathrm{ref}}(t)$ using the shared peak and RMS relative error metrics (\texttt{compute\_quantity\_error}):
+\begin{equation}
+\varepsilon_{\mathrm{peak}} = \frac{\left|\max_t \|x(t)\| - \max_t \|x_{\mathrm{ref}}(t)\|\right|}{\max_t \|x_{\mathrm{ref}}(t)\|}, \qquad
+\varepsilon_{\mathrm{rms}} = \frac{\sqrt{\frac{1}{N}\sum_{k=1}^{N} \|x(t_k) - x_{\mathrm{ref}}(t_k)\|_2^2}}{\max_t \|x_{\mathrm{ref}}(t)\|},
+\end{equation}
+against the pinned tolerances \texttt{PEAK\_TOLERANCE} $= 0.05$ ($5\%$) and \texttt{RMS\_TOLERANCE} $= 0.02$ ($2\%$). Each channel and the overall \texttt{TopologyParityReport} take one of three states:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \texttt{"unavailable"} (\texttt{passed = False}): emitted whenever \texttt{reference.mapping\_hash != candidate.mapping\_hash} (reason \texttt{"mapping hash mismatch"}), or when any required physical channel is missing or contains \texttt{NaN} on either side. A report with any unavailable required channel never passes;
+\item \texttt{"failed"} (\texttt{passed = False}): all required physical channels are available, and at least one exceeds $\varepsilon_{\mathrm{peak}} > 0.05$ or $\varepsilon_{\mathrm{rms}} > 0.02$;
+\item \texttt{"passed"} (\texttt{passed = True}): all required physical channels are available and satisfy $\varepsilon_{\mathrm{peak}} \le 0.05$ and $\varepsilon_{\mathrm{rms}} \le 0.02$.
+\end{enumerate}
+Channels labelled \texttt{"allocated"} on both sides are compared and reported separately in \texttt{allocated\_channels}; they never influence the physical parity verdict.
+
+\textbf{Limitations.}
+Law-level qualification verifies that an engine's contact evaluation and integration pipeline reproduces the shared contact law at matched states; forward-dynamics trajectory divergence across distinct multi-body solvers (OpenSim, MuJoCo, Drake) is qualified separately by the per-engine adapters (G7--G9). Rigid-proxy hand bindings do not identify biological finger articulation or internal co-contraction squeeze.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_topology_parity_harness.py \
+    tests/unit/grip_contact/test_grip_parity_metrics.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
