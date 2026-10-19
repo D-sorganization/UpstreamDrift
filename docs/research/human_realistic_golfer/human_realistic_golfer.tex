@@ -766,6 +766,84 @@ python3 scripts/grip/grip_style_parity_report.py --out /tmp/g10_parity_report
 python3 -m pytest tests/unit/grip_contact/test_grip_style_parity_report.py
 \end{verbatim}
 
+\subsection{OpenSim Topology Grip Friction Mapping and Swing Parity (HRG-GS-G7b)}
+\textbf{Diagnosis of Five Root Causes.} Investigation of the HRG-GS-G10 OpenSim swing net-wrench divergence ($319.75\%$ peak / $91.60\%$ RMS on \texttt{overlap}/\texttt{interlock} swing and $5995.09\%$ peak / $1334.63\%$ RMS on \texttt{ten\_finger} swing over $0.04$\,s, alongside $35.8\%$ tangential-force divergence and $40\text{--}50\%$ contact-point drift) via a single-pair sliding-friction probe and trajectory boundary inspection isolated five distinct analytical and numerical root causes:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textit{Prescribed-Motion Spline Horizon Truncation (\path{grip_contact_osim_sim.py}):} \texttt{simulate\_grip\_contact} sliced \texttt{swing.time\_s} and \texttt{swing.q} at \texttt{t\_end\_s} ($0.040$\,s) before constructing \texttt{ContactGripSimulator}. When OpenSim's implicit BDF integrator (\texttt{CPodes}) evaluated trial steps slightly beyond $t_{\mathrm{last}} = 0.040$\,s to interpolate the final sample state, \texttt{SimmSpline::calcDerivative} switched from cubic spline interpolation to linear extrapolation ($\ddot{q}(t) \equiv 0$ for $t > t_{\mathrm{last}}$). This injected a $\sim 90$\,rad/s$^2$ prescribed-hand acceleration step discontinuity at $t = 0.040$\,s, producing the $319.75\%$ (\texttt{overlap}/\texttt{interlock}) and $5995.09\%$ (\texttt{ten\_finger}) boundary force spikes at the final sample. Passing the full trajectory horizon (\texttt{full\_times}) to \texttt{SimmSpline} while integrating to \texttt{t\_end=float(times[-1])} removes the boundary discontinuity completely.
+\item \textit{BDF Integrator Tolerance (\texttt{TOPOLOGY\_CONTACT\_ACCURACY}):} \texttt{grip\_contact\_osim\_sim.py} ran \texttt{CPodes} at \texttt{CONTACT\_ACCURACY = 1e-4}, whereas Pinocchio, Drake, and the single-pad feasibility probe in \path{test_opensim_contact_grip.py} use $10^{-6}$. At $10^{-4}$ tolerance on the stiff $171$\,kN/m contact foundation, a $3\,\mu\mathrm{m}$ local truncation error produces $5\text{--}8$\,N transient force spikes across opposing pads ($10\text{--}26\%$ of the $31$\,N net club force). Setting \texttt{TOPOLOGY\_CONTACT\_ACCURACY = 1e-6} for topology runs (while retaining \texttt{CONTACT\_ACCURACY = 1e-4} for the legacy \texttt{PadContactModel} path) eliminates BDF step chattering without altering legacy pad runs.
+\item \textit{IEEE-754 ULP Ring-Count Rounding in \texttt{capped\_cylinder\_mesh} (\path{grip_mesh.py}):} For the lead hand (\texttt{L}) grip cylinder axial span $[-0.036, 0.120]$\,m at $1.0$\,mm ring pitch, floating-point division yielded $(\mathrm{hi} - \mathrm{lo}) / \Delta z = 156.00000000000003$, which \texttt{math.ceil} rounded up to $157$ rings ($0.99363$\,mm pitch), whereas the trail hand (\texttt{R}) span $[-0.180, -0.024]$\,m yielded $156.0$ ($156$ rings, $1.00000$\,mm pitch). This shifted lead-hand pads off the mesh vertex rings onto triangle faces with a $0.33$\,N static $z$-force bias and $6.6\%$ tangential asymmetry. Subtracting a $10^{-12}$ ULP guard before \texttt{math.ceil} restores exact $1.00000$\,mm ring pitch on both hands.
+\item \textit{Quadratic Winkler Operating Point ($\delta_0 = 2\delta_{\mathrm{preload}}$) and Normal Tangent Stiffness:} The shared Hunt--Crossley normal law $F_{\mathrm{HC}}(\delta) = k_{\mathrm{law}}\delta$ has constant tangent stiffness $F'_{\mathrm{HC}}(\delta_{\mathrm{preload}}) = k_{\mathrm{law}} = 171\,095$\,N/m at $\delta_{\mathrm{preload}} = 0.25$\,mm ($f_{\mathrm{target}} = 42.7738$\,N). By contrast, OpenSim's Winkler foundation force is quadratic in penetration depth:
+\begin{equation}
+F_{\mathrm{Winkler}}(\delta) = k_W \Phi \delta^2 \implies \frac{\mathrm{d}F_{\mathrm{Winkler}}}{\mathrm{d}\delta}(\delta_0) = \frac{2 F_{\mathrm{Winkler}}(\delta_0)}{\delta_0}.
+\end{equation}
+Calibrating \texttt{calibrated\_site\_foundation} at $\delta_0 = \delta_{\mathrm{preload}} = 0.25$\,mm yielded $\mathrm{d}F_{\mathrm{Winkler}}/\mathrm{d}\delta = 2 f_{\mathrm{target}}/\delta_{\mathrm{preload}} = 2 k_{\mathrm{law}} = 342\,190$\,N/m (measured $359\,533.8$\,N/m on the discrete mesh), making the OpenSim grip $2\times$ too stiff in translation and tilt and causing the $40\text{--}50\%$ deficit in \texttt{contact\_point\_drift} and \texttt{deflection\_L/R}. Matching both the preload force $F_{\mathrm{Winkler}}(\delta_0) = f_{\mathrm{target}}$ and the tangent stiffness $F'_{\mathrm{Winkler}}(\delta_0) = k_{\mathrm{law}}/\mathrm{count}$ uniquely requires:
+\begin{equation}
+\delta_0 = 2\delta_{\mathrm{preload}} = 0.50\,\mathrm{mm}, \qquad
+k_W = \frac{f_{\mathrm{target}}}{\Phi \delta_0^2},
+\end{equation}
+consistent with \texttt{elastic\_foundation\_for\_law} in \path{elastic_foundation.py}. Each topology \texttt{ContactSphere} center is shifted radially inward by $\delta_0 - \delta_{\mathrm{preload}} = 0.25$\,mm via \texttt{shift\_topology\_site\_inward} so its neutral pose penetration equals $\delta_0$, while \texttt{\_index\_topology\_records} retains the unshifted anatomical center for physical penetration and contact-point drift reporting. Furthermore, for opposing pads at $\pm\delta_{\mathrm{disp}}$, the second-order Winkler convexity $+\tfrac{1}{4}f_{\mathrm{target}}(\delta_{\mathrm{disp}}/\delta_{\mathrm{preload}})^2$ cancels identically in the 3D vector sum ($\mathbf{F}_{\mathrm{net}}$, $\mathbf{M}_{\mathrm{com}}$) but adds with the same positive sign in unsigned scalar normal-force sums (\texttt{squeeze\_n}); projecting each sphere's unsigned scalar normal force onto the Hunt--Crossley tangent line via the exact analytical ratio
+\begin{equation}
+\frac{F_{\mathrm{HC}}(\delta_{\mathrm{phys},k}, \dot{\delta}_k)}{F_{\mathrm{Winkler}}(\delta_k, \dot{\delta}_k)} = \frac{2(\delta_k/\delta_0) - 1}{(\delta_k/\delta_0)^2} = 1 - \left(\frac{\delta_k - \delta_0}{\delta_k}\right)^2, \qquad \delta_k = \delta_{\mathrm{phys},k} + (\delta_0 - \delta_{\mathrm{preload}}),
+\end{equation}
+preserves exact linear-law scalar squeeze parity ($\le 1.03\%$ peak, $\le 0.94\%$ RMS across all styles and motions).
+\item \textit{Stribeck vs.\ Simbody Hollars Tangential Friction Mapping:} The shared tangential friction coefficient in \path{pad_contact.py} is
+\begin{equation}
+\mu_{\mathrm{law}}(v) = \left[\mu_d + (\mu_s - \mu_d)\exp\!\left(-\left(\frac{v}{v_{\mathrm{tr}}}\right)^2\right) + \mu_v v\right]\tanh\!\left(\frac{v}{v_{\mathrm{tr}}}\right),
+\end{equation}
+whereas OpenSim's \texttt{ElasticFoundationForce} evaluates Simbody's Hollars smoothing (with $s(x) = x^2(3 - 2x)$ for $x \in [0, 1]$):
+\begin{equation}
+\mu_{\mathrm{Simbody}}(v) = \begin{cases}
+s(v/v_{\mathrm{tr}})\,\tilde{\mu}_s, & v < v_{\mathrm{tr}}, \\
+\tilde{\mu}_s - s\!\left(\min\!\left(\tfrac{v - v_{\mathrm{tr}}}{2v_{\mathrm{tr}}}, 1\right)\right)(\tilde{\mu}_s - \tilde{\mu}_d) + \tilde{\mu}_v v, & v \ge v_{\mathrm{tr}}.
+\end{cases}
+\end{equation}
+For $\mu_s = 0.9$, $\mu_d = 0.7$, $\mu_v = 0.1$\,s/m, and $v_{\mathrm{tr}} = 10^{-3}$\,m/s, $\mu_{\mathrm{law}}(v)$ is monotonically increasing with no static peak above $\mu_d = 0.7$ ($\mu_{\mathrm{law}}(v_{\mathrm{tr}}) = [0.7 + 0.2 e^{-1}]\tanh(1) = 0.58915$), whereas passing $\tilde{\mu}_s = \mu_s = 0.9$ to Simbody creates a peak of $\mu_{\mathrm{Simbody}}(v_{\mathrm{tr}}) = 0.9001$ ($+52.8\%$ overshoot at $v = v_{\mathrm{tr}}$ and $28.45\%$ peak error across the sliding sweep). Because $\max_{v \le 3v_{\mathrm{tr}}}(\mu_{\mathrm{law}}(v) - \mu_v v) = \mu_d$, mapping $\tilde{\mu}_s = \tilde{\mu}_d = \mu_d = 0.7$ eliminates the spurious Stribeck peak and aligns $\mu_{\mathrm{Simbody}}(v)$ with $\mu_{\mathrm{law}}(v)$ across the single-pair sliding sweep ($v_s \in [10^{-4}, 1.0]$\,m/s) to \textbf{$1.832\%$ peak / $4.768\%$ RMS} (within the $5\%$ tolerance).
+\end{enumerate}
+
+\textbf{Before/After Parity Summary ($0.04$\,s and $0.10$\,s Hold and Swing).} Table~\ref{tab:g7b_before_after_parity} compares the OpenSim topology grip errors against the Pinocchio reference before and after the HRG-GS-G7b analytical mapping and spline-horizon fix.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\begin{tabular}{lllrrrrr}
+\toprule
+\textbf{Horizon} & \textbf{Motion} & \textbf{Style} & \textbf{Before \texttt{net\_force}} & \textbf{After \texttt{net\_force}} & \textbf{Before \texttt{net\_moment}} & \textbf{After \texttt{net\_moment}} & \textbf{After \texttt{drift}} \\
+ &  &  & \textbf{Peak / RMS (\%)} & \textbf{Peak / RMS (\%)} & \textbf{Peak / RMS (\%)} & \textbf{Peak / RMS (\%)} & \textbf{Pk / RMS (\%)} \\
+\midrule
+$0.04$\,s & Hold & Overlap & 1.098 / 1.412 & \textbf{0.000 / 0.910} (pass) & 1.099 / 0.684 & \textbf{0.000 / 0.648} (pass) & 3.19 / 4.29 \\
+$0.04$\,s & Hold & Interlock & 1.098 / 1.412 & \textbf{0.000 / 0.910} (pass) & 1.099 / 0.684 & \textbf{0.000 / 0.648} (pass) & 3.19 / 4.29 \\
+$0.04$\,s & Hold & Ten-Finger & 0.969 / 9.872 & 2.412 / 2.599 (xfail) & 17.798 / 4.625 & \textbf{0.833 / 0.741} (pass) & 8.95 / 6.72 \\
+$0.04$\,s & Swing & Overlap & 319.750 / 91.599 & \textbf{0.000 / 0.941} (pass) & 283.326 / 83.529 & \textbf{0.000 / 0.645} (pass) & 2.57 / 3.93 \\
+$0.04$\,s & Swing & Interlock & 319.750 / 91.599 & \textbf{0.000 / 0.941} (pass) & 283.326 / 83.529 & \textbf{0.000 / 0.645} (pass) & 2.57 / 3.93 \\
+$0.04$\,s & Swing & Ten-Finger & 5995.091 / 1334.628 & 0.290 / 5.070 (xfail) & 7842.170 / 1731.901 & 0.833 / 2.918 (xfail) & 8.51 / 5.06 \\
+\midrule
+$0.10$\,s & Hold & Overlap & --- & \textbf{0.000 / 0.584} (pass) & --- & \textbf{0.000 / 0.416} (pass) & 3.19 / 4.02 \\
+$0.10$\,s & Hold & Interlock & --- & \textbf{0.000 / 0.584} (pass) & --- & \textbf{0.000 / 0.416} (pass) & 3.19 / 4.02 \\
+$0.10$\,s & Hold & Ten-Finger & --- & \textbf{2.412 / 1.731} (pass) & --- & \textbf{0.833 / 0.523} (pass) & 8.95 / 6.18 \\
+$0.10$\,s & Swing & Overlap & --- & \textbf{0.000 / 0.745} (pass) & --- & \textbf{0.000 / 0.517} (pass) & 2.57 / 3.11 \\
+$0.10$\,s & Swing & Interlock & --- & \textbf{0.000 / 0.745} (pass) & --- & \textbf{0.000 / 0.517} (pass) & 2.57 / 3.11 \\
+$0.10$\,s & Swing & Ten-Finger & --- & 0.290 / 4.856 (xfail) & --- & 0.833 / 4.437 (xfail) & 8.51 / 4.48 \\
+\bottomrule
+\end{tabular}
+\caption{OpenSim topology grip parity vs.\ Pinocchio reference before and after HRG-GS-G7b across $0.04$\,s and $0.10$\,s hold and swing (determinate limits: peak $\le 5.0\%$, RMS $\le 2.0\%$).}
+\label{tab:g7b_before_after_parity}
+\end{table}
+
+\textbf{Failed Experiments and Residual \texttt{ten\_finger} Limitation.}
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textit{Shifting \texttt{\_index\_topology\_records} sample coordinates inward by $\delta_0 - \delta_{\mathrm{preload}}$:} Evaluated and rejected because \texttt{\_sample\_topology\_side} uses the indexed coordinates to report physical penetration $\delta_{\mathrm{phys}}$ and radial unit normals; shifting the reported centers biased the neutral penetration report from $0.25$\,mm to $0.50$\,mm. Keeping \texttt{\_index\_topology\_records} at the unshifted anatomical centers while shifting only the OpenSim \texttt{ContactSphere} geometry locations preserves exact geometric reporting.
+\item \textit{Unprojected Winkler scalar normal-force sum at $\delta_0 = 2\delta_{\mathrm{preload}}$:} Evaluated and rejected because the second-order Winkler convexity $+\tfrac{1}{4}f_{\mathrm{target}}(\Delta\delta/\delta_{\mathrm{preload}})^2$ adds constructively across opposing $\pm y$ pads in the unsigned scalar sum \texttt{squeeze\_n}, raising \texttt{ten\_finger} lead-hand squeeze RMS to $2.05\%$ (above the $2.0\%$ G7 limit). Projecting each sphere's unsigned scalar normal force onto the Hunt--Crossley tangent line via $1 - ((\delta_k - \delta_0)/\delta_k)^2$ reduces lead/trail squeeze RMS to $0.30\text{--}0.94\%$ across all styles.
+\item \textit{Residual \texttt{ten\_finger} RMS Error ($2.60\%$ on $0.04$\,s hold \texttt{net\_force}; $5.07\% / 2.92\%$ on $0.04$\,s swing):} In \texttt{ten\_finger}, the lead index distal/middle phalanges ($x = -0.025$\,m) and trail little-finger capsules ($x = -0.048$\,m) sit on only one axial side of the grip CoM without an opposing capsule on the same hand, creating a net static pitch couple balanced by club pitch tilt ($\sim 0.4^\circ$). Because OpenSim's \texttt{ElasticFoundationForce} evaluates tangential friction at triangle centroids on the outer cylinder surface ($r = r_{\mathrm{grip}} = 13.5$\,mm) with zero normal-patch torsional resistance ($\tau_n = 0$), whereas Pinocchio's shared law (\path{pad_contact.py}) applies tangential force at the midpoint of the penetration depth ($r_{\mathrm{mid}} = r_{\mathrm{grip}} - \tfrac{1}{2}\delta$) and includes analytical patch spin torque $\tau_n = \tfrac{2}{3}\mu(v_{\mathrm{eff}}) r_{\mathrm{patch}} f_n \tanh(\omega_n / \omega_{\mathrm{tr}})$, the lever-arm and spin-torque difference excites a low-amplitude pitch mode on the asymmetric \texttt{ten\_finger} layout. Over $0.10$\,s static hold, this transient damps out and \texttt{ten\_finger} passes both determinate metrics ($2.412\% / 1.731\%$ on \texttt{net\_force} and $0.833\% / 0.523\%$ on \texttt{net\_moment\_com}); on the short $0.04$\,s window, \texttt{opensim-ten\_finger-hold} and \texttt{opensim-ten\_finger-swing} remain strict \texttt{xfail}s with updated measured numbers and no loosened tolerances.
+\end{itemize}
+
+\textbf{Reproduction Commands.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_opensim_topology_grip.py -k sliding_friction
+python3 -m pytest tests/unit/grip_contact/test_grip_style_parity_report.py
+python3 scripts/grip/grip_style_parity_report.py --duration-s 0.04 --out /tmp/g7b_004
+python3 scripts/grip/grip_style_parity_report.py --duration-s 0.10 --out /tmp/g7b_010
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
