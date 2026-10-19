@@ -406,6 +406,56 @@ python3 -m pytest tests/unit/grip_contact/test_contact_topology.py \
 \textbf{Limitation.} No finger markers exist in the capture, so finger contact
 locations are not identifiable from data; the table fixes them by assumption.
 
+\subsection{Allocated Hand--Hand Contact Reporting (HRG-GS-G3, \#13301)}
+\textbf{Method.} We generalize the palm--thumb allocation (\texttt{palm\_thumb.py})
+across every hand--hand pair in the contact topology $\mathcal{T}$ (HRG-GS-G1,
+\#13299). Given the world-frame closure wrench $F_{\mathrm{closure}} =
+(f_{\mathrm{lead}}, \tau_{\mathrm{lead}})$ from the trail-hand-to-club
+constraint and hand--club reactions $(f_{\mathrm{hc}}, \tau_{\mathrm{hc}})$,
+the residual wrench $F_{\mathrm{rem}} = (f_{\mathrm{lead}} -
+f_{\mathrm{hc}}, \tau_{\mathrm{lead}} - \tau_{\mathrm{hc}})$ is
+partitioned among active hand--hand pairs via weights $w_i \ge 0$ ($\sum_i w_i =
+1$). The split across pairs is an explicit, labelled modelling prior
+(\texttt{AllocationPrior}), not an identified physical quantity. Hand--club reactions
+$(f_{\mathrm{hc}}, \tau_{\mathrm{hc}})$ default to zero when not supplied, which attributes
+the entirety of the observable closure wrench to hand--hand pairs, exactly as HRG-H1 did.
+\texttt{AllocatedHandContacts} records the active \texttt{prior\_name} and
+\texttt{hand\_club\_source} (\texttt{"supplied"} vs \texttt{"not\_supplied"}) so this
+modelling assumption is visible to all consumers. For each pair $i$, the patch point $p_i$
+and unit normal $\hat{n}_i$ (pointing lead to trail) are evaluated via primitive distance
+solvers. The force $f_i = w_i f_{\mathrm{rem}}$ is transported to $p_i$, resolving
+couple $c_i = w_i \tau_{\mathrm{rem}} - (p_i - p_{\mathrm{ref}})
+\times f_i$. Compressive normal force is $f_{n,i} = \max(0, -f_i \cdot
+\hat{n}_i)$, tangential force $f_{t,i} = \|f_i - (f_i \cdot
+\hat{n}_i)\hat{n}_i\|$, and friction ratio $\mu_{\mathrm{eff}} =
+f_{t,i}/(\mu f_{n,i})$. Unloaded flags mark tensile configurations ($-f_i
+\cdot \hat{n}_i \le 0$).
+
+\textbf{Parameters.} Static friction coefficient $\mu = 0.9$; equal-split pair
+weights prior (\texttt{name="equal\_split"}, $w_i = 1/N_{\mathrm{pairs}}$); normal tolerance $10^{-9}$; minimum
+closure force $10^{-9}$\,N. Hand--club reactions default to zero (\texttt{hand\_club\_source="not\_supplied"}).
+
+\textbf{Acceptance Criteria.}
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item The sum of allocated hand--hand forces and hand--club forces reproduces closure
+$\lambda$ to $\le 10^{-9}$\,N.
+\item Every allocated channel emits \texttt{method="allocation"}, user-visible
+label \path{external:<pair>_allocated}, \path{prior_name}, and
+\path{hand_club_source}; requesting physical mode on welded
+topology raises \path{SchemaFeatureUnavailableError} via \path{require_allocated_mode}.
+\item Native viewer overlay renders one arrow per allocated pair under the allocated
+contact toggle.
+\end{enumerate}
+
+\textbf{Limitations.} Allocation partitions a single resultant closure wrench
+using an assumed modelling prior rather than solving multi-body compliant contact; internal squeeze co-contraction
+between opposing pairs is not observable from the net closure wrench. Hand--club forces default to zero when not supplied.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_allocated_hand_contact.py \
+    tests/unit/grip_contact/test_palm_thumb.py
+\end{verbatim}
 \section{Appearance}
 Placeholder for HRG appearance children.
 
