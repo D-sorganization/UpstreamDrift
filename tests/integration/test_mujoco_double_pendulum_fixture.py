@@ -26,6 +26,7 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engi
     MuJoCoPhysicsEngine,
 )
 from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.engine_core.engine_availability import require_engine
 
 pytestmark = [pytest.mark.integration, pytest.mark.headless_safe]
 
@@ -99,9 +100,15 @@ def test_double_pendulum_inverse_dynamics_matches_analytical(
     np.testing.assert_allclose(tau, [8.96798933, 3.76418137], atol=1e-4)
 
 
+@require_engine("pinocchio")
 def test_double_pendulum_pinocchio_parity(engine: MuJoCoPhysicsEngine) -> None:
-    """MuJoCo and Pinocchio agree on drift, ID, and zero contact force (#12989)."""
-    pinocchio = pytest.importorskip("pinocchio")
+    """MuJoCo and Pinocchio agree on drift, ID, and zero contact force (#12989).
+
+    ``require_engine`` rejects the ``MagicMock`` that ``tests/unit/conftest.py``
+    installs for collection, which ``pytest.importorskip`` would accept.
+    """
+    import pinocchio
+
     pin_model = pinocchio.buildModelFromUrdf(str(_URDF_PATH))
     pin_data = pin_model.createData()
 
