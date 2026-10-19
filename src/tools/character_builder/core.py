@@ -172,10 +172,33 @@ class CharacterBuilderModel:
         return lines
 
     def export(self, fmt: str, directory: Path | str) -> Path:
-        """Write ``spec``/``urdf``/``mjcf``/``osim``/``appearance`` into ``directory``."""
+        """Write ``spec``/``urdf``/``mjcf``/``osim``/``appearance``/``grip_binding`` into ``directory``."""
         if fmt == "appearance":
             return self.export_appearance(directory)
-        text, _media, filename = spec_export.export_character(self.compile(), fmt)
+        if fmt == "grip_binding":
+            return self.export_grip_binding(directory)
+        compiled = self.compile()
+        text, _media, filename = spec_export.export_character(compiled, fmt)
+        out_path = self._write_export(directory, filename, text)
+        self.export_grip_binding(directory, stem=out_path.stem)
+        return out_path
+
+    def grip_binding_manifest(self) -> dict[str, Any]:
+        """Build and validate the ``grip-binding/v1`` manifest for the compiled character."""
+        return spec_export.build_grip_binding_manifest(self.compile())
+
+    def export_grip_binding(
+        self,
+        directory: Path | str,
+        *,
+        stem: str | None = None,
+    ) -> Path:
+        """Write the ``grip-binding/v1`` sidecar JSON next to the exported character."""
+        compiled = self.compile()
+        manifest = spec_export.build_grip_binding_manifest(compiled)
+        base_stem = stem or f"{compiled.preset_id or 'custom'}_{compiled.sha256[:8]}"
+        filename = f"{base_stem}.grip_binding.json"
+        text = json.dumps(manifest, indent=2) + "\n"
         return self._write_export(directory, filename, text)
 
     def verify_cross_engine_parity(

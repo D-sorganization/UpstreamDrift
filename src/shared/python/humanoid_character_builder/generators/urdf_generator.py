@@ -58,8 +58,9 @@ from src.shared.python.humanoid_character_builder.generators._link_generation im
     generate_link,
     generate_materials,
 )
+from dataclasses import dataclass
 from src.shared.python.humanoid_character_builder.generators.urdf_config import (
-    URDFGeneratorConfig,
+    URDFGeneratorConfig as _BaseURDFGeneratorConfig,
 )
 from src.shared.python.humanoid_character_builder.generators.urdf_geometry import (
     add_geometry_element,
@@ -95,6 +96,14 @@ if TYPE_CHECKING:  # annotations only; nothing here parses XML
     import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - type annotations only
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class URDFGeneratorConfig(_BaseURDFGeneratorConfig):
+    """Configuration for URDF generation, including grip-binding requirement."""
+
+    require_grip_binding: bool = False
+
 
 # Re-export URDFGeneratorConfig so existing callers that import it from this
 # module continue to work without change.
@@ -231,6 +240,8 @@ class HumanoidURDFGenerator:
         params: BodyParameters,
         output_path: Path | str | None = None,
         mesh_dir: Path | str | None = None,
+        *,
+        require_grip_binding: bool = False,
     ) -> str:
         """
         Generate URDF from body parameters.
@@ -239,12 +250,26 @@ class HumanoidURDFGenerator:
             params: Body parameters
             output_path: Optional path to write URDF file
             mesh_dir: Optional directory containing mesh files
+            require_grip_binding: When True, fail closed if no club is composed
 
         Returns:
             URDF XML string
         """
         if not (params is not None):
             raise ValueError("params must be provided")
+        if require_grip_binding or getattr(self.config, "require_grip_binding", False):
+            from src.shared.python.grip_contact.binding_manifest import (
+                fail_closed_grip_binding,
+            )
+
+            fail_closed_grip_binding(
+                "humanoid-urdf-v1",
+                consumer="HumanoidURDFGenerator",
+                reason=(
+                    "HumanoidURDFGenerator generates a clubless humanoid from "
+                    "BodyParameters without a composed club body or closure"
+                ),
+            )
         self.build_model(params, mesh_dir)
 
         urdf_xml = build_urdf_xml(
@@ -481,6 +506,8 @@ def generate_humanoid_urdf(
     params: BodyParameters,
     output_path: Path | str | None = None,
     config: URDFGeneratorConfig | None = None,
+    *,
+    require_grip_binding: bool = False,
 ) -> str:
     """
     Convenience function to generate humanoid URDF.
@@ -489,6 +516,7 @@ def generate_humanoid_urdf(
         params: Body parameters
         output_path: Optional path to write URDF
         config: Generator configuration
+        require_grip_binding: When True, fail closed if no club is composed
 
     Returns:
         URDF XML string
@@ -496,4 +524,11 @@ def generate_humanoid_urdf(
     if not (params is not None):
         raise ValueError("params must be provided")
     generator = HumanoidURDFGenerator(config)
-    return cast(str, generator.generate(params, output_path))
+    return cast(
+        str,
+        generator.generate(
+            params,
+            output_path,
+            require_grip_binding=require_grip_binding,
+        ),
+    )
