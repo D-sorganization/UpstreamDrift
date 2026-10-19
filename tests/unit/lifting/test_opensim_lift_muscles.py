@@ -306,6 +306,50 @@ def test_muscle_receipts_carry_measured_ik_id_residuals() -> None:
             assert res_status["moments_within"] is True
 
 
+def test_render_per_lift_table_missing_fields_reports_unavailable_never_zero() -> None:
+    """A receipt with missing fields renders unavailable, never 0.00 or 0.0%."""
+    from scripts.measure_opensim_lift_muscles import render_per_lift_table
+
+    incomplete_receipt = {
+        "lifts": {
+            "squat": {
+                "lift": "squat",
+                "status": "unavailable",
+                "classification": None,
+                "window_start_s": None,
+                "window_end_s": None,
+                "mean_reserve_share": None,
+                "peak_reserve_share": None,
+                "residual_status": None,
+            },
+            "deadlift": {},
+        }
+    }
+    table = render_per_lift_table(incomplete_receipt)
+    assert "unavailable" in table
+    assert "0.00" not in table
+    assert "0.0%" not in table
+
+
+def test_render_per_lift_table_committed_receipts() -> None:
+    """The committed receipts.json renders all five lifts with measured metrics."""
+    if not RECEIPTS_PATH.is_file():
+        pytest.skip("receipts file not found")
+    from scripts.measure_opensim_lift_muscles import render_per_lift_table
+
+    data = json.loads(RECEIPTS_PATH.read_text(encoding="utf-8"))
+    table = render_per_lift_table(data)
+    assert "Squat" in table
+    assert "Deadlift" in table
+    assert "Bench Press" in table
+    assert "Snatch" in table
+    assert "Clean & Jerk" in table
+    assert "56.9%" in table
+    assert "17.3%" in table
+    assert "Within" in table
+    assert "Outside" in table
+
+
 # -------------------------------------------------------------------------
 # Integration Tests (With Real OpenSim 4.6)
 # -------------------------------------------------------------------------

@@ -370,15 +370,125 @@ def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
     }
 
 
+LIFT_DISPLAY_NAMES: dict[str, str] = {
+    "squat": "Squat",
+    "deadlift": "Deadlift",
+    "bench_press": "Bench Press",
+    "snatch": "Snatch",
+    "clean_and_jerk": "Clean & Jerk",
+}
+
+
+def render_per_lift_table(receipt: dict[str, Any]) -> str:
+    """Render a markdown summary table for all barbell lifts from receipts."""
+    lifts_data: dict[str, Any] = receipt.get("lifts", receipt)
+    ordered_keys = [lift for lift in LIFTS if lift in lifts_data]
+    extra_keys = [lift for lift in lifts_data if lift not in ordered_keys]
+    target_lifts = ordered_keys + extra_keys
+    if not target_lifts:
+        target_lifts = list(lifts_data.keys())
+
+    header = (
+        "| Lift | Status | Classification | Window (s) | Mean Reserve Share | "
+        "Peak Reserve Share | Pelvis Residual Force (N, vs Hicks) | "
+        "Pelvis Residual Moment (N·m, vs Hicks) | Within / Outside |"
+    )
+    separator = "| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |"
+    rows: list[str] = [header, separator]
+
+    for lift in target_lifts:
+        rec = lifts_data.get(lift)
+        if not isinstance(rec, dict):
+            rec = {}
+        name = LIFT_DISPLAY_NAMES.get(lift, lift.replace("_", " ").title())
+        status = rec.get("status")
+        status_str = f"`{status}`" if status else "unavailable"
+        classification = rec.get("classification")
+        class_str = f"`{classification}`" if classification else "unavailable"
+
+        w_start = rec.get("window_start_s")
+        w_end = rec.get("window_end_s")
+        if w_start is not None and w_end is not None:
+            window_str = f"{w_start:.1f}–{w_end:.1f}"
+        else:
+            window_str = "unavailable"
+
+        mean_share = rec.get("mean_reserve_share")
+        if mean_share is None and isinstance(rec.get("reserve_share"), (int, float)):
+            mean_share = rec.get("reserve_share")
+        mean_str = (
+            f"{mean_share * 100:.1f}%" if mean_share is not None else "unavailable"
+        )
+
+        peak_share = rec.get("peak_reserve_share")
+        peak_str = (
+            f"{peak_share * 100:.1f}%" if peak_share is not None else "unavailable"
+        )
+
+        res = rec.get("residual_status")
+        if (
+            isinstance(res, dict)
+            and res.get("measured_pelvis_residual_force_n") is not None
+            and res.get("hicks_force_limit_n") is not None
+        ):
+            meas_f = float(res["measured_pelvis_residual_force_n"])
+            lim_f = float(res["hicks_force_limit_n"])
+            force_str = f"{meas_f:.2f} (vs {lim_f:.2f})"
+        else:
+            force_str = "unavailable"
+
+        if (
+            isinstance(res, dict)
+            and res.get("measured_pelvis_residual_moment_nm") is not None
+            and res.get("hicks_moment_limit_nm") is not None
+        ):
+            meas_m = float(res["measured_pelvis_residual_moment_nm"])
+            lim_m = float(res["hicks_moment_limit_nm"])
+            moment_str = f"{meas_m:.2f} (vs {lim_m:.2f})"
+        else:
+            moment_str = "unavailable"
+
+        if (
+            isinstance(res, dict)
+            and res.get("forces_within") is not None
+            and res.get("moments_within") is not None
+        ):
+            within_str = (
+                "Within"
+                if (res["forces_within"] and res["moments_within"])
+                else "Outside"
+            )
+        else:
+            within_str = "unavailable"
+
+        rows.append(
+            f"| {name} | {status_str} | {class_str} | {window_str} | {mean_str} | "
+            f"{peak_str} | {force_str} | {moment_str} | {within_str} |"
+        )
+
+    return "\n".join(rows)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=DEFAULT_RECEIPT)
     parser.add_argument("--stride", type=int, default=5)
+    parser.add_argument(
+        "--table", action="store_true", help="Print Markdown summary table"
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     out_file = args.out
     out_dir = out_file.parent
+
+    if args.table:
+        if not out_file.is_file():
+            logger.error("Receipts file not found: %s", out_file)
+            return 1
+        data = json.loads(out_file.read_text(encoding="utf-8"))
+        print(render_per_lift_table(data))
+        return 0
 
     record = measure(stride=args.stride, out_dir=out_dir)
 
