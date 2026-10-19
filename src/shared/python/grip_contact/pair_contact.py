@@ -192,6 +192,26 @@ class PairWrench:
                 f"got {self.tangential_force_mag_n}"
             )
 
+    @property
+    def normal_force_n(self) -> float:
+        """Alias for ``normal_force_mag_n``."""
+        return self.normal_force_mag_n
+
+    @property
+    def tangential_force_n(self) -> float:
+        """Alias for ``tangential_force_mag_n``."""
+        return self.tangential_force_mag_n
+
+    @property
+    def force_n(self) -> np.ndarray:
+        """Alias for ``force_b_n`` (force exerted by body A on body B)."""
+        return self.force_b_n
+
+    @property
+    def moment_nm(self) -> np.ndarray:
+        """Alias for ``moment_b_nm`` (moment exerted on body B about ``point_b_m``)."""
+        return self.moment_b_nm
+
     def total_force_n(self) -> np.ndarray:
         """Net force of the pair (identically zero by action/reaction)."""
         return self.force_a_n + self.force_b_n

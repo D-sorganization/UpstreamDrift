@@ -15,6 +15,7 @@ by mocap palm welds (``lh_mocap``, ``rh_mocap``), reusing:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import xml.etree.ElementTree as ET
 from collections.abc import Mapping
@@ -170,6 +171,27 @@ def check_hand_assets_available(
             f"hand assets mesh directory missing at {mesh_dir}",
         )
     return hand_dir
+
+
+def lab_model_hash(model_id: str, *, assets_root: Path | None = None) -> str:
+    """Return the reproducible ``sha256:`` provenance hash of a lab model.
+
+    The digest covers, in the fixed order of ``_REQUIRED_ASSET_FILES``, each
+    consumed XML file's name followed by its bytes, so it changes whenever any
+    input of :func:`build_grip_lab_mjcf` changes. Mesh binaries are excluded:
+    the XML files pin them by file name.
+
+    Raises:
+        ValueError: when ``model_id`` is not a grip laboratory model.
+        SchemaFeatureUnavailableError: when the hand assets are missing.
+    """
+    canonical_id = _canonical_lab_model_id(model_id)
+    hand_dir = check_hand_assets_available(canonical_id, assets_root=assets_root)
+    digest = hashlib.sha256()
+    for name in _REQUIRED_ASSET_FILES[canonical_id]:
+        digest.update(name.encode("utf-8") + b"\0")
+        digest.update((hand_dir / name).read_bytes())
+    return f"sha256:{digest.hexdigest()}"
 
 
 def _load_lab_manifest(

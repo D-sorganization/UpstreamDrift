@@ -50,7 +50,6 @@ from src.shared.python.grip_contact.contact_topology import (
     ContactSite,
     ContactTopology,
     coerce_contact_topology,
-    contact_topology,
 )
 from src.shared.python.grip_contact.pair_contact import (
     ContactCapsule,

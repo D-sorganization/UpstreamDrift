@@ -1,7 +1,7 @@
 {
   "schema": "grip-binding/v1",
   "model_id": "mujoco_allegro_hand_lab",
-  "model_hash": "sha256:4a8c1e72b90f3d56a71e84c20d9b5f31e6a4c802d7b1e3f5092837465a1b2c3d",
+  "model_hash": "sha256:95f950c5749b16bbaeb42daac4b0d849703fddfc14ded4dda16d97bde17e4632",
   "handedness": "right",
   "side_roles": {
     "left": "lead",
