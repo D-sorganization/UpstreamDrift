@@ -578,7 +578,18 @@ def topology_hand_hand_pair_wrench(
     mode: str = "separated_v2",
     handedness: Handedness = DEFAULT_HANDEDNESS,
 ) -> PairWrench:
-    """Evaluate physical contact wrench for a hand-hand pair on separate hand bodies."""
+    """Evaluate physical contact wrench for a hand-hand pair on separate phalanx/hand bodies.
+
+    Preconditions:
+        ``model`` is a :class:`TopologyContactModel`;
+        ``pair`` is a hand-hand :class:`ContactPair` in ``model.topology``;
+        ``mode`` is in ``pair.physical_modes`` (e.g. ``'separated_v2'``);
+        ``frame_a`` and ``frame_b`` are valid :class:`BushingState` instances.
+    Postconditions:
+        Returns :class:`PairWrench` evaluated via the G2 kernels
+        (:func:`sphere_capsule`, :func:`capsule_sphere`, :func:`capsule_capsule`)
+        satisfying exact action-reaction.
+    """
     if not isinstance(model, TopologyContactModel):
         raise TypeError(
             f"model must be TopologyContactModel, got {type(model).__name__}"

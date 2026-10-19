@@ -1,7 +1,7 @@
 {
   "schema": "grip-binding/v1",
   "model_id": "mujoco_shadow_hand_lab",
-  "model_hash": "sha256:9f4b3e28c14d7a05e6128b4c93d01a85f7e2c409b8a1d3e5f60718293a4b5c6d",
+  "model_hash": "sha256:d5b09e2e55fd1130da314a28749a3cc623c4b77284aa434ead610d240c06acb6",
   "handedness": "right",
   "side_roles": {
     "left": "lead",

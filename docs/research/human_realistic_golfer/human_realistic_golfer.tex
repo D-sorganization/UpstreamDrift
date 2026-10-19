@@ -1391,6 +1391,8 @@ Model ID & Style & Sites & Pairs & Hand--Hand $f_{n,0}$ (N) & Thumb-Art.\ $f_n$ 
 \end{tabular}
 \end{table}
 
+\textbf{Model Provenance Hash.} Each laboratory manifest's \texttt{model\_hash} is \texttt{lab\_model\_hash(model\_id)}: SHA-256 over the consumed hand-asset XML files in fixed order (\texttt{scene\_both.xml}, \texttt{left\_hand.xml}, \texttt{right\_hand.xml} for Shadow; \texttt{left\_hand.xml}, \texttt{right\_hand.xml} for Allegro), each prefixed by its file name. A unit test recomputes it from the committed assets, so any asset edit invalidates the manifest. Mesh binaries are pinned by file name in those XML files.
+
 \textbf{Limitations.}
 The Shadow and Allegro grip laboratory is \emph{a contact fixture, not a qualified golfer}: its palms are driven by mocap welds around an isolated cylindrical handle without a torso, shoulder, or arm kinematic chain, and the anthropomorphic Allegro hand maps its four fingers across index, middle, ring, and little-finger topology sites using proximal/medial/distal links for distinct phalanx resolution.
 

@@ -207,6 +207,46 @@ def test_missing_hand_assets_fails_closed_with_schema_feature_unavailable() -> N
         )
 
 
+@pytest.mark.parametrize("model_id", LAB_MODEL_IDS)
+def test_manifest_model_hash_is_reproducible_from_the_hand_assets(
+    model_id: str,
+) -> None:
+    """The committed ``model_hash`` is recomputed from the XML files the lab builds from.
+
+    A provenance hash nobody can reproduce is not provenance: the manifest
+    value must equal :func:`lab_model_hash` over the exact hand-asset XML
+    files that :func:`build_grip_lab_mjcf` consumes, and the provenance
+    source must be an existing path.
+    """
+    _require_lab_adapter_and_assets(model_id)
+    from src.engines.physics_engines.mujoco.python.grip_lab_adapter import (
+        lab_model_hash,
+    )
+
+    manifest = json.loads((MANIFESTS_DIR / f"{model_id}.json").read_text("utf-8"))
+    assert manifest["model_hash"] == lab_model_hash(model_id)
+    assert (ROOT / manifest["provenance"]["source"]).exists()
+
+
+def test_lab_model_hash_changes_with_any_consumed_xml(tmp_path: Path) -> None:
+    """Editing any consumed XML file changes the hash; unknown ids are rejected."""
+    _require_lab_adapter_and_assets("mujoco_allegro_hand_lab")
+    import shutil  # noqa: PLC0415
+
+    from src.engines.physics_engines.mujoco.python.grip_lab_adapter import (
+        _DEFAULT_ASSETS_ROOT,
+        lab_model_hash,
+    )
+
+    shutil.copytree(_DEFAULT_ASSETS_ROOT / "wonik_allegro", tmp_path / "wonik_allegro")
+    base = lab_model_hash("mujoco_allegro_hand_lab", assets_root=tmp_path)
+    right = tmp_path / "wonik_allegro" / "right_hand.xml"
+    right.write_text(right.read_text("utf-8") + "\n<!-- edit -->\n", "utf-8")
+    assert lab_model_hash("mujoco_allegro_hand_lab", assets_root=tmp_path) != base
+    with pytest.raises(ValueError):
+        lab_model_hash("not_a_lab_model")
+
+
 @pytest.mark.live_simulation
 @pytest.mark.parametrize("model_id", LAB_MODEL_IDS)
 @pytest.mark.parametrize(

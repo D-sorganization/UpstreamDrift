@@ -151,6 +151,9 @@ def build_overlay_feed(
     if palm_thumb:
         _, friction = palm_thumb_patch_for_spec(swing.bundle.spec_bytes)
         spec = json.loads(swing.bundle.spec_bytes)
+        friction = spec.get("contact", {}).get("parameters", {}).get("static_friction")
+        if friction is None:
+            raise ValueError("the specification has no contact static_friction")
         try:
             from src.shared.python.motion_matching.execution.grip_rotation import (
                 grip_spec_of,
