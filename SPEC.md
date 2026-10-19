@@ -2741,6 +2741,16 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13318 | Unify grip frames across model_appearance and grip_contact, fix Drake contact normal recording |
+| 2026-10-19 | #13337 | Add cross-model grip capability inventory manifest, DbC loader, and verification suite |
+| 2026-10-19 | #13217 | Report the allocated trail-palm-on-lead-thumb force (patch frame, allocation, provider metadata); physics unchanged |
+| 2026-10-19 | #13284 | Run real-OpenSim lift tests in a dedicated CI job (OSL-13) |
+| 2026-10-19 | #13276 | LIFT-5 clean and jerk is the whole lift: Tools make_clean_and_jerk_config (Tools #5661) on the standard's eight phases with a hang/rack/overhead bar; bundle and parity regenerated, rack/jerk IK strict xfail |
+| 2026-10-19 | #13366 | ci(quality-gate): aggregate frontend-tests and the other gating CI Standard jobs so a red job blocks the merge queue |
+| 2026-10-19 | #13361 | fix(ui): include physical style in resolveGrip to resolve red main on frontend-tests |
+| 2026-10-19 | #13358 | fix(launcher): renumber jaxsim_dashboard to order 105 to resolve duplicate tile order 33 |
+| 2026-10-19 | #13359 | fix(data_io): make c3d_loader resilient to sidekick.lab.bio test pollution |
+| 2026-10-19 | #13320 | Engine-agnostic grip-style contact topology: GripStyle and trigger finger join the physical GripSpec; per-style contact pair tables with anatomy scaling.; generalised shared contact law: sphere-capsule and capsule-capsule |
 | 2026-10-19 | #13341 | test_check_windows_deps no longer races real engine imports against a 3s wait; the probe is tested synchronously with optional engines forced absent |
 | 2026-10-19 | #13269 | Route web launcher to /tools/spine-viewer, update Ch68 manual and ignore licensed_assets |
 | 2026-10-19 | #13288 | Compute muscle forces and activations for barbell squat (OSL-4) |

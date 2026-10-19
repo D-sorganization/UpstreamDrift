@@ -13,6 +13,11 @@ This module imports only the standard library.
 
 from __future__ import annotations
 
+import importlib
+import importlib.util
+from pathlib import Path
+import sys
+import types
 from typing import Any
 
 __all__ = ["c3d_reader_class", "marker_set_types"]
@@ -20,20 +25,93 @@ __all__ = ["c3d_reader_class", "marker_set_types"]
 _BIO_PACKAGE = "src.shared.python.sidekick.lab.bio"
 
 
+def _ensure_bio_paths() -> None:
+    """Ensure UpstreamDrift's local bio directory is present on bio package __path__."""
+    local_bio = str(Path(__file__).resolve().parents[1] / "sidekick" / "lab" / "bio")
+    for mod_name in (
+        "src.shared.python.sidekick.lab.bio",
+        "shared.python.sidekick.lab.bio",
+        "sidekick.lab.bio",
+    ):
+        mod = sys.modules.get(mod_name)
+        if mod is not None and hasattr(mod, "__path__"):
+            if local_bio not in mod.__path__:
+                mod.__path__.append(local_bio)
+
+
+def _load_bio_submodule(submodule_name: str) -> types.ModuleType:
+    """Load a submodule of sidekick.lab.bio, resilient to Tools tree pollution (#13348)."""
+    _ensure_bio_paths()
+
+    def _is_valid(m: Any) -> bool:
+        if submodule_name == "c3d_reader":
+            return hasattr(m, "C3DDataReader")
+        if submodule_name == "_c3d_marker_set":
+            return hasattr(m, "MarkerSet")
+        return True
+
+    full_src_name = f"{_BIO_PACKAGE}.{submodule_name}"
+    aliases = (
+        full_src_name,
+        f"shared.python.sidekick.lab.bio.{submodule_name}",
+        f"sidekick.lab.bio.{submodule_name}",
+    )
+    for name in aliases:
+        mod = sys.modules.get(name)
+        if mod is not None and _is_valid(mod):
+            return mod
+
+    try:
+        mod = importlib.import_module(full_src_name)
+        if _is_valid(mod):
+            return mod
+    except (ModuleNotFoundError, ImportError):
+        pass
+
+    try:
+        mod = importlib.import_module(f"sidekick.lab.bio.{submodule_name}")
+        if _is_valid(mod):
+            return mod
+    except (ModuleNotFoundError, ImportError):
+        pass
+
+    file_path = (
+        Path(__file__).resolve().parents[1]
+        / "sidekick"
+        / "lab"
+        / "bio"
+        / f"{submodule_name}.py"
+    )
+    if not file_path.is_file():
+        raise ModuleNotFoundError(f"No module named {full_src_name!r}")
+
+    spec = importlib.util.spec_from_file_location(full_src_name, file_path)
+    if spec is None or spec.loader is None:
+        raise ModuleNotFoundError(
+            f"Cannot create spec for {full_src_name!r} from {file_path}"
+        )
+
+    mod = importlib.util.module_from_spec(spec)
+    for alias in aliases:
+        sys.modules[alias] = mod
+
+    try:
+        spec.loader.exec_module(mod)
+    except BaseException:
+        for alias in aliases:
+            sys.modules.pop(alias, None)
+        raise
+
+    return mod
+
+
 def c3d_reader_class() -> Any:
     """Return :class:`C3DDataReader`, importing ``ezc3d`` on first use."""
-    from src.shared.python.sidekick.lab.bio.c3d_reader import (  # noqa: PLC0415 - lazy by design
-        C3DDataReader,
-    )
-
-    return C3DDataReader
+    mod = _load_bio_submodule("c3d_reader")
+    return mod.C3DDataReader
 
 
 def marker_set_types() -> tuple[Any, Any]:
     """Return ``(MarkerSet, MarkerSetMismatchError)`` lazily."""
-    from src.shared.python.sidekick.lab.bio._c3d_marker_set import (  # noqa: PLC0415 - lazy by design
-        MarkerSet,
-        MarkerSetMismatchError,
-    )
-
-    return MarkerSet, MarkerSetMismatchError
+    mod = _load_bio_submodule("_c3d_marker_set")
+    return mod.MarkerSet, mod.MarkerSetMismatchError
