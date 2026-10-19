@@ -1849,6 +1849,70 @@ QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
     --out docs/development/lifting/evidence/opensim_muscles/receipts.json
 \end{verbatim}
 
+\subsection{OpenSim Barbell Lift Joint Reactions (OSL-5, Issue \#13043)}\label{sec:opensim-joint-reactions}
+\paragraph{Method and Formulation.}
+OSL-5 computes the 3D internal joint reaction loads across the barbell lift motion window
+by applying the OpenSim \texttt{JointReaction} analysis to the static-optimization muscle forces and kinematics.
+Loads are evaluated across four primary anatomical articulation sites:
+\begin{enumerate}[noitemsep]
+\item \textbf{L5/S1 Lumbar Joint:} Evaluated at the OpenSim \texttt{back} joint connecting \texttt{pelvis\_offset} (parent)
+  and \texttt{torso\_offset} (child). Reaction forces are expressed in the inferior body coordinate frame
+  (pelvis ISB convention: $+X$ anterior, $+Y$ cranial, $+Z$ right). Axial compression is $+F_y$ and anterior-posterior shear is $+F_x$.
+\item \textbf{Knee Tibiofemoral Joint:} Contact load across \texttt{walker\_knee\_r} and \texttt{walker\_knee\_l},
+  reported as the 3D resultant spatial force norm.
+\item \textbf{Knee Patellofemoral Joint:} Evaluated across \texttt{patellofemoral\_r} and \texttt{patellofemoral\_l}.
+  The \texttt{RajagopalLaiUhlrich2023} model explicitly includes articulated patellofemoral joints.
+\item \textbf{Shoulder Glenohumeral Joint:} Evaluated at the \texttt{acromial\_r} and \texttt{acromial\_l} joints.
+  In this model, the shoulder joints are articulated CustomJoints (three rotational DOFs, not welded).
+\end{enumerate}
+
+\paragraph{Static-Hold Analytic Bound.}
+To verify dynamic consistency and frame orientation, the static-hold analytic bound verifies that at zero velocity
+and zero acceleration in an upright static hold:
+\begin{equation}
+W_{\text{above}} \le \text{Compression} \le W_{\text{above}} + \sum_{m} F_m
+\end{equation}
+where $W_{\text{above}} = M_{\text{above}} g$ is the gravitational load of all body segments superior to L5/S1 plus the barbell.
+In the Rajagopal model, $M_{\text{above}} = 136.4979\,\mathrm{kg}$ (torso $32.4045\,\mathrm{kg}$, arms $4.0934\,\mathrm{kg}$, barbell $100.0\,\mathrm{kg}$),
+giving $W_{\text{above}} = 1338.59\,\mathrm{N}$. With zero active torso muscles crossing L5/S1 in the 80-muscle lower-extremity model,
+the bound holds with equality: measured compression is $1338.59\,\mathrm{N}$ with an absolute residual of $2.27 \times 10^{-13}\,\mathrm{N}$,
+confirming exact physical consistency.
+
+\paragraph{Measured Back Squat Joint Reactions.}
+Across the 41-frame squat window ($0.00\,\mathrm{s}$ to $0.20\,\mathrm{s}$, lifter mass $80.31\,\mathrm{kg}$, body weight $787.60\,\mathrm{N}$, barbell mass $100.0\,\mathrm{kg}$),
+the measured reaction loads are:
+\begin{center}\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccc}
+\toprule
+Joint Articulation & Mean Force (N) & Peak Force (N) & Mean (BW) & Peak (BW)\\
+\midrule
+L5/S1 Compression ($+F_y$) & 1579.32 & 1683.66 & 2.01 & 2.14\\
+L5/S1 AP Shear ($+F_x$) & -956.85 & -989.32 & -1.21 & -1.26\\
+Knee Tibiofemoral Resultant & 10154.88 & 11997.15 & 12.89 & 15.23\\
+Knee Patellofemoral Resultant & 9295.27 & 12205.18 & 11.80 & 15.50\\
+Shoulder Glenohumeral Resultant & 714.06 & 732.62 & 0.91 & 0.93\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Movement Optimizer L5/S1 Cross-Check.}
+Comparing the OpenSim L5/S1 reaction against the Movement Optimizer \texttt{spine\_loads.py} planar ergonomic model:
+Movement Optimizer yields mean compression of $807.98\,\mathrm{N}$ (peak $851.13\,\mathrm{N}$) and mean AP shear of $-1219.75\,\mathrm{N}$ (peak $-1228.80\,\mathrm{N}$).
+The models differ because Movement Optimizer computes a planar ergonomic rigid-body estimate of skeletal load based on gravitational and inertial torso segment loads without active muscle tensions. In contrast, OpenSim evaluates the full 3D musculoskeletal joint reaction with 3D pelvic and lumbar coordinates, forward-dynamics accelerations, and muscle forces.
+
+\paragraph{Status of Other Four Lifts.}
+The remaining four barbell lifts (\texttt{deadlift}, \texttt{bench\_press}, \texttt{snatch}, \texttt{clean\_and\_jerk})
+are reported as \texttt{unavailable} with reason \texttt{"no OSL-4 muscle solve (needs OSL-3 \#13041 bundles)"}.
+Values are explicitly recorded as null rather than synthetic zeros.
+
+\paragraph{Reproduction Command.}
+\begin{verbatim}
+UPSTREAMDRIFT_MSK_BASE_MODEL=$HOME/Repositories/ud-13044/shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim \
+PYTHONPATH=$PWD QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg \
+    python3 scripts/measure_opensim_lift_joint_reactions.py \
+    --out docs/development/lifting/evidence/opensim_joint_reactions/receipts.json
+\end{verbatim}
+
 \subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
 \paragraph{Planar Pull.} The previous Tools snatch configuration ran from
 the floor setup to the overhead-squat catch through one mid-time via point.
