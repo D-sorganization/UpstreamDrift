@@ -18,6 +18,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13364 · Ci(Quality-Gate): Aggregate Frontend-Tests and the Other Gating CI Standard Jobs so a Red Job Blocks the Merge Queue
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13364
+- **Branch:** cursor/merge-queue-gate-13364
+- **PR:** #13366
+- **Paths:** see #13366
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`65857013`; collated from changes/13364-quality-gate-aggregates-gating-jobs.md)
+- **Summary:** ci(quality-gate): aggregate frontend-tests and the other gating CI Standard jobs so a red job blocks the merge queue
+- **Next step:** Merge the PR.
+
+### DL-#13355 · Fix(Ui): Include Physical Style in resolveGrip to Resolve Red Main on Frontend-Tests
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13355
+- **Branch:** fix/main-grip-selection-style
+- **PR:** #13361
+- **Paths:** see #13361
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`3e195a56`; collated from changes/13355-fix-grip-selection-style.md)
+- **Summary:** fix(ui): include physical style in resolveGrip to resolve red main on frontend-tests
+- **Next step:** Merge the PR.
+
+### DL-#13350 · Fix(Launcher): Renumber Jaxsim_Dashboard to Order 105 to Resolve Duplicate Tile Order 33
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13350
+- **Branch:** fix/13350-launcher-tile-order
+- **PR:** #13358
+- **Paths:** see #13358
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`deec5362`; collated from changes/13350-renumber-jaxsim-dashboard.md)
+- **Summary:** fix(launcher): renumber jaxsim_dashboard to order 105 to resolve duplicate tile order 33
+- **Next step:** Merge the PR.
+
+### DL-#13348 · Fix(Data_Io): Make C3d_Loader Resilient to Sidekick.Lab.Bio Test Pollution
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13348
+- **Branch:** fix/13348-c3d-marker-set-import
+- **PR:** #13359
+- **Paths:** see #13359
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`100b1885`; collated from changes/13348-c3d-loader-bio-resilience.md)
+- **Summary:** fix(data_io): make c3d_loader resilient to sidekick.lab.bio test pollution
+- **Next step:** Merge the PR.
+
 ### DL-#13001 · Reject Unauthenticated Diagnostics in Remote Mode, Redact Absolute Repo Root, and Measure Runtime Probes
 
 - **State:** in_review
@@ -1389,12 +1441,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #11745
 - **Branch:** claude/lift-5-squat-bundle
-- **PR:** #12245, #12340, #13052, #13047, #13263
+- **PR:** #12245, #12340, #13052, #13047, #13263, #13276
 - **Paths:** see #12245
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-18 (`5841213b`; collated from changes/11745-bump-vendor-ud-tools-to-a459505-tools-56.md)
+- **Last verified:** 2026-10-19 (`c0d8142c`; collated from changes/11745-lift-5-clean-and-jerk-is-the-whole-lift.md)
 - **Summary:** LIFT-5 slice 1: back-squat same-input bundle from the Movement Optimizer via full-body marker IK, with provenance, regeneration script and MuJoCo replay smoke test
-- **Next step:** Bump vendor/ud-tools to the Tools #5653 merge commit and regenerate the snatch bundle and parity record so tools_pin matches
+- **Next step:** Merge the PR; then the LIFT-4 barbell record for OpenSim IK/ID of the pull bundles
 
 ### DL-#11737 · OSV-6 Lead Foot: Lateral-Marker Zero-Twist Correction (Knee_Flexion_Axis) and Leg-Marker Calibration Constraints Under --Foot-Progression; MuJoCo Address Toe-Out Within 2 Deg on Both Captures (Driver +0.2/-0.3, Iron -0.0/-1.4 Deg); Canonical Receipts Unchanged (Default-On Correction Is a Recorded Failed Experiment)
 
@@ -2587,6 +2639,71 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13298 · Unify Grip Frames Across Model_Appearance and Grip_Contact, Fix Drake Contact Normal Recording
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13298
+- **Branch:** fix/13298-grip-frame-unify
+- **PR:** #13318
+- **Paths:** see #13318
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`24633553`; collated from changes/13298-unify-grip-frames-across-model-appearanc.md)
+- **Summary:** Unify grip frames across model_appearance and grip_contact, fix Drake contact normal recording
+- **Next step:** Shipped in PR #13318.
+
+### DL-#13322 · Add Cross-Model Grip Capability Inventory Manifest, DbC Loader, and Verification Suite
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13322
+- **Branch:** merged via #13337
+- **PR:** #13337
+- **Paths:** see #13337
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`a9170eb8`; collated from changes/13322-add-cross-model-grip-capability-inventor.md)
+- **Summary:** Add cross-model grip capability inventory manifest, DbC loader, and verification suite
+- **Next step:** Shipped in PR #13337.
+
+### DL-#13189 · Report the Allocated Trail-Palm-on-Lead-Thumb Force (Patch Frame, Allocation, Provider Metadata); Physics Unchanged
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13189
+- **Branch:** feat/13189-palm-thumb-contact
+- **PR:** #13217
+- **Paths:** see #13217
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`15cafedb`; collated from changes/13189-report-the-allocated-trail-palm-on-lead.md)
+- **Summary:** Report the allocated trail-palm-on-lead-thumb force (patch frame, allocation, provider metadata); physics unchanged
+- **Next step:** Shipped in PR #13217.
+
+### DL-#13049 · Run Real-OpenSim Lift Tests in a Dedicated CI Job (OSL-13)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13049
+- **Branch:** merged via #13284
+- **PR:** #13284
+- **Paths:** see #13284
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`aefee65b`; collated from changes/13049-run-real-opensim-lift-tests-in-a-dedicat.md)
+- **Summary:** Run real-OpenSim lift tests in a dedicated CI job (OSL-13)
+- **Next step:** Shipped in PR #13284.
+
+### DL-#13299 · Engine-Agnostic Grip-Style Contact Topology: GripStyle and Trigger Finger Join the Physical GripSpec; Per-Style Contact Pair Tables With Anatomy Scaling.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13299
+- **Branch:** merged via #13320
+- **PR:** #13320
+- **Paths:** see #13320
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`10e75c0b`; collated from changes/13299-engine-agnostic-grip-style-contact-topol.md)
+- **Summary:** Engine-agnostic grip-style contact topology: GripStyle and trigger finger join the physical GripSpec; per-style contact pair tables with anatomy scaling.
+- **Next step:** Shipped in PR #13320.
+
 ### DL-#13339 · Test_Check_Windows_Deps No Longer Races Real Engine Imports Against a 3s Wait; the Probe Is Tested Synchronously With Optional Engines Forced Absent
 
 - **State:** shipped
@@ -2645,10 +2762,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13300
 - **Branch:** feat/13300-capsule-contact-law
-- **PR:** #13319
+- **PR:** #13319, #13320
 - **Paths:** see #13319
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`c2ebbf6e`; collated from changes/13300-generalised-shared-contact-law-sphere-ca.md)
+- **Last verified:** 2026-10-19 (`10e75c0b`; collated from changes/13300-generalised-shared-contact-law-sphere-ca.md)
 - **Summary:** generalised shared contact law: sphere-capsule and capsule-capsule
 - **Next step:** Shipped in PR #13319.
 
