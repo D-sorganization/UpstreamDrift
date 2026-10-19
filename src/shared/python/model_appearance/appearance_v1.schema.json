@@ -115,7 +115,26 @@
       "additionalProperties": false,
       "properties": {
         "style": { "enum": ["overlap", "interlock", "ten_finger"] },
-        "lead_thumb_offset_deg": { "type": "number", "minimum": 0, "maximum": 45 }
+        "lead_thumb_offset_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 45
+        },
+        "grip_strength_deg": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 30
+        },
+        "lead_roll_offset_deg": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 30
+        },
+        "trail_roll_offset_deg": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 30
+        }
       }
     },
     "materials": {
