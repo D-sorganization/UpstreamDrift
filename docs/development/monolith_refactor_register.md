@@ -185,6 +185,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 848 | `src/shared/python/motion_matching/club_only/reproduction.py` |
 | 847 | `src/api/routes/bunker_workbench.py` |
 | 846 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m` |
+| 846 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
 | 846 | `src/tools/model_explorer/gui.py` |
 | 843 | `src/shared/python/motion_pipeline/orchestrator.py` |
 | 842 | `src/shared/python/gui_pkg/help_content.py` |
@@ -225,7 +226,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 806 | `src/launchers/_launcher_navigation_ui.py` |
 | 804 | `src/shared/python/spine/movement_variants.py` |
 | 803 | `src/shared/python/ui/qt/widgets/signal_toolkit_processing_mixin.py` |
-| 802 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
 | 802 | `src/shared/python/plotting/renderers/kinetics.py` |
 | 801 | `src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py` |
 | 801 | `src/shared/python/sidekick/ui/tools_sidebar/sidebar.py` |

@@ -36,6 +36,7 @@ from src.engines.physics_engines.opensim.python.full_body_grip_contact import (
     ContactGripConfig,
     capsule_sphere_count,
     pad_name,
+    shift_topology_site_inward,
 )
 from src.engines.physics_engines.opensim.python.full_body_grip_topology import (
     CLUB_FREE_COORDINATES,
@@ -79,6 +80,7 @@ from src.shared.python.motion_matching.contact_law import ContactParameters
 ENGINE = "opensim_contact"
 CONTACT_INTEGRATOR = "CPodes"
 CONTACT_ACCURACY = 1e-4
+TOPOLOGY_CONTACT_ACCURACY = 1e-6
 _SIDES = (("L", "left"), ("R", "right"))
 CALIBRATION_HALF_LENGTH_M = 0.02
 _GRAVITY_M_S2 = 9.80665
@@ -188,12 +190,21 @@ def _calibrated_site_foundation_cached(
 ) -> ElasticFoundationParameters:
     """Calibrate foundation stiffness for a site radius so summed stiffness matches shared law.
 
-    Cached via :func:`functools.lru_cache` on pure hashable arguments (floats, int,
-    and frozen :class:`ContactParameters`). Builds a short calibration mesh in a
-    temporary directory and evaluates the native OpenSim contact force at neutral preload.
+    Because the Winkler foundation law is quadratic in penetration
+    (``F(delta) = k_W * Phi * delta^2``), matching both the preload force
+    ``f_target = k_law * delta_nom / count`` and the local tangent stiffness
+    ``dF/ddelta(delta_0) = 2 * F(delta_0) / delta_0 = k_law / count`` requires
+    ``delta_0 = 2 * delta_nom``.  Furthermore, the shared Stribeck-regularized
+    friction curve ``[mu_d + (mu_s - mu_d)*exp(-(v/v_tr)^2) + mu_v*v]*tanh(v/v_tr)``
+    with ``mu_s = 0.9, mu_d = 0.7`` is monotonically increasing without a static
+    peak above ``mu_d`` (at ``v = v_tr``, ``mu_law(v_tr) = 0.589`` whereas Simbody's
+    Hollars law peaks at ``mu_s``); mapping ``static_friction = law.dynamic_friction``
+    aligns Simbody's Hollars curve with the shared tangential law across all slip
+    regimes within 5 %.
     """
-    delta = DEFAULT_TOPOLOGY_PRELOAD_M
-    f_target = (law.stiffness_n_m * delta) / count
+    delta_nom = DEFAULT_TOPOLOGY_PRELOAD_M
+    f_target = (law.stiffness_n_m * delta_nom) / count
+    delta = 2.0 * delta_nom
     factor = winkler_patch_factor_m(radius_m, grip_radius_m)
     k_winkler = f_target / (factor * delta * delta)
     layout = PadLayout(
@@ -204,7 +215,7 @@ def _calibrated_site_foundation_cached(
     ef = ElasticFoundationParameters(
         stiffness_n_m3=k_winkler,
         dissipation_s_m=law.dissipation_s_m,
-        static_friction=law.static_friction,
+        static_friction=law.dynamic_friction,
         dynamic_friction=law.dynamic_friction,
         viscous_friction=law.viscous_friction,
         transition_velocity_m_s=law.transition_velocity_m_s,
@@ -341,7 +352,8 @@ class ContactGripSimulator(BushingGripSimulator):
         self._frames: dict[tuple[str, str], Any] = {}
         self._pad_forces: dict[str, list[tuple[Any, int, int]]] = {}
         self._topo_forces: dict[
-            str, list[tuple[str, list[tuple[Any, int, int, np.ndarray, float]]]]
+            str,
+            list[tuple[str, list[tuple[Any, int, int, np.ndarray, float, float]]]],
         ] = {}
         super().__init__(spec_bytes, names, time_s, q, interface)
         self._index_records()
@@ -391,20 +403,28 @@ class ContactGripSimulator(BushingGripSimulator):
         assert self.topology_model is not None
         osim = self._osim
         topo = self.topology_model.topology
+        grip_r = self.topology_model.cylinder.radius_m
         hand = self._model.getBodySet().get("LGrip")
         for pair in self.topology_model.physical_grip_pairs("R"):
             site = topo.site(pair.site_a)
             mapped = map_site_to_hand_frame(topo, site, "R")
             if mapped.primitive == "sphere":
+                ef_site = self.contact_config.site_foundation(mapped.radius_m, 1)
+                extra_pen = ef_site.preload_penetration_m - DEFAULT_TOPOLOGY_PRELOAD_M
+                shifted = shift_topology_site_inward(
+                    mapped.centre_m, "R", grip_r, extra_pen
+                )
                 geom = osim.ContactSphere.safeDownCast(
                     self._model.getContactGeometrySet().get(f"grip_pad_{pair.name}")
                 )
                 geom.connectSocket_frame(hand)
-                at = tie[:3, :3] @ mapped.centre_m + tie[:3, 3]
+                at = tie[:3, :3] @ shifted + tie[:3, 3]
                 geom.set_location(osim.Vec3(*(float(x) for x in at)))
             elif mapped.primitive == "capsule":
                 p0, p1 = mapped.endpoints_m
                 count = capsule_sphere_count(mapped.half_length_m, mapped.radius_m)
+                ef_site = self.contact_config.site_foundation(mapped.radius_m, count)
+                extra_pen = ef_site.preload_penetration_m - DEFAULT_TOPOLOGY_PRELOAD_M
                 for k in range(count):
                     geom = osim.ContactSphere.safeDownCast(
                         self._model.getContactGeometrySet().get(
@@ -414,7 +434,8 @@ class ContactGripSimulator(BushingGripSimulator):
                     geom.connectSocket_frame(hand)
                     t = k / (count - 1)
                     c_k = np.asarray(p0) + t * (np.asarray(p1) - np.asarray(p0))
-                    at = tie[:3, :3] @ c_k + tie[:3, 3]
+                    shifted = shift_topology_site_inward(c_k, "R", grip_r, extra_pen)
+                    at = tie[:3, :3] @ shifted + tie[:3, 3]
                     geom.set_location(osim.Vec3(*(float(x) for x in at)))
 
     def _tie_right_hand_to_left(self, spec: dict[str, Any]) -> None:
@@ -467,18 +488,23 @@ class ContactGripSimulator(BushingGripSimulator):
             for pair in self.topology_model.physical_grip_pairs(side):
                 site = topo.site(pair.site_a)
                 mapped = map_site_to_hand_frame(topo, site, side)
-                entries: list[tuple[str, np.ndarray, float]] = []
+                entries: list[tuple[str, np.ndarray, float, float]] = []
                 if mapped.primitive == "sphere":
+                    ef_site = self.contact_config.site_foundation(mapped.radius_m, 1)
                     entries.append(
                         (
                             f"{CONTACT_FORCE_PREFIX}_{pair.name}",
                             np.asarray(mapped.centre_m),
                             mapped.radius_m,
+                            ef_site.preload_penetration_m,
                         )
                     )
                 elif mapped.primitive == "capsule":
                     p0, p1 = mapped.endpoints_m
                     count = capsule_sphere_count(mapped.half_length_m, mapped.radius_m)
+                    ef_site = self.contact_config.site_foundation(
+                        mapped.radius_m, count
+                    )
                     for k in range(count):
                         t = k / (count - 1)
                         c_k = np.asarray(p0) + t * (np.asarray(p1) - np.asarray(p0))
@@ -487,10 +513,11 @@ class ContactGripSimulator(BushingGripSimulator):
                                 f"{CONTACT_FORCE_PREFIX}_{pair.name}_{k}",
                                 c_k,
                                 mapped.radius_m,
+                                ef_site.preload_penetration_m,
                             )
                         )
                 indexed_entries = []
-                for name, pos, sphere_r in entries:
+                for name, pos, sphere_r, d0 in entries:
                     force = osim.ElasticFoundationForce.safeDownCast(
                         self._model.getForceSet().get(name)
                     )
@@ -498,7 +525,7 @@ class ContactGripSimulator(BushingGripSimulator):
                     names = [labels.get(i) for i in range(labels.size())]
                     i_f = names.index(f"{name}.{CLUB_BODY}.force.X")
                     i_t = names.index(f"{name}.{CLUB_BODY}.torque.X")
-                    indexed_entries.append((force, i_f, i_t, pos, sphere_r))
+                    indexed_entries.append((force, i_f, i_t, pos, sphere_r, d0))
                 rows.append((pair.name, indexed_entries))
             self._topo_forces[side] = rows
 
@@ -556,7 +583,7 @@ class ContactGripSimulator(BushingGripSimulator):
             pen_max = 0.0
             last_u_rad = np.array([0.0, 0.0, 1.0])
             last_rel = np.zeros(3)
-            for force, i_f, i_t, local_pos, sphere_r in entries:
+            for force, i_f, i_t, local_pos, sphere_r, d0 in entries:
                 rec = force.getRecordValues(state)
                 f = np.array([rec.get(i_f + j) for j in range(3)])
                 t = np.array([rec.get(i_t + j) for j in range(3)])
@@ -571,11 +598,21 @@ class ContactGripSimulator(BushingGripSimulator):
                 )
                 last_u_rad = u_rad
                 last_rel = rel
-                fn_k = max(0.0, -float(f @ u_rad))
-                f_tang_k = f - (-fn_k) * u_rad
+                fn_raw = max(0.0, -float(f @ u_rad))
+                f_tang_k = f - (-fn_raw) * u_rad
+                pen_phys = max(0.0, sphere_r + grip_r - norm_rad)
+                pen_k = max(
+                    0.0,
+                    sphere_r + grip_r - norm_rad + (d0 - DEFAULT_TOPOLOGY_PRELOAD_M),
+                )
+                if pen_k > 1e-12 and d0 > 0.0:
+                    ratio_hc_w = max(0.0, 1.0 - ((pen_k - d0) / pen_k) ** 2)
+                    fn_k = fn_raw * ratio_hc_w
+                else:
+                    fn_k = fn_raw
                 fn_pair += fn_k
                 ft_vec += f_tang_k
-                pen_max = max(pen_max, max(0.0, sphere_r + grip_r - norm_rad))
+                pen_max = max(pen_max, pen_phys)
 
             ft_mag = float(np.linalg.norm(ft_vec))
             total_f += f_pair
@@ -706,11 +743,17 @@ class ContactGripSimulator(BushingGripSimulator):
     def run(
         self,
         t_end: float | None = None,
-        accuracy: float = CONTACT_ACCURACY,
+        accuracy: float | None = None,
         on_sample: Callable[[float], None] | None = None,
         method: str = CONTACT_INTEGRATOR,
     ) -> OpenSimContactRun:
         """Integrate with the stiff (implicit) integrator the contact needs."""
+        if accuracy is None:
+            accuracy = (
+                TOPOLOGY_CONTACT_ACCURACY
+                if self.topology_model is not None
+                else CONTACT_ACCURACY
+            )
         res = super().run(t_end, accuracy, on_sample, method)
         assert isinstance(res, OpenSimContactRun)
         return res
@@ -769,17 +812,18 @@ def simulate_grip_contact(
     """
     if pads is None and topology_model is None:
         raise ValueError("either pads or topology_model must be provided")
-    times = swing.time_s
+    full_times = np.asarray(swing.time_s, dtype=float)
+    times = full_times
     if t_end_s is not None:
-        times = times[times <= t_end_s + 1e-12]
+        times = full_times[full_times <= t_end_s + 1e-12]
     if hold:
-        q = np.tile(np.asarray(swing.q[0], float), (len(times), 1))
+        q = np.tile(np.asarray(swing.q[0], float), (len(full_times), 1))
     else:
-        q = np.asarray(swing.q[: len(times)], dtype=float)
+        q = np.asarray(swing.q[: len(full_times)], dtype=float)
     sim = ContactGripSimulator(
         spec_bytes,
         swing.names,
-        times,
+        full_times,
         q,
         pads=pads,
         interface=interface,
