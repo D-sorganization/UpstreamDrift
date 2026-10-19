@@ -323,8 +323,7 @@ def _verify_pinocchio(
             )
 
             pin_model = FullBodyPinocchioModel(doc)
-            zero_coords = {str(c): 0.0 for c in doc.get("coordinate_order", [])}
-            pin_frame_poses = pin_model.frame_poses(zero_coords)
+            pin_frame_poses = pin_model.frame_poses(pin_model.neutral_coordinates())
             for fname, fpose in pin_frame_poses.items():
                 if fname in spec_frame_origins:
                     err = float(

@@ -284,6 +284,15 @@ class NativePinocchioModel:
             raise ValueError("Native coordinates must be finite")
         return q
 
+    def neutral_coordinates(self) -> dict[str, float]:
+        """Return the neutral value of every native coordinate, keyed by name.
+
+        Postcondition: the keys are exactly the native coordinate inventory, so
+        the result is a valid argument to :meth:`configuration`.
+        """
+        q = self._pin.neutral(self.model)
+        return {name: float(q[index]) for name, index in self._coordinates.items()}
+
     def velocity(self, rates: Mapping[str, float]) -> NDArray[np.float64]:
         """Generalised velocity for named coordinate rates (1-DOF primitives)."""
         return self._velocity_vector(rates)
