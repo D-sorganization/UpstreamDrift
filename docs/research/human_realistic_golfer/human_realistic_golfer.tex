@@ -656,6 +656,57 @@ and spacing represent photographic pose estimations rather than dynamic
 motion-capture measurements; individual grip variations across club selections
 or swing phases are unmodelled.
 
+\subsection{Simscape Grip Topology Export and Allocated Reporting (HRG-GS-M11, \#13333)}
+\textbf{Model Topology, Manifest, and Sibling Export.}
+Simscape Multibody (\path{GolfSwing3D_Human.slx}, model ID \texttt{simscape\_gs3dx\_human}) models the two-handed grip as a closed kinematic loop with welded hand--club constraints (\texttt{attachment\_mode="weld"} in \path{src/config/grip_bindings/simscape_gs3dx_human.json}, schema \texttt{grip-binding/v1}). Rather than modifying \path{gs3dx_appearance.v1.json}---which remains $100\%$ byte-identical for v1 consumers---Python generates a deterministic sibling file \path{gs3dx_grip_topology.json} (\texttt{schema\_version="simscape-grip-topology/v1"}) via \path{scripts/export_simscape_grip_topology.py} (with \texttt{--check} drift detection). The export serializes:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item All six canonical \texttt{ContactTopology} variants ($\{\texttt{overlap}, \texttt{interlock}, \texttt{ten\_finger}\} \times \{\texttt{trigger\_finger} \in \{\text{false}, \text{true}\}\}$), preserving $100\%$ of site identifiers, primitive geometries (sphere and capsule radii, endpoints, normals, tangents), and contact pair identifiers (\texttt{hand\_grip\_pair\_ids} and \texttt{hand\_hand\_pair\_ids}), with every pair explicitly tagged \texttt{simscape\_label="allocated"}.
+\item Posed G4 hand mesh geometry from \texttt{build\_grip\_hand\_mesh} (\path{src/shared/python/model_appearance/grip_hand_mesh.py}) for both lead and trail hands across each style variant, including palm/thumb/phalanx components, $V$-azimuths, thumb azimuths, axial distances below the grip butt ($0.065$\,m lead, $0.145$\,m trail), and 3D fingertip coordinates in the shared grip frame.
+\item Named grip presets (\texttt{palmer\_overlap}, \texttt{woods\_interlock}, \texttt{ten\_finger}) with \texttt{photo\_estimate} provenance.
+\end{enumerate}
+On the MATLAB side, \path{gs3dx_read_grip_topology.m} acts strictly as a thin JSON reader (\texttt{jsondecode} + schema check) with zero re-implementation of contact topology or Hunt--Crossley/Coulomb contact laws.
+
+\textbf{Coordinate Frames, Units, and Parameters.}
+All exported and allocated quantities use SI units ($\mathrm{m}$, $\mathrm{rad}$, $\mathrm{N}$, $\mathrm{N\cdot m}$). In the shared grip frame $F_{\mathrm{grip}}$, $+x$ points from grip butt toward clubhead, $+y$ toward the target line, and $+z = +x \times +y$. Grip cylinder radius is $r_{\mathrm{grip}} = 0.014$\,m and default baseline hand squeeze is $F_{\mathrm{sq}} = 120.0$\,N per hand.
+
+\textbf{Equations and Numerical Method (Allocated Reporting from Recorded States).}
+Given a recorded closed-loop state snapshot $s_k$ from a \texttt{simscape-closed-loop-snapshot/v1} export ($\mathbf{M}\mathbf{a} + \mathbf{h} = \mathbf{S}^{\top}\boldsymbol{\tau} + \mathbf{J}_c^{\top}\boldsymbol{\lambda}_c$), the closure constraint multiplier $\boldsymbol{\lambda}_c \in \mathbb{R}^m$ is obtained via \texttt{solve\_closure\_multiplier} and lifted into the canonical 6-DOF grip-frame closure wrench $\mathbf{W}_{\mathrm{grip}} = [\mathbf{f}_c^{\top}, \boldsymbol{\tau}_c^{\top}]^{\top} \in \mathbb{R}^6$ at the grip origin:
+\begin{equation}
+\mathbf{W}_{\mathrm{grip}} = \mathcal{L}_{\text{closure}}\!\left(\boldsymbol{\lambda}_c\right), \quad
+\mathbf{f}_c = [f_{c,x}, f_{c,y}, f_{c,z}]^{\top}, \quad
+\boldsymbol{\tau}_c = [\tau_{c,x}, \tau_{c,y}, \tau_{c,z}]^{\top}.
+\end{equation}
+All contact forces in the welded Simscape loop are reporting-only allocations (\texttt{label="allocated (uniform prior, welded hands)"}) with identically zero injected forces:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textit{Hand--Hand Allocation (G3)}: \texttt{allocate\_hand\_hand\_from\_closure}$(\mathbf{W}_{\mathrm{grip}}, \mathcal{T}, \text{prior})$ solves the minimum-weighted-norm linear system $\mathbf{A}_{\mathrm{hh}}\mathbf{f}_{\mathrm{hh}} = \mathbf{W}_{\mathrm{grip}}$ over the active hand--hand pairs $\mathcal{P}_{\mathrm{hh}}(\mathcal{T})$, reporting per-pair normal force $f_{n,i} = \max(0, -\mathbf{n}_i \cdot \mathbf{f}_i)$, tangential magnitude $f_{t,i} = \|\mathbf{f}_i - (\mathbf{f}_i \cdot \mathbf{n}_i)\mathbf{n}_i\|_2$, and spin moment $m_{s,i}$.
+\item \textit{Palm--Thumb Legacy Decomposition (H1)}: \texttt{allocate\_from\_closure}$(\mathbf{W}_{\mathrm{grip}})$ decomposes $\mathbf{W}_{\mathrm{grip}}$ across the trail-thenar / lead-thumb and finger-saddle contact patches.
+\item \textit{Hand--Grip Pad Allocation}: For active hand--grip pad pairs $p \in \mathcal{P}_{\mathrm{hg}}(\mathcal{T})$ on hand $\sigma \in \{\text{lead}, \text{trail}\}$ with pad weight $w_p > 0$ ($\sum_{p \in \mathcal{P}_{\mathrm{hg},\sigma}} w_p = W_\sigma$), normal force combines baseline radial squeeze $F_{\mathrm{sq}}$ and radial closure projection, while tangential force and spin moment distribute axial/transverse shear and shaft torque:
+\begin{align}
+f_{n,p} &= \frac{w_p}{W_\sigma} F_{\mathrm{sq}} + \frac{w_p}{\sum_{q \in \mathcal{P}_{\mathrm{hg}}} w_q} \max\!\left(0, -\mathbf{n}_p \cdot \mathbf{f}_c\right), \\
+f_{t,p} &= \frac{w_p}{\sum_{q \in \mathcal{P}_{\mathrm{hg}}} w_q} \left( \|\mathbf{f}_c - (\mathbf{f}_c \cdot \mathbf{n}_p)\mathbf{n}_p\|_2 + \frac{\sqrt{\tau_{c,y}^2 + \tau_{c,z}^2}}{\max(r_p, r_{\mathrm{grip}})} \right), \quad
+m_{s,p} = \frac{w_p}{\sum_{q \in \mathcal{P}_{\mathrm{hg}}} w_q} |\tau_{c,x}|.
+\end{align}
+\item \textit{Zero Injected Wrench Invariant}: Every pair in the resulting \texttt{GripStepReport} carries \texttt{pair\_labels}$[p] = \texttt{"allocated"}$, so \texttt{body\_wrenches()} returns $\mathbf{0} \in \mathbb{R}^3$ for all bodies, \texttt{injected\_body\_wrenches} is empty, and \texttt{SimscapeGripReportingAdapter.apply\_wrenches} raises \texttt{SchemaFeatureUnavailableError} if called.
+\end{enumerate}
+
+\textbf{Acceptance Criteria and Deferred R2025b Validation.}
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item Schema validation passes for \path{gs3dx_grip_topology.json} and two consecutive runs produce identical SHA-256 digests; \path{gs3dx_appearance.v1.json} remains byte-identical.
+\item $100\%$ of \texttt{ContactTopology} pair IDs and site IDs are preserved across all six style/trigger variants, and exported fingertip positions match G4 \texttt{build\_grip\_hand\_mesh} to $\le 10^{-8}$\,m.
+\item Allocated reporting on synthetic \texttt{WELD6} and checked-in planar \texttt{simscape-closed-loop-snapshot/v1} fixtures produces finite non-negative pad forces, hand--hand wrench reconstruction error $\le 10^{-9}$\,N, and zero injected forces ($\texttt{injected\_force\_count} = 0$, $\max \|\mathbf{F}_{\mathrm{inj}}\| = 0$).
+\item Native MATLAB R2025b execution of \texttt{gs3dx\_read\_grip\_topology} and Mechanics Explorer visual verification on \path{GolfSwing3D_Human.slx} is recorded as deferred validation \texttt{HRG-GS-M11} (\#13333) in \path{docs/development/deferred-catalog-bundle.json}, explicitly targeting \path{C:/Program Files/MATLAB/R2025b/bin/matlab.exe}.
+\end{enumerate}
+
+\textbf{Limitations.}
+Because Simscape \path{GolfSwing3D_Human.slx} welds the hands into a closed kinematic loop rather than stepping compliant 3D contact dynamics at every phalanx, all reported pad and inter-hand forces are post-hoc allocations from the loop-closure reaction wrench under a regularizing prior, not dynamically identified biological finger forces.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 scripts/export_simscape_grip_topology.py --check
+python3 scripts/export_simscape_appearance.py --check
+python3 -m pytest tests/unit/grip_contact/test_simscape_grip_topology_export.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
