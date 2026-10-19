@@ -739,6 +739,76 @@ All five admitted MuJoCo humanoid MJCFs represent each hand as a single rigid bo
 python3 -m pytest tests/unit/grip_contact/test_mujoco_humanoid_grip_adapter.py
 \end{verbatim}
 
+\subsection{MyoSuite Golfer Grip Adapter (HRG-GS-M7, \#13329)}
+\label{sec:hrg-gs-m7-myosuite-grip}
+
+\textbf{Grip-Site and Club-Shaft Geometry Defect and Fix.}
+Prior to HRG-GS-M7, \texttt{\_worldbody\_addons} in \path{src/engines/physics_engines/myosuite/python/golfer_scene.py} defined the club shaft capsule geom with \texttt{fromto="0 \{-0.5 * club.length\_m\} 0 0 0 0"} (spanning only half the club length from the clubhead origin $\mathbf{0}$ toward the grip butt at $-L_{\mathrm{club}}\hat{\mathbf{y}}$), whereas \texttt{\_club\_grip\_sites\_xml} placed \texttt{grip\_site\_club\_l} and \texttt{grip\_site\_club\_r} near the butt using the full length $L_{\mathrm{club}}$:
+\begin{equation}
+y_{\mathrm{L}} = -\left(L_{\mathrm{club}} - \delta_{\mathrm{butt}}\right), \qquad
+y_{\mathrm{R}} = -\left(L_{\mathrm{club}} - \delta_{\mathrm{butt}} - \Delta s_{\mathrm{LR}}\right),
+\end{equation}
+with $\delta_{\mathrm{butt}} = 0.032\,\mathrm{m}$ and $\Delta s_{\mathrm{LR}} = 0.0762\,\mathrm{m}$ (matching the G0 unified \texttt{GripInterface} axial coordinates in \path{docs/development/full_body_models/full_body_spec_anthro_driver.json}). Consequently, the grip sites lay $\sim 0.546\,\mathrm{m}$ beyond the end of the half-length shaft geom, and the committed MJCF scenes under \path{shared/models/myosuite/golf/body/} retained stale site positions ($y = -0.88 / -0.95\,\mathrm{m}$). Fixing \texttt{\_worldbody\_addons} to span the full club length \texttt{fromto="0 \{-club.length\_m\} 0 0 0 0"} and regenerating the committed scenes places every grip site on the shaft segment within the grip section $y \in [-L_{\mathrm{club}}, -(L_{\mathrm{club}} - L_{\mathrm{grip}})]$ with zero fudge factors (Table~\ref{tab:hrg-gs-m7-shaft-fix}).
+
+\begin{table}[h!]
+\centering
+\caption{Club Shaft Capsule Span and Grip-Site Axial Coordinates Before and After HRG-GS-M7 (\#13329).}
+\label{tab:hrg-gs-m7-shaft-fix}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Scene ($L_{\mathrm{club}}$, $L_{\mathrm{grip}}$) & Shaft $y$ Before (m) & Committed Sites Before (m) & Shaft $y$ After (m) & Grip Segment $y$ (m) & Sites After $(y_{\mathrm{L}}, y_{\mathrm{R}})$ (m) \\
+\midrule
+Driver ($1.156\,\mathrm{m}$, $0.265\,\mathrm{m}$) & $[-0.578, 0.000]$ & $(-0.8800, -0.9500)$ & $[-1.156, 0.000]$ & $[-1.156, -0.891]$ & $(-1.1240, -1.0478)$ \\
+7-Iron ($0.940\,\mathrm{m}$, $0.265\,\mathrm{m}$) & $[-0.470, 0.000]$ & $(-0.8800, -0.9500)$ & $[-0.940, 0.000]$ & $[-0.940, -0.675]$ & $(-0.9080, -0.8318)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Model Topology, Manifests, and Dual-Mode Contract.}
+In \path{src/engines/physics_engines/myosuite/python/golfer_scene.py}, \texttt{MyoSuiteGolferGripAdapter} implements \texttt{ModelGripAdapter} for the two admitted MyoSuite golfer scenes ($n_{\mathrm{body}} = 33$, $n_{\mathrm{eq}} = 20$), each backed by a \texttt{grip-binding/v1} manifest under \path{src/config/grip_bindings/}:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \texttt{myosuite\_golfer\_driver} (\path{shared/models/myosuite/golf/body/golfer_myobody_driver.xml}, SHA-256 \texttt{133ad3e0...});
+\item \texttt{myosuite\_golfer\_iron} (\path{shared/models/myosuite/golf/body/golfer_myobody_iron.xml}, SHA-256 \texttt{f387f7d6...}).
+\end{enumerate}
+The adapter binds \texttt{lead\_hand\_body="hand\_l"}, \texttt{trail\_hand\_body="hand\_r"}, and \texttt{club\_body="golf\_club"} (where \texttt{golf\_club} sits in \texttt{<worldbody>} with a 6-DOF \texttt{<freejoint name="club\_free"/>} and is coupled to \texttt{hand\_l} and \texttt{hand\_r} by site-weld equalities \texttt{grip\_weld\_l} and \texttt{grip\_weld\_r}), resolving $100\%$ of canonical \texttt{ContactTopology} sites via rigid-hand finger proxies (\texttt{representation="rigid\_proxy"}). Two mutually exclusive operating modes are supported:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Site-Weld Mode (default, \texttt{contact\_mode=False}):} Both \texttt{grip\_weld\_l} and \texttt{grip\_weld\_r} remain active in \texttt{data.eq\_active}. \texttt{capabilities()} honestly declares \texttt{attachment\_modes=("weld",)}, \texttt{supports\_physical\_pairs=False}, \texttt{supports\_wrench\_application=False}, and a non-empty \texttt{unavailable\_reason}; calling \texttt{apply\_wrenches} or \texttt{apply\_report} raises \texttt{WeldedGripBodyError} (\texttt{SchemaFeatureUnavailableError}, \texttt{ValueError}). Per-hand weld constraint wrenches $(\mathbf{F}_h, \boldsymbol{\tau}_h)$ at club-side anchors $\mathbf{r}_h$ ($h \in \{\mathrm{L}, \mathrm{R}\}$) are extracted from \texttt{data.efc\_force} via \texttt{grip\_analysis\_from\_efc} and allocated across pad--grip and hand--hand pairs under the named \texttt{AllocationPrior} (default \texttt{prior\_name="equal\_split"}), labelled \texttt{"allocated"} with \texttt{applied\_allocated\_force\_n()} $= 0.0\,\mathrm{N}$.
+\item \textbf{Contact Mode (\texttt{contact\_mode=True}):} Disables only \texttt{grip\_weld\_l} and \texttt{grip\_weld\_r} in \texttt{model.eq\_active0} and \texttt{data.eq\_active} (leaving all $18$ patellar/knee and foot-contact equalities active), declares \texttt{supports\_physical\_pairs=True} and \texttt{supports\_wrench\_application=True}, and applies shared-law pad--grip wrenches to \texttt{hand\_l}, \texttt{hand\_r}, and \texttt{golf\_club} through \texttt{data.xfrc\_applied} transferred to each body's COM \texttt{data.xipos}. If either grip weld is re-enabled in \texttt{data.eq\_active}, \texttt{apply\_wrenches} raises \texttt{WeldedGripBodyError} so weld and shared contact are never applied on the same pair.
+\end{itemize}
+
+\textbf{Bimanual Grasp Synthesis and Measured Parity.}
+With midpoint $\mathbf{r}_{\mathrm{M}} = \tfrac{1}{2}(\mathbf{r}_{\mathrm{L}} + \mathbf{r}_{\mathrm{R}})$ and bimanual grasp matrix $\mathbf{G}(\mathbf{r}_{\mathrm{L}}, \mathbf{r}_{\mathrm{R}}) \in \R^{6 \times 12}$ from \texttt{loop\_nullspace.grip\_split.grasp\_map}, the stacked hand wrench vector $\mathbf{y} = [\mathbf{F}_{\mathrm{L}}^{\top}, \boldsymbol{\tau}_{\mathrm{L}}^{\top}, \mathbf{F}_{\mathrm{R}}^{\top}, \boldsymbol{\tau}_{\mathrm{R}}^{\top}]^{\top} \in \R^{12}$ and net club wrench $\mathbf{w}_{\mathrm{club}} = [\mathbf{F}_{\mathrm{net}}^{\top}, \mathbf{M}_{\mathrm{M}}^{\top}]^{\top} \in \R^{6}$ satisfy:
+\begin{equation}
+\|\mathbf{G}\mathbf{y} - \mathbf{w}_{\mathrm{club}}\|_{\infty} \le 10^{-9}\,\mathrm{N}
+\end{equation}
+across all $3$ grip styles (\texttt{overlap}, \texttt{interlock}, \texttt{ten\_finger}) $\times$ $2$ modes (\texttt{weld}, \texttt{contact}). Table~\ref{tab:hrg-gs-m7-parity} reports the measured site-weld constraint wrenches, allocated \texttt{trail\_palm\_lead\_thumb} magnitudes, bimanual grasp synthesis residuals, and M3 qualification harness parity errors against \texttt{PinocchioGripAdapter} and \texttt{law\_level\_series} on identical site states ($F_{\mathrm{sq}} = 1100.0\,\mathrm{N}$, $\Delta t = 0.002\,\mathrm{s}$, $21$ steps).
+
+\begin{table}[h!]
+\centering
+\caption{Measured Site-Weld Constraint Wrenches, Bimanual Grasp Synthesis Residuals, and M3 Parity Errors (HRG-GS-M7, \#13329).}
+\label{tab:hrg-gs-m7-parity}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+Model ID & $\|\mathbf{F}_{\mathrm{L}}\|$ (N) & $\|\mathbf{F}_{\mathrm{R}}\|$ (N) & $\|\mathbf{F}_{\mathrm{net}}\|$ (N) & $\|\mathbf{M}_{\mathrm{M}}\|$ (N$\cdot$m) & Palm--Thumb $f_t$ (N) & $\|\mathbf{G}\mathbf{y} - \mathbf{w}_{\mathrm{club}}\|_{\infty}$ (N) & Max $\varepsilon_{\mathrm{peak}}$ / $\varepsilon_{\mathrm{rms}}$ \\
+\midrule
+\texttt{myosuite\_golfer\_driver} & $412.523$ & $419.238$ & $628.390$ & $119.120$ & $153.677$ & $4.26 \times 10^{-14}$ & $0.00 \times 10^{0}$ / $0.00 \times 10^{0}$ \\
+\texttt{myosuite\_golfer\_iron} & $416.452$ & $431.523$ & $638.151$ & $105.344$ & $165.066$ & $7.11 \times 10^{-15}$ & $0.00 \times 10^{0}$ / $0.00 \times 10^{0}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Limitations.}
+The pinned MyoBody-simple-upper model represents each hand as a single rigid body (\texttt{hand\_l}, \texttt{hand\_r}) without articulated finger joints, so all $14$--$15$ contact sites bind via \texttt{representation="rigid\_proxy"}. In the default site-weld mode, the left/right wrench split between two rigid welds on the same club body is indeterminate in rigid-body statics and reflects MuJoCo's solver regularization (\texttt{split\_method="efc\_force"}); physical pad--grip contact wrenches are only active when \texttt{contact\_mode=True} is explicitly selected.
+
+\textbf{Reproduction Commands.}
+\begin{verbatim}
+bash scripts/setup_myosuite_models.sh
+python3 -m pytest tests/unit/engines/myosuite/test_golfer_scene.py
+python3 -m pytest tests/unit/grip_contact/test_myosuite_golfer_grip_adapter.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
