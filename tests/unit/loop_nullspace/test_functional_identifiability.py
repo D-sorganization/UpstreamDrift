@@ -79,8 +79,8 @@ def _box_set(dec, half: float = 1.0) -> FeasibleSet:
     for i in range(n):
         e = np.zeros(n)
         e[i] = 1.0
-        rows.append(FeasibleRow(e, half, f"B:{i}:up", "B", "box"))
-        rows.append(FeasibleRow(-e, half, f"B:{i}:lo", "B", "box"))
+        rows.append(FeasibleRow(e, half, f"B:{i}:up", "B", "torque"))
+        rows.append(FeasibleRow(-e, half, f"B:{i}:lo", "B", "torque"))
     return dataclasses.replace(FeasibleSet.from_rows(n, rows), decomposition=dec)
 
 
