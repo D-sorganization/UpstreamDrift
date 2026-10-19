@@ -21,11 +21,9 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
-from scipy.integrate import solve_ivp
 
 from src.engines.physics_engines.pinocchio.python import grip_bushing as bushing
 from src.shared.python.grip_contact import (
-    CoordinateSpline,
     CoordinateSwing,
     GripInterface,
 )
@@ -98,12 +96,7 @@ class ClubInHands(bushing.ClubOnBushings):
         return law
 
 
-def hold_state(sim: ClubInHands, q: np.ndarray) -> tuple[Any, np.ndarray]:
-    """Hand source at rest and the club state at the weld pose for ``q``."""
-    still = np.zeros_like(q)
-    weld = sim.kinematics.state(q, still)
-    y = bushing._initial_state(weld, sim._pin)  # noqa: SLF001
-    return (lambda _t: (q, still)), y
+hold_state = bushing.hold_state
 
 
 def _record_step(
@@ -155,25 +148,8 @@ def simulate_grip_contact(
     times = swing.time_s
     if t_end_s is not None:
         times = times[times <= t_end_s + 1e-12]
-    if hold:
-        source, y0 = hold_state(sim, np.asarray(swing.q[0], float))
-    else:
-        spline = CoordinateSpline(swing.time_s, swing.q)
-        source = spline.evaluate
-        weld0 = sim.kinematics.state(*source(float(times[0])))
-        y0 = bushing._initial_state(weld0, sim._pin)  # noqa: SLF001
-        y0[7:10] = weld0.rotation.T @ weld0.velocity_m_s
-        y0[10:13] = weld0.rotation.T @ weld0.omega_rad_s
-    sol = solve_ivp(
-        lambda t, y: sim.derivatives(t, y, source),
-        (float(times[0]), float(times[-1])),
-        y0,
-        method="Radau",
-        t_eval=times,
-        rtol=tol.rtol,
-        atol=tol.atol,
-        max_step=tol.max_step_s,
-    )
+    source, y0 = bushing.initial_swing_state(sim, swing, times, hold)
+    sol = bushing.integrate_free_flyer_radau(sim, source, times, y0, tol)
     if not sol.success:
         raise RuntimeError(f"pinocchio contact integration failed: {sol.message}")
     wrench: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}

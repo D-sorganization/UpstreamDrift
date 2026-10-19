@@ -1816,8 +1816,31 @@ Triceps & 0 & --- & --- & --- & ---\\
 \end{tabular}
 \end{center}
 The upper-body and trunk muscle groups are absent in the Rajagopal 80-muscle lower-limb model
-and are driven by coordinate actuators. The remaining four lifts (bench press, deadlift,
-snatch, clean and jerk) are reported as \texttt{unavailable} pending barbell bundles and IK/ID receipts.
+and are driven by coordinate actuators.
+
+\paragraph{Per-Lift Muscle and Residual Summary.}
+The table below summarizes muscle evaluation and residual gate metrics across all five barbell lifts from \texttt{receipts.json}:
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{\begin{tabular}{lcccccccc}
+\toprule
+Lift & Status & Classification & Window (s) & Mean Reserve & Peak Reserve & Pelvis Force (N, vs Hicks) & Pelvis Moment (N\,m, vs Hicks) & Within / Outside\\
+\midrule
+Squat & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 56.9\% & 67.7\% & 23.70 (vs 146.93) & 12.02 (vs 18.64) & Within\\
+Deadlift & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 17.3\% & 20.2\% & 288.23 (vs 110.92) & 147.88 (vs 18.28) & Outside\\
+Bench Press & \texttt{unavailable} & \texttt{unqualified} & unavailable & unavailable & unavailable & unavailable & unavailable & unavailable\\
+Snatch & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 37.7\% & 71.3\% & 463.57 (vs 155.12) & 202.60 (vs 27.10) & Outside\\
+Clean \& Jerk & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 38.9\% & 58.5\% & 458.52 (vs 223.10) & 259.03 (vs 38.77) & Outside\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+\subparagraph{Evaluation Findings and Limitations.}
+Three plain findings apply to this evaluation:
+\begin{enumerate}
+\item The analyzed window is the 0.2\,s LIFT-5 engine window from the setup, so it covers the start of the pull only, not the whole lift and not the jerk.
+\item Every lift is \texttt{unqualified}, and deadlift, snatch, and clean and jerk also fail the Hicks residual gate.
+\item Bench press is unavailable (no supine IK).
+\end{enumerate}
 
 \paragraph{Coordinate Breakdown and Ground Shear Asymmetry.}
 At frame~0, total sagittal extension demand ($\tau_\text{hip} + \tau_\text{knee}$) is virtually
@@ -2095,14 +2118,14 @@ Lift & Marker RMS / Max (m) & Segment RMS (rad) & Reach Miss L / R & Max Oversho
 \midrule
 Squat & 0.0164 / 0.0304 & 0.0169 & 0.00 / 1.51\,mm & $4.18\times 10^{-5}$ & \textbf{23.70 / 146.93} & \textbf{12.02 / 18.64} \\
 Deadlift & 0.0112 / 0.0390 & 0.0158 & 7.11 / 6.91\,$\mu$m & $6.5\times 10^{-4}$ & 288.23 / 110.92 & 147.88 / 18.28 \\
-Bench Press & 0.0581 / 0.2164 & 0.0882 & 0.418 / 0.433\,m & $4.4\times 10^{-4}$ & 4598.27 / 32.49 & 1575.93 / 3.30 \\
+Bench Press & 0.0160 / 0.0554 & 0.0248 & 12.5\,$\mu$m / 6.37\,mm & $2.12\times 10^{-3}$ & 511.26 / 32.49 & 318.13 / 3.45 \\
 Snatch & 0.0089 / 0.0579 & 0.0095 & 7.68 / 7.57\,$\mu$m & $3.8\times 10^{-4}$ & 463.57 / 155.12 & 202.60 / 27.10 \\
 Clean \& Jerk & 0.0198 / 0.1612 & 0.0220 & 6.43 / 6.02\,$\mu$m & $2.3\times 10^{-3}$ & 458.52 / 223.10 & 259.03 / 38.77 \\
 \bottomrule
 \end{tabular}
 \caption{Measured OpenSim IK and ID Metrics Across All Five Barbell Lifts (OSL-3).
-Squat passes both Hicks residual thresholds. Deadlift, snatch, and clean-and-jerk hands reach
-the bar within micrometres, but exceed residual thresholds during dynamic settling and are strictly xfailed.}
+Squat passes both Hicks residual thresholds. Deadlift, snatch, clean-and-jerk, and bench-press hands reach
+the bar within tolerance, but exceed residual thresholds during dynamic settling and are strictly xfailed.}
 \label{tab:opensim-ik-id-all-five}
 \end{table}
 

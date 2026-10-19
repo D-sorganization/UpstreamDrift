@@ -219,10 +219,10 @@ class ClubOnBushings:
         rot_t = club.rotation.T
         return np.concatenate([rot_t @ force, rot_t @ moment])
 
-    def derivatives(self, t: float, y: np.ndarray, hand_source: Any) -> np.ndarray:
-        """``d/dt [q, v]`` with ``aba`` for the club acceleration."""
-        _, club, frames, law = self.evaluate(t, y, hand_source)
-        tau = self.joint_torque(club, frames, law)
+    def free_flyer_aba_derivatives(
+        self, club: RigidBodyState, y: np.ndarray, tau: np.ndarray
+    ) -> np.ndarray:
+        """State derivative d/dt [q, v] using Pinocchio aba for a free-flyer club."""
         quat = y[3:7] / np.linalg.norm(y[3:7])
         q = np.concatenate([y[:3], quat])
         v = y[7:13]
@@ -234,6 +234,13 @@ class ClubOnBushings:
         )
         return np.concatenate([club.rotation @ v[:3], quat_dot, accel])
 
+    def derivatives(self, t: float, y: np.ndarray, hand_source: Any) -> np.ndarray:
+        """``d/dt [q, v]`` with ``aba`` for the club acceleration."""
+        _, frames, law = self.wrenches(t, y, hand_source)
+        club = self.club_state(y)
+        tau = self.joint_torque(club, frames, law)
+        return self.free_flyer_aba_derivatives(club, y, tau)
+
 
 def _initial_state(weld: RigidBodyState, pin: Any) -> np.ndarray:
     quat = pin.Quaternion(weld.rotation)
@@ -243,6 +250,51 @@ def _initial_state(weld: RigidBodyState, pin: Any) -> np.ndarray:
             [quat.x, quat.y, quat.z, quat.w],
             np.zeros(6),
         ]
+    )
+
+
+def hold_state(sim: Any, q: np.ndarray) -> tuple[Any, np.ndarray]:
+    """Hand source at rest and the club state at the weld pose for ``q``."""
+    still = np.zeros_like(q)
+    weld = sim.kinematics.state(q, still)
+    return (lambda _t: (q, still)), _initial_state(weld, sim._pin)  # noqa: SLF001
+
+
+def initial_swing_state(
+    sim: Any,
+    swing: CoordinateSwing,
+    times: np.ndarray,
+    hold: bool,
+) -> tuple[Any, np.ndarray]:
+    """Return kinematics source and initial state vector for a swing."""
+    if hold:
+        return hold_state(sim, np.asarray(swing.q[0], float))
+    spline = CoordinateSpline(swing.time_s, swing.q)
+    source = spline.evaluate
+    weld0 = sim.kinematics.state(*source(float(times[0])))
+    y0 = _initial_state(weld0, sim._pin)  # noqa: SLF001
+    y0[7:10] = weld0.rotation.T @ weld0.velocity_m_s
+    y0[10:13] = weld0.rotation.T @ weld0.omega_rad_s
+    return source, y0
+
+
+def integrate_free_flyer_radau(
+    sim: Any,
+    source: Any,
+    times: np.ndarray,
+    y0: np.ndarray,
+    tol: Any,
+) -> Any:
+    """Solve free-flyer club IVP using SciPy Radau integrator."""
+    return solve_ivp(
+        lambda t, y: sim.derivatives(t, y, source),
+        (float(times[0]), float(times[-1])),
+        y0,
+        method="Radau",
+        t_eval=times,
+        rtol=tol.rtol,
+        atol=tol.atol,
+        max_step=tol.max_step_s,
     )
 
 

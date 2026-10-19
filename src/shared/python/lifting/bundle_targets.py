@@ -160,6 +160,8 @@ class LiftTargets:
     frame: LiftFrame
     provenance: Mapping[str, Any] = field(default_factory=dict)
     tibial_torsion: Mapping[str, Any] = field(default_factory=dict)
+    bench_force_n: Mapping[str, Array] = field(default_factory=dict)
+    bench_point_m: Mapping[str, Array] = field(default_factory=dict)
 
     def landmarks(self, k: int) -> dict[str, Array]:
         """Landmark positions of state ``k`` (of the selection) by label."""
@@ -310,6 +312,44 @@ def _foot_loads(
     return forces, moments
 
 
+def _bench_loads(
+    bundle: InputBundle, indices: tuple[int, ...], frame: LiftFrame
+) -> tuple[dict[str, Array], dict[str, Array]]:
+    """Shared-law back-sphere forces and contact points in the OpenSim frame.
+
+    Extracts contact forces for back spheres pressing on a raised support
+    (bench press ``bench_top``) using the bundle reference engine's VectorPlant.
+    """
+    spec = json.loads(bundle.spec_bytes)
+    supports = spec.get("contact", {}).get("supports") or []
+    bench = [s for s in supports if s.get("name") == "bench_top"]
+    if not bench:
+        return {}, {}
+    from src.shared.python.motion_matching.same_input import VectorPlant
+
+    spheres = tuple(bench[0].get("spheres", ()))
+    plant = VectorPlant(bundle.reference_engine, bundle.spec_bytes)
+    raw_forces: dict[str, list[Array]] = {s: [] for s in spheres}
+    raw_points: dict[str, list[Array]] = {s: [] for s in spheres}
+    for k in indices:
+        q, v = bundle.reference_q[k], bundle.reference_v[k]
+        cs = plant.contact_samples(q, v)
+        for s in spheres:
+            sample = cs.get(s)
+            if sample is None:
+                raw_forces[s].append(np.zeros(3))
+                raw_points[s].append(np.zeros(3))
+            else:
+                f = np.asarray(sample.normal_force_n) + np.asarray(
+                    sample.friction_force_n
+                )
+                raw_forces[s].append(f)
+                raw_points[s].append(np.asarray(sample.contact_point_m, dtype=float))
+    forces = {s: frame.vector(np.array(raw_forces[s])) for s in spheres}
+    points = {s: frame.point(np.array(raw_points[s])) for s in spheres}
+    return forces, points
+
+
 def lift_targets(lift: str, path: Path, *, stride: int = 1) -> LiftTargets:
     """Landmarks and external loads of a barbell same-input bundle.
 
@@ -361,6 +401,7 @@ def lift_targets(lift: str, path: Path, *, stride: int = 1) -> LiftTargets:
     hands = _hand_loads(bundle, indices, frame)
     positions[:, IK_LANDMARKS.index("bar")] = hands.bar_m
     grf_force, grf_moment = _foot_loads(bundle, indices, frame)
+    bench_force, bench_point = _bench_loads(bundle, indices, frame)
     return LiftTargets(
         lift=lift,
         path=Path(path),
@@ -381,6 +422,8 @@ def lift_targets(lift: str, path: Path, *, stride: int = 1) -> LiftTargets:
         height_m=float(bundle.provenance["optimizer"]["height_m"]),
         frame=frame,
         tibial_torsion=dict(spec.get(TIBIAL_TORSION_KEY) or {}),
+        bench_force_n=bench_force,
+        bench_point_m=bench_point,
         provenance={
             "reference_engine": bundle.reference_engine,
             "dt_s": float(bundle.dt_s),

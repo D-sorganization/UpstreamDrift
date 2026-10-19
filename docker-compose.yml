@@ -112,8 +112,9 @@ services:
     networks:
       - upstream-drift
 
-  # Training stage for advanced ML workflows
+  # Training stage for advanced ML workflows (opt-in: --profile training)
   training:
+    profiles: ["training"]
     build:
       context: .
       dockerfile: Dockerfile

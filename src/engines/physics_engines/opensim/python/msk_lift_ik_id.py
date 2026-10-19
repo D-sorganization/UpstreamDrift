@@ -178,6 +178,12 @@ _GCV_DEGREE = 5
 _OPENSIM_SAGITTAL = SagittalFrame(forward=(1.0, 0.0, 0.0), up=(0.0, 1.0, 0.0))
 _FOOT_BODY = {"left": "calcn_l", "right": "calcn_r"}
 _HAND_BODY = {"L": "hand_l", "R": "hand_r"}
+_BENCH_BODY: Mapping[str, str] = {
+    "back_RPSH": "torso",
+    "back_LPSH": "torso",
+    "back_RPSI": "pelvis",
+    "back_LPSI": "pelvis",
+}
 _STATIC_XTOL_M = 1e-12
 _STATIC_BRACKET_M = 0.2
 
@@ -792,25 +798,12 @@ def _derivatives(splines: Any, n: int, t: float) -> tuple[Array, Array, Array]:
     return values[0], values[1], values[2]
 
 
-def _body_wrench(
-    model: Any,
-    state: Any,
-    body: str,
-    force: Array,
-    moment_about_point: Array,
-    point: Array,
-) -> tuple[int, Any]:
-    """Spatial force on ``body`` (ground axes, moment about the body origin)."""
-    osim = import_opensim()
-    frame = model.getBodySet().get(body)
-    origin = _vec3(frame.getPositionInGround(state))
-    moment = moment_about_point + np.cross(point - origin, force)
-    return int(frame.getMobilizedBodyIndex()), osim.SpatialVec(
-        osim.Vec3(*map(float, moment)), osim.Vec3(*map(float, force))
-    )
-
-
 def _external_body_forces(model: Any, state: Any, targets: LiftTargets, k: int) -> Any:
+    """Applied external body wrenches (feet, hands, and bench support if present).
+
+    Each wrench's force and moment about the mobilized body origin are
+    accumulated into spatial forces on the model bodies.
+    """
     osim = import_opensim()
     count = model.getBodySet().getSize() + 1  # plus ground
     forces = osim.VectorOfSpatialVec(count, osim.SpatialVec(osim.Vec3(0), osim.Vec3(0)))
@@ -830,9 +823,34 @@ def _external_body_forces(model: Any, state: Any, targets: LiftTargets, k: int) 
         wrenches.append(
             (body, targets.hand_force_n[side][k], targets.hand_torque_nm[side][k], grip)
         )
-    for body, force, moment, point in wrenches:
-        index, spatial = _body_wrench(model, state, body, force, moment, point)
-        forces.set(index, spatial)
+    for sphere, body in _BENCH_BODY.items():
+        if sphere in targets.bench_force_n:
+            wrenches.append(
+                (
+                    body,
+                    targets.bench_force_n[sphere][k],
+                    zero,
+                    targets.bench_point_m[sphere][k],
+                )
+            )
+    body_forces = np.zeros((count, 3), dtype=float)
+    body_moments = np.zeros((count, 3), dtype=float)
+    bodies = model.getBodySet()
+    for body, force, moment_about_point, point in wrenches:
+        frame = bodies.get(body)
+        index = int(frame.getMobilizedBodyIndex())
+        origin = _vec3(frame.getPositionInGround(state))
+        body_forces[index] += force
+        body_moments[index] += moment_about_point + np.cross(point - origin, force)
+    for idx in range(count):
+        if np.any(body_forces[idx]) or np.any(body_moments[idx]):
+            forces.set(
+                idx,
+                osim.SpatialVec(
+                    osim.Vec3(*map(float, body_moments[idx])),
+                    osim.Vec3(*map(float, body_forces[idx])),
+                ),
+            )
     return forces
 
 
@@ -917,17 +935,24 @@ def id_receipt(targets: LiftTargets, inverse: IDResult) -> dict[str, Any]:
     forces = [peaks[n] for n in RESIDUAL_COORDINATES[3:]]
     moments = [peaks[n] for n in RESIDUAL_COORDINATES[:3]]
     joints = [n for n in inverse.coordinates if n not in RESIDUAL_COORDINATES]
+    external_loads = {
+        "feet": "GCV-1 foot wrench of the bundle's shared-law contact "
+        "(kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
+        "hands": "GCV-7 per-hand bushing wrench of the bundle bar "
+        "(BushingSample.grip_analysis), negated onto hand_l/hand_r at the "
+        "model's grip point; the barbell body is massless in ID",
+        "model_forces": "removed (muscles, actuators, contact); gravity kept",
+    }
+    if targets.bench_force_n:
+        external_loads["bench"] = (
+            "shared-law back-sphere contact wrench of the bundle (VectorPlant), "
+            "applied to torso (back_RPSH, back_LPSH) and pelvis (back_RPSI, back_LPSI) "
+            "at the contact points"
+        )
     return {
         "solver": "OpenSim InverseDynamicsSolver; quintic GCV spline derivatives, "
         "no low-pass filter (InverseDynamicsTool default)",
-        "external_loads": {
-            "feet": "GCV-1 foot wrench of the bundle's shared-law contact "
-            "(kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
-            "hands": "GCV-7 per-hand bushing wrench of the bundle bar "
-            "(BushingSample.grip_analysis), negated onto hand_l/hand_r at the "
-            "model's grip point; the barbell body is massless in ID",
-            "model_forces": "removed (muscles, actuators, contact); gravity kept",
-        },
+        "external_loads": external_loads,
         "residuals": residuals,
         "residual_gate": {
             "reference": "Hicks et al. 2015, J Biomech Eng 137:020905",
