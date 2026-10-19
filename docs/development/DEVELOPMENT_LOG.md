@@ -2652,6 +2652,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13302 · Drive Finger Pose From Contact Topology With Per-Hand Roll, Absorbing #13166
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13302
+- **Branch:** merged via #13338
+- **PR:** #13338
+- **Paths:** see #13338
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`366e8614`; collated from changes/13302-drive-finger-pose-from-contact-topology.md)
+- **Summary:** Drive finger pose from contact topology with per-hand roll, absorbing #13166
+- **Next step:** Shipped in PR #13338.
+
 ### DL-#13391 · Drop the Removed Simulator.Set_Publish_Every_Time_Step Call From Drake Simulate and Fit_Swing_Autodiff; Drake Already Defaults to No Per-Step Publish
 
 - **State:** shipped
