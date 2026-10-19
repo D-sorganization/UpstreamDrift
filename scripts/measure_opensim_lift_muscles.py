@@ -59,78 +59,79 @@ def _git(*args: str) -> str:
     return out.stdout.strip()
 
 
-def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
-    """Generate phase-resolved PNG plots under 300 KB each."""
-    out_dir.mkdir(parents=True, exist_ok=True)
-    generated = []
+# Color palette for phases
+PHASE_COLORS: dict[str, str] = {
+    "standing": "#E2E8F0",
+    "descent": "#CBD5E1",
+    "bottom": "#FED7AA",
+    "ascent": "#BAE6FD",
+    "lockout": "#E2E8F0",
+}
 
+
+def _shade_phases(
+    ax: plt.Axes,
+    solution: dict[str, Any],
+    t_start: float,
+    t_end: float,
+) -> None:
+    phase_dict = solution.get("phases") or {}
+    if len(phase_dict) == 1 and "bottom" in list(phase_dict.keys())[0]:
+        seg_label = list(phase_dict.keys())[0]
+        ax.axvspan(t_start, t_end, color="#FED7AA", alpha=0.35)
+        y_top = ax.get_ylim()[1]
+        ax.text(
+            0.5 * (t_start + t_end),
+            y_top * 0.93,
+            seg_label,
+            ha="center",
+            va="top",
+            fontsize=8.5,
+            fontweight="semibold",
+            color="#9A3412",
+            bbox={
+                "boxstyle": "round,pad=0.2",
+                "facecolor": "#FFEDD5",
+                "edgecolor": "#FDBA74",
+                "alpha": 0.9,
+            },
+        )
+    else:
+        phases = lift_phases("squat")
+        for p_idx, p in enumerate(phases):
+            t_p0 = t_start + p.t_frac * (t_end - t_start)
+            t_p1 = (
+                t_start + phases[p_idx + 1].t_frac * (t_end - t_start)
+                if p_idx + 1 < len(phases)
+                else t_end
+            )
+            col = PHASE_COLORS.get(p.name, "#F1F5F9")
+            ax.axvspan(
+                t_p0,
+                t_p1,
+                color=col,
+                alpha=0.5,
+                label=f"Phase: {p.name}" if p_idx == 0 else None,
+            )
+            ax.text(
+                0.5 * (t_p0 + t_p1),
+                ax.get_ylim()[1] * 0.92,
+                p.name,
+                ha="center",
+                va="top",
+                fontsize=8,
+                fontweight="semibold",
+                alpha=0.7,
+            )
+
+
+def _plot_activations(solution: dict[str, Any], out_path: Path) -> Path:
     times = np.asarray(solution["times"])
     t_start, t_end = float(times[0]), float(times[-1])
-    phases = lift_phases("squat")
     activations = np.asarray(solution["activations"])
-    forces = np.asarray(solution["forces"])
     muscle_names = solution["muscle_names"]
     name_to_idx = {name: i for i, name in enumerate(muscle_names)}
 
-    # Color palette for phases
-    phase_colors = {
-        "standing": "#E2E8F0",
-        "descent": "#CBD5E1",
-        "bottom": "#FED7AA",
-        "ascent": "#BAE6FD",
-        "lockout": "#E2E8F0",
-    }
-
-    def shade_phases(ax: plt.Axes) -> None:
-        phase_dict = solution.get("phases") or {}
-        if len(phase_dict) == 1 and "bottom" in list(phase_dict.keys())[0]:
-            seg_label = list(phase_dict.keys())[0]
-            ax.axvspan(t_start, t_end, color="#FED7AA", alpha=0.35)
-            y_top = ax.get_ylim()[1]
-            ax.text(
-                0.5 * (t_start + t_end),
-                y_top * 0.93,
-                seg_label,
-                ha="center",
-                va="top",
-                fontsize=8.5,
-                fontweight="semibold",
-                color="#9A3412",
-                bbox={
-                    "boxstyle": "round,pad=0.2",
-                    "facecolor": "#FFEDD5",
-                    "edgecolor": "#FDBA74",
-                    "alpha": 0.9,
-                },
-            )
-        else:
-            for p_idx, p in enumerate(phases):
-                t_p0 = t_start + p.t_frac * (t_end - t_start)
-                t_p1 = (
-                    t_start + phases[p_idx + 1].t_frac * (t_end - t_start)
-                    if p_idx + 1 < len(phases)
-                    else t_end
-                )
-                col = phase_colors.get(p.name, "#F1F5F9")
-                ax.axvspan(
-                    t_p0,
-                    t_p1,
-                    color=col,
-                    alpha=0.5,
-                    label=f"Phase: {p.name}" if p_idx == 0 else None,
-                )
-                ax.text(
-                    0.5 * (t_p0 + t_p1),
-                    ax.get_ylim()[1] * 0.92,
-                    p.name,
-                    ha="center",
-                    va="top",
-                    fontsize=8,
-                    fontweight="semibold",
-                    alpha=0.7,
-                )
-
-    # 1. Major Groups Activations by Phase
     fig, ax = plt.subplots(figsize=(8, 4.5), dpi=130)
     for group_name, col in (
         ("quadriceps", "#2563EB"),
@@ -157,17 +158,23 @@ def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
         fontweight="bold",
     )
     ax.set_ylim(-0.02, 1.05)
-    shade_phases(ax)
+    _shade_phases(ax, solution, t_start, t_end)
     ax.legend(loc="lower right", framealpha=0.9, fontsize=9)
     ax.grid(True, ls=":", alpha=0.6)
     plt.tight_layout()
 
-    p1 = out_dir / "squat_muscle_activations_by_phase.png"
-    plt.savefig(p1)
+    plt.savefig(out_path)
     plt.close(fig)
-    generated.append(p1.name)
+    return out_path
 
-    # 2. Major Groups Forces by Phase
+
+def _plot_forces(solution: dict[str, Any], out_path: Path) -> Path:
+    times = np.asarray(solution["times"])
+    t_start, t_end = float(times[0]), float(times[-1])
+    forces = np.asarray(solution["forces"])
+    muscle_names = solution["muscle_names"]
+    name_to_idx = {name: i for i, name in enumerate(muscle_names)}
+
     fig, ax = plt.subplots(figsize=(8, 4.5), dpi=130)
     for group_name, col in (
         ("quadriceps", "#2563EB"),
@@ -193,18 +200,19 @@ def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
         fontsize=11,
         fontweight="bold",
     )
-    shade_phases(ax)
+    _shade_phases(ax, solution, t_start, t_end)
     ax.legend(loc="upper left", framealpha=0.9, fontsize=9)
     ax.grid(True, ls=":", alpha=0.6)
     plt.tight_layout()
 
-    p2 = out_dir / "squat_muscle_forces_by_phase.png"
-    plt.savefig(p2)
+    plt.savefig(out_path)
     plt.close(fig)
-    generated.append(p2.name)
+    return out_path
 
-    # 3. Joint Moments vs Reserves
-    fig, ax = plt.subplots(figsize=(8, 4.5), dpi=130)
+
+def _plot_moments_and_reserves(solution: dict[str, Any], out_path: Path) -> Path:
+    times = np.asarray(solution["times"])
+    t_start, t_end = float(times[0]), float(times[-1])
     tau_targets = np.asarray(solution["tau_targets"])
     tau_muscles = np.asarray(solution["tau_muscles"])
     reserves = np.asarray(solution["reserves"])
@@ -213,6 +221,7 @@ def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
     total_muscle = np.sum(np.abs(tau_muscles), axis=1)
     total_reserve = np.sum(np.abs(reserves), axis=1)
 
+    fig, ax = plt.subplots(figsize=(8, 4.5), dpi=130)
     ax.plot(
         times,
         total_demand,
@@ -244,15 +253,28 @@ def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
         fontsize=11,
         fontweight="bold",
     )
-    shade_phases(ax)
+    _shade_phases(ax, solution, t_start, t_end)
     ax.legend(loc="upper right", framealpha=0.9, fontsize=9)
     ax.grid(True, ls=":", alpha=0.6)
     plt.tight_layout()
 
-    p3 = out_dir / "squat_joint_moments_and_reserves.png"
-    plt.savefig(p3)
+    plt.savefig(out_path)
     plt.close(fig)
-    generated.append(p3.name)
+    return out_path
+
+
+def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
+    """Generate phase-resolved PNG plots under 300 KB each."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    generated = [
+        _plot_activations(
+            solution, out_dir / "squat_muscle_activations_by_phase.png"
+        ).name,
+        _plot_forces(solution, out_dir / "squat_muscle_forces_by_phase.png").name,
+        _plot_moments_and_reserves(
+            solution, out_dir / "squat_joint_moments_and_reserves.png"
+        ).name,
+    ]
 
     # Verify size constraint (< 300 KB)
     for fname in generated:

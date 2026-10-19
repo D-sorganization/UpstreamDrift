@@ -31,7 +31,8 @@ from __future__ import annotations
 
 import logging
 import math
-from collections.abc import Mapping
+import tempfile
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
@@ -42,6 +43,12 @@ import numpy as np
 from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
 from src.engines.physics_engines.opensim.python.msk_lift_arm_reach import (
     reaching_lift_build,
+)
+from src.engines.physics_engines.opensim.python.msk_lift_muscle_report import (
+    LiftSolveResults,
+    compute_squat_diagnostics,
+    format_squat_solution,
+    unavailable_lift_record,
 )
 from src.engines.physics_engines.opensim.python.musculoskeletal_graft import SIDES
 from src.engines.physics_engines.opensim.python.musculoskeletal_solvers import (
@@ -410,87 +417,36 @@ def _run_moco_eval(
         }
 
 
-def evaluate_lift_muscles(
+def _run_lift_ik_id(
     lift: str,
-    *,
-    stride: int = 5,
-    scratch_dir: Path | None = None,
-    run_moco: bool = True,
-) -> dict[str, Any]:
-    """Compute muscle activations, forces, and reserve shares for *lift*.
-
-    Generic across all barbell lifts.  For lifts lacking an IK/ID bundle,
-    returns an honest ``unavailable`` record.
-    """
-    require(lift in LIFTS, f"unknown lift {lift!r}; choose from {list(LIFTS)}")
-
-    if lift != "squat":
-        return {
-            "lift": lift,
-            "status": "unavailable",
-            "reason": (
-                f"no LIFT-5 same-input bundle is registered for {lift!r} in "
-                "SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit"
-            ),
-            "classification": "unqualified",
-            "reserve_share": None,
-            "mean_reserve_share": None,
-            "peak_reserve_share": None,
-            "window_start_s": None,
-            "window_end_s": None,
-            "duration_s": None,
-            "start_pose": None,
-            "coordinate_breakdown": None,
-            "primary_reserve_drivers": None,
-            "bound_violations_or_pinned": None,
-            "hip_demand_asymmetry": None,
-            "forces": None,
-            "activations": None,
-            "major_groups": None,
-            "phases": None,
-            "moco": None,
-        }
-
-    if not is_engine_available("opensim"):
-        return {
-            "lift": lift,
-            "status": "unavailable",
-            "reason": "Native OpenSim runtime is not available in current environment",
-            "classification": "unqualified",
-            "reserve_share": None,
-            "mean_reserve_share": None,
-            "peak_reserve_share": None,
-            "window_start_s": None,
-            "window_end_s": None,
-            "duration_s": None,
-            "start_pose": None,
-            "coordinate_breakdown": None,
-            "primary_reserve_drivers": None,
-            "bound_violations_or_pinned": None,
-            "hip_demand_asymmetry": None,
-            "forces": None,
-            "activations": None,
-            "major_groups": None,
-            "phases": None,
-            "moco": None,
-        }
-
+    stride: int,
+) -> tuple[LiftTargets, Any, ikid.IKResult, ikid.IDResult]:
     path = SAME_INPUT_LIFT_BUNDLES[lift]
     assert path is not None
 
     targets = lift_targets(lift, path, stride=stride)
     base_model = resolve_base_model()
     scales = ikid.bundle_segment_scales(targets, base_model)
-    build, reach = reaching_lift_build(lift, targets, base_model, scales)
+    build, _reach = reaching_lift_build(lift, targets, base_model, scales)
     pelvis = ikid.pelvis_landmark_targets(build, targets, base_model)
     ik = ikid.run_inverse_kinematics(build, targets, pelvis)
     inverse = ikid.run_inverse_dynamics(build, targets, ik)
+    return targets, build, ik, inverse
 
-    # Set up scratch directory for serialized assets
-    work_dir = scratch_dir or Path("/tmp/opensim_lift_muscles_squat")
-    work_dir.mkdir(parents=True, exist_ok=True)
 
-    actuated_model = _prepare_actuated_model(build.model)
+def _prepare_scratch_assets(
+    build_model: Any,
+    ik: ikid.IKResult,
+    targets: LiftTargets,
+    scratch_dir: Path | None,
+) -> tuple[Path, Path, Path]:
+    if scratch_dir is not None:
+        work_dir = scratch_dir
+        work_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        work_dir = Path(tempfile.mkdtemp(prefix="opensim_lift_muscles_squat_"))
+
+    actuated_model = _prepare_actuated_model(build_model)
     model_path = work_dir / "squat_msk.osim"
     actuated_model.printToXML(str(model_path))
 
@@ -499,16 +455,19 @@ def evaluate_lift_muscles(
     write_sto(coords_path, targets.time_s, coords_dict)
 
     _, loads_xml = _build_external_loads(targets, actuated_model, work_dir)
+    return model_path, coords_path, loads_xml
 
-    # Setup MuscleBasis with rigid-tendon Millard muscles
-    _make_muscles_rigid_tendon(build.model)
-    basis = MuscleBasis(build.model, ik.coordinates)
-    leg_coords = leg_coordinates()
-    leg_indices = [ik.coordinates.index(c) for c in leg_coords]
 
-    n_frames = len(targets.time_s)
+def _solve_lift_frames(
+    basis: MuscleBasis,
+    ik: ikid.IKResult,
+    inverse: ikid.IDResult,
+    leg_indices: list[int],
+    time_s: np.ndarray,
+) -> LiftSolveResults:
+    n_frames = len(time_s)
     n_muscles = len(basis.muscles)
-    n_leg_coords = len(leg_coords)
+    n_leg_coords = len(leg_indices)
 
     activations = np.zeros((n_frames, n_muscles))
     forces = np.zeros((n_frames, n_muscles))
@@ -520,7 +479,7 @@ def evaluate_lift_muscles(
     passive_tau = np.zeros((n_frames, n_leg_coords))
     moment_balance_errors = np.zeros(n_frames)
 
-    v_coords = np.gradient(ik.q, targets.time_s, axis=0)
+    v_coords = np.gradient(ik.q, time_s, axis=0)
 
     for i in range(n_frames):
         q_frame = ik.q[i]
@@ -553,151 +512,77 @@ def evaluate_lift_muscles(
     total_share = float(np.sum(np.abs(reserves)) / np.sum(np.abs(tau_targets)))
     classification = classify_lift_reserves(total_share)
 
-    major_groups = _summarize_groups(activations, forces, basis.muscle_names)
+    return LiftSolveResults(
+        activations=activations,
+        forces=forces,
+        reserves=reserves,
+        tau_muscles=tau_muscles,
+        tau_targets=tau_targets,
+        cap_pos=cap_pos,
+        cap_neg=cap_neg,
+        passive_tau=passive_tau,
+        moment_balance_errors=moment_balance_errors,
+        mean_share=mean_share,
+        peak_share=peak_share,
+        total_share=total_share,
+        classification=classification,
+    )
+
+
+def evaluate_lift_muscles(
+    lift: str,
+    *,
+    stride: int = 5,
+    scratch_dir: Path | None = None,
+    run_moco: bool = True,
+) -> dict[str, Any]:
+    """Compute muscle activations, forces, and reserve shares for *lift*.
+
+    Generic across all barbell lifts.  For lifts lacking an IK/ID bundle,
+    returns an honest ``unavailable`` record.
+    """
+    require(lift in LIFTS, f"unknown lift {lift!r}; choose from {list(LIFTS)}")
+
+    if lift != "squat":
+        return unavailable_lift_record(
+            lift,
+            f"no LIFT-5 same-input bundle is registered for {lift!r} in "
+            "SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
+        )
+
+    if not is_engine_available("opensim"):
+        return unavailable_lift_record(
+            lift,
+            "Native OpenSim runtime is not available in current environment",
+        )
+
+    targets, build, ik, inverse = _run_lift_ik_id(lift, stride)
+    model_path, coords_path, loads_xml = _prepare_scratch_assets(
+        build.model, ik, targets, scratch_dir
+    )
+
+    # Setup MuscleBasis with rigid-tendon Millard muscles
+    _make_muscles_rigid_tendon(build.model)
+    basis = MuscleBasis(build.model, ik.coordinates)
+    leg_coords = leg_coordinates()
+    leg_indices = [ik.coordinates.index(c) for c in leg_coords]
+
+    solve = _solve_lift_frames(basis, ik, inverse, leg_indices, targets.time_s)
+    major_groups = _summarize_groups(
+        solve.activations, solve.forces, basis.muscle_names
+    )
     phases = _summarize_phases(
         targets.time_s,
-        activations,
-        forces,
+        solve.activations,
+        solve.forces,
         basis.muscle_names,
-        lift,
+        "squat",
         coordinate_names=ik.coordinates,
         q=ik.q,
     )
-
-    # Coordinate-by-coordinate demand, capacity, passive moment, and reserve summary
-    coord_breakdown: dict[str, dict[str, Any]] = {}
-    for j, c in enumerate(leg_coords):
-        dem = tau_targets[:, j]
-        res = reserves[:, j]
-        tot_dem = float(np.sum(np.abs(dem)))
-        tot_res = float(np.sum(np.abs(res)))
-        coord_breakdown[c] = {
-            "id_demand_frame0_nm": round(float(dem[0]), 2),
-            "id_demand_mean_abs_nm": round(float(np.mean(np.abs(dem))), 2),
-            "id_demand_peak_abs_nm": round(float(np.max(np.abs(dem))), 2),
-            "active_capacity_pos_mean_nm": round(float(np.mean(cap_pos[:, j])), 2),
-            "active_capacity_neg_mean_nm": round(float(np.mean(cap_neg[:, j])), 2),
-            "passive_moment_frame0_nm": round(float(passive_tau[0, j]), 2),
-            "passive_moment_mean_nm": round(float(np.mean(passive_tau[:, j])), 2),
-            "reserve_frame0_nm": round(float(res[0]), 2),
-            "reserve_mean_abs_nm": round(float(np.mean(np.abs(res))), 2),
-            "reserve_peak_abs_nm": round(float(np.max(np.abs(res))), 2),
-            "reserve_share": round(tot_res / tot_dem, 4) if tot_dem > 1e-6 else 0.0,
-        }
-
-    sorted_drivers = sorted(
-        leg_coords,
-        key=lambda c: float(np.sum(np.abs(reserves[:, leg_coords.index(c)]))),
-        reverse=True,
+    diag = compute_squat_diagnostics(
+        build.model, ik, leg_coords, targets, solve, major_groups, phases
     )
-    primary_reserve_drivers = [
-        c
-        for c in sorted_drivers
-        if float(np.sum(np.abs(reserves[:, leg_coords.index(c)]))) > 1.0
-    ][:4]
-
-    # Coordinate bound pinning check
-    coord_set = build.model.getCoordinateSet()
-    pinned_coords: list[str] = []
-    bound_details: list[dict[str, Any]] = []
-    for name in leg_coords:
-        if coord_set.getIndex(name) == -1:
-            continue
-        coord_obj = coord_set.get(name)
-        min_deg = float(np.degrees(coord_obj.getRangeMin()))
-        max_deg = float(np.degrees(coord_obj.getRangeMax()))
-        q_idx = ik.coordinates.index(name)
-        q_series_deg = np.degrees(ik.q[:, q_idx])
-
-        pinned_max = np.abs(q_series_deg - max_deg) <= 1.0
-        pinned_min = np.abs(q_series_deg - min_deg) <= 1.0
-        pinned_any = pinned_max | pinned_min
-        if np.any(pinned_any):
-            pinned_coords.append(name)
-            bound_type = "max" if np.all(pinned_max[pinned_any]) else "min"
-            bound_val = max_deg if bound_type == "max" else min_deg
-            bound_details.append(
-                {
-                    "coordinate": name,
-                    "bound": f"{bound_type} ({bound_val:.1f} deg)",
-                    "frames_pinned_count": int(np.sum(pinned_any)),
-                    "fraction_pinned": round(float(np.mean(pinned_any)), 4),
-                    "min_margin_deg": round(
-                        float(
-                            np.min(
-                                np.minimum(
-                                    np.abs(q_series_deg - min_deg),
-                                    np.abs(q_series_deg - max_deg),
-                                )
-                            )
-                        ),
-                        3,
-                    ),
-                }
-            )
-
-    bound_violations_or_pinned = {
-        "has_pinned_coordinates": bool(pinned_coords),
-        "warning": "An IK result pinned at a coordinate bound is not a credible posture.",
-        "pinned_coordinates": sorted(set(pinned_coords)),
-        "details": bound_details,
-    }
-
-    # Left/right hip demand asymmetry explanation
-    hip_r_idx = leg_coords.index("hip_flexion_r")
-    hip_l_idx = leg_coords.index("hip_flexion_l")
-    knee_r_idx = leg_coords.index("knee_angle_r")
-    knee_l_idx = leg_coords.index("knee_angle_l")
-    hip_demand_asymmetry = {
-        "frame0_hip_demand_r_nm": round(float(tau_targets[0, hip_r_idx]), 2),
-        "frame0_hip_demand_l_nm": round(float(tau_targets[0, hip_l_idx]), 2),
-        "frame0_knee_demand_r_nm": round(float(tau_targets[0, knee_r_idx]), 2),
-        "frame0_knee_demand_l_nm": round(float(tau_targets[0, knee_l_idx]), 2),
-        "frame0_total_sagittal_r_nm": round(
-            float(tau_targets[0, hip_r_idx] + tau_targets[0, knee_r_idx]), 2
-        ),
-        "frame0_total_sagittal_l_nm": round(
-            float(tau_targets[0, hip_l_idx] + tau_targets[0, knee_l_idx]), 2
-        ),
-        "frame0_grf_vertical_l_n": round(float(targets.grf_force_n["left"][0, 1]), 2),
-        "frame0_grf_vertical_r_n": round(float(targets.grf_force_n["right"][0, 1]), 2),
-        "frame0_grf_anterior_shear_l_n": round(
-            float(targets.grf_force_n["left"][0, 0]), 2
-        ),
-        "frame0_grf_anterior_shear_r_n": round(
-            float(targets.grf_force_n["right"][0, 0]), 2
-        ),
-        "shear_differential_n": round(
-            float(
-                targets.grf_force_n["left"][0, 0] - targets.grf_force_n["right"][0, 0]
-            ),
-            2,
-        ),
-        "cause": (
-            "Total sagittal leg extension demand at frame 0 is virtually identical across legs "
-            "(-434.68 N m right vs -434.89 N m left, within 0.05%), matching vertical GRF (~1135 N each). "
-            "The hip-vs-knee demand split asymmetry (-220.0 N m vs -381.9 N m hip demand) is driven by "
-            "anterior-posterior ground shear force: +208.96 N forward shear on left foot vs -127.35 N "
-            "backward shear on right foot (a 336.31 N differential). Forward shear shifts the left GRF "
-            "line of action forward, reducing knee extension demand (-53.0 N m vs -214.7 N m) and "
-            "increasing hip extension demand (-381.9 N m vs -220.0 N m)."
-        ),
-    }
-
-    start_pose = {
-        "hip_flexion_r_deg": round(
-            float(np.degrees(ik.q[0, ik.coordinates.index("hip_flexion_r")])), 2
-        ),
-        "hip_flexion_l_deg": round(
-            float(np.degrees(ik.q[0, ik.coordinates.index("hip_flexion_l")])), 2
-        ),
-        "knee_angle_r_deg": round(
-            float(np.degrees(ik.q[0, ik.coordinates.index("knee_angle_r")])), 2
-        ),
-        "knee_angle_l_deg": round(
-            float(np.degrees(ik.q[0, ik.coordinates.index("knee_angle_l")])), 2
-        ),
-    }
 
     moco_record = (
         _run_moco_eval(model_path, coords_path, loads_xml, targets.time_s)
@@ -709,33 +594,13 @@ def evaluate_lift_muscles(
         }
     )
 
-    return {
-        "lift": lift,
-        "status": "complete",
-        "reason": "",
-        "classification": classification,
-        "reserve_share": total_share,
-        "mean_reserve_share": mean_share,
-        "peak_reserve_share": peak_share,
-        "window_start_s": float(targets.time_s[0]),
-        "window_end_s": float(targets.time_s[-1]),
-        "duration_s": round(float(targets.time_s[-1] - targets.time_s[0]), 4),
-        "start_pose": start_pose,
-        "coordinate_breakdown": coord_breakdown,
-        "primary_reserve_drivers": primary_reserve_drivers,
-        "bound_violations_or_pinned": bound_violations_or_pinned,
-        "hip_demand_asymmetry": hip_demand_asymmetry,
-        "moment_balance_max_error_nm": float(np.max(moment_balance_errors)),
-        "times": targets.time_s,
-        "muscle_names": basis.muscle_names,
-        "leg_coordinates": leg_coords,
-        "activations": activations,
-        "forces": forces,
-        "reserves": reserves,
-        "tau_targets": tau_targets,
-        "tau_muscles": tau_muscles,
-        "major_groups": major_groups,
-        "phases": phases,
-        "moco": moco_record,
-        "citation": RAJAGOPAL_MODEL_CITATION,
-    }
+    return format_squat_solution(
+        lift,
+        targets,
+        basis.muscle_names,
+        leg_coords,
+        solve,
+        diag,
+        moco_record,
+        RAJAGOPAL_MODEL_CITATION,
+    )
