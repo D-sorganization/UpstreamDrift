@@ -466,7 +466,8 @@ def test_virtual_work_synthetic_two_body_fixture(
         power_from_pairs = sum(
             float(
                 pw.force_b_n
-                @ (v_club + np.cross(omega_club, pw.contact_point_m - p_club_origin))
+                @ (v_club + np.cross(omega_club, pw.point_b_m - p_club_origin))
+                + pw.moment_b_nm @ omega_club
             )
             for pw in report.pair_wrenches.values()
         )

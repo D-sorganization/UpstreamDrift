@@ -47,8 +47,9 @@ from src.shared.python.grip_contact.prescribed_motion import RigidBodyState
 from src.shared.python.grip_contact.topology_contact import (
     TopologyContactModel,
     TopologySideWrench,
+    aggregate_side_wrench,
     map_site_to_hand_frame,
-    topology_side_wrench,
+    topology_pair_wrench,
 )
 from src.shared.python.motion_matching.full_body_schema import (
     SchemaFeatureUnavailableError,
@@ -631,93 +632,29 @@ def _evaluate_physical_side(
     binding: HandClubBinding,
     body_states: Mapping[str, RigidBodyState],
     club_frame: BushingState,
-    role: str,
     side_char: str,
 ) -> tuple[TopologySideWrench, dict[str, PairWrench]]:
-    """Evaluate physical hand-grip pairs for one hand via ``topology_side_wrench``."""
+    """Evaluate one hand's bound physical pairs, each at its site body's frame.
+
+    Each site's implied hand grip frame comes from its own body (rigid proxies
+    or phalanges), so per-pair evaluation via ``topology_pair_wrench`` covers
+    both rigid and articulated hands with one code path.
+    """
     topology = topology_model.topology
     site_map = binding.site_binding_map()
-    hand_body = binding.hand_body_for_role(role)
-    default_hand_state = body_states[hand_body]
-    default_hand_frame = BushingState(
-        default_hand_state.rotation,
-        default_hand_state.position_m,
-        default_hand_state.velocity_m_s,
-        default_hand_state.omega_rad_s,
-    )
-
-    pairs = topology_model.physical_grip_pairs(side_char)
-    bound_frames: dict[str, BushingState] = {}
-    for pair in pairs:
-        if pair.site_a in site_map:
-            sb = site_map[pair.site_a]
-            site = topology.site(pair.site_a)
-            b_state = body_states[sb.body_id]
-            bound_frames[pair.name] = _implied_hand_frame_for_site(
-                topology, site, side_char, sb, b_state
-            )
-
-    if not bound_frames:
-        empty_sw = topology_side_wrench(
-            topology_model, side_char, default_hand_frame, club_frame
-        )
-        return empty_sw, {}
-
-    first_frame = next(iter(bound_frames.values()))
-    uniform = all(
-        np.allclose(f.rotation, first_frame.rotation, atol=1e-12)
-        and np.allclose(f.position_m, first_frame.position_m, atol=1e-12)
-        and np.allclose(f.velocity_m_s, first_frame.velocity_m_s, atol=1e-12)
-        and np.allclose(f.omega_rad_s, first_frame.omega_rad_s, atol=1e-12)
-        for f in bound_frames.values()
-    )
-    if uniform:
-        sw = topology_side_wrench(
-            topology_model,
-            side_char,
-            first_frame,
-            club_frame,
-            mode=binding.attachment_mode,
-        )
-        active = {
-            name: pw for name, pw in sw.pair_wrenches.items() if name in bound_frames
-        }
-        return sw, active
-
-    active_wrenches: dict[str, PairWrench] = {}
-    force_sum = np.zeros(3)
-    moment_sum = np.zeros(3)
-    norm_list: list[float] = []
-    tang_list: list[float] = []
-    for pair in pairs:
-        if pair.name not in bound_frames:
+    mode = binding.attachment_mode
+    active: dict[str, PairWrench] = {}
+    for pair in topology_model.physical_grip_pairs(side_char):
+        if pair.site_a not in site_map or mode not in pair.physical_modes:
             continue
-        sw_i = topology_side_wrench(
-            topology_model,
-            side_char,
-            bound_frames[pair.name],
-            club_frame,
-            mode=binding.attachment_mode,
+        sb = site_map[pair.site_a]
+        hand_frame = _implied_hand_frame_for_site(
+            topology, topology.site(pair.site_a), side_char, sb, body_states[sb.body_id]
         )
-        if pair.name in sw_i.pair_wrenches:
-            pw = sw_i.pair_wrenches[pair.name]
-            active_wrenches[pair.name] = pw
-            force_sum = force_sum + pw.force_b_n
-            moment_sum = moment_sum + pw.moment_b_nm
-            norm_list.append(pw.normal_force_mag_n)
-            tang_list.append(pw.tangential_force_mag_n)
-
-    norm_arr = np.asarray(norm_list, dtype=float)
-    tang_arr = np.asarray(tang_list, dtype=float)
-    combined_sw = TopologySideWrench(
-        force_n=force_sum,
-        moment_nm=moment_sum,
-        pair_wrenches=active_wrenches,
-        normal_force_n=norm_arr,
-        tangential_force_n=tang_arr,
-        total_normal_force_n=float(np.sum(norm_arr)) if len(norm_arr) > 0 else 0.0,
-    )
-    return combined_sw, active_wrenches
+        active[pair.name] = topology_pair_wrench(
+            topology_model, pair, hand_frame, club_frame, mode=mode
+        )
+    return aggregate_side_wrench(active), active
 
 
 def _assemble_body_wrenches(
@@ -922,13 +859,12 @@ def evaluate_contacts(
 
     side_wrenches: dict[str, TopologySideWrench] = {}
     physical_pair_wrenches: dict[str, PairWrench] = {}
-    for role, side_char in (("lead", "L"), ("trail", "R")):
+    for side_char in ("L", "R"):
         sw, active = _evaluate_physical_side(
             topology_model,
             binding,
             body_states,
             club_frames[side_char],
-            role,
             side_char,
         )
         side_wrenches[side_char] = sw

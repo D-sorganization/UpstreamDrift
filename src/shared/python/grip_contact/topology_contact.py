@@ -56,6 +56,7 @@ __all__ = [
     "PairTraceRecorder",
     "TopologyContactModel",
     "TopologySideWrench",
+    "aggregate_side_wrench",
     "build_topology_model",
     "hand_x_origin",
     "map_site_to_hand_frame",
@@ -433,33 +434,43 @@ def topology_side_wrench(
     pairs_with_prims = model.physical_pair_primitives(side)
     grip_cap = model.grip_capsule(side)
 
-    force = np.zeros(3)
-    moment = np.zeros(3)
     pair_wrenches: dict[str, PairWrench] = {}
-    normal_forces: list[float] = []
-    tangential_forces: list[float] = []
-
     for pair, prim_a in pairs_with_prims:
         if mode not in pair.physical_modes:
             continue
-        pw = _evaluate_site_on_grip(model, prim_a, grip_cap, hand_frame, club_frame)
-        pair_wrenches[pair.name] = pw
+        pair_wrenches[pair.name] = _evaluate_site_on_grip(
+            model, prim_a, grip_cap, hand_frame, club_frame
+        )
+    return aggregate_side_wrench(pair_wrenches)
+
+
+def aggregate_side_wrench(
+    pair_wrenches: Mapping[str, PairWrench],
+) -> TopologySideWrench:
+    """Sum per-pair wrenches into one :class:`TopologySideWrench`.
+
+    Postconditions:
+        ``force_n``/``moment_nm`` are the sums of the pairs' club-side
+        (``force_b_n``/``moment_b_nm``) values in insertion order; an empty
+        mapping is a true zero (no pairs, no force), never NaN.
+    """
+    force = np.zeros(3)
+    moment = np.zeros(3)
+    normal_forces: list[float] = []
+    tangential_forces: list[float] = []
+    for pw in pair_wrenches.values():
         force += pw.force_b_n
         moment += pw.moment_b_nm
         normal_forces.append(pw.normal_force_mag_n)
         tangential_forces.append(pw.tangential_force_mag_n)
-
     norm_arr = np.array(normal_forces, dtype=float)
-    tang_arr = np.array(tangential_forces, dtype=float)
-    total_norm = float(np.sum(norm_arr)) if len(norm_arr) > 0 else 0.0
-
     return TopologySideWrench(
         force_n=force,
         moment_nm=moment,
-        pair_wrenches=pair_wrenches,
+        pair_wrenches=dict(pair_wrenches),
         normal_force_n=norm_arr,
-        tangential_force_n=tang_arr,
-        total_normal_force_n=total_norm,
+        tangential_force_n=np.array(tangential_forces, dtype=float),
+        total_normal_force_n=float(np.sum(norm_arr)),
     )
 
 
