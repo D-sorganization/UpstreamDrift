@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13378 | Bump vendor/ud-tools to Tools 96a1684 (Coriolis Christoffel term, Tools #5664; standard gravity, Tools #5668) |
 | 2026-10-19 | #13344 | feat(lifting): high-bar rack reach sweep and wrist mode resolution; fix(lifting): resolve unstable open-loop wrist mode on high-bar rack |
 | 2026-10-19 | #13318 | Unify grip frames across model_appearance and grip_contact, fix Drake contact normal recording |
 | 2026-10-19 | #13337 | Add cross-model grip capability inventory manifest, DbC loader, and verification suite |
