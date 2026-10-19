@@ -2665,6 +2665,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13045 · Kinetics Parity for All Registered Lifts
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13045
+- **Branch:** merged via #13443
+- **PR:** #13443
+- **Paths:** see #13443
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`dcd7e47e`; collated from changes/13045-kinetics-parity-for-all-registered-lifts.md)
+- **Summary:** kinetics parity for all registered lifts
+- **Next step:** Shipped in PR #13443.
+
 ### DL-#13423 · Declare Websockets for Realtime Python Backend and Document Qualisys C3D/TRC Export Path in formats.md
 
 - **State:** shipped
