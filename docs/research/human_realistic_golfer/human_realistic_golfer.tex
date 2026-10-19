@@ -312,6 +312,18 @@ equations and residual report are in the Simscape matching reference,
 section ``The full-body-v2 Schema and Trunk Coordinate Migration''. The geometry
 is HRG-D2.
 
+\subsection{Landmark Regional Trunk Joints (HRG-D2, \#13173)}
+HRG-D2 places L5/S1 at the HRG-C3 design offset and C7/T1 at the cervicale.
+T12/L1 is placed at the Gray lumbar fraction $18/46$, and the neutral
+curvature is checked against Yukawa et al.\ 2018. The de Leva trunk solids
+are re-parented and the dummy body is dropped. The ROM becomes soft limits,
+with hard ranges report-only. The back markers observe rank 5 of the six
+trunk coordinates, so the split is regularised by
+\texttt{bruno2015\_regional}. The details, the mass ledger, the cross-engine
+results and the best-fit Hub residual (61.9 / 34.3~mm) are in the Simscape
+matching reference, section ``Landmark Regional Trunk Joints for
+full-body-v2''.
+
 \section{Anatomical Angles}
 Placeholder for HRG anatomical-angle children.
 

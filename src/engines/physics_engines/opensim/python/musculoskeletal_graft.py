@@ -183,12 +183,15 @@ def spec_document(spec_bytes: bytes) -> dict[str, Any]:
     spec = json.loads(spec_bytes)
     schema = require_full_body_schema(spec, consumer="musculoskeletal graft")
     if schema.schema_id != "full-body-v1":
+        # HRG-D2 (#13173) decision: deferred to HRG-Q1. The graft maps donor
+        # muscle paths onto the v1 single-pivot torso; the regional trunk needs
+        # lumbar and thoracic attachment bodies and per-level paths (#12735).
         raise SchemaFeatureUnavailableError(
             schema.schema_id,
             consumer="musculoskeletal graft",
-            feature="grafting muscles onto the regional trunk (needs the "
-            "regional-trunk geometry of HRG-D2 and the muscle paths qualified "
-            "by HRG-Q1)",
+            feature="grafting muscles onto the regional trunk (needs "
+            "lumbar/thoracic attachment bodies and per-level muscle paths, "
+            "epic #12735)",
             child="HRG-Q1",
             issue=13176,
         )
