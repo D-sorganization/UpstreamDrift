@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12985 · Align Default Engine Models to Canonical Golfer and Raise KeyError on Unknown Body in Compute_Jacobian
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12985
+- **Branch:** orch/12985-agy
+- **PR:** #13312
+- **Paths:** see #13312
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`23dbe141`; collated from changes/12985-align-default-engine-models-to-canonical.md)
+- **Summary:** Align default engine models to canonical golfer and raise KeyError on unknown body in compute_jacobian
+- **Next step:** Review and merge PR
+
 ### DL-#12990 · Standardize Get_Joint_Names Across Physics Engines to Match Generalized Velocity Dimensions (Nv) With Per-DOF Expansion for Multi-DOF Joints
 
 - **State:** in_review
