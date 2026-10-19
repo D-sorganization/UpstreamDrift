@@ -88,6 +88,8 @@ _SOLVER_STEP_RELAXATION: float = 0.95
 _SOLVER_MAX_ITERATIONS: int = 5
 #: Convergence tolerance (m) on distal phalanx centroid radial distance to target site.
 _SOLVER_TOLERANCE_M: float = 1e-6
+#: Symmetric interior barrel ring stations in (0, 1) ensuring continuous azimuthal vertex coverage.
+_PHALANX_BARREL_STATIONS: tuple[float, ...] = (0.2, 0.4, 0.6, 0.8)
 
 
 @dataclass(frozen=True)
@@ -336,7 +338,12 @@ def _finger(
         e, t = _radial(theta), curl * _tangential(theta)
         start, end = d * e - before * t + lift, d * e + after * t + lift
         mesh = capsule_mesh(
-            start, end, radius, inward=-e, stations=(before / length,), sides=sides
+            start,
+            end,
+            radius,
+            inward=-e,
+            stations=(before / length, *_PHALANX_BARREL_STATIONS),
+            sides=sides,
         )
         parts.append((f"{name}_{bone}", mesh))
         theta += curl * 2.0 * math.atan2(after, d)
