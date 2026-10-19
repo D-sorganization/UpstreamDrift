@@ -2639,6 +2639,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13159 · Fix(Lifting): Resolve Unstable Open-Loop Wrist Mode on High-Bar Rack
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13159
+- **Branch:** merged via #13344
+- **PR:** #13344
+- **Paths:** see #13344
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`ff23d322`; collated from changes/13159-fix-lifting-resolve-unstable-open-loop-w.md)
+- **Summary:** fix(lifting): resolve unstable open-loop wrist mode on high-bar rack
+- **Next step:** Shipped in PR #13344.
+
+### DL-#13158 · Feat(Lifting): High-Bar Rack Reach Sweep and Wrist Mode Resolution
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13158
+- **Branch:** merged via #13344
+- **PR:** #13344
+- **Paths:** see #13344
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`ff23d322`; collated from changes/13158-feat-lifting-high-bar-rack-reach-sweep-a.md)
+- **Summary:** feat(lifting): high-bar rack reach sweep and wrist mode resolution
+- **Next step:** Shipped in PR #13344.
+
 ### DL-#13298 · Unify Grip Frames Across Model_Appearance and Grip_Contact, Fix Drake Contact Normal Recording
 
 - **State:** shipped
