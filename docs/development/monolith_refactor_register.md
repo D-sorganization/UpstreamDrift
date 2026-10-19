@@ -41,6 +41,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1166 | `src/shared/python/analysis/orchestrator.py` |
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
+| 1162 | `src/engines/physics_engines/myosuite/python/myohand_bilateral_adapter.py` |
 | 1161 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1158 | `src/engines/simscape/adapter.py` |
 | 1157 | `src/shared/python/lifting/bundles.py` |
