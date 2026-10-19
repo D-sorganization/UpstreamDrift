@@ -699,7 +699,7 @@ python3 -m pytest tests/unit/grip_contact/test_opensim_topology_grip.py
 \subsection{OpenSim MSK Grip Adapter (HRG-GS-M4, \#13326)}
 \textbf{Method and Architecture.}
 The native OpenSim musculoskeletal grip adapter (\texttt{OpenSimMskGripAdapter} in
-\path{src/engines/physics_engines/opensim/python/msk_club.py}) binds the shared anatomical contact
+\path{src/engines/physics_engines/opensim/python/msk_grip_adapter.py}; the club XML stays in \path{msk_club.py}) binds the shared anatomical contact
 topology $\mathcal{T}$ (\texttt{ContactTopology}, HRG-GS-G1, \#13299) and rigid-proxy binding layer
 (\texttt{grip\_contact.binding}, HRG-GS-M3, \#13325) directly to OpenSim golfer models
 (\texttt{golf\_humanoid.osim}, \texttt{golf\_humanoid\_scaled.osim}, and \texttt{bruno2015\_fullbody\_os4\_v2.osim}).

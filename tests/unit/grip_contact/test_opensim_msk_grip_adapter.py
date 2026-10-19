@@ -31,6 +31,7 @@ import pytest
 from defusedxml import ElementTree as SafeET
 
 from src.engines.physics_engines.opensim.python import msk_club as mc
+from src.engines.physics_engines.opensim.python import msk_grip_adapter as ga
 from src.shared.python.grip_contact import BushingState, GripInterface
 from src.shared.python.grip_contact.binding import (
     GripCapabilities,
@@ -77,9 +78,8 @@ pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[3]
 MANIFESTS_DIR = ROOT / "src" / "config" / "grip_bindings"
-MSK_CLUB_PY = (
-    ROOT / "src" / "engines" / "physics_engines" / "opensim" / "python" / "msk_club.py"
-)
+OPENSIM_PY = ROOT / "src" / "engines" / "physics_engines" / "opensim" / "python"
+GUARDED_MODULES = (OPENSIM_PY / "msk_club.py", OPENSIM_PY / "msk_grip_adapter.py")
 NEUTRAL_PENETRATION_TOL_M = 5.0e-4  # +-0.5 mm
 SQUEEZE_N = 1100.0
 
@@ -163,7 +163,7 @@ def test_admitted_manifests_validate_and_resolve_all_sites(
 
 def test_bruno2015_admission_notes_locked_forearm_and_wrist() -> None:
     """bruno2015_fullbody_os4_v2 is admitted individually with its locked forearm/wrist noted."""
-    admission = mc.admit_opensim_grip_model("bruno2015_fullbody_os4_v2")
+    admission = ga.admit_opensim_grip_model("bruno2015_fullbody_os4_v2")
     assert admission.model_id == "bruno2015_fullbody_os4_v2"
     assert admission.lead_hand_body == "hand_L"
     assert admission.trail_hand_body == "hand_R"
@@ -180,7 +180,7 @@ def test_bruno2015_admission_notes_locked_forearm_and_wrist() -> None:
     assert "forearm" in admission.note.lower() and "wrist" in admission.note.lower()
 
     # Adapter can resolve binding for bruno2015_fullbody_os4_v2 without requiring private SimTK file
-    adapter = mc.OpenSimMskGripAdapter.from_model_id("bruno2015_fullbody_os4_v2")
+    adapter = ga.OpenSimMskGripAdapter.from_model_id("bruno2015_fullbody_os4_v2")
     topo = contact_topology(GripSpec(style=GripStyle.OVERLAP))
     binding = adapter.resolve_binding(topo)
     assert binding.model_id == "bruno2015_fullbody_os4_v2"
@@ -199,9 +199,9 @@ def test_bruno2015_admission_notes_locked_forearm_and_wrist() -> None:
 def test_lumbar_only_spine_models_fail_closed(lumbar_model_id: str) -> None:
     """Lumbar-only spine models lack hand bodies and fail closed with SchemaFeatureUnavailableError."""
     with pytest.raises(SchemaFeatureUnavailableError):
-        mc.admit_opensim_grip_model(lumbar_model_id)
+        ga.admit_opensim_grip_model(lumbar_model_id)
     with pytest.raises(SchemaFeatureUnavailableError):
-        mc.OpenSimMskGripAdapter.from_model_id(lumbar_model_id)
+        ga.OpenSimMskGripAdapter.from_model_id(lumbar_model_id)
 
 
 def test_xml_model_without_hands_fails_closed() -> None:
@@ -217,7 +217,7 @@ def test_xml_model_without_hands_fails_closed() -> None:
             body_objects.remove(body)
 
     with pytest.raises(SchemaFeatureUnavailableError):
-        mc.OpenSimMskGripAdapter.from_xml_element(model_el, model_id="stripped_lumbar")
+        ga.OpenSimMskGripAdapter.from_xml_element(model_el, model_id="stripped_lumbar")
 
 
 @pytest.mark.requires_opensim
@@ -230,7 +230,7 @@ def test_weld_mode_three_styles_allocated_only_and_apply_raises(
 ) -> None:
     """Weld mode (lead WeldJoint + trail WeldConstraint): allocated/reporting only, apply raises."""
     _require_opensim_runtime()
-    adapter = mc.OpenSimMskGripAdapter.from_model_id(
+    adapter = ga.OpenSimMskGripAdapter.from_model_id(
         "golf_humanoid",
         grip_model="weld",
         grip_style=style,
@@ -320,7 +320,7 @@ def test_bushing_mode_three_styles_physical_preload_and_point_forces(
 ) -> None:
     """Free club + two bushings mode: physical pairs, neutral preload within +-0.5 mm, point forces applied."""
     _require_opensim_runtime()
-    adapter = mc.OpenSimMskGripAdapter.from_model_id(
+    adapter = ga.OpenSimMskGripAdapter.from_model_id(
         "golf_humanoid",
         grip_model="bushing",
         grip_style=style,
@@ -381,7 +381,7 @@ def test_net_club_wrench_vs_msk_club_bushing_and_m3_harness(
 ) -> None:
     """Net club wrench vs existing msk_club bushing path <= 5 % peak / <= 2 % RMS, and M3 harness passes."""
     _require_opensim_runtime()
-    sim_res = mc.simulate_msk_grip_hold(
+    sim_res = ga.simulate_msk_grip_hold(
         model_id="golf_humanoid",
         club="driver",
         grip_style=style,
@@ -434,7 +434,7 @@ def test_net_club_wrench_vs_msk_club_bushing_and_m3_harness(
         assert ch_res.error.rms_error <= RMS_TOLERANCE
 
     # 3. M3 qualification harness also passes for the allocated weld-mode series
-    weld_adapter = mc.OpenSimMskGripAdapter.from_model_id(
+    weld_adapter = ga.OpenSimMskGripAdapter.from_model_id(
         "golf_humanoid",
         grip_model="weld",
         grip_style=style,
@@ -465,7 +465,7 @@ def test_net_club_wrench_vs_msk_club_bushing_and_m3_harness(
     }
     weld_club_seq = {
         side: [
-            mc._club_side_bushing_state(
+            ga._club_side_bushing_state(
                 club_pose.rotation,
                 club_pose.position_m,
                 club_pose.velocity_m_s,
@@ -505,24 +505,25 @@ def _attribute_chain_depth(node: ast.AST) -> int:
     return depth
 
 
-def test_ast_lod_and_function_budgets() -> None:
+@pytest.mark.parametrize("module_path", GUARDED_MODULES, ids=lambda p: p.name)
+def test_ast_lod_and_function_budgets(module_path: Path) -> None:
     """AST gate: <= 2 dot chain depth, <= 100 lines/function, <= 8 params, <= 1200 lines/file."""
-    source = MSK_CLUB_PY.read_text(encoding="utf-8")
+    source = module_path.read_text(encoding="utf-8")
     lines = source.splitlines()
-    assert len(lines) <= 1200, f"{MSK_CLUB_PY.name} has {len(lines)} lines > 1200"
-    tree = ast.parse(source, filename=str(MSK_CLUB_PY))
+    assert len(lines) <= 1200, f"{module_path.name} has {len(lines)} lines > 1200"
+    tree = ast.parse(source, filename=str(module_path))
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute):
             depth = _attribute_chain_depth(node)
             assert depth <= 2, (
-                f"{MSK_CLUB_PY.name}:{node.lineno} has attribute chain depth {depth} > 2: "
+                f"{module_path.name}:{node.lineno} has attribute chain depth {depth} > 2: "
                 f"{ast.unparse(node)}"
             )
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
             assert node.end_lineno is not None
             length = node.end_lineno - node.lineno + 1
             assert length <= 100, (
-                f"{MSK_CLUB_PY.name}:{node.name} is {length} lines > 100"
+                f"{module_path.name}:{node.name} is {length} lines > 100"
             )
             args = node.args
             n_params = (
@@ -535,5 +536,5 @@ def test_ast_lod_and_function_budgets() -> None:
             if args.args and args.args[0].arg in ("self", "cls"):
                 n_params -= 1
             assert n_params <= 8, (
-                f"{MSK_CLUB_PY.name}:{node.name} has {n_params} params > 8"
+                f"{module_path.name}:{node.name} has {n_params} params > 8"
             )
