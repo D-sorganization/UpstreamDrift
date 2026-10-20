@@ -371,6 +371,19 @@ Add one antagonist pad diametrically opposite each unpaired pad, at the same axi
 
 Sites and pairs are generated in `contact_topology.py`, so every engine inherits them. The segment-mapped bindings map them to `lh_rf_medial`/`rh_th_distal`/`rh_rf_base` (Allegro, which has no little finger), `lh_lfproximal`/`rh_thdistal`/`rh_lfknuckle` (Shadow) and `lh_proxph5`/`rh_distal_thumb`/`rh_fourthmc` (MyoHand), each a body no other site uses. `tests/unit/grip_contact/test_initial_closure_equilibrium.py` asserts a zero net force and moment ($10^{-9}$) for every style and trigger option, that every hand–grip pad sits at $-\delta_0$, and that each antagonist exists exactly when its opposed pad does. The ten-finger topology now has 12 physical pairs, exactly the Simscape kernel's `MAX_PHYSICAL_PAIRS` (the kernel exports the styles without the trigger finger); the kernel exporter locates the ten-finger capsule row by name rather than by a fixed index.
 
+### Engine Follow-Ups
+
+- OpenSim: a sphere site off the side mesh's 1 mm ring grid gets its own ring-aligned mesh, as capsule sites already did. The ten-finger trail hypothenar sits at the derived little-finger station ($-36.96$ mm) and otherwise picked up a 0.03 N axial bias at rest; the $t = 0$ net force falls from 0.039 N to $10^{-5}$ N.
+- Drake: topology runs default to accuracy $10^{-7}$ with a 50 µs step cap (`TOPOLOGY_ACCURACY`). Implicit Euler at $10^{-5}$ left a 0.6 µm off-axis deflection drift against Pinocchio; the kick had hidden it in the normalising peak (overlap swing deflection RMS 5.56 % / 2.66 % at $10^{-5}$, 0.80 % / 0.38 % at $10^{-7}$).
+
+### Parity Outcome
+
+Tolerances are unchanged (5 % peak, 2 % RMS). Against `main`:
+
+- Now passing, xfails removed: MuJoCo overlap and interlock hold and swing deflection (#13306); OpenSim ten-finger 0.04 s hold net force (#13308).
+- Every determinate absolute error fell. Example: Drake overlap swing net force RMS 0.230 → 0.002 N; OpenSim overlap hold net moment RMS 246 → 4.5 mN·m.
+- Exposed, strict xfail under #13560: `net_moment_com` for MuJoCo ten-finger hold (0.63 % / 2.27 %) and OpenSim overlap and interlock hold (5.45 % / 2.51 %) and swing (0.39 % / 4.06 %). Without the 38 N·m kick the reference net moment is a 0.16–0.47 N·m start-up transient. The Pinocchio reference is converged (Radau $10^{-9}$ moves it by $10^{-7}$ N·m in hold). A finer MuJoCo step (5 µs) and a finer OpenSim mesh (288 segments, 0.5 mm pitch) leave the errors unchanged, so these are engine contact-model gaps the kick had masked.
+
 ### What Was Tried and Rejected
 
 - Balancing with the existing pads: infeasible. The heel station (x = 12 mm) lies proximal of every opposing lead pad (20 and 44 mm), so compression-only forces cannot cancel its moment.
