@@ -50,12 +50,19 @@ from src.shared.python.lifting.bundle_targets import LiftTargets
 Array = NDArray[np.float64]
 
 __all__ = [
+    "ARM_REACH_BOUND_MARGIN_RAD",
     "ARM_REACH_COORDINATES",
     "REACH_PRIOR_WEIGHT",
     "ArmReach",
     "reaching_arm_coordinates",
     "reaching_lift_build",
 ]
+
+#: Interior bound margin (rad) so arm reach least squares cannot sit exactly
+#: on a model range bound (OSL-12, #13048). Prevents subsequent unconstrained
+#: IK tracking from drifting past range limits.
+ARM_REACH_BOUND_MARGIN_RAD = 1e-3
+
 
 #: Arm coordinates the reach solve moves, per side (``_r`` / ``_l`` suffix).
 ARM_REACH_COORDINATES: tuple[str, ...] = (
@@ -129,8 +136,14 @@ def _solve_side(
     """Bounded reach of one hand; the rest of ``state`` is held."""
     coords = model.getCoordinateSet()
     names = [f"{name}_{side}" for name in ARM_REACH_COORDINATES]
-    low = np.array([coords.get(n).getRangeMin() for n in names])
-    high = np.array([coords.get(n).getRangeMax() for n in names])
+    low = (
+        np.array([coords.get(n).getRangeMin() for n in names])
+        + ARM_REACH_BOUND_MARGIN_RAD
+    )
+    high = (
+        np.array([coords.get(n).getRangeMax() for n in names])
+        - ARM_REACH_BOUND_MARGIN_RAD
+    )
     prior = np.array([coords.get(n).getDefaultValue() for n in names])
     start = np.clip(prior, low, high)
 

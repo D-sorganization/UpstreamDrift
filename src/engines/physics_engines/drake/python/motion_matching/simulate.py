@@ -80,16 +80,9 @@ logger = logging.getLogger(__name__)
 
 POLY_DEGREE: int = _POLY_DEGREE
 
-_CANONICAL_PINOCCHIO_URDF: Path = (
-    Path(__file__).resolve().parents[2]
-    / "pinocchio"
-    / "models"
-    / "generated"
-    / "golfer.urdf"
-)
-DEFAULT_GOLFER_URDF: Path = (
-    _CANONICAL_PINOCCHIO_URDF if _CANONICAL_PINOCCHIO_URDF.exists() else CANONICAL_URDF
-)
+# The Drake-generated, actuated golfer. A Pinocchio-model default would need
+# transmissions and a joint map (separate modeling decision; see #13454).
+DEFAULT_GOLFER_URDF: Path = CANONICAL_URDF
 
 GRIP_FRAME_NAME: str = "mid_hands"
 CLUBHEAD_FRAME_NAME: str = "club_head"
