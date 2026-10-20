@@ -2182,6 +2182,75 @@ matching reference, section ``Landmark Regional Trunk Joints for
 full-body-v2''.
 
 \section{Anatomical Angles}
-Placeholder for HRG anatomical-angle children.
+\label{sec:angles}
+
+\subsection{Wrist and Forearm Angles of \texttt{full-body-v1} (HRG-E2, \#13169)}
+\paragraph{Package.}
+\path{src/shared/python/anatomical_angles/} (PR \#13241) decomposes a
+radius-to-hand rotation in the ISB wrist sequence (\texttt{isb\_wrist},
+$ZXY$: flexion, ulnar deviation, axial rotation) and a humerus-to-forearm
+rotation in the ISB elbow sequence (\texttt{isb\_elbow}: flexion, carrying
+angle, pronation).  Forearm pronation is reported separately from the third
+wrist angle.  Left-side raw angles are mapped by
+$\mathrm{diag}(1,-1,-1)$, so flexion, ulnar deviation and pronation are
+positive on both sides.  At $|\text{second angle}|=90^{\circ}$ only the first
+and third components become NaN, each with a reason.  Every series carries
+\texttt{observability = "fitted\_grip\_rotation"} and its receipt path.
+
+\paragraph{Engine Adapter and Neutral Calibration.}
+\path{anatomical_angles/full_body_v1.py} takes the world rotations of three
+bodies per side from any engine.  Their names come from the sign map
+(\S\ref{sec:signmap}): \texttt{LUpperArm}, \texttt{LLowerForearm},
+\texttt{Clubface Vector} on the left, and \texttt{RUpperArm},
+\texttt{RLowerForearm}, \texttt{RHandStandoff} on the right.  The
+specification has no palm, thumb or styloid landmark, so the Wu frames are a
+\emph{declared} calibration at $q=0$, using the HRG-00 convention of a
+neutral forearm and wrist (\S\ref{sec:wrist}).  In the model basis:
+\begin{itemize}[nosep]
+  \item Wu wrist frame, with radius and hand coincident at $q=0$:
+    $Y=-x$ (proximal).  $X$ (volar) is $-y$ on the left and $+y$ on the
+    right.  $Z=X\times Y$ is then radial ($+z$) on the right and ulnar
+    ($-z$) on the left.
+  \item ISB elbow frame, the same on both sides, with humerus and forearm
+    coincident at $q=0$: $X=+z$, $Y=-x$, $Z=-y$.  Pronation is measured from
+    the neutral (thumb-up) forearm, not from ISB's supinated anatomical zero.
+\end{itemize}
+Each body gets a constant offset $C=R_{\mathrm{body}}(q{=}0)^{\top}W$, and
+the anatomical frame is $R_{\mathrm{body}}(t)\,C$.  The offset absorbs the
+engine's body axes and the declared physical grip rotation in the wrist base.
+The hand frame therefore follows the physical hand or club body only.
+Appearance and visual grip parameters are not inputs.  A native-basis spec
+(no \texttt{WRIST\_ROLL}) is refused by \texttt{check\_spec\_family}.
+
+\paragraph{Verification.}
+\path{tests/unit/anatomical_angles/test_full_body_v1_wrist.py} checks the
+following:
+\begin{itemize}[nosep]
+  \item On the compiled MuJoCo fixture spec, each arm coordinate at
+    $+20^{\circ}$ gives the sign-map meaning to $10^{-6}$\,rad:
+    \texttt{LWInputY} is extension and \texttt{RWInputY} is flexion;
+    \texttt{*WInputX} is radial deviation; \texttt{RFInput} is pronation and
+    \texttt{LFInput} is supination; \texttt{*EInput} is elbow extension.
+  \item With a synthetic chain built from the pinned axes, every component is
+    zero at $q=0$.
+  \item The pronation coordinate leaves the wrist neutral.
+  \item Mirrored motions give identical anatomical values.
+  \item Arbitrary engine body axes and pelvis placement leave the angles
+    unchanged to $10^{-10}$.
+\end{itemize}
+
+\paragraph{Best-Fit Values Pending.}
+The private best-fit bundle (\S\ref{sec:model}) was not on the machine that
+built this revision, so no best-fit wrist or forearm numbers appear here.
+The report-only test prints the address value and the extremes per side when
+it is given the bundle:
+{\small
+\begin{verbatim}
+HRG_BEST_FIT_BUNDLE=<private-bundle> pytest -o addopts="" -q -n 0 -s \
+  tests/unit/anatomical_angles/test_full_body_v1_wrist.py \
+  -k best_fit_wrist_forearm_report
+\end{verbatim}}
+Because the wrist angles come from the fitted grip rotation, they are
+model-estimated, not measured hand anatomy.
 
 \end{document}
