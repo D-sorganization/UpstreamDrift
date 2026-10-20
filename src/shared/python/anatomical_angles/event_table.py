@@ -1,17 +1,21 @@
 """Swing-event table and CSV/JSON export of anatomical angles (HRG-E4, #13175).
 
-The table samples the wrist and forearm series of :mod:`anatomical_angles` at
-caller-supplied swing events (address, top, impact, finish). It does not detect
-events: the frames come from an existing detector (for example
-``swing_comparison.events.detect_events``) and the caller names it in
-``event_source``, which every export carries.
+The table samples the wrist and forearm series of :mod:`anatomical_angles`, and
+optionally the lab-frame pelvis and thorax terms, at swing events. Address,
+top, impact and finish come from the caller: an existing detector (for example
+``swing_comparison.events.detect_events``) named in ``event_source``, which
+every export carries. Pelvis reversal is detected here from the pelvis turn
+when trunk series are given (:mod:`anatomical_angles.trunk_events`); its
+definition is exported with it, and an undetected reversal is reported with a
+reason, never guessed.
 
 Terms, frames and sign conventions come from the one golf-term description
-(:func:`anatomical_angles.terms.wrist_term_specs`); this module adds no term.
-Lead and trail sides follow ``core.handedness``. Every value carries its
-observability, receipt path and calibration ids; a value that is NaN in the
-series stays missing (JSON ``null``, empty CSV cell) with a reason. Pelvis
-reversal and trunk terms are not on ``main`` yet and are not accepted here.
+(:func:`anatomical_angles.terms.wrist_term_specs` and
+:func:`anatomical_angles.trunk_pelvis.term_specs`); this module adds no term.
+Lead and trail sides follow ``core.handedness``; trunk rows are ``midline``.
+Every value carries its observability, receipt path and calibration ids; a
+value that is NaN in the series stays missing (JSON ``null``, empty CSV cell)
+with a reason.
 """
 
 from __future__ import annotations
@@ -21,7 +25,7 @@ import io
 import json
 import math
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
@@ -32,6 +36,21 @@ from src.shared.python.anatomical_angles.terms import (
     wrist_term_reference,
     wrist_term_specs,
 )
+from src.shared.python.anatomical_angles.trunk_events import (
+    PELVIS_REVERSAL,
+    PELVIS_REVERSAL_DEFINITION,
+    SINGULAR_REASON,
+    TrunkPelvisSeries,
+    detect_pelvis_reversal,
+    segment_role,
+    trunk_term_degrees,
+)
+from src.shared.python.anatomical_angles.trunk_pelvis import (
+    TrunkPelvisTermSpec,
+    term_frame,
+    term_reference,
+    term_specs,
+)
 from src.shared.python.anatomical_angles.wrist import WristForearm, check_side
 from src.shared.python.core.handedness import (
     lead_side,
@@ -40,9 +59,13 @@ from src.shared.python.core.handedness import (
 )
 
 SCHEMA_ID = "upstreamdrift.anatomical_event_table"
-SCHEMA_VERSION = 1
-#: Swing events in their required temporal order.
+SCHEMA_VERSION = 2
+#: Caller-supplied swing events in their required temporal order.
 EVENT_ORDER: tuple[str, ...] = ("address", "top", "impact", "finish")
+#: Every table event, in row order (pelvis reversal is detected, not supplied).
+TABLE_EVENTS: tuple[str, ...] = ("address", PELVIS_REVERSAL, "top", "impact", "finish")
+#: ``side`` of the unsided trunk and pelvis rows.
+MIDLINE = "midline"
 UNITS: dict[str, str] = {"angle": "deg", "time": "s"}
 CSV_COLUMNS: tuple[str, ...] = (
     "event",
@@ -86,18 +109,29 @@ class EventRow:
 
 @dataclass(frozen=True)
 class AnatomicalEventTable:
-    """Rows in event order, then registry term order, with export metadata."""
+    """Rows in :data:`TABLE_EVENTS` order, then wrist and trunk registry order.
+
+    ``event_detection`` maps each detected event to its definition;
+    ``undetected_events`` maps a detectable event that was not found to why.
+    """
 
     rows: tuple[EventRow, ...]
     events: dict[str, tuple[int, float]]
     handedness: str
     event_source: str
     terms: tuple[WristTermSpec, ...]
+    trunk_terms: tuple[TrunkPelvisTermSpec, ...] = ()
+    event_detection: dict[str, str] = field(default_factory=dict)
+    undetected_events: dict[str, str] = field(default_factory=dict)
 
 
 def _check_events(events: Mapping[str, Any], n: int) -> dict[str, int]:
     if not events:
         raise ValueError("at least one swing event is required")
+    if PELVIS_REVERSAL in events:
+        raise ValueError(
+            "pelvis_reversal is detected from the pelvis series, not supplied"
+        )
     unknown = sorted(set(events) - set(EVENT_ORDER))
     if unknown:
         raise ValueError(f"unknown event(s) {unknown}; choose from {list(EVENT_ORDER)}")
@@ -118,8 +152,6 @@ def _check_events(events: Mapping[str, Any], n: int) -> dict[str, int]:
 
 
 def _check_arms(arms: Mapping[str, WristForearm], n: int) -> None:
-    if not arms:
-        raise ValueError("at least one arm (side 'L' or 'R') is required")
     for side, arm in arms.items():
         check_side(side)
         if arm.wrist.side != side or arm.forearm.side != side:
@@ -141,6 +173,78 @@ def _sample(
     return value, reason, series
 
 
+def _wrist_rows(
+    arms: Mapping[str, WristForearm],
+    sides: Mapping[str, str],
+    event: str,
+    frame: int,
+    time: float,
+) -> list[EventRow]:
+    rows: list[EventRow] = []
+    for spec in wrist_term_specs():
+        side = sides[spec.role]
+        if side not in arms:
+            continue
+        value, reason, series = _sample(arms[side], spec, frame)
+        rows.append(
+            EventRow(
+                event,
+                frame,
+                time,
+                spec.term_id,
+                spec.role,
+                side,
+                value,
+                reason,
+                series.observability,
+                series.receipt_path,
+                tuple(series.calibration),
+            )
+        )
+    return rows
+
+
+def _trunk_rows(
+    values: Mapping[str, np.ndarray],
+    trunk: TrunkPelvisSeries,
+    event: str,
+    frame: int,
+    time: float,
+) -> list[EventRow]:
+    rows: list[EventRow] = []
+    for spec in term_specs():
+        value = float(values[spec.term_id][frame])
+        rows.append(
+            EventRow(
+                event,
+                frame,
+                time,
+                spec.term_id,
+                segment_role(spec),
+                MIDLINE,
+                value,
+                SINGULAR_REASON if math.isnan(value) else "",
+                trunk.observability,
+                trunk.receipt_path,
+                (trunk.calibration[0], trunk.calibration[1]),
+            )
+        )
+    return rows
+
+
+def _detect_events(
+    values: Mapping[str, np.ndarray], frames: dict[str, int], n: int
+) -> tuple[dict[str, str], dict[str, str]]:
+    """Add the pelvis reversal to ``frames``; return (detected, undetected)."""
+    frame, why = detect_pelvis_reversal(
+        values["pelvis_turn_isb"], frames.get("address", 0), frames.get("impact", n - 1)
+    )
+    if frame is None:
+        return {}, {PELVIS_REVERSAL: why}
+    frames[PELVIS_REVERSAL] = frame
+    return {PELVIS_REVERSAL: PELVIS_REVERSAL_DEFINITION}, {}
+
+
 def anatomical_event_table(
     arms: Mapping[str, WristForearm],
     events: Mapping[str, Any],
@@ -148,15 +252,19 @@ def anatomical_event_table(
     *,
     handedness: str,
     event_source: str,
+    trunk: TrunkPelvisSeries | None = None,
 ) -> AnatomicalEventTable:
-    """Wrist and forearm terms of ``arms`` sampled at ``events``.
+    """Wrist, forearm and (with ``trunk``) pelvis/thorax terms at ``events``.
 
     ``arms`` maps ``"L"``/``"R"`` to the series of that side; a missing side
     yields no rows for its role (nothing is filled in). ``events`` maps names
     from :data:`EVENT_ORDER` to frame indices that are non-decreasing in that
     order. ``time_s`` gives one time per frame. ``event_source`` names the
-    detector or annotation that produced the frames. Raises ``ValueError`` on
-    any violated precondition.
+    detector or annotation that produced the frames. With ``trunk`` the table
+    adds the registered trunk/pelvis terms and the detected pelvis reversal
+    (searched between address and impact, or the whole series without them).
+    Raises ``ValueError`` on any violated precondition, including neither
+    arms nor trunk.
     """
     handedness = validate_handedness(handedness)
     if not isinstance(event_source, str) or not event_source.strip():
@@ -164,38 +272,34 @@ def anatomical_event_table(
     times = np.asarray(time_s, dtype=float).reshape(-1)
     if not np.all(np.isfinite(times)):
         raise ValueError("time_s must be finite")
+    if not arms and trunk is None:
+        raise ValueError("at least one arm (side 'L' or 'R') or trunk is required")
     _check_arms(arms, times.size)
+    values: dict[str, np.ndarray] = {}
+    if trunk is not None:
+        values = trunk_term_degrees(trunk, handedness, times.size)
     frames = _check_events(events, times.size)
+    detected: dict[str, str] = {}
+    undetected: dict[str, str] = {}
+    if trunk is not None:
+        detected, undetected = _detect_events(values, frames, times.size)
+    ordered = {e: frames[e] for e in TABLE_EVENTS if e in frames}
     sides = {"lead": lead_side(handedness), "trail": trail_side(handedness)}
-    specs = wrist_term_specs()
     rows: list[EventRow] = []
-    for event, frame in frames.items():
-        for spec in specs:
-            side = sides[spec.role]
-            if side not in arms:
-                continue
-            value, reason, series = _sample(arms[side], spec, frame)
-            rows.append(
-                EventRow(
-                    event,
-                    frame,
-                    float(times[frame]),
-                    spec.term_id,
-                    spec.role,
-                    side,
-                    value,
-                    reason,
-                    series.observability,
-                    series.receipt_path,
-                    tuple(series.calibration),
-                )
-            )
+    for event, frame in ordered.items():
+        time = float(times[frame])
+        rows.extend(_wrist_rows(arms, sides, event, frame, time))
+        if trunk is not None:
+            rows.extend(_trunk_rows(values, trunk, event, frame, time))
     return AnatomicalEventTable(
         tuple(rows),
-        {e: (f, float(times[f])) for e, f in frames.items()},
+        {e: (f, float(times[f])) for e, f in ordered.items()},
         handedness,
         event_source,
-        specs,
+        wrist_term_specs() if arms else (),
+        term_specs() if trunk is not None else (),
+        detected,
+        undetected,
     )
 
 
@@ -210,6 +314,33 @@ def _term_meta(spec: WristTermSpec) -> dict[str, str]:
     }
 
 
+def _trunk_meta(spec: TrunkPelvisTermSpec) -> dict[str, str]:
+    return {
+        "unit": UNITS["angle"],
+        "role": segment_role(spec),
+        "profile": "isb_thorax",
+        "frame": term_frame(),
+        "sign_convention": spec.sign_convention,
+        "description": spec.description,
+        "reference": term_reference(),
+    }
+
+
+def _reference(table: AnatomicalEventTable) -> str:
+    refs = [wrist_term_reference()] if table.terms else []
+    if table.trunk_terms:
+        refs.append(term_reference())
+    return "; ".join(refs)
+
+
+def _event_entry(table: AnatomicalEventTable, event: str) -> dict[str, Any]:
+    frame, time = table.events[event]
+    entry: dict[str, Any] = {"frame": frame, "time_s": time}
+    if event in table.event_detection:
+        entry["detection"] = table.event_detection[event]
+    return entry
+
+
 def to_json_dict(table: AnatomicalEventTable) -> dict[str, Any]:
     """Strict-JSON document (no NaN) matching :data:`EVENT_TABLE_JSON_SCHEMA`."""
     return {
@@ -218,9 +349,13 @@ def to_json_dict(table: AnatomicalEventTable) -> dict[str, Any]:
         "units": dict(UNITS),
         "handedness": table.handedness,
         "event_source": table.event_source,
-        "reference": wrist_term_reference(),
-        "events": {e: {"frame": f, "time_s": t} for e, (f, t) in table.events.items()},
-        "terms": {s.term_id: _term_meta(s) for s in table.terms},
+        "reference": _reference(table),
+        "events": {e: _event_entry(table, e) for e in table.events},
+        "undetected_events": dict(table.undetected_events),
+        "terms": {
+            **{s.term_id: _term_meta(s) for s in table.terms},
+            **{s.term_id: _trunk_meta(s) for s in table.trunk_terms},
+        },
         "rows": [
             {
                 "event": r.event,
@@ -251,12 +386,18 @@ def _csv_header(table: AnatomicalEventTable) -> Sequence[str]:
         f"# units: angle={UNITS['angle']} time={UNITS['time']}",
         f"# handedness: {table.handedness}",
         f"# event_source: {table.event_source}",
-        f"# reference: {wrist_term_reference()}",
+        f"# reference: {_reference(table)}",
         "# value_deg is empty where the sample is invalid; see invalid_reason",
     ]
-    for spec in table.terms:
-        lines.append(f"# frame {spec.term_id}: {spec.frame}")
-        lines.append(f"# sign_convention {spec.term_id}: {spec.sign_convention}")
+    for event, definition in table.event_detection.items():
+        lines.append(f"# detection {event}: {definition}")
+    for event, reason in table.undetected_events.items():
+        lines.append(f"# undetected {event}: {reason}")
+    frames = [(s.term_id, s.frame, s.sign_convention) for s in table.terms]
+    frames += [(s.term_id, term_frame(), s.sign_convention) for s in table.trunk_terms]
+    for term_id, frame, sign in frames:
+        lines.append(f"# frame {term_id}: {frame}")
+        lines.append(f"# sign_convention {term_id}: {sign}")
     return lines
 
 
@@ -298,6 +439,7 @@ EVENT_TABLE_JSON_SCHEMA: dict[str, Any] = {
         "event_source",
         "reference",
         "events",
+        "undetected_events",
         "terms",
         "rows",
     ],
@@ -314,7 +456,7 @@ EVENT_TABLE_JSON_SCHEMA: dict[str, Any] = {
         "reference": _STR,
         "events": {
             "type": "object",
-            "propertyNames": {"enum": list(EVENT_ORDER)},
+            "propertyNames": {"enum": list(TABLE_EVENTS)},
             "minProperties": 1,
             "additionalProperties": {
                 "type": "object",
@@ -322,8 +464,14 @@ EVENT_TABLE_JSON_SCHEMA: dict[str, Any] = {
                 "properties": {
                     "frame": {"type": "integer", "minimum": 0},
                     "time_s": {"type": "number"},
+                    "detection": _STR,
                 },
             },
+        },
+        "undetected_events": {
+            "type": "object",
+            "propertyNames": {"enum": [PELVIS_REVERSAL]},
+            "additionalProperties": _STR,
         },
         "terms": {
             "type": "object",
@@ -344,12 +492,12 @@ EVENT_TABLE_JSON_SCHEMA: dict[str, Any] = {
                 "additionalProperties": False,
                 "required": list(CSV_COLUMNS),
                 "properties": {
-                    "event": {"enum": list(EVENT_ORDER)},
+                    "event": {"enum": list(TABLE_EVENTS)},
                     "frame": {"type": "integer", "minimum": 0},
                     "time_s": {"type": "number"},
                     "term_id": _STR,
-                    "role": {"enum": ["lead", "trail"]},
-                    "side": {"enum": ["L", "R"]},
+                    "role": {"enum": ["lead", "trail", "pelvis", "thorax"]},
+                    "side": {"enum": ["L", "R", MIDLINE]},
                     "value_deg": {"type": ["number", "null"]},
                     "invalid_reason": {"type": ["string", "null"]},
                     "observability": _STR,
@@ -372,8 +520,10 @@ __all__ = [
     "CSV_COLUMNS",
     "EVENT_ORDER",
     "EVENT_TABLE_JSON_SCHEMA",
+    "MIDLINE",
     "SCHEMA_ID",
     "SCHEMA_VERSION",
+    "TABLE_EVENTS",
     "UNITS",
     "AnatomicalEventTable",
     "EventRow",
