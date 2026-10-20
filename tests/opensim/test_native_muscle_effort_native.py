@@ -13,6 +13,8 @@ from typing import Any, Callable
 
 import pytest
 
+from tests.helpers.opensim_support import require_opensim
+
 pytestmark = [pytest.mark.unit, pytest.mark.requires_opensim]
 
 
@@ -79,7 +81,7 @@ def test_native_constant_interval_matches_fresh_raw_replay(
     record_property: Callable[[str, str], None],
 ) -> None:
     """Compare one accepted constant raw interval with an independent replay."""
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     from src.engines.physics_engines.opensim.python.tour_matching.native_muscle_effort_adapter import (
         AnalyticRecruitmentConfig,
         EffortBasis,

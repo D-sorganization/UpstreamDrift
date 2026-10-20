@@ -11,6 +11,8 @@ from typing import Any, Callable
 
 import pytest
 
+from tests.helpers.opensim_support import require_opensim
+
 pytestmark = [pytest.mark.unit, pytest.mark.requires_opensim]
 
 
@@ -46,7 +48,7 @@ def _antagonist_fixture(osim: Any) -> tuple[Any, Any]:
 def test_native_pin_fixture_has_complete_antagonist_observations(
     record_property: Callable[[str, str], None],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     record_property(
         "native_runtime_json",
         json.dumps(
