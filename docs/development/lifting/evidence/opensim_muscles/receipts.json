@@ -1,7 +1,7 @@
 {
   "generator": "scripts/measure_opensim_lift_muscles.py",
   "issue": "#13042 (OSL-4)",
-  "source_commit": "ec75416690ec3f1e2ae5f2fc44ae8c1f24cbdc41",
+  "source_commit": "7a963f7b9aa30e671fc19d8e8f75c9324d0992ee",
   "reserve_share_threshold": 0.05,
   "citation": "Rajagopal A, Dembia CL, DeMers MS, Delp DD, Hicks JL, Delp SL. Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human Gait. IEEE Trans Biomed Eng. 2016;63(10):2068-2079. doi:10.1109/TBME.2016.2586862",
   "lifts": {
@@ -743,9 +743,9 @@
         "forces_within": false,
         "moments_within": false,
         "measured_pelvis_residual_force_n": 511.5755,
-        "hicks_force_limit_n": 32.4934,
+        "hicks_force_limit_n": 221.8473,
         "measured_pelvis_residual_moment_nm": 318.3181,
-        "hicks_moment_limit_nm": 3.4481,
+        "hicks_moment_limit_nm": 23.5421,
         "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
       },
       "reserve_share_threshold": 0.05,
@@ -1080,7 +1080,7 @@
         "window_s": [0.0, 0.2],
         "mesh_interval_s": 0.02,
         "max_iterations": 20,
-        "wall_clock_s": 181.20027947425842,
+        "wall_clock_s": 85.8148500919342,
         "converged": false,
         "status": "Maximum_Iterations_Exceeded",
         "objective": 904.6010831621893,
