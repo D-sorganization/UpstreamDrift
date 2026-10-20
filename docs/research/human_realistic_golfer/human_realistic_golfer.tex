@@ -2234,6 +2234,48 @@ results and the best-fit Hub residual (61.9 / 34.3~mm) are in the Simscape
 matching reference, section ``Landmark Regional Trunk Joints for
 full-body-v2''.
 
+\subsection{Articulated Pelvis, Abdomen and Thorax Visuals (HRG-D3, \#13174)}
+This slice uses three rigid visuals, one for each trunk segment. Skinned
+blending is not used. The MuJoCo exporter now accepts the visual layer for
+\texttt{full-body-v2}. Before this change it raised
+\texttt{SchemaFeatureUnavailableError}. The pelvis, \texttt{trunk\_lumbar}
+and thorax bodies each draw the \texttt{visual\_hints} ellipsoid of their own
+de Leva solid (pelvis, middle\_trunk, upper\_trunk) and their own skeleton
+capsules. Each visual is attached to its own MJCF body, so it follows the
+lumbar and thoracic joints. In the appearance layer,
+\texttt{trunk\_lumbar} is classified as \texttt{torso}, so the abdomen wears
+the shirt.
+
+The seam checks run in
+\path{tests/unit/motion_matching/test_full_body_v2_trunk_visuals.py}. They
+cover the driver and 7-iron captures. They use every corner of the soft-ROM
+box of the six trunk coordinates (64 poses) and 64 seeded interior poses.
+\begin{itemize}
+\item No gap. Each regional joint centre stays strictly inside both adjacent
+  ellipsoids. The normalised levels at $q=0$ (driver) are 0.375 and 0.759 at
+  L5/S1, and 0.261 and 0.768 at T12/L1, where a level below 1 means inside.
+  The joint centre is fixed in both bodies, so this holds at every pose.
+\item No telescoping. A child ellipsoid centre never enters its parent's
+  ellipsoid.
+\item No pelvis--thorax interpenetration. Every sampled thorax surface point
+  stays outside the pelvis ellipsoid.
+\end{itemize}
+A separate exploratory probe used the driver capture, the 64 corners, 200
+random poses (seed 0) and 4000 surface points. Its minimum levels were 2.12
+for the abdomen centre in the pelvis, 1.84 for the thorax centre in the
+abdomen, and 2.47 for the thorax surface in the pelvis.
+Adjacent ellipsoids do overlap locally at each seam. That overlap is what
+closes the gap, so the test does not require zero adjacent overlap.
+
+The visuals do not change the physics. The plain, visual and appearance
+exports compile to identical body, joint, inertia and equality arrays. They
+also give identical \texttt{xpos} and \texttt{qacc} at a seeded state.
+
+Deferred: stills at address, top and impact, and a render check of the
+visible thoracic rotation. The work machine has no GL context, so no render
+evidence is claimed. Skinned blending across the lumbar and thoracic joints
+(\path{skinned_body.py}) is also not done in this slice.
+
 \section{Anatomical Angles}
 \label{sec:angles}
 

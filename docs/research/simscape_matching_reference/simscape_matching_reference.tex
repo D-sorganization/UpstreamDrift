@@ -7848,10 +7848,10 @@ the registry.
 
 The consumers that accept both schemas are the MuJoCo, URDF/Drake and
 Pinocchio models, the OpenSim export and parity adapter, the Pink task builder
-and the polynomial actuation. Pelvis relocation accepts v1 only. Three
-consumers raise \texttt{NotImplementedError} for v2:
+and the polynomial actuation. Pelvis relocation accepts v1 only. The MuJoCo
+visual layer accepts v2 since HRG-D3 (\#13174). Two consumers raise
+\texttt{NotImplementedError} for v2:
 \begin{itemize}
-\item the MuJoCo visual layer (HRG-D3);
 \item the qualified upper-body Pinocchio model (HRG-D2);
 \item the musculoskeletal graft (HRG-D2, HRG-Q1).
 \end{itemize}
@@ -8056,7 +8056,7 @@ with \texttt{derive\_landmark\_v2\_spec(v1, provenance=...)} as the entry
 point. ADR-0055 and the \#12736 conventions are unchanged. The neutral offset
 is excluded from the angles, every regional output carries a
 \texttt{distribution\_source}, and the coupling law is not altered. The MuJoCo
-visual layer is HRG-D3. Dynamics qualification and the muscle graft are
+visual layer (one rigid visual per trunk segment) is HRG-D3, \#13174. Dynamics qualification and the muscle graft are
 HRG-Q1. This section reports software and geometric correctness only, and it
 is not a scientific qualification.
 
