@@ -154,9 +154,11 @@ class SimOptions:
         urdf_path: Override the URDF source. ``None`` resolves to the
             canonical humanoid URDF.
         grip_body_name: Name of the URDF body whose body-frame origin we
-            sample as the ``grip`` anchor. Default ``"club_grip"``.
+            sample as the ``grip`` anchor. Default :data:`GRIP_FRAME_NAME`
+            (``"mid_hands"``), the frame Pinocchio samples on the same URDF.
         clubhead_body_name: Name of the body whose body-frame origin we
-            sample as the ``clubhead`` anchor. Default ``"clubhead"``.
+            sample as the ``clubhead`` anchor. Default
+            :data:`CLUBHEAD_FRAME_NAME` (``"club_head"``).
         random_seed: Seed for stochastic choices.
         basis: Basis used for torque parametrization: ``"power"`` or
             ``"bernstein"``. Default is ``"power"``.
@@ -174,8 +176,8 @@ class SimOptions:
     time_step_s: float = 1.0e-3
     gravity: tuple[float, float, float] | NDArray[np.float64] = (0.0, 0.0, -9.80665)
     urdf_path: Path | str | None = None
-    grip_body_name: str = "club_grip"
-    clubhead_body_name: str = "clubhead"
+    grip_body_name: str = GRIP_FRAME_NAME
+    clubhead_body_name: str = CLUBHEAD_FRAME_NAME
     random_seed: int = 0
     basis: Literal["power", "bernstein"] = "power"
     T_s: float | None = None
