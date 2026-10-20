@@ -181,11 +181,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
 | 861 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
+| 858 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
 | 853 | `src/shared/python/sidekick/process_calculators/constants.py` |
 | 850 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
 | 849 | `src/tools/training_controller/gui.py` |
-| 848 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
 | 848 | `src/shared/python/motion_matching/club_only/reproduction.py` |
 | 847 | `src/api/routes/bunker_workbench.py` |
 | 846 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m` |
