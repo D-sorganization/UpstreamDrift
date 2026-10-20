@@ -201,6 +201,9 @@ def test_complete_lifts_joint_reactions_computed(
     sol = lift_reaction_solutions[lift]
     assert sol["status"] == "complete"
     assert sol["lift"] == lift
+    # Replayed |udot - qdd| in rad/s^2. Measured 1.14e-5 (squat), 1.23e-5
+    # (deadlift), 3.50e-5 (snatch), 2.31e-4 (clean and jerk) against IK
+    # accelerations of about 20 rad/s^2: a relative error below 1.2e-5.
     assert sol["acceleration_error_max"] < 5e-4
     assert sol["window_start_s"] == 0.0
     assert sol["window_end_s"] == 0.2
@@ -223,11 +226,14 @@ def test_complete_lifts_joint_reactions_computed(
         l5s1["qualification"]
         == "lower bound: no trunk muscles; the lumbar moment is an ideal actuator"
     )
-    assert l5s1["compression_mean_n"] > 500.0
-    assert l5s1["compression_peak_n"] > 500.0
-    assert l5s1["compression_mean_bw"] > 0.5
+    # Loaded lifts compress L5/S1 by more than one body weight; the squat,
+    # with the most trunk lean under the bar, by more than 1.5.
+    assert l5s1["compression_mean_n"] > 1000.0
+    assert l5s1["compression_peak_n"] > 1000.0
+    assert l5s1["compression_mean_bw"] > (1.5 if lift == "squat" else 1.0)
     assert l5s1["ap_shear_mean_n"] != 0.0
     assert l5s1["compression_torso_frame_mean_n"] > 500.0
+    assert sol["acceleration_error_max"] is not None
     assert l5s1["ap_shear_torso_frame_mean_n"] != 0.0
     assert l5s1["peak_lumbar_actuator_moment_nm"] is not None
     assert "#12735" in l5s1["segmental_spine_reference"]
@@ -299,9 +305,14 @@ def test_min_acceleration_frame_bound_all_lifts(
         min_acc["lower_bound_satisfied"] and min_acc["upper_bound_satisfied"]
     )
     assert min_acc["qdd_norm_rad_s2"] > 0.0
-    assert min_acc["w_above_n"] > 500.0
-    assert min_acc["l5_s1_compression_pelvis_n"] > 0.0
-    assert min_acc["l5_s1_compression_torso_n"] > 0.0
+    assert min_acc["w_above_n"] > 1000.0
+    # Measured: squat 1445/1031 N, pulls 716-1006 N (pelvis/torso frame).
+    floor = 1000.0 if lift == "squat" else 500.0
+    assert min_acc["l5_s1_compression_pelvis_n"] > floor
+    assert min_acc["l5_s1_compression_torso_n"] > floor
+    if lift == "squat":
+        # The least-accelerated squat frame still fails the upper bound.
+        assert min_acc["passed"] is False
 
 
 @pytest.mark.requires_opensim
