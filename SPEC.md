@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13520 | Drake native golfer grip tests pass with real pydrake: default loader parses the generator humanoid (not the #13312 canonical golfer), actuator retrofit no longer calls num_velocities() before Finalize, humanoid_urdf.py split under 1200 lines and its size exceptions removed |
+| 2026-10-20 | #13504 | MuJoCo topology grip schedules each node friction row's solreffriction time to the shared law's secant slip gain every step (friction_secant_gain); ten_finger 0.04 s hold net_force 2.866% -> 0.413% RMS, ten_finger 0.10 s hold and swing pass all ten parity quantities, overlap/interlock per-hand forces 10-18% -> under 1% RMS |
 | 2026-10-20 | #13517 | Symmetric capsule line-contact quadrature integrates the shorter capsule axis (#13508) |
 | 2026-10-20 | #13515 | Add headless regression test for Drake-Simscape equivalence theta sizing (#13449). |
 | 2026-10-20 | #13472 | Reclassify grip_style as a physical pick across CLI, API, desktop and web and migrate legacy sidecars |

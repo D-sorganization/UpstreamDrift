@@ -2730,6 +2730,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13466 · Drake Native Golfer Grip Tests Pass With Real Pydrake: Default Loader Parses the Generator Humanoid (Not the #13312 Canonical Golfer), Actuator Retrofit No Longer Calls Num_Velocities() Before Finalize, humanoid_urdf.py Split Under 1200 Lines and Its Size Exceptions Removed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13466
+- **Branch:** merged via #13520
+- **PR:** #13520
+- **Paths:** see #13520
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`b9a397d6`; collated from changes/13466-drake-native-golfer-grip-tests-pass-with.md)
+- **Summary:** Drake native golfer grip tests pass with real pydrake: default loader parses the generator humanoid (not the #13312 canonical golfer), actuator retrofit no longer calls num_velocities() before Finalize, humanoid_urdf.py split under 1200 lines and its size exceptions removed
+- **Next step:** Shipped in PR #13520.
+
 ### DL-#13508 · Symmetric Capsule Line-Contact Quadrature Integrates the Shorter Capsule Axis (#13508)
 
 - **State:** shipped
@@ -3165,12 +3178,12 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13306
 - **Branch:** merged via #13422
-- **PR:** #13422, #13442
+- **PR:** #13422, #13442, #13504
 - **Paths:** see #13422
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-20 (`b18575db`; collated from changes/13306-prove-hyperstatic-per-hand-split-diverge.md)
+- **Last verified:** 2026-10-20 (`ec754166`; collated from changes/13306-mujoco-friction-secant-schedule.md)
 - **Summary:** Add MuJoCo ContactTopology grip-contact adapter and parity tests (HRG-GS-G8)
-- **Next step:** Shipped in PR #13422.
+- **Next step:** Review and merge; overlap/interlock 0.10 s trail-hand deflection (4.60% hold, 3.39% swing RMS) stays a strict xfail; OpenSim ten_finger 0.04 s gaps remain
 
 ### DL-#13305 · Calibrate OpenSim Topology Grip Foundation at 2X Preload With Hollars Friction Mapping and Preserve SimmSpline Horizon Across Short Swing Windows
 
