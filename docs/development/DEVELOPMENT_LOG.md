@@ -375,10 +375,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12683
 - **Branch:** fix/12683-trail-toe-out
-- **PR:** #12731
+- **PR:** #12731, #13482
 - **Paths:** see #12731
 - **Started:** 2026-10-15
-- **Last verified:** 2026-10-15 (`f6e69608`; collated from changes/12683-r3-trail-foot-toe-out-owner-style-target.md)
+- **Last verified:** 2026-10-20 (`1562f63d`; collated from changes/12683-pin-the-trail-foot-toe-out-on-the-commit.md)
 - **Summary:** R3: trail-foot toe-out owner style target (TRAIL_TOE_OUT_STYLE_DEG = 20 deg, single-sourced from DEFAULT_TOE_OUT_DEG) via a new --foot-progression style mode, now the canonical default; capture mode still lets the measurement win; per-foot target_source in receipts; driver trail -2.9 -> 19.8 deg, 7-iron -9.8 -> 13.5 deg (hip_rotation_r at its -40 deg limit)
 - **Next step:** Owner decision on the 7-iron shortfall (hip external-rotation range vs accept ~13.5 deg), then regenerate anthro_driver_seeds/anthro_iron_seeds_zmp receipts before R4 (#12684).
 
@@ -2665,16 +2665,29 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13043 · Add OpenSim 3D Joint Reaction Analysis for Barbell Lifts (OSL-5)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13043
+- **Branch:** merged via #13415
+- **PR:** #13415
+- **Paths:** see #13415
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`b030576f`; collated from changes/13043-add-opensim-3d-joint-reaction-analysis-f.md)
+- **Summary:** Add OpenSim 3D joint reaction analysis for barbell lifts (OSL-5)
+- **Next step:** Shipped in PR #13415.
+
 ### DL-#13460 · Relax Last-Ulp Geometry Assertions in Batched Grip Contact Tests (Linux BLAS Dot Rounding)
 
 - **State:** shipped
 - **Owner:** unassigned
 - **Issue:** #13460
 - **Branch:** merged via #13473
-- **PR:** #13473
+- **PR:** #13473, #13469
 - **Paths:** see #13473
 - **Started:** 2026-10-20
-- **Last verified:** 2026-10-20 (`0dddc0fc`; collated from changes/13460-relax-last-ulp-geometry-assertions-in-ba.md)
+- **Last verified:** 2026-10-20 (`844aea4a`; collated from changes/13460-mark-the-torch-cuda-wheel-index-pip-prob.md)
 - **Summary:** Relax last-ulp geometry assertions in batched grip contact tests (Linux BLAS dot rounding)
 - **Next step:** Shipped in PR #13473.
 
@@ -2905,10 +2918,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13308
 - **Branch:** feat/13308-grip-style-parity-report
-- **PR:** #13422
+- **PR:** #13422, #13442
 - **Paths:** see #13422
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13308-extend-grip-contact-parity-with-per-pair.md)
+- **Last verified:** 2026-10-20 (`b18575db`; collated from changes/13308-align-collinear-capsule-cylinder-midpoin.md)
 - **Summary:** Extend grip_contact.parity with per-pair forces, contact-point drift, determinate/indeterminate classification, and cross-engine style parity report (HRG-GS-G10)
 - **Next step:** Shipped in PR #13422.
 
@@ -2931,10 +2944,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13306
 - **Branch:** merged via #13422
-- **PR:** #13422
+- **PR:** #13422, #13442
 - **Paths:** see #13422
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13306-add-mujoco-contacttopology-grip-contact.md)
+- **Last verified:** 2026-10-20 (`b18575db`; collated from changes/13306-prove-hyperstatic-per-hand-split-diverge.md)
 - **Summary:** Add MuJoCo ContactTopology grip-contact adapter and parity tests (HRG-GS-G8)
 - **Next step:** Shipped in PR #13422.
 
