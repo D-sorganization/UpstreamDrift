@@ -153,3 +153,44 @@ class TestLeaderboardPublishGating:
         assert f"contains(github.event.pull_request.labels.*.name, '{FULL_LABEL}')" in (
             condition
         )
+
+
+class TestOpenSimMainRunsComplete:
+    """#13494: a per-SHA group queued one OpenSim run for every main push.
+
+    ``ci-requires-opensim.yml`` keyed its main group on ``github.sha``, so no
+    main run ever superseded another and 42 main pushes sat queued for the four
+    docker runners. Grouped per event and ref without cancel-in-progress,
+    GitHub keeps the running main run plus only the newest pending one. PR runs
+    still cancel superseded pushes. Merge-queue runs keep a group per queue ref
+    and are never cancelled, because the merge queue needs their result.
+    """
+
+    NAME = "ci-requires-opensim.yml"
+    GROUP = "ci-requires-opensim-${{ github.event_name }}-${{ github.ref }}"
+    CANCEL = "${{ github.event_name == 'pull_request' }}"
+
+    def test_group_is_per_event_and_ref(self) -> None:
+        group = _load(self.NAME)["concurrency"]["group"]
+        assert "github.sha" not in group, "per-SHA groups queue every main push"
+        assert "runner." not in group, "runner context is invalid in concurrency"
+        assert group == self.GROUP
+
+    def test_only_pr_runs_cancel_in_progress(self) -> None:
+        # merge_group and push runs evaluate this to false, so a merge-queue
+        # or main run that has started is never cancelled.
+        concurrency = _load(self.NAME)["concurrency"]
+        assert concurrency["cancel-in-progress"] == self.CANCEL
+
+    def test_merge_group_keeps_its_own_per_ref_group(self) -> None:
+        on = _triggers(_load(self.NAME))
+        assert "merge_group" in on
+        group = _load(self.NAME)["concurrency"]["group"]
+        assert "github.event_name" in group and "github.ref" in group
+
+    def test_workflow_lint_allows_conditional_cancel(self) -> None:
+        lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
+        allowlist = next(
+            line for line in lint.splitlines() if "nightly-publish.yml" in line
+        )
+        assert self.NAME in allowlist
