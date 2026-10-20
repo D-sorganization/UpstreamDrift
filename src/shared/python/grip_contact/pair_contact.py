@@ -770,6 +770,83 @@ def _as_vec3(v: np.ndarray) -> Vec3:
     return (a, b, c)
 
 
+def _capsule_core_length_m(capsule: ContactCapsule) -> float:
+    axis = capsule.p1_m - capsule.p0_m
+    return float(math.sqrt(_dot3(axis.tolist(), axis.tolist())))
+
+
+def _capsule_line_quadrature_key(
+    capsule: ContactCapsule,
+) -> tuple[float, float, Vec3, Vec3]:
+    """Deterministic ordering key for symmetric line-contact integration (#13508)."""
+    p0 = _as_vec3(np.asarray(capsule.p0_m, float))
+    p1 = _as_vec3(np.asarray(capsule.p1_m, float))
+    return (_capsule_core_length_m(capsule), capsule.radius_m, p0, p1)
+
+
+def _canonical_line_contact_integrator(
+    capsule_a: ContactCapsule, capsule_b: ContactCapsule
+) -> tuple[ContactCapsule, ContactCapsule, bool]:
+    """Pick the capsule whose axis is discretised for :func:`capsule_capsule`.
+
+    The shorter core segment is integrated so a long grip does not dilute the
+    load when argument order swaps (#13508).  Equal lengths break ties by
+    :func:`_capsule_line_quadrature_key` so ``(A,B)`` and ``(B,A)`` share the
+    same integrator.
+
+    Postconditions:
+        Returns ``(integrator, other, integrator_is_a)`` with
+        ``integrator_is_a`` true when ``integrator`` is ``capsule_a``.
+    """
+    key_a = _capsule_line_quadrature_key(capsule_a)
+    key_b = _capsule_line_quadrature_key(capsule_b)
+    if key_a <= key_b:
+        return capsule_a, capsule_b, True
+    return capsule_b, capsule_a, False
+
+
+def _line_contact_from_integrator(
+    integrator: ContactCapsule,
+    other: ContactCapsule,
+    integrator_is_a: bool,
+    st_a: BushingState,
+    st_b: BushingState,
+    law_params: ContactParameters,
+    patch_radius_m: float,
+    spin_transition_rad_s: float,
+) -> LineNode:
+    st_integ = st_a if integrator_is_a else st_b
+    st_other = st_b if integrator_is_a else st_a
+    nodes = [
+        _line_node(
+            sphere_capsule(
+                node,
+                other,
+                st_integ,
+                st_other,
+                law_params,
+                patch_radius_m,
+                spin_transition_rad_s,
+            )
+        )
+        for node in capsule_line_nodes(integrator)
+    ]
+    total = combine_line_nodes(nodes)
+    if integrator_is_a:
+        return total
+    return LineNode(
+        total.force_b_n,
+        total.moment_b_nm,
+        total.force_a_n,
+        total.moment_a_nm,
+        total.contact_point_m,
+        (-total.normal[0], -total.normal[1], -total.normal[2]),
+        total.penetration_m,
+        total.normal_force_mag_n,
+        total.tangential_force_mag_n,
+    )
+
+
 def capsule_capsule(
     capsule_a: ContactCapsule,
     capsule_b: ContactCapsule,
@@ -781,8 +858,9 @@ def capsule_capsule(
 ) -> PairWrench:
     """Shared line-contact law between two capsules (body A and body B) (#13308).
 
-    Capsule A's axis is discretised into :func:`capsule_line_nodes`; each node
-    sphere meets capsule B through :func:`sphere_capsule` (Hunt-Crossley
+    The shorter capsule's axis is discretised into :func:`capsule_line_nodes`
+    (ties broken deterministically when lengths match, #13508); each node
+    sphere meets the other capsule through :func:`sphere_capsule` (Hunt-Crossley
     normal, regularised Coulomb/Stribeck friction and torsional spin friction
     from motion_matching.contact_law) and :func:`combine_line_nodes` weights
     every node ``1 / n``.  The law integrates the penetration along the
@@ -810,21 +888,19 @@ def capsule_capsule(
     law_params = _check_law_args(law, patch_radius_m, spin_transition_rad_s)
     st_a = _resolve_state(state_a, "state_a")
     st_b = _resolve_state(state_b, "state_b")
-    nodes = [
-        _line_node(
-            sphere_capsule(
-                node,
-                capsule_b,
-                st_a,
-                st_b,
-                law_params,
-                patch_radius_m,
-                spin_transition_rad_s,
-            )
-        )
-        for node in capsule_line_nodes(capsule_a)
-    ]
-    total = combine_line_nodes(nodes)
+    integrator, other, integrator_is_a = _canonical_line_contact_integrator(
+        capsule_a, capsule_b
+    )
+    total = _line_contact_from_integrator(
+        integrator,
+        other,
+        integrator_is_a,
+        st_a,
+        st_b,
+        law_params,
+        patch_radius_m,
+        spin_transition_rad_s,
+    )
     return PairWrench(
         force_a_n=np.array(total.force_a_n),
         moment_a_nm=np.array(total.moment_a_nm),
