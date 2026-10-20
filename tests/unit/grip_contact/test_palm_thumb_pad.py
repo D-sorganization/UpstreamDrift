@@ -36,6 +36,7 @@ from src.shared.python.grip_contact.palm_thumb_pad import (
     PALM_THUMB_PAIR,
     SEPARATION_FORCE_TOL_N,
     TIMESTEP_SENSITIVITY_TOL,
+    ImpactSetup,
     hand_drift_gate,
     palm_thumb_impact_response,
     palm_thumb_pad_force,
@@ -234,14 +235,11 @@ def test_timestep_halving_changes_peak_and_impulse_by_at_most_one_percent(
     interface: GripInterface,
 ) -> None:
     model = _model(interface)
-    kwargs = {
-        "mass_kg": 0.5,
-        "approach_speed_m_s": 0.2,
-        "initial_gap_m": 2.0e-4,
-        "duration_s": 0.01,
-    }
+    setup = ImpactSetup(
+        mass_kg=0.5, approach_speed_m_s=0.2, initial_gap_m=2.0e-4, duration_s=0.01
+    )
     report = timestep_halving_sensitivity(
-        model, _frame(interface.left), _frame(interface.right), dt_s=2.0e-5, **kwargs
+        model, _frame(interface.left), _frame(interface.right), setup, dt_s=2.0e-5
     )
     coarse = report["coarse"]
     fine = report["fine"]
@@ -261,19 +259,29 @@ def test_impact_response_preconditions(interface: GripInterface) -> None:
         "mass_kg": 0.5,
         "approach_speed_m_s": 0.2,
         "initial_gap_m": 1e-4,
-        "dt_s": 1e-5,
         "duration_s": 1e-3,
     }
-    palm_thumb_impact_response(model, lead, trail, **good)
+    palm_thumb_impact_response(model, lead, trail, ImpactSetup(**good), dt_s=1e-5)
     for key, bad in [
         ("mass_kg", 0.0),
         ("approach_speed_m_s", -0.1),
         ("initial_gap_m", -1e-3),
-        ("dt_s", 0.0),
         ("duration_s", float("nan")),
     ]:
         with pytest.raises(ValueError):
-            palm_thumb_impact_response(model, lead, trail, **{**good, key: bad})
+            ImpactSetup(**{**good, key: bad})
+    with pytest.raises(ValueError):
+        palm_thumb_impact_response(model, lead, trail, ImpactSetup(**good), dt_s=0.0)
+    with pytest.raises(TypeError):
+        palm_thumb_impact_response(model, lead, trail, good, dt_s=1e-5)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="never reached"):
+        timestep_halving_sensitivity(
+            model,
+            lead,
+            trail,
+            ImpactSetup(**{**good, "approach_speed_m_s": 0.0, "initial_gap_m": 1e-2}),
+            dt_s=1e-4,
+        )
 
 
 @pytest.mark.unit

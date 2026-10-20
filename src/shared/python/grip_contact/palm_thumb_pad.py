@@ -81,6 +81,7 @@ __all__ = [
     "TIMESTEP_SENSITIVITY_TOL",
     "DriftGate",
     "ImpactResponse",
+    "ImpactSetup",
     "PalmThumbPadForce",
     "hand_drift_gate",
     "palm_thumb_impact_response",
@@ -258,38 +259,52 @@ class ImpactResponse:
     impulse_n_s: float
 
 
+@dataclass(frozen=True)
+class ImpactSetup:
+    """Trail-hand impact on the pad: ``mass_kg`` closing at ``approach_speed_m_s``.
+
+    The trail hand starts ``initial_gap_m`` short of contact and the run lasts
+    ``duration_s``. Preconditions (``ValueError``): positive mass and duration,
+    finite non-negative speed and gap.
+    """
+
+    mass_kg: float
+    approach_speed_m_s: float
+    initial_gap_m: float
+    duration_s: float
+
+    def __post_init__(self) -> None:
+        _positive("mass_kg", self.mass_kg)
+        _positive("duration_s", self.duration_s)
+        for name in ("approach_speed_m_s", "initial_gap_m"):
+            v = float(getattr(self, name))
+            if not math.isfinite(v) or v < 0.0:
+                raise ValueError(f"{name} must be finite and >= 0, got {v!r}")
+
+
 def palm_thumb_impact_response(
     model: TopologyContactModel,
     lead_frame: BushingState,
     trail_frame: BushingState,
+    setup: ImpactSetup,
     *,
-    mass_kg: float,
-    approach_speed_m_s: float,
-    initial_gap_m: float,
     dt_s: float,
-    duration_s: float,
     handedness: Handedness = DEFAULT_HANDEDNESS,
 ) -> ImpactResponse:
     """Trail-hand impact on the pad, integrated with classical RK4.
 
-    The lead hand is held at ``lead_frame``; the trail hand (``mass_kg``)
-    translates along the pad normal of ``trail_frame``, starting
-    ``initial_gap_m`` short of contact and closing at ``approach_speed_m_s``.
-    The impulse is integrated as an extra RK4 state. Preconditions: positive
-    mass, timestep and duration, non-negative speed and gap (``ValueError``).
+    The lead hand is held at ``lead_frame``; the trail hand translates along
+    the pad normal of ``trail_frame`` as described by ``setup``. The impulse
+    is integrated as an extra RK4 state. Preconditions: ``setup`` an
+    :class:`ImpactSetup` (``TypeError``), positive ``dt_s`` (``ValueError``).
     """
-    mass = _positive("mass_kg", mass_kg)
+    if not isinstance(setup, ImpactSetup):
+        raise TypeError(f"setup must be ImpactSetup, got {type(setup).__name__}")
     dt = _positive("dt_s", dt_s)
-    t_end = _positive("duration_s", duration_s)
-    for name, v in (
-        ("approach_speed_m_s", approach_speed_m_s),
-        ("initial_gap_m", initial_gap_m),
-    ):
-        if not math.isfinite(float(v)) or float(v) < 0.0:
-            raise ValueError(f"{name} must be finite and >= 0, got {v!r}")
+    mass = float(setup.mass_kg)
     rest = _evaluate(model, lead_frame, trail_frame, handedness)
     n = np.asarray(rest.normal, dtype=float)
-    start = -(float(rest.penetration_m) + float(initial_gap_m)) * n
+    start = -(float(rest.penetration_m) + float(setup.initial_gap_m)) * n
 
     def rhs(s: float, v: float) -> tuple[float, float, float]:
         pw = _evaluate(
@@ -297,8 +312,8 @@ def palm_thumb_impact_response(
         )
         return v, float(np.dot(pw.force_a_n, n)) / mass, float(pw.normal_force_mag_n)
 
-    s, v, impulse, peak = 0.0, float(approach_speed_m_s), 0.0, 0.0
-    for _ in range(int(round(t_end / dt))):
+    s, v, impulse, peak = 0.0, float(setup.approach_speed_m_s), 0.0, 0.0
+    for _ in range(int(round(float(setup.duration_s) / dt))):
         k1 = rhs(s, v)
         k2 = rhs(s + 0.5 * dt * k1[0], v + 0.5 * dt * k1[1])
         k3 = rhs(s + 0.5 * dt * k2[0], v + 0.5 * dt * k2[1])
@@ -314,34 +329,34 @@ def timestep_halving_sensitivity(
     model: TopologyContactModel,
     lead_frame: BushingState,
     trail_frame: BushingState,
+    setup: ImpactSetup,
     *,
     dt_s: float,
-    **impact: Any,
+    handedness: Handedness = DEFAULT_HANDEDNESS,
 ) -> dict[str, Any]:
     """Run :func:`palm_thumb_impact_response` at ``dt_s`` and ``dt_s / 2``.
 
     Returns the two responses and the relative changes of peak normal force and
-    impulse (relative to the fine run). ``impact`` carries the remaining
-    keyword arguments of :func:`palm_thumb_impact_response`.
+    impulse (relative to the fine run). Raises ``ValueError`` when the trail
+    hand never reaches the pad within ``setup.duration_s``.
     """
     dt = _positive("dt_s", dt_s)
-    coarse = palm_thumb_impact_response(
-        model, lead_frame, trail_frame, dt_s=dt, **impact
-    )
-    fine = palm_thumb_impact_response(
-        model, lead_frame, trail_frame, dt_s=dt / 2.0, **impact
-    )
+    runs = [
+        palm_thumb_impact_response(
+            model, lead_frame, trail_frame, setup, dt_s=step, handedness=handedness
+        )
+        for step in (dt, dt / 2.0)
+    ]
+    coarse, fine = runs
     if fine.peak_normal_force_n <= 0.0 or fine.impulse_n_s <= 0.0:
         raise ValueError("impact never reached the pad; increase duration_s")
+    peak_change = abs(coarse.peak_normal_force_n - fine.peak_normal_force_n)
+    impulse_change = abs(coarse.impulse_n_s - fine.impulse_n_s)
     return {
         "coarse": coarse,
         "fine": fine,
-        "peak_relative_change": abs(
-            coarse.peak_normal_force_n - fine.peak_normal_force_n
-        )
-        / fine.peak_normal_force_n,
-        "impulse_relative_change": abs(coarse.impulse_n_s - fine.impulse_n_s)
-        / fine.impulse_n_s,
+        "peak_relative_change": peak_change / fine.peak_normal_force_n,
+        "impulse_relative_change": impulse_change / fine.impulse_n_s,
     }
 
 
