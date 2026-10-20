@@ -4335,10 +4335,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13041
 - **Branch:** merged via #13047
-- **PR:** #13047, #13404, #13431
+- **PR:** #13047, #13404, #13431, #13536
 - **Paths:** see #13047
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-19 (`9866f8c1`; collated from changes/13041-bench-press-supine-opensim-ik-id-with-be.md)
+- **Last verified:** 2026-10-20 (`702d19d6`; collated from changes/13041-count-bench-support-reaction-in-hicks-re.md)
 - **Summary:** Lift body and every derived lift input (squat on the OSL-17 rack, deadlift, clean, snatch, bench) regenerated on the whole-row de Leva table (#13037) with main's tibial torsion; regression-snapshot IK bounds re-derived; bundle builder picks RK4-stable substeps (deadlift 8 -> 16, parity xfail removed); follow-ups OSL-18 #13157 (foot torsion marker gate, strict xfail), OSL-19 #13158 (arm reach), OSL-20 #13159 (open-loop wrist mode)
 - **Next step:** Shipped in PR #13047.
 

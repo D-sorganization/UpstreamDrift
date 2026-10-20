@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13536 | Count bench support reaction in Hicks residual limit |
 | 2026-10-20 | #13532 | complete OSL-4 muscle solve and residual gating for supine bench press |
 | 2026-10-20 | #13527 | R4: the dynamics receipt records IK and FD knee flexion through the first static window (acceptance item 4 instrumentation) |
 | 2026-10-20 | #13525 | HRG-H2 diagnostic palm-thumb pad: drift-gated physical trail_palm_lead_thumb pair on the shared G2 law in separated_v2, impact timestep and preload sensitivity reports, and a new spec revision with its own spec_sha256; contract pinned by tests. |
