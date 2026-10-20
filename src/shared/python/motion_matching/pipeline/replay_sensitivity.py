@@ -3,16 +3,24 @@
 The tracked full-body replay is deterministic: the same reference on the same
 build gives a bit-identical record (fixed-step RK4, no random numbers, no
 threads; ``tests/unit/motion_matching/pipeline/test_replay_sensitivity_13112.py``).
-It is, however, sensitive: before impact the computed-torque tracking pulls a
-perturbed run back to the reference, but after impact the ball's impulse, the
-release and the single-foot follow-through let two nearby runs separate
-exponentially. A sub-millimetre change of a segment's centre of mass, a 1e-16
-change in a calibration (summation order of a BLAS reduction on another host)
-or a receipt rounding of 1e-5 in a document is then amplified to tens of
-millimetres of whole-swing marker RMS by the end of the follow-through.
+Two runs of the calibrated driver command on one host give identical
+receipts, and they match the committed ControlTower receipt to 4e-10 m in
+dynamics RMS although the hip calibration differs at 1e-16.
 
-That is a property of the closed-loop dynamics, not a bug to suppress. This
-module measures it instead of hiding it:
+Measured with this module on the canonical driver and 7-iron commands, the
+replay is not chaotic for reference perturbations from 1e-6 to 1e-3: the
+separation of a perturbed run contracts before impact (growth rate about
+-0.27 /s) and grows only slowly after it (+1.4 /s driver, +1.7 /s 7-iron;
+e-folding 0.6-0.7 s), so a perturbation is amplified about 4x by impact,
+6x by 0.1 s after impact and 8-10x by the end of the capture, linearly in
+its size. Receipts that "do not reproduce" therefore differ in their inputs:
+code and document drift between the receipt's commit and the checkout, and
+the iterative ZMP filter, which turned a 0.1 mm IK difference into a
+different reference (pass-1 centre-of-mass shift 133 mm against 47 mm) and
+a 33 mm after-impact difference, while the address-to-impact RMS agreed to
+0.004 mm.
+
+This module measures the sensitivity instead of hiding it:
 
 * :func:`finite_time_growth_rate` fits the finite-time Lyapunov-style
   exponent ``lambda`` of ``|dx(t)| ~ |dx_0| exp(lambda t)`` over a window;
@@ -20,10 +28,8 @@ module measures it instead of hiding it:
   windows of the separation between a nominal and a perturbed replay;
 * :func:`replay_sensitivity` runs the perturbed replay and returns the
   receipt block ``dynamics.replay_sensitivity``;
-* :func:`post_impact_window_rms` gives the bounded acceptance metric: the
-  marker RMS over a fixed window after impact, short enough that a
-  sub-millimetre input change cannot move it by more than the stated
-  reproducibility tolerance;
+* :func:`post_impact_window_rms` gives the bounded after-impact metric: the
+  marker RMS over a fixed window after impact;
 * :func:`compare_receipts` reports which receipt values differ between two
   runs beyond a tolerance, ignoring wall-clock fields.
 
@@ -52,14 +58,13 @@ SEPARATION_FLOOR_M = 1e-12
 #: 0.1 mm, two orders below the 31-34 mm address-to-impact replay RMS and the
 #: smallest model-change effect the receipts are used to rank (~1 mm).
 REPRODUCIBILITY_TOLERANCE_M = 1e-4
-#: Fixed after-impact window of the bounded acceptance metric (s). With the
-#: measured after-impact growth rates of the canonical driver and 7-iron
-#: replays (``CANONICAL_RUN.md`` #13112 paragraph), a 1e-6 input change grows
-#: by well under the 0.1 mm tolerance in 0.1 s, while the follow-through to
-#: the end of the capture (0.5-0.6 s after impact) amplifies it to the
-#: 10-80 mm swings the issue reports. 0.1 s covers the ball contact, the
-#: release and the start of the follow-through: the part of the swing after
-#: impact that still bears on the ball.
+#: Fixed after-impact window of the bounded metric (s). It covers the ball
+#: contact, the release and the start of the follow-through, the part of the
+#: swing after impact that still bears on the ball, and stops before the
+#: follow-through where the reference IK branch is not unique (#12042). The
+#: measured amplification of a reference perturbation inside it is 4.8-6.3x
+#: (against 8-10x to the end of the capture), so an input change below
+#: 16 um moves it by less than ``REPRODUCIBILITY_TOLERANCE_M``.
 POST_IMPACT_WINDOW_S = 0.1
 #: Receipt keys that are wall-clock or host dependent and never reproduce.
 VOLATILE_KEYS = frozenset({"elapsed_s"})

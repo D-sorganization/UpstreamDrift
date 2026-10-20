@@ -178,6 +178,12 @@ def build_parser() -> argparse.ArgumentParser:
         "divergence growth before and after impact (#13112)",
     )
     parser.add_argument(
+        "--replay-sensitivity-epsilon",
+        type=_nonnegative_float,
+        default=1e-6,
+        help="size of the --replay-sensitivity reference offset (m or rad)",
+    )
+    parser.add_argument(
         "--address-only",
         action="store_true",
         help="stop after the calibrated address and write address_report.json",
@@ -1247,6 +1253,7 @@ def _simulate_and_receipt(
             dynamics_report["fd_phase"],
             tracking_backend=tracking,
             reference_hook=hook,
+            epsilon=args.replay_sensitivity_epsilon,
         )
     _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)
     render_skipped = _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)

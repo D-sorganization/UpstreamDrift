@@ -893,6 +893,7 @@ def replay_sensitivity_block(
     *,
     tracking_backend: str = "kkt",
     reference_hook: Any = None,
+    epsilon: float = 1e-6,
 ) -> dict[str, Any]:
     """Receipt block ``dynamics.replay_sensitivity`` (#13112, opt-in).
 
@@ -925,5 +926,6 @@ def replay_sensitivity_block(
         q_track,
         sim_q,
         float(fd_phase["impact_time_s"]),
+        epsilon=epsilon,
     )
     return {"status": "ok", **block}
