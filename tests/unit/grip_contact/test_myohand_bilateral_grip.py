@@ -69,6 +69,9 @@ SCENE_PY = (
 ADAPTER_PY = (
     ROOT / "src/engines/physics_engines/myosuite/python/myohand_bilateral_adapter.py"
 )
+CONTROLLER_PY = (
+    ROOT / "src/engines/physics_engines/myosuite/python/myohand_grip_controller.py"
+)
 
 ALLOWED_HAND_SEGMENT_TOKENS = (
     "distph",
@@ -451,6 +454,92 @@ def test_frozen_finger_law_level_parity_on_identical_site_states(
         "myosuite_myohand_bilateral_iron",
     ],
 )
+def test_mujoco_free_joint_mj_inverse_frame_conversion_convention(
+    model_id: str,
+) -> None:
+    """Verify MuJoCo freejoint mj_inverse conversion (world linear DOFs, body angular DOFs about xpos)."""
+    mujoco = pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from scipy.spatial.transform import Rotation
+
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        MyoHandBilateralGripAdapter,
+    )
+
+    adapter = MyoHandBilateralGripAdapter(model_id, contact_mode="shared")
+    rot_club = Rotation.from_euler("XYZ", [0.32, -0.41, 0.68]).as_matrix()
+    q_xyzw = Rotation.from_matrix(rot_club).as_quat()
+    q_wxyz = np.array([q_xyzw[3], q_xyzw[0], q_xyzw[1], q_xyzw[2]], dtype=float)
+    p_origin = np.array([0.12, -0.18, 0.45], dtype=float)
+    v_origin_w = np.array([0.35, -0.25, 0.15], dtype=float)
+    omega_w = np.array([1.1, -0.75, 0.55], dtype=float)
+    a_origin_w = np.array([-1.8, 1.4, 0.65], dtype=float)
+    alpha_w = np.array([2.8, -2.2, 3.6], dtype=float)
+
+    qpos_club = np.concatenate([p_origin, q_wxyz])
+    qvel_club = np.concatenate([v_origin_w, rot_club.T @ omega_w])
+    qacc_club = np.concatenate([a_origin_w, rot_club.T @ alpha_w])
+
+    f_mj, m_mj_com, m_mj_origin, c_norm = adapter.club_mj_inverse_requirement(
+        qpos_club=qpos_club,
+        qvel_club=qvel_club,
+        qacc_club=qacc_club,
+    )
+    assert c_norm == 0.0
+
+    # 1. Exact 3D Newton-Euler using scene mass/inertia matches mj_inverse to machine precision
+    scene_props = adapter.club_scene_inertial_properties()
+    f_sc, m_sc_com, m_sc_origin = scene_props.inverse_dynamics_at_phase(
+        0.0,
+        0.0,
+        0.0,
+        rotation=rot_club,
+        origin_accel_m_s2=a_origin_w,
+        alpha_rad_s2=alpha_w,
+        omega_rad_s=omega_w,
+    )
+    assert np.allclose(f_mj, f_sc, atol=1e-13, rtol=1e-13)
+    assert np.allclose(m_mj_com, m_sc_com, atol=1e-13, rtol=1e-13)
+    assert np.allclose(m_mj_origin, m_sc_origin, atol=1e-13, rtol=1e-13)
+
+    # 2. Analytic ClubSpec properties match mass, COM, I_xx, I_zz; iron I_yy reflects boundinertia=1e-4
+    f_ana, m_ana_com, m_ana_origin = adapter.club_inverse_dynamics_requirement(
+        origin_accel_m_s2=a_origin_w,
+        alpha_rad_s2=alpha_w,
+        omega_rad_s=omega_w,
+        rotation=rot_club,
+    )
+    assert np.allclose(f_mj, f_ana, atol=1e-13, rtol=1e-13)
+    if model_id == "myosuite_myohand_bilateral_driver":
+        assert np.allclose(m_mj_com, m_ana_com, atol=1e-13, rtol=1e-13)
+        assert np.allclose(m_mj_origin, m_ana_origin, atol=1e-13, rtol=1e-13)
+    else:
+        assert scene_props.inertia_com_kg_m2[1, 1] == pytest.approx(1e-4, abs=1e-16)
+
+    # 3. Round-trip (f_mj, m_mj_com) through xfrc_applied + mj_forward recovers qacc_club
+    bid = adapter._club_body_id()
+    qadr, vadr = adapter._club_joint_addrs()
+    adapter._data.qpos[qadr : qadr + 7] = qpos_club
+    adapter._data.qvel[:] = 0.0
+    adapter._data.qvel[vadr : vadr + 6] = qvel_club
+    adapter._data.qacc[:] = 0.0
+    adapter._data.xfrc_applied[:] = 0.0
+    adapter._data.xfrc_applied[bid, :3] = f_mj
+    adapter._data.xfrc_applied[bid, 3:6] = m_mj_com
+    mujoco.mj_forward(adapter._model, adapter._data)
+    assert np.allclose(
+        adapter._data.qacc[vadr : vadr + 6], qacc_club, atol=1e-11, rtol=1e-11
+    )
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.parametrize(
+    "model_id",
+    [
+        "myosuite_myohand_bilateral_driver",
+        "myosuite_myohand_bilateral_iron",
+    ],
+)
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -458,7 +547,7 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
     model_id: str,
     style: GripStyle,
 ) -> None:
-    """Prescribed club requirement is independent of applied wrench; scaling wrench x2 changes error."""
+    """Both analytic and MuJoCo mj_inverse requirements are independent of applied hand wrenches."""
     pytest.importorskip("mujoco")
     _require_myohand_assets()
     from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
@@ -480,20 +569,36 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
     adapter.set_prescribed_grip_state(hand_seq[-1], club_seq[-1])
     rep = adapter.evaluate_contacts()
     adapter.apply_report(rep)
-    f_req_1, m_req_com_1, m_req_orig_1 = adapter.club_inverse_dynamics_requirement()
+    f_req_1, m_req_com_1, m_req_orig_1 = adapter.club_inverse_dynamics_requirement(
+        t_s=float(times[-1]), n_steps=21, dt_s=FIXTURE_DT_S
+    )
+    f_mj_1, m_mj_com_1, m_mj_orig_1, c_norm_1 = adapter.club_mj_inverse_requirement(
+        t_s=float(times[-1]), n_steps=21, dt_s=FIXTURE_DT_S
+    )
+    assert c_norm_1 == 0.0
 
-    # Apply a deliberately wrong (scaled x2) contact wrench: requirement must NOT change.
+    # Apply a deliberately wrong (scaled x2) contact wrench: neither analytic nor
+    # MuJoCo mj_inverse requirement may change.
     wrenches_x2 = {
         body_id: (2.0 * f, 2.0 * m) for body_id, (f, m) in rep.body_wrenches().items()
     }
     adapter.apply_wrenches(wrenches_x2)
-    f_req_2, m_req_com_2, m_req_orig_2 = adapter.club_inverse_dynamics_requirement()
+    f_req_2, m_req_com_2, m_req_orig_2 = adapter.club_inverse_dynamics_requirement(
+        t_s=float(times[-1]), n_steps=21, dt_s=FIXTURE_DT_S
+    )
+    f_mj_2, m_mj_com_2, m_mj_orig_2, c_norm_2 = adapter.club_mj_inverse_requirement(
+        t_s=float(times[-1]), n_steps=21, dt_s=FIXTURE_DT_S
+    )
+    assert c_norm_2 == 0.0
     assert np.allclose(f_req_1, f_req_2, atol=0.0, rtol=0.0)
     assert np.allclose(m_req_com_1, m_req_com_2, atol=0.0, rtol=0.0)
     assert np.allclose(m_req_orig_1, m_req_orig_2, atol=0.0, rtol=0.0)
+    assert np.allclose(f_mj_1, f_mj_2, atol=0.0, rtol=0.0)
+    assert np.allclose(m_mj_com_1, m_mj_com_2, atol=0.0, rtol=0.0)
+    assert np.allclose(m_mj_orig_1, m_mj_orig_2, atol=0.0, rtol=0.0)
 
     # Full trajectory report at 1x vs 2x scaled contact wrench:
-    # required wrench is unchanged while measured errors change.
+    # both MuJoCo mj_inverse and analytic requirements are unchanged while measured errors change.
     report_1x = evaluate_grasp_resultant_newton_check(
         adapter, n_steps=21, dt_s=FIXTURE_DT_S, wrench_scale=1.0
     )
@@ -502,6 +607,11 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
     )
     assert report_1x.required_force_n == report_2x.required_force_n
     assert report_1x.required_moment_com_nm == report_2x.required_moment_com_nm
+    assert report_1x.analytic_required_force_n == report_2x.analytic_required_force_n
+    assert (
+        report_1x.analytic_required_moment_com_nm
+        == report_2x.analytic_required_moment_com_nm
+    )
     assert not np.isclose(
         report_1x.force_peak_rel_error, report_2x.force_peak_rel_error, rtol=1e-3
     )
@@ -515,6 +625,16 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
         report_1x.moment_rms_rel_error, report_2x.moment_rms_rel_error, rtol=1e-3
     )
     assert not np.isclose(
+        report_1x.mj_central_diff_force_rms_rel_error,
+        report_2x.mj_central_diff_force_rms_rel_error,
+        rtol=1e-3,
+    )
+    assert not np.isclose(
+        report_1x.mj_central_diff_moment_rms_rel_error,
+        report_2x.mj_central_diff_moment_rms_rel_error,
+        rtol=1e-3,
+    )
+    assert not np.isclose(
         report_1x.newton_force_rel_error, report_2x.newton_force_rel_error, rtol=1e-3
     )
     assert not np.isclose(
@@ -526,43 +646,30 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
     assert report_1x.grasp_synthesis.residual_inf_n <= 1e-9
     assert report_1x.per_hand_split_status == "INDETERMINATE"
     assert report_1x.squeeze_status == "INDETERMINATE"
+    assert report_1x.contact_regime == "quasi_stick"
+    assert report_1x.min_squeeze_for_stick_n > 0.0
+    assert report_1x.lead_squeeze_normal_force_n > report_1x.min_squeeze_for_stick_n
+    assert report_1x.trail_squeeze_normal_force_n > report_1x.min_squeeze_for_stick_n
+    assert len(report_1x.nullspace_split_vector) == 6
+    assert float(np.linalg.norm(report_1x.nullspace_split_vector)) > 0.0
 
-    # Every loaded hand-club pair sits at saturated dynamic friction:
-    # |v_t| = sqrt(0.015^2 + 0.005^2) = 0.0158114 m/s >> v_tr = 0.001 m/s,
-    # so |f_t| / (mu_s * f_n) = mu_d / mu_s = 0.7 / 0.9 = 7/9 ≈ 0.777778.
+    # Every hand-club and hand-hand pair is held in bilateral compression and
+    # regularized quasi-stick (0 < |v_t| < v_tr = 1.0 mm/s, 0 < |f_t|/(mu_s*f_n) < 1).
     law = adapter.topology_model().law
-    expected_cone_ratio = law.dynamic_friction / law.static_friction
-    hh_names = {p.name for p in adapter.topology().hand_hand_pairs()}
+    v_tr = float(law.transition_velocity_m_s)
     assert len(report_1x.friction_cone_ratios) == len(adapter.topology().pairs)
     for pair_name, ratio in report_1x.friction_cone_ratios.items():
         v_slip = report_1x.slip_velocities_m_s[pair_name]
-        if pair_name in hh_names:
-            assert np.isclose(v_slip, 0.0, atol=1e-12)
-            assert ratio is not None and np.isclose(ratio, 0.0, atol=1e-12)
-        elif ratio is not None:
-            assert np.isclose(v_slip, float(np.hypot(0.015, 0.005)), atol=1e-6)
-            assert np.isclose(ratio, expected_cone_ratio, rtol=1e-6)
+        assert ratio is not None, f"Expected active compression on {pair_name}"
+        assert 0.0 < ratio < 0.25, (
+            f"Expected quasi-stick cone ratio < 0.25 on {pair_name}, got {ratio}"
+        )
+        assert 0.0 < v_slip < v_tr, (
+            f"Expected quasi-stick micro-slip < {v_tr} m/s on {pair_name}, got {v_slip}"
+        )
 
 
 @pytest.mark.requires_mujoco
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "build_prescribed_grip_trajectory prescribes independent hand and club kinematics "
-        "with unidirectional -y_grip compression (-1.5 to -1.8 mm, unloading the 5 palm/heel "
-        "pads) and tangential relative slip |v_t| up to 15.811 mm/s >> v_tr = 1.0 mm/s, "
-        "driving all loaded hand-club pads into saturated sliding friction (|f_t|=mu_d*f_n, "
-        "|F_hand| ~ 2140-2568 N) rather than the small club inverse-dynamics requirement "
-        "m*(a_com - g) (~3.45 N driver, ~4.56 N iron). Measured (force_peak_rel_error, "
-        "force_rms_rel_error) and (moment_peak_rel_error, moment_rms_rel_error): "
-        "driver overlap/interlock (596.59, 509.84) and (1814.00, 1530.33); "
-        "driver ten_finger (716.11, 611.94) and (2182.02, 1840.83); "
-        "iron overlap/interlock (449.56, 384.21) and (1584.99, 1328.52); "
-        "iron ten_finger (539.67, 461.19) and (1907.68, 1599.07) "
-        "(exceeding PEAK_TOLERANCE=0.05, RMS_TOLERANCE=0.02)."
-    ),
-)
 @pytest.mark.parametrize(
     "model_id",
     [
@@ -573,11 +680,11 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
-def test_grasp_resultant_matches_prescribed_inverse_dynamics_within_m3_tolerances(
+def test_grasp_synthesis_solver_closure_residual(
     model_id: str,
     style: GripStyle,
 ) -> None:
-    """Compare hands' net club wrench to prescribed club requirement within 5% peak / 2% RMS."""
+    """Grasp-synthesis closure (solver residual + adapter site-mapping check, not acceptance evidence)."""
     pytest.importorskip("mujoco")
     _require_myohand_assets()
     from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
@@ -592,14 +699,78 @@ def test_grasp_resultant_matches_prescribed_inverse_dynamics_within_m3_tolerance
         contact_mode="shared",
         frozen_fingers=True,
     )
+    report = evaluate_grasp_resultant_newton_check(adapter, n_steps=21)
+    assert report.solver_closure_force_peak_rel_error <= 1e-10
+    assert report.solver_closure_force_rms_rel_error <= 1e-10
+    assert report.solver_closure_moment_peak_rel_error <= 1e-10
+    assert report.solver_closure_moment_rms_rel_error <= 1e-10
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.parametrize(
+    "model_id",
+    [
+        "myosuite_myohand_bilateral_driver",
+        "myosuite_myohand_bilateral_iron",
+    ],
+)
+@pytest.mark.parametrize(
+    "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
+)
+def test_grasp_resultant_matches_prescribed_inverse_dynamics_within_m3_tolerances(
+    model_id: str,
+    style: GripStyle,
+) -> None:
+    """Acceptance gate: MuJoCo mj_inverse requirement (analytic & central-diff qacc) + forward replay."""
+    pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        MyoHandBilateralGripAdapter,
+        evaluate_grasp_resultant_newton_check,
+        replay_club_forward_trajectory,
+    )
+
+    spec = GripSpec(style=style, trigger_finger=True)
+    adapter = MyoHandBilateralGripAdapter(
+        model_id,
+        grip_spec=spec,
+        contact_mode="shared",
+        frozen_fingers=True,
+    )
     newton_report = evaluate_grasp_resultant_newton_check(adapter, n_steps=21)
 
+    # Step 2a: Hand contact resultant vs MuJoCo mj_inverse (analytic qacc)
+    assert newton_report.max_club_constraint_force_n == 0.0
     assert newton_report.force_peak_rel_error <= PEAK_TOLERANCE
     assert newton_report.force_rms_rel_error <= RMS_TOLERANCE
     assert newton_report.moment_peak_rel_error <= PEAK_TOLERANCE
     assert newton_report.moment_rms_rel_error <= RMS_TOLERANCE
     assert newton_report.newton_force_rel_error <= PEAK_TOLERANCE
     assert newton_report.newton_moment_com_residual_nm <= 1e-3
+
+    # Step 2b: Hand contact resultant vs MuJoCo mj_inverse (central-difference qacc of prescribed qvel)
+    assert newton_report.mj_central_diff_force_peak_rel_error <= PEAK_TOLERANCE
+    assert newton_report.mj_central_diff_force_rms_rel_error <= RMS_TOLERANCE
+    assert newton_report.mj_central_diff_moment_peak_rel_error <= PEAK_TOLERANCE
+    assert newton_report.mj_central_diff_moment_rms_rel_error <= RMS_TOLERANCE
+
+    # Step 2c: Analytic ClubInertialProperties vs MuJoCo mj_inverse discrepancy (mass/inertia check)
+    assert newton_report.analytic_vs_mj_force_peak_rel_error <= PEAK_TOLERANCE
+    assert newton_report.analytic_vs_mj_force_rms_rel_error <= RMS_TOLERANCE
+    assert newton_report.analytic_vs_mj_moment_peak_rel_error <= PEAK_TOLERANCE
+    assert newton_report.analytic_vs_mj_moment_rms_rel_error <= RMS_TOLERANCE
+
+    # Step 3: Open-loop forward replay with mj_step under solved hand contact wrenches + gravity
+    replay_report = replay_club_forward_trajectory(adapter, n_steps=21, substeps=10)
+    assert replay_report.integrator == "semi_implicit_euler"
+    assert replay_report.integrator_order == 1
+    assert replay_report.max_active_club_weld_count == 0
+    assert replay_report.max_club_constraint_force_n == 0.0
+    assert replay_report.com_pos_peak_rel_error <= PEAK_TOLERANCE
+    assert replay_report.com_pos_rms_rel_error <= RMS_TOLERANCE
+    assert replay_report.orientation_peak_rel_error <= PEAK_TOLERANCE
+    assert replay_report.orientation_rms_rel_error <= RMS_TOLERANCE
+    assert replay_report.passed is True
 
 
 # ---------------------------------------------------------------------------
@@ -613,7 +784,9 @@ def test_dbc_preconditions_and_missing_assets(tmp_path: Path) -> None:
     pytest.importorskip("mujoco")
     _require_myohand_assets()
     from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        ClubInertialProperties,
         MyoHandBilateralGripAdapter,
+        solve_force_regulated_hand_frames,
     )
     from src.engines.physics_engines.myosuite.python.myohand_bilateral_scene import (
         check_myohand_assets_available,
@@ -637,6 +810,20 @@ def test_dbc_preconditions_and_missing_assets(tmp_path: Path) -> None:
             squeeze_n=-10.0,
         )
 
+    with pytest.raises(ValueError, match="mass_kg"):
+        ClubInertialProperties(
+            mass_kg=0.0,
+            com_local_m=(0.0, -0.2, 0.0),
+            inertia_com_kg_m2=np.eye(3),
+        )
+
+    with pytest.raises(TypeError, match="topology_model"):
+        solve_force_regulated_hand_frames(
+            "not_a_model",  # type: ignore[arg-type]
+            {},
+            np.zeros(6),
+        )
+
 
 def _attribute_chain_depth(node: ast.AST) -> int:
     depth = 0
@@ -656,7 +843,7 @@ def _attribute_chain_depth(node: ast.AST) -> int:
 
 def test_ast_file_function_and_lod_budgets() -> None:
     """Enforce <= 1200 lines/file, <= 100 lines and <= 8 params/fn, <= 2 dots LoD."""
-    for path in (SCENE_PY, ADAPTER_PY):
+    for path in (SCENE_PY, ADAPTER_PY, CONTROLLER_PY):
         assert path.is_file(), f"Missing implementation file: {path}"
         source = path.read_text(encoding="utf-8")
         lines = source.splitlines()
