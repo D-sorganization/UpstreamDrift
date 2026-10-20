@@ -887,12 +887,10 @@ def replay_sensitivity_block(
     sim: fs.FullBodySimulator,
     lane: Lane,
     kin: FullBodyMarkerKinematics,
-    q_track: np.ndarray,
-    sim_q: np.ndarray,
+    tracks: tuple[np.ndarray, np.ndarray],
     fd_phase: Mapping[str, Any],
     *,
-    tracking_backend: str = "kkt",
-    reference_hook: Any = None,
+    replay_options: Mapping[str, Any] | None = None,
     epsilon: float = 1e-6,
 ) -> dict[str, Any]:
     """Receipt block ``dynamics.replay_sensitivity`` (#13112, opt-in).
@@ -900,7 +898,9 @@ def replay_sensitivity_block(
     Replays the tracked reference once more with a seeded 1e-6 offset of
     every coordinate and reports the Lyapunov-style growth of the marker
     separation before and after impact (``replay_sensitivity``). Costs one
-    extra replay; reports only.
+    extra replay; reports only. ``tracks`` is ``(q_track, sim_q)``: the
+    tracked reference and its nominal replay. ``replay_options`` holds the
+    ``tracking_backend`` and ``reference_hook`` passed to ``replay``.
     """
     from src.shared.python.motion_matching.pipeline.replay_sensitivity import (
         replay_sensitivity,
@@ -908,14 +908,16 @@ def replay_sensitivity_block(
 
     if fd_phase.get("status") != "ok":
         return {"status": "unavailable", "reason": "no impact split"}
+    q_track, sim_q = tracks
+    options = dict(replay_options or {})
 
     def run(reference: np.ndarray) -> np.ndarray:
         _, q = replay(
             sim,
             lane,
             reference,
-            tracking_backend=tracking_backend,
-            reference_hook=reference_hook,
+            tracking_backend=options.get("tracking_backend", "kkt"),
+            reference_hook=options.get("reference_hook"),
         )
         return q
 

@@ -204,20 +204,20 @@ def replay_sensitivity(
     *,
     epsilon: float = PERTURBATION,
     seed: int = PERTURBATION_SEED,
-    post_window_s: float = POST_IMPACT_WINDOW_S,
 ) -> dict[str, Any]:
     """Receipt block ``dynamics.replay_sensitivity``.
 
     Replays ``q_track + epsilon * direction`` with ``run_replay`` (which
     returns the simulated coordinates on ``times``) and reports how the
     marker separation from ``nominal_q`` grows before and after impact.
+    The bounded window is ``POST_IMPACT_WINDOW_S``.
     """
     ref = np.asarray(q_track, dtype=float)
     perturbed = ref + epsilon * perturbation_direction(ref.shape, seed)
     sim_b = np.asarray(run_replay(perturbed), dtype=float)
     separation = marker_separation(markers, nominal_q, sim_b)
     report = divergence_report(
-        times, separation, impact_time_s, epsilon, post_window_s=post_window_s
+        times, separation, impact_time_s, epsilon, post_window_s=POST_IMPACT_WINDOW_S
     )
     report["perturbation_seed"] = int(seed)
     report["perturbation"] = "constant offset of every reference coordinate"

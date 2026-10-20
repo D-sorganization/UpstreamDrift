@@ -1185,6 +1185,29 @@ def _ground_support_receipt(
     )
 
 
+def _maybe_replay_sensitivity(
+    args: Any,
+    plant: tuple[Lane, Any, Any],
+    tracks: tuple[np.ndarray, np.ndarray],
+    dynamics_report: dict[str, Any],
+    replay_options: dict[str, Any],
+) -> None:
+    """Add the opt-in ``replay_sensitivity`` block (#13112) in place."""
+    if not getattr(args, "replay_sensitivity", False):
+        return
+    lane, kin, sim = plant
+    q_track, sim_q = tracks
+    dynamics_report["replay_sensitivity"] = replay_sensitivity_block(
+        sim,
+        lane,
+        kin,
+        (q_track, sim_q),
+        dynamics_report["fd_phase"],
+        replay_options=replay_options,
+        epsilon=args.replay_sensitivity_epsilon,
+    )
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -1243,18 +1266,13 @@ def _simulate_and_receipt(
             club_attachments=cal_res.attachments,
         )
     )
-    if getattr(args, "replay_sensitivity", False):
-        dynamics_report["replay_sensitivity"] = replay_sensitivity_block(
-            sim,
-            lane,
-            kin,
-            q_track,
-            sim_q,
-            dynamics_report["fd_phase"],
-            tracking_backend=tracking,
-            reference_hook=hook,
-            epsilon=args.replay_sensitivity_epsilon,
-        )
+    _maybe_replay_sensitivity(
+        args,
+        (lane, kin, sim),
+        (q_track, sim_q),
+        dynamics_report,
+        {"tracking_backend": tracking, "reference_hook": hook},
+    )
     _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)
     render_skipped = _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)
     receipt = _ground_support_receipt(
