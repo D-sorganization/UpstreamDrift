@@ -590,3 +590,15 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 Full rule: [fleet-rules/merge-queue.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/merge-queue.md) (synced from Repository_Management; edit the source there).
 
 <!-- END FLEET-MANAGED: merge-queue -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: remote-destructive-commands -->
+
+### Remote and Destructive Commands: Guarded Scripts Only
+
+Never run an inline delete or cleanup one-liner on another host (`ssh host "powershell -Command ..."`, `ssh host "rm ..."`). Run a reviewed script that refuses empty, relative or home paths, defaults to a dry run and caps deletions. Never delete by age under a home directory. If you stop a remote command, kill the remote process, not only the local ssh client.
+
+Full rule: [fleet-rules/remote-destructive-commands.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/remote-destructive-commands.md) (synced from Repository_Management; edit the source there).
+
+<!-- END FLEET-MANAGED: remote-destructive-commands -->
