@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13480 | Restore the #13396 grip follow-ups lost in the HRG-GS consolidation: one club_state per Pinocchio RHS and the HRG reference's assessments and layout fixes |
 | 2026-10-20 | #13473 | Relax last-ulp geometry assertions in batched grip contact tests (Linux BLAS dot rounding) |
 | 2026-10-20 | #13471 | Test the MyoSuite gymnasium-first import behaviourally in _engine_init |
 | 2026-10-19 | #13445 | Verify bilateral myoHand grip against independent MuJoCo mj_inverse requirement and forward replay |

@@ -2697,10 +2697,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13396
 - **Branch:** merged via #13422
-- **PR:** #13422
+- **PR:** #13422, #13480
 - **Paths:** see #13422
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13396-pinocchio-grip-rhs-memoise-hand-kinemati.md)
+- **Last verified:** 2026-10-20 (`9c1c578f`; collated from changes/13396-restore-the-13396-grip-follow-ups-lost-i.md)
 - **Summary:** HRG reference: record that an analytic Radau Jacobian is not worth building for the Pinocchio grip sim (num_jac is 5-15% of CPU; Newton iterations dominate)
 - **Next step:** Shipped in PR #13422.
 
