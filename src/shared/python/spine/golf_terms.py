@@ -32,6 +32,7 @@ from typing import Any, Literal
 import numpy as np
 
 from src.shared.python.anatomical_angles import terms as _wrist_terms
+from src.shared.python.anatomical_angles import trunk_pelvis as _trunk_pelvis
 from src.shared.python.contracts import ensure
 from src.shared.python.spine._golf_term_impl import (
     Handedness,
@@ -388,6 +389,23 @@ _TERMS.update(
             reference=_wrist_terms.wrist_term_reference(),
         )
         for w in _wrist_terms.wrist_term_specs()
+    }
+)
+
+# HRG-E3 (#13171): pelvis and thorax in the golfer's ISB lab frame.
+_TERMS.update(
+    {
+        s.term_id: _term(
+            s.term_id,
+            _trunk_pelvis.evaluator(s),  # type: ignore[arg-type]
+            description=s.description,
+            frame=_trunk_pelvis.term_frame(),
+            sign_convention=s.sign_convention,
+            units="deg",
+            required_inputs=_trunk_pelvis.required_inputs(s),
+            reference=_trunk_pelvis.term_reference(),
+        )
+        for s in _trunk_pelvis.term_specs()
     }
 )
 
