@@ -105,7 +105,7 @@
     -9.80665
   ],
   "kernel_hashes": {
-    "kernel_m_sha256": "926a7d57dd9e67cde5a7246ef6fbe93c752fc25ca2b9ff27ed47cd409745b839",
+    "kernel_m_sha256": "897ea3c55f6ed273d3d3620f390f0514f2da386bf2e1a31f67ccfa54d1553546",
     "params_json_sha256": "c325d8be1fc1ddcdb7fcd1bd18fac627bb18acc5c64275775bb9ea6884c3ec69"
   },
   "matlab_release": "2025b",
