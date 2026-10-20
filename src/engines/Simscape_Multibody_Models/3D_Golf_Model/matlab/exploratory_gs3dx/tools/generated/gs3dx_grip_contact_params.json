@@ -82,13 +82,14 @@
   "schema_version": "simscape-grip-contact-kernel/v1",
   "styles": {
     "interlock": {
-      "active_pairs": 9,
+      "active_pairs": 10,
       "pair_names": [
         "lead_palm_proximal_grip",
         "lead_palm_distal_grip",
         "lead_finger_proximal_grip",
         "lead_finger_distal_grip",
         "lead_heel_pad_butt",
+        "lead_butt_fingers_grip",
         "trail_palm_proximal_grip",
         "trail_palm_distal_grip",
         "trail_finger_proximal_grip",
@@ -103,9 +104,11 @@
         "sphere",
         "sphere",
         "sphere",
+        "sphere",
         "sphere"
       ],
       "pair_sides": [
+        "L",
         "L",
         "L",
         "L",
@@ -214,6 +217,25 @@
         ],
         [
           1.0,
+          1.0,
+          1.0,
+          -0.02,
+          0.01995,
+          -0.012700000000000005,
+          -0.02,
+          0.01995,
+          -0.012700000000000005,
+          0.0075,
+          -0.08000000000000002,
+          0.0,
+          -0.0127,
+          0.15620000000000006,
+          0.0,
+          -0.0127,
+          0.0127
+        ],
+        [
+          1.0,
           2.0,
           1.0,
           -0.015,
@@ -287,25 +309,6 @@
           0.0,
           0.0127,
           0.0127
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
         ],
         [
           0.0,
@@ -347,16 +350,17 @@
         ]
       ],
       "style_id": 2,
-      "topology_mapping_hash": "sha256:5e5ce5b7c1c4d49b"
+      "topology_mapping_hash": "sha256:c841ba31fc0c8f46"
     },
     "overlap": {
-      "active_pairs": 9,
+      "active_pairs": 10,
       "pair_names": [
         "lead_palm_proximal_grip",
         "lead_palm_distal_grip",
         "lead_finger_proximal_grip",
         "lead_finger_distal_grip",
         "lead_heel_pad_butt",
+        "lead_butt_fingers_grip",
         "trail_palm_proximal_grip",
         "trail_palm_distal_grip",
         "trail_finger_proximal_grip",
@@ -371,9 +375,11 @@
         "sphere",
         "sphere",
         "sphere",
+        "sphere",
         "sphere"
       ],
       "pair_sides": [
+        "L",
         "L",
         "L",
         "L",
@@ -482,6 +488,25 @@
         ],
         [
           1.0,
+          1.0,
+          1.0,
+          -0.02,
+          0.01995,
+          -0.012700000000000005,
+          -0.02,
+          0.01995,
+          -0.012700000000000005,
+          0.0075,
+          -0.08000000000000002,
+          0.0,
+          -0.0127,
+          0.15620000000000006,
+          0.0,
+          -0.0127,
+          0.0127
+        ],
+        [
+          1.0,
           2.0,
           1.0,
           -0.015,
@@ -555,25 +580,6 @@
           0.0,
           0.0127,
           0.0127
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
         ],
         [
           0.0,
@@ -615,21 +621,23 @@
         ]
       ],
       "style_id": 1,
-      "topology_mapping_hash": "sha256:acb59ea5287f8409"
+      "topology_mapping_hash": "sha256:c18b8ee19f9d7e8b"
     },
     "ten_finger": {
-      "active_pairs": 10,
+      "active_pairs": 12,
       "pair_names": [
         "lead_palm_proximal_grip",
         "lead_palm_distal_grip",
         "lead_finger_proximal_grip",
         "lead_finger_distal_grip",
         "lead_heel_pad_butt",
+        "lead_butt_fingers_grip",
         "trail_palm_proximal_grip",
         "trail_palm_distal_grip",
         "trail_finger_proximal_grip",
         "trail_finger_distal_grip",
-        "ten_finger_little_finger_grip"
+        "ten_finger_little_finger_grip",
+        "trail_hypothenar_grip"
       ],
       "pair_primitives": [
         "sphere",
@@ -641,7 +649,9 @@
         "sphere",
         "sphere",
         "sphere",
-        "capsule"
+        "sphere",
+        "capsule",
+        "sphere"
       ],
       "pair_sides": [
         "L",
@@ -649,6 +659,8 @@
         "L",
         "L",
         "L",
+        "L",
+        "R",
         "R",
         "R",
         "R",
@@ -743,6 +755,25 @@
           -0.02445,
           -0.012699999999999996,
           0.012,
+          -0.08000000000000002,
+          0.0,
+          -0.0127,
+          0.15620000000000006,
+          0.0,
+          -0.0127,
+          0.0127
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          -0.02,
+          0.01995,
+          -0.012700000000000005,
+          -0.02,
+          0.01995,
+          -0.012700000000000005,
+          0.0075,
           -0.08000000000000002,
           0.0,
           -0.0127,
@@ -847,46 +878,27 @@
           0.0127
         ],
         [
+          1.0,
+          2.0,
+          1.0,
+          -0.036958198925323815,
+          -0.02045,
+          0.012700000000000001,
+          -0.036958198925323815,
+          -0.02045,
+          0.012700000000000001,
+          0.008,
+          -0.15620000000000006,
           0.0,
+          0.0127,
+          0.08,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
+          0.0127,
+          0.0127
         ]
       ],
       "style_id": 3,
-      "topology_mapping_hash": "sha256:11b31975e4956b70"
+      "topology_mapping_hash": "sha256:fc7cebec019a74bf"
     }
   }
 }

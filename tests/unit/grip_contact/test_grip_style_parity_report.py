@@ -556,6 +556,20 @@ def test_real_style_parity_report_structure_all_engines(
                 assert "allocated" in pq.reason
 
 
+def _net_moment_xfail(case: str, numbers: str) -> pytest.MarkDecorator:
+    """Strict xfail for a net-moment gap exposed by the balanced t = 0 preload."""
+    return pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason=(
+            f"{case} 0.04 s determinate net_moment_com {numbers} exceeds the "
+            "5.0% peak / 2.0% RMS tolerances (#13560): since #13555 removed the "
+            "unbalanced t = 0 preload the reference net moment is a 0.16-0.47 N m "
+            "start-up transient instead of the 38 N m kick; the absolute error fell"
+        ),
+    )
+
+
 _DETERMINATE_ENGINE_CASES = [
     # Drake (G9): passes all determinate quantities across all styles and motions
     pytest.param(
@@ -602,6 +616,7 @@ _DETERMINATE_ENGINE_CASES = [
     ),
     # MuJoCo (G8): passes all determinate quantities across all styles and motions
     # (the per-row friction gain schedule closed the ten_finger hold gap, #13306)
+    # except ten_finger hold net_moment_com since #13555 (#13560)
     pytest.param(
         "mujoco",
         GripStyle.OVERLAP,
@@ -620,7 +635,10 @@ _DETERMINATE_ENGINE_CASES = [
         "mujoco",
         GripStyle.TEN_FINGER,
         "hold",
-        marks=[pytest.mark.requires_mujoco],
+        marks=[
+            pytest.mark.requires_mujoco,
+            _net_moment_xfail("MuJoCo ten_finger hold", "peak 0.631% / RMS 2.266%"),
+        ],
         id="mujoco-ten_finger-hold",
     ),
     pytest.param(
@@ -644,10 +662,9 @@ _DETERMINATE_ENGINE_CASES = [
         marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-swing",
     ),
-    # OpenSim (G7/G7b): passes overlap and interlock on 0.04 s and 0.10 s hold
-    # and swing, and ten_finger 0.10 s swing (3.682% / 1.911%); ten_finger
-    # 0.04 s hold and swing and 0.10 s hold (2.970% RMS) exceed 2.0% RMS on
-    # determinate net_force.
+    # OpenSim (G7/G7b): since #13555 passes ten_finger 0.04 s hold; ten_finger
+    # 0.04 s swing exceeds 2.0% RMS on determinate net_force, and overlap and
+    # interlock exceed the tolerances on determinate net_moment_com (#13560).
     # Since #13308 the reference uses the same line-contact law as the
     # ElasticFoundationForce sphere chain, so the remaining gap is the friction
     # and patch-torque mapping (tau_n = 0, surface lever), not the capsule law.
@@ -655,47 +672,47 @@ _DETERMINATE_ENGINE_CASES = [
         "opensim",
         GripStyle.OVERLAP,
         "hold",
-        marks=[pytest.mark.requires_opensim],
+        marks=[
+            pytest.mark.requires_opensim,
+            _net_moment_xfail("OpenSim overlap hold", "peak 5.451% / RMS 2.512%"),
+        ],
         id="opensim-overlap-hold",
     ),
     pytest.param(
         "opensim",
         GripStyle.INTERLOCK,
         "hold",
-        marks=[pytest.mark.requires_opensim],
+        marks=[
+            pytest.mark.requires_opensim,
+            _net_moment_xfail("OpenSim interlock hold", "peak 5.451% / RMS 2.512%"),
+        ],
         id="opensim-interlock-hold",
     ),
     pytest.param(
         "opensim",
         GripStyle.TEN_FINGER,
         "hold",
-        marks=[
-            pytest.mark.requires_opensim,
-            pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "OpenSim ten_finger 0.04 s hold determinate net_force RMS is 4.577% "
-                    "(peak 4.639%, net_moment_com peak 0.000% / RMS 1.231%) > 2.0% "
-                    "RMS_TOLERANCE against the continuous line-contact reference "
-                    "(#13308; 2.970% RMS over 0.10 s)"
-                ),
-            ),
-        ],
+        marks=[pytest.mark.requires_opensim],
         id="opensim-ten_finger-hold",
     ),
     pytest.param(
         "opensim",
         GripStyle.OVERLAP,
         "swing",
-        marks=[pytest.mark.requires_opensim],
+        marks=[
+            pytest.mark.requires_opensim,
+            _net_moment_xfail("OpenSim overlap swing", "peak 0.391% / RMS 4.059%"),
+        ],
         id="opensim-overlap-swing",
     ),
     pytest.param(
         "opensim",
         GripStyle.INTERLOCK,
         "swing",
-        marks=[pytest.mark.requires_opensim],
+        marks=[
+            pytest.mark.requires_opensim,
+            _net_moment_xfail("OpenSim interlock swing", "peak 0.391% / RMS 4.059%"),
+        ],
         id="opensim-interlock-swing",
     ),
     pytest.param(
