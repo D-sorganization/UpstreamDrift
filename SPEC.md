@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13517 | Symmetric capsule line-contact quadrature integrates the shorter capsule axis (#13508) |
+| 2026-10-20 | #13515 | Add headless regression test for Drake-Simscape equivalence theta sizing (#13449). |
 | 2026-10-20 | #13472 | Reclassify grip_style as a physical pick across CLI, API, desktop and web and migrate legacy sidecars |
 | 2026-10-20 | #13498 | HRG-E3 slice: pelvis and thorax ISB lab-frame turn, tilt, obliquity and side-bend golf terms with golf-word aliases; thoracic/lumbar split marked unavailable |
 | 2026-10-20 | #13511 | ci(opensim): Real OpenSim job reuses a validated per-runner venv and opensim-models clone and stops uploading the GitHub pip cache from self-hosted runners |
