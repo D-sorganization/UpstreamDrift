@@ -12,7 +12,6 @@ These tests supplement test_third_party_integration_audit.py.
 
 from __future__ import annotations
 
-import inspect
 from pathlib import Path
 
 import numpy as np
@@ -158,29 +157,50 @@ class TestOpenSimSpecificVerification:
 class TestMyoSuiteGymnasiumCompatibility:
     """Verify MyoSuite uses gymnasium with gym fallback."""
 
-    def test_myosuite_prefers_gymnasium(self) -> None:
-        """MyoSuite engine must prefer gymnasium over legacy gym."""
-        source_code = inspect.getsource(
-            __import__(
-                "src.engines.physics_engines.myosuite.python.myosuite_physics_engine",
-                fromlist=["MyoSuitePhysicsEngine"],
-            )
-        )
-        assert "import gymnasium" in source_code, (
-            "MyoSuite engine should prefer 'import gymnasium' over legacy 'import gym'"
-        )
+    @staticmethod
+    def _load_engine_init(
+        monkeypatch: pytest.MonkeyPatch, **fake_modules: object
+    ) -> object:
+        """Execute a fresh copy of ``_engine_init`` with MyoSuite "available".
 
-    def test_myosuite_has_gym_fallback(self) -> None:
-        """MyoSuite must fall back to legacy gym if gymnasium is missing."""
-        source_code = inspect.getsource(
-            __import__(
-                "src.engines.physics_engines.myosuite.python.myosuite_physics_engine",
-                fromlist=["MyoSuitePhysicsEngine"],
-            )
+        ``fake_modules`` maps module names to a stub, or ``None`` to make the
+        import fail. The gymnasium/gym import lives in ``_engine_init`` (#13453).
+        """
+        import importlib.util
+        import sys
+        import types
+
+        from src.shared.python.engine_core import engine_availability
+
+        monkeypatch.setattr(engine_availability, "MYOSUITE_AVAILABLE", True)
+        monkeypatch.setitem(sys.modules, "myosuite", types.ModuleType("myosuite"))
+        for name, stub in fake_modules.items():
+            monkeypatch.setitem(sys.modules, name, stub)  # type: ignore[arg-type]
+        spec = importlib.util.find_spec(
+            "src.engines.physics_engines.myosuite.python._engine_init"
         )
-        assert "import gym" in source_code, (
-            "MyoSuite engine must have a fallback to legacy 'import gym'"
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def test_myosuite_prefers_gymnasium(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """With gymnasium importable it is bound, even when legacy gym exists."""
+        import types
+
+        fake_gymnasium = types.ModuleType("gymnasium")
+        module = self._load_engine_init(
+            monkeypatch, gymnasium=fake_gymnasium, gym=types.ModuleType("gym")
         )
+        assert module.gym is fake_gymnasium  # type: ignore[attr-defined]
+
+    def test_myosuite_has_gym_fallback(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """With gymnasium missing, legacy gym is bound instead."""
+        import types
+
+        fake_gym = types.ModuleType("gym")
+        module = self._load_engine_init(monkeypatch, gymnasium=None, gym=fake_gym)
+        assert module.gym is fake_gym  # type: ignore[attr-defined]
 
     def test_myosuite_engine_load_from_string_raises(self) -> None:
         """load_from_string must raise (Gym envs don't support string loading)."""

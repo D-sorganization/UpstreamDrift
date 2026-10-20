@@ -2762,10 +2762,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13330
 - **Branch:** merged via #13422
-- **PR:** #13422
+- **PR:** #13422, #13445
 - **Paths:** see #13422
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13330-add-myohub-myohand-articulated-bilateral.md)
+- **Last verified:** 2026-10-19 (`2717ba32`; collated from changes/13330-regulate-bilateral-myohand-grip-trajecto.md)
 - **Summary:** Add MyoHub myoHand articulated bilateral grip fixture and segment-mapped phalanx adapter (HRG-GS-M8)
 - **Next step:** Shipped in PR #13422.
 
