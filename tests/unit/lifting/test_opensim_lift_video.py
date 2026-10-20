@@ -23,12 +23,16 @@ import pytest
 
 from src.engines.physics_engines.opensim.python.msk_lift_video import (
     LIFT_VIEWS,
+    VIEWER_FOV_Y_RAD,
     LiftVideoConfig,
+    compute_lift_framing,
+    draw_lift_legend,
     extract_lift_wrenches,
     generate_contact_sheet,
     lift_camera_transforms,
     lift_video_schedule,
     muscle_color_rgb,
+    pinhole_for_lifting_view,
     render_opensim_lift_video,
 )
 from src.shared.python.force_overlay.contracts import WrenchKind
@@ -221,6 +225,129 @@ def test_generate_contact_sheet_dimensions(tmp_path: Path) -> None:
     assert img.shape == (200, 450, 3)
 
 
+@pytest.mark.parametrize("view", LIFT_VIEWS)
+def test_compute_lift_framing_lifter_span(view: str) -> None:
+    """Lifter bounding box vertical span is >= 60% of frame height across views."""
+    # Synthetic lifter bounding box: height 1.78m (standing) centered at (0, 0.9, 0)
+    # with bar endpoints at z = +/- 1.10m
+    points = np.array(
+        [
+            [-0.2, 0.05, -0.2],  # foot L
+            [-0.2, 0.05, 0.2],  # foot R
+            [0.1, 1.78, 0.0],  # head
+            [-0.1, 0.95, -0.2],  # hip L
+            [-0.1, 0.95, 0.2],  # hip R
+            [0.0, 1.45, -0.25],  # shoulder L
+            [0.0, 1.45, 0.25],  # shoulder R
+        ]
+    )
+    bar_ends = np.array(
+        [
+            [0.0, 1.45, -1.10],
+            [0.0, 1.45, 1.10],
+        ]
+    )
+
+    lookat, dist = compute_lift_framing(
+        points, bar_ends, view=view, image_size_px=(800, 600)
+    )
+    cam = pinhole_for_lifting_view(view, lookat, dist, VIEWER_FOV_Y_RAD, (800, 600))
+
+    uv, mask = cam.project(points)
+    assert np.all(mask), f"points behind camera in view {view}"
+    v_min, v_max = float(np.min(uv[:, 1])), float(np.max(uv[:, 1]))
+    vertical_span_ratio = (v_max - v_min) / 600.0
+
+    # Lifter must span >= 60% of image height
+    assert vertical_span_ratio >= 0.60, (
+        f"view {view}: vertical span ratio {vertical_span_ratio:.3f} < 0.60"
+    )
+
+
+@pytest.mark.parametrize("view", LIFT_VIEWS)
+def test_compute_lift_framing_barbell_endpoints_visible(view: str) -> None:
+    """Barbell endpoints (+/- 1.10 m along bar) remain strictly inside the frame."""
+    points = np.array(
+        [
+            [0.0, 0.05, 0.0],
+            [0.0, 1.78, 0.0],
+        ]
+    )
+    bar_ends = np.array(
+        [
+            [0.05, 1.45, -1.10],
+            [0.05, 1.45, 1.10],
+            [-0.15, 0.85, -1.10],
+            [-0.15, 0.85, 1.10],
+        ]
+    )
+
+    lookat, dist = compute_lift_framing(
+        points, bar_ends, view=view, image_size_px=(800, 600)
+    )
+    cam = pinhole_for_lifting_view(view, lookat, dist, VIEWER_FOV_Y_RAD, (800, 600))
+
+    uv, mask = cam.project(bar_ends)
+    assert np.all(mask), f"bar ends behind camera in view {view}"
+    # Check inside frame: 0 <= u <= 800, 0 <= v <= 600
+    for i, (u, v) in enumerate(uv):
+        assert 0.0 <= u <= 800.0, f"bar endpoint {i} u={u:.1f} out of bounds in {view}"
+        assert 0.0 <= v <= 600.0, f"bar endpoint {i} v={v:.1f} out of bounds in {view}"
+
+
+def test_draw_lift_legend_layout_and_elements() -> None:
+    """Legend renders 2D HUD with force scale, activation gradient, and status."""
+    frame = np.full((600, 800, 3), 40, dtype=np.uint8)
+
+    # Active window
+    frame_active = draw_lift_legend(
+        frame,
+        lift="squat",
+        time_s=1.50,
+        in_activation_window=True,
+        force_scale_n=500.0,
+        force_scale_px=55,
+    )
+    assert frame_active.shape == (600, 800, 3)
+    # HUD was drawn in top-left
+    assert not np.array_equal(frame_active[:160, :270], frame[:160, :270])
+
+    # Inactive window (outside OSL-4)
+    frame_inactive = draw_lift_legend(
+        frame,
+        lift="squat",
+        time_s=0.20,
+        in_activation_window=False,
+        force_scale_n=500.0,
+        force_scale_px=55,
+    )
+    assert frame_inactive.shape == (600, 800, 3)
+    # Colors/text differ between active and inactive
+    assert not np.array_equal(frame_active, frame_inactive)
+
+
+@pytest.mark.requires_opensim
+def test_marker_set_cleared_for_showcase() -> None:
+    """Experimental and tracking markers are cleared so floating red spheres are not rendered."""
+    _real_opensim()
+    _require_body()
+    from src.engines.physics_engines.opensim.python.musculoskeletal_swing import (
+        resolve_base_model,
+    )
+    from src.shared.python.engine_core.opensim_runtime import import_opensim
+
+    osim = import_opensim()
+    base_model = resolve_base_model()
+    model = osim.Model(str(base_model))
+    # Original Rajagopal model contains experimental markers (C7, CLAV, RACR, etc.)
+    initial_markers = model.getMarkerSet().getSize()
+    assert initial_markers > 0
+
+    # Calling clearAndDestroy removes all markers from visualizer
+    model.updMarkerSet().clearAndDestroy()
+    assert model.getMarkerSet().getSize() == 0
+
+
 # ---------------------------------------------------------------------------
 # Headless OpenSim Smoke Test
 # ---------------------------------------------------------------------------
@@ -228,6 +355,7 @@ def test_generate_contact_sheet_dimensions(tmp_path: Path) -> None:
 
 @pytest.mark.requires_opensim
 @pytest.mark.headless_safe
+@pytest.mark.timeout(180)
 def test_headless_lift_video_render_smoke(tmp_path: Path) -> None:
     """Renders a 2-frame smoke clip headless and verifies model occupies frame."""
     _real_opensim()

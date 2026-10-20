@@ -8,10 +8,11 @@ and projected force/wrench overlays.
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 import sys
 import time
-from typing import Any
+from typing import Any, NamedTuple
 
 import imageio.v2 as imageio
 import numpy as np
@@ -20,13 +21,15 @@ from src.engines.physics_engines.opensim.python.msk_lift_video import (
     SETTLE_S,
     UI_STRIP_PX,
     VIEWER_FOV_Y_RAD,
+    compute_lift_framing,
+    draw_lift_legend,
     extract_lift_wrenches,
     generate_contact_sheet,
     lift_camera_transforms,
     lift_video_schedule,
     muscle_color_rgb,
     pinhole_for_lifting_view,
-    solve_lift_motion_and_muscles,
+    solve_full_lift_motion_and_muscles,
 )
 from src.shared.python.engine_core.opensim_runtime import import_opensim
 from src.shared.python.force_overlay.contracts import ForceTorqueFrame
@@ -45,9 +48,6 @@ from src.tools.native_viewer_export.overlay2d import draw_glyphs_rgb
 
 logger = get_logger(__name__)
 
-LOOKAT_CENTER_M = (0.0, 0.9, 0.0)
-DEFAULT_LIFT_CAMERA_DISTANCE_M = 2.8
-
 
 def _setup_visualizer(osim: Any, model: Any) -> Any:
     """Initialize Simbody visualizer in Y-up orientation with neutral ground."""
@@ -56,6 +56,10 @@ def _setup_visualizer(osim: Any, model: Any) -> Any:
     )
     if geom_dir.is_dir():
         osim.ModelVisualizer.addDirToGeometrySearchPaths(str(geom_dir))
+
+    # Clear base model experimental markers (C7, CLAV, RACR, etc.) and IK markers
+    # so they do not render as floating dark red spheres.
+    model.updMarkerSet().clearAndDestroy()
 
     model.setUseVisualizer(True)
     state = model.initSystem()
@@ -100,19 +104,42 @@ def _recolor_muscles(
         m.updGeometryPath().setColor(state, osim.Vec3(r, g, b))
 
 
+def _set_neutral_muscles(osim: Any, model: Any, state: Any) -> None:
+    """Set all muscle paths to neutral grey (0.6, 0.6, 0.6)."""
+    muscles = model.getMuscles()
+    n_muscles = muscles.getSize()
+    grey = osim.Vec3(0.6, 0.6, 0.6)
+    for i in range(n_muscles):
+        model.getMuscles().get(i).updGeometryPath().setColor(state, grey)
+
+
+FRAME_SETTLE_S: float = 0.05
+
+
+class ActivationWindow(NamedTuple):
+    targets: Any
+    activations: np.ndarray
+    window_s: tuple[float, float]
+
+
 def _render_frames(
     job: dict[str, Any],
-    targets: Any,
+    full_targets: Any,
     model: Any,
     state: Any,
     viz: Any,
-    ik: Any,
-    activations: np.ndarray,
+    full_ik: Any,
+    act_window: ActivationWindow,
+    bar_endpoints_m: np.ndarray,
 ) -> list[np.ndarray]:
-    """Render and capture all requested video frames with overlays."""
+    """Render and capture all requested video frames with overlays and dynamic framing."""
     osim = import_opensim()
-    sched, q_interp, nearest = lift_video_schedule(
-        targets.time_s, ik.q, fps=job["fps"], speed=job["speed"]
+    window_targets = act_window.targets
+    activations = act_window.activations
+    window_s = act_window.window_s
+
+    sched, q_interp, _ = lift_video_schedule(
+        full_targets.time_s, full_ik.q, fps=job["fps"], speed=job["speed"]
     )
     total_frames = len(sched.sample_times_s)
     if job.get("frames") is not None:
@@ -126,34 +153,54 @@ def _render_frames(
     fov = simbody_fov_y_rad(VIEWER_FOV_Y_RAD, win_hw[0], y1 - y0)
     viz.setCameraFieldOfView(fov)
 
-    dist = DEFAULT_LIFT_CAMERA_DISTANCE_M
-    _set_simbody_camera(osim, viz, job["view"], LOOKAT_CENTER_M, dist)
+    # Compute dynamic camera framing for the lift and view
+    lookat, dist = compute_lift_framing(
+        full_targets.positions_m,
+        bar_endpoints_m,
+        view=job["view"],
+        fov_y_rad=fov,
+        image_size_px=(job["width"], job["height"]),
+    )
+    _set_simbody_camera(osim, viz, job["view"], lookat, dist)
 
+    # Physical force scale calculation for legend (500 N arrow length in pixels)
+    focal = (job["height"] / 2.0) / math.tan(fov / 2.0)
+    scale_px = int(round(500.0 * 0.001 * focal / dist))
+    scale_px = max(20, min(120, scale_px))
+
+    t_start, t_end = window_s
     coords = model.getCoordinateSet()
     style = ForceGlyphStyle()
     rendered: list[np.ndarray] = []
 
     for f_idx in range(total_frames):
-        for name, val in zip(ik.coordinates, q_interp[f_idx], strict=True):
+        t_curr = float(sched.sample_times_s[f_idx])
+        for name, val in zip(full_ik.coordinates, q_interp[f_idx], strict=True):
             coords.get(name).setValue(state, float(val), False)
 
-        orig_idx = int(nearest[f_idx])
-        _recolor_muscles(osim, model, state, activations[orig_idx])
+        in_window = (t_curr >= t_start - 1e-4) and (t_curr <= t_end + 1e-4)
+        if in_window:
+            t_rel = float(np.clip(t_curr - t_start, 0.0, window_targets.time_s[-1]))
+            window_idx = int(np.argmin(np.abs(window_targets.time_s - t_rel)))
+            _recolor_muscles(osim, model, state, activations[window_idx])
+        else:
+            _set_neutral_muscles(osim, model, state)
+
         model.realizePosition(state)
         viz.drawFrameNow(state)
-        time.sleep(SETTLE_S)
+        time.sleep(FRAME_SETTLE_S)
 
         frame = grab_window()
-        if job["overlay"] == "forces":
-            wrenches = extract_lift_wrenches(targets, orig_idx)
+        if job["overlay"] == "forces" and in_window:
+            wrenches = extract_lift_wrenches(window_targets, window_idx)
             ft = ForceTorqueFrame(
-                time_s=float(sched.sample_times_s[f_idx]),
+                time_s=t_curr,
                 wrenches=tuple(wrenches),
                 engine="opensim",
             )
             cam = pinhole_for_lifting_view(
                 job["view"],
-                LOOKAT_CENTER_M,
+                lookat,
                 dist,
                 fov,
                 (frame.shape[1], frame.shape[0]),
@@ -162,6 +209,14 @@ def _render_frames(
 
         cropped = frame[y0:y1, x0:x1]
         final_frame = fit_to_size(cropped, job["width"], job["height"])
+        final_frame = draw_lift_legend(
+            final_frame,
+            lift=job["lift"],
+            time_s=t_curr,
+            in_activation_window=in_window,
+            force_scale_n=500.0,
+            force_scale_px=scale_px,
+        )
         rendered.append(final_frame)
 
     return rendered
@@ -173,12 +228,34 @@ def run_worker(job_path: Path) -> None:
     job: dict[str, Any] = json.loads(job_path.read_text(encoding="utf-8"))
 
     osim = import_opensim()
-    targets, build, ik, activations, _ = solve_lift_motion_and_muscles(
-        job["lift"], stride=5
-    )
+    max_ik = int(job["frames"]) if job.get("frames") is not None else None
+    (
+        full_targets,
+        build,
+        full_ik,
+        window_targets,
+        activations,
+        _,
+        window_s,
+        bar_endpoints,
+    ) = solve_full_lift_motion_and_muscles(job["lift"], stride=5, max_ik_frames=max_ik)
     state, viz = _setup_visualizer(osim, build.model)
 
-    frames = _render_frames(job, targets, build.model, state, viz, ik, activations)
+    act_window = ActivationWindow(
+        targets=window_targets,
+        activations=activations,
+        window_s=window_s,
+    )
+    frames = _render_frames(
+        job,
+        full_targets,
+        build.model,
+        state,
+        viz,
+        full_ik,
+        act_window,
+        bar_endpoints,
+    )
 
     out_file = Path(job["out_path"])
     out_file.parent.mkdir(parents=True, exist_ok=True)

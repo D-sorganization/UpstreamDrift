@@ -186,6 +186,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
 | 853 | `src/shared/python/sidekick/process_calculators/constants.py` |
 | 852 | `src/engines/physics_engines/opensim/python/tour_matching/native_muscle_effort_adapter.py` |
+| 850 | `src/engines/physics_engines/opensim/python/msk_lift_video.py` |
 | 850 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
 | 849 | `src/tools/training_controller/gui.py` |
 | 848 | `src/shared/python/motion_matching/club_only/reproduction.py` |
@@ -215,6 +216,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 822 | `src/engines/physics_engines/mujoco/python/grip_lab_adapter.py` |
 | 822 | `src/shared/python/gui_pkg/help_system.py` |
 | 822 | `src/tools/capture_rig/layout_editor.py` |
+| 820 | `src/engines/physics_engines/opensim/python/msk_lift_model.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
 | 815 | `src/engines/physics_engines/mujoco/python/native_full_body_replay.py` |
 | 813 | `src/api/services/chat_service.py` |

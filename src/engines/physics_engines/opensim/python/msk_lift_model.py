@@ -520,6 +520,34 @@ def _attach_barbell(model: Any, placement: _BarPlacement, bar_mass_kg: float) ->
         osim.Vec3(-half, 0.0, 0.0),
         osim.Vec3(0.0),
     )
+
+    # Visual geometry for barbell shaft and plates (OSL-8, #13045).
+    # Dimensions cited from src.shared.python.lifting.barbell_bushing.Barbell:
+    # shaft_length_m=2.20, shaft_radius_m=0.014, plate_radius_m=0.225,
+    # plate_offset_m=0.70. Simbody cylinders lie along local Y; rotate 90 deg
+    # about Z to align with the barbell local X axis connecting the hands.
+    rot = osim.Rotation(math.pi / 2.0, osim.Vec3(0.0, 0.0, 1.0))
+    t_shaft = osim.Transform(rot, osim.Vec3(0.0, 0.0, 0.0))
+    pof_shaft = osim.PhysicalOffsetFrame(f"{BAR_BODY}_shaft_frame", bar, t_shaft)
+    shaft_geom = osim.Cylinder(
+        float(shared_bar.shaft_radius_m), float(shared_bar.shaft_length_m / 2.0)
+    )
+    shaft_geom.setColor(osim.Vec3(0.7, 0.7, 0.7))
+    pof_shaft.attachGeometry(shaft_geom)
+    bar.addComponent(pof_shaft)
+
+    for side, sign in (("l", -1.0), ("r", 1.0)):
+        t_plate = osim.Transform(
+            rot, osim.Vec3(sign * float(shared_bar.plate_offset_m), 0.0, 0.0)
+        )
+        pof_plate = osim.PhysicalOffsetFrame(
+            f"{BAR_BODY}_plate_{side}_frame", bar, t_plate
+        )
+        plate_geom = osim.Cylinder(float(shared_bar.plate_radius_m), 0.025)
+        plate_geom.setColor(osim.Vec3(0.2, 0.2, 0.2))
+        pof_plate.attachGeometry(plate_geom)
+        bar.addComponent(pof_plate)
+
     model.addBody(bar)
     model.addJoint(weld)
     closure = osim.WeldConstraint(

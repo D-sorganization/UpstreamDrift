@@ -242,6 +242,459 @@ def lift_video_schedule(
     return sched, q_interp, nearest
 
 
+def compute_lift_framing(
+    positions_m: np.ndarray,
+    bar_endpoints_m: np.ndarray | None = None,
+    view: str = "side",
+    fov_y_rad: float = VIEWER_FOV_Y_RAD,
+    image_size_px: tuple[int, int] = (800, 600),
+    margin: float = 0.08,
+    min_lifter_height_ratio: float = 0.60,
+) -> tuple[tuple[float, float, float], float]:
+    """Compute camera lookat and distance to dynamically frame lifter and barbell.
+
+    Ensures:
+    1. Lifter span >= min_lifter_height_ratio of image height when standing/extended.
+    2. All lifter points and barbell endpoints fit inside the frame with safety margin.
+    3. Lookat is centered at the 3D bounding box center of the movement.
+    """
+    pts_list = [positions_m.reshape(-1, 3)]
+    if bar_endpoints_m is not None:
+        pts_list.append(bar_endpoints_m.reshape(-1, 3))
+    all_pts = np.vstack(pts_list)
+    p_min = all_pts.min(axis=0)
+    p_max = all_pts.max(axis=0)
+    lookat = (
+        float((p_min[0] + p_max[0]) / 2.0),
+        float((p_min[1] + p_max[1]) / 2.0),
+        float((p_min[2] + p_max[2]) / 2.0),
+    )
+
+    _, pinhole_rot, _ = lift_camera_transforms(view, lookat, 1.0)
+    w, h = image_size_px
+    aspect = w / h
+    half_fov_y = fov_y_rad / 2.0
+    tan_y = math.tan(half_fov_y)
+    tan_x = aspect * tan_y
+
+    rel = all_pts - np.asarray(lookat)
+    cam_pts = rel @ pinhole_rot
+
+    x_cam = np.abs(cam_pts[:, 0])
+    y_cam = np.abs(cam_pts[:, 1])
+    z_cam = cam_pts[:, 2]
+
+    eff_margin = max(0.01, min(0.40, margin))
+    d_x = x_cam / ((1.0 - eff_margin) * tan_x) - z_cam
+    d_y = y_cam / ((1.0 - eff_margin) * tan_y) - z_cam
+    d_min = max(float(np.max(d_x)), float(np.max(d_y)))
+
+    # Lifter vertical height
+    lifter_pts = positions_m.reshape(-1, 3)
+    lifter_h = float(lifter_pts[:, 1].max() - lifter_pts[:, 1].min())
+    d_max_ratio = lifter_h / (2.0 * min_lifter_height_ratio * tan_y)
+    distance = float(np.clip(d_min, 1.5, max(d_min, d_max_ratio)))
+    return lookat, distance
+
+
+def _draw_legend_arrows_and_scale(
+    out: np.ndarray,
+    bx: int,
+    by: int,
+    font: int,
+    scale: float,
+    color_text: tuple[int, int, int],
+    force_scale_n: float,
+    force_scale_px: int,
+) -> None:
+    import cv2
+
+    # GRF (Green)
+    cv2.circle(out, (bx + 18, by + 40), 5, (60, 220, 60), -1, cv2.LINE_AA)
+    cv2.putText(
+        out,
+        "GRF contact force",
+        (bx + 32, by + 44),
+        font,
+        scale,
+        color_text,
+        1,
+        cv2.LINE_AA,
+    )
+
+    # Grip (Blue)
+    cv2.circle(out, (bx + 18, by + 60), 5, (60, 160, 255), -1, cv2.LINE_AA)
+    cv2.putText(
+        out,
+        "Hand grip wrench",
+        (bx + 32, by + 64),
+        font,
+        scale,
+        color_text,
+        1,
+        cv2.LINE_AA,
+    )
+
+    # Force scale bar
+    sx0, sy0 = bx + 18, by + 82
+    sx1 = sx0 + int(force_scale_px)
+    cv2.line(out, (sx0, sy0), (sx1, sy0), (220, 220, 220), 2, cv2.LINE_AA)
+    cv2.line(out, (sx0, sy0 - 3), (sx0, sy0 + 3), (220, 220, 220), 1, cv2.LINE_AA)
+    cv2.line(out, (sx1, sy0 - 3), (sx1, sy0 + 3), (220, 220, 220), 1, cv2.LINE_AA)
+    cv2.putText(
+        out,
+        f"{int(force_scale_n)} N scale",
+        (sx1 + 10, sy0 + 4),
+        font,
+        scale,
+        color_text,
+        1,
+        cv2.LINE_AA,
+    )
+
+
+def _draw_legend_activation_bar(
+    out: np.ndarray,
+    bx: int,
+    by: int,
+    font: int,
+    color_dim: tuple[int, int, int],
+) -> None:
+    import cv2
+
+    ax0, ay0, aw, ah = bx + 18, by + 102, 130, 10
+    grad = np.zeros((ah, aw, 3), dtype=np.uint8)
+    for c in range(aw):
+        val = c / max(1.0, float(aw - 1))
+        grad[:, c, 0] = int(val * 255)
+        grad[:, c, 1] = 0
+        grad[:, c, 2] = int((1.0 - val) * 255)
+    out[ay0 : ay0 + ah, ax0 : ax0 + aw] = grad
+    cv2.rectangle(
+        out, (ax0, ay0), (ax0 + aw, ay0 + ah), (150, 150, 150), 1, cv2.LINE_AA
+    )
+    cv2.putText(out, "0.0", (ax0, ay0 + ah + 12), font, 0.35, color_dim, 1, cv2.LINE_AA)
+    cv2.putText(
+        out,
+        "Activation",
+        (ax0 + 40, ay0 + ah + 12),
+        font,
+        0.35,
+        color_dim,
+        1,
+        cv2.LINE_AA,
+    )
+    cv2.putText(
+        out,
+        "1.0",
+        (ax0 + aw - 16, ay0 + ah + 12),
+        font,
+        0.35,
+        color_dim,
+        1,
+        cv2.LINE_AA,
+    )
+
+
+def draw_lift_legend(
+    frame_rgb: np.ndarray,
+    lift: str,
+    time_s: float,
+    in_activation_window: bool,
+    force_scale_n: float = 500.0,
+    force_scale_px: int = 50,
+) -> np.ndarray:
+    """Draw 2D HUD legend overlay on an RGB video frame.
+
+    Displays:
+    1. Title with lift name and current playback timestamp.
+    2. Arrow indicators for per-foot GRF contact force (green) and hand grip wrench (blue).
+    3. Scaled force reference bar in Newtons (N).
+    4. Muscle activation color gradient bar from 0.0 (blue) to 1.0 (red).
+    5. OSL-4 activation window status indicator.
+    """
+    import cv2
+
+    out = frame_rgb.copy()
+    h, w = out.shape[:2]
+    bx, by, bw, bh = 15, 15, 270, 160
+    if bx + bw > w or by + bh > h:
+        return out
+
+    sub = out[by : by + bh, bx : bx + bw]
+    overlay = np.zeros_like(sub)
+    out[by : by + bh, bx : bx + bw] = cv2.addWeighted(overlay, 0.7, sub, 0.3, 0)
+    cv2.rectangle(out, (bx, by), (bx + bw, by + bh), (80, 80, 80), 1, cv2.LINE_AA)
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    scale = 0.42
+    color_text = (230, 230, 230)
+    color_dim = (170, 170, 170)
+
+    # 1. Title
+    lift_title = lift.replace("_", " ").title()
+    title = f"{lift_title} | t = {time_s:.2f} s"
+    cv2.putText(
+        out, title, (bx + 12, by + 20), font, 0.48, (255, 255, 255), 1, cv2.LINE_AA
+    )
+
+    # 2. Arrows & force scale
+    _draw_legend_arrows_and_scale(
+        out, bx, by, font, scale, color_text, force_scale_n, force_scale_px
+    )
+
+    # 3. Activation bar
+    _draw_legend_activation_bar(out, bx, by, font, color_dim)
+
+    # 4. Status line
+    if in_activation_window:
+        status_txt = "activation: OSL-4 active"
+        status_col = (100, 255, 100)
+    else:
+        status_txt = "activation: OSL-4 window only"
+        status_col = (200, 200, 120)
+    cv2.putText(
+        out,
+        status_txt,
+        (bx + 12, by + bh - 10),
+        font,
+        0.38,
+        status_col,
+        1,
+        cv2.LINE_AA,
+    )
+
+    return out
+
+
+def _retarget_lift_motion(lift: str, sol: Any) -> Any:
+    """Retarget sagittal solution to 3D full body motion."""
+    from src.shared.python.lifting.back_bar import BACK_SQUAT, BackBarGeometry
+    from src.shared.python.lifting.back_rack import RACKS
+    from src.shared.python.lifting.barbell_bushing import Barbell
+    from src.shared.python.lifting.bundles import (
+        LIFT_SPEC,
+        lift_hands_to_full_body,
+        lift_to_full_body,
+        load_seed_pose,
+    )
+    from src.shared.python.lifting.loaded_balance import LoadBalance
+
+    lift_spec = LIFT_SPEC.read_bytes()
+    if lift == "squat":
+        geom = BackBarGeometry.from_standard(
+            BACK_SQUAT, height_m=1.78, rack=RACKS["high_bar"]
+        )
+        load = LoadBalance(Barbell(float(sol.source["bar_mass_kg"])))
+        return lift_to_full_body(
+            lift_spec, sol, load_seed_pose(), geometry=geom, load=load
+        )
+    return lift_hands_to_full_body(lift_spec, sol, load_seed_pose(), lift)
+
+
+def _compute_full_motion_kinematics(
+    kin: Any,
+    frame: Any,
+    attachments: dict[str, Any],
+    lift_motion: Any,
+    in_pelvis: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Compute landmark positions, barbell endpoints, and pelvis rotations."""
+    from src.shared.python.lifting.bundle_targets import IK_LANDMARKS, PELVIS_BODY
+
+    order = tuple(attachments)
+    full_points = np.array([kin.marker_positions(q) for q in lift_motion.q])
+    full_positions = frame.point(full_points[:, [order.index(x) for x in IK_LANDMARKS]])
+
+    bar_pts = full_positions[:, IK_LANDMARKS.index("bar")]
+    ends_1 = bar_pts + np.array([0.0, 0.0, -1.10])
+    ends_2 = bar_pts + np.array([0.0, 0.0, 1.10])
+    bar_endpoints = np.concatenate([ends_1, ends_2], axis=0)
+
+    full_pelvis_rot = np.array(
+        [
+            frame.rotation
+            @ kin.body_poses(q, [PELVIS_BODY])[PELVIS_BODY][0]
+            @ in_pelvis
+            for q in lift_motion.q
+        ]
+    )
+    return full_positions, bar_endpoints, full_pelvis_rot
+
+
+def solve_full_lift_motion_targets(
+    lift: str,
+    path: Path,
+    stride: int = 1,
+) -> tuple[LiftTargets, tuple[float, float], np.ndarray]:
+    """Extract full-motion LiftTargets from bundle sagittal retargeting provenance.
+
+    Returns (full_targets, (t_start, t_end), bar_endpoints_m).
+    """
+    from src.shared.python.lifting.bundle_targets import (
+        _foot_stations,
+        _kinematics,
+        _lift_frame,
+        bundle_pelvis_rotation,
+        lift_targets,
+    )
+    from src.shared.python.lifting.bundles import (
+        LANDMARK_ATTACHMENTS,
+        LANDMARK_LABELS,
+    )
+    from src.shared.python.lifting.sagittal_retarget import SagittalSolution
+    from src.shared.python.motion_matching.same_input import InputBundle
+
+    bundle = InputBundle.load(path)
+    win_dict = bundle.provenance.get("window", {})
+    t_start = float(win_dict.get("start_s", 0.0))
+    t_dur = float(win_dict.get("duration_s", 0.2))
+    window_s = (t_start, t_start + t_dur)
+
+    targets_short = lift_targets(lift, path, stride=5)
+    spec = json.loads(bundle.spec_bytes)
+    stations = _foot_stations(spec)
+    attachments = {
+        label: LANDMARK_ATTACHMENTS[label] for label in LANDMARK_LABELS
+    } | stations
+    kin, body_mass = _kinematics(bundle.spec_bytes, attachments)
+    frame = _lift_frame(kin, bundle.reference_q[0])
+
+    sol = SagittalSolution.from_record(bundle.provenance["sagittal_solution"])
+    lift_motion = _retarget_lift_motion(lift, sol)
+    in_pelvis = bundle_pelvis_rotation(spec)
+    full_positions, bar_endpoints, full_pelvis_rot = _compute_full_motion_kinematics(
+        kin, frame, attachments, lift_motion, in_pelvis
+    )
+
+    indices = tuple(range(0, len(lift_motion.time_s), stride))
+    time_s = lift_motion.time_s[list(indices)]
+    full_positions = full_positions[list(indices)]
+    full_pelvis_rot = full_pelvis_rot[list(indices)]
+
+    full_targets = LiftTargets(
+        lift=lift,
+        path=path,
+        sha256=targets_short.sha256,
+        indices=indices,
+        time_s=time_s,
+        positions_m=full_positions,
+        foot_stations_m=stations,
+        grf_force_n=targets_short.grf_force_n,
+        grf_moment_nm=targets_short.grf_moment_nm,
+        hand_force_n=targets_short.hand_force_n,
+        hand_torque_nm=targets_short.hand_torque_nm,
+        grip_m=targets_short.grip_m,
+        pelvis_rotation=full_pelvis_rot,
+        source_coordinates=targets_short.source_coordinates,
+        body_mass_kg=body_mass,
+        bar_mass_kg=targets_short.bar_mass_kg,
+        height_m=targets_short.height_m,
+        frame=frame,
+        tibial_torsion=targets_short.tibial_torsion,
+        bench_force_n=targets_short.bench_force_n,
+        bench_point_m=targets_short.bench_point_m,
+        provenance=targets_short.provenance,
+    )
+    return full_targets, window_s, bar_endpoints
+
+
+def solve_full_lift_motion_and_muscles(
+    lift: str,
+    stride: int = 5,
+    max_ik_frames: int | None = None,
+) -> tuple[
+    LiftTargets,
+    Any,
+    Any,
+    LiftTargets,
+    np.ndarray,
+    list[str],
+    tuple[float, float],
+    np.ndarray,
+]:
+    """Solve full-motion IK and OSL-4 window static optimization muscle activations.
+
+    Returns (full_targets, build, full_ik, window_targets, activations, muscle_names, window_s, bar_endpoints).
+    """
+    from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
+    from src.engines.physics_engines.opensim.python.msk_lift_arm_reach import (
+        reaching_lift_build,
+    )
+    from src.engines.physics_engines.opensim.python.msk_lift_muscles import (
+        MuscleBasis,
+        _make_muscles_rigid_tendon,
+        _solve_lift_frames,
+        leg_coordinates,
+    )
+
+    path = SAME_INPUT_LIFT_BUNDLES.get(lift)
+    if path is None or not path.is_file():
+        raise ValueError(f"no same-input bundle found for lift {lift!r}")
+
+    # 1. Short-window solve for activations & wrenches
+    window_targets = lift_targets(lift, path, stride=stride)
+    base_model = resolve_base_model()
+    scales = ikid.bundle_segment_scales(window_targets, base_model)
+    build, _reach = reaching_lift_build(lift, window_targets, base_model, scales)
+    pelvis_short = ikid.pelvis_landmark_targets(build, window_targets, base_model)
+    ik_short = ikid.run_inverse_kinematics(build, window_targets, pelvis_short)
+    inverse_short = ikid.run_inverse_dynamics(build, window_targets, ik_short)
+
+    _make_muscles_rigid_tendon(build.model)
+    basis = MuscleBasis(build.model, ik_short.coordinates)
+    leg_coords = leg_coordinates()
+    leg_indices = [ik_short.coordinates.index(c) for c in leg_coords]
+    solve_short = _solve_lift_frames(
+        basis, ik_short, inverse_short, leg_indices, window_targets.time_s
+    )
+
+    # 2. Full-motion targets & IK
+    full_targets, window_s, bar_endpoints = solve_full_lift_motion_targets(
+        lift, path, stride=1
+    )
+    if max_ik_frames is not None and max_ik_frames < len(full_targets.time_s):
+        sub_indices = full_targets.indices[:max_ik_frames]
+        full_targets = LiftTargets(
+            lift=full_targets.lift,
+            path=full_targets.path,
+            sha256=full_targets.sha256,
+            indices=sub_indices,
+            time_s=full_targets.time_s[:max_ik_frames],
+            positions_m=full_targets.positions_m[:max_ik_frames],
+            foot_stations_m=full_targets.foot_stations_m,
+            grf_force_n=full_targets.grf_force_n,
+            grf_moment_nm=full_targets.grf_moment_nm,
+            hand_force_n=full_targets.hand_force_n,
+            hand_torque_nm=full_targets.hand_torque_nm,
+            grip_m=full_targets.grip_m,
+            pelvis_rotation=full_targets.pelvis_rotation[:max_ik_frames],
+            source_coordinates=full_targets.source_coordinates,
+            body_mass_kg=full_targets.body_mass_kg,
+            bar_mass_kg=full_targets.bar_mass_kg,
+            height_m=full_targets.height_m,
+            frame=full_targets.frame,
+            tibial_torsion=full_targets.tibial_torsion,
+            bench_force_n=full_targets.bench_force_n,
+            bench_point_m=full_targets.bench_point_m,
+            provenance=full_targets.provenance,
+        )
+
+    pelvis_full = ikid.pelvis_landmark_targets(build, full_targets, base_model)
+    full_ik = ikid.run_inverse_kinematics(build, full_targets, pelvis_full)
+
+    return (
+        full_targets,
+        build,
+        full_ik,
+        window_targets,
+        solve_short.activations,
+        basis.muscle_names,
+        window_s,
+        bar_endpoints,
+    )
+
+
 def solve_lift_motion_and_muscles(
     lift: str,
     stride: int = 5,
@@ -366,6 +819,12 @@ def render_opensim_lift_video(
             str(job_file),
         ]
         env = {**os.environ}
+        if "UPSTREAMDRIFT_MSK_BASE_MODEL" not in env:
+            default_base = Path(
+                "/home/dieterolson/Repositories/ud-13044/shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim"
+            )
+            if default_base.is_file():
+                env["UPSTREAMDRIFT_MSK_BASE_MODEL"] = str(default_base)
         env["NATIVE_VIEWER_XVFB"] = "1"
         env["PYTHONPATH"] = os.pathsep.join(sys.path)
 
