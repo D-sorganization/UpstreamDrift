@@ -405,13 +405,16 @@ def visual_grip_block(
         "lead_thumb_offset_deg": grip.lead_thumb_offset_deg,
     }
     if overrides is not None:
-        if overrides.grip_strength_deg is not None:
-            block["grip_strength_deg"] = float(overrides.grip_strength_deg)
-        if overrides.lead_roll_offset_deg is not None:
-            block["lead_roll_offset_deg"] = float(overrides.lead_roll_offset_deg)
-        if overrides.trail_roll_offset_deg is not None:
-            block["trail_roll_offset_deg"] = float(overrides.trail_roll_offset_deg)
+        _put_visual_offsets(block, overrides)
     return block
+
+
+def _put_visual_offsets(block: dict[str, Any], overrides: GripOverrides) -> None:
+    """Write the picked strength and roll offsets into ``block`` (in place)."""
+    for key in ("grip_strength_deg", "lead_roll_offset_deg", "trail_roll_offset_deg"):
+        value = getattr(overrides, key)
+        if value is not None:
+            block[key] = float(value)
 
 
 def apply_visual_picks(
@@ -428,12 +431,7 @@ def apply_visual_picks(
     check_sidecar_grip(block)
     if overrides.grip_thumb_offset_deg is not None:
         block["lead_thumb_offset_deg"] = float(overrides.grip_thumb_offset_deg)
-    if overrides.grip_strength_deg is not None:
-        block["grip_strength_deg"] = float(overrides.grip_strength_deg)
-    if overrides.lead_roll_offset_deg is not None:
-        block["lead_roll_offset_deg"] = float(overrides.lead_roll_offset_deg)
-    if overrides.trail_roll_offset_deg is not None:
-        block["trail_roll_offset_deg"] = float(overrides.trail_roll_offset_deg)
+    _put_visual_offsets(block, overrides)
     if block:
         out["grip"] = block
     return out

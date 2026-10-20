@@ -33,7 +33,7 @@ describe('GripControls', () => {
     fireEvent.change(screen.getByLabelText(/^Lead Thumb Offset/), {
       target: { value: '20' },
     });
-    fireEvent.change(screen.getByLabelText(/^Visual Grip Strength/), {
+    fireEvent.change(screen.getByLabelText(/^Grip Strength Offset/), {
       target: { value: '10' },
     });
     fireEvent.change(screen.getByLabelText(/^Lead Roll Offset/), {
