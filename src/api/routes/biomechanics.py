@@ -5,10 +5,14 @@ from __future__ import annotations
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.shared.python.analysis.biomechanics_display import prepare_biomechanics_plot
+from src.shared.python.anatomical_angles import event_table as anatomical_events
+from src.shared.python.anatomical_angles.wrist import wrist_forearm_angles
 from src.shared.python.biomechanics.joint_conventions import (
+    AnatomicalFrame,
     RotationConvention,
     matrix_to_orientations,
     orientations_to_matrix,
@@ -39,6 +43,65 @@ class ConversionRequest(BaseModel):
     target_sequence: str = "XYZ"
     source_degrees: bool = False
     target_degrees: bool = False
+
+
+class SegmentFrames(BaseModel):
+    """World pose series of one calibrated segment (rotations ``(N, 3, 3)``)."""
+
+    model_config = ConfigDict(extra="forbid")
+    rotation_world: list[Any] = Field(max_length=100_000)
+    origin_world: list[Any] = Field(max_length=100_000)
+    calibration_id: str
+
+
+class ArmFrames(BaseModel):
+    """Segment frames of one side; ``radius`` defaults to ``forearm``."""
+
+    model_config = ConfigDict(extra="forbid")
+    humerus: SegmentFrames
+    forearm: SegmentFrames
+    hand: SegmentFrames
+    radius: SegmentFrames | None = None
+
+
+class AnatomicalEventTableRequest(BaseModel):
+    """Calibrated arm frames, swing-event frames and export provenance."""
+
+    model_config = ConfigDict(extra="forbid")
+    time_s: list[float] = Field(max_length=100_000)
+    events: dict[str, int]
+    handedness: str
+    event_source: str
+    receipt_path: str
+    arms: dict[str, ArmFrames]
+    format: Literal["json", "csv"] = "json"
+
+
+def _frame(segment: SegmentFrames | None) -> AnatomicalFrame | None:
+    return None if segment is None else AnatomicalFrame(**segment.model_dump())
+
+
+def _anatomical_event_table(
+    payload: AnatomicalEventTableRequest,
+) -> anatomical_events.AnatomicalEventTable:
+    arms = {
+        side: wrist_forearm_angles(
+            _frame(arm.humerus),
+            _frame(arm.forearm),
+            _frame(arm.hand),
+            side,
+            receipt_path=payload.receipt_path,
+            radius=_frame(arm.radius),
+        )
+        for side, arm in payload.arms.items()
+    }
+    return anatomical_events.anatomical_event_table(
+        arms,
+        payload.events,
+        payload.time_s,
+        handedness=payload.handedness,
+        event_source=payload.event_source,
+    )
 
 
 def _compute_biomechanics(payload: dict[str, Any]) -> dict[str, Any]:
@@ -90,6 +153,25 @@ def convert(payload: ConversionRequest) -> dict[str, Any]:
         }
     except (ValueError, TypeError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/anatomical-event-table", response_model=None)
+def anatomical_event_table(
+    payload: AnatomicalEventTableRequest,
+) -> dict[str, Any] | PlainTextResponse:
+    """Wrist and forearm angles at swing events, as the desktop export.
+
+    Angles are computed from the posted calibrated frames by the shared
+    ``anatomical_angles`` functions, so the JSON (``EVENT_TABLE_JSON_SCHEMA``)
+    and CSV bodies equal the desktop export for the same bundle.
+    """
+    try:
+        table = _anatomical_event_table(payload)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    if payload.format == "csv":
+        return PlainTextResponse(anatomical_events.to_csv(table), media_type="text/csv")
+    return anatomical_events.to_json_dict(table)
 
 
 @router.get("/results")

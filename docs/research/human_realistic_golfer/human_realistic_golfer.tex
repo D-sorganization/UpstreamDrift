@@ -2573,13 +2573,28 @@ per event and term.
 with known values.  It checks the values at each event for both handedness
 choices, the provenance on every row, the reasons for missing values, the
 rejection of invalid events and inputs, schema validation, and the CSV
-header.  No best-fit or tour values are reported here.  Open items for
-\#13175: pelvis reversal and trunk terms, the API endpoint, the desktop and
+header.  No best-fit or tour values are reported here.
+
+\paragraph{API Endpoint.}
+\texttt{POST /biomechanics/anatomical-event-table}
+(\path{src/api/routes/biomechanics.py}) takes per-side calibrated humerus,
+forearm and hand frames (optional radius), the event frames, the time
+series, handedness, event source and receipt path.  It computes the angles
+with \texttt{wrist\_forearm\_angles} and the table with
+\texttt{anatomical\_event\_table}, and returns \texttt{to\_json\_dict} or,
+with \texttt{format: csv}, \texttt{to\_csv}.  It adds no computation, so a
+client gets the desktop export for the same bundle.  An invalid bundle is
+HTTP 422.  \path{tests/biomechanics/test_anatomical_event_table_api.py}
+compares the response with the shared functions called directly and
+validates it against the schema.
+
+Open items for \#13175: pelvis reversal and trunk terms, the desktop and
 web table (\texttt{feature\_parity.json}), and HUD captions in
 \texttt{native\_viewer\_export}.
 {\small
 \begin{verbatim}
 py -3 -m pytest -o addopts="" -q -n 0 tests/unit/anatomical_angles/test_event_table.py
+py -3 -m pytest -o addopts="" -q -n 0 tests/biomechanics/test_anatomical_event_table_api.py
 \end{verbatim}}
 
 \end{document}
