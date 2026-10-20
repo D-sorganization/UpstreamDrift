@@ -26,7 +26,6 @@ import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.secur
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-import math
 from typing import Any
 
 import numpy as np
