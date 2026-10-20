@@ -1,5 +1,5 @@
 ---
-issue: 13334
+issue: 13552
 summary: "Simscape grip kernel follows the shared capsule line-contact law; ten_finger verifier back to 1e-11; structural freshness check for generated JSON; committed R2025b evidence"
 dl_state: "in_review"
 next_step: "Merge via queue. Any later change to the shared grip law or scenarios requires regenerating the kernel (scripts/export_simscape_grip_kernel.py) and rerunning R2025b on DeskComputer; test_r2025b_receipt_hashes_match_committed_kernel_and_inputs fails until the receipts are refreshed."
