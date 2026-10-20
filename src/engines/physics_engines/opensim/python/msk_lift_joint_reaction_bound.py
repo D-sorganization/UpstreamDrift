@@ -129,11 +129,14 @@ def build_real_lift_bound_record(
     w_above: float,
     c_pelvis: float,
     c_torso: float,
-    crossing_force: float,
-    crossing_count: int,
+    crossing: tuple[float, int],
     lift: str = "squat",
 ) -> dict[str, Any]:
-    """Format evaluation of the analytic bound on a dynamic lift frame."""
+    """Format evaluation of the analytic bound on a dynamic lift frame.
+
+    ``crossing`` is (summed force of the muscles crossing L5/S1 in N, their count).
+    """
+    crossing_force, crossing_count = crossing
     lower_ok = bool(c_pelvis >= w_above - 1e-4)
     upper_ok = bool(c_pelvis <= w_above + crossing_force + 1e-4)
     return {
@@ -174,8 +177,7 @@ def build_real_squat_bound_record(
         w_above,
         c_pelvis,
         c_torso,
-        crossing_force,
-        crossing_count,
+        (crossing_force, crossing_count),
         lift="squat",
     )
 

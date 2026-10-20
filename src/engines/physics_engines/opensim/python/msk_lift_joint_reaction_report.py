@@ -201,7 +201,7 @@ def format_joint_reaction_solution(
     body_weight_n: float,
     reactions: JointReactionSeries,
     phases: dict[str, dict[str, float]],
-    cross_check: dict[str, Any],
+    cross_check: dict[str, Any] | None,
     static_bound: dict[str, Any],
     extra_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:

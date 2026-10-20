@@ -12,6 +12,7 @@ import json
 import logging
 import math
 import tempfile
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -347,12 +348,35 @@ def _min_acceleration_bound(
         w_above=w_above_val,
         c_pelvis=float(reactions.l5s1_comp_n[min_k]),
         c_torso=float(reactions.l5s1_torso_comp_n[min_k]),
-        crossing_force=crossing_force,
-        crossing_count=len(crossing),
+        crossing=(crossing_force, len(crossing)),
         lift=lift,
     )
 
     return float(m_above), real_lift_info
+
+
+def _unavailable_reason(lift: str, osl4_qual: dict[str, Any]) -> str | None:
+    """Why *lift* has no joint-reaction solve, or ``None`` when it can run."""
+    if osl4_qual.get("status") == "unavailable":
+        return str(osl4_qual.get("reason", f"no OSL-4 muscle solve for {lift}"))
+    if osl4_qual.get("mean_reserve_share") is None and "reason" in osl4_qual:
+        return str(osl4_qual["reason"])
+    bundle_path = SAME_INPUT_LIFT_BUNDLES.get(lift)
+    if bundle_path is None or not bundle_path.is_file():
+        return (
+            f"no LIFT-5 same-input bundle is registered for {lift!r} in "
+            "SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit"
+        )
+    if not is_engine_available("opensim"):
+        return "Native OpenSim runtime is not available in current environment"
+    return None
+
+
+def _peak_lumbar_moment(coordinates: Sequence[str], tau: np.ndarray) -> float | None:
+    """Peak absolute ``lumbar_extension`` ID moment (N m), if the model has it."""
+    if "lumbar_extension" not in coordinates:
+        return None
+    return float(np.max(np.abs(tau[:, coordinates.index("lumbar_extension")])))
 
 
 def evaluate_lift_joint_reactions(
@@ -369,30 +393,9 @@ def evaluate_lift_joint_reactions(
     require(lift in LIFTS, f"unknown lift {lift!r}; choose from {list(LIFTS)}")
 
     osl4_qual = _read_osl4_qualification(lift)
-    if osl4_qual.get("status") == "unavailable":
-        return unavailable_joint_reaction_record(
-            lift,
-            osl4_qual.get("reason", f"no OSL-4 muscle solve for {lift}"),
-        )
-    if osl4_qual.get("mean_reserve_share") is None and "reason" in osl4_qual:
-        return unavailable_joint_reaction_record(
-            lift,
-            osl4_qual["reason"],
-        )
-
-    bundle_path = SAME_INPUT_LIFT_BUNDLES.get(lift)
-    if bundle_path is None or not bundle_path.is_file():
-        return unavailable_joint_reaction_record(
-            lift,
-            f"no LIFT-5 same-input bundle is registered for {lift!r} in "
-            "SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
-        )
-
-    if not is_engine_available("opensim"):
-        return unavailable_joint_reaction_record(
-            lift,
-            "Native OpenSim runtime is not available in current environment",
-        )
+    reason = _unavailable_reason(lift, osl4_qual)
+    if reason is not None:
+        return unavailable_joint_reaction_record(lift, reason)
 
     targets, build, ik, inverse = _run_lift_ik_id(lift, stride)
     tmp = scratch_dir or Path(
@@ -439,19 +442,9 @@ def evaluate_lift_joint_reactions(
     )
     static_bound = static_hold_analytic_bound(lift, build.model, real_lift_info)
 
-    lumbar_idx = (
-        ik.coordinates.index("lumbar_extension")
-        if "lumbar_extension" in ik.coordinates
-        else None
-    )
-    peak_lumbar = (
-        float(np.max(np.abs(inverse.tau[:, lumbar_idx])))
-        if lumbar_idx is not None
-        else None
-    )
     extra_ctx = {
         "bar_mass_kg": targets.bar_mass_kg,
-        "peak_lumbar_moment_nm": peak_lumbar,
+        "peak_lumbar_moment_nm": _peak_lumbar_moment(ik.coordinates, inverse.tau),
         "qualification_info": osl4_qual,
     }
 
