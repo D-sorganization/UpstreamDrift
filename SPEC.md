@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13468 | Size Drake-Simscape equivalence fixture theta from the plant actuator count; Resolve the Drake autodiff fit grip body through the shared simulate fallback; Guard DrakePhysicsEngine.get_joint_names against unfinalized plants; Remove dead Pinocchio default branch from Drake simulate DEFAULT_GOLFER_URDF |
 | 2026-10-20 | #13469 | Mark the torch CUDA wheel-index pip probe requires_network so the offline unit gate stops crashing an xdist worker |
 | 2026-10-20 | #13442 | Prove hyperstatic per-hand split divergence between MuJoCo soft-constraint cone QP and shared penalty law with minimal two-pad test and update G8 reference; Align collinear capsule-cylinder midpoint convention and topology solimp impedance d0=0.001 so MuJoCo ten_finger 0.04 s hold and swing pass determinate parity |
 | 2026-10-20 | #13415 | Add OpenSim 3D joint reaction analysis for barbell lifts (OSL-5) |
