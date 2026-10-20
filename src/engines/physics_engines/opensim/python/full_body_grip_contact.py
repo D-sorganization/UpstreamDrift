@@ -21,6 +21,7 @@ Hunt-Crossley pairs give no force (see GRIP_PARITY_DECISIONS.md section 19).
 
 from __future__ import annotations
 
+import math
 import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
