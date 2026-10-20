@@ -70,6 +70,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 from numpy.typing import NDArray
 
+from ._simulate_support import _resolve_body_name
 from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
 from .simulate import COEFFS_PER_JOINT, SimOptions, evaluate_torque_polynomial
 
@@ -440,6 +441,19 @@ def build_polynomial_torque_system_autodiff(
 # ---------------------------------------------------------------------------
 
 
+def _resolve_grip_body(plant: Any, grip_body_name: str) -> tuple[str, Any]:
+    """Resolve the grip body exactly as ``simulate_with_coefficients`` does.
+
+    Uses the shared ``_resolve_body_name`` fallback chain so the synthetic
+    target and the fit sample the same body (#13450).
+    """
+    resolved = _resolve_body_name(plant, grip_body_name)
+    if resolved is None:
+        msg = f"plant has no body named {grip_body_name!r}; cannot compute grip cost"
+        raise ValueError(msg)
+    return resolved, plant.GetBodyByName(resolved)
+
+
 def _build_autodiff_plant(
     urdf_path: Path | str | None,
     time_step_s: float,
@@ -562,10 +576,7 @@ def _autodiff_simulate_and_cost(  # noqa: C901
     simulator.Initialize()
 
     # Lazily compute body-frame for grip pose extraction.
-    if not plant_ad.HasBodyNamed(grip_body_name):
-        msg = f"plant has no body named {grip_body_name!r}; cannot compute grip cost"
-        raise ValueError(msg)
-    grip_body = plant_ad.GetBodyByName(grip_body_name)
+    _, grip_body = _resolve_grip_body(plant_ad, grip_body_name)
 
     # Diff-and-square accumulator (AutoDiffXd scalar).
     pos_term = AutoDiffXd(0.0, np.zeros(theta.shape[0]))
@@ -958,9 +969,10 @@ def _final_rmse_float_plant(
 
     context = plant_float.CreateDefaultContext()
     actuation_port = plant_float.get_actuation_input_port()
-    if not plant_float.HasBodyNamed(grip_body_name):
+    try:
+        _, grip_body = _resolve_grip_body(plant_float, grip_body_name)
+    except ValueError:
         return float("nan")
-    grip_body = plant_float.GetBodyByName(grip_body_name)
     sim = Simulator(plant_float, context)
     sim.Initialize()
     sse = 0.0

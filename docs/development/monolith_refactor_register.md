@@ -104,12 +104,12 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 994 | `src/api/models/responses.py` |
 | 994 | `src/engines/physics_engines/myosuite/python/myohand_grip_controller.py` |
 | 993 | `src/shared/python/motion_matching/execution/spec_builder.py` |
+| 991 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` |
 | 990 | `src/shared/python/estimation/map_estimator.py` |
 | 988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py` |
 | 984 | `src/tools/bunker_shot_gui/viewport_widgets.py` |
 | 981 | `src/shared/python/workspace/necromatcher_video.py` |
 | 980 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
-| 979 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` |
 | 979 | `src/shared/python/motion_matching/pipeline/address.py` |
 | 977 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 975 | `src/api/routes/simulation_ws.py` |
@@ -231,6 +231,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 804 | `src/shared/python/spine/movement_variants.py` |
 | 803 | `src/shared/python/ui/qt/widgets/signal_toolkit_processing_mixin.py` |
 | 802 | `src/shared/python/plotting/renderers/kinetics.py` |
+| 801 | `src/engines/physics_engines/drake/python/drake_physics_engine.py` |
 | 801 | `src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py` |
 | 801 | `src/shared/python/sidekick/ui/tools_sidebar/sidebar.py` |
 | 801 | `src/tools/model_explorer/mesh_browser.py` |
