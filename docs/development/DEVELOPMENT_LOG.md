@@ -6142,10 +6142,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12684
 - **Branch:** merged via #12788
-- **PR:** #12788
+- **PR:** #12788, #13527
 - **Paths:** see #12788
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`3fd79f6c`; collated from changes/12684-r4-address-knee-flexion-owner-15-5-deg-p.md)
+- **Last verified:** 2026-10-20 (`19f8fef3`; collated from changes/12684-r4-the-dynamics-receipt-records-ik-and-f.md)
 - **Summary:** R4: address knee flexion (owner 15 +-5 deg prior, reliable capture wins, hard no-hyperextension bound, per-knee target_source in the receipt; --knee-flexion defaults to capture)
 - **Next step:** Shipped in PR #12788.
 
