@@ -43,7 +43,7 @@ from src.shared.python.spine.coupling import (
 )
 from src.shared.python.spine.levels import SpinalLevel, SpinalRegion
 
-__all__ = ["available_laws", "coupling_law", "load_coupling_laws"]
+__all__ = ["available_laws", "coupling_law", "load_coupling_law", "load_coupling_laws"]
 
 DEFAULT_PATH = (
     Path(__file__).resolve().parents[3] / "config" / "spine_coupling_laws.json"
@@ -186,6 +186,34 @@ def _citation_text(entry: dict) -> str:
     if cite.get("page"):
         parts.append(f"p. {cite['page']}")
     return "; ".join(parts)
+
+
+def load_coupling_law(law_id: str, *, require_verified: bool = False) -> CouplingLaw:
+    """Build the coupling law for ``law_id`` (issue #12743 public entry point).
+
+    When ``require_verified`` is true, raises if the entry's
+    ``verified_from_primary`` flag is false (including pending placeholders).
+
+    Postconditions: same as :func:`coupling_law`.
+
+    Raises:
+        TypeError: if ``law_id`` is not a ``str``.
+        ValueError: for an unknown id, an unverified entry with
+            ``require_verified=True``, a pending law, or an unsupported
+            ``kind``/distribution type.
+    """
+    if not isinstance(law_id, str):
+        raise TypeError(f"law_id must be a str, got {type(law_id).__name__}")
+    entries = load_coupling_laws()
+    if law_id not in entries:
+        raise ValueError(f"unknown coupling law {law_id!r}; known: {sorted(entries)}")
+    entry = entries[law_id]
+    if require_verified and not entry["verified_from_primary"]:
+        raise ValueError(
+            f"coupling law {law_id!r} is not verified_from_primary; "
+            f"citation: {entry['citation']['source']}"
+        )
+    return coupling_law(law_id)
 
 
 def coupling_law(law_id: str) -> CouplingLaw:
