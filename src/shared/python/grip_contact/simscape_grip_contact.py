@@ -35,6 +35,7 @@ from src.shared.python.grip_contact.contact_topology import (
     contact_topology,
 )
 from src.shared.python.grip_contact.interface import GripInterface
+from src.shared.python.grip_contact.generated_freshness import generated_json_matches
 from src.shared.python.grip_contact.matlab_kernel import (
     DEFAULT_SQUEEZE_PER_HAND_N,
     STYLE_IDS,
@@ -452,14 +453,19 @@ def export_scenarios_json(
     *,
     check: bool = False,
 ) -> int:
-    """Write or check ``gs3dx_grip_contact_scenarios.json``."""
+    """Write or check ``gs3dx_grip_contact_scenarios.json``.
+
+    ``check`` uses :func:`generated_json_matches`: the Hermite coefficients
+    carry finite-difference-amplified ulp noise that differs between runners.
+    """
     payload = build_scenarios_payload()
-    text = render_json_deterministic(payload)
     target = Path(path)
     if check:
         if not target.exists():
             return 1
-        return 0 if target.read_text(encoding="utf-8") == text else 1
+        committed = json.loads(target.read_text(encoding="utf-8"))
+        return 0 if generated_json_matches(committed, payload) else 1
+    text = render_json_deterministic(payload)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(text, encoding="utf-8")
     return 0

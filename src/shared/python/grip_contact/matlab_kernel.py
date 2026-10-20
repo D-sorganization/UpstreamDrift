@@ -34,6 +34,7 @@ from src.shared.python.grip_contact.contact_topology import (
     GripStyle,
     contact_topology,
 )
+from src.shared.python.grip_contact.generated_freshness import generated_json_matches
 from src.shared.python.grip_contact.interface import SIDES, GripInterface
 from src.shared.python.grip_contact.matlab_kernel_source import (
     MATLAB_HELPER_FUNCTIONS,
@@ -906,7 +907,11 @@ def export_matlab_kernel_bundle(
     golden_json_path: Path = DEFAULT_GOLDEN_JSON_PATH,
     check: bool = False,
 ) -> int:
-    """Write or check ``gs3dx_grip_contact_kernel.m``, params JSON, and golden JSON."""
+    """Write or check ``gs3dx_grip_contact_kernel.m``, params JSON, and golden JSON.
+
+    ``check`` compares the kernel and params byte-for-byte and the golden
+    vectors with :func:`generated_json_matches` (cross-environment ulp noise).
+    """
     params = build_kernel_params_payload()
     golden = build_golden_vectors_payload(params)
     m_text = render_matlab_kernel_source(params)
@@ -919,12 +924,13 @@ def export_matlab_kernel_bundle(
         (Path(golden_json_path), g_text),
     )
     if check:
-        for path, expected_text in targets:
-            if not path.exists():
-                return 1
-            if path.read_text(encoding="utf-8") != expected_text:
-                return 1
-        return 0
+        if not all(path.exists() for path, _ in targets):
+            return 1
+        exact = all(
+            path.read_text(encoding="utf-8") == text for path, text in targets[:2]
+        )
+        committed = json.loads(Path(golden_json_path).read_text(encoding="utf-8"))
+        return 0 if exact and generated_json_matches(committed, golden) else 1
 
     for path, expected_text in targets:
         path.parent.mkdir(parents=True, exist_ok=True)

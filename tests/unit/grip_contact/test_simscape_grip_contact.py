@@ -334,7 +334,9 @@ def test_export_scenarios_json_check_and_structure(tmp_path: Path) -> None:
     out_tmp = tmp_path / "scenarios.json"
     assert export_scenarios_json(out_tmp, check=False) == 0
     assert export_scenarios_json(out_tmp, check=True) == 0
-    out_tmp.write_text(out_tmp.read_text(encoding="utf-8") + " ", encoding="utf-8")
+    drifted = json.loads(out_tmp.read_text(encoding="utf-8"))
+    drifted["squeeze_per_hand_n"] = 1101.0
+    out_tmp.write_text(json.dumps(drifted), encoding="utf-8")
     assert export_scenarios_json(out_tmp, check=True) == 1
 
 
