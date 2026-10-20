@@ -8,21 +8,20 @@ on:
       - "**.md"
       - "LICENSE"
       - ".gitignore"
-  merge_group:
+  # No merge_group trigger: this job is not a required check (only
+  # quality-gate is), so the merge queue never waited on it (#13513).
   # Pull requests run via pull_request; push covers main only, so a PR branch
-  # does not run the job twice (merge-queue refs are not main).
+  # does not run the job twice.
   push:
     branches:
       - main
   workflow_dispatch:
 
 concurrency:
-  # PR runs cancel superseded pushes. Main, merge-queue and dispatched runs are
-  # never cancelled once running. A per-SHA main group queued one run per merge
+  # PR runs cancel superseded pushes. Main and dispatched runs are never
+  # cancelled once running. A per-SHA main group queued one run per merge
   # for the four docker runners (#13494). Grouped per event and ref, GitHub keeps
-  # the running main run plus only the newest pending one (#12285). Each
-  # merge-queue entry has its own gh-readonly-queue ref, so it keeps its own
-  # group and the queue always gets its result.
+  # the running main run plus only the newest pending one (#12285).
   group: ci-requires-opensim-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
