@@ -10,6 +10,9 @@ the MuJoCo and Simscape parity tests both use it.
 
 from __future__ import annotations
 
+import difflib
+import logging
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -23,12 +26,49 @@ from src.shared.python.grip_contact.parity import (
     QuantityError,
 )
 
+logger = logging.getLogger(__name__)
+
 __all__ = [
     "failing_net_wrench",
     "net_club_wrench",
     "net_club_wrench_errors",
     "payloads_numerically_close",
+    "report_generated_drift",
 ]
+
+
+def report_generated_drift(
+    path: Path,
+    current: str | None,
+    expected: str,
+    *,
+    max_lines: int = 80,
+) -> None:
+    """Log which generated file failed a ``--check`` and a bounded unified diff (#13544).
+
+    Diagnostics only: callers still return their non-zero drift code. ``current``
+    is ``None`` when the committed file is missing. At most ``max_lines`` diff
+    lines are logged (``-`` committed, ``+`` freshly rendered).
+    """
+    if max_lines < 1:
+        raise ValueError(f"max_lines must be >= 1, got {max_lines!r}")
+    if current is None:
+        logger.warning("generated file missing: %s", path)
+        return
+    diff = list(
+        difflib.unified_diff(
+            current.splitlines(),
+            expected.splitlines(),
+            fromfile=f"{path} (committed)",
+            tofile=f"{path} (rendered now)",
+            n=1,
+            lineterm="",
+        )
+    )
+    shown = diff[:max_lines] or ["(no line diff: trailing newline or line endings)"]
+    if len(diff) > max_lines:
+        shown.append(f"... diff truncated ({len(diff) - max_lines} more lines)")
+    logger.warning("generated file drifted: %s\n%s", path, "\n".join(shown))
 
 
 def payloads_numerically_close(a: Any, b: Any, *, tol: float = 1e-6) -> bool:

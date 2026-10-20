@@ -25,6 +25,7 @@ from src.shared.python.grip_contact.contact_topology import (
 from src.shared.python.grip_contact.interface import SIDES, GripInterface
 from src.shared.python.grip_contact.net_wrench_parity import (
     payloads_numerically_close,
+    report_generated_drift,
 )
 from src.shared.python.grip_contact.pair_contact import (
     closest_point_segment,
@@ -1151,13 +1152,13 @@ def export_matlab_kernel_bundle(
         (Path(golden_json_path), g_text),
     )
     if check:
-        for path, expected_text in targets:
-            p = Path(path)
-            if not p.exists():
-                return 1
-            current = p.read_text(encoding="utf-8")
+        for p, expected_text in targets:
+            current = p.read_text(encoding="utf-8") if p.exists() else None
             if current != expected_text:
-                if p.resolve() == DEFAULT_GOLDEN_JSON_PATH.resolve():
+                if (
+                    current is not None
+                    and p.resolve() == DEFAULT_GOLDEN_JSON_PATH.resolve()
+                ):
                     try:
                         act = json.loads(current)
                         exp = json.loads(expected_text)
@@ -1165,6 +1166,7 @@ def export_matlab_kernel_bundle(
                             continue
                     except Exception:
                         pass
+                report_generated_drift(p, current, expected_text)
                 return 1
         return 0
 
