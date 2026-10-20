@@ -2730,6 +2730,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13508 · Symmetric Capsule Line-Contact Quadrature Integrates the Shorter Capsule Axis (#13508)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13508
+- **Branch:** merged via #13517
+- **PR:** #13517
+- **Paths:** see #13517
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`f7d5547a`; collated from changes/13508-symmetric-capsule-line-contact-quadratur.md)
+- **Summary:** Symmetric capsule line-contact quadrature integrates the shorter capsule axis (#13508)
+- **Next step:** Shipped in PR #13517.
+
 ### DL-#13346 · Reclassify Grip_Style as a Physical Pick Across CLI, API, Desktop and Web and Migrate Legacy Sidecars
 
 - **State:** shipped
@@ -2866,10 +2879,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13449
 - **Branch:** fix/ud-drake-bugs
-- **PR:** #13468
+- **PR:** #13468, #13515
 - **Paths:** see #13468
 - **Started:** 2026-10-20
-- **Last verified:** 2026-10-20 (`e541e40b`; collated from changes/13449-size-drake-simscape-equivalence-fixture-.md)
+- **Last verified:** 2026-10-20 (`f0d94751`; collated from changes/13449-add-headless-regression-test-for-drake-s.md)
 - **Summary:** Size Drake-Simscape equivalence fixture theta from the plant actuator count
 - **Next step:** Shipped in PR #13468.
 
