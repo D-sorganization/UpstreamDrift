@@ -108,8 +108,9 @@ def test_spec_goals_and_bounds() -> None:
     spec = create_predictive_deadlift_spec(cfg)
 
     assert spec["exploratory"] is True
-    assert "effort" in spec["goals"]
-    assert "terminal_lockout" in spec["goals"]
+    # Lockout is enforced by the final bounds; the feet stay planted by a goal.
+    assert spec["goals"] == ["effort", "planted_feet"]
+    assert spec["planted_feet_weight"] == cfg.planted_feet_weight
     assert spec["mesh_intervals"] == 25
 
     # Bounds come from the solved poses, never from constants in the spec.
@@ -415,6 +416,32 @@ def test_build_predictive_deadlift_study_initializes() -> None:
     assert solver is not None
 
 
+def test_planted_feet_weight_is_validated() -> None:
+    """A negative planted-feet weight is rejected."""
+    with pytest.raises(ValueError, match="planted_feet_weight"):
+        PredictiveDeadliftConfig(planted_feet_weight=-1.0)
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.slow
+def test_planted_feet_goal_holds_the_setup_calcanei() -> None:
+    """The goal tracks both calcanei at their setup-pose ground positions."""
+    pytest.importorskip("opensim")
+    cfg = PredictiveDeadliftConfig(max_iterations=2, duration_bounds=(1.5, 3.0))
+    study, meta = build_predictive_deadlift_study(cfg)
+    goal = study.getProblem().getPhase(0).getGoal("planted_feet")
+    assert goal.getWeight() == cfg.planted_feet_weight
+
+    reference = meta["planted_feet_reference"]
+    assert set(reference) == {"/bodyset/calcn_r", "/bodyset/calcn_l"}
+    assert reference["/bodyset/calcn_r"][1] == pytest.approx(
+        reference["/bodyset/calcn_l"][1], abs=0.003
+    )
+    times = meta["planted_feet_times"]
+    assert times[0] == 0.0
+    assert times[-1] >= cfg.duration_bounds[1]
+
+
 def test_residual_optimal_force_scales_with_total_weight() -> None:
     """Residual optimal force is the configured multiple of total weight."""
     cfg = PredictiveDeadliftConfig(
@@ -716,7 +743,7 @@ def test_fixed_duration_is_a_valid_bound() -> None:
 def test_cli_duration_bounds_reach_the_stage1_config(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """``--duration-bounds`` sets the stage-1 final-time bounds."""
+    """``--duration-bounds`` and ``--planted-feet-weight`` reach stage 1."""
     import importlib
 
     mod = importlib.import_module("scripts.measure_opensim_predictive_deadlift")
@@ -724,6 +751,7 @@ def test_cli_duration_bounds_reach_the_stage1_config(
 
     def _stop(config: PredictiveDeadliftConfig, *args: object) -> dict[str, object]:
         seen["bounds"] = config.duration_bounds
+        seen["feet"] = config.planted_feet_weight
         raise SystemExit(0)
 
     monkeypatch.setattr(mod, "run_stage1_solve", _stop)
@@ -737,9 +765,12 @@ def test_cli_duration_bounds_reach_the_stage1_config(
                 "--duration-bounds",
                 "2.0",
                 "2.0",
+                "--planted-feet-weight",
+                "500",
             ]
         )
     assert seen["bounds"] == (2.0, 2.0)
+    assert seen["feet"] == 500.0
 
 
 def test_bundle_pose_targets_read_the_optimizer_solution() -> None:

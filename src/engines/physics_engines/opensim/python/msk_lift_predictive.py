@@ -133,6 +133,7 @@ class PredictiveDeadliftConfig:
     finite_difference_scheme: str = "forward"
     residual_force_scale: float = 2.0
     residual_effort_weight: float = 10.0
+    planted_feet_weight: float = 1.0e4
     multibody_dynamics_mode: str = "explicit"
     exploratory: bool = True
 
@@ -175,6 +176,10 @@ class PredictiveDeadliftConfig:
                 "residual_force_scale must be positive and residual_effort_weight "
                 "non-negative"
             )
+        if self.planted_feet_weight < 0.0:
+            raise ValueError(
+                f"planted_feet_weight must be non-negative: {self.planted_feet_weight}"
+            )
 
     def residual_optimal_force_n(self) -> float:
         """Residual optimal force: ``residual_force_scale`` times total weight."""
@@ -196,6 +201,7 @@ class PredictiveDeadliftConfig:
             "height_m": self.height_m,
             "effort_weight": self.effort_weight,
             "terminal_lockout_weight": self.terminal_lockout_weight,
+            "planted_feet_weight": self.planted_feet_weight,
             "finite_difference_scheme": self.finite_difference_scheme,
             "exploratory": self.exploratory,
         }
@@ -230,7 +236,8 @@ def create_predictive_deadlift_spec(config: PredictiveDeadliftConfig) -> dict[st
     return {
         "exploratory": config.exploratory,
         "actuation_mode": config.actuation_mode,
-        "goals": ["effort", "terminal_lockout"],
+        "goals": ["effort", "planted_feet"],
+        "planted_feet_weight": config.planted_feet_weight,
         "mesh_intervals": config.mesh_intervals,
         "welded_joints": sorted(welds),
         "actuators": actuators,
@@ -329,6 +336,10 @@ def _add_pelvis_residuals(model: Any, optimal_force_n: float) -> list[str]:
 POSE_FLOOR_PENETRATION_M = 0.003
 #: Largest equation residual a solved pose may keep (m).
 POSE_SOLVE_TOLERANCE_M = 1e-6
+PLANTED_FEET_FRAMES = ("/bodyset/calcn_r", "/bodyset/calcn_l")
+PLANTED_FEET_SAMPLES = 11
+PLANTED_FEET_TIME_MARGIN_S = 0.1
+
 _LEG_POSE_KEYS = ("hip_flexion", "knee_angle", "ankle_angle")
 _TRUNK_POSE_KEYS = ("pelvis_tilt", "lumbar_extension", "pelvis_tx", "pelvis_ty")
 
@@ -501,6 +512,53 @@ _POSE_COORDINATES = {
 }
 
 
+def planted_feet_reference(
+    model: Any, setup_pose: dict[str, float]
+) -> dict[str, list[float]]:
+    """Ground-frame origin of each calcaneus in the solved setup pose."""
+    state = model.initSystem()
+    _apply_pose(model, state, setup_pose)
+    bodies = model.getBodySet()
+    return {
+        path: [
+            float(v)
+            for v in np.asarray(
+                bodies.get(path.rsplit("/", 1)[1]).getPositionInGround(state).to_numpy()
+            )
+        ]
+        for path in PLANTED_FEET_FRAMES
+    }
+
+
+def _add_planted_feet_goal(
+    problem: Any, reference: dict[str, list[float]], t_end: float, weight: float
+) -> list[float]:
+    """Track both calcanei at fixed ground positions over ``[0, t_end]``.
+
+    A deadlift keeps the feet planted; without this goal the optimizer lifts
+    them and carries the body on the pelvis residual instead of the ground.
+    Returns the reference sample times (postcondition: they span ``t_end``).
+    """
+    require(t_end > 0.0, f"t_end must be positive: {t_end}")
+    osim = import_opensim()
+    labels = osim.StdVectorString()
+    for path in PLANTED_FEET_FRAMES:
+        labels.append(path)
+    table = osim.TimeSeriesTableVec3()
+    table.setColumnLabels(labels)
+    times = np.linspace(0.0, t_end + PLANTED_FEET_TIME_MARGIN_S, PLANTED_FEET_SAMPLES)
+    for t in times:
+        row = osim.RowVectorVec3(len(PLANTED_FEET_FRAMES))
+        for i, path in enumerate(PLANTED_FEET_FRAMES):
+            row[i] = osim.Vec3(*reference[path])
+        table.appendRow(float(t), row)
+    goal = osim.MocoTranslationTrackingGoal("planted_feet", weight)
+    goal.setTranslationReference(table)
+    goal.setFramePaths(labels)
+    problem.addGoal(goal)
+    return [float(t) for t in times]
+
+
 def _clip_bound(value: float, width: float, path: list[float]) -> list[float]:
     """``value`` plus or minus ``width``, clipped to the path bounds."""
     return [max(path[0], value - width), min(path[1], value + width)]
@@ -604,6 +662,10 @@ def build_predictive_deadlift_study(
             f"/forceset/residual_{coord}", config.residual_effort_weight
         )
     problem.addGoal(effort)
+    feet_reference = planted_feet_reference(model, setup_pose)
+    feet_times = _add_planted_feet_goal(
+        problem, feet_reference, config.duration_bounds[1], config.planted_feet_weight
+    )
     _configure_phase_bounds(phase, model, setup_pose, lockout_pose)
 
     solver = osim.MocoCasADiSolver.safeDownCast(study.initCasADiSolver())
@@ -620,6 +682,8 @@ def build_predictive_deadlift_study(
     meta["pose_targets"] = pose_targets
     meta["setup_pose"] = setup_pose
     meta["lockout_pose"] = lockout_pose
+    meta["planted_feet_reference"] = feet_reference
+    meta["planted_feet_times"] = feet_times
     return study, meta
 
 
@@ -800,6 +864,7 @@ def format_predictive_receipt(
         "residual_assisted": solve_summary.get("residual_assisted"),
         "residual_optimal_force_n": config.residual_optimal_force_n(),
         "residual_effort_weight": config.residual_effort_weight,
+        "planted_feet_weight": config.planted_feet_weight,
         "residual_moment_peak_nm": solve_summary.get("residual_moment_peak_nm"),
         "residual_moment_rms_nm": solve_summary.get("residual_moment_rms_nm"),
         "residual_moment_limit_nm": solve_summary.get("residual_moment_limit_nm"),

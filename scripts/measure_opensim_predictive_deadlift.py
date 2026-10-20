@@ -247,7 +247,7 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 ## Result Status: Exploratory
 
 ### Stage 1: Torque-Driven Solve
-- **Actuation:** `CoordinateActuator`s on free coordinates; six pelvis residuals (optimal force {receipt.get("residual_optimal_force_n")}, effort weight {receipt.get("residual_effort_weight")}); muscles removed
+- **Actuation:** `CoordinateActuator`s on free coordinates; six pelvis residuals (optimal force {receipt.get("residual_optimal_force_n")}, effort weight {receipt.get("residual_effort_weight")}); planted-feet goal weight {receipt.get("planted_feet_weight")}; muscles removed
 - **Solver Status:** `{stage1.get("solver_status", "unknown")}`
 - **Converged:** `{stage1.get("converged", False)}`
 - **Iterations:** {stage1.get("iterations")}
@@ -546,6 +546,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--residual-effort-weight", type=float, default=10.0)
     parser.add_argument(
+        "--planted-feet-weight",
+        type=float,
+        default=1.0e4,
+        help="Weight of the goal holding both calcanei at the setup pose",
+    )
+    parser.add_argument(
         "--fd-scheme", choices=("forward", "central"), default="forward"
     )
     parser.add_argument(
@@ -587,6 +593,7 @@ def main(argv: list[str] | None = None) -> int:
         solver={
             "finite_difference_scheme": args.fd_scheme,
             "multibody_dynamics_mode": args.dynamics_mode,
+            "planted_feet_weight": args.planted_feet_weight,
             **(
                 {"duration_bounds": tuple(args.duration_bounds)}
                 if args.duration_bounds
