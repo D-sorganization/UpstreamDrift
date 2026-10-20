@@ -42,11 +42,11 @@ contract tests stay stable without the external tool.
 
 After a run, the output directory contains:
 
-| Artifact        | Contents                                                                                                                                                       |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Artifact        | Contents                                                                                                                                                                |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `joints3d.csv`  | Columns `frame,time` then `<joint>_x,<joint>_y,<joint>_z` for the 22 SMPL body joints (`SMPL_BODY_JOINTS` in `run_hmr2.py`), positions in **meters**, `time` in seconds |
-| `betas.json`    | `{"betas": [<10 floats>], "gender": "male"\|"female"\|"neutral"}` — SMPL shape coefficients                                                                     |
-| `metadata.json` | `source_video`, `fps`, `tool_version` (`"stub"` when no real tool ran), `joint_names`                                                                            |
+| `betas.json`    | `{"betas": [<10 floats>], "gender": "male"\|"female"\|"neutral"}` — SMPL shape coefficients                                                                             |
+| `metadata.json` | `source_video`, `fps`, `tool_version` (`"stub"` when no real tool ran), `joint_names`                                                                                   |
 
 ## Downstream consumers
 

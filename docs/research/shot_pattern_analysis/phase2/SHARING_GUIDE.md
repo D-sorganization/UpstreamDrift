@@ -7,10 +7,10 @@ comparison per club. The files reuse accepted publication graphics without
 regeneration. Their hashes are recorded in
 [Artifact Delivery Evidence](validation/artifact_delivery_v2/README.md).
 
-| Club | Dispersion Image | Overhead Image |
-| --- | --- | --- |
-| Driver | `social__driver__lean0_curve1_rotation2_combined2__density.png` | `social__driver__lean0_curve1_rotation2_combined2__overhead.png` |
-| Seven Iron | `social__seven_iron__lean0_curve1_rotation2_combined2__density.png` | `social__seven_iron__lean0_curve1_rotation2_combined2__overhead.png` |
+| Club           | Dispersion Image                                                        | Overhead Image                                                           |
+| -------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Driver         | `social__driver__lean0_curve1_rotation2_combined2__density.png`         | `social__driver__lean0_curve1_rotation2_combined2__overhead.png`         |
+| Seven Iron     | `social__seven_iron__lean0_curve1_rotation2_combined2__density.png`     | `social__seven_iron__lean0_curve1_rotation2_combined2__overhead.png`     |
 | Pitching Wedge | `social__pitching_wedge__lean0_curve1_rotation2_combined2__density.png` | `social__pitching_wedge__lean0_curve1_rotation2_combined2__overhead.png` |
 
 These six images select zero shaft lean, curve strength ×1, shaft-twist standard

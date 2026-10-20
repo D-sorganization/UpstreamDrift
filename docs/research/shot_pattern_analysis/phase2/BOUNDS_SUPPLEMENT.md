@@ -34,18 +34,18 @@ $[-6^\circ,+6^\circ]$. The pitching-wedge protocols retain speed factors
 $[0.75,1.25]$, which yield $[24,40]\,\mathrm{m\,s^{-1}}$ for the illustrative
 $32\,\mathrm{m\,s^{-1}}$ preset. The separate driver speed sensitivity uses
 $[0.75,1.30]$, or $[33.75,58.5]\,\mathrm{m\,s^{-1}}$ for the
-$45\,\mathrm{m\,s^{-1}}$ preset. These are *optimizer bounds*, not observations
+$45\,\mathrm{m\,s^{-1}}$ preset. These are _optimizer bounds_, not observations
 of a golfer's achievable delivery. A Gaussian perturbation outside a physical
 simulation's domain remains an unsupported sample rather than being clipped or
 resampled.
 
 ## Predeclared Supplemental Protocols
 
-| Protocol ID | Cells | Target Forward Distance | Face Bounds | Speed Factors | Purpose |
-| --- | ---: | ---: | ---: | ---: | --- |
-| `pw-primary-face-bounds/1` | 18 | Within-lean straight nominal target | $[-6,+6]^\circ$ | $[0.75,1.25]$ | Strong PW, zero lean; nine noise profiles at shaft-twist SD $1^\circ$ and $2^\circ$ |
-| `pw-control-face-bounds/1` | 4 | $77.40247724866299\,\mathrm{m}$ | $[-6,+6]^\circ$ | $[0.75,1.25]$ | Strong PW, $5^\circ$ lean; shaft-only and combined2 profiles at both SDs |
-| `driver-control-speed-bounds/1` | 4 | $178.94875782337786\,\mathrm{m}$ | $[-6,+6]^\circ$ | $[0.75,1.30]$ | Strong driver, $5^\circ$ lean; same two profiles and SDs, separately labeled speed sensitivity |
+| Protocol ID                     | Cells |             Target Forward Distance |     Face Bounds | Speed Factors | Purpose                                                                                        |
+| ------------------------------- | ----: | ----------------------------------: | --------------: | ------------: | ---------------------------------------------------------------------------------------------- |
+| `pw-primary-face-bounds/1`      |    18 | Within-lean straight nominal target | $[-6,+6]^\circ$ | $[0.75,1.25]$ | Strong PW, zero lean; nine noise profiles at shaft-twist SD $1^\circ$ and $2^\circ$            |
+| `pw-control-face-bounds/1`      |     4 |     $77.40247724866299\,\mathrm{m}$ | $[-6,+6]^\circ$ | $[0.75,1.25]$ | Strong PW, $5^\circ$ lean; shaft-only and combined2 profiles at both SDs                       |
+| `driver-control-speed-bounds/1` |     4 |    $178.94875782337786\,\mathrm{m}$ | $[-6,+6]^\circ$ | $[0.75,1.30]$ | Strong driver, $5^\circ$ lean; same two profiles and SDs, separately labeled speed sensitivity |
 
 Each cell has three physical patterns and, if accepted for the final stage,
 10,000 requested shots per pattern: 26 distinct cells and 780,000 attempted

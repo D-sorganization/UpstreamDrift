@@ -16,20 +16,20 @@ that created those launch conditions.
 
 ## Inputs
 
-| Control        | Unit  | Range accepted     | Default |
-| -------------- | ----- | ------------------ | ------- |
-| Ball Speed     | mph   | 50 to 200          | 163     |
-| Launch Angle   | deg   | -5 to 45           | 11      |
-| Backspin       | rpm   | 0 to 12000         | 2500    |
-| Sidespin       | rpm   | -5000 to 5000      | 0       |
-| Wind Speed     | mph   | 0 to 50            | 0       |
-| Wind Direction | deg   | 0 to 360           | 0       |
-| Altitude       | ft    | 0 to 10000         | 0       |
+| Control        | Unit | Range accepted | Default |
+| -------------- | ---- | -------------- | ------- |
+| Ball Speed     | mph  | 50 to 200      | 163     |
+| Launch Angle   | deg  | -5 to 45       | 11      |
+| Backspin       | rpm  | 0 to 12000     | 2500    |
+| Sidespin       | rpm  | -5000 to 5000  | 0       |
+| Wind Speed     | mph  | 0 to 50        | 0       |
+| Wind Direction | deg  | 0 to 360       | 0       |
+| Altitude       | ft   | 0 to 10000     | 0       |
 
 - Sidespin sign convention: positive sidespin curves the ball to the right of
   the target line. Backspin and sidespin are combined into one total spin rate
   [rpm] plus a unit spin-axis vector before the simulator sees them.
-- Wind Direction is the direction the wind blows *toward*, measured from
+- Wind Direction is the direction the wind blows _toward_, measured from
   downrange (+x) toward the left (+y): 0 deg is a pure tailwind, 180 deg a pure
   headwind. Wind is a horizontal vector [m/s]; its z-component is always zero.
 - Altitude is converted to metres and used to derive air density [kg/m^3] via
@@ -86,6 +86,7 @@ the mapping from that literature to specific modules is in
   results still compute.
 
 ## See Also
+
 - [Simulation Controls](simulation_controls.md)
 - [Visualization Settings](visualization.md)
 - [Shot Tracer](shot_tracer.md) - the same flight question across several models

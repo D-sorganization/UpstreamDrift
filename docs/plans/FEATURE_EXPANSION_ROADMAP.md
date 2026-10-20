@@ -1234,16 +1234,16 @@ All proposed additions use MIT/BSD/Apache compatible licenses:
 ### What Commercial Products Do
 
 | Feature                 | OPTICAL | K-VEST | TrackMan | Foresight | **Us**   |
-| ----------------------- | ----- | ------ | -------- | --------- | -------- |
-| 3D Kinematics           | ✅    | ✅     | ❌       | ❌        | ✅       |
-| Ball Flight             | ❌    | ❌     | ✅       | ✅        | ✅       |
-| Forward Dynamics        | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Muscle Models           | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Swing Optimization      | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Injury Risk             | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Multi-Engine Validation | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Open Source             | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Price                   | $30k+ | $8k+   | $22k+    | $20k+     | **Free** |
+| ----------------------- | ------- | ------ | -------- | --------- | -------- |
+| 3D Kinematics           | ✅      | ✅     | ❌       | ❌        | ✅       |
+| Ball Flight             | ❌      | ❌     | ✅       | ✅        | ✅       |
+| Forward Dynamics        | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Muscle Models           | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Swing Optimization      | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Injury Risk             | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Multi-Engine Validation | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Open Source             | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Price                   | $30k+   | $8k+   | $22k+    | $20k+     | **Free** |
 
 ### Our Unique Value Proposition
 

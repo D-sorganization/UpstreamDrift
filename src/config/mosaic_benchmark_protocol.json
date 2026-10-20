@@ -10,7 +10,7 @@
     "data_seed": 8,
     "prior_seed": 2,
     "geometry_scale": 1.05,
-    "prior_relative_spread": 0.10
+    "prior_relative_spread": 0.1
   },
   "anchors": {
     "mass_row": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
@@ -23,16 +23,14 @@
     "kinematic_rms_max_rad": 0.001,
     "torque_rms_ratio_max": 0.25,
     "structural_rank": 9,
-    "unobservable_parameters": [
-      "m_0"
-    ],
+    "unobservable_parameters": ["m_0"],
     "open_loop_replay_rms_max_rad": 0.035,
     "open_loop_horizon_s": 0.75
   },
   "promotion_metrics": {
-    "geometry_error_target_m": 2.5e-05,
+    "geometry_error_target_m": 2.5e-5,
     "kinematic_rms_target_rad": 0.00075,
-    "torque_rms_ratio_nominal": 0.20,
+    "torque_rms_ratio_nominal": 0.2,
     "closed_loop_effort_rms_max": 0.05,
     "open_loop_replay_rms_nominal_rad": 0.031
   },

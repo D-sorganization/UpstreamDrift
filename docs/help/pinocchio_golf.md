@@ -16,36 +16,36 @@ introspection of a model, not for a driven, controlled swing.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| URDF model | file (`*.urdf`, `*.xml`) | `Load File...` opens a file dialog; a default `models/generated/golfer.urdf` is loaded at start-up when present. |
-| Discovered models | enumeration | Every `*.urdf` under the shared URDF directory returned by `get_shared_urdf_path()`. |
-| Operating mode | dynamic / kinematic | `operating_mode` starts as `"dynamic"`. |
-| Joint position | rad | One slider plus spin box per joint; slider span is +/- 10.0 rad (`SLIDER_RANGE_RAD`) with a 100 counts/rad scale (`SLIDER_SCALE`). |
-| Physics time step | s | 0.01 s (`DT_DEFAULT`). |
-| Visualization toggles | boolean | Reference frames, centre-of-mass spheres (radius 0.02 m, `COM_SPHERE_RADIUS`), manipulability ellipsoids. |
-| Points of interest | selection | Checkbox list of frames for manipulability analysis. |
-| Live analysis | boolean | Computes induced accelerations and counterfactuals every recorded frame. |
+| Input                 | Unit / type              | Notes                                                                                                                              |
+| --------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| URDF model            | file (`*.urdf`, `*.xml`) | `Load File...` opens a file dialog; a default `models/generated/golfer.urdf` is loaded at start-up when present.                   |
+| Discovered models     | enumeration              | Every `*.urdf` under the shared URDF directory returned by `get_shared_urdf_path()`.                                               |
+| Operating mode        | dynamic / kinematic      | `operating_mode` starts as `"dynamic"`.                                                                                            |
+| Joint position        | rad                      | One slider plus spin box per joint; slider span is +/- 10.0 rad (`SLIDER_RANGE_RAD`) with a 100 counts/rad scale (`SLIDER_SCALE`). |
+| Physics time step     | s                        | 0.01 s (`DT_DEFAULT`).                                                                                                             |
+| Visualization toggles | boolean                  | Reference frames, centre-of-mass spheres (radius 0.02 m, `COM_SPHERE_RADIUS`), manipulability ellipsoids.                          |
+| Points of interest    | selection                | Checkbox list of frames for manipulability analysis.                                                                               |
+| Live analysis         | boolean                  | Computes induced accelerations and counterfactuals every recorded frame.                                                           |
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| MeshCat 3D scene | rendered frames in a browser | Server started on port 7000 where supported; the host URL is printed into the log panel. |
-| Model size readout | `nq`, `nv` counts | Logged on load. |
-| Simulation time | s | `sim_time`. |
-| Joint positions / velocities | rad, rad/s | Recorded per frame. |
-| Joint torques | N*m | Recorded per frame - always zero in the current loop (see Limitations). |
-| Kinetic energy | J | `data.kinetic_energy`. |
-| Potential energy | J | `data.potential_energy`. |
-| Club-head position | m (3-vector) | From the first frame whose name contains `club` or `head`, else the last frame. |
-| Club-head velocity | m/s (3-vector) | `pin.getFrameVelocity` on the same frame. |
-| Induced accelerations | rad/s^2 per generalized coordinate | Per source. |
-| Counterfactuals | rad/s^2 (`ztcf_accel`) and N*m (`zvcf_torque`) | Per frame. |
-| Jacobian condition number | dimensionless | *Matrix Analysis* readout. |
-| Constraint rank | count | *Matrix Analysis* readout. |
-| Recorded frame count | count | `Frames: N` label. |
-| Exported statistics | CSV | `Export CSV` in the Analysis tab. |
+| Output                       | Unit / type                                     | Notes                                                                                    |
+| ---------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| MeshCat 3D scene             | rendered frames in a browser                    | Server started on port 7000 where supported; the host URL is printed into the log panel. |
+| Model size readout           | `nq`, `nv` counts                               | Logged on load.                                                                          |
+| Simulation time              | s                                               | `sim_time`.                                                                              |
+| Joint positions / velocities | rad, rad/s                                      | Recorded per frame.                                                                      |
+| Joint torques                | N\*m                                            | Recorded per frame - always zero in the current loop (see Limitations).                  |
+| Kinetic energy               | J                                               | `data.kinetic_energy`.                                                                   |
+| Potential energy             | J                                               | `data.potential_energy`.                                                                 |
+| Club-head position           | m (3-vector)                                    | From the first frame whose name contains `club` or `head`, else the last frame.          |
+| Club-head velocity           | m/s (3-vector)                                  | `pin.getFrameVelocity` on the same frame.                                                |
+| Induced accelerations        | rad/s^2 per generalized coordinate              | Per source.                                                                              |
+| Counterfactuals              | rad/s^2 (`ztcf_accel`) and N\*m (`zvcf_torque`) | Per frame.                                                                               |
+| Jacobian condition number    | dimensionless                                   | _Matrix Analysis_ readout.                                                               |
+| Constraint rank              | count                                           | _Matrix Analysis_ readout.                                                               |
+| Recorded frame count         | count                                           | `Frames: N` label.                                                                       |
+| Exported statistics          | CSV                                             | `Export CSV` in the Analysis tab.                                                        |
 
 ## Method
 
@@ -90,6 +90,7 @@ Qt layer:
   limits.
 
 ## See Also
+
 - [Pinocchio engine reference](../engines/pinocchio.md)
 - [Engine capabilities matrix](../engines/engine_capabilities.md)
 - [Engine support tiers](../engines/support_tiers.md)

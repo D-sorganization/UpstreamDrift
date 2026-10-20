@@ -9,13 +9,13 @@ Specification only; no production module. Section numbers in
 `loop_nullspace.tex` (Variability Sensitivity, `sec:variability`) are the
 citable contract for every variability child (epic section 5A, V1 to V8):
 
-| Section | Content | Golden keys |
-|---|---|---|
-| `sec:var-lin` | KKT linearization on the tangent bundle, reactions re-solved, `K_geom(λ) = Σ_r λ_r ∇²Φ_r`; `G_t N = 0` | `linearization`, `golfer_preload` |
-| `sec:var-salt` | Event projection `Π` and saltation matrix `S`, `S f⁻ = f⁺` | `saltation` |
-| `sec:var-cov` | Covariance recursion and adjoint form | `min_variance.model` |
+| Section              | Content                                                                                                                                        | Golden keys                           |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `sec:var-lin`        | KKT linearization on the tangent bundle, reactions re-solved, `K_geom(λ) = Σ_r λ_r ∇²Φ_r`; `G_t N = 0`                                         | `linearization`, `golfer_preload`     |
+| `sec:var-salt`       | Event projection `Π` and saltation matrix `S`, `S f⁻ = f⁺`                                                                                     | `saltation`                           |
+| `sec:var-cov`        | Covariance recursion and adjoint form                                                                                                          | `min_variance.model`                  |
 | `sec:var-mechanisms` | M1 signal-dependent noise, M2 geometric preload, M3 muscle impedance (MyoSuite/OpenSim only); `OBJECTIVE_FLAT_INVARIANT` when none is declared | `min_variance`, `additive_noise_flat` |
-| `sec:var-face` | Wrapped face-angle error, bias, SD, IQR, exceedance, miss probability; coefficient of variation banned for zero-centred outcomes | none |
+| `sec:var-face`       | Wrapped face-angle error, bias, SD, IQR, exceedance, miss probability; coefficient of variation banned for zero-centred outcomes               | none                                  |
 
 Registry additions (`src/config/loop_nullspace_registry.json`): hypotheses
 `H-NOISE-ADDITIVE`, `H-NOISE-SIGNAL-DEPENDENT`, `H-GEOMETRIC-PRELOAD`,
@@ -46,19 +46,19 @@ hard-KKT solve with the reaction re-solved; capability is `PARTIAL` with
 `derivative_method=finite_difference` (central differences along retractions,
 step `1e-5`).
 
-* MyoSuite refuses (`DerivativeCapabilityUnavailable`) and reports `NONE`
+- MyoSuite refuses (`DerivativeCapabilityUnavailable`) and reports `NONE`
   unless `kkt_regularization == 0`.
-* Muscle activation states are unsupported (`UNSUPPORTED_STATE_COMPONENTS`).
+- Muscle activation states are unsupported (`UNSUPPORTED_STATE_COMPONENTS`).
   NSX-94 adds quasi-static muscle stiffness on top of the coordinate
   derivatives (`apply_muscle_stiffness`); activation and fibre-length dynamics
   remain undifferentiated.
-* Non-claim: `mjd_transitionFD` differentiates MuJoCo's soft stepping
+- Non-claim: `mjd_transitionFD` differentiates MuJoCo's soft stepping
   (solref/solimp compliance). It is a separately characterised registry entry
   and its sensitivities are not conformance evidence here.
-* Pinocchio agreement (same specification, state and load; basis-independent
+- Pinocchio agreement (same specification, state and load; basis-independent
   operators `D P^T`): the bound is the registered NSX-56 Track N tolerance
   propagated through the differencing step, `max(1e-11, 1e-11, 1e-12, 1e-8) /
-  1e-5 = 1e-3` (scaled). Measured: acceleration `7e-12`, reaction `1e-10`,
+1e-5 = 1e-3` (scaled). Measured: acceleration `7e-12`, reaction `1e-10`,
   `d a/d tau` `4e-12`, `d a/d xi` `9e-7`, `d a/d eta` `6e-5`, `d lambda/d xi`
   `1e-5`, `d lambda/d eta` `7e-5`. Agreement between engines is not physical
   validation.
@@ -77,11 +77,11 @@ Modules (all under `src/shared/python/loop_nullspace/`):
   `event_outcome_rows` (`C Π`, NSX-83). `LinearizedDynamics` is reused from
   `estimation/mosaic/local_policy.py`.
 - `nonlinearity_gate.py`: `assess_nonlinearity(rollout, directions, *,
-  amplitude, gate_threshold)`. **`gate_threshold` has no default**: NSX-80
+amplitude, gate_threshold)`. **`gate_threshold` has no default**: NSX-80
   specifies a gate but no number, so the caller supplies it.
   `LinearValidity` is `LINEAR_VALID`, `NOT_LINEAR_VALID` or `NOT_ASSESSED`.
 - `variance_records.py`: `assess_variance(problem, declaration, *,
-  outcome_units, gate=None)` returning typed `QuantityRecord`s. Kernels are
+outcome_units, gate=None)` returning typed `QuantityRecord`s. Kernels are
   `INVARIANT` unless M2 or M3 is declared; variance is `INVARIANT` with the
   noise hypothesis in `conditioning` when no mechanism is declared and
   `FAMILY_DEPENDENT` otherwise.
@@ -116,7 +116,7 @@ Modules (all under `src/shared/python/loop_nullspace/`):
   reported, `AGREES` only if the gate ran and passed) and `sd_records`
   (`QuantityRecord`s, `UNVALIDATED`, mode label as a convention).
 - `replay_campaign.py`: `replay_strategy(spec, name, ReplayCase, TorqueNoise,
-  outcome_fn)` runs NSX-31 `replay()` under held torque noise; the strategy
+outcome_fn)` runs NSX-31 `replay()` under held torque noise; the strategy
   mode is the replay mode (R10), the integrator is RK4 at `dt / substeps`, and
   a terminated replay is a retained failure.
 
@@ -129,7 +129,6 @@ zero-order-hold noise inside RK4 stages. Non-claims: the MC is a statement about
 the model under the declared noise; a failure rate is not a physical
 probability; replay is not physical acceptance. NSX-95 comparisons must use this
 runner.
-
 
 ## NSX-93 Declared Impedance and Delayed Feedback Layer (#12722)
 
@@ -214,12 +213,11 @@ diagnostic, not a time-varying stability proof. The tangent chain is `k = 1`
 analytic point mass, pendulum and planar-golfer oracles through the provider
 seam, not every engine adapter.
 
-
 ## NSX-95 Consistency Strategy Catalogue and Comparison Campaigns (#12724)
 
 The owner's question is which strategies make a golfer more consistent, under
 which disturbances and at what cost. The primary outcome is the face-angle
-variance. The catalogue is data; the evaluators *compose* NSX-91/92/93/94/25 and
+variance. The catalogue is data; the evaluators _compose_ NSX-91/92/93/94/25 and
 add no new dynamics. Modules (all under `src/shared/python/loop_nullspace/`):
 
 - `strategy_spec.py`: frozen registry `CATALOGUE` of S1-S12. Each entry declares
@@ -241,20 +239,20 @@ add no new dynamics. Modules (all under `src/shared/python/loop_nullspace/`):
 
 Catalogue status.
 
-| Id  | Strategy                    | Status          | Evaluator composed                                   |
-| --- | --------------------------- | --------------- | ---------------------------------------------------- |
-| S1  | Null-space redistribution   | implemented     | NSX-92 `minimise_face_variance`, M1 channel only     |
-| S2  | Co-contraction / impedance  | implemented     | NSX-93 `layer_variance`; NSX-94 co-contraction curve |
-| S3  | Distal stabilization        | implemented     | NSX-93 impedance window ending at impact             |
-| S4  | Proximal-distal effort      | not implemented | no per-joint effort-share parameterisation           |
-| S5  | Grip / hand-split preload   | implemented     | NSX-92, M2 (geometric preload) channel only          |
-| S6  | Kinematic redundancy (UCM)  | not implemented | no UCM computation exists in the repository          |
-| S7  | Delayed feedback            | implemented     | NSX-93 delayed feedback and frozen delay margin      |
-| S8  | Speed-accuracy              | implemented     | NSX-92 `chs_variance_front`                          |
-| S9  | Biarticular coupling        | not implemented | no biarticular comparison on the NSX-94 frame        |
-| S10 | Shaft-flex phase matching   | unavailable     | rigid club has no shaft flexibility                  |
-| S11 | Timing / sequencing         | not implemented | no timing-disturbance variance evaluator            |
-| S12 | Address-state consistency   | not implemented | no address-consistency cost model                    |
+| Id  | Strategy                   | Status          | Evaluator composed                                   |
+| --- | -------------------------- | --------------- | ---------------------------------------------------- |
+| S1  | Null-space redistribution  | implemented     | NSX-92 `minimise_face_variance`, M1 channel only     |
+| S2  | Co-contraction / impedance | implemented     | NSX-93 `layer_variance`; NSX-94 co-contraction curve |
+| S3  | Distal stabilization       | implemented     | NSX-93 impedance window ending at impact             |
+| S4  | Proximal-distal effort     | not implemented | no per-joint effort-share parameterisation           |
+| S5  | Grip / hand-split preload  | implemented     | NSX-92, M2 (geometric preload) channel only          |
+| S6  | Kinematic redundancy (UCM) | not implemented | no UCM computation exists in the repository          |
+| S7  | Delayed feedback           | implemented     | NSX-93 delayed feedback and frozen delay margin      |
+| S8  | Speed-accuracy             | implemented     | NSX-92 `chs_variance_front`                          |
+| S9  | Biarticular coupling       | not implemented | no biarticular comparison on the NSX-94 frame        |
+| S10 | Shaft-flex phase matching  | unavailable     | rigid club has no shaft flexibility                  |
+| S11 | Timing / sequencing        | not implemented | no timing-disturbance variance evaluator             |
+| S12 | Address-state consistency  | not implemented | no address-consistency cost model                    |
 
 A not-implemented or unavailable arm returns its reason and no numbers; the
 campaign lists it under `not_attempted` and excludes it from the failure rate.
@@ -270,10 +268,10 @@ Declared choices (ambiguities resolved conservatively).
   case's baseline. Absolute variances are reported but not compared across
   representations. An arm whose ratio is not below one cannot win.
 - Matched CHS. Clubhead speed is an input of each case. An arm outside
-  `chs_rel_tol` of the reference (slower *or* faster, or of unknown speed) is
+  `chs_rel_tol` of the reference (slower _or_ faster, or of unknown speed) is
   excluded with `SPEED_MISMATCH`; the speed-for-consistency trade belongs to the
-  unconstrained fronts. Matched effort adds a common cap *within one effort
-  basis* (allocated torque, expected layer torque, muscle activation are separate
+  unconstrained fronts. Matched effort adds a common cap _within one effort
+  basis_ (allocated torque, expected layer torque, muscle activation are separate
   lines, R10); an arm over the cap is excluded, never relaxed.
 - Negative controls. A flat NSX-92 objective, a zero impedance, a zero feedback
   gain, a missing preload for S5 or a curve with no declared mechanism returns
@@ -293,7 +291,7 @@ Fixtures used in the tests (invented demonstrations, none a golfer measurement):
 the NSX-92 pendulum for S1/S5/S8, the NSX-93 double integrator for S2/S3/S7 and
 the NSX-94 antagonist pair for co-contraction. Observed results of those
 fixtures are not claims about golfers; a late impedance window helped less than
-full-horizon stiffness and needed *more* expected effort, because early
+full-horizon stiffness and needed _more_ expected effort, because early
 regulation keeps the feedback torque small.
 
 Non-claims. Rankings are conditional on the declared priors, mechanisms and the
@@ -311,17 +309,17 @@ rigid closed-loop solve. The registry check is
 `tests/integration/cross_engine/divergence_registry.yaml` (40 rows: four engine
 pairs against the Pinocchio ANALYTIC reference, ten metrics each).
 
-* **Track N** compares `d a/d tau`, `d a/d xi`, `d a/d eta` and the three
+- **Track N** compares `d a/d tau`, `d a/d xi`, `d a/d eta` and the three
   `d lambda` blocks as basis-independent operators (`D P^T` for state blocks) in
   the Pinocchio coordinate order, at the NSX-56 projected states (frames 0 and
   400), one seeded actuated load and one closure tangent space.
-* **Track S** (scientific comparison, not a measured noise level) compares the
-  first-order covariance maps the sensitivities induce under a *declared* unit
+- **Track S** (scientific comparison, not a measured noise level) compares the
+  first-order covariance maps the sensitivities induce under a _declared_ unit
   isotropic noise: `acc_load_variance = A S A^T`, `acc_state_variance = D_xi
-  D_xi^T + D_eta D_eta^T` and the two reaction analogues. Face-angle kernels and
+D_xi^T + D_eta D_eta^T` and the two reaction analogues. Face-angle kernels and
   minimum-variance allocations (NSX-89 to NSX-92) are not in this stack, so they
   are **not** compared here.
-* **Tolerances are derived, then registered.** Load blocks: `kkt_bound` with a
+- **Tolerances are derived, then registered.** Load blocks: `kkt_bound` with a
   zero right-hand side times `sqrt(nv)`. State blocks of a finite-difference
   engine (MuJoCo, MyoSuite, OpenSim): the Track N differences propagated with
   `kkt_bound`, divided by the step, times `sqrt(k)` (NSX-88). State blocks of an
@@ -330,15 +328,15 @@ pairs against the Pinocchio ANALYTIC reference, ten metrics each).
   registry value is the larger bound over the two frames rounded up to two
   significant digits; a test requires every registered value to cover the
   per-run derived bound, and another that the measured difference stays inside it.
-* **Capability matrix.** Pinocchio ANALYTIC and Drake AUTODIFF are `FULL`;
+- **Capability matrix.** Pinocchio ANALYTIC and Drake AUTODIFF are `FULL`;
   MuJoCo, MyoSuite and OpenSim are `PARTIAL` (finite difference). Simscape has no
   native adapter and is declared `NONE` in `default_registry()` with its reason.
-* **Planted errors fail.** A sign flip, a swap of the force and torque halves of
+- **Planted errors fail.** A sign flip, a swap of the force and torque halves of
   the grip wrench, a two-name coordinate swap and a 0.1 percent load-block error
   are each caught. Derivatives whose scheme marks soft stepping
   (`mjd_transition`, `solref`, `solimp`) are refused: soft and hard dynamics are
   never mixed.
-* **Measured versus bound** (scaled, worst of the two frames; the registered
+- **Measured versus bound** (scaled, worst of the two frames; the registered
   value is the bound). All measurements are inside their bounds; no divergence
   is registered. Load blocks: measured 2e-11 or better against bounds near 1e-9
   (`d a`) and 6e-7 (`d lambda`). State blocks, finite-difference engines:
@@ -346,47 +344,47 @@ pairs against the Pinocchio ANALYTIC reference, ten metrics each).
   (`d lambda/d eta` up to 1.8): the propagated bound is sound but loose by two
   to four orders for the state blocks. Drake: measured 7.5e-11 or better against
   resolution-limited bounds from below 1e-9 up to 3.4e-4.
-* **Non-claims.** The MyoSuite rows inherit the MuJoCo derivation (the adapter
+- **Non-claims.** The MyoSuite rows inherit the MuJoCo derivation (the adapter
   drives the same routine) and were not measured on the authoring host, where
   the installed `myosuite` exposes no supported runtime layout (#12635); the
   `requires_myosuite` test enforces the per-run bound wherever it loads. The
   variance rows use declared, not measured, noise. Numerical conformance is not
   physical validation.
-Anthro ensemble report (NSX-61 acceptance;
-`tests/integration/test_loop_nullspace_anthro_ensemble.py`, `slow`). Members are
-rebuilt with the NSX-60 foot-contact rows (`foot_contact_tol_m = 0`), decomposed,
-given the unchanged `H-TORQUE-CAPACITY` prior and Coulomb cones, and enveloped
-(35 joint torques and the six closure-wrench components, 41 quantities) with
-`static_envelopes`; the nominal trajectory is member 0. Sampling is the declared
-`H-KINEMATIC-ENSEMBLE-PRIOR` with seed 12586; the host is a shared 4-core, so
-the sample is modest: three windows of three consecutive record frames (0 to 2,
-150 to 152, 300 to 302), 12 samples each, at `sigma_q = 0.001` (1 mm, 1 mrad).
+  Anthro ensemble report (NSX-61 acceptance;
+  `tests/integration/test_loop_nullspace_anthro_ensemble.py`, `slow`). Members are
+  rebuilt with the NSX-60 foot-contact rows (`foot_contact_tol_m = 0`), decomposed,
+  given the unchanged `H-TORQUE-CAPACITY` prior and Coulomb cones, and enveloped
+  (35 joint torques and the six closure-wrench components, 41 quantities) with
+  `static_envelopes`; the nominal trajectory is member 0. Sampling is the declared
+  `H-KINEMATIC-ENSEMBLE-PRIOR` with seed 12586; the host is a shared 4-core, so
+  the sample is modest: three windows of three consecutive record frames (0 to 2,
+  150 to 152, 300 to 302), 12 samples each, at `sigma_q = 0.001` (1 mm, 1 mrad).
 
-- Admission: all 36 samples are admitted (none rejected) at both sigmas.
-- The hypothesis perturbs the root too, so a sample can lift a foot or leave
+* Admission: all 36 samples are admitted (none rejected) at both sigmas.
+* The hypothesis perturbs the root too, so a sample can lift a foot or leave
   fewer than three contacts. The root rows cannot then be balanced (the
   acceleration is held at its nominal value) and `decompose` refuses the sample,
   which is counted, not repaired. At `sigma_q = 0.001` the refused counts are 7,
   8 and 4 of 12 (19 of 36), leaving 5, 4 and 8 enveloped members. At the
   kinematic default `sigma_q = 0.02` only 3 of 12 samples in window 0 can be
   balanced, which is why the envelope report uses the smaller sigma.
-- Union (interval hull, nominal included): the median width over the nominal
+* Union (interval hull, nominal included): the median width over the nominal
   width is 1.0008, 1.0005 and 1.0008 per window (maximum 1.016, 1.486 and
   1.026): a kinematic perturbation this small widens the envelope by well under
   1 percent for the typical quantity and by up to 49 percent for the worst cell.
   The union contains every member interval in every cell (asserted).
-- Intersection: empty in 15 of 123 (frame, quantity) cells in windows 0 and 150
+* Intersection: empty in 15 of 123 (frame, quantity) cells in windows 0 and 150
   (members with disjoint intervals; elsewhere the median width over nominal is
   0.9994 and 0.9992, minimum 0.14 and 0.81). In window 300 three member frames
   are INFEASIBLE under the capacity prior (the perturbation pushes the recorded
   effort outside it), so the intersection is empty in all 123 cells there; the
   union skips those members.
-- Sign classes: members disagree on the sign class in 4 of 123 cells (3 frames)
+* Sign classes: members disagree on the sign class in 4 of 123 cells (3 frames)
   in window 0, none in window 150 and 9 cells (3 frames) in window 300; no decided
   nominal sign becomes INDETERMINATE in the union in any window (0 cells, 0
   frames). In total 13 cells in 6 of the 9 frames change class across members.
   An infeasible member frame has no class and is reported separately.
-- Non-claims: the sampling distribution is a declared hypothesis, not measured
+* Non-claims: the sampling distribution is a declared hypothesis, not measured
   uncertainty; the hull is not a confidence set; three short windows do not
   characterise the swing; the capacity prior is ASSUMED and unchanged.
 
@@ -459,7 +457,6 @@ reaction is a simulation, not a force plate); the hull is not a confidence set;
 three short windows do not characterise the swing; the capacity prior is ASSUMED
 and unchanged. Bi-level inertia learning is out of scope.
 
-
 ## NSX-99 Sensitivity Stage and Report Schema Version 2 (#12728)
 
 `facade.analyze` gains a `sensitivity` stage (progress 99.5, after the envelope
@@ -471,12 +468,12 @@ plot model built from the report and compute nothing themselves.
 Options (all additive; `mechanisms`, `strategy_set` and `outcome_priority`
 without a `disturbance_spec` are refused):
 
-| Field              | Meaning                                                          | Default            |
-| ------------------ | ---------------------------------------------------------------- | ------------------ |
+| Field              | Meaning                                                            | Default            |
+| ------------------ | ------------------------------------------------------------------ | ------------------ |
 | `disturbance_spec` | One or more NSX-82 `DisturbanceSpec` (spectral-density covariance) | none (stage off)   |
-| `mechanisms`       | Declared mechanism ids (M1 signal-dependent noise, M2, M3)       | empty              |
-| `strategy_set`     | NSX-95 catalogue ids to compare                                  | all twelve         |
-| `outcome_priority` | Ordered outcome names; the first is the primary outcome          | `face_angle` first |
+| `mechanisms`       | Declared mechanism ids (M1 signal-dependent noise, M2, M3)         | empty              |
+| `strategy_set`     | NSX-95 catalogue ids to compare                                    | all twelve         |
+| `outcome_priority` | Ordered outcome names; the first is the primary outcome            | `face_angle` first |
 
 M1 must be declared exactly when a disturbance carries a signal law; a
 disagreement is a `ValueError`, because silently adding or dropping M1 would
@@ -574,4 +571,3 @@ assert every string is on screen. Regenerate with
 `python3 -m tests.unit.loop_nullspace.variability_view_text --write`.
 
 Non-claims: the views add no validation; amplitudes remain declared hypotheses.
-

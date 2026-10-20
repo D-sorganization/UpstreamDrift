@@ -104,11 +104,11 @@ Astra predeclared the supplemental representative PDF/SVG selection in `validati
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.
 
-| Dataset | Planned / Completed / Unavailable Cells | Attempted Shot Rows | Archive |
-| --- | --- | ---: | --- |
-| Original Primary | 324 / 270 / 54 | 8,100,000 | 2,097 files, 15 ZIP parts |
-| Original Fixed-Target Control | 72 / 52 / 20 | 1,560,000 | 427 files, 3 ZIP parts |
-| Bounds Supplement | 26 / 26 / 0 | 780,000 | 191 files, 2 ZIP parts |
+| Dataset                       | Planned / Completed / Unavailable Cells | Attempted Shot Rows | Archive                   |
+| ----------------------------- | --------------------------------------- | ------------------: | ------------------------- |
+| Original Primary              | 324 / 270 / 54                          |           8,100,000 | 2,097 files, 15 ZIP parts |
+| Original Fixed-Target Control | 72 / 52 / 20                            |           1,560,000 | 427 files, 3 ZIP parts    |
+| Bounds Supplement             | 26 / 26 / 0                             |             780,000 | 191 files, 2 ZIP parts    |
 
 The supplement retains 779,712 supported and 288 unsupported rows. Four PW zero-lean control aliases reuse verified executions and add no shots. Original unavailable records remain unchanged. Audits, exact-byte restoration and restored full-report equality pass. See `validation/independent_primary_final_audit.json`, `validation/independent_control_final_audit.json`, `validation/PRIMARY_FINAL_ARCHIVE_RESTORATION.md`, `validation/CONTROL_FINAL_ARCHIVE_RESTORATION.md`, and `validation/SUPPLEMENT_FINAL_VALIDATION.md`.
 

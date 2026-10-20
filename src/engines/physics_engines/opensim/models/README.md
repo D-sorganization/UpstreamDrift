@@ -190,7 +190,7 @@ specifications (`full_body_spec_anthro_driver.json` and `full_body_spec_anthro_i
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `generated/full_body_anthro_driver.osim` | Full-body golfer with driver club, 44 coordinates, weld grip closure, foot Hunt-Crossley contact spheres, 34 tour markers |
 | `generated/full_body_anthro_iron7.osim`  | Full-body golfer with 7-iron club, 44 coordinates, weld grip closure, foot Hunt-Crossley contact spheres, 34 tour markers |
-| `generated/<model>.receipt.json`         | Per-model hash provenance receipt linking spec sha256 to osim sha256 and topology metadata                               |
+| `generated/<model>.receipt.json`         | Per-model hash provenance receipt linking spec sha256 to osim sha256 and topology metadata                                |
 | `generated/club/`                        | Exporter-written club meshes and `provenance.json` the generated models load (byte-identical to `geometry/club/`)         |
 
 ### Exporter Command

@@ -12,24 +12,24 @@ UpstreamDrift is a large (538K LOC, 5591 py files), multi-engine golf-swing phys
 
 ## Score Summary
 
-| Criterion | Grade (0-10) | Weight | Confidence | Findings |
-| --- | --- | --- | --- | --- |
-| A. Project Organization | 8 | 5 | high | 7 |
-| B. Documentation | 8 | 6 | high | 15 |
-| C. Testing | 8 | 12 | high | 10 |
-| D. Robustness | 7 | 10 | high | 10 |
-| E. Performance | 7 | 5 | high | 11 |
-| F. Code Craftsmanship | 6 | 8 | high | 28 |
-| G. Dependencies | 8 | 6 | high | 11 |
-| H. Security | 7 | 12 | high | 7 |
-| I. Configuration | 8 | 4 | medium | 7 |
-| J. Observability | 8 | 6 | medium | 0 |
-| K. Maintainability | 8 | 6 | high | 4 |
-| L. CI/CD | 8 | 8 | high | 5 |
-| M. Deployment | 9 | 4 | high | 0 |
-| N. Compliance | 9 | 2 | high | 0 |
-| O. Agentic Usability | 8 | 6 | high | 0 |
-| **Overall** | | **100** | | **115** |
+| Criterion               | Grade (0-10) | Weight  | Confidence | Findings |
+| ----------------------- | ------------ | ------- | ---------- | -------- |
+| A. Project Organization | 8            | 5       | high       | 7        |
+| B. Documentation        | 8            | 6       | high       | 15       |
+| C. Testing              | 8            | 12      | high       | 10       |
+| D. Robustness           | 7            | 10      | high       | 10       |
+| E. Performance          | 7            | 5       | high       | 11       |
+| F. Code Craftsmanship   | 6            | 8       | high       | 28       |
+| G. Dependencies         | 8            | 6       | high       | 11       |
+| H. Security             | 7            | 12      | high       | 7        |
+| I. Configuration        | 8            | 4       | medium     | 7        |
+| J. Observability        | 8            | 6       | medium     | 0        |
+| K. Maintainability      | 8            | 6       | high       | 4        |
+| L. CI/CD                | 8            | 8       | high       | 5        |
+| M. Deployment           | 9            | 4       | high       | 0        |
+| N. Compliance           | 9            | 2       | high       | 0        |
+| O. Agentic Usability    | 8            | 6       | high       | 0        |
+| **Overall**             |              | **100** |            | **115**  |
 
 ## What's Working Well
 
@@ -41,8 +41,8 @@ UpstreamDrift is a large (538K LOC, 5591 py files), multi-engine golf-swing phys
 ## Top Risks
 
 - Crash-Early (F, weight 8) has the largest confirmed cluster (28 findings): a 493-instance broad-except tail grandfathered by the error-handling ratchet; the swallow/log-without-reraise cases concentrated in scripts/ and MATLAB bridges still mask errors despite the helper-based migration path.
-- Complexity & suppression density: 762 functions at CC>=C (worst cc=70 _apply_session in starting_pose_matcher/gui_session_mixin.py:199), plus 1945 type:ignore and 2350 noqa across the tree — maintainability debt that managed baselines slow but do not reduce.
-- DRY (H, weight 12): acknowledged parallel DbC implementations (contracts.py docstring concedes a second core/contracts/ implementation) and repeated from_dict/__post_init__/cleanup-on-error blocks; with the highest rubric weight these duplications materially cap the score.
+- Complexity & suppression density: 762 functions at CC>=C (worst cc=70 \_apply_session in starting_pose_matcher/gui_session_mixin.py:199), plus 1945 type:ignore and 2350 noqa across the tree — maintainability debt that managed baselines slow but do not reduce.
+- DRY (H, weight 12): acknowledged parallel DbC implementations (contracts.py docstring concedes a second core/contracts/ implementation) and repeated from_dict/**post_init**/cleanup-on-error blocks; with the highest rubric weight these duplications materially cap the score.
 - Coverage blind spots: 373 # pragma: no cover pragmas and fail_under=75 (not high for a showpiece) mean meaningful slices of the 538K-LOC surface (GUI, optional engines, MATLAB bridges) are likely under-tested.
 
 ## Findings
@@ -52,4 +52,3 @@ UpstreamDrift is a large (538K LOC, 5591 py files), multi-engine golf-swing phys
 ## Methodology
 
 Read-only worktree off `origin/main`; uvx static sweeps (ruff/bandit/radon + pattern greps); parallel adversarial reviewers per A-O dimension and per high-risk subsystem; every candidate finding independently skeptic-verified at its cited line before filing; weighted A-O scoring (PP1-PP8 Pragmatic Programmer principles).
-

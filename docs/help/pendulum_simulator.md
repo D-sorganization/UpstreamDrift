@@ -19,27 +19,27 @@ governing matrices shown alongside the animation.
 
 The window has four tabs, each a separate model with its own controls:
 
-| Tab                | Model                                          | Degrees of freedom |
-| ------------------ | ---------------------------------------------- | ------------------ |
-| Double Pendulum    | arms + shaft, clubhead as a point mass at tip  | 2                  |
-| Triple Pendulum    | three-segment chain (shoulder, elbow, wrist)   | 3                  |
-| Golfer Upper Body  | hub, two scapula/arm chains, shared club, closed kinematic loop | 8 DOF with 4 loop constraints, so 4 independent |
-| Screw Kinematics   | screw-theory visualisation of the active pose  | n/a                |
+| Tab               | Model                                                           | Degrees of freedom                              |
+| ----------------- | --------------------------------------------------------------- | ----------------------------------------------- |
+| Double Pendulum   | arms + shaft, clubhead as a point mass at tip                   | 2                                               |
+| Triple Pendulum   | three-segment chain (shoulder, elbow, wrist)                    | 3                                               |
+| Golfer Upper Body | hub, two scapula/arm chains, shared club, closed kinematic loop | 8 DOF with 4 loop constraints, so 4 independent |
+| Screw Kinematics  | screw-theory visualisation of the active pose                   | n/a                                             |
 
 Physical parameters, from `PendulumParams` in
 `src/shared/python/pendulum_simulator/physics.py` (the triple and golfer models
 have analogous parameter sets):
 
-| Parameter              | Symbol | Unit        | Typical value in code |
-| ---------------------- | ------ | ----------- | --------------------- |
-| Arm (segment 1) mass   | m1     | kg          | ~5.0                  |
-| Shaft (segment 2) mass | m2     | kg          | ~0.30                 |
-| Arm length             | L1     | m           | ~0.65                 |
-| Shaft length           | L2     | m           | ~1.10                 |
-| Clubhead mass          | mClub  | kg          | ~0.20                 |
-| Gravity                | g      | m/s^2       | 9.80665, toggleable to 0 |
-| Viscous damping        | b1, b2 | N*m*s/rad   | 0.0                   |
-| Coulomb friction       | mu1, mu2 | N*m       | 0.0                   |
+| Parameter              | Symbol   | Unit      | Typical value in code    |
+| ---------------------- | -------- | --------- | ------------------------ |
+| Arm (segment 1) mass   | m1       | kg        | ~5.0                     |
+| Shaft (segment 2) mass | m2       | kg        | ~0.30                    |
+| Arm length             | L1       | m         | ~0.65                    |
+| Shaft length           | L2       | m         | ~1.10                    |
+| Clubhead mass          | mClub    | kg        | ~0.20                    |
+| Gravity                | g        | m/s^2     | 9.80665, toggleable to 0 |
+| Viscous damping        | b1, b2   | N*m*s/rad | 0.0                      |
+| Coulomb friction       | mu1, mu2 | N\*m      | 0.0                      |
 
 Initial conditions and drive:
 
@@ -61,7 +61,7 @@ Initial conditions and drive:
 - Full state trajectory: time [s], joint angles [rad], joint angular velocities
   [rad/s].
 - Mass (inertia) matrix M(q) terms, the Coriolis/centrifugal vector
-  C(q, qdot)*qdot, and the gravity torque vector G(q), displayed with physical
+  C(q, qdot)\*qdot, and the gravity torque vector G(q), displayed with physical
   labels and live at the selected sample.
 - Jacobians for the active model, with an equations popup documenting the
   dynamics and Jacobian derivations.
@@ -123,6 +123,7 @@ double-pendulum parameterisation are analysed in
   to a placeholder while the simulation still runs.
 
 ## See Also
+
 - [Pendulum Models](../engines/pendulum.md)
 - [Double Pendulum Identifiability](../research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md)
 - [Swing Objective Lab](swing_objective_lab.md) - optimises this model class against competing objectives

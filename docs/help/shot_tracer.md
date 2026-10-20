@@ -16,13 +16,13 @@ and plot it beside the computed curves.
 
 ## Inputs
 
-| Control        | Unit  | Range accepted | Default |
-| -------------- | ----- | -------------- | ------- |
-| Ball Speed     | mph   | 50 to 200      | 163     |
-| Launch Angle   | deg   | -10 to 45      | 11      |
-| Backspin       | rpm   | 0 to 12000     | 2500    |
-| Direction      | deg   | -45 to 45      | 0       |
-| Spin Axis Tilt | deg   | -45 to 45      | 0       |
+| Control        | Unit | Range accepted | Default |
+| -------------- | ---- | -------------- | ------- |
+| Ball Speed     | mph  | 50 to 200      | 163     |
+| Launch Angle   | deg  | -10 to 45      | 11      |
+| Backspin       | rpm  | 0 to 12000     | 2500    |
+| Direction      | deg  | -45 to 45      | 0       |
+| Spin Axis Tilt | deg  | -45 to 45      | 0       |
 
 - Direction is the horizontal launch azimuth. Spin Axis Tilt is the spin-axis
   roll: 0 deg is pure backspin, plus or minus 45 deg is a fade or draw axis.
@@ -39,13 +39,13 @@ and plot it beside the computed curves.
 
 A comparison table with one row per selected model:
 
-| Column         | Unit |
-| -------------- | ---- |
-| Model          | name |
-| Carry          | yd   |
-| Max Height     | m    |
-| Time           | s    |
-| Landing        | deg  |
+| Column     | Unit |
+| ---------- | ---- |
+| Model      | name |
+| Carry      | yd   |
+| Max Height | m    |
+| Time       | s    |
+| Landing    | deg  |
 
 Plus a 3D overlay of every trajectory, one colour per model, with an
 independent colour set reserved for imported records so an imported curve can
@@ -62,15 +62,15 @@ over identical launch conditions. Models are resolved through
 `FlightModelRegistry`. Two are distinct integrations and the rest share one
 constant-coefficient implementation:
 
-| Model             | Approach                                              | Citation string in code       |
-| ----------------- | ----------------------------------------------------- | ----------------------------- |
-| Waterloo/Penner   | Waterloo quadratic Cd with Penner spin-ratio lift fit | Penner (2003); McPhee et al.  |
-| MacDonald-Hanzely | ODE model with exponential spin decay                 | MacDonald & Hanzely (1991)    |
-| Nathan            | Constant Cd/Cl with spin decay (Cd 0.22, Cl 0.24)     | Nathan et al. (2018)          |
-| Ballantyne        | Constant Cd/Cl, steady spin (Cd 0.20, Cl 0.18)        | Ballantyne et al. (2012)      |
-| J. Cole           | Constant Cd/Cl, moderate decay (Cd 0.23, Cl 0.22)     | Cole (2016)                   |
-| Rospie DL         | Constant Cd/Cl, driver launch (Cd 0.21, Cl 0.19)      | Rospie & Layton (2014)        |
-| Charry L3         | Constant Cd/Cl, higher drag (Cd 0.24, Cl 0.21)        | Charry et al. (2017)          |
+| Model             | Approach                                              | Citation string in code      |
+| ----------------- | ----------------------------------------------------- | ---------------------------- |
+| Waterloo/Penner   | Waterloo quadratic Cd with Penner spin-ratio lift fit | Penner (2003); McPhee et al. |
+| MacDonald-Hanzely | ODE model with exponential spin decay                 | MacDonald & Hanzely (1991)   |
+| Nathan            | Constant Cd/Cl with spin decay (Cd 0.22, Cl 0.24)     | Nathan et al. (2018)         |
+| Ballantyne        | Constant Cd/Cl, steady spin (Cd 0.20, Cl 0.18)        | Ballantyne et al. (2012)     |
+| J. Cole           | Constant Cd/Cl, moderate decay (Cd 0.23, Cl 0.22)     | Cole (2016)                  |
+| Rospie DL         | Constant Cd/Cl, driver launch (Cd 0.21, Cl 0.19)      | Rospie & Layton (2014)       |
+| Charry L3         | Constant Cd/Cl, higher drag (Cd 0.24, Cl 0.21)        | Charry et al. (2017)         |
 
 Drag and lift coefficients are dimensionless; spin decay rates are in 1/s.
 Every `FlightResult` carries the coefficient set the producing model actually
@@ -105,6 +105,7 @@ Model background is in
   the comparison table still populates.
 
 ## See Also
+
 - [ADR-0047: Trajectory Visualization - Shared Wire, Preserved Viewers](../adr/0047-trajectory-visualization-shared-wire-preserved-viewers.md)
 - [Ball Flight Simulator](ball_flight_simulator.md) - one model, with environment controls
 - [Golf Ball Physics: Scientific Basis and Model Documentation](../physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md)

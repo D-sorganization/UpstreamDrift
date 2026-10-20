@@ -52,11 +52,11 @@ Implemented in `loop_nullspace/allocation.py` (types in `allocation_spec.py`):
   (weight 1.0) plus torque rate (weight 0.1), no gross-power or reference term.
   Measured on host Brick (shared 4-core, load about 4), Clarabel:
 
-  | Window | Frames | Status | Iterations | Solve time | KKT primal | KKT dual | KKT compl. | Retained rank / gauge |
-  |---|---|---|---|---|---|---|---|---|
-  | Longest BOUNDED run (96 to 339) | 82 | OPTIMAL | 24 | 0.289 s | 2.6e-14 | 5.7e-10 | 2.2e-13 | 794 / 218 |
-  | First 10 frames of that run | 10 | OPTIMAL | 18 | 0.028 s | 1.5e-13 | 7.3e-12 | 9.8e-13 | 87 / 13 |
-  | All 199 decomposable frames | 199 | INFEASIBLE | 3 | 0.214 s | none | none | none | 1679 / 350 |
+  | Window                          | Frames | Status     | Iterations | Solve time | KKT primal | KKT dual | KKT compl. | Retained rank / gauge |
+  | ------------------------------- | ------ | ---------- | ---------- | ---------- | ---------- | -------- | ---------- | --------------------- |
+  | Longest BOUNDED run (96 to 339) | 82     | OPTIMAL    | 24         | 0.289 s    | 2.6e-14    | 5.7e-10  | 2.2e-13    | 794 / 218             |
+  | First 10 frames of that run     | 10     | OPTIMAL    | 18         | 0.028 s    | 1.5e-13    | 7.3e-12  | 9.8e-13    | 87 / 13               |
+  | All 199 decomposable frames     | 199    | INFEASIBLE | 3          | 0.214 s    | none       | none     | none       | 1679 / 350            |
 
   On the 82-frame run the objective terms are effort 3.00 and rate 424.3, the
   record is `FAMILY_DEPENDENT` with `H-TORQUE-CAPACITY` and `H-FRICTION-CONE`
@@ -66,6 +66,7 @@ Implemented in `loop_nullspace/allocation.py` (types in `allocation_spec.py`):
   (about 36 s, the benchmark's cost). Frame 510 (airborne) is refused before
   the window is chosen, and the window never spans it because the window must be
   contiguous at the benchmark stride.
+
 - Non-claims: the optimum is a hypothesis-conditioned representative, not an
   estimate of true hand loads; no "zero sign flips" criterion is used.
   `force_nullspace/redistribution.py` is untouched (API-compatible); its shim
@@ -141,14 +142,14 @@ envelopes.
 normalised functional `f` and the stacked system `A z <= b` (polyhedral rows
 `G z <= h` plus cone blocks `b_j - A_j z in SOC`), a leaf carries
 
-* `LOWER_BOUND`: a primal witness `w` (feasible, value `f(w)`) and a dual `d`
+- `LOWER_BOUND`: a primal witness `w` (feasible, value `f(w)`) and a dual `d`
   with `d >= 0` on rows, `d_j in SOC` on cone blocks (self-dual) and
   stationarity `c + A^T d = 0`. Weak duality gives `f(z) >= const - b . d` for
   every feasible `z`; the witness gives `min f <= f(w)`. This is primal
   feasibility plus a zero-duality-gap certificate checked by the verifier, not
   a trust in the solver status.
-* `FARKAS`: `d` in the dual cone, `A^T d = 0`, `b . d < 0` (set empty).
-* `WITNESS_ONLY`: `f` is unbounded below; a feasible witness with `f` below
+- `FARKAS`: `d` in the dual cone, `A^T d = 0`, `b . d < 0` (set empty).
+- `WITNESS_ONLY`: `f` is unbounded below; a feasible witness with `f` below
   the threshold (found with the violation as an extra row) proves failure.
 
 Verdict, with `atol = SIGN_ATOL_RTOL * scale` (the NSX-22 sign tolerance, never
@@ -301,10 +302,10 @@ integrator or projector.
 
 ### Modes and the Mandatory Label
 
-| `ReplayPolicy`           | `ReplayMode` | `evidence_label`                | What it is                                                            |
-| ------------------------ | ------------ | ------------------------------- | --------------------------------------------------------------------- |
-| `INDEPENDENT_TIME_ONLY`  | `OPEN_LOOP`  | `independent_open_loop_replay`  | Allocated torque applied as is; only time enters.                     |
-| `STATE_FEEDBACK`         | `FEEDBACK`   | `feedback_assisted_tracking`    | Allocated torque plus a declared feedback law on the state error.     |
+| `ReplayPolicy`          | `ReplayMode` | `evidence_label`               | What it is                                                        |
+| ----------------------- | ------------ | ------------------------------ | ----------------------------------------------------------------- |
+| `INDEPENDENT_TIME_ONLY` | `OPEN_LOOP`  | `independent_open_loop_replay` | Allocated torque applied as is; only time enters.                 |
+| `STATE_FEEDBACK`        | `FEEDBACK`   | `feedback_assisted_tracking`   | Allocated torque plus a declared feedback law on the state error. |
 
 `ReplayReport.__post_init__` refuses a mode that disagrees with its policy, an
 open-loop report that carries any feedback, a feedback report without its law,
@@ -611,20 +612,20 @@ rank 5, nullity 7, gauge 1; four point feet: nullity 12). Golden
 `rank(E_x N)` for five observation maps, and the numeric fixture at zero root
 pose (`zero_root_pose=True`) reproduces every entry.
 
-| Observation map | 2 points | 4 points |
-|---|---|---|
-| Net force and moment (root rows already fix it) | 0 | 0 |
-| Net force | 0 | 0 |
-| Vertical load of each foot | 0 | 1 |
-| Force of each foot | 1 | 3 |
-| Every point force | 1 | 6 |
+| Observation map                                 | 2 points | 4 points |
+| ----------------------------------------------- | -------- | -------- |
+| Net force and moment (root rows already fix it) | 0        | 0        |
+| Net force                                       | 0        | 0        |
+| Vertical load of each foot                      | 0        | 1        |
+| Force of each foot                              | 1        | 3        |
+| Every point force                               | 1        | 6        |
 
 Implementation (`loop_nullspace/ground_contact.py`, `ground_envelopes.py`):
 
 - Seam: `PinocchioForceAdapter.foot_contact_candidates(q)` returns the six
   contact spheres (`ContactCandidate`: `FootContact` at the sphere centre, world
   ground normal, spec static friction, signed gap). `snapshot_from_adapter(...,
-  foot_contact_tol_m=T)` keeps candidates with `gap <= T` and stacks their rows
+foot_contact_tol_m=T)` keeps candidates with `gap <= T` and stacks their rows
   of `compute_contact_jacobian` as `J_g`; without `T` (default) `J_g` stays
   `None` and no other engine changes. An adapter without the method raises
   `CapabilityUnavailable`.
@@ -632,13 +633,13 @@ Implementation (`loop_nullspace/ground_contact.py`, `ground_envelopes.py`):
   its three `f_g` entries, reusing `force_nullspace.constraints.FrictionCone`;
   they enter `FeasibleSet.from_hypotheses(cones=...)` under `H-FRICTION-CONE`.
 - Observation: `GroundObservation(selector, values, sigma, labels, source,
-  coverage=3)` with mandatory positive per-row `sigma` and constructors
+coverage=3)` with mandatory positive per-row `sigma` and constructors
   `from_point_loads`, `from_contact_groups`, `from_normal_load_and_cop` and
   `from_vertical_plates` (OF-11, #13067: per-foot `FootLoadReading` load and
   CoP rows about the plate's force-sensing plane, with the exact shear lever
   arm; shear is never assigned a value).
 - Plate screen (OF-12, #13070): `plate_screen.plate_consistency(frames,
-  providers, setup)` screens a candidate's `ScreenFrame`s with a Bonferroni
+providers, setup)` screens a candidate's `ScreenFrame`s with a Bonferroni
   `FamilyWiseRule`, profiles the common-mode clock offset over
   `ScreenSetup.offsets_s` and decides on the joint feasible-set verdict
   (observation-only verdict reported beside it);
@@ -707,7 +708,6 @@ scientific qualification (software correctness only).
 envelope union contains every member. NSX-62 samples only along unidentified
 directions inside the pseudo-inertia constraint; identified combinations stay
 fixed (see the NSX-62 section below).
-
 
 ## NSX-43 PyQt Tabs (#12575)
 

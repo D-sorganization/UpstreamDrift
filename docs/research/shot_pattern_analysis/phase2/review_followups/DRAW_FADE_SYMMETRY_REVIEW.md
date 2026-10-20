@@ -23,14 +23,14 @@ as `D Σ Dᵀ`, not remain silently unchanged.
 
 A pure public-geometry evaluation at zero lean/yaw, without flight simulation:
 
-| Club | Twist (°) | Delivered Face (°) | Delivered Loft (°) |
-| --- | ---: | ---: | ---: |
-| Driver | −1 | +0.85335046 | 10.52247926 |
-| Driver | +1 | −0.85197935 | 9.47752070 |
-| 7-Iron | −1 | +0.89341907 | 34.45397213 |
-| 7-Iron | +1 | −0.88865672 | 33.54602773 |
-| PW | −1 | +0.90240065 | 46.43835306 |
-| PW | +1 | −0.89527894 | 45.56164673 |
+| Club   | Twist (°) | Delivered Face (°) | Delivered Loft (°) |
+| ------ | --------: | -----------------: | -----------------: |
+| Driver |        −1 |        +0.85335046 |        10.52247926 |
+| Driver |        +1 |        −0.85197935 |         9.47752070 |
+| 7-Iron |        −1 |        +0.89341907 |        34.45397213 |
+| 7-Iron |        +1 |        −0.88865672 |        33.54602773 |
+| PW     |        −1 |        +0.90240065 |        46.43835306 |
+| PW     |        +1 |        −0.89527894 |        45.56164673 |
 
 The static loft/lie inputs are the study presets (10°/58.5°, 34°/63°, 46°/64°).
 These examples establish a geometry-level obstruction, not a predicted sign or

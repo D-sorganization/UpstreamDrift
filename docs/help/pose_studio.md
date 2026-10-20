@@ -17,25 +17,25 @@ matcher's target.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Active engine | one of `drake`, `mujoco`, `pinocchio`, `opensim`, `simscape` | The picker only offers engines present in *both* the adapter registry and the kinematics-service registry. Missing wheels fall back to a mock, flagged by a yellow status pill. |
-| Joint angles | **degrees**, range -180.0 to +180.0 | Accordion of per-joint spinboxes and sliders, grouped by body region. Sliders tick in tenths of a degree. |
-| Angle display unit | degrees (default) or radians | A display toggle only: internal state is always kept in degrees, and the sliders always tick in tenths of a degree. |
-| Pelvis translation | **metres**, 3-vector | Part of `CanonicalPose`. |
-| Pelvis rotation | **degrees**, intrinsic XYZ Euler, 3-vector | Part of `CanonicalPose`. |
-| Pose Library selection | `canonical_zero_pose` or `canonical_from_reference_setup` | The two starting points offered. |
-| 3D landmark click | pointer input | Highlights the picked landmark. |
-| Undo / redo | Ctrl+Z / Ctrl+Shift+Z | Stack of `CanonicalPose` snapshots. |
+| Input                  | Unit / type                                                  | Notes                                                                                                                                                                           |
+| ---------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Active engine          | one of `drake`, `mujoco`, `pinocchio`, `opensim`, `simscape` | The picker only offers engines present in _both_ the adapter registry and the kinematics-service registry. Missing wheels fall back to a mock, flagged by a yellow status pill. |
+| Joint angles           | **degrees**, range -180.0 to +180.0                          | Accordion of per-joint spinboxes and sliders, grouped by body region. Sliders tick in tenths of a degree.                                                                       |
+| Angle display unit     | degrees (default) or radians                                 | A display toggle only: internal state is always kept in degrees, and the sliders always tick in tenths of a degree.                                                             |
+| Pelvis translation     | **metres**, 3-vector                                         | Part of `CanonicalPose`.                                                                                                                                                        |
+| Pelvis rotation        | **degrees**, intrinsic XYZ Euler, 3-vector                   | Part of `CanonicalPose`.                                                                                                                                                        |
+| Pose Library selection | `canonical_zero_pose` or `canonical_from_reference_setup`    | The two starting points offered.                                                                                                                                                |
+| 3D landmark click      | pointer input                                                | Highlights the picked landmark.                                                                                                                                                 |
+| Undo / redo            | Ctrl+Z / Ctrl+Shift+Z                                        | Stack of `CanonicalPose` snapshots.                                                                                                                                             |
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| `CanonicalPose` (in-process) | `pelvis_translation_m` in metres, `pelvis_rotation_xyz_deg` in degrees, `joint_angles_deg` in degrees, `convention_tag` = `"canonical-v1"` | The edited pose. Joint-angle keys must be a subset of `REFERENCE_GOLFER_FIELDS`; unknown names raise. Missing keys default to 0.0 degrees on round-trip. |
-| 3D skeleton view | metres | Matplotlib 3D rendering of the current pose under the active engine's forward kinematics. |
-| Engine status pill | enumerated status | Whether the selected engine is live or mocked. |
-| Units badge | text | The active engine's *native* convention, for information only: Drake URDF / RPY (rad), MuJoCo MJCF / Euler (rad), Pinocchio URDF / RPY (rad), OpenSim `.osim` / coordinates (rad), Simscape Parameters / RPY (deg). |
+| Output                       | Unit / type                                                                                                                                | Notes                                                                                                                                                                                                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CanonicalPose` (in-process) | `pelvis_translation_m` in metres, `pelvis_rotation_xyz_deg` in degrees, `joint_angles_deg` in degrees, `convention_tag` = `"canonical-v1"` | The edited pose. Joint-angle keys must be a subset of `REFERENCE_GOLFER_FIELDS`; unknown names raise. Missing keys default to 0.0 degrees on round-trip.                                                            |
+| 3D skeleton view             | metres                                                                                                                                     | Matplotlib 3D rendering of the current pose under the active engine's forward kinematics.                                                                                                                           |
+| Engine status pill           | enumerated status                                                                                                                          | Whether the selected engine is live or mocked.                                                                                                                                                                      |
+| Units badge                  | text                                                                                                                                       | The active engine's _native_ convention, for information only: Drake URDF / RPY (rad), MuJoCo MJCF / Euler (rad), Pinocchio URDF / RPY (rad), OpenSim `.osim` / coordinates (rad), Simscape Parameters / RPY (deg). |
 
 There is no file output. See Limitations.
 
@@ -53,7 +53,7 @@ structure and its test split are documented in the tool's
 The pose type itself is `CanonicalPose` in
 [`canonical.py`](../../src/shared/python/pose_interchange/canonical.py),
 which validates shapes and field names on construction and marks its
-arrays non-writeable. Angles in the joint panel are *always* displayed
+arrays non-writeable. Angles in the joint panel are _always_ displayed
 in the canonical convention regardless of the engine's own convention;
 the units badge exists to tell you what that engine reports natively,
 and does not change any value you see.
@@ -82,6 +82,7 @@ and does not change any value you see.
 - The tile is registered at maturity `beta`.
 
 ## See Also
+
 - [Pose Studio README](../../src/tools/pose_studio/README.md)
 - [Motion-Match Preview](motion_target_preview.md) - consumes the canonical pose as a starting-pose seed
 - [Motion matching](../motion_matching/README.md)

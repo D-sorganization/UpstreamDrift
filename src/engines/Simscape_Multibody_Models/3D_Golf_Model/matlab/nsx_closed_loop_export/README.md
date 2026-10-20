@@ -13,17 +13,17 @@ exported yet; see `docs/development/planning/DV-12583.md`. The golf-model
 
 ## Files
 
-| File | Purpose |
-| --- | --- |
-| `nsx_simscape_closed_loop_export.m` | Entry point: R2025b check, rig build, probing, SHA-256, JSON |
-| `nsx_simscape_probe.m` | Forward-dynamics probe of an open-tree model at `(q, v)` |
-| `nsx_build_planar_rig.m` | Builds `NSX_PlanarRig.slx`, the NSX-00 planar golfer as an open tree |
+| File                                | Purpose                                                              |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `nsx_simscape_closed_loop_export.m` | Entry point: R2025b check, rig build, probing, SHA-256, JSON         |
+| `nsx_simscape_probe.m`              | Forward-dynamics probe of an open-tree model at `(q, v)`             |
+| `nsx_build_planar_rig.m`            | Builds `NSX_PlanarRig.slx`, the NSX-00 planar golfer as an open tree |
 
 ## Model and Conventions
 
 - Rig: lead arm (shoulder, elbow), club joint, trail arm (shoulder, elbow), revolute
   joints about `+z`, relative angles, `q = [lead_shoulder lead_elbow club_angle
-  trail_shoulder trail_elbow]`. Segments hang along `-y` at zero angle, so a segment of
+trail_shoulder trail_elbow]`. Segments hang along `-y` at zero angle, so a segment of
   absolute angle `a` points along `u(a) = (sin a, -cos a)`. Gravity `(0, -g, 0)`.
 - Units: m, kg, s, rad, N m. Parameters are the NSX-00 values, converted from exact
   rationals by `simscape_rig_spec.py`; rod inertia about the centre of mass is `m l^2 / 12`.

@@ -25,39 +25,39 @@ over.
 The endpoints take almost no numeric input: the state comes from the active
 engine, not from the caller.
 
-| Input | Source | Unit |
-| --- | --- | --- |
-| Generalized positions $q$ | `engine.get_state()` | rad (revolute) or m (prismatic) |
-| Generalized velocities $v$ | `engine.get_state()` | rad/s or m/s |
-| Mass matrix $M(q)$ | `engine.compute_mass_matrix()` | mixed, per degree-of-freedom pair |
-| Body Jacobian $J$ | `engine.compute_jacobian(body)` | m per rad (linear rows) |
-| Simulation time | `engine.time` | s |
-| Applied joint torques | `engine.get_applied_torques()` (optional) | N m |
-| `format` | `POST /analysis/export` body | `"csv"` or `"json"` |
-| `time_range` | `POST /analysis/export` body, `[start, end]` | s |
-| `body_name`, `position`, `rotation` | `POST /simulation/position` body | name, m, rad (roll, pitch, yaw) |
-| `body_a`, `body_b` | `POST /simulation/measure` body | body names |
-| `drift_generalized_force`, `control_generalized_force` | `POST /analysis/tools/drift-control/ratio` | N or N m per degree of freedom |
-| `decay_rate`, `horizon`, `n_steps`, `n_trials`, `perturbation_scale` | `POST /analysis/tools/contraction/estimate` | 1/s, s, count, count, dimensionless |
+| Input                                                                | Source                                       | Unit                                |
+| -------------------------------------------------------------------- | -------------------------------------------- | ----------------------------------- |
+| Generalized positions $q$                                            | `engine.get_state()`                         | rad (revolute) or m (prismatic)     |
+| Generalized velocities $v$                                           | `engine.get_state()`                         | rad/s or m/s                        |
+| Mass matrix $M(q)$                                                   | `engine.compute_mass_matrix()`               | mixed, per degree-of-freedom pair   |
+| Body Jacobian $J$                                                    | `engine.compute_jacobian(body)`              | m per rad (linear rows)             |
+| Simulation time                                                      | `engine.time`                                | s                                   |
+| Applied joint torques                                                | `engine.get_applied_torques()` (optional)    | N m                                 |
+| `format`                                                             | `POST /analysis/export` body                 | `"csv"` or `"json"`                 |
+| `time_range`                                                         | `POST /analysis/export` body, `[start, end]` | s                                   |
+| `body_name`, `position`, `rotation`                                  | `POST /simulation/position` body             | name, m, rad (roll, pitch, yaw)     |
+| `body_a`, `body_b`                                                   | `POST /simulation/measure` body              | body names                          |
+| `drift_generalized_force`, `control_generalized_force`               | `POST /analysis/tools/drift-control/ratio`   | N or N m per degree of freedom      |
+| `decay_rate`, `horizon`, `n_steps`, `n_trials`, `perturbation_scale` | `POST /analysis/tools/contraction/estimate`  | 1/s, s, count, count, dimensionless |
 
 ## Outputs
 
-| Output | Endpoint | Unit |
-| --- | --- | --- |
-| `sim_time` | `/analysis/metrics`, `/analysis/statistics` | s |
-| `joint_positions`, `joint_velocities` | `/analysis/metrics` | rad or m; rad/s or m/s |
-| `max_velocity` | `/analysis/metrics` | rad/s or m/s |
-| `rms_velocity` | `/analysis/metrics` | rad/s or m/s |
-| `kinetic_energy` | `/analysis/metrics` | J |
-| `club_head_speed` | `/analysis/metrics` | m/s |
-| `current`, `minimum`, `maximum`, `mean`, `std_dev` per metric | `/analysis/statistics` | same unit as that metric |
-| `sample_count` | `/analysis/statistics` | count (at most 500) |
-| `time_series` (metric name to values) | `/analysis/statistics` | same unit as that metric |
-| CSV or JSON attachment | `/analysis/export` | file download |
-| `distance`, `position_a`, `position_b`, `delta` | `/simulation/measure` | m |
-| `angle_rad`, `angle_deg`, `velocity`, `torque` per joint | `/simulation/measurements` | rad, deg, rad/s, N m |
-| `ratio`, `summary` | `/analysis/tools/drift-control/ratio` | dimensionless |
-| `estimated_rate`, `is_contracting` | `/analysis/tools/contraction/estimate` | 1/s, boolean |
+| Output                                                        | Endpoint                                    | Unit                     |
+| ------------------------------------------------------------- | ------------------------------------------- | ------------------------ |
+| `sim_time`                                                    | `/analysis/metrics`, `/analysis/statistics` | s                        |
+| `joint_positions`, `joint_velocities`                         | `/analysis/metrics`                         | rad or m; rad/s or m/s   |
+| `max_velocity`                                                | `/analysis/metrics`                         | rad/s or m/s             |
+| `rms_velocity`                                                | `/analysis/metrics`                         | rad/s or m/s             |
+| `kinetic_energy`                                              | `/analysis/metrics`                         | J                        |
+| `club_head_speed`                                             | `/analysis/metrics`                         | m/s                      |
+| `current`, `minimum`, `maximum`, `mean`, `std_dev` per metric | `/analysis/statistics`                      | same unit as that metric |
+| `sample_count`                                                | `/analysis/statistics`                      | count (at most 500)      |
+| `time_series` (metric name to values)                         | `/analysis/statistics`                      | same unit as that metric |
+| CSV or JSON attachment                                        | `/analysis/export`                          | file download            |
+| `distance`, `position_a`, `position_b`, `delta`               | `/simulation/measure`                       | m                        |
+| `angle_rad`, `angle_deg`, `velocity`, `torque` per joint      | `/simulation/measurements`                  | rad, deg, rad/s, N m     |
+| `ratio`, `summary`                                            | `/analysis/tools/drift-control/ratio`       | dimensionless            |
+| `estimated_rate`, `is_contracting`                            | `/analysis/tools/contraction/estimate`      | 1/s, boolean             |
 
 Endpoint paths are as declared in the router. `register_routes` in
 `src/api/route_registry.py` prepends a deployment-configured prefix; the tile
@@ -66,6 +66,7 @@ declares `/api/analysis`.
 ## Method
 
 ### Energy Analysis
+
 **Kinetic energy.** The API computes, per sample,
 
 $$T = \tfrac{1}{2}\, v^{\mathsf T} M(q)\, v \quad [\mathrm{J}]$$
@@ -78,8 +79,10 @@ They come from the engine recorders. The Pinocchio backends
 (`src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui_simulation.py`
 and the sibling `motion_matching/simulate.py`) record
 
-$$T = \texttt{pin.computeKineticEnergy}(model, data, q, v), \quad
-V = \texttt{pin.computePotentialEnergy}(model, data, q), \quad E = T + V$$
+$$
+T = \texttt{pin.computeKineticEnergy}(model, data, q, v), \quad
+V = \texttt{pin.computePotentialEnergy}(model, data, q), \quad E = T + V
+$$
 
 Repo gotcha: `pinocchio.computeTotalEnergy` does not exist in the Python
 bindings this repo depends on. Every call site calls `computeKineticEnergy` and
@@ -92,14 +95,14 @@ call site to `computeTotalEnergy`.
 (`src/shared/python/analysis/energy_metrics.py`) takes the kinetic and
 potential time series and returns, with $E_k = T_k + V_k$:
 
-| Metric | Formula | Unit |
-| --- | --- | --- |
-| `max_kinetic_energy` | $\max_k T_k$ | J |
-| `max_potential_energy` | $\max_k V_k$ | J |
-| `max_total_energy` | $\max_k E_k$ | J |
-| `energy_efficiency` | $100 \cdot T_{k^*} / \max_k E_k$, where $k^*$ is the index of peak club head speed | percent |
-| `energy_variation` | standard deviation of $E_k$ | J |
-| `energy_drift` | $E_{N-1} - E_0$ | J |
+| Metric                 | Formula                                                                            | Unit    |
+| ---------------------- | ---------------------------------------------------------------------------------- | ------- |
+| `max_kinetic_energy`   | $\max_k T_k$                                                                       | J       |
+| `max_potential_energy` | $\max_k V_k$                                                                       | J       |
+| `max_total_energy`     | $\max_k E_k$                                                                       | J       |
+| `energy_efficiency`    | $100 \cdot T_{k^*} / \max_k E_k$, where $k^*$ is the index of peak club head speed | percent |
+| `energy_variation`     | standard deviation of $E_k$                                                        | J       |
+| `energy_drift`         | $E_{N-1} - E_0$                                                                    | J       |
 
 `energy_efficiency` is `0.0` when no club-head-speed series is attached to the
 instance, and `0.0` when the maximum total energy is not positive.
@@ -110,8 +113,10 @@ Preconditions require equal-length finite arrays with $T_k \ge 0$.
 forward passively (zero torque) for `horizon` steps of `dt`, evaluates
 $T_k = \tfrac{1}{2} v_k^{\mathsf T} M(q_k) v_k$ at every step, and reports
 
-$$\varepsilon = \max_k \frac{|T_k - T_0|}{|T_0|}, \qquad
-\text{passed} \iff \varepsilon \le \text{rel-tol} \; (\text{default } 10^{-2})$$
+$$
+\varepsilon = \max_k \frac{|T_k - T_0|}{|T_0|}, \qquad
+\text{passed} \iff \varepsilon \le \text{rel-tol} \; (\text{default } 10^{-2})
+$$
 
 The docstring is explicit that this is valid only for a model configured
 conservative (gravity disabled, zero joint damping), because kinetic energy is
@@ -131,22 +136,23 @@ as a planned enhancement in the docstring of
 `src/shared/python/biomechanics/kinematic_sequence.py`.
 
 ### Kinematic Sequence
+
 `SegmentTimingAnalyzer.analyze(segment_velocities, times)`
 (`src/shared/python/biomechanics/kinematic_sequence.py`;
 `KinematicSequenceAnalyzer` and `KinematicSequenceResult` are
 backward-compatible aliases) takes a mapping of segment name to 1-D velocity
 array plus a time array.
 
-| Quantity | Formula | Unit |
-| --- | --- | --- |
-| `peak_velocity` | maximum absolute velocity, per segment | unit of the supplied velocity (rad/s for recorder joint velocities) |
-| `time`, `index` | time and index at that maximum | s, index |
-| `normalized_velocity` | segment peak divided by the largest peak in the set | 0 to 1 |
-| `speed_gain` | this segment's peak divided by the previous entry's peak in the caller's `expected_order`, only when the proximal peak exceeds $10^{-6}$ | dimensionless |
-| `deceleration_rate` | negative slope of the absolute velocity across a 30 ms window starting at the peak | velocity unit per s |
-| `timing_gaps` | difference of consecutive peak times over peaks sorted by time, keyed `"a->b"` | s |
-| `sequence_consistency` | correctly ordered pairs divided by comparable pairs, over all two-combinations of the `expected_order` segments present in the data | 0 to 1 |
-| `is_valid_sequence` | `sequence_consistency == 1.0` and at least two peaks | boolean |
+| Quantity               | Formula                                                                                                                                  | Unit                                                                |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `peak_velocity`        | maximum absolute velocity, per segment                                                                                                   | unit of the supplied velocity (rad/s for recorder joint velocities) |
+| `time`, `index`        | time and index at that maximum                                                                                                           | s, index                                                            |
+| `normalized_velocity`  | segment peak divided by the largest peak in the set                                                                                      | 0 to 1                                                              |
+| `speed_gain`           | this segment's peak divided by the previous entry's peak in the caller's `expected_order`, only when the proximal peak exceeds $10^{-6}$ | dimensionless                                                       |
+| `deceleration_rate`    | negative slope of the absolute velocity across a 30 ms window starting at the peak                                                       | velocity unit per s                                                 |
+| `timing_gaps`          | difference of consecutive peak times over peaks sorted by time, keyed `"a->b"`                                                           | s                                                                   |
+| `sequence_consistency` | correctly ordered pairs divided by comparable pairs, over all two-combinations of the `expected_order` segments present in the data      | 0 to 1                                                              |
+| `is_valid_sequence`    | `sequence_consistency == 1.0` and at least two peaks                                                                                     | boolean                                                             |
 
 Proximal-to-distal sequencing is not built in. `expected_order` is a
 caller-supplied list. The module docstring states plainly that it implements no
@@ -181,6 +187,7 @@ interchangeable.
 Neither variant is exposed by the analysis endpoints; both are library calls.
 
 ### Jacobian Analysis
+
 **End-effector velocity mapping.** For a body Jacobian $J(q)$,
 
 $$\dot x = J(q)\, v$$
@@ -213,10 +220,10 @@ Research 4(2), 3-9.
 the same module computes $\kappa = \sigma_{\max} / \sigma_{\min}$ via
 `np.linalg.cond` and applies the Guideline C2 thresholds:
 
-| Condition | Behaviour |
-| --- | --- |
-| $\kappa > 10^{6}$ | warning logged: near-singularity, reduced manipulability |
-| $\kappa > 10^{10}$ | error logged; switch to pseudoinverse or damped least squares |
+| Condition          | Behaviour                                                                |
+| ------------------ | ------------------------------------------------------------------------ |
+| $\kappa > 10^{6}$  | warning logged: near-singularity, reduced manipulability                 |
+| $\kappa > 10^{10}$ | error logged; switch to pseudoinverse or damped least squares            |
 | $\kappa > 10^{12}$ | raises `SingularityError`; the configuration is treated as unrecoverable |
 
 An empty Jacobian returns infinity rather than raising.
@@ -228,6 +235,7 @@ golf task points `clubhead`, `grip`, `left_hand`, `right_hand` and
 `shaft_mid`.
 
 ### Statistics, Export and Measurement
+
 `/analysis/metrics` appends each snapshot to a bounded in-memory buffer
 (`max_history = 500`, oldest dropped). `/analysis/statistics` scans that buffer
 for scalar, non-NaN keys and reports per key the minimum, maximum, mean and
@@ -251,17 +259,18 @@ control generalized force, from caller-supplied arrays
 nearby deterministic rollouts (`src/tools/contraction/verifier.py`).
 
 ## Method Citations
+
 `src/shared/python/analysis/dataclasses.py` defines a frozen `MethodCitation`
 dataclass (`name`, `authors`, `year`, `title`, `doi`, `notes`) and four
 pre-defined citations. They are attached to analysis results as a `methodology`
 field. This table reproduces what that module declares.
 
-| Name | Authors | Year | Title | DOI |
-| --- | --- | --- | --- | --- |
-| Proximal-to-Distal Sequencing | Putnam | 1993 | Sequential motions of body segments in striking and throwing skills | `10.1016/0021-9290(93)90084-R` |
-| X-Factor | Cheetham et al. | 2001 | The importance of stretching the X-Factor in the downswing of golf | none declared in the source |
-| Crunch Factor | McHardy and Pollard | 2005 | Muscle activity during the golf swing | `10.1136/bjsm.2004.014514` |
-| Spinal Load Analysis | Hosea et al. | 1990 | Biomechanical analysis of the golfer's back | none declared in the source |
+| Name                          | Authors             | Year | Title                                                               | DOI                            |
+| ----------------------------- | ------------------- | ---- | ------------------------------------------------------------------- | ------------------------------ |
+| Proximal-to-Distal Sequencing | Putnam              | 1993 | Sequential motions of body segments in striking and throwing skills | `10.1016/0021-9290(93)90084-R` |
+| X-Factor                      | Cheetham et al.     | 2001 | The importance of stretching the X-Factor in the downswing of golf  | none declared in the source    |
+| Crunch Factor                 | McHardy and Pollard | 2005 | Muscle activity during the golf swing                               | `10.1136/bjsm.2004.014514`     |
+| Spinal Load Analysis          | Hosea et al.        | 1990 | Biomechanical analysis of the golfer's back                         | none declared in the source    |
 
 The `notes` field on each citation qualifies the method:
 
@@ -318,6 +327,7 @@ here.
   called by any endpoint here.
 
 ## See Also
+
 - [Analysis Tools narrative guide](analysis_tools.md)
 - [Simulation Controls](simulation_controls.md)
 - [Engine Selection](engine_selection.md)

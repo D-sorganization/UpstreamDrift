@@ -1,6 +1,7 @@
 # Candidate Revision Record: Supplemental Social Context (#12115)
 
 ## Overview
+
 - **Issue**: #12115
 - **Branch**: `codex/shot-pattern-social-context`
 - **Worktree**: `/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift`
@@ -8,12 +9,14 @@
 - **Revised Commit**: `14f27706e4` (`14f27706e4e9e52ca1324a7a2bac59e86ab33ef9`)
 
 ## File Checksums (SHA-256)
+
 - `src/tools/shot_pattern_analysis/matched_pair_social.py`: `16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369`
 - `src/tools/shot_pattern_analysis/matched_supplement_figures.py`: `9254d7aede64f5aed19bd32f7cd5a8fb1b1899f6e18d000ba2096b228fc18246`
 - `tests/tools/shot_pattern_analysis/test_matched_pair_social.py`: `33a0123655348810fd5fe377e9873b67ec65e685fc133c1bebafc724b8c8600e`
 - `tests/tools/shot_pattern_analysis/test_matched_social_integration.py`: `1b5ddb65bffa37d4d0b262754fa6064b5be716c009aa064b2e5222d4d996b075`
 
 ## Revisions Implemented
+
 1. **Narrowed Pair Social API**:
    - Replaced speculative overlapping `context` and `metadata` fallback dictionaries on `write_pair_social_density` with explicitly typed optional `source_protocols: tuple[str, str] | None` and `target_modes: tuple[str, str] | None`.
    - Distinct ordered facts are mapped unambiguously to the two condition labels:
@@ -36,6 +39,7 @@
    - Removed tests covering deleted speculative options.
 
 ## Validation Results
+
 - **Red Tests (failing on candidate b9f1 before source updates)**:
   - Log: `/tmp/p2-social-context-r2-red.txt`
   - Result: 16 failed, 18 passed in 76.08s
@@ -51,4 +55,4 @@
 - **Review Contract Suite**:
   - Result: 15 passed in 103.25s
 
-*No production asset claims; root/Astra will qualify actual cards.*
+_No production asset claims; root/Astra will qualify actual cards._

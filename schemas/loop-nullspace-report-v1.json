@@ -27,11 +27,7 @@
       "pattern": "^1\\.[0-9]+\\.[0-9]+$"
     },
     "status": {
-      "enum": [
-        "complete",
-        "insufficient_frames",
-        "admission_rejected"
-      ],
+      "enum": ["complete", "insufficient_frames", "admission_rejected"],
       "description": "complete: every requested stage ran; the others stop honestly before the numbers they would gate."
     },
     "reason": {
@@ -48,10 +44,7 @@
     "engine": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "name",
-        "model_provenance"
-      ],
+      "required": ["name", "model_provenance"],
       "properties": {
         "name": {
           "type": "string",
@@ -74,10 +67,7 @@
       ],
       "properties": {
         "metric": {
-          "enum": [
-            "identity",
-            "inverse_mass"
-          ]
+          "enum": ["identity", "inverse_mass"]
         },
         "include_envelopes": {
           "type": "boolean"
@@ -170,10 +160,7 @@
                 "type": "string"
               },
               "citation_id": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "source_note": {
                 "type": "string"
@@ -186,10 +173,7 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "id",
-              "statement"
-            ],
+            "required": ["id", "statement"],
             "properties": {
               "id": {
                 "type": "string"
@@ -203,10 +187,7 @@
       }
     },
     "admission": {
-      "type": [
-        "object",
-        "null"
-      ],
+      "type": ["object", "null"],
       "additionalProperties": false,
       "description": "Admission verdict; null only when no frame survived decomposition.",
       "required": [
@@ -222,11 +203,7 @@
       ],
       "properties": {
         "verdict": {
-          "enum": [
-            "ADMITTED",
-            "REJECTED",
-            "REPAIRED"
-          ]
+          "enum": ["ADMITTED", "REJECTED", "REPAIRED"]
         },
         "reasons": {
           "type": "array",
@@ -255,11 +232,7 @@
         "residuals": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "phi",
-            "phi_dot",
-            "phi_ddot"
-          ],
+          "required": ["phi", "phi_dot", "phi_ddot"],
           "properties": {
             "phi": {
               "$ref": "#/$defs/quantity"
@@ -275,17 +248,10 @@
       }
     },
     "invariants": {
-      "type": [
-        "object",
-        "null"
-      ],
+      "type": ["object", "null"],
       "additionalProperties": false,
       "description": "Invariant quantities per analysed frame, each behind its validity gate.",
-      "required": [
-        "metric_label",
-        "gates",
-        "frames"
-      ],
+      "required": ["metric_label", "gates", "frames"],
       "properties": {
         "metric_label": {
           "type": "string"
@@ -298,10 +264,7 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "index",
-              "quantities"
-            ],
+            "required": ["index", "quantities"],
             "properties": {
               "index": {
                 "type": "integer",
@@ -316,10 +279,7 @@
       }
     },
     "envelopes": {
-      "type": [
-        "object",
-        "null"
-      ],
+      "type": ["object", "null"],
       "additionalProperties": false,
       "description": "Static per-frame envelopes of the declared feasible sets; infeasible frames are listed, never dropped.",
       "required": [
@@ -380,10 +340,7 @@
                 "type": "array",
                 "description": "Per frame: positive, negative, zero or indeterminate (NSX-22 sign class); null for an infeasible frame.",
                 "items": {
-                  "type": [
-                    "string",
-                    "null"
-                  ],
+                  "type": ["string", "null"],
                   "enum": [
                     "positive",
                     "negative",
@@ -516,25 +473,15 @@
       }
     },
     "allocation": {
-      "type": [
-        "object",
-        "null"
-      ],
+      "type": ["object", "null"],
       "description": "Optional hypothesis-conditioned representative; status 'not_run' when no frame was feasible.",
-      "required": [
-        "status",
-        "frame_indices",
-        "excluded_frames"
-      ],
+      "required": ["status", "frame_indices", "excluded_frames"],
       "properties": {
         "status": {
           "type": "string"
         },
         "reason": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         },
         "frame_indices": {
           "$ref": "#/$defs/frameIndexList"
@@ -543,10 +490,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "index",
-              "reason"
-            ],
+            "required": ["index", "reason"],
             "properties": {
               "index": {
                 "type": "integer"
@@ -577,10 +521,7 @@
           "$ref": "#/$defs/number"
         },
         "kkt_residuals": {
-          "type": [
-            "object",
-            "null"
-          ]
+          "type": ["object", "null"]
         },
         "iterations": {
           "type": "integer"
@@ -598,16 +539,10 @@
           }
         },
         "power_reduction": {
-          "type": [
-            "object",
-            "null"
-          ]
+          "type": ["object", "null"]
         },
         "convexity": {
-          "type": [
-            "object",
-            "null"
-          ]
+          "type": ["object", "null"]
         }
       }
     },
@@ -626,10 +561,7 @@
       "type": "object",
       "additionalProperties": false,
       "description": "Added by the service layer around the facade report.",
-      "required": [
-        "cache_key",
-        "source_id"
-      ],
+      "required": ["cache_key", "source_id"],
       "properties": {
         "cache_key": {
           "type": "string",
@@ -689,11 +621,7 @@
     "modelProvenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "name",
-        "version",
-        "content_hash"
-      ],
+      "required": ["name", "version", "content_hash"],
       "properties": {
         "name": {
           "type": "string",
@@ -711,11 +639,7 @@
     "inputProvenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "kind",
-        "source",
-        "note"
-      ],
+      "required": ["kind", "source", "note"],
       "properties": {
         "kind": {
           "type": "string",
@@ -731,10 +655,7 @@
       }
     },
     "number": {
-      "type": [
-        "number",
-        "null"
-      ]
+      "type": ["number", "null"]
     },
     "tensor": {
       "description": "Nested arrays of finite numbers; a non-finite entry is null.",
@@ -777,17 +698,10 @@
           "minLength": 1
         },
         "allocation_dependence": {
-          "enum": [
-            "INVARIANT",
-            "FAMILY_DEPENDENT",
-            "UNAVAILABLE"
-          ]
+          "enum": ["INVARIANT", "FAMILY_DEPENDENT", "UNAVAILABLE"]
         },
         "validation_status": {
-          "enum": [
-            "UNVALIDATED",
-            "VALIDATED"
-          ]
+          "enum": ["UNVALIDATED", "VALIDATED"]
         },
         "model_provenance": {
           "$ref": "#/$defs/modelProvenance"
@@ -808,10 +722,7 @@
           }
         },
         "reason": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         }
       },
       "allOf": [
@@ -890,12 +801,7 @@
     "refusedFrame": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "index",
-        "stage",
-        "reason",
-        "residual_scaled"
-      ],
+      "required": ["index", "stage", "reason", "residual_scaled"],
       "properties": {
         "index": {
           "type": "integer",
@@ -909,10 +815,7 @@
           "minLength": 1
         },
         "residual_scaled": {
-          "type": [
-            "number",
-            "null"
-          ]
+          "type": ["number", "null"]
         }
       }
     },
@@ -955,9 +858,7 @@
         }
       },
       "then": {
-        "required": [
-          "reason"
-        ]
+        "required": ["reason"]
       }
     }
   ]

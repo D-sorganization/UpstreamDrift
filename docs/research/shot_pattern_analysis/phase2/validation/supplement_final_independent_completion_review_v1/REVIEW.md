@@ -2,11 +2,11 @@
 
 Accepted as complete saved-data and packaging evidence: 26 unique executions, 780,000 attempted pattern rows, 779,712 supported rows, and 288 retained unsupported rows. Four verified PW control references reuse primary executions and add no Monte Carlo rows.
 
-| Protocol Root | Cells | Attempted Rows | Supported Rows | Unsupported Rows |
-| --- | ---: | ---: | ---: | ---: |
-| PW Primary Face Bounds | 18 | 540,000 | 539,976 | 24 |
-| PW Control Face Bounds | 4 | 120,000 | 119,994 | 6 |
-| Driver Control Speed Bounds | 4 | 120,000 | 119,742 | 258 |
+| Protocol Root               | Cells | Attempted Rows | Supported Rows | Unsupported Rows |
+| --------------------------- | ----: | -------------: | -------------: | ---------------: |
+| PW Primary Face Bounds      |    18 |        540,000 |        539,976 |               24 |
+| PW Control Face Bounds      |     4 |        120,000 |        119,994 |                6 |
+| Driver Control Speed Bounds |     4 |        120,000 |        119,742 |              258 |
 
 All three full-audit receipts are complete and passing, and their recorded maxima remain within the unchanged limits. This review reran the strict protocol, immutable acceptance and four-alias validators. It matched every final cell configuration to its plan, verified each complete cell manifest and its file bytes, and reconciled row, support, common-three score and audit coverage counts. The existing full audits include 792 direct-public-API scored rows and four selected-cell bootstrap checks; this review did not repeat the full CSV statistics or simulate any shots.
 

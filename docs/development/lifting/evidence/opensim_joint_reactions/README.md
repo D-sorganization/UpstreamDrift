@@ -6,8 +6,9 @@ using real OpenSim 4.6 and the Rajagopal 2023 musculoskeletal model.
 ## Overview
 
 OSL-5 computes 3D internal joint reaction loads across the barbell lift motion window:
+
 1. **L5/S1 Lumbar Joint**: OpenSim `back` joint expressed in inferior pelvis ISB frame and torso frame.
-   *Qualification*: lower bound: no trunk muscles; the lumbar moment is an ideal actuator.
+   _Qualification_: lower bound: no trunk muscles; the lumbar moment is an ideal actuator.
 2. **Knee Tibiofemoral Joint**: Resultant contact load across `walker_knee_r` and `walker_knee_l`.
 3. **Knee Patellofemoral Joint**: Articulated patella joint contact load (`patellofemoral_r/l`).
 4. **Shoulder Glenohumeral Joint**: Evaluated at articulated `acromial_r/l` CustomJoints (3 rotational DOFs).
@@ -24,15 +25,15 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 
 ### Measured Reaction Loads
 
-| Joint | Metric | Qualification | Mean (N) | Peak (N) | Mean (BW) | Peak (BW) |
-|---|---|---|---|---|---|---|
-| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1579.32 | 1683.66 | 2.01 | 2.14 |
-| **L5/S1 AP Shear** | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -956.85 | -989.32 | -1.21 | -1.26 |
-| **L5/S1 Torso Compression** | +F_y (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1104.77 | 1158.95 | unavailable | unavailable |
-| **L5/S1 Torso AP Shear** | +F_x (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1480.75 | -1555.69 | unavailable | unavailable |
-| **Knee Tibiofemoral** | Resultant 3D norm | unqualified | 10154.88 | 11997.15 | 12.89 | 15.23 |
-| **Knee Patellofemoral** | Resultant 3D norm | unqualified | 9295.27 | 12205.18 | 11.80 | 15.50 |
-| **Shoulder Glenohumeral** | Resultant 3D norm | unqualified | 714.06 | 732.62 | 0.91 | 0.93 |
+| Joint                       | Metric              | Qualification                                                         | Mean (N) | Peak (N) | Mean (BW)   | Peak (BW)   |
+| --------------------------- | ------------------- | --------------------------------------------------------------------- | -------- | -------- | ----------- | ----------- |
+| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1579.32  | 1683.66  | 2.01        | 2.14        |
+| **L5/S1 AP Shear**          | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -956.85  | -989.32  | -1.21       | -1.26       |
+| **L5/S1 Torso Compression** | +F_y (torso frame)  | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1104.77  | 1158.95  | unavailable | unavailable |
+| **L5/S1 Torso AP Shear**    | +F_x (torso frame)  | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1480.75 | -1555.69 | unavailable | unavailable |
+| **Knee Tibiofemoral**       | Resultant 3D norm   | unqualified                                                           | 10154.88 | 11997.15 | 12.89       | 15.23       |
+| **Knee Patellofemoral**     | Resultant 3D norm   | unqualified                                                           | 9295.27  | 12205.18 | 11.80       | 15.50       |
+| **Shoulder Glenohumeral**   | Resultant 3D norm   | unqualified                                                           | 714.06   | 732.62   | 0.91        | 0.93        |
 
 - **Peak Lumbar Actuator Moment**: 665.32 N·m (ideal coordinate actuator; no active erector spinae in Rajagopal)
 - **Segmental Spine Reference**: Use segmental spine model (#12735) for multi-segment spinal load with active trunk muscles
@@ -40,6 +41,7 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 ### Static-Hold Analytic Bound & Dynamic Squat Frame Check
 
 #### Default Pose Self-Consistency (Frame and Sign)
+
 - **Upper Mass Above L5/S1**: 136.4979 kg (Torso, Arms, Barbell)
 - **Gravitational Weight Above ($W_{\text{above}}$)**: 1338.59 N
 - **Measured L5/S1 Compression**: 1338.59 N
@@ -48,6 +50,7 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 - **Verification Status**: **PASSED** (Evaluates all-zero default pose; checks frame and sign self-consistency only (not verifying lift))
 
 #### Dynamic Squat Minimal-Acceleration Frame Evaluation
+
 - **Frame Index**: 40 (time = 0.2000 s)
 - **Generalized Acceleration Norm ($\|\ddot{q}\|$)**: 20.0378 rad/s²
 - **Upper Weight Above ($W_{\text{above}}$)**: 1338.59 N
@@ -80,9 +83,11 @@ with reason: `no OSL-4 muscle solve (needs OSL-3 #13041 bundles)`. Values are ex
 ## Evidence Figures
 
 ### L5/S1 Joint Reaction Loads vs Movement Optimizer
+
 ![L5/S1 Joint Reaction Loads](squat_l5s1_joint_reaction_loads.png)
 
 ### Knee and Shoulder Joint Reactions
+
 ![Knee and Shoulder Joint Reactions](squat_knee_and_shoulder_joint_reactions.png)
 
 ## Reproduction Commands

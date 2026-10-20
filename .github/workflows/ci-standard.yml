@@ -1565,8 +1565,7 @@ jobs:
 
   quality-gate:
     name: quality-gate
-    needs:
-      [
+    needs: [
         agent-context,
         pick-runner,
         changed-paths,

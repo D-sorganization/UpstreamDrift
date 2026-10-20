@@ -12,20 +12,20 @@ The Tour Matching Viewer visualizes matched Tour-player swing baselines alongsid
 
 ## Inputs
 
-| Input | Units | Description |
-| --- | --- | --- |
-| Tour Baseline Receipt | json / npz | Certified Tour baseline capture dataset |
-| Candidate Simulation | npz | Model forward-dynamics trajectory rollout |
-| Alignment Landmark | event | Temporal synchronization keyframe (typically impact) |
+| Input                 | Units      | Description                                          |
+| --------------------- | ---------- | ---------------------------------------------------- |
+| Tour Baseline Receipt | json / npz | Certified Tour baseline capture dataset              |
+| Candidate Simulation  | npz        | Model forward-dynamics trajectory rollout            |
+| Alignment Landmark    | event      | Temporal synchronization keyframe (typically impact) |
 
 ## Outputs
 
-| Output | Units | Description |
-| --- | --- | --- |
-| Kinematic Comparison | mm, deg | Residual trajectory differences between baseline and candidate |
-| Kinetic Overlay | N, N*m | Ground reaction force profiles and segment torque comparisons |
-| Delivery Metrics | m/s, deg | Face angle, path angle, and attack angle at impact |
-| Parity Score | % | Normalized agreement metric against Tour baseline standards |
+| Output               | Units    | Description                                                    |
+| -------------------- | -------- | -------------------------------------------------------------- |
+| Kinematic Comparison | mm, deg  | Residual trajectory differences between baseline and candidate |
+| Kinetic Overlay      | N, N\*m  | Ground reaction force profiles and segment torque comparisons  |
+| Delivery Metrics     | m/s, deg | Face angle, path angle, and attack angle at impact             |
+| Parity Score         | %        | Normalized agreement metric against Tour baseline standards    |
 
 ## Method
 

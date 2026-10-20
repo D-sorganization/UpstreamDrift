@@ -18,37 +18,37 @@ simulation.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Model selection | enumeration | `Default Golf Model`, plus every `*.urdf` found by the URDF scan (see Method). |
-| Operating mode | `Dynamic (Physics)` or `Kinematic (Pose)` | Dynamic integrates; kinematic poses the plant. |
-| Joint position | rad (revolute) / m (prismatic) | One slider plus spin box per single-DOF joint; limits are read from the plant, falling back to a UI default range. Multi-DOF joints and welds are skipped. |
-| Integration time step | s | Fixed at 1e-3 s (`TIME_STEP_S`); the Qt timer ticks at the same period. |
-| Initial pelvis height | m | 1.0 m (`INITIAL_PELVIS_HEIGHT_M`). |
-| `MESHCAT_HOST` | env var | Host for the MeshCat server; when set, the browser is not auto-opened (container / headless use). |
-| Visualization toggles | boolean | Forces, torques, mobility ellipsoid, force ellipsoid, induced-acceleration vectors, counterfactual vectors, live analysis. |
-| Manipulability target bodies | selection | Checkbox grid of plant bodies. |
-| Induced-acceleration source | enumeration | `gravity`, `velocity`, `total`, or a named single-DOF joint. |
-| Counterfactual type | enumeration | `ztcf_accel` or `zvcf_torque`. |
+| Input                        | Unit / type                               | Notes                                                                                                                                                      |
+| ---------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Model selection              | enumeration                               | `Default Golf Model`, plus every `*.urdf` found by the URDF scan (see Method).                                                                             |
+| Operating mode               | `Dynamic (Physics)` or `Kinematic (Pose)` | Dynamic integrates; kinematic poses the plant.                                                                                                             |
+| Joint position               | rad (revolute) / m (prismatic)            | One slider plus spin box per single-DOF joint; limits are read from the plant, falling back to a UI default range. Multi-DOF joints and welds are skipped. |
+| Integration time step        | s                                         | Fixed at 1e-3 s (`TIME_STEP_S`); the Qt timer ticks at the same period.                                                                                    |
+| Initial pelvis height        | m                                         | 1.0 m (`INITIAL_PELVIS_HEIGHT_M`).                                                                                                                         |
+| `MESHCAT_HOST`               | env var                                   | Host for the MeshCat server; when set, the browser is not auto-opened (container / headless use).                                                          |
+| Visualization toggles        | boolean                                   | Forces, torques, mobility ellipsoid, force ellipsoid, induced-acceleration vectors, counterfactual vectors, live analysis.                                 |
+| Manipulability target bodies | selection                                 | Checkbox grid of plant bodies.                                                                                                                             |
+| Induced-acceleration source  | enumeration                               | `gravity`, `velocity`, `total`, or a named single-DOF joint.                                                                                               |
+| Counterfactual type          | enumeration                               | `ztcf_accel` or `zvcf_torque`.                                                                                                                             |
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| MeshCat 3D scene | rendered frames in a browser | URL is logged on start-up. |
-| Simulation time | s | Status bar. |
-| Recorded joint positions / velocities | rad, rad/s (revolute) | `DrakeRecorder.q_history`, `v_history`. |
-| Club-head position | m (3-vector) | `club_head_pos_history`. |
-| Centre-of-mass position | m (3-vector) | `com_position_history`. |
-| Angular momentum | kg*m^2/s (3-vector) | `angular_momentum_history`. |
-| Ground reaction forces | N (3-vector) | `ground_forces_history`. |
-| Centre of pressure | m (3-vector) | `cop_position_history`. |
-| Induced accelerations | rad/s^2 per generalized coordinate | Per source, per frame. |
-| Counterfactuals | rad/s^2 (ZTCF) and N*m (ZVCF) | Stored per frame. |
-| Jacobian condition number | dimensionless | *Matrix Analysis* readout. |
-| Constraint rank | count | *Matrix Analysis* readout. |
-| Recorded frame count | count | `Frames: N` label. |
-| Exported recording | `.json`, `.csv`, `.mat`, `.hdf5` | The "Export Analysis Data (CSV)" button calls `export_recording_all_formats`, which writes all four formats by default. |
+| Output                                | Unit / type                        | Notes                                                                                                                   |
+| ------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| MeshCat 3D scene                      | rendered frames in a browser       | URL is logged on start-up.                                                                                              |
+| Simulation time                       | s                                  | Status bar.                                                                                                             |
+| Recorded joint positions / velocities | rad, rad/s (revolute)              | `DrakeRecorder.q_history`, `v_history`.                                                                                 |
+| Club-head position                    | m (3-vector)                       | `club_head_pos_history`.                                                                                                |
+| Centre-of-mass position               | m (3-vector)                       | `com_position_history`.                                                                                                 |
+| Angular momentum                      | kg\*m^2/s (3-vector)               | `angular_momentum_history`.                                                                                             |
+| Ground reaction forces                | N (3-vector)                       | `ground_forces_history`.                                                                                                |
+| Centre of pressure                    | m (3-vector)                       | `cop_position_history`.                                                                                                 |
+| Induced accelerations                 | rad/s^2 per generalized coordinate | Per source, per frame.                                                                                                  |
+| Counterfactuals                       | rad/s^2 (ZTCF) and N\*m (ZVCF)     | Stored per frame.                                                                                                       |
+| Jacobian condition number             | dimensionless                      | _Matrix Analysis_ readout.                                                                                              |
+| Constraint rank                       | count                              | _Matrix Analysis_ readout.                                                                                              |
+| Recorded frame count                  | count                              | `Frames: N` label.                                                                                                      |
+| Exported recording                    | `.json`, `.csv`, `.mat`, `.hdf5`   | The "Export Analysis Data (CSV)" button calls `export_recording_all_formats`, which writes all four formats by default. |
 
 ## Method
 
@@ -91,6 +91,7 @@ The engine adapter used elsewhere in the suite is `DrakePhysicsEngine` in
   finalised plant instead of a golfer.
 
 ## See Also
+
 - [Drake engine reference](../engines/drake.md)
 - [Engine capabilities matrix](../engines/engine_capabilities.md)
 - [Engine support tiers](../engines/support_tiers.md)

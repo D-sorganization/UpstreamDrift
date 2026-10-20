@@ -308,8 +308,8 @@ indistinguishable from one made in a terminal.
   `--gain`, `--auto-exposure`, applied to every selected view and recorded
   in the derived plan name), duration and dry run. _Plan check_ and _Record_.
 - **Process** — _Proxies_, _Ingest_ with any registered estimator (MediaPipe,
-  OpenPose, OpenPose BODY_25 DNN; unavailable ones are marked with the
-  install hint), _Calibrate intrinsics_ (board, square size) and
+  OpenPose, OpenPose BODY*25 DNN; unavailable ones are marked with the
+  install hint), \_Calibrate intrinsics* (board, square size) and
   _Reconstruct_ (anchor segment and tape-measured length; a file named
   `intrinsics*.json` starts a first take, anything else is taken as a
   previous `reconstruction.json`).

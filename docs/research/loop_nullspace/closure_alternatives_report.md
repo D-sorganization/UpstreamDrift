@@ -62,11 +62,11 @@ All closure rows are in the shaft-first grip frame (`x` along the club),
 ordered `fx fy fz tx ty tz`. The weld pose residual is
 `Phi_6(q) = log6(T_lead^-1 T_trail)` with the lead grip frame on the club.
 
-| Model                  | Closure kind  | Rows kept          | Pose residual                    | Coordinates |
-| ---------------------- | ------------- | ------------------ | -------------------------------- | ----------- |
+| Model                  | Closure kind  | Rows kept           | Pose residual                    | Coordinates |
+| ---------------------- | ------------- | ------------------- | -------------------------------- | ----------- |
 | `WELD`                 | `WELD6`       | `fx fy fz tx ty tz` | all six components of `Phi_6`    | 14          |
-| `SHAFT_TWIST_REVOLUTE` | `SHAFT_FREE5` | `fx fy fz ty tz`   | `Phi_6` without the twist `tx`   | 14          |
-| `TRAIL_BALL`           | `BALL3`       | `fx fy fz`         | the three position components    | 14          |
+| `SHAFT_TWIST_REVOLUTE` | `SHAFT_FREE5` | `fx fy fz ty tz`    | `Phi_6` without the twist `tx`   | 14          |
+| `TRAIL_BALL`           | `BALL3`       | `fx fy fz`          | the three position components    | 14          |
 | `LEAD_BALL`            | `WELD6`       | `fx fy fz tx ty tz` | `Phi_6(q, beta)`, six components | 17          |
 
 `LEAD_BALL` hangs the club on a z-y-x ball (`beta`, three unactuated
@@ -93,11 +93,11 @@ Fixed-base spatial fixture, seed 7, 20 frames, gates `1e-6` at every level
 (never loosened). Table 1 gives the maximum scaled residuals of the model's own
 rows (position / velocity / acceleration); `-` marks a refusal.
 
-| Trajectory | `WELD`                        | `SHAFT_TWIST_REVOLUTE`         | `TRAIL_BALL`                   | `LEAD_BALL`                   |
-| ---------- | ----------------------------- | ------------------------------ | ------------------------------ | ----------------------------- |
-| `WELDED`   | admit (2e-16 / 2e-15 / 2e-15) | admit (2e-16 / 2e-15 / 2e-15)  | admit (1e-16 / 2e-15 / 1e-15)  | admit (2e-16 / 2e-15 / 2e-15) |
-| `TWIST`    | refuse (2e-16 / 1.3 / 1.7)    | admit (2e-16 / 1e-15 / 2e-15)  | admit (1e-16 / 1e-15 / 9e-16)  | refuse (2e-16 / 1.3 / 1.7)    |
-| `TILT`     | refuse (2e-16 / 1.6 / 2.9)    | refuse (2e-16 / 1.4 / 2.3)     | admit (1e-16 / 9e-16 / 9e-16)  | refuse (2e-16 / 1.6 / 2.9)    |
+| Trajectory | `WELD`                        | `SHAFT_TWIST_REVOLUTE`        | `TRAIL_BALL`                  | `LEAD_BALL`                   |
+| ---------- | ----------------------------- | ----------------------------- | ----------------------------- | ----------------------------- |
+| `WELDED`   | admit (2e-16 / 2e-15 / 2e-15) | admit (2e-16 / 2e-15 / 2e-15) | admit (1e-16 / 2e-15 / 1e-15) | admit (2e-16 / 2e-15 / 2e-15) |
+| `TWIST`    | refuse (2e-16 / 1.3 / 1.7)    | admit (2e-16 / 1e-15 / 2e-15) | admit (1e-16 / 1e-15 / 9e-16) | refuse (2e-16 / 1.3 / 1.7)    |
+| `TILT`     | refuse (2e-16 / 1.6 / 2.9)    | refuse (2e-16 / 1.4 / 2.3)    | admit (1e-16 / 9e-16 / 9e-16) | refuse (2e-16 / 1.6 / 2.9)    |
 
 Table 1. Table entries are model by trajectory, all models judged on the
 welded-coordinate motion (embedded with a locked ball for `LEAD_BALL`).
@@ -111,10 +111,10 @@ Position level. The probe takes three steps of `1e-4` to `2e-4` along a twist
 or tilt direction scaled to a unit weld rate, with zero rates, and evaluates
 each model's own pose residual (maximum over the steps):
 
-| Probe direction | `WELD`  | `SHAFT_TWIST_REVOLUTE` | `TRAIL_BALL` | `LEAD_BALL` |
-| --------------- | ------- | ---------------------- | ------------ | ----------- |
-| `TWIST`         | 2.0e-4 (refuse) | 9.3e-9 (admit) | 1.7e-9 (admit) | 2.0e-4 (refuse) |
-| `TILT`          | 1.9e-4 (refuse) | 4.7e-5 (refuse) | 4.5e-9 (admit) | 1.9e-4 (refuse) |
+| Probe direction | `WELD`          | `SHAFT_TWIST_REVOLUTE` | `TRAIL_BALL`   | `LEAD_BALL`     |
+| --------------- | --------------- | ---------------------- | -------------- | --------------- |
+| `TWIST`         | 2.0e-4 (refuse) | 9.3e-9 (admit)         | 1.7e-9 (admit) | 2.0e-4 (refuse) |
+| `TILT`          | 1.9e-4 (refuse) | 4.7e-5 (refuse)        | 4.5e-9 (admit) | 1.9e-4 (refuse) |
 
 Table 2. A model admits a direction when the rows it keeps close to second
 order in the step; a model whose dropped rows the direction would violate at
@@ -123,13 +123,13 @@ is not a statement about a swing.
 
 ## Null-Space Dimensions
 
-| Quantity                                   | `WELD` | `SHAFT_TWIST_REVOLUTE` | `TRAIL_BALL` | `LEAD_BALL` |
-| ------------------------------------------ | ------ | ---------------------- | ------------ | ----------- |
-| Admitted velocity dimension, spatial       | 8      | 9                      | 11           | 11          |
-| Admitted velocity dimension, anthro        | 35     | 36                     | 38           | n/a         |
-| Allocation nullity, spatial fixed base     | 6      | 5                      | 3            | 3           |
-| Allocation nullity, anthro (range)         | 6-18   | 5-17                   | 3-15         | n/a         |
-| Golden                                     | exact  | exact                  | exact        | structural  |
+| Quantity                               | `WELD` | `SHAFT_TWIST_REVOLUTE` | `TRAIL_BALL` | `LEAD_BALL` |
+| -------------------------------------- | ------ | ---------------------- | ------------ | ----------- |
+| Admitted velocity dimension, spatial   | 8      | 9                      | 11           | 11          |
+| Admitted velocity dimension, anthro    | 35     | 36                     | 38           | n/a         |
+| Allocation nullity, spatial fixed base | 6      | 5                      | 3            | 3           |
+| Allocation nullity, anthro (range)     | 6-18   | 5-17                   | 3-15         | n/a         |
+| Golden                                 | exact  | exact                  | exact        | structural  |
 
 Table 3. The rows-only counts on the fixed-base and floating-root-no-feet variants
 agree with the exact sympy golden `restriction_counts` (tested). `LEAD_BALL` has `n=17`,
@@ -150,11 +150,11 @@ ball). The boxes below bracket these numbers.
 Welded trajectory, 20 frames. Entries are feasible frames, then the median
 envelope width (torque in N m over the 14 joints; force multiplier in N).
 
-| Box     | `WELD`                | `SHAFT_TWIST_REVOLUTE` | `TRAIL_BALL`        | `LEAD_BALL`         |
-| ------- | --------------------- | ---------------------- | ------------------- | ------------------- |
-| 6 N m   | 20; 6.26; 25.6 N      | 16; 3.76; 11.7 N       | 0 (all infeasible)  | 0 (all infeasible)  |
-| 8 N m   | 20; 16.0; 75.9 N      | 20; 14.7; 72.8 N       | 20; 2.18; 13.1 N    | 20; 2.73; 17.6 N    |
-| 12 N m  | 20; 24.0; 130.5 N     | 20; 24.0; 120.5 N      | 20; 12.3; 44.0 N    | 20; 12.5; 44.0 N    |
+| Box    | `WELD`            | `SHAFT_TWIST_REVOLUTE` | `TRAIL_BALL`       | `LEAD_BALL`        |
+| ------ | ----------------- | ---------------------- | ------------------ | ------------------ |
+| 6 N m  | 20; 6.26; 25.6 N  | 16; 3.76; 11.7 N       | 0 (all infeasible) | 0 (all infeasible) |
+| 8 N m  | 20; 16.0; 75.9 N  | 20; 14.7; 72.8 N       | 20; 2.18; 13.1 N   | 20; 2.73; 17.6 N   |
+| 12 N m | 20; 24.0; 130.5 N | 20; 24.0; 120.5 N      | 20; 12.3; 44.0 N   | 20; 12.5; 44.0 N   |
 
 Table 4. Conflict sets of the infeasible frames name `H-TORQUE-CAPACITY` only.
 No frame is balance-inconsistent on the fixed base. Torque-width ratio against
@@ -176,14 +176,14 @@ capacity prior only.
 
 ## Where Conclusions Differ From NSX-26
 
-| Topic                         | NSX-26 (restriction)                              | NSX-72 (re-derived)                                                            |
-| ----------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Admitted trajectories         | Only the welded one                               | Each model admits its own null space; weld refuses twist, revolute admits it   |
-| Residuals reported            | Weld rows                                         | Position, velocity and acceleration of each model's own rows                   |
-| Welded trajectory dynamics    | Restricted rows                                   | Identical for the rows-only models (a check, not an assumption)                |
-| Admitted motion dimension     | Unchanged                                         | Grows 8, 9, 11 (spatial) and 35, 36, 38 (anthro)                               |
-| Lead-hand ball                | Not expressible                                   | Own coordinates, nullity 3, determined moments, different force envelope       |
-| Position level                | Skipped on anthro                                 | Evaluated on the spatial fixture; second order versus first order per model    |
+| Topic                      | NSX-26 (restriction) | NSX-72 (re-derived)                                                          |
+| -------------------------- | -------------------- | ---------------------------------------------------------------------------- |
+| Admitted trajectories      | Only the welded one  | Each model admits its own null space; weld refuses twist, revolute admits it |
+| Residuals reported         | Weld rows            | Position, velocity and acceleration of each model's own rows                 |
+| Welded trajectory dynamics | Restricted rows      | Identical for the rows-only models (a check, not an assumption)              |
+| Admitted motion dimension  | Unchanged            | Grows 8, 9, 11 (spatial) and 35, 36, 38 (anthro)                             |
+| Lead-hand ball             | Not expressible      | Own coordinates, nullity 3, determined moments, different force envelope     |
+| Position level             | Skipped on anthro    | Evaluated on the spatial fixture; second order versus first order per model  |
 
 The practical reading: the NSX-26 numbers can be quoted as the dynamics of a
 revolute or ball grip **for the same welded trajectory**. They cannot be quoted

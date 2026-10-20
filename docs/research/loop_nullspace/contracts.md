@@ -40,18 +40,18 @@ remaining per-child contracts are in these parts:
 
 ## Golden Fixture Index
 
-| Golden | Content | Used by |
-|---|---|---|
-| `planar_two_arm_full` | 5-DOF planar two-arm golfer, all coordinates actuated: `M`, `h`, `S`, `J_c`, `Jdot_v`, dimension counts, three-case zero-side classification with residual, minimum-metric torque | NSX-12, 15, 17, 22, 23, 30 |
-| `planar_two_arm_club_unactuated` | Same configuration, club angle unactuated | NSX-12, 15, 17, 30 |
-| `planar_straight_arm_rank_deficient` | Collinear configuration (rank `J_c` = 1), both actuation variants, exact rational data | NSX-12, 15, 26 |
-| `spatial_counts` | Dimension counts for fixed base, floating root, floating root with two point feet and with four point feet (counts only, no numeric state) | NSX-12, 15, 60 |
-| `lower_body_observation` | Exact (sympy) nullity and `rank(E_x N)` of five ground-reaction observation maps for two-point and four-point feet | NSX-60 |
-| `envelope_analytic_lp` | Closed-form envelope, Chebyshev centre, trajectory coupling, infeasible and unbounded certificates, sign classes | NSX-12, 20, 21, 22, 25 |
-| `grasp_map_worked_example` | `G`, `K`, `Phi`, `G#`, closing-hand map `Q`, bare-club Newton-Euler worked example, split coordinates | NSX-16, 17 |
-| `c_pm_identity` | `c_plus`/`c_minus` identity samples, unique uniform minimiser, heterogeneous minimiser | NSX-23 |
-| `closure_convention` | One relative twist through the Pinocchio, Drake, MuJoCo and OpenSim conventions, conversion matrices | NSX-02, 50 |
-| `variability_sensitivity` | Tangent linearization `(F_t, G_t)` with and without the geometric preload `Σ λ_r ∇²Φ_r`, saltation matrix and event projection, closed-form minimum-variance `z*`, additive-noise flat case, planar-golfer preload block | NSX-80 to NSX-89 |
+| Golden                               | Content                                                                                                                                                                                                                  | Used by                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| `planar_two_arm_full`                | 5-DOF planar two-arm golfer, all coordinates actuated: `M`, `h`, `S`, `J_c`, `Jdot_v`, dimension counts, three-case zero-side classification with residual, minimum-metric torque                                        | NSX-12, 15, 17, 22, 23, 30 |
+| `planar_two_arm_club_unactuated`     | Same configuration, club angle unactuated                                                                                                                                                                                | NSX-12, 15, 17, 30         |
+| `planar_straight_arm_rank_deficient` | Collinear configuration (rank `J_c` = 1), both actuation variants, exact rational data                                                                                                                                   | NSX-12, 15, 26             |
+| `spatial_counts`                     | Dimension counts for fixed base, floating root, floating root with two point feet and with four point feet (counts only, no numeric state)                                                                               | NSX-12, 15, 60             |
+| `lower_body_observation`             | Exact (sympy) nullity and `rank(E_x N)` of five ground-reaction observation maps for two-point and four-point feet                                                                                                       | NSX-60                     |
+| `envelope_analytic_lp`               | Closed-form envelope, Chebyshev centre, trajectory coupling, infeasible and unbounded certificates, sign classes                                                                                                         | NSX-12, 20, 21, 22, 25     |
+| `grasp_map_worked_example`           | `G`, `K`, `Phi`, `G#`, closing-hand map `Q`, bare-club Newton-Euler worked example, split coordinates                                                                                                                    | NSX-16, 17                 |
+| `c_pm_identity`                      | `c_plus`/`c_minus` identity samples, unique uniform minimiser, heterogeneous minimiser                                                                                                                                   | NSX-23                     |
+| `closure_convention`                 | One relative twist through the Pinocchio, Drake, MuJoCo and OpenSim conventions, conversion matrices                                                                                                                     | NSX-02, 50                 |
+| `variability_sensitivity`            | Tangent linearization `(F_t, G_t)` with and without the geometric preload `Σ λ_r ∇²Φ_r`, saltation matrix and event projection, closed-form minimum-variance `z*`, additive-noise flat case, planar-golfer preload block | NSX-80 to NSX-89           |
 
 ## NSX-02 Canonical Closure Convention (#12551)
 
@@ -464,7 +464,7 @@ Implementation notes (`loop_nullspace/envelopes.py`, #12565):
   anthropometric run is blocked (below).
 - **Real anthro benchmark (run in NSX-60, #12585).** Chain:
   `snapshot_from_adapter(foot_contact_tol_m=0.0) -> decompose -> FeasibleSet
-  (envelope_only, capacity, foot cones) -> static_envelopes` on the 200 strided
+(envelope_only, capacity, foot cones) -> static_envelopes` on the 200 strided
   frames `0, 3, ..., 597` of `ground_support/dynamics_record.npz` with
   `full_body_spec_hipcal_scaled.json` (Pinocchio, 41 coordinates, 35 actuated;
   23 of 35 capacity slots are ASSUMED). Quantities: 35 joint torques, the six
@@ -472,16 +472,16 @@ Implementation notes (`loop_nullspace/envelopes.py`, #12565):
   frame). Measured on host `Brick` (Linux 7.0.0-38 x86_64, Python 3.12.13,
   4-core shared machine, load about 2):
 
-  | Item | Result |
-  |---|---|
-  | Frames decomposed | 199 of 200 |
-  | Frame refused | 510 (airborne, no sphere within the tolerance): `BalanceInconsistentError`, scaled residual `1.89e-8` against `BALANCE_TOL = 1e-9`; not repaired, tolerance unchanged |
-  | Flight frames that decompose with no contact | 18 (471, 474, 489-507, 540-564 stride 3) |
-  | Snapshot, closure projection and decomposition, 199 frames | 57 to 84 s over three runs |
-  | `static_envelopes` wall time, 199 frames x 46 quantities | 19.5 s (73 513 simplex iterations) |
-  | Status | 124 BOUNDED, 75 INFEASIBLE |
-  | Conflict set of every INFEASIBLE frame | `H-TORQUE-CAPACITY` only |
-  | Chebyshev margin, BOUNDED frames | min 0.0059, median 1.19, max 3.30 |
+  | Item                                                       | Result                                                                                                                                                                |
+  | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Frames decomposed                                          | 199 of 200                                                                                                                                                            |
+  | Frame refused                                              | 510 (airborne, no sphere within the tolerance): `BalanceInconsistentError`, scaled residual `1.89e-8` against `BALANCE_TOL = 1e-9`; not repaired, tolerance unchanged |
+  | Flight frames that decompose with no contact               | 18 (471, 474, 489-507, 540-564 stride 3)                                                                                                                              |
+  | Snapshot, closure projection and decomposition, 199 frames | 57 to 84 s over three runs                                                                                                                                            |
+  | `static_envelopes` wall time, 199 frames x 46 quantities   | 19.5 s (73 513 simplex iterations)                                                                                                                                    |
+  | Status                                                     | 124 BOUNDED, 75 INFEASIBLE                                                                                                                                            |
+  | Conflict set of every INFEASIBLE frame                     | `H-TORQUE-CAPACITY` only                                                                                                                                              |
+  | Chebyshev margin, BOUNDED frames                           | min 0.0059, median 1.19, max 3.30                                                                                                                                     |
 
   The INFEASIBLE frames are the recorded efforts exceeding the ASSUMED
   capacities (the deletion filter names no contact or cone hypothesis); they
@@ -493,9 +493,9 @@ Implementation notes (`loop_nullspace/envelopes.py`, #12565):
   `tests/integration/test_loop_nullspace_anthro_envelope_benchmark.py`
   (`slow`, `requires_pinocchio`; `LOOP_NULLSPACE_BENCH_JSON=<path>` writes the
   measured record). It replaces the former blocker test.
+
 - Non-claim: static envelopes over-approximate trajectory-feasible ranges when
   smoothness priors are active (NSX-25).
-
 
 ## NSX-41 Output-Policy Display Contract (#12573)
 

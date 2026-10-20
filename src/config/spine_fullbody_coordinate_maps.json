@@ -26,11 +26,7 @@
       "orientation_groups": {
         "shoulder_r": {
           "golf_body": "humerus_r",
-          "golf_coordinates": [
-            "arm_flex_r",
-            "arm_add_r",
-            "arm_rot_r"
-          ],
+          "golf_coordinates": ["arm_flex_r", "arm_add_r", "arm_rot_r"],
           "target_body": "humerus_R",
           "target_coordinates": [
             "elv_angle_r",
@@ -41,11 +37,7 @@
         },
         "shoulder_l": {
           "golf_body": "humerus_l",
-          "golf_coordinates": [
-            "arm_flex_l",
-            "arm_add_l",
-            "arm_rot_l"
-          ],
+          "golf_coordinates": ["arm_flex_l", "arm_add_l", "arm_rot_l"],
           "target_body": "humerus_L",
           "target_coordinates": [
             "elv_angle_l",
@@ -59,12 +51,7 @@
         "hand_r": "hand_R",
         "hand_l": "hand_L"
       },
-      "foot_bodies": [
-        "calcn_r",
-        "toes_r",
-        "calcn_l",
-        "toes_l"
-      ],
+      "foot_bodies": ["calcn_r", "toes_r", "calcn_l", "toes_l"],
       "golf_coordinates": [
         {
           "golf": "pelvis_tilt",

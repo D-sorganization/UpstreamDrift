@@ -209,8 +209,6 @@ divergences:
       order differs and is permuted by name; closure rows canonical after
       the NSX-02 conversion.
 
-
-
   - id: nsx56-pinocchio-myosuite-m
     check: closed_loop_snapshot_conformance
     metric: M

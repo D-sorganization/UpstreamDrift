@@ -14,12 +14,12 @@ validity gates, the gross-power identity, constrained counterfactuals, envelope
 geometry, reaction-restriction semantics, the canonical closure convention, a
 rank audit of the pendulum constraints and the citation verification table.
 
-| Item                         | Status                                                                  |
-| ---------------------------- | ----------------------------------------------------------------------- |
-| Formulas and goldens         | Reproduced by exact sympy derivations; regenerated and compared by tests |
-| Citations                    | Verification table in the reference; unverified sources are not used     |
-| Scientific qualification     | None; no numerical result about any golfer                               |
-| External validation          | Deferred (NSX-05)                                                        |
+| Item                     | Status                                                                   |
+| ------------------------ | ------------------------------------------------------------------------ |
+| Formulas and goldens     | Reproduced by exact sympy derivations; regenerated and compared by tests |
+| Citations                | Verification table in the reference; unverified sources are not used     |
+| Scientific qualification | None; no numerical result about any golfer                               |
+| External validation      | Deferred (NSX-05)                                                        |
 
 ## Contents of This Directory
 

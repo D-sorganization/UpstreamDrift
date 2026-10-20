@@ -54,8 +54,8 @@ For a fresh restore, first compare the downloaded manifest byte-for-byte with th
 
 The accepted local primary/control archives were checked once against their receipts and copied byte-identically to `/tmp/shot-pattern-delivery-resume/release-assets-primary-control-prepared/`. The frozen final `REPORT.md` and PDF retain links into `phase2/supplement_report_v1/`. Keep the original baseline study checkout intact. For the publication/consumer tree, restore the accepted child archive to a fresh temporary `phase2` tree, verify its archive and full extracted inventory first, then route the extracted `supplement_report_v2_layout_repair/` directory to the canonical `supplement_report_v1/` path expected by those unchanged report links. This is a delivery-path mapping only; do not edit the report bytes or replace the baseline in the study checkout. Record both the pre-routing extracted child hashes and the final routed path in the restoration receipt.
 
-| Bundle | ZIP asset name | Bytes | ZIP SHA256 | Manifest SHA256 |
-| --- | --- | ---: | --- | --- |
+| Bundle  | ZIP asset name                     |       Bytes | ZIP SHA256                                                         | Manifest SHA256                                                    |
+| ------- | ---------------------------------- | ----------: | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
 | Primary | `primary_final_figures_v1_001.zip` | 223,739,795 | `6ba794355bf4575e2a6fb24a3dc7473dbd0279a628c3e99bbe191ce2a4785cc2` | `3375d756c1aa39fb985ebccfb46600de8e1e07714f3dee5561ec7e5ae6229d44` |
 | Control | `control_final_figures_v1_001.zip` | 168,462,247 | `0101c2cbc5cba3ffb0b6bded0979cb63fb28adb52f446fbda1a4384c226e35c0` | `492962d0dc0a2f43ea95b143d352b4234331a8a2c42d10b33c1f7a55c9dbae9c` |
 

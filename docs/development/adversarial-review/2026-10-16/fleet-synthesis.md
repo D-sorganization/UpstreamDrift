@@ -9,8 +9,8 @@ and `findings/` pages. Numbers here were measured on the clones reviewed (commit
 
 The mathematics is in better shape than the software around it. Where a reviewer could run a kernel against a
 textbook identity — AffineDrift's manipulator dynamics (Ṃ−2C skew to 3e-16, RNEA vs Lagrange to 1e-9), Tools'
-rotation conventions (12 Euler sequences agree with SciPy to 9e-16), Tools_Private's JANAF-derived thermochemistry,
-UpstreamDrift's integrators — it passed. Where the code converts between _units or conventions_ at a boundary
+rotation conventions (12 Euler sequences agree with SciPy to 9e-16), Tools*Private's JANAF-derived thermochemistry,
+UpstreamDrift's integrators — it passed. Where the code converts between \_units or conventions* at a boundary
 (kmol/h vs Nm³/h, pure-species vs solution dew point, feed-oxygen vs oxidant oxygen, forward-integrated vs pointwise
 counterfactual) it failed, and every one of those failures sailed through a test suite with thousands of tests, because
 the suites overwhelmingly assert _shape_ (`> 0`, `is not None`, "the mock was called", "the prose contains the word")
@@ -33,8 +33,8 @@ several of its gates provably cannot fire. The fix is not more gates. It is fewe
 ### 2.1 Bare Floats Carry Units in Their Name, if at All
 
 `feed_rate / ghsv  # m3` (Tools WGS) is wrong by 22.4× because `feed_rate` is kmol/h. `elements["O"] = stoich_o / phi`
-(Tools_Private) silently discards feed oxygen. Lucas viscosity (Tools) mixes three half-remembered formulas with Pc in
-Pa, bar and MPa. None of these are "math errors"; they are _type_ errors Python cannot see.
+(Tools*Private) silently discards feed oxygen. Lucas viscosity (Tools) mixes three half-remembered formulas with Pc in
+Pa, bar and MPa. None of these are "math errors"; they are \_type* errors Python cannot see.
 
 **Instead:** make units a type at every public boundary. Three graduated options, cheapest first:
 

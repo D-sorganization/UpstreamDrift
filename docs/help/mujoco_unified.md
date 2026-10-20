@@ -17,14 +17,14 @@ if you do not have a reason to prefer another engine.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Model selection | enumeration | Built-in MJCF models, chosen in the *Physics Models & Mechanisms* combo box. |
-| Operating mode | `Dynamic (Torque Control)` or `Kinematic (Pose Adjustment)` | Dynamic integrates physics; kinematic sets joint positions directly. |
-| Per-actuator torque command | N*m | One slider per actuator, range -100 N*m to +100 N*m, default 0 N*m; the slider label reads back in N*m. |
-| Joint pose | rad (revolute) / m (prismatic) | Kinematic-mode sliders, limits taken from the loaded MJCF. |
-| Loaded MJCF model | XML string | The built-in models are embedded XML constants in `models/` of the `mujoco_humanoid_golf` package. |
-| Camera / overlay toggles | boolean | Force, torque, contact and reference-frame overlays. |
+| Input                       | Unit / type                                                 | Notes                                                                                                   |
+| --------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Model selection             | enumeration                                                 | Built-in MJCF models, chosen in the _Physics Models & Mechanisms_ combo box.                            |
+| Operating mode              | `Dynamic (Torque Control)` or `Kinematic (Pose Adjustment)` | Dynamic integrates physics; kinematic sets joint positions directly.                                    |
+| Per-actuator torque command | N\*m                                                        | One slider per actuator, range -100 N*m to +100 N*m, default 0 N*m; the slider label reads back in N*m. |
+| Joint pose                  | rad (revolute) / m (prismatic)                              | Kinematic-mode sliders, limits taken from the loaded MJCF.                                              |
+| Loaded MJCF model           | XML string                                                  | The built-in models are embedded XML constants in `models/` of the `mujoco_humanoid_golf` package.      |
+| Camera / overlay toggles    | boolean                                                     | Force, torque, contact and reference-frame overlays.                                                    |
 
 Built-in model sizes as declared in the tile's own model configuration
 (`__main__.py` and `gui/tabs/physics_tab.py`): chaotic driven pendulum
@@ -35,15 +35,15 @@ are installed.
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| Live 3D viewport | rendered frames | MuJoCo scene at the widget's configured frame rate. |
-| Simulation time | s | Shown in the status bar. |
-| Joint positions / velocities | rad, rad/s (revolute) | Recorded per frame while recording is armed. |
-| Applied joint torques | N*m | Whatever the sliders or the active control scheme commanded. |
-| Recorded frame count | count | Status readout while recording. |
-| Exported recording | file | Written through the shared exporter; see `src/shared/python/data_io/export.py`. |
-| Plots | figures | Live Analysis, Plotting and Analysis tabs. |
+| Output                       | Unit / type           | Notes                                                                           |
+| ---------------------------- | --------------------- | ------------------------------------------------------------------------------- |
+| Live 3D viewport             | rendered frames       | MuJoCo scene at the widget's configured frame rate.                             |
+| Simulation time              | s                     | Shown in the status bar.                                                        |
+| Joint positions / velocities | rad, rad/s (revolute) | Recorded per frame while recording is armed.                                    |
+| Applied joint torques        | N\*m                  | Whatever the sliders or the active control scheme commanded.                    |
+| Recorded frame count         | count                 | Status readout while recording.                                                 |
+| Exported recording           | file                  | Written through the shared exporter; see `src/shared/python/data_io/export.py`. |
+| Plots                        | figures               | Live Analysis, Plotting and Analysis tabs.                                      |
 
 ## Method
 
@@ -78,6 +78,7 @@ capability list for this tile is declared in `src/config/models.yaml` under
   a model's segment masses or inertias against a real golfer.
 
 ## See Also
+
 - [MuJoCo engine reference](../engines/mujoco.md)
 - [Engine capabilities matrix](../engines/engine_capabilities.md)
 - [Engine support tiers](../engines/support_tiers.md)

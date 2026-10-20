@@ -16,10 +16,10 @@ A diagnostic changed only the face search box to [−6°, +6°]. It retained the
 77.402477249 m raw target, speed limits [24, 40] m/s, face-minus-path ±3°,
 0.05 m acceptance tolerance, primary contact/flight resolution, and all physics:
 
-| Pattern | Face (°) | Path (°) | Speed (m/s) | Raw Residual (m) | Fine Replay Residual (m) |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Draw | −0.260459639 | +2.739540361 | 32.045914261 | 1.14e−13 | 0.000211396 |
-| Fade | +0.260459639 | −2.739540361 | 32.045914261 | 1.14e−13 | 0.000211396 |
+| Pattern |     Face (°) |     Path (°) |  Speed (m/s) | Raw Residual (m) | Fine Replay Residual (m) |
+| ------- | -----------: | -----------: | -----------: | ---------------: | -----------------------: |
+| Draw    | −0.260459639 | +2.739540361 | 32.045914261 |         1.14e−13 |              0.000211396 |
+| Fade    | +0.260459639 | −2.739540361 | 32.045914261 |         1.14e−13 |              0.000211396 |
 
 Both solves took seven optimizer evaluations. Fine replay used 512 contact
 steps and 0.005 s flight step. There was no post-flight aiming operation.
