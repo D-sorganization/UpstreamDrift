@@ -80,6 +80,7 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     build_dynamics_report,
     lane_reference_zmp,
     replay,
+    replay_sensitivity_block,
     score_reference,
     shooting_fit,
     zmp_filter,
@@ -170,6 +171,12 @@ def build_parser() -> argparse.ArgumentParser:
         description="Ground-supported full-body pipeline runner with pluggable plant engines."
     )
     parser.add_argument("--out", type=Path, default=Path.cwd())
+    parser.add_argument(
+        "--replay-sensitivity",
+        action="store_true",
+        help="replay once more from a seeded 1e-6 offset and record the "
+        "divergence growth before and after impact (#13112)",
+    )
     parser.add_argument(
         "--address-only",
         action="store_true",
@@ -1230,6 +1237,17 @@ def _simulate_and_receipt(
             club_attachments=cal_res.attachments,
         )
     )
+    if getattr(args, "replay_sensitivity", False):
+        dynamics_report["replay_sensitivity"] = replay_sensitivity_block(
+            sim,
+            lane,
+            kin,
+            q_track,
+            sim_q,
+            dynamics_report["fd_phase"],
+            tracking_backend=tracking,
+            reference_hook=hook,
+        )
     _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)
     render_skipped = _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)
     receipt = _ground_support_receipt(

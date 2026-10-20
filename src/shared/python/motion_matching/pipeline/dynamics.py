@@ -20,8 +20,10 @@ if TYPE_CHECKING:
     from src.shared.python.motion_matching import full_body_forward_dynamics as fs
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.dynamics_filter import (
+    bound_com_shift,
     cart_table_shift,
     project_inside,
+    support_min_width,
 )
 from src.shared.python.motion_matching.ground_support import convex_hull_contains
 from src.shared.python.motion_matching.pipeline.constants import (
@@ -48,6 +50,9 @@ from src.shared.python.motion_matching.pipeline.fd_phase import (
     model_face_path,
 )
 from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
+from src.shared.python.motion_matching.pipeline.replay_sensitivity import (
+    post_impact_window_rms,
+)
 from src.shared.python.motion_matching.pipeline.turn_split import (
     lane_axis_targets,
     lane_split_weights,
@@ -485,7 +490,8 @@ def zmp_filter(
 
     Each pass projects the reference zero-moment point into the per-frame
     support polygon shrunk by ``ZMP_MARGIN_M``, finds the smallest smooth
-    centre-of-mass shift whose cart-table effect closes the gap, re-solves
+    centre-of-mass shift whose cart-table effect closes the gap, bounds it
+    per frame by the base of support's narrowest width (#13112), re-solves
     the IK against the markers with the shifted centre-of-mass path as
     per-frame rows, and low-passes the result again.
 
@@ -513,6 +519,12 @@ def zmp_filter(
         )
         heights = zmp["com"][:, 2] - lane.ground.height_m
         shift = cart_table_shift(zmp["zmp_xy"], target, heights, lane.times)
+        # #13112: the correction may not carry the centre of mass across the
+        # base of support (its narrowest width per frame); see
+        # ``dynamics_filter.bound_com_shift`` for the derivation.
+        limits = np.array([support_min_width(hull) for hull in zmp["hull_xy"]])
+        unbounded_max = float(np.sqrt(np.einsum("ij,ij->i", shift, shift)).max())
+        shift, clipped = bound_com_shift(shift, limits)
         com_goal = zmp["com"][:, :2] + shift
         goals = [(basis @ np.r_[g, 0.0], ZMP_COM_WEIGHT) for g in com_goal]
         q_new, fits = kin.solve_trajectory(
@@ -538,6 +550,9 @@ def zmp_filter(
                 "com_shift_max_m": float(
                     np.sqrt(np.einsum("ij,ij->i", shift, shift)).max()
                 ),  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
+                "com_shift_unbounded_max_m": unbounded_max,
+                "com_shift_bound_min_m": float(limits.min()),
+                "com_shift_clipped_frames": int(clipped.sum()),
                 "marker_rms_m": float(np.sqrt(np.mean(errors[lane.valid] ** 2))),
                 "closure_error_max_m": float(max(f.closure_error_m for f in fits)),
                 **zmp_summary(zmp, lane.times),
@@ -638,6 +653,12 @@ def _fd_phase_block(
     lane, spec = inputs.lane, inputs.club_spec
     reference = model_face_path(inputs.kin, inputs.q_ref, lane.times, spec)
     block = fd_phase_report(lane.times, sim_errors, lane.valid, reference.centres)
+    if block["status"] == "ok":
+        block.update(
+            post_impact_window_rms(
+                lane.times, sim_errors, lane.valid, block["impact_time_s"]
+            )
+        )
     block["clubhead_speed"] = clubhead_speed_report(
         simulated=model_face_path(inputs.kin, inputs.sim_q, lane.times, spec),
         reference=reference,
@@ -860,3 +881,49 @@ def build_dynamics_report(
         "ball_impact": getattr(record, "ball_impact", None),
     }
     return report, sim_errors
+
+
+def replay_sensitivity_block(
+    sim: fs.FullBodySimulator,
+    lane: Lane,
+    kin: FullBodyMarkerKinematics,
+    q_track: np.ndarray,
+    sim_q: np.ndarray,
+    fd_phase: Mapping[str, Any],
+    *,
+    tracking_backend: str = "kkt",
+    reference_hook: Any = None,
+) -> dict[str, Any]:
+    """Receipt block ``dynamics.replay_sensitivity`` (#13112, opt-in).
+
+    Replays the tracked reference once more with a seeded 1e-6 offset of
+    every coordinate and reports the Lyapunov-style growth of the marker
+    separation before and after impact (``replay_sensitivity``). Costs one
+    extra replay; reports only.
+    """
+    from src.shared.python.motion_matching.pipeline.replay_sensitivity import (
+        replay_sensitivity,
+    )
+
+    if fd_phase.get("status") != "ok":
+        return {"status": "unavailable", "reason": "no impact split"}
+
+    def run(reference: np.ndarray) -> np.ndarray:
+        _, q = replay(
+            sim,
+            lane,
+            reference,
+            tracking_backend=tracking_backend,
+            reference_hook=reference_hook,
+        )
+        return q
+
+    block = replay_sensitivity(
+        run,
+        kin.marker_positions,
+        lane.times,
+        q_track,
+        sim_q,
+        float(fd_phase["impact_time_s"]),
+    )
+    return {"status": "ok", **block}
