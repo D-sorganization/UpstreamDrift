@@ -18,6 +18,7 @@ if TYPE_CHECKING:
         FullBodyMarkerKinematics,
     )
     from src.shared.python.motion_matching import full_body_forward_dynamics as fs
+from src.shared.python.motion_matching import address_knee
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.dynamics_filter import (
     bound_com_shift,
@@ -25,6 +26,7 @@ from src.shared.python.motion_matching.dynamics_filter import (
     project_inside,
     support_min_width,
 )
+from src.shared.python.motion_matching.foot_progression import address_window
 from src.shared.python.motion_matching.ground_support import convex_hull_contains
 from src.shared.python.motion_matching.pipeline.constants import (
     BALANCE,
@@ -880,7 +882,32 @@ def build_dynamics_report(
         "lowest_sphere_height_max_m": float(record.lowest_sphere_height_m.max()),
         "ball_impact": getattr(record, "ball_impact", None),
     }
+    knee_block = knee_flexion_dynamics_block(lane, kin, q_ref, sim_q)
+    if knee_block is not None:
+        report["knee_flexion_deg"] = knee_block
     return report, sim_errors
+
+
+def knee_flexion_dynamics_block(
+    lane: Any, kin: Any, q_ref: np.ndarray, sim_q: np.ndarray
+) -> dict[str, Any] | None:
+    """``dynamics.knee_flexion_deg`` when the address set knee targets (#12684).
+
+    The IK reference and FD replay knee flexion over the first static window
+    (``address_knee.knee_flexion_window_report``). None when ``lane.knees`` is
+    not a ``KneeTargets`` (``--knee-flexion off``), so those receipts are
+    unchanged; a capture without a static window is reported as unavailable.
+    """
+    targets = getattr(lane, "knees", None)
+    if not isinstance(targets, address_knee.KneeTargets):
+        return None
+    try:
+        window = address_window(lane.points, lane.valid, tuple(lane.labels))
+    except ValueError as exc:
+        return {"enabled": True, "status": f"unavailable: {exc}"}
+    block = address_knee.knee_flexion_window_report(kin, q_ref, sim_q, targets, window)
+    block["status"] = "ok"
+    return block
 
 
 def replay_sensitivity_block(

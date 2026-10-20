@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13190 · HRG-H2 Diagnostic Palm-Thumb Pad: Drift-Gated Physical Trail_Palm_Lead_Thumb Pair on the Shared G2 Law in Separated_V2, Impact Timestep and Preload Sensitivity Reports, and a New Spec Revision With Its Own Spec_Sha256; Contract Pinned by Tests.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13190
+- **Branch:** feat/13190-palm-thumb-pad
+- **PR:** #13525
+- **Paths:** src/shared/python/grip_contact/palm_thumb_pad.py,tests/unit/grip_contact/test_palm_thumb_pad.py
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`c93840a6`; collated from changes/13190-hrg-h2-diagnostic-palm-thumb-pad-drift-g.md)
+- **Summary:** HRG-H2 diagnostic palm-thumb pad: drift-gated physical trail_palm_lead_thumb pair on the shared G2 law in separated_v2, impact timestep and preload sensitivity reports, and a new spec revision with its own spec_sha256; contract pinned by tests.
+- **Next step:** Owner: cross-engine parity of the pad on MuJoCo/Drake/Pinocchio/OpenSim and the HRG .tex reference section remain open.
+
 ### DL-#13171 · HRG-E3 Slice: Pelvis and Thorax ISB Lab-Frame Turn, Tilt, Obliquity and Side-Bend Golf Terms With Golf-Word Aliases; Thoracic/Lumbar Split Marked Unavailable
 
 - **State:** in_review
@@ -2730,6 +2743,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13466 · Drake Native Golfer Grip Tests Pass With Real Pydrake: Default Loader Parses the Generator Humanoid (Not the #13312 Canonical Golfer), Actuator Retrofit No Longer Calls Num_Velocities() Before Finalize, humanoid_urdf.py Split Under 1200 Lines and Its Size Exceptions Removed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13466
+- **Branch:** merged via #13520
+- **PR:** #13520
+- **Paths:** see #13520
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`b9a397d6`; collated from changes/13466-drake-native-golfer-grip-tests-pass-with.md)
+- **Summary:** Drake native golfer grip tests pass with real pydrake: default loader parses the generator humanoid (not the #13312 canonical golfer), actuator retrofit no longer calls num_velocities() before Finalize, humanoid_urdf.py split under 1200 lines and its size exceptions removed
+- **Next step:** Shipped in PR #13520.
+
+### DL-#13508 · Symmetric Capsule Line-Contact Quadrature Integrates the Shorter Capsule Axis (#13508)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13508
+- **Branch:** merged via #13517
+- **PR:** #13517
+- **Paths:** see #13517
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`f7d5547a`; collated from changes/13508-symmetric-capsule-line-contact-quadratur.md)
+- **Summary:** Symmetric capsule line-contact quadrature integrates the shorter capsule axis (#13508)
+- **Next step:** Shipped in PR #13517.
+
 ### DL-#13346 · Reclassify Grip_Style as a Physical Pick Across CLI, API, Desktop and Web and Migrate Legacy Sidecars
 
 - **State:** shipped
@@ -2866,10 +2905,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13449
 - **Branch:** fix/ud-drake-bugs
-- **PR:** #13468
+- **PR:** #13468, #13515
 - **Paths:** see #13468
 - **Started:** 2026-10-20
-- **Last verified:** 2026-10-20 (`e541e40b`; collated from changes/13449-size-drake-simscape-equivalence-fixture-.md)
+- **Last verified:** 2026-10-20 (`f0d94751`; collated from changes/13449-add-headless-regression-test-for-drake-s.md)
 - **Summary:** Size Drake-Simscape equivalence fixture theta from the plant actuator count
 - **Next step:** Shipped in PR #13468.
 
@@ -3152,12 +3191,12 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13306
 - **Branch:** merged via #13422
-- **PR:** #13422, #13442
+- **PR:** #13422, #13442, #13504
 - **Paths:** see #13422
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-20 (`b18575db`; collated from changes/13306-prove-hyperstatic-per-hand-split-diverge.md)
+- **Last verified:** 2026-10-20 (`ec754166`; collated from changes/13306-mujoco-friction-secant-schedule.md)
 - **Summary:** Add MuJoCo ContactTopology grip-contact adapter and parity tests (HRG-GS-G8)
-- **Next step:** Shipped in PR #13422.
+- **Next step:** Review and merge; overlap/interlock 0.10 s trail-hand deflection (4.60% hold, 3.39% swing RMS) stays a strict xfail; OpenSim ten_finger 0.04 s gaps remain
 
 ### DL-#13305 · Calibrate OpenSim Topology Grip Foundation at 2X Preload With Hollars Friction Mapping and Preserve SimmSpline Horizon Across Short Swing Windows
 
@@ -3711,10 +3750,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13042
 - **Branch:** merged via #13288
-- **PR:** #13288, #13419
+- **PR:** #13288, #13419, #13532
 - **Paths:** see #13288
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`d1880753`; collated from changes/13042-record-osl-4-muscle-forces-activations-a.md)
+- **Last verified:** 2026-10-20 (`7a963f7b`; collated from changes/13042-complete-osl-4-muscle-solve-and-residual.md)
 - **Summary:** Compute muscle forces and activations for barbell squat (OSL-4)
 - **Next step:** Shipped in PR #13288.
 
@@ -4296,10 +4335,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13041
 - **Branch:** merged via #13047
-- **PR:** #13047, #13404, #13431
+- **PR:** #13047, #13404, #13431, #13536
 - **Paths:** see #13047
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-19 (`9866f8c1`; collated from changes/13041-bench-press-supine-opensim-ik-id-with-be.md)
+- **Last verified:** 2026-10-20 (`702d19d6`; collated from changes/13041-count-bench-support-reaction-in-hicks-re.md)
 - **Summary:** Lift body and every derived lift input (squat on the OSL-17 rack, deadlift, clean, snatch, bench) regenerated on the whole-row de Leva table (#13037) with main's tibial torsion; regression-snapshot IK bounds re-derived; bundle builder picks RK4-stable substeps (deadlift 8 -> 16, parity xfail removed); follow-ups OSL-18 #13157 (foot torsion marker gate, strict xfail), OSL-19 #13158 (arm reach), OSL-20 #13159 (open-loop wrist mode)
 - **Next step:** Shipped in PR #13047.
 
@@ -6103,10 +6142,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12684
 - **Branch:** merged via #12788
-- **PR:** #12788
+- **PR:** #12788, #13527
 - **Paths:** see #12788
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`3fd79f6c`; collated from changes/12684-r4-address-knee-flexion-owner-15-5-deg-p.md)
+- **Last verified:** 2026-10-20 (`19f8fef3`; collated from changes/12684-r4-the-dynamics-receipt-records-ik-and-f.md)
 - **Summary:** R4: address knee flexion (owner 15 +-5 deg prior, reliable capture wins, hard no-hyperextension bound, per-knee target_source in the receipt; --knee-flexion defaults to capture)
 - **Next step:** Shipped in PR #12788.
 
