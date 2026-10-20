@@ -12,6 +12,7 @@ radial distance from the shaft centreline.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 import math
 from dataclasses import dataclass
 from enum import Enum
@@ -31,11 +32,11 @@ GRIP: Final[str] = "grip"
 
 
 #: Default neutral-pose preload penetration (m), within the 0.5 mm tolerance.
-#: Only the diametrically opposed palm/finger ring pads carry it. The preload is
-#: an internal squeeze, so a hand-grip site with no opposing pad (the lead heel
-#: pad, the ten-finger trail little finger and the trail index trigger) is seated
-#: tangent to the grip: at the neutral pose the pads exert no net force or moment
-#: on the club (GRIP_PARITY_DECISIONS.md, initial closure equilibrium).
+#: Every hand-grip pad carries it. The preload is an internal squeeze, so each
+#: pad that has no ring partner (the lead heel pad, the ten-finger trail little
+#: finger and the trail index trigger) is paired with a diametrically opposite
+#: antagonist pad at the same axial station: at the neutral pose the pads exert
+#: no net force or moment on the club (GRIP_PARITY_DECISIONS.md section 20).
 DEFAULT_TOPOLOGY_PRELOAD_M: Final[float] = 2.5e-4
 
 #: Reference adult hand length L0 (m) from distal wrist crease to middle fingertip.
@@ -590,16 +591,14 @@ def _ten_finger_sites(
     x_mid = x_lead + 0.022
     x_idx = x_lead + 0.036
     target_idx_lit = g.r_idx + g.r_lit - preload_m
-    # The trail little finger has no opposing pad on the grip, so it sits tangent.
-    rho_lit_tangent = g.rho_lit_grip + preload_m
-    radial_diff = g.rho_idx_grip - rho_lit_tangent
+    radial_diff = g.rho_idx_grip - g.rho_lit_grip
     dx_abut = math.sqrt(max(0.0, target_idx_lit**2 - radial_diff**2))
     x_lit = x_idx + dx_abut
     return _finger_sites(
         g,
         _cyl_point(x_mid, g.rho_mid_grip, alpha_lead - 0.15),
         _cyl_point(x_idx, g.rho_idx_grip, alpha_lead),
-        _cyl_point(x_lit, rho_lit_tangent, alpha_lead),
+        _cyl_point(x_lit, g.rho_lit_grip, alpha_lead),
     )
 
 
@@ -705,7 +704,71 @@ def _build_pairs(style: GripStyle, trigger_finger: bool) -> tuple[ContactPair, .
                 primitive_pair=("capsule", "cylinder"),
             )
         )
+    pairs += [
+        ContactPair(
+            name=f"{site}_grip",
+            site_a=site,
+            site_b=GRIP,
+            primitive_pair=("sphere", "cylinder"),
+        )
+        for site in _antagonist_site_names(style, trigger_finger)
+    ]
     return tuple(pairs)
+
+
+def _antagonist_site_names(style: GripStyle, trigger_finger: bool) -> list[str]:
+    """Names of the antagonist pads that oppose the otherwise unpaired pads."""
+    names = ["lead_butt_fingers"]
+    if trigger_finger:
+        names.append("trail_thumb_pad")
+    if style is GripStyle.TEN_FINGER:
+        names.append("trail_hypothenar")
+    return names
+
+
+def _antagonist_sites(
+    unopposed: Mapping[str, ContactSite],
+    hand_anatomy: HandAnatomy,
+    r_grip: float,
+    preload: float,
+) -> list[ContactSite]:
+    """Antagonist pads diametrically opposite the unpaired hand-grip pads.
+
+    ``unopposed`` maps each antagonist name to the pad it opposes. Each
+    antagonist sits at that pad's axial station on the far side of the grip at
+    the shared preload, so the two equal radial normal forces are collinear
+    through the grip axis and cancel in force and moment:
+
+    * ``lead_butt_fingers`` (lead little/ring fingers) oppose the heel pad;
+    * ``trail_thumb_pad`` (trail thumb) opposes the index trigger;
+    * ``trail_hypothenar`` (trail hypothenar eminence) opposes the ten-finger
+      trail little finger.
+    """
+    spec = {
+        "lead_butt_fingers": (
+            "lead",
+            "butt_fingers",
+            hand_anatomy.little_finger_radius_m,
+        ),
+        "trail_thumb_pad": ("trail", "thumb_pad", hand_anatomy.thumb_radius_m),
+        "trail_hypothenar": ("trail", "hypothenar", hand_anatomy.palm_pad_radius_m),
+    }
+    sites = []
+    for name, opposed in unopposed.items():
+        hand, segment, radius = spec[name]
+        x, y, z = opposed.centre_m
+        theta = math.atan2(z, y) + math.pi
+        sites.append(
+            ContactSite(
+                name=name,
+                hand=hand,
+                segment=segment,
+                primitive="sphere",
+                centre_m=_cyl_point(x, r_grip + radius - preload, theta),
+                radius_m=radius,
+            )
+        )
+    return sites
 
 
 def _lead_heel_site(
@@ -713,15 +776,18 @@ def _lead_heel_site(
     alpha_lead: float,
     hand_anatomy: HandAnatomy,
     r_grip: float,
+    preload: float,
 ) -> ContactSite:
-    """Return the lead heel pad ContactSite, tangent to the grip (no opposing pad)."""
+    """Return the lead heel pad ContactSite."""
     r_heel = hand_anatomy.heel_pad_radius_m
     return ContactSite(
         name="lead_heel_pad",
         hand="lead",
         segment="heel_pad",
         primitive="sphere",
-        centre_m=_cyl_point(x_lead - 0.020, r_grip + r_heel, alpha_lead + math.pi),
+        centre_m=_cyl_point(
+            x_lead - 0.020, r_grip + r_heel - preload, alpha_lead + math.pi
+        ),
         radius_m=r_heel,
     )
 
@@ -808,7 +874,7 @@ def contact_topology(
     trail_pads = _four_hand_pad_sites(
         "trail", x_trail, alpha_trail, hand_anatomy, r_grip, preload
     )
-    lead_heel = _lead_heel_site(x_lead, alpha_lead, hand_anatomy, r_grip)
+    lead_heel = _lead_heel_site(x_lead, alpha_lead, hand_anatomy, r_grip, preload)
     lead_thumb, trail_palm_pocket = _thumb_palm_sites(
         x_lead,
         alpha_lead,
@@ -839,13 +905,29 @@ def contact_topology(
                 hand="trail",
                 segment="index_trigger",
                 primitive="capsule",
-                # Tangent to the grip: the trigger finger has no opposing pad.
-                centre_m=_cyl_point(x_trail + 0.032, r_grip + r_trig, alpha_trail),
+                centre_m=_cyl_point(
+                    x_trail + 0.032, r_grip + r_trig - preload, alpha_trail
+                ),
                 radius_m=r_trig,
                 half_length_m=0.008 * hand_anatomy.scale,
             )
         )
 
+    by_name = {site.name: site for site in sites}
+    opposed_by = {
+        "lead_butt_fingers": "lead_heel_pad",
+        "trail_thumb_pad": "trail_index_trigger",
+        "trail_hypothenar": "trail_little_finger",
+    }
+    sites += _antagonist_sites(
+        {
+            name: by_name[opposed_by[name]]
+            for name in _antagonist_site_names(spec.style, spec.trigger_finger)
+        },
+        hand_anatomy,
+        r_grip,
+        preload,
+    )
     pairs = _build_pairs(spec.style, spec.trigger_finger)
     return ContactTopology(
         style=spec.style,

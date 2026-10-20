@@ -40,7 +40,10 @@
     "trail_finger_proximal": "rh_mf_proximal",
     "trail_finger_distal": "rh_mf_distal",
     "trail_little_finger": "rh_rf_distal",
-    "trail_index_trigger": "rh_ff_distal"
+    "trail_index_trigger": "rh_ff_distal",
+    "lead_butt_fingers": "lh_rf_proximal",
+    "trail_thumb_pad": "rh_th_distal",
+    "trail_hypothenar": "rh_palm"
   },
   "unavailable_sites": {}
 }

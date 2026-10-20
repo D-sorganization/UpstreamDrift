@@ -157,1947 +157,8 @@
         "trail_palm_distal_grip",
         "trail_finger_proximal_grip",
         "trail_finger_distal_grip",
-        "lead_heel_pad_butt"
-      ],
-      "hand_hand_pair_ids": [
-        "trail_palm_lead_thumb",
-        "interlock_little_finger_lead_middle",
-        "interlock_lead_index_wrap"
-      ],
-      "pair_ids": [
-        "lead_palm_proximal_grip",
-        "lead_palm_distal_grip",
-        "lead_finger_proximal_grip",
-        "lead_finger_distal_grip",
-        "trail_palm_proximal_grip",
-        "trail_palm_distal_grip",
-        "trail_finger_proximal_grip",
-        "trail_finger_distal_grip",
         "lead_heel_pad_butt",
-        "trail_palm_lead_thumb",
-        "interlock_little_finger_lead_middle",
-        "interlock_lead_index_wrap"
-      ],
-      "pairs": [
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing"
-          ],
-          "id": "lead_palm_proximal_grip",
-          "kind": "hand_grip",
-          "name": "lead_palm_proximal_grip",
-          "physical_modes": [
-            "contact",
-            "contact_v1",
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "lead_palm_proximal",
-          "site_b": "grip"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing"
-          ],
-          "id": "lead_palm_distal_grip",
-          "kind": "hand_grip",
-          "name": "lead_palm_distal_grip",
-          "physical_modes": [
-            "contact",
-            "contact_v1",
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "lead_palm_distal",
-          "site_b": "grip"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing"
-          ],
-          "id": "lead_finger_proximal_grip",
-          "kind": "hand_grip",
-          "name": "lead_finger_proximal_grip",
-          "physical_modes": [
-            "contact",
-            "contact_v1",
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "lead_finger_proximal",
-          "site_b": "grip"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing"
-          ],
-          "id": "lead_finger_distal_grip",
-          "kind": "hand_grip",
-          "name": "lead_finger_distal_grip",
-          "physical_modes": [
-            "contact",
-            "contact_v1",
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "lead_finger_distal",
-          "site_b": "grip"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing"
-          ],
-          "id": "trail_palm_proximal_grip",
-          "kind": "hand_grip",
-          "name": "trail_palm_proximal_grip",
-          "physical_modes": [
-            "contact",
-            "contact_v1",
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "trail_palm_proximal",
-          "site_b": "grip"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing"
-          ],
-          "id": "trail_palm_distal_grip",
-          "kind": "hand_grip",
-          "name": "trail_palm_distal_grip",
-          "physical_modes": [
-            "contact",
-            "contact_v1",
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "trail_palm_distal",
-          "site_b": "grip"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing"
-          ],
-          "id": "trail_finger_proximal_grip",
-          "kind": "hand_grip",
-          "name": "trail_finger_proximal_grip",
-          "physical_modes": [
-            "contact",
-            "contact_v1",
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "trail_finger_proximal",
-          "site_b": "grip"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing"
-          ],
-          "id": "trail_finger_distal_grip",
-          "kind": "hand_grip",
-          "name": "trail_finger_distal_grip",
-          "physical_modes": [
-            "contact",
-            "contact_v1",
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "trail_finger_distal",
-          "site_b": "grip"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing"
-          ],
-          "id": "lead_heel_pad_butt",
-          "kind": "hand_grip",
-          "name": "lead_heel_pad_butt",
-          "physical_modes": [
-            "contact",
-            "contact_v1",
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "lead_heel_pad",
-          "site_b": "grip"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing",
-            "contact",
-            "contact_v1"
-          ],
-          "id": "trail_palm_lead_thumb",
-          "kind": "hand_hand",
-          "name": "trail_palm_lead_thumb",
-          "physical_modes": [
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "trail_palm_pocket",
-          "site_b": "lead_thumb"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing",
-            "contact",
-            "contact_v1"
-          ],
-          "id": "interlock_little_finger_lead_middle",
-          "kind": "hand_hand",
-          "name": "interlock_little_finger_lead_middle",
-          "physical_modes": [
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "trail_little_finger",
-          "site_b": "lead_middle"
-        },
-        {
-          "allocated_modes": [
-            "weld",
-            "closure",
-            "bushing",
-            "contact",
-            "contact_v1"
-          ],
-          "id": "interlock_lead_index_wrap",
-          "kind": "hand_hand",
-          "name": "interlock_lead_index_wrap",
-          "physical_modes": [
-            "separated_v2"
-          ],
-          "simscape_label": "allocated",
-          "site_a": "lead_index",
-          "site_b": "trail_little_finger"
-        }
-      ],
-      "posed_hands": {
-        "lead": {
-          "components": [
-            {
-              "bounds_max_grip_m": [
-                0.072,
-                0.03303598,
-                0.0454031
-              ],
-              "bounds_min_grip_m": [
-                0.056,
-                -0.02229428,
-                0.02342664
-              ],
-              "centroid_grip_m": [
-                0.064,
-                0.00537085,
-                0.03441487
-              ],
-              "centroid_hand_m": [
-                0.00537085,
-                0.03441487,
-                0.032
-              ],
-              "face_count": 416,
-              "finger": "index",
-              "name": "index_proximal",
-              "on_grip": false,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.072,
-                0.04188782,
-                0.03932949
-              ],
-              "bounds_min_grip_m": [
-                0.056,
-                0.01713313,
-                0.00098732
-              ],
-              "centroid_grip_m": [
-                0.064,
-                0.02973289,
-                0.01959091
-              ],
-              "centroid_hand_m": [
-                0.02973289,
-                0.01959091,
-                0.032
-              ],
-              "face_count": 416,
-              "finger": "index",
-              "name": "index_middle",
-              "on_grip": false,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.072,
-                0.04454806,
-                0.01690207
-              ],
-              "bounds_min_grip_m": [
-                0.056,
-                0.02597307,
-                -0.01773139
-              ],
-              "centroid_grip_m": [
-                0.064,
-                0.03520008,
-                0.0
-              ],
-              "centroid_hand_m": [
-                0.03520008,
-                0.0,
-                0.032
-              ],
-              "face_count": 416,
-              "finger": "index",
-              "name": "index_distal",
-              "on_grip": false,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.04695,
-                0.00819925,
-                0.0090477
-              ],
-              "bounds_min_grip_m": [
-                0.03055,
-                -0.03958619,
-                -0.03959766
-              ],
-              "centroid_grip_m": [
-                0.03875,
-                -0.01569347,
-                -0.01527498
-              ],
-              "centroid_hand_m": [
-                -0.01569347,
-                -0.01527498,
-                0.00675
-              ],
-              "face_count": 416,
-              "finger": "middle",
-              "name": "middle_proximal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.04695,
-                -0.00260856,
-                0.02802204
-              ],
-              "bounds_min_grip_m": [
-                0.03055,
-                -0.03958021,
-                -0.00734481
-              ],
-              "centroid_grip_m": [
-                0.03875,
-                -0.02061827,
-                0.01077762
-              ],
-              "centroid_hand_m": [
-                -0.02061827,
-                0.01077762,
-                0.00675
-              ],
-              "face_count": 416,
-              "finger": "middle",
-              "name": "middle_middle",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.04695,
-                0.01668255,
-                0.03295005
-              ],
-              "bounds_min_grip_m": [
-                0.03055,
-                -0.01892166,
-                0.01170895
-              ],
-              "centroid_grip_m": [
-                0.03875,
-                -0.00145152,
-                0.02224376
-              ],
-              "centroid_hand_m": [
-                -0.00145152,
-                0.02224376,
-                0.00675
-              ],
-              "face_count": 416,
-              "finger": "middle",
-              "name": "middle_distal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.03025,
-                0.00779946,
-                0.0070924
-              ],
-              "bounds_min_grip_m": [
-                0.01465,
-                -0.03784526,
-                -0.03785358
-              ],
-              "centroid_grip_m": [
-                0.02245,
-                -0.0150229,
-                -0.01538059
-              ],
-              "centroid_hand_m": [
-                -0.0150229,
-                -0.01538059,
-                -0.00955
-              ],
-              "face_count": 416,
-              "finger": "ring",
-              "name": "ring_proximal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.03025,
-                -0.00384432,
-                0.02684174
-              ],
-              "bounds_min_grip_m": [
-                0.01465,
-                -0.03784094,
-                -0.0085022
-              ],
-              "centroid_grip_m": [
-                0.02245,
-                -0.02045308,
-                0.00958784
-              ],
-              "centroid_hand_m": [
-                -0.02045308,
-                0.00958784,
-                -0.00955
-              ],
-              "face_count": 416,
-              "finger": "ring",
-              "name": "ring_middle",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.03025,
-                0.01534873,
-                0.03225177
-              ],
-              "bounds_min_grip_m": [
-                0.01465,
-                -0.01938677,
-                0.01129929
-              ],
-              "centroid_grip_m": [
-                0.02245,
-                -0.00231222,
-                0.02169236
-              ],
-              "centroid_hand_m": [
-                -0.00231222,
-                0.02169236,
-                -0.00955
-              ],
-              "face_count": 416,
-              "finger": "ring",
-              "name": "ring_distal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.01435,
-                0.00677057,
-                0.00184225
-              ],
-              "bounds_min_grip_m": [
-                0.00075,
-                -0.03294234,
-                -0.03340232
-              ],
-              "centroid_grip_m": [
-                0.00755,
-                -0.01308589,
-                -0.01578004
-              ],
-              "centroid_hand_m": [
-                -0.01308589,
-                -0.01578004,
-                -0.02445
-              ],
-              "face_count": 416,
-              "finger": "little",
-              "name": "little_proximal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.01435,
-                -0.00971826,
-                0.01931971
-              ],
-              "bounds_min_grip_m": [
-                0.00075,
-                -0.03292801,
-                -0.01168457
-              ],
-              "centroid_grip_m": [
-                0.00755,
-                -0.02106454,
-                0.00428402
-              ],
-              "centroid_hand_m": [
-                -0.02106454,
-                0.00428402,
-                -0.02445
-              ],
-              "face_count": 416,
-              "finger": "little",
-              "name": "little_middle",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.01435,
-                0.00319761,
-                0.03194465
-              ],
-              "bounds_min_grip_m": [
-                0.00075,
-                -0.02327406,
-                0.00576391
-              ],
-              "centroid_grip_m": [
-                0.00755,
-                -0.01036515,
-                0.01853475
-              ],
-              "centroid_hand_m": [
-                -0.01036515,
-                0.01853475,
-                -0.02445
-              ],
-              "face_count": 416,
-              "finger": "little",
-              "name": "little_distal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.06005,
-                0.03219933,
-                0.01198822
-              ],
-              "bounds_min_grip_m": [
-                0.00347,
-                -0.00447184,
-                -0.0322
-              ],
-              "centroid_grip_m": [
-                0.03176,
-                0.01498925,
-                -0.01049559
-              ],
-              "centroid_hand_m": [
-                0.01498925,
-                -0.01049559,
-                -0.00024
-              ],
-              "face_count": 2176,
-              "finger": "palm",
-              "name": "palm",
-              "on_grip": true,
-              "vertex_count": 1090
-            },
-            {
-              "bounds_max_grip_m": [
-                0.0615,
-                0.03220321,
-                0.01338431
-              ],
-              "bounds_min_grip_m": [
-                0.0105,
-                0.01349187,
-                -0.00532704
-              ],
-              "centroid_grip_m": [
-                0.036,
-                0.02284754,
-                0.00402864
-              ],
-              "centroid_hand_m": [
-                0.02284754,
-                0.00402864,
-                0.004
-              ],
-              "face_count": 256,
-              "finger": "thumb",
-              "name": "thumb_proximal",
-              "on_grip": true,
-              "vertex_count": 130
-            },
-            {
-              "bounds_max_grip_m": [
-                0.0875,
-                0.03220321,
-                0.01338431
-              ],
-              "bounds_min_grip_m": [
-                0.0425,
-                0.01349187,
-                -0.00532704
-              ],
-              "centroid_grip_m": [
-                0.065,
-                0.02284754,
-                0.00402864
-              ],
-              "centroid_hand_m": [
-                0.02284754,
-                0.00402864,
-                0.033
-              ],
-              "face_count": 256,
-              "finger": "thumb",
-              "name": "thumb_distal",
-              "on_grip": true,
-              "vertex_count": 130
-            }
-          ],
-          "distance_below_butt_m": 0.032,
-          "fingertips_in_grip_m": {
-            "index": [
-              0.064,
-              0.03520008,
-              0.0
-            ],
-            "little": [
-              0.00755,
-              -0.01036515,
-              0.01853475
-            ],
-            "middle": [
-              0.03875,
-              -0.00145152,
-              0.02224376
-            ],
-            "ring": [
-              0.02245,
-              -0.00231222,
-              0.02169236
-            ],
-            "thumb": [
-              0.065,
-              0.02284754,
-              0.00402864
-            ]
-          },
-          "hand": "lead",
-          "hand_to_grip_rotation": [
-            [
-              0.0,
-              0.0,
-              1.0
-            ],
-            [
-              1.0,
-              0.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0,
-              0.0
-            ]
-          ],
-          "hand_to_grip_translation_m": [
-            0.032,
-            0.0,
-            0.0
-          ],
-          "min_pad_clearance_m": 0.001,
-          "thumb_azimuth_deg": 10.0,
-          "v_azimuth_deg": 20.0
-        },
-        "trail": {
-          "components": [
-            {
-              "bounds_max_grip_m": [
-                0.13945,
-                -0.01103466,
-                0.03054116
-              ],
-              "bounds_min_grip_m": [
-                0.12345,
-                -0.03201023,
-                -0.02500063
-              ],
-              "centroid_grip_m": [
-                0.13145,
-                -0.02152244,
-                0.00277026
-              ],
-              "centroid_hand_m": [
-                -0.02152244,
-                0.00277026,
-                0.02325
-              ],
-              "face_count": 416,
-              "finger": "index",
-              "name": "index_proximal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.13945,
-                0.00726568,
-                -0.00919996
-              ],
-              "bounds_min_grip_m": [
-                0.12345,
-                -0.03194181,
-                -0.02992354
-              ],
-              "centroid_grip_m": [
-                0.13145,
-                -0.01174187,
-                -0.01968852
-              ],
-              "centroid_hand_m": [
-                -0.01174187,
-                -0.01968852,
-                0.02325
-              ],
-              "face_count": 416,
-              "finger": "index",
-              "name": "index_middle",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.13945,
-                0.02607557,
-                -0.01121887
-              ],
-              "bounds_min_grip_m": [
-                0.12345,
-                -0.00850445,
-                -0.02996142
-              ],
-              "centroid_grip_m": [
-                0.13145,
-                0.00837154,
-                -0.02065486
-              ],
-              "centroid_hand_m": [
-                0.00837154,
-                -0.02065486,
-                0.02325
-              ],
-              "face_count": 416,
-              "finger": "index",
-              "name": "index_distal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.12315,
-                -0.0120048,
-                0.03223028
-              ],
-              "bounds_min_grip_m": [
-                0.10675,
-                -0.03167613,
-                -0.0290028
-              ],
-              "centroid_grip_m": [
-                0.11495,
-                -0.02184046,
-                0.00161374
-              ],
-              "centroid_hand_m": [
-                -0.02184046,
-                0.00161374,
-                0.00675
-              ],
-              "face_count": 416,
-              "finger": "middle",
-              "name": "middle_proximal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.12315,
-                0.01266207,
-                -0.01263404
-              ],
-              "bounds_min_grip_m": [
-                0.10675,
-                -0.03168947,
-                -0.03032406
-              ],
-              "centroid_grip_m": [
-                0.11495,
-                -0.00886679,
-                -0.0215093
-              ],
-              "centroid_hand_m": [
-                -0.00886679,
-                -0.0215093,
-                0.00675
-              ],
-              "face_count": 416,
-              "finger": "middle",
-              "name": "middle_middle",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.12315,
-                0.03070861,
-                -0.00532842
-              ],
-              "bounds_min_grip_m": [
-                0.10675,
-                -0.00371761,
-                -0.03032163
-              ],
-              "centroid_grip_m": [
-                0.11495,
-                0.01318609,
-                -0.01797273
-              ],
-              "centroid_hand_m": [
-                0.01318609,
-                -0.01797273,
-                0.00675
-              ],
-              "face_count": 416,
-              "finger": "middle",
-              "name": "middle_distal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.10645,
-                -0.01155663,
-                0.03078457
-              ],
-              "bounds_min_grip_m": [
-                0.09085,
-                -0.03123269,
-                -0.02653321
-              ],
-              "centroid_grip_m": [
-                0.09865,
-                -0.02139466,
-                0.00212568
-              ],
-              "centroid_hand_m": [
-                -0.02139466,
-                0.00212568,
-                -0.00955
-              ],
-              "face_count": 416,
-              "finger": "ring",
-              "name": "ring_proximal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.10645,
-                0.01106806,
-                -0.01102994
-              ],
-              "bounds_min_grip_m": [
-                0.09085,
-                -0.0312124,
-                -0.02981374
-              ],
-              "centroid_grip_m": [
-                0.09865,
-                -0.00950503,
-                -0.0204917
-              ],
-              "centroid_hand_m": [
-                -0.00950503,
-                -0.0204917,
-                -0.00955
-              ],
-              "face_count": 416,
-              "finger": "ring",
-              "name": "ring_middle",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.10645,
-                0.0293709,
-                -0.00608869
-              ],
-              "bounds_min_grip_m": [
-                0.09085,
-                -0.00447014,
-                -0.02986896
-              ],
-              "centroid_grip_m": [
-                0.09865,
-                0.01217232,
-                -0.01810357
-              ],
-              "centroid_hand_m": [
-                0.01217232,
-                -0.01810357,
-                -0.00955
-              ],
-              "face_count": 416,
-              "finger": "ring",
-              "name": "ring_distal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.0708,
-                0.01388723,
-                -0.0037576
-              ],
-              "bounds_min_grip_m": [
-                0.0572,
-                -0.03049636,
-                -0.03174982
-              ],
-              "centroid_grip_m": [
-                0.064,
-                -0.00830457,
-                -0.01775371
-              ],
-              "centroid_hand_m": [
-                -0.00830457,
-                -0.01775371,
-                -0.0442
-              ],
-              "face_count": 416,
-              "finger": "little",
-              "name": "little_proximal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.0708,
-                0.02472582,
-                -0.00153859
-              ],
-              "bounds_min_grip_m": [
-                0.0572,
-                0.00041219,
-                -0.03163852
-              ],
-              "centroid_grip_m": [
-                0.064,
-                0.012861,
-                -0.01614226
-              ],
-              "centroid_hand_m": [
-                0.012861,
-                -0.01614226,
-                -0.0442
-              ],
-              "face_count": 416,
-              "finger": "little",
-              "name": "little_middle",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.0708,
-                0.02969566,
-                0.01585368
-              ],
-              "bounds_min_grip_m": [
-                0.0572,
-                0.01129051,
-                -0.0149739
-              ],
-              "centroid_grip_m": [
-                0.064,
-                0.02036868,
-                0.0
-              ],
-              "centroid_hand_m": [
-                0.02036868,
-                0.0,
-                -0.0442
-              ],
-              "face_count": 416,
-              "finger": "little",
-              "name": "little_distal",
-              "on_grip": true,
-              "vertex_count": 210
-            },
-            {
-              "bounds_max_grip_m": [
-                0.13625,
-                0.0302581,
-                0.03219731
-              ],
-              "bounds_min_grip_m": [
-                0.07967,
-                -0.02069776,
-                0.00358392
-              ],
-              "centroid_grip_m": [
-                0.10796,
-                0.004736,
-                0.01767499
-              ],
-              "centroid_hand_m": [
-                0.004736,
-                0.01767499,
-                -0.00024
-              ],
-              "face_count": 2176,
-              "finger": "palm",
-              "name": "palm",
-              "on_grip": true,
-              "vertex_count": 1090
-            },
-            {
-              "bounds_max_grip_m": [
-                0.1377,
-                0.0327,
-                0.0095
-              ],
-              "bounds_min_grip_m": [
-                0.0867,
-                0.0137,
-                -0.0095
-              ],
-              "centroid_grip_m": [
-                0.1122,
-                0.0232,
-                0.0
-              ],
-              "centroid_hand_m": [
-                0.0232,
-                0.0,
-                0.004
-              ],
-              "face_count": 256,
-              "finger": "thumb",
-              "name": "thumb_proximal",
-              "on_grip": true,
-              "vertex_count": 130
-            },
-            {
-              "bounds_max_grip_m": [
-                0.1637,
-                0.0327,
-                0.0095
-              ],
-              "bounds_min_grip_m": [
-                0.1187,
-                0.0137,
-                -0.0095
-              ],
-              "centroid_grip_m": [
-                0.1412,
-                0.0232,
-                0.0
-              ],
-              "centroid_hand_m": [
-                0.0232,
-                0.0,
-                0.033
-              ],
-              "face_count": 256,
-              "finger": "thumb",
-              "name": "thumb_distal",
-              "on_grip": true,
-              "vertex_count": 130
-            }
-          ],
-          "distance_below_butt_m": 0.1082,
-          "fingertips_in_grip_m": {
-            "index": [
-              0.13145,
-              0.00837154,
-              -0.02065486
-            ],
-            "little": [
-              0.064,
-              0.02036868,
-              0.0
-            ],
-            "middle": [
-              0.11495,
-              0.01318609,
-              -0.01797273
-            ],
-            "ring": [
-              0.09865,
-              0.01217232,
-              -0.01810357
-            ],
-            "thumb": [
-              0.1412,
-              0.0232,
-              0.0
-            ]
-          },
-          "hand": "trail",
-          "hand_to_grip_rotation": [
-            [
-              0.0,
-              0.0,
-              1.0
-            ],
-            [
-              1.0,
-              0.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0,
-              0.0
-            ]
-          ],
-          "hand_to_grip_translation_m": [
-            0.1082,
-            0.0,
-            0.0
-          ],
-          "min_pad_clearance_m": 0.0001,
-          "thumb_azimuth_deg": 0.0,
-          "v_azimuth_deg": 20.0
-        }
-      },
-      "sites": [
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.017,
-            -0.02045,
-            0.0
-          ],
-          "half_length_m": 0.0,
-          "hand": "lead",
-          "hand_frame_centre_m": [
-            -0.015,
-            -0.02045,
-            -0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              -0.015
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              -0.02045
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              -0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            1.0,
-            0.0
-          ],
-          "name": "lead_palm_proximal",
-          "primitive": "sphere",
-          "radius_m": 0.008,
-          "segment": "palm_proximal"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.047,
-            -0.02045,
-            0.0
-          ],
-          "half_length_m": 0.0,
-          "hand": "lead",
-          "hand_frame_centre_m": [
-            0.015,
-            -0.02045,
-            -0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.015
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              -0.02045
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              -0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            1.0,
-            0.0
-          ],
-          "name": "lead_palm_distal",
-          "primitive": "sphere",
-          "radius_m": 0.008,
-          "segment": "palm_distal"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.02,
-            0.02045,
-            0.0
-          ],
-          "half_length_m": 0.0,
-          "hand": "lead",
-          "hand_frame_centre_m": [
-            -0.012,
-            0.02045,
-            -0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              -0.012
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              0.02045
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              -0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            -1.0,
-            0.0
-          ],
-          "name": "lead_finger_proximal",
-          "primitive": "sphere",
-          "radius_m": 0.008,
-          "segment": "finger_proximal"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.044,
-            0.02045,
-            0.0
-          ],
-          "half_length_m": 0.0,
-          "hand": "lead",
-          "hand_frame_centre_m": [
-            0.012,
-            0.02045,
-            -0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.012
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              0.02045
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              -0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            -1.0,
-            0.0
-          ],
-          "name": "lead_finger_distal",
-          "primitive": "sphere",
-          "radius_m": 0.008,
-          "segment": "finger_distal"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.0932,
-            -0.02045,
-            0.0
-          ],
-          "half_length_m": 0.0,
-          "hand": "trail",
-          "hand_frame_centre_m": [
-            -0.015,
-            -0.02045,
-            0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              -0.015
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              -0.02045
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            1.0,
-            0.0
-          ],
-          "name": "trail_palm_proximal",
-          "primitive": "sphere",
-          "radius_m": 0.008,
-          "segment": "palm_proximal"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.1232,
-            -0.02045,
-            0.0
-          ],
-          "half_length_m": 0.0,
-          "hand": "trail",
-          "hand_frame_centre_m": [
-            0.015,
-            -0.02045,
-            0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.015
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              -0.02045
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            1.0,
-            0.0
-          ],
-          "name": "trail_palm_distal",
-          "primitive": "sphere",
-          "radius_m": 0.008,
-          "segment": "palm_distal"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.0962,
-            0.02045,
-            0.0
-          ],
-          "half_length_m": 0.0,
-          "hand": "trail",
-          "hand_frame_centre_m": [
-            -0.012,
-            0.02045,
-            0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              -0.012
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              0.02045
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            -1.0,
-            0.0
-          ],
-          "name": "trail_finger_proximal",
-          "primitive": "sphere",
-          "radius_m": 0.008,
-          "segment": "finger_proximal"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.1202,
-            0.02045,
-            0.0
-          ],
-          "half_length_m": 0.0,
-          "hand": "trail",
-          "hand_frame_centre_m": [
-            0.012,
-            0.02045,
-            0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.012
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              0.02045
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            -1.0,
-            0.0
-          ],
-          "name": "trail_finger_distal",
-          "primitive": "sphere",
-          "radius_m": 0.008,
-          "segment": "finger_distal"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.012,
-            -0.0247,
-            0.0
-          ],
-          "half_length_m": 0.0,
-          "hand": "lead",
-          "hand_frame_centre_m": [
-            -0.02,
-            -0.0247,
-            -0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              -0.02
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              -0.0247
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              -0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            1.0,
-            0.0
-          ],
-          "name": "lead_heel_pad",
-          "primitive": "sphere",
-          "radius_m": 0.012,
-          "segment": "heel_pad"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.077,
-            0.02161653,
-            0.00381158
-          ],
-          "half_length_m": 0.01,
-          "hand": "lead",
-          "hand_frame_centre_m": [
-            0.045,
-            0.02161653,
-            -0.00888842
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.045
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              0.02161653
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              -0.00888842
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            -0.98480775,
-            -0.17364818
-          ],
-          "name": "lead_thumb",
-          "primitive": "capsule",
-          "radius_m": 0.0095,
-          "segment": "thumb"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.077,
-            0.03860446,
-            0.00680701
-          ],
-          "half_length_m": 0.0,
-          "hand": "trail",
-          "hand_frame_centre_m": [
-            -0.0312,
-            0.03860446,
-            0.01950701
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              -0.0312
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              0.03860446
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              0.01950701
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            -0.98480775,
-            -0.17364818
-          ],
-          "name": "trail_palm_pocket",
-          "primitive": "sphere",
-          "radius_m": 0.008,
-          "segment": "palm_thenar"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.064,
-            0.01462763,
-            -0.01429108
-          ],
-          "half_length_m": 0.008,
-          "hand": "lead",
-          "hand_frame_centre_m": [
-            0.032,
-            0.01462763,
-            -0.02699108
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.032
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              0.01462763
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              -0.02699108
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            -0.71528761,
-            0.69883019
-          ],
-          "name": "lead_middle",
-          "primitive": "capsule",
-          "radius_m": 0.008,
-          "segment": "middle_finger"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.064,
-            0.0352,
-            0.0
-          ],
-          "half_length_m": 0.008,
-          "hand": "lead",
-          "hand_frame_centre_m": [
-            0.032,
-            0.0352,
-            -0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.032
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              0.0352
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              -0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            -1.0,
-            0.0
-          ],
-          "name": "lead_index",
-          "primitive": "capsule",
-          "radius_m": 0.008,
-          "segment": "index_finger"
-        },
-        {
-          "axis_m": [
-            1.0,
-            0.0,
-            0.0
-          ],
-          "centre_m": [
-            0.064,
-            0.01995,
-            0.0
-          ],
-          "half_length_m": 0.008,
-          "hand": "trail",
-          "hand_frame_centre_m": [
-            -0.0442,
-            0.01995,
-            0.0127
-          ],
-          "hand_frame_transform_4x4": [
-            [
-              1.0,
-              0.0,
-              0.0,
-              -0.0442
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              0.01995
-            ],
-            [
-              0.0,
-              0.0,
-              1.0,
-              0.0127
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              1.0
-            ]
-          ],
-          "inward_normal": [
-            0.0,
-            -1.0,
-            0.0
-          ],
-          "name": "trail_little_finger",
-          "primitive": "capsule",
-          "radius_m": 0.0075,
-          "segment": "little_finger"
-        }
-      ],
-      "style": "interlock",
-      "trigger_finger": false
-    },
-    "interlock_trigger": {
-      "grip_radius_m": 0.0127,
-      "hand_grip_pair_ids": [
-        "lead_palm_proximal_grip",
-        "lead_palm_distal_grip",
-        "lead_finger_proximal_grip",
-        "lead_finger_distal_grip",
-        "trail_palm_proximal_grip",
-        "trail_palm_distal_grip",
-        "trail_finger_proximal_grip",
-        "trail_finger_distal_grip",
-        "lead_heel_pad_butt",
-        "trail_index_trigger_grip"
+        "lead_butt_fingers_grip"
       ],
       "hand_hand_pair_ids": [
         "trail_palm_lead_thumb",
@@ -2117,7 +178,2024 @@
         "trail_palm_lead_thumb",
         "interlock_little_finger_lead_middle",
         "interlock_lead_index_wrap",
-        "trail_index_trigger_grip"
+        "lead_butt_fingers_grip"
+      ],
+      "pairs": [
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_palm_proximal_grip",
+          "kind": "hand_grip",
+          "name": "lead_palm_proximal_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_palm_proximal",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_palm_distal_grip",
+          "kind": "hand_grip",
+          "name": "lead_palm_distal_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_palm_distal",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_finger_proximal_grip",
+          "kind": "hand_grip",
+          "name": "lead_finger_proximal_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_finger_proximal",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_finger_distal_grip",
+          "kind": "hand_grip",
+          "name": "lead_finger_distal_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_finger_distal",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "trail_palm_proximal_grip",
+          "kind": "hand_grip",
+          "name": "trail_palm_proximal_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_palm_proximal",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "trail_palm_distal_grip",
+          "kind": "hand_grip",
+          "name": "trail_palm_distal_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_palm_distal",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "trail_finger_proximal_grip",
+          "kind": "hand_grip",
+          "name": "trail_finger_proximal_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_finger_proximal",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "trail_finger_distal_grip",
+          "kind": "hand_grip",
+          "name": "trail_finger_distal_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_finger_distal",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_heel_pad_butt",
+          "kind": "hand_grip",
+          "name": "lead_heel_pad_butt",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_heel_pad",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing",
+            "contact",
+            "contact_v1"
+          ],
+          "id": "trail_palm_lead_thumb",
+          "kind": "hand_hand",
+          "name": "trail_palm_lead_thumb",
+          "physical_modes": [
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_palm_pocket",
+          "site_b": "lead_thumb"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing",
+            "contact",
+            "contact_v1"
+          ],
+          "id": "interlock_little_finger_lead_middle",
+          "kind": "hand_hand",
+          "name": "interlock_little_finger_lead_middle",
+          "physical_modes": [
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_little_finger",
+          "site_b": "lead_middle"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing",
+            "contact",
+            "contact_v1"
+          ],
+          "id": "interlock_lead_index_wrap",
+          "kind": "hand_hand",
+          "name": "interlock_lead_index_wrap",
+          "physical_modes": [
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_index",
+          "site_b": "trail_little_finger"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_butt_fingers_grip",
+          "kind": "hand_grip",
+          "name": "lead_butt_fingers_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_butt_fingers",
+          "site_b": "grip"
+        }
+      ],
+      "posed_hands": {
+        "lead": {
+          "components": [
+            {
+              "bounds_max_grip_m": [
+                0.072,
+                0.03303598,
+                0.0454031
+              ],
+              "bounds_min_grip_m": [
+                0.056,
+                -0.02229428,
+                0.02342664
+              ],
+              "centroid_grip_m": [
+                0.064,
+                0.00537085,
+                0.03441487
+              ],
+              "centroid_hand_m": [
+                0.00537085,
+                0.03441487,
+                0.032
+              ],
+              "face_count": 416,
+              "finger": "index",
+              "name": "index_proximal",
+              "on_grip": false,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.072,
+                0.04188782,
+                0.03932949
+              ],
+              "bounds_min_grip_m": [
+                0.056,
+                0.01713313,
+                0.00098732
+              ],
+              "centroid_grip_m": [
+                0.064,
+                0.02973289,
+                0.01959091
+              ],
+              "centroid_hand_m": [
+                0.02973289,
+                0.01959091,
+                0.032
+              ],
+              "face_count": 416,
+              "finger": "index",
+              "name": "index_middle",
+              "on_grip": false,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.072,
+                0.04454806,
+                0.01690207
+              ],
+              "bounds_min_grip_m": [
+                0.056,
+                0.02597307,
+                -0.01773139
+              ],
+              "centroid_grip_m": [
+                0.064,
+                0.03520008,
+                0.0
+              ],
+              "centroid_hand_m": [
+                0.03520008,
+                0.0,
+                0.032
+              ],
+              "face_count": 416,
+              "finger": "index",
+              "name": "index_distal",
+              "on_grip": false,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.04695,
+                0.00819925,
+                0.0090477
+              ],
+              "bounds_min_grip_m": [
+                0.03055,
+                -0.03958619,
+                -0.03959766
+              ],
+              "centroid_grip_m": [
+                0.03875,
+                -0.01569347,
+                -0.01527498
+              ],
+              "centroid_hand_m": [
+                -0.01569347,
+                -0.01527498,
+                0.00675
+              ],
+              "face_count": 416,
+              "finger": "middle",
+              "name": "middle_proximal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.04695,
+                -0.00260856,
+                0.02802204
+              ],
+              "bounds_min_grip_m": [
+                0.03055,
+                -0.03958021,
+                -0.00734481
+              ],
+              "centroid_grip_m": [
+                0.03875,
+                -0.02061827,
+                0.01077762
+              ],
+              "centroid_hand_m": [
+                -0.02061827,
+                0.01077762,
+                0.00675
+              ],
+              "face_count": 416,
+              "finger": "middle",
+              "name": "middle_middle",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.04695,
+                0.01668255,
+                0.03295005
+              ],
+              "bounds_min_grip_m": [
+                0.03055,
+                -0.01892166,
+                0.01170895
+              ],
+              "centroid_grip_m": [
+                0.03875,
+                -0.00145152,
+                0.02224376
+              ],
+              "centroid_hand_m": [
+                -0.00145152,
+                0.02224376,
+                0.00675
+              ],
+              "face_count": 416,
+              "finger": "middle",
+              "name": "middle_distal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.03025,
+                0.00779946,
+                0.0070924
+              ],
+              "bounds_min_grip_m": [
+                0.01465,
+                -0.03784526,
+                -0.03785358
+              ],
+              "centroid_grip_m": [
+                0.02245,
+                -0.0150229,
+                -0.01538059
+              ],
+              "centroid_hand_m": [
+                -0.0150229,
+                -0.01538059,
+                -0.00955
+              ],
+              "face_count": 416,
+              "finger": "ring",
+              "name": "ring_proximal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.03025,
+                -0.00384432,
+                0.02684174
+              ],
+              "bounds_min_grip_m": [
+                0.01465,
+                -0.03784094,
+                -0.0085022
+              ],
+              "centroid_grip_m": [
+                0.02245,
+                -0.02045308,
+                0.00958784
+              ],
+              "centroid_hand_m": [
+                -0.02045308,
+                0.00958784,
+                -0.00955
+              ],
+              "face_count": 416,
+              "finger": "ring",
+              "name": "ring_middle",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.03025,
+                0.01534873,
+                0.03225177
+              ],
+              "bounds_min_grip_m": [
+                0.01465,
+                -0.01938677,
+                0.01129929
+              ],
+              "centroid_grip_m": [
+                0.02245,
+                -0.00231222,
+                0.02169236
+              ],
+              "centroid_hand_m": [
+                -0.00231222,
+                0.02169236,
+                -0.00955
+              ],
+              "face_count": 416,
+              "finger": "ring",
+              "name": "ring_distal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.01435,
+                0.00677057,
+                0.00184225
+              ],
+              "bounds_min_grip_m": [
+                0.00075,
+                -0.03294234,
+                -0.03340232
+              ],
+              "centroid_grip_m": [
+                0.00755,
+                -0.01308589,
+                -0.01578004
+              ],
+              "centroid_hand_m": [
+                -0.01308589,
+                -0.01578004,
+                -0.02445
+              ],
+              "face_count": 416,
+              "finger": "little",
+              "name": "little_proximal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.01435,
+                -0.00971826,
+                0.01931971
+              ],
+              "bounds_min_grip_m": [
+                0.00075,
+                -0.03292801,
+                -0.01168457
+              ],
+              "centroid_grip_m": [
+                0.00755,
+                -0.02106454,
+                0.00428402
+              ],
+              "centroid_hand_m": [
+                -0.02106454,
+                0.00428402,
+                -0.02445
+              ],
+              "face_count": 416,
+              "finger": "little",
+              "name": "little_middle",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.01435,
+                0.00319761,
+                0.03194465
+              ],
+              "bounds_min_grip_m": [
+                0.00075,
+                -0.02327406,
+                0.00576391
+              ],
+              "centroid_grip_m": [
+                0.00755,
+                -0.01036515,
+                0.01853475
+              ],
+              "centroid_hand_m": [
+                -0.01036515,
+                0.01853475,
+                -0.02445
+              ],
+              "face_count": 416,
+              "finger": "little",
+              "name": "little_distal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.06005,
+                0.03219933,
+                0.01198822
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00447184,
+                -0.0322
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.01498925,
+                -0.01049559
+              ],
+              "centroid_hand_m": [
+                0.01498925,
+                -0.01049559,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "palm",
+              "name": "palm",
+              "on_grip": true,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
+                0.0615,
+                0.03220321,
+                0.01338431
+              ],
+              "bounds_min_grip_m": [
+                0.0105,
+                0.01349187,
+                -0.00532704
+              ],
+              "centroid_grip_m": [
+                0.036,
+                0.02284754,
+                0.00402864
+              ],
+              "centroid_hand_m": [
+                0.02284754,
+                0.00402864,
+                0.004
+              ],
+              "face_count": 256,
+              "finger": "thumb",
+              "name": "thumb_proximal",
+              "on_grip": true,
+              "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.0875,
+                0.03220321,
+                0.01338431
+              ],
+              "bounds_min_grip_m": [
+                0.0425,
+                0.01349187,
+                -0.00532704
+              ],
+              "centroid_grip_m": [
+                0.065,
+                0.02284754,
+                0.00402864
+              ],
+              "centroid_hand_m": [
+                0.02284754,
+                0.00402864,
+                0.033
+              ],
+              "face_count": 256,
+              "finger": "thumb",
+              "name": "thumb_distal",
+              "on_grip": true,
+              "vertex_count": 130
+            }
+          ],
+          "distance_below_butt_m": 0.032,
+          "fingertips_in_grip_m": {
+            "index": [
+              0.064,
+              0.03520008,
+              0.0
+            ],
+            "little": [
+              0.00755,
+              -0.01036515,
+              0.01853475
+            ],
+            "middle": [
+              0.03875,
+              -0.00145152,
+              0.02224376
+            ],
+            "ring": [
+              0.02245,
+              -0.00231222,
+              0.02169236
+            ],
+            "thumb": [
+              0.065,
+              0.02284754,
+              0.00402864
+            ]
+          },
+          "hand": "lead",
+          "hand_to_grip_rotation": [
+            [
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "hand_to_grip_translation_m": [
+            0.032,
+            0.0,
+            0.0
+          ],
+          "min_pad_clearance_m": 0.001,
+          "thumb_azimuth_deg": 10.0,
+          "v_azimuth_deg": 20.0
+        },
+        "trail": {
+          "components": [
+            {
+              "bounds_max_grip_m": [
+                0.13945,
+                -0.01103466,
+                0.03054116
+              ],
+              "bounds_min_grip_m": [
+                0.12345,
+                -0.03201023,
+                -0.02500063
+              ],
+              "centroid_grip_m": [
+                0.13145,
+                -0.02152244,
+                0.00277026
+              ],
+              "centroid_hand_m": [
+                -0.02152244,
+                0.00277026,
+                0.02325
+              ],
+              "face_count": 416,
+              "finger": "index",
+              "name": "index_proximal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13945,
+                0.00726568,
+                -0.00919996
+              ],
+              "bounds_min_grip_m": [
+                0.12345,
+                -0.03194181,
+                -0.02992354
+              ],
+              "centroid_grip_m": [
+                0.13145,
+                -0.01174187,
+                -0.01968852
+              ],
+              "centroid_hand_m": [
+                -0.01174187,
+                -0.01968852,
+                0.02325
+              ],
+              "face_count": 416,
+              "finger": "index",
+              "name": "index_middle",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13945,
+                0.02607557,
+                -0.01121887
+              ],
+              "bounds_min_grip_m": [
+                0.12345,
+                -0.00850445,
+                -0.02996142
+              ],
+              "centroid_grip_m": [
+                0.13145,
+                0.00837154,
+                -0.02065486
+              ],
+              "centroid_hand_m": [
+                0.00837154,
+                -0.02065486,
+                0.02325
+              ],
+              "face_count": 416,
+              "finger": "index",
+              "name": "index_distal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.12315,
+                -0.0120048,
+                0.03223028
+              ],
+              "bounds_min_grip_m": [
+                0.10675,
+                -0.03167613,
+                -0.0290028
+              ],
+              "centroid_grip_m": [
+                0.11495,
+                -0.02184046,
+                0.00161374
+              ],
+              "centroid_hand_m": [
+                -0.02184046,
+                0.00161374,
+                0.00675
+              ],
+              "face_count": 416,
+              "finger": "middle",
+              "name": "middle_proximal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.12315,
+                0.01266207,
+                -0.01263404
+              ],
+              "bounds_min_grip_m": [
+                0.10675,
+                -0.03168947,
+                -0.03032406
+              ],
+              "centroid_grip_m": [
+                0.11495,
+                -0.00886679,
+                -0.0215093
+              ],
+              "centroid_hand_m": [
+                -0.00886679,
+                -0.0215093,
+                0.00675
+              ],
+              "face_count": 416,
+              "finger": "middle",
+              "name": "middle_middle",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.12315,
+                0.03070861,
+                -0.00532842
+              ],
+              "bounds_min_grip_m": [
+                0.10675,
+                -0.00371761,
+                -0.03032163
+              ],
+              "centroid_grip_m": [
+                0.11495,
+                0.01318609,
+                -0.01797273
+              ],
+              "centroid_hand_m": [
+                0.01318609,
+                -0.01797273,
+                0.00675
+              ],
+              "face_count": 416,
+              "finger": "middle",
+              "name": "middle_distal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.10645,
+                -0.01155663,
+                0.03078457
+              ],
+              "bounds_min_grip_m": [
+                0.09085,
+                -0.03123269,
+                -0.02653321
+              ],
+              "centroid_grip_m": [
+                0.09865,
+                -0.02139466,
+                0.00212568
+              ],
+              "centroid_hand_m": [
+                -0.02139466,
+                0.00212568,
+                -0.00955
+              ],
+              "face_count": 416,
+              "finger": "ring",
+              "name": "ring_proximal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.10645,
+                0.01106806,
+                -0.01102994
+              ],
+              "bounds_min_grip_m": [
+                0.09085,
+                -0.0312124,
+                -0.02981374
+              ],
+              "centroid_grip_m": [
+                0.09865,
+                -0.00950503,
+                -0.0204917
+              ],
+              "centroid_hand_m": [
+                -0.00950503,
+                -0.0204917,
+                -0.00955
+              ],
+              "face_count": 416,
+              "finger": "ring",
+              "name": "ring_middle",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.10645,
+                0.0293709,
+                -0.00608869
+              ],
+              "bounds_min_grip_m": [
+                0.09085,
+                -0.00447014,
+                -0.02986896
+              ],
+              "centroid_grip_m": [
+                0.09865,
+                0.01217232,
+                -0.01810357
+              ],
+              "centroid_hand_m": [
+                0.01217232,
+                -0.01810357,
+                -0.00955
+              ],
+              "face_count": 416,
+              "finger": "ring",
+              "name": "ring_distal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.0708,
+                0.01388723,
+                -0.0037576
+              ],
+              "bounds_min_grip_m": [
+                0.0572,
+                -0.03049636,
+                -0.03174982
+              ],
+              "centroid_grip_m": [
+                0.064,
+                -0.00830457,
+                -0.01775371
+              ],
+              "centroid_hand_m": [
+                -0.00830457,
+                -0.01775371,
+                -0.0442
+              ],
+              "face_count": 416,
+              "finger": "little",
+              "name": "little_proximal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.0708,
+                0.02472582,
+                -0.00153859
+              ],
+              "bounds_min_grip_m": [
+                0.0572,
+                0.00041219,
+                -0.03163852
+              ],
+              "centroid_grip_m": [
+                0.064,
+                0.012861,
+                -0.01614226
+              ],
+              "centroid_hand_m": [
+                0.012861,
+                -0.01614226,
+                -0.0442
+              ],
+              "face_count": 416,
+              "finger": "little",
+              "name": "little_middle",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.0708,
+                0.02969566,
+                0.01585368
+              ],
+              "bounds_min_grip_m": [
+                0.0572,
+                0.01129051,
+                -0.0149739
+              ],
+              "centroid_grip_m": [
+                0.064,
+                0.02036868,
+                0.0
+              ],
+              "centroid_hand_m": [
+                0.02036868,
+                0.0,
+                -0.0442
+              ],
+              "face_count": 416,
+              "finger": "little",
+              "name": "little_distal",
+              "on_grip": true,
+              "vertex_count": 210
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.0302581,
+                0.03219731
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.02069776,
+                0.00358392
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.004736,
+                0.01767499
+              ],
+              "centroid_hand_m": [
+                0.004736,
+                0.01767499,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "palm",
+              "name": "palm",
+              "on_grip": true,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
+                0.1377,
+                0.0327,
+                0.0095
+              ],
+              "bounds_min_grip_m": [
+                0.0867,
+                0.0137,
+                -0.0095
+              ],
+              "centroid_grip_m": [
+                0.1122,
+                0.0232,
+                0.0
+              ],
+              "centroid_hand_m": [
+                0.0232,
+                0.0,
+                0.004
+              ],
+              "face_count": 256,
+              "finger": "thumb",
+              "name": "thumb_proximal",
+              "on_grip": true,
+              "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.1637,
+                0.0327,
+                0.0095
+              ],
+              "bounds_min_grip_m": [
+                0.1187,
+                0.0137,
+                -0.0095
+              ],
+              "centroid_grip_m": [
+                0.1412,
+                0.0232,
+                0.0
+              ],
+              "centroid_hand_m": [
+                0.0232,
+                0.0,
+                0.033
+              ],
+              "face_count": 256,
+              "finger": "thumb",
+              "name": "thumb_distal",
+              "on_grip": true,
+              "vertex_count": 130
+            }
+          ],
+          "distance_below_butt_m": 0.1082,
+          "fingertips_in_grip_m": {
+            "index": [
+              0.13145,
+              0.00837154,
+              -0.02065486
+            ],
+            "little": [
+              0.064,
+              0.02036868,
+              0.0
+            ],
+            "middle": [
+              0.11495,
+              0.01318609,
+              -0.01797273
+            ],
+            "ring": [
+              0.09865,
+              0.01217232,
+              -0.01810357
+            ],
+            "thumb": [
+              0.1412,
+              0.0232,
+              0.0
+            ]
+          },
+          "hand": "trail",
+          "hand_to_grip_rotation": [
+            [
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "hand_to_grip_translation_m": [
+            0.1082,
+            0.0,
+            0.0
+          ],
+          "min_pad_clearance_m": 0.0001,
+          "thumb_azimuth_deg": 0.0,
+          "v_azimuth_deg": 20.0
+        }
+      },
+      "sites": [
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.017,
+            -0.02045,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            -0.015,
+            -0.02045,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.015
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.02045
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "name": "lead_palm_proximal",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "palm_proximal"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.047,
+            -0.02045,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            0.015,
+            -0.02045,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.015
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.02045
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "name": "lead_palm_distal",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "palm_distal"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.02,
+            0.02045,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            -0.012,
+            0.02045,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.012
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.02045
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "lead_finger_proximal",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "finger_proximal"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.044,
+            0.02045,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            0.012,
+            0.02045,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.012
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.02045
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "lead_finger_distal",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "finger_distal"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.0932,
+            -0.02045,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            -0.015,
+            -0.02045,
+            0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.015
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.02045
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "name": "trail_palm_proximal",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "palm_proximal"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.1232,
+            -0.02045,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            0.015,
+            -0.02045,
+            0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.015
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.02045
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "name": "trail_palm_distal",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "palm_distal"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.0962,
+            0.02045,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            -0.012,
+            0.02045,
+            0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.012
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.02045
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "trail_finger_proximal",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "finger_proximal"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.1202,
+            0.02045,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            0.012,
+            0.02045,
+            0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.012
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.02045
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "trail_finger_distal",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "finger_distal"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.012,
+            -0.02445,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            -0.02,
+            -0.02445,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.02
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.02445
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "name": "lead_heel_pad",
+          "primitive": "sphere",
+          "radius_m": 0.012,
+          "segment": "heel_pad"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.077,
+            0.02161653,
+            0.00381158
+          ],
+          "half_length_m": 0.01,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            0.045,
+            0.02161653,
+            -0.00888842
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.045
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.02161653
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.00888842
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -0.98480775,
+            -0.17364818
+          ],
+          "name": "lead_thumb",
+          "primitive": "capsule",
+          "radius_m": 0.0095,
+          "segment": "thumb"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.077,
+            0.03860446,
+            0.00680701
+          ],
+          "half_length_m": 0.0,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            -0.0312,
+            0.03860446,
+            0.01950701
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0312
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.03860446
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.01950701
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -0.98480775,
+            -0.17364818
+          ],
+          "name": "trail_palm_pocket",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "palm_thenar"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.064,
+            0.01462763,
+            -0.01429108
+          ],
+          "half_length_m": 0.008,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            0.032,
+            0.01462763,
+            -0.02699108
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.032
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.01462763
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.02699108
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -0.71528761,
+            0.69883019
+          ],
+          "name": "lead_middle",
+          "primitive": "capsule",
+          "radius_m": 0.008,
+          "segment": "middle_finger"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.064,
+            0.0352,
+            0.0
+          ],
+          "half_length_m": 0.008,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            0.032,
+            0.0352,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.032
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0352
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "lead_index",
+          "primitive": "capsule",
+          "radius_m": 0.008,
+          "segment": "index_finger"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.064,
+            0.01995,
+            0.0
+          ],
+          "half_length_m": 0.008,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            -0.0442,
+            0.01995,
+            0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0442
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.01995
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "trail_little_finger",
+          "primitive": "capsule",
+          "radius_m": 0.0075,
+          "segment": "little_finger"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.012,
+            0.01995,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            -0.02,
+            0.01995,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.02
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.01995
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "lead_butt_fingers",
+          "primitive": "sphere",
+          "radius_m": 0.0075,
+          "segment": "butt_fingers"
+        }
+      ],
+      "style": "interlock",
+      "trigger_finger": false
+    },
+    "interlock_trigger": {
+      "grip_radius_m": 0.0127,
+      "hand_grip_pair_ids": [
+        "lead_palm_proximal_grip",
+        "lead_palm_distal_grip",
+        "lead_finger_proximal_grip",
+        "lead_finger_distal_grip",
+        "trail_palm_proximal_grip",
+        "trail_palm_distal_grip",
+        "trail_finger_proximal_grip",
+        "trail_finger_distal_grip",
+        "lead_heel_pad_butt",
+        "trail_index_trigger_grip",
+        "lead_butt_fingers_grip",
+        "trail_thumb_pad_grip"
+      ],
+      "hand_hand_pair_ids": [
+        "trail_palm_lead_thumb",
+        "interlock_little_finger_lead_middle",
+        "interlock_lead_index_wrap"
+      ],
+      "pair_ids": [
+        "lead_palm_proximal_grip",
+        "lead_palm_distal_grip",
+        "lead_finger_proximal_grip",
+        "lead_finger_distal_grip",
+        "trail_palm_proximal_grip",
+        "trail_palm_distal_grip",
+        "trail_finger_proximal_grip",
+        "trail_finger_distal_grip",
+        "lead_heel_pad_butt",
+        "trail_palm_lead_thumb",
+        "interlock_little_finger_lead_middle",
+        "interlock_lead_index_wrap",
+        "trail_index_trigger_grip",
+        "lead_butt_fingers_grip",
+        "trail_thumb_pad_grip"
       ],
       "pairs": [
         {
@@ -2352,6 +2430,42 @@
           ],
           "simscape_label": "allocated",
           "site_a": "trail_index_trigger",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_butt_fingers_grip",
+          "kind": "hand_grip",
+          "name": "lead_butt_fingers_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_butt_fingers",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "trail_thumb_pad_grip",
+          "kind": "hand_grip",
+          "name": "trail_thumb_pad_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_thumb_pad",
           "site_b": "grip"
         }
       ],
@@ -3724,14 +3838,14 @@
           ],
           "centre_m": [
             0.012,
-            -0.0247,
+            -0.02445,
             0.0
           ],
           "half_length_m": 0.0,
           "hand": "lead",
           "hand_frame_centre_m": [
             -0.02,
-            -0.0247,
+            -0.02445,
             -0.0127
           ],
           "hand_frame_transform_4x4": [
@@ -3745,7 +3859,7 @@
               0.0,
               1.0,
               0.0,
-              -0.0247
+              -0.02445
             ],
             [
               0.0,
@@ -4048,14 +4162,14 @@
           ],
           "centre_m": [
             0.1402,
-            0.0207,
+            0.02045,
             0.0
           ],
           "half_length_m": 0.008,
           "hand": "trail",
           "hand_frame_centre_m": [
             0.032,
-            0.0207,
+            0.02045,
             0.0127
           ],
           "hand_frame_transform_4x4": [
@@ -4069,7 +4183,7 @@
               0.0,
               1.0,
               0.0,
-              0.0207
+              0.02045
             ],
             [
               0.0,
@@ -4093,6 +4207,114 @@
           "primitive": "capsule",
           "radius_m": 0.008,
           "segment": "index_trigger"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.012,
+            0.01995,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            -0.02,
+            0.01995,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.02
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.01995
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "lead_butt_fingers",
+          "primitive": "sphere",
+          "radius_m": 0.0075,
+          "segment": "butt_fingers"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.1402,
+            -0.02195,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            0.032,
+            -0.02195,
+            0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.032
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.02195
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "name": "trail_thumb_pad",
+          "primitive": "sphere",
+          "radius_m": 0.0095,
+          "segment": "thumb_pad"
         }
       ],
       "style": "interlock",
@@ -4109,7 +4331,8 @@
         "trail_palm_distal_grip",
         "trail_finger_proximal_grip",
         "trail_finger_distal_grip",
-        "lead_heel_pad_butt"
+        "lead_heel_pad_butt",
+        "lead_butt_fingers_grip"
       ],
       "hand_hand_pair_ids": [
         "trail_palm_lead_thumb",
@@ -4126,7 +4349,8 @@
         "trail_finger_distal_grip",
         "lead_heel_pad_butt",
         "trail_palm_lead_thumb",
-        "overlap_little_finger_lead_index"
+        "overlap_little_finger_lead_index",
+        "lead_butt_fingers_grip"
       ],
       "pairs": [
         {
@@ -4326,6 +4550,24 @@
           "simscape_label": "allocated",
           "site_a": "trail_little_finger",
           "site_b": "lead_index"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_butt_fingers_grip",
+          "kind": "hand_grip",
+          "name": "lead_butt_fingers_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_butt_fingers",
+          "site_b": "grip"
         }
       ],
       "posed_hands": {
@@ -5697,14 +5939,14 @@
           ],
           "centre_m": [
             0.012,
-            -0.0247,
+            -0.02445,
             0.0
           ],
           "half_length_m": 0.0,
           "hand": "lead",
           "hand_frame_centre_m": [
             -0.02,
-            -0.0247,
+            -0.02445,
             -0.0127
           ],
           "hand_frame_transform_4x4": [
@@ -5718,7 +5960,7 @@
               0.0,
               1.0,
               0.0,
-              -0.0247
+              -0.02445
             ],
             [
               0.0,
@@ -6012,6 +6254,60 @@
           "primitive": "capsule",
           "radius_m": 0.0075,
           "segment": "little_finger"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.012,
+            0.01995,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            -0.02,
+            0.01995,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.02
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.01995
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "lead_butt_fingers",
+          "primitive": "sphere",
+          "radius_m": 0.0075,
+          "segment": "butt_fingers"
         }
       ],
       "style": "overlap",
@@ -6029,7 +6325,9 @@
         "trail_finger_proximal_grip",
         "trail_finger_distal_grip",
         "lead_heel_pad_butt",
-        "trail_index_trigger_grip"
+        "trail_index_trigger_grip",
+        "lead_butt_fingers_grip",
+        "trail_thumb_pad_grip"
       ],
       "hand_hand_pair_ids": [
         "trail_palm_lead_thumb",
@@ -6047,7 +6345,9 @@
         "lead_heel_pad_butt",
         "trail_palm_lead_thumb",
         "overlap_little_finger_lead_index",
-        "trail_index_trigger_grip"
+        "trail_index_trigger_grip",
+        "lead_butt_fingers_grip",
+        "trail_thumb_pad_grip"
       ],
       "pairs": [
         {
@@ -6264,6 +6564,42 @@
           ],
           "simscape_label": "allocated",
           "site_a": "trail_index_trigger",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_butt_fingers_grip",
+          "kind": "hand_grip",
+          "name": "lead_butt_fingers_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_butt_fingers",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "trail_thumb_pad_grip",
+          "kind": "hand_grip",
+          "name": "trail_thumb_pad_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_thumb_pad",
           "site_b": "grip"
         }
       ],
@@ -7636,14 +7972,14 @@
           ],
           "centre_m": [
             0.012,
-            -0.0247,
+            -0.02445,
             0.0
           ],
           "half_length_m": 0.0,
           "hand": "lead",
           "hand_frame_centre_m": [
             -0.02,
-            -0.0247,
+            -0.02445,
             -0.0127
           ],
           "hand_frame_transform_4x4": [
@@ -7657,7 +7993,7 @@
               0.0,
               1.0,
               0.0,
-              -0.0247
+              -0.02445
             ],
             [
               0.0,
@@ -7960,14 +8296,14 @@
           ],
           "centre_m": [
             0.1402,
-            0.0207,
+            0.02045,
             0.0
           ],
           "half_length_m": 0.008,
           "hand": "trail",
           "hand_frame_centre_m": [
             0.032,
-            0.0207,
+            0.02045,
             0.0127
           ],
           "hand_frame_transform_4x4": [
@@ -7981,7 +8317,7 @@
               0.0,
               1.0,
               0.0,
-              0.0207
+              0.02045
             ],
             [
               0.0,
@@ -8005,6 +8341,114 @@
           "primitive": "capsule",
           "radius_m": 0.008,
           "segment": "index_trigger"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.012,
+            0.01995,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            -0.02,
+            0.01995,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.02
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.01995
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "lead_butt_fingers",
+          "primitive": "sphere",
+          "radius_m": 0.0075,
+          "segment": "butt_fingers"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.1402,
+            -0.02195,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            0.032,
+            -0.02195,
+            0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.032
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.02195
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "name": "trail_thumb_pad",
+          "primitive": "sphere",
+          "radius_m": 0.0095,
+          "segment": "thumb_pad"
         }
       ],
       "style": "overlap",
@@ -8022,7 +8466,9 @@
         "trail_finger_proximal_grip",
         "trail_finger_distal_grip",
         "lead_heel_pad_butt",
-        "ten_finger_little_finger_grip"
+        "ten_finger_little_finger_grip",
+        "lead_butt_fingers_grip",
+        "trail_hypothenar_grip"
       ],
       "hand_hand_pair_ids": [
         "trail_palm_lead_thumb"
@@ -8038,7 +8484,9 @@
         "trail_finger_distal_grip",
         "lead_heel_pad_butt",
         "trail_palm_lead_thumb",
-        "ten_finger_little_finger_grip"
+        "ten_finger_little_finger_grip",
+        "lead_butt_fingers_grip",
+        "trail_hypothenar_grip"
       ],
       "pairs": [
         {
@@ -8238,6 +8686,42 @@
           "simscape_label": "allocated",
           "site_a": "trail_little_finger",
           "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_butt_fingers_grip",
+          "kind": "hand_grip",
+          "name": "lead_butt_fingers_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_butt_fingers",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "trail_hypothenar_grip",
+          "kind": "hand_grip",
+          "name": "trail_hypothenar_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_hypothenar",
+          "site_b": "grip"
         }
       ],
       "posed_hands": {
@@ -8951,24 +9435,24 @@
             },
             {
               "bounds_max_grip_m": [
-                0.09004795,
+                0.0900418,
                 0.01388723,
                 -0.0037576
               ],
               "bounds_min_grip_m": [
-                0.07644795,
+                0.0764418,
                 -0.03049636,
                 -0.03174982
               ],
               "centroid_grip_m": [
-                0.08324795,
+                0.0832418,
                 -0.00830457,
                 -0.01775371
               ],
               "centroid_hand_m": [
                 -0.00830457,
                 -0.01775371,
-                -0.02495205
+                -0.0249582
               ],
               "face_count": 416,
               "finger": "little",
@@ -8978,24 +9462,24 @@
             },
             {
               "bounds_max_grip_m": [
-                0.09004795,
+                0.0900418,
                 0.02472582,
                 -0.00153859
               ],
               "bounds_min_grip_m": [
-                0.07644795,
+                0.0764418,
                 0.00041219,
                 -0.03163852
               ],
               "centroid_grip_m": [
-                0.08324795,
+                0.0832418,
                 0.012861,
                 -0.01614226
               ],
               "centroid_hand_m": [
                 0.012861,
                 -0.01614226,
-                -0.02495205
+                -0.0249582
               ],
               "face_count": 416,
               "finger": "little",
@@ -9005,24 +9489,24 @@
             },
             {
               "bounds_max_grip_m": [
-                0.09004795,
+                0.0900418,
                 0.02969566,
                 0.01585368
               ],
               "bounds_min_grip_m": [
-                0.07644795,
+                0.0764418,
                 0.01129051,
                 -0.0149739
               ],
               "centroid_grip_m": [
-                0.08324795,
+                0.0832418,
                 0.02036868,
                 0.0
               ],
               "centroid_hand_m": [
                 0.02036868,
                 0.0,
-                -0.02495205
+                -0.0249582
               ],
               "face_count": 416,
               "finger": "little",
@@ -9120,7 +9604,7 @@
               -0.02065486
             ],
             "little": [
-              0.08324795,
+              0.0832418,
               0.02036868,
               0.0
             ],
@@ -9609,14 +10093,14 @@
           ],
           "centre_m": [
             0.012,
-            -0.0247,
+            -0.02445,
             0.0
           ],
           "half_length_m": 0.0,
           "hand": "lead",
           "hand_frame_centre_m": [
             -0.02,
-            -0.0247,
+            -0.02445,
             -0.0127
           ],
           "hand_frame_transform_4x4": [
@@ -9630,7 +10114,7 @@
               0.0,
               1.0,
               0.0,
-              -0.0247
+              -0.02445
             ],
             [
               0.0,
@@ -9878,15 +10362,15 @@
             0.0
           ],
           "centre_m": [
-            0.08324795,
-            0.0202,
+            0.0832418,
+            0.01995,
             0.0
           ],
           "half_length_m": 0.008,
           "hand": "trail",
           "hand_frame_centre_m": [
-            -0.03695205,
-            0.0202,
+            -0.0369582,
+            0.01995,
             0.0127
           ],
           "hand_frame_transform_4x4": [
@@ -9894,13 +10378,13 @@
               1.0,
               0.0,
               0.0,
-              -0.03695205
+              -0.0369582
             ],
             [
               0.0,
               1.0,
               0.0,
-              0.0202
+              0.01995
             ],
             [
               0.0,
@@ -9924,6 +10408,114 @@
           "primitive": "capsule",
           "radius_m": 0.0075,
           "segment": "little_finger"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.012,
+            0.01995,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            -0.02,
+            0.01995,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.02
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.01995
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "lead_butt_fingers",
+          "primitive": "sphere",
+          "radius_m": 0.0075,
+          "segment": "butt_fingers"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.0832418,
+            -0.02045,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            -0.0369582,
+            -0.02045,
+            0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0369582
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.02045
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "name": "trail_hypothenar",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "hypothenar"
         }
       ],
       "style": "ten_finger",
@@ -9942,7 +10534,10 @@
         "trail_finger_distal_grip",
         "lead_heel_pad_butt",
         "ten_finger_little_finger_grip",
-        "trail_index_trigger_grip"
+        "trail_index_trigger_grip",
+        "lead_butt_fingers_grip",
+        "trail_thumb_pad_grip",
+        "trail_hypothenar_grip"
       ],
       "hand_hand_pair_ids": [
         "trail_palm_lead_thumb"
@@ -9959,7 +10554,10 @@
         "lead_heel_pad_butt",
         "trail_palm_lead_thumb",
         "ten_finger_little_finger_grip",
-        "trail_index_trigger_grip"
+        "trail_index_trigger_grip",
+        "lead_butt_fingers_grip",
+        "trail_thumb_pad_grip",
+        "trail_hypothenar_grip"
       ],
       "pairs": [
         {
@@ -10176,6 +10774,60 @@
           ],
           "simscape_label": "allocated",
           "site_a": "trail_index_trigger",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "lead_butt_fingers_grip",
+          "kind": "hand_grip",
+          "name": "lead_butt_fingers_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "lead_butt_fingers",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "trail_thumb_pad_grip",
+          "kind": "hand_grip",
+          "name": "trail_thumb_pad_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_thumb_pad",
+          "site_b": "grip"
+        },
+        {
+          "allocated_modes": [
+            "weld",
+            "closure",
+            "bushing"
+          ],
+          "id": "trail_hypothenar_grip",
+          "kind": "hand_grip",
+          "name": "trail_hypothenar_grip",
+          "physical_modes": [
+            "contact",
+            "contact_v1",
+            "separated_v2"
+          ],
+          "simscape_label": "allocated",
+          "site_a": "trail_hypothenar",
           "site_b": "grip"
         }
       ],
@@ -10890,24 +11542,24 @@
             },
             {
               "bounds_max_grip_m": [
-                0.09004795,
+                0.0900418,
                 0.01388723,
                 -0.0037576
               ],
               "bounds_min_grip_m": [
-                0.07644795,
+                0.0764418,
                 -0.03049636,
                 -0.03174982
               ],
               "centroid_grip_m": [
-                0.08324795,
+                0.0832418,
                 -0.00830457,
                 -0.01775371
               ],
               "centroid_hand_m": [
                 -0.00830457,
                 -0.01775371,
-                -0.02495205
+                -0.0249582
               ],
               "face_count": 416,
               "finger": "little",
@@ -10917,24 +11569,24 @@
             },
             {
               "bounds_max_grip_m": [
-                0.09004795,
+                0.0900418,
                 0.02472582,
                 -0.00153859
               ],
               "bounds_min_grip_m": [
-                0.07644795,
+                0.0764418,
                 0.00041219,
                 -0.03163852
               ],
               "centroid_grip_m": [
-                0.08324795,
+                0.0832418,
                 0.012861,
                 -0.01614226
               ],
               "centroid_hand_m": [
                 0.012861,
                 -0.01614226,
-                -0.02495205
+                -0.0249582
               ],
               "face_count": 416,
               "finger": "little",
@@ -10944,24 +11596,24 @@
             },
             {
               "bounds_max_grip_m": [
-                0.09004795,
+                0.0900418,
                 0.02969566,
                 0.01585368
               ],
               "bounds_min_grip_m": [
-                0.07644795,
+                0.0764418,
                 0.01129051,
                 -0.0149739
               ],
               "centroid_grip_m": [
-                0.08324795,
+                0.0832418,
                 0.02036868,
                 0.0
               ],
               "centroid_hand_m": [
                 0.02036868,
                 0.0,
-                -0.02495205
+                -0.0249582
               ],
               "face_count": 416,
               "finger": "little",
@@ -11059,7 +11711,7 @@
               0.0
             ],
             "little": [
-              0.08324795,
+              0.0832418,
               0.02036868,
               0.0
             ],
@@ -11548,14 +12200,14 @@
           ],
           "centre_m": [
             0.012,
-            -0.0247,
+            -0.02445,
             0.0
           ],
           "half_length_m": 0.0,
           "hand": "lead",
           "hand_frame_centre_m": [
             -0.02,
-            -0.0247,
+            -0.02445,
             -0.0127
           ],
           "hand_frame_transform_4x4": [
@@ -11569,7 +12221,7 @@
               0.0,
               1.0,
               0.0,
-              -0.0247
+              -0.02445
             ],
             [
               0.0,
@@ -11817,15 +12469,15 @@
             0.0
           ],
           "centre_m": [
-            0.08324795,
-            0.0202,
+            0.0832418,
+            0.01995,
             0.0
           ],
           "half_length_m": 0.008,
           "hand": "trail",
           "hand_frame_centre_m": [
-            -0.03695205,
-            0.0202,
+            -0.0369582,
+            0.01995,
             0.0127
           ],
           "hand_frame_transform_4x4": [
@@ -11833,13 +12485,13 @@
               1.0,
               0.0,
               0.0,
-              -0.03695205
+              -0.0369582
             ],
             [
               0.0,
               1.0,
               0.0,
-              0.0202
+              0.01995
             ],
             [
               0.0,
@@ -11872,14 +12524,14 @@
           ],
           "centre_m": [
             0.1522,
-            0.0207,
+            0.02045,
             0.0
           ],
           "half_length_m": 0.008,
           "hand": "trail",
           "hand_frame_centre_m": [
             0.032,
-            0.0207,
+            0.02045,
             0.0127
           ],
           "hand_frame_transform_4x4": [
@@ -11893,7 +12545,7 @@
               0.0,
               1.0,
               0.0,
-              0.0207
+              0.02045
             ],
             [
               0.0,
@@ -11917,6 +12569,168 @@
           "primitive": "capsule",
           "radius_m": 0.008,
           "segment": "index_trigger"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.012,
+            0.01995,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "lead",
+          "hand_frame_centre_m": [
+            -0.02,
+            0.01995,
+            -0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.02
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.01995
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "name": "lead_butt_fingers",
+          "primitive": "sphere",
+          "radius_m": 0.0075,
+          "segment": "butt_fingers"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.1522,
+            -0.02195,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            0.032,
+            -0.02195,
+            0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.032
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.02195
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "name": "trail_thumb_pad",
+          "primitive": "sphere",
+          "radius_m": 0.0095,
+          "segment": "thumb_pad"
+        },
+        {
+          "axis_m": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "centre_m": [
+            0.0832418,
+            -0.02045,
+            0.0
+          ],
+          "half_length_m": 0.0,
+          "hand": "trail",
+          "hand_frame_centre_m": [
+            -0.0369582,
+            -0.02045,
+            0.0127
+          ],
+          "hand_frame_transform_4x4": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0369582
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.02045
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0127
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "inward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "name": "trail_hypothenar",
+          "primitive": "sphere",
+          "radius_m": 0.008,
+          "segment": "hypothenar"
         }
       ],
       "style": "ten_finger",

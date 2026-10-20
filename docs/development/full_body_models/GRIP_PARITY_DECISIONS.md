@@ -346,3 +346,37 @@ Convergence: driver accuracy $10^{-4}$ gives a net-force RMS error of 131 N (spi
 - Internal-force diagnostics (#11986): `contact/hand_drift_<club>.json`, `contact/internal_force_<club>.json`, and the `_ft*`, `_trail`, `_lead`, `_s[xyz]*` series in `contact/`. Reproduce: `run_grip_hand_drift.py` locally; on a heavy host `run_grip_contact.py --club driver --tag _ft5e-3 --friction-time 5e-3` (likewise `--hand-mode lead_only|trail_follows_club`, `--trail-shift-mm 0.01 0 0`), then `run_grip_internal_force_compare.py`.
 - Clips (outside the repository): `~/Videos/Parity Audit/golfer_realism/grip_kinetics/<club>_{contact,bushing}_grip_hands_closeup_0p5x_60fps.mp4`, 1920 by 1080 at 60 fps, 0.5x, with per-hand force arrows from the GCV-10 overlay glyphs.
 - Tests: `python3 -m pytest -n 0 tests/unit/grip_contact` (add `-m slow` for the Drake and Pinocchio holds).
+
+## 20. Initial Closure Equilibrium (#13555)
+
+The shared topology preloads every hand–grip pad at $\delta_0 = 0.25$ mm, which gives 42.774 N per pad under the radius-independent penalty law $f = k\delta$. A sphere–cylinder normal force acts radially through the grip axis, so a ring pad and the pad diametrically across from it at the same axial station cancel in force and moment. Three pads had no such partner:
+
+| Pad pair                        | Styles              | Station (neutral)                 |
+| ------------------------------- | ------------------- | --------------------------------- |
+| `lead_heel_pad_butt`            | All                 | 20 mm proximal of the lead hand   |
+| `ten_finger_little_finger_grip` | Ten-finger          | Trail little finger, lead side    |
+| `trail_index_trigger_grip`      | Any, with trigger   | 32 mm distal of the trail hand    |
+
+Each unpaired pad put a 42.774 N radial force on the club at $t = 0$, with a 2.5–5.5 N·m couple depending on the style. That is not an internal squeeze: the club is kicked at the first step. In every engine's swing parity run this kick, not the swing, was the reference peak of the determinate net force (Drake overlap swing: `peak_ref` = 42.774 N), which inflated the denominators of the normalized RMS metrics.
+
+### Decision
+
+Add one antagonist pad diametrically opposite each unpaired pad, at the same axial station and the same preload, so every hand–grip pad still sits at $\delta_0$ and the neutral-pose wrench is zero by construction:
+
+| Antagonist site     | Pair                      | Opposes                         | Anatomy                                                                         |
+| ------------------- | ------------------------- | ------------------------------- | ------------------------------------------------------------------------------- |
+| `lead_butt_fingers` | `lead_butt_fingers_grip`  | `lead_heel_pad_butt`            | Lead little and ring fingers wrapping the butt, opposite the hypothenar heel    |
+| `trail_thumb_pad`   | `trail_thumb_pad_grip`    | `trail_index_trigger_grip`      | Trail thumb closing on the shaft opposite the pulled-back index finger          |
+| `trail_hypothenar`  | `trail_hypothenar_grip`   | `ten_finger_little_finger_grip` | Trail hypothenar eminence across from the free (non-overlapping) little finger  |
+
+Sites and pairs are generated in `contact_topology.py`, so every engine inherits them. The segment-mapped bindings map them to `lh_rf_proximal`/`rh_th_distal`/`rh_palm` (Allegro, which has no little finger), `lh_lfproximal`/`rh_thdistal`/`rh_lfmetacarpal` (Shadow) and `lh_proxph5`/`rh_distal_thumb`/`rh_fifthmc` (MyoHand). `tests/unit/grip_contact/test_initial_closure_equilibrium.py` asserts a zero net force and moment ($10^{-9}$) for every style and trigger option, that every hand–grip pad sits at $-\delta_0$, and that each antagonist exists exactly when its opposed pad does. The ten-finger topology now has 12 physical pairs, exactly the Simscape kernel's `MAX_PHYSICAL_PAIRS` (the kernel exports the styles without the trigger finger); the kernel exporter locates the ten-finger capsule row by name rather than by a fixed index.
+
+### What Was Tried and Rejected
+
+- Balancing with the existing pads: infeasible. The heel station (x = 12 mm) lies proximal of every opposing lead pad (20 and 44 mm), so compression-only forces cannot cancel its moment.
+- Seating the unpaired pads tangent to the grip (gap 0): zeroes the $t = 0$ wrench but leaves pads at contact onset. That broke the MuJoCo per-site `solref` calibration (which needs every pad in contact at the held pose; it failed to converge), the OpenSim Elastic Foundation offset, and the per-pad Drake onset checks; the heel chattered in the separated scenarios; and the Drake swing deflection RMS rose to 2.9 % against the 2 % limit because its denominator lost the kick (the absolute gap was unchanged, 0.6 µm against 0.53 µm). Tolerances were not loosened; the approach was dropped.
+
+### Consequences
+
+- Pair sets, per-hand loads and the exported Simscape topology, kernel constants, golden vectors and scenario digests change. Per-hand splits stay indeterminate (§19); net force and moment remain the determinate checks.
+- Simscape evidence in `exploratory_gs3dx/receipts/grip_contact/`, and any "Initial Preload Transient" analysis built on the old topology, are stale until rerun in MATLAB R2025b on DeskComputer. That rerun stays deferred under HRG-GS-M12.

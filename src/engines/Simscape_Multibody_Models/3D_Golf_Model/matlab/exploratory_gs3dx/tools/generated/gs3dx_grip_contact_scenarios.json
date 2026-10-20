@@ -105,8 +105,8 @@
     -9.80665
   ],
   "kernel_hashes": {
-    "kernel_m_sha256": "38695ab66cb77301b7dd663e68606809ba81d6cf3fa03c92255f6ce37b384dc2",
-    "params_json_sha256": "1a47921a6c93ecf8d6cac6c2fa8ac377120e79e6aaae4452a83518e0521b2b00"
+    "kernel_m_sha256": "d33be59da9e103af0c9f70dfba88fa806cd66a88b1bf41901b3871561c325ce6",
+    "params_json_sha256": "709feb9995979f2375cc1ee99ceb2b0426b871d50288957448faf12edbdc796e"
   },
   "matlab_release": "2025b",
   "scenarios": {
@@ -15254,7 +15254,8 @@
         "lead_heel_pad_butt",
         "trail_palm_lead_thumb",
         "interlock_little_finger_lead_middle",
-        "interlock_lead_index_wrap"
+        "interlock_lead_index_wrap",
+        "lead_butt_fingers_grip"
       ],
       "allocated_pair_names": [
         "trail_palm_lead_thumb",
@@ -15264,6 +15265,7 @@
       "pair_labels": {
         "interlock_lead_index_wrap": "allocated",
         "interlock_little_finger_lead_middle": "allocated",
+        "lead_butt_fingers_grip": "physical",
         "lead_finger_distal_grip": "physical",
         "lead_finger_proximal_grip": "physical",
         "lead_heel_pad_butt": "physical",
@@ -15281,6 +15283,7 @@
         "lead_finger_proximal_grip",
         "lead_finger_distal_grip",
         "lead_heel_pad_butt",
+        "lead_butt_fingers_grip",
         "trail_palm_proximal_grip",
         "trail_palm_distal_grip",
         "trail_finger_proximal_grip",
@@ -15288,7 +15291,7 @@
       ],
       "style": "interlock",
       "style_id": 2,
-      "topology_mapping_hash": "sha256:5e5ce5b7c1c4d49b"
+      "topology_mapping_hash": "sha256:c841ba31fc0c8f46"
     },
     "overlap": {
       "all_pair_names": [
@@ -15302,13 +15305,15 @@
         "trail_finger_distal_grip",
         "lead_heel_pad_butt",
         "trail_palm_lead_thumb",
-        "overlap_little_finger_lead_index"
+        "overlap_little_finger_lead_index",
+        "lead_butt_fingers_grip"
       ],
       "allocated_pair_names": [
         "trail_palm_lead_thumb",
         "overlap_little_finger_lead_index"
       ],
       "pair_labels": {
+        "lead_butt_fingers_grip": "physical",
         "lead_finger_distal_grip": "physical",
         "lead_finger_proximal_grip": "physical",
         "lead_heel_pad_butt": "physical",
@@ -15327,6 +15332,7 @@
         "lead_finger_proximal_grip",
         "lead_finger_distal_grip",
         "lead_heel_pad_butt",
+        "lead_butt_fingers_grip",
         "trail_palm_proximal_grip",
         "trail_palm_distal_grip",
         "trail_finger_proximal_grip",
@@ -15334,7 +15340,7 @@
       ],
       "style": "overlap",
       "style_id": 1,
-      "topology_mapping_hash": "sha256:acb59ea5287f8409"
+      "topology_mapping_hash": "sha256:c18b8ee19f9d7e8b"
     },
     "ten_finger": {
       "all_pair_names": [
@@ -15348,12 +15354,15 @@
         "trail_finger_distal_grip",
         "lead_heel_pad_butt",
         "trail_palm_lead_thumb",
-        "ten_finger_little_finger_grip"
+        "ten_finger_little_finger_grip",
+        "lead_butt_fingers_grip",
+        "trail_hypothenar_grip"
       ],
       "allocated_pair_names": [
         "trail_palm_lead_thumb"
       ],
       "pair_labels": {
+        "lead_butt_fingers_grip": "physical",
         "lead_finger_distal_grip": "physical",
         "lead_finger_proximal_grip": "physical",
         "lead_heel_pad_butt": "physical",
@@ -15362,6 +15371,7 @@
         "ten_finger_little_finger_grip": "physical",
         "trail_finger_distal_grip": "physical",
         "trail_finger_proximal_grip": "physical",
+        "trail_hypothenar_grip": "physical",
         "trail_palm_distal_grip": "physical",
         "trail_palm_lead_thumb": "allocated",
         "trail_palm_proximal_grip": "physical"
@@ -15372,15 +15382,17 @@
         "lead_finger_proximal_grip",
         "lead_finger_distal_grip",
         "lead_heel_pad_butt",
+        "lead_butt_fingers_grip",
         "trail_palm_proximal_grip",
         "trail_palm_distal_grip",
         "trail_finger_proximal_grip",
         "trail_finger_distal_grip",
-        "ten_finger_little_finger_grip"
+        "ten_finger_little_finger_grip",
+        "trail_hypothenar_grip"
       ],
       "style": "ten_finger",
       "style_id": 3,
-      "topology_mapping_hash": "sha256:11b31975e4956b70"
+      "topology_mapping_hash": "sha256:fc7cebec019a74bf"
     }
   },
   "swing_sha256": "df7802600828a7e04158cec5cdb487505a5ba1fff0c15044756540c5eb68bc0a"

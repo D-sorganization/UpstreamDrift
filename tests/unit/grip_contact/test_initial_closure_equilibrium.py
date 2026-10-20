@@ -2,10 +2,10 @@
 
 The shared preload is an internal hand squeeze, so at the neutral (t = 0) pose
 the physical hand-grip pads must exert no net force or moment on the club.
-Only the diametrically opposed palm/finger ring pads carry it; a site with no
-opposing pad (the lead heel pad, the ten-finger trail little finger and the
-trail index trigger) is seated tangent to the grip and carries no load until
-the club moves into it.
+Every hand-grip pad sits at the shared preload; each pad without a ring
+partner (the lead heel pad, the ten-finger trail little finger and the trail
+index trigger) is opposed by an antagonist pad diametrically across the grip
+at the same axial station (#13555).
 """
 
 from __future__ import annotations
@@ -36,9 +36,15 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
 SPEC_PATH = ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
 SQUEEZE = 1100.0
-UNOPPOSED_PAIRS = frozenset(
-    {"lead_heel_pad_butt", "ten_finger_little_finger_grip", "trail_index_trigger_grip"}
-)
+#: Antagonist pair -> (pair it opposes, active when (style, trigger_finger)).
+ANTAGONISTS = {
+    "lead_butt_fingers_grip": ("lead_heel_pad_butt", lambda s, t: True),
+    "trail_thumb_pad_grip": ("trail_index_trigger_grip", lambda s, t: t),
+    "trail_hypothenar_grip": (
+        "ten_finger_little_finger_grip",
+        lambda s, t: s is GripStyle.TEN_FINGER,
+    ),
+}
 CASES = [(s, t) for s in GripStyle for t in (False, True)]
 
 
@@ -82,12 +88,23 @@ def test_neutral_pose_net_club_wrench_is_zero(
 
 
 @pytest.mark.parametrize(("style", "trigger_finger"), CASES)
-def test_only_opposed_ring_pads_carry_preload(
+def test_every_hand_grip_pad_carries_the_shared_preload(
     style: GripStyle, trigger_finger: bool
 ) -> None:
-    """Opposed ring pads sit at the shared preload; unopposed sites are tangent."""
+    """Every hand-grip pad, antagonists included, sits at the shared preload."""
     topo = contact_topology(GripSpec(style=style, trigger_finger=trigger_finger))
     for pair in topo.hand_grip_pairs():
         gap = pair_surface_gap_m(topo, pair)
-        expected = 0.0 if pair.name in UNOPPOSED_PAIRS else -DEFAULT_TOPOLOGY_PRELOAD_M
-        assert gap == pytest.approx(expected, abs=1e-12), pair.name
+        assert gap == pytest.approx(-DEFAULT_TOPOLOGY_PRELOAD_M, abs=1e-12), pair.name
+
+
+@pytest.mark.parametrize(("style", "trigger_finger"), CASES)
+def test_antagonist_opposes_each_unpaired_pad(
+    style: GripStyle, trigger_finger: bool
+) -> None:
+    """An antagonist exists exactly when the pad it opposes does."""
+    topo = contact_topology(GripSpec(style=style, trigger_finger=trigger_finger))
+    names = {pair.name for pair in topo.pairs}
+    for antagonist, (opposed, active) in ANTAGONISTS.items():
+        assert (antagonist in names) is active(style, trigger_finger), antagonist
+        assert (opposed in names) is active(style, trigger_finger), opposed
