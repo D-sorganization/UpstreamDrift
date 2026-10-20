@@ -2306,4 +2306,46 @@ HRG_BEST_FIT_BUNDLE=<private-bundle> pytest -o addopts="" -q -n 0 -s \
 Because the wrist angles come from the fitted grip rotation, they are
 model-estimated, not measured hand anatomy.
 
+\subsection{Event Table and Export of Anatomical Angles (HRG-E4, \#13175)}
+\paragraph{Scope of This Slice.}
+\path{anatomical_angles/event_table.py} samples the wrist and forearm series
+of HRG-E2 at the swing events address, top, impact and finish.  It does not
+detect events.  The caller passes frame indices from an existing detector
+(for example \texttt{swing\_comparison.events.detect\_events}) and names it
+in \texttt{event\_source}, which every export records.  Frames must be in
+range and non-decreasing in the order above.  Lead and trail sides follow
+\texttt{core.handedness}.  A side without series gives no rows; nothing is
+filled in.  Pelvis reversal and the trunk terms are not on \texttt{main} at
+this revision (open PR \#13498), so this slice does not accept them.
+
+\paragraph{Terms, Units and Signs.}
+Term identifiers, frames and sign conventions are read from
+\texttt{anatomical\_angles.terms.wrist\_term\_specs}, the description used by
+the golf-term registry; no second term list exists.  Angles are in degrees
+and times in seconds.  A NaN sample, such as a gimbal-locked component, stays
+missing: \texttt{null} in JSON and an empty cell in CSV, with its reason.  Every
+row carries \texttt{observability}, the receipt path and both calibration ids.
+
+\paragraph{Exports.}
+\texttt{to\_json} writes strict JSON (no NaN) that matches
+\texttt{EVENT\_TABLE\_JSON\_SCHEMA} (JSON Schema 2020-12, schema id
+\texttt{upstreamdrift.anatomical\_event\_table}, version 1).  \texttt{to\_csv}
+writes \texttt{\#} header lines with the units, handedness, event source,
+reference, and each term's frame and sign convention, followed by one row
+per event and term.
+
+\paragraph{Verification and Open Items.}
+\path{tests/unit/anatomical_angles/test_event_table.py} uses synthetic series
+with known values.  It checks the values at each event for both handedness
+choices, the provenance on every row, the reasons for missing values, the
+rejection of invalid events and inputs, schema validation, and the CSV
+header.  No best-fit or tour values are reported here.  Open items for
+\#13175: pelvis reversal and trunk terms, the API endpoint, the desktop and
+web table (\texttt{feature\_parity.json}), and HUD captions in
+\texttt{native\_viewer\_export}.
+{\small
+\begin{verbatim}
+py -3 -m pytest -o addopts="" -q -n 0 tests/unit/anatomical_angles/test_event_table.py
+\end{verbatim}}
+
 \end{document}
