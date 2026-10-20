@@ -17,8 +17,14 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
-  cancel-in-progress: true
+  # PR runs cancel superseded pushes. Main, merge-queue and dispatched runs are
+  # never cancelled once running. A per-SHA main group queued one run per merge
+  # for the four docker runners (#13494). Grouped per event and ref, GitHub keeps
+  # the running main run plus only the newest pending one (#12285). Each
+  # merge-queue entry has its own gh-readonly-queue ref, so it keeps its own
+  # group and the queue always gets its result.
+  group: ci-requires-opensim-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
