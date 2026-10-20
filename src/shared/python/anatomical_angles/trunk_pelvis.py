@@ -55,7 +55,6 @@ __all__ = [
 
 PELVIS_INPUT = "pelvis_rotation_world"
 THORAX_INPUT = "thorax_rotation_world"
-_ROT_TOL = 1e-6
 _FE, _LB, _AR = 0, 1, 2
 _WU = (
     "Wu et al. 2002, J Biomech 35:543 (ISB part I 4.3, pelvis); Wu et al. "
@@ -96,17 +95,14 @@ def golfer_lab_frame(up: object, target: object, handedness: str) -> np.ndarray:
 
 
 def _rotations(value: object, name: str) -> np.ndarray:
-    rot = np.asarray(value, dtype=float)
-    if rot.ndim == 2:
-        rot = rot[None]
-    if rot.ndim != 3 or rot.shape[1:] != (3, 3) or not np.all(np.isfinite(rot)):
-        raise ValueError(f"{name} must be finite (3, 3) or (N, 3, 3) rotations")
-    gram = np.swapaxes(rot, 1, 2) @ rot
-    if not np.allclose(gram, np.eye(3), atol=_ROT_TOL, rtol=0) or not np.allclose(
-        np.linalg.det(rot), 1.0, atol=_ROT_TOL, rtol=0
-    ):
-        raise ValueError(f"{name} must hold proper rotations (orthonormal, det +1)")
-    return rot
+    """``(N, 3, 3)`` proper rotations, validated like every other registry term.
+
+    Delegates to ``spine._golf_term_impl.rotation_series``. Imported at call
+    time: ``spine`` imports ``golf_terms``, which imports this module.
+    """
+    from src.shared.python.spine._golf_term_impl import rotation_series
+
+    return rotation_series(value, name)
 
 
 def segment_lab_angles(
