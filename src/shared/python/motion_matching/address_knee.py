@@ -78,6 +78,7 @@ __all__ = [
     "knee_flexion_deg",
     "knee_flexion_from_markers",
     "knee_flexion_report",
+    "knee_flexion_window_report",
     "knee_posture_prior",
     "model_knee_flexion_deg",
     "no_hyperextension_bounds",
@@ -516,3 +517,83 @@ def record_knee_flexion(
     """Add the ``knee_flexion_deg`` block to ``address_report`` when enabled."""
     if targets is not None:
         address_report["knee_flexion_deg"] = knee_flexion_report(kin, q, targets)
+
+
+# --------------------------------------- through dynamics (acceptance item 4)
+
+
+def _window_stats(
+    kin: Any, q: np.ndarray, side: str, target_deg: float, sign: float
+) -> dict[str, Any]:
+    """Per-knee flexion summary of one trajectory over the window frames."""
+    flexion = np.array([model_knee_flexion_deg(kin, row)[side] for row in q])
+    coords = q[:, _knee_index(kin, side)]
+    hyperextended = bool((sign * coords < -1e-9).any())
+    error = float(np.abs(flexion - target_deg).max())
+    return {
+        "min_deg": float(flexion.min()),
+        "max_deg": float(flexion.max()),
+        "max_abs_error_deg": error,
+        "within_band": error <= KNEE_FLEX_BAND_DEG and not hyperextended,
+        "hyperextended": hyperextended,
+    }
+
+
+def knee_flexion_window_report(
+    kin: Any,
+    q_ik: np.ndarray,
+    q_fd: np.ndarray,
+    targets: KneeTargets | None,
+    window: np.ndarray,
+) -> dict[str, Any]:
+    """Receipt block ``dynamics.knee_flexion_deg`` (#12684 acceptance item 4).
+
+    Measures, for each knee, the geometric flexion of the IK reference
+    (``q_ik``) and the forward-dynamics replay (``q_fd``) over the first
+    static window (``foot_progression.address_window`` frame indices): the
+    frame-0 values and their difference, and per trajectory the range, the
+    largest error against the address target, ``within_band`` (every window
+    frame within ``KNEE_FLEX_BAND_DEG`` of the target and never hyperextended)
+    and ``hyperextended``. Reports only; it changes no solve.
+
+    Preconditions: ``q_ik`` and ``q_fd`` are (frames, coordinates) arrays of
+    one shape; ``window`` is a non-empty set of frame indices in range.
+    ``targets`` None gives ``{"enabled": False}``.
+    """
+    if targets is None:
+        return {"enabled": False}
+    ik, fd = np.asarray(q_ik, dtype=float), np.asarray(q_fd, dtype=float)
+    if ik.ndim != 2 or ik.shape != fd.shape:
+        raise ValueError(
+            f"IK and FD trajectories must share a 2-D shape, got {ik.shape} and {fd.shape}"
+        )
+    frames = np.asarray(window, dtype=int)
+    if frames.size == 0 or frames.min() < 0 or frames.max() >= ik.shape[0]:
+        raise ValueError(
+            f"window must be non-empty frame indices in [0, {ik.shape[0]})"
+        )
+    knees: dict[str, Any] = {}
+    for side in _SIDES:
+        target = float(targets.target_deg[side])
+        sign = flexion_sign(kin, ik[0], side)
+        ik0 = model_knee_flexion_deg(kin, ik[0])[side]
+        fd0 = model_knee_flexion_deg(kin, fd[0])[side]
+        knees[side] = {
+            "role": foot_role(side, targets.handedness),
+            "target_deg": target,
+            "target_source": targets.sources[side],
+            "ik_frame0_deg": float(ik0),
+            "fd_frame0_deg": float(fd0),
+            "fd_minus_ik_frame0_deg": float(fd0 - ik0),
+            "ik": _window_stats(kin, ik[frames], side, target, sign),
+            "fd": _window_stats(kin, fd[frames], side, target, sign),
+        }
+    return {
+        "enabled": True,
+        "mode": targets.mode,
+        "band_deg": KNEE_FLEX_BAND_DEG,
+        "window": "first static window (foot_progression.address_window)",
+        "window_frames": int(frames.size),
+        "window_last_frame": int(frames.max()),
+        "knees": knees,
+    }

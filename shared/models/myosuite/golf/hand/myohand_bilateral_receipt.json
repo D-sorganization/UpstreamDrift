@@ -1,0 +1,56 @@
+{
+  "clubs": {
+    "driver": {
+      "length_m": 1.156,
+      "name": "driver",
+      "scene_xml": "myohand_bilateral_driver.xml",
+      "sha256": "b374ae8337c4cc38e35c51e7fa112c6a6dc1172dab7c601c80656f10c62bb13d",
+      "total_mass_kg": 0.313
+    },
+    "iron": {
+      "length_m": 0.94,
+      "name": "iron7",
+      "scene_xml": "myohand_bilateral_iron.xml",
+      "sha256": "dae0ec8e8e08872144d14cce5516df1ed7f6001e22648cd01e714bac52649677",
+      "total_mass_kg": 0.428
+    }
+  },
+  "generated_assets_sha256": {
+    "assets/myohand_left_chain.xml": "de5ef817d691e56f2d9605fab9eedcd6bfc9791bf98de6876cc7e0650c17e08b",
+    "assets/myohand_right_chain.xml": "348b88dbcd7e15d5bebc0f55f070cda73b5e4d3bde090234fa12db9049e1ffc6"
+  },
+  "issue": 13330,
+  "left_hand_mirror": {
+    "body_reflection_diag": [
+      1.0,
+      1.0,
+      -1.0
+    ],
+    "mesh_scale": [
+      1.0,
+      1.0,
+      -1.0
+    ],
+    "method": "sagittal_world_reflection_S_W_and_body_local_reflection_S_B_with_mesh_scale_1_1_-1",
+    "supported": true,
+    "world_reflection_diag": [
+      -1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "myo_sim_pin": "33f3ded946f55adbdcf963c99999587aadaf975f",
+  "qualification": {
+    "actuators_active": false,
+    "is_contact_fixture": true,
+    "muscle_recruitment_in_scope": false,
+    "notes": "Bilateral myoHand articulated grip fixture (HRG-GS-M8, #13330). Muscle recruitment is out of scope; actuators remain inactive."
+  },
+  "schema_version": 1,
+  "source_xml_sha256": {
+    "hand/assets/myohand_assets.xml": "2d6bd1f8c2dce2f0793ee8cd15b01281beb076be1cc6070dc0316f0dbe093dc8",
+    "hand/assets/myohand_body.xml": "4b55b3fb1b33b4934f25668d3e8a03f84dec3a51dc6383ca6a1da20d5d6b4862",
+    "hand/myohand.xml": "f744d0d38f3b9defb3497527fc0da7b2f4610bf57ee57f357003ae2d3f6bc0c1",
+    "scene/myosuite_scene.xml": "39e342fc0f4669b10fe28bfb6542fd06563db41b95cad3c4dc673ab126f4e11a"
+  }
+}

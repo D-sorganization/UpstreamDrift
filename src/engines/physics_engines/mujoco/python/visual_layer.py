@@ -26,6 +26,7 @@ from src.shared.python.model_appearance.club_assembly import (
     clubface_centre,
     clubface_vector,
 )
+from src.shared.python.model_appearance.club_chain_meshes import chain_layout
 from src.shared.python.model_appearance.schema import AppearanceDocument, BallSettings
 from src.shared.python.motion_matching.visual_skeleton import (
     VisualSkeleton,
@@ -213,6 +214,8 @@ def attach_visual_layer(
     club = assembly_from_spec(spec)
     club_body = club_body_name(spec)
     mesh_club = appearance is None and club is not None and club_body in elements
+    layout = chain_layout(spec)
+    club_bodies = {club_body} if layout is None else set(layout.bodies())
     for index, capsule in enumerate(
         () if appearance is not None else skeleton.capsules
     ):
@@ -238,13 +241,13 @@ def attach_visual_layer(
             attach_club_meshes,
         )
 
-        attach_club_meshes(root, elements, offsets, club_body, club)  # type: ignore[arg-type]
+        attach_club_meshes(root, elements, offsets, club_body, club, spec=spec)  # type: ignore[arg-type]
     ball_settings = appearance.ball if appearance is not None else BallSettings()
     ball_meta = _attach_decorative_ball(
         elements, offsets, club, club_body, ball_settings, skeleton.ground.height_m
     )
     for index, shape in enumerate(() if appearance is not None else skeleton.shapes):
-        if mesh_club and shape.body == club_body:
+        if mesh_club and shape.body in club_bodies:
             continue  # the mesh head replaces the ellipsoid hint
         ET.SubElement(
             elements[shape.body],

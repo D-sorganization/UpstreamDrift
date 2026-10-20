@@ -153,3 +153,52 @@ class TestLeaderboardPublishGating:
         assert f"contains(github.event.pull_request.labels.*.name, '{FULL_LABEL}')" in (
             condition
         )
+
+
+class TestOpenSimMainRunsComplete:
+    """#13494: a per-SHA group queued one OpenSim run for every main push.
+
+    ``ci-requires-opensim.yml`` keyed its main group on ``github.sha``, so no
+    main run ever superseded another and 42 main pushes sat queued for the four
+    docker runners. Grouped per event and ref without cancel-in-progress,
+    GitHub keeps the running main run plus only the newest pending one. PR runs
+    still cancel superseded pushes.
+
+    #13513: the job is not a required check (only ``quality-gate`` is), so the
+    merge queue never waited on it. It no longer triggers on ``merge_group``;
+    PR runs give pre-merge signal and main push runs give post-merge signal.
+    """
+
+    NAME = "ci-requires-opensim.yml"
+    GROUP = "ci-requires-opensim-${{ github.event_name }}-${{ github.ref }}"
+    CANCEL = "${{ github.event_name == 'pull_request' }}"
+
+    def test_group_is_per_event_and_ref(self) -> None:
+        group = _load(self.NAME)["concurrency"]["group"]
+        assert "github.sha" not in group, "per-SHA groups queue every main push"
+        assert "runner." not in group, "runner context is invalid in concurrency"
+        assert group == self.GROUP
+
+    def test_only_pr_runs_cancel_in_progress(self) -> None:
+        # push and dispatch runs evaluate this to false, so a main run that
+        # has started is never cancelled.
+        concurrency = _load(self.NAME)["concurrency"]
+        assert concurrency["cancel-in-progress"] == self.CANCEL
+
+    def test_no_merge_group_trigger(self) -> None:
+        # Not a required check, so merge-queue runs were pure runner cost.
+        on = _triggers(_load(self.NAME))
+        assert "merge_group" not in on, "merge queue never waits on this job"
+
+    def test_pr_and_main_push_triggers_remain(self) -> None:
+        on = _triggers(_load(self.NAME))
+        assert "pull_request" in on, "PR runs give the pre-merge signal"
+        assert on["push"]["branches"] == ["main"], "main runs give post-merge signal"
+        assert "workflow_dispatch" in on
+
+    def test_workflow_lint_allows_conditional_cancel(self) -> None:
+        lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
+        allowlist = next(
+            line for line in lint.splitlines() if "nightly-publish.yml" in line
+        )
+        assert self.NAME in allowlist

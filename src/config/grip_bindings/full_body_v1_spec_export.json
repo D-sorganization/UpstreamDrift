@@ -1,0 +1,28 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "full_body_v1_spec_export",
+  "model_hash": "sha256:a45d8c7c7168e8c68fa204f758e5a936b1816dfa256901cf3818d4d992ced930",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "neutral_address",
+    "description": "Address pose with club aligned and hands placed on grip"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+    "date": "2026-10-18",
+    "method": "spec_export"
+  },
+  "attachment_mode": "contact",
+  "club_body": "club",
+  "lead_hand_body": "lead_hand",
+  "trail_hand_body": "trail_hand",
+  "unavailable_sites": {}
+}

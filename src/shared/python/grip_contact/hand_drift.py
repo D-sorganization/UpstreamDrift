@@ -29,12 +29,43 @@ class HandDrift:
     rotation_deg: np.ndarray  # (n,) angle of the relative rotation change
 
     @property
+    def translation_mm(self) -> np.ndarray:
+        """Euclidean 3-D translation drift from sample 0 in the lead frame (mm)."""
+        return np.hypot(self.along_mm, self.across_mm)
+
+    @property
     def peak(self) -> dict[str, float]:
         """Peak absolute drift: ``along_mm``, ``across_mm``, ``rotation_deg``."""
         return {
             "along_mm": float(np.abs(self.along_mm).max()),
             "across_mm": float(self.across_mm.max()),
             "rotation_deg": float(self.rotation_deg.max()),
+        }
+
+    @property
+    def rms(self) -> dict[str, float]:
+        """RMS drift: ``along_mm``, ``across_mm``, ``translation_mm``, ``rotation_deg``."""
+        t_mm = self.translation_mm
+        return {
+            "along_mm": float(np.sqrt(np.mean(self.along_mm**2))),
+            "across_mm": float(np.sqrt(np.mean(self.across_mm**2))),
+            "translation_mm": float(np.sqrt(np.mean(t_mm**2))),
+            "rotation_deg": float(np.sqrt(np.mean(self.rotation_deg**2))),
+        }
+
+    def summary(self) -> dict[str, float]:
+        """Peak and RMS relative-pose deviation from sample 0 (translation in mm, rotation in deg)."""
+        t_mm = self.translation_mm
+        rms_vals = self.rms
+        return {
+            "translation_peak_mm": float(t_mm.max()),
+            "translation_rms_mm": rms_vals["translation_mm"],
+            "along_peak_mm": float(np.abs(self.along_mm).max()),
+            "along_rms_mm": rms_vals["along_mm"],
+            "across_peak_mm": float(self.across_mm.max()),
+            "across_rms_mm": rms_vals["across_mm"],
+            "rotation_peak_deg": float(self.rotation_deg.max()),
+            "rotation_rms_deg": rms_vals["rotation_deg"],
         }
 
 

@@ -8,17 +8,22 @@ on:
       - "**.md"
       - "LICENSE"
       - ".gitignore"
-  merge_group:
+  # No merge_group trigger: this job is not a required check (only
+  # quality-gate is), so the merge queue never waited on it (#13513).
   # Pull requests run via pull_request; push covers main only, so a PR branch
-  # does not run the job twice (merge-queue refs are not main).
+  # does not run the job twice.
   push:
     branches:
       - main
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
-  cancel-in-progress: true
+  # PR runs cancel superseded pushes. Main and dispatched runs are never
+  # cancelled once running. A per-SHA main group queued one run per merge
+  # for the four docker runners (#13494). Grouped per event and ref, GitHub keeps
+  # the running main run plus only the newest pending one (#12285).
+  group: ci-requires-opensim-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -79,18 +84,47 @@ jobs:
         uses: ./.github/actions/fetch-pinned-tools
 
       - name: Fetch OpenSim Rajagopal body model
+        # The sparse clone is kept per runner, keyed by the upstream commit
+        # (#13510). A cached copy is reused only when its HEAD is that commit
+        # and its checked-out files match HEAD. Anything else falls back to a
+        # fresh clone.
         shell: bash
+        env:
+          MODELS_URL: https://github.com/opensim-org/opensim-models.git
         run: |
-          rm -rf shared/models/opensim/opensim-models
-          git clone --depth 1 --filter=blob:none --sparse https://github.com/opensim-org/opensim-models.git shared/models/opensim/opensim-models
-          git -C shared/models/opensim/opensim-models sparse-checkout set Models/Rajagopal
-          test -f shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim
+          set -euo pipefail
+          dest=shared/models/opensim/opensim-models
+          cache_root="${RUNNER_TOOL_CACHE:-$RUNNER_TEMP}/upstreamdrift-opensim-models/${RUNNER_NAME:-local}"
+          rm -rf "$dest"
+          mkdir -p "$(dirname "$dest")"
+          sha="$(git ls-remote "$MODELS_URL" HEAD 2>/dev/null | cut -f1 || true)"
+          cached="$cache_root/${sha:-none}"
+          if [ -n "$sha" ] &&
+            [ "$(git -C "$cached" rev-parse HEAD 2>/dev/null)" = "$sha" ] &&
+            git -C "$cached" diff --quiet HEAD -- Models/Rajagopal; then
+            echo "Reusing cached opensim-models $sha"
+            cp -a "$cached" "$dest"
+          else
+            git clone --depth 1 --filter=blob:none --sparse "$MODELS_URL" "$dest"
+            git -C "$dest" sparse-checkout set Models/Rajagopal
+            head="$(git -C "$dest" rev-parse HEAD)"
+            {
+              rm -rf "$cache_root" &&
+                mkdir -p "$cache_root" &&
+                cp -a "$dest" "$cache_root/$head.partial" &&
+                mv "$cache_root/$head.partial" "$cache_root/$head"
+            } || echo "::warning::could not cache opensim-models $head"
+          fi
+          test -f "$dest/Models/Rajagopal/RajagopalLaiUhlrich2023.osim"
 
       - name: Set up Python 3.12
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5.4.0
         with:
           python-version: "3.12"
-          cache: "pip"
+          # Self-hosted runners keep a persistent per-runner PIP_CACHE_DIR.
+          # There the GitHub cache always missed and its post step uploaded
+          # ~135 MB over the fleet's uplink each run (#13510).
+          cache: ${{ runner.environment == 'github-hosted' && 'pip' || '' }}
           cache-dependency-path: |
             pyproject.toml
             requirements*.lock
@@ -98,15 +132,62 @@ jobs:
       - name: Create stub ui/dist for editable install
         run: mkdir -p ui/dist
 
-      - name: Set up Python venv and install dependencies
+      - name: Restore or build persistent OpenSim venv
+        # Writing the dev lock into a fresh venv cost ~210 s of every run
+        # (#13510). The venv is kept per runner, keyed by the lock, the
+        # opensim pin and the interpreter. It is reused only when its
+        # completion marker carries the key, the OpenSim/pytest stack imports
+        # and the installed set matches the build-time snapshot. Anything else
+        # (partial, corrupt, mutated) is wiped and rebuilt. Bump
+        # OPENSIM_VENV_SCHEMA to force a rebuild on every runner.
+        env:
+          OPENSIM_PIN: "4.6"
+          OPENSIM_VENV_SCHEMA: "1"
         run: |
-          python -m venv "$RUNNER_TEMP/opensim-ci-venv"
-          echo "$RUNNER_TEMP/opensim-ci-venv/bin" >> "$GITHUB_PATH"
-          echo "VIRTUAL_ENV=$RUNNER_TEMP/opensim-ci-venv" >> "$GITHUB_ENV"
-          "$RUNNER_TEMP/opensim-ci-venv/bin/python" -m pip install --upgrade pip
-          "$RUNNER_TEMP/opensim-ci-venv/bin/python" -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
-          "$RUNNER_TEMP/opensim-ci-venv/bin/python" -m pip install --no-cache-dir --no-deps -e ".[dev]"
-          "$RUNNER_TEMP/opensim-ci-venv/bin/python" -m pip install "opensim==4.6"
+          set -euo pipefail
+          base="${RUNNER_TOOL_CACHE:-$RUNNER_TEMP}/upstreamdrift-opensim-venv/${RUNNER_NAME:-local}"
+          interp="$(python -c 'import sys; print(sys.version, sys.executable)')"
+          lock_sha="$(sha256sum requirements-dev.lock | cut -d' ' -f1)"
+          key="$(printf '%s\n' "schema=$OPENSIM_VENV_SCHEMA" "opensim=$OPENSIM_PIN" "python=$interp" "lock=$lock_sha" | sha256sum | cut -c1-16)"
+          venv="$base/$key"
+          # --no-cache-dir guarded the shared ~/.cache/pip http-v2 race. The
+          # per-runner PIP_CACHE_DIR (Runner_Dashboard
+          # configure-runner-pipcache.sh) removes that race, so keep the guard
+          # only where no per-runner cache is configured.
+          no_cache=()
+          if [ -z "${PIP_CACHE_DIR:-}" ]; then no_cache=(--no-cache-dir); fi
+
+          venv_ok() {
+            [ "$(cat "$venv/.opensim-venv-complete" 2>/dev/null)" = "$key" ] || return 1
+            "$venv/bin/python" -c "import opensim, pytest, xdist, pytest_timeout; assert opensim.GetVersion().startswith('$OPENSIM_PIN')" >/dev/null || return 1
+            "$venv/bin/python" -m pip freeze --exclude-editable | cmp -s - "$venv/.opensim-venv-freeze"
+          }
+
+          if venv_ok; then
+            echo "Reusing persistent OpenSim venv $key"
+          else
+            echo "Building persistent OpenSim venv $key"
+            rm -rf "$venv"
+            mkdir -p "$base"
+            python -m venv "$venv"
+            "$venv/bin/python" -m pip install --upgrade pip
+            "$venv/bin/python" -m pip install "${no_cache[@]}" --ignore-installed -r requirements-dev.lock
+            "$venv/bin/python" -m pip install "${no_cache[@]}" "opensim==$OPENSIM_PIN"
+            "$venv/bin/python" -m pip freeze --exclude-editable > "$venv/.opensim-venv-freeze"
+            echo "$key" > "$venv/.opensim-venv-complete"
+          fi
+          # Keep only the current key so stale venvs do not fill the disk.
+          find "$base" -mindepth 1 -maxdepth 1 ! -name "$key" -exec rm -rf {} +
+          echo "$venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$venv" >> "$GITHUB_ENV"
+
+      - name: Install UpstreamDrift (editable) into the OpenSim venv
+        # Redone every run so the venv always tests this checkout.
+        run: |
+          set -euo pipefail
+          no_cache=()
+          if [ -z "${PIP_CACHE_DIR:-}" ]; then no_cache=(--no-cache-dir); fi
+          python -m pip install "${no_cache[@]}" --no-deps -e ".[dev]"
 
       - name: Verify OpenSim 4.6 is importable
         run: |

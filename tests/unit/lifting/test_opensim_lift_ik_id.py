@@ -26,14 +26,21 @@ import hashlib
 import json
 import math
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 
 _REPO = Path(__file__).resolve().parents[3]
 
+from src.engines.physics_engines.opensim.python.msk_lift_ik_id import (
+    IDResult,
+    RESIDUAL_COORDINATES,
+    id_receipt,
+)
 from src.shared.python.lifting import opensim_full_body_lifts as lifts_mod
 from src.shared.python.lifting.bundles import SAME_INPUT_LIFT_BUNDLES
+from src.shared.python.lifting.bundle_targets import LiftTargets, lift_targets
 from src.shared.python.lifting.opensim_full_body_lifts import (
     OpenSimFullBodyLiftSpec,
     compose_opensim_full_body_lift,
@@ -135,8 +142,8 @@ _RESIDUAL_GATE_XFAILS = {
         "moments_within=False (peak pelvis_tilt 147.88 Nm > 18.28 Nm) (#13041)"
     ),
     "bench_press": (
-        "forces_within=False (peak pelvis_ty 511.26 N > 32.49 N), "
-        "moments_within=False (peak pelvis_tilt 318.13 Nm > 3.45 Nm) (#13041)"
+        "forces_within=False (peak pelvis_ty 511.58 N > 221.85 N), "
+        "moments_within=False (peak pelvis_tilt 318.32 Nm > 23.54 Nm) (#13041)"
     ),
     "snatch": (
         "forces_within=False (peak pelvis_tx 463.57 N > 155.12 N), "
@@ -234,6 +241,13 @@ def test_lift_residual_gate(lift: str, request: pytest.FixtureRequest) -> None:
     assert gate["moments_within"] is True
 
 
+def test_squat_receipt_range_violations_empty() -> None:
+    receipts = _load_receipts()
+    entry = receipts["lifts"]["squat"]["ik_id"]
+    assert entry["status"] == "complete", entry["reason"]
+    assert entry["ik"]["range_violations"] == {}
+
+
 @pytest.mark.requires_opensim
 @pytest.mark.integration
 def test_squat_live_ik_coordinate_rms_below_receipt_threshold(
@@ -291,3 +305,64 @@ def test_bench_press_live_supine_and_bench_loads() -> None:
         assert elevation <= math.radians(20.0), (
             f"pelvis elevation {math.degrees(elevation):.1f} deg > 20 deg"
         )
+
+
+def test_id_receipt_peak_external_force_sums_feet_and_bench_framewise() -> None:
+    """Peak external force is the peak magnitude of the net ground-side support reaction.
+
+    At each frame, every support contact (both feet plus every bench sphere)
+    is summed before taking the vector magnitude; feet alone or sum of peaks
+    is not used.
+    """
+    coords = list(RESIDUAL_COORDINATES)
+    inverse = IDResult(
+        coordinates=coords,
+        tau=np.zeros((2, len(coords)), dtype=float),
+        com_height_m=1.0,
+    )
+    # Frame 0: feet dominant (200 N), bench zero -> net = 200 N
+    # Frame 1: feet small (20 N), bench dominant (300 N) -> net = 320 N
+    # Feet alone peak = 200 N; net support reaction peak = 320 N.
+    foot_l = np.array([[100.0, 0.0, 0.0], [10.0, 0.0, 0.0]], dtype=float)
+    foot_r = np.array([[100.0, 0.0, 0.0], [10.0, 0.0, 0.0]], dtype=float)
+    bench_1 = np.array([[0.0, 0.0, 0.0], [150.0, 0.0, 0.0]], dtype=float)
+    bench_2 = np.array([[0.0, 0.0, 0.0], [150.0, 0.0, 0.0]], dtype=float)
+
+    targets = MagicMock(spec=LiftTargets)
+    targets.grf_force_n = {"left": foot_l, "right": foot_r}
+    targets.bench_force_n = {"back_RPSH": bench_1, "back_LPSH": bench_2}
+
+    receipt = id_receipt(targets, inverse)
+    gate = receipt["residual_gate"]
+    assert gate["peak_external_force_n"] == pytest.approx(320.0)
+    assert gate["max_force_n"] == pytest.approx(0.05 * 320.0)
+    assert gate["max_moment_nm"] == pytest.approx(0.01 * 1.0 * 320.0)
+
+    # Without bench support, result falls back to feet alone
+    targets_no_bench = MagicMock(spec=LiftTargets)
+    targets_no_bench.grf_force_n = {"left": foot_l, "right": foot_r}
+    targets_no_bench.bench_force_n = {}
+    receipt_no_bench = id_receipt(targets_no_bench, inverse)
+    assert receipt_no_bench["residual_gate"]["peak_external_force_n"] == pytest.approx(
+        200.0
+    )
+
+
+def test_bench_press_peak_external_force_at_least_peak_bench_force() -> None:
+    """For bench press, peak_external_force_n is at least the peak bench force."""
+    receipts = _load_receipts()
+    entry = receipts["lifts"]["bench_press"]["ik_id"]
+    assert entry["status"] == "complete", entry["reason"]
+    gate = entry["id"]["residual_gate"]
+    peak_external = gate["peak_external_force_n"]
+
+    bundle_path = SAME_INPUT_LIFT_BUNDLES["bench_press"]
+    assert bundle_path is not None
+    targets = lift_targets("bench_press", bundle_path, stride=receipts.get("stride", 5))
+    assert targets.bench_force_n, (
+        "bench press targets must include bench contact forces"
+    )
+    bench_sum = sum(targets.bench_force_n.values())
+    peak_bench_n = float(np.linalg.norm(bench_sum, axis=1).max())
+
+    assert peak_external >= peak_bench_n

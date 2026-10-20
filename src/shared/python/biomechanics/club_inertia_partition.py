@@ -175,6 +175,51 @@ def club_solids_partition(spec: Mapping[str, Any]) -> ClubSolidsPartition:
             bare_solids.append(solid)
     if not bare_solids:
         raise ValueError(f"club body {name!r} has no club solids (head/shaft/grip)")
+    if not hands and isinstance(spec.get("grip_bushing"), Mapping):
+        gb = spec["grip_bushing"]
+        left_body = next(
+            (
+                b
+                for b in spec.get("bodies", [])
+                if b["name"] == gb.get("left_hand_body")
+            ),
+            None,
+        )
+        if left_body is not None:
+            for solid in left_body["solids"]:
+                if _HAND_SOLID.search(solid["name"]):
+                    suffix = _SUFFIX.search(solid["name"])
+                    hands[suffix.group(0) if suffix else solid["name"]] = _compose(
+                        [solid]
+                    )
+        right_body = next(
+            (
+                b
+                for b in spec.get("bodies", [])
+                if b["name"] == gb.get("right_hand_body")
+            ),
+            None,
+        )
+        if (
+            right_body is not None
+            and "placement_a" in closure
+            and "placement_b" in closure
+        ):
+            t_a_in_b = np.asarray(closure["placement_b"], float) @ np.linalg.inv(
+                np.asarray(closure["placement_a"], float)
+            )
+            for solid in right_body["solids"]:
+                if _HAND_SOLID.search(solid["name"]):
+                    suffix = _SUFFIX.search(solid["name"])
+                    placed = {
+                        **solid,
+                        "placement": (
+                            t_a_in_b @ np.asarray(solid["placement"], float)
+                        ).tolist(),
+                    }
+                    hands[suffix.group(0) if suffix else solid["name"]] = _compose(
+                        [placed]
+                    )
     bare = _compose(bare_solids)
     total = (spec.get("club") or {}).get("total_mass_kg")
     if total is not None and abs(bare.mass_kg - float(total)) > MASS_CHECK_TOLERANCE_KG:

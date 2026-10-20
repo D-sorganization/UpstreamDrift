@@ -18,6 +18,84 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13190 · HRG-H2 Diagnostic Palm-Thumb Pad: Drift-Gated Physical Trail_Palm_Lead_Thumb Pair on the Shared G2 Law in Separated_V2, Impact Timestep and Preload Sensitivity Reports, and a New Spec Revision With Its Own Spec_Sha256; Contract Pinned by Tests.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13190
+- **Branch:** feat/13190-palm-thumb-pad
+- **PR:** #13525
+- **Paths:** src/shared/python/grip_contact/palm_thumb_pad.py,tests/unit/grip_contact/test_palm_thumb_pad.py
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`c93840a6`; collated from changes/13190-hrg-h2-diagnostic-palm-thumb-pad-drift-g.md)
+- **Summary:** HRG-H2 diagnostic palm-thumb pad: drift-gated physical trail_palm_lead_thumb pair on the shared G2 law in separated_v2, impact timestep and preload sensitivity reports, and a new spec revision with its own spec_sha256; contract pinned by tests.
+- **Next step:** Owner: cross-engine parity of the pad on MuJoCo/Drake/Pinocchio/OpenSim and the HRG .tex reference section remain open.
+
+### DL-#13171 · HRG-E3 Slice: Pelvis and Thorax ISB Lab-Frame Turn, Tilt, Obliquity and Side-Bend Golf Terms With Golf-Word Aliases; Thoracic/Lumbar Split Marked Unavailable
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13171
+- **Branch:** claude/ud-13171-trunk-pelvis-terms
+- **PR:** #13498
+- **Paths:** see #13498
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`49f40152`; collated from changes/13171-hrg-e3-slice-pelvis-and-thorax-isb-lab-f.md)
+- **Summary:** HRG-E3 slice: pelvis and thorax ISB lab-frame turn, tilt, obliquity and side-bend golf terms with golf-word aliases; thoracic/lumbar split marked unavailable
+- **Next step:** HRG-E3 remaining: line-method pelvis/thorax turn labels, hip (isb_hip), knee (Grood-Suntay), shoulder YXY, elbow flexion
+
+### DL-#13490 · Hang Watchdog Dumps Stacks From a GIL-Held Python Handler so SIGUSR1 No Longer Segfaults the Xdist Controller (Exit 139)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13490
+- **Branch:** fix/qt-teardown-segv
+- **PR:** #13497
+- **Paths:** see #13497
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`76b42c4d`; collated from changes/13490-hang-watchdog-dumps-stacks-from-a-gil-he.md)
+- **Summary:** Hang watchdog dumps stacks from a GIL-held Python handler so SIGUSR1 no longer segfaults the xdist controller (exit 139)
+- **Next step:** Merge the PR; watch unit-test-gate for any further exit 139.
+
+### DL-#13256 · Re-Lands the Salvaged Source-Bound Native OpenSim Muscle-Effort Adapter and Runtime With SDK-Free Contract Tests; Native Tests Skip Without the SDK and No Manager Advance Has Been Executed.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13256
+- **Branch:** feat/ud-13256-native-muscle-adapter
+- **PR:** #13478
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/native_muscle_effort_adapter.py,src/engines/physics_engines/opensim/python/tour_matching/native_muscle_effort_runtime.py,src/engines/physics_engines/opensim/python/tour_matching/muscle_replay.py,tests/unit/engines/opensim/test_native_muscle_effort_adapter.py,tests/opensim/test_native_muscle_effort_adapter.py,tests/opensim/test_native_muscle_effort_native.py
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`bf10d600`; collated from changes/13256-native-muscle-effort-adapter.md)
+- **Summary:** Re-lands the salvaged source-bound native OpenSim muscle-effort adapter and runtime with SDK-free contract tests; native tests skip without the SDK and no Manager advance has been executed.
+- **Next step:** Owner decides whether native muscle advancement stays on the OSL/NSX roadmap; implement the opt-in stop_when_feasible allocator contract before any new native attempt.
+
+### DL-#13176 · HRG-Q1 Slice: Full-Body-V2 Mass Matrix and Gravity Qualified Against a Spec-Only Geometric-Jacobian Reference on MuJoCo (Measured Rel. Error <=4E-16, Tol 1E-12) With a Pinocchio Twin; Drake, OpenSim, MyoSuite, Limits, Closure, Contact and ID Remain Open
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13176
+- **Branch:** claude/ud-13176-hrg-q1-qualification
+- **PR:** #13491
+- **Paths:** see #13491
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`8000133e`; collated from changes/13176-hrg-q1-slice-full-body-v2-mass-matrix-an.md)
+- **Summary:** HRG-Q1 slice: full-body-v2 mass matrix and gravity qualified against a spec-only geometric-Jacobian reference on MuJoCo (measured rel. error <=4e-16, tol 1e-12) with a Pinocchio twin; Drake, OpenSim, MyoSuite, limits, closure, contact and ID remain open
+- **Next step:** Extend to Drake/OpenSim inertia-gravity and reference-trajectory inverse dynamics
+
+### DL-#13112 · Forward-Dynamics Replay Reproducibility: Deterministic Replay Test, Seeded Lyapunov-Style Sensitivity Probe (--Replay-Sensitivity), Bounded 0.1 s Post-Impact FD Metric, and a Base-of-Support Bound on the ZMP Filter Centre-of-Mass Shift
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13112
+- **Branch:** claude/ud-13112-fd-replay-repro
+- **PR:** #13501
+- **Paths:** see #13501
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`67c97461`; collated from changes/13112-replay-sensitivity-zmp-bound.md)
+- **Summary:** Forward-dynamics replay reproducibility: deterministic replay test, seeded Lyapunov-style sensitivity probe (--replay-sensitivity), bounded 0.1 s post-impact FD metric, and a base-of-support bound on the ZMP filter centre-of-mass shift
+- **Next step:** Regenerate anthro_iron_seeds_zmp on ControlTower with the CoM-shift bound; probe a segment-inertia (+/-5 mm CoM) perturbation with the same growth-rate metric
+
 ### DL-#12985 · Align Default Engine Models to Canonical Golfer and Raise KeyError on Unknown Body in Compute_Jacobian
 
 - **State:** in_review
@@ -336,10 +414,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12686
 - **Branch:** feat/12686-flexible-shaft-mujoco
-- **PR:** #12734
+- **PR:** #12734, #13486
 - **Paths:** see #12734
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`9dfe5d3a`; collated from changes/12686-r6-opt-in-flexible-golf-shaft-as-a-rigid.md)
+- **Last verified:** 2026-10-20 (`069023b1`; collated from changes/12686-r6-criterion-6-mujoco-visual-and-appeara.md)
 - **Summary:** R6: opt-in flexible golf shaft as a rigid-link spring-damper chain (MuJoCo); generic STIFF profile flagged default_not_measured; rigid default byte-identical; other engines refuse chain specs
 - **Next step:** Criterion 6 (deflected-shaft render) and criterion 7 (dynamic clubhead-speed study); R11 engine ports
 
@@ -375,10 +453,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12683
 - **Branch:** fix/12683-trail-toe-out
-- **PR:** #12731
+- **PR:** #12731, #13482
 - **Paths:** see #12731
 - **Started:** 2026-10-15
-- **Last verified:** 2026-10-15 (`f6e69608`; collated from changes/12683-r3-trail-foot-toe-out-owner-style-target.md)
+- **Last verified:** 2026-10-20 (`1562f63d`; collated from changes/12683-pin-the-trail-foot-toe-out-on-the-commit.md)
 - **Summary:** R3: trail-foot toe-out owner style target (TRAIL_TOE_OUT_STYLE_DEG = 20 deg, single-sourced from DEFAULT_TOE_OUT_DEG) via a new --foot-progression style mode, now the canonical default; capture mode still lets the measurement win; per-foot target_source in receipts; driver trail -2.9 -> 19.8 deg, 7-iron -9.8 -> 13.5 deg (hip_rotation_r at its -40 deg limit)
 - **Next step:** Owner decision on the 7-iron shortfall (hip external-rotation range vs accept ~13.5 deg), then regenerate anthro_driver_seeds/anthro_iron_seeds_zmp receipts before R4 (#12684).
 
@@ -2665,6 +2743,487 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13334 · Add Stateless Simscape Physical Grip Contact Codegen Kernel, GS3DX_GripContact Builder/Runner, and M12 Parity Harness
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13334
+- **Branch:** merged via #13529
+- **PR:** #13529
+- **Paths:** see #13529
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`3153e8c0`; collated from changes/13334-add-simscape-physical-grip-contact-codeg.md)
+- **Summary:** Add stateless Simscape physical grip contact codegen kernel, GS3DX_GripContact builder/runner, and M12 parity harness
+- **Next step:** Shipped in PR #13529.
+
+### DL-#13466 · Drake Native Golfer Grip Tests Pass With Real Pydrake: Default Loader Parses the Generator Humanoid (Not the #13312 Canonical Golfer), Actuator Retrofit No Longer Calls Num_Velocities() Before Finalize, humanoid_urdf.py Split Under 1200 Lines and Its Size Exceptions Removed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13466
+- **Branch:** merged via #13520
+- **PR:** #13520
+- **Paths:** see #13520
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`b9a397d6`; collated from changes/13466-drake-native-golfer-grip-tests-pass-with.md)
+- **Summary:** Drake native golfer grip tests pass with real pydrake: default loader parses the generator humanoid (not the #13312 canonical golfer), actuator retrofit no longer calls num_velocities() before Finalize, humanoid_urdf.py split under 1200 lines and its size exceptions removed
+- **Next step:** Shipped in PR #13520.
+
+### DL-#13508 · Symmetric Capsule Line-Contact Quadrature Integrates the Shorter Capsule Axis (#13508)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13508
+- **Branch:** merged via #13517
+- **PR:** #13517
+- **Paths:** see #13517
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`f7d5547a`; collated from changes/13508-symmetric-capsule-line-contact-quadratur.md)
+- **Summary:** Symmetric capsule line-contact quadrature integrates the shorter capsule axis (#13508)
+- **Next step:** Shipped in PR #13517.
+
+### DL-#13346 · Reclassify Grip_Style as a Physical Pick Across CLI, API, Desktop and Web and Migrate Legacy Sidecars
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13346
+- **Branch:** merged via #13472
+- **PR:** #13472
+- **Paths:** see #13472
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`53919d4d`; collated from changes/13346-reclassify-grip-style-as-a-physical-pick.md)
+- **Summary:** Reclassify grip_style as a physical pick across CLI, API, desktop and web and migrate legacy sidecars
+- **Next step:** Shipped in PR #13472.
+
+### DL-#13510 · Ci(Opensim): Real OpenSim Job Reuses a Validated Per-Runner Venv and Opensim-Models Clone and Stops Uploading the GitHub Pip Cache From Self-Hosted Runners
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13510
+- **Branch:** merged via #13511
+- **PR:** #13511
+- **Paths:** see #13511
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`d8d85a52`; collated from changes/13510-ci-opensim-real-opensim-job-reuses-a-val.md)
+- **Summary:** ci(opensim): Real OpenSim job reuses a validated per-runner venv and opensim-models clone and stops uploading the GitHub pip cache from self-hosted runners
+- **Next step:** Shipped in PR #13511.
+
+### DL-#13500 · Fix Duplicate Tex_Skin_2 Asset in MuJoCo With_Head Exports so the MJCF Compiles
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13500
+- **Branch:** merged via #13505
+- **PR:** #13505
+- **Paths:** see #13505
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`94b8e96b`; collated from changes/13500-fix-duplicate-tex-skin-2-asset-in-mujoco.md)
+- **Summary:** Fix duplicate tex_skin_2 asset in MuJoCo with_head exports so the MJCF compiles
+- **Next step:** Shipped in PR #13505.
+
+### DL-#13175 · HRG-E4 Slice: Anatomical-Angle Event Table (Address/Top/Impact/Finish) With CSV/JSON Export Carrying Units, Sign Conventions, Observability and Receipts; JSON Schema Validated
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13175
+- **Branch:** merged via #13503
+- **PR:** #13503, #13538
+- **Paths:** see #13503
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`b9edfcc0`; collated from changes/13175-hrg-e4-slice-post-biomechanics-anatomica.md)
+- **Summary:** HRG-E4 slice: anatomical-angle event table (address/top/impact/finish) with CSV/JSON export carrying units, sign conventions, observability and receipts; JSON schema validated
+- **Next step:** Shipped in PR #13503.
+
+### DL-#13174 · MuJoCo Visual Layer for Full-Body-V2: One Rigid Pelvis, Abdomen and Thorax Visual per Trunk Segment, Seam No-Gap and Physics-Unchanged Tests (HRG-D3 Slice; Renders Deferred)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13174
+- **Branch:** merged via #13499
+- **PR:** #13499
+- **Paths:** see #13499
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`396a999f`; collated from changes/13174-mujoco-visual-layer-for-full-body-v2-one.md)
+- **Summary:** MuJoCo visual layer for full-body-v2: one rigid pelvis, abdomen and thorax visual per trunk segment, seam no-gap and physics-unchanged tests (HRG-D3 slice; renders deferred)
+- **Next step:** Shipped in PR #13499.
+
+### DL-#13494 · Stop CI Requires OpenSim Queueing One Run per Main Push
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13494
+- **Branch:** ci/opensim-main-concurrency
+- **PR:** #13496
+- **Paths:** see #13496
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`2e64f840`; collated from changes/13494-stop-ci-requires-opensim-queueing-one-ru.md)
+- **Summary:** Stop CI Requires OpenSim queueing one run per main push
+- **Next step:** Shipped in PR #13496.
+
+### DL-#13017 · Heavy Lanes: Install Real Pin/Pin-Pink Wheels and Isolate Each Lane in a Venv
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13017
+- **Branch:** merged via #13476
+- **PR:** #13476
+- **Paths:** see #13476
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`1aadc830`; collated from changes/13017-heavy-lanes-install-real-pin-pin-pink-wh.md)
+- **Summary:** Heavy lanes: install real pin/pin-pink wheels and isolate each lane in a venv
+- **Next step:** Shipped in PR #13476.
+
+### DL-#13454 · Remove Dead Pinocchio Default Branch From Drake Simulate DEFAULT_GOLFER_URDF
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13454
+- **Branch:** fix/ud-drake-bugs
+- **PR:** #13468
+- **Paths:** see #13468
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`e541e40b`; collated from changes/13454-remove-dead-pinocchio-default-branch-fro.md)
+- **Summary:** Remove dead Pinocchio default branch from Drake simulate DEFAULT_GOLFER_URDF
+- **Next step:** Shipped in PR #13468.
+
+### DL-#13451 · Guard DrakePhysicsEngine.Get_Joint_Names Against Unfinalized Plants
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13451
+- **Branch:** fix/ud-drake-bugs
+- **PR:** #13468
+- **Paths:** see #13468
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`e541e40b`; collated from changes/13451-guard-drakephysicsengine-get-joint-names.md)
+- **Summary:** Guard DrakePhysicsEngine.get_joint_names against unfinalized plants
+- **Next step:** Shipped in PR #13468.
+
+### DL-#13450 · Resolve the Drake Autodiff Fit Grip Body Through the Shared Simulate Fallback
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13450
+- **Branch:** fix/ud-drake-bugs
+- **PR:** #13468
+- **Paths:** see #13468
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`e541e40b`; collated from changes/13450-resolve-the-drake-autodiff-fit-grip-body.md)
+- **Summary:** Resolve the Drake autodiff fit grip body through the shared simulate fallback
+- **Next step:** Shipped in PR #13468.
+
+### DL-#13449 · Size Drake-Simscape Equivalence Fixture Theta From the Plant Actuator Count
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13449
+- **Branch:** fix/ud-drake-bugs
+- **PR:** #13468, #13515
+- **Paths:** see #13468
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`f0d94751`; collated from changes/13449-add-headless-regression-test-for-drake-s.md)
+- **Summary:** Size Drake-Simscape equivalence fixture theta from the plant actuator count
+- **Next step:** Shipped in PR #13468.
+
+### DL-#13043 · Add OpenSim 3D Joint Reaction Analysis for Barbell Lifts (OSL-5)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13043
+- **Branch:** merged via #13415
+- **PR:** #13415
+- **Paths:** see #13415
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`b030576f`; collated from changes/13043-add-opensim-3d-joint-reaction-analysis-f.md)
+- **Summary:** Add OpenSim 3D joint reaction analysis for barbell lifts (OSL-5)
+- **Next step:** Shipped in PR #13415.
+
+### DL-#13460 · Relax Last-Ulp Geometry Assertions in Batched Grip Contact Tests (Linux BLAS Dot Rounding)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13460
+- **Branch:** merged via #13473
+- **PR:** #13473, #13469
+- **Paths:** see #13473
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`844aea4a`; collated from changes/13460-mark-the-torch-cuda-wheel-index-pip-prob.md)
+- **Summary:** Relax last-ulp geometry assertions in batched grip contact tests (Linux BLAS dot rounding)
+- **Next step:** Shipped in PR #13473.
+
+### DL-#13453 · Test the MyoSuite Gymnasium-First Import Behaviourally in _Engine_Init
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13453
+- **Branch:** fix/ud-myosuite-gym-tests
+- **PR:** #13471
+- **Paths:** see #13471
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`1402b709`; collated from changes/13453-test-myosuite-gymnasium-import-behaviour.md)
+- **Summary:** Test the MyoSuite gymnasium-first import behaviourally in _engine_init
+- **Next step:** Shipped in PR #13471.
+
+### DL-#13396 · HRG Reference: Record That an Analytic Radau Jacobian Is Not Worth Building for the Pinocchio Grip Sim (Num_Jac Is 5-15% of CPU; Newton Iterations Dominate)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13396
+- **Branch:** merged via #13422
+- **PR:** #13422, #13480
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-20 (`9c1c578f`; collated from changes/13396-restore-the-13396-grip-follow-ups-lost-i.md)
+- **Summary:** HRG reference: record that an analytic Radau Jacobian is not worth building for the Pinocchio grip sim (num_jac is 5-15% of CPU; Newton iterations dominate)
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13384 · Batch One Side of the Grip Topology Contact Law: Validate Once, Python-Float Row Kernel, 9.9X Faster Topology_Side_Wrench With Bit-Identical Parity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13384
+- **Branch:** merged via #13422
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13384-batch-one-side-of-the-grip-topology-cont.md)
+- **Summary:** Batch one side of the grip topology contact law: validate once, Python-float row kernel, 9.9x faster topology_side_wrench with bit-identical parity
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13336 · Extract Single Array-Namespace Contact Kernel in Motion_Matching Shared by Contact_Law, Jax_Contact, and Grip_Contact
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13336
+- **Branch:** feat/13336-array-namespace-contact-kernel
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13336-extract-pure-array-namespace-contact-ker.md)
+- **Summary:** Extract single array-namespace contact kernel in motion_matching shared by contact_law, jax_contact, and grip_contact
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13335 · Emit Grip-Binding/V1 Metadata on Club-Composed Character Builder Exports, Fail Closed on Clubless Exports, and Enforce 100% Model-Library Grip Binding Admission
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13335
+- **Branch:** merged via #13422
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13335-emit-grip-binding-v1-metadata-on-club-co.md)
+- **Summary:** Emit grip-binding/v1 metadata on club-composed character builder exports, fail closed on clubless exports, and enforce 100% model-library grip binding admission
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13333 · Export Deterministic Simscape GolfSwing3D Grip Topology and Allocate Pad and Hand-Hand Forces From Recorded States With Zero Injected Forces
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13333
+- **Branch:** feat/13333-simscape-grip-topology-export
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13333-export-deterministic-simscape-golfswing3.md)
+- **Summary:** Export deterministic Simscape GolfSwing3D grip topology and allocate pad and hand-hand forces from recorded states with zero injected forces
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13332 · Add Explicit Bilateral Lead-Hand Bushing Attachment and NativeDrakeGolferGripAdapter for the Native Drake Golfer (HRG-GS-M10).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13332
+- **Branch:** merged via #13422
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13332-add-explicit-bilateral-lead-hand-bushing.md)
+- **Summary:** Add explicit bilateral lead-hand bushing attachment and NativeDrakeGolferGripAdapter for the native Drake golfer (HRG-GS-M10).
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13331 · Add Native Pinocchio Golfer Separate-Hand Variant and NativePinocchioGolferGripAdapter (HRG-GS-M9).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13331
+- **Branch:** merged via #13422
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13331-add-native-pinocchio-golfer-separate-han.md)
+- **Summary:** Add native Pinocchio golfer separate-hand variant and NativePinocchioGolferGripAdapter (HRG-GS-M9).
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13330 · Add MyoHub myoHand Articulated Bilateral Grip Fixture and Segment-Mapped Phalanx Adapter (HRG-GS-M8)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13330
+- **Branch:** merged via #13422
+- **PR:** #13422, #13445
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2717ba32`; collated from changes/13330-regulate-bilateral-myohand-grip-trajecto.md)
+- **Summary:** Add MyoHub myoHand articulated bilateral grip fixture and segment-mapped phalanx adapter (HRG-GS-M8)
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13329 · Add MyoSuiteGolferGripAdapter, Grip-Binding Manifests, and Fix MyoSuite Club Shaft Geometry
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13329
+- **Branch:** merged via #13422
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13329-add-myosuitegolfergripadapter-grip-bindi.md)
+- **Summary:** Add MyoSuiteGolferGripAdapter, grip-binding manifests, and fix MyoSuite club shaft geometry
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13328 · Add MuJoCo Shadow/Allegro Grip Laboratory Adapter With Phalanx-Mapped Sites and Physical Hand-Hand Contact
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13328
+- **Branch:** merged via #13422
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13328-add-mujoco-shadow-allegro-grip-laborator.md)
+- **Summary:** Add MuJoCo Shadow/Allegro grip laboratory adapter with phalanx-mapped sites and physical hand-hand contact
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13327 · Add Native MuJoCo Humanoid Golf Grip Adapter for Rigid-Hand MJCFs (HRG-GS-M5)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13327
+- **Branch:** feat/13327-mujoco-humanoid-grip-adapter
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13327-add-native-mujoco-humanoid-golf-grip-ada.md)
+- **Summary:** Add native MuJoCo humanoid golf grip adapter for rigid-hand MJCFs (HRG-GS-M5)
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13326 · Add Native OpenSim MSK Grip Adapter With Weld/Bushing Binding, Bruno 2015 Admission, and M3 Qualification
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13326
+- **Branch:** merged via #13422
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13326-add-native-opensim-msk-grip-adapter-with.md)
+- **Summary:** Add native OpenSim MSK grip adapter with weld/bushing binding, Bruno 2015 admission, and M3 qualification
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13325 · Add Cross-Model Grip Qualification Harness With 3-State Availability Envelope and Pair-Level Parity (HRG-GS-M3)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13325
+- **Branch:** feat/13325-grip-qualification-harness
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13325-add-cross-model-grip-qualification-harne.md)
+- **Summary:** Add cross-model grip qualification harness with 3-state availability envelope and pair-level parity (HRG-GS-M3)
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13324 · Add Versioned Per-Model Grip Binding Manifests and Frame/Unit Validator (HRG-GS-M2)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13324
+- **Branch:** merged via #13422
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13324-add-versioned-per-model-grip-binding-man.md)
+- **Summary:** Add versioned per-model grip binding manifests and frame/unit validator (HRG-GS-M2)
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13323 · Add Shared Model Grip Binding Contract, GripProvider Protocol, and PinocchioGripAdapter (HRG-GS-M1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13323
+- **Branch:** merged via #13422
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13323-add-shared-model-grip-binding-contract-g.md)
+- **Summary:** Add shared model grip binding contract, GripProvider protocol, and PinocchioGripAdapter (HRG-GS-M1)
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13309 · Separate LHand and RHand in Full-Body-V2 (Opt-In) and Evaluate Physical Hand-Hand Contact Pairs
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13309
+- **Branch:** merged via #13422
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13309-separate-lhand-and-rhand-in-full-body-v2.md)
+- **Summary:** Separate LHand and RHand in full-body-v2 (opt-in) and evaluate physical hand-hand contact pairs
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13308 · Extend Grip_Contact.Parity With Per-Pair Forces, Contact-Point Drift, Determinate/Indeterminate Classification, and Cross-Engine Style Parity Report (HRG-GS-G10)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13308
+- **Branch:** feat/13308-grip-style-parity-report
+- **PR:** #13422, #13442, #13457
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-20 (`5884e94a`; collated from changes/13308-continuous-capsule-line-contact.md)
+- **Summary:** Extend grip_contact.parity with per-pair forces, contact-point drift, determinate/indeterminate classification, and cross-engine style parity report (HRG-GS-G10)
+- **Next step:** Shipped in PR #13457.
+
+### DL-#13307 · Refactor Drake ClubInHands to Two Hand Bodies and Add TopologyContactModel Adapter
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13307
+- **Branch:** feat/13307-drake-two-hand-grip
+- **PR:** #13422
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13307-refactor-drake-clubinhands-to-two-hand-b.md)
+- **Summary:** Refactor Drake ClubInHands to two hand bodies and add TopologyContactModel adapter
+- **Next step:** Shipped in PR #13422.
+
+### DL-#13306 · Add MuJoCo ContactTopology Grip-Contact Adapter and Parity Tests (HRG-GS-G8)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13306
+- **Branch:** merged via #13422
+- **PR:** #13422, #13442, #13504
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-20 (`ec754166`; collated from changes/13306-mujoco-friction-secant-schedule.md)
+- **Summary:** Add MuJoCo ContactTopology grip-contact adapter and parity tests (HRG-GS-G8)
+- **Next step:** Review and merge; overlap/interlock 0.10 s trail-hand deflection (4.60% hold, 3.39% swing RMS) stays a strict xfail; OpenSim ten_finger 0.04 s gaps remain
+
+### DL-#13305 · Calibrate OpenSim Topology Grip Foundation at 2X Preload With Hollars Friction Mapping and Preserve SimmSpline Horizon Across Short Swing Windows
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13305
+- **Branch:** merged via #13422
+- **PR:** #13422, #13458
+- **Paths:** see #13422
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-20 (`ac3676bb`; collated from changes/13305-fix-opensim-capsule-contact-mesh-ring-al.md)
+- **Summary:** Calibrate OpenSim topology grip foundation at 2x preload with Hollars friction mapping and preserve SimmSpline horizon across short swing windows
+- **Next step:** Shipped in PR #13422.
+
 ### DL-#13045 · Kinetics Parity for All Registered Lifts
 
 - **State:** shipped
@@ -2710,10 +3269,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13304
 - **Branch:** merged via #13414
-- **PR:** #13414
+- **PR:** #13414, #13422
 - **Paths:** see #13414
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`d7005811`; collated from changes/13304-pinocchio-grip-contact-adapter.md)
+- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13304-add-pinocchio-grip-adapter-driven-by-con.md)
 - **Summary:** Pinocchio grip-contact adapter from shared topology (HRG-GS-G6)
 - **Next step:** Shipped in PR #13414.
 
@@ -3204,10 +3763,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13042
 - **Branch:** merged via #13288
-- **PR:** #13288, #13419
+- **PR:** #13288, #13419, #13532
 - **Paths:** see #13288
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`d1880753`; collated from changes/13042-record-osl-4-muscle-forces-activations-a.md)
+- **Last verified:** 2026-10-20 (`7a963f7b`; collated from changes/13042-complete-osl-4-muscle-solve-and-residual.md)
 - **Summary:** Compute muscle forces and activations for barbell squat (OSL-4)
 - **Next step:** Shipped in PR #13288.
 
@@ -3373,10 +3932,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13169
 - **Branch:** feat/13169-anatomical-angles
-- **PR:** #13198
+- **PR:** #13198, #13487
 - **Paths:** see #13198
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`5272fa8b`; collated from changes/13169-engine-neutral-anatomical-angles-package.md)
+- **Last verified:** 2026-10-20 (`471e868e`; collated from changes/13169-hrg-e2-full-body-v1-wrist-forearm-adapte.md)
 - **Summary:** Engine-neutral anatomical angles package with wrist and forearm terms (HRG-E2)
 - **Next step:** Shipped in PR #13198.
 
@@ -3776,10 +4335,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13048
 - **Branch:** merged via #13047
-- **PR:** #13047
+- **PR:** #13047, #13456
 - **Paths:** see #13047
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13048-osl-12-rajagopal-hands-reach-the-bundle.md)
+- **Last verified:** 2026-10-20 (`dd1b1650`; collated from changes/13048-keep-the-squat-ik-inside-every-coordinat.md)
 - **Summary:** OSL-12: OpenSim lift IK/ID credibility: pelvis width scaling and verified virtual ASIS/PSIS landmarks, 1e7 Pa contact (PR #476) within 8 mm, ankle-lean balanced holds at zero pelvis residual, in-range squat IK
 - **Next step:** Shipped in PR #13047.
 
@@ -3789,10 +4348,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13041
 - **Branch:** merged via #13047
-- **PR:** #13047, #13404, #13431
+- **PR:** #13047, #13404, #13431, #13536
 - **Paths:** see #13047
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-19 (`9866f8c1`; collated from changes/13041-bench-press-supine-opensim-ik-id-with-be.md)
+- **Last verified:** 2026-10-20 (`702d19d6`; collated from changes/13041-count-bench-support-reaction-in-hicks-re.md)
 - **Summary:** Lift body and every derived lift input (squat on the OSL-17 rack, deadlift, clean, snatch, bench) regenerated on the whole-row de Leva table (#13037) with main's tibial torsion; regression-snapshot IK bounds re-derived; bundle builder picks RK4-stable substeps (deadlift 8 -> 16, parity xfail removed); follow-ups OSL-18 #13157 (foot torsion marker gate, strict xfail), OSL-19 #13158 (arm reach), OSL-20 #13159 (open-loop wrist mode)
 - **Next step:** Shipped in PR #13047.
 
@@ -5596,10 +6155,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12684
 - **Branch:** merged via #12788
-- **PR:** #12788
+- **PR:** #12788, #13527
 - **Paths:** see #12788
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`3fd79f6c`; collated from changes/12684-r4-address-knee-flexion-owner-15-5-deg-p.md)
+- **Last verified:** 2026-10-20 (`19f8fef3`; collated from changes/12684-r4-the-dynamics-receipt-records-ik-and-f.md)
 - **Summary:** R4: address knee flexion (owner 15 +-5 deg prior, reliable capture wins, hard no-hyperextension bound, per-knee target_source in the receipt; --knee-flexion defaults to capture)
 - **Next step:** Shipped in PR #12788.
 

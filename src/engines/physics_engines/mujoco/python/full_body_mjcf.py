@@ -24,7 +24,6 @@ from src.engines.physics_engines.mujoco.python.native_mjcf import (
 )
 from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.motion_matching.full_body_schema import (
-    SchemaFeatureUnavailableError,
     require_full_body_schema,
 )
 from src.shared.python.motion_matching.full_body_spec import order_full_body_joints
@@ -126,6 +125,7 @@ def export_full_body_mjcf(
     visual: bool = False,
     appearance: AppearanceDocument | None = None,
     with_head: bool = False,
+    require_grip_binding: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     """Export the full-body specification to MJCF with 41 scalar joints and contact sites.
 
@@ -135,21 +135,29 @@ def export_full_body_mjcf(
     document (implies ``visual``) restyles that layer with materials,
     textures and smooth meshes; it is never read by the physics path.
     ``with_head`` adds only the visible head and neck to the legacy capsule
-    layer (an appearance document already includes them).
+    layer (an appearance document already includes them). A full-body-v2
+    spec gets one rigid trunk visual per segment (pelvis, ``trunk_lumbar``,
+    thorax), each on its own body, so the visuals follow the lumbar and
+    thoracic joints (HRG-D3, #13174).
     """
+    from src.shared.python.grip_contact.binding_manifest import (
+        build_spec_grip_binding_manifest,
+        has_composed_club_spec,
+    )
+
     spec = json.loads(model_bytes)
-    schema = require_full_body_schema(spec, consumer="MJCF export")
-    if (visual or with_head or appearance is not None) and (
-        schema.schema_id != "full-body-v1"
-    ):
-        raise SchemaFeatureUnavailableError(
-            schema.schema_id,
-            consumer="MJCF export",
-            feature="the visual layer (regional trunk skin and capsules; "
-            "export physics only with visual=False)",
-            child="HRG-D3",
-            issue=13174,
+    model_sha = hashlib.sha256(model_bytes).hexdigest()
+    if require_grip_binding:
+        build_spec_grip_binding_manifest(
+            spec,
+            model_id="full_body_v1_spec_export",
+            model_hash=f"sha256:{model_sha}",
+            source="src/engines/physics_engines/mujoco/python/full_body_mjcf.py",
+            consumer="mujoco.full_body_mjcf",
         )
+    # Both schemas carry the visual layer: in full-body-v2 the pelvis,
+    # trunk_lumbar and thorax each draw their own solid's visuals (HRG-D3).
+    require_full_body_schema(spec, consumer="MJCF export")
     if not isinstance(spec.get("closure"), dict):
         raise ValueError("Missing closure specification")
     if not isinstance(spec.get("contact"), dict):
@@ -184,11 +192,19 @@ def export_full_body_mjcf(
         )
 
     xml = ET.tostring(root, encoding="unicode")
-    extra = {} if visual_meta is None else {"visual_layer": visual_meta}
+    extra: dict[str, Any] = {} if visual_meta is None else {"visual_layer": visual_meta}
+    if has_composed_club_spec(spec):
+        extra["grip_binding"] = build_spec_grip_binding_manifest(
+            spec,
+            model_id="full_body_v1_spec_export",
+            model_hash=f"sha256:{model_sha}",
+            source="src/engines/physics_engines/mujoco/python/full_body_mjcf.py",
+            consumer="mujoco.full_body_mjcf",
+        )
     return xml, {
         **extra,
         "representation": "native-full-body-mjcf-v1",
-        "model_sha256": hashlib.sha256(model_bytes).hexdigest(),
+        "model_sha256": model_sha,
         "mjcf_sha256": hashlib.sha256(xml.encode("utf-8")).hexdigest(),
         "coordinate_order": spec["coordinate_order"],
         "frame_sites": frame_sites,

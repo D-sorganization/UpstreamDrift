@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "c32d0548c6bd1ede848fc2a76223f13846d93326ff8e2b26a513cabe95b4defb",
+      "fingerprint": "e1afcdcb54d5cdf4a25ab0f2370cc52544a4afee1e29319f1a18134a1c2b747a",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "122475bfa6e445ee8a2d4e1f94eae41c3b0e6bce954d1eb8ea44a1e40662e052",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "16da3586691a3c05c88df5482f1fe309976dcbdbe6dc21c816cb8706b1d0d1cb",
+        "src/config/feature_parity.json": "0f37cc44c265f45ec4567e5ff78b762b25b1aec051ec4384611663a1fbe20c73",
         "src/config/launcher_manifest.json": "26337829a1de75576be220e293c6d4f012f97303c0639401a8d902e76c418f37",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "7c868b0c444389fad39bdd30469abd32439f5bd11b9b5019c941ac0049e0763c",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Reviewed after merging origin/main into feat/13303-grip-style-presets: launcher-atlas inputs include worktree vendor resolution in model.py and merged feature_parity.json; capability atlas regenerated cleanly with --check verified; tile ids, routes and order unchanged."
+      "rationale": "Reviewed after reclassifying grip_style as physical pick (#13346): feature_parity.json marks grip_style physical with committed test suite; capability atlas graph verified fresh and deterministic; tile ids, routes and order unchanged."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",
@@ -73,7 +73,7 @@
       "rationale": "NSX-50 (#12578): MujocoAdapter now mixes in DynamicMapsMixin with a NativeDynamicLayout (quat_wxyz, linear world, angular body); static pose translation in canonical.py/protocol.py is unchanged. Contract updated for the dynamic-map surface and the multi-DOF ValueError. Validated: test_mujoco_protocol.py plus the NSX-50 dynamic-map unit and engine tests (64 passed)."
     },
     "project-task-native-replay": {
-      "fingerprint": "c0d2feff8bc9217b912dc693741475b04be094d8c833db756966bbe6e80a1447",
+      "fingerprint": "355cb2b917454602cac558d4f819fe2e80504d8498ef4cbdcea5c1181d796813",
       "inputs": {
         "docs/agent_context/contracts/project-task-native-replay.md": "754359ce3d2ccfe8d80a31a1cd8867f151dc5bd63bf0023231a2cc797fc3f254",
         "src/engines/myosuite_project_command_solve.py": "a8b3168dfb20b8f94322d2b8dc1e2b8570d4e11b3d4222f8b1300e71711cd2e2",
@@ -95,12 +95,12 @@
         "tests/unit/engines/myosuite/test_project_task_feedback.py": "d9d8f9ae7b58e3c5fb9e641a32b1eeacf7b9873a26839d4c0724c27ad3ceff00",
         "tests/unit/engines/myosuite/test_project_task_forecast.py": "a35bdf3f3ab2d8941743f1409d36a925c8f07f366ffd6cb58ac0719dd4d97fc1",
         "tests/unit/engines/myosuite/test_project_task_native_search.py": "63795cc637ab7b62cca3ef213836584df94383dfdc9cfb10ef14352962dde63b",
-        "tests/unit/engines/myosuite/test_project_task_producer.py": "ead3c9f3eb031cf78bc63e011b8a9e1fe203a6b16af3c3e8f3120950f81f6faf",
+        "tests/unit/engines/myosuite/test_project_task_producer.py": "97f77ae7a53a4f5a85bd07e1586342219c817e97362846a17dee96202163dd20",
         "tests/unit/engines/myosuite/test_project_task_tracking.py": "8b329a3e676b28906e3c5a0f7439d483625ce071400f949420be0021488c0dc4",
         "tests/unit/motion_matching/test_bounded_candidate_search.py": "5a256b469fe1f4fdd502626f125cd50eb64a62b1ec304488eda64335ca72ee4d",
         "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py": "98bf31807478472f8e15310c73d1e92552feb74a84988e32df905a80019c64c9"
       },
-      "rationale": "Re-reviewed after merging main's #12268 movement-optimizer retarget with #12418: _seam_redirect.py differs from main only by the signal_toolkit split-root redirect; load_pinned_tools_package and the private replay path are unchanged. The registered boundary suite gives 62 passed and 123 skipped (MyoSuite unavailable on this Windows host); CI runs the full suite. Software evidence only, no physical qualification."
+      "rationale": "Synchronize test_project_task_producer.py with updated MyoSuite golfer scene hashes (#13297, #13422)"
     }
   },
   "version": 1

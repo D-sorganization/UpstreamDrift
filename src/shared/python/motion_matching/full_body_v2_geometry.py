@@ -126,7 +126,7 @@ EXPORT_STATUS: Mapping[str, Mapping[str, str]] = MappingProxyType(
     {
         "mujoco": {
             "status": "exported",
-            "reason": "physics MJCF; the visual layer is HRG-D3",
+            "reason": "physics MJCF and per-segment trunk visual layer",
         },
         "drake_urdf": {"status": "exported", "reason": "URDF bundle and plant"},
         "pinocchio": {

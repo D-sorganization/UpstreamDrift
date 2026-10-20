@@ -385,11 +385,16 @@ def _create_sidecar_and_manifest(
     contact_spheres: dict[str, dict[str, Any]],
     incomplete_physics_reason: str | None,
 ) -> tuple[dict[str, Any], ModelBundleManifest]:
+    from src.shared.python.grip_contact.binding_manifest import (
+        build_spec_grip_binding_manifest,
+        has_composed_club_spec,
+    )
+
     closure = spec.get("closure", {})
     model_sha = hashlib.sha256(spec_bytes).hexdigest()
     urdf_sha = hashlib.sha256(urdf_xml.encode("utf-8")).hexdigest()
 
-    sidecar = {
+    sidecar: dict[str, Any] = {
         "schema_version": 1,
         "requires_sidecar": True,
         "representation": "native-full-body-urdf-v1",
@@ -405,6 +410,14 @@ def _create_sidecar_and_manifest(
         "gravity_m_s2": spec.get("gravity_m_s2", [0.0, 0.0, -9.80665]),
         "limit_semantics": "restore-unbounded-before-dynamics",
     }
+    if has_composed_club_spec(spec):
+        sidecar["grip_binding"] = build_spec_grip_binding_manifest(
+            spec,
+            model_id="full_body_v1_spec_export",
+            model_hash=f"sha256:{model_sha}",
+            source="src/shared/python/model_generation/export/model_bundle.py",
+            consumer="model_generation.export.model_bundle",
+        )
     sidecar_sha = hashlib.sha256(
         json.dumps(sidecar, indent=2).encode("utf-8")
     ).hexdigest()
@@ -432,6 +445,8 @@ def export_model_bundle(
     incomplete_physics_reason: str | None = None,
     include_visuals: bool = False,
     asset_root: Path | None = None,
+    *,
+    require_grip_binding: bool = False,
 ) -> ModelBundle:
     """Generate an engine-neutral ModelBundle from specification bytes.
 
@@ -444,6 +459,20 @@ def export_model_bundle(
     spec = json.loads(spec_bytes)
     if not isinstance(spec, dict) or "coordinate_order" not in spec:
         raise ValueError("Invalid full-body specification")
+
+    if require_grip_binding:
+        from src.shared.python.grip_contact.binding_manifest import (
+            build_spec_grip_binding_manifest,
+        )
+
+        model_sha = hashlib.sha256(spec_bytes).hexdigest()
+        build_spec_grip_binding_manifest(
+            spec,
+            model_id="full_body_v1_spec_export",
+            model_hash=f"sha256:{model_sha}",
+            source="src/shared/python/model_generation/export/model_bundle.py",
+            consumer="model_generation.export.model_bundle",
+        )
 
     body_links = {body["name"]: f"body_{i}" for i, body in enumerate(spec["bodies"])}
     if len(body_links) != len(spec["bodies"]) or "world" not in body_links:
@@ -481,6 +510,19 @@ def export_model_bundle(
     )
     bundle.validate()
     return bundle
+
+
+def export_full_body_urdf(
+    model_bytes: bytes,
+    *,
+    require_grip_binding: bool = False,
+) -> tuple[str, dict[str, Any]]:
+    """Export the full-body specification to URDF and sidecar metadata."""
+    bundle = export_model_bundle(
+        model_bytes,
+        require_grip_binding=require_grip_binding,
+    )
+    return bundle.urdf_xml, bundle.sidecar or {}
 
 
 def _assemble_and_validate_bundle(

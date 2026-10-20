@@ -420,6 +420,18 @@ def test_apply_grip_selection_sidecar_with_physical_key_raises() -> None:
 def test_apply_grip_selection_restores_sidecar_visual_picks_in_returned_grip() -> None:
     """apply_grip_selection returned grip includes sidecar and override visual picks."""
     configured_doc = apply_grip_config(DRIVER, GripSpec())
+    # A visual-only override + sidecar leaves the document physics hash unchanged
+    doc_vis, grip_vis = apply_grip_selection(
+        configured_doc,
+        GripOverrides(grip_strength_deg=12.0),
+        sidecar_grip={"lead_thumb_offset_deg": 18.0},
+    )
+    assert grip_vis is not None
+    assert grip_vis.style is GripStyle.OVERLAP
+    assert grip_vis.lead_thumb_offset_deg == pytest.approx(18.0)
+    assert physics_spec_sha256(doc_vis) == physics_spec_sha256(configured_doc)
+
+    # A physical style override mints a new revision while preserving sidecar visual picks
     overrides = GripOverrides(grip_style="ten_finger")
     doc, grip = apply_grip_selection(
         configured_doc,
@@ -429,5 +441,4 @@ def test_apply_grip_selection_restores_sidecar_visual_picks_in_returned_grip() -
     assert grip is not None
     assert grip.style is GripStyle.TEN_FINGER
     assert grip.lead_thumb_offset_deg == pytest.approx(18.0)
-    # The document physics hash is unchanged
-    assert physics_spec_sha256(doc) == physics_spec_sha256(configured_doc)
+    assert physics_spec_sha256(doc) != physics_spec_sha256(configured_doc)

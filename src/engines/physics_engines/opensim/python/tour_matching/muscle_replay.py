@@ -11,7 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
@@ -285,10 +285,10 @@ def _integrate_native_replay(
 
 def _admit_native_muscles(
     model: Any,
-    controls: Mapping[str, NDArray[np.float64]],
+    control_names: Collection[str],
     contact_force_paths: tuple[str, ...],
 ) -> tuple[Any, tuple[str, ...]]:
-    """Reject hidden drive mechanisms before adding the owned input player."""
+    """Validate exact muscle channel names and reject hidden drive mechanisms."""
     osim = import_opensim()
 
     recursive_muscle_paths = _audit_drive_components(model, osim, contact_force_paths)
@@ -309,7 +309,7 @@ def _admit_native_muscles(
         raise ValueError("prescribed coordinate is forbidden in independent replay")
     if any(coordinates.get(i).getDefaultLocked() for i in range(coordinates.getSize())):
         raise ValueError("locked coordinate needs a qualified initialization policy")
-    if set(controls) != set(muscle_names):
+    if set(control_names) != set(muscle_names):
         raise ValueError("excitation names must exactly match native muscle names")
 
     return muscles, muscle_names
