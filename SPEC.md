@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13496 | Stop CI Requires OpenSim queueing one run per main push |
+| 2026-10-20 | #13476 | Heavy lanes: install real pin/pin-pink wheels and isolate each lane in a venv |
 | 2026-10-20 | #13458 | Fix OpenSim capsule contact mesh ring alignment, CoP reporting, and BDF accuracy for ten-finger parity |
 | 2026-10-20 | #13487 | HRG-E2: full-body-v1 wrist/forearm adapter with declared neutral Wu calibration, verified on compiled MuJoCo; best-fit report test gated on HRG_BEST_FIT_BUNDLE |
 | 2026-10-20 | #13456 | keep the squat IK inside every coordinate range (OSL-12) |
