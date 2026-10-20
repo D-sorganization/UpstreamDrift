@@ -644,9 +644,10 @@ _DETERMINATE_ENGINE_CASES = [
         marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-swing",
     ),
-    # OpenSim (G7/G7b): passes overlap and interlock on 0.04 s hold and swing
-    # (and 0.10 s hold and swing, plus ten_finger 0.10 s hold);
-    # ten_finger 0.04 s hold and swing exceed 2.0% RMS on determinate net_force.
+    # OpenSim (G7/G7b): passes overlap and interlock on 0.04 s and 0.10 s hold
+    # and swing, and ten_finger 0.10 s swing (3.682% / 1.911%); ten_finger
+    # 0.04 s hold and swing and 0.10 s hold (2.970% RMS) exceed 2.0% RMS on
+    # determinate net_force.
     # Since #13308 the reference uses the same line-contact law as the
     # ElasticFoundationForce sphere chain, so the remaining gap is the friction
     # and patch-torque mapping (tau_n = 0, surface lever), not the capsule law.
@@ -674,10 +675,10 @@ _DETERMINATE_ENGINE_CASES = [
                 strict=True,
                 raises=AssertionError,
                 reason=(
-                    "OpenSim ten_finger 0.04 s hold determinate net_force RMS is 4.585% "
-                    "(peak 4.656%, net_moment_com peak 0.833% / RMS 1.255%) > 2.0% "
+                    "OpenSim ten_finger 0.04 s hold determinate net_force RMS is 4.577% "
+                    "(peak 4.639%, net_moment_com peak 0.000% / RMS 1.231%) > 2.0% "
                     "RMS_TOLERANCE against the continuous line-contact reference "
-                    "(#13308; 2.979% RMS over 0.10 s)"
+                    "(#13308; 2.970% RMS over 0.10 s)"
                 ),
             ),
         ],
@@ -707,10 +708,10 @@ _DETERMINATE_ENGINE_CASES = [
                 strict=True,
                 raises=AssertionError,
                 reason=(
-                    "OpenSim ten_finger 0.04 s swing determinate net_force RMS is 4.913% "
-                    "(peak 1.500%) and net_moment_com RMS is 2.920% (peak 0.833%) > 2.0% "
+                    "OpenSim ten_finger 0.04 s swing determinate net_force RMS is 2.374% "
+                    "(peak 3.682%; net_moment_com passes at 0.000% / 0.924%) > 2.0% "
                     "RMS_TOLERANCE against the continuous line-contact reference "
-                    "(#13308; 4.821% / 4.469% RMS over 0.10 s)"
+                    "(#13308; passes over 0.10 s at 3.682% / 1.911%)"
                 ),
             ),
         ],
