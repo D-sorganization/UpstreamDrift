@@ -27,6 +27,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1196 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
 | 1194 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
+| 1194 | `src/shared/python/grip_contact/matlab_kernel.py` |
 | 1193 | `src/launchers/model_card.py` |
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
@@ -108,6 +109,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 990 | `src/shared/python/estimation/map_estimator.py` |
 | 988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py` |
 | 984 | `src/tools/bunker_shot_gui/viewport_widgets.py` |
+| 981 | `src/shared/python/grip_contact/simscape_grip_contact.py` |
 | 981 | `src/shared/python/workspace/necromatcher_video.py` |
 | 980 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 979 | `src/shared/python/motion_matching/pipeline/address.py` |
