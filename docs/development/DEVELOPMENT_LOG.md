@@ -2665,6 +2665,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13494 · Stop CI Requires OpenSim Queueing One Run per Main Push
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13494
+- **Branch:** ci/opensim-main-concurrency
+- **PR:** #13496
+- **Paths:** see #13496
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`2e64f840`; collated from changes/13494-stop-ci-requires-opensim-queueing-one-ru.md)
+- **Summary:** Stop CI Requires OpenSim queueing one run per main push
+- **Next step:** Shipped in PR #13496.
+
+### DL-#13017 · Heavy Lanes: Install Real Pin/Pin-Pink Wheels and Isolate Each Lane in a Venv
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13017
+- **Branch:** merged via #13476
+- **PR:** #13476
+- **Paths:** see #13476
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`1aadc830`; collated from changes/13017-heavy-lanes-install-real-pin-pin-pink-wh.md)
+- **Summary:** Heavy lanes: install real pin/pin-pink wheels and isolate each lane in a venv
+- **Next step:** Shipped in PR #13476.
+
 ### DL-#13454 · Remove Dead Pinocchio Default Branch From Drake Simulate DEFAULT_GOLFER_URDF
 
 - **State:** shipped
