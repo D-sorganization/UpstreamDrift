@@ -18,12 +18,6 @@
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "reason": "Issue #12042 temporary exception while turn metrics, weld projection, and IK restart policies are decomposed from pipeline CLI (1457 lines).",
       "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "reason": "Issue #13297 HRG-GS consolidated humanoid URDF builder combining bilateral grip bushings and revolute joint actuators scheduled for decomposition by simulation-team (1217 lines).",
-      "expires_on": "2026-11-30"
     }
   ]
 }
