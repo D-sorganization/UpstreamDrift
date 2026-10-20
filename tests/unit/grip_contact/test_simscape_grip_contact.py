@@ -18,6 +18,7 @@ Covers:
 from __future__ import annotations
 
 import copy
+import dataclasses
 import json
 from pathlib import Path
 
@@ -515,8 +516,11 @@ def test_simscape_r2025b_net_wrench_parity_against_pinocchio(
         ClubDynamics,
         CoordinateSwing,
         GripInterface,
-        TopologyKineticsSeries,
         simscape_series_to_contact_run,
+    )
+    from src.shared.python.grip_contact.net_wrench_parity import (
+        failing_net_wrench,
+        net_club_wrench_errors,
     )
     from src.shared.python.motion_matching.grip_contract import GripSpec
 
@@ -555,14 +559,15 @@ def test_simscape_r2025b_net_wrench_parity_against_pinocchio(
     )
     sim_run = simscape_series_to_contact_run(raw_series, interface=interface)
 
-    errs = parity_errors(
-        sim_run, pin_run, t_end_s=duration, club=club, interface=interface
-    )
-    assert errs["net_force"].peak_error <= PEAK_TOLERANCE
-    assert errs["net_force"].rms_error <= RMS_TOLERANCE
-    assert errs["net_moment_com"].peak_error <= PEAK_TOLERANCE
-    assert errs["net_moment_com"].rms_error <= RMS_TOLERANCE
+    # Section 19: only the net club wrench is determinate; the per-hand split
+    # and squeeze are not acceptance quantities.
+    errors = net_club_wrench_errors(sim_run.series, pin_run.series, club, interface)
+    assert not failing_net_wrench(errors), failing_net_wrench(errors)
 
-    pin_topo = TopologyKineticsSeries.from_contact_run(pin_run, topo_model)
-    report = compare_topology_series(pin_topo, sim_topo)
-    assert report.passed
+    # Negative control: a 10 % error in the Simscape club force must fail.
+    forces = sim_run.series.force_on_club_n
+    scaled = dataclasses.replace(
+        sim_run.series, force_on_club_n={k: 1.1 * v for k, v in forces.items()}
+    )
+    bad = net_club_wrench_errors(scaled, pin_run.series, club, interface)
+    assert "net_force" in failing_net_wrench(bad)
