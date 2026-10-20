@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13190 · HRG-H2 Diagnostic Palm-Thumb Pad: Drift-Gated Physical Trail_Palm_Lead_Thumb Pair on the Shared G2 Law in Separated_V2, Impact Timestep and Preload Sensitivity Reports, and a New Spec Revision With Its Own Spec_Sha256; Contract Pinned by Tests.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13190
+- **Branch:** feat/13190-palm-thumb-pad
+- **PR:** #13525
+- **Paths:** src/shared/python/grip_contact/palm_thumb_pad.py,tests/unit/grip_contact/test_palm_thumb_pad.py
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`c93840a6`; collated from changes/13190-hrg-h2-diagnostic-palm-thumb-pad-drift-g.md)
+- **Summary:** HRG-H2 diagnostic palm-thumb pad: drift-gated physical trail_palm_lead_thumb pair on the shared G2 law in separated_v2, impact timestep and preload sensitivity reports, and a new spec revision with its own spec_sha256; contract pinned by tests.
+- **Next step:** Owner: cross-engine parity of the pad on MuJoCo/Drake/Pinocchio/OpenSim and the HRG .tex reference section remain open.
+
 ### DL-#13171 · HRG-E3 Slice: Pelvis and Thorax ISB Lab-Frame Turn, Tilt, Obliquity and Side-Bend Golf Terms With Golf-Word Aliases; Thoracic/Lumbar Split Marked Unavailable
 
 - **State:** in_review
