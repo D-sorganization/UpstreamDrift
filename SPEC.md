@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13458 | Fix OpenSim capsule contact mesh ring alignment, CoP reporting, and BDF accuracy for ten-finger parity |
+| 2026-10-20 | #13487 | HRG-E2: full-body-v1 wrist/forearm adapter with declared neutral Wu calibration, verified on compiled MuJoCo; best-fit report test gated on HRG_BEST_FIT_BUNDLE |
+| 2026-10-20 | #13456 | keep the squat IK inside every coordinate range (OSL-12) |
+| 2026-10-20 | #13486 | R6 criterion 6: MuJoCo visual and appearance layers draw a chain shaft per link (shaft pieces per chain body, head on the tip link) so deflection is visible; rigid MJCF byte-identical |
 | 2026-10-20 | #13468 | Size Drake-Simscape equivalence fixture theta from the plant actuator count; Resolve the Drake autodiff fit grip body through the shared simulate fallback; Guard DrakePhysicsEngine.get_joint_names against unfinalized plants; Remove dead Pinocchio default branch from Drake simulate DEFAULT_GOLFER_URDF |
 | 2026-10-20 | #13469 | Mark the torch CUDA wheel-index pip probe requires_network so the offline unit gate stops crashing an xdist worker |
 | 2026-10-20 | #13442 | Prove hyperstatic per-hand split divergence between MuJoCo soft-constraint cone QP and shared penalty law with minimal two-pad test and update G8 reference; Align collinear capsule-cylinder midpoint convention and topology solimp impedance d0=0.001 so MuJoCo ten_finger 0.04 s hold and swing pass determinate parity |
