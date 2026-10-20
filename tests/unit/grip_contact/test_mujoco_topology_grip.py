@@ -229,7 +229,10 @@ def test_old_pad_path_mjcf_is_byte_identical() -> None:
     assert actual_pre == expected_pre
     assert (
         hashlib.sha256(actual_pre.encode("utf-8")).hexdigest()
-        == "b7185302c5f9a68599645b12161a07e75071600cad8316c54b4015c3a9a61086"
+        in (
+            "b7185302c5f9a68599645b12161a07e75071600cad8316c54b4015c3a9a61086",  # Linux (glibc float format)
+            "46e1b20596a0d0e8fdc7c2fea1053f068cb01f4e146e10814d9e6707c3ce1837",  # Windows (MSVC float format)
+        )
     )
 
     q0 = np.asarray(swing.q[0], float)
