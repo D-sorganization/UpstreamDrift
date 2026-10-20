@@ -90,7 +90,11 @@ def _has_pinocchio() -> bool:
         import pinocchio  # noqa: F401
     except ImportError:
         return False
-    return True
+    # The CI unit lane may mock pinocchio; only a real module has a Model class.
+    if type(pinocchio).__module__ == "unittest.mock":
+        return False
+    model_cls = getattr(pinocchio, "Model", None)
+    return isinstance(model_cls, type) and model_cls.__module__ != "unittest.mock"
 
 
 requires_pinocchio = pytest.mark.skipif(
