@@ -77,8 +77,8 @@ class AnatomicalEventTableRequest(BaseModel):
     format: Literal["json", "csv"] = "json"
 
 
-def _frame(segment: SegmentFrames | None) -> AnatomicalFrame | None:
-    return None if segment is None else AnatomicalFrame(**segment.model_dump())
+def _frame(segment: SegmentFrames) -> AnatomicalFrame:
+    return AnatomicalFrame(**segment.model_dump())
 
 
 def _anatomical_event_table(
@@ -91,7 +91,7 @@ def _anatomical_event_table(
             _frame(arm.hand),
             side,
             receipt_path=payload.receipt_path,
-            radius=_frame(arm.radius),
+            radius=None if arm.radius is None else _frame(arm.radius),
         )
         for side, arm in payload.arms.items()
     }

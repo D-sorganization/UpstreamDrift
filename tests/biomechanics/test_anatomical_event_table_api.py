@@ -143,3 +143,12 @@ def test_invalid_bundle_is_a_client_error(client, override) -> None:
 def test_unknown_format_is_rejected(client) -> None:
     response = client.post(URL, json=_payload(format="xlsx"))
     assert response.status_code == 422
+
+
+def test_explicit_radius_equal_to_forearm_matches_the_default(client) -> None:
+    arm = _arm("L", 20.0)
+    explicit = {**arm, "radius": arm["forearm"]}
+    default = client.post(URL, json=_payload(arms={"L": arm}))
+    given = client.post(URL, json=_payload(arms={"L": explicit}))
+    assert given.status_code == 200, given.text
+    assert given.json() == default.json()
