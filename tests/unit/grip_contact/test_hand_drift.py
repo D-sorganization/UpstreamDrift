@@ -59,6 +59,30 @@ def test_known_drift_is_recovered_in_the_lead_frame() -> None:
     assert peak["rotation_deg"] == pytest.approx(0.5, abs=1e-6)
 
 
+def test_hand_drift_rms_and_summary_metrics() -> None:
+    r_l, p_l = _frames()
+    n = r_l.shape[0]
+    shift = np.zeros((n, 3))
+    shift[:, 0] = np.linspace(0.0, 3e-3, n)  # 0..3 mm along
+    shift[:, 1] = np.linspace(0.0, 4e-3, n)  # 0..4 mm across -> 0..5 mm total
+    twist = _rot_z(np.radians(np.linspace(0.0, 1.0, n)))
+    r_t = np.einsum("nij,njk->nik", r_l, twist)
+    p_t = p_l + np.einsum("nij,nj->ni", r_l, shift)
+    drift = hand_relative_drift({"L": (r_l, p_l), "R": (r_t, p_t)})
+    np.testing.assert_allclose(
+        drift.translation_mm, np.linspace(0.0, 5.0, n), atol=1e-9
+    )
+    summary = drift.summary()
+    assert summary["translation_peak_mm"] == pytest.approx(5.0, abs=1e-9)
+    assert summary["translation_rms_mm"] == pytest.approx(
+        float(np.sqrt(np.mean(np.linspace(0.0, 5.0, n) ** 2))), abs=1e-9
+    )
+    assert summary["rotation_peak_deg"] == pytest.approx(1.0, abs=1e-6)
+    assert summary["rotation_rms_deg"] == pytest.approx(
+        float(np.sqrt(np.mean(np.linspace(0.0, 1.0, n) ** 2))), abs=1e-6
+    )
+
+
 def test_malformed_series_are_rejected() -> None:
     r_l, p_l = _frames()
     with pytest.raises(ValueError):

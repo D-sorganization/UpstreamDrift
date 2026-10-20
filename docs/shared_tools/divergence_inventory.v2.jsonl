@@ -595,6 +595,7 @@
 {"path": "engine_core/finite_difference.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/interfaces.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/mock_engine.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
+{"path": "engine_core/model_contracts.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/mujoco_compat.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/opensim_runtime.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/plugin_registry.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
@@ -860,6 +861,9 @@
 {"path": "golf_viz/_colors.py", "classification": "ud-only", "package": "golf_viz", "spelling_only": false}
 {"path": "golf_viz/_geometry.py", "classification": "ud-only", "package": "golf_viz", "spelling_only": false}
 {"path": "grip_contact/__init__.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/batched_pair_contact.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/binding.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/binding_manifest.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/bushing_law.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/capability_inventory.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/closure_series.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
@@ -881,8 +885,11 @@
 {"path": "grip_contact/parameters.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/parity.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/prescribed_motion.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/simscape_grip_topology.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/static_balance.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/swing_input.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/topology_contact.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/topology_series.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/trajectory_conditioning.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "ground_model/__init__.py", "classification": "ud-only", "package": "ground_model", "spelling_only": false}
 {"path": "ground_model/consumer_gateway.py", "classification": "ud-only", "package": "ground_model", "spelling_only": false}
@@ -1397,6 +1404,7 @@
 {"path": "motion_matching/contact_derivatives.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/contact_force_allocator.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/contact_identification.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/contact_kernel.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/contact_law.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/contact_mode_qualifier.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/contact_wrench_qp.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1766,6 +1774,7 @@
 {"path": "neural_motion/episodes/store.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/episodes/views.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/experiment.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
+{"path": "neural_motion/golfer_udim_addendum.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/inference/__init__.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/inference/distribution.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/inference/orchestration.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}

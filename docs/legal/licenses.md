@@ -125,6 +125,7 @@ model/backbone license separately.
 | `upstream-mocap-preproc` | rust, mocap-preproc              | `>=0.1.0`                        | Needs source verification              | Needs review           | Internal/adjacent package; verify package metadata before release.                 |
 | `upstream-physics`       | rust                             | `>=0.1.0`                        | Needs source verification              | Needs review           | Internal/adjacent package; verify package metadata before release.                 |
 | `uvicorn`                | core                             | `>=0.30.0`                       | BSD-3-Clause                           | Commercial-OK          | ASGI server.                                                                       |
+| `websockets`             | realtime                         | `>=12.0,<18.0`                   | BSD-3-Clause                           | Commercial-OK          | Opt-in Python realtime subscriber client; lazy import in ws_pubsub.                |
 | `warp-lang`              | warp                             | `>=1.3.0`                        | Apache-2.0                             | Commercial-OK          | Optional NVIDIA Warp dependency.                                                   |
 
 ## Follow-Up Review Items

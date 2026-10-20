@@ -423,6 +423,93 @@ class TrunkMigrator:
             message=str(sol.message),
         )
 
+    @staticmethod
+    def _batch_ry_rx_rz(ry: Array, rx: Array, rz: Array) -> Array:
+        """Batch 3x3 rotation matrix ``Ry(ry) @ Rx(rx) @ Rz(rz)`` of shape ``(N, 3, 3)``."""
+        cy, sy = np.cos(ry), np.sin(ry)
+        cx, sx = np.cos(rx), np.sin(rx)
+        cz, sz = np.cos(rz), np.sin(rz)
+        rot = np.empty((ry.shape[0], 3, 3), dtype=float)
+        rot[:, 0, 0] = cy * cz + sy * sx * sz
+        rot[:, 0, 1] = -cy * sz + sy * sx * cz
+        rot[:, 0, 2] = sy * cx
+        rot[:, 1, 0] = cx * sz
+        rot[:, 1, 1] = cx * cz
+        rot[:, 1, 2] = -sx
+        rot[:, 2, 0] = -sy * cz + cy * sx * sz
+        rot[:, 2, 1] = sy * sz + cy * sx * cz
+        rot[:, 2, 2] = cy * cx
+        return rot
+
+    def _batch_v2_rotation(self, phi: Array) -> Array:
+        """Batch v2 thorax rotation matrix ``(N, 3, 3)`` for trunk coordinates ``phi`` ``(N, 6)``."""
+        rl = self._batch_ry_rx_rz(phi[:, 0], phi[:, 1], phi[:, 2])
+        rt = self._batch_ry_rx_rz(phi[:, 3], phi[:, 4], phi[:, 5])
+        return np.einsum("nij,njk->nik", rl, rt)
+
+    def migrate_coordinates(self, q: Array, order: Sequence[str]) -> Array:
+        """Vectorized migration of ``q`` ``(frames, len(order))`` to ``_v2_order`` coordinates.
+
+        Solves the exact KKT optimality conditions ``min_phi ||D phi||^2`` subject
+        to ``log(R_1^T R_2(phi)) = 0`` across all frames simultaneously, matching
+        :meth:`migrate_frame` to ``<= 1e-8`` rad without computing witness solves.
+        """
+        values = np.asarray(q, dtype=float)
+        if tuple(order) != self._v1_order:
+            raise ValueError("order must be the v1 document's coordinate_order")
+        if values.ndim != 2 or values.shape[1] != len(order) or values.shape[0] < 1:
+            raise ValueError(
+                f"q must have shape (frames, {len(order)}), got {values.shape}"
+            )
+        if not np.all(np.isfinite(values)):
+            raise ValueError("v1 coordinates must be finite")
+        n_frames = values.shape[0]
+        v1_idx = {name: i for i, name in enumerate(order)}
+        v1_trunk = np.column_stack([values[:, v1_idx[c]] for c in self._v1.coordinates])
+        target = np.array([self._v1.pose(row)[:3, :3] for row in v1_trunk])
+        target_t = np.swapaxes(target, 1, 2)
+        phi = np.array([self._rejected_mapping(row) for row in v1_trunk])
+        dtd2 = 2.0 * (self._split.T @ self._split)
+
+        for _ in range(6):
+            r2 = self._batch_v2_rotation(phi)
+            c_val = Rotation.from_matrix(
+                np.einsum("nij,njk->nik", target_t, r2)
+            ).as_rotvec()
+            if float(np.max(np.linalg.norm(c_val, axis=1))) < 1.0e-13:
+                break
+            jac = np.empty((n_frames, 3, 6), dtype=float)
+            for k in range(6):
+                step = np.zeros((1, 6), dtype=float)
+                step[0, k] = _FD_STEP
+                rp = self._batch_v2_rotation(phi + step)
+                rm = self._batch_v2_rotation(phi - step)
+                cp = Rotation.from_matrix(
+                    np.einsum("nij,njk->nik", target_t, rp)
+                ).as_rotvec()
+                cm = Rotation.from_matrix(
+                    np.einsum("nij,njk->nik", target_t, rm)
+                ).as_rotvec()
+                jac[:, :, k] = (cp - cm) / (2.0 * _FD_STEP)
+            kkt = np.zeros((n_frames, 9, 9), dtype=float)
+            kkt[:, :6, :6] = dtd2[None, :, :]
+            kkt[:, :6, 6:] = np.swapaxes(jac, 1, 2)
+            kkt[:, 6:, :6] = jac
+            rhs = np.zeros((n_frames, 9, 1), dtype=float)
+            rhs[:, :6, 0] = -(phi @ dtd2.T)
+            rhs[:, 6:, 0] = -c_val
+            delta = np.linalg.solve(kkt, rhs)[:, :6, 0]
+            phi = phi + delta
+
+        out = np.empty((n_frames, len(self._v2_order)), dtype=float)
+        v2_trunk_idx = {name: i for i, name in enumerate(V2_TRUNK.coordinates)}
+        for col_idx, name in enumerate(self._v2_order):
+            if name in v2_trunk_idx:
+                out[:, col_idx] = phi[:, v2_trunk_idx[name]]
+            else:
+                out[:, col_idx] = values[:, v1_idx[name]]
+        return out
+
     def migrate_trajectory(self, q: Array, order: Sequence[str]) -> MigrationReport:
         """Migrate ``q`` (frames, coordinates) given in the v1 ``order``.
 

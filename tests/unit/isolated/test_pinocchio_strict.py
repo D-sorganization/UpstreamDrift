@@ -79,8 +79,10 @@ class TestPinocchioStrict:
         engine.model.existFrame.return_value = False
         engine.model.existBodyName.return_value = False
 
-        jac = engine.compute_jacobian("missing_link")
-        assert jac is None
+        with pytest.raises(
+            KeyError, match=r"Body/Frame 'missing_link' not found in Pinocchio model"
+        ):
+            engine.compute_jacobian("missing_link")
 
     def test_set_control_rejects_invalid_length_without_mutating_tau(self):
         engine = self.make_engine()

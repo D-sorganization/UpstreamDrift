@@ -2157,6 +2157,56 @@ MUJOCO_GL=egl python3 scripts/measure_opensim_lift_ik_id.py
 python3 -m pytest -o addopts="" tests/unit/lifting/test_opensim_lift_ik_id.py
 \end{verbatim}
 
+\subsection{Lift Kinetics Parity Across All Five Lifts (OSL-8, Issue \#13045)}\label{sec:lift-kinetics-parity-all-five}
+\paragraph{Cross-Engine Contact and Grip Kinetics Parity.}
+Issue \#13045 generalizes the LIFT-7 back-squat kinetics parity framework (\texttt{src/shared/python/lifting/kinetics\_parity.py} and \texttt{scripts/measure\_lift\_kinetics\_parity.py}) across all five registered barbell lift bundles in \texttt{SAME\_INPUT\_LIFT\_BUNDLES} (\texttt{back\_squat}, \texttt{deadlift}, \texttt{bench\_press}, \texttt{snatch}, and \texttt{clean\_and\_jerk}).
+At each reference state (11 states sampled with stride 20 across the 200-frame kinematic window), the ground-reaction breakdown (per-foot force, net force, centre of pressure, and free moment about the vertical axis) and hand grip wrench (per-hand force and couple) are evaluated across MuJoCo, Drake, Pinocchio, and OpenSim same-input adapters.
+
+Tolerances remain fixed at acceleration parity level L1: $|\Delta X| \le 10^{-6} + 10^{-8} \max |X|$\,N or N\,m, and $10^{-8}$\,m for the centre of pressure (CoP).
+Table~\ref{tab:kinetics-parity-all-five} presents the largest measured differences from MuJoCo across all evaluated states. Across all five lifts, net ground reaction force agrees within $3.6\times 10^{-10}$\,N, net CoP agrees within $6.8\times 10^{-14}$\,m, and net free moment agrees within $1.9\times 10^{-11}$\,N\,m. Drake grip net force and couple agree with MuJoCo within $6.5\times 10^{-10}$\,N and $2.1\times 10^{-10}$\,N\,m. In Pinocchio and OpenSim, same-input adapters do not implement closure-multiplier extraction, reporting grip wrench as unavailable with an explicit reason string.
+
+\begin{table}[h]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llccccc}
+\toprule
+Lift & Engine & Net GRF (N) & Net CoP (m) & Net Free Moment (N\,m) & Grip Force (N) & Grip Couple (N\,m) \\
+\midrule
+Back Squat & Drake & $2.33\times 10^{-10}$ & $4.01\times 10^{-15}$ & $6.89\times 10^{-12}$ & $6.42\times 10^{-10}$ & $2.02\times 10^{-10}$ \\
+Back Squat & Pinocchio & $2.53\times 10^{-10}$ & $5.18\times 10^{-15}$ & $4.47\times 10^{-12}$ & unavailable & unavailable \\
+Back Squat & OpenSim & $1.51\times 10^{-10}$ & $4.28\times 10^{-15}$ & $5.64\times 10^{-12}$ & unavailable & unavailable \\
+\midrule
+Deadlift & Drake & $2.96\times 10^{-10}$ & $1.24\times 10^{-14}$ & $3.54\times 10^{-12}$ & $3.00\times 10^{-11}$ & $3.57\times 10^{-11}$ \\
+Deadlift & Pinocchio & $1.82\times 10^{-10}$ & $1.13\times 10^{-14}$ & $2.82\times 10^{-12}$ & unavailable & unavailable \\
+Deadlift & OpenSim & $1.86\times 10^{-10}$ & $1.44\times 10^{-14}$ & $3.52\times 10^{-12}$ & unavailable & unavailable \\
+\midrule
+Bench Press & Drake & $1.95\times 10^{-10}$ & $6.75\times 10^{-14}$ & $2.97\times 10^{-13}$ & $9.45\times 10^{-11}$ & $1.13\times 10^{-10}$ \\
+Bench Press & Pinocchio & $9.12\times 10^{-11}$ & $2.06\times 10^{-14}$ & $1.91\times 10^{-13}$ & unavailable & unavailable \\
+Bench Press & OpenSim & $4.88\times 10^{-11}$ & $3.31\times 10^{-14}$ & $3.60\times 10^{-13}$ & unavailable & unavailable \\
+\midrule
+Snatch & Drake & $3.40\times 10^{-10}$ & $1.39\times 10^{-14}$ & $1.86\times 10^{-11}$ & $4.23\times 10^{-11}$ & $5.72\times 10^{-11}$ \\
+Snatch & Pinocchio & $2.07\times 10^{-10}$ & $1.36\times 10^{-14}$ & $1.04\times 10^{-11}$ & unavailable & unavailable \\
+Snatch & OpenSim & $1.25\times 10^{-10}$ & $1.47\times 10^{-14}$ & $6.85\times 10^{-12}$ & unavailable & unavailable \\
+\midrule
+Clean and Jerk & Drake & $3.57\times 10^{-10}$ & $1.01\times 10^{-14}$ & $4.10\times 10^{-12}$ & $9.08\times 10^{-11}$ & $1.18\times 10^{-10}$ \\
+Clean and Jerk & Pinocchio & $2.73\times 10^{-10}$ & $1.36\times 10^{-14}$ & $2.69\times 10^{-12}$ & unavailable & unavailable \\
+Clean and Jerk & OpenSim & $2.75\times 10^{-10}$ & $1.52\times 10^{-14}$ & $3.46\times 10^{-12}$ & unavailable & unavailable \\
+\bottomrule
+\end{tabular}
+\caption{Largest Measured Cross-Engine Kinetics Differences From MuJoCo Across All Five Lifts (OSL-8).}
+\label{tab:kinetics-parity-all-five}
+\end{table}
+
+\paragraph{Inverse Dynamics and Joint Moments Investigation.}
+The same-input adapters for MuJoCo, Drake, and Pinocchio (\texttt{VectorPlant} and the respective full-body engine models) implement forward-dynamics evaluation ($\ddot{q}(q, v, \tau)$), closed-loop kinematic weld residuals, and contact kinematics. None of the same-input adapters expose an inverse-dynamics pipeline to compute joint moments under external ground and grip forces. In contrast, OpenSim evaluates inverse dynamics through its dedicated \texttt{InverseDynamicsSolver} pipeline (\texttt{opensim\_full\_body\_lifts.py}), applying external ground and hand wrenches to \texttt{calcn\_l}/\texttt{calcn\_r} and \texttt{hand\_l}/\texttt{hand\_r}.
+Per OSL-8 scope, joint moments across same-input adapters are recorded as unavailable with the exact reason string rather than constructing an unvetted ID pipeline.
+
+\paragraph{Reproduction Commands.}
+To evaluate cross-engine kinetics parity across all five registered barbell lifts:
+\begin{verbatim}
+MUJOCO_GL=egl python3 scripts/measure_lift_kinetics_parity.py --lift all
+python3 -m pytest -o addopts="" tests/unit/lifting/test_squat_kinetics_parity.py
+\end{verbatim}
+
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,
 \texttt{docs/development/lifting/pack\_parity\_baseline.json} (schema

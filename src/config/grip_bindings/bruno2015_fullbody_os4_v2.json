@@ -1,0 +1,36 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "bruno2015_fullbody_os4_v2",
+  "model_hash": "sha256:e488ae2cf67be3de36f569cab514e181bfa89d5186d998f1627b461b4498fd47",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "calibrated_address_locked_forearm_wrist",
+    "description": "Bruno 2015 full-body thoracolumbar spine model with locked forearm and wrist coordinates (pro_sup_l, wrist_flex_l, wrist_dev_l, pro_sup_r, wrist_flex_r, wrist_dev_r)"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "src/config/spine_model_assets.json#bruno2015_fullbody_os4_v2",
+    "date": "2026-10-19",
+    "method": "opensim_spine_fullbody_coordinate_map",
+    "locked_forearm_wrist_coordinates": [
+      "pro_sup_l",
+      "wrist_flex_l",
+      "wrist_dev_l",
+      "pro_sup_r",
+      "wrist_flex_r",
+      "wrist_dev_r"
+    ]
+  },
+  "attachment_mode": "weld",
+  "club_body": "Club",
+  "lead_hand_body": "hand_L",
+  "trail_hand_body": "hand_R",
+  "unavailable_sites": {}
+}
