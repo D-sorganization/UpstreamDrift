@@ -18,6 +18,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13490 · Hang Watchdog Dumps Stacks From a GIL-Held Python Handler so SIGUSR1 No Longer Segfaults the Xdist Controller (Exit 139)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13490
+- **Branch:** fix/qt-teardown-segv
+- **PR:** #13497
+- **Paths:** see #13497
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`76b42c4d`; collated from changes/13490-hang-watchdog-dumps-stacks-from-a-gil-he.md)
+- **Summary:** Hang watchdog dumps stacks from a GIL-held Python handler so SIGUSR1 no longer segfaults the xdist controller (exit 139)
+- **Next step:** Merge the PR; watch unit-test-gate for any further exit 139.
+
+### DL-#13256 · Re-Lands the Salvaged Source-Bound Native OpenSim Muscle-Effort Adapter and Runtime With SDK-Free Contract Tests; Native Tests Skip Without the SDK and No Manager Advance Has Been Executed.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13256
+- **Branch:** feat/ud-13256-native-muscle-adapter
+- **PR:** #13478
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/native_muscle_effort_adapter.py,src/engines/physics_engines/opensim/python/tour_matching/native_muscle_effort_runtime.py,src/engines/physics_engines/opensim/python/tour_matching/muscle_replay.py,tests/unit/engines/opensim/test_native_muscle_effort_adapter.py,tests/opensim/test_native_muscle_effort_adapter.py,tests/opensim/test_native_muscle_effort_native.py
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`bf10d600`; collated from changes/13256-native-muscle-effort-adapter.md)
+- **Summary:** Re-lands the salvaged source-bound native OpenSim muscle-effort adapter and runtime with SDK-free contract tests; native tests skip without the SDK and no Manager advance has been executed.
+- **Next step:** Owner decides whether native muscle advancement stays on the OSL/NSX roadmap; implement the opt-in stop_when_feasible allocator contract before any new native attempt.
+
+### DL-#13176 · HRG-Q1 Slice: Full-Body-V2 Mass Matrix and Gravity Qualified Against a Spec-Only Geometric-Jacobian Reference on MuJoCo (Measured Rel. Error <=4E-16, Tol 1E-12) With a Pinocchio Twin; Drake, OpenSim, MyoSuite, Limits, Closure, Contact and ID Remain Open
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13176
+- **Branch:** claude/ud-13176-hrg-q1-qualification
+- **PR:** #13491
+- **Paths:** see #13491
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`8000133e`; collated from changes/13176-hrg-q1-slice-full-body-v2-mass-matrix-an.md)
+- **Summary:** HRG-Q1 slice: full-body-v2 mass matrix and gravity qualified against a spec-only geometric-Jacobian reference on MuJoCo (measured rel. error <=4e-16, tol 1e-12) with a Pinocchio twin; Drake, OpenSim, MyoSuite, limits, closure, contact and ID remain open
+- **Next step:** Extend to Drake/OpenSim inertia-gravity and reference-trajectory inverse dynamics
+
+### DL-#13112 · Forward-Dynamics Replay Reproducibility: Deterministic Replay Test, Seeded Lyapunov-Style Sensitivity Probe (--Replay-Sensitivity), Bounded 0.1 s Post-Impact FD Metric, and a Base-of-Support Bound on the ZMP Filter Centre-of-Mass Shift
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13112
+- **Branch:** claude/ud-13112-fd-replay-repro
+- **PR:** #13501
+- **Paths:** see #13501
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`67c97461`; collated from changes/13112-replay-sensitivity-zmp-bound.md)
+- **Summary:** Forward-dynamics replay reproducibility: deterministic replay test, seeded Lyapunov-style sensitivity probe (--replay-sensitivity), bounded 0.1 s post-impact FD metric, and a base-of-support bound on the ZMP filter centre-of-mass shift
+- **Next step:** Regenerate anthro_iron_seeds_zmp on ControlTower with the CoM-shift bound; probe a segment-inertia (+/-5 mm CoM) perturbation with the same growth-rate metric
+
 ### DL-#12985 · Align Default Engine Models to Canonical Golfer and Raise KeyError on Unknown Body in Compute_Jacobian
 
 - **State:** in_review
@@ -2665,6 +2717,58 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13510 · Ci(Opensim): Real OpenSim Job Reuses a Validated Per-Runner Venv and Opensim-Models Clone and Stops Uploading the GitHub Pip Cache From Self-Hosted Runners
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13510
+- **Branch:** merged via #13511
+- **PR:** #13511
+- **Paths:** see #13511
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`d8d85a52`; collated from changes/13510-ci-opensim-real-opensim-job-reuses-a-val.md)
+- **Summary:** ci(opensim): Real OpenSim job reuses a validated per-runner venv and opensim-models clone and stops uploading the GitHub pip cache from self-hosted runners
+- **Next step:** Shipped in PR #13511.
+
+### DL-#13500 · Fix Duplicate Tex_Skin_2 Asset in MuJoCo With_Head Exports so the MJCF Compiles
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13500
+- **Branch:** merged via #13505
+- **PR:** #13505
+- **Paths:** see #13505
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`94b8e96b`; collated from changes/13500-fix-duplicate-tex-skin-2-asset-in-mujoco.md)
+- **Summary:** Fix duplicate tex_skin_2 asset in MuJoCo with_head exports so the MJCF compiles
+- **Next step:** Shipped in PR #13505.
+
+### DL-#13175 · HRG-E4 Slice: Anatomical-Angle Event Table (Address/Top/Impact/Finish) With CSV/JSON Export Carrying Units, Sign Conventions, Observability and Receipts; JSON Schema Validated
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13175
+- **Branch:** merged via #13503
+- **PR:** #13503
+- **Paths:** see #13503
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`0cf7e34d`; collated from changes/13175-hrg-e4-slice-anatomical-angle-event-tabl.md)
+- **Summary:** HRG-E4 slice: anatomical-angle event table (address/top/impact/finish) with CSV/JSON export carrying units, sign conventions, observability and receipts; JSON schema validated
+- **Next step:** Shipped in PR #13503.
+
+### DL-#13174 · MuJoCo Visual Layer for Full-Body-V2: One Rigid Pelvis, Abdomen and Thorax Visual per Trunk Segment, Seam No-Gap and Physics-Unchanged Tests (HRG-D3 Slice; Renders Deferred)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13174
+- **Branch:** merged via #13499
+- **PR:** #13499
+- **Paths:** see #13499
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`396a999f`; collated from changes/13174-mujoco-visual-layer-for-full-body-v2-one.md)
+- **Summary:** MuJoCo visual layer for full-body-v2: one rigid pelvis, abdomen and thorax visual per trunk segment, seam no-gap and physics-unchanged tests (HRG-D3 slice; renders deferred)
+- **Next step:** Shipped in PR #13499.
+
 ### DL-#13494 · Stop CI Requires OpenSim Queueing One Run per Main Push
 
 - **State:** shipped
@@ -2996,12 +3100,12 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13308
 - **Branch:** feat/13308-grip-style-parity-report
-- **PR:** #13422, #13442
+- **PR:** #13422, #13442, #13457
 - **Paths:** see #13422
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-20 (`b18575db`; collated from changes/13308-align-collinear-capsule-cylinder-midpoin.md)
+- **Last verified:** 2026-10-20 (`5884e94a`; collated from changes/13308-continuous-capsule-line-contact.md)
 - **Summary:** Extend grip_contact.parity with per-pair forces, contact-point drift, determinate/indeterminate classification, and cross-engine style parity report (HRG-GS-G10)
-- **Next step:** Shipped in PR #13422.
+- **Next step:** Shipped in PR #13457.
 
 ### DL-#13307 · Refactor Drake ClubInHands to Two Hand Bodies and Add TopologyContactModel Adapter
 
