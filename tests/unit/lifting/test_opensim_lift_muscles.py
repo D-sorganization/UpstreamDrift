@@ -64,6 +64,16 @@ def _require_body() -> None:
 # -------------------------------------------------------------------------
 
 
+def _reserve_share_floor(lift: str) -> float:
+    """Lower bound on the measured reserve share per lift.
+
+    The standing lifts load the legs, so their reserve share is above 5 %.
+    The supine bench press barely loads the legs (measured 0.0471, #13042),
+    so its floor is 0.04.
+    """
+    return 0.04 if lift == "bench_press" else 0.05
+
+
 def test_reserve_share_zero_demand() -> None:
     """Zero demand and zero reserves give 0.0 reserve share."""
     tau = np.zeros(5)
@@ -184,7 +194,8 @@ def test_bench_press_complete_record_with_bench_contact_and_residual_gate() -> N
         assert receipt["classification"] == "unqualified"
         assert receipt["residual_status"]["forces_within"] is False
         assert receipt["residual_status"]["moments_within"] is False
-        assert receipt["reserve_share"] is not None and receipt["reserve_share"] > 0.0
+        assert receipt["reserve_share"] is not None
+        assert receipt["reserve_share"] > _reserve_share_floor("bench_press")
         assert receipt["moment_balance_max_error_nm"] < 1e-4
 
         # External loads used by the solve must include bench contact wrench from OSL-3 receipt
@@ -305,7 +316,8 @@ def test_muscle_receipts_recorded_for_all_lifts() -> None:
         entry = lifts[lift]
         assert entry["status"] == "complete", f"{lift}: {entry.get('reason')}"
         assert entry["classification"] == "unqualified"
-        assert entry["reserve_share"] is not None and entry["reserve_share"] > 0.0
+        assert entry["reserve_share"] is not None
+        assert entry["reserve_share"] > _reserve_share_floor(lift)
         assert "residual_status" in entry
 
 
@@ -525,7 +537,8 @@ def test_live_remaining_lifts_muscle_solutions(lift: str) -> None:
     receipt = evaluate_lift_muscles(lift, stride=5, run_moco=False)
     assert receipt["status"] == "complete", receipt.get("reason", "")
     assert receipt["classification"] == "unqualified"
-    assert receipt["reserve_share"] is not None and receipt["reserve_share"] > 0.0
+    assert receipt["reserve_share"] is not None
+    assert receipt["reserve_share"] > _reserve_share_floor(lift)
     assert receipt["moment_balance_max_error_nm"] < 1e-4
     assert "residual_status" in receipt
     assert receipt["residual_status"]["forces_within"] is False
