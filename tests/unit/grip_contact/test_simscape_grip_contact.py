@@ -88,7 +88,12 @@ def _has_pinocchio() -> bool:
     try:
         import pinocchio  # noqa: F401
 
-        return hasattr(pinocchio, "Model")
+        if type(pinocchio).__module__ == "unittest.mock":
+            return False
+        model_cls = getattr(pinocchio, "Model", None)
+        if model_cls is None or type(model_cls).__module__ == "unittest.mock":
+            return False
+        return isinstance(model_cls, type)
     except ImportError:
         return False
 
