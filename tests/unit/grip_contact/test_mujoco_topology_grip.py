@@ -846,7 +846,7 @@ def _deflection_xfail(motion: str, numbers: str) -> pytest.MarkDecorator:
         strict=True,
         raises=AssertionError,
         reason=(
-            "Trail-hand deflection in the hyperstatic two-hand grip (#13306, "
+            "Trail-hand deflection in the hyperstatic two-hand grip (#13547, "
             "GRIP_PARITY_DECISIONS.md Section 19): with the per-row friction gain "
             "schedule every per-hand force, squeeze and couple passes, but the "
             f"measured 0.1 s {motion} deflection_L / deflection_R (peak_error, "

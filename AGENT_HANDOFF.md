@@ -49,6 +49,11 @@ open-fp vertical force plates as measured constraints (Epic #13061; plan and DV-
 
 - Contract OF-01 #13065, reader OF-02 #13066, readings at model time OF-05 #13069, vertical-cell observation rows with sensing-plane lever OF-11 #13067, family-wise elimination screen OF-12 #13070. AGPL boundary: files and network only; all data unqualified until DV-13061.
 
+HRG-GS grip styles and hand–club/hand–hand contact (Epic #13297, closed):
+
+- Continuous capsule line-contact law #13457 (#13308); MuJoCo per-row friction gain schedule `friction_secant_gain` #13504 (#13306); order-invariant quadrature #13517 (#13508).
+- Open residuals, both strict xfails under `-m slow` (never loosen 5 % peak / 2 % RMS): MuJoCo overlap/interlock 0.10 s trail-hand deflection #13547; OpenSim ten_finger 0.04 s net_force #13548.
+
 Segmental spine (Epic #12735, ADR-0055):
 
 - Software pathway landed and consolidated by SPN-16 #12773: manual chapter 66, `docs/research/segmental_spine/README.md#how-to-run-a-study`; all results unqualified, owner-blocked on #12749, #12737, #12755, #12758, #12763, #12770.

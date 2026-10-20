@@ -678,7 +678,7 @@ _DETERMINATE_ENGINE_CASES = [
                     "OpenSim ten_finger 0.04 s hold determinate net_force RMS is 4.577% "
                     "(peak 4.639%, net_moment_com peak 0.000% / RMS 1.231%) > 2.0% "
                     "RMS_TOLERANCE against the continuous line-contact reference "
-                    "(#13308; 2.970% RMS over 0.10 s)"
+                    "(#13548; 2.970% RMS over 0.10 s)"
                 ),
             ),
         ],
@@ -711,7 +711,7 @@ _DETERMINATE_ENGINE_CASES = [
                     "OpenSim ten_finger 0.04 s swing determinate net_force RMS is 2.374% "
                     "(peak 3.682%; net_moment_com passes at 0.000% / 0.924%) > 2.0% "
                     "RMS_TOLERANCE against the continuous line-contact reference "
-                    "(#13308; passes over 0.10 s at 3.682% / 1.911%)"
+                    "(#13548; passes over 0.10 s at 3.682% / 1.911%)"
                 ),
             ),
         ],
