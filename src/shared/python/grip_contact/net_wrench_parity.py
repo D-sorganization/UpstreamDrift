@@ -23,29 +23,7 @@ from src.shared.python.grip_contact.parity import (
     QuantityError,
 )
 
-__all__ = [
-    "failing_net_wrench",
-    "net_club_wrench",
-    "net_club_wrench_errors",
-    "payloads_numerically_close",
-]
-
-
-def payloads_numerically_close(a: Any, b: Any, *, tol: float = 1e-6) -> bool:
-    """Check if two JSON payloads match with floating-point tolerance for cross-platform parity."""
-    if isinstance(a, dict) and isinstance(b, dict):
-        if a.keys() != b.keys():
-            return False
-        return all(payloads_numerically_close(a[k], b[k], tol=tol) for k in a)
-    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
-        if len(a) != len(b):
-            return False
-        return all(
-            payloads_numerically_close(x, y, tol=tol) for x, y in zip(a, b, strict=True)
-        )
-    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-        return abs(float(a) - float(b)) <= tol * (1.0 + abs(float(b)))
-    return a == b
+__all__ = ["failing_net_wrench", "net_club_wrench", "net_club_wrench_errors"]
 
 
 def net_club_wrench(

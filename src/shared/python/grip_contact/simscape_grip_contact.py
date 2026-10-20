@@ -35,6 +35,7 @@ from src.shared.python.grip_contact.contact_topology import (
     contact_topology,
 )
 from src.shared.python.grip_contact.interface import GripInterface
+from src.shared.python.grip_contact.generated_freshness import generated_json_matches
 from src.shared.python.grip_contact.matlab_kernel import (
     DEFAULT_SQUEEZE_PER_HAND_N,
     STYLE_IDS,
@@ -42,9 +43,6 @@ from src.shared.python.grip_contact.matlab_kernel import (
     evaluate_kernel_reference,
     kernel_bundle_sha256,
     render_json_deterministic,
-)
-from src.shared.python.grip_contact.net_wrench_parity import (
-    payloads_numerically_close,
 )
 from src.shared.python.grip_contact.parity import GripKineticsSeries
 from src.shared.python.grip_contact.prescribed_motion import (
@@ -455,25 +453,19 @@ def export_scenarios_json(
     *,
     check: bool = False,
 ) -> int:
-    """Write or check ``gs3dx_grip_contact_scenarios.json``."""
+    """Write or check ``gs3dx_grip_contact_scenarios.json``.
+
+    ``check`` uses :func:`generated_json_matches`: the Hermite coefficients
+    carry finite-difference-amplified ulp noise that differs between runners.
+    """
     payload = build_scenarios_payload()
-    text = render_json_deterministic(payload)
     target = Path(path)
     if check:
         if not target.exists():
             return 1
-        current = target.read_text(encoding="utf-8")
-        if current == text:
-            return 0
-        if target.resolve() == DEFAULT_SCENARIOS_JSON_PATH.resolve():
-            try:
-                act = json.loads(current)
-                exp = json.loads(text)
-                if payloads_numerically_close(act, exp):
-                    return 0
-            except Exception:
-                pass
-        return 1
+        committed = json.loads(target.read_text(encoding="utf-8"))
+        return 0 if generated_json_matches(committed, payload) else 1
+    text = render_json_deterministic(payload)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(text, encoding="utf-8")
     return 0
@@ -713,37 +705,27 @@ def simscape_series_to_topology_series(
     )
 
 
-def _hand_and_club_poses(
-    series: SimscapeGripContactSeries,
-    interface: GripInterface,
+def _grip_frame_poses(
+    series: SimscapeGripContactSeries, interface: GripInterface
 ) -> tuple[
-    dict[str, tuple[np.ndarray, np.ndarray]],
-    dict[str, tuple[np.ndarray, np.ndarray]],
+    dict[str, tuple[np.ndarray, np.ndarray]], dict[str, tuple[np.ndarray, np.ndarray]]
 ]:
-    n = series.time_s.size
-    off_l = interface.left.matrix()
-    off_r = interface.right.matrix()
-    club_pos_l = np.zeros((n, 3), dtype=float)
-    club_rot_l = np.zeros((n, 3, 3), dtype=float)
-    club_pos_r = np.zeros((n, 3), dtype=float)
-    club_rot_r = np.zeros((n, 3, 3), dtype=float)
-    for k in range(n):
-        rc = series.club_rotation_w[k]
-        pc = series.club_position_w_m[k]
-        club_pos_l[k] = pc + rc @ off_l[:3, 3]
-        club_rot_l[k] = rc @ off_l[:3, :3]
-        club_pos_r[k] = pc + rc @ off_r[:3, 3]
-        club_rot_r[k] = rc @ off_r[:3, :3]
-    return (
-        {
-            "L": (series.hand_l_rotation_w, series.hand_l_position_w_m),
-            "R": (series.hand_r_rotation_w, series.hand_r_position_w_m),
-        },
-        {
-            "L": (club_rot_l, club_pos_l),
-            "R": (club_rot_r, club_pos_r),
-        },
-    )
+    """Per-side ``(rotation, position)`` series of the hands and club grip frames.
+
+    Postconditions:
+        Club grip frames are the club pose composed with the interface's
+        club-local grip frames, shape ``(n, 3, 3)`` and ``(n, 3)`` per side.
+    """
+    rot_c, pos_c = series.club_rotation_w, series.club_position_w_m
+    club_pose = {}
+    for side, frame in (("L", interface.left), ("R", interface.right)):
+        off = frame.matrix()
+        club_pose[side] = (rot_c @ off[:3, :3], pos_c + rot_c @ off[:3, 3])
+    hand_pose = {
+        "L": (series.hand_l_rotation_w, series.hand_l_position_w_m),
+        "R": (series.hand_r_rotation_w, series.hand_r_position_w_m),
+    }
+    return hand_pose, club_pose
 
 
 def simscape_series_to_kinetics_series(
@@ -755,7 +737,7 @@ def simscape_series_to_kinetics_series(
         spec = json.loads(DEFAULT_SPEC_PATH.read_text(encoding="utf-8"))
         interface = GripInterface.from_spec(spec)
 
-    hand_pose, club_pose = _hand_and_club_poses(series, interface)
+    hand_pose, club_pose = _grip_frame_poses(series, interface)
     wrench = {
         "L": (series.force_on_club_l_w_n, series.moment_on_club_l_w_nm),
         "R": (series.force_on_club_r_w_n, series.moment_on_club_r_w_nm),
@@ -786,7 +768,7 @@ def simscape_series_to_contact_run(
         spec = json.loads(DEFAULT_SPEC_PATH.read_text(encoding="utf-8"))
         interface = GripInterface.from_spec(spec)
     kin = simscape_series_to_kinetics_series(series, interface=interface)
-    hand_pose, club_pose = _hand_and_club_poses(series, interface)
+    hand_pose, club_pose = _grip_frame_poses(series, interface)
     axial, roll = slip_from_frames(hand_pose, club_pose)
     from src.shared.python.motion_matching.grip_contract import GripSpec
 

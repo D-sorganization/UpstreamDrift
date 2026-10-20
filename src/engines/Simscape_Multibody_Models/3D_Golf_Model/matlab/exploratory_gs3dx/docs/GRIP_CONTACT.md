@@ -25,10 +25,11 @@ To stay 100% DRY with the Python source of truth (`src/shared/python/grip_contac
 1. **Generator (`src/shared/python/grip_contact/matlab_kernel.py` and `scripts/export_simscape_grip_kernel.py`):**
    - Extracts all contact law parameters (`normal_stiffness_n_m`, `damping_s_m`, `static_friction`, `dynamic_friction`, `viscous_friction_s_m`, `stribeck_velocity_m_s`, `patch_radius_m`, `spin_transition_rad_s`), club grip frame offsets, and all 3 grip topologies (`overlap`, `interlock`, `ten_finger` at $F_{\mathrm{sq}} = 1100\,\mathrm{N}$ per hand) into fixed-size $(12 \times 17)$ numeric pair tables (`MAX_PHYSICAL_PAIRS = 12`).
    - Emits `tools/generated/gs3dx_grip_contact_kernel.m` (`%#codegen` compliant: fixed sizes, no containers, no strings, no dynamic memory allocation, no `persistent` variables) and `tools/generated/gs3dx_grip_contact_params.json`.
-   - `python3 scripts/export_simscape_grip_kernel.py --check` verifies byte-for-byte freshness and fails if the Python contact law, capsule closest-point geometry, or topology parameters drift from the generated `.m` and `.json` artifacts.
+   - `python3 scripts/export_simscape_grip_kernel.py --check` verifies byte-for-byte freshness and fails if the Python contact law, capsule line-contact quadrature, or topology parameters drift from the generated `.m` and `.json` artifacts.
 
 2. **Stateless Physical Pair Law (Proven by `pair_contact.py`):**
    - The shared pairwise contact law in `src/shared/python/grip_contact/pair_contact.py`—specifically `sphere_capsule`, `capsule_capsule`, and `_sample_contact` (which delegates to `sphere_ground_contact` and `torsional_friction_moment` in `src/shared/python/motion_matching/contact_law.py`)—is **stateless**: it computes Hunt–Crossley normal force $f_n = \max(0, k_n \delta_+(1 - c_n v_n))$, regularized tanh/Stribeck tangential friction $\vec{f}_t = -\mu(s) f_n \tanh(s / v_{\mathrm{tr}}) \vec{v}_t / s$ with **no tangential spring**, and torsional patch spin moment $\vec{m}_s = -\mu_s f_n r_{\mathrm{patch}} \tanh(\omega_n / \omega_{\mathrm{tr}})\hat{\mathbf{n}}$ purely as algebraic functions of instantaneous penetration $\delta$ and relative velocity $(\vec{v}_{\mathrm{rel}}, \vec{\omega}_{\mathrm{rel}})$.
+   - Capsule–capsule pairs (the ten-finger little finger on the grip) follow the shared line-contact law of `capsule_capsule` (#13308, #13508): the shorter (hand) capsule is discretised into `line_contact_node_count` node spheres, each meets the grip capsule through the sphere–capsule law and is weighted `1/n`, so the wrench stays continuous for nearly parallel capsules. The pair table's `line_nodes` column (kernel schema v2) carries the node count; sphere rows use 1. The generator rejects a hand capsule that is not the shorter one.
    - Because the shared law is stateless, `gs3dx_grip_contact_kernel` has no continuous state input (`z_state`) and no state derivative output (`dz_dt`). Its exact signature is:
      ```matlab
      [F_club_w, M_club_w, F_hand_L_w, M_hand_L_w, F_hand_R_w, M_hand_R_w, ...
@@ -64,36 +65,37 @@ The MathWorks Home license enforces a hard limit of **1,000 compiled nonvirtual 
 | --- | ---: | ---: | ---: |
 | `GS3DX_FullBody` | 945 | 55 | 30 |
 | `GS3DX_FullBodyContact` | 967 | 33 | 8 |
-| `GS3DX_Neck` / `GS3DX_Human` | **975** | **25** | **0** |
+| `GS3DX_Neck` | 975 | 25 | 0 |
+| `GS3DX_Human` ([HUMAN.md](HUMAN.md)) | **965** | **35** | **10** |
 
 ### Reasoning-Only Estimate of Block Types Required to Embed Physical Grip Contact in `GS3DX_Human`
 
-> **Estimate (by reasoning only; not compiled or measured in `GS3DX_Human`):** Because `GS3DX_Human` is already at the 975-block persistent reserve ceiling (zero reserve headroom), replacing its welded hand–club loop with physical grip contact would require adding the following block types beyond deleting `Right Hand Weld` (`Weld Joint`):
+> **Estimate (by reasoning only; not compiled or measured in `GS3DX_Human`):** Because `GS3DX_Human` compiles to 965 blocks, 10 below the 975-block persistent cap, replacing its welded hand–club loop with physical grip contact would require adding the following block types beyond deleting `Right Hand Weld` (`Weld Joint`):
 > - A 6-DOF club joint (`6-DOF Joint`) and principal-inertia alignment frame (`Rigid Transform`) between the lead hand and club body;
 > - Three `Transform Sensor` blocks (`Club`, `Hand_L`, `Hand_R` relative to `World`) together with `PS-Simulink Converter` blocks for position, rotation, linear velocity, and angular velocity on each body;
 > - The `Grip Contact Kernel` (`MATLAB Function` block) and `GripStyleId` parameter;
 > - `External Force and Torque` block(s) on the club (and bilateral hands if reaction wrenches are applied back to the hands) together with `Simulink-PS Converter` and `Demux` routing blocks.
 >
-> Because `GS3DX_Human` has zero compiled-block headroom below the 975-block reserve gate, physical grip contact is isolated in the standalone `GS3DX_GripContact` fixture model rather than modifying `GS3DX_Human.slx`.
+> The standalone fixture's sensing, kernel and wrench-application blocks alone (three Transform Sensors, twelve PS-Simulink Converters, the kernel, the External Force and Torque block and its converters) number about two dozen top-level blocks, well over the 10-block headroom, so physical grip contact is isolated in the standalone `GS3DX_GripContact` fixture model rather than modifying `GS3DX_Human.slx`.
 
-## R2025b Measured Values: Pending Orchestrator Run
+## R2025b Measured Values
 
-Only `test_gs3dx_grip_pair_wrench` has been executed and measured in MATLAB R2025b so far. All `GS3DX_GripContact` model build, compiled block count, simulation, qualification probe, and Pinocchio parity rows are pending the orchestrator's R2025b run of `gs3dx_build_grip_contact` and `gs3dx_grip_contact_run`:
+Measured on DeskComputer, MATLAB R2025b, 2026-10-19, from commit-matched sources: the receipt's `kernel_sha256` and `input_sha256` equal the committed generated kernel and scenarios, and `test_r2025b_receipt_hashes_match_committed_kernel_and_inputs` enforces that. Evidence: `receipts/grip_contact/`. Parity percentages are against the Pinocchio G6 reference over the 0.1 s windows (peak / RMS, % of reference peak). The 0.00 % peaks in overlap and interlock are the t = 0 preload transient (below), which both engines evaluate from the same initial state, so the RMS column is the informative one. Overlap and interlock share their physical hand–grip pads; they differ only in allocated hand–hand pairs, which are never applied, so their numbers are identical.
 
 | Check / Metric | Style / Scenario | Gate / Tolerance | R2025b Measured Value | Status |
 | --- | --- | --- | --- | --- |
 | Golden test result (`test_gs3dx_grip_pair_wrench`) | All 3 styles, 51 golden cases | $\le 10^{-10}$ rel / $\le 10^{-9}\,\mathrm{N}$ abs | **1/1 test PASSED in R2025b (all 51 golden cases)** | **Passed** |
-| Compiled block count (`GS3DX_GripContact`) | Uncompiled / compiled total | $\le 975$ compiled ($1{,}000$ ceiling $- 25$ reserve) | Pending orchestrator run | Pending |
-| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `overlap` / `hold` | Peak $\le 5\%$, RMS $\le 2\%$ | Pending orchestrator run | Pending |
-| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `overlap` / `short_swing` | Peak $\le 5\%$, RMS $\le 2\%$ | Pending orchestrator run | Pending |
-| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `interlock` / `hold` | Peak $\le 5\%$, RMS $\le 2\%$ | Pending orchestrator run | Pending |
-| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `interlock` / `short_swing` | Peak $\le 5\%$, RMS $\le 2\%$ | Pending orchestrator run | Pending |
-| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `ten_finger` / `hold` | Peak $\le 5\%$, RMS $\le 2\%$ | Pending orchestrator run | Pending |
-| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `ten_finger` / `short_swing` | Peak $\le 5\%$, RMS $\le 2\%$ | Pending orchestrator run | Pending |
-| Timestep-convergence change (`max_rel_force_diff`) | `overlap` / `short_swing` | $\le 2\%$ relative force change | Pending orchestrator run | Pending |
-| Save/reload difference (`max_abs_force_diff_n`, `max_abs_moment_diff_nm`) | `overlap` / `short_swing` | $\le 10^{-11}\,\mathrm{N}$ / $\mathrm{N\cdot m}$ | Pending orchestrator run | Pending |
-| Frame-probe error at $t = 0$ (`max_pos_err_m`, `max_rot_err_fro`) | All styles & scenarios | $\le 10^{-8}\,\mathrm{m}$, $\le 10^{-8}$ Frobenius | Pending orchestrator run | Pending |
-| Force-sign check (`min_normal_push_dot_n`) | All styles (`hold`) | $> 0\,\mathrm{N}$ outward normal push | Pending orchestrator run | Pending |
+| Compiled block count (`GS3DX_GripContact`) | Nonvirtual / compiled total | $\le 975$ compiled ($1{,}000$ ceiling $- 25$ reserve) | 48 / **81** | Passed |
+| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `overlap` / `hold` | Peak $\le 5\%$, RMS $\le 2\%$ | force 0.00 / 0.0005 %; moment 0.00 / 0.0003 % | Passed |
+| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `overlap` / `short_swing` | Peak $\le 5\%$, RMS $\le 2\%$ | force 0.00 / 0.0034 %; moment 0.00 / 0.0024 % | Passed |
+| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `interlock` / `hold` | Peak $\le 5\%$, RMS $\le 2\%$ | force 0.00 / 0.0005 %; moment 0.00 / 0.0003 % | Passed |
+| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `interlock` / `short_swing` | Peak $\le 5\%$, RMS $\le 2\%$ | force 0.00 / 0.0034 %; moment 0.00 / 0.0024 % | Passed |
+| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `ten_finger` / `hold` | Peak $\le 5\%$, RMS $\le 2\%$ | force 0.002 / 0.0036 %; moment 0.00 / 0.0007 % | Passed |
+| Net-club-wrench parity vs. Pinocchio (`net_force` peak / RMS, `net_moment_com` peak / RMS) | `ten_finger` / `short_swing` | Peak $\le 5\%$, RMS $\le 2\%$ | force 0.011 / 0.045 %; moment 0.00 / 0.048 % | Passed |
+| Timestep-convergence change (`max_rel_force_diff`) | `overlap` / `short_swing` | $\le 2\%$ relative force change | $4.7\times10^{-5}$ (max step 0.2 → 0.1 ms) | Passed |
+| Save/reload difference (`max_abs_force_diff_n`, `max_abs_moment_diff_nm`) | `overlap` / `short_swing` | $\le 10^{-11}\,\mathrm{N}$ / $\mathrm{N\cdot m}$ | 0 / 0 | Passed |
+| Frame-probe error at $t = 0$ (`max_pos_err_m`, `max_rot_err_fro`) | All styles & scenarios | $\le 10^{-8}\,\mathrm{m}$, $\le 10^{-8}$ Frobenius | 0 m / $1.3\times10^{-15}$ (consistency probe of the built initial pose) | Passed |
+| Force-sign check (`min_normal_push_dot_n`) | All styles (`hold`) | $> 0\,\mathrm{N}$ outward normal push | min 42.77 N (the shared 0.25 mm preload) | Passed |
 
 ## Validation and Reproduction Commands
 
@@ -121,3 +123,28 @@ out_dir = fullfile(repo_root, ...
     'src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/receipts/grip_contact');
 summary = gs3dx_grip_contact_run(repo_root, out_dir);
 ```
+
+## Initial Preload Transient (Shared Initial Condition)
+
+At t = 0 every physical pad sits at the shared 0.25 mm preload (42.77 N). In
+overlap and interlock the lead heel pad (`lead_heel_pad_butt`) pushes along
+the club axis with no opposing pad, so the lead side starts with a net
+42.77 N axial force while the four opposed trail pads cancel. Within one 2 ms
+sample the club settles to carrying its weight (3.07 N). Pinocchio shows the
+same transient because it starts from the same G6 initial condition, so this
+is a property of the shared topology and preload, not of the Simscape
+adapter. It is out of scope for M12 and recorded as a follow-up.
+
+## Reproduction
+
+On an R2025b host, from an UpstreamDrift checkout (`-sd` set to its root):
+
+```matlab
+g = fullfile(pwd, 'src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx');
+addpath(fullfile(g, 'tools')); addpath(fullfile(g, 'tools/generated')); addpath(fullfile(g, 'tests'));
+assertSuccess(runtests('test_gs3dx_grip_pair_wrench'));
+gs3dx_grip_contact_run(pwd, fullfile(g, 'receipts/grip_contact'));
+```
+
+Then on any host: `python3 -m pytest tests/unit/grip_contact/test_simscape_grip_contact.py`
+(the parity cases need Pinocchio).
