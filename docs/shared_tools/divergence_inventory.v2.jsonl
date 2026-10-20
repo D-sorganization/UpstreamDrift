@@ -179,6 +179,7 @@
 {"path": "analysis/swing_metrics.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
 {"path": "anatomical_angles/__init__.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/basis.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
+{"path": "anatomical_angles/full_body_v1.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/golf_aliases.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/hand_frame.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/terms.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
@@ -1221,6 +1222,7 @@
 {"path": "model_appearance/ball.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_assembly.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/club_chain_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_face.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_head_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_shaft_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}

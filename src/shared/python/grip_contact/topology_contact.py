@@ -72,6 +72,7 @@ from src.shared.python.grip_contact.pair_contact import (
     ContactSphere,
     PairWrench,
     capsule_capsule,
+    capsule_line_nodes,
     capsule_sphere,
     closest_point_segment,
     sphere_capsule,
@@ -264,16 +265,16 @@ def _build_side_batch(
 ) -> SideBatch:
     """Stack the hand-site primitives of ``pairs`` physical in ``mode``, in order."""
     prims = [prim for p, prim in pairs if mode in p.physical_modes]
-    starts = [q.center_m if isinstance(q, ContactSphere) else q.p0_m for q in prims]
-    ends = [q.p1_m for q in prims if isinstance(q, ContactCapsule)]
-    end_rows: list[int] = []
+    centres: list[np.ndarray] = []
+    node_rows: list[tuple[int, ...]] = []
     for q in prims:
-        capsule = isinstance(q, ContactCapsule)
-        end_rows.append(len(prims) + sum(r >= 0 for r in end_rows) if capsule else -1)
+        nodes = capsule_line_nodes(q) if isinstance(q, ContactCapsule) else (q,)
+        node_rows.append(tuple(range(len(centres), len(centres) + len(nodes))))
+        centres.extend(n.center_m for n in nodes)
     return SideBatch(
         pair_names=tuple(p.name for p, _ in pairs if mode in p.physical_modes),
-        hand_points_m=np.array(starts + ends, dtype=float).reshape(-1, 1, 3),
-        capsule_ends=tuple(end_rows),
+        hand_points_m=np.array(centres, dtype=float).reshape(-1, 1, 3),
+        node_rows=tuple(node_rows),
         site_radii_m=tuple(float(q.radius_m) for q in prims),
         grip_points_m=np.array([grip.p0_m, grip.p1_m], dtype=float).reshape(2, 1, 3),
         grip_radius_m=float(grip.radius_m),
@@ -477,8 +478,11 @@ class _LazyPairWrenches(Mapping[str, PairWrench]):
         row = self._rows[name]
         force_b = np.array(row.force_n)
         force_a = -force_b
-        lever_a = np.array(row.contact_point_m) - self._hand_frame.position_m
-        moment_a = cross3(lever_a, force_a) - np.array(row.spin_nm)
+        if row.hand_moment_nm is not None:  # capsule line contact (#13308)
+            moment_a = np.array(row.hand_moment_nm)
+        else:
+            lever_a = np.array(row.contact_point_m) - self._hand_frame.position_m
+            moment_a = cross3(lever_a, force_a) - np.array(row.spin_nm)
         return PairWrench(
             force_a_n=force_a,
             moment_a_nm=moment_a,

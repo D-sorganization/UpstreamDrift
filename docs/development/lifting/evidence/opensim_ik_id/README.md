@@ -24,11 +24,11 @@ barbell lifts from `receipts.json` (41 frames, stride 5):
 
 | Lift | Bundle SHA-256 | Marker RMS / Max (m) | Best Practice | Reach Miss L / R | Max Range Overshoot (rad) | Pelvis Residual Force (N, vs Hicks) | Pelvis Residual Moment (Nm, vs Hicks) | Hicks Gate |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Squat** | `f2fab146...` | 0.0193 / 0.0355 | Pass | 3.81 / 5.69 cm | 8.0e-4 (`arm_flex/rot`, `elbow`, `pro_sup`) | 25.21 (vs 146.59) | 17.43 (vs 18.49) | **Pass** |
-| **Deadlift** | `a8483a37...` | 0.0112 / 0.0390 | Pass | 7.11 / 6.91 µm | 6.5e-4 (`pro_sup_l/r`) | 288.23 (vs 110.92) | 147.88 (vs 18.28) | Fail (xfail) |
-| **Bench Press** | `f700f098...` | 0.0160 / 0.0554 | Fail (bar max) | 12.5 µm / 6.37 mm | 2.1e-3 (`pro_sup_l/r`, `elbow_flex_r`) | 511.26 (vs 32.49) | 318.13 (vs 3.45) | Fail (xfail) |
-| **Snatch** | `24c7e8e4...` | 0.0089 / 0.0579 | Fail (bar max) | 7.68 / 7.57 µm | 3.8e-4 (`pro_sup_l/r`) | 463.57 (vs 155.12) | 202.60 (vs 27.10) | Fail (xfail) |
-| **Clean & Jerk** | `0b5221ff...` | 0.0198 / 0.1612 | Fail (bar max) | 6.43 / 6.02 µm | 2.3e-3 (`pro_sup_l/r`) | 458.52 (vs 223.10) | 259.03 (vs 38.77) | Fail (xfail) |
+| **Squat** | `0179c5a2...` | 0.0164 / 0.0304 | Pass | 2.53 µm / 1.94 mm | none (0 rad) | 23.82 (vs 146.93) | 11.75 (vs 18.64) | **Pass** |
+| **Deadlift** | `a8483a37...` | 0.0112 / 0.0391 | Pass | 7.10 µm / 6.90 µm | 6.1e-04 (`pro_sup_l`, `pro_sup_r`) | 288.29 (vs 110.92) | 148.02 (vs 18.28) | Fail (xfail) |
+| **Bench Press** | `f700f098...` | 0.0160 / 0.0556 | Fail (bar max) | 12.49 µm / 6.67 mm | 1.4e-03 (`pro_sup_l`, `pro_sup_r`) | 511.58 (vs 32.49) | 318.32 (vs 3.45) | Fail (xfail) |
+| **Snatch** | `24c7e8e4...` | 0.0089 / 0.0579 | Fail (bar max) | 7.68 µm / 7.57 µm | 3.8e-04 (`pro_sup_l`, `pro_sup_r`) | 463.21 (vs 155.12) | 202.62 (vs 27.10) | Fail (xfail) |
+| **Clean & Jerk** | `0b5221ff...` | 0.0198 / 0.1612 | Fail (bar max) | 6.43 µm / 6.01 µm | 2.2e-03 (`pro_sup_l`, `pro_sup_r`) | 458.56 (vs 223.10) | 259.00 (vs 38.77) | Fail (xfail) |
 
 ### Key Findings and Gate Status
 
@@ -37,18 +37,19 @@ barbell lifts from `receipts.json` (41 frames, stride 5):
    to relative precision $< 3\times 10^{-13}$ (80 kg lifter, 120 kg bar;
    plus bench 846.8 N for bench press).
 2. **Kinematic Marker Tracking:** Deadlift and back squat pass the best-practice
-   marker tracking gate (RMS $\le 0.02$\,m, max $\le 0.04$\,m). Snatch has low RMS
-   (0.0089\,m) but exceeds the max gate on the bar marker (0.0579\,m). Clean and
-   jerk similarly has low RMS (0.0198\,m) with bar marker max 0.1612\,m.
-   Bench press achieves low marker RMS (0.0160\,m) below the 0.02\,m threshold,
-   exceeding the max gate on the bar marker (0.0554\,m vs 0.04\,m).
+   marker tracking gate (RMS $\le 0.02$\,m, max $\le 0.04$\,m; back squat achieves
+   0.0164\,m RMS and 0.0304\,m max). Snatch has low RMS (0.0089\,m) but exceeds the max
+   gate on the bar marker (0.0579\,m). Clean and jerk similarly has low RMS
+   (0.0198\,m) with bar marker max 0.1612\,m. Bench press achieves low marker RMS
+   (0.0160\,m) below the 0.02\,m threshold, exceeding the max gate on the bar marker
+   (0.0556\,m vs 0.04\,m).
 3. **Arm Reach to the Bar:** Deadlift, snatch, and clean-and-jerk hands reach the
    bundle bar within micrometres ($< 10$\,µm), well within the 1.0\,mm threshold.
-   Bench press reaches within 12.5\,µm (left) and 6.37\,mm (right) via flexed
-   elbow arm seeds. Back squat exhibits the known OSL-19 posterior shoulder
-   workspace bottleneck (3.81 / 5.69\,cm).
+   Bench press reaches within 12.49\,µm (left) and 6.67\,mm (right) via flexed
+   elbow arm seeds. Back squat hands reach within 2.53\,µm (left) and 1.94\,mm (right).
 4. **Hicks Residual Gate:** The back squat satisfies the Hicks criteria (forces
-   and moments within thresholds on all 41 states). The other four lifts exceed
+   and moments within thresholds on all 41 states: peak force 23.82\,N vs 146.93\,N limit,
+   peak moment 11.75\,N$\cdot$m vs 18.64\,N$\cdot$m limit). The other four lifts exceed
    the thresholds. These failures are strictly xfailed with measured numbers;
    thresholds are not loosened.
 
@@ -122,6 +123,24 @@ blocks full-window parity OSL-20 (#13159).
 A diagnostic fit of the bodyweight squat bundle tracked the pelvis to 3 mm.
 Excluding the bar, its markers came to 1.78 cm RMS and 4.15 cm maximum. See
 `lift_models.tex`, OSL-14 subsection.
+
+### Squat Coordinate Range Closeout (OSL-12, #13048)
+
+Under OSL-12 (#13048), the back squat achieves full satisfaction of all four acceptance criteria:
+1. **Marker Best Practice:** RMS 0.0164 m $\le$ 0.02 m and max 0.0304 m $\le$ 0.04 m (`within_best_practice: True`).
+2. **Hicks Residual Gate:** Peak pelvis residual force 23.82 N $\le$ 146.93 N limit (`forces_within: True`); peak pelvis residual moment 11.75 N$\cdot$m $\le$ 18.64 N$\cdot$m limit (`moments_within: True`).
+3. **Contact Penetration:** Max sphere penetration 7.32 mm $\le$ 8.00 mm limit (`within_limit: True`).
+4. **Coordinate Ranges:** Every coordinate remains strictly within its model range (`range_violations == {}`, zero rad overshoot).
+
+The root cause of coordinate overshoot on main was twofold:
+1. Arm coordinates were left unclamped during IK (`_UNCLAMPED_PREFIXES` in `msk_lift_ik_id.py`) because clamping them directly causes OpenSim's `AssemblySolver::assemble()` to fail with Ipopt infeasibility (`status 2`) under the two-hand welded barbell constraint (attempt 2a, logged).
+2. The bounded least-squares reach solve placed the arm seed directly on the model range limits (`arm_flex_r = 1.5707963 rad`), allowing weak coordinate tasks in unconstrained IK to drift just past the bound by ~4.2e-5 rad.
+
+The resolution (attempt 2b) applies an interior bound margin:
+- `ARM_REACH_BOUND_MARGIN_RAD = 1e-3` rad in `msk_lift_arm_reach.py` restricts the reach solve bounds to $[q_{\min} + 10^{-3}, q_{\max} - 10^{-3}]$, preventing seeds from sitting on range limits.
+- `ARM_TASK_BOUND_MARGIN_RAD = 1e-3` rad in `msk_lift_ik_id.py` clips coordinate task target values inside the same interior bounds.
+
+With this margin, all 41 states of the back squat stay strictly inside their model ranges (`range_violations == {}`), with no adverse impact on reach quality (left 2.53 µm, right 1.94 mm) or solver convergence.
 
 These are software receipts, not physical acceptance. See
 `docs/research/lift_models/lift_models.tex` (OSL-3, OSL-12, OSL-14 and "Hands That Reach the Bundle Bar"

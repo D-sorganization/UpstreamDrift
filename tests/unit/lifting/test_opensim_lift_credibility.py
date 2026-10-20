@@ -49,19 +49,6 @@ pytestmark = pytest.mark.unit
 #: Bundle shoulder landmark to grip is 0.2033 m (R) / 0.2198 m (L); OpenSim RSJC/LSJC
 #: to bundle grip is 0.2052 m (R) / 0.2232 m (L); OpenSim RSJC/LSJC to hand CoM is
 #: 0.2059 m (R) / 0.2232 m (L).
-#: Coordinate range overshoot reaches a maximum of 4.18e-5 rad across 5 coordinates:
-#: arm_rot_r (4.18e-5 rad, 6 frames), arm_flex_r (3.79e-5 rad, 6 frames),
-#: pro_sup_r (3.25e-5 rad, 6 frames), pro_sup_l (2.97e-5 rad, 6 frames), and
-#: elbow_flex_r (8.79e-7 rad, 2 frames). Neither the reach nor range bounds are loosened.
-_RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "OSL-19 #13158: right hand reach 1.51 mm > 1.0 mm bound and max coordinate "
-        "overshoot 4.18e-5 rad (arm_rot_r 4.18e-5, arm_flex_r 3.79e-5, pro_sup_r 3.25e-5, "
-        "pro_sup_l 2.97e-5, elbow_flex_r 8.79e-7 rad) at 3 pinned limits "
-        "(arm_flex_r 90 deg, arm_rot_r -90 deg, elbow_flex_r 150 deg); bounds not loosened."
-    ),
-)
 #: Bundle hip-centre separation (OSL-14, #13057: the AN-1 lift body's de Leva
 #: spacing, 2 * 0.052 * 1.78 m) and the generic Rajagopal one.
 _BUNDLE_HIP_WIDTH_M = 0.18512
@@ -345,7 +332,6 @@ def test_hold_is_balanced_over_its_support(holds: dict, lift: str) -> None:
 
 @pytest.mark.requires_opensim
 @pytest.mark.integration
-@_RAJAGOPAL_ARM_RANGES
 def test_squat_ik_keeps_every_coordinate_in_range() -> None:
     _real_opensim()
     _base_model()
