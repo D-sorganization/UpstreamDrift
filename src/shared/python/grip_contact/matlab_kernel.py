@@ -1155,7 +1155,10 @@ def export_matlab_kernel_bundle(
         for p, expected_text in targets:
             current = p.read_text(encoding="utf-8") if p.exists() else None
             if current != expected_text:
-                if p.resolve() == DEFAULT_GOLDEN_JSON_PATH.resolve():
+                if (
+                    current is not None
+                    and p.resolve() == DEFAULT_GOLDEN_JSON_PATH.resolve()
+                ):
                     try:
                         act = json.loads(current)
                         exp = json.loads(expected_text)

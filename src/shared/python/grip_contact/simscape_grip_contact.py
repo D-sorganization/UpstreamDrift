@@ -464,7 +464,10 @@ def export_scenarios_json(
         current = target.read_text(encoding="utf-8") if target.exists() else None
         if current == text:
             return 0
-        if target.resolve() == DEFAULT_SCENARIOS_JSON_PATH.resolve():
+        if (
+            current is not None
+            and target.resolve() == DEFAULT_SCENARIOS_JSON_PATH.resolve()
+        ):
             try:
                 act = json.loads(current)
                 exp = json.loads(text)
