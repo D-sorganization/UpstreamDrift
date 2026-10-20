@@ -122,23 +122,34 @@ def interface(spec_dict: dict[str, Any]) -> GripInterface:
 def test_default_flag_model_is_byte_and_numerically_unchanged() -> None:
     """AC 1: Default attachment='unilateral' leaves URDF and plant dynamics identical."""
     MultibodyPlant = _require_drake()
+    from pydrake.multibody.parsing import Parser
+
     from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf import (
-        CANONICAL_URDF,
         EXPECTED_NUM_VELOCITIES,
         load_humanoid_dimensions,
         load_humanoid_into_plant,
         render_urdf_string,
     )
 
-    # 1. Rendered URDF string is byte-identical to on-disk golfer.urdf
-    dims = load_humanoid_dimensions()
-    assert render_urdf_string(dims) == CANONICAL_URDF.read_text(encoding="utf-8")
+    # 1. The default model is exactly the generator's rendered humanoid (the
+    #    right-hand-weld model the bilateral bushing targets).  Since #13312 the
+    #    on-disk models/generated/golfer.urdf is the canonical golfer built by
+    #    tools/model_converter (drift-gated by test_drake_urdf_drift), a
+    #    different body tree, so it is not the default here (#13466).
+    plant_rendered = MultibodyPlant(0.0)
+    Parser(plant_rendered).AddModelsFromString(
+        render_urdf_string(load_humanoid_dimensions()), "urdf"
+    )
+    plant_rendered.Finalize()
 
     # 2. Loading with default args vs explicit attachment="unilateral" produces
     #    numerically identical plant state, mass matrix, and time derivatives.
     plant_default = MultibodyPlant(0.0)
     load_humanoid_into_plant(plant_default)
     plant_default.Finalize()
+    assert plant_default.HasBodyNamed("left_hand")
+    assert plant_default.HasBodyNamed("right_hand")
+    assert plant_default.num_positions() == plant_rendered.num_positions()
 
     plant_unilat = MultibodyPlant(0.0)
     load_humanoid_into_plant(plant_unilat, attachment="unilateral")
@@ -167,6 +178,19 @@ def test_default_flag_model_is_byte_and_numerically_unchanged() -> None:
     xdot_def = plant_default.EvalTimeDerivatives(ctx_def).CopyToVector()
     xdot_uni = plant_unilat.EvalTimeDerivatives(ctx_uni).CopyToVector()
     np.testing.assert_allclose(xdot_def, xdot_uni, atol=0.0, rtol=0.0)
+
+    ctx_ren = plant_rendered.CreateDefaultContext()
+    plant_rendered.SetPositions(ctx_ren, q)
+    plant_rendered.SetVelocities(ctx_ren, v)
+    np.testing.assert_allclose(
+        plant_rendered.CalcMassMatrix(ctx_ren), m_def, atol=0.0, rtol=0.0
+    )
+    np.testing.assert_allclose(
+        plant_rendered.EvalTimeDerivatives(ctx_ren).CopyToVector(),
+        xdot_def,
+        atol=0.0,
+        rtol=0.0,
+    )
 
     # Invalid attachment flag raises ValueError
     plant_bad = MultibodyPlant(0.0)

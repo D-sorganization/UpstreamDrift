@@ -30,14 +30,18 @@ from __future__ import annotations
 
 import copy
 import xml.etree.ElementTree as ET  # noqa: N817, S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # construction only; minidom is defusedxml
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import yaml
 from defusedxml import minidom
 
-from src.shared.python.biomechanics.grip_wrench import GripAnalysis
+from .humanoid_grip_attachment import (
+    LEFT_HAND_UNAVAILABLE_REASON,
+    add_bilateral_left_hand_bushing,
+    right_hand_grip_analysis,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - import-time hint only
     from pydrake.multibody.parsing import Parser  # noqa: F401
@@ -47,6 +51,7 @@ if TYPE_CHECKING:  # pragma: no cover - import-time hint only
 
 __all__ = [
     "CANONICAL_URDF",
+    "LEFT_HAND_UNAVAILABLE_REASON",
     "SHARED_DIMENSIONS_YAML",
     "SHARED_INERTIA_YAML",
     "SHARED_TOPOLOGY_YAML",
@@ -948,86 +953,18 @@ def build_humanoid_urdf(
 VALID_ATTACHMENT_MODES: tuple[str, ...] = ("unilateral", "bilateral")
 
 
-def add_bilateral_left_hand_bushing(
-    plant: MultibodyPlant,
-    *,
-    topology: Any | None = None,
-    bushing: Any | None = None,
-) -> Any:
-    """Attach ``left_hand`` to ``club_shaft`` via ``LinearBushingRollPitchYaw``."""
-    from importlib import import_module  # noqa: PLC0415
-
-    import numpy as np  # noqa: PLC0415
-
-    from src.shared.python.grip_contact.contact_topology import (  # noqa: PLC0415
-        contact_topology,
-    )
-    from src.shared.python.grip_contact.parameters import (  # noqa: PLC0415
-        BushingParameters,
-        default_bushing,
-    )
-    from src.shared.python.grip_contact.topology_contact import (  # noqa: PLC0415
-        hand_x_origin,
-    )
-
-    math_mod: Any = import_module("pydrake.math")
-    tree_mod: Any = import_module("pydrake.multibody.tree")
-
-    topo = topology if topology is not None else contact_topology()
-    b_params = bushing if bushing is not None else default_bushing()
-    if not isinstance(b_params, BushingParameters):
-        raise TypeError(
-            f"bushing must be BushingParameters, got {type(b_params).__name__}"
-        )
-
-    dx = hand_x_origin(topo, "lead") - hand_x_origin(topo, "trail")
-    club_body = plant.GetBodyByName("club_shaft")
-    left_hand_body = plant.GetBodyByName("left_hand")
-    right_hand_body = plant.GetBodyByName("right_hand")
-    club_lead_tf = math_mod.RigidTransform(np.array([dx, 0.0, 0.10], dtype=float))
-    club_trail_tf = math_mod.RigidTransform(np.array([0.0, 0.0, 0.10], dtype=float))
-    ident_tf = math_mod.RigidTransform()
-
-    frame_club_lead = plant.AddFrame(
-        tree_mod.FixedOffsetFrame(
-            "club_lead_grip", club_body.body_frame(), club_lead_tf
-        )
-    )
-    plant.AddFrame(
-        tree_mod.FixedOffsetFrame(
-            "club_trail_grip", club_body.body_frame(), club_trail_tf
-        )
-    )
-    frame_left_hand = plant.AddFrame(
-        tree_mod.FixedOffsetFrame(
-            "left_hand_grip", left_hand_body.body_frame(), ident_tf
-        )
-    )
-    plant.AddFrame(
-        tree_mod.FixedOffsetFrame(
-            "right_hand_grip", right_hand_body.body_frame(), ident_tf
-        )
-    )
-    return plant.AddForceElement(
-        tree_mod.LinearBushingRollPitchYaw(
-            frame_left_hand,
-            frame_club_lead,
-            np.asarray(b_params.rotational_stiffness_nm_rad, dtype=float),
-            np.asarray(b_params.rotational_damping_nms_rad, dtype=float),
-            np.asarray(b_params.translational_stiffness_n_m, dtype=float),
-            np.asarray(b_params.translational_damping_ns_m, dtype=float),
-        )
-    )
-
-
 def ensure_revolute_joint_actuators(plant: MultibodyPlant) -> int:
     """Add one actuator per single-DOF joint when the URDF omits transmissions.
 
     The canonical generated golfer URDF lists revolute joints but no
     ``<transmission>`` blocks, so Drake's parser leaves ``num_actuators() == 0``.
-    ``simulate_with_coefficients`` sizes ``theta`` for the 19 internal revolute
+    ``simulate_with_coefficients`` sizes ``theta`` for the internal revolute
     DOFs (``nv - 6`` floating root). This helper retrofits joint actuators in
     plant joint-index order so the torque polynomial port can connect.
+
+    It runs before ``Finalize()``, where Drake forbids ``num_velocities()``
+    (#13466), so ``nv - 6`` coverage is enforced per joint instead: every joint
+    must be a weld (0), single-DOF (1) or the floating root (6).
 
     Returns:
         ``plant.num_actuators()`` after any retrofit (unchanged when already
@@ -1035,7 +972,7 @@ def ensure_revolute_joint_actuators(plant: MultibodyPlant) -> int:
 
     Raises:
         TypeError: if ``plant`` does not expose Drake joint queries.
-        ValueError: if the retrofit count disagrees with ``nv - 6``.
+        ValueError: if a joint has any other DOF count (it would go unactuated).
     """
     get_joint = getattr(plant, "get_joint", None)
     add_actuator = getattr(plant, "AddJointActuator", None)
@@ -1049,23 +986,22 @@ def ensure_revolute_joint_actuators(plant: MultibodyPlant) -> int:
 
     from pydrake.multibody.tree import JointIndex  # noqa: PLC0415
 
+    joints = [get_joint(JointIndex(i)) for i in range(int(plant.num_joints()))]
+    for joint in joints:
+        if int(joint.num_velocities()) not in (0, 1, 6):
+            msg = (
+                f"joint {joint.name()!r} has {joint.num_velocities()} DOFs; the "
+                "revolute actuator retrofit covers only 1-DOF joints, so it "
+                "would leave DOFs unactuated"
+            )
+            raise ValueError(msg)
     added = 0
-    for index in range(int(plant.num_joints())):
-        joint = get_joint(JointIndex(index))
-        if int(joint.num_velocities()) != 1:
-            continue
-        add_actuator(f"{joint.name()}_motor", joint)
-        added += 1
+    for joint in joints:
+        if int(joint.num_velocities()) == 1:
+            add_actuator(f"{joint.name()}_motor", joint)
+            added += 1
 
     n_actuators = int(plant.num_actuators())
-    expected = max(int(plant.num_velocities()) - 6, 0)
-    if expected > 0 and n_actuators != expected:
-        msg = (
-            "revolute joint actuator retrofit produced "
-            f"{n_actuators} actuators but plant has nv={plant.num_velocities()} "
-            f"(expected {expected} actuated DOFs)"
-        )
-        raise ValueError(msg)
     if added != n_actuators:  # pragma: no cover - Drake invariant
         msg = (
             f"actuator count mismatch after retrofit: added={added}, "
@@ -1083,7 +1019,13 @@ def load_humanoid_into_plant(
     topology: Any | None = None,
     bushing: Any | None = None,
 ) -> ModelInstanceIndex:
-    """Add the canonical humanoid URDF to a Drake ``MultibodyPlant``."""
+    """Add the Drake humanoid to a Drake ``MultibodyPlant``.
+
+    ``urdf_path=None`` parses the generator's humanoid
+    (:func:`render_urdf_string`), the right-hand-weld model with
+    ``left_hand``/``right_hand`` that ``attachment='bilateral'`` targets.
+    Pass :data:`CANONICAL_URDF` explicitly for the on-disk canonical golfer.
+    """
     if not isinstance(attachment, str) or attachment not in VALID_ATTACHMENT_MODES:
         raise ValueError(
             f"attachment must be one of {VALID_ATTACHMENT_MODES}, got {attachment!r}"
@@ -1091,96 +1033,28 @@ def load_humanoid_into_plant(
 
     from pydrake.multibody.parsing import Parser  # noqa: PLC0415
 
-    path = Path(urdf_path) if urdf_path is not None else CANONICAL_URDF
-    if not path.exists():
-        build_humanoid_urdf(out_path=path)
-
     parser = Parser(plant)
-    models = parser.AddModels(str(path))  # type: ignore[arg-type]
+    if urdf_path is None:
+        # The generator's humanoid (right hand welded to the club), not the
+        # on-disk CANONICAL_URDF: since #13312 that file is the canonical
+        # golfer built by tools/model_converter, a different body tree (#13466).
+        source = "render_urdf_string(load_humanoid_dimensions())"
+        urdf = render_urdf_string(load_humanoid_dimensions())
+        models = parser.AddModelsFromString(urdf, "urdf")  # type: ignore[arg-type]
+    else:
+        path = Path(urdf_path)
+        source = str(path)
+        if not path.exists():
+            build_humanoid_urdf(out_path=path)
+        models = parser.AddModels(source)  # type: ignore[arg-type]
     if not models:  # pragma: no cover - Drake raises before reaching here
-        msg = f"Drake Parser returned no model instances for {path}"
+        msg = f"Drake Parser returned no model instances for {source}"
         raise RuntimeError(msg)
     if attachment == "bilateral":
         add_bilateral_left_hand_bushing(plant, topology=topology, bushing=bushing)
 
     ensure_revolute_joint_actuators(plant)
     return models[0]
-
-
-LEFT_HAND_UNAVAILABLE_REASON = (
-    "left hand unavailable: the URDF welds the club to the right hand only "
-    "(DRAKE_PARITY_SPEC section 3.4), so there is no left-hand constraint"
-)
-
-
-def right_hand_grip_analysis(
-    plant: MultibodyPlant,
-    context: Any,
-    vdot: Any,
-    *,
-    club_body: str = "club_shaft",
-) -> GripAnalysis:
-    """Right-hand grip wrench ON THE CLUB for the right-hand-weld URDF (GCV-8).
-
-    The only load path into the club is the right-hand weld, so Newton-Euler
-    of the club gives that wrench directly (the holding-hand formula with no
-    other hand).  It acts at the club body origin, the weld anchor.  The left
-    hand is ``None`` with a reason, never zero.
-
-    Args:
-        plant: finalized plant holding the humanoid URDF.
-        context: plant context at the state of interest.
-        vdot: generalised acceleration, shape ``(plant.num_velocities(),)``.
-        club_body: name of the club body.
-
-    Postconditions: ``right`` is set, ``left`` is ``None`` and
-    ``unavailable_reason`` states why; no net or couple is reported.
-
-    Raises:
-        ValueError: on a wrongly shaped ``vdot`` or an unknown club body.
-    """
-    import numpy as np  # noqa: PLC0415
-
-    from src.engines.physics_engines.drake.python.full_body_model import (  # noqa: PLC0415,E501
-        club_newton_euler,
-    )
-    from src.shared.python.biomechanics.grip_extraction import (  # noqa: PLC0415
-        hand_from_arrays,
-        holding_hand_wrench,
-    )
-    from src.shared.python.biomechanics.grip_wrench import (  # noqa: PLC0415
-        analyze_grip,
-    )
-
-    acceleration = np.asarray(vdot, dtype=float)
-    if acceleration.shape != (plant.num_velocities(),):
-        raise ValueError(
-            f"vdot must have shape ({plant.num_velocities()},), "
-            f"got {acceleration.shape}"
-        )
-    if not plant.HasBodyNamed(club_body):
-        raise ValueError(f"club body {club_body!r} not found in the plant")
-    body = plant.GetBodyByName(club_body)
-    gravity = np.asarray(plant.gravity_field().gravity_vector(), dtype=float)
-    club = club_newton_euler(
-        plant, context, body, acceleration, gravity, welded=[body.index()]
-    )
-    point = np.asarray(plant.EvalBodyPoseInWorld(context, body).translation())
-    force, torque = holding_hand_wrench(
-        closing_force_n=np.zeros(3),
-        closing_torque_nm=np.zeros(3),
-        closing_point_m=point,
-        holding_point_m=point,
-        **club,
-    )
-    right = hand_from_arrays("R", point, force, torque)
-    analysis = analyze_grip(
-        None,
-        right,
-        split_method="unavailable",
-        metadata={"engine": "drake", "path": "urdf_right_hand_weld"},
-    )
-    return replace(analysis, unavailable_reason=LEFT_HAND_UNAVAILABLE_REASON)
 
 
 # ---------------------------------------------------------------------------
