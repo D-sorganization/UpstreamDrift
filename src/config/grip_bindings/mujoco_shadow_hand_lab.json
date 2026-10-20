@@ -43,7 +43,7 @@
     "trail_index_trigger": "rh_ffdistal",
     "lead_butt_fingers": "lh_lfproximal",
     "trail_thumb_pad": "rh_thdistal",
-    "trail_hypothenar": "rh_lfmetacarpal"
+    "trail_hypothenar": "rh_lfknuckle"
   },
   "unavailable_sites": {}
 }

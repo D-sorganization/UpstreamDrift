@@ -71,6 +71,12 @@ from src.shared.python.grip_contact.topology_contact import (
 ENGINE = "drake_contact"
 DEFAULT_ACCURACY = 1.0e-5
 DEFAULT_MAX_STEP_S = 2.0e-4
+#: Topology-contact default. Implicit Euler is first order: at 1e-5 its
+#: truncation error left a 0.6 um off-axis hand-club deflection drift against
+#: the Pinocchio reference, hidden while the unbalanced t = 0 preload set the
+#: normalising peak (#13555). 1e-7 brings the swing deflection RMS under 1 %.
+TOPOLOGY_ACCURACY = 1.0e-7
+TOPOLOGY_MAX_STEP_S = 5.0e-5
 RIGID_STIFFNESS_N_M = 1.0e11
 SCHEME = "implicit_euler"
 HAND_MASS_KG = 100.0
@@ -563,7 +569,10 @@ def _system(sim: ClubInHands, kin: WeldClubKinematics, source: Any) -> Any:
 
 def _resolve_tolerances(
     tolerances: IntegratorTolerances | float | None,
+    topology: bool = False,
 ) -> IntegratorTolerances:
+    if tolerances is None and topology:
+        return IntegratorTolerances(TOPOLOGY_ACCURACY, TOPOLOGY_MAX_STEP_S)
     if tolerances is None:
         return IntegratorTolerances()
     if isinstance(tolerances, IntegratorTolerances):
@@ -604,9 +613,10 @@ def simulate_grip_contact(
     """Integrate the free club held by pads or topology over the prescribed swing.
 
     With ``hold`` the hands stay at the first sample's pose.  The club starts
-    with the weld velocity of the first sample.
+    with the weld velocity of the first sample.  Without ``tolerances`` a
+    topology run uses ``TOPOLOGY_ACCURACY`` and ``TOPOLOGY_MAX_STEP_S``.
     """
-    tol = _resolve_tolerances(tolerances)
+    tol = _resolve_tolerances(tolerances, topology=topology_model is not None)
     analysis = _module("pydrake.systems.analysis")
     spec = json.loads(spec_bytes)
     interface = interface or GripInterface.from_spec(spec)
