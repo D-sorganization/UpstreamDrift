@@ -1,4 +1,4 @@
 ---
 issue: 13334
-summary: "Add stateless Simscape physical grip contact codegen kernel, GS3DX_GripContact builder/runner, and M12 parity harness"
+summary: "Simscape physical grip contact (M12): stateless line-contact codegen kernel, GS3DX_GripContact fixture, and committed R2025b evidence passing net-club-wrench parity vs Pinocchio"
 ---
