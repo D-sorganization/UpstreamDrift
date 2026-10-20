@@ -2353,6 +2353,7 @@ The shared pairwise contact law in \path{src/shared/python/grip_contact/pair_con
  p_hand_R, R_hand_R, v_hand_R, omega_hand_R, ...
  style_id)
 \end{verbatim}
+Capsule--capsule rows (the ten-finger little finger on the grip) follow the shared line-contact law of \texttt{capsule\_capsule} (\#13308, \#13508): the shorter hand capsule is discretised into $n = \texttt{line\_contact\_node\_count}(L/2, r)$ equally spaced node spheres, each meets the grip capsule through the sphere--capsule law, and the node wrenches are weighted $1/n$, so the wrench stays continuous for nearly parallel capsules where a closest-point law jumps. The pair table's \texttt{line\_nodes} column (kernel schema \texttt{simscape-grip-contact-kernel/v2}) carries $n$ ($1$ for spheres), and the generator rejects a hand capsule that is not the shorter one. Per-pair contact point and slip speed are normal-load-weighted node means.
 Given club state $(\mathbf{p}_C, \mathbf{R}_C, \mathbf{v}_C, \boldsymbol{\omega}_C)$, left/right hand states $(\mathbf{p}_h, \mathbf{R}_h, \mathbf{v}_h, \boldsymbol{\omega}_h)$ ($h \in \{\mathrm{L}, \mathrm{R}\}$), and style selector $\mathrm{style\_id} \in \{1, 2, 3\}$ (with squeeze preload $F_{\mathrm{sq}} = 1100\,\mathrm{N}$ per hand baked into the $(12 \times 17)$ pair tables), each active physical hand--grip pair $k$ is evaluated by:
 \begin{enumerate}[leftmargin=*,noitemsep]
 \item \textit{Geometry and Closest Points}: Sphere centers (via \texttt{closest\_point\_segment}) or capsule segments (via \texttt{closest\_points\_segments}) are transformed into world coordinates against the side's club grip capsule $(\mathbf{b}_{0,w}, \mathbf{b}_{1,w}, r_b)$ to compute signed distance $d_{\mathrm{signed},k} = d_k - r_{a,k} - r_{b,k}$, unilateral penetration $\delta_k = \max(0, -d_{\mathrm{signed},k})$, unit normal $\hat{\mathbf{n}}_k$, and contact point $\mathbf{p}_{c,k}$.
@@ -2380,8 +2381,8 @@ Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{overlap} / \texttt{
 Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{overlap} / \texttt{short\_swing} & Peak $\le 5\%$, RMS $\le 2\%$ & $F$ 0.00 / 0.0034\,\%; $M$ 0.00 / 0.0024\,\% \\
 Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{interlock} / \texttt{hold} & Peak $\le 5\%$, RMS $\le 2\%$ & $F$ 0.00 / 0.0005\,\%; $M$ 0.00 / 0.0003\,\% \\
 Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{interlock} / \texttt{short\_swing} & Peak $\le 5\%$, RMS $\le 2\%$ & $F$ 0.00 / 0.0034\,\%; $M$ 0.00 / 0.0024\,\% \\
-Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{ten\_finger} / \texttt{hold} & Peak $\le 5\%$, RMS $\le 2\%$ & $F$ 0.0013 / 0.0072\,\%; $M$ 0.00 / 0.0005\,\% \\
-Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{ten\_finger} / \texttt{short\_swing} & Peak $\le 5\%$, RMS $\le 2\%$ & $F$ 0.032 / 0.065\,\%; $M$ 0.00 / 0.056\,\% \\
+Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{ten\_finger} / \texttt{hold} & Peak $\le 5\%$, RMS $\le 2\%$ & $F$ 0.002 / 0.0036\,\%; $M$ 0.00 / 0.0007\,\% \\
+Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{ten\_finger} / \texttt{short\_swing} & Peak $\le 5\%$, RMS $\le 2\%$ & $F$ 0.011 / 0.045\,\%; $M$ 0.00 / 0.048\,\% \\
 Timestep-convergence change (\texttt{max\_rel\_force\_diff}) & \texttt{overlap} / \texttt{short\_swing} & $\le 2\%$ relative force diff & $4.7\times10^{-5}$ \\
 Save/reload difference ($\Delta F$, $\Delta M$) & \texttt{overlap} / \texttt{short\_swing} & $\le 10^{-11}\,\mathrm{N}$ / $\mathrm{N\cdot m}$ & $0$ / $0$ \\
 Frame-probe error at $t = 0$ ($\Delta p$, $\|\Delta R\|_F$) & All styles \& scenarios & $\le 10^{-8}\,\mathrm{m}$, $\le 10^{-8}$ Fro & $0$ / $1.3\times10^{-15}$ \\
