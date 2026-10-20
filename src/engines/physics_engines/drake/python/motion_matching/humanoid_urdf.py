@@ -1035,7 +1035,7 @@ def ensure_revolute_joint_actuators(plant: MultibodyPlant) -> int:
 
     Raises:
         TypeError: if ``plant`` does not expose Drake joint queries.
-        ValueError: if the retrofit count disagrees with ``nv - 6``.
+        ValueError: if the retrofit leaves a non-floating joint DOF unactuated.
     """
     get_joint = getattr(plant, "get_joint", None)
     add_actuator = getattr(plant, "AddJointActuator", None)
@@ -1049,21 +1049,21 @@ def ensure_revolute_joint_actuators(plant: MultibodyPlant) -> int:
 
     from pydrake.multibody.tree import JointIndex  # noqa: PLC0415
 
-    added = 0
+    added = expected = 0  # pre-Finalize, plant num_velocities() raises (#13017)
     for index in range(int(plant.num_joints())):
         joint = get_joint(JointIndex(index))
-        if int(joint.num_velocities()) != 1:
-            continue
-        add_actuator(f"{joint.name()}_motor", joint)
-        added += 1
+        nv = int(joint.num_velocities())
+        if "floating" not in str(joint.type_name()):
+            expected += nv
+        if nv == 1:
+            add_actuator(f"{joint.name()}_motor", joint)
+            added += 1
 
     n_actuators = int(plant.num_actuators())
-    expected = max(int(plant.num_velocities()) - 6, 0)
     if expected > 0 and n_actuators != expected:
         msg = (
-            "revolute joint actuator retrofit produced "
-            f"{n_actuators} actuators but plant has nv={plant.num_velocities()} "
-            f"(expected {expected} actuated DOFs)"
+            f"revolute joint actuator retrofit produced {n_actuators} actuators "
+            f"(expected {expected} actuated DOFs from the non-floating joints)"
         )
         raise ValueError(msg)
     if added != n_actuators:  # pragma: no cover - Drake invariant

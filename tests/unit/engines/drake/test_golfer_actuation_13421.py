@@ -43,6 +43,73 @@ def test_ensure_revolute_joint_actuators_noop_when_actuators_present() -> None:
     plant.AddJointActuator.assert_not_called()
 
 
+class _PreFinalizePlant:
+    """Unfinalized Drake plant: plant-level ``num_velocities()`` raises.
+
+    Real pydrake raises ``RuntimeError`` for plant-wide state-size queries
+    before ``Finalize()``; joint-level queries are allowed (#13017).
+    """
+
+    def __init__(self, joints: list[MagicMock]) -> None:
+        self._joints = joints
+        self.actuators: list[str] = []
+
+    def num_velocities(self) -> int:
+        msg = "Pre-finalize calls to 'num_velocities()' are not allowed"
+        raise RuntimeError(msg)
+
+    def num_joints(self) -> int:
+        return len(self._joints)
+
+    def get_joint(self, index: int) -> MagicMock:
+        return self._joints[int(index)]
+
+    def num_actuators(self) -> int:
+        return len(self.actuators)
+
+    def AddJointActuator(self, name: str, joint: MagicMock) -> None:  # noqa: N802
+        self.actuators.append(name)
+
+
+def _joint(name: str, nv: int, type_name: str) -> MagicMock:
+    joint = MagicMock(name=name)
+    joint.name.return_value = name
+    joint.num_velocities.return_value = nv
+    joint.type_name.return_value = type_name
+    return joint
+
+
+@pytest.fixture
+def _fake_joint_index() -> Generator[None, None, None]:
+    tree = MagicMock()
+    tree.JointIndex = int
+    with patch.dict(sys.modules, {"pydrake.multibody.tree": tree}):
+        yield
+
+
+@pytest.mark.usefixtures("_fake_joint_index")
+def test_retrofit_runs_on_an_unfinalized_plant() -> None:
+    """The retrofit runs pre-Finalize, so it must not query plant nv."""
+    joints = [_joint(f"j{i}", 1, "revolute") for i in range(3)]
+    joints.append(_joint("club_weld", 0, "weld"))
+    plant = _PreFinalizePlant(joints)
+
+    assert ensure_revolute_joint_actuators(plant) == 3
+    assert plant.actuators == ["j0_motor", "j1_motor", "j2_motor"]
+
+
+@pytest.mark.usefixtures("_fake_joint_index")
+def test_retrofit_still_rejects_unactuated_multi_dof_joints() -> None:
+    """A ball joint the retrofit skips leaves DOFs unactuated: fail closed."""
+    joints = [
+        _joint("root", 6, "quaternion_floating"),
+        _joint("hip", 1, "revolute"),
+        _joint("shoulder", 3, "ball_rpy"),
+    ]
+    with pytest.raises(ValueError, match="expected 4 actuated DOFs"):
+        ensure_revolute_joint_actuators(_PreFinalizePlant(joints))
+
+
 _PYDRAKE_KEYS = [
     "pydrake",
     "pydrake.all",
