@@ -2743,6 +2743,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13544 · Grip_Contact Exporter --Check Now Logs the Drifted File and a Bounded Unified Diff (Flake Diagnostics)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13544
+- **Branch:** merged via #13546
+- **PR:** #13546
+- **Paths:** see #13546
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`bb208823`; collated from changes/13544-grip-exporter-drift-diagnostics.md)
+- **Summary:** grip_contact exporter --check now logs the drifted file and a bounded unified diff (flake diagnostics)
+- **Next step:** Shipped in PR #13546.
+
 ### DL-#13334 · Add Stateless Simscape Physical Grip Contact Codegen Kernel, GS3DX_GripContact Builder/Runner, and M12 Parity Harness
 
 - **State:** shipped
@@ -2827,10 +2840,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13175
 - **Branch:** merged via #13503
-- **PR:** #13503, #13538
+- **PR:** #13503, #13538, #13541
 - **Paths:** see #13503
 - **Started:** 2026-10-20
-- **Last verified:** 2026-10-20 (`b9edfcc0`; collated from changes/13175-hrg-e4-slice-post-biomechanics-anatomica.md)
+- **Last verified:** 2026-10-20 (`527c99ad`; collated from changes/13175-hrg-e4-pelvis-reversal-trunk-terms.md)
 - **Summary:** HRG-E4 slice: anatomical-angle event table (address/top/impact/finish) with CSV/JSON export carrying units, sign conventions, observability and receipts; JSON schema validated
 - **Next step:** Shipped in PR #13503.
 

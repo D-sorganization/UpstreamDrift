@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13546 | grip_contact exporter --check now logs the drifted file and a bounded unified diff (flake diagnostics) |
+| 2026-10-20 | #13541 | HRG-E4 slice: event table detects pelvis reversal (peak pelvis_turn_isb between address and impact, distinct from max X-factor) and adds the six lab-frame pelvis/thorax terms; export schema v2 |
 | 2026-10-20 | #13529 | Add stateless Simscape physical grip contact codegen kernel, GS3DX_GripContact builder/runner, and M12 parity harness |
 | 2026-10-20 | #13538 | HRG-E4 slice: POST /biomechanics/anatomical-event-table serves the shared anatomical-angle event table (JSON/CSV) from calibrated arm frames |
 | 2026-10-20 | #13536 | Count bench support reaction in Hicks residual limit |
