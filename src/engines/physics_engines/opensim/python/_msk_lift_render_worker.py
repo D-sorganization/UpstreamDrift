@@ -184,7 +184,7 @@ def run_worker(job_path: Path) -> None:
     out_file.parent.mkdir(parents=True, exist_ok=True)
     writer = imageio.get_writer(
         str(out_file),
-        format="FFMPEG",
+        format="FFMPEG",  # type: ignore[arg-type]
         fps=int(job["fps"]),
         codec="libx264",
         output_params=["-crf", "18", "-pix_fmt", "yuv420p"],

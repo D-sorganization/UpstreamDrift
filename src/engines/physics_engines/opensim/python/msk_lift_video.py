@@ -168,30 +168,35 @@ def muscle_color_rgb(activation: float) -> tuple[float, float, float]:
     return (val, 0.0, 1.0 - val)
 
 
+def _vec3(arr: Any) -> tuple[float, float, float]:
+    """Convert a 3-sequence to a typed float 3-tuple."""
+    return (float(arr[0]), float(arr[1]), float(arr[2]))
+
+
 def extract_lift_wrenches(targets: Any, frame_idx: int) -> list[OverlayWrench]:
     """Extract 4 OverlayWrenches (2 foot GRF, 2 hand bar wrenches) for frame_idx."""
     lms = targets.landmarks(frame_idx)
-    mid_foot_l = (lms["heel_l"] + lms["forefoot_l"]) / 2.0
-    mid_foot_r = (lms["heel_r"] + lms["forefoot_r"]) / 2.0
+    mid_foot_l = _vec3((lms["heel_l"] + lms["forefoot_l"]) / 2.0)
+    mid_foot_r = _vec3((lms["heel_r"] + lms["forefoot_r"]) / 2.0)
 
-    grf_l_f = tuple(float(x) for x in targets.grf_force_n["left"][frame_idx])
-    grf_r_f = tuple(float(x) for x in targets.grf_force_n["right"][frame_idx])
+    grf_l_f = _vec3(targets.grf_force_n["left"][frame_idx])
+    grf_r_f = _vec3(targets.grf_force_n["right"][frame_idx])
 
-    grip_l_p = tuple(float(x) for x in targets.grip_m["L"][frame_idx])
-    grip_r_p = tuple(float(x) for x in targets.grip_m["R"][frame_idx])
+    grip_l_p = _vec3(targets.grip_m["L"][frame_idx])
+    grip_r_p = _vec3(targets.grip_m["R"][frame_idx])
 
-    grip_l_f = tuple(float(x) for x in targets.hand_force_n["L"][frame_idx])
-    grip_r_f = tuple(float(x) for x in targets.hand_force_n["R"][frame_idx])
+    grip_l_f = _vec3(targets.hand_force_n["L"][frame_idx])
+    grip_r_f = _vec3(targets.hand_force_n["R"][frame_idx])
 
-    grip_l_tau = tuple(float(x) for x in targets.hand_torque_nm["L"][frame_idx])
-    grip_r_tau = tuple(float(x) for x in targets.hand_torque_nm["R"][frame_idx])
+    grip_l_tau = _vec3(targets.hand_torque_nm["L"][frame_idx])
+    grip_r_tau = _vec3(targets.hand_torque_nm["R"][frame_idx])
 
     return [
         OverlayWrench(
             kind=WrenchKind.CONTACT,
             label="contact:grf_left",
             body="calcn_l",
-            point_m=(float(mid_foot_l[0]), float(mid_foot_l[1]), float(mid_foot_l[2])),
+            point_m=mid_foot_l,
             force_n=grf_l_f,
             source="opensim_lift",
         ),
@@ -199,7 +204,7 @@ def extract_lift_wrenches(targets: Any, frame_idx: int) -> list[OverlayWrench]:
             kind=WrenchKind.CONTACT,
             label="contact:grf_right",
             body="calcn_r",
-            point_m=(float(mid_foot_r[0]), float(mid_foot_r[1]), float(mid_foot_r[2])),
+            point_m=mid_foot_r,
             force_n=grf_r_f,
             source="opensim_lift",
         ),
@@ -287,7 +292,7 @@ def generate_contact_sheet(
 
     if isinstance(frames_or_video, Path):
         reader = imageio.get_reader(str(frames_or_video))
-        all_frames = list(reader)
+        all_frames = list(reader)  # type: ignore[call-overload]
         reader.close()
         step_indices = np.linspace(0, len(all_frames) - 1, count, dtype=int)
         frames = [all_frames[i] for i in step_indices]
