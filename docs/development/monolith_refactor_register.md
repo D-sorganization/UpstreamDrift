@@ -14,7 +14,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 4082 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/main_scripts/golf_swing_analysis_gui.m` |
 | 4074 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/2D GUI/main_scripts/golf_swing_analysis_gui.m` |
 | 1589 | `src/shared/python/motion_matching/full_body_forward_dynamics.py` |
-| 1476 | `src/shared/python/motion_matching/pipeline/cli.py` |
+| 1519 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 1465 | `src/shared/python/motion_matching/acceptance.py` |
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m` |
 | 1217 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
@@ -128,6 +128,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
 | 955 | `src/shared/python/force_overlay/glyphs.py` |
 | 955 | `src/shared/python/pendulum_simulator/gui/simulation_panel.py` |
+| 954 | `src/shared/python/grip_contact/pair_contact.py` |
 | 954 | `src/tools/shot_pattern_analysis/matched_gui.py` |
 | 952 | `src/shared/python/pendulum_simulator/gui/panel_builders.py` |
 | 950 | `src/deployment/safety/monitor.py` |
@@ -139,6 +140,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 942 | `src/bunkershot3d/solvers/shot.py` |
 | 942 | `src/shared/python/estimation/dime_dynamics_window.py` |
 | 934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py` |
+| 933 | `src/shared/python/motion_matching/pipeline/dynamics.py` |
 | 932 | `src/shared/python/model_generation/library/model_library.py` |
 | 926 | `src/shared/python/engine_core/cross_engine_validator.py` |
 | 924 | `src/engines/physics_engines/opensim/python/muscle_analysis.py` |
@@ -167,7 +169,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 884 | `src/shared/python/estimation/dime_learned_initializers.py` |
 | 883 | `src/shared/python/config/model_pack_manifest.py` |
 | 879 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/SkeletonPlotter.m` |
-| 878 | `src/shared/python/grip_contact/pair_contact.py` |
 | 878 | `src/shared/python/grip_contact/simscape_grip_topology.py` |
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
@@ -179,7 +180,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 866 | `src/engines/feedback_observation_qualification.py` |
 | 864 | `src/tools/shot_pattern_analysis/matched_report_plots.py` |
 | 864 | `src/tools/simulation_backends_launcher/gui.py` |
-| 862 | `src/shared/python/motion_matching/pipeline/dynamics.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
 | 861 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
