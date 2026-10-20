@@ -277,6 +277,27 @@ def _build_external_loads(
         ef_hand.set_torque_identifier(f"{hand_body}_torque_")
         ext_loads.cloneAndAppend(ef_hand)
 
+    # Bench contact loads (if present)
+    for sphere, body in ikid._BENCH_BODY.items():
+        if sphere in targets.bench_force_n:
+            for ax, comp in zip("xyz", range(3), strict=False):
+                loads_data[f"{sphere}_force_v{ax}"] = targets.bench_force_n[sphere][
+                    :, comp
+                ]
+                loads_data[f"{sphere}_torque_{ax}"] = np.zeros(n_frames)
+                loads_data[f"{sphere}_point_p{ax}"] = targets.bench_point_m[sphere][
+                    :, comp
+                ]
+            ef_bench = osim.ExternalForce()
+            ef_bench.setName(f"{sphere}_bench")
+            ef_bench.set_applied_to_body(body)
+            ef_bench.set_force_expressed_in_body("ground")
+            ef_bench.set_point_expressed_in_body("ground")
+            ef_bench.set_force_identifier(f"{sphere}_force_v")
+            ef_bench.set_point_identifier(f"{sphere}_point_p")
+            ef_bench.set_torque_identifier(f"{sphere}_torque_")
+            ext_loads.cloneAndAppend(ef_bench)
+
     sto_path = scratch_dir / "external_loads.sto"
     write_sto(sto_path, times, loads_data)
     ext_loads.setDataFileName(str(sto_path.resolve()))
@@ -353,6 +374,13 @@ def detect_motion_phases(
         # not the full cycle (floor setup, lockout, catch, jerk, etc.).
         if duration <= 0.5:
             label = f"pull (engine window {t_start:.1f}-{t_end:.1f} s)"
+            return [(label, t_start, t_end)]
+
+    if lift == "bench_press":
+        # The partial 0.2 s engine window covers unrack / bar start,
+        # not the full cycle (chest touch, press, lockout).
+        if duration <= 0.5:
+            label = f"unrack (engine window {t_start:.1f}-{t_end:.1f} s)"
             return [(label, t_start, t_end)]
 
     # Fallback to standard phase fractions only when motion covers full cycle
@@ -561,12 +589,6 @@ def evaluate_lift_muscles(
     supine posture, returns an honest ``unavailable`` record.
     """
     require(lift in LIFTS, f"unknown lift {lift!r}; choose from {list(LIFTS)}")
-
-    if lift == "bench_press":
-        return unavailable_lift_record(
-            lift,
-            "bench press IK does not pose a supine lifter; standing posture on bench is unphysical",
-        )
 
     bundle_path = SAME_INPUT_LIFT_BUNDLES.get(lift)
     if bundle_path is None or not bundle_path.is_file():
