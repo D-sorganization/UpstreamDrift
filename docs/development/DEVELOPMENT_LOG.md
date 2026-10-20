@@ -336,10 +336,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12686
 - **Branch:** feat/12686-flexible-shaft-mujoco
-- **PR:** #12734
+- **PR:** #12734, #13486
 - **Paths:** see #12734
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`9dfe5d3a`; collated from changes/12686-r6-opt-in-flexible-golf-shaft-as-a-rigid.md)
+- **Last verified:** 2026-10-20 (`069023b1`; collated from changes/12686-r6-criterion-6-mujoco-visual-and-appeara.md)
 - **Summary:** R6: opt-in flexible golf shaft as a rigid-link spring-damper chain (MuJoCo); generic STIFF profile flagged default_not_measured; rigid default byte-identical; other engines refuse chain specs
 - **Next step:** Criterion 6 (deflected-shaft render) and criterion 7 (dynamic clubhead-speed study); R11 engine ports
 
@@ -3009,10 +3009,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13305
 - **Branch:** merged via #13422
-- **PR:** #13422
+- **PR:** #13422, #13458
 - **Paths:** see #13422
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`2605c9ef`; collated from changes/13305-implement-opensim-contacttopology-grip-c.md)
+- **Last verified:** 2026-10-20 (`ac3676bb`; collated from changes/13305-fix-opensim-capsule-contact-mesh-ring-al.md)
 - **Summary:** Calibrate OpenSim topology grip foundation at 2x preload with Hollars friction mapping and preserve SimmSpline horizon across short swing windows
 - **Next step:** Shipped in PR #13422.
 
@@ -3724,10 +3724,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13169
 - **Branch:** feat/13169-anatomical-angles
-- **PR:** #13198
+- **PR:** #13198, #13487
 - **Paths:** see #13198
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`5272fa8b`; collated from changes/13169-engine-neutral-anatomical-angles-package.md)
+- **Last verified:** 2026-10-20 (`471e868e`; collated from changes/13169-hrg-e2-full-body-v1-wrist-forearm-adapte.md)
 - **Summary:** Engine-neutral anatomical angles package with wrist and forearm terms (HRG-E2)
 - **Next step:** Shipped in PR #13198.
 
@@ -4127,10 +4127,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13048
 - **Branch:** merged via #13047
-- **PR:** #13047
+- **PR:** #13047, #13456
 - **Paths:** see #13047
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13048-osl-12-rajagopal-hands-reach-the-bundle.md)
+- **Last verified:** 2026-10-20 (`dd1b1650`; collated from changes/13048-keep-the-squat-ik-inside-every-coordinat.md)
 - **Summary:** OSL-12: OpenSim lift IK/ID credibility: pelvis width scaling and verified virtual ASIS/PSIS landmarks, 1e7 Pa contact (PR #476) within 8 mm, ankle-lean balanced holds at zero pelvis residual, in-range squat IK
 - **Next step:** Shipped in PR #13047.
 
