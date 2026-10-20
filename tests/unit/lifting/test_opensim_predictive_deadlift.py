@@ -18,6 +18,8 @@ from typing import Any
 
 import pytest
 
+from tests.helpers.opensim_support import require_opensim
+
 from src.engines.physics_engines.opensim.python.msk_lift_predictive import (
     PredictiveDeadliftConfig,
     build_comparison_table,
@@ -426,7 +428,7 @@ def test_planted_feet_weight_is_validated() -> None:
 @pytest.mark.slow
 def test_planted_feet_goal_holds_the_setup_calcanei() -> None:
     """The goal tracks both calcanei at their setup-pose ground positions."""
-    pytest.importorskip("opensim")
+    require_opensim()
     cfg = PredictiveDeadliftConfig(max_iterations=2, duration_bounds=(1.5, 3.0))
     study, meta = build_predictive_deadlift_study(cfg)
     goal = study.getProblem().getPhase(0).getGoal("planted_feet")
@@ -594,7 +596,7 @@ def test_residual_force_norm_includes_tz() -> None:
 @pytest.mark.slow
 def test_bar_kinematics_replays_on_the_processed_model() -> None:
     """FK replay runs on a solved trajectory (it crashed on a MocoProblemRep)."""
-    pytest.importorskip("opensim")
+    require_opensim()
     import numpy as np
 
     from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
@@ -621,7 +623,7 @@ def test_bar_kinematics_replays_on_the_processed_model() -> None:
 @pytest.mark.slow
 def test_stage2_guess_is_built_from_stage1_states() -> None:
     """The muscle study's guess carries stage 1's grid, states and shared controls."""
-    pytest.importorskip("opensim")
+    require_opensim()
     import importlib
 
     import numpy as np
