@@ -601,7 +601,7 @@ _DETERMINATE_ENGINE_CASES = [
         id="drake-ten_finger-swing",
     ),
     # MuJoCo (G8): passes all determinate quantities across all styles and motions
-    # except the 0.04 s ten_finger hold (strict xfail below, #13308)
+    # (the per-row friction gain schedule closed the ten_finger hold gap, #13306)
     pytest.param(
         "mujoco",
         GripStyle.OVERLAP,
@@ -620,23 +620,7 @@ _DETERMINATE_ENGINE_CASES = [
         "mujoco",
         GripStyle.TEN_FINGER,
         "hold",
-        marks=[
-            pytest.mark.requires_mujoco,
-            pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "MuJoCo ten_finger 0.04 s hold determinate net_force RMS is 2.866% "
-                    "(peak 3.136%; net_moment_com peak 0.103% / RMS 0.723%) > 2.0% "
-                    "RMS_TOLERANCE after the continuous line-contact law (#13308): "
-                    "every pair force is closer to the reference than before (e.g. "
-                    "trail_palm_distal 0.124 N versus 0.143 N RMS), but the ~0.1 N "
-                    "net-force residual of the hyperstatic cone-QP split (#13306) grows "
-                    "with the larger, now-continuous pitch transient (1.873% RMS over "
-                    "0.10 s)"
-                ),
-            ),
-        ],
+        marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-hold",
     ),
     pytest.param(
@@ -660,9 +644,10 @@ _DETERMINATE_ENGINE_CASES = [
         marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-swing",
     ),
-    # OpenSim (G7/G7b): passes overlap and interlock on 0.04 s hold and swing
-    # (and 0.10 s hold and swing, plus ten_finger 0.10 s hold);
-    # ten_finger 0.04 s hold and swing exceed 2.0% RMS on determinate net_force.
+    # OpenSim (G7/G7b): passes overlap and interlock on 0.04 s and 0.10 s hold
+    # and swing, and ten_finger 0.10 s swing (3.682% / 1.911%); ten_finger
+    # 0.04 s hold and swing and 0.10 s hold (2.970% RMS) exceed 2.0% RMS on
+    # determinate net_force.
     # Since #13308 the reference uses the same line-contact law as the
     # ElasticFoundationForce sphere chain, so the remaining gap is the friction
     # and patch-torque mapping (tau_n = 0, surface lever), not the capsule law.
@@ -690,10 +675,10 @@ _DETERMINATE_ENGINE_CASES = [
                 strict=True,
                 raises=AssertionError,
                 reason=(
-                    "OpenSim ten_finger 0.04 s hold determinate net_force RMS is 4.585% "
-                    "(peak 4.656%, net_moment_com peak 0.833% / RMS 1.255%) > 2.0% "
+                    "OpenSim ten_finger 0.04 s hold determinate net_force RMS is 4.577% "
+                    "(peak 4.639%, net_moment_com peak 0.000% / RMS 1.231%) > 2.0% "
                     "RMS_TOLERANCE against the continuous line-contact reference "
-                    "(#13308; 2.979% RMS over 0.10 s)"
+                    "(#13308; 2.970% RMS over 0.10 s)"
                 ),
             ),
         ],
@@ -723,10 +708,10 @@ _DETERMINATE_ENGINE_CASES = [
                 strict=True,
                 raises=AssertionError,
                 reason=(
-                    "OpenSim ten_finger 0.04 s swing determinate net_force RMS is 4.913% "
-                    "(peak 1.500%) and net_moment_com RMS is 2.920% (peak 0.833%) > 2.0% "
+                    "OpenSim ten_finger 0.04 s swing determinate net_force RMS is 2.374% "
+                    "(peak 3.682%; net_moment_com passes at 0.000% / 0.924%) > 2.0% "
                     "RMS_TOLERANCE against the continuous line-contact reference "
-                    "(#13308; 4.821% / 4.469% RMS over 0.10 s)"
+                    "(#13308; passes over 0.10 s at 3.682% / 1.911%)"
                 ),
             ),
         ],
