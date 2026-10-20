@@ -616,7 +616,7 @@ The helper \texttt{map\_site\_to\_hand\_frame} transforms site primitives into t
 \begin{equation}
 p_{\mathrm{hand}} = p_{\mathrm{axis\_offset}} + \begin{bmatrix} x_{\mathrm{site}} - x_{\mathrm{orig}} \\ y_{\mathrm{site}} \\ z_{\mathrm{site}} \end{bmatrix}.
 \end{equation}
-At the weld pose, every physical pad--grip site's surface gap is exactly $-0.250$\,mm, satisfying the $\pm 0.5$\,mm neutral preload contract.
+At the weld pose, every diametrically opposed palm/finger ring pad's surface gap is exactly $-0.250$\,mm, satisfying the $\pm 0.5$\,mm neutral preload contract. The preload is an internal squeeze, so the three hand--grip sites with no opposing pad (\texttt{lead\_heel\_pad\_butt}, \texttt{ten\_finger\_little\_finger\_grip} and \texttt{trail\_index\_trigger\_grip}) are seated tangent (gap $0$) and the net hand--grip wrench on the club at $t = 0$ is zero for every style and trigger option (\#13555). Before \#13555 those sites were also preloaded, which put a $42.774$\,N radial force and a $2.5$--$5.5$\,N\,m couple on the club at $t = 0$, depending on the style.
 
 \textbf{Pinocchio Adapter.} \texttt{ClubInHands} in \path{src/engines/physics_engines/pinocchio/python/grip_contact_sim.py} accepts an optional
 \texttt{topology\_model: TopologyContactModel}. When supplied, \texttt{wrenches()} evaluates \texttt{topology\_side\_wrench} and caches per-pair
