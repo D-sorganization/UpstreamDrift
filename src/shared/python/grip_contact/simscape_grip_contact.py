@@ -37,7 +37,6 @@ from src.shared.python.grip_contact.contact_topology import (
 from src.shared.python.grip_contact.interface import GripInterface
 from src.shared.python.grip_contact.matlab_kernel import (
     DEFAULT_SQUEEZE_PER_HAND_N,
-    MAX_PHYSICAL_PAIRS,
     STYLE_IDS,
     build_kernel_params_payload,
     evaluate_kernel_reference,
@@ -498,7 +497,6 @@ class SimscapeGripContactSeries:
     pair_slip_speed_m_s: Mapping[str, np.ndarray]
     pair_labels: Mapping[str, PairLabel]
     unavailable_reasons: Mapping[str, str]
-    z_state_m: np.ndarray
 
 
 def _check_nan_reason(
@@ -656,13 +654,6 @@ def parse_simscape_grip_contact_series(
         },
         pair_labels=labels,
         unavailable_reasons=dict(payload.get("unavailable_reasons") or {}),
-        z_state_m=np.asarray(
-            payload.get(
-                "z_state_m",
-                np.zeros((len(payload["time_s"]), MAX_PHYSICAL_PAIRS), dtype=float),
-            ),
-            dtype=float,
-        ),
     )
 
 
@@ -866,7 +857,6 @@ def synthesize_reference_simscape_series(
             "r_hand_r": hr_traj["rotation_world_from_hand"][k],
             "v_hand_r_m_s": hr_traj["velocity_world_m_s"][k],
             "omega_hand_r_rad_s": hr_traj["omega_world_rad_s"][k],
-            "z_state": [0.0] * MAX_PHYSICAL_PAIRS,
         }
         out = evaluate_kernel_reference(params, style, inp)
         f_club_seq.append(out["f_club_w_n"].tolist())
@@ -914,7 +904,6 @@ def synthesize_reference_simscape_series(
         "pair_slip_speed_m_s": p_slip,
         "pair_labels": labels,
         "unavailable_reasons": dict.fromkeys(a_names, HAND_HAND_IDENTIFIABILITY_NOTE),
-        "z_state_m": [[0.0] * MAX_PHYSICAL_PAIRS for _ in times],
     }
 
 

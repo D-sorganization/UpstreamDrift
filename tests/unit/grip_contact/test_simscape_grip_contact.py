@@ -116,7 +116,11 @@ def test_kernel_params_payload_and_matlab_source_contract() -> None:
         "function [F_club_w, M_club_w, F_hand_L_w, M_hand_L_w, F_hand_R_w, M_hand_R_w,"
         in src
     )
-    assert "dz_dt" in src
+    assert (
+        "pair_moment_club_w, pair_contact_point_w] = gs3dx_grip_contact_kernel(" in src
+    )
+    assert "z_state" not in src
+    assert "dz_dt" not in src
     # Codegen prohibitions: no persistent state, no containers.Map, no eval/feval.
     for forbidden in ("persistent ", "containers.Map", "eval(", "feval("):
         assert forbidden not in src
@@ -203,7 +207,10 @@ def test_golden_vectors_cover_all_styles_and_edge_cases() -> None:
     for case in cases:
         inp = case["inputs"]
         exp = case["expected"]
+        assert "z_state" not in inp
+        assert "dz_dt" not in exp
         out = evaluate_kernel_reference(params, case["style"], inp)
+        assert "dz_dt" not in out
         np.testing.assert_allclose(
             out["f_club_w_n"], exp["f_club_w_n"], rtol=1e-12, atol=1e-12
         )
@@ -226,7 +233,10 @@ def test_golden_vectors_cover_all_styles_and_edge_cases() -> None:
             out["pair_spin_nm"], exp["pair_spin_nm"], rtol=1e-12, atol=1e-12
         )
         np.testing.assert_allclose(
-            out["dz_dt"], exp["pair_slip_speed_m_s"], rtol=1e-12, atol=1e-12
+            out["pair_slip_speed_m_s"],
+            exp["pair_slip_speed_m_s"],
+            rtol=1e-12,
+            atol=1e-12,
         )
         # Newton's third law: club net force equals minus sum of hand net forces.
         np.testing.assert_allclose(
@@ -249,6 +259,8 @@ def test_matlab_pair_wrench_unittest_file_contract() -> None:
     assert "1e-9" in content
     assert "gs3dx_grip_pair_golden.json" in content
     assert "gs3dx_grip_contact_kernel" in content
+    assert "z_state" not in content
+    assert "dz_dt" not in content
 
 
 # ---------------------------------------------------------------------------
@@ -325,11 +337,13 @@ def test_simscape_series_loader_dbc_and_nan_reason_contract(tmp_path: Path) -> N
     sample = synthesize_reference_simscape_series(
         style="overlap", scenario="hold", n_samples=6
     )
+    assert "z_state_m" not in sample
     validate_simscape_grip_contact_series(sample)
 
     series_path = tmp_path / "series.json"
     series_path.write_text(json.dumps(sample), encoding="utf-8")
     loaded = load_simscape_grip_contact_series(series_path)
+    assert not hasattr(loaded, "z_state_m")
     topo_series = simscape_series_to_topology_series(loaded)
     kin_series = simscape_series_to_kinetics_series(loaded)
 
@@ -446,7 +460,7 @@ def test_matlab_builder_runner_and_deferred_catalog_contracts() -> None:
     assert "gs3dx_block_budget" in builder_src
     assert "External Force and Torque" in builder_src
     assert "Transform Sensor" in builder_src
-    assert "Integrator" in builder_src
+    assert "Integrator" not in builder_src
     assert "add_block('sm_lib/Joints/Weld Joint'" not in builder_src
 
     runner_src = runner_m.read_text(encoding="utf-8")
