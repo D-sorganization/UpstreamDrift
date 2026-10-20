@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13038 · Record the OSL Epic Handoff State (Open PRs, Owner Decisions, Rejected Video Work)
+
+- **State:** in_progress
+- **Owner:** unassigned
+- **Issue:** #13038
+- **Branch:** docs/osl-handoff-2026-10-20
+- **PR:** #13549
+- **Paths:** see #13549
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`12378aad`; collated from changes/13038-record-the-osl-epic-handoff-state-open-p.md)
+- **Summary:** Record the OSL epic handoff state (open PRs, owner decisions, rejected video work)
+- **Next step:** Merge #13521 and #13512; owner picks the OSL-7 stage-1 formulation; rework OSL-8 videos (#13526) with frame-by-frame review
+
 ### DL-#13190 · HRG-H2 Diagnostic Palm-Thumb Pad: Drift-Gated Physical Trail_Palm_Lead_Thumb Pair on the Shared G2 Law in Separated_V2, Impact Timestep and Preload Sensitivity Reports, and a New Spec Revision With Its Own Spec_Sha256; Contract Pinned by Tests.
 
 - **State:** in_review
@@ -2742,6 +2755,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13557 · Grip Topology Parity Compares Numerically-Zero Reference Channels (Peak <= 1E-8 N or N·m) Absolutely Instead of Relatively; Fixes myoHand Frozen-Finger Law-Level Parity on Roundoff Spin Channels
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13557
+- **Branch:** merged via #13558
+- **PR:** #13558
+- **Paths:** see #13558
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`b53903ee`; collated from changes/13557-grip-parity-numerical-zero-reference.md)
+- **Summary:** Grip topology parity compares numerically-zero reference channels (peak <= 1e-8 N or N·m) absolutely instead of relatively; fixes myoHand frozen-finger law-level parity on roundoff spin channels
+- **Next step:** Shipped in PR #13558.
 
 ### DL-#13544 · Grip_Contact Exporter --Check Now Logs the Drifted File and a Bounded Unified Diff (Flake Diagnostics)
 
