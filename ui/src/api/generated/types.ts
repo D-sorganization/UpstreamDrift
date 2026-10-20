@@ -1126,10 +1126,14 @@ export interface CharacterAppearanceRequest {
   bottom_color?: string | null;
   /** Golf glove by role; the lead hand is the left of a right-hander */
   glove?: "none" | "lead" | "trail" | "both" | null;
-  /** Grip style (picture only): overlap, interlock, ten_finger */
-  grip_style?: "overlap" | "interlock" | "ten_finger" | null;
   /** Lead thumb offset, degrees (picture only) */
   grip_thumb_offset_deg?: number | null;
+  /** Both-hand roll offset, degrees (picture only) */
+  grip_strength_deg?: number | null;
+  /** Lead-hand roll offset, degrees (picture only) */
+  lead_roll_offset_deg?: number | null;
+  /** Trail-hand roll offset, degrees (picture only) */
+  trail_roll_offset_deg?: number | null;
   /** Appearance document name (letters, digits, '_' or '-') */
   name?: string | null;
 }
@@ -2047,7 +2051,7 @@ export interface GreenReadingResponse {
 }
 
 /**
- * Grip picks for a character: physical ones make a new model revision. Golf words: ``preset`` is the grip strength; the ``*_shaft_rotation`` values turn a hand about the shaft (positive is stronger); the ``*_palm_diagonal`` values set where the shaft crosses the palm; the ``*_set_angle`` values the angle at the wrist; ``lead_below_butt`` and ``hand_spacing`` are metres. ``grip_style`` and ``grip_thumb_offset_deg`` are picture-only.
+ * Grip picks for a character: physical ones make a new model revision. Golf words: ``preset`` is the grip strength; the ``*_shaft_rotation`` values turn a hand about the shaft (positive is stronger); the ``*_palm_diagonal`` values set where the shaft crosses the palm; the ``*_set_angle`` values the angle at the wrist; ``lead_below_butt`` and ``hand_spacing`` are metres; ``grip_style`` selects the physical contact topology (HRG-GS-G1). ``grip_thumb_offset_deg``, ``grip_strength_deg``, ``lead_roll_offset_deg`` and ``trail_roll_offset_deg`` are picture-only.
  */
 export interface GripRevisionRequest {
   character?: CharacterSpecRequest | null;
@@ -2062,6 +2066,9 @@ export interface GripRevisionRequest {
   hand_spacing?: number | null;
   grip_style?: "overlap" | "interlock" | "ten_finger" | null;
   grip_thumb_offset_deg?: number | null;
+  grip_strength_deg?: number | null;
+  lead_roll_offset_deg?: number | null;
+  trail_roll_offset_deg?: number | null;
 }
 
 /**

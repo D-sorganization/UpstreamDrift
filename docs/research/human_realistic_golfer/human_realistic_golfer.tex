@@ -387,6 +387,31 @@ non-default value is written by \texttt{apply\_grip\_config} as a new spec
 revision and changes the physics hash.  The default (overlap, no trigger) is
 omitted from the physical JSON, so existing v1 spec bytes are unchanged.
 
+\textbf{Pick classification and sidecar migration (\#13346).} Because
+\texttt{grip\_style} selects the physical contact topology (which finger sites
+contact the grip cylinder and which hand--hand pairs exist),
+\texttt{grip\_selection.py} classifies \texttt{grip\_style} in
+\texttt{PHYSICAL\_PICKS} ($9 \to 10$ physical picks) and removes
+\texttt{grip\_style}/\texttt{"style"} from \texttt{VISUAL\_PICKS} and
+\texttt{VISUAL\_KEYS} ($5 \to 4$ visual picks: \texttt{grip\_thumb\_offset\_deg},
+\texttt{grip\_strength\_deg}, \texttt{lead\_roll\_offset\_deg},
+\texttt{trail\_roll\_offset\_deg}).  Picking a non-default style on an
+unrevised v1 document mints \texttt{spec\_revision.version = 1} with
+\texttt{configuration = "grip"}, stamps \texttt{subject.grip\_config.style} and
+\texttt{subject.grip\_provenance}, and moves \texttt{physics\_spec\_sha256}
+(e.g., on the anthropometric driver spec, \texttt{style\_only}
+\texttt{interlock} moves \texttt{physics\_spec\_sha256} from
+\texttt{296bdc363b3f\dots} to \texttt{98bd6b2e7957\dots} with
+\texttt{refit\_required: false} $\to$ \texttt{true}).  Re-picking the
+document's current physical style (including \texttt{"overlap"} on an unrevised
+v1 document) is a no-op that leaves the document bytes and hash identical.
+New \texttt{appearance-v1} sidecars never carry \texttt{grip.style};
+\texttt{migrate\_sidecar\_grip} strips a legacy sidecar \texttt{grip.style}
+with a \texttt{DeprecationWarning} when it matches the document's physical
+style and raises \texttt{ValueError} naming both styles when it disagrees, so
+sidecar and physical styles can never diverge.  On \texttt{native\_viewer\_export},
+\texttt{--grip-style} is refused with a message pointing to \texttt{spec\_builder}.
+
 \textbf{Frame.} Sites are expressed in the shared grip frame of
 \texttt{grip\_contact.pad\_layout}: $+x$ along the grip from butt to head,
 $\rho=\sqrt{y^2+z^2}$ radial.  Each site is a sphere or capsule
@@ -413,10 +438,13 @@ it is physical only in the separated-hand v2 topology (HRG-GS-G11, \#13309).
 
 \textbf{Acceptance.} Exact pair sets per style; every site within 0.5\,mm of
 the grip surface or its partner at the neutral pose; radii proportional to
-$L$; one \texttt{GripStyle} definition in \texttt{src/}.  Reproduce with:
+$L$; one \texttt{GripStyle} definition in \texttt{src/}; \texttt{grip\_style}
+classified as physical across CLI, desktop and web with legacy sidecar
+migration/refusal.  Reproduce with:
 \begin{verbatim}
 python3 -m pytest tests/unit/grip_contact/test_contact_topology.py \
-    tests/unit/motion_matching/test_grip_config.py
+    tests/unit/motion_matching/test_grip_config.py \
+    tests/unit/motion_matching/test_grip_selection.py
 \end{verbatim}
 
 \textbf{Limitation.} No finger markers exist in the capture, so finger contact
