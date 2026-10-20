@@ -16,6 +16,9 @@ Design by Contract
 
 from __future__ import annotations
 
+import json
+import math
+
 import pytest
 from src.shared.python.perturbation.config import (
     PerturbationConfig,
@@ -297,6 +300,35 @@ class TestComputeConsistency:
 
     def test_empty_summaries(self) -> None:
         assert compute_consistency({}) == {}
+
+    def test_zero_mean_consistency_is_nan_with_reason(self) -> None:
+        # Two engines with symmetric opposite means: overall mean is 0.0
+        summaries = {
+            "a": _make_summary(
+                "a", 0.8, metrics={"rmse": _make_metric_stats(-1.0, 0.1)}
+            ),
+            "b": _make_summary(
+                "b", 0.8, metrics={"rmse": _make_metric_stats(1.0, 0.1)}
+            ),
+        }
+        c = compute_consistency(summaries, threshold=0.2)["rmse"]
+        assert math.isnan(c.coefficient_of_variation)
+        assert c.cv_reason is not None
+        assert "undefined" in c.cv_reason
+        assert c.is_consistent is False
+
+        # Report serialization stays strict-JSON safe
+        report = CrossEngineReport(
+            config=PerturbationConfig(n_trials=2),
+            summaries=summaries,
+            ranking=[],
+            consistency={"rmse": c},
+        )
+        d = report.to_dict()
+        assert d["consistency"]["rmse"]["cv"] is None
+        assert d["consistency"]["rmse"]["cv_reason"] == c.cv_reason
+        assert d["consistency"]["rmse"]["is_consistent"] is False
+        json.dumps(d, allow_nan=False)
 
 
 # ---------------------------------------------------------------------------

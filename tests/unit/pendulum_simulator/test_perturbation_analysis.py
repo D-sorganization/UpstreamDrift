@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 from src.shared.python.pendulum_simulator.perturbation_analysis import (
@@ -107,3 +109,42 @@ class TestVariabilitySummary:
     def test_empty_results_raises(self) -> None:
         with pytest.raises(AssertionError):
             variability_summary([])
+
+    def test_zero_mean_tip_speed_cv_is_nan_with_reason(self) -> None:
+        results = [
+            {
+                "tip_speed_final": 0.0,
+                "tip_position_final": np.array([0.0, 0.0]),
+            },
+            {
+                "tip_speed_final": 0.0,
+                "tip_position_final": np.array([0.0, 0.0]),
+            },
+        ]
+        summary = variability_summary(results)
+        assert math.isnan(summary["tip_speed_cv"])
+        assert summary.get("tip_speed_cv_reason") is not None
+        assert "undefined" in summary["tip_speed_cv_reason"]
+
+    def test_zero_mean_speed_not_scored_perfectly_robust(self) -> None:
+        from src.shared.python.perturbation.robustness_score import (
+            compute_robustness_score,
+        )
+
+        results = [
+            {
+                "tip_speed_final": 0.0,
+                "tip_position_final": np.array([0.0, 0.0]),
+            },
+            {
+                "tip_speed_final": 0.0,
+                "tip_position_final": np.array([0.0, 0.0]),
+            },
+        ]
+        summary = variability_summary(results)
+        cv = summary["tip_speed_cv"]
+        # Analyzer policy: non-finite CV falls back to 1.0 (least robust), never 0.0 (perfect)
+        cv_effective = float(cv) if np.isfinite(cv) else 1.0
+        score = compute_robustness_score(cv_effective)
+        assert score == pytest.approx(0.5)
+        assert score < 1.0

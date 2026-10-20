@@ -7,8 +7,11 @@ import json
 import numpy as np
 import pytest
 from src.shared.python.perturbation.statistics import (
+    CV_NEAR_ZERO_MEAN,
+    CV_UNDEFINED_REASON,
     MetricStatistics,
     compute_metric_statistics,
+    safe_cv,
 )
 
 # ---------------------------------------------------------------------------
@@ -153,3 +156,35 @@ class TestComputeMetricStatistics:
         d = stats.to_dict()
         assert isinstance(d, dict)
         assert d["mean"] == stats.mean
+
+
+# ---------------------------------------------------------------------------
+# safe_cv helper
+# ---------------------------------------------------------------------------
+
+
+class TestSafeCv:
+    @pytest.mark.unit
+    @pytest.mark.parametrize("mean", [0.0, 1e-13, -1e-13, 1e-12, -1e-12])
+    def test_near_zero_mean_returns_nan_with_reason(self, mean: float) -> None:
+        cv, reason = safe_cv(mean, 0.5)
+        assert np.isnan(cv)
+        assert reason == CV_UNDEFINED_REASON
+
+    @pytest.mark.unit
+    def test_well_defined_mean_absolute(self) -> None:
+        cv, reason = safe_cv(-2.0, 0.5, absolute=True)
+        assert cv == pytest.approx(0.25)
+        assert reason is None
+
+    @pytest.mark.unit
+    def test_well_defined_mean_signed(self) -> None:
+        cv, reason = safe_cv(-2.0, 0.5, absolute=False)
+        assert cv == pytest.approx(-0.25)
+        assert reason is None
+
+    @pytest.mark.unit
+    def test_zero_std_with_nonzero_mean(self) -> None:
+        cv, reason = safe_cv(5.0, 0.0)
+        assert cv == 0.0
+        assert reason is None
