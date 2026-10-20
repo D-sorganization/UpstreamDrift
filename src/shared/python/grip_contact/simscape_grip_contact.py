@@ -699,6 +699,29 @@ def simscape_series_to_topology_series(
     )
 
 
+def _grip_frame_poses(
+    series: SimscapeGripContactSeries, interface: GripInterface
+) -> tuple[
+    dict[str, tuple[np.ndarray, np.ndarray]], dict[str, tuple[np.ndarray, np.ndarray]]
+]:
+    """Per-side ``(rotation, position)`` series of the hands and club grip frames.
+
+    Postconditions:
+        Club grip frames are the club pose composed with the interface's
+        club-local grip frames, shape ``(n, 3, 3)`` and ``(n, 3)`` per side.
+    """
+    rot_c, pos_c = series.club_rotation_w, series.club_position_w_m
+    club_pose = {}
+    for side, frame in (("L", interface.left), ("R", interface.right)):
+        off = frame.matrix()
+        club_pose[side] = (rot_c @ off[:3, :3], pos_c + rot_c @ off[:3, 3])
+    hand_pose = {
+        "L": (series.hand_l_rotation_w, series.hand_l_position_w_m),
+        "R": (series.hand_r_rotation_w, series.hand_r_position_w_m),
+    }
+    return hand_pose, club_pose
+
+
 def simscape_series_to_kinetics_series(
     series: SimscapeGripContactSeries,
     interface: GripInterface | None = None,
@@ -708,32 +731,10 @@ def simscape_series_to_kinetics_series(
         spec = json.loads(DEFAULT_SPEC_PATH.read_text(encoding="utf-8"))
         interface = GripInterface.from_spec(spec)
 
-    n = series.time_s.size
-    club_pos_l = np.zeros((n, 3), dtype=float)
-    club_rot_l = np.zeros((n, 3, 3), dtype=float)
-    club_pos_r = np.zeros((n, 3), dtype=float)
-    club_rot_r = np.zeros((n, 3, 3), dtype=float)
-    off_l = interface.left.matrix()
-    off_r = interface.right.matrix()
-    for k in range(n):
-        rc = series.club_rotation_w[k]
-        pc = series.club_position_w_m[k]
-        club_pos_l[k] = pc + rc @ off_l[:3, 3]
-        club_rot_l[k] = rc @ off_l[:3, :3]
-        club_pos_r[k] = pc + rc @ off_r[:3, 3]
-        club_rot_r[k] = rc @ off_r[:3, :3]
-
+    hand_pose, club_pose = _grip_frame_poses(series, interface)
     wrench = {
         "L": (series.force_on_club_l_w_n, series.moment_on_club_l_w_nm),
         "R": (series.force_on_club_r_w_n, series.moment_on_club_r_w_nm),
-    }
-    hand_pose = {
-        "L": (series.hand_l_rotation_w, series.hand_l_position_w_m),
-        "R": (series.hand_r_rotation_w, series.hand_r_position_w_m),
-    }
-    club_pose = {
-        "L": (club_rot_l, club_pos_l),
-        "R": (club_rot_r, club_pos_r),
     }
     return GripKineticsSeries.from_frames(
         series.engine,
@@ -761,30 +762,7 @@ def simscape_series_to_contact_run(
         spec = json.loads(DEFAULT_SPEC_PATH.read_text(encoding="utf-8"))
         interface = GripInterface.from_spec(spec)
     kin = simscape_series_to_kinetics_series(series, interface=interface)
-    n = series.time_s.size
-    off_l, off_r = interface.left.matrix(), interface.right.matrix()
-    club_pos_l = np.array(
-        [
-            series.club_position_w_m[k] + series.club_rotation_w[k] @ off_l[:3, 3]
-            for k in range(n)
-        ]
-    )
-    club_rot_l = np.array([series.club_rotation_w[k] @ off_l[:3, :3] for k in range(n)])
-    club_pos_r = np.array(
-        [
-            series.club_position_w_m[k] + series.club_rotation_w[k] @ off_r[:3, 3]
-            for k in range(n)
-        ]
-    )
-    club_rot_r = np.array([series.club_rotation_w[k] @ off_r[:3, :3] for k in range(n)])
-    hand_pose = {
-        "L": (series.hand_l_rotation_w, series.hand_l_position_w_m),
-        "R": (series.hand_r_rotation_w, series.hand_r_position_w_m),
-    }
-    club_pose = {
-        "L": (club_rot_l, club_pos_l),
-        "R": (club_rot_r, club_pos_r),
-    }
+    hand_pose, club_pose = _grip_frame_poses(series, interface)
     axial, roll = slip_from_frames(hand_pose, club_pose)
     from src.shared.python.motion_matching.grip_contract import GripSpec
 
