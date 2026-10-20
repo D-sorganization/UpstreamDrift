@@ -19,21 +19,30 @@ from __future__ import annotations
 import json
 import math
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field, replace
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Final, Literal
 
 import numpy as np
 
-from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
-    BimanualGraspSynthesis,
-)
 from src.engines.physics_engines.myosuite.python.myohand_bilateral_scene import (
     HAND_SCENE_REL_DIR,
     MYOHAND_CANONICAL_JOINTS,
     check_myohand_assets_available,
     generate_myohand_bilateral_scene,
+)
+from src.engines.physics_engines.myosuite.python.myohand_grip_controller import (
+    DRIVER_CLUB_PROPERTIES,
+    IRON_CLUB_PROPERTIES,
+    ClubInertialProperties,
+    ForwardReplayClubReport,
+    GraspResultantNewtonReport,
+    build_prescribed_grip_trajectory,
+    evaluate_grasp_resultant_newton_check,
+    register_interface_context,
+    replay_club_forward_trajectory,
+    solve_force_regulated_hand_frames,
 )
 from src.shared.python.grip_contact.bushing_law import BushingState
 from src.shared.python.grip_contact.binding import (
@@ -59,7 +68,6 @@ from src.shared.python.grip_contact.contact_topology import (
 )
 from src.shared.python.grip_contact.hand_hand_allocation import AllocationPrior
 from src.shared.python.grip_contact.interface import GripInterface
-from src.shared.python.grip_contact.parity import compute_quantity_error
 from src.shared.python.grip_contact.prescribed_motion import (
     RigidBodyState,
     hand_frame_states,
@@ -73,10 +81,6 @@ from src.shared.python.grip_contact.topology_series import (
     TopologyKineticsSeries,
     topology_mapping_hash,
 )
-from src.shared.python.loop_nullspace.evidence import (
-    GripFrame as NullspaceGripFrame,
-)
-from src.shared.python.loop_nullspace.grip_split import grasp_map
 from src.shared.python.model_appearance.grip_hand_mesh import (
     DEFAULT_HAND_MESH_PARAMS,
     HandMeshParams,
@@ -90,14 +94,18 @@ from src.shared.python.motion_matching.contact_law import ContactParameters
 from src.shared.python.motion_matching.grip_contract import GripSpec
 
 __all__ = [
+    "ClubInertialProperties",
     "FINGER_POSE_JOINT_MAP",
+    "ForwardReplayClubReport",
     "GraspResultantNewtonReport",
     "MYOHAND_BILATERAL_MODEL_IDS",
     "MyoHandBilateralGripAdapter",
     "build_prescribed_grip_trajectory",
     "evaluate_grasp_resultant_newton_check",
     "pose_to_myohand_joint_targets",
+    "replay_club_forward_trajectory",
     "run_myohand_frozen_qualification_series",
+    "solve_force_regulated_hand_frames",
 ]
 
 _THIS_FILE: Final[Path] = Path(__file__).resolve()
@@ -182,36 +190,6 @@ _JOINT_MAP_ROWS: Final[tuple[tuple[str, str, str], ...]] = (
 FINGER_POSE_JOINT_MAP: Final[tuple[dict[str, str], ...]] = tuple(
     {"joint": j, "body": b, "source": s} for j, b, s in _JOINT_MAP_ROWS
 )
-
-
-@dataclass(frozen=True)
-class GraspResultantNewtonReport:
-    """Grasp-resultant inverse-dynamics and Newton-Euler balance report (HRG-GS-M8).
-
-    ``per_hand_split_status`` and ``squeeze_status`` are explicitly labelled
-    ``"INDETERMINATE"`` because a hyperstatic two-hand grip has a 6-D internal
-    nullspace and cannot uniquely determine per-hand split or internal squeeze
-    from club dynamics alone.
-    """
-
-    model_id: str
-    style: str
-    club_mass_kg: float
-    force_peak_rel_error: float
-    force_rms_rel_error: float
-    moment_peak_rel_error: float
-    moment_rms_rel_error: float
-    newton_force_rel_error: float
-    newton_moment_com_residual_nm: float
-    net_hand_force_n: tuple[float, float, float]
-    required_force_n: tuple[float, float, float]
-    net_hand_moment_com_nm: tuple[float, float, float]
-    required_moment_com_nm: tuple[float, float, float]
-    grasp_synthesis: BimanualGraspSynthesis
-    friction_cone_ratios: dict[str, float | None]
-    slip_velocities_m_s: dict[str, float] = field(default_factory=dict)
-    per_hand_split_status: Literal["INDETERMINATE"] = "INDETERMINATE"
-    squeeze_status: Literal["INDETERMINATE"] = "INDETERMINATE"
 
 
 def _clamp_joint(name: str, val_rad: float) -> float:
@@ -442,6 +420,14 @@ class MyoHandBilateralGripAdapter(ModelGripAdapter):
         self._data = mujoco.MjData(self._model)
         self._configure_physics_and_pose()
         self._calib_rel_transforms = self._capture_calib_phalanx_transforms()
+        self._club_properties = (
+            IRON_CLUB_PROPERTIES
+            if model_id == "myosuite_myohand_bilateral_iron"
+            else DRIVER_CLUB_PROPERTIES
+        )
+        register_interface_context(
+            self._interface, self._topology_model, self._club_properties
+        )
         self._prescribed_hand_frames: dict[str, BushingState] | None = None
         self._prescribed_club_frames: dict[str, BushingState] | None = None
         self._last_sampled_states: BodyStates | None = None
@@ -631,16 +617,17 @@ class MyoHandBilateralGripAdapter(ModelGripAdapter):
         z3 = np.zeros(3, dtype=float)
         club_state = RigidBodyState(np.eye(3, dtype=float), z3, z3.copy(), z3.copy())
         base_frames = hand_frame_states(club_state, self._interface)
-        preload = np.array([0.0, -0.0015, 0.0], dtype=float)
-        hand_frames = {
-            side: BushingState(
-                rotation=st.rotation.copy(),
-                position_m=st.position_m + st.rotation @ preload,
-                velocity_m_s=st.velocity_m_s.copy(),
-                omega_rad_s=st.omega_rad_s.copy(),
-            )
-            for side, st in base_frames.items()
-        }
+        f_req, m_req_com, _ = self._club_properties.inverse_dynamics_at_phase(
+            0.0, 0.0, 0.0
+        )
+        r_com = np.asarray(self._club_properties.com_local_m, dtype=float)
+        r_l = np.asarray(base_frames["L"].position_m, dtype=float)
+        r_r = np.asarray(base_frames["R"].position_m, dtype=float)
+        r_mid = 0.5 * (r_l + r_r)
+        w_req_mid = np.concatenate([f_req, m_req_com + np.cross(r_com - r_mid, f_req)])
+        hand_frames, _ = solve_force_regulated_hand_frames(
+            self._topology_model, base_frames, w_req_mid
+        )
         return hand_frames, base_frames
 
     def _current_club_state(
@@ -841,9 +828,113 @@ class MyoHandBilateralGripAdapter(ModelGripAdapter):
             )
         )
 
+    def _club_joint_addrs(self) -> tuple[int, int]:
+        mujoco = self._mujoco
+        jid = int(
+            mujoco.mj_name2id(self._model, mujoco.mjtObj.mjOBJ_JOINT, "club_free")
+        )
+        return int(self._model.jnt_qposadr[jid]), int(self._model.jnt_dofadr[jid])
+
     def club_mass_kg(self) -> float:
         """Return mass (kg) of the free golf_club body."""
         return float(self._model.body_mass[self._club_body_id()])
+
+    def club_scene_inertial_properties(self) -> ClubInertialProperties:
+        """Return compiled MuJoCo ``MjModel`` mass, COM offset, and body-frame COM inertia of ``golf_club``."""
+        from scipy.spatial.transform import Rotation
+
+        bid = self._club_body_id()
+        mass = float(self._model.body_mass[bid])
+        ipos = np.asarray(self._model.body_ipos[bid], dtype=float)
+        inertia = np.asarray(self._model.body_inertia[bid], dtype=float)
+        iquat = np.asarray(self._model.body_iquat[bid], dtype=float)
+        q_xyzw = np.array([iquat[1], iquat[2], iquat[3], iquat[0]], dtype=float)
+        r_iquat = np.asarray(Rotation.from_quat(q_xyzw).as_matrix(), dtype=float)
+        inertia_body = r_iquat @ np.diag(inertia) @ r_iquat.T
+        opt = self._model.opt
+        grav = np.asarray(opt.gravity, dtype=float)
+        return ClubInertialProperties(
+            mass_kg=mass,
+            com_local_m=(float(ipos[0]), float(ipos[1]), float(ipos[2])),
+            inertia_com_kg_m2=inertia_body,
+            gravity_m_s2=(float(grav[0]), float(grav[1]), float(grav[2])),
+        )
+
+    def club_free_qpos_qvel(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return ``(qpos_club[7], qvel_club[6])`` for ``club_free``."""
+        qadr, vadr = self._club_joint_addrs()
+        qpos_c = np.asarray(self._data.qpos[qadr : qadr + 7], dtype=float).copy()
+        qvel_c = np.asarray(self._data.qvel[vadr : vadr + 6], dtype=float).copy()
+        return qpos_c, qvel_c
+
+    def club_com_and_rotation(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return ``(xipos[3], xmat[3, 3])`` of ``golf_club`` in world coordinates."""
+        bid = self._club_body_id()
+        com_w = np.asarray(self._data.xipos[bid], dtype=float).copy()
+        xmat_flat = np.asarray(self._data.xmat[bid], dtype=float).copy()
+        rot_w = xmat_flat.reshape(3, 3)
+        return com_w, rot_w
+
+    def active_club_weld_count(self) -> int:
+        """Return count of active equality constraints attached to ``golf_club`` (must be 0)."""
+        bid = self._club_body_id()
+        neq = int(self._model.neq)
+        if neq == 0:
+            return 0
+        eq_type = np.asarray(self._model.eq_type, dtype=int)
+        eq_obj1 = np.asarray(self._model.eq_obj1id, dtype=int)
+        eq_obj2 = np.asarray(self._model.eq_obj2id, dtype=int)
+        eq_act = np.asarray(self._data.eq_active, dtype=int)
+        mujoco = self._mujoco
+        weld_type = int(mujoco.mjtEq.mjEQ_WELD)
+        count = 0
+        for i in range(neq):
+            if eq_act[i] != 0 and eq_type[i] == weld_type:
+                if eq_obj1[i] == bid or eq_obj2[i] == bid:
+                    count += 1
+        return count
+
+    def integrator_info(self) -> tuple[str, int]:
+        """Return ``(integrator_name, integrator_order)`` configured on ``MjModel.opt``."""
+        opt = self._model.opt
+        int_code = int(opt.integrator)
+        mujoco = self._mujoco
+        if int_code == int(mujoco.mjtIntegrator.mjINT_RK4):
+            return ("rk4", 4)
+        if int_code == int(mujoco.mjtIntegrator.mjINT_IMPLICIT):
+            return ("implicit_euler", 1)
+        if int_code == int(mujoco.mjtIntegrator.mjINT_IMPLICITFAST):
+            return ("implicit_fast_euler", 1)
+        return ("semi_implicit_euler", 1)
+
+    def step_club_with_wrench(
+        self,
+        force_n: np.ndarray,
+        moment_com_nm: np.ndarray,
+        *,
+        dt_s: float = FIXTURE_DT_S,
+    ) -> float:
+        """Advance ``mj_step`` by ``dt_s`` with only ``(force_n, moment_com_nm)`` on ``golf_club``."""
+        if not math.isfinite(dt_s) or dt_s <= 0.0:
+            raise ValueError(f"dt_s must be finite and > 0, got {dt_s}")
+        bid = self._club_body_id()
+        _, vadr = self._club_joint_addrs()
+        opt = self._model.opt
+        orig_dt = float(opt.timestep)
+        opt.timestep = float(dt_s)
+        try:
+            self._data.xfrc_applied[:] = 0.0
+            self._data.xfrc_applied[bid, :3] = np.asarray(force_n, dtype=float)
+            self._data.xfrc_applied[bid, 3:6] = np.asarray(moment_com_nm, dtype=float)
+            self._data.ctrl[:] = 0.0
+            self._data.qvel[:vadr] = 0.0
+            self._mujoco.mj_step(self._model, self._data)
+            qfrc_con = np.asarray(
+                self._data.qfrc_constraint[vadr : vadr + 6], dtype=float
+            )
+            return float(np.linalg.norm(qfrc_con))
+        finally:
+            opt.timestep = orig_dt
 
     def club_moment_about_com(
         self, force_n: np.ndarray, moment_origin_nm: np.ndarray
@@ -864,104 +955,154 @@ class MyoHandBilateralGripAdapter(ModelGripAdapter):
         dt_s: float = FIXTURE_DT_S,
         origin_accel_m_s2: np.ndarray | None = None,
         alpha_rad_s2: np.ndarray | None = None,
+        omega_rad_s: np.ndarray | None = None,
+        rotation: np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Compute prescribed (F_req, M_req_com, M_req_origin) from prescribed club kinematics.
+        """Compute analytical (F_req, M_req_com, M_req_origin) from ``ClubInertialProperties``.
 
-        Evaluates ``F_req(t) = m (a_com(t) - g)`` and ``M_req,com(t) = I alpha + w x I w``
-        from :func:`build_prescribed_grip_trajectory`, independent of ``xfrc_applied``/``cacc``.
+        Uses closed-form :class:`ClubInertialProperties` derived from :class:`ClubSpec`
+        (independent of ``MjModel``/``MjData``, ``xfrc_applied``, and ``cacc``).
         """
         if n_steps < 2:
             raise ValueError(f"n_steps must be >= 2, got {n_steps}")
         if not math.isfinite(dt_s) or dt_s <= 0.0:
             raise ValueError(f"dt_s must be finite and > 0, got {dt_s}")
-        bid = self._club_body_id()
-        mass = float(self._model.body_mass[bid])
-        opt = self._model.opt
-        gravity = np.asarray(opt.gravity, dtype=float)
-        xpos = np.asarray(self._data.xpos[bid], dtype=float)
-        xipos = np.asarray(self._data.xipos[bid], dtype=float)
-        r_com = xipos - xpos
 
         omega_freq = 2.0 * math.pi / (float(n_steps - 1) * float(dt_s))
+        rot_club = rotation
         if t_s is not None:
             phase = omega_freq * float(t_s)
             sin_p, cos_p = math.sin(phase), math.cos(phase)
+            if rot_club is None:
+                theta_z = (0.15 / omega_freq) * (1.0 - cos_p)
+                ct, st = math.cos(theta_z), math.sin(theta_z)
+                rot_club = np.array(
+                    [[ct, -st, 0.0], [st, ct, 0.0], [0.0, 0.0, 1.0]], dtype=float
+                )
         elif self._prescribed_club_frames is not None:
             c_state = self._current_club_state(self._prescribed_club_frames)
             sin_p = float(c_state.omega_rad_s[2]) / 0.15
             cos_p = float(c_state.velocity_m_s[0]) / 0.02
+            if rot_club is None:
+                rot_club = c_state.rotation
         else:
             sin_p, cos_p, omega_freq = 0.0, 0.0, 0.0
 
-        omega_w = np.array([0.0, 0.0, 0.15 * sin_p], dtype=float)
-        a_origin = (
-            np.asarray(origin_accel_m_s2, dtype=float)
-            if origin_accel_m_s2 is not None
-            else np.array([-0.02 * omega_freq * sin_p, 0.0, 0.0], dtype=float)
+        return self._club_properties.inverse_dynamics_at_phase(
+            sin_p,
+            cos_p,
+            omega_freq,
+            rotation=rot_club,
+            origin_accel_m_s2=origin_accel_m_s2,
+            alpha_rad_s2=alpha_rad_s2,
+            omega_rad_s=omega_rad_s,
         )
-        alpha_w = (
-            np.asarray(alpha_rad_s2, dtype=float)
-            if alpha_rad_s2 is not None
-            else np.array([0.0, 0.0, 0.15 * omega_freq * cos_p], dtype=float)
+
+    def club_mj_inverse_requirement(
+        self,
+        *,
+        t_s: float | None = None,
+        n_steps: int = 21,
+        dt_s: float = FIXTURE_DT_S,
+        qpos_club: np.ndarray | None = None,
+        qvel_club: np.ndarray | None = None,
+        qacc_club: np.ndarray | None = None,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+        """Compute independent MuJoCo ``mj_inverse`` requirement on ``club_free``.
+
+        Sets ``club_free`` ``qpos``, ``qvel``, and ``qacc`` from the prescribed trajectory
+        (or caller-supplied arrays), zeroes ``xfrc_applied`` and ``ctrl``, runs
+        ``mujoco.mj_inverse``, and converts ``qfrc_inverse`` on the 6 ``club_free`` DOFs
+        (world-frame linear force at ``xpos``, body-local torque about ``xpos``) into
+        ``(F_mj_w, M_mj_com_w, M_mj_origin_w, constraint_force_norm)``.
+        """
+        if n_steps < 2:
+            raise ValueError(f"n_steps must be >= 2, got {n_steps}")
+        if not math.isfinite(dt_s) or dt_s <= 0.0:
+            raise ValueError(f"dt_s must be finite and > 0, got {dt_s}")
+
+        qpos_p, qvel_p, qacc_p = _prescribed_club_qpos_qvel_qacc(t_s, n_steps, dt_s)
+        qpos_c = (
+            np.asarray(qpos_club, dtype=float)
+            if qpos_club is not None
+            else (qpos_p if t_s is not None else self.club_free_qpos_qvel()[0])
         )
-        a_com = (
-            a_origin
-            + np.cross(alpha_w, r_com)
-            + np.cross(omega_w, np.cross(omega_w, r_com))
+        qvel_c = (
+            np.asarray(qvel_club, dtype=float)
+            if qvel_club is not None
+            else (qvel_p if t_s is not None else self.club_free_qpos_qvel()[1])
         )
-        f_req = mass * (a_com - gravity)
+        qacc_c = np.asarray(qacc_club, dtype=float) if qacc_club is not None else qacc_p
 
-        r_imat = np.asarray(self._data.ximat[bid], dtype=float).reshape(3, 3)
-        i_com = r_imat @ np.diag(self._model.body_inertia[bid]) @ r_imat.T
-        m_req_com = i_com @ alpha_w + np.cross(omega_w, i_com @ omega_w)
-        m_req_origin = m_req_com + np.cross(r_com, f_req)
-        return f_req, m_req_com, m_req_origin
+        mujoco = self._mujoco
+        data = self._data
+        bid = self._club_body_id()
+        qadr, vadr = self._club_joint_addrs()
+        qpos_saved = data.qpos.copy()
+        qvel_saved = data.qvel.copy()
+        qacc_saved = data.qacc.copy()
+        xfrc_saved = data.xfrc_applied.copy()
+        ctrl_saved = data.ctrl.copy()
+        try:
+            data.qvel[:] = 0.0
+            data.qacc[:] = 0.0
+            data.qpos[qadr : qadr + 7] = qpos_c
+            data.qvel[vadr : vadr + 6] = qvel_c
+            data.qacc[vadr : vadr + 6] = qacc_c
+            data.xfrc_applied[:] = 0.0
+            data.ctrl[:] = 0.0
+            mujoco.mj_inverse(self._model, data)
+
+            qfrc_inv = np.asarray(
+                data.qfrc_inverse[vadr : vadr + 6], dtype=float
+            ).copy()
+            qfrc_con = np.asarray(
+                data.qfrc_constraint[vadr : vadr + 6], dtype=float
+            ).copy()
+            c_norm = float(np.linalg.norm(qfrc_con))
+            qfrc_net = qfrc_inv + qfrc_con
+
+            f_mj_w = qfrc_net[:3].copy()
+            rot_w = np.asarray(data.xmat[bid], dtype=float).reshape(3, 3)
+            m_origin_w = rot_w @ qfrc_net[3:6]
+            xpos = np.asarray(data.xpos[bid], dtype=float)
+            xipos = np.asarray(data.xipos[bid], dtype=float)
+            m_com_w = m_origin_w + np.cross(xpos - xipos, f_mj_w)
+            return f_mj_w, m_com_w, m_origin_w, c_norm
+        finally:
+            data.qpos[:] = qpos_saved
+            data.qvel[:] = qvel_saved
+            data.qacc[:] = qacc_saved
+            data.xfrc_applied[:] = xfrc_saved
+            data.ctrl[:] = ctrl_saved
+            mujoco.mj_forward(self._model, data)
 
 
-def build_prescribed_grip_trajectory(
-    interface: GripInterface,
-    *,
-    n_steps: int = 21,
-    dt_s: float = FIXTURE_DT_S,
-) -> tuple[np.ndarray, list[dict[str, BushingState]], list[dict[str, BushingState]]]:
-    """Build deterministic 2 ms prescribed sliding-contact trajectory for M3 law-level parity.
-
-    Prescribes independent hand and club kinematics with unidirectional ``-y_grip``
-    compression (``-1.5`` to ``-1.8 mm``) and tangential slip speed up to
-    ``15.811 mm/s >> v_tr = 1.0 mm/s`` (a sliding contact, not a static hold).
-    """
-    if n_steps < 2:
-        raise ValueError(f"n_steps must be >= 2, got {n_steps}")
-    times = np.arange(n_steps, dtype=float) * float(dt_s)
-    hand_seq: list[dict[str, BushingState]] = []
-    club_seq: list[dict[str, BushingState]] = []
-
-    for t in times:
-        phase = 2.0 * math.pi * float(t) / (float(n_steps - 1) * float(dt_s))
-        sp, cp = math.sin(phase), math.cos(phase)
-        club_state = RigidBodyState(
-            rotation=np.eye(3, dtype=float),
-            position_m=np.array([0.002 * sp, 0.0, 0.0], dtype=float),
-            velocity_m_s=np.array([0.02 * cp, 0.0, 0.0], dtype=float),
-            omega_rad_s=np.array([0.0, 0.0, 0.15 * sp], dtype=float),
-        )
-        c_frames = hand_frame_states(club_state, interface)
-        delta_p = np.array(
-            [0.0004 * sp, -0.0015 - 0.0003 * cp, 0.0002 * sp], dtype=float
-        )
-        delta_v = np.array([0.015 * cp, 0.010 * sp, 0.005 * cp], dtype=float)
-        h_frames = {
-            side: BushingState(
-                rotation=st.rotation.copy(),
-                position_m=st.position_m + st.rotation @ delta_p,
-                velocity_m_s=st.velocity_m_s + st.rotation @ delta_v,
-                omega_rad_s=st.omega_rad_s.copy(),
-            )
-            for side, st in c_frames.items()
-        }
-        hand_seq.append(h_frames)
-        club_seq.append(c_frames)
-    return times, hand_seq, club_seq
+def _prescribed_club_qpos_qvel_qacc(
+    t_s: float | None,
+    n_steps: int,
+    dt_s: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    if t_s is None:
+        qpos0 = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], dtype=float)
+        z6 = np.zeros(6, dtype=float)
+        return qpos0, z6, z6.copy()
+    omega_freq = 2.0 * math.pi / (float(n_steps - 1) * float(dt_s))
+    phase = omega_freq * float(t_s)
+    sp, cp = math.sin(phase), math.cos(phase)
+    pos_w = np.array([(0.02 / omega_freq) * sp, 0.0, 0.0], dtype=float)
+    theta_z = (0.15 / omega_freq) * (1.0 - cp)
+    half_th = 0.5 * theta_z
+    q_wxyz = np.array([math.cos(half_th), 0.0, 0.0, math.sin(half_th)], dtype=float)
+    vel_w = np.array([0.02 * cp, 0.0, 0.0], dtype=float)
+    omega_local = np.array([0.0, 0.0, 0.15 * sp], dtype=float)
+    acc_w = np.array([-0.02 * omega_freq * sp, 0.0, 0.0], dtype=float)
+    alpha_local = np.array([0.0, 0.0, 0.15 * omega_freq * cp], dtype=float)
+    return (
+        np.concatenate([pos_w, q_wxyz]),
+        np.concatenate([vel_w, omega_local]),
+        np.concatenate([acc_w, alpha_local]),
+    )
 
 
 def run_myohand_frozen_qualification_series(
@@ -1002,161 +1143,4 @@ def run_myohand_frozen_qualification_series(
         model_id=binding.model_id,
         mapping_hash=m_hash,
         binding=binding,
-    )
-
-
-def _synthesize_club_grasp(
-    report: GripStepReport,
-    r_l: np.ndarray,
-    r_r: np.ndarray,
-) -> BimanualGraspSynthesis:
-    sw_map = report.side_wrenches
-    sw_l, sw_r = sw_map["L"], sw_map["R"]
-    f_l = np.asarray(sw_l.force_n, dtype=float)
-    tau_l = np.asarray(sw_l.moment_nm, dtype=float)
-    f_r = np.asarray(sw_r.force_n, dtype=float)
-    tau_r = np.asarray(sw_r.moment_nm, dtype=float)
-    r_mid = 0.5 * (r_l + r_r)
-    y_vec = np.concatenate([f_l, tau_l, f_r, tau_r])
-    g_mat = grasp_map(
-        NullspaceGripFrame(rotation=np.eye(3, dtype=float), origin=r_mid), r_l, r_r
-    )
-    w_club = g_mat @ y_vec
-    f_net = f_l + f_r
-    m_mid = np.cross(r_l - r_mid, f_l) + tau_l + np.cross(r_r - r_mid, f_r) + tau_r
-    w_direct = np.concatenate([f_net, m_mid])
-    res_inf = float(np.max(np.abs(w_club - w_direct)))
-    return BimanualGraspSynthesis(g_mat, y_vec, w_direct, res_inf)
-
-
-def _terminal_cone_and_slip(
-    adapter: MyoHandBilateralGripAdapter,
-    report: GripStepReport,
-    hand_frames: Mapping[str, BushingState],
-    club_frames: Mapping[str, BushingState],
-) -> tuple[dict[str, float | None], dict[str, float]]:
-    topo_model = adapter.topology_model()
-    topo = adapter.topology()
-    law = topo_model.law
-    mu_s = float(law.static_friction)
-    cone_ratios: dict[str, float | None] = {}
-    slip_speeds: dict[str, float] = {}
-    for pname, pw in report.pair_wrenches.items():
-        fn = float(pw.normal_force_mag_n)
-        ft = float(pw.tangential_force_mag_n)
-        cone_ratios[pname] = float(ft / (mu_s * fn)) if fn > 1e-12 else None
-        pair = topo.pair(pname)
-        side_a = "L" if pair.site_a.startswith("lead_") else "R"
-        st_a = hand_frames[side_a]
-        st_b = (
-            club_frames[side_a]
-            if pair.is_hand_grip
-            else hand_frames["L" if pair.site_b.startswith("lead_") else "R"]
-        )
-        pt_c = np.asarray(pw.contact_point_m, dtype=float)
-        n_vec = np.asarray(pw.normal, dtype=float)
-        v_a = st_a.velocity_m_s + np.cross(st_a.omega_rad_s, pt_c - st_a.position_m)
-        v_b = st_b.velocity_m_s + np.cross(st_b.omega_rad_s, pt_c - st_b.position_m)
-        v_rel = v_a - v_b
-        v_tan = v_rel - n_vec * float(n_vec @ v_rel)
-        slip_speeds[pname] = float(np.linalg.norm(v_tan))
-    return cone_ratios, slip_speeds
-
-
-def _vec3_tuple(vec: np.ndarray) -> tuple[float, float, float]:
-    return (float(vec[0]), float(vec[1]), float(vec[2]))
-
-
-def evaluate_grasp_resultant_newton_check(
-    adapter: MyoHandBilateralGripAdapter,
-    *,
-    n_steps: int = 21,
-    dt_s: float = FIXTURE_DT_S,
-    wrench_scale: float = 1.0,
-) -> GraspResultantNewtonReport:
-    """Compare hands' net club contact wrench to the prescribed club inverse-dynamics requirement.
-
-    What is compared:
-        At each step ``t_k`` of :func:`build_prescribed_grip_trajectory`, the hands' net
-        physical contact force ``F_hand(t_k)`` and COM moment ``M_hand,com(t_k)`` on
-        ``golf_club`` (assembled from ``rep.body_wrenches()`` by the shared contact law,
-        scaled by ``wrench_scale``) are compared via :func:`compute_quantity_error`
-        against the non-circular prescribed club inverse-dynamics requirement
-        ``F_req(t_k) = m_club (a_com(t_k) - g)`` and
-        ``M_req,com(t_k) = I_com alpha(t_k) + omega(t_k) x (I_com omega(t_k))`` computed
-        analytically from the prescribed club trajectory, independent of ``xfrc_applied``
-        and ``cacc``. Also reports bimanual grasp-map synthesis ``G y = w_club``,
-        terminal per-pair tangential slip speeds ``||v_t||`` (m/s), and static
-        friction-cone ratios ``||f_t|| / (mu_s f_n)`` (``mu_d / mu_s = 0.7 / 0.9 = 0.7778``
-        on every loaded hand-club pair under sliding contact ``||v_t|| = 15.811 mm/s``).
-    """
-    if not math.isfinite(wrench_scale) or wrench_scale <= 0.0:
-        raise ValueError(f"wrench_scale must be finite and > 0, got {wrench_scale}")
-    iface = adapter.interface()
-    times, hand_seq, club_seq = build_prescribed_grip_trajectory(
-        iface, n_steps=n_steps, dt_s=dt_s
-    )
-    f_hand_seq = np.zeros((n_steps, 3), dtype=float)
-    f_req_seq = np.zeros((n_steps, 3), dtype=float)
-    m_hand_com_seq = np.zeros((n_steps, 3), dtype=float)
-    m_req_com_seq = np.zeros((n_steps, 3), dtype=float)
-    last_report: GripStepReport | None = None
-    topo = adapter.topology()
-    binding = adapter.resolve_binding(topo)
-    club_body = binding.club_body
-
-    for k in range(n_steps):
-        adapter.set_prescribed_grip_state(hand_seq[k], club_seq[k])
-        rep = adapter.evaluate_contacts()
-        scaled_wrenches = {
-            b: (wrench_scale * f, wrench_scale * m)
-            for b, (f, m) in rep.body_wrenches().items()
-        }
-        adapter.apply_wrenches(scaled_wrenches)
-        f_req, m_req_com, _ = adapter.club_inverse_dynamics_requirement(
-            t_s=float(times[k]), n_steps=n_steps, dt_s=dt_s
-        )
-        f_net, m_origin = scaled_wrenches[club_body]
-        m_hand_com = adapter.club_moment_about_com(f_net, m_origin)
-        f_hand_seq[k], f_req_seq[k] = f_net, f_req
-        m_hand_com_seq[k], m_req_com_seq[k] = m_hand_com, m_req_com
-        last_report = rep
-
-    assert last_report is not None
-    f_err = compute_quantity_error(f_hand_seq, f_req_seq, name="club_net_force_n")
-    m_err = compute_quantity_error(
-        m_hand_com_seq, m_req_com_seq, name="club_net_moment_com_nm"
-    )
-    f_last, f_req_last = f_hand_seq[-1], f_req_seq[-1]
-    m_last, m_req_last = m_hand_com_seq[-1], m_req_com_seq[-1]
-    newton_f_rel = float(
-        np.linalg.norm(f_last - f_req_last)
-        / max(float(np.linalg.norm(f_req_last)), 1e-9)
-    )
-    newton_m_res = float(np.linalg.norm(m_last - m_req_last))
-    cone_ratios, slip_speeds = _terminal_cone_and_slip(
-        adapter, last_report, hand_seq[-1], club_seq[-1]
-    )
-    r_l = np.asarray(club_seq[-1]["L"].position_m, dtype=float)
-    r_r = np.asarray(club_seq[-1]["R"].position_m, dtype=float)
-    synthesis = _synthesize_club_grasp(last_report, r_l, r_r)
-    style_enum = topo.style
-
-    return GraspResultantNewtonReport(
-        model_id=adapter.model_id,
-        style=style_enum.value,
-        club_mass_kg=adapter.club_mass_kg(),
-        force_peak_rel_error=float(f_err.peak_error),
-        force_rms_rel_error=float(f_err.rms_error),
-        moment_peak_rel_error=float(m_err.peak_error),
-        moment_rms_rel_error=float(m_err.rms_error),
-        newton_force_rel_error=newton_f_rel,
-        newton_moment_com_residual_nm=newton_m_res,
-        net_hand_force_n=_vec3_tuple(f_last),
-        required_force_n=_vec3_tuple(f_req_last),
-        net_hand_moment_com_nm=_vec3_tuple(m_last),
-        required_moment_com_nm=_vec3_tuple(m_req_last),
-        grasp_synthesis=synthesis,
-        friction_cone_ratios=cone_ratios,
-        slip_velocities_m_s=slip_speeds,
     )
