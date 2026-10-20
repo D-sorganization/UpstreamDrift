@@ -38,11 +38,13 @@ from src.shared.python.grip_contact.interface import GripInterface
 from src.shared.python.grip_contact.matlab_kernel import (
     DEFAULT_SQUEEZE_PER_HAND_N,
     STYLE_IDS,
-    _payloads_numerically_close,
     build_kernel_params_payload,
     evaluate_kernel_reference,
     kernel_bundle_sha256,
     render_json_deterministic,
+)
+from src.shared.python.grip_contact.net_wrench_parity import (
+    payloads_numerically_close,
 )
 from src.shared.python.grip_contact.parity import GripKineticsSeries
 from src.shared.python.grip_contact.prescribed_motion import (
@@ -467,7 +469,7 @@ def export_scenarios_json(
             try:
                 act = json.loads(current)
                 exp = json.loads(text)
-                if _payloads_numerically_close(act, exp):
+                if payloads_numerically_close(act, exp):
                     return 0
             except Exception:
                 pass

@@ -1,21 +1,9 @@
 """Canonical Python -> MATLAB codegen kernel for Simscape grip contact (HRG-GS-M12, #13334).
 
 Generates:
-1. ``gs3dx_grip_contact_kernel.m`` — a ``%#codegen``-compatible MATLAB function
-   with fixed-size arrays, no containers/strings/dynamic memory, and no
-   persistent or continuous state.  The shared pairwise contact law in
-   :func:`pair_contact.sphere_capsule`, :func:`pair_contact.capsule_capsule`,
-   and :func:`pair_contact._sample_contact` is stateless (Hunt-Crossley normal
-   force, regularized tanh/Stribeck tangential friction with no tangential
-   spring, and torsional spin moment).  Evaluates all physical topology pairs
-   of a style and returns per-pair channels and net wrenches on the club and
-   each hand in World axes about their body origins.
-2. ``gs3dx_grip_contact_params.json`` — law parameters, club grip frame offsets,
-   and per-style physical pair tables exported from the Python source of truth.
-3. ``gs3dx_grip_pair_golden.json`` — constitutive golden vectors (randomized 3D
-   states plus separated, just touching, near-collinear capsules, stick, slip,
-   zero relative velocity, coincident axis, and rebounding clamp edge cases)
-   cross-checked against :func:`topology_side_wrench`.
+1. gs3dx_grip_contact_kernel.m: %#codegen-compatible stateless pairwise contact law.
+2. gs3dx_grip_contact_params.json: law parameters, grip frames, and physical pair tables.
+3. gs3dx_grip_pair_golden.json: constitutive golden vectors verified against topology_side_wrench.
 """
 
 from __future__ import annotations
@@ -35,6 +23,9 @@ from src.shared.python.grip_contact.contact_topology import (
     contact_topology,
 )
 from src.shared.python.grip_contact.interface import SIDES, GripInterface
+from src.shared.python.grip_contact.net_wrench_parity import (
+    payloads_numerically_close,
+)
 from src.shared.python.grip_contact.pair_contact import (
     closest_point_segment,
     closest_points_segments,
@@ -65,6 +56,25 @@ KERNEL_SCHEMA_VERSION = "simscape-grip-contact-kernel/v1"
 GOLDEN_SCHEMA_VERSION = "simscape-grip-pair-golden/v1"
 MAX_PHYSICAL_PAIRS = 12
 PAIR_TABLE_COLS = 17
+PAIR_TABLE_COLUMNS: tuple[str, ...] = (
+    "active",
+    "side_code",
+    "prim_code",
+    "a0_x",
+    "a0_y",
+    "a0_z",
+    "a1_x",
+    "a1_y",
+    "a1_z",
+    "r_a",
+    "b0_x",
+    "b0_y",
+    "b0_z",
+    "b1_x",
+    "b1_y",
+    "b1_z",
+    "r_b",
+)
 STYLE_IDS: dict[str, int] = {"overlap": 1, "interlock": 2, "ten_finger": 3}
 
 
@@ -106,14 +116,12 @@ def _build_style_table(model: TopologyContactModel, style_name: str) -> dict[str
         for pair in model.physical_grip_pairs(side):
             mapped = map_site_to_hand_frame(topo, pair.site_a, side)
             if mapped.primitive == "sphere":
-                prim_code = 1.0
-                a0 = [float(x) for x in mapped.centre_m]
-                a1 = [float(x) for x in mapped.centre_m]
+                prim_code, a0 = 1.0, [float(x) for x in mapped.centre_m]
+                a1 = list(a0)
             elif mapped.primitive == "capsule":
                 prim_code = 2.0
-                p0, p1 = mapped.endpoints_m
-                a0 = [float(x) for x in p0]
-                a1 = [float(x) for x in p1]
+                a0 = [float(x) for x in mapped.endpoints_m[0]]
+                a1 = [float(x) for x in mapped.endpoints_m[1]]
             else:
                 raise ValueError(f"Unsupported primitive {mapped.primitive!r}")
             ra = float(mapped.radius_m)
@@ -179,25 +187,7 @@ def build_kernel_params_payload(
     payload: dict[str, Any] = {
         "schema_version": KERNEL_SCHEMA_VERSION,
         "max_physical_pairs": MAX_PHYSICAL_PAIRS,
-        "pair_table_columns": [
-            "active",
-            "side_code",
-            "prim_code",
-            "a0_x",
-            "a0_y",
-            "a0_z",
-            "a1_x",
-            "a1_y",
-            "a1_z",
-            "r_a",
-            "b0_x",
-            "b0_y",
-            "b0_z",
-            "b1_x",
-            "b1_y",
-            "b1_z",
-            "r_b",
-        ],
+        "pair_table_columns": list(PAIR_TABLE_COLUMNS),
         "law": {
             "normal_stiffness_n_m": float(law.stiffness_n_m),
             "damping_s_m": float(law.dissipation_s_m),
@@ -742,18 +732,16 @@ def evaluate_kernel_reference(
     r_club = np.asarray(inputs["r_club"], dtype=float)
     v_club = np.asarray(inputs["v_club_m_s"], dtype=float)
     omega_club = np.asarray(inputs["omega_club_rad_s"], dtype=float)
-    pose_hl = (
-        np.asarray(inputs["p_hand_l_m"], dtype=float),
-        np.asarray(inputs["r_hand_l"], dtype=float),
-        np.asarray(inputs["v_hand_l_m_s"], dtype=float),
-        np.asarray(inputs["omega_hand_l_rad_s"], dtype=float),
-    )
-    pose_hr = (
-        np.asarray(inputs["p_hand_r_m"], dtype=float),
-        np.asarray(inputs["r_hand_r"], dtype=float),
-        np.asarray(inputs["v_hand_r_m_s"], dtype=float),
-        np.asarray(inputs["omega_hand_r_rad_s"], dtype=float),
-    )
+
+    def _pose(s: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        return (
+            np.asarray(inputs[f"p_hand_{s}_m"], dtype=float),
+            np.asarray(inputs[f"r_hand_{s}"], dtype=float),
+            np.asarray(inputs[f"v_hand_{s}_m_s"], dtype=float),
+            np.asarray(inputs[f"omega_hand_{s}_rad_s"], dtype=float),
+        )
+
+    pose_hl, pose_hr = _pose("l"), _pose("r")
 
     frames = params["club_grip_frames"]
     dp_l = r_club @ np.asarray(frames["L"]["position_m"], dtype=float)
@@ -841,18 +829,16 @@ def _verify_against_topology_side_wrench(
         np.asarray(inputs["v_club_m_s"], dtype=float),
         np.asarray(inputs["omega_club_rad_s"], dtype=float),
     )
-    hand_l = BushingState(
-        np.asarray(inputs["r_hand_l"], dtype=float),
-        np.asarray(inputs["p_hand_l_m"], dtype=float),
-        np.asarray(inputs["v_hand_l_m_s"], dtype=float),
-        np.asarray(inputs["omega_hand_l_rad_s"], dtype=float),
-    )
-    hand_r = BushingState(
-        np.asarray(inputs["r_hand_r"], dtype=float),
-        np.asarray(inputs["p_hand_r_m"], dtype=float),
-        np.asarray(inputs["v_hand_r_m_s"], dtype=float),
-        np.asarray(inputs["omega_hand_r_rad_s"], dtype=float),
-    )
+
+    def _bstate(s: str) -> BushingState:
+        return BushingState(
+            np.asarray(inputs[f"r_hand_{s}"], dtype=float),
+            np.asarray(inputs[f"p_hand_{s}_m"], dtype=float),
+            np.asarray(inputs[f"v_hand_{s}_m_s"], dtype=float),
+            np.asarray(inputs[f"omega_hand_{s}_rad_s"], dtype=float),
+        )
+
+    hand_l, hand_r = _bstate("l"), _bstate("r")
     c_l = club.frame(interface.left.matrix())
     c_r = club.frame(interface.right.matrix())
     w_l = topology_side_wrench(model, "L", hand_l, c_l)
@@ -1145,24 +1131,6 @@ def kernel_bundle_sha256(
     }
 
 
-def _payloads_numerically_close(a: Any, b: Any, *, tol: float = 1e-6) -> bool:
-    """Check if two JSON payloads match with floating-point tolerance for cross-platform parity."""
-    if isinstance(a, dict) and isinstance(b, dict):
-        if a.keys() != b.keys():
-            return False
-        return all(_payloads_numerically_close(a[k], b[k], tol=tol) for k in a)
-    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
-        if len(a) != len(b):
-            return False
-        return all(
-            _payloads_numerically_close(x, y, tol=tol)
-            for x, y in zip(a, b, strict=True)
-        )
-    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-        return abs(float(a) - float(b)) <= tol * (1.0 + abs(float(b)))
-    return a == b
-
-
 def export_matlab_kernel_bundle(
     *,
     kernel_m_path: Path = DEFAULT_KERNEL_M_PATH,
@@ -1193,7 +1161,7 @@ def export_matlab_kernel_bundle(
                     try:
                         act = json.loads(current)
                         exp = json.loads(expected_text)
-                        if _payloads_numerically_close(act, exp):
+                        if payloads_numerically_close(act, exp):
                             continue
                     except Exception:
                         pass
