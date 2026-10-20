@@ -109,3 +109,24 @@ def test_cache_is_bounded_and_isolated(setup: Any) -> None:
     hands.clear()
     assert set(sim.hand_frames(0.5, source)) == set(module.SIDES)
     assert source.calls.count(0.5) == 1
+
+
+def test_derivatives_build_the_club_state_once(setup: Any) -> None:
+    """One ``club_state`` per right-hand side; the result is unchanged."""
+    module, spec, names, interface, spline = setup
+    sim = module.ClubOnBushings(spec, names, interface)
+    y = _state(sim, spline, 0.01)
+    want = module.ClubOnBushings(spec, names, interface).derivatives(
+        0.01, y, spline.evaluate
+    )
+    original = sim.club_state
+    calls: list[int] = []
+
+    def counting(state: np.ndarray) -> Any:
+        calls.append(1)
+        return original(state)
+
+    sim.club_state = counting
+    got = sim.derivatives(0.01, y, spline.evaluate)
+    assert len(calls) == 1
+    np.testing.assert_array_equal(got, want)

@@ -72,11 +72,11 @@ and are not committed; only hashes and aggregate numbers appear below.
 
 \begin{center}
 \small
-\begin{tabular}{@{}p{62mm}p{100mm}@{}}
+\begin{tabular}{@{}p{58mm}p{100mm}@{}}
 \toprule
 Artefact & SHA-256 \\
 \midrule
-Best-fit spec (\texttt{full\_body\_spec\_hipcal\_scaled.json}) &
+Best-fit spec\newline {\footnotesize\texttt{full\_body\_spec\_hipcal\_scaled.json}} &
   {\scriptsize\path{d1829abf69ca4fae73d9c553440aa73d367a5fc03efa5efec5b845197560b296}} \\
 Bundle (\texttt{bundles/driver.npz}) &
   {\scriptsize\path{bfa1a9a86cc84c8c7d2f1bce821750d10564d1aa5f59549d082c87e855cdfe91}} \\
@@ -108,11 +108,22 @@ the private spec.
   \item Hash the private spec and bundle with \texttt{sha256sum}; compare with
     the table above.
   \item Sign map:
-    \path{pytest -o addopts="" -q -n 0 tests/unit/motion_matching/test_full_body_coordinate_sign_map.py}
-  \item Range report (set the variable to the private bundle path):\\
-    \path{HRG_BEST_FIT_BUNDLE=<private-bundle> pytest -o addopts="" -q -n 0 -s tests/unit/motion_matching/test_bundle_human_range_characterisation.py}
-  \item Headless environment: \texttt{QT\_QPA\_PLATFORM=offscreen
-    MPLBACKEND=Agg MUJOCO\_GL=egl PYTHONPATH=.:src}.
+{\small
+\begin{verbatim}
+pytest -o addopts="" -q -n 0 \
+  tests/unit/motion_matching/test_full_body_coordinate_sign_map.py
+\end{verbatim}}
+  \item Range report (set the variable to the private bundle path):
+{\small
+\begin{verbatim}
+HRG_BEST_FIT_BUNDLE=<private-bundle> pytest -o addopts="" -q -n 0 -s \
+  tests/unit/motion_matching/test_bundle_human_range_characterisation.py
+\end{verbatim}}
+  \item Headless environment:
+{\small
+\begin{verbatim}
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl PYTHONPATH=.:src
+\end{verbatim}}
 \end{enumerate}
 
 \section{Coordinate Conventions and Sign Map}
@@ -328,11 +339,15 @@ across four capabilities:
 \item \texttt{physical\_hand\_hand}: Dynamic inter-hand pad-to-pad contact dynamics.
 \end{enumerate}
 
-Every entry records its verified mechanical attachment mode
-(such as \texttt{rigid\_branch\_kinematic}, \texttt{closure\_weld},
-\texttt{bushing\_compliance}, \texttt{free\_plus\_bushings},
-\texttt{site\_weld}, \texttt{mocap\_weld}, or \texttt{direct\_mid\_hands})
-and finger kinematic fidelity (\texttt{none}, \texttt{rigid\_proxy}, or \texttt{articulated}).
+Every entry records its verified mechanical attachment mode and its finger
+kinematic fidelity.  The attachment modes are
+\begin{itemize}[nosep]
+  \item \texttt{rigid\_branch\_kinematic}, \texttt{closure\_weld}, \texttt{site\_weld},
+    \texttt{mocap\_weld} and \texttt{direct\_mid\_hands};
+  \item \texttt{bushing\_compliance} and \texttt{free\_plus\_bushings};
+\end{itemize}
+and the finger fidelities are \texttt{none}, \texttt{rigid\_proxy} and
+\texttt{articulated}.
 By contract, no capability may claim \texttt{available = true} without an active
 \texttt{evidence\_test} verifying the code path; currently, only the full-body-v1
 spec export path (exercised in \texttt{test\_engine\_grip\_contact.py} and
@@ -340,9 +355,10 @@ spec export path (exercised in \texttt{test\_engine\_grip\_contact.py} and
 evidence. All other capabilities remain \texttt{available = false} with explicit
 diagnostic reasons and tracking issues mapped to epic children (\#13326--\#13336).
 
-Non-hand-bearing models (\texttt{putting\_green}, \texttt{putting\_green\_gui},
-\texttt{pendulum\_simulator}, and \texttt{swing\_objective\_lab}) are explicitly
-segregated in an \texttt{excluded} list with formal justifications.
+Models that carry no hands are explicitly segregated in an \texttt{excluded}
+list with formal justifications: \texttt{putting\_green},
+\texttt{putting\_green\_gui}, \texttt{pendulum\_simulator} and
+\texttt{swing\_objective\_lab}.
 
 Empirical verification against source assets revealed several divergences from
 initial panel assumptions:
@@ -432,8 +448,10 @@ f_{t,i}/(\mu f_{n,i})$. Unloaded flags mark tensile configurations ($-f_i
 \cdot \hat{n}_i \le 0$).
 
 \textbf{Parameters.} Static friction coefficient $\mu = 0.9$; equal-split pair
-weights prior (\texttt{name="equal\_split"}, $w_i = 1/N_{\mathrm{pairs}}$); normal tolerance $10^{-9}$; minimum
-closure force $10^{-9}$\,N. Hand--club reactions default to zero (\texttt{hand\_club\_source="not\_supplied"}).
+weights prior, $w_i = 1/N_{\mathrm{pairs}}$ (\texttt{name="equal\_split"});
+normal tolerance $10^{-9}$; minimum closure force $10^{-9}$\,N.  Hand--club
+reactions default to zero, recorded as
+\texttt{hand\_club\_source="not\_supplied"}.
 
 \textbf{Acceptance Criteria.}
 \begin{enumerate}[leftmargin=*,noitemsep]
@@ -619,11 +637,14 @@ Python floats:
 \item capsule site $i$ (reference \texttt{capsule\_capsule}): closest segment points $(a_i, b_i)$ (general, parallel and
   degenerate branches), contact $\tfrac12[(a_i + r_i \hat n_i) + (b_i - r_g \hat n_i)]$; the grip is sampled against the plane
   $(\hat n_i,\; a_i + r_i\hat n_i)$ with the exactly negated relative velocity and spin;
-\item both rows then apply the shared law of \texttt{sphere\_ground\_contact} and \texttt{torsional\_friction\_moment}:
-  $f_n = \max\!\big(0,\, k\,\delta\,(1 + d\,\dot\delta)\big)$,
-  $\mu(s) = \mu_d + (\mu_s - \mu_d)e^{-(s/v_{\mathrm{trans}})^2} + \mu_v s$,
-  $f_t = -\tfrac{v_t}{s}\,\mu(s)\,f_n \tanh(s/v_{\mathrm{trans}})$, and
-  $M_{\mathrm{spin}} = -\hat u\,\mu_s f_n r_{\mathrm{patch}} \tanh(\omega_n/\omega_0)$,
+\item \texttt{sphere\_ground\_contact} and \texttt{torsional\_friction\_moment} give the shared law that both rows
+  then apply, term for term:
+  \begin{gather*}
+  f_n = \max\!\big(0,\, k\,\delta\,(1 + d\,\dot\delta)\big), \qquad
+  \mu(s) = \mu_d + (\mu_s - \mu_d)e^{-(s/v_{\mathrm{trans}})^2} + \mu_v s, \\
+  f_t = -\tfrac{v_t}{s}\,\mu(s)\,f_n \tanh(s/v_{\mathrm{trans}}), \qquad
+  M_{\mathrm{spin}} = -\hat u\,\mu_s f_n r_{\mathrm{patch}} \tanh(\omega_n/\omega_0),
+  \end{gather*}
   where $s = \|v_t\|$, $\hat u$ is the re-normalised plane normal, and the plane height is taken along the raw normal, as
   \texttt{GroundPlane} does.
 \end{itemize}
@@ -655,9 +676,9 @@ last bit and were rejected.
   style/trigger/side cases, the reference took $1437\,\mu$s and the batched path $146\,\mu$s on average, a ratio of means of
   $9.9\times$ (per-case range $8.7$--$13.8\times$). The original PR-head code measured $1337$--$1467\,\mu$s on average, so
   the gain over it is similar. The regression guard asserts $\ge 6\times$.
-\item Pinocchio (\texttt{simulate\_grip\_contact}, $0.04$\,s window, \texttt{topology\_model}), CPU per case: before
+\item Pinocchio (\path{simulate_grip_contact}, $0.04$\,s window, \path{topology_model}), CPU per case: before
   $10.9$--$13.8$\,s, after $3.8$--$4.8$\,s. Wall time was $5.2$--$11.3$\,s on the loaded host, so
-  \texttt{test\_pinocchio\_topology\_grip.py} stayed in the slow lane at this step (see the next subsection). Its pytest wall times at load average 6--12 are:
+  \path{test_pinocchio_topology_grip.py} stayed in the slow lane at this step (see the next subsection). Its pytest wall times at load average 6--12 are:
   \texttt{\_fast} cases $3.0$--$6.0$\,s, timestep halving $8.6$--$11.0$\,s, $0.2$\,s static hold $12.7$--$14.2$\,s, and
   $1$\,s swing replay $52$--$75$\,s. The non-law right-hand-side costs (prescribed motion, bushing state construction,
   Radau overhead) now dominate.
@@ -674,13 +695,14 @@ shared host and vary by about $\pm15\%$ between runs. The G6 parameter line abov
 $v_{\mathrm{trans}} = 0.01$\,m/s, $r_{\mathrm{patch}} \approx 4.47$\,mm) does not match the values that
 \texttt{build\_pad\_model} returns for the anthropometric driver spec ($k \approx 1.71\times10^5$\,N/m, $d \approx 0.383$\,s/m,
 $v_{\mathrm{trans}} = 10^{-3}$\,m/s, $r_{\mathrm{patch}} \approx 2.29$\,mm, $\mu_v = 0$). That discrepancy is recorded for
-follow-up and not corrected here. This document was not compiled locally (no \texttt{pdflatex} on the host).
+follow-up and not corrected here.
 
 \textbf{Reproduction Commands.}
 \begin{verbatim}
 python3 -m pytest -n 0 tests/unit/grip_contact/test_topology_contact_batched.py \
     tests/unit/grip_contact/test_topology_contact.py
-python3 -m pytest -n 0 -m slow tests/unit/grip_contact/test_pinocchio_topology_grip.py
+python3 -m pytest -n 0 -m slow \
+    tests/unit/grip_contact/test_pinocchio_topology_grip.py
 \end{verbatim}
 
 \subsection{Pinocchio Grip Right-Hand-Side Cost (\#13396)}
@@ -702,10 +724,10 @@ unchanged.
 \item \textbf{One club state per RHS.} \texttt{ClubOnBushings.evaluate} returns hands, club state, club frames and the
   law together. \texttt{derivatives} reuses that club state for the joint torque and the translational rate.
   \texttt{ClubInHands} overrides only \texttt{contact\_law}, which dispatches to the pad or topology law.
-\item \textbf{Python-float preconditions.} \texttt{rotation\_errors}
-  (\path{src/shared/python/grip_contact/bushing_law.py}) returns $\max_{ij}|R^{\mathsf T}R - I|_{ij}$ and $\det R$ in
-  Python floats (column dot products and cofactor expansion). \texttt{BushingState.\_\_post\_init\_\_} keeps its
-  $10^{-6}$ orthonormality threshold and its messages. \texttt{topology\_contact.\_validate\_bushing\_state} keeps its
+\item \textbf{Python-float preconditions.} \path{rotation_errors} returns $\max_{ij}|R^{\mathsf T}R - I|_{ij}$ and
+  $\det R$ in Python floats (column dot products and cofactor expansion); it is defined in
+  \path{src/shared/python/grip_contact/bushing_law.py}. \path{BushingState.__post_init__} keeps its
+  $10^{-6}$ orthonormality threshold and its messages. \path{topology_contact._validate_bushing_state} keeps its
   $10^{-5}$ Gram and determinant thresholds and now shares this helper instead of its own copy. Only the precondition
   checks changed; the stored arrays and every computed quantity are untouched.
 \end{itemize}
@@ -740,7 +762,9 @@ unchanged.
   way, and the standard CI unit lane excludes \texttt{requires\_pinocchio}.
 \item \textbf{Remaining cost.} The contact law is now about half the RHS. The finite-difference Jacobian is
   \emph{not} a significant cost (see the assessment below).
-\item \textbf{Compilation.} This document was not compiled locally (no \texttt{pdflatex} on the host).
+\item \textbf{Compilation.} The document compiles with pdfTeX 1.40.25 (TeX Live 2023, Debian packages) in two
+  \texttt{pdflatex -halt-on-error} passes, with no errors or undefined references (47 pages). Sections up to this
+  one set without overfull lines; later grip sections still report overfull lines, which affect layout only.
 \end{itemize}
 
 \textbf{Reproduction Commands.}
@@ -751,6 +775,50 @@ python3 -m pytest -n 0 tests/unit/grip_contact/test_pinocchio_hand_frame_cache.p
 python3 -m pytest -n 0 -m "slow and requires_pinocchio" \
     tests/unit/grip_contact/test_pinocchio_topology_grip.py
 \end{verbatim}
+
+\textbf{Rejected Follow-Up: Analytic Jacobian (Assessment Only).} Before an analytic $\partial f/\partial y$ was built,
+the six $0.04$\,s topology cases were instrumented. SciPy's \texttt{radau.num\_jac} was wrapped for its call count and
+CPU time, \texttt{radau.solve\_collocation\_system} for Newton iterations and failures, and \texttt{Radau.\_step\_impl}
+for accepted step sizes. Results on brick at load average 8--12:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Jacobian cost.} The finite-difference Jacobian is evaluated 15--54 times per case and costs 5--15\% of CPU.
+  Its 13 columns share one stage time, so they reuse the memoised hand frames.
+\item \textbf{Newton iterations.} 283--362 steps are accepted per case at 2.10--2.25 simplified-Newton iterations per
+  step. Each iteration costs three RHS evaluations, so Newton iterations account for most of the RHS calls. Newton
+  failed on 1--17 steps per case.
+\item \textbf{Step sizes.} 46--61\% of accepted steps sit at the $2\times10^{-4}$\,s \texttt{max\_step} cap, which is an
+  accuracy setting and is not relaxed.
+\end{itemize}
+An exact Jacobian would remove at most the 5--15\% spent in \texttt{num\_jac}, less the cost of evaluating it. It
+cannot reduce the iteration count much below the two iterations Radau needs to confirm convergence, and it could at
+best avoid the few Newton-failure step cuts. It would also need derivatives of the regularised friction, the Stribeck
+curve and Pinocchio's \texttt{aba}, and it would change the trajectories within the integrator tolerance instead of
+reproducing them bit for bit. It was therefore not built. The remaining levers are the per-RHS cost (the contact law
+is about half of it) and the number of RHS evaluations, which the step cap and the stiffness fix.
+
+\textbf{Rejected Follow-Up: Inlined Row Kernel (Measured, Reverted).} Unprofiled CPU timing showed where the
+simulation time goes: the RHS is about 85\% of simulation CPU, and within it the contact law is about 38\% and
+the memoised hand kinematics about 15\%; Radau's own work is about 12\% and setup is negligible. A bit-identical rewrite
+of the row kernel was then tried:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Change.} One inlined pair-row function shared by sphere and capsule sites, reading flat per-side
+  constants with a single tuple unpack. The validated frame floats were reused instead of being converted twice.
+\item \textbf{Bit-identity.} All 3{,}600 side evaluations (every style, trigger, side and mode) matched byte for byte,
+  and so did the seven simulation runs.
+\item \textbf{Speed.} An isolated contact row fell from $9.1$ to $6.9\,\mu$s. On side calls captured from a simulation
+  (every row in contact), timed old against new in one process, the gain was only 2--7\% ($100 \to 95$, $147 \to 137$
+  and $145 \to 142\,\mu$s per side), about 2\% of simulation CPU.
+\end{itemize}
+A side call has no remaining hotspot. Validation, the two stacked transforms, the per-row arithmetic and the output
+assembly are each plain CPython bytecode of a few to a few tens of microseconds, so the pure-Python law is at its
+floor. The denser kernel was not worth 2--7\% and was reverted. Two levers remain, and both need a decision first:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Compiled row kernel.} Section~F of \texttt{AGENTS.md} admits Rust only for a kernel shared with another
+  runtime. Bit-identity would also depend on \texttt{exp} and \texttt{tanh} matching the platform \texttt{libm}.
+\item \textbf{Single validation of frame states.} Making the \texttt{BushingState} arrays read-only would let the
+  topology law trust the construction-time checks, worth about 10--15\% of the law. It changes the behaviour of a type
+  shared across engines.
+\end{itemize}
 
 \subsection{MuJoCo Topology Contact Reference (HRG-GS-G8, \#13306)}
 \textbf{Topology Geometry and Pair Generation.} The MuJoCo grip-contact adapter (\path{src/engines/physics_engines/mujoco/python/grip_contact_sim.py})
@@ -1503,7 +1571,7 @@ python3 -m pytest tests/unit/grip_contact/test_grip_binding_manifests.py
 \subsection{MyoHand Articulated Bilateral Grip Fixture (HRG-GS-M8, \#13330)}
 \label{sec:hrg-gs-m8-myohand-bilateral}
 
-Issue~\#13330 (\texttt{HRG-GS-M8}) composes the pinned MyoHub \texttt{myoHand} right-hand chain with a sagittally mirrored left \texttt{myoHand} chain and a 6-DOF free golf club (\texttt{driver} or \texttt{iron7}) into an articulated bilateral grip fixture (\texttt{src/engines/physics\_engines/myosuite/python/myohand\_bilateral\_scene.py} and \texttt{myohand\_bilateral\_adapter.py}), binding all $15$ shared \texttt{ContactTopology} sites onto distinct phalanx, metacarpal, and thumb segments (\texttt{representation="phalange"}, \texttt{attachment\_mode="separated\_v2"}).
+Issue~\#13330 (\texttt{HRG-GS-M8}) composes the pinned MyoHub \texttt{myoHand} right-hand chain with a sagittally mirrored left \texttt{myoHand} chain and a 6-DOF free golf club (\texttt{driver} or \texttt{iron7}) into an articulated bilateral grip fixture (\texttt{src/engines/physics\_engines/myosuite/python/myohand\_bilateral\_scene.py}, \texttt{myohand\_bilateral\_adapter.py}, and \texttt{myohand\_grip\_controller.py}), binding all $15$ shared \texttt{ContactTopology} sites onto distinct phalanx, metacarpal, and thumb segments (\texttt{representation="phalange"}, \texttt{attachment\_mode="separated\_v2"}).
 
 \textbf{Scene Composition and Asset Hash Provenance.}
 The pure-function scene generator \texttt{generate\_myohand\_bilateral\_scene} reads \texttt{shared/models/myosuite/myo\_sim/hand/myohand.xml}, \texttt{hand/assets/myohand\_assets.xml}, and \texttt{hand/assets/myohand\_body.xml} at the pinned commit \texttt{33f3ded946f55adbdcf963c99999587aadaf975f} and writes two standalone MJCF scenes under \texttt{shared/models/myosuite/golf/hand/}:
@@ -1578,46 +1646,65 @@ Little ($N=5$) & \texttt{mcp5\_flexion/abduction}, \texttt{pm5/md5\_flexion} & \
 \textbf{Equations and Parameters.}
 For each finger $k \in \{2,3,4,5\}$ with phalanx lengths $\ell_{k,1}, \ell_{k,2}, \ell_{k,3}$ scaled by $s = \texttt{params.scale}$ around effective cylinder radius $r_{\mathrm{eff}} = r_{\mathrm{grip}} + c_{\mathrm{pad}}$ ($r_{\mathrm{grip}} = 0.014\,\mathrm{m}$, $c_{\mathrm{pad}} = 0.002\,\mathrm{m}$), the wrap angles are $\theta_{\mathrm{mcp},k} = 0.65\,s\ell_{k,1}/r_{\mathrm{eff}}$, $\theta_{\mathrm{pip},k} = 0.85\,s\ell_{k,2}/r_{\mathrm{eff}}$, and $\theta_{\mathrm{dip},k} = 0.70\,s\ell_{k,3}/r_{\mathrm{eff}}$, clamped to the anatomical joint limits of \texttt{myohand\_body.xml}. In frozen-finger acceptance mode (\texttt{frozen\_fingers=True}), \texttt{MyoHandBilateralGripAdapter} writes $q_j = q_j^{\star}$ into \texttt{data.qpos}, activates the $46$ MuJoCo \texttt{<joint>} equality constraints (\texttt{eq\_active = 1}, polynomial target $q_j^{\star}$), and zeroes all $78$ muscle controls and activations (\texttt{data.ctrl = 0}, \texttt{data.act = 0}). In \texttt{contact\_mode="shared"}, all geom collision masks are zeroed (\texttt{geom\_contype = 0}, \texttt{geom\_conaffinity = 0}) so native MuJoCo contact is strictly excluded (\texttt{registered\_grip\_collision\_count() == 0}), and COM-transferred wrenches from both hand--club and physical hand--hand pairs (\texttt{trail\_palm\_lead\_thumb}, \texttt{overlap\_little\_finger\_lead\_index}, \texttt{interlock\_little\_finger\_lead\_middle}, \texttt{interlock\_lead\_index\_wrap}) are applied to \texttt{data.xfrc\_applied}.
 
-\textbf{Measured Law-Level Parity, Non-Circular Grasp-Resultant Newton Check, and Sliding Friction-Cone Ratios.}
-Table~\ref{tab:hrg-gs-m8-parity} summarizes the measured M3 \textbf{law-level parity} (evaluating the frozen-finger shared contact law on identical prescribed site states, not engine forward-dynamics parity) against \texttt{PinocchioGripAdapter} ($\varepsilon_{\mathrm{peak}}/\varepsilon_{\mathrm{rms}} = 0.00/0.00$) and \texttt{law\_level\_series} ($\varepsilon_{\mathrm{peak}} \le 4.58 \times 10^{-15} \ll 0.05$, $\varepsilon_{\mathrm{rms}} \le 4.15 \times 10^{-15} \ll 0.02$) over the $21$-step ($\Delta t = 0.002\,\mathrm{s}$, $T = 0.04\,\mathrm{s}$, $\Omega = 2\pi/T = 50\pi \approx 157.080\,\mathrm{rad/s}$) trajectory in \texttt{build\_prescribed\_grip\_trajectory}, together with the non-circular club inverse-dynamics comparison (\texttt{evaluate\_grasp\_resultant\_newton\_check}) between the hands' net contact wrench $(\mathbf{F}_{\mathrm{hand}}(t), \mathbf{M}_{\mathrm{hand,com}}(t))$ from \texttt{rep.body\_wrenches()} and the prescribed club requirement:
-\begin{equation}
-  \mathbf{F}_{\mathrm{req}}(t) = m_{\mathrm{club}}\bigl(\mathbf{a}_{\mathrm{com}}(t) - \mathbf{g}\bigr), \qquad
-  \mathbf{M}_{\mathrm{req,com}}(t) = \mathbf{I}_{\mathrm{com}}\boldsymbol{\alpha}_{\mathrm{club}}(t) + \boldsymbol{\omega}_{\mathrm{club}}(t) \times \bigl(\mathbf{I}_{\mathrm{com}}\boldsymbol{\omega}_{\mathrm{club}}(t)\bigr),
-\end{equation}
-where $\mathbf{a}_{\mathrm{origin}}(t) = [-0.02\,\Omega\sin(\Omega t), 0, 0]^{\top}\,\mathrm{m/s^2}$, $\boldsymbol{\omega}_{\mathrm{club}}(t) = [0, 0, 0.15\sin(\Omega t)]^{\top}\,\mathrm{rad/s}$, $\boldsymbol{\alpha}_{\mathrm{club}}(t) = [0, 0, 0.15\,\Omega\cos(\Omega t)]^{\top}\,\mathrm{rad/s^2}$, and $\mathbf{a}_{\mathrm{com}}(t) = \mathbf{a}_{\mathrm{origin}}(t) + \boldsymbol{\alpha}_{\mathrm{club}}(t) \times \mathbf{r}_{\mathrm{com}} + \boldsymbol{\omega}_{\mathrm{club}}(t) \times (\boldsymbol{\omega}_{\mathrm{club}}(t) \times \mathbf{r}_{\mathrm{com}})$ are differentiated analytically from the closed-form prescribed club trajectory, completely independent of \texttt{data.xfrc\_applied} and \texttt{data.cacc} (verified by scaling the applied contact wrench $\times 2$, which leaves $(\mathbf{F}_{\mathrm{req}}, \mathbf{M}_{\mathrm{req,com}})$ invariant while changing the measured errors).
+\textbf{Club Mass/Inertia Provenance, Independent MuJoCo \texttt{mj\_inverse} Requirement, and Bimanual Grasp Map.}
+In the initial M8 commit (\texttt{96405cce03}), \texttt{DRIVER\_CLUB\_PROPERTIES} and \texttt{IRON\_CLUB\_PROPERTIES} in \texttt{myohand\_grip\_controller.py} were hand-entered constants copied and rounded to $8$ decimal places on the inertia diagonal ($\operatorname{diag}(0.03744414, 0.00024399, 0.0374877)\,\mathrm{kg\cdot m^2}$ driver; $\operatorname{diag}(0.0343317, 0.0001, 0.03428158)\,\mathrm{kg\cdot m^2}$ 7-iron), which introduced a $3.063 \times 10^{-8}$ peak / $2.217 \times 10^{-8}$ RMS (driver) and $5.497 \times 10^{-8}$ peak / $3.979 \times 10^{-8}$ RMS (7-iron) moment rounding discrepancy against the compiled MuJoCo scene. \texttt{ClubInertialProperties.from\_club\_spec(club)} now derives $(m_{\mathrm{club}}, \mathbf{r}_{\mathrm{com}}, \mathbf{I}_{\mathrm{com}})$ in closed form from the \texttt{ClubSpec} solid geometry (\texttt{CLUBS["driver"]} and \texttt{CLUBS["iron7"]} in \path{src/shared/python/motion_matching/club_models.py}: uniform capsule shaft+grip of length $L$, radius $r_s$, mass $m_s = m_{\mathrm{shaft}} + m_{\mathrm{grip}}$ plus ellipsoid/box head of half-sizes $(h_x, h_y, h_z)$ and mass $m_h$ via the parallel-axis theorem), completely independent of \texttt{MjModel}/\texttt{MjData}. Comparing \texttt{from\_club\_spec} against MuJoCo's \texttt{<compiler inertiafromgeom="auto" balanceinertia="true" boundmass="0.001" boundinertia=".0001"/>} (\texttt{adapter.club\_scene\_inertial\_properties()}, which rotates \texttt{model.body\_inertia} by \texttt{model.body\_iquat} back into the club body frame) shows exact agreement on mass ($0.313\,\mathrm{kg}$ driver, $0.428\,\mathrm{kg}$ 7-iron), COM offset ($y_{\mathrm{com}} = -0.21236421725239618\,\mathrm{m}$ driver, $-0.17570093457943925\,\mathrm{m}$ 7-iron), and transverse inertias $I_{xx}, I_{zz}$ to $\le 1.39 \times 10^{-17}\,\mathrm{kg\cdot m^2}$, while for the 7-iron MuJoCo's \texttt{boundinertia=".0001"} compiler floor clamps the axial shaft moment from $I_{yy,\mathrm{spec}} = 6.492449 \times 10^{-5}\,\mathrm{kg\cdot m^2}$ up to $I_{yy,\mathrm{mj}} = 1.000000 \times 10^{-4}\,\mathrm{kg\cdot m^2}$.
 
-\textbf{Physical Cause of the Prescribed-Trajectory Wrench Mismatch and Uniform $0.7778$ Cone Ratio.}
-The benchmark trajectory \texttt{build\_prescribed\_grip\_trajectory} is an open-loop \textbf{sliding contact} trajectory, not a static hold: it prescribes independent hand and club kinematics with a unidirectional $-y_{\mathrm{grip}}$ radial shift $\Delta \mathbf{p}(t) = [0.4\sin(\Omega t), -1.5 - 0.3\cos(\Omega t), 0.2\sin(\Omega t)]^{\top}\,\mathrm{mm}$ and relative velocity $\Delta \mathbf{v}(t) = [15\cos(\Omega t), 10\sin(\Omega t), 5\cos(\Omega t)]^{\top}\,\mathrm{mm/s}$.
-\begin{itemize}
-  \item \textbf{Unilateral pad loading and saturated dynamic sliding friction ($\mu_d/\mu_s = 0.7778$):} The $-y_{\mathrm{grip}}$ shift separates all $5$ palm/heel-pad pairs on the $-y_{\mathrm{grip}}$ side ($f_n = f_t = 0\,\mathrm{N}$, cone ratio \texttt{None}) and compresses the $5$ (\texttt{overlap}/\texttt{interlock}) or $6$ (\texttt{ten\_finger}) finger-pad pairs on the $+y_{\mathrm{grip}}$ side ($\hat{\mathbf{n}}_{\mathrm{grip}} = [0, -1, 0]^{\top}$, terminal $f_n = 350.745\,\mathrm{N}$). On every loaded hand--club pair, the tangential relative slip speed is $\|\mathbf{v}_t(t)\| \in [0.165, 15.811]\,\mathrm{mm/s}$ across the trajectory and $\|\mathbf{v}_t(T)\| = \sqrt{15^2 + 5^2} = 15.811\,\mathrm{mm/s} = 15.811\,v_{\mathrm{tr}}$ at $t = T$ ($v_{\mathrm{tr}} = 1.0\,\mathrm{mm/s}$). Because $\|\mathbf{v}_t(T)\| \gg v_{\mathrm{tr}}$, the Stribeck transition $\exp(-(\|\mathbf{v}_t\|/v_{\mathrm{tr}})^2) = \exp(-250) \approx 0$ and regularization $\tanh(\|\mathbf{v}_t\|/v_{\mathrm{tr}}) = \tanh(15.811) = 1.0$ saturate every loaded hand--club pad at dynamic friction $\|\mathbf{f}_t\| = \mu_d f_n = 0.70\,f_n = 245.521\,\mathrm{N}$ ($\mu_s = 0.90$, $\mu_d = 0.70$, $\mu_v = 0.0\,\mathrm{s/m}$), yielding the uniform static friction-cone ratio
+Over the $21$-step ($\Delta t = 0.002\,\mathrm{s}$, $T = 0.04\,\mathrm{s}$, $\Omega = 2\pi/T = 50\pi \approx 157.080\,\mathrm{rad/s}$) kinematically consistent prescribed club trajectory
+\begin{equation}
+  \mathbf{p}_{\mathrm{origin}}(t) = \int_0^t \mathbf{v}_{\mathrm{origin}}(\tau)\,\mathrm{d}\tau = \begin{bmatrix} \frac{0.02}{\Omega}\sin(\Omega t) \\ 0 \\ 0 \end{bmatrix}\mathrm{m}, \qquad
+  \mathbf{R}_{\mathrm{club}}(t) = \mathbf{R}_z\!\bigl(\theta_z(t)\bigr), \qquad
+  \theta_z(t) = \int_0^t \omega_z(\tau)\,\mathrm{d}\tau = \frac{0.15}{\Omega}\bigl(1 - \cos(\Omega t)\bigr)\,\mathrm{rad},
+\end{equation}
+with $\mathbf{v}_{\mathrm{origin}}(t) = [0.02\cos(\Omega t), 0, 0]^{\top}\,\mathrm{m/s}$, $\boldsymbol{\omega}_{\mathrm{club}}(t) = [0, 0, 0.15\sin(\Omega t)]^{\top}\,\mathrm{rad/s}$, $\mathbf{a}_{\mathrm{origin}}(t) = [-0.02\,\Omega\sin(\Omega t), 0, 0]^{\top}\,\mathrm{m/s^2}$, and $\boldsymbol{\alpha}_{\mathrm{club}}(t) = [0, 0, 0.15\,\Omega\cos(\Omega t)]^{\top}\,\mathrm{rad/s^2}$, \texttt{evaluate\_grasp\_resultant\_newton\_check} evaluates two independent inverse-dynamics requirements:
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \textit{Independent MuJoCo \texttt{mj\_inverse} Requirement (\texttt{club\_mj\_inverse\_requirement}):} At each step $t_k$, sets \texttt{club\_free} \texttt{qpos} and \texttt{qvel} from the prescribed trajectory and \texttt{qacc} from either (a) the analytic second derivative or (b) second-order central differences of the prescribed \texttt{qvel} (\texttt{np.gradient(qvel\_seq, dt\_s, axis=0, edge\_order=2)}); zeroes \texttt{data.xfrc\_applied} and \texttt{data.ctrl}; runs \texttt{mujoco.mj\_inverse}; verifies zero club constraint/contact force ($\|\mathbf{qfrc}_{\mathrm{constraint,club}}\|_2 = 0.0\,\mathrm{N}$); and converts \texttt{qfrc\_inverse} on the $6$ \texttt{club\_free} DOFs (where MuJoCo's free joint expresses linear DOFs $\mathbf{qfrc}_{\mathrm{inv},0:3}$ in world axes at \texttt{xpos} and angular DOFs $\mathbf{qfrc}_{\mathrm{inv},3:6}$ in body-local axes about \texttt{xpos}) to world force and moment about the club COM (\texttt{xipos}):
   \begin{equation}
-    \frac{\|\mathbf{f}_t\|}{\mu_s f_n} = \frac{\mu_d}{\mu_s} = \frac{0.70}{0.90} = \frac{7}{9} \approx 0.7778.
+    \mathbf{F}_{\mathrm{mj},W} = \mathbf{qfrc}_{\mathrm{inv},0:3}, \qquad
+    \mathbf{M}_{\mathrm{mj,origin},W} = \mathbf{R}_{\mathrm{club}}\,\mathbf{qfrc}_{\mathrm{inv},3:6}, \qquad
+    \mathbf{M}_{\mathrm{mj,com},W} = \mathbf{M}_{\mathrm{mj,origin},W} + (\mathbf{x}_{\mathrm{origin}} - \mathbf{x}_{\mathrm{com}}) \times \mathbf{F}_{\mathrm{mj},W}.
   \end{equation}
-  \item \textbf{Zero-slip hand--hand pairs:} On every hand--hand pair (\texttt{trail\_palm\_lead\_thumb}, \texttt{overlap\_little\_finger\_lead\_index}, \texttt{interlock\_little\_finger\_lead\_middle}, \texttt{interlock\_lead\_index\_wrap}), both hands share the same prescribed $(\Delta \mathbf{p}, \Delta \mathbf{v})$, so $\|\mathbf{v}_t\| = 0.000\,\mathrm{mm/s}$ ($2.98 \times 10^{-15}\,\mathrm{mm/s}$ floating-point roundoff at $\phi = 2\pi$), $f_n = 42.774\,\mathrm{N}$, $f_t = 0.000\,\mathrm{N}$, and $\|\mathbf{f}_t\|/(\mu_s f_n) = 0.0000$.
-  \item \textbf{Resultant wrench vs.\ prescribed club requirement:} Summing the unopposed $+y_{\mathrm{grip}}$ normal forces and saturated sliding friction across the $5$ (\texttt{overlap}/\texttt{interlock}) or $6$ (\texttt{ten\_finger}) loaded finger pads produces a net terminal club force $\mathbf{F}_{\mathrm{hand}}(T) = (-686.84, 1164.61, 1659.67)\,\mathrm{N}$ ($\|\mathbf{F}_{\mathrm{hand}}(T)\| = 2140.70\,\mathrm{N}$) for \texttt{overlap}/\texttt{interlock} and $(-824.20, 1397.53, 1991.60)\,\mathrm{N}$ ($\|\mathbf{F}_{\mathrm{hand}}(T)\| = 2568.84\,\mathrm{N}$) for \texttt{ten\_finger}, with COM moments $\|\mathbf{M}_{\mathrm{hand,com}}(T)\| = 1602.93$--$1928.00\,\mathrm{N\cdot m}$ (driver) and $1280.83$--$1541.48\,\mathrm{N\cdot m}$ (7-iron). By contrast, the gentle prescribed club motion requires only $\mathbf{F}_{\mathrm{req}}(T) = (1.566, 0.000, 3.071)\,\mathrm{N}$ ($\|\mathbf{F}_{\mathrm{req}}(T)\| = 3.447\,\mathrm{N}$, $\mathbf{M}_{\mathrm{req,com}}(T) = (0, 0, 0.883)\,\mathrm{N\cdot m}$) for the driver and $\mathbf{F}_{\mathrm{req}}(T) = (1.772, 0.000, 4.199)\,\mathrm{N}$ ($\|\mathbf{F}_{\mathrm{req}}(T)\| = 4.557\,\mathrm{N}$, $\mathbf{M}_{\mathrm{req,com}}(T) = (0, 0, 0.808)\,\mathrm{N\cdot m}$) for the 7-iron. The resulting relative errors ($384\times$--$716\times$ on force, $1328\times$--$2182\times$ on moment) exceed the M3 tolerances ($5\%$ peak / $2\%$ RMS) and are gated as a strict \texttt{xfail} in \texttt{test\_grasp\_resultant\_matches\_prescribed\_inverse\_dynamics\_within\_m3\_tolerances}. Because the bimanual grasp map $\mathbf{G} \in \mathbb{R}^{6 \times 12}$ ($\|\mathbf{G}\mathbf{y} - \mathbf{w}_{\mathrm{club}}\|_{\infty} \le 1.14 \times 10^{-13}$) has a $6$-D internal nullspace, \texttt{GraspResultantNewtonReport} labels \texttt{per\_hand\_split\_status = "INDETERMINATE"} and \texttt{squeeze\_status = "INDETERMINATE"}.
+  This coordinate conversion is verified to $\le 1.0 \times 10^{-13}$ on a general 3D pose, velocity, and acceleration (\texttt{test\_mujoco\_free\_joint\_mj\_inverse\_frame\_conversion\_convention}), and non-circularity is verified by scaling applied hand wrenches by $\times 2$, which leaves both \texttt{mj\_inverse} and analytic requirements invariant while doubling the hand wrench error (\texttt{test\_club\_inverse\_dynamics\_requirement\_is\_non\_circular\_and\_sliding\_cone\_ratios}).
+  \item \textit{Analytic \texttt{ClubSpec} Requirement (\texttt{club\_inverse\_dynamics\_requirement}):} Evaluates $\mathbf{F}_{\mathrm{req}}(t) = m_{\mathrm{club}}(\mathbf{a}_{\mathrm{com}}(t) - \mathbf{g})$ and $\mathbf{M}_{\mathrm{req,com}}(t) = \mathbf{I}_{\mathrm{com}}\boldsymbol{\alpha}_{\mathrm{club}}(t) + \boldsymbol{\omega}_{\mathrm{club}}(t) \times (\mathbf{I}_{\mathrm{com}}\boldsymbol{\omega}_{\mathrm{club}}(t))$ using \texttt{ClubInertialProperties.from\_club\_spec}. The discrepancy between the analytic requirement and the MuJoCo \texttt{mj\_inverse} requirement (analytic \texttt{qacc}) is $1.24 \times 10^{-16}$ peak / $5.95 \times 10^{-17}$ RMS on force and $5.28 \times 10^{-15}$ peak / $3.79 \times 10^{-15}$ RMS on moment (driver), and $0.00$ peak / $5.09 \times 10^{-17}$ RMS on force and $2.89 \times 10^{-15}$ peak / $2.13 \times 10^{-15}$ RMS on moment (7-iron).
+\end{enumerate}
+Let $\mathbf{y} = [\mathbf{w}_L^{\top}, \mathbf{w}_R^{\top}]^{\top} \in \mathbb{R}^{12}$ denote the stacked lead- and trail-hand wrenches about reference points $\mathbf{r}_L, \mathbf{r}_R$ on the grip axis ($r_{x,L} = +0.024\,\mathrm{m}$, $r_{x,R} = -0.0522\,\mathrm{m}$, axial separation $d_x = 76.2\,\mathrm{mm}$). The bimanual grasp map $\mathbf{G} = [\mathbf{T}_L\;\mathbf{T}_R] \in \mathbb{R}^{6 \times 12}$ maps $\mathbf{y}$ onto the net club wrench $\mathbf{w}_{\mathrm{club}} = \mathbf{G}\mathbf{y}$ about $\mathbf{r}_{\mathrm{mid}} = \frac{1}{2}(\mathbf{r}_L + \mathbf{r}_R)$ with $\dim\ker(\mathbf{G}) = 6$. In accordance with \S 19, any solution takes the form $\mathbf{y} = \mathbf{G}^{+}\mathbf{w}_{\mathrm{club}} + \mathbf{K}\mathbf{s}$, where $\mathbf{K} \in \mathbb{R}^{12 \times 6}$ spans the internal nullspace and $\mathbf{s} = \boldsymbol{\Phi}\mathbf{y} = \frac{1}{2}(\mathbf{w}_R - \mathbf{w}_L) \in \mathbb{R}^6$ is the mechanically indeterminate internal wrench split (\texttt{per\_hand\_split\_status = "INDETERMINATE"}, \texttt{squeeze\_status = "INDETERMINATE"}).
+
+\textbf{Force-Regulated Bimanual Grip Controller, Solver-Closure Residual, and Open-Loop Forward Replay.}
+In the prior open-loop sliding baseline, \texttt{build\_prescribed\_grip\_trajectory} applied an unregulated unidirectional shift $\Delta \mathbf{p}(t) = [0.4\sin(\Omega t), -1.5 - 0.3\cos(\Omega t), 0.2\sin(\Omega t)]^{\top}\,\mathrm{mm}$ and slip velocity $\Delta \mathbf{v}(t) = [15\cos(\Omega t), 10\sin(\Omega t), 5\cos(\Omega t)]^{\top}\,\mathrm{mm/s}$. That shift unloaded all $5$ palm/heel pads on the $-y_{\mathrm{grip}}$ side ($f_n = 0\,\mathrm{N}$) and compressed only the $5$ (\texttt{overlap}/\texttt{interlock}) or $6$ (\texttt{ten\_finger}) finger pads on the $+y_{\mathrm{grip}}$ side to $f_n(T) = 350.745\,\mathrm{N}$ at tangential slip speed $\|\mathbf{v}_t(T)\| = 15.811\,\mathrm{mm/s} = 15.811\,v_{\mathrm{tr}}$ ($v_{\mathrm{tr}} = 1.0\,\mathrm{mm/s}$), saturating every finger pad at dynamic sliding friction $\|\mathbf{f}_t\|/(\mu_s f_n) = \mu_d/\mu_s = 0.70/0.90 = 0.7778$ and producing a net club force $\|\mathbf{F}_{\mathrm{hand}}(T)\| = 2140.70\,\mathrm{N}$ (\texttt{overlap}/\texttt{interlock}) or $2568.84\,\mathrm{N}$ (\texttt{ten\_finger}) against the $\le 4.557\,\mathrm{N}$ club requirement ($384\times$--$716\times$ force error and $1328\times$--$2182\times$ moment error).
+
+To regulate the net hand wrench without artificial force scaling, \texttt{myohand\_grip\_controller.py} (\texttt{solve\_force\_regulated\_hand\_frames}) places both hands in a bilateral preload squeeze around $\delta_0 = 0.25\,\mathrm{mm}$ ($f_{n,0} = k_n \delta_0 = 42.774\,\mathrm{N}$ per pad at $k_n = 171\,095\,\mathrm{N/m}$, $c_n = 70.0\,\mathrm{N\cdot s/m}$) so that the $5$ palm/heel pads ($\hat{\mathbf{n}}_{\mathrm{grip}} = [0, +1, 0]^{\top}$) and the $5$ or $6$ finger/trigger pads ($\hat{\mathbf{n}}_{\mathrm{grip}} = [0, -1, 0]^{\top}$) compress the grip cylinder from opposite sides. Keeping both hand frames rotationally locked to the club grip frame ($\mathbf{R}_{\mathrm{hand},s}(t) = \mathbf{R}_{\mathrm{club},s}(t)$), the controller solves at each step $s \in \{0, \ldots, 20\}$ for the $6$-DOF bimanual regulation vector in the club grip frame:
+\begin{equation}
+  \mathbf{q}(t_s) = \bigl(\Delta p_{y,L},\; \Delta p_{y,R},\; \Delta v_x,\; \Delta v_{z,L},\; \Delta v_{z,R},\; \Delta \omega_x\bigr)^{\top} \in \mathbb{R}^6, \qquad
+  \mathbf{G}\mathbf{y}\bigl(\mathbf{q}(t_s)\bigr) = \mathbf{w}_{\mathrm{req,mid}}(t_s).
+\end{equation}
+Here $(\Delta p_{y,L}, \Delta p_{y,R})$ modulate the lead and trail normal-force differentials around the $\delta_0 = 0.25\,\mathrm{mm}$ squeeze to satisfy $F_{y,L} + F_{y,R} = F_{\mathrm{req},y}$ and the yaw moment $M_z$ via the $76.2\,\mathrm{mm}$ inter-hand lever arm; $(\Delta v_{z,L}, \Delta v_{z,R})$ modulate tangential quasi-stick shear along $z_{\mathrm{grip}}$ to satisfy $F_{z,L} + F_{z,R} = F_{\mathrm{req},z}$ and the pitch moment $M_y$; $\Delta v_x$ regulates shaft-axis force $F_x$; and $\Delta \omega_x$ regulates shaft-axis roll torque $M_x$:
+\begin{itemize}
+  \item \textbf{Grasp-synthesis closure (solver residual, not acceptance evidence):} Because \texttt{solve\_force\_regulated\_hand\_frames} solves $\mathbf{G}\mathbf{y}(\mathbf{q}) = \mathbf{w}_{\mathrm{req,mid}}$ using the shared \texttt{topology\_side\_wrench} law against the analytic \texttt{ClubInertialProperties} target, the $1.85 \times 10^{-13}$--$2.88 \times 10^{-12}$ peak / $9.22 \times 10^{-13}$--$1.93 \times 10^{-12}$ RMS force and $9.93 \times 10^{-15}$--$3.34 \times 10^{-13}$ peak / $3.71 \times 10^{-12}$--$6.84 \times 10^{-12}$ RMS moment differences against \texttt{club\_inverse\_dynamics\_requirement} (\texttt{solver\_closure\_*}, tested in \texttt{test\_grasp\_synthesis\_solver\_closure\_residual}) verify root-solver convergence and adapter site-mapping consistency, not physical acceptance.
+  \item \textbf{Acceptance Gate 1 --- Independent MuJoCo \texttt{mj\_inverse} Requirement:} Against MuJoCo \texttt{mj\_inverse} with analytic \texttt{qacc}, relative force errors drop from $596.59 / 509.84$ (\texttt{driver overlap/interlock}), $716.11 / 611.94$ (\texttt{driver ten\_finger}), $449.56 / 384.21$ (\texttt{iron overlap/interlock}), and $539.67 / 461.19$ (\texttt{iron ten\_finger}) to $\varepsilon_{\mathrm{peak}} \le 2.88 \times 10^{-12} \ll 0.05$ and $\varepsilon_{\mathrm{rms}} \le 1.93 \times 10^{-12} \ll 0.02$, and relative COM moment errors drop from $1328.52$--$2182.02$ to $\varepsilon_{\mathrm{peak}} \le 3.37 \times 10^{-13} \ll 0.05$ and $\varepsilon_{\mathrm{rms}} \le 6.84 \times 10^{-12} \ll 0.02$. Against MuJoCo \texttt{mj\_inverse} with second-order central-difference \texttt{qacc} of the prescribed \texttt{qvel}, force peak/RMS errors are $0.433\% / 0.713\%$ (driver) and $0.358\% / 0.635\%$ (7-iron), and COM moment peak/RMS errors are $3.080\% / 1.408\%$ (both within the $5\%$ peak / $2\%$ RMS M3 tolerances, governed by the $\mathcal{O}((\Omega\Delta t)^2) \approx 1.64\%$ interior / $3.08\%$ boundary finite-difference truncation error on the $21$-step sinusoid; Table~\ref{tab:hrg-gs-m8-parity}).
+  \item \textbf{Acceptance Gate 2 --- Open-Loop Forward Replay (\texttt{mj\_step}):} In commit \texttt{96405cce03}, the prescribed trajectory set $\mathbf{p}_{\mathrm{origin}}(t) = [0.002\sin(\Omega t), 0, 0]^{\top}\,\mathrm{m}$ and $\mathbf{R}_{\mathrm{club}}(t) = \mathbf{I}_3$ while prescribing $\mathbf{v}_{\mathrm{origin}}(t) = [0.02\cos(\Omega t), 0, 0]^{\top}\,\mathrm{m/s}$ and $\boldsymbol{\omega}_{\mathrm{club}}(t) = [0, 0, 0.15\sin(\Omega t)]^{\top}\,\mathrm{rad/s}$ ($\dot{\mathbf{p}}_{\mathrm{origin}} \neq \mathbf{v}_{\mathrm{origin}}$, $\dot{\mathbf{R}}_{\mathrm{club}} \neq [\boldsymbol{\omega}_{\mathrm{club}}]_{\times}\mathbf{R}_{\mathrm{club}}$), causing open-loop forward replay to drift by $2.2903\,\mathrm{mm}$ COM position error ($114.5\%$ of amplitude) and $2.3969\,\mathrm{mrad}$ orientation error. With the kinematically consistent state $\mathbf{p}_{\mathrm{origin}}(t) = \int_0^t \mathbf{v}_{\mathrm{origin}}(\tau)\,\mathrm{d}\tau$ and $\mathbf{R}_{\mathrm{club}}(t) = \mathbf{R}_z(\int_0^t \omega_z(\tau)\,\mathrm{d}\tau)$, open-loop forward replay (\texttt{replay\_club\_forward\_trajectory}, stepping the free \texttt{golf\_club} from $t = 0$ over $T = 0.04\,\mathrm{s}$ via \texttt{mj\_step} with MuJoCo's first-order \texttt{semi\_implicit\_euler} integrator at $N_{\mathrm{sub}} = 10$ substeps of $\Delta t_{\mathrm{sub}} = 0.2\,\mathrm{ms}$, linearly interpolated hand contact wrenches on \texttt{xfrc\_applied}, zero active club welds, and gravity active) tracks the prescribed trajectory with COM position peak/RMS error $0.0065 / 0.0045\,\mathrm{mm}$ ($1.47\% / 1.02\%$ of the $0.4417\,\mathrm{mm}$ COM motion amplitude) on driver and $0.0058 / 0.0041\,\mathrm{mm}$ ($1.52\% / 1.09\%$ of the $0.3784\,\mathrm{mm}$ COM motion amplitude) on 7-iron, and orientation peak/RMS error $0.0246 / 0.0139\,\mathrm{mrad}$ ($1.29\% / 0.73\%$ of the $1.9099\,\mathrm{mrad}$ rotation amplitude) on both clubs (Table~\ref{tab:hrg-gs-m8-parity}).
+  \item \textbf{Explicit \S 19 squeeze, nullspace split, and quasi-stick friction-cone ratios:} At $t = T$, the normal squeeze forces are $(F_{\mathrm{squeeze},L}, F_{\mathrm{squeeze},R}) = (206.83, 207.38)\,\mathrm{N}$ (\texttt{driver overlap/interlock}), $(210.13, 237.07)\,\mathrm{N}$ (\texttt{driver ten\_finger}), $(207.27, 208.04)\,\mathrm{N}$ (\texttt{iron overlap/interlock}), and $(210.63, 238.27)\,\mathrm{N}$ (\texttt{iron ten\_finger}), exceeding $F_{\mathrm{squeeze,min}}(T) = \|\mathbf{F}_{\mathrm{req}}(T)\|_2 / \mu_s$ ($3.830\,\mathrm{N}$ driver, $5.064\,\mathrm{N}$ 7-iron at $\mu_s = 0.90$) by $> 50\times$. The terminal nullspace split $\mathbf{s}(T) = \frac{1}{2}(\mathbf{w}_R - \mathbf{w}_L)$ is $(8.825, 0.000, 10.639, 0.223, 0.016, 0.018)$ (\texttt{driver overlap/interlock}), $(7.238, 0.000, 27.130, -0.471, 0.013, -0.050)$ (\texttt{driver ten\_finger}), $(7.986, 0.000, 13.288, 0.230, 0.022, 0.017)$ (\texttt{iron overlap/interlock}), and $(6.422, 0.000, 30.087, -0.477, 0.018, -0.050)$ (\texttt{iron ten\_finger}). Every hand--club pad remains in compression and regularized quasi-stick with $\|\mathbf{v}_{t,i}(T)\| \in [0.049, 0.091]\,\mathrm{mm/s} < v_{\mathrm{tr}} = 1.0\,\mathrm{mm/s}$ and $\|\mathbf{f}_{t,i}(T)\| / (\mu_s f_{n,i}(T)) \in [0.0490, 0.0904] \ll 1.0$.
 \end{itemize}
 
 \begin{table}[h!]
 \centering
-\caption{Measured Frozen-Finger Law-Level Parity, Non-Circular Prescribed Club Inverse-Dynamics Errors, Slip Speeds, and Friction-Cone Ratios for the Bilateral MyoHand Fixture (HRG-GS-M8, \#13330).}
+\caption{Measured Frozen-Finger Law-Level Parity, MuJoCo \texttt{mj\_inverse} Club Inverse-Dynamics Errors (Analytic and Central-Difference \texttt{qacc}), Grasp-Synthesis Solver-Closure Residuals, and Open-Loop Forward-Replay Errors for the Bilateral MyoHand Fixture (HRG-GS-M8, \#13330).}
 \label{tab:hrg-gs-m8-parity}
-\footnotesize
-\begin{tabular}{llrrrrrrr}
+\scriptsize
+\begin{tabular}{llrrrrrr}
 \toprule
-Model ID & Style & Pairs & Law-Level Pin.\ $\varepsilon_{\mathrm{peak}}/\varepsilon_{\mathrm{rms}}$ & Law-Level Ref.\ $\varepsilon_{\mathrm{peak}}/\varepsilon_{\mathrm{rms}}$ & Force $\varepsilon_{\mathrm{peak}}/\varepsilon_{\mathrm{rms}}$ & Moment $\varepsilon_{\mathrm{peak}}/\varepsilon_{\mathrm{rms}}$ & $\|\Delta \mathbf{M}_{\mathrm{com}}\|$ (N$\cdot$m) & Slip $\|\mathbf{v}_t\|$ (mm/s) / $\frac{\|\mathbf{f}_t\|}{\mu_s f_n}$ \\
+Model ID & Style & Law-Level Ref.\ $\varepsilon_{\mathrm{pk}}/\varepsilon_{\mathrm{rms}}$ & \texttt{mj\_inv} (Ana.\ \texttt{qacc}) $F$ / $M$ $\varepsilon_{\mathrm{pk}}/\varepsilon_{\mathrm{rms}}$ & \texttt{mj\_inv} (CD \texttt{qacc}) $F$ / $M$ $\varepsilon_{\mathrm{pk}}/\varepsilon_{\mathrm{rms}}$ (\%) & Solver Closure $F$ / $M$ $\varepsilon_{\mathrm{pk}}/\varepsilon_{\mathrm{rms}}$ & Forward Replay COM $\varepsilon_{\mathrm{pk}}/\varepsilon_{\mathrm{rms}}$ (mm, \%) & Forward Replay Rot.\ $\varepsilon_{\mathrm{pk}}/\varepsilon_{\mathrm{rms}}$ (mrad, \%) \\
 \midrule
-\texttt{...\_driver} & \texttt{overlap} & $12$ & $0.00 / 0.00$ & $4.58 / 4.15 \times 10^{-15}$ & $596.59 / 509.84$ & $1814.00 / 1530.33$ & $1603.49$ & $15.811 / 0.7778$ \\
-\texttt{...\_driver} & \texttt{interlock} & $13$ & $0.00 / 0.00$ & $4.58 / 4.15 \times 10^{-15}$ & $596.59 / 509.84$ & $1814.00 / 1530.33$ & $1603.49$ & $15.811 / 0.7778$ \\
-\texttt{...\_driver} & \texttt{ten\_finger} & $12$ & $0.00 / 0.00$ & $4.58 / 4.15 \times 10^{-15}$ & $716.11 / 611.94$ & $2182.02 / 1840.83$ & $1928.56$ & $15.811 / 0.7778$ \\
-\texttt{...\_iron} & \texttt{overlap} & $12$ & $0.00 / 0.00$ & $4.26 / 4.13 \times 10^{-15}$ & $449.56 / 384.21$ & $1584.99 / 1328.52$ & $1281.37$ & $15.811 / 0.7778$ \\
-\texttt{...\_iron} & \texttt{interlock} & $13$ & $0.00 / 0.00$ & $4.26 / 4.13 \times 10^{-15}$ & $449.56 / 384.21$ & $1584.99 / 1328.52$ & $1281.37$ & $15.811 / 0.7778$ \\
-\texttt{...\_iron} & \texttt{ten\_finger} & $12$ & $0.00 / 0.00$ & $4.26 / 4.13 \times 10^{-15}$ & $539.67 / 461.19$ & $1907.68 / 1599.07$ & $1542.02$ & $15.811 / 0.7778$ \\
+\texttt{...\_driver} & \texttt{overlap} & $2.22 / 2.66\text{e-}16$ & $1.86\text{e-}13/1.93\text{e-}12$, $2.05\text{e-}13/6.84\text{e-}12$ & $0.433/0.713$, $3.080/1.408$ & $1.86\text{e-}13/1.93\text{e-}12$, $2.00\text{e-}13/6.84\text{e-}12$ & $0.0065/0.0045$ ($1.47/1.02$) & $0.0246/0.0139$ ($1.29/0.73$) \\
+\texttt{...\_driver} & \texttt{interlock} & $2.22 / 2.66\text{e-}16$ & $1.86\text{e-}13/1.93\text{e-}12$, $2.05\text{e-}13/6.84\text{e-}12$ & $0.433/0.713$, $3.080/1.408$ & $1.86\text{e-}13/1.93\text{e-}12$, $2.00\text{e-}13/6.84\text{e-}12$ & $0.0065/0.0045$ ($1.47/1.02$) & $0.0246/0.0139$ ($1.29/0.73$) \\
+\texttt{...\_driver} & \texttt{ten\_finger} & $2.05 / 2.13\text{e-}16$ & $2.88\text{e-}12/1.93\text{e-}12$, $1.52\text{e-}14/6.73\text{e-}12$ & $0.433/0.713$, $3.080/1.408$ & $2.88\text{e-}12/1.93\text{e-}12$, $9.93\text{e-}15/6.73\text{e-}12$ & $0.0065/0.0045$ ($1.47/1.02$) & $0.0246/0.0139$ ($1.29/0.73$) \\
+\texttt{...\_iron} & \texttt{overlap} & $3.12 / 2.86\text{e-}16$ & $4.88\text{e-}13/9.22\text{e-}13$, $3.37\text{e-}13/3.71\text{e-}12$ & $0.358/0.635$, $3.080/1.408$ & $4.88\text{e-}13/9.22\text{e-}13$, $3.34\text{e-}13/3.71\text{e-}12$ & $0.0058/0.0041$ ($1.52/1.09$) & $0.0246/0.0139$ ($1.29/0.73$) \\
+\texttt{...\_iron} & \texttt{interlock} & $3.12 / 2.86\text{e-}16$ & $4.88\text{e-}13/9.22\text{e-}13$, $3.37\text{e-}13/3.71\text{e-}12$ & $0.358/0.635$, $3.080/1.408$ & $4.88\text{e-}13/9.22\text{e-}13$, $3.34\text{e-}13/3.71\text{e-}12$ & $0.0058/0.0041$ ($1.52/1.09$) & $0.0246/0.0139$ ($1.29/0.73$) \\
+\texttt{...\_iron} & \texttt{ten\_finger} & $2.92 / 2.32\text{e-}16$ & $6.76\text{e-}13/1.46\text{e-}12$, $1.01\text{e-}13/6.00\text{e-}12$ & $0.358/0.635$, $3.080/1.408$ & $6.76\text{e-}13/1.46\text{e-}12$, $9.79\text{e-}14/6.00\text{e-}12$ & $0.0058/0.0041$ ($1.52/1.09$) & $0.0246/0.0139$ ($1.29/0.73$) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \textbf{Limitations.}
-Muscle recruitment across the $78$ \texttt{myoHand} musculotendon actuators ($39$ per hand) is explicitly out of scope for \texttt{HRG-GS-M8}: all actuators remain inactive (\texttt{ctrl = 0}, \texttt{act = 0}) and finger joints are locked via equality constraints in the frozen-finger qualification mode. Furthermore, this bilateral scene is an isolated two-hand + club grip fixture driven via wrist mocap welds rather than a full-body swing simulation, the prescribed M3 benchmark trajectory is an open-loop sliding contact rather than a force-balanced hold, and the hyperstatic per-hand wrench split and internal squeeze remain mechanically indeterminate from club inverse dynamics alone.
+Muscle recruitment across the $78$ \texttt{myoHand} musculotendon actuators ($39$ per hand) is explicitly out of scope for \texttt{HRG-GS-M8}: all actuators remain inactive (\texttt{ctrl = 0}, \texttt{act = 0}) and finger joints are locked via equality constraints in the frozen-finger qualification mode. Furthermore, this bilateral scene is an isolated two-hand + club grip fixture driven via wrist mocap welds rather than a full-body swing simulation, tangential force regulation relies on regularized Stribeck quasi-stick ($\|\mathbf{v}_t\| \le 0.091\,\mathrm{mm/s} < v_{\mathrm{tr}} = 1.0\,\mathrm{mm/s}$) rather than a stateful bristle/elastoplastic stiction model at exact zero slip, and the hyperstatic per-hand wrench split $\mathbf{s} \in \ker(\mathbf{G})$ and internal preload squeeze ($\delta_0 = 0.25\,\mathrm{mm}$) remain mechanically indeterminate from club inverse dynamics alone and are selected by the explicit bimanual lever-arm parameterization $\mathbf{q}(t)$. In addition, for \texttt{iron7}, MuJoCo's \texttt{boundinertia=".0001"} compiler floor clamps the axial shaft moment of inertia from $6.492 \times 10^{-5}\,\mathrm{kg\cdot m^2}$ up to $1.000 \times 10^{-4}\,\mathrm{kg\cdot m^2}$.
 
 \textbf{Reproduction Commands.}
 \begin{verbatim}
