@@ -28,6 +28,7 @@ inverse dynamics on a reference trajectory remain open on #13176.
 from __future__ import annotations
 
 import json
+import types
 from pathlib import Path
 from typing import Any
 
@@ -208,8 +209,14 @@ def test_mujoco_mass_matrix_and_gravity_match_spec(doc, configs) -> None:
 @pytest.mark.requires_pinocchio
 def test_pinocchio_mass_matrix_and_gravity_match_spec(doc, configs) -> None:
     pin = pytest.importorskip("pinocchio")
-    if not hasattr(pin, "Model"):
-        pytest.skip("the installed 'pinocchio' is not the rigid-body dynamics library")
+    # CI lanes stub engines as MagicMock in sys.modules; a stub passes
+    # importorskip and hasattr, so require a real module with a string version.
+    if not (
+        isinstance(pin, types.ModuleType)
+        and isinstance(getattr(pin, "__version__", None), str)
+        and isinstance(getattr(pin, "Model", None), type)
+    ):
+        pytest.skip("pinocchio is a stub or not the rigid-body dynamics library")
     from src.engines.physics_engines.pinocchio.python.native_model import (
         FullBodyPinocchioModel,
     )
