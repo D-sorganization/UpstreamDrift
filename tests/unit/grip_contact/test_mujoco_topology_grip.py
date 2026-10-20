@@ -55,6 +55,7 @@ from src.shared.python.grip_contact.topology_contact import (
     topology_pair_wrench,
     topology_side_wrench,
 )
+from src.shared.python.motion_matching.contact_kernel import friction_secant_gain
 from src.shared.python.motion_matching.grip_contract import GripSpec
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_mujoco]
@@ -751,6 +752,50 @@ def test_capsule_node_friction_matches_shared_line_law_ten_finger() -> None:
     assert native_ft == pytest.approx(shared.tangential_force_mag_n, rel=0.10)
 
 
+def test_scheduled_node_friction_rows_follow_shared_law_ten_finger() -> None:
+    """Every loaded node friction row carries the shared law's force (#13306).
+
+    A fixed ``solreffriction`` time gives each row one viscous gain, so rows
+    at other loads and slip speeds missed the regularised law by up to 17 %
+    after 10 ms of the ten-finger hold.  ``advance`` schedules each row's
+    time constant to the law's secant gain, and switching step scaling off
+    restores the static (calibration) time constants exactly.
+    """
+    module = _mujoco_sim_module()
+    spec_bytes, _, names, swing, interface, topo_model = _setup(
+        style=GripStyle.TEN_FINGER
+    )
+    q0 = np.asarray(swing.q[0], float)
+    sim = module.ClubInHands(
+        spec_bytes, names, interface, pads=None, topology_model=topo_model
+    )
+    sim.calibrate(q0)
+    sim.hold_pose(q0)
+    static_time = sim.model.pair_solreffriction[:, 0].copy()
+    static_impratio = float(sim.model.opt.impratio)
+    sim.advance(1000)
+    d = sim.data
+    ratios = []
+    for i in range(d.ncon):
+        c = d.contact[i]
+        if c.efc_address < 0 or int(c.geom1) not in sim._pad_geom:
+            continue
+        a = int(c.efc_address)
+        speed = float(np.hypot(d.efc_vel[a + 1], d.efc_vel[a + 2]))
+        law_ft = friction_secant_gain(speed, topo_model.law) * d.efc_force[a] * speed
+        if law_ft > 0.05:
+            ratios.append(
+                float(np.hypot(d.efc_force[a + 1], d.efc_force[a + 2])) / law_ft
+            )
+    assert len(ratios) >= 10
+    np.testing.assert_allclose(ratios, 1.0, rtol=0.02)
+    assert not np.array_equal(sim.model.pair_solreffriction[:, 0], static_time)
+
+    sim._set_step_scaling(False)
+    np.testing.assert_array_equal(sim.model.pair_solreffriction[:, 0], static_time)
+    assert sim.model.opt.impratio == pytest.approx(static_impratio, rel=1e-12)
+
+
 def test_two_pad_hyperstatic_penalty_vs_mujoco_cone_divergence() -> None:
     """Minimal 2-pad hyperstatic test (#13306) proving why MuJoCo cone QP diverges from penalty split."""
     import mujoco
@@ -846,24 +891,34 @@ def test_two_pad_hyperstatic_penalty_vs_mujoco_cone_divergence() -> None:
     assert ft2_ell == pytest.approx(0.9 * fn2_ell, rel=1e-4)
 
 
+def _deflection_xfail(motion: str, numbers: str) -> pytest.MarkDecorator:
+    return pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason=(
+            "Trail-hand deflection in the hyperstatic two-hand grip (#13306, "
+            "GRIP_PARITY_DECISIONS.md Section 19): with the per-row friction gain "
+            "schedule every per-hand force, squeeze and couple passes, but the "
+            f"measured 0.1 s {motion} deflection_L / deflection_R (peak_error, "
+            f"rms_error) are {numbers} for OVERLAP and INTERLOCK "
+            "(exceeding PEAK_TOLERANCE=5%, RMS_TOLERANCE=2%)."
+        ),
+    )
+
+
+_HOLD_DEFLECTION_XFAIL = _deflection_xfail("hold", "(1.89%, 1.74%) / (3.89%, 4.60%)")
+_SWING_DEFLECTION_XFAIL = _deflection_xfail("swing", "(1.64%, 1.53%) / (2.99%, 3.39%)")
+
+
 @pytest.mark.slow
 @pytest.mark.timeout(600)
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Indeterminate per-hand split and internal squeeze in a hyperstatic 2-hand grip "
-        "between MuJoCo condim=6 elliptic soft constraint and Pinocchio explicit Stribeck "
-        "penalty law (#13306, GRIP_PARITY_DECISIONS.md Section 19): while determinate net "
-        "wrench passes, measured 0.1 s hold force_L / force_R / overall max (peak_error, "
-        "rms_error) are OVERLAP (0.01%, 10.49%) / (1.22%, 17.02%) / (35.3%, 53.1%), "
-        "INTERLOCK (0.01%, 10.49%) / (1.22%, 17.02%) / (35.3%, 53.1%), TEN_FINGER "
-        "(0.62%, 8.38%) / (0.57%, 8.15%) / (33.6%, 29.9%) "
-        "(exceeding PEAK_TOLERANCE=5%, RMS_TOLERANCE=2%)."
-    ),
-)
 @pytest.mark.parametrize(
-    "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
+    "style",
+    [
+        pytest.param(GripStyle.OVERLAP, marks=_HOLD_DEFLECTION_XFAIL),
+        pytest.param(GripStyle.INTERLOCK, marks=_HOLD_DEFLECTION_XFAIL),
+        GripStyle.TEN_FINGER,
+    ],
 )
 def test_dynamic_parity_hold_vs_pinocchio(style: GripStyle) -> None:
     """0.1 s hold full PARITY_QUANTITIES (including indeterminate per-hand split) vs Pinocchio."""
@@ -904,22 +959,13 @@ def test_dynamic_parity_hold_vs_pinocchio(style: GripStyle) -> None:
 
 @pytest.mark.slow
 @pytest.mark.timeout(600)
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Indeterminate per-hand split and internal squeeze in a hyperstatic 2-hand grip "
-        "between MuJoCo condim=6 elliptic soft constraint and Pinocchio explicit Stribeck "
-        "penalty law (#13306, GRIP_PARITY_DECISIONS.md Section 19): while determinate net "
-        "wrench passes, measured 0.1 s swing force_L / force_R / overall max (peak_error, "
-        "rms_error) are OVERLAP (0.01%, 14.83%) / (0.40%, 18.31%) / (38.2%, 68.2%), "
-        "INTERLOCK (0.01%, 14.83%) / (0.40%, 18.31%) / (38.2%, 68.2%), TEN_FINGER "
-        "(0.01%, 12.34%) / (0.12%, 11.94%) / (94.7%, 67.2%) "
-        "(exceeding PEAK_TOLERANCE=5%, RMS_TOLERANCE=2%)."
-    ),
-)
 @pytest.mark.parametrize(
-    "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
+    "style",
+    [
+        pytest.param(GripStyle.OVERLAP, marks=_SWING_DEFLECTION_XFAIL),
+        pytest.param(GripStyle.INTERLOCK, marks=_SWING_DEFLECTION_XFAIL),
+        GripStyle.TEN_FINGER,
+    ],
 )
 def test_dynamic_parity_short_swing_vs_pinocchio(style: GripStyle) -> None:
     """Short 0.1 s swing full PARITY_QUANTITIES (including indeterminate per-hand split) vs Pinocchio."""

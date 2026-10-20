@@ -601,7 +601,7 @@ _DETERMINATE_ENGINE_CASES = [
         id="drake-ten_finger-swing",
     ),
     # MuJoCo (G8): passes all determinate quantities across all styles and motions
-    # except the 0.04 s ten_finger hold (strict xfail below, #13308)
+    # (the per-row friction gain schedule closed the ten_finger hold gap, #13306)
     pytest.param(
         "mujoco",
         GripStyle.OVERLAP,
@@ -620,23 +620,7 @@ _DETERMINATE_ENGINE_CASES = [
         "mujoco",
         GripStyle.TEN_FINGER,
         "hold",
-        marks=[
-            pytest.mark.requires_mujoco,
-            pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "MuJoCo ten_finger 0.04 s hold determinate net_force RMS is 2.866% "
-                    "(peak 3.136%; net_moment_com peak 0.103% / RMS 0.723%) > 2.0% "
-                    "RMS_TOLERANCE after the continuous line-contact law (#13308): "
-                    "every pair force is closer to the reference than before (e.g. "
-                    "trail_palm_distal 0.124 N versus 0.143 N RMS), but the ~0.1 N "
-                    "net-force residual of the hyperstatic cone-QP split (#13306) grows "
-                    "with the larger, now-continuous pitch transient (1.873% RMS over "
-                    "0.10 s)"
-                ),
-            ),
-        ],
+        marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-hold",
     ),
     pytest.param(
