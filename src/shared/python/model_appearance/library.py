@@ -212,6 +212,8 @@ PART_RULES: tuple[tuple[str, str], ...] = (
     ("lowertorso", "pelvis"),
     ("uppertorsobase", "torso"),
     ("comrod", "torso"),
+    # full-body-v2 abdomen (HRG-D3): dressed with the shirt like the thorax.
+    ("trunk_lumbar", "torso"),
     ("*clubface*", "club"),
     ("*club*", "club"),
     ("*shaft*", "club"),
