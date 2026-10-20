@@ -27,8 +27,13 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: docker-size-gates-${{ github.ref }}
-  cancel-in-progress: true
+  # PR runs cancel superseded pushes. Main and dispatched runs are never
+  # cancelled once running: their push paths match most merges, so per-ref
+  # cancellation meant no main run ever finished (#13489). Grouped per event
+  # and ref, GitHub keeps the running run plus only the newest pending one,
+  # which bounds docker pool use without queueing a run per merge (#12285).
+  group: docker-size-gates-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

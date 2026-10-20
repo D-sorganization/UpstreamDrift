@@ -202,3 +202,46 @@ class TestOpenSimMainRunsComplete:
             line for line in lint.splitlines() if "nightly-publish.yml" in line
         )
         assert self.NAME in allowlist
+
+
+@pytest.mark.parametrize(
+    ("name", "prefix"),
+    [
+        ("docker-size-gates.yml", "docker-size-gates"),
+        ("docker-smoke.yml", "docker-smoke"),
+    ],
+)
+class TestDockerGateMainRunsComplete:
+    """#13489: per-ref cancel-in-progress cancelled every main docker gate run.
+
+    Their push ``paths`` match on most merges, so each new merge cancelled the
+    run still waiting for a docker runner, and the gates never finished on
+    main. PR runs still cancel superseded pushes. Non-PR runs are grouped per
+    event and ref without cancel-in-progress, so GitHub keeps the running run
+    plus only the newest pending one. That bounds docker pool use to two runs
+    per workflow instead of one per merge.
+    """
+
+    def test_only_pr_runs_cancel_in_progress(self, name: str, prefix: str) -> None:
+        concurrency = _load(name)["concurrency"]
+        assert (
+            concurrency["cancel-in-progress"]
+            == "${{ github.event_name == 'pull_request' }}"
+        )
+
+    def test_non_pr_runs_keep_only_the_newest_pending_run(
+        self, name: str, prefix: str
+    ) -> None:
+        group = _load(name)["concurrency"]["group"]
+        assert "github.sha" not in group, "per-SHA groups queue every main push"
+        assert "runner." not in group, "runner context is invalid in concurrency"
+        assert group == f"{prefix}-${{{{ github.event_name }}}}-${{{{ github.ref }}}}"
+
+    def test_workflow_lint_allows_conditional_cancel(
+        self, name: str, prefix: str
+    ) -> None:
+        lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
+        allowlist = next(
+            line for line in lint.splitlines() if "nightly-publish.yml" in line
+        )
+        assert name in allowlist

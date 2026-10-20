@@ -101,8 +101,9 @@ jobs:
             # cross-engine-equivalence.yml cancels PR runs only, via an
             # expression, so a running main run always finishes (#12285).
             # ci-requires-opensim.yml does the same (#13494).
+            # docker-size-gates.yml and docker-smoke.yml do the same (#13489).
             case "$(basename "$f")" in
-              publish-artifacts.yml|release.yml|publish.yml|deploy.yml|nightly-publish.yml|cross-engine-equivalence.yml|ci-requires-opensim.yml)
+              publish-artifacts.yml|release.yml|publish.yml|deploy.yml|nightly-publish.yml|cross-engine-equivalence.yml|ci-requires-opensim.yml|docker-size-gates.yml|docker-smoke.yml)
                 echo "::notice::Skipping cancel-in-progress check for $f (intentional exception)"
                 ;;
               *)
