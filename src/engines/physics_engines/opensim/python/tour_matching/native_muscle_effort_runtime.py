@@ -43,6 +43,14 @@ class NativeEffortBackend(Protocol):
 
 
 @dataclass(frozen=True)
+class NativeSourcePin:
+    """Reviewed model-bytes digest and OpenSim runtime identity."""
+
+    source_sha256: str
+    runtime_identity: str
+
+
+@dataclass(frozen=True)
 class NativeEffortStepResult:
     proposal: NativeMuscleEffortProposal
     accepted_snapshot: NativeMuscleStateSnapshot | None
@@ -144,8 +152,7 @@ class _OpenSimNativeEffortBackend:
         osim: Any,
         model: Any,
         state: Any,
-        source_sha256: str,
-        runtime_identity: str,
+        pin: NativeSourcePin,
         source_path: Path,
         coordinate: NativeCoordinateMapping,
         analytic_by_muscle: Mapping[str, AnalyticRecruitmentConfig],
@@ -160,6 +167,8 @@ class _OpenSimNativeEffortBackend:
             NativeCoordinateMapping,
         )
 
+        source_sha256 = pin.source_sha256
+        runtime_identity = pin.runtime_identity
         if not isinstance(coordinate, NativeCoordinateMapping):
             raise TypeError("coordinate mapping must be source-audited")
         if any(
@@ -610,8 +619,7 @@ def load_pinned_opensim_backend(
     *,
     osim: Any,
     source_path: str | Path,
-    expected_source_sha256: str,
-    expected_runtime_identity: str,
+    expected_pin: NativeSourcePin,
     coordinate_mapping: NativeCoordinateMapping,
     analytic_by_muscle: Mapping[str, AnalyticRecruitmentConfig],
     initial_state: Mapping[str, float],
@@ -624,10 +632,10 @@ def load_pinned_opensim_backend(
         raise ValueError("initial native time must be finite")
     path = Path(source_path).resolve(strict=True)
     source_sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
-    if source_sha256 != expected_source_sha256:
+    if source_sha256 != expected_pin.source_sha256:
         raise ValueError("native model source hash differs from reviewed pin")
     runtime_identity = str(osim.GetVersionAndDate())
-    if runtime_identity != expected_runtime_identity:
+    if runtime_identity != expected_pin.runtime_identity:
         raise ValueError("loaded OpenSim runtime differs from reviewed pin")
     model = osim.Model(str(path))
     model.finalizeConnections()
@@ -650,8 +658,7 @@ def load_pinned_opensim_backend(
         model=model,
         source_path=path,
         state=state,
-        source_sha256=source_sha256,
-        runtime_identity=runtime_identity,
+        pin=NativeSourcePin(source_sha256, runtime_identity),
         coordinate=coordinate_mapping,
         analytic_by_muscle=analytic_by_muscle,
         integrator_accuracy=integrator_accuracy,

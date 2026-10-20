@@ -761,6 +761,7 @@ def test_executor_poison_session_after_partial_or_unverified_advance(
 
 def test_pinned_backend_rejects_source_mismatch_before_model_load(tmp_path) -> None:
     from src.engines.physics_engines.opensim.python.tour_matching.native_muscle_effort_runtime import (
+        NativeSourcePin,
         load_pinned_opensim_backend,
     )
 
@@ -780,8 +781,7 @@ def test_pinned_backend_rejects_source_mismatch_before_model_load(tmp_path) -> N
         load_pinned_opensim_backend(
             osim=Runtime(),
             source_path=source,
-            expected_source_sha256="0" * 64,
-            expected_runtime_identity="pinned runtime",
+            expected_pin=NativeSourcePin("0" * 64, "pinned runtime"),
             coordinate_mapping=snapshot().coordinate,
             analytic_by_muscle={},
             initial_state={},

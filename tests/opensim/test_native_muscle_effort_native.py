@@ -89,6 +89,7 @@ def test_native_constant_interval_matches_fresh_raw_replay(
     )
     from src.engines.physics_engines.opensim.python.tour_matching.native_muscle_effort_runtime import (
         NativeMuscleEffortExecutor,
+        NativeSourcePin,
         load_pinned_opensim_backend,
         verify_fresh_constant_replay,
     )
@@ -200,8 +201,7 @@ def test_native_constant_interval_matches_fresh_raw_replay(
     backend = load_pinned_opensim_backend(
         osim=osim,
         source_path=source_path,
-        expected_source_sha256=source_sha256,
-        expected_runtime_identity=runtime_identity,
+        expected_pin=NativeSourcePin(source_sha256, runtime_identity),
         coordinate_mapping=mapping,
         analytic_by_muscle=analytic,
         initial_state=initial_state,
