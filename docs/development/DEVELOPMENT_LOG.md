@@ -2665,6 +2665,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13460 · Relax Last-Ulp Geometry Assertions in Batched Grip Contact Tests (Linux BLAS Dot Rounding)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13460
+- **Branch:** merged via #13473
+- **PR:** #13473
+- **Paths:** see #13473
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`0dddc0fc`; collated from changes/13460-relax-last-ulp-geometry-assertions-in-ba.md)
+- **Summary:** Relax last-ulp geometry assertions in batched grip contact tests (Linux BLAS dot rounding)
+- **Next step:** Shipped in PR #13473.
+
+### DL-#13453 · Test the MyoSuite Gymnasium-First Import Behaviourally in _Engine_Init
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13453
+- **Branch:** fix/ud-myosuite-gym-tests
+- **PR:** #13471
+- **Paths:** see #13471
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`1402b709`; collated from changes/13453-test-myosuite-gymnasium-import-behaviour.md)
+- **Summary:** Test the MyoSuite gymnasium-first import behaviourally in _engine_init
+- **Next step:** Shipped in PR #13471.
+
 ### DL-#13396 · HRG Reference: Record That an Analytic Radau Jacobian Is Not Worth Building for the Pinocchio Grip Sim (Num_Jac Is 5-15% of CPU; Newton Iterations Dominate)
 
 - **State:** shipped
