@@ -545,6 +545,7 @@ def _attach_barbell(model: Any, placement: _BarPlacement, bar_mass_kg: float) ->
         )
         plate_geom = osim.Cylinder(float(shared_bar.plate_radius_m), 0.025)
         plate_geom.setColor(osim.Vec3(0.2, 0.2, 0.2))
+        plate_geom.setOpacity(0.6)
         pof_plate.attachGeometry(plate_geom)
         bar.addComponent(pof_plate)
 

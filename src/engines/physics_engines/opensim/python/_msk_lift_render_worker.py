@@ -51,11 +51,23 @@ logger = get_logger(__name__)
 
 def _setup_visualizer(osim: Any, model: Any) -> Any:
     """Initialize Simbody visualizer in Y-up orientation with neutral ground."""
-    geom_dir = Path(
-        "/home/dieterolson/Repositories/ud-13044/shared/models/opensim/opensim-models/Geometry"
+    from src.engines.physics_engines.opensim.python.musculoskeletal_swing import (
+        resolve_base_model,
     )
-    if geom_dir.is_dir():
-        osim.ModelVisualizer.addDirToGeometrySearchPaths(str(geom_dir))
+
+    try:
+        base_path = resolve_base_model()
+        # Add Rajagopal-specific Geometry (contains r_pelvis.vtp, l_pelvis.vtp, sacrum.vtp)
+        # as well as the root Geometry directory (OSL-8, #13045).
+        search_dirs = [
+            base_path.parent / "Geometry",
+            base_path.parents[2] / "Geometry",
+        ]
+        for d in search_dirs:
+            if d.is_dir():
+                osim.ModelVisualizer.addDirToGeometrySearchPaths(str(d))
+    except (FileNotFoundError, IndexError):
+        pass
 
     # Clear base model experimental markers (C7, CLAV, RACR, etc.) and IK markers
     # so they do not render as floating dark red spheres.
@@ -122,6 +134,39 @@ class ActivationWindow(NamedTuple):
     window_s: tuple[float, float]
 
 
+def _setup_camera_and_viewport(
+    viz: Any,
+    state: Any,
+    full_targets: Any,
+    bar_endpoints_m: np.ndarray,
+    job: dict[str, Any],
+) -> tuple[tuple[int, int, int, int], float, tuple[float, float, float], float, int]:
+    """Configure visualizer camera, viewport crop, and physical force legend scale."""
+    osim = import_opensim()
+    viz.drawFrameNow(state)
+    time.sleep(SETTLE_S)
+    win = grab_window()
+    win_hw = win.shape[:2]
+    crop_box = principal_crop(win_hw, UI_STRIP_PX, (job["width"], job["height"]))
+    y0, y1, _, _ = crop_box
+    fov = simbody_fov_y_rad(VIEWER_FOV_Y_RAD, win_hw[0], y1 - y0)
+    viz.setCameraFieldOfView(fov)
+
+    lookat, dist = compute_lift_framing(
+        full_targets.positions_m,
+        bar_endpoints_m,
+        view=job["view"],
+        fov_y_rad=fov,
+        image_size_px=(job["width"], job["height"]),
+    )
+    _set_simbody_camera(osim, viz, job["view"], lookat, dist)
+
+    focal = (job["height"] / 2.0) / math.tan(fov / 2.0)
+    scale_px = int(round(500.0 * 0.001 * focal / dist))
+    scale_px = max(20, min(120, scale_px))
+    return crop_box, fov, lookat, dist, scale_px
+
+
 def _render_frames(
     job: dict[str, Any],
     full_targets: Any,
@@ -131,7 +176,7 @@ def _render_frames(
     full_ik: Any,
     act_window: ActivationWindow,
     bar_endpoints_m: np.ndarray,
-) -> list[np.ndarray]:
+) -> tuple[list[np.ndarray], list[int]]:
     """Render and capture all requested video frames with overlays and dynamic framing."""
     osim = import_opensim()
     window_targets = act_window.targets
@@ -145,33 +190,19 @@ def _render_frames(
     if job.get("frames") is not None:
         total_frames = min(int(job["frames"]), total_frames)
 
-    viz.drawFrameNow(state)
-    time.sleep(SETTLE_S)
-    win = grab_window()
-    win_hw = win.shape[:2]
-    y0, y1, x0, x1 = principal_crop(win_hw, UI_STRIP_PX, (job["width"], job["height"]))
-    fov = simbody_fov_y_rad(VIEWER_FOV_Y_RAD, win_hw[0], y1 - y0)
-    viz.setCameraFieldOfView(fov)
-
-    # Compute dynamic camera framing for the lift and view
-    lookat, dist = compute_lift_framing(
-        full_targets.positions_m,
-        bar_endpoints_m,
-        view=job["view"],
-        fov_y_rad=fov,
-        image_size_px=(job["width"], job["height"]),
+    (y0, y1, x0, x1), fov, lookat, dist, scale_px = _setup_camera_and_viewport(
+        viz, state, full_targets, bar_endpoints_m, job
     )
-    _set_simbody_camera(osim, viz, job["view"], lookat, dist)
-
-    # Physical force scale calculation for legend (500 N arrow length in pixels)
-    focal = (job["height"] / 2.0) / math.tan(fov / 2.0)
-    scale_px = int(round(500.0 * 0.001 * focal / dist))
-    scale_px = max(20, min(120, scale_px))
 
     t_start, t_end = window_s
     coords = model.getCoordinateSet()
-    style = ForceGlyphStyle()
+    style = ForceGlyphStyle(
+        force_scale_m_per_n=1.0 / 1000.0,
+        max_length_m=1.0,
+        shaft_radius_m=0.015,
+    )
     rendered: list[np.ndarray] = []
+    window_frame_indices: list[int] = []
 
     for f_idx in range(total_frames):
         t_curr = float(sched.sample_times_s[f_idx])
@@ -180,6 +211,7 @@ def _render_frames(
 
         in_window = (t_curr >= t_start - 1e-4) and (t_curr <= t_end + 1e-4)
         if in_window:
+            window_frame_indices.append(f_idx)
             t_rel = float(np.clip(t_curr - t_start, 0.0, window_targets.time_s[-1]))
             window_idx = int(np.argmin(np.abs(window_targets.time_s - t_rel)))
             _recolor_muscles(osim, model, state, activations[window_idx])
@@ -219,7 +251,7 @@ def _render_frames(
         )
         rendered.append(final_frame)
 
-    return rendered
+    return rendered, window_frame_indices
 
 
 def run_worker(job_path: Path) -> None:
@@ -246,7 +278,7 @@ def run_worker(job_path: Path) -> None:
         activations=activations,
         window_s=window_s,
     )
-    frames = _render_frames(
+    frames, window_frames = _render_frames(
         job,
         full_targets,
         build.model,
@@ -273,7 +305,9 @@ def run_worker(job_path: Path) -> None:
 
     if job.get("sheet_path"):
         sheet_path = Path(job["sheet_path"])
-        generate_contact_sheet(frames, sheet_path, count=6)
+        generate_contact_sheet(
+            frames, sheet_path, count=6, window_frame_indices=window_frames
+        )
 
     result = {
         "status": "rendered",

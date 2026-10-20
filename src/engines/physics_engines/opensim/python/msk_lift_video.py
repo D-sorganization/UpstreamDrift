@@ -108,10 +108,11 @@ def lift_camera_transforms(
     require(distance_m > 0.0, "distance_m must be positive")
 
     if view == "side":
-        # Looking from right side towards -Z: lifter faces right (+X)
-        view_dir = np.array([0.0, 0.0, -1.0])
+        # 30 deg front-oblique off sagittal axis so 0.45m plates do not occlude body (OSL-8, #13045)
+        angle = math.radians(30.0)
+        view_dir = np.array([-math.sin(angle), 0.0, -math.cos(angle)])
         up = np.array([0.0, 1.0, 0.0])
-        right = np.array([1.0, 0.0, 0.0])
+        right = np.array([math.cos(angle), 0.0, -math.sin(angle)])
     elif view == "front":
         # Looking from anterior towards -X: lifter's left foot (-Z) is to the right
         view_dir = np.array([-1.0, 0.0, 0.0])
@@ -506,6 +507,11 @@ def _compute_full_motion_kinematics(
     full_points = np.array([kin.marker_positions(q) for q in lift_motion.q])
     full_positions = frame.point(full_points[:, [order.index(x) for x in IK_LANDMARKS]])
 
+    # LANDMARK_ATTACHMENTS maps "bar" to ("Hub", _ORIGIN) for kinematic topology,
+    # but the barbell's real position comes from the retargeted lift motion (OSL-8, #13045).
+    if hasattr(lift_motion, "bar_m") and lift_motion.bar_m is not None:
+        full_positions[:, IK_LANDMARKS.index("bar")] = frame.point(lift_motion.bar_m)
+
     bar_pts = full_positions[:, IK_LANDMARKS.index("bar")]
     ends_1 = bar_pts + np.array([0.0, 0.0, -1.10])
     ends_2 = bar_pts + np.array([0.0, 0.0, 1.10])
@@ -599,6 +605,78 @@ def solve_full_lift_motion_targets(
     return full_targets, window_s, bar_endpoints
 
 
+def _truncate_targets(targets: LiftTargets, max_frames: int | None) -> LiftTargets:
+    """Truncate targets to max_frames along the time dimension if requested."""
+    if max_frames is None or max_frames >= len(targets.time_s):
+        return targets
+    return LiftTargets(
+        lift=targets.lift,
+        path=targets.path,
+        sha256=targets.sha256,
+        indices=targets.indices[:max_frames],
+        time_s=targets.time_s[:max_frames],
+        positions_m=targets.positions_m[:max_frames],
+        foot_stations_m=targets.foot_stations_m,
+        grf_force_n=targets.grf_force_n,
+        grf_moment_nm=targets.grf_moment_nm,
+        hand_force_n=targets.hand_force_n,
+        hand_torque_nm=targets.hand_torque_nm,
+        grip_m=targets.grip_m,
+        pelvis_rotation=targets.pelvis_rotation[:max_frames],
+        source_coordinates=targets.source_coordinates,
+        body_mass_kg=targets.body_mass_kg,
+        bar_mass_kg=targets.bar_mass_kg,
+        height_m=targets.height_m,
+        frame=targets.frame,
+        tibial_torsion=targets.tibial_torsion,
+        bench_force_n=targets.bench_force_n,
+        bench_point_m=targets.bench_point_m,
+        provenance=targets.provenance,
+    )
+
+
+def _solve_window_activations(
+    lift: str,
+    path: Path,
+    stride: int,
+) -> tuple[LiftTargets, Any, Any, np.ndarray, list[str], dict[str, float]]:
+    """Solve short-window static optimization for muscle activations."""
+    from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
+    from src.engines.physics_engines.opensim.python.msk_lift_arm_reach import (
+        reaching_lift_build,
+    )
+    from src.engines.physics_engines.opensim.python.msk_lift_muscles import (
+        MuscleBasis,
+        _make_muscles_rigid_tendon,
+        _solve_lift_frames,
+        leg_coordinates,
+    )
+
+    window_targets = lift_targets(lift, path, stride=stride)
+    base_model = resolve_base_model()
+    scales = ikid.bundle_segment_scales(window_targets, base_model)
+    build, reach = reaching_lift_build(lift, window_targets, base_model, scales)
+    pelvis_short = ikid.pelvis_landmark_targets(build, window_targets, base_model)
+    ik_short = ikid.run_inverse_kinematics(build, window_targets, pelvis_short)
+    inverse_short = ikid.run_inverse_dynamics(build, window_targets, ik_short)
+
+    _make_muscles_rigid_tendon(build.model)
+    basis = MuscleBasis(build.model, ik_short.coordinates)
+    leg_coords = leg_coordinates()
+    leg_indices = [ik_short.coordinates.index(c) for c in leg_coords]
+    solve_short = _solve_lift_frames(
+        basis, ik_short, inverse_short, leg_indices, window_targets.time_s
+    )
+    return (
+        window_targets,
+        base_model,
+        scales,
+        solve_short.activations,
+        basis.muscle_names,
+        reach.coordinates,
+    )
+
+
 def solve_full_lift_motion_and_muscles(
     lift: str,
     stride: int = 5,
@@ -618,14 +696,8 @@ def solve_full_lift_motion_and_muscles(
     Returns (full_targets, build, full_ik, window_targets, activations, muscle_names, window_s, bar_endpoints).
     """
     from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
-    from src.engines.physics_engines.opensim.python.msk_lift_arm_reach import (
-        reaching_lift_build,
-    )
-    from src.engines.physics_engines.opensim.python.msk_lift_muscles import (
-        MuscleBasis,
-        _make_muscles_rigid_tendon,
-        _solve_lift_frames,
-        leg_coordinates,
+    from src.engines.physics_engines.opensim.python.msk_lift_model import (
+        build_lift_model,
     )
 
     path = SAME_INPUT_LIFT_BUNDLES.get(lift)
@@ -633,63 +705,41 @@ def solve_full_lift_motion_and_muscles(
         raise ValueError(f"no same-input bundle found for lift {lift!r}")
 
     # 1. Short-window solve for activations & wrenches
-    window_targets = lift_targets(lift, path, stride=stride)
-    base_model = resolve_base_model()
-    scales = ikid.bundle_segment_scales(window_targets, base_model)
-    build, _reach = reaching_lift_build(lift, window_targets, base_model, scales)
-    pelvis_short = ikid.pelvis_landmark_targets(build, window_targets, base_model)
-    ik_short = ikid.run_inverse_kinematics(build, window_targets, pelvis_short)
-    inverse_short = ikid.run_inverse_dynamics(build, window_targets, ik_short)
-
-    _make_muscles_rigid_tendon(build.model)
-    basis = MuscleBasis(build.model, ik_short.coordinates)
-    leg_coords = leg_coordinates()
-    leg_indices = [ik_short.coordinates.index(c) for c in leg_coords]
-    solve_short = _solve_lift_frames(
-        basis, ik_short, inverse_short, leg_indices, window_targets.time_s
-    )
+    (
+        window_targets,
+        base_model,
+        scales,
+        activations,
+        muscle_names,
+        arm_coords,
+    ) = _solve_window_activations(lift, path, stride)
 
     # 2. Full-motion targets & IK
     full_targets, window_s, bar_endpoints = solve_full_lift_motion_targets(
-        lift, path, stride=1
+        lift, path, stride=stride
     )
-    if max_ik_frames is not None and max_ik_frames < len(full_targets.time_s):
-        sub_indices = full_targets.indices[:max_ik_frames]
-        full_targets = LiftTargets(
-            lift=full_targets.lift,
-            path=full_targets.path,
-            sha256=full_targets.sha256,
-            indices=sub_indices,
-            time_s=full_targets.time_s[:max_ik_frames],
-            positions_m=full_targets.positions_m[:max_ik_frames],
-            foot_stations_m=full_targets.foot_stations_m,
-            grf_force_n=full_targets.grf_force_n,
-            grf_moment_nm=full_targets.grf_moment_nm,
-            hand_force_n=full_targets.hand_force_n,
-            hand_torque_nm=full_targets.hand_torque_nm,
-            grip_m=full_targets.grip_m,
-            pelvis_rotation=full_targets.pelvis_rotation[:max_ik_frames],
-            source_coordinates=full_targets.source_coordinates,
-            body_mass_kg=full_targets.body_mass_kg,
-            bar_mass_kg=full_targets.bar_mass_kg,
-            height_m=full_targets.height_m,
-            frame=full_targets.frame,
-            tibial_torsion=full_targets.tibial_torsion,
-            bench_force_n=full_targets.bench_force_n,
-            bench_point_m=full_targets.bench_point_m,
-            provenance=full_targets.provenance,
-        )
+    full_targets = _truncate_targets(full_targets, max_ik_frames)
 
-    pelvis_full = ikid.pelvis_landmark_targets(build, full_targets, base_model)
-    full_ik = ikid.run_inverse_kinematics(build, full_targets, pelvis_full)
+    build_full = build_lift_model(
+        lift,
+        body_mass_kg=full_targets.body_mass_kg,
+        height_m=full_targets.height_m,
+        bar_mass_kg=full_targets.bar_mass_kg,
+        base_model_path=base_model,
+        segment_scales=scales,
+        arm_coordinates=arm_coords,
+        tibial_torsion=full_targets.tibial_torsion,
+    )
+    pelvis_full = ikid.pelvis_landmark_targets(build_full, full_targets, base_model)
+    full_ik = ikid.run_inverse_kinematics(build_full, full_targets, pelvis_full)
 
     return (
         full_targets,
-        build,
+        build_full,
         full_ik,
         window_targets,
-        solve_short.activations,
-        basis.muscle_names,
+        activations,
+        muscle_names,
         window_s,
         bar_endpoints,
     )
@@ -739,20 +789,42 @@ def generate_contact_sheet(
     frames_or_video: Path | Sequence[np.ndarray],
     out_path: Path,
     count: int = 6,
+    window_frame_indices: Sequence[int] | None = None,
 ) -> Path:
-    """Generate a 2x3 contact sheet of 6 evenly spaced frames."""
+    """Generate a 2x3 contact sheet of 6 representative frames.
+
+    When ``window_frame_indices`` is provided, ensures at least 2 frames capture
+    the active OSL-4 window with visible force overlays and muscle activations.
+    """
     import imageio.v2 as imageio
 
     if isinstance(frames_or_video, Path):
         reader = imageio.get_reader(str(frames_or_video))
         all_frames = list(reader)  # type: ignore[call-overload]
         reader.close()
-        step_indices = np.linspace(0, len(all_frames) - 1, count, dtype=int)
-        frames = [all_frames[i] for i in step_indices]
     else:
-        seq = list(frames_or_video)
-        step_indices = np.linspace(0, len(seq) - 1, count, dtype=int)
-        frames = [seq[i] for i in step_indices]
+        all_frames = list(frames_or_video)
+
+    total = len(all_frames)
+    if (
+        window_frame_indices is not None
+        and len(window_frame_indices) > 0
+        and count == 6
+        and total >= 6
+    ):
+        w_start = int(window_frame_indices[0])
+        w_end = int(window_frame_indices[-1])
+        w_mid1 = w_start + (w_end - w_start) // 3
+        w_mid2 = w_start + 2 * (w_end - w_start) // 3
+        pre1 = 0
+        pre2 = w_start // 2
+        post1 = w_end + (total - 1 - w_end) // 2
+        post2 = total - 1
+        step_indices = np.array([pre1, pre2, w_mid1, w_mid2, post1, post2], dtype=int)
+    else:
+        step_indices = np.linspace(0, total - 1, count, dtype=int)
+
+    frames = [all_frames[i] for i in step_indices]
 
     row0 = np.concatenate(frames[:3], axis=1)
     row1 = np.concatenate(frames[3:6], axis=1)
@@ -820,11 +892,10 @@ def render_opensim_lift_video(
         ]
         env = {**os.environ}
         if "UPSTREAMDRIFT_MSK_BASE_MODEL" not in env:
-            default_base = Path(
-                "/home/dieterolson/Repositories/ud-13044/shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim"
-            )
-            if default_base.is_file():
-                env["UPSTREAMDRIFT_MSK_BASE_MODEL"] = str(default_base)
+            try:
+                env["UPSTREAMDRIFT_MSK_BASE_MODEL"] = str(resolve_base_model())
+            except FileNotFoundError:
+                pass
         env["NATIVE_VIEWER_XVFB"] = "1"
         env["PYTHONPATH"] = os.pathsep.join(sys.path)
 
