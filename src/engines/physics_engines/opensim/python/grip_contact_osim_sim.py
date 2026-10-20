@@ -555,6 +555,78 @@ class ContactGripSimulator(BushingGripSimulator):
                 )
             self._pad_forces[side] = rows
 
+    @staticmethod
+    def _accumulate_pair_wrench(
+        entries: list[Any],
+        state: Any,
+        p1: np.ndarray,
+        r1: np.ndarray,
+        p2: np.ndarray,
+        axis_point: np.ndarray,
+        axis: np.ndarray,
+        grip_r: float,
+    ) -> tuple[np.ndarray, np.ndarray, float, float, PairWrench]:
+        f_pair = np.zeros(3)
+        t_pair = np.zeros(3)
+        fn_pair = 0.0
+        ft_vec = np.zeros(3)
+        pen_max = 0.0
+        rel_weighted = np.zeros(3)
+        u_rad_weighted = np.zeros(3)
+        rel_mean = np.zeros(3)
+        u_rad_mean = np.zeros(3)
+        for force, i_f, i_t, local_pos, sphere_r, d0 in entries:
+            rec = force.getRecordValues(state)
+            f = np.array([rec.get(i_f + j) for j in range(3)])
+            t = np.array([rec.get(i_t + j) for j in range(3)])
+            f_pair += f
+            t_pair += t
+            c_world = p1 + r1 @ local_pos
+            rel = c_world - axis_point
+            radial = rel - (axis @ rel) * axis
+            norm_rad = float(np.linalg.norm(radial))
+            u_rad = radial / norm_rad if norm_rad > 1e-12 else np.array([0.0, 0.0, 1.0])
+            rel_mean += rel
+            u_rad_mean += u_rad
+            fn_raw = max(0.0, -float(f @ u_rad))
+            f_tang_k = f - (-fn_raw) * u_rad
+            pen_phys = max(0.0, sphere_r + grip_r - norm_rad)
+            pen_k = max(
+                0.0,
+                sphere_r + grip_r - norm_rad + (d0 - DEFAULT_TOPOLOGY_PRELOAD_M),
+            )
+            if pen_k > 1e-12 and d0 > 0.0:
+                ratio_hc_w = max(0.0, 1.0 - ((pen_k - d0) / pen_k) ** 2)
+                fn_k = fn_raw * ratio_hc_w
+            else:
+                fn_k = fn_raw
+            fn_pair += fn_k
+            ft_vec += f_tang_k
+            pen_max = max(pen_max, pen_phys)
+            rel_weighted += fn_k * rel
+            u_rad_weighted += fn_k * u_rad
+
+        ft_mag = float(np.linalg.norm(ft_vec))
+        eff_rel = rel_weighted / fn_pair if fn_pair > 1e-12 else rel_mean / len(entries)
+        eff_u = u_rad_weighted if fn_pair > 1e-12 else u_rad_mean
+        norm_u = float(np.linalg.norm(eff_u))
+        eff_u_rad = eff_u / norm_u if norm_u > 1e-12 else np.array([0.0, 0.0, 1.0])
+        contact_pt = axis_point + (axis @ eff_rel) * axis + eff_u_rad * grip_r
+        pw = PairWrench(
+            force_a_n=-f_pair,
+            moment_a_nm=np.zeros(3),
+            force_b_n=f_pair,
+            moment_b_nm=t_pair,
+            contact_point_m=contact_pt,
+            normal=-eff_u_rad,
+            penetration_m=pen_max,
+            point_a_m=p1,
+            point_b_m=p2,
+            normal_force_mag_n=fn_pair,
+            tangential_force_mag_n=ft_mag,
+        )
+        return f_pair, t_pair, fn_pair, ft_mag, pw
+
     # ----------------------------------------------------------------- sample
     def _sample_topology_side(
         self,
@@ -578,73 +650,13 @@ class ContactGripSimulator(BushingGripSimulator):
         tangential_forces: list[float] = []
 
         for pair_name, entries in self._topo_forces[side]:
-            f_pair = np.zeros(3)
-            t_pair = np.zeros(3)
-            fn_pair = 0.0
-            ft_vec = np.zeros(3)
-            pen_max = 0.0
-            rel_weighted = np.zeros(3)
-            u_rad_weighted = np.zeros(3)
-            rel_mean = np.zeros(3)
-            u_rad_mean = np.zeros(3)
-            for force, i_f, i_t, local_pos, sphere_r, d0 in entries:
-                rec = force.getRecordValues(state)
-                f = np.array([rec.get(i_f + j) for j in range(3)])
-                t = np.array([rec.get(i_t + j) for j in range(3)])
-                f_pair += f
-                t_pair += t
-                c_world = p1 + r1 @ local_pos
-                rel = c_world - axis_point
-                radial = rel - (axis @ rel) * axis
-                norm_rad = float(np.linalg.norm(radial))
-                u_rad = (
-                    radial / norm_rad if norm_rad > 1e-12 else np.array([0.0, 0.0, 1.0])
-                )
-                rel_mean += rel
-                u_rad_mean += u_rad
-                fn_raw = max(0.0, -float(f @ u_rad))
-                f_tang_k = f - (-fn_raw) * u_rad
-                pen_phys = max(0.0, sphere_r + grip_r - norm_rad)
-                pen_k = max(
-                    0.0,
-                    sphere_r + grip_r - norm_rad + (d0 - DEFAULT_TOPOLOGY_PRELOAD_M),
-                )
-                if pen_k > 1e-12 and d0 > 0.0:
-                    ratio_hc_w = max(0.0, 1.0 - ((pen_k - d0) / pen_k) ** 2)
-                    fn_k = fn_raw * ratio_hc_w
-                else:
-                    fn_k = fn_raw
-                fn_pair += fn_k
-                ft_vec += f_tang_k
-                pen_max = max(pen_max, pen_phys)
-                rel_weighted += fn_k * rel
-                u_rad_weighted += fn_k * u_rad
-
-            ft_mag = float(np.linalg.norm(ft_vec))
+            f_pair, t_pair, fn_pair, ft_mag, pw = self._accumulate_pair_wrench(
+                entries, state, p1, r1, p2, axis_point, axis, grip_r
+            )
             total_f += f_pair
             total_t += t_pair
             normal_forces.append(fn_pair)
             tangential_forces.append(ft_mag)
-            eff_rel = (
-                rel_weighted / fn_pair if fn_pair > 1e-12 else rel_mean / len(entries)
-            )
-            eff_u = u_rad_weighted if fn_pair > 1e-12 else u_rad_mean
-            norm_u = float(np.linalg.norm(eff_u))
-            eff_u_rad = eff_u / norm_u if norm_u > 1e-12 else np.array([0.0, 0.0, 1.0])
-            contact_pt = axis_point + (axis @ eff_rel) * axis + eff_u_rad * grip_r
-            pw = PairWrench(
-                force_a_n=-f_pair,
-                moment_a_nm=np.zeros(3),
-                force_b_n=f_pair,
-                moment_b_nm=t_pair,
-                contact_point_m=contact_pt,
-                normal=-eff_u_rad,
-                penetration_m=pen_max,
-                point_a_m=p1,
-                point_b_m=p2,
-                normal_force_mag_n=fn_pair,
-                tangential_force_mag_n=ft_mag,
-            )
             pair_wrenches[pair_name] = pw
 
         total = np.concatenate([total_f, total_t])
