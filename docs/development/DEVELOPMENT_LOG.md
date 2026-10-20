@@ -2743,6 +2743,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13334 · Add Stateless Simscape Physical Grip Contact Codegen Kernel, GS3DX_GripContact Builder/Runner, and M12 Parity Harness
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13334
+- **Branch:** merged via #13529
+- **PR:** #13529
+- **Paths:** see #13529
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`3153e8c0`; collated from changes/13334-add-simscape-physical-grip-contact-codeg.md)
+- **Summary:** Add stateless Simscape physical grip contact codegen kernel, GS3DX_GripContact builder/runner, and M12 parity harness
+- **Next step:** Shipped in PR #13529.
+
 ### DL-#13466 · Drake Native Golfer Grip Tests Pass With Real Pydrake: Default Loader Parses the Generator Humanoid (Not the #13312 Canonical Golfer), Actuator Retrofit No Longer Calls Num_Velocities() Before Finalize, humanoid_urdf.py Split Under 1200 Lines and Its Size Exceptions Removed
 
 - **State:** shipped
@@ -2814,10 +2827,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13175
 - **Branch:** merged via #13503
-- **PR:** #13503
+- **PR:** #13503, #13538
 - **Paths:** see #13503
 - **Started:** 2026-10-20
-- **Last verified:** 2026-10-20 (`0cf7e34d`; collated from changes/13175-hrg-e4-slice-anatomical-angle-event-tabl.md)
+- **Last verified:** 2026-10-20 (`b9edfcc0`; collated from changes/13175-hrg-e4-slice-post-biomechanics-anatomica.md)
 - **Summary:** HRG-E4 slice: anatomical-angle event table (address/top/impact/finish) with CSV/JSON export carrying units, sign conventions, observability and receipts; JSON schema validated
 - **Next step:** Shipped in PR #13503.
 

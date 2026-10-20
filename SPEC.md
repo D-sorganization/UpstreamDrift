@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13529 | Add stateless Simscape physical grip contact codegen kernel, GS3DX_GripContact builder/runner, and M12 parity harness |
+| 2026-10-20 | #13538 | HRG-E4 slice: POST /biomechanics/anatomical-event-table serves the shared anatomical-angle event table (JSON/CSV) from calibrated arm frames |
 | 2026-10-20 | #13536 | Count bench support reaction in Hicks residual limit |
 | 2026-10-20 | #13532 | complete OSL-4 muscle solve and residual gating for supine bench press |
 | 2026-10-20 | #13527 | R4: the dynamics receipt records IK and FD knee flexion through the first static window (acceptance item 4 instrumentation) |
