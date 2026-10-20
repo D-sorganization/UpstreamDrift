@@ -250,6 +250,48 @@ def test_golden_vectors_cover_all_styles_and_edge_cases() -> None:
 
 
 @pytest.mark.unit
+def test_kernel_capsule_pairs_use_shared_line_contact_quadrature() -> None:
+    """Capsule rows integrate along the hand capsule like ``capsule_capsule`` (#13308).
+
+    The closest-point law snapped the little-finger contact ~8 mm once the
+    finger tilted past ``sin^2(theta) = 1e-10``; the line quadrature keeps the
+    contact point and club force continuous across that tilt.
+    """
+    from src.shared.python.grip_contact.pair_contact import line_contact_node_count
+
+    params = build_kernel_params_payload()
+    tbl = np.asarray(params["styles"]["ten_finger"]["pair_table"], dtype=float)
+    caps = [k for k, row in enumerate(tbl) if row[0] > 0.0 and row[2] == 2.0]
+    assert caps, "ten_finger must carry at least one capsule pair"
+    for k in caps:
+        row = tbl[k]
+        half_a = 0.5 * float(np.linalg.norm(row[6:9] - row[3:6]))
+        assert row[17] == line_contact_node_count(half_a, float(row[9]))
+
+    golden = json.loads(DEFAULT_GOLDEN_JSON_PATH.read_text(encoding="utf-8"))
+    (case,) = [
+        c
+        for c in golden["cases"]
+        if c["style"] == "ten_finger" and c["category"] == "near_collinear_capsules"
+    ]
+    k = caps[0]
+    points, forces = [], []
+    for angle in (0.0, 5.0e-6, 2.0e-5, 1.0e-4):
+        c, s = np.cos(angle), np.sin(angle)
+        tilt = np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
+        inp = dict(case["inputs"])
+        inp["r_hand_r"] = (np.asarray(inp["r_hand_r"]) @ tilt).tolist()
+        out = evaluate_kernel_reference(params, "ten_finger", inp)
+        assert out["pair_normal_n"][k] > 0.0
+        points.append(out["pair_contact_point_w_m"][k])
+        forces.append(out["f_club_w_n"])
+    jumps = np.linalg.norm(np.diff(np.asarray(points), axis=0), axis=1)
+    assert jumps.max() < 1.0e-4, jumps
+    f = np.asarray(forces)
+    assert np.linalg.norm(f[1] - f[0]) < 1.0e-3 * np.linalg.norm(f[0])
+
+
+@pytest.mark.unit
 def test_matlab_pair_wrench_unittest_file_contract() -> None:
     """MATLAB unittest file checks R2025b and 1e-10 rel / 1e-9 N abs tolerances."""
     test_m = GS3DX_ROOT / "tests/test_gs3dx_grip_pair_wrench.m"

@@ -35,9 +35,13 @@ from src.shared.python.grip_contact.contact_topology import (
     contact_topology,
 )
 from src.shared.python.grip_contact.interface import SIDES, GripInterface
+from src.shared.python.grip_contact.matlab_kernel_source import (
+    MATLAB_HELPER_FUNCTIONS,
+    MATLAB_LOOP_BODY,
+)
 from src.shared.python.grip_contact.pair_contact import (
     closest_point_segment,
-    closest_points_segments,
+    line_contact_node_count,
 )
 from src.shared.python.grip_contact.prescribed_motion import RigidBodyState
 from src.shared.python.grip_contact.topology_contact import (
@@ -61,10 +65,10 @@ DEFAULT_KERNEL_M_PATH = DEFAULT_GENERATED_DIR / "gs3dx_grip_contact_kernel.m"
 DEFAULT_PARAMS_JSON_PATH = DEFAULT_GENERATED_DIR / "gs3dx_grip_contact_params.json"
 DEFAULT_GOLDEN_JSON_PATH = GS3DX_ROOT / "tests/fixtures/gs3dx_grip_pair_golden.json"
 
-KERNEL_SCHEMA_VERSION = "simscape-grip-contact-kernel/v1"
+KERNEL_SCHEMA_VERSION = "simscape-grip-contact-kernel/v2"
 GOLDEN_SCHEMA_VERSION = "simscape-grip-pair-golden/v1"
 MAX_PHYSICAL_PAIRS = 12
-PAIR_TABLE_COLS = 17
+PAIR_TABLE_COLS = 18
 STYLE_IDS: dict[str, int] = {"overlap": 1, "interlock": 2, "ten_finger": 3}
 
 
@@ -91,7 +95,15 @@ def _orthogonal_unit(axis: np.ndarray) -> np.ndarray:
 
 
 def _build_style_table(model: TopologyContactModel, style_name: str) -> dict[str, Any]:
-    """Build fixed-size ``(MAX_PHYSICAL_PAIRS, 17)`` numeric table for ``style_name``."""
+    """Build fixed-size ``(MAX_PHYSICAL_PAIRS, 18)`` numeric table for ``style_name``.
+
+    Column 18 is the node count of the pair's line-contact quadrature: 1 for a
+    sphere, :func:`line_contact_node_count` of the hand capsule for a capsule.
+
+    Preconditions:
+        Every hand capsule is strictly shorter than its grip capsule, so it is
+        the axis :func:`pair_contact.capsule_capsule` integrates (#13508).
+    """
     topo = model.topology
     rows: list[list[float]] = []
     pair_names: list[str] = []
@@ -105,19 +117,18 @@ def _build_style_table(model: TopologyContactModel, style_name: str) -> dict[str
         rb = float(cap_b.radius_m)
         for pair in model.physical_grip_pairs(side):
             mapped = map_site_to_hand_frame(topo, pair.site_a, side)
+            ra = float(mapped.radius_m)
             if mapped.primitive == "sphere":
-                prim_code = 1.0
+                prim_code, nodes = 1.0, 1.0
                 a0 = [float(x) for x in mapped.centre_m]
-                a1 = [float(x) for x in mapped.centre_m]
+                a1 = list(a0)
             elif mapped.primitive == "capsule":
                 prim_code = 2.0
-                p0, p1 = mapped.endpoints_m
-                a0 = [float(x) for x in p0]
-                a1 = [float(x) for x in p1]
+                a0, a1 = ([float(x) for x in p] for p in mapped.endpoints_m)
+                nodes = float(_hand_capsule_node_count(a0, a1, ra, b0, b1, pair.name))
             else:
                 raise ValueError(f"Unsupported primitive {mapped.primitive!r}")
-            ra = float(mapped.radius_m)
-            row = [1.0, side_code, prim_code, *a0, *a1, ra, *b0, *b1, rb]
+            row = [1.0, side_code, prim_code, *a0, *a1, ra, *b0, *b1, rb, nodes]
             rows.append(row)
             pair_names.append(pair.name)
             pair_sides.append(side)
@@ -138,6 +149,24 @@ def _build_style_table(model: TopologyContactModel, style_name: str) -> dict[str
         "pair_primitives": pair_primitives,
         "pair_table": rows,
     }
+
+
+def _hand_capsule_node_count(
+    a0: list[float],
+    a1: list[float],
+    r_a: float,
+    b0: list[float],
+    b1: list[float],
+    name: str,
+) -> int:
+    """Line-contact node count of a hand capsule that integrates its pair."""
+    len_a = math.dist(a0, a1)
+    if not len_a < math.dist(b0, b1):
+        raise ValueError(
+            f"pair {name!r}: hand capsule ({len_a} m) must be shorter than the grip "
+            "capsule; the kernel integrates along the hand capsule"
+        )
+    return line_contact_node_count(0.5 * len_a, r_a)
 
 
 DEFAULT_SQUEEZE_PER_HAND_N = 1100.0
@@ -163,7 +192,7 @@ def build_kernel_params_payload(
     spec_path: Path = DEFAULT_SPEC_PATH,
     squeeze_per_hand_n: float = DEFAULT_SQUEEZE_PER_HAND_N,
 ) -> dict[str, Any]:
-    """Build the canonical ``simscape-grip-contact-kernel/v1`` parameters dictionary."""
+    """Build the canonical ``simscape-grip-contact-kernel/v2`` parameters dictionary."""
     spec = json.loads(Path(spec_path).read_text(encoding="utf-8"))
     interface = GripInterface.from_spec(spec)
     base_model = _model_for_style(spec, GripStyle.OVERLAP, squeeze_per_hand_n)
@@ -197,6 +226,7 @@ def build_kernel_params_payload(
             "b1_y",
             "b1_z",
             "r_b",
+            "line_nodes",
         ],
         "law": {
             "normal_stiffness_n_m": float(law.stiffness_n_m),
@@ -225,7 +255,7 @@ def build_kernel_params_payload(
 
 
 def validate_kernel_params_payload(payload: Mapping[str, Any]) -> None:
-    """Validate ``simscape-grip-contact-kernel/v1`` parameters dictionary (DbC)."""
+    """Validate ``simscape-grip-contact-kernel/v2`` parameters dictionary (DbC)."""
     if not isinstance(payload, Mapping):
         raise TypeError("kernel params payload must be a Mapping")
     if payload.get("schema_version") != KERNEL_SCHEMA_VERSION:
@@ -266,297 +296,6 @@ def _format_matlab_matrix(mat: list[list[float]], indent: str = "        ") -> s
     return "\n".join(lines)
 
 
-_MATLAB_HELPER_FUNCTIONS = """
-function c = local_cross3(a, b)
-    c = [a(2)*b(3) - a(3)*b(2); ...
-         a(3)*b(1) - a(1)*b(3); ...
-         a(1)*b(2) - a(2)*b(1)];
-end
-
-function u = local_orthogonal_unit(axis)
-    nrm = sqrt(axis(1)*axis(1) + axis(2)*axis(2) + axis(3)*axis(3));
-    if nrm < 1.0e-12
-        u = [1.0; 0.0; 0.0];
-        return;
-    end
-    unit = axis / nrm;
-    if abs(unit(3)) < 0.9
-        ref = [0.0; 0.0; 1.0];
-    else
-        ref = [1.0; 0.0; 0.0];
-    end
-    ortho = local_cross3(unit, ref);
-    onrm = sqrt(ortho(1)*ortho(1) + ortho(2)*ortho(2) + ortho(3)*ortho(3));
-    if onrm > 1.0e-12
-        u = ortho / onrm;
-    else
-        u = [1.0; 0.0; 0.0];
-    end
-end
-
-function q = local_closest_point_segment(p, a, b)
-    ab = b - a;
-    denom = ab(1)*ab(1) + ab(2)*ab(2) + ab(3)*ab(3);
-    if denom < 1.0e-14
-        q = a;
-        return;
-    end
-    ap = p - a;
-    t = (ap(1)*ab(1) + ap(2)*ab(2) + ap(3)*ab(3)) / denom;
-    t = min(max(t, 0.0), 1.0);
-    q = a + t * ab;
-end
-
-function [pa, pb] = local_closest_points_segments(p1, q1, p2, q2)
-    d1 = q1 - p1;
-    d2 = q2 - p2;
-    r = p1 - p2;
-    a = d1(1)*d1(1) + d1(2)*d1(2) + d1(3)*d1(3);
-    e = d2(1)*d2(1) + d2(2)*d2(2) + d2(3)*d2(3);
-    f = d2(1)*r(1) + d2(2)*r(2) + d2(3)*r(3);
-    if a < 1.0e-14 && e < 1.0e-14
-        pa = p1;
-        pb = p2;
-        return;
-    end
-    if a < 1.0e-14
-        pa = p1;
-        t = min(max(f / e, 0.0), 1.0);
-        pb = p2 + t * d2;
-        return;
-    end
-    c = d1(1)*r(1) + d1(2)*r(2) + d1(3)*r(3);
-    if e < 1.0e-14
-        s = min(max(-c / a, 0.0), 1.0);
-        pa = p1 + s * d1;
-        pb = p2;
-        return;
-    end
-    b = d1(1)*d2(1) + d1(2)*d2(2) + d1(3)*d2(3);
-    denom = max(a * e - b * b, 0.0);
-    if denom < 1.0e-10 * a * e
-        s0 = -c / a;
-        s1 = (-c + b) / a;
-        s_min = min(s0, s1);
-        s_max = max(s0, s1);
-        lo = max(0.0, s_min);
-        hi = min(1.0, s_max);
-        if lo <= hi
-            s = 0.5 * (lo + hi);
-            t = min(max((a * s + c) / b, 0.0), 1.0);
-        elseif s_max < 0.0
-            s = 0.0;
-            t = min(max(f / e, 0.0), 1.0);
-        else
-            s = 1.0;
-            t = min(max((b + f) / e, 0.0), 1.0);
-        end
-    else
-        s = (b * f - c * e) / denom;
-        t = (b * s + f) / e;
-        if s < 0.0
-            s = 0.0;
-            t = min(max(f / e, 0.0), 1.0);
-        elseif s > 1.0
-            s = 1.0;
-            t = min(max((b + f) / e, 0.0), 1.0);
-        else
-            if t < 0.0
-                t = 0.0;
-                s = min(max(-c / a, 0.0), 1.0);
-            elseif t > 1.0
-                t = 1.0;
-                s = min(max((b - c) / a, 0.0), 1.0);
-            end
-        end
-    end
-    pa = p1 + s * d1;
-    pb = p2 + t * d2;
-end
-
-function [f_n_mag, f_t_mag, spin_mag, slip_speed, force_vec, spin_vec] = ...
-    local_plane_contact(u_normal, penetration, v_rel, omega_rel, ...
-    k_n, c_n, mu_s, mu_d, mu_v, v_tr, r_patch, omega_tr)
-    v_n = u_normal(1)*v_rel(1) + u_normal(2)*v_rel(2) + u_normal(3)*v_rel(3);
-    v_t = v_rel - u_normal * v_n;
-    slip_speed = sqrt(v_t(1)*v_t(1) + v_t(2)*v_t(2) + v_t(3)*v_t(3));
-    if penetration <= 0.0
-        f_n_mag = 0.0;
-        f_t_mag = 0.0;
-        spin_mag = 0.0;
-        force_vec = zeros(3, 1);
-        spin_vec = zeros(3, 1);
-        return;
-    end
-    rate = -v_n;
-    f_n_mag = max(0.0, k_n * penetration * (1.0 + c_n * rate));
-    normal_force = u_normal * f_n_mag;
-    if slip_speed > 0.0 && f_n_mag > 0.0
-        ratio = slip_speed / v_tr;
-        mu = mu_d + (mu_s - mu_d) * exp(-(ratio * ratio)) + mu_v * slip_speed;
-        f_t_mag = mu * f_n_mag * tanh(ratio);
-        friction_force = (-v_t / slip_speed) * f_t_mag;
-    else
-        f_t_mag = 0.0;
-        friction_force = zeros(3, 1);
-    end
-    force_vec = normal_force + friction_force;
-    if f_n_mag > 0.0 && r_patch > 0.0
-        spin_rate = u_normal(1)*omega_rel(1) + u_normal(2)*omega_rel(2) + u_normal(3)*omega_rel(3);
-        spin_mag = mu_s * f_n_mag * r_patch * abs(tanh(spin_rate / omega_tr));
-        spin_vec = -u_normal * (mu_s * f_n_mag * r_patch * tanh(spin_rate / omega_tr));
-    else
-        spin_mag = 0.0;
-        spin_vec = zeros(3, 1);
-    end
-end
-"""
-
-_MATLAB_LOOP_BODY = f"""    % Club-side grip frames in World
-    dp_L = R_club * p_club_L_local;
-    p_b_L = p_club + dp_L;
-    R_b_L = R_club * R_club_L_local;
-    v_b_L = v_club + local_cross3(omega_club, dp_L);
-
-    dp_R = R_club * p_club_R_local;
-    p_b_R = p_club + dp_R;
-    R_b_R = R_club * R_club_R_local;
-    v_b_R = v_club + local_cross3(omega_club, dp_R);
-
-    % Fixed-size output preallocation
-    F_hand_L_w = zeros(3, 1);
-    M_hand_L_w = zeros(3, 1);
-    F_hand_R_w = zeros(3, 1);
-    M_hand_R_w = zeros(3, 1);
-    F_side_L = zeros(3, 1);
-    M_side_L = zeros(3, 1);
-    F_side_R = zeros(3, 1);
-    M_side_R = zeros(3, 1);
-
-    pair_normal_n = zeros({MAX_PHYSICAL_PAIRS}, 1);
-    pair_tangent_n = zeros({MAX_PHYSICAL_PAIRS}, 1);
-    pair_spin_nm = zeros({MAX_PHYSICAL_PAIRS}, 1);
-    pair_penetration_m = zeros({MAX_PHYSICAL_PAIRS}, 1);
-    pair_slip_speed_m_s = zeros({MAX_PHYSICAL_PAIRS}, 1);
-    pair_signed_dist_m = zeros({MAX_PHYSICAL_PAIRS}, 1);
-    pair_force_club_w = zeros({MAX_PHYSICAL_PAIRS}, 3);
-    pair_moment_club_w = zeros({MAX_PHYSICAL_PAIRS}, 3);
-    pair_contact_point_w = zeros({MAX_PHYSICAL_PAIRS}, 3);
-
-    for k = 1:{MAX_PHYSICAL_PAIRS}
-        if pair_table(k, 1) <= 0.0
-            continue;
-        end
-        side_code = pair_table(k, 2);
-        prim_code = pair_table(k, 3);
-        a0 = [pair_table(k, 4); pair_table(k, 5); pair_table(k, 6)];
-        a1 = [pair_table(k, 7); pair_table(k, 8); pair_table(k, 9)];
-        r_a = pair_table(k, 10);
-        b0 = [pair_table(k, 11); pair_table(k, 12); pair_table(k, 13)];
-        b1 = [pair_table(k, 14); pair_table(k, 15); pair_table(k, 16)];
-        r_b = pair_table(k, 17);
-
-        if side_code == 1.0
-            p_a = p_hand_L;
-            R_a = R_hand_L;
-            v_a0 = v_hand_L;
-            omega_a = omega_hand_L;
-            p_b = p_b_L;
-            R_b = R_b_L;
-            v_b0 = v_b_L;
-            omega_b = omega_club;
-        else
-            p_a = p_hand_R;
-            R_a = R_hand_R;
-            v_a0 = v_hand_R;
-            omega_a = omega_hand_R;
-            p_b = p_b_R;
-            R_b = R_b_R;
-            v_b0 = v_b_R;
-            omega_b = omega_club;
-        end
-
-        b0_w = p_b + R_b * b0;
-        b1_w = p_b + R_b * b1;
-
-        if prim_code == 1.0
-            center_w = p_a + R_a * a0;
-            p_axis = local_closest_point_segment(center_w, b0_w, b1_w);
-            diff_v = p_axis - center_w;
-            dist = sqrt(diff_v(1)*diff_v(1) + diff_v(2)*diff_v(2) + diff_v(3)*diff_v(3));
-            if dist > 1.0e-12
-                normal = diff_v / dist;
-            else
-                normal = local_orthogonal_unit(b1_w - b0_w);
-            end
-            signed_dist = dist - r_a - r_b;
-            penetration = max(0.0, -signed_dist);
-            contact_pt = center_w + r_a * normal;
-            v_a = v_a0 + local_cross3(omega_a, contact_pt - p_a);
-            v_b = v_b0 + local_cross3(omega_b, contact_pt - p_b);
-            [f_n_mag, f_t_mag, spin_mag, slip_speed, force_a, spin_a] = ...
-                local_plane_contact(-normal, penetration, v_a - v_b, omega_a - omega_b, ...
-                k_n, c_n, mu_s, mu_d, mu_v, v_tr, r_patch, omega_tr);
-            force_b = -force_a;
-            moment_a = local_cross3(contact_pt - p_a, force_a) + spin_a;
-            moment_b_side = local_cross3(contact_pt - p_b, force_b) - spin_a;
-        else
-            a0_w = p_a + R_a * a0;
-            a1_w = p_a + R_a * a1;
-            [pa, pb] = local_closest_points_segments(a0_w, a1_w, b0_w, b1_w);
-            diff_v = pb - pa;
-            dist = sqrt(diff_v(1)*diff_v(1) + diff_v(2)*diff_v(2) + diff_v(3)*diff_v(3));
-            if dist > 1.0e-12
-                normal = diff_v / dist;
-            else
-                normal = local_orthogonal_unit(b1_w - b0_w);
-            end
-            signed_dist = dist - r_a - r_b;
-            penetration = max(0.0, -signed_dist);
-            sa = pa + r_a * normal;
-            sb = pb - r_b * normal;
-            contact_pt = 0.5 * (sa + sb);
-            v_a = v_a0 + local_cross3(omega_a, contact_pt - p_a);
-            v_b = v_b0 + local_cross3(omega_b, contact_pt - p_b);
-            [f_n_mag, f_t_mag, spin_mag, slip_speed, force_b, spin_b] = ...
-                local_plane_contact(normal, penetration, v_b - v_a, omega_b - omega_a, ...
-                k_n, c_n, mu_s, mu_d, mu_v, v_tr, r_patch, omega_tr);
-            force_a = -force_b;
-            spin_a = -spin_b;
-            moment_a = local_cross3(contact_pt - p_a, force_a) + spin_a;
-            moment_b_side = local_cross3(contact_pt - p_b, force_b) + spin_b;
-        end
-
-        if side_code == 1.0
-            F_hand_L_w = F_hand_L_w + force_a;
-            M_hand_L_w = M_hand_L_w + moment_a;
-            F_side_L = F_side_L + force_b;
-            M_side_L = M_side_L + moment_b_side;
-        else
-            F_hand_R_w = F_hand_R_w + force_a;
-            M_hand_R_w = M_hand_R_w + moment_a;
-            F_side_R = F_side_R + force_b;
-            M_side_R = M_side_R + moment_b_side;
-        end
-
-        pair_normal_n(k) = f_n_mag;
-        pair_tangent_n(k) = f_t_mag;
-        pair_spin_nm(k) = spin_mag;
-        pair_penetration_m(k) = penetration;
-        pair_slip_speed_m_s(k) = slip_speed;
-        pair_signed_dist_m(k) = signed_dist;
-        pair_force_club_w(k, :) = force_b.';
-        pair_moment_club_w(k, :) = moment_b_side.';
-        pair_contact_point_w(k, :) = contact_pt.';
-    end
-
-    F_club_w = F_side_L + F_side_R;
-    M_club_w = (M_side_L + local_cross3(p_b_L - p_club, F_side_L)) + ...
-               (M_side_R + local_cross3(p_b_R - p_club, F_side_R));
-end
-"""
-
-
 def render_matlab_kernel_source(params: Mapping[str, Any]) -> str:
     """Render ``gs3dx_grip_contact_kernel.m`` from ``params`` (single source of truth)."""
     validate_kernel_params_payload(params)
@@ -582,8 +321,9 @@ def render_matlab_kernel_source(params: Mapping[str, Any]) -> str:
 %   DO NOT EDIT MANUALLY. Generated by scripts/export_simscape_grip_kernel.py
 %   from src/shared/python/grip_contact/matlab_kernel.py.
 %   Schema: {KERNEL_SCHEMA_VERSION}
-%   Stateless constitutive law mirroring sphere_capsule, capsule_capsule, and
-%   _sample_contact in src/shared/python/grip_contact/pair_contact.py.
+%   Stateless constitutive law mirroring sphere_capsule, the capsule_capsule
+%   line-contact quadrature, and _sample_contact in
+%   src/shared/python/grip_contact/pair_contact.py.
 %
 %   Inputs:
 %     p_club (3x1), R_club (3x3), v_club (3x1), omega_club (3x1)
@@ -617,7 +357,7 @@ def render_matlab_kernel_source(params: Mapping[str, Any]) -> str:
     p_club_R_local = [{_fmt(p_r[0])}; {_fmt(p_r[1])}; {_fmt(p_r[2])}];
     R_club_R_local = {_format_matlab_matrix(r_r)};
 
-    % Select fixed-size (12x17) pair table for style_id
+    % Select fixed-size (12x18) pair table for style_id
     if style_id == 2
         pair_table = {tbl_interlock};
     elseif style_id == 3
@@ -627,7 +367,8 @@ def render_matlab_kernel_source(params: Mapping[str, Any]) -> str:
     end
 
 """
-    return header + _MATLAB_LOOP_BODY + _MATLAB_HELPER_FUNCTIONS
+    loop = MATLAB_LOOP_BODY.replace("@MAXP@", str(MAX_PHYSICAL_PAIRS))
+    return header + loop + MATLAB_HELPER_FUNCTIONS
 
 
 def _eval_plane_contact_py(
@@ -676,57 +417,76 @@ def _eval_plane_contact_py(
     return f_n_mag, f_t_mag, spin_mag, slip_speed, force_vec, spin_vec
 
 
+def _eval_sphere_node_py(
+    center_w: np.ndarray,
+    r_a: float,
+    seg_b: tuple[np.ndarray, np.ndarray, float],
+    pose_a: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    pose_b: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    law: Mapping[str, float],
+) -> tuple[Any, ...]:
+    """Mirror of ``local_sphere_capsule`` in ``gs3dx_grip_contact_kernel.m``."""
+    b0_w, b1_w, r_b = seg_b
+    p_a, _, v_a0, om_a = pose_a
+    p_b, _, v_b0, om_b = pose_b
+    p_axis, _ = closest_point_segment(center_w, b0_w, b1_w)
+    diff_v = p_axis - center_w
+    dist = float(np.linalg.norm(diff_v))
+    normal = diff_v / dist if dist > 1e-12 else _orthogonal_unit(b1_w - b0_w)
+    sdist = dist - r_a - r_b
+    pen = max(0.0, -sdist)
+    cpt = center_w + r_a * normal
+    v_a = v_a0 + cross3(om_a, cpt - p_a)
+    v_b = v_b0 + cross3(om_b, cpt - p_b)
+    fn, ft, sp, slp, force_a, spin_a = _eval_plane_contact_py(
+        -normal, pen, v_a - v_b, om_a - om_b, law
+    )
+    moment_a = cross3(cpt - p_a, force_a) + spin_a
+    moment_b = cross3(cpt - p_b, -force_a) - spin_a
+    return fn, ft, sp, slp, pen, sdist, force_a, moment_a, -force_a, moment_b, cpt
+
+
 def _eval_pair_row_py(
     row: np.ndarray,
     pose_a: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     pose_b: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     law: Mapping[str, float],
 ) -> tuple[Any, ...]:
-    """Evaluate a single row of ``pair_table`` in Python."""
-    prim_code = row[2]
+    """Evaluate one ``pair_table`` row in Python, node by node like the kernel.
+
+    Postconditions:
+        Forces, moments and the normal, tangential and spin magnitudes are
+        ``1 / n`` weighted node sums; penetration is the deepest node's and the
+        signed distance the smallest; contact point and slip speed are
+        normal-load weighted node means (unweighted when no node is loaded).
+    """
     a0, a1, r_a = row[3:6], row[6:9], float(row[9])
-    b0, b1, r_b = row[10:13], row[13:16], float(row[16])
-    p_a, r_a_m, v_a0, om_a = pose_a
-    p_b, r_b_m, v_b0, om_b = pose_b
-    b0_w = p_b + r_b_m @ b0
-    b1_w = p_b + r_b_m @ b1
-    if prim_code == 1.0:
-        center_w = p_a + r_a_m @ a0
-        p_axis, _ = closest_point_segment(center_w, b0_w, b1_w)
-        diff_v = p_axis - center_w
-        dist = float(np.linalg.norm(diff_v))
-        normal = diff_v / dist if dist > 1e-12 else _orthogonal_unit(b1_w - b0_w)
-        sdist = dist - r_a - r_b
-        pen = max(0.0, -sdist)
-        cpt = center_w + r_a * normal
-        v_a = v_a0 + cross3(om_a, cpt - p_a)
-        v_b = v_b0 + cross3(om_b, cpt - p_b)
-        fn, ft, sp, slp, force_a, spin_a = _eval_plane_contact_py(
-            -normal, pen, v_a - v_b, om_a - om_b, law
+    p_b, r_b_m = pose_b[0], pose_b[1]
+    seg_b = (p_b + r_b_m @ row[10:13], p_b + r_b_m @ row[13:16], float(row[16]))
+    n_nodes = int(row[17])
+    w = 1.0 / n_nodes
+    fn = ft = sp = pen = load_slip = mean_slip = 0.0
+    sdist = math.inf
+    fa, ma, fb, mb, cp_load, cp_mean = (np.zeros(3, dtype=float) for _ in range(6))
+    for j in range(n_nodes):
+        node = a0 + (j / (n_nodes - 1)) * (a1 - a0) if n_nodes > 1 else a0
+        n_fn, n_ft, n_sp, n_slp, n_pen, n_sd, n_fa, n_ma, n_fb, n_mb, n_cpt = (
+            _eval_sphere_node_py(
+                pose_a[0] + pose_a[1] @ node, r_a, seg_b, pose_a, pose_b, law
+            )
         )
-        force_b = -force_a
-        moment_a = cross3(cpt - p_a, force_a) + spin_a
-        moment_b_side = cross3(cpt - p_b, force_b) - spin_a
+        fn, ft, sp = fn + w * n_fn, ft + w * n_ft, sp + w * n_sp
+        pen, sdist = max(pen, n_pen), min(sdist, n_sd)
+        fa, ma = fa + w * n_fa, ma + w * n_ma
+        fb, mb = fb + w * n_fb, mb + w * n_mb
+        cp_load, cp_mean = cp_load + (w * n_fn) * n_cpt, cp_mean + w * n_cpt
+        load_slip += (w * n_fn) * n_slp
+        mean_slip += w * n_slp
+    if fn > 0.0:
+        cpt, slp = cp_load / fn, load_slip / fn
     else:
-        a0_w = p_a + r_a_m @ a0
-        a1_w = p_a + r_a_m @ a1
-        pa, pb = closest_points_segments(a0_w, a1_w, b0_w, b1_w)
-        diff_v = pb - pa
-        dist = float(np.linalg.norm(diff_v))
-        normal = diff_v / dist if dist > 1e-12 else _orthogonal_unit(b1_w - b0_w)
-        sdist = dist - r_a - r_b
-        pen = max(0.0, -sdist)
-        cpt = 0.5 * ((pa + r_a * normal) + (pb - r_b * normal))
-        v_a = v_a0 + cross3(om_a, cpt - p_a)
-        v_b = v_b0 + cross3(om_b, cpt - p_b)
-        fn, ft, sp, slp, force_b, spin_b = _eval_plane_contact_py(
-            normal, pen, v_b - v_a, om_b - om_a, law
-        )
-        force_a = -force_b
-        spin_a = -spin_b
-        moment_a = cross3(cpt - p_a, force_a) + spin_a
-        moment_b_side = cross3(cpt - p_b, force_b) + spin_b
-    return fn, ft, sp, pen, slp, sdist, force_a, moment_a, force_b, moment_b_side, cpt
+        cpt, slp = cp_mean, mean_slip
+    return fn, ft, sp, pen, slp, sdist, fa, ma, fb, mb, cpt
 
 
 def evaluate_kernel_reference(
