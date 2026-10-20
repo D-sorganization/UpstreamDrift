@@ -51,11 +51,13 @@ from src.shared.python.grip_contact.contact_topology import (
     contact_topology,
 )
 from src.shared.python.grip_contact.parity import (
+    NUMERICAL_ZERO_PEAK,
     PEAK_TOLERANCE,
     RMS_TOLERANCE,
     ChannelParityResult,
     TopologyParityReport,
     compare_topology_series,
+    compute_quantity_error,
 )
 from src.shared.python.grip_contact.topology_contact import (
     TopologyContactModel,
@@ -331,6 +333,71 @@ def test_identical_series_pass_and_scaled_normal_fails_peak(
     assert ch_norm.error is not None
     assert ch_norm.error.peak_error == pytest.approx(0.06)
     assert ch_norm.error.peak_error > PEAK_TOLERANCE
+
+
+def _with_spin(
+    series: TopologyKineticsSeries, pair: str, values: np.ndarray
+) -> TopologyKineticsSeries:
+    """Return ``series`` with the spin channel of ``pair`` replaced by ``values``."""
+    spin = dict(series.pair_spin_moment_nm)
+    spin[pair] = values
+    return replace(series, pair_spin_moment_nm=spin)
+
+
+def test_numerical_zero_reference_spin_channel_is_compared_absolutely(
+    overlap_model: TopologyContactModel,
+) -> None:
+    """A ~1e-14 N·m reference spin peak is numerical zero, not a 32 % miss.
+
+    Reproduces the myoHand frozen-finger law-level failure on
+    ``spin:trail_index_trigger_grip`` (reference 1.29e-14, candidate 8.75e-15).
+    """
+    assert NUMERICAL_ZERO_PEAK == 1e-8
+    phys_pair = overlap_model.topology.hand_grip_pairs()[0].name
+    ch = f"spin:{phys_pair}"
+    base = _make_series(overlap_model)
+    n = base.time_s.size
+    rng = np.random.default_rng(13)
+    ref_noise = 1.2e-14 * rng.uniform(-1.0, 1.0, n)
+    ref_noise[n // 2] = 1.2910139841389068e-14
+    cand_noise = 8.0e-15 * rng.uniform(-1.0, 1.0, n)
+    cand_noise[n // 3] = 8.75405750832983e-15
+    ref = _with_spin(base, phys_pair, ref_noise)
+    cand = _with_spin(base, phys_pair, cand_noise)
+
+    rep = compare_topology_series(ref, cand)
+    assert rep.passed is True, rep.to_dict()["channels"][ch]
+    err = rep.channels[ch].error
+    assert err is not None
+    assert err.numerical_zero is True
+    assert err.peak_reference == pytest.approx(1.2910139841389068e-14)
+    assert err.peak_error == 0.0 and err.rms_error == 0.0
+    assert err.to_dict()["numerical_zero"] is True
+
+    # A genuine candidate spin against a numerically-zero reference still fails.
+    genuine = _with_spin(base, phys_pair, np.full(n, 0.08))
+    rep_fail = compare_topology_series(ref, genuine)
+    assert rep_fail.status == "failed"
+    assert rep_fail.channels[ch].status == "failed"
+    assert rep_fail.channels[ch].error is not None
+    assert rep_fail.channels[ch].error.peak_error == float("inf")
+
+    # Just above the floor the relative 5 % / 2 % metric still applies.
+    small = _with_spin(base, phys_pair, np.full(n, 10.0 * NUMERICAL_ZERO_PEAK))
+    small_cand = _with_spin(base, phys_pair, np.full(n, 7.0 * NUMERICAL_ZERO_PEAK))
+    rep_small = compare_topology_series(small, small_cand)
+    small_err = rep_small.channels[ch].error
+    assert small_err is not None and small_err.numerical_zero is False
+    assert small_err.peak_error == pytest.approx(0.3)
+    assert rep_small.channels[ch].status == "failed"
+
+
+def test_numerical_zero_floor_never_applies_to_strict_comparisons() -> None:
+    """Without ``allow_zero_reference`` a tiny reference stays relative (no floor)."""
+    ref = np.full((5, 3), 1e-14)
+    err = compute_quantity_error(ref * 0.5, ref, name="force_L")
+    assert err.numerical_zero is False
+    assert err.peak_error == pytest.approx(0.5)
 
 
 def test_allocated_channels_never_affect_physical_verdict(

@@ -21,17 +21,18 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1200 | `src/tools/shot_pattern_analysis/matched_lean_control.py` |
 | 1199 | `src/api/services/simulation_service.py` |
 | 1198 | `src/launchers/cross_engine_dashboard.py` |
+| 1198 | `src/shared/python/grip_contact/matlab_kernel.py` |
 | 1198 | `src/tools/capture_rig/gui.py` |
 | 1197 | `src/bunkershot3d/solvers/mpm/verification.py` |
 | 1197 | `src/launchers/launcher_diagnostics.py` |
 | 1196 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
-| 1196 | `src/shared/python/grip_contact/matlab_kernel.py` |
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
 | 1193 | `src/launchers/model_card.py` |
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1183 | `src/launchers/launcher_simulation.py` |
 | 1182 | `src/launchers/launcher_model_handlers.py` |
+| 1181 | `src/shared/python/grip_contact/parity.py` |
 | 1180 | `src/launchers/upstream_drift_launcher.py` |
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
 | 1174 | `src/shared/python/lifting/bundles.py` |
@@ -41,7 +42,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1168 | `src/shared/python/shadow_tracker/ingestion.py` |
 | 1167 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1167 | `src/launchers/settings_dialog.py` |
-| 1167 | `src/shared/python/grip_contact/parity.py` |
 | 1167 | `src/shared/python/grip_contact/topology_contact.py` |
 | 1166 | `src/shared/python/analysis/orchestrator.py` |
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
@@ -108,8 +108,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 991 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` |
 | 990 | `src/shared/python/estimation/map_estimator.py` |
 | 988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py` |
+| 986 | `src/shared/python/grip_contact/simscape_grip_contact.py` |
 | 984 | `src/tools/bunker_shot_gui/viewport_widgets.py` |
-| 983 | `src/shared/python/grip_contact/simscape_grip_contact.py` |
 | 981 | `src/shared/python/workspace/necromatcher_video.py` |
 | 980 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 979 | `src/shared/python/motion_matching/pipeline/address.py` |
