@@ -1,0 +1,695 @@
+{
+  "schema": "os9-address-registration/v1",
+  "issue": "#13434",
+  "qualification": "kinematics only; anatomical priors declared, not validated",
+  "inputs": {
+    "model": "golf_humanoid_344e.osim",
+    "model_sha256": "344e8a86bd155e90d0882db4300c963b2665fe087b950245555fc38dc33b5ad7",
+    "trc": "tour_average_tracked.trc",
+    "trc_sha256": "203ad3629ea38c4c4705426bbd938de8c9706ea364c08366b61068f554eaa07f"
+  },
+  "method": {
+    "calibration_frames": "quiet address hold (owner decision, #13434 a)",
+    "quiet_first_frame": 0,
+    "quiet_last_frame": 80,
+    "quiet_duration_s": 0.222222222,
+    "prior_weight_frame_equivalents": 81,
+    "iterations": 6,
+    "pelvis_seed": {
+      "pelvis_tilt": 0.32402239410735495,
+      "pelvis_list": 0.03202272023915751,
+      "pelvis_rotation": -3.1380699790266617,
+      "pelvis_tx": 1.1029892297822468,
+      "pelvis_ty": 0.9482376662264332,
+      "pelvis_tz": -0.051841187705146376
+    },
+    "pelvis_seed_residual_rad": 4.976392642608182e-16,
+    "assumptions": [
+      "Body markers lie within their declared radius of an anatomical landmark anchored to the scaled model's joints.",
+      "Waist-belt axes coincide with the pelvis body axes (heading seed).",
+      "The subject holds one posture during the quiet address segment.",
+      "Club markers have no anatomical prior and are placed freely."
+    ]
+  },
+  "calibration": {
+    "rms_per_iteration_m": [
+      0.019171775483670786,
+      0.01914260051881778,
+      0.019136980980081146,
+      0.019136178304983303,
+      0.019134856595885305,
+      0.019133849202895375
+    ],
+    "best_iteration": 6,
+    "per_marker_rms_m": {
+      "WaistLeft": 0.012899796280879795,
+      "WaistRight": 0.01257571638963895,
+      "WaistLBack": 0.024861032315675043,
+      "WaistRBack": 0.028640787481833088,
+      "BackTop": 0.01862972070518506,
+      "BackLeft": 0.0230093901628656,
+      "BackRight": 0.02009190987511493,
+      "HeadTop": 0.017411859288068172,
+      "HeadFront": 0.043497049970134406,
+      "HeadSide": 0.021169517928044744,
+      "LShoulderTop": 0.027825819920317282,
+      "LShoulderBack": 0.020953013717591538,
+      "LElbowOut": 0.029954250616779567,
+      "LUArmHigh": 0.02328972956877611,
+      "LWristTop": 0.014032185250598097,
+      "RShoulderBack": 0.010520654373610765,
+      "RElbowOut": 0.012203315385604485,
+      "RUArmHigh": 0.01684857896236293,
+      "RWristTop": 0.012999973867548757,
+      "LKneeOut": 0.023150404613669268,
+      "LToeIn": 0.012266261430946827,
+      "LToeOut": 0.01959483484828389,
+      "LAnkleOut": 0.022945391492809608,
+      "RKneeOut": 0.013770051063239459,
+      "RToeIn": 0.014100027795584315,
+      "RToeOut": 0.022646774024899678,
+      "RAnkleOut": 0.018277978826994903,
+      "Marker_2:2:1": 0.00016185082155695713,
+      "Marker_2:2:2": 0.00011862276842487998,
+      "Marker_2:2:3": 0.0002405408439692837,
+      "Marker_3:3:1": 0.0004518959878837934,
+      "Marker_3:3:2": 0.00032026957263012586,
+      "Marker_3:3:3": 0.00015588273348400399
+    }
+  },
+  "prior_deviation": {
+    "WaistRight": {
+      "body": "pelvis",
+      "landmark": "waist belt, front, over the iliac crest",
+      "prior_m": [
+        -0.02,
+        0.04,
+        0.17
+      ],
+      "offset_m": [
+        -0.03199202157643029,
+        0.036961757621698316,
+        0.17209741848723198
+      ],
+      "deviation_mm": 12.547456417515873,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "WaistRBack": {
+      "body": "pelvis",
+      "landmark": "waist belt, back",
+      "prior_m": [
+        -0.155,
+        0.09,
+        0.085
+      ],
+      "offset_m": [
+        -0.1737863695682165,
+        0.06835132016537396,
+        0.0850574529009476
+      ],
+      "deviation_mm": 28.66350154764038,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "WaistLeft": {
+      "body": "pelvis",
+      "landmark": "waist belt, front, over the iliac crest",
+      "prior_m": [
+        -0.02,
+        0.04,
+        -0.17
+      ],
+      "offset_m": [
+        -0.030584162808750107,
+        0.03274461035507143,
+        -0.1702610561157755
+      ],
+      "deviation_mm": 12.83484832623469,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "WaistLBack": {
+      "body": "pelvis",
+      "landmark": "waist belt, back",
+      "prior_m": [
+        -0.155,
+        0.09,
+        -0.085
+      ],
+      "offset_m": [
+        -0.17002557889873265,
+        0.07018872274788426,
+        -0.08443035341683737
+      ],
+      "deviation_mm": 24.871252980739577,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "BackTop": {
+      "body": "torso",
+      "landmark": "C7",
+      "prior_m": [
+        -0.0517129161,
+        0.46684826,
+        0.0
+      ],
+      "offset_m": [
+        -0.06969730320463965,
+        0.47000254640449246,
+        0.0036090511035137547
+      ],
+      "deviation_mm": 18.612172149399136,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "HeadTop": {
+      "body": "torso",
+      "landmark": "vertex",
+      "prior_m": [
+        -0.0167129161,
+        0.74684826,
+        0.0
+      ],
+      "offset_m": [
+        -0.005197908781807193,
+        0.7594273786248311,
+        -0.0034343651978358592
+      ],
+      "deviation_mm": 17.396105404018225,
+      "radius_mm": 100.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "HeadFront": {
+      "body": "torso",
+      "landmark": "forehead",
+      "prior_m": [
+        0.0832870839,
+        0.6668482600000001,
+        0.0
+      ],
+      "offset_m": [
+        0.11795372398633298,
+        0.6930867598155812,
+        0.0006146413185931852
+      ],
+      "deviation_mm": 43.48117513819195,
+      "radius_mm": 100.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "HeadSide": {
+      "body": "torso",
+      "landmark": "left temple",
+      "prior_m": [
+        0.0032870839,
+        0.6668482600000001,
+        -0.08
+      ],
+      "offset_m": [
+        0.010824797450120736,
+        0.6784725651559015,
+        -0.09599498826734698
+      ],
+      "deviation_mm": 21.16084227042386,
+      "radius_mm": 100.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "BackRight": {
+      "body": "torso",
+      "landmark": "right scapula",
+      "prior_m": [
+        -0.0867129161,
+        0.32684826,
+        0.09
+      ],
+      "offset_m": [
+        -0.09528777697803302,
+        0.30870131745998836,
+        0.09029319316446317
+      ],
+      "deviation_mm": 20.073009860501575,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "BackLeft": {
+      "body": "torso",
+      "landmark": "left scapula",
+      "prior_m": [
+        -0.0867129161,
+        0.32684826,
+        -0.09
+      ],
+      "offset_m": [
+        -0.10078596847850713,
+        0.3086683098496756,
+        -0.09082450048257812
+      ],
+      "deviation_mm": 23.0052427016595,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "RShoulderTop": {
+      "body": "torso",
+      "landmark": "acromion",
+      "prior_m": [
+        0.0032870839,
+        0.44184826,
+        0.2145888384
+      ],
+      "offset_m": [
+        0.0032870839,
+        0.44184826,
+        0.2145888384
+      ],
+      "deviation_mm": 0.0,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "RShoulderBack": {
+      "body": "torso",
+      "landmark": "posterior shoulder",
+      "prior_m": [
+        -0.0667129161,
+        0.41684826,
+        0.16094162880000001
+      ],
+      "offset_m": [
+        -0.06270056618068622,
+        0.4249237953032333,
+        0.155562996905418
+      ],
+      "deviation_mm": 10.49966205961885,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "LShoulderTop": {
+      "body": "torso",
+      "landmark": "acromion",
+      "prior_m": [
+        0.0032870839,
+        0.44184826,
+        -0.2145888384
+      ],
+      "offset_m": [
+        0.025823986158564884,
+        0.45591378674043304,
+        -0.20638280437212042
+      ],
+      "deviation_mm": 27.804496045867502,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "LShoulderBack": {
+      "body": "torso",
+      "landmark": "posterior shoulder",
+      "prior_m": [
+        -0.0667129161,
+        0.41684826,
+        -0.16094162880000001
+      ],
+      "offset_m": [
+        -0.08675690799527307,
+        0.41982212864547225,
+        -0.15563255835009623
+      ],
+      "deviation_mm": 20.947356273772034,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "RKneeOut": {
+      "body": "femur_r",
+      "landmark": "lateral femoral epicondyle",
+      "prior_m": [
+        -0.0079696008,
+        -0.40188833,
+        0.0472909215
+      ],
+      "offset_m": [
+        -0.003423734032409448,
+        -0.4136339241609897,
+        0.05289588094332363
+      ],
+      "deviation_mm": 13.785479941759808,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "RAnkleOut": {
+      "body": "tibia_r",
+      "landmark": "lateral malleolus",
+      "prior_m": [
+        -0.0149294736,
+        -0.42922608,
+        0.035
+      ],
+      "offset_m": [
+        -0.031492806728286894,
+        -0.4370039910734281,
+        0.03550899054386568
+      ],
+      "deviation_mm": 18.305708846108793,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "RToeIn": {
+      "body": "calcn_r",
+      "landmark": "first metatarsal head",
+      "prior_m": [
+        0.16219389,
+        0.0029983476,
+        -0.023890514100000003
+      ],
+      "offset_m": [
+        0.16765097311512284,
+        -0.0005446978837180781,
+        -0.036353198400965105
+      ],
+      "deviation_mm": 14.058855835756185,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "RToeOut": {
+      "body": "calcn_r",
+      "landmark": "fifth metatarsal head",
+      "prior_m": [
+        0.13219389,
+        0.0029983476,
+        0.0361094859
+      ],
+      "offset_m": [
+        0.14733965654268757,
+        -0.00188791223413905,
+        0.05220735010951222
+      ],
+      "deviation_mm": 22.63649733152656,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "RUArmHigh": {
+      "body": "humerus_r",
+      "landmark": "lateral upper arm, 0.16 m proximal of the elbow",
+      "prior_m": [
+        0.0,
+        -0.22474449,
+        0.045
+      ],
+      "offset_m": [
+        0.0008506890521012884,
+        -0.20812647799225822,
+        0.043020180854371905
+      ],
+      "deviation_mm": 16.75713814474924,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "RElbowOut": {
+      "body": "humerus_r",
+      "landmark": "lateral humeral epicondyle",
+      "prior_m": [
+        0.017665241,
+        -0.38474449,
+        0.027104535
+      ],
+      "offset_m": [
+        0.022615173520256614,
+        -0.37452446159792036,
+        0.02334735358544228
+      ],
+      "deviation_mm": 11.961071217759155,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "RWristTop": {
+      "body": "radius_r",
+      "landmark": "dorsal wrist",
+      "prior_m": [
+        -0.035240856,
+        -0.26454969,
+        0.015843816
+      ],
+      "offset_m": [
+        -0.033364091685560364,
+        -0.25183038866715557,
+        0.015973802139453055
+      ],
+      "deviation_mm": 12.857673470892866,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "LKneeOut": {
+      "body": "femur_l",
+      "landmark": "lateral femoral epicondyle",
+      "prior_m": [
+        -0.0079990646,
+        -0.40337452,
+        -0.047280911800000006
+      ],
+      "offset_m": [
+        -0.003450756762167437,
+        -0.42335777692254684,
+        -0.058097792688145765
+      ],
+      "deviation_mm": 23.173747508086336,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "LAnkleOut": {
+      "body": "tibia_l",
+      "landmark": "lateral malleolus",
+      "prior_m": [
+        -0.0149253045,
+        -0.42608357,
+        -0.035
+      ],
+      "offset_m": [
+        -0.03181776669963963,
+        -0.4415698410709139,
+        -0.03626572323337034
+      ],
+      "deviation_mm": 22.95173035201423,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "LToeIn": {
+      "body": "calcn_l",
+      "landmark": "first metatarsal head",
+      "prior_m": [
+        0.16907706,
+        0.0028891621000000003,
+        0.0238330021
+      ],
+      "offset_m": [
+        0.1748462636444532,
+        0.0018453702030281007,
+        0.03460006228390501
+      ],
+      "deviation_mm": 12.259804126460942,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "LToeOut": {
+      "body": "calcn_l",
+      "landmark": "fifth metatarsal head",
+      "prior_m": [
+        0.13907706,
+        0.0028891621000000003,
+        -0.036166997900000004
+      ],
+      "offset_m": [
+        0.15312804018859974,
+        -0.003669472195313092,
+        -0.04814960490074875
+      ],
+      "deviation_mm": 19.596647637146315,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "LUArmHigh": {
+      "body": "humerus_l",
+      "landmark": "lateral upper arm, 0.16 m proximal of the elbow",
+      "prior_m": [
+        0.0,
+        -0.19601572999999997,
+        -0.045
+      ],
+      "offset_m": [
+        -0.008298577192049274,
+        -0.17435399427628415,
+        -0.04296106755779041
+      ],
+      "deviation_mm": 23.286357024670078,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "LElbowOut": {
+      "body": "humerus_l",
+      "landmark": "lateral humeral epicondyle",
+      "prior_m": [
+        0.016346183,
+        -0.35601573,
+        -0.028067436
+      ],
+      "offset_m": [
+        0.03073787672417757,
+        -0.3302527603598278,
+        -0.022867167737017146
+      ],
+      "deviation_mm": 29.964883496151813,
+      "radius_mm": 40.0,
+      "at_bound": false,
+      "side_ok": true
+    },
+    "LWristTop": {
+      "body": "radius_l",
+      "landmark": "dorsal wrist",
+      "prior_m": [
+        -0.035158028,
+        -0.26232912999999997,
+        -0.015715671
+      ],
+      "offset_m": [
+        -0.03274859773616707,
+        -0.24853936750481753,
+        -0.014921412449710906
+      ],
+      "deviation_mm": 14.021189340227934,
+      "radius_mm": 60.0,
+      "at_bound": false,
+      "side_ok": true
+    }
+  },
+  "placed_at_prior_unseen_in_hold": [
+    "RShoulderTop"
+  ],
+  "markers_at_bound": [],
+  "side_failures": [],
+  "swing_ik": {
+    "mean_marker_rms_m": 0.0324780693616003,
+    "max_marker_rms_m": 0.04957618913363854,
+    "os8_mean_marker_rms_m": 0.048505300165420685,
+    "reg_weight": 0.01,
+    "continuous": true,
+    "judged_largest_step": {
+      "frame": 2,
+      "coordinate": "pro_sup_l",
+      "step_rad": 0.19040176980873968
+    }
+  },
+  "torso_in_pelvis_rotation_deg": {
+    "frames": {
+      "address_hold": 0,
+      "address_0p211s": 76,
+      "top": 397,
+      "impact": 476
+    },
+    "registered": {
+      "address_hold": {
+        "magnitude": 30.20997661957588,
+        "lumbar_extension": -29.576608563120395,
+        "lumbar_bending": 6.308562345711359,
+        "lumbar_rotation": 2.9749801557883186
+      },
+      "address_0p211s": {
+        "magnitude": 29.909560925080577,
+        "lumbar_extension": -29.497568863394758,
+        "lumbar_bending": 5.048183017578064,
+        "lumbar_rotation": 2.4762776164219367
+      },
+      "top": {
+        "magnitude": 59.72925410376425,
+        "lumbar_extension": -17.70233906564948,
+        "lumbar_bending": -9.563451125870564,
+        "lumbar_rotation": -58.051691899523135
+      },
+      "impact": {
+        "magnitude": 53.763512224604746,
+        "lumbar_extension": -20.7227789591402,
+        "lumbar_bending": 33.345137390838325,
+        "lumbar_rotation": -31.877226051432018
+      }
+    },
+    "os8_baseline": {
+      "address_hold": {
+        "magnitude": 63.75937130561788,
+        "lumbar_extension": 13.982455099583289,
+        "lumbar_bending": 53.07708914759023,
+        "lumbar_rotation": -41.713099128322256
+      },
+      "address_0p211s": {
+        "magnitude": 65.38079251462295,
+        "lumbar_extension": 13.21553854302497,
+        "lumbar_bending": 55.13238959929644,
+        "lumbar_rotation": -41.81952053837297
+      },
+      "top": {
+        "magnitude": 113.43607113954317,
+        "lumbar_extension": 39.6537069558179,
+        "lumbar_bending": 80.53719195927204,
+        "lumbar_rotation": -119.99999986287999
+      },
+      "impact": {
+        "magnitude": 119.99176447270675,
+        "lumbar_extension": 89.55330051415869,
+        "lumbar_bending": 15.073181217778313,
+        "lumbar_rotation": -105.37139957395128
+      }
+    }
+  },
+  "plausibility": {
+    "passed": false,
+    "failures": [
+      "address"
+    ],
+    "trunk": [
+      {
+        "event": "address",
+        "rotation_deg": 30.20997661957588,
+        "limit_deg": 30.0,
+        "passed": false
+      },
+      {
+        "event": "top",
+        "rotation_deg": 59.72925410376425,
+        "limit_deg": 75.0,
+        "passed": true
+      },
+      {
+        "event": "impact",
+        "rotation_deg": 53.763512224604746,
+        "limit_deg": 60.0,
+        "passed": true
+      }
+    ],
+    "limits": "declared screening bounds, citation pending (#13434)"
+  },
+  "outputs": {
+    "model": "golf_humanoid_scaled_tour_markers_address_registered.osim",
+    "model_sha256": "56c6c6f0e947ae92d2b6041135e049b68284d46c70fee135339ba3e3f447393e",
+    "states_sha256": "f489d41b68e84df3addab2ade825ae0266e672e60ec3abd083275f9f8c76d3f2"
+  }
+}
