@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13469 | Mark the torch CUDA wheel-index pip probe requires_network so the offline unit gate stops crashing an xdist worker |
+| 2026-10-20 | #13442 | Prove hyperstatic per-hand split divergence between MuJoCo soft-constraint cone QP and shared penalty law with minimal two-pad test and update G8 reference; Align collinear capsule-cylinder midpoint convention and topology solimp impedance d0=0.001 so MuJoCo ten_finger 0.04 s hold and swing pass determinate parity |
+| 2026-10-20 | #13415 | Add OpenSim 3D joint reaction analysis for barbell lifts (OSL-5) |
+| 2026-10-20 | #13482 | Pin the trail-foot toe-out on the committed canonical receipts: driver 19.76 deg, 7-iron 20.00 deg against the 20 deg style target (OSV-4 2 deg acceptance) |
 | 2026-10-20 | #13480 | Restore the #13396 grip follow-ups lost in the HRG-GS consolidation: one club_state per Pinocchio RHS and the HRG reference's assessments and layout fixes |
 | 2026-10-20 | #13473 | Relax last-ulp geometry assertions in batched grip contact tests (Linux BLAS dot rounding) |
 | 2026-10-20 | #13471 | Test the MyoSuite gymnasium-first import behaviourally in _engine_init |
