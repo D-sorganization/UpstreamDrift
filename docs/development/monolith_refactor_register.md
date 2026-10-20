@@ -43,11 +43,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1167 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1167 | `src/launchers/settings_dialog.py` |
 | 1167 | `src/shared/python/grip_contact/parity.py` |
+| 1167 | `src/shared/python/grip_contact/topology_contact.py` |
 | 1166 | `src/shared/python/analysis/orchestrator.py` |
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
 | 1163 | `src/engines/simscape/adapter.py` |
-| 1163 | `src/shared/python/grip_contact/topology_contact.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
 | 1150 | `src/tools/bunker_shot_gui/gui.py` |
 | 1147 | `src/api/routes/launch_monitor_analytics.py` |
@@ -154,13 +154,13 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 897 | `src/shared/python/motion_matching/surrogate/compact/training.py` |
 | 896 | `src/bunkershot3d/solvers/mpm/ballreach.py` |
 | 896 | `src/launchers/launcher_layout_manager.py` |
+| 894 | `src/engines/physics_engines/mujoco/python/grip_contact_sim.py` |
 | 892 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/2D GUI/visualization/SkeletonPlotter.m` |
 | 892 | `src/tools/matched_swing_browser/gui.py` |
 | 890 | `src/shared/python/sidekick/process_calculators/scrubber_calculator.py` |
 | 889 | `src/bunkershot3d/io/schema.py` |
 | 889 | `src/motion_capture/opencap_ingest/augmenter.py` |
 | 888 | `src/engines/pendulum_models/python/double_pendulum_model/ui/double_pendulum_gui.py` |
-| 887 | `src/engines/physics_engines/mujoco/python/grip_contact_sim.py` |
 | 887 | `src/shared/python/sidekick/process_calculators/syngas_compression_calculator.py` |
 | 887 | `src/tools/bunker_shot_gui/bridge.py` |
 | 885 | `src/shared/python/estimation/dime_report_integration.py` |
@@ -168,6 +168,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 884 | `src/shared/python/estimation/dime_learned_initializers.py` |
 | 883 | `src/shared/python/config/model_pack_manifest.py` |
 | 879 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/SkeletonPlotter.m` |
+| 878 | `src/shared/python/grip_contact/pair_contact.py` |
 | 878 | `src/shared/python/grip_contact/simscape_grip_topology.py` |
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
