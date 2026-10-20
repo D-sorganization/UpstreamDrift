@@ -43,8 +43,8 @@ import csv
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
-from unittest.mock import MagicMock
+from typing import TYPE_CHECKING, Any
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -225,6 +225,37 @@ def _load_simscape_poses(csv_path: Path) -> list[SimscapePose]:
 
 
 # ---------------------------------------------------------------------------
+# Drake theta sizing (issue #13449)
+# ---------------------------------------------------------------------------
+
+_LEGACY_MAX_JOINT_PAD = 64
+
+
+def build_zero_theta_for_equivalence(
+    sim_mod: Any,
+    *,
+    time_step_s: float,
+) -> NDArray[np.float64]:
+    """Size zero theta from the golfer plant actuator count (#13449, #7725)."""
+    from pydrake.multibody.plant import MultibodyPlant  # noqa: PLC0415
+
+    from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf import (  # noqa: E501, PLC0415
+        load_humanoid_into_plant,
+    )
+
+    plant = MultibodyPlant(time_step=time_step_s)
+    load_humanoid_into_plant(plant, sim_mod.DEFAULT_GOLFER_URDF)
+    plant.Finalize()
+    n_actuators = sim_mod._resolve_n_actuators(plant)
+    if n_actuators <= 0:
+        raise ValueError(
+            f"canonical golfer plant must expose actuators, got {n_actuators}"
+        )
+    coeffs = sim_mod.COEFFS_PER_JOINT
+    return np.zeros(n_actuators * coeffs, dtype=np.float64)
+
+
+# ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
 
@@ -246,6 +277,44 @@ def test_drake_probe_rejects_collection_mock(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setitem(sys.modules, "pydrake", MagicMock())
     with pytest.raises(pytest.skip.Exception):
         _require_real_pydrake()
+
+
+@pytest.mark.unit
+def test_equivalence_zero_theta_uses_plant_actuator_count_not_legacy_pad() -> None:
+    """Regression #13449: 64-joint padding is rejected by the #7725 guard."""
+    n_actuators = 19
+    coeffs_per_joint = 7
+    plant = MagicMock(name="plant")
+    sim_mod = MagicMock(name="simulate_module")
+    sim_mod.COEFFS_PER_JOINT = coeffs_per_joint
+    sim_mod.DEFAULT_GOLFER_URDF = Path("golfer.urdf")
+    sim_mod._resolve_n_actuators.return_value = n_actuators
+
+    legacy_len = _LEGACY_MAX_JOINT_PAD * coeffs_per_joint
+    expected_len = n_actuators * coeffs_per_joint
+    assert expected_len != legacy_len
+
+    plant_module = MagicMock(name="pydrake.multibody.plant")
+    plant_module.MultibodyPlant = MagicMock(return_value=plant)
+    fake_pydrake = {
+        "pydrake": MagicMock(),
+        "pydrake.multibody": MagicMock(),
+        "pydrake.multibody.plant": plant_module,
+    }
+    with (
+        patch.dict(sys.modules, fake_pydrake),
+        patch(
+            "src.engines.physics_engines.drake.python.motion_matching."
+            "humanoid_urdf.load_humanoid_into_plant",
+        ) as load_humanoid,
+    ):
+        theta = build_zero_theta_for_equivalence(sim_mod, time_step_s=1.0e-3)
+
+    assert theta.shape == (expected_len,)
+    assert theta.shape != (legacy_len,)
+    plant.Finalize.assert_called_once()
+    load_humanoid.assert_called_once_with(plant, sim_mod.DEFAULT_GOLFER_URDF)
+    sim_mod._resolve_n_actuators.assert_called_once_with(plant)
 
 
 @pytest.fixture(scope="module")
@@ -274,20 +343,7 @@ def drake_simout(drake_simulate_module):
         sample_rate_hz=1000.0,
         time_step_s=1.0e-3,
     )
-    # Size theta from the plant the simulate wrapper will build, so the #7725
-    # actuator-vs-theta guard sees a matching length (#13449).
-    from pydrake.multibody.plant import MultibodyPlant  # noqa: PLC0415
-
-    from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf import (  # noqa: E501, PLC0415
-        load_humanoid_into_plant,
-    )
-
-    plant = MultibodyPlant(time_step=options.time_step_s)
-    load_humanoid_into_plant(plant, sim_mod.DEFAULT_GOLFER_URDF)
-    plant.Finalize()
-    n_actuators = sim_mod._resolve_n_actuators(plant)
-    assert n_actuators > 0
-    theta = np.zeros(n_actuators * sim_mod.COEFFS_PER_JOINT, dtype=np.float64)
+    theta = build_zero_theta_for_equivalence(sim_mod, time_step_s=options.time_step_s)
     return sim_mod.simulate_with_coefficients(theta, options=options)
 
 
