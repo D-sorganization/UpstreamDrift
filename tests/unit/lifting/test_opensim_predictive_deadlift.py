@@ -12,6 +12,8 @@ Verifies:
 from __future__ import annotations
 
 from pathlib import Path
+
+import numpy as np
 from typing import Any
 
 import pytest
@@ -29,6 +31,11 @@ from src.engines.physics_engines.opensim.python.msk_lift_predictive_report impor
 )
 
 pytestmark = pytest.mark.unit
+
+BUNDLE = (
+    Path(__file__).resolve().parents[3]
+    / "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
+)
 
 
 def _fake_solution(labels: list[str], controls: Any) -> Any:
@@ -105,17 +112,15 @@ def test_spec_goals_and_bounds() -> None:
     assert "terminal_lockout" in spec["goals"]
     assert spec["mesh_intervals"] == 25
 
-    # Check setup and lockout coordinate targets/bounds
-    bounds = spec["coordinate_bounds"]
-    assert "pelvis_ty" in bounds
-    assert "hip_flexion_r" in bounds
-    assert "knee_angle_r" in bounds
-    assert "lumbar_extension" in bounds
+    # Bounds come from the solved poses, never from constants in the spec.
+    assert "compute_deadlift_poses" in spec["coordinate_bounds"]
 
-    # Check that welded joints and active actuators are recorded
+    # Straight arms that flex at the shoulder, held in the sagittal plane.
     assert "welded_joints" in spec
-    assert "acromial_r" in spec["welded_joints"]
+    assert "acromial_r" not in spec["welded_joints"]
     assert "elbow_r" in spec["welded_joints"]
+    for coord in ("arm_add_r", "arm_rot_r", "arm_add_l", "arm_rot_l"):
+        assert coord in spec["zero_constrained_coordinates"]
     assert "subtalar_r" in spec["welded_joints"]
     assert "mtp_r" in spec["welded_joints"]
 
@@ -294,20 +299,93 @@ def test_compute_deadlift_poses() -> None:
         build_lift_model,
     )
     from src.engines.physics_engines.opensim.python.msk_lift_predictive import (
+        POSE_FLOOR_PENETRATION_M,
+        _clean_model_and_get_welds,
         compute_deadlift_poses,
+    )
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
+        bundle_pose_targets,
     )
 
     built = build_lift_model(
         "deadlift", body_mass_kg=80.0, height_m=1.78, bar_mass_kg=100.0
     )
-    setup, lockout = compute_deadlift_poses(built.model)
+    _clean_model_and_get_welds(built.model)
+    targets = bundle_pose_targets(BUNDLE)
+    setup, lockout = compute_deadlift_poses(built.model, targets)
 
-    assert setup["bar_height_m"] == pytest.approx(0.432, abs=0.01)
+    assert setup["bar_height_m"] == pytest.approx(
+        targets["setup_bar_height_m"], abs=0.005
+    )
     assert lockout["bar_height_m"] > setup["bar_height_m"]
     assert lockout["hip_flexion"] == 0.0
     assert lockout["knee_angle"] == 0.0
     assert setup["hip_flexion"] > 1.0
     assert setup["knee_angle"] > 1.0
+    for pose in (setup, lockout):
+        support = _static_support(built.model, pose)
+        # Flat-footed: every foot sphere touches the floor, none deeper than
+        # the seating penetration; the combined COM lies over the spheres.
+        assert support["sphere_y"].max() <= 0.0, pose
+        assert support["sphere_y"].min() >= -POSE_FLOOR_PENETRATION_M - 1e-9, pose
+        assert (
+            support["sphere_x"].min() <= support["com_x"] <= support["sphere_x"].max()
+        )
+    # The feet stay planted.  Measured: the spheres coincide within 1.9 mm.
+    # They cannot coincide exactly: the Rajagopal ankle axis is oblique and
+    # the subtalar joint is welded, so changing the ankle angle turns the foot
+    # slightly, which no pelvis translation removes.
+    np.testing.assert_allclose(
+        _static_support(built.model, setup)["sphere_x"],
+        _static_support(built.model, lockout)["sphere_x"],
+        atol=2.5e-3,
+    )
+    # A deadlift setup: bar over midfoot, trunk inclined forward of the hips.
+    support = _static_support(built.model, setup)
+    assert support["bar_x"] == pytest.approx(support["sphere_x"].mean(), abs=0.02)
+    assert support["shoulder_x"] > support["hip_x"]
+    # Trunk inclinations are the bundle's; the arms hang vertically.
+    for pose, key in ((setup, "setup_trunk_rad"), (lockout, "lockout_trunk_rad")):
+        support = _static_support(built.model, pose)
+        assert support["trunk_rad"] == pytest.approx(targets[key], abs=1e-4)
+        assert support["hand_x"] == pytest.approx(support["shoulder_x"], abs=1e-4)
+
+
+def _static_support(model: Any, pose: dict[str, Any]) -> dict[str, Any]:
+    """Recompute, by forward kinematics, where a pose puts COM, bar and feet."""
+    from src.engines.physics_engines.opensim.python.msk_lift_model import (
+        _foot_spheres,
+        _ground_points,
+    )
+
+    state = model.initSystem()
+    cset = model.getCoordinateSet()
+    for key in ("hip_flexion", "knee_angle", "ankle_angle"):
+        for side in "rl":
+            cset.get(f"{key}_{side}").setValue(state, pose[key], False)
+    for side in "rl":
+        cset.get(f"arm_flex_{side}").setValue(state, pose["arm_flex"], False)
+    for key in ("pelvis_tilt", "lumbar_extension", "pelvis_tx", "pelvis_ty"):
+        cset.get(key).setValue(state, pose[key], False)
+    model.realizePosition(state)
+    points = _ground_points(model, state, _foot_spheres(1.78 / 1.70))
+    bodies = model.getBodySet()
+
+    def _xy(body: str) -> np.ndarray:
+        pos = bodies.get(body).getPositionInGround(state)
+        return np.array([pos.get(0), pos.get(1)])
+
+    trunk = _xy("humerus_r") - _xy("femur_r")
+    return {
+        "trunk_rad": float(np.arctan2(trunk[0], trunk[1])),
+        "hand_x": _xy("hand_r")[0],
+        "com_x": model.calcMassCenterPosition(state).get(0),
+        "sphere_x": np.sort(points[:, 0]),
+        "sphere_y": points[:, 1],
+        "bar_x": bodies.get("barbell").getPositionInGround(state).get(0),
+        "shoulder_x": bodies.get("humerus_r").getPositionInGround(state).get(0),
+        "hip_x": bodies.get("femur_r").getPositionInGround(state).get(0),
+    }
 
 
 # -------------------------------------------------------------------------
@@ -656,3 +734,19 @@ def test_cli_duration_bounds_reach_the_stage1_config(
             ]
         )
     assert seen["bounds"] == (2.0, 2.0)
+
+
+def test_bundle_pose_targets_read_the_optimizer_solution() -> None:
+    """Setup bar height and trunk inclinations are the bundle's, not constants."""
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
+        bundle_pose_targets,
+    )
+    from src.shared.python.motion_matching.same_input import InputBundle
+
+    targets = bundle_pose_targets(BUNDLE)
+    sagittal = InputBundle.load(BUNDLE).provenance["sagittal_solution"]
+    trunk = np.asarray(sagittal["segment_angles_rad"], dtype=float)[:, 2]
+    assert targets["setup_trunk_rad"] == trunk[0]
+    assert targets["lockout_trunk_rad"] == trunk[-1]
+    metrics = compute_bundle_metrics(BUNDLE)
+    assert targets["setup_bar_height_m"] == metrics["bar_start_height_m"]

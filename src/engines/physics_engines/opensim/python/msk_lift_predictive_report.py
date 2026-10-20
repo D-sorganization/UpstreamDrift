@@ -38,6 +38,34 @@ OSL3_IK_ID_RECEIPT = (
 )
 
 
+#: The LIFT-5 deadlift same-input bundle; its planar optimizer solution sets
+#: the predictive setup and lockout poses.
+DEADLIFT_BUNDLE = (
+    Path(__file__).resolve().parents[5]
+    / "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
+)
+
+
+def bundle_pose_targets(bundle_path: Path | str = DEADLIFT_BUNDLE) -> dict[str, float]:
+    """Setup bar height and setup/lockout trunk inclinations from the bundle.
+
+    The trunk inclination is the optimizer's third segment angle (hip to
+    shoulder, radians from vertical, positive forward); the bar height is the
+    bundle's starting bar height (``compute_bundle_metrics``).
+    """
+    sagittal = InputBundle.load(Path(bundle_path)).provenance.get("sagittal_solution")
+    require(
+        isinstance(sagittal, dict) and "segment_angles_rad" in sagittal,
+        f"bundle at {bundle_path} has no sagittal_solution segment_angles_rad",
+    )
+    trunk = np.asarray(sagittal["segment_angles_rad"], dtype=float)[:, 2]
+    return {
+        "setup_trunk_rad": float(trunk[0]),
+        "lockout_trunk_rad": float(trunk[-1]),
+        "setup_bar_height_m": compute_bundle_metrics(bundle_path)["bar_start_height_m"],
+    }
+
+
 def tracked_opensim_record(path: Path = OSL3_IK_ID_RECEIPT) -> dict[str, str]:
     """Status of the tracked OpenSim deadlift row, derived from the OSL-3 receipt.
 
@@ -273,9 +301,7 @@ def build_comparison_table(
     hardcoded fallback.
     """
     if bundle_path is None:
-        bundle_path = Path(
-            "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
-        )
+        bundle_path = DEADLIFT_BUNDLE
 
     bundle_metrics: dict[str, float] = {}
     bundle_err: str | None = None
