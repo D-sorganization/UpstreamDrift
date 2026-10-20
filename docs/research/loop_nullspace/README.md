@@ -14,12 +14,12 @@ validity gates, the gross-power identity, constrained counterfactuals, envelope
 geometry, reaction-restriction semantics, the canonical closure convention, a
 rank audit of the pendulum constraints and the citation verification table.
 
-| Item                         | Status                                                                  |
-| ---------------------------- | ----------------------------------------------------------------------- |
-| Formulas and goldens         | Reproduced by exact sympy derivations; regenerated and compared by tests |
-| Citations                    | Verification table in the reference; unverified sources are not used     |
-| Scientific qualification     | None; no numerical result about any golfer                               |
-| External validation          | Deferred (NSX-05)                                                        |
+| Item                     | Status                                                                   |
+| ------------------------ | ------------------------------------------------------------------------ |
+| Formulas and goldens     | Reproduced by exact sympy derivations; regenerated and compared by tests |
+| Citations                | Verification table in the reference; unverified sources are not used     |
+| Scientific qualification | None; no numerical result about any golfer                               |
+| External validation      | Deferred (NSX-05)                                                        |
 
 ## Contents of This Directory
 
@@ -33,6 +33,10 @@ rank audit of the pendulum constraints and the citation verification table.
   `contracts_trajectory.md` (NSX-23 to NSX-61 and NSX-62 Ensembles) and
   `contracts_variability.md` (NSX-80 to NSX-98 and NSX-62 Inertial Parameter
   Ensemble) to stay under the documentation size budget.
+- `after_one_solution.md` maps the AffineDrift article "After One Solution" to the
+  `loop_nullspace` API (NSE-UD-4a, #13464); `after_one_solution_example.py` is its
+  runnable companion on the generic planar fixture, smoke-tested by
+  `tests/unit/loop_nullspace/test_after_one_solution_example.py`.
 - `muscle_level_view.md` is the exploratory scoping report for a muscle-redundancy layer above the envelopes (NSX-73, #12591).
 - `closure_alternatives_report.md` compares grip models that each have their own
   closure kinematics (NSX-72); its records are in `records/`.

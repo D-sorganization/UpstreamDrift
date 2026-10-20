@@ -160,3 +160,7 @@ not the nearest-point projection onto the solution set.
   `UP-NSX-loop-nullspace-exploration` open until a calculation is registered.
 - `src/config/loop_nullspace_registry.json` is checked by the NSX-11 citation
   gate when it lands.
+
+## References
+
+- [After-One-Solution Workflow Mapping](../research/loop_nullspace/after_one_solution.md): maps the AffineDrift article sections to the `loop_nullspace` API, with a runnable example (NSE-UD-4a, #13464).
