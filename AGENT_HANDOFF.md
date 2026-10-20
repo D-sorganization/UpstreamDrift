@@ -52,6 +52,7 @@ open-fp vertical force plates as measured constraints (Epic #13061; plan and DV-
 Segmental spine (Epic #12735, ADR-0055):
 
 - Software pathway landed and consolidated by SPN-16 #12773: manual chapter 66, `docs/research/segmental_spine/README.md#how-to-run-a-study`; all results unqualified, owner-blocked on #12749, #12737, #12755, #12758, #12763, #12770.
+- Spine golf input is invalid until #13434 lands. The OS-3b/OS-7/OS-8 tour-marker model was mirrored and unregistered, so SPN-14a #12769 and SPN-D9 #13427 (no PRs, leases released) must re-run on `docs/development/opensim_tour_matching/evidence/os9_address_registration/` from PR #13484. The owner must decide the address trunk screening bound (30.2° vs 30°, lumbar flexion); see `EPIC_10003.md#os-9-prior-constrained-address-registration-2026-10-19-13434`.
 
 Shot-pattern study (straight, draw and fade; #12409, PR #12418):
 
