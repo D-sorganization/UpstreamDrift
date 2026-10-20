@@ -2665,6 +2665,58 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13454 · Remove Dead Pinocchio Default Branch From Drake Simulate DEFAULT_GOLFER_URDF
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13454
+- **Branch:** fix/ud-drake-bugs
+- **PR:** #13468
+- **Paths:** see #13468
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`e541e40b`; collated from changes/13454-remove-dead-pinocchio-default-branch-fro.md)
+- **Summary:** Remove dead Pinocchio default branch from Drake simulate DEFAULT_GOLFER_URDF
+- **Next step:** Shipped in PR #13468.
+
+### DL-#13451 · Guard DrakePhysicsEngine.Get_Joint_Names Against Unfinalized Plants
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13451
+- **Branch:** fix/ud-drake-bugs
+- **PR:** #13468
+- **Paths:** see #13468
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`e541e40b`; collated from changes/13451-guard-drakephysicsengine-get-joint-names.md)
+- **Summary:** Guard DrakePhysicsEngine.get_joint_names against unfinalized plants
+- **Next step:** Shipped in PR #13468.
+
+### DL-#13450 · Resolve the Drake Autodiff Fit Grip Body Through the Shared Simulate Fallback
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13450
+- **Branch:** fix/ud-drake-bugs
+- **PR:** #13468
+- **Paths:** see #13468
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`e541e40b`; collated from changes/13450-resolve-the-drake-autodiff-fit-grip-body.md)
+- **Summary:** Resolve the Drake autodiff fit grip body through the shared simulate fallback
+- **Next step:** Shipped in PR #13468.
+
+### DL-#13449 · Size Drake-Simscape Equivalence Fixture Theta From the Plant Actuator Count
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13449
+- **Branch:** fix/ud-drake-bugs
+- **PR:** #13468
+- **Paths:** see #13468
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`e541e40b`; collated from changes/13449-size-drake-simscape-equivalence-fixture-.md)
+- **Summary:** Size Drake-Simscape equivalence fixture theta from the plant actuator count
+- **Next step:** Shipped in PR #13468.
+
 ### DL-#13043 · Add OpenSim 3D Joint Reaction Analysis for Barbell Lifts (OSL-5)
 
 - **State:** shipped
