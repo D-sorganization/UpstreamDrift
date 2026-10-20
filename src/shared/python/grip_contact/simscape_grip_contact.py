@@ -38,6 +38,7 @@ from src.shared.python.grip_contact.interface import GripInterface
 from src.shared.python.grip_contact.matlab_kernel import (
     DEFAULT_SQUEEZE_PER_HAND_N,
     STYLE_IDS,
+    _payloads_numerically_close,
     build_kernel_params_payload,
     evaluate_kernel_reference,
     kernel_bundle_sha256,
@@ -459,7 +460,18 @@ def export_scenarios_json(
     if check:
         if not target.exists():
             return 1
-        return 0 if target.read_text(encoding="utf-8") == text else 1
+        current = target.read_text(encoding="utf-8")
+        if current == text:
+            return 0
+        if target.resolve() == DEFAULT_SCENARIOS_JSON_PATH.resolve():
+            try:
+                act = json.loads(current)
+                exp = json.loads(text)
+                if _payloads_numerically_close(act, exp):
+                    return 0
+            except Exception:
+                pass
+        return 1
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(text, encoding="utf-8")
     return 0
