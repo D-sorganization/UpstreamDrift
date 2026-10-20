@@ -261,6 +261,9 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 - **Residual Moment Peak:** {receipt.get("residual_moment_peak_nm")} N·m (RMS {receipt.get("residual_moment_rms_nm")} N·m)
 - **Residual Moment Limit (1 % COM height × m g):** {receipt.get("residual_moment_limit_nm")} N·m (within: {receipt.get("residual_moment_within_limit")})
 - **Residual Assisted:** {receipt.get("residual_assisted")}
+- **Pose Targets (bundle):** {receipt.get("pose_targets")}
+- **Setup Pose:** {receipt.get("setup_pose")}
+- **Lockout Pose:** {receipt.get("lockout_pose")}
 
 ### Stage 2: Muscle-Driven Solve
 - **Actuation:** 80 Rajagopal lower-limb muscles (DeGroote-Fregly 2016)
@@ -330,6 +333,8 @@ def run_stage1_solve(
             lockout_pose=meta.get("lockout_pose"),
         )
     summary["warm_start"] = None if guess_path is None else str(guess_path)
+    for key in ("pose_targets", "setup_pose", "lockout_pose"):
+        summary[key] = meta.get(key)
 
     # Enhance summary from parsed log
     parsed = _parse_solve_log(log_file)

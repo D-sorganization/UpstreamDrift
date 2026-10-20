@@ -282,6 +282,12 @@ def test_format_predictive_receipt() -> None:
     assert "residual_assisted" in receipt
     assert receipt["residual_optimal_force_n"] == cfg.residual_optimal_force_n()
     assert receipt["residual_effort_weight"] == cfg.residual_effort_weight
+    for key in ("pose_targets", "setup_pose", "lockout_pose"):
+        assert receipt[key] is None  # absent from this summary, never invented
+    poses = {"pose_targets": {"a": 1.0}, "setup_pose": {"b": 2.0}}
+    receipt = format_predictive_receipt(cfg, {**solve_summary, **poses})
+    assert receipt["pose_targets"] == {"a": 1.0}
+    assert receipt["setup_pose"] == {"b": 2.0}
     for key in (
         "residual_moment_peak_nm",
         "residual_moment_rms_nm",

@@ -813,6 +813,9 @@ def format_predictive_receipt(
         "constraint_violation": solve_summary.get("constraint_violation"),
         "last_iterate_inf_pr": solve_summary.get("last_iterate_inf_pr"),
         "wall_clock_s": solve_summary.get("wall_clock_s"),
+        "pose_targets": solve_summary.get("pose_targets"),
+        "setup_pose": solve_summary.get("setup_pose"),
+        "lockout_pose": solve_summary.get("lockout_pose"),
         "comparison_table": comp_table,
         "reproduction_command": "python scripts/measure_opensim_predictive_deadlift.py",
     }
