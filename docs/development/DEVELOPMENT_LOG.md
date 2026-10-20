@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13171 · HRG-E3 Slice: Pelvis and Thorax ISB Lab-Frame Turn, Tilt, Obliquity and Side-Bend Golf Terms With Golf-Word Aliases; Thoracic/Lumbar Split Marked Unavailable
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13171
+- **Branch:** claude/ud-13171-trunk-pelvis-terms
+- **PR:** #13498
+- **Paths:** see #13498
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`49f40152`; collated from changes/13171-hrg-e3-slice-pelvis-and-thorax-isb-lab-f.md)
+- **Summary:** HRG-E3 slice: pelvis and thorax ISB lab-frame turn, tilt, obliquity and side-bend golf terms with golf-word aliases; thoracic/lumbar split marked unavailable
+- **Next step:** HRG-E3 remaining: line-method pelvis/thorax turn labels, hip (isb_hip), knee (Grood-Suntay), shoulder YXY, elbow flexion
+
 ### DL-#13490 · Hang Watchdog Dumps Stacks From a GIL-Held Python Handler so SIGUSR1 No Longer Segfaults the Xdist Controller (Exit 139)
 
 - **State:** in_review
@@ -2716,6 +2729,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13346 · Reclassify Grip_Style as a Physical Pick Across CLI, API, Desktop and Web and Migrate Legacy Sidecars
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13346
+- **Branch:** merged via #13472
+- **PR:** #13472
+- **Paths:** see #13472
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`53919d4d`; collated from changes/13346-reclassify-grip-style-as-a-physical-pick.md)
+- **Summary:** Reclassify grip_style as a physical pick across CLI, API, desktop and web and migrate legacy sidecars
+- **Next step:** Shipped in PR #13472.
 
 ### DL-#13510 · Ci(Opensim): Real OpenSim Job Reuses a Validated Per-Runner Venv and Opensim-Models Clone and Stops Uploading the GitHub Pip Cache From Self-Hosted Runners
 

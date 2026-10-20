@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13472 | Reclassify grip_style as a physical pick across CLI, API, desktop and web and migrate legacy sidecars |
+| 2026-10-20 | #13498 | HRG-E3 slice: pelvis and thorax ISB lab-frame turn, tilt, obliquity and side-bend golf terms with golf-word aliases; thoracic/lumbar split marked unavailable |
 | 2026-10-20 | #13511 | ci(opensim): Real OpenSim job reuses a validated per-runner venv and opensim-models clone and stops uploading the GitHub pip cache from self-hosted runners |
 | 2026-10-20 | #13505 | Fix duplicate tex_skin_2 asset in MuJoCo with_head exports so the MJCF compiles |
 | 2026-10-20 | #13497 | Hang watchdog dumps stacks from a GIL-held Python handler so SIGUSR1 no longer segfaults the xdist controller (exit 139) |
