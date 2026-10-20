@@ -444,7 +444,7 @@ def build_polynomial_torque_system_autodiff(
 def _resolve_grip_body(plant: Any, grip_body_name: str) -> tuple[str, Any]:
     """Resolve the grip body exactly as ``simulate_with_coefficients`` does.
 
-    Uses the shared ``_resolve_body_name`` fallback chain so the synthetic
+    Uses the shared ``_resolve_body_name`` alias chain so the synthetic
     target and the fit sample the same body (#13450).
     """
     resolved = _resolve_body_name(plant, grip_body_name)
