@@ -70,7 +70,7 @@ The table below is generated directly from `receipts.json` via `scripts/measure_
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | Squat | `complete` | `unqualified` | 0.0–0.2 | 56.9% | 67.7% | 23.82 (vs 146.93) | 11.75 (vs 18.64) | Within |
 | Deadlift | `complete` | `unqualified` | 0.0–0.2 | 17.3% | 20.2% | 288.29 (vs 110.92) | 148.02 (vs 18.28) | Outside |
-| Bench Press | `complete` | `unqualified` | 0.0–0.2 | 6.0% | 26.3% | 511.58 (vs 32.49) | 318.32 (vs 3.45) | Outside |
+| Bench Press | `complete` | `unqualified` | 0.0–0.2 | 6.0% | 26.3% | 511.58 (vs 221.85) | 318.32 (vs 23.54) | Outside |
 | Snatch | `complete` | `unqualified` | 0.0–0.2 | 37.7% | 71.3% | 463.21 (vs 155.12) | 202.62 (vs 27.10) | Outside |
 | Clean & Jerk | `complete` | `unqualified` | 0.0–0.2 | 38.9% | 58.5% | 458.56 (vs 223.10) | 259.00 (vs 38.77) | Outside |
 

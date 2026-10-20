@@ -924,7 +924,11 @@ def run_inverse_dynamics(
 
 
 def id_receipt(targets: LiftTargets, inverse: IDResult) -> dict[str, Any]:
-    """Residuals (with the Hicks 2015 gate) and joint-moment summary."""
+    """Residuals (with the Hicks 2015 gate) and joint-moment summary.
+
+    Hicks reference force is the peak magnitude of the net support reaction:
+    sum both feet plus every bench sphere (when present); hands/bar stay out.
+    """
     column = {n: j for j, n in enumerate(inverse.coordinates)}
     residuals: dict[str, dict[str, Any]] = {}
     peaks: dict[str, float] = {}
@@ -936,8 +940,10 @@ def id_receipt(targets: LiftTargets, inverse: IDResult) -> dict[str, Any]:
             "max_abs": float(np.abs(series).max()),
             "rms": float(np.sqrt(np.mean(series**2))),
         }
-    grf = targets.grf_force_n["left"] + targets.grf_force_n["right"]
-    peak_force = float(np.linalg.norm(grf, axis=1).max())
+    support = targets.grf_force_n["left"] + targets.grf_force_n["right"]
+    for force in getattr(targets, "bench_force_n", {}).values():
+        support = support + force
+    peak_force = float(np.linalg.norm(support, axis=1).max())
     max_force = RESIDUAL_FORCE_FRACTION * peak_force
     max_moment = RESIDUAL_MOMENT_FRACTION * inverse.com_height_m * peak_force
     forces = [peaks[n] for n in RESIDUAL_COORDINATES[3:]]

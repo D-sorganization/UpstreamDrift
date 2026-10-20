@@ -79,10 +79,10 @@
           "residual_gate": {
             "com_height_m": 0.5305917949566877,
             "forces_within": false,
-            "max_force_n": 32.49343335895118,
-            "max_moment_nm": 3.448149826046284,
+            "max_force_n": 221.847327089482,
+            "max_moment_nm": 23.542074297350336,
             "moments_within": false,
-            "peak_external_force_n": 649.8686671790235,
+            "peak_external_force_n": 4436.94654178964,
             "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
           },
           "residuals": {
@@ -1854,6 +1854,6 @@
       }
     }
   },
-  "source_commit": "9b427ff2513b402493f7ee9456348630df4fd079",
+  "source_commit": "7a963f7b9aa30e671fc19d8e8f75c9324d0992ee",
   "stride": 5
 }
