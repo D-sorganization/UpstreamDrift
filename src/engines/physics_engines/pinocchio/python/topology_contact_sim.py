@@ -231,6 +231,59 @@ def _pair_result_from_wrench(
     )
 
 
+def _require_wrench_inputs(
+    topology: object, hands: object, club: object, law: object
+) -> None:
+    """Raise TypeError unless the wrench-evaluation inputs have the right types."""
+    if not isinstance(topology, ContactTopology):
+        raise TypeError(
+            f"topology must be ContactTopology, got {type(topology).__name__}"
+        )
+    if not isinstance(hands, Mapping):
+        raise TypeError(f"hands must be a Mapping, got {type(hands).__name__}")
+    if not isinstance(club, BushingState | RigidBodyState):
+        raise TypeError(
+            f"club must be BushingState or RigidBodyState, got {type(club).__name__}"
+        )
+    if not isinstance(law, ContactParameters):
+        raise TypeError(f"law must be ContactParameters, got {type(law).__name__}")
+
+
+def _evaluate_topology_pair(
+    topology: ContactTopology,
+    pair: Any,
+    hand_states: Mapping[str, BushingState],
+    club_state: BushingState,
+    law: ContactParameters,
+    grip_cap: ContactCapsule,
+    patch_radius_m: float | None,
+    spin_transition_rad_s: float,
+) -> Any:
+    """Evaluate one topology pair with the shared primitive kernels.
+
+    Hand-grip pairs act between a hand site and the grip capsule on the club;
+    hand-hand pairs act between two hand sites.  The patch radius defaults to
+    the Hertz-style sqrt(2 r_eff delta_0) at the shared preload.
+    """
+    site_a = topology.site(pair.site_a)
+    if patch_radius_m is None:
+        r_grip = topology.grip_radius_m
+        r_eff = 1.0 / (1.0 / site_a.radius_m + 1.0 / r_grip)
+        patch = math.sqrt(2.0 * r_eff * DEFAULT_PRELOAD_M)
+    else:
+        patch = patch_radius_m
+    prim_a = _site_primitive(site_a)
+    st_a = hand_states[site_a.hand]
+    if pair.is_hand_grip:
+        prim_b, st_b = grip_cap, club_state
+    else:
+        site_b = topology.site(pair.site_b)
+        prim_b, st_b = _site_primitive(site_b), hand_states[site_b.hand]
+    return _evaluate_pair_primitives(
+        prim_a, prim_b, st_a, st_b, law, patch, spin_transition_rad_s
+    )
+
+
 def evaluate_topology_wrenches(
     topology: ContactTopology,
     hands: Mapping[str, BushingState],
@@ -257,18 +310,7 @@ def evaluate_topology_wrenches(
         Hand-hand pairs do not contribute to club wrench.
         Hand wrenches sum to net club wrench.
     """
-    if not isinstance(topology, ContactTopology):
-        raise TypeError(
-            f"topology must be ContactTopology, got {type(topology).__name__}"
-        )
-    if not isinstance(hands, Mapping):
-        raise TypeError(f"hands must be a Mapping, got {type(hands).__name__}")
-    if not isinstance(club, BushingState | RigidBodyState):
-        raise TypeError(
-            f"club must be BushingState or RigidBodyState, got {type(club).__name__}"
-        )
-    if not isinstance(law, ContactParameters):
-        raise TypeError(f"law must be ContactParameters, got {type(law).__name__}")
+    _require_wrench_inputs(topology, hands, club, law)
 
     lead_hand = _resolve_hand_state(hands, "lead")
     trail_hand = _resolve_hand_state(hands, "trail")
@@ -291,39 +333,17 @@ def evaluate_topology_wrenches(
     )
 
     for pair in topology.pairs:
+        wrench = _evaluate_topology_pair(
+            topology,
+            pair,
+            hand_states,
+            club_state,
+            law,
+            grip_cap,
+            patch_radius_m,
+            spin_transition_rad_s,
+        )
         site_a = topology.site(pair.site_a)
-        if patch_radius_m is None:
-            r_eff = 1.0 / (1.0 / site_a.radius_m + 1.0 / r_grip)
-            patch = math.sqrt(2.0 * r_eff * DEFAULT_PRELOAD_M)
-        else:
-            patch = patch_radius_m
-
-        prim_a = _site_primitive(site_a)
-        st_a = hand_states[site_a.hand]
-        if pair.is_hand_grip:
-            wrench = _evaluate_pair_primitives(
-                prim_a,
-                grip_cap,
-                st_a,
-                club_state,
-                law,
-                patch,
-                spin_transition_rad_s,
-            )
-        else:
-            site_b = topology.site(pair.site_b)
-            prim_b = _site_primitive(site_b)
-            st_b = hand_states[site_b.hand]
-            wrench = _evaluate_pair_primitives(
-                prim_a,
-                prim_b,
-                st_a,
-                st_b,
-                law,
-                patch,
-                spin_transition_rad_s,
-            )
-
         res = _pair_result_from_wrench(pair, wrench)
         results[pair.name] = res
 
