@@ -2741,6 +2741,15 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-20 | #13511 | ci(opensim): Real OpenSim job reuses a validated per-runner venv and opensim-models clone and stops uploading the GitHub pip cache from self-hosted runners |
+| 2026-10-20 | #13505 | Fix duplicate tex_skin_2 asset in MuJoCo with_head exports so the MJCF compiles |
+| 2026-10-20 | #13497 | Hang watchdog dumps stacks from a GIL-held Python handler so SIGUSR1 no longer segfaults the xdist controller (exit 139) |
+| 2026-10-20 | #13457 | Continuous capsule line-contact law (axial node quadrature) replaces the closest-point capsule law; MuJoCo emits node spheres with N-scaled friction time and drops the parallel-capsule workaround; MuJoCo 0.04 s ten_finger hold net_force RMS 2.866% is a strict xfail |
+| 2026-10-20 | #13478 | Re-lands the salvaged source-bound native OpenSim muscle-effort adapter and runtime with SDK-free contract tests; native tests skip without the SDK and no Manager advance has been executed. |
+| 2026-10-20 | #13491 | HRG-Q1 slice: full-body-v2 mass matrix and gravity qualified against a spec-only geometric-Jacobian reference on MuJoCo (measured rel. error <=4e-16, tol 1e-12) with a Pinocchio twin; Drake, OpenSim, MyoSuite, limits, closure, contact and ID remain open |
+| 2026-10-20 | #13503 | HRG-E4 slice: anatomical-angle event table (address/top/impact/finish) with CSV/JSON export carrying units, sign conventions, observability and receipts; JSON schema validated |
+| 2026-10-20 | #13499 | MuJoCo visual layer for full-body-v2: one rigid pelvis, abdomen and thorax visual per trunk segment, seam no-gap and physics-unchanged tests (HRG-D3 slice; renders deferred) |
+| 2026-10-20 | #13501 | Forward-dynamics replay reproducibility: deterministic replay test, seeded Lyapunov-style sensitivity probe (--replay-sensitivity), bounded 0.1 s post-impact FD metric, and a base-of-support bound on the ZMP filter centre-of-mass shift |
 | 2026-10-20 | #13496 | Stop CI Requires OpenSim queueing one run per main push |
 | 2026-10-20 | #13476 | Heavy lanes: install real pin/pin-pink wheels and isolate each lane in a venv |
 | 2026-10-20 | #13458 | Fix OpenSim capsule contact mesh ring alignment, CoP reporting, and BDF accuracy for ten-finger parity |
