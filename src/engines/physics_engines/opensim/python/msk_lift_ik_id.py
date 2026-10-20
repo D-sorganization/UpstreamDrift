@@ -91,6 +91,7 @@ from src.shared.python.lifting.sagittal_retarget import (
 Array = NDArray[np.float64]
 
 __all__ = [
+    "ARM_TASK_BOUND_MARGIN_RAD",
     "ARM_TASK_WEIGHT",
     "BAR_WEIGHT",
     "IK_COORDINATE_RMS_THRESHOLD_RAD",
@@ -167,6 +168,10 @@ PELVIS_WEIGHT = LOWER_LIMB_WEIGHT
 _UNCLAMPED_PREFIXES = ("arm_", "elbow_", "pro_sup", "wrist_")
 #: Arm coordinate-task weight (marker weights are 1 and 10).
 ARM_TASK_WEIGHT = 0.01
+#: Arm coordinate-task bound margin (rad): pulls unclamped arm coordinates to an
+#: interior target (at least this far from range bounds) so numerical drift during
+#: unconstrained IK does not violate bounds (OSL-12, #13048).
+ARM_TASK_BOUND_MARGIN_RAD = 1e-3
 #: Stated limitation of the landmark set (recorded in every IK receipt).
 _PELVIS_OBSERVABILITY = (
     "pelvis orientation is weakly observed in the bundle itself: LIFT-5 "
@@ -534,21 +539,24 @@ def _range_violations(model: Any, names: tuple[str, ...], q: Array) -> dict:
 
 
 def _arm_coordinate_tasks(model: Any) -> Any:
-    """Weak coordinate tasks holding every arm coordinate at its hold value.
+    """Weak coordinate tasks holding every arm coordinate near its hold value.
 
     Only the shoulders and the bar observe the arms, so elbow, forearm and
     wrist angles form a null space the solver otherwise wanders through
     (OSL-12 measured elbow hyperextension to -146 deg).  The task weight
-    :data:`ARM_TASK_WEIGHT` is small against the marker weights.
+    :data:`ARM_TASK_WEIGHT` is small against the marker weights.  Task targets
+    are placed at least :data:`ARM_TASK_BOUND_MARGIN_RAD` inside coordinate
+    ranges so unclamped tracking does not drift past range limits (#13048).
     """
     osim = import_opensim()
     tasks = osim.SimTKArrayCoordinateReference()
     for coordinate in model.getCoordinateSet():
         name = coordinate.getName()
         if name.startswith(_UNCLAMPED_PREFIXES):
-            task = osim.CoordinateReference(
-                name, osim.Constant(coordinate.getDefaultValue())
-            )
+            low, high = float(coordinate.getRangeMin()), float(coordinate.getRangeMax())
+            m = ARM_TASK_BOUND_MARGIN_RAD
+            target = float(np.clip(coordinate.getDefaultValue(), low + m, high - m))
+            task = osim.CoordinateReference(name, osim.Constant(target))
             task.setWeight(ARM_TASK_WEIGHT)
             tasks.push_back(task)
     return tasks

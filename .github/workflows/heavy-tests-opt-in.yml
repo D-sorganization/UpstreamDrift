@@ -121,6 +121,13 @@ jobs:
             libdbus-1-3 libxrandr2 libxss1 libxcursor1 libxcomposite1 \
             libasound2-dev libxi6 libxtst6
 
+      - name: Create isolated virtualenv (no shared toolcache pollution)
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/heavy-venv"
+          echo "$RUNNER_TEMP/heavy-venv/bin" >> "$GITHUB_PATH"
+
       - name: Install Python dependencies
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
         timeout-minutes: 20
@@ -134,8 +141,8 @@ jobs:
           python3 scripts/ci/bootstrap_conformance_deps.py
           python -m ensurepip --upgrade || true
           pip install \
-            pinocchio \
-            pink \
+            pin \
+            pin-pink \
             mujoco \
             mediapipe \
             meshcat \

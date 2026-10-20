@@ -58,8 +58,13 @@ import numpy as np
 from src.shared.python.model_appearance import foot, geometry, library
 from src.shared.python.model_appearance import head_mesh as head_mesh_asset
 from src.shared.python.model_appearance.club_assembly import (
+    club_body_name,
     club_part_material,
     ClubAssembly,
+)
+from src.shared.python.model_appearance.club_chain_meshes import (
+    ClubPart,
+    club_meshes_by_body,
 )
 from src.shared.python.model_appearance.cross_section import (
     TRUNK_PARTS,
@@ -245,6 +250,8 @@ class _Context:
     head_enabled: bool
     #: Procedural shoe-last shells of the foot bodies that could be sized (F1).
     feet: Mapping[str, Sequence[foot.FootPart]] = field(default_factory=dict)
+    #: Club parts per body (``club_chain_meshes``; chain shaft R6, #12686).
+    club_parts: Mapping[str, Sequence[ClubPart]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -478,10 +485,7 @@ def _meshes_for_body(
     if part == "hand" and ctx.club is not None and library.is_grip_hand_standoff(body):
         return []  # the grip hands are drawn on the club; no second hand loft
     if part == "club" and ctx.club is not None:
-        finish = library.material_name_for(ctx.doc, body)
-        return [
-            BodyMesh(body, *item) for item in club_meshes(ctx.club, finish, ctx.doc)
-        ]
+        return [BodyMesh(body, *item) for item in ctx.club_parts.get(body, ())]
     if body in ctx.feet:
         return _foot_meshes(ctx, body)
     scale = 1.0 if rule is None else rule.radius_scale
@@ -492,6 +496,17 @@ def _meshes_for_body(
     else:
         segments = _limb_segments(part, caps, scale)
     return _segment_meshes(ctx, body, part, segments)
+
+
+def _club_parts(
+    spec: Mapping[str, Any], doc: AppearanceDocument, club: ClubAssembly | None
+) -> dict[str, list[ClubPart]]:
+    """Club parts per body, in the club body's finish (empty without a club)."""
+    body = club_body_name(spec)
+    if club is None or body is None:
+        return {}
+    finish = library.material_name_for(doc, body)
+    return club_meshes_by_body(spec, club, finish, doc)
 
 
 def body_meshes(
@@ -523,6 +538,7 @@ def body_meshes(
         spec.get("subject", {}),
         doc.head.enabled,
         foot.foot_parts(spec, sections, model=doc.foot.model),
+        _club_parts(spec, doc, club),
     )
     by_body: dict[str, list[Capsule]] = {}
     for cap in skeleton.capsules:

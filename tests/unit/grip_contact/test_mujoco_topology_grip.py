@@ -38,6 +38,10 @@ from src.shared.python.grip_contact.contact_topology import (
     contact_topology,
 )
 from src.shared.python.grip_contact.pad_contact import build_pad_model, grip_axis
+from src.shared.python.grip_contact.pair_contact import (
+    ContactCapsule,
+    capsule_line_nodes,
+)
 from src.shared.python.grip_contact.parity import (
     PEAK_TOLERANCE,
     RMS_TOLERANCE,
@@ -260,7 +264,7 @@ def test_old_pad_path_mjcf_is_byte_identical() -> None:
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
 def test_topology_mjcf_primitives_and_exclusions(style: GripStyle) -> None:
-    """One sphere/capsule geom per physical site, contype=0/conaffinity=0, explicit pairs."""
+    """Sphere geoms per physical site (capsules as line-contact nodes), explicit pairs."""
     module = _mujoco_sim_module()
     spec_bytes, _, names, _, interface, topo_model = _setup(style=style)
     sim = module.ClubInHands(
@@ -270,8 +274,6 @@ def test_topology_mjcf_primitives_and_exclusions(style: GripStyle) -> None:
     mj = sim._mj
 
     phys_pairs = topo_model.topology.hand_grip_pairs()
-    assert m.npair == len(phys_pairs)
-
     grip_geom_id = int(m.geom("grip").id)
     hand_body_ids = {int(m.body("hand_L").id), int(m.body("hand_R").id)}
 
@@ -287,22 +289,36 @@ def test_topology_mjcf_primitives_and_exclusions(style: GripStyle) -> None:
     )
     assert '<exclude body1="hand_L" body2="hand_R"/>' in xml
 
+    expected_pairs = 0
     for p in phys_pairs:
         site = topo_model.topology.site(p.site_a)
-        assert f'<pair geom1="{site.name}" geom2="grip" condim="6"' in xml
-        geom_id = int(m.geom(site.name).id)
-        assert int(m.geom_contype[geom_id]) == 0
-        assert int(m.geom_conaffinity[geom_id]) == 0
+        if site.primitive == "sphere":
+            geom_names = [site.name]
+        else:  # capsule: shared axial line-contact nodes (#13308)
+            p0, p1 = site.endpoints_m
+            count = len(
+                capsule_line_nodes(
+                    ContactCapsule(np.asarray(p0), np.asarray(p1), site.radius_m)
+                )
+            )
+            geom_names = [
+                module.line_node_geom_name(site.name, j) for j in range(count)
+            ]
+            assert f'name="{site.name}"' not in xml
+        expected_pairs += len(geom_names)
         expected_body = (
             int(m.body("hand_L").id)
             if site.hand == "lead"
             else int(m.body("hand_R").id)
         )
-        assert int(m.geom_bodyid[geom_id]) == expected_body
-        if site.primitive == "sphere":
+        for name in geom_names:
+            assert f'<pair geom1="{name}" geom2="grip" condim="6"' in xml
+            geom_id = int(m.geom(name).id)
+            assert int(m.geom_contype[geom_id]) == 0
+            assert int(m.geom_conaffinity[geom_id]) == 0
+            assert int(m.geom_bodyid[geom_id]) == expected_body
             assert int(m.geom_type[geom_id]) == int(mj.mjtGeom.mjGEOM_SPHERE)
-        else:
-            assert int(m.geom_type[geom_id]) == int(mj.mjtGeom.mjGEOM_CAPSULE)
+    assert m.npair == expected_pairs
 
     # Every explicit pair must link a physical hand site and the grip cylinder
     for pair_idx in range(m.npair):
@@ -616,6 +632,220 @@ def test_dynamic_net_wrench_parity_short_swing_vs_pinocchio(style: GripStyle) ->
     assert not failing, failing
 
 
+def test_capsule_line_contact_continuous_and_matches_shared_law_ten_finger() -> None:
+    """Native node contacts follow the continuous shared line law (#13308).
+
+    The old capsule geom snapped its contact 8 mm (overlap centre to endpoint)
+    once the finger tilted past ``sin^2(theta) = 1e-10`` at ~1.18 ms; the
+    node spheres keep the normal-force-weighted contact centroid on the shared
+    law's contact point before and after that tilt, with no geometry switch.
+    """
+    module = _mujoco_sim_module()
+    spec_bytes, _, names, swing, interface, topo_model = _setup(
+        style=GripStyle.TEN_FINGER
+    )
+    q0 = np.asarray(swing.q[0], float)
+    sim = module.ClubInHands(
+        spec_bytes, names, interface, pads=None, topology_model=topo_model
+    )
+    sim.calibrate(q0)
+    sim.hold_pose(q0)
+    pair_little = next(
+        p
+        for p in topo_model.physical_grip_pairs("R")
+        if p.site_a == "trail_little_finger"
+    )
+    k_little = topo_model.physical_grip_pairs("R").index(pair_little)
+    sizes0 = sim.model.geom_size.copy()
+
+    def native_vs_shared() -> tuple[float, np.ndarray]:
+        hands = sim.place_hands(float(sim.data.time))
+        sim._mj.mj_forward(sim.model, sim.data)
+        frame_r = sim.club_state_now().frame(sim._offsets["R"])
+        shared = topology_pair_wrench(topo_model, pair_little, hands["R"], frame_r)
+        res = np.zeros(6)
+        load = 0.0
+        moment = np.zeros(3)
+        for i in range(sim.data.ncon):
+            c = sim.data.contact[i]
+            if sim._pad_geom.get(int(c.geom1)) != ("R", k_little):
+                continue
+            sim._mj.mj_contactForce(sim.model, sim.data, i, res)
+            load += float(res[0])
+            moment += float(res[0]) * np.asarray(c.pos, float)
+        assert load > 0.0
+        centroid = moment / load
+        return float(np.linalg.norm(centroid - shared.contact_point_m)), centroid
+
+    err_0, c_0 = native_vs_shared()
+    sim.advance(1)  # |theta| ~ 1e-8 rad: below the old 1e-5 rad threshold
+    err_1, c_1 = native_vs_shared()
+    sim.advance(200)  # t ~ 2 ms: past the old threshold crossing at ~1.18 ms
+    err_2, c_2 = native_vs_shared()
+    assert max(err_0, err_1, err_2) < 5.0e-4
+    # No 8 mm snap: the contact drifts with the club, far less than 1 mm.
+    assert float(np.linalg.norm(c_2 - c_1)) < 1.0e-3
+    np.testing.assert_array_equal(sim.model.geom_size, sizes0)
+
+
+def test_capsule_node_friction_matches_shared_line_law_ten_finger() -> None:
+    """Node friction rows share one contact's friction gain (#13308).
+
+    MuJoCo's regularised friction gain is per contact row, so ``N`` node rows
+    with the single-contact ``solreffriction`` time constant resisted slip
+    about ``N`` times as strongly (37.9 N versus the shared law's 19.5 N on
+    the trail little finger at 10 ms).  Each node row therefore uses ``N``
+    times that time constant, and the pair's tangential force tracks the law.
+    """
+    module = _mujoco_sim_module()
+    spec_bytes, _, names, swing, interface, topo_model = _setup(
+        style=GripStyle.TEN_FINGER
+    )
+    q0 = np.asarray(swing.q[0], float)
+    sim = module.ClubInHands(
+        spec_bytes, names, interface, pads=None, topology_model=topo_model
+    )
+    nodes_per_site: dict[tuple[str, int], int] = {}
+    for key in sim._pad_geom.values():
+        nodes_per_site[key] = nodes_per_site.get(key, 0) + 1
+
+    def pair_nodes(i: int) -> int:
+        g1, g2 = int(sim.model.pair_geom1[i]), int(sim.model.pair_geom2[i])
+        return nodes_per_site[sim._pad_geom.get(g1) or sim._pad_geom[g2]]
+
+    single = {
+        float(sim.model.pair_solreffriction[i, 0])
+        for i in range(sim.model.npair)
+        if pair_nodes(i) == 1
+    }
+    assert len(single) == 1
+    (base_time,) = single
+    for i in range(sim.model.npair):
+        assert sim.model.pair_solreffriction[i, 0] == pytest.approx(
+            pair_nodes(i) * base_time
+        )
+    assert max(nodes_per_site.values()) == 5
+
+    sim.calibrate(q0)
+    sim.hold_pose(q0)
+    pair_little = next(
+        p
+        for p in topo_model.physical_grip_pairs("R")
+        if p.site_a == "trail_little_finger"
+    )
+    k_little = topo_model.physical_grip_pairs("R").index(pair_little)
+    sim.advance(1000)  # t = 10 ms: the club pitch has loaded the finger in shear
+    hands = sim.place_hands(float(sim.data.time))
+    sim._mj.mj_forward(sim.model, sim.data)
+    frame_r = sim.club_state_now().frame(sim._offsets["R"])
+    shared = topology_pair_wrench(topo_model, pair_little, hands["R"], frame_r)
+    res = np.zeros(6)
+    native_ft = 0.0
+    for i in range(sim.data.ncon):
+        c = sim.data.contact[i]
+        if sim._pad_geom.get(int(c.geom1)) != ("R", k_little):
+            continue
+        sim._mj.mj_contactForce(sim.model, sim.data, i, res)
+        native_ft += float(np.hypot(res[1], res[2]))
+    assert shared.tangential_force_mag_n > 5.0
+    assert native_ft == pytest.approx(shared.tangential_force_mag_n, rel=0.10)
+
+
+def test_two_pad_hyperstatic_penalty_vs_mujoco_cone_divergence() -> None:
+    """Minimal 2-pad hyperstatic test (#13306) proving why MuJoCo cone QP diverges from penalty split."""
+    import mujoco
+
+    from src.shared.python.grip_contact.bushing_law import BushingState
+    from src.shared.python.grip_contact.pair_contact import (
+        ContactCapsule,
+        ContactSphere,
+        sphere_capsule,
+    )
+    from src.shared.python.motion_matching.contact_law import ContactParameters
+
+    law = ContactParameters(
+        stiffness_n_m=171095.0080515298,
+        dissipation_s_m=0.38266566243249167,
+        static_friction=0.9,
+        dynamic_friction=0.7,
+        viscous_friction=0.0,
+        transition_velocity_m_s=1.0e-3,
+    )
+    delta0, r_grip, r_pad = 0.00025, 0.014, 0.008
+    x_pad = r_grip + r_pad - delta0
+    m_club, m_hand = 0.313, 100.0
+    a_hat = (1.0 / m_club) + (1.0 / m_hand)
+    d0 = 0.001
+    k_sol = (1.0 - d0) * a_hat * law.stiffness_n_m
+    b_sol = k_sol * delta0 * law.dissipation_s_m
+
+    sphere_l = ContactSphere(center_m=np.array([-x_pad, 0.0, 0.03]), radius_m=r_pad)
+    sphere_r = ContactSphere(center_m=np.array([+x_pad, 0.0, -0.03]), radius_m=r_pad)
+    grip_cap = ContactCapsule(
+        p0_m=np.array([0.0, 0.0, -0.15]),
+        p1_m=np.array([0.0, 0.0, +0.15]),
+        radius_m=r_grip,
+    )
+    hand_st = BushingState(np.eye(3), np.zeros(3), np.zeros(3), np.zeros(3))
+
+    def _eval_mj(
+        v_club: np.ndarray, condim: int, cone: str, imp: float, tf: float
+    ) -> tuple[float, float, float]:
+        xml = (
+            f'<mujoco><compiler inertiafromgeom="false"/>'
+            f'<option timestep="1e-5" integrator="Euler" cone="{cone}" impratio="{imp}" gravity="0 0 0">'
+            f'<flag multiccd="disable" refsafe="disable" warmstart="disable"/></option>'
+            f'<worldbody><body name="club"><freejoint/>'
+            f'<inertial pos="0 0 0" mass="{m_club}" diaginertia="0.05 0.05 0.0004"/>'
+            f'<geom name="grip" type="cylinder" fromto="0 0 -0.15 0 0 0.15" size="{r_grip}" contype="0" conaffinity="0"/></body>'
+            f'<body name="hand_L"><freejoint/><inertial pos="0 0 0" mass="{m_hand}" diaginertia="10 10 10"/>'
+            f'<geom name="pad_L" type="sphere" pos="{-x_pad} 0 0.03" size="{r_pad}" contype="0" conaffinity="0"/></body>'
+            f'<body name="hand_R"><freejoint/><inertial pos="0 0 0" mass="{m_hand}" diaginertia="10 10 10"/>'
+            f'<geom name="pad_R" type="sphere" pos="{x_pad} 0 -0.03" size="{r_pad}" contype="0" conaffinity="0"/></body></worldbody>'
+            f'<contact><exclude body1="hand_L" body2="hand_R"/>'
+            f'<pair geom1="pad_L" geom2="grip" condim="{condim}" friction="0.9 0.9 0 0 0" '
+            f'solref="-{k_sol:.17g} -{b_sol:.17g}" solreffriction="{tf:.17g} 1" solimp="{d0} {d0} 0.001 0.5 2"/>'
+            f'<pair geom1="pad_R" geom2="grip" condim="{condim}" friction="0.9 0.9 0 0 0" '
+            f'solref="-{k_sol:.17g} -{b_sol:.17g}" solreffriction="{tf:.17g} 1" solimp="{d0} {d0} 0.001 0.5 2"/></contact></mujoco>'
+        )
+        m = mujoco.MjModel.from_xml_string(xml)
+        d = mujoco.MjData(m)
+        d.qvel[0:3] = v_club
+        mujoco.mj_forward(m, d)
+        res_l, res_r = np.zeros(6), np.zeros(6)
+        mujoco.mj_contactForce(m, d, 0, res_l)
+        mujoco.mj_contactForce(m, d, 1, res_r)
+        return (
+            float(res_l[0]),
+            float(np.hypot(res_l[1], res_l[2])),
+            float(np.linalg.norm(res_l[:3])),
+        )
+
+    # State 0 (v=0): elliptic matches static normal force (42.774 N), pyramidal biases it (+29.6%)
+    v0 = np.zeros(3)
+    pw0 = sphere_capsule(
+        sphere_l, grip_cap, hand_st, BushingState(np.eye(3), v0, v0, v0), law
+    )
+    fn0_ell, _, _ = _eval_mj(v0, 3, "elliptic", 0.95, 1.9e-5)
+    fn0_pyr, _, _ = _eval_mj(v0, 3, "pyramidal", 0.95, 1.9e-5)
+    assert fn0_ell == pytest.approx(pw0.normal_force_mag_n, rel=1e-3)
+    assert (fn0_pyr - pw0.normal_force_mag_n) / pw0.normal_force_mag_n > 0.25
+
+    # State 2 (v_z = -3 mm/s = 3*v_tr): penalty keeps fn=42.774 N, whereas MuJoCo elliptic cone
+    # QCQP projection inflates normal squeeze to >70 N (+65.9%) and |f_L| by +83.1%
+    v2 = np.array([0.0, 0.0, -0.003])
+    pw2 = sphere_capsule(
+        sphere_l, grip_cap, hand_st, BushingState(np.eye(3), v0, v2, v0), law
+    )
+    fn2_ell, ft2_ell, f2_ell = _eval_mj(v2, 3, "elliptic", 0.95, 1.9e-5)
+    assert pw2.normal_force_mag_n == pytest.approx(42.773752, rel=1e-5)
+    assert (fn2_ell - pw2.normal_force_mag_n) / pw2.normal_force_mag_n > 0.60
+    assert (f2_ell - float(np.linalg.norm(pw2.force_b_n))) / float(
+        np.linalg.norm(pw2.force_b_n)
+    ) > 0.80
+    assert ft2_ell == pytest.approx(0.9 * fn2_ell, rel=1e-4)
+
+
 @pytest.mark.slow
 @pytest.mark.timeout(600)
 @pytest.mark.xfail(
@@ -626,9 +856,9 @@ def test_dynamic_net_wrench_parity_short_swing_vs_pinocchio(style: GripStyle) ->
         "between MuJoCo condim=6 elliptic soft constraint and Pinocchio explicit Stribeck "
         "penalty law (#13306, GRIP_PARITY_DECISIONS.md Section 19): while determinate net "
         "wrench passes, measured 0.1 s hold force_L / force_R / overall max (peak_error, "
-        "rms_error) are OVERLAP (0.08%, 10.48%) / (0.55%, 17.01%) / (35.8%, 53.1%), "
-        "INTERLOCK (0.08%, 10.48%) / (0.55%, 17.01%) / (35.8%, 53.1%), TEN_FINGER "
-        "(0.56%, 8.52%) / (0.38%, 8.29%) / (33.9%, 30.5%) "
+        "rms_error) are OVERLAP (0.01%, 10.49%) / (1.22%, 17.02%) / (35.3%, 53.1%), "
+        "INTERLOCK (0.01%, 10.49%) / (1.22%, 17.02%) / (35.3%, 53.1%), TEN_FINGER "
+        "(0.62%, 8.38%) / (0.57%, 8.15%) / (33.6%, 29.9%) "
         "(exceeding PEAK_TOLERANCE=5%, RMS_TOLERANCE=2%)."
     ),
 )
@@ -682,9 +912,9 @@ def test_dynamic_parity_hold_vs_pinocchio(style: GripStyle) -> None:
         "between MuJoCo condim=6 elliptic soft constraint and Pinocchio explicit Stribeck "
         "penalty law (#13306, GRIP_PARITY_DECISIONS.md Section 19): while determinate net "
         "wrench passes, measured 0.1 s swing force_L / force_R / overall max (peak_error, "
-        "rms_error) are OVERLAP (0.14%, 14.84%) / (0.18%, 18.33%) / (38.4%, 68.3%), "
-        "INTERLOCK (0.14%, 14.84%) / (0.18%, 18.33%) / (38.4%, 68.3%), TEN_FINGER "
-        "(0.14%, 12.54%) / (0.24%, 12.13%) / (97.1%, 68.5%) "
+        "rms_error) are OVERLAP (0.01%, 14.83%) / (0.40%, 18.31%) / (38.2%, 68.2%), "
+        "INTERLOCK (0.01%, 14.83%) / (0.40%, 18.31%) / (38.2%, 68.2%), TEN_FINGER "
+        "(0.01%, 12.34%) / (0.12%, 11.94%) / (94.7%, 67.2%) "
         "(exceeding PEAK_TOLERANCE=5%, RMS_TOLERANCE=2%)."
     ),
 )

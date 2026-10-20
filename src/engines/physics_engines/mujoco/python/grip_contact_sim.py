@@ -47,7 +47,11 @@ from src.shared.python.grip_contact.contact_topology import (
     pair_surface_gap_m,
 )
 from src.shared.python.grip_contact.pad_contact import PadContactModel, grip_axis
-from src.shared.python.grip_contact.pair_contact import PairWrench
+from src.shared.python.grip_contact.pair_contact import (
+    ContactCapsule,
+    PairWrench,
+    capsule_line_nodes,
+)
 from src.shared.python.grip_contact.parity import GripKineticsSeries
 from src.shared.python.grip_contact.topology_contact import (
     PairTraceRecorder,
@@ -65,14 +69,47 @@ HAND_MODES = ("prescribed", "trail_follows_club", "lead_only")
 HAND_MASS_KG = 100.0
 HAND_INERTIA_KG_M2 = 10.0
 IMPEDANCE = 0.95
-TOPOLOGY_IMPEDANCE = 0.01
-TOPOLOGY_IMPRATIO_STATIC = 0.095
-TOPOLOGY_FRICTION_TIME_STATIC_S = 1.9e-6
+TOPOLOGY_IMPEDANCE = 0.001
+TOPOLOGY_IMPRATIO_STATIC = 0.95
+TOPOLOGY_FRICTION_TIME_STATIC_S = 1.9e-5
 TOPOLOGY_STEP_SCALE = 1000.0
 
 
 def _nums(values: Any) -> str:
     return " ".join(format(float(v), ".17g") for v in values)
+
+
+def line_node_geom_name(site: str, node: int) -> str:
+    """MJCF geom name of axial line-contact node ``node`` of capsule ``site``."""
+    return f"{site}_node{node}"
+
+
+def _site_node_geoms(
+    topo: Any, site: str, side: str
+) -> tuple[tuple[str, ...], tuple[tuple[np.ndarray, float], ...]]:
+    """Geom names and (hand-frame centre, radius) spheres of one topology site.
+
+    A sphere site is one sphere.  A capsule site is the shared axial
+    line-contact quadrature (#13308): one sphere per
+    :func:`~src.shared.python.grip_contact.pair_contact.capsule_line_nodes`
+    node, each paired with the grip under the site's calibrated ``solref``,
+    so their summed native contacts integrate the penetration along the
+    capsule exactly as the shared law does.  A native capsule-cylinder
+    contact would instead snap between the overlap centre and an endpoint.
+    """
+    mapped = map_site_to_hand_frame(topo, site, side)
+    if mapped.primitive == "sphere":
+        return (mapped.name,), ((np.asarray(mapped.centre_m, float), mapped.radius_m),)
+    if mapped.primitive == "capsule":
+        p0, p1 = mapped.endpoints_m
+        nodes = capsule_line_nodes(
+            ContactCapsule(
+                np.asarray(p0, float), np.asarray(p1, float), mapped.radius_m
+            )
+        )
+        names = tuple(line_node_geom_name(mapped.name, j) for j in range(len(nodes)))
+        return names, tuple((n.center_m, n.radius_m) for n in nodes)
+    raise ValueError(f"unsupported primitive {mapped.primitive!r}")
 
 
 def _topology_bodies_and_pairs(
@@ -93,30 +130,25 @@ def _topology_bodies_and_pairs(
     for side in sides:
         geoms: list[str] = []
         for k, pair in enumerate(topo_model.physical_grip_pairs(side)):
-            mapped = map_site_to_hand_frame(topo, pair.site_a, side)
-            if mapped.primitive == "sphere":
-                geoms.append(
-                    f'<geom name="{mapped.name}" type="sphere" '
-                    f'size="{mapped.radius_m:.17g}" pos="{_nums(mapped.centre_m)}" '
-                    f'contype="0" conaffinity="0" mass="0"/>'
-                )
-            elif mapped.primitive == "capsule":
-                p0, p1 = mapped.endpoints_m
-                geoms.append(
-                    f'<geom name="{mapped.name}" type="capsule" '
-                    f'size="{mapped.radius_m:.17g}" fromto="{_nums(p0)} {_nums(p1)}" '
-                    f'contype="0" conaffinity="0" mass="0"/>'
-                )
-            else:
-                raise ValueError(f"unsupported primitive {mapped.primitive!r}")
+            names, spheres = _site_node_geoms(topo, pair.site_a, side)
             ref = solref.get((side, k)) or solref[pair.name]
-            pairs.append(
-                f'<pair geom1="{mapped.name}" geom2="grip" condim="6" '
-                f'friction="{mu:.17g} {mu:.17g} {torsional:.17g} 1e-5 1e-5" '
-                f'solref="{ref[0]:.17g} {ref[1]:.17g}" '
-                f'solreffriction="{friction_time_s:.17g} 1" '
-                f'solimp="{TOPOLOGY_IMPEDANCE} {TOPOLOGY_IMPEDANCE} 0.001 0.5 2"/>'
-            )
+            # MuJoCo's regularised friction gain is per contact row: N node rows
+            # at one contact's time constant resist slip ~N times as hard as the
+            # shared line law, so each node row is N times slower (#13308).
+            node_friction_time_s = friction_time_s * len(names)
+            for name, (centre, radius) in zip(names, spheres, strict=True):
+                geoms.append(
+                    f'<geom name="{name}" type="sphere" '
+                    f'size="{radius:.17g}" pos="{_nums(centre)}" '
+                    f'contype="0" conaffinity="0" mass="0"/>'
+                )
+                pairs.append(
+                    f'<pair geom1="{name}" geom2="grip" condim="6" '
+                    f'friction="{mu:.17g} {mu:.17g} {torsional:.17g} 1e-5 1e-5" '
+                    f'solref="{ref[0]:.17g} {ref[1]:.17g}" '
+                    f'solreffriction="{node_friction_time_s:.17g} 1" '
+                    f'solimp="{TOPOLOGY_IMPEDANCE} {TOPOLOGY_IMPEDANCE} 0.001 0.5 2"/>'
+                )
         bodies.append(
             f'<body name="hand_{side}"><freejoint name="hand_{side}_free"/>'
             f'<inertial pos="0 0 0" mass="{HAND_MASS_KG}" diaginertia="10 10 10"/>'
@@ -363,9 +395,11 @@ class ClubInHands:
         self._offsets = {s: self.interface.frame(s).matrix() for s in SIDES}
         self._pad_geom: dict[int, tuple[str, int]] = {}
         if self.topology_model is not None:
+            topo = self.topology_model.topology
             for s in self.pad_sides:
                 for k, pair in enumerate(self.topology_model.physical_grip_pairs(s)):
-                    self._pad_geom[int(self.model.geom(pair.site_a).id)] = (s, k)
+                    for name in _site_node_geoms(topo, pair.site_a, s)[0]:
+                        self._pad_geom[int(self.model.geom(name).id)] = (s, k)
         else:
             for s in self.pad_sides:
                 for k in range(self.pad_count):

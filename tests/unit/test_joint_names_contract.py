@@ -244,6 +244,22 @@ class TestDrakeJointNamesContract:
         engine = DrakePhysicsEngine()
         assert engine.get_joint_names() == []
 
+    def test_drake_unfinalized_plant_returns_empty(self) -> None:
+        """An unfinalized plant forbids num_velocities(); must not be queried (#13451)."""
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
+            DrakePhysicsEngine,
+        )
+
+        engine = DrakePhysicsEngine()
+        plant = MagicMock(name="UnfinalizedPlant")
+        plant.is_finalized.return_value = False
+        plant.num_velocities.side_effect = RuntimeError(
+            "Pre-finalize calls to 'num_velocities()' are not allowed"
+        )
+        engine.plant = plant
+        assert engine.get_joint_names() == []
+        plant.num_velocities.assert_not_called()
+
     def test_drake_mock_double_pendulum(self) -> None:
         from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,

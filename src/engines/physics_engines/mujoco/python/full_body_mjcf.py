@@ -24,7 +24,6 @@ from src.engines.physics_engines.mujoco.python.native_mjcf import (
 )
 from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.motion_matching.full_body_schema import (
-    SchemaFeatureUnavailableError,
     require_full_body_schema,
 )
 from src.shared.python.motion_matching.full_body_spec import order_full_body_joints
@@ -136,7 +135,10 @@ def export_full_body_mjcf(
     document (implies ``visual``) restyles that layer with materials,
     textures and smooth meshes; it is never read by the physics path.
     ``with_head`` adds only the visible head and neck to the legacy capsule
-    layer (an appearance document already includes them).
+    layer (an appearance document already includes them). A full-body-v2
+    spec gets one rigid trunk visual per segment (pelvis, ``trunk_lumbar``,
+    thorax), each on its own body, so the visuals follow the lumbar and
+    thoracic joints (HRG-D3, #13174).
     """
     from src.shared.python.grip_contact.binding_manifest import (
         build_spec_grip_binding_manifest,
@@ -153,18 +155,9 @@ def export_full_body_mjcf(
             source="src/engines/physics_engines/mujoco/python/full_body_mjcf.py",
             consumer="mujoco.full_body_mjcf",
         )
-    schema = require_full_body_schema(spec, consumer="MJCF export")
-    if (visual or with_head or appearance is not None) and (
-        schema.schema_id != "full-body-v1"
-    ):
-        raise SchemaFeatureUnavailableError(
-            schema.schema_id,
-            consumer="MJCF export",
-            feature="the visual layer (regional trunk skin and capsules; "
-            "export physics only with visual=False)",
-            child="HRG-D3",
-            issue=13174,
-        )
+    # Both schemas carry the visual layer: in full-body-v2 the pelvis,
+    # trunk_lumbar and thorax each draw their own solid's visuals (HRG-D3).
+    require_full_body_schema(spec, consumer="MJCF export")
     if not isinstance(spec.get("closure"), dict):
         raise ValueError("Missing closure specification")
     if not isinstance(spec.get("contact"), dict):
