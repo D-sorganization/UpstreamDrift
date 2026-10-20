@@ -87,9 +87,10 @@ POSES_JSON = REPO_ROOT / "tests/fixtures/club_face/address_poses.json"
 def _has_pinocchio() -> bool:
     try:
         import pinocchio  # noqa: F401
+
+        return hasattr(pinocchio, "Model")
     except ImportError:
         return False
-    return True
 
 
 requires_pinocchio = pytest.mark.skipif(
