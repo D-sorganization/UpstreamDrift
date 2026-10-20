@@ -60,6 +60,17 @@ class _Assets:
         self.asset: ET.Element = asset
         self.materials = library.library_materials(doc)
         self._made: set[str] = set()
+        # Reuse materials (and their textures) an earlier pass already emitted
+        # into this asset block; a second _Assets must not re-emit them (#13500).
+        for existing in self.asset.findall("material"):
+            mat = existing.get("name", "")
+            if mat.startswith("mat_"):
+                base = mat[4:]
+                self._made.add(
+                    f"{base[: -len('_plane')]}:plane"
+                    if base.endswith("_plane")
+                    else base
+                )
         self.n_meshes = 0
 
     @property
