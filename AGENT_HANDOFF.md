@@ -45,6 +45,10 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+Null-space exploration after one solution (AffineDrift Epic #5093; ADR-0054):
+
+- Draft PRs, merge in order: UD-1 #13475 (`classify_functional`, attribution intervals), UD-2 #13470 (manifold continuation), UD-3 #13467 (muscle-fibre affine hull; red CI = unrelated float-equality flake, rerun), UD-4a #13493 (docs; stacks on UD-1/UD-2). Owner merge unblocks AffineDrift AD-5 #5098; see `docs/development/HANDOFF.md`.
+
 open-fp vertical force plates as measured constraints (Epic #13061; plan and DV-13061 in #13062):
 
 - Contract OF-01 #13065, reader OF-02 #13066, readings at model time OF-05 #13069, vertical-cell observation rows with sensing-plane lever OF-11 #13067, family-wise elimination screen OF-12 #13070. AGPL boundary: files and network only; all data unqualified until DV-13061.

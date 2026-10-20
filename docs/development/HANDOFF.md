@@ -1,3 +1,18 @@
+# Null-Space Exploration After One Solution — AffineDrift Epic #5093 (Handoff 2026-10-20)
+
+- Repository: `D-sorganization/UpstreamDrift`; four draft PRs, each on its own branch and worktree under `UpstreamDrift-worktrees/nse-*`. Companion article and registration live in `D-sorganization/AffineDrift` (#5100, #5101, #5105, #5107).
+- Objective: give `loop_nullspace` the tools the AffineDrift article "After One Solution" relies on: exact-vs-numerical invariance classification, interval attribution, predictor-corrector manifold continuation, and the muscle-fibre affine-hull fix. ADR-0054 governs.
+- Completed (all pushed, draft, never merged):
+  - UD-1 #13461 → PR #13475, `claude/nse-ud1-13461`: `classify_functional` returns NUMERICALLY_INVARIANT / FAMILY_DEPENDENT with residual `||N^T s|| / ||s_x * s||` (`N` already carries `variable_scale`; never rescale); optional bound `||N^T s|| R` only with a bounded feasible set, R an enclosing radius. `attribution_quantities` reports per-source intervals; totals are invariant.
+  - UD-2 #13462 → PR #13470, `claude/nse-ud2-13462`: `loop_nullspace/manifold_continuation.py` (IFT chart, O(h^2) tangent predictor, Newton corrector; rank drop raises; no cubic-order claim).
+  - UD-3 #13463 → PR #13467, `claude/nse-ud3-13463`: `ActivationFiber` dimension from the true affine hull (LP implicit-equality detection) and hit-and-run in hull coordinates; singleton only at hull dimension 0. CI red is an unrelated exact-float-equality flake; failed jobs re-run.
+  - UD-4a #13464 → PR #13493, `claude/nse-ud4a-13464` (stacks on UD-1 and UD-2 by merge): `docs/research/loop_nullspace/after_one_solution.md` plus a runnable example and its test.
+- Validation: per-branch ruff, ruff format, mypy, `pytest tests/unit/loop_nullspace -q` green. A main-baseline run (88 failed / 182 errors on main, MATLAB test excluded) diffed by test ID showed no new failures on any branch.
+- Next steps:
+  1. Owner reviews and merges UD-1, UD-2, UD-3, then UD-4a (rebase or re-merge main into UD-4a after UD-1/UD-2 land).
+  2. Then AffineDrift AD-5 #5098: replace the `review-required` companion pins in AffineDrift `data/companion/pins.json` with the merged main SHAs. AD-4 pins UD-4a at code commit `6706d3aac`; this handoff commit is docs-only and intentionally not pinned.
+  3. The temporary `nse-baseline` verification worktree has been removed.
+
 # Project Steward Pass — 2026-10-19
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `staff/project-steward-task-2307c8`; draft PR opened from this branch (`docs(project): steward status 2026-10-19`).
