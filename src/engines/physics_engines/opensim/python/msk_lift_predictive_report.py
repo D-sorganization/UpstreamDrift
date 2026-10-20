@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -58,7 +58,8 @@ def bundle_pose_targets(bundle_path: Path | str = DEADLIFT_BUNDLE) -> dict[str, 
         isinstance(sagittal, dict) and "segment_angles_rad" in sagittal,
         f"bundle at {bundle_path} has no sagittal_solution segment_angles_rad",
     )
-    trunk = np.asarray(sagittal["segment_angles_rad"], dtype=float)[:, 2]
+    angles = cast("dict[str, Any]", sagittal)["segment_angles_rad"]
+    trunk = np.asarray(angles, dtype=np.float64)[:, 2]
     return {
         "setup_trunk_rad": float(trunk[0]),
         "lockout_trunk_rad": float(trunk[-1]),

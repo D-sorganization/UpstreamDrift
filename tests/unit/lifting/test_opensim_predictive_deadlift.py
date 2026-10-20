@@ -740,6 +740,20 @@ def test_fixed_duration_is_a_valid_bound() -> None:
         PredictiveDeadliftConfig(duration_bounds=(0.0, 0.0))
 
 
+def test_reproduction_command_keeps_every_cli_flag() -> None:
+    """The receipt's command reruns the measurement with the same flags."""
+    import importlib
+
+    mod = importlib.import_module("scripts.measure_opensim_predictive_deadlift")
+    command = mod.reproduction_command(
+        ["--dynamics-mode", "implicit", "--out-dir", "a b"]
+    )
+    assert command == (
+        "python3 scripts/measure_opensim_predictive_deadlift.py "
+        "--dynamics-mode implicit --out-dir 'a b'"
+    )
+
+
 def test_cli_duration_bounds_reach_the_stage1_config(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -752,6 +766,7 @@ def test_cli_duration_bounds_reach_the_stage1_config(
     def _stop(config: PredictiveDeadliftConfig, *args: object) -> dict[str, object]:
         seen["bounds"] = config.duration_bounds
         seen["feet"] = config.planted_feet_weight
+        seen["mesh"] = (config.mesh_intervals, config.max_iterations)
         raise SystemExit(0)
 
     monkeypatch.setattr(mod, "run_stage1_solve", _stop)
@@ -767,10 +782,15 @@ def test_cli_duration_bounds_reach_the_stage1_config(
                 "2.0",
                 "--planted-feet-weight",
                 "500",
+                "--mesh-intervals",
+                "7",
+                "--max-iterations",
+                "9",
             ]
         )
     assert seen["bounds"] == (2.0, 2.0)
     assert seen["feet"] == 500.0
+    assert seen["mesh"] == (7, 9)
 
 
 def test_bundle_pose_targets_read_the_optimizer_solution() -> None:

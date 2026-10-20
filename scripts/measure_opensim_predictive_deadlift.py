@@ -21,6 +21,7 @@ import logging
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -448,12 +449,11 @@ def _write_receipt_artifacts(out_dir: Path, receipt: dict[str, Any]) -> None:
 def run_measurement(
     out_dir: Path,
     log_dir: Path = DEFAULT_LOG_DIR,
-    mesh_intervals: int = 15,
-    max_iterations: int = 3000,
     from_log: Path | None = None,
     residual: dict[str, float] | None = None,
     solver: dict[str, Any] | None = None,
     stage1_guess: Path | None = None,
+    command: str | None = None,
 ) -> dict[str, Any]:
     """Execute staged predictive deadlift measurement and generate honest evidence."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -466,8 +466,6 @@ def run_measurement(
     cfg_stage1 = PredictiveDeadliftConfig(
         actuation_mode="torque",
         torque_optimal_force_nm=1000.0,
-        mesh_intervals=mesh_intervals,
-        max_iterations=max_iterations,
         convergence_tolerance=1e-2,
         constraint_tolerance=1e-2,
         bar_mass_kg=100.0,
@@ -502,8 +500,8 @@ def run_measurement(
     stage2_summary = _run_stage2_if_converged(
         stage1_summary,
         stage1_solution,
-        mesh_intervals,
-        max_iterations,
+        cfg_stage1.mesh_intervals,
+        cfg_stage1.max_iterations,
         stage2_log,
         out_dir,
         options,
@@ -517,9 +515,18 @@ def run_measurement(
     receipt["stage2_muscle"] = stage2_summary
     receipt["source_commit"] = _git("rev-parse", "HEAD")
     receipt["total_script_wall_clock_s"] = time.perf_counter() - t_start
+    if command is not None:
+        receipt["reproduction_command"] = command
 
     _write_receipt_artifacts(out_dir, receipt)
     return receipt
+
+
+def reproduction_command(argv: list[str]) -> str:
+    """Shell command that reruns this measurement with the same arguments."""
+    return shlex.join(
+        ["python3", "scripts/measure_opensim_predictive_deadlift.py", *argv]
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -583,14 +590,14 @@ def main(argv: list[str] | None = None) -> int:
     run_measurement(
         out_dir=out_dir,
         log_dir=args.log_dir,
-        mesh_intervals=args.mesh_intervals,
-        max_iterations=args.max_iterations,
         from_log=args.from_log,
         residual={
             "residual_force_scale": args.residual_force_scale,
             "residual_effort_weight": args.residual_effort_weight,
         },
         solver={
+            "mesh_intervals": args.mesh_intervals,
+            "max_iterations": args.max_iterations,
             "finite_difference_scheme": args.fd_scheme,
             "multibody_dynamics_mode": args.dynamics_mode,
             "planted_feet_weight": args.planted_feet_weight,
@@ -601,6 +608,7 @@ def main(argv: list[str] | None = None) -> int:
             ),
         },
         stage1_guess=args.stage1_guess,
+        command=reproduction_command(sys.argv[1:] if argv is None else argv),
     )
     return 0
 
