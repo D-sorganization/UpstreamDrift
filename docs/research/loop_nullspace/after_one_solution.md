@@ -104,8 +104,8 @@ coordinates.
 ### Fibre Dimension From the True Affine Hull
 
 `ActivationFiber.hull_dimension` is the dimension of the true affine hull, with
-implicit equalities found by LP. It equals `m - rank G` only when a strictly
-box-feasible point exists. In the example, `G = [40 40 0]` N m with `b = 80` N m
+implicit equalities found by LP. It equals `m - rank G` when a strictly
+box-feasible point exists (a sufficient condition, not a necessary one). In the example, `G = [40 40 0]` N m with `b = 80` N m
 forces the first two activations to 1: the fibre is a segment of dimension 1
 although `dim ker G = 2`. `sample_result` reports when the fibre is a single
 point instead of repeating one point silently. Samples are coverage, not a
