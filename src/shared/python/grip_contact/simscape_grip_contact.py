@@ -44,6 +44,7 @@ from src.shared.python.grip_contact.matlab_kernel import (
     kernel_bundle_sha256,
     render_json_deterministic,
 )
+from src.shared.python.grip_contact.net_wrench_parity import report_generated_drift
 from src.shared.python.grip_contact.parity import GripKineticsSeries
 from src.shared.python.grip_contact.prescribed_motion import (
     CoordinateSpline,
@@ -461,10 +462,11 @@ def export_scenarios_json(
     payload = build_scenarios_payload()
     target = Path(path)
     if check:
-        if not target.exists():
-            return 1
-        committed = json.loads(target.read_text(encoding="utf-8"))
-        return 0 if generated_json_matches(committed, payload) else 1
+        current = target.read_text(encoding="utf-8") if target.exists() else None
+        if current is not None and generated_json_matches(json.loads(current), payload):
+            return 0
+        report_generated_drift(target, current, render_json_deterministic(payload))
+        return 1
     text = render_json_deterministic(payload)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(text, encoding="utf-8")

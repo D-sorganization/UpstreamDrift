@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13038 · Record the OSL Epic Handoff State (Open PRs, Owner Decisions, Rejected Video Work)
+
+- **State:** in_progress
+- **Owner:** unassigned
+- **Issue:** #13038
+- **Branch:** docs/osl-handoff-2026-10-20
+- **PR:** #13549
+- **Paths:** see #13549
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`12378aad`; collated from changes/13038-record-the-osl-epic-handoff-state-open-p.md)
+- **Summary:** Record the OSL epic handoff state (open PRs, owner decisions, rejected video work)
+- **Next step:** Merge #13521 and #13512; owner picks the OSL-7 stage-1 formulation; rework OSL-8 videos (#13526) with frame-by-frame review
+
 ### DL-#13190 · HRG-H2 Diagnostic Palm-Thumb Pad: Drift-Gated Physical Trail_Palm_Lead_Thumb Pair on the Shared G2 Law in Separated_V2, Impact Timestep and Preload Sensitivity Reports, and a New Spec Revision With Its Own Spec_Sha256; Contract Pinned by Tests.
 
 - **State:** in_review
@@ -2743,6 +2756,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13557 · Grip Topology Parity Compares Numerically-Zero Reference Channels (Peak <= 1E-8 N or N·m) Absolutely Instead of Relatively; Fixes myoHand Frozen-Finger Law-Level Parity on Roundoff Spin Channels
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13557
+- **Branch:** merged via #13558
+- **PR:** #13558
+- **Paths:** see #13558
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`b53903ee`; collated from changes/13557-grip-parity-numerical-zero-reference.md)
+- **Summary:** Grip topology parity compares numerically-zero reference channels (peak <= 1e-8 N or N·m) absolutely instead of relatively; fixes myoHand frozen-finger law-level parity on roundoff spin channels
+- **Next step:** Shipped in PR #13558.
+
+### DL-#13544 · Grip_Contact Exporter --Check Now Logs the Drifted File and a Bounded Unified Diff (Flake Diagnostics)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13544
+- **Branch:** merged via #13546
+- **PR:** #13546
+- **Paths:** see #13546
+- **Started:** 2026-10-20
+- **Last verified:** 2026-10-20 (`bb208823`; collated from changes/13544-grip-exporter-drift-diagnostics.md)
+- **Summary:** grip_contact exporter --check now logs the drifted file and a bounded unified diff (flake diagnostics)
+- **Next step:** Shipped in PR #13546.
+
 ### DL-#13334 · Add Stateless Simscape Physical Grip Contact Codegen Kernel, GS3DX_GripContact Builder/Runner, and M12 Parity Harness
 
 - **State:** shipped
@@ -2827,10 +2866,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13175
 - **Branch:** merged via #13503
-- **PR:** #13503, #13538
+- **PR:** #13503, #13538, #13541
 - **Paths:** see #13503
 - **Started:** 2026-10-20
-- **Last verified:** 2026-10-20 (`b9edfcc0`; collated from changes/13175-hrg-e4-slice-post-biomechanics-anatomica.md)
+- **Last verified:** 2026-10-20 (`527c99ad`; collated from changes/13175-hrg-e4-pelvis-reversal-trunk-terms.md)
 - **Summary:** HRG-E4 slice: anatomical-angle event table (address/top/impact/finish) with CSV/JSON export carrying units, sign conventions, observability and receipts; JSON schema validated
 - **Next step:** Shipped in PR #13503.
 

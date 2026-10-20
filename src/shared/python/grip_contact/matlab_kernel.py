@@ -40,6 +40,7 @@ from src.shared.python.grip_contact.matlab_kernel_source import (
     MATLAB_HELPER_FUNCTIONS,
     MATLAB_LOOP_BODY,
 )
+from src.shared.python.grip_contact.net_wrench_parity import report_generated_drift
 from src.shared.python.grip_contact.pair_contact import (
     closest_point_segment,
     line_contact_node_count,
@@ -924,13 +925,15 @@ def export_matlab_kernel_bundle(
         (Path(golden_json_path), g_text),
     )
     if check:
-        if not all(path.exists() for path, _ in targets):
-            return 1
-        exact = all(
-            path.read_text(encoding="utf-8") == text for path, text in targets[:2]
-        )
-        committed = json.loads(Path(golden_json_path).read_text(encoding="utf-8"))
-        return 0 if exact and generated_json_matches(committed, golden) else 1
+        for path, text in targets:
+            current = path.read_text(encoding="utf-8") if path.exists() else None
+            same = current == text
+            if not same and current is not None and path is targets[2][0]:
+                same = generated_json_matches(json.loads(current), golden)
+            if not same:
+                report_generated_drift(path, current, text)
+                return 1
+        return 0
 
     for path, expected_text in targets:
         path.parent.mkdir(parents=True, exist_ok=True)

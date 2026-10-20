@@ -45,6 +45,15 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+OpenSim musculoskeletal barbell lifts (OSL, Epic #13038; research record `docs/research/lift_models/lift_models.tex`; state as of 2026-10-20):
+
+- OSL-3 #13041 and OSL-4 #13042: all five lifts complete and unqualified; the bench press landed in #13431, #13532 and #13536 (Hicks force from feet plus bench). Open: the 511.6 N bench pelvis residual and a 4437 N support peak (2.5 times the lifter-plus-bar weight) not yet explained.
+- OSL-5 #13043: PR #13521 (armed) adds the deadlift, snatch and clean and jerk; per-lift floors restored; acceleration bound 5e-4 with a `Tolerance-Change-Evidence` trailer. The bench press waits on this PR, then needs its own solve.
+- OSL-7 #13044: PR #13512 (armed, Refs) adds solved poses, the planted-feet goal and `docs/development/lifting/evidence/opensim_predictive/RUN_HISTORY.md` (ControlTower runs C to S). Stage 1 does not converge; the owner chooses welded feet, a 30 to 50 interval mesh, or 180 kg contact retuning.
+- OSL-8 #13045: PR #13526 (open, not armed; three Gemini rounds rejected) renders a different motion than the OSL-3 IK; see the review comment there before continuing. Verify every render frame by eye.
+- Also open: OSL-14 #13057, OSL-15 #13093, OSL-16 #13104, OSL-17 #13131 (floating-base regulation is an owner decision), LIFT-5 #11745, LIFT-6 #11746 and #13072.
+- Real-OpenSim tests need `UPSTREAMDRIFT_MSK_BASE_MODEL` pointing at `RajagopalLaiUhlrich2023.osim` and `--timeout=1400`; route imports through `tests.helpers.opensim_support.require_opensim()`.
+
 open-fp vertical force plates as measured constraints (Epic #13061; plan and DV-13061 in #13062):
 
 - Contract OF-01 #13065, reader OF-02 #13066, readings at model time OF-05 #13069, vertical-cell observation rows with sensing-plane lever OF-11 #13067, family-wise elimination screen OF-12 #13070. AGPL boundary: files and network only; all data unqualified until DV-13061.

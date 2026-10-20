@@ -37,6 +37,11 @@ if TYPE_CHECKING:
 PEAK_TOLERANCE = 0.05
 #: RMS of the difference, normalised by the reference peak.
 RMS_TOLERANCE = 0.02
+#: Absolute peak (N or N·m) at or below which a zero-allowed channel is numerical
+#: zero and is compared absolutely, not relatively.  Measured over
+#: tests/unit/grip_contact (2026-10-20): roundoff peaks <= 1.83e-10, genuine peaks
+#: >= 1.59e-6; 1e-8 sits near their geometric mean with >= 55x margin each side.
+NUMERICAL_ZERO_PEAK = 1e-8
 SIDES = ("L", "R")
 PARITY_QUANTITIES = (
     "force_L",
@@ -111,6 +116,7 @@ __all__ = [
     "PAIR_PARITY_QUANTITIES",
     "PARITY_ENGINES",
     "PARITY_QUANTITIES",
+    "NUMERICAL_ZERO_PEAK",
     "PARITY_STATUSES",
     "PEAK_TOLERANCE",
     "RMS_TOLERANCE",
@@ -378,6 +384,8 @@ class QuantityError:
     peak_candidate: float
     peak_error: float
     rms_error: float
+    #: True when the reference peak is at most :data:`NUMERICAL_ZERO_PEAK`.
+    numerical_zero: bool = False
 
     def passes(self) -> bool:
         """True when both errors are inside the parity tolerances."""
@@ -390,6 +398,7 @@ class QuantityError:
             "peak_candidate": self.peak_candidate,
             "peak_error": self.peak_error,
             "rms_error": self.rms_error,
+            "numerical_zero": self.numerical_zero,
             "passes": self.passes(),
         }
 
@@ -401,18 +410,23 @@ def compute_quantity_error(
     name: str = "quantity",
     allow_zero_reference: bool = False,
 ) -> QuantityError:
-    """Compute peak and RMS error of ``candidate`` against ``reference``."""
+    """Compute peak and RMS error of ``candidate`` against ``reference``.
+
+    With ``allow_zero_reference`` a reference peak at or below
+    :data:`NUMERICAL_ZERO_PEAK` is numerical zero: the channel passes (errors 0)
+    only if the candidate peak is also at or below the floor, else the errors are
+    infinite.  Relative error on roundoff would be meaningless.
+    """
     cand_arr, ref_arr = np.asarray(candidate, float), np.asarray(reference, float)
     x = cand_arr.reshape(cand_arr.shape[0], -1)
     x_ref = ref_arr.reshape(ref_arr.shape[0], -1)
     mag, mag_ref = np.linalg.norm(x, axis=1), np.linalg.norm(x_ref, axis=1)
     peak_ref, peak_cand = float(mag_ref.max()), float(mag.max())
-    if peak_ref <= 0.0:
-        if not allow_zero_reference:
-            raise ValueError(f"reference peak of {name} is zero")
-        if peak_cand <= 1e-15:
-            return QuantityError(0.0, peak_cand, 0.0, 0.0)
-        return QuantityError(0.0, peak_cand, float("inf"), float("inf"))
+    if peak_ref <= 0.0 and not allow_zero_reference:
+        raise ValueError(f"reference peak of {name} is zero")
+    if allow_zero_reference and peak_ref <= NUMERICAL_ZERO_PEAK:
+        err = 0.0 if peak_cand <= NUMERICAL_ZERO_PEAK else float("inf")
+        return QuantityError(peak_ref, peak_cand, err, err, numerical_zero=True)
     rms = float(np.sqrt(np.mean(np.sum((x - x_ref) ** 2, axis=1))))
     return QuantityError(
         peak_ref, peak_cand, abs(peak_cand - peak_ref) / peak_ref, rms / peak_ref
