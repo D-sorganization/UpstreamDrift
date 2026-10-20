@@ -122,3 +122,7 @@ docs/research/shot_pattern_analysis/phase2/statistics_v2/
 # UpstreamDrift#11743: byte-for-byte vendored copy of Repository_Management's
 # biomech_parity_standard.json, pinned by the digest in MANIFEST.json beside it.
 src/shared/python/lifting/_canonical/
+
+# Generated Simscape grip contact kernel, parameters, scenarios, and golden fixtures (#13334).
+src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/fixtures/gs3dx_grip_pair_golden.json
+src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/generated/
