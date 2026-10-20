@@ -72,7 +72,9 @@ def _match(expected: Any, actual: Any, scale_rtol: float) -> bool:
         a, b = _numeric_array(expected), _numeric_array(actual)
         if a is not None and b is not None:
             return _arrays_match(a, b, scale_rtol)
-        return all(_match(e, v, scale_rtol) for e, v in zip(expected, actual, strict=True))
+        return all(
+            _match(e, v, scale_rtol) for e, v in zip(expected, actual, strict=True)
+        )
     if isinstance(expected, bool) or isinstance(actual, bool):
         return expected is actual
     if isinstance(expected, int) and isinstance(actual, int):
