@@ -130,6 +130,20 @@
       "id": "biomech.exercise_injury_dashboards"
     },
     {
+      "feature_id": "biomechanics.anatomical_event_table",
+      "title": "Anatomical Event Table of Wrist and Forearm Terms at Swing Events",
+      "status": "gap",
+      "pyqt": "src/shared/python/ui/anatomical_event_table_widget.py",
+      "api": null,
+      "web": "ui/src/components/analysis/anatomicalEventTable/AnatomicalEventTable.tsx",
+      "issue": 13175,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "HRG-E4 (#13175). Both surfaces render the event-table export document (anatomical_angles.event_table.to_json_dict) as text through one view: anatomical_angles/event_table_view.py on the desktop and its mirror eventTableView.ts on the web. The golden fixture ui/src/components/analysis/anatomicalEventTable/fixtures/eventTableView.json is the shared export of one bundle plus the exact cells, and the PyQt and vitest suites both assert it, so the values are identical. Gap until the web table fetches its document from POST /biomechanics/anatomical-event-table (#13538, not yet on main); then set api to src/api/routes/biomechanics.py and status to parity. Neither table is wired to a launcher tile or page yet.",
+      "id": "biomechanics.anatomical_event_table"
+    },
+    {
       "feature_id": "canonical_core.workspaces",
       "title": "Canonical-core estimation/comparison workspaces",
       "status": "parity",
@@ -3307,7 +3321,7 @@
   "inputs": {
     "src/config/models.yaml": "7c868b0c444389fad39bdd30469abd32439f5bd11b9b5019c941ac0049e0763c",
     "src/config/launcher_manifest.json": "26337829a1de75576be220e293c6d4f012f97303c0639401a8d902e76c418f37",
-    "src/config/feature_parity.json": "0f37cc44c265f45ec4567e5ff78b762b25b1aec051ec4384611663a1fbe20c73",
+    "src/config/feature_parity.json": "e36d3734d369de3303f0557ce529702644d7abb14cb81015cd50cd16bd2144bc",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
