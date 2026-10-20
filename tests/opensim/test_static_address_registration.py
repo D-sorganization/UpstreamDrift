@@ -15,6 +15,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.static_address_reg
     waist_cluster_frame,
 )
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -114,7 +115,7 @@ def test_waist_cluster_frame_properties() -> None:
 @pytest.mark.requires_opensim
 def test_solve_pelvis_rotations_recovers_heading() -> None:
     """A golfer facing -x (the capture heading) is recovered to 1e-6 rad."""
-    opensim = pytest.importorskip("opensim")
+    opensim = require_opensim()
     model = opensim.Model(str(REAL_MODEL))
     target = Rotation.from_euler("y", np.pi - 0.02).as_matrix() @ (
         Rotation.from_euler("z", 0.3).as_matrix()

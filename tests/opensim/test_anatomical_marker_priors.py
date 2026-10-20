@@ -20,6 +20,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.marker_plausibilit
     assess_marker_placements,
 )
 from src.shared.python.contracts import PreconditionError
+from tests.helpers.opensim_support import require_opensim
 
 ROOT = Path(__file__).resolve().parents[2]
 OS7_MODEL_PATH = (
@@ -98,7 +99,7 @@ def test_clamp_to_priors() -> None:
 @pytest.mark.integration
 @pytest.mark.requires_opensim
 def test_anatomical_marker_priors_os7_scaled_model() -> None:
-    opensim = pytest.importorskip("opensim")
+    opensim = require_opensim()
     assert OS7_MODEL_PATH.is_file(), f"Model not found: {OS7_MODEL_PATH}"
 
     priors = anatomical_marker_priors(OS7_MODEL_PATH)
@@ -148,7 +149,7 @@ def test_anatomical_marker_priors_os7_scaled_model() -> None:
 @pytest.mark.integration
 @pytest.mark.requires_opensim
 def test_old_marker_offsets_fail_plausibility_defect_13434() -> None:
-    opensim = pytest.importorskip("opensim")
+    opensim = require_opensim()
     assert OS7_MODEL_PATH.is_file(), f"Model not found: {OS7_MODEL_PATH}"
 
     priors = anatomical_marker_priors(OS7_MODEL_PATH)
