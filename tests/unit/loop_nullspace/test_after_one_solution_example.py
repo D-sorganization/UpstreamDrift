@@ -153,7 +153,7 @@ def _package_names() -> set[str]:
 
 def test_document_has_eleven_numbered_sections() -> None:
     text = DOC.read_text(encoding="utf-8")
-    rows = re.findall(r"^\| (\d+) \|", text, flags=re.MULTILINE)
+    rows = re.findall(r"^\| (\d+)\s*\|", text, flags=re.MULTILINE)
     assert [int(r) for r in rows] == list(range(1, _SECTION_COUNT + 1))
 
 
@@ -169,7 +169,9 @@ def test_document_states_the_binding_caveats() -> None:
         "enclosing radius",
         "local only",
     ):
-        assert needle in text.lower().replace("local-only", "local only"), needle
+        assert needle in " ".join(text.lower().split()).replace(
+            "local-only", "local only"
+        ), needle
 
 
 def test_every_named_api_exists_in_the_package() -> None:
