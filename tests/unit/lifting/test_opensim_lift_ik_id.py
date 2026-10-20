@@ -234,6 +234,13 @@ def test_lift_residual_gate(lift: str, request: pytest.FixtureRequest) -> None:
     assert gate["moments_within"] is True
 
 
+def test_squat_receipt_range_violations_empty() -> None:
+    receipts = _load_receipts()
+    entry = receipts["lifts"]["squat"]["ik_id"]
+    assert entry["status"] == "complete", entry["reason"]
+    assert entry["ik"]["range_violations"] == {}
+
+
 @pytest.mark.requires_opensim
 @pytest.mark.integration
 def test_squat_live_ik_coordinate_rms_below_receipt_threshold(

@@ -1178,11 +1178,15 @@ runs two passes:
   marker at weight 0, so the bar cannot pull the trunk.
 \item \textbf{Reach solve.} With the seed's first-state body held and the arm
   chain at the hold, a bounded least-squares solve (scipy TRF, the model
-  ranges as bounds) moves \texttt{arm\_flex}, \texttt{arm\_add},
+  ranges as bounds with an interior bound margin $\delta = 1\times 10^{-3}$\,rad,
+  \texttt{ARM\_REACH\_BOUND\_MARGIN\_RAD}) moves \texttt{arm\_flex}, \texttt{arm\_add},
   \texttt{arm\_rot} and \texttt{elbow\_flex} on each side until the hand's
   centre of mass, which is the weld's grip point, lies on that hand's bundle
   grip (\texttt{LiftTargets.grip\_m}). A prior of $10^{-3}$\,m/rad towards
   the hold picks among the solutions. The forearm and wrist stay at the hold.
+  In unconstrained IK, the coordinate task targets are similarly clipped inside
+  $[q_\mathrm{min} + \delta, q_\mathrm{max} - \delta]$ with
+  \texttt{ARM\_TASK\_BOUND\_MARGIN\_RAD} ($10^{-3}$\,rad) to prevent numerical boundary drift.
 \end{enumerate}
 The model is then rebuilt with those arms as its hold
 (\texttt{build\_lift\_model(arm\_coordinates=\ldots)}). The bar weld is
@@ -1248,14 +1252,20 @@ state of the window:
   (\texttt{arm\_flex} 67.2/88.9$^\circ$, pronation 30.7/55.0$^\circ$), so the
   committed solve moves only the four shoulder and elbow coordinates, with
   the hold prior.
+\item Direct arm coordinate clamping in IK: Clamping the arm coordinates
+  alongside coordinate tasks and the two-hand welded barbell constraint triggers an
+  Ipopt infeasibility assembly error (\texttt{AssemblySolver::assemble() Failed:
+  Ipopt: Infeasible problem detected (status 2)}). Clamping was therefore left off
+  for the arms (\texttt{\_UNCLAMPED\_PREFIXES}), and the interior bound margin was
+  used instead.
 \end{itemize}
 
 \paragraph{Limitations.} The marker gate is met. The Hicks residual gate is
-not, because of the state-0 settling transient, and stays open on \#13048
-(both items below are resolved by OSL-17, next subsection).
-Closing it needs either a bundle window that starts at rest on its contact,
-or derivatives that use the bundle's own states before the window. The
-bundle's bar position is a fitted shelf in front of the face, not a
+resolved by the high-bar rack and settled lead-in of OSL-17 (next subsection).
+With the interior bound margin on the arm reach solve and task targets,
+coordinate range overshoot is eliminated (zero violations, empty receipt),
+fully meeting the OSL-12 acceptance criteria on the back squat.
+The bundle's bar position is a fitted shelf in front of the face, not a
 back-squat rack, so these arm poses are not a back-squat technique. The
 reaching arms are fitted at the first state only; the IK then tracks the bar.
 Reproduce with \texttt{MUJOCO\_GL=egl python3 scripts/measure\_opensim\_lift\_ik\_id.py}
@@ -2210,11 +2220,11 @@ moment threshold 1\,\% of COM height $\times$ peak external force).
 \toprule
 Lift & Marker RMS / Max (m) & Segment RMS (rad) & Reach Miss L / R & Max Overshoot (rad) & Pelvis Force / Limit (N) & Pelvis Moment / Limit (N\,m) \\
 \midrule
-Squat & 0.0164 / 0.0304 & 0.0169 & 0.00 / 1.51\,mm & $4.18\times 10^{-5}$ & \textbf{23.70 / 146.93} & \textbf{12.02 / 18.64} \\
-Deadlift & 0.0112 / 0.0390 & 0.0158 & 7.11 / 6.91\,$\mu$m & $6.5\times 10^{-4}$ & 288.23 / 110.92 & 147.88 / 18.28 \\
-Bench Press & 0.0160 / 0.0554 & 0.0248 & 12.5\,$\mu$m / 6.37\,mm & $2.12\times 10^{-3}$ & 511.26 / 32.49 & 318.13 / 3.45 \\
-Snatch & 0.0089 / 0.0579 & 0.0095 & 7.68 / 7.57\,$\mu$m & $3.8\times 10^{-4}$ & 463.57 / 155.12 & 202.60 / 27.10 \\
-Clean \& Jerk & 0.0198 / 0.1612 & 0.0220 & 6.43 / 6.02\,$\mu$m & $2.3\times 10^{-3}$ & 458.52 / 223.10 & 259.03 / 38.77 \\
+Squat & 0.0164 / 0.0304 & 0.0169 & 2.53\,$\mu$m / 1.94\,mm & 0 (none) & \textbf{23.82 / 146.93} & \textbf{11.75 / 18.64} \\
+Deadlift & 0.0112 / 0.0391 & 0.0158 & 7.10 / 6.90\,$\mu$m & $6.1\times 10^{-4}$ & 288.29 / 110.92 & 148.02 / 18.28 \\
+Bench Press & 0.0160 / 0.0556 & 0.0248 & 12.5\,$\mu$m / 6.67\,mm & $1.4\times 10^{-3}$ & 511.58 / 32.49 & 318.32 / 3.45 \\
+Snatch & 0.0089 / 0.0579 & 0.0095 & 7.68 / 7.57\,$\mu$m & $3.8\times 10^{-4}$ & 463.21 / 155.12 & 202.62 / 27.10 \\
+Clean \& Jerk & 0.0198 / 0.1612 & 0.0220 & 6.43 / 6.01\,$\mu$m & $2.2\times 10^{-3}$ & 458.56 / 223.10 & 259.00 / 38.77 \\
 \bottomrule
 \end{tabular}
 \caption{Measured OpenSim IK and ID Metrics Across All Five Barbell Lifts (OSL-3).
