@@ -65,10 +65,11 @@ HAND_MODES = ("prescribed", "trail_follows_club", "lead_only")
 HAND_MASS_KG = 100.0
 HAND_INERTIA_KG_M2 = 10.0
 IMPEDANCE = 0.95
-TOPOLOGY_IMPEDANCE = 0.01
-TOPOLOGY_IMPRATIO_STATIC = 0.095
-TOPOLOGY_FRICTION_TIME_STATIC_S = 1.9e-6
+TOPOLOGY_IMPEDANCE = 0.001
+TOPOLOGY_IMPRATIO_STATIC = 0.95
+TOPOLOGY_FRICTION_TIME_STATIC_S = 1.9e-5
 TOPOLOGY_STEP_SCALE = 1000.0
+PARALLEL_CAPSULE_SIN2_TOL = 1.0e-10
 
 
 def _nums(values: Any) -> str:
@@ -362,14 +363,37 @@ class ClubInHands:
         self._hand = {s: int(self.model.body(f"hand_{s}").id) for s in self.pad_sides}
         self._offsets = {s: self.interface.frame(s).matrix() for s in SIDES}
         self._pad_geom: dict[int, tuple[str, int]] = {}
+        self._grip_geom_id = int(self.model.geom("grip").id)
+        self._capsule_geoms: list[tuple[int, float]] = []
         if self.topology_model is not None:
             for s in self.pad_sides:
                 for k, pair in enumerate(self.topology_model.physical_grip_pairs(s)):
-                    self._pad_geom[int(self.model.geom(pair.site_a).id)] = (s, k)
+                    gid = int(self.model.geom(pair.site_a).id)
+                    self._pad_geom[gid] = (s, k)
+                    mapped = map_site_to_hand_frame(
+                        self.topology_model.topology, pair.site_a, s
+                    )
+                    if mapped.primitive == "capsule":
+                        self._capsule_geoms.append((gid, mapped.half_length_m))
         else:
             for s in self.pad_sides:
                 for k in range(self.pad_count):
                     self._pad_geom[int(self.model.geom(f"pad_{s}{k}").id)] = (s, k)
+
+    def _sync_parallel_capsules(self) -> None:
+        """Match shared closest_points_segments midpoint convention when sin^2(theta) < 1e-10."""
+        if not self._capsule_geoms:
+            return
+        mj, m, d = self._mj, self.model, self.data
+        mj.mj_kinematics(m, d)
+        ax_grip = d.geom_xmat[self._grip_geom_id].reshape(3, 3)[:, 2]
+        for gid, half_len in self._capsule_geoms:
+            ax_cap = d.geom_xmat[gid].reshape(3, 3)[:, 2]
+            dot = float(ax_cap @ ax_grip)
+            if max(1.0 - dot * dot, 0.0) < PARALLEL_CAPSULE_SIN2_TOL:
+                m.geom_size[gid, 1] = 1.0e-9
+            else:
+                m.geom_size[gid, 1] = half_len
 
     # ------------------------------------------------------------ placement
     def _set_free(self, body: int, rot: np.ndarray, pos: np.ndarray) -> None:
@@ -602,6 +626,7 @@ class ClubInHands:
         """Normal force and penetration of every pad/site contact after ``mj_forward``."""
         mj, m, d = self._mj, self.model, self.data
         self._set_step_scaling(False)
+        self._sync_parallel_capsules()
         mj.mj_forward(m, d)
         res = np.zeros(6)
         force: dict[tuple[str, int], float] = {}
@@ -683,11 +708,13 @@ class ClubInHands:
         for _ in range(steps):
             t = float(d.time)
             self.place_hands(t, velocity_time=t + 0.5 * dt)
+            self._sync_parallel_capsules()
             mj.mj_step(m, d)
 
     def sample(self) -> ContactSample:
         """Exact hand pose at the current time, forward, and the contact wrench."""
         hands = self.place_hands(float(self.data.time))
+        self._sync_parallel_capsules()
         self._mj.mj_forward(self.model, self.data)
         return self.read(hands)
 

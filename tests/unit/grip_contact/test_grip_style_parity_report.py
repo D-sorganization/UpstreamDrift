@@ -600,9 +600,7 @@ _DETERMINATE_ENGINE_CASES = [
         marks=[pytest.mark.requires_drake],
         id="drake-ten_finger-swing",
     ),
-    # MuJoCo (G8): passes overlap and interlock on 0.04 s hold and swing;
-    # ten_finger 0.04 s hold and swing exceed 2.0% RMS on net_force due to
-    # five-capsule initial contact settling transient (settles to < 1.7% over 0.10 s).
+    # MuJoCo (G8): passes all determinate quantities across all styles and motions
     pytest.param(
         "mujoco",
         GripStyle.OVERLAP,
@@ -621,18 +619,7 @@ _DETERMINATE_ENGINE_CASES = [
         "mujoco",
         GripStyle.TEN_FINGER,
         "hold",
-        marks=[
-            pytest.mark.requires_mujoco,
-            pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "MuJoCo ten_finger 0.04 s hold determinate net_force RMS is 2.595% "
-                    "(peak 2.033%, net_moment_com peak 2.398% / RMS 0.980%) > 2.0% RMS_TOLERANCE "
-                    "during 5-capsule contact settling (settles to 1.69% RMS over 0.10 s)"
-                ),
-            ),
-        ],
+        marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-hold",
     ),
     pytest.param(
@@ -653,18 +640,7 @@ _DETERMINATE_ENGINE_CASES = [
         "mujoco",
         GripStyle.TEN_FINGER,
         "swing",
-        marks=[
-            pytest.mark.requires_mujoco,
-            pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "MuJoCo ten_finger 0.04 s swing determinate net_force RMS is 2.005% "
-                    "(peak 1.610%, net_moment_com peak 4.294% / RMS 1.627%) > 2.0% RMS_TOLERANCE "
-                    "on 0.04 s window (settles to 1.36% RMS over 0.10 s)"
-                ),
-            ),
-        ],
+        marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-swing",
     ),
     # OpenSim (G7/G7b): passes overlap and interlock on 0.04 s hold and swing

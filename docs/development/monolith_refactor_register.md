@@ -159,6 +159,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 889 | `src/bunkershot3d/io/schema.py` |
 | 889 | `src/motion_capture/opencap_ingest/augmenter.py` |
 | 888 | `src/engines/pendulum_models/python/double_pendulum_model/ui/double_pendulum_gui.py` |
+| 887 | `src/engines/physics_engines/mujoco/python/grip_contact_sim.py` |
 | 887 | `src/shared/python/sidekick/process_calculators/syngas_compression_calculator.py` |
 | 887 | `src/tools/bunker_shot_gui/bridge.py` |
 | 885 | `src/shared/python/estimation/dime_report_integration.py` |
@@ -179,7 +180,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 862 | `src/shared/python/motion_matching/pipeline/dynamics.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
 | 861 | `src/shared/python/motion_matching/pipeline/lane.py` |
-| 860 | `src/engines/physics_engines/mujoco/python/grip_contact_sim.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
 | 853 | `src/shared/python/sidekick/process_calculators/constants.py` |
