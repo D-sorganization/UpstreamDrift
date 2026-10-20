@@ -72,11 +72,11 @@ and are not committed; only hashes and aggregate numbers appear below.
 
 \begin{center}
 \small
-\begin{tabular}{@{}p{62mm}p{100mm}@{}}
+\begin{tabular}{@{}p{58mm}p{100mm}@{}}
 \toprule
 Artefact & SHA-256 \\
 \midrule
-Best-fit spec (\texttt{full\_body\_spec\_hipcal\_scaled.json}) &
+Best-fit spec\newline {\footnotesize\texttt{full\_body\_spec\_hipcal\_scaled.json}} &
   {\scriptsize\path{d1829abf69ca4fae73d9c553440aa73d367a5fc03efa5efec5b845197560b296}} \\
 Bundle (\texttt{bundles/driver.npz}) &
   {\scriptsize\path{bfa1a9a86cc84c8c7d2f1bce821750d10564d1aa5f59549d082c87e855cdfe91}} \\
@@ -108,11 +108,22 @@ the private spec.
   \item Hash the private spec and bundle with \texttt{sha256sum}; compare with
     the table above.
   \item Sign map:
-    \path{pytest -o addopts="" -q -n 0 tests/unit/motion_matching/test_full_body_coordinate_sign_map.py}
-  \item Range report (set the variable to the private bundle path):\\
-    \path{HRG_BEST_FIT_BUNDLE=<private-bundle> pytest -o addopts="" -q -n 0 -s tests/unit/motion_matching/test_bundle_human_range_characterisation.py}
-  \item Headless environment: \texttt{QT\_QPA\_PLATFORM=offscreen
-    MPLBACKEND=Agg MUJOCO\_GL=egl PYTHONPATH=.:src}.
+{\small
+\begin{verbatim}
+pytest -o addopts="" -q -n 0 \
+  tests/unit/motion_matching/test_full_body_coordinate_sign_map.py
+\end{verbatim}}
+  \item Range report (set the variable to the private bundle path):
+{\small
+\begin{verbatim}
+HRG_BEST_FIT_BUNDLE=<private-bundle> pytest -o addopts="" -q -n 0 -s \
+  tests/unit/motion_matching/test_bundle_human_range_characterisation.py
+\end{verbatim}}
+  \item Headless environment:
+{\small
+\begin{verbatim}
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl PYTHONPATH=.:src
+\end{verbatim}}
 \end{enumerate}
 
 \section{Coordinate Conventions and Sign Map}
@@ -328,11 +339,15 @@ across four capabilities:
 \item \texttt{physical\_hand\_hand}: Dynamic inter-hand pad-to-pad contact dynamics.
 \end{enumerate}
 
-Every entry records its verified mechanical attachment mode
-(such as \texttt{rigid\_branch\_kinematic}, \texttt{closure\_weld},
-\texttt{bushing\_compliance}, \texttt{free\_plus\_bushings},
-\texttt{site\_weld}, \texttt{mocap\_weld}, or \texttt{direct\_mid\_hands})
-and finger kinematic fidelity (\texttt{none}, \texttt{rigid\_proxy}, or \texttt{articulated}).
+Every entry records its verified mechanical attachment mode and its finger
+kinematic fidelity.  The attachment modes are
+\begin{itemize}[nosep]
+  \item \texttt{rigid\_branch\_kinematic}, \texttt{closure\_weld}, \texttt{site\_weld},
+    \texttt{mocap\_weld} and \texttt{direct\_mid\_hands};
+  \item \texttt{bushing\_compliance} and \texttt{free\_plus\_bushings};
+\end{itemize}
+and the finger fidelities are \texttt{none}, \texttt{rigid\_proxy} and
+\texttt{articulated}.
 By contract, no capability may claim \texttt{available = true} without an active
 \texttt{evidence\_test} verifying the code path; currently, only the full-body-v1
 spec export path (exercised in \texttt{test\_engine\_grip\_contact.py} and
@@ -340,9 +355,10 @@ spec export path (exercised in \texttt{test\_engine\_grip\_contact.py} and
 evidence. All other capabilities remain \texttt{available = false} with explicit
 diagnostic reasons and tracking issues mapped to epic children (\#13326--\#13336).
 
-Non-hand-bearing models (\texttt{putting\_green}, \texttt{putting\_green\_gui},
-\texttt{pendulum\_simulator}, and \texttt{swing\_objective\_lab}) are explicitly
-segregated in an \texttt{excluded} list with formal justifications.
+Models that carry no hands are explicitly segregated in an \texttt{excluded}
+list with formal justifications: \texttt{putting\_green},
+\texttt{putting\_green\_gui}, \texttt{pendulum\_simulator} and
+\texttt{swing\_objective\_lab}.
 
 Empirical verification against source assets revealed several divergences from
 initial panel assumptions:
@@ -432,8 +448,10 @@ f_{t,i}/(\mu f_{n,i})$. Unloaded flags mark tensile configurations ($-f_i
 \cdot \hat{n}_i \le 0$).
 
 \textbf{Parameters.} Static friction coefficient $\mu = 0.9$; equal-split pair
-weights prior (\texttt{name="equal\_split"}, $w_i = 1/N_{\mathrm{pairs}}$); normal tolerance $10^{-9}$; minimum
-closure force $10^{-9}$\,N. Hand--club reactions default to zero (\texttt{hand\_club\_source="not\_supplied"}).
+weights prior, $w_i = 1/N_{\mathrm{pairs}}$ (\texttt{name="equal\_split"});
+normal tolerance $10^{-9}$; minimum closure force $10^{-9}$\,N.  Hand--club
+reactions default to zero, recorded as
+\texttt{hand\_club\_source="not\_supplied"}.
 
 \textbf{Acceptance Criteria.}
 \begin{enumerate}[leftmargin=*,noitemsep]
@@ -619,11 +637,14 @@ Python floats:
 \item capsule site $i$ (reference \texttt{capsule\_capsule}): closest segment points $(a_i, b_i)$ (general, parallel and
   degenerate branches), contact $\tfrac12[(a_i + r_i \hat n_i) + (b_i - r_g \hat n_i)]$; the grip is sampled against the plane
   $(\hat n_i,\; a_i + r_i\hat n_i)$ with the exactly negated relative velocity and spin;
-\item both rows then apply the shared law of \texttt{sphere\_ground\_contact} and \texttt{torsional\_friction\_moment}:
-  $f_n = \max\!\big(0,\, k\,\delta\,(1 + d\,\dot\delta)\big)$,
-  $\mu(s) = \mu_d + (\mu_s - \mu_d)e^{-(s/v_{\mathrm{trans}})^2} + \mu_v s$,
-  $f_t = -\tfrac{v_t}{s}\,\mu(s)\,f_n \tanh(s/v_{\mathrm{trans}})$, and
-  $M_{\mathrm{spin}} = -\hat u\,\mu_s f_n r_{\mathrm{patch}} \tanh(\omega_n/\omega_0)$,
+\item \texttt{sphere\_ground\_contact} and \texttt{torsional\_friction\_moment} give the shared law that both rows
+  then apply, term for term:
+  \begin{gather*}
+  f_n = \max\!\big(0,\, k\,\delta\,(1 + d\,\dot\delta)\big), \qquad
+  \mu(s) = \mu_d + (\mu_s - \mu_d)e^{-(s/v_{\mathrm{trans}})^2} + \mu_v s, \\
+  f_t = -\tfrac{v_t}{s}\,\mu(s)\,f_n \tanh(s/v_{\mathrm{trans}}), \qquad
+  M_{\mathrm{spin}} = -\hat u\,\mu_s f_n r_{\mathrm{patch}} \tanh(\omega_n/\omega_0),
+  \end{gather*}
   where $s = \|v_t\|$, $\hat u$ is the re-normalised plane normal, and the plane height is taken along the raw normal, as
   \texttt{GroundPlane} does.
 \end{itemize}
@@ -655,9 +676,9 @@ last bit and were rejected.
   style/trigger/side cases, the reference took $1437\,\mu$s and the batched path $146\,\mu$s on average, a ratio of means of
   $9.9\times$ (per-case range $8.7$--$13.8\times$). The original PR-head code measured $1337$--$1467\,\mu$s on average, so
   the gain over it is similar. The regression guard asserts $\ge 6\times$.
-\item Pinocchio (\texttt{simulate\_grip\_contact}, $0.04$\,s window, \texttt{topology\_model}), CPU per case: before
+\item Pinocchio (\path{simulate_grip_contact}, $0.04$\,s window, \path{topology_model}), CPU per case: before
   $10.9$--$13.8$\,s, after $3.8$--$4.8$\,s. Wall time was $5.2$--$11.3$\,s on the loaded host, so
-  \texttt{test\_pinocchio\_topology\_grip.py} stayed in the slow lane at this step (see the next subsection). Its pytest wall times at load average 6--12 are:
+  \path{test_pinocchio_topology_grip.py} stayed in the slow lane at this step (see the next subsection). Its pytest wall times at load average 6--12 are:
   \texttt{\_fast} cases $3.0$--$6.0$\,s, timestep halving $8.6$--$11.0$\,s, $0.2$\,s static hold $12.7$--$14.2$\,s, and
   $1$\,s swing replay $52$--$75$\,s. The non-law right-hand-side costs (prescribed motion, bushing state construction,
   Radau overhead) now dominate.
@@ -674,13 +695,14 @@ shared host and vary by about $\pm15\%$ between runs. The G6 parameter line abov
 $v_{\mathrm{trans}} = 0.01$\,m/s, $r_{\mathrm{patch}} \approx 4.47$\,mm) does not match the values that
 \texttt{build\_pad\_model} returns for the anthropometric driver spec ($k \approx 1.71\times10^5$\,N/m, $d \approx 0.383$\,s/m,
 $v_{\mathrm{trans}} = 10^{-3}$\,m/s, $r_{\mathrm{patch}} \approx 2.29$\,mm, $\mu_v = 0$). That discrepancy is recorded for
-follow-up and not corrected here. This document was not compiled locally (no \texttt{pdflatex} on the host).
+follow-up and not corrected here.
 
 \textbf{Reproduction Commands.}
 \begin{verbatim}
 python3 -m pytest -n 0 tests/unit/grip_contact/test_topology_contact_batched.py \
     tests/unit/grip_contact/test_topology_contact.py
-python3 -m pytest -n 0 -m slow tests/unit/grip_contact/test_pinocchio_topology_grip.py
+python3 -m pytest -n 0 -m slow \
+    tests/unit/grip_contact/test_pinocchio_topology_grip.py
 \end{verbatim}
 
 \subsection{Pinocchio Grip Right-Hand-Side Cost (\#13396)}
@@ -702,10 +724,10 @@ unchanged.
 \item \textbf{One club state per RHS.} \texttt{ClubOnBushings.evaluate} returns hands, club state, club frames and the
   law together. \texttt{derivatives} reuses that club state for the joint torque and the translational rate.
   \texttt{ClubInHands} overrides only \texttt{contact\_law}, which dispatches to the pad or topology law.
-\item \textbf{Python-float preconditions.} \texttt{rotation\_errors}
-  (\path{src/shared/python/grip_contact/bushing_law.py}) returns $\max_{ij}|R^{\mathsf T}R - I|_{ij}$ and $\det R$ in
-  Python floats (column dot products and cofactor expansion). \texttt{BushingState.\_\_post\_init\_\_} keeps its
-  $10^{-6}$ orthonormality threshold and its messages. \texttt{topology\_contact.\_validate\_bushing\_state} keeps its
+\item \textbf{Python-float preconditions.} \path{rotation_errors} returns $\max_{ij}|R^{\mathsf T}R - I|_{ij}$ and
+  $\det R$ in Python floats (column dot products and cofactor expansion); it is defined in
+  \path{src/shared/python/grip_contact/bushing_law.py}. \path{BushingState.__post_init__} keeps its
+  $10^{-6}$ orthonormality threshold and its messages. \path{topology_contact._validate_bushing_state} keeps its
   $10^{-5}$ Gram and determinant thresholds and now shares this helper instead of its own copy. Only the precondition
   checks changed; the stored arrays and every computed quantity are untouched.
 \end{itemize}
@@ -740,7 +762,9 @@ unchanged.
   way, and the standard CI unit lane excludes \texttt{requires\_pinocchio}.
 \item \textbf{Remaining cost.} The contact law is now about half the RHS. The finite-difference Jacobian is
   \emph{not} a significant cost (see the assessment below).
-\item \textbf{Compilation.} This document was not compiled locally (no \texttt{pdflatex} on the host).
+\item \textbf{Compilation.} The document compiles with pdfTeX 1.40.25 (TeX Live 2023, Debian packages) in two
+  \texttt{pdflatex -halt-on-error} passes, with no errors or undefined references (47 pages). Sections up to this
+  one set without overfull lines; later grip sections still report overfull lines, which affect layout only.
 \end{itemize}
 
 \textbf{Reproduction Commands.}
@@ -751,6 +775,50 @@ python3 -m pytest -n 0 tests/unit/grip_contact/test_pinocchio_hand_frame_cache.p
 python3 -m pytest -n 0 -m "slow and requires_pinocchio" \
     tests/unit/grip_contact/test_pinocchio_topology_grip.py
 \end{verbatim}
+
+\textbf{Rejected Follow-Up: Analytic Jacobian (Assessment Only).} Before an analytic $\partial f/\partial y$ was built,
+the six $0.04$\,s topology cases were instrumented. SciPy's \texttt{radau.num\_jac} was wrapped for its call count and
+CPU time, \texttt{radau.solve\_collocation\_system} for Newton iterations and failures, and \texttt{Radau.\_step\_impl}
+for accepted step sizes. Results on brick at load average 8--12:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Jacobian cost.} The finite-difference Jacobian is evaluated 15--54 times per case and costs 5--15\% of CPU.
+  Its 13 columns share one stage time, so they reuse the memoised hand frames.
+\item \textbf{Newton iterations.} 283--362 steps are accepted per case at 2.10--2.25 simplified-Newton iterations per
+  step. Each iteration costs three RHS evaluations, so Newton iterations account for most of the RHS calls. Newton
+  failed on 1--17 steps per case.
+\item \textbf{Step sizes.} 46--61\% of accepted steps sit at the $2\times10^{-4}$\,s \texttt{max\_step} cap, which is an
+  accuracy setting and is not relaxed.
+\end{itemize}
+An exact Jacobian would remove at most the 5--15\% spent in \texttt{num\_jac}, less the cost of evaluating it. It
+cannot reduce the iteration count much below the two iterations Radau needs to confirm convergence, and it could at
+best avoid the few Newton-failure step cuts. It would also need derivatives of the regularised friction, the Stribeck
+curve and Pinocchio's \texttt{aba}, and it would change the trajectories within the integrator tolerance instead of
+reproducing them bit for bit. It was therefore not built. The remaining levers are the per-RHS cost (the contact law
+is about half of it) and the number of RHS evaluations, which the step cap and the stiffness fix.
+
+\textbf{Rejected Follow-Up: Inlined Row Kernel (Measured, Reverted).} Unprofiled CPU timing showed where the
+simulation time goes: the RHS is about 85\% of simulation CPU, and within it the contact law is about 38\% and
+the memoised hand kinematics about 15\%; Radau's own work is about 12\% and setup is negligible. A bit-identical rewrite
+of the row kernel was then tried:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Change.} One inlined pair-row function shared by sphere and capsule sites, reading flat per-side
+  constants with a single tuple unpack. The validated frame floats were reused instead of being converted twice.
+\item \textbf{Bit-identity.} All 3{,}600 side evaluations (every style, trigger, side and mode) matched byte for byte,
+  and so did the seven simulation runs.
+\item \textbf{Speed.} An isolated contact row fell from $9.1$ to $6.9\,\mu$s. On side calls captured from a simulation
+  (every row in contact), timed old against new in one process, the gain was only 2--7\% ($100 \to 95$, $147 \to 137$
+  and $145 \to 142\,\mu$s per side), about 2\% of simulation CPU.
+\end{itemize}
+A side call has no remaining hotspot. Validation, the two stacked transforms, the per-row arithmetic and the output
+assembly are each plain CPython bytecode of a few to a few tens of microseconds, so the pure-Python law is at its
+floor. The denser kernel was not worth 2--7\% and was reverted. Two levers remain, and both need a decision first:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Compiled row kernel.} Section~F of \texttt{AGENTS.md} admits Rust only for a kernel shared with another
+  runtime. Bit-identity would also depend on \texttt{exp} and \texttt{tanh} matching the platform \texttt{libm}.
+\item \textbf{Single validation of frame states.} Making the \texttt{BushingState} arrays read-only would let the
+  topology law trust the construction-time checks, worth about 10--15\% of the law. It changes the behaviour of a type
+  shared across engines.
+\end{itemize}
 
 \subsection{MuJoCo Topology Contact Reference (HRG-GS-G8, \#13306)}
 \textbf{Topology Geometry and Pair Generation.} The MuJoCo grip-contact adapter (\path{src/engines/physics_engines/mujoco/python/grip_contact_sim.py})
