@@ -179,6 +179,7 @@
 {"path": "analysis/swing_metrics.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
 {"path": "anatomical_angles/__init__.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/basis.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
+{"path": "anatomical_angles/event_table.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/full_body_v1.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/golf_aliases.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/hand_frame.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
