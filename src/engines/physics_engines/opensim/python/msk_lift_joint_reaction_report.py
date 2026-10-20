@@ -264,7 +264,10 @@ def format_joint_reaction_solution(
 
 
 def _eval_mo_planar_curves(
-    targets: Any, torso_angles: np.ndarray, opensim_torso_arms_kg: float
+    targets: Any,
+    torso_angles: np.ndarray,
+    opensim_torso_arms_kg: float,
+    lift: str = "squat",
 ) -> tuple[
     np.ndarray,
     np.ndarray,
@@ -292,24 +295,35 @@ def _eval_mo_planar_curves(
     qd_opt = np.gradient(q_opt, times, axis=0)
     qdd_opt = np.gradient(qd_opt, times, axis=0)
 
+    exercise_type = "deadlift" if lift == "deadlift" else "squat"
     body_default = BodyModel(body_mass=targets.body_mass_kg, height=targets.height_m)
     bar_mass = targets.bar_mass_kg
     comp_def = spinal_compression(
-        q_opt, qd_opt, qdd_opt, body_default, bar_mass, "squat"
+        q_opt, qd_opt, qdd_opt, body_default, bar_mass, exercise_type
     )
-    shear_def = spinal_shear(q_opt, qd_opt, qdd_opt, body_default, bar_mass, "squat")
+    shear_def = spinal_shear(
+        q_opt, qd_opt, qdd_opt, body_default, bar_mass, exercise_type
+    )
     adr_def = to_adr0055_ap_shear(shear_def)
 
     body_aligned = BodyModel(body_mass=targets.body_mass_kg, height=targets.height_m)
-    body_aligned.m_squat[2] = opensim_torso_arms_kg
+    if exercise_type == "deadlift":
+        body_aligned.m_deadlift[2] = opensim_torso_arms_kg
+        m_def = float(body_default.m_deadlift[2]) + bar_mass
+        m_align = float(body_aligned.m_deadlift[2]) + bar_mass
+    else:
+        body_aligned.m_squat[2] = opensim_torso_arms_kg
+        m_def = float(body_default.m_squat[2]) + bar_mass
+        m_align = float(body_aligned.m_squat[2]) + bar_mass
+
     comp_align = spinal_compression(
-        q_opt, qd_opt, qdd_opt, body_aligned, bar_mass, "squat"
+        q_opt, qd_opt, qdd_opt, body_aligned, bar_mass, exercise_type
     )
-    shear_align = spinal_shear(q_opt, qd_opt, qdd_opt, body_aligned, bar_mass, "squat")
+    shear_align = spinal_shear(
+        q_opt, qd_opt, qdd_opt, body_aligned, bar_mass, exercise_type
+    )
     adr_align = to_adr0055_ap_shear(shear_align)
 
-    m_def = float(body_default.m_squat[2]) + bar_mass
-    m_align = float(body_aligned.m_squat[2]) + bar_mass
     return (
         comp_def,
         shear_def,
@@ -352,8 +366,9 @@ def crosscheck_movement_optimizer_l5s1(
     torso_reactions: tuple[np.ndarray, np.ndarray] | None = None,
     *,
     opensim_m_above_kg: float,
+    lift: str = "squat",
 ) -> dict[str, Any]:
-    """Compute Movement Optimizer spine_loads.py L5/S1 on squat kinematics.
+    """Compute Movement Optimizer spine_loads.py L5/S1 on lift kinematics.
 
     ``opensim_m_above_kg`` is the model mass above L5/S1 including the bar,
     summed from the OpenSim body set by the caller.
@@ -372,7 +387,10 @@ def crosscheck_movement_optimizer_l5s1(
         m_def,
         m_align,
     ) = _eval_mo_planar_curves(
-        targets, torso_angles, opensim_m_above_kg - targets.bar_mass_kg
+        targets,
+        torso_angles,
+        opensim_m_above_kg - targets.bar_mass_kg,
+        lift=lift,
     )
 
     tol_n = 50.0

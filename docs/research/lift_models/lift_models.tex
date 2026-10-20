@@ -1903,16 +1903,18 @@ Loads are evaluated across four primary anatomical articulation sites:
 \paragraph{Key Limitations: Absence of Trunk Muscles and Inherited Qualification.}
 The Rajagopal model lacks active trunk extensor muscles (e.g., erector spinae).
 The sagittal lumbar extension moment is supplied entirely by an ideal coordinate actuator
-(\texttt{lumbar\_extension}), with a measured peak demand of $665.32\,\mathrm{N\cdot m}$ in the squat solve.
+(\texttt{lumbar\_extension}), with a measured peak demand of $665.62\,\mathrm{N\cdot m}$ in the squat solve,
+$487.28\,\mathrm{N\cdot m}$ in the deadlift, $1145.59\,\mathrm{N\cdot m}$ in the snatch, and
+$1296.56\,\mathrm{N\cdot m}$ in the clean and jerk.
 Because coordinate actuators apply pure generalized forces without muscular line-of-action compression,
 the computed L5/S1 joint reaction force excludes trunk muscular co-contraction. It constitutes a
 gravity-plus-inertia lower bound rather than an anatomical spinal compression estimate.
 The segmental spine model (\#12735) is identified as the required path for active multi-segment trunk load.
-Furthermore, the underlying OSL-4 static optimization solve is classified as \texttt{unqualified},
-with a mean reserve actuator share of $0.5695$ and peak share of $0.6766$ (exceeding the $0.05$ threshold).
+Furthermore, the underlying OSL-4 static optimization solves for all completed lifts are classified as \texttt{unqualified},
+with mean reserve actuator shares exceeding the $0.05$ threshold (squat: $0.5695$, deadlift: $0.1558$, snatch: $0.5369$, clean and jerk: $0.5195$).
 All reaction loads inherit this unqualified status.
 
-\paragraph{Analytic Bound and Dynamic Squat Frame Evaluation.}
+\paragraph{Analytic Bound and Dynamic Minimal-Acceleration Frame Evaluations.}
 To verify sign conventions and coordinate frame extraction, an analytic bound is first evaluated at
 an upright, zero-velocity, zero-acceleration default pose:
 \begin{equation}
@@ -1922,12 +1924,14 @@ where $W_{\text{above}} = M_{\text{above}} g$ is the gravitational weight of all
 Muscles crossing L5/S1 are verified dynamically from geometry paths; exactly 0 muscles cross between the torso and pelvis/legs in Rajagopal, giving $\sum F_m = 0.0\,\mathrm{N}$.
 At the default pose, compression is $1338.59\,\mathrm{N}$ with an absolute residual of $2.27 \times 10^{-13}\,\mathrm{N}$ (\texttt{passed: True}). This test verifies frame and sign self-consistency only, and does not verify dynamic lift validity.
 
-The bound was additionally evaluated on the dynamic squat frame with minimal generalized acceleration norm:
-frame 40 ($t = 0.2000\,\mathrm{s}$, $\|\ddot{q}\| = 20.0378\,\mathrm{rad/s^2}$, $W_{\text{above}} = 1338.59\,\mathrm{N}$).
-Measured compression is $1437.27\,\mathrm{N}$ in the pelvis frame and $1030.71\,\mathrm{N}$ in the torso frame.
-The lower bound $W_{\text{above}} \le \text{Comp}$ is satisfied in the pelvis frame ($1338.59 \le 1437.27$) but not the torso frame ($1338.59 \le 1030.71$).
-The upper bound $\text{Comp} \le W_{\text{above}} + \sum F_m$ is satisfied in the torso frame ($1030.71 \le 1338.59$) but not the pelvis frame ($1437.27 \le 1338.59$).
-Because both inequalities do not hold simultaneously, this dynamic check honestly reports \texttt{passed: False}, reflecting the influence of dynamic pelvis accelerations, trunk inclination, and the absence of trunk musculature.
+The bound was additionally evaluated on the dynamic lift frames with minimal generalized acceleration norm:
+\begin{itemize}[noitemsep]
+\item \textbf{Back Squat:} Frame 39 ($t = 0.1950\,\mathrm{s}$, $\|\ddot{q}\| = 20.12\,\mathrm{rad/s^2}$, $W_{\text{above}} = 1338.59\,\mathrm{N}$). Pelvis compression $1445.38\,\mathrm{N}$, torso compression $1031.19\,\mathrm{N}$ (\texttt{passed: False}).
+\item \textbf{Deadlift:} Frame 7 ($t = 0.0350\,\mathrm{s}$, $\|\ddot{q}\| = 2.56\,\mathrm{rad/s^2}$, $W_{\text{above}} = 1338.59\,\mathrm{N}$). Pelvis compression $1005.87\,\mathrm{N}$, torso compression $931.54\,\mathrm{N}$ (\texttt{passed: False}).
+\item \textbf{Snatch:} Frame 6 ($t = 0.0300\,\mathrm{s}$, $\|\ddot{q}\| = 10.61\,\mathrm{rad/s^2}$, $W_{\text{above}} = 1338.59\,\mathrm{N}$). Pelvis compression $899.69\,\mathrm{N}$, torso compression $822.54\,\mathrm{N}$ (\texttt{passed: False}).
+\item \textbf{Clean and Jerk:} Frame 2 ($t = 0.0100\,\mathrm{s}$, $\|\ddot{q}\| = 20.52\,\mathrm{rad/s^2}$, $W_{\text{above}} = 1338.59\,\mathrm{N}$). Pelvis compression $801.23\,\mathrm{N}$, torso compression $716.25\,\mathrm{N}$ (\texttt{passed: False}).
+\end{itemize}
+Because both inequalities do not hold simultaneously, each dynamic check honestly reports \texttt{passed: False}, reflecting the influence of dynamic pelvis accelerations, trunk inclination, and the absence of trunk musculature.
 
 \paragraph{Measured Back Squat Joint Reactions.}
 Across the 41-frame squat bottom inflection slice ($0.00\,\mathrm{s}$ to $0.20\,\mathrm{s}$, lifter mass $80.31\,\mathrm{kg}$, body weight $787.60\,\mathrm{N}$, barbell mass $100.0\,\mathrm{kg}$),
@@ -1937,13 +1941,70 @@ the measured reaction loads and qualifications are:
 \toprule
 Joint Articulation & Qualification Status & Mean (N) & Peak (N) & Mean (BW) & Peak (BW)\\
 \midrule
-L5/S1 Compression ($+F_y$, pelvis) & lower bound: ideal actuator & 1579.32 & 1683.66 & 2.01 & 2.14\\
-L5/S1 AP Shear ($+F_x$, pelvis) & lower bound: ideal actuator & -956.85 & -989.32 & -1.21 & -1.26\\
-L5/S1 Compression ($+F_y$, torso) & lower bound: ideal actuator & 1104.77 & 1158.95 & 1.40 & 1.47\\
-L5/S1 AP Shear ($+F_x$, torso) & lower bound: ideal actuator & -1480.75 & -1555.69 & -1.88 & -1.98\\
-Knee Tibiofemoral Resultant & unqualified (OSL-4 reserves) & 10154.88 & 11997.15 & 12.89 & 15.23\\
-Knee Patellofemoral Resultant & unqualified (OSL-4 reserves) & 9295.27 & 12205.18 & 11.80 & 15.50\\
-Shoulder Glenohumeral Resultant & unqualified (OSL-4 reserves) & 714.06 & 732.62 & 0.91 & 0.93\\
+L5/S1 Compression ($+F_y$, pelvis) & lower bound: ideal actuator & 1579.34 & 1683.68 & 2.01 & 2.14\\
+L5/S1 AP Shear ($+F_x$, pelvis) & lower bound: ideal actuator & -956.80 & -989.17 & -1.21 & -1.26\\
+L5/S1 Compression ($+F_y$, torso) & lower bound: ideal actuator & 1104.80 & 1158.96 & 1.40 & 1.47\\
+L5/S1 AP Shear ($+F_x$, torso) & lower bound: ideal actuator & -1480.72 & -1555.61 & -1.88 & -1.98\\
+Knee Tibiofemoral Resultant & unqualified (OSL-4 reserves) & 10154.70 & 11997.23 & 12.89 & 15.23\\
+Knee Patellofemoral Resultant & unqualified (OSL-4 reserves) & 9295.12 & 12205.34 & 11.80 & 15.50\\
+Shoulder Glenohumeral Resultant & unqualified (OSL-4 reserves) & 714.06 & 732.58 & 0.91 & 0.93\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Measured Deadlift Joint Reactions.}
+Across the 41-frame deadlift motion window ($0.00\,\mathrm{s}$ to $0.20\,\mathrm{s}$, lifter mass $80.31\,\mathrm{kg}$, body weight $787.60\,\mathrm{N}$, barbell mass $100.0\,\mathrm{kg}$),
+the measured reaction loads and qualifications are:
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llcccc}
+\toprule
+Joint Articulation & Qualification Status & Mean (N) & Peak (N) & Mean (BW) & Peak (BW)\\
+\midrule
+L5/S1 Compression ($+F_y$, pelvis) & lower bound: ideal actuator & 1031.58 & 1126.71 & 1.31 & 1.43\\
+L5/S1 AP Shear ($+F_x$, pelvis) & lower bound: ideal actuator & -818.82 & -878.01 & -1.04 & -1.11\\
+L5/S1 Compression ($+F_y$, torso) & lower bound: ideal actuator & 945.98 & 1040.64 & 1.20 & 1.32\\
+L5/S1 AP Shear ($+F_x$, torso) & lower bound: ideal actuator & -919.34 & -983.80 & -1.17 & -1.25\\
+Knee Tibiofemoral Resultant & unqualified (OSL-4 reserves) & 9457.62 & 11027.46 & 12.01 & 14.00\\
+Knee Patellofemoral Resultant & unqualified (OSL-4 reserves) & 5806.06 & 7568.23 & 7.37 & 9.61\\
+Shoulder Glenohumeral Resultant & unqualified (OSL-4 reserves) & 526.94 & 538.66 & 0.67 & 0.68\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Measured Snatch Joint Reactions.}
+Across the 41-frame snatch first pull motion window ($0.00\,\mathrm{s}$ to $0.20\,\mathrm{s}$, lifter mass $80.31\,\mathrm{kg}$, body weight $787.60\,\mathrm{N}$, barbell mass $100.0\,\mathrm{kg}$),
+the measured reaction loads and qualifications are:
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llcccc}
+\toprule
+Joint Articulation & Qualification Status & Mean (N) & Peak (N) & Mean (BW) & Peak (BW)\\
+\midrule
+L5/S1 Compression ($+F_y$, pelvis) & lower bound: ideal actuator & 1034.51 & 1477.06 & 1.31 & 1.88\\
+L5/S1 AP Shear ($+F_x$, pelvis) & lower bound: ideal actuator & -954.10 & -1402.93 & -1.21 & -1.78\\
+L5/S1 Compression ($+F_y$, torso) & lower bound: ideal actuator & 942.44 & 1415.07 & 1.20 & 1.80\\
+L5/S1 AP Shear ($+F_x$, torso) & lower bound: ideal actuator & -1043.01 & -1464.53 & -1.32 & -1.86\\
+Knee Tibiofemoral Resultant & unqualified (OSL-4 reserves) & 9921.70 & 12617.83 & 12.60 & 16.02\\
+Knee Patellofemoral Resultant & unqualified (OSL-4 reserves) & 2418.29 & 5777.86 & 3.07 & 7.34\\
+Shoulder Glenohumeral Resultant & unqualified (OSL-4 reserves) & 536.60 & 554.39 & 0.68 & 0.70\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Measured Clean and Jerk Joint Reactions.}
+Across the 41-frame clean and jerk first pull motion window ($0.00\,\mathrm{s}$ to $0.20\,\mathrm{s}$, lifter mass $80.31\,\mathrm{kg}$, body weight $787.60\,\mathrm{N}$, barbell mass $100.0\,\mathrm{kg}$),
+the measured reaction loads and qualifications are:
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llcccc}
+\toprule
+Joint Articulation & Qualification Status & Mean (N) & Peak (N) & Mean (BW) & Peak (BW)\\
+\midrule
+L5/S1 Compression ($+F_y$, pelvis) & lower bound: ideal actuator & 1127.55 & 1337.21 & 1.43 & 1.70\\
+L5/S1 AP Shear ($+F_x$, pelvis) & lower bound: ideal actuator & -1027.45 & -1317.43 & -1.30 & -1.67\\
+L5/S1 Compression ($+F_y$, torso) & lower bound: ideal actuator & 979.69 & 1177.60 & 1.24 & 1.50\\
+L5/S1 AP Shear ($+F_x$, torso) & lower bound: ideal actuator & -1180.83 & -1451.76 & -1.50 & -1.84\\
+Knee Tibiofemoral Resultant & unqualified (OSL-4 reserves) & 8255.45 & 12178.43 & 10.48 & 15.46\\
+Knee Patellofemoral Resultant & unqualified (OSL-4 reserves) & 956.58 & 5115.51 & 1.21 & 6.50\\
+Shoulder Glenohumeral Resultant & unqualified (OSL-4 reserves) & 551.03 & 585.77 & 0.70 & 0.74\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1954,19 +2015,17 @@ of spinal load based on $(m_{\text{above}} + m_{\text{bar}}) g$ projected along 
 plus planar inertial terms. OpenSim native reactions are decomposed in the pelvis frame.
 To establish a like-for-like comparison, OpenSim reactions were rotated into the longitudinal torso axis
 (matching the MO torso angle definition), and Movement Optimizer was evaluated with OpenSim's exact $M_{\text{above}} = 136.50\,\mathrm{kg}$
-(default MO uses Winter fractions yielding $M_{\text{above}} = 154.45\,\mathrm{kg}$).
-Torso inclination averages $42.58^\circ$ (peak $45.19^\circ$).
-Default MO predicts mean compression $807.98\,\mathrm{N}$ (peak $851.13\,\mathrm{N}$) and AP shear $-1219.75\,\mathrm{N}$ (peak $-1228.80\,\mathrm{N}$).
-Aligned MO predicts mean compression $724.83\,\mathrm{N}$ (peak $757.81\,\mathrm{N}$) and AP shear $-1083.96\,\mathrm{N}$ (peak $-1089.20\,\mathrm{N}$).
-Against a pre-evaluation tolerance of $50.0\,\mathrm{N}$, the residual differences between OpenSim torso reactions and aligned MO are:
-compression mean difference $+379.94\,\mathrm{N}$ (peak $+439.35\,\mathrm{N}$), and AP shear mean difference $-396.78\,\mathrm{N}$ (peak $+467.04\,\mathrm{N}$).
-The tolerance is not satisfied because Movement Optimizer assumes a stationary pelvis and planar kinematics,
-whereas OpenSim incorporates 3D multi-body dynamics, vertical pelvis inflection acceleration ($a_y > 0$), and 3D coordinate coupling.
+for both lifts (default MO uses Winter fractions yielding $154.45\,\mathrm{kg}$ for squat and $146.42\,\mathrm{kg}$ for deadlift).
+\begin{itemize}[noitemsep]
+\item \textbf{Back Squat:} Torso inclination averages $42.58^\circ$ (peak $45.19^\circ$). Aligned MO predicts mean compression $724.87\,\mathrm{N}$ (peak $757.79\,\mathrm{N}$) and AP shear $-1083.96\,\mathrm{N}$ (peak $-1089.23\,\mathrm{N}$). Against the pre-evaluation tolerance of $50.0\,\mathrm{N}$, OpenSim torso reactions yield residual differences: compression mean residual $+379.93\,\mathrm{N}$ (peak $+439.34\,\mathrm{N}$), and AP shear residual $-396.77\,\mathrm{N}$ (peak $+466.98\,\mathrm{N}$). Tolerance satisfied: \texttt{FAILED}.
+\item \textbf{Deadlift:} Torso inclination averages $43.91^\circ$ (peak $44.83^\circ$). Aligned MO predicts mean compression $936.18\,\mathrm{N}$ (peak $957.64\,\mathrm{N}$) and AP shear $-979.61\,\mathrm{N}$ (peak $-1004.19\,\mathrm{N}$). Against the pre-evaluation tolerance of $50.0\,\mathrm{N}$, OpenSim torso reactions yield residual differences: compression mean residual $+9.80\,\mathrm{N}$ (peak $+101.78\,\mathrm{N}$), and AP shear residual $+60.27\,\mathrm{N}$ (peak $+146.48\,\mathrm{N}$). Tolerance satisfied: \texttt{FAILED}.
+\end{itemize}
+In both lifts, the $50.0\,\mathrm{N}$ tolerance is not satisfied because Movement Optimizer assumes a stationary pelvis and planar kinematics, whereas OpenSim incorporates 3D multi-body dynamics, vertical acceleration, and 3D coordinate coupling.
 
-\paragraph{Status of Other Four Lifts.}
-The remaining four barbell lifts (\texttt{deadlift}, \texttt{bench\_press}, \texttt{snatch}, \texttt{clean\_and\_jerk})
-are reported as \texttt{unavailable} with reason \texttt{"no OSL-4 muscle solve (needs OSL-3 \#13041 bundles)"}.
-Values are explicitly recorded as null rather than synthetic zeros.
+\paragraph{Status of Bench Press.}
+The bench press lift (\texttt{bench\_press}) remains reported as \texttt{unavailable} with reason
+\texttt{"bench press IK does not pose a supine lifter; standing posture on bench is unphysical"},
+read dynamically from the OSL-4 receipt. Values are explicitly recorded as null rather than synthetic zeros.
 
 \paragraph{Reproduction Command.}
 \begin{verbatim}
