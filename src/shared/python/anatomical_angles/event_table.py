@@ -226,7 +226,7 @@ def _trunk_rows(
                 SINGULAR_REASON if math.isnan(value) else "",
                 trunk.observability,
                 trunk.receipt_path,
-                tuple(trunk.calibration),
+                (trunk.calibration[0], trunk.calibration[1]),
             )
         )
     return rows
