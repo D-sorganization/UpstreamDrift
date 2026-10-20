@@ -12,9 +12,10 @@ The 2026-10-18 heavy run failed every lane for two environmental reasons:
 
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
 import re
-import sys
+from types import ModuleType
 
 import pytest
 
@@ -24,8 +25,24 @@ ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / ".github" / "workflows" / "heavy-tests-opt-in.yml"
 DOCKERFILE = ROOT / "Dockerfile.heavy_test"
 
-sys.path.insert(0, str(ROOT / "scripts"))
-import check_heavy_dep_parity as parity  # noqa: E402
+
+def _load_parity() -> ModuleType:
+    """Load the script by file path.
+
+    Never put ``scripts/`` on ``sys.path``: it contains ``opensim`` and
+    ``motion_capture`` packages that would shadow the real ones for every
+    later test in the same process.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "_check_heavy_dep_parity", ROOT / "scripts" / "check_heavy_dep_parity.py"
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+parity = _load_parity()
 
 
 def _pip_packages(path: Path) -> set[str]:
