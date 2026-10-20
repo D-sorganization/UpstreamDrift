@@ -3750,10 +3750,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13042
 - **Branch:** merged via #13288
-- **PR:** #13288, #13419
+- **PR:** #13288, #13419, #13532
 - **Paths:** see #13288
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`d1880753`; collated from changes/13042-record-osl-4-muscle-forces-activations-a.md)
+- **Last verified:** 2026-10-20 (`7a963f7b`; collated from changes/13042-complete-osl-4-muscle-solve-and-residual.md)
 - **Summary:** Compute muscle forces and activations for barbell squat (OSL-4)
 - **Next step:** Shipped in PR #13288.
 
