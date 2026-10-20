@@ -18,7 +18,12 @@
       "category": "native_viewer_export",
       "host_requirement": "MATLAB R2025b (DeskComputer / ControlTower)",
       "export_script": "scripts/matlab/export_simscape_mechanics_explorer_views.m",
-      "view_presets": ["face_on", "down_the_line", "overhead", "perspective"],
+      "view_presets": [
+        "face_on",
+        "down_the_line",
+        "overhead",
+        "perspective"
+      ],
       "rationale": "Simscape Mechanics Explorer video export (smwritevideo) requires MATLAB R2025b host and cannot run on headless CI (brick)."
     },
     {
@@ -60,7 +65,15 @@
       "matlab_runner": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_grip_contact_run.m",
       "matlab_unittest": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/test_gs3dx_grip_pair_wrench.m",
       "artifact_path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/receipts/grip_contact/gs3dx_grip_contact_receipt.json",
-      "rationale": "Building GS3DX_GripContact.slx, running test_gs3dx_grip_pair_wrench.m, and executing gs3dx_grip_contact_run.m across overlap/interlock/ten_finger hold and short_swing scenarios requires a licensed MATLAB R2025b + Simscape Multibody host (C:/Program Files/MATLAB/R2025b/bin/matlab.exe) and cannot run on headless Linux CI."
+      "rationale": "Building GS3DX_GripContact.slx, running test_gs3dx_grip_pair_wrench.m, and executing gs3dx_grip_contact_run.m across overlap/interlock/ten_finger hold and short_swing scenarios requires a licensed MATLAB R2025b + Simscape Multibody host (C:/Program Files/MATLAB/R2025b/bin/matlab.exe) and cannot run on headless Linux CI.",
+      "r2025b_execution": {
+        "date": "2026-10-19",
+        "host": "DeskComputer",
+        "release": "R2025b",
+        "receipt": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/receipts/grip_contact/gs3dx_grip_contact_receipt.json",
+        "result": "golden test passed; model built (81 compiled blocks); all 6 style/scenario runs pass determinate net-club-wrench parity vs Pinocchio; convergence, save/reload, frame-probe and force-sign checks pass",
+        "rerun_trigger": "test_r2025b_receipt_hashes_match_committed_kernel_and_inputs fails when the kernel or inputs change"
+      }
     }
   ]
 }

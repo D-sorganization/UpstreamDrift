@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import copy
 import dataclasses
+import hashlib
 import json
 from pathlib import Path
 
@@ -571,3 +572,23 @@ def test_simscape_r2025b_net_wrench_parity_against_pinocchio(
     )
     bad = net_club_wrench_errors(scaled, pin_run.series, club, interface)
     assert "net_force" in failing_net_wrench(bad)
+
+
+@pytest.mark.unit
+def test_r2025b_receipt_hashes_match_committed_kernel_and_inputs() -> None:
+    """The committed R2025b evidence was produced from the committed kernel and inputs.
+
+    A regenerated kernel (for example after a shared-law change) or changed
+    scenario inputs make this fail until the R2025b run is repeated.
+    """
+    receipt_path = DEFAULT_RECEIPT_DIR / "gs3dx_grip_contact_receipt.json"
+    if not receipt_path.exists():
+        pytest.skip("R2025b receipt not committed yet")
+    receipt = load_simscape_grip_contact_receipt(receipt_path)
+    generated = GS3DX_ROOT / "tools/generated"
+    for key, name in (
+        ("kernel_sha256", "gs3dx_grip_contact_kernel.m"),
+        ("input_sha256", "gs3dx_grip_contact_scenarios.json"),
+    ):
+        digest = hashlib.sha256((generated / name).read_bytes()).hexdigest()
+        assert receipt[key] == digest, f"{name} changed since the R2025b run"
