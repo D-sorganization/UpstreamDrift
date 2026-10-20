@@ -25,11 +25,10 @@ import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.secur
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+import math
 from typing import Any
 
 import numpy as np
-
-import math
 
 from src.shared.python.grip_contact import GripInterface
 from src.shared.python.grip_contact.elastic_foundation import (
@@ -43,6 +42,7 @@ from src.shared.python.grip_contact.grip_mesh import (
 )
 from src.shared.python.grip_contact.contact_topology import DEFAULT_TOPOLOGY_PRELOAD_M
 from src.shared.python.grip_contact.pad_contact import PadContactModel
+from src.shared.python.grip_contact.pair_contact import line_contact_node_count
 from src.shared.python.grip_contact.pad_layout import PAD_RADIUS_M, PadLayout
 from src.shared.python.grip_contact.topology_contact import (
     TopologyContactModel,
@@ -50,25 +50,10 @@ from src.shared.python.grip_contact.topology_contact import (
 )
 
 
-def capsule_sphere_count(half_length_m: float, radius_m: float) -> int:
-    """Number of discrete spheres approximating a capsule medial axis in OpenSim.
-
-    Preconditions:
-        ``half_length_m`` must be a nonnegative finite float.
-        ``radius_m`` must be a positive finite float.
-
-    Postconditions:
-        Returns an integer >= 2 ensuring sphere center spacing <= radius_m / 2.
-    """
-    if not (math.isfinite(half_length_m) and half_length_m >= 0.0):
-        raise ValueError(
-            f"half_length_m must be nonnegative and finite, got {half_length_m}"
-        )
-    if not (math.isfinite(radius_m) and radius_m > 0.0):
-        raise ValueError(f"radius_m must be positive and finite, got {radius_m}")
-    core_len = 2.0 * half_length_m
-    return max(2, int(round(core_len / (0.5 * radius_m))) + 1)
-
+#: The OpenSim sphere chain of a capsule site is the shared line-contact
+#: quadrature (#13308): same node count and node positions as
+#: :func:`~src.shared.python.grip_contact.pair_contact.capsule_line_nodes`.
+capsule_sphere_count = line_contact_node_count
 
 CONTACT_FORCE_PREFIX = "grip_contact"
 SIDES = ("L", "R")

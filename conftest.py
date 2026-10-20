@@ -21,9 +21,10 @@ with contextlib.suppress(ImportError, AttributeError, OSError, RuntimeError):
 # This variant is immune to both problems:
 #   * the REAL stderr fd is dup'd inside CaptureManager.global_and_fixture_
 #     disabled(), so dumps bypass capture and reach the job log;
-#   * faulthandler.register(SIGUSR1) installs a C-level handler needing
-#     neither the GIL nor Python signal dispatch, and nothing in-process
-#     cancels it;
+#   * SIGUSR1 runs a Python-level handler that dumps every thread with
+#     faulthandler.dump_traceback() while holding the GIL (see
+#     _install_stack_dump_handler for why the C-level
+#     faulthandler.register() variant segfaulted the xdist controller);
 #   * a detached watchdog subprocess signals its parent pytest process if it
 #     lives past 8 minutes (then every 4, max 4 shots) and exits within 10 s
 #     of the parent exiting, so healthy runs are unaffected.
@@ -61,13 +62,37 @@ _WATCHDOG_SRC = "\n".join(
 )
 
 
+def _install_stack_dump_handler(dump_file):
+    """Dump every thread's stack to *dump_file* on SIGUSR1, holding the GIL.
+
+    ``faulthandler.register(SIGUSR1, all_threads=True)`` dumps from inside the
+    C signal handler, without the GIL, while the other threads keep pushing
+    and popping frames. On the xdist controller - four execnet receiver
+    threads plus the main loop, all constantly switching frames - that walk
+    read a freed frame and segfaulted the whole session (exit 139, issue
+    #13490: runs 39167045502, 39260041633, 39293974000 all died in the same
+    millisecond the watchdog fired). A Python-level handler runs on the main
+    thread between bytecodes with the GIL held, so no other thread can mutate
+    its frame stack mid-walk. Blocking syscalls and lock waits are
+    interrupted to run it (PEP 475), which covers the hangs this watchdog
+    exists for.
+    """
+    import faulthandler
+    import signal
+
+    def _dump_all_threads(signum, frame) -> None:
+        faulthandler.dump_traceback(file=dump_file, all_threads=True)
+
+    signal.signal(signal.SIGUSR1, _dump_all_threads)
+    return _dump_all_threads
+
+
 def _arm_hang_forensics(config) -> None:
     import signal as _signal
 
     if not hasattr(_signal, "SIGUSR1"):
         return
     with contextlib.suppress(Exception):
-        import faulthandler as _faulthandler
         import subprocess as _subprocess
         import sys as _sys
 
@@ -79,7 +104,7 @@ def _arm_hang_forensics(config) -> None:
             real_fd = _os.dup(2)
         pipe_r, pipe_w = _os.pipe()
         dump_file = _os.fdopen(pipe_w, "w")
-        _faulthandler.register(_signal.SIGUSR1, file=dump_file, all_threads=True)
+        _install_stack_dump_handler(dump_file)
         dump_dest = _os.fdopen(real_fd, "w")
         _subprocess.Popen(
             [_sys.executable, "-c", _WATCHDOG_SRC, str(_os.getpid())],

@@ -563,7 +563,8 @@ evaluates compliant physical contact between anatomical hand sites $\mathcal{S}$
 (HRG-GS-G1, \#13299) and the club grip cylinder via the G2 pairwise kernels (\path{pair_contact.py}, \#13300).
 Sites ride on the prescribed hand frame, while the club grip cylinder rides on the dynamic club frame.
 Physical hand--grip contact pairs are evaluated using \texttt{sphere\_capsule} for spherical sites (palm and finger pads, heel pad)
-and \texttt{capsule\_capsule} for cylindrical finger segments (such as the optional trail index trigger finger).
+and \texttt{capsule\_capsule} for cylindrical finger segments (such as the optional trail index trigger finger); since \#13308
+\texttt{capsule\_capsule} is the axial line-contact law of Section~\ref{sec:hrg-gs-line-contact}.
 
 For each physical pair $i$, the signed penetration depth $\delta_i = \max(0, r_{A,i} + r_{B,i} - d(p_A, p_B))$ and relative contact point
 velocity $v_{c,i}$ yield compressive normal force $f_{n,i}$ and regularized friction force $f_{t,i}$:
@@ -634,9 +635,9 @@ Python floats:
 \item sphere site $i$ (reference \texttt{sphere\_capsule}): closest grip-axis point $q_i$, normal
   $\hat n_i = (q_i - c_i)/\|q_i - c_i\|$, contact $p_{c,i} = c_i + r_i \hat n_i$; the hand sphere is sampled against the
   plane $(-\hat n_i,\; q_i - r_g \hat n_i)$ with relative velocity $v_h(p_{c,i}) - v_g(p_{c,i})$;
-\item capsule site $i$ (reference \texttt{capsule\_capsule}): closest segment points $(a_i, b_i)$ (general, parallel and
-  degenerate branches), contact $\tfrac12[(a_i + r_i \hat n_i) + (b_i - r_g \hat n_i)]$; the grip is sampled against the plane
-  $(\hat n_i,\; a_i + r_i\hat n_i)$ with the exactly negated relative velocity and spin;
+\item capsule site $i$ (reference \texttt{capsule\_capsule}, \#13308): its $N_i$ axial line-contact nodes are stacked as
+  sphere rows, and \texttt{combine\_line\_nodes} (shared with the reference) weights each by $1/N_i$ (see Continuous
+  Capsule Line-Contact Law); the pair also carries the hand-side moment, since its contact point is a node centroid;
 \item \texttt{sphere\_ground\_contact} and \texttt{torsional\_friction\_moment} give the shared law that both rows
   then apply, term for term:
   \begin{gather*}
@@ -820,13 +821,135 @@ floor. The denser kernel was not worth 2--7\% and was reverted. Two levers remai
   shared across engines.
 \end{itemize}
 
+\subsection{Continuous Capsule Line-Contact Law (HRG-GS-G10, \#13308)}
+\label{sec:hrg-gs-line-contact}
+\textbf{Problem.} The capsule pair law (\texttt{capsule\_capsule}) used the closest points of the two core segments
+(\texttt{closest\_points\_segments}). Their minimum distance is continuous, but the closest points are not: for nearly
+parallel segments the routine returned the overlap centre while $\sin^2\theta = a e - b^2 < 10^{-10}\,a e$ and an endpoint
+just past it. For the \texttt{ten\_finger} trail little-finger capsule ($r = 7.5$\,mm, $L = 16$\,mm, preload
+$\delta_0 = 0.25$\,mm) at a pitch of $0.99 \times 10^{-5}$ versus $1.01 \times 10^{-5}$\,rad, the contact point moved from
+$x = -48.0$ to $-56.0$\,mm and the club moment changed from $2.053$ to $2.396$\,N$\cdot$m. Physically, a
+penetrating capsule nearly parallel to a cylinder makes a line contact whose resultant lies near the overlap centre and
+moves continuously as the capsule tilts.
+
+\textbf{Law.} Capsule A's core segment $[p_0, p_1]$, of length $L$ and radius $r_A$, is discretised into
+$N = \max(2, \mathrm{round}(L / (r_A/2)) + 1)$ equally spaced nodes (\texttt{line\_contact\_node\_count},
+\texttt{capsule\_line\_nodes}):
+\begin{equation}
+c_k = p_0 + \frac{k}{N-1}(p_1 - p_0), \qquad k = 0, \dots, N-1.
+\end{equation}
+Each node is a sphere $(c_k, r_A)$ evaluated against capsule B by the shared \texttt{sphere\_capsule} law (Hunt--Crossley
+normal, regularised Coulomb/Stribeck friction and torsional spin friction), giving the full-stiffness node wrench
+$(\mathbf{F}_k, \mathbf{M}_k)$ with depth $\delta_k = r_A + r_B - d(c_k, [q_0, q_1])$. The pair wrench is
+(\texttt{combine\_line\_nodes})
+\begin{equation}
+\mathbf{F} = \frac{1}{N}\sum_k \mathbf{F}_k, \qquad \mathbf{M} = \frac{1}{N}\sum_k \mathbf{M}_k,
+\end{equation}
+which is the line contact $\mathbf{F} = \int_0^1 \mathbf{f}(s)\,ds$ of per-length stiffness $k/L$, evaluated by an
+$N$-point rule. The law is linear in $k$ (the normal force $\max(0, k\delta(1 + d\dot\delta))$, the friction and the spin
+moment all scale with it), so weighting the full-stiffness node wrenches by $1/N$ equals running every node at $k/N$.
+Reported quantities: $f_n = \tfrac1N\sum_k f_{n,k}$ and $f_t = \tfrac1N\sum_k f_{t,k}$ (line loads, as MuJoCo and
+OpenSim sum their per-contact magnitudes), $\delta = \max_k \delta_k$, contact point
+$\mathbf{p} = \sum_k f_{n,k}\mathbf{p}_k / \sum_k f_{n,k}$ (the normal-force-weighted node centroid), and normal
+$\hat{\mathbf{n}} \propto \sum_k f_{n,k}\hat{\mathbf{n}}_k$. With zero total normal force, $\mathbf{p}$ and
+$\hat{\mathbf{n}}$ fall back to the unweighted node means.
+
+\textbf{Properties.}
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \emph{Continuity.} Every node wrench is continuous in the poses, and no closest point or branch is selected, so
+  $\mathbf{F}$, $\mathbf{M}$, $f_n$ and $\mathbf{p}$ (where $f_n > 0$) are continuous. A node whose end lifts off loses
+  its load smoothly.
+\item \emph{Parallel equivalence.} With a uniform depth $\delta_0$ along an exactly parallel capsule, all nodes carry
+  $k\delta_0$, so $f_n = k\delta_0$ at the overlap centre: the closest-point law's result at $\theta = 0$. Preload
+  calibrations of every engine are therefore unchanged.
+\item \emph{Linear depth.} For a small pitch in the plane of the two axes with both ends in contact, $\delta(s)$ is linear and symmetric nodes give
+  $\tfrac1N\sum_k\delta_k = \delta(\tfrac12)$ exactly, so the total load is unchanged by the tilt while the centroid moves
+  toward the deeper end.
+\item \emph{Action and reaction} hold node by node, so they hold for the sum; each node is unilateral and inside its
+  friction cone at its own slip speed.
+\end{enumerate}
+
+\textbf{Engine Mirrors (Single Source).} Pinocchio, Drake and the OpenSim MSK adapter call
+\texttt{topology\_side\_wrench}, whose batched kernel (\texttt{side\_rows\_wrench}) stacks the capsule nodes as sphere rows
+and combines them with the same \texttt{combine\_line\_nodes}. OpenSim's topology grip already modelled each capsule as
+this sphere chain with stiffness $k/N$; \texttt{capsule\_sphere\_count} is now the shared \texttt{line\_contact\_node\_count}.
+MuJoCo emits one sphere geom per node, each paired with the grip cylinder under the site's calibrated \texttt{solref}.
+\texttt{ClubInHands.calibrate} sums the node contacts of a site, so the per-site calibration is unchanged. MuJoCo's
+analytic sphere--cylinder collider replaces the capsule--cylinder \texttt{mjc\_Convex} path, and
+\texttt{\_sync\_parallel\_capsules} is deleted.
+MuJoCo's regularised friction gain belongs to each contact row and does not scale with \texttt{solref}, so $N$ node rows
+at the single-contact \texttt{solreffriction} time constant $T_f$ resisted slip about $N$ times as hard as the shared law:
+$37.94$\,N versus $19.49$\,N of tangential force on the trail little finger at $t = 10$\,ms of the \texttt{ten\_finger}
+hold (\texttt{pair\_tangential\_force} $75.5\% / 81.6\%$ peak/RMS error at $0.04$\,s). Each node row therefore uses
+$N T_f$ (a sphere site keeps $T_f$): $22.65$ versus $21.44$\,N at $10$\,ms and $8.38$ versus $9.64$\,N at $30$\,ms, and the
+pair's tangential error falls to $3.65\% / 3.07\%$.
+
+\textbf{Evidence.}
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \emph{Continuity} (\path{tests/unit/grip_contact/test_capsule_line_contact.py}): the contact point moves less than
+  $10^{-7}$\,m between $\theta = 0.99 \times 10^{-5}$ and $1.01 \times 10^{-5}$\,rad (formerly $8.0$\,mm); over 801
+  tilts in $[-10^{-3}, 10^{-3}]$\,rad no step exceeds $2.5\,\mu$m; the normal force over 401 tilts in $[0, 0.2]$\,rad
+  never steps by more than $5\%$ of its preload value; at $\theta = 0$ the force is $k\delta_0$ at the overlap centre
+  to $10^{-12}$ relative.
+\item \emph{Mirrors}: the batched kernel equals the reference \texttt{capsule\_capsule} to $10^{-12}$\,N
+  (\texttt{test\_topology\_contact\_batched.py}); MuJoCo's native node forces are uniform and linear in depth
+  ($34{,}220$\,N/m per node at preload) and their total matches the shared law to $0.004\%$ at $10$\,ms of the hold;
+  the load-weighted node centroid stays within $0.5$\,mm of the shared contact point before and after the old
+  threshold crossing (\texttt{test\_capsule\_line\_contact\_continuous\_and\_matches\_shared\_law\_ten\_finger}); and
+  node friction tracks the law to $10\%$ (\texttt{test\_capsule\_node\_friction\_matches\_shared\_line\_law\_ten\_finger}).
+\item \emph{Cross-engine parity} (\texttt{grip\_style\_parity\_report.py}; tolerances unchanged at $5\%$ peak and $2\%$
+  RMS). \texttt{overlap} and \texttt{interlock} contain no hand--grip capsule and are unchanged. Drake (shared kernel)
+  passes every case: \texttt{ten\_finger} \texttt{net\_force} $0.218\% / 0.187\%$ hold and $0.015\% / 1.185\%$ swing at
+  $0.04$\,s. MuJoCo passes \texttt{ten\_finger} swing at $0.04$\,s ($2.244\% / 1.832\%$) and both motions at $0.10$\,s
+  ($1.873\%$ and $1.292\%$ RMS), but fails the $0.04$\,s hold: \texttt{net\_force} $3.136\% / 2.866\%$ (strict
+  \texttt{xfail}; previously $1.902\% / 1.971\%$). OpenSim's $0.04$\,s \texttt{ten\_finger} cases stay strict
+  \texttt{xfail}s ($4.656\% / 4.585\%$ hold, previously $2.412\% / 2.599\%$; $1.500\% / 4.913\%$ swing, previously
+  $0.290\% / 5.070\%$), and its $0.10$\,s hold, which passed at $1.731\%$ RMS, now reads $2.979\%$.
+\item \emph{Diagnosis of the MuJoCo and OpenSim hold regressions.} The new reference is physically different: the
+  former endpoint snap at $1.18$\,ms dropped $13.5\%$ of the little-finger pitch couple; without it the club's
+  pitch transient is about $15\%$ larger (Pinocchio $|F_{\mathrm{net}}|$ peak $3.571$ versus $3.489$\,N; little-finger
+  $f_n$ now decays from $42.77$ to $40.98$\,N, as OpenSim's sphere chain already did, instead of staying at
+  $42.66$\,N). Every MuJoCo pair force is closer to the reference than before (RMS difference $0.025$--$0.124$\,N
+  versus $0.038$--$0.143$\,N for the nine hand--grip pads), yet the club \texttt{net\_force}, the $\approx 3.5$\,N
+  residual of $\approx 1$\,kN of opposing grip forces, carries the same phase-shifted oscillation error as before at
+  $1.6\times$ the amplitude ($0.107$ versus $0.069$\,N RMS). This is the hyperstatic cone-QP split of \#13306, not a
+  mismatch of the capsule law.
+\end{itemize}
+
+\textbf{Limitations.}
+\begin{itemize}[leftmargin=*,noitemsep]
+\item A capsule crossing the partner at a large angle touches only the nodes near the crossing, so its load is about
+  $k\delta \cdot w/L$ for a contact width $w$, smaller than the former point law's $k\delta$. Every capsule pair in the
+  current topologies is axial, so no current result changes for this reason; a crossing site would need its own stiffness.
+\item The $N$-point rule is exact for a linear depth profile. After one end lifts off, it approximates
+  $\int\delta^+\,ds$ with an error below one node spacing ($\approx r/2$) of the lift-off point.
+\item Nodes sit on capsule A's axis only, so the law is not symmetric in A and B.
+\item \texttt{capsule\_capsule\_distance} and \texttt{closest\_points\_segments} keep the closest-point geometry for gaps
+  and distances. \texttt{hand\_hand\_allocation} still takes its allocation patch from that geometry; the hand-hand
+  relative pose is constant to $10^{-10}$\,mm in the captured swing, so it does not jump there.
+\item MuJoCo's $0.04$\,s \texttt{ten\_finger} hold and OpenSim's $0.10$\,s \texttt{ten\_finger} hold fail \texttt{net\_force}
+  RMS against the continuous reference (above). The tolerances were not changed; closing them needs the \#13306
+  hyperstatic friction work, not a capsule-law change.
+\item This document was not compiled locally (no \texttt{pdflatex} on the host).
+\end{itemize}
+
+\textbf{Reproduction Commands.}
+\begin{verbatim}
+python3 -m pytest -n 0 tests/unit/grip_contact/test_capsule_line_contact.py \
+    tests/unit/grip_contact/test_capsule_contact_law.py \
+    tests/unit/grip_contact/test_topology_contact_batched.py
+python3 -m pytest -n 0 tests/unit/grip_contact/test_mujoco_topology_grip.py
+PYTHONPATH=. python3 scripts/grip/grip_style_parity_report.py --duration-s 0.04 --out out/g10_004
+PYTHONPATH=. python3 scripts/grip/grip_style_parity_report.py --duration-s 0.10 --out out/g10_010
+\end{verbatim}
+
 \subsection{MuJoCo Topology Contact Reference (HRG-GS-G8, \#13306)}
 \textbf{Topology Geometry and Pair Generation.} The MuJoCo grip-contact adapter (\path{src/engines/physics_engines/mujoco/python/grip_contact_sim.py})
 accepts an optional \texttt{topology\_model: TopologyContactModel} in \texttt{contact\_mjcf}, \texttt{ClubInHands}, \texttt{build\_run}, \texttt{hold\_run}, and \texttt{simulate\_grip\_contact}.
 When \texttt{topology\_model} is supplied, the legacy symmetric 6+6 sphere \texttt{PadLayout} is replaced by one MuJoCo collision primitive per physical hand--grip pair in \texttt{topology\_model.physical\_grip\_pairs(side)}:
 \begin{itemize}[leftmargin=*,noitemsep]
 \item Spherical pad sites (\texttt{primitive="sphere"}) emit \texttt{<geom name="\{site\}" type="sphere" size="\{r\}" pos="\{p\}" contype="0" conaffinity="0" mass="0"/>}.
-\item Cylindrical phalanx sites (\texttt{primitive="capsule"}) emit \texttt{<geom name="\{site\}" type="capsule" size="\{r\}" fromto="\{a\} \{b\}" contype="0" conaffinity="0" mass="0"/>}.
+\item Cylindrical phalanx sites (\texttt{primitive="capsule"}) emit, since \#13308, one sphere geom \texttt{\{site\}\_node\{j\}} of radius $r$ per shared axial line-contact node (\texttt{capsule\_line\_nodes}), each with its own \texttt{<pair>} under the site's calibrated \texttt{solref}; the original single \texttt{type="capsule"} geom is described below as a superseded root cause.
 \end{itemize}
 Each site primitive is placed on \texttt{hand\_L} (\texttt{lead}) or \texttt{hand\_R} (\texttt{trail}) by reusing \texttt{map\_site\_to\_hand\_frame(topology, pair.site\_a, side)} without introducing new coordinate frame transformations.
 All contact geoms carry \texttt{contype="0" conaffinity="0"}, so broadphase parent--child and hand--hand collisions are disabled; in addition, \texttt{<exclude body1="hand\_L" body2="hand\_R"/>} is emitted in \texttt{<contact>} and one explicit \texttt{<pair geom1="\{site\}" geom2="grip" condim="6" .../>} is generated per physical hand--grip site.
@@ -841,7 +964,7 @@ Hand--hand pairs (\texttt{hand\_hand\_pairs()}) are never emitted as physical Mu
 \end{equation}
 At $d_0 = 0.95$, the regularizer added $53.4$\,kg of artificial normal constraint mass; at $d_0 = 0.01$, $\epsilon_n = d_0/(1-d_0) = 1.01\%$ still leaked $1\%$ of unconstrained relative acceleration $J_n \ddot{q}_0$ (gravity plus prescribed swing hand acceleration $a_{\mathrm{hand}}(0)$) into $f_n$ at $t = 0$, producing a $4.294\%$ $t = 0$ \texttt{net\_moment\_com} error in \texttt{ten\_finger} swing. Setting $d_0 = 0.001$ (\texttt{TOPOLOGY\_IMPEDANCE}) reduces the acceleration leak by $10\times$ to $\epsilon_n = 0.100\%$, dropping the $t=0$ \texttt{net\_moment\_com} error in \texttt{ten\_finger} swing from $4.294\%$ to $0.265\%$ and in \texttt{ten\_finger} hold from $2.398\%$ to $0.012\%$.
 \item \textit{Missing analytical \texttt{mjc\_CapsuleCylinder} collider (\texttt{mjc\_Convex} \texttt{multiccd} contact jumping)}: MuJoCo dispatches \texttt{capsule}--\texttt{cylinder} pairs to \texttt{mjc\_Convex}, which with \texttt{multiccd} enabled emitted 3 contacts at $t=0$, dropped to 2 at $\theta \ge 5.6$\,nrad, and 1 at $\theta \ge 1.71$\,mrad on \texttt{ten\_finger\_little\_finger\_grip}. Emitting \texttt{<flag multiccd="disable" refsafe="disable"/>} on the topology path enforces a single contact across all orientations.
-\item \textit{Collinear capsule--cylinder midpoint convention ($\sin^2\theta < 10^{-10}$)}: In \texttt{ten\_finger}, \texttt{trail\_little\_finger} is a $16.0$\,mm capsule ($r = 7.5$\,mm, half-length $8.0$\,mm) whose axis is parallel to the grip cylinder axis at $t = 0$ and opposes \texttt{lead\_heel\_pad\_butt} across a $62.0$\,mm axial lever arm (forming a pure $2.5340$\,N$\cdot$m pitch couple while radial forces cancel to $0.0000$\,N). In the shared contact law (\texttt{closest\_points\_segments}), segments with $\sin^2\theta = 1 - (\hat{\mathbf{u}}_{\mathrm{cap}} \cdot \hat{\mathbf{u}}_{\mathrm{grip}})^2 < 10^{-10}$ ($|\theta| < 10^{-5}$\,rad) place the contact point at the centre of the axial overlap (capsule midpoint $s = 0.5$), which holds for the first $118$ steps ($t \in [0, 1.18\text{ ms}]$) before $|\theta|$ crosses $10^{-5}$\,rad and the contact point shifts $8.0$\,mm to the proximal capsule endpoint ($s = 1.0$). Without a collinearity threshold, \texttt{mjc\_Convex} snapped the contact point by $8.000$\,mm at step $1$ ($t = 10\,\mu\mathrm{s}$, $|\theta| \sim 10^{-8}$\,rad), cutting the pitch couple by $\Delta M = 42.7738\,\mathrm{N} \times 0.008\,\mathrm{m} = 0.3422$\,N$\cdot$m ($13.5\%$) for $1.17$\,ms. \texttt{ClubInHands.\_sync\_parallel\_capsules} checks $\max(1 - (\hat{\mathbf{u}}_{\mathrm{cap}} \cdot \hat{\mathbf{u}}_{\mathrm{grip}})^2, 0) < 10^{-10}$ before \texttt{mj\_forward} and \texttt{mj\_step}, setting \texttt{geom\_size[gid, 1]} $= 10^{-9}$\,m when collinear (evaluating contact at the capsule midpoint) and restoring \texttt{half\_length\_m} once $\sin^2\theta \ge 10^{-10}$.
+\item \textit{Collinear capsule--cylinder contact jump (superseded by \#13308)}: In \texttt{ten\_finger}, \texttt{trail\_little\_finger} is a $16.0$\,mm capsule ($r = 7.5$\,mm, half-length $8.0$\,mm) whose axis is parallel to the grip cylinder axis at $t = 0$ and opposes \texttt{lead\_heel\_pad\_butt} across a $62.0$\,mm axial lever arm (a pure $2.5340$\,N$\cdot$m pitch couple while radial forces cancel). The former closest-point law (\texttt{closest\_points\_segments}) placed the contact at the overlap centre while $\sin^2\theta < 10^{-10}$ ($|\theta| < 10^{-5}$\,rad, the first $118$ steps, $t \le 1.18$\,ms) and at the proximal endpoint just past it, an $8.0$\,mm jump; \texttt{mjc\_Convex} snapped by $8.000$\,mm already at step $1$ ($|\theta| \sim 10^{-8}$\,rad), cutting the pitch couple by $42.7738\,\mathrm{N} \times 0.008\,\mathrm{m} = 0.3422$\,N$\cdot$m ($13.5\%$). \emph{Failed experiment:} \texttt{ClubInHands.\_sync\_parallel\_capsules} shrank the capsule geom to a $10^{-9}$\,m half-length while $\sin^2\theta < 10^{-10}$, so MuJoCo copied the shared law's discontinuity instead of removing it. Both were replaced by the continuous line-contact law and node spheres (\#13308); the workaround is deleted.
 \item \textit{Tangential viscous friction scaling (\texttt{impratio} / \texttt{solreffriction})}: Tangential viscous damping $c_{\mathrm{fric}} = B_f/R_f = \frac{2\,\mathrm{impratio}}{(1-d_0)t_f \hat{A}_0}$ depends only on $\mathrm{impratio}/t_f$, whereas parasitic tangential mass $1/R_f \propto d_0 \cdot \mathrm{impratio}$. With $d_0 = 0.001$, using $\mathrm{impratio} = 0.95$ (\texttt{TOPOLOGY\_IMPRATIO\_STATIC}) and $t_f = 19\,\mu\mathrm{s}$ (\texttt{TOPOLOGY\_FRICTION\_TIME\_STATIC\_S}) for un-stepped static \texttt{mj\_forward} ($1/R_f = 0.27$\,g) and scaling both by $1000\times$ ($\mathrm{impratio} = 950$, $t_f = 19$\,ms) during \texttt{advance()} preserves $\mathrm{impratio}/t_f = 5.0 \times 10^4\,\mathrm{s}^{-1}$ and $d_0 t_f = 1.9\Delta t > \Delta t$.
 \end{enumerate}
 
@@ -866,12 +989,12 @@ Style & Static $1\times$ / $2\times$ & Hold $F_{\mathrm{net}}$ & Hold $M_{\mathr
 \midrule
 \texttt{overlap}    & $0.001\% / 0.003\%$ & (0.01\%, 0.19\%) & (0.01\%, 0.10\%) & (0.03\%, 0.19\%) & (0.03\%, 0.12\%) & $\le 1.22\%$ (10.5--18.3\%) \\
 \texttt{interlock}  & $0.001\% / 0.003\%$ & (0.01\%, 0.19\%) & (0.01\%, 0.10\%) & (0.03\%, 0.19\%) & (0.03\%, 0.12\%) & $\le 1.22\%$ (10.5--18.3\%) \\
-\texttt{ten\_finger} & $0.0001\% / 0.002\%$ & (1.90\%, 1.30\%) & (0.01\%, 0.30\%) & (1.59\%, 1.04\%) & (0.27\%, 0.32\%) & $\le 0.62\%$ (8.2--12.3\%) \\
+\texttt{ten\_finger} & $0.0001\% / 0.002\%$ & (3.14\%, 1.87\%) & (0.10\%, 0.47\%) & (2.24\%, 1.29\%) & (0.49\%, 0.41\%) & $\le 0.63\%$ (10.2--14.6\%) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Across all 10 \texttt{PARITY\_QUANTITIES} on the $0.10$\,s window, the overall maximum $(\text{peak\_error}, \text{rms\_error})$ is $(35.3\%, 53.1\%)$ for \texttt{overlap}/\texttt{interlock} hold (previously $(35.8\%, 53.1\%)$), $(33.6\%, 29.9\%)$ for \texttt{ten\_finger} hold (previously $(33.9\%, 30.5\%)$), $(38.2\%, 68.2\%)$ for \texttt{overlap}/\texttt{interlock} swing (previously $(38.4\%, 68.3\%)$), and $(94.7\%, 67.2\%)$ for \texttt{ten\_finger} swing (previously $(97.1\%, 68.5\%)$).
+Across all 10 \texttt{PARITY\_QUANTITIES} on the $0.10$\,s window, the overall maximum $(\text{peak\_error}, \text{rms\_error})$ is $(35.3\%, 53.1\%)$ for \texttt{overlap}/\texttt{interlock} hold (previously $(35.8\%, 53.1\%)$), $(39.5\%, 35.8\%)$ for \texttt{ten\_finger} hold (previously $(33.6\%, 29.9\%)$ under the closest-point capsule law), $(38.2\%, 68.2\%)$ for \texttt{overlap}/\texttt{interlock} swing (previously $(38.4\%, 68.3\%)$), and $(82.7\%, 72.4\%)$ for \texttt{ten\_finger} swing (previously $(94.7\%, 67.2\%)$). The \texttt{ten\_finger} row is measured with the continuous line-contact law and per-node friction scaling of \#13308 (Section~\ref{sec:hrg-gs-line-contact}).
 
 \textbf{Hyperstatic Per-Hand Split Analysis and Minimal Two-Pad Demonstration (\#13306).} Per \path{docs/development/full_body_models/GRIP_PARITY_DECISIONS.md} Section~19, the per-hand force split of a hyperstatic two-hand grip is governed by the internal compliance nullspace and agrees across engines only if both apply the identical compliant force law at every pad. Mathematical analysis and a minimal two-pad experiment (\texttt{test\_two\_pad\_hyperstatic\_penalty\_vs\_mujoco\_cone\_divergence} in \path{tests/unit/grip_contact/test_mujoco_topology_grip.py}: lead sphere $\mathrm{Pad}_L$ at $(-x_{\mathrm{pad}}, 0, +0.03)$\,m and trail sphere $\mathrm{Pad}_R$ at $(+x_{\mathrm{pad}}, 0, -0.03)$\,m on a $0.313$\,kg club cylinder of radius $14$\,mm at preload $\delta_0 = 0.25$\,mm, $f_{n,0} = 42.774$\,N) prove that MuJoCo's constraint solver cannot represent the shared penalty law per pad under any configuration (\texttt{condim=3} or \texttt{6}, \texttt{elliptic} or \texttt{pyramidal} cone, with or without spin/rolling friction) for four structural reasons:
 \begin{enumerate}[leftmargin=*,noitemsep]
@@ -959,7 +1082,8 @@ $f_{\mathrm{target}} = 42.7738$\,N with $0.0000\%$ numerical error against the s
 
 \textbf{Sphere-Chain Approximation of Capsule Sites.} Capsule (phalanx) sites, such as the trail little finger
 in the ten-finger grip style ($r = 7.5$\,mm, half-length $L = 8$\,mm), are approximated by a discrete chain
-of $N$ contact spheres along the capsule's medial axis with center spacing bounded by $r/2$:
+of $N$ contact spheres along the capsule's medial axis with center spacing of about $r/2$ ($2L/(N-1) = 4.0$\,mm here). Since
+\#13308 this chain is the shared line-contact quadrature (\texttt{capsule\_sphere\_count} is \texttt{line\_contact\_node\_count}):
 \begin{equation}
 N = \max\left(2, \mathrm{round}\left(\frac{2L}{0.5r}\right) + 1\right) = 5.
 \end{equation}
@@ -1088,9 +1212,9 @@ Hold & Interlock & MuJoCo & 0.009 / 0.297 & 0.010 / 0.148 & pass & 0.000 / 0.191
 Hold & Interlock & Drake & 0.000 / 0.058 & 0.000 / 0.029 & pass & 0.000 / 0.038 & 0.246 / 0.377 & 0.134 / 0.156 \\
 \midrule
 Hold & Ten-Finger & Pinocchio & 0.000 / 0.000 & 0.000 / 0.000 & pass & 0.000 / 0.000 & 0.000 / 0.000 & 0.000 / 0.000 \\
-Hold & Ten-Finger & OpenSim & 0.969 / 9.872 & 17.798 / 4.625 & fail (xfail) & 0.313 / 5.133 & 1.746 / 21.392 & 45.038 / 27.993 \\
-Hold & Ten-Finger & MuJoCo & 1.902 / 1.971 & 0.017 / 0.454 & pass & 0.000 / 0.224 & 2.428 / 7.278 & 2.346 / 1.131 \\
-Hold & Ten-Finger & Drake & 0.172 / 0.173 & 0.000 / 0.049 & pass & 0.000 / 0.033 & 0.291 / 0.241 & 0.150 / 0.164 \\
+Hold & Ten-Finger & OpenSim & 4.656 / 4.585 & 0.833 / 1.255 & fail (xfail) & 0.110 / 2.454 & 15.177 / 12.061 & 5.325 / 5.960 \\
+Hold & Ten-Finger & MuJoCo & 3.136 / 2.866 & 0.103 / 0.723 & fail (xfail) & 0.000 / 0.182 & 4.703 / 8.125 & 1.042 / 0.834 \\
+Hold & Ten-Finger & Drake & 0.218 / 0.187 & 0.000 / 0.062 & pass & 0.000 / 0.038 & 0.261 / 0.246 & 0.161 / 0.174 \\
 \midrule
 Swing & Overlap & Pinocchio & 0.000 / 0.000 & 0.000 / 0.000 & pass & 0.000 / 0.000 & 0.000 / 0.000 & 0.000 / 0.000 \\
 Swing & Overlap & OpenSim & 319.750 / 91.599 & 283.326 / 83.529 & fail (xfail) & 0.485 / 4.111 & 4.460 / 22.719 & 46.187 / 27.610 \\
@@ -1103,9 +1227,9 @@ Swing & Interlock & MuJoCo & 0.027 / 0.273 & 0.026 / 0.179 & pass & 0.000 / 0.25
 Swing & Interlock & Drake & 0.000 / 0.537 & 0.000 / 0.484 & pass & 0.000 / 0.029 & 0.308 / 0.326 & 0.163 / 0.208 \\
 \midrule
 Swing & Ten-Finger & Pinocchio & 0.000 / 0.000 & 0.000 / 0.000 & pass & 0.000 / 0.000 & 0.000 / 0.000 & 0.000 / 0.000 \\
-Swing & Ten-Finger & OpenSim & 5995.091 / 1334.628 & 7842.170 / 1731.901 & fail (xfail) & 0.391 / 5.407 & 35.818 / 24.318 & 40.670 / 18.094 \\
-Swing & Ten-Finger & MuJoCo & 1.586 / 1.451 & 0.260 / 0.435 & pass & 0.000 / 0.360 & 1.730 / 9.306 & 1.490 / 1.789 \\
-Swing & Ten-Finger & Drake & 0.096 / 1.642 & 0.000 / 0.592 & pass & 0.000 / 0.024 & 0.298 / 0.313 & 0.124 / 0.240 \\
+Swing & Ten-Finger & OpenSim & 1.500 / 4.913 & 0.833 / 2.920 & fail (xfail) & 0.786 / 2.613 & 17.384 / 13.982 & 8.124 / 4.000 \\
+Swing & Ten-Finger & MuJoCo & 2.244 / 1.832 & 0.486 / 0.578 & pass & 0.001 / 0.321 & 1.080 / 10.244 & 0.232 / 1.435 \\
+Swing & Ten-Finger & Drake & 0.015 / 1.185 & 0.000 / 0.355 & pass & 0.000 / 0.027 & 0.296 / 0.308 & 0.139 / 0.223 \\
 \bottomrule
 \end{tabular}
 \caption{Cross-engine grip-style parity across Pinocchio (reference), OpenSim, MuJoCo, and Drake over $0.04$\,s static hold and swing replay (determinate limits: peak $\le 5.0\%$, RMS $\le 2.0\%$; pair columns are classified \texttt{indeterminate}).}
@@ -1128,9 +1252,9 @@ Hold & Overlap & Drake & 0.00 / 0.19 & 0.21 / 0.31 & 0.21 / 0.32 & 0.33 / 0.47 &
 Hold & Interlock & OpenSim & 1.10 / 16.42 & 3.04 / 28.03 & 3.28 / 29.01 & 13.50 / 23.15 & 0.30 / 17.70 & 36.67 / 36.37 & 32.04 / 32.04 \\
 Hold & Interlock & MuJoCo & 0.01 / 16.27 & 1.70 / 27.19 & 1.32 / 28.47 & 35.30 / 82.52 & 1.42 / 3.32 & 2.74 / 5.58 & 0.69 / 0.69 \\
 Hold & Interlock & Drake & 0.00 / 0.19 & 0.21 / 0.31 & 0.21 / 0.32 & 0.33 / 0.47 & 0.33 / 0.37 & 0.11 / 0.33 & 0.17 / 0.17 \\
-Hold & Ten-Finger & OpenSim & 2.13 / 24.00 & 5.95 / 23.42 & 4.04 / 23.71 & 4.50 / 29.07 & 1.13 / 13.12 & 24.14 / 30.31 & 27.78 / 27.78 \\
-Hold & Ten-Finger & MuJoCo & 0.62 / 12.83 & 0.57 / 12.48 & 0.68 / 12.65 & 33.55 / 46.09 & 0.00 / 2.67 & 1.84 / 1.45 & 1.17 / 1.17 \\
-Hold & Ten-Finger & Drake & 0.04 / 0.16 & 0.04 / 0.16 & 0.04 / 0.16 & 0.48 / 0.26 & 0.00 / 0.24 & 0.17 / 0.16 & 0.16 / 0.16 \\
+Hold & Ten-Finger & OpenSim & 3.02 / 10.16 & 6.27 / 9.93 & 4.65 / 10.04 & 16.72 / 8.46 & 0.02 / 6.58 & 4.29 / 6.87 & 5.82 / 5.82 \\
+Hold & Ten-Finger & MuJoCo & 0.26 / 16.20 & 0.63 / 15.65 & 0.75 / 15.93 & 39.51 / 55.16 & 0.01 / 4.03 & 0.96 / 0.98 & 0.81 / 0.81 \\
+Hold & Ten-Finger & Drake & 0.02 / 0.18 & 0.02 / 0.18 & 0.02 / 0.18 & 0.43 / 0.24 & 0.00 / 0.26 & 0.18 / 0.17 & 0.17 / 0.17 \\
 \midrule
 Swing & Overlap & OpenSim & 130.4 / 53.6 & 258.0 / 75.6 & 21.59 / 32.28 & 10.78 / 26.26 & 8.63 / 11.30 & 29.88 / 32.51 & 20.96 / 20.96 \\
 Swing & Overlap & MuJoCo & 0.01 / 20.08 & 0.09 / 34.26 & 2.51 / 36.27 & 38.21 / 92.46 & 3.52 / 2.57 & 2.89 / 3.93 & 1.04 / 1.04 \\
@@ -1138,9 +1262,9 @@ Swing & Overlap & Drake & 0.00 / 0.35 & 0.29 / 0.52 & 0.30 / 0.33 & 0.32 / 0.42 
 Swing & Interlock & OpenSim & 130.4 / 53.6 & 258.0 / 75.6 & 21.59 / 32.28 & 10.78 / 26.26 & 8.63 / 11.30 & 29.88 / 32.51 & 20.96 / 20.96 \\
 Swing & Interlock & MuJoCo & 0.01 / 20.08 & 0.09 / 34.26 & 2.51 / 36.27 & 38.21 / 92.46 & 3.52 / 2.57 & 2.89 / 3.93 & 1.04 / 1.04 \\
 Swing & Interlock & Drake & 0.00 / 0.35 & 0.29 / 0.52 & 0.30 / 0.33 & 0.32 / 0.42 & 0.23 / 0.32 & 0.78 / 1.71 & 0.12 / 0.12 \\
-Swing & Ten-Finger & OpenSim & 181.8 / 68.2 & 193.3 / 67.7 & 0.34 / 25.87 & 4.54 / 49.82 & 6.73 / 11.68 & 14.66 / 20.08 & 17.89 / 17.89 \\
-Swing & Ten-Finger & MuJoCo & 0.01 / 16.15 & 0.12 / 15.62 & 0.17 / 16.01 & 94.67 / 88.18 & 2.53 / 1.95 & 2.18 / 1.77 & 1.80 / 1.80 \\
-Swing & Ten-Finger & Drake & 0.00 / 0.20 & 0.02 / 0.22 & 0.02 / 0.20 & 1.12 / 0.68 & 0.17 / 0.20 & 1.56 / 1.15 & 0.12 / 0.12 \\
+Swing & Ten-Finger & OpenSim & 0.00 / 11.19 & 2.99 / 10.93 & 0.80 / 11.15 & 15.97 / 16.21 & 6.03 / 3.14 & 2.39 / 4.96 & 3.80 / 3.80 \\
+Swing & Ten-Finger & MuJoCo & 0.01 / 19.53 & 0.18 / 18.90 & 0.24 / 19.37 & 82.68 / 96.62 & 3.58 / 2.44 & 1.75 / 1.39 & 1.43 / 1.43 \\
+Swing & Ten-Finger & Drake & 0.00 / 0.21 & 0.02 / 0.22 & 0.02 / 0.21 & 0.26 / 0.61 & 0.19 / 0.20 & 1.41 / 1.09 & 0.12 / 0.12 \\
 \bottomrule
 \end{tabular}
 \caption{Measured indeterminate hyperstatic quantities ($\%$) vs.\ Pinocchio reference on $0.04$\,s hold and swing (\texttt{GRIP\_PARITY\_DECISIONS.md} Section~19).}
@@ -1149,9 +1273,9 @@ Swing & Ten-Finger & Drake & 0.00 / 0.20 & 0.02 / 0.22 & 0.02 / 0.20 & 1.12 / 0.
 
 \textbf{Limitations.}
 \begin{enumerate}[leftmargin=*,noitemsep]
-\item Drake passes all determinate quantities across all three styles for both $0.04$\,s hold and $0.04$\,s swing ($\le 0.172\%$ peak, $\le 1.642\%$ RMS).
-\item MuJoCo passes all determinate quantities across all three styles (\texttt{overlap}, \texttt{interlock}, \texttt{ten\_finger}) on both $0.04$\,s hold and $0.04$\,s swing ($\le 1.902\%$ peak, $\le 1.971\%$ RMS) after enforcing the shared collinear capsule--cylinder midpoint convention ($\sin^2\theta < 10^{-10}$ on \texttt{trail\_little\_finger}) and reducing \texttt{TOPOLOGY\_IMPEDANCE} from $d_0 = 0.01$ to $d_0 = 0.001$ (before these two corrections, \texttt{ten\_finger} $0.04$\,s hold and swing had \texttt{net\_force} RMS $= 2.595\%$ and $2.005\%$ and \texttt{net\_moment\_com} peak $= 2.398\%$ and $4.294\%$).
-\item OpenSim passes \texttt{overlap} and \texttt{interlock} determinate quantities on $0.04$\,s static hold ($\le 1.099\%$ peak, $\le 1.412\%$ RMS), whereas \texttt{ten\_finger} hold and all three $0.04$\,s swings exhibit large transient tangential/inertial spikes on the discretized 5-sphere \texttt{ElasticFoundationForce} meshes while still matching total per-hand normal squeeze over $0.10$\,s (Table~\ref{tab:osim_pin_parity}); these four cases are recorded as strict \texttt{xfail}s with measured numbers. These OpenSim rows record the pre-HRG-GS-G7b numbers; the G7b friction mapping, operating-point calibration, spline-horizon fix, per-capsule ring-aligned \texttt{ContactMesh}, normal-force-weighted CoP reporting, and $5\times 10^{-8}$ BDF accuracy (Section~\ref{sec:hrg-gs-g7b}) supersede them: all \texttt{overlap} and \texttt{interlock} cases ($0.04$\,s and $0.10$\,s hold and swing), all $0.10$\,s \texttt{ten\_finger} cases (hold and swing), and $0.04$\,s \texttt{ten\_finger} \texttt{net\_moment\_com} ($0.000\%$ peak / $0.705\%$ hold RMS, $0.930\%$ swing RMS) now pass, and only $0.04$\,s \texttt{ten\_finger} \texttt{net\_force} RMS ($2.588\%$ hold, $2.605\%$ swing) remains a strict \texttt{xfail} (Table~\ref{tab:g7b_before_after_parity}).
+\item Drake passes all determinate quantities across all three styles for both $0.04$\,s hold and $0.04$\,s swing ($\le 0.218\%$ peak, $\le 1.185\%$ RMS).
+\item MuJoCo passes all determinate quantities on \texttt{overlap} and \texttt{interlock} (both motions) and on \texttt{ten\_finger} $0.04$\,s swing ($2.244\%$ / $1.832\%$ on \texttt{net\_force}). The $0.04$\,s \texttt{ten\_finger} hold fails \texttt{net\_force} RMS ($3.136\%$ peak, $2.866\%$ RMS $> 2.0\%$) and is a strict \texttt{xfail} with these numbers; it passes over $0.10$\,s ($1.873\%$ RMS). It passed ($1.902\%$ / $1.971\%$) only while MuJoCo copied the former discontinuous closest-point law (\texttt{\_sync\_parallel\_capsules}, deleted by \#13308); see Section~\ref{sec:hrg-gs-line-contact} for the diagnosis. \texttt{TOPOLOGY\_IMPEDANCE} $d_0 = 0.001$ is unchanged (before it, \texttt{ten\_finger} $0.04$\,s hold and swing had \texttt{net\_force} RMS $= 2.595\%$ and $2.005\%$ and \texttt{net\_moment\_com} peak $= 2.398\%$ and $4.294\%$).
+\item OpenSim passes \texttt{overlap} and \texttt{interlock} determinate quantities on $0.04$\,s static hold ($\le 1.099\%$ peak, $\le 1.412\%$ RMS), whereas \texttt{ten\_finger} hold and all three $0.04$\,s swings exhibit large transient tangential/inertial spikes on the discretized 5-sphere \texttt{ElasticFoundationForce} meshes while still matching total per-hand normal squeeze over $0.10$\,s (Table~\ref{tab:osim_pin_parity}); these four cases are recorded as strict \texttt{xfail}s with measured numbers. These OpenSim rows record the pre-HRG-GS-G7b numbers; the G7b friction mapping, operating-point calibration, spline-horizon fix, per-capsule ring-aligned \texttt{ContactMesh}, normal-force-weighted CoP reporting, and $5\times 10^{-8}$ BDF accuracy (Section~\ref{sec:hrg-gs-g7b}) supersede them: all \texttt{overlap} and \texttt{interlock} cases ($0.04$\,s and $0.10$\,s hold and swing), all $0.10$\,s \texttt{ten\_finger} cases (hold and swing), and $0.04$\,s \texttt{ten\_finger} \texttt{net\_moment\_com} ($0.000\%$ peak / $0.705\%$ hold RMS, $0.930\%$ swing RMS) now pass, and only $0.04$\,s \texttt{ten\_finger} \texttt{net\_force} RMS ($2.588\%$ hold, $2.605\%$ swing) remains a strict \texttt{xfail} (Table~\ref{tab:g7b_before_after_parity}). Against the continuous line-contact reference of \#13308, the $0.10$\,s ten-finger hold no longer passes (\texttt{net\_force} $4.656\%$ / $2.979\%$ RMS); see Section~\ref{sec:hrg-gs-line-contact}.
 \item Hand--hand pairs (\texttt{overlap} and \texttt{interlock}) are analytically allocated under prescribed hand kinematics and reported as \texttt{NaN} with an explicit reason in every engine row.
 \end{enumerate}
 
@@ -1833,7 +1957,7 @@ $0.10$\,s & Swing & Ten-Finger & --- & \textbf{2.499 / 1.922} (pass) & --- & \te
 \item \textit{Shifting \texttt{\_index\_topology\_records} sample coordinates inward by $\delta_0 - \delta_{\mathrm{preload}}$:} Evaluated and rejected because \texttt{\_sample\_topology\_side} uses the indexed coordinates to report physical penetration $\delta_{\mathrm{phys}}$ and radial unit normals; shifting the reported centers biased the neutral penetration report from $0.25$\,mm to $0.50$\,mm. Keeping \texttt{\_index\_topology\_records} at the unshifted anatomical centers while shifting only the OpenSim \texttt{ContactSphere} geometry locations preserves exact geometric reporting.
 \item \textit{Unprojected Winkler scalar normal-force sum at $\delta_0 = 2\delta_{\mathrm{preload}}$:} Evaluated and rejected because the second-order Winkler convexity $+\tfrac{1}{4}f_{\mathrm{target}}(\Delta\delta/\delta_{\mathrm{preload}})^2$ adds constructively across opposing $\pm y$ pads in the unsigned scalar sum \texttt{squeeze\_n}, raising \texttt{ten\_finger} lead-hand squeeze RMS to $2.05\%$ (above the $2.0\%$ G7 limit). Projecting each sphere's unsigned scalar normal force onto the Hunt--Crossley tangent line via $1 - ((\delta_k - \delta_0)/\delta_k)^2$ reduces lead/trail squeeze RMS to $0.30\text{--}0.94\%$ across all styles.
 \item \textit{Concentrating \texttt{trail\_little\_finger} into a single sphere at $p_0$ ($s = 0$) or midpoint ($s = 0.5$):} Evaluated and rejected. Placing a single sphere at $p_0$ ($x_{\mathrm{hand}} = -44.958$\,mm) matches Pinocchio's tilted closest point ($s = 0$) for $t \ge 0.002$\,s and reduces the step-1 force difference $\|\Delta\mathbf{F}_{\mathrm{net}}(t_1)\|$ from $0.2022$\,N to $0.0056$\,N, but introduces a $0.3636\,\mathrm{N\cdot m}$ ($14.345\%$ peak) moment error at $t = 0$ because Pinocchio's \texttt{closest\_points\_segments} evaluates parallel segments ($\theta = 0$) at the midpoint $s = 0.5000$. Conversely, placing a single sphere at the midpoint $s = 0.5$ leaves the $0.04$\,s \texttt{net\_force} RMS at $2.589\%$ (hold) / $2.596\%$ (swing) while losing capsule rotational roll resistance.
-\item \textit{Residual $0.04$\,s \texttt{ten\_finger} \texttt{net\_force} RMS ($2.588\%$ hold, $2.605\%$ swing; passes over $0.10$\,s at $1.716\%$ hold, $1.922\%$ swing):} Controlled single-sphere experiments (\texttt{OpenSim(p0)} vs.\ \texttt{Pinocchio(p0)}, where all 10 sites are identical single spheres at identical coordinates) yield $2.567\%$ (hold) and $2.578\%$ (swing) \texttt{net\_force} RMS over $0.04$\,s, proving that the residual $\sim 2.6\%$ RMS is \emph{not} caused by the 5-sphere capsule approximation. During the initial gravitational settling transient ($t \in [0.002, 0.020]$\,s, tangential slip speed $v_t \in [0.1, 1.0]\,\mathrm{mm/s} = [0.1, 1.0]\,v_{\mathrm{tr}}$), Simbody's \texttt{ElasticFoundationForce} with $\tilde{\mu}_s = \tilde{\mu}_d = 0.70$ evaluates a piecewise-linear ramp $\mu_{\mathrm{Simbody}}(v) = 0.70\min(v/v_{\mathrm{tr}}, 1)$ (initial slope $700\,\mathrm{s/m}$ and corner $0.70$ at $v = v_{\mathrm{tr}}$) versus the shared Stribeck-$\tanh$ law's initial slope $\mu_s / v_{\mathrm{tr}} = 900\,\mathrm{s/m}$ and smooth knee $\mu_{\mathrm{law}}(v_{\mathrm{tr}}) = 0.5892$. Summed across $10$ pads carrying $427.7$\,N of normal preload, this micro-slip friction-curve shape difference produces a $0.09\text{--}0.10$\,N transient tangential force difference over $t \in [0.004, 0.020]$\,s that decays to $< 0.03$\,N by $t = 0.040$\,s. Because \texttt{ten\_finger} has radially balanced preload at $t = 0$, its reference peak $\max_t\|\mathbf{F}_{\mathrm{net,ref}}\|$ is only $3.4890$\,N (hold) / $4.0995$\,N (swing) ($10.4\text{--}12.3\times$ smaller than the $42.7738$\,N unopposed-pad peak in \texttt{overlap}/\texttt{interlock}). Over $0.10$\,s, both \texttt{ten\_finger} hold ($2.395\% / 1.716\%$, $0.000\% / 0.467\%$) and \texttt{ten\_finger} swing ($2.499\% / 1.922\%$, $0.000\% / 0.845\%$) pass all determinate tolerances; on the short $0.04$\,s window, \texttt{opensim-ten\_finger-hold} and \texttt{opensim-ten\_finger-swing} remain strict \texttt{xfail}s with updated measured numbers and no loosened tolerances.
+\item \textit{Residual $0.04$\,s \texttt{ten\_finger} \texttt{net\_force} RMS ($2.588\%$ hold, $2.605\%$ swing; against the \#13308 line-contact reference $4.585\%$ hold and $4.913\% / 2.920\%$ swing, Section~\ref{sec:hrg-gs-line-contact}):} Controlled single-sphere experiments (\texttt{OpenSim(p0)} vs.\ \texttt{Pinocchio(p0)}, where all 10 sites are identical single spheres at identical coordinates) yield $2.567\%$ (hold) and $2.578\%$ (swing) \texttt{net\_force} RMS over $0.04$\,s, proving that the residual $\sim 2.6\%$ RMS is \emph{not} caused by the 5-sphere capsule approximation. During the initial gravitational settling transient ($t \in [0.002, 0.020]$\,s, tangential slip speed $v_t \in [0.1, 1.0]\,\mathrm{mm/s} = [0.1, 1.0]\,v_{\mathrm{tr}}$), Simbody's \texttt{ElasticFoundationForce} with $\tilde{\mu}_s = \tilde{\mu}_d = 0.70$ evaluates a piecewise-linear ramp $\mu_{\mathrm{Simbody}}(v) = 0.70\min(v/v_{\mathrm{tr}}, 1)$ (initial slope $700\,\mathrm{s/m}$ and corner $0.70$ at $v = v_{\mathrm{tr}}$) versus the shared Stribeck-$\tanh$ law's initial slope $\mu_s / v_{\mathrm{tr}} = 900\,\mathrm{s/m}$ and smooth knee $\mu_{\mathrm{law}}(v_{\mathrm{tr}}) = 0.5892$. Summed across $10$ pads carrying $427.7$\,N of normal preload, this micro-slip friction-curve shape difference produces a $0.09\text{--}0.10$\,N transient tangential force difference over $t \in [0.004, 0.020]$\,s that decays to $< 0.03$\,N by $t = 0.040$\,s. Furthermore, in \texttt{ten\_finger}, the lead index distal/middle phalanges ($x = -0.025$\,m) and trail little-finger capsules ($x = -0.048$\,m) sit on only one axial side of the grip CoM without an opposing capsule on the same hand, creating a net static pitch couple balanced by club pitch tilt ($\sim 0.4^\circ$). Because OpenSim's \texttt{ElasticFoundationForce} evaluates tangential friction at triangle centroids on the outer cylinder surface ($r = r_{\mathrm{grip}} = 13.5$\,mm) with zero normal-patch torsional resistance ($\tau_n = 0$), whereas Pinocchio's shared law (\path{pad_contact.py}) applies tangential force at the midpoint of the penetration depth ($r_{\mathrm{mid}} = r_{\mathrm{grip}} - \tfrac{1}{2}\delta$) and includes analytical patch spin torque $\tau_n = \tfrac{2}{3}\mu(v_{\mathrm{eff}}) r_{\mathrm{patch}} f_n \tanh(\omega_n / \omega_{\mathrm{tr}})$, the lever-arm and spin-torque difference excites a low-amplitude pitch mode on the asymmetric \texttt{ten\_finger} layout. Over $0.10$\,s static hold, this transient damps out and \texttt{ten\_finger} passes both determinate metrics ($2.395\% / 1.716\%$ on \texttt{net\_force} and $0.000\% / 0.467\%$ on \texttt{net\_moment\_com}); on the short $0.04$\,s window, \texttt{opensim-ten\_finger-hold} and \texttt{opensim-ten\_finger-swing} remain strict \texttt{xfail}s with updated measured numbers and no loosened tolerances.
 \end{itemize}
 
 \textbf{Reproduction Commands.}
@@ -2233,6 +2357,48 @@ trunk coordinates, so the split is regularised by
 results and the best-fit Hub residual (61.9 / 34.3~mm) are in the Simscape
 matching reference, section ``Landmark Regional Trunk Joints for
 full-body-v2''.
+
+\subsection{Articulated Pelvis, Abdomen and Thorax Visuals (HRG-D3, \#13174)}
+This slice uses three rigid visuals, one for each trunk segment. Skinned
+blending is not used. The MuJoCo exporter now accepts the visual layer for
+\texttt{full-body-v2}. Before this change it raised
+\texttt{SchemaFeatureUnavailableError}. The pelvis, \texttt{trunk\_lumbar}
+and thorax bodies each draw the \texttt{visual\_hints} ellipsoid of their own
+de Leva solid (pelvis, middle\_trunk, upper\_trunk) and their own skeleton
+capsules. Each visual is attached to its own MJCF body, so it follows the
+lumbar and thoracic joints. In the appearance layer,
+\texttt{trunk\_lumbar} is classified as \texttt{torso}, so the abdomen wears
+the shirt.
+
+The seam checks run in
+\path{tests/unit/motion_matching/test_full_body_v2_trunk_visuals.py}. They
+cover the driver and 7-iron captures. They use every corner of the soft-ROM
+box of the six trunk coordinates (64 poses) and 64 seeded interior poses.
+\begin{itemize}
+\item No gap. Each regional joint centre stays strictly inside both adjacent
+  ellipsoids. The normalised levels at $q=0$ (driver) are 0.375 and 0.759 at
+  L5/S1, and 0.261 and 0.768 at T12/L1, where a level below 1 means inside.
+  The joint centre is fixed in both bodies, so this holds at every pose.
+\item No telescoping. A child ellipsoid centre never enters its parent's
+  ellipsoid.
+\item No pelvis--thorax interpenetration. Every sampled thorax surface point
+  stays outside the pelvis ellipsoid.
+\end{itemize}
+A separate exploratory probe used the driver capture, the 64 corners, 200
+random poses (seed 0) and 4000 surface points. Its minimum levels were 2.12
+for the abdomen centre in the pelvis, 1.84 for the thorax centre in the
+abdomen, and 2.47 for the thorax surface in the pelvis.
+Adjacent ellipsoids do overlap locally at each seam. That overlap is what
+closes the gap, so the test does not require zero adjacent overlap.
+
+The visuals do not change the physics. The plain, visual and appearance
+exports compile to identical body, joint, inertia and equality arrays. They
+also give identical \texttt{xpos} and \texttt{qacc} at a seeded state.
+
+Deferred: stills at address, top and impact, and a render check of the
+visible thoracic rotation. The work machine has no GL context, so no render
+evidence is claimed. Skinned blending across the lumbar and thoracic joints
+(\path{skinned_body.py}) is also not done in this slice.
 
 \section{Anatomical Angles}
 \label{sec:angles}
