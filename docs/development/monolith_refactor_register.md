@@ -36,7 +36,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
 | 1174 | `src/shared/python/lifting/bundles.py` |
 | 1170 | `src/config/launcher_manifest_loader.py` |
-| 1170 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
 | 1168 | `src/api/local_server.py` |
 | 1168 | `src/api/routes/data_explorer.py` |
 | 1168 | `src/shared/python/shadow_tracker/ingestion.py` |
@@ -174,6 +173,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
 | 873 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
 | 871 | `src/shared/python/grip_contact/contact_topology.py` |
+| 870 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
 | 868 | `src/shared/python/workspace/necromatcher_video_jobs.py` |
 | 866 | `src/engines/feedback_observation_qualification.py` |
@@ -183,9 +183,9 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
 | 861 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
-| 858 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
 | 853 | `src/shared/python/sidekick/process_calculators/constants.py` |
+| 852 | `src/engines/physics_engines/opensim/python/tour_matching/native_muscle_effort_adapter.py` |
 | 850 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
 | 849 | `src/tools/training_controller/gui.py` |
 | 848 | `src/shared/python/motion_matching/club_only/reproduction.py` |
@@ -205,6 +205,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 835 | `src/shared/python/engine_core/engine_probes.py` |
 | 833 | `src/shared/python/ui/qt/widgets/signal_toolkit_ui_mixin.py` |
 | 831 | `src/bunkershot3d/solvers/mpm/constitutive.py` |
+| 831 | `src/engines/physics_engines/opensim/python/tour_matching/native_muscle_effort_runtime.py` |
 | 831 | `src/tools/starting_pose_matcher/gui_builders_mixin.py` |
 | 830 | `src/research/deformable/objects.py` |
 | 830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py` |
