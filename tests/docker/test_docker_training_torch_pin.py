@@ -57,6 +57,7 @@ def test_dockerfile_training_stage_uses_shared_torch_pin() -> None:
     assert "cu124" not in block
 
 
+@pytest.mark.requires_network
 def test_pinned_torch_is_available_on_cuda_wheel_index() -> None:
     """Fail closed if PyTorch drops the pinned wheel from the CUDA index."""
     result = subprocess.run(
@@ -84,3 +85,20 @@ def test_torch_cuda_display_name_matches_index() -> None:
     feature = get_feature("torch-cuda")
     assert re.search(r"CUDA 12\.\d+", feature.display_name)
     assert "12.4" not in feature.display_name
+
+
+def test_wheel_index_probe_is_excluded_from_offline_unit_lanes() -> None:
+    """The pip dry-run hits download.pytorch.org (UpstreamDrift #13460).
+
+    Resolving ``torch`` there fetches multi-hundred-MB wheel metadata; on the
+    CI unit gate it crashed an xdist worker. Fleet Testing Standards section 5
+    requires network tests to carry ``requires_network`` so offline lanes
+    deselect them.
+    """
+    marks = {
+        m.name
+        for m in getattr(
+            test_pinned_torch_is_available_on_cuda_wheel_index, "pytestmark", []
+        )
+    }
+    assert "requires_network" in marks

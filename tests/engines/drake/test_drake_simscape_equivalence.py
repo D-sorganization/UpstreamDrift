@@ -274,11 +274,20 @@ def drake_simout(drake_simulate_module):
         sample_rate_hz=1000.0,
         time_step_s=1.0e-3,
     )
-    # Theta sized to the URDF actuator count; pad generously so the
-    # simulate wrapper's actuator-vs-theta DOF check picks the URDF's
-    # native count and runs at zero torque.
-    n_actuators_max = 64  # safe upper bound for the canonical humanoid
-    theta = np.zeros(n_actuators_max * sim_mod.COEFFS_PER_JOINT, dtype=np.float64)
+    # Size theta from the plant the simulate wrapper will build, so the #7725
+    # actuator-vs-theta guard sees a matching length (#13449).
+    from pydrake.multibody.plant import MultibodyPlant  # noqa: PLC0415
+
+    from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf import (  # noqa: E501, PLC0415
+        load_humanoid_into_plant,
+    )
+
+    plant = MultibodyPlant(time_step=options.time_step_s)
+    load_humanoid_into_plant(plant, sim_mod.DEFAULT_GOLFER_URDF)
+    plant.Finalize()
+    n_actuators = sim_mod._resolve_n_actuators(plant)
+    assert n_actuators > 0
+    theta = np.zeros(n_actuators * sim_mod.COEFFS_PER_JOINT, dtype=np.float64)
     return sim_mod.simulate_with_coefficients(theta, options=options)
 
 

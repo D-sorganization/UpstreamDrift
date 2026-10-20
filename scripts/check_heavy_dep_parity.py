@@ -33,8 +33,8 @@ WORKFLOW = REPO_ROOT / ".github" / "workflows" / "heavy-tests-opt-in.yml"
 # ---------------------------------------------------------------------------
 CANONICAL_HEAVY_DEPS: frozenset[str] = frozenset(
     {
-        "pinocchio",
-        "pink",
+        "pin",
+        "pin-pink",
         "mujoco",
         "mediapipe",
         "meshcat",

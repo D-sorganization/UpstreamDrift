@@ -152,6 +152,12 @@ class ContactGripConfig:
         """OBJ path of ``side``'s grip mesh."""
         return self.mesh_dir / f"grip_mesh_{side}.obj"
 
+    def capsule_mesh_path(self, pair_name: str) -> Path:
+        """OBJ path of a capsule pair's ring-aligned grip mesh."""
+        if not isinstance(pair_name, str) or not pair_name.strip():
+            raise ValueError("pair_name must be a non-empty string")
+        return self.mesh_dir / f"grip_mesh_{pair_name}.obj"
+
     def site_foundation(
         self, radius_m: float, count: int = 1
     ) -> ElasticFoundationParameters:
@@ -169,8 +175,54 @@ def _grip_axis(interface: GripInterface, cfg: ContactGripConfig) -> tuple:
     return point, rot[:, 0], rot[:, 1]
 
 
+def _write_capsule_meshes(
+    point: np.ndarray,
+    axis: np.ndarray,
+    radial: np.ndarray,
+    cfg: ContactGripConfig,
+    facts: dict[str, Any],
+) -> None:
+    """Write ring-aligned grip cylinder meshes centered on each capsule site's axial midpoint."""
+    assert cfg.topology_model is not None
+    topo = cfg.topology_model.topology
+    grip_r = cfg.layout.grip_radius_m
+    for side in SIDES:
+        centre = cfg.origin_axial_m(side)
+        for pair in cfg.topology_model.physical_grip_pairs(side):
+            site = topo.site(pair.site_a)
+            mapped = map_site_to_hand_frame(topo, site, side)
+            if mapped.primitive != "capsule":
+                continue
+            cap_centre = centre + mapped.centre_m[0]
+            half_cap = (
+                math.ceil(
+                    (mapped.half_length_m + mapped.radius_m + MESH_MARGIN_M)
+                    / cfg.ring_pitch_m
+                    - 1e-12
+                )
+                * cfg.ring_pitch_m
+            )
+            cap_path = cfg.capsule_mesh_path(pair.name)
+            verts, faces = capped_cylinder_mesh(
+                grip_r,
+                point,
+                axis,
+                radial,
+                (cap_centre - half_cap, cap_centre + half_cap),
+                cfg.mesh_segments,
+                cfg.ring_pitch_m,
+            )
+            write_obj(cap_path, verts, faces)
+            facts[pair.name] = {
+                "file": str(cap_path),
+                "vertices": int(len(verts)),
+                "faces": int(len(faces)),
+                "axial_range_m": [cap_centre - half_cap, cap_centre + half_cap],
+            }
+
+
 def write_grip_meshes(interface: GripInterface, cfg: ContactGripConfig) -> dict:
-    """Write the two closed grip meshes (club-body frame); return their facts."""
+    """Write the closed grip meshes (club-body frame); return their facts."""
     point, axis, radial = _grip_axis(interface, cfg)
     layout = cfg.layout
     half = max(layout.axial_offsets_m(), key=abs)
@@ -194,6 +246,8 @@ def write_grip_meshes(interface: GripInterface, cfg: ContactGripConfig) -> dict:
             "faces": int(len(faces)),
             "axial_range_m": [centre - half, centre + half],
         }
+    if cfg.topology_model is not None:
+        _write_capsule_meshes(point, axis, radial, cfg, facts)
     return facts
 
 
@@ -308,6 +362,10 @@ def _build_topology_contact(
                     ef_site,
                 )
             elif mapped.primitive == "capsule":
+                cap_mesh_name = f"grip_mesh_{pair.name}"
+                _contact_mesh(
+                    geometry, cap_mesh_name, club, cfg.capsule_mesh_path(pair.name)
+                )
                 p0, p1 = mapped.endpoints_m
                 count = capsule_sphere_count(mapped.half_length_m, mapped.radius_m)
                 ef_site = (
@@ -331,7 +389,7 @@ def _build_topology_contact(
                     _foundation_force(
                         forces,
                         f"{CONTACT_FORCE_PREFIX}_{pair.name}_{k}",
-                        (f"grip_pad_{pair.name}_{k}", f"grip_mesh_{side}"),
+                        (f"grip_pad_{pair.name}_{k}", cap_mesh_name),
                         ef_site,
                     )
     return {

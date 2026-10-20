@@ -335,6 +335,12 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         if not self.plant:
             return []
 
+        # Drake forbids dimension queries (num_velocities, ...) before
+        # Finalize(); a freshly constructed engine holds an unfinalized plant.
+        is_finalized = getattr(self.plant, "is_finalized", None)
+        if callable(is_finalized) and not is_finalized():
+            return []
+
         nv = int(self.plant.num_velocities())
         if nv == 0:
             return []
