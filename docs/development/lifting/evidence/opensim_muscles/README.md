@@ -68,17 +68,17 @@ The table below is generated directly from `receipts.json` via `scripts/measure_
 
 | Lift | Status | Classification | Window (s) | Mean Reserve Share | Peak Reserve Share | Pelvis Residual Force (N, vs Hicks) | Pelvis Residual Moment (N·m, vs Hicks) | Within / Outside |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| Squat | `complete` | `unqualified` | 0.0–0.2 | 56.9% | 67.7% | 23.70 (vs 146.93) | 12.02 (vs 18.64) | Within |
-| Deadlift | `complete` | `unqualified` | 0.0–0.2 | 17.3% | 20.2% | 288.23 (vs 110.92) | 147.88 (vs 18.28) | Outside |
-| Bench Press | `unavailable` | `unqualified` | unavailable | unavailable | unavailable | unavailable | unavailable | unavailable |
-| Snatch | `complete` | `unqualified` | 0.0–0.2 | 37.7% | 71.3% | 463.57 (vs 155.12) | 202.60 (vs 27.10) | Outside |
-| Clean & Jerk | `complete` | `unqualified` | 0.0–0.2 | 38.9% | 58.5% | 458.52 (vs 223.10) | 259.03 (vs 38.77) | Outside |
+| Squat | `complete` | `unqualified` | 0.0–0.2 | 56.9% | 67.7% | 23.82 (vs 146.93) | 11.75 (vs 18.64) | Within |
+| Deadlift | `complete` | `unqualified` | 0.0–0.2 | 17.3% | 20.2% | 288.29 (vs 110.92) | 148.02 (vs 18.28) | Outside |
+| Bench Press | `complete` | `unqualified` | 0.0–0.2 | 6.0% | 26.3% | 511.58 (vs 32.49) | 318.32 (vs 3.45) | Outside |
+| Snatch | `complete` | `unqualified` | 0.0–0.2 | 37.7% | 71.3% | 463.21 (vs 155.12) | 202.62 (vs 27.10) | Outside |
+| Clean & Jerk | `complete` | `unqualified` | 0.0–0.2 | 38.9% | 58.5% | 458.56 (vs 223.10) | 259.00 (vs 38.77) | Outside |
 
 ### Plain Assessment Statements
 
-- **Partial Engine Window:** The analyzed window is the 0.2 s LIFT-5 engine window from the setup, so it covers the start of the pull only, not the whole lift and not the jerk.
-- **Qualification and Residuals:** Every lift is `unqualified`, and deadlift, snatch and clean-and-jerk also fail the Hicks residual gate.
-- **Bench Press Status:** Bench press is unavailable (no supine IK).
+- **Partial Engine Window:** The analyzed window is the 0.2 s LIFT-5 engine window from the setup (unrack for bench press, start of pull for deadlift/snatch/clean & jerk, bottom for squat), so it does not cover the full lift, chest press, or jerk.
+- **Qualification and Residuals:** Every lift is `unqualified`. Squat passes the Hicks residual gate but fails reserve share (56.9%); bench press, deadlift, snatch, and clean-and-jerk fail the Hicks residual gate.
+- **Bench Press and Upper-Body Actuation:** Bench press IK poses a supine lifter with back-sphere bench contact. However, the RajagopalLaiUhlrich2023 base model contains 80 lower-limb muscles only. Upper-limb coordinates (14 DOFs across shoulders, elbows, and wrists) have 0 muscles in this model; 100% of upper-limb joint moments (peak elbow flexion 414.9 N·m, arm rotation 249.3 N·m) are carried by coordinate and reserve actuators, not muscles.
 
 ---
 
@@ -192,6 +192,12 @@ Because the knee is anterior to the ankle and the hip is posterior in a deep squ
 - **Muscle Activations:** ![Clean & Jerk Activations](clean_and_jerk_muscle_activations_by_phase.png)
 - **Muscle Forces:** ![Clean & Jerk Forces](clean_and_jerk_muscle_forces_by_phase.png)
 - **Joint Moments and Reserves:** ![Clean & Jerk Moments and Reserves](clean_and_jerk_joint_moments_and_reserves.png)
+
+### 5. Bench Press
+
+- **Muscle Activations:** ![Bench Press Activations](bench_press_muscle_activations_by_phase.png)
+- **Muscle Forces:** ![Bench Press Forces](bench_press_muscle_forces_by_phase.png)
+- **Joint Moments and Reserves:** ![Bench Press Moments and Reserves](bench_press_joint_moments_and_reserves.png)
 
 ---
 
