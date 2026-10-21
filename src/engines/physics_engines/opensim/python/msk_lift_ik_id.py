@@ -74,6 +74,10 @@ from src.engines.physics_engines.opensim.python.msk_lift_model import (
     PENETRATION_LIMIT_M,
     LiftModelBuild,
 )
+from src.engines.physics_engines.opensim.python.msk_lift_simbody_kinematics import (
+    generalized_speeds_from_spline_derivatives,
+    spline_coordinate_derivatives,
+)
 from src.shared.python.biomechanics.ground_reaction import (
     ContactSet,
     analyze_ground_reaction,
@@ -111,6 +115,7 @@ __all__ = [
     "run_inverse_dynamics",
     "run_inverse_kinematics",
     "static_hold_grf",
+    "generalized_speeds_from_spline_derivatives",
 ]
 
 IK_MARKER_RMS_THRESHOLD_M = 0.02
@@ -790,61 +795,6 @@ def _splines(ik: IKResult, time_s: Array) -> Any:
     return osim.GCVSplineSet(table, osim.StdVectorString(), _GCV_DEGREE, 0.0)
 
 
-def _derivatives(splines: Any, n: int, t: float) -> tuple[Array, Array, Array]:
-    osim = import_opensim()
-    x = osim.Vector(1, float(t))
-    first, second = osim.StdVectorInt(), osim.StdVectorInt()
-    first.append(0)
-    second.append(0)
-    second.append(0)
-    values = np.empty((3, n))
-    for j in range(n):
-        f = splines.get(j)
-        values[0, j] = f.calcValue(x)
-        values[1, j] = f.calcDerivative(first, x)
-        values[2, j] = f.calcDerivative(second, x)
-    return values[0], values[1], values[2]
-
-
-_PELVIS_ROTATION_COORDINATES = ("pelvis_tilt", "pelvis_list", "pelvis_rotation")
-_PELVIS_EULER_SEQUENCE = "ZXY"
-
-
-def generalized_speeds_from_spline_derivatives(
-    coordinates: tuple[str, ...],
-    q: Array,
-    qd: Array,
-    qdd: Array,
-) -> tuple[Array, Array]:
-    """Map spline ``(q, qd, qdd)`` to Simbody ``(u, udot)`` for inverse dynamics.
-
-    Rajagopal pelvis orientation coordinates are intrinsic Euler angles in
-    :data:`_PELVIS_EULER_SEQUENCE` order; their generalized speeds and
-    accelerations are not the raw spline derivatives.  Every other coordinate
-    uses the spline first and second derivatives directly.
-    """
-    if q.shape != qd.shape or q.shape != qdd.shape:
-        raise ValueError("q, qd and qdd must share the same shape")
-    if len(coordinates) != q.size:
-        raise ValueError("coordinates length must match derivative vectors")
-    u = np.asarray(qd, dtype=float).copy()
-    udot = np.asarray(qdd, dtype=float).copy()
-    names = list(coordinates)
-    if all(name in names for name in _PELVIS_ROTATION_COORDINATES):
-        from src.engines.physics_engines.opensim.python.spine.inverse_dynamics import (
-            euler_rate_columns,
-        )
-
-        indices = [names.index(name) for name in _PELVIS_ROTATION_COORDINATES]
-        q_p = q[indices]
-        qd_p = qd[indices]
-        qdd_p = qdd[indices]
-        omega, alpha = euler_rate_columns(q_p, qd_p, qdd_p, _PELVIS_EULER_SEQUENCE)
-        u[indices] = omega
-        udot[indices] = alpha
-    return u, udot
-
-
 def _external_body_forces(model: Any, state: Any, targets: LiftTargets, k: int) -> Any:
     """Applied external body wrenches (feet, hands, and bench support if present).
 
@@ -936,7 +886,7 @@ def run_inverse_dynamics(
     )
     rows, com = [], []
     for k, t in enumerate(targets.time_s):
-        q, qd, qdd = _derivatives(splines, len(names), float(t))
+        q, qd, qdd = spline_coordinate_derivatives(splines, len(names), float(t))
         u, udot_values = generalized_speeds_from_spline_derivatives(
             tuple(names), q, qd, qdd
         )

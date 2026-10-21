@@ -18,6 +18,10 @@ from typing import Any
 import numpy as np
 
 from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
+from src.engines.physics_engines.opensim.python.msk_lift_simbody_kinematics import (
+    generalized_speeds_from_spline_derivatives,
+    spline_coordinate_derivatives,
+)
 from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_bound import (
     build_real_squat_bound_record,
     mass_above_l5s1,
@@ -109,8 +113,8 @@ def _solve_frame_reaction(
     forces = context["forces"]
     t = float(context["times"][row])
 
-    qk, qd, qdd = ikid._derivatives(splines, len(ik.coordinates), t)
-    u, udot = ikid.generalized_speeds_from_spline_derivatives(
+    qk, qd, qdd = spline_coordinate_derivatives(splines, len(ik.coordinates), t)
+    u, udot = generalized_speeds_from_spline_derivatives(
         ik.coordinates, qk, qd, qdd
     )
     for name, val, spd in zip(ik.coordinates, qk, u, strict=True):

@@ -4,7 +4,7 @@
 - Governing issue: #13564.
 - Objective: fix deterministic failures in `test_squat_joint_reactions_computed` and `test_native_constant_interval_matches_fresh_raw_replay` on the `CI Requires OpenSim` workflow.
 - Completed: muscle allocation shares the nfev budget between baseline and `least_squares`, marks budget exhaustion as non-feasible, and documents semantics in chapter 39; squat ID and joint reactions convert Rajagopal pelvis ZXY Euler spline derivatives to Simbody speeds via `generalized_speeds_from_spline_derivatives` (lift reference updated in `docs/research/lift_models/lift_models.tex`).
-- Validation (local): `python3 -m pytest tests/unit/shared_python/test_muscle_excitation_allocation.py -q`; `python3 -m pytest tests/unit/lifting/test_opensim_lift_ik_id.py::test_generalized_speeds_convert_pelvis_euler_derivatives -q`; `python3 -m scripts.check_design_manual_governance`.
+- Validation (local): muscle allocation unit tests; `test_opensim_lift_joint_reactions` squat tests; `scripts/ci/check_file_size_budget.py`; `scripts.check_design_manual_governance`.
 - Next step: merge after `CI Requires OpenSim` and quality-gate are green on PR #13568.
 
 # Project Steward Pass — 2026-10-19
