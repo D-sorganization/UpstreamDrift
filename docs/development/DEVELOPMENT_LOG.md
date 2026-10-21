@@ -24,7 +24,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** cursor-cloud
 - **Issue:** #13564
 - **Branch:** cursor/fix-opensim-ci-13564-90e0
-- **PR:** not created
+- **PR:** #13568
 - **Paths:** src/shared/python/biomechanics/muscle_allocation.py, src/engines/physics_engines/opensim/python/msk_lift_ik_id.py, src/engines/physics_engines/opensim/python/msk_lift_joint_reactions.py, tests/unit/shared_python/test_muscle_excitation_allocation.py, tests/unit/lifting/test_opensim_lift_ik_id.py
 - **Started:** 2026-10-21
 - **Last verified:** 2026-10-21 (SELF)
