@@ -38,7 +38,7 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## CI Throughput (RM Epic #2215)
 
-- UD-CI-032 #13573: PR #13584 (`cursor/cancel-merge-queue-audit-1f01`) — merge-queue-safe `cancel-in-progress` audit; **gated** on RM #2216 (do not arm auto-merge until that lands).
+- UD-CI-032 #13573: PR #13584 (`cursor/cancel-merge-queue-audit-1f01`) — merge-queue-safe `cancel-in-progress` audit; RM #2216 landed — arm auto-merge once `quality-gate` is green.
 
 ## Required Before Continuing
 

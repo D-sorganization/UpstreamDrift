@@ -174,10 +174,11 @@ class TestLeaderboardPublishGating:
 
     def test_workflow_lint_allows_intentional_cancel_false(self) -> None:
         lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
-        allowlist = next(
-            line for line in lint.splitlines() if "nightly-publish.yml" in line
-        )
-        assert self.NAME in allowlist
+        assert "audit_workflow_cancellation_semantics.py" in lint
+        script = (
+            REPO_ROOT / "scripts" / "ci" / "audit_workflow_cancellation_semantics.py"
+        ).read_text(encoding="utf-8")
+        assert f'"{self.NAME}"' in script
 
 
 class TestOpenSimMainRunsComplete:
