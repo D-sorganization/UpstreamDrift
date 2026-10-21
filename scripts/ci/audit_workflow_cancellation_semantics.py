@@ -155,7 +155,9 @@ def audit_workflow_paths(paths: list[Path]) -> list[str]:
     try:
         import yaml
     except ImportError as exc:
-        raise RuntimeError("PyYAML is required for workflow cancellation audit") from exc
+        raise RuntimeError(
+            "PyYAML is required for workflow cancellation audit"
+        ) from exc
 
     violations: list[str] = []
     for path in paths:
