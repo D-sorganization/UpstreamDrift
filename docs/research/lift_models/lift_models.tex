@@ -421,7 +421,8 @@ triplet (\texttt{pelvis\_tilt}, \texttt{pelvis\_list}, \texttt{pelvis\_rotation}
 which are intrinsic Euler angles in ZXY order and are mapped to Simbody
 $u$ and $\dot u$ with the same \texttt{euler\_rate\_columns} helper used on
 the segmental-spine pathway (\texttt{generalized\_speeds\_from\_spline\_derivatives}
-in \texttt{msk\_lift\_ik\_id.py}). OSL-5 joint-reaction acceleration checks
+in \texttt{msk\_lift\_simbody\_kinematics.py}, re-exported from
+\texttt{msk\_lift\_ik\_id.py}). OSL-5 joint-reaction acceleration checks
 use the same mapping so muscle-driven ID and reaction analysis share one
 kinematic convention. The external body forces are added by superposition
 ($\tau = \mathrm{ID}(\dot u) + \mathrm{ID}_4(0, F) - \mathrm{ID}_4(0, 0)$, since
