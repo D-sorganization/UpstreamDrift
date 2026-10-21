@@ -72,15 +72,15 @@ def test_interior_fd_error_scales_with_dt_squared() -> None:
     t = 0.4
     analytic = np.array([3.0 * t * t])
     err_coarse = abs(
-        mapped_acceleration_from_speeds(
-            t, t_min, t_max, 0.1, _speeds_cubic, analytic
-        )[0]
+        mapped_acceleration_from_speeds(t, t_min, t_max, 0.1, _speeds_cubic, analytic)[
+            0
+        ]
         - analytic[0]
     )
     err_fine = abs(
-        mapped_acceleration_from_speeds(
-            t, t_min, t_max, 0.02, _speeds_cubic, analytic
-        )[0]
+        mapped_acceleration_from_speeds(t, t_min, t_max, 0.02, _speeds_cubic, analytic)[
+            0
+        ]
         - analytic[0]
     )
     assert err_fine < err_coarse

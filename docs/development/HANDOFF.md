@@ -6,7 +6,8 @@
 - Completed: muscle allocation budget semantics; squat Simbody kinematics (analytic mapped `udot` + `setTime`/`realizeDynamics`; muscle overrides before `realizeDynamics`); native State copy on muscle advance; OpenSim CI force-reinstall plus kinematics-revision gate; squat receipt embeds worst-frame acceleration diagnostics and runtime fingerprints; A/B showed FD targets can pass the 5e-6 gate while |FD−analytic| ≈ 0.075 — production uses analytic accelerations only.
 - Validation (local): squat `acceleration_error_max` ≈ 8.7e-7 at `stride=5`; `test_opensim_lift_joint_reactions` passes.
 - CI evidence (head `3cf7513`, run39550374790): only `test_squat_joint_reactions_computed` failed at `acceleration_error_max` ≈ 1.146e-5 — not reproduced locally at `stride=5`; next CI run must print `acceleration_realization` on failure and assert `MSK_LIFT_JR_KINEMATICS_REVISION >= 4` after editable install.
-- Next step: merge after `CI Requires OpenSim` is green on PR #13568.
+- Hygiene: Ruff format on `test_msk_lift_simbody_kinematics.py`; `test_opensim_job_speed` expects `--force-reinstall --no-deps` editable install (matches workflow).
+- Next step: merge after `CI Requires OpenSim` is green on PR #13568. Dependency-consistency certifi/Pillow (#13563) is a separate adoption if needed.
 
 # Project Steward Pass — 2026-10-19
 
