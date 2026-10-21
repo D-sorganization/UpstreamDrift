@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13571 · Gate OpenSim CI on Paths or Ci:Opensim Label With Classify_Ci_Changes Job
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13571
+- **Branch:** cursor/opensim-ci-path-label-gating-eee2
+- **PR:** #13585
+- **Paths:** see #13585
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`31f4a29e`; collated from changes/13571-gate-opensim-ci-on-paths-or-ci-opensim-l.md)
+- **Summary:** Gate OpenSim CI on paths or ci:opensim label with classify_ci_changes job
+- **Next step:** Merge after RM #2216; do not arm auto-merge until then.
+
 ### DL-#13038 · Record the OSL Epic Handoff State (Open PRs, Owner Decisions, Rejected Video Work)
 
 - **State:** in_progress
