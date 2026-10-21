@@ -36,6 +36,10 @@ detail of a finished slice to the archive instead of growing this file.
 - ADR-0041 Amendment 1 (#9630, #9619): consumer-side self-calibration fitters live in `src/motion_capture/reconstruct/`; Tools keeps vendor-neutral reference geometry.
 - Real-data acceptance is deferred to `docs/development/planning/DV-9619.md`; the rig soak to `DV-9613.md`.
 
+## CI Throughput (RM Epic #2215)
+
+- UD-CI-032 #13573: PR #13584 (`cursor/cancel-merge-queue-audit-1f01`) — merge-queue-safe `cancel-in-progress` audit; **gated** on RM #2216 (do not arm auto-merge until that lands).
+
 ## Required Before Continuing
 
 - Read `AGENTS.md`, `CLAUDE.md`, and `docs/development/DEVELOPMENT_LOG.md`.
