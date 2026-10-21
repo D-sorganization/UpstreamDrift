@@ -83,3 +83,11 @@ def test_disable_workflow_exists_for_post_merge() -> None:
     assert "jules_push_pr_noise_retirement.py" in text
     assert "--disable" in text
     assert "branches: [main]" in text or "branches:\n      - main" in text
+
+
+def test_disable_workflow_on_lint_cancel_false_allowlist() -> None:
+    lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
+    allowlist = next(
+        line for line in lint.splitlines() if "nightly-publish.yml" in line
+    )
+    assert "jules-push-pr-noise-disable.yml" in allowlist
