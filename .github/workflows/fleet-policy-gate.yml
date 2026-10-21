@@ -17,6 +17,12 @@ concurrency:
 jobs:
   fleet-policy-gate:
     name: Fleet policy gate
+    # Fork PRs lack the App credentials for the protected policy checkout.
+    # The policy still runs on merge_group; no fork-head code or credential
+    # fallback is used.
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 10
     steps:

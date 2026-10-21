@@ -2,12 +2,15 @@
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 import yaml
+
+from scripts import fork_pr_runner_guard
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -25,6 +28,24 @@ def _step(workflow: dict, name: str) -> dict:
         for step in workflow["jobs"]["fleet-policy-gate"]["steps"]
         if step.get("name") == name
     )
+
+
+def _evaluate_fork_skip(job_if: str, event: str, head_repository: str | None) -> bool:
+    """Evaluate this workflow's simple fork predicate against event contexts."""
+    expression = job_if.removeprefix("${{").removesuffix("}}").strip()
+    expression = expression.replace(
+        "github.event.pull_request.head.repo.full_name",
+        repr(head_repository),
+    )
+    expression = expression.replace(
+        "github.event.pull_request", "True" if event == "pull_request" else "None"
+    )
+    expression = expression.replace(
+        "github.repository", repr("D-sorganization/UpstreamDrift")
+    )
+    expression = expression.replace("||", "or").replace("&&", "and")
+    expression = re.sub(r"!(?!=)", "not ", expression)
+    return bool(eval(expression, {"__builtins__": {}}, {}))  # noqa: S307
 
 
 def _run_shell(
@@ -117,6 +138,34 @@ def test_consumer_uses_protected_policy_checkout_and_trusted_event_base() -> Non
         '--default-branch "$DEFAULT_BRANCH"',
     ):
         assert flag in script
+
+
+def test_policy_job_skips_fork_prs_and_actual_guard_accepts_workflow(
+    tmp_path: Path,
+) -> None:
+    workflow = _workflow()
+    job_if = workflow["jobs"]["fleet-policy-gate"].get("if")
+    assert isinstance(job_if, str)
+
+    workflow_fixture = tmp_path / ".github/workflows"
+    workflow_fixture.mkdir(parents=True)
+    (workflow_fixture / WORKFLOW.name).write_text(
+        WORKFLOW.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    assert fork_pr_runner_guard.find_violations(tmp_path) == []
+
+    cases = [
+        ("pull_request", "D-sorganization/fork", False),
+        ("pull_request", "D-sorganization/UpstreamDrift", True),
+        ("merge_group", None, True),
+        ("workflow_dispatch", None, True),
+        ("schedule", None, True),
+    ]
+    for event, head_repository, expected in cases:
+        assert _evaluate_fork_skip(job_if, event, head_repository) is expected
+
+    assert workflow["jobs"]["fleet-policy-gate"]["runs-on"] == "d-sorg-fleet-docker"
+    assert workflow["jobs"]["fleet-policy-gate"]["steps"]
 
 
 def test_policy_checkout_uses_fail_closed_repository_scoped_app_token() -> None:
