@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13577 · Add Fast PR/Push and Full Merge-Queue/Scheduled Tiers With a Fail-Closed Required Aggregate
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13577
+- **Branch:** codex/13577-ci-fast-full
+- **PR:** #13612
+- **Paths:** .github/workflows/ci-standard.yml,scripts/ci/classify_event_tier.py,tests/ci/test_ci_standard_workflow.py,tests/ci/test_required_check_contract.py
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`ac77271c`; collated from changes/13577-add-fast-and-full-ci-event-tiers-with-a.md)
+- **Summary:** Add fast PR/push and full merge-queue/scheduled tiers with a fail-closed required aggregate
+- **Next step:** Complete canonical full pre-PR validation with the published trusted provider; then collect live merge-group canary and seven-day latency evidence
+
 ### DL-#13595 · CI Standard Lint Gate
 
 - **State:** in_review
