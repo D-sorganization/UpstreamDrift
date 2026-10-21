@@ -68,6 +68,8 @@ dependencies = [
     # the same reason as tornado/click above: the floor must bind on every install
     # path (CVE-2026-97687, fixed in 2.8.0; #11191).
     "urllib3>=2.8.0",
+    # Transitive via requests; floor binds on every install path (PYSEC-2026-4320).
+    "certifi>=2026.10.19",
 
     "flask>=3.1.3",
 
