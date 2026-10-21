@@ -32,7 +32,7 @@ function [F_club_w, M_club_w, F_hand_L_w, M_hand_L_w, F_hand_R_w, M_hand_R_w, ..
 
     % Constitutive law constants from Python source of truth
     k_n = 171095.00805152979;
-    c_n = 0.38266566243249167;
+    c_n = 0.38266566243248928;
     mu_s = 0.90000000000000002;
     mu_d = 0.69999999999999996;
     mu_v = 0;

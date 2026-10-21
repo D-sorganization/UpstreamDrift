@@ -18,8 +18,13 @@ from typing import Any
 import numpy as np
 
 from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
-from src.engines.physics_engines.opensim.python.msk_lift_simbody_kinematics import (
-    simbody_kinematics_at_spline_time,
+from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_diagnostics import (
+    MSK_LIFT_JR_KINEMATICS_REVISION,
+    joint_reaction_source_fingerprint,
+)
+from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_frame import (
+    collect_frame_reaction_loads,
+    solve_lift_frame_inverse_dynamics,
 )
 from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_bound import (
     build_real_squat_bound_record,
@@ -49,8 +54,6 @@ from src.engines.physics_engines.opensim.python.spine._osim_helpers import (
 )
 from src.engines.physics_engines.opensim.python.spine.joint_reactions import (
     _add_residual_actuators,
-    _child_reaction,
-    _override,
     _regularise_massless_bodies,
     _residual_actuators,
 )
@@ -62,9 +65,6 @@ from src.shared.python.lifting.pack_audit.names import LIFTS
 
 logger = logging.getLogger(__name__)
 
-# Bumped when joint-reaction kinematics or realization order changes; CI asserts this.
-MSK_LIFT_JR_KINEMATICS_REVISION = 4
-
 __all__ = [
     "MSK_LIFT_JR_KINEMATICS_REVISION",
     "crosscheck_movement_optimizer_l5s1",
@@ -72,29 +72,6 @@ __all__ = [
     "joint_reaction_source_fingerprint",
     "static_hold_analytic_bound",
 ]
-
-
-def joint_reaction_source_fingerprint() -> dict[str, Any]:
-    """Runtime and source paths for squat joint-reaction acceleration checks."""
-    import scipy
-    import sys
-
-    osim = import_opensim()
-    return {
-        "kinematics_revision": MSK_LIFT_JR_KINEMATICS_REVISION,
-        "joint_reactions_module": str(Path(__file__).resolve()),
-        "simbody_kinematics_module": str(
-            Path(__file__).resolve().parent / "msk_lift_simbody_kinematics.py"
-        ),
-        "opensim_version": str(osim.GetVersion()),
-        "numpy_version": str(np.__version__),
-        "scipy_version": str(scipy.__version__),
-        "python_executable": sys.executable,
-        "realization_order": (
-            "coordinates+setTime; muscle+residual overrides; realizeDynamics; "
-            "InverseDynamicsSolver; residual torques; realizeAcceleration"
-        ),
-    }
 
 
 def _setup_joint_reaction_model(
@@ -129,82 +106,16 @@ def _solve_frame_reaction(
     float,
     float,
 ]:
-    osim = import_opensim()
-    splines = context["splines"]
-    ik = context["ik"]
-    u_idx = context["u_index"]
-    coord_names = context["coord_names"]
-    res_acts = context["residuals"]
-    muscles = model.getMuscles()
-    m_names = context["muscle_names"]
-    forces = context["forces"]
-    t = float(context["times"][row])
-
-    qk, u, udot = simbody_kinematics_at_spline_time(
-        splines,
-        ik.coordinates,
-        len(ik.coordinates),
-        t,
-    )
-    state.setTime(t)
-    for name, val, spd in zip(ik.coordinates, qk, u, strict=True):
-        c = model.getCoordinateSet().get(name)
-        c.setValue(state, float(val), False)
-        c.setSpeedValue(state, float(spd))
-    for m_i, m_name in enumerate(m_names):
-        _override(muscles.get(m_name), state, float(forces[row, m_i]))
-    for act in res_acts:
-        _override(act, state, 0.0)
-    model.realizeDynamics(state)
-
-    simbody_udot = osim.Vector(state.getNU(), 0.0)
-    for name, acc in zip(ik.coordinates, udot, strict=True):
-        simbody_udot.set(u_idx[name], float(acc))
-
-    tau = osim.InverseDynamicsSolver(model).solve(state, simbody_udot)
-    for name, act in zip(coord_names, res_acts, strict=True):
-        _override(act, state, tau.get(u_idx[name]))
-
-    model.realizeAcceleration(state)
-    actual_udot = state.getUDot()
-    acc_err = 0.0
-    for name, acc in zip(ik.coordinates, udot, strict=True):
-        err = abs(actual_udot.get(u_idx[name]) - acc)
-        if err > acc_err:
-            acc_err = err
-            worst = context.setdefault(
-                "acceleration_worst",
-                {"error_rad_s2": 0.0},
-            )
-            if err > float(worst.get("error_rad_s2", 0.0)):
-                worst.update(
-                    {
-                        "error_rad_s2": float(err),
-                        "frame_index": int(row),
-                        "time_s": float(t),
-                        "coordinate": str(name),
-                        "mobility_index": int(u_idx[name]),
-                        "target_udot_rad_s2": float(acc),
-                        "realized_udot_rad_s2": float(actual_udot.get(u_idx[name])),
-                    }
-                )
-
-    f_back_g, _ = _child_reaction(context["joints"]["back"], state)
-    R_pelvis = transform_to_matrix(context["pelvis_body"].getTransformInGround(state))[
-        :3, :3
-    ]
-    f_l5s1 = R_pelvis.T @ f_back_g
-    R_torso = transform_to_matrix(context["torso_body"].getTransformInGround(state))[
-        :3, :3
-    ]
-    f_l5s1_torso = R_torso.T @ f_back_g
-
-    f_kr, _ = _child_reaction(context["joints"]["knee_r"], state)
-    f_kl, _ = _child_reaction(context["joints"]["knee_l"], state)
-    f_pr, _ = _child_reaction(context["joints"]["pat_r"], state)
-    f_pl, _ = _child_reaction(context["joints"]["pat_l"], state)
-    f_sr, _ = _child_reaction(context["joints"]["sh_r"], state)
-    f_sl, _ = _child_reaction(context["joints"]["sh_l"], state)
+    _, acc_err, qdd_norm = solve_lift_frame_inverse_dynamics(model, state, context, row)
+    (
+        f_l5s1,
+        f_l5s1_torso,
+        f_kr,
+        f_kl,
+        f_pr,
+        f_pl,
+        gh_norms,
+    ) = collect_frame_reaction_loads(context, state)
 
     return (
         f_l5s1,
@@ -213,9 +124,9 @@ def _solve_frame_reaction(
         f_kl,
         f_pr,
         f_pl,
-        np.array([np.linalg.norm(f_sr), np.linalg.norm(f_sl)]),
+        gh_norms,
         acc_err,
-        float(np.linalg.norm(udot)),
+        qdd_norm,
     )
 
 

@@ -44,9 +44,12 @@ dependencies = [
     "platformdirs>=4.2.0",
 
     # Runtime security floor constraints documented in issue #3838.
-    # pillow raised to 12.3.0 for PYSEC-2026-2253/2254/2255/2256/2257 and
+    # Certifi floor addresses the current pip-audit finding in #13563.
+    # Pillow floor addresses the reported finding in #13563 and prior advisories.
+    # Pillow 12.3.0 cleared PYSEC-2026-2253/2254/2255/2256/2257 and
     # PYSEC-2026-3451/3452/3453/3454/3493/3494/3495/3496 (#8738).
-    "pillow>=12.3.0",
+    "certifi>=2026.10.19",
+    "pillow>=13.0.0",
     "requests>=2.33.0",
     "python-dotenv>=1.2.2",
     "bokeh>=3.8.2",

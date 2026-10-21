@@ -22,7 +22,8 @@ dependencies:
       - h5py>=3.0.0
       - jinja2>=3.1.0
       - platformdirs>=4.2.0
-      - pillow>=12.3.0
+      - certifi>=2026.10.19
+      - pillow>=13.0.0
       - requests>=2.33.0
       - python-dotenv>=1.2.2
       - bokeh>=3.8.2
