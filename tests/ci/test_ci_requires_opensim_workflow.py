@@ -12,7 +12,7 @@ from scripts.classify_ci_changes import load_lane_config, should_run_opensim_lan
 
 pytestmark = pytest.mark.unit
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = REPO_ROOT / ".github/workflows/ci-requires-opensim.yml"
 CONFIG_PATH = REPO_ROOT / "scripts/config/ci_opensim_path_patterns.json"
 OPENSIM_LABEL = "ci:opensim"
@@ -98,8 +98,12 @@ class TestOpenSimJobLevelGating:
 
     def test_heavy_steps_guarded_when_lane_skipped(self) -> None:
         steps = _load()["jobs"]["requires-opensim"]["steps"]
-        models = next(s for s in steps if s.get("name") == "Fetch OpenSim Rajagopal body model")
-        assert "needs.classify-changes.outputs.run == 'true'" in str(models.get("if", ""))
+        models = next(
+            s for s in steps if s.get("name") == "Fetch OpenSim Rajagopal body model"
+        )
+        assert "needs.classify-changes.outputs.run == 'true'" in str(
+            models.get("if", "")
+        )
 
     def test_skip_step_reports_success_for_required_check(self) -> None:
         steps = _load()["jobs"]["requires-opensim"]["steps"]
@@ -118,3 +122,9 @@ class TestOpenSimJobLevelGating:
         assert "nightly" in text.lower()
         assert "@core" in text or "core" in text.lower()
         assert "24" in text
+
+    def test_lane_jobs_use_fleet_runners_not_hosted(self) -> None:
+        jobs = _load()["jobs"]
+        for job_id in ("classify-changes", "report-nightly"):
+            runs_on = jobs[job_id]["runs-on"]
+            assert runs_on == "d-sorg-fleet-docker", f"{job_id} must not use ubuntu-latest"

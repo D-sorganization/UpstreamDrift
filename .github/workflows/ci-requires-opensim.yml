@@ -43,7 +43,7 @@ jobs:
     if: >-
       (!github.event.pull_request ||
       github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     outputs:
       run: ${{ steps.classify.outputs.run }}
@@ -106,9 +106,9 @@ jobs:
       (needs.classify-changes.outputs.run != 'true' ||
       needs.pick-runner.result == 'success')
     runs-on: >-
-      ${{ needs.classify-changes.outputs.run != 'true' && 'ubuntu-latest' ||
+      ${{ needs.classify-changes.outputs.run == 'true' &&
       github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository && 'ubuntu-latest' ||
-      needs.pick-runner.outputs.runner }}
+      (needs.pick-runner.outputs.runner || 'd-sorg-fleet-docker') }}
     timeout-minutes: 25
     env:
       QT_QPA_PLATFORM: offscreen
@@ -310,7 +310,7 @@ jobs:
       (!github.event.pull_request ||
       github.event.pull_request.head.repo.full_name == github.repository) &&
       github.event_name == 'schedule'
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     permissions:
       issues: write

@@ -202,7 +202,9 @@ class TestOpenSimMainRunsComplete:
         assert "labeled" in pr["types"]
         jobs = _load(self.NAME)["jobs"]
         assert "classify-changes" in jobs
-        assert "needs.classify-changes.outputs.run == 'true'" in jobs["pick-runner"]["if"]
+        assert (
+            "needs.classify-changes.outputs.run == 'true'" in jobs["pick-runner"]["if"]
+        )
 
     def test_post_merge_nightly_and_dispatch_triggers_remain(self) -> None:
         on = _triggers(_load(self.NAME))

@@ -99,3 +99,26 @@ def test_config_json_is_valid_fixture() -> None:
     raw = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
     assert raw["label"] == "ci:opensim"
     assert raw["path_globs"]
+
+
+def test_github_output_uses_os_environ(tmp_path, monkeypatch) -> None:
+    output_file = tmp_path / "github_output.txt"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output_file))
+    from scripts.classify_ci_changes import main
+
+    assert (
+        main(
+            [
+                "opensim",
+                "--event",
+                "pull_request",
+                "--changed-file",
+                "docs/foo.md",
+                "--github-output",
+            ]
+        )
+        == 0
+    )
+    text = output_file.read_text(encoding="utf-8")
+    assert "run=false" in text
+    assert "reason=doc_only" in text

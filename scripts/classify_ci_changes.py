@@ -106,11 +106,7 @@ def classify_path(path: str, config: LaneConfig) -> ChangeCategory:
 def _matched_lane_paths(
     changed_files: Sequence[str], path_globs: Sequence[str]
 ) -> tuple[str, ...]:
-    return tuple(
-        path
-        for path in changed_files
-        if path_matches_lane(path, path_globs)
-    )
+    return tuple(path for path in changed_files if path_matches_lane(path, path_globs))
 
 
 def should_run_opensim_lane(
@@ -149,7 +145,7 @@ def _parse_labels(raw: str | None) -> tuple[str, ...]:
 
 
 def _write_github_output(outputs: Mapping[str, str]) -> None:
-    output_path = sys.environ.get("GITHUB_OUTPUT")
+    output_path = os.environ.get("GITHUB_OUTPUT")
     path = Path(output_path or os.devnull)
     with path.open("a", encoding="utf-8") as handle:
         for key, value in outputs.items():
