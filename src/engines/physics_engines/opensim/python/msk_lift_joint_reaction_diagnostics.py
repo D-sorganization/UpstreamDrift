@@ -12,13 +12,14 @@ import numpy as np
 from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 # Bumped when joint-reaction kinematics or realization order changes; CI asserts this.
-MSK_LIFT_JR_KINEMATICS_REVISION = 5
+MSK_LIFT_JR_KINEMATICS_REVISION = 6
 
 
 def _source_sha256(path: Path) -> str:
     digest = hashlib.sha256()
     digest.update(path.read_bytes())
     return digest.hexdigest()
+
 
 __all__ = [
     "MSK_LIFT_JR_KINEMATICS_REVISION",
@@ -46,9 +47,11 @@ def joint_reaction_source_fingerprint() -> dict[str, Any]:
         "numpy_version": str(np.__version__),
         "scipy_version": str(scipy.__version__),
         "python_executable": sys.executable,
+        "constraints_enforced_for_id": False,
         "realization_order": (
-            "coordinates+setTime; muscle+residual overrides; realizeDynamics; "
-            "InverseDynamicsSolver; residual torques; realizeAcceleration"
+            "disable couplers; coordinates+setTime; muscle+residual overrides; "
+            "realizeDynamics; InverseDynamicsSolver; residual torques; "
+            "realizeAcceleration"
         ),
     }
 

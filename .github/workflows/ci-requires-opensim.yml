@@ -213,7 +213,7 @@ jobs:
               joint_reaction_source_fingerprint,
           )
 
-          assert MSK_LIFT_JR_KINEMATICS_REVISION >= 5
+          assert MSK_LIFT_JR_KINEMATICS_REVISION >= 6
           print(json.dumps(joint_reaction_source_fingerprint(), indent=2))
           PY
 

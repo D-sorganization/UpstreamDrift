@@ -200,7 +200,8 @@ def test_squat_joint_reactions_computed(
     assert sol["acceleration_error_max"] < 5e-6, sol.get("acceleration_realization")
     realization = sol.get("acceleration_realization") or {}
     fingerprint = realization.get("source_fingerprint") or {}
-    assert fingerprint.get("kinematics_revision") >= 5
+    assert fingerprint.get("kinematics_revision") >= 6
+    assert fingerprint.get("constraints_enforced_for_id") is False
     assert fingerprint.get("simbody_kinematics_sha256")
     assert fingerprint.get("joint_reaction_frame_sha256")
 

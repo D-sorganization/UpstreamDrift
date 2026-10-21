@@ -4,13 +4,13 @@
 - Governing issue: #13564.
 - Objective: fix deterministic failures in `test_squat_joint_reactions_computed` and `test_native_constant_interval_matches_fresh_raw_replay` on the `CI Requires OpenSim` workflow.
 - Completed: muscle allocation budget semantics; squat Simbody kinematics (analytic mapped `udot` + `setTime`/`realizeDynamics`; muscle overrides before `realizeDynamics`); native State copy on muscle advance; OpenSim CI force-reinstall plus kinematics-revision gate; squat receipt embeds worst-frame acceleration diagnostics and runtime fingerprints; A/B showed FD targets can pass the 5e-6 gate while |FD−analytic| ≈ 0.075 — production uses analytic accelerations only.
-- Validation (local): squat `acceleration_error_max` ≈ 8.7e-7 at `stride=5`; `test_opensim_lift_joint_reactions` passes.
-- CI evidence (head `3cf7513`, run39550374790): only `test_squat_joint_reactions_computed` failed at `acceleration_error_max` ≈ 1.146e-5 — not reproduced locally at `stride=5`; next CI run must print `acceleration_realization` on failure and assert `MSK_LIFT_JR_KINEMATICS_REVISION >= 4` after editable install.
+- Validation (local): squat `acceleration_error_max` ≈ 2.4e-9 at `stride=5` after disabling couplers for ID (`MSK_LIFT_JR_KINEMATICS_REVISION` 6); `test_opensim_lift_joint_reactions` passes locally.
+- CI evidence (runs on `bce2e78075` / `259a4bbf80`): self-hosted fleet stuck at `acceleration_error_max` ≈ 1.146×10⁻⁵ on `pro_sup_l` frame 11 with three enforced couplers (patellofemoral ×2, `hand_r_to_barbell`); revision-6 disables couplers per spine ID (ADR-0055 item 6).
 - Hygiene: Ruff format on lifting tests; `test_opensim_job_speed` matches `--force-reinstall --no-deps` editable install.
 - Architecture: `_solve_frame_reaction` decomposed into `msk_lift_joint_reaction_frame.py` + `msk_lift_joint_reaction_diagnostics.py` (function-lines budget).
 - CI batch: certifi/Pillow floors (#13563 pins); regenerated Simscape grip contact generated artifacts from Python source of truth.
-- Native CI on `bce2e78075` still reported `acceleration_error_max` ≈ 1.146×10⁻⁵ (worst frame 11; local stride=5 is 41 frames / ≈8.7×10⁻⁷) — environment mismatch suspected; added OpenSim job smoke gate, `PYTHONDONTWRITEBYTECODE`, thread caps, and `__pycache__` purge after editable install.
-- Next step: merge after `CI Requires OpenSim` and quality-gate are green on PR #13568.
+- OpenSim job hygiene: pre-pytest smoke gate, `PYTHONDONTWRITEBYTECODE`, thread caps, `__pycache__` purge after editable install.
+- Next step: merge after `CI Requires OpenSim` (revision ≥ 6) and quality-gate are green on PR #13568.
 
 # Project Steward Pass — 2026-10-19
 
