@@ -10,6 +10,7 @@ multi-ecosystem-groups:
       timezone: America/Los_Angeles
     commit-message:
       prefix: chore(deps)
+    open-pull-requests-limit: 10
 
 updates:
   - package-ecosystem: pip
@@ -18,7 +19,6 @@ updates:
       interval: weekly
     patterns: ["*"]
     multi-ecosystem-group: weekly-deps
-    open-pull-requests-limit: 10
     labels:
       - dependencies
       - automated
@@ -31,7 +31,6 @@ updates:
       interval: weekly
     patterns: ["*"]
     multi-ecosystem-group: weekly-deps
-    open-pull-requests-limit: 5
     labels:
       - dependencies
       - ci/cd
@@ -43,7 +42,6 @@ updates:
       interval: weekly
     patterns: ["*"]
     multi-ecosystem-group: weekly-deps
-    open-pull-requests-limit: 5
     labels:
       - dependencies
       - frontend
