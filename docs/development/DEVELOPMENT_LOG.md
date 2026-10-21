@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13579 · Engine Docker Cache Steps per Fleet Contract
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13579
+- **Branch:** feat/engine-docker-cache-13579
+- **PR:** #13598
+- **Paths:** see #13598
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`d5112d55`; collated from changes/13579-engine-docker-cache-steps-per-fleet-cont.md)
+- **Summary:** engine docker cache steps per fleet contract
+- **Next step:** Merge the PR.
+
 ### DL-#13580 · Quarantine Pilot for Simscape Grip Contact Tests and Audit Validator (UD-CI-030)
 
 - **State:** in_review
