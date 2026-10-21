@@ -71,7 +71,11 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ._simulate_support import _resolve_body_name
-from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
+from .humanoid_urdf import (
+    CANONICAL_URDF,
+    load_humanoid_into_plant,
+    resolve_plant_n_actuators,
+)
 from .simulate import COEFFS_PER_JOINT, SimOptions, evaluate_torque_polynomial
 
 if TYPE_CHECKING:  # pragma: no cover - import-time only
@@ -477,9 +481,7 @@ def _build_autodiff_plant(
 
     n_q = int(plant_float.num_positions())
     n_v = int(plant_float.num_velocities())
-    n_actuators = int(plant_float.num_actuators())
-    if n_actuators == 0:
-        n_actuators = max(n_v - 6, 0)
+    n_actuators = resolve_plant_n_actuators(plant_float)
 
     plant_ad = plant_float.ToAutoDiffXd()
     return plant_ad, plant_float, n_q, n_v, n_actuators
@@ -756,7 +758,15 @@ def fit_swing_drake_autodiff(  # noqa: C901
         options.sim_options.time_step_s,
     )
     if options.n_joints_hint is not None:
-        n_actuators = int(options.n_joints_hint)
+        hint = int(options.n_joints_hint)
+        if hint != n_actuators:
+            msg = (
+                f"n_joints_hint ({hint}) must match the loaded plant's actuator "
+                f"count ({n_actuators}); resize theta to "
+                f"{n_actuators * COEFFS_PER_JOINT} coefficients instead of "
+                "overriding the plant dimension"
+            )
+            raise ValueError(msg)
     n = n_actuators * COEFFS_PER_JOINT
 
     if initial_theta is None:

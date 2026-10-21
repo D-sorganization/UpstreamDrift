@@ -70,7 +70,11 @@ from ._simulate_support import (
     build_polynomial_torque_system as _build_polynomial_torque_system,
 )
 from ._simulate_support import record_rollout as _record_rollout
-from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
+from .humanoid_urdf import (
+    CANONICAL_URDF,
+    load_humanoid_into_plant,
+    resolve_plant_n_actuators,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - import-time only
     from pydrake.multibody.plant import MultibodyPlant
@@ -358,13 +362,7 @@ def _sample_grid(
 
 def _resolve_n_actuators(plant: MultibodyPlant) -> int:
     """Return the number of actuators / actuated DOFs in the plant."""
-    n = int(plant.num_actuators())
-    if n > 0:
-        return n
-    # Fallback to velocity dimension minus 6 (floating root) which matches the
-    # actuated chain in the canonical URDF.
-    nv = int(plant.num_velocities())
-    return max(nv - 6, 0)
+    return resolve_plant_n_actuators(plant)
 
 
 @dataclass(frozen=True)

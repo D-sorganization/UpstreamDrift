@@ -2938,18 +2938,31 @@ open. Preserve explicit ground configuration in independent replay.
 - **Summary:** Guard DrakePhysicsEngine.get_joint_names against unfinalized plants
 - **Next step:** Shipped in PR #13468.
 
+### DL-#13531 · Align Drake Autodiff Fit Theta With Canonical URDF Actuator Count
+
+- **State:** in_review
+- **Owner:** cursor-cloud
+- **Issue:** #13531
+- **Branch:** cursor/canonical-golfer-alignment-6336
+- **PR:** not created
+- **Paths:** `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py`, `fit_swing_autodiff.py`, `simulate.py`, `tests/engines/drake/test_drake_fit_actuator_alignment_13531.py`, `tests/engines/drake/test_drake_fit_swing_autodiff.py`
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (SELF)
+- **Summary:** Single source of truth for golfer actuator count (`resolve_plant_n_actuators`); autodiff fit and recovery tests size theta from the loaded `CANONICAL_URDF` plant instead of legacy 19-DOF assumptions.
+- **Next step:** Merge PR after CI heavy Drake lane confirms live recovery tests.
+
 ### DL-#13450 · Resolve the Drake Autodiff Fit Grip Body Through the Shared Simulate Fallback
 
-- **State:** shipped
+- **State:** in_review
 - **Owner:** unassigned
 - **Issue:** #13450
-- **Branch:** fix/ud-drake-bugs
-- **PR:** #13468
-- **Paths:** see #13468
+- **Branch:** cursor/canonical-golfer-alignment-6336
+- **PR:** not created (supersedes open #13553)
+- **Paths:** `src/engines/physics_engines/drake/python/motion_matching/_simulate_support.py`, `simulate.py`, `tests/engines/drake/test_drake_grip_body_resolution_13450.py`
 - **Started:** 2026-10-20
-- **Last verified:** 2026-10-20 (`e541e40b`; collated from changes/13450-resolve-the-drake-autodiff-fit-grip-body.md)
-- **Summary:** Resolve the Drake autodiff fit grip body through the shared simulate fallback
-- **Next step:** Shipped in PR #13468.
+- **Last verified:** 2026-10-21 (SELF)
+- **Summary:** Drake fit and simulate sample canonical `mid_hands` / `club_head` frames (Pinocchio parity); grip aliases only, no wrist/shaft fallback.
+- **Next step:** Merge combined alignment PR and close #13450 with live recovery evidence once #13531 lands.
 
 ### DL-#13449 · Size Drake-Simscape Equivalence Fixture Theta From the Plant Actuator Count
 
