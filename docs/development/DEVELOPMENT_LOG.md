@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13595 · CI Standard Lint Gate
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #13595
+- **Branch:** codex/13595-ci-lint
+- **PR:** #13599
+- **Paths:** .github/actionlint.yaml,.github/WORKFLOWS.md,.github/workflows/ci-standard.yml,.github/workflows/fleet-policy-gate.yml,.github/workflows/architecture-map-contract.yml,scripts/pre_push_hook.py,tests/ci/test_ci_infrastructure.py,tests/ci/test_ci_drift_gate_arguments.py,tests/ci/test_devlog_repair_workflow.py,tests/ci/test_publication_quality_workflow.py,AGENT_HANDOFF.md
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`d5d8ce1c`; collated from changes/13595-ci-standard-lint.md)
+- **Summary:** Repair CI lint, trusted governed policy consumption, publication detection coverage, and pre-push failure guidance
+- **Next step:** Wait for Hume's trusted-base helper publication and central guard/protected-registry follow-ups, central fork-policy publication, the preflight fallback-worker fix, and CI cohort drain; then apply the canonical consumer workflow and run full pre-PR with the central gate enabled before any push.
+
 ### DL-#13579 · Engine Docker Cache Steps per Fleet Contract
 
 - **State:** in_review
