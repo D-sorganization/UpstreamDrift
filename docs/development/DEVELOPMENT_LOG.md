@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13574 · Record Merge-Queue Batch-Size Experiment Snapshots and Fleet Merge Settings Checker
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13574
+- **Branch:** cursor/merge-queue-batch-size-db92
+- **PR:** #13588
+- **Paths:** see #13588
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`1c6736d7`; collated from changes/13574-merge-queue-batch-size-snapshot.md)
+- **Summary:** Record merge-queue batch-size experiment snapshots and fleet merge settings checker
+- **Next step:** Apply target snapshot via apply_fleet_merge_queue_settings.py after merge; confirm --live.
+
 ### DL-#13571 · Gate OpenSim CI on Paths or Ci:Opensim Label With Classify_Ci_Changes Job
 
 - **State:** in_review
@@ -2768,6 +2781,32 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13582 · Add OpenSim CI Failure Triage Snapshot, Doc, and Classifier Script for UD-CI-002T.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13582
+- **Branch:** merged via #13589
+- **PR:** #13589
+- **Paths:** see #13589
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`c9caab9c`; collated from changes/13582-add-opensim-ci-failure-triage-snapshot-d.md)
+- **Summary:** Add OpenSim CI failure triage snapshot, doc, and classifier script for UD-CI-002t.
+- **Next step:** Shipped in PR #13589.
+
+### DL-#13572 · Move Cross-Engine Leaderboard JSON Publish Off PR Triggers (Nightly and Main Push Only).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13572
+- **Branch:** merged via #13583
+- **PR:** #13583
+- **Paths:** see #13583
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`9eae13f1`; collated from changes/13572-move-cross-engine-leaderboard-json-publi.md)
+- **Summary:** Move cross-engine leaderboard JSON publish off PR triggers (nightly and main push only).
+- **Next step:** Shipped in PR #13583.
 
 ### DL-#13563 · Bump Pillow to 13.0.0 and Certifi to 2026.10.19 to Clear Pip-Audit CVEs.
 

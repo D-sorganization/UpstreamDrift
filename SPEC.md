@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-21 | #13589 | Add OpenSim CI failure triage snapshot, doc, and classifier script for UD-CI-002t. |
+| 2026-10-21 | #13588 | Record merge-queue batch-size experiment snapshots and fleet merge settings checker |
+| 2026-10-21 | #13583 | Move cross-engine leaderboard JSON publish off PR triggers (nightly and main push only). |
 | 2026-10-21 | #13585 | Gate OpenSim CI on paths or ci:opensim label with classify_ci_changes job |
 | 2026-10-21 | #13587 | Canonicalize grip-contact codegen floats and refresh Simscape MATLAB kernel/scenario exports.; Bump pillow to 13.0.0 and certifi to 2026.10.19 to clear pip-audit CVEs. |
 | 2026-10-20 | #13558 | Grip topology parity compares numerically-zero reference channels (peak <= 1e-8 N or N·m) absolutely instead of relatively; fixes myoHand frozen-finger law-level parity on roundoff spin channels |
