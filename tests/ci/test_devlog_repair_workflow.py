@@ -144,6 +144,73 @@ def test_consumer_workflow_passes_actual_local_only_runner_guard(
     assert result.returncode == 0, result.stdout + result.stderr
 
 
+def test_consumer_passes_actual_pinning_and_inventory_guards(tmp_path: Path) -> None:
+    fixture_root = tmp_path
+    workflows_dir = fixture_root / ".github/workflows"
+    workflows_dir.mkdir(parents=True)
+    (workflows_dir / WORKFLOW.name).write_text(
+        WORKFLOW.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+
+    inventory_source = (REPO_ROOT / ".github/WORKFLOWS.md").read_text(encoding="utf-8")
+    table_lines = [
+        line for line in inventory_source.splitlines() if line.startswith("|")
+    ]
+    header_index = next(
+        index for index, line in enumerate(table_lines) if line.startswith("| File ")
+    )
+    header = table_lines[header_index : header_index + 2]
+    consumer_rows = [
+        line
+        for line in table_lines[header_index + 2 :]
+        if line.split("|", maxsplit=2)[1].strip() == WORKFLOW.name
+    ]
+    inventory_path = fixture_root / ".github/WORKFLOWS.md"
+    inventory_path.write_text(
+        "\n".join([*header, *consumer_rows]) + "\n", encoding="utf-8"
+    )
+
+    pinning = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/check_github_actions_pinned.py"),
+            "--workflow-dir",
+            str(workflows_dir),
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        timeout=15,
+        check=False,
+    )
+    inventory = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/check_workflow_inventory.py"),
+            "--repo-root",
+            str(fixture_root),
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        timeout=15,
+        check=False,
+    )
+
+    assert (pinning.returncode, inventory.returncode) == (0, 0), (
+        f"pinning guard ({pinning.returncode}): {pinning.stderr}{pinning.stdout}\n"
+        f"inventory guard ({inventory.returncode}): "
+        f"{inventory.stderr}{inventory.stdout}"
+    )
+
+    assert consumer_rows, "fleet-policy-gate.yml inventory metadata is missing"
+    row = consumer_rows[0].split("|")
+    assert "pull_request" in row[2] and "merge_group" in row[2]
+    assert "workflow_dispatch" in row[2] and "daily schedule" in row[2]
+    assert "contents: read" in row[4]
+    assert "Repository_Management contents: read (App)" in row[4]
+
+
 @pytest.mark.skipif(os.name == "nt", reason="the extracted workflow step requires Bash")
 @pytest.mark.parametrize(
     ("event", "env_key"),
