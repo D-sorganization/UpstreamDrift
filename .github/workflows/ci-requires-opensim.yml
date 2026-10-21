@@ -1,39 +1,85 @@
 name: CI Requires OpenSim
 
+# UD-CI-002 (#13571): run on OpenSim/physics paths OR the ``ci:opensim`` label
+# (including synchronize while labeled), nightly ``schedule``, ``workflow_dispatch``,
+# and post-merge ``push`` to main — never on ``merge_group``.
+#
+# Path vs label conflict: ``pull_request`` deliberately has no trigger-level
+# ``paths`` filter. The ``classify-changes`` job applies paths OR label so a
+# labeled PR still re-runs on synchronize when only docs change.
+#
+# Regression detection delay: PRs that touch only non-OpenSim code rely on the
+# nightly schedule (08:00 UTC) and post-merge main runs. Owner: @core. Response
+# SLA: acknowledge nightly failures within 24 hours (``report-nightly`` job).
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - "docs/**"
-      - "**.md"
-      - "LICENSE"
-      - ".gitignore"
-  # No merge_group trigger: this job is not a required check (only
-  # quality-gate is), so the merge queue never waited on it (#13513).
-  # Pull requests run via pull_request; push covers main only, so a PR branch
-  # does not run the job twice.
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   push:
     branches:
       - main
   workflow_dispatch:
+  schedule:
+    # Nightly at 08:00 UTC — staggered after ci-standard and optional-stack.
+    - cron: "0 8 * * *"
 
 concurrency:
-  # PR runs cancel superseded pushes. Main and dispatched runs are never
-  # cancelled once running. A per-SHA main group queued one run per merge
-  # for the four docker runners (#13494). Grouped per event and ref, GitHub keeps
-  # the running main run plus only the newest pending one (#12285).
-  group: ci-requires-opensim-${{ github.event_name }}-${{ github.ref }}
+  # PR runs cancel superseded pushes. Main, nightly and dispatched runs are never
+  # cancelled once running. Label events other than ci:opensim get their own
+  # group so tagging a PR never cancels its in-flight run (#12224 / #13571).
+  group: >-
+    ci-requires-opensim-${{ github.event_name == 'pull_request' &&
+    format('{0}-{1}', github.ref, github.event.action == 'labeled' &&
+    github.event.label.name != 'ci:opensim' && 'label' || 'run') ||
+    format('{0}-{1}', github.event_name, github.ref) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
 jobs:
-  pick-runner:
+  classify-changes:
+    name: classify OpenSim lane
     # Fork PRs never run on the self-hosted fleet (RM#1989).
     if: >-
       (!github.event.pull_request ||
       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.classify.outputs.run }}
+      reason: ${{ steps.classify.outputs.reason }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Classify paths or ci:opensim label
+        id: classify
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          changed=()
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            mapfile -t changed < <(git diff --name-only "origin/${BASE_REF}...HEAD")
+          fi
+          args=(opensim --event "$EVENT_NAME" --labels "$PR_LABELS" --github-output)
+          for file in "${changed[@]}"; do
+            args+=(--changed-file "$file")
+          done
+          python3 scripts/classify_ci_changes.py "${args[@]}"
+
+  pick-runner:
+    needs: classify-changes
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      needs.classify-changes.outputs.run == 'true'
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
       'ubuntu-latest' || 'd-sorg-fleet-docker' }}
@@ -50,11 +96,19 @@ jobs:
 
   requires-opensim:
     name: Real OpenSim 4.6 (requires_opensim)
-    needs: pick-runner
+    needs: [classify-changes, pick-runner]
+    # When the lane is skipped, still report success for branch-protection contexts.
     if: >-
       (!github.event.pull_request ||
-      github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository && 'ubuntu-latest' || needs.pick-runner.outputs.runner }}
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      always() &&
+      needs.classify-changes.result == 'success' &&
+      (needs.classify-changes.outputs.run != 'true' ||
+      needs.pick-runner.result == 'success')
+    runs-on: >-
+      ${{ needs.classify-changes.outputs.run == 'true' &&
+      github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository && 'ubuntu-latest' ||
+      (needs.pick-runner.outputs.runner || 'd-sorg-fleet-docker') }}
     timeout-minutes: 25
     env:
       QT_QPA_PLATFORM: offscreen
@@ -63,7 +117,18 @@ jobs:
       SDL_VIDEODRIVER: dummy
       UPSTREAMDRIFT_MSK_BASE_MODEL: shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim
     steps:
+      - name: Skip OpenSim lane (paths/label gate)
+        if: needs.classify-changes.outputs.run != 'true'
+        run: |
+          echo "OpenSim lane skipped (${{ needs.classify-changes.outputs.reason }})."
+          {
+            echo "## OpenSim lane skipped"
+            echo "- reason: \`${{ needs.classify-changes.outputs.reason }}\`"
+            echo "- nightly + main push still cover non-OpenSim regressions"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Clean corrupt git objects
+        if: needs.classify-changes.outputs.run == 'true'
         shell: bash
         run: |
           if [ -d .git ]; then
@@ -77,13 +142,16 @@ jobs:
           fi
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.classify-changes.outputs.run == 'true'
         with:
           fetch-depth: 1
 
       - name: Fetch pinned Tools packages
+        if: needs.classify-changes.outputs.run == 'true'
         uses: ./.github/actions/fetch-pinned-tools
 
       - name: Fetch OpenSim Rajagopal body model
+        if: needs.classify-changes.outputs.run == 'true'
         # The sparse clone is kept per runner, keyed by the upstream commit
         # (#13510). A cached copy is reused only when its HEAD is that commit
         # and its checked-out files match HEAD. Anything else falls back to a
@@ -118,6 +186,7 @@ jobs:
           test -f "$dest/Models/Rajagopal/RajagopalLaiUhlrich2023.osim"
 
       - name: Set up Python 3.12
+        if: needs.classify-changes.outputs.run == 'true'
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5.4.0
         with:
           python-version: "3.12"
@@ -130,9 +199,11 @@ jobs:
             requirements*.lock
 
       - name: Create stub ui/dist for editable install
+        if: needs.classify-changes.outputs.run == 'true'
         run: mkdir -p ui/dist
 
       - name: Restore or build persistent OpenSim venv
+        if: needs.classify-changes.outputs.run == 'true'
         # Writing the dev lock into a fresh venv cost ~210 s of every run
         # (#13510). The venv is kept per runner, keyed by the lock, the
         # opensim pin and the interpreter. It is reused only when its
@@ -182,6 +253,7 @@ jobs:
           echo "VIRTUAL_ENV=$venv" >> "$GITHUB_ENV"
 
       - name: Install UpstreamDrift (editable) into the OpenSim venv
+        if: needs.classify-changes.outputs.run == 'true'
         # Redone every run so the venv always tests this checkout.
         run: |
           set -euo pipefail
@@ -190,6 +262,7 @@ jobs:
           python -m pip install "${no_cache[@]}" --no-deps -e ".[dev]"
 
       - name: Verify OpenSim 4.6 is importable
+        if: needs.classify-changes.outputs.run == 'true'
         run: |
           python - <<'PY'
           import opensim
@@ -199,6 +272,7 @@ jobs:
           PY
 
       - name: Run requires_opensim tests
+        if: needs.classify-changes.outputs.run == 'true'
         run: |
           python -m pytest \
             tests/unit/lifting tests/opensim \
@@ -227,3 +301,63 @@ jobs:
               print("::error::Zero tests passed! All selected tests were skipped or none were run.", file=sys.stderr)
               sys.exit(1)
           PY
+
+  report-nightly:
+    name: Report Nightly OpenSim Result
+    needs: [classify-changes, requires-opensim]
+    if: >-
+      always() &&
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      github.event_name == 'schedule'
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open, update or close the nightly failure issue
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        with:
+          script: |
+            const title = 'Nightly OpenSim CI FAILED';
+            const results = JSON.parse(process.env.NEEDS_JSON);
+            const failed = Object.entries(results)
+              .filter(([, job]) => job.result !== 'success')
+              .map(([name, job]) => `- \`${name}\`: ${job.result}`);
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const { data: open } = await github.rest.issues.listForRepo({
+              ...context.repo, state: 'open', labels: 'ci',
+            });
+            const existing = open.find((issue) => issue.title === title);
+            if (failed.length === 0) {
+              if (existing) {
+                await github.rest.issues.createComment({
+                  ...context.repo, issue_number: existing.number,
+                  body: `Nightly OpenSim lane passed in [run ${context.runId}](${runUrl}). Closing.`,
+                });
+                await github.rest.issues.update({
+                  ...context.repo, issue_number: existing.number, state: 'closed',
+                });
+              }
+              return;
+            }
+            const body = [
+              `Nightly OpenSim CI failed in [run ${context.runId}](${runUrl}).`,
+              '',
+              'Owner: @core — acknowledge within 24 hours.',
+              '',
+              ...failed,
+              '',
+              'Reproduce on a PR by adding the `ci:opensim` label, or re-run via workflow_dispatch.',
+            ].join('\n');
+            if (existing) {
+              await github.rest.issues.createComment({
+                ...context.repo, issue_number: existing.number, body,
+              });
+            } else {
+              await github.rest.issues.create({
+                ...context.repo, title, body, labels: ['ci', 'ci-cd'],
+              });
+            }
