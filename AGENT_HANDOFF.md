@@ -39,7 +39,7 @@ detail of a finished slice to the archive instead of growing this file.
 ## CI Throughput (RM Epic #2215)
 
 - UD-CI-032 #13573: PR #13584 (`cursor/cancel-merge-queue-audit-1f01`) — merge-queue-safe `cancel-in-progress` audit; RM #2216 landed — arm auto-merge once `quality-gate` is green.
-- UD-CI-033 #13595: `codex/13595-ci-lint` fixes Actionlint/ShellCheck blockers and adds a tested consumer for the governed RM #2253 fleet-policy/development-log repair gate; forwards trusted event type for approved merge-group batch selection. Publish only after the RM provider and registry merge. Prior canonical pre-PR checks passed except existing development-log WIP/size policy limits (consistency suite took about five minutes); no PR is open.
+- UD-CI-033 #13595: `codex/13595-ci-lint` fixes Actionlint/ShellCheck blockers and adds a tested consumer for the governed RM #2253 fleet-policy/development-log repair gate; forwards trusted event type and uses a contents-read GitHub App token scoped to Repository_Management for the protected policy checkout. Publish after RM #2259 and its rollout registry merge, then rerun canonical `pre_pr`. Prior provider gate hit editable-environment import shadowing; parent reports provider fix underway. No UD PR is open.
 
 ## Required Before Continuing
 

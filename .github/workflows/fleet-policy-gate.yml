@@ -23,15 +23,28 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: target
+          token: ${{ github.token }}
           # Bounded history supports registered continuation ancestry without
           # downloading a consumer repository's complete history.
           fetch-depth: 64
+
+      - name: Generate Repository_Management read token
+        id: policy-app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.JULES_APP_ID }}
+          private-key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: Repository_Management
+          permission-contents: read
 
       - uses: actions/checkout@v4
         with:
           repository: D-sorganization/Repository_Management
           ref: main
           path: policy
+          token: ${{ steps.policy-app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Resolve trusted development-log baseline
         id: devlog-base

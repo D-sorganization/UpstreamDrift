@@ -68,6 +68,49 @@ def test_consumer_uses_protected_policy_checkout_and_trusted_event_base() -> Non
     assert "${{ github.sha }}" not in base_file
 
 
+def test_policy_checkout_uses_fail_closed_repository_scoped_app_token() -> None:
+    steps = _workflow()["jobs"]["fleet-policy-gate"]["steps"]
+    policy_checkout_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("uses", "").startswith("actions/checkout@")
+        and step.get("with", {}).get("repository")
+        == "D-sorganization/Repository_Management"
+    )
+    token_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("id") == "policy-app-token"
+    )
+    token_step = steps[token_index]
+    target_checkout = next(
+        step
+        for step in steps
+        if step.get("uses", "").startswith("actions/checkout@")
+        and not step.get("with", {}).get("repository")
+    )
+    policy_checkout = steps[policy_checkout_index]
+
+    assert token_index < policy_checkout_index
+    assert token_step["uses"] == (
+        "actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510"
+    )
+    assert token_step["with"]["app-id"] == "${{ secrets.JULES_APP_ID }}"
+    assert token_step["with"]["private-key"] == "${{ secrets.JULES_APP_PRIVATE_KEY }}"
+    assert token_step["with"]["owner"] == "${{ github.repository_owner }}"
+    assert token_step["with"]["repositories"] == "Repository_Management"
+    assert token_step["with"]["permission-contents"] == "read"
+    assert "if" not in token_step and not token_step.get("continue-on-error", False)
+
+    assert target_checkout["with"]["path"] == "target"
+    assert target_checkout["with"]["token"] == "${{ github.token }}"
+    assert (
+        policy_checkout["with"]["token"]
+        == "${{ steps.policy-app-token.outputs.token }}"
+    )
+    assert policy_checkout["with"]["persist-credentials"] == "false"
+
+
 @pytest.mark.skipif(os.name == "nt", reason="the extracted workflow step requires Bash")
 @pytest.mark.parametrize(
     ("event", "env_key"),
