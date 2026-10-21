@@ -1,9 +1,10 @@
 """Heavy optional CI lanes run nightly or on demand, not on every PR push (#12224).
 
 The docker fleet lane is the scarcest runner capacity. Cross-engine
-equivalence, the optional stack and the PR leaderboard artifact used to run on
-every PR push; with per-ref ``cancel-in-progress`` almost none of them ever
-completed. These tests pin the gating contract:
+equivalence and the optional stack used to run on every PR push; with per-ref
+``cancel-in-progress`` almost none of them ever completed. The cross-engine
+leaderboard JSON publisher now runs nightly and on main push only (#13572).
+These tests pin the gating contract:
 
 * the light conformance gate still runs on every PR and main push;
 * heavy jobs run on ``schedule``, ``workflow_dispatch`` or a PR carrying the
@@ -49,7 +50,6 @@ def _only_full_label_events_start(condition: str) -> None:
     [
         "cross-engine-equivalence.yml",
         "ci-optional-stack.yml",
-        "cross-engine-leaderboard-publish.yml",
     ],
 )
 def test_other_label_events_cannot_cancel_a_run(name: str) -> None:
@@ -141,18 +141,39 @@ class TestOptionalStackGating:
 
 
 class TestLeaderboardPublishGating:
-    NAME = "cross-engine-leaderboard-publish.yml"
+    """#13572 / UD-CI-031: PR artifact runs were a top CI failure source."""
 
-    def test_pr_artifact_needs_full_label_and_main_publish_unchanged(self) -> None:
-        data = _load(self.NAME)
-        on = _triggers(data)
+    NAME = "cross-engine-leaderboard-publish.yml"
+    REQUIRED_CHECKS = REPO_ROOT / "scripts" / "config" / "ci-required-checks-live.json"
+    PUBLISH_CONTEXT = "publish cross-engine leaderboard JSON"
+
+    def test_no_pull_request_trigger(self) -> None:
+        on = _triggers(_load(self.NAME))
+        assert "pull_request" not in on
+
+    def test_runs_nightly_post_merge_and_on_demand(self) -> None:
+        on = _triggers(_load(self.NAME))
         assert on["push"]["branches"] == ["main"]
-        assert "labeled" in on["pull_request"]["types"]
-        condition = data["jobs"]["publish"]["if"]
-        assert "github.event_name != 'pull_request'" in condition
-        assert f"contains(github.event.pull_request.labels.*.name, '{FULL_LABEL}')" in (
-            condition
+        assert on["schedule"][0]["cron"].split()[-1] == "*", "must run daily"
+        assert "workflow_dispatch" in on
+
+    def test_non_pr_runs_are_not_cancelled_once_running(self) -> None:
+        concurrency = _load(self.NAME)["concurrency"]
+        assert concurrency["cancel-in-progress"] is False
+        group = concurrency["group"]
+        assert "github.event.action" not in group
+        assert "format('{0}-{1}', github.event_name, github.ref)" in group
+
+    def test_not_a_required_branch_protection_context(self) -> None:
+        if not self.REQUIRED_CHECKS.is_file():
+            pytest.skip("ci-required-checks-live.json lands with RM #2216")
+        payload = pytest.importorskip("json").loads(
+            self.REQUIRED_CHECKS.read_text(encoding="utf-8")
         )
+        required = payload.get("required_contexts", payload.get("contexts", []))
+        assert isinstance(required, list)
+        assert self.PUBLISH_CONTEXT not in required
+        assert "cross-engine-leaderboard-publish" not in required
 
 
 class TestOpenSimMainRunsComplete:
