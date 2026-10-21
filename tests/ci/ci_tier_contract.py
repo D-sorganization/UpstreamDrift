@@ -35,6 +35,7 @@ def run_aggregate(
     tmp_path: Path,
     *,
     tier: str = "full",
+    event: str | None = None,
     code: bool = True,
     fork: bool = False,
     docs: bool | None = None,
@@ -73,6 +74,7 @@ def run_aggregate(
                 env[name] = conclusions[match.group(1)]
     env.update(
         CI_TIER=tier,
+        EVENT_NAME=event or ("pull_request" if tier == "fast" else "merge_group"),
         CODE_CHANGED=str(code).lower(),
         DOCS_CHANGED=str(docs).lower(),
         PUBLICATION_CHANGED=str(publication).lower(),

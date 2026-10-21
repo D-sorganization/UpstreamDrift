@@ -229,6 +229,7 @@ jobs:
       code: ${{ steps.detect.outputs.code }}
       docs: ${{ steps.detect.outputs.docs }}
       publication: ${{ steps.detect.outputs.publication }}
+      tier: ${{ steps.tier.outputs.tier }}
     steps:
       - name: Enable long Git paths
         run: git config --global core.longpaths true
@@ -247,8 +248,8 @@ jobs:
           set -euo pipefail
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
 
-          # Only pull_request runs can be narrowed; push, schedule and
-          # workflow_dispatch always exercise the full suite.
+          # Only pull_request diffs narrow path-specific gates. Event tiers
+          # separately select fast PR/push or full queue/scheduled execution.
           if [ "$EVENT_NAME" != "pull_request" ]; then
             echo "Event '$EVENT_NAME' always runs the full suite."
             echo "code=true" >> "$GITHUB_OUTPUT"
@@ -258,6 +259,16 @@ jobs:
           fi
 
           changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          # An empty diff is not evidence that every changed file is documentation.
+          if [ -z "$changed" ]; then
+            echo "::warning::Empty PR diff; retaining every path-specific gate."
+            {
+              echo "code=true"
+              echo "docs=true"
+              echo "publication=true"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           echo "Changed files:"
           echo "$changed"
 
@@ -320,6 +331,15 @@ jobs:
             echo "- docs-governance changes: \`$docs\`"
             echo "- publication authority changes: \`$publication\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Classify CI Event Tier
+        id: tier
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        # The pinned provider supplies event tier only; the detector above
+        # retains authority for docs/publication paths and failure handling.
+        run: python3 scripts/ci/classify_event_tier.py --event "$EVENT_NAME" < /dev/null >> "$GITHUB_OUTPUT"
 
   # ---------------------------------------------------------------------------
   # Quality gates are split into independent, parallel jobs (issue #7064) so a
@@ -652,7 +672,7 @@ jobs:
   security-scans:
     name: security-scans
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    if: needs.changed-paths.outputs.code == 'true' && needs.changed-paths.outputs.tier == 'full'
     runs-on: >-
       ${{ github.event.pull_request &&
       github.event.pull_request.head.repo.full_name != github.repository &&
@@ -1629,6 +1649,8 @@ jobs:
           PICK_RUNNER: ${{ needs.pick-runner.result }}
           CHANGED_PATHS: ${{ needs.changed-paths.result }}
           CODE_CHANGED: ${{ needs.changed-paths.outputs.code }}
+          CI_TIER: ${{ needs.changed-paths.outputs.tier }}
+          EVENT_NAME: ${{ github.event_name }}
           PUBLICATION_CHANGED: ${{ needs.changed-paths.outputs.publication }}
           CODE_QUALITY: ${{ needs.code-quality.result }}
           COMPANION_WORKFLOWS: ${{ needs.companion-workflows.result }}
@@ -1658,6 +1680,45 @@ jobs:
         run: |
           set -uo pipefail
           failed=0
+
+          case "${CI_TIER:-}" in
+            fast|full) ;;
+            *) echo "::error::Missing or invalid CI tier; refusing to approve."; exit 1 ;;
+          esac
+          case "$EVENT_NAME" in
+            pull_request|push) event_tier="fast" ;;
+            *) event_tier="full" ;;
+          esac
+          if [ "$CI_TIER" != "$event_tier" ]; then
+            echo "::error::CI tier does not match the event; refusing to approve."
+            exit 1
+          fi
+          case "$CODE_CHANGED" in
+            true) ;;
+            false)
+              if [ "$EVENT_NAME" != "pull_request" ]; then
+                echo "::error::Only a PR diff can waive code gates."
+                exit 1
+              fi
+              ;;
+            *) echo "::error::Invalid code-change output; refusing to approve."; exit 1 ;;
+          esac
+
+          # These expensive children remain in the static needs graph, so a
+          # failure/cancellation always reaches this aggregate. Only fast-tier
+          # skips of these exact jobs are expected (#13577).
+          expected_for_gate() {
+            local job="$1" default_result="$2"
+            if [ "$CI_TIER" = "fast" ]; then
+              case "$job" in
+                security-scans|tests|rust-wheel-parity|core-only-install|alembic-postgres-round-trip)
+                  echo "skipped"
+                  return
+                  ;;
+              esac
+            fi
+            echo "$default_result"
+          }
 
           gates="code-quality:$CODE_QUALITY"
           gates="$gates companion-workflows:$COMPANION_WORKFLOWS"
@@ -1689,6 +1750,7 @@ jobs:
           {
             echo "## Quality Gate Summary"
             echo ""
+            echo "- CI Tier: \`$CI_TIER\`"
             echo "- non-docs changes: \`$CODE_CHANGED\`"
             echo "- docs-governance changes: \`$DOCS_CHANGED\`"
             echo "- publication authority changes: \`$PUBLICATION_CHANGED\`"
@@ -1765,8 +1827,9 @@ jobs:
           for entry in $gates; do
             name="${entry%%:*}"
             result="${entry#*:}"
-            if [ "$result" != "$expected" ]; then
-              echo "::error::$name reported '$result', expected '$expected'."
+            required_result=$(expected_for_gate "$name" "$expected")
+            if [ "$result" != "$required_result" ]; then
+              echo "::error::$name reported '$result', expected '$required_result'."
               failed=1
             fi
           done
@@ -1779,8 +1842,9 @@ jobs:
           for entry in $fleet_gates; do
             name="${entry%%=*}"
             result="${entry#*=}"
-            if [ "$result" != "$fleet_expected" ]; then
-              echo "::error::$name reported '$result', expected '$fleet_expected'."
+            required_result=$(expected_for_gate "$name" "$fleet_expected")
+            if [ "$result" != "$required_result" ]; then
+              echo "::error::$name reported '$result', expected '$required_result'."
               failed=1
             fi
           done
@@ -1806,7 +1870,7 @@ jobs:
     if: >-
       (!github.event.pull_request ||
       github.event.pull_request.head.repo.full_name == github.repository) &&
-      (needs.changed-paths.outputs.code == 'true')
+      (needs.changed-paths.outputs.code == 'true' && needs.changed-paths.outputs.tier == 'full')
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
@@ -1952,7 +2016,7 @@ jobs:
 
   tests:
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    if: needs.changed-paths.outputs.code == 'true' && needs.changed-paths.outputs.tier == 'full'
     runs-on: >-
       ${{ github.event.pull_request &&
       github.event.pull_request.head.repo.full_name != github.repository &&
@@ -2659,7 +2723,7 @@ jobs:
     if: >-
       (!github.event.pull_request ||
       github.event.pull_request.head.repo.full_name == github.repository) &&
-      (needs.changed-paths.outputs.code == 'true')
+      (needs.changed-paths.outputs.code == 'true' && needs.changed-paths.outputs.tier == 'full')
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
     services:
@@ -3607,7 +3671,7 @@ jobs:
   rust-wheel-parity:
     name: rust-wheel-parity
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    if: needs.changed-paths.outputs.code == 'true' && needs.changed-paths.outputs.tier == 'full'
     # In the required `quality-gate` aggregate's `needs`, so a fleet pin here
     # blocked every merge a second time. Pure `cargo`/`maturin` work with no
     # fleet-local state, so it follows the dispatcher like its siblings.

@@ -32,8 +32,15 @@ def test_heavy_jobs_run_only_for_full_tier_code_changes(job: str) -> None:
     assert "needs.changed-paths.outputs.code == 'true'" in condition
 
 
-@pytest.mark.parametrize("tier", ["fast", "full"])
-@pytest.mark.parametrize("code,fork", [(True, False), (False, False), (True, True)])
+@pytest.mark.parametrize(
+    "tier,code,fork",
+    [
+        ("fast", True, False),
+        ("fast", False, False),
+        ("fast", True, True),
+        ("full", True, False),
+    ],
+)
 def test_expected_skips_and_successes_pass_the_real_aggregate(
     tmp_path: Path, tier: str, code: bool, fork: bool
 ) -> None:
@@ -75,3 +82,21 @@ def test_empty_pr_diff_does_not_silently_skip_code_gates(tmp_path: Path) -> None
 def test_existing_opensim_lane_classifier_remains_available() -> None:
     source = (ROOT / "scripts/classify_ci_changes.py").read_text()
     assert "def should_run_opensim_lane(" in source
+
+
+@pytest.mark.parametrize(
+    "event,tier",
+    [
+        ("pull_request", "fast"),
+        ("push", "fast"),
+        ("merge_group", "full"),
+        ("schedule", "full"),
+        ("workflow_dispatch", "full"),
+        ("future_event", "full"),
+    ],
+)
+def test_aggregate_accepts_the_providers_actual_event_mapping(
+    tmp_path: Path, event: str, tier: str
+) -> None:
+    result = run_aggregate(tmp_path, event=event, tier=tier)
+    assert result.returncode == 0, result.stdout + result.stderr
