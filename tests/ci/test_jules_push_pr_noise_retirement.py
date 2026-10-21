@@ -68,7 +68,7 @@ def test_repository_state_guard_passes() -> None:
 def test_retired_workflows_not_required_contexts() -> None:
     config = load_config(CONFIG)
     if not REQUIRED_CHECKS.is_file():
-        pytest.skip("ci-required-checks-live.json lands with RM #2216")
+        pytest.skip("ci-required-checks-live.json not yet on UpstreamDrift main")
     findings = check_not_required_contexts(config)
     assert findings == []
     payload = json.loads(REQUIRED_CHECKS.read_text(encoding="utf-8"))
