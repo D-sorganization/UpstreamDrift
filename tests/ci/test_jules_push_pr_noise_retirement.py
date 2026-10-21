@@ -87,7 +87,8 @@ def test_disable_workflow_exists_for_post_merge() -> None:
 
 def test_disable_workflow_on_lint_cancel_false_allowlist() -> None:
     lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
-    allowlist = next(
-        line for line in lint.splitlines() if "nightly-publish.yml" in line
-    )
-    assert "jules-push-pr-noise-disable.yml" in allowlist
+    assert "audit_workflow_cancellation_semantics.py" in lint
+    script = (
+        REPO_ROOT / "scripts" / "ci" / "audit_workflow_cancellation_semantics.py"
+    ).read_text(encoding="utf-8")
+    assert '"jules-push-pr-noise-disable.yml"' in script
