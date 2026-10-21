@@ -760,7 +760,7 @@ def test_two_pad_hyperstatic_penalty_vs_mujoco_cone_divergence() -> None:
 
     law = ContactParameters(
         stiffness_n_m=171095.0080515298,
-        dissipation_s_m=0.38266566243249167,
+        dissipation_s_m=0.3826656624324893,
         static_friction=0.9,
         dynamic_friction=0.7,
         viscous_friction=0.0,

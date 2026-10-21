@@ -50,7 +50,7 @@
     }
   },
   "law": {
-    "damping_s_m": 0.38266566243249167,
+    "damping_s_m": 0.3826656624324893,
     "dynamic_friction": 0.7,
     "normal_stiffness_n_m": 171095.0080515298,
     "patch_radius_m": 0.002293315093406717,

@@ -11,7 +11,9 @@ the MuJoCo and Simscape parity tests both use it.
 from __future__ import annotations
 
 import difflib
+import json
 import logging
+import math
 from pathlib import Path
 from typing import Any
 
@@ -29,12 +31,41 @@ from src.shared.python.grip_contact.parity import (
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "canonical_export_float",
+    "canonicalize_export_tree",
     "failing_net_wrench",
     "net_club_wrench",
     "net_club_wrench_errors",
     "payloads_numerically_close",
     "report_generated_drift",
 ]
+
+
+def canonical_export_float(val: float) -> float:
+    """Return a float64 value with deterministic decimal text for codegen exports.
+
+    Postcondition: ``json.dumps(canonical_export_float(x))`` is stable across
+    supported CPython versions on the CI matrix (3.11 and 3.12).
+    """
+    f = float(val)
+    if not math.isfinite(f):
+        raise ValueError(f"canonical_export_float requires a finite float, got {val!r}")
+    if abs(f) < 1e-18:
+        return 0.0
+    return json.loads(json.dumps(f))
+
+
+def canonicalize_export_tree(value: Any) -> Any:
+    """Recursively canonicalize floats in nested JSON-like export structures."""
+    if isinstance(value, float):
+        return canonical_export_float(value)
+    if isinstance(value, list):
+        return [canonicalize_export_tree(item) for item in value]
+    if isinstance(value, tuple):
+        return [canonicalize_export_tree(item) for item in value]
+    if isinstance(value, dict):
+        return {key: canonicalize_export_tree(item) for key, item in value.items()}
+    return value
 
 
 def report_generated_drift(

@@ -24,6 +24,8 @@ from src.shared.python.grip_contact.contact_topology import (
 )
 from src.shared.python.grip_contact.interface import SIDES, GripInterface
 from src.shared.python.grip_contact.net_wrench_parity import (
+    canonical_export_float,
+    canonicalize_export_tree,
     payloads_numerically_close,
     report_generated_drift,
 )
@@ -80,9 +82,11 @@ STYLE_IDS: dict[str, int] = {"overlap": 1, "interlock": 2, "ten_finger": 3}
 
 
 def _fmt(val: float) -> str:
-    """Format a float with full IEEE-754 round-trip precision for MATLAB/JSON."""
-    clean = 0.0 if abs(float(val)) < 1e-18 else float(val)
-    return f"{clean:.17g}"
+    """Format a float with deterministic decimal text for MATLAB literals."""
+    clean = canonical_export_float(val)
+    if clean == 0.0:
+        return "0"
+    return json.dumps(clean)
 
 
 def _orthogonal_unit(axis: np.ndarray) -> np.ndarray:
@@ -212,7 +216,7 @@ def build_kernel_params_payload(
         "styles": styles_dict,
     }
     validate_kernel_params_payload(payload)
-    return payload
+    return canonicalize_export_tree(payload)
 
 
 def validate_kernel_params_payload(payload: Mapping[str, Any]) -> None:
