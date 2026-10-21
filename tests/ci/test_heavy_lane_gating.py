@@ -167,17 +167,21 @@ class TestOpenSimMainRunsComplete:
     #13513: the job is not a required check (only ``quality-gate`` is), so the
     merge queue never waited on it. It no longer triggers on ``merge_group``;
     PR runs give pre-merge signal and main push runs give post-merge signal.
+
+    #13571: path/label gating moved into ``classify-changes``; nightly schedule
+    and ``ci:opensim`` label events follow the same concurrency pattern as the
+    optional-stack lane.
     """
 
     NAME = "ci-requires-opensim.yml"
-    GROUP = "ci-requires-opensim-${{ github.event_name }}-${{ github.ref }}"
     CANCEL = "${{ github.event_name == 'pull_request' }}"
+    OPENSIM_LABEL = "ci:opensim"
 
     def test_group_is_per_event_and_ref(self) -> None:
         group = _load(self.NAME)["concurrency"]["group"]
         assert "github.sha" not in group, "per-SHA groups queue every main push"
         assert "runner." not in group, "runner context is invalid in concurrency"
-        assert group == self.GROUP
+        assert f"github.event.label.name != '{self.OPENSIM_LABEL}'" in group
 
     def test_only_pr_runs_cancel_in_progress(self) -> None:
         # push and dispatch runs evaluate this to false, so a main run that
@@ -190,10 +194,20 @@ class TestOpenSimMainRunsComplete:
         on = _triggers(_load(self.NAME))
         assert "merge_group" not in on, "merge queue never waits on this job"
 
-    def test_pr_and_main_push_triggers_remain(self) -> None:
+    def test_pr_paths_or_label_gating_is_job_level(self) -> None:
         on = _triggers(_load(self.NAME))
-        assert "pull_request" in on, "PR runs give the pre-merge signal"
+        pr = on["pull_request"]
+        assert "paths" not in pr
+        assert "paths-ignore" not in pr
+        assert "labeled" in pr["types"]
+        jobs = _load(self.NAME)["jobs"]
+        assert "classify-changes" in jobs
+        assert "needs.classify-changes.outputs.run == 'true'" in jobs["pick-runner"]["if"]
+
+    def test_post_merge_nightly_and_dispatch_triggers_remain(self) -> None:
+        on = _triggers(_load(self.NAME))
         assert on["push"]["branches"] == ["main"], "main runs give post-merge signal"
+        assert on["schedule"], "nightly covers non-OpenSim PR regressions"
         assert "workflow_dispatch" in on
 
     def test_workflow_lint_allows_conditional_cancel(self) -> None:
