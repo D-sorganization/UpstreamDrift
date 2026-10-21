@@ -1,68 +1,60 @@
-# Dependabot configuration (Issues #767, #1493)
-# Automatically creates PRs to update dependencies
-
+# Golden target — UpstreamDrift (RM#2196)
 version: 2
-updates:
-  # Python dependencies
-  - package-ecosystem: "pip"
-    directory: "/"
+
+multi-ecosystem-groups:
+  weekly-deps:
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Los_Angeles
+
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    patterns: ["*"]
+    multi-ecosystem-group: weekly-deps
     open-pull-requests-limit: 10
     labels:
-      - "dependencies"
-      - "automated"
+      - dependencies
+      - automated
     commit-message:
-      prefix: "chore(deps)"
-    groups:
-      # Group minor/patch updates to reduce PR noise
-      python-minor-patch:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
-    # casadi is pinned by the qualified Bioptim runtime contract:
-    # tests/unit/optimization/test_bioptim_dependency_contract.py
-    # (test_bioptim_admits_the_numerically_checked_runtime) requires the
-    # optimal-control + bioptim extras to accept exactly casadi 3.6.7 and
-    # reject newer releases until re-qualified numerically. Drop this
-    # ignore only alongside a re-qualification of the contract test.
+      prefix: chore(deps)
     ignore:
-      - dependency-name: "casadi"
+      - dependency-name: casadi
 
-  # GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: weekly
+      day: monday
+    patterns: ["*"]
+    multi-ecosystem-group: weekly-deps
     open-pull-requests-limit: 5
     labels:
-      - "dependencies"
-      - "ci/cd"
-      - "automated"
+      - dependencies
+      - ci/cd
+      - automated
     commit-message:
-      prefix: "chore(ci)"
+      prefix: chore(ci)
 
-  # npm (UI dependencies)
-  - package-ecosystem: "npm"
-    directory: "/ui"
+  - package-ecosystem: npm
+    directory: /ui
     schedule:
-      interval: "weekly"
+      interval: weekly
+    patterns: ["*"]
+    multi-ecosystem-group: weekly-deps
     open-pull-requests-limit: 5
     labels:
-      - "dependencies"
-      - "frontend"
-      - "automated"
+      - dependencies
+      - frontend
+      - automated
     commit-message:
-      prefix: "chore(ui-deps)"
-    # @vitejs/plugin-react 6.x requires Vite 8 (peerDependencies vite
-    # ^8.0.0; Vite 7 exports no ./internal entrypoint), so a lone major
-    # bump cannot merge against ui's vite ^7.3.2 — see issue #9249.
-    # Drop this ignore when the ui toolchain upgrades to Vite 8.
+      prefix: chore(ui-deps)
     ignore:
       - dependency-name: "@vitejs/plugin-react"
         update-types:
-          - "version-update:semver-major"
+          - version-update:semver-major
