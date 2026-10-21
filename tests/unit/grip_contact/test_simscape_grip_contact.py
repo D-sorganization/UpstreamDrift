@@ -149,6 +149,7 @@ def test_kernel_params_payload_and_matlab_source_contract() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.xdist_group("grip_contact_committed_generated_check")
 @pytest.mark.quarantine(
     issue="13544",
     owner="gemini",
@@ -289,6 +290,7 @@ def test_matlab_pair_wrench_unittest_file_contract() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.xdist_group("grip_contact_committed_generated_check")
 @pytest.mark.quarantine(
     issue="13544",
     owner="gemini",

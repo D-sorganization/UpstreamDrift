@@ -10,10 +10,13 @@ relax the check itself (a drifted file still returns ``1``).
 
 from __future__ import annotations
 
+import threading
+import time
 from pathlib import Path
 
 import pytest
 
+from src.shared.python.grip_contact.generated_export_lock import GENERATED_EXPORT_LOCK
 from src.shared.python.grip_contact.matlab_kernel import export_matlab_kernel_bundle
 from src.shared.python.grip_contact.net_wrench_parity import report_generated_drift
 from src.shared.python.grip_contact.simscape_grip_contact import export_scenarios_json
@@ -36,6 +39,45 @@ def test_report_generated_drift_names_file_and_bounds_diff(
     # 20 diff lines plus a header line and a truncation line, never the whole file.
     assert len(err.splitlines()) <= 24
     assert "LINE 499" not in err
+
+
+@pytest.mark.unit
+def test_committed_export_paths_share_process_lock(tmp_path: Path) -> None:
+    """#13544: exporters serialize when targets include committed generated paths."""
+    from src.shared.python.grip_contact.matlab_kernel import (
+        DEFAULT_GOLDEN_JSON_PATH,
+        DEFAULT_KERNEL_M_PATH,
+        DEFAULT_PARAMS_JSON_PATH,
+        _uses_committed_generated_paths,
+    )
+
+    assert _uses_committed_generated_paths(
+        DEFAULT_KERNEL_M_PATH, DEFAULT_PARAMS_JSON_PATH, DEFAULT_GOLDEN_JSON_PATH
+    )
+    local = tmp_path / "k.m", tmp_path / "p.json", tmp_path / "g.json"
+    assert not _uses_committed_generated_paths(*local)
+
+    paths = {
+        "kernel_m_path": local[0],
+        "params_json_path": local[1],
+        "golden_json_path": local[2],
+    }
+    assert export_matlab_kernel_bundle(**paths, check=False) == 0
+    held = threading.Event()
+
+    def hold_lock() -> None:
+        with GENERATED_EXPORT_LOCK:
+            held.set()
+            time.sleep(0.05)
+
+    worker = threading.Thread(target=hold_lock)
+    worker.start()
+    assert held.wait(1.0)
+    start = time.monotonic()
+    assert export_scenarios_json(tmp_path / "scenarios.json", check=False) == 0
+    elapsed = time.monotonic() - start
+    worker.join(timeout=1.0)
+    assert elapsed >= 0.04
 
 
 @pytest.mark.unit
