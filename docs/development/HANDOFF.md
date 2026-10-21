@@ -1,3 +1,11 @@
+# Oldest-issues backlog sweep — #13011 / #13544 / #12998
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `cursor/oldest-issues-sweep-b975`; PR: pending push.
+- Objective: triage the 95 open issues oldest-first; land small fixes with TDD/DbC.
+- Completed: realtime `FileTransport` stops and joins the poll thread when the last subscriber unsubscribes (#13011); Simscape grip committed-path export checks share a process lock and xdist group (#13544); `jaxsim_dashboard` added to `engines.dashboards` in `feature_parity.json` (#12998 gap).
+- Validation: `pytest tests/shared/realtime/test_transport_file.py tests/unit/grip_contact/test_generated_drift_report.py tests/config/feature_parity -q -n 4 --no-cov` (grip `--check` on committed `.m` may fail locally on float formatting; unchanged on CI trees where committed bytes match).
+- Next: open PR with triage tables for Dieter bulk-close of verified-closed LIFT issues.
+
 # Project Steward Pass — 2026-10-19
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `staff/project-steward-task-2307c8`; draft PR opened from this branch (`docs(project): steward status 2026-10-19`).

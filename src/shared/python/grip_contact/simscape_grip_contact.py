@@ -34,6 +34,7 @@ from src.shared.python.grip_contact.contact_topology import (
     GripStyle,
     contact_topology,
 )
+from src.shared.python.grip_contact.generated_export_lock import GENERATED_EXPORT_LOCK
 from src.shared.python.grip_contact.interface import GripInterface
 from src.shared.python.grip_contact.matlab_kernel import (
     DEFAULT_SQUEEZE_PER_HAND_N,
@@ -457,6 +458,17 @@ def export_scenarios_json(
     check: bool = False,
 ) -> int:
     """Write or check ``gs3dx_grip_contact_scenarios.json``."""
+    if Path(path).resolve() == DEFAULT_SCENARIOS_JSON_PATH.resolve():
+        with GENERATED_EXPORT_LOCK:
+            return _export_scenarios_json_locked(path=path, check=check)
+    return _export_scenarios_json_locked(path=path, check=check)
+
+
+def _export_scenarios_json_locked(
+    path: Path,
+    *,
+    check: bool,
+) -> int:
     payload = build_scenarios_payload()
     text = render_json_deterministic(payload)
     target = Path(path)

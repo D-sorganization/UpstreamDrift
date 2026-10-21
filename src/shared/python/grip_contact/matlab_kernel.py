@@ -18,6 +18,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.grip_contact.bushing_law import BushingState, cross3
+from src.shared.python.grip_contact.generated_export_lock import GENERATED_EXPORT_LOCK
 from src.shared.python.grip_contact.contact_topology import (
     GripStyle,
     contact_topology,
@@ -1132,6 +1133,25 @@ def kernel_bundle_sha256(
     }
 
 
+def _uses_committed_generated_paths(
+    kernel_m_path: Path,
+    params_json_path: Path,
+    golden_json_path: Path,
+) -> bool:
+    """Return True when any target is the repository's committed generated path."""
+    committed = (
+        DEFAULT_KERNEL_M_PATH.resolve(),
+        DEFAULT_PARAMS_JSON_PATH.resolve(),
+        DEFAULT_GOLDEN_JSON_PATH.resolve(),
+    )
+    targets = (
+        Path(kernel_m_path).resolve(),
+        Path(params_json_path).resolve(),
+        Path(golden_json_path).resolve(),
+    )
+    return any(t in committed for t in targets)
+
+
 def export_matlab_kernel_bundle(
     *,
     kernel_m_path: Path = DEFAULT_KERNEL_M_PATH,
@@ -1140,6 +1160,31 @@ def export_matlab_kernel_bundle(
     check: bool = False,
 ) -> int:
     """Write or check ``gs3dx_grip_contact_kernel.m``, params JSON, and golden JSON."""
+    if _uses_committed_generated_paths(
+        kernel_m_path, params_json_path, golden_json_path
+    ):
+        with GENERATED_EXPORT_LOCK:
+            return _export_matlab_kernel_bundle_locked(
+                kernel_m_path=kernel_m_path,
+                params_json_path=params_json_path,
+                golden_json_path=golden_json_path,
+                check=check,
+            )
+    return _export_matlab_kernel_bundle_locked(
+        kernel_m_path=kernel_m_path,
+        params_json_path=params_json_path,
+        golden_json_path=golden_json_path,
+        check=check,
+    )
+
+
+def _export_matlab_kernel_bundle_locked(
+    *,
+    kernel_m_path: Path,
+    params_json_path: Path,
+    golden_json_path: Path,
+    check: bool,
+) -> int:
     params = build_kernel_params_payload()
     golden = build_golden_vectors_payload(params)
     m_text = render_matlab_kernel_source(params)
