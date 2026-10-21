@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-21 | #13586 | Retire Jules push/PR noise workflows batch 1 with archived rollback copies and post-merge gh disable. |
 | 2026-10-21 | #13589 | Add OpenSim CI failure triage snapshot, doc, and classifier script for UD-CI-002t. |
 | 2026-10-21 | #13588 | Record merge-queue batch-size experiment snapshots and fleet merge settings checker |
 | 2026-10-21 | #13583 | Move cross-engine leaderboard JSON publish off PR triggers (nightly and main push only). |
