@@ -1,4 +1,4 @@
-# OpenSim CI Failure Triage (UD-CI-002t)
+# OpenSim CI Failure Triage (UD-CI-002T)
 
 Parent epic: [Repository_Management#2215](https://github.com/D-sorganization/Repository_Management/issues/2215).
 
@@ -12,7 +12,7 @@ This note satisfies [#13582](https://github.com/D-sorganization/UpstreamDrift/is
 | [`scripts/ci/opensim_workflow_triage.py`](../../scripts/ci/opensim_workflow_triage.py) | Regenerate the snapshot from GitHub Actions (`python3 -m scripts.ci.opensim_workflow_triage --window-days 14 --output …`) |
 | [`tests/ci/test_opensim_workflow_triage.py`](../../tests/ci/test_opensim_workflow_triage.py) | Classification contract tests |
 
-## Window And Headline Metrics
+## Window and Headline Metrics
 
 Snapshot generated **2026-10-21** (UTC), workflow `ci-requires-opensim.yml`, 14-day lookback:
 
@@ -26,7 +26,7 @@ Snapshot generated **2026-10-21** (UTC), workflow `ci-requires-opensim.yml`, 14-
 
 Cancelled runs (199) are concurrency noise from `cancel-in-progress` on PRs and are excluded from failure-rate math.
 
-## Failure Mode Classification (14d)
+## Failure Mode Classification (14D)
 
 | Category | Count | Share of failures |
 | -------- | ----- | ----------------- |
@@ -50,7 +50,7 @@ Infra buckets are **not** candidates for `@pytest.mark.quarantine`; they need ru
 
 Example failing run for signature 1: `https://github.com/D-sorganization/UpstreamDrift/actions/runs/39563097770`
 
-### Regression Detail (test_defect)
+### Regression Detail (Test Defect)
 
 From job logs and [#13564](https://github.com/D-sorganization/UpstreamDrift/issues/13564):
 
