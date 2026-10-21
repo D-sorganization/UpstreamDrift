@@ -29,7 +29,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-10-21
 - **Last verified:** 2026-10-21 (SELF)
 - **Summary:** Restore native muscle-effort allocation feasibility under the shared nfev budget, document allocator status semantics, align lift ID with Simbody pelvis Euler rates, use analytic mapped spline accelerations for joint-reaction ID, and disable Rajagopal couplers during reaction ID (revision 6) so self-hosted OpenSim matches the spine joint-reaction contract.
-- **Next step:** Confirm PR #13568 `CI Requires OpenSim` passes with `MSK_LIFT_JR_KINEMATICS_REVISION >= 6` and squat smoke gate green on the self-hosted fleet.
+- **Next step:** Merge PR #13568 (OpenSim + quality-gate green on `863acc1b75`).
 
 ### DL-#13038 · Record the OSL Epic Handoff State (Open PRs, Owner Decisions, Rejected Video Work)
 

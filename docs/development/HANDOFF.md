@@ -10,7 +10,9 @@
 - Architecture: `_solve_frame_reaction` decomposed into `msk_lift_joint_reaction_frame.py` + `msk_lift_joint_reaction_diagnostics.py` (function-lines budget).
 - CI batch: certifi/Pillow floors (#13563 pins); regenerated Simscape grip contact generated artifacts from Python source of truth.
 - OpenSim job hygiene: pre-pytest smoke gate, `PYTHONDONTWRITEBYTECODE`, thread caps, `__pycache__` purge after editable install.
-- Next step: merge after `CI Requires OpenSim` (revision ≥ 6) and quality-gate are green on PR #13568.
+- CI (head `863acc1b75`): **Real OpenSim 4.6** and **quality-gate** green; squat smoke + `requires_opensim` pytest passed with revision 6 / couplers disabled.
+- Unrelated red on same push: `jaxsim-upgrade-guard` (MuJoCo free-fall fixture `floating` joint assert on self-hosted) and `Canonical Core Conformance Gate` (runner shutdown during post-job cache upload after tests passed).
+- Next step: merge PR #13568 for #13564; re-run optional companion workflows if branch protection lists them.
 
 # Project Steward Pass — 2026-10-19
 
