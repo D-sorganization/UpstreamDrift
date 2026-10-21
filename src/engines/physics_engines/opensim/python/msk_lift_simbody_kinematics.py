@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -82,6 +83,31 @@ def _mapped_speeds_at_time(
     return u
 
 
+def mapped_acceleration_from_speeds(
+    t: float,
+    t_min: float,
+    t_max: float,
+    sample_dt: float,
+    speeds_at: Callable[[float], Array],
+    analytic_udot: Array,
+) -> Array:
+    """Finite-difference acceleration on mapped speeds when the window is interior.
+
+    Uses a centred difference only when ``t ± sample_dt/2`` lies inside
+    ``[t_min, t_max]``.  At motion endpoints (or when the window is clipped),
+    returns the spline-derived *analytic_udot* so boundary times do not use a
+    one-sided secant (which is first-order and biased — e.g. ``u=t²`` at ``t=0``).
+    """
+    half = 0.5 * sample_dt
+    t_lo = t - half
+    t_hi = t + half
+    if t_lo >= t_min and t_hi <= t_max:
+        u_lo = speeds_at(t_lo)
+        u_hi = speeds_at(t_hi)
+        return (u_hi - u_lo) / sample_dt
+    return np.asarray(analytic_udot, dtype=float).copy()
+
+
 def simbody_kinematics_at_spline_time(
     splines: Any,
     coordinates: tuple[str, ...],
@@ -94,10 +120,11 @@ def simbody_kinematics_at_spline_time(
 ) -> tuple[Array, Array, Array]:
     """Return ``(q, u, udot)`` for inverse dynamics at spline time *t*.
 
-    Generalized accelerations ``udot`` use central differences on mapped
-    generalized speeds so they stay consistent with Simbody's realized
-    ``State.getUDot()`` after ``InverseDynamicsSolver`` (analytic Euler-angle
-    second derivatives can overshoot the ID residual on some platforms).
+    Interior times use centred differences on mapped generalized speeds so
+    ``udot`` stays consistent with Simbody's realized ``State.getUDot()``
+    after ``InverseDynamicsSolver``.  Endpoints use the analytic spline
+    accelerations (including pelvis Euler mapping) because a clipped window
+    would be a one-sided secant.
     """
     if len(coordinates) != n:
         raise ValueError("coordinates length must match n")
@@ -110,12 +137,10 @@ def simbody_kinematics_at_spline_time(
     u, analytic_udot = generalized_speeds_from_spline_derivatives(
         coordinates, q, qd, qdd
     )
-    half = 0.5 * sample_dt
-    t_lo = max(t_min, t - half)
-    t_hi = min(t_max, t + half)
-    if t_hi - t_lo < sample_dt * 0.25:
-        return q, u, analytic_udot
-    u_lo = _mapped_speeds_at_time(splines, coordinates, n, t_lo)
-    u_hi = _mapped_speeds_at_time(splines, coordinates, n, t_hi)
-    udot = (u_hi - u_lo) / (t_hi - t_lo)
+    def speeds_at(tt: float) -> Array:
+        return _mapped_speeds_at_time(splines, coordinates, n, tt)
+
+    udot = mapped_acceleration_from_speeds(
+        t, t_min, t_max, sample_dt, speeds_at, analytic_udot
+    )
     return q, u, udot
