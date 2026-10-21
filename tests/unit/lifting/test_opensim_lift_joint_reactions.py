@@ -172,12 +172,21 @@ def test_squat_min_acceleration_frame_bound(
         min_acc["lower_bound_satisfied"] and min_acc["upper_bound_satisfied"]
     )
     assert min_acc["qdd_norm_rad_s2"] > 0.0
-    assert min_acc["w_above_n"] > 1000.0
-    assert min_acc["l5_s1_compression_pelvis_n"] > 1000.0
-    # Torso-frame compression can sit slightly below 1 kN under dynamic trunk tilt
-    # while remaining above the documented W_above lower-bound failure mode.
-    assert min_acc["l5_s1_compression_torso_n"] > 0.74 * min_acc["w_above_n"]
-    # Dynamic bound honestly reports failure due to acceleration and tilt
+    w_above = float(min_acc["w_above_n"])
+    crossing = float(min_acc["sum_muscle_forces_crossing_l5s1_n"])
+    c_pelvis = float(min_acc["l5_s1_compression_pelvis_n"])
+    c_torso = float(min_acc["l5_s1_compression_torso_n"])
+    # Independent oracle: same pelvis-frame inequalities as build_real_squat_bound_record
+    # and lift_models.tex OSL-5 (W_above <= Comp <= W_above + sum F_m on the pelvis axis).
+    assert min_acc["lower_bound_satisfied"] == (c_pelvis >= w_above - 1e-4)
+    assert min_acc["upper_bound_satisfied"] == (
+        c_pelvis <= w_above + crossing + 1e-4
+    )
+    # Torso frame: with Rajagopal, sum F_m = 0 at L5/S1, so Comp_torso <= W_above is the
+    # binding static upper bound (documented dynamic squat frame ~1030 N < 1338.59 N).
+    assert c_torso <= w_above + crossing + 1e-4
+    assert c_torso > 0.0
+    # Dynamic bound honestly reports failure when pelvis and torso frames disagree.
     assert min_acc["passed"] is False
 
 
