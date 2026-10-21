@@ -2782,6 +2782,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13573 · Merge-Queue-Safe Workflow Cancel-in-Progress Audit and Gh-Readonly-Queue Push Ignores (UD-CI-032).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13573
+- **Branch:** merged via #13584
+- **PR:** #13584
+- **Paths:** see #13584
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`e30806f5`; collated from changes/13573-merge-queue-safe-workflow-cancel-in-prog.md)
+- **Summary:** Merge-queue-safe workflow cancel-in-progress audit and gh-readonly-queue push ignores (UD-CI-032).
+- **Next step:** Shipped in PR #13584.
+
 ### DL-#13575 · Retire Jules Push/PR Noise Workflows Batch 1 With Archived Rollback Copies and Post-Merge Gh Disable.
 
 - **State:** shipped
