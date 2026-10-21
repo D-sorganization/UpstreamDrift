@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-21 | #13602 | Serialize Simscape grip committed-path generated export checks under xdist |
+| 2026-10-21 | #13600 | Stop realtime file-tail poll thread when last subscriber unsubscribes |
 | 2026-10-21 | #13603 | Register jaxsim_dashboard on engines.dashboards for feature-parity tile coverage |
 | 2026-10-21 | #13598 | engine docker cache steps per fleet contract |
 | 2026-10-21 | #13596 | Quarantine pilot for Simscape grip contact tests and audit validator (UD-CI-030) |
