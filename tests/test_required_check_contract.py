@@ -1,6 +1,7 @@
 """Required check must reject failed, cancelled or unexpectedly skipped children."""
 
 from pathlib import Path
+import os
 import shutil
 
 import pytest
@@ -9,7 +10,9 @@ from tests.ci.ci_tier_contract import FULL_TIER_JOBS, run_aggregate, workflow
 
 pytestmark = [
     pytest.mark.unit,
-    pytest.mark.skipif(not shutil.which("bash"), reason="Bash required"),
+    pytest.mark.skipif(
+        os.name == "nt" or not shutil.which("bash"), reason="POSIX Bash required"
+    ),
 ]
 REQUIRED_CHILDREN = tuple(workflow()["jobs"]["quality-gate"]["needs"])
 

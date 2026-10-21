@@ -13,7 +13,9 @@ from tests.ci.ci_tier_contract import FULL_TIER_JOBS, ROOT, run_aggregate, workf
 
 pytestmark = [
     pytest.mark.unit,
-    pytest.mark.skipif(not shutil.which("bash"), reason="Bash required"),
+    pytest.mark.skipif(
+        os.name == "nt" or not shutil.which("bash"), reason="POSIX Bash required"
+    ),
 ]
 
 
