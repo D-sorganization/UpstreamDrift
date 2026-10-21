@@ -78,13 +78,14 @@ jobs:
         env:
           DEVLOG_BASE_SHA: ${{ steps.devlog-base.outputs.sha }}
           REPOSITORY: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
           receipt="$RUNNER_TEMP/devlog-eligibility.json"
           if [[ -n "$DEVLOG_BASE_SHA" && -f policy/scripts/devlog_repair_eligibility.py ]]; then
             head_sha=$(git -C target rev-parse HEAD)
             python policy/scripts/devlog_repair_eligibility.py \
-              --target-root target --policy-root policy --repository "$REPOSITORY" \
+              --target-root target --policy-root policy --repository "$REPOSITORY" --event "$EVENT_NAME" \
               --base-sha "$DEVLOG_BASE_SHA" --head-sha "$head_sha" > "$receipt"
           else
             printf '%s\n' '{"mode":"strict","reason":"Reconciliation or protected selector not yet published"}' > "$receipt"

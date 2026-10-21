@@ -142,10 +142,12 @@ def test_manual_and_schedule_default_to_strict_without_head_fallback() -> None:
     workflow = _workflow()
     selector = _step(workflow, "Select approved development governance mode")
     script = selector["run"]
+    assert selector["env"]["EVENT_NAME"] == "${{ github.event_name }}"
     assert 'mode":"strict"' in script
     assert "Reconciliation or protected selector not yet published" in script
     assert "policy/scripts/devlog_repair_eligibility.py" in script
     assert '--base-sha "$DEVLOG_BASE_SHA" --head-sha "$head_sha"' in script
+    assert '--event "$EVENT_NAME"' in script
     assert (
         "workflow_dispatch|schedule) ;;"
         in _step(workflow, "Resolve trusted development-log baseline")["run"]
@@ -233,6 +235,7 @@ def test_selector_accepts_only_repair_or_strict(
             "PATH": f"{fake_bin}{os.pathsep}{os.environ['PATH']}",
             "DEVLOG_BASE_SHA": "a" * 40,
             "REPOSITORY": "D-sorganization/UpstreamDrift",
+            "EVENT_NAME": "merge_group",
             "RUNNER_TEMP": str(tmp_path),
             "GITHUB_OUTPUT": str(output),
         },
