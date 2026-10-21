@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13580 · Quarantine Pilot for Simscape Grip Contact Tests and Audit Validator (UD-CI-030)
+
+- **State:** in_review
+- **Owner:** gemini
+- **Issue:** #13580
+- **Branch:** feat/quarantine-pilot-13580
+- **PR:** #13596
+- **Paths:** see #13596
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`1e652a65`; collated from changes/13580-quarantine-pilot-for-simscape-grip-conta.md)
+- **Summary:** Quarantine pilot for Simscape grip contact tests and audit validator (UD-CI-030)
+- **Next step:** Merge via merge queue.
+
 ### DL-#13574 · Record Merge-Queue Batch-Size Experiment Snapshots and Fleet Merge Settings Checker
 
 - **State:** in_review
