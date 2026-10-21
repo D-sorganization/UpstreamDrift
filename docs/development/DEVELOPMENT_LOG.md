@@ -29,7 +29,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-10-21
 - **Last verified:** 2026-10-21 (SELF)
 - **Summary:** Restore native muscle-effort allocation feasibility under the shared nfev budget, document allocator status semantics, align lift ID with Simbody pelvis Euler rates, and derive joint-reaction acceleration targets from central differences on mapped speeds so ID residuals match `State.getUDot()` on self-hosted OpenSim runners.
-- **Next step:** Push the FD kinematics and `pip install --force-reinstall -e` CI change, then merge after `CI Requires OpenSim` is green on PR #13568.
+- **Next step:** Merge after `CI Requires OpenSim` is green on PR #13568 (endpoint FD uses analytic accelerations; interior uses centred differences).
 
 ### DL-#13038 · Record the OSL Epic Handoff State (Open PRs, Owner Decisions, Rejected Video Work)
 
