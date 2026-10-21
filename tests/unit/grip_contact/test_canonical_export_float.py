@@ -36,7 +36,10 @@ def test_canonical_export_float_unifies_python_matrix_damping() -> None:
 
 def test_canonicalize_export_tree_recurses() -> None:
     tree = canonicalize_export_tree(
-        {"law": {"damping_s_m": 0.3826656624324893}, "rows": [[1.0, 2.0000000000000004]]}
+        {
+            "law": {"damping_s_m": 0.3826656624324893},
+            "rows": [[1.0, 2.0000000000000004]],
+        }
     )
     assert tree["law"]["damping_s_m"] == canonical_export_float(0.3826656624324893)
     assert tree["rows"][0][1] == canonical_export_float(2.0000000000000004)
@@ -49,7 +52,9 @@ def test_committed_matlab_kernel_and_scenarios_exports_are_fresh() -> None:
 
 
 def test_kernel_params_damping_matches_canonical_law() -> None:
-    from src.shared.python.grip_contact.net_wrench_parity import canonicalize_export_tree
+    from src.shared.python.grip_contact.net_wrench_parity import (
+        canonicalize_export_tree,
+    )
 
     export_params = canonicalize_export_tree(build_kernel_params_payload())
     damping = export_params["law"]["damping_s_m"]
