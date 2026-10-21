@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.ci.ci_tier_contract import FULL_TIER_JOBS, ROOT, run_aggregate, workflow
+from ci_tier_contract import FULL_TIER_JOBS, ROOT, run_aggregate, workflow
 
 pytestmark = [
     pytest.mark.unit,

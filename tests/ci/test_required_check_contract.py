@@ -6,7 +6,7 @@ import shutil
 
 import pytest
 
-from tests.ci.ci_tier_contract import FULL_TIER_JOBS, run_aggregate, workflow
+from ci_tier_contract import FULL_TIER_JOBS, run_aggregate, workflow
 
 pytestmark = [
     pytest.mark.unit,

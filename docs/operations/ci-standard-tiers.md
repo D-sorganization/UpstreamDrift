@@ -62,7 +62,8 @@ pinned bytes, event mapping and conservative empty-diff behavior.
 
 ```bash
 python3 -m pytest -o addopts= --confcutdir=tests/ci \
-  tests/test_ci_standard_workflow.py tests/test_required_check_contract.py \
+  tests/ci/test_ci_standard_workflow.py \
+  tests/ci/test_required_check_contract.py \
   tests/ci/test_classify_event_tier.py -q
 ```
 
