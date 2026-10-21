@@ -10,6 +10,8 @@ multi-ecosystem-groups:
       timezone: America/Los_Angeles
     commit-message:
       prefix: chore(deps)
+    # GitHub: open-pull-requests-limit only on MEG (not on grouped updates).
+    # max(10 pip, 5 github-actions, 5 npm) from fleet golden.
     open-pull-requests-limit: 10
 
 updates:
