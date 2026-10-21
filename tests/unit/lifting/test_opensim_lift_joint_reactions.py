@@ -179,9 +179,7 @@ def test_squat_min_acceleration_frame_bound(
     # Independent oracle: same pelvis-frame inequalities as build_real_squat_bound_record
     # and lift_models.tex OSL-5 (W_above <= Comp <= W_above + sum F_m on the pelvis axis).
     assert min_acc["lower_bound_satisfied"] == (c_pelvis >= w_above - 1e-4)
-    assert min_acc["upper_bound_satisfied"] == (
-        c_pelvis <= w_above + crossing + 1e-4
-    )
+    assert min_acc["upper_bound_satisfied"] == (c_pelvis <= w_above + crossing + 1e-4)
     # Torso frame: with Rajagopal, sum F_m = 0 at L5/S1, so Comp_torso <= W_above is the
     # binding static upper bound (documented dynamic squat frame ~1030 N < 1338.59 N).
     assert c_torso <= w_above + crossing + 1e-4
@@ -199,7 +197,9 @@ def test_squat_joint_reactions_computed(
     sol = squat_reaction_solution
     assert sol["status"] == "complete"
     assert sol["lift"] == "squat"
-    assert sol["acceleration_error_max"] < 5e-6
+    assert sol["acceleration_error_max"] < 5e-6, sol.get("acceleration_realization")
+    realization = sol.get("acceleration_realization") or {}
+    assert realization.get("source_fingerprint", {}).get("kinematics_revision") >= 4
 
     # Inherited OSL-4 qualification
     assert sol["classification"] == "unqualified"

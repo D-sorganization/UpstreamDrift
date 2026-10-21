@@ -198,6 +198,19 @@ jobs:
           assert version.startswith("4.6"), f"expected OpenSim 4.6, got {version}"
           PY
 
+      - name: Verify squat joint-reaction kinematics revision
+        run: |
+          python - <<'PY'
+          import json
+          from src.engines.physics_engines.opensim.python.msk_lift_joint_reactions import (
+              MSK_LIFT_JR_KINEMATICS_REVISION,
+              joint_reaction_source_fingerprint,
+          )
+
+          assert MSK_LIFT_JR_KINEMATICS_REVISION >= 4
+          print(json.dumps(joint_reaction_source_fingerprint(), indent=2))
+          PY
+
       - name: Run requires_opensim tests
         run: |
           python -m pytest \
