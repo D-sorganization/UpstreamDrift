@@ -1,0 +1,174 @@
+name: Fleet Policy Gate
+
+on:
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 9 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fleet-policy-gate-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  fleet-policy-gate:
+    name: Fleet policy gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: target
+          # Bounded history supports registered continuation ancestry without
+          # downloading a consumer repository's complete history.
+          fetch-depth: 64
+
+      - uses: actions/checkout@v4
+        with:
+          repository: D-sorganization/Repository_Management
+          ref: main
+          path: policy
+
+      - name: Resolve trusted development-log baseline
+        id: devlog-base
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+        run: |
+          set -euo pipefail
+          base_sha=""
+          case "$EVENT_NAME" in
+            pull_request) base_sha="$PR_BASE_SHA" ;;
+            merge_group) base_sha="$MERGE_GROUP_BASE_SHA" ;;
+            workflow_dispatch|schedule) ;;
+            *) echo "Unsupported workflow event: $EVENT_NAME" >&2; exit 2 ;;
+          esac
+          if [[ "$EVENT_NAME" == "pull_request" || "$EVENT_NAME" == "merge_group" ]]; then
+            if [[ -z "$base_sha" ]]; then
+              echo "Required event base SHA is missing" >&2
+              exit 2
+            fi
+          fi
+          if [[ -n "$base_sha" ]]; then
+            if [[ ! "$base_sha" =~ ^[0-9a-fA-F]{40}$ ]]; then
+              echo "Event base is not a full commit SHA" >&2
+              exit 2
+            fi
+            if ! git -C target cat-file -e "${base_sha}^{commit}" 2>/dev/null; then
+              git -C target fetch --no-tags --depth=1 origin "$base_sha"
+            fi
+            git -C target cat-file -e "${base_sha}^{commit}"
+          fi
+          printf 'sha=%s\n' "$base_sha" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install policy dependencies
+        run: python -m pip install --disable-pip-version-check pyyaml==6.0.2
+
+      - name: Select approved development governance mode
+        id: devlog-mode
+        env:
+          DEVLOG_BASE_SHA: ${{ steps.devlog-base.outputs.sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          receipt="$RUNNER_TEMP/devlog-eligibility.json"
+          if [[ -n "$DEVLOG_BASE_SHA" && -f policy/scripts/devlog_repair_eligibility.py ]]; then
+            head_sha=$(git -C target rev-parse HEAD)
+            python policy/scripts/devlog_repair_eligibility.py \
+              --target-root target --policy-root policy --repository "$REPOSITORY" \
+              --base-sha "$DEVLOG_BASE_SHA" --head-sha "$head_sha" > "$receipt"
+          else
+            printf '%s\n' '{"mode":"strict","reason":"Reconciliation or protected selector not yet published"}' > "$receipt"
+          fi
+          mode=$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["mode"])' "$receipt")
+          case "$mode" in strict|repair) ;; *) echo "Invalid governance mode" >&2; exit 2 ;; esac
+          printf 'mode=%s\n' "$mode" >> "$GITHUB_OUTPUT"
+
+      - name: Run fleet policy gate from current Repository_Management checkout
+        if: ${{ github.repository == 'D-sorganization/Repository_Management' }}
+        run: python target/scripts/fleet_policy_gate.py --repo-root target
+
+      - name: Check fleet rules drift from current Repository_Management checkout
+        if: ${{ github.repository == 'D-sorganization/Repository_Management' }}
+        run: python target/scripts/render_agent_rules.py --check --repo-root target
+
+      - name: Validate development log from current Repository_Management checkout
+        env:
+          DEVLOG_BASE_SHA: ${{ steps.devlog-base.outputs.sha }}
+          DEVLOG_MODE: ${{ steps.devlog-mode.outputs.mode }}
+        if: ${{ github.repository == 'D-sorganization/Repository_Management' }}
+        run: |
+          set -euo pipefail
+          mode="${DEVLOG_MODE:-strict}"
+          case "$mode" in strict|repair) ;; *) exit 2 ;; esac
+          args=(--repo-root target --mode "$mode")
+          if [[ -n "$DEVLOG_BASE_SHA" ]]; then
+            args+=(--base-ref "$DEVLOG_BASE_SHA")
+          fi
+          python target/shared_scripts/development_log_gate.py "${args[@]}" | tee "$RUNNER_TEMP/devlog-result.json"
+
+      - name: Validate runner machine caps (RM-OPS-015)
+        if: ${{ github.repository == 'D-sorganization/Repository_Management' }}
+        run: python target/scripts/runner_machine_caps.py --validate --caps target/config/runner_machine_caps.yaml --manifest target/config/fleet_manifest.yaml
+
+      - name: Run fleet policy gate from central policy repository
+        if: ${{ github.repository != 'D-sorganization/Repository_Management' }}
+        run: python policy/scripts/fleet_policy_gate.py --repo-root target
+
+      - name: Validate development log from central policy repository
+        env:
+          DEVLOG_BASE_SHA: ${{ steps.devlog-base.outputs.sha }}
+          DEVLOG_MODE: ${{ steps.devlog-mode.outputs.mode }}
+        if: ${{ github.repository != 'D-sorganization/Repository_Management' }}
+        run: |
+          set -euo pipefail
+          mode="${DEVLOG_MODE:-strict}"
+          case "$mode" in strict|repair) ;; *) exit 2 ;; esac
+          args=(--repo-root target --mode "$mode")
+          if [[ -n "$DEVLOG_BASE_SHA" ]]; then
+            args+=(--base-ref "$DEVLOG_BASE_SHA")
+          fi
+          python policy/shared_scripts/development_log_gate.py "${args[@]}" | tee "$RUNNER_TEMP/devlog-result.json"
+
+      - name: Publish development governance result
+        if: always()
+        env:
+          DEVLOG_MODE: ${{ steps.devlog-mode.outputs.mode }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          result = Path(os.environ["RUNNER_TEMP"]) / "devlog-result.json"
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("## Development Governance\n\n")
+              summary.write(f"Mode: {os.environ.get('DEVLOG_MODE') or 'strict'}\n\n")
+              if not result.is_file():
+                  summary.write("Validation did not complete; no acceptance claimed.\n")
+              else:
+                  data = json.loads(result.read_text())
+                  passed = data.get("passed") is True
+                  debt = data.get("reconciliation_required") is True or not passed
+                  summary.write(f"Selected Gate Passed: {passed}\n\n")
+                  summary.write(f"Reconciliation Required: {debt}\n\n")
+                  summary.write("A repair pass does not admit new work or qualify scientific acceptance.\n")
+                  summary.write("\n```json\n" + json.dumps(data, indent=2) + "\n```\n")
+          PY
+
+      - name: Preserve development governance receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: development-governance-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/devlog-eligibility.json
+            ${{ runner.temp }}/devlog-result.json
+          if-no-files-found: warn

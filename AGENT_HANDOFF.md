@@ -39,7 +39,7 @@ detail of a finished slice to the archive instead of growing this file.
 ## CI Throughput (RM Epic #2215)
 
 - UD-CI-032 #13573: PR #13584 (`cursor/cancel-merge-queue-audit-1f01`) — merge-queue-safe `cancel-in-progress` audit; RM #2216 landed — arm auto-merge once `quality-gate` is green.
-- UD-CI-033 #13595: `codex/13595-ci-lint` fixes Actionlint/ShellCheck blockers independently of #13577; canonical pre-PR checks passed except existing development-log WIP/size policy limits (consistency suite took about five minutes); parent review pending.
+- UD-CI-033 #13595: `codex/13595-ci-lint` fixes Actionlint/ShellCheck blockers and adds a tested consumer for the governed RM #2253 fleet-policy/development-log repair gate; publish only after the RM provider merges. Prior canonical pre-PR checks passed except existing development-log WIP/size policy limits (consistency suite took about five minutes); no PR is open.
 
 ## Required Before Continuing
 
