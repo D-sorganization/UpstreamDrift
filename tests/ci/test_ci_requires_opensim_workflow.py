@@ -127,4 +127,6 @@ class TestOpenSimJobLevelGating:
         jobs = _load()["jobs"]
         for job_id in ("classify-changes", "report-nightly"):
             runs_on = jobs[job_id]["runs-on"]
-            assert runs_on == "d-sorg-fleet-docker", f"{job_id} must not use ubuntu-latest"
+            assert runs_on == "d-sorg-fleet-docker", (
+                f"{job_id} must not use ubuntu-latest"
+            )
