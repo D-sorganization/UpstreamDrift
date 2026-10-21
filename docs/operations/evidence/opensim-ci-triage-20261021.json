@@ -1,0 +1,89 @@
+{
+  "counts": {
+    "cancelled": 199,
+    "completed": 494,
+    "failure": 110,
+    "runs": 496,
+    "success": 185
+  },
+  "failure_categories": {
+    "env_misconfig": 0,
+    "flake": 0,
+    "infra_disk": 0,
+    "infra_runner": 3,
+    "infra_timeout": 0,
+    "test_defect": 100,
+    "unknown": 7
+  },
+  "flake_sha_count": 0,
+  "generated_at": "2026-10-21T09:22:11.173561+00:00",
+  "rates": {
+    "failure_rate_non_cancelled": 0.3728813559322034,
+    "main_push": 0.43478260869565216,
+    "pull_request": 0.49707602339181284
+  },
+  "repository": "D-sorganization/UpstreamDrift",
+  "source": "RM-CI-000 / GitHub Actions workflow run API + failed job logs",
+  "success_duration_seconds": {
+    "p90": 22952.799999999996,
+    "sample_size": 185
+  },
+  "top_failure_signatures": [
+    {
+      "category": "test_defect",
+      "count": 76,
+      "decision": "fix",
+      "example_run_id": 39563097770,
+      "notes": "Track in #13564; restore squat ID accuracy and native replay feasibility without tolerance loosening.",
+      "owner": "@core (lifting/native OpenSim)",
+      "signature": "tests/unit/lifting/test_opensim_lift_joint_reactions.py::test_squat_joint_reactions_computed+tests/opensim/test_native_muscle_effort_native.py::test_native_constant_interval_matches_fresh_raw_replay"
+    },
+    {
+      "category": "test_defect",
+      "count": 18,
+      "decision": "monitor",
+      "example_run_id": 39557765298,
+      "notes": "See linked workflow run for details.",
+      "owner": "@core",
+      "signature": "test_squat_joint_reactions_computed"
+    },
+    {
+      "category": "unknown",
+      "count": 7,
+      "decision": "monitor",
+      "example_run_id": 39560070788,
+      "notes": "Re-pull logs before acting; likely expired log retention on cancelled runs.",
+      "owner": "@core",
+      "signature": "unclassified"
+    },
+    {
+      "category": "test_defect",
+      "count": 5,
+      "decision": "monitor",
+      "example_run_id": 39359935647,
+      "notes": "See linked workflow run for details.",
+      "owner": "@core",
+      "signature": "pytest_summary_failure"
+    },
+    {
+      "category": "infra_runner",
+      "count": 3,
+      "decision": "monitor",
+      "example_run_id": 39553328585,
+      "notes": "Orphan cleanup and expired logs are not pytest flakes; no quarantine.",
+      "owner": "@core (Runner_Dashboard)",
+      "signature": "runner_orphan_cleanup"
+    },
+    {
+      "category": "test_defect",
+      "count": 1,
+      "decision": "monitor",
+      "example_run_id": 39396748899,
+      "notes": "See linked workflow run for details.",
+      "owner": "@core",
+      "signature": "test_native_constant_interval_matches_fresh_raw_replay"
+    }
+  ],
+  "window_days": 14,
+  "workflow": "ci-requires-opensim.yml"
+}
