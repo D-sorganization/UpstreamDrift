@@ -44,6 +44,7 @@ from src.shared.python.grip_contact.matlab_kernel import (
     render_json_deterministic,
 )
 from src.shared.python.grip_contact.net_wrench_parity import (
+    canonicalize_export_tree,
     payloads_numerically_close,
     report_generated_drift,
 )
@@ -427,7 +428,7 @@ def build_scenarios_payload(
         "scenarios": scenarios,
     }
     validate_scenarios_payload(payload)
-    return payload
+    return canonicalize_export_tree(payload)
 
 
 def validate_scenarios_payload(payload: Mapping[str, Any]) -> None:
