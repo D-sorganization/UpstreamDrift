@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-21 | #13603 | Register jaxsim_dashboard on engines.dashboards for feature-parity tile coverage |
 | 2026-10-21 | #13598 | engine docker cache steps per fleet contract |
 | 2026-10-21 | #13596 | Quarantine pilot for Simscape grip contact tests and audit validator (UD-CI-030) |
 | 2026-10-21 | #13584 | Merge-queue-safe workflow cancel-in-progress audit and gh-readonly-queue push ignores (UD-CI-032). |

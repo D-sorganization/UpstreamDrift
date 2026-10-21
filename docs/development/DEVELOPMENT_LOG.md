@@ -4179,10 +4179,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12998
 - **Branch:** merged via #13224
-- **PR:** #13224
+- **PR:** #13224, #13603
 - **Paths:** see #13224
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-18 (`3dec2e7c`; collated from changes/12998-add-jaxsim-launcher-dashboard-tile-and-e.md)
+- **Last verified:** 2026-10-21 (`fef8efa8`; collated from changes/12998-register-jaxsim-dashboard-on-engines-das.md)
 - **Summary:** Add JaxSim launcher dashboard tile and engine tile coverage test
 - **Next step:** Shipped in PR #13224.
 
