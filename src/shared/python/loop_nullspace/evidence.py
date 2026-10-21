@@ -213,7 +213,13 @@ class QuantityRecord:
             if not np.all(np.isnan(values)):
                 raise ValueError("UNAVAILABLE QuantityRecord values must be all NaN")
         else:
-            if not np.all(np.isfinite(values)):
+            partial = "C-ENVELOPE-PARTIAL-FRAMES" in self.conventions
+            if partial:
+                if np.all(np.isnan(values)):
+                    raise ValueError(
+                        "partial-frame envelope records need at least one finite bound"
+                    )
+            elif not np.all(np.isfinite(values)):
                 raise ValueError("available QuantityRecord values must be finite")
             if dep is AllocationDependence.INVARIANT and self.hypotheses:
                 raise ValueError("INVARIANT QuantityRecord must not carry hypotheses")
