@@ -1,5 +1,6 @@
 """Contracts for the consumer-side fleet development governance workflow."""
 
+import json
 import os
 import subprocess
 import sys
@@ -35,6 +36,7 @@ def _run_shell(
         env={
             **os.environ,
             "PATH": f"{Path(sys.executable).parent}{os.pathsep}{os.environ['PATH']}",
+            "RUNNER_TEMP": str(cwd / "runner-temp"),
             **env,
         },
         text=True,
@@ -58,7 +60,34 @@ def test_consumer_uses_protected_policy_checkout_and_trusted_event_base() -> Non
         for step in checkouts
     )
 
+    target_checkout_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("uses", "").startswith("actions/checkout@")
+        and not step.get("with", {}).get("repository")
+    )
+    token_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("id") == "policy-app-token"
+    )
+    policy_checkout_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("uses", "").startswith("actions/checkout@")
+        and step.get("with", {}).get("repository")
+        == "D-sorganization/Repository_Management"
+    )
+    setup_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("uses", "").startswith("actions/setup-python@")
+    )
     resolver = _step(workflow, "Resolve trusted development-log baseline")
+    resolver_index = steps.index(resolver)
+    assert target_checkout_index < token_index < policy_checkout_index < setup_index
+    assert setup_index + 1 == resolver_index
+    assert steps[setup_index]["with"]["python-version"] == "3.12"
     script = resolver["run"]
     assert resolver["env"]["PR_BASE_SHA"] == "${{ github.event.pull_request.base.sha }}"
     assert resolver["env"]["PR_HEAD_SHA"] == "${{ github.event.pull_request.head.sha }}"
@@ -73,10 +102,21 @@ def test_consumer_uses_protected_policy_checkout_and_trusted_event_base() -> Non
         == "${{ github.event.merge_group.base_sha }}"
     )
     assert "pull_request)" in script
-    assert 'merge_group) base_sha="$MERGE_GROUP_BASE_SHA"' in script
+    assert "merge_group)" in script
     assert "policy/scripts/devlog_trusted_base.py" in script
     assert "target/scripts/devlog_trusted_base.py" not in script
     assert "git -C target rev-parse HEAD" not in script
+    for flag in (
+        "--repo-root target",
+        '--event "$EVENT_NAME"',
+        '--event-base-sha "$PR_BASE_SHA"',
+        '--pr-head-sha "$PR_HEAD_SHA"',
+        '--expected-sha "$GITHUB_SHA"',
+        '--base-ref "$BASE_REF"',
+        '--repository "$REPOSITORY"',
+        '--default-branch "$DEFAULT_BRANCH"',
+    ):
+        assert flag in script
 
 
 def test_policy_checkout_uses_fail_closed_repository_scoped_app_token() -> None:
@@ -255,20 +295,31 @@ def test_resolver_uses_protected_helper_result_not_event_anchor_or_head(
     helper_called = tmp_path / "policy-helper-called"
     trusted_base = "c" * 40
     helper_source = f"""
+import argparse
+import json
 import os
 import pathlib
-import sys
 
-assert sys.argv[1:] == ["--target-root", "target"]
-assert os.environ["EVENT_NAME"] == "pull_request"
-assert os.environ["PR_BASE_SHA"] == {"a" * 40!r}
-assert os.environ["PR_HEAD_SHA"] == {"b" * 40!r}
-assert os.environ["GITHUB_SHA"] == {"d" * 40!r}
-assert os.environ["BASE_REF"] == "release/next"
-assert os.environ["REPOSITORY"] == "D-sorganization/UpstreamDrift"
-assert os.environ["DEFAULT_BRANCH"] == "main"
+parser = argparse.ArgumentParser()
+parser.add_argument("--repo-root", required=True)
+parser.add_argument("--event", required=True)
+parser.add_argument("--event-base-sha", required=True)
+parser.add_argument("--pr-head-sha", required=True)
+parser.add_argument("--expected-sha", required=True)
+parser.add_argument("--base-ref", required=True)
+parser.add_argument("--repository", required=True)
+parser.add_argument("--default-branch", required=True)
+args = parser.parse_args()
+assert args.repo_root == "target"
+assert args.event == "pull_request"
+assert args.event_base_sha == {"a" * 40!r}
+assert args.pr_head_sha == {"b" * 40!r}
+assert args.expected_sha == {"d" * 40!r}
+assert args.base_ref == "release/next"
+assert args.repository == "D-sorganization/UpstreamDrift"
+assert args.default_branch == "main"
 pathlib.Path(os.environ["HELPER_CALL_MARKER"]).write_text("protected", encoding="utf-8")
-print("{trusted_base}")
+print(json.dumps({{"verified": True, "proof_kind": "pull_request_protected_merge_parent", "baseline_sha": "{trusted_base}", "mode": "strict", "receipt": "complete"}}))
 """
     policy_helper.write_text(helper_source, encoding="utf-8")
 
@@ -295,6 +346,7 @@ print("{trusted_base}")
             "MERGE_GROUP_BASE_SHA": "",
             "HELPER_CALL_MARKER": str(helper_called),
             "GITHUB_OUTPUT": str(tmp_path / "output"),
+            "RUNNER_TEMP": str(tmp_path / "runner-temp"),
         },
         cwd=tmp_path,
     )
@@ -303,10 +355,27 @@ print("{trusted_base}")
     assert helper_called.read_text(encoding="utf-8") == "protected"
     assert not (tmp_path / "candidate-helper-called").exists()
     assert (tmp_path / "output").read_text(encoding="utf-8") == f"sha={trusted_base}\n"
+    assert json.loads(
+        (tmp_path / "runner-temp/devlog-base-proof.json").read_text(encoding="utf-8")
+    ) == {
+        "verified": True,
+        "proof_kind": "pull_request_protected_merge_parent",
+        "baseline_sha": trusted_base,
+        "mode": "strict",
+        "receipt": "complete",
+    }
 
 
 @pytest.mark.skipif(os.name == "nt", reason="the extracted workflow step requires Bash")
 def test_resolver_fails_closed_when_protected_helper_is_missing(tmp_path: Path) -> None:
+    target_decoy = tmp_path / "target/scripts/devlog_trusted_base.py"
+    target_decoy.parent.mkdir(parents=True)
+    target_decoy.write_text(
+        "from pathlib import Path\n"
+        "Path('candidate-helper-called').write_text('bad')\n"
+        f'print(\'{{"baseline_sha":"{"e" * 40}"}}\')\n',
+        encoding="utf-8",
+    )
     resolver = _step(_workflow(), "Resolve trusted development-log baseline")
     result = _run_shell(
         resolver["run"],
@@ -320,12 +389,116 @@ def test_resolver_fails_closed_when_protected_helper_is_missing(tmp_path: Path) 
             "DEFAULT_BRANCH": "main",
             "MERGE_GROUP_BASE_SHA": "",
             "GITHUB_OUTPUT": str(tmp_path / "output"),
+            "RUNNER_TEMP": str(tmp_path / "runner-temp"),
+        },
+        cwd=tmp_path,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert (tmp_path / "output").read_text(encoding="utf-8") == "sha=\n"
+    assert not (tmp_path / "candidate-helper-called").exists()
+    saved_proof = json.loads(
+        (tmp_path / "runner-temp/devlog-base-proof.json").read_text(encoding="utf-8")
+    )
+    assert saved_proof["verified"] is False
+    assert saved_proof["proof_kind"] == "helper_unpublished"
+    assert saved_proof["baseline_sha"] is None
+    assert "not yet published" in saved_proof["reason"]
+
+    selector = _step(_workflow(), "Select approved development governance mode")
+    selected = _run_shell(
+        selector["run"],
+        {
+            "DEVLOG_BASE_SHA": "",
+            "REPOSITORY": "D-sorganization/UpstreamDrift",
+            "EVENT_NAME": "pull_request",
+            "RUNNER_TEMP": str(tmp_path / "runner-temp"),
+            "GITHUB_OUTPUT": str(tmp_path / "selector-output"),
+        },
+        cwd=tmp_path,
+    )
+    assert selected.returncode == 0, selected.stdout + selected.stderr
+    assert (tmp_path / "selector-output").read_text(encoding="utf-8") == "mode=strict\n"
+    eligibility = json.loads(
+        (tmp_path / "runner-temp/devlog-eligibility.json").read_text(encoding="utf-8")
+    )
+    assert eligibility["mode"] == "strict"
+
+
+@pytest.mark.skipif(os.name == "nt", reason="the extracted workflow step requires Bash")
+@pytest.mark.parametrize(
+    ("helper_output", "helper_exit_code"),
+    [
+        ("not-json", 0),
+        (
+            '{"verified": true, "proof_kind": "pull_request_protected_merge_parent", "baseline_sha": null}',
+            0,
+        ),
+        (
+            '{"verified": false, "proof_kind": "pull_request_protected_merge_parent", "baseline_sha": "cccccccccccccccccccccccccccccccccccccccc"}',
+            0,
+        ),
+        (
+            '{"verified": true, "proof_kind": "wrong_proof", "baseline_sha": "cccccccccccccccccccccccccccccccccccccccc"}',
+            0,
+        ),
+        (
+            '{"verified": true, "proof_kind": "pull_request_protected_merge_parent", "baseline_sha": "not-a-commit-sha"}',
+            0,
+        ),
+        (
+            '{"verified": true, "proof_kind": "pull_request_protected_merge_parent", "baseline_sha": "cccccccccccccccccccccccccccccccccccccccc"}',
+            1,
+        ),
+    ],
+)
+def test_present_trusted_helper_bad_proof_fails_resolver(
+    tmp_path: Path, helper_output: str, helper_exit_code: int
+) -> None:
+    policy_helper = tmp_path / "policy/scripts/devlog_trusted_base.py"
+    policy_helper.parent.mkdir(parents=True)
+    policy_helper.write_text(
+        "import argparse, os, sys\n"
+        "parser = argparse.ArgumentParser()\n"
+        "parser.add_argument('--repo-root', required=True)\n"
+        "parser.add_argument('--event', required=True)\n"
+        "parser.add_argument('--event-base-sha', required=True)\n"
+        "parser.add_argument('--pr-head-sha', required=True)\n"
+        "parser.add_argument('--expected-sha', required=True)\n"
+        "parser.add_argument('--base-ref', required=True)\n"
+        "parser.add_argument('--repository', required=True)\n"
+        "parser.add_argument('--default-branch', required=True)\n"
+        "parser.parse_args()\n"
+        "print(os.environ['HELPER_OUTPUT'])\n"
+        "raise SystemExit(int(os.environ['HELPER_EXIT_CODE']))\n",
+        encoding="utf-8",
+    )
+
+    resolver = _step(_workflow(), "Resolve trusted development-log baseline")
+    result = _run_shell(
+        resolver["run"],
+        {
+            "EVENT_NAME": "pull_request",
+            "PR_BASE_SHA": "a" * 40,
+            "PR_HEAD_SHA": "b" * 40,
+            "GITHUB_SHA": "d" * 40,
+            "BASE_REF": "main",
+            "REPOSITORY": "D-sorganization/UpstreamDrift",
+            "DEFAULT_BRANCH": "main",
+            "MERGE_GROUP_BASE_SHA": "",
+            "GITHUB_OUTPUT": str(tmp_path / "output"),
+            "RUNNER_TEMP": str(tmp_path / "runner-temp"),
+            "HELPER_OUTPUT": helper_output,
+            "HELPER_EXIT_CODE": str(helper_exit_code),
         },
         cwd=tmp_path,
     )
 
     assert result.returncode == 2
-    assert "Protected trusted-base helper is missing" in result.stderr
+    if helper_exit_code:
+        assert "Protected trusted-base verification failed" in result.stderr
+    else:
+        assert "Protected trusted-base proof is invalid" in result.stderr
     assert not (tmp_path / "output").exists()
 
 
@@ -364,11 +537,20 @@ def test_merge_group_resolver_keeps_the_event_base_unchanged(tmp_path: Path) -> 
             "DEFAULT_BRANCH": "main",
             "MERGE_GROUP_BASE_SHA": base_sha,
             "GITHUB_OUTPUT": str(tmp_path / "output"),
+            "RUNNER_TEMP": str(tmp_path / "runner-temp"),
         },
         cwd=tmp_path,
     )
     assert result.returncode == 0, result.stderr
     assert (tmp_path / "output").read_text(encoding="utf-8") == f"sha={base_sha}\n"
+    assert (
+        json.loads(
+            (tmp_path / "runner-temp/devlog-base-proof.json").read_text(
+                encoding="utf-8"
+            )
+        )["baseline_sha"]
+        == base_sha
+    )
 
 
 def test_manual_and_schedule_default_to_strict_without_head_fallback() -> None:
@@ -382,7 +564,7 @@ def test_manual_and_schedule_default_to_strict_without_head_fallback() -> None:
     assert '--base-sha "$DEVLOG_BASE_SHA" --head-sha "$head_sha"' in script
     assert '--event "$EVENT_NAME"' in script
     assert (
-        "workflow_dispatch|schedule) ;;"
+        "workflow_dispatch|schedule)"
         in _step(workflow, "Resolve trusted development-log baseline")["run"]
     )
     assert (
@@ -413,6 +595,7 @@ def test_only_eligible_selector_result_can_choose_repair_and_result_stays_visibl
     artifact = _step(workflow, "Preserve development governance receipts")
     assert artifact["if"] == "always()"
     assert "devlog-eligibility.json" in artifact["with"]["path"]
+    assert "devlog-base-proof.json" in artifact["with"]["path"]
     assert "devlog-result.json" in artifact["with"]["path"]
 
 
