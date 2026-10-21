@@ -2808,6 +2808,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13011 · Stop Realtime File-Tail Poll Thread When Last Subscriber Unsubscribes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13011
+- **Branch:** merged via #13600
+- **PR:** #13600
+- **Paths:** see #13600
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`93a3db81`; collated from changes/13011-stop-realtime-file-tail-poll-thread-when.md)
+- **Summary:** Stop realtime file-tail poll thread when last subscriber unsubscribes
+- **Next step:** Shipped in PR #13600.
+
 ### DL-#13573 · Merge-Queue-Safe Workflow Cancel-in-Progress Audit and Gh-Readonly-Queue Push Ignores (UD-CI-032).
 
 - **State:** shipped
@@ -2892,10 +2905,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13544
 - **Branch:** merged via #13546
-- **PR:** #13546
+- **PR:** #13546, #13602
 - **Paths:** see #13546
 - **Started:** 2026-10-20
-- **Last verified:** 2026-10-20 (`bb208823`; collated from changes/13544-grip-exporter-drift-diagnostics.md)
+- **Last verified:** 2026-10-21 (`9fb90ed9`; collated from changes/13544-serialize-simscape-grip-committed-path-g.md)
 - **Summary:** grip_contact exporter --check now logs the drifted file and a bounded unified diff (flake diagnostics)
 - **Next step:** Shipped in PR #13546.
 
