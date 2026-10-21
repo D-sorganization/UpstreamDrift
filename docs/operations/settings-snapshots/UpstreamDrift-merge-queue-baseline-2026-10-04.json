@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "repo": "D-sorganization/UpstreamDrift",
+  "ruleset_id": 24451991,
+  "ruleset_name": "Merge Queue (PR Fast Lane, RM#1900)",
+  "recorded_for": "RM#1900 merge-queue enablement (UpstreamDrift#11491)",
+  "merge_queue": {
+    "merge_method": "SQUASH",
+    "max_entries_to_build": 5,
+    "min_entries_to_merge": 1,
+    "max_entries_to_merge": 5,
+    "min_entries_to_merge_wait_minutes": 5,
+    "grouping_strategy": "ALLGREEN",
+    "check_response_timeout_minutes": 360
+  }
+}
