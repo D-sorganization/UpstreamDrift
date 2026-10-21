@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-21 | #13587 | Canonicalize grip-contact codegen floats and refresh Simscape MATLAB kernel/scenario exports.; Bump pillow to 13.0.0 and certifi to 2026.10.19 to clear pip-audit CVEs. |
 | 2026-10-20 | #13558 | Grip topology parity compares numerically-zero reference channels (peak <= 1e-8 N or N·m) absolutely instead of relatively; fixes myoHand frozen-finger law-level parity on roundoff spin channels |
 | 2026-10-20 | #13549 | Record the OSL epic handoff state (open PRs, owner decisions, rejected video work) |
 | 2026-10-20 | #13546 | grip_contact exporter --check now logs the drifted file and a bounded unified diff (flake diagnostics) |
