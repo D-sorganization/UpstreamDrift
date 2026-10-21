@@ -197,7 +197,7 @@ pandas==3.0.2
     #   upstream-drift (pyproject.toml)
 pathspec==1.0.4
     # via mypy
-pillow==12.3.0
+pillow==13.0.0
     # via
     #   bokeh
     #   imageio
