@@ -129,6 +129,37 @@ def test_parse_quarantine_ast(tmp_path: Path) -> None:
     assert rec1.expires == "2026-10-30"
 
 
+def test_parse_quarantine_ast_class_level(tmp_path: Path) -> None:
+    code = textwrap.dedent(
+        """
+        import pytest
+
+        @pytest.mark.quarantine(issue="class-123", owner="cursor", expires="2026-11-20")
+        class TestQuarantinedSuite:
+            def test_method_one(self):
+                pass
+
+            def test_method_two(self):
+                pass
+
+            def helper_method(self):
+                pass
+        """
+    )
+    test_file = tmp_path / "test_class_quarantine.py"
+    test_file.write_text(code, encoding="utf-8")
+
+    records = parse_quarantine_ast(test_file)
+    assert len(records) == 2
+    test_ids = [r.test_id for r in records]
+    assert f"{test_file.as_posix()}::TestQuarantinedSuite::test_method_one" in test_ids
+    assert f"{test_file.as_posix()}::TestQuarantinedSuite::test_method_two" in test_ids
+    for r in records:
+        assert r.issue == "class-123"
+        assert r.owner == "cursor"
+        assert r.expires == "2026-11-20"
+
+
 def test_parse_quarantine_ast_missing_argument(tmp_path: Path) -> None:
     code = textwrap.dedent(
         """

@@ -187,11 +187,11 @@ def parse_quarantine_ast(file_path: Path | str) -> list[QuarantineRecord]:
     tree = ast.parse(content, filename=posix_path)
     records: list[QuarantineRecord] = []
 
-    def process_function(
-        fn_node: ast.FunctionDef | ast.AsyncFunctionDef,
-        class_prefix: str = "",
-    ) -> None:
-        for decorator in fn_node.decorator_list:
+    def extract_quarantine_kwargs(
+        decorators: list[ast.expr],
+        lineno: int,
+    ) -> dict[str, str] | None:
+        for decorator in decorators:
             if not isinstance(decorator, ast.Call):
                 continue
 
@@ -222,32 +222,49 @@ def parse_quarantine_ast(file_path: Path | str) -> list[QuarantineRecord]:
             if missing:
                 missing_str = ", ".join(repr(m) for m in missing)
                 msg = (
-                    f"Quarantine marker in {posix_path}:{fn_node.lineno} "
+                    f"Quarantine marker in {posix_path}:{lineno} "
                     f"missing required {missing_str}"
                 )
                 raise ValueError(msg)
+            return kwargs
+        return None
 
-            test_name = (
-                f"{class_prefix}::{fn_node.name}" if class_prefix else fn_node.name
-            )
-            node_id = f"{posix_path}::{test_name}"
+    def process_function(
+        fn_node: ast.FunctionDef | ast.AsyncFunctionDef,
+        class_prefix: str = "",
+        inherited_kwargs: dict[str, str] | None = None,
+    ) -> None:
+        kwargs = extract_quarantine_kwargs(fn_node.decorator_list, fn_node.lineno)
+        effective_kwargs = kwargs or inherited_kwargs
+        if not effective_kwargs:
+            return
 
-            record = QuarantineRecord(
-                test_id=node_id,
-                file_path=posix_path,
-                issue=kwargs["issue"],
-                owner=kwargs["owner"],
-                expires=kwargs["expires"],
-            )
-            records.append(record)
+        test_name = f"{class_prefix}::{fn_node.name}" if class_prefix else fn_node.name
+        node_id = f"{posix_path}::{test_name}"
+
+        record = QuarantineRecord(
+            test_id=node_id,
+            file_path=posix_path,
+            issue=effective_kwargs["issue"],
+            owner=effective_kwargs["owner"],
+            expires=effective_kwargs["expires"],
+        )
+        records.append(record)
 
     for item in tree.body:
         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
             process_function(item)
         elif isinstance(item, ast.ClassDef):
+            class_kwargs = extract_quarantine_kwargs(item.decorator_list, item.lineno)
             for class_item in item.body:
                 if isinstance(class_item, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    process_function(class_item, class_prefix=item.name)
+                    if class_kwargs and not class_item.name.startswith("test"):
+                        continue
+                    process_function(
+                        class_item,
+                        class_prefix=item.name,
+                        inherited_kwargs=class_kwargs,
+                    )
 
     return records
 
