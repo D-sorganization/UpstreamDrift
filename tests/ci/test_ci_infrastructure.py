@@ -287,7 +287,8 @@ class TestCIEnvironmentCompatibility:
         assert "for display_num in $(seq 90 129)" in start_step
         assert 'lockdir="/tmp/upstreamdrift-xvfb-${display_num}.lock"' in start_step
         assert 'mkdir "$lockdir"' in start_step
-        assert 'echo "DISPLAY=:${display_num}" >> "$GITHUB_ENV"' in start_step
+        assert 'echo "DISPLAY=:${display_num}"' in start_step
+        assert '} >> "$GITHUB_ENV"' in start_step
         assert "Xvfb :99" not in start_step
         assert "UPSTREAMDRIFT_XVFB_PID" in stop_step
         assert "UPSTREAMDRIFT_XVFB_LOCKDIR" in stop_step
