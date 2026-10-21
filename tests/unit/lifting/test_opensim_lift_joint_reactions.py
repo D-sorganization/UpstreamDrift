@@ -199,7 +199,10 @@ def test_squat_joint_reactions_computed(
     assert sol["lift"] == "squat"
     assert sol["acceleration_error_max"] < 5e-6, sol.get("acceleration_realization")
     realization = sol.get("acceleration_realization") or {}
-    assert realization.get("source_fingerprint", {}).get("kinematics_revision") >= 4
+    fingerprint = realization.get("source_fingerprint") or {}
+    assert fingerprint.get("kinematics_revision") >= 5
+    assert fingerprint.get("simbody_kinematics_sha256")
+    assert fingerprint.get("joint_reaction_frame_sha256")
 
     # Inherited OSL-4 qualification
     assert sol["classification"] == "unqualified"

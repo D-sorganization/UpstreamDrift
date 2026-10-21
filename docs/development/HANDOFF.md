@@ -9,6 +9,7 @@
 - Hygiene: Ruff format on lifting tests; `test_opensim_job_speed` matches `--force-reinstall --no-deps` editable install.
 - Architecture: `_solve_frame_reaction` decomposed into `msk_lift_joint_reaction_frame.py` + `msk_lift_joint_reaction_diagnostics.py` (function-lines budget).
 - CI batch: certifi/Pillow floors (#13563 pins); regenerated Simscape grip contact generated artifacts from Python source of truth.
+- Native CI on `bce2e78075` still reported `acceleration_error_max` ≈ 1.146×10⁻⁵ (worst frame 11; local stride=5 is 41 frames / ≈8.7×10⁻⁷) — environment mismatch suspected; added OpenSim job smoke gate, `PYTHONDONTWRITEBYTECODE`, thread caps, and `__pycache__` purge after editable install.
 - Next step: merge after `CI Requires OpenSim` and quality-gate are green on PR #13568.
 
 # Project Steward Pass — 2026-10-19

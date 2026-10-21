@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import sys
 from pathlib import Path
 from typing import Any
@@ -11,7 +12,13 @@ import numpy as np
 from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 # Bumped when joint-reaction kinematics or realization order changes; CI asserts this.
-MSK_LIFT_JR_KINEMATICS_REVISION = 4
+MSK_LIFT_JR_KINEMATICS_REVISION = 5
+
+
+def _source_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    digest.update(path.read_bytes())
+    return digest.hexdigest()
 
 __all__ = [
     "MSK_LIFT_JR_KINEMATICS_REVISION",
@@ -26,10 +33,15 @@ def joint_reaction_source_fingerprint() -> dict[str, Any]:
 
     osim = import_opensim()
     parent = Path(__file__).resolve().parent
+    kin_path = parent / "msk_lift_simbody_kinematics.py"
+    frame_path = parent / "msk_lift_joint_reaction_frame.py"
     return {
         "kinematics_revision": MSK_LIFT_JR_KINEMATICS_REVISION,
         "joint_reactions_module": str(parent / "msk_lift_joint_reactions.py"),
-        "simbody_kinematics_module": str(parent / "msk_lift_simbody_kinematics.py"),
+        "joint_reaction_frame_module": str(frame_path),
+        "simbody_kinematics_module": str(kin_path),
+        "simbody_kinematics_sha256": _source_sha256(kin_path),
+        "joint_reaction_frame_sha256": _source_sha256(frame_path),
         "opensim_version": str(osim.GetVersion()),
         "numpy_version": str(np.__version__),
         "scipy_version": str(scipy.__version__),

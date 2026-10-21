@@ -61,6 +61,11 @@ jobs:
       MPLBACKEND: Agg
       MUJOCO_GL: egl
       SDL_VIDEODRIVER: dummy
+      PYTHONDONTWRITEBYTECODE: "1"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
       UPSTREAMDRIFT_MSK_BASE_MODEL: shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim
     steps:
       - name: Clean corrupt git objects
@@ -188,6 +193,7 @@ jobs:
           no_cache=()
           if [ -z "${PIP_CACHE_DIR:-}" ]; then no_cache=(--no-cache-dir); fi
           python -m pip install "${no_cache[@]}" --force-reinstall --no-deps -e ".[dev]"
+          find src/engines/physics_engines/opensim/python -type d -name __pycache__ -prune -exec rm -rf {} +
 
       - name: Verify OpenSim 4.6 is importable
         run: |
@@ -207,8 +213,32 @@ jobs:
               joint_reaction_source_fingerprint,
           )
 
-          assert MSK_LIFT_JR_KINEMATICS_REVISION >= 4
+          assert MSK_LIFT_JR_KINEMATICS_REVISION >= 5
           print(json.dumps(joint_reaction_source_fingerprint(), indent=2))
+          PY
+
+      - name: Smoke squat joint-reaction acceleration gate
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          from src.engines.physics_engines.opensim.python.msk_lift_joint_reactions import (
+              evaluate_lift_joint_reactions,
+          )
+
+          receipt = evaluate_lift_joint_reactions("squat", stride=5)
+          err = float(receipt["acceleration_error_max"])
+          limit = 5e-6
+          if err >= limit:
+              print(
+                  json.dumps(receipt.get("acceleration_realization"), indent=2),
+                  file=sys.stderr,
+              )
+              raise SystemExit(
+                  f"acceleration_error_max {err} >= {limit} before pytest"
+              )
+          print(f"acceleration_error_max {err} < {limit}")
           PY
 
       - name: Run requires_opensim tests
