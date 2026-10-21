@@ -3,7 +3,7 @@
 - Repository: `D-sorganization/UpstreamDrift`; branch `cursor/fix-opensim-ci-13564-90e0`; PR: #13568.
 - Governing issue: #13564.
 - Objective: fix deterministic failures in `test_squat_joint_reactions_computed` and `test_native_constant_interval_matches_fresh_raw_replay` on the `CI Requires OpenSim` workflow.
-- Completed: muscle allocation shares the nfev budget between baseline and `least_squares`, marks budget exhaustion as non-feasible, and documents semantics in chapter 39; squat ID and joint reactions convert Rajagopal pelvis ZXY Euler spline derivatives to Simbody speeds via `generalized_speeds_from_spline_derivatives` (lift reference updated in `docs/research/lift_models/lift_models.tex`).
+- Completed: muscle allocation budget semantics; squat Simbody kinematics module; native `advance_to` copies `Manager.integrate` state via `osim.State(...)` so post-return readbacks do not use a dangling reference.
 - Validation (local): muscle allocation unit tests; `test_opensim_lift_joint_reactions` squat tests; `scripts/ci/check_file_size_budget.py`; `scripts.check_design_manual_governance`.
 - Next step: merge after `CI Requires OpenSim` and quality-gate are green on PR #13568.
 
