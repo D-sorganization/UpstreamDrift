@@ -2782,6 +2782,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13575 · Retire Jules Push/PR Noise Workflows Batch 1 With Archived Rollback Copies and Post-Merge Gh Disable.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13575
+- **Branch:** merged via #13586
+- **PR:** #13586
+- **Paths:** see #13586
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`483b7813`; collated from changes/13575-retire-jules-push-pr-noise-batch-1.md)
+- **Summary:** Retire Jules push/PR noise workflows batch 1 with archived rollback copies and post-merge gh disable.
+- **Next step:** Shipped in PR #13586.
+
 ### DL-#13582 · Add OpenSim CI Failure Triage Snapshot, Doc, and Classifier Script for UD-CI-002T.
 
 - **State:** shipped
