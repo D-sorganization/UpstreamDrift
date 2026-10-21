@@ -38,6 +38,7 @@ from src.shared.python.grip_contact import (
     load_coordinate_swing,
     parity_errors,
 )
+from src.shared.python.grip_contact.net_wrench_parity import matlab_export_literal
 from src.shared.python.grip_contact.matlab_kernel import (
     DEFAULT_GOLDEN_JSON_PATH,
     DEFAULT_KERNEL_M_PATH,
@@ -134,10 +135,13 @@ def test_kernel_params_payload_and_matlab_source_contract() -> None:
 
     # Every law constant in params must appear verbatim in the generated MATLAB.
     law = params["law"]
-    assert f"{law['normal_stiffness_n_m']:.17g}" in src
-    assert f"{law['static_friction']:.17g}" in src
-    assert f"{law['dynamic_friction']:.17g}" in src
-    assert f"{law['patch_radius_m']:.17g}" in src
+    for key in (
+        "normal_stiffness_n_m",
+        "static_friction",
+        "dynamic_friction",
+        "patch_radius_m",
+    ):
+        assert matlab_export_literal(law[key]) in src
 
 
 @pytest.mark.unit
