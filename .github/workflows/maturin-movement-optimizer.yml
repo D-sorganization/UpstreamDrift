@@ -22,8 +22,6 @@ name: Maturin Movement Optimizer
 on:
   push:
     branches: [main]
-    branches-ignore:
-      - "gh-readonly-queue/**"
     paths:
       - "vendor/ud-tools"
       - ".github/workflows/maturin-movement-optimizer.yml"

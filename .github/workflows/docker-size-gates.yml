@@ -3,8 +3,6 @@ name: Docker Size and Health Check
 on:
   push:
     branches: ["main"]
-    branches-ignore:
-      - "gh-readonly-queue/**"
     paths:
       - "Dockerfile"
       - "Dockerfile.modular"

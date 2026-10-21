@@ -20,8 +20,6 @@ on:
       - ".github/actions/docs-governance-checks/**"
   push:
     branches: [main]
-    branches-ignore:
-      - "gh-readonly-queue/**"
     paths:
       - "docs/**"
       - "manuals/upstreamdrift/**"

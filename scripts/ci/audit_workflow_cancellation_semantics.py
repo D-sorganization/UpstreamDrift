@@ -47,14 +47,46 @@ def _push_branches(on: dict[str, Any]) -> list[str] | None:
     return None
 
 
-def _has_readonly_queue_ignore(on: dict[str, Any]) -> bool:
+def _push_trigger(on: dict[str, Any]) -> dict[str, Any] | None:
     push = on.get("push")
-    if not isinstance(push, dict):
-        return False
+    return push if isinstance(push, dict) else None
+
+
+def _has_readonly_queue_ignore(push: dict[str, Any]) -> bool:
     ignore = push.get("branches-ignore") or []
     if isinstance(ignore, str):
         ignore = [ignore]
     return any(READONLY_QUEUE_BRANCH_IGNORE in str(item) for item in ignore)
+
+
+def _push_is_main_only(push_branches: list[str]) -> bool:
+    """True when branch pushes are limited to ``main`` (queue branches excluded)."""
+    return push_branches == ["main"]
+
+
+def _readonly_queue_push_compliance(
+    push: dict[str, Any], push_branches: list[str] | None
+) -> list[str]:
+    """Return violations for merge-queue branch push filtering on ``push``."""
+    if push is None:
+        return []
+    if "branches" in push and "branches-ignore" in push:
+        return [
+            "push must not set both branches and branches-ignore "
+            "(GitHub Actions forbids the combination); use branches: [main] alone "
+            "or branches-ignore without branches"
+        ]
+    if push_branches is not None and _push_is_main_only(push_branches):
+        return []
+    if push_branches is None and "tags" in push and "branches" not in push:
+        return []
+    if _has_readonly_queue_ignore(push):
+        return []
+    return [
+        "push must ignore gh-readonly-queue branches "
+        f"(branches-ignore: [{READONLY_QUEUE_BRANCH_IGNORE!r}]) "
+        "unless it is limited to branches: [main]"
+    ]
 
 
 def audit_workflow_file(path: Path, data: dict[str, Any]) -> list[str]:
@@ -72,6 +104,7 @@ def audit_workflow_file(path: Path, data: dict[str, Any]) -> list[str]:
     group = str(concurrency.get("group", ""))
     violations: list[str] = []
 
+    push = _push_trigger(on)
     push_branches = _push_branches(on)
     has_branch_push = push_branches is not None
     has_merge_group = "merge_group" in events
@@ -105,11 +138,8 @@ def audit_workflow_file(path: Path, data: dict[str, Any]) -> list[str]:
             f"{path.name}: cancel-in-progress must be true or the PR-only expression"
         )
 
-    if has_branch_push and not _has_readonly_queue_ignore(on):
-        violations.append(
-            f"{path.name}: push.branches must include "
-            f"branches-ignore: [{READONLY_QUEUE_BRANCH_IGNORE!r}]"
-        )
+    for message in _readonly_queue_push_compliance(push, push_branches):
+        violations.append(f"{path.name}: {message}")
 
     if has_merge_group and "github.event_name" not in group:
         violations.append(

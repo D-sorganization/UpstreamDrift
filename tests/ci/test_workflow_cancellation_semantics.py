@@ -61,22 +61,26 @@ def test_ci_standard_never_cancels_merge_queue_or_main_runs() -> None:
     assert "merge_group" in _on(data)
 
 
-def test_push_to_main_workflows_ignore_readonly_queue_branches() -> None:
+def test_push_triggers_do_not_combine_branches_and_branches_ignore() -> None:
     offenders: list[str] = []
     for path in sorted(WORKFLOWS.glob("*.yml")):
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
             continue
-        on = _on(data)
-        push = on.get("push")
-        if not isinstance(push, dict) or "branches" not in push:
-            continue
-        ignore = push.get("branches-ignore") or []
-        if isinstance(ignore, str):
-            ignore = [ignore]
-        if not any(READONLY_QUEUE_IGNORE in str(item) for item in ignore):
+        push = _on(data).get("push")
+        if isinstance(push, dict) and "branches" in push and "branches-ignore" in push:
             offenders.append(path.name)
     assert offenders == []
+
+
+def test_readonly_queue_push_compliance(audit_module) -> None:
+    """``branches: [main]`` satisfies queue safety without ``branches-ignore``."""
+    for path in audit_module.iter_workflow_files(WORKFLOWS):
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        on = audit_module._workflow_on(data)
+        push = audit_module._push_trigger(on)
+        push_branches = audit_module._push_branches(on)
+        assert audit_module._readonly_queue_push_compliance(push, push_branches) == []
 
 
 def test_workflow_lint_enforces_merge_queue_cancellation_audit() -> None:
@@ -91,15 +95,16 @@ def test_inventory_lists_cancel_and_readonly_queue_compliance(audit_module) -> N
     for path in audit_module.iter_workflow_files(WORKFLOWS):
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         on = audit_module._workflow_on(data)
+        push = audit_module._push_trigger(on)
         push_branches = audit_module._push_branches(on)
         concurrency = data.get("concurrency") or {}
         rows.append(
             {
                 "workflow": path.name,
                 "cancel_in_progress": concurrency.get("cancel-in-progress"),
-                "readonly_queue_ignore": audit_module._has_readonly_queue_ignore(on)
-                if push_branches
-                else None,
+                "readonly_queue_compliant": not audit_module._readonly_queue_push_compliance(
+                    push, push_branches
+                ),
             }
         )
     assert rows, "expected at least one workflow row"

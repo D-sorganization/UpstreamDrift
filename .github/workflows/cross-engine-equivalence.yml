@@ -26,8 +26,6 @@ name: Cross-Engine Equivalence
 on:
   push:
     branches: [main]
-    branches-ignore:
-      - "gh-readonly-queue/**"
     paths:
       - "src/engines/**"
       - "!src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**"

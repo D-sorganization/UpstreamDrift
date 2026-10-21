@@ -25,8 +25,6 @@ on:
       - ".github/workflows/ci-engine-models.yml"
   push:
     branches: [main]
-    branches-ignore:
-      - "gh-readonly-queue/**"
     paths:
       - "shared/models/golf_humanoid_*.yaml"
       - "src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py"

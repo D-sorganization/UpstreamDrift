@@ -15,8 +15,6 @@ on:
   push:
     branches:
       - main
-    branches-ignore:
-      - "gh-readonly-queue/**"
     paths:
       - "docs/architecture/C4.md"
       - "scripts/architecture_map_contract.py"

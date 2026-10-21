@@ -22,8 +22,6 @@ name: Collate Change Fragments
 on:
   push:
     branches: [main]
-    branches-ignore:
-      - "gh-readonly-queue/**"
     paths:
       - "changes/**"
   workflow_dispatch:
