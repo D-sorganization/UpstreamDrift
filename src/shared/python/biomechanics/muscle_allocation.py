@@ -144,6 +144,7 @@ class _SearchOutcome:
     status_message: str
     budget_exhausted: bool
     optimizer_success: bool
+    evaluation_budget_exhausted: bool
     evaluation_error: str | None
 
 
@@ -378,6 +379,7 @@ class _ExcitationSearcher:
         status_message = "all channels fixed"
         budget_exhausted = False
         optimizer_success = True
+        evaluation_budget_exhausted = False
         evaluation_error: str | None = None
         try:
             self._evaluate(self._candidate0)
@@ -428,6 +430,8 @@ class _ExcitationSearcher:
                 )
         except _EvaluationBudgetExhausted as exc:
             budget_exhausted = True
+            evaluation_budget_exhausted = True
+            optimizer_success = False
             status_message = str(exc)
         except (ValueError, RuntimeError, FloatingPointError, OverflowError) as exc:
             evaluation_error = str(exc)
@@ -439,6 +443,7 @@ class _ExcitationSearcher:
             status_message=status_message,
             budget_exhausted=budget_exhausted,
             optimizer_success=optimizer_success,
+            evaluation_budget_exhausted=evaluation_budget_exhausted,
             evaluation_error=evaluation_error,
         )
 
@@ -534,7 +539,10 @@ def _finalize_allocation_result(
             for item in details
         )
     )
-    feasible = bool(within_tolerance and outcome.optimizer_success)
+    feasible = bool(
+        within_tolerance
+        and (outcome.optimizer_success or outcome.evaluation_budget_exhausted)
+    )
     solver_failed = not outcome.optimizer_success and not outcome.budget_exhausted
     status: Literal[
         "feasible",

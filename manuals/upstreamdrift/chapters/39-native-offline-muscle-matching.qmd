@@ -217,11 +217,20 @@ residual by a positive caller tolerance and includes the force-equilibrium
 residual. Raw excitation bounds intersect the previous raw command plus or
 minus the allowed rate times `dt`; zero-width channels remain fixed. The
 `max_nfev` budget counts every complete candidate evaluation, including
-finite-difference probes. Results retain the best successfully evaluated
-candidate. `infeasible` means that candidate misses the declared numeric
-tolerances, not that global or physiological infeasibility has been proved;
-optimizer failure and evaluation-budget exhaustion have distinct statuses.
-No candidate is applied by this function.
+the mandatory baseline evaluation and any finite-difference probes. The
+bounded least-squares call receives only the evaluations remaining after that
+baseline. Results retain the best successfully evaluated candidate.
+`feasible` requires declared coordinate and equilibrium tolerances on the
+best candidate and either a successful optimizer termination
+(`optimizer_success`) or exhaustion of the shared global evaluation budget
+while that candidate already meets the tolerances (`evaluation_budget_exhausted`).
+Hitting the budget without meeting tolerances is `budget_exhausted` and not
+`feasible`. `infeasible` means the optimizer terminated successfully but the
+best candidate misses the declared numeric tolerances; that does not prove
+global or physiological infeasibility.
+Optimizer failure (`solver_failed`) and evaluation-budget exhaustion
+(`budget_exhausted`) remain distinct statuses. No candidate is applied by
+this function.
 
 The existing activation kernel floors its input and activation at
 `min_activation`. The API therefore reports the caller's raw bounded command

@@ -936,7 +936,10 @@ def run_inverse_dynamics(
     )
     rows, com = [], []
     for k, t in enumerate(targets.time_s):
-        q, u, udot_values = _derivatives(splines, len(names), float(t))
+        q, qd, qdd = _derivatives(splines, len(names), float(t))
+        u, udot_values = generalized_speeds_from_spline_derivatives(
+            tuple(names), q, qd, qdd
+        )
         for j, name in enumerate(names):
             coords.get(name).setValue(state, float(q[j]), False)
             coords.get(name).setSpeedValue(state, float(u[j]))

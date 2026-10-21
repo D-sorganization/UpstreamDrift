@@ -413,9 +413,17 @@ per-segment scale factors from the bundle's own joint-centre distances
 OpenSim's \texttt{InverseKinematicsSolver} (accuracy $10^{-8}$, coordinate
 clamping off, lower-limb weight 10, shoulders and bar 1) on every fifth state
 (41 frames). \texttt{run\_inverse\_dynamics} uses \texttt{InverseDynamicsSolver}
-on a copy with muscles, actuators and contact removed and gravity kept; speeds
-and accelerations come from quintic GCV splines of the IK coordinates; the
-external body forces are added by superposition
+on a copy with muscles, actuators and contact removed and gravity kept. Joint
+positions come from quintic GCV splines of the IK coordinates; generalized
+speeds and accelerations passed to \texttt{InverseDynamicsSolver.solve} use
+those spline derivatives directly except for the Rajagopal pelvis orientation
+triplet (\texttt{pelvis\_tilt}, \texttt{pelvis\_list}, \texttt{pelvis\_rotation}),
+which are intrinsic Euler angles in ZXY order and are mapped to Simbody
+$u$ and $\dot u$ with the same \texttt{euler\_rate\_columns} helper used on
+the segmental-spine pathway (\texttt{generalized\_speeds\_from\_spline\_derivatives}
+in \texttt{msk\_lift\_ik\_id.py}). OSL-5 joint-reaction acceleration checks
+use the same mapping so muscle-driven ID and reaction analysis share one
+kinematic convention. The external body forces are added by superposition
 ($\tau = \mathrm{ID}(\dot u) + \mathrm{ID}_4(0, F) - \mathrm{ID}_4(0, 0)$, since
 the four-argument solve omits gravity). The bar is massless in ID because the
 GCV-7 hand wrench already carries it. The static hold
