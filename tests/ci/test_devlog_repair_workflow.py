@@ -1,8 +1,8 @@
 """Contracts for the consumer-side fleet development governance workflow."""
 
+import ast
 import json
 import os
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -44,8 +44,34 @@ def _evaluate_fork_skip(job_if: str, event: str, head_repository: str | None) ->
         "github.repository", repr("D-sorganization/UpstreamDrift")
     )
     expression = expression.replace("||", "or").replace("&&", "and")
-    expression = re.sub(r"!(?!=)", "not ", expression)
-    return bool(eval(expression, {"__builtins__": {}}, {}))  # noqa: S307
+    expression = expression.replace("!", "not ")
+    try:
+        tree = ast.parse(expression, mode="eval")
+    except SyntaxError as exc:
+        raise ValueError("unsupported expression syntax") from exc
+
+    def evaluate(node: ast.expr) -> object:
+        if isinstance(node, ast.Constant) and (
+            type(node.value) in {bool, str} or node.value is None
+        ):
+            return node.value
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+            return not bool(evaluate(node.operand))
+        if isinstance(node, ast.BoolOp):
+            values = [bool(evaluate(value)) for value in node.values]
+            if isinstance(node.op, ast.And):
+                return all(values)
+            if isinstance(node.op, ast.Or):
+                return any(values)
+        if (
+            isinstance(node, ast.Compare)
+            and len(node.ops) == 1
+            and isinstance(node.ops[0], ast.Eq)
+        ):
+            return evaluate(node.left) == evaluate(node.comparators[0])
+        raise ValueError("unsupported expression syntax")
+
+    return bool(evaluate(tree.body))
 
 
 def _run_shell(
@@ -166,6 +192,19 @@ def test_policy_job_skips_fork_prs_and_actual_guard_accepts_workflow(
 
     assert workflow["jobs"]["fleet-policy-gate"]["runs-on"] == "d-sorg-fleet-docker"
     assert workflow["jobs"]["fleet-policy-gate"]["steps"]
+
+
+def test_fork_skip_evaluator_rejects_unsupported_expression_syntax(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="unsupported expression syntax"):
+        _evaluate_fork_skip("1 + 2", "pull_request", None)
+
+    marker = tmp_path / "expression-was-executed"
+    expression = f"__import__('pathlib').Path({str(marker)!r}).touch()"
+    with pytest.raises(ValueError, match="unsupported expression syntax"):
+        _evaluate_fork_skip(expression, "pull_request", None)
+    assert not marker.exists()
 
 
 def test_policy_checkout_uses_fail_closed_repository_scoped_app_token() -> None:
