@@ -145,6 +145,33 @@ def test_floor_plateau_seed_finds_feasible_above_floor_candidate() -> None:
     )
 
 
+def test_tight_tolerance_antagonist_allocation_within_default_budget() -> None:
+    """Native muscle-effort fixture: two muscles, small target, max_nfev=80."""
+    dt = 0.01
+    paths = (
+        replace(
+            _path("flexor", {"hinge_coord": 0.05}, prior=0.1, rate=100.0),
+            activation=0.1,
+        ),
+        replace(
+            _path("extensor", {"hinge_coord": -0.05}, prior=0.1, rate=100.0),
+            activation=0.1,
+        ),
+    )
+    result = allocate_muscle_excitations(
+        paths,
+        ("hinge_coord",),
+        (0.02,),
+        coordinate_effort_units=("N*m",),
+        dt_s=dt,
+        effort_tolerances=(1e-8,),
+        max_nfev=80,
+    )
+    assert result.feasible
+    assert result.status == "feasible"
+    assert result.generalized_effort["hinge_coord"] == pytest.approx(0.02, abs=1e-8)
+
+
 def test_floor_seed_respects_slew_upper_bound_below_floor() -> None:
     path = replace(
         _path("slew-limited", {"hip": 0.05}, prior=0.0, rate=0.5),

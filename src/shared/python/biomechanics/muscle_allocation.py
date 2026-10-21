@@ -384,7 +384,8 @@ class _ExcitationSearcher:
             optimizer_start = _seed_floor_plateaus(
                 self._candidate0, self._free, self._boxes, self._paths
             )
-            if self._free:
+            optimizer_budget = self._request.max_nfev - self.evaluation_count
+            if self._free and optimizer_budget > 0:
 
                 def objective(values: np.ndarray) -> np.ndarray:
                     effort, details = self._evaluate(self._expand(values))
@@ -408,7 +409,7 @@ class _ExcitationSearcher:
                         np.asarray([self._boxes[i][0] for i in self._free]),
                         np.asarray([self._boxes[i][1] for i in self._free]),
                     ),
-                    max_nfev=self._request.max_nfev,
+                    max_nfev=optimizer_budget,
                     method="trf",
                     x_scale="jac",
                 )
@@ -417,6 +418,13 @@ class _ExcitationSearcher:
                 budget_exhausted = not optimizer_success and (
                     getattr(result, "status", None) == 0
                     or "maximum" in str(result.message).lower()
+                )
+            elif self._free:
+                budget_exhausted = True
+                optimizer_success = False
+                status_message = (
+                    f"maximum candidate-evaluation budget {self._request.max_nfev} "
+                    "exhausted before optimizer start"
                 )
         except _EvaluationBudgetExhausted as exc:
             budget_exhausted = True
@@ -519,15 +527,14 @@ def _finalize_allocation_result(
             residual_by_coordinate=payload.residual_by_coordinate,
         )
     residual = achieved - request.target
-    feasible = bool(
+    within_tolerance = bool(
         np.all(np.abs(residual) <= request.tolerances)
         and all(
             abs(item.equilibrium_residual_n) <= request.force_tolerance
             for item in details
         )
-        and not outcome.budget_exhausted
-        and outcome.optimizer_success
     )
+    feasible = bool(within_tolerance and outcome.optimizer_success)
     solver_failed = not outcome.optimizer_success and not outcome.budget_exhausted
     status: Literal[
         "feasible",
@@ -536,12 +543,12 @@ def _finalize_allocation_result(
         "solver_failed",
         "evaluation_failed",
     ] = (
-        "budget_exhausted"
+        "feasible"
+        if feasible
+        else "budget_exhausted"
         if outcome.budget_exhausted
         else "solver_failed"
         if solver_failed
-        else "feasible"
-        if feasible
         else "infeasible"
     )
     return MuscleAllocationResult(

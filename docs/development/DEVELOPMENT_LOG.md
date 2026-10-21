@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13564 · Fix CI Requires OpenSim Regressions (Squat Joint Reactions and Native Muscle Effort)
+
+- **State:** in_review
+- **Owner:** cursor-cloud
+- **Issue:** #13564
+- **Branch:** cursor/fix-opensim-ci-13564-90e0
+- **PR:** not created
+- **Paths:** src/shared/python/biomechanics/muscle_allocation.py, src/engines/physics_engines/opensim/python/msk_lift_ik_id.py, src/engines/physics_engines/opensim/python/msk_lift_joint_reactions.py, tests/unit/shared_python/test_muscle_excitation_allocation.py, tests/unit/lifting/test_opensim_lift_ik_id.py
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (SELF)
+- **Summary:** Restore native muscle-effort allocation feasibility under the shared nfev budget and align squat joint-reaction acceleration checks with Simbody pelvis Euler rates.
+- **Next step:** Merge after `CI Requires OpenSim` and quality-gate are green on the PR.
+
 ### DL-#13038 · Record the OSL Epic Handoff State (Open PRs, Owner Decisions, Rejected Video Work)
 
 - **State:** in_progress

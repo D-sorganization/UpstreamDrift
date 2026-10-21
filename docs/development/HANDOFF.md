@@ -1,3 +1,12 @@
+# CI Requires OpenSim — #13564
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `cursor/fix-opensim-ci-13564-90e0`; PR: pending push.
+- Governing issue: #13564.
+- Objective: fix deterministic failures in `test_squat_joint_reactions_computed` and `test_native_constant_interval_matches_fresh_raw_replay` on the `CI Requires OpenSim` workflow.
+- Completed: muscle allocation shares the nfev budget between baseline and `least_squares`; squat joint reactions convert pelvis Euler spline derivatives to Simbody speeds before inverse dynamics and acceleration checks.
+- Validation (local): `python3 -m pytest tests/unit/shared_python/test_muscle_excitation_allocation.py -q`; `python3 -m pytest tests/unit/lifting/test_opensim_lift_ik_id.py::test_generalized_speeds_convert_pelvis_euler_derivatives -q`; squat `acceleration_error_max` ≈ 1.8e-6 on this VM with OpenSim 4.6.
+- Next steps: push branch, open PR with `Fixes #13564`, confirm fleet `CI Requires OpenSim` and quality-gate.
+
 # Project Steward Pass — 2026-10-19
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `staff/project-steward-task-2307c8`; draft PR opened from this branch (`docs(project): steward status 2026-10-19`).

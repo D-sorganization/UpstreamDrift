@@ -109,8 +109,11 @@ def _solve_frame_reaction(
     forces = context["forces"]
     t = float(context["times"][row])
 
-    qk, uk, udotk = ikid._derivatives(splines, len(ik.coordinates), t)
-    for name, val, spd in zip(ik.coordinates, qk, uk, strict=True):
+    qk, qd, qdd = ikid._derivatives(splines, len(ik.coordinates), t)
+    u, udot = ikid.generalized_speeds_from_spline_derivatives(
+        ik.coordinates, qk, qd, qdd
+    )
+    for name, val, spd in zip(ik.coordinates, qk, u, strict=True):
         c = model.getCoordinateSet().get(name)
         c.setValue(state, float(val))
         c.setSpeedValue(state, float(spd))
@@ -122,7 +125,7 @@ def _solve_frame_reaction(
         _override(act, state, 0.0)
 
     simbody_udot = osim.Vector(state.getNU(), 0.0)
-    for name, acc in zip(ik.coordinates, udotk, strict=True):
+    for name, acc in zip(ik.coordinates, udot, strict=True):
         simbody_udot.set(u_idx[name], float(acc))
 
     tau = osim.InverseDynamicsSolver(model).solve(state, simbody_udot)
@@ -133,7 +136,7 @@ def _solve_frame_reaction(
     actual_udot = state.getUDot()
     acc_err = max(
         abs(actual_udot.get(u_idx[name]) - acc)
-        for name, acc in zip(ik.coordinates, udotk, strict=True)
+        for name, acc in zip(ik.coordinates, udot, strict=True)
     )
 
     f_back_g, _ = _child_reaction(context["joints"]["back"], state)
@@ -162,7 +165,7 @@ def _solve_frame_reaction(
         f_pl,
         np.array([np.linalg.norm(f_sr), np.linalg.norm(f_sl)]),
         acc_err,
-        float(np.linalg.norm(udotk)),
+        float(np.linalg.norm(udot)),
     )
 
 
