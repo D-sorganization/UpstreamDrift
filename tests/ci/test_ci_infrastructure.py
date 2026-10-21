@@ -10,13 +10,16 @@ This file addresses infrastructure issues identified in CI pipeline failures.
 """
 
 import json
+import logging
 import re
+import runpy
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 pytestmark = pytest.mark.unit
 
@@ -36,6 +39,39 @@ QUALITY_GATE_FLEET_GATES = (
     "workflow-inventory",
     "urdf-layering",
 )
+
+
+def test_pre_push_hook_keeps_pytest_failure_and_gives_repair_guidance(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A failed pytest run must block push and direct the user to fix failures."""
+    invocation: list[list[str]] = []
+
+    def failed_pytest(args: list[str], *, check: bool) -> subprocess.CompletedProcess:
+        invocation.append(args)
+        assert check is False
+        return subprocess.CompletedProcess(args, returncode=1)
+
+    monkeypatch.setattr(subprocess, "run", failed_pytest)
+    hook = runpy.run_path(str(REPO_ROOT / "scripts" / "pre_push_hook.py"))
+
+    with caplog.at_level(logging.ERROR):
+        result = hook["main"]()
+
+    assert invocation and invocation[0][1:3] == ["-m", "pytest"]
+    assert result != 0
+    assert "Run 'python -m pytest' locally" in caplog.text
+    assert "Fix the failing tests before pushing" in caplog.text
+    assert "--no-verify" not in caplog.text
+
+
+def test_architecture_map_contract_uses_approved_fleet_runner() -> None:
+    """The architecture contract must not route through an ungated hosted fallback."""
+    workflow_path = REPO_ROOT / ".github/workflows/architecture-map-contract.yml"
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    job = workflow["jobs"]["validate-map"]
+
+    assert job["runs-on"] == "d-sorg-fleet-docker"
 
 
 def _major_minor(version: str) -> tuple[int, int]:
@@ -287,7 +323,8 @@ class TestCIEnvironmentCompatibility:
         assert "for display_num in $(seq 90 129)" in start_step
         assert 'lockdir="/tmp/upstreamdrift-xvfb-${display_num}.lock"' in start_step
         assert 'mkdir "$lockdir"' in start_step
-        assert 'echo "DISPLAY=:${display_num}" >> "$GITHUB_ENV"' in start_step
+        assert 'echo "DISPLAY=:${display_num}"' in start_step
+        assert '} >> "$GITHUB_ENV"' in start_step
         assert "Xvfb :99" not in start_step
         assert "UPSTREAMDRIFT_XVFB_PID" in stop_step
         assert "UPSTREAMDRIFT_XVFB_LOCKDIR" in stop_step
