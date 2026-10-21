@@ -32,7 +32,11 @@ def _run_shell(
     return subprocess.run(
         ["bash", "-euo", "pipefail", "-c", script],
         cwd=cwd,
-        env={**os.environ, **env},
+        env={
+            **os.environ,
+            "PATH": f"{Path(sys.executable).parent}{os.pathsep}{os.environ['PATH']}",
+            **env,
+        },
         text=True,
         capture_output=True,
         timeout=15,
@@ -57,16 +61,22 @@ def test_consumer_uses_protected_policy_checkout_and_trusted_event_base() -> Non
     resolver = _step(workflow, "Resolve trusted development-log baseline")
     script = resolver["run"]
     assert resolver["env"]["PR_BASE_SHA"] == "${{ github.event.pull_request.base.sha }}"
+    assert resolver["env"]["PR_HEAD_SHA"] == "${{ github.event.pull_request.head.sha }}"
+    assert resolver["env"]["GITHUB_SHA"] == "${{ github.sha }}"
+    assert resolver["env"]["BASE_REF"] == "${{ github.event.pull_request.base.ref }}"
+    assert resolver["env"]["REPOSITORY"] == "${{ github.repository }}"
+    assert resolver["env"]["DEFAULT_BRANCH"] == (
+        "${{ github.event.repository.default_branch }}"
+    )
     assert (
         resolver["env"]["MERGE_GROUP_BASE_SHA"]
         == "${{ github.event.merge_group.base_sha }}"
     )
-    assert 'pull_request) base_sha="$PR_BASE_SHA"' in script
+    assert "pull_request)" in script
     assert 'merge_group) base_sha="$MERGE_GROUP_BASE_SHA"' in script
-    assert "github.sha" not in script and "git -C target rev-parse HEAD" not in script
-
-    base_file = _step(workflow, "Resolve trusted development-log baseline")["env"]
-    assert "${{ github.sha }}" not in base_file
+    assert "policy/scripts/devlog_trusted_base.py" in script
+    assert "target/scripts/devlog_trusted_base.py" not in script
+    assert "git -C target rev-parse HEAD" not in script
 
 
 def test_policy_checkout_uses_fail_closed_repository_scoped_app_token() -> None:
@@ -237,13 +247,90 @@ def test_event_requiring_base_fails_when_its_base_sha_is_missing(
 
 
 @pytest.mark.skipif(os.name == "nt", reason="the extracted workflow step requires Bash")
-@pytest.mark.parametrize(
-    ("event", "base_env"),
-    [("pull_request", "PR_BASE_SHA"), ("merge_group", "MERGE_GROUP_BASE_SHA")],
-)
-def test_resolver_exports_the_event_base_commit(
-    tmp_path: Path, event: str, base_env: str
+def test_resolver_uses_protected_helper_result_not_event_anchor_or_head(
+    tmp_path: Path,
 ) -> None:
+    policy_helper = tmp_path / "policy/scripts/devlog_trusted_base.py"
+    policy_helper.parent.mkdir(parents=True)
+    helper_called = tmp_path / "policy-helper-called"
+    trusted_base = "c" * 40
+    helper_source = f"""
+import os
+import pathlib
+import sys
+
+assert sys.argv[1:] == ["--target-root", "target"]
+assert os.environ["EVENT_NAME"] == "pull_request"
+assert os.environ["PR_BASE_SHA"] == {"a" * 40!r}
+assert os.environ["PR_HEAD_SHA"] == {"b" * 40!r}
+assert os.environ["GITHUB_SHA"] == {"d" * 40!r}
+assert os.environ["BASE_REF"] == "release/next"
+assert os.environ["REPOSITORY"] == "D-sorganization/UpstreamDrift"
+assert os.environ["DEFAULT_BRANCH"] == "main"
+pathlib.Path(os.environ["HELPER_CALL_MARKER"]).write_text("protected", encoding="utf-8")
+print("{trusted_base}")
+"""
+    policy_helper.write_text(helper_source, encoding="utf-8")
+
+    target_decoy = tmp_path / "target/scripts/devlog_trusted_base.py"
+    target_decoy.parent.mkdir(parents=True)
+    target_decoy.write_text(
+        "from pathlib import Path\n"
+        "Path('candidate-helper-called').write_text('bad')\n"
+        f"print('{('e' * 40)}')\n",
+        encoding="utf-8",
+    )
+
+    resolver = _step(_workflow(), "Resolve trusted development-log baseline")
+    result = _run_shell(
+        resolver["run"],
+        {
+            "EVENT_NAME": "pull_request",
+            "PR_BASE_SHA": "a" * 40,
+            "PR_HEAD_SHA": "b" * 40,
+            "GITHUB_SHA": "d" * 40,
+            "BASE_REF": "release/next",
+            "REPOSITORY": "D-sorganization/UpstreamDrift",
+            "DEFAULT_BRANCH": "main",
+            "MERGE_GROUP_BASE_SHA": "",
+            "HELPER_CALL_MARKER": str(helper_called),
+            "GITHUB_OUTPUT": str(tmp_path / "output"),
+        },
+        cwd=tmp_path,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert helper_called.read_text(encoding="utf-8") == "protected"
+    assert not (tmp_path / "candidate-helper-called").exists()
+    assert (tmp_path / "output").read_text(encoding="utf-8") == f"sha={trusted_base}\n"
+
+
+@pytest.mark.skipif(os.name == "nt", reason="the extracted workflow step requires Bash")
+def test_resolver_fails_closed_when_protected_helper_is_missing(tmp_path: Path) -> None:
+    resolver = _step(_workflow(), "Resolve trusted development-log baseline")
+    result = _run_shell(
+        resolver["run"],
+        {
+            "EVENT_NAME": "pull_request",
+            "PR_BASE_SHA": "a" * 40,
+            "PR_HEAD_SHA": "b" * 40,
+            "GITHUB_SHA": "d" * 40,
+            "BASE_REF": "main",
+            "REPOSITORY": "D-sorganization/UpstreamDrift",
+            "DEFAULT_BRANCH": "main",
+            "MERGE_GROUP_BASE_SHA": "",
+            "GITHUB_OUTPUT": str(tmp_path / "output"),
+        },
+        cwd=tmp_path,
+    )
+
+    assert result.returncode == 2
+    assert "Protected trusted-base helper is missing" in result.stderr
+    assert not (tmp_path / "output").exists()
+
+
+@pytest.mark.skipif(os.name == "nt", reason="the extracted workflow step requires Bash")
+def test_merge_group_resolver_keeps_the_event_base_unchanged(tmp_path: Path) -> None:
     target = tmp_path / "target"
     target.mkdir()
     subprocess.run(["git", "init", "-q"], cwd=target, check=True, timeout=10)
@@ -268,11 +355,14 @@ def test_resolver_exports_the_event_base_commit(
     result = _run_shell(
         resolver["run"],
         {
-            "EVENT_NAME": event,
-            "PR_BASE_SHA": base_sha if base_env == "PR_BASE_SHA" else "",
-            "MERGE_GROUP_BASE_SHA": base_sha
-            if base_env == "MERGE_GROUP_BASE_SHA"
-            else "",
+            "EVENT_NAME": "merge_group",
+            "PR_BASE_SHA": "",
+            "PR_HEAD_SHA": "",
+            "GITHUB_SHA": base_sha,
+            "BASE_REF": "",
+            "REPOSITORY": "D-sorganization/UpstreamDrift",
+            "DEFAULT_BRANCH": "main",
+            "MERGE_GROUP_BASE_SHA": base_sha,
             "GITHUB_OUTPUT": str(tmp_path / "output"),
         },
         cwd=tmp_path,

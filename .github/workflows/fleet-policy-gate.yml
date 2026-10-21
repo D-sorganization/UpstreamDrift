@@ -51,12 +51,35 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_SHA: ${{ github.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          REPOSITORY: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
         run: |
           set -euo pipefail
           base_sha=""
           case "$EVENT_NAME" in
-            pull_request) base_sha="$PR_BASE_SHA" ;;
+            pull_request)
+              if [[ -z "$PR_BASE_SHA" ]]; then
+                echo "Required event base SHA is missing" >&2
+                exit 2
+              fi
+              trusted_base_helper="policy/scripts/devlog_trusted_base.py"
+              if [[ ! -f "$trusted_base_helper" ]]; then
+                echo "Protected trusted-base helper is missing" >&2
+                exit 2
+              fi
+              if ! base_sha=$(python "$trusted_base_helper" --target-root target); then
+                echo "Protected trusted-base verification failed" >&2
+                exit 2
+              fi
+              if [[ ! "$base_sha" =~ ^[0-9a-fA-F]{40}$ ]]; then
+                echo "Protected trusted-base helper returned an invalid commit SHA" >&2
+                exit 2
+              fi
+              ;;
             merge_group) base_sha="$MERGE_GROUP_BASE_SHA" ;;
             workflow_dispatch|schedule) ;;
             *) echo "Unsupported workflow event: $EVENT_NAME" >&2; exit 2 ;;
@@ -67,7 +90,7 @@ jobs:
               exit 2
             fi
           fi
-          if [[ -n "$base_sha" ]]; then
+          if [[ "$EVENT_NAME" == "merge_group" && -n "$base_sha" ]]; then
             if [[ ! "$base_sha" =~ ^[0-9a-fA-F]{40}$ ]]; then
               echo "Event base is not a full commit SHA" >&2
               exit 2
