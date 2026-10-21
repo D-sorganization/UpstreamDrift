@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 pytestmark = pytest.mark.unit
 
@@ -62,6 +63,15 @@ def test_pre_push_hook_keeps_pytest_failure_and_gives_repair_guidance(
     assert "Run 'python -m pytest' locally" in caplog.text
     assert "Fix the failing tests before pushing" in caplog.text
     assert "--no-verify" not in caplog.text
+
+
+def test_architecture_map_contract_uses_approved_fleet_runner() -> None:
+    """The architecture contract must not route through an ungated hosted fallback."""
+    workflow_path = REPO_ROOT / ".github/workflows/architecture-map-contract.yml"
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    job = workflow["jobs"]["validate-map"]
+
+    assert job["runs-on"] == "d-sorg-fleet-docker"
 
 
 def _major_minor(version: str) -> tuple[int, int]:
