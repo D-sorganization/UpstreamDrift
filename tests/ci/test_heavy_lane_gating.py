@@ -84,13 +84,10 @@ class TestCrossEngineEquivalenceGating:
         assert "format('{0}-{1}', github.event_name, github.ref)" in group
 
     def test_workflow_lint_allows_conditional_cancel(self) -> None:
-        # The workflow-file lint greps for a literal ``cancel-in-progress:
-        # true``, so the conditional form above must be on its exception list.
+        # Workflow lint delegates merge-queue-safe cancellation to the audit
+        # script (UD-CI-032), which accepts PR-scoped cancel expressions.
         lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
-        allowlist = next(
-            line for line in lint.splitlines() if "nightly-publish.yml" in line
-        )
-        assert self.NAME in allowlist
+        assert "audit_workflow_cancellation_semantics.py" in lint
 
     def test_dispatcher_exposes_heavy_flag(self) -> None:
         dispatcher = _load(self.NAME)["jobs"]["pick-runner"]
@@ -177,10 +174,11 @@ class TestLeaderboardPublishGating:
 
     def test_workflow_lint_allows_intentional_cancel_false(self) -> None:
         lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
-        allowlist = next(
-            line for line in lint.splitlines() if "nightly-publish.yml" in line
-        )
-        assert self.NAME in allowlist
+        assert "audit_workflow_cancellation_semantics.py" in lint
+        script = (
+            REPO_ROOT / "scripts" / "ci" / "audit_workflow_cancellation_semantics.py"
+        ).read_text(encoding="utf-8")
+        assert f'"{self.NAME}"' in script
 
 
 class TestOpenSimMainRunsComplete:
@@ -242,7 +240,4 @@ class TestOpenSimMainRunsComplete:
 
     def test_workflow_lint_allows_conditional_cancel(self) -> None:
         lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
-        allowlist = next(
-            line for line in lint.splitlines() if "nightly-publish.yml" in line
-        )
-        assert self.NAME in allowlist
+        assert "audit_workflow_cancellation_semantics.py" in lint
