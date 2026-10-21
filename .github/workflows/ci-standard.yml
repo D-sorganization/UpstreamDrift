@@ -4,6 +4,8 @@ name: CI Standard
 on:
   push:
     branches: [main]
+    branches-ignore:
+      - "gh-readonly-queue/**"
     paths-ignore:
       - "docs/**"
       - "**.md"
@@ -36,8 +38,8 @@ concurrency:
   # cancelling each other (main was never verified: every run was cancelled by
   # the next push). PR/branch refs keep the per-ref group so superseded pushes
   # still cancel. RM #1507 / #9409.
-  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

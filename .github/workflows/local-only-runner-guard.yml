@@ -12,13 +12,15 @@ on:
       - ".github/workflows/**"
   push:
     branches: [main]
+    branches-ignore:
+      - "gh-readonly-queue/**"
     paths:
       - ".github/workflows/**"
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

@@ -17,6 +17,8 @@ on:
   push:
     branches:
       - main
+    branches-ignore:
+      - "gh-readonly-queue/**"
   workflow_dispatch:
   schedule:
     # Nightly at 08:00 UTC — staggered after ci-standard and optional-stack.

@@ -22,6 +22,8 @@ name: Maturin Movement Optimizer
 on:
   push:
     branches: [main]
+    branches-ignore:
+      - "gh-readonly-queue/**"
     paths:
       - "vendor/ud-tools"
       - ".github/workflows/maturin-movement-optimizer.yml"
@@ -34,7 +36,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

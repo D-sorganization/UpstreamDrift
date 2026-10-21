@@ -95,22 +95,13 @@ jobs:
             if ! grep -q '^concurrency:' "$f"; then
               FAIL="${FAIL}\n  - $f: missing concurrency block"
             fi
-            # Check cancel-in-progress: true (only if concurrency exists)
-            # Exception allowlist — workflows where cancel-in-progress: false is legitimate
-            # (publishes/releases should not be interrupted mid-stream).
-            # cross-engine-equivalence.yml cancels PR runs only, via an
-            # expression, so a running main run always finishes (#12285).
-            # ci-requires-opensim.yml does the same (#13494).
-            case "$(basename "$f")" in
-              publish-artifacts.yml|release.yml|publish.yml|deploy.yml|nightly-publish.yml|cross-engine-equivalence.yml|cross-engine-leaderboard-publish.yml|ci-requires-opensim.yml|jules-push-pr-noise-disable.yml)
-                echo "::notice::Skipping cancel-in-progress check for $f (intentional exception)"
-                ;;
-              *)
-                if grep -q '^concurrency:' "$f" && ! grep -q 'cancel-in-progress:\s*true' "$f"; then
-                  FAIL="${FAIL}\n  - $f: cancel-in-progress not set to true"
-                fi
-                ;;
-            esac
+            # Merge-queue-safe cancellation (UD-CI-032 / issue #13573): PR runs may
+            # cancel superseded work, but merge_group and main push runs must not.
+            if grep -q '^concurrency:' "$f"; then
+              if ! python3 scripts/ci/audit_workflow_cancellation_semantics.py "$f"; then
+                FAIL="${FAIL}\n  - $f: merge-queue cancellation semantics failed (see audit output)"
+              fi
+            fi
           done <<< "$FILES"
           if [ -n "$FAIL" ]; then
             printf "::error::Workflow lint failed:%b\n" "$FAIL"

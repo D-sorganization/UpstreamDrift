@@ -3,6 +3,8 @@ name: Docker Security Scan
 on:
   push:
     branches: [main]
+    branches-ignore:
+      - "gh-readonly-queue/**"
     paths:
       - "Dockerfile"
       - "requirements*.txt"
@@ -20,7 +22,7 @@ on:
 
 concurrency:
   group: docker-security-scan-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   trivy-scan:
