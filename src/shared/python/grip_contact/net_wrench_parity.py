@@ -30,6 +30,9 @@ from src.shared.python.grip_contact.parity import (
 
 logger = logging.getLogger(__name__)
 
+# Grip codegen must match on the CI Python 3.11 / 3.12 matrix (#13334).
+_EXPORT_FLOAT_DECIMALS = 11
+
 __all__ = [
     "canonical_export_float",
     "canonicalize_export_tree",
@@ -53,7 +56,8 @@ def canonical_export_float(val: float) -> float:
         raise ValueError(f"canonical_export_float requires a finite float, got {val!r}")
     if abs(f) < 1e-18:
         return 0.0
-    return json.loads(json.dumps(f))
+    rounded = round(f, _EXPORT_FLOAT_DECIMALS)
+    return json.loads(json.dumps(rounded))
 
 
 def matlab_export_literal(val: float) -> str:

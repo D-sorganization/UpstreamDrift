@@ -212,7 +212,7 @@ def build_kernel_params_payload(
         "styles": styles_dict,
     }
     validate_kernel_params_payload(payload)
-    return canonicalize_export_tree(payload)
+    return payload
 
 
 def validate_kernel_params_payload(payload: Mapping[str, Any]) -> None:
@@ -1123,7 +1123,7 @@ def kernel_bundle_sha256(
 ) -> dict[str, str]:
     """Compute SHA-256 digests of the generated MATLAB kernel and params JSON."""
     if params is None:
-        params = build_kernel_params_payload()
+        params = canonicalize_export_tree(build_kernel_params_payload())
     m_src = render_matlab_kernel_source(params)
     p_src = render_json_deterministic(params)
     return {
@@ -1140,10 +1140,11 @@ def export_matlab_kernel_bundle(
     check: bool = False,
 ) -> int:
     """Write or check ``gs3dx_grip_contact_kernel.m``, params JSON, and golden JSON."""
-    params = build_kernel_params_payload()
-    golden = build_golden_vectors_payload(params)
-    m_text = render_matlab_kernel_source(params)
-    p_text = render_json_deterministic(params)
+    raw_params = build_kernel_params_payload()
+    export_params = canonicalize_export_tree(raw_params)
+    golden = build_golden_vectors_payload(raw_params)
+    m_text = render_matlab_kernel_source(export_params)
+    p_text = render_json_deterministic(export_params)
     g_text = render_json_deterministic(golden)
 
     targets = (
