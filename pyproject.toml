@@ -811,6 +811,8 @@ markers = [
     "security: security-posture tests (secret scanning, auth hardening)",
     "validates_physics: tests that check computed physics against an analytic or published ground truth",
     "launch_qa: launch-mode functional QA gate (web/--classic/--api-only/--engine matrix; see docs/testing/launch_qa.md)",
+    "quarantine: marks flaky tests in quarantine with issue, owner, and expiry metadata (UD-CI-030)",
+    "xdist_group: pytest-xdist load-scope group name for serializing related tests across workers",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)

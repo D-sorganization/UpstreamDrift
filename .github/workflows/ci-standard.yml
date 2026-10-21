@@ -252,9 +252,11 @@ jobs:
           # separately select fast PR/push or full queue/scheduled execution.
           if [ "$EVENT_NAME" != "pull_request" ]; then
             echo "Event '$EVENT_NAME' always runs the full suite."
-            echo "code=true" >> "$GITHUB_OUTPUT"
-            echo "docs=true" >> "$GITHUB_OUTPUT"
-            echo "publication=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "code=true"
+              echo "docs=true"
+              echo "publication=true"
+            } >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -322,9 +324,11 @@ jobs:
             esac
           done <<< "$changed"
 
-          echo "code=$code" >> "$GITHUB_OUTPUT"
-          echo "docs=$docs" >> "$GITHUB_OUTPUT"
-          echo "publication=$publication" >> "$GITHUB_OUTPUT"
+          {
+            echo "code=$code"
+            echo "docs=$docs"
+            echo "publication=$publication"
+          } >> "$GITHUB_OUTPUT"
           {
             echo "## Changed paths"
             echo "- non-docs changes: \`$code\`"
@@ -2161,12 +2165,14 @@ jobs:
       - name: Document Native Engine Coverage In Core Lane
         if: steps.core-test-changes.outputs.skip != 'true'
         run: |
-          echo "## Core CI Coverage" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- This lane installs core project dependencies plus \`[dev,gui-test]\`." >> "$GITHUB_STEP_SUMMARY"
-          echo "- MuJoCo coverage may run because MuJoCo is part of the base project dependencies." >> "$GITHUB_STEP_SUMMARY"
-          echo "- Drake, Pinocchio, OpenSim, and MyoSuite are optional extras and are not provisioned in this lane." >> "$GITHUB_STEP_SUMMARY"
-          echo "- Passing this job does not claim full native-engine integration coverage for those optional stacks." >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Core CI Coverage"
+            echo ""
+            echo "- This lane installs core project dependencies plus \`[dev,gui-test]\`."
+            echo "- MuJoCo coverage may run because MuJoCo is part of the base project dependencies."
+            echo "- Drake, Pinocchio, OpenSim, and MyoSuite are optional extras and are not provisioned in this lane."
+            echo "- Passing this job does not claim full native-engine integration coverage for those optional stacks."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Start Xvfb
         if: steps.core-test-changes.outputs.skip != 'true'
@@ -2187,9 +2193,11 @@ jobs:
             sleep 2
 
             if kill -0 "$xvfb_pid" 2>/dev/null; then
-              echo "DISPLAY=:${display_num}" >> "$GITHUB_ENV"
-              echo "UPSTREAMDRIFT_XVFB_PID=${xvfb_pid}" >> "$GITHUB_ENV"
-              echo "UPSTREAMDRIFT_XVFB_LOCKDIR=${lockdir}" >> "$GITHUB_ENV"
+              {
+                echo "DISPLAY=:${display_num}"
+                echo "UPSTREAMDRIFT_XVFB_PID=${xvfb_pid}"
+                echo "UPSTREAMDRIFT_XVFB_LOCKDIR=${lockdir}"
+              } >> "$GITHUB_ENV"
               echo "Started Xvfb on display :${display_num}"
               exit 0
             fi
@@ -2598,10 +2606,12 @@ jobs:
           QT_API: pyqt6
         run: |
           set -o pipefail
-          echo "## Cross-Engine Validator Core Unit Tests" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- This step exercises the dependency-free validator logic only." >> "$GITHUB_STEP_SUMMARY"
-          echo "- It does not install or verify Drake, Pinocchio, OpenSim, or MyoSuite." >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Cross-Engine Validator Core Unit Tests"
+            echo ""
+            echo "- This step exercises the dependency-free validator logic only."
+            echo "- It does not install or verify Drake, Pinocchio, OpenSim, or MyoSuite."
+          } >> "$GITHUB_STEP_SUMMARY"
           xvfb-run --auto-servernum python -m pytest tests/integration/test_cross_engine_validation.py \
             -p no:xvfb \
             --timeout=60 \
@@ -2797,7 +2807,7 @@ jobs:
           python -m pip install "psycopg[binary]>=3.1"
       - name: Run Alembic PostgreSQL round-trip
         env:
-          ALEMBIC_ROUND_TRIP_DATABASE_URL: postgresql+psycopg://upstreamdrift:upstreamdrift@localhost:${{ job.services.postgres.ports[5432] }}/upstreamdrift_migrations
+          ALEMBIC_ROUND_TRIP_DATABASE_URL: postgresql+psycopg://upstreamdrift:upstreamdrift@localhost:${{ job.services.postgres.ports['5432'] }}/upstreamdrift_migrations
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
         run: |
           python3 - <<'PY'
@@ -2939,11 +2949,11 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           REQUIRE_DRIFT_GATES: "1"
         run: |
-          drift_suites="tests/integration/launch_monitor_drift/"
+          drift_suites=("tests/integration/launch_monitor_drift/")
           if [ -d tests/integration/putting_green_drift ]; then
-            drift_suites="$drift_suites tests/integration/putting_green_drift/"
+            drift_suites+=("tests/integration/putting_green_drift/")
           fi
-          python -m pytest $drift_suites \
+          python -m pytest "${drift_suites[@]}" \
             --timeout=120 \
             --timeout-method=thread \
             -v --tb=short
@@ -3505,15 +3515,19 @@ jobs:
       - name: Rust Quality Gate Summary
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
-          echo "## Rust Quality Gate (${{ matrix.os }})" >> $GITHUB_STEP_SUMMARY
-          echo "- rustfmt: formatted" >> $GITHUB_STEP_SUMMARY
-          echo "- clippy: no warnings" >> $GITHUB_STEP_SUMMARY
-          echo "- cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Rust Quality Gate (${{ matrix.os }})"
+            echo "- rustfmt: formatted"
+            echo "- clippy: no warnings"
+            echo "- cargo test: all tests pass"
+          } >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            echo "- cargo check --features python: all targets typecheck" >> $GITHUB_STEP_SUMMARY
-            echo "- maturin: wheel built" >> $GITHUB_STEP_SUMMARY
-            echo "- Python bindings and source adapters: verified" >> $GITHUB_STEP_SUMMARY
-            echo "- WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
+            {
+              echo "- cargo check --features python: all targets typecheck"
+              echo "- maturin: wheel built"
+              echo "- Python bindings and source adapters: verified"
+              echo "- WASM: target compiled and verified"
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
   rust-quickstart:

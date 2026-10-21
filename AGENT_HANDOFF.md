@@ -38,7 +38,9 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## CI Throughput (RM Epic #2215)
 
-- UD-CI-010b #13577: `codex/13577-ci-fast-full` adds event tiers and fail-closed aggregate tests; live merge-group canary and seven-day evaluation remain open. See `docs/operations/ci-standard-tiers.md`.
+- UD-CI-010b #13577: `codex/13577-ci-fast-full` retains required ancestor `8a5c5b0`; actual main including #13599 is merge-integrated. Full pre-PR validation remains pending on the published trusted provider; live canary and seven-day latency evidence remain open.
+- UD-CI-032 #13573: PR #13584 (`cursor/cancel-merge-queue-audit-1f01`) — merge-queue-safe `cancel-in-progress` audit; RM #2216 landed — arm auto-merge once `quality-gate` is green.
+- UD-CI-033 #13595: `codex/13595-ci-lint` fixes Actionlint/ShellCheck blockers and adds the governed RM #2253 policy consumer with protected baseline proof, a Repository_Management contents-read App token, trusted event forwarding, and `d-sorg-fleet-docker` routing. Actual CI found Semgrep `python.lang.security.audit.eval-detected` in the test-only fork-skip expression evaluator; the evaluator now interprets only the required GitHub expression AST nodes and rejects arithmetic/call syntax (including a side-effect fixture). Focused CI tests pass; Semgrep 1.182.0 with the CI rulesets reports 0 findings across all four scanned CI test files. The exact published-provider `pre_pr` invocation passed all eight gates, including whole-repository consistency and Fleet Policy Gate; 22 policy-consumer tests passed. Existing action pin, inventory, local-runner, central-policy, and publication detector contracts remain covered. Do not push; parent owns final push after queue/registry confirmation.
 
 ## Required Before Continuing
 

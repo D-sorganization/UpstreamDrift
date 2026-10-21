@@ -18,6 +18,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13595 · CI Standard Lint Gate
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #13595
+- **Branch:** codex/13595-ci-lint
+- **PR:** #13599
+- **Paths:** .github/actionlint.yaml,.github/WORKFLOWS.md,.github/workflows/ci-standard.yml,.github/workflows/fleet-policy-gate.yml,.github/workflows/architecture-map-contract.yml,scripts/pre_push_hook.py,tests/ci/test_ci_infrastructure.py,tests/ci/test_ci_drift_gate_arguments.py,tests/ci/test_devlog_repair_workflow.py,tests/ci/test_publication_quality_workflow.py,AGENT_HANDOFF.md
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`d5d8ce1c`; collated from changes/13595-ci-standard-lint.md)
+- **Summary:** Repair CI lint, trusted governed policy consumption, publication detection coverage, and pre-push failure guidance
+- **Next step:** Wait for Hume's trusted-base helper publication and central guard/protected-registry follow-ups, central fork-policy publication, the preflight fallback-worker fix, and CI cohort drain; then apply the canonical consumer workflow and run full pre-PR with the central gate enabled before any push.
+
+### DL-#13579 · Engine Docker Cache Steps per Fleet Contract
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13579
+- **Branch:** feat/engine-docker-cache-13579
+- **PR:** #13598
+- **Paths:** see #13598
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`d5112d55`; collated from changes/13579-engine-docker-cache-steps-per-fleet-cont.md)
+- **Summary:** engine docker cache steps per fleet contract
+- **Next step:** Merge the PR.
+
+### DL-#13580 · Quarantine Pilot for Simscape Grip Contact Tests and Audit Validator (UD-CI-030)
+
+- **State:** in_review
+- **Owner:** gemini
+- **Issue:** #13580
+- **Branch:** feat/quarantine-pilot-13580
+- **PR:** #13596
+- **Paths:** see #13596
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`1e652a65`; collated from changes/13580-quarantine-pilot-for-simscape-grip-conta.md)
+- **Summary:** Quarantine pilot for Simscape grip contact tests and audit validator (UD-CI-030)
+- **Next step:** Merge via merge queue.
+
 ### DL-#13574 · Record Merge-Queue Batch-Size Experiment Snapshots and Fleet Merge Settings Checker
 
 - **State:** in_review
@@ -2782,6 +2821,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13011 · Stop Realtime File-Tail Poll Thread When Last Subscriber Unsubscribes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13011
+- **Branch:** merged via #13600
+- **PR:** #13600
+- **Paths:** see #13600
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`93a3db81`; collated from changes/13011-stop-realtime-file-tail-poll-thread-when.md)
+- **Summary:** Stop realtime file-tail poll thread when last subscriber unsubscribes
+- **Next step:** Shipped in PR #13600.
+
 ### DL-#13573 · Merge-Queue-Safe Workflow Cancel-in-Progress Audit and Gh-Readonly-Queue Push Ignores (UD-CI-032).
 
 - **State:** shipped
@@ -2866,10 +2918,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13544
 - **Branch:** merged via #13546
-- **PR:** #13546
+- **PR:** #13546, #13602
 - **Paths:** see #13546
 - **Started:** 2026-10-20
-- **Last verified:** 2026-10-20 (`bb208823`; collated from changes/13544-grip-exporter-drift-diagnostics.md)
+- **Last verified:** 2026-10-21 (`9fb90ed9`; collated from changes/13544-serialize-simscape-grip-committed-path-g.md)
 - **Summary:** grip_contact exporter --check now logs the drifted file and a bounded unified diff (flake diagnostics)
 - **Next step:** Shipped in PR #13546.
 
@@ -4153,10 +4205,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12998
 - **Branch:** merged via #13224
-- **PR:** #13224
+- **PR:** #13224, #13603
 - **Paths:** see #13224
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-18 (`3dec2e7c`; collated from changes/12998-add-jaxsim-launcher-dashboard-tile-and-e.md)
+- **Last verified:** 2026-10-21 (`fef8efa8`; collated from changes/12998-register-jaxsim-dashboard-on-engines-das.md)
 - **Summary:** Add JaxSim launcher dashboard tile and engine tile coverage test
 - **Next step:** Shipped in PR #13224.
 

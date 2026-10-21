@@ -149,6 +149,12 @@ def test_kernel_params_payload_and_matlab_source_contract() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.xdist_group("grip_contact_committed_generated_check")
+@pytest.mark.quarantine(
+    issue="13544",
+    owner="gemini",
+    expires="2026-11-04",
+)
 def test_export_matlab_kernel_bundle_check_and_drift_detection(tmp_path: Path) -> None:
     """Committed generated files are fresh and --check catches any mutation."""
     assert export_matlab_kernel_bundle(check=True) == 0
@@ -284,6 +290,12 @@ def test_matlab_pair_wrench_unittest_file_contract() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.xdist_group("grip_contact_committed_generated_check")
+@pytest.mark.quarantine(
+    issue="13544",
+    owner="gemini",
+    expires="2026-11-04",
+)
 def test_export_scenarios_json_check_and_structure(tmp_path: Path) -> None:
     """Scenario input JSON is fresh and matches Pinocchio/MuJoCo G6 parameters."""
     assert export_scenarios_json(DEFAULT_SCENARIOS_JSON_PATH, check=True) == 0
