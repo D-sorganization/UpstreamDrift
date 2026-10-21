@@ -18,6 +18,9 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.grip_contact.bushing_law import BushingState, cross3
+from src.shared.python.grip_contact.generated_export_lock import (
+    serialize_committed_export,
+)
 from src.shared.python.grip_contact.contact_topology import (
     GripStyle,
     contact_topology,
@@ -1140,41 +1143,55 @@ def export_matlab_kernel_bundle(
     check: bool = False,
 ) -> int:
     """Write or check ``gs3dx_grip_contact_kernel.m``, params JSON, and golden JSON."""
-    raw_params = build_kernel_params_payload()
-    export_params = canonicalize_export_tree(raw_params)
-    golden = build_golden_vectors_payload(raw_params)
-    m_text = render_matlab_kernel_source(export_params)
-    p_text = render_json_deterministic(export_params)
-    g_text = render_json_deterministic(golden)
 
-    targets = (
-        (Path(kernel_m_path), m_text),
-        (Path(params_json_path), p_text),
-        (Path(golden_json_path), g_text),
-    )
-    if check:
-        for p, expected_text in targets:
-            current = p.read_text(encoding="utf-8") if p.exists() else None
-            if current != expected_text:
-                if (
-                    current is not None
-                    and p.resolve() == DEFAULT_GOLDEN_JSON_PATH.resolve()
-                ):
-                    try:
-                        act = json.loads(current)
-                        exp = json.loads(expected_text)
-                        if payloads_numerically_close(act, exp):
-                            continue
-                    except Exception:
-                        pass
-                report_generated_drift(p, current, expected_text)
-                return 1
+    def _run() -> int:
+        raw_params = build_kernel_params_payload()
+        export_params = canonicalize_export_tree(raw_params)
+        golden = build_golden_vectors_payload(raw_params)
+        m_text = render_matlab_kernel_source(export_params)
+        p_text = render_json_deterministic(export_params)
+        g_text = render_json_deterministic(golden)
+
+        payload_targets = (
+            (Path(kernel_m_path), m_text),
+            (Path(params_json_path), p_text),
+            (Path(golden_json_path), g_text),
+        )
+        if check:
+            for p, expected_text in payload_targets:
+                current = p.read_text(encoding="utf-8") if p.exists() else None
+                if current != expected_text:
+                    if (
+                        current is not None
+                        and p.resolve() == DEFAULT_GOLDEN_JSON_PATH.resolve()
+                    ):
+                        try:
+                            act = json.loads(current)
+                            exp = json.loads(expected_text)
+                            if payloads_numerically_close(act, exp):
+                                continue
+                        except Exception:
+                            pass
+                    report_generated_drift(p, current, expected_text)
+                    return 1
+            return 0
+
+        for path, expected_text in payload_targets:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(expected_text, encoding="utf-8")
         return 0
 
-    for path, expected_text in targets:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(expected_text, encoding="utf-8")
-    return 0
+    lock_targets = (
+        Path(kernel_m_path),
+        Path(params_json_path),
+        Path(golden_json_path),
+    )
+    committed = (
+        DEFAULT_KERNEL_M_PATH,
+        DEFAULT_PARAMS_JSON_PATH,
+        DEFAULT_GOLDEN_JSON_PATH,
+    )
+    return serialize_committed_export(lock_targets, committed, _run)
 
 
 __all__ = [
