@@ -10,7 +10,9 @@ This file addresses infrastructure issues identified in CI pipeline failures.
 """
 
 import json
+import logging
 import re
+import runpy
 import subprocess
 import sys
 from pathlib import Path
@@ -36,6 +38,30 @@ QUALITY_GATE_FLEET_GATES = (
     "workflow-inventory",
     "urdf-layering",
 )
+
+
+def test_pre_push_hook_keeps_pytest_failure_and_gives_repair_guidance(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A failed pytest run must block push and direct the user to fix failures."""
+    invocation: list[list[str]] = []
+
+    def failed_pytest(args: list[str], *, check: bool) -> subprocess.CompletedProcess:
+        invocation.append(args)
+        assert check is False
+        return subprocess.CompletedProcess(args, returncode=1)
+
+    monkeypatch.setattr(subprocess, "run", failed_pytest)
+    hook = runpy.run_path(str(REPO_ROOT / "scripts" / "pre_push_hook.py"))
+
+    with caplog.at_level(logging.ERROR):
+        result = hook["main"]()
+
+    assert invocation and invocation[0][1:3] == ["-m", "pytest"]
+    assert result != 0
+    assert "Run 'python -m pytest' locally" in caplog.text
+    assert "Fix the failing tests before pushing" in caplog.text
+    assert "--no-verify" not in caplog.text
 
 
 def _major_minor(version: str) -> tuple[int, int]:
