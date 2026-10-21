@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "canonical_export_float",
     "canonicalize_export_tree",
+    "matlab_export_literal",
     "failing_net_wrench",
     "net_club_wrench",
     "net_club_wrench_errors",
@@ -53,6 +54,14 @@ def canonical_export_float(val: float) -> float:
     if abs(f) < 1e-18:
         return 0.0
     return json.loads(json.dumps(f))
+
+
+def matlab_export_literal(val: float) -> str:
+    """Format a canonical float as a MATLAB numeric literal."""
+    clean = canonical_export_float(val)
+    if clean == 0.0:
+        return "0"
+    return json.dumps(clean)
 
 
 def canonicalize_export_tree(value: Any) -> Any:
