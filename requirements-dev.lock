@@ -31,12 +31,13 @@ bokeh==3.8.2
     # via upstream-drift (pyproject.toml)
 build==1.4.0
     # via upstream-drift (pyproject.toml)
-certifi==2026.1.4
+certifi==2026.10.19
     # via
     #   httpcore
     #   httpx
     #   pyproj
     #   requests
+    #   upstream-drift (pyproject.toml)
 cffi==2.0.0
     # via
     #   clarabel
