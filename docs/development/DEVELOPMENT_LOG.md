@@ -2756,6 +2756,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13563 · Bump Pillow to 13.0.0 and Certifi to 2026.10.19 to Clear Pip-Audit CVEs.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13563
+- **Branch:** merged via #13587
+- **PR:** #13587
+- **Paths:** see #13587
+- **Started:** 2026-10-21
+- **Last verified:** 2026-10-21 (`e73f47e2`; collated from changes/13563-bump-pillow-to-13-0-0-and-certifi-to-202.md)
+- **Summary:** Bump pillow to 13.0.0 and certifi to 2026.10.19 to clear pip-audit CVEs.
+- **Next step:** Shipped in PR #13587.
+
 ### DL-#13557 · Grip Topology Parity Compares Numerically-Zero Reference Channels (Peak <= 1E-8 N or N·m) Absolutely Instead of Relatively; Fixes myoHand Frozen-Finger Law-Level Parity on Roundoff Spin Channels
 
 - **State:** shipped
@@ -2788,10 +2801,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13334
 - **Branch:** merged via #13529
-- **PR:** #13529
+- **PR:** #13529, #13587
 - **Paths:** see #13529
 - **Started:** 2026-10-20
-- **Last verified:** 2026-10-20 (`3153e8c0`; collated from changes/13334-add-simscape-physical-grip-contact-codeg.md)
+- **Last verified:** 2026-10-21 (`e73f47e2`; collated from changes/13334-canonicalize-grip-contact-codegen-floats.md)
 - **Summary:** Add stateless Simscape physical grip contact codegen kernel, GS3DX_GripContact builder/runner, and M12 parity harness
 - **Next step:** Shipped in PR #13529.
 
