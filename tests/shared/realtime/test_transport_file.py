@@ -275,6 +275,7 @@ class TestReadNewLines:
 # ----------------------------- shutdown ---------------------------------------
 
 
+@pytest.mark.unit
 def test_unsubscribe_last_callback_stops_poll_thread(tmp_path: Path) -> None:
     """#13011: no idle tail thread after the last subscriber leaves."""
     t = _make_transport(tmp_path)
