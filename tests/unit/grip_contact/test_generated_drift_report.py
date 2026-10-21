@@ -44,18 +44,23 @@ def test_report_generated_drift_names_file_and_bounds_diff(
 @pytest.mark.unit
 def test_committed_export_paths_share_process_lock(tmp_path: Path) -> None:
     """#13544: exporters serialize when targets include committed generated paths."""
+    from src.shared.python.grip_contact.generated_export_lock import (
+        targets_touch_committed,
+    )
     from src.shared.python.grip_contact.matlab_kernel import (
         DEFAULT_GOLDEN_JSON_PATH,
         DEFAULT_KERNEL_M_PATH,
         DEFAULT_PARAMS_JSON_PATH,
-        _uses_committed_generated_paths,
     )
 
-    assert _uses_committed_generated_paths(
-        DEFAULT_KERNEL_M_PATH, DEFAULT_PARAMS_JSON_PATH, DEFAULT_GOLDEN_JSON_PATH
+    committed = (
+        DEFAULT_KERNEL_M_PATH,
+        DEFAULT_PARAMS_JSON_PATH,
+        DEFAULT_GOLDEN_JSON_PATH,
     )
+    assert targets_touch_committed(committed, committed)
     local = tmp_path / "k.m", tmp_path / "p.json", tmp_path / "g.json"
-    assert not _uses_committed_generated_paths(*local)
+    assert not targets_touch_committed(local, committed)
 
     paths = {
         "kernel_m_path": local[0],
