@@ -17,7 +17,7 @@ concurrency:
 jobs:
   fleet-policy-gate:
     name: Fleet policy gate
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

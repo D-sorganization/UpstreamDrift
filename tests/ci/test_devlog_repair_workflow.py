@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -109,6 +110,38 @@ def test_policy_checkout_uses_fail_closed_repository_scoped_app_token() -> None:
         == "${{ steps.policy-app-token.outputs.token }}"
     )
     assert policy_checkout["with"]["persist-credentials"] == "false"
+
+
+def test_consumer_workflow_passes_actual_local_only_runner_guard(
+    tmp_path: Path,
+) -> None:
+    guard_path = REPO_ROOT / ".github/workflows/local-only-runner-guard.yml"
+    guard_workflow = yaml.load(
+        guard_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader
+    )
+    guard_step = next(
+        step
+        for step in guard_workflow["jobs"]["reject-hosted-runner-routing"]["steps"]
+        if step.get("name", "").startswith(
+            "Verify workflows use approved local routing"
+        )
+    )
+    workflows_dir = tmp_path / ".github/workflows"
+    workflows_dir.mkdir(parents=True)
+    (workflows_dir / WORKFLOW.name).write_text(
+        WORKFLOW.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+
+    result = subprocess.run(
+        [sys.executable, "-c", guard_step["run"]],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        timeout=15,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 @pytest.mark.skipif(os.name == "nt", reason="the extracted workflow step requires Bash")

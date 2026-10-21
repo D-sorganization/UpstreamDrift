@@ -39,7 +39,7 @@ detail of a finished slice to the archive instead of growing this file.
 ## CI Throughput (RM Epic #2215)
 
 - UD-CI-032 #13573: PR #13584 (`cursor/cancel-merge-queue-audit-1f01`) — merge-queue-safe `cancel-in-progress` audit; RM #2216 landed — arm auto-merge once `quality-gate` is green.
-- UD-CI-033 #13595: `codex/13595-ci-lint` fixes Actionlint/ShellCheck blockers and adds a tested consumer for the governed RM #2253 fleet-policy/development-log repair gate; forwards trusted event type and uses a contents-read GitHub App token scoped to Repository_Management for the protected policy checkout. Publish after RM #2259 and its rollout registry merge, then rerun canonical `pre_pr`. Prior provider gate hit editable-environment import shadowing; parent reports provider fix underway. No UD PR is open.
+- UD-CI-033 #13595: `codex/13595-ci-lint` fixes Actionlint/ShellCheck blockers and adds a tested consumer for the governed RM #2253 fleet-policy/development-log repair gate; forwards trusted event type, uses a contents-read GitHub App token scoped to Repository_Management, and routes the policy job to `d-sorg-fleet-docker` per the actual local-only runner guard. Consumer workflow checks pass locally. Publish after RM #2259 and its rollout registry merge; parent is investigating an additional provider-job fetch failure before qualification. No UD PR is open.
 
 ## Required Before Continuing
 
