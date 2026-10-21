@@ -175,6 +175,13 @@ class TestLeaderboardPublishGating:
         assert self.PUBLISH_CONTEXT not in required
         assert "cross-engine-leaderboard-publish" not in required
 
+    def test_workflow_lint_allows_intentional_cancel_false(self) -> None:
+        lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
+        allowlist = next(
+            line for line in lint.splitlines() if "nightly-publish.yml" in line
+        )
+        assert self.NAME in allowlist
+
 
 class TestOpenSimMainRunsComplete:
     """#13494: a per-SHA group queued one OpenSim run for every main push.

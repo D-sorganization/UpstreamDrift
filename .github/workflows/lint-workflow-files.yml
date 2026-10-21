@@ -102,7 +102,7 @@ jobs:
             # expression, so a running main run always finishes (#12285).
             # ci-requires-opensim.yml does the same (#13494).
             case "$(basename "$f")" in
-              publish-artifacts.yml|release.yml|publish.yml|deploy.yml|nightly-publish.yml|cross-engine-equivalence.yml|ci-requires-opensim.yml)
+              publish-artifacts.yml|release.yml|publish.yml|deploy.yml|nightly-publish.yml|cross-engine-equivalence.yml|cross-engine-leaderboard-publish.yml|ci-requires-opensim.yml)
                 echo "::notice::Skipping cancel-in-progress check for $f (intentional exception)"
                 ;;
               *)
