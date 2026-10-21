@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 from collections.abc import Callable
 from typing import Any
 
@@ -72,17 +71,6 @@ def generalized_speeds_from_spline_derivatives(
     return u, udot
 
 
-def _mapped_speeds_at_time(
-    splines: Any,
-    coordinates: tuple[str, ...],
-    n: int,
-    t: float,
-) -> Array:
-    q, qd, qdd = spline_coordinate_derivatives(splines, n, t)
-    u, _ = generalized_speeds_from_spline_derivatives(coordinates, q, qd, qdd)
-    return u
-
-
 def mapped_acceleration_from_speeds(
     t: float,
     t_min: float,
@@ -113,34 +101,18 @@ def simbody_kinematics_at_spline_time(
     coordinates: tuple[str, ...],
     n: int,
     t: float,
-    *,
-    t_min: float,
-    t_max: float,
-    sample_dt: float,
 ) -> tuple[Array, Array, Array]:
     """Return ``(q, u, udot)`` for inverse dynamics at spline time *t*.
 
-    Interior times use centred differences on mapped generalized speeds so
-    ``udot`` stays consistent with Simbody's realized ``State.getUDot()``
-    after ``InverseDynamicsSolver``.  Endpoints use the analytic spline
-    accelerations (including pelvis Euler mapping) because a clipped window
-    would be a one-sided secant.
+    ``udot`` is the analytic mapped acceleration from the GCV spline
+    (including pelvis intrinsic ZXY Euler rates).  Centred finite differences
+    on mapped speeds are available via :func:`mapped_acceleration_from_speeds`
+    for experiments but are not used here: they can pass an ID residual gate
+    while differing materially from the spline acceleration target.
     """
     if len(coordinates) != n:
         raise ValueError("coordinates length must match n")
-    if t_max < t_min:
-        raise ValueError("t_max must be >= t_min")
-    if sample_dt <= 0.0 or not math.isfinite(sample_dt):
-        raise ValueError("sample_dt must be positive and finite")
 
     q, qd, qdd = spline_coordinate_derivatives(splines, n, t)
-    u, analytic_udot = generalized_speeds_from_spline_derivatives(
-        coordinates, q, qd, qdd
-    )
-    def speeds_at(tt: float) -> Array:
-        return _mapped_speeds_at_time(splines, coordinates, n, tt)
-
-    udot = mapped_acceleration_from_speeds(
-        t, t_min, t_max, sample_dt, speeds_at, analytic_udot
-    )
+    u, udot = generalized_speeds_from_spline_derivatives(coordinates, q, qd, qdd)
     return q, u, udot
