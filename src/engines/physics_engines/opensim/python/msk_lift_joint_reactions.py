@@ -19,8 +19,7 @@ import numpy as np
 
 from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
 from src.engines.physics_engines.opensim.python.msk_lift_simbody_kinematics import (
-    generalized_speeds_from_spline_derivatives,
-    spline_coordinate_derivatives,
+    simbody_kinematics_at_spline_time,
 )
 from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_bound import (
     build_real_squat_bound_record,
@@ -113,15 +112,24 @@ def _solve_frame_reaction(
     forces = context["forces"]
     t = float(context["times"][row])
 
-    qk, qd, qdd = spline_coordinate_derivatives(splines, len(ik.coordinates), t)
-    u, udot = generalized_speeds_from_spline_derivatives(
-        ik.coordinates, qk, qd, qdd
+    t_min = float(context["time_min"])
+    t_max = float(context["time_max"])
+    sample_dt = float(context["sample_dt"])
+    qk, u, udot = simbody_kinematics_at_spline_time(
+        splines,
+        ik.coordinates,
+        len(ik.coordinates),
+        t,
+        t_min=t_min,
+        t_max=t_max,
+        sample_dt=sample_dt,
     )
+    state.setTime(t)
     for name, val, spd in zip(ik.coordinates, qk, u, strict=True):
         c = model.getCoordinateSet().get(name)
-        c.setValue(state, float(val))
+        c.setValue(state, float(val), False)
         c.setSpeedValue(state, float(spd))
-    model.realizeVelocity(state)
+    model.realizeDynamics(state)
 
     for m_i, m_name in enumerate(m_names):
         _override(muscles.get(m_name), state, float(forces[row, m_i]))
@@ -185,6 +193,10 @@ def _compute_reactions_timeseries(
     u_idx = ikid._u_index(model, state)
     res_acts = _residual_actuators(model, coord_names)
     splines = ikid._splines(ik, targets.time_s)
+    times = np.asarray(targets.time_s, dtype=float)
+    sample_dt = (
+        1e-3 if times.size < 2 else float(np.min(np.diff(times))) * 0.5
+    )
 
     joints = {
         "back": model.getJointSet().get("back"),
@@ -204,6 +216,9 @@ def _compute_reactions_timeseries(
         "muscle_names": muscle_names,
         "forces": forces,
         "times": targets.time_s,
+        "time_min": float(times[0]),
+        "time_max": float(times[-1]),
+        "sample_dt": sample_dt,
         "joints": joints,
         "pelvis_body": model.getBodySet().get("pelvis"),
         "torso_body": model.getBodySet().get("torso"),

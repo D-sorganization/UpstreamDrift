@@ -28,8 +28,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** src/shared/python/biomechanics/muscle_allocation.py, src/engines/physics_engines/opensim/python/msk_lift_simbody_kinematics.py, src/engines/physics_engines/opensim/python/msk_lift_ik_id.py, src/engines/physics_engines/opensim/python/msk_lift_joint_reactions.py, src/engines/physics_engines/opensim/python/tour_matching/native_muscle_effort_runtime.py, manuals/upstreamdrift/chapters/39-native-offline-muscle-matching.qmd, docs/research/lift_models/lift_models.tex, tests/unit/shared_python/test_muscle_excitation_allocation.py, tests/unit/lifting/test_opensim_lift_ik_id.py, tests/unit/lifting/test_opensim_lift_joint_reactions.py, tests/opensim/test_native_muscle_effort_native.py
 - **Started:** 2026-10-21
 - **Last verified:** 2026-10-21 (SELF)
-- **Summary:** Restore native muscle-effort allocation feasibility under the shared nfev budget, document allocator status semantics, and align lift ID and joint-reaction kinematics with Simbody pelvis Euler rates.
-- **Next step:** Merge after `CI Requires OpenSim` and quality-gate are green on the PR.
+- **Summary:** Restore native muscle-effort allocation feasibility under the shared nfev budget, document allocator status semantics, align lift ID with Simbody pelvis Euler rates, and derive joint-reaction acceleration targets from central differences on mapped speeds so ID residuals match `State.getUDot()` on self-hosted OpenSim runners.
+- **Next step:** Push the FD kinematics and `pip install --force-reinstall -e` CI change, then merge after `CI Requires OpenSim` is green on PR #13568.
 
 ### DL-#13038 · Record the OSL Epic Handoff State (Open PRs, Owner Decisions, Rejected Video Work)
 

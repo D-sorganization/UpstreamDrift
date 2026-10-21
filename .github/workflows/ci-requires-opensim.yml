@@ -187,7 +187,7 @@ jobs:
           set -euo pipefail
           no_cache=()
           if [ -z "${PIP_CACHE_DIR:-}" ]; then no_cache=(--no-cache-dir); fi
-          python -m pip install "${no_cache[@]}" --no-deps -e ".[dev]"
+          python -m pip install "${no_cache[@]}" --force-reinstall --no-deps -e ".[dev]"
 
       - name: Verify OpenSim 4.6 is importable
         run: |

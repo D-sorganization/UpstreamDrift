@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import numpy as np
@@ -68,3 +69,53 @@ def generalized_speeds_from_spline_derivatives(
         u[indices] = omega
         udot[indices] = alpha
     return u, udot
+
+
+def _mapped_speeds_at_time(
+    splines: Any,
+    coordinates: tuple[str, ...],
+    n: int,
+    t: float,
+) -> Array:
+    q, qd, qdd = spline_coordinate_derivatives(splines, n, t)
+    u, _ = generalized_speeds_from_spline_derivatives(coordinates, q, qd, qdd)
+    return u
+
+
+def simbody_kinematics_at_spline_time(
+    splines: Any,
+    coordinates: tuple[str, ...],
+    n: int,
+    t: float,
+    *,
+    t_min: float,
+    t_max: float,
+    sample_dt: float,
+) -> tuple[Array, Array, Array]:
+    """Return ``(q, u, udot)`` for inverse dynamics at spline time *t*.
+
+    Generalized accelerations ``udot`` use central differences on mapped
+    generalized speeds so they stay consistent with Simbody's realized
+    ``State.getUDot()`` after ``InverseDynamicsSolver`` (analytic Euler-angle
+    second derivatives can overshoot the ID residual on some platforms).
+    """
+    if len(coordinates) != n:
+        raise ValueError("coordinates length must match n")
+    if t_max < t_min:
+        raise ValueError("t_max must be >= t_min")
+    if sample_dt <= 0.0 or not math.isfinite(sample_dt):
+        raise ValueError("sample_dt must be positive and finite")
+
+    q, qd, qdd = spline_coordinate_derivatives(splines, n, t)
+    u, analytic_udot = generalized_speeds_from_spline_derivatives(
+        coordinates, q, qd, qdd
+    )
+    half = 0.5 * sample_dt
+    t_lo = max(t_min, t - half)
+    t_hi = min(t_max, t + half)
+    if t_hi - t_lo < sample_dt * 0.25:
+        return q, u, analytic_udot
+    u_lo = _mapped_speeds_at_time(splines, coordinates, n, t_lo)
+    u_hi = _mapped_speeds_at_time(splines, coordinates, n, t_hi)
+    udot = (u_hi - u_lo) / (t_hi - t_lo)
+    return q, u, udot
