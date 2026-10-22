@@ -138,10 +138,12 @@ jobs:
           if git diff --quiet -- reports/cross_engine_leaderboard.json; then
             echo "No changes to reports/cross_engine_leaderboard.json"
           else
-            echo "## Cross-engine leaderboard JSON diff" >> "$GITHUB_STEP_SUMMARY"
-            echo '```diff' >> "$GITHUB_STEP_SUMMARY"
-            git diff -- reports/cross_engine_leaderboard.json >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo "## Cross-engine leaderboard JSON diff"
+              echo '```diff'
+              git diff -- reports/cross_engine_leaderboard.json
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload leaderboard JSON artifact
