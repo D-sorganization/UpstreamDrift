@@ -39,7 +39,7 @@ detail of a finished slice to the archive instead of growing this file.
 ## Nightly Validation Startup (#13619, #13626)
 
 - `codex/13619-nightly-startup` carries forward the prior coordinator's qualified fixes on current `main`: Python 3.12 for the reviewed Drake builds and invocation-local `-p no:xvfb` for motion smoke.
-- Preserve engine versions, extras, real engine checks and the existing EGL/OSMesa/display fallback. Qualification and ready-PR publication continue in the Brick session; natural nightly acceptance remains pending.
+- Preserve engine versions, extras, real engine checks and the existing EGL/OSMesa/display fallback. PR #13635 is open with a merge hold; exact-head CI and native reviews are running. Keep #13619 open for real nightly acceptance; #13626 is linked to the implemented wrapper fix.
 
 ## CI Throughput (RM Epic #2215)
 
