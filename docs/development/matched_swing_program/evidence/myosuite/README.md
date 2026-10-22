@@ -13,7 +13,7 @@ evidence is enumerated, and the remedy names the exact command that
 regenerates real receipts. A previous version of these files contained
 placeholder sha256 digests and invented marker metrics; those fabricated
 values were removed in this PR and must never be restored without real
-execution. The model hashes below are recorded _targets_ for regeneration,
+execution. The model hashes below are recorded *targets* for regeneration,
 not evidence.
 
 ## Engine Scope and Model Hashes

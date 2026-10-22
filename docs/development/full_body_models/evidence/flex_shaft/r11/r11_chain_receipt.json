@@ -10,7 +10,7 @@
     "steps": 1330,
     "dt_s": 0.001,
     "impact_split_time_s": 1.322953640157547,
-    "max_pose_drift_m": 2.7976454328554823e-6
+    "max_pose_drift_m": 2.7976454328554823e-06
   },
   "full_horizon_open_loop": {
     "opensim": {
@@ -22,11 +22,11 @@
         "growth_rate_per_s": 40.120306351004665,
         "horizon_s": 0.67
       },
-      "max_pose_drift_m": 1.6574546873758488e-5,
+      "max_pose_drift_m": 1.6574546873758488e-05,
       "segment_steps": 50,
       "worst_segment": {
         "coordinate_error_rad": 0.00010603502975847778,
-        "frame_error_m": 5.155873755154908e-7
+        "frame_error_m": 5.155873755154908e-07
       }
     },
     "myosuite": {
@@ -38,7 +38,7 @@
         "growth_rate_per_s": null,
         "horizon_s": 1.33
       },
-      "max_pose_drift_m": 2.7976454328554823e-6,
+      "max_pose_drift_m": 2.7976454328554823e-06,
       "segment_steps": 50,
       "worst_segment": {
         "coordinate_error_rad": 1.6214049547436105e-10,
@@ -47,11 +47,16 @@
     }
   },
   "impact_window": {
-    "window_s_from_impact": [-0.07995364015754691, 0.005046359842453052],
+    "window_s_from_impact": [
+      -0.07995364015754691,
+      0.005046359842453052
+    ],
     "replay": "open loop from the reference state at the window start, bundle efforts and ball force",
     "max_clubhead_deflection_m": 0.18899837979094386,
     "clubhead_deflection_at_impact_m": [
-      0.007378702914981235, -0.0012017466128521816, 0.0417043547318577
+      0.007378702914981235,
+      -0.0012017466128521816,
+      0.0417043547318577
     ],
     "max_abs_shaft_q_rad": 0.13375295232091264,
     "engines": {
@@ -85,8 +90,8 @@
       "horizon_s": 0.67
     },
     "worst_segment": {
-      "coordinate_error_rad": 6.130998692327472e-5,
-      "frame_error_m": 2.663561196314463e-7
+      "coordinate_error_rad": 6.130998692327472e-05,
+      "frame_error_m": 2.663561196314463e-07
     },
     "bundle_sha256_brick": "58312dcfb324d252393d5f917d94f145fe83efed0829216cb2f6bb6e51955d4d"
   }

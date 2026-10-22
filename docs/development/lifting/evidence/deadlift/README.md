@@ -107,7 +107,6 @@ from `deadlift_bundle.npz`.
 ### Bar-Hold Metrics (Provenance)
 
 The barbell hold re-tracks the standing pose with the bar carried by the hands:
-
 - **Bar deviation:** 35.95 mm (0.03595 m) against the reference trajectory.
 - **Left hand force:** peak magnitude 614.05 N (mean [34.07, 1.11, 456.98] N),
   peak torque magnitude 4.71 Nm.
@@ -119,7 +118,6 @@ The barbell hold re-tracks the standing pose with the bar carried by the hands:
 The OpenSim IK/ID receipt (`docs/development/lifting/evidence/opensim_ik_id/receipts.json`)
 is measured with real OpenSim 4.6 and the RajagopalLaiUhlrich2023 model over 41 frames
 (stride 5):
-
 - **Marker kinematics:** RMS error 0.0112 m (1.12 cm, within the 0.0200 m threshold),
   maximum marker error 0.0390 m (within the 0.0400 m threshold). The kinematics
   satisfies the best-practice marker gate (`within_best_practice = True`).

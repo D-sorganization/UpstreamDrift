@@ -7,6 +7,7 @@ target/
 # UpstreamDrift#13507: generator-written and hash-pinned research evidence trees (CHECKSUMS.sha256)
 docs/research/**
 docs/assessments/**
+docs/**/evidence/**
 
 # Repository_Management#1520: SPEC.md's change-log table is left unpadded on
 # purpose. Prettier pads markdown table cells to the width of the widest row,

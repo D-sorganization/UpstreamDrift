@@ -131,7 +131,6 @@ from `bench_press_bundle.npz`.
 ### Bar-Hold Metrics (Provenance)
 
 The barbell hold re-tracks the supine bench pose with the bar carried by the hands:
-
 - **Bar deviation:** 28.18 mm (0.02818 m) against the reference trajectory.
 - **Left hand force:** peak magnitude 1542.41 N (mean [−12.02, 93.84, 1078.87] N),
   peak torque magnitude 26.44 Nm.
@@ -143,7 +142,6 @@ The barbell hold re-tracks the supine bench pose with the bar carried by the han
 The OpenSim IK/ID receipt (`docs/development/lifting/evidence/opensim_ik_id/receipts.json`)
 is measured with real OpenSim 4.6 and the RajagopalLaiUhlrich2023 model over 41 frames
 (stride 5):
-
 - **Marker kinematics:** RMS error 0.0581 m (5.81 cm, vs 0.0200 m threshold),
   maximum marker error 0.2164 m (vs 0.0400 m threshold). The kinematics fails
   the best-practice marker gate (`within_best_practice = False`).
