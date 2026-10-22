@@ -38,7 +38,7 @@ permissions:
 concurrency:
   # Main, scheduled and dispatched runs are never cancelled once running.
   group: >-
-    cross-engine-leaderboard-publish-${{ format('{0}-{1}', github.event_name, github.ref) }}
+    ${{ format('cross-engine-leaderboard-publish-{0}-{1}', github.event_name, github.ref) }}
   cancel-in-progress: false
 
 jobs:
