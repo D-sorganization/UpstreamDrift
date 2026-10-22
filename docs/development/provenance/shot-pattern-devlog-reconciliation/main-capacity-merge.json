@@ -1,9 +1,6 @@
 {
   "scope": "Merge actual main capacity repair while preserving both previously governed metadata corrections. No record omitted, scientific acceptance or limit changed.",
-  "parents": [
-    "b3397ea39a",
-    "8a22fd99a86f76e0fd1e42989a4e0ae1843a76df"
-  ],
+  "parents": ["b3397ea39a", "8a22fd99a86f76e0fd1e42989a4e0ae1843a76df"],
   "entry_count": 76,
   "incoming_state_correction": 10783,
   "retained_branch_state_correction": 9507,

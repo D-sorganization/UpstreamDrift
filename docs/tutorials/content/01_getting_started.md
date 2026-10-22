@@ -44,6 +44,7 @@ python scripts/ci/verify_installation.py
 Expected output:
 \`\`\`
 ============================================================
+
 Golf Modeling Suite - Installation Verification
 ============================================================
 

@@ -75,13 +75,13 @@ The Golf Modeling Suite is an ambitious, well-architected platform that consolid
 
 ### 2.2 Security Concerns
 
-| Issue                                   | Location                             | Risk   |
+| Issue | Location | Risk |
 | --------------------------------------- | ------------------------------------ | ------ | --------------- | ------ |
-| No secrets scanning in CI               | Workflows                            | HIGH   |
+| No secrets scanning in CI | Workflows | HIGH |
 | `pip-audit` runs non-blocking (`        |                                      | true`) | ci-standard.yml | MEDIUM |
-| Bandit installed but not running        | CI                                   | MEDIUM |
-| Hardcoded environment variables         | upstream_drift_launcher.py:2170-2175 | LOW    |
-| Mock object handling in production code | upstream_drift_launcher.py:1116-1149 | LOW    |
+| Bandit installed but not running | CI | MEDIUM |
+| Hardcoded environment variables | upstream_drift_launcher.py:2170-2175 | LOW |
+| Mock object handling in production code | upstream_drift_launcher.py:1116-1149 | LOW |
 
 ### 2.3 Reliability Gaps
 
@@ -122,15 +122,15 @@ The Golf Modeling Suite is an ambitious, well-architected platform that consolid
 
 ### 3.3 User Experience Gaps
 
-| Feature                   | Current State             | Competitive Standard            |
-| ------------------------- | ------------------------- | ------------------------------- |
-| Undo/Redo in GUI          | Disabled (placeholder)    | Required                        |
-| Layout persistence        | Partial                   | Auto-save expected              |
-| High-contrast theme       | Not available             | Accessibility requirement       |
-| Touch/mobile support      | None                      | Increasingly expected           |
-| Video import for analysis | Placeholder               | Core feature for competitors    |
+| Feature                   | Current State             | Competitive Standard              |
+| ------------------------- | ------------------------- | --------------------------------- |
+| Undo/Redo in GUI          | Disabled (placeholder)    | Required                          |
+| Layout persistence        | Partial                   | Auto-save expected                |
+| High-contrast theme       | Not available             | Accessibility requirement         |
+| Touch/mobile support      | None                      | Increasingly expected             |
+| Video import for analysis | Placeholder               | Core feature for competitors      |
 | Real-time pose overlay    | Not available             | Standard in Sportsbox AI, OPTICAL |
-| 3D URDF visualization     | "In progress" placeholder | Required for model building     |
+| 3D URDF visualization     | "In progress" placeholder | Required for model building       |
 
 ---
 
@@ -138,7 +138,7 @@ The Golf Modeling Suite is an ambitious, well-architected platform that consolid
 
 ### 4.1 Market Leaders Comparison
 
-| Feature                  | Golf Modeling Suite | Sportsbox AI       | OPTICAL Golf        | Fujitsu Kozuchi | MOXI         |
+| Feature                  | Golf Modeling Suite | Sportsbox AI       | OPTICAL Golf      | Fujitsu Kozuchi | MOXI         |
 | ------------------------ | ------------------- | ------------------ | ----------------- | --------------- | ------------ |
 | **3D Motion Capture**    | Via C3D import      | Phone video → 3D   | Optical mocap     | AI skeleton     | Wearable IMU |
 | **Real-time Analysis**   | Yes (limited)       | Yes                | Yes               | Yes             | Yes          |

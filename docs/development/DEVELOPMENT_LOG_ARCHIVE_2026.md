@@ -4560,7 +4560,7 @@ open. Preserve explicit ground configuration in independent replay.
 - **Summary:** Cross-engine _safe_cv returns NaN at near-zero mean; robustness_score fails closed and the API reports null with a reason instead of perfect robustness
 - **Next step:** Shipped in PR #13029.
 
-### DL-#12803 · Re-Synced the Chat Child Copy With the Pinned Tools Tree: ChatDockWidget.__Init__ Now Takes ChatConnectionConfig/ChatPresentationConfig/ChatIntegrationHooks (Tools#4897), Call Sites Updated, and the Expiring Architecture-Budget Exception Removed.
+### DL-#12803 · Re-Synced the Chat Child Copy With the Pinned Tools Tree: ChatDockWidget.**Init** Now Takes ChatConnectionConfig/ChatPresentationConfig/ChatIntegrationHooks (Tools#4897), Call Sites Updated, and the Expiring Architecture-Budget Exception Removed.
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -4570,7 +4570,7 @@ open. Preserve explicit ground configuration in independent replay.
 - **Paths:** see #12858
 - **Started:** 2026-10-17
 - **Last verified:** 2026-10-17 (`ad09ed35`; collated from changes/12803-re-synced-the-chat-child-copy-with-the-p.md)
-- **Summary:** Re-synced the chat child copy with the pinned Tools tree: ChatDockWidget.__init__ now takes ChatConnectionConfig/ChatPresentationConfig/ChatIntegrationHooks (Tools#4897), call sites updated, and the expiring architecture-budget exception removed.
+- **Summary:** Re-synced the chat child copy with the pinned Tools tree: ChatDockWidget.**init** now takes ChatConnectionConfig/ChatPresentationConfig/ChatIntegrationHooks (Tools#4897), call sites updated, and the expiring architecture-budget exception removed.
 - **Next step:** Shipped in PR #12858.
 
 ### DL-#12758 · SPN-9C: Full-Body Driving of the Bruno Model (Coordinate Map, Shoulder Orientation Match, Club Hand Wrench and Ground Reaction Loads, Study Option and Receipt Record)

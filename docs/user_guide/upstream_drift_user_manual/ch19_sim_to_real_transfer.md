@@ -244,12 +244,12 @@ calibrating the simulation to match the real robot as closely as possible.
 The `IdentificationResult` dataclass holds the output of the identification
 process:
 
-| Field               | Type             | Description                     |
+| Field | Type | Description |
 | ------------------- | ---------------- | ------------------------------- | ---------------------------- |
-| `identified_params` | `dict[str, float | NDArray]`                       | Identified parameter values. |
-| `residual_error`    | `float`          | Final optimization residual.    |
-| `iterations`        | `int`            | Number of iterations performed. |
-| `converged`         | `bool`           | Whether optimization converged. |
+| `identified_params` | `dict[str, float | NDArray]` | Identified parameter values. |
+| `residual_error` | `float` | Final optimization residual. |
+| `iterations` | `int` | Number of iterations performed. |
+| `converged` | `bool` | Whether optimization converged. |
 
 ### 19.2.2 The SystemIdentifier Class
 
@@ -376,18 +376,18 @@ $$
 The `compute_reality_gap` method provides a comprehensive set of metrics
 quantifying the simulation-to-reality discrepancy:
 
-| Metric                   | Formula                                                |
+| Metric | Formula |
 | ------------------------ | ------------------------------------------------------ | ---------------------------------------------- | --- |
-| `total_mse`              | $\frac{1}{T \cdot 2n_q} \sum \|x_{sim} - x_{real}\|^2$ |
-| `position_mse`           | MSE over position components only.                     |
-| `velocity_mse`           | MSE over velocity components only.                     |
-| `max_position_error`     | $\max\_{t,j}                                           | q*{sim}^{(t,j)} - q*{real}^{(t,j)}             | $   |
-| `max_velocity_error`     | $\max\_{t,j}                                           | \dot{q}_{sim}^{(t,j)} - \dot{q}_{real}^{(t,j)} | $   |
-| `mean_position_error`    | Mean absolute position error.                          |
-| `mean_velocity_error`    | Mean absolute velocity error.                          |
-| `trajectory_length`      | Number of timesteps compared.                          |
-| `joint_{j}_position_mse` | Per-joint position MSE.                                |
-| `joint_{j}_velocity_mse` | Per-joint velocity MSE.                                |
+| `total_mse` | $\frac{1}{T \cdot 2n_q} \sum \|x_{sim} - x_{real}\|^2$ |
+| `position_mse` | MSE over position components only. |
+| `velocity_mse` | MSE over velocity components only. |
+| `max_position_error` | $\max\_{t,j} | q*{sim}^{(t,j)} - q*{real}^{(t,j)} | $ |
+| `max_velocity_error` | $\max\_{t,j} | \dot{q}_{sim}^{(t,j)} - \dot{q}_{real}^{(t,j)} | $ |
+| `mean_position_error` | Mean absolute position error. |
+| `mean_velocity_error` | Mean absolute velocity error. |
+| `trajectory_length` | Number of timesteps compared. |
+| `joint_{j}_position_mse` | Per-joint position MSE. |
+| `joint_{j}_velocity_mse` | Per-joint velocity MSE. |
 
 ### 19.2.7 Validation
 

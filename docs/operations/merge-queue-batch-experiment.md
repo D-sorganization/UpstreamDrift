@@ -13,10 +13,10 @@ and applied with `scripts/ci/apply_fleet_merge_queue_settings.py`.
 
 ## Before / After
 
-| Field | Baseline (2026-10-04) | Target |
-| --- | ---: | ---: |
-| `max_entries_to_build` | 5 | 3 |
-| `max_entries_to_merge` | 5 | 3 |
+| Field                  | Baseline (2026-10-04) | Target |
+| ---------------------- | --------------------: | -----: |
+| `max_entries_to_build` |                     5 |      3 |
+| `max_entries_to_merge` |                     5 |      3 |
 
 Baseline file: `settings-snapshots/UpstreamDrift-merge-queue-baseline-2026-10-04.json`.
 
