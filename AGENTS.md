@@ -399,12 +399,13 @@ Fleet-wide policy from `Repository_Management#1390`:
    `gh pr create --draft` or the GitHub UI draft toggle.
 2. **Commit frequently.** Use small, conventional commits that save progress as you go;
    never batch a day's work into a single commit.
-3. **Agent handoff document.** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) at the repo root
-   tracks current-state-only info (active epics/PRs, must-read architecture pointers,
-   in-flight branch stacking, gate commands, a do-not list, and the short-term roadmap).
-   Update it as part of **every PR you open** and **every push that lands on `main`**.
-   It is not a changelog — history lives in git; keep it current-state only and under
-   150 lines.
+3. **Agent handoff.** Follow the fleet **Handoffs and Change Fragments** rule in the
+   synced block below (`durable-handoffs`): put the handoff in the PR body's
+   **Handoff** section and ship a change fragment; do not edit `HANDOFF.md`,
+   `DEVELOPMENT_LOG.md`, or the `SPEC.md` change log directly. Root
+   [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) is legacy coordination only until
+   Runner Dashboard [#2155](https://github.com/D-sorganization/Runner_Dashboard/issues/2155)
+   lands the fleet handoff store — do not treat it as the per-PR handoff target.
 
 ---
 

@@ -9,7 +9,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import urllib.request
 from pathlib import Path
 
 ACTIONLINT_VERSION = "1.7.7"
@@ -25,6 +24,20 @@ def _repo_root() -> Path:
 
 def _default_config() -> Path:
     return _repo_root() / ".github" / "actionlint.yaml"
+
+
+def _fetch_download_script() -> bytes:
+    """Download the upstream bootstrap script via curl (fixed HTTPS URL only)."""
+    result = subprocess.run(
+        [
+            "curl",
+            "-fsSL",
+            DOWNLOAD_SCRIPT_URL,
+        ],
+        check=True,
+        capture_output=True,
+    )
+    return result.stdout
 
 
 def resolve_actionlint_binary(root: Path | None = None) -> Path:
@@ -45,7 +58,7 @@ def resolve_actionlint_binary(root: Path | None = None) -> Path:
         if local.is_file():
             return local
 
-    script_body = urllib.request.urlopen(DOWNLOAD_SCRIPT_URL, timeout=60).read()
+    script_body = _fetch_download_script()
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".bash", delete=False) as tmp:
         tmp.write(script_body)
         script_path = Path(tmp.name)
