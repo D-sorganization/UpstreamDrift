@@ -152,7 +152,7 @@ class TestPersistentVenv:
             "Verify OpenSim 4.6 is importable"
         )
         step = _step(EDITABLE_STEP)
-        assert "if" not in step
+        assert step.get("if") == "needs.classify-changes.outputs.run == 'true'"
         run = step["run"]
         assert (
             'python -m pip install "${no_cache[@]}" --force-reinstall --no-deps -e ".[dev]"'
