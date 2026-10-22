@@ -326,6 +326,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13629 · Schedule Nightly Development Log Archiver Workflow and Noop Contract Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13629
+- **Branch:** merged via #13628
+- **PR:** #13628
+- **Paths:** see #13628
+- **Started:** 2026-10-22
+- **Last verified:** 2026-10-22 (`29cb48eb`; collated from changes/13629-schedule-nightly-development-log-archive.md)
+- **Summary:** Schedule nightly development log archiver workflow and noop contract test
+- **Next step:** Shipped in PR #13628.
+
+### DL-#13621 · Reconcile Development Log Against GitHub PR Truth and Archive Terminal Rows for Fleet Policy Gate
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13621
+- **Branch:** merged via #13621
+- **PR:** #13621
+- **Paths:** see #13621
+- **Started:** 2026-10-22
+- **Last verified:** 2026-10-22 (`c28cdb20`; collated from changes/13621-reconcile-development-log-against-github.md)
+- **Summary:** Reconcile development log against GitHub PR truth and archive terminal rows for fleet policy gate
+- **Next step:** Shipped in PR #13621.
+
 ### DL-#5915 · Remove @dieterolson From CODEOWNERS; Keep Team-Based Ownership
 
 - **State:** shipped
