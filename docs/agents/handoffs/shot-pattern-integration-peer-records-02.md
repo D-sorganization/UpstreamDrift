@@ -270,4 +270,3 @@ Branch `feat/nm10-benchmark-speed-10625`; PR against `main`. Parent epic [#10603
 - Evidence receipt: `docs/plans/neural_motion_matching/evidence/nm10_benchmark_speed_efficiency_receipt.json` (labeled `DIAGNOSTIC` under #10960 / #11146; historical unmeasured baselines).
 - Markdown report: `docs/plans/neural_motion_matching/benchmark_accepted_speed.md`.
 - Focused verification: `python -m pytest tests/unit/neural_motion/test_benchmark_nm10.py -q -n 0 --no-cov --timeout=60` (13 passed in 0.58s).
-

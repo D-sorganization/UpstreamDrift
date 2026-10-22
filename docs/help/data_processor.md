@@ -80,6 +80,7 @@ Sidekick startup does not depend on the full Data Processor UI stack.
   Tools repository; fixes belong upstream in Tools.
 
 ## See Also
+
 - [Tools Calculator Suite](tools_calculator_hub.md) - shares this exact
   entry point
 - [Data Explorer](data_explorer.md) - the other Tools-provided data tile

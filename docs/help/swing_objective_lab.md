@@ -21,21 +21,21 @@ are not present in this checkout.
 From `SwingObjectiveCompareRequest` in `src/api/routes/swing_objectives.py`,
 which is the in-repo contract for a comparison run:
 
-| Field                | Unit  | Constraint       | Default |
-| -------------------- | ----- | ---------------- | ------- |
-| `arm_mass_kg`        | kg    | > 0              | 5.0     |
-| `shaft_mass_kg`      | kg    | > 0              | preset  |
-| `clubhead_mass_kg`   | kg    | > 0              | preset  |
-| `arm_length_m`       | m     | > 0              | 0.65    |
-| `club_length_m`      | m     | > 0              | 1.10    |
-| `top_arm_angle_rad`  | rad   | -                | 2.618   |
-| `top_wrist_cock_rad` | rad   | -                | 1.745   |
-| `duration_s`         | s     | 0.05 < d <= 1.5  | 0.28    |
-| `hub_torque_nm`      | N*m   | 1.0 < t <= 2000  | 250.0   |
-| `wrist_torque_nm`    | N*m   | 0.1 < t <= 500   | 20.0    |
-| `node_count`         | count | 5 to 101         | 21      |
-| `preset_name`        | -     | optional         | none    |
-| `objective_keys`     | -     | optional, min 2  | all     |
+| Field                | Unit  | Constraint      | Default |
+| -------------------- | ----- | --------------- | ------- |
+| `arm_mass_kg`        | kg    | > 0             | 5.0     |
+| `shaft_mass_kg`      | kg    | > 0             | preset  |
+| `clubhead_mass_kg`   | kg    | > 0             | preset  |
+| `arm_length_m`       | m     | > 0             | 0.65    |
+| `club_length_m`      | m     | > 0             | 1.10    |
+| `top_arm_angle_rad`  | rad   | -               | 2.618   |
+| `top_wrist_cock_rad` | rad   | -               | 1.745   |
+| `duration_s`         | s     | 0.05 < d <= 1.5 | 0.28    |
+| `hub_torque_nm`      | N*m   | 1.0 < t <= 2000 | 250.0   |
+| `wrist_torque_nm`    | N*m   | 0.1 < t <= 500  | 20.0    |
+| `node_count`         | count | 5 to 101        | 21      |
+| `preset_name`        | -     | optional        | none    |
+| `objective_keys`     | -     | optional, min 2 | all     |
 
 `arm_length_m` is hub-to-hands; `club_length_m` is hands-to-head.
 `top_arm_angle_rad` and `top_wrist_cock_rad` are the configuration at the top
@@ -144,6 +144,7 @@ Files inspected: `src/api/routes/swing_objectives.py`,
 `src/config/launcher_manifest.json`.
 
 ## See Also
+
 - [Pendulum Simulator](pendulum_simulator.md) - the model class being optimised
 - [Pendulum Models](../engines/pendulum.md)
 - [ADR-0004: Launcher Provider Migration](../adr/0004-launcher-provider-migration.md)

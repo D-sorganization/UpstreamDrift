@@ -23,11 +23,11 @@ the capabilities `biomechanics`, `exercise_preset` and `sit_to_stand`.
 
 ## Inputs
 
-| Input | How it is supplied | Unit or values |
-| --- | --- | --- |
-| Exercise name | fixed to `sit_to_stand` by the tile's `exercise` field | identifier string |
-| Engine | `BIOMECH_ENGINE`, or the dashboard's toolbar combo box | `MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `JaxSim_Models`, `OpenSim_Models` |
-| Sit-to-stand model definition | the selected engine's sibling model checkout, under `exercises/sit_to_stand` | engine-native model format |
+| Input                         | How it is supplied                                                           | Unit or values                                                                         |
+| ----------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Exercise name                 | fixed to `sit_to_stand` by the tile's `exercise` field                       | identifier string                                                                      |
+| Engine                        | `BIOMECH_ENGINE`, or the dashboard's toolbar combo box                       | `MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `JaxSim_Models`, `OpenSim_Models` |
+| Sit-to-stand model definition | the selected engine's sibling model checkout, under `exercises/sit_to_stand` | engine-native model format                                                             |
 
 `BiomechExerciseHandler` in `src/launchers/launcher_model_handlers.py` reads
 `model.exercise` and launches the dashboard script.
@@ -38,10 +38,10 @@ registered model source.
 
 ## Outputs
 
-| Output | Description |
-| --- | --- |
-| Window title | `Biomechanics Exercise: Sit_To_Stand` (the shell applies `str.title()` to the raw exercise name) |
-| Embedded dashboard | the selected engine's dashboard, constructed with `exercise_filter="sit_to_stand"` |
+| Output             | Description                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------ |
+| Window title       | `Biomechanics Exercise: Sit_To_Stand` (the shell applies `str.title()` to the raw exercise name) |
+| Embedded dashboard | the selected engine's dashboard, constructed with `exercise_filter="sit_to_stand"`               |
 
 Everything numeric that a sit-to-stand analysis would produce is computed by
 the embedded engine dashboard and by the model in the sibling checkout, not by
@@ -93,6 +93,7 @@ The template's Outputs section cannot be completed from this repository.
   exercise was found in this checkout.
 
 ## See Also
+
 - [Exercise Dashboard](biomech_exercise.md)
 - [Gait Model](biomech_gait.md)
 - [Biomechanics workspace architecture](../architecture/biomech_workspace.md)

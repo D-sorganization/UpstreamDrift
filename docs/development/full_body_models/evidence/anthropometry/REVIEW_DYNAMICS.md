@@ -231,17 +231,18 @@ monotonically.
 
 | Iteration (lr 5e-4) | MJX replay markers to 1.65 s |
 | ------------------- | ---------------------------- | --------------------- | ------------------------ | -------------------------- |
-| Iteration           | MJX replay to 1.45 s         | shared plant to 1.5 s | shared plant whole swing | pelvis yaw lag 1.3 / 1.4 s |
-| ---                 | ---                          | ---                   | ---                      | ---                        |
-| 0 (unmodified)      | 41.0 mm                      | 56.1 mm               | 74.6 mm                  | 14.9 / 12.3 deg            |
-| 2                   | 34.2 mm                      | 48.0 mm               | 78.1 mm                  | 12.2 / 8.2 deg             |
-| 4                   | 32.0 mm                      | 42.4 mm               | 79.6 mm                  | 10.6 / 5.4 deg             |
-| 6                   | 30.5 mm                      | 42.8 mm               | 83.3 mm                  | 10.3 / 4.3 deg             |
-| 8                   | 29.5 mm                      | 44.6 mm               | 195.5 mm                 | 10.4 / 4.0 deg             |
-| 10                  | 28.8 mm                      | 43.7 mm               | 192.4 mm                 | 10.6 / 3.8 deg             |
-| 12                  | 28.4 mm                      | 42.1 mm               | 190.0 mm                 | 10.3 / 3.4 deg             |
-| 14                  | 27.9 mm                      | 41.6 mm               | 184.9 mm                 | 9.9 / 3.1 deg              |
-| 16                  | 27.5 mm                      | 40.2 mm               | 182.3 mm                 | 9.4 / 2.6 deg              |
+
+| Iteration      | MJX replay to 1.45 s | shared plant to 1.5 s | shared plant whole swing | pelvis yaw lag 1.3 / 1.4 s |
+| -------------- | -------------------- | --------------------- | ------------------------ | -------------------------- |
+| 0 (unmodified) | 41.0 mm              | 56.1 mm               | 74.6 mm                  | 14.9 / 12.3 deg            |
+| 2              | 34.2 mm              | 48.0 mm               | 78.1 mm                  | 12.2 / 8.2 deg             |
+| 4              | 32.0 mm              | 42.4 mm               | 79.6 mm                  | 10.6 / 5.4 deg             |
+| 6              | 30.5 mm              | 42.8 mm               | 83.3 mm                  | 10.3 / 4.3 deg             |
+| 8              | 29.5 mm              | 44.6 mm               | 195.5 mm                 | 10.4 / 4.0 deg             |
+| 10             | 28.8 mm              | 43.7 mm               | 192.4 mm                 | 10.6 / 3.8 deg             |
+| 12             | 28.4 mm              | 42.1 mm               | 190.0 mm                 | 10.3 / 3.4 deg             |
+| 14             | 27.9 mm              | 41.6 mm               | 184.9 mm                 | 9.9 / 3.1 deg              |
+| 16             | 27.5 mm              | 40.2 mm               | 182.3 mm                 | 9.4 / 2.6 deg              |
 
 Validation in the shared-law simulator (`downswing_experiment.py
 --reference`, the real plant with the rigid weld and RK4): every snapshot replayed in the shared-law simulator (`downswing_mjx_h145_iter*.json`), columns above.

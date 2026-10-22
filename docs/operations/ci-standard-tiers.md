@@ -9,11 +9,11 @@ The reviewed required-check export is Repository_Management
 UpstreamDrift's exported required context is `quality-gate`. No repository
 settings are changed by this implementation.
 
-| Event | Tier | Full-Only Jobs |
-| --- | --- | --- |
-| `pull_request` | Fast | Expected to be skipped |
-| `push` | Fast | Expected to be skipped |
-| `merge_group` | Full | Required for code changes |
+| Event                                           | Tier | Full-Only Jobs            |
+| ----------------------------------------------- | ---- | ------------------------- |
+| `pull_request`                                  | Fast | Expected to be skipped    |
+| `push`                                          | Fast | Expected to be skipped    |
+| `merge_group`                                   | Full | Required for code changes |
 | `schedule`, `workflow_dispatch`, unknown events | Full | Required for code changes |
 
 The full-only jobs are `security-scans`, `tests` (the integration matrix),

@@ -548,11 +548,11 @@ policy = train_muscle_policy(env, total_timesteps=100000)
 
 ### Reward Functions
 
-| Task       | Reward | Description         |
+| Task | Reward | Description |
 | ---------- | ------ | ------------------- | --------------- | ------------------------- |
-| `tracking` | $-     | q - q\_{target}     | $               | Track time-varying target |
-| `reach`    | $-     | q - q\_{target}     | - 0.01 \cdot t$ | Reach target quickly      |
-| `swing`    | Custom | Golf swing specific |
+| `tracking` | $- | q - q\_{target} | $ | Track time-varying target |
+| `reach` | $- | q - q\_{target} | - 0.01 \cdot t$ | Reach target quickly |
+| `swing` | Custom | Golf swing specific |
 
 ---
 

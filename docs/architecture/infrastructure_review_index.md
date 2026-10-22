@@ -1,11 +1,13 @@
 # Infrastructure Review - Complete Documentation Index
 
 ## Overview
+
 This directory contains a comprehensive build/config/CI infrastructure review for the UpstreamDrift project, completed March 7, 2026.
 
 ## Documents Included
 
 ### 1. **BUILD_INFRASTRUCTURE_REVIEW.md** (Primary Report)
+
 - **Length:** 800+ lines
 - **Purpose:** Comprehensive technical analysis
 - **Contents:**
@@ -20,6 +22,7 @@ This directory contains a comprehensive build/config/CI infrastructure review fo
 **Best for:** Technical deep-dive, implementation planning, code reviews
 
 ### 2. **CONFIG_ISSUES_QUICK_REFERENCE.md** (Executive Summary)
+
 - **Length:** 300+ lines
 - **Purpose:** Quick reference for team coordination
 - **Contents:**
@@ -33,6 +36,7 @@ This directory contains a comprehensive build/config/CI infrastructure review fo
 **Best for:** Team meetings, sprint planning, quick lookup
 
 ### 3. **REVIEW_SUMMARY.txt** (One-Page Executive Brief)
+
 - **Length:** 350+ lines
 - **Purpose:** Executive-level overview
 - **Contents:**
@@ -56,6 +60,7 @@ This directory contains a comprehensive build/config/CI infrastructure review fo
 **Get a team organized to fix issues** → Read CONFIG_ISSUES_QUICK_REFERENCE.md
 
 **Deep-dive into specific issues** → Read BUILD_INFRASTRUCTURE_REVIEW.md sections:
+
 - Section 1: Dependency Management
 - Section 2: Build System
 - Section 3: Tool Configuration
@@ -71,6 +76,7 @@ This directory contains a comprehensive build/config/CI infrastructure review fo
 ### Grade: B+ (Production-Ready with Improvements Needed)
 
 ✅ **Strengths:**
+
 - Modern build system (Hatchling, PEP 517/518)
 - Excellent security (A- grade, bcrypt, pip-audit blocking)
 - Comprehensive pre-commit hooks (60+)
@@ -78,12 +84,14 @@ This directory contains a comprehensive build/config/CI infrastructure review fo
 - 1,563+ unit tests
 
 ❌ **Critical Issues (Fix Immediately):**
+
 1. MyPy version mismatch: 1.13.0 vs 1.19.1 in lock file
 2. NumPy version conflict: requirements.txt says >=2.0.1, environment.yml says <2.0.0
 3. Unexpected Flask dependency in requirements.txt
 4. Duplicate configuration files (mypy.ini, pytest_improvements.ini)
 
 ⚠️ **Important Issues (Fix This Sprint):**
+
 1. Docker port mismatch (8000 vs 8001)
 2. Python version mismatch (Dockerfile 3.12 vs environment.yml 3.11)
 3. Missing pytest in CI pipeline
@@ -92,6 +100,7 @@ This directory contains a comprehensive build/config/CI infrastructure review fo
 ## Files Analyzed
 
 **Configuration:** 40+ files totaling 2,500+ lines
+
 - pyproject.toml (329 lines) - Build config
 - Dockerfile, Dockerfile.unified, docker-compose.yml - Containers
 - .pre-commit-config.yaml (347 lines) - Git hooks
@@ -99,12 +108,14 @@ This directory contains a comprehensive build/config/CI infrastructure review fo
 - Tool configs: mypy.ini, pytest_improvements.ini
 
 **CI/CD:** 60+ workflow files
+
 - ci-standard.yml (primary CI - has issues)
 - nightly-cross-engine.yml
 - 45 Jules-* workflows (AI agents)
 - docker-size-gates.yml, release.yml, etc.
 
 **Documentation:** 5 files
+
 - CONTRIBUTING.md (⭐⭐⭐⭐⭐)
 - SECURITY.md (⭐⭐⭐⭐⭐)
 - CHANGELOG.md (⭐⭐⭐⭐⭐)
@@ -114,6 +125,7 @@ This directory contains a comprehensive build/config/CI infrastructure review fo
 ## Timeline for Fixes
 
 ### Week 1 (4 hours) - Critical Fixes
+
 - Fix mypy version in CI
 - Align numpy versions
 - Remove Flask from requirements.txt
@@ -121,12 +133,14 @@ This directory contains a comprehensive build/config/CI infrastructure review fo
 - Pin ruff in pyproject.toml
 
 ### Week 2 (8 hours) - CI/CD Improvements
+
 - Add pytest to ci-standard.yml
 - Fix port mismatch in Docker
 - Align Python versions
 - Add version matrix to CI
 
 ### Week 3-4 (15 hours) - Polish
+
 - Update Makefile
 - Fix cross-platform issues (pytest-unit)
 - Consolidate Dockerfiles
@@ -170,6 +184,7 @@ This directory contains a comprehensive build/config/CI infrastructure review fo
 ## Questions or Clarifications?
 
 See BUILD_INFRASTRUCTURE_REVIEW.md for:
+
 - Detailed explanations of each issue
 - Code examples showing before/after
 - Rationale for recommendations
@@ -178,17 +193,20 @@ See BUILD_INFRASTRUCTURE_REVIEW.md for:
 ## Recommendations Highlight
 
 **Most Important Actions:**
+
 1. Fix mypy version (affects all local type checking)
 2. Fix numpy versions (affects all environments)
 3. Add pytest to CI (without this, tests don't validate)
 4. Fix Docker ports (prevents docker-compose usage)
 
 **High-Impact, Low-Effort:**
+
 - Remove duplicate config files (10 minutes)
 - Delete requirements.txt (5 minutes)
 - Update Makefile (15 minutes)
 
 **High-Value Documentation:**
+
 - Update README with correct ports
 - Document dependency management strategy
 - Add troubleshooting section for "works locally, fails in CI"

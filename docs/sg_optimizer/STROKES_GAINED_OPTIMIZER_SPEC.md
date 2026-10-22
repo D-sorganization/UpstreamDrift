@@ -115,7 +115,7 @@ All three condition parameters are stored in a `CourseConditions` config attache
 - **Action** $a = (c, \theta_{\text{aim}}, \text{shot type})$: club, aim line, and shot type (full / knockdown / draw / fade — Phase 2 extension).
 - **Transition** $P_i(s' \mid s, a; \text{Conditions})$: sample landing from the player's tilted bivariate, **modulated by conditions and starting lie**, project to world frame, look up landing lie. Water/OB handled by deterministic drop transitions with added stroke. Trees handled by the recovery model when $t$ is high.
 - **Cost** $+1$ per stroke, absorbing at holed.
-- **Bellman**: $V^*(s) = \min_a [1 + \mathbb{E}\, V^*(s')]$.
+- **Bellman**: $V^_(s) = \min_a [1 + \mathbb{E}\, V^_(s')]$.
 
 Solved by vectorized value iteration on a discretized grid.
 
