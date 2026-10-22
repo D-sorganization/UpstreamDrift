@@ -496,3 +496,4 @@ one optional provider skip. Canonical calculation is chapter48; turnover is
 The calculation registry remains empty and release blocked; full-body
 anatomy, calibration, physiology, contact/grip, capture horizon, production
 variants and six-engine parity remain unresolved.
+

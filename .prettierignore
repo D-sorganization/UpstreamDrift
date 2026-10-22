@@ -8,6 +8,7 @@ target/
 docs/research/**
 docs/assessments/**
 docs/**/evidence/**
+docs/agents/handoffs/**
 
 # Repository_Management#1520: SPEC.md's change-log table is left unpadded on
 # purpose. Prettier pads markdown table cells to the width of the widest row,

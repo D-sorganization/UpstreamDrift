@@ -1,3 +1,4 @@
+
 # Active: Assistance-Explicit OpenSim Replay, F07 #12147
 
 - Branch `feat/f07-opensim-mixed-replay-12147`; separate native scalar-muscle and CoordinateActuator T01 admission and fresh replay with explicit assistance role/bounds/gain/unit identity, immutable physical outputs and input/state/policy provenance. Root assistance follows ground-parent topology, including renamed coordinates. Other regional roles remain declared hypotheses.
