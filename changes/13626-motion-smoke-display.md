@@ -1,3 +1,8 @@
+---
+issue: 13626
+summary: "Prevent duplicate Xvfb startup in the motion-matching smoke command."
+---
+
 # Motion-Matching Smoke Display Startup
 
 Disable automatic pytest-xvfb startup for the motion-matching smoke command so
