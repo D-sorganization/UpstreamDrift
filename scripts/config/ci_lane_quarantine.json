@@ -1,0 +1,17 @@
+{
+  "schema_version": "ci-lane-quarantine/v1",
+  "issue": "https://github.com/D-sorganization/UpstreamDrift/pull/13568",
+  "owner": "cursor",
+  "expires": "2026-10-29",
+  "lanes": [
+    {
+      "workflow": "ci-requires-opensim.yml",
+      "job": "requires-opensim",
+      "reason": "Deterministic test_defect regression on main (#13564): squat joint-reaction acceleration gate and native muscle-effort replay. Tracked in https://github.com/D-sorganization/UpstreamDrift/pull/13568.",
+      "expected_failure_node_ids": [
+        "tests/unit/lifting/test_opensim_lift_joint_reactions.py::test_squat_joint_reactions_computed",
+        "tests/opensim/test_native_muscle_effort_native.py::test_native_constant_interval_matches_fresh_raw_replay"
+      ]
+    }
+  ]
+}
