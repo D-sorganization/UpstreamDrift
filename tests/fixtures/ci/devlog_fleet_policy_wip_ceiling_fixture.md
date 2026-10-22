@@ -5,7 +5,7 @@
 
 ## Active
 
-### DL-#90001 · First merged feature
+### DL-#90001 · First Merged Feature
 
 - **State:** in_review
 - **Owner:** agent
@@ -18,7 +18,7 @@
 - **Summary:** Merged work still marked in_review
 - **Next step:** Merge the PR.
 
-### DL-#90002 · Second merged feature
+### DL-#90002 · Second Merged Feature
 
 - **State:** in_progress
 - **Owner:** agent
@@ -31,7 +31,7 @@
 - **Summary:** Merged work still marked in_progress
 - **Next step:** Open PR.
 
-### DL-#90003 · Live open pull request
+### DL-#90003 · Live Open Pull Request
 
 - **State:** in_progress
 - **Owner:** agent
