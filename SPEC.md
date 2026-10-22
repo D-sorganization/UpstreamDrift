@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-22 | #13617 | Remove @dieterolson from CODEOWNERS; keep team-based ownership |
 | 2026-10-21 | #13612 | Add fast PR/push and full merge-queue/scheduled tiers with a fail-closed required aggregate |
 | 2026-10-21 | #13599 | Repair CI lint, trusted governed policy consumption, publication detection coverage, and pre-push failure guidance |
 | 2026-10-21 | #13602 | Serialize Simscape grip committed-path generated export checks under xdist |
