@@ -1,0 +1,28 @@
+# Regression fixture: historical cross-engine-leaderboard-publish job `if` typo
+# (unclosed `)` before `name:`) that produced zero-job workflow failures on push.
+name: cross-engine-leaderboard-publish-fixture
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fixture
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name != 'pull_request' ||
+      (contains(github.event.pull_request.labels.*.name, 'ci:full') &&
+      (github.event.action != 'labeled' ||
+      github.event.label.name == 'ci:full'))
+    name: publish cross-engine leaderboard JSON
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: echo ok

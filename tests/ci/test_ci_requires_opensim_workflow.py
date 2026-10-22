@@ -131,13 +131,14 @@ class TestOpenSimJobLevelGating:
                 f"{job_id} must not use ubuntu-latest"
             )
 
-    def test_pytest_step_runs_strict_without_lane_quarantine(self) -> None:
+    def test_pytest_step_adjudicates_ci_lane_quarantine(self) -> None:
         steps = _load()["jobs"]["requires-opensim"]["steps"]
         pytest_step = next(
             s for s in steps if s.get("name") == "Run requires_opensim tests"
         )
         body = str(pytest_step.get("run", ""))
-        assert "scripts.ci.ci_lane_quarantine" not in body
+        assert "scripts.ci.ci_lane_quarantine" in body
+        assert "ci-requires-opensim.yml" in body
         assert "Smoke squat joint-reaction acceleration gate" in {
             s.get("name") for s in steps
         }

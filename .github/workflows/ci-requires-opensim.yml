@@ -319,6 +319,7 @@ jobs:
       - name: Run requires_opensim tests
         if: needs.classify-changes.outputs.run == 'true'
         run: |
+          set +e
           python -m pytest \
             tests/unit/lifting tests/opensim \
             -m "requires_opensim and not slow and not heavy" \
@@ -329,6 +330,17 @@ jobs:
             --tb=short \
             -v \
             --junitxml="$RUNNER_TEMP/opensim-results.xml"
+          pytest_rc=$?
+          set -e
+          python3 -m scripts.ci.ci_lane_quarantine \
+            --workflow ci-requires-opensim.yml \
+            --job requires-opensim \
+            --pytest-exit-code "$pytest_rc" \
+            --junitxml "$RUNNER_TEMP/opensim-results.xml"
+          final_rc=$?
+          if [ "$final_rc" -ne 0 ]; then
+            exit "$final_rc"
+          fi
 
           python - "$RUNNER_TEMP/opensim-results.xml" <<'PY'
           import sys

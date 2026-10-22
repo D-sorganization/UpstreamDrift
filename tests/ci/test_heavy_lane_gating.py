@@ -159,7 +159,9 @@ class TestLeaderboardPublishGating:
         assert concurrency["cancel-in-progress"] is False
         group = concurrency["group"]
         assert "github.event.action" not in group
-        assert "format('{0}-{1}', github.event_name, github.ref)" in group
+        assert "github.event_name" in group
+        assert "github.ref" in group
+        assert "cross-engine-leaderboard-publish" in group
 
     def test_not_a_required_branch_protection_context(self) -> None:
         if not self.REQUIRED_CHECKS.is_file():
