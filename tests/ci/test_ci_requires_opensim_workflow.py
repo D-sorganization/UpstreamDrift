@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -123,13 +125,53 @@ class TestOpenSimJobLevelGating:
         assert "@core" in text or "core" in text.lower()
         assert "24" in text
 
-    def test_lane_jobs_use_fleet_runners_not_hosted(self) -> None:
+    def test_lightweight_jobs_reuse_reversible_dispatch_policy(self) -> None:
         jobs = _load()["jobs"]
-        for job_id in ("classify-changes", "report-nightly"):
-            runs_on = jobs[job_id]["runs-on"]
-            assert runs_on == "d-sorg-fleet-docker", (
-                f"{job_id} must not use ubuntu-latest"
-            )
+        route = jobs["pick-runner"]["runs-on"]
+        assert "!github.event.repository.private" in route
+        assert "vars.CI_RUNNER_MODE != 'local'" in route
+        assert jobs["classify-changes"]["runs-on"] == route
+        assert jobs["report-nightly"]["runs-on"] == "d-sorg-fleet-docker"
+        real_route = jobs["requires-opensim"]["runs-on"]
+        assert "needs.classify-changes.outputs.run == 'true'" in real_route
+        assert "needs.pick-runner.outputs.runner" in real_route
+        assert route.removeprefix("${{").removesuffix("}}").strip() in real_route
+        assert "runner=d-sorg-fleet-docker" in jobs["pick-runner"]["steps"][0]["run"]
+        for name in ("classify-changes", "pick-runner", "requires-opensim"):
+            assert "head.repo.full_name == github.repository" in jobs[name]["if"]
+
+    def test_failed_diff_never_reports_skip(self, tmp_path: Path) -> None:
+        steps = _load()["jobs"]["classify-changes"]["steps"]
+        script = next(step["run"] for step in steps if step.get("id") == "classify")
+        bindir = tmp_path / "bin"
+        bindir.mkdir()
+        for name, body in {
+            "git": "exit 73",
+            "python3": 'touch "$CLASSIFIER_CALLED"',
+        }.items():
+            command = bindir / name
+            command.write_text("#!/bin/sh\n" + body + "\n", encoding="utf-8")
+            command.chmod(0o755)
+        called = tmp_path / "called"
+        output = tmp_path / "output"
+        result = subprocess.run(
+            ["bash", "-c", script],
+            env={
+                **os.environ,
+                "PATH": f"{bindir}:{os.environ['PATH']}",
+                "GITHUB_OUTPUT": str(output),
+                "EVENT_NAME": "pull_request",
+                "BASE_REF": "missing",
+                "PR_LABELS": "",
+                "CLASSIFIER_CALLED": str(called),
+            },
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 73
+        assert not called.exists()
+        assert not output.exists() or "run=false" not in output.read_text()
 
     def test_pytest_step_adjudicates_ci_lane_quarantine(self) -> None:
         steps = _load()["jobs"]["requires-opensim"]["steps"]
