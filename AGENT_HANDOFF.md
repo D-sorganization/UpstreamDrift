@@ -36,6 +36,11 @@ detail of a finished slice to the archive instead of growing this file.
 - ADR-0041 Amendment 1 (#9630, #9619): consumer-side self-calibration fitters live in `src/motion_capture/reconstruct/`; Tools keeps vendor-neutral reference geometry.
 - Real-data acceptance is deferred to `docs/development/planning/DV-9619.md`; the rig soak to `DV-9613.md`.
 
+## Nightly Validation Startup (#13619, #13626)
+
+- `codex/13619-nightly-startup` carries forward the prior coordinator's qualified fixes on current `main`: Python 3.12 for the reviewed Drake builds and invocation-local `-p no:xvfb` for motion smoke.
+- Preserve engine versions, extras, real engine checks and the existing EGL/OSMesa/display fallback. Qualification and ready-PR publication continue in the Brick session; natural nightly acceptance remains pending.
+
 ## CI Throughput (RM Epic #2215)
 
 - UD-CI-010b #13577: `codex/13577-ci-fast-full` retains required ancestor `8a5c5b0`; actual main including #13599 is merge-integrated. Root-level CI contract tests moved to `tests/ci/` after live repo-structure CI found the layout violation; focused validation passed and the fix is committed. Full pre-PR validation/publication remains parent-owned; live canary and seven-day latency evidence remain open.
