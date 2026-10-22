@@ -38,7 +38,7 @@ permissions:
 concurrency:
   # Main, scheduled and dispatched runs are never cancelled once running.
   group: >-
-    cross-engine-leaderboard-publish-${{ format('{0}-{1}', github.event_name, github.ref) }}
+    ${{ format('cross-engine-leaderboard-publish-{0}-{1}', github.event_name, github.ref) }}
   cancel-in-progress: false
 
 jobs:
@@ -138,10 +138,12 @@ jobs:
           if git diff --quiet -- reports/cross_engine_leaderboard.json; then
             echo "No changes to reports/cross_engine_leaderboard.json"
           else
-            echo "## Cross-engine leaderboard JSON diff" >> "$GITHUB_STEP_SUMMARY"
-            echo '```diff' >> "$GITHUB_STEP_SUMMARY"
-            git diff -- reports/cross_engine_leaderboard.json >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo "## Cross-engine leaderboard JSON diff"
+              echo '```diff'
+              git diff -- reports/cross_engine_leaderboard.json
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload leaderboard JSON artifact
