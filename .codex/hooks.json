@@ -1,0 +1,16 @@
+{
+  "description": "Fleet agent-check hooks (Codex CLI pin 0.139.0).",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -lc 'root=\"$(git rev-parse --show-toplevel)\"; exec python3 \"$root/scripts/agent-check-hook-bridge.py\" codex-stop'\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}
