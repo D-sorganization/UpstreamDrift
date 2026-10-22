@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-22 | #13637 | Route OpenSim classification and skip reporting through the existing reversible public hosted policy; fail closed on diff errors while preserving real engine Docker validation. |
 | 2026-10-22 | #13635 | Use Python 3.12 for the reviewed nightly cross-engine dependencies.; Prevent duplicate Xvfb startup in the motion-matching smoke command. |
 | 2026-10-22 | #13614 | Quarantine CI Requires OpenSim lane (RM #2252) until #13564 fix lands. |
 | 2026-10-22 | #13615 | Restore CI Requires OpenSim: squat JR kinematics revision 6 and native muscle-effort allocation. |
