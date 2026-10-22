@@ -85,7 +85,9 @@ def test_propose_step_exits_without_pr_when_archive_made_no_changes(
     )
     subprocess.run(["git", "config", "user.name", "CI test"], cwd=repo, check=True)
     (repo / "docs/development").mkdir(parents=True)
-    (repo / "docs/development/DEVELOPMENT_LOG.md").write_text("fixture\n", encoding="utf-8")
+    (repo / "docs/development/DEVELOPMENT_LOG.md").write_text(
+        "fixture\n", encoding="utf-8"
+    )
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "commit", "-qm", "fixture"], cwd=repo, check=True)
 
