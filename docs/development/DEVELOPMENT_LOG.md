@@ -326,6 +326,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13626 · Prevent Duplicate Xvfb Startup in the Motion-Matching Smoke Command.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13626
+- **Branch:** merged via #13635
+- **PR:** #13635
+- **Paths:** see #13635
+- **Started:** 2026-10-22
+- **Last verified:** 2026-10-22 (`8117cbc1`; collated from changes/13626-motion-smoke-display.md)
+- **Summary:** Prevent duplicate Xvfb startup in the motion-matching smoke command.
+- **Next step:** Shipped in PR #13635.
+
+### DL-#13619 · Use Python 3.12 for the Reviewed Nightly Cross-Engine Dependencies.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13619
+- **Branch:** merged via #13635
+- **PR:** #13635
+- **Paths:** see #13635
+- **Started:** 2026-10-22
+- **Last verified:** 2026-10-22 (`8117cbc1`; collated from changes/13619-nightly-python-runtime.md)
+- **Summary:** Use Python 3.12 for the reviewed nightly cross-engine dependencies.
+- **Next step:** Shipped in PR #13635.
+
 ### DL-#13568 · Quarantine CI Requires OpenSim Lane (RM #2252) Until #13564 Fix Lands.
 
 - **State:** shipped
