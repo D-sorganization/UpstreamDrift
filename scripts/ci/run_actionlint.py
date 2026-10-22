@@ -57,10 +57,14 @@ def resolve_actionlint_binary(root: Path | None = None) -> Path:
         )
     finally:
         script_path.unlink(missing_ok=True)
-    binary = root / "actionlint"
-    if not binary.is_file():
+    downloaded = root / "actionlint"
+    if not downloaded.is_file():
         raise RuntimeError("actionlint download completed but binary is missing")
-    return binary
+    dest = Path(os.environ.get("RUNNER_TEMP", tempfile.gettempdir())) / "actionlint"
+    shutil.copy2(downloaded, dest)
+    dest.chmod(0o755)
+    downloaded.unlink(missing_ok=True)
+    return dest
 
 
 def run_actionlint(

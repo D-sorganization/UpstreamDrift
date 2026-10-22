@@ -60,4 +60,5 @@ def test_lint_workflow_files_runs_actionlint_on_changed_paths() -> None:
     lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
     assert "Run actionlint on modified workflows" in lint
     assert "download-actionlint.bash" in lint
-    assert "./actionlint -config-file .github/actionlint.yaml" in lint
+    assert 'actionlint" -config-file .github/actionlint.yaml' in lint
+    assert "rm -f actionlint" in lint

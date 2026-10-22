@@ -34,6 +34,8 @@ jobs:
         run: |
           set -eo pipefail
           curl -sSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s -- 1.7.7
+          install -m 0755 actionlint "$RUNNER_TEMP/actionlint"
+          rm -f actionlint
 
       - name: Identify modified workflow files
         id: changed
@@ -57,7 +59,7 @@ jobs:
           while IFS= read -r f; do
             [ -z "$f" ] && continue
             [ ! -f "$f" ] && continue
-            ./actionlint -config-file .github/actionlint.yaml "$f"
+            "$RUNNER_TEMP/actionlint" -config-file .github/actionlint.yaml "$f"
           done <<< "$FILES"
 
       - name: Require timeout-minutes, concurrency, cancel-in-progress
