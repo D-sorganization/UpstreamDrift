@@ -2834,6 +2834,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#5915 · Remove @dieterolson From CODEOWNERS; Keep Team-Based Ownership
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #5915
+- **Branch:** merged via #13617
+- **PR:** #13617
+- **Paths:** see #13617
+- **Started:** 2026-10-22
+- **Last verified:** 2026-10-22 (`3dfbb4dc`; collated from changes/5915-remove-dieter-codeowners.md)
+- **Summary:** Remove @dieterolson from CODEOWNERS; keep team-based ownership
+- **Next step:** Shipped in PR #13617.
+
 ### DL-#13011 · Stop Realtime File-Tail Poll Thread When Last Subscriber Unsubscribes
 
 - **State:** shipped
