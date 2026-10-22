@@ -326,6 +326,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13568 · Quarantine CI Requires OpenSim Lane (RM #2252) Until #13564 Fix Lands.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13568
+- **Branch:** merged via #13614
+- **PR:** #13614
+- **Paths:** see #13614
+- **Started:** 2026-10-22
+- **Last verified:** 2026-10-22 (`efff779f`; collated from changes/13568-quarantine-ci-requires-opensim-lane-rm-2.md)
+- **Summary:** Quarantine CI Requires OpenSim lane (RM #2252) until #13564 fix lands.
+- **Next step:** Shipped in PR #13614.
+
+### DL-#13564 · Restore CI Requires OpenSim: Squat JR Kinematics Revision 6 and Native Muscle-Effort Allocation.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13564
+- **Branch:** merged via #13615
+- **PR:** #13615
+- **Paths:** see #13615
+- **Started:** 2026-10-22
+- **Last verified:** 2026-10-22 (`50e1409a`; collated from changes/13564-restore-ci-requires-opensim-squat-jr-kin.md)
+- **Summary:** Restore CI Requires OpenSim: squat JR kinematics revision 6 and native muscle-effort allocation.
+- **Next step:** Shipped in PR #13615.
+
 ### DL-#13572 · Gate Workflow Edits With Actionlint; Fix Cross-Engine Leaderboard Publish Concurrency Expression
 
 - **State:** shipped
