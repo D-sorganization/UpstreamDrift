@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13636 · Route OpenSim Classification and Skip Reporting Through the Existing Reversible Public Hosted Policy; Fail Closed on Diff Errors While Preserving Real Engine Docker Validation.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13636
+- **Branch:** codex/13636-opensim-lightweight-routing
+- **PR:** #13637
+- **Paths:** see #13637
+- **Started:** 2026-10-22
+- **Last verified:** 2026-10-22 (`a0fe9edc`; collated from changes/13636-route-opensim-classification-and-skip-re.md)
+- **Summary:** Route OpenSim classification and skip reporting through the existing reversible public hosted policy; fail closed on diff errors while preserving real engine Docker validation.
+- **Next step:** Qualify source and admit after the current nightly cohort; verify natural routing before runtime savings claims.
+
 ### DL-#11161 — Capture Registry, Capture Export and Swing Comparison (Owner Swing vs Tour Average)
 
 - **Next step:** Coordinate the separately tracked engine deliveries in #11165–#11169 and cross-engine comparison #11170; keep this parent active until its scoped acceptance is met.
