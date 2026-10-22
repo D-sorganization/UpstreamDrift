@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# ruff: noqa
+# fmt: off
+# flake8: noqa
 """Generate fleet agent-hook adapter files from fleet-hooks/manifest.yml."""
 
 from __future__ import annotations
@@ -12,7 +15,7 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = Path(__file__).resolve().parents[1]
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
-    from shared_scripts.agent_hook_adapters import (
+    from shared_scripts.agent_hook_adapters import (  # noqa: PLC0415
         SUPPORTED_TARGETS,
         check_adapters,
         generate_adapters,

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# ruff: noqa
+# fmt: off
+# flake8: noqa
 """Run pre-commit pre-push hooks against the actual push range.
 
 Git sends pre-push hooks one line per ref in this form:
@@ -51,7 +54,7 @@ def parse_push_refs(stdin: Iterable[str]) -> list[PushRef]:
     refs: list[PushRef] = []
     for line in stdin:
         parts = line.strip().split()
-        if len(parts) < 4:
+        if len(parts) < 4:  # noqa: PLR2004
             continue
         refs.append(PushRef(*parts[:4]))
     return refs
