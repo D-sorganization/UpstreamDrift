@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-22 | #13631 | Use curl for actionlint bootstrap script download (Semgrep merge_group) |
+| 2026-10-22 | #13616 | Gate workflow edits with actionlint; fix cross-engine leaderboard publish concurrency expression |
 | 2026-10-22 | #13628 | Schedule nightly development log archiver workflow and noop contract test |
 | 2026-10-22 | #13621 | Reconcile development log against GitHub PR truth and archive terminal rows for fleet policy gate |
 | 2026-10-22 | #13617 | Remove @dieterolson from CODEOWNERS; keep team-based ownership |

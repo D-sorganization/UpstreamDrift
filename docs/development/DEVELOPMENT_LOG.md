@@ -326,6 +326,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13572 · Gate Workflow Edits With Actionlint; Fix Cross-Engine Leaderboard Publish Concurrency Expression
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13572
+- **Branch:** merged via #13616
+- **PR:** #13616, #13631
+- **Paths:** see #13616
+- **Started:** 2026-10-22
+- **Last verified:** 2026-10-22 (`7c43857e`; collated from changes/13572-use-curl-for-actionlint-bootstrap-script.md)
+- **Summary:** Gate workflow edits with actionlint; fix cross-engine leaderboard publish concurrency expression
+- **Next step:** Shipped in PR #13616.
+
 ### DL-#13629 · Schedule Nightly Development Log Archiver Workflow and Noop Contract Test
 
 - **State:** shipped
