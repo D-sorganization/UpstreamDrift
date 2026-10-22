@@ -1,3 +1,16 @@
 {
-  "outputStyle": "Proactive"
+  "outputStyle": "Proactive",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 scripts/agent-check-hook-bridge.py claude-stop",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
 }
