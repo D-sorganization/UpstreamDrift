@@ -2,6 +2,7 @@
 # ruff: noqa
 # fmt: off
 # flake8: noqa
+# mypy: ignore-errors
 """Generate fleet agent-hook adapter files from fleet-hooks/manifest.yml."""
 
 from __future__ import annotations

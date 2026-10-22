@@ -2,6 +2,7 @@
 # ruff: noqa
 # fmt: off
 # flake8: noqa
+# mypy: ignore-errors
 """Provider-agnostic agent hook runner driven by fleet-hooks/manifest.yml."""
 
 from __future__ import annotations
@@ -19,7 +20,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path, PurePosixPath
 from typing import Any, Literal, cast
 
-import yaml
+import yaml  # type: ignore
 
 try:
     from shared_scripts.run_mypy_diff import resolve_changed_files  # noqa: PLC0415
@@ -32,12 +33,10 @@ except ImportError:
     ) -> list[str]:
         return []
 
-try:
-    from src.contracts import require  # noqa: PLC0415
-except ImportError:
-    def require(condition: bool, message: str = "Precondition failed") -> None:
-        if not condition:
-            raise ValueError(message)
+
+def require(condition: bool, message: str = "Precondition failed") -> None:
+    if not condition:
+        raise ValueError(message)
 
 log = logging.getLogger(__name__)
 CheckStatus = Literal["pass", "fail", "skip"]

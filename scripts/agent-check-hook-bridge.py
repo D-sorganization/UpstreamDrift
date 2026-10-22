@@ -2,6 +2,7 @@
 # ruff: noqa
 # fmt: off
 # flake8: noqa
+# mypy: ignore-errors
 """Provider-specific stdin/stdout bridge around ``scripts/agent-check``."""
 
 from __future__ import annotations

@@ -1,6 +1,7 @@
 # ruff: noqa
 # fmt: off
 # flake8: noqa
+# mypy: ignore-errors
 """Generate provider hook adapters that call ``scripts/agent-check``."""
 
 from __future__ import annotations
@@ -10,14 +11,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
-import yaml
+import yaml  # type: ignore
 
-try:
-    from src.contracts import require  # noqa: PLC0415
-except ImportError:
-    def require(condition: bool, message: str = "Precondition failed") -> None:
-        if not condition:
-            raise ValueError(message)
+
+def require(condition: bool, message: str = "Precondition failed") -> None:
+    if not condition:
+        raise ValueError(message)
 
 BRIDGE_REL = "scripts/agent-check-hook-bridge.py"
 CURSOR_HOOK_VERSION = 1

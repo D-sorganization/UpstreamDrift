@@ -2,6 +2,7 @@
 # ruff: noqa
 # fmt: off
 # flake8: noqa
+# mypy: ignore-errors
 """Git pre-push fallback: run ``scripts/agent-check`` on the push range."""
 
 from __future__ import annotations

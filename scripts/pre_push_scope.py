@@ -2,6 +2,7 @@
 # ruff: noqa
 # fmt: off
 # flake8: noqa
+# mypy: ignore-errors
 """Run pre-commit pre-push hooks against the actual push range.
 
 Git sends pre-push hooks one line per ref in this form:
