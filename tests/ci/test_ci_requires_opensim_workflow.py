@@ -139,3 +139,6 @@ class TestOpenSimJobLevelGating:
         body = str(pytest_step.get("run", ""))
         assert "scripts.ci.ci_lane_quarantine" in body
         assert "ci-requires-opensim.yml" in body
+        assert "Smoke squat joint-reaction acceleration gate" in {
+            s.get("name") for s in steps
+        }
