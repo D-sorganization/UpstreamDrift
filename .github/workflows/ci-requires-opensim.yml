@@ -43,7 +43,9 @@ jobs:
     if: >-
       (!github.event.pull_request ||
       github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: d-sorg-fleet-docker
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 5
     outputs:
       run: ${{ steps.classify.outputs.run }}
@@ -65,7 +67,11 @@ jobs:
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
           changed=()
           if [ "$EVENT_NAME" = "pull_request" ]; then
-            mapfile -t changed < <(git diff --name-only "origin/${BASE_REF}...HEAD")
+            # Capture first: process substitution would hide a failed comparison.
+            changed_paths=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+            if [ -n "$changed_paths" ]; then
+              mapfile -t changed <<< "$changed_paths"
+            fi
           fi
           args=(opensim --event "$EVENT_NAME" --labels "$PR_LABELS" --github-output)
           for file in "${changed[@]}"; do
@@ -107,8 +113,9 @@ jobs:
       needs.pick-runner.result == 'success')
     runs-on: >-
       ${{ needs.classify-changes.outputs.run == 'true' &&
-      github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository && 'ubuntu-latest' ||
-      (needs.pick-runner.outputs.runner || 'd-sorg-fleet-docker') }}
+      (needs.pick-runner.outputs.runner || 'd-sorg-fleet-docker') ||
+      (!github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker') }}
     timeout-minutes: 25
     env:
       QT_QPA_PLATFORM: offscreen
