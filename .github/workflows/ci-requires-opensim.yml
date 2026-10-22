@@ -115,6 +115,11 @@ jobs:
       MPLBACKEND: Agg
       MUJOCO_GL: egl
       SDL_VIDEODRIVER: dummy
+      PYTHONDONTWRITEBYTECODE: "1"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
       UPSTREAMDRIFT_MSK_BASE_MODEL: shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim
     steps:
       - name: Skip OpenSim lane (paths/label gate)
@@ -259,7 +264,8 @@ jobs:
           set -euo pipefail
           no_cache=()
           if [ -z "${PIP_CACHE_DIR:-}" ]; then no_cache=(--no-cache-dir); fi
-          python -m pip install "${no_cache[@]}" --no-deps -e ".[dev]"
+          python -m pip install "${no_cache[@]}" --force-reinstall --no-deps -e ".[dev]"
+          find src/engines/physics_engines/opensim/python -type d -name __pycache__ -prune -exec rm -rf {} +
 
       - name: Verify OpenSim 4.6 is importable
         if: needs.classify-changes.outputs.run == 'true'
@@ -271,10 +277,48 @@ jobs:
           assert version.startswith("4.6"), f"expected OpenSim 4.6, got {version}"
           PY
 
+      - name: Verify squat joint-reaction kinematics revision
+        if: needs.classify-changes.outputs.run == 'true'
+        run: |
+          python - <<'PY'
+          import json
+          from src.engines.physics_engines.opensim.python.msk_lift_joint_reactions import (
+              MSK_LIFT_JR_KINEMATICS_REVISION,
+              joint_reaction_source_fingerprint,
+          )
+
+          assert MSK_LIFT_JR_KINEMATICS_REVISION >= 6
+          print(json.dumps(joint_reaction_source_fingerprint(), indent=2))
+          PY
+
+      - name: Smoke squat joint-reaction acceleration gate
+        if: needs.classify-changes.outputs.run == 'true'
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          from src.engines.physics_engines.opensim.python.msk_lift_joint_reactions import (
+              evaluate_lift_joint_reactions,
+          )
+
+          receipt = evaluate_lift_joint_reactions("squat", stride=5)
+          err = float(receipt["acceleration_error_max"])
+          limit = 5e-6
+          if err >= limit:
+              print(
+                  json.dumps(receipt.get("acceleration_realization"), indent=2),
+                  file=sys.stderr,
+              )
+              raise SystemExit(
+                  f"acceleration_error_max {err} >= {limit} before pytest"
+              )
+          print(f"acceleration_error_max {err} < {limit}")
+          PY
+
       - name: Run requires_opensim tests
         if: needs.classify-changes.outputs.run == 'true'
         run: |
-          set +e
           python -m pytest \
             tests/unit/lifting tests/opensim \
             -m "requires_opensim and not slow and not heavy" \
@@ -285,17 +329,6 @@ jobs:
             --tb=short \
             -v \
             --junitxml="$RUNNER_TEMP/opensim-results.xml"
-          pytest_rc=$?
-          set -e
-          python3 -m scripts.ci.ci_lane_quarantine \
-            --workflow ci-requires-opensim.yml \
-            --job requires-opensim \
-            --pytest-exit-code "$pytest_rc" \
-            --junitxml "$RUNNER_TEMP/opensim-results.xml"
-          final_rc=$?
-          if [ "$final_rc" -ne 0 ]; then
-            exit "$final_rc"
-          fi
 
           python - "$RUNNER_TEMP/opensim-results.xml" <<'PY'
           import sys

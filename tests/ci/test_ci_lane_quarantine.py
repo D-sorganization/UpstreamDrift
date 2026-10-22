@@ -10,14 +10,10 @@ import pytest
 
 from scripts.ci.ci_lane_quarantine import (
     adjudicate_pytest_exit,
-    load_ledger,
     validate_ledger,
 )
 
 pytestmark = pytest.mark.unit
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-LEDGER = REPO_ROOT / "scripts/config/ci_lane_quarantine.json"
 
 # From main run 39696833816 failed log (2026-10-21).
 SQUAT_NODE = (
@@ -28,6 +24,21 @@ NATIVE_NODE = (
     "tests/opensim/test_native_muscle_effort_native.py"
     "::test_native_constant_interval_matches_fresh_raw_replay"
 )
+
+FIXTURE_LEDGER = {
+    "schema_version": "ci-lane-quarantine/v1",
+    "issue": "https://github.com/D-sorganization/UpstreamDrift/pull/13568",
+    "owner": "cursor",
+    "expires": "2026-10-29",
+    "lanes": [
+        {
+            "workflow": "ci-requires-opensim.yml",
+            "job": "requires-opensim",
+            "reason": "Deterministic regression on main (#13564).",
+            "expected_failure_node_ids": [SQUAT_NODE, NATIVE_NODE],
+        }
+    ],
+}
 
 
 def _junit_with_failures(*node_ids: str) -> str:
@@ -45,19 +56,16 @@ def _junit_with_failures(*node_ids: str) -> str:
     )
 
 
-class TestLedgerContract:
-    def test_committed_ledger_validates(self) -> None:
-        assert validate_ledger(LEDGER) == ()
+@pytest.fixture
+def ledger_path(tmp_path: Path) -> Path:
+    path = tmp_path / "ci_lane_quarantine.json"
+    path.write_text(json.dumps(FIXTURE_LEDGER), encoding="utf-8")
+    return path
 
-    def test_ledger_links_pr_13568_with_expiry(self) -> None:
-        ledger = load_ledger(LEDGER)
-        assert "13568" in str(ledger["issue"])
-        assert ledger["expires"] == "2026-10-29"
-        lane = ledger["lanes"][0]
-        assert lane["workflow"] == "ci-requires-opensim.yml"
-        assert lane["job"] == "requires-opensim"
-        assert SQUAT_NODE in lane["expected_failure_node_ids"]
-        assert NATIVE_NODE in lane["expected_failure_node_ids"]
+
+class TestLedgerContract:
+    def test_fixture_ledger_validates(self, ledger_path: Path) -> None:
+        assert validate_ledger(ledger_path) == ()
 
 
 class TestAdjudicatePytestExit:
@@ -67,18 +75,22 @@ class TestAdjudicatePytestExit:
             '<?xml version="1.0"?><testsuite tests="0"></testsuite>',
             encoding="utf-8",
         )
+        ledger = tmp_path / "ledger.json"
+        ledger.write_text(json.dumps(FIXTURE_LEDGER), encoding="utf-8")
         assert (
             adjudicate_pytest_exit(
                 pytest_exit_code=0,
                 junit_path=junit,
                 workflow="ci-requires-opensim.yml",
                 job="requires-opensim",
-                ledger_path=LEDGER,
+                ledger_path=ledger,
             )
             == 0
         )
 
-    def test_dual_failure_from_main_log_is_quarantined(self, tmp_path: Path) -> None:
+    def test_dual_failure_from_main_log_is_quarantined(
+        self, tmp_path: Path, ledger_path: Path
+    ) -> None:
         junit = tmp_path / "results.xml"
         junit.write_text(
             _junit_with_failures(SQUAT_NODE, NATIVE_NODE),
@@ -89,12 +101,14 @@ class TestAdjudicatePytestExit:
             junit_path=junit,
             workflow="ci-requires-opensim.yml",
             job="requires-opensim",
-            ledger_path=LEDGER,
+            ledger_path=ledger_path,
             as_of=date(2026, 10, 22),
         )
         assert rc == 0
 
-    def test_expired_quarantine_fails_closed(self, tmp_path: Path) -> None:
+    def test_expired_quarantine_fails_closed(
+        self, tmp_path: Path, ledger_path: Path
+    ) -> None:
         junit = tmp_path / "results.xml"
         junit.write_text(_junit_with_failures(SQUAT_NODE), encoding="utf-8")
         rc = adjudicate_pytest_exit(
@@ -102,12 +116,14 @@ class TestAdjudicatePytestExit:
             junit_path=junit,
             workflow="ci-requires-opensim.yml",
             job="requires-opensim",
-            ledger_path=LEDGER,
+            ledger_path=ledger_path,
             as_of=date(2026, 11, 1),
         )
         assert rc == 1
 
-    def test_unexpected_failure_rejects_quarantine(self, tmp_path: Path) -> None:
+    def test_unexpected_failure_rejects_quarantine(
+        self, tmp_path: Path, ledger_path: Path
+    ) -> None:
         junit = tmp_path / "results.xml"
         junit.write_text(
             _junit_with_failures(
@@ -121,7 +137,7 @@ class TestAdjudicatePytestExit:
             junit_path=junit,
             workflow="ci-requires-opensim.yml",
             job="requires-opensim",
-            ledger_path=LEDGER,
+            ledger_path=ledger_path,
             as_of=date(2026, 10, 22),
         )
         assert rc == 1
