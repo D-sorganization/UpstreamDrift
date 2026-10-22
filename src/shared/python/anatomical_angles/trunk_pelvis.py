@@ -292,6 +292,26 @@ TRUNK_PELVIS_GLOSSARY: dict[str, GlossaryEntry] = {
     s.term_id: GlossaryEntry(s.term_id, s.formula, s.sign_convention, _LAB, _WU)
     for s in _SPECS
 }
+_LINE_REF = "ADR-0055 item 8; swing_comparison/turn.py"
+_LINE_FRAME = "explicit up rotated to +Z; horizontal XY projection of markers"
+TRUNK_PELVIS_GLOSSARY.update(
+    {
+        "pelvis_turn_line": GlossaryEntry(
+            "pelvis_turn_line",
+            "turn of pelvis marker line vs address from swing_comparison.turn",
+            "trail rotation positive (backswing positive both hands): +turn right, -turn left",
+            _LINE_FRAME,
+            _LINE_REF,
+        ),
+        "thorax_turn_line": GlossaryEntry(
+            "thorax_turn_line",
+            "turn of upper_trunk marker line vs address from swing_comparison.turn",
+            "trail rotation positive (backswing positive both hands): +turn right, -turn left",
+            _LINE_FRAME,
+            _LINE_REF,
+        ),
+    }
+)
 #: Golf words -> registered term ids. "Shoulder turn" means thorax rotation,
 #: not glenohumeral motion.
 GOLF_WORDS: dict[str, str] = {w: s.term_id for s in _SPECS for w in s.golf_words}
