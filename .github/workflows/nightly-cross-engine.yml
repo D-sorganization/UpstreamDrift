@@ -147,8 +147,8 @@ jobs:
       - name: Summarize dependency failure
         if: failure() && steps.install_deps.outcome == 'failure'
         run: |
-          echo "## Dependency Installation Failed" >> $GITHUB_STEP_SUMMARY
-          echo "Cross-engine validation aborted due to environment setup failure." >> $GITHUB_STEP_SUMMARY
+          echo "## Dependency Installation Failed" >> "$GITHUB_STEP_SUMMARY"
+          echo "Cross-engine validation aborted due to environment setup failure." >> "$GITHUB_STEP_SUMMARY"
           echo '{"status": "dependency_failure"}' > test-results/setup-status.json
 
       - name: Verify native engine imports
