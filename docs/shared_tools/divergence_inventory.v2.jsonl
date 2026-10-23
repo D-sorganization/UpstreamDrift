@@ -90,7 +90,6 @@
 {"path": "ai/knowledge/eval.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/manifest.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/pack.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/knowledge/search.py", "classification": "ud-only", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/sources.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/wizard.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/mcp/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": true}
