@@ -26,7 +26,7 @@ def test_record_calibrated_address_records_summary_feet_and_knees() -> None:
     ):
         addr.record_calibrated_address(report, "sim", kin, address, lane, ("m",), "ad")
     assert report["calibrated"] == {"k": 1}
-    s.assert_called_once_with("sim", kin, address, lane, ("m",), "ad")
+    s.assert_called_once_with("sim", kin, address, lane, ("m",), "ad", spec=None)
     feet.assert_called_once_with(report, kin, address.q, lane.feet)
     knees.assert_called_once_with(report, kin, address.q, lane.knees)
 
