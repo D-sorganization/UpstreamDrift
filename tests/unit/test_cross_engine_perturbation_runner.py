@@ -301,6 +301,7 @@ class TestComputeConsistency:
     def test_empty_summaries(self) -> None:
         assert compute_consistency({}) == {}
 
+    @pytest.mark.unit
     def test_zero_mean_consistency_is_nan_with_reason(self) -> None:
         # Two engines with symmetric opposite means: overall mean is 0.0
         summaries = {

@@ -110,6 +110,7 @@ class TestVariabilitySummary:
         with pytest.raises(AssertionError):
             variability_summary([])
 
+    @pytest.mark.unit
     def test_zero_mean_tip_speed_cv_is_nan_with_reason(self) -> None:
         results = [
             {
@@ -126,6 +127,7 @@ class TestVariabilitySummary:
         assert summary.get("tip_speed_cv_reason") is not None
         assert "undefined" in summary["tip_speed_cv_reason"]
 
+    @pytest.mark.unit
     def test_zero_mean_speed_not_scored_perfectly_robust(self) -> None:
         from src.shared.python.perturbation.robustness_score import (
             compute_robustness_score,

@@ -278,7 +278,7 @@ class PerturbationConfig:
 
 def variability_summary(
     results: list[dict],
-) -> dict[str, float | np.ndarray]:
+) -> dict[str, float | np.ndarray | str | None]:
     """Compute statistical summary from batch simulation results.
 
     Parameters
@@ -297,7 +297,8 @@ def variability_summary(
     Design by Contract
     ------------------
     Pre:  len(results) > 0
-    Post: all values are finite
+    Post: numeric values are finite except ``tip_speed_cv``, which is NaN
+          with a ``tip_speed_cv_reason`` when the mean speed is near zero
     """
     assert len(results) > 0, "results must be non-empty"
 
