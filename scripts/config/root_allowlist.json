@@ -21,6 +21,7 @@
     ".jules",
     ".kiro",
     ".mcp.json",
+    ".oss-scanner",
     ".pre-commit-config.yaml",
     ".prettierignore",
     ".specify",
