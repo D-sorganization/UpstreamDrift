@@ -17,6 +17,8 @@ from typing import Any
 import pytest
 import yaml
 
+pytestmark = pytest.mark.unit
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW_DIRS = (
     REPO_ROOT / ".github" / "workflows",
