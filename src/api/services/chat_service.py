@@ -165,7 +165,7 @@ class ChatService:
                     self._adapter = GeminiAdapter(api_key=api_key, model=settings.model)
             else:
                 self._adapter = self._load_subscription_cli_adapter(
-                    settings.provider.name.lower(), settings.model
+                    settings.provider.name, settings.model
                 )
 
             import os as _os
@@ -216,7 +216,9 @@ class ChatService:
                     AntigravityCliAdapter,
                 )
 
-                return AntigravityCliAdapter(model=model)
+                from typing import cast
+
+                return cast(BaseAgentAdapter, AntigravityCliAdapter(model=model))
             except ImportError:
                 from src.shared.python.ai.adapters.gemini_cli_adapter import (
                     GeminiCliAdapter,
