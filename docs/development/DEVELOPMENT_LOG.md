@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13648 · Characterize the Existing KnowledgePack Search Contract Before Provider Synchronization.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13648
+- **Branch:** codex/13648-knowledgepack-search
+- **PR:** #13649
+- **Paths:** tests/unit/ai/test_knowledge_pack_search.py
+- **Started:** 2026-10-23
+- **Last verified:** 2026-10-23 (`f5c47acf`; collated from changes/13648-extract-knowledgepack-bm25-search-behind.md)
+- **Summary:** Characterize the existing KnowledgePack search contract before provider synchronization.
+- **Next step:** Use these regression tests when synchronizing the provider-owned search implementation.
+
 ### DL-#12577 · Add Loop Null-Space Interpretation Help and Salvage Tracking
 
 - **State:** in_review
