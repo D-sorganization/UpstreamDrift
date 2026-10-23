@@ -489,6 +489,49 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         rows.append(w * (basis @ com - goal[0]))
         jacs.append(w * (basis @ jac_com)[:, self._dof])
 
+    def _club_body_name(self) -> str | None:
+        for name in self.adapter.body_frames:
+            if name.endswith("Clubface Vector"):
+                return name
+        return None
+
+    def _club_sole_world(self) -> Array:
+        """World sole point (spec club-body origin) at the current ``data`` pose."""
+        name = self._club_body_name()
+        if name is None:
+            raise ValueError("model has no club body")
+        mjt_obj = self._mj.mjtObj
+        body_id = self._mj.mj_name2id(self.model, mjt_obj.mjOBJ_BODY, name)
+        frame = self.adapter.body_frames[name]
+        rot_mj = self.data.xmat[body_id].reshape(3, 3)
+        return self.data.xpos[body_id] + rot_mj @ frame[:3, 3]
+
+    def _append_club_sole(
+        self,
+        rows: list[Array],
+        jacs: list[Array],
+        ground: GroundPlane,
+        weight: float,
+    ) -> None:
+        if weight <= 0:
+            return
+        if self._club_body_name() is None:
+            return
+        n = np.asarray(ground.normal, dtype=float)
+        n = n / np.linalg.norm(n)
+        pos = self._club_sole_world()
+        hover = float(pos @ n - ground.height_m)
+        if hover <= 0.0:
+            return
+        name = self._club_body_name()
+        body_id = self._mj.mj_name2id(self.model, self._mj.mjtObj.mjOBJ_BODY, name)
+        nv = self.model.nv
+        jp = np.zeros((3, nv))
+        self._mj.mj_jac(self.model, self.data, jp, None, pos, body_id)
+        w = np.sqrt(weight)
+        rows.append(np.array([w * hover]))
+        jacs.append(w * (n @ jp)[None, self._dof])
+
     def sphere_ground_points(self, q: Array, ground: GroundPlane) -> dict[str, Array]:
         """Projection of each contact sphere centre onto the ground plane at ``q``."""
         self._set(q)
