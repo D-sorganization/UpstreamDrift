@@ -163,6 +163,20 @@ class ChatService:
                     )
 
                     self._adapter = GeminiAdapter(api_key=api_key, model=settings.model)
+            else:
+                self._adapter = self._load_subscription_cli_adapter(
+                    settings.provider.name.lower(), settings.model
+                )
+
+            import os as _os
+
+            env_provider = _os.environ.get("UPSTREAMDRIFT_AI_PROVIDER", "").strip()
+            if env_provider:
+                override = self._load_subscription_cli_adapter(
+                    env_provider.lower(), getattr(settings, "model", None)
+                )
+                if override is not None:
+                    self._adapter = override
 
             if self._adapter:
                 logger.info("ChatService loaded adapter: %s", settings.provider.name)
@@ -176,6 +190,44 @@ class ChatService:
                 "ChatService: failed to load settings (%s), falling back to Ollama", e
             )
             self._fallback_to_ollama()
+
+    def _load_subscription_cli_adapter(
+        self, provider_key: str, model: str | None = None
+    ) -> BaseAgentAdapter | None:
+        """Load a subscription-authenticated CLI adapter (zero paid API keys)."""
+        key = provider_key.strip().lower()
+        if key in {"claude_cli", "claude_code", "claude"}:
+            from src.shared.python.ai.adapters.claude_code_adapter import (
+                ClaudeCodeAdapter,
+            )
+
+            return ClaudeCodeAdapter(model=model)
+        if key in {"codex_cli", "codex"}:
+            from src.shared.python.ai.adapters.codex_cli_adapter import CodexCliAdapter
+
+            return CodexCliAdapter(model=model)
+        if key in {"agy", "antigravity", "antigravity_cli", "gemini_cli"}:
+            if key == "gemini_cli":
+                logger.info(
+                    "ChatService: provider 'gemini_cli' is deprecated; routing to 'agy'"
+                )
+            try:
+                from src.shared.python.ai.adapters.antigravity_cli_adapter import (
+                    AntigravityCliAdapter,
+                )
+
+                return AntigravityCliAdapter(model=model)
+            except ImportError:
+                from src.shared.python.ai.adapters.gemini_cli_adapter import (
+                    GeminiCliAdapter,
+                )
+
+                return GeminiCliAdapter(binary="agy", model=model)
+        if key in {"cline_cli", "cline"}:
+            from src.shared.python.ai.adapters.cline_adapter import ClineAdapter
+
+            return ClineAdapter()
+        return None
 
     def _fallback_to_ollama(self) -> None:
         """Fall back to default Ollama adapter.
