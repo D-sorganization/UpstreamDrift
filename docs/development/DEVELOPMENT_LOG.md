@@ -391,6 +391,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13334 · Critique Physical Grip-Contact Calibration and Validation Evidence
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13334
+- **Branch:** merged via #13661
+- **PR:** #13661
+- **Paths:** see #13661
+- **Started:** 2026-10-23
+- **Last verified:** 2026-10-23 (`46a71b8a`; collated from changes/13334-critic-grip-contact-2026-10-23.md)
+- **Summary:** Critique physical grip-contact calibration and validation evidence
+- **Next step:** Shipped in PR #13661.
+
 ### DL-#13608 · Exclude Generated Capability-Atlas Output From Tauri Workflow Path Triggers
 
 - **State:** shipped
