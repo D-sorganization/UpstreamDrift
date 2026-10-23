@@ -45,6 +45,12 @@ def _only_full_label_events_start(condition: str) -> None:
     assert f"github.event.label.name == '{FULL_LABEL}'" in condition
 
 
+def _only_opensim_label_events_start_classifier(condition: str) -> None:
+    label = "ci:opensim"
+    assert "github.event.action != 'labeled'" in condition
+    assert f"github.event.label.name == '{label}'" in condition
+
+
 @pytest.mark.parametrize(
     "name",
     [
@@ -233,6 +239,10 @@ class TestOpenSimMainRunsComplete:
         assert (
             "needs.classify-changes.outputs.run == 'true'" in jobs["pick-runner"]["if"]
         )
+
+    def test_unrelated_label_events_skip_classifier(self) -> None:
+        condition = _load(self.NAME)["jobs"]["classify-changes"]["if"]
+        _only_opensim_label_events_start_classifier(condition)
 
     def test_post_merge_nightly_and_dispatch_triggers_remain(self) -> None:
         on = _triggers(_load(self.NAME))

@@ -11,6 +11,10 @@ name: CI Requires OpenSim
 # Regression detection delay: PRs that touch only non-OpenSim code rely on the
 # nightly schedule (08:00 UTC) and post-merge main runs. Owner: @core. Response
 # SLA: acknowledge nightly failures within 24 hours (``report-nightly`` job).
+#
+# Unrelated ``labeled`` events (for example ``claim:codex``) must not run
+# classification or heavy OpenSim steps; only ``ci:opensim`` label events do
+# (#13638). ``synchronize`` while labeled still classifies via paths or label.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, labeled]
@@ -39,10 +43,13 @@ permissions:
 jobs:
   classify-changes:
     name: classify OpenSim lane
-    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    # Fork PRs never run on the self-hosted fleet (RM#1989). Unrelated label
+    # events skip classification entirely (#13638); only ``ci:opensim`` starts it.
     if: >-
       (!github.event.pull_request ||
-      github.event.pull_request.head.repo.full_name == github.repository)
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event.action != 'labeled' ||
+      github.event.label.name == 'ci:opensim')
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
       'ubuntu-latest' || 'd-sorg-fleet-docker' }}

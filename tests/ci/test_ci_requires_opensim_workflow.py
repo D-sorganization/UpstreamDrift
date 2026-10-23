@@ -18,6 +18,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = REPO_ROOT / ".github/workflows/ci-requires-opensim.yml"
 CONFIG_PATH = REPO_ROOT / "scripts/config/ci_opensim_path_patterns.json"
 OPENSIM_LABEL = "ci:opensim"
+UNRELATED_LABEL = "claim:codex"
+
+
+def _only_opensim_label_events_start_classifier(condition: str) -> None:
+    """Unrelated ``labeled`` events must not run classify-changes (#13638)."""
+    assert "github.event.action != 'labeled'" in condition
+    assert f"github.event.label.name == '{OPENSIM_LABEL}'" in condition
 
 
 def _load() -> dict[str, Any]:
@@ -50,6 +57,80 @@ class TestOpenSimWorkflowTriggers:
     def test_main_push_post_merge_signal_retained(self) -> None:
         on = _triggers(_load())
         assert on["push"]["branches"] == ["main"]
+
+
+class TestOpenSimUnrelatedLabelGating:
+    """#13638: unrelated ``labeled`` events must not allocate classification."""
+
+    def test_unrelated_label_skips_classifier_job(self) -> None:
+        condition = _load()["jobs"]["classify-changes"]["if"]
+        _only_opensim_label_events_start_classifier(condition)
+
+    def test_ci_opensim_label_event_still_classifies(self) -> None:
+        condition = _load()["jobs"]["classify-changes"]["if"]
+        _only_opensim_label_events_start_classifier(condition)
+        config = load_lane_config(CONFIG_PATH)
+        decision = should_run_opensim_lane(
+            event_name="pull_request",
+            changed_files=("docs/only.md",),
+            labels=(OPENSIM_LABEL,),
+            config=config,
+        )
+        assert decision.run is True
+        assert decision.reason == "label"
+
+    def test_synchronize_while_labeled_not_blocked_by_label_guard(self) -> None:
+        condition = _load()["jobs"]["classify-changes"]["if"]
+        assert "github.event.action != 'labeled'" in condition
+        config = load_lane_config(CONFIG_PATH)
+        decision = should_run_opensim_lane(
+            event_name="pull_request",
+            changed_files=("src/tools/foo.py",),
+            labels=(OPENSIM_LABEL, UNRELATED_LABEL),
+            config=config,
+        )
+        assert decision.run is True
+
+    def test_opened_and_synchronize_still_classify_paths(self) -> None:
+        condition = _load()["jobs"]["classify-changes"]["if"]
+        _only_opensim_label_events_start_classifier(condition)
+        config = load_lane_config(CONFIG_PATH)
+        path_decision = should_run_opensim_lane(
+            event_name="pull_request",
+            changed_files=("src/engines/physics_engines/opensim/python/foo.py",),
+            labels=(),
+            config=config,
+        )
+        assert path_decision.run is True
+        doc_decision = should_run_opensim_lane(
+            event_name="pull_request",
+            changed_files=("docs/plans/foo.md",),
+            labels=(),
+            config=config,
+        )
+        assert doc_decision.run is False
+
+    def test_non_pr_events_keep_classifier(self) -> None:
+        condition = _load()["jobs"]["classify-changes"]["if"]
+        assert "!github.event.pull_request" in condition
+        config = load_lane_config(CONFIG_PATH)
+        for event in ("push", "schedule", "workflow_dispatch"):
+            decision = should_run_opensim_lane(
+                event_name=event,
+                changed_files=(),
+                labels=(),
+                config=config,
+            )
+            assert decision.run is True
+
+    def test_fork_prs_still_excluded_before_label_guard(self) -> None:
+        condition = _load()["jobs"]["classify-changes"]["if"]
+        assert "head.repo.full_name == github.repository" in condition
+        _only_opensim_label_events_start_classifier(condition)
+
+    def test_unrelated_label_classifier_guard_not_on_pick_runner(self) -> None:
+        pick_if = _load()["jobs"]["pick-runner"]["if"]
+        assert "github.event.action != 'labeled'" not in pick_if
 
 
 class TestOpenSimJobLevelGating:
