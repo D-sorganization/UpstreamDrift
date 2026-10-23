@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-23 | #13652 | Exclude generated capability-atlas output from Tauri workflow path triggers |
+| 2026-10-23 | #13607 | Add loop null-space interpretation help and salvage tracking |
 | 2026-10-23 | #13651 | Clear deleted ThemeManager main-window wrappers during test cleanup |
 | 2026-10-23 | #13643 | Defer generated collation branch updates when the canonical queue preflight cannot verify editability |
 | 2026-10-23 | #13647 | Remove stale CI Requires OpenSim lane quarantine (squat JR + native muscle-effort tests pass for real since #13615) |

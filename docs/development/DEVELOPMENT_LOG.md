@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12577 · Add Loop Null-Space Interpretation Help and Salvage Tracking
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12577
+- **Branch:** cursor/nsx-45-help-doc-3c3f
+- **PR:** #13607
+- **Paths:** see #13607
+- **Started:** 2026-10-23
+- **Last verified:** 2026-10-23 (`b7d7977e`; collated from changes/12577-add-loop-null-space-interpretation-help.md)
+- **Summary:** Add loop null-space interpretation help and salvage tracking
+- **Next step:** Merge PR #13607 after checks pass.
+
 ### DL-#13650 · Clear Deleted ThemeManager Main-Window Wrappers During Test Cleanup
 
 - **State:** in_review
@@ -364,6 +377,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13608 · Exclude Generated Capability-Atlas Output From Tauri Workflow Path Triggers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13608
+- **Branch:** staff/issue-remediator-13608-119eb1
+- **PR:** #13652
+- **Paths:** .github/workflows/tauri-build.yml,tests/ci/test_ci_infrastructure.py
+- **Started:** 2026-10-23
+- **Last verified:** 2026-10-23 (`b22f0717`; collated from changes/13608-exclude-generated-capability-atlas-outpu.md)
+- **Summary:** Exclude generated capability-atlas output from Tauri workflow path triggers
+- **Next step:** Shipped in PR #13652.
 
 ### DL-#13626 · Prevent Duplicate Xvfb Startup in the Motion-Matching Smoke Command.
 
