@@ -14,6 +14,26 @@ MAIN = "origin/main"
 
 
 def main() -> None:
+    nsx_issue = _find_issue_map()
+    nsx_merge = _find_merged_map()
+    pr_by_issue = _find_open_prs_by_issue()
+
+    deferred = set(range(70, 76))
+    absorbed = {
+        n
+        for n in range(76)
+        if n not in nsx_issue and n not in nsx_merge and n not in deferred
+    }
+
+    print("# NSX program salvage tracker (retire PR #12634)\n")
+    print(
+        "Archive branch: `feat/nsx-consolidated-wave15-19`. "
+        "Parent science epic: #12593.\n"
+    )
+    _print_inventory(nsx_issue, nsx_merge, pr_by_issue, deferred, absorbed)
+
+
+def _find_issue_map() -> dict[int, int]:
     nsx_issue: dict[int, int] = {}
     root = Path("docs/research/loop_nullspace")
     if root.is_dir():
@@ -43,7 +63,10 @@ def main() -> None:
         match = re.search(r"\[NSX-(\d+)\]", data["title"])
         if match:
             nsx_issue[int(match.group(1))] = num
+    return nsx_issue
 
+
+def _find_merged_map() -> dict[int, str]:
     log = subprocess.run(
         ["git", "log", MAIN, "--oneline", "-10000"],
         capture_output=True,
@@ -54,9 +77,12 @@ def main() -> None:
     for line in log.splitlines():
         if "#12634" in line:
             continue
-        for m in re.finditer(r"NSX-(\d+)", line, re.I):
+        for m in re.finditer(r"NSX-(\d+)", line, re.IGNORECASE):
             nsx_merge.setdefault(int(m.group(1)), line)
+    return nsx_merge
 
+
+def _find_open_prs_by_issue() -> dict[int, list[dict[str, object]]]:
     open_prs = json.loads(
         subprocess.run(
             [
@@ -83,21 +109,16 @@ def main() -> None:
             continue
         for m in re.finditer(r"#(\d+)", str(pr["title"])):
             pr_by_issue[int(m.group(1))].append(pr)
+    return pr_by_issue
 
-    deferred = set(range(70, 76)) | {72, 73, 74, 71, 70}
-    absorbed = {
-        n
-        for n in range(76)
-        if n not in nsx_issue
-        and n not in nsx_merge
-        and n not in deferred
-    }
 
-    print("# NSX program salvage tracker (retire PR #12634)\n")
-    print(
-        "Archive branch: `feat/nsx-consolidated-wave15-19`. "
-        "Parent science epic: #12593.\n"
-    )
+def _print_inventory(
+    nsx_issue: dict[int, int],
+    nsx_merge: dict[int, str],
+    pr_by_issue: dict[int, list[dict[str, object]]],
+    deferred: set[int],
+    absorbed: set[int],
+) -> None:
     for nsx in range(76):
         issue = nsx_issue.get(nsx)
         issue_ref = f"#{issue}" if issue else "—"
@@ -134,7 +155,7 @@ def main() -> None:
             elif istate == "OPEN":
                 state = f"open issue #{issue}, no green slice PR"
             elif istate == "CLOSED":
-                state = f"issue closed (likely via consolidate #13033)"
+                state = "issue closed (likely via consolidate #13033)"
                 checked = "x"
             else:
                 state = f"issue {istate}"
@@ -150,10 +171,7 @@ def main() -> None:
             checked = " "
 
         rank = _rank(nsx, state)
-        print(
-            f"- [{checked}] **NSX-{nsx:02d}** ({issue_ref}) — "
-            f"rank {rank} — {state}"
-        )
+        print(f"- [{checked}] **NSX-{nsx:02d}** ({issue_ref}) — rank {rank} — {state}")
 
 
 def _rank(nsx: int, state: str) -> str:
