@@ -133,7 +133,11 @@ def adjudicate_pytest_exit(
     """
     if pytest_exit_code == 0:
         return 0
-    ledger = load_ledger(ledger_path)
+    try:
+        ledger = load_ledger(ledger_path)
+    except FileNotFoundError:
+        # No ledger committed means no lane is quarantined; fail closed.
+        return pytest_exit_code
     lane = find_lane(ledger, workflow, job)
     if lane is None:
         return pytest_exit_code
