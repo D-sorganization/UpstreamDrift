@@ -117,6 +117,8 @@ def test_workflow_runs_archiver_and_targets_docs_development_only() -> None:
     assert "schedule" in workflow["on"]
     cron = workflow["on"]["schedule"][0]["cron"]
     assert cron == "0 11 * * *"
+    assert workflow["permissions"]["contents"] == "write"
+    assert workflow["permissions"]["pull-requests"] == "write"
 
     archive_run = _step("Archive terminal development-log entries")["run"]
     assert "shared_scripts/development_log.py" in archive_run
@@ -127,3 +129,11 @@ def test_workflow_runs_archiver_and_targets_docs_development_only() -> None:
     assert propose["env"]["BRANCH"] == "bot/development-log-archive"
     assert "docs/development/DEVELOPMENT_LOG.md" in propose_run
     assert "automerge_guard" in propose["env"]["GUARD"]
+
+
+def test_workflow_uses_hosted_runner_on_public_repositories() -> None:
+    job = _workflow()["jobs"]["archive"]
+    runs_on = job["runs-on"]
+    assert "ubuntu-latest" in runs_on
+    assert "d-sorg-fleet-docker" in runs_on
+    assert "CI_RUNNER_MODE" in runs_on
