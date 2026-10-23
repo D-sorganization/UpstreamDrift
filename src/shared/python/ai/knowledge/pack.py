@@ -9,7 +9,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import re
 import sqlite3
 from collections.abc import Mapping
 from contextlib import closing
@@ -29,11 +28,6 @@ from .sources import SourceFile, head_commit, select_files
 
 #: Bumped on any incompatible schema change; readers refuse other versions.
 FORMAT_VERSION = 1
-_TITLE_WEIGHT = 5.0
-_TEXT_WEIGHT = 1.0
-_TOKEN_RE = re.compile(r"\w+", re.UNICODE)
-_MAX_QUERY_TOKENS = 32
-
 _SCHEMA = """
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE files (
@@ -212,31 +206,10 @@ class KnowledgePack:
     def search(
         self, query: str, k: int = 8, include_superseded: bool = False
     ) -> list[Passage]:
-        """Top ``k`` passages by BM25 (titles weighted), authority breaking ties.
+        """Top ``k`` passages by BM25 (titles weighted), authority breaking ties."""
+        from .search import search_pack
 
-        Any text is a valid query: it is reduced to word tokens, so FTS5
-        operators in user input are never interpreted.
-        """
-        if not isinstance(query, str):
-            raise TypeError("query must be a string")
-        if not isinstance(k, int) or isinstance(k, bool) or k < 1:
-            raise ValueError("k must be a positive integer")
-        tokens = _TOKEN_RE.findall(query)[:_MAX_QUERY_TOKENS]
-        if not tokens:
-            return []
-        match = " OR ".join('"' + t.replace('"', "") + '"' for t in tokens)
-        hidden = "" if include_superseded else _hidden_clause()
-        sql = (
-            "SELECT p.repo, p.source, p.anchor, p.title, p.text, p.commit_sha,"
-            " p.content_hash, p.status, p.authority,"
-            f" bm25(passages_fts, {_TITLE_WEIGHT}, {_TEXT_WEIGHT}) AS score"
-            " FROM passages_fts JOIN passages p ON p.id = passages_fts.rowid"
-            f" WHERE passages_fts MATCH ?{hidden}"
-            " ORDER BY score, p.authority_rank, p.id LIMIT ?"
-        )
-        with closing(self._connect()) as conn:
-            rows = conn.execute(sql, (match, k)).fetchall()
-        return [_passage(row) for row in rows]
+        return search_pack(self, query, k, include_superseded)
 
     def info(self) -> PackInfo:
         meta = self._meta()
