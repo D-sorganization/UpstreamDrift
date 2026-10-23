@@ -15,9 +15,9 @@ def _pack(tmp_path: Path) -> KnowledgePack:
     docs = root / "docs"
     docs.mkdir(parents=True)
     contents = {
-        "title-match.md": "# Quasar Diagnostics\\n\\nA focused procedure describes telemetry and calibration.\\n",
-        "body-match.md": "# General Reference\\n\\nThe quasar diagnostic process explains telemetry and calibration.\\n",
-        "old.md": "---\\nstatus: superseded\\n---\\n# Retired Quasar\\n\\nOld quasar procedures are obsolete.\\n",
+        "title-match.md": "# Quasar Diagnostics\n\nA focused procedure describes telemetry and calibration.\n",
+        "body-match.md": "# General Reference\n\nThe quasar diagnostic process explains telemetry and calibration.\n",
+        "old.md": "---\nstatus: superseded\n---\n# Retired Quasar\n\nOld quasar procedures are obsolete.\n",
     }
     for name, text in contents.items():
         (docs / name).write_text(text, encoding="utf-8")
