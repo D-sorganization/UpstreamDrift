@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13650 · Clear Deleted ThemeManager Main-Window Wrappers During Test Cleanup
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13650
+- **Branch:** codex/13650-theme-manager-fixture
+- **PR:** #13651
+- **Paths:** see #13651
+- **Started:** 2026-10-23
+- **Last verified:** 2026-10-23 (`f4e52a4a`; collated from changes/13650-clear-deleted-thememanager-main-window-w.md)
+- **Summary:** Clear deleted ThemeManager main-window wrappers during test cleanup
+- **Next step:** Merge the Qt fixture cleanup fix.
+
 ### DL-#13641 · Defer Generated Collation Branch Updates When the Canonical Queue Preflight Cannot Verify Editability
 
 - **State:** in_review
