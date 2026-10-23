@@ -991,7 +991,8 @@ def _build_style_edge_cases(
     )
     col_in = _clone_inputs(base)
     if style == "ten_finger":
-        cap_row = tbl[9]
+        names = params["styles"][style]["pair_names"]
+        cap_row = tbl[names.index("ten_finger_little_finger_grip")]
         ca0, ca1 = cap_row[3:6], cap_row[6:9]
         cb_mid = 0.5 * (cap_row[10:13] + cap_row[13:16])
         ra_c, rb_c = float(cap_row[9]), float(cap_row[16])
