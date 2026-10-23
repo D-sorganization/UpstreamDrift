@@ -111,3 +111,7 @@ RUN python -m pytest tests/api tests/motion_capture \
 # The audit runs as an unprivileged uid; let it read and write the checkout
 # and the venv (for scratch builds and reproductions).
 RUN chmod -R a+rwX /src /opt/venv /opt/cargo
+
+# Phase B runs as uid 65532 (the Runner_Dashboard scan sandbox forces it);
+# declare it so the image never defaults to root (Trivy DS-0002).
+USER 65532:65532
