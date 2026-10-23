@@ -3,6 +3,7 @@
 # =============================================================================
 # Builds the UpstreamDrift desktop app using Tauri 2
 # Runs on: Pull requests (check only), Releases (build artifacts)
+# Generated capability-atlas output is excluded from CI triggers.
 #
 # Prerequisites:
 # - Rust toolchain
@@ -17,6 +18,7 @@ on:
     branches: [main]
     paths:
       - "ui/**"
+      - "!ui/public/capability-atlas/**"
       - ".github/workflows/tauri-build.yml"
       - "src-tauri/**"
       - "**/Cargo.toml"
@@ -27,6 +29,7 @@ on:
   pull_request:
     paths:
       - "ui/**"
+      - "!ui/public/capability-atlas/**"
       - ".github/workflows/tauri-build.yml"
       - "src-tauri/**"
       - "**/Cargo.toml"
