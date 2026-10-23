@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-23 | #13651 | Clear deleted ThemeManager main-window wrappers during test cleanup |
 | 2026-10-23 | #13643 | Defer generated collation branch updates when the canonical queue preflight cannot verify editability |
 | 2026-10-23 | #13647 | Remove stale CI Requires OpenSim lane quarantine (squat JR + native muscle-effort tests pass for real since #13615) |
 | 2026-10-22 | #13637 | Route OpenSim classification and skip reporting through the existing reversible public hosted policy; fail closed on diff errors while preserving real engine Docker validation. |
