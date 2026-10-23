@@ -495,13 +495,17 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
                 return name
         return None
 
+    def _club_body_id(self, name: str) -> int:
+        """MuJoCo body id of the named club body."""
+        mjt_obj = self._mj.mjtObj
+        return int(self._mj.mj_name2id(self.model, mjt_obj.mjOBJ_BODY, name))
+
     def _club_sole_world(self) -> Array:
         """World sole point (spec club-body origin) at the current ``data`` pose."""
         name = self._club_body_name()
         if name is None:
             raise ValueError("model has no club body")
-        mjt_obj = self._mj.mjtObj
-        body_id = self._mj.mj_name2id(self.model, mjt_obj.mjOBJ_BODY, name)
+        body_id = self._club_body_id(name)
         frame = self.adapter.body_frames[name]
         rot_mj = self.data.xmat[body_id].reshape(3, 3)
         return self.data.xpos[body_id] + rot_mj @ frame[:3, 3]
@@ -515,7 +519,8 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
     ) -> None:
         if weight <= 0:
             return
-        if self._club_body_name() is None:
+        name = self._club_body_name()
+        if name is None:
             return
         n = np.asarray(ground.normal, dtype=float)
         n = n / np.linalg.norm(n)
@@ -523,8 +528,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         hover = float(pos @ n - ground.height_m)
         if hover <= 0.0:
             return
-        name = self._club_body_name()
-        body_id = self._mj.mj_name2id(self.model, self._mj.mjtObj.mjOBJ_BODY, name)
+        body_id = self._club_body_id(name)
         nv = self.model.nv
         jp = np.zeros((3, nv))
         self._mj.mj_jac(self.model, self.data, jp, None, pos, body_id)

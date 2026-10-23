@@ -255,7 +255,7 @@ ELBOW_PIT_WEIGHT_SWING: float = 0.01
 ADDRESS_BALANCE_WEIGHT: float = 3.0
 #: Weakly pull the spec club-body sole (origin) to the ground plane at address
 #: (#12969). Weight is in the same units as ``ground_weight`` (metres).
-ADDRESS_CLUB_SOLE_WEIGHT: float = 3.0e4
+ADDRESS_CLUB_SOLE_WEIGHT: float = 1.0e3
 #: Acceptance band for sole height above the calibrated ground plane (metres).
 CLUB_SOLE_GROUND_TOLERANCE_M: float = 0.01
 ELBOW_PIT_WEIGHTS_NEUTRAL: tuple[float, ...] = (0.02,)
