@@ -10,6 +10,30 @@ from src.shared.python.ai.knowledge.pack import KnowledgePack, build_pack
 pytestmark = pytest.mark.unit
 
 
+def _multi_repo_pack(tmp_path: Path) -> KnowledgePack:
+    roots: dict[str, Path] = {}
+    for repo in ("UpstreamDrift", "Tools"):
+        root = tmp_path / repo.lower()
+        docs = root / "docs"
+        docs.mkdir(parents=True)
+        (docs / "topic.md").write_text(
+            f"# {repo} Topic\n\nShared quasar diagnostic wording for {repo}.\n",
+            encoding="utf-8",
+        )
+        roots[repo] = root
+    manifest = PackManifest(
+        id="multi_repo_pack",
+        title="Multi Repo Pack",
+        sources=(
+            SourceSpec("UpstreamDrift", "product", ("docs/**/*.md",)),
+            SourceSpec("Tools", "reference", ("docs/**/*.md",)),
+        ),
+    )
+    pack_path = tmp_path / "multi.sqlite"
+    build_pack(manifest, roots, pack_path)
+    return KnowledgePack.open(pack_path)
+
+
 def _pack(tmp_path: Path) -> KnowledgePack:
     root = tmp_path / "source"
     docs = root / "docs"
@@ -38,6 +62,21 @@ def test_search_preserves_title_weighted_bm25_order(tmp_path: Path) -> None:
         "Quasar Diagnostics",
         "General Reference",
     ]
+
+
+def test_search_returns_empty_for_blank_query(tmp_path: Path) -> None:
+    pack = _pack(tmp_path)
+    assert pack.search("") == []
+    assert pack.search("   \t") == []
+
+
+def test_search_preserves_repository_scope(tmp_path: Path) -> None:
+    results = _multi_repo_pack(tmp_path).search("quasar diagnostic", k=4)
+    assert {passage.repo for passage in results} == {"UpstreamDrift", "Tools"}
+    assert {passage.title for passage in results} == {
+        "UpstreamDrift Topic",
+        "Tools Topic",
+    }
 
 
 def test_search_hides_superseded_and_sanitizes_fts(tmp_path: Path) -> None:
