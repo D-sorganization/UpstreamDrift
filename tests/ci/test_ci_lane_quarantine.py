@@ -1,4 +1,4 @@
-"""Contract tests for CI lane quarantine (RM #2252 / #13568)."""
+"""Contract tests for CI lane quarantine (RM #2252 / UD-CI-030)."""
 
 from __future__ import annotations
 
@@ -10,7 +10,6 @@ import pytest
 
 from scripts.ci.ci_lane_quarantine import (
     adjudicate_pytest_exit,
-    load_ledger,
     validate_ledger,
 )
 
@@ -19,15 +18,37 @@ pytestmark = pytest.mark.unit
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LEDGER = REPO_ROOT / "scripts/config/ci_lane_quarantine.json"
 
-# From main run 39696833816 failed log (2026-10-21).
-SQUAT_NODE = (
-    "tests/unit/lifting/test_opensim_lift_joint_reactions.py"
-    "::test_squat_joint_reactions_computed"
-)
-NATIVE_NODE = (
-    "tests/opensim/test_native_muscle_effort_native.py"
-    "::test_native_constant_interval_matches_fresh_raw_replay"
-)
+SAMPLE_NODE = "tests/unit/example/test_mod.py::test_thing"
+OTHER_NODE = "tests/unit/example/test_mod.py::test_other"
+
+
+def _write_ledger(
+    path: Path,
+    *,
+    expires: str = "2026-10-29",
+    issue: str = "https://github.com/D-sorganization/UpstreamDrift/pull/1",
+    owner: str = "owner",
+    node_ids: tuple[str, ...] = (SAMPLE_NODE,),
+) -> None:
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "ci-lane-quarantine/v1",
+                "issue": issue,
+                "owner": owner,
+                "expires": expires,
+                "lanes": [
+                    {
+                        "workflow": "example.yml",
+                        "job": "example-job",
+                        "reason": "test fixture",
+                        "expected_failure_node_ids": list(node_ids),
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
 
 
 def _junit_with_failures(*node_ids: str) -> str:
@@ -45,19 +66,11 @@ def _junit_with_failures(*node_ids: str) -> str:
     )
 
 
-class TestLedgerContract:
-    def test_committed_ledger_validates(self) -> None:
-        assert validate_ledger(LEDGER) == ()
+class TestNoActiveQuarantine:
+    """UpstreamDrift currently ships no active lane quarantine (#13564 fixed on main)."""
 
-    def test_ledger_links_pr_13568_with_expiry(self) -> None:
-        ledger = load_ledger(LEDGER)
-        assert "13568" in str(ledger["issue"])
-        assert ledger["expires"] == "2026-10-29"
-        lane = ledger["lanes"][0]
-        assert lane["workflow"] == "ci-requires-opensim.yml"
-        assert lane["job"] == "requires-opensim"
-        assert SQUAT_NODE in lane["expected_failure_node_ids"]
-        assert NATIVE_NODE in lane["expected_failure_node_ids"]
+    def test_no_ledger_is_committed(self) -> None:
+        assert not LEDGER.exists()
 
 
 class TestAdjudicatePytestExit:
@@ -71,57 +84,82 @@ class TestAdjudicatePytestExit:
             adjudicate_pytest_exit(
                 pytest_exit_code=0,
                 junit_path=junit,
-                workflow="ci-requires-opensim.yml",
-                job="requires-opensim",
-                ledger_path=LEDGER,
+                workflow="example.yml",
+                job="example-job",
+                ledger_path=tmp_path / "missing-ledger.json",
             )
             == 0
         )
 
-    def test_dual_failure_from_main_log_is_quarantined(self, tmp_path: Path) -> None:
+    def test_missing_ledger_fails_closed(self, tmp_path: Path) -> None:
+        """No committed ledger means no lane is quarantined: pytest's failure stands."""
+        junit = tmp_path / "results.xml"
+        junit.write_text(_junit_with_failures(SAMPLE_NODE), encoding="utf-8")
+        rc = adjudicate_pytest_exit(
+            pytest_exit_code=1,
+            junit_path=junit,
+            workflow="example.yml",
+            job="example-job",
+            ledger_path=tmp_path / "missing-ledger.json",
+        )
+        assert rc == 1
+
+    def test_matching_failure_is_quarantined(self, tmp_path: Path) -> None:
+        ledger_path = tmp_path / "ledger.json"
+        _write_ledger(ledger_path, node_ids=(SAMPLE_NODE, OTHER_NODE))
         junit = tmp_path / "results.xml"
         junit.write_text(
-            _junit_with_failures(SQUAT_NODE, NATIVE_NODE),
-            encoding="utf-8",
+            _junit_with_failures(SAMPLE_NODE, OTHER_NODE), encoding="utf-8"
         )
         rc = adjudicate_pytest_exit(
             pytest_exit_code=1,
             junit_path=junit,
-            workflow="ci-requires-opensim.yml",
-            job="requires-opensim",
-            ledger_path=LEDGER,
+            workflow="example.yml",
+            job="example-job",
+            ledger_path=ledger_path,
             as_of=date(2026, 10, 22),
         )
         assert rc == 0
 
     def test_expired_quarantine_fails_closed(self, tmp_path: Path) -> None:
+        ledger_path = tmp_path / "ledger.json"
+        _write_ledger(ledger_path)
         junit = tmp_path / "results.xml"
-        junit.write_text(_junit_with_failures(SQUAT_NODE), encoding="utf-8")
+        junit.write_text(_junit_with_failures(SAMPLE_NODE), encoding="utf-8")
         rc = adjudicate_pytest_exit(
             pytest_exit_code=1,
             junit_path=junit,
-            workflow="ci-requires-opensim.yml",
-            job="requires-opensim",
-            ledger_path=LEDGER,
+            workflow="example.yml",
+            job="example-job",
+            ledger_path=ledger_path,
             as_of=date(2026, 11, 1),
         )
         assert rc == 1
 
     def test_unexpected_failure_rejects_quarantine(self, tmp_path: Path) -> None:
+        ledger_path = tmp_path / "ledger.json"
+        _write_ledger(ledger_path)
         junit = tmp_path / "results.xml"
         junit.write_text(
-            _junit_with_failures(
-                SQUAT_NODE,
-                "tests/unit/lifting/test_opensim_lift_muscles.py::test_other",
-            ),
-            encoding="utf-8",
+            _junit_with_failures(SAMPLE_NODE, OTHER_NODE), encoding="utf-8"
         )
         rc = adjudicate_pytest_exit(
             pytest_exit_code=1,
             junit_path=junit,
-            workflow="ci-requires-opensim.yml",
-            job="requires-opensim",
-            ledger_path=LEDGER,
+            workflow="example.yml",
+            job="example-job",
+            ledger_path=ledger_path,
             as_of=date(2026, 10, 22),
         )
         assert rc == 1
+
+
+class TestValidateLedger:
+    def test_missing_ledger_reports_error(self, tmp_path: Path) -> None:
+        errors = validate_ledger(tmp_path / "missing-ledger.json")
+        assert errors
+
+    def test_well_formed_ledger_validates(self, tmp_path: Path) -> None:
+        ledger_path = tmp_path / "ledger.json"
+        _write_ledger(ledger_path)
+        assert validate_ledger(ledger_path) == ()
