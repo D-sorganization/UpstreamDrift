@@ -51,6 +51,8 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+Canonical golfer Drake alignment (#13531, #13450; folded into the grip-lane consolidation): actuator count from `resolve_plant_n_actuators`, grip frames `mid_hands`/`club_head`; verify `tests/engines/drake/test_drake_fit_actuator_alignment_13531.py` and grip-resolution tests.
+
 OpenSim musculoskeletal barbell lifts (OSL, Epic #13038; research record `docs/research/lift_models/lift_models.tex`; state as of 2026-10-20):
 
 - OSL-3 #13041 and OSL-4 #13042: all five lifts complete and unqualified; the bench press landed in #13431, #13532 and #13536 (Hicks force from feet plus bench). Open: the 511.6 N bench pelvis residual and a 4437 N support peak (2.5 times the lifter-plus-bar weight) not yet explained.
