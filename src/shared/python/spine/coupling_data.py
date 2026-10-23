@@ -188,6 +188,16 @@ def _citation_text(entry: dict) -> str:
     return "; ".join(parts)
 
 
+def _lookup_entry(law_id: str) -> dict:
+    """Return the JSON entry for ``law_id`` after validating type and existence."""
+    if not isinstance(law_id, str):
+        raise TypeError(f"law_id must be a str, got {type(law_id).__name__}")
+    entries = load_coupling_laws()
+    if law_id not in entries:
+        raise ValueError(f"unknown coupling law {law_id!r}; known: {sorted(entries)}")
+    return entries[law_id]
+
+
 def load_coupling_law(law_id: str, *, require_verified: bool = False) -> CouplingLaw:
     """Build the coupling law for ``law_id`` (issue #12743 public entry point).
 
@@ -202,12 +212,7 @@ def load_coupling_law(law_id: str, *, require_verified: bool = False) -> Couplin
             ``require_verified=True``, a pending law, or an unsupported
             ``kind``/distribution type.
     """
-    if not isinstance(law_id, str):
-        raise TypeError(f"law_id must be a str, got {type(law_id).__name__}")
-    entries = load_coupling_laws()
-    if law_id not in entries:
-        raise ValueError(f"unknown coupling law {law_id!r}; known: {sorted(entries)}")
-    entry = entries[law_id]
+    entry = _lookup_entry(law_id)
     if require_verified and not entry["verified_from_primary"]:
         raise ValueError(
             f"coupling law {law_id!r} is not verified_from_primary; "
@@ -230,12 +235,7 @@ def coupling_law(law_id: str) -> CouplingLaw:
         ValueError: for an unknown id, a pending law (no verified numbers
             shipped) or an unsupported ``kind``/distribution type.
     """
-    if not isinstance(law_id, str):
-        raise TypeError(f"law_id must be a str, got {type(law_id).__name__}")
-    entries = load_coupling_laws()
-    if law_id not in entries:
-        raise ValueError(f"unknown coupling law {law_id!r}; known: {sorted(entries)}")
-    entry = entries[law_id]
+    entry = _lookup_entry(law_id)
     if entry["status"] == "pending":
         raise ValueError(
             f"coupling law {law_id!r} is pending and cannot be built: "
