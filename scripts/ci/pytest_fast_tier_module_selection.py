@@ -69,7 +69,9 @@ def _matches_any(path: str, patterns: Sequence[str]) -> bool:
     return any(_glob_matches(pattern, path) for pattern in patterns)
 
 
-def _tracked_test_modules(repo_root: Path, candidates: Iterable[Path]) -> tuple[str, ...]:
+def _tracked_test_modules(
+    repo_root: Path, candidates: Iterable[Path]
+) -> tuple[str, ...]:
     tracked: list[str] = []
     for candidate in candidates:
         rel = candidate.relative_to(repo_root).as_posix()
