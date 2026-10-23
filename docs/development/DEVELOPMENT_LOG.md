@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13641 · Defer Generated Collation Branch Updates When the Canonical Queue Preflight Cannot Verify Editability
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13641
+- **Branch:** codex/13641-collator-update-preflight
+- **PR:** #13643
+- **Paths:** see #13643
+- **Started:** 2026-10-23
+- **Last verified:** 2026-10-23 (`2dc1348b`; collated from changes/13641-defer-generated-collation-branch-updates.md)
+- **Summary:** Defer generated collation branch updates when the canonical queue preflight cannot verify editability
+- **Next step:** Publish after canonical RM2335 merges; qualify natural consumer execution
+
 ### DL-#13636 · Route OpenSim Classification and Skip Reporting Through the Existing Reversible Public Hosted Policy; Fail Closed on Diff Errors While Preserving Real Engine Docker Validation.
 
 - **State:** in_review
@@ -384,12 +397,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13564
 - **Branch:** merged via #13615
-- **PR:** #13615
+- **PR:** #13615, #13647
 - **Paths:** see #13615
 - **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`50e1409a`; collated from changes/13564-restore-ci-requires-opensim-squat-jr-kin.md)
+- **Last verified:** 2026-10-23 (`3368efe0`; collated from changes/13564-remove-stale-ci-requires-opensim-lane-qu.md)
 - **Summary:** Restore CI Requires OpenSim: squat JR kinematics revision 6 and native muscle-effort allocation.
-- **Next step:** Shipped in PR #13615.
+- **Next step:** Close #13564; the real fix landed in #13615 and has been verified green on main across multiple CI runs.
 
 ### DL-#13572 · Gate Workflow Edits With Actionlint; Fix Cross-Engine Leaderboard Publish Concurrency Expression
 
