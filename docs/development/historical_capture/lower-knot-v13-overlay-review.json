@@ -13,9 +13,9 @@
   "selected_original_png_hashes_verified": true,
   "producer_runtime_parent_audit_brackets_verified": true,
   "dense_audit": {
-    "assessment_path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment.json",
+    "assessment_path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment.json",
     "assessment_sha256": "e4e82f4a09b3e2d75f7894562efbfd15cd7f4dc5a364540da0fdc76495b78de9",
-    "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-variant-fit-v13-audit.json",
+    "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-variant-fit-v13-audit.json",
     "sha256": "1587efb2b62f5e1aae612afdbb0e3d0935bf149f0bea5c080121e4afb77f4cb0",
     "fit_id": "tiger-lower-knot-variant-fit-v13",
     "dense_original_rms_pixels": 28.781548513185022,
