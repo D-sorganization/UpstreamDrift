@@ -15,7 +15,7 @@ PDF/SVG bytes were verified but not independently rendered. This does not approv
 From this isolated layout worktree, choose a new output directory:
 
 ```bash
-OPENBLAS_NUM_THREADS=1 QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy /tmp/shot-pattern-validation-venv-20261009/bin/python -m docs.research.shot_pattern_analysis.phase2.review_followups.render_footer_repair_review /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift /tmp/footer-repair-new-review
+OPENBLAS_NUM_THREADS=1 QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy /tmp/shot-pattern-validation-venv-20261009/bin/python -m docs.research.shot_pattern_analysis.phase2.review_followups.render_footer_repair_review <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift /tmp/footer-repair-new-review
 ```
 
 The executed render harness is preserved byte-for-byte in the evidence bundle. Its later cleanup added only narrow type-checker comments for dynamic instrumentation and a known two-condition tuple; `harness_typing_only_transition.json` records equal Python ASTs and both hashes. Scoped Mypy and Ruff then passed. The original render receipt still identifies the exact executed bytes.

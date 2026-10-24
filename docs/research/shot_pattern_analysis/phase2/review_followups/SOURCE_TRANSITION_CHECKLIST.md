@@ -35,7 +35,7 @@ Before issuing the real source-transition receipt: freeze source; rerun focused 
 From the candidate worktree, save `matched_source_snapshot()` from `src.tools.shot_pattern_analysis.matched_export` with the qualified runtime. Then run the preparer from the main study worktree:
 
 ```sh
-python3 docs/research/shot_pattern_analysis/phase2/review_followups/prepare_source_transition.py --acceptance docs/research/shot_pattern_analysis/phase2/final_acceptance.json --snapshot NEW_CANDIDATE_SNAPSHOT.json --candidate-root /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift --output NEW_PENDING_INVENTORY.json
+python3 docs/research/shot_pattern_analysis/phase2/review_followups/prepare_source_transition.py --acceptance docs/research/shot_pattern_analysis/phase2/final_acceptance.json --snapshot NEW_CANDIDATE_SNAPSHOT.json --candidate-root <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift --output NEW_PENDING_INVENTORY.json
 ```
 
 The preparer checks actual candidate source/native bytes against the snapshot and refuses to overwrite an output. Ruff and scoped Mypy pass. No flights were executed for this inventory review.

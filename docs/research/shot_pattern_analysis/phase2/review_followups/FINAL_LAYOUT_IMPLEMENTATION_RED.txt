@@ -72,7 +72,7 @@ E               assert np.float64(407.0028248587571) >= np.float64(472.543524561
 E                +  where np.float64(407.0028248587571) = Bbox([[407.0028248587571, 149.23888888888905], [428.0028248587571, 158.96111111111128]]).x0
 E                +  and   np.float64(472.54352456199354) = Bbox([[445.54352456199354, 142.98888888888905], [472.54352456199354, 156.87777777777794]]).x1
 
-/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/tests/tools/shot_pattern_analysis/test_academic_plots.py:549: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/tests/tools/shot_pattern_analysis/test_academic_plots.py:549: AssertionError
 _________ test_social_density_phone_preview_geometry_and_typography[2] _________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1811/test_social_density_phone_prev0')
@@ -202,7 +202,7 @@ n_panels = 2
 E                   AssertionError: Tick label '0.00' too small at 1080px preview: height=6.6px < 11.0px
 E                   assert np.float64(6.562500000000043) >= 11.0
 
-/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/tests/tools/shot_pattern_analysis/test_academic_plots.py:673: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/tests/tools/shot_pattern_analysis/test_academic_plots.py:673: AssertionError
 _________ test_social_density_phone_preview_geometry_and_typography[3] _________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1811/test_social_density_phone_prev1')
@@ -332,30 +332,30 @@ n_panels = 3
 E                   AssertionError: Tick label '0.00' too small at 1080px preview: height=6.6px < 11.0px
 E                   assert np.float64(6.562500000000043) >= 11.0
 
-/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/tests/tools/shot_pattern_analysis/test_academic_plots.py:673: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/tests/tools/shot_pattern_analysis/test_academic_plots.py:673: AssertionError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

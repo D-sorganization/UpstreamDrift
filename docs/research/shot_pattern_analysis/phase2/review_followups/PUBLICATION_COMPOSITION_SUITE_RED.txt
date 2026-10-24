@@ -16,17 +16,17 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_require
 >       roots, inventory = _make_roots(tmp_path)
                            ^^^^^^^^^^^^^^^^^^^^^
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:150: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:150: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:110: in _make_roots
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:110: in _make_roots
     inventory = json.loads(INVENTORY.read_text())
                            ^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
     with self.open(mode='r', encoding=encoding, errors=errors) as f:
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = PosixPath('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
+self = PosixPath('<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
 mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
 
     def open(self, mode='r', buffering=-1, encoding=None,
@@ -39,9 +39,9 @@ mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
             encoding = io.text_encoding(encoding)
 >       return io.open(self, mode, buffering, encoding, errors, newline)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       FileNotFoundError: [Errno 2] No such file or directory: '/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
+E       FileNotFoundError: [Errno 2] No such file or directory: '<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
 ____ test_loader_rejects_missing_extra_duplicate_or_mislabelled_plan_cells _____
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_rejects_missing_ex0')
@@ -56,17 +56,17 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_rejects
 >       roots, _ = _make_roots(tmp_path)
                    ^^^^^^^^^^^^^^^^^^^^^
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:186: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:186: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:110: in _make_roots
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:110: in _make_roots
     inventory = json.loads(INVENTORY.read_text())
                            ^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
     with self.open(mode='r', encoding=encoding, errors=errors) as f:
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = PosixPath('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
+self = PosixPath('<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
 mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
 
     def open(self, mode='r', buffering=-1, encoding=None,
@@ -79,9 +79,9 @@ mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
             encoding = io.text_encoding(encoding)
 >       return io.open(self, mode, buffering, encoding, errors, newline)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       FileNotFoundError: [Errno 2] No such file or directory: '/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
+E       FileNotFoundError: [Errno 2] No such file or directory: '<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
 __________ test_loader_rejects_wrong_bounds_even_if_cell_names_match ___________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_rejects_wrong_boun0')
@@ -97,14 +97,14 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_rejects
 >       inventory = json.loads(INVENTORY.read_text())
                                ^^^^^^^^^^^^^^^^^^^^^
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:219: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:219: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
     with self.open(mode='r', encoding=encoding, errors=errors) as f:
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = PosixPath('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
+self = PosixPath('<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
 mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
 
     def open(self, mode='r', buffering=-1, encoding=None,
@@ -117,9 +117,9 @@ mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
             encoding = io.text_encoding(encoding)
 >       return io.open(self, mode, buffering, encoding, errors, newline)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       FileNotFoundError: [Errno 2] No such file or directory: '/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
+E       FileNotFoundError: [Errno 2] No such file or directory: '<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
 _____ test_loader_rejects_unknown_config_fields_and_nonradial_nominal_miss _____
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_rejects_unknown_co0')
@@ -134,14 +134,14 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_rejects
 >       inventory = json.loads(INVENTORY.read_text())
                                ^^^^^^^^^^^^^^^^^^^^^
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:233: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:233: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
     with self.open(mode='r', encoding=encoding, errors=errors) as f:
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = PosixPath('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
+self = PosixPath('<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
 mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
 
     def open(self, mode='r', buffering=-1, encoding=None,
@@ -154,9 +154,9 @@ mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
             encoding = io.text_encoding(encoding)
 >       return io.open(self, mode, buffering, encoding, errors, newline)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       FileNotFoundError: [Errno 2] No such file or directory: '/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
+E       FileNotFoundError: [Errno 2] No such file or directory: '<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
 ______________ test_loader_rejects_nonfinite_nominal_coordinates _______________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_rejects_nonfinite_0')
@@ -169,14 +169,14 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_rejects
 >       inventory = json.loads(INVENTORY.read_text())
                                ^^^^^^^^^^^^^^^^^^^^^
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:273: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:273: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
     with self.open(mode='r', encoding=encoding, errors=errors) as f:
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = PosixPath('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
+self = PosixPath('<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
 mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
 
     def open(self, mode='r', buffering=-1, encoding=None,
@@ -189,9 +189,9 @@ mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
             encoding = io.text_encoding(encoding)
 >       return io.open(self, mode, buffering, encoding, errors, newline)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       FileNotFoundError: [Errno 2] No such file or directory: '/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
+E       FileNotFoundError: [Errno 2] No such file or directory: '<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
 ___ test_loader_requires_one_shared_execution_snapshot_across_protocol_roots ___
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_requires_one_share0')
@@ -206,17 +206,17 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1802/test_loader_require
 >       roots, _ = _make_roots(tmp_path)
                    ^^^^^^^^^^^^^^^^^^^^^
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:296: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:296: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:110: in _make_roots
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_report.py:110: in _make_roots
     inventory = json.loads(INVENTORY.read_text())
                            ^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
     with self.open(mode='r', encoding=encoding, errors=errors) as f:
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = PosixPath('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
+self = PosixPath('<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
 mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
 
     def open(self, mode='r', buffering=-1, encoding=None,
@@ -229,32 +229,32 @@ mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
             encoding = io.text_encoding(encoding)
 >       return io.open(self, mode, buffering, encoding, errors, newline)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       FileNotFoundError: [Errno 2] No such file or directory: '/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
+E       FileNotFoundError: [Errno 2] No such file or directory: '<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'
 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

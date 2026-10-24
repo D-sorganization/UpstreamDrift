@@ -12,7 +12,7 @@ protocol = 'original_primary'
 >       validate_original_matrix_protocol(report, protocol=protocol,
                                           common_targets=_TARGETS if protocol == "original_control" else None)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py:39: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py:39: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
 report = {'cells': [{'cell': 'driver_lean0_curve1_rotation1_shaft_only', 'config': {'club': {'club_id': 'driver', 'club_speed_m...[1.0, 0.5, 0.44704, 0.00635, 0.00635, 0.0, ...], 'correlation': None}, 'n_shots': 10000, 'seed': 20261009, ...}}, ...]}
@@ -67,7 +67,7 @@ protocol = 'original_primary', common_targets = None
             )
 E           ValueError: original_primary cells/configurations differ from the reviewed protocol
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py:124: ValueError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py:124: ValueError
 _ test_original_final_protocol_accepts_only_missing_historical_bounds[original_control] _
 
 protocol = 'original_control'
@@ -80,7 +80,7 @@ protocol = 'original_control'
 >       validate_original_matrix_protocol(report, protocol=protocol,
                                           common_targets=_TARGETS if protocol == "original_control" else None)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py:39: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py:39: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
 report = {'cells': [{'cell': 'driver_lean0_curve1_rotation1_shaft_only', 'config': {'club': {'club_id': 'driver', 'club_speed_m...[1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, ...], 'correlation': None}, 'n_shots': 10000, 'seed': 20261009, ...}}, ...]}
@@ -136,7 +136,7 @@ common_targets = {'driver': 178.94875782337786, 'seven_iron': 127.88194166336235
             )
 E           ValueError: original_control cells/configurations differ from the reviewed protocol
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py:124: ValueError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py:124: ValueError
 _ test_hash_bound_historical_pilot_accepts_defaults_without_rewriting_evidence _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1784/test_hash_bound_historical_pil0')
@@ -156,7 +156,7 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1784/test_hash_bound_his
 >       loaded, provenance = load_reviewed_common_targets(tmp_path)
                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py:70: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py:70: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
 phase2_root = PosixPath('/tmp/pytest-of-dieterolson/pytest-1784/test_hash_bound_historical_pil0')
@@ -219,30 +219,30 @@ phase2_root = PosixPath('/tmp/pytest-of-dieterolson/pytest-1784/test_hash_bound_
 >           raise ValueError("accepted control-pilot plan differs from its factorial protocol")
 E           ValueError: accepted control-pilot plan differs from its factorial protocol
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py:184: ValueError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py:184: ValueError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
