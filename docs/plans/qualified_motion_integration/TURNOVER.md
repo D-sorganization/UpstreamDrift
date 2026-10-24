@@ -133,7 +133,7 @@ retain native/MeshCat review.
 
 Local implementation checkpoint: `7caf4bc6f` on
 `feat/10269-crocoddyl-polynomial-actions`, in
-`C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10269-crocoddyl-actions`.
+`<owner-home>/Repositories/Worktrees/UpstreamDrift-10269-crocoddyl-actions`.
 It is committed but not pushed. Its base remains `722540e707`; the next worker
 must integrate current #10270 (at least `f489853f5`) before publication.
 Nineteen unit tests and six fresh-process native cases pass, including FDDP,

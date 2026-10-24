@@ -142,7 +142,7 @@ Branch `fix/10271-hipcal-provenance`; PR [#10722](https://github.com/D-sorganiza
 
 PR [#10715](https://github.com/D-sorganization/UpstreamDrift/pull/10715) (open; implementation commit `f33b40c9c`); branch
 `bot/issue-9225-golfviz-consolidation` off `origin/main` @ `901b2de5e`;
-worktree `C:/Users/diete/Repositories/UpstreamDrift-worktrees/local-9225`;
+worktree `<owner-home>/Repositories/UpstreamDrift-worktrees/local-9225`;
 governing issue [#9225](https://github.com/D-sorganization/UpstreamDrift/issues/9225)
 (source:assessment P2, DRY PP1); DL-#9225.
 The four per-tree `GolfSwingVisualizer.m` copies (1180–1183 lines each; 323
