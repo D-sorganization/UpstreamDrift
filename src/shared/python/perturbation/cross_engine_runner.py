@@ -48,6 +48,7 @@ from src.shared.python.perturbation.cross_engine_trial_parity import (
 from src.shared.python.perturbation.perturbation_base import (
     CanonicalPerturbationBatch,
 )
+from src.shared.python.perturbation.statistics import safe_cv
 from src.shared.python.perturbation.trial_adapter_contracts import (
     require_plan_execution_identity,
 )
@@ -111,6 +112,7 @@ class ConsistencyMetrics:
     spread: float
     coefficient_of_variation: float
     is_consistent: bool
+    cv_reason: str | None = None
 
 
 @dataclass
@@ -160,7 +162,10 @@ class CrossEngineReport:
             "consistency": {
                 name: {
                     "spread": c.spread,
-                    "cv": c.coefficient_of_variation,
+                    "cv": None
+                    if not np.isfinite(c.coefficient_of_variation)
+                    else c.coefficient_of_variation,
+                    "cv_reason": c.cv_reason,
                     "is_consistent": c.is_consistent,
                     "engine_means": c.engine_means,
                 }
@@ -767,14 +772,15 @@ def compute_consistency(
         spread = float(np.max(means_arr) - np.min(means_arr))
         mean_val = float(np.mean(means_arr))
         std_val = float(np.std(means_arr))
-        cv = std_val / abs(mean_val) if abs(mean_val) > 1e-12 else 0.0
+        cv, cv_reason = safe_cv(mean_val, std_val)
 
         consistency[metric_name] = ConsistencyMetrics(
             metric_name=metric_name,
             engine_means=engine_means,
             spread=spread,
             coefficient_of_variation=cv,
-            is_consistent=cv < threshold,
+            is_consistent=(cv < threshold) if np.isfinite(cv) else False,
+            cv_reason=cv_reason,
         )
 
     return consistency

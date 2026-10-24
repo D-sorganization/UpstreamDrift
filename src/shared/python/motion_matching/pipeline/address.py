@@ -42,8 +42,12 @@ from src.shared.python.motion_matching.closure_fit import (
     closure_residual,
     fit_closure_placement,
 )
+from src.shared.python.motion_matching.pipeline.address_club import (
+    lane_has_club_markers,
+)
 from src.shared.python.motion_matching.pipeline.constants import (
     ADDRESS_BALANCE_WEIGHT,
+    ADDRESS_CLUB_SOLE_WEIGHT,
     ADDRESS_ELBOW_BOUNDS_DEG,
     ADDRESS_RESTART_SPREAD_RAD,
     ADDRESS_RESTARTS,
@@ -235,6 +239,9 @@ def best_address(
         }
         axis_targets = lane.pit_targets_for(list(range(STATIC_FRAMES)), pit_weight)
     bounds, knee_terms = _knee_terms(lane, kin, base, bounds)
+    club_sole_weight = (
+        ADDRESS_CLUB_SOLE_WEIGHT if lane_has_club_markers(lane.labels) else 0.0
+    )
 
     def solve(q0: np.ndarray, extra_prior: Mapping[str, float] | None) -> Any:
         return kin.solve_pose(
@@ -251,6 +258,7 @@ def best_address(
             prior_weights={**lane.prior_weights, **(extra_prior or {})},
             axis_targets=axis_targets,
             balance_weight=balance,
+            club_sole_weight=club_sole_weight,
             **knee_terms,
         )
 
@@ -381,6 +389,9 @@ def fit_closure_from_address(
     """
     bounds = dict(lane.bounds) | wrist_bounds()
     locked = {k: float(np.radians(v)) for k, v in TRAIL_WRIST_ADDRESS_DEG.items()}
+    club_sole_weight = (
+        ADDRESS_CLUB_SOLE_WEIGHT if lane_has_club_markers(lane.labels) else 0.0
+    )
     fit = kin.solve_pose(
         lane.points[0],
         lane.valid[0],
@@ -395,6 +406,7 @@ def fit_closure_from_address(
         prior_weights=lane.prior_weights,
         axis_targets=lane.pit_targets_for(list(range(STATIC_FRAMES)), ELBOW_PIT_WEIGHT),
         closure_rotation_weight=0.0,
+        club_sole_weight=club_sole_weight,
     )
     kin._set(fit.q)
     # LoD: Use delegating property closure_sites
@@ -742,6 +754,8 @@ def calibrated_address_summary(
     lane: Lane,
     labels: tuple[str, ...],
     adapter: Any,
+    *,
+    spec: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Summary of the calibrated address pose, closure, CoM, and angles.
 
@@ -752,11 +766,24 @@ def calibrated_address_summary(
         raise ValueError(
             f"address.q size {len(address.q)} does not match {len(kin.coordinate_order)}"
         )
+    from src.shared.python.motion_matching.pipeline.address_club import (
+        assert_club_sole_at_ground,
+        club_sole_report,
+    )
     from src.shared.python.motion_matching.pipeline.dynamics import (
         com_report,
         segment_rms,
     )
     from src.shared.python.motion_matching.pipeline.reference import marker_errors
+
+    document = spec if spec is not None else getattr(adapter, "specification", None)
+    club_sole = (
+        club_sole_report(kin, address.q, document, lane.ground)
+        if isinstance(document, Mapping)
+        else {"available": False, "reason": "no specification for club sole"}
+    )
+    if club_sole.get("available") and isinstance(document, Mapping):
+        assert_club_sole_at_ground(kin, address.q, document, lane.ground)
 
     return {
         "marker_rms_m": address.marker_rms_m,
@@ -774,6 +801,7 @@ def calibrated_address_summary(
             for name in kin.coordinate_order[adapter.upper_body_coordinates :]
         },
         "posture": posture_summary(kin, address.q),
+        "club_sole": club_sole,
     }
 
 
@@ -785,6 +813,8 @@ def record_calibrated_address(
     lane: Lane,
     labels: tuple[str, ...],
     adapter: Any,
+    *,
+    spec: Mapping[str, Any] | None = None,
 ) -> None:
     """Record the calibrated-address summary plus foot and knee diagnostics.
 
@@ -800,7 +830,7 @@ def record_calibrated_address(
     )
 
     address_report["calibrated"] = calibrated_address_summary(
-        sim, kin, address, lane, labels, adapter
+        sim, kin, address, lane, labels, adapter, spec=spec
     )
     record_foot_progression(address_report, kin, address.q, lane.feet)
     address_knee.record_knee_flexion(address_report, kin, address.q, lane.knees)
