@@ -168,7 +168,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
             # Scoped to the tool cache ONLY (UpstreamDrift#9443).
-            # This used to be `chown -R ... /home/dieterolson/actions-runners`,
+            # This used to be `chown -R ... <owner-home>/actions-runners`,
             # which swept EVERY runner's _work tree on the host -- including
             # the checked-out repositories of jobs running concurrently on
             # other runners. chown bumps each inode's ctime without touching
@@ -347,7 +347,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
             # Scoped to the tool cache ONLY (UpstreamDrift#9443).
-            # This used to be `chown -R ... /home/dieterolson/actions-runners`,
+            # This used to be `chown -R ... <owner-home>/actions-runners`,
             # which swept EVERY runner's _work tree on the host -- including
             # the checked-out repositories of jobs running concurrently on
             # other runners. chown bumps each inode's ctime without touching

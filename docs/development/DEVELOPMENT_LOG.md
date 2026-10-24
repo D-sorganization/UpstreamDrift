@@ -317,8 +317,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** scripts/ci/run_native_engine_lane.py; scripts/ci/run_native_engine_lane.sh; docs/development/matched_swing_program/evidence/nightly/; tests/docs/test_native_lane_freshness.py; tests/scripts/test_run_native_engine_lane.py
 - **Started:** 2026-09-21
 - **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** Added idempotent native-engine lane runner emitting hashed nightly receipts for OpenSim and MyoSuite (`requires_opensim` / `requires_myosuite` pytest markers), freshness gate warning at seven days and failing at thirty days, and ControlTower verification docs without editing `.github/workflows`.
-- **Next step:** Refresh receipts on ControlTower opensim-10003 venv; merge PR closing #10342.
+- **Summary:** Added idempotent native-engine lane runner emitting hashed nightly receipts for OpenSim and MyoSuite (`requires_opensim` / `requires_myosuite` pytest markers), freshness gate warning at seven days and failing at thirty days, and <host> verification docs without editing `.github/workflows`.
+- **Next step:** Refresh receipts on <host> opensim-10003 venv; merge PR closing #10342.
 - **Evidence:** docs/development/matched_swing_program/evidence/nightly/opensim_receipt.json; docs/development/matched_swing_program/evidence/nightly/myosuite_receipt.json; tests/docs/test_native_lane_freshness.py.
 
 ### DL-#9162 · Local Branch Triage
@@ -776,7 +776,7 @@ Earlier Methods V8 and the five-page extraction report remain unchanged.
 
 See [Application Procedure](necromatcher-replay-impact.md) and its linked review/report. Tiger stays
 within original frames 0–190 ([0,191)); Hogan stays [0,750). No historical
-Library mutation, qualified match or new ControlTower delivery is established.
+Library mutation, qualified match or new <host> delivery is established.
 Remaining goal work includes improved historical matching, authored dynamics,
 simulation golf integration and desktop parity. The full goal remains active.
 
@@ -801,7 +801,7 @@ The three-page Native Desktop Supplement 1 and editable LaTeX, screenshots and
 intact synthetic bundle are saved on the local Desktop. See [Procedure](necromatcher-replay-impact.md)
 and [Frozen Review](historical_capture/native-desktop-replay-impact-review.json). Tiger remains [0,191), Hogan [0,750).
 Historical fits, scientific qualification, simulation golf and final overall
-desktop parity acceptance remain open. No new ControlTower delivery or remote
+desktop parity acceptance remain open. No new <host> delivery or remote
 CI-green claim is made. The full goal remains active.
 
 ## Local Research Admission Race Follow-Up — #11493

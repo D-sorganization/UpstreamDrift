@@ -1023,7 +1023,7 @@ study,vandv,provenance,units}`, with subpackages re-exported by name and a
   Tauri Rust/npm package minors. The Linux Tauri lanes also install
   `libdbus-1-dev` because the updated Rust graph contains `libdbus-sys`.
 - **2026-06-18** - Hardened the Tauri Build check after the UI audit recovery
-  PR exposed DeskComputer runner PATH drift: `CARGO_HOME` is now rooted at the
+  PR exposed <host> runner PATH drift: `CARGO_HOME` is now rooted at the
   workspace, the Rust toolchain verifier persists `$CARGO_HOME/bin` into
   `$GITHUB_PATH`, and CI infrastructure tests pin that Cargo remains reachable
   before rustfmt/clippy/check steps run.

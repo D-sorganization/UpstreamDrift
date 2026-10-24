@@ -89,12 +89,12 @@ This ledger records the Phase 2 classification and Epic linkage of all **163 ope
 | #11642 | Epic: Full-Body Muscle-Driven Golf Swing (MyoFullBody Legs, Trunk and Arms)      | `CANONICAL_ACTIVE` | `epic:2-engine-contracts`     | Epic 2 (#11605)             |
 | #11617 | OpenSim Musculoskeletal Golf Swing: Muscle Actions for the Matched Motion        | `CANONICAL_ACTIVE` | `epic:2-engine-contracts`     | Epic 2 (#11605)             |
 | #11614 | [SIP P-9] Same-Input Parity Calculation Reference (LaTeX) and Design-Manual C... | `CANONICAL_ACTIVE` | `epic:2-engine-contracts`     | Epic 2 (#11605)             |
-| #11613 | [SIP P-8] [MATLAB R2025b host: DeskComputer/ControlTower] Simscape Same-Input... | `CANONICAL_ACTIVE` | `epic:2-engine-contracts`     | Epic 2 (#11605)             |
+| #11613 | [SIP P-8] [MATLAB R2025b host: <host>/<host>] Simscape Same-Input... | `CANONICAL_ACTIVE` | `epic:2-engine-contracts`     | Epic 2 (#11605)             |
 | #11609 | [SIP P-4] Drake Same-Input Replay of the MuJoCo Torque Bundles (Driver and 7-... | `CANONICAL_ACTIVE` | `epic:2-engine-contracts`     | Epic 2 (#11605)             |
 | #11608 | [SIP P-3] Pinocchio Same-Input Replay of the MuJoCo Torque Bundles (Driver an... | `CANONICAL_ACTIVE` | `epic:2-engine-contracts`     | Epic 2 (#11605)             |
 | #11605 | [EPIC] Same-Input Cross-Engine Dynamics Parity: MuJoCo Torque Profiles Reprod... | `MASTER_EPIC`      | `epic:2-engine-contracts`     | EPIC-2 Master Epic (#11605) |
 | #11570 | One golfer model for all engines: consume the spec-exported URDF everywhere; ... | `CANONICAL_ACTIVE` | `epic:2-engine-contracts`     | Epic 2 (#11605)             |
-| #11569 | [MATLAB R2025b host: DeskComputer/ControlTower] Simscape parity: inverse dyna... | `CANONICAL_ACTIVE` | `epic:2-engine-contracts`     | Epic 2 (#11605)             |
+| #11569 | [MATLAB R2025b host: <host>/<host>] Simscape parity: inverse dyna... | `CANONICAL_ACTIVE` | `epic:2-engine-contracts`     | Epic 2 (#11605)             |
 | #11546 | [MOSAIC-14] Vectorised multi-trial batching over trials (block-arrow Schur, t... | `CANONICAL_ACTIVE` | `epic:1-scientific-integrity` | Epic 1 (#9700)              |
 | #11545 | [MOSAIC-13] Remediate DIME defects (list in reference §12); retire or re-scop... | `CANONICAL_ACTIVE` | `epic:1-scientific-integrity` | Epic 1 (#9700)              |
 | #11544 | [MOSAIC-12] Humanoid/manipulation transfer: known-payload anchor, reference-p... | `CANONICAL_ACTIVE` | `epic:1-scientific-integrity` | Epic 1 (#9700)              |
