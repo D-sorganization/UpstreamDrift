@@ -1,4 +1,4 @@
-{"schema_version": 2, "tools_pin": "96a1684a234471b90bc9a6e813b542bed8686d1b", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
+{"schema_version": 2, "tools_pin": "37a7477e45ff3169893a3993e0ce11965d45cd2a", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
 {"path": "README.md", "classification": "tools-only", "package": "README.md", "spelling_only": false}
 {"path": "README_PACKAGE.md", "classification": "ud-only", "package": "README_PACKAGE.md", "spelling_only": false}
 {"path": "__init__.py", "classification": "diverged", "package": "__init__.py", "spelling_only": false}
@@ -68,7 +68,7 @@
 {"path": "ai/gui/assistant/streaming.py", "classification": "ud-only", "package": "ai", "spelling_only": false}
 {"path": "ai/gui/assistant/transcript.py", "classification": "ud-only", "package": "ai", "spelling_only": false}
 {"path": "ai/gui/assistant_panel.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/gui/assistant_widgets.py", "classification": "diverged", "package": "ai", "spelling_only": true}
+{"path": "ai/gui/assistant_widgets.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/gui/chat_export.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/gui/history_sidebar.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/gui/session_manager.py", "classification": "identical", "package": "ai", "spelling_only": false}
@@ -3337,6 +3337,7 @@
 {"path": "ui/info_button.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/loading_button.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/overlay.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
+{"path": "ui/owned_timer.py", "classification": "tools-only", "package": "ui", "spelling_only": false}
 {"path": "ui/pane_layout.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/preferences_dialog.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/provenance_value.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
