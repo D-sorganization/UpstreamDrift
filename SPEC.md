@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13788 | Reconcile neural motion matching and Simscape documentation with diagnostic receipts |
 | 2026-10-24 | #13756 | Private path leak ratchet, denylist patterns, and mechanical owner-home redaction consolidation. |
 | 2026-10-24 | #13769 | Add Cursor Cloud environment.json fleet bootstrap via Repository_Management scripts/cursor/bootstrap.sh. |
 | 2026-10-24 | #13751 | R11: the R6 chain shaft runs in Pinocchio (spec spring and damper torque before constraintDynamics) and passes the same static, modal, topology and same-input parity gate; Pinocchio joins CHAIN_ENGINES, only Simscape still refuses a chain |

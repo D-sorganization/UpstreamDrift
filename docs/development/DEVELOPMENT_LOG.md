@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13778 · Reconcile Neural Motion Matching and Simscape Documentation With Diagnostic Receipts
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13778
+- **Branch:** staff/issue-remediator-13778-ebd00a
+- **PR:** #13788
+- **Paths:** see #13788
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`4da07ebf`; collated from changes/13778-reconcile-neural-motion-matching-and-sim.md)
+- **Summary:** Reconcile neural motion matching and Simscape documentation with diagnostic receipts
+- **Next step:** Review the receipt-backed prose and merge PR
+
 ### DL-#13720 · Route Legacy Chat UI Builder Imports to the Pinned Tools Module With Shared Module Identity.
 
 - **State:** in_review
