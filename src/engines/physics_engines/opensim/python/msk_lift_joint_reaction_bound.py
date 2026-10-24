@@ -27,6 +27,7 @@ from src.engines.physics_engines.opensim.python.spine.joint_reactions import (
 from src.shared.python.contracts import require
 from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.engine_core.opensim_runtime import import_opensim
+from src.shared.python.lifting.pack_audit.names import LIFTS
 
 _UPPER_BODY_NAMES: tuple[str, ...] = (
     "torso",
@@ -134,17 +135,21 @@ def _solve_default_pose_reaction(
     return comp, crossing_force, len(crossing_muscles)
 
 
-def build_real_squat_bound_record(
+def build_real_lift_bound_record(
     frame_idx: int,
     time_s: float,
     qdd_norm: float,
     w_above: float,
     c_pelvis: float,
     c_torso: float,
-    crossing_force: float,
-    crossing_count: int,
+    crossing: tuple[float, int],
+    lift: str = "squat",
 ) -> dict[str, Any]:
-    """Format evaluation of the analytic bound on a dynamic squat frame."""
+    """Format evaluation of the analytic bound on a dynamic lift frame.
+
+    ``crossing`` is (summed force of the muscles crossing L5/S1 in N, their count).
+    """
+    crossing_force, crossing_count = crossing
     lower_ok = bool(c_pelvis >= w_above - 1e-4)
     upper_ok = bool(c_pelvis <= w_above + crossing_force + 1e-4)
     return {
@@ -160,25 +165,49 @@ def build_real_squat_bound_record(
         "upper_bound_satisfied": upper_ok,
         "passed": lower_ok and upper_ok,
         "note": (
-            "Evaluated (pelvis-frame compression) on the solved squat frame with "
+            f"Evaluated (pelvis-frame compression) on the solved {lift} frame with "
             "the smallest generalized acceleration norm; the static bound ignores "
             "that frame's acceleration and the ideal lumbar actuator."
         ),
     }
 
 
+def build_real_squat_bound_record(
+    frame_idx: int,
+    time_s: float,
+    qdd_norm: float,
+    w_above: float,
+    c_pelvis: float,
+    c_torso: float,
+    crossing_force: float,
+    crossing_count: int,
+) -> dict[str, Any]:
+    """Backward-compatible alias for squat bound record."""
+    return build_real_lift_bound_record(
+        frame_idx,
+        time_s,
+        qdd_norm,
+        w_above,
+        c_pelvis,
+        c_torso,
+        (crossing_force, crossing_count),
+        lift="squat",
+    )
+
+
 def static_hold_analytic_bound(
     lift: str = "squat",
     build_model: Any | None = None,
+    real_lift_frame_info: dict[str, Any] | None = None,
     real_squat_frame_info: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Verify static-hold analytic bound on default pose and dynamic squat frame."""
-    require(lift == "squat", f"analytic bound implemented for 'squat', got {lift!r}")
+    """Verify static-hold analytic bound on default pose and dynamic lift frame."""
+    require(lift in LIFTS, f"unknown lift {lift!r}; choose from {list(LIFTS)}")
     osim = import_opensim()
     if build_model is not None:
         model = osim.Model(build_model)
     else:
-        _, build, _, _ = _run_lift_ik_id("squat", stride=5)
+        _, build, _, _ = _run_lift_ik_id(lift, stride=5)
         model = osim.Model(build.model)
 
     m_above = mass_above_l5s1(model)
@@ -207,18 +236,24 @@ def static_hold_analytic_bound(
         ),
     }
 
+    frame_info = (
+        real_lift_frame_info
+        if real_lift_frame_info is not None
+        else real_squat_frame_info
+    )
     real_rec: dict[str, Any] = (
-        real_squat_frame_info
-        if real_squat_frame_info is not None
+        frame_info
+        if frame_info is not None
         else {
             "passed": None,
-            "reason": "not evaluated: no solved squat frame was supplied",
+            "reason": f"not evaluated: no solved {lift} frame was supplied",
         }
     )
 
+    frame_key = f"{lift}_min_acceleration_frame"
     return {
         "frame_sign_self_consistency_at_default_pose": default_rec,
-        "squat_min_acceleration_frame": real_rec,
+        frame_key: real_rec,
         "passed": passed_def,
         "m_above_kg": round(float(m_above), 4),
         "w_above_n": round(float(w_above), 2),

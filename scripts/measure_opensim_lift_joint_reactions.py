@@ -83,16 +83,33 @@ def _shade_phase(ax: plt.Axes, t_start: float, t_end: float, label: str) -> None
     )
 
 
+def _lift_title(lift: str) -> str:
+    if lift == "squat":
+        return "Back Squat"
+    if lift == "clean_and_jerk":
+        return "Clean and Jerk"
+    return lift.replace("_", " ").title()
+
+
 def _plot_l5s1_loads(solution: dict[str, Any], out_path: Path) -> Path:
     ts = solution["timeseries"]
     times = np.asarray(ts["time_s"])
     t_start, t_end = float(times[0]), float(times[-1])
     comp_osim = np.asarray(ts["l5s1_comp_n"])
     shear_osim = np.asarray(ts["l5s1_ap_shear_n"])
+    lift = solution.get("lift", "squat")
+    title_lift = _lift_title(lift)
 
     cc = solution.get("cross_check_movement_optimizer") or {}
     comp_opt = np.asarray(cc.get("compression_curve_n", []))
     shear_opt = np.asarray(cc.get("adr0055_ap_shear_curve_n", []))
+
+    phases = solution.get("phases") or {}
+    phase_label = (
+        list(phases.keys())[0]
+        if phases
+        else f"engine window ({t_start:.2f}-{t_end:.2f} s)"
+    )
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8.5, 6.0), dpi=130, sharex=True)
 
@@ -103,7 +120,8 @@ def _plot_l5s1_loads(solution: dict[str, Any], out_path: Path) -> Path:
         color="#1E293B",
         lw=2.2,
     )
-    if len(comp_opt) == len(times):
+    has_mo = len(comp_opt) == len(times)
+    if has_mo:
         ax1.plot(
             times,
             comp_opt,
@@ -113,14 +131,15 @@ def _plot_l5s1_loads(solution: dict[str, Any], out_path: Path) -> Path:
             ls="--",
         )
     ax1.set_ylabel("Compression (N)", fontsize=10)
+    title_suffix = " vs Movement Optimizer" if has_mo else ""
     ax1.set_title(
-        "Back Squat: L5/S1 Joint Reaction vs Movement Optimizer",
+        f"{title_lift}: L5/S1 Joint Reaction{title_suffix}",
         fontsize=11,
         fontweight="bold",
     )
     ax1.grid(True, ls=":", alpha=0.6)
     ax1.legend(loc="lower right", framealpha=0.9, fontsize=9)
-    _shade_phase(ax1, t_start, t_end, "bottom (0.00-0.20 s)")
+    _shade_phase(ax1, t_start, t_end, phase_label)
 
     ax2.plot(
         times,
@@ -129,7 +148,7 @@ def _plot_l5s1_loads(solution: dict[str, Any], out_path: Path) -> Path:
         color="#DC2626",
         lw=2.2,
     )
-    if len(shear_opt) == len(times):
+    if has_mo:
         ax2.plot(
             times,
             shear_opt,
@@ -142,7 +161,7 @@ def _plot_l5s1_loads(solution: dict[str, Any], out_path: Path) -> Path:
     ax2.set_ylabel("AP Shear Force (N)", fontsize=10)
     ax2.grid(True, ls=":", alpha=0.6)
     ax2.legend(loc="lower left", framealpha=0.9, fontsize=9)
-    _shade_phase(ax2, t_start, t_end, "bottom (0.00-0.20 s)")
+    _shade_phase(ax2, t_start, t_end, phase_label)
 
     plt.tight_layout()
     plt.savefig(out_path)
@@ -157,6 +176,15 @@ def _plot_knee_and_shoulder(solution: dict[str, Any], out_path: Path) -> Path:
     tf_r, tf_l = np.asarray(ts["knee_tf_r_n"]), np.asarray(ts["knee_tf_l_n"])
     pf_r, pf_l = np.asarray(ts["knee_pf_r_n"]), np.asarray(ts["knee_pf_l_n"])
     gh_r, gh_l = np.asarray(ts["shoulder_gh_r_n"]), np.asarray(ts["shoulder_gh_l_n"])
+    lift = solution.get("lift", "squat")
+    title_lift = _lift_title(lift)
+
+    phases = solution.get("phases") or {}
+    phase_label = (
+        list(phases.keys())[0]
+        if phases
+        else f"engine window ({t_start:.2f}-{t_end:.2f} s)"
+    )
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8.5, 6.0), dpi=130, sharex=True)
 
@@ -192,13 +220,13 @@ def _plot_knee_and_shoulder(solution: dict[str, Any], out_path: Path) -> Path:
     )
     ax1.set_ylabel("Contact Resultant (N)", fontsize=10)
     ax1.set_title(
-        "Back Squat: Knee and Shoulder Joint Reactions (3D Spatial Resultant)",
+        f"{title_lift}: Knee and Shoulder Joint Reactions (3D Spatial Resultant)",
         fontsize=11,
         fontweight="bold",
     )
     ax1.grid(True, ls=":", alpha=0.6)
     ax1.legend(loc="upper right", framealpha=0.9, fontsize=8.5)
-    _shade_phase(ax1, t_start, t_end, "bottom (0.00-0.20 s)")
+    _shade_phase(ax1, t_start, t_end, phase_label)
 
     ax2.plot(
         times,
@@ -219,7 +247,7 @@ def _plot_knee_and_shoulder(solution: dict[str, Any], out_path: Path) -> Path:
     ax2.set_ylabel("Shoulder Reaction (N)", fontsize=10)
     ax2.grid(True, ls=":", alpha=0.6)
     ax2.legend(loc="upper right", framealpha=0.9, fontsize=8.5)
-    _shade_phase(ax2, t_start, t_end, "bottom (0.00-0.20 s)")
+    _shade_phase(ax2, t_start, t_end, phase_label)
 
     plt.tight_layout()
     plt.savefig(out_path)
@@ -245,14 +273,20 @@ def _fmt_status(val: Any) -> str:
     return "unavailable"
 
 
-def _render_header_section(squat: dict[str, Any], commit: str) -> str:
+def _render_header_section(receipts: dict[str, Any], commit: str) -> str:
+    complete_lifts = [
+        k
+        for k in ("squat", "deadlift", "snatch", "clean_and_jerk")
+        if isinstance(receipts.get(k), dict) and receipts[k].get("status") == "complete"
+    ]
+    squat = receipts.get("squat") or {}
     w_start = squat.get("window_start_s")
     w_end = squat.get("window_end_s")
     ts = squat.get("timeseries")
     n_frames = len(ts["time_s"]) if isinstance(ts, dict) and "time_s" in ts else None
     if w_start is not None and w_end is not None:
         f_str = f"{n_frames} frames" if n_frames is not None else "unavailable"
-        window_str = f"{_fmt_val(w_start)} s to {_fmt_val(w_end)} s ({f_str}, bottom inflection phase)"
+        window_str = f"{_fmt_val(w_start)} s to {_fmt_val(w_end)} s ({f_str})"
     else:
         window_str = "unavailable"
 
@@ -270,6 +304,12 @@ def _render_header_section(squat: dict[str, Any], commit: str) -> str:
     )
     qual_cls = squat.get("classification") or "unavailable"
 
+    completed_str = (
+        ", ".join(_lift_title(k) for k in complete_lifts)
+        if complete_lifts
+        else "unavailable"
+    )
+
     return f"""# OpenSim Barbell Lift Joint Reaction Load Receipts (OSL-5, #13043)
 
 `receipts.json` and evidence plots are generated by `scripts/measure_opensim_lift_joint_reactions.py`
@@ -283,28 +323,31 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 2. **Knee Tibiofemoral Joint**: Resultant contact load across `walker_knee_r` and `walker_knee_l`.
 3. **Knee Patellofemoral Joint**: Articulated patella joint contact load (`patellofemoral_r/l`).
 4. **Shoulder Glenohumeral Joint**: Evaluated at articulated `acromial_r/l` CustomJoints (3 rotational DOFs).
-5. **Movement Optimizer Cross-Check**: Compares L5/S1 loads against `movement_optimizer.spine_loads` in aligned torso frame.
-6. **Static-Hold Analytic Bound**: Frame/sign self-consistency at default pose and evaluation on dynamic squat frame.
+5. **Movement Optimizer Cross-Check**: Compares L5/S1 loads against `movement_optimizer.spine_loads` in aligned torso frame for the squat and deadlift.
+6. **Static-Hold Analytic Bound**: Frame/sign self-consistency at default pose and evaluation on dynamic lift frames.
 
-## Evidence Summary (Back Squat Slice)
+## Evidence Summary
 
 - **Source Commit**: `{commit}`
 - **Lifter Mass**: {lifter_str}
 - **Barbell Mass**: {bar_str}
-- **Window**: {window_str}
-- **Inherited OSL-4 Qualification**: {qual_cls} (mean reserve share: {_fmt_val(squat.get("mean_reserve_share"), ".4f")}, peak reserve share: {_fmt_val(squat.get("peak_reserve_share"), ".4f")}, threshold: {_fmt_val(squat.get("reserve_share_threshold"), ".2f")})"""
+- **Motion Window**: {window_str}
+- **Completed Lifts ({len(complete_lifts)}/5)**: {completed_str}
+- **Unavailable Lifts (1/5)**: Bench Press (supine posture limitation)
+- **Inherited OSL-4 Qualification**: {qual_cls}"""
 
 
-def _render_loads_table(squat: dict[str, Any]) -> str:
-    l5s1 = squat.get("l5_s1") or {}
-    tf = squat.get("knee_tibiofemoral") or {}
-    pf = squat.get("knee_patellofemoral") or {}
-    gh = squat.get("shoulder_glenohumeral") or {}
+def _render_single_lift_table(lift: str, sol: dict[str, Any]) -> str:
+    title = _lift_title(lift)
+    l5s1 = sol.get("l5_s1") or {}
+    tf = sol.get("knee_tibiofemoral") or {}
+    pf = sol.get("knee_patellofemoral") or {}
+    gh = sol.get("shoulder_glenohumeral") or {}
     qual = l5s1.get("qualification") or "unavailable"
-    inh_qual = squat.get("classification") or "unavailable"
+    inh_qual = sol.get("classification") or "unavailable"
 
     lines = [
-        "### Measured Reaction Loads\n",
+        f"#### {title}\n",
         "| Joint | Metric | Qualification | Mean (N) | Peak (N) | Mean (BW) | Peak (BW) |",
         "|---|---|---|---|---|---|---|",
         f"| **L5/S1 Axial Compression** | +F_y (pelvis frame) | {qual} | {_fmt_val(l5s1.get('compression_mean_n'))} | {_fmt_val(l5s1.get('compression_peak_n'))} | {_fmt_val(l5s1.get('compression_mean_bw'))} | {_fmt_val(l5s1.get('compression_peak_bw'))} |",
@@ -321,10 +364,30 @@ def _render_loads_table(squat: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _render_analytic_bound_section(squat: dict[str, Any]) -> str:
-    bound = squat.get("static_hold_analytic_bound") or {}
+def _render_loads_table(receipts: dict[str, Any]) -> str:
+    if "l5_s1" in receipts:
+        return "### Measured Reaction Loads\n\n" + _render_single_lift_table(
+            receipts.get("lift", "squat"), receipts
+        )
+    sub_tables = []
+    for lift in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+        sol = receipts.get(lift)
+        if isinstance(sol, dict):
+            sub_tables.append(_render_single_lift_table(lift, sol))
+    if not sub_tables:
+        sub_tables.append(_render_single_lift_table("squat", {}))
+    return "### Measured Reaction Loads\n\n" + "\n\n".join(sub_tables)
+
+
+def _render_single_bound(lift: str, sol: dict[str, Any]) -> str:
+    title = _lift_title(lift)
+    bound = sol.get("static_hold_analytic_bound") or {}
     def_pose = bound.get("frame_sign_self_consistency_at_default_pose") or {}
-    min_acc = bound.get("squat_min_acceleration_frame") or {}
+    min_acc = (
+        bound.get(f"{lift}_min_acceleration_frame")
+        or bound.get("squat_min_acceleration_frame")
+        or {}
+    )
 
     diff_str = (
         _fmt_val(def_pose.get("absolute_difference_n"), ".4e")
@@ -332,69 +395,105 @@ def _render_analytic_bound_section(squat: dict[str, Any]) -> str:
         else "unavailable"
     )
 
-    return f"""### Static-Hold Analytic Bound & Dynamic Squat Frame Check
-
-#### Default Pose Self-Consistency (Frame and Sign)
-- **Upper Mass Above L5/S1**: {_fmt_val(def_pose.get("m_above_kg"), ".4f")} kg (Torso, Arms, Barbell)
-- **Gravitational Weight Above ($W_{{\\text{{above}}}}$)**: {_fmt_val(def_pose.get("w_above_n"))} N
-- **Measured L5/S1 Compression**: {_fmt_val(def_pose.get("l5_s1_compression_n"))} N
-- **Absolute Difference**: {diff_str} N
+    return f"""#### {title} Analytic Bound
+- **Default Pose Upper Mass ($m_{{\\text{{above}}}}$)**: {_fmt_val(def_pose.get("m_above_kg"), ".4f")} kg, Weight = {_fmt_val(def_pose.get("w_above_n"))} N, Measured Compression = {_fmt_val(def_pose.get("l5_s1_compression_n"))} N (Diff: {diff_str} N)
 - **Muscles Crossing L5/S1**: {_fmt_val(def_pose.get("muscles_crossing_l5s1_count"), "d")} (sum crossing forces = {_fmt_val(def_pose.get("sum_muscle_forces_crossing_l5s1_n"), ".4f")} N)
-- **Verification Status**: **{_fmt_status(def_pose.get("passed"))}** ({def_pose.get("note") or "unavailable"})
-
-#### Dynamic Squat Minimal-Acceleration Frame Evaluation
-- **Frame Index**: {_fmt_val(min_acc.get("frame_index"), "d")} (time = {_fmt_val(min_acc.get("time_s"), ".4f")} s)
-- **Generalized Acceleration Norm ($\\|\\ddot{{q}}\\|$)**: {_fmt_val(min_acc.get("qdd_norm_rad_s2"), ".4f")} rad/s²
-- **Upper Weight Above ($W_{{\\text{{above}}}}$)**: {_fmt_val(min_acc.get("w_above_n"))} N
-- **Measured Pelvis Compression**: {_fmt_val(min_acc.get("l5_s1_compression_pelvis_n"))} N
-- **Measured Torso Compression**: {_fmt_val(min_acc.get("l5_s1_compression_torso_n"))} N
-- **Lower Bound ($W_{{\\text{{above}}}} \\le \\text{{Compression}}$)**: {_fmt_status(min_acc.get("lower_bound_satisfied"))}
-- **Upper Bound ($\\text{{Compression}} \\le W_{{\\text{{above}}}} + \\sum F_m$)**: {_fmt_status(min_acc.get("upper_bound_satisfied"))}
-- **Evaluation Status**: **{_fmt_status(min_acc.get("passed"))}** ({min_acc.get("note") or "unavailable"})"""
+- **Default Pose Status**: **{_fmt_status(def_pose.get("passed"))}** ({def_pose.get("note") or "unavailable"})
+- **Dynamic Minimal-Acceleration Frame**: Frame {_fmt_val(min_acc.get("frame_index"), "d")} ($t = {_fmt_val(min_acc.get("time_s"), ".4f")}$ s, $\\|\\ddot{{q}}\\| = {_fmt_val(min_acc.get("qdd_norm_rad_s2"), ".4f")}$ rad/s²)
+- **Dynamic Weight Above ($W_{{\\text{{above}}}}$)**: {_fmt_val(min_acc.get("w_above_n"))} N, Pelvis Compression = {_fmt_val(min_acc.get("l5_s1_compression_pelvis_n"))} N, Torso Compression = {_fmt_val(min_acc.get("l5_s1_compression_torso_n"))} N
+- **Dynamic Bound Status**: **{_fmt_status(min_acc.get("passed"))}** ({min_acc.get("note") or "unavailable"})"""
 
 
-def _render_mo_section(squat: dict[str, Any]) -> str:
-    cc = squat.get("cross_check_movement_optimizer") or {}
-    return f"""### Movement Optimizer L5/S1 Cross-Check
+def _render_analytic_bound_section(receipts: dict[str, Any]) -> str:
+    if "static_hold_analytic_bound" in receipts:
+        return (
+            "### Static-Hold Analytic Bound & Dynamic Frame Checks\n\n"
+            + _render_single_bound(receipts.get("lift", "squat"), receipts)
+        )
+    sub = []
+    for lift in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+        sol = receipts.get(lift)
+        if isinstance(sol, dict):
+            sub.append(_render_single_bound(lift, sol))
+    if not sub:
+        sub.append(_render_single_bound("squat", {}))
+    return "### Static-Hold Analytic Bound & Dynamic Frame Checks\n\n" + "\n\n".join(
+        sub
+    )
 
+
+def _render_single_mo(lift: str, sol: dict[str, Any]) -> str:
+    title = _lift_title(lift)
+    cc = sol.get("cross_check_movement_optimizer") or {}
+    return f"""#### {title} Movement Optimizer Cross-Check
 - **Model**: {cc.get("model") or "unavailable"}
 - **Upper Body Mass ($m_{{\\text{{above}}}}$)**: OpenSim = {_fmt_val(cc.get("opensim_m_above_kg"), ".4f")} kg, Movement Optimizer default = {_fmt_val(cc.get("movement_optimizer_m_above_default_kg"), ".4f")} kg, Movement Optimizer aligned = {_fmt_val(cc.get("movement_optimizer_m_above_aligned_kg"), ".4f")} kg
 - **Angle Definitions**:
   - OpenSim: {cc.get("opensim_angle_definition") or "unavailable"}
   - Movement Optimizer: {cc.get("movement_optimizer_angle_definition") or "unavailable"}
-- **Default Movement Optimizer**: Compression Mean = {_fmt_val(cc.get("compression_mean_n"))} N, Peak = {_fmt_val(cc.get("compression_peak_n"))} N; ADR-0055 AP Shear Mean = {_fmt_val(cc.get("adr0055_ap_shear_mean_n"))} N, Peak = {_fmt_val(cc.get("adr0055_ap_shear_peak_n"))} N
 - **Aligned Movement Optimizer (Torso Frame)**: Compression Mean = {_fmt_val(cc.get("aligned_compression_mean_n"))} N, Peak = {_fmt_val(cc.get("aligned_compression_peak_n"))} N; ADR-0055 AP Shear Mean = {_fmt_val(cc.get("aligned_adr0055_ap_shear_mean_n"))} N, Peak = {_fmt_val(cc.get("aligned_adr0055_ap_shear_peak_n"))} N
-- **Pre-Evaluation Tolerance**: {_fmt_val(cc.get("pre_evaluation_tolerance_n"))} N
+- **Pre-Evaluation Tolerance**: {_fmt_val(cc.get("pre_evaluation_tolerance_n"))} N (Tolerance Satisfied: {_fmt_status(cc.get("tolerance_satisfied"))})
 - **Residual Differences (OpenSim Torso vs Aligned Movement Optimizer)**:
   - Compression Mean Residual: {_fmt_val(cc.get("aligned_residual_compression_mean_n"))} N (Peak: {_fmt_val(cc.get("aligned_residual_compression_max_n"))} N)
   - AP Shear Mean Residual: {_fmt_val(cc.get("aligned_residual_ap_shear_mean_n"))} N (Peak: {_fmt_val(cc.get("aligned_residual_ap_shear_max_n"))} N)
 - **Model Difference Analysis**: {cc.get("model_difference_explanation") or "unavailable"}"""
 
 
+def _render_mo_section(receipts: dict[str, Any]) -> str:
+    if "cross_check_movement_optimizer" in receipts:
+        return "### Movement Optimizer L5/S1 Cross-Check\n\n" + _render_single_mo(
+            receipts.get("lift", "squat"), receipts
+        )
+    sub = []
+    for lift in ("squat", "deadlift"):
+        sol = receipts.get(lift)
+        if isinstance(sol, dict):
+            sub.append(_render_single_mo(lift, sol))
+    if not sub:
+        sub.append(_render_single_mo("squat", {}))
+    return "### Movement Optimizer L5/S1 Cross-Check\n\n" + "\n\n".join(sub)
+
+
 def _render_other_lifts_section(receipts: dict[str, Any]) -> str:
-    other_reasons = set()
-    for lk in ("deadlift", "bench_press", "snatch", "clean_and_jerk"):
-        rec = receipts.get(lk)
-        if isinstance(rec, dict) and rec.get("reason"):
-            other_reasons.add(rec["reason"])
-    other_reason_str = (
-        "; ".join(sorted(other_reasons)) if other_reasons else "unavailable"
-    )
+    unavail = {}
+    for lk, sol in receipts.items():
+        if isinstance(sol, dict) and sol.get("status") == "unavailable":
+            unavail[lk] = sol.get("reason", "unavailable")
+    if not unavail:
+        bench = receipts.get("bench_press")
+        reason = (
+            bench.get("reason", "unavailable")
+            if isinstance(bench, dict)
+            else "unavailable"
+        )
+        unavail["bench_press"] = reason
 
-    return f"""### Status of Other Four Lifts
-
-The other four lifts (`deadlift`, `bench_press`, `snatch`, `clean_and_jerk`) are reported as `unavailable`
-with reason: `{other_reason_str}`. Values are explicitly `null` (never synthetic zeros)."""
+    lines = ["### Status of Unavailable Lifts\n"]
+    for lk, r in unavail.items():
+        title = _lift_title(lk)
+        lines.append(f"- **{title} (`{lk}`)**: `unavailable` — reason: `{r}`")
+    lines.append("\nValues are explicitly `null` (never synthetic zeros).")
+    return "\n".join(lines)
 
 
 def _render_footer_section() -> str:
     return """## Evidence Figures
 
-### L5/S1 Joint Reaction Loads vs Movement Optimizer
-![L5/S1 Joint Reaction Loads](squat_l5s1_joint_reaction_loads.png)
+### Back Squat
+- **L5/S1 Reactions vs Movement Optimizer**: ![Squat L5/S1](squat_l5s1_joint_reaction_loads.png)
+- **Knee & Shoulder Reactions**: ![Squat Knee and Shoulder](squat_knee_and_shoulder_joint_reactions.png)
 
-### Knee and Shoulder Joint Reactions
-![Knee and Shoulder Joint Reactions](squat_knee_and_shoulder_joint_reactions.png)
+### Deadlift
+- **L5/S1 Reactions vs Movement Optimizer**: ![Deadlift L5/S1](deadlift_l5s1_joint_reaction_loads.png)
+- **Knee & Shoulder Reactions**: ![Deadlift Knee and Shoulder](deadlift_knee_and_shoulder_joint_reactions.png)
+
+### Snatch
+- **L5/S1 Reactions**: ![Snatch L5/S1](snatch_l5s1_joint_reaction_loads.png)
+- **Knee & Shoulder Reactions**: ![Snatch Knee and Shoulder](snatch_knee_and_shoulder_joint_reactions.png)
+
+### Clean and Jerk
+- **L5/S1 Reactions**: ![Clean and Jerk L5/S1](clean_and_jerk_l5s1_joint_reaction_loads.png)
+- **Knee & Shoulder Reactions**: ![Clean and Jerk Knee and Shoulder](clean_and_jerk_knee_and_shoulder_joint_reactions.png)
 
 ## Reproduction Commands
 
@@ -407,12 +506,11 @@ PYTHONPATH=$PWD QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg \\
 
 def render_evidence_readme(receipts: dict[str, Any], commit: str) -> str:
     """Render comprehensive Markdown evidence README from measured receipts."""
-    squat = receipts.get("squat") or {}
     sections = [
-        _render_header_section(squat, commit),
-        _render_loads_table(squat),
-        _render_analytic_bound_section(squat),
-        _render_mo_section(squat),
+        _render_header_section(receipts, commit),
+        _render_loads_table(receipts),
+        _render_analytic_bound_section(receipts),
+        _render_mo_section(receipts),
         _render_other_lifts_section(receipts),
         _render_footer_section(),
     ]
@@ -457,14 +555,29 @@ def main() -> None:
         sol = evaluate_lift_joint_reactions(lift, stride=args.stride)
         receipts[lift] = sol
 
-    squat_sol = receipts["squat"]
-    if squat_sol.get("status") == "complete" and "timeseries" in squat_sol:
-        plot1 = args.plot_dir / "squat_l5s1_joint_reaction_loads.png"
-        plot2 = args.plot_dir / "squat_knee_and_shoulder_joint_reactions.png"
-        _plot_l5s1_loads(squat_sol, plot1)
-        _plot_knee_and_shoulder(squat_sol, plot2)
-        logger.info("Saved plot 1: %s (%d bytes)", plot1, plot1.stat().st_size)
-        logger.info("Saved plot 2: %s (%d bytes)", plot2, plot2.stat().st_size)
+    for lift_name in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+        sol = receipts.get(lift_name)
+        if (
+            isinstance(sol, dict)
+            and sol.get("status") == "complete"
+            and "timeseries" in sol
+        ):
+            plot1 = args.plot_dir / f"{lift_name}_l5s1_joint_reaction_loads.png"
+            plot2 = args.plot_dir / f"{lift_name}_knee_and_shoulder_joint_reactions.png"
+            _plot_l5s1_loads(sol, plot1)
+            _plot_knee_and_shoulder(sol, plot2)
+            logger.info(
+                "Saved %s plot 1: %s (%d bytes)",
+                lift_name,
+                plot1,
+                plot1.stat().st_size,
+            )
+            logger.info(
+                "Saved %s plot 2: %s (%d bytes)",
+                lift_name,
+                plot2,
+                plot2.stat().st_size,
+            )
 
     full_receipt = {
         "generator": "scripts/measure_opensim_lift_joint_reactions.py",
