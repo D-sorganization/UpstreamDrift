@@ -137,7 +137,9 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("missing patterns file: %s", PATTERNS_PATH)
         return 2
     if not BASELINE_PATH.is_file() and not args.update_baseline:
-        logger.error("missing baseline: %s (run with --update-baseline once)", BASELINE_PATH)
+        logger.error(
+            "missing baseline: %s (run with --update-baseline once)", BASELINE_PATH
+        )
         return 2
 
     patterns = _load_patterns()
