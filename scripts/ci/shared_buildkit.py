@@ -19,6 +19,10 @@ made healthy (or the lock cannot be taken in time) ``ensure`` reports
 ``action=fallback`` with an empty ``builder`` output, the caller builds with the
 default docker builder (a cold but correct build) and a ``::warning`` explains
 why. ``--strict`` turns the fallback into a failure for canary/diagnostic runs.
+
+UD-CI-014 (#13579) landed in ``d5112d5546aaceca2cc69b36f0d9223ce0219a85`` (PR #13598);
+acceptance: ``tests/unit/scripts/test_engine_cache_contract.py`` (shared ``ud-buildkit``,
+no per-runner ``type=local`` / ``type=gha`` exports).
 """
 
 from __future__ import annotations

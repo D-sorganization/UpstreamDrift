@@ -11,6 +11,11 @@ contact-derived ground reaction of the OSL-2 model and, when a LIFT-5
 same-input bundle exists, the IK and inverse-dynamics receipt (marker and
 segment-angle errors, residual forces and moments, bundle SHA-256).  A lift
 without a bundle is recorded unavailable with the reason, never as zero.
+
+OSL-16 (#13104) loaded-foot tracking landed in ``cb8b736d2e3c0c8f4bd45deafa53896a6f13a5f7``
+(PR #13120); acceptance:
+``tests/unit/lifting/test_loaded_foot_tracking.py::test_loaded_feet_stay_within_the_lift5_ankle_bounds``
+and ``::test_tracking_converges_in_the_rk4_substep``.
 """
 
 from __future__ import annotations

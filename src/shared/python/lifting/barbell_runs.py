@@ -25,7 +25,10 @@ body with the bar's static weight subtracted as a joint-space feedforward
 ``J^T m g`` on the actuated rows only; the root rows of that load (about 980 N
 down and 635 N m of pelvis pitch on the squat bundle) were left out of the
 controller's model, so the commanded accelerations were wrong by up to about
-4000 rad/s^2 from the first step and the re-track diverged.
+4000 rad/s^2 from the first step and the re-track diverged.  Landed in
+``600ee7650f7a4842959bb59d7b09140cc6acfa3d`` (PR #13092); acceptance:
+``tests/unit/lifting/test_barbell_evidence.py::test_retracked_bundle_records_it_follows_its_source``
+and ``tests/unit/lifting/test_opensim_lift_ik_id.py::test_squat_receipt_range_violations_empty``.
 """
 
 from __future__ import annotations
