@@ -210,9 +210,32 @@ without the declaration (`UNAVAILABLE`). Burdet 2001 supports selective control
 of impedance geometry, not co-contraction. The feedback is uncompensated delayed
 state feedback (no predictor). The frozen delay margin is a first-loss
 diagnostic, not a time-varying stability proof. The tangent chain is `k = 1`
-(NSX-84). `H-TIMING-JITTER` is not implemented here. Engine coverage is the
-analytic point mass, pendulum and planar-golfer oracles through the provider
-seam, not every engine adapter.
+(NSX-84) in the unit oracles. `H-TIMING-JITTER` is not implemented here.
+
+Engine seam coverage. `tests/integration/cross_engine/test_loop_nullspace_layer_conformance.py`
+evaluates the layer from each torque engine's closed-loop sensitivities
+(`constrained_acceleration_derivatives`) at the NSX-56 projected states
+(frames 0 and 400; tangent dimension 35 of 41 coordinates). MuJoCo
+(finite difference) and Drake (autodiff) are compared with the Pinocchio
+ANALYTIC reference in the shared reference frame `P_ref`, with declared
+diagonal gains `K = 40 N m/rad` and `D = 4 N m s/rad` on the actuated
+coordinates built once from `(P_ref, O_ref)`. The acceleration row of the
+impedance closed loop `[P^T Dxi P, P^T Deta P] - P^T A S^T K_imp` differs by at
+most `sqrt(d_xi^2 + d_eta^2) + d_tau |K_imp|_2`, and the feedback column
+`P^T A S^T K_fb` by `d_tau |K_fb|_2`, where the `d_*` are the NSX-98 Track N
+bounds of the engine pair (derived, not registered separately). Measured: Drake
+`6.4e-6` and `1.9e-6` against bounds `0.026` and `0.32`; MuJoCo `0.014` and `0.025`
+against `1.0` and `15`. The gain term itself is about `2.2e5`, so the check is
+not vacuous, and a sign-flipped impedance or a stiffness/damping block swap
+fails. A frozen chain from each engine's operators runs through
+`LayerLinearization` (impedance folded, delayed feedback augmented, frozen delay
+margin); the moving-frame connection is shared kinematics and is left out of that
+chain, so it shows evaluability, not a variance prediction. Every torque engine
+(muscle capability `NONE`) is either compared or declares derivative capability
+`NONE` with its reason: Simscape (DV-12718), where the layer is `UNAVAILABLE`.
+MyoSuite and OpenSim are muscle-driven (NSX-94). Reproduce, in an environment
+with Pinocchio, Drake and MuJoCo:
+`python3 -m pytest tests/integration/cross_engine/test_loop_nullspace_layer_conformance.py -q`.
 
 
 ## NSX-95 Consistency Strategy Catalogue and Comparison Campaigns (#12724)
