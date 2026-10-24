@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13208 · Lock Per-Runner BuildKit Cache Regression Guards
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13208
+- **Branch:** cursor/close-13208-docker-cache-doc-66dc
+- **PR:** #13681
+- **Paths:** see #13681
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`3b9cd5a6`; collated from changes/13208-lock-per-runner-buildkit-cache-regressio.md)
+- **Summary:** Lock per-runner BuildKit cache regression guards
+- **Next step:** Merge PR #13681
+
 ### DL-#13578 · Adopt Fast-Tier Pytest Changed-Module Selection for Unit-Test-Gate
 
 - **State:** in_review
@@ -404,6 +417,71 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13683 · Route Native F02 and BoxFDDP Mass Reads Through Full_Mass_Matrix on MuJoCo 3.13+.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13683
+- **Branch:** merged via #13684
+- **PR:** #13684
+- **Paths:** see #13684
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`5a385701`; collated from changes/13683-route-native-f02-and-boxfddp-mass-reads.md)
+- **Summary:** Route native F02 and BoxFDDP mass reads through full_mass_matrix on MuJoCo 3.13+.
+- **Next step:** Shipped in PR #13684.
+
+### DL-#13660 · Wire Subscription CLI Adapters (Claude, Codex, Antigravity), Simulation HostActionPort Controls, and Local Whisper VTT Into Sidekick
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13660
+- **Branch:** merged via #13664
+- **PR:** #13664
+- **Paths:** see #13664
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`434ae1bd`; collated from changes/13660-sidekick-cli-voice.md)
+- **Summary:** Wire subscription CLI adapters (Claude, Codex, Antigravity), simulation HostActionPort controls, and local Whisper VTT into Sidekick
+- **Next step:** Shipped in PR #13664.
+
+### DL-#13479 · Bump Vendor/Ud-Tools to Tools 37A7477 (Owned Restartable UI Timers, Tools #5670; Chat Dock Stops Scroll Timers on Close, Tools #5674) and Re-Sync Src/Shared/Python/Chat
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13479
+- **Branch:** merged via #13551
+- **PR:** #13551
+- **Paths:** see #13551
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`60f260f9`; collated from changes/13479-bump-vendor-ud-tools-to-tools-37a7477-chat-timers.md)
+- **Summary:** Bump vendor/ud-tools to Tools 37a7477 (owned restartable UI timers, Tools #5670; chat dock stops scroll timers on close, Tools #5674) and re-sync src/shared/python/chat
+- **Next step:** Shipped in PR #13551.
+
+### DL-#13179 · Use Full_Mass_Matrix in Grip-Weld Axial Closure KKT Tests for MuJoCo 3.13+.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13179
+- **Branch:** merged via #13682
+- **PR:** #13682
+- **Paths:** see #13682
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`6078b022`; collated from changes/13179-use-full-mass-matrix-in-grip-weld-axial.md)
+- **Summary:** Use full_mass_matrix in grip-weld axial closure KKT tests for MuJoCo 3.13+.
+- **Next step:** Shipped in PR #13682.
+
+### DL-#13044 · OSL-7 Predictive Deadlift: Solved Statically Supported Poses With Free Shoulders, a Planted-Feet Goal, Hicks Moment Gate and a 17-Run History; Stage 1 Still Does Not Converge With Foot Contact
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13044
+- **Branch:** merged via #13512
+- **PR:** #13512
+- **Paths:** see #13512
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`fcc4221c`; collated from changes/13044-predictive-moco-simulation-of-deadlift-l.md)
+- **Summary:** OSL-7 predictive deadlift: solved statically supported poses with free shoulders, a planted-feet goal, Hicks moment gate and a 17-run history; stage 1 still does not converge with foot contact
+- **Next step:** Shipped in PR #13512.
+
 ### DL-#13555 · Grip Contact: Add Antagonist Pads Opposite the Heel, Trigger and Ten-Finger Little-Finger Pads so the Neutral-Pose Closure Preload Exerts Zero Net Force and Moment on the Club
 
 - **State:** shipped
@@ -436,10 +514,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13531
 - **Branch:** merged via #13666
-- **PR:** #13666
+- **PR:** #13666, #13565
 - **Paths:** see #13666
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`955dd563`; collated from changes/13531-align-drake-autodiff-fit-theta-with-cano.md)
+- **Last verified:** 2026-10-24 (`5343a4af`; collated from changes/13531-align-drake-autodiff-fit-theta-with-cano.md)
 - **Summary:** Align Drake autodiff fit theta with canonical URDF actuator count
 - **Next step:** Shipped in PR #13666.
 
@@ -449,10 +527,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13450
 - **Branch:** merged via #13666
-- **PR:** #13666
+- **PR:** #13666, #13565
 - **Paths:** see #13666
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`955dd563`; collated from changes/13450-drake-samples-the-canonical-mid-hands-cl.md)
+- **Last verified:** 2026-10-24 (`5343a4af`; collated from changes/13450-drake-samples-the-canonical-mid-hands-cl.md)
 - **Summary:** Drake samples the canonical mid_hands/club_head frames like Pinocchio; legacy grip names are aliases only and a missing frame fails closed instead of falling back to right_hand or the shaft
 - **Next step:** Shipped in PR #13666.
 
@@ -475,10 +553,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13109
 - **Branch:** merged via #13665
-- **PR:** #13665
+- **PR:** #13665, #13446
 - **Paths:** see #13665
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`2aeda180`; collated from changes/13109-lock-canonical-driver-seeds-closure-and.md)
+- **Last verified:** 2026-10-24 (`b15fdbd9`; collated from changes/13109-lock-canonical-driver-seeds-closure-and.md)
 - **Summary:** Lock canonical driver seeds closure and weight-fraction gates in CI (#13109)
 - **Next step:** Shipped in PR #13665.
 
@@ -670,10 +748,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13572
 - **Branch:** merged via #13616
-- **PR:** #13616, #13631
+- **PR:** #13616, #13631, #13680
 - **Paths:** see #13616
 - **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`7c43857e`; collated from changes/13572-use-curl-for-actionlint-bootstrap-script.md)
+- **Last verified:** 2026-10-24 (`9497fdb6`; collated from changes/13572-pin-live-required-check-export-for-ud-ci.md)
 - **Summary:** Gate workflow edits with actionlint; fix cross-engine leaderboard publish concurrency expression
 - **Next step:** Shipped in PR #13616.
 

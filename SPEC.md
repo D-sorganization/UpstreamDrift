@@ -2741,6 +2741,15 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13684 | Route native F02 and BoxFDDP mass reads through full_mass_matrix on MuJoCo 3.13+. |
+| 2026-10-24 | #13664 | Wire subscription CLI adapters (Claude, Codex, Antigravity), simulation HostActionPort controls, and local Whisper VTT into Sidekick |
+| 2026-10-24 | #13680 | Pin live required-check export for UD-CI-031 |
+| 2026-10-24 | #13551 | Bump vendor/ud-tools to Tools 37a7477 (owned restartable UI timers, Tools #5670; chat dock stops scroll timers on close, Tools #5674) and re-sync src/shared/python/chat |
+| 2026-10-24 | #13565 | Drake samples the canonical mid_hands/club_head frames like Pinocchio; legacy grip names are aliases only and a missing frame fails closed instead of falling back to right_hand or the shaft; Align Drake autodiff fit theta with canonical URDF actuator count |
+| 2026-10-24 | #13681 | Lock per-runner BuildKit cache regression guards |
+| 2026-10-24 | #13682 | Use full_mass_matrix in grip-weld axial closure KKT tests for MuJoCo 3.13+. |
+| 2026-10-24 | #13446 | Lock canonical driver seeds closure and weight-fraction gates in CI (#13109) |
+| 2026-10-24 | #13512 | OSL-7 predictive deadlift: solved statically supported poses with free shoulders, a planted-feet goal, Hicks moment gate and a 17-run history; stage 1 still does not converge with foot contact |
 | 2026-10-24 | #13667 | Extend KnowledgePack search characterization with repo scope and blank queries.; Isolate Capture Rig theme-compliance ThemeManager fixture from stale singletons. |
 | 2026-10-24 | #13669 | Adopt fast-tier pytest changed-module selection for unit-test-gate |
 | 2026-10-24 | #13666 | Drake samples the canonical mid_hands/club_head frames like Pinocchio; legacy grip names are aliases only and a missing frame fails closed instead of falling back to right_hand or the shaft; Align Drake autodiff fit theta with canonical URDF actuator count; Hand off the HRG-GS grip parity residuals: AGENT_HANDOFF entry for epic #13297 and xfail reasons pointing at the open tracking issues #13547 (MuJoCo deflection) and #13548 (OpenSim ten_finger); Grip contact: add antagonist pads opposite the heel, trigger and ten-finger little-finger pads so the neutral-pose closure preload exerts zero net force and moment on the club |
