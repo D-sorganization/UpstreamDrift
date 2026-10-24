@@ -29,7 +29,7 @@ Astra's standalone share-figure review confirmed that `_render_density_compariso
 - `tests/research/test_shot_pattern_final_figures.py`: `beed0d164514c59bc5a2c20452ec03af5459e7bddeed40fecb3b3610ef99cee7`
 
 ## Verification Evidence
-All commands run in `/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift` on branch `codex/shot-pattern-matched-delivery`:
+All commands run in `<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift` on branch `codex/shot-pattern-matched-delivery`:
 
 1. **Red Test Failure (TDD)**:
    - Command: `QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest -o addopts='' tests/research/test_shot_pattern_final_figures.py`
@@ -42,12 +42,12 @@ All commands run in `/home/dieterolson/.codex/worktrees/shot-pattern-analysis/Up
    - Result: 18 passed, 0 failed.
 
 3. **Ruff Check & Format**:
-   - Command: `/home/dieterolson/Repositories/UpstreamDrift/.venv/bin/ruff check scripts/research/shot_pattern_analysis/build_final_figures.py tests/research/test_shot_pattern_final_figures.py && /home/dieterolson/Repositories/UpstreamDrift/.venv/bin/ruff format --check scripts/research/shot_pattern_analysis/build_final_figures.py tests/research/test_shot_pattern_final_figures.py`
+   - Command: `<owner-home>/Repositories/UpstreamDrift/.venv/bin/ruff check scripts/research/shot_pattern_analysis/build_final_figures.py tests/research/test_shot_pattern_final_figures.py && <owner-home>/Repositories/UpstreamDrift/.venv/bin/ruff format --check scripts/research/shot_pattern_analysis/build_final_figures.py tests/research/test_shot_pattern_final_figures.py`
    - Log: `/tmp/p2-comparison-caption-ruff.txt`
    - Result: All checks passed, 2 files already formatted.
 
 4. **Mypy Type Checking**:
-   - Command: `/home/dieterolson/Repositories/UpstreamDrift/.venv/bin/mypy --python-version 3.12 --follow-imports=silent scripts/research/shot_pattern_analysis/build_final_figures.py tests/research/test_shot_pattern_final_figures.py`
+   - Command: `<owner-home>/Repositories/UpstreamDrift/.venv/bin/mypy --python-version 3.12 --follow-imports=silent scripts/research/shot_pattern_analysis/build_final_figures.py tests/research/test_shot_pattern_final_figures.py`
    - Log: `/tmp/p2-comparison-caption-mypy.txt`
    - Result: `Success: no issues found in 2 source files`.
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 import hashlib,json,zipfile,subprocess
-r=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+r=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
 p=Path('docs/research/shot_pattern_analysis/phase2')
 e=r/p/'validation/document_policy_repair_v1'; e.mkdir(exist_ok=True)
 changes={
@@ -31,8 +31,8 @@ for k,replacements in changes.items():
   if old not in text: raise RuntimeError('Turnover gate text drift')
   text=text.replace(old,new)
   text=text.replace('The current run is diagnostic only because helper repairs proceeded while its broad test selection ran;','This run is diagnostic only because helper repairs proceeded while its broad test selection ran;')
-  old='BOUNDS (`/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`, branch `codex/shot-pattern-report-precision`) is inactive; its accepted repairs are already in MAIN.'
-  new='BOUNDS (`/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`, branch `codex/shot-pattern-protocol-preconditions`, based at `b231eed2f8`) has an active Gemini protocol-guard repair. The candidate is not accepted; preserve its ownership. Earlier accepted repairs are already in MAIN.'
+  old='BOUNDS (`<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`, branch `codex/shot-pattern-report-precision`) is inactive; its accepted repairs are already in MAIN.'
+  new='BOUNDS (`<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`, branch `codex/shot-pattern-protocol-preconditions`, based at `b231eed2f8`) has an active Gemini protocol-guard repair. The candidate is not accepted; preserve its ownership. Earlier accepted repairs are already in MAIN.'
   if old not in text: raise RuntimeError('Turnover bounds text drift')
   text=text.replace(old,new)
  path.write_text(text)

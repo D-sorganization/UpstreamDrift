@@ -110,7 +110,7 @@ target_x_m = 77.402, scale_x_m = 2.0, scale_y_m = 2.0
 E           AssertionError: Case pitching_wedge_shaft_only_narrow, column 0: decorated vertical clearance is cramped/negative (-1.50 pt < 6.0 pt). Upper xlabel bbox: Bbox(x0=311.11985801649763, y0=387.37174479166663, x1=421.11985801649763, y1=401.7083333333333), lower title bbox: Bbox(x0=300.24485801649763, y0=375.12174479166663, x1=431.99485801649763, y1=389.4583333333333).
 E           assert np.float64(-1.5023437500000136) >= 6.0
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py:169: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py:169: AssertionError
 _ test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_shaft_only_narrow-seven_iron-148.5-4.0-4.0] _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2193/test_academic_density_row_gutt1')
@@ -221,7 +221,7 @@ target_x_m = 148.5, scale_x_m = 4.0, scale_y_m = 4.0
 E           AssertionError: Case seven_iron_shaft_only_narrow, column 0: decorated vertical clearance is cramped/negative (-1.50 pt < 6.0 pt). Upper xlabel bbox: Bbox(x0=311.11985801649763, y0=387.37174479166663, x1=421.11985801649763, y1=401.7083333333333), lower title bbox: Bbox(x0=300.24485801649763, y0=375.12174479166663, x1=431.99485801649763, y1=389.4583333333333).
 E           assert np.float64(-1.5023437500000136) >= 6.0
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py:169: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py:169: AssertionError
 _ test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_combined_noise-seven_iron-148.5-5.0-3.8] _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2193/test_academic_density_row_gutt2')
@@ -332,30 +332,30 @@ target_x_m = 148.5, scale_x_m = 5.0, scale_y_m = 3.8
 E           AssertionError: Case seven_iron_combined_noise, column 0: decorated vertical clearance is cramped/negative (-1.50 pt < 6.0 pt). Upper xlabel bbox: Bbox(x0=278.31560265328653, y0=387.37174479166663, x1=388.31560265328653, y1=401.7083333333333), lower title bbox: Bbox(x0=267.44060265328653, y0=375.12174479166663, x1=399.19060265328653, y1=389.4583333333333).
 E           assert np.float64(-1.5023437500000136) >= 6.0
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py:169: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py:169: AssertionError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

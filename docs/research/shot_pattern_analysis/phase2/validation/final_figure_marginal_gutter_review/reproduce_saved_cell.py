@@ -7,7 +7,7 @@ from scripts.research.shot_pattern_analysis.build_final_figures import _supporte
 from src.tools.shot_pattern_analysis import academic_plots as p
 
 root = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift"
     "/docs/research/shot_pattern_analysis/phase2/final_v1"
     "/driver_lean0_curve1_rotation1_combined2"
 )

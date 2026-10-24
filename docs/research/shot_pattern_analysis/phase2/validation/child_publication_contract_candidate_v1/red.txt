@@ -9,7 +9,7 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_child_preserve
 >       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
 ______________ ERROR at setup of test_tampering_rejected[numeric] ______________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_numeri0')
@@ -19,7 +19,7 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_reje
 >       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
 ______________ ERROR at setup of test_tampering_rejected[reused] _______________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_reused0')
@@ -29,7 +29,7 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_reje
 >       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
 _______________ ERROR at setup of test_tampering_rejected[extra] _______________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_extra_0')
@@ -39,7 +39,7 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_reje
 >       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
 _____________ ERROR at setup of test_tampering_rejected[identity] ______________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_identi0')
@@ -49,7 +49,7 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_reje
 >       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
 _____________ ERROR at setup of test_tampering_rejected[duplicate] _____________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_duplic0')
@@ -59,7 +59,7 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_reje
 >       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
 ______________ ERROR at setup of test_tampering_rejected[source] _______________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_source0')
@@ -69,7 +69,7 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_reje
 >       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
 _ ERROR at setup of test_parent_mutation_during_render_rejected_without_receipt _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_parent_mutation_during_re0')
@@ -79,7 +79,7 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_parent_mutatio
 >       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
 _____________ ERROR at setup of test_wrong_renderer_scope_rejected _____________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_wrong_renderer_scope_reje0')
@@ -89,30 +89,30 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_wrong_renderer
 >       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

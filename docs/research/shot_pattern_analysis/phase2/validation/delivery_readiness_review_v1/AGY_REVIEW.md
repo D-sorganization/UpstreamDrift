@@ -2,7 +2,7 @@
 
 **Audit Date:** 2026-10-09  
 **Auditor / Agent Engine:** Gemini 3.8 Flash (High) via Antigravity CLI  
-**Worktree:** `/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift`  
+**Worktree:** `<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift`  
 **Active Branch:** `codex/shot-pattern-matched-delivery` (unpushed extension of open Phase 1 PR [#11941](https://github.com/D-sorganization/UpstreamDrift/pull/11941))  
 **Target Path:** `/tmp/p2-delivery-readiness-audit.md`  
 

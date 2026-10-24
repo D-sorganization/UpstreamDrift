@@ -1,6 +1,6 @@
 from pathlib import Path
 import hashlib,json,datetime
-r=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');b=r/'docs/research/shot_pattern_analysis/phase2';v=b/'validation/final_report_composition_fix_review_v1'
+r=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');b=r/'docs/research/shot_pattern_analysis/phase2';v=b/'validation/final_report_composition_fix_review_v1'
 def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 paths=['scripts/research/shot_pattern_analysis/build_final_report.py','scripts/research/shot_pattern_analysis/final_report_inputs.py','scripts/research/shot_pattern_analysis/report_synthesis.py','tests/research/test_shot_pattern_final_report.py','tests/research/test_shot_pattern_report_synthesis.py','tests/research/fixtures/shot_pattern_selected_synthesis.json','docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md']
 s=json.loads((b/'supplement_report_v1/REPORT_SUPPLEMENT.json').read_text());bounds={e['source_protocol']:{'face_bounds_deg':e['config']['match_face_bounds_deg'],'speed_factors':e['config']['match_speed_factors']} for e in s['unique_cells']}

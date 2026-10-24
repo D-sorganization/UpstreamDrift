@@ -1,7 +1,7 @@
 import hashlib,json
 from pathlib import Path
 from src.tools.shot_pattern_analysis.matched_lean_control import analyze_explicit_source_pair
-root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+root=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
 out=root/'validation/driver_curve_bounds_reporting_review_v1'
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def ref(folder,cell,protocol):

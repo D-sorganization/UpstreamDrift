@@ -6,10 +6,10 @@ sys.path.insert(0,str(Path.cwd()))
 from src.tools.shot_pattern_analysis import academic_plots as plots
 from scripts.research.shot_pattern_analysis.build_final_figures import _supported_points
 import importlib.util
-spec=importlib.util.spec_from_file_location("review_current_builder", "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_final_figures.py")
+spec=importlib.util.spec_from_file_location("review_current_builder", "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_final_figures.py")
 builder=importlib.util.module_from_spec(spec);spec.loader.exec_module(builder)
 plots.write_overhead_trajectory_figure=lambda *_a,**_k: {}
-main=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+main=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
 out=main/'validation/control_neighbor_repair_preflight_v1'
 out.mkdir(exist_ok=True)
 records=[]

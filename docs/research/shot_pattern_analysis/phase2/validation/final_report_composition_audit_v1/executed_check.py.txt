@@ -1,6 +1,6 @@
 from pathlib import Path
 import json,hashlib,datetime
-r=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');b=r/'docs/research/shot_pattern_analysis/phase2';v=b/'validation/final_report_composition_audit_v1'
+r=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');b=r/'docs/research/shot_pattern_analysis/phase2';v=b/'validation/final_report_composition_audit_v1'
 def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 paths=['scripts/research/shot_pattern_analysis/build_final_report.py','scripts/research/shot_pattern_analysis/final_report_inputs.py','src/tools/shot_pattern_analysis/matched_interpretation.py','src/tools/shot_pattern_analysis/matched_formatting.py','docs/research/shot_pattern_analysis/phase2/review_followups/FINAL_NARRATIVE_ACCEPTANCE.md','docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md','docs/research/shot_pattern_analysis/phase2/validation/selected_headline_traceability_v1/review.json','docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json']
 sha={p:h(r/p) for p in paths};pairs=json.loads((b/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons'];selected=[]

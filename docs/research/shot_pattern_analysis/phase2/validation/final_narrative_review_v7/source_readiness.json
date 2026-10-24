@@ -18,7 +18,7 @@
     "stderr.txt",
     "stdout.txt"
   ],
-  "pandoc": "/home/dieterolson/.local/bin/pandoc",
+  "pandoc": "<owner-home>/.local/bin/pandoc",
   "findings": [
     {
       "kind": "stale_status",
