@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13671 | Bump ui lockfile (zod 4.6.7) to clear GHSA-mrhx-c7xc-m3w5 so the UI Security Audit and merge queue pass |
+| 2026-10-24 | #13425 | Model explorer headless export: support NPZ trajectories with 'q', document and verify results replay for anthro driver mjx_package with stiff weld constraint |
 | 2026-10-23 | #13661 | Critique physical grip-contact calibration and validation evidence |
 | 2026-10-23 | #13649 | Characterize the existing KnowledgePack search contract before provider synchronization. |
 | 2026-10-23 | #13652 | Exclude generated capability-atlas output from Tauri workflow path triggers |

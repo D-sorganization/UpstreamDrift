@@ -391,6 +391,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13670 · Bump Ui Lockfile (Zod 4.6.7) to Clear GHSA-Mrhx-C7xc-M3w5 so the UI Security Audit and Merge Queue Pass
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13670
+- **Branch:** merged via #13671
+- **PR:** #13671
+- **Paths:** see #13671
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`fb5706fd`; collated from changes/13670-bump-ui-lockfile-zod-4-6-7-to-clear-ghsa.md)
+- **Summary:** Bump ui lockfile (zod 4.6.7) to clear GHSA-mrhx-c7xc-m3w5 so the UI Security Audit and merge queue pass
+- **Next step:** Shipped in PR #13671.
+
+### DL-#12942 · Model Explorer Headless Export: Support NPZ Trajectories With 'Q', Document and Verify Results Replay for Anthro Driver Mjx_Package With Stiff Weld Constraint
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12942
+- **Branch:** merged via #13425
+- **PR:** #13425
+- **Paths:** see #13425
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`9cc0160e`; collated from changes/12942-model-explorer-headless-export-support-n.md)
+- **Summary:** Model explorer headless export: support NPZ trajectories with 'q', document and verify results replay for anthro driver mjx_package with stiff weld constraint
+- **Next step:** Shipped in PR #13425.
+
 ### DL-#13334 · Critique Physical Grip-Contact Calibration and Validation Evidence
 
 - **State:** shipped
