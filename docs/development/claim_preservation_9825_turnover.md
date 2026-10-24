@@ -3,7 +3,7 @@
 ## Current Ownership
 
 - Parent impact/acoustics #9700; follow-up to #9787 / merged PR #9804.
-- Worktree: C:/Users/diete/Repositories/UpstreamDrift-impact-claim-preservation.
+- Worktree: <owner-home>/Repositories/UpstreamDrift-impact-claim-preservation.
 - Branch: fix/9825-preserve-reviewed-claims, protected-main base
   9f54c5e0b79d9ca0e81aebf52f90f07ffac832c0.
 - Codex lease session impact-acoustics-01a07d8a-claims9825 expires

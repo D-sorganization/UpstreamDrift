@@ -115,6 +115,6 @@ A backend estimation error is only meaningful when compared against the subject'
 
 The formal specifications corresponding to this protocol are:
 
-1. **Landmark Correspondence:** [`src/config/cov_landmark_correspondence.json`](file:///C:/Users/diete/Repositories/UpstreamDrift-worktrees/agy-cov3-11271/src/config/cov_landmark_correspondence.json)
-2. **Comparison Profile:** [`src/config/cov_comparison_profile.v1.json`](file:///C:/Users/diete/Repositories/UpstreamDrift-worktrees/agy-cov3-11271/src/config/cov_comparison_profile.v1.json)
-3. **Verification Suite:** [`tests/unit/motion_capture/test_cov3_protocol_and_correspondence.py`](file:///C:/Users/diete/Repositories/UpstreamDrift-worktrees/agy-cov3-11271/tests/unit/motion_capture/test_cov3_protocol_and_correspondence.py)
+1. **Landmark Correspondence:** [`src/config/cov_landmark_correspondence.json`](file:///<owner-home>/Repositories/UpstreamDrift-worktrees/agy-cov3-11271/src/config/cov_landmark_correspondence.json)
+2. **Comparison Profile:** [`src/config/cov_comparison_profile.v1.json`](file:///<owner-home>/Repositories/UpstreamDrift-worktrees/agy-cov3-11271/src/config/cov_comparison_profile.v1.json)
+3. **Verification Suite:** [`tests/unit/motion_capture/test_cov3_protocol_and_correspondence.py`](file:///<owner-home>/Repositories/UpstreamDrift-worktrees/agy-cov3-11271/tests/unit/motion_capture/test_cov3_protocol_and_correspondence.py)
