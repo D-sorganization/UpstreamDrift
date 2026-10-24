@@ -625,17 +625,17 @@ src/shared/python/perturbation/
 
 ## 12. Glossary
 
-| Term                              | Definition                                                  |
+| Term | Definition |
 | --------------------------------- | ----------------------------------------------------------- | ---- | -------------------------------------- |
-| **CV (Coefficient of Variation)** | std /                                                       | mean | — dimensionless measure of variability |
-| **Robustness Score (RS)**         | 1/(1+CV_weighted) — unified robustness metric ∈ (0,1]       |
-| **Perturbation amplitude**        | Scale factor for noise magnitude relative to nominal input  |
-| **White noise**                   | Independent, identically distributed Gaussian samples       |
-| **Pink noise (1/f)**              | Power spectral density ∝ 1/f — correlated temporal noise    |
-| **Brown noise**                   | Integrated white noise — random walk / drift                |
-| **Monte Carlo**                   | Repeated random sampling to estimate statistical properties |
-| **ZTCF**                          | Zero-Torque Counterfactual — passive dynamics prediction    |
-| **ZVCF**                          | Zero-Velocity Counterfactual — with control but no momentum |
+| **CV (Coefficient of Variation)** | std / | mean | — dimensionless measure of variability |
+| **Robustness Score (RS)** | 1/(1+CV_weighted) — unified robustness metric ∈ (0,1] |
+| **Perturbation amplitude** | Scale factor for noise magnitude relative to nominal input |
+| **White noise** | Independent, identically distributed Gaussian samples |
+| **Pink noise (1/f)** | Power spectral density ∝ 1/f — correlated temporal noise |
+| **Brown noise** | Integrated white noise — random walk / drift |
+| **Monte Carlo** | Repeated random sampling to estimate statistical properties |
+| **ZTCF** | Zero-Torque Counterfactual — passive dynamics prediction |
+| **ZVCF** | Zero-Velocity Counterfactual — with control but no momentum |
 
 ---
 

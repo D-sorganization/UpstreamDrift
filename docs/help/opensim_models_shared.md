@@ -15,19 +15,19 @@ by hand. It is a folder shortcut, not a viewer and not a simulator.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Tile click | user action | The only input. |
+| Input                     | Unit / type     | Notes                                                                 |
+| ------------------------- | --------------- | --------------------------------------------------------------------- |
+| Tile click                | user action     | The only input.                                                       |
 | Sibling checkout location | filesystem path | Resolved as `<parent of your UpstreamDrift checkout>/OpenSim_Models`. |
 
 No numeric or physical inputs, so there are no units to declare.
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| An OS file-manager window | external window | Opened on the `OpenSim_Models` directory. |
-| Launch success flag | boolean | `False` when the directory does not exist, with a `directory not found` warning in the launcher log. |
+| Output                    | Unit / type     | Notes                                                                                                |
+| ------------------------- | --------------- | ---------------------------------------------------------------------------------------------------- |
+| An OS file-manager window | external window | Opened on the `OpenSim_Models` directory.                                                            |
+| Launch success flag       | boolean         | `False` when the directory does not exist, with a `directory not found` warning in the launcher log. |
 
 The tile produces no simulation data and no physical quantities.
 
@@ -43,7 +43,7 @@ No calculation. Registry entry `opensim_models_shared` in `src/config/models.yam
 The `OpenSim_Models` repository is one of the five biomechanics siblings covered by
 [ADR-0014](../adr/0014-shared-biomech-models.md); its Python package is
 `opensim_models` and its path override environment variable is `OPENSIM_MODELS_HOME`. Its models
-are consumed elsewhere in the suite as ``osim``, per the
+are consumed elsewhere in the suite as `osim`, per the
 `_PREFERRED_ENGINE_BY_MODEL_TYPE` mapping in
 `src/launchers/launcher_model_handlers.py`.
 
@@ -66,6 +66,7 @@ are consumed elsewhere in the suite as ``osim``, per the
   in this tile commits, syncs or version-checks those edits.
 
 ## See Also
+
 - [ADR-0014: shared biomech models](../adr/0014-shared-biomech-models.md)
 - [Biomech workspace setup](../architecture/biomech_workspace.md)
 - [External provider onboarding](../development/external_provider_onboarding.md)

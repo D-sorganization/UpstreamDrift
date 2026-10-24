@@ -27,7 +27,7 @@ def main() -> int:
     if result.returncode != 0:
         logger.error("Pre-push checks failed. Push aborted.")
         logger.error("Run 'python -m pytest' locally to see failures.")
-        logger.error("Use 'git push --no-verify' to skip (not recommended).")
+        logger.error("Fix the failing tests before pushing.")
         return 1
 
     logger.info("Pre-push checks passed.")

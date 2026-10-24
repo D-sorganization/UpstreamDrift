@@ -14,27 +14,27 @@ The Golf Simulator Console integrates ball flight projection, terrain interactio
 
 The simulator receives ball launch conditions and environmental parameters:
 
-| Input | Units | Description |
-| --- | --- | --- |
-| Ball Speed | m/s (or mph) | Initial velocity of the golf ball at clubface separation |
-| Launch Angle | deg | Initial vertical launch angle relative to the ground plane |
-| Launch Direction | deg | Horizontal azimuth angle relative to the target line |
-| Backspin | rpm | Spin rate around the horizontal transverse axis |
-| Sidespin | rpm | Spin rate around the vertical axis determining fade/draw |
-| Wind Speed | m/s | Ambient horizontal wind speed |
-| Wind Direction | deg | Direction of wind relative to target azimuth |
+| Input            | Units        | Description                                                |
+| ---------------- | ------------ | ---------------------------------------------------------- |
+| Ball Speed       | m/s (or mph) | Initial velocity of the golf ball at clubface separation   |
+| Launch Angle     | deg          | Initial vertical launch angle relative to the ground plane |
+| Launch Direction | deg          | Horizontal azimuth angle relative to the target line       |
+| Backspin         | rpm          | Spin rate around the horizontal transverse axis            |
+| Sidespin         | rpm          | Spin rate around the vertical axis determining fade/draw   |
+| Wind Speed       | m/s          | Ambient horizontal wind speed                              |
+| Wind Direction   | deg          | Direction of wind relative to target azimuth               |
 
 ## Outputs
 
 Computed ballistic and rollout quantities:
 
-| Output | Units | Description |
-| --- | --- | --- |
-| Carry Distance | m | Total horizontal distance travelled before first ground contact |
-| Total Distance | m | Total distance including bounce and rollout |
-| Apex Height | m | Maximum vertical height attained during flight |
-| Flight Time | s | Duration from impact to initial ground touch |
-| Offline Dispersion | m | Lateral distance from target line at rest |
+| Output             | Units | Description                                                     |
+| ------------------ | ----- | --------------------------------------------------------------- |
+| Carry Distance     | m     | Total horizontal distance travelled before first ground contact |
+| Total Distance     | m     | Total distance including bounce and rollout                     |
+| Apex Height        | m     | Maximum vertical height attained during flight                  |
+| Flight Time        | s     | Duration from impact to initial ground touch                    |
+| Offline Dispersion | m     | Lateral distance from target line at rest                       |
 
 ## Method
 

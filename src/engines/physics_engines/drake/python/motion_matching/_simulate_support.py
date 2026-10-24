@@ -137,15 +137,20 @@ def build_polynomial_torque_system(
 # Forward kinematics
 # ---------------------------------------------------------------------------
 
+# Name aliases of the canonical frames only (``mid_hands`` grip, ``club_head``
+# clubhead, the frames Pinocchio samples on the same URDF). A different body,
+# e.g. ``right_hand`` (the wrist) or the shaft origin, is never substituted:
+# a model without the frame fails closed (#13450).
 _FALLBACK_BODIES: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
-    (("club_grip", "grip"), ("mid_hands", "grip", "right_hand")),
-    (("clubhead", "club_head"), ("club_head", "club_shaft")),
+    (("club_grip", "grip"), ("mid_hands",)),
+    (("clubhead",), ("club_head",)),
     (("mid_hands",), ("club_grip", "grip")),
+    (("club_head",), ("clubhead",)),
 )
 
 
 def _resolve_body_name(plant: Any, body_name: str) -> str | None:
-    """Return ``body_name`` or the first existing fallback; ``None`` if absent."""
+    """Return ``body_name`` or an existing alias of it; ``None`` if absent."""
     has_body = getattr(plant, "HasBodyNamed", None)
     if has_body is not None and bool(has_body(body_name)):
         return body_name

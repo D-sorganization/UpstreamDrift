@@ -21,6 +21,7 @@ Hunt-Crossley pairs give no force (see GRIP_PARITY_DECISIONS.md section 19).
 
 from __future__ import annotations
 
+import math
 import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -28,8 +29,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-
-import math
 
 from src.shared.python.grip_contact import GripInterface
 from src.shared.python.grip_contact.elastic_foundation import (
@@ -43,6 +42,7 @@ from src.shared.python.grip_contact.grip_mesh import (
 )
 from src.shared.python.grip_contact.contact_topology import DEFAULT_TOPOLOGY_PRELOAD_M
 from src.shared.python.grip_contact.pad_contact import PadContactModel
+from src.shared.python.grip_contact.pair_contact import line_contact_node_count
 from src.shared.python.grip_contact.pad_layout import PAD_RADIUS_M, PadLayout
 from src.shared.python.grip_contact.topology_contact import (
     TopologyContactModel,
@@ -50,25 +50,10 @@ from src.shared.python.grip_contact.topology_contact import (
 )
 
 
-def capsule_sphere_count(half_length_m: float, radius_m: float) -> int:
-    """Number of discrete spheres approximating a capsule medial axis in OpenSim.
-
-    Preconditions:
-        ``half_length_m`` must be a nonnegative finite float.
-        ``radius_m`` must be a positive finite float.
-
-    Postconditions:
-        Returns an integer >= 2 ensuring sphere center spacing <= radius_m / 2.
-    """
-    if not (math.isfinite(half_length_m) and half_length_m >= 0.0):
-        raise ValueError(
-            f"half_length_m must be nonnegative and finite, got {half_length_m}"
-        )
-    if not (math.isfinite(radius_m) and radius_m > 0.0):
-        raise ValueError(f"radius_m must be positive and finite, got {radius_m}")
-    core_len = 2.0 * half_length_m
-    return max(2, int(round(core_len / (0.5 * radius_m))) + 1)
-
+#: The OpenSim sphere chain of a capsule site is the shared line-contact
+#: quadrature (#13308): same node count and node positions as
+#: :func:`~src.shared.python.grip_contact.pair_contact.capsule_line_nodes`.
+capsule_sphere_count = line_contact_node_count
 
 CONTACT_FORCE_PREFIX = "grip_contact"
 SIDES = ("L", "R")
@@ -152,6 +137,12 @@ class ContactGripConfig:
         """OBJ path of ``side``'s grip mesh."""
         return self.mesh_dir / f"grip_mesh_{side}.obj"
 
+    def capsule_mesh_path(self, pair_name: str) -> Path:
+        """OBJ path of a capsule pair's ring-aligned grip mesh."""
+        if not isinstance(pair_name, str) or not pair_name.strip():
+            raise ValueError("pair_name must be a non-empty string")
+        return self.mesh_dir / f"grip_mesh_{pair_name}.obj"
+
     def site_foundation(
         self, radius_m: float, count: int = 1
     ) -> ElasticFoundationParameters:
@@ -169,8 +160,69 @@ def _grip_axis(interface: GripInterface, cfg: ContactGripConfig) -> tuple:
     return point, rot[:, 0], rot[:, 1]
 
 
+def _has_own_mesh(mapped: Any, ring_pitch_m: float) -> bool:
+    """Whether a site needs its own grip mesh with rings centred on it.
+
+    Capsule sites always do. A sphere site does when its axial offset is off
+    the side mesh's ring grid: the elastic foundation integrates over faces, so
+    a sphere between ring lines sees an asymmetric patch and picks up an axial
+    tangential bias at rest (the ten-finger trail hypothenar, which sits at the
+    derived little-finger station, #13555).
+    """
+    if mapped.primitive == "capsule":
+        return True
+    steps = float(mapped.centre_m[0]) / ring_pitch_m
+    return abs(steps - round(steps)) > 1e-6
+
+
+def _write_capsule_meshes(
+    point: np.ndarray,
+    axis: np.ndarray,
+    radial: np.ndarray,
+    cfg: ContactGripConfig,
+    facts: dict[str, Any],
+) -> None:
+    """Write ring-aligned grip meshes centred on each own-mesh site's axial midpoint."""
+    assert cfg.topology_model is not None
+    topo = cfg.topology_model.topology
+    grip_r = cfg.layout.grip_radius_m
+    for side in SIDES:
+        centre = cfg.origin_axial_m(side)
+        for pair in cfg.topology_model.physical_grip_pairs(side):
+            site = topo.site(pair.site_a)
+            mapped = map_site_to_hand_frame(topo, site, side)
+            if not _has_own_mesh(mapped, cfg.ring_pitch_m):
+                continue
+            half_length = mapped.half_length_m if mapped.primitive == "capsule" else 0.0
+            cap_centre = centre + mapped.centre_m[0]
+            half_cap = (
+                math.ceil(
+                    (half_length + mapped.radius_m + MESH_MARGIN_M) / cfg.ring_pitch_m
+                    - 1e-12
+                )
+                * cfg.ring_pitch_m
+            )
+            cap_path = cfg.capsule_mesh_path(pair.name)
+            verts, faces = capped_cylinder_mesh(
+                grip_r,
+                point,
+                axis,
+                radial,
+                (cap_centre - half_cap, cap_centre + half_cap),
+                cfg.mesh_segments,
+                cfg.ring_pitch_m,
+            )
+            write_obj(cap_path, verts, faces)
+            facts[pair.name] = {
+                "file": str(cap_path),
+                "vertices": int(len(verts)),
+                "faces": int(len(faces)),
+                "axial_range_m": [cap_centre - half_cap, cap_centre + half_cap],
+            }
+
+
 def write_grip_meshes(interface: GripInterface, cfg: ContactGripConfig) -> dict:
-    """Write the two closed grip meshes (club-body frame); return their facts."""
+    """Write the closed grip meshes (club-body frame); return their facts."""
     point, axis, radial = _grip_axis(interface, cfg)
     layout = cfg.layout
     half = max(layout.axial_offsets_m(), key=abs)
@@ -194,6 +246,8 @@ def write_grip_meshes(interface: GripInterface, cfg: ContactGripConfig) -> dict:
             "faces": int(len(faces)),
             "axial_range_m": [centre - half, centre + half],
         }
+    if cfg.topology_model is not None:
+        _write_capsule_meshes(point, axis, radial, cfg, facts)
     return facts
 
 
@@ -301,13 +355,23 @@ def _build_topology_contact(
                     location,
                     mapped.radius_m,
                 )
+                mesh_name = f"grip_mesh_{side}"
+                if _has_own_mesh(mapped, cfg.ring_pitch_m):
+                    mesh_name = f"grip_mesh_{pair.name}"
+                    _contact_mesh(
+                        geometry, mesh_name, club, cfg.capsule_mesh_path(pair.name)
+                    )
                 _foundation_force(
                     forces,
                     f"{CONTACT_FORCE_PREFIX}_{pair.name}",
-                    (f"grip_pad_{pair.name}", f"grip_mesh_{side}"),
+                    (f"grip_pad_{pair.name}", mesh_name),
                     ef_site,
                 )
             elif mapped.primitive == "capsule":
+                cap_mesh_name = f"grip_mesh_{pair.name}"
+                _contact_mesh(
+                    geometry, cap_mesh_name, club, cfg.capsule_mesh_path(pair.name)
+                )
                 p0, p1 = mapped.endpoints_m
                 count = capsule_sphere_count(mapped.half_length_m, mapped.radius_m)
                 ef_site = (
@@ -331,7 +395,7 @@ def _build_topology_contact(
                     _foundation_force(
                         forces,
                         f"{CONTACT_FORCE_PREFIX}_{pair.name}_{k}",
-                        (f"grip_pad_{pair.name}_{k}", f"grip_mesh_{side}"),
+                        (f"grip_pad_{pair.name}_{k}", cap_mesh_name),
                         ef_site,
                     )
     return {

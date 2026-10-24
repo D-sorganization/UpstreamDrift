@@ -17,14 +17,14 @@ counterpart to the optical-marker workflow in [C3D Viewer](c3d_viewer.md).
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| `--input` session directory | filesystem path (required) | Directory of the FreeMoCap session recordings (the synchronised camera videos). |
-| `--output` directory | filesystem path (required) | Created if absent; receives `landmarks.csv` and `metadata.json`. |
-| `--env-python` | filesystem path (optional) | Interpreter inside the separate FreeMoCap virtualenv. Defaults to the current `sys.executable`, which will normally *not* have FreeMoCap installed. |
-| `--timeout` | seconds (float, default `1800.0`) | Subprocess wall-clock limit, i.e. 30 minutes. |
-| `--dry-run` | flag | Skips the subprocess entirely and writes stub artifacts. |
-| `--json` | flag | Prints the result record to stdout as JSON. |
+| Input                       | Unit / type                       | Notes                                                                                                                                               |
+| --------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--input` session directory | filesystem path (required)        | Directory of the FreeMoCap session recordings (the synchronised camera videos).                                                                     |
+| `--output` directory        | filesystem path (required)        | Created if absent; receives `landmarks.csv` and `metadata.json`.                                                                                    |
+| `--env-python`              | filesystem path (optional)        | Interpreter inside the separate FreeMoCap virtualenv. Defaults to the current `sys.executable`, which will normally _not_ have FreeMoCap installed. |
+| `--timeout`                 | seconds (float, default `1800.0`) | Subprocess wall-clock limit, i.e. 30 minutes.                                                                                                       |
+| `--dry-run`                 | flag                              | Skips the subprocess entirely and writes stub artifacts.                                                                                            |
+| `--json`                    | flag                              | Prints the result record to stdout as JSON.                                                                                                         |
 
 Camera count, capture frame rate (Hz) and calibration are properties of
 the FreeMoCap session you recorded, not of this tile; it passes the
@@ -32,12 +32,12 @@ directory through untouched.
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| `landmarks.csv` | columns `frame,landmark_id,x,y,z` | `frame` is a 0-based integer frame index; `landmark_id` is a 0-based integer. `x`/`y`/`z` are written by FreeMoCap in whatever length unit it emits (typically metres) - **the sidecar performs no unit conversion and no axis reorientation**. |
-| `metadata.json` | JSON object | Session metadata as emitted by FreeMoCap: `freemocap_version`, `n_frames` (frames), `n_landmarks` (count), `fps` (Hz), `duration_s` (seconds). |
-| Process exit code | integer | `0` on success; otherwise the subprocess return code, with `-1` for timeout and `127` for a missing interpreter. |
-| `FreeMoCapResult` (Python API) | dataclass | `success`, `used_real_freemocap`, `return_code`, `stderr_tail` (last 4 KB of stderr), and the two artifact paths. |
+| Output                         | Unit / type                       | Notes                                                                                                                                                                                                                                           |
+| ------------------------------ | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `landmarks.csv`                | columns `frame,landmark_id,x,y,z` | `frame` is a 0-based integer frame index; `landmark_id` is a 0-based integer. `x`/`y`/`z` are written by FreeMoCap in whatever length unit it emits (typically metres) - **the sidecar performs no unit conversion and no axis reorientation**. |
+| `metadata.json`                | JSON object                       | Session metadata as emitted by FreeMoCap: `freemocap_version`, `n_frames` (frames), `n_landmarks` (count), `fps` (Hz), `duration_s` (seconds).                                                                                                  |
+| Process exit code              | integer                           | `0` on success; otherwise the subprocess return code, with `-1` for timeout and `127` for a missing interpreter.                                                                                                                                |
+| `FreeMoCapResult` (Python API) | dataclass                         | `success`, `used_real_freemocap`, `return_code`, `stderr_tail` (last 4 KB of stderr), and the two artifact paths.                                                                                                                               |
 
 ## Method
 
@@ -83,6 +83,7 @@ FreeMoCap's own landmark estimation is MediaPipe-based, and its
 - The tile is registered at maturity `beta`.
 
 ## See Also
+
 - [FreeMoCap sidecar pipeline](../motion_capture/freemocap_sidecar.md)
 - [FreeMoCap integration](../motion_capture/freemocap.md)
 - [Markerless mocap acceptance criteria](../motion_capture/markerless_mocap_acceptance.md)

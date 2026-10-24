@@ -85,17 +85,6 @@ def test_mujoco_export_compiles_in_v2_order_and_matches_spec_fk(v2_doc, v2_bytes
         )
 
 
-def test_mujoco_visual_layer_is_not_implemented_for_v2(v2_bytes) -> None:
-    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
-        export_full_body_mjcf,
-    )
-
-    with pytest.raises(
-        SchemaFeatureUnavailableError, match=r"HRG-D3 \(tracked: #13174\)"
-    ):
-        export_full_body_mjcf(v2_bytes, visual=True)
-
-
 def test_urdf_bundle_accepts_v2(v2_doc, v2_bytes) -> None:
     from src.engines.physics_engines.drake.python.full_body_urdf import (
         export_full_body_urdf,

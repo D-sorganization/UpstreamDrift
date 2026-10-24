@@ -41,18 +41,18 @@ testing the full deployment pipeline without hardware.
 
 `RobotConfig` specifies the hardware parameters of the robot:
 
-| Field                | Type                | Default        | Description              |
+| Field | Type | Default | Description |
 | -------------------- | ------------------- | -------------- | ------------------------ | ---------------------------- |
-| `name`               | `str`               | required       | Robot identifier string. |
-| `n_joints`           | `int`               | required       | Number of joints.        |
-| `joint_names`        | `list[str]`         | auto-generated | Names for each joint.    |
-| `joint_limits_lower` | `NDArray            | None`          | `None`                   | Lower position limits (rad). |
-| `joint_limits_upper` | `NDArray            | None`          | `None`                   | Upper position limits (rad). |
-| `velocity_limits`    | `NDArray            | None`          | `None`                   | Maximum velocities (rad/s).  |
-| `torque_limits`      | `NDArray            | None`          | `None`                   | Maximum torques (Nm).        |
-| `communication_type` | `CommunicationType` | `SIMULATION`   | Communication protocol.  |
-| `ip_address`         | `str`               | `"127.0.0.1"`  | Robot IP (if networked). |
-| `port`               | `int`               | `5000`         | Communication port.      |
+| `name` | `str` | required | Robot identifier string. |
+| `n_joints` | `int` | required | Number of joints. |
+| `joint_names` | `list[str]` | auto-generated | Names for each joint. |
+| `joint_limits_lower` | `NDArray            | None` | `None` | Lower position limits (rad). |
+| `joint_limits_upper` | `NDArray            | None` | `None` | Upper position limits (rad). |
+| `velocity_limits` | `NDArray            | None` | `None` | Maximum velocities (rad/s). |
+| `torque_limits` | `NDArray            | None` | `None` | Maximum torques (Nm). |
+| `communication_type` | `CommunicationType` | `SIMULATION` | Communication protocol. |
+| `ip_address` | `str` | `"127.0.0.1"` | Robot IP (if networked). |
+| `port` | `int` | `5000` | Communication port. |
 
 If `joint_names` is not provided, they are auto-generated as
 `["joint_0", "joint_1", ...]`.
@@ -72,17 +72,17 @@ hardware-level control modes:
 
 The `ControlCommand` dataclass packages a control command to send to the robot:
 
-| Field                | Type          | Description                    |
+| Field | Type | Description |
 | -------------------- | ------------- | ------------------------------ | ------------------------------------ |
-| `timestamp`          | `float`       | Command timestamp (seconds).   |
-| `mode`               | `ControlMode` | Control mode for this command. |
-| `position_targets`   | `NDArray      | None`                          | Target joint positions (rad).        |
-| `velocity_targets`   | `NDArray      | None`                          | Target joint velocities (rad/s).     |
-| `torque_commands`    | `NDArray      | None`                          | Commanded joint torques (Nm).        |
-| `feedforward_torque` | `NDArray      | None`                          | Feed-forward torque term (Nm).       |
-| `stiffness`          | `NDArray      | None`                          | Joint stiffness (impedance mode).    |
-| `damping`            | `NDArray      | None`                          | Joint damping (impedance mode).      |
-| `gripper_command`    | `float        | None`                          | Gripper position (0=closed, 1=open). |
+| `timestamp` | `float` | Command timestamp (seconds). |
+| `mode` | `ControlMode` | Control mode for this command. |
+| `position_targets` | `NDArray      | None` | Target joint positions (rad). |
+| `velocity_targets` | `NDArray      | None` | Target joint velocities (rad/s). |
+| `torque_commands` | `NDArray      | None` | Commanded joint torques (Nm). |
+| `feedforward_torque` | `NDArray      | None` | Feed-forward torque term (Nm). |
+| `stiffness` | `NDArray      | None` | Joint stiffness (impedance mode). |
+| `damping` | `NDArray      | None` | Joint damping (impedance mode). |
+| `gripper_command` | `float        | None` | Gripper position (0=closed, 1=open). |
 
 **Validation.** The `validate(n_joints)` method checks that the required fields
 for the current mode are present and have the correct dimension. It raises
@@ -101,17 +101,17 @@ cmd = ControlCommand.impedance_command(timestamp, positions, stiffness, damping)
 `RobotState` encapsulates all sensor data received from the robot at a single
 timestep:
 
-| Field                | Type                | Description                      |
+| Field | Type | Description |
 | -------------------- | ------------------- | -------------------------------- | ------------------------------------- |
-| `timestamp`          | `float`             | Measurement timestamp (seconds). |
-| `joint_positions`    | `NDArray`           | Joint positions (rad).           |
-| `joint_velocities`   | `NDArray`           | Joint velocities (rad/s).        |
-| `joint_torques`      | `NDArray`           | Measured joint torques (Nm).     |
-| `ft_wrenches`        | `dict[str, NDArray] | None`                            | Force/torque sensor readings by name. |
-| `imu_data`           | `IMUReading         | None`                            | IMU sensor data.                      |
-| `contact_states`     | `list[bool]         | None`                            | Binary contact flags.                 |
-| `motor_temperatures` | `NDArray            | None`                            | Motor temperatures (Celsius).         |
-| `battery_level`      | `float              | None`                            | Battery level (0.0 to 1.0).           |
+| `timestamp` | `float` | Measurement timestamp (seconds). |
+| `joint_positions` | `NDArray` | Joint positions (rad). |
+| `joint_velocities` | `NDArray` | Joint velocities (rad/s). |
+| `joint_torques` | `NDArray` | Measured joint torques (Nm). |
+| `ft_wrenches` | `dict[str, NDArray] | None` | Force/torque sensor readings by name. |
+| `imu_data` | `IMUReading         | None` | IMU sensor data. |
+| `contact_states` | `list[bool]         | None` | Binary contact flags. |
+| `motor_temperatures` | `NDArray            | None` | Motor temperatures (Celsius). |
+| `battery_level` | `float              | None` | Battery level (0.0 to 1.0). |
 
 The `get_state_vector()` method returns the concatenated state $[q, \dot{q}]$.
 The `get_ft_wrench(sensor_name)` method looks up a specific force/torque sensor.
@@ -337,16 +337,16 @@ where $\epsilon$ is the anomaly threshold (default 0.1 rad).
 
 **AnomalyReport dataclass.**
 
-| Field                | Type          | Description                       |
+| Field | Type | Description |
 | -------------------- | ------------- | --------------------------------- | ------------------------------ |
-| `timestamp`          | `float`       | Detection time.                   |
-| `anomaly_type`       | `AnomalyType` | Category of anomaly.              |
-| `severity`           | `float`       | Severity level, 0.0 to 1.0.       |
-| `affected_joints`    | `list[int]`   | Indices of affected joints.       |
-| `description`        | `str`         | Human-readable description.       |
-| `recommended_action` | `str`         | Suggested response.               |
-| `confidence`         | `float`       | Detection confidence, 0.0 to 1.0. |
-| `raw_data`           | `dict         | None`                             | Raw sensor data for debugging. |
+| `timestamp` | `float` | Detection time. |
+| `anomaly_type` | `AnomalyType` | Category of anomaly. |
+| `severity` | `float` | Severity level, 0.0 to 1.0. |
+| `affected_joints` | `list[int]` | Indices of affected joints. |
+| `description` | `str` | Human-readable description. |
+| `recommended_action` | `str` | Suggested response. |
+| `confidence` | `float` | Detection confidence, 0.0 to 1.0. |
+| `raw_data` | `dict         | None` | Raw sensor data for debugging. |
 
 The `detect_anomaly` method checks two conditions:
 

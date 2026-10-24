@@ -73,6 +73,7 @@ __all__ = [
     "contact_law_kernel",
     "evaluate_contact_kernel",
     "evaluate_contact_kernel_jax",
+    "friction_secant_gain",
     "jax_contact_kernel",
     "smooth_contact_law_kernel",
     "torsional_moment_kernel",
@@ -473,6 +474,37 @@ def contact_law_kernel(
         tangential_force_n=f_t,
         spin_moment_nm=m_s,
     )
+
+
+def friction_secant_gain(
+    speed_m_s: Any, params: ContactKernelParams | ContactParameters
+) -> Any:
+    """Secant slip gain $g(v) = \\mu(v)\\tanh(v/v_{tr})/v$ of the friction law [s/m].
+
+    ``contact_law_kernel`` gives a friction magnitude
+    $|f_t| = g(v)\\,f_n\\,v$ at slip speed $v$, so a viscous friction element of
+    gain $g(v) f_n$ reproduces the law at that speed (#13306). At rest the gain
+    is the static slope $\\mu_s / v_{tr}$.
+
+    Preconditions: every speed is finite and nonnegative (``ValueError``).
+    Postconditions: same shape as ``speed_m_s`` (a ``float`` for a scalar),
+    positive, and nonincreasing in speed.
+    """
+    speed = np.asarray(speed_m_s, dtype=float)
+    if not np.all(np.isfinite(speed)) or np.any(speed < 0.0):
+        raise ValueError("speed_m_s must be finite and nonnegative")
+    v_tr = params.transition_velocity_m_s
+    ratio = speed / v_tr
+    mu = (
+        params.dynamic_friction
+        + (params.static_friction - params.dynamic_friction) * np.exp(-(ratio**2))
+        + params.viscous_friction * speed
+    )
+    small = ratio < 1e-6  # tanh(r)/r = 1 - r**2/3 + ...
+    safe = np.where(small, 1.0, ratio)
+    tanh_over_ratio = np.where(small, 1.0 - ratio**2 / 3.0, np.tanh(safe) / safe)
+    gain = mu * tanh_over_ratio / v_tr
+    return float(gain) if gain.ndim == 0 else gain
 
 
 def evaluate_contact_kernel(

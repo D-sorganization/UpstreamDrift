@@ -25,39 +25,39 @@ over.
 The endpoints take almost no numeric input: the state comes from the active
 engine, not from the caller.
 
-| Input | Source | Unit |
-| --- | --- | --- |
-| Generalized positions $q$ | `engine.get_state()` | rad (revolute) or m (prismatic) |
-| Generalized velocities $v$ | `engine.get_state()` | rad/s or m/s |
-| Mass matrix $M(q)$ | `engine.compute_mass_matrix()` | mixed, per degree-of-freedom pair |
-| Body Jacobian $J$ | `engine.compute_jacobian(body)` | m per rad (linear rows) |
-| Simulation time | `engine.time` | s |
-| Applied joint torques | `engine.get_applied_torques()` (optional) | N m |
-| `format` | `POST /analysis/export` body | `"csv"` or `"json"` |
-| `time_range` | `POST /analysis/export` body, `[start, end]` | s |
-| `body_name`, `position`, `rotation` | `POST /simulation/position` body | name, m, rad (roll, pitch, yaw) |
-| `body_a`, `body_b` | `POST /simulation/measure` body | body names |
-| `drift_generalized_force`, `control_generalized_force` | `POST /analysis/tools/drift-control/ratio` | N or N m per degree of freedom |
-| `decay_rate`, `horizon`, `n_steps`, `n_trials`, `perturbation_scale` | `POST /analysis/tools/contraction/estimate` | 1/s, s, count, count, dimensionless |
+| Input                                                                | Source                                       | Unit                                |
+| -------------------------------------------------------------------- | -------------------------------------------- | ----------------------------------- |
+| Generalized positions $q$                                            | `engine.get_state()`                         | rad (revolute) or m (prismatic)     |
+| Generalized velocities $v$                                           | `engine.get_state()`                         | rad/s or m/s                        |
+| Mass matrix $M(q)$                                                   | `engine.compute_mass_matrix()`               | mixed, per degree-of-freedom pair   |
+| Body Jacobian $J$                                                    | `engine.compute_jacobian(body)`              | m per rad (linear rows)             |
+| Simulation time                                                      | `engine.time`                                | s                                   |
+| Applied joint torques                                                | `engine.get_applied_torques()` (optional)    | N m                                 |
+| `format`                                                             | `POST /analysis/export` body                 | `"csv"` or `"json"`                 |
+| `time_range`                                                         | `POST /analysis/export` body, `[start, end]` | s                                   |
+| `body_name`, `position`, `rotation`                                  | `POST /simulation/position` body             | name, m, rad (roll, pitch, yaw)     |
+| `body_a`, `body_b`                                                   | `POST /simulation/measure` body              | body names                          |
+| `drift_generalized_force`, `control_generalized_force`               | `POST /analysis/tools/drift-control/ratio`   | N or N m per degree of freedom      |
+| `decay_rate`, `horizon`, `n_steps`, `n_trials`, `perturbation_scale` | `POST /analysis/tools/contraction/estimate`  | 1/s, s, count, count, dimensionless |
 
 ## Outputs
 
-| Output | Endpoint | Unit |
-| --- | --- | --- |
-| `sim_time` | `/analysis/metrics`, `/analysis/statistics` | s |
-| `joint_positions`, `joint_velocities` | `/analysis/metrics` | rad or m; rad/s or m/s |
-| `max_velocity` | `/analysis/metrics` | rad/s or m/s |
-| `rms_velocity` | `/analysis/metrics` | rad/s or m/s |
-| `kinetic_energy` | `/analysis/metrics` | J |
-| `club_head_speed` | `/analysis/metrics` | m/s |
-| `current`, `minimum`, `maximum`, `mean`, `std_dev` per metric | `/analysis/statistics` | same unit as that metric |
-| `sample_count` | `/analysis/statistics` | count (at most 500) |
-| `time_series` (metric name to values) | `/analysis/statistics` | same unit as that metric |
-| CSV or JSON attachment | `/analysis/export` | file download |
-| `distance`, `position_a`, `position_b`, `delta` | `/simulation/measure` | m |
-| `angle_rad`, `angle_deg`, `velocity`, `torque` per joint | `/simulation/measurements` | rad, deg, rad/s, N m |
-| `ratio`, `summary` | `/analysis/tools/drift-control/ratio` | dimensionless |
-| `estimated_rate`, `is_contracting` | `/analysis/tools/contraction/estimate` | 1/s, boolean |
+| Output                                                        | Endpoint                                    | Unit                     |
+| ------------------------------------------------------------- | ------------------------------------------- | ------------------------ |
+| `sim_time`                                                    | `/analysis/metrics`, `/analysis/statistics` | s                        |
+| `joint_positions`, `joint_velocities`                         | `/analysis/metrics`                         | rad or m; rad/s or m/s   |
+| `max_velocity`                                                | `/analysis/metrics`                         | rad/s or m/s             |
+| `rms_velocity`                                                | `/analysis/metrics`                         | rad/s or m/s             |
+| `kinetic_energy`                                              | `/analysis/metrics`                         | J                        |
+| `club_head_speed`                                             | `/analysis/metrics`                         | m/s                      |
+| `current`, `minimum`, `maximum`, `mean`, `std_dev` per metric | `/analysis/statistics`                      | same unit as that metric |
+| `sample_count`                                                | `/analysis/statistics`                      | count (at most 500)      |
+| `time_series` (metric name to values)                         | `/analysis/statistics`                      | same unit as that metric |
+| CSV or JSON attachment                                        | `/analysis/export`                          | file download            |
+| `distance`, `position_a`, `position_b`, `delta`               | `/simulation/measure`                       | m                        |
+| `angle_rad`, `angle_deg`, `velocity`, `torque` per joint      | `/simulation/measurements`                  | rad, deg, rad/s, N m     |
+| `ratio`, `summary`                                            | `/analysis/tools/drift-control/ratio`       | dimensionless            |
+| `estimated_rate`, `is_contracting`                            | `/analysis/tools/contraction/estimate`      | 1/s, boolean             |
 
 Endpoint paths are as declared in the router. `register_routes` in
 `src/api/route_registry.py` prepends a deployment-configured prefix; the tile
@@ -66,6 +66,7 @@ declares `/api/analysis`.
 ## Method
 
 ### Energy Analysis
+
 **Kinetic energy.** The API computes, per sample,
 
 $$T = \tfrac{1}{2}\, v^{\mathsf T} M(q)\, v \quad [\mathrm{J}]$$
@@ -78,7 +79,7 @@ They come from the engine recorders. The Pinocchio backends
 (`src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui_simulation.py`
 and the sibling `motion_matching/simulate.py`) record
 
-$$T = \texttt{pin.computeKineticEnergy}(model, data, q, v), \quad
+$$ T = \texttt{pin.computeKineticEnergy}(model, data, q, v), \quad
 V = \texttt{pin.computePotentialEnergy}(model, data, q), \quad E = T + V$$
 
 Repo gotcha: `pinocchio.computeTotalEnergy` does not exist in the Python
@@ -324,3 +325,4 @@ here.
 - [Visualization](visualization.md)
 - [Project Map](../architecture/PROJECT_MAP.md)
 - [User manual](../user_guide/user_manual.md)
+$$

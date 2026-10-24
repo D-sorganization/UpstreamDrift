@@ -21,9 +21,9 @@
       "expires_on": "2026-11-30"
     },
     {
-      "path": "src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py",
+      "path": "src/shared/python/grip_contact/matlab_kernel.py",
       "owner": "@dieterolson @D-sorganization/simulation-team",
-      "reason": "Issue #13297 temporary exception while bilateral left hand bushing and revolute joint actuator retrofits are factored.",
+      "reason": "Issue #13334 temporary exception for canonical MATLAB grip contact codegen kernel and constitutive golden vector generator; scheduled for decomposition across codegen and golden generator modules.",
       "expires_on": "2026-11-30"
     }
   ]

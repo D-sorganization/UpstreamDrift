@@ -72,6 +72,7 @@ def _synthesize_target(
     n_samples: int = 31,
     sim_time_s: float = 0.3,
     seed: int = 0,
+    n_joints: int | None = None,
 ) -> tuple[_SyntheticTarget, np.ndarray]:
     """Generate a synthetic (target, theta_true) pair.
 
@@ -90,9 +91,16 @@ def _synthesize_target(
         * np.array([1.0, 0.0, 0.5])
     )
     grip = base_xyz[None, :] + sweep
-    # Plausible theta_true (kept small so torques stay in scope of the
-    # canonical bounds).
-    n_joints = 19  # canonical EXPECTED_NUM_REVOLUTE_DOF for the URDF.
+    if n_joints is None:
+        from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf import (  # noqa: PLC0415
+            CANONICAL_URDF,
+            count_actuators_for_urdf,
+        )
+
+        n_joints = count_actuators_for_urdf(CANONICAL_URDF)
+    if n_joints < 1:
+        msg = f"n_joints must be >= 1; got {n_joints}"
+        raise ValueError(msg)
     theta_true = 1.0e-2 * rng.standard_normal(n_joints * COEFFS_PER_JOINT)
     return _SyntheticTarget(time=time, grip=grip), theta_true
 

@@ -82,6 +82,18 @@ _GRIP_VALUE = {
     "hand_spacing": lambda g: g.hand_spacing_m,
 }
 _HAND_PICKS = tuple(_GRIP_VALUE)
+_VISUAL_GRIP_SPINS = (
+    ("grip_thumb_offset_deg", "Lead Thumb Offset (deg, Picture Only)", 0.0, 45.0, 10.0),
+    ("grip_strength_deg", "Grip Strength Offset (deg, Picture Only)", -30.0, 30.0, 0.0),
+    ("lead_roll_offset_deg", "Lead Roll Offset (deg, Picture Only)", -30.0, 30.0, 0.0),
+    (
+        "trail_roll_offset_deg",
+        "Trail Roll Offset (deg, Picture Only)",
+        -30.0,
+        30.0,
+        0.0,
+    ),
+)
 
 
 def _library_options(library: dict[str, Any], key: str) -> list[str]:
@@ -210,23 +222,25 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         for name in GRIP_STYLE_CHOICES:
             self.grip_style_combo.addItem(name, name)
         self.grip_style_combo.currentIndexChanged.connect(self._on_grip_style)
-        form.addRow("Grip Style (Picture Only)", self.grip_style_combo)
-        self.grip_thumb_spin = QtWidgets.QDoubleSpinBox()
-        self.grip_thumb_spin.setRange(0.0, 45.0)
-        self.grip_thumb_spin.setObjectName("grip_grip_thumb_offset_deg")
-        self.grip_thumb_spin.setValue(10.0)
-        self.grip_thumb_spin.valueChanged.connect(
-            lambda v: self._on_grip_pick("grip_thumb_offset_deg", v)
-        )
-        form.addRow("Lead Thumb Offset (deg, Picture Only)", self.grip_thumb_spin)
+        form.addRow("Grip Style", self.grip_style_combo)
+        self.visual_grip_spins: dict[str, QtWidgets.QDoubleSpinBox] = {}
+        for name, label, low, high, default in _VISUAL_GRIP_SPINS:
+            spin = QtWidgets.QDoubleSpinBox()
+            spin.setRange(low, high)
+            spin.setObjectName(f"grip_{name}")
+            spin.setValue(default)
+            spin.valueChanged.connect(lambda v, n=name: self._on_grip_pick(n, v))
+            self.visual_grip_spins[name] = spin
+            form.addRow(label, spin)
+        self.grip_thumb_spin = self.visual_grip_spins["grip_thumb_offset_deg"]
         reset = QtWidgets.QPushButton("Reset Grip")
         reset.setObjectName("reset_grip")
         reset.clicked.connect(lambda _c=False: self._on_grip_reset())
         form.addRow(reset)
         form.addRow(
             QtWidgets.QLabel(
-                "Strength, palm diagonal and spacing change the physics: they make "
-                "a new model revision that needs a refit."
+                "Strength, style, palm diagonal and spacing change the physics: they "
+                "make a new model revision that needs a refit."
             )
         )
         return group
@@ -282,6 +296,8 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         self._syncing = True
         self.grip_preset_combo.setCurrentIndex(0)
         self.grip_style_combo.setCurrentIndex(0)
+        for name, _label, _low, _high, default in _VISUAL_GRIP_SPINS:
+            self.visual_grip_spins[name].setValue(default)
         self._syncing = False
         self._sync_grip_spins()
         self._refresh()

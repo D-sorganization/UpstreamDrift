@@ -236,8 +236,7 @@ class ClubOnBushings:
 
     def derivatives(self, t: float, y: np.ndarray, hand_source: Any) -> np.ndarray:
         """``d/dt [q, v]`` with ``aba`` for the club acceleration."""
-        _, frames, law = self.wrenches(t, y, hand_source)
-        club = self.club_state(y)
+        _, club, frames, law = self.evaluate(t, y, hand_source)
         tau = self.joint_torque(club, frames, law)
         return self.free_flyer_aba_derivatives(club, y, tau)
 

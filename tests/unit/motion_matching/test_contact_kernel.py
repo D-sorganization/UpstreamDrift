@@ -37,6 +37,7 @@ from src.shared.python.grip_contact.pair_contact import (
     ContactCapsule,
     ContactSphere,
     capsule_capsule,
+    capsule_line_nodes,
     sphere_capsule,
 )
 from src.shared.python.motion_matching.contact_kernel import (
@@ -341,8 +342,10 @@ def test_all_callers_delegate_to_single_shared_kernel(
 
     w_cc = capsule_capsule(cap_a, cap_b, law=default_law, patch_radius_m=0.003)
     assert w_cc.normal_force_mag_n > 0.0
-    assert kernel_calls == 3
-    assert spin_calls == 3
+    # One shared-kernel call per axial line-contact node (#13308).
+    n_nodes = len(capsule_line_nodes(cap_a))
+    assert kernel_calls == 2 + n_nodes
+    assert spin_calls == 2 + n_nodes
 
     interface = GripInterface.from_spec(json.loads(SPEC.read_text()))
     pad_model = build_pad_model(interface, squeeze_per_hand_n=1000.0)
@@ -350,8 +353,8 @@ def test_all_callers_delegate_to_single_shared_kernel(
     club = BushingState(np.eye(3), np.zeros(3), np.zeros(3), np.zeros(3))
     w_pad = pad_wrench(pad_model, "R", hand, club)
     assert w_pad.normal_force_n.sum() > 0.0
-    assert kernel_calls > 3
-    assert spin_calls > 3
+    assert kernel_calls > 2 + n_nodes
+    assert spin_calls > 2 + n_nodes
 
     jax = pytest.importorskip("jax")
     import jax.numpy as jnp
