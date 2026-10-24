@@ -309,7 +309,11 @@ class Decomposition:
     ``x_p`` is the minimum-metric-torque particular solution (minimum scaled
     norm among those); ``N`` has orthonormal columns in scaled coordinates.
     Arrays are read-only.  ``records`` holds the user-visible quantities as
-    :class:`QuantityRecord` objects.
+    :class:`QuantityRecord` objects.  ``variable_scale`` is the per-entry
+    characteristic scale of ``x`` already folded into ``N`` (``N = s_x * V``,
+    ``V`` orthonormal); it is ``None`` only for a hand-built decomposition and
+    is what lets :mod:`functional_identifiability` normalise without scaling a
+    second time.
     """
 
     x_p: Array
@@ -321,6 +325,7 @@ class Decomposition:
     metric_label: str
     scales: CharacteristicScales
     records: dict[str, QuantityRecord] = field(repr=False, default_factory=dict)
+    variable_scale: Array | None = field(repr=False, default=None)
 
     @property
     def n_actuated(self) -> int:
@@ -551,6 +556,7 @@ def decompose(
         records=_records(
             snapshot, counts, info.condition_number, x_p[:n_a], metric.label
         ),
+        variable_scale=readonly_float(fns.variable_scale, "variable_scale"),
     )
 
 
