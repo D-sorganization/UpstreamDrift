@@ -82,6 +82,8 @@ __all__ = [
 ]
 
 SERIES_LABEL = "STATIC"
+# NSX-42 / #13150: bounded frames stay visible when other frames are UNBOUNDED.
+PARTIAL_ENVELOPE_FRAMES_CONVENTION = "C-ENVELOPE-PARTIAL-FRAMES"
 SIGN_ATOL_RTOL = BALANCE_TOL
 ACTIVE_RTOL = 1e-8
 STATIC_CONVENTION = (
@@ -549,7 +551,7 @@ class EnvelopeSeries:
             )
         conventions = common["conventions"]
         if np.isnan(vals).any():
-            conventions = (*conventions, "C-ENVELOPE-PARTIAL-FRAMES")
+            conventions = (*conventions, PARTIAL_ENVELOPE_FRAMES_CONVENTION)
             common["conventions"] = conventions
         hyps: dict[str, None] = {}
         for t in range(self.n_frames):
