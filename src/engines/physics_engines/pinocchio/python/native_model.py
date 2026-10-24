@@ -30,6 +30,8 @@ from src.shared.python.motion_matching.full_body_v2 import (
 )
 from src.shared.python.motion_matching.marker_projection import project_markers
 
+from .shaft_springs import ShaftSprings
+
 # The principal SE(3) logarithm changes branch at a rotation of pi. Keep
 # derivative claims outside a small explicit numerical margin of that cut.
 _WELD_LOG_BRANCH_MARGIN_RAD = 1e-7
@@ -211,6 +213,15 @@ class NativePinocchioModel:
             self._frames[frame["name"]] = self.model.addFrame(
                 pin.Frame(frame["name"], joint, placement, pin.FrameType.OP_FRAME)
             )
+        # Chain-shaft springs (#12691): unactuated, applied as a torque.
+        self._shaft = ShaftSprings.from_spec(
+            specification, self._coordinates, self._velocity_indices
+        )
+        self.passive_coordinates: tuple[str, ...] = self._shaft.names
+
+    def shaft_springs(self) -> dict[str, tuple[float, float, float]]:
+        """Chain-shaft springs as applied: ``{coordinate: (k, rest, c)}``."""
+        return self._shaft.compiled()
 
     def _add_joint_primitives(
         self, parent: int, placement: Any, joint_spec: Mapping[str, Any]
@@ -715,7 +726,7 @@ class NativePinocchioModel:
         """
         q = self.configuration(coordinates)
         v = self._velocity_vector(rates)
-        tau = self._velocity_vector(primitive_efforts)
+        tau = self._shaft.effort(self._velocity_vector(primitive_efforts), q, v)
         acceleration = self._pin.constraintDynamics(
             self.model, self.data, q, v, tau, self.constraints, self.constraint_data
         )
@@ -732,8 +743,10 @@ class NativePinocchioModel:
         ``configuration``, ``velocity`` and ``effort`` are in Pinocchio's own
         index order (the scalar-joint adapters use it unchanged).  Wraps
         ``constraintDynamics``; ``effort`` excludes the closure reaction, which
-        the solver adds.  Raises ``FloatingPointError`` on a nonfinite result.
+        the solver adds.  Raises ``FloatingPointError`` on a nonfinite result
+        and ``ShaftChainUnsupportedError`` for a chain shaft (no springs here).
         """
+        self._shaft.refuse("constrained_acceleration")
         accel = np.array(
             self._pin.constraintDynamics(
                 self.model,
@@ -774,7 +787,9 @@ class NativePinocchioModel:
         Efforts are primitive-conjugate, before the upstream force-frame map.
         These local derivatives require numerical qualification before use in
         a trajectory sensitivity solver; this method does not integrate them.
+        A chain shaft is refused: its spring Jacobians are not included.
         """
+        self._shaft.refuse("acceleration_derivatives")
         self.accelerations(coordinates, rates, primitive_efforts)
         raw = self._pin.computeConstraintDynamicsDerivatives(
             self.model, self.data, self.constraints, self.constraint_data
@@ -1084,7 +1099,7 @@ class FullBodyPinocchioModel(NativePinocchioModel):
         """Forward accelerations combining joint efforts, contact forces, and grip/weld closure."""
         q = self.configuration(coordinates)
         v = self._velocity_vector(rates)
-        tau = self._velocity_vector(primitive_efforts)
+        tau = self._shaft.effort(self._velocity_vector(primitive_efforts), q, v)
         samples = self.contact_forces(coordinates, rates)
         pin = self._pin
         pin.computeJointJacobians(self.model, self.data, q)
