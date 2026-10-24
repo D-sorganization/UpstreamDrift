@@ -147,7 +147,7 @@ def test_sensitive_keys_redacted_recursively() -> None:
 
 def test_value_with_home_path_redacted() -> None:
     """String values containing a /home/ path are scrubbed."""
-    chat_context.record_event("fs", {"note": "wrote to /home/alice/x"})
+    chat_context.record_event("fs", {"note": "wrote to <owner-home>/x"})
     payload = chat_context.get_chat_context()
     assert payload["events"][0]["payload"]["note"] == "<redacted>"
 

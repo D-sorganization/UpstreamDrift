@@ -4,7 +4,7 @@ The tracked full-body replay is deterministic: the same reference on the same
 build gives a bit-identical record (fixed-step RK4, no random numbers, no
 threads; ``tests/unit/motion_matching/pipeline/test_replay_sensitivity_13112.py``).
 Two runs of the calibrated driver command on one host give identical
-receipts, and they match the committed ControlTower receipt to 4e-10 m in
+receipts, and they match the committed <host> receipt to 4e-10 m in
 dynamics RMS although the hip calibration differs at 1e-16.
 
 Measured with this module on the canonical driver and 7-iron commands, the

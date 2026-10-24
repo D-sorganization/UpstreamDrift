@@ -54,8 +54,8 @@ def main() -> None:
             run_id="two_window_fit_9967_102",
             matlab_release=qualified["matlab_release"],
             matlab_version=qualified["matlab_version"],
-            host="DeskComputer",
-            machine="DeskComputer",
+            host="<host>",
+            machine="<host>",
             model_sha256=candidate_doc["model_sha256"],
             candidate_sha256=candidate_sha,
             replay_npz_sha256=replay_sha,
@@ -93,7 +93,7 @@ def main() -> None:
                 "gates": qualified["gates"],
                 "solver_configuration": qualified["solver_configuration"],
                 "note": (
-                    "Native R2025b qualification was recorded on DeskComputer; "
+                    "Native R2025b qualification was recorded on <host>; "
                     "candidate.npz/playback.gif derived from committed "
                     "returned-replay.npz for CI-reproducible MatchedSwingCandidate "
                     "packaging (MS-60)."

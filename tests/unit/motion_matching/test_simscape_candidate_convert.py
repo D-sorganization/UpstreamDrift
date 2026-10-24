@@ -111,7 +111,7 @@ def test_simscape_run_manifest_schema_validation() -> None:
             run_id="two_window_fit_9967_102",
             matlab_release=qualified["matlab_release"],
             matlab_version=qualified["matlab_version"],
-            host="DeskComputer",
+            host="<host>",
             model_sha256=candidate_doc["model_sha256"],
             candidate_sha256=str(receipt["returned_sha256"]),
             replay_npz_sha256=replay_sha,

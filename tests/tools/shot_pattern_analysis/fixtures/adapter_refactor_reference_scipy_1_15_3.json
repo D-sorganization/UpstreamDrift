@@ -2,7 +2,7 @@
   "provenance": {
     "source_commit": "de9ece2b99121e6f0c5a18f85e9331012d80a7b0",
     "source_tree": "d0fca9395abdaca6d1075ba5ce2343ed0b361ba7",
-    "harness_path": "/home/dieterolson/.codex/worktrees/shot-pattern-safe-followup/UpstreamDrift/tests/tools/shot_pattern_analysis/test_adapter_refactor.py",
+    "harness_path": "<owner-home>/.codex/worktrees/shot-pattern-safe-followup/UpstreamDrift/tests/tools/shot_pattern_analysis/test_adapter_refactor.py",
     "harness_sha256": "53a3ba0ef97e120afa778d0eb8e1e38849d8264e2f1bbcdbf1bd18d584fa6d4e",
     "python": "3.12.13",
     "numpy": "2.2.6",

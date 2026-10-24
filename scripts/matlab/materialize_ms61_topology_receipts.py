@@ -3,7 +3,7 @@
 
 Derives fail-closed software receipts from the committed run-102 returned package.
 Does not invent native R2025b fit success: native_gate.json stays blocked until a
-licensed DeskComputer fit under two_window_fit_9967_103 produces a G1-passing
+licensed <host> fit under two_window_fit_9967_103 produces a G1-passing
 full-marker terminal (or MS-104 lands neck/full-body model work).
 """
 
@@ -276,7 +276,7 @@ def _write_handoff(
                 "- `runtime_license_receipt.json`",
                 "- `parity_receipt.json`",
                 "",
-                "## Next Native Action (DeskComputer / R2025b Only)",
+                "## Next Native Action (<host> / R2025b Only)",
                 "",
                 "```powershell",
                 "PYTHONPATH=. python scripts/matlab/materialize_ms61_topology_receipts.py",

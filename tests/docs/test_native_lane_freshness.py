@@ -37,7 +37,7 @@ def test_native_lane_receipt_is_committed(engine: str) -> None:
     assert receipt_path.is_file(), (
         f"Missing native lane receipt at {receipt_path}. "
         "Run `bash scripts/ci/run_native_engine_lane.sh --engine "
-        f"{engine} --out {DEFAULT_OUT_DIR}` on ControlTower."
+        f"{engine} --out {DEFAULT_OUT_DIR}` on <host>."
     )
 
 
@@ -65,7 +65,7 @@ def test_native_lane_receipt_freshness(engine: str) -> None:
     )
     message = (
         f"{receipt_path.name} is {age_days:.1f} days old "
-        f"(generated_at={generated_at}). Refresh on ControlTower via "
+        f"(generated_at={generated_at}). Refresh on <host> via "
         f"`bash scripts/ci/run_native_engine_lane.sh --engine {engine}`."
     )
     if level == "fail":

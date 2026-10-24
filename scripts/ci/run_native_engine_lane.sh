@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Run OpenSim, MyoSuite, or Drake native pytest lanes and write nightly receipts (MS-43 #10342, MMR-10D #11094).
 #
-# Intended for ControlTower / labeled fleet runners.  Standard CI skips these
+# Intended for <host> / labeled fleet runners.  Standard CI skips these
 # markers; refresh receipts at least weekly via nightly-cross-engine.yml or:
 #
 #   bash scripts/ci/run_native_engine_lane.sh --engine opensim \
 #     --out docs/development/matched_swing_program/evidence/nightly
 #
-# ControlTower example (opensim-10003 venv):
+# <host> example (opensim-10003 venv):
 #
 #   bash scripts/ci/run_native_engine_lane.sh --engine opensim \
-#     --venv /home/dieterolson/opensim-10003 \
+#     --venv <owner-home>/opensim-10003 \
 #     --out docs/development/matched_swing_program/evidence/nightly
 #
 set -euo pipefail

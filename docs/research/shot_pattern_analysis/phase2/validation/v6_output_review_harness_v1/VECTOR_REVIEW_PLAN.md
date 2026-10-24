@@ -11,8 +11,8 @@ Read-only source inspection confirms `academic_plots._save_formats` exports the 
 ## Existing Tools Available
 
 - Poppler `pdftoppm` and `pdfinfo` are available through the Codex bundled override binaries; system `pdftotext` is available.
-- Validation Python has `pypdf` and Pillow. Bundled Python `/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3` also has `pdfplumber`.
-- Bundled Node `/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node` has `sharp` (SVG rendering through its existing library stack) and `playwright`. No need to install an alternative PDF engine, browser or SVG library. `cairosvg`, PyMuPDF and `rsvg-convert` are absent in the inspected runtimes.
+- Validation Python has `pypdf` and Pillow. Bundled Python `<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3` also has `pdfplumber`.
+- Bundled Node `<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node` has `sharp` (SVG rendering through its existing library stack) and `playwright`. No need to install an alternative PDF engine, browser or SVG library. `cairosvg`, PyMuPDF and `rsvg-convert` are absent in the inspected runtimes.
 - Existing validation scripts `supplement_v3_graphical_review/root_pw_primary_cells/executed_label_check.py.txt` and original v4 club label checks demonstrate saved-summary/PDF-text reconciliation. Reuse their extraction conventions, correcting wrapping normalization against actual schema, rather than inventing a new scientific parser.
 
 Pin executable/library versions and qualification-script SHA in the new receipt. Tool presence is established; no current vector was rendered yet. A small known-good/known-bad fixture qualification is required before using any new operational bounds/comparison check as evidence.

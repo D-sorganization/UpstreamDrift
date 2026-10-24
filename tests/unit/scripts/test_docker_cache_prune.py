@@ -1,6 +1,6 @@
 """Static contract for the daily host docker-cache-prune script (UD #12941).
 
-ControlTower's /usr/local/sbin/docker-cache-prune was patched by hand during
+<host>'s /usr/local/sbin/docker-cache-prune was patched by hand during
 #12878 to spare images labelled ``keep`` (explorer / ud-sim / profile images).
 The canonical script lives in-repo so deploy jobs cannot drift from fleet policy.
 """

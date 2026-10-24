@@ -1,7 +1,7 @@
 {
   "schema": "recovered-fit-inputs/v1",
   "issue": 11596,
-  "source": "ControlTower WSL (ControlTower-Runner) ~/fits/driver_g1_rtol6/",
+  "source": "<host> WSL (<host>-Runner) ~/fits/driver_g1_rtol6/",
   "recovered": "2026-10-06",
   "identity_check": {
     "candidate_sha256": "a7372b787824d902a616d2a77cf5dfaed2b68accf2cc112593bc8419a80e8509",

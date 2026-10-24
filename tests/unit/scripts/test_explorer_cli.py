@@ -179,7 +179,7 @@ def test_simulate_trajectory_fails_fast_when_mujoco_resets_unstable_state(
 ) -> None:
     """MuJoCo silently resets an unstable state (time returns to 0); a naive
     ``while data.time < target`` loop then never terminates (seen in the
-    ControlTower container on the anthro driver model)."""
+    <host> container on the anthro driver model)."""
     import mujoco
 
     model = cli.load_mujoco_model(str(model_path))

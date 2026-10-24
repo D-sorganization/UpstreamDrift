@@ -26,8 +26,8 @@ Use the frozen producer checkout, not a later MAIN module version. First inspect
 
 ```bash
 REVIEW_PY=/tmp/shot-pattern-validation-venv-20261009/bin/python
-STUDY_MAIN=/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift
-STUDY_PRODUCER=/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift
+STUDY_MAIN=<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift
+STUDY_PRODUCER=<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift
 STUDY_PHASE="$STUDY_MAIN/docs/research/shot_pattern_analysis/phase2"
 REVIEW_OUT="$STUDY_PHASE/validation/supplement_v6_final_graphics_review_v1"
 cd "$STUDY_PRODUCER"
@@ -35,7 +35,7 @@ cd "$STUDY_PRODUCER"
 import json
 from pathlib import Path
 from src.tools.shot_pattern_analysis.matched_supplement_pipeline import load_verified_supplement_artifacts
-phase = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+phase = Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
 terminal = json.loads((phase/'validation/supplement_rendering_revision_v6/exit.json').read_text())
 if terminal.get('process_exit_code') != 0 or terminal.get('status') != 'completed_pending_full_independent_acceptance':
     raise ValueError('No successful completed producer boundary')

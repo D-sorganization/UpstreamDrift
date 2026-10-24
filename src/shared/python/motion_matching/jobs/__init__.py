@@ -7,7 +7,7 @@ portable packages, fault recovery, and PF-08 benchmark schemas only.
 
 Software-contract layer: measured service targets are budgets, never invented
 universal solve-time guarantees. Native long-run host recovery remains a
-named blocker until DeskComputer evidence lands.
+named blocker until <host> evidence lands.
 """
 
 from __future__ import annotations

@@ -118,7 +118,7 @@ if ($Run -eq "two_window_fit_9967_103" -and -not $Replay -and -not $Fit) {
         throw "native_gate.json must not claim physical acceptance without a licensed receipt"
     }
     Write-Host "MS-61 software contracts OK for $Run (status=$($gate.status); host=$hostName)."
-    Write-Host "Native G1 remains blocked until DeskComputer R2025b Fit + full-marker terminal <= 35 mm."
+    Write-Host "Native G1 remains blocked until <host> R2025b Fit + full-marker terminal <= 35 mm."
     return
 }
 

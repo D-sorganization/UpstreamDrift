@@ -99,7 +99,7 @@ fixture is an installed public elbow task, not private capture data or a
 production golf model.
 
 The callback-ownership and observed-clock checks were added after the retained
-DeskComputer runtime execution. Their synthetic MuJoCo regressions pass in the
+<host> runtime execution. Their synthetic MuJoCo regressions pass in the
 local environment, but this exact source revision has not yet been rerun under
 the pinned MyoSuite 3.0.0/MuJoCo 3.6.0 runtime. The earlier native result applies
 only to the source bytes used by its disposable overlay; it is not evidence for

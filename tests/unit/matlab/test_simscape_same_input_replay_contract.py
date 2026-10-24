@@ -41,7 +41,7 @@ def _make_valid_receipt() -> dict[str, Any]:
         "bundle_schema": BUNDLE_SCHEMA,
         "issue": 11613,
         "epic": 11605,
-        "host": "DeskComputer",
+        "host": "<host>",
         "matlab_release": "2025b",
         "matlab_version": "25.2.0.0000000 (R2025b)",
         "effort_hold_rate_hz": 1000.0,

@@ -5,7 +5,7 @@
   "document_sha256": "5d1e5eac6813aecabee69752704510860597a64cf45b28798b011e6109d3bdd5",
   "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
   "attachments_source": "docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json",
-  "warm_start_source": "candidate:/home/dieterolson/fits/w030r/candidate.npz",
+  "warm_start_source": "candidate:<owner-home>/fits/w030r/candidate.npz",
   "ground_height_m": 0.0002577801048755657,
   "armature_kg_m2": 0.005,
   "effort_bounds_n_m": {

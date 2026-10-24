@@ -44,7 +44,7 @@ EXPLORER_SERVICE_REQUIRES: dict[str, tuple[str, ...]] = {
 }
 # Display / GL prerequisites the entrypoint must refuse to start without (DbC).
 EXPLORER_ENTRYPOINT_GUARDS = ("QT_QPA_PLATFORM", "MUJOCO_GL", "DISPLAY")
-# ud-sim:latest is a ControlTower alias for the explorer-headless image (UD #12939).
+# ud-sim:latest is a <host> alias for the explorer-headless image (UD #12939).
 UD_SIM_IMAGE = "ud-sim:latest"
 UD_SIM_BUILD_TARGET = "explorer-headless"
 UD_SIM_PROFILE = "explorer-images"
@@ -76,7 +76,7 @@ def _stage_body(dockerfile: str, stage: str) -> str | None:
 def runtime_retention_failures(modular: str) -> list[str]:
     """Profile images build from ``runtime``; host prune jobs spare only label keep.
 
-    UD #13113: without it, ControlTower's disk guard deleted upstream-drift:full
+    UD #13113: without it, <host>'s disk guard deleted upstream-drift:full
     (and ud-sim built on it), which then had to be rebuilt over a cellular link.
     Every stage derived from ``runtime`` inherits the label.
     """
@@ -112,7 +112,7 @@ def ud_sim_image_contract_failures(root: Path) -> list[str]:
     if block is None:
         failures.append(
             "docker-compose.yml is missing the ud-sim service "
-            "(ControlTower ct-run.sh expects ud-sim:latest)"
+            "(<host> ct-run.sh expects ud-sim:latest)"
         )
         return failures
 

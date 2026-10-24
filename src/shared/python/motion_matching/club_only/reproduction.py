@@ -410,33 +410,33 @@ def _next_step_for_cell(cell: MatrixCellResult) -> str:
     if cell.status == "unqualified":
         runtime = _native_runtime_for_model(cell.model_id)
         return (
-            f"On DeskComputer with {runtime}, run native Fit/G1 for "
+            f"On <host> with {runtime}, run native Fit/G1 for "
             f"{cell.model_id}×{cell.trial_id} and attach a receipt under "
             "docs/plans/club_only_matching/evidence/; do not invent native_g1_pass"
         )
     if cell.status == "missing_runtime":
         return (
-            f"On DeskComputer, install/enable the missing runtime for {cell.model_id}, "
+            f"On <host>, install/enable the missing runtime for {cell.model_id}, "
             'then python -c "from src.shared.python.motion_matching.club_only.'
             "matrix_qualification import build_matrix_qualification_report; "
             'build_matrix_qualification_report()" and commit a fresh evidence receipt'
         )
     if cell.status == "unsupported":
         return (
-            f"On DeskComputer, keep {cell.model_id} out of club-only promotion; "
+            f"On <host>, keep {cell.model_id} out of club-only promotion; "
             "reconcile via #10585 ownership / topology before adding a matrix "
             "cell campaign"
         )
     if cell.status == "rejected":
         return (
-            f"On DeskComputer, diagnose gate failures for {cell.model_id}×"
+            f"On <host>, diagnose gate failures for {cell.model_id}×"
             f"{cell.trial_id} ({cell.blocker or 'physical_failed'}); retain "
             "rejected package hashes; re-run python -m pytest "
             "tests/unit/motion_matching/test_club_matrix_qualification.py "
             "-q -n 0 --no-cov --timeout=60 after the fix"
         )
     return (
-        f"On DeskComputer, inspect unresolved cell {cell.model_id}×{cell.trial_id} "
+        f"On <host>, inspect unresolved cell {cell.model_id}×{cell.trial_id} "
         f"status={cell.status!r} blocker={cell.blocker!r}; do not invent "
         "native_g1_pass from software-contract tests"
     )

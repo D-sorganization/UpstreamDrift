@@ -9,7 +9,7 @@ Pure software contracts for:
 - Timestep / contact-transition / initial-state perturbation check roster
 - Independent replay package save/reopen
 
-Native ControlTower qualification is out of scope here. Status payloads always
+Native <host> qualification is out of scope here. Status payloads always
 report ``claims_native_success=False`` until a linked MS-100 receipt proves
 otherwise.
 """
@@ -592,7 +592,7 @@ def ms111_contract_status() -> dict[str, Any]:
         "notes": (
             "Software contracts for G2/G3 continuation, armature-propagated "
             "independent replay, and fail-closed integrator parity. Native "
-            "ControlTower desk success is not claimed."
+            "<host> desk success is not claimed."
         ),
     }
 

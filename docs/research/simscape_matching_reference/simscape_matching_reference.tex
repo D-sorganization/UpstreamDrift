@@ -5047,7 +5047,7 @@ dimensions, codec, strictly increasing presentation timestamps and file
 hashes. Four sampled frames per clip were visually reviewed for geometry,
 framing and overlays; this is not every-frame anatomical acceptance.
 
-The package is saved on both local and DeskComputer Desktops as
+The package is saved on both local and <host> Desktops as
 \texttt{Simscape\_Matches\_20261003\_Club\_Refined\_1080p}, alongside
 a ZIP with the same stem. The 4,083,966-byte ZIP and extracted MP4 hashes
 were verified on both machines. Historical packages remain unchanged.
@@ -5266,7 +5266,7 @@ Failed experiment, recorded: the canonical 54.5~mm depended on a
 calibration seeded with the wrong club; which calibrated 7-iron result is
 canonical awaits an owner decision.
 
-Reproduce (ControlTower \texttt{ud-sim}, repository root; add
+Reproduce (<host> \texttt{ud-sim}, repository root; add
 \texttt{--static-seeds --zmp-filter} for the calibrated run):
 \begin{verbatim}
 python3 -m scripts.set_spec_club_markers apply \
@@ -5292,7 +5292,7 @@ receipts are unchanged; when set the receipt records
 Measured with the club-face fixture flags (\texttt{--static-seeds
 --foot-progression capture --face-weight 3.0}, plus \texttt{--zmp-filter} on
 the 7-iron) at commit \texttt{87ba5b2f39}, with same-commit controls on
-ControlTower \texttt{ud-sim}; scored by
+<host> \texttt{ud-sim}; scored by
 \texttt{regenerate\_club\_face\_fixtures --reuse-run}:
 
 \begin{center}
@@ -5327,7 +5327,7 @@ bound; that is the grip refit's job. Open: a measured driver cluster (the
 \texttt{grip\_rotation\_deg} refit on the fixed clusters. Fixtures are not
 regenerated and no bound, tolerance or filter constant changed.
 
-Reproduce (ControlTower \texttt{ud-sim}, repository root):
+Reproduce (<host> \texttt{ud-sim}, repository root):
 \begin{verbatim}
 python3 -m src.shared.python.motion_matching.pipeline.cli \
   --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json \
@@ -5345,7 +5345,7 @@ holds the six \texttt{Clubhead} offsets of the static-seed calibrated
 document. The triad shape is unchanged (52/92/96~mm); the calibration only
 re-places it on the club, moving the head markers 14--44~mm and the shaft
 markers about 34~mm, which is the face rotation the native placement lacked.
-Runs on ControlTower \texttt{ud-sim} at \texttt{6438169a61}; the face and
+Runs on <host> \texttt{ud-sim} at \texttt{6438169a61}; the face and
 speed columns are \texttt{measure\_swing} of the tracked trajectory, because
 the same-input reference export of the fixed run diverges at impact
 (non-finite MuJoCo acceleration in \texttt{generate\_reference\_bundle}):
@@ -5381,7 +5381,7 @@ are not regenerated; the open items are the same-input export divergence,
 the \texttt{grip\_rotation\_deg} refit on the fixed clusters, and whether
 calibrated runs should hold the measured cluster fixed by default.
 
-Reproduce (ControlTower \texttt{ud-sim}, repository root):
+Reproduce (<host> \texttt{ud-sim}, repository root):
 \begin{verbatim}
 python3 -m scripts.set_spec_club_markers derive --club driver \
   --receipt-commit 1bef55345715f5c4787ab80f2b54bc19736df633 \
@@ -5399,7 +5399,7 @@ python3 -m src.shared.python.motion_matching.pipeline.cli \
 \paragraph{Per-Capture Grip Rotation on the Fixed Clusters (Issue \#12221).}
 With both club clusters held fixed, the hand-to-club rotation was refitted once per
 capture (capture-A driver, capture-B 7-iron) from free-wrist runs
-(\texttt{--fix-club-markers --free-wrists}, fixture flags, ControlTower
+(\texttt{--fix-club-markers --free-wrists}, fixture flags, <host>
 \texttt{ud-sim}, commit \texttt{b90ab900fa}). Let $G(R_0)$ be the document's grip rotation, $G(E)$ an extrinsic
 $x$-$y$-$z$ correction, and $M_k$ the free-wrist orientation of frame $k$ under
 the old grip, so that $\mathrm{angles}(\cdot)$ returns pronation, cock and flexion. The
@@ -5512,7 +5512,7 @@ The fitted driver rotation was applied to the committed driver document
 (\texttt{scripts/set\_spec\_grip\_rotation.py}, receipt
 \texttt{fit\_grip\_rotation\_receipt\_driver.json}), and the three driver
 ground-support receipts, the driver OpenSim export and the driver club-face fixture
-were regenerated on ControlTower \texttt{ud-sim} (commits \texttt{8d42b60dce} and
+were regenerated on <host> \texttt{ud-sim} (commits \texttt{8d42b60dce} and
 \texttt{e44573633b}, identical documents). The calibrated driver commands now add
 \texttt{--fix-club-markers}, since the fit is valid only with the measured cluster
 held fixed. Address / IK / dynamics marker RMS (mm), before $\to$ after:
@@ -5546,7 +5546,7 @@ capture and is not independently validated.
 
 \paragraph{Driver Club-Face Fixture (Issue \#12221).}
 The driver club-face fixture (\texttt{tests/fixtures/club\_face}) was regenerated at
-\texttt{9fe74740a5} on ControlTower. The same-input export no longer stops at the
+\texttt{9fe74740a5} on <host>. The same-input export no longer stops at the
 trail-shoulder singularity (\#12266) on this document.
 
 \begin{center}
@@ -5641,7 +5641,7 @@ Pinocchio series were regenerated from this fixture with the \#12503 recipe
 python3 -m scripts.regenerate_club_face_fixtures --work <dir> --capture iron
 \end{verbatim}
 
-Reproduce (ControlTower \texttt{ud-sim}, repository root):
+Reproduce (<host> \texttt{ud-sim}, repository root):
 \begin{verbatim}
 python3 -m src.shared.python.motion_matching.pipeline.cli \
   --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
@@ -5857,7 +5857,7 @@ scaled document as \texttt{spec\_<club>.json}: the calibrated hip frames set
 the foot yaw, and the raw document's forward kinematics of the same pose
 turns the lead foot by 29--30 deg and lifts it 10--11 cm off the floor.
 
-\textbf{Result} (runs at \texttt{4bd77f5818} on ControlTower, MuJoCo forward
+\textbf{Result} (runs at \texttt{4bd77f5818} on <host>, MuJoCo forward
 kinematics of each fixture; old means \#12117):
 \begin{center}
 \begin{tabular}{@{}lrr@{}}
@@ -6445,7 +6445,7 @@ licence still has to be confirmed and recorded before any asset-based variant.
 \item These swings were fitted with the closure enforced, so a residual near
  zero confirms engine consistency of the closure frames, not an independent
  reachability test of the hand geometry.
-\item Drake ran on the ControlTower container. On the brick host its plant
+\item Drake ran on the <host> container. On the brick host its plant
  import fails on a missing
  \texttt{shared.python.model\_generation.inertia.result} in the pinned Tools
  tree (a Tools gap) and is reported unavailable there, never zero.
@@ -7827,11 +7827,11 @@ closed-loop dynamics, and differences in the inputs.
 \subsection{Determinism}
 The replay integrates the plant with fixed-step RK4 ($\Delta t = 1$~ms), with
 no random numbers, no threads and no adaptive step. Two runs of the
-calibrated driver and 7-iron commands on one host (DeskComputer,
+calibrated driver and 7-iron commands on one host (<host>,
 \texttt{main} at \texttt{6dd08fcb1c}) give receipts identical in every value
 except the wall-clock \texttt{elapsed\_s}. A unit test runs the tracked
 replay twice on separately built plants and requires a bit-identical
-record. Across hosts the driver run reproduces the committed ControlTower
+record. Across hosts the driver run reproduces the committed <host>
 receipt to $4\times10^{-10}$~m in dynamics RMS, although the hip calibration
 differs at $10^{-16}$.
 
@@ -7942,7 +7942,7 @@ $\pm 5$~mm segment centre-of-mass experiment of the question is a different,
 persistent perturbation. The committed 7-iron ZMP receipt predates the bound
 and must be regenerated on the canonical host. The sensitivity measurements
 come from one host; the cross-host comparison uses the committed
-ControlTower receipts.
+<host> receipts.
 
 \section{The \texttt{full-body-v2} Schema and Trunk Coordinate Migration (HRG-D1, \#13170)}
 \label{sec:full-body-v2}

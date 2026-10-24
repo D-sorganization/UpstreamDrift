@@ -389,7 +389,7 @@ def test_explorer_images_must_be_labelled_keep(tmp_path: Path) -> None:
 def test_runtime_stage_must_be_labelled_keep(tmp_path: Path) -> None:
     """UD #13113: profile images (upstream-drift:full et al.) build from runtime.
 
-    Without the label, ControlTower's disk guard deleted every profile image and
+    Without the label, <host>'s disk guard deleted every profile image and
     the ud-sim image built on top of upstream-drift:full.
     """
     _write_minimal_tree(tmp_path)

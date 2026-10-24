@@ -11,7 +11,7 @@ Running diff-scoped pytest: /tmp/shot-pattern-validation-venv-20261009/bin/pytho
 ................................................F
 =================================== FAILURES ===================================
 __ test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs ___
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_articulated_ground_posthoc_sensitivity.py:32: in test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_articulated_ground_posthoc_sensitivity.py:32: in test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs
     assert hashlib.sha256((ROOT / relative).read_bytes()).hexdigest() == expected
 E   AssertionError: assert 'ec8c37b73f22...05250112e8b31' == '4934a4cf6168...387944a2b1c15'
 E     
@@ -19,62 +19,62 @@ E     - 4934a4cf6168a339755794151eb70dbd36af7bce84c38d9efa9387944a2b1c15
 E     + ec8c37b73f22d97bda93d4fee4d586513a73d966ca0081c42cb05250112e8b31
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
     warnings.warn(
 
 src/shared/python/signal_toolkit/__init__.py:43
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
     from .polynomial_generator import PolynomialGeneratorWidget
 
 src/shared/python/signal_toolkit/__init__.py:52
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
     from .widget import SignalToolkitWidget
 
 src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
 src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
 src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
 src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
     from ...utils.state_manager import state_manager
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
     from starlette.testclient import TestClient as TestClient  # noqa
 
 src/shared/python/motion_matching/loaders/c3d_body.py:36
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
     from ._optical import fill_short_gaps, y_up_to_z_up
 
 src/shared/python/motion_pipeline/orchestrator.py:147
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
     class PipelineConfig(BaseModel):
 
 src/shared/python/motion_pipeline/api.py:39
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
     class PipelineRequest(BaseModel):
 
 src/shared/python/config/model_registry.py:242: 1 warning
@@ -82,7 +82,7 @@ tests/api/test_engine_matrix_route.py: 1 warning
 tests/api/test_physics_api.py: 15 warnings
 tests/config/launcher_manifest/test_canonical_core_shell.py: 3 warnings
 tests/launch_modes/test_launch_matrix.py: 6 warnings
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 src/shared/python/config/model_registry.py:413: 1 warning
@@ -90,7 +90,7 @@ tests/api/test_engine_matrix_route.py: 1 warning
 tests/api/test_physics_api.py: 15 warnings
 tests/config/launcher_manifest/test_canonical_core_shell.py: 3 warnings
 tests/launch_modes/test_launch_matrix.py: 6 warnings
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 src/shared/python/config/model_registry.py:459: 1 warning
@@ -98,53 +98,53 @@ tests/api/test_engine_matrix_route.py: 1 warning
 tests/api/test_physics_api.py: 15 warnings
 tests/config/launcher_manifest/test_canonical_core_shell.py: 3 warnings
 tests/launch_modes/test_launch_matrix.py: 6 warnings
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 scripts/research/proximal_distal_energy/run_experiments.py:49
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/proximal_distal_energy/run_experiments.py:49: DeprecationWarning: DynamicsProvider is deprecated and will be removed in a future release; use EquationsOfMotionProvider instead.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/proximal_distal_energy/run_experiments.py:49: DeprecationWarning: DynamicsProvider is deprecated and will be removed in a future release; use EquationsOfMotionProvider instead.
     from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
     import zmq.eventloop.ioloop
 
 tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_physics_engines_strict_jacobian_standardization_mocked
 tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_get_sensors_implemented
 tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_contact_forces_use_mujoco_grf_sign_convention
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/mujoco_version.py:63: UserWarning: Could not validate MuJoCo version: __version__. Proceeding with fallback Jacobian handling.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/mujoco_version.py:63: UserWarning: Could not validate MuJoCo version: __version__. Proceeding with fallback Jacobian handling.
     _check_mujoco_version()
 
 tests/integration/test_physics_engines_strict.py::TestOpenSimStrict::test_inverse_dynamics_implemented
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:226: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:226: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = OpenSimPhysicsEngine()
 
 tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_loading_uses_gym
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:258: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:258: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = MyoSuitePhysicsEngine()
 
 tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_loading_without_sim_raises_and_rolls_back_state
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:275: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:275: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = MyoSuitePhysicsEngine()
 
 tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_step_uses_env_step_and_preserves_timestep
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:290: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:290: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = MyoSuitePhysicsEngine()
 
 tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_step_uses_last_control_action_when_available
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:315: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:315: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = MyoSuitePhysicsEngine()
 
 tests/integration/test_physics_interfaces.py::TestPhysicsEngines::test_myosuite_methods
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:56: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:56: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = MyoSuitePhysicsEngine()
 
 tests/integration/test_physics_interfaces.py::TestPhysicsEngines::test_opensim_methods
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:85: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:85: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = OpenSimPhysicsEngine()
 
 tests/launch_modes/test_launch_matrix.py::test_web_app_constructs_within_budget
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/api/local_server.py:987: DeprecationWarning: 
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/api/local_server.py:987: DeprecationWarning: 
           on_event is deprecated, use lifespan event handlers instead.
   
           Read more about it in the
@@ -153,7 +153,7 @@ tests/launch_modes/test_launch_matrix.py::test_web_app_constructs_within_budget
     @app.on_event("shutdown")
 
 tests/launch_modes/test_launch_matrix.py::test_web_app_constructs_within_budget
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/applications.py:4744: DeprecationWarning: 
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/applications.py:4744: DeprecationWarning: 
           on_event is deprecated, use lifespan event handlers instead.
   
           Read more about it in the
@@ -162,15 +162,15 @@ tests/launch_modes/test_launch_matrix.py::test_web_app_constructs_within_budget
     return self.router.on_event(event_type)  # ty: ignore[deprecated]
 
 tests/launch_modes/test_launch_matrix.py: 74 warnings
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/palette.py:110: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/palette.py:110: DeprecationWarning: __package__ != __spec__.parent
     from .colors import THEME_COLOR_KEYS
 
 tests/launch_modes/test_launch_matrix.py: 74 warnings
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/palette.py:113: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/palette.py:113: DeprecationWarning: __package__ != __spec__.parent
     from .theme_manager import get_theme_manager
 
 tests/launchers/test_simulation_guis.py::TestExternalToolsAdapter::test_get_video_analyzer_dockable_ui_is_self_contained
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/integration.py:57: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/integration.py:57: DeprecationWarning: __package__ != __spec__.parent
     from .theme_manager import ThemeManager
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
@@ -232,102 +232,102 @@ FAILED tests/research/test_articulated_ground_posthoc_sensitivity.py::test_groun
 
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
     warnings.warn(
 
 src/shared/python/motion_matching/loaders/c3d_body.py:36
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
     from ._optical import fill_short_gaps, y_up_to_z_up
 
 src/shared/python/signal_toolkit/__init__.py:43
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
     from .polynomial_generator import PolynomialGeneratorWidget
 
 src/shared/python/signal_toolkit/__init__.py:52
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
     from .widget import SignalToolkitWidget
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
     from starlette.testclient import TestClient as TestClient  # noqa
 
 src/shared/python/motion_pipeline/orchestrator.py:147
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
     class PipelineConfig(BaseModel):
 
 src/shared/python/motion_pipeline/api.py:39
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
     class PipelineRequest(BaseModel):
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
     import zmq.eventloop.ioloop
 
 src/shared/python/config/model_registry.py:242
 src/shared/python/config/model_registry.py:242
 src/shared/python/config/model_registry.py:242
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 src/shared/python/config/model_registry.py:413
 src/shared/python/config/model_registry.py:413
 src/shared/python/config/model_registry.py:413
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 src/shared/python/config/model_registry.py:459
 src/shared/python/config/model_registry.py:459
 src/shared/python/config/model_registry.py:459
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 scripts/research/proximal_distal_energy/run_experiments.py:49
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/proximal_distal_energy/run_experiments.py:49: DeprecationWarning: DynamicsProvider is deprecated and will be removed in a future release; use EquationsOfMotionProvider instead.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/proximal_distal_energy/run_experiments.py:49: DeprecationWarning: DynamicsProvider is deprecated and will be removed in a future release; use EquationsOfMotionProvider instead.
     from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
 
 src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
 src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
     from ...utils.state_manager import state_manager
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/qpsolvers/solvers/__init__.py:1087
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/qpsolvers/solvers/__init__.py:1087: UserWarning: no QP solver found on your system, you can install solvers from PyPI by ``pip install qpsolvers[open_source_solvers]``
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/qpsolvers/solvers/__init__.py:1087: UserWarning: no QP solver found on your system, you can install solvers from PyPI by ``pip install qpsolvers[open_source_solvers]``
     warnings.warn(
 
 tests/unit/motion_matching/test_full_body_markers.py:13
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/motion_matching/test_full_body_markers.py:13: DeprecationWarning: src.engines.physics_engines.mujoco.python.full_body_markers is deprecated; import from src.engines.physics_engines.mujoco.python.full_body_ik or src.shared.python.motion_matching.full_body_ik instead.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/motion_matching/test_full_body_markers.py:13: DeprecationWarning: src.engines.physics_engines.mujoco.python.full_body_markers is deprecated; import from src.engines.physics_engines.mujoco.python.full_body_ik or src.shared.python.motion_matching.full_body_ik instead.
     from src.engines.physics_engines.mujoco.python import full_body_markers as module
 
 tests/unit/motion_matching/test_full_body_simulation.py:11
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/motion_matching/test_full_body_simulation.py:11: DeprecationWarning: src.engines.physics_engines.mujoco.python.full_body_simulation is deprecated; import from src.shared.python.motion_matching.full_body_forward_dynamics instead.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/motion_matching/test_full_body_simulation.py:11: DeprecationWarning: src.engines.physics_engines.mujoco.python.full_body_simulation is deprecated; import from src.shared.python.motion_matching.full_body_forward_dynamics instead.
     from src.engines.physics_engines.mujoco.python import full_body_simulation as module
 
 tests/unit/sidekick/test_electrode_and_thermal.py:19
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/sidekick/test_electrode_and_thermal.py:19: DeprecationWarning: Using pure-Python ElectrodeAdvancementCalculator
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/sidekick/test_electrode_and_thermal.py:19: DeprecationWarning: Using pure-Python ElectrodeAdvancementCalculator
     _CALC = ElectrodeAdvancementCalculator()
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

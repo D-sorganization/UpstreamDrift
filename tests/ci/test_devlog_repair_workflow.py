@@ -715,7 +715,7 @@ def test_selector_accepts_only_repair_or_strict(
     real_python = (
         Path(
             os.environ.get(
-                "VIRTUAL_ENV", "/home/dieterolson/Repositories/UpstreamDrift/.venv"
+                "VIRTUAL_ENV", "<owner-home>/Repositories/UpstreamDrift/.venv"
             )
         )
         / "bin/python"

@@ -1,7 +1,7 @@
 """Run native-engine pytest lanes and emit hashed nightly receipts (MS-43 #10342, MMR-10D #11094).
 
 OpenSim, MyoSuite, and Drake tests are skipped in standard CI; this harness is intended
-for ControlTower or another labeled runner with the qualified SDK venv.  Receipt
+for <host> or another labeled runner with the qualified SDK venv.  Receipt
 shape follows ``scripts/ci/check_motion_runtime.py`` (schema version, checker
 hash, repository revision, source freshness, per-probe outcomes).
 """
@@ -57,9 +57,9 @@ ENGINE_LANES: dict[str, dict[str, Any]] = {
         "pytest_marker": "requires_opensim",
         "python_module": "opensim",
         "distribution": "opensim",
-        "default_venv": "/home/dieterolson/opensim-10003",
+        "default_venv": "<owner-home>/opensim-10003",
         "receipt_filename": "opensim_receipt.json",
-        "runner_hint": "ControlTower opensim-10003 venv; nightly-cross-engine.yml",
+        "runner_hint": "<host> opensim-10003 venv; nightly-cross-engine.yml",
     },
     "myosuite": {
         "pytest_marker": "requires_myosuite",
@@ -67,7 +67,7 @@ ENGINE_LANES: dict[str, dict[str, Any]] = {
         "distribution": "myosuite",
         "default_venv": None,
         "receipt_filename": "myosuite_receipt.json",
-        "runner_hint": "ControlTower with myosuite extra; nightly-cross-engine.yml",
+        "runner_hint": "<host> with myosuite extra; nightly-cross-engine.yml",
     },
     "drake": {
         "pytest_marker": "requires_drake",
@@ -75,7 +75,7 @@ ENGINE_LANES: dict[str, dict[str, Any]] = {
         "distribution": "drake",
         "default_venv": None,
         "receipt_filename": "drake_receipt.json",
-        "runner_hint": "ControlTower with drake/pydrake venv; nightly-cross-engine.yml",
+        "runner_hint": "<host> with drake/pydrake venv; nightly-cross-engine.yml",
     },
     "mujoco": {
         "pytest_marker": "requires_mujoco",
@@ -83,7 +83,7 @@ ENGINE_LANES: dict[str, dict[str, Any]] = {
         "distribution": "mujoco",
         "default_venv": None,
         "receipt_filename": "mujoco_receipt.json",
-        "runner_hint": "ControlTower with mujoco extra; nightly-cross-engine.yml",
+        "runner_hint": "<host> with mujoco extra; nightly-cross-engine.yml",
     },
     "pinocchio": {
         "pytest_marker": "requires_pinocchio",
@@ -91,7 +91,7 @@ ENGINE_LANES: dict[str, dict[str, Any]] = {
         "distribution": "pinocchio",
         "default_venv": None,
         "receipt_filename": "pinocchio_receipt.json",
-        "runner_hint": "ControlTower with pinocchio/crocoddyl venv; nightly-cross-engine.yml",
+        "runner_hint": "<host> with pinocchio/crocoddyl venv; nightly-cross-engine.yml",
     },
     "simscape": {
         "pytest_marker": "requires_matlab",
@@ -764,7 +764,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--venv",
-        help="qualified interpreter or venv root (ControlTower opensim-10003 default)",
+        help="qualified interpreter or venv root (<host> opensim-10003 default)",
     )
     parser.add_argument("--python", help="explicit python executable")
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_SECONDS)

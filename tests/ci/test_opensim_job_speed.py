@@ -7,7 +7,7 @@ Before #13510 every ``Real OpenSim 4.6`` run on the saturated docker fleet:
 * passed ``--no-cache-dir``, defeating the per-runner ``PIP_CACHE_DIR`` from
   Runner_Dashboard ``configure-runner-pipcache.sh``;
 * let ``actions/setup-python`` ``cache: pip`` miss and then upload ~135 MB
-  to the GitHub cache over ControlTower's cellular uplink (mean 128 s);
+  to the GitHub cache over <host>'s cellular uplink (mean 128 s);
 * re-cloned opensim-models from GitHub.
 
 These tests pin the replacement: a persistent, validated, per-runner venv

@@ -133,7 +133,7 @@ function testPrivacyViolationAbsolutePosixPath(t)
 end
 
 function testPrivacyViolationUserDirectory(t)
-    verifyError(t, @() gs3dx_runtime_fingerprint('25.2.0', 'R2025b', helperMockVer(), '/home/user/python', '1.26.4', '1.5.10'), ...
+    verifyError(t, @() gs3dx_runtime_fingerprint('25.2.0', 'R2025b', helperMockVer(), '<owner-home>/python', '1.26.4', '1.5.10'), ...
         'gs3dx:match_export:PrivacyViolation');
 end
 

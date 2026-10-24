@@ -1,12 +1,12 @@
 {
   "source_sha256": {
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/vector_inspection.py": "268742868c39d6d642c32ad9eae1fdda364bf66cf03ebb3a767f7d218699b51a",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_vector_inspection.py": "eb5516c1ea0bde0a83ba7ed06ade7cacbb8b03c2a707c0f55ea08d76b9391a11"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/vector_inspection.py": "268742868c39d6d642c32ad9eae1fdda364bf66cf03ebb3a767f7d218699b51a",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_vector_inspection.py": "eb5516c1ea0bde0a83ba7ed06ade7cacbb8b03c2a707c0f55ea08d76b9391a11"
   },
   "samples": {
     ".pdf": {
       "format": "pdf",
-      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve1_rotation2_combined2/density.pdf",
+      "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve1_rotation2_combined2/density.pdf",
       "file_sha256": "8341083a39f510ec796255e27734a59a78b982c07d8b2a6e33e3a79f8e7b4c22",
       "expected_sha256": "8341083a39f510ec796255e27734a59a78b982c07d8b2a6e33e3a79f8e7b4c22",
       "byte_size": 139501,
@@ -65,7 +65,7 @@
     },
     ".svg": {
       "format": "svg",
-      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve1_rotation2_combined2/density.svg",
+      "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve1_rotation2_combined2/density.svg",
       "file_sha256": "6a0eb9a01b36925c85c9bd6651bb7eeb6542d0fdfdb02c4ac71c1d5491890f7b",
       "expected_sha256": "6a0eb9a01b36925c85c9bd6651bb7eeb6542d0fdfdb02c4ac71c1d5491890f7b",
       "byte_size": 387539,

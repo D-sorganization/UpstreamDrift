@@ -1,6 +1,6 @@
 """MS-111 Pinocchio G2/G3 continuation and independent replay contracts (#10385).
 
-Software-contract layer only. Native ControlTower desk qualification remains
+Software-contract layer only. Native <host> desk qualification remains
 blocked until MS-107 produces an accepted same-integrator G1 and MS-100
 receipts pass; these tests never invent native success.
 """

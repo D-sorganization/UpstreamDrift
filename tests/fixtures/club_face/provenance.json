@@ -354,7 +354,7 @@
    },
    "pipeline_argv": [
     "--spec",
-    "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-12221a/docs/development/full_body_models/full_body_spec_anthro_driver.json",
+    "<owner-home>/Repositories/UpstreamDrift-worktrees/claude-12221a/docs/development/full_body_models/full_body_spec_anthro_driver.json",
     "--capture",
     "driver",
     "--static-seeds",
@@ -725,7 +725,7 @@
    },
    "pipeline_argv": [
     "--spec",
-    "/home/dieterolson/Repositories/UpstreamDrift-worktrees/orch-12279-regen/docs/development/full_body_models/full_body_spec_anthro_iron7.json",
+    "<owner-home>/Repositories/UpstreamDrift-worktrees/orch-12279-regen/docs/development/full_body_models/full_body_spec_anthro_iron7.json",
     "--capture",
     "iron",
     "--static-seeds",
@@ -736,7 +736,7 @@
     "--face-weight",
     "3.0",
     "--out",
-    "/home/dieterolson/fleet24/orch-12279-regen/work/iron"
+    "<owner-home>/fleet24/orch-12279-regen/work/iron"
    ],
    "run_receipt_sha256": "555fe63d4f9c8d109d257edaafe9647ac0a8e88d1149db114df12e143a03f026",
    "spec_sha256": "dcad19e0a13b52f26aa8b0efdcba0b48d81c3a7c62a50b47072d957fde0e9f84",

@@ -16,12 +16,12 @@ Run from any directory using the qualified Python environment:
 
 ```bash
 /tmp/shot-pattern-validation-venv-20261009/bin/python /tmp/shot-pattern-v6-output-review/review_batch.py \
-  --repo /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift \
-  --report /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1 \
-  --completion-receipt /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_rendering_revision_v6/exit.json \
-  --start-receipt /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_rendering_revision_v6/start.json \
+  --repo <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift \
+  --report <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1 \
+  --completion-receipt <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_rendering_revision_v6/exit.json \
+  --start-receipt <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_rendering_revision_v6/start.json \
   --start-sha256 ab2d3b97b8be26a0fbe4bfa7f2fabaccefb8de602493f76a6d07d2682595bfc0 \
-  --expected-numeric /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json \
+  --expected-numeric <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json \
   --group pairs --kind across_lean --offset 0 --limit 12 \
   --output /tmp/shot-pattern-v6-output-review/across_lean_000_011
 ```

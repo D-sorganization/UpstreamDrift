@@ -1,7 +1,7 @@
 {
   "schema": "recovered-fit-inputs/v1",
   "issue": 11596,
-  "source": "ControlTower WSL (ControlTower-Runner) ~/fits/w030r/",
+  "source": "<host> WSL (<host>-Runner) ~/fits/w030r/",
   "recovered": "2026-10-06",
   "identity_check": {
     "candidate_sha256": "90b80cf50f8b86bf72bc8a5a85610227820a355bb32d7b7df26ab19af5568599",
