@@ -600,6 +600,25 @@ def _hand_source(
     return held
 
 
+def _configured_simulator(
+    system: Any, tol: IntegratorTolerances, start_time_s: float
+) -> Any:
+    """Error-controlled implicit-Euler ``Simulator`` for ``system`` at ``tol``."""
+    analysis = _module("pydrake.systems.analysis")
+    simulator = analysis.Simulator(system)
+    analysis.ApplySimulatorConfig(
+        analysis.SimulatorConfig(
+            integration_scheme=SCHEME,
+            max_step_size=tol.max_step_s,
+            accuracy=tol.accuracy,
+            use_error_control=True,
+            start_time=start_time_s,
+        ),
+        simulator,
+    )
+    return simulator
+
+
 def simulate_grip_contact(
     spec_bytes: bytes,
     swing: CoordinateSwing,
@@ -617,7 +636,6 @@ def simulate_grip_contact(
     topology run uses ``TOPOLOGY_ACCURACY`` and ``TOPOLOGY_MAX_STEP_S``.
     """
     tol = _resolve_tolerances(tolerances, topology=topology_model is not None)
-    analysis = _module("pydrake.systems.analysis")
     spec = json.loads(spec_bytes)
     interface = interface or GripInterface.from_spec(spec)
     kin = WeldClubKinematics(spec_bytes, list(swing.names))
@@ -632,17 +650,7 @@ def simulate_grip_contact(
     x0 = sim.club_state()
     x0[7:10] = weld0.omega_rad_s
     x0[10:13] = weld0.velocity_m_s
-    simulator = analysis.Simulator(_system(sim, kin, source))
-    analysis.ApplySimulatorConfig(
-        analysis.SimulatorConfig(
-            integration_scheme=SCHEME,
-            max_step_size=tol.max_step_s,
-            accuracy=tol.accuracy,
-            use_error_control=True,
-            start_time=float(times[0]),
-        ),
-        simulator,
-    )
+    simulator = _configured_simulator(_system(sim, kin, source), tol, float(times[0]))
     wrench, hand_pose, club_pose = start_simulation(simulator, float(times[0]), x0)
     normal: dict[str, list] = {s: [] for s in SIDES}
     tangential: dict[str, list] = {s: [] for s in SIDES}
