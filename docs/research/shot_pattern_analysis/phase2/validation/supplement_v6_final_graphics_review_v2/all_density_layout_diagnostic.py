@@ -7,7 +7,7 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2"
 )
 BASE = ROOT / "validation/supplement_v6_final_graphics_review_v2"
 FIGURES = ROOT / "supplement_report_v1/figures/comparisons"

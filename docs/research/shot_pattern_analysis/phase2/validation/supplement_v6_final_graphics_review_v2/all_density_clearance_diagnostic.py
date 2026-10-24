@@ -7,7 +7,7 @@ import pathlib
 import re
 
 BASE = pathlib.Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2"
 )
 FIGURES = BASE.parent.parent / "supplement_report_v1/figures/comparisons"
 OUTPUT = BASE / "all_density_clearance_diagnostic.json"
