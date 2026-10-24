@@ -1,7 +1,7 @@
 from pathlib import Path
 import hashlib,json,datetime
 from PIL import Image,ImageOps,ImageDraw
-phase=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');new=phase/'final_figures_v1';old=phase/'presentation_preview_rejected_final_v4/final_figures_v1';out=phase/'validation/original_final_graphics_independent_review_v6';out.mkdir(exist_ok=True)
+phase=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');new=phase/'final_figures_v1';old=phase/'presentation_preview_rejected_final_v4/final_figures_v1';out=phase/'validation/original_final_graphics_independent_review_v6';out.mkdir(exist_ok=True)
 h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 a=json.loads((new/'figure_manifest.json').read_text());b=json.loads((old/'figure_manifest.json').read_text())
 assert all(h(new/k)==v for k,v in a['outputs'].items())

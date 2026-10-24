@@ -1,7 +1,7 @@
 from pathlib import Path
 import json,hashlib,re,csv
 from datetime import datetime,timezone
-p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2'); f=p/'control_final_figures_v1';o=p/'validation/original_final_graphics_independent_review_v4/astra_control_remaining';h=lambda x:hashlib.sha256(x.read_bytes()).hexdigest();a=json.loads((o/'inventory.json').read_text());m=json.loads((f/'figure_manifest.json').read_text());assert h(f/'figure_manifest.json')==a['manifest_sha256'];before={k:h(f/k) for k in m['outputs']};assert before==m['outputs'];checks=[]
+p=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2'); f=p/'control_final_figures_v1';o=p/'validation/original_final_graphics_independent_review_v4/astra_control_remaining';h=lambda x:hashlib.sha256(x.read_bytes()).hexdigest();a=json.loads((o/'inventory.json').read_text());m=json.loads((f/'figure_manifest.json').read_text());assert h(f/'figure_manifest.json')==a['manifest_sha256'];before={k:h(f/k) for k in m['outputs']};assert before==m['outputs'];checks=[]
 def text(x):return re.sub(r'\s+',' ',' '.join(re.findall(r'<!--(.*?)-->',x.read_text(),re.S)))
 for r in a['files']:
  assert h(f/r['path'])==r['sha256']==m['outputs'][r['path']]

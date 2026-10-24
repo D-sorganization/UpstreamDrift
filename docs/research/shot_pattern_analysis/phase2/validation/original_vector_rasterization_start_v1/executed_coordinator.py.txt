@@ -6,7 +6,7 @@ import os
 import sys
 import time
 
-ROOT = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+ROOT = Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
 sys.path.insert(0, str(ROOT))
 from scripts.research.shot_pattern_analysis.vector_rasterization import render_vector
 

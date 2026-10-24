@@ -1,7 +1,7 @@
 {
   "scope": "Original Saved-Data Figures, Reporting Revision Only",
   "status": "rendered_pending_final_visual_review",
-  "source_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift",
+  "source_worktree": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift",
   "source_commit": "9ea4c14bed0d27c1a2edec0144c6993ee818c21d",
   "source_sha256": {
     "src/tools/shot_pattern_analysis/academic_plots.py": "ed1b840b0b19df5c4e73ccb9dfef0c1ca826c5f0d3ff7ff4ac7913396013df54",
@@ -72,8 +72,8 @@
         "/tmp/shot-pattern-validation-venv-20261009/bin/python",
         "-m",
         "scripts.research.shot_pattern_analysis.build_final_figures",
-        "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1",
-        "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1"
+        "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1",
+        "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1"
       ],
       "started": "2026-10-10T05:44:22.343541+00:00",
       "finished": "2026-10-10T06:32:48.668478+00:00",
@@ -84,8 +84,8 @@
         "/tmp/shot-pattern-validation-venv-20261009/bin/python",
         "-m",
         "scripts.research.shot_pattern_analysis.build_final_figures",
-        "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_v1",
-        "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1"
+        "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_v1",
+        "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1"
       ],
       "started": "2026-10-10T06:32:48.742335+00:00",
       "finished": "2026-10-10T07:05:12.380134+00:00",

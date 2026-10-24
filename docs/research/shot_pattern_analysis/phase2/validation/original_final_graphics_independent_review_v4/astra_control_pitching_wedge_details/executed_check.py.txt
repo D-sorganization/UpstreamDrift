@@ -1,7 +1,7 @@
 from pathlib import Path
 import json,hashlib,re
 from datetime import datetime,timezone
-p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');o=p/'validation/original_final_graphics_independent_review_v4/astra_control_pitching_wedge_details';rows=json.loads((o/'initial_inventory.json').read_text());h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest();checks=[]
+p=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');o=p/'validation/original_final_graphics_independent_review_v4/astra_control_pitching_wedge_details';rows=json.loads((o/'initial_inventory.json').read_text());h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest();checks=[]
 for r in rows:
  f=p/r['path'];assert h(f)==r['sha256'];cell=f.parent.name;src=p/'control_final_v1'/cell;s=json.loads((src/'summary.json').read_text());c=s['config'];noise=c['noise']['standard_deviations'];fl=json.loads((src/'flight_samples.json').read_text());assert c['target_x_m']==s['target_x_m']==fl['target_x_m'];assert s['target_x_m'] == json.loads((p/'control_final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/summary.json').read_text())['target_x_m']
  svg=f.with_suffix('.svg');t=re.sub(r'\s+',' ',' '.join(re.findall(r'<!--(.*?)-->',svg.read_text(),re.S)))

@@ -1,7 +1,7 @@
 import hashlib,json,subprocess,datetime
 from pathlib import Path
 from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
-main=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+main=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
 phase=main/'docs/research/shot_pattern_analysis/phase2'
 python='/tmp/shot-pattern-validation-venv-20261009/bin/python'
 sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
