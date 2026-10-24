@@ -480,7 +480,8 @@ class PerturbationPanel(QWidget):
                 else 0.0
             )
         else:
-            mean = std = cv = mn = mx = 0.0
+            mean = std = mn = mx = 0.0
+            cv = float("nan")
 
         score = summary.robustness_score
         n = summary.config.n_trials

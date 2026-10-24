@@ -66,6 +66,8 @@ def unavailable_lift_record(lift: str, reason: str) -> dict[str, Any]:
         "mean_reserve_share": None,
         "peak_reserve_share": None,
         "residual_status": None,
+        "external_loads": None,
+        "limitations": [],
         "window_start_s": None,
         "window_end_s": None,
         "duration_s": None,
@@ -115,6 +117,19 @@ def load_ik_id_residual_status(
             gate.get("reference", "Hicks et al. 2015, J Biomech Eng 137:020905")
         ),
     }
+
+
+def load_ik_id_external_loads(
+    lift: str,
+    receipts_path: Path | None = None,
+) -> dict[str, str]:
+    """Load external loads description from the IK/ID receipt."""
+    path = receipts_path or IK_ID_RECEIPTS_PATH
+    if not path.is_file():
+        raise FileNotFoundError(f"IK/ID receipts file not found: {path}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    lift_id = data["lifts"][lift]["ik_id"]["id"]
+    return dict(lift_id.get("external_loads", {}))
 
 
 def compute_coordinate_breakdown(
@@ -324,6 +339,14 @@ def format_squat_solution(
 ) -> dict[str, Any]:
     """Assemble the complete solution dictionary for a barbell lift."""
     status = load_ik_id_residual_status(lift)
+    ext_loads = load_ik_id_external_loads(lift)
+    limitations = [
+        "RajagopalLaiUhlrich2023 includes 80 lower-limb muscles only. "
+        "Upper-limb coordinates (arm_flex_r/l, arm_add_r/l, arm_rot_r/l, "
+        "elbow_flex_r/l, pro_sup_r/l, wrist_flex_r/l, wrist_dev_r/l) have 0 muscles "
+        "in this model and are driven 100% by coordinate/reserve actuators; "
+        "arm and chest muscle forces were not solved."
+    ]
     return {
         "lift": lift,
         "status": "complete",
@@ -333,6 +356,8 @@ def format_squat_solution(
         "mean_reserve_share": solve.mean_share,
         "peak_reserve_share": solve.peak_share,
         "residual_status": status,
+        "external_loads": ext_loads,
+        "limitations": limitations,
         "window_start_s": float(targets.time_s[0]),
         "window_end_s": float(targets.time_s[-1]),
         "duration_s": round(float(targets.time_s[-1] - targets.time_s[0]), 4),

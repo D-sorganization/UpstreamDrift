@@ -2,7 +2,9 @@
 
 Provides pure JAX implementations of:
 1. Compliant Hunt-Crossley normal ground contact with regularised Coulomb friction,
-   matching ``src.shared.python.motion_matching.contact_law.sphere_ground_contact``.
+   matching ``src.shared.python.motion_matching.contact_law.sphere_ground_contact``
+   by delegating to :func:`src.shared.python.motion_matching.contact_kernel.contact_law_kernel`
+   with ``xp=jax.numpy``.
 2. Equal-and-opposite weld spring-damper spatial reactions between two sites,
    supporting differentiable closed-chain grip constraints.
 
@@ -19,6 +21,7 @@ import jax
 import jax.numpy as jnp
 
 from src.shared.python.core.contracts import require
+from src.shared.python.motion_matching.contact_kernel import contact_law_kernel
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     GroundPlane,
@@ -70,9 +73,9 @@ def sphere_ground_contact_jax(
 ) -> tuple[jax.Array, jax.Array]:
     """Evaluate differentiable sphere-ground contact forces in JAX.
 
-    Matches the Hunt-Crossley normal compliance and regularised Coulomb
-    friction law from ``contact_law.sphere_ground_contact``, using a small
-    speed floor to maintain finite gradients at zero tangential velocity.
+    Delegates normal and friction force evaluation to the shared array-namespace
+    kernel :func:`src.shared.python.motion_matching.contact_kernel.contact_law_kernel`
+    with ``xp=jax.numpy``.
 
     Args:
         center: 3-vector sphere centre position in world coordinates (m).
@@ -80,7 +83,7 @@ def sphere_ground_contact_jax(
         radius_m: Sphere radius in metres (must be positive).
         ground: Ground plane specification.
         parameters: Shared contact parameters.
-        speed_floor_m_s: Smoothing term under tangential speed sqrt (m/s).
+        speed_floor_m_s: Retained for API compatibility (must be positive).
 
     Returns:
         Tuple of (normal_force, friction_force) as 3-vectors in world frame (N).
@@ -94,32 +97,12 @@ def sphere_ground_contact_jax(
 
     signed_distance = jnp.dot(n_ground, c) - ground.height_m - radius_m
     penetration = jnp.maximum(0.0, -signed_distance)
-    rate = -jnp.dot(n_ground, v)
+    v_n = jnp.dot(n_ground, v)
+    tangential = v - n_ground * v_n
 
-    raw_magnitude = (
-        parameters.stiffness_n_m
-        * penetration
-        * (1.0 + parameters.dissipation_s_m * rate)
-    )
-    magnitude = jnp.maximum(0.0, raw_magnitude)
-    has_contact = penetration > 0.0
-    magnitude = jnp.where(has_contact, magnitude, 0.0)
-
-    tangential = v - n_ground * jnp.dot(n_ground, v)
-    speed = jnp.sqrt(jnp.dot(tangential, tangential) + speed_floor_m_s**2)
-    ratio = speed / parameters.transition_velocity_m_s
-    mu = (
-        parameters.dynamic_friction
-        + (parameters.static_friction - parameters.dynamic_friction)
-        * jnp.exp(-(ratio**2))
-        + parameters.viscous_friction * speed
-    )
-    friction = -tangential / speed * mu * magnitude * jnp.tanh(ratio)
-
-    zero_vec = jnp.zeros_like(c)
-    normal_force = jnp.where(has_contact, n_ground * magnitude, zero_vec)
-    friction_force = jnp.where(has_contact, friction, zero_vec)
-
+    res = contact_law_kernel(penetration, v_n, tangential, parameters, xp=jnp)
+    normal_force = n_ground * res.normal_force_n
+    friction_force = res.tangential_force_n
     return normal_force, friction_force
 
 

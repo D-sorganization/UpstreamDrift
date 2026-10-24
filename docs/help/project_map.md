@@ -21,20 +21,20 @@ in-repository file rather than as a program. Declared capabilities:
 
 ## Inputs
 
-| Input | Description | Unit or values |
-| --- | --- | --- |
+| Input         | Description                                                 | Unit or values           |
+| ------------- | ----------------------------------------------------------- | ------------------------ |
 | Document path | fixed by the registry to `docs/architecture/PROJECT_MAP.md` | repository-relative path |
-| Host platform | selects the open mechanism | Windows, macOS, or other |
+| Host platform | selects the open mechanism                                  | Windows, macOS, or other |
 
 There are no user-supplied parameters. Nothing about the document is
 configurable from the tile.
 
 ## Outputs
 
-| Output | Description |
-| --- | --- |
+| Output            | Description                                                                                     |
+| ----------------- | ----------------------------------------------------------------------------------------------- |
 | Rendered document | the Project Map opened for reading, in a launcher document view or in the system default viewer |
-| Exit status | non-zero from the proxy runner when the file is missing or cannot be opened |
+| Exit status       | non-zero from the proxy runner when the file is missing or cannot be opened                     |
 
 The document itself carries, as of its version 2.1.1 header dated 2026-06-10,
 sixteen sections: launcher tiles, physics engines, the model gait and
@@ -77,6 +77,7 @@ which is the same registry pair that declares this tile.
   current inventory.
 
 ## See Also
+
 - [Project Map document](../architecture/PROJECT_MAP.md)
 - [System overview](../architecture/system_overview.md)
 - [Feature roadmap](../architecture/feature_roadmap.md)

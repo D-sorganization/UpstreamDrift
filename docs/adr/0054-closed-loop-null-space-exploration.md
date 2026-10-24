@@ -84,8 +84,9 @@ NSX research views may display `INVARIANT` quantities, envelopes and
 representatives while `output_policy.py` continues to withhold joint loads from
 swing reports without calibration and evidence.
 
-*Option A (recommended): two surfaces, evidence-axis mapping.*
+_Option A (recommended): two surfaces, evidence-axis mapping._
 `display_decision(record, surface)` returns a decision per surface.
+
 - Research surface (the NSX tabs and panel): `INVARIANT` quantities are shown
   with a model-provenance badge. `FAMILY_DEPENDENT` quantities are shown only
   as bands, or as a labelled representative overlaid on its band under a named
@@ -94,11 +95,11 @@ swing reports without calibration and evidence.
   already admits that output name with calibration and evidence. The default
   for an unknown combination is to withhold.
 
-*Option B: research views only.* NSX is shown in the research tabs. It is
+_Option B: research views only._ NSX is shown in the research tabs. It is
 never exposed to the swing report or any export path, even when the policy
 would admit the output.
 
-*Option C: policy extension.* `output_policy.py` gains a new advertised class
+_Option C: policy extension._ `output_policy.py` gains a new advertised class
 for `INVARIANT` quantities with uncertainty, so they can enter swing reports
 as well.
 

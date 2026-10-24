@@ -1178,11 +1178,15 @@ runs two passes:
   marker at weight 0, so the bar cannot pull the trunk.
 \item \textbf{Reach solve.} With the seed's first-state body held and the arm
   chain at the hold, a bounded least-squares solve (scipy TRF, the model
-  ranges as bounds) moves \texttt{arm\_flex}, \texttt{arm\_add},
+  ranges as bounds with an interior bound margin $\delta = 1\times 10^{-3}$\,rad,
+  \texttt{ARM\_REACH\_BOUND\_MARGIN\_RAD}) moves \texttt{arm\_flex}, \texttt{arm\_add},
   \texttt{arm\_rot} and \texttt{elbow\_flex} on each side until the hand's
   centre of mass, which is the weld's grip point, lies on that hand's bundle
   grip (\texttt{LiftTargets.grip\_m}). A prior of $10^{-3}$\,m/rad towards
   the hold picks among the solutions. The forearm and wrist stay at the hold.
+  In unconstrained IK, the coordinate task targets are similarly clipped inside
+  $[q_\mathrm{min} + \delta, q_\mathrm{max} - \delta]$ with
+  \texttt{ARM\_TASK\_BOUND\_MARGIN\_RAD} ($10^{-3}$\,rad) to prevent numerical boundary drift.
 \end{enumerate}
 The model is then rebuilt with those arms as its hold
 (\texttt{build\_lift\_model(arm\_coordinates=\ldots)}). The bar weld is
@@ -1248,14 +1252,20 @@ state of the window:
   (\texttt{arm\_flex} 67.2/88.9$^\circ$, pronation 30.7/55.0$^\circ$), so the
   committed solve moves only the four shoulder and elbow coordinates, with
   the hold prior.
+\item Direct arm coordinate clamping in IK: Clamping the arm coordinates
+  alongside coordinate tasks and the two-hand welded barbell constraint triggers an
+  Ipopt infeasibility assembly error (\texttt{AssemblySolver::assemble() Failed:
+  Ipopt: Infeasible problem detected (status 2)}). Clamping was therefore left off
+  for the arms (\texttt{\_UNCLAMPED\_PREFIXES}), and the interior bound margin was
+  used instead.
 \end{itemize}
 
 \paragraph{Limitations.} The marker gate is met. The Hicks residual gate is
-not, because of the state-0 settling transient, and stays open on \#13048
-(both items below are resolved by OSL-17, next subsection).
-Closing it needs either a bundle window that starts at rest on its contact,
-or derivatives that use the bundle's own states before the window. The
-bundle's bar position is a fitted shelf in front of the face, not a
+resolved by the high-bar rack and settled lead-in of OSL-17 (next subsection).
+With the interior bound margin on the arm reach solve and task targets,
+coordinate range overshoot is eliminated (zero violations, empty receipt),
+fully meeting the OSL-12 acceptance criteria on the back squat.
+The bundle's bar position is a fitted shelf in front of the face, not a
 back-squat rack, so these arm poses are not a back-squat technique. The
 reaching arms are fitted at the first state only; the IK then tracks the bar.
 Reproduce with \texttt{MUJOCO\_GL=egl python3 scripts/measure\_opensim\_lift\_ik\_id.py}
@@ -1825,11 +1835,11 @@ The table below summarizes muscle evaluation and residual gate metrics across al
 \toprule
 Lift & Status & Classification & Window (s) & Mean Reserve & Peak Reserve & Pelvis Force (N, vs Hicks) & Pelvis Moment (N\,m, vs Hicks) & Within / Outside\\
 \midrule
-Squat & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 56.9\% & 67.7\% & 23.70 (vs 146.93) & 12.02 (vs 18.64) & Within\\
-Deadlift & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 17.3\% & 20.2\% & 288.23 (vs 110.92) & 147.88 (vs 18.28) & Outside\\
-Bench Press & \texttt{unavailable} & \texttt{unqualified} & unavailable & unavailable & unavailable & unavailable & unavailable & unavailable\\
-Snatch & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 37.7\% & 71.3\% & 463.57 (vs 155.12) & 202.60 (vs 27.10) & Outside\\
-Clean \& Jerk & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 38.9\% & 58.5\% & 458.52 (vs 223.10) & 259.03 (vs 38.77) & Outside\\
+Squat & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 56.9\% & 67.7\% & 23.82 (vs 146.93) & 11.75 (vs 18.64) & Within\\
+Deadlift & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 17.3\% & 20.2\% & 288.29 (vs 110.92) & 148.02 (vs 18.28) & Outside\\
+Bench Press & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 6.0\% & 26.3\% & 511.58 (vs 221.85) & 318.32 (vs 23.54) & Outside\\
+Snatch & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 37.7\% & 71.3\% & 463.21 (vs 155.12) & 202.62 (vs 27.10) & Outside\\
+Clean \& Jerk & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 38.9\% & 58.5\% & 458.56 (vs 223.10) & 259.00 (vs 38.77) & Outside\\
 \bottomrule
 \end{tabular}}
 \end{center}
@@ -1837,9 +1847,9 @@ Clean \& Jerk & \texttt{complete} & \texttt{unqualified} & 0.0--0.2 & 38.9\% & 5
 \subparagraph{Evaluation Findings and Limitations.}
 Three plain findings apply to this evaluation:
 \begin{enumerate}
-\item The analyzed window is the 0.2\,s LIFT-5 engine window from the setup, so it covers the start of the pull only, not the whole lift and not the jerk.
-\item Every lift is \texttt{unqualified}, and deadlift, snatch, and clean and jerk also fail the Hicks residual gate.
-\item Bench press is unavailable (no supine IK).
+\item The analyzed window is the 0.2\,s LIFT-5 engine window from the setup (unrack for bench press, start of pull for deadlift/snatch/clean and jerk, bottom for squat), so it does not cover the full lift, chest press, or jerk.
+\item Every lift is \texttt{unqualified}. Squat passes the Hicks residual gate but fails reserve share (56.9\%); bench press, deadlift, snatch, and clean and jerk fail the Hicks residual gate.
+\item Bench press is solved in a supine posture with bench back-sphere contact external loads. However, the Rajagopal model contains 80 lower-limb muscles only; all 14 upper-limb coordinates lack muscles and are driven 100\% by coordinate/reserve actuators (peak elbow flexion moment $414.9\,\mathrm{N\cdot m}$, arm rotation $249.3\,\mathrm{N\cdot m}$); arm and chest muscle forces were not solved.
 \end{enumerate}
 
 \paragraph{Coordinate Breakdown and Ground Shear Asymmetry.}
@@ -1870,6 +1880,100 @@ coordinate errors and reached \texttt{Maximum\_Iterations\_Exceeded} with object
 QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
     python3 scripts/measure_opensim_lift_muscles.py \
     --out docs/development/lifting/evidence/opensim_muscles/receipts.json
+\end{verbatim}
+
+\subsection{OpenSim Barbell Lift Joint Reactions (OSL-5, Issue \#13043)}\label{sec:opensim-joint-reactions}
+\paragraph{Method and Formulation.}
+OSL-5 computes the 3D internal joint reaction loads across the barbell lift motion window
+by applying the OpenSim \texttt{JointReaction} analysis to the static-optimization muscle forces and kinematics.
+Loads are evaluated across four primary anatomical articulation sites:
+\begin{enumerate}[noitemsep]
+\item \textbf{L5/S1 Lumbar Joint:} Evaluated at the OpenSim \texttt{back} joint connecting \texttt{pelvis\_offset} (parent)
+  and \texttt{torso\_offset} (child). Reaction forces are extracted in the inferior body coordinate frame
+  (pelvis ISB convention: $+X$ anterior, $+Y$ cranial, $+Z$ right), and also rotated into the longitudinal torso coordinate frame.
+  \textit{Qualification}: lower bound: no trunk muscles; the lumbar moment is an ideal actuator.
+\item \textbf{Knee Tibiofemoral Joint:} Contact load across \texttt{walker\_knee\_r} and \texttt{walker\_knee\_l},
+  reported as the 3D resultant spatial force norm.
+\item \textbf{Knee Patellofemoral Joint:} Evaluated across \texttt{patellofemoral\_r} and \texttt{patellofemoral\_l}.
+  The \texttt{RajagopalLaiUhlrich2023} model explicitly includes articulated patellofemoral joints.
+\item \textbf{Shoulder Glenohumeral Joint:} Evaluated at the \texttt{acromial\_r} and \texttt{acromial\_l} joints.
+  In this model, the shoulder joints are articulated CustomJoints (three rotational DOFs, not welded).
+\end{enumerate}
+
+\paragraph{Key Limitations: Absence of Trunk Muscles and Inherited Qualification.}
+The Rajagopal model lacks active trunk extensor muscles (e.g., erector spinae).
+The sagittal lumbar extension moment is supplied entirely by an ideal coordinate actuator
+(\texttt{lumbar\_extension}), with a measured peak demand of $665.32\,\mathrm{N\cdot m}$ in the squat solve.
+Because coordinate actuators apply pure generalized forces without muscular line-of-action compression,
+the computed L5/S1 joint reaction force excludes trunk muscular co-contraction. It constitutes a
+gravity-plus-inertia lower bound rather than an anatomical spinal compression estimate.
+The segmental spine model (\#12735) is identified as the required path for active multi-segment trunk load.
+Furthermore, the underlying OSL-4 static optimization solve is classified as \texttt{unqualified},
+with a mean reserve actuator share of $0.5695$ and peak share of $0.6766$ (exceeding the $0.05$ threshold).
+All reaction loads inherit this unqualified status.
+
+\paragraph{Analytic Bound and Dynamic Squat Frame Evaluation.}
+To verify sign conventions and coordinate frame extraction, an analytic bound is first evaluated at
+an upright, zero-velocity, zero-acceleration default pose:
+\begin{equation}
+W_{\text{above}} \le \text{Compression} \le W_{\text{above}} + \sum_{m} F_m
+\end{equation}
+where $W_{\text{above}} = M_{\text{above}} g$ is the gravitational weight of all bodies superior to L5/S1 (torso $32.4045\,\mathrm{kg}$, arms $4.0934\,\mathrm{kg}$, barbell $100.0\,\mathrm{kg}$, total $M_{\text{above}} = 136.4979\,\mathrm{kg}$, $W_{\text{above}} = 1338.59\,\mathrm{N}$).
+Muscles crossing L5/S1 are verified dynamically from geometry paths; exactly 0 muscles cross between the torso and pelvis/legs in Rajagopal, giving $\sum F_m = 0.0\,\mathrm{N}$.
+At the default pose, compression is $1338.59\,\mathrm{N}$ with an absolute residual of $2.27 \times 10^{-13}\,\mathrm{N}$ (\texttt{passed: True}). This test verifies frame and sign self-consistency only, and does not verify dynamic lift validity.
+
+The bound was additionally evaluated on the dynamic squat frame with minimal generalized acceleration norm:
+frame 40 ($t = 0.2000\,\mathrm{s}$, $\|\ddot{q}\| = 20.0378\,\mathrm{rad/s^2}$, $W_{\text{above}} = 1338.59\,\mathrm{N}$).
+Measured compression is $1437.27\,\mathrm{N}$ in the pelvis frame and $1030.71\,\mathrm{N}$ in the torso frame.
+The lower bound $W_{\text{above}} \le \text{Comp}$ is satisfied in the pelvis frame ($1338.59 \le 1437.27$) but not the torso frame ($1338.59 \le 1030.71$).
+The upper bound $\text{Comp} \le W_{\text{above}} + \sum F_m$ is satisfied in the torso frame ($1030.71 \le 1338.59$) but not the pelvis frame ($1437.27 \le 1338.59$).
+Because both inequalities do not hold simultaneously, this dynamic check honestly reports \texttt{passed: False}, reflecting the influence of dynamic pelvis accelerations, trunk inclination, and the absence of trunk musculature.
+
+\paragraph{Measured Back Squat Joint Reactions.}
+Across the 41-frame squat bottom inflection slice ($0.00\,\mathrm{s}$ to $0.20\,\mathrm{s}$, lifter mass $80.31\,\mathrm{kg}$, body weight $787.60\,\mathrm{N}$, barbell mass $100.0\,\mathrm{kg}$),
+the measured reaction loads and qualifications are:
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llcccc}
+\toprule
+Joint Articulation & Qualification Status & Mean (N) & Peak (N) & Mean (BW) & Peak (BW)\\
+\midrule
+L5/S1 Compression ($+F_y$, pelvis) & lower bound: ideal actuator & 1579.32 & 1683.66 & 2.01 & 2.14\\
+L5/S1 AP Shear ($+F_x$, pelvis) & lower bound: ideal actuator & -956.85 & -989.32 & -1.21 & -1.26\\
+L5/S1 Compression ($+F_y$, torso) & lower bound: ideal actuator & 1104.77 & 1158.95 & 1.40 & 1.47\\
+L5/S1 AP Shear ($+F_x$, torso) & lower bound: ideal actuator & -1480.75 & -1555.69 & -1.88 & -1.98\\
+Knee Tibiofemoral Resultant & unqualified (OSL-4 reserves) & 10154.88 & 11997.15 & 12.89 & 15.23\\
+Knee Patellofemoral Resultant & unqualified (OSL-4 reserves) & 9295.27 & 12205.18 & 11.80 & 15.50\\
+Shoulder Glenohumeral Resultant & unqualified (OSL-4 reserves) & 714.06 & 732.62 & 0.91 & 0.93\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Movement Optimizer Aligned Cross-Check.}
+Movement Optimizer (\texttt{movement\_optimizer.spine\_loads}) computes a planar ergonomic rigid-body estimate
+of spinal load based on $(m_{\text{above}} + m_{\text{bar}}) g$ projected along the torso inclination angle,
+plus planar inertial terms. OpenSim native reactions are decomposed in the pelvis frame.
+To establish a like-for-like comparison, OpenSim reactions were rotated into the longitudinal torso axis
+(matching the MO torso angle definition), and Movement Optimizer was evaluated with OpenSim's exact $M_{\text{above}} = 136.50\,\mathrm{kg}$
+(default MO uses Winter fractions yielding $M_{\text{above}} = 154.45\,\mathrm{kg}$).
+Torso inclination averages $42.58^\circ$ (peak $45.19^\circ$).
+Default MO predicts mean compression $807.98\,\mathrm{N}$ (peak $851.13\,\mathrm{N}$) and AP shear $-1219.75\,\mathrm{N}$ (peak $-1228.80\,\mathrm{N}$).
+Aligned MO predicts mean compression $724.83\,\mathrm{N}$ (peak $757.81\,\mathrm{N}$) and AP shear $-1083.96\,\mathrm{N}$ (peak $-1089.20\,\mathrm{N}$).
+Against a pre-evaluation tolerance of $50.0\,\mathrm{N}$, the residual differences between OpenSim torso reactions and aligned MO are:
+compression mean difference $+379.94\,\mathrm{N}$ (peak $+439.35\,\mathrm{N}$), and AP shear mean difference $-396.78\,\mathrm{N}$ (peak $+467.04\,\mathrm{N}$).
+The tolerance is not satisfied because Movement Optimizer assumes a stationary pelvis and planar kinematics,
+whereas OpenSim incorporates 3D multi-body dynamics, vertical pelvis inflection acceleration ($a_y > 0$), and 3D coordinate coupling.
+
+\paragraph{Status of Other Four Lifts.}
+The remaining four barbell lifts (\texttt{deadlift}, \texttt{bench\_press}, \texttt{snatch}, \texttt{clean\_and\_jerk})
+are reported as \texttt{unavailable} with reason \texttt{"no OSL-4 muscle solve (needs OSL-3 \#13041 bundles)"}.
+Values are explicitly recorded as null rather than synthetic zeros.
+
+\paragraph{Reproduction Command.}
+\begin{verbatim}
+UPSTREAMDRIFT_MSK_BASE_MODEL=$HOME/Repositories/ud-13044/shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim \
+PYTHONPATH=$PWD QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg \
+    python3 scripts/measure_opensim_lift_joint_reactions.py \
+    --out docs/development/lifting/evidence/opensim_joint_reactions/receipts.json
 \end{verbatim}
 
 \subsection{Predictive Moco Deadlift (OSL-7, Issue \#13044)}\label{sec:opensim-predictive-deadlift}
@@ -2116,11 +2220,11 @@ moment threshold 1\,\% of COM height $\times$ peak external force).
 \toprule
 Lift & Marker RMS / Max (m) & Segment RMS (rad) & Reach Miss L / R & Max Overshoot (rad) & Pelvis Force / Limit (N) & Pelvis Moment / Limit (N\,m) \\
 \midrule
-Squat & 0.0164 / 0.0304 & 0.0169 & 0.00 / 1.51\,mm & $4.18\times 10^{-5}$ & \textbf{23.70 / 146.93} & \textbf{12.02 / 18.64} \\
-Deadlift & 0.0112 / 0.0390 & 0.0158 & 7.11 / 6.91\,$\mu$m & $6.5\times 10^{-4}$ & 288.23 / 110.92 & 147.88 / 18.28 \\
-Bench Press & 0.0160 / 0.0554 & 0.0248 & 12.5\,$\mu$m / 6.37\,mm & $2.12\times 10^{-3}$ & 511.26 / 32.49 & 318.13 / 3.45 \\
-Snatch & 0.0089 / 0.0579 & 0.0095 & 7.68 / 7.57\,$\mu$m & $3.8\times 10^{-4}$ & 463.57 / 155.12 & 202.60 / 27.10 \\
-Clean \& Jerk & 0.0198 / 0.1612 & 0.0220 & 6.43 / 6.02\,$\mu$m & $2.3\times 10^{-3}$ & 458.52 / 223.10 & 259.03 / 38.77 \\
+Squat & 0.0164 / 0.0304 & 0.0169 & 2.53\,$\mu$m / 1.94\,mm & 0 (none) & \textbf{23.82 / 146.93} & \textbf{11.75 / 18.64} \\
+Deadlift & 0.0112 / 0.0391 & 0.0158 & 7.10 / 6.90\,$\mu$m & $6.1\times 10^{-4}$ & 288.29 / 110.92 & 148.02 / 18.28 \\
+Bench Press & 0.0160 / 0.0556 & 0.0248 & 12.5\,$\mu$m / 6.67\,mm & $1.4\times 10^{-3}$ & 511.58 / 221.85 & 318.32 / 23.54 \\
+Snatch & 0.0089 / 0.0579 & 0.0095 & 7.68 / 7.57\,$\mu$m & $3.8\times 10^{-4}$ & 463.21 / 155.12 & 202.62 / 27.10 \\
+Clean \& Jerk & 0.0198 / 0.1612 & 0.0220 & 6.43 / 6.01\,$\mu$m & $2.2\times 10^{-3}$ & 458.56 / 223.10 & 259.00 / 38.77 \\
 \bottomrule
 \end{tabular}
 \caption{Measured OpenSim IK and ID Metrics Across All Five Barbell Lifts (OSL-3).
@@ -2145,6 +2249,56 @@ To reproduce the barbell bundle generation and OpenSim IK/ID measurements:
 python3 scripts/generate_barbell_squat_evidence.py --lift <lift> --part bundle
 MUJOCO_GL=egl python3 scripts/measure_opensim_lift_ik_id.py
 python3 -m pytest -o addopts="" tests/unit/lifting/test_opensim_lift_ik_id.py
+\end{verbatim}
+
+\subsection{Lift Kinetics Parity Across All Five Lifts (OSL-8, Issue \#13045)}\label{sec:lift-kinetics-parity-all-five}
+\paragraph{Cross-Engine Contact and Grip Kinetics Parity.}
+Issue \#13045 generalizes the LIFT-7 back-squat kinetics parity framework (\texttt{src/shared/python/lifting/kinetics\_parity.py} and \texttt{scripts/measure\_lift\_kinetics\_parity.py}) across all five registered barbell lift bundles in \texttt{SAME\_INPUT\_LIFT\_BUNDLES} (\texttt{back\_squat}, \texttt{deadlift}, \texttt{bench\_press}, \texttt{snatch}, and \texttt{clean\_and\_jerk}).
+At each reference state (11 states sampled with stride 20 across the 200-frame kinematic window), the ground-reaction breakdown (per-foot force, net force, centre of pressure, and free moment about the vertical axis) and hand grip wrench (per-hand force and couple) are evaluated across MuJoCo, Drake, Pinocchio, and OpenSim same-input adapters.
+
+Tolerances remain fixed at acceleration parity level L1: $|\Delta X| \le 10^{-6} + 10^{-8} \max |X|$\,N or N\,m, and $10^{-8}$\,m for the centre of pressure (CoP).
+Table~\ref{tab:kinetics-parity-all-five} presents the largest measured differences from MuJoCo across all evaluated states. Across all five lifts, net ground reaction force agrees within $3.6\times 10^{-10}$\,N, net CoP agrees within $6.8\times 10^{-14}$\,m, and net free moment agrees within $1.9\times 10^{-11}$\,N\,m. Drake grip net force and couple agree with MuJoCo within $6.5\times 10^{-10}$\,N and $2.1\times 10^{-10}$\,N\,m. In Pinocchio and OpenSim, same-input adapters do not implement closure-multiplier extraction, reporting grip wrench as unavailable with an explicit reason string.
+
+\begin{table}[h]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llccccc}
+\toprule
+Lift & Engine & Net GRF (N) & Net CoP (m) & Net Free Moment (N\,m) & Grip Force (N) & Grip Couple (N\,m) \\
+\midrule
+Back Squat & Drake & $2.33\times 10^{-10}$ & $4.01\times 10^{-15}$ & $6.89\times 10^{-12}$ & $6.42\times 10^{-10}$ & $2.02\times 10^{-10}$ \\
+Back Squat & Pinocchio & $2.53\times 10^{-10}$ & $5.18\times 10^{-15}$ & $4.47\times 10^{-12}$ & unavailable & unavailable \\
+Back Squat & OpenSim & $1.51\times 10^{-10}$ & $4.28\times 10^{-15}$ & $5.64\times 10^{-12}$ & unavailable & unavailable \\
+\midrule
+Deadlift & Drake & $2.96\times 10^{-10}$ & $1.24\times 10^{-14}$ & $3.54\times 10^{-12}$ & $3.00\times 10^{-11}$ & $3.57\times 10^{-11}$ \\
+Deadlift & Pinocchio & $1.82\times 10^{-10}$ & $1.13\times 10^{-14}$ & $2.82\times 10^{-12}$ & unavailable & unavailable \\
+Deadlift & OpenSim & $1.86\times 10^{-10}$ & $1.44\times 10^{-14}$ & $3.52\times 10^{-12}$ & unavailable & unavailable \\
+\midrule
+Bench Press & Drake & $1.95\times 10^{-10}$ & $6.75\times 10^{-14}$ & $2.97\times 10^{-13}$ & $9.45\times 10^{-11}$ & $1.13\times 10^{-10}$ \\
+Bench Press & Pinocchio & $9.12\times 10^{-11}$ & $2.06\times 10^{-14}$ & $1.91\times 10^{-13}$ & unavailable & unavailable \\
+Bench Press & OpenSim & $4.88\times 10^{-11}$ & $3.31\times 10^{-14}$ & $3.60\times 10^{-13}$ & unavailable & unavailable \\
+\midrule
+Snatch & Drake & $3.40\times 10^{-10}$ & $1.39\times 10^{-14}$ & $1.86\times 10^{-11}$ & $4.23\times 10^{-11}$ & $5.72\times 10^{-11}$ \\
+Snatch & Pinocchio & $2.07\times 10^{-10}$ & $1.36\times 10^{-14}$ & $1.04\times 10^{-11}$ & unavailable & unavailable \\
+Snatch & OpenSim & $1.25\times 10^{-10}$ & $1.47\times 10^{-14}$ & $6.85\times 10^{-12}$ & unavailable & unavailable \\
+\midrule
+Clean and Jerk & Drake & $3.57\times 10^{-10}$ & $1.01\times 10^{-14}$ & $4.10\times 10^{-12}$ & $9.08\times 10^{-11}$ & $1.18\times 10^{-10}$ \\
+Clean and Jerk & Pinocchio & $2.73\times 10^{-10}$ & $1.36\times 10^{-14}$ & $2.69\times 10^{-12}$ & unavailable & unavailable \\
+Clean and Jerk & OpenSim & $2.75\times 10^{-10}$ & $1.52\times 10^{-14}$ & $3.46\times 10^{-12}$ & unavailable & unavailable \\
+\bottomrule
+\end{tabular}
+\caption{Largest Measured Cross-Engine Kinetics Differences From MuJoCo Across All Five Lifts (OSL-8).}
+\label{tab:kinetics-parity-all-five}
+\end{table}
+
+\paragraph{Inverse Dynamics and Joint Moments Investigation.}
+The same-input adapters for MuJoCo, Drake, and Pinocchio (\texttt{VectorPlant} and the respective full-body engine models) implement forward-dynamics evaluation ($\ddot{q}(q, v, \tau)$), closed-loop kinematic weld residuals, and contact kinematics. None of the same-input adapters expose an inverse-dynamics pipeline to compute joint moments under external ground and grip forces. In contrast, OpenSim evaluates inverse dynamics through its dedicated \texttt{InverseDynamicsSolver} pipeline (\texttt{opensim\_full\_body\_lifts.py}), applying external ground and hand wrenches to \texttt{calcn\_l}/\texttt{calcn\_r} and \texttt{hand\_l}/\texttt{hand\_r}.
+Per OSL-8 scope, joint moments across same-input adapters are recorded as unavailable with the exact reason string rather than constructing an unvetted ID pipeline.
+
+\paragraph{Reproduction Commands.}
+To evaluate cross-engine kinetics parity across all five registered barbell lifts:
+\begin{verbatim}
+MUJOCO_GL=egl python3 scripts/measure_lift_kinetics_parity.py --lift all
+python3 -m pytest -o addopts="" tests/unit/lifting/test_squat_kinetics_parity.py
 \end{verbatim}
 
 \section{Measured Parity Results}

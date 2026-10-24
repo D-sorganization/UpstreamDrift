@@ -18,6 +18,12 @@
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "reason": "Issue #12042 temporary exception while turn metrics, weld projection, and IK restart policies are decomposed from pipeline CLI (1457 lines).",
       "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/grip_contact/matlab_kernel.py",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "reason": "Issue #13334/#13544 MATLAB grip codegen kernel with committed-path export serialization; scheduled decomposition (1214 lines).",
+      "expires_on": "2026-11-30"
     }
   ]
 }

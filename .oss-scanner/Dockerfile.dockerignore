@@ -1,0 +1,54 @@
+# Build-context filter for .oss-scanner/Dockerfile (issue #13658). BuildKit
+# uses <Dockerfile>.dockerignore in preference to the root .dockerignore, which
+# drops tests/ and conftest.py that the security audit needs. This keeps the
+# source, tests and lockfiles and drops VCS metadata, secrets, caches, build
+# output and the large MATLAB/Simscape models that are out of scan scope.
+
+# VCS metadata and credentials never enter the image
+.git
+**/.git
+
+# Local environment and secrets (keep the example templates)
+.env
+.env.*
+!.env.example
+!.env.docker.example
+**/*.pem
+**/*.key
+
+# Agent and editor state
+.claude
+.codex
+.cursor
+.gemini
+.vscode
+.idea
+
+# Virtual environments, caches and build output
+.venv
+**/.venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.benchmarks
+htmlcov
+.coverage
+target
+**/target
+ui/dist
+build
+dist
+*.egg-info
+
+# Out of scan scope: MATLAB/Simscape models, bulky docs and evidence
+# artifacts, generated output and logs
+docs
+evidence
+src/engines/Simscape_Multibody_Models
+output
+logs
+*.log
+*.db

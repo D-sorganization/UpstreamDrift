@@ -23,18 +23,18 @@ single recorded trajectory of robot motion.
 
 **Fields:**
 
-| Field                | Type                       | Default           | Description                               |
+| Field | Type | Default | Description |
 | -------------------- | -------------------------- | ----------------- | ----------------------------------------- | ------------------------------ |
-| `timestamps`         | `NDArray` shape `(T,)`     | required          | Time values for each frame in seconds.    |
-| `joint_positions`    | `NDArray` shape `(T, n_q)` | required          | Joint positions at each timestep.         |
-| `joint_velocities`   | `NDArray` shape `(T, n_v)` | required          | Joint velocities at each timestep.        |
-| `actions`            | `NDArray` shape `(T, n_u)` | `None`            | Control actions applied at each timestep. |
-| `end_effector_poses` | `NDArray` shape `(T, 7)`   | `None`            | EE poses [x,y,z,qw,qx,qy,qz].             |
-| `contact_states`     | `list[list[dict]]`         | `None`            | Contact info per timestep.                |
-| `task_id`            | `str                       | None`             | `None`                                    | Task identifier for filtering. |
-| `success`            | `bool`                     | `True`            | Whether the demonstration was successful. |
-| `source`             | `str`                      | `"teleoperation"` | Source of the demonstration.              |
-| `metadata`           | `dict[str, Any]`           | `{}`              | Arbitrary additional metadata.            |
+| `timestamps` | `NDArray` shape `(T,)` | required | Time values for each frame in seconds. |
+| `joint_positions` | `NDArray` shape `(T, n_q)` | required | Joint positions at each timestep. |
+| `joint_velocities` | `NDArray` shape `(T, n_v)` | required | Joint velocities at each timestep. |
+| `actions` | `NDArray` shape `(T, n_u)` | `None` | Control actions applied at each timestep. |
+| `end_effector_poses` | `NDArray` shape `(T, 7)` | `None` | EE poses [x,y,z,qw,qx,qy,qz]. |
+| `contact_states` | `list[list[dict]]` | `None` | Contact info per timestep. |
+| `task_id` | `str                       | None` | `None` | Task identifier for filtering. |
+| `success` | `bool` | `True` | Whether the demonstration was successful. |
+| `source` | `str` | `"teleoperation"` | Source of the demonstration. |
+| `metadata` | `dict[str, Any]` | `{}` | Arbitrary additional metadata. |
 
 **Validation.** The `__post_init__` method enforces that `timestamps`,
 `joint_positions`, and `joint_velocities` all share the same first dimension

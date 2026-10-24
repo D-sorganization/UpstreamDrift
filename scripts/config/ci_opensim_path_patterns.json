@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "label": "ci:opensim",
+  "doc_only_globs": ["docs/**", "**/*.md", "*.md", "LICENSE", ".gitignore"],
+  "path_globs": [
+    ".github/workflows/ci-requires-opensim.yml",
+    "scripts/classify_ci_changes.py",
+    "scripts/config/ci_opensim_path_patterns.json",
+    "shared/models/opensim/**",
+    "src/engines/physics_engines/opensim/**",
+    "src/opensim_models/**",
+    "src/shared/python/physics/**",
+    "tests/engines/opensim/**",
+    "tests/opensim/**",
+    "tests/unit/grip_contact/test_opensim*.py",
+    "tests/unit/lifting/**"
+  ]
+}

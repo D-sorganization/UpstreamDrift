@@ -180,4 +180,4 @@ Tools used by biomechanists, universities, and elite tour coaches.
 | **Simulators**      | TrackMan, GSPro, E6 Connect     | We are **not** a game. We are an engineering tool that can _simulate_ a game for validtion.                           |
 | **Launch Monitors** | Foresight, Garmin, Uneekor      | We are hardware-agnostic. We consume their data to power deeper analysis.                                             |
 | **Coaching Apps**   | Sportsbox AI, V1 Sports, Onform | We offer "Glass Box" transparency. We show the _forces_ and _muscles_, not just the positions.                        |
-| **Biomechanics**    | Optical, OpenSim, Visual3D        | We are the **integrator**. We combine the rigour of OpenSim with the speed of MuJoCo and the accessibility of Python. |
+| **Biomechanics**    | Optical, OpenSim, Visual3D      | We are the **integrator**. We combine the rigour of OpenSim with the speed of MuJoCo and the accessibility of Python. |

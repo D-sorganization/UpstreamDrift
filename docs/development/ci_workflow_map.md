@@ -83,7 +83,6 @@ ordinary PR review.
 | -------------------------- | ------------------------------------------------------------------------------------------- |
 | `auto-update-prs.yml`      | Rebase/update open PRs after `main` changes.                                                |
 | `pr-auto-labeler.yml`      | Applies scope and size labels to PRs.                                                       |
-| `PR-Comment-Responder.yml` | Collects PR comments for downstream processing.                                             |
 | `release.yml`              | Exact-main companion artifacts plus draft-first, attested tag releases and PyPI publishing. |
 | `tauri-build.yml`          | Desktop application build and release validation.                                           |
 

@@ -1,19 +1,19 @@
 # Autofix Safety: Require review for workflow and script changes
-.github/workflows/ @dieterolson @D-sorganization/security-reviewers
-scripts/ @dieterolson @D-sorganization/security-reviewers
+.github/workflows/ @D-sorganization/security-reviewers @D-sorganization/core-maintainers
+scripts/ @D-sorganization/security-reviewers @D-sorganization/core-maintainers
 
 # Core / critical surface (issue #5915: expand CODEOWNERS coverage)
-/src/ @dieterolson @D-sorganization/core-maintainers
+/src/ @D-sorganization/core-maintainers @D-sorganization/security-reviewers
 
 # Physics engine subtrees — dedicated ownership reduces bus-factor risk
-src/engines/ @dieterolson @D-sorganization/physics-team
-src/shared/python/ @dieterolson @D-sorganization/core-maintainers
+src/engines/ @D-sorganization/physics-team @D-sorganization/core-maintainers
+src/shared/python/ @D-sorganization/core-maintainers @D-sorganization/security-reviewers
 
 # API layer — security-sensitive; require security-reviewer sign-off
-src/api/ @dieterolson @D-sorganization/security-reviewers
+src/api/ @D-sorganization/security-reviewers @D-sorganization/core-maintainers
 
 # Shared auth module — extra gate on security-critical code
-src/api/auth/ @dieterolson @D-sorganization/security-reviewers
+src/api/auth/ @D-sorganization/security-reviewers @D-sorganization/core-maintainers
 
 # No blanket *.py owner — rely on per-package ownership above to reduce
 # bus-factor risk (issue #3074).

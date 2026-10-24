@@ -28,7 +28,7 @@ This approach maximizes code reuse, ensures consistent validation, and creates a
 | Component               | Purpose                     | Strengths                             | Limitations                           |
 | ----------------------- | --------------------------- | ------------------------------------- | ------------------------------------- |
 | `URDFBuilder`           | Manual segment construction | Strong validation, handedness support | No parametric generation, manual-only |
-| `MuJoCo I/O`            | Bidirectional MJCF↔URDF    | Good format conversion                | Engine-specific, no standalone use    |
+| `MuJoCo I/O`            | Bidirectional MJCF↔URDF     | Good format conversion                | Engine-specific, no standalone use    |
 | `Pinocchio Exporter`    | YAML→URDF                   | Composite joint expansion             | Tightly coupled to YAML spec          |
 | `HumanoidURDFGenerator` | Parametric humanoid         | Anthropometry, multiple inertia modes | No general-purpose builder            |
 | `CharacterBuilder`      | High-level API              | Clean interface, presets              | Only humanoid models                  |

@@ -2741,6 +2741,91 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13666 | Drake samples the canonical mid_hands/club_head frames like Pinocchio; legacy grip names are aliases only and a missing frame fails closed instead of falling back to right_hand or the shaft; Align Drake autodiff fit theta with canonical URDF actuator count; Hand off the HRG-GS grip parity residuals: AGENT_HANDOFF entry for epic #13297 and xfail reasons pointing at the open tracking issues #13547 (MuJoCo deflection) and #13548 (OpenSim ten_finger); Grip contact: add antagonist pads opposite the heel, trigger and ten-finger little-finger pads so the neutral-pose closure preload exerts zero net force and moment on the club |
+| 2026-10-24 | #13518 | CI: set rust-cache cache-bin false so post steps stop deleting the shared host rustup binary (Refs Repository_Management#2138) |
+| 2026-10-24 | #13665 | Audit near-zero-mean CV callers: return NaN with reason in cross-engine runner and pendulum variability summary; Add load_coupling_law require_verified gate for SPN-3 cited coupling data; Pull club sole to ground at address IK; record sole height in calibrated receipt; Lock canonical driver seeds closure and weight-fraction gates in CI (#13109) |
+| 2026-10-24 | #13674 | Bump transitive undici to 8.12.3 in ui/package-lock.json to clear HIGH npm audit advisories that ejected every merge-queue entry |
+| 2026-10-24 | #13659 | Add .oss-scanner security-scan contract (project.yaml, offline audit Dockerfile, threat model) for the fleet scanner pilot |
+| 2026-10-24 | #13668 | Skip redundant OpenSim CI runs when unrelated PR labels are applied |
+| 2026-10-24 | #13671 | Bump ui lockfile (zod 4.6.7) to clear GHSA-mrhx-c7xc-m3w5 so the UI Security Audit and merge queue pass |
+| 2026-10-24 | #13425 | Model explorer headless export: support NPZ trajectories with 'q', document and verify results replay for anthro driver mjx_package with stiff weld constraint |
+| 2026-10-23 | #13661 | Critique physical grip-contact calibration and validation evidence |
+| 2026-10-23 | #13649 | Characterize the existing KnowledgePack search contract before provider synchronization. |
+| 2026-10-23 | #13652 | Exclude generated capability-atlas output from Tauri workflow path triggers |
+| 2026-10-23 | #13607 | Add loop null-space interpretation help and salvage tracking |
+| 2026-10-23 | #13651 | Clear deleted ThemeManager main-window wrappers during test cleanup |
+| 2026-10-23 | #13643 | Defer generated collation branch updates when the canonical queue preflight cannot verify editability |
+| 2026-10-23 | #13647 | Remove stale CI Requires OpenSim lane quarantine (squat JR + native muscle-effort tests pass for real since #13615) |
+| 2026-10-22 | #13637 | Route OpenSim classification and skip reporting through the existing reversible public hosted policy; fail closed on diff errors while preserving real engine Docker validation. |
+| 2026-10-22 | #13635 | Use Python 3.12 for the reviewed nightly cross-engine dependencies.; Prevent duplicate Xvfb startup in the motion-matching smoke command. |
+| 2026-10-22 | #13614 | Quarantine CI Requires OpenSim lane (RM #2252) until #13564 fix lands. |
+| 2026-10-22 | #13615 | Restore CI Requires OpenSim: squat JR kinematics revision 6 and native muscle-effort allocation. |
+| 2026-10-22 | #13631 | Use curl for actionlint bootstrap script download (Semgrep merge_group) |
+| 2026-10-22 | #13616 | Gate workflow edits with actionlint; fix cross-engine leaderboard publish concurrency expression |
+| 2026-10-22 | #13628 | Schedule nightly development log archiver workflow and noop contract test |
+| 2026-10-22 | #13621 | Reconcile development log against GitHub PR truth and archive terminal rows for fleet policy gate |
+| 2026-10-22 | #13617 | Remove @dieterolson from CODEOWNERS; keep team-based ownership |
+| 2026-10-21 | #13612 | Add fast PR/push and full merge-queue/scheduled tiers with a fail-closed required aggregate |
+| 2026-10-21 | #13599 | Repair CI lint, trusted governed policy consumption, publication detection coverage, and pre-push failure guidance |
+| 2026-10-21 | #13602 | Serialize Simscape grip committed-path generated export checks under xdist |
+| 2026-10-21 | #13600 | Stop realtime file-tail poll thread when last subscriber unsubscribes |
+| 2026-10-21 | #13603 | Register jaxsim_dashboard on engines.dashboards for feature-parity tile coverage |
+| 2026-10-21 | #13598 | engine docker cache steps per fleet contract |
+| 2026-10-21 | #13596 | Quarantine pilot for Simscape grip contact tests and audit validator (UD-CI-030) |
+| 2026-10-21 | #13584 | Merge-queue-safe workflow cancel-in-progress audit and gh-readonly-queue push ignores (UD-CI-032). |
+| 2026-10-21 | #13586 | Retire Jules push/PR noise workflows batch 1 with archived rollback copies and post-merge gh disable. |
+| 2026-10-21 | #13589 | Add OpenSim CI failure triage snapshot, doc, and classifier script for UD-CI-002t. |
+| 2026-10-21 | #13588 | Record merge-queue batch-size experiment snapshots and fleet merge settings checker |
+| 2026-10-21 | #13583 | Move cross-engine leaderboard JSON publish off PR triggers (nightly and main push only). |
+| 2026-10-21 | #13585 | Gate OpenSim CI on paths or ci:opensim label with classify_ci_changes job |
+| 2026-10-21 | #13587 | Canonicalize grip-contact codegen floats and refresh Simscape MATLAB kernel/scenario exports.; Bump pillow to 13.0.0 and certifi to 2026.10.19 to clear pip-audit CVEs. |
+| 2026-10-20 | #13558 | Grip topology parity compares numerically-zero reference channels (peak <= 1e-8 N or N·m) absolutely instead of relatively; fixes myoHand frozen-finger law-level parity on roundoff spin channels |
+| 2026-10-20 | #13549 | Record the OSL epic handoff state (open PRs, owner decisions, rejected video work) |
+| 2026-10-20 | #13546 | grip_contact exporter --check now logs the drifted file and a bounded unified diff (flake diagnostics) |
+| 2026-10-20 | #13541 | HRG-E4 slice: event table detects pelvis reversal (peak pelvis_turn_isb between address and impact, distinct from max X-factor) and adds the six lab-frame pelvis/thorax terms; export schema v2 |
+| 2026-10-20 | #13529 | Add stateless Simscape physical grip contact codegen kernel, GS3DX_GripContact builder/runner, and M12 parity harness |
+| 2026-10-20 | #13538 | HRG-E4 slice: POST /biomechanics/anatomical-event-table serves the shared anatomical-angle event table (JSON/CSV) from calibrated arm frames |
+| 2026-10-20 | #13536 | Count bench support reaction in Hicks residual limit |
+| 2026-10-20 | #13532 | complete OSL-4 muscle solve and residual gating for supine bench press |
+| 2026-10-20 | #13527 | R4: the dynamics receipt records IK and FD knee flexion through the first static window (acceptance item 4 instrumentation) |
+| 2026-10-20 | #13525 | HRG-H2 diagnostic palm-thumb pad: drift-gated physical trail_palm_lead_thumb pair on the shared G2 law in separated_v2, impact timestep and preload sensitivity reports, and a new spec revision with its own spec_sha256; contract pinned by tests. |
+| 2026-10-20 | #13520 | Drake native golfer grip tests pass with real pydrake: default loader parses the generator humanoid (not the #13312 canonical golfer), actuator retrofit no longer calls num_velocities() before Finalize, humanoid_urdf.py split under 1200 lines and its size exceptions removed |
+| 2026-10-20 | #13504 | MuJoCo topology grip schedules each node friction row's solreffriction time to the shared law's secant slip gain every step (friction_secant_gain); ten_finger 0.04 s hold net_force 2.866% -> 0.413% RMS, ten_finger 0.10 s hold and swing pass all ten parity quantities, overlap/interlock per-hand forces 10-18% -> under 1% RMS |
+| 2026-10-20 | #13517 | Symmetric capsule line-contact quadrature integrates the shorter capsule axis (#13508) |
+| 2026-10-20 | #13515 | Add headless regression test for Drake-Simscape equivalence theta sizing (#13449). |
+| 2026-10-20 | #13472 | Reclassify grip_style as a physical pick across CLI, API, desktop and web and migrate legacy sidecars |
+| 2026-10-20 | #13498 | HRG-E3 slice: pelvis and thorax ISB lab-frame turn, tilt, obliquity and side-bend golf terms with golf-word aliases; thoracic/lumbar split marked unavailable |
+| 2026-10-20 | #13511 | ci(opensim): Real OpenSim job reuses a validated per-runner venv and opensim-models clone and stops uploading the GitHub pip cache from self-hosted runners |
+| 2026-10-20 | #13505 | Fix duplicate tex_skin_2 asset in MuJoCo with_head exports so the MJCF compiles |
+| 2026-10-20 | #13497 | Hang watchdog dumps stacks from a GIL-held Python handler so SIGUSR1 no longer segfaults the xdist controller (exit 139) |
+| 2026-10-20 | #13457 | Continuous capsule line-contact law (axial node quadrature) replaces the closest-point capsule law; MuJoCo emits node spheres with N-scaled friction time and drops the parallel-capsule workaround; MuJoCo 0.04 s ten_finger hold net_force RMS 2.866% is a strict xfail |
+| 2026-10-20 | #13478 | Re-lands the salvaged source-bound native OpenSim muscle-effort adapter and runtime with SDK-free contract tests; native tests skip without the SDK and no Manager advance has been executed. |
+| 2026-10-20 | #13491 | HRG-Q1 slice: full-body-v2 mass matrix and gravity qualified against a spec-only geometric-Jacobian reference on MuJoCo (measured rel. error <=4e-16, tol 1e-12) with a Pinocchio twin; Drake, OpenSim, MyoSuite, limits, closure, contact and ID remain open |
+| 2026-10-20 | #13503 | HRG-E4 slice: anatomical-angle event table (address/top/impact/finish) with CSV/JSON export carrying units, sign conventions, observability and receipts; JSON schema validated |
+| 2026-10-20 | #13499 | MuJoCo visual layer for full-body-v2: one rigid pelvis, abdomen and thorax visual per trunk segment, seam no-gap and physics-unchanged tests (HRG-D3 slice; renders deferred) |
+| 2026-10-20 | #13501 | Forward-dynamics replay reproducibility: deterministic replay test, seeded Lyapunov-style sensitivity probe (--replay-sensitivity), bounded 0.1 s post-impact FD metric, and a base-of-support bound on the ZMP filter centre-of-mass shift |
+| 2026-10-20 | #13496 | Stop CI Requires OpenSim queueing one run per main push |
+| 2026-10-20 | #13476 | Heavy lanes: install real pin/pin-pink wheels and isolate each lane in a venv |
+| 2026-10-20 | #13458 | Fix OpenSim capsule contact mesh ring alignment, CoP reporting, and BDF accuracy for ten-finger parity |
+| 2026-10-20 | #13487 | HRG-E2: full-body-v1 wrist/forearm adapter with declared neutral Wu calibration, verified on compiled MuJoCo; best-fit report test gated on HRG_BEST_FIT_BUNDLE |
+| 2026-10-20 | #13456 | keep the squat IK inside every coordinate range (OSL-12) |
+| 2026-10-20 | #13486 | R6 criterion 6: MuJoCo visual and appearance layers draw a chain shaft per link (shaft pieces per chain body, head on the tip link) so deflection is visible; rigid MJCF byte-identical |
+| 2026-10-20 | #13468 | Size Drake-Simscape equivalence fixture theta from the plant actuator count; Resolve the Drake autodiff fit grip body through the shared simulate fallback; Guard DrakePhysicsEngine.get_joint_names against unfinalized plants; Remove dead Pinocchio default branch from Drake simulate DEFAULT_GOLFER_URDF |
+| 2026-10-20 | #13469 | Mark the torch CUDA wheel-index pip probe requires_network so the offline unit gate stops crashing an xdist worker |
+| 2026-10-20 | #13442 | Prove hyperstatic per-hand split divergence between MuJoCo soft-constraint cone QP and shared penalty law with minimal two-pad test and update G8 reference; Align collinear capsule-cylinder midpoint convention and topology solimp impedance d0=0.001 so MuJoCo ten_finger 0.04 s hold and swing pass determinate parity |
+| 2026-10-20 | #13415 | Add OpenSim 3D joint reaction analysis for barbell lifts (OSL-5) |
+| 2026-10-20 | #13482 | Pin the trail-foot toe-out on the committed canonical receipts: driver 19.76 deg, 7-iron 20.00 deg against the 20 deg style target (OSV-4 2 deg acceptance) |
+| 2026-10-20 | #13480 | Restore the #13396 grip follow-ups lost in the HRG-GS consolidation: one club_state per Pinocchio RHS and the HRG reference's assessments and layout fixes |
+| 2026-10-20 | #13473 | Relax last-ulp geometry assertions in batched grip contact tests (Linux BLAS dot rounding) |
+| 2026-10-20 | #13471 | Test the MyoSuite gymnasium-first import behaviourally in _engine_init |
+| 2026-10-19 | #13445 | Verify bilateral myoHand grip against independent MuJoCo mj_inverse requirement and forward replay |
+| 2026-10-19 | #13422 | Add Pinocchio grip adapter driven by ContactTopology and G2 kernels; Calibrate OpenSim topology grip foundation at 2x preload with Hollars friction mapping and preserve SimmSpline horizon across short swing windows; Implement OpenSim ContactTopology grip contact adapter; Add MuJoCo ContactTopology grip-contact adapter and parity tests (HRG-GS-G8); Refactor Drake ClubInHands to two hand bodies and add TopologyContactModel adapter; Extend grip_contact.parity with per-pair forces, contact-point drift, determinate/indeterminate classification, and cross-engine style parity report (HRG-GS-G10); Separate LHand and RHand in full-body-v2 (opt-in) and evaluate physical hand-hand contact pairs; Add shared model grip binding contract, GripProvider protocol, and PinocchioGripAdapter (HRG-GS-M1); Add versioned per-model grip binding manifests and frame/unit validator (HRG-GS-M2); Add cross-model grip qualification harness with 3-state availability envelope and pair-level parity (HRG-GS-M3); Add native OpenSim MSK grip adapter with weld/bushing binding, Bruno 2015 admission, and M3 qualification; Add native MuJoCo humanoid golf grip adapter for rigid-hand MJCFs (HRG-GS-M5); Add MuJoCo Shadow/Allegro grip laboratory adapter with phalanx-mapped sites and physical hand-hand contact; Add MyoSuiteGolferGripAdapter, grip-binding manifests, and fix MyoSuite club shaft geometry; Add MyoHub myoHand articulated bilateral grip fixture and segment-mapped phalanx adapter (HRG-GS-M8); Add native Pinocchio golfer separate-hand variant and NativePinocchioGolferGripAdapter (HRG-GS-M9).; Add explicit bilateral lead-hand bushing attachment and NativeDrakeGolferGripAdapter for the native Drake golfer (HRG-GS-M10).; Export deterministic Simscape GolfSwing3D grip topology and allocate pad and hand-hand forces from recorded states with zero injected forces; Emit grip-binding/v1 metadata on club-composed character builder exports, fail closed on clubless exports, and enforce 100% model-library grip binding admission; Extract single array-namespace contact kernel in motion_matching shared by contact_law, jax_contact, and grip_contact; Batch one side of the grip topology contact law: validate once, Python-float row kernel, 9.9x faster topology_side_wrench with bit-identical parity; HRG reference: record that an analytic Radau Jacobian is not worth building for the Pinocchio grip sim (num_jac is 5-15% of CPU; Newton iterations dominate); Pinocchio grip RHS: memoise hand kinematics per stage time, one club state per RHS, Python-float BushingState checks; bit-identical, -37% CPU; 0.04 s topology tests leave the slow lane |
+| 2026-10-19 | #13443 | kinetics parity for all registered lifts |
+| 2026-10-19 | #13312 | Align default engine models to canonical golfer and raise KeyError on unknown body in compute_jacobian |
+| 2026-10-19 | #13441 | Declare websockets for realtime Python backend and document Qualisys C3D/TRC export path in formats.md |
+| 2026-10-19 | #13440 | Add dated NM addendum superseding sealed golfer u_dim=5 records after #12608 |
+| 2026-10-19 | #13435 | Retrofit Drake golfer joint actuators when URDF omits transmissions; fail closed on unwired torque (#13421). |
+| 2026-10-19 | #13436 | Lock baseline receipt provenance to tibial-torsion anthropometry (#12789 closure). |
 | 2026-10-19 | #13414 | Pinocchio grip-contact adapter from shared topology (HRG-GS-G6) |
 | 2026-10-19 | #13430 | Docker CI builds on the host's shared ud-buildkit builder (one layer cache per host); per-runner local cache import/export removed, cold throwaway-builder fallback |
 | 2026-10-19 | #13431 | Bench press supine OpenSim IK/ID with bench contact support |

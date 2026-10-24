@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import math
+import tempfile
 from pathlib import Path
 import numpy as np
 import pytest
@@ -61,6 +62,16 @@ def _require_body() -> None:
 # -------------------------------------------------------------------------
 # Unit Tests (Without OpenSim)
 # -------------------------------------------------------------------------
+
+
+def _reserve_share_floor(lift: str) -> float:
+    """Lower bound on the measured reserve share per lift.
+
+    The standing lifts load the legs, so their reserve share is above 5 %.
+    The supine bench press barely loads the legs (measured 0.0471, #13042),
+    so its floor is 0.04.
+    """
+    return 0.04 if lift == "bench_press" else 0.05
 
 
 def test_reserve_share_zero_demand() -> None:
@@ -167,15 +178,65 @@ def test_deep_squat_window_never_labeled_standing() -> None:
         assert not any(disallowed in name for name in all_names)
 
 
-def test_bench_press_unavailable_due_to_supine_ik_reason() -> None:
-    """Bench press IK does not pose a supine lifter, so it stays unavailable with that reason."""
-    receipt = evaluate_lift_muscles("bench_press")
-    assert receipt["status"] == "unavailable"
-    assert "supine" in receipt["reason"].lower()
-    assert receipt["forces"] is None
-    assert receipt["activations"] is None
-    assert receipt["reserve_share"] is None
-    assert receipt["classification"] == "unqualified"
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_bench_press_complete_record_with_bench_contact_and_residual_gate() -> None:
+    """Bench press solves a complete record with bench contact external loads and fails residual gate."""
+    _real_opensim()
+    _require_body()
+    with tempfile.TemporaryDirectory(prefix="test_bp_muscles_") as tmp_dir:
+        scratch = Path(tmp_dir)
+        receipt = evaluate_lift_muscles(
+            "bench_press", stride=5, scratch_dir=scratch, run_moco=False
+        )
+        assert receipt["status"] == "complete", receipt.get("reason", "")
+        # Residual gate failed, so it must not read qualified
+        assert receipt["classification"] == "unqualified"
+        assert receipt["residual_status"]["forces_within"] is False
+        assert receipt["residual_status"]["moments_within"] is False
+        assert receipt["reserve_share"] is not None
+        assert receipt["reserve_share"] > _reserve_share_floor("bench_press")
+        assert receipt["moment_balance_max_error_nm"] < 1e-4
+
+        # External loads used by the solve must include bench contact wrench from OSL-3 receipt
+        assert "external_loads" in receipt
+        ext_loads = receipt["external_loads"]
+        assert "bench" in ext_loads
+        assert "back-sphere" in ext_loads["bench"].lower()
+
+        # Scratch external-loads XML carries the bench wrench
+        xml_path = scratch / "external_loads.xml"
+        assert xml_path.is_file()
+        xml_content = xml_path.read_text(encoding="utf-8")
+        assert "back_RPSH_bench" in xml_content
+        assert "back_LPSH_bench" in xml_content
+        assert "back_RPSI_bench" in xml_content
+        assert "back_LPSI_bench" in xml_content
+        assert "torso" in xml_content
+        assert "pelvis" in xml_content
+
+        # Limitations entry explicitly documents upper-limb coordinates lack muscles in Rajagopal
+        assert "limitations" in receipt
+        assert any(
+            "upper" in lim.lower() or "arm" in lim.lower()
+            for lim in receipt["limitations"]
+        )
+
+
+def test_bench_press_window_never_labeled_with_nonexistent_phases() -> None:
+    """A partial engine window covering bench press unrack never falsely labels chest touch or lockout."""
+    times = np.linspace(0.0, 0.2, 41)
+    coord_names = ["arm_flex_r", "arm_flex_l", "elbow_flex_r", "elbow_flex_l"]
+    q = np.zeros((41, 4))
+
+    segments = detect_motion_phases("bench_press", times, coord_names, q)
+    assert len(segments) == 1
+    seg_name, t0, t1 = segments[0]
+    assert "unrack" in seg_name
+    assert "engine window 0.0-0.2 s" in seg_name
+    all_names = [s[0].lower() for s in segments]
+    for disallowed in ("chest_touch", "press", "lockout"):
+        assert not any(disallowed in name for name in all_names)
 
 
 def test_deadlift_window_never_labeled_with_nonexistent_phases() -> None:
@@ -251,13 +312,12 @@ def test_muscle_receipts_recorded_for_all_lifts() -> None:
     data = json.loads(RECEIPTS_PATH.read_text(encoding="utf-8"))
     lifts = data["lifts"]
     assert set(lifts.keys()) == set(LIFTS)
-    assert lifts["bench_press"]["status"] == "unavailable"
-    assert "supine" in lifts["bench_press"]["reason"].lower()
-    for lift in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+    for lift in ("squat", "bench_press", "deadlift", "snatch", "clean_and_jerk"):
         entry = lifts[lift]
         assert entry["status"] == "complete", f"{lift}: {entry.get('reason')}"
         assert entry["classification"] == "unqualified"
-        assert entry["reserve_share"] is not None and entry["reserve_share"] > 0.05
+        assert entry["reserve_share"] is not None
+        assert entry["reserve_share"] > _reserve_share_floor(lift)
         assert "residual_status" in entry
 
 
@@ -267,7 +327,7 @@ def test_muscle_receipts_carry_measured_ik_id_residuals() -> None:
         pytest.skip("receipts files not found")
     m_data = json.loads(RECEIPTS_PATH.read_text(encoding="utf-8"))["lifts"]
     ik_data = json.loads(IK_ID_RECEIPTS_PATH.read_text(encoding="utf-8"))["lifts"]
-    for lift in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+    for lift in ("squat", "bench_press", "deadlift", "snatch", "clean_and_jerk"):
         m_rec = m_data[lift]
         assert m_rec["status"] == "complete"
         res_status = m_rec["residual_status"]
@@ -467,19 +527,25 @@ def test_hip_demand_asymmetry_cause_quotes_the_measured_values() -> None:
 
 @pytest.mark.requires_opensim
 @pytest.mark.integration
-@pytest.mark.parametrize("lift", ["deadlift", "snatch", "clean_and_jerk"])
+@pytest.mark.parametrize(
+    "lift", ["deadlift", "bench_press", "snatch", "clean_and_jerk"]
+)
 def test_live_remaining_lifts_muscle_solutions(lift: str) -> None:
-    """Live static optimization solve for deadlift, snatch, and clean & jerk."""
+    """Live static optimization solve for deadlift, bench press, snatch, and clean & jerk."""
     _real_opensim()
     _require_body()
     receipt = evaluate_lift_muscles(lift, stride=5, run_moco=False)
     assert receipt["status"] == "complete", receipt.get("reason", "")
     assert receipt["classification"] == "unqualified"
-    assert receipt["reserve_share"] is not None and receipt["reserve_share"] > 0.05
+    assert receipt["reserve_share"] is not None
+    assert receipt["reserve_share"] > _reserve_share_floor(lift)
     assert receipt["moment_balance_max_error_nm"] < 1e-4
     assert "residual_status" in receipt
     assert receipt["residual_status"]["forces_within"] is False
     assert receipt["residual_status"]["moments_within"] is False
     phase_names = list(receipt["phases"].keys())
     assert len(phase_names) == 1
-    assert "pull" in phase_names[0]
+    if lift == "bench_press":
+        assert "unrack" in phase_names[0]
+    else:
+        assert "pull" in phase_names[0]

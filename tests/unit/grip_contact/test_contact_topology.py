@@ -111,6 +111,10 @@ TRIGGER_PAIR: tuple[str, str, str, tuple[str, str]] = (
 )
 
 
+def _antagonist_pair(site: str) -> tuple[str, str, str, tuple[str, str]]:
+    return (f"{site}_grip", site, GRIP, ("sphere", "cylinder"))
+
+
 def test_grip_style_has_exactly_one_definition_in_src() -> None:
     """GripStyle enum has a single definition under src/ and is re-exported cleanly."""
     pattern = re.compile(r"^\s*class\s+GripStyle\b", re.MULTILINE)
@@ -140,6 +144,12 @@ def test_pair_counts_and_exact_pair_sets_per_style(
     expected = list(BASE_PAIRS) + list(STYLE_SPECIFIC_PAIRS[style])
     if trigger_finger:
         expected.append(TRIGGER_PAIR)
+    # Antagonists opposing the unpaired heel, trigger and ten-finger pads (#13555).
+    expected.append(_antagonist_pair("lead_butt_fingers"))
+    if trigger_finger:
+        expected.append(_antagonist_pair("trail_thumb_pad"))
+    if style is GripStyle.TEN_FINGER:
+        expected.append(_antagonist_pair("trail_hypothenar"))
 
     actual = [
         (pair.name, pair.site_a, pair.site_b, pair.primitive_pair)

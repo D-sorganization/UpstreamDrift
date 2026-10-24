@@ -1,0 +1,28 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "mujoco_canonical_golf_humanoid",
+  "model_hash": "sha256:56c6a1050b25e60e2afddc6d41757eaf4aab34f2565cda7def9023322c8de5e2",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "neutral_address",
+    "description": "MuJoCo canonical golf humanoid MJCF at qpos0 with club_grip parented to left_hand and welded to right_hand via right_grip_site/club_grip_site"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "src/engines/physics_engines/mujoco/_golf_swing_canonical_xml.py",
+    "date": "2026-10-18",
+    "method": "native_mjcf_weld_grip"
+  },
+  "attachment_mode": "weld",
+  "club_body": "club_grip",
+  "lead_hand_body": "left_hand",
+  "trail_hand_body": "right_hand",
+  "unavailable_sites": {}
+}

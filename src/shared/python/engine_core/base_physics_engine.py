@@ -520,6 +520,14 @@ class ModelLoadingMixin:
         """
         return Path(path).stem
 
+    def get_body_names(self) -> list[str]:
+        """Return names of all bodies in the model.
+
+        Default base implementation returns an empty list. Specific engine
+        adapters override this to provide engine-native body names.
+        """
+        return []
+
 
 class SimulationMixin:
     """Mixin providing common simulation utilities."""

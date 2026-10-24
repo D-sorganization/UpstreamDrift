@@ -21,18 +21,18 @@ validate a model, not when you want to inspect a single simulation.
 ([`config.py`](../../src/shared/python/data_io/dataset_generator/config.py))
 carries the run settings. Units are explicit in its docstring:
 
-| Field | Default | Unit / meaning |
-| --- | --- | --- |
-| `num_samples` | 100 | count of simulation runs, must be > 0 |
-| `duration` | 2.0 | seconds per run, must be > 0 and >= `timestep` |
-| `timestep` | 0.002 | seconds, must be > 0 |
-| `seed` | 42 | integer RNG seed; same seed reproduces the dataset |
-| `vary_initial_positions` | `True` | randomise initial joint positions |
-| `vary_initial_velocities` | `False` | randomise initial joint velocities |
-| `position_ranges` / `velocity_ranges` | empty | lists of `ParameterRange` |
-| `control_profiles` | `[zero]` | list of `ControlProfile` |
-| `record_*` flags | see below | which quantities to record |
-| `output_fields` | `None` | explicit field allow-list; `None` records all |
+| Field                                 | Default   | Unit / meaning                                     |
+| ------------------------------------- | --------- | -------------------------------------------------- |
+| `num_samples`                         | 100       | count of simulation runs, must be > 0              |
+| `duration`                            | 2.0       | seconds per run, must be > 0 and >= `timestep`     |
+| `timestep`                            | 0.002     | seconds, must be > 0                               |
+| `seed`                                | 42        | integer RNG seed; same seed reproduces the dataset |
+| `vary_initial_positions`              | `True`    | randomise initial joint positions                  |
+| `vary_initial_velocities`             | `False`   | randomise initial joint velocities                 |
+| `position_ranges` / `velocity_ranges` | empty     | lists of `ParameterRange`                          |
+| `control_profiles`                    | `[zero]`  | list of `ControlProfile`                           |
+| `record_*` flags                      | see below | which quantities to record                         |
+| `output_fields`                       | `None`    | explicit field allow-list; `None` records all      |
 
 `ParameterRange(name, min_val, max_val, distribution, num_points)`
 requires `min_val <= max_val` and a `distribution` of `uniform`,
@@ -61,14 +61,14 @@ loaded. Every engine-dependent endpoint calls `_require_active_engine`.
 A `TrainingDataset` of `SimulationSample` records, exportable in the six
 formats that `GET /dataset/export/formats` returns:
 
-| Format | Notes |
-| --- | --- |
-| `hdf5` | HDF5 hierarchical data; recommended for large datasets |
-| `sqlite` | SQLite database, queryable and structured |
-| `csv` | one CSV file per sample, human-readable |
-| `mat` | MATLAB `.mat`; requires scipy |
-| `json` | small datasets and configuration |
-| `c3d` | C3D motion-capture format; requires ezc3d |
+| Format   | Notes                                                  |
+| -------- | ------------------------------------------------------ |
+| `hdf5`   | HDF5 hierarchical data; recommended for large datasets |
+| `sqlite` | SQLite database, queryable and structured              |
+| `csv`    | one CSV file per sample, human-readable                |
+| `mat`    | MATLAB `.mat`; requires scipy                          |
+| `json`   | small datasets and configuration                       |
+| `c3d`    | C3D motion-capture format; requires ezc3d              |
 
 Exports are written only under the allow-listed output roots `output`
 and `data`. The web layer returns a `GenerateResult` of `dataset_id`,
@@ -121,6 +121,7 @@ prefix `/dataset`). That router exposes `POST /generate`,
   Training Controller for the training side.
 
 ## See Also
+
 - [Training Controller](training_controller.md) - consumes generated datasets
 - [Data Explorer](data_explorer.md) - inspects generated datasets
 - [Analysis tools](analysis_tools.md)

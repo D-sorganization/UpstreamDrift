@@ -84,8 +84,18 @@ HRG_E2_TERMS = {
 }
 
 
+HRG_E3_TERMS = {
+    "pelvis_turn_isb",
+    "pelvis_anterior_tilt_isb",
+    "pelvis_lead_hip_up_isb",
+    "thorax_turn_isb",
+    "thorax_forward_bend_isb",
+    "thorax_lead_side_bend_isb",
+}
+
+
 def test_registered_terms_are_the_adr_table() -> None:
-    assert set(registered_terms()) == EXPECTED_TERMS | HRG_E2_TERMS
+    assert set(registered_terms()) == EXPECTED_TERMS | HRG_E2_TERMS | HRG_E3_TERMS
 
 
 @pytest.mark.parametrize("term_id", sorted(EXPECTED_TERMS))

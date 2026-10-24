@@ -38,14 +38,14 @@ qualification. The design-manual inventory blocker is
 
 ## Tolerances (Fixed Before the Runs)
 
-| Check                                                            | Threshold                                    |
+| Check | Threshold |
 | ---------------------------------------------------------------- | -------------------------------------------- | --- | --------------------- | --- | -------------- |
-| Hold: mean vertical ground reaction over the last 0.5 s of 1.5 s | body + bar weight within 1 %                 |
-| Hold: hand vertical forces                                       | bar weight within 1 %, left share 0.5 ± 0.01 |
-| Hold: peak bushing deflection                                    | ≤ 3 mm                                       |
-| Bundle replay in MuJoCo (first 5 steps)                          | ≤ 1e-8                                       |
-| Cross-engine parity, every 20th state                            | `                                            | dX  | <= 1e-6 + 1e-8 \* max | X   | ` (L1, #11605) |
-| Unit: static hold on the plant, Newton's third law, Jacobian     | 1 %, 1e-6 N, 1e-6                            |
+| Hold: mean vertical ground reaction over the last 0.5 s of 1.5 s | body + bar weight within 1 % |
+| Hold: hand vertical forces | bar weight within 1 %, left share 0.5 ± 0.01 |
+| Hold: peak bushing deflection | ≤ 3 mm |
+| Bundle replay in MuJoCo (first 5 steps) | ≤ 1e-8 |
+| Cross-engine parity, every 20th state | `                                           | dX  | <= 1e-6 + 1e-8 \* max | X   |` (L1, #11605) |
+| Unit: static hold on the plant, Newton's third law, Jacobian | 1 %, 1e-6 N, 1e-6 |
 
 ## Results
 

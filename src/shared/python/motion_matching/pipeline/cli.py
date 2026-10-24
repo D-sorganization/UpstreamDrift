@@ -80,6 +80,7 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     build_dynamics_report,
     lane_reference_zmp,
     replay,
+    replay_sensitivity_block,
     score_reference,
     shooting_fit,
     zmp_filter,
@@ -170,6 +171,18 @@ def build_parser() -> argparse.ArgumentParser:
         description="Ground-supported full-body pipeline runner with pluggable plant engines."
     )
     parser.add_argument("--out", type=Path, default=Path.cwd())
+    parser.add_argument(
+        "--replay-sensitivity",
+        action="store_true",
+        help="replay once more from a seeded 1e-6 offset and record the "
+        "divergence growth before and after impact (#13112)",
+    )
+    parser.add_argument(
+        "--replay-sensitivity-epsilon",
+        type=_nonnegative_float,
+        default=1e-6,
+        help="size of the --replay-sensitivity reference offset (m or rad)",
+    )
     parser.add_argument(
         "--address-only",
         action="store_true",
@@ -639,7 +652,9 @@ def _calibrate_and_scale(
     )
     sim = fs.FullBodySimulator(adapter)
     address2 = lane.best_address(kin, address.q)
-    record_calibrated_address(address_report, sim, kin, address2, lane, labels, adapter)
+    record_calibrated_address(
+        address_report, sim, kin, address2, lane, labels, adapter, spec=scaled_spec
+    )
     return _CalibrateAndScaleResult(
         scaled_spec,
         spec_bytes,
@@ -1172,6 +1187,29 @@ def _ground_support_receipt(
     )
 
 
+def _maybe_replay_sensitivity(
+    args: Any,
+    plant: tuple[Lane, Any, Any],
+    tracks: tuple[np.ndarray, np.ndarray],
+    dynamics_report: dict[str, Any],
+    replay_options: dict[str, Any],
+) -> None:
+    """Add the opt-in ``replay_sensitivity`` block (#13112) in place."""
+    if not getattr(args, "replay_sensitivity", False):
+        return
+    lane, kin, sim = plant
+    q_track, sim_q = tracks
+    dynamics_report["replay_sensitivity"] = replay_sensitivity_block(
+        sim,
+        lane,
+        kin,
+        (q_track, sim_q),
+        dynamics_report["fd_phase"],
+        replay_options=replay_options,
+        epsilon=args.replay_sensitivity_epsilon,
+    )
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -1229,6 +1267,13 @@ def _simulate_and_receipt(
             club_spec=cal_res.scaled_spec,
             club_attachments=cal_res.attachments,
         )
+    )
+    _maybe_replay_sensitivity(
+        args,
+        (lane, kin, sim),
+        (q_track, sim_q),
+        dynamics_report,
+        {"tracking_backend": tracking, "reference_hook": hook},
     )
     _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)
     render_skipped = _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)

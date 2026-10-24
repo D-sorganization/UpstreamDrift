@@ -16,7 +16,7 @@
     200
   ],
   "reference_engine": "mujoco",
-  "source_commit": "f83f2a32846d4a95d9d66a0d6a7048800a88e039",
+  "source_commit": "9969c0aa1472164a04369efabc7490ab18336376",
   "generator": "scripts/measure_lift_kinetics_parity.py",
   "mujoco_values": [
     {
