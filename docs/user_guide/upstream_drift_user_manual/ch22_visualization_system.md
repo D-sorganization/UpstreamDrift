@@ -97,14 +97,14 @@ a delegate to `_init_arrow_geom` with a small radius.
 The `add_visualization_overlays()` entry point (not shown in full)
 renders the following:
 
-| Overlay                  | Geometry      | Colour Convention             |
+| Overlay | Geometry | Colour Convention |
 | ------------------------ | ------------- | ----------------------------- | ---- | --- |
-| Contact normal forces    | Arrow         | Red (`rgba=[1,0,0,0.8]`)      |
-| Contact friction forces  | Arrow         | Orange (`rgba=[1,0.5,0,0.6]`) |
-| Joint torques (positive) | Sphere        | Green, radius $\propto        | \tau | $   |
-| Joint torques (negative) | Sphere        | Blue, radius $\propto         | \tau | $   |
-| Actual trajectory        | Line segments | Per-body colour cycle         |
-| Desired trajectory       | Line segments | Cyan, alternating-gap style   |
+| Contact normal forces | Arrow | Red (`rgba=[1,0,0,0.8]`) |
+| Contact friction forces | Arrow | Orange (`rgba=[1,0.5,0,0.6]`) |
+| Joint torques (positive) | Sphere | Green, radius $\propto | \tau | $ |
+| Joint torques (negative) | Sphere | Blue, radius $\propto | \tau | $ |
+| Actual trajectory | Line segments | Per-body colour cycle |
+| Desired trajectory | Line segments | Cyan, alternating-gap style |
 
 Toggles (`show_contacts`, `show_torques`, `show_trajectories`, etc.) and
 scale factors (`force_scale`, `torque_scale`) are configurable at
@@ -148,22 +148,22 @@ plotting/
 Every plotting function accepts an optional `PlotConfig`; the module
 default `DEFAULT_CONFIG` is used when none is supplied.
 
-| Attribute      | Type           | Default | Description                 |
+| Attribute | Type | Default | Description |
 | -------------- | -------------- | ------- | --------------------------- | ---------------------- |
-| `width`        | `float`        | 10.0    | Figure width (inches)       |
-| `height`       | `float`        | 6.0     | Figure height (inches)      |
-| `dpi`          | `int`          | 100     | Dots per inch               |
-| `line_width`   | `float`        | 1.5     | Default line width          |
-| `marker_size`  | `float`        | 20.0    | Default scatter marker size |
-| `title_size`   | `float`        | 14.0    | Title font size             |
-| `label_size`   | `float`        | 12.0    | Axis label font size        |
-| `tick_size`    | `float`        | 10.0    | Tick label font size        |
-| `legend_size`  | `float`        | 10.0    | Legend font size            |
-| `show_grid`    | `bool`         | `True`  | Display grid lines          |
-| `grid_alpha`   | `float`        | 0.3     | Grid line opacity           |
-| `tight_layout` | `bool`         | `True`  | Apply tight-layout          |
-| `colors`       | `ColorPalette` | default | Colour palette instance     |
-| `style`        | `str           | None`   | `None`                      | Matplotlib style sheet |
+| `width` | `float` | 10.0 | Figure width (inches) |
+| `height` | `float` | 6.0 | Figure height (inches) |
+| `dpi` | `int` | 100 | Dots per inch |
+| `line_width` | `float` | 1.5 | Default line width |
+| `marker_size` | `float` | 20.0 | Default scatter marker size |
+| `title_size` | `float` | 14.0 | Title font size |
+| `label_size` | `float` | 12.0 | Axis label font size |
+| `tick_size` | `float` | 10.0 | Tick label font size |
+| `legend_size` | `float` | 10.0 | Legend font size |
+| `show_grid` | `bool` | `True` | Display grid lines |
+| `grid_alpha` | `float` | 0.3 | Grid line opacity |
+| `tight_layout` | `bool` | `True` | Apply tight-layout |
+| `colors` | `ColorPalette` | default | Colour palette instance |
+| `style` | `str           | None` | `None` | Matplotlib style sheet |
 
 Helper methods:
 
@@ -367,15 +367,15 @@ functions for persisting figures and their underlying data.
 
 ### 22.4.1 ExportConfig
 
-| Attribute          | Type   | Default   | Description                     |
+| Attribute | Type | Default | Description |
 | ------------------ | ------ | --------- | ------------------------------- | --------------------- |
-| `output_dir`       | `str   | Path`     | `"exports"`                     | Root export directory |
-| `image_format`     | `str`  | `"png"`   | Default raster format           |
-| `vector_format`    | `str`  | `"pdf"`   | Default vector format           |
-| `dpi`              | `int`  | 300       | Raster export resolution        |
-| `transparent`      | `bool` | `False`   | Transparent background          |
-| `bbox_inches`      | `str`  | `"tight"` | Bounding box mode               |
-| `include_metadata` | `bool` | `True`    | Embed timestamp and source info |
+| `output_dir` | `str   | Path` | `"exports"` | Root export directory |
+| `image_format` | `str` | `"png"` | Default raster format |
+| `vector_format` | `str` | `"pdf"` | Default vector format |
+| `dpi` | `int` | 300 | Raster export resolution |
+| `transparent` | `bool` | `False` | Transparent background |
+| `bbox_inches` | `str` | `"tight"` | Bounding box mode |
+| `include_metadata` | `bool` | `True` | Embed timestamp and source info |
 
 ### 22.4.2 `export_figure`
 

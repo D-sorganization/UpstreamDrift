@@ -2,6 +2,18 @@
 
 # UpstreamDrift Project Status
 
+Refreshed by project-steward on 2026-10-19: added DV-11984, DV-11542, DV-12554,
+DV-12583, DV-12718, DV-13061 and DV-13082 (catalog `docs/development/planning/catalog.json`
+additions since the 2026-10-06 refresh) as parked features and their prerequisites
+under Decisions Needed. No feature has moved to done. The seven Board-decision-pending
+items recorded on or before 2026-10-06 have now sat unanswered for 13-26 days, past the
+14-day proposal-age threshold, and are architectural (resourcing/scope decisions on
+external-validation work); this run's worktree has no checkout of Repository_Management
+and therefore no `shared_scripts.board_proposals` CLI to dry-run or submit against, so
+none is filed with the Board this pass. A run with that tooling available should submit
+DV-10375, DV-9700, DV-9619, DV-9613 and DV-9546 (first recorded 2026-09-23) and DV-10382
+(first recorded 2026-09-23) and DV-11408 (first recorded 2026-10-04) as Board proposals.
+
 Refreshed by project-steward on 2026-10-06: added DV-11408 (OpenCap golf accuracy
 qualification, catalog `docs/development/planning/catalog.json`) as a parked feature
 and its prerequisites under Decisions Needed. No feature has moved to done.
@@ -23,6 +35,13 @@ current issue state or physical completion.
 | DV-9619  | [EPIC] Self-calibrating markerless mocap: learn camera placement and skeleton from observed swings, with strict outlier rejection | parked | Awaiting verified prerequisites | 2026-09-23  |
 | DV-9613  | Rig soak: three-camera sessions intermittently fail to open cameras (dshow I/O error) and a camera re-enumerates mid-series       | parked | Awaiting verified prerequisites | 2026-09-23  |
 | DV-9546  | Epic: Deliver and Qualify the Impact Zone and Impact Explorer Product                                                             | parked | Awaiting verified prerequisites | 2026-09-23  |
+| DV-11984 | Empirical Qualification of Contact and Delivery Covariance                                                                        | parked | Awaiting verified prerequisites | 2026-10-19  |
+| DV-11542 | MOSAIC-10: Multi-Swing Acquisition and Registration Across Real Golfer Trials                                                     | parked | Awaiting verified prerequisites | 2026-10-19  |
+| DV-12554 | NSX-05: External Validation Protocol for Closed-Loop Null-Space Exploration (Instrumented Grip, Surface EMG, and Held-Out Swings) | parked | Awaiting verified prerequisites | 2026-10-19  |
+| DV-12583 | NSX-55: Golf-Model Simscape Closed-Loop Export in MATLAB R2025b                                                                   | parked | Awaiting verified prerequisites | 2026-10-19  |
+| DV-12718 | NSX-89: Simscape Per-Frame Linearization Export in MATLAB R2025b                                                                  | parked | Awaiting verified prerequisites | 2026-10-19  |
+| DV-13061 | Open-FP Force Plate Hardware Qualification for Measured Vertical GRF                                                              | parked | Awaiting DV-13082               | 2026-10-19  |
+| DV-13082 | Qualified Open-FP Device Record for Measured Vertical Ground Reaction                                                             | parked | Awaiting verified prerequisites | 2026-10-19  |
 
 ## Blockers
 
@@ -56,6 +75,29 @@ none of it supplies the missing external evidence.
 - DV-9546: Board decision pending on whether to resource the [Owner Plan](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-9546.md); accountable owner, access dates, funding and execution capacity remain unverified.
 - DV-9546: Decide how to obtain and qualify calibrated independent club/ball/contact observations matching advertised model tiers; prerequisite evidence remains unavailable.
 - DV-9546: Decide how to obtain and qualify equipment/condition provenance and predeclared validation accuracy budgets; prerequisite evidence remains unavailable.
+- DV-11984: Board decision pending on whether to resource the [Owner Plan](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-11984.md) (first recorded 2026-10-19); accountable owner, access dates, funding and execution capacity remain unverified.
+- DV-11984: Decide how to obtain physical clubheads with measured mass, CG, full inertia tensor and face geometry; prerequisite evidence remains unavailable.
+- DV-11984: Decide how to obtain calibrated launch, spin and strike-location measurements with repeated trials; prerequisite evidence remains unavailable.
+- DV-11984: Decide how to obtain authorized player delivery measurement sessions with synchronized instruments; prerequisite evidence remains unavailable.
+- DV-11542: Board decision pending on whether to resource the [Owner Plan](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-11542.md) (first recorded 2026-10-19); accountable owner, access dates, funding and execution capacity remain unverified.
+- DV-11542: Decide how to obtain an authorized cohort of human golfers under institutional protocol; prerequisite evidence remains unavailable.
+- DV-11542: Decide how to obtain a multi-camera optical motion capture or high-speed synchronized IMU instrumentation rig; prerequisite evidence remains unavailable.
+- DV-12554: Board decision pending on whether to resource the [Owner Plan](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-12554.md) (first recorded 2026-10-19); accountable owner, access dates, funding and execution capacity remain unverified.
+- DV-12554: Decide how to obtain a dual-section 6-axis instrumented golf grip with calibrated bare-club mass and inertia matching the NSX-01 interface; prerequisite evidence remains unavailable.
+- DV-12554: Decide how to obtain a synchronized high-speed optical motion capture, bilateral force plate and surface EMG acquisition rig with a pre-declared electromechanical delay model; prerequisite evidence remains unavailable.
+- DV-12554: Decide how to obtain an authorized multi-swing human golfer cohort with disjoint training and held-out test trials under institutional protocol; prerequisite evidence remains unavailable.
+- DV-12583: Board decision pending on whether to resource the [Owner Plan](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-12583.md) (first recorded 2026-10-19); accountable owner, access dates, funding and execution capacity remain unverified.
+- DV-12583: Decide how to build and validate a probe-capable open-tree GS3DX variant (joint actuation, state targets, cut-loop closure sensor) in MATLAB R2025b; prerequisite evidence remains unavailable.
+- DV-12583: Decide how to obtain an R2025b host licence admitting the probe variant's non-virtual block count; prerequisite evidence remains unavailable.
+- DV-12583: Decide how to obtain an independent same-topology reference (Pinocchio/MuJoCo/Drake/OpenSim) to compare against within registry tolerances; prerequisite evidence remains unavailable.
+- DV-12718: Board decision pending on whether to resource the [Owner Plan](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-12718.md) (first recorded 2026-10-19); accountable owner, access dates, funding and execution capacity remain unverified.
+- DV-12718: Decide how to obtain the DV-12583 probe-capable golf variant and an R2025b licence admitting Simulink Control Design linearize; prerequisite evidence remains unavailable.
+- DV-12718: Decide how to obtain a same-topology independent reference tangent linearization to compare against within registry tolerances; prerequisite evidence remains unavailable.
+- DV-13061: Board decision pending on whether to resource the [Owner Plan](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-13061.md) (first recorded 2026-10-19); this epic's acceptance is fully delegated to DV-13082 (#13082), so its own Decisions Needed items are DV-13082's.
+- DV-13082: Board decision pending on whether to resource the [Owner Plan](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-13082.md) (first recorded 2026-10-19); accountable owner, access dates, funding and execution capacity remain unverified.
+- DV-13082: Decide how to obtain an assembled open-fp plate pair with all eight load cells reading and production MCU firmware (M2/M3); prerequisite evidence remains unavailable.
+- DV-13082: Decide how to obtain a per-device calibration file, reference masses and a reference scale for the M4 static checks; prerequisite evidence remains unavailable.
+- DV-13082: Decide how to obtain a golfer and capture session for the M6 real-swing and false-trigger checks, and a named owner accountable for the device and qualification session; prerequisite evidence remains unavailable.
 
 ## Reactivation
 

@@ -74,6 +74,10 @@ from src.engines.physics_engines.opensim.python.msk_lift_model import (
     PENETRATION_LIMIT_M,
     LiftModelBuild,
 )
+from src.engines.physics_engines.opensim.python.msk_lift_simbody_kinematics import (
+    generalized_speeds_from_spline_derivatives,
+    spline_coordinate_derivatives,
+)
 from src.shared.python.biomechanics.ground_reaction import (
     ContactSet,
     analyze_ground_reaction,
@@ -91,6 +95,7 @@ from src.shared.python.lifting.sagittal_retarget import (
 Array = NDArray[np.float64]
 
 __all__ = [
+    "ARM_TASK_BOUND_MARGIN_RAD",
     "ARM_TASK_WEIGHT",
     "BAR_WEIGHT",
     "IK_COORDINATE_RMS_THRESHOLD_RAD",
@@ -110,6 +115,7 @@ __all__ = [
     "run_inverse_dynamics",
     "run_inverse_kinematics",
     "static_hold_grf",
+    "generalized_speeds_from_spline_derivatives",
 ]
 
 IK_MARKER_RMS_THRESHOLD_M = 0.02
@@ -167,6 +173,10 @@ PELVIS_WEIGHT = LOWER_LIMB_WEIGHT
 _UNCLAMPED_PREFIXES = ("arm_", "elbow_", "pro_sup", "wrist_")
 #: Arm coordinate-task weight (marker weights are 1 and 10).
 ARM_TASK_WEIGHT = 0.01
+#: Arm coordinate-task bound margin (rad): pulls unclamped arm coordinates to an
+#: interior target (at least this far from range bounds) so numerical drift during
+#: unconstrained IK does not violate bounds (OSL-12, #13048).
+ARM_TASK_BOUND_MARGIN_RAD = 1e-3
 #: Stated limitation of the landmark set (recorded in every IK receipt).
 _PELVIS_OBSERVABILITY = (
     "pelvis orientation is weakly observed in the bundle itself: LIFT-5 "
@@ -178,6 +188,12 @@ _GCV_DEGREE = 5
 _OPENSIM_SAGITTAL = SagittalFrame(forward=(1.0, 0.0, 0.0), up=(0.0, 1.0, 0.0))
 _FOOT_BODY = {"left": "calcn_l", "right": "calcn_r"}
 _HAND_BODY = {"L": "hand_l", "R": "hand_r"}
+_BENCH_BODY: Mapping[str, str] = {
+    "back_RPSH": "torso",
+    "back_LPSH": "torso",
+    "back_RPSI": "pelvis",
+    "back_LPSI": "pelvis",
+}
 _STATIC_XTOL_M = 1e-12
 _STATIC_BRACKET_M = 0.2
 
@@ -528,21 +544,24 @@ def _range_violations(model: Any, names: tuple[str, ...], q: Array) -> dict:
 
 
 def _arm_coordinate_tasks(model: Any) -> Any:
-    """Weak coordinate tasks holding every arm coordinate at its hold value.
+    """Weak coordinate tasks holding every arm coordinate near its hold value.
 
     Only the shoulders and the bar observe the arms, so elbow, forearm and
     wrist angles form a null space the solver otherwise wanders through
     (OSL-12 measured elbow hyperextension to -146 deg).  The task weight
-    :data:`ARM_TASK_WEIGHT` is small against the marker weights.
+    :data:`ARM_TASK_WEIGHT` is small against the marker weights.  Task targets
+    are placed at least :data:`ARM_TASK_BOUND_MARGIN_RAD` inside coordinate
+    ranges so unclamped tracking does not drift past range limits (#13048).
     """
     osim = import_opensim()
     tasks = osim.SimTKArrayCoordinateReference()
     for coordinate in model.getCoordinateSet():
         name = coordinate.getName()
         if name.startswith(_UNCLAMPED_PREFIXES):
-            task = osim.CoordinateReference(
-                name, osim.Constant(coordinate.getDefaultValue())
-            )
+            low, high = float(coordinate.getRangeMin()), float(coordinate.getRangeMax())
+            m = ARM_TASK_BOUND_MARGIN_RAD
+            target = float(np.clip(coordinate.getDefaultValue(), low + m, high - m))
+            task = osim.CoordinateReference(name, osim.Constant(target))
             task.setWeight(ARM_TASK_WEIGHT)
             tasks.push_back(task)
     return tasks
@@ -776,41 +795,12 @@ def _splines(ik: IKResult, time_s: Array) -> Any:
     return osim.GCVSplineSet(table, osim.StdVectorString(), _GCV_DEGREE, 0.0)
 
 
-def _derivatives(splines: Any, n: int, t: float) -> tuple[Array, Array, Array]:
-    osim = import_opensim()
-    x = osim.Vector(1, float(t))
-    first, second = osim.StdVectorInt(), osim.StdVectorInt()
-    first.append(0)
-    second.append(0)
-    second.append(0)
-    values = np.empty((3, n))
-    for j in range(n):
-        f = splines.get(j)
-        values[0, j] = f.calcValue(x)
-        values[1, j] = f.calcDerivative(first, x)
-        values[2, j] = f.calcDerivative(second, x)
-    return values[0], values[1], values[2]
-
-
-def _body_wrench(
-    model: Any,
-    state: Any,
-    body: str,
-    force: Array,
-    moment_about_point: Array,
-    point: Array,
-) -> tuple[int, Any]:
-    """Spatial force on ``body`` (ground axes, moment about the body origin)."""
-    osim = import_opensim()
-    frame = model.getBodySet().get(body)
-    origin = _vec3(frame.getPositionInGround(state))
-    moment = moment_about_point + np.cross(point - origin, force)
-    return int(frame.getMobilizedBodyIndex()), osim.SpatialVec(
-        osim.Vec3(*map(float, moment)), osim.Vec3(*map(float, force))
-    )
-
-
 def _external_body_forces(model: Any, state: Any, targets: LiftTargets, k: int) -> Any:
+    """Applied external body wrenches (feet, hands, and bench support if present).
+
+    Each wrench's force and moment about the mobilized body origin are
+    accumulated into spatial forces on the model bodies.
+    """
     osim = import_opensim()
     count = model.getBodySet().getSize() + 1  # plus ground
     forces = osim.VectorOfSpatialVec(count, osim.SpatialVec(osim.Vec3(0), osim.Vec3(0)))
@@ -830,9 +820,34 @@ def _external_body_forces(model: Any, state: Any, targets: LiftTargets, k: int) 
         wrenches.append(
             (body, targets.hand_force_n[side][k], targets.hand_torque_nm[side][k], grip)
         )
-    for body, force, moment, point in wrenches:
-        index, spatial = _body_wrench(model, state, body, force, moment, point)
-        forces.set(index, spatial)
+    for sphere, body in _BENCH_BODY.items():
+        if sphere in targets.bench_force_n:
+            wrenches.append(
+                (
+                    body,
+                    targets.bench_force_n[sphere][k],
+                    zero,
+                    targets.bench_point_m[sphere][k],
+                )
+            )
+    body_forces = np.zeros((count, 3), dtype=float)
+    body_moments = np.zeros((count, 3), dtype=float)
+    bodies = model.getBodySet()
+    for body, force, moment_about_point, point in wrenches:
+        frame = bodies.get(body)
+        index = int(frame.getMobilizedBodyIndex())
+        origin = _vec3(frame.getPositionInGround(state))
+        body_forces[index] += force
+        body_moments[index] += moment_about_point + np.cross(point - origin, force)
+    for idx in range(count):
+        if np.any(body_forces[idx]) or np.any(body_moments[idx]):
+            forces.set(
+                idx,
+                osim.SpatialVec(
+                    osim.Vec3(*map(float, body_moments[idx])),
+                    osim.Vec3(*map(float, body_forces[idx])),
+                ),
+            )
     return forces
 
 
@@ -871,7 +886,10 @@ def run_inverse_dynamics(
     )
     rows, com = [], []
     for k, t in enumerate(targets.time_s):
-        q, u, udot_values = _derivatives(splines, len(names), float(t))
+        q, qd, qdd = spline_coordinate_derivatives(splines, len(names), float(t))
+        u, udot_values = generalized_speeds_from_spline_derivatives(
+            tuple(names), q, qd, qdd
+        )
         for j, name in enumerate(names):
             coords.get(name).setValue(state, float(q[j]), False)
             coords.get(name).setSpeedValue(state, float(u[j]))
@@ -898,7 +916,11 @@ def run_inverse_dynamics(
 
 
 def id_receipt(targets: LiftTargets, inverse: IDResult) -> dict[str, Any]:
-    """Residuals (with the Hicks 2015 gate) and joint-moment summary."""
+    """Residuals (with the Hicks 2015 gate) and joint-moment summary.
+
+    Hicks reference force is the peak magnitude of the net support reaction:
+    sum both feet plus every bench sphere (when present); hands/bar stay out.
+    """
     column = {n: j for j, n in enumerate(inverse.coordinates)}
     residuals: dict[str, dict[str, Any]] = {}
     peaks: dict[str, float] = {}
@@ -910,24 +932,33 @@ def id_receipt(targets: LiftTargets, inverse: IDResult) -> dict[str, Any]:
             "max_abs": float(np.abs(series).max()),
             "rms": float(np.sqrt(np.mean(series**2))),
         }
-    grf = targets.grf_force_n["left"] + targets.grf_force_n["right"]
-    peak_force = float(np.linalg.norm(grf, axis=1).max())
+    support = targets.grf_force_n["left"] + targets.grf_force_n["right"]
+    for force in getattr(targets, "bench_force_n", {}).values():
+        support = support + force
+    peak_force = float(np.linalg.norm(support, axis=1).max())
     max_force = RESIDUAL_FORCE_FRACTION * peak_force
     max_moment = RESIDUAL_MOMENT_FRACTION * inverse.com_height_m * peak_force
     forces = [peaks[n] for n in RESIDUAL_COORDINATES[3:]]
     moments = [peaks[n] for n in RESIDUAL_COORDINATES[:3]]
     joints = [n for n in inverse.coordinates if n not in RESIDUAL_COORDINATES]
+    external_loads = {
+        "feet": "GCV-1 foot wrench of the bundle's shared-law contact "
+        "(kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
+        "hands": "GCV-7 per-hand bushing wrench of the bundle bar "
+        "(BushingSample.grip_analysis), negated onto hand_l/hand_r at the "
+        "model's grip point; the barbell body is massless in ID",
+        "model_forces": "removed (muscles, actuators, contact); gravity kept",
+    }
+    if targets.bench_force_n:
+        external_loads["bench"] = (
+            "shared-law back-sphere contact wrench of the bundle (VectorPlant), "
+            "applied to torso (back_RPSH, back_LPSH) and pelvis (back_RPSI, back_LPSI) "
+            "at the contact points"
+        )
     return {
         "solver": "OpenSim InverseDynamicsSolver; quintic GCV spline derivatives, "
         "no low-pass filter (InverseDynamicsTool default)",
-        "external_loads": {
-            "feet": "GCV-1 foot wrench of the bundle's shared-law contact "
-            "(kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
-            "hands": "GCV-7 per-hand bushing wrench of the bundle bar "
-            "(BushingSample.grip_analysis), negated onto hand_l/hand_r at the "
-            "model's grip point; the barbell body is massless in ID",
-            "model_forces": "removed (muscles, actuators, contact); gravity kept",
-        },
+        "external_loads": external_loads,
         "residuals": residuals,
         "residual_gate": {
             "reference": "Hicks et al. 2015, J Biomech Eng 137:020905",

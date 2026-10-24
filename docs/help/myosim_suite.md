@@ -15,9 +15,9 @@ engine yourself. It does not run a simulation.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| *Probe engine* button | user action | Triggers the lazy import of `MyoSuitePhysicsEngine` and instantiates it once as a smoke test. |
+| Input                 | Unit / type | Notes                                                                                         |
+| --------------------- | ----------- | --------------------------------------------------------------------------------------------- |
+| _Probe engine_ button | user action | Triggers the lazy import of `MyoSuitePhysicsEngine` and instantiates it once as a smoke test. |
 
 That is the complete input surface of the tile. There are no model, time-step,
 duration, activation or environment-id fields; the widget deliberately does not
@@ -26,11 +26,11 @@ instantiate the engine on construction (see the module docstring in
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| Engine status | text | One of `not probed`, `available`, or `unavailable (<exception text>)`. |
+| Output                     | Unit / type    | Notes                                                                                              |
+| -------------------------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| Engine status              | text           | One of `not probed`, `available`, or `unavailable (<exception text>)`.                             |
 | Programmatic usage snippet | read-only text | Shows `Engine()` / `load_model('myoElbowPose1D6MRandom-v0')` against the `PhysicsEngine` protocol. |
-| Intro text | text | One paragraph describing MyoSuite as a Gym-based suite of musculoskeletal environments on MuJoCo. |
+| Intro text                 | text           | One paragraph describing MyoSuite as a Gym-based suite of musculoskeletal environments on MuJoCo.  |
 
 No physical quantities are produced by this tile, so there are no units to
 report.
@@ -69,6 +69,7 @@ there is no separate half-sarcomere solver in this repository.
   any particular MyoSuite environment id can be constructed.
 
 ## See Also
+
 - [MyoSim engine reference](../engines/myosim.md)
 - [MuJoCo engine reference](../engines/mujoco.md) - MyoSuite is built on MuJoCo
 - [Engine capabilities matrix](../engines/engine_capabilities.md)

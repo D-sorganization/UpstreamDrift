@@ -31,13 +31,13 @@ descriptive statistics.
 
 ## Outputs
 
-| Output | Format / units |
-| --- | --- |
-| Dataset listing | JSON: `name`, `path`, `format`, `size_bytes` (bytes), `columns` |
-| Preview | JSON rows from the head of the file |
-| Statistics | JSON `stats` mapping column name to a float-or-null summary, plus `row_count` |
-| Filtered rows | JSON rows matching the filter, capped at the requested limit |
-| Export | `csv` (comma-separated values) or `json` (array of objects) - the only two formats `GET /tools/data-explorer/export-formats` returns |
+| Output          | Format / units                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Dataset listing | JSON: `name`, `path`, `format`, `size_bytes` (bytes), `columns`                                                                      |
+| Preview         | JSON rows from the head of the file                                                                                                  |
+| Statistics      | JSON `stats` mapping column name to a float-or-null summary, plus `row_count`                                                        |
+| Filtered rows   | JSON rows matching the filter, capped at the requested limit                                                                         |
+| Export          | `csv` (comma-separated values) or `json` (array of objects) - the only two formats `GET /tools/data-explorer/export-formats` returns |
 
 ## Method
 
@@ -83,6 +83,7 @@ submodule or set `TOOLS_REPO_PATH`.
   and no cross-dataset join.
 
 ## See Also
+
 - [Data Processor](data_processor.md) - the other Tools-provided data tile
 - [Dataset Generator](dataset_generator.md) - produces datasets to explore
 - [Vendored Tools repository notes](../../vendor/README.md)

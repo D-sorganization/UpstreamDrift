@@ -44,6 +44,25 @@ if PINOCCHIO_AVAILABLE:
 
 from src.shared.python.core import constants
 
+
+def _require_pinocchio() -> None:
+    """Precondition for model loading: the bindings imported with this module.
+
+    ``pin`` is bound only when ``PINOCCHIO_AVAILABLE`` was true at import time
+    (a ``MagicMock`` injected into ``sys.modules`` by a unit-test conftest is
+    rejected there), or when a caller binds it explicitly. Loading without it
+    must fail as a missing requirement, not as a ``NameError`` deep inside the
+    loader.
+
+    Raises:
+        ImportError: If the Pinocchio bindings are not bound to ``pin``.
+    """
+    if "pin" not in globals():
+        raise ImportError(
+            "Pinocchio Python bindings are not available; install pin>=2.6.0"
+        )
+
+
 logger = get_logger(__name__)
 
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
@@ -137,6 +156,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             force_visualization=CapabilityLevel.FULL,
             inverse_dynamics=CapabilityLevel.FULL,
             drift_acceleration=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
             extra={"spatial_jacobian_order": "angular_linear"},
         )
 
@@ -148,6 +168,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """
         if path is None:
             raise ValueError("path must be provided")
+        _require_pinocchio()
         if not path.endswith(".urdf"):
             logger.warning("Pinocchio loader expects URDF, got: %s", path)
 
@@ -171,6 +192,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """
         if content is None:
             raise ValueError("content must be provided")
+        _require_pinocchio()
         if extension != "urdf":
             logger.warning("Pinocchio load_from_string mostly supports URDF.")
 
@@ -284,6 +306,58 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the current state (positions, velocities)."""
         return self.q.copy(), self.v.copy()
+
+    def get_joint_names(self) -> list[str]:
+        """Get list of joint names matching generalized velocity dimensions (nv).
+
+        Returns:
+            List of unique, non-empty joint names of length nv in model order.
+            Empty list if no model is loaded.
+        """
+        if self.model is None:
+            return []
+
+        nv = int(self.model.nv)
+        if nv == 0:
+            return []
+
+        names: list[str] = [""] * nv
+        njoints = getattr(self.model, "njoints", len(getattr(self.model, "joints", [])))
+        # Pinocchio joint 0 is Universe (fixed, 0 DOFs). Joints 1..njoints-1 are the model joints.
+        for j in range(1, njoints):
+            try:
+                joint = self.model.joints[j]
+                nv_j = int(joint.nv)
+                if nv_j == 0:
+                    continue
+                idx_v = int(joint.idx_v)
+                raw_name = ""
+                if hasattr(self.model, "names") and j < len(self.model.names):
+                    raw_name = str(self.model.names[j])
+                j_name = raw_name if raw_name else f"joint_{j}"
+
+                if nv_j == 1:
+                    if 0 <= idx_v < nv:
+                        names[idx_v] = j_name
+                else:
+                    for d in range(nv_j):
+                        if 0 <= idx_v + d < nv:
+                            names[idx_v + d] = f"{j_name}_{d}"
+            except (
+                RuntimeError,
+                ValueError,
+                AttributeError,
+                TypeError,
+                IndexError,
+            ) as exc:
+                logger.debug("Error processing Pinocchio joint %d: %s", j, exc)
+                continue
+
+        for i in range(nv):
+            if not names[i]:
+                names[i] = f"dof_{i}"
+
+        return names
 
     def get_link_transforms(self) -> dict[str, np.ndarray]:
         """Return frame poses without advancing the Pinocchio model."""
@@ -436,6 +510,12 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         frame = self.get_force_torque_frame()
         return None if frame is None else frame.axial_loads
 
+    def get_body_names(self) -> list[str]:
+        """Get names of all frames/bodies in the Pinocchio model."""
+        if self.model is None:
+            return []
+        return [f.name for f in getattr(self.model, "frames", [])]
+
     @precondition(
         lambda self, body_name: self.is_initialized,
         "Engine must be initialized",
@@ -452,8 +532,12 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             return None
 
         if not self.model.existFrame(body_name):
+            valid_frames = self.get_body_names()
             logger.warning(f"Body/Frame '{body_name}' not found in Pinocchio model.")
-            return None
+            raise KeyError(
+                f"Body/Frame '{body_name}' not found in Pinocchio model. "
+                f"Valid frames: {valid_frames}"
+            )
 
         frame_id = self.model.getFrameId(body_name)
 

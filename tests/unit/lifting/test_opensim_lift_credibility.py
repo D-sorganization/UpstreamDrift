@@ -39,18 +39,16 @@ from src.shared.python.lifting.pack_audit.names import LIFTS
 
 pytestmark = pytest.mark.unit
 
-#: OSL-17 (#13131) regression on the high-bar rack bundle: the IK carries
-#: the Rajagopal arm_flex, arm_rot, pro_sup and elbow_flex coordinates up to
-#: 1.21e-3 rad past their ranges (the arms cannot reach a grip behind the
-#: neck; see ``test_opensim_lift_bar_reach``).  Not loosened.  On the
-#: #13037 whole-row lift body (#13041): up to 8.0e-4 rad (arm_rot_l).
-_RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "OSL-19 #13158: high-bar grip pushes Rajagopal arm coordinates up "
-        "to 8.0e-4 rad past their ranges (folded arm reach about 0.20 m)."
-    ),
-)
+#: OSL-19 (#13158): high-bar rack reach sweep (grip width 0.75 m).
+#: Left hand reach is resolved to 0.0024 mm (well inside 1 mm bound).
+#: Right hand reach stops 1.51 mm from the grip (down from 56.9 mm, 97.4%
+#: reduction), exceeding the 1.0 mm bound. The binding physical constraint is
+#: three simultaneous 3D joint limits on the right arm: arm_flex_r = 90.0 deg
+#: (1.57080 rad), arm_rot_r = -90.0 deg (-1.57080 rad), and elbow_flex_r = 150.0 deg
+#: (2.61800 rad), rather than the 2D planar d_min (0.2059 m).
+#: Bundle shoulder landmark to grip is 0.2033 m (R) / 0.2198 m (L); OpenSim RSJC/LSJC
+#: to bundle grip is 0.2052 m (R) / 0.2232 m (L); OpenSim RSJC/LSJC to hand CoM is
+#: 0.2059 m (R) / 0.2232 m (L).
 #: Bundle hip-centre separation (OSL-14, #13057: the AN-1 lift body's de Leva
 #: spacing, 2 * 0.052 * 1.78 m) and the generic Rajagopal one.
 _BUNDLE_HIP_WIDTH_M = 0.18512
@@ -334,7 +332,6 @@ def test_hold_is_balanced_over_its_support(holds: dict, lift: str) -> None:
 
 @pytest.mark.requires_opensim
 @pytest.mark.integration
-@_RAJAGOPAL_ARM_RANGES
 def test_squat_ik_keeps_every_coordinate_in_range() -> None:
     _real_opensim()
     _base_model()

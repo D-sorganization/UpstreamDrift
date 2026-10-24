@@ -24,10 +24,10 @@ quantities to document.
 The only interactive elements, and only on the `__main__.py` path, are two
 buttons:
 
-| Control                | Effect                                             |
-| ---------------------- | -------------------------------------------------- |
-| "Simulate Ball Flight" | Draws a fixed three-point polyline and a sphere    |
-| "Putting Green Mode"   | Draws a fixed plane, a cylinder, and a sphere      |
+| Control                | Effect                                          |
+| ---------------------- | ----------------------------------------------- |
+| "Simulate Ball Flight" | Draws a fixed three-point polyline and a sphere |
+| "Putting Green Mode"   | Draws a fixed plane, a cylinder, and a sphere   |
 
 ## Outputs
 
@@ -94,6 +94,7 @@ The two produce visibly different windows. Files inspected:
 `src/config/launcher_manifest.json`.
 
 ## See Also
+
 - [Ball Flight Simulator](ball_flight_simulator.md) - a working flight simulation
 - [Putting Green](putting_green.md) - a working putting simulation
 - [ADR-0013: Launcher Composability](../adr/0013-launcher-composability.md)

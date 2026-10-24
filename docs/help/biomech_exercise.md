@@ -21,12 +21,12 @@ the per-engine dashboards this shell hosts, not by the shell itself.
 
 ## Inputs
 
-| Input | How it is supplied | Unit or values |
-| --- | --- | --- |
-| Exercise name | `--exercise` argument, else the `BIOMECH_EXERCISE` environment variable, else `gait` | identifier string, for example `gait`, `sit_to_stand` |
-| Preferred engine | `BIOMECH_ENGINE` environment variable, or the `preferred_engine` constructor argument | one of the discovered engine names |
-| Available engines | `discover_exercise(exercise)` in `src/shared/python/biomech/exercise_registry.py` | list of engine names |
-| Engine selection | toolbar combo box, at runtime | one of the listed engines |
+| Input             | How it is supplied                                                                    | Unit or values                                        |
+| ----------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Exercise name     | `--exercise` argument, else the `BIOMECH_EXERCISE` environment variable, else `gait`  | identifier string, for example `gait`, `sit_to_stand` |
+| Preferred engine  | `BIOMECH_ENGINE` environment variable, or the `preferred_engine` constructor argument | one of the discovered engine names                    |
+| Available engines | `discover_exercise(exercise)` in `src/shared/python/biomech/exercise_registry.py`     | list of engine names                                  |
+| Engine selection  | toolbar combo box, at runtime                                                         | one of the listed engines                             |
 
 `discover_exercise` asks each registered model source (`_MODEL_SOURCES` in
 `src/shared/python/config/model_source_providers.py`) for its root and reports
@@ -39,12 +39,12 @@ is a dependency-light analysis backend with no sibling model repository
 
 ## Outputs
 
-| Output | Description |
-| --- | --- |
-| Window title | `Biomechanics Exercise: <Exercise>` |
+| Output                    | Description                                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Window title              | `Biomechanics Exercise: <Exercise>`                                                                                                |
 | Embedded dashboard widget | `MuJoCoDashboard`, `DrakeDashboard`, `PinocchioDashboard` or `JaxSimDashboard`, each constructed with `exercise_filter=<exercise>` |
-| Engine-load error panel | a word-wrapped `QLabel` with object name `engine-load-error` when the selected engine cannot be imported or constructed |
-| OpenSim placeholder | the literal text "OpenSim dashboard not yet available." |
+| Engine-load error panel   | a word-wrapped `QLabel` with object name `engine-load-error` when the selected engine cannot be imported or constructed            |
+| OpenSim placeholder       | the literal text "OpenSim dashboard not yet available."                                                                            |
 
 All numeric results, plots and risk scores come from the embedded dashboard.
 This module produces no metrics of its own.
@@ -95,6 +95,7 @@ lives in `VIRTUAL_PREFIXES` in
   and lands on the fallback list.
 
 ## See Also
+
 - [Gait Model](biomech_gait.md)
 - [Sit-to-Stand Model](biomech_sit_to_stand.md)
 - [Engine Selection](engine_selection.md)

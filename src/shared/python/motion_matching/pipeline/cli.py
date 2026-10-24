@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 import logging
 from pathlib import Path
@@ -80,6 +80,7 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     build_dynamics_report,
     lane_reference_zmp,
     replay,
+    replay_sensitivity_block,
     score_reference,
     shooting_fit,
     zmp_filter,
@@ -170,6 +171,18 @@ def build_parser() -> argparse.ArgumentParser:
         description="Ground-supported full-body pipeline runner with pluggable plant engines."
     )
     parser.add_argument("--out", type=Path, default=Path.cwd())
+    parser.add_argument(
+        "--replay-sensitivity",
+        action="store_true",
+        help="replay once more from a seeded 1e-6 offset and record the "
+        "divergence growth before and after impact (#13112)",
+    )
+    parser.add_argument(
+        "--replay-sensitivity-epsilon",
+        type=_nonnegative_float,
+        default=1e-6,
+        help="size of the --replay-sensitivity reference offset (m or rad)",
+    )
     parser.add_argument(
         "--address-only",
         action="store_true",
@@ -487,6 +500,7 @@ class PipelineContext:
     engine: str
     log: logging.Logger
     t_start: float
+    neural_receipt: dict[str, Any] | None = None
 
 
 def _init_pipeline(args: argparse.Namespace) -> PipelineContext:
@@ -638,7 +652,9 @@ def _calibrate_and_scale(
     )
     sim = fs.FullBodySimulator(adapter)
     address2 = lane.best_address(kin, address.q)
-    record_calibrated_address(address_report, sim, kin, address2, lane, labels, adapter)
+    record_calibrated_address(
+        address_report, sim, kin, address2, lane, labels, adapter, spec=scaled_spec
+    )
     return _CalibrateAndScaleResult(
         scaled_spec,
         spec_bytes,
@@ -1166,7 +1182,31 @@ def _ground_support_receipt(
             kin=kin,
             q_ref=q_ref,
             elapsed_s=time.perf_counter() - ctx.t_start,
+            neural=ctx.neural_receipt,
         )
+    )
+
+
+def _maybe_replay_sensitivity(
+    args: Any,
+    plant: tuple[Lane, Any, Any],
+    tracks: tuple[np.ndarray, np.ndarray],
+    dynamics_report: dict[str, Any],
+    replay_options: dict[str, Any],
+) -> None:
+    """Add the opt-in ``replay_sensitivity`` block (#13112) in place."""
+    if not getattr(args, "replay_sensitivity", False):
+        return
+    lane, kin, sim = plant
+    q_track, sim_q = tracks
+    dynamics_report["replay_sensitivity"] = replay_sensitivity_block(
+        sim,
+        lane,
+        kin,
+        (q_track, sim_q),
+        dynamics_report["fd_phase"],
+        replay_options=replay_options,
+        epsilon=args.replay_sensitivity_epsilon,
     )
 
 
@@ -1227,6 +1267,13 @@ def _simulate_and_receipt(
             club_spec=cal_res.scaled_spec,
             club_attachments=cal_res.attachments,
         )
+    )
+    _maybe_replay_sensitivity(
+        args,
+        (lane, kin, sim),
+        (q_track, sim_q),
+        dynamics_report,
+        {"tracking_backend": tracking, "reference_hook": hook},
     )
     _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)
     render_skipped = _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)
@@ -1332,11 +1379,27 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     return CalibratedRun(ctx, lane, base_spec, labels, cal_res, provenance)
 
 
+def _neural_receipt_from_args(args: argparse.Namespace) -> dict[str, Any]:
+    """Resolve neural CLI flags through the motion-matching controller (#12970)."""
+    from src.tools.motion_matching.neural_cli import (
+        build_neural_receipt,
+        enforce_neural_gate,
+        prepare_ground_support_neural,
+    )
+
+    request, disposition = prepare_ground_support_neural(args)
+    enforce_neural_gate(disposition)
+    return build_neural_receipt(request, disposition)
+
+
 def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
     """Return the calibrated address report (``foot_progression`` included).
 
     Adds ``hip_coordinates_deg``: the six hip coordinates at the calibrated
     address, so a coordinate at its range limit is visible in the report.
+
+    The address stage runs no neural inference and writes no receipt, so the
+    neural disposition (#12970) is resolved only by :func:`run_pipeline`.
     """
     cal_res = calibrate_run(args).cal_res
     report = cal_res.address_report
@@ -1357,9 +1420,10 @@ def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
 @precondition(lambda args: args is not None, "args must not be None")
 def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     """Execute the full-body ground support matching pipeline."""
+    neural_receipt = _neural_receipt_from_args(args)
     run = calibrate_run(args)
     ctx, lane, base_spec, labels, cal_res = (
-        run.ctx,
+        replace(run.ctx, neural_receipt=neural_receipt),
         run.lane,
         run.base_spec,
         run.labels,

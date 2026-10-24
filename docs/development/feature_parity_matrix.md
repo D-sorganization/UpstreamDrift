@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 46 parity · 5 gap · 16 exempt (12 pending decision in #7460).
+**Summary:** 47 parity · 5 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -25,7 +25,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `diagnostics.integrations_health`<br>Diagnostics + integrations-health panel | ✅ parity | `src/launchers/integrations_health_panel.py` | `src/api/routes/diagnostics.py` | `ui/src/components/ui/DiagnosticsPanel.tsx` | — |
 | `docs.document_library`<br>Document library / project map viewer | ⚪ exempt | `src/launchers/library_widget.py` | — | — | Desktop documentation browser; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `drake.gui_force_overlay`<br>Drake GUI force/torque arrows and live tension/compression shading | ✅ parity | `src/engines/physics_engines/drake/python/src/drake_force_overlay.py` | `src/api/routes/force_overlays.py` | `ui/src/components/visualization/ForceOverlay.tsx` | — |
-| `engines.dashboards`<br>Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio) | ⚪ exempt | `src/launchers/drake_dashboard.py` | — | — | Experimental desktop dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
+| `engines.dashboards`<br>Per-engine interactive dashboards (Drake, JaxSim, MuJoCo, Pinocchio) | ⚪ exempt | `src/launchers/drake_dashboard.py` | — | — | Experimental desktop dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `engines.load_and_simulate`<br>Engine load/probe + basic simulation loop | ✅ parity | `src/launchers/launcher_simulation.py` | `src/api/routes/engines.py` | `ui/src/pages/Simulation.tsx` | — |
 | `export.recordings_downloads`<br>Export/recording parity (HDF5/MAT/C3D/CSV/video, persisted recordings) | ✅ parity | `src/shared/python/data_io/export.py` | `src/api/routes/recordings.py` | `ui/src/components/simulation/RecordingsPanel.tsx` | — |
 | `export.video_speed_variants`<br>Time-based native video export with full-, half- and quarter-speed clips and an impact slow-motion clip | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | — | — | Headless CLI batch export of mp4 clips (60 fps, 1x, 0.5x and 0.25x, optional 0.1x impact window; the motion-matching video export writes the same three variants through export_video_variants) through each engine's desktop viewer; no web route renders or serves these clips, so there is no browser equivalent until one is added (GCV-14, #11720, epic #11706). |
@@ -57,7 +57,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.bunkershot3d_workbench`<br>BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict) | 🔴 gap | `src/tools/bunker_shot_gui/gui.py` | `src/api/routes/bunker_workbench.py` | `ui/src/pages/BunkerWorkbench.tsx` | #12536 |
 | `tools.capture_rig`<br>Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management; saved coaching lines/arrows/circles/ellipses/rectangles with selection, resize, undo/redo, frame visibility and annotated still/video exports; reference comparison and overlay player force/torque vector arrow layers (FTO-25, #11310) | ⚪ exempt | `src/tools/capture_rig/__main__.py` | — | — | Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); variants, overlays, provenance and annotation (#9790, #9791) and the multiview layout model/presets/editor and the layout-composited live preview and playback (#9810, #9811, #9812, #9813, #9814) run on the same local session trees; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.character_builder`<br>Character Builder (spec-native character, presets, engine export) | ✅ parity | `src/tools/character_builder/gui.py` | `src/api/routes/character_builder.py` | `ui/src/pages/CharacterBuilder.tsx` | — |
-| `tools.character_builder_grip`<br>Grip presets and sliders (weak, neutral, strong; rotation, palm diagonal, spacing, style) | ✅ parity | `src/tools/character_builder/gui.py` | `src/api/routes/character_appearance.py` | `ui/src/components/character/GripControls.tsx` | — |
+| `tools.character_builder_grip`<br>Grip presets and sliders (weak, neutral, strong, Palmer overlap, Woods interlock, ten-finger; rotation, palm diagonal, spacing, style) | ✅ parity | `src/tools/character_builder/gui.py` | `src/api/routes/character_appearance.py` | `ui/src/components/character/GripControls.tsx` | — |
 | `tools.data_explorer`<br>Data Explorer (import/filter/visualize datasets) | ✅ parity | — | `src/api/routes/data_explorer.py` | `ui/src/pages/DataExplorer.tsx` | — |
 | `tools.dataset_generator`<br>Swing dataset generation and import | ✅ parity | — | `src/api/routes/dataset.py` | `ui/src/pages/DatasetGenerator.tsx` | — |
 | `tools.golf_simulator`<br>Golf Simulator capability-aware controls and replay submission | ✅ parity | `src/tools/golf_simulator/gui.py` | `src/api/routes/golf_simulator.py` | `ui/src/pages/GolfSimulator.tsx` | — |
@@ -74,6 +74,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.putting_green`<br>Putting green simulation | ✅ parity | `src/engines/physics_engines/putting_green/python/simulator.py` | `src/api/routes/putting_green.py` | `ui/src/pages/PuttingGreen.tsx` | — |
 | `tools.rate_of_closure`<br>Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | 🔴 gap | `vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py` | `src/api/local_server.py` | `ui/src/pages/ImpactExplorer.tsx` | #11987 |
 | `tools.shot_pattern_analysis`<br>Shot Pattern Analysis Workbench | ⚪ exempt | `src/tools/shot_pattern_analysis/gui.py` | — | — | The current product surface is a local PyQt6 launcher and headless CLI for deterministic physics simulation and local CSV, JSON, and PNG exports. There is no API route or React page, so browser parity is not claimed. |
+| `tools.spine_study`<br>Segmental spine study execution and model asset selection | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
 | `tools.spine_viewer`<br>Segmental spine viewer (per-level load heatmaps from study receipts) | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
 | `tools.terrain_engine`<br>Terrain and topography configuration | ✅ parity | — | `src/api/routes/terrain.py` | `ui/src/pages/Terrain.tsx` | — |
 | `tools.video_analyzer`<br>Video Analyzer (pose tracking and force/torque overlay) | ✅ parity | `src/tools/video_analyzer/gui.py` | `src/api/routes/video_overlays.py` | `ui/src/pages/VideoAnalyzer.tsx` | — |
@@ -108,6 +109,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `ground_reaction_plots` | `analysis.ground_reaction` |
 | `impact_parameters` | `analysis.impact_parameters` |
 | `injury_analysis` | `biomech.exercise_injury_dashboards` |
+| `jaxsim_dashboard` | `engines.dashboards` |
 | `launch_monitor_analytics` | `tools.launch_monitor_analytics` |
 | `matched_swing_browser` | `tools.matched_swing_browser` |
 | `matlab_suite` | `tools.matlab_suite` |

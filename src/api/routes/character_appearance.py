@@ -17,18 +17,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from src.api.services.character_appearance_service import (
-    appearance_library,
-    appearance_sidecar_filename,
-    build_appearance,
-    grip_revision_summary,
-)
-from src.shared.python.motion_matching.execution.grip_selection import (
-    GripOverrides,
-)
-
 from ..models.requests import CharacterSpecRequest
-from .character_builder import _compile
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -46,6 +35,9 @@ _CHOICE_FIELDS = (
     "bottom_color",
     "glove",
     "grip_thumb_offset_deg",
+    "grip_strength_deg",
+    "lead_roll_offset_deg",
+    "trail_roll_offset_deg",
     "name",
 )
 
@@ -91,6 +83,24 @@ class CharacterAppearanceRequest(BaseModel):
     grip_thumb_offset_deg: float | None = Field(
         None, ge=0.0, le=45.0, description="Lead thumb offset, degrees (picture only)"
     )
+    grip_strength_deg: float | None = Field(
+        None,
+        ge=-30.0,
+        le=30.0,
+        description="Both-hand roll offset, degrees (picture only)",
+    )
+    lead_roll_offset_deg: float | None = Field(
+        None,
+        ge=-30.0,
+        le=30.0,
+        description="Lead-hand roll offset, degrees (picture only)",
+    )
+    trail_roll_offset_deg: float | None = Field(
+        None,
+        ge=-30.0,
+        le=30.0,
+        description="Trail-hand roll offset, degrees (picture only)",
+    )
     # The name becomes the export filename stem, so it is restricted to a
     # header- and path-safe identifier.
     name: str | None = Field(
@@ -122,10 +132,14 @@ def _build(
     spec_sha256: str | None = None
     preset_id: str | None = None
     if request.character is not None:
+        from .character_builder import _compile
+
         compiled = _compile(request.character)
         spec_sha256 = compiled.sha256
         preset_id = compiled.preset_id
     try:
+        from src.api.services.character_appearance_service import build_appearance
+
         document = build_appearance(_choices(request), spec_sha256)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -135,6 +149,8 @@ def _build(
 @router.get("/character-builder/appearance/library")
 def get_appearance_library() -> dict[str, Any]:
     """List skin tones, clothing presets, finishes and every named material."""
+    from src.api.services.character_appearance_service import appearance_library
+
     return appearance_library()
 
 
@@ -152,6 +168,10 @@ def build_character_appearance(request: CharacterAppearanceRequest) -> dict[str,
 )
 def export_character_appearance(request: CharacterAppearanceRequest) -> Response:
     """Export the picked appearance as a downloadable JSON sidecar."""
+    from src.api.services.character_appearance_service import (
+        appearance_sidecar_filename,
+    )
+
     document, spec_sha256, preset_id = _build(request)
     filename = appearance_sidecar_filename(
         document, preset_id=preset_id, spec_sha256=spec_sha256
@@ -170,13 +190,23 @@ class GripRevisionRequest(BaseModel):
     values turn a hand about the shaft (positive is stronger); the
     ``*_palm_diagonal`` values set where the shaft crosses the palm; the
     ``*_set_angle`` values the angle at the wrist; ``lead_below_butt`` and
-    ``hand_spacing`` are metres; ``grip_style`` selects the contact topology.
-    These are physical and make a new model revision (refit needed).
-    ``grip_thumb_offset_deg`` is picture-only.
+    ``hand_spacing`` are metres; ``grip_style`` selects the physical contact
+    topology (HRG-GS-G1).  ``grip_thumb_offset_deg``, ``grip_strength_deg``,
+    ``lead_roll_offset_deg`` and ``trail_roll_offset_deg`` are picture-only.
     """
 
     character: CharacterSpecRequest | None = None
-    preset: Literal["weak", "neutral", "strong"] | None = None
+    preset: (
+        Literal[
+            "weak",
+            "neutral",
+            "strong",
+            "palmer_overlap",
+            "woods_interlock",
+            "ten_finger",
+        ]
+        | None
+    ) = None
     lead_shaft_rotation: float | None = None
     trail_shaft_rotation: float | None = None
     lead_palm_diagonal: float | None = None
@@ -187,6 +217,9 @@ class GripRevisionRequest(BaseModel):
     hand_spacing: float | None = None
     grip_style: Literal["overlap", "interlock", "ten_finger"] | None = None
     grip_thumb_offset_deg: float | None = None
+    grip_strength_deg: float | None = None
+    lead_roll_offset_deg: float | None = None
+    trail_roll_offset_deg: float | None = None
 
     model_config = {"extra": "forbid"}
 
@@ -198,6 +231,12 @@ def build_grip_revision(request: GripRevisionRequest) -> dict[str, Any]:
     A physical pick returns the new revision's hashes and ``refit_required``;
     picture-only picks leave ``physics_spec_sha256`` equal to the parent's.
     """
+    from src.api.services.character_appearance_service import grip_revision_summary
+    from src.shared.python.motion_matching.execution.grip_selection import (
+        GripOverrides,
+    )
+    from .character_builder import _compile
+
     picks = request.model_dump(exclude={"character"}, exclude_none=True)
     try:
         compiled = _compile(

@@ -42,25 +42,25 @@ _MIDPOINT_TOL_M = 1e-9
 #: has not reached it.  Declared before measuring; the bound solve reaches
 #: about 3e-6 m.
 _REACH_TOL_M = 1e-3
-#: OSL-17 (#13131) regression, measured on the high-bar rack bundle: the
-#: Rajagopal arm ranges (arm_flex <= 90 deg, arm_rot >= -90 deg, elbow_flex
-#: <= 150 deg) cannot put the hands on a grip behind the neck.  The bounded
-#: reach solve stops on those bounds 4.63 cm (L) and 6.03 cm (R) from the
-#: grips, against the 1 mm reach bound, and the IK then carries arm_flex,
-#: arm_rot, pro_sup and elbow_flex up to 1.21e-3 rad past their ranges.  The
-#: bounds are not loosened.  On the #13037 whole-row lift body (#13041) the
-#: reach stops 3.81 cm (L) and 5.69 cm (R) short and the ranges are exceeded
-#: by up to 8.0e-4 rad.  Shared cause with the pre-rack whole-row elbow-limit
-#: miss (8.3/21.5 mm): the folded Rajagopal arm cannot bring the hand within
-#: about 0.20 m of its shoulder landmark in these directions (shoulder-to-grip
-#: distance plus reach miss 0.198-0.213 m in all four cases), and the grips
-#: sit 0.146-0.190 m from the shoulders.
+#: OSL-19 (#13158): high-bar rack reach sweep (grip width 0.75 m).
+#: Left hand reach is resolved to 0.0024 mm (well inside 1 mm bound).
+#: Right hand reach stops 1.51 mm from the grip (down from 56.9 mm, 97.4%
+#: reduction), exceeding the 1.0 mm bound. The binding physical constraint is
+#: three simultaneous 3D joint limits on the right arm: arm_flex_r = 90.0 deg
+#: (1.57080 rad), arm_rot_r = -90.0 deg (-1.57080 rad), and elbow_flex_r = 150.0 deg
+#: (2.61800 rad), rather than the 2D planar d_min (0.2059 m).
+#: Bundle shoulder landmark to grip is 0.2033 m (R) / 0.2198 m (L); OpenSim RSJC/LSJC
+#: to bundle grip is 0.2052 m (R) / 0.2232 m (L); OpenSim RSJC/LSJC to hand CoM is
+#: 0.2059 m (R) / 0.2232 m (L).
+#: Coordinate range overshoot was resolved by the 1e-3 rad interior bound
+#: margin (OSL-12, #13048). Right-hand reach error remains 1.94 mm (> 1.0 mm bound)
+#: at the pinned joint limits; bounds not loosened.
 _RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-19 #13158: Rajagopal arm ranges cannot reach the high-bar grip "
-        "(reach 3.81/5.69 cm > 1 mm; ranges exceeded by up to 8.0e-4 rad); "
-        "the folded arm stops about 0.20 m from the shoulder."
+        "OSL-19 #13158 / OSL-12 #13048: right hand reach 1.94 mm > 1.0 mm bound "
+        "(arm_flex_r 90 deg, arm_rot_r -90 deg, elbow_flex_r 150 deg limits with "
+        "1e-3 rad interior bound margin); bounds not loosened."
     ),
 )
 
@@ -197,7 +197,6 @@ def test_squat_ik_meets_the_marker_gate(squat_receipt: dict) -> None:
 
 @pytest.mark.requires_opensim
 @pytest.mark.integration
-@_RAJAGOPAL_ARM_RANGES
 def test_squat_ik_keeps_every_coordinate_in_range_with_the_reaching_arms(
     squat_receipt: dict,
 ) -> None:

@@ -4,13 +4,322 @@
   "lifts": {
     "bench_press": {
       "ik_id": {
-        "bundle": null,
-        "id": null,
-        "ik": null,
+        "bundle": {
+          "bar_mass_kg": 100.0,
+          "body_mass_kg": 80.31300000000002,
+          "dt_s": 0.001,
+          "frame": {
+            "axes": "x forward (heel to forefoot), y up, z right",
+            "origin_in_bundle_world_m": [
+              -0.07484107728982554, -0.1717228189757191, 0.0
+            ],
+            "rotation_rows": [
+              [-0.010088487343578156, -0.9999491099166591, 0.0],
+              [0.0, 0.0, 1.0],
+              [-0.9999491099166591, 0.010088487343578156, -0.0]
+            ]
+          },
+          "frames": 41,
+          "height_m": 1.78,
+          "path": "docs/development/lifting/evidence/bench_press/bench_press_barbell_bundle.npz",
+          "reference_engine": "mujoco",
+          "sha256": "f700f098094a9898c2cf20f5a7bf2c97b6967b44b806f146cd6e958aa83834fb",
+          "spec_sha256": "292da0bcfc1109d27175b0865de215084dcf3c591c16a6e8893fba94b9211cdb",
+          "steps": 200,
+          "stride": 5,
+          "time_s": [0.0, 0.2],
+          "window": {
+            "duration_s": 0.2,
+            "start_s": 0.8933333333333334
+          }
+        },
+        "id": {
+          "all_finite": true,
+          "external_loads": {
+            "bench": "shared-law back-sphere contact wrench of the bundle (VectorPlant), applied to torso (back_RPSH, back_LPSH) and pelvis (back_RPSI, back_LPSI) at the contact points",
+            "feet": "GCV-1 foot wrench of the bundle's shared-law contact (kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
+            "hands": "GCV-7 per-hand bushing wrench of the bundle bar (BushingSample.grip_analysis), negated onto hand_l/hand_r at the model's grip point; the barbell body is massless in ID",
+            "model_forces": "removed (muscles, actuators, contact); gravity kept"
+          },
+          "joint_moments_peak_abs": {
+            "ankle_angle_l": 24.609122909873065,
+            "ankle_angle_r": 24.212511223345246,
+            "arm_add_l": 184.21727019464987,
+            "arm_add_r": 193.37880308535702,
+            "arm_flex_l": 109.46818912942067,
+            "arm_flex_r": 74.65442689683015,
+            "arm_rot_l": 249.30583076640636,
+            "arm_rot_r": 199.72048037130014,
+            "elbow_flex_l": 414.9066839213445,
+            "elbow_flex_r": 380.7853011356896,
+            "hip_adduction_l": 13.223655714743007,
+            "hip_adduction_r": 28.000091844464094,
+            "hip_flexion_l": 81.82913991362093,
+            "hip_flexion_r": 86.81187525767065,
+            "hip_rotation_l": 11.867411833482596,
+            "hip_rotation_r": 17.56243093399247,
+            "knee_angle_l": 75.74341933310329,
+            "knee_angle_l_beta": 0.06096313291282355,
+            "knee_angle_r": 76.09298815644384,
+            "knee_angle_r_beta": 0.0637790067780409,
+            "lumbar_bending": 50.503595064499265,
+            "lumbar_extension": 366.2923958083577,
+            "lumbar_rotation": 46.53443805222975,
+            "mtp_angle_l": 0.13847993571259015,
+            "mtp_angle_r": 0.13630312392536026,
+            "pro_sup_l": 15.399285305795408,
+            "pro_sup_r": 19.679877955177172,
+            "subtalar_angle_l": 10.18391001213379,
+            "subtalar_angle_r": 9.501607356807632,
+            "wrist_dev_l": 73.90673849179404,
+            "wrist_dev_r": 54.20165321992966,
+            "wrist_flex_l": 103.45991074399356,
+            "wrist_flex_r": 87.22506862064948
+          },
+          "residual_gate": {
+            "com_height_m": 0.5305917949566877,
+            "forces_within": false,
+            "max_force_n": 221.847327089482,
+            "max_moment_nm": 23.542074297350336,
+            "moments_within": false,
+            "peak_external_force_n": 4436.94654178964,
+            "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
+          },
+          "residuals": {
+            "pelvis_list": {
+              "max_abs": 26.304460755123205,
+              "rms": 10.387882482804232,
+              "unit": "N m"
+            },
+            "pelvis_rotation": {
+              "max_abs": 41.07689661020248,
+              "rms": 13.326971545122369,
+              "unit": "N m"
+            },
+            "pelvis_tilt": {
+              "max_abs": 318.3181314424387,
+              "rms": 127.27370827989859,
+              "unit": "N m"
+            },
+            "pelvis_tx": {
+              "max_abs": 141.034689796309,
+              "rms": 37.17538891500707,
+              "unit": "N"
+            },
+            "pelvis_ty": {
+              "max_abs": 511.57550299197754,
+              "rms": 134.80654889490063,
+              "unit": "N"
+            },
+            "pelvis_tz": {
+              "max_abs": 56.36149166736158,
+              "rms": 26.1391441137321,
+              "unit": "N"
+            }
+          },
+          "solver": "OpenSim InverseDynamicsSolver; quintic GCV spline derivatives, no low-pass filter (InverseDynamicsTool default)"
+        },
+        "ik": {
+          "accuracy": 1e-8,
+          "arm_reach": {
+            "coordinates_rad": {
+              "arm_add_l": 0.41611828352250446,
+              "arm_add_r": 0.3172730381297347,
+              "arm_flex_l": 0.5740509841448568,
+              "arm_flex_r": 0.7673628996066402,
+              "arm_rot_l": -1.3585406156422433,
+              "arm_rot_r": -1.4381745966436212,
+              "elbow_flex_l": 2.5887984458179703,
+              "elbow_flex_r": 2.6169999999999995
+            },
+            "frame": 0,
+            "method": "seed pass: OpenSim IK of the hold-pose model with the bar unweighted; then, with that body pose held, bounded least squares (scipy TRF, model ranges) on arm_flex/arm_add/arm_rot/elbow_flex per side so each hand's centre of mass lies on the bundle's grip point (prior weight 0.001 m/rad to the hold)",
+            "reach_error_m": {
+              "L": 1.249422570149488e-5,
+              "R": 0.006665026906744451
+            }
+          },
+          "clamping": "on (OpenSim IK default) except the arm coordinates arm_/elbow_/pro_sup/wrist_, which coordinate tasks (weight 0.01) hold at the hold pose; coordinates outside the model range are listed",
+          "frames": 41,
+          "marker_error": {
+            "max_m": 0.05555867262281604,
+            "per_marker_max_m": {
+              "ankle_l": 0.007898679688529253,
+              "ankle_r": 0.008093253754193312,
+              "asis_l": 0.00538397247400307,
+              "asis_r": 0.005136065290791945,
+              "bar": 0.05555867262281604,
+              "forefoot_l": 0.02102353788595452,
+              "forefoot_r": 0.0213397907514742,
+              "heel_l": 0.012474454158509264,
+              "heel_r": 0.012642236704850474,
+              "hip_l": 0.007056469489205214,
+              "hip_r": 0.007320844298089783,
+              "knee_l": 0.016536152823214342,
+              "knee_r": 0.0163852144281154,
+              "psis_l": 0.014252932864771998,
+              "psis_r": 0.01451810858931746,
+              "shoulder_l": 0.022432947421217243,
+              "shoulder_r": 0.022767760139041204
+            },
+            "per_marker_rms_m": {
+              "ankle_l": 0.007634302267223449,
+              "ankle_r": 0.007838672820645778,
+              "asis_l": 0.003748004461503107,
+              "asis_r": 0.003811886428678351,
+              "bar": 0.0422429659114643,
+              "forefoot_l": 0.0205172205664847,
+              "forefoot_r": 0.020827801433930686,
+              "heel_l": 0.012235616458002573,
+              "heel_r": 0.012352372470610627,
+              "hip_l": 0.004909979012968945,
+              "hip_r": 0.005246314114182257,
+              "knee_l": 0.015501703836965539,
+              "knee_r": 0.015413528401993719,
+              "psis_l": 0.00914157709749736,
+              "psis_r": 0.00936591392522421,
+              "shoulder_l": 0.01670959508580849,
+              "shoulder_r": 0.017047429542035898
+            },
+            "rms_m": 0.016015514900786478,
+            "threshold_max_m": 0.04,
+            "threshold_rms_m": 0.02,
+            "within_best_practice": false
+          },
+          "markers": [
+            "ankle_l",
+            "ankle_r",
+            "knee_l",
+            "knee_r",
+            "hip_l",
+            "hip_r",
+            "shoulder_l",
+            "shoulder_r",
+            "bar",
+            "heel_l",
+            "heel_r",
+            "forefoot_l",
+            "forefoot_r",
+            "asis_l",
+            "asis_r",
+            "psis_l",
+            "psis_r"
+          ],
+          "observability": "pelvis orientation is weakly observed in the bundle itself: LIFT-5 tracked only the hip centres on the pelvis, so the bundle's pelvis tilt is whatever its own IK left; with coordinate ranges clamped, OpenSim resolves the hip/pelvis/lumbar trade-off inside the Rajagopal ranges",
+          "pelvis_landmarks": {
+            "bundle_pelvis_tilt_rad": [1.5589124406780839, 1.669522742246925],
+            "hip_width_bundle_m": 0.18512000000000006,
+            "hip_width_generic_m": 0.15452,
+            "mapping": "bundle hip-centre midpoint + bundle Rajagopal pelvis frame (bundle_targets.bundle_pelvis_rotation) applied to the generic marker offsets from the generic hip-centre midpoint, scaled by the pelvis factors",
+            "model_deviation_max_m": {
+              "asis_l": 0.00538397247400307,
+              "asis_r": 0.005136065290791945,
+              "psis_l": 0.014252932864771998,
+              "psis_r": 0.01451810858931746
+            },
+            "model_deviation_rms_m": {
+              "asis_l": 0.003748004461503107,
+              "asis_r": 0.003811886428678351,
+              "psis_l": 0.00914157709749736,
+              "psis_r": 0.00936591392522421
+            },
+            "model_hip_flexion_range_rad": [-0.52359878, 2.0943951],
+            "model_pelvis_tilt_rad": [1.570619330014514, 1.570793881867618],
+            "pelvis_scale_xyz": [
+              1.0470588235294118, 1.0470588235294118, 1.1980326171369406
+            ],
+            "reason": "the bundle's hip flexion lies inside the model range",
+            "source": "the generic RajagopalLaiUhlrich2023.osim pelvis markers LASI/RASI/LPSI/RPSI",
+            "source_hip_flexion_rad": [
+              -0.264390447633453, -0.25053005608134504
+            ],
+            "tracked": true
+          },
+          "range_violations": {
+            "pro_sup_l": {
+              "frames": 37,
+              "max_rad": 0.0006016994461281883,
+              "min_rad": -0.0014370240238367582,
+              "range_max_rad": 2.09,
+              "range_min_rad": 0.0
+            },
+            "pro_sup_r": {
+              "frames": 36,
+              "max_rad": 0.000685257878971135,
+              "min_rad": -0.0013008941251796957,
+              "range_max_rad": 2.09,
+              "range_min_rad": 0.0
+            }
+          },
+          "segment_angle_error": {
+            "definition": "sagittal shank, thigh and trunk angles from the landmarks (sagittal_retarget.segment_angles), model minus bundle",
+            "max_abs_rad": 0.03594142226159225,
+            "per_segment_rms_rad": {
+              "shank": 0.03341414371848852,
+              "thigh": 0.009944807940960785,
+              "trunk": 0.02504873722720708
+            },
+            "rms_rad": 0.024784695829618137,
+            "threshold_rms_rad": 0.03490658503988659
+          },
+          "solver": "OpenSim InverseKinematicsSolver (engine of InverseKinematicsTool)",
+          "weights": {
+            "ankle_l": 10.0,
+            "ankle_r": 10.0,
+            "asis_l": 10.0,
+            "asis_r": 10.0,
+            "bar": 1.0,
+            "forefoot_l": 10.0,
+            "forefoot_r": 10.0,
+            "heel_l": 10.0,
+            "heel_r": 10.0,
+            "hip_l": 10.0,
+            "hip_r": 10.0,
+            "knee_l": 10.0,
+            "knee_r": 10.0,
+            "psis_l": 10.0,
+            "psis_r": 10.0,
+            "shoulder_l": 1.0,
+            "shoulder_r": 1.0
+          }
+        },
         "lift": "bench_press",
-        "model": null,
-        "reason": "no LIFT-5 same-input bundle is registered for 'bench_press' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
-        "status": "unavailable"
+        "model": {
+          "bar_mass_kg": 100.0,
+          "body_source": {
+            "licence": "opensim-org/opensim-models submodule, referenced not vendored; audit in src/engines/physics_engines/opensim/models/README.md",
+            "name": "RajagopalLaiUhlrich2023",
+            "path": "RajagopalLaiUhlrich2023.osim",
+            "sha256": "8f30d0b64750b87eb7f705907862590535212b4afd7e919faa3fd7d1683d22ec"
+          },
+          "scale_factor": 1.0470588235294118,
+          "segment_scale_factors": {
+            "calcn_l": 1.0000000000000007,
+            "calcn_r": 1.0000000000000004,
+            "femur_l": 0.9828667228217867,
+            "femur_r": 1.0120843803154163,
+            "patella_l": 0.9828667228217867,
+            "patella_r": 1.0120843803154163,
+            "pelvis": [
+              1.0470588235294118, 1.0470588235294118, 1.1980326171369406
+            ],
+            "talus_l": 1.0000000000000007,
+            "talus_r": 1.0000000000000004,
+            "tibia_l": 1.0919910904006696,
+            "tibia_r": 1.1025207280535998,
+            "toes_l": 1.0000000000000007,
+            "toes_r": 1.0000000000000004,
+            "torso": [1.0810979341225482, 1.0810979341225482, 1.19364705882352]
+          },
+          "skeleton_mass_kg": 80.31300000000003,
+          "tibial_torsion": {
+            "l": 10.0,
+            "r": 10.0,
+            "source": "Seber et al. 2000, Arch Orthop Trauma Surg 120:255-258 (doi:10.1007/s004020050459): CT tibiofibular torsion of 50 male adults, range 16-50 deg"
+          }
+        },
+        "reason": "",
+        "status": "complete"
       },
       "static_hold": {
         "available": true,
@@ -23,9 +332,7 @@
           "pelvis_tz": 0.0
         },
         "com_m": [
-          -0.3131347711329408,
-          -0.004400432548588966,
-          0.8108316739215875
+          -0.3131347711329408, -0.004400432548588966, 0.8108316739215875
         ],
         "expected_weight_n": 1961.33,
         "gravity_m_s2": 9.80665,
@@ -62,42 +369,336 @@
         },
         "support_cop_m": {
           "bench": [
-            -0.38299830908505667,
-            -0.0029675790809377592,
-            0.39602375863621986
+            -0.38299830908505667, -0.0029675790809377592, 0.39602375863621986
           ],
-          "left": [
-            0.5021818537590709,
-            0.07839299497423423,
-            0.0
-          ],
-          "right": [
-            0.49816473193893374,
-            -0.05939092066345154,
-            0.0
-          ]
+          "left": [0.5021818537590709, 0.07839299497423423, 0.0],
+          "right": [0.49816473193893374, -0.05939092066345154, 0.0]
         },
         "support_vertical_n": {
           "bench": 1806.0217382912956,
           "left": 43.20324750328961,
           "right": 112.10501420540368
         },
-        "total_grf_n": [
-          -1.2009682532858323e-13,
-          0.0,
-          1961.329999999989
-        ]
+        "total_grf_n": [-1.2009682532858323e-13, 0.0, 1961.329999999989]
       }
     },
     "clean_and_jerk": {
       "ik_id": {
-        "bundle": null,
-        "id": null,
-        "ik": null,
+        "bundle": {
+          "bar_mass_kg": 100.0,
+          "body_mass_kg": 80.31300000000002,
+          "dt_s": 0.001,
+          "frame": {
+            "axes": "x forward (heel to forefoot), y up, z right",
+            "origin_in_bundle_world_m": [
+              0.07296448168567703, -0.002168583415857702, 0.0
+            ],
+            "rotation_rows": [
+              [0.9999982772640321, -0.0018561974485724183, 0.0],
+              [0.0, 0.0, 1.0],
+              [-0.0018561974485724183, -0.9999982772640321, 0.0]
+            ]
+          },
+          "frames": 41,
+          "height_m": 1.78,
+          "path": "docs/development/lifting/evidence/clean_and_jerk/clean_and_jerk_barbell_bundle.npz",
+          "reference_engine": "mujoco",
+          "sha256": "0b5221ff7cc3b7128be609428a9681e7f0cc4398f38a7c8e0c35163d0beb45aa",
+          "spec_sha256": "617433abe253d7a658372efb4463aec9dfe7f59256628450d8bae7ec36f6e4d8",
+          "steps": 200,
+          "stride": 5,
+          "time_s": [0.0, 0.2],
+          "window": {
+            "duration_s": 0.2,
+            "start_s": 0.6933333333333334
+          }
+        },
+        "id": {
+          "all_finite": true,
+          "external_loads": {
+            "feet": "GCV-1 foot wrench of the bundle's shared-law contact (kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
+            "hands": "GCV-7 per-hand bushing wrench of the bundle bar (BushingSample.grip_analysis), negated onto hand_l/hand_r at the model's grip point; the barbell body is massless in ID",
+            "model_forces": "removed (muscles, actuators, contact); gravity kept"
+          },
+          "joint_moments_peak_abs": {
+            "ankle_angle_l": 166.69847328757726,
+            "ankle_angle_r": 166.49698283360874,
+            "arm_add_l": 122.59776531228172,
+            "arm_add_r": 128.16229457776066,
+            "arm_flex_l": 69.75085956825536,
+            "arm_flex_r": 124.2973633001099,
+            "arm_rot_l": 79.56362782611083,
+            "arm_rot_r": 78.95609274482246,
+            "elbow_flex_l": 223.55157125635262,
+            "elbow_flex_r": 241.2842095669777,
+            "hip_adduction_l": 620.517172494139,
+            "hip_adduction_r": 685.5257843767935,
+            "hip_flexion_l": 800.195150645653,
+            "hip_flexion_r": 793.8214757734951,
+            "hip_rotation_l": 235.84409553050327,
+            "hip_rotation_r": 247.80222374240327,
+            "knee_angle_l": 235.17238233454768,
+            "knee_angle_l_beta": 0.06487569000360005,
+            "knee_angle_r": 216.19984708964864,
+            "knee_angle_r_beta": 0.06663268941047192,
+            "lumbar_bending": 52.90432705962966,
+            "lumbar_extension": 1296.5573097206666,
+            "lumbar_rotation": 14.119341098281915,
+            "mtp_angle_l": 0.08526398289476171,
+            "mtp_angle_r": 0.08643384334749053,
+            "pro_sup_l": 10.077405469516721,
+            "pro_sup_r": 11.4027940176943,
+            "subtalar_angle_l": 97.5090419498682,
+            "subtalar_angle_r": 100.85322374657034,
+            "wrist_dev_l": 3.422585697050766,
+            "wrist_dev_r": 2.7587056819347646,
+            "wrist_flex_l": 55.0738569663836,
+            "wrist_flex_r": 58.95185681932996
+          },
+          "residual_gate": {
+            "com_height_m": 0.8688697680987902,
+            "forces_within": false,
+            "max_force_n": 223.09515995109246,
+            "max_moment_nm": 38.76812797813364,
+            "moments_within": false,
+            "peak_external_force_n": 4461.903199021849,
+            "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
+          },
+          "residuals": {
+            "pelvis_list": {
+              "max_abs": 8.206489018892691,
+              "rms": 4.8950063986129715,
+              "unit": "N m"
+            },
+            "pelvis_rotation": {
+              "max_abs": 21.82724269343373,
+              "rms": 6.024103089826579,
+              "unit": "N m"
+            },
+            "pelvis_tilt": {
+              "max_abs": 259.0016413939327,
+              "rms": 80.20364336747747,
+              "unit": "N m"
+            },
+            "pelvis_tx": {
+              "max_abs": 458.56014309327304,
+              "rms": 92.66675398117019,
+              "unit": "N"
+            },
+            "pelvis_ty": {
+              "max_abs": 257.4855335575652,
+              "rms": 63.76311032544467,
+              "unit": "N"
+            },
+            "pelvis_tz": {
+              "max_abs": 17.59765347002158,
+              "rms": 4.923662804878444,
+              "unit": "N"
+            }
+          },
+          "solver": "OpenSim InverseDynamicsSolver; quintic GCV spline derivatives, no low-pass filter (InverseDynamicsTool default)"
+        },
+        "ik": {
+          "accuracy": 1e-8,
+          "arm_reach": {
+            "coordinates_rad": {
+              "arm_add_l": -0.24405149998406686,
+              "arm_add_r": -0.2282602179668204,
+              "arm_flex_l": 0.4172876881007903,
+              "arm_flex_r": 0.5149564094218556,
+              "arm_rot_l": -0.09558142033944461,
+              "arm_rot_r": -0.08342207612414308,
+              "elbow_flex_l": 1.1216852995674291,
+              "elbow_flex_r": 1.0545780052267513
+            },
+            "frame": 0,
+            "method": "seed pass: OpenSim IK of the hold-pose model with the bar unweighted; then, with that body pose held, bounded least squares (scipy TRF, model ranges) on arm_flex/arm_add/arm_rot/elbow_flex per side so each hand's centre of mass lies on the bundle's grip point (prior weight 0.001 m/rad to the hold)",
+            "reach_error_m": {
+              "L": 6.427576125224407e-6,
+              "R": 6.0118277964715596e-6
+            }
+          },
+          "clamping": "on (OpenSim IK default) except the arm coordinates arm_/elbow_/pro_sup/wrist_, which coordinate tasks (weight 0.01) hold at the hold pose; coordinates outside the model range are listed",
+          "frames": 41,
+          "marker_error": {
+            "max_m": 0.16124311550869433,
+            "per_marker_max_m": {
+              "ankle_l": 0.00489925212159588,
+              "ankle_r": 0.005022688215187979,
+              "asis_l": 0.0076880589947381246,
+              "asis_r": 0.007918771775901874,
+              "bar": 0.16124311550869433,
+              "forefoot_l": 0.016056663373057466,
+              "forefoot_r": 0.016428093699440673,
+              "heel_l": 0.009362364953626424,
+              "heel_r": 0.009533021198393696,
+              "hip_l": 0.003795417198879948,
+              "hip_r": 0.003931857050341621,
+              "knee_l": 0.011164543259517025,
+              "knee_r": 0.011324513425723796,
+              "psis_l": 0.00728897606525326,
+              "psis_r": 0.007302892004226149,
+              "shoulder_l": 0.04545559232145502,
+              "shoulder_r": 0.040355333817612554
+            },
+            "per_marker_rms_m": {
+              "ankle_l": 0.004229421349648791,
+              "ankle_r": 0.004364143166734599,
+              "asis_l": 0.003873239685573713,
+              "asis_r": 0.00403204969234588,
+              "bar": 0.07049231007054856,
+              "forefoot_l": 0.012744489239589128,
+              "forefoot_r": 0.01345920799634919,
+              "heel_l": 0.007540444515657028,
+              "heel_r": 0.007800596885180558,
+              "hip_l": 0.003756515667958545,
+              "hip_r": 0.0038916263457853865,
+              "knee_l": 0.010555354880439159,
+              "knee_r": 0.010856083079313142,
+              "psis_l": 0.0039085759859575535,
+              "psis_r": 0.003974011224731302,
+              "shoulder_l": 0.021912344641183107,
+              "shoulder_r": 0.020699118108108705
+            },
+            "rms_m": 0.019847713059487435,
+            "threshold_max_m": 0.04,
+            "threshold_rms_m": 0.02,
+            "within_best_practice": false
+          },
+          "markers": [
+            "ankle_l",
+            "ankle_r",
+            "knee_l",
+            "knee_r",
+            "hip_l",
+            "hip_r",
+            "shoulder_l",
+            "shoulder_r",
+            "bar",
+            "heel_l",
+            "heel_r",
+            "forefoot_l",
+            "forefoot_r",
+            "asis_l",
+            "asis_r",
+            "psis_l",
+            "psis_r"
+          ],
+          "observability": "pelvis orientation is weakly observed in the bundle itself: LIFT-5 tracked only the hip centres on the pelvis, so the bundle's pelvis tilt is whatever its own IK left; with coordinate ranges clamped, OpenSim resolves the hip/pelvis/lumbar trade-off inside the Rajagopal ranges",
+          "pelvis_landmarks": {
+            "bundle_pelvis_tilt_rad": [
+              -0.9383280049011511, -0.6281449249724063
+            ],
+            "hip_width_bundle_m": 0.18512000000000003,
+            "hip_width_generic_m": 0.15452,
+            "mapping": "bundle hip-centre midpoint + bundle Rajagopal pelvis frame (bundle_targets.bundle_pelvis_rotation) applied to the generic marker offsets from the generic hip-centre midpoint, scaled by the pelvis factors",
+            "model_deviation_max_m": {
+              "asis_l": 0.0076880589947381246,
+              "asis_r": 0.007918771775901874,
+              "psis_l": 0.00728897606525326,
+              "psis_r": 0.007302892004226149
+            },
+            "model_deviation_rms_m": {
+              "asis_l": 0.003873239685573713,
+              "asis_r": 0.00403204969234588,
+              "psis_l": 0.0039085759859575535,
+              "psis_r": 0.003974011224731302
+            },
+            "model_hip_flexion_range_rad": [-0.52359878, 2.0943951],
+            "model_pelvis_tilt_rad": [-0.9608734923907146, -0.5948514880769609],
+            "pelvis_scale_xyz": [
+              1.0470588235294118, 1.0470588235294118, 1.1980326171369404
+            ],
+            "reason": "the bundle's hip flexion lies inside the model range",
+            "source": "the generic RajagopalLaiUhlrich2023.osim pelvis markers LASI/RASI/LPSI/RPSI",
+            "source_hip_flexion_rad": [0.8620780388402319, 1.718690174139069],
+            "tracked": true
+          },
+          "range_violations": {
+            "pro_sup_l": {
+              "frames": 37,
+              "max_rad": 2.611645547335718e-5,
+              "min_rad": -0.002243332015780821,
+              "range_max_rad": 2.09,
+              "range_min_rad": 0.0
+            },
+            "pro_sup_r": {
+              "frames": 36,
+              "max_rad": 2.865855475265204e-5,
+              "min_rad": -0.0020551755434621696,
+              "range_max_rad": 2.09,
+              "range_min_rad": 0.0
+            }
+          },
+          "segment_angle_error": {
+            "definition": "sagittal shank, thigh and trunk angles from the landmarks (sagittal_retarget.segment_angles), model minus bundle",
+            "max_abs_rad": 0.07610030159181203,
+            "per_segment_rms_rad": {
+              "shank": 0.008308116214867626,
+              "thigh": 0.006287764767183829,
+              "trunk": 0.036598098778782055
+            },
+            "rms_rad": 0.02196953659827378,
+            "threshold_rms_rad": 0.03490658503988659
+          },
+          "solver": "OpenSim InverseKinematicsSolver (engine of InverseKinematicsTool)",
+          "weights": {
+            "ankle_l": 10.0,
+            "ankle_r": 10.0,
+            "asis_l": 10.0,
+            "asis_r": 10.0,
+            "bar": 1.0,
+            "forefoot_l": 10.0,
+            "forefoot_r": 10.0,
+            "heel_l": 10.0,
+            "heel_r": 10.0,
+            "hip_l": 10.0,
+            "hip_r": 10.0,
+            "knee_l": 10.0,
+            "knee_r": 10.0,
+            "psis_l": 10.0,
+            "psis_r": 10.0,
+            "shoulder_l": 1.0,
+            "shoulder_r": 1.0
+          }
+        },
         "lift": "clean_and_jerk",
-        "model": null,
-        "reason": "no LIFT-5 same-input bundle is registered for 'clean_and_jerk' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
-        "status": "unavailable"
+        "model": {
+          "bar_mass_kg": 100.0,
+          "body_source": {
+            "licence": "opensim-org/opensim-models submodule, referenced not vendored; audit in src/engines/physics_engines/opensim/models/README.md",
+            "name": "RajagopalLaiUhlrich2023",
+            "path": "RajagopalLaiUhlrich2023.osim",
+            "sha256": "8f30d0b64750b87eb7f705907862590535212b4afd7e919faa3fd7d1683d22ec"
+          },
+          "scale_factor": 1.0470588235294118,
+          "segment_scale_factors": {
+            "calcn_l": 1.0000000000000009,
+            "calcn_r": 1.0000000000000007,
+            "femur_l": 0.9728381886109237,
+            "femur_r": 1.002204531429695,
+            "patella_l": 0.9728381886109237,
+            "patella_r": 1.002204531429695,
+            "pelvis": [
+              1.0470588235294118, 1.0470588235294118, 1.1980326171369404
+            ],
+            "talus_l": 1.0000000000000009,
+            "talus_r": 1.0000000000000007,
+            "tibia_l": 1.0919910904006702,
+            "tibia_r": 1.1025207280536002,
+            "toes_l": 1.0000000000000009,
+            "toes_r": 1.0000000000000007,
+            "torso": [1.081900057802019, 1.081900057802019, 1.1936470588235286]
+          },
+          "skeleton_mass_kg": 80.31300000000003,
+          "tibial_torsion": {
+            "l": 10.0,
+            "r": 10.0,
+            "source": "Seber et al. 2000, Arch Orthop Trauma Surg 120:255-258 (doi:10.1007/s004020050459): CT tibiofibular torsion of 50 male adults, range 16-50 deg"
+          }
+        },
+        "reason": "",
+        "status": "complete"
       },
       "static_hold": {
         "available": true,
@@ -113,9 +714,7 @@
           "pelvis_tz": 0.0
         },
         "com_m": [
-          -0.06765051081932792,
-          2.045692337054872e-09,
-          0.9152743063717724
+          -0.06765051081932792, 2.045692337054872e-9, 0.9152743063717724
         ],
         "expected_weight_n": 1961.33,
         "gravity_m_s2": 9.80665,
@@ -139,7 +738,7 @@
         "settling_rad": {
           "fore_aft": -0.07861692321385903,
           "pelvis_list": 8.03174846443656e-10,
-          "pelvis_rotation": -3.022845711689277e-08
+          "pelvis_rotation": -3.022845711689277e-8
         },
         "spec": {
           "bar_mass_kg": 120.0,
@@ -147,37 +746,335 @@
           "height_m": 1.78
         },
         "support_cop_m": {
-          "left": [
-            -0.06765050812321702,
-            0.08915966977543101,
-            0.0
-          ],
-          "right": [
-            -0.06765051351543613,
-            -0.08915966568404445,
-            0.0
-          ]
+          "left": [-0.06765050812321702, 0.08915966977543101, 0.0],
+          "right": [-0.06765051351543613, -0.08915966568404445, 0.0]
         },
         "support_vertical_n": {
           "left": 980.6650000000307,
           "right": 980.6650000000841
         },
-        "total_grf_n": [
-          -1.2009682532859093e-13,
-          0.0,
-          1961.3300000001148
-        ]
+        "total_grf_n": [-1.2009682532859093e-13, 0.0, 1961.3300000001148]
       }
     },
     "deadlift": {
       "ik_id": {
-        "bundle": null,
-        "id": null,
-        "ik": null,
+        "bundle": {
+          "bar_mass_kg": 100.0,
+          "body_mass_kg": 80.31300000000002,
+          "dt_s": 0.001,
+          "frame": {
+            "axes": "x forward (heel to forefoot), y up, z right",
+            "origin_in_bundle_world_m": [
+              0.07132516828783374, -0.002058866396630832, 0.0
+            ],
+            "rotation_rows": [
+              [0.9999975458045055, -0.0022154875232933873, 0.0],
+              [0.0, 0.0, 1.0],
+              [-0.0022154875232933873, -0.9999975458045055, 0.0]
+            ]
+          },
+          "frames": 41,
+          "height_m": 1.78,
+          "path": "docs/development/lifting/evidence/deadlift/deadlift_barbell_bundle.npz",
+          "reference_engine": "mujoco",
+          "sha256": "a8483a3771b844f7ec652e839fd64337d6f806b82d26f0fcc7ba8bf3a19bac40",
+          "spec_sha256": "97c9c5f2565abc0747ea1b73ae9f245f2d1126644fce0649401da1521d81b804",
+          "steps": 200,
+          "stride": 5,
+          "time_s": [0.0, 0.2],
+          "window": {
+            "duration_s": 0.2,
+            "start_s": 0.4266666666666667
+          }
+        },
+        "id": {
+          "all_finite": true,
+          "external_loads": {
+            "feet": "GCV-1 foot wrench of the bundle's shared-law contact (kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
+            "hands": "GCV-7 per-hand bushing wrench of the bundle bar (BushingSample.grip_analysis), negated onto hand_l/hand_r at the model's grip point; the barbell body is massless in ID",
+            "model_forces": "removed (muscles, actuators, contact); gravity kept"
+          },
+          "joint_moments_peak_abs": {
+            "ankle_angle_l": 111.89785256031777,
+            "ankle_angle_r": 112.7263473083088,
+            "arm_add_l": 13.2667983339704,
+            "arm_add_r": 11.722867738113331,
+            "arm_flex_l": 27.192699101107962,
+            "arm_flex_r": 58.48748278517658,
+            "arm_rot_l": 9.644271192675156,
+            "arm_rot_r": 10.137787281812244,
+            "elbow_flex_l": 107.38274672376384,
+            "elbow_flex_r": 124.17166818654708,
+            "hip_adduction_l": 196.11072046823298,
+            "hip_adduction_r": 213.3234927476379,
+            "hip_flexion_l": 278.66569951711386,
+            "hip_flexion_r": 304.75027855593976,
+            "hip_rotation_l": 120.52177732420111,
+            "hip_rotation_r": 122.81752023381276,
+            "knee_angle_l": 72.2694401502459,
+            "knee_angle_l_beta": 0.03506307795789536,
+            "knee_angle_r": 54.94420434341278,
+            "knee_angle_r_beta": 0.035910838623487394,
+            "lumbar_bending": 10.708498626667392,
+            "lumbar_extension": 487.2784236913715,
+            "lumbar_rotation": 8.135441615770608,
+            "mtp_angle_l": 0.06215394402489286,
+            "mtp_angle_r": 0.06207970083918225,
+            "pro_sup_l": 5.32458246626025,
+            "pro_sup_r": 6.53532895883186,
+            "subtalar_angle_l": 68.16802600379889,
+            "subtalar_angle_r": 68.92340840347796,
+            "wrist_dev_l": 5.7136260564748405,
+            "wrist_dev_r": 5.487835178287373,
+            "wrist_flex_l": 24.925479799277543,
+            "wrist_flex_r": 28.33598019017966
+          },
+          "residual_gate": {
+            "com_height_m": 0.8242058024706648,
+            "forces_within": false,
+            "max_force_n": 110.92206153538005,
+            "max_moment_nm": 18.284521347893673,
+            "moments_within": false,
+            "peak_external_force_n": 2218.441230707601,
+            "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
+          },
+          "residuals": {
+            "pelvis_list": {
+              "max_abs": 9.27273928581514,
+              "rms": 2.7580865761048483,
+              "unit": "N m"
+            },
+            "pelvis_rotation": {
+              "max_abs": 2.859155041104318,
+              "rms": 1.814854035465869,
+              "unit": "N m"
+            },
+            "pelvis_tilt": {
+              "max_abs": 148.01555794041354,
+              "rms": 26.56276558293672,
+              "unit": "N m"
+            },
+            "pelvis_tx": {
+              "max_abs": 166.81054371629344,
+              "rms": 26.731822955477387,
+              "unit": "N"
+            },
+            "pelvis_ty": {
+              "max_abs": 288.2930758037652,
+              "rms": 45.19452338039066,
+              "unit": "N"
+            },
+            "pelvis_tz": {
+              "max_abs": 6.28389303202165,
+              "rms": 1.3919083121040796,
+              "unit": "N"
+            }
+          },
+          "solver": "OpenSim InverseDynamicsSolver; quintic GCV spline derivatives, no low-pass filter (InverseDynamicsTool default)"
+        },
+        "ik": {
+          "accuracy": 1e-8,
+          "arm_reach": {
+            "coordinates_rad": {
+              "arm_add_l": -0.09132286650006614,
+              "arm_add_r": -0.09286104849115899,
+              "arm_flex_l": 0.2095295502103069,
+              "arm_flex_r": 0.267401628835259,
+              "arm_rot_l": -0.07100169195367274,
+              "arm_rot_r": -0.07441969433368242,
+              "elbow_flex_l": 1.1237269289045808,
+              "elbow_flex_r": 1.1248278583443512
+            },
+            "frame": 0,
+            "method": "seed pass: OpenSim IK of the hold-pose model with the bar unweighted; then, with that body pose held, bounded least squares (scipy TRF, model ranges) on arm_flex/arm_add/arm_rot/elbow_flex per side so each hand's centre of mass lies on the bundle's grip point (prior weight 0.001 m/rad to the hold)",
+            "reach_error_m": {
+              "L": 7.103132211261658e-6,
+              "R": 6.904849714735382e-6
+            }
+          },
+          "clamping": "on (OpenSim IK default) except the arm coordinates arm_/elbow_/pro_sup/wrist_, which coordinate tasks (weight 0.01) hold at the hold pose; coordinates outside the model range are listed",
+          "frames": 41,
+          "marker_error": {
+            "max_m": 0.03907290159770345,
+            "per_marker_max_m": {
+              "ankle_l": 0.00667297900520386,
+              "ankle_r": 0.006767660253888609,
+              "asis_l": 0.003244509443449534,
+              "asis_r": 0.003340368642008813,
+              "bar": 0.03907290159770345,
+              "forefoot_l": 0.018878839251643752,
+              "forefoot_r": 0.019003589772745483,
+              "heel_l": 0.010415437522155417,
+              "heel_r": 0.010412603840529548,
+              "hip_l": 0.0047548124587003865,
+              "hip_r": 0.004863949506281043,
+              "knee_l": 0.01238014202308975,
+              "knee_r": 0.012479133482094031,
+              "psis_l": 0.0035092500921964183,
+              "psis_r": 0.0036038021959875328,
+              "shoulder_l": 0.013375096714287518,
+              "shoulder_r": 0.0140065333345444
+            },
+            "per_marker_rms_m": {
+              "ankle_l": 0.006431963601513792,
+              "ankle_r": 0.006596221664528751,
+              "asis_l": 0.002988527695164792,
+              "asis_r": 0.0030102411583123353,
+              "bar": 0.022719493696615765,
+              "forefoot_l": 0.018364403453236127,
+              "forefoot_r": 0.01864654182677162,
+              "heel_l": 0.010045607912341749,
+              "heel_r": 0.010106797044344662,
+              "hip_l": 0.004740965967320244,
+              "hip_r": 0.00484688116735685,
+              "knee_l": 0.012362184214222945,
+              "knee_r": 0.01244069125648269,
+              "psis_l": 0.0032207801019426096,
+              "psis_r": 0.0033285515626313984,
+              "shoulder_l": 0.010222967956275003,
+              "shoulder_r": 0.01158818183027166
+            },
+            "rms_m": 0.01116945963555792,
+            "threshold_max_m": 0.04,
+            "threshold_rms_m": 0.02,
+            "within_best_practice": true
+          },
+          "markers": [
+            "ankle_l",
+            "ankle_r",
+            "knee_l",
+            "knee_r",
+            "hip_l",
+            "hip_r",
+            "shoulder_l",
+            "shoulder_r",
+            "bar",
+            "heel_l",
+            "heel_r",
+            "forefoot_l",
+            "forefoot_r",
+            "asis_l",
+            "asis_r",
+            "psis_l",
+            "psis_r"
+          ],
+          "observability": "pelvis orientation is weakly observed in the bundle itself: LIFT-5 tracked only the hip centres on the pelvis, so the bundle's pelvis tilt is whatever its own IK left; with coordinate ranges clamped, OpenSim resolves the hip/pelvis/lumbar trade-off inside the Rajagopal ranges",
+          "pelvis_landmarks": {
+            "bundle_pelvis_tilt_rad": [
+              -0.7236100138953695, -0.6628758166038906
+            ],
+            "hip_width_bundle_m": 0.18511999999999998,
+            "hip_width_generic_m": 0.15452,
+            "mapping": "bundle hip-centre midpoint + bundle Rajagopal pelvis frame (bundle_targets.bundle_pelvis_rotation) applied to the generic marker offsets from the generic hip-centre midpoint, scaled by the pelvis factors",
+            "model_deviation_max_m": {
+              "asis_l": 0.003244509443449534,
+              "asis_r": 0.003340368642008813,
+              "psis_l": 0.0035092500921964183,
+              "psis_r": 0.0036038021959875328
+            },
+            "model_deviation_rms_m": {
+              "asis_l": 0.002988527695164792,
+              "asis_r": 0.0030102411583123353,
+              "psis_l": 0.0032207801019426096,
+              "psis_r": 0.0033285515626313984
+            },
+            "model_hip_flexion_range_rad": [-0.52359878, 2.0943951],
+            "model_pelvis_tilt_rad": [-0.7517380936475981, -0.6779699596469816],
+            "pelvis_scale_xyz": [
+              1.0470588235294118, 1.0470588235294118, 1.1980326171369402
+            ],
+            "reason": "the bundle's hip flexion lies inside the model range",
+            "source": "the generic RajagopalLaiUhlrich2023.osim pelvis markers LASI/RASI/LPSI/RPSI",
+            "source_hip_flexion_rad": [1.427540776005137, 1.6404479899906093],
+            "tracked": true
+          },
+          "range_violations": {
+            "pro_sup_l": {
+              "frames": 38,
+              "max_rad": 3.4806729875325744e-5,
+              "min_rad": -0.00061254994878957,
+              "range_max_rad": 2.09,
+              "range_min_rad": 0.0
+            },
+            "pro_sup_r": {
+              "frames": 38,
+              "max_rad": 2.7640717193506877e-5,
+              "min_rad": -0.0005459234955572393,
+              "range_max_rad": 2.09,
+              "range_min_rad": 0.0
+            }
+          },
+          "segment_angle_error": {
+            "definition": "sagittal shank, thigh and trunk angles from the landmarks (sagittal_retarget.segment_angles), model minus bundle",
+            "max_abs_rad": 0.02372109158879665,
+            "per_segment_rms_rad": {
+              "shank": 0.02085968476166292,
+              "thigh": 0.0075050650305673134,
+              "trunk": 0.01612959343392847
+            },
+            "rms_rad": 0.01582841573260808,
+            "threshold_rms_rad": 0.03490658503988659
+          },
+          "solver": "OpenSim InverseKinematicsSolver (engine of InverseKinematicsTool)",
+          "weights": {
+            "ankle_l": 10.0,
+            "ankle_r": 10.0,
+            "asis_l": 10.0,
+            "asis_r": 10.0,
+            "bar": 1.0,
+            "forefoot_l": 10.0,
+            "forefoot_r": 10.0,
+            "heel_l": 10.0,
+            "heel_r": 10.0,
+            "hip_l": 10.0,
+            "hip_r": 10.0,
+            "knee_l": 10.0,
+            "knee_r": 10.0,
+            "psis_l": 10.0,
+            "psis_r": 10.0,
+            "shoulder_l": 1.0,
+            "shoulder_r": 1.0
+          }
+        },
         "lift": "deadlift",
-        "model": null,
-        "reason": "no LIFT-5 same-input bundle is registered for 'deadlift' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
-        "status": "unavailable"
+        "model": {
+          "bar_mass_kg": 100.0,
+          "body_source": {
+            "licence": "opensim-org/opensim-models submodule, referenced not vendored; audit in src/engines/physics_engines/opensim/models/README.md",
+            "name": "RajagopalLaiUhlrich2023",
+            "path": "RajagopalLaiUhlrich2023.osim",
+            "sha256": "8f30d0b64750b87eb7f705907862590535212b4afd7e919faa3fd7d1683d22ec"
+          },
+          "scale_factor": 1.0470588235294118,
+          "segment_scale_factors": {
+            "calcn_l": 1.0000000000000002,
+            "calcn_r": 0.9999999999999997,
+            "femur_l": 0.9789395410350493,
+            "femur_r": 1.008094574545453,
+            "patella_l": 0.9789395410350493,
+            "patella_r": 1.008094574545453,
+            "pelvis": [
+              1.0470588235294118, 1.0470588235294118, 1.1980326171369402
+            ],
+            "talus_l": 1.0000000000000002,
+            "talus_r": 0.9999999999999997,
+            "tibia_l": 1.0919910904006696,
+            "tibia_r": 1.1025207280535994,
+            "toes_l": 1.0000000000000002,
+            "toes_r": 0.9999999999999997,
+            "torso": [
+              1.0818323053815688, 1.0818323053815688, 1.1936470588235295
+            ]
+          },
+          "skeleton_mass_kg": 80.31300000000003,
+          "tibial_torsion": {
+            "l": 10.0,
+            "r": 10.0,
+            "source": "Seber et al. 2000, Arch Orthop Trauma Surg 120:255-258 (doi:10.1007/s004020050459): CT tibiofibular torsion of 50 male adults, range 16-50 deg"
+          }
+        },
+        "reason": "",
+        "status": "complete"
       },
       "static_hold": {
         "available": true,
@@ -193,9 +1090,7 @@
           "pelvis_tz": 0.0
         },
         "com_m": [
-          -0.06719700336970696,
-          -2.0129391710767416e-05,
-          0.9086167666179914
+          -0.06719700336970696, -2.0129391710767416e-5, 0.9086167666179914
         ],
         "expected_weight_n": 1961.33,
         "gravity_m_s2": 9.80665,
@@ -218,7 +1113,7 @@
         "relative_error": -4.637132465076903e-15,
         "settling_rad": {
           "fore_aft": -0.07927654309569268,
-          "pelvis_list": -7.802182209977222e-06,
+          "pelvis_list": -7.802182209977222e-6,
           "pelvis_rotation": 0.0002994562449198364
         },
         "spec": {
@@ -227,37 +1122,335 @@
           "height_m": 1.78
         },
         "support_cop_m": {
-          "left": [
-            -0.06722371037502783,
-            0.0891346127032048,
-            0.0
-          ],
-          "right": [
-            -0.0671702963643862,
-            -0.08917487148662506,
-            0.0
-          ]
+          "left": [-0.06722371037502783, 0.0891346127032048, 0.0],
+          "right": [-0.0671702963643862, -0.08917487148662506, 0.0]
         },
         "support_vertical_n": {
           "left": 980.6649999999813,
           "right": 980.6650000000096
         },
-        "total_grf_n": [
-          -1.2009682532858336e-13,
-          0.0,
-          1961.3299999999908
-        ]
+        "total_grf_n": [-1.2009682532858336e-13, 0.0, 1961.3299999999908]
       }
     },
     "snatch": {
       "ik_id": {
-        "bundle": null,
-        "id": null,
-        "ik": null,
+        "bundle": {
+          "bar_mass_kg": 100.0,
+          "body_mass_kg": 80.31300000000002,
+          "dt_s": 0.001,
+          "frame": {
+            "axes": "x forward (heel to forefoot), y up, z right",
+            "origin_in_bundle_world_m": [
+              0.07245531613271654, -0.002114003192256663, 0.0
+            ],
+            "rotation_rows": [
+              [0.9999983715037779, -0.001804713216055224, 0.0],
+              [0.0, 0.0, 1.0],
+              [-0.001804713216055224, -0.9999983715037779, 0.0]
+            ]
+          },
+          "frames": 41,
+          "height_m": 1.78,
+          "path": "docs/development/lifting/evidence/snatch/snatch_barbell_bundle.npz",
+          "reference_engine": "mujoco",
+          "sha256": "24c7e8e4c140e2e3a52047851fd460e07e871dc17573e96414b6a493e9d4dacc",
+          "spec_sha256": "19a4f3a5b062d75d13121911cc621e1f482037b82bd1625fd7db0cd7298386fa",
+          "steps": 200,
+          "stride": 5,
+          "time_s": [0.0, 0.2],
+          "window": {
+            "duration_s": 0.2,
+            "start_s": 0.4666666666666667
+          }
+        },
+        "id": {
+          "all_finite": true,
+          "external_loads": {
+            "feet": "GCV-1 foot wrench of the bundle's shared-law contact (kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
+            "hands": "GCV-7 per-hand bushing wrench of the bundle bar (BushingSample.grip_analysis), negated onto hand_l/hand_r at the model's grip point; the barbell body is massless in ID",
+            "model_forces": "removed (muscles, actuators, contact); gravity kept"
+          },
+          "joint_moments_peak_abs": {
+            "ankle_angle_l": 116.55881584067826,
+            "ankle_angle_r": 196.28500145142334,
+            "arm_add_l": 308.5754161296475,
+            "arm_add_r": 367.14746587024814,
+            "arm_flex_l": 252.66413001479512,
+            "arm_flex_r": 196.84646290815334,
+            "arm_rot_l": 217.51119697900205,
+            "arm_rot_r": 287.84544442742805,
+            "elbow_flex_l": 159.83647257148166,
+            "elbow_flex_r": 230.9687654979647,
+            "hip_adduction_l": 698.5287624094407,
+            "hip_adduction_r": 293.09066590698325,
+            "hip_flexion_l": 773.1335644401776,
+            "hip_flexion_r": 852.9612662518128,
+            "hip_rotation_l": 230.02858597770597,
+            "hip_rotation_r": 109.58856051346348,
+            "knee_angle_l": 524.9908633037198,
+            "knee_angle_l_beta": 0.07080277385603176,
+            "knee_angle_r": 310.4949754991095,
+            "knee_angle_r_beta": 0.0668983632666072,
+            "lumbar_bending": 339.0566115683952,
+            "lumbar_extension": 1145.5850192349903,
+            "lumbar_rotation": 509.67194369598883,
+            "mtp_angle_l": 1.553678905144028,
+            "mtp_angle_r": 0.08623783192207499,
+            "pro_sup_l": 36.32944517332931,
+            "pro_sup_r": 25.46788201434078,
+            "subtalar_angle_l": 56.30307745100117,
+            "subtalar_angle_r": 55.11689251647186,
+            "wrist_dev_l": 64.31145437930357,
+            "wrist_dev_r": 87.11365147065474,
+            "wrist_flex_l": 40.75298230746563,
+            "wrist_flex_r": 64.83574567188944
+          },
+          "residual_gate": {
+            "com_height_m": 0.873360604828763,
+            "forces_within": false,
+            "max_force_n": 155.1218246248807,
+            "max_moment_nm": 27.095458115305423,
+            "moments_within": false,
+            "peak_external_force_n": 3102.436492497614,
+            "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
+          },
+          "residuals": {
+            "pelvis_list": {
+              "max_abs": 89.95820084855296,
+              "rms": 33.42181443856118,
+              "unit": "N m"
+            },
+            "pelvis_rotation": {
+              "max_abs": 92.40539890362439,
+              "rms": 40.77056989938602,
+              "unit": "N m"
+            },
+            "pelvis_tilt": {
+              "max_abs": 202.62033778149487,
+              "rms": 85.62934524334544,
+              "unit": "N m"
+            },
+            "pelvis_tx": {
+              "max_abs": 463.21446589689924,
+              "rms": 188.070309001734,
+              "unit": "N"
+            },
+            "pelvis_ty": {
+              "max_abs": 290.24162897087047,
+              "rms": 61.65878415330635,
+              "unit": "N"
+            },
+            "pelvis_tz": {
+              "max_abs": 148.38534278369355,
+              "rms": 62.053137810930615,
+              "unit": "N"
+            }
+          },
+          "solver": "OpenSim InverseDynamicsSolver; quintic GCV spline derivatives, no low-pass filter (InverseDynamicsTool default)"
+        },
+        "ik": {
+          "accuracy": 1e-8,
+          "arm_reach": {
+            "coordinates_rad": {
+              "arm_add_l": -0.5898558732894689,
+              "arm_add_r": -0.6031863553768391,
+              "arm_flex_l": 0.13493906673852044,
+              "arm_flex_r": 0.17388639430850036,
+              "arm_rot_l": -0.16714849208367796,
+              "arm_rot_r": -0.18846844847689667,
+              "elbow_flex_l": 1.227790970753022,
+              "elbow_flex_r": 1.285179574610647
+            },
+            "frame": 0,
+            "method": "seed pass: OpenSim IK of the hold-pose model with the bar unweighted; then, with that body pose held, bounded least squares (scipy TRF, model ranges) on arm_flex/arm_add/arm_rot/elbow_flex per side so each hand's centre of mass lies on the bundle's grip point (prior weight 0.001 m/rad to the hold)",
+            "reach_error_m": {
+              "L": 7.676223935341201e-6,
+              "R": 7.566780345534453e-6
+            }
+          },
+          "clamping": "on (OpenSim IK default) except the arm coordinates arm_/elbow_/pro_sup/wrist_, which coordinate tasks (weight 0.01) hold at the hold pose; coordinates outside the model range are listed",
+          "frames": 41,
+          "marker_error": {
+            "max_m": 0.05792951814332972,
+            "per_marker_max_m": {
+              "ankle_l": 0.00517181345429978,
+              "ankle_r": 0.005296670104233573,
+              "asis_l": 0.0036390147942686538,
+              "asis_r": 0.0033257619197950626,
+              "bar": 0.05792951814332972,
+              "forefoot_l": 0.016468916349281472,
+              "forefoot_r": 0.016794808446616304,
+              "heel_l": 0.009376810564904947,
+              "heel_r": 0.009505723887239238,
+              "hip_l": 0.004444038805830839,
+              "hip_r": 0.004182798097173074,
+              "knee_l": 0.011400210380691018,
+              "knee_r": 0.011431658760878606,
+              "psis_l": 0.0037920006178984666,
+              "psis_r": 0.0036555036903424478,
+              "shoulder_l": 0.014564963474966105,
+              "shoulder_r": 0.013931125521888984
+            },
+            "per_marker_rms_m": {
+              "ankle_l": 0.0041326429925681455,
+              "ankle_r": 0.004293962540826118,
+              "asis_l": 0.002345181947479529,
+              "asis_r": 0.002251335732748156,
+              "bar": 0.02060844527535264,
+              "forefoot_l": 0.01221346395997308,
+              "forefoot_r": 0.013585413746965246,
+              "heel_l": 0.007512277299891166,
+              "heel_r": 0.008037931642016603,
+              "hip_l": 0.004048951610720115,
+              "hip_r": 0.004061783866470701,
+              "knee_l": 0.009571206059295456,
+              "knee_r": 0.010392082016888418,
+              "psis_l": 0.0031565890921049396,
+              "psis_r": 0.0031617769804090905,
+              "shoulder_l": 0.008800280308474935,
+              "shoulder_r": 0.010284149249107775
+            },
+            "rms_m": 0.008948325781516385,
+            "threshold_max_m": 0.04,
+            "threshold_rms_m": 0.02,
+            "within_best_practice": false
+          },
+          "markers": [
+            "ankle_l",
+            "ankle_r",
+            "knee_l",
+            "knee_r",
+            "hip_l",
+            "hip_r",
+            "shoulder_l",
+            "shoulder_r",
+            "bar",
+            "heel_l",
+            "heel_r",
+            "forefoot_l",
+            "forefoot_r",
+            "asis_l",
+            "asis_r",
+            "psis_l",
+            "psis_r"
+          ],
+          "observability": "pelvis orientation is weakly observed in the bundle itself: LIFT-5 tracked only the hip centres on the pelvis, so the bundle's pelvis tilt is whatever its own IK left; with coordinate ranges clamped, OpenSim resolves the hip/pelvis/lumbar trade-off inside the Rajagopal ranges",
+          "pelvis_landmarks": {
+            "bundle_pelvis_tilt_rad": [
+              -0.9213282531940027, -0.8100816909013335
+            ],
+            "hip_width_bundle_m": 0.18512,
+            "hip_width_generic_m": 0.15452,
+            "mapping": "bundle hip-centre midpoint + bundle Rajagopal pelvis frame (bundle_targets.bundle_pelvis_rotation) applied to the generic marker offsets from the generic hip-centre midpoint, scaled by the pelvis factors",
+            "model_deviation_max_m": {
+              "asis_l": 0.0036390147942686538,
+              "asis_r": 0.0033257619197950626,
+              "psis_l": 0.0037920006178984666,
+              "psis_r": 0.0036555036903424478
+            },
+            "model_deviation_rms_m": {
+              "asis_l": 0.002345181947479529,
+              "asis_r": 0.002251335732748156,
+              "psis_l": 0.0031565890921049396,
+              "psis_r": 0.0031617769804090905
+            },
+            "model_hip_flexion_range_rad": [-0.52359878, 2.0943951],
+            "model_pelvis_tilt_rad": [-0.933205094396108, -0.8328992658591667],
+            "pelvis_scale_xyz": [
+              1.0470588235294118, 1.0470588235294118, 1.1980326171369404
+            ],
+            "reason": "the bundle's hip flexion lies inside the model range",
+            "source": "the generic RajagopalLaiUhlrich2023.osim pelvis markers LASI/RASI/LPSI/RPSI",
+            "source_hip_flexion_rad": [1.1226063161611317, 1.5640377535369567],
+            "tracked": true
+          },
+          "range_violations": {
+            "pro_sup_l": {
+              "frames": 17,
+              "max_rad": 5.291733832738564e-5,
+              "min_rad": -0.0003651961729301561,
+              "range_max_rad": 2.09,
+              "range_min_rad": 0.0
+            },
+            "pro_sup_r": {
+              "frames": 18,
+              "max_rad": 3.9018158924425484e-5,
+              "min_rad": -0.0003778865057092363,
+              "range_max_rad": 2.09,
+              "range_min_rad": 0.0
+            }
+          },
+          "segment_angle_error": {
+            "definition": "sagittal shank, thigh and trunk angles from the landmarks (sagittal_retarget.segment_angles), model minus bundle",
+            "max_abs_rad": 0.025163438957174322,
+            "per_segment_rms_rad": {
+              "shank": 0.00967449848475076,
+              "thigh": 0.007570373584689013,
+              "trunk": 0.010866266006851474
+            },
+            "rms_rad": 0.00946893542194436,
+            "threshold_rms_rad": 0.03490658503988659
+          },
+          "solver": "OpenSim InverseKinematicsSolver (engine of InverseKinematicsTool)",
+          "weights": {
+            "ankle_l": 10.0,
+            "ankle_r": 10.0,
+            "asis_l": 10.0,
+            "asis_r": 10.0,
+            "bar": 1.0,
+            "forefoot_l": 10.0,
+            "forefoot_r": 10.0,
+            "heel_l": 10.0,
+            "heel_r": 10.0,
+            "hip_l": 10.0,
+            "hip_r": 10.0,
+            "knee_l": 10.0,
+            "knee_r": 10.0,
+            "psis_l": 10.0,
+            "psis_r": 10.0,
+            "shoulder_l": 1.0,
+            "shoulder_r": 1.0
+          }
+        },
         "lift": "snatch",
-        "model": null,
-        "reason": "no LIFT-5 same-input bundle is registered for 'snatch' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
-        "status": "unavailable"
+        "model": {
+          "bar_mass_kg": 100.0,
+          "body_source": {
+            "licence": "opensim-org/opensim-models submodule, referenced not vendored; audit in src/engines/physics_engines/opensim/models/README.md",
+            "name": "RajagopalLaiUhlrich2023",
+            "path": "RajagopalLaiUhlrich2023.osim",
+            "sha256": "8f30d0b64750b87eb7f705907862590535212b4afd7e919faa3fd7d1683d22ec"
+          },
+          "scale_factor": 1.0470588235294118,
+          "segment_scale_factors": {
+            "calcn_l": 1.0000000000000007,
+            "calcn_r": 1.0000000000000002,
+            "femur_l": 0.9735539901202266,
+            "femur_r": 1.0028730457674404,
+            "patella_l": 0.9735539901202266,
+            "patella_r": 1.0028730457674404,
+            "pelvis": [
+              1.0470588235294118, 1.0470588235294118, 1.1980326171369404
+            ],
+            "talus_l": 1.0000000000000007,
+            "talus_r": 1.0000000000000002,
+            "tibia_l": 1.0919910904006696,
+            "tibia_r": 1.1025207280536,
+            "toes_l": 1.0000000000000007,
+            "toes_r": 1.0000000000000002,
+            "torso": [
+              1.0818347934881987, 1.0818347934881987, 1.1936470588235295
+            ]
+          },
+          "skeleton_mass_kg": 80.31300000000003,
+          "tibial_torsion": {
+            "l": 10.0,
+            "r": 10.0,
+            "source": "Seber et al. 2000, Arch Orthop Trauma Surg 120:255-258 (doi:10.1007/s004020050459): CT tibiofibular torsion of 50 male adults, range 16-50 deg"
+          }
+        },
+        "reason": "",
+        "status": "complete"
       },
       "static_hold": {
         "available": true,
@@ -273,9 +1466,7 @@
           "pelvis_tz": 0.0
         },
         "com_m": [
-          -0.06974001404521653,
-          -3.17169988941958e-05,
-          0.9474753642309137
+          -0.06974001404521653, -3.17169988941958e-5, 0.9474753642309137
         ],
         "expected_weight_n": 1961.33,
         "gravity_m_s2": 9.80665,
@@ -298,7 +1489,7 @@
         "relative_error": -2.249009245562298e-14,
         "settling_rad": {
           "fore_aft": -0.07557589043151977,
-          "pelvis_list": -1.3158941020400376e-05,
+          "pelvis_list": -1.3158941020400376e-5,
           "pelvis_rotation": 0.0004545986669738512
         },
         "spec": {
@@ -307,26 +1498,14 @@
           "height_m": 1.78
         },
         "support_cop_m": {
-          "left": [
-            -0.06978057323454212,
-            0.08915069406686466,
-            0.0
-          ],
-          "right": [
-            -0.0696994548558922,
-            -0.08921412806465256,
-            0.0
-          ]
+          "left": [-0.06978057323454212, 0.08915069406686466, 0.0],
+          "right": [-0.0696994548558922, -0.08921412806465256, 0.0]
         },
         "support_vertical_n": {
           "left": 980.6649999999645,
           "right": 980.6649999999914
         },
-        "total_grf_n": [
-          -1.200968253285812e-13,
-          0.0,
-          1961.3299999999558
-        ]
+        "total_grf_n": [-1.200968253285812e-13, 0.0, 1961.3299999999558]
       }
     },
     "squat": {
@@ -338,40 +1517,23 @@
           "frame": {
             "axes": "x forward (heel to forefoot), y up, z right",
             "origin_in_bundle_world_m": [
-              0.07039907363716258,
-              -0.0025029166554861363,
-              0.0
+              0.07050944037399849, -0.0024898839032959454, 0.0
             ],
             "rotation_rows": [
-              [
-                0.9999661028574376,
-                -0.008233658731609575,
-                0.0
-              ],
-              [
-                0.0,
-                0.0,
-                1.0
-              ],
-              [
-                -0.008233658731609575,
-                -0.9999661028574376,
-                0.0
-              ]
+              [0.9999689633828402, -0.007878595753559398, 0.0],
+              [0.0, 0.0, 1.0],
+              [-0.007878595753559398, -0.9999689633828402, 0.0]
             ]
           },
           "frames": 41,
           "height_m": 1.78,
           "path": "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz",
           "reference_engine": "mujoco",
-          "sha256": "f2fab14647e365c32cf2360c4e1319570736a22b7e455d8b2b0d77f96405700f",
-          "spec_sha256": "617433abe253d7a658372efb4463aec9dfe7f59256628450d8bae7ec36f6e4d8",
+          "sha256": "0179c5a263d7bc8941f0ec4cdc4d2bc96a733a22f772379a78f8cc5b8123722d",
+          "spec_sha256": "a35950b3680227bc5417b831b5e39a7eed40dd9f3673e71f7b472872496d7d76",
           "steps": 200,
           "stride": 5,
-          "time_s": [
-            0.0,
-            0.2
-          ],
+          "time_s": [0.0, 0.2],
           "window": {
             "duration_s": 0.2,
             "start_s": 1.4000000000000001
@@ -385,138 +1547,138 @@
             "model_forces": "removed (muscles, actuators, contact); gravity kept"
           },
           "joint_moments_peak_abs": {
-            "ankle_angle_l": 112.11939965126521,
-            "ankle_angle_r": 123.08716830845835,
-            "arm_add_l": 105.9620002307696,
-            "arm_add_r": 95.53998290110869,
-            "arm_flex_l": 50.2941892105651,
-            "arm_flex_r": 49.108330004814775,
-            "arm_rot_l": 70.18155828470132,
-            "arm_rot_r": 82.51516936982199,
-            "elbow_flex_l": 128.66520961668934,
-            "elbow_flex_r": 118.64745558728907,
-            "hip_adduction_l": 134.35741818483177,
-            "hip_adduction_r": 125.17195203257873,
-            "hip_flexion_l": 381.9245205411544,
-            "hip_flexion_r": 471.5983738449466,
-            "hip_rotation_l": 156.47639841129606,
-            "hip_rotation_r": 152.11906359359244,
-            "knee_angle_l": 256.70969247899467,
-            "knee_angle_l_beta": 0.024018388079663628,
-            "knee_angle_r": 214.71590623177187,
-            "knee_angle_r_beta": 0.024609437439926433,
-            "lumbar_bending": 53.18939324805357,
-            "lumbar_extension": 657.9104914318524,
-            "lumbar_rotation": 66.74054422041566,
-            "mtp_angle_l": 0.04293416753399646,
-            "mtp_angle_r": 0.04170246759179974,
-            "pro_sup_l": 3.7748308929250514,
-            "pro_sup_r": 10.626123546202297,
-            "subtalar_angle_l": 76.18536766775571,
-            "subtalar_angle_r": 53.24396313844738,
-            "wrist_dev_l": 15.210280364884671,
-            "wrist_dev_r": 14.223365212029204,
-            "wrist_flex_l": 32.951276421410824,
-            "wrist_flex_r": 34.194214606329005
+            "ankle_angle_l": 111.3778771135413,
+            "ankle_angle_r": 123.84311253496229,
+            "arm_add_l": 142.55616735205874,
+            "arm_add_r": 116.73344044298733,
+            "arm_flex_l": 31.982610631497582,
+            "arm_flex_r": 35.02705876965717,
+            "arm_rot_l": 78.41819421804944,
+            "arm_rot_r": 99.68462313539038,
+            "elbow_flex_l": 61.10397678084901,
+            "elbow_flex_r": 52.84376068081093,
+            "hip_adduction_l": 134.88829314883398,
+            "hip_adduction_r": 125.32462899642945,
+            "hip_flexion_l": 390.1418956784246,
+            "hip_flexion_r": 471.41716388040606,
+            "hip_rotation_l": 157.69476551411788,
+            "hip_rotation_r": 151.8744816419205,
+            "knee_angle_l": 255.37835412538982,
+            "knee_angle_l_beta": 0.024052098106742303,
+            "knee_angle_r": 214.06478037684303,
+            "knee_angle_r_beta": 0.024656281119113135,
+            "lumbar_bending": 43.73863085559582,
+            "lumbar_extension": 665.6150241991407,
+            "lumbar_rotation": 74.5537924842538,
+            "mtp_angle_l": 0.04292349843020723,
+            "mtp_angle_r": 0.04105496121414269,
+            "pro_sup_l": 3.329296393134636,
+            "pro_sup_r": 6.2131032172292215,
+            "subtalar_angle_l": 76.73830629651057,
+            "subtalar_angle_r": 51.73241249760435,
+            "wrist_dev_l": 17.908340730732437,
+            "wrist_dev_r": 22.935194478765375,
+            "wrist_flex_l": 19.81440122486857,
+            "wrist_flex_r": 22.711301772254476
           },
           "residual_gate": {
-            "com_height_m": 0.6308313563035204,
+            "com_height_m": 0.6343183159516905,
             "forces_within": true,
-            "max_force_n": 146.5915225538744,
-            "max_moment_nm": 18.494905799051736,
+            "max_force_n": 146.92973444051864,
+            "max_moment_nm": 18.640044342707778,
             "moments_within": true,
-            "peak_external_force_n": 2931.830451077488,
+            "peak_external_force_n": 2938.5946888103726,
             "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
           },
           "residuals": {
             "pelvis_list": {
-              "max_abs": 6.612763099101964,
-              "rms": 4.519104932963672,
+              "max_abs": 5.935991753541461,
+              "rms": 4.89546641378381,
               "unit": "N m"
             },
             "pelvis_rotation": {
-              "max_abs": 7.456542452216052,
-              "rms": 4.88914184908563,
+              "max_abs": 4.87492074405183,
+              "rms": 3.4548669068406777,
               "unit": "N m"
             },
             "pelvis_tilt": {
-              "max_abs": 17.43060234644103,
-              "rms": 12.565010389009263,
+              "max_abs": 11.748541834144117,
+              "rms": 7.915422356985236,
               "unit": "N m"
             },
             "pelvis_tx": {
-              "max_abs": 25.212876451412075,
-              "rms": 19.59900425283526,
+              "max_abs": 23.82223632414887,
+              "rms": 17.156565462854562,
               "unit": "N"
             },
             "pelvis_ty": {
-              "max_abs": 20.083327442048898,
-              "rms": 15.761006571833358,
+              "max_abs": 20.403038938187898,
+              "rms": 15.796253394628218,
               "unit": "N"
             },
             "pelvis_tz": {
-              "max_abs": 18.628365000884333,
-              "rms": 4.504162679260396,
+              "max_abs": 16.329621859511498,
+              "rms": 5.27290461452284,
               "unit": "N"
             }
           },
           "solver": "OpenSim InverseDynamicsSolver; quintic GCV spline derivatives, no low-pass filter (InverseDynamicsTool default)"
         },
         "ik": {
-          "accuracy": 1e-08,
+          "accuracy": 1e-8,
           "arm_reach": {
             "coordinates_rad": {
-              "arm_add_l": -1.0675286061517482,
-              "arm_add_r": -0.9756843437555549,
-              "arm_flex_l": 1.5707963299999999,
-              "arm_flex_r": 1.5263564600801616,
-              "arm_rot_l": -1.5707963299999999,
-              "arm_rot_r": -1.5511272575364436,
-              "elbow_flex_l": 2.6179999999999994,
-              "elbow_flex_r": 2.6179999999999994
+              "arm_add_l": -0.8277755564368698,
+              "arm_add_r": -0.6879988717630375,
+              "arm_flex_l": 1.5206669879225372,
+              "arm_flex_r": 1.569796318493218,
+              "arm_rot_l": -1.556145157875435,
+              "arm_rot_r": -1.5697962947672524,
+              "elbow_flex_l": 2.559100463152309,
+              "elbow_flex_r": 2.6169741885917954
             },
             "frame": 0,
             "method": "seed pass: OpenSim IK of the hold-pose model with the bar unweighted; then, with that body pose held, bounded least squares (scipy TRF, model ranges) on arm_flex/arm_add/arm_rot/elbow_flex per side so each hand's centre of mass lies on the bundle's grip point (prior weight 0.001 m/rad to the hold)",
             "reach_error_m": {
-              "L": 0.038120699982893996,
-              "R": 0.05691935466567537
+              "L": 2.5313034921092285e-6,
+              "R": 0.0019430073750435004
             }
           },
           "clamping": "on (OpenSim IK default) except the arm coordinates arm_/elbow_/pro_sup/wrist_, which coordinate tasks (weight 0.01) hold at the hold pose; coordinates outside the model range are listed",
           "frames": 41,
           "marker_error": {
-            "max_m": 0.03554392040092493,
+            "max_m": 0.030370245349544023,
             "per_marker_max_m": {
-              "ankle_l": 0.009842158439205375,
-              "ankle_r": 0.009712196693965358,
-              "bar": 0.029477668413539108,
-              "forefoot_l": 0.022911115937340264,
-              "forefoot_r": 0.022717218746258348,
-              "heel_l": 0.013475276650678984,
-              "heel_r": 0.01331183865899632,
-              "hip_l": 0.007460702035431648,
-              "hip_r": 0.007702423232872998,
-              "knee_l": 0.012621449204258872,
-              "knee_r": 0.012365561399703497,
-              "shoulder_l": 0.03554392040092493,
-              "shoulder_r": 0.03320854150947766
+              "ankle_l": 0.009862047777866144,
+              "ankle_r": 0.009678807229679431,
+              "bar": 0.0019227030251371003,
+              "forefoot_l": 0.022960845924466983,
+              "forefoot_r": 0.022673224356137237,
+              "heel_l": 0.013514526530824956,
+              "heel_r": 0.013287576217662654,
+              "hip_l": 0.007563924603368692,
+              "hip_r": 0.007689974460002386,
+              "knee_l": 0.01272790365839399,
+              "knee_r": 0.012415428717027633,
+              "shoulder_l": 0.030036974579331178,
+              "shoulder_r": 0.030370245349544023
             },
             "per_marker_rms_m": {
-              "ankle_l": 0.00929438449603977,
-              "ankle_r": 0.009002853701716891,
-              "bar": 0.028744895911160896,
-              "forefoot_l": 0.021701960311985586,
-              "forefoot_r": 0.021270307218001282,
-              "heel_l": 0.01290245336359467,
-              "heel_r": 0.01267399473856309,
-              "hip_l": 0.007367709411602149,
-              "hip_r": 0.007669687891729179,
-              "knee_l": 0.01243847928313717,
-              "knee_r": 0.012198640771378243,
-              "shoulder_l": 0.03417539517939377,
-              "shoulder_r": 0.031777231604606514
+              "ankle_l": 0.009293539970196107,
+              "ankle_r": 0.00899330014798709,
+              "bar": 0.0012725728387638826,
+              "forefoot_l": 0.02171628542823158,
+              "forefoot_r": 0.021267680278354587,
+              "heel_l": 0.012918816660939872,
+              "heel_r": 0.012674688962743357,
+              "hip_l": 0.007455370546374959,
+              "hip_r": 0.007676068767955669,
+              "knee_l": 0.012545594067677888,
+              "knee_r": 0.012271651282101994,
+              "shoulder_l": 0.028668726974843146,
+              "shoulder_r": 0.028878513282774125
             },
-            "rms_m": 0.019292466518624624,
+            "rms_m": 0.016405153948588252,
             "threshold_max_m": 0.04,
             "threshold_rms_m": 0.02,
             "within_best_practice": true
@@ -539,98 +1701,43 @@
           "observability": "pelvis orientation is weakly observed in the bundle itself: LIFT-5 tracked only the hip centres on the pelvis, so the bundle's pelvis tilt is whatever its own IK left; with coordinate ranges clamped, OpenSim resolves the hip/pelvis/lumbar trade-off inside the Rajagopal ranges",
           "pelvis_landmarks": {
             "bundle_pelvis_tilt_rad": [
-              -0.6124378626097026,
-              -0.5451665032331907
+              -0.6106133489387864, -0.5436162971446997
             ],
             "hip_width_bundle_m": 0.18512,
             "hip_width_generic_m": 0.15452,
             "mapping": "bundle hip-centre midpoint + bundle Rajagopal pelvis frame (bundle_targets.bundle_pelvis_rotation) applied to the generic marker offsets from the generic hip-centre midpoint, scaled by the pelvis factors",
             "model_deviation_max_m": {
-              "asis_l": 0.006245715282129301,
-              "asis_r": 0.007006240216587904,
-              "psis_l": 0.005378761810633933,
-              "psis_r": 0.005461138524858527
+              "asis_l": 0.00609485908162623,
+              "asis_r": 0.006855622073044885,
+              "psis_l": 0.005400485320813118,
+              "psis_r": 0.005357575467489652
             },
             "model_deviation_rms_m": {
-              "asis_l": 0.006167711265946407,
-              "asis_r": 0.006836676214292966,
-              "psis_l": 0.005258430221100374,
-              "psis_r": 0.005378325439156781
+              "asis_l": 0.005996951712130001,
+              "asis_r": 0.0066721912284543545,
+              "psis_l": 0.005287261899025413,
+              "psis_r": 0.0052986905673699045
             },
-            "model_hip_flexion_range_rad": [
-              -0.52359878,
-              2.0943951
-            ],
-            "model_pelvis_tilt_rad": [
-              -0.6276822265619367,
-              -0.5614760649278993
-            ],
+            "model_hip_flexion_range_rad": [-0.52359878, 2.0943951],
+            "model_pelvis_tilt_rad": [-0.6278671050209448, -0.5614393048142917],
             "pelvis_scale_xyz": [
-              1.0470588235294118,
-              1.0470588235294118,
-              1.1980326171369404
+              1.0470588235294118, 1.0470588235294118, 1.1980326171369404
             ],
-            "reason": "the bundle's own hip flexion spans 119.8-120.0 deg, outside the model's -30-120 deg range: its pelvis tilt was never observed (LIFT-5 tracked only the hip centres), so its pelvis landmarks are reported, not tracked",
+            "reason": "the bundle's own hip flexion spans 119.7-120.0 deg, outside the model's -30-120 deg range: its pelvis tilt was never observed (LIFT-5 tracked only the hip centres), so its pelvis landmarks are reported, not tracked",
             "source": "the generic RajagopalLaiUhlrich2023.osim pelvis markers LASI/RASI/LPSI/RPSI",
-            "source_hip_flexion_rad": [
-              2.0907336583805884,
-              2.094753547650151
-            ],
+            "source_hip_flexion_rad": [2.08940503264555, 2.09469606421697],
             "tracked": false
           },
-          "range_violations": {
-            "arm_flex_l": {
-              "frames": 41,
-              "max_rad": 1.5715028080364373,
-              "min_rad": 1.5712704753214384,
-              "range_max_rad": 1.57079633,
-              "range_min_rad": -1.57079633
-            },
-            "arm_rot_l": {
-              "frames": 41,
-              "max_rad": -1.571375590686394,
-              "min_rad": -1.5715973491411228,
-              "range_max_rad": 1.57079633,
-              "range_min_rad": -1.57079633
-            },
-            "elbow_flex_l": {
-              "frames": 41,
-              "max_rad": 2.6181009271866325,
-              "min_rad": 2.6180916868068795,
-              "range_max_rad": 2.618,
-              "range_min_rad": 0.0
-            },
-            "elbow_flex_r": {
-              "frames": 2,
-              "max_rad": 2.6180012472877072,
-              "min_rad": 2.617984895180582,
-              "range_max_rad": 2.618,
-              "range_min_rad": 0.0
-            },
-            "pro_sup_l": {
-              "frames": 41,
-              "max_rad": -0.0003050793631371255,
-              "min_rad": -0.0004315370147014229,
-              "range_max_rad": 2.09,
-              "range_min_rad": 0.0
-            },
-            "pro_sup_r": {
-              "frames": 41,
-              "max_rad": -0.0003554156601210906,
-              "min_rad": -0.0004876833109267202,
-              "range_max_rad": 2.09,
-              "range_min_rad": 0.0
-            }
-          },
+          "range_violations": {},
           "segment_angle_error": {
             "definition": "sagittal shank, thigh and trunk angles from the landmarks (sagittal_retarget.segment_angles), model minus bundle",
-            "max_abs_rad": 0.027982972649589155,
+            "max_abs_rad": 0.028191608042808125,
             "per_segment_rms_rad": {
-              "shank": 0.027312430176466784,
-              "thigh": 0.008031019865150892,
-              "trunk": 0.019011342297624776
+              "shank": 0.02755032328483481,
+              "thigh": 0.009457705042006074,
+              "trunk": 0.0027852191430045793
             },
-            "rms_rad": 0.019764423072584053,
+            "rms_rad": 0.016894041784359534,
             "threshold_rms_rad": 0.03490658503988659
           },
           "solver": "OpenSim InverseKinematicsSolver (engine of InverseKinematicsTool)",
@@ -661,27 +1768,23 @@
           },
           "scale_factor": 1.0470588235294118,
           "segment_scale_factors": {
-            "calcn_l": 0.9999999999999997,
-            "calcn_r": 0.9999999999999997,
-            "femur_l": 0.9842441399053465,
-            "femur_r": 1.0132998572130445,
-            "patella_l": 0.9842441399053465,
-            "patella_r": 1.0132998572130445,
+            "calcn_l": 1.0000000000000007,
+            "calcn_r": 1.0000000000000002,
+            "femur_l": 0.9842452106392339,
+            "femur_r": 1.0133002824253075,
+            "patella_l": 0.9842452106392339,
+            "patella_r": 1.0133002824253075,
             "pelvis": [
-              1.0470588235294118,
-              1.0470588235294118,
-              1.1980326171369404
+              1.0470588235294118, 1.0470588235294118, 1.1980326171369404
             ],
-            "talus_l": 0.9999999999999997,
-            "talus_r": 0.9999999999999997,
+            "talus_l": 1.0000000000000007,
+            "talus_r": 1.0000000000000002,
             "tibia_l": 1.0919910904006696,
-            "tibia_r": 1.1025207280535996,
-            "toes_l": 0.9999999999999997,
-            "toes_r": 0.9999999999999997,
+            "tibia_r": 1.1025207280536,
+            "toes_l": 1.0000000000000007,
+            "toes_r": 1.0000000000000002,
             "torso": [
-              1.075536396622096,
-              1.075536396622096,
-              1.1936470494027156
+              1.0766218852836789, 1.0766218852836789, 1.1936470515447448
             ]
           },
           "skeleton_mass_kg": 80.31300000000003,
@@ -708,9 +1811,7 @@
           "pelvis_tz": 0.0
         },
         "com_m": [
-          -0.16559062412027503,
-          -9.866062003047185e-07,
-          1.3277707552330755
+          -0.16559062412027503, -9.866062003047185e-7, 1.3277707552330755
         ],
         "expected_weight_n": 1961.33,
         "gravity_m_s2": 9.80665,
@@ -733,8 +1834,8 @@
         "relative_error": 8.810551683646116e-15,
         "settling_rad": {
           "fore_aft": -0.04867128635124003,
-          "pelvis_list": -8.223060845316255e-07,
-          "pelvis_rotation": 5.901086242292485e-06
+          "pelvis_list": -8.223060845316255e-7,
+          "pelvis_rotation": 5.901086242292485e-6
         },
         "spec": {
           "bar_mass_kg": 120.0,
@@ -742,29 +1843,17 @@
           "height_m": 1.78
         },
         "support_cop_m": {
-          "left": [
-            -0.16559116245645428,
-            0.09035261524832457,
-            0.0
-          ],
-          "right": [
-            -0.16559008578409476,
-            -0.09035458846072035,
-            0.0
-          ]
+          "left": [-0.16559116245645428, 0.09035261524832457, 0.0],
+          "right": [-0.16559008578409476, -0.09035458846072035, 0.0]
         },
         "support_vertical_n": {
           "left": 980.6649999999644,
           "right": 980.6650000000529
         },
-        "total_grf_n": [
-          -1.2009682532858498e-13,
-          0.0,
-          1961.3300000000172
-        ]
+        "total_grf_n": [-1.2009682532858498e-13, 0.0, 1961.3300000000172]
       }
     }
   },
-  "source_commit": "09ad32f5df5db639cd142d825ef1af434d94b8df",
+  "source_commit": "7a963f7b9aa30e671fc19d8e8f75c9324d0992ee",
   "stride": 5
 }

@@ -1,0 +1,28 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "simscape_gs3dx_human",
+  "model_hash": "sha256:9fb7f5897d2160c7402e4b0189cb490935bc49fd76dbdf286081e6f400ba6823",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "neutral_address",
+    "description": "Address pose with club aligned and hands welded to grip frame"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/appearance/gs3dx_grip_topology.json",
+    "date": "2026-10-18",
+    "method": "simscape_topology_export"
+  },
+  "attachment_mode": "weld",
+  "club_body": "club",
+  "lead_hand_body": "hand_l",
+  "trail_hand_body": "hand_r",
+  "unavailable_sites": {}
+}

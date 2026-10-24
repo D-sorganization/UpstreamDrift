@@ -10,17 +10,68 @@ This file addresses infrastructure issues identified in CI pipeline failures.
 """
 
 import json
+import logging
 import re
+import runpy
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# CI Standard jobs folded into the required `quality-gate` aggregate for
+# issue #13364 (they carry the RM#1989 fork guard).
+QUALITY_GATE_FLEET_GATES = (
+    "frontend-tests",
+    "core-only-install",
+    "dependency-consistency",
+    "alembic-postgres-round-trip",
+    "rust-quality-gate",
+    "rust-quickstart",
+    "local-only-workflows",
+    "pinned-actions",
+    "workflow-inventory",
+    "urdf-layering",
+)
+
+
+def test_pre_push_hook_keeps_pytest_failure_and_gives_repair_guidance(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A failed pytest run must block push and direct the user to fix failures."""
+    invocation: list[list[str]] = []
+
+    def failed_pytest(args: list[str], *, check: bool) -> subprocess.CompletedProcess:
+        invocation.append(args)
+        assert check is False
+        return subprocess.CompletedProcess(args, returncode=1)
+
+    monkeypatch.setattr(subprocess, "run", failed_pytest)
+    hook = runpy.run_path(str(REPO_ROOT / "scripts" / "pre_push_hook.py"))
+
+    with caplog.at_level(logging.ERROR):
+        result = hook["main"]()
+
+    assert invocation and invocation[0][1:3] == ["-m", "pytest"]
+    assert result != 0
+    assert "Run 'python -m pytest' locally" in caplog.text
+    assert "Fix the failing tests before pushing" in caplog.text
+    assert "--no-verify" not in caplog.text
+
+
+def test_architecture_map_contract_uses_approved_fleet_runner() -> None:
+    """The architecture contract must not route through an ungated hosted fallback."""
+    workflow_path = REPO_ROOT / ".github/workflows/architecture-map-contract.yml"
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    job = workflow["jobs"]["validate-map"]
+
+    assert job["runs-on"] == "d-sorg-fleet-docker"
 
 
 def _major_minor(version: str) -> tuple[int, int]:
@@ -272,7 +323,8 @@ class TestCIEnvironmentCompatibility:
         assert "for display_num in $(seq 90 129)" in start_step
         assert 'lockdir="/tmp/upstreamdrift-xvfb-${display_num}.lock"' in start_step
         assert 'mkdir "$lockdir"' in start_step
-        assert 'echo "DISPLAY=:${display_num}" >> "$GITHUB_ENV"' in start_step
+        assert 'echo "DISPLAY=:${display_num}"' in start_step
+        assert '} >> "$GITHUB_ENV"' in start_step
         assert "Xvfb :99" not in start_step
         assert "UPSTREAMDRIFT_XVFB_PID" in stop_step
         assert "UPSTREAMDRIFT_XVFB_LOCKDIR" in stop_step
@@ -596,6 +648,22 @@ class TestCIEnvironmentCompatibility:
 
         assert scripts["tauri"] == "tauri"
         assert scripts["tauri:build"] == "tauri build"
+
+    def test_tauri_path_filters_exclude_generated_capability_atlas(self) -> None:
+        """Generated capability-atlas output should not run the Tauri workflow."""
+        workflow_path = REPO_ROOT / ".github" / "workflows" / "tauri-build.yml"
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        workflow = yaml.safe_load(workflow_text)
+
+        for event in ("push", "pull_request"):
+            paths = workflow[True][event]["paths"]
+            assert "ui/**" in paths
+            assert "!ui/public/capability-atlas/**" in paths
+            assert paths.index("ui/**") < paths.index("!ui/public/capability-atlas/**")
+
+        assert "Generated capability-atlas output is excluded from CI triggers" in (
+            workflow_text
+        )
 
     def test_tauri_rust_and_npm_versions_share_minor(self) -> None:
         """Tauri app builds require Rust tauri and npm package parity."""
@@ -955,6 +1023,9 @@ class TestCIEnvironmentCompatibility:
             "seam-drift-gate",
             "impact-explorer-web-build",
             "always-on-unit-lane",
+            # Issue #13364: gating jobs that previously failed without
+            # blocking the merge queue.
+            *QUALITY_GATE_FLEET_GATES,
         }
         assert job["if"] == "always()"
         aggregate_step = next(
@@ -985,6 +1056,47 @@ class TestCIEnvironmentCompatibility:
             '[ "$PICK_RUNNER" != "success" ] || [ "$CHANGED_PATHS" != "success" ]'
             in aggregate
         )
+
+    def test_quality_gate_aggregates_every_gating_ci_standard_job(self) -> None:
+        """No CI Standard job that gates code PRs may sit outside `quality-gate`.
+
+        `quality-gate` is the only required check, so a gating job missing from
+        its `needs` can fail while the merge queue still lands the PR. That is
+        how #13320 and #13360 merged with `frontend-tests` red (issue #13364).
+        Only disabled jobs (`if: ... (false)`) and schedule/dispatch-only jobs
+        are allowed to stay out of the aggregate.
+        """
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        jobs = workflow["jobs"]
+        gate = jobs["quality-gate"]
+        aggregated = set(gate["needs"])
+        not_gating = {"quality-gate", "matlab-tests", "arduino-build", "parity-smoke"}
+
+        missing = sorted(set(jobs) - aggregated - not_gating)
+        assert not missing, (
+            f"CI Standard jobs not aggregated by quality-gate: {missing}. "
+            "Add them to quality-gate `needs` and the aggregate step (#13364)."
+        )
+
+        aggregate_step = next(
+            step
+            for step in gate["steps"]
+            if step.get("name") == "Aggregate quality gate results"
+        )
+        env_values = set(aggregate_step["env"].values())
+        for job_id in QUALITY_GATE_FLEET_GATES:
+            assert f"${{{{ needs.{job_id}.result }}}}" in env_values, job_id
+            assert f"{job_id}=$" in aggregate_step["run"], job_id
+        assert "$fleet_gates" in aggregate_step["run"]
 
     def test_ci_standard_runs_on_every_pull_request(self) -> None:
         """CI Standard must not be path-filtered out of any PR.

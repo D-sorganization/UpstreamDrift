@@ -21,14 +21,14 @@ This guide explains how to read the Variability & Consistency results of the clo
 
 Every number on these panels is a typed quantity with six evidence axes, and the panel shows them as badges and chips. The panel does no math and invents no label; it shows what the plot model decided.
 
-| Badge or chip | Meaning |
-| --- | --- |
-| `INVARIANT` | Identical for every admissible allocation under the declared model. It is not a measurement. |
+| Badge or chip      | Meaning                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `INVARIANT`        | Identical for every admissible allocation under the declared model. It is not a measurement.                                                             |
 | `FAMILY_DEPENDENT` | Depends on which allocation in the family is chosen. It is shown only with the hypotheses that fix it and is withheld when one is unverified or unknown. |
-| `UNAVAILABLE` | Cannot be computed (a missing derivative capability, an unimplemented strategy, an engine limit). It carries a reason and never a number, never zero. |
-| `UNVALIDATED` | No external validation has passed. Every variability quantity carries it today. |
-| A hypothesis chip | A named declared assumption the value is conditional on, for example a noise model or an impedance. It is an assumption, not a result. |
-| Conditioning chip | The orthogonal axis recording the noise-model hypotheses that variance values are conditioned on. |
+| `UNAVAILABLE`      | Cannot be computed (a missing derivative capability, an unimplemented strategy, an engine limit). It carries a reason and never a number, never zero.    |
+| `UNVALIDATED`      | No external validation has passed. Every variability quantity carries it today.                                                                          |
+| A hypothesis chip  | A named declared assumption the value is conditional on, for example a noise model or an impedance. It is an assumption, not a result.                   |
+| Conditioning chip  | The orthogonal axis recording the noise-model hypotheses that variance values are conditioned on.                                                        |
 
 ## Why Values Are Withheld
 

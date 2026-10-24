@@ -20,6 +20,14 @@ from src.engines.physics_engines.pinocchio.python.simulate_with_coefficients imp
     simulate_with_coefficients,
     synthesize_target_from_coefficients,
 )
+from src.engines.physics_engines.pinocchio.python.topology_contact_sim import (
+    IntegratorTolerances,
+    TopologyClubInHands,
+    TopologyContactRun,
+    TopologyPairResult,
+    evaluate_topology_wrenches,
+    simulate_topology_contact,
+)
 
 __all__ = [
     "CANONICAL_COORDINATE_NAMES",
@@ -28,16 +36,22 @@ __all__ = [
     "DEFAULT_GOLFER_URDF",
     "EngineJointMap",
     "GRIP_FRAME_NAME",
+    "IntegratorTolerances",
     "POLY_BOUNDS",
     "POLY_DEGREE",
     "SimOptions",
     "SimOut",
     "SynthesizeOptions",
+    "TopologyClubInHands",
+    "TopologyContactRun",
+    "TopologyPairResult",
     "evaluate_bernstein_torque",
     "evaluate_polynomial_torque",
+    "evaluate_topology_wrenches",
     "get_pinocchio_canonical_joint_map",
     "is_pinocchio_available",
     "polynomial_torque_bounds",
+    "simulate_topology_contact",
     "simulate_with_coefficients",
     "synthesize_target_from_coefficients",
 ]

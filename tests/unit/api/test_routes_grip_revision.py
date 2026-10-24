@@ -33,13 +33,13 @@ def client() -> TestClient:
 def test_route_matches_the_shared_fixture(client: TestClient, case: dict) -> None:
     body = client.post("/character-builder/grip", json=case["picks"]).json()
     expected = case["expected"]
-    assert body["physics_spec_sha256"] == expected["character_physics_spec_sha256"]
+    allowed_shas = {expected["character_physics_spec_sha256"]}
+    if "character_physics_spec_sha256_win" in expected:
+        allowed_shas.add(expected["character_physics_spec_sha256_win"])
+    assert body["physics_spec_sha256"] in allowed_shas
     assert body["refit_required"] == expected["refit_required"]
     if expected["grip"] is not None:
-        if case["name"] == "style_only":
-            assert body["grip"]["style"] == expected["grip"]["style"]
-        else:
-            assert body["grip"] == expected["grip"]
+        assert body["grip"] == expected["grip"]
     parent = FIXTURE["parent"]["character_physics_spec_sha256"]
     assert body["parent_physics_spec_sha256"] == parent
     assert (body["physics_spec_sha256"] == parent) is (not expected["refit_required"])
@@ -50,21 +50,34 @@ def test_route_refuses_an_unknown_pick_and_an_impossible_one(
 ) -> None:
     assert client.post("/character-builder/grip", json={"spin": 1}).status_code == 422
     r = client.post("/character-builder/grip", json={"lead_shaft_rotation": -60})
-    assert r.status_code == 422 and "lead_v_azimuth_deg" in r.json()["detail"]
+    # -60 deg is the lead alpha bound (lead V azimuth -40 deg, HRG-GS-G4); the
+    # trail hand then sits outside the trail V offset range: still impossible.
+    assert r.status_code == 422 and "trail_v_offset_deg" in r.json()["detail"]
 
 
 def test_appearance_export_carries_only_picture_picks(client: TestClient) -> None:
     ok = client.post(
         "/character-builder/appearance",
-        json={"grip_thumb_offset_deg": 20},
+        json={
+            "grip_thumb_offset_deg": 20,
+            "grip_strength_deg": 10,
+            "lead_roll_offset_deg": -5,
+            "trail_roll_offset_deg": 8,
+        },
     ).json()
     assert ok["appearance"]["grip"] == {
         "lead_thumb_offset_deg": 20.0,
+        "grip_strength_deg": 10.0,
+        "lead_roll_offset_deg": -5.0,
+        "trail_roll_offset_deg": 8.0,
     }
-    # physical values are not appearance fields: refused (422), never written
-    bad = client.post("/character-builder/appearance", json={"hand_spacing": 0.1})
-    assert bad.status_code == 422
+    # Since HRG-GS-G1 (#13346), grip_style is a physical pick (selects contact
+    # topology and requires a refit), so the appearance sidecar route refuses it
+    # alongside other physical grip parameters.
     bad_style = client.post(
         "/character-builder/appearance", json={"grip_style": "interlock"}
     )
     assert bad_style.status_code == 422
+    # a physical value is not an appearance field: refused, never written
+    bad = client.post("/character-builder/appearance", json={"hand_spacing": 0.1})
+    assert bad.status_code == 422

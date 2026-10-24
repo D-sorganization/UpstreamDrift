@@ -18,6 +18,9 @@ from typing import TYPE_CHECKING, Any, cast  # noqa: F401
 import mujoco
 import numpy as np
 
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.randomization_mixin import (
+    MuJoCoDomainRandomizationMixin,
+)
 from src.shared.python.body_part_viz import AxialLoadFrame
 from src.shared.python.core.contracts import (
     PreconditionError,
@@ -60,7 +63,7 @@ ALLOWED_MODEL_DIRS = [
     lambda self: self.model is None or self.data is not None,
     "If model is loaded, data must also be initialized",
 )
-class MuJoCoPhysicsEngine(BasePhysicsEngine):
+class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
     """Encapsulates MuJoCo model, data, and simulation control.
 
     Implements the shared PhysicsEngine protocol via BasePhysicsEngine,
@@ -446,13 +449,34 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         return ground_reaction_breakdown(wrenches, self.data.subtree_com[0])
 
     def get_joint_names(self) -> list[str]:
-        """Get list of joint names."""
+        """Get list of joint names matching generalized velocity dimensions (nv).
+
+        Returns:
+            List of unique, non-empty joint names of length nv in model order.
+            Empty list if no model is loaded.
+        """
         if self.model is None:
             return []
-        return [
-            mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i) or f"Joint {i}"
-            for i in range(self.model.njnt)
-        ]
+
+        nv = int(self.model.nv)
+        if nv == 0:
+            return []
+
+        names: list[str] = []
+        for i in range(nv):
+            jnt_id = int(self.model.dof_jntid[i])
+            jnt_name = (
+                mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, jnt_id)
+                or f"joint_{jnt_id}"
+            )
+            first_dof = int(self.model.jnt_dofadr[jnt_id])
+            dof_offset = i - first_dof
+            count = int(np.count_nonzero(self.model.dof_jntid == jnt_id))
+            if count == 1:
+                names.append(jnt_name)
+            else:
+                names.append(f"{jnt_name}_{dof_offset}")
+        return names
 
     def get_full_state(self) -> dict[str, Any]:
         """Get complete state in a single batched call (performance optimization).
@@ -581,6 +605,14 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         Section F Implementation: Uses MuJoCo's mj_forward with zero control
         to compute passive dynamics due to gravity and Coriolis/centrifugal forces.
 
+        Contact Handling:
+            Includes active constraint and contact forces (e.g., ground reaction
+            forces) resolved by MuJoCo's constraint solver under zero control
+            inputs (reads data.qacc after mj_forward with ctrl=0). On
+            unconstrained models without ground or active contacts, this
+            analytically equals the unconstrained rigid-body drift
+            M(q)^-1 * (-C(q,v)v - g(q)).
+
         Returns:
             q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
         """
@@ -617,7 +649,9 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
 
         Legacy method - use compute_drift_acceleration() for Section F compliance.
 
-        Returns acceleration when tau = 0 (and no active control).
+        Returns acceleration when tau = 0 (and no active control). Includes
+        active contact and constraint forces from forward dynamics (mj_forward).
+        On models without active contacts/ground, this matches -M(q)^-1 * bias.
         """
         if self.model is None or self.data is None:
             return np.array([])
@@ -640,6 +674,17 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
 
     # -------- Section 4: Jacobian Analysis --------
 
+    def get_body_names(self) -> list[str]:
+        """Get names of all bodies in the MuJoCo model."""
+        if self.model is None:
+            return []
+        names = []
+        for i in range(self.model.nbody):
+            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
+            if name:
+                names.append(name)
+        return names
+
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
         if body_name is None:
@@ -649,7 +694,10 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
 
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
         if body_id == -1:
-            return None
+            valid_bodies = self.get_body_names()
+            raise KeyError(
+                f"Body '{body_name}' not found in MuJoCo model. Valid bodies: {valid_bodies}"
+            )
 
         jacp = np.zeros((3, self.model.nv))
         jacr = np.zeros((3, self.model.nv))

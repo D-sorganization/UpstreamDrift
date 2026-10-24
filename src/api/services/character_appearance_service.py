@@ -30,7 +30,7 @@ from src.shared.python.motion_matching.execution.grip_selection import (
 )
 from src.shared.python.motion_matching.grip_contract import (
     GRIP_STRENGTH_PRESETS_DEG,
-    grip_spec_to_physical,
+    NAMED_GRIP_PRESETS,
 )
 from src.shared.python.model_appearance.schema import physics_spec_sha256
 
@@ -90,6 +90,9 @@ def appearance_library() -> dict[str, Any]:
         "glove": list(GLOVE_CHOICES),
         "grip": {
             "presets": dict(GRIP_STRENGTH_PRESETS_DEG),
+            "named_presets": {
+                name: p.to_library_dict() for name, p in NAMED_GRIP_PRESETS.items()
+            },
             "styles": list(GRIP_STYLE_CHOICES),
         },
         "headwear": list(HEADWEAR),
@@ -205,13 +208,15 @@ def compile_with_grip(
 ) -> CompiledCharacter:
     """``character`` with the physical grip picks as a new spec revision (GR4).
 
-    Without a physical pick the character is returned as it is.  The new
-    ``sha256`` is the revision's content hash, computed as ``compile_character``
-    does; the revision needs a refit.
+    Without an effective physical change the character is returned as it is.
+    The new ``sha256`` is the revision's content hash, computed as
+    ``compile_character`` does; the revision needs a refit.
     """
     if not overrides.has_physical:
         return character
     document, _grip = apply_grip_selection(character.document, overrides)
+    if document == character.document:
+        return character
     sha = hashlib.sha256(serialize_spec(document).encode("utf-8")).hexdigest()
     return replace(character, document=document, sha256=sha)
 
@@ -222,20 +227,26 @@ def grip_revision_summary(
     """The resolved grip, the sidecar block and the hashes of the picks (GR4).
 
     ``physics_spec_sha256`` is the revision's physics hash and
-    ``parent_physics_spec_sha256`` the character's own: they are equal exactly
-    when the picks are picture-only.  ``refit_required`` is true for a physical
-    pick.
+    ``parent_physics_spec_sha256`` the character's own: they are equal when
+    the picks are picture-only or re-pick the document's current physical
+    grip.  ``refit_required`` is true when a new spec revision was minted.
     """
     document, grip = apply_grip_selection(character.document, overrides)
     revised = compile_with_grip(character, overrides)
+    spec_sha = physics_spec_sha256(document)
+    parent_sha = physics_spec_sha256(character.document)
+    refit_required = spec_sha != parent_sha
+    physical_config = (
+        document.get("subject", {}).get("grip_config") if refit_required else None
+    )
     return {
-        "grip": None if grip is None else grip_spec_to_physical(grip),
-        "visual": None if grip is None else visual_grip_block(grip),
+        "grip": physical_config,
+        "visual": None if grip is None else visual_grip_block(grip, overrides),
         "spec_sha256": revised.sha256,
-        "physics_spec_sha256": physics_spec_sha256(document),
-        "parent_physics_spec_sha256": physics_spec_sha256(character.document),
+        "physics_spec_sha256": spec_sha,
+        "parent_physics_spec_sha256": parent_sha,
         "spec_revision": document.get("spec_revision"),
-        "refit_required": overrides.has_physical,
+        "refit_required": refit_required,
     }
 
 

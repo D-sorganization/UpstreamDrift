@@ -70,7 +70,11 @@ from ._simulate_support import (
     build_polynomial_torque_system as _build_polynomial_torque_system,
 )
 from ._simulate_support import record_rollout as _record_rollout
-from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
+from .humanoid_urdf import (
+    CANONICAL_URDF,
+    load_humanoid_into_plant,
+    resolve_plant_n_actuators,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - import-time only
     from pydrake.multibody.plant import MultibodyPlant
@@ -80,16 +84,9 @@ logger = logging.getLogger(__name__)
 
 POLY_DEGREE: int = _POLY_DEGREE
 
-_CANONICAL_PINOCCHIO_URDF: Path = (
-    Path(__file__).resolve().parents[2]
-    / "pinocchio"
-    / "models"
-    / "generated"
-    / "golfer.urdf"
-)
-DEFAULT_GOLFER_URDF: Path = (
-    _CANONICAL_PINOCCHIO_URDF if _CANONICAL_PINOCCHIO_URDF.exists() else CANONICAL_URDF
-)
+# The Drake-generated, actuated golfer. A Pinocchio-model default would need
+# transmissions and a joint map (separate modeling decision; see #13454).
+DEFAULT_GOLFER_URDF: Path = CANONICAL_URDF
 
 GRIP_FRAME_NAME: str = "mid_hands"
 CLUBHEAD_FRAME_NAME: str = "club_head"
@@ -161,9 +158,11 @@ class SimOptions:
         urdf_path: Override the URDF source. ``None`` resolves to the
             canonical humanoid URDF.
         grip_body_name: Name of the URDF body whose body-frame origin we
-            sample as the ``grip`` anchor. Default ``"club_grip"``.
+            sample as the ``grip`` anchor. Default :data:`GRIP_FRAME_NAME`
+            (``"mid_hands"``), the frame Pinocchio samples on the same URDF.
         clubhead_body_name: Name of the body whose body-frame origin we
-            sample as the ``clubhead`` anchor. Default ``"clubhead"``.
+            sample as the ``clubhead`` anchor. Default
+            :data:`CLUBHEAD_FRAME_NAME` (``"club_head"``).
         random_seed: Seed for stochastic choices.
         basis: Basis used for torque parametrization: ``"power"`` or
             ``"bernstein"``. Default is ``"power"``.
@@ -181,8 +180,8 @@ class SimOptions:
     time_step_s: float = 1.0e-3
     gravity: tuple[float, float, float] | NDArray[np.float64] = (0.0, 0.0, -9.80665)
     urdf_path: Path | str | None = None
-    grip_body_name: str = "club_grip"
-    clubhead_body_name: str = "clubhead"
+    grip_body_name: str = GRIP_FRAME_NAME
+    clubhead_body_name: str = CLUBHEAD_FRAME_NAME
     random_seed: int = 0
     basis: Literal["power", "bernstein"] = "power"
     T_s: float | None = None
@@ -363,13 +362,7 @@ def _sample_grid(
 
 def _resolve_n_actuators(plant: MultibodyPlant) -> int:
     """Return the number of actuators / actuated DOFs in the plant."""
-    n = int(plant.num_actuators())
-    if n > 0:
-        return n
-    # Fallback to velocity dimension minus 6 (floating root) which matches the
-    # actuated chain in the canonical URDF.
-    nv = int(plant.num_velocities())
-    return max(nv - 6, 0)
+    return resolve_plant_n_actuators(plant)
 
 
 @dataclass(frozen=True)
@@ -448,8 +441,18 @@ def _wire_actuation_and_logger(
         if hasattr(plant, "get_actuation_input_port")
         else None
     )
+    actuation_wired = False
     if actuation_port is not None and plant.num_actuators() == n_actuators:
         builder.Connect(torque_source.get_output_port(0), actuation_port)
+        actuation_wired = True
+    if n_actuators > 0 and not actuation_wired:
+        msg = (
+            "cannot wire polynomial torque to the plant: "
+            f"num_actuators()={plant.num_actuators()} but simulate expects "
+            f"{n_actuators} actuated joints; URDF transmissions or joint "
+            "actuators must match the theta packing order"
+        )
+        raise ValueError(msg)
 
     # State logger (for q, qd extraction)
     log_sink = api.log_sink_cls(plant.num_multibody_states())
@@ -555,7 +558,6 @@ def simulate_with_coefficients(
 
     # ---- 5. Run the sim ------------------------------------------------
     simulator = api.simulator_cls(diagram, diagram_context)
-    simulator.set_publish_every_time_step(False)
     simulator.Initialize()
 
     grid = _sample_grid(opts.simulation_time_s, opts.sample_rate_hz)

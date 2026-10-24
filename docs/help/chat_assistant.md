@@ -36,13 +36,13 @@ without you pasting it in.
 
 Server-to-client frames on the same socket:
 
-| Frame | Payload |
-| --- | --- |
-| `session_info` | `session_id` |
-| `chunk` | `content`, one streamed fragment of the reply |
-| `complete` | `session_id`, reply finished |
-| `history` | `messages` array |
-| `error` | `detail` |
+| Frame          | Payload                                       |
+| -------------- | --------------------------------------------- |
+| `session_info` | `session_id`                                  |
+| `chunk`        | `content`, one streamed fragment of the reply |
+| `complete`     | `session_id`, reply finished                  |
+| `history`      | `messages` array                              |
+| `error`        | `detail`                                      |
 
 Assistant turns are rendered as Markdown in the page. Sessions are
 persisted as files under `~/.golf_modeling_suite/chat_sessions/` on each
@@ -99,5 +99,6 @@ credentials reach the assistant.
   access control beyond filesystem permissions.
 
 ## See Also
+
 - [Sidekick](sidekick.md) - the desktop equivalent of this tile
 - [Data Explorer](data_explorer.md)

@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+"""Fleet agent hook entrypoint (slice 1). Adapters call this script unchanged."""
+
+from shared_scripts.agent_check import main
+
+if __name__ == "__main__":
+    raise SystemExit(main())

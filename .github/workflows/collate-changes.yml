@@ -32,7 +32,7 @@ permissions:
 
 concurrency:
   group: collate-changes
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   collate:
@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: Generate fleet app token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           app-id: ${{ secrets.JULES_APP_ID }}
           private-key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
@@ -63,7 +63,8 @@ jobs:
           path: .rm-tools
           token: ${{ steps.app-token.outputs.token }}
           # Cone mode (#9507): non-cone leaves core.sparseCheckout set in
-          # reused runner workspaces. Only scripts/automerge_guard.py is used.
+          # reused runner workspaces. Both read-only update and merge guards
+          # come from this same canonical checkout.
           sparse-checkout: scripts
 
       - name: Isolate Python tool cache (prevent shared-cache races)
@@ -134,6 +135,7 @@ jobs:
           BRANCH: bot/collate-changes
           REPO_SLUG: ${{ github.repository }}
           GUARD: .rm-tools/scripts/automerge_guard.py
+          UPDATE_GUARD: .rm-tools/scripts/pr_update_guard.py
         shell: bash
         run: |
           set -euo pipefail
@@ -143,11 +145,11 @@ jobs:
           fi
           OWNER="${REPO_SLUG%%/*}"
           PR_NUM=$(gh api "repos/$REPO_SLUG/pulls?state=open&head=$OWNER:$BRANCH" --jq '.[0].number // empty')
-          # A reviewer's hold must survive: a push newer than their disarm
-          # would make the guard treat the hold as superseded and re-arm.
-          if [ -n "$PR_NUM" ] && ! python3 "$GUARD" "$REPO_SLUG" "$PR_NUM"; then
-            echo "::warning::Collation PR #$PR_NUM is held by a reviewer; leaving it untouched."
-            echo "OUTCOME=collation PR #$PR_NUM held; not updated" >> "$GITHUB_ENV"
+          # Queued, held, or unverified PRs must be deferred before
+          # rewriting the generated branch. This preflight is not a lock.
+          if [ -n "$PR_NUM" ] && ! python3 "$UPDATE_GUARD" "$REPO_SLUG" "$PR_NUM"; then
+            echo "::warning::Collation PR #$PR_NUM is not editable; update deferred (queued, held, or status unavailable)."
+            echo "OUTCOME=collation PR #$PR_NUM not editable; update deferred" >> "$GITHUB_ENV"
             exit 0
           fi
           git config user.name "github-actions[bot]"

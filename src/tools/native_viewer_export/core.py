@@ -23,6 +23,7 @@ from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.shared.python.force_overlay.conversions import restrict_frame
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
+from src.shared.python.grip_contact.palm_thumb import PALM_THUMB_LABEL
 from src.shared.python.golf_view_presets import (
     VIEW_ORDER,
     get_view_preset,
@@ -124,6 +125,9 @@ class ExportSettings:
     shading: ForceColorScale | None = None
     force_vectors: bool = True  # straight joint/contact force arrows
     torque_vectors: bool = True  # curling joint torque arcs
+    #: allocated trail-palm-on-lead-thumb normal force arrow (HRG-H1, #13189);
+    #: independent of the force and torque vectors, needs ``overlays``
+    palm_thumb_force: bool = False
 
     @property
     def shading_enabled(self) -> bool:
@@ -188,9 +192,11 @@ class ExportSettings:
             raise ValueError("the 2x2 grid needs exactly four views")
         if self.shading is not None and not isinstance(self.shading, ForceColorScale):
             raise TypeError("shading must be a ForceColorScale or None")
-        for flag in ("force_vectors", "torque_vectors"):
+        for flag in ("force_vectors", "torque_vectors", "palm_thumb_force"):
             if not isinstance(getattr(self, flag), bool):
                 raise TypeError(f"{flag} must be bool")
+        if self.palm_thumb_force and not self.overlays:
+            raise ValueError("palm_thumb_force needs overlays (omit --no-overlay)")
 
     def effective_speeds(self, dt_s: float) -> tuple[float, ...]:
         """Speeds to export; a deprecated ``stride`` maps to its equivalent speed."""
@@ -382,6 +388,9 @@ class OverlayFeed:
     #: glyph kinds drawn; the frame (and its axial loads) is never restricted
     show_force: bool = True
     show_torque: bool = True
+    #: the allocated palm-on-thumb arrow (``PALM_THUMB_LABEL``), drawn only when
+    #: set and independent of ``show_force``/``show_torque``
+    show_palm_thumb: bool = False
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
@@ -398,10 +407,22 @@ class OverlayFeed:
 
             build = build_glyphs
         frame = self._frame(index)
+        allocated = tuple(
+            w
+            for w in frame.wrenches
+            if w.label == PALM_THUMB_LABEL
+            or (w.label.startswith("external:") and w.label.endswith("_allocated"))
+        )
+        if allocated:
+            frame = replace(
+                frame, wrenches=tuple(w for w in frame.wrenches if w not in allocated)
+            )
         if not (self.show_force and self.show_torque):
             frame = restrict_frame(
                 frame, show_force=self.show_force, show_torque=self.show_torque
             )
+        if allocated and self.show_palm_thumb:
+            frame = replace(frame, wrenches=(*frame.wrenches, *allocated))
         return build(frame, self.style)
 
     def axial_at(self, index: int) -> Any:
@@ -418,7 +439,24 @@ class OverlayFeed:
 
     @staticmethod
     def legend(glyphs: GlyphSet | None) -> str:
-        return "" if glyphs is None else legend_text(glyphs)
+        if glyphs is None:
+            return ""
+        text = legend_text(glyphs)
+        allocated_arrows = [
+            a
+            for a in glyphs.arrows
+            if a.label == PALM_THUMB_LABEL
+            or (a.label.startswith("external:") and a.label.endswith("_allocated"))
+        ]
+        if allocated_arrows:
+            if (
+                len(allocated_arrows) == 1
+                and allocated_arrows[0].label == PALM_THUMB_LABEL
+            ):
+                text += " | Palm-thumb force: allocated (not measured)"
+            else:
+                text += " | Hand-hand contact force: allocated (not measured)"
+        return text
 
 
 def view_lookats(

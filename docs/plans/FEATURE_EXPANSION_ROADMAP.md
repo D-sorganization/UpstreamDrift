@@ -215,12 +215,13 @@ class MuscleSynergyAnalyzer:
    - Recovery time recommendations
 
 **Injury Risk Thresholds** (from literature):
-| Metric | Safe | Caution | High Risk |
-|--------|------|---------|-----------|
-| L4-L5 Compression | <4x BW | 4-6x BW | >6x BW |
-| Lateral Shear | <0.5x BW | 0.5-1x BW | >1x BW |
-| X-Factor Stretch | <45° | 45-55° | >55° |
-| Transition Time | >0.3s | 0.2-0.3s | <0.2s |
+
+| Metric            | Safe     | Caution   | High Risk |
+| ----------------- | -------- | --------- | --------- |
+| L4-L5 Compression | <4x BW   | 4-6x BW   | >6x BW    |
+| Lateral Shear     | <0.5x BW | 0.5-1x BW | >1x BW    |
+| X-Factor Stretch  | <45°     | 45-55°    | >55°      |
+| Transition Time   | >0.3s    | 0.2-0.3s  | <0.2s     |
 
 ---
 
@@ -1234,16 +1235,16 @@ All proposed additions use MIT/BSD/Apache compatible licenses:
 ### What Commercial Products Do
 
 | Feature                 | OPTICAL | K-VEST | TrackMan | Foresight | **Us**   |
-| ----------------------- | ----- | ------ | -------- | --------- | -------- |
-| 3D Kinematics           | ✅    | ✅     | ❌       | ❌        | ✅       |
-| Ball Flight             | ❌    | ❌     | ✅       | ✅        | ✅       |
-| Forward Dynamics        | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Muscle Models           | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Swing Optimization      | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Injury Risk             | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Multi-Engine Validation | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Open Source             | ❌    | ❌     | ❌       | ❌        | ✅       |
-| Price                   | $30k+ | $8k+   | $22k+    | $20k+     | **Free** |
+| ----------------------- | ------- | ------ | -------- | --------- | -------- |
+| 3D Kinematics           | ✅      | ✅     | ❌       | ❌        | ✅       |
+| Ball Flight             | ❌      | ❌     | ✅       | ✅        | ✅       |
+| Forward Dynamics        | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Muscle Models           | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Swing Optimization      | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Injury Risk             | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Multi-Engine Validation | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Open Source             | ❌      | ❌     | ❌       | ❌        | ✅       |
+| Price                   | $30k+   | $8k+   | $22k+    | $20k+     | **Free** |
 
 ### Our Unique Value Proposition
 

@@ -19,3 +19,4 @@ Cadence: Bi-weekly, 1st and 3rd Friday.
 | Date       | Summary                                                   | Findings |
 | ---------- | --------------------------------------------------------- | -------- |
 | 2026-09-25 | Neural motion model cards and tour baseline qualification | 6        |
+| 2026-10-23 | Physical grip-contact calibration and validation         | 3        |

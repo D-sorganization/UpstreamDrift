@@ -7812,6 +7812,138 @@ The implementation is in \texttt{full\_body\_ik.py},
 \texttt{pipeline/lane.py} and \texttt{pipeline/constants.py}. The tests are
 \texttt{test\_ik\_restart\_continuity.py} and \texttt{pipeline/test\_lane.py}.
 
+\section{Replay Reproducibility, Sensitivity and the Bounded Centre-of-Mass Correction (\#13112)}
+\label{sec:replay_sensitivity}
+
+\subsection{Question}
+Committed calibrated receipts did not reproduce on a later \texttt{main}, and
+a $\pm 5$~mm change of one segment's centre of mass moved the whole-swing FD
+marker RMS by 10--40~mm, almost entirely after impact. With the ZMP filter
+on, the pre-torsion 7-iron diverged once to 128.5~mm, its centre-of-mass
+correction reaching 0.83--1.04~m. This section separates three possible
+causes: non-determinism of the replay, physical sensitivity of the
+closed-loop dynamics, and differences in the inputs.
+
+\subsection{Determinism}
+The replay integrates the plant with fixed-step RK4 ($\Delta t = 1$~ms), with
+no random numbers, no threads and no adaptive step. Two runs of the
+calibrated driver and 7-iron commands on one host (DeskComputer,
+\texttt{main} at \texttt{6dd08fcb1c}) give receipts identical in every value
+except the wall-clock \texttt{elapsed\_s}. A unit test runs the tracked
+replay twice on separately built plants and requires a bit-identical
+record. Across hosts the driver run reproduces the committed ControlTower
+receipt to $4\times10^{-10}$~m in dynamics RMS, although the hip calibration
+differs at $10^{-16}$.
+
+\subsection{Sensitivity: Finite-Time Growth Rate}
+Let $q_\mathrm{track}$ be the tracked reference, $\hat q(t)$ its replay, and
+$\hat q_\varepsilon(t)$ the replay of $q_\mathrm{track} + \varepsilon\,u$ with
+$u$ a seeded, unit-RMS, time-constant direction over the coordinates. With
+$p_m(q)$ the model marker positions, the separation is
+\[
+  s(t) = \sqrt{\operatorname{mean}_m \lVert p_m(\hat q(t)) - p_m(\hat q_\varepsilon(t)) \rVert^2}
+\]
+and the finite-time growth rate over a window $W$ is the least-squares slope
+\[
+  \lambda_W = \arg\min_{\lambda} \min_{c} \sum_{t_f \in W} \bigl(\ln s(t_f) - c - \lambda t_f\bigr)^2 ,
+\]
+reported for $W = [0, t_I]$ and $W = [t_I, t_\mathrm{end}]$ with $t_I$ the
+ball impact of \S\ref{sec:fd_phase_split}, together with the amplification
+$\max_W s / \varepsilon$. A positive $\lambda$ with amplification growing as
+$e^{\lambda t}$ beyond any bound, and a response that stops scaling with
+$\varepsilon$, would indicate chaos.
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\hline
+Run & $\varepsilon$ & $\lambda_{\le I}$ (1/s) & $\lambda_{>I}$ (1/s) & Amp.\ at $t_I + 0.1$~s & Amp.\ at End \\
+\hline
+Driver & $10^{-6}$ & $-0.26$ & $1.40$ & 6.3 & 9.7 \\
+Driver & $10^{-3}$ & $-0.27$ & $1.43$ & 6.1 & 9.4 \\
+7-iron (ZMP) & $10^{-6}$ & $-0.28$ & $1.67$ & 4.8 & 8.1 \\
+7-iron (ZMP) & $10^{-3}$ & $-0.23$ & $1.67$ & 4.9 & 8.2 \\
+\hline
+\end{tabular}
+\end{center}
+
+The tracking contracts a perturbation before impact and lets it grow slowly
+after impact (e-folding 0.6--0.7~s, longer than the 0.5~s follow-through),
+and the response is linear over three decades of $\varepsilon$. The replay is
+therefore not chaotic for reference perturbations: it amplifies a difference
+by at most about ten. The receipt differences in the question come from
+inputs that differ by millimetres. On the 7-iron, the same command on the two
+hosts gives an IK RMS of 30.57 against 30.69~mm, and the ZMP filter's
+iterative re-solve turns that into a different reference (pass-1
+centre-of-mass shift 133.0 against 46.9~mm); after impact the replays then
+differ by 33~mm, while the address-to-impact RMS agrees to 0.004~mm. A
+segment-inertia change is a persistent model change, not a perturbation of
+the reference, and was not probed here; it remains open.
+
+\subsection{Bounded Centre-of-Mass Correction}
+The ZMP filter (\texttt{pipeline.dynamics.zmp\_filter}) solves Kajita's
+cart-table problem for a centre-of-mass shift $\delta c$ whose effect
+$\delta z = \delta c - (z_c/g)\,\delta\ddot c$ closes the gap between the
+reference zero-moment point and its projection into the support polygon.
+The correction re-poses a marker-matched reference; it applies no force. In
+the quasi-static limit it moves the zero-moment point by $\delta c$ itself.
+With planted feet the whole-body centre of mass must stay over the base of
+support, so no admissible correction carries it farther than the base's
+narrowest width $w_f$: a larger shift would move a centred centre of mass
+across the base. Each frame's shift is therefore clipped radially,
+\[
+  \delta c_f \leftarrow \delta c_f \min\bigl(1, w_f / \lVert \delta c_f \rVert\bigr),
+\]
+with $w_f$ the minimum width of the convex hull of the frame's contact
+spheres (rotating calipers; about one foot length in double stance and one
+foot width on a single foot). A gap larger than $w_f$ is an acceleration the
+reference demands, typically on a frame whose vertical reaction is barely
+above the unloaded threshold, and re-posing cannot fix it. The direction is
+kept. Each pass records the unbounded maximum, the smallest bound and the
+number of clipped frames. On the 7-iron the bound clips 49 frames of pass 1
+(smallest bound 69.4~mm, unbounded 133.0~mm) and none of passes 2 and 3; the
+dynamics RMS changes from 91.09 to 85.41~mm, address to impact from 33.71 to
+33.82~mm and after impact from 165.3 to 153.7~mm. The 0.83--1.04~m shift of
+the pre-torsion run cannot recur.
+
+\subsection{Acceptance Metric}
+Address-to-impact FD RMS, $\mathrm{RMS}_{\le I}$, is the reproducible
+dynamics metric: before impact the tracking contracts
+($\lambda_{\le I} < 0$), and across hosts it reproduced to $10^{-9}$~m
+(driver) and $4\times10^{-6}$~m (7-iron, despite a 0.1~mm IK difference).
+The receipts also report $\mathrm{RMS}_{(I, I+0.1\,\mathrm{s}]}$
+(\texttt{fd\_rms\_post\_impact\_window\_m}), the FD marker RMS over a fixed
+0.1~s after impact. The window covers the ball contact, the release and the
+start of the follow-through, and stops before the rest of the follow-through,
+where the reference IK branch is not unique (\S\ref{sec:fd_phase_split}).
+Its measured amplification is at most 6.3, so an input change below
+16~$\mu$m moves it by less than the stated reproducibility tolerance of
+0.1~mm. The whole-swing and whole after-impact RMS remain in the receipt but
+cannot rank model changes smaller than about ten times the input difference
+between the runs compared. These metrics are reported only; no gate reads
+them.
+
+\subsection{Reproduction}
+\begin{verbatim}
+python docs/development/full_body_models/evidence/ground_support/run_ground_support.py \
+  --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
+  --static-seeds --fix-club-markers --capture driver \
+  --replay-sensitivity [--replay-sensitivity-epsilon 1e-3] --out <run>
+python docs/development/full_body_models/evidence/ground_support/run_ground_support.py \
+  --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json \
+  --static-seeds --zmp-filter --fix-club-markers --capture iron \
+  --replay-sensitivity [--replay-sensitivity-epsilon 1e-3] --out <run>
+\end{verbatim}
+Compare two run directories with
+\texttt{replay\_sensitivity.compare\_receipts} on their \texttt{receipt.json}.
+
+\subsection{Limitations}
+The probe perturbs the reference, not the model's inertial parameters; the
+$\pm 5$~mm segment centre-of-mass experiment of the question is a different,
+persistent perturbation. The committed 7-iron ZMP receipt predates the bound
+and must be regenerated on the canonical host. The sensitivity measurements
+come from one host; the cross-host comparison uses the committed
+ControlTower receipts.
+
 \section{The \texttt{full-body-v2} Schema and Trunk Coordinate Migration (HRG-D1, \#13170)}
 \label{sec:full-body-v2}
 
@@ -7848,10 +7980,10 @@ the registry.
 
 The consumers that accept both schemas are the MuJoCo, URDF/Drake and
 Pinocchio models, the OpenSim export and parity adapter, the Pink task builder
-and the polynomial actuation. Pelvis relocation accepts v1 only. Three
-consumers raise \texttt{NotImplementedError} for v2:
+and the polynomial actuation. Pelvis relocation accepts v1 only. The MuJoCo
+visual layer accepts v2 since HRG-D3 (\#13174). Two consumers raise
+\texttt{NotImplementedError} for v2:
 \begin{itemize}
-\item the MuJoCo visual layer (HRG-D3);
 \item the qualified upper-body Pinocchio model (HRG-D2);
 \item the musculoskeletal graft (HRG-D2, HRG-Q1).
 \end{itemize}
@@ -7980,6 +8112,70 @@ smoothness is imposed.
 \item v1-specific consumers outside the registry are left v1-only, for example
 the Crocoddyl \texttt{TorsoInput} weights.
 \end{itemize}
+
+\section{Allocated Trail-Palm-on-Lead-Thumb Force (HRG-H1)}
+\subsection{Scope and Status}
+In the full-body model the lead hand is the club body (\texttt{Clubface Vector})
+and the trail hand \texttt{RHandStandoff} is closed onto it by the loop
+constraint \texttt{RightHandOnClubForce}. Only the closure multiplier
+$\lambda$ is observable: a palm--thumb force would act between the same two
+bodies as the weld. The reported palm-on-thumb force is therefore an
+\emph{allocated equivalent} of $-\lambda$, labelled \texttt{method="allocation"}.
+It is not a new contact, not a measured biological force, and it never enters
+the equations of motion. The compiled \texttt{body\_mass}, \texttt{body\_inertia}
+and \texttt{eq\_data} and the physics-spec hash are unchanged (tested).
+
+\subsection{Patch Frame}
+Work in the lead hand-grip frame (origin on the grip axis at the lead hand
+centre, $z$ butt toward head, $x$ the toe axis, $y=z\times x$; units m). The
+palm reference $Q$ is the vertex centroid of the trail palm shell moved along
+$z$ by the hand spacing. The lead thumb is a capsule of radius $r$ (0.0095 m)
+whose axis lies at the thumb azimuth and radius $R_g+c+r$ ($R_g$ the grip
+radius, $c$ the pad clearance) between the declared stations
+\texttt{thumb\_stations\_m}. With $A$ the axis point nearest $Q$,
+$n=(Q-A)/\lVert Q-A\rVert$ (thumb toward palm) and the patch point is
+$P=A+rn$. A left-handed golfer's patch is the exact reflection of the
+right-handed one in the plane of the shaft and the face normal. The frame
+comes from \texttt{thumb\_palm\_patch}, the single function GR2 will later feed
+from \texttt{GripSpec}. Spacing of the default pose leaves only the thumb tip
+under the trail palm: the patch sits on the distal end cap (axial station 46 mm).
+
+\subsection{Allocation}
+The closing-hand load on the lead side is $(F,M_O)=(-\lambda_f,-\lambda_m)$ at
+the closure site $O$. At $P$: $M_P=M_O-(P-O)\times F$ (the residual couple is
+kept). A palm force pushes the thumb along $-n$, so
+$F_n=\max(0,-F\cdot n)$; $F\cdot n\ge 0$ is tension and is flagged
+\texttt{unloaded}. $F_t=\lVert F-(F\cdot n)n\rVert$, the friction ratio is
+$F_t/(\mu F_n)$ with the spec static friction $\mu=0.9$, and the share is
+$F_n/\lVert F\rVert$. When $\lambda$ is unavailable every quantity is
+\texttt{None} with a reason, never zero.
+
+\subsection{Evidence and Limitations}
+Tests: \texttt{test\_grip\_contact\_patch.py} (surface within 1 mm, palm
+margin 2 mm, mirror $10^{-9}$), \texttt{test\_palm\_thumb.py} ($\lambda$
+reproduced to $10^{-10}$, third law $10^{-9}$, static hold at 12 attitudes),
+\texttt{test\_palm\_thumb\_real\_spec\_13189.py}. On the driver bundle
+\texttt{r9b/driver\_bundle.npz} (61 of 1814 steps sampled), the peak allocated
+normal force is 342.8~N at step 1410 (closure force 343.9~N, share 0.997,
+friction ratio 0.088 against $\mu=0.9$); the median share is 0.550 and 10 of 61
+sampled frames are unloaded. The patch is carried to the world by the
+\emph{specification} club frame, $\mathrm{site}_b\,\mathrm{placement}_b^{-1}$,
+not by the MJCF body frame (the export re-centres it; a test checks that
+\texttt{placement\_b} lands on the weld site). The allocation is not unique
+($\lambda$ has no information on where the load acts) and the share depends on
+the declared patch.
+
+\subsection{Viewer Toggle}
+\texttt{--palm-thumb-force} draws the normal force on the thumb at the patch as
+a sky-blue arrow, scaled like the other force arrows, with the legend suffix
+``allocated (not measured)''. It is independent of
+\texttt{--force-vectors} and \texttt{--torque-vectors}; unloaded frames draw
+nothing. Stills: \texttt{\~{}/Videos/HRG\_2026-10-17/H1/}.
+
+Reproduce: build the patch with \texttt{thumb\_palm\_patch} from the spec club,
+call \texttt{BundleOverlayProvider.with\_palm\_thumb} on a
+\texttt{MujocoOverlaySource} and read \texttt{frame.metadata["palm\_thumb"]}.
+
 \section{Landmark Regional Trunk Joints for \texttt{full-body-v2} (HRG-D2, \#13173)}
 \label{sec:hrg-d2}
 
@@ -7992,7 +8188,7 @@ with \texttt{derive\_landmark\_v2\_spec(v1, provenance=...)} as the entry
 point. ADR-0055 and the \#12736 conventions are unchanged. The neutral offset
 is excluded from the angles, every regional output carries a
 \texttt{distribution\_source}, and the coupling law is not altered. The MuJoCo
-visual layer is HRG-D3. Dynamics qualification and the muscle graft are
+visual layer (one rigid visual per trunk segment) is HRG-D3, \#13174. Dynamics qualification and the muscle graft are
 HRG-Q1. This section reports software and geometric correctness only, and it
 is not a scientific qualification.
 

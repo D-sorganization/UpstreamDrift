@@ -28,30 +28,30 @@ The **Baseline Package Contract** (`tour-baseline-package/1.0.0`) extends the po
 
 The `BaselineIdentity` immutable dataclass encapsulates all generation parameters:
 
-| Field                     | Type              | Description                                                                    |
+| Field | Type | Description |
 | ------------------------- | ----------------- | ------------------------------------------------------------------------------ | --------------------------------------------------- |
-| `model_id`                | `str`             | Canonical golf model identifier from registry                                  |
-| `topology`                | `ModelTopology`   | Mechanical topology (full-body, planar, upper-body, kinematic)                 |
-| `backend`                 | `BackendType`     | Simulation engine (`mujoco`, `pinocchio`, `drake`, etc.)                       |
-| `provider_pin`            | `str`             | Commit hash or pinned version of provider                                      |
-| `fit_mode`                | `FitMode`         | Trajectory nature (`kinematic_pose`, `prescribed_trajectory`, `torque_driven`) |
-| `capture`                 | `str`             | Canonical capture trial (`driver` or `iron`)                                   |
-| `capture_sha256`          | `str`             | Audited SHA-256 hash of C3D optical capture                                    |
-| `horizon`                 | `str`             | Evaluation horizon (`G1`, `G2`, `G3`)                                          |
-| `frame_convention`        | `str`             | Coordinate convention (default: `z_up_y_forward`)                              |
-| `plane_convention`        | `str`             | Functional plane layout (`transverse_sagittal_frontal`)                        |
-| `measurement_map_version` | `str`             | Semantics version (`tour-measurement-map/1.0.0`)                               |
-| `fixed_geometry_hash`     | `str`             | SHA-256 of immutable link lengths and segment dimensions                       |
-| `fixed_inertia_hash`      | `str`             | SHA-256 of segment mass and rotational inertia tensor                          |
-| `solver_name`             | `str`             | Optimization algorithm (e.g. `ipopt`, `sqp`, `slsqp`)                          |
-| `solver_config`           | `dict`            | Solver parameters (`max_iter`, tolerances, barrier weights)                    |
-| `integrator`              | `str`             | Numerical integrator (`implicit_euler`, `rk4`)                                 |
-| `seed`                    | `int              | None`                                                                          | Deterministic pseudo-random seed                    |
-| `wall_clock_budget_s`     | `float            | None`                                                                          | Computation wall-clock budget in seconds            |
-| `max_evaluations_budget`  | `int              | None`                                                                          | Computation budget in function/Jacobian evaluations |
-| `candidate_ancestry`      | `tuple[str, ...]` | Lineage hashes of predecessor candidates                                       |
-| `runtime_hashes`          | `dict[str, str]`  | Environment dependencies (`python`, `numpy`, compiler)                         |
-| `file_hashes`             | `dict[str, str]`  | SHA-256 of model definition and configuration files                            |
+| `model_id` | `str` | Canonical golf model identifier from registry |
+| `topology` | `ModelTopology` | Mechanical topology (full-body, planar, upper-body, kinematic) |
+| `backend` | `BackendType` | Simulation engine (`mujoco`, `pinocchio`, `drake`, etc.) |
+| `provider_pin` | `str` | Commit hash or pinned version of provider |
+| `fit_mode` | `FitMode` | Trajectory nature (`kinematic_pose`, `prescribed_trajectory`, `torque_driven`) |
+| `capture` | `str` | Canonical capture trial (`driver` or `iron`) |
+| `capture_sha256` | `str` | Audited SHA-256 hash of C3D optical capture |
+| `horizon` | `str` | Evaluation horizon (`G1`, `G2`, `G3`) |
+| `frame_convention` | `str` | Coordinate convention (default: `z_up_y_forward`) |
+| `plane_convention` | `str` | Functional plane layout (`transverse_sagittal_frontal`) |
+| `measurement_map_version` | `str` | Semantics version (`tour-measurement-map/1.0.0`) |
+| `fixed_geometry_hash` | `str` | SHA-256 of immutable link lengths and segment dimensions |
+| `fixed_inertia_hash` | `str` | SHA-256 of segment mass and rotational inertia tensor |
+| `solver_name` | `str` | Optimization algorithm (e.g. `ipopt`, `sqp`, `slsqp`) |
+| `solver_config` | `dict` | Solver parameters (`max_iter`, tolerances, barrier weights) |
+| `integrator` | `str` | Numerical integrator (`implicit_euler`, `rk4`) |
+| `seed` | `int              | None` | Deterministic pseudo-random seed |
+| `wall_clock_budget_s` | `float            | None` | Computation wall-clock budget in seconds |
+| `max_evaluations_budget` | `int              | None` | Computation budget in function/Jacobian evaluations |
+| `candidate_ancestry` | `tuple[str, ...]` | Lineage hashes of predecessor candidates |
+| `runtime_hashes` | `dict[str, str]` | Environment dependencies (`python`, `numpy`, compiler) |
+| `file_hashes` | `dict[str, str]` | SHA-256 of model definition and configuration files |
 
 ---
 

@@ -194,10 +194,16 @@ Defaults: the built-in 25-DOF canonical humanoid, a 2 s passive simulation,
 ```bash
 docker compose --profile explorer-headless run --rm explorer-headless \
   export --model docs/development/full_body_models/evidence/ground_support/anthro_driver/mjx_package.xml \
+  --results tests/fixtures/results_playback/mujoco_fit/dynamics_record.npz \
   --out /out/anthro_driver.mp4 --duration 3 --fps 30
-# replay a results file instead of simulating (npz with "qpos", npy or csv):
+# replay a results file instead of simulating (npz with "qpos" or "q", npy or csv):
 #   --results /out/my_run.npz
 ```
+
+Models with stiff equality constraints or unassisted passive balance (such as
+`anthro_driver/mjx_package.xml`) require `--results` replay of recorded joint
+trajectories rather than unassisted passive simulation, which fails fast with
+a clear error.
 
 The exporter re-opens the written MP4 and fails unless the decoded frame count
 equals the rendered frame count. Other one-shot modes:
@@ -263,11 +269,13 @@ Every image built from `Dockerfile.modular` carries the label `keep=true`: it
 is set once in the `runtime` stage, so the profile images (`upstream-drift:full`,
 `:biomech`, `:research`, `:slim`) and the explorer stages built on top of them
 all inherit it (compose `labels:` repeats it for the explorer services). The
-host prune jobs (`runner-cleanup --disk-guard` from Runner_Dashboard and the
-host-only `docker-cache-prune`) skip images with that label
+host prune jobs (`runner-cleanup --disk-guard` from Runner_Dashboard and
+`scripts/docker/docker-cache-prune.sh`, installed to `/usr/local/sbin/docker-cache-prune`
+by Runner_Dashboard deploy) skip images with that label
 (`--filter label!=keep`). Before UD #13113 only the explorer stage was
 labelled, and ControlTower's disk guard deleted every profile image (and
-`ud-sim`, which is built `FROM upstream-drift:full`). Put the label in the
+`ud-sim:latest`, which shares the `explorer-headless` stage in
+`Dockerfile.modular`). Put the label in the
 Dockerfile, not on the `docker build` command line, so cached and ad-hoc
 rebuilds keep it.
 
@@ -284,6 +292,11 @@ services build them on demand, so a pruned image is rebuilt rather than pulled:
 | `upstream-drift:explorer-gui`      | `explorer-gui`      |
 | `ud-sim:latest`                    | `explorer-images`   |
 | `upstream-drift:full`              | `explorer-images`   |
+
+`ud-sim:latest` is documented in `docker/ud-sim/README.md`: it is **not** a
+separate Dockerfile; the `ud-sim` compose service builds `Dockerfile.modular`
+target `explorer-headless` and tags the result `ud-sim:latest` for ControlTower
+and `ct-run.sh`.
 
 `scripts/docker/explorer.sh` runs `docker image inspect` on the image it is
 about to use and rebuilds it when missing. `scripts/docker/explorer.sh ensure`

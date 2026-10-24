@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from functools import partial
 import json
@@ -31,7 +31,7 @@ from src.shared.python.model_appearance.schema import (
 from src.shared.python.motion_matching.execution.grip_selection import (
     add_grip_arguments,
     apply_visual_picks,
-    check_sidecar_grip,
+    migrate_sidecar_grip,
     overrides_from_args,
     refuse_physical_in_sidecar,
 )
@@ -64,6 +64,14 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
         action=argparse.BooleanOptionalAction,
         default=True,
         help="draw curling joint-torque arcs (default: on)",
+    )
+    p.add_argument(
+        "--palm-thumb-force",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="draw the allocated trail-palm-on-lead-thumb normal force at the "
+        "contact patch (an equivalent of the grip closure force, not a "
+        "measured contact; unloaded frames draw nothing; default: off)",
     )
     shade = p.add_argument_group(
         "segment shading",
@@ -267,7 +275,9 @@ def add_appearance_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
-def load_appearance_document(path: Path) -> dict[str, Any]:
+def load_appearance_document(
+    path: Path, document: Mapping[str, Any] | None = None
+) -> dict[str, Any]:
     """Parse an appearance-v1 document file (``ValueError`` if unreadable/invalid)."""
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -276,7 +286,13 @@ def load_appearance_document(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(f"--appearance {path} must hold a JSON object")
     if "grip" in data:
-        check_sidecar_grip(data["grip"])  # a clear message before the schema's
+        if not isinstance(data["grip"], Mapping):
+            raise ValueError("appearance.json 'grip' must be a JSON object")
+        migrated = migrate_sidecar_grip(data["grip"], document)
+        if migrated:
+            data["grip"] = migrated
+        else:
+            data.pop("grip")
     document_from_dict(data)  # validates (fail closed)
     return data
 
@@ -360,6 +376,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         shading=build_shading(args),
         force_vectors=args.force_vectors,
         torque_vectors=args.torque_vectors,
+        palm_thumb_force=args.palm_thumb_force,
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
@@ -402,6 +419,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 axial=settings.shading_enabled,
                 show_force=settings.force_vectors,
                 show_torque=settings.torque_vectors,
+                palm_thumb=settings.palm_thumb_force,
             ),
         )
     except (ValueError, FileNotFoundError) as exc:

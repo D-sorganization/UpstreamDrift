@@ -275,6 +275,26 @@ class TestReadNewLines:
 # ----------------------------- shutdown ---------------------------------------
 
 
+@pytest.mark.unit
+def test_unsubscribe_last_callback_stops_poll_thread(tmp_path: Path) -> None:
+    """#13011: no idle tail thread after the last subscriber leaves."""
+    t = _make_transport(tmp_path)
+    tok = t.subscribe("scope/topic", lambda _payload: None)
+    thread = t._poll_thread
+    assert thread is not None
+    assert thread.is_alive()
+    t.unsubscribe(tok)
+    assert t._channels == {}
+    assert t._poll_thread is None
+    assert not thread.is_alive()
+
+    tok2 = t.subscribe("scope/other", lambda _payload: None)
+    assert t._poll_thread is not None
+    assert t._poll_thread.is_alive()
+    t.unsubscribe(tok2)
+    assert t._poll_thread is None
+
+
 def test_shutdown_stops_poll_thread(tmp_path: Path) -> None:
     t = _make_transport(tmp_path)
     tok = t.subscribe("scope/topic", lambda p: None)

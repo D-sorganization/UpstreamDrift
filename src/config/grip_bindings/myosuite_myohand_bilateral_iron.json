@@ -1,0 +1,50 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "myosuite_myohand_bilateral_iron",
+  "model_hash": "sha256:dae0ec8e8e08872144d14cce5516df1ed7f6001e22648cd01e714bac52649677",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "address_myohand_bilateral_iron",
+    "description": "MyoHub myoHand articulated bilateral grip fixture with 6-DOF free 7-iron club (lh_* mirrored left hand and rh_* right hand, HRG-GS-M8 #13330)."
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "shared/models/myosuite/golf/hand/myohand_bilateral_iron.xml",
+    "myo_sim_pin": "33f3ded946f55adbdcf963c99999587aadaf975f",
+    "date": "2026-10-19",
+    "method": "phalanx_segment_mapped_separated_v2",
+    "qualification_role": "Articulated bilateral myoHand contact fixture; muscle recruitment is out of scope."
+  },
+  "attachment_mode": "separated_v2",
+  "club_body": "golf_club",
+  "lead_hand_body": "lh_lunate",
+  "trail_hand_body": "rh_lunate",
+  "segment_map": {
+    "lead_palm_proximal": "lh_fourthmc",
+    "lead_palm_distal": "lh_secondmc",
+    "lead_heel_pad": "lh_fifthmc",
+    "lead_finger_proximal": "lh_proxph4",
+    "lead_finger_distal": "lh_midph4",
+    "lead_thumb": "lh_distal_thumb",
+    "lead_middle": "lh_distph3",
+    "lead_index": "lh_distph2",
+    "trail_palm_proximal": "rh_fifthmc",
+    "trail_palm_distal": "rh_thirdmc",
+    "trail_palm_pocket": "rh_firstmc",
+    "trail_finger_proximal": "rh_proxph3",
+    "trail_finger_distal": "rh_midph3",
+    "trail_little_finger": "rh_distph5",
+    "trail_index_trigger": "rh_distph2",
+    "lead_butt_fingers": "lh_proxph5",
+    "trail_thumb_pad": "rh_distal_thumb",
+    "trail_hypothenar": "rh_fourthmc"
+  },
+  "unavailable_sites": {}
+}

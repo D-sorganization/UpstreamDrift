@@ -70,7 +70,12 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 from numpy.typing import NDArray
 
-from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
+from ._simulate_support import _resolve_body_name
+from .humanoid_urdf import (
+    CANONICAL_URDF,
+    load_humanoid_into_plant,
+    resolve_plant_n_actuators,
+)
 from .simulate import COEFFS_PER_JOINT, SimOptions, evaluate_torque_polynomial
 
 if TYPE_CHECKING:  # pragma: no cover - import-time only
@@ -440,6 +445,19 @@ def build_polynomial_torque_system_autodiff(
 # ---------------------------------------------------------------------------
 
 
+def _resolve_grip_body(plant: Any, grip_body_name: str) -> tuple[str, Any]:
+    """Resolve the grip body exactly as ``simulate_with_coefficients`` does.
+
+    Uses the shared ``_resolve_body_name`` alias chain so the synthetic
+    target and the fit sample the same body (#13450).
+    """
+    resolved = _resolve_body_name(plant, grip_body_name)
+    if resolved is None:
+        msg = f"plant has no body named {grip_body_name!r}; cannot compute grip cost"
+        raise ValueError(msg)
+    return resolved, plant.GetBodyByName(resolved)
+
+
 def _build_autodiff_plant(
     urdf_path: Path | str | None,
     time_step_s: float,
@@ -463,9 +481,7 @@ def _build_autodiff_plant(
 
     n_q = int(plant_float.num_positions())
     n_v = int(plant_float.num_velocities())
-    n_actuators = int(plant_float.num_actuators())
-    if n_actuators == 0:
-        n_actuators = max(n_v - 6, 0)
+    n_actuators = resolve_plant_n_actuators(plant_float)
 
     plant_ad = plant_float.ToAutoDiffXd()
     return plant_ad, plant_float, n_q, n_v, n_actuators
@@ -559,14 +575,10 @@ def _autodiff_simulate_and_cost(  # noqa: C901
         # Default: explicit RK3.
         simulator = Simulator_[AutoDiffXd](plant_ad, context)
 
-    simulator.set_publish_every_time_step(False)
     simulator.Initialize()
 
     # Lazily compute body-frame for grip pose extraction.
-    if not plant_ad.HasBodyNamed(grip_body_name):
-        msg = f"plant has no body named {grip_body_name!r}; cannot compute grip cost"
-        raise ValueError(msg)
-    grip_body = plant_ad.GetBodyByName(grip_body_name)
+    _, grip_body = _resolve_grip_body(plant_ad, grip_body_name)
 
     # Diff-and-square accumulator (AutoDiffXd scalar).
     pos_term = AutoDiffXd(0.0, np.zeros(theta.shape[0]))
@@ -746,7 +758,15 @@ def fit_swing_drake_autodiff(  # noqa: C901
         options.sim_options.time_step_s,
     )
     if options.n_joints_hint is not None:
-        n_actuators = int(options.n_joints_hint)
+        hint = int(options.n_joints_hint)
+        if hint != n_actuators:
+            msg = (
+                f"n_joints_hint ({hint}) must match the loaded plant's actuator "
+                f"count ({n_actuators}); resize theta to "
+                f"{n_actuators * COEFFS_PER_JOINT} coefficients instead of "
+                "overriding the plant dimension"
+            )
+            raise ValueError(msg)
     n = n_actuators * COEFFS_PER_JOINT
 
     if initial_theta is None:
@@ -959,11 +979,11 @@ def _final_rmse_float_plant(
 
     context = plant_float.CreateDefaultContext()
     actuation_port = plant_float.get_actuation_input_port()
-    if not plant_float.HasBodyNamed(grip_body_name):
+    try:
+        _, grip_body = _resolve_grip_body(plant_float, grip_body_name)
+    except ValueError:
         return float("nan")
-    grip_body = plant_float.GetBodyByName(grip_body_name)
     sim = Simulator(plant_float, context)
-    sim.set_publish_every_time_step(False)
     sim.Initialize()
     sse = 0.0
     for idx, t_target in enumerate(target_time):

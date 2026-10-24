@@ -28,14 +28,12 @@ interpreted as multipliers relative to nominal values for most parameters.
 
 **Dynamics parameters:**
 
-| Field                  | Default         | Description                    |
-| ---------------------- | --------------- | ------------------------------ |
-| `mass_range`           | `(0.8, 1.2)`    | Link mass scale factor.        |
-| `friction_range`       | `(0.5, 1.5)`    | Friction coefficient scale.    |
-| `damping_range`        | `(0.8, 1.2)`    | Joint damping scale.           |
-| `motor_strength_range` | `(0.9, 1.1)`    | Motor strength scale.          |
-| `inertia_range`        | `(0.9, 1.1)`    | Link inertia scale.            |
-| `center_of_mass_range` | `(-0.01, 0.01)` | CoM position offset in meters. |
+| Field                  | Default      | Description                             |
+| ---------------------- | ------------ | --------------------------------------- |
+| `mass_range`           | `(0.8, 1.2)` | Link mass scale factor.                 |
+| `friction_range`       | `(0.5, 1.5)` | Friction coefficient scale.             |
+| `damping_range`        | `(0.8, 1.2)` | Joint damping scale.                    |
+| `motor_strength_range` | `(0.9, 1.1)` | Motor strength and actuator gain scale. |
 
 **Delays and noise:**
 
@@ -48,17 +46,9 @@ interpreted as multipliers relative to nominal values for most parameters.
 
 **Environment parameters:**
 
-| Field                  | Default       | Description                 |
-| ---------------------- | ------------- | --------------------------- |
-| `gravity_range`        | `(9.5, 10.1)` | Gravity magnitude in m/s^2. |
-| `floor_friction_range` | `(0.5, 1.5)`  | Floor friction scale.       |
-
-**Actuator parameters:**
-
-| Field                 | Default         | Description                       |
-| --------------------- | --------------- | --------------------------------- |
-| `joint_offset_range`  | `(-0.02, 0.02)` | Joint position offset in radians. |
-| `actuator_gain_range` | `(0.95, 1.05)`  | Actuator gain scale.              |
+| Field           | Default       | Description                 |
+| --------------- | ------------- | --------------------------- |
+| `gravity_range` | `(9.5, 10.1)` | Gravity magnitude in m/s^2. |
 
 **Enable flags.** Each category of randomization can be enabled or disabled
 independently:
@@ -254,12 +244,12 @@ calibrating the simulation to match the real robot as closely as possible.
 The `IdentificationResult` dataclass holds the output of the identification
 process:
 
-| Field               | Type             | Description                     |
+| Field | Type | Description |
 | ------------------- | ---------------- | ------------------------------- | ---------------------------- |
-| `identified_params` | `dict[str, float | NDArray]`                       | Identified parameter values. |
-| `residual_error`    | `float`          | Final optimization residual.    |
-| `iterations`        | `int`            | Number of iterations performed. |
-| `converged`         | `bool`           | Whether optimization converged. |
+| `identified_params` | `dict[str, float | NDArray]` | Identified parameter values. |
+| `residual_error` | `float` | Final optimization residual. |
+| `iterations` | `int` | Number of iterations performed. |
+| `converged` | `bool` | Whether optimization converged. |
 
 ### 19.2.2 The SystemIdentifier Class
 
@@ -386,18 +376,18 @@ $$
 The `compute_reality_gap` method provides a comprehensive set of metrics
 quantifying the simulation-to-reality discrepancy:
 
-| Metric                   | Formula                                                |
+| Metric | Formula |
 | ------------------------ | ------------------------------------------------------ | ---------------------------------------------- | --- |
-| `total_mse`              | $\frac{1}{T \cdot 2n_q} \sum \|x_{sim} - x_{real}\|^2$ |
-| `position_mse`           | MSE over position components only.                     |
-| `velocity_mse`           | MSE over velocity components only.                     |
-| `max_position_error`     | $\max\_{t,j}                                           | q*{sim}^{(t,j)} - q*{real}^{(t,j)}             | $   |
-| `max_velocity_error`     | $\max\_{t,j}                                           | \dot{q}_{sim}^{(t,j)} - \dot{q}_{real}^{(t,j)} | $   |
-| `mean_position_error`    | Mean absolute position error.                          |
-| `mean_velocity_error`    | Mean absolute velocity error.                          |
-| `trajectory_length`      | Number of timesteps compared.                          |
-| `joint_{j}_position_mse` | Per-joint position MSE.                                |
-| `joint_{j}_velocity_mse` | Per-joint velocity MSE.                                |
+| `total_mse` | $\frac{1}{T \cdot 2n_q} \sum \|x_{sim} - x_{real}\|^2$ |
+| `position_mse` | MSE over position components only. |
+| `velocity_mse` | MSE over velocity components only. |
+| `max_position_error` | $\max\_{t,j} | q*{sim}^{(t,j)} - q*{real}^{(t,j)} | $ |
+| `max_velocity_error` | $\max\_{t,j} | \dot{q}_{sim}^{(t,j)} - \dot{q}_{real}^{(t,j)} | $ |
+| `mean_position_error` | Mean absolute position error. |
+| `mean_velocity_error` | Mean absolute velocity error. |
+| `trajectory_length` | Number of timesteps compared. |
+| `joint_{j}_position_mse` | Per-joint position MSE. |
+| `joint_{j}_velocity_mse` | Per-joint velocity MSE. |
 
 ### 19.2.7 Validation
 

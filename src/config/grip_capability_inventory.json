@@ -1,0 +1,703 @@
+{
+  "schema": "grip-capability-inventory/v1",
+  "description": "Cross-model grip capability inventory (HRG-GS-M0, issue #13322). Records grip attachment mode, finger articulation, and feasibility of visual styles, allocated hand-hand reporting, physical pad-grip contact, and physical hand-hand contact per model asset.",
+  "models": [
+    {
+      "id": "mujoco/driver",
+      "engine": "mujoco",
+      "asset_path": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+      "attachment_mode": "weld",
+      "fingers": "rigid_proxy",
+      "launcher_tile_ids": ["mujoco_unified"],
+      "description": "MuJoCo flagship full-body anthropometric model with driver club and Hunt-Crossley contact spheres.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Visual grip styles not yet wired into native MuJoCo golfer export; tracked in #13327",
+          "tracking_issue": "#13327"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Allocated hand-hand contact force reporting not yet implemented for MuJoCo; tracked in #13327",
+          "tracking_issue": "#13327"
+        },
+        "physical_pad_grip": {
+          "available": true,
+          "reason": "Tested via shared spec export path in grip_contact_sim",
+          "tracking_issue": "#13327",
+          "evidence_test": "tests/unit/grip_contact/test_engine_grip_contact.py"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Physical hand-hand contact pairs not yet defined or released; tracked in #13327",
+          "tracking_issue": "#13327"
+        }
+      }
+    },
+    {
+      "id": "mujoco/iron",
+      "engine": "mujoco",
+      "asset_path": "docs/development/full_body_models/full_body_spec_anthro_iron7.json",
+      "attachment_mode": "weld",
+      "fingers": "rigid_proxy",
+      "launcher_tile_ids": ["mujoco_unified"],
+      "description": "MuJoCo flagship full-body anthropometric model with 7-iron club.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Visual grip styles not yet wired into native MuJoCo golfer export; tracked in #13327",
+          "tracking_issue": "#13327"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Allocated hand-hand contact force reporting not yet implemented for MuJoCo; tracked in #13327",
+          "tracking_issue": "#13327"
+        },
+        "physical_pad_grip": {
+          "available": true,
+          "reason": "Tested via shared spec export path in grip_contact_sim",
+          "tracking_issue": "#13327",
+          "evidence_test": "tests/unit/grip_contact/test_engine_grip_contact.py"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Physical hand-hand contact pairs not yet defined or released; tracked in #13327",
+          "tracking_issue": "#13327"
+        }
+      }
+    },
+    {
+      "id": "mujoco/legacy-golfer",
+      "engine": "mujoco",
+      "asset_path": "src/engines/physics_engines/mujoco/models/generated/golfer.xml",
+      "attachment_mode": "weld",
+      "fingers": "rigid_proxy",
+      "launcher_tile_ids": ["mujoco_unified", "mujoco_dashboard"],
+      "description": "MuJoCo legacy generated golfer with club_shaft child of hand_left and single-hinge finger boxes.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Legacy MJCF has fixed rigid box finger proxies; visual style switching not implemented; tracked in #13327",
+          "tracking_issue": "#13327"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Legacy MJCF has club welded as child of hand_left without trail hand closure or allocation; tracked in #13327",
+          "tracking_issue": "#13327"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Club is a kinematic child body of hand_left; requires splitting club to freejoint; tracked in #13327",
+          "tracking_issue": "#13327"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "No hand-hand contact pairs defined in legacy MJCF; tracked in #13327",
+          "tracking_issue": "#13327"
+        }
+      }
+    },
+    {
+      "id": "mujoco/shadow-allegro-lab",
+      "engine": "mujoco",
+      "asset_path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/hand_assets/shadow_hand/right_hand.xml",
+      "attachment_mode": "mocap-weld",
+      "fingers": "articulated",
+      "launcher_tile_ids": ["mujoco_unified", "mujoco_dashboard"],
+      "description": "MuJoCo articulated hand research fixture with Shadow Hand and Wonik Allegro phalanges on free handle.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Articulated robotic hands in grip lab lack golf-specific overlap/interlock posture definitions; tracked in #13328",
+          "tracking_issue": "#13328"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Grip lab hand models are not wired into bimanual grasp reporting; tracked in #13328",
+          "tracking_issue": "#13328"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Phalanx site bindings and shared contact law integration pending in grip lab; tracked in #13328",
+          "tracking_issue": "#13328"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Inter-hand contact pairs between Shadow/Allegro phalanges pending; tracked in #13328",
+          "tracking_issue": "#13328"
+        }
+      }
+    },
+    {
+      "id": "drake/driver",
+      "engine": "drake",
+      "asset_path": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+      "attachment_mode": "weld",
+      "fingers": "rigid_proxy",
+      "launcher_tile_ids": ["drake_golf"],
+      "description": "Drake flagship full-body anthropometric model with driver club and MultibodyPlant contact.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Visual grip styles not yet wired into native Drake golfer export; tracked in #13332",
+          "tracking_issue": "#13332"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Allocated hand-hand contact force reporting not yet implemented for Drake; tracked in #13332",
+          "tracking_issue": "#13332"
+        },
+        "physical_pad_grip": {
+          "available": true,
+          "reason": "Tested via shared spec export path in grip_contact_sim",
+          "tracking_issue": "#13332",
+          "evidence_test": "tests/unit/grip_contact/test_engine_grip_contact.py"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Physical hand-hand contact pairs not yet defined or released; tracked in #13332",
+          "tracking_issue": "#13332"
+        }
+      }
+    },
+    {
+      "id": "drake/iron",
+      "engine": "drake",
+      "asset_path": "docs/development/full_body_models/full_body_spec_anthro_iron7.json",
+      "attachment_mode": "weld",
+      "fingers": "rigid_proxy",
+      "launcher_tile_ids": ["drake_golf"],
+      "description": "Drake flagship full-body anthropometric model with 7-iron club.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Visual grip styles not yet wired into native Drake golfer export; tracked in #13332",
+          "tracking_issue": "#13332"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Allocated hand-hand contact force reporting not yet implemented for Drake; tracked in #13332",
+          "tracking_issue": "#13332"
+        },
+        "physical_pad_grip": {
+          "available": true,
+          "reason": "Tested via shared spec export path in grip_contact_sim",
+          "tracking_issue": "#13332",
+          "evidence_test": "tests/unit/grip_contact/test_engine_grip_contact.py"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Physical hand-hand contact pairs not yet defined or released; tracked in #13332",
+          "tracking_issue": "#13332"
+        }
+      }
+    },
+    {
+      "id": "drake/legacy-golfer",
+      "engine": "drake",
+      "asset_path": "src/engines/physics_engines/drake/models/generated/golfer.urdf",
+      "attachment_mode": "weld",
+      "fingers": "none",
+      "launcher_tile_ids": ["drake_golf", "drake_dashboard"],
+      "description": "Drake legacy golfer URDF with club_shaft fixed to right_hand link.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Legacy Drake URDF has rigid hand boxes without fingers; visual style switching not implemented; tracked in #13332",
+          "tracking_issue": "#13332"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Club is rigidly attached to right_hand only in URDF; no left hand kinematic closure or allocation; tracked in #13332",
+          "tracking_issue": "#13332"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Requires floating-club URDF variant and Drake contact hydroelastic/compliant pads; tracked in #13332",
+          "tracking_issue": "#13332"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "No hand-hand contact geometries defined; tracked in #13332",
+          "tracking_issue": "#13332"
+        }
+      }
+    },
+    {
+      "id": "pinocchio/driver",
+      "engine": "pinocchio",
+      "asset_path": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+      "attachment_mode": "weld",
+      "fingers": "rigid_proxy",
+      "launcher_tile_ids": ["pinocchio_golf"],
+      "description": "Pinocchio flagship full-body anthropometric model with driver club and analytical derivatives.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Visual grip styles not yet wired into native Pinocchio golfer export; tracked in #13331",
+          "tracking_issue": "#13331"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Allocated hand-hand contact force reporting not yet implemented for Pinocchio; tracked in #13331",
+          "tracking_issue": "#13331"
+        },
+        "physical_pad_grip": {
+          "available": true,
+          "reason": "Tested via shared spec export path in grip_contact_sim",
+          "tracking_issue": "#13331",
+          "evidence_test": "tests/unit/grip_contact/test_engine_grip_contact.py"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Physical hand-hand contact pairs not yet defined or released; tracked in #13331",
+          "tracking_issue": "#13331"
+        }
+      }
+    },
+    {
+      "id": "pinocchio/iron",
+      "engine": "pinocchio",
+      "asset_path": "docs/development/full_body_models/full_body_spec_anthro_iron7.json",
+      "attachment_mode": "weld",
+      "fingers": "rigid_proxy",
+      "launcher_tile_ids": ["pinocchio_golf"],
+      "description": "Pinocchio flagship full-body anthropometric model with 7-iron club.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Visual grip styles not yet wired into native Pinocchio golfer export; tracked in #13331",
+          "tracking_issue": "#13331"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Allocated hand-hand contact force reporting not yet implemented for Pinocchio; tracked in #13331",
+          "tracking_issue": "#13331"
+        },
+        "physical_pad_grip": {
+          "available": true,
+          "reason": "Tested via shared spec export path in grip_contact_sim",
+          "tracking_issue": "#13331",
+          "evidence_test": "tests/unit/grip_contact/test_engine_grip_contact.py"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Physical hand-hand contact pairs not yet defined or released; tracked in #13331",
+          "tracking_issue": "#13331"
+        }
+      }
+    },
+    {
+      "id": "pinocchio/legacy-golfer",
+      "engine": "pinocchio",
+      "asset_path": "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf",
+      "attachment_mode": "weld",
+      "fingers": "rigid_proxy",
+      "launcher_tile_ids": ["pinocchio_golf", "pinocchio_dashboard"],
+      "description": "Pinocchio legacy golfer URDF with club_shaft fixed to mid_hands (attached to thorax3).",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Legacy URDF has club welded to virtual mid_hands; visual style switching not supported; tracked in #13331",
+          "tracking_issue": "#13331"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Mid-hands tree attachment bypasses bilateral hand contact loops; tracked in #13331",
+          "tracking_issue": "#13331"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Requires floating club link and separate bilateral hand contacts; tracked in #13331",
+          "tracking_issue": "#13331"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "No hand-hand contact pairs defined; tracked in #13331",
+          "tracking_issue": "#13331"
+        }
+      }
+    },
+    {
+      "id": "opensim/driver",
+      "engine": "opensim",
+      "asset_path": "src/engines/physics_engines/opensim/models/generated/full_body_anthro_driver.osim",
+      "attachment_mode": "weld",
+      "fingers": "rigid_proxy",
+      "launcher_tile_ids": ["opensim_golf"],
+      "description": "OpenSim flagship full-body anthropometric model with driver club and ElasticFoundationForce.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Visual grip styles not yet wired into generated OpenSim golfer; tracked in #13326",
+          "tracking_issue": "#13326"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Allocated hand-hand contact reporting not implemented for OpenSim driver; tracked in #13326",
+          "tracking_issue": "#13326"
+        },
+        "physical_pad_grip": {
+          "available": true,
+          "reason": "Tested via shared spec export path in grip_contact_osim_sim",
+          "tracking_issue": "#13326",
+          "evidence_test": "tests/unit/grip_contact/test_opensim_contact_grip.py"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Physical hand-hand contact pairs not yet defined in OpenSim driver; tracked in #13326",
+          "tracking_issue": "#13326"
+        }
+      }
+    },
+    {
+      "id": "opensim/iron",
+      "engine": "opensim",
+      "asset_path": "src/engines/physics_engines/opensim/models/generated/full_body_anthro_iron7.osim",
+      "attachment_mode": "weld",
+      "fingers": "rigid_proxy",
+      "launcher_tile_ids": ["opensim_golf"],
+      "description": "OpenSim flagship full-body anthropometric model with 7-iron club.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Visual grip styles not yet wired into generated OpenSim iron; tracked in #13326",
+          "tracking_issue": "#13326"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Allocated hand-hand contact reporting not implemented for OpenSim iron; tracked in #13326",
+          "tracking_issue": "#13326"
+        },
+        "physical_pad_grip": {
+          "available": true,
+          "reason": "Tested via shared spec export path in grip_contact_osim_sim",
+          "tracking_issue": "#13326",
+          "evidence_test": "tests/unit/grip_contact/test_opensim_contact_grip.py"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Physical hand-hand contact pairs not yet defined in OpenSim iron; tracked in #13326",
+          "tracking_issue": "#13326"
+        }
+      }
+    },
+    {
+      "id": "opensim/native-golf-humanoid",
+      "engine": "opensim",
+      "asset_path": "src/engines/physics_engines/opensim/models/golf_humanoid.osim",
+      "attachment_mode": "free+bushing",
+      "fingers": "none",
+      "launcher_tile_ids": ["opensim_golf"],
+      "description": "OpenSim Rajagopal musculoskeletal golf humanoid with msk_club bushing attachment.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Rajagopal golf_humanoid.osim uses static phalanx meshes; visual style adaptation pending in msk_club; tracked in #13326",
+          "tracking_issue": "#13326"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Bushing mode reports net hand wrenches; individual pair allocation not implemented; tracked in #13326",
+          "tracking_issue": "#13326"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Physical pad-grip contact not wired into golf_humanoid FreeJoint mode; tracked in #13326",
+          "tracking_issue": "#13326"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "No hand-hand contact pairs defined between rigid hands; tracked in #13326",
+          "tracking_issue": "#13326"
+        }
+      }
+    },
+    {
+      "id": "myosuite/driver",
+      "engine": "myosuite",
+      "asset_path": "shared/models/myosuite/golf/body/golfer_myobody_driver.xml",
+      "attachment_mode": "site-weld",
+      "fingers": "none",
+      "launcher_tile_ids": ["myosim_suite"],
+      "description": "MyoSuite MS-51 upper body musculoskeletal golfer with driver club and dual site-welds.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "MyoSuite golfer uses rigid ellipsoid hands without finger articulation; visual style switching not implemented; tracked in #13329",
+          "tracking_issue": "#13329"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Dual site-weld constraints lock both hands to club; allocated contact reporting pending in #13329",
+          "tracking_issue": "#13329"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Club is attached via equality welds; physical pad contact requires releasing welds to contact law; tracked in #13329",
+          "tracking_issue": "#13329"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "No hand-hand contact pairs defined on rigid hand bodies; tracked in #13329",
+          "tracking_issue": "#13329"
+        }
+      }
+    },
+    {
+      "id": "myosuite/iron",
+      "engine": "myosuite",
+      "asset_path": "shared/models/myosuite/golf/body/golfer_myobody_iron.xml",
+      "attachment_mode": "site-weld",
+      "fingers": "none",
+      "launcher_tile_ids": ["myosim_suite"],
+      "description": "MyoSuite MS-51 upper body musculoskeletal golfer with 7-iron club.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "MyoSuite golfer uses rigid ellipsoid hands without finger articulation; visual style switching not implemented; tracked in #13329",
+          "tracking_issue": "#13329"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Dual site-weld constraints lock both hands to club; allocated contact reporting pending in #13329",
+          "tracking_issue": "#13329"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Club is attached via equality welds; physical pad contact requires releasing welds to contact law; tracked in #13329",
+          "tracking_issue": "#13329"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "No hand-hand contact pairs defined on rigid hand bodies; tracked in #13329",
+          "tracking_issue": "#13329"
+        }
+      }
+    },
+    {
+      "id": "myosuite/myohand",
+      "engine": "myosuite",
+      "asset_path": "src/engines/physics_engines/mujoco/myo_sim/arm/myoarm_simple.xml",
+      "attachment_mode": "none",
+      "fingers": "articulated",
+      "launcher_tile_ids": ["myosim_suite"],
+      "description": "MyoHub myoHand / myoArm articulated musculoskeletal hand/arm asset (tracked for golf integration).",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "MyoHub myoHand is not checked out locally; placeholder myoarm_simple.xml lacks hand/finger bodies; tracked in #13330",
+          "tracking_issue": "#13330"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "No bilateral golf scene exists for myoHand in repository; tracked in #13330",
+          "tracking_issue": "#13330"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Phalanx contact geoms not yet bound to club shaft; tracked in #13330",
+          "tracking_issue": "#13330"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "No bilateral scene or phalanx pair contact evaluator exists; tracked in #13330",
+          "tracking_issue": "#13330"
+        }
+      }
+    },
+    {
+      "id": "simscape/driver",
+      "engine": "simscape",
+      "asset_path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/mdl_reference/GolfSwing3D_Kinetic.mdl",
+      "attachment_mode": "bushing",
+      "fingers": "none",
+      "launcher_tile_ids": ["matlab_suite"],
+      "description": "Simscape Multibody 3D Golf Model (GolfSwing3D_Kinetic) with driver club.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Simscape human model uses rigid ellipsoid hands without finger articulation; visual style export pending in #13333",
+          "tracking_issue": "#13333"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Allocated hand-hand contact force reporting from Simscape closed-loop snapshot pending in #13333",
+          "tracking_issue": "#13333"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Simscape Spatial Contact Force blocks or released-joint contact simulation pending in R2025b; tracked in #13334",
+          "tracking_issue": "#13334"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Simscape hand-hand physical contact requires dual-tree kinematic release; tracked in #13334",
+          "tracking_issue": "#13334"
+        }
+      }
+    },
+    {
+      "id": "simscape/iron",
+      "engine": "simscape",
+      "asset_path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/mdl_reference/GolfSwing3D_Kinetic.mdl",
+      "attachment_mode": "bushing",
+      "fingers": "none",
+      "launcher_tile_ids": ["matlab_suite"],
+      "description": "Simscape Multibody 3D Golf Model (GolfSwing3D_Kinetic) with 7-iron club.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Simscape human model uses rigid ellipsoid hands without finger articulation; visual style export pending in #13333",
+          "tracking_issue": "#13333"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Allocated hand-hand contact force reporting from Simscape closed-loop snapshot pending in #13333",
+          "tracking_issue": "#13333"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Simscape Spatial Contact Force blocks or released-joint contact simulation pending in R2025b; tracked in #13334",
+          "tracking_issue": "#13334"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Simscape hand-hand physical contact requires dual-tree kinematic release; tracked in #13334",
+          "tracking_issue": "#13334"
+        }
+      }
+    },
+    {
+      "id": "jaxsim/backend",
+      "engine": "jaxsim",
+      "asset_path": "src/engines/physics_engines/jaxsim/jaxsim_backend.py",
+      "attachment_mode": "bushing",
+      "fingers": "none",
+      "launcher_tile_ids": ["jaxsim_dashboard"],
+      "description": "JAXsim differentiable dynamics adapter with penalty weld spring-damper contact.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "JAXsim is an experimental backend loader without native visual grip style generator; tracked in #13336",
+          "tracking_issue": "#13336"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Differentiable bimanual wrench projection not implemented in JAXsim; tracked in #13336",
+          "tracking_issue": "#13336"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Differentiable G2 sphere-capsule contact kernel in JAX pending in #13336",
+          "tracking_issue": "#13336"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Differentiable capsule-capsule hand contact law pending in #13336",
+          "tracking_issue": "#13336"
+        }
+      }
+    },
+    {
+      "id": "humanoid_character_builder",
+      "engine": "humanoid_character_builder",
+      "asset_path": "src/shared/python/humanoid_character_builder/spec_export.py",
+      "attachment_mode": "weld",
+      "fingers": "none",
+      "launcher_tile_ids": ["character_builder"],
+      "description": "Humanoid character builder parameter compilation and multi-engine model exporter.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Character builder generates rigid anthropometric specs; visual grip style export not yet supported; tracked in #13335",
+          "tracking_issue": "#13335"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Grip allocation metadata export not implemented in character builder; tracked in #13335",
+          "tracking_issue": "#13335"
+        },
+        "physical_pad_grip": {
+          "available": true,
+          "reason": "Tested via humanoid_character_builder spec_export and URDF/MJCF neutral preload admission",
+          "tracking_issue": "#13335",
+          "evidence_test": "tests/unit/humanoid_character_builder/test_character_builder_grip_binding.py"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Hand-hand contact pairs not generated by character builder; tracked in #13335",
+          "tracking_issue": "#13335"
+        }
+      }
+    },
+    {
+      "id": "mujoco_humanoid",
+      "engine": "mujoco",
+      "asset_path": "src/shared/python/model_generation/library/bundled/mujoco_humanoid/humanoid.xml",
+      "attachment_mode": "weld",
+      "fingers": "none",
+      "launcher_tile_ids": ["model_explorer"],
+      "description": "Bundled MuJoCo humanoid model from the model-generation library with rigid spherical hands and no golf club.",
+      "features": {
+        "visual_style": {
+          "available": false,
+          "reason": "Bundled MuJoCo humanoid has spherical hands and no golf club; visual grip style not applicable without club composition; tracked in #13335",
+          "tracking_issue": "#13335"
+        },
+        "allocated_hand_hand": {
+          "available": false,
+          "reason": "Bundled MuJoCo humanoid is clubless in its base XML; allocated grasp reporting requires club composition via spec_export; tracked in #13335",
+          "tracking_issue": "#13335"
+        },
+        "physical_pad_grip": {
+          "available": false,
+          "reason": "Bundled MuJoCo humanoid has no composed club or pad contact geoms in base XML; tracked in #13335",
+          "tracking_issue": "#13335"
+        },
+        "physical_hand_hand": {
+          "available": false,
+          "reason": "Bundled MuJoCo humanoid has no hand-hand contact pairs defined; tracked in #13335",
+          "tracking_issue": "#13335"
+        }
+      }
+    }
+  ],
+  "excluded": [
+    {
+      "id": "putting_green",
+      "name": "Putting Green",
+      "reason": "Putting simulation model consisting of golf ball, putter head, and green surface; no golfer anatomy or hands."
+    },
+    {
+      "id": "putting_green_gui",
+      "name": "Putting Green GUI",
+      "reason": "Legacy launcher tile for putting simulator; no golfer anatomy or hands."
+    },
+    {
+      "id": "pendulum_simulator",
+      "name": "Pendulum Simulator",
+      "reason": "Double/triple rigid-link pendulum swing simulator; no golfer anatomy or hands."
+    },
+    {
+      "id": "swing_objective_lab",
+      "name": "Swing Objective Lab",
+      "reason": "Double pendulum trajectory optimization workbench; no golfer anatomy or hands."
+    },
+    {
+      "id": "simple_humanoid",
+      "name": "Simple Humanoid (12-DOF)",
+      "reason": "Bundled simplified 12-DOF URDF ends at forearm links (left_lower_arm, right_lower_arm) with no wrist or hand links."
+    },
+    {
+      "id": "simple_arm",
+      "name": "2-Link Arm",
+      "reason": "Bundled educational 2-link planar arm URDF has no hand, wrist, or golf club links."
+    },
+    {
+      "id": "simple_quadruped",
+      "name": "Simple Quadruped",
+      "reason": "Bundled quadruped robot URDF has four legs and no human hands or golf club."
+    }
+  ]
+}

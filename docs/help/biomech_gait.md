@@ -21,11 +21,11 @@ and gives it the capabilities `biomechanics`, `exercise_preset` and `gait`.
 
 ## Inputs
 
-| Input | How it is supplied | Unit or values |
-| --- | --- | --- |
-| Exercise name | fixed to `gait` by the tile's `exercise` field | identifier string |
-| Engine | `BIOMECH_ENGINE`, or the dashboard's toolbar combo box | `MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `JaxSim_Models`, `OpenSim_Models` |
-| Gait model definition | the selected engine's sibling model checkout, under `exercises/gait` | engine-native model format |
+| Input                 | How it is supplied                                                   | Unit or values                                                                         |
+| --------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Exercise name         | fixed to `gait` by the tile's `exercise` field                       | identifier string                                                                      |
+| Engine                | `BIOMECH_ENGINE`, or the dashboard's toolbar combo box               | `MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `JaxSim_Models`, `OpenSim_Models` |
+| Gait model definition | the selected engine's sibling model checkout, under `exercises/gait` | engine-native model format                                                             |
 
 `BiomechExerciseHandler` in `src/launchers/launcher_model_handlers.py` reads
 `model.exercise` (defaulting to `gait`) and launches the dashboard script.
@@ -35,9 +35,9 @@ under each registered model source.
 
 ## Outputs
 
-| Output | Description |
-| --- | --- |
-| Window title | `Biomechanics Exercise: Gait` |
+| Output             | Description                                                                |
+| ------------------ | -------------------------------------------------------------------------- |
+| Window title       | `Biomechanics Exercise: Gait`                                              |
 | Embedded dashboard | the selected engine's dashboard, constructed with `exercise_filter="gait"` |
 
 Everything numeric that a gait analysis would produce is computed by the
@@ -99,6 +99,7 @@ The template's Outputs section cannot be completed from this repository.
   found.
 
 ## See Also
+
 - [Exercise Dashboard](biomech_exercise.md)
 - [Sit-to-Stand Model](biomech_sit_to_stand.md)
 - [ZMP and gait scope audit](../architecture/zmp_gait_scope.md)

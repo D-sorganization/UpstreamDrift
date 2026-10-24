@@ -39,7 +39,20 @@ from src.shared.python.force_overlay.contracts import (
 )
 from src.shared.python.force_overlay.conversions import joint_torque_wrench
 from src.shared.python.force_overlay.grip_frame import grip_wrenches_and_metadata
+from src.shared.python.grip_contact.contact_topology import (
+    ContactTopology,
+    coerce_contact_topology,
+    contact_topology,
+)
+from src.shared.python.grip_contact.palm_thumb import (
+    METHOD as PALM_THUMB_METHOD,
+    PALM_THUMB_LABEL,
+    PalmThumbForce,
+    allocate_from_closure,
+    allocate_hand_hand_from_closure,
+)
 from src.shared.python.force_overlay.series import ForceTorqueSeries
+from src.shared.python.motion_matching.grip_contract import GripSpec
 from src.shared.python.motion_matching.same_input import InputBundle
 
 Array: TypeAlias = NDArray[np.float64]
@@ -234,6 +247,8 @@ class BundleOverlayProvider:
         if not engine:
             raise ValueError("engine must be a non-empty string")
         self._grip: GripSource | None = None
+        self._palm_thumb: tuple[Any, Any, float] | None = None
+        self._allocated_contacts: tuple[Any, ContactTopology, float] | None = None
         self._axial: AxialLoadSource | None = None
         self._axial_impact: tuple[float, float] | None = None
         self._accelerations: Array | None = None
@@ -274,6 +289,134 @@ class BundleOverlayProvider:
         if source:
             self._grip_source = source
         return self
+
+    def with_palm_thumb(
+        self, source: Any, patch: Any, *, static_friction: float
+    ) -> BundleOverlayProvider:
+        """Report the allocated palm-on-thumb force per frame (HRG-H1); returns ``self``.
+
+        Reporting only (``frame.metadata["palm_thumb"]``, ``method`` ``allocation``):
+        no wrench is added and the dynamics are unchanged. ``source`` provides
+        ``closure_wrench``, ``club_frame_world`` and ``closing_hand_side`` (the
+        MuJoCo overlay source); ``patch`` is a ``ThumbPatch``. Raises ``TypeError``
+        for a source without the accessors and ``ValueError`` if the source's
+        closing hand is not the patch's trail hand.
+        """
+        for name in ("closure_wrench", "club_frame_world"):
+            if not callable(getattr(source, name, None)):
+                raise TypeError(f"source must provide {name}(...)")
+        if getattr(source, "closing_hand_side", None) != patch.trail_side:
+            raise ValueError(
+                f"closing hand {getattr(source, 'closing_hand_side', None)!r} is not "
+                f"the patch trail hand {patch.trail_side!r}"
+            )
+        self._palm_thumb = (source, patch, float(static_friction))
+        return self
+
+    def with_allocated_contacts(
+        self,
+        source: Any,
+        topology: ContactTopology | GripSpec | None = None,
+        *,
+        static_friction: float,
+    ) -> BundleOverlayProvider:
+        """Report allocated hand-hand contact forces per frame (HRG-GS-G3, #13301).
+
+        Reporting only (``frame.metadata["allocated_contacts"]``, ``method`` ``allocation``):
+        no dynamics are changed. ``source`` provides ``closure_wrench`` and
+        ``club_frame_world``; ``topology`` is a :class:`ContactTopology` or
+        :class:`GripSpec` (defaults to ``contact_topology()``).
+        """
+        for name in ("closure_wrench", "club_frame_world"):
+            if not callable(getattr(source, name, None)):
+                raise TypeError(f"source must provide {name}(...)")
+        topo = coerce_contact_topology(topology)
+        self._allocated_contacts = (source, topo, float(static_friction))
+        return self
+
+    def _palm_thumb_report(
+        self,
+        coords: Mapping[str, float],
+        rates: Mapping[str, float],
+        efforts: Mapping[str, float],
+    ) -> tuple[tuple[OverlayWrench, ...], dict[str, Any]]:
+        """Palm-thumb and allocated hand-hand wrenches and metadata."""
+        if self._allocated_contacts is not None:
+            source, topo, friction = self._allocated_contacts
+            closure = source.closure_wrench(coords, rates, efforts)
+            rotation, origin = source.club_frame_world(coords)
+            allocations = allocate_hand_hand_from_closure(
+                closure,
+                club_rotation=rotation,
+                club_origin=origin,
+                topology=topo,
+                static_friction=friction,
+            )
+            meta: dict[str, Any] = {
+                "allocated_contacts": allocations.to_dict(),
+            }
+            if allocations.palm_thumb is not None:
+                meta["palm_thumb"] = allocations.palm_thumb.to_dict()
+
+            wrenches: list[OverlayWrench] = []
+            body_name = closure.wrenches[-1].body if closure.available else "club"
+            for pair_force in allocations.pairs.values():
+                if (
+                    not pair_force.available
+                    or pair_force.unloaded
+                    or not pair_force.normal_force_n
+                    or pair_force.patch_point_m is None
+                    or pair_force.patch_normal is None
+                ):
+                    continue
+                push = -pair_force.normal_force_n * np.asarray(
+                    pair_force.patch_normal, dtype=float
+                )
+                wrenches.append(
+                    OverlayWrench(
+                        WrenchKind.GRIP,
+                        pair_force.label,
+                        body_name,
+                        pair_force.patch_point_m,
+                        force_n=(float(push[0]), float(push[1]), float(push[2])),
+                        source=f"{self._engine}:{pair_force.method}",
+                    )
+                )
+            return tuple(wrenches), meta
+
+        if self._palm_thumb is None:
+            return (), {}
+        source, patch, friction = self._palm_thumb
+        closure = source.closure_wrench(coords, rates, efforts)
+        rotation, origin = source.club_frame_world(coords)
+        result = allocate_from_closure(
+            closure,
+            club_rotation=rotation,
+            club_origin=origin,
+            patch=patch,
+            static_friction=friction,
+        )
+        meta = {"palm_thumb": result.to_dict()}
+        if not isinstance(result, PalmThumbForce):
+            return (), meta
+        point = result.patch_point_m
+        if (
+            not result.available
+            or result.unloaded
+            or not result.normal_force_n
+            or point is None
+        ):
+            return (), meta
+        push = -result.normal_force_n * np.asarray(result.patch_normal, dtype=float)
+        wrench = OverlayWrench(
+            WrenchKind.GRIP,
+            PALM_THUMB_LABEL,
+            closure.wrenches[-1].body,
+            point,
+            force_n=(float(push[0]), float(push[1]), float(push[2])),
+            source=f"{self._engine}:{PALM_THUMB_METHOD}",
+        )
+        return (wrench,), meta
 
     def with_axial_loads(self, axial: AxialLoadSource) -> BundleOverlayProvider:
         """Attach per-frame segment axial loads (``frame.axial_loads``); returns ``self``.
@@ -401,6 +544,9 @@ class BundleOverlayProvider:
             index, coords, rates, ground, named_efforts
         )
         metadata.update(axial_meta)
+        palm_wrenches, palm_meta = self._palm_thumb_report(coords, rates, named_efforts)
+        wrenches.extend(palm_wrenches)
+        metadata.update(palm_meta)
         return ForceTorqueFrame(
             time_s=float(index * self._bundle.dt_s),
             engine=self._engine,

@@ -109,11 +109,12 @@ class CharacterBuilderModel:
     def set_grip(self, name: str, value: float | str | None) -> None:
         """Set (or, with ``None``, clear) one grip pick (HRG-GR4, #13205).
 
-        Physical picks (``preset``, ``lead_shaft_rotation``, ``grip_style``, ...)
-        change the compiled spec into a new revision that needs a refit;
-        ``grip_thumb_offset_deg`` is picture-only and goes in the appearance
-        sidecar.  ``ValueError`` for an unknown pick or an invalid value; the
-        picks are unchanged then.
+        Physical picks (``preset``, ``grip_style``, ``lead_shaft_rotation``,
+        ...) change the compiled spec into a new revision that needs a refit;
+        ``grip_thumb_offset_deg``, ``grip_strength_deg``,
+        ``lead_roll_offset_deg`` and ``trail_roll_offset_deg`` are picture-only
+        and go in the appearance sidecar.  ``ValueError`` for an unknown pick
+        or an invalid value; the picks are unchanged then.
         """
         if name not in (*PHYSICAL_PICKS, *VISUAL_PICKS):
             raise ValueError(f"unknown grip pick: {name!r}")
@@ -167,15 +168,39 @@ class CharacterBuilderModel:
             f"{grip.trail.alpha_deg:.1f} deg about the shaft (positive is stronger); "
             f"{grip.style.value}"
         ]
-        if self.grip_overrides().has_physical:
+        base = spec_export.compile_character(None, self._params.to_dict())
+        if self.compile().sha256 != base.sha256:
             lines.append("Grip change makes a new model revision: refit it.")
         return lines
 
     def export(self, fmt: str, directory: Path | str) -> Path:
-        """Write ``spec``/``urdf``/``mjcf``/``osim``/``appearance`` into ``directory``."""
+        """Write ``spec``/``urdf``/``mjcf``/``osim``/``appearance``/``grip_binding`` into ``directory``."""
         if fmt == "appearance":
             return self.export_appearance(directory)
-        text, _media, filename = spec_export.export_character(self.compile(), fmt)
+        if fmt == "grip_binding":
+            return self.export_grip_binding(directory)
+        compiled = self.compile()
+        text, _media, filename = spec_export.export_character(compiled, fmt)
+        out_path = self._write_export(directory, filename, text)
+        self.export_grip_binding(directory, stem=out_path.stem)
+        return out_path
+
+    def grip_binding_manifest(self) -> dict[str, Any]:
+        """Build and validate the ``grip-binding/v1`` manifest for the compiled character."""
+        return spec_export.build_grip_binding_manifest(self.compile())
+
+    def export_grip_binding(
+        self,
+        directory: Path | str,
+        *,
+        stem: str | None = None,
+    ) -> Path:
+        """Write the ``grip-binding/v1`` sidecar JSON next to the exported character."""
+        compiled = self.compile()
+        manifest = spec_export.build_grip_binding_manifest(compiled)
+        base_stem = stem or f"{compiled.preset_id or 'custom'}_{compiled.sha256[:8]}"
+        filename = f"{base_stem}.grip_binding.json"
+        text = json.dumps(manifest, indent=2) + "\n"
         return self._write_export(directory, filename, text)
 
     def verify_cross_engine_parity(

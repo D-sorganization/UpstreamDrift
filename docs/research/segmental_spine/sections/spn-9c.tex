@@ -115,16 +115,49 @@ excluded classes with their reasons, states in words when the club or the ground
 reaction is excluded or only gravity acts, and carries the map summary and the
 orientation residual.
 
+\paragraph{Real-Capture Run (Capture-A).}
+A full-body and inverse-dynamics run was evaluated on 2026-10-19 on main
+\texttt{fc49cd6e6f} under OpenSim 4.6 against the licensed model
+\texttt{bruno2015\_fullbody\_os4\_v2} (SHA-256
+\texttt{e488ae2cf67be3de36f569cab514e181bfa89d5186d998f1627b461b4498fd47}).
+The motion input is capture-A continuous IK
+\texttt{docs/development/opensim\_tour\_matching/evidence/os8\_continuous\_ik/ik\_states\_continuous.sto}
+(SHA-256
+\texttt{69fd5b8ea56b237bbbcd7e733a72807d087c831913fbf9de59f09c6ed4e8fc93};
+530 frames, 1.469\,s), driven with golf model
+\texttt{docs/development/opensim\_tour\_matching/evidence/os7\_moco\_g1/inputs/golf\_humanoid\_scaled\_tour\_markers.osim},
+\texttt{fullbody\_map} \texttt{bruno2015\_fullbody\_os4\_v2},
+\texttt{external\_loads\_policy} \texttt{club\_and\_grf},
+\texttt{muscle\_model\_policy} \texttt{millard\_equivalent} (446 Thelen2003
+muscles swapped for Millard2012), \texttt{unlock\_driven\_coordinates}
+\texttt{true} (22 thoracic LB/AR coordinates unlocked), \texttt{filter\_hz} 15,
+and \texttt{restrict\_law\_to\_model} \texttt{true}. Events occur at address
+0.211\,s, top 1.103\,s, and impact 1.319\,s; body weight is 764.6\,N.
+All stages (\texttt{golf\_input}, \texttt{drive}, \texttt{fullbody},
+\texttt{inverse\_dynamics}, \texttt{static\_optimization},
+\texttt{joint\_reactions}) completed with status \texttt{ok}. Every receipt is
+\texttt{unqualified} (\texttt{scientific\_status unqualified}) with three
+reasons: (1) torso alignment not supplied, identity assumed; (2) inverse-dynamics
+pelvis residual exceeds the budget; (3) 3 frames flagged for reserve use.
+Under coupling law \texttt{bruno2015\_regional} ($p=3$), the drive residual
+is maximum $1.4\times 10^{-13}$\,rad with 0 invalid frames. Full-body orientation
+residual is maximum 0.729\,rad, orientation maximum step is 0.053\,rad, and GRF
+maximum residual norm is 5132\,N. Inverse dynamics reports pelvis residual peak
+force 4849\,N = 6.34\,BW (force ratio 6.34) and peak moment 2689\,N$\cdot$m
+(moment ratio 2.28, body height 1.543\,m). These residuals are dominated by
+demand implied by the kinematics (see the earlier Newton check recorded in
+\#13056: after \#13076, \#13101 and \#13117 the ID root force matches
+$m(a_{\mathrm{com}} - g)$ in every phase).
+
 \paragraph{Assumptions and Limitations.}
 Forearm pronation and wrist are locked in the Bruno file and excluded on the golf
 side, so the hands follow the forearm only. The head and neck are held neutral.
 Equal hand weights, the foot distribution, the zero-pose equivalence and the
 unmodelled knee cross term are assumptions. The club wrench is a rigid-body
 reaction, not a grip model. Shoulder elevation is bounded below by its range, so
-swings that ask for a negative elevation show a positive residual. Real-capture
-acceptance on the owner workstation (anonymised capture identifier) is still
-pending; a synthetic swing proves only that the software path runs. Pelvis
-residuals are reported by the run and committed nowhere.
+swings that ask for a negative elevation show a positive residual. The capture-A
+run reported above is unqualified; a synthetic swing proves only that the
+software path runs. Only aggregate residuals are recorded here; trajectories and receipts stay out of the repository.
 
 \paragraph{Reproduction.}
 \begin{verbatim}

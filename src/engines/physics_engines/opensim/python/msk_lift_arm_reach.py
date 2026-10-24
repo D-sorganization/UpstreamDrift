@@ -50,12 +50,19 @@ from src.shared.python.lifting.bundle_targets import LiftTargets
 Array = NDArray[np.float64]
 
 __all__ = [
+    "ARM_REACH_BOUND_MARGIN_RAD",
     "ARM_REACH_COORDINATES",
     "REACH_PRIOR_WEIGHT",
     "ArmReach",
     "reaching_arm_coordinates",
     "reaching_lift_build",
 ]
+
+#: Interior bound margin (rad) so arm reach least squares cannot sit exactly
+#: on a model range bound (OSL-12, #13048). Prevents subsequent unconstrained
+#: IK tracking from drifting past range limits.
+ARM_REACH_BOUND_MARGIN_RAD = 1e-3
+
 
 #: Arm coordinates the reach solve moves, per side (``_r`` / ``_l`` suffix).
 ARM_REACH_COORDINATES: tuple[str, ...] = (
@@ -109,14 +116,34 @@ def _hand_centre(model: Any, state: Any, side: str) -> Array:
     return _vec3(hand.findStationLocationInGround(state, hand.getMassCenter()))
 
 
+#: A side whose reach misses by more than this restarts from the seeds below
+#: (the supine bench press lands far from the standing prior, OSL-3 #13041).
+_REACH_RESTART_TOL_M = 0.01
+#: Restart seeds (shoulder flexion, adduction, rotation, elbow flexion; deg).
+#: The first keeps the prior's shoulder angles and takes these rotation and
+#: elbow values.
+_REACH_RESTART_ELBOW_DEG = ((-60.0, 135.0),)
+_REACH_RESTART_SEEDS_DEG = (
+    (0.0, 0.0, -60.0, 140.0),
+    (45.0, -20.0, -60.0, 130.0),
+    (90.0, -20.0, -60.0, 130.0),
+)
+
+
 def _solve_side(
     model: Any, state: Any, side: str, target: Array
 ) -> tuple[dict[str, float], float]:
     """Bounded reach of one hand; the rest of ``state`` is held."""
     coords = model.getCoordinateSet()
     names = [f"{name}_{side}" for name in ARM_REACH_COORDINATES]
-    low = np.array([coords.get(n).getRangeMin() for n in names])
-    high = np.array([coords.get(n).getRangeMax() for n in names])
+    low = (
+        np.array([coords.get(n).getRangeMin() for n in names])
+        + ARM_REACH_BOUND_MARGIN_RAD
+    )
+    high = (
+        np.array([coords.get(n).getRangeMax() for n in names])
+        - ARM_REACH_BOUND_MARGIN_RAD
+    )
     prior = np.array([coords.get(n).getDefaultValue() for n in names])
     start = np.clip(prior, low, high)
 
@@ -131,6 +158,21 @@ def _solve_side(
         residual, start, bounds=(low, high), xtol=_REACH_XTOL, ftol=_REACH_XTOL
     )
     error = float(np.linalg.norm(residual(fit.x)[:3]))
+    if error > _REACH_RESTART_TOL_M:
+        candidates = [
+            np.array([prior[0], prior[1], *np.radians(_REACH_RESTART_ELBOW_DEG[0])])
+        ] + [np.radians(seed) for seed in _REACH_RESTART_SEEDS_DEG]
+        for candidate in candidates:
+            s = np.clip(candidate, low, high)
+            cand_fit = least_squares(
+                residual, s, bounds=(low, high), xtol=_REACH_XTOL, ftol=_REACH_XTOL
+            )
+            cand_err = float(np.linalg.norm(residual(cand_fit.x)[:3]))
+            if cand_err < error:
+                fit = cand_fit
+                error = cand_err
+                if error <= _REACH_RESTART_TOL_M:
+                    break
     return dict(zip(names, map(float, fit.x), strict=True)), error
 
 

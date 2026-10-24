@@ -1,7 +1,7 @@
 {
   "generator": "scripts/measure_opensim_lift_muscles.py",
   "issue": "#13042 (OSL-4)",
-  "source_commit": "8f6758d03d2a981acc407978fbcfc87e7b26293e",
+  "source_commit": "7a963f7b9aa30e671fc19d8e8f75c9324d0992ee",
   "reserve_share_threshold": 0.05,
   "citation": "Rajagopal A, Dembia CL, DeMers MS, Delp DD, Hicks JL, Delp SL. Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human Gait. IEEE Trans Biomed Eng. 2016;63(10):2068-2079. doi:10.1109/TBME.2016.2586862",
   "lifts": {
@@ -9,93 +9,102 @@
       "lift": "squat",
       "status": "complete",
       "classification": "unqualified",
-      "reserve_share": 0.568069179166055,
-      "mean_reserve_share": 0.5679658309137081,
-      "peak_reserve_share": 0.6723738008905368,
+      "reserve_share": 0.5695692179672001,
+      "mean_reserve_share": 0.5694622688878194,
+      "peak_reserve_share": 0.6766307085747488,
+      "residual_status": {
+        "forces_within": true,
+        "moments_within": true,
+        "measured_pelvis_residual_force_n": 23.8222,
+        "hicks_force_limit_n": 146.9297,
+        "measured_pelvis_residual_moment_nm": 11.7485,
+        "hicks_moment_limit_nm": 18.64,
+        "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
+      },
       "reserve_share_threshold": 0.05,
       "window_start_s": 0.0,
       "window_end_s": 0.2,
       "duration_s": 0.2,
       "start_pose": {
-        "hip_flexion_r_deg": 119.97,
+        "hip_flexion_r_deg": 119.95,
         "hip_flexion_l_deg": 120.0,
-        "knee_angle_r_deg": 109.76,
-        "knee_angle_l_deg": 109.49
+        "knee_angle_r_deg": 109.73,
+        "knee_angle_l_deg": 109.43
       },
       "coordinate_breakdown": {
         "hip_flexion_r": {
-          "id_demand_frame0_nm": -219.96,
-          "id_demand_mean_abs_nm": 360.36,
-          "id_demand_peak_abs_nm": 471.6,
-          "active_capacity_pos_mean_nm": 75.07,
-          "active_capacity_neg_mean_nm": -204.64,
-          "passive_moment_frame0_nm": -28.47,
+          "id_demand_frame0_nm": -222.15,
+          "id_demand_mean_abs_nm": 357.24,
+          "id_demand_peak_abs_nm": 471.42,
+          "active_capacity_pos_mean_nm": 75.05,
+          "active_capacity_neg_mean_nm": -204.67,
+          "passive_moment_frame0_nm": -28.51,
           "passive_moment_mean_nm": -28.26,
-          "reserve_frame0_nm": -140.76,
-          "reserve_mean_abs_nm": 203.54,
-          "reserve_peak_abs_nm": 272.41,
-          "reserve_share": 0.5648
+          "reserve_frame0_nm": -142.16,
+          "reserve_mean_abs_nm": 202.34,
+          "reserve_peak_abs_nm": 270.08,
+          "reserve_share": 0.5664
         },
         "hip_adduction_r": {
-          "id_demand_frame0_nm": -125.17,
-          "id_demand_mean_abs_nm": 51.54,
-          "id_demand_peak_abs_nm": 125.17,
-          "active_capacity_pos_mean_nm": 360.94,
-          "active_capacity_neg_mean_nm": -106.49,
-          "passive_moment_frame0_nm": 15.34,
+          "id_demand_frame0_nm": -125.32,
+          "id_demand_mean_abs_nm": 50.91,
+          "id_demand_peak_abs_nm": 125.32,
+          "active_capacity_pos_mean_nm": 360.92,
+          "active_capacity_neg_mean_nm": -106.52,
+          "passive_moment_frame0_nm": 15.33,
           "passive_moment_mean_nm": 15.45,
-          "reserve_frame0_nm": -96.87,
-          "reserve_mean_abs_nm": 109.54,
-          "reserve_peak_abs_nm": 136.09,
-          "reserve_share": 2.1256
+          "reserve_frame0_nm": -97.8,
+          "reserve_mean_abs_nm": 107.96,
+          "reserve_peak_abs_nm": 134.85,
+          "reserve_share": 2.1208
         },
         "hip_rotation_r": {
-          "id_demand_frame0_nm": 152.12,
-          "id_demand_mean_abs_nm": 92.9,
-          "id_demand_peak_abs_nm": 152.12,
-          "active_capacity_pos_mean_nm": 197.95,
+          "id_demand_frame0_nm": 151.87,
+          "id_demand_mean_abs_nm": 92.14,
+          "id_demand_peak_abs_nm": 151.87,
+          "active_capacity_pos_mean_nm": 197.86,
           "active_capacity_neg_mean_nm": -37.14,
-          "passive_moment_frame0_nm": 26.23,
-          "passive_moment_mean_nm": 26.43,
-          "reserve_frame0_nm": 47.02,
-          "reserve_mean_abs_nm": 92.86,
-          "reserve_peak_abs_nm": 172.61,
-          "reserve_share": 0.9996
+          "passive_moment_frame0_nm": 26.14,
+          "passive_moment_mean_nm": 26.4,
+          "reserve_frame0_nm": 47.98,
+          "reserve_mean_abs_nm": 93.04,
+          "reserve_peak_abs_nm": 167.15,
+          "reserve_share": 1.0099
         },
         "knee_angle_r": {
-          "id_demand_frame0_nm": -214.72,
-          "id_demand_mean_abs_nm": 116.63,
-          "id_demand_peak_abs_nm": 214.72,
-          "active_capacity_pos_mean_nm": 218.17,
-          "active_capacity_neg_mean_nm": -187.16,
+          "id_demand_frame0_nm": -214.06,
+          "id_demand_mean_abs_nm": 126.73,
+          "id_demand_peak_abs_nm": 214.06,
+          "active_capacity_pos_mean_nm": 218.27,
+          "active_capacity_neg_mean_nm": -187.06,
           "passive_moment_frame0_nm": 4.05,
-          "passive_moment_mean_nm": 4.49,
-          "reserve_frame0_nm": -27.15,
-          "reserve_mean_abs_nm": 18.18,
-          "reserve_peak_abs_nm": 39.89,
-          "reserve_share": 0.1559
+          "passive_moment_mean_nm": 4.5,
+          "reserve_frame0_nm": -27.44,
+          "reserve_mean_abs_nm": 21.38,
+          "reserve_peak_abs_nm": 43.45,
+          "reserve_share": 0.1687
         },
         "ankle_angle_r": {
-          "id_demand_frame0_nm": -47.98,
-          "id_demand_mean_abs_nm": 84.76,
-          "id_demand_peak_abs_nm": 123.09,
-          "active_capacity_pos_mean_nm": 72.3,
-          "active_capacity_neg_mean_nm": -277.16,
-          "passive_moment_frame0_nm": -27.14,
-          "passive_moment_mean_nm": -28.35,
+          "id_demand_frame0_nm": -48.26,
+          "id_demand_mean_abs_nm": 84.7,
+          "id_demand_peak_abs_nm": 123.84,
+          "active_capacity_pos_mean_nm": 72.32,
+          "active_capacity_neg_mean_nm": -277.34,
+          "passive_moment_frame0_nm": -27.07,
+          "passive_moment_mean_nm": -28.31,
           "reserve_frame0_nm": -0.0,
           "reserve_mean_abs_nm": 0.0,
           "reserve_peak_abs_nm": 0.0,
           "reserve_share": 0.0
         },
         "subtalar_angle_r": {
-          "id_demand_frame0_nm": -12.81,
-          "id_demand_mean_abs_nm": 18.74,
-          "id_demand_peak_abs_nm": 53.24,
-          "active_capacity_pos_mean_nm": 83.17,
-          "active_capacity_neg_mean_nm": -45.57,
-          "passive_moment_frame0_nm": 4.07,
-          "passive_moment_mean_nm": 4.26,
+          "id_demand_frame0_nm": -12.82,
+          "id_demand_mean_abs_nm": 18.77,
+          "id_demand_peak_abs_nm": 51.73,
+          "active_capacity_pos_mean_nm": 83.2,
+          "active_capacity_neg_mean_nm": -45.58,
+          "passive_moment_frame0_nm": 4.06,
+          "passive_moment_mean_nm": 4.25,
           "reserve_frame0_nm": -0.02,
           "reserve_mean_abs_nm": 0.02,
           "reserve_peak_abs_nm": 0.05,
@@ -111,99 +120,99 @@
           "passive_moment_mean_nm": 0.16,
           "reserve_frame0_nm": -0.03,
           "reserve_mean_abs_nm": 0.05,
-          "reserve_peak_abs_nm": 0.09,
-          "reserve_share": 1.1646
+          "reserve_peak_abs_nm": 0.08,
+          "reserve_share": 1.1504
         },
         "hip_flexion_l": {
-          "id_demand_frame0_nm": -381.92,
-          "id_demand_mean_abs_nm": 315.76,
-          "id_demand_peak_abs_nm": 381.92,
-          "active_capacity_pos_mean_nm": 63.09,
-          "active_capacity_neg_mean_nm": -200.02,
-          "passive_moment_frame0_nm": -31.97,
-          "passive_moment_mean_nm": -31.74,
-          "reserve_frame0_nm": -238.5,
-          "reserve_mean_abs_nm": 174.3,
-          "reserve_peak_abs_nm": 238.5,
-          "reserve_share": 0.552
+          "id_demand_frame0_nm": -381.01,
+          "id_demand_mean_abs_nm": 321.02,
+          "id_demand_peak_abs_nm": 390.14,
+          "active_capacity_pos_mean_nm": 63.1,
+          "active_capacity_neg_mean_nm": -200.03,
+          "passive_moment_frame0_nm": -31.99,
+          "passive_moment_mean_nm": -31.76,
+          "reserve_frame0_nm": -237.95,
+          "reserve_mean_abs_nm": 177.26,
+          "reserve_peak_abs_nm": 237.95,
+          "reserve_share": 0.5522
         },
         "hip_adduction_l": {
-          "id_demand_frame0_nm": -134.36,
-          "id_demand_mean_abs_nm": 58.93,
-          "id_demand_peak_abs_nm": 134.36,
-          "active_capacity_pos_mean_nm": 350.18,
-          "active_capacity_neg_mean_nm": -103.64,
-          "passive_moment_frame0_nm": 18.29,
-          "passive_moment_mean_nm": 18.32,
-          "reserve_frame0_nm": -169.76,
-          "reserve_mean_abs_nm": 100.28,
-          "reserve_peak_abs_nm": 169.76,
-          "reserve_share": 1.7017
+          "id_demand_frame0_nm": -134.89,
+          "id_demand_mean_abs_nm": 58.31,
+          "id_demand_peak_abs_nm": 134.89,
+          "active_capacity_pos_mean_nm": 350.2,
+          "active_capacity_neg_mean_nm": -103.56,
+          "passive_moment_frame0_nm": 18.32,
+          "passive_moment_mean_nm": 18.33,
+          "reserve_frame0_nm": -169.39,
+          "reserve_mean_abs_nm": 102.49,
+          "reserve_peak_abs_nm": 169.39,
+          "reserve_share": 1.7577
         },
         "hip_rotation_l": {
-          "id_demand_frame0_nm": 156.48,
-          "id_demand_mean_abs_nm": 97.46,
-          "id_demand_peak_abs_nm": 156.48,
-          "active_capacity_pos_mean_nm": 199.38,
-          "active_capacity_neg_mean_nm": -35.39,
-          "passive_moment_frame0_nm": 23.12,
-          "passive_moment_mean_nm": 23.06,
-          "reserve_frame0_nm": 47.46,
-          "reserve_mean_abs_nm": 94.04,
-          "reserve_peak_abs_nm": 155.67,
-          "reserve_share": 0.9649
+          "id_demand_frame0_nm": 157.69,
+          "id_demand_mean_abs_nm": 97.27,
+          "id_demand_peak_abs_nm": 157.69,
+          "active_capacity_pos_mean_nm": 199.48,
+          "active_capacity_neg_mean_nm": -35.4,
+          "passive_moment_frame0_nm": 23.21,
+          "passive_moment_mean_nm": 23.1,
+          "reserve_frame0_nm": 47.23,
+          "reserve_mean_abs_nm": 93.64,
+          "reserve_peak_abs_nm": 154.47,
+          "reserve_share": 0.9627
         },
         "knee_angle_l": {
-          "id_demand_frame0_nm": -52.97,
-          "id_demand_mean_abs_nm": 168.11,
-          "id_demand_peak_abs_nm": 256.71,
-          "active_capacity_pos_mean_nm": 211.43,
-          "active_capacity_neg_mean_nm": -178.57,
-          "passive_moment_frame0_nm": 5.9,
-          "passive_moment_mean_nm": 5.97,
+          "id_demand_frame0_nm": -53.11,
+          "id_demand_mean_abs_nm": 159.53,
+          "id_demand_peak_abs_nm": 255.38,
+          "active_capacity_pos_mean_nm": 211.49,
+          "active_capacity_neg_mean_nm": -178.4,
+          "passive_moment_frame0_nm": 5.97,
+          "passive_moment_mean_nm": 6.0,
           "reserve_frame0_nm": -0.02,
-          "reserve_mean_abs_nm": 52.29,
-          "reserve_peak_abs_nm": 98.45,
-          "reserve_share": 0.311
+          "reserve_mean_abs_nm": 50.15,
+          "reserve_peak_abs_nm": 98.91,
+          "reserve_share": 0.3143
         },
         "ankle_angle_l": {
-          "id_demand_frame0_nm": -73.2,
-          "id_demand_mean_abs_nm": 94.31,
-          "id_demand_peak_abs_nm": 112.12,
-          "active_capacity_pos_mean_nm": 71.75,
-          "active_capacity_neg_mean_nm": -276.4,
-          "passive_moment_frame0_nm": -28.09,
-          "passive_moment_mean_nm": -29.04,
+          "id_demand_frame0_nm": -72.73,
+          "id_demand_mean_abs_nm": 94.62,
+          "id_demand_peak_abs_nm": 111.38,
+          "active_capacity_pos_mean_nm": 71.83,
+          "active_capacity_neg_mean_nm": -276.59,
+          "passive_moment_frame0_nm": -28.03,
+          "passive_moment_mean_nm": -28.94,
           "reserve_frame0_nm": -0.01,
-          "reserve_mean_abs_nm": 0.15,
-          "reserve_peak_abs_nm": 1.57,
+          "reserve_mean_abs_nm": 0.16,
+          "reserve_peak_abs_nm": 1.58,
           "reserve_share": 0.0016
         },
         "subtalar_angle_l": {
-          "id_demand_frame0_nm": -10.21,
-          "id_demand_mean_abs_nm": 30.79,
-          "id_demand_peak_abs_nm": 76.19,
-          "active_capacity_pos_mean_nm": 82.89,
-          "active_capacity_neg_mean_nm": -45.31,
-          "passive_moment_frame0_nm": 4.2,
-          "passive_moment_mean_nm": 4.37,
+          "id_demand_frame0_nm": -10.4,
+          "id_demand_mean_abs_nm": 30.85,
+          "id_demand_peak_abs_nm": 76.74,
+          "active_capacity_pos_mean_nm": 82.93,
+          "active_capacity_neg_mean_nm": -45.33,
+          "passive_moment_frame0_nm": 4.19,
+          "passive_moment_mean_nm": 4.36,
           "reserve_frame0_nm": -0.02,
-          "reserve_mean_abs_nm": 0.49,
-          "reserve_peak_abs_nm": 5.98,
-          "reserve_share": 0.0158
+          "reserve_mean_abs_nm": 0.5,
+          "reserve_peak_abs_nm": 6.42,
+          "reserve_share": 0.0162
         },
         "mtp_angle_l": {
           "id_demand_frame0_nm": -0.04,
           "id_demand_mean_abs_nm": 0.04,
           "id_demand_peak_abs_nm": 0.04,
           "active_capacity_pos_mean_nm": 7.39,
-          "active_capacity_neg_mean_nm": -4.39,
+          "active_capacity_neg_mean_nm": -4.4,
           "passive_moment_frame0_nm": 0.17,
           "passive_moment_mean_nm": 0.16,
           "reserve_frame0_nm": -0.04,
           "reserve_mean_abs_nm": 0.9,
-          "reserve_peak_abs_nm": 7.48,
-          "reserve_share": 22.5363
+          "reserve_peak_abs_nm": 7.35,
+          "reserve_share": 22.5055
         }
       },
       "primary_reserve_drivers": [
@@ -234,18 +243,18 @@
         ]
       },
       "hip_demand_asymmetry": {
-        "frame0_hip_demand_r_nm": -219.96,
-        "frame0_hip_demand_l_nm": -381.92,
-        "frame0_knee_demand_r_nm": -214.72,
-        "frame0_knee_demand_l_nm": -52.97,
-        "frame0_total_sagittal_r_nm": -434.68,
-        "frame0_total_sagittal_l_nm": -434.89,
-        "frame0_grf_vertical_l_n": 1131.02,
-        "frame0_grf_vertical_r_n": 1139.24,
-        "frame0_grf_anterior_shear_l_n": 208.96,
-        "frame0_grf_anterior_shear_r_n": -127.35,
-        "shear_differential_n": 336.31,
-        "cause": "Total sagittal leg extension demand at frame 0 is virtually identical across legs (-434.68 N m right vs -434.89 N m left, within 0.05%), matching vertical GRF (~1135 N each). The hip-vs-knee demand split asymmetry (-220.0 N m vs -381.9 N m hip demand) is driven by anterior-posterior ground shear force: +208.96 N forward shear on left foot vs -127.35 N backward shear on right foot (a 336.31 N differential). Forward shear shifts the left GRF line of action forward, reducing knee extension demand (-53.0 N m vs -214.7 N m) and increasing hip extension demand (-381.9 N m vs -220.0 N m)."
+        "frame0_hip_demand_r_nm": -222.15,
+        "frame0_hip_demand_l_nm": -381.01,
+        "frame0_knee_demand_r_nm": -214.06,
+        "frame0_knee_demand_l_nm": -53.11,
+        "frame0_total_sagittal_r_nm": -436.21,
+        "frame0_total_sagittal_l_nm": -434.11,
+        "frame0_grf_vertical_l_n": 1128.94,
+        "frame0_grf_vertical_r_n": 1142.99,
+        "frame0_grf_anterior_shear_l_n": 207.67,
+        "frame0_grf_anterior_shear_r_n": -125.01,
+        "shear_differential_n": 332.68,
+        "cause": "Total sagittal leg extension demand at frame 0 is -436.21 N m right vs -434.11 N m left (0.48% apart), with vertical GRF 1142.99 N right vs 1128.94 N left. The hip-vs-knee split (hip -222.15 N m right vs -381.01 N m left; knee -214.06 N m right vs -53.11 N m left) follows the anterior-posterior ground shear: +207.67 N on the left foot vs -125.01 N on the right (a 332.68 N differential), which moves each GRF line of action and so trades knee extension demand for hip extension demand."
       },
       "moment_balance_max_error_nm": 1.1368683772161603e-13,
       "frames": 41,
@@ -254,23 +263,23 @@
         "quadriceps": {
           "n_muscles": 8,
           "peak_activation": 1.0,
-          "mean_activation": 0.7801599649374066,
-          "peak_force_n": 4561.791986563241,
-          "mean_force_n": 1927.6386783193427
+          "mean_activation": 0.7816518463377506,
+          "peak_force_n": 4559.391262561776,
+          "mean_force_n": 1929.578882784012
         },
         "gluteals": {
           "n_muscles": 18,
           "peak_activation": 1.0,
-          "mean_activation": 0.36029380590873833,
-          "peak_force_n": 1157.049525938256,
-          "mean_force_n": 345.53741753478585
+          "mean_activation": 0.35927382539687364,
+          "peak_force_n": 1156.3627747882845,
+          "mean_force_n": 344.75363312283383
         },
         "hamstrings": {
           "n_muscles": 8,
           "peak_activation": 1.0,
-          "mean_activation": 0.4089210579595504,
-          "peak_force_n": 2145.8608324360266,
-          "mean_force_n": 440.210787417595
+          "mean_activation": 0.4141480011918821,
+          "peak_force_n": 2145.231766360862,
+          "mean_force_n": 444.33473172521633
         },
         "erector spinae": {
           "n_muscles": 0,
@@ -306,23 +315,23 @@
           "quadriceps": {
             "n_muscles": 8,
             "peak_activation": 1.0,
-            "mean_activation": 0.7801599649374066,
-            "peak_force_n": 4561.791986563241,
-            "mean_force_n": 1927.6386783193427
+            "mean_activation": 0.7816518463377506,
+            "peak_force_n": 4559.391262561776,
+            "mean_force_n": 1929.578882784012
           },
           "gluteals": {
             "n_muscles": 18,
             "peak_activation": 1.0,
-            "mean_activation": 0.36029380590873833,
-            "peak_force_n": 1157.049525938256,
-            "mean_force_n": 345.53741753478585
+            "mean_activation": 0.35927382539687364,
+            "peak_force_n": 1156.3627747882845,
+            "mean_force_n": 344.75363312283383
           },
           "hamstrings": {
             "n_muscles": 8,
             "peak_activation": 1.0,
-            "mean_activation": 0.4089210579595504,
-            "peak_force_n": 2145.8608324360266,
-            "mean_force_n": 440.210787417595
+            "mean_activation": 0.4141480011918821,
+            "peak_force_n": 2145.231766360862,
+            "mean_force_n": 444.33473172521633
           },
           "erector spinae": {
             "n_muscles": 0,
@@ -359,85 +368,1446 @@
         "window_s": [0.0, 0.2],
         "mesh_interval_s": 0.02,
         "max_iterations": 20,
-        "wall_clock_s": 505.8942656517029,
+        "wall_clock_s": 180.71129155158997,
         "converged": false,
         "status": "Maximum_Iterations_Exceeded",
-        "objective": 142167.55878398905,
+        "objective": 141956.4841635697,
         "iterations": 20
       },
       "citation": "Rajagopal A, Dembia CL, DeMers MS, Delp DD, Hicks JL, Delp SL. Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human Gait. IEEE Trans Biomed Eng. 2016;63(10):2068-2079. doi:10.1109/TBME.2016.2586862"
     },
     "deadlift": {
       "lift": "deadlift",
-      "status": "unavailable",
+      "status": "complete",
       "classification": "unqualified",
-      "reason": "no LIFT-5 same-input bundle is registered for 'deadlift' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
-      "reserve_share": null,
-      "window_start_s": null,
-      "window_end_s": null,
-      "duration_s": null,
-      "start_pose": null,
-      "coordinate_breakdown": null,
-      "primary_reserve_drivers": null,
-      "bound_violations_or_pinned": null,
-      "hip_demand_asymmetry": null,
-      "major_groups": null,
-      "phases": null,
-      "moco": null
+      "reserve_share": 0.17477826355770398,
+      "mean_reserve_share": 0.1728234393045573,
+      "peak_reserve_share": 0.2017901160038145,
+      "residual_status": {
+        "forces_within": false,
+        "moments_within": false,
+        "measured_pelvis_residual_force_n": 288.2931,
+        "hicks_force_limit_n": 110.9221,
+        "measured_pelvis_residual_moment_nm": 148.0156,
+        "hicks_moment_limit_nm": 18.2845,
+        "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
+      },
+      "reserve_share_threshold": 0.05,
+      "window_start_s": 0.0,
+      "window_end_s": 0.2,
+      "duration_s": 0.2,
+      "start_pose": {
+        "hip_flexion_r_deg": 94.65,
+        "hip_flexion_l_deg": 95.05,
+        "knee_angle_r_deg": 74.46,
+        "knee_angle_l_deg": 73.81
+      },
+      "coordinate_breakdown": {
+        "hip_flexion_r": {
+          "id_demand_frame0_nm": -130.73,
+          "id_demand_mean_abs_nm": 217.77,
+          "id_demand_peak_abs_nm": 304.75,
+          "active_capacity_pos_mean_nm": 177.8,
+          "active_capacity_neg_mean_nm": -277.57,
+          "passive_moment_frame0_nm": -40.72,
+          "passive_moment_mean_nm": -36.9,
+          "reserve_frame0_nm": -2.9,
+          "reserve_mean_abs_nm": 15.05,
+          "reserve_peak_abs_nm": 34.55,
+          "reserve_share": 0.0691
+        },
+        "hip_adduction_r": {
+          "id_demand_frame0_nm": 102.95,
+          "id_demand_mean_abs_nm": 176.19,
+          "id_demand_peak_abs_nm": 213.32,
+          "active_capacity_pos_mean_nm": 291.08,
+          "active_capacity_neg_mean_nm": -134.11,
+          "passive_moment_frame0_nm": 4.62,
+          "passive_moment_mean_nm": 0.02,
+          "reserve_frame0_nm": -5.19,
+          "reserve_mean_abs_nm": 4.31,
+          "reserve_peak_abs_nm": 12.44,
+          "reserve_share": 0.0245
+        },
+        "hip_rotation_r": {
+          "id_demand_frame0_nm": -57.42,
+          "id_demand_mean_abs_nm": 100.28,
+          "id_demand_peak_abs_nm": 122.82,
+          "active_capacity_pos_mean_nm": 200.5,
+          "active_capacity_neg_mean_nm": -33.0,
+          "passive_moment_frame0_nm": 22.38,
+          "passive_moment_mean_nm": 20.04,
+          "reserve_frame0_nm": -52.88,
+          "reserve_mean_abs_nm": 96.32,
+          "reserve_peak_abs_nm": 124.15,
+          "reserve_share": 0.9604
+        },
+        "knee_angle_r": {
+          "id_demand_frame0_nm": -54.94,
+          "id_demand_mean_abs_nm": 18.7,
+          "id_demand_peak_abs_nm": 54.94,
+          "active_capacity_pos_mean_nm": 279.53,
+          "active_capacity_neg_mean_nm": -302.71,
+          "passive_moment_frame0_nm": 19.69,
+          "passive_moment_mean_nm": 16.56,
+          "reserve_frame0_nm": -0.01,
+          "reserve_mean_abs_nm": 0.01,
+          "reserve_peak_abs_nm": 0.01,
+          "reserve_share": 0.0003
+        },
+        "ankle_angle_r": {
+          "id_demand_frame0_nm": -60.91,
+          "id_demand_mean_abs_nm": 85.74,
+          "id_demand_peak_abs_nm": 112.73,
+          "active_capacity_pos_mean_nm": 73.91,
+          "active_capacity_neg_mean_nm": -341.4,
+          "passive_moment_frame0_nm": -26.89,
+          "passive_moment_mean_nm": -27.58,
+          "reserve_frame0_nm": 0.0,
+          "reserve_mean_abs_nm": 0.01,
+          "reserve_peak_abs_nm": 0.1,
+          "reserve_share": 0.0001
+        },
+        "subtalar_angle_r": {
+          "id_demand_frame0_nm": 40.48,
+          "id_demand_mean_abs_nm": 54.13,
+          "id_demand_peak_abs_nm": 68.92,
+          "active_capacity_pos_mean_nm": 91.72,
+          "active_capacity_neg_mean_nm": -46.46,
+          "passive_moment_frame0_nm": 3.97,
+          "passive_moment_mean_nm": 4.09,
+          "reserve_frame0_nm": 0.04,
+          "reserve_mean_abs_nm": 0.11,
+          "reserve_peak_abs_nm": 0.75,
+          "reserve_share": 0.0021
+        },
+        "mtp_angle_r": {
+          "id_demand_frame0_nm": -0.06,
+          "id_demand_mean_abs_nm": 0.04,
+          "id_demand_peak_abs_nm": 0.06,
+          "active_capacity_pos_mean_nm": 7.46,
+          "active_capacity_neg_mean_nm": -4.43,
+          "passive_moment_frame0_nm": 0.15,
+          "passive_moment_mean_nm": 0.15,
+          "reserve_frame0_nm": -0.07,
+          "reserve_mean_abs_nm": 0.17,
+          "reserve_peak_abs_nm": 1.2,
+          "reserve_share": 4.3768
+        },
+        "hip_flexion_l": {
+          "id_demand_frame0_nm": -99.26,
+          "id_demand_mean_abs_nm": 207.07,
+          "id_demand_peak_abs_nm": 278.67,
+          "active_capacity_pos_mean_nm": 152.48,
+          "active_capacity_neg_mean_nm": -266.51,
+          "passive_moment_frame0_nm": -49.62,
+          "passive_moment_mean_nm": -45.41,
+          "reserve_frame0_nm": -1.95,
+          "reserve_mean_abs_nm": 12.38,
+          "reserve_peak_abs_nm": 35.89,
+          "reserve_share": 0.0598
+        },
+        "hip_adduction_l": {
+          "id_demand_frame0_nm": 88.31,
+          "id_demand_mean_abs_nm": 158.32,
+          "id_demand_peak_abs_nm": 196.11,
+          "active_capacity_pos_mean_nm": 288.46,
+          "active_capacity_neg_mean_nm": -134.84,
+          "passive_moment_frame0_nm": 11.42,
+          "passive_moment_mean_nm": 7.43,
+          "reserve_frame0_nm": -5.23,
+          "reserve_mean_abs_nm": 4.43,
+          "reserve_peak_abs_nm": 10.67,
+          "reserve_share": 0.028
+        },
+        "hip_rotation_l": {
+          "id_demand_frame0_nm": -53.51,
+          "id_demand_mean_abs_nm": 99.52,
+          "id_demand_peak_abs_nm": 120.52,
+          "active_capacity_pos_mean_nm": 206.69,
+          "active_capacity_neg_mean_nm": -31.08,
+          "passive_moment_frame0_nm": 16.57,
+          "passive_moment_mean_nm": 14.65,
+          "reserve_frame0_nm": -44.56,
+          "reserve_mean_abs_nm": 90.63,
+          "reserve_peak_abs_nm": 114.9,
+          "reserve_share": 0.9106
+        },
+        "knee_angle_l": {
+          "id_demand_frame0_nm": -72.27,
+          "id_demand_mean_abs_nm": 25.31,
+          "id_demand_peak_abs_nm": 72.27,
+          "active_capacity_pos_mean_nm": 267.78,
+          "active_capacity_neg_mean_nm": -290.11,
+          "passive_moment_frame0_nm": 27.01,
+          "passive_moment_mean_nm": 23.14,
+          "reserve_frame0_nm": -0.01,
+          "reserve_mean_abs_nm": 0.01,
+          "reserve_peak_abs_nm": 0.01,
+          "reserve_share": 0.0003
+        },
+        "ankle_angle_l": {
+          "id_demand_frame0_nm": -57.42,
+          "id_demand_mean_abs_nm": 83.47,
+          "id_demand_peak_abs_nm": 111.9,
+          "active_capacity_pos_mean_nm": 73.78,
+          "active_capacity_neg_mean_nm": -345.94,
+          "passive_moment_frame0_nm": -26.18,
+          "passive_moment_mean_nm": -26.96,
+          "reserve_frame0_nm": 0.0,
+          "reserve_mean_abs_nm": 0.01,
+          "reserve_peak_abs_nm": 0.08,
+          "reserve_share": 0.0001
+        },
+        "subtalar_angle_l": {
+          "id_demand_frame0_nm": 39.38,
+          "id_demand_mean_abs_nm": 53.31,
+          "id_demand_peak_abs_nm": 68.17,
+          "active_capacity_pos_mean_nm": 92.29,
+          "active_capacity_neg_mean_nm": -46.48,
+          "passive_moment_frame0_nm": 3.86,
+          "passive_moment_mean_nm": 3.99,
+          "reserve_frame0_nm": 0.04,
+          "reserve_mean_abs_nm": 0.1,
+          "reserve_peak_abs_nm": 0.65,
+          "reserve_share": 0.0019
+        },
+        "mtp_angle_l": {
+          "id_demand_frame0_nm": -0.06,
+          "id_demand_mean_abs_nm": 0.04,
+          "id_demand_peak_abs_nm": 0.06,
+          "active_capacity_pos_mean_nm": 7.47,
+          "active_capacity_neg_mean_nm": -4.45,
+          "passive_moment_frame0_nm": 0.15,
+          "passive_moment_mean_nm": 0.15,
+          "reserve_frame0_nm": -0.06,
+          "reserve_mean_abs_nm": 0.15,
+          "reserve_peak_abs_nm": 1.02,
+          "reserve_share": 3.8299
+        }
+      },
+      "primary_reserve_drivers": [
+        "hip_rotation_r",
+        "hip_rotation_l",
+        "hip_flexion_r",
+        "hip_flexion_l"
+      ],
+      "bound_violations_or_pinned": {
+        "has_pinned_coordinates": false,
+        "warning": "An IK result pinned at a coordinate bound is not a credible posture.",
+        "pinned_coordinates": [],
+        "details": []
+      },
+      "hip_demand_asymmetry": {
+        "frame0_hip_demand_r_nm": -130.73,
+        "frame0_hip_demand_l_nm": -99.26,
+        "frame0_knee_demand_r_nm": -54.94,
+        "frame0_knee_demand_l_nm": -72.27,
+        "frame0_total_sagittal_r_nm": -185.68,
+        "frame0_total_sagittal_l_nm": -171.53,
+        "frame0_grf_vertical_l_n": 676.48,
+        "frame0_grf_vertical_r_n": 678.81,
+        "frame0_grf_anterior_shear_l_n": -58.04,
+        "frame0_grf_anterior_shear_r_n": -9.56,
+        "shear_differential_n": -48.49,
+        "cause": "Total sagittal leg extension demand at frame 0 is -185.68 N m right vs -171.53 N m left (7.62% apart), with vertical GRF 678.81 N right vs 676.48 N left. The hip-vs-knee split (hip -130.73 N m right vs -99.26 N m left; knee -54.94 N m right vs -72.27 N m left) follows the anterior-posterior ground shear: -58.04 N on the left foot vs -9.56 N on the right (a -48.49 N differential), which moves each GRF line of action and so trades knee extension demand for hip extension demand."
+      },
+      "moment_balance_max_error_nm": 8.526512829121202e-14,
+      "frames": 41,
+      "stride": 5,
+      "major_groups": {
+        "quadriceps": {
+          "n_muscles": 8,
+          "peak_activation": 1.0,
+          "mean_activation": 0.4366045148786313,
+          "peak_force_n": 4467.471601822253,
+          "mean_force_n": 1371.3980547313804
+        },
+        "gluteals": {
+          "n_muscles": 18,
+          "peak_activation": 1.0,
+          "mean_activation": 0.11884257465421279,
+          "peak_force_n": 830.9756563152816,
+          "mean_force_n": 131.37516919247008
+        },
+        "hamstrings": {
+          "n_muscles": 8,
+          "peak_activation": 1.0,
+          "mean_activation": 0.7498294769369609,
+          "peak_force_n": 1520.013842270393,
+          "mean_force_n": 704.8550712180604
+        },
+        "erector spinae": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "deltoids": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "trapezius": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "triceps": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        }
+      },
+      "phases": {
+        "pull (engine window 0.0-0.2 s)": {
+          "quadriceps": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.4366045148786313,
+            "peak_force_n": 4467.471601822253,
+            "mean_force_n": 1371.3980547313804
+          },
+          "gluteals": {
+            "n_muscles": 18,
+            "peak_activation": 1.0,
+            "mean_activation": 0.11884257465421279,
+            "peak_force_n": 830.9756563152816,
+            "mean_force_n": 131.37516919247008
+          },
+          "hamstrings": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.7498294769369609,
+            "peak_force_n": 1520.013842270393,
+            "mean_force_n": 704.8550712180604
+          },
+          "erector spinae": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "deltoids": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "trapezius": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "triceps": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          }
+        }
+      },
+      "moco": {
+        "solver": "opensim.MocoInverse/Ipopt (Hermite-Simpson, DGF2016, rigid tendon)",
+        "window_s": [0.0, 0.2],
+        "mesh_interval_s": 0.02,
+        "max_iterations": 20,
+        "wall_clock_s": 126.77385020256042,
+        "converged": false,
+        "status": "Maximum_Iterations_Exceeded",
+        "objective": 70844.77185739412,
+        "iterations": 20
+      },
+      "citation": "Rajagopal A, Dembia CL, DeMers MS, Delp DD, Hicks JL, Delp SL. Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human Gait. IEEE Trans Biomed Eng. 2016;63(10):2068-2079. doi:10.1109/TBME.2016.2586862"
     },
     "bench_press": {
       "lift": "bench_press",
-      "status": "unavailable",
+      "status": "complete",
       "classification": "unqualified",
-      "reason": "no LIFT-5 same-input bundle is registered for 'bench_press' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
-      "reserve_share": null,
-      "window_start_s": null,
-      "window_end_s": null,
-      "duration_s": null,
-      "start_pose": null,
-      "coordinate_breakdown": null,
-      "primary_reserve_drivers": null,
-      "bound_violations_or_pinned": null,
-      "hip_demand_asymmetry": null,
-      "major_groups": null,
-      "phases": null,
-      "moco": null
+      "reserve_share": 0.04710152744633638,
+      "mean_reserve_share": 0.06007078560851274,
+      "peak_reserve_share": 0.26319579072995863,
+      "residual_status": {
+        "forces_within": false,
+        "moments_within": false,
+        "measured_pelvis_residual_force_n": 511.5755,
+        "hicks_force_limit_n": 221.8473,
+        "measured_pelvis_residual_moment_nm": 318.3181,
+        "hicks_moment_limit_nm": 23.5421,
+        "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
+      },
+      "reserve_share_threshold": 0.05,
+      "window_start_s": 0.0,
+      "window_end_s": 0.2,
+      "duration_s": 0.2,
+      "start_pose": {
+        "hip_flexion_r_deg": -15.83,
+        "hip_flexion_l_deg": -16.58,
+        "knee_angle_r_deg": 95.5,
+        "knee_angle_l_deg": 94.08
+      },
+      "coordinate_breakdown": {
+        "hip_flexion_r": {
+          "id_demand_frame0_nm": -21.08,
+          "id_demand_mean_abs_nm": 36.32,
+          "id_demand_peak_abs_nm": 86.81,
+          "active_capacity_pos_mean_nm": 157.61,
+          "active_capacity_neg_mean_nm": -255.48,
+          "passive_moment_frame0_nm": 58.47,
+          "passive_moment_mean_nm": 55.53,
+          "reserve_frame0_nm": -7.4,
+          "reserve_mean_abs_nm": 1.03,
+          "reserve_peak_abs_nm": 7.4,
+          "reserve_share": 0.0284
+        },
+        "hip_adduction_r": {
+          "id_demand_frame0_nm": -1.55,
+          "id_demand_mean_abs_nm": 5.32,
+          "id_demand_peak_abs_nm": 28.0,
+          "active_capacity_pos_mean_nm": 267.33,
+          "active_capacity_neg_mean_nm": -243.23,
+          "passive_moment_frame0_nm": -18.35,
+          "passive_moment_mean_nm": -19.05,
+          "reserve_frame0_nm": -1.19,
+          "reserve_mean_abs_nm": 0.2,
+          "reserve_peak_abs_nm": 1.49,
+          "reserve_share": 0.0368
+        },
+        "hip_rotation_r": {
+          "id_demand_frame0_nm": -4.72,
+          "id_demand_mean_abs_nm": 2.98,
+          "id_demand_peak_abs_nm": 17.56,
+          "active_capacity_pos_mean_nm": 19.66,
+          "active_capacity_neg_mean_nm": -176.86,
+          "passive_moment_frame0_nm": -2.21,
+          "passive_moment_mean_nm": -2.94,
+          "reserve_frame0_nm": 17.01,
+          "reserve_mean_abs_nm": 3.46,
+          "reserve_peak_abs_nm": 22.57,
+          "reserve_share": 1.1643
+        },
+        "knee_angle_r": {
+          "id_demand_frame0_nm": -40.91,
+          "id_demand_mean_abs_nm": 12.73,
+          "id_demand_peak_abs_nm": 76.09,
+          "active_capacity_pos_mean_nm": 169.18,
+          "active_capacity_neg_mean_nm": -156.52,
+          "passive_moment_frame0_nm": -34.32,
+          "passive_moment_mean_nm": -31.66,
+          "reserve_frame0_nm": -0.0,
+          "reserve_mean_abs_nm": 0.03,
+          "reserve_peak_abs_nm": 0.04,
+          "reserve_share": 0.0024
+        },
+        "ankle_angle_r": {
+          "id_demand_frame0_nm": -24.21,
+          "id_demand_mean_abs_nm": 3.71,
+          "id_demand_peak_abs_nm": 24.21,
+          "active_capacity_pos_mean_nm": 75.87,
+          "active_capacity_neg_mean_nm": -317.47,
+          "passive_moment_frame0_nm": -20.85,
+          "passive_moment_mean_nm": -21.05,
+          "reserve_frame0_nm": 0.0,
+          "reserve_mean_abs_nm": 0.02,
+          "reserve_peak_abs_nm": 0.03,
+          "reserve_share": 0.0054
+        },
+        "subtalar_angle_r": {
+          "id_demand_frame0_nm": 9.5,
+          "id_demand_mean_abs_nm": 0.99,
+          "id_demand_peak_abs_nm": 9.5,
+          "active_capacity_pos_mean_nm": 89.34,
+          "active_capacity_neg_mean_nm": -47.15,
+          "passive_moment_frame0_nm": 3.13,
+          "passive_moment_mean_nm": 3.11,
+          "reserve_frame0_nm": 0.01,
+          "reserve_mean_abs_nm": 0.02,
+          "reserve_peak_abs_nm": 0.02,
+          "reserve_share": 0.0176
+        },
+        "mtp_angle_r": {
+          "id_demand_frame0_nm": -0.05,
+          "id_demand_mean_abs_nm": 0.05,
+          "id_demand_peak_abs_nm": 0.14,
+          "active_capacity_pos_mean_nm": 7.49,
+          "active_capacity_neg_mean_nm": -4.52,
+          "passive_moment_frame0_nm": 0.13,
+          "passive_moment_mean_nm": 0.14,
+          "reserve_frame0_nm": -0.02,
+          "reserve_mean_abs_nm": 0.08,
+          "reserve_peak_abs_nm": 0.11,
+          "reserve_share": 1.6469
+        },
+        "hip_flexion_l": {
+          "id_demand_frame0_nm": -18.72,
+          "id_demand_mean_abs_nm": 35.76,
+          "id_demand_peak_abs_nm": 81.83,
+          "active_capacity_pos_mean_nm": 147.92,
+          "active_capacity_neg_mean_nm": -232.54,
+          "passive_moment_frame0_nm": 59.33,
+          "passive_moment_mean_nm": 55.77,
+          "reserve_frame0_nm": -4.46,
+          "reserve_mean_abs_nm": 0.22,
+          "reserve_peak_abs_nm": 4.46,
+          "reserve_share": 0.0063
+        },
+        "hip_adduction_l": {
+          "id_demand_frame0_nm": 2.09,
+          "id_demand_mean_abs_nm": 4.41,
+          "id_demand_peak_abs_nm": 13.22,
+          "active_capacity_pos_mean_nm": 281.75,
+          "active_capacity_neg_mean_nm": -245.58,
+          "passive_moment_frame0_nm": -10.39,
+          "passive_moment_mean_nm": -10.87,
+          "reserve_frame0_nm": -0.57,
+          "reserve_mean_abs_nm": 0.03,
+          "reserve_peak_abs_nm": 0.57,
+          "reserve_share": 0.0068
+        },
+        "hip_rotation_l": {
+          "id_demand_frame0_nm": -11.87,
+          "id_demand_mean_abs_nm": 2.98,
+          "id_demand_peak_abs_nm": 11.87,
+          "active_capacity_pos_mean_nm": 18.75,
+          "active_capacity_neg_mean_nm": -164.97,
+          "passive_moment_frame0_nm": -0.24,
+          "passive_moment_mean_nm": -0.88,
+          "reserve_frame0_nm": 9.7,
+          "reserve_mean_abs_nm": 0.62,
+          "reserve_peak_abs_nm": 9.7,
+          "reserve_share": 0.21
+        },
+        "knee_angle_l": {
+          "id_demand_frame0_nm": -36.61,
+          "id_demand_mean_abs_nm": 12.97,
+          "id_demand_peak_abs_nm": 75.74,
+          "active_capacity_pos_mean_nm": 170.47,
+          "active_capacity_neg_mean_nm": -157.76,
+          "passive_moment_frame0_nm": -30.4,
+          "passive_moment_mean_nm": -27.85,
+          "reserve_frame0_nm": -0.0,
+          "reserve_mean_abs_nm": 0.03,
+          "reserve_peak_abs_nm": 0.04,
+          "reserve_share": 0.0021
+        },
+        "ankle_angle_l": {
+          "id_demand_frame0_nm": -24.61,
+          "id_demand_mean_abs_nm": 4.08,
+          "id_demand_peak_abs_nm": 24.61,
+          "active_capacity_pos_mean_nm": 75.91,
+          "active_capacity_neg_mean_nm": -323.13,
+          "passive_moment_frame0_nm": -20.3,
+          "passive_moment_mean_nm": -20.29,
+          "reserve_frame0_nm": 0.0,
+          "reserve_mean_abs_nm": 0.02,
+          "reserve_peak_abs_nm": 0.03,
+          "reserve_share": 0.0042
+        },
+        "subtalar_angle_l": {
+          "id_demand_frame0_nm": 10.18,
+          "id_demand_mean_abs_nm": 1.83,
+          "id_demand_peak_abs_nm": 10.18,
+          "active_capacity_pos_mean_nm": 90.05,
+          "active_capacity_neg_mean_nm": -47.15,
+          "passive_moment_frame0_nm": 3.05,
+          "passive_moment_mean_nm": 3.01,
+          "reserve_frame0_nm": 0.01,
+          "reserve_mean_abs_nm": 0.02,
+          "reserve_peak_abs_nm": 0.02,
+          "reserve_share": 0.0084
+        },
+        "mtp_angle_l": {
+          "id_demand_frame0_nm": -0.05,
+          "id_demand_mean_abs_nm": 0.05,
+          "id_demand_peak_abs_nm": 0.14,
+          "active_capacity_pos_mean_nm": 7.5,
+          "active_capacity_neg_mean_nm": -4.56,
+          "passive_moment_frame0_nm": 0.13,
+          "passive_moment_mean_nm": 0.14,
+          "reserve_frame0_nm": -0.02,
+          "reserve_mean_abs_nm": 0.07,
+          "reserve_peak_abs_nm": 0.1,
+          "reserve_share": 1.4091
+        }
+      },
+      "primary_reserve_drivers": [
+        "hip_rotation_r",
+        "hip_flexion_r",
+        "hip_rotation_l",
+        "hip_flexion_l"
+      ],
+      "bound_violations_or_pinned": {
+        "has_pinned_coordinates": false,
+        "warning": "An IK result pinned at a coordinate bound is not a credible posture.",
+        "pinned_coordinates": [],
+        "details": []
+      },
+      "hip_demand_asymmetry": {
+        "frame0_hip_demand_r_nm": -21.08,
+        "frame0_hip_demand_l_nm": -18.72,
+        "frame0_knee_demand_r_nm": -40.91,
+        "frame0_knee_demand_l_nm": -36.61,
+        "frame0_total_sagittal_r_nm": -61.99,
+        "frame0_total_sagittal_l_nm": -55.33,
+        "frame0_grf_vertical_l_n": 315.52,
+        "frame0_grf_vertical_r_n": 326.86,
+        "frame0_grf_anterior_shear_l_n": -20.97,
+        "frame0_grf_anterior_shear_r_n": -22.23,
+        "shear_differential_n": 1.26,
+        "cause": "Total sagittal leg extension demand at frame 0 is -61.99 N m right vs -55.33 N m left (10.74% apart), with vertical GRF 326.86 N right vs 315.52 N left. The hip-vs-knee split (hip -21.08 N m right vs -18.72 N m left; knee -40.91 N m right vs -36.61 N m left) follows the anterior-posterior ground shear: -20.97 N on the left foot vs -22.23 N on the right (a 1.26 N differential), which moves each GRF line of action and so trades knee extension demand for hip extension demand."
+      },
+      "moment_balance_max_error_nm": 2.842170943040401e-14,
+      "frames": 41,
+      "stride": 5,
+      "major_groups": {
+        "quadriceps": {
+          "n_muscles": 8,
+          "peak_activation": 0.5698141549053471,
+          "mean_activation": 0.02220218827239243,
+          "peak_force_n": 2551.4722661847095,
+          "mean_force_n": 465.47711190495494
+        },
+        "gluteals": {
+          "n_muscles": 18,
+          "peak_activation": 1.0,
+          "mean_activation": 0.07322297513381638,
+          "peak_force_n": 1046.4971198329347,
+          "mean_force_n": 66.68728413762551
+        },
+        "hamstrings": {
+          "n_muscles": 8,
+          "peak_activation": 1.0,
+          "mean_activation": 0.36285492176434536,
+          "peak_force_n": 445.3327711242773,
+          "mean_force_n": 137.49753392836757
+        },
+        "erector spinae": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "deltoids": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "trapezius": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "triceps": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        }
+      },
+      "phases": {
+        "unrack (engine window 0.0-0.2 s)": {
+          "quadriceps": {
+            "n_muscles": 8,
+            "peak_activation": 0.5698141549053471,
+            "mean_activation": 0.02220218827239243,
+            "peak_force_n": 2551.4722661847095,
+            "mean_force_n": 465.47711190495494
+          },
+          "gluteals": {
+            "n_muscles": 18,
+            "peak_activation": 1.0,
+            "mean_activation": 0.07322297513381638,
+            "peak_force_n": 1046.4971198329347,
+            "mean_force_n": 66.68728413762551
+          },
+          "hamstrings": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.36285492176434536,
+            "peak_force_n": 445.3327711242773,
+            "mean_force_n": 137.49753392836757
+          },
+          "erector spinae": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "deltoids": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "trapezius": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "triceps": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          }
+        }
+      },
+      "moco": {
+        "solver": "opensim.MocoInverse/Ipopt (Hermite-Simpson, DGF2016, rigid tendon)",
+        "window_s": [0.0, 0.2],
+        "mesh_interval_s": 0.02,
+        "max_iterations": 20,
+        "wall_clock_s": 85.8148500919342,
+        "converged": false,
+        "status": "Maximum_Iterations_Exceeded",
+        "objective": 904.6010831621893,
+        "iterations": 20
+      },
+      "citation": "Rajagopal A, Dembia CL, DeMers MS, Delp DD, Hicks JL, Delp SL. Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human Gait. IEEE Trans Biomed Eng. 2016;63(10):2068-2079. doi:10.1109/TBME.2016.2586862",
+      "external_loads": {
+        "bench": "shared-law back-sphere contact wrench of the bundle (VectorPlant), applied to torso (back_RPSH, back_LPSH) and pelvis (back_RPSI, back_LPSI) at the contact points",
+        "feet": "GCV-1 foot wrench of the bundle's shared-law contact (kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
+        "hands": "GCV-7 per-hand bushing wrench of the bundle bar (BushingSample.grip_analysis), negated onto hand_l/hand_r at the model's grip point; the barbell body is massless in ID",
+        "model_forces": "removed (muscles, actuators, contact); gravity kept"
+      },
+      "limitations": [
+        "RajagopalLaiUhlrich2023 includes 80 lower-limb muscles only. Upper-limb coordinates (arm_flex_r/l, arm_add_r/l, arm_rot_r/l, elbow_flex_r/l, pro_sup_r/l, wrist_flex_r/l, wrist_dev_r/l) have 0 muscles in this model and are driven 100% by coordinate/reserve actuators; arm and chest muscle forces were not solved."
+      ]
     },
     "snatch": {
       "lift": "snatch",
-      "status": "unavailable",
+      "status": "complete",
       "classification": "unqualified",
-      "reason": "no LIFT-5 same-input bundle is registered for 'snatch' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
-      "reserve_share": null,
-      "window_start_s": null,
-      "window_end_s": null,
-      "duration_s": null,
-      "start_pose": null,
-      "coordinate_breakdown": null,
-      "primary_reserve_drivers": null,
-      "bound_violations_or_pinned": null,
-      "hip_demand_asymmetry": null,
-      "major_groups": null,
-      "phases": null,
-      "moco": null
+      "reserve_share": 0.4222209033235543,
+      "mean_reserve_share": 0.3773135579419738,
+      "peak_reserve_share": 0.7133828928082467,
+      "residual_status": {
+        "forces_within": false,
+        "moments_within": false,
+        "measured_pelvis_residual_force_n": 463.2145,
+        "hicks_force_limit_n": 155.1218,
+        "measured_pelvis_residual_moment_nm": 202.6203,
+        "hicks_moment_limit_nm": 27.0955,
+        "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
+      },
+      "reserve_share_threshold": 0.05,
+      "window_start_s": 0.0,
+      "window_end_s": 0.2,
+      "duration_s": 0.2,
+      "start_pose": {
+        "hip_flexion_r_deg": 90.15,
+        "hip_flexion_l_deg": 90.23,
+        "knee_angle_r_deg": 56.09,
+        "knee_angle_l_deg": 54.97
+      },
+      "coordinate_breakdown": {
+        "hip_flexion_r": {
+          "id_demand_frame0_nm": -98.11,
+          "id_demand_mean_abs_nm": 515.32,
+          "id_demand_peak_abs_nm": 852.96,
+          "active_capacity_pos_mean_nm": 153.88,
+          "active_capacity_neg_mean_nm": -246.89,
+          "passive_moment_frame0_nm": -68.39,
+          "passive_moment_mean_nm": -69.28,
+          "reserve_frame0_nm": 5.72,
+          "reserve_mean_abs_nm": 239.93,
+          "reserve_peak_abs_nm": 534.56,
+          "reserve_share": 0.4656
+        },
+        "hip_adduction_r": {
+          "id_demand_frame0_nm": 188.32,
+          "id_demand_mean_abs_nm": 129.4,
+          "id_demand_peak_abs_nm": 293.09,
+          "active_capacity_pos_mean_nm": 265.57,
+          "active_capacity_neg_mean_nm": -122.89,
+          "passive_moment_frame0_nm": 15.1,
+          "passive_moment_mean_nm": 12.97,
+          "reserve_frame0_nm": 3.31,
+          "reserve_mean_abs_nm": 35.12,
+          "reserve_peak_abs_nm": 79.69,
+          "reserve_share": 0.2714
+        },
+        "hip_rotation_r": {
+          "id_demand_frame0_nm": -80.95,
+          "id_demand_mean_abs_nm": 45.49,
+          "id_demand_peak_abs_nm": 109.59,
+          "active_capacity_pos_mean_nm": 195.35,
+          "active_capacity_neg_mean_nm": -28.29,
+          "passive_moment_frame0_nm": 19.37,
+          "passive_moment_mean_nm": 16.99,
+          "reserve_frame0_nm": -69.95,
+          "reserve_mean_abs_nm": 68.65,
+          "reserve_peak_abs_nm": 128.58,
+          "reserve_share": 1.5093
+        },
+        "knee_angle_r": {
+          "id_demand_frame0_nm": -37.53,
+          "id_demand_mean_abs_nm": 183.01,
+          "id_demand_peak_abs_nm": 310.49,
+          "active_capacity_pos_mean_nm": 237.17,
+          "active_capacity_neg_mean_nm": -289.27,
+          "passive_moment_frame0_nm": 45.75,
+          "passive_moment_mean_nm": 47.53,
+          "reserve_frame0_nm": -0.01,
+          "reserve_mean_abs_nm": 6.66,
+          "reserve_peak_abs_nm": 41.64,
+          "reserve_share": 0.0364
+        },
+        "ankle_angle_r": {
+          "id_demand_frame0_nm": -58.58,
+          "id_demand_mean_abs_nm": 130.82,
+          "id_demand_peak_abs_nm": 196.29,
+          "active_capacity_pos_mean_nm": 90.48,
+          "active_capacity_neg_mean_nm": -390.61,
+          "passive_moment_frame0_nm": -14.62,
+          "passive_moment_mean_nm": -13.94,
+          "reserve_frame0_nm": 0.0,
+          "reserve_mean_abs_nm": 0.03,
+          "reserve_peak_abs_nm": 0.68,
+          "reserve_share": 0.0002
+        },
+        "subtalar_angle_r": {
+          "id_demand_frame0_nm": 46.12,
+          "id_demand_mean_abs_nm": 38.95,
+          "id_demand_peak_abs_nm": 55.12,
+          "active_capacity_pos_mean_nm": 100.02,
+          "active_capacity_neg_mean_nm": -48.72,
+          "passive_moment_frame0_nm": 2.25,
+          "passive_moment_mean_nm": 2.13,
+          "reserve_frame0_nm": 0.04,
+          "reserve_mean_abs_nm": 0.03,
+          "reserve_peak_abs_nm": 0.12,
+          "reserve_share": 0.0007
+        },
+        "mtp_angle_r": {
+          "id_demand_frame0_nm": -0.06,
+          "id_demand_mean_abs_nm": 0.04,
+          "id_demand_peak_abs_nm": 0.09,
+          "active_capacity_pos_mean_nm": 7.27,
+          "active_capacity_neg_mean_nm": -5.34,
+          "passive_moment_frame0_nm": 0.08,
+          "passive_moment_mean_nm": 0.07,
+          "reserve_frame0_nm": -0.06,
+          "reserve_mean_abs_nm": 0.12,
+          "reserve_peak_abs_nm": 1.67,
+          "reserve_share": 2.7043
+        },
+        "hip_flexion_l": {
+          "id_demand_frame0_nm": -101.8,
+          "id_demand_mean_abs_nm": 256.86,
+          "id_demand_peak_abs_nm": 773.13,
+          "active_capacity_pos_mean_nm": 121.61,
+          "active_capacity_neg_mean_nm": -238.63,
+          "passive_moment_frame0_nm": -86.18,
+          "passive_moment_mean_nm": -99.91,
+          "reserve_frame0_nm": 10.01,
+          "reserve_mean_abs_nm": 132.2,
+          "reserve_peak_abs_nm": 466.11,
+          "reserve_share": 0.5147
+        },
+        "hip_adduction_l": {
+          "id_demand_frame0_nm": 185.2,
+          "id_demand_mean_abs_nm": 161.26,
+          "id_demand_peak_abs_nm": 698.53,
+          "active_capacity_pos_mean_nm": 274.14,
+          "active_capacity_neg_mean_nm": -121.67,
+          "passive_moment_frame0_nm": 22.92,
+          "passive_moment_mean_nm": 26.35,
+          "reserve_frame0_nm": 4.38,
+          "reserve_mean_abs_nm": 70.68,
+          "reserve_peak_abs_nm": 607.24,
+          "reserve_share": 0.4383
+        },
+        "hip_rotation_l": {
+          "id_demand_frame0_nm": -83.58,
+          "id_demand_mean_abs_nm": 60.04,
+          "id_demand_peak_abs_nm": 230.03,
+          "active_capacity_pos_mean_nm": 198.09,
+          "active_capacity_neg_mean_nm": -26.28,
+          "passive_moment_frame0_nm": 13.67,
+          "passive_moment_mean_nm": 10.73,
+          "reserve_frame0_nm": -69.14,
+          "reserve_mean_abs_nm": 53.06,
+          "reserve_peak_abs_nm": 111.67,
+          "reserve_share": 0.8838
+        },
+        "knee_angle_l": {
+          "id_demand_frame0_nm": -31.89,
+          "id_demand_mean_abs_nm": 198.58,
+          "id_demand_peak_abs_nm": 524.99,
+          "active_capacity_pos_mean_nm": 212.43,
+          "active_capacity_neg_mean_nm": -245.58,
+          "passive_moment_frame0_nm": 61.38,
+          "passive_moment_mean_nm": 85.88,
+          "reserve_frame0_nm": -0.01,
+          "reserve_mean_abs_nm": 103.98,
+          "reserve_peak_abs_nm": 457.82,
+          "reserve_share": 0.5236
+        },
+        "ankle_angle_l": {
+          "id_demand_frame0_nm": -58.74,
+          "id_demand_mean_abs_nm": 60.07,
+          "id_demand_peak_abs_nm": 116.56,
+          "active_capacity_pos_mean_nm": 57.16,
+          "active_capacity_neg_mean_nm": -348.91,
+          "passive_moment_frame0_nm": -13.85,
+          "passive_moment_mean_nm": -48.86,
+          "reserve_frame0_nm": 0.0,
+          "reserve_mean_abs_nm": 45.2,
+          "reserve_peak_abs_nm": 195.6,
+          "reserve_share": 0.7524
+        },
+        "subtalar_angle_l": {
+          "id_demand_frame0_nm": 46.0,
+          "id_demand_mean_abs_nm": 24.16,
+          "id_demand_peak_abs_nm": 56.3,
+          "active_capacity_pos_mean_nm": 90.52,
+          "active_capacity_neg_mean_nm": -47.31,
+          "passive_moment_frame0_nm": 2.15,
+          "passive_moment_mean_nm": 7.25,
+          "reserve_frame0_nm": 0.04,
+          "reserve_mean_abs_nm": 4.85,
+          "reserve_peak_abs_nm": 17.44,
+          "reserve_share": 0.2009
+        },
+        "mtp_angle_l": {
+          "id_demand_frame0_nm": -0.06,
+          "id_demand_mean_abs_nm": 0.29,
+          "id_demand_peak_abs_nm": 1.55,
+          "active_capacity_pos_mean_nm": 7.76,
+          "active_capacity_neg_mean_nm": -3.66,
+          "passive_moment_frame0_nm": 0.07,
+          "passive_moment_mean_nm": 0.15,
+          "reserve_frame0_nm": -0.06,
+          "reserve_mean_abs_nm": 1.3,
+          "reserve_peak_abs_nm": 5.22,
+          "reserve_share": 4.4827
+        }
+      },
+      "primary_reserve_drivers": [
+        "hip_flexion_r",
+        "hip_flexion_l",
+        "knee_angle_l",
+        "hip_adduction_l"
+      ],
+      "bound_violations_or_pinned": {
+        "has_pinned_coordinates": false,
+        "warning": "An IK result pinned at a coordinate bound is not a credible posture.",
+        "pinned_coordinates": [],
+        "details": []
+      },
+      "hip_demand_asymmetry": {
+        "frame0_hip_demand_r_nm": -98.11,
+        "frame0_hip_demand_l_nm": -101.8,
+        "frame0_knee_demand_r_nm": -37.53,
+        "frame0_knee_demand_l_nm": -31.89,
+        "frame0_total_sagittal_r_nm": -135.64,
+        "frame0_total_sagittal_l_nm": -133.7,
+        "frame0_grf_vertical_l_n": 675.11,
+        "frame0_grf_vertical_r_n": 680.45,
+        "frame0_grf_anterior_shear_l_n": -75.3,
+        "frame0_grf_anterior_shear_r_n": -71.45,
+        "shear_differential_n": -3.85,
+        "cause": "Total sagittal leg extension demand at frame 0 is -135.64 N m right vs -133.70 N m left (1.43% apart), with vertical GRF 680.45 N right vs 675.11 N left. The hip-vs-knee split (hip -98.11 N m right vs -101.80 N m left; knee -37.53 N m right vs -31.89 N m left) follows the anterior-posterior ground shear: -75.30 N on the left foot vs -71.45 N on the right (a -3.85 N differential), which moves each GRF line of action and so trades knee extension demand for hip extension demand."
+      },
+      "moment_balance_max_error_nm": 1.1368683772161603e-13,
+      "frames": 41,
+      "stride": 5,
+      "major_groups": {
+        "quadriceps": {
+          "n_muscles": 8,
+          "peak_activation": 1.0,
+          "mean_activation": 0.4052585373830207,
+          "peak_force_n": 3947.110588719631,
+          "mean_force_n": 723.2800989368777
+        },
+        "gluteals": {
+          "n_muscles": 18,
+          "peak_activation": 1.0,
+          "mean_activation": 0.29653675437070215,
+          "peak_force_n": 1192.4482206201778,
+          "mean_force_n": 239.13175835094438
+        },
+        "hamstrings": {
+          "n_muscles": 8,
+          "peak_activation": 1.0,
+          "mean_activation": 0.6308431214583836,
+          "peak_force_n": 2039.7209763571002,
+          "mean_force_n": 738.1159144219197
+        },
+        "erector spinae": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "deltoids": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "trapezius": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "triceps": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        }
+      },
+      "phases": {
+        "pull (engine window 0.0-0.2 s)": {
+          "quadriceps": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.4052585373830207,
+            "peak_force_n": 3947.110588719631,
+            "mean_force_n": 723.2800989368777
+          },
+          "gluteals": {
+            "n_muscles": 18,
+            "peak_activation": 1.0,
+            "mean_activation": 0.29653675437070215,
+            "peak_force_n": 1192.4482206201778,
+            "mean_force_n": 239.13175835094438
+          },
+          "hamstrings": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.6308431214583836,
+            "peak_force_n": 2039.7209763571002,
+            "mean_force_n": 738.1159144219197
+          },
+          "erector spinae": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "deltoids": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "trapezius": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "triceps": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          }
+        }
+      },
+      "moco": {
+        "solver": "opensim.MocoInverse/Ipopt (Hermite-Simpson, DGF2016, rigid tendon)",
+        "window_s": [0.0, 0.2],
+        "mesh_interval_s": 0.02,
+        "max_iterations": 20,
+        "wall_clock_s": 127.47504496574402,
+        "converged": false,
+        "status": "Maximum_Iterations_Exceeded",
+        "objective": 451694.0433909149,
+        "iterations": 20
+      },
+      "citation": "Rajagopal A, Dembia CL, DeMers MS, Delp DD, Hicks JL, Delp SL. Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human Gait. IEEE Trans Biomed Eng. 2016;63(10):2068-2079. doi:10.1109/TBME.2016.2586862"
     },
     "clean_and_jerk": {
       "lift": "clean_and_jerk",
-      "status": "unavailable",
+      "status": "complete",
       "classification": "unqualified",
-      "reason": "no LIFT-5 same-input bundle is registered for 'clean_and_jerk' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
-      "reserve_share": null,
-      "window_start_s": null,
-      "window_end_s": null,
-      "duration_s": null,
-      "start_pose": null,
-      "coordinate_breakdown": null,
-      "primary_reserve_drivers": null,
-      "bound_violations_or_pinned": null,
-      "hip_demand_asymmetry": null,
-      "major_groups": null,
-      "phases": null,
-      "moco": null
+      "reserve_share": 0.44390925569190703,
+      "mean_reserve_share": 0.38904123267634905,
+      "peak_reserve_share": 0.5854282645336873,
+      "residual_status": {
+        "forces_within": false,
+        "moments_within": false,
+        "measured_pelvis_residual_force_n": 458.5601,
+        "hicks_force_limit_n": 223.0952,
+        "measured_pelvis_residual_moment_nm": 259.0016,
+        "hicks_moment_limit_nm": 38.7681,
+        "reference": "Hicks et al. 2015, J Biomech Eng 137:020905"
+      },
+      "reserve_share_threshold": 0.05,
+      "window_start_s": 0.0,
+      "window_end_s": 0.2,
+      "duration_s": 0.2,
+      "start_pose": {
+        "hip_flexion_r_deg": 98.94,
+        "hip_flexion_l_deg": 98.94,
+        "knee_angle_r_deg": 53.96,
+        "knee_angle_l_deg": 52.7
+      },
+      "coordinate_breakdown": {
+        "hip_flexion_r": {
+          "id_demand_frame0_nm": -86.8,
+          "id_demand_mean_abs_nm": 437.95,
+          "id_demand_peak_abs_nm": 793.82,
+          "active_capacity_pos_mean_nm": 173.03,
+          "active_capacity_neg_mean_nm": -188.12,
+          "passive_moment_frame0_nm": -86.38,
+          "passive_moment_mean_nm": -65.48,
+          "reserve_frame0_nm": 9.57,
+          "reserve_mean_abs_nm": 234.78,
+          "reserve_peak_abs_nm": 538.35,
+          "reserve_share": 0.5361
+        },
+        "hip_adduction_r": {
+          "id_demand_frame0_nm": 167.43,
+          "id_demand_mean_abs_nm": 434.52,
+          "id_demand_peak_abs_nm": 685.53,
+          "active_capacity_pos_mean_nm": 237.89,
+          "active_capacity_neg_mean_nm": -120.32,
+          "passive_moment_frame0_nm": 32.91,
+          "passive_moment_mean_nm": 15.36,
+          "reserve_frame0_nm": 4.24,
+          "reserve_mean_abs_nm": 242.97,
+          "reserve_peak_abs_nm": 506.09,
+          "reserve_share": 0.5592
+        },
+        "hip_rotation_r": {
+          "id_demand_frame0_nm": -65.41,
+          "id_demand_mean_abs_nm": 128.84,
+          "id_demand_peak_abs_nm": 247.8,
+          "active_capacity_pos_mean_nm": 190.64,
+          "active_capacity_neg_mean_nm": -24.78,
+          "passive_moment_frame0_nm": 21.96,
+          "passive_moment_mean_nm": 16.42,
+          "reserve_frame0_nm": -59.53,
+          "reserve_mean_abs_nm": 135.69,
+          "reserve_peak_abs_nm": 258.6,
+          "reserve_share": 1.0531
+        },
+        "knee_angle_r": {
+          "id_demand_frame0_nm": -45.5,
+          "id_demand_mean_abs_nm": 134.43,
+          "id_demand_peak_abs_nm": 216.2,
+          "active_capacity_pos_mean_nm": 215.01,
+          "active_capacity_neg_mean_nm": -266.5,
+          "passive_moment_frame0_nm": 73.76,
+          "passive_moment_mean_nm": 51.85,
+          "reserve_frame0_nm": -0.01,
+          "reserve_mean_abs_nm": 0.22,
+          "reserve_peak_abs_nm": 0.84,
+          "reserve_share": 0.0016
+        },
+        "ankle_angle_r": {
+          "id_demand_frame0_nm": -54.58,
+          "id_demand_mean_abs_nm": 133.62,
+          "id_demand_peak_abs_nm": 166.5,
+          "active_capacity_pos_mean_nm": 91.24,
+          "active_capacity_neg_mean_nm": -419.4,
+          "passive_moment_frame0_nm": -11.81,
+          "passive_moment_mean_nm": -12.96,
+          "reserve_frame0_nm": 0.0,
+          "reserve_mean_abs_nm": 0.58,
+          "reserve_peak_abs_nm": 1.67,
+          "reserve_share": 0.0043
+        },
+        "subtalar_angle_r": {
+          "id_demand_frame0_nm": 43.81,
+          "id_demand_mean_abs_nm": 79.98,
+          "id_demand_peak_abs_nm": 100.85,
+          "active_capacity_pos_mean_nm": 103.3,
+          "active_capacity_neg_mean_nm": -49.13,
+          "passive_moment_frame0_nm": 1.82,
+          "passive_moment_mean_nm": 1.95,
+          "reserve_frame0_nm": 0.03,
+          "reserve_mean_abs_nm": 5.01,
+          "reserve_peak_abs_nm": 14.23,
+          "reserve_share": 0.0626
+        },
+        "mtp_angle_r": {
+          "id_demand_frame0_nm": -0.09,
+          "id_demand_mean_abs_nm": 0.03,
+          "id_demand_peak_abs_nm": 0.09,
+          "active_capacity_pos_mean_nm": 7.28,
+          "active_capacity_neg_mean_nm": -5.4,
+          "passive_moment_frame0_nm": 0.06,
+          "passive_moment_mean_nm": 0.05,
+          "reserve_frame0_nm": -0.05,
+          "reserve_mean_abs_nm": 3.3,
+          "reserve_peak_abs_nm": 5.99,
+          "reserve_share": 103.9714
+        },
+        "hip_flexion_l": {
+          "id_demand_frame0_nm": -104.41,
+          "id_demand_mean_abs_nm": 468.32,
+          "id_demand_peak_abs_nm": 800.2,
+          "active_capacity_pos_mean_nm": 142.38,
+          "active_capacity_neg_mean_nm": -182.24,
+          "passive_moment_frame0_nm": -107.17,
+          "passive_moment_mean_nm": -86.7,
+          "reserve_frame0_nm": 9.79,
+          "reserve_mean_abs_nm": 244.76,
+          "reserve_peak_abs_nm": 531.74,
+          "reserve_share": 0.5226
+        },
+        "hip_adduction_l": {
+          "id_demand_frame0_nm": 176.52,
+          "id_demand_mean_abs_nm": 398.85,
+          "id_demand_peak_abs_nm": 620.52,
+          "active_capacity_pos_mean_nm": 253.27,
+          "active_capacity_neg_mean_nm": -117.11,
+          "passive_moment_frame0_nm": 38.44,
+          "passive_moment_mean_nm": 25.29,
+          "reserve_frame0_nm": 4.73,
+          "reserve_mean_abs_nm": 200.12,
+          "reserve_peak_abs_nm": 430.35,
+          "reserve_share": 0.5017
+        },
+        "hip_rotation_l": {
+          "id_demand_frame0_nm": -75.37,
+          "id_demand_mean_abs_nm": 122.84,
+          "id_demand_peak_abs_nm": 235.84,
+          "active_capacity_pos_mean_nm": 192.15,
+          "active_capacity_neg_mean_nm": -24.19,
+          "passive_moment_frame0_nm": 15.82,
+          "passive_moment_mean_nm": 11.08,
+          "reserve_frame0_nm": -65.5,
+          "reserve_mean_abs_nm": 127.38,
+          "reserve_peak_abs_nm": 243.86,
+          "reserve_share": 1.0369
+        },
+        "knee_angle_l": {
+          "id_demand_frame0_nm": -30.25,
+          "id_demand_mean_abs_nm": 156.36,
+          "id_demand_peak_abs_nm": 235.17,
+          "active_capacity_pos_mean_nm": 203.22,
+          "active_capacity_neg_mean_nm": -248.66,
+          "passive_moment_frame0_nm": 94.68,
+          "passive_moment_mean_nm": 69.52,
+          "reserve_frame0_nm": -0.01,
+          "reserve_mean_abs_nm": 0.17,
+          "reserve_peak_abs_nm": 0.7,
+          "reserve_share": 0.0011
+        },
+        "ankle_angle_l": {
+          "id_demand_frame0_nm": -56.21,
+          "id_demand_mean_abs_nm": 135.29,
+          "id_demand_peak_abs_nm": 166.7,
+          "active_capacity_pos_mean_nm": 90.72,
+          "active_capacity_neg_mean_nm": -426.55,
+          "passive_moment_frame0_nm": -11.11,
+          "passive_moment_mean_nm": -12.51,
+          "reserve_frame0_nm": 0.0,
+          "reserve_mean_abs_nm": 0.44,
+          "reserve_peak_abs_nm": 1.36,
+          "reserve_share": 0.0033
+        },
+        "subtalar_angle_l": {
+          "id_demand_frame0_nm": 44.45,
+          "id_demand_mean_abs_nm": 77.58,
+          "id_demand_peak_abs_nm": 97.51,
+          "active_capacity_pos_mean_nm": 104.08,
+          "active_capacity_neg_mean_nm": -49.09,
+          "passive_moment_frame0_nm": 1.73,
+          "passive_moment_mean_nm": 1.88,
+          "reserve_frame0_nm": 0.03,
+          "reserve_mean_abs_nm": 3.85,
+          "reserve_peak_abs_nm": 11.7,
+          "reserve_share": 0.0497
+        },
+        "mtp_angle_l": {
+          "id_demand_frame0_nm": -0.09,
+          "id_demand_mean_abs_nm": 0.03,
+          "id_demand_peak_abs_nm": 0.09,
+          "active_capacity_pos_mean_nm": 7.3,
+          "active_capacity_neg_mean_nm": -5.41,
+          "passive_moment_frame0_nm": 0.05,
+          "passive_moment_mean_nm": 0.05,
+          "reserve_frame0_nm": -0.05,
+          "reserve_mean_abs_nm": 3.14,
+          "reserve_peak_abs_nm": 5.91,
+          "reserve_share": 98.2904
+        }
+      },
+      "primary_reserve_drivers": [
+        "hip_flexion_l",
+        "hip_adduction_r",
+        "hip_flexion_r",
+        "hip_adduction_l"
+      ],
+      "bound_violations_or_pinned": {
+        "has_pinned_coordinates": false,
+        "warning": "An IK result pinned at a coordinate bound is not a credible posture.",
+        "pinned_coordinates": [],
+        "details": []
+      },
+      "hip_demand_asymmetry": {
+        "frame0_hip_demand_r_nm": -86.8,
+        "frame0_hip_demand_l_nm": -104.41,
+        "frame0_knee_demand_r_nm": -45.5,
+        "frame0_knee_demand_l_nm": -30.25,
+        "frame0_total_sagittal_r_nm": -132.3,
+        "frame0_total_sagittal_l_nm": -134.67,
+        "frame0_grf_vertical_l_n": 676.66,
+        "frame0_grf_vertical_r_n": 682.83,
+        "frame0_grf_anterior_shear_l_n": -107.41,
+        "frame0_grf_anterior_shear_r_n": -120.79,
+        "shear_differential_n": 13.38,
+        "cause": "Total sagittal leg extension demand at frame 0 is -132.30 N m right vs -134.67 N m left (1.76% apart), with vertical GRF 682.83 N right vs 676.66 N left. The hip-vs-knee split (hip -86.80 N m right vs -104.41 N m left; knee -45.50 N m right vs -30.25 N m left) follows the anterior-posterior ground shear: -107.41 N on the left foot vs -120.79 N on the right (a 13.38 N differential), which moves each GRF line of action and so trades knee extension demand for hip extension demand."
+      },
+      "moment_balance_max_error_nm": 1.1368683772161603e-13,
+      "frames": 41,
+      "stride": 5,
+      "major_groups": {
+        "quadriceps": {
+          "n_muscles": 8,
+          "peak_activation": 1.0,
+          "mean_activation": 0.11322763329294461,
+          "peak_force_n": 3684.7448159793903,
+          "mean_force_n": 279.48914735948625
+        },
+        "gluteals": {
+          "n_muscles": 18,
+          "peak_activation": 1.0,
+          "mean_activation": 0.1969303877178583,
+          "peak_force_n": 1050.374084186596,
+          "mean_force_n": 164.8035275752517
+        },
+        "hamstrings": {
+          "n_muscles": 8,
+          "peak_activation": 1.0,
+          "mean_activation": 0.856014868849041,
+          "peak_force_n": 2101.938291055487,
+          "mean_force_n": 739.5224680808641
+        },
+        "erector spinae": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "deltoids": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "trapezius": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "triceps": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        }
+      },
+      "phases": {
+        "pull (engine window 0.0-0.2 s)": {
+          "quadriceps": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.11322763329294461,
+            "peak_force_n": 3684.7448159793903,
+            "mean_force_n": 279.48914735948625
+          },
+          "gluteals": {
+            "n_muscles": 18,
+            "peak_activation": 1.0,
+            "mean_activation": 0.1969303877178583,
+            "peak_force_n": 1050.374084186596,
+            "mean_force_n": 164.8035275752517
+          },
+          "hamstrings": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.856014868849041,
+            "peak_force_n": 2101.938291055487,
+            "mean_force_n": 739.5224680808641
+          },
+          "erector spinae": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "deltoids": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "trapezius": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "triceps": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          }
+        }
+      },
+      "moco": {
+        "solver": "opensim.MocoInverse/Ipopt (Hermite-Simpson, DGF2016, rigid tendon)",
+        "window_s": [0.0, 0.2],
+        "mesh_interval_s": 0.02,
+        "max_iterations": 20,
+        "wall_clock_s": 137.85799622535706,
+        "converged": false,
+        "status": "Maximum_Iterations_Exceeded",
+        "objective": 378883.9198532359,
+        "iterations": 20
+      },
+      "citation": "Rajagopal A, Dembia CL, DeMers MS, Delp DD, Hicks JL, Delp SL. Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human Gait. IEEE Trans Biomed Eng. 2016;63(10):2068-2079. doi:10.1109/TBME.2016.2586862"
     }
   }
 }
