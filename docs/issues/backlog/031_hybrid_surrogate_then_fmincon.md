@@ -21,10 +21,10 @@ is the most likely production path: train once, fit many.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\hybrid_surrogate_polish.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\result_io.py` (writes the canonical result struct in a format `leaderboard.m` can read)
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option2\test_hybrid_surrogate_polish.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option2\test_result_io.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\hybrid_surrogate_polish.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\result_io.py` (writes the canonical result struct in a format `leaderboard.m` can read)
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option2\test_hybrid_surrogate_polish.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option2\test_result_io.py`
 
 ## Public API
 

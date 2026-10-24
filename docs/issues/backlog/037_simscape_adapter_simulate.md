@@ -23,13 +23,13 @@ just another engine.
 
 ## File targets
 
-- Modify: `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\simscape_adapter.py` (replace stubs with real implementations)
-- New: `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\engine_startup.py` (lazy `matlab.engine.start_matlab` with timeout and license error wrapping)
-- New: `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\logsout_to_simscape_output.py` (turns the flat-double struct returned by `simulate_with_coefficients.m` into a `SimscapeOutput` numpy view)
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\test_simscape_adapter_simulate.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\test_engine_startup.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\test_logsout_conversion.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\fixtures\sample_logsout.json` (captured from a real MATLAB run for offline testing)
+- Modify: `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\simscape_adapter.py` (replace stubs with real implementations)
+- New: `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\engine_startup.py` (lazy `matlab.engine.start_matlab` with timeout and license error wrapping)
+- New: `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\logsout_to_simscape_output.py` (turns the flat-double struct returned by `simulate_with_coefficients.m` into a `SimscapeOutput` numpy view)
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\test_simscape_adapter_simulate.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\test_engine_startup.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\test_logsout_conversion.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\fixtures\sample_logsout.json` (captured from a real MATLAB run for offline testing)
 
 ## Public API
 

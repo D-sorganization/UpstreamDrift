@@ -20,12 +20,12 @@ without these diagnostics it is invisible until production.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\inverse_diagnostics.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\latent_projection.py` (UMAP/t-SNE wrapper)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\diversity_metrics.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option3\test_inverse_diagnostics.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option3\test_latent_projection.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option3\test_diversity_metrics.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\inverse_diagnostics.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\latent_projection.py` (UMAP/t-SNE wrapper)
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\diversity_metrics.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option3\test_inverse_diagnostics.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option3\test_latent_projection.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option3\test_diversity_metrics.py`
 
 ## Public API
 

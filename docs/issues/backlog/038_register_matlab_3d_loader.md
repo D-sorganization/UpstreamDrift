@@ -21,11 +21,11 @@ Option 4 "just another engine" from the perspective of `system_identification`,
 
 ## File targets
 
-- New: `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\loader.py`
-- Modify: `C:\Users\diete\Repositories\UpstreamDrift\src\engines\loaders.py` (add `load_matlab_3d_engine` and entry to `LOADER_MAP`)
-- New: `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\test_loader.py`
-- New: `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\test_loaders_registry_integration.py`
-- Modify: `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\INSTALLATION.md` (link from `loaders.py` docstring)
+- New: `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\loader.py`
+- Modify: `<owner-home>\Repositories\UpstreamDrift\src\engines\loaders.py` (add `load_matlab_3d_engine` and entry to `LOADER_MAP`)
+- New: `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\test_loader.py`
+- New: `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\test_loaders_registry_integration.py`
+- Modify: `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\INSTALLATION.md` (link from `loaders.py` docstring)
 
 ## Public API
 

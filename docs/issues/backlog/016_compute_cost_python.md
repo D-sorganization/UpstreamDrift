@@ -22,12 +22,12 @@ become meaningless.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\motion_matching\__init__.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\motion_matching\cost.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\motion_matching\options.py` (`CostOptions` dataclass)
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\test_cost.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\test_cost_cross_check_matlab.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\fixtures\matlab_cost_reference.json` (precomputed MATLAB outputs for fixed `(theta, target, opts)` triples)
+- `<owner-home>\Repositories\UpstreamDrift\src\shared\python\motion_matching\__init__.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\shared\python\motion_matching\cost.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\shared\python\motion_matching\options.py` (`CostOptions` dataclass)
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\test_cost.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\test_cost_cross_check_matlab.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\fixtures\matlab_cost_reference.json` (precomputed MATLAB outputs for fixed `(theta, target, opts)` triples)
 
 ## Public API
 

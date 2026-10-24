@@ -20,9 +20,9 @@ This is the bridge equivalent of the parsim option in MATLAB-side multistart (#0
 
 ## File targets
 
-- New: `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\simscape_adapter_pool.py`
-- New: `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\worker.py` (subprocess entry point)
-- New: `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\test_simscape_adapter_pool.py`
+- New: `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\simscape_adapter_pool.py`
+- New: `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\worker.py` (subprocess entry point)
+- New: `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\test_simscape_adapter_pool.py`
 
 ## Public API
 
