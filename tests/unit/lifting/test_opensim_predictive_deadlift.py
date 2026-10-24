@@ -237,6 +237,41 @@ def test_comparison_table_missing_field_converged_has_none_not_fallback() -> Non
     assert "missing" in q["lift_duration_s"]["reason"]
 
 
+def test_receipt_carries_the_tracked_comparison_when_converged() -> None:
+    """A converged solve with trajectories gets the OSL-7 comparison (JSON-safe)."""
+    import json
+
+    cfg = PredictiveDeadliftConfig()
+    height = 0.432 + 0.477 * np.linspace(0.0, 1.0, 101)
+    converged = {
+        "converged": True,
+        "bar_start_height_m": 0.432,
+        "trajectories": {
+            "bar_height_m": height,
+            "coordinates": {"hip_flexion_r": np.full(101, np.radians(90.0))},
+        },
+    }
+    table = build_comparison_table(converged, cfg)
+    assert table["tracked_comparison"]["status"] == "compared"
+    assert table["tracked_comparison"]["bar_path"]["status"] == "compared"
+    json.dumps(table["tracked_comparison"])  # numpy-free, receipt-safe
+
+
+def test_receipt_comparison_is_unavailable_with_a_reason() -> None:
+    """Infeasible or trajectory-less solves record why there is no comparison."""
+    cfg = PredictiveDeadliftConfig()
+    infeasible = build_comparison_table(
+        {"converged": False, "constraint_violation": 61.27}, cfg
+    )["tracked_comparison"]
+    assert infeasible["status"] == "unavailable"
+    assert "infeasible iterate" in infeasible["reason"]
+    bare = build_comparison_table({"converged": True}, cfg)["tracked_comparison"]
+    assert bare == {
+        "status": "unavailable",
+        "reason": "the solve record has no trajectories",
+    }
+
+
 def test_config_actuation_mode() -> None:
     """Configuration validates torque and muscle actuation modes."""
     cfg_torque = PredictiveDeadliftConfig(

@@ -86,9 +86,9 @@ def tracked_opensim_record(path: Path = OSL3_IK_ID_RECEIPT) -> dict[str, str]:
         }
     return {
         "status": "not compared",
-        "reason": "the OSL-3 deadlift IK/ID receipt is complete, but the "
-        "predictive-versus-tracked comparison (joint moments, GRF) is not "
-        "implemented yet",
+        "reason": "the OSL-3 deadlift IK/ID receipt is complete; the "
+        "comparison runs only on a converged predictive solution (see "
+        "tracked_comparison)",
     }
 
 
@@ -384,5 +384,23 @@ def build_comparison_table(
             ),
         },
         "tracked_opensim": tracked_opensim_record(),
+        "tracked_comparison": _tracked_comparison(results, infeasible_reason),
         "quantities": quantities,
     }
+
+
+def _tracked_comparison(
+    results: dict[str, Any], infeasible_reason: str | None
+) -> dict[str, Any]:
+    """Predictive-versus-tracked comparison, or the reason it did not run."""
+    from src.engines.physics_engines.opensim.python import (
+        msk_lift_predictive_compare as compare,
+    )
+
+    if infeasible_reason is not None:
+        return compare.unavailable(infeasible_reason)
+    if "trajectories" not in results:
+        return compare.unavailable("the solve record has no trajectories")
+    return compare.compare_with_tracked(
+        results["trajectories"], compare.load_tracked_reference()
+    )
