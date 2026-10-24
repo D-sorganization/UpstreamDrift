@@ -1,7 +1,7 @@
 {
-  "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\calibrated-prefix-100ms-01-bundle.zip",
+  "archive": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\calibrated-prefix-100ms-01-bundle.zip",
   "sha256": "bfe11699f3a3b2b4d805c5c3659473ef358c74de77be9cbccb0f70624a9b84a2",
-  "remote_archive": "C:/Users/diete/SimscapeTour9921/calibrated-prefix-100ms-01-bundle.zip",
+  "remote_archive": "<owner-home>/SimscapeTour9921/calibrated-prefix-100ms-01-bundle.zip",
   "zip_crc_verified": true,
   "files_sha256": {
     "calibrated-prefix-100ms-01/actuator_audit.json": "e0230bb15fe2ae89bcea7dbe5621eca5b3619a8cecdf04639d2565d28be37a03",

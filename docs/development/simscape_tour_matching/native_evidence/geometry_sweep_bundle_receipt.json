@@ -1,7 +1,7 @@
 {
   "bundle_sha256": "ca61cfbe43a0800f04bb53190a2b03da25584213ddf37975141f306172ece64a",
-  "local_path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\geometry-sweep-02-bundle.zip",
-  "remote_path": "C:/Users/diete/SimscapeTour9921/geometry-sweep-02-bundle.zip",
+  "local_path": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\geometry-sweep-02-bundle.zip",
+  "remote_path": "<owner-home>/SimscapeTour9921/geometry-sweep-02-bundle.zip",
   "runtime_revision": "5309fb140",
   "physics_source_base": "9a381f018",
   "source_patch": "fit_golf_pose_seed.m",

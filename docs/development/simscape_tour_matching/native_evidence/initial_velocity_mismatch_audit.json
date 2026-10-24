@@ -2,8 +2,8 @@
   "qualification": "failed initial-velocity acceptance; do not use as verified replay",
   "source_revision": "317cc5d8d",
   "raw_mat_sha256": "824355037eb045a631e7635121c8496f65f635b31b44eee2c0bcf8941ea4fee5",
-  "local_raw_mat": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\initial_velocity_seed_unqualified.mat",
-  "remote_raw_mat": "C:/Users/diete/SimscapeTour9921/velocity-seed-01/initial_velocity_seed.mat",
+  "local_raw_mat": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\initial_velocity_seed_unqualified.mat",
+  "remote_raw_mat": "<owner-home>/SimscapeTour9921/velocity-seed-01/initial_velocity_seed.mat",
   "coordinates": [
     {
       "name": "TranslationInputX",

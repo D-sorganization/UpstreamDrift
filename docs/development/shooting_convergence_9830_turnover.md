@@ -76,7 +76,7 @@ fixed-candidate-study-16.json and fixed-candidate-study-32.json.
 - candidate-32.npz SHA256:
   8c0986d83ce46e048582f8da4e959fb376638eac3e66344ebcd3f38cf02563a0.
 
-Exploratory helper: C:/Users/diete/AppData/Local/Temp/impact-9830-study.py.
+Exploratory helper: <owner-home>/AppData/Local/Temp/impact-9830-study.py.
 It reuses the benchmark torque-limit helper and the production symbolic RHS.
 The initial run saved the successful eight-substep candidate before Linux Git
 failed to interpret the Windows worktree path. Reuse that exact saved candidate

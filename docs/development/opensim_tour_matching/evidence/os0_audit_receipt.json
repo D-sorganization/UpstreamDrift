@@ -5,7 +5,7 @@
     "python_version": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
     "platform": "Windows-11-10.0.26200-SP0",
     "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
-    "executable": "C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "executable": "<owner-home>\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
     "packages": {
       "opensim": {
         "installed": false,

@@ -7,7 +7,7 @@ continuation replaces the old restart instructions for completed OS-2b/3b work.
 
 ## Exact Source and Runtime
 
-- Local worktree: `C:/Users/diete/Repositories/_wt_claude_10341`.
+- Local worktree: `<owner-home>/Repositories/_wt_claude_10341`.
 - Local branch: `feat/10341-moco-g1`, commit `6914383f5`.
 - Original source branch was absent on origin and had no PR found by the exact
   source-branch query. This review published the unchanged commit as

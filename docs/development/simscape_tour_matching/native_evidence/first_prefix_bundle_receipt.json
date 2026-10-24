@@ -1,8 +1,8 @@
 {
   "bundle_name": "first-prefix-50ms-20260910.zip",
   "bundle_sha256": "97ebd8b261b58deda873d29ddb099fbcad4ec2ef93c180441305df78dd3635e3",
-  "local_path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\first-prefix-20260910\\first-prefix-50ms-20260910.zip",
-  "remote_path": "C:/Users/diete/SimscapeTour9921/checkpoints/first-prefix-25/first-prefix-50ms-20260910.zip",
+  "local_path": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\first-prefix-20260910\\first-prefix-50ms-20260910.zip",
+  "remote_path": "<owner-home>/SimscapeTour9921/checkpoints/first-prefix-25/first-prefix-50ms-20260910.zip",
   "manifest": {
     "schema": "simscape-continuation-bundle/1",
     "source_base": "0d8b3400421c8c71807356eba4d9b7cdb273c33f",

@@ -142,7 +142,7 @@ by this review. Remote live-process status was not rechecked by the reviewer.
 ## Copy-Ready Prompt
 
 Resume the tour-average C3D matching goal from
-`C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native`, branch
+`<owner-home>/Repositories/Worktrees/UpstreamDrift-pinocchio-native`, branch
 `feat/9967-native-simscape-pinocchio`. Read AGENTS.md, CLAUDE.md,
 docs/development/HANDOFF.md and this RUN101_REVIEW_AND_TURNOVER.md first.
 Acquire the issue9967 lease and check for newer work before edits or execution.

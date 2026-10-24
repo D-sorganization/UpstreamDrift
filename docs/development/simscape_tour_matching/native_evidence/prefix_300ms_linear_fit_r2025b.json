@@ -4544,7 +4544,7 @@
   ],
   "candidate_transfer": {
     "source_report_sha256": "f718cb9e486d043e38d506013f486788ce712f316bddc6da728a943bb119d3e5",
-    "source_path": "C:\\Users\\diete\\SimscapeTour9921\\prefix-300ms-linear-01\\transfer_source_report.json",
+    "source_path": "<owner-home>\\SimscapeTour9921\\prefix-300ms-linear-01\\transfer_source_report.json",
     "semantics": "torque candidate only; fresh objective and evaluation history"
   },
   "initial_parameters": [

@@ -8,7 +8,7 @@ unfinished; resume only when the user authorizes continued work.
 
 Implementation checkpoint: `f0e149443ad4b4f58c17dce44accd233ca42cdca` on
 `feat/necromatcher-native-fit-11235`, in
-`C:/Users/diete/Repositories/Worktrees/UpstreamDrift-necromatcher-native-fit`.
+`<owner-home>/Repositories/Worktrees/UpstreamDrift-necromatcher-native-fit`.
 The documentation commit containing this guide follows that checkpoint.
 [PR #11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) is open
 against `main` and was observed as **draft**. Do not merge, mark ready or claim
@@ -70,7 +70,7 @@ not measured. Hogan remains `[0,750)`.
 The local historical Library exists at:
 
 ```text
-C:/Users/diete/AppData/Local/upstream-drift/upstream-drift/launcher/necromatcher
+<owner-home>/AppData/Local/upstream-drift/upstream-drift/launcher/necromatcher
 ```
 
 Its index is **`project.json`**, not `index.json`. Confirm the configured store
@@ -200,7 +200,7 @@ agy actions through alternate routes without renewed human authorization.
 
 Run from the worktree, with `PYTHONPATH` containing the root and `src`.
 Use `QT_QPA_PLATFORM=offscreen` for the Qt test lane. On this host the installed
-Python is `C:/Users/diete/AppData/Local/Programs/Python/Python313/python.exe`.
+Python is `<owner-home>/AppData/Local/Programs/Python/Python313/python.exe`.
 The repository hooks use Ruff 0.15.17 and mypy 1.13 with:
 
 ```text
@@ -248,7 +248,7 @@ The tracked starting points are the
 long historical turnover; retrieve only the packet's relevant sections.
 
 Local Desktop artifacts are under
-`C:/Users/diete/Desktop/Necromatcher Review 2026-10-01`.
+`<owner-home>/Desktop/Necromatcher Review 2026-10-01`.
 `Local Research Golf Supplement 1` contains the reviewed three-page LaTeX/PDF,
 raw synthetic evidence and `publication.json`; `Admission Race Follow-Up`
 preserves the second run separately. These screenshots are not historical

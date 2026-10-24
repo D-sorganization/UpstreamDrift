@@ -3,12 +3,12 @@
   "red": {
     "failed": 2,
     "cause": "MATLAB:UndefinedFunction audit_golf_actuator_torques",
-    "log": "C:/Users/diete/SimscapeTour9921/actuator-audit-red.log"
+    "log": "<owner-home>/SimscapeTour9921/actuator-audit-red.log"
   },
   "green": {
     "passed": 2,
     "exit_code": 0,
-    "log": "C:/Users/diete/SimscapeTour9921/actuator-audit-green.log"
+    "log": "<owner-home>/SimscapeTour9921/actuator-audit-green.log"
   },
   "coverage": [
     "polynomial comparison at nonuniform native timestamps",

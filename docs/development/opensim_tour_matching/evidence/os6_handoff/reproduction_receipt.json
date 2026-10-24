@@ -9,37 +9,37 @@
   "scope_note": "Pilot scope evaluated on initial 0.10s observation window; full G1 (0.85s) tracking evaluated in evidence/matched/driver_g1_opensim (MS-42 #10341).",
   "asset_manifest": {
     "c3d_capture": {
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\data\\C3D_TA_Driver.c3d",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\data\\C3D_TA_Driver.c3d",
       "sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
       "exists": true,
       "size_bytes": 402432
     },
     "tracked_trc": {
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\tour_average_tracked.trc",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\tour_average_tracked.trc",
       "sha256": "203ad3629ea38c4c4705426bbd938de8c9706ea364c08366b61068f554eaa07f",
       "exists": true,
       "size_bytes": 614355
     },
     "os4_controls": {
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os4_moco_tracking\\tracked_controls.sto",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os4_moco_tracking\\tracked_controls.sto",
       "sha256": "dab10f6acdf76cf83549955fdf16df8dfac3a249aebe4452e0e715ddb8f01080",
       "exists": true,
       "size_bytes": 19441
     },
     "os5_coefficients": {
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os5_polynomial_profile\\polynomial_coefficients.json",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os5_polynomial_profile\\polynomial_coefficients.json",
       "sha256": "f8ad89ffa7839d7d38ae89e07bdd6649794693a9838805c5b0317180524c083d",
       "exists": true,
       "size_bytes": 26010
     },
     "os5_states": {
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os5_polynomial_profile\\forward_states.sto",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os5_polynomial_profile\\forward_states.sto",
       "sha256": "baf2bb5fbc4b063771238d1f38b7be56e9d77f9cbb7c3b22b8968a85adfcb051",
       "exists": true,
       "size_bytes": 11997
     },
     "os5_receipt": {
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os5_polynomial_profile\\receipt.json",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os5_polynomial_profile\\receipt.json",
       "sha256": "9e96585aac4fb4527d50dc50daeb9126a5a4d9785d7006a957e16881f7704d30",
       "exists": true,
       "size_bytes": 9864
@@ -56,9 +56,9 @@
     "polynomial_bounds_passed": true
   },
   "visual_artifacts": {
-    "effort_rates_plot": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os6_handoff\\os6_effort_and_rates.png",
-    "marker_error_plot": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os6_handoff\\os6_marker_error_timecourse.png",
-    "trajectory_overlay_plot": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os6_handoff\\os6_3d_trajectory_overlay.png"
+    "effort_rates_plot": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os6_handoff\\os6_effort_and_rates.png",
+    "marker_error_plot": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os6_handoff\\os6_marker_error_timecourse.png",
+    "trajectory_overlay_plot": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os6_handoff\\os6_3d_trajectory_overlay.png"
   },
   "reproduction_instructions": [
     "1. Clone repository UpstreamDrift and install dependencies.",

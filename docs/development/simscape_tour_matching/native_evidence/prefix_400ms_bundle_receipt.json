@@ -10,8 +10,8 @@
   "cold_replay_and_audit_exit_code": 0,
   "audited_channels": 22,
   "qualification": "Exploratory 0.4 s prefix only; optimizer budget exhausted; not full-swing acceptance.",
-  "local_archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\prefix-400ms-quadratic-01-bundle.zip",
-  "remote_archive": "C:/Users/diete/SimscapeTour9921/prefix-400ms-quadratic-01-bundle.zip",
+  "local_archive": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\prefix-400ms-quadratic-01-bundle.zip",
+  "remote_archive": "<owner-home>/SimscapeTour9921/prefix-400ms-quadratic-01-bundle.zip",
   "files": {
     "checkpoints/first-prefix/evaluation-00001-11fd8e272eea8d8e183f4ca31dea82292b4fa4ac1d562469766374a09f316ae7.json": "eda8f3e0097a88276c5f199e07f954f47fee0e6be0ee92826b13e56804381766",
     "checkpoints/first-prefix/evaluation-00005-8ed942adbef40b3ee3b520e0635567a930566b3cb008e31c3ceb5963510c5912.json": "bb7dea2de68aef49f1907e0c3a6fc575bb789f428cc2160d0849658f192ad1f5",

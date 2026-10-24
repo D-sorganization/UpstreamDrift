@@ -1,7 +1,7 @@
 {
-  "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\prefix-1100ms-sextic-01-bundle.zip",
+  "archive": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\prefix-1100ms-sextic-01-bundle.zip",
   "sha256": "22f78cd716f1252fef2031a508807edb3efb5409d67fdb4e803bc421be8f06d9",
-  "remote_archive": "C:/Users/diete/SimscapeTour9921/prefix-1100ms-sextic-01-bundle.zip",
+  "remote_archive": "<owner-home>/SimscapeTour9921/prefix-1100ms-sextic-01-bundle.zip",
   "zip_crc_verified": true,
   "files_sha256": {
     "checkpoints/first-prefix/evaluation-00001-d3cc944d9733dc5ec4a60bbedc933185ac9ae967a430f860543c55deb8d612bd.json": "f6d864a1f19a7989a580ceec210b7d431a94eb9e09a37cbd051ee5ffebd76208",

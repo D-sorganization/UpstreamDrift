@@ -1,6 +1,6 @@
 {
-  "local_path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\prefix-300ms-linear-01-bundle.zip",
-  "remote_path": "C:/Users/diete/SimscapeTour9921/prefix-300ms-linear-01-bundle.zip",
+  "local_path": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\prefix-300ms-linear-01-bundle.zip",
+  "remote_path": "<owner-home>/SimscapeTour9921/prefix-300ms-linear-01-bundle.zip",
   "sha256": "94c3062b34d4292ea44fcfba78696a606e1e2e315be4079a2b557f50d277cdd3",
   "runtime_base": "d344b726d504366a22657055368a43ddcc84fe3e",
   "runtime_patches": [],

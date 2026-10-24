@@ -88,7 +88,7 @@ readback checks decoded frame count and source dimensions. Existing destinations
 are rejected; the manifest publishes last after staging and parent revalidation.
 
 The actual Desktop review package is
-`C:/Users/diete/Desktop/Necromatcher Review 2026-10-01`. New `Tiger Overlay` and
+`<owner-home>/Desktop/Necromatcher Review 2026-10-01`. New `Tiger Overlay` and
 `Hogan Overlay` subfolders contain the v6 research overlay MP4s, selected PNGs
 (Tiger 0/103/209; Hogan 0/549/749), and manifests. These depict the original
 authored-ground hypotheses, not the unpublished repaired candidates. The
@@ -163,7 +163,7 @@ Thirteen UI tests and native recall/failure/import/overlay tests pass. Native
 import forms and landmark overlays are implemented. A real Hogan practice frame
 was rendered from the persistent capture ZIP, with PTS 3300000 × 1/30000 seconds,
 750 source frames and physical time unknown. Preview outside Git:
-`C:/Users/diete/Downloads/historical-capture/necromatcher-native-hogan-font-20261001.png`.
+`<owner-home>/Downloads/historical-capture/necromatcher-native-hogan-font-20261001.png`.
 The Windows offscreen Qt plugin exposes no system font families; the verification
 harness explicitly loaded the installed Segoe UI font. No product font fallback
 or user preference was changed to accommodate that headless renderer.
@@ -206,7 +206,7 @@ The official USGA broadcast source now has a downloaded 2981–3267-second
 excerpt outside Git, 1280×720 AV1 with audio, 30000/1001 presentation FPS,
 clip duration 286.031 seconds and SHA-256
 `6618fd8caf6a3c17ba4121d23b9bcdd576eff868a73045166f0a260705c30dde`.
-Path: `C:/Users/diete/Downloads/historical-capture/tiger_2000/usga/bado2QdgD3c-teeoff-2981-3267.mp4`.
+Path: `<owner-home>/Downloads/historical-capture/tiger_2000/usga/bado2QdgD3c-teeoff-2981-3267.mp4`.
 Its chapter label is insufficient golfer identity evidence: the contact sheet
 mostly shows other players. The subsequent 3267–3616-second window is downloaded
 (349.013 s, SHA-256 `e6b524474db4b800bafe8b98e754c8fc6d2fe7e43feec86b15db45adbac7889b`)
@@ -233,7 +233,7 @@ Its documentation check fails on `.jules/bolt.md:208`, inherited from main's
 unrelated quaternion optimization. Record this external failure; the CI skill
 forbids modifying pre-existing failures outside the story.
 
-Real imports are complete and verified after reopening: Hogan practice 750 frames, perfection 899, compilation 839; Tiger practice 2,000. Library root: `C:/Users/diete/AppData/Local/upstream-drift/upstream-drift/launcher/necromatcher`. Media stays outside Git. Library validation passed: 43 workspace/API tests, 13 library tests after the ZIP typing correction, scoped mypy for all three production modules, repo-wide Ruff lint and format (8,269 files). Draft PR #11237 is published. Keep it draft until the base capture PR is accepted and dependency tracking is resolved. The public workspace facade and native-model/driving-profile/image-capture artifact contracts are registered. Implement the tile/web/desktop child #11234 under #11232, then wire real dense fitting and native downstream adapters under #11235 with evidence.
+Real imports are complete and verified after reopening: Hogan practice 750 frames, perfection 899, compilation 839; Tiger practice 2,000. Library root: `<owner-home>/AppData/Local/upstream-drift/upstream-drift/launcher/necromatcher`. Media stays outside Git. Library validation passed: 43 workspace/API tests, 13 library tests after the ZIP typing correction, scoped mypy for all three production modules, repo-wide Ruff lint and format (8,269 files). Draft PR #11237 is published. Keep it draft until the base capture PR is accepted and dependency tracking is resolved. The public workspace facade and native-model/driving-profile/image-capture artifact contracts are registered. Implement the tile/web/desktop child #11234 under #11232, then wire real dense fitting and native downstream adapters under #11235 with evidence.
 
 The existing `ModelMatchHandoffCoordinator` currently generates fixed output artifacts and hard-coded fit metrics. Do not call those results real matching or reuse that coordinator as Necromatcher scientific evidence. The shadow-tracker segmentation fallback issue #11227 also remains open. Physical-time calibration, shot continuity, club visibility, camera calibration and source-year lineage remain unresolved for the current clips.
 

@@ -261,6 +261,6 @@
   "max_force_error_N": 1.1368683772161603e-13,
   "max_torque_error_Nm": 0,
   "matlab": "25.2.0.3177638 (R2025b) Update 5",
-  "source_candidate": "C:/Users/diete/SimscapeTour9921/prefix-300ms-linear-01",
+  "source_candidate": "<owner-home>/SimscapeTour9921/prefix-300ms-linear-01",
   "plane_tilt_deg": 30
 }

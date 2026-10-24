@@ -35,7 +35,7 @@ as recorded in the parent remote-execution document.
   units still need source-port qualification before treating them as SI.
 
 Full scripts, logs and raw MAT outputs remain in
-`C:/Users/diete/SimscapeTour9921` on DeskComputer. Raw MAT files retain both opts
+`<owner-home>/SimscapeTour9921` on DeskComputer. Raw MAT files retain both opts
 and theta. They are intentionally not embedded in source control.
 
 The next slice adds `joint_sensor_red.json` (four expected mapping failures and

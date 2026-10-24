@@ -101,9 +101,9 @@ swing. Preserve that distinction when quoting the result.
 - Plot: `native_evidence/first_prefix_fit_r2025b.png`.
 - Initial pose: `native_evidence/native_pose_seed_waist_r2025b.json`.
 - Local checkpoint directory:
-  `C:/Users/diete/Repositories/simscape-tour-checkpoints/first-prefix-20260910`.
+  `<owner-home>/Repositories/simscape-tour-checkpoints/first-prefix-20260910`.
 - DeskComputer checkpoint directory:
-  `C:/Users/diete/SimscapeTour9921/checkpoints/first-prefix-25`.
+  `<owner-home>/SimscapeTour9921/checkpoints/first-prefix-25`.
 - Saved snapshot:
   `evaluation-00283-56e0ff8fb6fdfba07912fa7dbf3fb70197da89899d4c85955865726f8303dcab.json`.
 
@@ -132,12 +132,12 @@ uses the authoritative forward wrapper via the native marker adapter, and saves
 JSON plus a raw MAT replay before asserting parity and initial-state tolerances.
 Its fixed input preserves the original coefficients and body offsets; it does
 not recalibrate against the replay. The original raw MAT is preserved on
-DeskComputer at `C:/Users/diete/SimscapeTour9921/cold_candidate_replay.mat`.
+DeskComputer at `<owner-home>/SimscapeTour9921/cold_candidate_replay.mat`.
 
 ## Running or Resuming on DeskComputer
 
 Use the isolated interpreter at
-`C:/Users/diete/SimscapeTour9921/python-r2025b/Scripts/python.exe`.
+`<owner-home>/SimscapeTour9921/python-r2025b/Scripts/python.exe`.
 It uses Python 3.12 and the engine installed from the local R2025b installation;
 the global R2024b engine was not changed. MATLAB must report `2025b` and root
 `C:/Program Files/MATLAB/R2025b`. Do not use the default MATLAB on PATH.
@@ -149,9 +149,9 @@ directory intact. The replay script is
 `native_evidence/reproduction/first_prefix_fit.py` relative to this guide.
 
 ```powershell
-$fitRepo = 'C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime'
-$fitPython = 'C:/Users/diete/SimscapeTour9921/python-r2025b/Scripts/python.exe'
-$fitRun = 'C:/Users/diete/SimscapeTour9921/resumed-first-prefix'
+$fitRepo = '<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime'
+$fitPython = '<owner-home>/SimscapeTour9921/python-r2025b/Scripts/python.exe'
+$fitRun = '<owner-home>/SimscapeTour9921/resumed-first-prefix'
 $fitState = "$fitRepo/docs/development/simscape_tour_matching/native_evidence/initial_velocity_seed_qualified_r2025b.json"
 $fitScript = "$fitRepo/docs/development/simscape_tour_matching/native_evidence/reproduction/first_prefix_fit.py"
 & $fitPython $fitScript --repo $fitRepo --run-dir $fitRun --initial-state $fitState --duration 0.1 --max-nfev 10

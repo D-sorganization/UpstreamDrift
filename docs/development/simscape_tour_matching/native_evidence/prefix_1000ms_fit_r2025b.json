@@ -27571,7 +27571,7 @@
   ],
   "candidate_transfer": {
     "source_report_sha256": "d8f771b7037593fae7cd2643a858dd02d4ff9a15ed063554c3fae80ba0553eab",
-    "source_path": "C:\\Users\\diete\\SimscapeTour9921\\prefix-900ms-sextic-01\\first_prefix_fit.json",
+    "source_path": "<owner-home>\\SimscapeTour9921\\prefix-900ms-sextic-01\\first_prefix_fit.json",
     "semantics": "torque candidate only; fresh objective and evaluation history"
   },
   "initial_parameters": [

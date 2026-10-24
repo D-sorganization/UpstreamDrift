@@ -42,7 +42,7 @@
         "library": "../reference-fit-artifacts-9914/final-library"
       },
       "source": {
-        "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Driver.c3d",
+        "path": "<owner-home>\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Driver.c3d",
         "sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
         "format": "c3d"
       },
@@ -233,7 +233,7 @@
         "library": "../reference-fit-artifacts-9914/final-library"
       },
       "source": {
-        "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Iron.c3d",
+        "path": "<owner-home>\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Iron.c3d",
         "sha256": "00a70c1ec0a887c28f9c0397766904eb9e79dee9f6d2bbd0cbb0062445adf561",
         "format": "c3d"
       },
@@ -424,7 +424,7 @@
         "library": "../reference-fit-artifacts-9914/final-library"
       },
       "source": {
-        "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Driver.c3d",
+        "path": "<owner-home>\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Driver.c3d",
         "sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
         "format": "c3d"
       },
@@ -527,7 +527,7 @@
         "library": "../reference-fit-artifacts-9914/final-library"
       },
       "source": {
-        "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Iron.c3d",
+        "path": "<owner-home>\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Iron.c3d",
         "sha256": "00a70c1ec0a887c28f9c0397766904eb9e79dee9f6d2bbd0cbb0062445adf561",
         "format": "c3d"
       },
@@ -639,7 +639,7 @@
         "library": "../reference-fit-artifacts-9914/qualified-library"
       },
       "source": {
-        "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Driver.c3d",
+        "path": "<owner-home>\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Driver.c3d",
         "sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
         "format": "c3d"
       },

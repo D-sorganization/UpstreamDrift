@@ -21,6 +21,6 @@
   "red_exit": 1,
   "green_exit": 0,
   "qualification": "Synthetic native pose regression only; fixed attachments, not dynamics or a global optimum.",
-  "local_archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\attached-pose-01-bundle.zip",
-  "remote_archive": "C:/Users/diete/SimscapeTour9921/attached-pose-01-bundle.zip"
+  "local_archive": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\attached-pose-01-bundle.zip",
+  "remote_archive": "<owner-home>/SimscapeTour9921/attached-pose-01-bundle.zip"
 }

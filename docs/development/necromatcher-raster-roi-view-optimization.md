@@ -14,7 +14,7 @@ Compute the entire winner mask before writing the depth view. Keep the original 
 
 A public-renderer counting-buffer regression failed on both source-size fixtures before the change: the old depth workspace used coordinate-array gathers/scatters. The corrected renderer uses rectangular views. An analytical overlapping-surface test checks exact nearest depth, BGR color, deterministic equal-depth identity, coverage and uncovered state. The focused ROI/grid/surface suite passes 43 cases.
 
-The pre-change renderer is preserved outside Git at `C:/Users/diete/Repositories/Temp/shape-roi-view-optimization-v1/projective-renderer-old-00b7.py`, SHA256 `aa8027adc8e527d26085ab91e9a12c5175e2fcc341b3de5c4c75783edf584a3a`. Twenty-seven SDK-free synthetic comparisons at 32x24, 320x240 and 1280x720 check exact pixels, mask, depth and geometry IDs across front-facing, perspective, behind-camera, near-plane, off-frame, degenerate, subpixel, sorted-tie and offset cases. They pass without native compilation or historical rendering. TEMP red/green, parity and pinned-type-check logs remain preserved.
+The pre-change renderer is preserved outside Git at `<owner-home>/Repositories/Temp/shape-roi-view-optimization-v1/projective-renderer-old-00b7.py`, SHA256 `aa8027adc8e527d26085ab91e9a12c5175e2fcc341b3de5c4c75783edf584a3a`. Twenty-seven SDK-free synthetic comparisons at 32x24, 320x240 and 1280x720 check exact pixels, mask, depth and geometry IDs across front-facing, perspective, behind-camera, near-plane, off-frame, degenerate, subpixel, sorted-tie and offset cases. They pass without native compilation or historical rendering. TEMP red/green, parity and pinned-type-check logs remain preserved.
 
 ## Qualification and Later Measurement
 

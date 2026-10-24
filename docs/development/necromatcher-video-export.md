@@ -47,7 +47,7 @@ historical reconstruction. No host filesystem paths are exposed in responses.
 ## Review and Repeatability
 
 The initial actual Desktop examples are under
-`C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/`: Tiger Overlay has 210
+`<owner-home>/Desktop/Necromatcher Review 2026-10-01/`: Tiger Overlay has 210
 frames at 1280×720 and source rate 30000/1001; Hogan Overlay has 750 frames at
 320×240 and source rate 30. The local review index and SHA-256 manifest also
 identify original portable fit packages, failed interim candidates and the

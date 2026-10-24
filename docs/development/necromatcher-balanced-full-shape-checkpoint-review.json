@@ -83,7 +83,7 @@
       "sha256": "1976eb6d33b7460063e64e614734e4b284f6da8e5b9ced0866d4504fc03861f6"
     }
   ],
-  "controltower_destination": "C:/Users/diete/Desktop/Necromatcher Balanced Full Shape Checkpoint Report 2026-10-03 V1",
+  "controltower_destination": "<owner-home>/Desktop/Necromatcher Balanced Full Shape Checkpoint Report 2026-10-03 V1",
   "controltower_payload_count": 26,
   "controltower_payload_bytes": 23799673,
   "controltower_manifest_sha256": "3d85126acd9d7ac93dd0cc4fecc778b94f231d4ec3779a6df1793cbb1ffea858",

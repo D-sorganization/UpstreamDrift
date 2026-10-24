@@ -1,9 +1,9 @@
 {
-  "local_path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\actuator-instrumentation-01-bundle.zip",
-  "remote_path": "C:/Users/diete/SimscapeTour9921/actuator-instrumentation-01-bundle.zip",
+  "local_path": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\actuator-instrumentation-01-bundle.zip",
+  "remote_path": "<owner-home>/SimscapeTour9921/actuator-instrumentation-01-bundle.zip",
   "sha256": "b5ae16b4d4901d4d12765c64196efe38d051a19ca1702838f7c323b37525b025",
   "runtime_base": "59e944b44",
-  "isolated_checkout": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-actuator-audit",
+  "isolated_checkout": "<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-actuator-audit",
   "model_before_sha256": "90b2d0bb06af0758300a498cc919857cd717c8d22aa99644feab60376ec1c9ab",
   "model_after_sha256": "deb039b2eebf00001cac8097a79d7dbf0dee4a9d2ea0cc883caa80941e044512",
   "native_exit_codes": {
