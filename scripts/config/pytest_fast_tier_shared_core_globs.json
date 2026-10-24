@@ -1,0 +1,17 @@
+{
+  "shared_core_globs": [
+    "src/shared/python/**",
+    "pyproject.toml",
+    "requirements*.lock",
+    "requirements*.txt",
+    "environment.yml",
+    "rust_core/**",
+    "vendor/**",
+    "tests/conftest.py",
+    "tests/**/conftest.py"
+  ],
+  "workflow_globs": [
+    ".github/workflows/ci-standard.yml",
+    "scripts/ci/**"
+  ]
+}
