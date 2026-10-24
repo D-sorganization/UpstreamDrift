@@ -2,7 +2,7 @@
   "pid": 1925667,
   "command": [
     "/tmp/shot-pattern-validation-venv-20261009/bin/python",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/check_layout_child_clearance.py"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/check_layout_child_clearance.py"
   ],
-  "log": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_clearance.log"
+  "log": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_clearance.log"
 }
