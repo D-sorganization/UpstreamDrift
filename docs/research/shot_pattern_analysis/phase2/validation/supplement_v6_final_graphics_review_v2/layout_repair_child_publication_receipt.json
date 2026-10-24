@@ -1,8 +1,8 @@
 {
-  "baseline": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1",
+  "baseline": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1",
   "baseline_figure_ledger_sha256": "b01de45bb20d8bc7b0d041fb69af2185d77275d19ec598f269fed0bb2589b293",
   "baseline_pipeline_sha256": "035c65b249937a639d0ddfd5bd5df3aef8b46aaae351b98a4c6ae9e29e0b064a",
-  "child": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair",
+  "child": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair",
   "child_figure_ledger_sha256": "88df51839e5531725d30b9e327c9ed1960324afc653eb519cd3701d69453ac12",
   "child_pipeline_sha256": "033224c948fabee2cb77fd2b85d7daf11a52730fa96afd02d77259125723f702",
   "repair_source_commit": "5a1fdbfe51",
@@ -744,6 +744,6 @@
     }
   ],
   "schema": "supplement-density-layout-child-publication/1",
-  "scope_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/density_layout_repair_scope.json",
+  "scope_path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/density_layout_repair_scope.json",
   "scope_sha256": "7599cc36a0008857c5579502512510f8521f8452f53b88b771e3d5db3462caba"
 }
