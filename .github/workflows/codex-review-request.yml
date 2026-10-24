@@ -11,8 +11,20 @@ permissions:
   issues: read
   pull-requests: read
 
+# Distinct from the reusable workflow's own group, so the two never deadlock.
+concurrency:
+  group: codex-review-caller-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   request:
-    uses: D-sorganization/fleet-workflows/.github/workflows/reusable-codex-review-request.yml@2bfdbb9efc22a9aabb9d6262f9cc911fc3e4cc60 # main 2026-10-23
+    # Fork guard: fork PR code never reaches the self-hosted fleet.
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      !github.event.pull_request.draft
+    uses: D-sorganization/fleet-workflows/.github/workflows/reusable-codex-review-request.yml@9ec883c13db26501d54c7eeeaa7bf1cbd1cfde8e # main 2026-10-23
+    with:
+      timeout-minutes: 5
     secrets:
       CODEX_REVIEW_REQUEST_TOKEN: ${{ secrets.CODEX_REVIEW_REQUEST_TOKEN }}
