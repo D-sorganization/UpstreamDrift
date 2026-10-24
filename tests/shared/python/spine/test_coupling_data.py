@@ -18,6 +18,7 @@ from src.shared.python.spine.coupling import regional_fraction
 from src.shared.python.spine.coupling_data import (
     available_laws,
     coupling_law,
+    load_coupling_law,
     load_coupling_laws,
 )
 from src.shared.python.spine.levels import SpinalLevel, SpinalRegion
@@ -258,6 +259,31 @@ def test_returned_law_is_independent_copy() -> None:
     second = coupling_law("uniform_reference")
     assert first is not second
     assert not first.matrices[SpinalLevel.L5_S1].flags.writeable
+
+
+def test_load_coupling_law_matches_coupling_law() -> None:
+    for law_id in available_laws():
+        assert load_coupling_law(law_id).law_id == coupling_law(law_id).law_id
+
+
+def test_require_verified_accepts_primary_verified_laws() -> None:
+    for law_id in ("bruno2015_regional", "fujii2007_lumbar"):
+        load_coupling_law(law_id, require_verified=True)
+
+
+def test_require_verified_rejects_unverified_reference() -> None:
+    with pytest.raises(ValueError, match="verified_from_primary"):
+        load_coupling_law("uniform_reference", require_verified=True)
+
+
+@pytest.mark.parametrize("law_id", ["bruno2015_per_level", "pearcy1984_lumbar"])
+def test_require_verified_rejects_pending(law_id: str) -> None:
+    with pytest.raises(ValueError, match="verified_from_primary"):
+        load_coupling_law(law_id, require_verified=True)
+
+
+def test_unverified_reference_loads_without_gate() -> None:
+    assert load_coupling_law("uniform_reference").law_id == "uniform_reference"
 
 
 def test_fujii_isb_signs_follow_adr_0055() -> None:

@@ -25,6 +25,8 @@ from typing import Protocol
 
 import numpy as np
 
+from src.shared.python.perturbation.statistics import safe_cv
+
 logger = logging.getLogger(__name__)
 
 
@@ -276,7 +278,7 @@ class PerturbationConfig:
 
 def variability_summary(
     results: list[dict],
-) -> dict[str, float | np.ndarray]:
+) -> dict[str, float | np.ndarray | str | None]:
     """Compute statistical summary from batch simulation results.
 
     Parameters
@@ -295,7 +297,8 @@ def variability_summary(
     Design by Contract
     ------------------
     Pre:  len(results) > 0
-    Post: all values are finite
+    Post: numeric values are finite except ``tip_speed_cv``, which is NaN
+          with a ``tip_speed_cv_reason`` when the mean speed is near zero
     """
     assert len(results) > 0, "results must be non-empty"
 
@@ -304,12 +307,13 @@ def variability_summary(
 
     speed_mean = float(np.mean(speeds))
     speed_std = float(np.std(speeds))
-    speed_cv = speed_std / speed_mean if speed_mean != 0 else 0.0
+    speed_cv, speed_cv_reason = safe_cv(speed_mean, speed_std, absolute=False)
 
-    summary: dict[str, float | np.ndarray] = {
+    summary: dict[str, float | np.ndarray | str | None] = {
         "tip_speed_mean": speed_mean,
         "tip_speed_std": speed_std,
         "tip_speed_cv": speed_cv,
+        "tip_speed_cv_reason": speed_cv_reason,
         "tip_speed_min": float(np.min(speeds)),
         "tip_speed_max": float(np.max(speeds)),
         "tip_position_mean": np.mean(positions, axis=0),

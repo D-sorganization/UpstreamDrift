@@ -1,4 +1,5 @@
 # Build/Config/CI Infrastructure Review - UpstreamDrift
+
 **Date:** March 7, 2026
 **Project:** UpstreamDrift (Biomechanical Golf Simulation Suite)
 **Status:** PRODUCTION READY with Minor Configuration Issues
@@ -10,6 +11,7 @@
 UpstreamDrift has a **well-organized and comprehensive build infrastructure** with modern tooling, security best practices, and CI/CD pipelines. However, there are **several configuration redundancies and inconsistencies** that should be addressed to improve maintainability and reduce operational friction.
 
 **Overall Assessment:**
+
 - ✅ **Strengths:** Modern tooling (ruff, pytest, pre-commit), security-hardened, comprehensive documentation
 - ⚠️ **Gaps:** Configuration redundancy, inconsistent dependency management, mixed build system approaches
 - ❌ **Critical Issues:** None blocking functionality
@@ -20,15 +22,15 @@ UpstreamDrift has a **well-organized and comprehensive build infrastructure** wi
 
 ### 1.1 Dependency Files Overview
 
-| File | Purpose | Size | Status |
-|------|---------|------|--------|
-| `pyproject.toml` | Primary build config (PEP 517/518) | 329 lines | ✅ Active |
-| `requirements.txt` | Pip requirements (manual) | 82 lines | ⚠️ Redundant |
-| `requirements.lock` | Pinned dependencies (generated) | 98 lines | ✅ Active |
-| `requirements-dev.lock` | Dev dependencies (generated) | 130 lines | ✅ Active |
-| `environment.yml` | Conda environment | 149 lines | ✅ Active |
-| `setup.py` | Legacy setuptools | 4 lines | ⚠️ Minimal wrapper |
-| `package.json` | Node.js UI | 40 lines | ✅ Active |
+| File                    | Purpose                            | Size      | Status             |
+| ----------------------- | ---------------------------------- | --------- | ------------------ |
+| `pyproject.toml`        | Primary build config (PEP 517/518) | 329 lines | ✅ Active          |
+| `requirements.txt`      | Pip requirements (manual)          | 82 lines  | ⚠️ Redundant       |
+| `requirements.lock`     | Pinned dependencies (generated)    | 98 lines  | ✅ Active          |
+| `requirements-dev.lock` | Dev dependencies (generated)       | 130 lines | ✅ Active          |
+| `environment.yml`       | Conda environment                  | 149 lines | ✅ Active          |
+| `setup.py`              | Legacy setuptools                  | 4 lines   | ⚠️ Minimal wrapper |
+| `package.json`          | Node.js UI                         | 40 lines  | ✅ Active          |
 
 ### 1.2 Dependency Inconsistencies
 
@@ -41,12 +43,14 @@ UpstreamDrift has a **well-organized and comprehensive build infrastructure** wi
    - **Root cause:** Relaxed constraints in pyproject.toml but tighter in requirements.txt
 
 2. **Core Dependency Drift:**
+
    ```
    pyproject.toml:    numpy>=1.26.4,<3.0.0, scipy>=1.13.1
    requirements.txt:  numpy>=2.0.1,        scipy>=1.13.1
    requirements.lock: numpy==1.26.4,       scipy==1.13.1
    environment.yml:   numpy>=1.26.4,<2.0.0, scipy>=1.13.1,<2.0.0
    ```
+
    **Problem:** environment.yml pins numpy to <2.0.0, but requirements.txt allows >=2.0.1
 
 3. **Ruff Version Pinning:**
@@ -69,6 +73,7 @@ UpstreamDrift has a **well-organized and comprehensive build infrastructure** wi
 ### 1.3 Dependency Resolution Recommendations
 
 **Priority 1 - CRITICAL:**
+
 1. Remove Flask from requirements.txt (unless intentional)
 2. Align numpy version constraints across all files:
    - Use `numpy>=1.26.4,<2.0.0` everywhere (environment.yml is correct)
@@ -76,11 +81,13 @@ UpstreamDrift has a **well-organized and comprehensive build infrastructure** wi
 3. Lock MyPy version in CI to match lock files: `mypy==1.19.1`
 
 **Priority 2 - IMPORTANT:**
+
 1. Pin ruff in `pyproject.toml` to match CI: `ruff==0.14.10`
 2. Regenerate lock files after changes: `pip-compile pyproject.toml`
 3. Document dependency management strategy (which tool is authoritative?)
 
 **Priority 3 - NICE-TO-HAVE:**
+
 1. Remove `requirements.txt` in favor of `pyproject.toml` + lock files (modern approach)
 2. Use `pip-tools` for lock file management to ensure consistency
 
@@ -91,6 +98,7 @@ UpstreamDrift has a **well-organized and comprehensive build infrastructure** wi
 ### 2.1 Build System Configuration
 
 **Primary Build System:** Hatchling (modern, PEP 517 compliant)
+
 ```toml
 [build-system]
 requires = ["hatchling"]
@@ -98,6 +106,7 @@ build-backend = "hatchling.build"
 ```
 
 **Build Hooks:** Custom hook in `build_hooks.py` for UI bundling
+
 ```toml
 [tool.hatch.build.hooks.custom]
 path = "build_hooks.py"
@@ -108,18 +117,21 @@ path = "build_hooks.py"
 **File:** `build_hooks.py` (69 lines)
 
 **Strengths:**
+
 - ✅ Handles React UI build before packaging
 - ✅ Gracefully skips UI build in CI (CI environment or SKIP_UI_BUILD env var)
 - ✅ Proper error handling for missing npm
 - ✅ Uses capture_output to prevent noisy builds
 
 **Issues:**
+
 1. **Missing npm version check:** No verification that npm is compatible
 2. **No error message context:** Subprocess errors don't include stdout
 3. **Missing --legacy-peer-deps rationale:** Why is this needed for React 19?
 4. **No input validation:** Doesn't check if ui/package.json exists before running
 
 **Recommendations:**
+
 ```python
 # Add these checks
 def initialize(self, version: str, build_data: dict) -> None:
@@ -139,6 +151,7 @@ def initialize(self, version: str, build_data: dict) -> None:
 ### 2.3 Setup.py Analysis
 
 **Current content:**
+
 ```python
 from setuptools import setup
 setup()
@@ -157,6 +170,7 @@ setup()
 **Location:** `pyproject.toml` [tool.ruff]
 
 **Current Config:**
+
 ```toml
 line-length = 88
 target-version = "py310"
@@ -172,6 +186,7 @@ ignore = ["E501", "B008", "RET504", "PERF203", "PERF401"]
 ```
 
 **Analysis:**
+
 - ✅ Good balance of strictness (many rules but sensible exceptions)
 - ✅ Excludes legacy/vendor code appropriately
 - ⚠️ T201 (print statements) allowed in scripts/tests but blocked elsewhere - enforced via pre-commit
@@ -184,6 +199,7 @@ ignore = ["E501", "B008", "RET504", "PERF203", "PERF401"]
 **Files:** `pyproject.toml` and `mypy.ini` (REDUNDANT)
 
 **pyproject.toml [tool.mypy]:**
+
 ```toml
 python_version = "3.10"
 ignore_missing_imports = true
@@ -198,6 +214,7 @@ exclude = [
 ```
 
 **mypy.ini:**
+
 ```ini
 [mypy]
 ignore_missing_imports = True
@@ -207,6 +224,7 @@ exclude = ["src/shared/python"]
 ```
 
 **CRITICAL ISSUE: Configuration Mismatch**
+
 - `mypy.ini` excludes only `src/shared/python`
 - `pyproject.toml` excludes 23 different directories
 - **When both exist, which is authoritative?** MyPy reads `.ini` first if present
@@ -219,6 +237,7 @@ exclude = ["src/shared/python"]
 **Files:** `pyproject.toml` and `pytest_improvements.ini` (REDUNDANT)
 
 **pyproject.toml [tool.pytest.ini_options]:**
+
 ```toml
 testpaths = ["tests"]
 pythonpath = [".", "src", "src/shared/python", "src/tools", ...]
@@ -234,6 +253,7 @@ markers = [
 ```
 
 **pytest_improvements.ini:**
+
 ```ini
 [pytest]
 required_plugins = pytest-cov pytest-mock pytest-asyncio
@@ -245,6 +265,7 @@ markers = [
 ```
 
 **Issues:**
+
 1. **Duplicate markers:** pytest_improvements.ini defines same markers as pyproject.toml
 2. **File is incomplete:** Missing pythonpath, testpaths, addopts
 3. **Filename suggests draft:** "pytest_improvements.ini" implies this is WIP
@@ -257,6 +278,7 @@ markers = [
 **Location:** `pyproject.toml` [tool.black]
 
 **Current Config:**
+
 ```toml
 line-length = 88
 target-version = ["py310"]
@@ -281,6 +303,7 @@ exclude = '''
 ### 4.1 CI Workflow Files
 
 **Active Workflows:**
+
 - `ci-standard.yml` - Primary CI (runs on PR/push)
 - `nightly-cross-engine.yml` - Extended engine tests (nightly)
 - `tauri-build.yml` - Desktop app builds
@@ -289,6 +312,7 @@ exclude = '''
 - `pre-commit-config.yaml` - Local pre-commit hooks (60+ hooks!)
 
 **Historical/Educational Workflows (46 files!)**
+
 - Jules-* workflows (45 files) - AI assessment/remediation agents
 - Manual-Run-All, agent-metrics-dashboard, etc.
 
@@ -301,6 +325,7 @@ exclude = '''
 **Timeout:** 20 minutes
 
 **Jobs:**
+
 1. **quality-gate** (Primary CI)
    - Ruff lint
    - Ruff format check (not ruff check!)
@@ -317,6 +342,7 @@ exclude = '''
    - Tests (skipped in output shown)
 
 **Critical Observations:**
+
 1. **No Python version matrix:** Only tests on 3.11, not 3.10, 3.12
 2. **pip-audit has documented exceptions:**
    - CVE-2024-23342 (ecdsa) - No fix available
@@ -330,6 +356,7 @@ exclude = '''
 ### 4.3 CI Configuration Issues
 
 **CRITICAL:**
+
 1. MyPy version mismatch: CI installs 1.13.0, lock file has 1.19.1
    - **Fix:** Install from dev extras: `pip install -e ".[dev]"`
    - OR update lock files to match
@@ -343,6 +370,7 @@ exclude = '''
    - **Fix:** Update check to allow `TRACKED_TASK #123` format
 
 **WARNINGS:**
+
 1. No test matrix (only 3.11, no 3.10/3.12 despite pyproject.toml supporting both)
 2. No coverage reporting
 3. No artifacts uploaded
@@ -357,11 +385,13 @@ exclude = '''
 **Stages:** builder → runtime → training
 
 **Stage 1: Builder**
+
 - Base: `continuumio/miniconda3:24.11.1-0`
 - Installs: Build tools, conda packages (Python 3.12)
 - Issue: Specifies Python 3.12 but pyproject.toml targets 3.10-3.12
 
 **Stage 2: Runtime**
+
 - Base: `continuumio/miniconda3:24.11.1-0`
 - Installs: GL libraries, system deps for PyQt6
 - User: golfer (non-root, ✅ security best practice)
@@ -370,11 +400,13 @@ exclude = '''
 - Healthcheck: `/health` endpoint
 
 **Stage 3: Training**
+
 - Extends runtime
 - Adds: gymnasium, stable-baselines3, tensorboard, ray[rllib]
 - Rationale: Separate stage for heavy ML workloads
 
 **Issues:**
+
 1. **Python version mismatch:** Builder uses 3.12, but environment.yml specifies 3.11
    ```dockerfile
    RUN conda install ... python=3.12
@@ -397,36 +429,42 @@ exclude = '''
 **Stages:** ui-builder → runtime (uses micromamba)
 
 **Differences from Dockerfile:**
+
 1. Builds React UI in stage 1
 2. Uses micromamba (faster conda)
 3. Installs package via `pip install -e .`
 4. Serves built UI from `/app/ui/dist`
 
 **Advantages:**
+
 - ✅ Builds UI in container
 - ✅ Cleaner separation
 - ✅ Smaller final image (micromamba)
 
 **Issues:**
+
 1. **Port mismatch:** Health check uses 8000 but Dockerfile uses 8001
 2. **Entry point different:** Command is `upstream-drift --no-browser`
 3. **Which is authoritative?** Two Dockerfiles = confusion
 
 **Recommendation:** Remove one Dockerfile. If keeping both, document which is for what:
+
 - `Dockerfile` = development with all build tools
 - `Dockerfile.unified` = production-optimized with UI bundled
 
 ### 5.3 docker-compose.yml
 
 **Services:**
+
 1. `backend` - Python API server (port 8001)
 2. `frontend` - Node.js UI (port 5180)
 
 **Issues:**
+
 1. **Port hardcoded:** API_PORT=8001 in env, but Dockerfile exposes 8000
    ```yaml
    ports:
-     - "8001:8001"  # Doesn't match Dockerfile EXPOSE 8000
+     - "8001:8001" # Doesn't match Dockerfile EXPOSE 8000
    ```
 2. **Command inconsistency:** docker-compose runs uvicorn directly
    ```yaml
@@ -438,6 +476,7 @@ exclude = '''
 5. **Volumes unmounted:** `/workspace/data` volume created but never populated
 
 **Recommendations:**
+
 1. Align all port references: 8000 or 8001 (choose one)
 2. Update frontend to use production build
 3. Add proper health check to depends_on
@@ -446,6 +485,7 @@ exclude = '''
 ### 5.4 environment.yml
 
 **Issues:**
+
 1. **Mixed pip/conda:** Uses conda for core, pip for others
    - conda-forge for numpy, scipy, pyqt6
    - pip for fastapi, uvicorn, etc.
@@ -463,6 +503,7 @@ exclude = '''
 **File:** `.pre-commit-config.yaml` (347 lines)
 
 **Coverage:**
+
 - ✅ Python (ruff, mypy, bandit, semgrep)
 - ✅ JavaScript/TypeScript (eslint)
 - ✅ CSS/SCSS (stylelint)
@@ -470,16 +511,20 @@ exclude = '''
 - ✅ Universal (prettier, custom checks)
 
 **Hook Categories:**
+
 1. **Fast (commit-time):** ruff, prettier, eslint (~15 seconds claimed)
 2. **Slow (pre-push):** mypy, pytest, bandit, semgrep (~60+ seconds)
 
 **Issues:**
+
 1. **pytest-unit hook uses language: system**
+
    ```yaml
    - id: pytest-unit
      entry: python3 -m pytest
-     language: system  # Non-portable on Windows!
+     language: system # Non-portable on Windows!
    ```
+
    **Fix:** Use `language: python` for cross-platform compatibility
 
 2. **Local hook for radon uses language: python** ✅ Good
@@ -488,15 +533,18 @@ exclude = '''
    - Code comment explains this (good documentation)
 
 4. **Skip list too aggressive:** Skips slow hooks in CI entirely
+
    ```yaml
    skip: [pytest-unit, bandit, mypy, semgrep, radon]
    ```
+
    **Problem:** CI doesn't run these checks at all!
    - Pre-commit should fail, but it doesn't in CI
 
 5. **ESLint only on ui/src:** Good scoping to prevent noise
 
 **Recommendations:**
+
 1. Fix pytest-unit to use cross-platform language: python
 2. Configure pre-commit.ci to run pytest-unit (don't skip in CI)
 3. Document why bandit/mypy/semgrep are skipped (too slow for auto-commit?)
@@ -509,6 +557,7 @@ exclude = '''
 ### 7.1 CONTRIBUTING.md
 
 **Quality:** ⭐⭐⭐⭐ (Excellent)
+
 - ✅ Clear setup instructions
 - ✅ Code standards documented
 - ✅ Physics engine guidelines
@@ -517,11 +566,13 @@ exclude = '''
 - ✅ PR process defined
 
 **Issues:**
+
 - Clone URL: `dieterolson/UpstreamDrift` (personal account) - may change if transferred
 
 ### 7.2 SECURITY.md
 
 **Quality:** ⭐⭐⭐⭐⭐ (Excellent)
+
 - ✅ Comprehensive security policy
 - ✅ Reporting procedure defined
 - ✅ Recent security fixes documented (Jan 2026)
@@ -530,6 +581,7 @@ exclude = '''
 - ✅ Compliance statements (OWASP, CWE)
 
 **Coverage:**
+
 - Authentication/Authorization (bcrypt, JWT, RBAC)
 - API Security (rate limiting, input validation, SQL injection protection)
 - Dependency Security (pip-audit blocking in CI)
@@ -538,6 +590,7 @@ exclude = '''
 ### 7.3 CHANGELOG.md
 
 **Quality:** ⭐⭐⭐⭐ (Excellent)
+
 - ✅ Follows Keep a Changelog format
 - ✅ Semantic versioning
 - ✅ Security fixes highlighted (A- grade improvement, D+ → A-)
@@ -549,6 +602,7 @@ exclude = '''
 ### 7.4 AGENTS.md
 
 **Quality:** ⭐⭐⭐⭐ (Excellent for AI agents)
+
 - ✅ Comprehensive directives for AI pair programming
 - ✅ Security guidelines (no secrets, code review)
 - ✅ Python coding standards
@@ -566,12 +620,14 @@ exclude = '''
 **Purpose:** Sync repo, generate icons, create desktop shortcuts
 
 **Analysis:**
+
 - ✅ Proper orthogonality (separate functions for each concern)
 - ✅ Addresses specific technical debt (DRY violations)
 - ✅ Windows-specific (PowerShell for shortcuts)
 - ✅ Graceful fallback for missing images
 
 **Issues:**
+
 1. **Relative path handling:** Uses `relative_to()` which may fail on different systems
 2. **Icon path validation:** Checks `if output_icon.exists()` but doesn't handle file permissions
 3. **git_sync_repository() called but not shown:** Unclear what this does
@@ -581,12 +637,14 @@ exclude = '''
 **Purpose:** Unified launcher for web UI, classic desktop, or API-only modes
 
 **Features:**
+
 - ✅ Multiple launch modes (web, classic, API-only, engine-specific)
 - ✅ Port configuration
 - ✅ No-browser option
 - ✅ Good help text
 
 **Issues:**
+
 1. **Dynamic engine choices:** Tries to import EngineType but falls back to hardcoded list
    - Hardcoded list: `["mujoco", "drake", "pinocchio", "opensim", "myosim"]`
    - Real list includes: `["matlab_2d", "matlab_3d", "pendulum"]`
@@ -603,6 +661,7 @@ exclude = '''
 **File:** `Makefile` (90 lines)
 
 **Targets:**
+
 - `install` - Install deps + editable install with [dev]
 - `lint` - ruff check + mypy
 - `format` - black + ruff format + ruff fix
@@ -614,6 +673,7 @@ exclude = '''
 - `all` - install + format + lint + test
 
 **Issues:**
+
 1. **Black referenced but removed from pre-commit:** Line 49 calls `black .` but it's not in dependencies
 2. **UNUSED:** MyPy not called in `lint` target (only `ruff check`)
    - Pre-commit calls mypy separately
@@ -628,6 +688,7 @@ exclude = '''
    But pyproject.toml testpaths only includes `tests/`
 
 **Recommendations:**
+
 1. Add mypy to lint target: `mypy . --config-file pyproject.toml || true`
 2. Remove black (use ruff format only)
 3. Add pytest to lint target
@@ -639,18 +700,21 @@ exclude = '''
 ## 10. Summary of Configuration Issues
 
 ### Critical (Must Fix)
+
 1. **MyPy version mismatch:** CI uses 1.13.0, lock file has 1.19.1
 2. **Duplicate configuration files:** mypy.ini + pytest_improvements.ini redundant with pyproject.toml
 3. **Port inconsistency:** Dockerfile exposes 8000, docker-compose uses 8001
 4. **Flask in requirements.txt:** Appears to be copy-paste error
 
 ### Important (Should Fix)
+
 1. **Numpy version constraints:** environment.yml says <2.0.0, requirements.txt says >=2.0.1
 2. **No pytest in CI:** ci-standard.yml doesn't appear to run tests
 3. **Python version mismatch:** Dockerfile builder uses 3.12, environment.yml specifies 3.11
 4. **Ruff version loose in pyproject.toml:** Should pin to 0.14.10 like CI
 
 ### Nice-to-Have (Polish)
+
 1. **Remove requirements.txt:** Modern approach is pyproject.toml + lock files
 2. **Choose one Dockerfile:** Unclear which is production, which is dev
 3. **Black reference in Makefile:** Now uses ruff-format only
@@ -665,6 +729,7 @@ exclude = '''
 **Current State:** Modern and well-organized
 
 **Changes Needed:**
+
 ```diff
 [project]
 dependencies = [
@@ -694,6 +759,7 @@ cache_dir = ".pytest_cache"
 **Strategy:** Adopt PEP 517/518 (pyproject.toml) as single source of truth
 
 **Steps:**
+
 1. Delete `requirements.txt` (use lock files instead)
 2. Keep `requirements.lock` and `requirements-dev.lock` (generated by pip-compile)
 3. Use pip-tools workflow:
@@ -706,6 +772,7 @@ cache_dir = ".pytest_cache"
 ### CI/CD Pipeline
 
 **Update ci-standard.yml:**
+
 ```yaml
 jobs:
   quality-gate:
@@ -765,6 +832,7 @@ FROM node:20 AS dev
 ### Pre-commit Hooks
 
 **Fix Windows compatibility:**
+
 ```yaml
 - id: pytest-unit
   entry: python -m pytest  # Changed from python3
@@ -773,9 +841,10 @@ FROM node:20 AS dev
 ```
 
 **Don't skip in CI:**
+
 ```yaml
 ci:
-  skip: []  # Run all hooks
+  skip: [] # Run all hooks
 ```
 
 ---
@@ -844,6 +913,7 @@ if __name__ == "__main__":
 ### Optional Dependencies
 
 **Well-designed extras:**
+
 - `all-engines` - Drake + Pinocchio
 - `analysis` - OpenCV + scikit-learn
 - `pose` - MediaPipe + video processing
@@ -866,6 +936,7 @@ if __name__ == "__main__":
 ## 14. Action Plan (Prioritized)
 
 ### Week 1 - Critical Fixes
+
 - [ ] Fix mypy version in ci-standard.yml: change 1.13.0 to 1.19.1
 - [ ] Remove Flask from requirements.txt or document why it's there
 - [ ] Align numpy versions: change all to `>=1.26.4,<2.0.0`
@@ -873,6 +944,7 @@ if __name__ == "__main__":
 - [ ] Pin ruff in pyproject.toml to 0.14.10
 
 ### Week 2 - CI/CD Improvements
+
 - [ ] Add pytest execution to ci-standard.yml
 - [ ] Add python version matrix (3.10, 3.11, 3.12)
 - [ ] Fix TRACKED_TASK/TRACKED_DEFECT check to allow references: `# TRACKED_TASK #123`
@@ -880,6 +952,7 @@ if __name__ == "__main__":
 - [ ] Verify all hooks run in CI (don't skip)
 
 ### Week 3 - Docker/Container Updates
+
 - [ ] Align Dockerfile ports (8000 vs 8001)
 - [ ] Fix Dockerfile Python version (3.12 vs 3.11)
 - [ ] Consolidate to one primary Dockerfile + optional variants
@@ -887,6 +960,7 @@ if __name__ == "__main__":
 - [ ] Add proper healthcheck to depends_on
 
 ### Week 4 - Dev Experience
+
 - [ ] Remove black references (use ruff-format only)
 - [ ] Fix pytest-unit hook for Windows (language: python)
 - [ ] Update Makefile: add mypy + pytest to lint
@@ -894,6 +968,7 @@ if __name__ == "__main__":
 - [ ] Document dependency management process
 
 ### Week 5 - Testing & Validation
+
 - [ ] Run new CI configuration on test branch
 - [ ] Validate all configs with scripts/validate_config.py
 - [ ] Test setup_golf_suite.py on Windows + Linux
@@ -907,6 +982,7 @@ if __name__ == "__main__":
 **Overall Assessment: B+ (Good with room for improvement)**
 
 ### Strengths
+
 - ✅ Comprehensive security configuration (SECURITY.md, bcrypt, pip-audit)
 - ✅ Modern build system (hatchling, PEP 517/518)
 - ✅ Extensive pre-commit hooks (60+)
@@ -915,6 +991,7 @@ if __name__ == "__main__":
 - ✅ Multi-engine support properly architected
 
 ### Weaknesses
+
 - ⚠️ Configuration redundancy (multiple build configs for same tool)
 - ⚠️ Version inconsistencies across files
 - ⚠️ CI doesn't run tests (pytest missing)
@@ -922,12 +999,14 @@ if __name__ == "__main__":
 - ⚠️ Dependency management not fully modern (requirements.txt still in use)
 
 ### Risk Assessment
+
 - **No blocking issues** - code can be built and run
 - **Maintenance burden** - redundant configs increase future errors
 - **CI effectiveness** - missing pytest means tests aren't validated in pipeline
 - **Developer friction** - config mismatches cause "works locally, fails in CI" issues
 
 ### Next Steps
+
 1. Implement Week 1 critical fixes immediately
 2. Schedule Week 2-5 improvements in next sprint
 3. Document final decisions in CONTRIBUTING.md

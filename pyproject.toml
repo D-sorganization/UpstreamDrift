@@ -44,10 +44,12 @@ dependencies = [
     "platformdirs>=4.2.0",
 
     # Runtime security floor constraints documented in issue #3838.
-    # pillow raised to 13.0.0 for CVE-2026-112395–112899 (pip-audit 2026-10-21);
-    # previously 12.3.0 for PYSEC-2026-2253/2254/2255/2256/2257 and
-    # PYSEC-2026-3451/3452/3453/3454/3493/3494/3495/3496 (#8738).
+    # pillow raised to 13.0.0 for CVE-2026-112395/112397/112400/112404/
+    # 112895/112896/112897/112899 (GHSA-*), fixed in 13.0.0 (#13563).
     "pillow>=13.0.0",
+    # Transitive via httpx/requests/pyproj rather than imported directly.
+    # PYSEC-2026-4320, fixed in 2026.10.19 (#13563).
+    "certifi>=2026.10.19",
     "requests>=2.33.0",
     "python-dotenv>=1.2.2",
     "bokeh>=3.8.2",
@@ -809,6 +811,8 @@ markers = [
     "security: security-posture tests (secret scanning, auth hardening)",
     "validates_physics: tests that check computed physics against an analytic or published ground truth",
     "launch_qa: launch-mode functional QA gate (web/--classic/--api-only/--engine matrix; see docs/testing/launch_qa.md)",
+    "quarantine: marks flaky tests in quarantine with issue, owner, and expiry metadata (UD-CI-030)",
+    "xdist_group: pytest-xdist load-scope group name for serializing related tests across workers",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)

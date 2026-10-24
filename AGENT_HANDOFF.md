@@ -36,6 +36,12 @@ detail of a finished slice to the archive instead of growing this file.
 - ADR-0041 Amendment 1 (#9630, #9619): consumer-side self-calibration fitters live in `src/motion_capture/reconstruct/`; Tools keeps vendor-neutral reference geometry.
 - Real-data acceptance is deferred to `docs/development/planning/DV-9619.md`; the rig soak to `DV-9613.md`.
 
+## CI Throughput (RM Epic #2215)
+
+- UD-CI-010b #13577: `codex/13577-ci-fast-full` retains required ancestor `8a5c5b0`; actual main including #13599 is merge-integrated. Root-level CI contract tests moved to `tests/ci/` after live repo-structure CI found the layout violation; focused validation passed and the fix is committed. Full pre-PR validation/publication remains parent-owned; live canary and seven-day latency evidence remain open.
+- UD-CI-032 #13573: PR #13584 (`cursor/cancel-merge-queue-audit-1f01`) — merge-queue-safe `cancel-in-progress` audit; RM #2216 landed — arm auto-merge once `quality-gate` is green.
+- UD-CI-033 #13595: `codex/13595-ci-lint` fixes Actionlint/ShellCheck blockers and adds the governed RM #2253 policy consumer with protected baseline proof, a Repository_Management contents-read App token, trusted event forwarding, and `d-sorg-fleet-docker` routing. Actual CI found Semgrep `python.lang.security.audit.eval-detected` in the test-only fork-skip expression evaluator; the evaluator now interprets only the required GitHub expression AST nodes and rejects arithmetic/call syntax (including a side-effect fixture). Focused CI tests pass; Semgrep 1.182.0 with the CI rulesets reports 0 findings across all four scanned CI test files. The exact published-provider `pre_pr` invocation passed all eight gates, including whole-repository consistency and Fleet Policy Gate; 22 policy-consumer tests passed. Existing action pin, inventory, local-runner, central-policy, and publication detector contracts remain covered. Do not push; parent owns final push after queue/registry confirmation.
+
 ## Required Before Continuing
 
 - Read `AGENTS.md`, `CLAUDE.md`, and `docs/development/DEVELOPMENT_LOG.md`.
@@ -44,6 +50,8 @@ detail of a finished slice to the archive instead of growing this file.
 - Update this handoff, the development-log entry, and exactly one `SPEC.md` change-log row for every substantive PR.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
+
+Canonical golfer Drake alignment (#13531, #13450; folded into the grip-lane consolidation): actuator count from `resolve_plant_n_actuators`, grip frames `mid_hands`/`club_head`; verify `tests/engines/drake/test_drake_fit_actuator_alignment_13531.py` and grip-resolution tests.
 
 OpenSim musculoskeletal barbell lifts (OSL, Epic #13038; research record `docs/research/lift_models/lift_models.tex`; state as of 2026-10-20):
 
@@ -57,6 +65,11 @@ OpenSim musculoskeletal barbell lifts (OSL, Epic #13038; research record `docs/r
 open-fp vertical force plates as measured constraints (Epic #13061; plan and DV-13061 in #13062):
 
 - Contract OF-01 #13065, reader OF-02 #13066, readings at model time OF-05 #13069, vertical-cell observation rows with sensing-plane lever OF-11 #13067, family-wise elimination screen OF-12 #13070. AGPL boundary: files and network only; all data unqualified until DV-13061.
+
+HRG-GS grip styles and hand–club/hand–hand contact (Epic #13297, closed):
+
+- Continuous capsule line-contact law #13457 (#13308); MuJoCo per-row friction gain schedule `friction_secant_gain` #13504 (#13306); order-invariant quadrature #13517 (#13508).
+- Residuals MuJoCo overlap/interlock 0.10 s trail-hand deflection #13547 and OpenSim ten_finger hold net_force #13548: xfails removed by the antagonist preload pads #13555 (tolerances unchanged, 5 % peak / 2 % RMS). Newly exposed `net_moment_com` strict xfails tracked in #13560. Simscape line-contact kernel #13552 (PR #13556) still open: its R2025b receipts need a rerun after this change.
 
 Segmental spine (Epic #12735, ADR-0055):
 

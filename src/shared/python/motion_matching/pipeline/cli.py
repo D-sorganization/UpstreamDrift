@@ -652,7 +652,9 @@ def _calibrate_and_scale(
     )
     sim = fs.FullBodySimulator(adapter)
     address2 = lane.best_address(kin, address.q)
-    record_calibrated_address(address_report, sim, kin, address2, lane, labels, adapter)
+    record_calibrated_address(
+        address_report, sim, kin, address2, lane, labels, adapter, spec=scaled_spec
+    )
     return _CalibrateAndScaleResult(
         scaled_spec,
         spec_bytes,

@@ -16,28 +16,28 @@ not a terrain editor.
 
 ## Inputs
 
-| Control     | Unit | Range accepted   | Default                          |
-| ----------- | ---- | ---------------- | -------------------------------- |
-| Environment | -    | preset list      | first preset                     |
-| Width       | m    | 1 to 1000        | preset width                     |
-| Length      | m    | 1 to 2000        | preset length                    |
-| Slope       | deg  | -20 to 20        | 0                                |
-| Direction   | deg  | 0 to 360         | 0                                |
-| Query X     | m    | 0 to preset width  | half the width                 |
-| Query Y     | m    | 0 to preset length | half the length                |
+| Control     | Unit | Range accepted     | Default         |
+| ----------- | ---- | ------------------ | --------------- |
+| Environment | -    | preset list        | first preset    |
+| Width       | m    | 1 to 1000          | preset width    |
+| Length      | m    | 1 to 2000          | preset length   |
+| Slope       | deg  | -20 to 20          | 0               |
+| Direction   | deg  | 0 to 360           | 0               |
+| Query X     | m    | 0 to preset width  | half the width  |
+| Query Y     | m    | 0 to preset length | half the length |
 
 Environment presets, with their default extents and the terrain types they
 contain (`ENVIRONMENT_PRESETS` in
 `src/shared/python/physics/terrain_presets.py`):
 
-| Preset          | Default size    | Terrain types                                 |
-| --------------- | --------------- | --------------------------------------------- |
-| `putting_green` | 10 m x 15 m     | green, fringe                                 |
-| `fairway`       | 50 m x 200 m    | fairway, rough, bunker                        |
-| `driving_range` | 80 m x 300 m    | tee, fairway, rough                           |
-| `bunker`        | 20 m x 20 m     | bunker, green, fringe                         |
-| `rough`         | 30 m x 40 m     | rough, fairway                                |
-| `full_hole`     | 60 m x 340 m    | tee, fairway, rough, bunker, fringe, green    |
+| Preset          | Default size | Terrain types                              |
+| --------------- | ------------ | ------------------------------------------ |
+| `putting_green` | 10 m x 15 m  | green, fringe                              |
+| `fairway`       | 50 m x 200 m | fairway, rough, bunker                     |
+| `driving_range` | 80 m x 300 m | tee, fairway, rough                        |
+| `bunker`        | 20 m x 20 m  | bunker, green, fringe                      |
+| `rough`         | 30 m x 40 m  | rough, fairway                             |
+| `full_hole`     | 60 m x 340 m | tee, fairway, rough, bunker, fringe, green |
 
 Selecting a preset resets Width and Length to its defaults and re-centres the
 query point. Query controls stay disabled until a terrain has loaded
@@ -91,6 +91,7 @@ and per-material coefficients are all defined by those modules.
   the numbers.
 
 ## See Also
+
 - [Putting Green](putting_green.md) - the roll simulation that consumes a green surface
 - [Golf Environment](golf_environment.md) - the 3D range and hole viewer
 - [Simulation Controls](simulation_controls.md)

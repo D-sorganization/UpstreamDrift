@@ -43,6 +43,7 @@ exec ${runner[@]+"${runner[@]}"} python -m pytest tests/integration/motion_match
   -m "slow and not live_simulation" \
   --timeout=0 \
   -p no:randomly \
+  -p no:xvfb \
   -rA \
   --tb=short \
   "$@"

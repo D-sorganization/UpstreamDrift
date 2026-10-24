@@ -10,10 +10,11 @@ status: stub
 
 The registry describes this tile as quantifying how a rotating clubhead's
 impact-point delivery differs from the delivery of the tracked reference point
+
 - the clubhead centre of mass or its geometric centre. The distinction matters
-because a launch monitor or motion-capture system tracks one point on the head
-while the ball is struck at another, and a head that is rotating through impact
-gives those two points different velocities.
+  because a launch monitor or motion-capture system tracks one point on the head
+  while the ball is struck at another, and a head that is rotating through impact
+  gives those two points different velocities.
 
 No implementation of this tile could be found in this repository, so this page
 does not describe its behaviour. See [Unclear](#unclear) below.
@@ -97,6 +98,7 @@ Files and locations inspected: `src/config/launcher_manifest.json`,
 `../Tools/src/`.
 
 ## See Also
+
 - [ADR-0045: Putting Integration - One Experience, Two Preserved Physics Stacks](../adr/0045-putting-integration-one-experience-two-preserved-stacks.md)
 - [ADR-0004: Launcher Provider Migration](../adr/0004-launcher-provider-migration.md)
 - [Putting Green](putting_green.md) - the other preserved putting stack

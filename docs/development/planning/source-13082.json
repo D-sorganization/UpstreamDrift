@@ -4,10 +4,6 @@
   "title": "[OF-HW] Qualified open-fp Device Record (Deferred Validation DV-13061)",
   "body": "**OF-HW** · open-fp integration · `tier:strong` · Parent epic: #13061\n\n### Goal\nTrack the **physical** qualification of an open-fp plate pair. Until it is done, every open-fp trial in UpstreamDrift is unqualified measurement: it may be shown and compared, but it is never acceptance evidence for any model.\n\nThe deferred-validation record is [`docs/development/planning/DV-13061.md`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-13061.md) (status **deferred**, kind physical-measurement). This issue is the work item it points to. It cannot be completed in software, and it must never be closed on bench, simulator or synthetic data.\n\n### Acceptance (from DV-13061)\n1. A per-device calibration file. On that device, the open-fp M4 checks pass: total force within 1 %, CoP within 10 mm at marked spots, and body weight within 1 % of a reference scale.\n2. On the same device and production firmware, open-fp M6 passes: 20 real swings captured, none missed, and no false triggers during 2 minutes of quiet standing. M3 200 Hz frames show no sequence gaps over 10 minutes.\n3. Recorded temperature, auto-zero drift and tare movement over a session, with the open-fp commit, firmware and calibration ids used.\n4. A qualification reference is recorded in `PlateProvenance.qualification` for that device's trials, and DV-13061 is updated through the deferred-validation process (publish, verify, close, in that order).\n\n### What This Unlocks\n- OF-08 may drop the \"unqualified\" label for trials from the qualified device.\n- OF-10 may use measured vertical wrenches as targets.\n- OF-12 eliminations may be reported as conditional on a qualified measurement rather than an unqualified one.\n\n### Prerequisites (Currently Unavailable)\nAn assembled pair with all eight cells reading and production MCU firmware; a per-device M4 calibration; reference masses and scale; a golfer and capture session.\n\n### Depends On\nHardware. No software child blocks it.",
   "updated_at": "2026-10-17T04:35:05Z",
-  "labels": [
-    "enhancement",
-    "research",
-    "tier:strong"
-  ],
+  "labels": ["enhancement", "research", "tier:strong"],
   "state": "open"
 }

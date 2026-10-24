@@ -13,16 +13,16 @@ topologies, bone lengths, and joint conventions.
 The `SkeletonConfig` dataclass describes the kinematic structure of a
 skeleton:
 
-| Field             | Type             | Description                          |
+| Field | Type | Description |
 | ----------------- | ---------------- | ------------------------------------ | ------------------------------------------ |
-| `name`            | `str`            | Skeleton identifier                  |
-| `joint_names`     | `list[str]`      | Ordered list of joint names          |
-| `parent_indices`  | `list[int]`      | Parent index per joint (-1 for root) |
-| `joint_offsets`   | `NDArray (n, 3)` | T-pose offset from parent in metres  |
-| `joint_axes`      | `NDArray (n, 3)  | None`                                | Rotation axis per joint (default z)        |
-| `joint_limits`    | `NDArray (n, 2)  | None`                                | [min, max] angle limits (default $\pm\pi$) |
-| `semantic_labels` | `dict[str, str]` | Maps semantic names to joint names   |
-| `end_effectors`   | `list[str]`      | Names of end-effector joints         |
+| `name` | `str` | Skeleton identifier |
+| `joint_names` | `list[str]` | Ordered list of joint names |
+| `parent_indices` | `list[int]` | Parent index per joint (-1 for root) |
+| `joint_offsets` | `NDArray (n, 3)` | T-pose offset from parent in metres |
+| `joint_axes` | `NDArray (n, 3)  | None` | Rotation axis per joint (default z) |
+| `joint_limits` | `NDArray (n, 2)  | None` | [min, max] angle limits (default $\pm\pi$) |
+| `semantic_labels` | `dict[str, str]` | Maps semantic names to joint names |
+| `end_effectors` | `list[str]` | Names of end-effector joints |
 
 Post-initialisation validation ensures that `parent_indices` and
 `joint_offsets` have the same length as `joint_names`. Missing

@@ -16,11 +16,11 @@ clubhead delivery actually produce", rather than "what does this launch produce"
 
 ## Inputs
 
-| Control         | Unit | Range accepted | Default |
-| --------------- | ---- | -------------- | ------- |
-| Clubhead Speed  | m/s  | 20 to 60       | 45.0    |
-| Loft Angle      | deg  | 5 to 60        | 10.5    |
-| Clubhead Mass   | kg   | 0.100 to 0.400 | 0.200   |
+| Control        | Unit | Range accepted | Default |
+| -------------- | ---- | -------------- | ------- |
+| Clubhead Speed | m/s  | 20 to 60       | 45.0    |
+| Loft Angle     | deg  | 5 to 60        | 10.5    |
+| Clubhead Mass  | kg   | 0.100 to 0.400 | 0.200   |
 
 - **Physics Engine Source** selects which provider builds the swing state.
   Entries are real providers, not labels:
@@ -32,9 +32,9 @@ clubhead delivery actually produce", rather than "what does this launch produce"
   - `drake`, `pinocchio` - listed so the roadmap is visible, but permanently
     disabled with an honest tooltip reason ("engine sourcing not yet
     implemented" or "engine not installed").
-  A provider is contractually forbidden from stamping another engine's name on
-  its output, so the engine shown in the results is the engine that produced
-  them.
+    A provider is contractually forbidden from stamping another engine's name on
+    its output, so the engine shown in the results is the engine that produced
+    them.
 - Club presets stamp speed and loft pairs: Driver (50.0 m/s, 10.5 deg),
   7-Iron (35.0 m/s, 34.0 deg), PW (28.0 m/s, 46.0 deg).
 
@@ -95,6 +95,7 @@ with the module mapping in
   still compute.
 
 ## See Also
+
 - [Ball Flight Simulator](ball_flight_simulator.md) - flight only, with environment controls
 - [Shot Tracer](shot_tracer.md) - the flight question across several models
 - [Engine Selection Guide](engine_selection.md)

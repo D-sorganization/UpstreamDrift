@@ -571,15 +571,17 @@ class _OpenSimNativeEffortBackend:
             self._pending_muscle_names,
             self._applied,
         )
-        advanced_state = manager.integrate(float(end_time_s))
+        integrated_state = manager.integrate(float(end_time_s))
         self._verify_raw_readback(
             self._pending_muscles,
-            advanced_state,
+            integrated_state,
             self._pending_muscle_names,
             self._applied,
         )
+        # ``integrate`` returns the Manager's internal state; copy before the
+        # step-local Manager is destroyed so later ``observe()`` readbacks stay valid.
         self._model = self._pending_model
-        self._state = advanced_state
+        self._state = self._osim.State(integrated_state)
         self._muscles = self._pending_muscles
         self._muscle_names = self._pending_muscle_names
         self._coordinate = self._pending_coordinate
