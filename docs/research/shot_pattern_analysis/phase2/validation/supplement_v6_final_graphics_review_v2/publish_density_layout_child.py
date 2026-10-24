@@ -20,7 +20,7 @@ BASELINE = PHASE2 / "supplement_report_v1"
 CHILD = PHASE2 / "supplement_report_v2_layout_repair"
 STAGING = EVIDENCE / "layout_repair_render_staging"
 REPAIR_SOURCE = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-layout-gutter/UpstreamDrift"
+    "<owner-home>/.codex/worktrees/shot-pattern-layout-gutter/UpstreamDrift"
 )
 
 

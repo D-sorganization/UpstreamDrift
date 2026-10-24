@@ -13,9 +13,9 @@ def sha(path: Path) -> str:
 
 
 python = "/tmp/shot-pattern-validation-venv-20261009/bin/python"  # nosec B108
-main = Path("/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
+main = Path("<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
 producer = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift"
+    "<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift"
 )
 phase = main / "docs/research/shot_pattern_analysis/phase2"
 output = phase / "validation/supplement_v6_final_graphics_review_v2"
