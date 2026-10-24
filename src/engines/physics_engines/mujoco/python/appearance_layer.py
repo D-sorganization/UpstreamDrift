@@ -28,6 +28,7 @@ from src.shared.python.model_appearance.body_meshes import (
     resolve_appearance,
 )
 from src.shared.python.model_appearance.club_assembly import ClubAssembly
+from src.shared.python.model_appearance.club_chain_meshes import club_meshes_by_body
 from src.shared.python.model_appearance.schema import (
     AppearanceDocument,
     Material,
@@ -59,6 +60,17 @@ class _Assets:
         self.asset: ET.Element = asset
         self.materials = library.library_materials(doc)
         self._made: set[str] = set()
+        # Reuse materials (and their textures) an earlier pass already emitted
+        # into this asset block; a second _Assets must not re-emit them (#13500).
+        for existing in self.asset.findall("material"):
+            mat = existing.get("name", "")
+            if mat.startswith("mat_"):
+                base = mat[4:]
+                self._made.add(
+                    f"{base[: -len('_plane')]}:plane"
+                    if base.endswith("_plane")
+                    else base
+                )
         self.n_meshes = 0
 
     @property
@@ -293,11 +305,15 @@ def attach_club_meshes(
     club: ClubAssembly,
     finish: str = "satin_steel",
     doc: AppearanceDocument | None = None,
+    *,
+    spec: Mapping[str, Any] | None = None,
 ) -> int:
     """Add only the shaft, grip, mesh head and grip hands of ``club`` (plain layer).
 
     ``doc`` (default: the contract default) decides the hands: bare skin, or
-    the glove its ``glove`` field names.
+    the glove its ``glove`` field names. With ``spec``, the parts go to the
+    bodies ``club_chain_meshes.club_meshes_by_body`` names (a chain shaft is
+    cut per link, head on the tip link, R6 #12686); without it, all on ``body``.
 
     For the plain ``visual=True`` export, which keeps its capsule skeleton but
     should still show the real head (GCV-11) and both hands wrapped on the
@@ -307,8 +323,19 @@ def attach_club_meshes(
     if doc is None:
         doc = document_from_dict({"schema_version": "appearance-v1"})
     assets = _Assets(root, doc)
-    for label, mesh, material in club_meshes(club, finish, doc):
-        _add_mesh_visual(
-            assets, elements[body], f"vmesh_club_{label}", offsets[body], mesh, material
-        )
+    parts = (
+        {body: club_meshes(club, finish, doc)}
+        if spec is None
+        else club_meshes_by_body(spec, club, finish, doc)
+    )
+    for part_body, items in parts.items():
+        for label, mesh, material in items:
+            _add_mesh_visual(
+                assets,
+                elements[part_body],
+                f"vmesh_club_{label}",
+                offsets[part_body],
+                mesh,
+                material,
+            )
     return assets.n_meshes

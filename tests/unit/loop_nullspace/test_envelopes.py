@@ -276,14 +276,33 @@ def test_records_are_family_dependent_with_hypotheses() -> None:
     assert "H0" in r.hypotheses
 
 
-def test_records_unbounded_are_unavailable_with_reason() -> None:
+def test_records_partial_unbounded_frames_stay_family_dependent() -> None:
+    import dataclasses
+
+    quantities = _analytic_quantities()
+    series = static_envelopes([_analytic_set(), _analytic_set()], quantities)
+    upper = np.array(series.upper, copy=True)
+    upper[1, 0] = np.nan
+    status_upper = list(series.status_upper)
+    row = list(status_upper[1])
+    row[0] = BoundStatus.UNBOUNDED
+    status_upper[1] = tuple(row)
+    series = dataclasses.replace(series, upper=upper, status_upper=tuple(status_upper))
+    rec = series.records(ModelProvenance("m", "1"), InputProvenance("f", "s"))["tau_1"]
+    assert rec.allocation_dependence is AllocationDependence.FAMILY_DEPENDENT
+    assert np.isfinite(rec.values[0, 0]) and np.isfinite(rec.values[0, 1])
+    assert np.isnan(rec.values[1, 1])
+    assert "C-ENVELOPE-PARTIAL-FRAMES" in rec.conventions
+
+
+def test_records_fully_unbounded_quantity_stays_unavailable() -> None:
     series = static_envelopes(
         [_unbounded_set()],
         [EnvelopeQuantity("lam_2", [0.0, 1.0], 0.0, "N", scale=100.0)],
     )
     rec = series.records(ModelProvenance("m", "1"), InputProvenance("f", "s"))["lam_2"]
     assert rec.allocation_dependence is AllocationDependence.UNAVAILABLE
-    assert "UNBOUNDED" in rec.reason
+    assert "UNBOUNDED" in (rec.reason or "")
 
 
 # ------------------------------------------------------------------- DbC

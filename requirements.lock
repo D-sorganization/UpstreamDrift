@@ -23,12 +23,13 @@ blinker==1.9.0
     # via flask
 bokeh==3.9.0
     # via upstream-drift (pyproject.toml)
-certifi==2026.1.4
+certifi==2026.10.19
     # via
     #   httpcore
     #   httpx
     #   pyproj
     #   requests
+    #   upstream-drift (pyproject.toml)
 cffi==2.0.0
     # via cryptography
 charset-normalizer==3.4.7
@@ -120,7 +121,7 @@ packaging==26.2
     #   limits
 pandas==2.3.3
     # via upstream-drift (pyproject.toml)
-pillow==12.3.0
+pillow==13.0.0
     # via
     #   bokeh
     #   upstream-drift (pyproject.toml)

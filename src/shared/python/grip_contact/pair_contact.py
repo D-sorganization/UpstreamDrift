@@ -9,7 +9,9 @@ Coulomb contact law and torsional spin friction.
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import NamedTuple
 
 import numpy as np
 
@@ -28,9 +30,13 @@ __all__ = [
     "PairWrench",
     "capsule_capsule",
     "capsule_capsule_distance",
+    "capsule_line_nodes",
     "capsule_sphere",
     "closest_point_segment",
     "closest_points_segments",
+    "combine_line_nodes",
+    "line_contact_node_count",
+    "LineNode",
     "sphere_capsule",
     "sphere_capsule_distance",
 ]
@@ -192,6 +198,26 @@ class PairWrench:
                 f"got {self.tangential_force_mag_n}"
             )
 
+    @property
+    def normal_force_n(self) -> float:
+        """Alias for ``normal_force_mag_n``."""
+        return self.normal_force_mag_n
+
+    @property
+    def tangential_force_n(self) -> float:
+        """Alias for ``tangential_force_mag_n``."""
+        return self.tangential_force_mag_n
+
+    @property
+    def force_n(self) -> np.ndarray:
+        """Alias for ``force_b_n`` (force exerted by body A on body B)."""
+        return self.force_b_n
+
+    @property
+    def moment_nm(self) -> np.ndarray:
+        """Alias for ``moment_b_nm`` (moment exerted on body B about ``point_b_m``)."""
+        return self.moment_b_nm
+
     def total_force_n(self) -> np.ndarray:
         """Net force of the pair (identically zero by action/reaction)."""
         return self.force_a_n + self.force_b_n
@@ -344,6 +370,12 @@ def closest_points_segments(
         Returns (pa, pb) on [a0, a1] and [b0, b1] respectively, minimizing ||pa - pb||.
         For parallel or coincident segments, returns a documented finite pair
         at the center of their mutual projection overlap.
+
+    The minimum distance is continuous in the endpoints, but the returned
+    points are not: when ``sin^2(theta) < 1e-10`` they sit at the overlap
+    centre, and just past it at an endpoint.  Use it for distances and
+    gaps; the capsule contact law (:func:`capsule_capsule`) integrates along
+    the axis instead (#13308).
     """
     p_a0 = _finite_vec3(a0, "a0")
     p_a1 = _finite_vec3(a1, "a1")
@@ -561,7 +593,10 @@ def capsule_capsule_distance(
         Returns (signed_distance_m, contact_point_m, normal, pa_m, pb_m).
         signed_distance_m < 0 indicates penetration.
         normal is a unit vector pointing from body A toward body B.
-        contact_point_m is the midpoint of the surface overlap.
+        contact_point_m is the midpoint of the surface overlap at the closest
+        points, which jump for nearly parallel capsules (see
+        :func:`closest_points_segments`); :func:`capsule_capsule` does not use
+        it to apply force.
     """
     _require_capsule_pair(capsule_a, capsule_b)
     st_a = _resolve_state(state_a, "state_a")
@@ -584,6 +619,234 @@ def capsule_capsule_distance(
     return signed_dist, contact_point, normal, pa, pb
 
 
+def line_contact_node_count(half_length_m: float, radius_m: float) -> int:
+    """Number of axial nodes of a capsule's line-contact quadrature.
+
+    The single shared rule for every engine that discretises a capsule (the
+    OpenSim sphere chain re-exports it as ``capsule_sphere_count``).
+
+    Preconditions:
+        ``half_length_m`` must be a nonnegative finite float.
+        ``radius_m`` must be a positive finite float.
+
+    Postconditions:
+        Returns an integer >= 2 whose node spacing along the core segment is
+        about ``radius_m / 2`` (``round(2 L / (r / 2)) + 1`` nodes).
+    """
+    if not (math.isfinite(half_length_m) and half_length_m >= 0.0):
+        raise ValueError(
+            f"half_length_m must be nonnegative and finite, got {half_length_m}"
+        )
+    if not (math.isfinite(radius_m) and radius_m > 0.0):
+        raise ValueError(f"radius_m must be positive and finite, got {radius_m}")
+    core_len = 2.0 * half_length_m
+    return max(2, int(round(core_len / (0.5 * radius_m))) + 1)
+
+
+def capsule_line_nodes(capsule: ContactCapsule) -> tuple[ContactSphere, ...]:
+    """Body-frame node spheres of ``capsule``'s axial line-contact quadrature.
+
+    Preconditions:
+        ``capsule`` is a :class:`ContactCapsule`.
+
+    Postconditions:
+        Returns ``n = line_contact_node_count(L / 2, r)`` spheres of radius
+        ``r`` centred at ``p0 + (k / (n - 1)) (p1 - p0)``, ``k = 0..n-1``: the
+        first at ``p0``, the last at ``p1``, equally spaced.
+    """
+    if not isinstance(capsule, ContactCapsule):
+        raise TypeError(f"capsule must be ContactCapsule, got {type(capsule).__name__}")
+    axis = capsule.p1_m - capsule.p0_m
+    half_length = 0.5 * math.sqrt(_dot3(axis.tolist(), axis.tolist()))
+    count = line_contact_node_count(half_length, capsule.radius_m)
+    return tuple(
+        ContactSphere(capsule.p0_m + (k / (count - 1)) * axis, capsule.radius_m)
+        for k in range(count)
+    )
+
+
+Vec3 = tuple[float, float, float]
+
+
+class LineNode(NamedTuple):
+    """One axial node's full-stiffness wrench, as Python floats (world axes).
+
+    Moments are about the pair's ``point_a_m`` (``moment_a_nm``) and
+    ``point_b_m`` (``moment_b_nm``); ``normal`` points from A toward B.
+    """
+
+    force_a_n: Vec3
+    moment_a_nm: Vec3
+    force_b_n: Vec3
+    moment_b_nm: Vec3
+    contact_point_m: Vec3
+    normal: Vec3
+    penetration_m: float
+    normal_force_mag_n: float
+    tangential_force_mag_n: float
+
+
+def _dot3(a: Sequence[float], b: Sequence[float]) -> float:
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+
+def _unit3(v: Sequence[float], fallback: Sequence[float]) -> Vec3:
+    norm = math.sqrt(_dot3(v, v))
+    if norm > 1e-300:
+        return (v[0] / norm, v[1] / norm, v[2] / norm)
+    return (fallback[0], fallback[1], fallback[2])
+
+
+def combine_line_nodes(nodes: Sequence[LineNode]) -> LineNode:
+    """Resultant of a capsule's axial nodes, each weighted ``1 / n``.
+
+    The penalty load is integrated along the capsule axis with ``n`` equally
+    weighted nodes: ``F = (1/n) sum_k F_k``, where ``F_k`` is the
+    full-stiffness sphere-capsule wrench of node ``k``.  The law is linear in
+    stiffness, so this is the line contact of per-length stiffness ``k / L``.
+    It is continuous in the pose because it never selects a closest point.
+
+    Preconditions:
+        ``nodes`` holds at least one :class:`LineNode`.
+
+    Postconditions:
+        Forces and moments are the left-to-right weighted sums (action and
+        reaction hold node by node, so they hold for the sum); the
+        ``normal_force_mag_n`` and ``tangential_force_mag_n`` values are the
+        weighted sums of the node magnitudes (the line load); ``penetration_m``
+        is the deepest node's; ``contact_point_m`` is the normal-force-weighted
+        node centroid and ``normal`` the unit normal-force resultant direction.
+        With zero total normal force they fall back to the unweighted node
+        centroid and mean normal.
+    """
+    if not nodes:
+        raise ValueError("combine_line_nodes needs at least one node")
+    w = 1.0 / len(nodes)
+    fa = ma = fb = mb = cp = nsum = cp_mean = n_mean = (0.0, 0.0, 0.0)
+    f_n = f_t = pen = 0.0
+    for node in nodes:
+        fa = _axpy(w, node.force_a_n, fa)
+        ma = _axpy(w, node.moment_a_nm, ma)
+        fb = _axpy(w, node.force_b_n, fb)
+        mb = _axpy(w, node.moment_b_nm, mb)
+        load = w * node.normal_force_mag_n
+        f_n += load
+        f_t += w * node.tangential_force_mag_n
+        cp = _axpy(load, node.contact_point_m, cp)
+        nsum = _axpy(load, node.normal, nsum)
+        cp_mean = _axpy(w, node.contact_point_m, cp_mean)
+        n_mean = _axpy(w, node.normal, n_mean)
+        pen = max(pen, node.penetration_m)
+    if f_n > 0.0:
+        point = (cp[0] / f_n, cp[1] / f_n, cp[2] / f_n)
+        normal = _unit3(nsum, _unit3(n_mean, nodes[0].normal))
+    else:
+        point = cp_mean
+        normal = _unit3(n_mean, nodes[0].normal)
+    return LineNode(fa, ma, fb, mb, point, normal, pen, f_n, f_t)
+
+
+def _axpy(a: float, x: Sequence[float], y: Sequence[float]) -> Vec3:
+    """``y + a * x`` on 3-vectors of Python floats."""
+    return (y[0] + a * x[0], y[1] + a * x[1], y[2] + a * x[2])
+
+
+def _line_node(pw: PairWrench) -> LineNode:
+    return LineNode(
+        _as_vec3(pw.force_a_n),
+        _as_vec3(pw.moment_a_nm),
+        _as_vec3(pw.force_b_n),
+        _as_vec3(pw.moment_b_nm),
+        _as_vec3(pw.contact_point_m),
+        _as_vec3(pw.normal),
+        pw.penetration_m,
+        pw.normal_force_mag_n,
+        pw.tangential_force_mag_n,
+    )
+
+
+def _as_vec3(v: np.ndarray) -> Vec3:
+    a, b, c = v.tolist()
+    return (a, b, c)
+
+
+def _capsule_core_length_m(capsule: ContactCapsule) -> float:
+    axis = capsule.p1_m - capsule.p0_m
+    return float(math.sqrt(_dot3(axis.tolist(), axis.tolist())))
+
+
+def _capsule_line_quadrature_key(
+    capsule: ContactCapsule,
+) -> tuple[float, float, Vec3, Vec3]:
+    """Deterministic ordering key for symmetric line-contact integration (#13508)."""
+    p0 = _as_vec3(np.asarray(capsule.p0_m, float))
+    p1 = _as_vec3(np.asarray(capsule.p1_m, float))
+    return (_capsule_core_length_m(capsule), capsule.radius_m, p0, p1)
+
+
+def _canonical_line_contact_integrator(
+    capsule_a: ContactCapsule, capsule_b: ContactCapsule
+) -> tuple[ContactCapsule, ContactCapsule, bool]:
+    """Pick the capsule whose axis is discretised for :func:`capsule_capsule`.
+
+    The shorter core segment is integrated so a long grip does not dilute the
+    load when argument order swaps (#13508).  Equal lengths break ties by
+    :func:`_capsule_line_quadrature_key` so ``(A,B)`` and ``(B,A)`` share the
+    same integrator.
+
+    Postconditions:
+        Returns ``(integrator, other, integrator_is_a)`` with
+        ``integrator_is_a`` true when ``integrator`` is ``capsule_a``.
+    """
+    key_a = _capsule_line_quadrature_key(capsule_a)
+    key_b = _capsule_line_quadrature_key(capsule_b)
+    if key_a <= key_b:
+        return capsule_a, capsule_b, True
+    return capsule_b, capsule_a, False
+
+
+def _line_contact_from_integrator(
+    integrator: ContactCapsule,
+    other: ContactCapsule,
+    integrator_is_a: bool,
+    st_a: BushingState,
+    st_b: BushingState,
+    law_params: ContactParameters,
+    patch_radius_m: float,
+    spin_transition_rad_s: float,
+) -> LineNode:
+    st_integ = st_a if integrator_is_a else st_b
+    st_other = st_b if integrator_is_a else st_a
+    nodes = [
+        _line_node(
+            sphere_capsule(
+                node,
+                other,
+                st_integ,
+                st_other,
+                law_params,
+                patch_radius_m,
+                spin_transition_rad_s,
+            )
+        )
+        for node in capsule_line_nodes(integrator)
+    ]
+    total = combine_line_nodes(nodes)
+    if integrator_is_a:
+        return total
+    return LineNode(
+        total.force_b_n,
+        total.moment_b_nm,
+        total.force_a_n,
+        total.moment_a_nm,
+        total.contact_point_m,
+        (-total.normal[0], -total.normal[1], -total.normal[2]),
+        total.penetration_m,
+        total.normal_force_mag_n,
+        total.tangential_force_mag_n,
+    )
+
+
 def capsule_capsule(
     capsule_a: ContactCapsule,
     capsule_b: ContactCapsule,
@@ -593,10 +856,20 @@ def capsule_capsule(
     patch_radius_m: float = 0.0,
     spin_transition_rad_s: float = 1.0,
 ) -> PairWrench:
-    """Shared contact law between two capsules (body A and body B).
+    """Shared line-contact law between two capsules (body A and body B) (#13308).
 
-    Reuses the Hunt-Crossley normal force, regularised Coulomb/Stribeck friction
-    and torsional spin friction moment from motion_matching.contact_law.
+    The shorter capsule's axis is discretised into :func:`capsule_line_nodes`
+    (ties broken deterministically when lengths match, #13508); each node
+    sphere meets the other capsule through :func:`sphere_capsule` (Hunt-Crossley
+    normal, regularised Coulomb/Stribeck friction and torsional spin friction
+    from motion_matching.contact_law) and :func:`combine_line_nodes` weights
+    every node ``1 / n``.  The law integrates the penetration along the
+    overlap instead of selecting a closest point, so it is continuous for
+    nearly parallel capsules, where the closest point of
+    :func:`closest_points_segments` jumps from the overlap centre to an
+    endpoint.  For exactly parallel capsules with a uniform depth ``delta``
+    it equals the closest-point law: normal force ``k delta (1 + d ddelta)``
+    at the overlap centre.
 
     Preconditions:
         capsule_a, capsule_b: ContactCapsule instances.
@@ -606,39 +879,40 @@ def capsule_capsule(
 
     Postconditions:
         Returns PairWrench satisfying action/reaction by construction.
-        Zero force and moment when separated (gap >= 0.0).
+        Zero force and moment when no node penetrates (``penetration_m == 0``).
         Normal force is strictly unilateral / compressive (never pulling).
+        The wrench and contact point are continuous in the poses wherever the
+        normal force is positive.
     """
     _require_capsule_pair(capsule_a, capsule_b)
     law_params = _check_law_args(law, patch_radius_m, spin_transition_rad_s)
     st_a = _resolve_state(state_a, "state_a")
     st_b = _resolve_state(state_b, "state_b")
-
-    signed_dist, contact_point, normal, pa, pb = capsule_capsule_distance(
-        capsule_a, capsule_b, st_a, st_b
+    integrator, other, integrator_is_a = _canonical_line_contact_integrator(
+        capsule_a, capsule_b
     )
-    penetration = max(0.0, -signed_dist)
-    if penetration <= 0.0:
-        return _separated_wrench(contact_point, normal, st_a, st_b)
-
-    v_a = _point_velocity(st_a, contact_point)
-    v_b = _point_velocity(st_b, contact_point)
-
-    plane = _contact_plane(normal, pa + capsule_a.radius_m * normal)
-    sample, spin_b = _sample_contact(
-        pb,
-        v_b - v_a,
-        capsule_b.radius_m,
-        plane,
-        st_b.omega_rad_s - st_a.omega_rad_s,
+    total = _line_contact_from_integrator(
+        integrator,
+        other,
+        integrator_is_a,
+        st_a,
+        st_b,
         law_params,
         patch_radius_m,
         spin_transition_rad_s,
     )
-    force_a = -(sample.normal_force_n + sample.friction_force_n)
-    spin_a = -spin_b
-    return _pair_wrench_from_forces(
-        force_a, spin_a, contact_point, normal, penetration, st_a, st_b, sample
+    return PairWrench(
+        force_a_n=np.array(total.force_a_n),
+        moment_a_nm=np.array(total.moment_a_nm),
+        force_b_n=np.array(total.force_b_n),
+        moment_b_nm=np.array(total.moment_b_nm),
+        contact_point_m=np.array(total.contact_point_m),
+        normal=np.array(total.normal),
+        penetration_m=total.penetration_m,
+        point_a_m=st_a.position_m,
+        point_b_m=st_b.position_m,
+        normal_force_mag_n=total.normal_force_mag_n,
+        tangential_force_mag_n=total.tangential_force_mag_n,
     )
 
 

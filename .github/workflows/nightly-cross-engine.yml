@@ -74,7 +74,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11"]
+        # Reviewed Drake 1.57/1.58 builds require Python >=3.12 (#13619).
+        python-version: ["3.12"]
 
     steps:
       - name: Clean corrupt git objects and disable sparse-checkout
@@ -146,8 +147,8 @@ jobs:
       - name: Summarize dependency failure
         if: failure() && steps.install_deps.outcome == 'failure'
         run: |
-          echo "## Dependency Installation Failed" >> $GITHUB_STEP_SUMMARY
-          echo "Cross-engine validation aborted due to environment setup failure." >> $GITHUB_STEP_SUMMARY
+          echo "## Dependency Installation Failed" >> "$GITHUB_STEP_SUMMARY"
+          echo "Cross-engine validation aborted due to environment setup failure." >> "$GITHUB_STEP_SUMMARY"
           echo '{"status": "dependency_failure"}' > test-results/setup-status.json
 
       - name: Verify native engine imports

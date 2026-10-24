@@ -811,9 +811,16 @@ class FullBodyPinocchioModel(NativePinocchioModel):
         require_full_body_schema(specification, consumer="Pinocchio full-body model")
         self.specification = specification
         self._pin = pin
+        self._separated_hands = bool(
+            specification.get("hand_separation", {}).get("enabled")
+            or "grip_bushing" in specification
+        )
         self._build_tree(specification)
         self._initialize_contact(specification)
-        self._initialize_closure(specification["closure"])
+        if self._separated_hands:
+            self._initialize_separated_grip(specification)
+        else:
+            self._initialize_closure(specification["closure"])
         from .contact_derivatives import PinocchioContactDifferentiator
 
         frames = {
@@ -823,6 +830,31 @@ class FullBodyPinocchioModel(NativePinocchioModel):
         self._contact_differentiator = PinocchioContactDifferentiator(
             pin, self.model, frames
         )
+
+    def _initialize_separated_grip(self, specification: Mapping[str, Any]) -> None:
+        """Initialize hand and club grip frames without bilateral weld constraints."""
+        from src.shared.python.grip_contact.interface import GripInterface
+
+        pin = self._pin
+        self.constraints = []
+        self.constraint_data = []
+        self._grip_interface = GripInterface.from_spec(specification)
+        self._grip_hand_frames: dict[str, int] = {}
+        self._grip_club_frames: dict[str, int] = {}
+        gb = specification["grip_bushing"]
+        for side in ("L", "R"):
+            entry = gb[side]
+            hj, hpose = self._bodies[entry["hand_body"]]
+            hplace = hpose * self._transform(entry["hand_frame"])
+            self._grip_hand_frames[side] = self.model.addFrame(
+                pin.Frame(f"GripHand_{side}", hj, hplace, pin.FrameType.OP_FRAME)
+            )
+            cj, cpose = self._bodies[entry["club_body"]]
+            cplace = cpose * self._transform(entry["club_frame"])
+            self._grip_club_frames[side] = self.model.addFrame(
+                pin.Frame(f"GripClub_{side}", cj, cplace, pin.FrameType.OP_FRAME)
+            )
+        self.data = self.model.createData()
 
     def _initialize_contact(self, specification: Mapping[str, Any]) -> None:
         pin = self._pin
@@ -981,36 +1013,120 @@ class FullBodyPinocchioModel(NativePinocchioModel):
             matrix.setflags(write=False)
         return NativeAccelerationDerivatives(base.names, dq, dv, base.deffort)
 
+    def _frame_bushing_state(self, fid: int) -> Any:
+        from src.shared.python.grip_contact.bushing_law import BushingState
+
+        pin = self._pin
+        pose = self.data.oMf[fid]
+        vel = pin.getFrameVelocity(
+            self.model, self.data, fid, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+        )
+        return BushingState(
+            np.array(pose.rotation, dtype=float, copy=True),
+            np.array(pose.translation, dtype=float, copy=True),
+            np.array(vel.linear, dtype=float, copy=True),
+            np.array(vel.angular, dtype=float, copy=True),
+        )
+
+    def separated_grip_wrenches(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        style: Any = None,
+    ) -> dict[str, Any]:
+        """Evaluate hand-on-club retention and physical hand-hand wrenches on a separated-hand spec."""
+        if not self._separated_hands:
+            raise ValueError("separated_grip_wrenches requires a separated-hand spec")
+        from src.shared.python.grip_contact.bushing_law import bushing_wrench
+        from src.shared.python.grip_contact.contact_topology import (
+            GripStyle,
+            contact_topology,
+        )
+        from src.shared.python.grip_contact.topology_contact import (
+            build_topology_model,
+            topology_hand_hand_wrenches,
+        )
+        from src.shared.python.motion_matching.grip_contract import GripSpec
+
+        grip_style = GripStyle.OVERLAP if style is None else GripStyle(style)
+        q = self.configuration(coordinates)
+        v = self._velocity_vector(rates)
+        self._pin.forwardKinematics(self.model, self.data, q, v)
+        self._pin.updateFramePlacements(self.model, self.data)
+        hands = {
+            s: self._frame_bushing_state(self._grip_hand_frames[s]) for s in ("L", "R")
+        }
+        club_frames = {
+            s: self._frame_bushing_state(self._grip_club_frames[s]) for s in ("L", "R")
+        }
+        hand_on_club = {
+            s: bushing_wrench(self._grip_interface.bushing, hands[s], club_frames[s])
+            for s in ("L", "R")
+        }
+        topo = contact_topology(GripSpec(style=grip_style))
+        topo_model = build_topology_model(self._grip_interface, topology=topo)
+        hand_hand = topology_hand_hand_wrenches(
+            topo_model, hands["L"], hands["R"], mode="separated_v2"
+        )
+        return {
+            "hand_on_club": hand_on_club,
+            "hand_hand": hand_hand,
+            "hands": hands,
+            "club_frames": club_frames,
+        }
+
     def accelerations(
         self,
         coordinates: Mapping[str, float],
         rates: Mapping[str, float],
         primitive_efforts: Mapping[str, float],
     ) -> dict[str, float]:
-        """Forward accelerations combining joint efforts, contact forces, and weld closure."""
+        """Forward accelerations combining joint efforts, contact forces, and grip/weld closure."""
         q = self.configuration(coordinates)
         v = self._velocity_vector(rates)
         tau = self._velocity_vector(primitive_efforts)
         samples = self.contact_forces(coordinates, rates)
-        self._pin.computeJointJacobians(self.model, self.data, q)
+        pin = self._pin
+        pin.computeJointJacobians(self.model, self.data, q)
         tau_contact = np.zeros(self.model.nv, dtype=float)
+        ref_frame = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
         for sphere in self.contact_spheres:
             sample = samples[sphere.name]
             if sample.penetration_m > 0.0:
                 f_world = sample.normal_force_n + sample.friction_force_n
                 fid = self._contact_frames[sphere.name]
-                pin = self._pin
-                ref_frame = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
                 j_raw = np.asarray(
-                    pin.getFrameJacobian(
-                        self.model,
-                        self.data,
-                        fid,
-                        ref_frame,
-                    ),
+                    self._pin.getFrameJacobian(self.model, self.data, fid, ref_frame),
                     dtype=float,
                 )
                 tau_contact += j_raw[:3, :].T @ f_world
+
+        if self._separated_hands:
+            grip = self.separated_grip_wrenches(coordinates, rates)
+            self._pin.computeJointJacobians(self.model, self.data, q)
+            hh = grip["hand_hand"]
+            hh_f = {"L": hh.force_on_lead_n, "R": hh.force_on_trail_n}
+            hh_m = {"L": hh.moment_on_lead_nm, "R": hh.moment_on_trail_nm}
+            for s in ("L", "R"):
+                w_club = grip["hand_on_club"][s]
+                jc = np.asarray(
+                    self._pin.getFrameJacobian(
+                        self.model, self.data, self._grip_club_frames[s], ref_frame
+                    ),
+                    dtype=float,
+                )
+                jh = np.asarray(
+                    self._pin.getFrameJacobian(
+                        self.model, self.data, self._grip_hand_frames[s], ref_frame
+                    ),
+                    dtype=float,
+                )
+                tau_contact += jc.T @ np.concatenate([w_club.force_n, w_club.moment_nm])
+                tau_contact += jh.T @ np.concatenate(
+                    [-w_club.force_n + hh_f[s], -w_club.moment_nm + hh_m[s]]
+                )
+            accel = self._pin.aba(self.model, self.data, q, v, tau + tau_contact)
+            return self._acceleration_dict(accel)
 
         acceleration = self._pin.constraintDynamics(
             self.model,

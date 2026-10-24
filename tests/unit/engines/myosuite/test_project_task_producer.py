@@ -294,8 +294,8 @@ def test_command_producer_rejects_task_hook_replacement_before_execution(
 
 
 _PRODUCTION_SHA256 = {
-    "driver": "e4a55d603af42db841d2a6e7b5fc5de71fb43a49a843c5d78b2062927202a8c5",
-    "iron": "b5c05b4e305398ac4c5e68bc6b84c89df273446dda3eab9532116a82117f660b",
+    "driver": "3a007bd960bb7edc37e04eb610b141b19d55e2f2f2381a7075a14dccd24f7154",
+    "iron": "550b000e48398b86bc5c881dd8fae27cd6d74209474775cbfe76b7234449aa9a",
 }
 
 

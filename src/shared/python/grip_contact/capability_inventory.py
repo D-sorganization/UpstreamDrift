@@ -260,3 +260,157 @@ def load_grip_capability_inventory(
         models=models_dict,
         excluded=excluded_dict,
     )
+
+
+PHYSICS_TILE_TYPES = frozenset(
+    {
+        "physics_engine",
+        "custom_humanoid",
+        "mjcf",
+        "drake",
+        "pinocchio",
+        "opensim",
+        "matlab_app",
+    }
+)
+
+
+def _read_yaml_models(yaml_path: Path) -> list[dict[str, Any]]:
+    import yaml
+
+    with yaml_path.open("r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    if not isinstance(data, dict):
+        return []
+    models = data.get("models", [])
+    return models if isinstance(models, list) else []
+
+
+def enumerate_advertised_hand_bearing_assets(
+    repo_root: Path | None = None,
+) -> tuple[str, ...]:
+    """Enumerate all advertised hand-bearing model assets and launcher tiles.
+
+    Reads the M0 engine model inventory (`src/config/engine_model_inventory.json`),
+    the launcher manifest (`src/config/models.yaml`), and the bundled model
+    library (`src/shared/python/model_generation/library/bundled/manifest.json`),
+    filtering out assets explicitly listed in `excluded` of
+    `grip_capability_inventory.json`.
+    """
+    resolved_root = (repo_root or REPO_ROOT_DEFAULT).resolve()
+    inventory = load_grip_capability_inventory(repo_root=resolved_root)
+    assets: set[str] = set(inventory.models.keys())
+
+    config_dir = resolved_root / "src" / "config"
+    engine_inv_path = config_dir / "engine_model_inventory.json"
+    if engine_inv_path.is_file():
+        raw_inv = json.loads(engine_inv_path.read_text(encoding="utf-8"))
+        for pkg in raw_inv.get("packages", []):
+            pid = str(pkg.get("id", ""))
+            if pid and not inventory.is_excluded(pid):
+                assets.add(pid)
+
+    models_yaml_path = config_dir / "models.yaml"
+    if models_yaml_path.is_file():
+        for m in _read_yaml_models(models_yaml_path):
+            mid = str(m.get("id", ""))
+            mtype = str(m.get("type", ""))
+            launcher_cfg = m.get("launcher", {})
+            cat = (
+                str(launcher_cfg.get("category", ""))
+                if isinstance(launcher_cfg, dict)
+                else ""
+            )
+            is_model_tile = (
+                cat == "physics_engine"
+                or mtype in PHYSICS_TILE_TYPES
+                or mid == "character_builder"
+            )
+            if mid and is_model_tile and not inventory.is_excluded(mid):
+                assets.add(mid)
+
+    bundled_path = (
+        resolved_root
+        / "src/shared/python/model_generation/library/bundled/manifest.json"
+    )
+    if bundled_path.is_file():
+        raw_bundled = json.loads(bundled_path.read_text(encoding="utf-8"))
+        for bmodel in raw_bundled.get("models", []):
+            bid = str(bmodel.get("id", ""))
+            if bid and not inventory.is_excluded(bid):
+                assets.add(bid)
+
+    return tuple(sorted(assets))
+
+
+def _load_valid_binding_ids(repo_root: Path) -> set[str]:
+    from src.shared.python.grip_contact.binding_manifest import validate_manifest
+
+    bindings_dir = repo_root / "src" / "config" / "grip_bindings"
+    bound_ids: set[str] = set()
+    if not bindings_dir.is_dir():
+        return bound_ids
+    for mf_path in sorted(bindings_dir.glob("*.json")):
+        manifest = json.loads(mf_path.read_text(encoding="utf-8"))
+        validate_manifest(manifest)
+        bound_ids.add(str(manifest["model_id"]))
+        bound_ids.add(mf_path.stem)
+    return bound_ids
+
+
+def _resolve_capability_entry(
+    inventory: GripCapabilityInventory,
+    asset_id: str,
+) -> ModelGripCapability | None:
+    direct = inventory.get_model(asset_id)
+    if direct is not None:
+        return direct
+    for model in inventory.models.values():
+        if asset_id in model.launcher_tile_ids:
+            return model
+    return None
+
+
+def verify_model_library_admission(
+    inventory: GripCapabilityInventory | None = None,
+    repo_root: Path | None = None,
+) -> dict[str, str]:
+    """Verify 100% admission coverage of advertised hand-bearing model assets.
+
+    Every advertised asset with hands must either have a validated
+    `grip-binding/v1` manifest (`"bound"`) or be reason-coded in
+    `grip_capability_inventory.json` (`"reason_coded"`).
+    """
+    resolved_root = (repo_root or REPO_ROOT_DEFAULT).resolve()
+    inv = inventory or load_grip_capability_inventory(repo_root=resolved_root)
+    bound_ids = _load_valid_binding_ids(resolved_root)
+    advertised = enumerate_advertised_hand_bearing_assets(repo_root=resolved_root)
+
+    status: dict[str, str] = {}
+    for asset_id in advertised:
+        cap = _resolve_capability_entry(inv, asset_id)
+        if cap is None:
+            raise ValueError(
+                f"Unadmitted hand-bearing model asset {asset_id!r}: neither bound nor reason-coded in inventory"
+            )
+        has_direct_manifest = (
+            asset_id in bound_ids
+            or cap.id in bound_ids
+            or (
+                "full_body_spec_anthro" in cap.asset_path
+                and "full_body_v1_spec_export" in bound_ids
+            )
+        )
+        if has_direct_manifest:
+            status[asset_id] = "bound"
+            continue
+
+        # Must be reason-coded for all unavailable features
+        for fname, feat in cap.features.items():
+            if not feat.available and not feat.reason.strip():
+                raise ValueError(
+                    f"Asset {asset_id!r} feature {fname!r} is unavailable without a reason"
+                )
+        status[asset_id] = "reason_coded"
+
+    return status

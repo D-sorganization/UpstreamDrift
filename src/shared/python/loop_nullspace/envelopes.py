@@ -489,8 +489,10 @@ class EnvelopeSeries:
     ) -> dict[str, QuantityRecord]:
         """One FAMILY_DEPENDENT record per quantity, values ``(frames, 2)``.
 
-        A quantity with any non-BOUNDED bound becomes UNAVAILABLE with the
-        reason stated (the finite bounds stay in :attr:`lower`/:attr:`upper`).
+        Per-frame non-``BOUNDED`` bounds are kept as NaN in :attr:`values` so the
+        plot model can segment ``UNBOUNDED`` frames while still showing bounded
+        frames (NSX-42 / #13150).  Whole-quantity ``UNAVAILABLE`` is reserved
+        for infeasible Chebyshev status on every frame.
         """
         out = {}
         for j, name in enumerate(self.names):
@@ -500,28 +502,46 @@ class EnvelopeSeries:
     def _record(
         self, j: int, name: str, model: ModelProvenance, source: InputProvenance
     ) -> QuantityRecord:
-        vals = np.stack([self.lower[:, j], self.upper[:, j]], axis=1)
+        vals = np.stack([self.lower[:, j], self.upper[:, j]], axis=1).astype(
+            float, copy=True
+        )
+        for t in range(self.n_frames):
+            if self.status_lower[t][j] is not BoundStatus.BOUNDED:
+                vals[t, 0] = np.nan
+            if self.status_upper[t][j] is not BoundStatus.BOUNDED:
+                vals[t, 1] = np.nan
         common: dict[str, Any] = {
             "units": self.units[j],
             "model_provenance": model,
             "input_provenance": source,
             "conventions": (STATIC_CONVENTION,),
         }
-        bad = sorted(
-            {
-                s.name
-                for t in range(self.n_frames)
-                for s in (self.status_lower[t][j], self.status_upper[t][j])
-                if s is not BoundStatus.BOUNDED
-            }
-        )
-        if bad:
+        if all(st is BoundStatus.INFEASIBLE for st in self.chebyshev_status):
             return QuantityRecord(
                 values=np.full(vals.shape, np.nan),
                 allocation_dependence=AllocationDependence.UNAVAILABLE,
-                reason=f"{name}: non-bounded envelope in some frames ({', '.join(bad)})",
+                reason=f"{name}: static feasible set empty on every frame",
                 **common,
             )
+        if not np.isfinite(vals).any():
+            bad = sorted(
+                {
+                    s.name
+                    for t in range(self.n_frames)
+                    for s in (self.status_lower[t][j], self.status_upper[t][j])
+                    if s is not BoundStatus.BOUNDED
+                }
+            )
+            return QuantityRecord(
+                values=vals,
+                allocation_dependence=AllocationDependence.UNAVAILABLE,
+                reason=f"{name}: non-bounded envelope in all frames ({', '.join(bad)})",
+                **common,
+            )
+        conventions = common["conventions"]
+        if np.isnan(vals).any():
+            conventions = (*conventions, "C-ENVELOPE-PARTIAL-FRAMES")
+            common["conventions"] = conventions
         hyps: dict[str, None] = {}
         for t in range(self.n_frames):
             hyps.update(dict.fromkeys(self.frame_hypothesis_ids[t]))

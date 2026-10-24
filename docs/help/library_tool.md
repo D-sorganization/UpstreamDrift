@@ -21,23 +21,23 @@ Declared capabilities: `research_library`, `references`, `documents`.
 
 ## Inputs
 
-| Input | How it is supplied | Unit or values |
-| --- | --- | --- |
-| Documents to import | file dialog, filter `Documents (*.pdf *.tex)` with an All Files fallback | file paths |
-| Search query | the toolbar search box | whitespace-separated tokens, tokenized with `shlex`; a leading `-` negates a token; the literals `and` and `or` are skipped |
-| Document selection | row selection in the table | one row at a time |
-| Library location | `~/.golf_modeling_suite/library`, created if absent | filesystem path |
-| Index location | `~/.golf_modeling_suite/library/library_index.db` | SQLite file |
+| Input               | How it is supplied                                                       | Unit or values                                                                                                              |
+| ------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Documents to import | file dialog, filter `Documents (*.pdf *.tex)` with an All Files fallback | file paths                                                                                                                  |
+| Search query        | the toolbar search box                                                   | whitespace-separated tokens, tokenized with `shlex`; a leading `-` negates a token; the literals `and` and `or` are skipped |
+| Document selection  | row selection in the table                                               | one row at a time                                                                                                           |
+| Library location    | `~/.golf_modeling_suite/library`, created if absent                      | filesystem path                                                                                                             |
+| Index location      | `~/.golf_modeling_suite/library/library_index.db`                        | SQLite file                                                                                                                 |
 
 ## Outputs
 
-| Output | Description |
-| --- | --- |
-| Imported file | a copy of the source file inside the library folder, made with `shutil.copy2` only when a file of that name is not already there |
-| `documents` table row | `id`, `file_name` (unique), `file_path`, `title`, `author`, `year`, `topic`, `added_date` |
-| Document table | four columns, Title, Author, Year and Topic, ordered by `added_date` descending, read-only, single-row selection |
-| Metadata preview | HTML showing title, author, year, topic and file name, all HTML-escaped |
-| Document Chat panel | present but permanently disabled; see [Limitations](#limitations) |
+| Output                | Description                                                                                                                      |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Imported file         | a copy of the source file inside the library folder, made with `shutil.copy2` only when a file of that name is not already there |
+| `documents` table row | `id`, `file_name` (unique), `file_path`, `title`, `author`, `year`, `topic`, `added_date`                                        |
+| Document table        | four columns, Title, Author, Year and Topic, ordered by `added_date` descending, read-only, single-row selection                 |
+| Metadata preview      | HTML showing title, author, year, topic and file name, all HTML-escaped                                                          |
+| Document Chat panel   | present but permanently disabled; see [Limitations](#limitations)                                                                |
 
 Metadata defaults when nothing better is available: `title` is the source file
 stem, `author` is the literal string `Unknown`, `year` is the current year, and
@@ -97,6 +97,7 @@ Defining module: `src/launchers/library_widget.py`.
   with no sharing, sync or export.
 
 ## See Also
+
 - [Project Map](../architecture/PROJECT_MAP.md)
 - [Launchers](../user_guide/launchers.md)
 - [User manual](../user_guide/user_manual.md)

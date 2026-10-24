@@ -30,11 +30,27 @@ describe('GripControls', () => {
     render(<Harness />);
     const button = screen.getByRole('button', { name: 'Build Grip Revision' });
     expect(button).toBeDisabled();
-    fireEvent.change(screen.getByLabelText('Grip Style (Picture Only)'), {
+    fireEvent.change(screen.getByLabelText(/^Lead Thumb Offset/), {
+      target: { value: '20' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Grip Strength Offset/), {
+      target: { value: '10' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Lead Roll Offset/), {
+      target: { value: '-5' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Trail Roll Offset/), {
+      target: { value: '8' },
+    });
+    expect(button).toBeDisabled(); // picture-only picks (thumb + HRG-A2) are not a revision
+    fireEvent.change(screen.getByLabelText('Grip Style'), {
+      target: { value: 'overlap' },
+    });
+    expect(button).toBeDisabled(); // unchanged default physical style is a no-op
+    // HRG-GS-G1 (#13346): non-default grip_style is a physical pick and enables Build Grip Revision.
+    fireEvent.change(screen.getByLabelText('Grip Style'), {
       target: { value: 'interlock' },
     });
-    expect(button).toBeDisabled(); // a picture-only pick is not a revision
-    fireEvent.change(screen.getByLabelText('Grip Strength'), { target: { value: 'strong' } });
     expect(button).toBeEnabled();
   });
 

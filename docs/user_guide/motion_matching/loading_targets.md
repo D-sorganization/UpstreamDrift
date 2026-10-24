@@ -229,4 +229,3 @@ calibrated_result = probe_spec_identifiability(
 )
 assert calibrated_result.is_full_rank  # rank 44 of 44
 ```
-

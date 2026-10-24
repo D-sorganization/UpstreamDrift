@@ -1,0 +1,26 @@
+{
+  "issue": "#13575",
+  "epic": "Repository_Management#2215",
+  "plan_item": "UD-CI-003",
+  "k1_k2_keep": [
+    "Jules-Redundant-PR-Closer.yml",
+    "Jules-Redundant-Issue-Closer.yml",
+    "Jules-Auto-Assign-Issues.yml",
+    "Jules-Issue-Mention-Handler.yml",
+    "Jules-Diff-Verifier.yml"
+  ],
+  "batches": {
+    "1": {
+      "summary": "Jules workflows marked retire with push/pull_request listeners (K3 overrides).",
+      "retired_active_paths": [
+        ".github/workflows/Jules-Control-Tower.yml",
+        ".github/workflows/Jules-Supersede-Check.yml"
+      ],
+      "archive_dir": ".github/workflows-retired/jules-push-pr-noise/batch-1",
+      "workflow_names": [
+        "Jules Control Tower",
+        "Jules Supersede Check"
+      ]
+    }
+  }
+}

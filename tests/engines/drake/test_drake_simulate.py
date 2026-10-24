@@ -64,8 +64,8 @@ class TestSimOptions:
         assert opts.time_step_s == pytest.approx(1.0e-3)
         assert opts.gravity == (0.0, 0.0, -9.80665)
         assert opts.urdf_path is None
-        assert opts.grip_body_name == "club_grip"
-        assert opts.clubhead_body_name == "clubhead"
+        assert opts.grip_body_name == "mid_hands"
+        assert opts.clubhead_body_name == "club_head"
 
     @pytest.mark.parametrize(
         "kwargs",

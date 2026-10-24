@@ -49,6 +49,8 @@ from typing import Any, Literal
 import numpy as np
 import numpy.typing as npt
 
+from src.shared.python.grip_contact.contact_topology import contact_topology
+from src.shared.python.grip_contact.topology_contact import hand_x_origin
 from src.shared.python.math_utils.quaternion import rotmat_to_quat
 from src.shared.python.motion_matching.piecewise_polynomial import (
     bernstein_to_power_matrix,
@@ -75,6 +77,8 @@ _DEFAULT_URDF = (
 # loader, so tests can introspect the contract without importing pinocchio.
 GRIP_FRAME_NAME: str = "mid_hands"
 CLUBHEAD_FRAME_NAME: str = "club_head"
+LEAD_HAND_FRAME_NAME: str = "lead_hand"
+TRAIL_HAND_FRAME_NAME: str = "trail_hand"
 
 
 # --------------------------------------------------------------------------- #
@@ -213,6 +217,7 @@ class SimOptions:
     t0: float = 0.0
     output_rate_hz: float | None = None
     compute_qdd: bool = True
+    hands: Literal["merged", "separate"] = "merged"
 
     def __post_init__(self) -> None:  # DbC preconditions, parity spec sec 5.2
         if self.T_s is not None:
@@ -248,6 +253,9 @@ class SimOptions:
             raise ValueError(msg)
         if self.basis not in ("power", "bernstein"):
             msg = f"basis must be 'power' or 'bernstein', got {self.basis!r}"
+            raise ValueError(msg)
+        if self.hands not in ("merged", "separate"):
+            msg = f"hands must be 'merged' or 'separate', got {self.hands!r}"
             raise ValueError(msg)
         if self.gravity is not None:
             g = np.asarray(self.gravity, dtype=np.float64)
@@ -359,8 +367,46 @@ def _resolve_urdf_path(urdf_path: str | Path | None) -> Path:
     return Path(urdf_path)
 
 
-def _get_cached_model(urdf_path: Path) -> Any:
-    """Build and cache the Pinocchio model for the given URDF."""
+def _attach_separate_hand_frames(pin_mod: Any, model: Any) -> Any:
+    """Attach massless ``lead_hand`` and ``trail_hand`` frames around ``mid_hands``."""
+    out = model.copy()
+    if out.existFrame(LEAD_HAND_FRAME_NAME) and out.existFrame(TRAIL_HAND_FRAME_NAME):
+        return out
+
+    mid_id = _frame_id(out, GRIP_FRAME_NAME)
+    mid_frame = out.frames[mid_id]
+    parent_joint = mid_frame.parentJoint
+    mid_placement = mid_frame.placement
+
+    topology = contact_topology()
+    spacing_m = hand_x_origin(topology, "trail") - hand_x_origin(topology, "lead")
+    half_spacing = 0.5 * spacing_m
+    r_grip = np.array(
+        [[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [-1.0, 0.0, 0.0]], dtype=np.float64
+    )
+    frame_type = pin_mod.FrameType.BODY
+
+    for hand_name, z_offset in (
+        (LEAD_HAND_FRAME_NAME, half_spacing),
+        (TRAIL_HAND_FRAME_NAME, -half_spacing),
+    ):
+        if out.existFrame(hand_name):
+            continue
+        se3_rel = pin_mod.SE3(r_grip, np.array([0.0, 0.0, z_offset], dtype=np.float64))
+        placement = mid_placement * se3_rel
+        frame_obj = pin_mod.Frame(
+            hand_name, parent_joint, mid_id, placement, frame_type
+        )
+        out.addFrame(frame_obj)
+    return out
+
+
+def _get_cached_model(
+    urdf_path: Path, *, hands: Literal["merged", "separate"] = "merged"
+) -> Any:
+    """Build and cache the Pinocchio model for the given URDF and hand mode."""
+    if hands not in ("merged", "separate"):
+        raise ValueError(f"hands must be 'merged' or 'separate', got {hands!r}")
     if not is_pinocchio_available():
         msg = (
             "Pinocchio C++ runtime (with buildModelFromUrdf) is required. "
@@ -370,7 +416,8 @@ def _get_cached_model(urdf_path: Path) -> Any:
 
     import pinocchio as pin  # noqa: PLC0415
 
-    key = str(urdf_path.resolve())
+    resolved = str(urdf_path.resolve())
+    key = resolved if hands == "merged" else f"{resolved}::hands={hands}"
     with _MODEL_CACHE_LOCKS[key]:
         cached = _MODEL_CACHE.get(key)
         if cached is not None:
@@ -378,9 +425,36 @@ def _get_cached_model(urdf_path: Path) -> Any:
         if not urdf_path.exists():
             msg = f"URDF not found at {urdf_path}"
             raise FileNotFoundError(msg)
-        model = pin.buildModelFromUrdf(str(urdf_path))
+        base_model = _MODEL_CACHE.get(resolved)
+        if base_model is None:
+            base_model = pin.buildModelFromUrdf(str(urdf_path))
+            _MODEL_CACHE[resolved] = base_model
+        model = (
+            base_model
+            if hands == "merged"
+            else _attach_separate_hand_frames(pin, base_model)
+        )
         _MODEL_CACHE[key] = model
         return model
+
+
+def build_golfer_model(
+    hands: Literal["merged", "separate"] = "merged",
+    *,
+    urdf_path: str | Path | None = None,
+    gravity: npt.NDArray[np.float64] | None = None,
+) -> Any:
+    """Build and return the native Pinocchio golfer model for ``hands`` mode."""
+    resolved_path = _resolve_urdf_path(urdf_path)
+    model = _get_cached_model(resolved_path, hands=hands)
+    if gravity is not None:
+        g_vec = np.asarray(gravity, dtype=np.float64)
+        if g_vec.shape != (3,):
+            raise ValueError(f"gravity must have shape (3,), got {g_vec.shape!r}")
+        model = model.copy()
+        grav_obj = model.gravity
+        grav_obj.linear = g_vec
+    return model
 
 
 def _frame_id(model: Any, name: str) -> int:
@@ -507,10 +581,9 @@ def _require_runtime() -> None:
 def _load_model(opts: SimOptions) -> tuple[Any, Path]:
     """Return the (possibly gravity-overridden) model and its URDF path."""
     urdf_path = _resolve_urdf_path(opts.urdf_path)
-    model = _get_cached_model(urdf_path)
-    if opts.gravity is not None:
-        model = model.copy()
-        model.gravity.linear = np.asarray(opts.gravity, dtype=np.float64)
+    model = build_golfer_model(
+        hands=opts.hands, urdf_path=urdf_path, gravity=opts.gravity
+    )
     return model, urdf_path
 
 
@@ -527,6 +600,11 @@ def _rk4_coefficients(
     return p_coeffs / scale_powers[None, :]
 
 
+def _flat_copy(arr: Any) -> npt.NDArray[np.float64]:
+    flat = np.asarray(arr, dtype=np.float64).reshape(-1)
+    return flat.copy()
+
+
 def _initial_state(
     pin_mod: Any, model: Any, initial_pose: dict[str, Any] | None
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
@@ -535,13 +613,9 @@ def _initial_state(
     pose = initial_pose if initial_pose is not None else {}
     q0_in = pose.get("q")
     qd0_in = pose.get("qd")
-    q0 = (
-        np.asarray(q0_in, dtype=np.float64).reshape(-1).copy()
-        if q0_in is not None
-        else pin_mod.neutral(model)
-    )
+    q0 = _flat_copy(q0_in) if q0_in is not None else pin_mod.neutral(model)
     qd0 = (
-        np.asarray(qd0_in, dtype=np.float64).reshape(-1).copy()
+        _flat_copy(qd0_in)
         if qd0_in is not None
         else np.zeros(n_joints, dtype=np.float64)
     )

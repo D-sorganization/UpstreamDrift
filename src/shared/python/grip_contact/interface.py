@@ -195,12 +195,22 @@ class GripInterface:
             raise ValueError("spec has no closure")
         club = closure["body_b"]
         t_right = np.asarray(closure["placement_b"], dtype=float)
-        joints = [j for j in spec.get("joints", []) if j.get("child") == club]
-        if len(joints) != 1:
-            raise ValueError(
-                f"expected exactly one joint parenting the club, found {len(joints)}"
-            )
-        p_left = np.asarray(joints[0]["child_to_follower"], dtype=float)[:3, 3]
+        gb = spec.get("grip_bushing")
+        if (
+            isinstance(gb, Mapping)
+            and isinstance(gb.get("L"), Mapping)
+            and "club_frame" in gb["L"]
+        ):
+            p_left = np.asarray(gb["L"]["club_frame"], dtype=float)[:3, 3]
+        elif isinstance(gb, Mapping) and "club_left_frame" in gb:
+            p_left = np.asarray(gb["club_left_frame"], dtype=float)[:3, 3]
+        else:
+            joints = [j for j in spec.get("joints", []) if j.get("child") == club]
+            if len(joints) != 1:
+                raise ValueError(
+                    f"expected exactly one joint parenting the club, found {len(joints)}"
+                )
+            p_left = np.asarray(joints[0]["child_to_follower"], dtype=float)[:3, 3]
         rot = tuple(tuple(float(x) for x in row) for row in t_right[:3, :3])
         left = GripFrame("L", _v3(p_left), rot)  # type: ignore[arg-type]
         right = GripFrame("R", _v3(t_right[:3, 3]), rot)  # type: ignore[arg-type]

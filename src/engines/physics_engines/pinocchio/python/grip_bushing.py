@@ -17,6 +17,8 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
+from dataclasses import dataclass
 from importlib import import_module
 from typing import Any
 
@@ -27,7 +29,7 @@ from src.engines.physics_engines.pinocchio.python.native_model import (
     FullBodyPinocchioModel,
 )
 from src.shared.python.grip_contact import (
-    BushingWrench,
+    BushingState,
     ClubDynamics,
     CoordinateSpline,
     CoordinateSwing,
@@ -37,13 +39,38 @@ from src.shared.python.grip_contact import (
     hand_frame_states,
 )
 from src.shared.python.grip_contact.bushing_law import cross3
-from src.shared.python.grip_contact.parity import BushingProbe, GripKineticsSeries
+from src.shared.python.grip_contact.contact_topology import (
+    GripStyle,
+    contact_topology,
+)
+from src.shared.python.grip_contact.hand_drift import (
+    HandDrift,
+    hand_relative_drift,
+)
+from src.shared.python.grip_contact.parity import (
+    BushingProbe,
+    GripKineticsSeries,
+    QuantityError,
+    _compute_quantity_error,
+)
+from src.shared.python.grip_contact.topology_contact import (
+    HAND_HAND_IDENTIFIABILITY_NOTE,
+    PairTraceRecorder,
+    TopologyHandHandWrench,
+    build_topology_model,
+    topology_hand_hand_wrenches,
+    topology_side_wrench,
+)
+from src.shared.python.motion_matching.full_body_v2 import separate_v2_hands
+from src.shared.python.motion_matching.grip_contract import GripSpec
 
 ENGINE = "pinocchio"
 DEFAULT_RTOL = 1.0e-9
 DEFAULT_ATOL = 1.0e-12
 DEFAULT_MAX_STEP_S = 2.5e-4
 SIDES = ("L", "R")
+#: Distinct ``(hand_source, t)`` hand-frame evaluations kept (Radau stages + 1).
+HAND_CACHE_SIZE = 8
 
 
 def _pin() -> Any:
@@ -59,25 +86,38 @@ class WeldClubKinematics:
         self.model = self.adapter.model
         self.data = self.model.createData()
         self.names = list(names)
+        self._q_idx = np.array(
+            [self.adapter._coordinates[n] for n in self.names],
+            dtype=int,  # noqa: SLF001
+        )
+        self._v_idx = np.array(
+            [self.adapter._velocity_indices[n] for n in self.names],
+            dtype=int,  # noqa: SLF001
+        )
+        self._config = np.zeros(self.model.nq, dtype=float)
+        self._rates = np.zeros(self.model.nv, dtype=float)
         self._joint, self._body_pose = self.adapter.body_placement(
             spec["closure"]["body_b"]
         )
+        self._body_hom = np.array(self._body_pose.homogeneous, dtype=float)
 
     def state(self, q: np.ndarray, qdot: np.ndarray) -> RigidBodyState:
         """Pose and spatial velocity of the spec club frame for ``(q, qdot)``."""
         pin = self._pin
-        config = self.adapter.configuration(dict(zip(self.names, q, strict=True)))
-        rates = self.adapter.velocity(dict(zip(self.names, qdot, strict=True)))
-        pin.forwardKinematics(self.model, self.data, config, rates)
+        self._config[self._q_idx] = q
+        self._rates[self._v_idx] = qdot
+        pin.forwardKinematics(self.model, self.data, self._config, self._rates)
         joint_pose = self.data.oMi[self._joint]
         local = self.data.v[self._joint]  # joint-frame spatial velocity
         rot_j = np.array(joint_pose.rotation)
         omega = rot_j @ np.array(local.angular)
         v_joint = rot_j @ np.array(local.linear)
-        body = RigidBodyState(rot_j, np.array(joint_pose.translation), v_joint, omega)
-        frame = body.frame(np.array(self._body_pose.homogeneous))
+        arm = rot_j @ self._body_hom[:3, 3]
         return RigidBodyState(
-            frame.rotation, frame.position_m, frame.velocity_m_s, frame.omega_rad_s
+            rot_j @ self._body_hom[:3, :3],
+            np.array(joint_pose.translation) + arm,
+            v_joint + cross3(omega, arm),
+            omega,
         )
 
 
@@ -105,6 +145,7 @@ class ClubOnBushings:
         )
         self.model, self.data = model, model.createData()
         self._offsets = {s: interface.frame(s).matrix() for s in SIDES}
+        self._hand_cache: dict[tuple[Any, float], dict[str, Any]] = {}
 
     @staticmethod
     def club_state(y: np.ndarray) -> RigidBodyState:
@@ -120,18 +161,49 @@ class ClubOnBushings:
         )
         return RigidBodyState(rot, y[:3].copy(), rot @ y[7:10], rot @ y[10:13])
 
-    def wrenches(
-        self, t: float, y: np.ndarray, hand_source: Any
-    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, BushingWrench]]:
-        """Hand frames, club frames and bushing wrenches at ``(t, y)``."""
-        q, qdot = hand_source(t)
-        hands = hand_frame_states(self.kinematics.state(q, qdot), self.interface)
-        club = self.club_state(y)
-        frames = {s: club.frame(self._offsets[s]) for s in SIDES}
-        law = {
+    def hand_frames(self, t: float, hand_source: Any) -> dict[str, Any]:
+        """Hand bushing frames at ``t``, memoised for recent times.
+
+        Precondition: ``hand_source`` is a pure function of ``t`` (a spline or
+        a fixed pose).  Radau re-evaluates the right-hand side at the same
+        stage times across Newton iterations and its finite-difference
+        Jacobian, so the weld forward kinematics is computed once per
+        distinct ``(hand_source, t)``; the returned frames are bit-identical
+        to a fresh evaluation.
+        """
+        key = (hand_source, t)
+        hands = self._hand_cache.get(key)
+        if hands is None:
+            q, qdot = hand_source(t)
+            hands = hand_frame_states(self.kinematics.state(q, qdot), self.interface)
+            if len(self._hand_cache) >= HAND_CACHE_SIZE:
+                del self._hand_cache[next(iter(self._hand_cache))]
+            self._hand_cache[key] = hands
+        return dict(hands)
+
+    def contact_law(
+        self, hands: dict[str, Any], frames: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Per-side wrench on the club frame: the shared bushing law."""
+        return {
             s: bushing_wrench(self.interface.bushing, hands[s], frames[s])
             for s in SIDES
         }
+
+    def evaluate(
+        self, t: float, y: np.ndarray, hand_source: Any
+    ) -> tuple[dict[str, Any], RigidBodyState, dict[str, Any], dict[str, Any]]:
+        """Hand frames, club body state, club frames and law at ``(t, y)``."""
+        hands = self.hand_frames(t, hand_source)
+        club = self.club_state(y)
+        frames = {s: club.frame(self._offsets[s]) for s in SIDES}
+        return hands, club, frames, self.contact_law(hands, frames)
+
+    def wrenches(
+        self, t: float, y: np.ndarray, hand_source: Any
+    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+        """Hand frames, club frames and law wrenches at ``(t, y)``."""
+        hands, _, frames, law = self.evaluate(t, y, hand_source)
         return hands, frames, law
 
     def joint_torque(
@@ -164,8 +236,7 @@ class ClubOnBushings:
 
     def derivatives(self, t: float, y: np.ndarray, hand_source: Any) -> np.ndarray:
         """``d/dt [q, v]`` with ``aba`` for the club acceleration."""
-        _, frames, law = self.wrenches(t, y, hand_source)
-        club = self.club_state(y)
+        _, club, frames, law = self.evaluate(t, y, hand_source)
         tau = self.joint_torque(club, frames, law)
         return self.free_flyer_aba_derivatives(club, y, tau)
 
@@ -333,4 +404,384 @@ def probe_bushing_forces(
         force_n={s: law[s].force_n for s in SIDES},
         hand_rotation=hand_rot,
         engine_total_force_n=club.mass_kg * (a_com - gravity),
+    )
+
+
+class SeparatedHandsKinematics:
+    """Pinocchio forward kinematics of separated LHandBody and RHandStandoff chains (#13309)."""
+
+    def __init__(self, spec: dict[str, Any], names: list[str]) -> None:
+        self._pin = _pin()
+        self.adapter = FullBodyPinocchioModel(spec)
+        self.model = self.adapter.model
+        self.data = self.model.createData()
+        self.names = list(names)
+        self._q_idx = np.array(
+            [self.adapter._coordinates[n] for n in self.names],
+            dtype=int,  # noqa: SLF001
+        )
+        self._v_idx = np.array(
+            [self.adapter._velocity_indices[n] for n in self.names],
+            dtype=int,  # noqa: SLF001
+        )
+        self._config = np.zeros(self.model.nq, dtype=float)
+        self._rates = np.zeros(self.model.nv, dtype=float)
+        gb = spec["grip_bushing"]
+        self._joints: dict[str, int] = {}
+        self._hand_in_joint: dict[str, np.ndarray] = {}
+        for side in SIDES:
+            entry = gb[side]
+            j_idx, b_pose = self.adapter.body_placement(entry["hand_body"])
+            self._joints[side] = j_idx
+            self._hand_in_joint[side] = np.array(
+                b_pose.homogeneous, dtype=float
+            ) @ np.asarray(entry["hand_frame"], dtype=float)
+        j_l, b_l = self.adapter.body_placement(gb["L"]["hand_body"])
+        self._left_joint = j_l
+        self._left_body_hom = np.array(b_l.homogeneous, dtype=float)
+
+    def _run_fk(self, q: np.ndarray, qdot: np.ndarray) -> None:
+        self._config[self._q_idx] = q
+        self._rates[self._v_idx] = qdot
+        self._pin.forwardKinematics(self.model, self.data, self._config, self._rates)
+
+    def left_body_state(self, q: np.ndarray, qdot: np.ndarray) -> RigidBodyState:
+        """Pose and spatial velocity of ``LHandBody`` (coincident with welded club frame at q=0)."""
+        self._run_fk(q, qdot)
+        jp = self.data.oMi[self._left_joint]
+        lv = self.data.v[self._left_joint]
+        rot = np.array(jp.rotation)
+        body = RigidBodyState(
+            rot,
+            np.array(jp.translation),
+            rot @ np.array(lv.linear),
+            rot @ np.array(lv.angular),
+        )
+        f = body.frame(self._left_body_hom)
+        return RigidBodyState(f.rotation, f.position_m, f.velocity_m_s, f.omega_rad_s)
+
+    def left_hand_state(self, q: np.ndarray, qdot: np.ndarray) -> BushingState:
+        """Direct world ``BushingState`` of the lead hand frame on ``LHandBody``."""
+        self._run_fk(q, qdot)
+        j_idx = self._joints["L"]
+        jp = self.data.oMi[j_idx]
+        lv = self.data.v[j_idx]
+        rot = np.array(jp.rotation)
+        off = self._hand_in_joint["L"]
+        omega = rot @ np.array(lv.angular)
+        arm = rot @ off[:3, 3]
+        return BushingState(
+            rot @ off[:3, :3],
+            np.array(jp.translation) + arm,
+            rot @ np.array(lv.linear) + cross3(omega, arm),
+            omega,
+        )
+
+    def hand_states(self, q: np.ndarray, qdot: np.ndarray) -> dict[str, BushingState]:
+        """Independent left-wrist (``LHandBody``) and right-wrist (``RHandStandoff``) states."""
+        self._run_fk(q, qdot)
+        out: dict[str, BushingState] = {}
+        for side in SIDES:
+            j_idx = self._joints[side]
+            jp = self.data.oMi[j_idx]
+            lv = self.data.v[j_idx]
+            rot = np.array(jp.rotation)
+            off = self._hand_in_joint[side]
+            omega = rot @ np.array(lv.angular)
+            arm = rot @ off[:3, 3]
+            out[side] = BushingState(
+                rot @ off[:3, :3],
+                np.array(jp.translation) + arm,
+                rot @ np.array(lv.linear) + cross3(omega, arm),
+                omega,
+            )
+        return out
+
+
+@dataclass(frozen=True)
+class SeparatedGripRun:
+    """Result of ``simulate_separated_v2_grip`` with hand-on-club and hand-hand traces (#13309)."""
+
+    series: GripKineticsSeries
+    club_com_local_m: np.ndarray
+    pair_normal_force_n: dict[str, np.ndarray]
+    pair_tangential_force_n: dict[str, np.ndarray]
+    pair_contact_point_drift_m: dict[str, np.ndarray]
+    pair_penetration_m: dict[str, np.ndarray]
+    hand_hand_wrenches: tuple[TopologyHandHandWrench, ...]
+    relative_hand_drift: HandDrift
+    max_action_reaction_error_n: float
+
+    def net_moment_com_nm(self, target: GripKineticsSeries | None = None) -> np.ndarray:
+        """Total closure moment about the bare club COM in world coordinates (N*m)."""
+        s = self.series if target is None else target
+        r_com = np.einsum("nij,j->ni", s.club_rotation, self.club_com_local_m)
+        return (
+            s.torque_on_club_nm["L"]
+            + s.torque_on_club_nm["R"]
+            + np.cross(s.grip_point_m["L"] - r_com, s.force_on_club_n["L"])
+            + np.cross(s.grip_point_m["R"] - r_com, s.force_on_club_n["R"])
+        )
+
+    def net_moment_com_error(self, reference: GripKineticsSeries) -> QuantityError:
+        """Parity error of net closure moment about the bare club COM against ``reference``."""
+        return _compute_quantity_error(
+            self.net_moment_com_nm(self.series),
+            self.net_moment_com_nm(reference),
+            "net_moment_com",
+        )
+
+
+def _build_se3_hand_source(
+    kin: SeparatedHandsKinematics,
+    spline: CoordinateSpline,
+    times: np.ndarray,
+) -> Any:
+    """Build SE(3)-consistent separated-hand evaluator preserving exact sample states."""
+    packed = np.empty((times.size, 24), dtype=float)
+    eye3 = np.eye(3)
+    for k, t_val in enumerate(times):
+        qk, qdk = spline.evaluate(float(t_val))
+        hs = kin.hand_states(qk, qdk)
+        rl, pl = hs["L"].rotation, hs["L"].position_m
+        rr, pr = hs["R"].rotation, hs["R"].position_m
+        packed[k, :9] = rl.ravel()
+        packed[k, 9:12] = pl
+        packed[k, 12:21] = (rl.T @ rr).ravel()
+        packed[k, 21:24] = rl.T @ (pr - pl)
+    sp24 = CoordinateSpline(times, packed)
+
+    def evaluate_hands(t: float) -> dict[str, BushingState]:
+        val, dot = sp24.evaluate(t)
+        rl = val[:9].reshape(3, 3)
+        rl = 0.5 * rl @ (3.0 * eye3 - rl.T @ rl)
+        rl_dot = dot[:9].reshape(3, 3)
+        skew_l = rl_dot @ rl.T
+        wl = np.array(
+            [
+                0.5 * (skew_l[2, 1] - skew_l[1, 2]),
+                0.5 * (skew_l[0, 2] - skew_l[2, 0]),
+                0.5 * (skew_l[1, 0] - skew_l[0, 1]),
+            ]
+        )
+        pl = val[9:12]
+        vl = dot[9:12]
+        r_rel = val[12:21].reshape(3, 3)
+        r_rel = 0.5 * r_rel @ (3.0 * eye3 - r_rel.T @ r_rel)
+        r_rel_dot = dot[12:21].reshape(3, 3)
+        p_rel = val[21:24]
+        p_rel_dot = dot[21:24]
+        skew_rel = r_rel_dot @ r_rel.T
+        w_rel_local = np.array(
+            [
+                0.5 * (skew_rel[2, 1] - skew_rel[1, 2]),
+                0.5 * (skew_rel[0, 2] - skew_rel[2, 0]),
+                0.5 * (skew_rel[1, 0] - skew_rel[0, 1]),
+            ]
+        )
+        rr = rl @ r_rel
+        wr = wl + rl @ w_rel_local
+        arm = rl @ p_rel
+        pr = pl + arm
+        vr = vl + cross3(wl, arm) + rl @ p_rel_dot
+        return {
+            "L": BushingState(rl, pl, vl, wl),
+            "R": BushingState(rr, pr, vr, wr),
+        }
+
+    return evaluate_hands
+
+
+def simulate_separated_v2_grip_styles(
+    spec_bytes: bytes,
+    swing: CoordinateSwing,
+    interface: GripInterface | None = None,
+    styles: Sequence[GripStyle] = (
+        GripStyle.OVERLAP,
+        GripStyle.INTERLOCK,
+        GripStyle.TEN_FINGER,
+    ),
+    rtol: float = DEFAULT_RTOL,
+    atol: float = DEFAULT_ATOL,
+    max_step_s: float = DEFAULT_MAX_STEP_S,
+) -> dict[GripStyle, SeparatedGripRun]:
+    """Integrate the separated-v2 club once and collect per-style contact traces without cross-style merging."""
+    style_tuple = tuple(GripStyle(s) for s in styles)
+    if not style_tuple:
+        raise ValueError("styles must contain at least one GripStyle")
+    spec = json.loads(spec_bytes)
+    if not spec.get("hand_separation", {}).get("enabled"):
+        spec = separate_v2_hands(spec)
+    interface = interface or GripInterface.from_spec(spec)
+    kin = SeparatedHandsKinematics(spec, list(swing.names))
+    club_dyn = ClubDynamics.from_spec(spec)
+    pin = _pin()
+    club_model = pin.Model()
+    club_model.gravity.linear[:] = np.asarray(spec["gravity_m_s2"], float)
+    c_joint = club_model.addJoint(
+        0, pin.JointModelFreeFlyer(), pin.SE3.Identity(), "club"
+    )
+    club_model.appendBodyToJoint(
+        c_joint,
+        pin.Inertia(
+            club_dyn.mass_kg, np.asarray(club_dyn.com_m), club_dyn.inertia_com_kg_m2
+        ),
+        pin.SE3.Identity(),
+    )
+    club_data = club_model.createData()
+    offsets = {s: interface.frame(s).matrix() for s in SIDES}
+    spline = CoordinateSpline(swing.time_s, swing.q)
+    times = swing.time_s
+    hand_eval = _build_se3_hand_source(kin, spline, times)
+    y0 = _initial_state(kin.left_body_state(*spline.evaluate(float(times[0]))), pin)
+
+    def rhs(t: float, y: np.ndarray) -> np.ndarray:
+        hands = hand_eval(t)
+        club = ClubOnBushings.club_state(y)
+        frames = {s: club.frame(offsets[s]) for s in SIDES}
+        law = {s: bushing_wrench(interface.bushing, hands[s], frames[s]) for s in SIDES}
+        force = law["L"].force_n + law["R"].force_n
+        moment = (
+            law["L"].moment_nm
+            + cross3(frames["L"].position_m - club.position_m, law["L"].force_n)
+            + law["R"].moment_nm
+            + cross3(frames["R"].position_m - club.position_m, law["R"].force_n)
+        )
+        rot_t = club.rotation.T
+        tau = np.concatenate([rot_t @ force, rot_t @ moment])
+        quat = y[3:7] / np.linalg.norm(y[3:7])
+        q_c = np.concatenate([y[:3], quat])
+        v_c = y[7:13]
+        accel = np.array(pin.aba(club_model, club_data, q_c, v_c, tau))
+        omega = v_c[3:]
+        qv, qw = quat[:3], quat[3]
+        quat_dot = 0.5 * np.concatenate(
+            [qw * omega + cross3(qv, omega), [-float(qv @ omega)]]
+        )
+        return np.concatenate([club.rotation @ v_c[:3], quat_dot, accel])
+
+    sol = solve_ivp(
+        rhs,
+        (float(times[0]), float(times[-1])),
+        y0,
+        method="DOP853",
+        t_eval=times,
+        rtol=rtol,
+        atol=atol,
+        max_step=max_step_s,
+    )
+    if not sol.success:
+        raise RuntimeError(f"separated v2 club integration failed: {sol.message}")
+    return {
+        st: _collect_separated_run(
+            sol.y, times, hand_eval, interface, club_dyn, st, int(sol.nfev)
+        )
+        for st in style_tuple
+    }
+
+
+def simulate_separated_v2_grip(
+    spec_bytes: bytes,
+    swing: CoordinateSwing,
+    interface: GripInterface | None = None,
+    style: GripStyle = GripStyle.OVERLAP,
+    rtol: float = DEFAULT_RTOL,
+    atol: float = DEFAULT_ATOL,
+    max_step_s: float = DEFAULT_MAX_STEP_S,
+) -> SeparatedGripRun:
+    """Simulate separated-hand ``full-body-v2`` grip retention and physical hand-hand contact (#13309).
+
+    Evaluates ``LHandBody`` from the left-wrist chain and ``RHandStandoff`` from
+    the right-wrist chain, retains each hand on the free bare club via the shared
+    retention law, and evaluates physical hand-hand pairs with ``mode='separated_v2'``.
+    """
+    target_style = GripStyle(style)
+    return simulate_separated_v2_grip_styles(
+        spec_bytes,
+        swing,
+        interface=interface,
+        styles=(target_style,),
+        rtol=rtol,
+        atol=atol,
+        max_step_s=max_step_s,
+    )[target_style]
+
+
+def _collect_separated_run(
+    sol_y: np.ndarray,
+    times: np.ndarray,
+    hand_eval: Any,
+    interface: GripInterface,
+    club_dyn: ClubDynamics,
+    style: GripStyle,
+    nfev: int,
+) -> SeparatedGripRun:
+    offsets = {s: interface.frame(s).matrix() for s in SIDES}
+    topo = contact_topology(GripSpec(style=style))
+    topo_model = build_topology_model(interface, topology=topo)
+    recorder = PairTraceRecorder(topo_model, mode="separated_v2")
+    wrench: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    hand_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    club_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    club_rot = []
+    hh_list: list[TopologyHandHandWrench] = []
+    max_ar_err = 0.0
+    for k, t in enumerate(times):
+        y = sol_y[:, k]
+        hands = hand_eval(float(t))
+        club = ClubOnBushings.club_state(y)
+        frames = {s: club.frame(offsets[s]) for s in SIDES}
+        law = {s: bushing_wrench(interface.bushing, hands[s], frames[s]) for s in SIDES}
+        topo_law = {
+            s: topology_side_wrench(topo_model, s, hands[s], frames[s]) for s in SIDES
+        }
+        hh = topology_hand_hand_wrenches(
+            topo_model, hands["L"], hands["R"], mode="separated_v2"
+        )
+        recorder.record(topo_law, hands, frames, hand_hand=hh)
+        hh_list.append(hh)
+        ar_err = float(np.linalg.norm(hh.force_on_lead_n + hh.force_on_trail_n))
+        max_ar_err = max(max_ar_err, ar_err)
+        for s in SIDES:
+            wrench[s][0].append(law[s].force_n)
+            wrench[s][1].append(law[s].moment_nm)
+            hand_pose[s][0].append(hands[s].rotation)
+            hand_pose[s][1].append(hands[s].position_m)
+            club_pose[s][0].append(frames[s].rotation)
+            club_pose[s][1].append(frames[s].position_m)
+        club_rot.append(club.rotation)
+    arrays = {
+        name: {s: (np.array(d[s][0]), np.array(d[s][1])) for s in SIDES}
+        for name, d in (("w", wrench), ("h", hand_pose), ("c", club_pose))
+    }
+    rec = recorder.result()
+    pen_m = recorder.pair_penetration_m()
+    drift = hand_relative_drift(arrays["h"])
+    series = GripKineticsSeries.from_frames(
+        ENGINE,
+        times,
+        arrays["w"],
+        arrays["h"],
+        arrays["c"],
+        np.array(club_rot),
+        metadata={
+            "mode": "separated_v2",
+            "grip_style": style.value,
+            "rhs_evaluations": nfev,
+            "identifiability_note": HAND_HAND_IDENTIFIABILITY_NOTE,
+            "pair_penetration_m": pen_m,
+            "relative_hand_pose": drift.summary(),
+            **rec,
+        },
+    )
+    return SeparatedGripRun(
+        series=series,
+        club_com_local_m=np.asarray(club_dyn.com_m, dtype=float),
+        pair_normal_force_n=rec["pair_normal_force_n"],
+        pair_tangential_force_n=rec["pair_tangential_force_n"],
+        pair_contact_point_drift_m=rec["pair_contact_point_drift_m"],
+        pair_penetration_m=pen_m,
+        hand_hand_wrenches=tuple(hh_list),
+        relative_hand_drift=drift,
+        max_action_reaction_error_n=max_ar_err,
     )

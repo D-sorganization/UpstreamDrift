@@ -4,12 +4,12 @@ Machine-readable record: [`src/config/impact_acceptance.json`](../../src/config/
 gated by `tests/config/impact_acceptance/test_impact_acceptance_matrix.py`.
 This page restates it for review; the JSON is authoritative.
 
-| Field                                               | Value                                                                                                                               |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Audit snapshot (UpstreamDrift / Tools)              | `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / `3d93bb2c89813e17551814d3be7e895f791e29af` (2026-09-04)                                |
+| Field                                               | Value                                                                                                                                 |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Audit snapshot (UpstreamDrift / Tools)              | `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / `3d93bb2c89813e17551814d3be7e895f791e29af` (2026-09-04)                                  |
 | Reconciled against (UpstreamDrift base / Tools pin) | `53b10400b2f4ecbdd464ea5ddfc33a41ce73f28c` / `8a11691b4e9aee7d04dfc39628a8269ca561b07d` (2026-10-12 UTC; protected provider PR #5573) |
-| Release claim                                       | `code_verified_only`; no predictive-accuracy claim                                                                                  |
-| Supported Python matrix                             | 3.11 and 3.12 (CI Standard); 3.12 for the lock and Docker image                                                                     |
+| Release claim                                       | `code_verified_only`; no predictive-accuracy claim                                                                                    |
+| Supported Python matrix                             | 3.11 and 3.12 (CI Standard); 3.12 for the lock and Docker image                                                                       |
 
 ## Model-Capability Matrix
 

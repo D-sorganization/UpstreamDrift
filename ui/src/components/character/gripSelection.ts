@@ -5,12 +5,13 @@
  * (`resolve_grip`): the same precedence (pick, then the document's grip, then
  * the defaults) and the same split between two kinds of pick.
  *
- * - Physical picks (strength preset, rotation about the shaft, palm diagonal,
- *   set angle, depth, hand spacing) change the model's physics. They are sent
- *   to `/api/character-builder/grip` and make a new model revision that needs
- *   a refit. They are never part of the appearance export.
- * - Visual picks (style, lead thumb) are picture-only and go in the
- *   `.appearance.json` sidecar's `grip` block.
+ * - Physical picks (strength preset, grip style, rotation about the shaft,
+ *   palm diagonal, set angle, depth, hand spacing) change the model's physics.
+ *   They are sent to `/api/character-builder/grip` and make a new model
+ *   revision that needs a refit. They are never part of the appearance export.
+ * - Visual picks (lead thumb offset, grip strength offset, lead/trail roll
+ *   offsets) are picture-only and go in the `.appearance.json` sidecar's
+ *   `grip` block.
  *
  * `tests/fixtures/grip/grip_roundtrip.json` holds the resolved grips both
  * sides must produce. The Python resolver is the authority for ranges: the
@@ -83,11 +84,14 @@ export interface PhysicalGripPicks {
   trail_set_angle?: number;
   lead_below_butt?: number;
   hand_spacing?: number;
+  grip_style?: GripStyle;
 }
 
 export interface VisualGripPicks {
-  grip_style?: GripStyle;
   grip_thumb_offset_deg?: number;
+  grip_strength_deg?: number;
+  lead_roll_offset_deg?: number;
+  trail_roll_offset_deg?: number;
 }
 
 export type GripPicks = PhysicalGripPicks & VisualGripPicks;
@@ -100,7 +104,7 @@ export const DEFAULT_GRIP: PhysicalGrip = {
   handedness: 'right',
 };
 
-const PHYSICAL_KEYS: ReadonlyArray<keyof PhysicalGripPicks> = [
+const NON_STYLE_PHYSICAL_KEYS: ReadonlyArray<keyof PhysicalGripPicks> = [
   'preset',
   'lead_shaft_rotation',
   'trail_shaft_rotation',
@@ -112,6 +116,11 @@ const PHYSICAL_KEYS: ReadonlyArray<keyof PhysicalGripPicks> = [
   'hand_spacing',
 ];
 
+export const PHYSICAL_KEYS: ReadonlyArray<keyof PhysicalGripPicks> = [
+  ...NON_STYLE_PHYSICAL_KEYS,
+  'grip_style',
+];
+
 const RANGES = {
   alpha_deg: [-60, 60],
   psi_deg: [5, 85],
@@ -119,8 +128,14 @@ const RANGES = {
 } as const;
 
 /** True when any pick changes the physics (so a new revision and a refit). */
-export function hasPhysicalPick(picks: GripPicks): boolean {
-  return PHYSICAL_KEYS.some((k) => picks[k] !== undefined);
+export function hasPhysicalPick(picks: GripPicks, base: PhysicalGrip = DEFAULT_GRIP): boolean {
+  if (NON_STYLE_PHYSICAL_KEYS.some((k) => picks[k] !== undefined)) {
+    return true;
+  }
+  if (picks.grip_style !== undefined) {
+    return picks.grip_style !== (base.style ?? 'overlap');
+  }
+  return false;
 }
 
 function checked(name: keyof HandAngles, value: number): number {
@@ -176,6 +191,9 @@ export function resolveGrip(picks: GripPicks, base: PhysicalGrip = DEFAULT_GRIP)
     spacing = picks.hand_spacing;
   }
   if (picks.grip_style !== undefined) {
+    if (!GRIP_STYLES.includes(picks.grip_style)) {
+      throw new Error(`grip style must be one of ${GRIP_STYLES.join(', ')}, got ${picks.grip_style}`);
+    }
     style = picks.grip_style;
   }
   if (!(spacing > 0)) throw new Error(`hand_spacing must be positive, got ${spacing}`);
@@ -195,21 +213,30 @@ export function resolveGrip(picks: GripPicks, base: PhysicalGrip = DEFAULT_GRIP)
   return result;
 }
 
+const ROLL_OFFSET_KEYS = [
+  'grip_strength_deg',
+  'lead_roll_offset_deg',
+  'trail_roll_offset_deg',
+] as const;
+
 /** The sidecar `grip` block of the visual picks (only the picked keys). */
-export function visualGripBlock(picks: VisualGripPicks): Record<string, number | string> {
-  const block: Record<string, number | string> = {};
-  if (picks.grip_style !== undefined) {
-    if (!GRIP_STYLES.includes(picks.grip_style)) {
-      throw new Error(`grip style must be one of ${GRIP_STYLES.join(', ')}, got ${picks.grip_style}`);
-    }
-    block.style = picks.grip_style;
-  }
+export function visualGripBlock(picks: VisualGripPicks): Record<string, number> {
+  const block: Record<string, number> = {};
   if (picks.grip_thumb_offset_deg !== undefined) {
     const t = picks.grip_thumb_offset_deg;
     if (!Number.isFinite(t) || t < 0 || t > 45) {
       throw new Error(`grip_thumb_offset_deg must be in [0, 45], got ${t}`);
     }
     block.lead_thumb_offset_deg = t;
+  }
+  for (const key of ROLL_OFFSET_KEYS) {
+    const v = picks[key];
+    if (v !== undefined) {
+      if (!Number.isFinite(v) || v < -30 || v > 30) {
+        throw new Error(`${key} must be in [-30, 30], got ${v}`);
+      }
+      block[key] = v;
+    }
   }
   return block;
 }

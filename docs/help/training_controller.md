@@ -20,19 +20,19 @@ itself runs in the framework adapter.
 Submitting a job builds a `TrainingConfig`
 ([`config.py`](../../src/shared/python/training/config.py)):
 
-| Field | Type / unit |
-| --- | --- |
-| `framework` | `TrainingFramework.PYTORCH` (`"pytorch"`) or `TrainingFramework.GYMNASIUM` (`"gymnasium"`) |
-| `entry_point` | non-empty string, `"module.path:callable"` or a script path |
-| `output_dir` | `pathlib.Path` for checkpoints, metrics, and logs; created by the worker |
-| `hyperparameters` | free-form mapping, passed verbatim to the adapter |
-| `dataset_id` | id of a registered dataset, or `None` for self-generating workloads such as RL envs |
-| `resources` | `ResourceRequest`; defaults to 1 CPU core and 1024 MiB RAM |
-| `max_epochs` | positive int or `None` (supervised) |
-| `max_steps` | positive int or `None` (RL / per-iteration) |
-| `seed` | non-negative int or `None` |
-| `tags` | string-to-string mapping for dashboard filtering |
-| `schema_version` | int >= 1 |
+| Field             | Type / unit                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| `framework`       | `TrainingFramework.PYTORCH` (`"pytorch"`) or `TrainingFramework.GYMNASIUM` (`"gymnasium"`) |
+| `entry_point`     | non-empty string, `"module.path:callable"` or a script path                                |
+| `output_dir`      | `pathlib.Path` for checkpoints, metrics, and logs; created by the worker                   |
+| `hyperparameters` | free-form mapping, passed verbatim to the adapter                                          |
+| `dataset_id`      | id of a registered dataset, or `None` for self-generating workloads such as RL envs        |
+| `resources`       | `ResourceRequest`; defaults to 1 CPU core and 1024 MiB RAM                                 |
+| `max_epochs`      | positive int or `None` (supervised)                                                        |
+| `max_steps`       | positive int or `None` (RL / per-iteration)                                                |
+| `seed`            | non-negative int or `None`                                                                 |
+| `tags`            | string-to-string mapping for dashboard filtering                                           |
+| `schema_version`  | int >= 1                                                                                   |
 
 `ResourceRequest` fields: `cpu_cores` (count, >= 1), `gpu_count`
 (count, >= 0 where 0 means CPU-only), `memory_mb` (MiB resident-set
@@ -121,6 +121,7 @@ widget to the launcher.
   PR". All three now exist. Treat this page as current.
 
 ## See Also
+
 - [Training Controller package README](../../src/tools/training_controller/README.md)
   (stale in the way noted above)
 - [Dataset Generator](dataset_generator.md) - produces the datasets jobs consume

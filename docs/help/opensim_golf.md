@@ -16,18 +16,18 @@ an approximation, to integrate it.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Model file | `.osim` | Passed as a command-line argument to `opensim_gui.py`, or chosen with `Load Model`. There is no default model. |
-| Integration time step | s | 0.001 s (`GolfSwingModel.dt`). |
-| Simulation duration | s | 1.5 s (`GolfSwingModel.duration`). |
-| Gravity | m/s^2 | `-constants.GRAVITY_M_S2`. |
-| Arm length | m | 0.7 m. |
-| Club length | m | 1.1 m. |
-| Arm mass | kg | 5.0 kg. |
-| Club mass | kg | 0.4 kg. |
-| Peak shoulder torque | N*m | 50.0 N*m. |
-| Passive wrist torque | N*m | 1.0 N*m. |
+| Input                 | Unit / type | Notes                                                                                                          |
+| --------------------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
+| Model file            | `.osim`     | Passed as a command-line argument to `opensim_gui.py`, or chosen with `Load Model`. There is no default model. |
+| Integration time step | s           | 0.001 s (`GolfSwingModel.dt`).                                                                                 |
+| Simulation duration   | s           | 1.5 s (`GolfSwingModel.duration`).                                                                             |
+| Gravity               | m/s^2       | `-constants.GRAVITY_M_S2`.                                                                                     |
+| Arm length            | m           | 0.7 m.                                                                                                         |
+| Club length           | m           | 1.1 m.                                                                                                         |
+| Arm mass              | kg          | 5.0 kg.                                                                                                        |
+| Club mass             | kg          | 0.4 kg.                                                                                                        |
+| Peak shoulder torque  | N*m         | 50.0 N*m.                                                                                                      |
+| Passive wrist torque  | N*m         | 1.0 N*m.                                                                                                       |
 
 The numeric parameters above are constructor defaults on `GolfSwingModel`
 (`src/engines/physics_engines/opensim/python/opensim_golf/core.py`). The tile's
@@ -35,16 +35,16 @@ UI does not expose editors for them; they are not user inputs from the GUI.
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| Joint angles vs time | rad | Plot 1, axis labelled "Joint Angles (rad)"; shoulder and wrist traces. |
-| Joint torques vs time | N*m | Plot 2, axis labelled "Joint Torques (Nm)". |
-| Swing trajectory | m (2D) | Plot 3: hand path and club-head path in the XZ plane, equal aspect. |
-| Muscle forces | N | `SimulationResult.muscle_forces`, one column per muscle in the model. |
-| Control signals | dimensionless activations | One column per model control. |
-| Marker positions | m (3-vector per marker per step) | One entry per marker in the model's marker set. |
-| Simulation summary | s and step count | Status line: duration and number of steps. |
-| Status / error dialogs | text | Explicit dialogs for "OpenSim Not Installed", "Model Load Failed", "Model File Not Found". |
+| Output                 | Unit / type                      | Notes                                                                                      |
+| ---------------------- | -------------------------------- | ------------------------------------------------------------------------------------------ |
+| Joint angles vs time   | rad                              | Plot 1, axis labelled "Joint Angles (rad)"; shoulder and wrist traces.                     |
+| Joint torques vs time  | N*m                              | Plot 2, axis labelled "Joint Torques (Nm)".                                                |
+| Swing trajectory       | m (2D)                           | Plot 3: hand path and club-head path in the XZ plane, equal aspect.                        |
+| Muscle forces          | N                                | `SimulationResult.muscle_forces`, one column per muscle in the model.                      |
+| Control signals        | dimensionless activations        | One column per model control.                                                              |
+| Marker positions       | m (3-vector per marker per step) | One entry per marker in the model's marker set.                                            |
+| Simulation summary     | s and step count                 | Status line: duration and number of steps.                                                 |
+| Status / error dialogs | text                             | Explicit dialogs for "OpenSim Not Installed", "Model Load Failed", "Model File Not Found". |
 
 ## Method
 
@@ -58,7 +58,7 @@ muscle forces, controls and marker positions each step.
 The GUI is `MainWidget` in
 `src/engines/physics_engines/opensim/python/opensim_gui.py`, hosted by the thin
 `OpenSimGolfGUI` `QMainWindow` for standalone launch. Plots are matplotlib on a
-`FigureCanvasQTAgg`. A *Screw Kinematics* tab is added when
+`FigureCanvasQTAgg`. A _Screw Kinematics_ tab is added when
 `src.shared.python.screw_theory.ui.ScrewVisualizationTab` imports successfully.
 
 The engine adapter used elsewhere in the suite is `OpenSimPhysicsEngine` - see
@@ -87,6 +87,7 @@ The engine adapter used elsewhere in the suite is `OpenSimPhysicsEngine` - see
   matplotlib panels only.
 
 ## See Also
+
 - [OpenSim engine reference](../engines/opensim.md)
 - [Engine capabilities matrix](../engines/engine_capabilities.md)
 - [Engine support tiers](../engines/support_tiers.md)

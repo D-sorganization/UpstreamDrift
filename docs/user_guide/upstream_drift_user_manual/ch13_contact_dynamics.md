@@ -646,7 +646,7 @@ I_3 & I_3 & \cdots & I_3 \\
 \end{bmatrix}
 $$
 
-where $\mathbf{r}_i = \mathbf{p}_i - \mathbf{p}_{\text{obj}}$ is the vector
+where $\mathbf{r}_i = \mathbf{p}*i - \mathbf{p}*{\text{obj}}$ is the vector
 from the object frame to the $i$-th contact point, and $[\mathbf{r}]_\times$ is
 the skew-symmetric matrix:
 

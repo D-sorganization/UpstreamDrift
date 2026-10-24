@@ -124,6 +124,7 @@ Computed-torque tracking simulation, zero-moment point diagnostics, contact para
 | `lowest_sphere_height_min_m`      | m        | Minimum elevation of lowest foot contact sphere in simulation    | dynamics |
 | `lowest_sphere_height_max_m`      | m        | Maximum elevation of lowest foot contact sphere in simulation    | dynamics |
 | `finish_feasibility`              | compound | Finish-window feasibility metrics of reference and simulation    | dynamics |
+| `replay_sensitivity`              | compound | Divergence of a 1e-6 perturbed replay, split at impact (#13112)  | dynamics |
 | `zmp_filter`                      | compound | Optional cart-table zero-moment-point filter report              | dynamics |
 | `centroidal_filter`               | compound | Optional centroidal feasibility filter (v2) before/after report  | dynamics |
 | `shooting_fit`                    | compound | Optional contact-aware shooting fit report                       | dynamics |

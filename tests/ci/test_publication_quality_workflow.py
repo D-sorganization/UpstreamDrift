@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -35,12 +37,86 @@ def test_publication_paths_drive_a_dedicated_protected_job() -> None:
         "pyproject.toml",
     ):
         assert path in detect
-    assert 'echo "publication=true" >> "$GITHUB_OUTPUT"' in detect
+    assert '"$GITHUB_OUTPUT"' in detect
     assert publication["needs"] == ["pick-runner", "changed-paths"]
     assert publication["if"] == "needs.changed-paths.outputs.publication == 'true'"
     assert "numpy>=1.26.0" in text
     assert "pymupdf>=1.26.0" in text
     assert "pikepdf>=10.0.0" in text
+
+
+@pytest.mark.parametrize(
+    ("event_name", "changed_path", "expected_publication", "uses_git"),
+    [
+        (
+            "pull_request",
+            "tests/research/test_publication_quality.py",
+            "true",
+            True,
+        ),
+        ("pull_request", "README.md", "false", True),
+        ("merge_group", "README.md", "true", False),
+        ("push", "README.md", "true", False),
+    ],
+)
+def test_publication_detector_runtime_outputs(
+    tmp_path: Path,
+    event_name: str,
+    changed_path: str,
+    expected_publication: str,
+    uses_git: bool,
+) -> None:
+    _, workflow = _workflow()
+    detect = workflow["jobs"]["changed-paths"]["steps"][2]["run"]
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    git_call_marker = tmp_path / "git-called"
+    fake_git = fake_bin / "git"
+    fake_git.write_text(
+        "#!/bin/sh\n"
+        'printf "called\\n" >> "$GIT_CALL_MARKER"\n'
+        'printf "%s\\n" "$FAKE_CHANGED_PATHS"\n',
+        encoding="utf-8",
+    )
+    fake_git.chmod(0o755)
+
+    output_path = tmp_path / "github-output"
+    summary_path = tmp_path / "step-summary"
+    result = subprocess.run(
+        ["bash", "-euo", "pipefail", "-c", detect],
+        cwd=tmp_path,
+        env={
+            **os.environ,
+            "PATH": f"{fake_bin}{os.pathsep}{os.environ['PATH']}",
+            "EVENT_NAME": event_name,
+            "BASE_REF": "main",
+            "FAKE_CHANGED_PATHS": changed_path,
+            "GIT_CALL_MARKER": str(git_call_marker),
+            "GITHUB_OUTPUT": str(output_path),
+            "GITHUB_STEP_SUMMARY": str(summary_path),
+        },
+        text=True,
+        capture_output=True,
+        timeout=15,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    outputs = dict(
+        line.split("=", maxsplit=1)
+        for line in output_path.read_text(encoding="utf-8").splitlines()
+    )
+    assert outputs["publication"] == expected_publication
+    if event_name != "pull_request":
+        assert outputs == {"code": "true", "docs": "true", "publication": "true"}
+    assert git_call_marker.exists() is uses_git, (
+        "only pull_request detection should invoke git diff"
+    )
+    if event_name == "pull_request":
+        summary = summary_path.read_text(encoding="utf-8")
+        assert f"publication authority changes: `{expected_publication}`" in summary
+    else:
+        assert not summary_path.exists(), "full-suite events exit before summary output"
 
 
 def test_publication_job_runs_the_complete_revision_bound_validator() -> None:

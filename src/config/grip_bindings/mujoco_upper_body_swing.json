@@ -1,0 +1,28 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "mujoco_upper_body_swing",
+  "model_hash": "sha256:3d48a569a8f01948f0142287ee8800f537fda0f980c5f082b9018061c3add0be",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "neutral_address",
+    "description": "MuJoCo upper-body golf swing MJCF at qpos0 with club parented to right_hand and welded to left_hand"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "src/engines/physics_engines/mujoco/_golf_swing_upper_body_xml.py",
+    "date": "2026-10-18",
+    "method": "native_mjcf_weld_grip"
+  },
+  "attachment_mode": "weld",
+  "club_body": "club",
+  "lead_hand_body": "left_hand",
+  "trail_hand_body": "right_hand",
+  "unavailable_sites": {}
+}

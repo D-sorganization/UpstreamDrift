@@ -1,0 +1,28 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "mujoco_advanced_biomechanical_swing",
+  "model_hash": "sha256:68979900daad7eda01f6f7b8b4e12086d444a322e99aba4acf57f86ed4fa7535",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "neutral_address",
+    "description": "MuJoCo advanced biomechanical golf swing MJCF at qpos0 with club_grip parented to right_hand and welded to left_hand"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "src/engines/physics_engines/mujoco/_golf_swing_advanced_xml.py",
+    "date": "2026-10-18",
+    "method": "native_mjcf_weld_grip"
+  },
+  "attachment_mode": "weld",
+  "club_body": "club_grip",
+  "lead_hand_body": "left_hand",
+  "trail_hand_body": "right_hand",
+  "unavailable_sites": {}
+}

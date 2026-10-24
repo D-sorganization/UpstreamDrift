@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "type": "command",
+        "command": "python3 scripts/agent-check-hook-bridge.py cursor-stop",
+        "timeout": 120,
+        "failClosed": true
+      }
+    ]
+  }
+}

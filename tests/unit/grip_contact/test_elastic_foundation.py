@@ -10,6 +10,7 @@ import pytest
 
 from src.shared.python.grip_contact import GripInterface
 from src.shared.python.grip_contact.elastic_foundation import (
+    elastic_foundation_for_law,
     elastic_foundation_parameters,
     winkler_patch_factor_m,
 )
@@ -70,3 +71,22 @@ def test_calibrated_stiffness_is_validated(pads) -> None:
     with pytest.raises(ValueError):
         ef.with_stiffness(-1.0)
     assert ef.analytic_force_n(-1e-3) == 0.0
+
+
+def test_elastic_foundation_for_law_exact_equality(pads) -> None:
+    ef_direct = elastic_foundation_parameters(pads)
+    ef_law = elastic_foundation_for_law(
+        pads.law,
+        pads.layout.grip_radius_m,
+        pads.layout.pad_radius_m,
+        pads.layout.preload_penetration_m,
+        layout=pads.layout,
+    )
+    assert ef_direct == ef_law
+    ef_law_default = elastic_foundation_for_law(
+        pads.law,
+        pads.layout.grip_radius_m,
+        pads.layout.pad_radius_m,
+        pads.layout.preload_penetration_m,
+    )
+    assert ef_direct == ef_law_default

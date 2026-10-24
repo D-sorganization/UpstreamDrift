@@ -23,23 +23,23 @@ launch.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Video file | `video/mp4`, `video/webm`, `video/ogg`, `video/quicktime` (`.mov`), `video/x-msvideo` (`.avi`), `video/x-matroska` (`.mkv`) | Uploaded through the page. Declared MIME type is cross-checked against the file's magic bytes. |
-| Maximum file size | 500 MB (`500 * 1024 * 1024` bytes) | Hard limit in the upload validator. Also surfaced as a configurable `maxFileSizeMB`, default 500 MB. |
-| Working frame rate | Hz (frames per second), default 30 | Configuration value `defaultFPS`, capped at 120 Hz. Used to convert between frame index and seconds; frame duration is `1 / defaultFPS` seconds. |
-| Current frame | integer frame index, 0-based | Clamped to `0 .. totalFrames - 1` by the frame navigator. |
-| Annotations | drawing input in canvas pixels | Drawn over the video on a Fabric.js canvas. |
-| Node.js | version 18 or newer, plus npm 9 or newer | A prerequisite of the launcher, not a user setting. |
+| Input              | Unit / type                                                                                                                 | Notes                                                                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Video file         | `video/mp4`, `video/webm`, `video/ogg`, `video/quicktime` (`.mov`), `video/x-msvideo` (`.avi`), `video/x-matroska` (`.mkv`) | Uploaded through the page. Declared MIME type is cross-checked against the file's magic bytes.                                                   |
+| Maximum file size  | 500 MB (`500 * 1024 * 1024` bytes)                                                                                          | Hard limit in the upload validator. Also surfaced as a configurable `maxFileSizeMB`, default 500 MB.                                             |
+| Working frame rate | Hz (frames per second), default 30                                                                                          | Configuration value `defaultFPS`, capped at 120 Hz. Used to convert between frame index and seconds; frame duration is `1 / defaultFPS` seconds. |
+| Current frame      | integer frame index, 0-based                                                                                                | Clamped to `0 .. totalFrames - 1` by the frame navigator.                                                                                        |
+| Annotations        | drawing input in canvas pixels                                                                                              | Drawn over the video on a Fabric.js canvas.                                                                                                      |
+| Node.js            | version 18 or newer, plus npm 9 or newer                                                                                    | A prerequisite of the launcher, not a user setting.                                                                                              |
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| A running local web application | HTTP on the Next.js dev-server port | The tile's job is to start this; the work happens in the page. |
-| Frame readout | frame index, time as `frame / fps` in seconds, and the frame rate in Hz | Displayed by the frame navigator. |
-| Exported annotations | annotation records | Produced by the app's annotation exporter. |
-| On-screen swing analysis | scores, phase timeline, tempo chart, metrics, detected issues, recommendations | Rendered in the browser by the app's swing-analysis dashboard. |
+| Output                          | Unit / type                                                                    | Notes                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| A running local web application | HTTP on the Next.js dev-server port                                            | The tile's job is to start this; the work happens in the page. |
+| Frame readout                   | frame index, time as `frame / fps` in seconds, and the frame rate in Hz        | Displayed by the frame navigator.                              |
+| Exported annotations            | annotation records                                                             | Produced by the app's annotation exporter.                     |
+| On-screen swing analysis        | scores, phase timeline, tempo chart, metrics, detected issues, recommendations | Rendered in the browser by the app's swing-analysis dashboard. |
 
 Concrete numeric ranges and units for the swing metrics are defined
 inside the Tools repository, not here; read them there rather than
@@ -92,6 +92,7 @@ the MediaPipe and OpenPose tiles.
   format.
 
 ## See Also
+
 - [Video analysis tutorial](../tutorials/content/04_video_analysis.md)
 - [MediaPipe](mediapipe_analysis.md), [OpenPose](openpose_analysis.md)
 - [Motion pipeline format matrix](../motion_pipeline/formats.md) - what the pipeline will actually ingest
