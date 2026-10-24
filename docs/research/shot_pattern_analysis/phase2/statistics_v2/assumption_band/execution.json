@@ -57,7 +57,7 @@
       "src/shared/python/physics/rigid_contact.py": "6aaf9d697b536c449dbf8fa5918e7e015bd3f6655e555af6489b96958fd90843",
       "src/tools/shot_pattern_analysis/matched_matrix.py": "dc979c890ae6881a0d4cd07dedc5bfcc020e78fa57e1d2b69e8edfbdacac06dd"
     },
-    "native_binary_path": "/home/dieterolson/shotpattern-v2/venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+    "native_binary_path": "<owner-home>/shotpattern-v2/venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
     "native_binary_sha256": "d157b45a709e5c476fdc049efd9829427fc967860c3ee77d58cbac9f461a74ec",
     "cargo_lock_present": false,
     "contact_backend": {

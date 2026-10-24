@@ -7,7 +7,7 @@ import sys
 from typing import Any
 
 ROOT = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift"
+    "<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift"
 )
 sys.path.insert(0, str(ROOT))
 
@@ -24,7 +24,7 @@ def _load_public_apis():
 sha256, reconstruct_pair = _load_public_apis()
 
 P = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift"
     "/docs/research/shot_pattern_analysis/phase2"
 )
 OUT = Path("/tmp/shot-pattern-actual-pair-adapter-review")  # nosec B108

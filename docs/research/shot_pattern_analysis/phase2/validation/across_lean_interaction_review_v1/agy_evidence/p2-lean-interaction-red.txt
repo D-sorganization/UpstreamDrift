@@ -61,7 +61,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e70f3d79550>
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E       KeyError: 'course_scoring_effect_modification'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py:358: KeyError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py:358: KeyError
 ___ test_across_lean_pair_uses_same_six_conditional_intersection_for_scoring ___
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2025/test_across_lean_pair_uses_sam0')
@@ -129,7 +129,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e70f3d7afc0>
 E       assert 0 == 2
 E        +  where 0 = len([])
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py:425: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py:425: AssertionError
 _________ test_across_lean_scoring_failure_records_unavailable_status __________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2025/test_across_lean_scoring_failu0')
@@ -174,30 +174,30 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e70f3d7be90>
         }
 E       KeyError: 'course_scoring_effect_modification'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py:498: KeyError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py:498: KeyError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

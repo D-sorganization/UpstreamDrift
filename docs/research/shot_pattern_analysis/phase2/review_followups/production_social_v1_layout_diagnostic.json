@@ -2,7 +2,7 @@
   "status": "visual_review_pending",
   "scope": "Actual Saved Data Component, Not Final Study Acceptance",
   "sources": {
-    "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py": "ca336daefbd440095832ab57549d1e1bde72949244dbd0bb3fc35a22b2912c43",
+    "<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py": "ca336daefbd440095832ab57549d1e1bde72949244dbd0bb3fc35a22b2912c43",
     "src/tools/shot_pattern_analysis/matched_pair_social.py": "6b5c8bac66601a51d8ce04900c29b5e496bb0b9e46da3c3832746133c44ec907"
   },
   "inputs": {

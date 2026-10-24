@@ -2,7 +2,7 @@
   "schema": "independent-across-lean-qualification/1",
   "created_utc": "2026-10-10T07:24:13.307651+00:00",
   "status": "accepted_component_candidate",
-  "source_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+  "source_worktree": "<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
   "candidate_sources": {
     "src/tools/shot_pattern_analysis/matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
     "tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py": "cd52f6fe0535c1163e2ed0bf05a8a6846219424cd791f7dae30c2ba20b5c59c9",
@@ -48,7 +48,7 @@
     "incorrect inventory location rejected (path corrected)",
     "unnecessary transition receipt rejected for identical PW execution snapshots (conditional receipt use corrected)"
   ],
-  "reproduce": "cd /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift && QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/across_lean_interaction_review_v1/check_actual_controls.py.txt",
+  "reproduce": "cd <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift && QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/across_lean_interaction_review_v1/check_actual_controls.py.txt",
   "evidence_sha256": {
     "ACTUAL_CONTROL_TABLE.md": "491bf7c55c3cb752457aa85027330c87ea255096a10bdac660ddfe6b8e7bae42",
     "REVIEW.md": "e2beaa6afc9e15880f1c84917c3996a856ccfc0b35d869832d5ec42ccc9b6c49",
