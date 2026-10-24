@@ -38,6 +38,7 @@ from src.shared.python.motion_matching.club_shaft_chain import (
     clamped_head_frequencies,
     span_properties,
 )
+from tests.support.real_engines import real_module
 
 pytestmark = [pytest.mark.unit, pytest.mark.cross_engine]
 
@@ -76,8 +77,8 @@ MODULES = {"drake": "pydrake.multibody.plant"}  # skips when pydrake is mocked
 
 
 def _require(engine: str) -> None:
-    pytest.importorskip("mujoco")
-    pytest.importorskip(MODULES.get(engine, engine))
+    real_module("mujoco")
+    real_module(MODULES.get(engine, engine))
 
 
 @pytest.fixture(scope="module")
