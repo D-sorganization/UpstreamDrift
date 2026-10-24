@@ -443,6 +443,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13618 · Install the Governed Canonical Admission Publisher Copy and Protected CI Caller With Independently Pinned Private Provider Runtime and Trusted Copy Drift Checking.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13618
+- **Branch:** merged via #13645
+- **PR:** #13645
+- **Paths:** see #13645
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`89280c80`; collated from changes/13618-protected-admission-publication.md)
+- **Summary:** Install the governed canonical admission publisher copy and protected CI caller with independently pinned private provider runtime and trusted copy drift checking.
+- **Next step:** Shipped in PR #13645.
+
+### DL-#13270 · Port Frame_Rate, Trunk_Spin, Hold_Limit_Jump, Rebase_Turns and Reference_Rate With Tests From Commit 22419Ee13 and Record the Failed Stance Probes in FORWARD_DYNAMICS.md
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13270
+- **Branch:** merged via #13735
+- **PR:** #13735
+- **Paths:** see #13735
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`5f9f2831`; collated from changes/13270-port-frame-rate-trunk-spin-hold-limit-ju.md)
+- **Summary:** Port frame_rate, trunk_spin, hold_limit_jump, rebase_turns and reference_rate with tests from commit 22419ee13 and record the failed stance probes in FORWARD_DYNAMICS.md
+- **Next step:** Shipped in PR #13735.
+
+### DL-#13255 · GS3DX GRF Exporter: Opt-In Lock_Joints (Gs3dx_Lock_Joints, in Memory) and DRY Shared Contact-Geometry / Sole-Point / CSV / SHA-256 Helpers; the Locked-Joint Stance Costs ~140 s Wall per Simulated ms
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13255
+- **Branch:** merged via #13726
+- **PR:** #13726
+- **Paths:** see #13726
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`470ce2e7`; collated from changes/13255-gs3dx-grf-exporter-opt-in-lock-joints-gs.md)
+- **Summary:** GS3DX GRF exporter: opt-in lock_joints (gs3dx_lock_joints, in memory) and DRY shared contact-geometry / sole-point / CSV / SHA-256 helpers; the locked-joint stance costs ~140 s wall per simulated ms
+- **Next step:** Shipped in PR #13726.
+
 ### DL-#13256 · Add Opt-In Allocate_Muscle_Excitations_Until_Feasible (Stop_When_Feasible) for Bounded Muscle Allocation: Stops During a Counted Evaluation on an Exact Feasible Witness and Reports Declared_Feasibility_Satisfied
 
 - **State:** shipped

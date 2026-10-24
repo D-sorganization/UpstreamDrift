@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13645 | Install the governed canonical admission publisher copy and protected CI caller with independently pinned private provider runtime and trusted copy drift checking. |
+| 2026-10-24 | #13735 | Port frame_rate, trunk_spin, hold_limit_jump, rebase_turns and reference_rate with tests from commit 22419ee13 and record the failed stance probes in FORWARD_DYNAMICS.md |
+| 2026-10-24 | #13726 | GS3DX GRF exporter: opt-in lock_joints (gs3dx_lock_joints, in memory) and DRY shared contact-geometry / sole-point / CSV / SHA-256 helpers; the locked-joint stance costs ~140 s wall per simulated ms |
 | 2026-10-24 | #13691 | Add opt-in allocate_muscle_excitations_until_feasible (stop_when_feasible) for bounded muscle allocation: stops during a counted evaluation on an exact feasible witness and reports declared_feasibility_satisfied |
 | 2026-10-24 | #13721 | OSL-7: predictive-versus-tracked deadlift comparison (bar path, window-start joint angles, group activations, L5/S1 status) aligned by bar-rise fraction; receipt wiring follows in a second PR |
 | 2026-10-24 | #13729 | Escape # in lift_models.tex so compile-latex-references passes (OSL-7 follow-up) |
