@@ -23,11 +23,11 @@ RMSEs are unreliable.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\round_trip_validation.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\matlab_bridge.py` (thin wrapper around MATLAB Engine for Python that calls `simulate_with_coefficients.m`)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\plot_surrogate_residuals.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option2\test_round_trip_validation.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option2\test_matlab_bridge.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\round_trip_validation.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\matlab_bridge.py` (thin wrapper around MATLAB Engine for Python that calls `simulate_with_coefficients.m`)
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\plot_surrogate_residuals.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option2\test_round_trip_validation.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option2\test_matlab_bridge.py`
 
 ## Public API
 

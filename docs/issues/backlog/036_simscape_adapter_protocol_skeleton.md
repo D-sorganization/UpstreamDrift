@@ -22,15 +22,15 @@ wires this into the loader registry.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\__init__.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\simscape_adapter.py` (skeleton)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\simscape_output.py` (`SimscapeOutput` dataclass)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\simscape_errors.py` (`SimulationError`, `EngineStartupError`, `LicenseError`, `ModelLoadError`)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\cache.py` (`_ResultCache`)
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\test_protocol_compliance.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\test_simscape_output.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\test_simscape_errors.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\test_cache.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\__init__.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\simscape_adapter.py` (skeleton)
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\simscape_output.py` (`SimscapeOutput` dataclass)
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\simscape_errors.py` (`SimulationError`, `EngineStartupError`, `LicenseError`, `ModelLoadError`)
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\cache.py` (`_ResultCache`)
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\test_protocol_compliance.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\test_simscape_output.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\test_simscape_errors.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\test_cache.py`
 
 ## Public API
 

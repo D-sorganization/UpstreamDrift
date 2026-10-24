@@ -21,9 +21,9 @@ multiple valid solutions.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\swing_inverse_cvae.py` (`KinematicEncoder`, `CoefficientDecoder`, `SwingInverseCVAE`)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\cvae_config.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option3\test_swing_inverse_cvae.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\swing_inverse_cvae.py` (`KinematicEncoder`, `CoefficientDecoder`, `SwingInverseCVAE`)
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\cvae_config.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option3\test_swing_inverse_cvae.py`
 
 ## Public API
 

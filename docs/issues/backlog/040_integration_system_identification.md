@@ -23,10 +23,10 @@ the Option 4 epic.
 
 ## File targets
 
-- New: `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\integration\test_system_identification_integration.py`
-- New: `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\integration\test_simscape_with_domain_randomization.py`
-- New: `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option4\integration\fixtures\sysid_target_synthetic.json` (synthetic target captured from a known mass-set perturbation)
-- Maybe modify: `C:\Users\diete\Repositories\UpstreamDrift\src\learning\sim2real\system_identification.py` (only if the test exposes a contract gap; do **not** make changes that aren't motivated by a test)
+- New: `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\integration\test_system_identification_integration.py`
+- New: `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\integration\test_simscape_with_domain_randomization.py`
+- New: `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option4\integration\fixtures\sysid_target_synthetic.json` (synthetic target captured from a known mass-set perturbation)
+- Maybe modify: `<owner-home>\Repositories\UpstreamDrift\src\learning\sim2real\system_identification.py` (only if the test exposes a contract gap; do **not** make changes that aren't motivated by a test)
 
 ## Public API
 

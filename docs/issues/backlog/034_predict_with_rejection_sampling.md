@@ -24,10 +24,10 @@ ms-per-fit option that gracefully handles multi-modality.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\predict_with_rejection_sampling.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\sample_scorer.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option3\test_predict_with_rejection_sampling.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option3\test_sample_scorer.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\predict_with_rejection_sampling.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\sample_scorer.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option3\test_predict_with_rejection_sampling.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option3\test_sample_scorer.py`
 
 ## Public API
 
