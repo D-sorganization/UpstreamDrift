@@ -1,0 +1,18 @@
+name: Codex Review Request
+
+# Thin caller: requests one Codex review only for risky or large PRs.
+# Logic lives in D-sorganization/fleet-workflows (pinned to a reviewed SHA).
+on:
+  pull_request:
+    types: [opened, ready_for_review, labeled]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  request:
+    uses: D-sorganization/fleet-workflows/.github/workflows/reusable-codex-review-request.yml@2bfdbb9efc22a9aabb9d6262f9cc911fc3e4cc60 # main 2026-10-23
+    secrets:
+      CODEX_REVIEW_REQUEST_TOKEN: ${{ secrets.CODEX_REVIEW_REQUEST_TOKEN }}
