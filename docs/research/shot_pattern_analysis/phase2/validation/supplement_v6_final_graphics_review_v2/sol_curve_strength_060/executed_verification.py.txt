@@ -1,5 +1,5 @@
 import hashlib,json,pathlib,datetime
-P=pathlib.Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+P=pathlib.Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
 B=P/'validation/supplement_v6_final_graphics_review_v2'; D=B/'curve_strength_060'; O=B/'sol_curve_strength_060'; R=P/'supplement_report_v1'
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
 def require(v,message):
