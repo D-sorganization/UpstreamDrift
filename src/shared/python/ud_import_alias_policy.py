@@ -83,14 +83,7 @@ class UdSharedImportAliasFinder(SharedImportAliasFinder):
             return self._pinned_chat_ui_builder_spec(fullname)
         if fullname == _CHAT_UI_BUILDER_LEGACY:
             canonical = importlib.import_module(_CHAT_UI_BUILDER_CANONICAL)
-            spec = importlib.util.spec_from_loader(
-                fullname,
-                cast(Any, _AliasLoader(canonical)),
-                origin=canonical.__file__,
-            )
-            if spec is not None:
-                spec.submodule_search_locations = getattr(canonical, "__path__", None)
-            return spec
+            return self._alias_spec(fullname, canonical)
 
         parts = fullname.split(".")
         if (
@@ -101,15 +94,20 @@ class UdSharedImportAliasFinder(SharedImportAliasFinder):
             canonical = importlib.import_module(
                 ".".join(["src", "shared", "python", *parts[2:]])
             )
-            spec = importlib.util.spec_from_loader(
-                fullname,
-                cast(Any, _AliasLoader(canonical)),
-                origin=canonical.__file__,
-            )
-            if spec is not None:
-                spec.submodule_search_locations = getattr(canonical, "__path__", None)
-            return spec
+            return self._alias_spec(fullname, canonical)
         return super().find_spec(fullname, path, target)
+
+    @staticmethod
+    def _alias_spec(fullname: str, canonical: ModuleType) -> Any:
+        """Build an alias spec while preserving its canonical module origin."""
+        spec = importlib.util.spec_from_loader(
+            fullname,
+            cast(Any, _AliasLoader(canonical)),
+            origin=canonical.__file__,
+        )
+        if spec is not None:
+            spec.submodule_search_locations = getattr(canonical, "__path__", None)
+        return spec
 
     def _pinned_chat_ui_builder_spec(self, fullname: str) -> Any:
         """Load the exact Tools-owned builder from vendor or an install."""

@@ -14,10 +14,24 @@ pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
-def _run_import_order(tmp_path: Path, first: str, second: str) -> None:
-    """Import both spellings in a clean process and check provider identity."""
+def _run_isolated_import(code: str, cwd: Path) -> None:
+    """Run an import scenario with a clean project path and headless Qt."""
     env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
     env["QT_QPA_PLATFORM"] = "offscreen"
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        cwd=cwd,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr[-2000:]
+
+
+def _run_import_order(tmp_path: Path, first: str, second: str) -> None:
+    """Import both spellings in a clean process and check provider identity."""
     code = f"""
 import importlib
 import sys
@@ -43,16 +57,7 @@ assert consumer.mirror_chat_dock_view is first.mirror_chat_dock_view
 for name in ("ChatDockView", "mirror_chat_dock_view", "build_chat_dock_ui"):
     assert getattr(first, name) is getattr(second, name)
 """
-    result = subprocess.run(
-        [sys.executable, "-c", code],
-        cwd=tmp_path,
-        env=env,
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=False,
-    )
-    assert result.returncode == 0, result.stderr[-2000:]
+    _run_isolated_import(code, tmp_path)
 
 
 @pytest.mark.parametrize(
@@ -108,17 +113,7 @@ except ModuleNotFoundError as error:
 else:
     raise AssertionError("missing provider fell back to UpstreamDrift's copy")
 """
-    env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
-    result = subprocess.run(
-        [sys.executable, "-c", code],
-        cwd=tmp_path,
-        env=env,
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=False,
-    )
-    assert result.returncode == 0, result.stderr[-2000:]
+    _run_isolated_import(code, tmp_path)
 
 
 @pytest.mark.parametrize(
@@ -167,14 +162,4 @@ assert module is legacy
 for name in ("ChatDockView", "mirror_chat_dock_view", "build_chat_dock_ui"):
     assert getattr(module, name) is getattr(legacy, name)
 """
-    env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
-    result = subprocess.run(
-        [sys.executable, "-c", code],
-        cwd=tmp_path,
-        env=env,
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=False,
-    )
-    assert result.returncode == 0, result.stderr[-2000:]
+    _run_isolated_import(code, tmp_path)
