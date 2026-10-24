@@ -25,6 +25,7 @@ from typing import Any, TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.motion_matching.acceptance import (
     Horizon,
     evaluate,
@@ -98,7 +99,7 @@ def fit_toy_2link(
     recovered_tau = np.zeros((n_frames, 2), dtype=np.float64)
     l1, l2 = link_lengths
     m1, m2 = link_masses
-    g = 9.81
+    g = float(GRAVITY_M_S2)
 
     for i in range(n_frames):
         q1, q2 = float(q_target[i, 0]), float(q_target[i, 1])

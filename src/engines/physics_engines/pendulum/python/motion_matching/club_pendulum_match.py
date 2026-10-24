@@ -6,6 +6,7 @@ contracts and seed mapping live in
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 import math
 from typing import Any
@@ -274,7 +275,7 @@ def _triple_initial_state(
 ) -> tuple[TriplePendulumParams, np.ndarray, np.ndarray, float]:
     """Build params, q0/v0, and first-frame RMSE for a triple fit."""
     params = TriplePendulumParams(
-        m1=5.0, m2=7.5, m3=0.35, L1=l_hub, L2=l_arm, L3=l_club, g=9.81
+        m1=5.0, m2=7.5, m3=0.35, L1=l_hub, L2=l_arm, L3=l_club, g=float(GRAVITY_M_S2)
     )
     q0 = (
         np.asarray(q0_override, dtype=np.float64)

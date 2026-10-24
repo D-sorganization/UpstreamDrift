@@ -23,6 +23,7 @@ tracks.
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from collections.abc import Sequence
 from typing import TypeAlias
@@ -31,7 +32,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 Array: TypeAlias = NDArray[np.float64]
-GRAVITY_M_S2 = 9.81
+GRAVITY_M_S2 = float(GRAVITY_M_S2)
 
 
 def _hull_edges(hull_xy: Array) -> tuple[Array, Array]:

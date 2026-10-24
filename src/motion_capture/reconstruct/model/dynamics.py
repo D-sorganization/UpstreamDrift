@@ -19,6 +19,7 @@ replay error that stays small says the kinematics and kinetics agree.
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -32,7 +33,7 @@ from src.shared.python.core.contracts import require
 from .kinematics import ArticulatedModel
 
 Array = npt.NDArray[np.float64]
-GRAVITY = np.array([0.0, -9.81, 0.0])
+GRAVITY = np.array([0.0, -float(GRAVITY_M_S2), 0.0])
 #: Segment mass as a fraction of body mass, by the segment's length name
 #: (de Leva 1996 adjusted Zatsiorsky values, rounded; head+neck lumped).
 MASS_FRACTIONS: dict[str, float] = {

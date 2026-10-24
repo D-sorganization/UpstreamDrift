@@ -17,6 +17,7 @@ NON-GOALS & NON-CLAIMS:
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -41,7 +42,9 @@ NON_CLAIMS: tuple[str, ...] = (
     "No global-optimality claims: outer problem is non-convex; convergence is to local Gauss-Newton minima.",
 )
 
-DEFAULT_GRAVITY_3D: FloatArray = np.array([0.0, 0.0, -9.81], dtype=np.float64)
+DEFAULT_GRAVITY_3D: FloatArray = np.array(
+    [0.0, 0.0, -float(GRAVITY_M_S2)], dtype=np.float64
+)
 
 
 # ---------------------------------------------------------------------------
