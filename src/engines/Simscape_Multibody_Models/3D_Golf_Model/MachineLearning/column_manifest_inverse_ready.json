@@ -1,5 +1,5 @@
 {
-  "schema_source": "C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet",
+  "schema_source": "<owner-home>\\Repositories\\data\\TenThousandFiles.parquet",
   "description": "Inverse-ready instantaneous golf dynamics selection. Time is intentionally excluded. Inputs are current position, current velocity, and applied joint torques/forces. Targets are the resulting position, velocity, and segment/joint accelerations for the same independent timestep sample.",
   "input_columns": {
     "positions": [

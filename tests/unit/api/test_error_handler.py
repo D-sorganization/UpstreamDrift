@@ -20,7 +20,7 @@ from src.api.utils.error_codes import ErrorCode
 pytestmark = pytest.mark.unit
 
 _SECRET_POSIX_PATH = "/abs/secret/path/config.env"
-_SECRET_WIN_PATH = r"C:\Users\secret\proj\.env"
+_SECRET_WIN_PATH = r"<owner-home>\proj\.env"
 _SECRET_ETC_PATH = "/etc/shadow"
 
 
