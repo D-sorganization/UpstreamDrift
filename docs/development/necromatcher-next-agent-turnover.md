@@ -57,7 +57,6 @@ lines and 400 test lines unless an applicable documented exception exists.
 | External Golf        | Existing qualified-contact and destination gates remain intact                                          | No unverified research delivery to external destinations                      |
 | AffineDrift          | Earlier handoff/deployment cohort is separate                                                           | New sanitized publication must be separately verified; no new deployment here |
 | Reports and Visuals  | Compiled reviewed LaTeX supplements, synthetic evidence and historical research stills/videos           | Latest optimized Tiger full video has not been exported                       |
-| <host>               | Earlier deliveries are historical evidence only                                                         | No new delivery; resolve existing access/approval constraints with the user   |
 
 ## Exact Evidence Boundaries
 
