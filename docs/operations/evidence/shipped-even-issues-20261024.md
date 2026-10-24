@@ -3,7 +3,7 @@
 Night-swarm record: fixes already on `main`; acceptance is exercised by the normal CI
 unit suite (no duplicate subprocess harness).
 
-## #13579 — UD-CI-014 engine Docker cache (PR #13598)
+## #13579 — UD-CI-014 Engine Docker Cache (PR #13598)
 
 | Field | Value |
 | --- | --- |
@@ -15,7 +15,7 @@ unit suite (no duplicate subprocess harness).
 - `tests/unit/scripts/test_engine_cache_contract.py::test_docker_build_workflows_use_shared_buildkit_contract`
 - `tests/unit/scripts/test_engine_cache_contract.py::test_no_workflow_uses_per_runner_type_local_or_gha_cache`
 
-## #13072 — LIFT-4 barbell re-track (PR #13092)
+## #13072 — LIFT-4 Barbell Re-Track (PR #13092)
 
 | Field | Value |
 | --- | --- |
@@ -27,7 +27,7 @@ unit suite (no duplicate subprocess harness).
 - `tests/unit/lifting/test_barbell_evidence.py::test_retracked_bundle_records_it_follows_its_source`
 - `tests/unit/lifting/test_opensim_lift_ik_id.py::test_squat_receipt_range_violations_empty`
 
-## #13104 — OSL-16 loaded foot tracking (PR #13120)
+## #13104 — OSL-16 Loaded Foot Tracking (PR #13120)
 
 | Field | Value |
 | --- | --- |
@@ -39,7 +39,7 @@ unit suite (no duplicate subprocess harness).
 - `tests/unit/lifting/test_loaded_foot_tracking.py::test_loaded_feet_stay_within_the_lift5_ankle_bounds`
 - `tests/unit/lifting/test_loaded_foot_tracking.py::test_tracking_converges_in_the_rk4_substep`
 
-## Anti-phantom note
+## Anti-Phantom Note
 
 GitHub issue bodies for these items cite implementation paths (for example
 `src/shared/python/lifting/barbell_runs.py`), not this evidence file. An
