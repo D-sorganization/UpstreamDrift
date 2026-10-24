@@ -456,6 +456,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#12784 · Route Motion-Matching Nightly Smoke to GitHub-Hosted Runners on Public Repos.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12784
+- **Branch:** merged via #13754
+- **PR:** #13754
+- **Paths:** see #13754
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`d718ffeb`; collated from changes/12784-motion-matching-smoke-hosted-runner.md)
+- **Summary:** Route motion-matching nightly smoke to GitHub-hosted runners on public repos.
+- **Next step:** Shipped in PR #13754.
+
 ### DL-#13725 · Make the Grip MJCF Independent of the BLAS Kernel and Libm: Deterministic Damping Design and Pad Ring Trig
 
 - **State:** shipped
