@@ -300,3 +300,99 @@ async def get_history(request: Request, session_id: str) -> dict[str, Any]:
         raise ValueError("request must be provided")
     messages = _chat_service_from(request).get_session_history(session_id)
     return {"session_id": session_id, "messages": messages}
+
+
+_ALLOWED_VOICE_MIMES: frozenset[str] = frozenset(
+    {
+        "audio/wav",
+        "audio/x-wav",
+        "audio/webm",
+        "audio/ogg",
+        "audio/mp4",
+        "audio/mpeg",
+    }
+)
+_MAX_VOICE_BYTES: int = 10 * 1024 * 1024
+
+
+@router.get("/chat/voice/status")
+async def get_chat_voice_status() -> Any:
+    """Return local Whisper voice-to-text availability (Cache-Control: no-store)."""
+    from fastapi.responses import JSONResponse
+
+    payload: dict[str, Any] = {
+        "available": False,
+        "engine": "none",
+        "model": "base.en",
+        "max_bytes": _MAX_VOICE_BYTES,
+        "allowed_mimes": sorted(_ALLOWED_VOICE_MIMES),
+    }
+    try:
+        from src.shared.python.sidekick.voice import VoiceTranscriber
+
+        payload.update(VoiceTranscriber().status())
+    except ImportError:
+        import importlib.util
+
+        if importlib.util.find_spec("faster_whisper") is not None:
+            payload.update({"available": True, "engine": "faster-whisper"})
+    return JSONResponse(content=payload, headers={"Cache-Control": "no-store"})
+
+
+@router.post("/chat/voice/transcribe")
+async def transcribe_chat_voice(request: Request) -> Any:
+    """Transcribe uploaded audio locally via Whisper for composer insertion."""
+    from fastapi.responses import JSONResponse
+
+    content_type = (
+        (
+            request.headers.get("x-audio-mime")
+            or request.headers.get("content-type", "audio/wav")
+        )
+        .split(";")[0]
+        .strip()
+        .lower()
+    )
+    raw_bytes = await request.body()
+    if not raw_bytes:
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Audio payload must not be empty."},
+            headers={"Cache-Control": "no-store"},
+        )
+    if len(raw_bytes) > _MAX_VOICE_BYTES:
+        return JSONResponse(
+            status_code=413,
+            content={"detail": "Audio payload exceeds 10 MiB limit."},
+            headers={"Cache-Control": "no-store"},
+        )
+    if content_type not in _ALLOWED_VOICE_MIMES:
+        return JSONResponse(
+            status_code=415,
+            content={"detail": f"Unsupported audio MIME type: {content_type}"},
+            headers={"Cache-Control": "no-store"},
+        )
+    try:
+        from src.shared.python.sidekick.voice import VoiceTranscriber
+
+        res = VoiceTranscriber().transcribe_bytes(raw_bytes, mime_type=content_type)
+        body = {
+            "text": res.text,
+            "duration_s": res.duration_s,
+            "language": res.language,
+            "engine": res.engine,
+            "auto_send": False,
+        }
+        return JSONResponse(content=body, headers={"Cache-Control": "no-store"})
+    except ImportError:
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Local Whisper engine is not installed."},
+            headers={"Cache-Control": "no-store"},
+        )
+    except ValueError as exc:
+        return JSONResponse(
+            status_code=400,
+            content={"detail": str(exc)},
+            headers={"Cache-Control": "no-store"},
+        )
