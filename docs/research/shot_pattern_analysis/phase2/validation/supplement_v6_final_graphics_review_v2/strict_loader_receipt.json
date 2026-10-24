@@ -3,14 +3,14 @@
   "status": "passed",
   "finished_utc": "2026-10-11T00:23:45.527266+00:00",
   "python": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
-  "producer_checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
+  "producer_checkout": "<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
   "producer_commit": "4023111d2aaf8b20449a36f8691a295f4a94ceff",
   "public_loader": "src.tools.shot_pattern_analysis.matched_supplement_pipeline.load_verified_supplement_artifacts",
-  "terminal_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_rendering_revision_v6/exit.json",
+  "terminal_path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_rendering_revision_v6/exit.json",
   "terminal_sha256": "bc0bb4e12f22194f0e8c8ceda53c7ef591af93dc32071957fb80c663f0b78fd5",
   "pipeline_receipt_sha256": "035c65b249937a639d0ddfd5bd5df3aef8b46aaae351b98a4c6ae9e29e0b064a",
   "ledger_sha256": "b01de45bb20d8bc7b0d041fb69af2185d77275d19ec598f269fed0bb2589b293",
-  "expected_numeric_reference_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json",
+  "expected_numeric_reference_path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json",
   "expected_numeric_reference_sha256": "59a922fbcd2c06b23674466538d992f5169628464783adbcb6353a4cfb921edd",
   "numeric_sha256": {
     "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
@@ -52,15 +52,15 @@
     "matched_pair_social.py": "16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369"
   },
   "input_sha256": {
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/matrix_plan.json": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_v1/matrix_plan.json": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/matrix_plan.json": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/matrix_plan.json": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/matrix_plan.json": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json": "d414750473fde94622d35ce137dee6820a33e71c70e20635dec5c40dd6585117",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/source_transition_supplement.json": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/common_targets.json": "79cac0bc5fcac90cdd2f708c75c3714401c5771a09512c259d8222e607375c75",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_pilot_v1/matrix_plan.json": "491a37dd430b4de0946089b75db11db5fe17016df3b98ff32d6c819f664af073",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json": "59a922fbcd2c06b23674466538d992f5169628464783adbcb6353a4cfb921edd"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/matrix_plan.json": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_v1/matrix_plan.json": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/matrix_plan.json": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/matrix_plan.json": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/matrix_plan.json": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json": "d414750473fde94622d35ce137dee6820a33e71c70e20635dec5c40dd6585117",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/source_transition_supplement.json": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/common_targets.json": "79cac0bc5fcac90cdd2f708c75c3714401c5771a09512c259d8222e607375c75",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_pilot_v1/matrix_plan.json": "491a37dd430b4de0946089b75db11db5fe17016df3b98ff32d6c819f664af073",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json": "59a922fbcd2c06b23674466538d992f5169628464783adbcb6353a4cfb921edd"
   }
 }

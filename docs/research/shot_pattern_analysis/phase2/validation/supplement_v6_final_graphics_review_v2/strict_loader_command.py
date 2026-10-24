@@ -18,7 +18,7 @@ def sha(path: Path) -> str:
 
 
 phase = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/"
     "docs/research/shot_pattern_analysis/phase2"
 )
 output = phase / "validation/supplement_v6_final_graphics_review_v2"
@@ -58,7 +58,7 @@ receipt = {
     "status": "passed",
     "finished_utc": datetime.now(timezone.utc).isoformat(),
     "python": "/tmp/shot-pattern-validation-venv-20261009/bin/python",  # nosec B108
-    "producer_checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
+    "producer_checkout": "<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
     "producer_commit": terminal["candidate_commit"],
     "public_loader": "src.tools.shot_pattern_analysis.matched_supplement_pipeline.load_verified_supplement_artifacts",
     "terminal_path": str(terminal_path),

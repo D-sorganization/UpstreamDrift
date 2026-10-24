@@ -4,8 +4,8 @@
     "86d0f28b1cc5acf61185e07e320c816c2d005512"
   ],
   "object_repositories": [
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools",
-    "/home/dieterolson/Repositories/UpstreamDrift/vendor/ud-tools"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools",
+    "<owner-home>/Repositories/UpstreamDrift/vendor/ud-tools"
   ],
   "provider_files": [
     {

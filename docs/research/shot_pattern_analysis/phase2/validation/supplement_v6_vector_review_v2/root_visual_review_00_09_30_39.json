@@ -26,7 +26,7 @@
       "assignment_index": 0,
       "native_raster_sha256": "4568422edaca3122c47015b8da2b79a293a40e1e235e862a94b13234a8cf03f3",
       "contact_sha256": "a3282ea886429b7a1393626acc3a74b762b136308dffe4ee4aa4919cd578c205",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_00.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_00.png",
       "decision": "accepted",
       "findings": []
     },
@@ -52,7 +52,7 @@
       "assignment_index": 1,
       "native_raster_sha256": "c0213cd8d196cc5ed93bc3f1ec6a7978716d176a89cfcb93365573297fbfa4a1",
       "contact_sha256": "a3282ea886429b7a1393626acc3a74b762b136308dffe4ee4aa4919cd578c205",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_00.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_00.png",
       "decision": "accepted",
       "findings": []
     },
@@ -78,7 +78,7 @@
       "assignment_index": 2,
       "native_raster_sha256": "b31cbefac35a52e85f36ea1cbced89251b5194a00bf805636675eedc5e21108e",
       "contact_sha256": "5b5917175ad3a96f79f93afb8ce2c7de9ef557d30e212f20078c998f25664532",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_02.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_02.png",
       "decision": "accepted",
       "findings": []
     },
@@ -104,7 +104,7 @@
       "assignment_index": 3,
       "native_raster_sha256": "4c29ea8c3e94f329c86a591821c572455ec1e39b8430e8d372e2bb2e669bf088",
       "contact_sha256": "5b5917175ad3a96f79f93afb8ce2c7de9ef557d30e212f20078c998f25664532",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_02.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_02.png",
       "decision": "accepted",
       "findings": []
     },
@@ -130,7 +130,7 @@
       "assignment_index": 4,
       "native_raster_sha256": "23ced8cae69dcc149a9edd3fdba2d891a2709f3c8880c029df3bc72c86d5a6ba",
       "contact_sha256": "2745361b3ed5c66b639e993a761fd8474da0321270a4e7ceb3e97ff348734a49",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_04.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_04.png",
       "decision": "accepted",
       "findings": []
     },
@@ -156,7 +156,7 @@
       "assignment_index": 5,
       "native_raster_sha256": "bb7889a229376caa52cc5b40f2ed722ef661d171aa6bac41fc7a7bddcdb56b77",
       "contact_sha256": "2745361b3ed5c66b639e993a761fd8474da0321270a4e7ceb3e97ff348734a49",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_04.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_04.png",
       "decision": "accepted",
       "findings": []
     },
@@ -182,7 +182,7 @@
       "assignment_index": 6,
       "native_raster_sha256": "1caefad0dbad4590e7a3cc73eb60d1db13cbf3d491a0e9971eed2d205e22b1ff",
       "contact_sha256": "2a858070000db9e7af76cc6b350885cb652a8b3381b96a19fc7efff95180c0b4",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_06.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_06.png",
       "decision": "accepted",
       "findings": []
     },
@@ -208,7 +208,7 @@
       "assignment_index": 7,
       "native_raster_sha256": "78da2ad7256ef40677fd9f2889bbd657831b5a576405058b6a2a86193abc3a1a",
       "contact_sha256": "2a858070000db9e7af76cc6b350885cb652a8b3381b96a19fc7efff95180c0b4",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_06.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_06.png",
       "decision": "accepted",
       "findings": []
     },
@@ -234,7 +234,7 @@
       "assignment_index": 8,
       "native_raster_sha256": "715b01b2edaf8ceaf34582981698a5dc93925908863df3e442f2e35cdc6efb9f",
       "contact_sha256": "3bb50b98cc1fa55b4a665827074d1d51339c2de62a8789cbf6525a8f9e7fcf89",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_08.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_08.png",
       "decision": "accepted",
       "findings": []
     },
@@ -260,7 +260,7 @@
       "assignment_index": 9,
       "native_raster_sha256": "4bed1fc9c6fd25d77b8dc883798165f32ff657336067ae37001048e092c58b46",
       "contact_sha256": "3bb50b98cc1fa55b4a665827074d1d51339c2de62a8789cbf6525a8f9e7fcf89",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_08.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_08.png",
       "decision": "accepted",
       "findings": []
     },
@@ -286,7 +286,7 @@
       "assignment_index": 30,
       "native_raster_sha256": "9dbc8b0c5b1c3691a14fb44e8f72d160b78541fb6a8870cd9f1dd3ab84777884",
       "contact_sha256": "96f7ea023fea813f987647fb6145f8b54a4aca99bcac1c85db7d81c37adf2ca8",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_30.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_30.png",
       "decision": "accepted",
       "findings": []
     },
@@ -312,7 +312,7 @@
       "assignment_index": 31,
       "native_raster_sha256": "d54e4c361cb1857ebd470e6721ad7248c13061938e091947d7dd6decb87f1b0b",
       "contact_sha256": "96f7ea023fea813f987647fb6145f8b54a4aca99bcac1c85db7d81c37adf2ca8",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_30.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_30.png",
       "decision": "accepted",
       "findings": []
     },
@@ -338,7 +338,7 @@
       "assignment_index": 32,
       "native_raster_sha256": "e3c0ced39b111c5c80569106e23b17deb22aa34c546b325b5d8502a1791f0626",
       "contact_sha256": "156cad4b31ab0de01aa0d4e17f6c632332e759569a5887b635daad574f6c68d5",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_32.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_32.png",
       "decision": "accepted",
       "findings": []
     },
@@ -364,7 +364,7 @@
       "assignment_index": 33,
       "native_raster_sha256": "b84d890512b3d10bdaf230880c5d13a2c474104a9f82607f0c28af47fc7daa70",
       "contact_sha256": "156cad4b31ab0de01aa0d4e17f6c632332e759569a5887b635daad574f6c68d5",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_32.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_32.png",
       "decision": "accepted",
       "findings": []
     },
@@ -390,7 +390,7 @@
       "assignment_index": 34,
       "native_raster_sha256": "7d5b3d73c448d6e9a06a273311a3231953f9aa0e9e1e4bf23ef2400c9d66a2b3",
       "contact_sha256": "88f1aafb34ddeca7d16b319960bb7d0a37e94b03fc1c1d91e1d47e7ea8978b64",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_34.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_34.png",
       "decision": "accepted",
       "findings": []
     },
@@ -416,7 +416,7 @@
       "assignment_index": 35,
       "native_raster_sha256": "a58bd581f568ba52ee4d632010d307df38bf1c0562b013ebda0f27f7ee47ccca",
       "contact_sha256": "88f1aafb34ddeca7d16b319960bb7d0a37e94b03fc1c1d91e1d47e7ea8978b64",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_34.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_34.png",
       "decision": "accepted",
       "findings": []
     },
@@ -442,7 +442,7 @@
       "assignment_index": 36,
       "native_raster_sha256": "a4d76b89e16960f94fd15daa6f7626e1d124881bdfdc187d2cfcb0e8f619f826",
       "contact_sha256": "47a2cbd00f10e854980cbd2f25d546fc1f1b7d7e831762eb22e87a93591fddf5",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_36.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_36.png",
       "decision": "accepted",
       "findings": []
     },
@@ -468,7 +468,7 @@
       "assignment_index": 37,
       "native_raster_sha256": "2e5fbcfabb72563d470d10797dd89d70a5b152a3188f544d74772315e66bb43b",
       "contact_sha256": "47a2cbd00f10e854980cbd2f25d546fc1f1b7d7e831762eb22e87a93591fddf5",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_36.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_36.png",
       "decision": "accepted",
       "findings": []
     },
@@ -494,7 +494,7 @@
       "assignment_index": 38,
       "native_raster_sha256": "4531c0b448611e39df53c5d673eac3dc1c21f3b486c594a0bbb64ffe32ab46fa",
       "contact_sha256": "17dd3eea6579c1437f80472c44b27e968ad197b30d923b9ae20a46ff8449c001",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_38.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_38.png",
       "decision": "accepted",
       "findings": []
     },
@@ -520,7 +520,7 @@
       "assignment_index": 39,
       "native_raster_sha256": "52e57b81be758ed02c1e18a44cbf58b2aaeff1061752f754a50f5a5e447ba798",
       "contact_sha256": "17dd3eea6579c1437f80472c44b27e968ad197b30d923b9ae20a46ff8449c001",
-      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_38.png",
+      "contact": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/root_contacts/comparison_38.png",
       "decision": "accepted",
       "findings": []
     }

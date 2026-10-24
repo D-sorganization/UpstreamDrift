@@ -122,7 +122,7 @@
   "measurement_finalizer": {
     "detail": "Recomputed grouped summary from all 1122 durable per-PDF rows; no PDF was rerendered by finalizer.",
     "exit_code": 0,
-    "final_receipt_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/bbox_painted_ink_boundary_review.json"
+    "final_receipt_path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/bbox_painted_ink_boundary_review.json"
   },
   "nonzero_page_edge_band_counts": {},
   "original_render_process": {
@@ -130,7 +130,7 @@
     "pid": 1923641,
     "terminal_error": "TypeError sorting mixed float/string keys in post-render JSON summary; all 1122 per-PDF render rows were flushed before this finalization error"
   },
-  "pdftoppm_path": "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override/pdftoppm",
+  "pdftoppm_path": "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override/pdftoppm",
   "pdftoppm_version": "26.05.0",
   "per_pdf_measurements_compression": "gzip JSONL; one record per flagged PDF, including source hash, raster hash, every flagged word/edge probe, ink clearance, page-edge band counts.",
   "per_pdf_measurements_path": "supplement_v6_vector_review_v2/bbox_painted_ink_per_pdf.jsonl.gz",
