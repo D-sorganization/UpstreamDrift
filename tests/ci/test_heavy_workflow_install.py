@@ -18,6 +18,7 @@ import re
 from types import ModuleType
 
 import pytest
+import yaml
 
 pytestmark = pytest.mark.unit
 
@@ -69,3 +70,25 @@ def test_workflow_installs_into_isolated_venv_before_pip() -> None:
     first_pip = re.search(r"pip install --upgrade pip", text)
     assert venv and first_pip and venv.start() < first_pip.start()
     assert "GITHUB_PATH" in text
+
+
+def test_heavy_lane_propagates_pytest_exit_status() -> None:
+    run_step = next(
+        step
+        for step in yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))["jobs"][
+            "run-heavy-tests"
+        ]["steps"]
+        if "Run heavy" in step.get("name", "")
+    )
+    assert "set -o pipefail" in run_step["run"]
+
+
+def test_public_repo_routes_heavy_lanes_to_hosted_runner() -> None:
+    step = next(
+        step
+        for step in yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))["jobs"][
+            "pick-runner"
+        ]["steps"]
+        if step.get("id") == "check"
+    )
+    assert "ubuntu-latest" in step["run"]
