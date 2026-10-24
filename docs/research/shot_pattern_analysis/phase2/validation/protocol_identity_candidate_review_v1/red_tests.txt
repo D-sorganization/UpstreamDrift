@@ -1,7 +1,7 @@
 ============================= test session starts ==============================
 platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
 PyQt6 6.11.0 -- Qt runtime 6.11.1 -- Qt compiled 6.11.0
-rootdir: /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift
+rootdir: <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift
 configfile: pyproject.toml
 collected 4 items
 

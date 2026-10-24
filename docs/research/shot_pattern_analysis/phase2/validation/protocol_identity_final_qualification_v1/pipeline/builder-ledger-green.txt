@@ -161,9 +161,9 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7703fafef7a0>
             transition_receipt_sha256="receipt-hash",
         )
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py:802: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py:802: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_pipeline.py:820: in build_final_supplement_report
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_pipeline.py:820: in build_final_supplement_report
     _verify_figure_assets(output_dir, {"figures": figure_ledger})
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
@@ -192,30 +192,30 @@ ledger = {'figures': [{'figure_kind': 'density', 'cell': 'pitching_wedge_lean0_c
 >               raise ValueError("supplement figure artifact is missing or unsafe")
 E               ValueError: supplement figure artifact is missing or unsafe
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_pipeline.py:540: ValueError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_pipeline.py:540: ValueError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
