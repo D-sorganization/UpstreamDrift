@@ -25,7 +25,7 @@
       "test_gs3dx_track_learn_configuration/test_caller_loaded_dirty_model_survives_errors",
       "test_gs3dx_track_learn_configuration/test_preflight_fails_before_dynamics_on_fixture"
     ],
-    "helper_path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-simscape-matching-main-20261002\\src\\engines\\Simscape_Multibody_Models\\3D_Golf_Model\\matlab\\exploratory_gs3dx\\tools\\gs3dx_track_learn.m",
+    "helper_path": "<owner-home>\\Repositories\\UpstreamDrift-worktrees\\codex-simscape-matching-main-20261002\\src\\engines\\Simscape_Multibody_Models\\3D_Golf_Model\\matlab\\exploratory_gs3dx\\tools\\gs3dx_track_learn.m",
     "note": "Negative/lifecycle preflight tests only; valid configured Human execution and owned-model lifecycle remain required",
     "receipt": {
       "actual_process_exit_code": 1,

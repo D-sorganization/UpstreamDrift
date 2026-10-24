@@ -50,7 +50,7 @@ ejecta mass, and `ValidationComparison` refuses to fabricate a comparison agains
 | ADR                                      | `docs/adr/0032-bunkershot3d-club-design-architecture.md`    |
 
 **Keep every worktree for this epic on D:.** The original integration worktree lived at
-`C:\Users\diete\Repositories\UpstreamDrift-worktrees\bunker-pro` and was **deleted mid-run
+`<owner-home>\Repositories\UpstreamDrift-worktrees\bunker-pro` and was **deleted mid-run
 by a fleet worktree cleanup** that freed ~100 GB on C: (604 MB free → 102 GB free). Nothing
 was lost — worktrees share the main repo's object store, so every merge commit survived and
 was simply re-checked-out on D: — but do not put work-in-progress on C: and assume it will
