@@ -891,52 +891,52 @@
     "mujoco_modules": [
       {
         "module": "mujoco",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\__init__.py",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\__init__.py",
         "sha256": "f8e5b528617004b6215e16cb0c945faf1f8c7b5d798e5b92e3aabce19c838497"
       },
       {
         "module": "mujoco._callbacks",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_callbacks.cp312-win_amd64.pyd",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_callbacks.cp312-win_amd64.pyd",
         "sha256": "6b512d68b80d26ba91c6988fc90748a7c6c1ce8f1605366e8567f9b30df8c48c"
       },
       {
         "module": "mujoco._constants",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_constants.cp312-win_amd64.pyd",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_constants.cp312-win_amd64.pyd",
         "sha256": "0b6764f6bc153b0c91d2ca3d35d39fb051c04f713b7bca4acd9d73cc635c8a83"
       },
       {
         "module": "mujoco._enums",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_enums.cp312-win_amd64.pyd",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_enums.cp312-win_amd64.pyd",
         "sha256": "d892f3db26d58aac0ab66f2c1a0cb162b1f9ff00451f4dd6da3ae860d6057eb5"
       },
       {
         "module": "mujoco._errors",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_errors.cp312-win_amd64.pyd",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_errors.cp312-win_amd64.pyd",
         "sha256": "6b9149d1369612baa89185eea41e671b7c94a3a4b0c34ab4c4c18ce55f80ed4f"
       },
       {
         "module": "mujoco._functions",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_functions.cp312-win_amd64.pyd",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_functions.cp312-win_amd64.pyd",
         "sha256": "45f6d2a4bdbc6aa13471259bb7641313229b45f8a127d1e30973fa2a64b0c285"
       },
       {
         "module": "mujoco._render",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_render.cp312-win_amd64.pyd",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_render.cp312-win_amd64.pyd",
         "sha256": "b02291fc15acedf08463266b8d0c21200c8163615bcca8c87f132adb04f5920b"
       },
       {
         "module": "mujoco._specs",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_specs.cp312-win_amd64.pyd",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_specs.cp312-win_amd64.pyd",
         "sha256": "4ec54f3a98fec8125d53fbf1816d05003d5a043b14b5ebeaf2826487860658c2"
       },
       {
         "module": "mujoco._structs",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_structs.cp312-win_amd64.pyd",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\_structs.cp312-win_amd64.pyd",
         "sha256": "77264d94556e92e7b990cae5b732b4769a91976cf44dbca5e0392f6698d1febe"
       },
       {
         "module": "mujoco.glfw",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\glfw\\__init__.py",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\glfw\\__init__.py",
         "sha256": "584c79c72fd857343441cb79c8a8b32b4a39d19b0837ab59d6cb3722b31b1806"
       },
       {
@@ -945,70 +945,70 @@
       },
       {
         "module": "mujoco.rendering.classic",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\rendering\\classic\\__init__.py",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\rendering\\classic\\__init__.py",
         "sha256": "d658bc8cb97ef76a36ccd8d3f904c875160e4b402089b16e25c94d87124389c2"
       },
       {
         "module": "mujoco.rendering.classic.gl_context",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\rendering\\classic\\gl_context.py",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\rendering\\classic\\gl_context.py",
         "sha256": "a3cac3b6d582c149a93e95e4742c7fd4ad2083d31a329ee5b675e59e5377ff75"
       },
       {
         "module": "mujoco.rendering.classic.renderer",
-        "origin": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\rendering\\classic\\renderer.py",
+        "origin": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\mujoco\\rendering\\classic\\renderer.py",
         "sha256": "c2b792bec4e0072cced1f402fdda10f46f49a4c0dbf524f0f162ca47692321bc"
       }
     ],
-    "python_executable": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+    "python_executable": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
     "python_executable_sha256": "0b471133e110cfb53a061cad528ce8e517d7b9ac41a0a396c39ad795a487fc14",
     "source_module_origins": [
       {
         "module": "src.engines.physics_engines.mujoco.python.full_body_ik",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_ik.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_ik.py",
         "sha256": "2192171bb6fc69042c4a0db8ab010122599a1c3470bf6a6a6629bff0af31cf6e"
       },
       {
         "module": "src.engines.physics_engines.mujoco.python.full_body_mjcf",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_mjcf.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_mjcf.py",
         "sha256": "1c34cf4b4986b1af4af88b17f24e7c4f8c7ce7fd9e271b815e2dcbd0658dde4f"
       },
       {
         "module": "src.engines.physics_engines.mujoco.python.full_body_model",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_model.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_model.py",
         "sha256": "c900a6ebc1072a66d259a4e2f03de3f3c6b9647ffbbcab1aa5fbb21db64185b3"
       },
       {
         "module": "src.engines.physics_engines.mujoco.python.native_mjcf",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_mjcf.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_mjcf.py",
         "sha256": "2f5dda6c31b2fe5ed6f7c6db532dfc3d71b634f698c5022b8fa7f0123a225f42"
       },
       {
         "module": "src.engines.physics_engines.mujoco.python.native_model",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_model.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_model.py",
         "sha256": "15586ebb1cea7c19d42f9635671d575acfe065149e656600e0ab9421c82bdb24"
       },
       {
         "module": "src.shared.python.motion_matching.constraint_kinematics",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\constraint_kinematics.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\constraint_kinematics.py",
         "sha256": "4cf80a3276078000c455a335a0c9eec8c487aac940cf44131d9ea4aecfad3112"
       },
       {
         "module": "src.shared.python.motion_matching.contact_law",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\contact_law.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\contact_law.py",
         "sha256": "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c"
       },
       {
         "module": "src.shared.python.motion_matching.full_body_ik",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\full_body_ik.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\full_body_ik.py",
         "sha256": "bfd6c550f5f9efd48695ae602bc4312d44fc91e22f46a749ba2adc919d0dab4d"
       }
     ]
   },
   "schema_version": 1,
   "source": {
-    "candidate_path": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\evidence\\native_candidates\\returned81_candidate.json",
+    "candidate_path": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\evidence\\native_candidates\\returned81_candidate.json",
     "candidate_sha256": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
-    "spec_path": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\full_body_spec_v1.json",
+    "spec_path": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\full_body_spec_v1.json",
     "spec_sha256": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3"
   },
   "synthetic_floor_translation": {
