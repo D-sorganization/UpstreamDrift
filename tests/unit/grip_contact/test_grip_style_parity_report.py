@@ -662,8 +662,8 @@ _DETERMINATE_ENGINE_CASES = [
         marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-swing",
     ),
-    # OpenSim (G7/G7b): since #13555 passes ten_finger 0.04 s hold; ten_finger
-    # 0.04 s swing exceeds 2.0% RMS on determinate net_force, and overlap and
+    # OpenSim (G7/G7b): since #13555 passes ten_finger 0.04 s hold and passes
+    # determinate net_force for ten_finger swing; ten_finger swing, overlap and
     # interlock exceed the tolerances on determinate net_moment_com (#13560).
     # Since #13308 the reference uses the same line-contact law as the
     # ElasticFoundationForce sphere chain, so the remaining gap is the friction
@@ -721,15 +721,10 @@ _DETERMINATE_ENGINE_CASES = [
         "swing",
         marks=[
             pytest.mark.requires_opensim,
-            pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "OpenSim ten_finger 0.04 s swing determinate net_force RMS is 2.374% "
-                    "(peak 3.682%; net_moment_com passes at 0.000% / 0.924%) > 2.0% "
-                    "RMS_TOLERANCE against the continuous line-contact reference "
-                    "(#13308; passes over 0.10 s at 3.682% / 1.911%)"
-                ),
+            _net_moment_xfail(
+                "OpenSim ten_finger swing",
+                "peak 2.066% / RMS 4.104% (19.5 mN m RMS against a 0.475 N m "
+                "reference peak; net_force passes at 0.706% / 1.011%, #13548)",
             ),
         ],
         id="opensim-ten_finger-swing",
