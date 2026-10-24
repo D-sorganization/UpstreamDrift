@@ -361,6 +361,29 @@ def test_allocator_hard_zero_trail_mode_locks_torques_to_zero() -> None:
 
 
 @pytest.mark.unit
+def test_hard_zero_trail_reports_inconsistent_zero_side() -> None:
+    """An algebraically inconsistent zero trail is rejected before the QP solve."""
+    nv = 10
+    actuated = np.arange(6, nv)
+    alloc = ContactForceAllocator(nv=nv, actuated_indices=actuated, n_contact_spheres=1)
+    j_ground = np.zeros((3, nv))
+    j_ground[:, :3] = np.eye(3)
+    j_grip = np.zeros((6, nv))
+    tau_rnea = np.zeros(nv)
+    tau_rnea[6] = 250.0
+    with pytest.warns(DeprecationWarning):
+        res = alloc.allocate(
+            tau_rnea=tau_rnea,
+            j_ground=j_ground,
+            j_grip=j_grip,
+            objective=AllocationObjective.HARD_ZERO_TRAIL,
+            trail_arm_indices=[6, 7],
+        )
+    assert res.feasibility_status is FeasibilityStatus.INFEASIBLE_HARD_ZERO_TRAIL
+    assert res.success is False
+
+
+@pytest.mark.unit
 def test_allocator_tau_bounds_not_broken_by_post_solve_correction() -> None:
     """Post-solve projection must never overwrite or violate declared actuator bounds."""
     rng = np.random.default_rng(88)
