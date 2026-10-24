@@ -391,6 +391,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13555 · Grip Contact: Add Antagonist Pads Opposite the Heel, Trigger and Ten-Finger Little-Finger Pads so the Neutral-Pose Closure Preload Exerts Zero Net Force and Moment on the Club
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13555
+- **Branch:** merged via #13666
+- **PR:** #13666
+- **Paths:** see #13666
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`955dd563`; collated from changes/13555-grip-contact-add-antagonist-pads-opposit.md)
+- **Summary:** Grip contact: add antagonist pads opposite the heel, trigger and ten-finger little-finger pads so the neutral-pose closure preload exerts zero net force and moment on the club
+- **Next step:** Shipped in PR #13666.
+
+### DL-#13547 · Hand Off the HRG-GS Grip Parity Residuals: AGENT_HANDOFF Entry for Epic #13297 and Xfail Reasons Pointing at the Open Tracking Issues #13547 (MuJoCo Deflection) and #13548 (OpenSim Ten_Finger)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13547
+- **Branch:** merged via #13666
+- **PR:** #13666
+- **Paths:** see #13666
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`955dd563`; collated from changes/13547-hand-off-the-hrg-gs-grip-parity-residual.md)
+- **Summary:** Hand off the HRG-GS grip parity residuals: AGENT_HANDOFF entry for epic #13297 and xfail reasons pointing at the open tracking issues #13547 (MuJoCo deflection) and #13548 (OpenSim ten_finger)
+- **Next step:** Shipped in PR #13666.
+
+### DL-#13531 · Align Drake Autodiff Fit Theta With Canonical URDF Actuator Count
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13531
+- **Branch:** merged via #13666
+- **PR:** #13666
+- **Paths:** see #13666
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`955dd563`; collated from changes/13531-align-drake-autodiff-fit-theta-with-cano.md)
+- **Summary:** Align Drake autodiff fit theta with canonical URDF actuator count
+- **Next step:** Shipped in PR #13666.
+
+### DL-#13450 · Drake Samples the Canonical Mid_Hands/Club_Head Frames Like Pinocchio; Legacy Grip Names Are Aliases Only and a Missing Frame Fails Closed Instead of Falling Back to Right_Hand or the Shaft
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13450
+- **Branch:** merged via #13666
+- **PR:** #13666
+- **Paths:** see #13666
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`955dd563`; collated from changes/13450-drake-samples-the-canonical-mid-hands-cl.md)
+- **Summary:** Drake samples the canonical mid_hands/club_head frames like Pinocchio; legacy grip names are aliases only and a missing frame fails closed instead of falling back to right_hand or the shaft
+- **Next step:** Shipped in PR #13666.
+
 ### DL-#13518 · CI: Set Rust-Cache Cache-Bin False so Post Steps Stop Deleting the Shared Host Rustup Binary (Refs Repository_Management#2138)
 
 - **State:** shipped
