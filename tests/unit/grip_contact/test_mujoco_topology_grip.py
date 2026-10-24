@@ -231,12 +231,11 @@ def test_old_pad_path_mjcf_is_byte_identical() -> None:
         sim.pad_sides,
     )
     assert actual_pre == expected_pre
+    # One digest for every platform and BLAS kernel (#13720): the damping design
+    # and pad ring trig use platform-independent arithmetic.
     assert (
         hashlib.sha256(actual_pre.encode("utf-8")).hexdigest()
-        in (
-            "b7185302c5f9a68599645b12161a07e75071600cad8316c54b4015c3a9a61086",  # Linux (glibc float format)
-            "46e1b20596a0d0e8fdc7c2fea1053f068cb01f4e146e10814d9e6707c3ce1837",  # Windows (MSVC float format)
-        )
+        == "48d14dd9138eee8319f74293d8235e8be5e586accb8bd78d35faa64fca597d48"
     )
 
     q0 = np.asarray(swing.q[0], float)
