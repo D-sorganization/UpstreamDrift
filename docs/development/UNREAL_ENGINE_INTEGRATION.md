@@ -472,7 +472,7 @@ GolfModelingSuitePlugin/
 | ---------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
 | **Latency in real-time streaming** | Desync between physics and rendering | Use interpolation/extrapolation; target 60Hz minimum data rate                   |
 | **Skeletal mesh mismatch**         | Incorrect joint mapping              | Create custom skeleton matching MuJoCo topology; use animation retargeting       |
-| **Cross-platform Python↔Unreal**  | IPC complexity                       | Use well-tested protocols (WebSocket/REST); consider MessagePack for performance |
+| **Cross-platform Python↔Unreal**   | IPC complexity                       | Use well-tested protocols (WebSocket/REST); consider MessagePack for performance |
 | **VR performance**                 | Frame drops cause nausea             | Aggressive LOD; fixed foveated rendering; async timewarp                         |
 | **Large motion capture files**     | Memory issues                        | Streaming playback; chunked loading                                              |
 

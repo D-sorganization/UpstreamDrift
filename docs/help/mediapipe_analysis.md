@@ -16,11 +16,11 @@ lab-grade measurement.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Video file | `.mp4`, `.avi`, `.mov` | Chosen through a file dialog. A blank selection is rejected before any worker starts, so the progress bar cannot silently sit at 0 percent. |
-| `min_detection_confidence` | dimensionless, 0.0-1.0 (default `0.5`) | Typed into the configuration box as `key=value`. |
-| `min_tracking_confidence` | dimensionless, 0.0-1.0 (default `0.5`) | As above. |
+| Input                      | Unit / type                            | Notes                                                                                                                                       |
+| -------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Video file                 | `.mp4`, `.avi`, `.mov`                 | Chosen through a file dialog. A blank selection is rejected before any worker starts, so the progress bar cannot silently sit at 0 percent. |
+| `min_detection_confidence` | dimensionless, 0.0-1.0 (default `0.5`) | Typed into the configuration box as `key=value`.                                                                                            |
+| `min_tracking_confidence`  | dimensionless, 0.0-1.0 (default `0.5`) | As above.                                                                                                                                   |
 
 The configuration box is parsed line by line; `#` starts a comment,
 numeric values become floats and `true`/`false` become booleans. Frame
@@ -29,14 +29,14 @@ and are not settable here.
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| `output/mediapipe_results.json` | JSON array, one object per processed frame | Written relative to the process working directory. |
-| `timestamp` | seconds | Computed as `frame_index / fps` from the video's own frame rate. |
-| `confidence` | dimensionless, 0.0-1.0 | Mean landmark visibility for the frame. `0.0` when no pose was detected. |
-| `joint_angles` | **radians** | Per-joint mapping. The `PoseEstimationResult` contract defines joint angles in radians. |
-| `keypoint_count` | count | Number of raw keypoints retained for the frame; present only when raw keypoints exist. |
-| In-memory raw keypoints | normalized 3D and pixel 2D | Held during the run but **not** written to the JSON file. Normalized `x`/`y` are fractions of image width/height; `z` is MediaPipe's relative depth. The 2D copy is `x * width_px`, `y * height_px`. |
+| Output                          | Unit / type                                | Notes                                                                                                                                                                                                |
+| ------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `output/mediapipe_results.json` | JSON array, one object per processed frame | Written relative to the process working directory.                                                                                                                                                   |
+| `timestamp`                     | seconds                                    | Computed as `frame_index / fps` from the video's own frame rate.                                                                                                                                     |
+| `confidence`                    | dimensionless, 0.0-1.0                     | Mean landmark visibility for the frame. `0.0` when no pose was detected.                                                                                                                             |
+| `joint_angles`                  | **radians**                                | Per-joint mapping. The `PoseEstimationResult` contract defines joint angles in radians.                                                                                                              |
+| `keypoint_count`                | count                                      | Number of raw keypoints retained for the frame; present only when raw keypoints exist.                                                                                                               |
+| In-memory raw keypoints         | normalized 3D and pixel 2D                 | Held during the run but **not** written to the JSON file. Normalized `x`/`y` are fractions of image width/height; `z` is MediaPipe's relative depth. The 2D copy is `x * width_px`, `y * height_px`. |
 
 ## Method
 
@@ -85,6 +85,7 @@ coordinates, partial 3D via relative depth) is recorded in the
   `pose_landmarks` result and has no multi-person path.
 
 ## See Also
+
 - [Video analysis tutorial](../tutorials/content/04_video_analysis.md)
 - [Motion pipeline format matrix](../motion_pipeline/formats.md)
 - [Motion pipeline troubleshooting](../motion_pipeline/troubleshooting.md)

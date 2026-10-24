@@ -7,6 +7,7 @@ days so stale native-lane evidence cannot masquerade as current on ``main``.
 from __future__ import annotations
 
 import json
+import os
 import warnings
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -68,9 +69,23 @@ def test_native_lane_receipt_freshness(engine: str) -> None:
         f"`bash scripts/ci/run_native_engine_lane.sh --engine {engine}`."
     )
     if level == "fail":
-        pytest.fail(message)
-    if level == "warn":
+        # Per Fable 3.2, expiry must not fail required PR/merge_group CI gates.
+        # Nightly or dedicated audit jobs enforce fail-closed by setting
+        # FAIL_ON_STALE_RECEIPT=1.
+        if os.environ.get("FAIL_ON_STALE_RECEIPT") == "1":
+            pytest.fail(message)
+        else:
+            warnings.warn(message, UserWarning, stacklevel=1)
+    elif level == "warn":
         warnings.warn(message, UserWarning, stacklevel=1)
+
+
+def test_native_lane_receipt_freshness_enforces_failure_when_opted_in(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FAIL_ON_STALE_RECEIPT", "1")
+    with pytest.raises(pytest.fail.Exception):
+        test_native_lane_receipt_freshness("opensim")
 
 
 def test_native_lane_receipt_warns_after_seven_days() -> None:

@@ -101,7 +101,7 @@ This dashboard tracks all core modules that currently possess **0% test coverage
 | `src/engines/physics_engines/pinocchio/python/dtack/ik/pink_solver.py`                                       | ❌ Untested |
 | `src/engines/physics_engines/pinocchio/python/dtack/ik/tasks.py`                                             | ❌ Untested |
 | `src/engines/physics_engines/pinocchio/python/dtack/sim/dynamics.py`                                         | ❌ Untested |
-| `src/engines/physics_engines/pinocchio/python/dtack/utils/optical_parser.py`                                   | ❌ Untested |
+| `src/engines/physics_engines/pinocchio/python/dtack/utils/optical_parser.py`                                 | ❌ Untested |
 | `src/engines/physics_engines/pinocchio/python/dtack/utils/matlab_importer.py`                                | ❌ Untested |
 | `src/engines/physics_engines/pinocchio/python/dtack/utils/mjcf_exporter.py`                                  | ❌ Untested |
 | `src/engines/physics_engines/pinocchio/python/dtack/utils/urdf_exporter.py`                                  | ❌ Untested |
@@ -145,7 +145,7 @@ This dashboard tracks all core modules that currently possess **0% test coverage
 | `src/engines/physics_engines/pinocchio/scripts/quality_check.py`                                             | ❌ Untested |
 | `src/engines/physics_engines/pinocchio/scripts/verify_pipeline.py`                                           | ❌ Untested |
 | `src/engines/physics_engines/pinocchio/tools/code_quality_check.py`                                          | ❌ Untested |
-| `src/engines/physics_engines/pinocchio/tools/probe_rawcap.py`                                                 | ❌ Untested |
+| `src/engines/physics_engines/pinocchio/tools/probe_rawcap.py`                                                | ❌ Untested |
 | `src/engines/physics_engines/putting_green/_tier.py`                                                         | ❌ Untested |
 | `src/engines/simscape/_engine_pool.py`                                                                       | ❌ Untested |
 | `src/engines/simscape/_simscape_io.py`                                                                       | ❌ Untested |

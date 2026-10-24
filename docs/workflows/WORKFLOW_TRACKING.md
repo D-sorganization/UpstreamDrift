@@ -33,11 +33,12 @@ Update this document whenever a new workflow is added or the status of an existi
 
 - `ci-standard.yml` is the default core PR lane. It is intentionally fast and
   honest about optional-engine coverage.
-- `ci-standard.yml` concurrency: the group is per-ref on branches/PRs (a newer
-  push cancels the superseded run) but per-commit on `main`, so consecutive
-  merges queue instead of cancelling each other and `main` always finishes a
-  run (RM #1507, #9409). `cancel-in-progress: true` stays literal because
-  `lint-workflow-files.yml` greps for it.
+- `ci-standard.yml` concurrency: the group is per-event, per-ref on branches/PRs
+  (a newer push cancels the superseded PR run) but per-commit on `main`, so
+  consecutive merges queue instead of cancelling each other and `main` always
+  finishes a run (RM #1507, #9409). `cancel-in-progress` is PR-scoped only
+  (`github.event_name == 'pull_request'`) so `merge_group` and `main` runs are
+  never cancelled (UD-CI-032, issue #13573).
 - `ci-standard.yml` `tests (3.x)` budget: `timeout-minutes: 150`, measured
   2026-09-03 from run 33779933815 (RM #1507, UD #9431). The lane runs serially
   (`-n 0`, since 2026-06-13) with coverage over 40,488 selected tests at

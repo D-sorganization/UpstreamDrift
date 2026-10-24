@@ -84,7 +84,7 @@ def test_n_joints_hint_must_match_plant_not_override() -> None:
 @pytest.mark.requires_drake
 def test_canonical_urdf_actuator_count_matches_fit_options_default() -> None:
     """Live Drake: default fit plant exposes a stable positive actuator count."""
-    pytest.importorskip("pydrake")
+    pytest.importorskip("pydrake.multibody.plant")  # skips if pydrake is mocked
     n = count_actuators_for_urdf(CANONICAL_URDF)
     assert n > 0
     assert n != 19, (

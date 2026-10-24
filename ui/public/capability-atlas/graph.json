@@ -222,7 +222,7 @@
     },
     {
       "feature_id": "engines.dashboards",
-      "title": "Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio)",
+      "title": "Per-engine interactive dashboards (Drake, JaxSim, MuJoCo, Pinocchio)",
       "status": "exempt",
       "pyqt": "src/launchers/drake_dashboard.py",
       "api": null,
@@ -232,6 +232,7 @@
       "pending_decision": true,
       "tiles": [
         "drake_dashboard",
+        "jaxsim_dashboard",
         "mujoco_dashboard",
         "pinocchio_dashboard"
       ],
@@ -3307,7 +3308,7 @@
   "inputs": {
     "src/config/models.yaml": "7c868b0c444389fad39bdd30469abd32439f5bd11b9b5019c941ac0049e0763c",
     "src/config/launcher_manifest.json": "26337829a1de75576be220e293c6d4f012f97303c0639401a8d902e76c418f37",
-    "src/config/feature_parity.json": "0f37cc44c265f45ec4567e5ff78b762b25b1aec051ec4384611663a1fbe20c73",
+    "src/config/feature_parity.json": "37bf3ab847175fe42c353b91b89f183c271c46b353db72cc8a135da132228404",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

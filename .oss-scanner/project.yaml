@@ -1,0 +1,12 @@
+# Security-scan contract (anthropics/oss-scanner layout), issue #13658.
+# Part of the fleet security scanner epic D-sorganization/Runner_Dashboard#2566.
+# Operator settings (cadence, budget, priority) live in the Runner Dashboard's
+# config/security_scan.json, never here.
+
+repo: https://github.com/D-sorganization/UpstreamDrift
+
+primary_contact: dieterolson@gmail.com
+
+dockerfile: .oss-scanner/Dockerfile
+
+threat_model: .oss-scanner/threat_model.md

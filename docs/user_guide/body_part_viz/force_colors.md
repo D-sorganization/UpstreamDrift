@@ -65,9 +65,9 @@ Pinocchio, Simscape and pendulum GUIs through **Segment Force Colors…**) edits
 every `ForceColorScale` field:
 
 - **Overlay Opacity** (0-100 %) sets `opacity`; it applies immediately.
-- **Blend Mode** sets `blend_mode`. *Tint over model* shifts each segment's own
+- **Blend Mode** sets `blend_mode`. _Tint over model_ shifts each segment's own
   color toward the tension or compression color in proportion to the load, so
-  unloaded segments keep their appearance. *Replace colour* paints the load
+  unloaded segments keep their appearance. _Replace colour_ paints the load
   color (blended with the base by the opacity).
 - Each of the tension, compression and neutral colors has a hex field plus a
   picker button with a live swatch. **Reset Colours** restores the default blue,

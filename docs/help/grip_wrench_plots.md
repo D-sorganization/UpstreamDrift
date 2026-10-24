@@ -59,4 +59,5 @@ The left/right split of two rigid welds is set by the solver, not by physics; re
 
 - [Impact Parameters](impact_parameters.md)
 - [Analysis Tools](analysis_tools.md)
+- [Loop Null-Space Exploration](loop_nullspace.md)
 - [Variability Sensitivity Interpretation Guide](loop_nullspace_variability.md)
