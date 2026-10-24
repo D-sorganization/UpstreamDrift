@@ -35,7 +35,7 @@
     "control_aliases.json": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b"
   },
   "expected_reference": {
-    "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json",
+    "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json",
     "sha256": "59a922fbcd2c06b23674466538d992f5169628464783adbcb6353a4cfb921edd",
     "artifact_sha256": {
       "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
@@ -63,7 +63,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -188,7 +188,7 @@
         "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "159c2e564f314232798d165aa8f1fc7d212c04c43cb724b0dd8a549c9de35299",
         "status": "completed",
         "summary": {
@@ -4187,7 +4187,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -4312,7 +4312,7 @@
         "source_csv_sha256": "ea1d5b4dd40509214b9f52e1cea39bb255a1263ffd5f8da68b3effb09dfc18c3",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "32c727fd274dc34b4c868ec534c0c0cd50eaf0bd9f0e7b8b16d75212cc2fedb6",
         "status": "completed",
         "summary": {
@@ -8311,7 +8311,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -8436,7 +8436,7 @@
         "source_csv_sha256": "eab26a93590254837449692c388110b42e629865fde814cc9a44d3189070c8c3",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "d1c4c9f17b06070a8e58c1200262e30339c97a3b3750933ea1d37c8330e6ae01",
         "status": "completed",
         "summary": {
@@ -12435,7 +12435,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -12560,7 +12560,7 @@
         "source_csv_sha256": "439ab73b9ec1ba9da7255fdb0ef112ac8c146bbc79b77bd61d52df26ee12b694",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "0f1384e332864ba300b573b14dcbd7f7656f0b9c90f0bf6dd8c7bc01d79e24b7",
         "status": "completed",
         "summary": {
@@ -16559,7 +16559,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -16684,7 +16684,7 @@
         "source_csv_sha256": "40bf740e226c73138d1489f71ad924fd3838691a33be1f84a550d2218eb781f3",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "6b1b0a1269317a2451dddd91c0f3b068ae171550feaf0efeb7a6f4d4ca4e16f8",
         "status": "completed",
         "summary": {
@@ -20689,7 +20689,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -20814,7 +20814,7 @@
         "source_csv_sha256": "bdbc0089763896c25f94364677ee35bcdc3a32e980e6ac38cc2946dec9a294dd",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "cbc86dd9e565d88b478c726a4af52a2ba7cffa99dc33b95ef2d1e3e04aaf31c9",
         "status": "completed",
         "summary": {
@@ -24819,7 +24819,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -24944,7 +24944,7 @@
         "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "078878c32284aa822aabf3fee2068e46907c68050ab546697a588ce1314b756b",
         "status": "completed",
         "summary": {
@@ -28949,7 +28949,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -29138,7 +29138,7 @@
         "source_csv_sha256": "80547398ee884237cacf285ec01129236aa97e845c0ca6cc6ea74cbe4bc34dec",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "bab67f9092a9b8c4815178b462029c6c3712a42cbb4d4bfc0893748e0bbc0322",
         "status": "completed",
         "summary": {
@@ -33201,7 +33201,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -33390,7 +33390,7 @@
         "source_csv_sha256": "62e6ab23e45afe6a274b50197cb96d34e062e6146cce7670fa6ad2359c70b237",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "ea661a6020921ab5cfc054cf384e1ea7a6d9ab97a0d0f810adaffb412bbe16e2",
         "status": "completed",
         "summary": {
@@ -37459,7 +37459,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -37584,7 +37584,7 @@
         "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "85685aa21c5ac55fb7bfc4a7fe20b6ef6e7a7469871d99388d256d48d1db8384",
         "status": "completed",
         "summary": {
@@ -41583,7 +41583,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -41708,7 +41708,7 @@
         "source_csv_sha256": "7f97724d5936b2ee390ed016a9f993dd4ca03f7321f3d7a1fc286edcac81a334",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "c0564a42b227b868b73dfa05a7dfd729d5b4e27e7c53ce36f23219b40b169e83",
         "status": "completed",
         "summary": {
@@ -45707,7 +45707,7 @@
             "llvmlite_version": "0.50.0",
             "numba_version": "0.68.0"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "numerical_runtime": {
             "numpy": "2.2.6",
@@ -45832,7 +45832,7 @@
         "source_csv_sha256": "56c4527fa7332a41d9875cafe61597186e40054917c9907b2b80b3ebe5654abb",
         "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
         "source_protocol": "pw-primary-face-bounds/1",
-        "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+        "source_root": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
         "source_summary_sha256": "ca4a62422213888f240bf0bdfd2e9d217375adabdfb71111aacd233e8a783a92",
         "status": "completed",
         "summary": {

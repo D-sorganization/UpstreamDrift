@@ -1,6 +1,6 @@
 from pathlib import Path
 import hashlib,json
-P=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+P=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
 V=P/'validation/supplement_v6_final_graphics_review_v2'; C=V/'layout_child_png_contacts'; O=V/'astra_layout_child_019_033'; O.mkdir(exist_ok=True)
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 expected={'inventory.json':'8c914bfb4f82c179490bee0f79222c6eeb3242ab5eda3607759c05c54026fff6','colorbar_native_inventory.json':'eada37be2e5fd529620075b2572abb7afca6d1aaff43c305127128b6eec33209'}

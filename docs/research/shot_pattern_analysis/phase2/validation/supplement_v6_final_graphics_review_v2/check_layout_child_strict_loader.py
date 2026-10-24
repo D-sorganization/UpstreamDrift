@@ -12,7 +12,7 @@ HERE = Path(__file__).resolve().parent
 PHASE = HERE.parents[1]
 CHILD = PHASE / "supplement_report_v2_layout_repair"
 PRODUCER = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift"
+    "<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift"
 )
 
 
