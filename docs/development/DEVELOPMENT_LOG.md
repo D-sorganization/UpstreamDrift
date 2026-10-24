@@ -553,10 +553,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12691
 - **Branch:** merged via #13738
-- **PR:** #13738, #13746
+- **PR:** #13738, #13746, #13751
 - **Paths:** see #13738
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`db738560`; collated from changes/12691-run-tests-cross-engine-test-flex-shaft-p.md)
+- **Last verified:** 2026-10-24 (`b443e958`; collated from changes/12691-r11-the-r6-chain-shaft-runs-in-pinocchio.md)
 - **Summary:** R11: the R6 chain shaft runs in Drake (RevoluteSpring plus joint damping) and passes the same static, modal, topology and same-input parity gate as OpenSim and MyoSuite; Drake joins CHAIN_ENGINES
 - **Next step:** Shipped in PR #13738.
 
