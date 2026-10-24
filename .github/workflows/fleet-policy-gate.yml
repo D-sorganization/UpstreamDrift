@@ -149,6 +149,14 @@ jobs:
       - name: Install policy dependencies
         run: python -m pip install --disable-pip-version-check pyyaml==6.0.2
 
+      - name: Verify canonical admission publisher workflow copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp -- \
+            target/.github/workflows/reusable-admission-report-publisher.yml \
+            policy/.github/workflows/reusable-admission-report-publisher.yml
+
       - name: Select approved development governance mode
         id: devlog-mode
         env:

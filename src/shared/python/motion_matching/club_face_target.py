@@ -120,6 +120,20 @@ def require_club_assembly(spec: Mapping[str, Any]) -> tuple[Any, str]:
     return assembly, club_body
 
 
+def _club_frame_bodies(spec: Mapping[str, Any], club_body: str) -> tuple[str, ...]:
+    """Bodies whose frame is the club-body frame at zero shaft deflection.
+
+    A rigid club has only the club body. A chain shaft (#12686) moves the
+    ``Clubhead`` frame to its tip link; every link uses the club-body frame
+    and coincides with it at zero deflection, so a placement on the tip link
+    is expressed in the same axes as one on the club body.
+    """
+    shaft = (spec.get("club") or {}).get("shaft") or {}
+    if shaft.get("model") != "chain":
+        return (club_body,)
+    return (club_body, str(shaft["tip_link"]))
+
+
 def face_axis_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Array:
     """Unit rendered face normal expressed in the spec ``frame``.
 
@@ -132,7 +146,7 @@ def face_axis_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Arra
 
     assembly, club_body = require_club_assembly(spec)
     body, placement = _frame_placement(spec, frame)
-    if body != club_body:
+    if body not in _club_frame_bodies(spec, club_body):
         raise ValueError(f"frame {frame} is on {body}, not on the club body")
     axis = placement[:3, :3].T @ ca.clubface_vector(assembly)
     return np.asarray(axis / np.linalg.norm(axis), dtype=float)

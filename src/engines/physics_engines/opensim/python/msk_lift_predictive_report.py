@@ -86,9 +86,9 @@ def tracked_opensim_record(path: Path = OSL3_IK_ID_RECEIPT) -> dict[str, str]:
         }
     return {
         "status": "not compared",
-        "reason": "the OSL-3 deadlift IK/ID receipt is complete, but the "
-        "predictive-versus-tracked comparison (joint moments, GRF) is not "
-        "implemented yet",
+        "reason": "the OSL-3 deadlift IK/ID receipt is complete; the "
+        "comparison runs only on a converged predictive solution (see "
+        "tracked_comparison)",
     }
 
 
@@ -265,14 +265,22 @@ def residual_moment_gate(
     return {"residual_moment_limit_nm": limit, "residual_moment_within_limit": within}
 
 
-def _extract_bar_kinematics(study: Any, solution: Any) -> dict[str, float]:
-    """Replay FK from states table and return kinematic metrics."""
-    # The rep holds the processed model (welds applied, muscles replaced); FK
-    # replays on a copy of it, since the rep itself exposes no initSystem().
-    # The rep must outlive the copy: a temporary rep leaves a dangling model.
+def _processed_model(study: Any) -> tuple[Any, Any]:
+    """The problem rep and a replayable copy of its processed model.
+
+    The rep holds the processed model (welds applied, muscles replaced); FK
+    replays on a copy of it, since the rep itself exposes no initSystem().
+    The caller must keep the rep alive while it uses the copy: a temporary
+    rep leaves a dangling model.
+    """
     osim = import_opensim()
     rep = study.getProblem().createRep()
-    model = osim.Model(rep.getModelBase())
+    return rep, osim.Model(rep.getModelBase())
+
+
+def _extract_bar_kinematics(study: Any, solution: Any) -> dict[str, float]:
+    """Replay FK from states table and return kinematic metrics."""
+    rep, model = _processed_model(study)
     times, bar_pos, com_heights = _replay_states(model, solution.exportToStatesTable())
     start_h = float(bar_pos[0, 1])
     final_h = float(bar_pos[-1, 1])
@@ -376,5 +384,23 @@ def build_comparison_table(
             ),
         },
         "tracked_opensim": tracked_opensim_record(),
+        "tracked_comparison": _tracked_comparison(results, infeasible_reason),
         "quantities": quantities,
     }
+
+
+def _tracked_comparison(
+    results: dict[str, Any], infeasible_reason: str | None
+) -> dict[str, Any]:
+    """Predictive-versus-tracked comparison, or the reason it did not run."""
+    from src.engines.physics_engines.opensim.python import (
+        msk_lift_predictive_compare as compare,
+    )
+
+    if infeasible_reason is not None:
+        return compare.unavailable(infeasible_reason)
+    if "trajectories" not in results:
+        return compare.unavailable("the solve record has no trajectories")
+    return compare.compare_with_tracked(
+        results["trajectories"], compare.load_tracked_reference()
+    )

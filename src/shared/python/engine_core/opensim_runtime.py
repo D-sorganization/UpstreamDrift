@@ -25,19 +25,66 @@ import through here adds no import-time weight.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, MutableMapping
 from dataclasses import dataclass
 from enum import Enum
 import logging
+import os
+from pathlib import Path
 import sys
 from typing import Any
 
-__all__ = ["OpenSimProbe", "OpenSimState", "import_opensim", "probe_opensim"]
+__all__ = [
+    "CASADI_IPOPT_PLUGIN",
+    "OpenSimProbe",
+    "OpenSimState",
+    "ensure_casadi_plugin_path",
+    "import_opensim",
+    "probe_opensim",
+]
 
 logger = logging.getLogger(__name__)
 
 OPENSIM_PACKAGE = "opensim"
 _DLL_FAILURE_MARKER = "DLL load failed"
+CASADI_IPOPT_PLUGIN = "casadi_nlpsol_ipopt.dll"
+CASADIPATH_ENV = "CASADIPATH"
+
+
+def ensure_casadi_plugin_path(
+    package_dir: Path | str,
+    *,
+    environ: MutableMapping[str, str] | None = None,
+    platform: str | None = None,
+) -> str | None:
+    """Point CasADi at the OpenSim wheel's plugins on Windows (OSL-7, #13044).
+
+    The OpenSim pip wheel bundles CasADi's solver plugins (``ipopt``) next to
+    the package, but on Windows CasADi only searches ``CASADIPATH``/``PATH``,
+    so ``MocoCasADiSolver`` fails with ``Plugin 'ipopt' is not found``.  This
+    sets ``CASADIPATH`` to ``package_dir`` when it is unset and the directory
+    holds the ipopt plugin.
+
+    Returns the path set, or ``None`` when nothing changed: not Windows, the
+    variable is already set (never overridden), or the plugin is absent.
+    """
+    env = os.environ if environ is None else environ
+    if (sys.platform if platform is None else platform) != "win32":
+        return None
+    if env.get(CASADIPATH_ENV):
+        return None
+    directory = Path(package_dir)
+    if not (directory / CASADI_IPOPT_PLUGIN).is_file():
+        return None
+    env[CASADIPATH_ENV] = str(directory)
+    return str(directory)
+
+
+def _configure_casadi_for_loaded_opensim() -> None:
+    """Apply :func:`ensure_casadi_plugin_path` to the imported ``opensim``."""
+    location = getattr(sys.modules.get(OPENSIM_PACKAGE), "__file__", None)
+    if isinstance(location, str):
+        ensure_casadi_plugin_path(Path(location).parent)
 
 
 def _statement_import(name: str) -> Any:
@@ -107,7 +154,9 @@ def import_opensim(
     """
     _require_opensim_name(module)
     try:
-        return importer(module)
+        imported = importer(module)
+        _configure_casadi_for_loaded_opensim()
+        return imported
     except ImportError as exc:
         if isinstance(exc, ModuleNotFoundError):
             raise

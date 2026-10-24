@@ -2741,6 +2741,16 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13691 | Add opt-in allocate_muscle_excitations_until_feasible (stop_when_feasible) for bounded muscle allocation: stops during a counted evaluation on an exact feasible witness and reports declared_feasibility_satisfied |
+| 2026-10-24 | #13721 | OSL-7: predictive-versus-tracked deadlift comparison (bar path, window-start joint angles, group activations, L5/S1 status) aligned by bar-rise fraction; receipt wiring follows in a second PR |
+| 2026-10-24 | #13729 | Escape # in lift_models.tex so compile-latex-references passes (OSL-7 follow-up) |
+| 2026-10-24 | #13723 | CI: the tests job checks out only the pinned myo_sim gitlink (depth 1) so the NSX-94 real-MyoSuite co-contraction tests run instead of skipping |
+| 2026-10-24 | #13719 | Chain shaft runs through the ground-support pipeline: IK holds chain coordinates at rest, face targets accept the tip link, replay uses the 0.125 ms substep |
+| 2026-10-24 | #13677 | Simscape grip kernel follows the shared capsule line-contact law; ten_finger verifier back to 1e-11; structural freshness check for generated JSON; goldens rebuilt from the rounded export params; committed R2025b evidence |
+| 2026-10-24 | #13715 | Fix DrakeKinematicsService.set_pose/get_link_transforms against a real MultibodyPlant (floating-base quaternion layout, body enumeration) |
+| 2026-10-24 | #13717 | NSX-94: run the co-contraction trade-off sweep on the real pinned MyoSuite elbow (myoelbow_1dof6muscles); replace the never-running importorskip(myo_sim) test |
+| 2026-10-24 | #13716 | NSX-93: cross-engine conformance of the declared impedance and delayed-feedback layer through the torque-engine derivative seam (Pinocchio reference, MuJoCo, Drake; Simscape UNAVAILABLE) |
+| 2026-10-24 | #13714 | static_envelopes retries a NUMERICAL warm-started HiGHS solve cold (anthro plate benchmark, highspy 1.15.1) |
 | 2026-10-24 | #13689 | Forward-rollout root-residual test closes the #13179 axial-load acceptance |
 | 2026-10-24 | #13688 | Guard test enforcing the single paired Monte Carlo runner rule for strategy comparisons (NSX-91) |
 | 2026-10-24 | #13690 | NSX-45: user help and interpretation guide for loop null-space exploration (Refs #12577) |

@@ -284,6 +284,7 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 ### Tracked OpenSim Solution Status
 - **Status:** `{comp["tracked_opensim"]["status"]}`
 - **Reason:** {comp["tracked_opensim"]["reason"]}
+- **Comparison:** `{comp["tracked_comparison"]["status"]}` {comp["tracked_comparison"].get("reason", "")}
 
 ## Reproduction Command
 
@@ -511,6 +512,10 @@ def run_measurement(
     receipt = format_predictive_receipt(
         cfg_stage1, stage1_summary, bundle_path=BUNDLE_PATH
     )
+    # Trajectories are numpy arrays used for the comparison only; keep them
+    # out of the JSON receipt.
+    for summary in (stage1_summary, stage2_summary):
+        summary.pop("trajectories", None)
     receipt["stage1_torque"] = stage1_summary
     receipt["stage2_muscle"] = stage2_summary
     receipt["source_commit"] = _git("rev-parse", "HEAD")

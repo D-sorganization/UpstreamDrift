@@ -29,6 +29,9 @@ from src.engines.physics_engines.opensim.python.msk_lift_model import (
     _ground_points,
     build_lift_model,
 )
+from src.engines.physics_engines.opensim.python.msk_lift_predictive_compare import (
+    predictive_trajectories,
+)
 from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
     _extract_bar_kinematics,
     _extract_residual_metrics,
@@ -826,6 +829,7 @@ def solve_predictive_deadlift(
     if converged:
         try:
             record.update(_extract_bar_kinematics(study, solution))
+            record["trajectories"] = predictive_trajectories(study, solution)
         except (RuntimeError, ValueError) as exc:
             logger.warning("FK replay failed on converged solution: %s", exc)
     gate = residual_moment_gate(moment_peak, record.get("com_height_m"), tot_weight)
