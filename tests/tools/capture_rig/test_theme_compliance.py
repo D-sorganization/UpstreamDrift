@@ -25,7 +25,7 @@ pytest.importorskip("PyQt6")
 pytest.importorskip("cv2")
 
 from PyQt6 import sip
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QWidget
 
 from src.shared.python.theme.colors import BUILTIN_THEMES
 from src.shared.python.theme.style_constants import Styles
@@ -75,6 +75,8 @@ def _forget_deleted_windows(manager: ThemeManager) -> None:
         for ref in manager._registered_windows
         if ref() is not None and not sip.isdeleted(ref())
     ]
+    if manager.main_window is not None and sip.isdeleted(manager.main_window):
+        manager.main_window = None
 
 
 @pytest.fixture
@@ -89,6 +91,21 @@ def theme_manager() -> Iterator[ThemeManager]:
     finally:
         _forget_deleted_windows(manager)
         manager.change_theme(before)
+
+
+def test_deleted_main_window_is_cleared_before_restyling() -> None:
+    _app()
+    ThemeManager.reset_instance()
+    window = QWidget()
+    manager = ThemeManager.instance(main_window=window)
+    sip.delete(window)
+
+    try:
+        _forget_deleted_windows(manager)
+        assert manager.main_window is None
+        manager.change_theme("Dark")
+    finally:
+        ThemeManager.reset_instance()
 
 
 # -- static --------------------------------------------------------------------

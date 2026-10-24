@@ -101,6 +101,7 @@ def test_docker_workflows_build_on_the_host_shared_buildkit_builder() -> None:
     workflow_paths = [
         REPO_ROOT / ".github" / "workflows" / "docker-smoke.yml",
         REPO_ROOT / ".github" / "workflows" / "docker-size-gates.yml",
+        REPO_ROOT / ".github" / "workflows" / "docker-security-scan.yml",
     ]
 
     for workflow_path in workflow_paths:
@@ -113,7 +114,8 @@ def test_docker_workflows_build_on_the_host_shared_buildkit_builder() -> None:
         assert "cache-from:" not in workflow
         assert "cache-to:" not in workflow
         assert "BuildKit cache" not in workflow
-        assert "max-parallel: 1" in workflow
+        if "strategy:" in workflow:
+            assert "max-parallel: 1" in workflow
         # Each build job ensures the shared builder and builds on it ...
         assert workflow.count("python3 scripts/ci/shared_buildkit.py ensure") == builds
         assert workflow.count(f"builder: {_SHARED_BUILDER}") == builds

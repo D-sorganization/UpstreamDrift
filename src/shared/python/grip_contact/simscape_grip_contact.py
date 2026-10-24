@@ -34,6 +34,9 @@ from src.shared.python.grip_contact.contact_topology import (
     GripStyle,
     contact_topology,
 )
+from src.shared.python.grip_contact.generated_export_lock import (
+    serialize_committed_export,
+)
 from src.shared.python.grip_contact.interface import GripInterface
 from src.shared.python.grip_contact.matlab_kernel import (
     DEFAULT_SQUEEZE_PER_HAND_N,
@@ -44,7 +47,9 @@ from src.shared.python.grip_contact.matlab_kernel import (
     render_json_deterministic,
 )
 from src.shared.python.grip_contact.net_wrench_parity import (
+    canonicalize_export_tree,
     payloads_numerically_close,
+    report_generated_drift,
 )
 from src.shared.python.grip_contact.parity import GripKineticsSeries
 from src.shared.python.grip_contact.prescribed_motion import (
@@ -426,7 +431,7 @@ def build_scenarios_payload(
         "scenarios": scenarios,
     }
     validate_scenarios_payload(payload)
-    return payload
+    return canonicalize_export_tree(payload)
 
 
 def validate_scenarios_payload(payload: Mapping[str, Any]) -> None:
@@ -456,27 +461,37 @@ def export_scenarios_json(
     check: bool = False,
 ) -> int:
     """Write or check ``gs3dx_grip_contact_scenarios.json``."""
-    payload = build_scenarios_payload()
-    text = render_json_deterministic(payload)
-    target = Path(path)
-    if check:
-        if not target.exists():
+
+    def _run() -> int:
+        payload = build_scenarios_payload()
+        text = render_json_deterministic(payload)
+        target = Path(path)
+        if check:
+            current = target.read_text(encoding="utf-8") if target.exists() else None
+            if current == text:
+                return 0
+            if (
+                current is not None
+                and target.resolve() == DEFAULT_SCENARIOS_JSON_PATH.resolve()
+            ):
+                try:
+                    act = json.loads(current)
+                    exp = json.loads(text)
+                    if payloads_numerically_close(act, exp):
+                        return 0
+                except Exception:
+                    pass
+            report_generated_drift(target, current, text)
             return 1
-        current = target.read_text(encoding="utf-8")
-        if current == text:
-            return 0
-        if target.resolve() == DEFAULT_SCENARIOS_JSON_PATH.resolve():
-            try:
-                act = json.loads(current)
-                exp = json.loads(text)
-                if payloads_numerically_close(act, exp):
-                    return 0
-            except Exception:
-                pass
-        return 1
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(text, encoding="utf-8")
-    return 0
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text, encoding="utf-8")
+        return 0
+
+    return serialize_committed_export(
+        (Path(path),),
+        (DEFAULT_SCENARIOS_JSON_PATH,),
+        _run,
+    )
 
 
 @dataclass(frozen=True)

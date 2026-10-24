@@ -20,23 +20,23 @@ A single JSON object pasted into the text box ("Paste canonical-core
 setup JSON"). It must decode to an object. The validated fields and
 their required units:
 
-| Field | Required value / unit |
-| --- | --- |
-| `convention` | exactly `"canonical-v2"` |
-| `units` | `"SI"`, or an object mapping the six quantities below |
-| `units.length` | `"m"` |
-| `units.mass` | `"kg"` |
-| `units.time` | `"s"` |
-| `units.angle` | `"rad"` |
-| `units.force` | `"N"` |
-| `units.torque` | `"N*m"` (aliases `N-m`, `Nm`, `N.m` accepted) |
-| `frame` or `world_frame` | exactly `"world_Zup"` |
-| `gravity` | optional; a finite 3-vector in m/s^2, must equal `[0.0, 0.0, -9.80665]` within 1e-6 |
-| `model.canonical_id` (or `model.id`) | non-empty string |
-| `model.joint_names` | non-empty list of non-empty strings |
-| `model.nq`, `model.nv` | positive integers satisfying `nq == nv + 1` |
-| `calibration.status` | `"complete"`, or `calibration.validated` is `true` |
-| `calibration.anthropometrics_ref` | or `subject_anthropometrics`, or `subject_id` - at least one must be set |
+| Field                                | Required value / unit                                                               |
+| ------------------------------------ | ----------------------------------------------------------------------------------- |
+| `convention`                         | exactly `"canonical-v2"`                                                            |
+| `units`                              | `"SI"`, or an object mapping the six quantities below                               |
+| `units.length`                       | `"m"`                                                                               |
+| `units.mass`                         | `"kg"`                                                                              |
+| `units.time`                         | `"s"`                                                                               |
+| `units.angle`                        | `"rad"`                                                                             |
+| `units.force`                        | `"N"`                                                                               |
+| `units.torque`                       | `"N*m"` (aliases `N-m`, `Nm`, `N.m` accepted)                                       |
+| `frame` or `world_frame`             | exactly `"world_Zup"`                                                               |
+| `gravity`                            | optional; a finite 3-vector in m/s^2, must equal `[0.0, 0.0, -9.80665]` within 1e-6 |
+| `model.canonical_id` (or `model.id`) | non-empty string                                                                    |
+| `model.joint_names`                  | non-empty list of non-empty strings                                                 |
+| `model.nq`, `model.nv`               | positive integers satisfying `nq == nv + 1`                                         |
+| `calibration.status`                 | `"complete"`, or `calibration.validated` is `true`                                  |
+| `calibration.anthropometrics_ref`    | or `subject_anthropometrics`, or `subject_id` - at least one must be set            |
 
 ## Outputs
 
@@ -44,7 +44,7 @@ their required units:
 - A per-step list of `title: status (issue_count)`, where status is one
   of `complete`, `blocked`, `ready`, `waiting`.
 - For each issue, two lines: `field_path: message` and `Fix:
-  suggested_fix`. Every issue also carries a stable `code`
+suggested_fix`. Every issue also carries a stable `code`
   (`CC36_CONVENTION`, `CC36_UNITS`, `CC36_UNIT_MISMATCH`,
   `CC36_WORLD_FRAME`, `CC36_GRAVITY_SHAPE`, `CC36_GRAVITY_FRAME`,
   `CC36_MODEL_REQUIRED`, `CC36_MODEL_ID`, `CC36_MODEL_JOINTS`,
@@ -100,6 +100,7 @@ process-wide embeddable-tool registry at import time, requesting a tab
   covered by tests.
 
 ## See Also
+
 - [Engine selection](engine_selection.md)
 - [Simulation controls](simulation_controls.md)
 - [Model Explorer](model_explorer.md) - where model dimensions come from

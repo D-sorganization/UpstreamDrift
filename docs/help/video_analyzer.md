@@ -12,19 +12,19 @@ The Video Analyzer extracts 2D biomechanical keypoints, swing planes, body angle
 
 ## Inputs
 
-| Input | Units | Description |
-| --- | --- | --- |
-| Video Footage | mp4 / avi / mov | Recorded swing video (target 60-240 fps) |
-| Spatial Scale | pixels / m | Known reference distance in the video plane |
-| Analysis Keyframes | frames / ms | Selected address, top-of-swing, impact, and finish events |
+| Input              | Units           | Description                                               |
+| ------------------ | --------------- | --------------------------------------------------------- |
+| Video Footage      | mp4 / avi / mov | Recorded swing video (target 60-240 fps)                  |
+| Spatial Scale      | pixels / m      | Known reference distance in the video plane               |
+| Analysis Keyframes | frames / ms     | Selected address, top-of-swing, impact, and finish events |
 
 ## Outputs
 
-| Output | Units | Description |
-| --- | --- | --- |
-| 2D Keypoint Trajectories | pixels | Frame-by-frame joint locations (shoulders, hips, hands) |
-| Swing Plane Angles | deg | Shaft lean, spine angle, and shoulder tilt |
-| Temporal Sequencing | ms | Interval durations between address, top, impact, and finish |
+| Output                   | Units  | Description                                                 |
+| ------------------------ | ------ | ----------------------------------------------------------- |
+| 2D Keypoint Trajectories | pixels | Frame-by-frame joint locations (shoulders, hips, hands)     |
+| Swing Plane Angles       | deg    | Shaft lean, spine angle, and shoulder tilt                  |
+| Temporal Sequencing      | ms     | Interval durations between address, top, impact, and finish |
 
 ## Method
 

@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "AfterTool": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -lc 'root=\"$(git rev-parse --show-toplevel)\"; exec python3 \"$root/scripts/agent-check-hook-bridge.py\" gemini-after-tool'\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -lc 'root=\"$(git rev-parse --show-toplevel)\"; exec python3 \"$root/scripts/agent-check-hook-bridge.py\" gemini-after-agent'\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

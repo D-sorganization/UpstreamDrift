@@ -1,9 +1,10 @@
 """Heavy optional CI lanes run nightly or on demand, not on every PR push (#12224).
 
 The docker fleet lane is the scarcest runner capacity. Cross-engine
-equivalence, the optional stack and the PR leaderboard artifact used to run on
-every PR push; with per-ref ``cancel-in-progress`` almost none of them ever
-completed. These tests pin the gating contract:
+equivalence and the optional stack used to run on every PR push; with per-ref
+``cancel-in-progress`` almost none of them ever completed. The cross-engine
+leaderboard JSON publisher now runs nightly and on main push only (#13572).
+These tests pin the gating contract:
 
 * the light conformance gate still runs on every PR and main push;
 * heavy jobs run on ``schedule``, ``workflow_dispatch`` or a PR carrying the
@@ -44,12 +45,17 @@ def _only_full_label_events_start(condition: str) -> None:
     assert f"github.event.label.name == '{FULL_LABEL}'" in condition
 
 
+def _only_opensim_label_events_start_classifier(condition: str) -> None:
+    label = "ci:opensim"
+    assert "github.event.action != 'labeled'" in condition
+    assert f"github.event.label.name == '{label}'" in condition
+
+
 @pytest.mark.parametrize(
     "name",
     [
         "cross-engine-equivalence.yml",
         "ci-optional-stack.yml",
-        "cross-engine-leaderboard-publish.yml",
     ],
 )
 def test_other_label_events_cannot_cancel_a_run(name: str) -> None:
@@ -84,13 +90,10 @@ class TestCrossEngineEquivalenceGating:
         assert "format('{0}-{1}', github.event_name, github.ref)" in group
 
     def test_workflow_lint_allows_conditional_cancel(self) -> None:
-        # The workflow-file lint greps for a literal ``cancel-in-progress:
-        # true``, so the conditional form above must be on its exception list.
+        # Workflow lint delegates merge-queue-safe cancellation to the audit
+        # script (UD-CI-032), which accepts PR-scoped cancel expressions.
         lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
-        allowlist = next(
-            line for line in lint.splitlines() if "nightly-publish.yml" in line
-        )
-        assert self.NAME in allowlist
+        assert "audit_workflow_cancellation_semantics.py" in lint
 
     def test_dispatcher_exposes_heavy_flag(self) -> None:
         dispatcher = _load(self.NAME)["jobs"]["pick-runner"]
@@ -141,18 +144,49 @@ class TestOptionalStackGating:
 
 
 class TestLeaderboardPublishGating:
-    NAME = "cross-engine-leaderboard-publish.yml"
+    """#13572 / UD-CI-031: PR artifact runs were a top CI failure source."""
 
-    def test_pr_artifact_needs_full_label_and_main_publish_unchanged(self) -> None:
-        data = _load(self.NAME)
-        on = _triggers(data)
+    NAME = "cross-engine-leaderboard-publish.yml"
+    REQUIRED_CHECKS = REPO_ROOT / "scripts" / "config" / "ci-required-checks-live.json"
+    PUBLISH_CONTEXT = "publish cross-engine leaderboard JSON"
+
+    def test_no_pull_request_trigger(self) -> None:
+        on = _triggers(_load(self.NAME))
+        assert "pull_request" not in on
+
+    def test_runs_nightly_post_merge_and_on_demand(self) -> None:
+        on = _triggers(_load(self.NAME))
         assert on["push"]["branches"] == ["main"]
-        assert "labeled" in on["pull_request"]["types"]
-        condition = data["jobs"]["publish"]["if"]
-        assert "github.event_name != 'pull_request'" in condition
-        assert f"contains(github.event.pull_request.labels.*.name, '{FULL_LABEL}')" in (
-            condition
+        assert on["schedule"][0]["cron"].split()[-1] == "*", "must run daily"
+        assert "workflow_dispatch" in on
+
+    def test_non_pr_runs_are_not_cancelled_once_running(self) -> None:
+        concurrency = _load(self.NAME)["concurrency"]
+        assert concurrency["cancel-in-progress"] is False
+        group = concurrency["group"]
+        assert "github.event.action" not in group
+        assert "github.event_name" in group
+        assert "github.ref" in group
+        assert "cross-engine-leaderboard-publish" in group
+
+    def test_not_a_required_branch_protection_context(self) -> None:
+        if not self.REQUIRED_CHECKS.is_file():
+            pytest.skip("ci-required-checks-live.json lands with RM #2216")
+        payload = pytest.importorskip("json").loads(
+            self.REQUIRED_CHECKS.read_text(encoding="utf-8")
         )
+        required = payload.get("required_contexts", payload.get("contexts", []))
+        assert isinstance(required, list)
+        assert self.PUBLISH_CONTEXT not in required
+        assert "cross-engine-leaderboard-publish" not in required
+
+    def test_workflow_lint_allows_intentional_cancel_false(self) -> None:
+        lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
+        assert "audit_workflow_cancellation_semantics.py" in lint
+        script = (
+            REPO_ROOT / "scripts" / "ci" / "audit_workflow_cancellation_semantics.py"
+        ).read_text(encoding="utf-8")
+        assert f'"{self.NAME}"' in script
 
 
 class TestOpenSimMainRunsComplete:
@@ -167,17 +201,21 @@ class TestOpenSimMainRunsComplete:
     #13513: the job is not a required check (only ``quality-gate`` is), so the
     merge queue never waited on it. It no longer triggers on ``merge_group``;
     PR runs give pre-merge signal and main push runs give post-merge signal.
+
+    #13571: path/label gating moved into ``classify-changes``; nightly schedule
+    and ``ci:opensim`` label events follow the same concurrency pattern as the
+    optional-stack lane.
     """
 
     NAME = "ci-requires-opensim.yml"
-    GROUP = "ci-requires-opensim-${{ github.event_name }}-${{ github.ref }}"
     CANCEL = "${{ github.event_name == 'pull_request' }}"
+    OPENSIM_LABEL = "ci:opensim"
 
     def test_group_is_per_event_and_ref(self) -> None:
         group = _load(self.NAME)["concurrency"]["group"]
         assert "github.sha" not in group, "per-SHA groups queue every main push"
         assert "runner." not in group, "runner context is invalid in concurrency"
-        assert group == self.GROUP
+        assert f"github.event.label.name != '{self.OPENSIM_LABEL}'" in group
 
     def test_only_pr_runs_cancel_in_progress(self) -> None:
         # push and dispatch runs evaluate this to false, so a main run that
@@ -190,15 +228,28 @@ class TestOpenSimMainRunsComplete:
         on = _triggers(_load(self.NAME))
         assert "merge_group" not in on, "merge queue never waits on this job"
 
-    def test_pr_and_main_push_triggers_remain(self) -> None:
+    def test_pr_paths_or_label_gating_is_job_level(self) -> None:
         on = _triggers(_load(self.NAME))
-        assert "pull_request" in on, "PR runs give the pre-merge signal"
+        pr = on["pull_request"]
+        assert "paths" not in pr
+        assert "paths-ignore" not in pr
+        assert "labeled" in pr["types"]
+        jobs = _load(self.NAME)["jobs"]
+        assert "classify-changes" in jobs
+        assert (
+            "needs.classify-changes.outputs.run == 'true'" in jobs["pick-runner"]["if"]
+        )
+
+    def test_unrelated_label_events_skip_classifier(self) -> None:
+        condition = _load(self.NAME)["jobs"]["classify-changes"]["if"]
+        _only_opensim_label_events_start_classifier(condition)
+
+    def test_post_merge_nightly_and_dispatch_triggers_remain(self) -> None:
+        on = _triggers(_load(self.NAME))
         assert on["push"]["branches"] == ["main"], "main runs give post-merge signal"
+        assert on["schedule"], "nightly covers non-OpenSim PR regressions"
         assert "workflow_dispatch" in on
 
     def test_workflow_lint_allows_conditional_cancel(self) -> None:
         lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
-        allowlist = next(
-            line for line in lint.splitlines() if "nightly-publish.yml" in line
-        )
-        assert self.NAME in allowlist
+        assert "audit_workflow_cancellation_semantics.py" in lint

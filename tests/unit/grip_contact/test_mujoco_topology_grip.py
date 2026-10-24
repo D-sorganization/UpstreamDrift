@@ -760,7 +760,7 @@ def test_two_pad_hyperstatic_penalty_vs_mujoco_cone_divergence() -> None:
 
     law = ContactParameters(
         stiffness_n_m=171095.0080515298,
-        dissipation_s_m=0.38266566243249167,
+        dissipation_s_m=0.38266566243,
         static_friction=0.9,
         dynamic_friction=0.7,
         viscous_friction=0.0,
@@ -841,34 +841,11 @@ def test_two_pad_hyperstatic_penalty_vs_mujoco_cone_divergence() -> None:
     assert ft2_ell == pytest.approx(0.9 * fn2_ell, rel=1e-4)
 
 
-def _deflection_xfail(motion: str, numbers: str) -> pytest.MarkDecorator:
-    return pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason=(
-            "Trail-hand deflection in the hyperstatic two-hand grip (#13306, "
-            "GRIP_PARITY_DECISIONS.md Section 19): with the per-row friction gain "
-            "schedule every per-hand force, squeeze and couple passes, but the "
-            f"measured 0.1 s {motion} deflection_L / deflection_R (peak_error, "
-            f"rms_error) are {numbers} for OVERLAP and INTERLOCK "
-            "(exceeding PEAK_TOLERANCE=5%, RMS_TOLERANCE=2%)."
-        ),
-    )
-
-
-_HOLD_DEFLECTION_XFAIL = _deflection_xfail("hold", "(1.89%, 1.74%) / (3.89%, 4.60%)")
-_SWING_DEFLECTION_XFAIL = _deflection_xfail("swing", "(1.64%, 1.53%) / (2.99%, 3.39%)")
-
-
 @pytest.mark.slow
 @pytest.mark.timeout(600)
 @pytest.mark.parametrize(
     "style",
-    [
-        pytest.param(GripStyle.OVERLAP, marks=_HOLD_DEFLECTION_XFAIL),
-        pytest.param(GripStyle.INTERLOCK, marks=_HOLD_DEFLECTION_XFAIL),
-        GripStyle.TEN_FINGER,
-    ],
+    list(GripStyle),
 )
 def test_dynamic_parity_hold_vs_pinocchio(style: GripStyle) -> None:
     """0.1 s hold full PARITY_QUANTITIES (including indeterminate per-hand split) vs Pinocchio."""
@@ -911,11 +888,7 @@ def test_dynamic_parity_hold_vs_pinocchio(style: GripStyle) -> None:
 @pytest.mark.timeout(600)
 @pytest.mark.parametrize(
     "style",
-    [
-        pytest.param(GripStyle.OVERLAP, marks=_SWING_DEFLECTION_XFAIL),
-        pytest.param(GripStyle.INTERLOCK, marks=_SWING_DEFLECTION_XFAIL),
-        GripStyle.TEN_FINGER,
-    ],
+    list(GripStyle),
 )
 def test_dynamic_parity_short_swing_vs_pinocchio(style: GripStyle) -> None:
     """Short 0.1 s swing full PARITY_QUANTITIES (including indeterminate per-hand split) vs Pinocchio."""

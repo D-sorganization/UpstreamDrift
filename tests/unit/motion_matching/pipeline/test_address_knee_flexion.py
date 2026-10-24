@@ -423,6 +423,7 @@ def test_off_mode_address_solve_is_unchanged(monkeypatch: pytest.MonkeyPatch) ->
     lane = SimpleNamespace(
         bounds={"knee_angle_r": (-2.0, 0.17)},
         anthropometric=False,
+        labels=(),  # Lane contract (#12969): no club markers, club sole off
         points=np.zeros((1, 1, 3)),
         valid=np.ones((1, 1), bool),
         ground=None,

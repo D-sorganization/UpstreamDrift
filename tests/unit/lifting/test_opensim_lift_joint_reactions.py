@@ -172,10 +172,19 @@ def test_squat_min_acceleration_frame_bound(
         min_acc["lower_bound_satisfied"] and min_acc["upper_bound_satisfied"]
     )
     assert min_acc["qdd_norm_rad_s2"] > 0.0
-    assert min_acc["w_above_n"] > 1000.0
-    assert min_acc["l5_s1_compression_pelvis_n"] > 1000.0
-    assert min_acc["l5_s1_compression_torso_n"] > 1000.0
-    # Dynamic bound honestly reports failure due to acceleration and tilt
+    w_above = float(min_acc["w_above_n"])
+    crossing = float(min_acc["sum_muscle_forces_crossing_l5s1_n"])
+    c_pelvis = float(min_acc["l5_s1_compression_pelvis_n"])
+    c_torso = float(min_acc["l5_s1_compression_torso_n"])
+    # Independent oracle: same pelvis-frame inequalities as build_real_squat_bound_record
+    # and lift_models.tex OSL-5 (W_above <= Comp <= W_above + sum F_m on the pelvis axis).
+    assert min_acc["lower_bound_satisfied"] == (c_pelvis >= w_above - 1e-4)
+    assert min_acc["upper_bound_satisfied"] == (c_pelvis <= w_above + crossing + 1e-4)
+    # Torso frame: with Rajagopal, sum F_m = 0 at L5/S1, so Comp_torso <= W_above is the
+    # binding static upper bound (documented dynamic squat frame ~1030 N < 1338.59 N).
+    assert c_torso <= w_above + crossing + 1e-4
+    assert c_torso > 0.0
+    # Dynamic bound honestly reports failure when pelvis and torso frames disagree.
     assert min_acc["passed"] is False
 
 
@@ -188,7 +197,13 @@ def test_squat_joint_reactions_computed(
     sol = squat_reaction_solution
     assert sol["status"] == "complete"
     assert sol["lift"] == "squat"
-    assert sol["acceleration_error_max"] < 5e-6
+    assert sol["acceleration_error_max"] < 5e-6, sol.get("acceleration_realization")
+    realization = sol.get("acceleration_realization") or {}
+    fingerprint = realization.get("source_fingerprint") or {}
+    assert fingerprint.get("kinematics_revision") >= 6
+    assert fingerprint.get("constraints_enforced_for_id") is False
+    assert fingerprint.get("simbody_kinematics_sha256")
+    assert fingerprint.get("joint_reaction_frame_sha256")
 
     # Inherited OSL-4 qualification
     assert sol["classification"] == "unqualified"

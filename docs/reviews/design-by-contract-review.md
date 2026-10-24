@@ -106,14 +106,15 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
 ```
 
 **Contract Coverage:**
-| Method | Preconditions | Postconditions | Invariants |
-|--------|--------------|----------------|------------|
-| `load_from_path` | ✅ Path exists, allowed dirs | ✅ Assertions | ✅ `@invariant_checked` |
-| `load_from_string` | ✅ Non-empty content | ✅ Assertions | ✅ `@invariant_checked` |
-| `get_state` | ✅ `@require_state` | - | - |
-| `set_state` | ✅ `@require_state` | - | ✅ `@invariant_checked` |
-| `save_checkpoint` | ✅ `@require_state` | - | - |
-| `restore_checkpoint` | ✅ `@require_state` | - | - |
+
+| Method               | Preconditions                | Postconditions | Invariants              |
+| -------------------- | ---------------------------- | -------------- | ----------------------- |
+| `load_from_path`     | ✅ Path exists, allowed dirs | ✅ Assertions  | ✅ `@invariant_checked` |
+| `load_from_string`   | ✅ Non-empty content         | ✅ Assertions  | ✅ `@invariant_checked` |
+| `get_state`          | ✅ `@require_state`          | -              | -                       |
+| `set_state`          | ✅ `@require_state`          | -              | ✅ `@invariant_checked` |
+| `save_checkpoint`    | ✅ `@require_state`          | -              | -                       |
+| `restore_checkpoint` | ✅ `@require_state`          | -              | -                       |
 
 ### 2.2 Common Physics Module (`src/engines/common/physics.py`)
 

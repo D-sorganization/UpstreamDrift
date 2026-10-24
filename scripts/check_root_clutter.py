@@ -65,6 +65,7 @@ DIRECTORY_ALLOWLIST: frozenset[str] = frozenset(
         "docs",
         "evidence",
         "examples",
+        "fleet-hooks",
         "htmlcov",
         "installer",
         "knowledge",

@@ -366,3 +366,19 @@ def test_bench_press_peak_external_force_at_least_peak_bench_force() -> None:
     peak_bench_n = float(np.linalg.norm(bench_sum, axis=1).max())
 
     assert peak_external >= peak_bench_n
+
+
+def test_generalized_speeds_convert_pelvis_euler_derivatives() -> None:
+    """Pelvis Euler coordinates need u/udot distinct from spline qd/qdd."""
+    from src.engines.physics_engines.opensim.python.msk_lift_ik_id import (
+        generalized_speeds_from_spline_derivatives,
+    )
+
+    coords = ("pelvis_tilt", "pelvis_list", "pelvis_rotation", "hip_flexion_r")
+    q = np.array([0.1, 0.05, -0.2, 1.0])
+    qd = np.array([0.02, -0.01, 0.03, 0.5])
+    qdd = np.array([0.1, -0.05, 0.08, 2.0])
+    u, udot = generalized_speeds_from_spline_derivatives(coords, q, qd, qdd)
+    assert not np.allclose(udot[:3], qdd[:3])
+    assert u[-1] == qd[-1]
+    assert udot[-1] == qdd[-1]

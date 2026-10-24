@@ -194,10 +194,16 @@ Defaults: the built-in 25-DOF canonical humanoid, a 2 s passive simulation,
 ```bash
 docker compose --profile explorer-headless run --rm explorer-headless \
   export --model docs/development/full_body_models/evidence/ground_support/anthro_driver/mjx_package.xml \
+  --results tests/fixtures/results_playback/mujoco_fit/dynamics_record.npz \
   --out /out/anthro_driver.mp4 --duration 3 --fps 30
-# replay a results file instead of simulating (npz with "qpos", npy or csv):
+# replay a results file instead of simulating (npz with "qpos" or "q", npy or csv):
 #   --results /out/my_run.npz
 ```
+
+Models with stiff equality constraints or unassisted passive balance (such as
+`anthro_driver/mjx_package.xml`) require `--results` replay of recorded joint
+trajectories rather than unassisted passive simulation, which fails fast with
+a clear error.
 
 The exporter re-opens the written MP4 and fails unless the decoded frame count
 equals the rendered frame count. Other one-shot modes:
