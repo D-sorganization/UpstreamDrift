@@ -18,6 +18,7 @@ from src.shared.python.biomechanics.muscle_allocation import (
     MuscleAllocationResult,
     MuscleRecruitmentPath,
     allocate_muscle_excitations,
+    allocate_muscle_excitations_until_feasible,
 )
 
 SUPPORTED_ADAPTER_ENGINES: frozenset[str] = frozenset(
@@ -194,7 +195,12 @@ class TransactionalMuscleStepper:
 
         pre_snapshot = self.plant.get_state_snapshot()
         opts = self.options
-        alloc_res = allocate_muscle_excitations(
+        allocate = (
+            allocate_muscle_excitations_until_feasible
+            if opts.stop_when_feasible
+            else allocate_muscle_excitations
+        )
+        alloc_res = allocate(
             paths=self.paths,
             coordinate_names=self.coordinate_names,
             desired_generalized_effort=desired_generalized_effort,

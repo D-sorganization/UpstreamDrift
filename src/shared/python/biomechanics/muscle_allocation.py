@@ -61,6 +61,10 @@ class MuscleAllocationResult:
     residual_by_coordinate: dict[str, float]
     nfev: int
     message: str
+    # "declared_feasibility_satisfied" only when the opt-in
+    # ``stop_when_feasible`` search stopped on a feasible witness; it is not an
+    # optimizer-convergence claim. Empty otherwise.
+    termination_reason: str = ""
 
 
 @dataclass(frozen=True)
@@ -74,6 +78,14 @@ class _Evaluation:
 
 class _EvaluationBudgetExhausted(RuntimeError):
     """Raised before an objective call would exceed the explicit budget."""
+
+
+class _DeclaredFeasibilitySatisfied(Exception):
+    """Internal unwind signal: a fully counted evaluation met every declared check.
+
+    Caught before the generic ``RuntimeError`` handler, so it is never confused
+    with an evaluation failure or budget exhaustion.
+    """
 
 
 def _number(value: float, label: str) -> float:
@@ -146,6 +158,7 @@ class _SearchOutcome:
     optimizer_success: bool
     evaluation_budget_exhausted: bool
     evaluation_error: str | None
+    declared_feasibility_satisfied: bool = False
 
 
 def _parse_allocation_request(
@@ -316,7 +329,10 @@ class _ExcitationSearcher:
             Callable[[MuscleRecruitmentPath, float], Callable[[float], _Evaluation]]
             | None
         ) = None,
+        *,
+        stop_when_feasible: bool = False,
     ) -> None:
+        self._stop_when_feasible = stop_when_feasible
         self._paths = paths
         self._coordinate_names = coordinate_names
         self._request = request
@@ -335,6 +351,30 @@ class _ExcitationSearcher:
         self.best_candidate: np.ndarray | None = None
         self.best_observation: tuple[np.ndarray, list[_Evaluation]] | None = None
         self.best_score = math.inf
+        self.feasible_witness: (
+            tuple[np.ndarray, tuple[np.ndarray, list[_Evaluation]]] | None
+        ) = None
+
+    def _within_declared_box(self, values: np.ndarray) -> bool:
+        """True when every raw excitation lies in its box (bounds and slew)."""
+        return all(
+            low <= float(value) <= high
+            for value, (low, high) in zip(values, self._boxes, strict=True)
+        )
+
+    def _meets_declared_feasibility(
+        self, values: np.ndarray, effort: np.ndarray, details: list[_Evaluation]
+    ) -> bool:
+        """Every declared check on one fully evaluated candidate."""
+        forces = np.asarray([d.equilibrium_residual_n for d in details], dtype=float)
+        outputs = np.concatenate((effort, forces, values))
+        if not np.all(np.isfinite(outputs)):
+            return False
+        return bool(
+            np.all(np.abs(effort - self._request.target) <= self._request.tolerances)
+            and np.all(np.abs(forces) <= self._request.force_tolerance)
+            and self._within_declared_box(values)
+        )
 
     def _evaluate(self, values: np.ndarray) -> tuple[np.ndarray, list[_Evaluation]]:
         if self.evaluation_count >= self._request.max_nfev:
@@ -365,6 +405,13 @@ class _ExcitationSearcher:
             self.best_candidate = values.copy()
             self.best_observation = (effort, details)
             self.best_score = score
+        if (
+            self._stop_when_feasible
+            and self.feasible_witness is None
+            and self._meets_declared_feasibility(values, effort, details)
+        ):
+            self.feasible_witness = (values.copy(), (effort, details))
+            raise _DeclaredFeasibilitySatisfied
         return effort, details
 
     def _expand(self, values: np.ndarray) -> np.ndarray:
@@ -428,6 +475,12 @@ class _ExcitationSearcher:
                     f"maximum candidate-evaluation budget {self._request.max_nfev} "
                     "exhausted before optimizer start"
                 )
+        except _DeclaredFeasibilitySatisfied:
+            optimizer_success = True
+            status_message = (
+                "declared_feasibility_satisfied at "
+                f"candidate evaluation {self.evaluation_count}"
+            )
         except _EvaluationBudgetExhausted as exc:
             budget_exhausted = True
             evaluation_budget_exhausted = True
@@ -436,15 +489,17 @@ class _ExcitationSearcher:
         except (ValueError, RuntimeError, FloatingPointError, OverflowError) as exc:
             evaluation_error = str(exc)
             status_message = f"candidate evaluation failed: {exc}"
+        witness = self.feasible_witness
         return _SearchOutcome(
-            best_candidate=self.best_candidate,
-            best_observation=self.best_observation,
+            best_candidate=witness[0] if witness else self.best_candidate,
+            best_observation=witness[1] if witness else self.best_observation,
             evaluation_count=self.evaluation_count,
             status_message=status_message,
             budget_exhausted=budget_exhausted,
             optimizer_success=optimizer_success,
             evaluation_budget_exhausted=evaluation_budget_exhausted,
             evaluation_error=evaluation_error,
+            declared_feasibility_satisfied=witness is not None,
         )
 
 
@@ -562,6 +617,11 @@ def _finalize_allocation_result(
     return MuscleAllocationResult(
         status=status,
         feasible=feasible,
+        termination_reason=(
+            "declared_feasibility_satisfied"
+            if outcome.declared_feasibility_satisfied
+            else ""
+        ),
         nfev=outcome.evaluation_count,
         message=outcome.status_message,
         excitations=payload.excitations,
@@ -572,6 +632,26 @@ def _finalize_allocation_result(
         generalized_effort=payload.generalized_effort,
         residual_by_coordinate=payload.residual_by_coordinate,
     )
+
+
+def _run_allocation(
+    paths: Sequence[MuscleRecruitmentPath],
+    coordinate_names: Sequence[str],
+    request: _ParsedAllocationRequest,
+    *,
+    stop_when_feasible: bool,
+) -> MuscleAllocationResult:
+    """Search and finalize one allocation for an already parsed request."""
+    _validate_recruitment_paths(paths, coordinate_names, request.dt)
+    boxes = [_bounds(path, request.dt) for path in paths]
+    outcome = _ExcitationSearcher(
+        paths,
+        coordinate_names,
+        request,
+        boxes,
+        stop_when_feasible=stop_when_feasible,
+    ).run()
+    return _finalize_allocation_result(paths, coordinate_names, request, boxes, outcome)
 
 
 def allocate_muscle_excitations(
@@ -594,6 +674,9 @@ def allocate_muscle_excitations(
     `max_nfev` caps complete candidate evaluations, including the initial
     candidate and finite-difference objective probes; cached final reporting
     does not perform an uncounted equilibrium solve.
+
+    See :func:`allocate_muscle_excitations_until_feasible` for the opt-in
+    variant that stops at the first declared-feasible witness.
     """
     request = _parse_allocation_request(
         coordinate_names,
@@ -604,7 +687,39 @@ def allocate_muscle_excitations(
         force_equilibrium_tolerance_n,
         max_nfev,
     )
-    _validate_recruitment_paths(paths, coordinate_names, request.dt)
-    boxes = [_bounds(path, request.dt) for path in paths]
-    outcome = _ExcitationSearcher(paths, coordinate_names, request, boxes).run()
-    return _finalize_allocation_result(paths, coordinate_names, request, boxes, outcome)
+    return _run_allocation(paths, coordinate_names, request, stop_when_feasible=False)
+
+
+def allocate_muscle_excitations_until_feasible(
+    paths: Sequence[MuscleRecruitmentPath],
+    coordinate_names: Sequence[str],
+    desired_generalized_effort: Sequence[float],
+    *,
+    coordinate_effort_units: Sequence[EffortUnit],
+    dt_s: float,
+    effort_tolerances: Sequence[float],
+    force_equilibrium_tolerance_n: float = 1e-4,
+    max_nfev: int = 80,
+) -> MuscleAllocationResult:
+    """Opt-in ``stop_when_feasible`` variant of :func:`allocate_muscle_excitations`.
+
+    Takes the same arguments but stops during the first fully counted
+    evaluation whose outputs are finite and meet every declared coordinate and
+    force-equilibrium tolerance with raw excitations inside the declared bounds
+    and slew box. The returned candidate is that exact feasible witness, never
+    a lower-L2 infeasible one, and the result reports
+    ``termination_reason == "declared_feasibility_satisfied"``. This is
+    one-step surrogate feasibility, not minimum-energy recruitment. The default
+    :func:`allocate_muscle_excitations` keeps the conservative optimizer and
+    budget behavior.
+    """
+    request = _parse_allocation_request(
+        coordinate_names,
+        desired_generalized_effort,
+        coordinate_effort_units,
+        effort_tolerances,
+        dt_s,
+        force_equilibrium_tolerance_n,
+        max_nfev,
+    )
+    return _run_allocation(paths, coordinate_names, request, stop_when_feasible=True)
