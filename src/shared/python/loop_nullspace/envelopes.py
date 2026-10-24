@@ -363,6 +363,15 @@ class _FrameSolver:
             self.session.reset()
         res = self.session.solve(c, warm=warm)
         self.iterations += res.iterations
+        if res.status is SolveStatus.NUMERICAL and (warm is not None or self.reuse):
+            # A retained or carried-over basis can leave HiGHS inconclusive
+            # (seen with highspy 1.15.1 on the anthro plate series).  The bounds
+            # do not depend on the start basis, so retry once cold; a cold
+            # NUMERICAL result is returned unchanged and still raises.
+            logger.debug("warm solve NUMERICAL (%s); retrying cold", res.reason)
+            self.session.reset()
+            res = self.session.solve(c)
+            self.iterations += res.iterations
         return res
 
     def feasibility(self, warm: Basis | None) -> tuple[LPResult, bool]:

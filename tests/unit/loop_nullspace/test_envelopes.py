@@ -248,6 +248,48 @@ def test_warm_start_equals_cold_start() -> None:
     assert warm.warm_started and not cold.warm_started
 
 
+def _numerical_on_warm(monkeypatch, *, also_cold: bool = False) -> list[bool]:
+    """Make HiGHS answer NUMERICAL for a warm-started solve (the 1.15.1 plate case)."""
+    from src.shared.python.loop_nullspace import envelopes as env
+    from src.shared.python.loop_nullspace.solvers import LPResult, SolveStatus
+
+    real = env.LPSession.solve
+    seen: list[bool] = []
+
+    def solve(self, c, *, warm=None):
+        seen.append(warm is not None)
+        if warm is not None or also_cold:
+            return LPResult(SolveStatus.NUMERICAL, reason="Unknown")
+        return real(self, c, warm=warm)
+
+    monkeypatch.setattr(env.LPSession, "solve", solve)
+    return seen
+
+
+def test_numerical_warm_basis_retries_cold_with_the_same_bounds(monkeypatch) -> None:
+    """A warm basis HiGHS cannot use must not abort a series (NSX-22 benchmark)."""
+    sets = _frame_sets(4)
+    quantities = [
+        EnvelopeQuantity(f"q{i}", e, 0.0, "N m", scale=5.0)
+        for i, e in enumerate(np.eye(3))
+    ]
+    cold = static_envelopes(sets, quantities, warm_start=False)
+    seen = _numerical_on_warm(monkeypatch)
+    warm = static_envelopes(sets, quantities, warm_start=True)
+    assert any(seen), "the warm basis was never offered"
+    assert np.allclose(warm.lower, cold.lower, atol=TOL, rtol=0)
+    assert np.allclose(warm.upper, cold.upper, atol=TOL, rtol=0)
+    assert warm.status_lower == cold.status_lower
+
+
+def test_numerical_cold_solve_still_raises(monkeypatch) -> None:
+    """The cold retry never masks a genuinely inconclusive solve."""
+    _numerical_on_warm(monkeypatch, also_cold=True)
+    quantities = [EnvelopeQuantity("q0", np.eye(3)[0], 0.0, "N m", scale=5.0)]
+    with pytest.raises(RuntimeError, match="inconclusive"):
+        static_envelopes(_frame_sets(2), quantities, warm_start=True)
+
+
 # ---------------------------------------------------------- evidence/flags
 def test_flags_propagate_from_binding_rows_only() -> None:
     clean = FeasibleRow(np.array([1.0]), 1.0, "A:up", "A", "torque")
