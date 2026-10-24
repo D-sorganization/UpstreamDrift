@@ -103,7 +103,7 @@ jobs:
           done < <(git log --format="%s" -n 5)
 
           if [ $loop_count -ge 3 ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "skip=true" >> "$GITHUB_OUTPUT"
             echo "::warning::Loop prevention: $loop_count CI trigger commits detected"
           else
             echo "skip=false" >> $GITHUB_OUTPUT
