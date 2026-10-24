@@ -51,9 +51,9 @@ stack is retained in this agent's tool transcript. The timeout was not widened
 and the render test was not repeated.
 
 Ruff commands:
-/home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python -m ruff check src/tools/shot_pattern_analysis/academic_plots.py src/tools/shot_pattern_analysis/matched_pair_social.py tests/research/test_shot_pattern_writer_legacy_api.py
+<owner-home>/Repositories/UpstreamDrift/.venv/bin/python -m ruff check src/tools/shot_pattern_analysis/academic_plots.py src/tools/shot_pattern_analysis/matched_pair_social.py tests/research/test_shot_pattern_writer_legacy_api.py
 Observed: All checks passed!
-/home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python -m ruff format --check src/tools/shot_pattern_analysis/academic_plots.py src/tools/shot_pattern_analysis/matched_pair_social.py tests/research/test_shot_pattern_writer_legacy_api.py
+<owner-home>/Repositories/UpstreamDrift/.venv/bin/python -m ruff format --check src/tools/shot_pattern_analysis/academic_plots.py src/tools/shot_pattern_analysis/matched_pair_social.py tests/research/test_shot_pattern_writer_legacy_api.py
 Observed: 3 files already formatted
 
 Local source context for the broader type-check (at HEAD cb4948eb1b694c525435cb42281eed1a04f06b55,

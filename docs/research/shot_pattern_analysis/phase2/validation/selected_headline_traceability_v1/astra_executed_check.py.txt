@@ -1,7 +1,7 @@
 from pathlib import Path
 import hashlib,json,math
 from datetime import datetime,timezone
-p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');o=p/'validation/selected_headline_traceability_v1';h=lambda x:hashlib.sha256(x.read_bytes()).hexdigest();inputs={str(x.relative_to(p)):h(x) for x in [o/'review.json',o/'REVIEW.md',o/'executed_check.py.txt']};r=json.loads((o/'review.json').read_text());assert len(r['cells'])==24 and len(r['rows'])==72
+p=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');o=p/'validation/selected_headline_traceability_v1';h=lambda x:hashlib.sha256(x.read_bytes()).hexdigest();inputs={str(x.relative_to(p)):h(x) for x in [o/'review.json',o/'REVIEW.md',o/'executed_check.py.txt']};r=json.loads((o/'review.json').read_text());assert len(r['cells'])==24 and len(r['rows'])==72
 assert all(h(p/k)==v for k,v in r['source_sha256'].items());expected={(c,cv,sd,pr) for c in ['driver','seven_iron','pitching_wedge'] for cv in [1,2] for sd in [1,2] for pr in ['shaft_only','combined2']};seen=set();supp=[]
 for cell in r['cells']:
  s=json.loads((p/cell['source_root']/'summary.json').read_text());c=s['config'];name=cell['cell'];club=c['club']['club_id'];profile='shaft_only' if all(v==0 for v in c['noise']['standard_deviations'][1:]) else 'combined2';key=(club,c['curve_scale'],c['noise']['standard_deviations'][0],profile);assert key in expected and key not in seen;seen.add(key)

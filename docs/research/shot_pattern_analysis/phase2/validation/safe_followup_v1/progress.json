@@ -142,7 +142,7 @@
     "complete_pre_pr": "Latest full canonical attempt after remote merge was interrupted on prior source at 24% with six failures; final-source complete pre-PR pending protocol amendment, not acceptance."
   },
   "canonical_pre_pr_diagnostics": {
-    "command": "/tmp/shot-upstream-ci-venv/bin/python -u /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --base-ref origin/main",
+    "command": "/tmp/shot-upstream-ci-venv/bin/python -u <owner-home>/Repositories/Repository_Management/scripts/pre_pr.py --base-ref origin/main",
     "environment": "Clean CI 126/126 dev-lock runtime; next invocation PYTHONPATH and MYPYPATH own worktree only; absolute central wrapper; headless variables; actionlint 1.7.7 and shellcheck 0.10.0.",
     "pre_guard_collection_failure": {
       "result": "INCOMPLETE; SIGINT exit 130 after pypdf collection failure, before consistency phase finished",
