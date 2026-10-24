@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13727 | Make the grip MJCF independent of the BLAS kernel and libm: deterministic damping design and pad ring trig |
+| 2026-10-24 | #13748 | Add the Simscape rigid-body stance exporter, R2025b fixture/receipt and Python GCV-2 parity test (rigid body at total mass/CoM on the six GS3DX sole contacts; net GRF +0.087% of weight, split within 0.43%, CoP within 1 mm) |
+| 2026-10-24 | #13746 | Run tests/cross_engine/test_flex_shaft_parity.py in the cross-engine equivalence workflow and add its sources to the path filters. |
 | 2026-10-24 | #13743 | Correct the OpenSim ten_finger swing xfail reason: net_force now passes; the remaining 0.04 s gap is net_moment_com (#13560) |
 | 2026-10-24 | #13744 | Port gs3dx_vertical_share and gs3dx_contact_wrench with tests from the unmerged capture-contact commit 22419ee13 |
 | 2026-10-24 | #13741 | Capture Rig theme-compliance fixture discards a ThemeManager singleton orphaned by QApplication teardown (fixes flaky QSettings-deleted teardown errors) |
