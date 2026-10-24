@@ -15,7 +15,7 @@ All three paths treat rows from the simulator parquet as independent instantaneo
 Simulation source:
 
 ```text
-C:\Users\diete\Repositories\data\TenThousandFiles.parquet
+<owner-home>\Repositories\data\TenThousandFiles.parquet
 ```
 
 Observed club target source:
@@ -57,7 +57,7 @@ Extraction command:
 
 ```powershell
 py -3.12 src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\extract_dynamics_dataset.py `
-  --source C:\Users\diete\Repositories\data\TenThousandFiles.parquet `
+  --source <owner-home>\Repositories\data\TenThousandFiles.parquet `
   --manifest src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\column_manifest_inverse_ready.json `
   --output src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\golf_inverse_ready.parquet
 ```
@@ -294,7 +294,7 @@ Two scenarios are supported:
 Export a start state:
 
 ```matlab
-cd('C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
+cd('<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
 addpath(fullfile(pwd, 'matlab'))
 export_start_state_from_input_file( ...
     "downswing", ...
@@ -460,7 +460,7 @@ Before relying on optimized torques in production model studies, add these contr
 `matlab/ml_workflow_gui.m` provides a step-by-step UI for the workflow:
 
 ```matlab
-cd('C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
+cd('<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
 addpath(fullfile(pwd, 'matlab'))
 ml_workflow_gui
 ```
@@ -555,7 +555,7 @@ py -3.12 src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\exp
 Then run in MATLAB:
 
 ```matlab
-cd('C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
+cd('<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
 simOut = matlab.run_ml_polynomial_input_swing( ...
     fullfile(pwd, 'data', 'processed', 'ml_torque_polynomial_inputs.mat'), ...
     'GolfSwing3D_Kinetic');

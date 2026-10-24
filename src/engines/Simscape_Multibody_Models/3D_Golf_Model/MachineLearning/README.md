@@ -81,7 +81,7 @@ From the repository root:
 
 ```powershell
 py -3.12 src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\extract_dynamics_dataset.py `
-  --source C:\Users\diete\Repositories\data\TenThousandFiles.parquet `
+  --source <owner-home>\Repositories\data\TenThousandFiles.parquet `
   --manifest src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\column_manifest_inverse_ready.json `
   --output src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\golf_inverse_ready.parquet
 ```
@@ -251,7 +251,7 @@ py -3.12 src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\exp
 Run MATLAB with those coefficients:
 
 ```matlab
-cd('C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
+cd('<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
 addpath(fullfile(pwd, 'matlab'))
 export_start_state_from_input_file( ...
     "downswing", ...
@@ -381,7 +381,7 @@ need to be implemented before a real overnight run.
 Open the MATLAB GUI from the ML folder:
 
 ```matlab
-cd('C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
+cd('<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
 addpath(fullfile(pwd, 'matlab'))
 ml_workflow_gui
 ```
