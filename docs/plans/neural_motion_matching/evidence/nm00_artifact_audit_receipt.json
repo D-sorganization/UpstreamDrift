@@ -1,6 +1,6 @@
 {
   "schema": "neural-artifact-audit/1.0.0",
-  "repo_root": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00",
+  "repo_root": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00",
   "source_revision": "c24afe02e",
   "historical_design_issues": [
     "#4075",
@@ -15,7 +15,7 @@
       "artifact_id": "corpus.ten_thousand_files",
       "kind": "remote_pointer",
       "role": "compact_corpus",
-      "path": "C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet",
+      "path": "<owner-home>\\Repositories\\data\\TenThousandFiles.parquet",
       "exists": false,
       "content_sha256": null,
       "schema_version": null,
@@ -35,9 +35,9 @@
       "disposition": "quarantine",
       "claim_status": "unsupported",
       "blockers": [
-        "absent documented path: C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet"
+        "absent documented path: <owner-home>\\Repositories\\data\\TenThousandFiles.parquet"
       ],
-      "retrieval_instructions": "Locate the host-local Simscape dump historically documented at C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet. If present, compute SHA-256, inspect parquet metadata/row groups with neural_motion.inspect_parquet_bounded, and record generation provenance (model release, seeds, geometry, contact) before any training claim. Do not invent 10k training results when absent.",
+      "retrieval_instructions": "Locate the host-local Simscape dump historically documented at <owner-home>\\Repositories\\data\\TenThousandFiles.parquet. If present, compute SHA-256, inspect parquet metadata/row groups with neural_motion.inspect_parquet_bounded, and record generation provenance (model release, seeds, geometry, contact) before any training claim. Do not invent 10k training results when absent.",
       "notes": "Documented in MachineLearning README / CONTROL_STRATEGY and surrogate/perstep/extract_dataset.py DEFAULT_SOURCE. REVIEW.md confirmed absence on the planning host.",
       "related_issues": ["#4075", "#4076", "#10615"]
     },
@@ -45,7 +45,7 @@
       "artifact_id": "fixture.sweep_synthetic",
       "kind": "fixture",
       "role": "sweep_corpus",
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00\\data\\sweep_synthetic",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00\\data\\sweep_synthetic",
       "exists": true,
       "content_sha256": "295cb93adfae1a38a13082d7c50e055df1fc3a97a80ceec6950b7081665fbedc",
       "schema_version": "0.1.0",
@@ -75,7 +75,7 @@
       "artifact_id": "checkpoint.surrogate_best_default",
       "kind": "checkpoint",
       "role": "forward_surrogate",
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00\\output\\surrogate\\checkpoint_best.pt",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00\\output\\surrogate\\checkpoint_best.pt",
       "exists": false,
       "content_sha256": null,
       "schema_version": null,
@@ -100,7 +100,7 @@
       "disposition": "quarantine",
       "claim_status": "unsupported",
       "blockers": [
-        "absent documented path: C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00\\output\\surrogate\\checkpoint_best.pt"
+        "absent documented path: <owner-home>\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00\\output\\surrogate\\checkpoint_best.pt"
       ],
       "retrieval_instructions": "Default PROJECT_SPEC path output/surrogate/checkpoint_best.pt. If present, load only via motion_matching._checkpoint_artifacts (weights_only=True). Prefer checkpoint_production.pt when both exist. Unsafe pickle payloads require MIGRATE.",
       "notes": "Default training output path; not a qualified artifact.",
@@ -110,7 +110,7 @@
       "artifact_id": "checkpoint.surrogate_production_default",
       "kind": "checkpoint",
       "role": "forward_surrogate",
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00\\output\\surrogate\\checkpoint_production.pt",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00\\output\\surrogate\\checkpoint_production.pt",
       "exists": false,
       "content_sha256": null,
       "schema_version": null,
@@ -135,7 +135,7 @@
       "disposition": "quarantine",
       "claim_status": "unsupported",
       "blockers": [
-        "absent documented path: C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00\\output\\surrogate\\checkpoint_production.pt"
+        "absent documented path: <owner-home>\\Repositories\\Worktrees\\UpstreamDrift-10615-nm00\\output\\surrogate\\checkpoint_production.pt"
       ],
       "retrieval_instructions": "Default production checkpoint path output/surrogate/checkpoint_production.pt. Same safe-load rules as checkpoint_best.",
       "notes": "",
