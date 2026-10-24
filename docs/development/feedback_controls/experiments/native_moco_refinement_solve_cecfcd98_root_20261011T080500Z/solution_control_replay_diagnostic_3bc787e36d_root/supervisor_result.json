@@ -28,7 +28,7 @@
       "time_only_controls.sto": "0975347efabf63f2344348ab1e77e67375e725c8bf010a28c0abdc660fbaf50b"
     },
     "worker_interpreter": {
-      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+      "path": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
       "sha256": "0b471133e110cfb53a061cad528ce8e517d7b9ac41a0a396c39ad795a487fc14"
     }
   },
@@ -61,7 +61,7 @@
       "time_only_controls.sto": "0975347efabf63f2344348ab1e77e67375e725c8bf010a28c0abdc660fbaf50b"
     },
     "worker_interpreter": {
-      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+      "path": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
       "sha256": "0b471133e110cfb53a061cad528ce8e517d7b9ac41a0a396c39ad795a487fc14"
     }
   },

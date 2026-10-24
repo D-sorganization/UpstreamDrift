@@ -29,7 +29,7 @@
       "time_only_controls.sto": "0975347efabf63f2344348ab1e77e67375e725c8bf010a28c0abdc660fbaf50b"
     },
     "worker_interpreter": {
-      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+      "path": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
       "sha256": "0b471133e110cfb53a061cad528ce8e517d7b9ac41a0a396c39ad795a487fc14"
     }
   },
@@ -37,22 +37,22 @@
   "schema": "source-bound-retained-solution-replay-invocation-v1",
   "wall_timeout_seconds": 30,
   "worker_command": [
-    "C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe",
+    "<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe",
     "-m",
     "tests.opensim.native_moco_ladder_worker",
     "--replay-existing",
-    "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
+    "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
     "--output",
-    "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_diagnostic_3bc787e36d_root\\retained_replay\\native_audit"
+    "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_diagnostic_3bc787e36d_root\\retained_replay\\native_audit"
   ],
   "worker_environment": {
     "BLIS_NUM_THREADS": "1",
-    "CASADIPATH": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim",
+    "CASADIPATH": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim",
     "MKL_NUM_THREADS": "1",
     "NUMEXPR_NUM_THREADS": "1",
     "OMP_NUM_THREADS": "1",
     "OPENBLAS_NUM_THREADS": "1",
-    "PYTHONPATH": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164",
+    "PYTHONPATH": "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164",
     "VECLIB_MAXIMUM_THREADS": "1"
   },
   "worker_invocation": {
@@ -65,29 +65,29 @@
     },
     "nonsecret_environment": {
       "BLIS_NUM_THREADS": "1",
-      "CASADIPATH": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim",
+      "CASADIPATH": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim",
       "MKL_NUM_THREADS": "1",
       "NUMEXPR_NUM_THREADS": "1",
       "OMP_NUM_THREADS": "1",
       "OPENBLAS_NUM_THREADS": "1",
-      "PYTHONPATH": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164",
+      "PYTHONPATH": "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164",
       "VECLIB_MAXIMUM_THREADS": "1"
     },
     "optimizer_invoked": false,
     "sampled_rss_soft_threshold_bytes": 1073741824,
     "schema": "native-retained-replay-invocation-v1",
-    "source_run": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
+    "source_run": "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
     "timeout_seconds": 30.0,
     "worker_command": [
-      "C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe",
+      "<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe",
       "-m",
       "tests.opensim.native_moco_ladder_worker",
       "--replay-existing",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
       "--output",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_diagnostic_3bc787e36d_root\\retained_replay\\native_audit"
+      "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_diagnostic_3bc787e36d_root\\retained_replay\\native_audit"
     ],
     "worker_sha256": "3a7f87e691db50531d12bd1228c6a9d402e5ecf198148d6ea89b6e66da5b9381",
-    "working_directory": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164"
+    "working_directory": "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164"
   }
 }
