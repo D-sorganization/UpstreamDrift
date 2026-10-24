@@ -297,7 +297,7 @@ def test_export_never_overwrites_existing_output(research_case, tmp_path):
 @pytest.mark.parametrize(
     "field,value",
     [
-        ("player_name", "C:/Users/private/secret"),
+        ("player_name", "<owner-home>/secret"),
         ("source_time", True),
         ("training_count", 99),
         ("image_points", 1),
