@@ -1,5 +1,4 @@
-# Closes #13619
-
-Nightly cross-engine validation on public repos now routes to GitHub-hosted
-runners (matching ci-standard), so reviewed Drake wheels install from PyPI instead
-of failing on stale self-hosted toolcache indexes.
+---
+issue: 13619
+summary: "Route nightly cross-engine validation to GitHub-hosted runners on public repos (Drake PyPI wheels)."
+---
