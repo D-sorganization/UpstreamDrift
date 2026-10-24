@@ -51,6 +51,8 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+Canonical golfer Drake alignment (#13531, #13450; folded into the grip-lane consolidation): actuator count from `resolve_plant_n_actuators`, grip frames `mid_hands`/`club_head`; verify `tests/engines/drake/test_drake_fit_actuator_alignment_13531.py` and grip-resolution tests.
+
 OpenSim musculoskeletal barbell lifts (OSL, Epic #13038; research record `docs/research/lift_models/lift_models.tex`; state as of 2026-10-20):
 
 - OSL-3 #13041 and OSL-4 #13042: all five lifts complete and unqualified; the bench press landed in #13431, #13532 and #13536 (Hicks force from feet plus bench). Open: the 511.6 N bench pelvis residual and a 4437 N support peak (2.5 times the lifter-plus-bar weight) not yet explained.
@@ -63,6 +65,11 @@ OpenSim musculoskeletal barbell lifts (OSL, Epic #13038; research record `docs/r
 open-fp vertical force plates as measured constraints (Epic #13061; plan and DV-13061 in #13062):
 
 - Contract OF-01 #13065, reader OF-02 #13066, readings at model time OF-05 #13069, vertical-cell observation rows with sensing-plane lever OF-11 #13067, family-wise elimination screen OF-12 #13070. AGPL boundary: files and network only; all data unqualified until DV-13061.
+
+HRG-GS grip styles and hand–club/hand–hand contact (Epic #13297, closed):
+
+- Continuous capsule line-contact law #13457 (#13308); MuJoCo per-row friction gain schedule `friction_secant_gain` #13504 (#13306); order-invariant quadrature #13517 (#13508).
+- Residuals MuJoCo overlap/interlock 0.10 s trail-hand deflection #13547 and OpenSim ten_finger hold net_force #13548: xfails removed by the antagonist preload pads #13555 (tolerances unchanged, 5 % peak / 2 % RMS). Newly exposed `net_moment_com` strict xfails tracked in #13560. Simscape line-contact kernel #13552 (PR #13556) still open: its R2025b receipts need a rerun after this change.
 
 Segmental spine (Epic #12735, ADR-0055):
 

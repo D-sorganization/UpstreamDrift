@@ -12,19 +12,19 @@ The Matched Swing Browser catalogs, filters, and previews certified swing trajec
 
 ## Inputs
 
-| Input | Units | Description |
-| --- | --- | --- |
+| Input           | Units    | Description                                               |
+| --------------- | -------- | --------------------------------------------------------- |
 | Filter Criteria | metadata | Engine selection, player category, club type, swing speed |
-| Search Query | string | Identifier, player name, or experiment tags |
-| Sort Attribute | key | Peak speed, impact consistency, or parity score |
+| Search Query    | string   | Identifier, player name, or experiment tags               |
+| Sort Attribute  | key      | Peak speed, impact consistency, or parity score           |
 
 ## Outputs
 
-| Output | Units | Description |
-| --- | --- | --- |
-| Matched Swing Records | table | Qualified swing trajectories matching search criteria |
-| Summary Metrics | m/s, deg | Club speed, ball speed, smash factor, launch metrics |
-| Artifact Provenance | hash | SHA-256 hashes of models, datasets, and solver receipts |
+| Output                | Units    | Description                                             |
+| --------------------- | -------- | ------------------------------------------------------- |
+| Matched Swing Records | table    | Qualified swing trajectories matching search criteria   |
+| Summary Metrics       | m/s, deg | Club speed, ball speed, smash factor, launch metrics    |
+| Artifact Provenance   | hash     | SHA-256 hashes of models, datasets, and solver receipts |
 
 ## Method
 

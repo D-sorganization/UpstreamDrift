@@ -16,32 +16,32 @@ reproducibility comparison, not a swing-analysis tool.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Engines | checkboxes | `mujoco`, `drake`, `pinocchio`, `pendulum_stub` (`ENGINE_NAMES`). `pendulum_stub` is checked by default. At least one must be checked - this is a stated precondition. |
-| Trials | count | Monte Carlo trials per engine. Range 1 to 500, default 10. |
-| Amplitude | N*m | Standard deviation of the additive Gaussian torque noise. Range 0.0 to 5.0 N*m, default 0.1 N*m. |
-| t_end | s | Total simulated duration. Range 0.1 s to 10.0 s, default 1.5 s. |
-| dt | s | Integration time step, applied to **all** engines so the comparison is fair. Range 0.001 s to 0.1 s, default 0.01 s. |
-| Seed | integer | Not exposed in the GUI. `CrossEngineSimConfig.seed` defaults to 42; trial *i* uses `seed + i`. |
-| `--shape-per-engine` | flag | CLI / constructor option giving each engine a distinct marker shape in the trajectory overlay (colour-blind aid). |
+| Input                | Unit / type | Notes                                                                                                                                                                  |
+| -------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Engines              | checkboxes  | `mujoco`, `drake`, `pinocchio`, `pendulum_stub` (`ENGINE_NAMES`). `pendulum_stub` is checked by default. At least one must be checked - this is a stated precondition. |
+| Trials               | count       | Monte Carlo trials per engine. Range 1 to 500, default 10.                                                                                                             |
+| Amplitude            | N*m         | Standard deviation of the additive Gaussian torque noise. Range 0.0 to 5.0 N*m, default 0.1 N*m.                                                                       |
+| t_end                | s           | Total simulated duration. Range 0.1 s to 10.0 s, default 1.5 s.                                                                                                        |
+| dt                   | s           | Integration time step, applied to **all** engines so the comparison is fair. Range 0.001 s to 0.1 s, default 0.01 s.                                                   |
+| Seed                 | integer     | Not exposed in the GUI. `CrossEngineSimConfig.seed` defaults to 42; trial _i_ uses `seed + i`.                                                                         |
+| `--shape-per-engine` | flag        | CLI / constructor option giving each engine a distinct marker shape in the trajectory overlay (colour-blind aid).                                                      |
 
 Constraints enforced by `CrossEngineSimConfig.__post_init__`: `dt > 0`,
 `t_end > 0`, `t_end > dt`, `noise_amplitude >= 0`, `n_trials > 0`.
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| Robustness score chart | dimensionless, `1 - CV` | Per engine, from the mean per-metric CV across trials. |
-| CV per metric chart | dimensionless | Cross-engine coefficient of variation for each of the three metrics. |
-| Trajectory overlay | rad | Axes labelled `q[0]` and `q[1]`; one marker shape per engine when enabled. |
-| `total_energy_final` mean / std | see Limitations | Computed as `0.5 * dot(v_final, v_final)` - a unit-mass kinetic-energy proxy. |
-| `end_effector_speed_final` mean / std | rad/s or m/s | The L2 norm of the final velocity vector; which unit applies depends on the engine's velocity convention. |
-| `peak_end_effector_speed` mean / std | rad/s or m/s | Same convention caveat. |
-| Backend provenance | `real` or `stub_2dof` | Every result declares whether real physics ran or the deterministic 2-DOF stub was substituted. |
-| Status label | text | `Ready` / progress / errors. |
-| Headless report | log output | `--no-gui` runs the comparison and logs the results. |
+| Output                                | Unit / type             | Notes                                                                                                     |
+| ------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------- |
+| Robustness score chart                | dimensionless, `1 - CV` | Per engine, from the mean per-metric CV across trials.                                                    |
+| CV per metric chart                   | dimensionless           | Cross-engine coefficient of variation for each of the three metrics.                                      |
+| Trajectory overlay                    | rad                     | Axes labelled `q[0]` and `q[1]`; one marker shape per engine when enabled.                                |
+| `total_energy_final` mean / std       | see Limitations         | Computed as `0.5 * dot(v_final, v_final)` - a unit-mass kinetic-energy proxy.                             |
+| `end_effector_speed_final` mean / std | rad/s or m/s            | The L2 norm of the final velocity vector; which unit applies depends on the engine's velocity convention. |
+| `peak_end_effector_speed` mean / std  | rad/s or m/s            | Same convention caveat.                                                                                   |
+| Backend provenance                    | `real` or `stub_2dof`   | Every result declares whether real physics ran or the deterministic 2-DOF stub was substituted.           |
+| Status label                          | text                    | `Ready` / progress / errors.                                                                              |
+| Headless report                       | log output              | `--no-gui` runs the comparison and logs the results.                                                      |
 
 Per-engine velocity and unit conventions are recorded in `_ENGINE_CONVENTIONS`
 in the module: Drake reports generalized velocity `v` with joint angles in rad,
@@ -90,6 +90,7 @@ path for CI, and the GUI path also falls back to headless when PyQt6 is absent.
   [Simulation Backends tile](simulation_backends.md).
 
 ## See Also
+
 - [Simulation Backends tile](simulation_backends.md)
 - [Cross-engine comparison reports](../simulation_backends/cross_engine_comparison.md)
 - [Engine capabilities matrix](../engines/engine_capabilities.md)

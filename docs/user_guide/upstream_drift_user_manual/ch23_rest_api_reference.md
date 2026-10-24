@@ -168,26 +168,26 @@ Execute a synchronous simulation.
 
 **Request model:** `SimulationRequest`
 
-| Field             | Type        | Required | Description                   |
+| Field | Type | Required | Description |
 | ----------------- | ----------- | -------- | ----------------------------- | ---------------------------------- |
-| `engine_type`     | `str`       | Yes      | Physics engine to use         |
-| `model_path`      | `str        | None`    | No                            | Path to model file                 |
-| `duration`        | `float`     | No (1.0) | Simulation duration (seconds) |
-| `timestep`        | `float      | None`    | No                            | Simulation time step               |
-| `initial_state`   | `dict       | None`    | No                            | Initial joint positions/velocities |
-| `control_inputs`  | `list[dict] | None`    | No                            | Control sequence                   |
-| `analysis_config` | `dict       | None`    | No                            | Analysis configuration             |
+| `engine_type` | `str` | Yes | Physics engine to use |
+| `model_path` | `str        | None` | No | Path to model file |
+| `duration` | `float` | No (1.0) | Simulation duration (seconds) |
+| `timestep` | `float      | None` | No | Simulation time step |
+| `initial_state` | `dict       | None` | No | Initial joint positions/velocities |
+| `control_inputs` | `list[dict] | None` | No | Control sequence |
+| `analysis_config` | `dict       | None` | No | Analysis configuration |
 
 **Response model:** `SimulationResponse`
 
-| Field              | Type       | Description                          |
+| Field | Type | Description |
 | ------------------ | ---------- | ------------------------------------ | ----------------------------- |
-| `success`          | `bool`     | Whether simulation completed         |
-| `duration`         | `float`    | Actual simulation duration           |
-| `frames`           | `int`      | Number of simulation frames          |
-| `data`             | `dict`     | States, controls, derived quantities |
-| `analysis_results` | `dict      | None`                                | Analysis results if requested |
-| `export_paths`     | `list[str] | None`                                | Paths to exported files       |
+| `success` | `bool` | Whether simulation completed |
+| `duration` | `float` | Actual simulation duration |
+| `frames` | `int` | Number of simulation frames |
+| `data` | `dict` | States, controls, derived quantities |
+| `analysis_results` | `dict      | None` | Analysis results if requested |
+| `export_paths` | `list[str] | None` | Paths to exported files |
 
 **Error responses:**
 
@@ -296,13 +296,13 @@ Run biomechanical analysis on simulation data.
 
 **Response model:** `AnalysisResponse`
 
-| Field            | Type       | Description                        |
+| Field | Type | Description |
 | ---------------- | ---------- | ---------------------------------- | ---------------------------------- |
-| `analysis_type`  | `str`      | Type of analysis performed         |
-| `success`        | `bool`     | Whether analysis completed         |
-| `results`        | `dict`     | Analysis results (metrics, values) |
-| `visualizations` | `list[str] | None`                              | Generated visualisation file paths |
-| `export_path`    | `str       | None`                              | Path to exported results           |
+| `analysis_type` | `str` | Type of analysis performed |
+| `success` | `bool` | Whether analysis completed |
+| `results` | `dict` | Analysis results (metrics, values) |
+| `visualizations` | `list[str] | None` | Generated visualisation file paths |
+| `export_path` | `str       | None` | Path to exported results |
 
 ### 23.2.6 Video Pose Estimation
 
@@ -312,14 +312,14 @@ Process a video file for pose estimation.
 
 **Request model:** `VideoAnalysisRequest`
 
-| Field                       | Type    | Default       | Description                  |
+| Field | Type | Default | Description |
 | --------------------------- | ------- | ------------- | ---------------------------- | ----------------------- |
-| `estimator_type`            | `str`   | `"mediapipe"` | Pose estimator backend       |
-| `min_confidence`            | `float` | 0.5           | Minimum detection confidence |
-| `enable_temporal_smoothing` | `bool`  | `True`        | Smooth pose over time        |
-| `max_frames`                | `int    | None`         | `None`                       | Limit frames to process |
-| `export_keypoints`          | `bool`  | `True`        | Include raw keypoints        |
-| `export_joint_angles`       | `bool`  | `True`        | Compute joint angles         |
+| `estimator_type` | `str` | `"mediapipe"` | Pose estimator backend |
+| `min_confidence` | `float` | 0.5 | Minimum detection confidence |
+| `enable_temporal_smoothing` | `bool` | `True` | Smooth pose over time |
+| `max_frames` | `int    | None` | `None` | Limit frames to process |
+| `export_keypoints` | `bool` | `True` | Include raw keypoints |
+| `export_joint_angles` | `bool` | `True` | Compute joint angles |
 
 **Response model:** `VideoAnalysisResponse`
 

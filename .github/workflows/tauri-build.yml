@@ -3,6 +3,7 @@
 # =============================================================================
 # Builds the UpstreamDrift desktop app using Tauri 2
 # Runs on: Pull requests (check only), Releases (build artifacts)
+# Generated capability-atlas output is excluded from CI triggers.
 #
 # Prerequisites:
 # - Rust toolchain
@@ -17,6 +18,7 @@ on:
     branches: [main]
     paths:
       - "ui/**"
+      - "!ui/public/capability-atlas/**"
       - ".github/workflows/tauri-build.yml"
       - "src-tauri/**"
       - "**/Cargo.toml"
@@ -27,6 +29,7 @@ on:
   pull_request:
     paths:
       - "ui/**"
+      - "!ui/public/capability-atlas/**"
       - ".github/workflows/tauri-build.yml"
       - "src-tauri/**"
       - "**/Cargo.toml"
@@ -122,6 +125,10 @@ jobs:
       - name: Cache Rust target (check)
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
+          # Self-hosted runners share ~/.cargo when CARGO_HOME is unset; cache-bin
+          # makes the post step delete every regular file it saw in $CARGO_HOME/bin,
+          # i.e. the host rustup binary (cargo/clippy proxies are symlinks to it).
+          cache-bin: "false"
           workspaces: ui/src-tauri -> target
           key: ud-tauri-check-${{ runner.name }}
 
@@ -260,6 +267,10 @@ jobs:
         if: matrix.os != 'windows' || env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
+          # Self-hosted runners share ~/.cargo when CARGO_HOME is unset; cache-bin
+          # makes the post step delete every regular file it saw in $CARGO_HOME/bin,
+          # i.e. the host rustup binary (cargo/clippy proxies are symlinks to it).
+          cache-bin: "false"
           workspaces: ui/src-tauri -> target
           key: ud-tauri-build-${{ runner.name }}-${{ matrix.target }}
 

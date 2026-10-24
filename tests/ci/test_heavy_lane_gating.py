@@ -45,6 +45,12 @@ def _only_full_label_events_start(condition: str) -> None:
     assert f"github.event.label.name == '{FULL_LABEL}'" in condition
 
 
+def _only_opensim_label_events_start_classifier(condition: str) -> None:
+    label = "ci:opensim"
+    assert "github.event.action != 'labeled'" in condition
+    assert f"github.event.label.name == '{label}'" in condition
+
+
 @pytest.mark.parametrize(
     "name",
     [
@@ -159,7 +165,9 @@ class TestLeaderboardPublishGating:
         assert concurrency["cancel-in-progress"] is False
         group = concurrency["group"]
         assert "github.event.action" not in group
-        assert "format('{0}-{1}', github.event_name, github.ref)" in group
+        assert "github.event_name" in group
+        assert "github.ref" in group
+        assert "cross-engine-leaderboard-publish" in group
 
     def test_not_a_required_branch_protection_context(self) -> None:
         if not self.REQUIRED_CHECKS.is_file():
@@ -231,6 +239,10 @@ class TestOpenSimMainRunsComplete:
         assert (
             "needs.classify-changes.outputs.run == 'true'" in jobs["pick-runner"]["if"]
         )
+
+    def test_unrelated_label_events_skip_classifier(self) -> None:
+        condition = _load(self.NAME)["jobs"]["classify-changes"]["if"]
+        _only_opensim_label_events_start_classifier(condition)
 
     def test_post_merge_nightly_and_dispatch_triggers_remain(self) -> None:
         on = _triggers(_load(self.NAME))

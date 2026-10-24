@@ -649,6 +649,22 @@ class TestCIEnvironmentCompatibility:
         assert scripts["tauri"] == "tauri"
         assert scripts["tauri:build"] == "tauri build"
 
+    def test_tauri_path_filters_exclude_generated_capability_atlas(self) -> None:
+        """Generated capability-atlas output should not run the Tauri workflow."""
+        workflow_path = REPO_ROOT / ".github" / "workflows" / "tauri-build.yml"
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        workflow = yaml.safe_load(workflow_text)
+
+        for event in ("push", "pull_request"):
+            paths = workflow[True][event]["paths"]
+            assert "ui/**" in paths
+            assert "!ui/public/capability-atlas/**" in paths
+            assert paths.index("ui/**") < paths.index("!ui/public/capability-atlas/**")
+
+        assert "Generated capability-atlas output is excluded from CI triggers" in (
+            workflow_text
+        )
+
     def test_tauri_rust_and_npm_versions_share_minor(self) -> None:
         """Tauri app builds require Rust tauri and npm package parity."""
         package_lock = json.loads(

@@ -40,13 +40,13 @@ whose `EXTERNAL_TOOLS` registry contains keys for `video_analyzer`,
 
 What the two tiles differ in is metadata only:
 
-| Field | `data_processor` | `tools_calculator_hub` |
-| --- | --- | --- |
-| `status` | `ready` | `external` |
-| `maturity` | `ready` | `beta` |
-| `surfaces` | `pyqt`, `web` | `web` |
-| `web_route` | `/tools/data-processor` | `/tools/calculators` |
-| `order` | 15 | 44 |
+| Field          | `data_processor`                                                                                | `tools_calculator_hub`                     |
+| -------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `status`       | `ready`                                                                                         | `external`                                 |
+| `maturity`     | `ready`                                                                                         | `beta`                                     |
+| `surfaces`     | `pyqt`, `web`                                                                                   | `web`                                      |
+| `web_route`    | `/tools/data-processor`                                                                         | `/tools/calculators`                       |
+| `order`        | 15                                                                                              | 44                                         |
 | `capabilities` | data_import, signal_processing, time_series, filtering, statistics, export, process_calculators | process_calculators, engineering, analysis |
 
 The one substantive overlap is the `process_calculators` capability,
@@ -100,6 +100,7 @@ matches only in registry data, generated artifacts, docs, and test
 allow-lists - never in implementation code.
 
 ## See Also
+
 - [Data Processor](data_processor.md) - shares this tile's entry point
 - [Data Explorer](data_explorer.md)
 - [Feature parity matrix](../development/feature_parity_matrix.md)

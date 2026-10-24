@@ -17,9 +17,9 @@ geometry and paths handed to it, and computes no physics of its own.
 
 Interactive controls on the standalone window:
 
-| Control     | Values                                          |
-| ----------- | ----------------------------------------------- |
-| Environment | Driving Range, Par 3 (150y), Par 4 (400y)       |
+| Control     | Values                                    |
+| ----------- | ----------------------------------------- |
+| Environment | Driving Range, Par 3 (150y), Par 4 (400y) |
 
 Programmatic inputs, for callers embedding the renderer:
 
@@ -84,6 +84,7 @@ caller supplies them.
   saying so and renders nothing.
 
 ## See Also
+
 - [Terrain Engine](terrain_engine.md) - real surface geometry and material queries
 - [Ball Flight Simulator](ball_flight_simulator.md) - produces trajectories worth overlaying
 - [Shot Tracer](shot_tracer.md)

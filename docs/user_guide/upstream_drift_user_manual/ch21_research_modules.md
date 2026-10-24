@@ -80,16 +80,16 @@ If the terminal cost matrix $P$ is `None`, the terminal cost is zero.
 
 The `CostFunction` fields are:
 
-| Field   | Type                 | Description                |
+| Field | Type | Description |
 | ------- | -------------------- | -------------------------- | ----------------------------------------- |
-| `Q`     | `NDArray (n_x, n_x)` | State cost weight matrix   |
-| `R`     | `NDArray (n_u, n_u)` | Control cost weight matrix |
-| `P`     | `NDArray (n_x, n_x)  | None`                      | Terminal cost weight matrix               |
-| `q`     | `NDArray (n_x,)      | None`                      | Linear state cost (optional)              |
-| `r`     | `NDArray (n_u,)      | None`                      | Linear control cost (optional)            |
-| `p`     | `NDArray (n_x,)      | None`                      | Linear terminal cost (optional)           |
-| `x_ref` | `NDArray             | None`                      | Reference state (1-D or 2-D trajectory)   |
-| `u_ref` | `NDArray             | None`                      | Reference control (1-D or 2-D trajectory) |
+| `Q` | `NDArray (n_x, n_x)` | State cost weight matrix |
+| `R` | `NDArray (n_u, n_u)` | Control cost weight matrix |
+| `P` | `NDArray (n_x, n_x)  | None` | Terminal cost weight matrix |
+| `q` | `NDArray (n_x,)      | None` | Linear state cost (optional) |
+| `r` | `NDArray (n_u,)      | None` | Linear control cost (optional) |
+| `p` | `NDArray (n_x,)      | None` | Linear terminal cost (optional) |
+| `x_ref` | `NDArray             | None` | Reference state (1-D or 2-D trajectory) |
+| `u_ref` | `NDArray             | None` | Reference control (1-D or 2-D trajectory) |
 
 When `x_ref` is two-dimensional (shape `(T, n_x)`), the reference at
 step $k$ is `x_ref[k]`; if $k$ exceeds the length the last entry is
@@ -113,13 +113,13 @@ $$\text{lb} \leq A\, x + B\, u \leq \text{ub}$$
 
 and are managed through the `Constraint` dataclass:
 
-| Field             | Type     | Description                          |
+| Field | Type | Description |
 | ----------------- | -------- | ------------------------------------ | -------------------------- |
-| `A`               | `NDArray | None`                                | State coefficient matrix   |
-| `B`               | `NDArray | None`                                | Control coefficient matrix |
-| `lb`              | `NDArray | None`                                | Lower bound vector         |
-| `ub`              | `NDArray | None`                                | Upper bound vector         |
-| `constraint_type` | `str`    | `"state"`, `"control"`, or `"mixed"` |
+| `A` | `NDArray | None` | State coefficient matrix |
+| `B` | `NDArray | None` | Control coefficient matrix |
+| `lb` | `NDArray | None` | Lower bound vector |
+| `ub` | `NDArray | None` | Upper bound vector |
+| `constraint_type` | `str` | `"state"`, `"control"`, or `"mixed"` |
 
 Setting only `A` with `lb` and `ub` yields a pure state constraint;
 setting only `B` yields a pure control constraint. The controller
@@ -493,14 +493,14 @@ cables, and cloth. All classes inherit from the abstract base class
 The `MaterialProperties` dataclass specifies physical material
 parameters:
 
-| Field               | Type    | Default | Description                    |
+| Field | Type | Default | Description |
 | ------------------- | ------- | ------- | ------------------------------ | ------------------------------------ |
-| `youngs_modulus`    | `float` | $10^6$  | Young's modulus $E$ in Pascals |
-| `poisson_ratio`     | `float` | 0.3     | Poisson's ratio $\nu$          |
-| `density`           | `float` | 1000.0  | Material density in kg/m$^3$   |
-| `damping`           | `float` | 0.01    | Viscous damping coefficient    |
-| `bending_stiffness` | `float  | None`   | `None`                         | Bending stiffness (for shells/cloth) |
-| `shear_stiffness`   | `float  | None`   | `None`                         | Shear stiffness (for cloth)          |
+| `youngs_modulus` | `float` | $10^6$ | Young's modulus $E$ in Pascals |
+| `poisson_ratio` | `float` | 0.3 | Poisson's ratio $\nu$ |
+| `density` | `float` | 1000.0 | Material density in kg/m$^3$ |
+| `damping` | `float` | 0.01 | Viscous damping coefficient |
+| `bending_stiffness` | `float  | None` | `None` | Bending stiffness (for shells/cloth) |
+| `shear_stiffness` | `float  | None` | `None` | Shear stiffness (for cloth) |
 
 Derived elastic moduli are available as computed properties:
 
@@ -661,17 +661,17 @@ robots within a shared simulation environment.
 Tasks are the atomic unit of work assigned to robots. The `Task`
 dataclass carries:
 
-| Field                | Type          | Description                                        |
+| Field | Type | Description |
 | -------------------- | ------------- | -------------------------------------------------- | ---------------------------------- |
-| `task_id`            | `str`         | Unique identifier                                  |
-| `task_type`          | `TaskType`    | MOVE_TO, PICK, PLACE, MANIPULATE, INSPECT, or WAIT |
-| `target_position`    | `NDArray (3,) | None`                                              | Spatial target for motion tasks    |
-| `target_object`      | `str          | None`                                              | Object identifier for manipulation |
-| `priority`           | `int`         | Higher values = higher priority                    |
-| `status`             | `TaskStatus`  | PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, FAILED  |
-| `assigned_robot`     | `str          | None`                                              | Robot currently assigned           |
-| `dependencies`       | `list[str]`   | Task IDs that must complete first                  |
-| `estimated_duration` | `float`       | Expected completion time (seconds)                 |
+| `task_id` | `str` | Unique identifier |
+| `task_type` | `TaskType` | MOVE_TO, PICK, PLACE, MANIPULATE, INSPECT, or WAIT |
+| `target_position` | `NDArray (3,) | None` | Spatial target for motion tasks |
+| `target_object` | `str          | None` | Object identifier for manipulation |
+| `priority` | `int` | Higher values = higher priority |
+| `status` | `TaskStatus` | PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, FAILED |
+| `assigned_robot` | `str          | None` | Robot currently assigned |
+| `dependencies` | `list[str]` | Task IDs that must complete first |
+| `estimated_duration` | `float` | Expected completion time (seconds) |
 
 The `is_ready(completed_tasks)` method checks whether all
 `dependencies` have been satisfied.

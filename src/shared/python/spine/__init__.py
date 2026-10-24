@@ -26,6 +26,7 @@ from src.shared.python.spine.coupling import (
 from src.shared.python.spine.coupling_data import (
     available_laws,
     coupling_law,
+    load_coupling_law,
     load_coupling_laws,
 )
 from src.shared.python.spine.distribution import (
@@ -117,6 +118,7 @@ __all__ = [
     "context_bands",
     "contribution_remainder",
     "coupling_law",
+    "load_coupling_law",
     "distribute",
     "distribute_series",
     "distribute_series_detailed",

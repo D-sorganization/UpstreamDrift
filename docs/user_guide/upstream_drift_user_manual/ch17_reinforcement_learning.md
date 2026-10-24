@@ -295,15 +295,15 @@ reward_config = RewardConfig(
 
 **Fields and defaults:**
 
-| Field                | Type                   | Default               | Description                      |
+| Field | Type | Default | Description |
 | -------------------- | ---------------------- | --------------------- | -------------------------------- | ------------------------------- |
-| `task_type`          | `TaskType`             | `TaskType.LOCOMOTION` | Task category.                   |
-| `target_velocity`    | `NDArray[np.floating]` | `[1.0, 0.0, 0.0]`     | Target velocity (locomotion).    |
-| `target_position`    | `NDArray[np.floating]  | None`                 | `None`                           | Target position (manipulation). |
-| `target_orientation` | `NDArray[np.floating]  | None`                 | `None`                           | Target orientation quaternion.  |
-| `max_episode_steps`  | `int`                  | `1000`                | Maximum timesteps per episode.   |
-| `early_termination`  | `bool`                 | `True`                | Terminate on failure conditions. |
-| `success_threshold`  | `float`                | `0.05`                | Error threshold for success.     |
+| `task_type` | `TaskType` | `TaskType.LOCOMOTION` | Task category. |
+| `target_velocity` | `NDArray[np.floating]` | `[1.0, 0.0, 0.0]` | Target velocity (locomotion). |
+| `target_position` | `NDArray[np.floating]  | None` | `None` | Target position (manipulation). |
+| `target_orientation` | `NDArray[np.floating]  | None` | `None` | Target orientation quaternion. |
+| `max_episode_steps` | `int` | `1000` | Maximum timesteps per episode. |
+| `early_termination` | `bool` | `True` | Terminate on failure conditions. |
+| `success_threshold` | `float` | `0.05` | Error threshold for success. |
 
 The `is_success(error)` method returns `True` when the task error falls below
 `success_threshold`, providing a binary success metric for evaluation.
@@ -424,14 +424,14 @@ The `reset` method:
 
 Subclasses must implement six abstract methods:
 
-| Method               | Signature                    | Purpose                               |
+| Method | Signature | Purpose |
 | -------------------- | ---------------------------- | ------------------------------------- | --------------------------------------- |
-| `_apply_action`      | `(action: NDArray) -> None`  | Write commands to the physics engine. |
-| `_step_simulation`   | `() -> None`                 | Advance the simulation forward.       |
-| `_get_observation`   | `() -> NDArray`              | Read and assemble the observation.    |
-| `_compute_reward`    | `(action: NDArray) -> float` | Compute the scalar reward.            |
-| `_check_termination` | `() -> bool`                 | Check for early termination.          |
-| `_reset_simulation`  | `(options: dict              | None) -> None`                        | Reset the physics to the initial state. |
+| `_apply_action` | `(action: NDArray) -> None` | Write commands to the physics engine. |
+| `_step_simulation` | `() -> None` | Advance the simulation forward. |
+| `_get_observation` | `() -> NDArray` | Read and assemble the observation. |
+| `_compute_reward` | `(action: NDArray) -> float` | Compute the scalar reward. |
+| `_check_termination` | `() -> bool` | Check for early termination. |
+| `_reset_simulation` | `(options: dict              | None) -> None` | Reset the physics to the initial state. |
 
 Additionally, two optional hook methods can be overridden:
 
@@ -610,10 +610,10 @@ robot must reach for an object, grasp it, and place it at a target location.
 
 **Constructor parameters (beyond the base class):**
 
-| Parameter            | Type     | Default | Description       |
+| Parameter | Type | Default | Description |
 | -------------------- | -------- | ------- | ----------------- | -------------------------- |
-| `object_initial_pos` | `NDArray | None`   | `[0.5, 0.0, 0.1]` | Initial object position.   |
-| `target_pos`         | `NDArray | None`   | `[0.5, 0.3, 0.1]` | Target placement position. |
+| `object_initial_pos` | `NDArray | None` | `[0.5, 0.0, 0.1]` | Initial object position. |
+| `target_pos` | `NDArray | None` | `[0.5, 0.3, 0.1]` | Target placement position. |
 
 The environment uses `TaskType.MANIPULATION`, `max_episode_steps=500`,
 `early_termination=False`, and `success_threshold=0.05`.

@@ -2741,6 +2741,29 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13666 | Drake samples the canonical mid_hands/club_head frames like Pinocchio; legacy grip names are aliases only and a missing frame fails closed instead of falling back to right_hand or the shaft; Align Drake autodiff fit theta with canonical URDF actuator count; Hand off the HRG-GS grip parity residuals: AGENT_HANDOFF entry for epic #13297 and xfail reasons pointing at the open tracking issues #13547 (MuJoCo deflection) and #13548 (OpenSim ten_finger); Grip contact: add antagonist pads opposite the heel, trigger and ten-finger little-finger pads so the neutral-pose closure preload exerts zero net force and moment on the club |
+| 2026-10-24 | #13518 | CI: set rust-cache cache-bin false so post steps stop deleting the shared host rustup binary (Refs Repository_Management#2138) |
+| 2026-10-24 | #13665 | Audit near-zero-mean CV callers: return NaN with reason in cross-engine runner and pendulum variability summary; Add load_coupling_law require_verified gate for SPN-3 cited coupling data; Pull club sole to ground at address IK; record sole height in calibrated receipt; Lock canonical driver seeds closure and weight-fraction gates in CI (#13109) |
+| 2026-10-24 | #13674 | Bump transitive undici to 8.12.3 in ui/package-lock.json to clear HIGH npm audit advisories that ejected every merge-queue entry |
+| 2026-10-24 | #13659 | Add .oss-scanner security-scan contract (project.yaml, offline audit Dockerfile, threat model) for the fleet scanner pilot |
+| 2026-10-24 | #13668 | Skip redundant OpenSim CI runs when unrelated PR labels are applied |
+| 2026-10-24 | #13671 | Bump ui lockfile (zod 4.6.7) to clear GHSA-mrhx-c7xc-m3w5 so the UI Security Audit and merge queue pass |
+| 2026-10-24 | #13425 | Model explorer headless export: support NPZ trajectories with 'q', document and verify results replay for anthro driver mjx_package with stiff weld constraint |
+| 2026-10-23 | #13661 | Critique physical grip-contact calibration and validation evidence |
+| 2026-10-23 | #13649 | Characterize the existing KnowledgePack search contract before provider synchronization. |
+| 2026-10-23 | #13652 | Exclude generated capability-atlas output from Tauri workflow path triggers |
+| 2026-10-23 | #13607 | Add loop null-space interpretation help and salvage tracking |
+| 2026-10-23 | #13651 | Clear deleted ThemeManager main-window wrappers during test cleanup |
+| 2026-10-23 | #13643 | Defer generated collation branch updates when the canonical queue preflight cannot verify editability |
+| 2026-10-23 | #13647 | Remove stale CI Requires OpenSim lane quarantine (squat JR + native muscle-effort tests pass for real since #13615) |
+| 2026-10-22 | #13637 | Route OpenSim classification and skip reporting through the existing reversible public hosted policy; fail closed on diff errors while preserving real engine Docker validation. |
+| 2026-10-22 | #13635 | Use Python 3.12 for the reviewed nightly cross-engine dependencies.; Prevent duplicate Xvfb startup in the motion-matching smoke command. |
+| 2026-10-22 | #13614 | Quarantine CI Requires OpenSim lane (RM #2252) until #13564 fix lands. |
+| 2026-10-22 | #13615 | Restore CI Requires OpenSim: squat JR kinematics revision 6 and native muscle-effort allocation. |
+| 2026-10-22 | #13631 | Use curl for actionlint bootstrap script download (Semgrep merge_group) |
+| 2026-10-22 | #13616 | Gate workflow edits with actionlint; fix cross-engine leaderboard publish concurrency expression |
+| 2026-10-22 | #13628 | Schedule nightly development log archiver workflow and noop contract test |
+| 2026-10-22 | #13621 | Reconcile development log against GitHub PR truth and archive terminal rows for fleet policy gate |
 | 2026-10-22 | #13617 | Remove @dieterolson from CODEOWNERS; keep team-based ownership |
 | 2026-10-21 | #13612 | Add fast PR/push and full merge-queue/scheduled tiers with a fail-closed required aggregate |
 | 2026-10-21 | #13599 | Repair CI lint, trusted governed policy consumption, publication detection coverage, and pre-push failure guidance |
