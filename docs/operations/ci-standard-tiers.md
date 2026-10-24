@@ -71,8 +71,8 @@ python3 -m pytest -o addopts= --confcutdir=tests/ci \
 
 These are executable software checks, not live GitHub scheduler evidence.
 The first actual merge-group canary must demonstrate that a failing full-tier
-child prevents approval. No intentional failing canary, live acceptance or
-post-deployment speedup is claimed here. #13577 remains open for that evidence.
+child prevents approval. Post-deployment P90 observation (seven UTC days, 15-minute
+provisional target) is operational follow-up after merge and is not a merge gate.
 
 ## Observation Window and Rollback
 
