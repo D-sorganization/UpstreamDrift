@@ -453,7 +453,7 @@ def run_remote_engine_replay(
 ) -> tuple[EngineReplayOutcome, Path, Path]:
     """Execute replay remotely on deskcomputer WSL Ubuntu-22.04 and fetch back artifacts."""
     logger.info("Executing remote replay for %s on deskcomputer WSL...", engine.upper())
-    remote_base = "/home/dieterolson/fb6_parity_run"
+    remote_base = "<owner-home>/fb6_parity_run"
     _sync_to_remote(remote_base)
 
     remote_out = f"{remote_base}/docs/development/full_body_models/evidence/fb6_parity"

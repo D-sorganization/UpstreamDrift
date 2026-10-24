@@ -362,7 +362,7 @@ and flags.
 Focused local validation: Ruff passes and 17 tests pass; two optional runtime
 tests skip in the local Python 3.13 environment because MyoSuite/Drake are
 absent. The actual MyoSuite runtime test passed in the isolated, task-owned
-Python 3.12 environment on DeskComputer (`MyoSuite 3.0.0`, `myo-sim 0.2.3`,
+Python 3.12 environment on <host> (`MyoSuite 3.0.0`, `myo-sim 0.2.3`,
 Gymnasium 1.2.3, MuJoCo 3.6.0): 1 passed with two overlay-only unknown pytest
 mark warnings. The fixture is the public elbow pose demo and does not qualify a
 production golf model. F01's required MyoSuite driver and iron rows remain
@@ -371,7 +371,7 @@ Gym four-tuple path was not changed because this provider avoids `env.step()`.
 The wrapper-state refactor adds one contract test; its focused bundle-contract
 and runtime suite passes 7 tests with one optional runtime skip locally.
 
-The callback/clock/full-state hardening is newer than the cited DeskComputer
+The callback/clock/full-state hardening is newer than the cited <host>
 runtime execution. Synthetic MuJoCo regressions and local affected tests cover
 the new checks; native MyoSuite revalidation of this exact source revision is
 pending. Keep the prior runtime receipt bound to its executed source and do not

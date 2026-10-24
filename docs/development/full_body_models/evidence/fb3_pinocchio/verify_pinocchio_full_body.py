@@ -8,7 +8,7 @@ Tests all four Done Gates:
 Plus forward accelerations combining contact forces and weld loop-closure dynamics.
 
 If real Pinocchio is not available in the local environment, automatically executes
-on ControlTower via SSH and saves the resulting receipt.
+on <host> via SSH and saves the resulting receipt.
 """
 
 from __future__ import annotations
@@ -62,19 +62,19 @@ def has_real_pinocchio() -> bool:
 
 
 def run_remote_controltower() -> dict[str, Any]:
-    """Execute verification remotely on ControlTower and return the receipt."""
+    """Execute verification remotely on <host> and return the receipt."""
     sys.stdout.write(
-        "Real Pinocchio not available locally. Dispatching to ControlTower...\n"
+        "Real Pinocchio not available locally. Dispatching to <host>...\n"
     )
     sys.stdout.flush()
-    # Sync files to ControlTower test directory
+    # Sync files to <host> test directory
     script = (
-        b"cd /home/dieterolson/fb3_pinocchio_test\n"
-        b"/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python "
+        b"cd <owner-home>/fb3_pinocchio_test\n"
+        b"<owner-home>/simscape-pinocchio-9967/.venv/bin/python "
         b"docs/development/full_body_models/evidence/fb3_pinocchio/verify_pinocchio_full_body.py --local\n"
     )
     res = subprocess.run(
-        ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "bash"],
+        ["ssh", "controltower", "wsl", "-d", "<host>-Runner", "bash"],
         input=script,
         capture_output=True,
     )
@@ -87,9 +87,9 @@ def run_remote_controltower() -> dict[str, Any]:
         )
 
     # Fetch receipt from remote
-    fetch_cmd = b"cat /home/dieterolson/fb3_pinocchio_test/docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json\n"
+    fetch_cmd = b"cat <owner-home>/fb3_pinocchio_test/docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json\n"
     res_fetch = subprocess.run(
-        ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "bash"],
+        ["ssh", "controltower", "wsl", "-d", "<host>-Runner", "bash"],
         input=fetch_cmd,
         capture_output=True,
     )

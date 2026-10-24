@@ -5,7 +5,7 @@ from it and takes a pose as ``{coordinate name: value}`` in the document's
 ``coordinate_order`` (``frame_poses`` on each adapter), so a pose translates
 between engines by name, never by index. This script takes the fitted
 address (frame 0 of the ground-support IK trajectory), evaluates every spec
-frame in MuJoCo locally and in Drake and Pinocchio on ControlTower (their
+frame in MuJoCo locally and in Drake and Pinocchio on <host> (their
 environments live there, as for FB-3), and writes ``receipt_<run>.json`` with the
 largest position and rotation deviation per engine. Gate: positions within 1e-5 m
 and rotations within 2e-5 rad of MuJoCo (URDF text precision), plus the masses and
@@ -36,10 +36,10 @@ RUN = "anthro_driver"  # overridden by --run (a ground-support output folder)
 SPEC = GROUND_SUPPORT / RUN / "full_body_spec_hipcal_scaled.json"
 TRAJECTORY = GROUND_SUPPORT / RUN / "ik_trajectory.npz"
 POSE = HERE / "address_pose.json"
-REMOTE_BASE = "/home/dieterolson/fb3_pinocchio_test"
+REMOTE_BASE = "<owner-home>/fb3_pinocchio_test"
 REMOTE_PYTHON = {
-    "drake": "/home/dieterolson/drake-native-10022/bin/python",
-    "pinocchio": "/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python",
+    "drake": "<owner-home>/drake-native-10022/bin/python",
+    "pinocchio": "<owner-home>/simscape-pinocchio-9967/.venv/bin/python",
 }
 SYNC = [
     "src/engines/physics_engines/drake/python/full_body_model.py",
@@ -112,7 +112,7 @@ def run_remote(engine: str) -> dict[str, list]:
                 "controltower",
                 "wsl",
                 "-d",
-                "ControlTower-Runner",
+                "<host>-Runner",
                 "mkdir",
                 "-p",
                 str(Path(remote).parent.as_posix()),
@@ -122,7 +122,7 @@ def run_remote(engine: str) -> dict[str, list]:
         if mk.returncode != 0:
             raise RuntimeError(mk.stderr.decode(errors="ignore"))
         tee = subprocess.run(
-            ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "tee", remote],
+            ["ssh", "controltower", "wsl", "-d", "<host>-Runner", "tee", remote],
             input=local.read_bytes(),
             capture_output=True,
         )
@@ -134,7 +134,7 @@ def run_remote(engine: str) -> dict[str, list]:
         f"--engine {engine} --local\n"
     ).encode()
     res = subprocess.run(
-        ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "bash"],
+        ["ssh", "controltower", "wsl", "-d", "<host>-Runner", "bash"],
         input=script,
         capture_output=True,
     )

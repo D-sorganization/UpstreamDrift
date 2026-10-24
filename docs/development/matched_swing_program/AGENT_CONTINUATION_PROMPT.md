@@ -13,14 +13,14 @@ Read:
 - [Raw Timestamped Evidence](evidence/continuation_20260918/matching-handoff-snapshot.json).
 - [Source and Recovery Manifest](evidence/continuation_20260918/matching-source-manifest.json).
 
-First deliverable: an evidence-only status update. Connect to ControlTower,
+First deliverable: an evidence-only status update. Connect to <host>,
 inspect the existing job and outputs, retrieve newly completed results into a
 new evidence directory, verify hashes/coverage, and report all failed/missing
 gates. Keep the current result even if rejected. No parameter sweep is required.
 
 For Windows SSH quoting, write an owned LF script, copy it with scp to
 `controltower:C:/Users/diete/`, then execute it through
-`ssh controltower "wsl -d ControlTower-Runner -- bash /mnt/c/Users/diete/NAME.sh"`.
+`ssh controltower "wsl -d <host>-Runner -- bash /mnt/c/Users/diete/NAME.sh"`.
 Use a unique NAME and script containing only the selected read-only inspection
 commands. Native paths and process IDs in the snapshot are historical; verify
 current state. Check processes, file timestamps and receipts, not just a quiet

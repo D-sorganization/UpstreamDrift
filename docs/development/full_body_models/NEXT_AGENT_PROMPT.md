@@ -39,8 +39,8 @@ Order of work and done gates:
 2. (reserved)
 3. FB-3 (#10065/#10066/#10067): per-engine builders and adapters; upper-body
    slice parity to 1e-12; contact parity on the harness; same-input replay
-   against Pinocchio with convergence. Run real-engine tests on ControlTower
-   (Pinocchio venv /home/dieterolson/simscape-pinocchio-9967, Drake runtime
+   against Pinocchio with convergence. Run real-engine tests on <host>
+   (Pinocchio venv <owner-home>/simscape-pinocchio-9967, Drake runtime
    per the Drake handoff) or locally for MuJoCo 3.3.4; archive receipts.
 4. FB-4 (#10068): per-engine marker calibration and IK using the shared
    alternating algorithm; offsets bound to the spec hash; per-frame RMS;
@@ -48,7 +48,7 @@ Order of work and done gates:
 5. FB-5 (#10069, Claude): full-body two-window shooting fit with contact.
 6. FB-6 (#10070): cross-engine parity and visual review.
 
-Compute conventions: ssh alias controltower, WSL distro ControlTower-Runner,
+Compute conventions: ssh alias controltower, WSL distro <host>-Runner,
 launch long jobs with systemd-run --user through a launcher that records pid
 and exit code (see the native lane's run_job.py pattern); ssh-spawned
 background processes die at logout. One BLAS/OpenMP thread for comparable

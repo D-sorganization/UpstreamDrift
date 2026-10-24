@@ -59,7 +59,7 @@ from src.shared.python.grip_contact import (  # noqa: E402
 ROOT = Path(__file__).resolve().parents[5]
 MODELS = ROOT / "docs/development/full_body_models"
 HERE = Path(__file__).resolve().parent
-DEFAULT_OUT = Path("/home/dieterolson/Videos/Parity Audit/golfer_realism/grip_kinetics")
+DEFAULT_OUT = Path("<owner-home>/Videos/Parity Audit/golfer_realism/grip_kinetics")
 GRAVITY = 9.80665
 
 

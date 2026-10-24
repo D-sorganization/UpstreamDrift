@@ -11,7 +11,7 @@ Chapter30 is canonical design authority; code lives in scripts/matlab.
 
 ## Actual Native Validation
 
-DeskComputer, explicit MATLAB R2025b Update5, batch exit0. A physical mass-spring-
+<host>, explicit MATLAB R2025b Update5, batch exit0. A physical mass-spring-
 damper network and Unit Delay run uninterrupted and from a saved/reloaded native
 ModelOperatingPoint at0.2s to0.4s. Position error0m over366 post-split samples;
 discrete error0 over21; actual executed injection error0N. Native clock remains

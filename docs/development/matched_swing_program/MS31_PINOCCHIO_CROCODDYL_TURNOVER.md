@@ -57,7 +57,7 @@ at every checkpoint so another agent can continue without the chat history.
 Software contracts landed in `src/shared/python/motion_matching/pinocchio_g2_g3.py`
 and the fitter `--ms111-schedule` / integrator-parity guard. Evidence:
 `docs/development/matched_swing_program/evidence/ms111/continuation_contract_status.json`
-(`claims_native_success=false`). Native ControlTower G2/G3 continuation still
+(`claims_native_success=false`). Native <host> G2/G3 continuation still
 requires an accepted MS-107 G1 checkpoint and MS-100 receipts — do not treat
 this slice as desk qualification.
 
@@ -76,21 +76,21 @@ G1 gates (run-102 thresholds): whole <= 25 mm, early <= 12 mm, terminal
   (CLI), problem assembly `crocoddyl_problem.py` (pure), action models and
   rollouts `crocoddyl_action.py`, marker kinematics + Gauss-Newton IK
   `marker_kinematics.py`, GIF renderer `candidate_playback.py`.
-- Runtime: ControlTower (Tailscale host `controltower`, SSH shell is cmd.exe),
-  WSL distro `ControlTower-Runner`, micromamba env `upstream-motion-runtime`
-  at `/home/dieterolson/mm-root` (Pinocchio 4.1.0, Crocoddyl 3.2.1, Pink 4.4.0
+- Runtime: <host> (Tailscale host `controltower`, SSH shell is cmd.exe),
+  WSL distro `<host>-Runner`, micromamba env `upstream-motion-runtime`
+  at `<owner-home>/mm-root` (Pinocchio 4.1.0, Crocoddyl 3.2.1, Pink 4.4.0
   from `scripts/config/motion_runtime/linux-64.explicit.txt`, plus ezc3d,
   scipy, pydantic, imageio, matplotlib). Recreate with
   `bash scripts/matched_swing/bootstrap_motion_runtime.sh`.
-- Clone: `/home/dieterolson/ms31-crocoddyl` (partial clone, `vendor/ud-tools`
-  initialised). Fits and logs under `/home/dieterolson/fits/<name>[.log]`.
+- Clone: `<owner-home>/ms31-crocoddyl` (partial clone, `vendor/ud-tools`
+  initialised). Fits and logs under `<owner-home>/fits/<name>[.log]`.
 - Windows has no Crocoddyl (conda-forge has no win-64 build). Unit tests
   (`tests/unit/motion_matching/test_crocoddyl_{problem,action}.py`) run on
   Windows; native tests need the env above.
 
 Remote pattern that works (quoting through cmd.exe -> wsl -> bash mangles `$`
 and quotes): write a script locally, `scp -q script.sh controltower:C:/Users/diete/`,
-run `ssh controltower "wsl -d ControlTower-Runner -- bash /mnt/c/Users/diete/script.sh"`,
+run `ssh controltower "wsl -d <host>-Runner -- bash /mnt/c/Users/diete/script.sh"`,
 pipe through `tr -d '\r'`. Long runs: launch detached with
 `scripts/matched_swing/run_crocoddyl_fit.sh` and poll the log for `^EXIT`.
 
@@ -125,7 +125,7 @@ pipe through `tr -d '\r'`. Long runs: launch detached with
    weight fraction, peak effort), cost breakdown. Candidate `candidate.npz`
    (q, v, u, replay, markers, targets). GIF via `candidate_playback.py`.
 
-## Results so Far (ControlTower, Driver Document `anthro_driver/full_body_spec_hipcal_scaled.json`)
+## Results so Far (<host>, Driver Document `anthro_driver/full_body_spec_hipcal_scaled.json`)
 
 | Run       | Window | Nodes | Solver rollout whole / terminal / club (mm) | RK45 replay whole (mm) | Note                                                                                                                                     |
 | --------- | ------ | ----- | ------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -225,7 +225,7 @@ In response, we developed and validated an audit-grade decoupled architecture in
 5. **Stage 5 (Uninterrupted Forward Simulation Replay Verification):**
    - Verified that continuous forward integration from $(q_0, v_0)$ without per-frame pose resets remains bounded and stable under the resolved forces.
 
-### Refined Benchmark Comparison (Full 1.8+ Second Trials on ControlTower)
+### Refined Benchmark Comparison (Full 1.8+ Second Trials on <host>)
 
 | Metric                            | Driver Swing (`C3D_TA_Driver.c3d`)    | 7-Iron Swing (`C3D_TA_Iron.c3d`)    | G1 Gate Target                 |
 | --------------------------------- | ------------------------------------- | ----------------------------------- | ------------------------------ |

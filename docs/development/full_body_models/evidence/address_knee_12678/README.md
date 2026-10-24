@@ -216,7 +216,7 @@ are unchanged. A capture without a static window of at least
 a value.
 
 No canonical numbers are posted here. They come from the R10 re-fit (#12692)
-on ControlTower.
+on <host>.
 
 ## Design Manual
 

@@ -28,7 +28,7 @@ GEOMETRY_PROBE_SHA256 = (
     "40c521457a251cf9b5c905a950a3806d9573ccf8a34e4a1a09d5e3948bedb2b1"
 )
 MUJOCO_ACCELERATION = Path(
-    "/home/dieterolson/native_engine_parity_telemetry_20261012/"
+    "<owner-home>/native_engine_parity_telemetry_20261012/"
     "mujoco_v1_zero_effort_20261011_root_attempt2/native-observation.json"
 )
 MUJOCO_ACCELERATION_SHA256 = (
