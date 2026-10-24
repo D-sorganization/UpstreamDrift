@@ -34,6 +34,16 @@ def test_nightly_runtime_supports_reviewed_drake_versions() -> None:
     ]
 
 
+def test_public_repo_routes_nightly_validation_to_hosted_runner() -> None:
+    step = next(
+        step
+        for step in _jobs()["pick-runner"]["steps"]
+        if step.get("id") == "check"
+    )
+    assert "ubuntu-latest" in step["run"]
+    assert "CI_RUNNER_MODE" in step["env"]
+
+
 def test_runtime_alignment_preserves_engine_coverage_and_failure_reporting() -> None:
     jobs = _jobs()
     job = jobs["cross-engine-validation"]
