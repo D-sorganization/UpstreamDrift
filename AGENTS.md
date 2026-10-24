@@ -349,7 +349,7 @@ PR description so reviewers can verify discoverability.
 
 ### Reasoning & Engagement
 
-- Surface ambiguity and ask; never guess silently. Push back on overcomplication.
+- Surface genuine requirement ambiguity and ask; make routine choices yourself and state the assumption. Never guess silently. Push back on overcomplication.
 - Stay surgical: every changed line traces to the request. Spotted is not fix: report unrelated problems as follow-ups. Clean up only your own orphans.
 - State a verifiable success criterion (for a bug, a failing test) before coding.
 
@@ -399,12 +399,13 @@ Fleet-wide policy from `Repository_Management#1390`:
    `gh pr create --draft` or the GitHub UI draft toggle.
 2. **Commit frequently.** Use small, conventional commits that save progress as you go;
    never batch a day's work into a single commit.
-3. **Agent handoff document.** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) at the repo root
-   tracks current-state-only info (active epics/PRs, must-read architecture pointers,
-   in-flight branch stacking, gate commands, a do-not list, and the short-term roadmap).
-   Update it as part of **every PR you open** and **every push that lands on `main`**.
-   It is not a changelog — history lives in git; keep it current-state only and under
-   150 lines.
+3. **Agent handoff.** Follow the fleet **Handoffs and Change Fragments** rule in the
+   synced block below (`durable-handoffs`): put the handoff in the PR body's
+   **Handoff** section and ship a change fragment; do not edit `HANDOFF.md`,
+   `DEVELOPMENT_LOG.md`, or the `SPEC.md` change log directly. Root
+   [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) is legacy coordination only until
+   Runner Dashboard [#2155](https://github.com/D-sorganization/Runner_Dashboard/issues/2155)
+   lands the fleet handoff store — do not treat it as the per-PR handoff target.
 
 ---
 
@@ -527,7 +528,7 @@ Full rule: [fleet-rules/deferred-validation.md](https://github.com/D-sorganizati
 
 ### PR Queue Consolidation
 
-With 6 or more open non-draft PRs under strict branch protection, or runner use at 70 % or more, consolidate eligible PRs into one branch and PR instead of draining them serially. Never fold in drafts, workflow changes or another live session's PRs.
+**Backstop** when [lane PRs](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-prs.md) did not keep the queue small: with 6 or more open non-draft PRs under strict branch protection, or runner use at 70 % or more, consolidate eligible PRs into one branch and PR instead of draining them serially. Never fold in drafts, workflow changes or another live session's PRs.
 
 Full rule: [fleet-rules/pr-queue-consolidation.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/pr-queue-consolidation.md) (synced from Repository_Management; edit the source there).
 
@@ -539,7 +540,7 @@ Full rule: [fleet-rules/pr-queue-consolidation.md](https://github.com/D-sorganiz
 
 ### Agent Tiers
 
-`tier:strong` is reserved for frontier agents, `tier:cli` is for any CLI agent, `tier:ollama` is mechanical work. An explicit label wins; an unclassified issue is strong. A CLI-tier agent never claims a strong issue: if it needs a design decision, open a draft PR with a `Blocked:` section and stop. Dispatch with `python -m scripts.dispatch_cli_agent`.
+`tier:strong` is reserved for frontier agents, `tier:cli` is for any CLI agent, `tier:ollama` is mechanical work. An explicit label wins; an unclassified issue is strong. A CLI-tier agent never claims a strong issue: if it needs a design decision, open a ready PR with a `Blocked:` section and stop. Dispatch with `python -m scripts.dispatch_cli_agent`.
 
 Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/agent-tiers.md) (synced from Repository_Management; edit the source there).
 
@@ -555,7 +556,7 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 > Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/pr-lifecycle.md.
 
 1. **Before pushing, run `python -m scripts.pre_pr` (RM-6).** Push once.
-2. **Open the PR ready (not draft) unless it is explicitly blocked; arm auto-merge with `scripts/automerge_guard.py`; then end the session.** Do not schedule check-ins, subscribe to PR activity, or enable Auto-fix.
+2. **Open or update your lane PR ready (never as a draft).** If blocked, use a `Blocked:` section in a ready PR (see [lane-prs.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-prs.md)). Arm squash auto-merge with `scripts/automerge_guard.py` (or `gh pr merge --auto --squash`) immediately; then end the session. Do not schedule check-ins, subscribe to PR activity, or enable Auto-fix.
 3. **If CI goes red, Runner Dashboard dispatches the fix (RD-1).** Do not revive the original session.
 4. **A follow-up hours later goes in a new session with a one-paragraph brief.**
 5. **Don't switch models mid-session (it throws away the prompt cache).**
@@ -590,3 +591,71 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 Full rule: [fleet-rules/merge-queue.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/merge-queue.md) (synced from Repository_Management; edit the source there).
 
 <!-- END FLEET-MANAGED: merge-queue -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: remote-destructive-commands -->
+
+### Remote and Destructive Commands: Guarded Scripts Only
+
+Never run an inline delete or cleanup one-liner on another host (`ssh host "powershell -Command ..."`, `ssh host "rm ..."`). Run a reviewed script that refuses empty, relative or home paths, defaults to a dry run and caps deletions. Never delete by age under a home directory. If you stop a remote command, kill the remote process, not only the local ssh client.
+
+Full rule: [fleet-rules/remote-destructive-commands.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/remote-destructive-commands.md) (synced from Repository_Management; edit the source there).
+
+<!-- END FLEET-MANAGED: remote-destructive-commands -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: remote-persistence -->
+
+### Never Leave Work on One Machine
+
+> This section is managed centrally by Repository_Management and synced fleet-wide.
+> Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/remote-persistence.md.
+
+Every coding agent — local, cloud, bot, or human-assisted — must keep work on the
+remote, not only on the machine where it was written.
+
+1. **Work on a feature branch, never `main`.** Open a PR from that branch; do not commit on the default branch.
+2. **Commit at every meaningful checkpoint** — at least after each passing test step and before any handoff, pause, or end of session — **and push to `origin`.** Unpushed commits are not handed off.
+3. **Always open PRs ready for review** (never as drafts). Arm squash auto-merge immediately via `python scripts/automerge_guard.py <owner/repo> <pr> --arm --strategy squash` or `gh pr merge --auto --squash`. If work is blocked, still open a ready PR whose body has a `Blocked:` section explaining why; CI and branch protection are the gates, not a human “mark ready” step.
+4. **Before reporting done or handing off, run `git status`.** A dirty working tree or unpushed commits means the work is not done.
+5. **Do not commit secrets or local environment files** (for example `.env`); use `.env.example` patterns and keep credentials out of git.
+
+<!-- END FLEET-MANAGED: remote-persistence -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: lane-prs -->
+
+### Lane PRs (One Open PR per Work Lane)
+
+Default workflow: one open non-draft PR per work lane on branch `<agent>/<lane-slug>` (or label `agent:<id>`). Push further fixes to that branch; do not open a second PR for the same lane. When a repo has more than 10 open non-draft PRs, the Orchestrator maintains a lane plan (UpstreamDrift #13340 format). [PR queue consolidation](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/pr-queue-consolidation.md) is the backstop when the queue is already large.
+
+Full rule: [fleet-rules/lane-prs.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-prs.md) (synced from Repository_Management; edit the source there).
+
+<!-- END FLEET-MANAGED: lane-prs -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: progressive-principles -->
+
+### Progressive Coding Principles (Ratchet)
+
+Seven active standards (P1–P7) apply only to **new and changed** code in the active diff — never as a backfill mandate on untouched legacy. Agents must not open cleanup issues for grandfathered gaps. Full text: fleet-rules/progressive-principles.md.
+
+Full rule: [fleet-rules/progressive-principles.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/progressive-principles.md) (synced from Repository_Management; edit the source there).
+
+<!-- END FLEET-MANAGED: progressive-principles -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: runner-dashboard-rollout-handoff -->
+
+### Runner Dashboard Rollout in PR Handoffs
+
+For Runner_Dashboard changes merged to main, do not list per-node redeploy or SSH steps in the PR Handoff. Say that the auto-deploy timer picks up main within ~10 minutes once main CI is green, and verify the `auto_deploy` section in `/api/fleet/status` (deployed SHA) on the hub and nodes. Reserve manual steps for first-time bootstrap only (install auto-deploy on a new node, mint tokens, env-file changes).
+
+Full rule: [fleet-rules/runner-dashboard-rollout-handoff.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/runner-dashboard-rollout-handoff.md) (synced from Repository_Management; edit the source there).
+
+<!-- END FLEET-MANAGED: runner-dashboard-rollout-handoff -->

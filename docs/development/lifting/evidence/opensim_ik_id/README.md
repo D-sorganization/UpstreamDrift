@@ -26,7 +26,7 @@ barbell lifts from `receipts.json` (41 frames, stride 5):
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Squat** | `0179c5a2...` | 0.0164 / 0.0304 | Pass | 2.53 µm / 1.94 mm | none (0 rad) | 23.82 (vs 146.93) | 11.75 (vs 18.64) | **Pass** |
 | **Deadlift** | `a8483a37...` | 0.0112 / 0.0391 | Pass | 7.10 µm / 6.90 µm | 6.1e-04 (`pro_sup_l`, `pro_sup_r`) | 288.29 (vs 110.92) | 148.02 (vs 18.28) | Fail (xfail) |
-| **Bench Press** | `f700f098...` | 0.0160 / 0.0556 | Fail (bar max) | 12.49 µm / 6.67 mm | 1.4e-03 (`pro_sup_l`, `pro_sup_r`) | 511.58 (vs 32.49) | 318.32 (vs 3.45) | Fail (xfail) |
+| **Bench Press** | `f700f098...` | 0.0160 / 0.0556 | Fail (bar max) | 12.49 µm / 6.67 mm | 1.4e-03 (`pro_sup_l`, `pro_sup_r`) | 511.58 (vs 221.85) | 318.32 (vs 23.54) | Fail (xfail) |
 | **Snatch** | `24c7e8e4...` | 0.0089 / 0.0579 | Fail (bar max) | 7.68 µm / 7.57 µm | 3.8e-04 (`pro_sup_l`, `pro_sup_r`) | 463.21 (vs 155.12) | 202.62 (vs 27.10) | Fail (xfail) |
 | **Clean & Jerk** | `0b5221ff...` | 0.0198 / 0.1612 | Fail (bar max) | 6.43 µm / 6.01 µm | 2.2e-03 (`pro_sup_l`, `pro_sup_r`) | 458.56 (vs 223.10) | 259.00 (vs 38.77) | Fail (xfail) |
 

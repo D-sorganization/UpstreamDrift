@@ -21,11 +21,11 @@ Hunt-Crossley pairs give no force (see GRIP_PARITY_DECISIONS.md section 19).
 
 from __future__ import annotations
 
+import math
 import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-import math
 from typing import Any
 
 import numpy as np
@@ -160,6 +160,21 @@ def _grip_axis(interface: GripInterface, cfg: ContactGripConfig) -> tuple:
     return point, rot[:, 0], rot[:, 1]
 
 
+def _has_own_mesh(mapped: Any, ring_pitch_m: float) -> bool:
+    """Whether a site needs its own grip mesh with rings centred on it.
+
+    Capsule sites always do. A sphere site does when its axial offset is off
+    the side mesh's ring grid: the elastic foundation integrates over faces, so
+    a sphere between ring lines sees an asymmetric patch and picks up an axial
+    tangential bias at rest (the ten-finger trail hypothenar, which sits at the
+    derived little-finger station, #13555).
+    """
+    if mapped.primitive == "capsule":
+        return True
+    steps = float(mapped.centre_m[0]) / ring_pitch_m
+    return abs(steps - round(steps)) > 1e-6
+
+
 def _write_capsule_meshes(
     point: np.ndarray,
     axis: np.ndarray,
@@ -167,7 +182,7 @@ def _write_capsule_meshes(
     cfg: ContactGripConfig,
     facts: dict[str, Any],
 ) -> None:
-    """Write ring-aligned grip cylinder meshes centered on each capsule site's axial midpoint."""
+    """Write ring-aligned grip meshes centred on each own-mesh site's axial midpoint."""
     assert cfg.topology_model is not None
     topo = cfg.topology_model.topology
     grip_r = cfg.layout.grip_radius_m
@@ -176,13 +191,13 @@ def _write_capsule_meshes(
         for pair in cfg.topology_model.physical_grip_pairs(side):
             site = topo.site(pair.site_a)
             mapped = map_site_to_hand_frame(topo, site, side)
-            if mapped.primitive != "capsule":
+            if not _has_own_mesh(mapped, cfg.ring_pitch_m):
                 continue
+            half_length = mapped.half_length_m if mapped.primitive == "capsule" else 0.0
             cap_centre = centre + mapped.centre_m[0]
             half_cap = (
                 math.ceil(
-                    (mapped.half_length_m + mapped.radius_m + MESH_MARGIN_M)
-                    / cfg.ring_pitch_m
+                    (half_length + mapped.radius_m + MESH_MARGIN_M) / cfg.ring_pitch_m
                     - 1e-12
                 )
                 * cfg.ring_pitch_m
@@ -340,10 +355,16 @@ def _build_topology_contact(
                     location,
                     mapped.radius_m,
                 )
+                mesh_name = f"grip_mesh_{side}"
+                if _has_own_mesh(mapped, cfg.ring_pitch_m):
+                    mesh_name = f"grip_mesh_{pair.name}"
+                    _contact_mesh(
+                        geometry, mesh_name, club, cfg.capsule_mesh_path(pair.name)
+                    )
                 _foundation_force(
                     forces,
                     f"{CONTACT_FORCE_PREFIX}_{pair.name}",
-                    (f"grip_pad_{pair.name}", f"grip_mesh_{side}"),
+                    (f"grip_pad_{pair.name}", mesh_name),
                     ef_site,
                 )
             elif mapped.primitive == "capsule":

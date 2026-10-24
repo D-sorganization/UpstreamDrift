@@ -1,0 +1,37 @@
+name: Jules push/PR noise workflow disable
+
+# Post-merge hygiene for UD-CI-003 (#13575): deleting YAML does not disable
+# orphaned GitHub workflow registrations. This job calls `gh workflow disable`
+# for each batch-1 retired path so no new runs are scheduled.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/config/jules_push_pr_noise_retirement.json"
+      - "scripts/ci/jules_push_pr_noise_retirement.py"
+      - ".github/workflows/jules-push-pr-noise-disable.yml"
+      - ".github/workflows-retired/jules-push-pr-noise/**"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: jules-push-pr-noise-disable-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  disable-retired:
+    name: Disable retired Jules push/PR noise workflows
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Disable batch-1 workflows on GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: python3 scripts/ci/jules_push_pr_noise_retirement.py --check --disable

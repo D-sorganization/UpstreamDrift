@@ -13,7 +13,7 @@ pathway.
 | GRF per foot and net, CoP, free moment (GCV-1)  | Parity in MuJoCo, Drake, Pinocchio, OpenSim                      | Parity in MuJoCo, Drake, Pinocchio, OpenSim (OSL-8, #13045)      |
 | GRF moment about the CoM                        | Pending (adapters expose no CoM)                                 | Pending                                                          |
 | Per-hand wrench and equivalent couple (GCV-7/8) | Parity in MuJoCo and Drake; unavailable in Pinocchio and OpenSim | Parity in MuJoCo and Drake; unavailable in Pinocchio and OpenSim |
-| Joint moments and powers                        | Unavailable (same-input adapters have no ID pipeline; #13045)   | Unavailable (same-input adapters have no ID pipeline; #13045)    |
+| Joint moments and powers                        | Unavailable (same-input adapters have no ID pipeline; #13045)    | Unavailable (same-input adapters have no ID pipeline; #13045)    |
 | Bar-system energy                               | Pending (no barbell body in the bundle)                          | Pending                                                          |
 | L5/S1 compression and shear                     | Pending                                                          | Pending                                                          |
 | Plots sheet per lift                            | Pending                                                          | Pending                                                          |
@@ -90,6 +90,7 @@ Largest difference from MuJoCo over the 11 states for all registered lifts:
 | Clean and Jerk | OpenSim   | 2.75e-10    | 1.52e-14    | 3.46e-12              | unavailable        | unavailable       |
 
 In all five lifts:
+
 - Net GRF agrees within $3.6\times10^{-10}$\,N (bound $\sim 10^{-5}$\,N).
 - Net CoP agrees within $6.8\times10^{-14}$\,m (bound $10^{-8}$\,m).
 - Drake grip wrench agrees within $6.5\times10^{-10}$\,N force and $2.1\times10^{-10}$\,N\,m couple.
@@ -130,4 +131,3 @@ leave the floor during mid-press (Fz = 0 N, CoP = None).
 MUJOCO_GL=egl python3 scripts/measure_lift_kinetics_parity.py
 python3 -m pytest -o addopts="" tests/unit/lifting/test_squat_kinetics_parity.py
 ```
-

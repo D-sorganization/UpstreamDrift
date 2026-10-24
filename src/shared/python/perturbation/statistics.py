@@ -21,6 +21,35 @@ CV_UNDEFINED_REASON = (
 )
 
 
+def safe_cv(
+    mean: float,
+    std: float,
+    *,
+    absolute: bool = True,
+) -> tuple[float, str | None]:
+    """Compute coefficient of variation with near-zero-mean protection.
+
+    Parameters
+    ----------
+    mean : float
+        Mean value.
+    std : float
+        Standard deviation.
+    absolute : bool, default True
+        If True, divide by ``|mean|``. If False, divide by ``mean``.
+
+    Returns
+    -------
+    tuple[float, str | None]
+        ``(cv, cv_reason)``. When ``|mean| <= CV_NEAR_ZERO_MEAN``, ``cv`` is
+        NaN and ``cv_reason`` is ``CV_UNDEFINED_REASON``; otherwise ``(cv, None)``.
+    """
+    if not abs(mean) > CV_NEAR_ZERO_MEAN:
+        return float("nan"), CV_UNDEFINED_REASON
+    denom = abs(mean) if absolute else mean
+    return float(std / denom), None
+
+
 @dataclass
 class MetricStatistics:
     """Summary statistics for a single metric across trials."""
@@ -89,10 +118,12 @@ def compute_metric_statistics(values: np.ndarray) -> MetricStatistics:
     mean = np.mean(values, axis=0)
     std = np.std(values, axis=0)
 
+    cv: float | np.ndarray
     # cv is undefined (NaN, not 0) when the mean is near zero
     if np.isscalar(mean) or mean.ndim == 0:
-        undefined = not abs(mean) > CV_NEAR_ZERO_MEAN
-        cv = np.nan if undefined else std / mean
+        cv_val, cv_reason_val = safe_cv(float(mean), float(std), absolute=False)
+        cv = cv_val
+        undefined = cv_reason_val is not None
     else:
         cv = np.full_like(mean, np.nan, dtype=float)
         mask = np.abs(mean) > CV_NEAR_ZERO_MEAN

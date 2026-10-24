@@ -120,12 +120,41 @@ knee flexion in degrees. Full numbers are in
   these numbers.
 - **Through the swing.** The knee residual acts at the address stage only. The
   trajectory IK, forward-dynamics frame 0 and the knee flexion through the first
-  static window are not yet measured. That is issue acceptance item 4.
+  static window are not yet measured on the canonical runs. That is issue
+  acceptance item 4. The receipt now carries the measurement (see below), so
+  the R10 re-fit reports it without further code.
 - **Cross-engine.** Drake, Pinocchio, OpenSim and MyoSuite replays of the new
   address have not been run. That is issue acceptance item 5.
 - **Swing-wide ROM.** `range_of_motion.LOWER_LIMB_RANGES_DEG["knee_angle"]` is
   unchanged at `(-120, 10)`. Hyperextension is forbidden at the address only. A
   swing-wide change needs capture evidence through impact and the finish.
+
+## Knee Flexion Through Dynamics (Acceptance Item 4 Instrumentation)
+
+When the address sets knee targets (`--knee-flexion prior` or `capture`), the
+dynamics report gains `dynamics.knee_flexion_deg`
+(`pipeline/dynamics.knee_flexion_dynamics_block`, computed by
+`address_knee.knee_flexion_window_report`). It reports only and changes no
+solve. For each knee it records:
+
+- the target and its `target_source`, copied from the address targets;
+- `ik_frame0_deg`, `fd_frame0_deg` and `fd_minus_ik_frame0_deg`: the IK
+  reference and forward-dynamics replay at frame 0;
+- for the IK reference (`ik`) and the replay (`fd`) over the first static
+  window (`foot_progression.address_window`, the same window as the capture
+  measurement): `min_deg`, `max_deg`, `max_abs_error_deg` against the target,
+  `hyperextended`, and `within_band`, which is true only when every window
+  frame is within `KNEE_FLEX_BAND_DEG` of the target and no frame hyperextends.
+
+The IK address itself is `address.knee_flexion_deg.knees.*.model_deg`, so
+"FD frame 0 equals the IK address" is the comparison of `fd_frame0_deg` with
+that value. With `--knee-flexion off` the block is absent and those receipts
+are unchanged. A capture without a static window of at least
+`MIN_WINDOW_FRAMES` frames records `status: unavailable: <reason>` rather than
+a value.
+
+No canonical numbers are posted here. They come from the R10 re-fit (#12692)
+on ControlTower.
 
 ## Design Manual
 
