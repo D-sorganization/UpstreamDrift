@@ -456,6 +456,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13462 · Loop_Nullspace: Local Solution-Manifold Continuation (Predictor-Corrector With Rank Gates) Over ForceNullSpace (NSE-UD-2)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13462
+- **Branch:** merged via #13470
+- **PR:** #13470
+- **Paths:** see #13470
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`dbd72379`; collated from changes/13462-loop-nullspace-local-solution-manifold-c.md)
+- **Summary:** loop_nullspace: local solution-manifold continuation (predictor-corrector with rank gates) over ForceNullSpace (NSE-UD-2)
+- **Next step:** Shipped in PR #13470.
+
+### DL-#13461 · Loop_Nullspace: Classify_Functional (Numerical Fibre Identifiability With Optional Enclosing-Radius Bound) and Attribution_Quantities (Per-Source Induced-Acceleration Envelopes); Decomposition Now Stores Variable_Scale
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13461
+- **Branch:** merged via #13475
+- **PR:** #13475
+- **Paths:** see #13475
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`eb00e096`; collated from changes/13461-loop-nullspace-classify-functional-numer.md)
+- **Summary:** loop_nullspace: classify_functional (numerical fibre identifiability with optional enclosing-radius bound) and attribution_quantities (per-source induced-acceleration envelopes); Decomposition now stores variable_scale
+- **Next step:** Shipped in PR #13475.
+
 ### DL-#12784 · Route Motion-Matching Nightly Smoke to GitHub-Hosted Runners on Public Repos.
 
 - **State:** shipped
