@@ -443,6 +443,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13256 · Add Opt-In Allocate_Muscle_Excitations_Until_Feasible (Stop_When_Feasible) for Bounded Muscle Allocation: Stops During a Counted Evaluation on an Exact Feasible Witness and Reports Declared_Feasibility_Satisfied
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13256
+- **Branch:** merged via #13691
+- **PR:** #13691
+- **Paths:** see #13691
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`669f4613`; collated from changes/13256-add-opt-in-stop-when-feasible-to-bounded.md)
+- **Summary:** Add opt-in allocate_muscle_excitations_until_feasible (stop_when_feasible) for bounded muscle allocation: stops during a counted evaluation on an exact feasible witness and reports declared_feasibility_satisfied
+- **Next step:** Shipped in PR #13691.
+
+### DL-#12686 · Chain Shaft Runs Through the Ground-Support Pipeline: IK Holds Chain Coordinates at Rest, Face Targets Accept the Tip Link, Replay Uses the 0.125 ms Substep
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12686
+- **Branch:** merged via #13719
+- **PR:** #13719
+- **Paths:** see #13719
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`c206545a`; collated from changes/12686-chain-shaft-runs-through-the-ground-supp.md)
+- **Summary:** Chain shaft runs through the ground-support pipeline: IK holds chain coordinates at rest, face targets accept the tip link, replay uses the 0.125 ms substep
+- **Next step:** Shipped in PR #13719.
+
 ### DL-#13017 · Fix DrakeKinematicsService.Set_Pose/Get_Link_Transforms Against a Real MultibodyPlant (Floating-Base Quaternion Layout, Body Enumeration)
 
 - **State:** shipped
@@ -462,10 +488,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12723
 - **Branch:** merged via #13717
-- **PR:** #13717
+- **PR:** #13717, #13723
 - **Paths:** see #13717
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`7bd683e2`; collated from changes/12723-nsx-94-run-the-co-contraction-trade-off.md)
+- **Last verified:** 2026-10-24 (`5b486938`; collated from changes/12723-ci-the-tests-job-checks-out-only-the-pin.md)
 - **Summary:** NSX-94: run the co-contraction trade-off sweep on the real pinned MyoSuite elbow (myoelbow_1dof6muscles); replace the never-running importorskip(myo_sim) test
 - **Next step:** Shipped in PR #13717.
 
@@ -631,10 +657,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13044
 - **Branch:** merged via #13512
-- **PR:** #13512
+- **PR:** #13512, #13729, #13721
 - **Paths:** see #13512
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`fcc4221c`; collated from changes/13044-predictive-moco-simulation-of-deadlift-l.md)
+- **Last verified:** 2026-10-24 (`ee36eed8`; collated from changes/13044-osl-7-predictive-versus-tracked-deadlift.md)
 - **Summary:** OSL-7 predictive deadlift: solved statically supported poses with free shoulders, a planted-feet goal, Hicks moment gate and a 17-run history; stage 1 still does not converge with foot contact
 - **Next step:** Shipped in PR #13512.
 
