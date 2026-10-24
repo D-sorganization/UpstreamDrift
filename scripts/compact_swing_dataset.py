@@ -28,8 +28,8 @@ Run manually (not in CI):
 .. code-block:: bash
 
     python3 scripts/compact_swing_dataset.py \
-        --src C:/Users/diete/Repositories/data/TenThousandFiles.parquet \
-        --out C:/Users/diete/Repositories/data/compact \
+        --src \"\$UD_COMPACT_SWING_PARQUET\" \
+        --out \"\$UD_COMPACT_SWING_OUT\" \
         --validate
 """
 
@@ -499,6 +499,79 @@ def _validate_outputs(out_dir: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _open_raw_parquet(src_path: Path) -> tuple[pq.ParquetFile, list[str]]:
+    """Open the raw parquet and return the file handle plus columns to read."""
+    pf = pq.ParquetFile(src_path)
+    raw_columns = set(pf.schema_arrow.names)
+    missing = [c for c in REQUIRED_RAW_COLUMNS if c not in raw_columns]
+    if missing:
+        raise ValueError(
+            f"raw parquet missing required columns (first 5): {missing[:5]}"
+        )
+    optional_present = [c for c in OPTIONAL_RAW_COLUMNS if c in raw_columns]
+    optional_missing = [c for c in OPTIONAL_RAW_COLUMNS if c not in raw_columns]
+    if optional_missing:
+        unexpected = [
+            c for c in optional_missing if c not in KNOWN_MISSING_KINEMATIC_COLUMNS
+        ]
+        if unexpected:
+            _LOGGER.warning(
+                "raw parquet missing optional columns (NaN-filled): %s",
+                unexpected,
+            )
+    return pf, REQUIRED_RAW_COLUMNS + optional_present
+
+
+def _compact_all_row_groups(
+    pf: pq.ParquetFile,
+    columns_to_read: list[str],
+    *,
+    timesteps_schema: pa.Schema,
+    trials_schema: pa.Schema,
+    timesteps_writer: pq.ParquetWriter,
+    trials_writer: pq.ParquetWriter,
+    limit_trials: int | None,
+) -> tuple[int, int]:
+    """Stream each row group into the parquet writers."""
+    n_trials_done = 0
+    n_timesteps_done = 0
+    for rg_idx in range(pf.num_row_groups):
+        if limit_trials is not None and n_trials_done >= limit_trials:
+            break
+        table = pf.read_row_group(rg_idx, columns=columns_to_read)
+        if table.num_rows == 0:
+            continue
+        trial_id_arr = _string_column_to_float64(table, TRIAL_COL)
+        trial_id = int(trial_id_arr[0])
+
+        ts_rows, summary = _timesteps_records_from_group(table, trial_id)
+        if not ts_rows:
+            continue
+        ts_batch = pa.Table.from_pylist(ts_rows, schema=timesteps_schema)
+        timesteps_writer.write_table(ts_batch)
+        n_timesteps_done += len(ts_rows)
+
+        trial_row = _trial_record_from_group(
+            table,
+            trial_id=trial_id,
+            simulation_time_s=summary["sim_time"],
+            sample_rate_hz=summary["rate"],
+            chs_max=summary["chs_max"],
+            total_work_J=summary["work"],
+        )
+        tr_batch = pa.Table.from_pylist([trial_row], schema=trials_schema)
+        trials_writer.write_table(tr_batch)
+        n_trials_done += 1
+
+        if n_trials_done % _PROGRESS_EVERY == 0:
+            _LOGGER.info(
+                "compacted %d trials (%d timesteps)",
+                n_trials_done,
+                n_timesteps_done,
+            )
+    return n_trials_done, n_timesteps_done
+
+
 @precondition(
     lambda src, out, **_: Path(src).exists(),
     "raw parquet file does not exist",
@@ -536,25 +609,7 @@ def compact_swing_dataset(
     out_dir = Path(out)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    pf = pq.ParquetFile(src_path)
-    raw_columns = set(pf.schema_arrow.names)
-    missing = [c for c in REQUIRED_RAW_COLUMNS if c not in raw_columns]
-    if missing:
-        raise ValueError(
-            f"raw parquet missing required columns (first 5): {missing[:5]}"
-        )
-    optional_present = [c for c in OPTIONAL_RAW_COLUMNS if c in raw_columns]
-    optional_missing = [c for c in OPTIONAL_RAW_COLUMNS if c not in raw_columns]
-    if optional_missing:
-        unexpected = [
-            c for c in optional_missing if c not in KNOWN_MISSING_KINEMATIC_COLUMNS
-        ]
-        if unexpected:
-            _LOGGER.warning(
-                "raw parquet missing optional columns (NaN-filled): %s",
-                unexpected,
-            )
-    columns_to_read = REQUIRED_RAW_COLUMNS + optional_present
+    pf, columns_to_read = _open_raw_parquet(src_path)
 
     timesteps_schema = _build_timesteps_schema()
     trials_schema = _build_trials_schema()
@@ -570,44 +625,16 @@ def compact_swing_dataset(
         compression="snappy",
     )
 
-    n_trials_done = 0
-    n_timesteps_done = 0
     try:
-        n_groups = pf.num_row_groups
-        for rg_idx in range(n_groups):
-            if limit_trials is not None and n_trials_done >= limit_trials:
-                break
-            table = pf.read_row_group(rg_idx, columns=columns_to_read)
-            if table.num_rows == 0:
-                continue
-            trial_id_arr = _string_column_to_float64(table, TRIAL_COL)
-            trial_id = int(trial_id_arr[0])
-
-            ts_rows, summary = _timesteps_records_from_group(table, trial_id)
-            if not ts_rows:
-                continue
-            ts_batch = pa.Table.from_pylist(ts_rows, schema=timesteps_schema)
-            timesteps_writer.write_table(ts_batch)
-            n_timesteps_done += len(ts_rows)
-
-            trial_row = _trial_record_from_group(
-                table,
-                trial_id=trial_id,
-                simulation_time_s=summary["sim_time"],
-                sample_rate_hz=summary["rate"],
-                chs_max=summary["chs_max"],
-                total_work_J=summary["work"],
-            )
-            tr_batch = pa.Table.from_pylist([trial_row], schema=trials_schema)
-            trials_writer.write_table(tr_batch)
-            n_trials_done += 1
-
-            if n_trials_done % _PROGRESS_EVERY == 0:
-                _LOGGER.info(
-                    "compacted %d trials (%d timesteps)",
-                    n_trials_done,
-                    n_timesteps_done,
-                )
+        n_trials_done, n_timesteps_done = _compact_all_row_groups(
+            pf,
+            columns_to_read,
+            timesteps_schema=timesteps_schema,
+            trials_schema=trials_schema,
+            timesteps_writer=timesteps_writer,
+            trials_writer=trials_writer,
+            limit_trials=limit_trials,
+        )
     finally:
         timesteps_writer.close()
         trials_writer.close()

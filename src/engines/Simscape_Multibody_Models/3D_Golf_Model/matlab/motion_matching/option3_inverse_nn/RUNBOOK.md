@@ -1,6 +1,6 @@
 # Option 3 — Runbook
 
-> Literal commands. Run from the **repo root** (`C:\Users\diete\Repositories\UpstreamDrift\`) unless noted. Paths use forward slashes; works in both bash and PowerShell.
+> Literal commands. Run from the **repo root** (`<owner-home>\Repositories\UpstreamDrift\`) unless noted. Paths use forward slashes; works in both bash and PowerShell.
 
 ## 0. Prerequisites
 

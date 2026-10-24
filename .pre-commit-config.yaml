@@ -106,6 +106,13 @@ repos:
         pass_filenames: false
         files: ^(manuals/upstreamdrift/|scripts/config/design_manual_governance\.json$|scripts/(check_design_manual_governance|design_manual_contract)\.py$|AGENTS\.md$|CLAUDE\.md$|SPEC\.md$|AGENT_HANDOFF\.md$)
 
+      - id: private-path-leak-ratchet
+        name: "private path leak ratchet"
+        entry: python3 scripts/ci/check_private_path_leaks.py
+        language: system
+        pass_filenames: false
+        always_run: true
+
   # -------------------------------------------------------------------------
   # Stage 3: Config File Formatting - ALWAYS RUNS
   # -------------------------------------------------------------------------
