@@ -285,82 +285,82 @@
     "loaded_module_hashes": [
       {
         "module": "src.engines.physics_engines.mujoco.python.full_body_ik",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_ik.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_ik.py",
         "sha256": "2192171bb6fc69042c4a0db8ab010122599a1c3470bf6a6a6629bff0af31cf6e"
       },
       {
         "module": "src.engines.physics_engines.mujoco.python.full_body_model",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_model.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_model.py",
         "sha256": "c900a6ebc1072a66d259a4e2f03de3f3c6b9647ffbbcab1aa5fbb21db64185b3"
       },
       {
         "module": "src.engines.physics_engines.mujoco.python.full_body_mjcf",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_mjcf.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_mjcf.py",
         "sha256": "1c34cf4b4986b1af4af88b17f24e7c4f8c7ce7fd9e271b815e2dcbd0658dde4f"
       },
       {
         "module": "src.engines.physics_engines.mujoco.python.native_model",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_model.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_model.py",
         "sha256": "15586ebb1cea7c19d42f9635671d575acfe065149e656600e0ab9421c82bdb24"
       },
       {
         "module": "src.shared.python.motion_matching.contact_law",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\contact_law.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\contact_law.py",
         "sha256": "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c"
       },
       {
         "module": "src.shared.python.motion_matching.constraint_kinematics",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\constraint_kinematics.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\constraint_kinematics.py",
         "sha256": "4cf80a3276078000c455a335a0c9eec8c487aac940cf44131d9ea4aecfad3112"
       },
       {
         "module": "src.shared.python.motion_matching.full_body_ik",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\full_body_ik.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\full_body_ik.py",
         "sha256": "bfd6c550f5f9efd48695ae602bc4312d44fc91e22f46a749ba2adc919d0dab4d"
       },
       {
         "module": "src.shared.python.motion_matching.same_input.plant",
-        "origin": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\plant.py",
+        "origin": "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\plant.py",
         "sha256": "ff61ed1b6b98b85d7f4f118d44b470c5e9e4e744423c0052f926f6bf1a0826c5"
       }
     ],
     "source_hashes_after": {
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\evidence\\native_candidates\\returned81_candidate.json": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_ik.py": "2192171bb6fc69042c4a0db8ab010122599a1c3470bf6a6a6629bff0af31cf6e",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_mjcf.py": "1c34cf4b4986b1af4af88b17f24e7c4f8c7ce7fd9e271b815e2dcbd0658dde4f",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_model.py": "c900a6ebc1072a66d259a4e2f03de3f3c6b9647ffbbcab1aa5fbb21db64185b3",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_full_body_replay.py": "593f34d473988a94d9140b11d5cb5d7fc39ddd742e02ddd7230ab10f20b8ba40",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_model.py": "15586ebb1cea7c19d42f9635671d575acfe065149e656600e0ab9421c82bdb24",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\constraint_kinematics.py": "4cf80a3276078000c455a335a0c9eec8c487aac940cf44131d9ea4aecfad3112",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\contact_law.py": "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\full_body_ik.py": "bfd6c550f5f9efd48695ae602bc4312d44fc91e22f46a749ba2adc919d0dab4d",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\__init__.py": "e183d4d7b27799bd8790baa7e1c99d0aebeca9b709e0ec04554b8848059e1774",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\integrator.py": "3fe57c6ebb939013b30b5b97bad6097821d8052eea21079b13a874b36c0c4bf9",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\plant.py": "ff61ed1b6b98b85d7f4f118d44b470c5e9e4e744423c0052f926f6bf1a0826c5",
-      "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_20261011_root_attempt2\\native-observation.json": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
-      "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_geometry.py": "66b568d211c5881a0f7e8d116318e761a3b871a4e73a5d084111400123b59f7f",
-      "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zero_effort_acceleration.py": "28d8f114bd58d91b5caa6243784ed84128f34de03820f9c9720ee7ad4e6d61de",
-      "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\run_mujoco_v1_zero_effort_acceleration_20261012.py": "1fc46a2c9bfcbe9236a51168ca8869cc6c0f9fcd180b505d940fb8c2392f6731"
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\evidence\\native_candidates\\returned81_candidate.json": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_ik.py": "2192171bb6fc69042c4a0db8ab010122599a1c3470bf6a6a6629bff0af31cf6e",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_mjcf.py": "1c34cf4b4986b1af4af88b17f24e7c4f8c7ce7fd9e271b815e2dcbd0658dde4f",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_model.py": "c900a6ebc1072a66d259a4e2f03de3f3c6b9647ffbbcab1aa5fbb21db64185b3",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_full_body_replay.py": "593f34d473988a94d9140b11d5cb5d7fc39ddd742e02ddd7230ab10f20b8ba40",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_model.py": "15586ebb1cea7c19d42f9635671d575acfe065149e656600e0ab9421c82bdb24",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\constraint_kinematics.py": "4cf80a3276078000c455a335a0c9eec8c487aac940cf44131d9ea4aecfad3112",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\contact_law.py": "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\full_body_ik.py": "bfd6c550f5f9efd48695ae602bc4312d44fc91e22f46a749ba2adc919d0dab4d",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\__init__.py": "e183d4d7b27799bd8790baa7e1c99d0aebeca9b709e0ec04554b8848059e1774",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\integrator.py": "3fe57c6ebb939013b30b5b97bad6097821d8052eea21079b13a874b36c0c4bf9",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\plant.py": "ff61ed1b6b98b85d7f4f118d44b470c5e9e4e744423c0052f926f6bf1a0826c5",
+      "<owner-home>\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_20261011_root_attempt2\\native-observation.json": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
+      "<owner-home>\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_geometry.py": "66b568d211c5881a0f7e8d116318e761a3b871a4e73a5d084111400123b59f7f",
+      "<owner-home>\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zero_effort_acceleration.py": "28d8f114bd58d91b5caa6243784ed84128f34de03820f9c9720ee7ad4e6d61de",
+      "<owner-home>\\Repositories\\docs\\development\\feedback_controls_planning\\run_mujoco_v1_zero_effort_acceleration_20261012.py": "1fc46a2c9bfcbe9236a51168ca8869cc6c0f9fcd180b505d940fb8c2392f6731"
     },
     "source_hashes_before": {
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\evidence\\native_candidates\\returned81_candidate.json": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_ik.py": "2192171bb6fc69042c4a0db8ab010122599a1c3470bf6a6a6629bff0af31cf6e",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_mjcf.py": "1c34cf4b4986b1af4af88b17f24e7c4f8c7ce7fd9e271b815e2dcbd0658dde4f",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_model.py": "c900a6ebc1072a66d259a4e2f03de3f3c6b9647ffbbcab1aa5fbb21db64185b3",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_full_body_replay.py": "593f34d473988a94d9140b11d5cb5d7fc39ddd742e02ddd7230ab10f20b8ba40",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_model.py": "15586ebb1cea7c19d42f9635671d575acfe065149e656600e0ab9421c82bdb24",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\constraint_kinematics.py": "4cf80a3276078000c455a335a0c9eec8c487aac940cf44131d9ea4aecfad3112",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\contact_law.py": "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\full_body_ik.py": "bfd6c550f5f9efd48695ae602bc4312d44fc91e22f46a749ba2adc919d0dab4d",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\__init__.py": "e183d4d7b27799bd8790baa7e1c99d0aebeca9b709e0ec04554b8848059e1774",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\integrator.py": "3fe57c6ebb939013b30b5b97bad6097821d8052eea21079b13a874b36c0c4bf9",
-      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\plant.py": "ff61ed1b6b98b85d7f4f118d44b470c5e9e4e744423c0052f926f6bf1a0826c5",
-      "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_20261011_root_attempt2\\native-observation.json": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
-      "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_geometry.py": "66b568d211c5881a0f7e8d116318e761a3b871a4e73a5d084111400123b59f7f",
-      "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zero_effort_acceleration.py": "28d8f114bd58d91b5caa6243784ed84128f34de03820f9c9720ee7ad4e6d61de",
-      "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\run_mujoco_v1_zero_effort_acceleration_20261012.py": "1fc46a2c9bfcbe9236a51168ca8869cc6c0f9fcd180b505d940fb8c2392f6731"
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\evidence\\native_candidates\\returned81_candidate.json": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\docs\\development\\full_body_models\\full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_ik.py": "2192171bb6fc69042c4a0db8ab010122599a1c3470bf6a6a6629bff0af31cf6e",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_mjcf.py": "1c34cf4b4986b1af4af88b17f24e7c4f8c7ce7fd9e271b815e2dcbd0658dde4f",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\full_body_model.py": "c900a6ebc1072a66d259a4e2f03de3f3c6b9647ffbbcab1aa5fbb21db64185b3",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_full_body_replay.py": "593f34d473988a94d9140b11d5cb5d7fc39ddd742e02ddd7230ab10f20b8ba40",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\engines\\physics_engines\\mujoco\\python\\native_model.py": "15586ebb1cea7c19d42f9635671d575acfe065149e656600e0ab9421c82bdb24",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\constraint_kinematics.py": "4cf80a3276078000c455a335a0c9eec8c487aac940cf44131d9ea4aecfad3112",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\contact_law.py": "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\full_body_ik.py": "bfd6c550f5f9efd48695ae602bc4312d44fc91e22f46a749ba2adc919d0dab4d",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\__init__.py": "e183d4d7b27799bd8790baa7e1c99d0aebeca9b709e0ec04554b8848059e1774",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\integrator.py": "3fe57c6ebb939013b30b5b97bad6097821d8052eea21079b13a874b36c0c4bf9",
+      "<owner-home>\\Repositories\\Worktrees\\feedback-moco-state-binding-11791\\src\\shared\\python\\motion_matching\\same_input\\plant.py": "ff61ed1b6b98b85d7f4f118d44b470c5e9e4e744423c0052f926f6bf1a0826c5",
+      "<owner-home>\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_20261011_root_attempt2\\native-observation.json": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
+      "<owner-home>\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_geometry.py": "66b568d211c5881a0f7e8d116318e761a3b871a4e73a5d084111400123b59f7f",
+      "<owner-home>\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zero_effort_acceleration.py": "28d8f114bd58d91b5caa6243784ed84128f34de03820f9c9720ee7ad4e6d61de",
+      "<owner-home>\\Repositories\\docs\\development\\feedback_controls_planning\\run_mujoco_v1_zero_effort_acceleration_20261012.py": "1fc46a2c9bfcbe9236a51168ca8869cc6c0f9fcd180b505d940fb8c2392f6731"
     },
     "spec_sha256": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3"
   },
