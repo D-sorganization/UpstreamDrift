@@ -877,6 +877,7 @@
 {"path": "grip_contact/contact_topology.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/couple_check.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/damping.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/deterministic_linalg.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/deterministic_math.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/elastic_foundation.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/force_decomposition.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
