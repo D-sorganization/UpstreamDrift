@@ -456,6 +456,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13725 · Make the Grip MJCF Independent of the BLAS Kernel and Libm: Deterministic Damping Design and Pad Ring Trig
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13725
+- **Branch:** merged via #13727
+- **PR:** #13727
+- **Paths:** see #13727
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`8f67942d`; collated from changes/13725-make-the-grip-mjcf-independent-of-the-bl.md)
+- **Summary:** Make the grip MJCF independent of the BLAS kernel and libm: deterministic damping design and pad ring trig
+- **Next step:** Shipped in PR #13727.
+
 ### DL-#13548 · Correct the OpenSim Ten_Finger Swing Xfail Reason: Net_Force Now Passes; the Remaining 0.04 s Gap Is Net_Moment_Com (#13560)
 
 - **State:** shipped
@@ -501,10 +514,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12691
 - **Branch:** merged via #13738
-- **PR:** #13738
+- **PR:** #13738, #13746
 - **Paths:** see #13738
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`47653aa1`; collated from changes/12691-r11-the-r6-chain-shaft-runs-in-drake-rev.md)
+- **Last verified:** 2026-10-24 (`db738560`; collated from changes/12691-run-tests-cross-engine-test-flex-shaft-p.md)
 - **Summary:** R11: the R6 chain shaft runs in Drake (RevoluteSpring plus joint damping) and passes the same static, modal, topology and same-input parity gate as OpenSim and MyoSuite; Drake joins CHAIN_ENGINES
 - **Next step:** Shipped in PR #13738.
 
@@ -540,10 +553,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13255
 - **Branch:** merged via #13726
-- **PR:** #13726, #13740
+- **PR:** #13726, #13740, #13748
 - **Paths:** see #13726
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`0fc68fd8`; collated from changes/13255-gs3dx-rigid-body-stance-proxy-gs3dx-rigid-s.md)
+- **Last verified:** 2026-10-24 (`13cf33f7`; collated from changes/13255-add-the-simscape-rigid-body-stance-expor.md)
 - **Summary:** GS3DX GRF exporter: opt-in lock_joints (gs3dx_lock_joints, in memory) and DRY shared contact-geometry / sole-point / CSV / SHA-256 helpers; the locked-joint stance costs ~140 s wall per simulated ms
 - **Next step:** Shipped in PR #13726.
 
