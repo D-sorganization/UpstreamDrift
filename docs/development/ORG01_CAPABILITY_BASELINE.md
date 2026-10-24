@@ -19,7 +19,7 @@ packages, saved layouts, and golden test fixtures.
 
 ## Baseline Metrics
 
-- **Total Cataloged Entries**: 190
+- **Total Cataloged Entries**: 191
 - **Observed Launcher Tiles / Models**: 104 (61 base desktop models + 29 discovered provider models + 14 web catalog tiles)
 - **Feature Parity Contracts**: 45
 - **Excluded Tool Packages / Libraries**: 9
@@ -29,7 +29,7 @@ packages, saved layouts, and golden test fixtures.
 
 | Workspace    | Primary Capability Count | Description                                                                           |
 | :----------- | :----------------------: | :------------------------------------------------------------------------------------ |
-| `analysis`   |            43            | Telemetry extraction, metric calculation, video/data analysis, and flight comparison  |
+| `analysis`   |            44            | Telemetry extraction, metric calculation, video/data analysis, and flight comparison  |
 | `capture`    |            21            | Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction           |
 | `governance` |            13            | Configuration setup, project architecture mapping, sidekick docks, and registry admin |
 | `putting`    |            6             | Putting physics, green surface simulation, and ball rolling dynamics                  |
@@ -69,8 +69,8 @@ The full inventory table is split into linked parts by primary workspace.
 
 | Part                                                                                                        | Entries | First ID                      | Last ID                              |
 | :---------------------------------------------------------------------------------------------------------- | :-----: | :---------------------------- | :----------------------------------- |
-| [Capability Baseline Inventory: Analysis (Part 1/2)](org01_capability_baseline/inventory-analysis-1.md)     |   25    | `analysis.analysis_tools_api` | `rate_of_closure`                    |
-| [Capability Baseline Inventory: Analysis (Part 2/2)](org01_capability_baseline/inventory-analysis-2.md)     |   18    | `render.body_appearance`      | `tools_video_analyzer`               |
+| [Capability Baseline Inventory: Analysis (Part 1/2)](org01_capability_baseline/inventory-analysis-1.md)     |   25    | `analysis.analysis_tools_api` | `perturbation_analysis`              |
+| [Capability Baseline Inventory: Analysis (Part 2/2)](org01_capability_baseline/inventory-analysis-2.md)     |   19    | `rate_of_closure`             | `tools_video_analyzer`               |
 | [Capability Baseline Inventory: Capture](org01_capability_baseline/inventory-capture.md)                    |   21    | `c3d_viewer`                  | `video_processor`                    |
 | [Capability Baseline Inventory: Governance](org01_capability_baseline/inventory-governance.md)              |   13    | `aip`                         | `tools.terrain_engine`               |
 | [Capability Baseline Inventory: Putting](org01_capability_baseline/inventory-putting.md)                    |    6    | `bunkershot3d`                | `tools.rate_of_closure`              |
