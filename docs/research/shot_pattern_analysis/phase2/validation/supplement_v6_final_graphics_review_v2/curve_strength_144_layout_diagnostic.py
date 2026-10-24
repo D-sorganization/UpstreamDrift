@@ -10,7 +10,7 @@ from matplotlib.textpath import TextPath
 from matplotlib.transforms import Affine2D
 
 ROOT = pathlib.Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2"
 )
 BATCH = ROOT / "validation/supplement_v6_final_graphics_review_v2/curve_strength_144"
 REPORT = ROOT / "supplement_report_v1"

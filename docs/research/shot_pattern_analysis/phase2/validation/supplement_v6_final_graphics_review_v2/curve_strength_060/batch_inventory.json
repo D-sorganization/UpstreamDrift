@@ -35,7 +35,7 @@
     "control_aliases.json": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b"
   },
   "expected_reference": {
-    "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json",
+    "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json",
     "sha256": "59a922fbcd2c06b23674466538d992f5169628464783adbcb6353a4cfb921edd",
     "artifact_sha256": {
       "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
