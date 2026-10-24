@@ -269,16 +269,6 @@ def test_emitted_springs_act_as_passive_forces() -> None:
 # --- engine wiring and DbC ------------------------------------------------------
 
 
-@pytest.mark.parametrize("engine", ["pinocchio"])
-def test_vector_plant_refuses_chain_spec_without_chain_support(
-    chain_spec: dict[str, Any], engine: str
-) -> None:
-    from src.shared.python.motion_matching.same_input.plant import VectorPlant
-
-    with pytest.raises(ShaftChainUnsupportedError, match="silent rigid replay"):
-        VectorPlant(engine, json.dumps(chain_spec).encode())
-
-
 def test_simulator_leaves_shaft_coordinates_unactuated(
     chain_spec: dict[str, Any],
 ) -> None:

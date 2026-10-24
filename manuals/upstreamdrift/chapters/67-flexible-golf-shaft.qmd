@@ -5,8 +5,8 @@
 Evidence class: implemented and unit tested, not approved. Issue #12686
 (epic #12678, R6) adds an opt-in flexible shaft to the full-body
 specification and the MuJoCo export. Issue #12691 (R11) realises the same
-chain in OpenSim, MyoSuite and Drake and lifts their refusal; Pinocchio and
-Simscape still refuse it. No calculation is registered. The
+chain in OpenSim, MyoSuite, Drake and Pinocchio and lifts their refusal;
+Simscape still refuses it. No calculation is registered. The
 registry blocker `UP-R6-flexible-shaft-chain` stays open until UP-D1
 inventories the pathway, a measured shaft profile replaces the generic one
 and a human reviews it.
@@ -113,8 +113,18 @@ $1 / \sqrt{\kappa}$, which keeps the modal damping ratios.
   would omit the springs refuse a chain specification: `affine_dynamics`
   raises `ShaftChainUnsupportedError` and `closed_loop_differentials` raises
   `DifferentialsUnavailable`.
-- Pinocchio and Simscape: not supported yet. `VectorPlant` raises
-  `ShaftChainUnsupportedError` for a chain specification on these engines
+- Pinocchio (#12691): Pinocchio has no joint-spring element, so
+  `ShaftSprings` (`pinocchio/python/shaft_springs.py`) reads each chain
+  primitive's `stiffness_n_m_rad`, `springref_rad` and `damping_n_m_s_rad`
+  and replaces the effort on that coordinate by
+  $-k\,(q - q_{ref}) - c\,\dot q$ before `constraintDynamics`, the MuJoCo
+  law; efforts on the chain coordinates are therefore ignored. The paths
+  that would omit the springs refuse a chain specification with
+  `ShaftChainUnsupportedError`: `constrained_acceleration` (native-order
+  vectors) and `acceleration_derivatives` (the spring Jacobians are not
+  added).
+- Simscape: not supported yet. `require_engine_support` raises
+  `ShaftChainUnsupportedError` for a chain specification on Simscape
   instead of replaying the shaft as free or rigid joints. `CHAIN_ENGINES`
   lists exactly the engines that pass the parity gate below.
 
@@ -185,8 +195,8 @@ Every engine builds the chain from the same chain specification
 (`apply_shaft_chain` on the canonical driver seed specification); no engine
 carries a shaft parameter of its own. The springs read back from each
 compiled model (OpenSim `SpringGeneralizedForce`, Drake `RevoluteSpring` and
-joint damping, MuJoCo joint stiffness and `dof_damping`) equal the
-specification values exactly.
+joint damping, Pinocchio `ShaftSprings`, MuJoCo joint stiffness and
+`dof_damping`) equal the specification values exactly.
 
 Static and modal checks run in the swing model: the shaft block of the
 full-body mass matrix is the grip-clamped chain's (the links' inertia about
@@ -201,6 +211,7 @@ the Clubhead origin over the eight chain coordinates (step $10^{-6}$ rad).
 | OpenSim | 5.5155 | 5.5115 | 3.9065 | frequency $2 \times 10^{-15}$, compliance $9 \times 10^{-10}$ relative |
 | MyoSuite | 5.5155 | 5.5115 | 3.9065 | identical |
 | Drake | 5.5155 | 5.5115 | 3.9065 | frequency $6 \times 10^{-15}$, compliance $7 \times 10^{-10}$ relative |
+| Pinocchio | 5.5155 | 5.5115 | 3.9065 | frequency $7 \times 10^{-15}$, compliance $7 \times 10^{-10}$ relative |
 
 The values reproduce the $N = 4$ row of the clamped study above, and both
 frequencies stay within the 1 % R6 tolerance of the FEM reference. The test
@@ -211,19 +222,21 @@ coordinates), every specification frame including the `Clubhead` frame on the
 tip link (to $10^{-12}$ m), the total mass and the full mass matrix (to
 $10^{-9}$ of its largest entry) agree with MuJoCo at three record frames with
 a random 1 mrad shaft deflection. At zero deflection the body-coordinate block
-of the OpenSim and Drake chain mass matrices equals the rigid club's.
+of the OpenSim, Drake and Pinocchio chain mass matrices equals the rigid
+club's.
 
 Same-input parity, at the existing tolerances (unchanged):
 
-| Check | Tolerance | OpenSim | MyoSuite | Drake |
-|---|---|---|---|---|
-| Pointwise constrained accelerations, frames 0, 400, 420, 1 mrad deflection, 0.01 rad/s shaft rates | $10^{-6} + 10^{-8} \max|a|$ | $\le 8.6 \times 10^{-9}$ (max $|a|$ up to $1.9 \times 10^{4}$) | 0 | $\le 2.1 \times 10^{-9}$ |
-| Open-loop 30 ms replay of a MuJoCo chain bundle, $q$ / $v$ | $10^{-10}$ / $10^{-8}$ | $8.6 \times 10^{-15}$ / $8.9 \times 10^{-13}$ | 0 / 0 | $1.6 \times 10^{-14}$ / $4.0 \times 10^{-11}$ |
-| Closed-loop 30 ms with the shared controller, $q$ / efforts | $10^{-10}$ / $10^{-6}$ | $1.3 \times 10^{-13}$ / $2.0 \times 10^{-10}$ | 0 / 0 | $7.1 \times 10^{-13}$ / $3.1 \times 10^{-10}$ |
+| Check | Tolerance | OpenSim | MyoSuite | Drake | Pinocchio |
+|---|---|---|---|---|---|
+| Pointwise constrained accelerations, frames 0, 400, 420, 1 mrad deflection, 0.01 rad/s shaft rates | $10^{-6} + 10^{-8} \max|a|$ | $\le 8.6 \times 10^{-9}$ (max $|a|$ up to $1.9 \times 10^{4}$) | 0 | $\le 2.1 \times 10^{-9}$ | $\le 5.5 \times 10^{-9}$ |
+| Open-loop 30 ms replay of a MuJoCo chain bundle, $q$ / $v$ | $10^{-10}$ / $10^{-8}$ | $8.6 \times 10^{-15}$ / $8.9 \times 10^{-13}$ | 0 / 0 | $1.6 \times 10^{-14}$ / $4.0 \times 10^{-11}$ | $1.6 \times 10^{-14}$ / $4.0 \times 10^{-11}$ |
+| Closed-loop 30 ms with the shared controller, $q$ / efforts | $10^{-10}$ / $10^{-6}$ | $1.3 \times 10^{-13}$ / $2.0 \times 10^{-10}$ | 0 / 0 | $7.1 \times 10^{-13}$ / $3.1 \times 10^{-10}$ | $7.1 \times 10^{-13}$ / $2.8 \times 10^{-10}$ |
 
-The Drake column was measured with pydrake 1.58 on Linux (ControlTower). The
-Drake cases are marked `requires_drake` and skip where pydrake is absent or
-mocked.
+The Drake and Pinocchio columns were measured with pydrake 1.58 and
+Pinocchio 4.1 on Linux (ControlTower). Their cases are marked
+`requires_drake` / `requires_pinocchio` and skip where the engine is absent
+or mocked.
 
 The 30 ms bundle deflects the shaft by up to 4.7 mrad, and the shaft
 accelerations in the pointwise check reach $10^{4}$ rad/s², so the springs are
@@ -362,10 +375,11 @@ reference model) and `src/shared/python/model_appearance/club_chain_meshes.py`
   effects are not modelled.
 - The head's centre of mass is on the shaft line, so the chain does not
   produce the bending caused by an offset head centre of mass.
-- MuJoCo, OpenSim, MyoSuite and Drake apply the chain. Pinocchio and
-  Simscape refuse a chain specification until their R11 ports pass the same
-  gate. Drake's affine dynamics and AutoDiff differentials refuse a chain
-  specification.
+- MuJoCo, OpenSim, MyoSuite, Drake and Pinocchio apply the chain.
+  Simscape refuses a chain specification until its R11 port passes the same
+  gate. Drake's affine dynamics and AutoDiff differentials and Pinocchio's
+  native-order constrained acceleration and acceleration derivatives refuse
+  a chain specification.
 - The bare-club inertia partition (`club_solids_partition`) rejects a chain
   specification; grip-wrench analysis is rigid-club only.
 - Criterion 7 (clubhead speed and face delivery) has been measured but is
