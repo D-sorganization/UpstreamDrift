@@ -1,0 +1,37 @@
+name: Conflict Disarm
+
+# UD #12634 excluded until Dieter decides (issue #2195).
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "15 */4 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Log actions only; do not mutate pull requests"
+        required: false
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      exclude_prs:
+        description: "Comma-separated PR numbers to skip"
+        required: false
+        default: "12634"
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: conflict-disarm-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  disarm:
+    uses: D-sorganization/Repository_Management/.github/workflows/reusable-conflict-disarm.yml@main
+    with:
+      dry_run: ${{ inputs.dry_run || 'true' }}
+      exclude_prs: ${{ inputs.exclude_prs || '12634' }}

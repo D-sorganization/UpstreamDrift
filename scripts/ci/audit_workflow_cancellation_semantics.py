@@ -19,6 +19,7 @@ PR_ONLY_CANCEL_EXPRESSION = "${{ github.event_name == 'pull_request' }}"
 CANCEL_FALSE_ALLOWLIST = frozenset(
     {
         "approve-same-repo-runs.yml",
+        "conflict-disarm.yml",
         "cross-engine-leaderboard-publish.yml",
         "jules-push-pr-noise-disable.yml",
         "release.yml",
