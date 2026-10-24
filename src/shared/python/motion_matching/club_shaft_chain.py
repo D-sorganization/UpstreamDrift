@@ -67,8 +67,8 @@ from src.shared.python.motion_matching.club_models import (
 SHAFT_MODELS: tuple[str, ...] = ("rigid", "chain")
 DEFAULT_SHAFT_MODEL = "rigid"
 #: Engines whose spec adapters apply the chain's joint springs and pass the
-#: chain parity gate (MuJoCo #12686; OpenSim and MyoSuite #12691).
-CHAIN_ENGINES: frozenset[str] = frozenset({"mujoco", "opensim", "myosuite"})
+#: chain parity gate (MuJoCo #12686; OpenSim, MyoSuite and Drake #12691).
+CHAIN_ENGINES: frozenset[str] = frozenset({"mujoco", "opensim", "myosuite", "drake"})
 PROFILE_STATUS = "default_not_measured"
 DEFAULT_FLEX = "Stiff"
 #: Links of the default chain: the smallest N whose static tip deflection and

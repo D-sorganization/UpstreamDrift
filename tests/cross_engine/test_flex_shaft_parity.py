@@ -1,4 +1,4 @@
-"""R11 (#12691): the R6 chain shaft in OpenSim and MyoSuite, against MuJoCo.
+"""R11 (#12691): the R6 chain shaft in OpenSim, MyoSuite and Drake, against MuJoCo.
 
 Every engine builds the chain from the same chain spec
 (``apply_shaft_chain``); no engine carries its own shaft parameter.
@@ -13,12 +13,14 @@ Every engine builds the chain from the same chain spec
 3. Topology: coordinate order with the appended shaft coordinates, chain
    frames, total mass and the mass matrix agree with MuJoCo; at zero
    deflection the rigid-coordinate block equals the rigid club's.
-4. The refusal is lifted only for passing engines: Drake and Pinocchio
-   (no chain yet) still raise ``ShaftChainUnsupportedError``.
+4. The refusal is lifted only for passing engines: Pinocchio (no chain
+   yet) still raises ``ShaftChainUnsupportedError``.
 """
 
 from __future__ import annotations
 
+import contextlib
+import importlib
 import json
 from pathlib import Path
 from typing import Any
@@ -60,15 +62,20 @@ FD_STEP_RAD = 1e-6
 REPLAY_S = 0.03
 OPENSIM_MARKS = (pytest.mark.requires_opensim, pytest.mark.integration)
 MYOSUITE_MARKS = (pytest.mark.requires_myosuite, pytest.mark.integration)
+DRAKE_MARKS = (pytest.mark.requires_drake, pytest.mark.integration)
 ENGINES = [
     pytest.param("opensim", marks=OPENSIM_MARKS),
     pytest.param("myosuite", marks=MYOSUITE_MARKS),
+    pytest.param("drake", marks=DRAKE_MARKS),
 ]
+#: Engines whose adapter reads its compiled springs back natively.
+NATIVE_SPRING_ENGINES = ("opensim", "drake")
+MODULES = {"drake": "pydrake.multibody.plant"}  # skips when pydrake is mocked
 
 
 def _require(engine: str) -> None:
     pytest.importorskip("mujoco")
-    pytest.importorskip(engine)
+    pytest.importorskip(MODULES.get(engine, engine))
 
 
 @pytest.fixture(scope="module")
@@ -105,6 +112,10 @@ def plants(chain_bytes: bytes) -> dict[str, Any]:
     """Lazily built chain plants, one per engine (module cache)."""
     from src.shared.python.motion_matching.same_input import VectorPlant
 
+    # Import pydrake at module scope: tests/conftest.py drops engine modules
+    # first imported inside a test, and its native modules cannot re-import.
+    with contextlib.suppress(ImportError):
+        importlib.import_module("pydrake.all")
     cache: dict[str, Any] = {}
 
     def get(engine: str) -> Any:
@@ -120,10 +131,10 @@ def plants(chain_bytes: bytes) -> dict[str, Any]:
 
 
 def test_chain_support_is_exactly_the_passing_engines() -> None:
-    assert {"mujoco", "opensim", "myosuite"} == set(CHAIN_ENGINES)
+    assert {"mujoco", "opensim", "myosuite", "drake"} == set(CHAIN_ENGINES)
 
 
-@pytest.mark.parametrize("engine", ["drake", "pinocchio"])
+@pytest.mark.parametrize("engine", ["pinocchio"])
 def test_engine_without_a_passing_gate_still_refuses(
     chain_bytes: bytes, engine: str
 ) -> None:
@@ -189,13 +200,15 @@ def _mujoco_mass_matrix(plant: Any, q: np.ndarray) -> np.ndarray:
 def _mass_matrix(engine: str, plant: Any, q: np.ndarray) -> np.ndarray:
     if engine == "opensim":
         return plant._adapter.mass_matrix(plant._named(q))
+    if engine == "drake":
+        return plant._adapter.mass_and_bias(q, np.zeros(plant.nv))[0]
     return _mujoco_mass_matrix(plant, q)
 
 
 def _springs(engine: str, plant: Any) -> dict[str, tuple[float, float]]:
     """Compiled ``{coordinate: (stiffness, damping)}`` of the shaft springs."""
     adapter = plant._adapter
-    if engine == "opensim":
+    if engine in NATIVE_SPRING_ENGINES:
         return {n: (k, c) for n, (k, _, c) in adapter.shaft_springs().items()}
     model = adapter.model
     return {
@@ -246,7 +259,13 @@ def test_mass_matrix_and_chain_frames_match_mujoco(
         np.testing.assert_allclose(pose, frames_ref[name], rtol=0, atol=1e-12)
 
 
-@pytest.mark.parametrize("engine", [pytest.param("opensim", marks=OPENSIM_MARKS)])
+@pytest.mark.parametrize(
+    "engine",
+    [
+        pytest.param("opensim", marks=OPENSIM_MARKS),
+        pytest.param("drake", marks=DRAKE_MARKS),
+    ],
+)
 def test_rigid_block_is_the_rigid_club_at_zero_deflection(
     plants: dict[str, Any],
     rigid_bytes: bytes,
@@ -415,3 +434,23 @@ def test_closed_loop_replay_matches_the_mujoco_chain_bundle(
     np.testing.assert_allclose(
         rollout.efforts, bundle.efforts, rtol=0, atol=REPLAY_EFFORT_ATOL
     )
+
+
+# --- Drake DbC: paths without the shaft springs refuse a chain -------------------
+
+
+@pytest.mark.requires_drake
+@pytest.mark.integration
+def test_drake_paths_without_shaft_springs_refuse_a_chain(
+    plants: dict[str, Any], record: dict[str, np.ndarray]
+) -> None:
+    from src.shared.python.loop_nullspace.autodiff_derivatives import (
+        DifferentialsUnavailable,
+    )
+
+    adapter = plants["get"]("drake")._adapter
+    q, v = record["q_chain"][400], np.zeros(len(record["q_chain"][400]))
+    with pytest.raises(ShaftChainUnsupportedError, match="affine_dynamics"):
+        adapter.affine_dynamics(q, v)
+    with pytest.raises(DifferentialsUnavailable, match="chain shaft"):
+        adapter.closed_loop_differentials(q, v)
