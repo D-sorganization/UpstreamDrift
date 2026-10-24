@@ -265,6 +265,11 @@ CALIBRATION_PRIOR_FRAMES: float = 40.0
 SCALE_GRID: tuple[float, ...] = (0.94, 0.97, 1.00)
 
 DT_S: float = 1e-3
+#: Replay step of a chain-shaft spec (#12686). The chain's stiff link modes
+#: leave the explicit integrator's stability region at ``DT_S`` (the canonical
+#: driver replay went non-finite); 0.125 ms is the substep the chain was
+#: qualified at (``same_input.bundle.FINE_EFFORT_HOLD_DT_S``).
+CHAIN_DT_S: float = 1.25e-4
 OMEGA_RAD_S: float = 30.0
 BALANCE: tuple[float, float] = (60.0, 15.0)
 RATE_HZ: float = 360.0

@@ -252,6 +252,55 @@ and not resolved here:
   joint angles to 0.13 rad), outside the small-deflection assumption of the
   linear springs; at impact it is 42 mm along the club $z$ axis.
 
+## Ground-Supported Pipeline Run (#12686)
+
+The motion-matching pipeline (`pipeline.cli`) now accepts a chain
+specification. Three changes were needed, each covered by
+`tests/unit/motion_matching/test_chain_shaft_pipeline.py`:
+
+- `club_face_target` accepts face frames on the chain's tip link. The
+  `Clubhead` frame sits on `Shaft Link 3`, which coincides with the club
+  body at zero deflection, so the face axis and centre equal the rigid ones.
+- The marker IK holds the chain coordinates at their rest angle (0). Left
+  free, they wound up to ±760 deg, because a static marker fit cannot
+  observe shaft bending. Explicit `locked` entries still win.
+- The forward-dynamics replay of a chain specification uses
+  `CHAIN_DT_S = 0.125 ms`, the step at which the chain was qualified
+  (`same_input.bundle.FINE_EFFORT_HOLD_DT_S`). At the rigid
+  `DT_S = 1 ms` the stiff tip springs go non-finite. The rigid club keeps
+  1 ms, and the receipt records `dynamics.dt_s`.
+
+Dynamic study (criterion 7). These are measured results, not qualified
+ones. Canonical seeds on this Windows host (MuJoCo, offscreen), main
+`9cf8a7c5b9` plus this change, compared with rigid controls run the same
+way:
+
+| Run | Clubhead speed at impact (sim / ref) | Error | FD RMS address to impact | Whole-run FD marker RMS |
+|---|---|---|---|---|
+| Driver, rigid | 49.06 / 52.01 m/s | −4.4 % | 39.5 mm | 74.5 mm |
+| Driver, chain | 55.20 / 50.20 m/s | +7.6 % | 35.1 mm | 177.0 mm |
+| 7-iron, rigid | 39.13 / 39.64 m/s | −5.2 % | 34.4 mm | 63.1 mm |
+| 7-iron, chain | no simulated impact | — | 249.1 mm | 721.1 mm |
+
+Speeds are at the face centre. Both rigid and chain runs are outside the
+3 % speed tolerance. The reference speeds differ between the rigid and chain
+runs because their IK solutions differ.
+
+- **Driver chain.** The run reaches impact. The Clubhead deflection
+  $|p(q) - p(q_{\text{straight}})|$ peaks at 194 mm, 83 ms before impact
+  (chain joint angles up to 6.7 deg), and is 80 mm at impact. This repeats
+  the open-loop R11 finding (0.19 m) with closed-loop tracking. After the
+  ball impulse the chain diverges: shaft angles reach 162 deg and the
+  post-impact FD RMS is 336 mm against 128 mm for the rigid club.
+- **7-iron chain** (`--zmp-filter`). Whole-body tracking drifts from the
+  backswing on: 56 mm at 0.3 s, 272 mm at the top, 470 mm at 1.2 s. The
+  face never comes within 0.15 m of the ball. The shaft deflection stays
+  small until the downswing (≤ 40 mm up to 1.2 s), so the loss is not
+  caused by the shaft blowing up. The cause is not identified.
+
+Neither run supports a statement about how shaft flexibility changes
+clubhead speed.
+
 ## Reproduction
 
 ```bash
@@ -274,6 +323,14 @@ PYTHONPATH=.:src python -m scripts.same_input_bundle replay \
   --bundle chain_bundle.npz --engine opensim --out replay_opensim.json
 ```
 
+Ground-supported chain run. The chain specification comes from
+`execution.spec_builder.with_shaft_model(document, club, "chain")` applied to
+`full_body_spec_anthro_driver.json`:
+
+```bash
+python -m src.shared.python.motion_matching.pipeline.cli --static-seeds   --fix-club-markers --capture driver --knee-flexion capture   --spec full_body_spec_anthro_driver_chain.json --out driver_chain
+```
+
 Code: `src/shared/python/motion_matching/club_shaft_chain.py` (engine-neutral
 parameters and specification transform),
 `src/engines/physics_engines/mujoco/python/native_mjcf.py` (spring emission),
@@ -294,10 +351,13 @@ reference model) and `src/shared/python/model_appearance/club_chain_meshes.py`
   gate.
 - The bare-club inertia partition (`club_solids_partition`) rejects a chain
   specification; grip-wrench analysis is rigid-club only.
-- Not done in #12686: the dynamic study of clubhead speed and face delivery
-  (criterion 7), and reviewed down-the-line stills of a deflected shaft
-  (criterion 6 evidence). The MuJoCo club meshes now follow the chain (see
-  Chain Shaft Render), but no still has been rendered and reviewed yet.
+- Criterion 7 (clubhead speed and face delivery) has been measured but is
+  not qualified. The driver chain run misses the speed tolerance by +7.6 %,
+  and the 7-iron chain run loses tracking (see Ground-Supported Pipeline
+  Run).
+- Criterion 6 is still open: no down-the-line still of a deflected shaft
+  has been rendered and reviewed. The MuJoCo club meshes now follow the
+  chain (see Chain Shaft Render).
 - Native-viewer stills of a deflected shaft (#12691 criterion 5) are not
   done. The OpenSim exporter still draws the club meshes on the club body,
   so it shows a straight shaft. The impact-window figure compares the

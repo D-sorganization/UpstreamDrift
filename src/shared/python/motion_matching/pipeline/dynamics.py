@@ -31,6 +31,7 @@ from src.shared.python.motion_matching.ground_support import convex_hull_contain
 from src.shared.python.motion_matching.pipeline.constants import (
     BALANCE,
     CONSISTENCY_PRIOR,
+    CHAIN_DT_S,
     DT_S,
     OMEGA_RAD_S,
     SHOOTING_LOCKED,
@@ -258,13 +259,14 @@ def replay(
         reference_hook=reference_hook,
     )
     rate_hz = lane.rate_hz
+    dt_s = replay_dt_s(sim.adapter)
     record = sim.run(
         q0,
         v0,
         controller,
         duration_s=float(lane.times[-1]),
-        dt_s=DT_S,
-        record_every=int(round(1.0 / (rate_hz * DT_S))),
+        dt_s=dt_s,
+        record_every=int(round(1.0 / (rate_hz * dt_s))),
         impact=impact,
     )
     sim_q = np.array(
@@ -274,6 +276,17 @@ def replay(
         ]
     )
     return record, sim_q
+
+
+def replay_dt_s(adapter: Any) -> float:
+    """Forward-dynamics replay step for ``adapter`` (seconds).
+
+    ``DT_S`` for a rigid club; ``CHAIN_DT_S`` when the adapter declares
+    chain-shaft ``passive_coordinates`` (#12686), whose stiff link modes are
+    unstable at ``DT_S``. Postcondition: a positive step.
+    """
+    passive = tuple(getattr(adapter, "passive_coordinates", ()) or ())
+    return CHAIN_DT_S if passive else DT_S
 
 
 def zmp_summary(zmp: dict[str, Any], times: np.ndarray) -> dict[str, float]:
@@ -826,7 +839,7 @@ def build_dynamics_report(
     rate_hz = lane.rate_hz
     report = {
         "duration_s": float(lane.times[-1]),
-        "dt_s": DT_S,
+        "dt_s": replay_dt_s(adapter),
         "controller": {
             "type": "computed torque tracking, unactuated root",
             "backend": validate_tracking_backend(inputs.tracking_backend),
