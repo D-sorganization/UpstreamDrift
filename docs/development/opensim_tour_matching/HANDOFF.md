@@ -1,5 +1,19 @@
 # OpenSim Motion-Matching Continuation Handoff
 
+## Current State (2026-10-20, #13434)
+
+- The tour-marker model frozen by OS-3b (`evidence/os7_moco_g1/inputs/golf_humanoid_scaled_tour_markers.osim`) is mirrored and unregistered. Every OS-7/OS-8 joint angle derived from it is unusable, for example 42° torso axial rotation at address. Do not build on it.
+- Use the OS-9 registration instead: `evidence/os9_address_registration/` (model, `receipt.json`, `ik_states_continuous.sto`). It comes from `os9_address_registration.py` in PR #13484 (branch `fix/13434-static-address-registration`, auto-merge armed). The method, the rejected experiments and the reproduction commands are in [EPIC_10003.md](EPIC_10003.md#os-9-prior-constrained-address-registration-2026-10-19-13434).
+- Open owner decisions on #13434:
+  - The address trunk screening bound: 30.2° measured against 30°, almost all lumbar flexion. Never loosen it unilaterally.
+  - The suspicious OS-3b humerus scale factors (1.46 right, 1.24 left).
+- Next work:
+  - Wire `tour_matching.marker_plausibility` fail-closed into `spine/golf_input.py`.
+  - Re-run SPN-14a #12769 and SPN-D9 #13427 on the OS-9 IK.
+- The sections below are the 2026-09-18 historical snapshot.
+
+## Historical Snapshot (2026-09-18)
+
 Reviewed 2026-09-18 at 01:45 UTC. Current issue #10341 (MS-42), epic #10363.
 OS-0..6 are historical delivered infrastructure; they are not an accepted
 full-swing match. The OS-6 shared metrics were unverified. The following

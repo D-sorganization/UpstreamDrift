@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-17T09:36:17Z",
+  "generated_at": "2026-10-20T14:52:09Z",
   "rows": [
     {
       "acceptance": null,
@@ -3936,6 +3936,56 @@
       "artefacts": {
         "gif": null,
         "mot": null,
+        "npz": "docs/development/opensim_tour_matching/evidence/os9_address_registration/marker_rms.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": null,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os9_address_registration/ik_receipt.json",
+      "sha256": "f48d5d4d64259c687b3bad7c161d9c846829cc56a687fbfcded33ffd6673fdc5"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/opensim_tour_matching/evidence/os9_address_registration/marker_rms.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": null,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os9_address_registration/receipt.json",
+      "sha256": "be64e32713f743d882a0c2b39b640f57f986eb6b86f0820a964ce09805c470e4"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
         "npz": null
       },
       "candidate_sha": null,
@@ -6444,5 +6494,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 157
+  "total_receipts": 159
 }
