@@ -129,7 +129,7 @@ depend on the inertia tensor — only the transient settling trajectory and
 its duration do.
 
 **Result** (MATLAB R2025b, 2 s settle, `ode23t`, 109.388 kg, 44 compiled
-blocks, 2.3 s wall clock). Measured at the last logged frame against the
+blocks, 2.8 s wall clock). Measured at the last logged frame against the
 unchanged GCV-2 tolerances (2% weight, 5% split, CoP within 0.05 m x / 0.01 m y):
 
 | criterion                        | measured           | GCV-2 bound        |
