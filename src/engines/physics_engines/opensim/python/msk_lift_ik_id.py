@@ -74,6 +74,10 @@ from src.engines.physics_engines.opensim.python.msk_lift_model import (
     PENETRATION_LIMIT_M,
     LiftModelBuild,
 )
+from src.engines.physics_engines.opensim.python.msk_lift_simbody_kinematics import (
+    generalized_speeds_from_spline_derivatives,
+    spline_coordinate_derivatives,
+)
 from src.shared.python.biomechanics.ground_reaction import (
     ContactSet,
     analyze_ground_reaction,
@@ -111,6 +115,7 @@ __all__ = [
     "run_inverse_dynamics",
     "run_inverse_kinematics",
     "static_hold_grf",
+    "generalized_speeds_from_spline_derivatives",
 ]
 
 IK_MARKER_RMS_THRESHOLD_M = 0.02
@@ -790,22 +795,6 @@ def _splines(ik: IKResult, time_s: Array) -> Any:
     return osim.GCVSplineSet(table, osim.StdVectorString(), _GCV_DEGREE, 0.0)
 
 
-def _derivatives(splines: Any, n: int, t: float) -> tuple[Array, Array, Array]:
-    osim = import_opensim()
-    x = osim.Vector(1, float(t))
-    first, second = osim.StdVectorInt(), osim.StdVectorInt()
-    first.append(0)
-    second.append(0)
-    second.append(0)
-    values = np.empty((3, n))
-    for j in range(n):
-        f = splines.get(j)
-        values[0, j] = f.calcValue(x)
-        values[1, j] = f.calcDerivative(first, x)
-        values[2, j] = f.calcDerivative(second, x)
-    return values[0], values[1], values[2]
-
-
 def _external_body_forces(model: Any, state: Any, targets: LiftTargets, k: int) -> Any:
     """Applied external body wrenches (feet, hands, and bench support if present).
 
@@ -897,7 +886,10 @@ def run_inverse_dynamics(
     )
     rows, com = [], []
     for k, t in enumerate(targets.time_s):
-        q, u, udot_values = _derivatives(splines, len(names), float(t))
+        q, qd, qdd = spline_coordinate_derivatives(splines, len(names), float(t))
+        u, udot_values = generalized_speeds_from_spline_derivatives(
+            tuple(names), q, qd, qdd
+        )
         for j, name in enumerate(names):
             coords.get(name).setValue(state, float(q[j]), False)
             coords.get(name).setSpeedValue(state, float(u[j]))

@@ -63,8 +63,10 @@ __all__ = [
     "add_bilateral_left_hand_bushing",
     "build_humanoid_urdf",
     "load_humanoid_dimensions",
+    "count_actuators_for_urdf",
     "load_humanoid_into_plant",
     "render_urdf_string",
+    "resolve_plant_n_actuators",
     "right_hand_grip_analysis",
 ]
 
@@ -1009,6 +1011,42 @@ def ensure_revolute_joint_actuators(plant: MultibodyPlant) -> int:
         )
         raise RuntimeError(msg)
     return n_actuators
+
+
+def resolve_plant_n_actuators(plant: MultibodyPlant) -> int:
+    """Return the actuated DOF count used to pack ``theta`` (issue #13531).
+
+    After :func:`load_humanoid_into_plant`, Drake reports one actuator per
+    actuated revolute joint. When the URDF omits transmissions entirely,
+    :func:`ensure_revolute_joint_actuators` retrofits motors and
+    ``num_actuators()`` is still authoritative. Only when the plant has zero
+    actuators *and* a finalized velocity count do we fall back to ``nv - 6``
+    (floating root), matching :mod:`simulate`.
+    """
+    n = int(plant.num_actuators())
+    if n > 0:
+        return n
+    nv = int(plant.num_velocities())
+    return max(nv - 6, 0)
+
+
+def count_actuators_for_urdf(
+    urdf_path: Path | str | None = None,
+    *,
+    time_step_s: float = 0.0,
+) -> int:
+    """Load ``urdf_path`` (default :data:`CANONICAL_URDF`) and return actuator count.
+
+    Raises:
+        ImportError: if ``pydrake`` is not installed.
+    """
+    from pydrake.multibody.plant import MultibodyPlant  # noqa: PLC0415
+
+    path = urdf_path if urdf_path is not None else CANONICAL_URDF
+    plant = MultibodyPlant(time_step_s)
+    load_humanoid_into_plant(plant, path)
+    plant.Finalize()
+    return resolve_plant_n_actuators(plant)
 
 
 def load_humanoid_into_plant(

@@ -16,11 +16,11 @@ instead when you want something that just runs.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Video file | `.mp4`, `.avi`, `.mov` | Chosen through a file dialog. |
-| `model_folder` | filesystem path | The only configuration key the worker actually forwards to the estimator. When absent, the estimator resolves a default location itself. |
-| Configuration box defaults | text | Pre-filled with `model_pose=BODY_25`, `net_resolution=-1x368`, `number_people_max=1`. These are shown for information; see Limitations. |
+| Input                      | Unit / type            | Notes                                                                                                                                    |
+| -------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Video file                 | `.mp4`, `.avi`, `.mov` | Chosen through a file dialog.                                                                                                            |
+| `model_folder`             | filesystem path        | The only configuration key the worker actually forwards to the estimator. When absent, the estimator resolves a default location itself. |
+| Configuration box defaults | text                   | Pre-filled with `model_pose=BODY_25`, `net_resolution=-1x368`, `number_people_max=1`. These are shown for information; see Limitations.  |
 
 The parser accepts both `--key value` and `key=value` lines and treats
 `#` as a comment. Frame rate and resolution come from the video itself
@@ -28,14 +28,14 @@ The parser accepts both `--key value` and `key=value` lines and treats
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| `output/openpose_results.json` | JSON array, one object per processed frame | Written relative to the process working directory. |
-| `timestamp` | seconds | Taken from OpenCV's `CAP_PROP_POS_MSEC` divided by 1000. |
-| `confidence` | dimensionless, 0.0-1.0 | Per-frame aggregate. `0.0` when no person was detected. |
-| `joint_angles` | **radians** | Per-joint mapping, as defined by the shared `PoseEstimationResult` contract. |
-| `keypoint_count` | count | Number of raw keypoints retained; present only when raw keypoints exist. |
-| In-memory raw keypoints | `[x_px, y_px, score]` per named keypoint | **Pixel** image coordinates plus a 0.0-1.0 detection score. Held during the run, not written to the JSON file. |
+| Output                         | Unit / type                                | Notes                                                                                                          |
+| ------------------------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `output/openpose_results.json` | JSON array, one object per processed frame | Written relative to the process working directory.                                                             |
+| `timestamp`                    | seconds                                    | Taken from OpenCV's `CAP_PROP_POS_MSEC` divided by 1000.                                                       |
+| `confidence`                   | dimensionless, 0.0-1.0                     | Per-frame aggregate. `0.0` when no person was detected.                                                        |
+| `joint_angles`                 | **radians**                                | Per-joint mapping, as defined by the shared `PoseEstimationResult` contract.                                   |
+| `keypoint_count`               | count                                      | Number of raw keypoints retained; present only when raw keypoints exist.                                       |
+| In-memory raw keypoints        | `[x_px, y_px, score]` per named keypoint   | **Pixel** image coordinates plus a 0.0-1.0 detection score. Held during the run, not written to the JSON file. |
 
 The **25 BODY_25 keypoints** are named in the estimator's
 `KEYPOINT_MAP`: Nose, Neck, RShoulder, RElbow, RWrist, LShoulder,
@@ -82,10 +82,11 @@ ingestion format (2D only, BODY_25 or COCO_18 JSON) is in the
 - **Raw keypoints are not exported** - only a count of them.
 - **Requires a separate install and carries licence conditions.**
   `pyopenpose` and the model weights are not shipped with
-  UpstreamDrift, and the tile is registered as *Academic License*.
+  UpstreamDrift, and the tile is registered as _Academic License_.
   Without them the run fails with an install hint.
 
 ## See Also
+
 - [OpenPose integration](../engines/openpose.md)
 - [Video analysis tutorial](../tutorials/content/04_video_analysis.md)
 - [Motion pipeline format matrix](../motion_pipeline/formats.md)

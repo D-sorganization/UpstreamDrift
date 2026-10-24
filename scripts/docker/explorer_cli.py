@@ -152,9 +152,12 @@ def load_trajectory(path: Path, nq: int) -> Any:
     suffix = path.suffix.lower()
     if suffix == ".npz":
         with np.load(path) as archive:
-            if "qpos" not in archive:
-                raise ExplorerError(f"{path.name} has no 'qpos' array")
-            qpos = np.asarray(archive["qpos"], dtype=float)
+            if "qpos" in archive:
+                qpos = np.asarray(archive["qpos"], dtype=float)
+            elif "q" in archive:
+                qpos = np.asarray(archive["q"], dtype=float)
+            else:
+                raise ExplorerError(f"{path.name} has no 'qpos' or 'q' array")
     elif suffix == ".npy":
         qpos = np.asarray(np.load(path), dtype=float)
     elif suffix == ".csv":

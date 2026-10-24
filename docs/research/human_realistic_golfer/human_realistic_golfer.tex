@@ -616,7 +616,7 @@ The helper \texttt{map\_site\_to\_hand\_frame} transforms site primitives into t
 \begin{equation}
 p_{\mathrm{hand}} = p_{\mathrm{axis\_offset}} + \begin{bmatrix} x_{\mathrm{site}} - x_{\mathrm{orig}} \\ y_{\mathrm{site}} \\ z_{\mathrm{site}} \end{bmatrix}.
 \end{equation}
-At the weld pose, every physical pad--grip site's surface gap is exactly $-0.250$\,mm, satisfying the $\pm 0.5$\,mm neutral preload contract.
+At the weld pose, every physical pad--grip site's surface gap is exactly $-0.250$\,mm, satisfying the $\pm 0.5$\,mm neutral preload contract. The preload is an internal squeeze, so it must be self-equilibrated on the club. Before \#13555 three pads had no ring partner across the grip (\texttt{lead\_heel\_pad\_butt}, \texttt{ten\_finger\_little\_finger\_grip} and \texttt{trail\_index\_trigger\_grip}), which put a $42.774$\,N radial force and a $2.5$--$5.5$\,N\,m couple on the club at $t = 0$, depending on the style. Each is now opposed by an antagonist pad diametrically across the grip at the same axial station and the same preload: \texttt{lead\_butt\_fingers} (the lead little and ring fingers, which in every grip style wrap the butt opposite the hypothenar heel pad), \texttt{trail\_thumb\_pad} (the trail thumb, which closes against the shaft opposite a pulled-back trigger index finger) and \texttt{trail\_hypothenar} (the trail hypothenar eminence, which in a ten-finger grip lies across the grip from the trail little finger that no longer overlaps or interlocks the lead hand). Sphere--cylinder normal forces act radially through the grip axis, so each pad and its antagonist exert equal, collinear forces that cancel in force and moment; the net hand--grip wrench on the club at $t = 0$ is zero for every style and trigger option. Seating the unpaired pads tangent (gap $0$) also zeroes the $t = 0$ wrench, but it was rejected: it leaves pads at contact onset, where engine calibrations that assume every pad at the preload (the MuJoCo per-site \texttt{solref} fit and the OpenSim Elastic Foundation offset) break and the heel chatters in the separated scenarios.
 
 \textbf{Pinocchio Adapter.} \texttt{ClubInHands} in \path{src/engines/physics_engines/pinocchio/python/grip_contact_sim.py} accepts an optional
 \texttt{topology\_model: TopologyContactModel}. When supplied, \texttt{wrenches()} evaluates \texttt{topology\_side\_wrench} and caches per-pair
@@ -2331,6 +2331,85 @@ python3 scripts/export_simscape_appearance.py --check
 python3 -m pytest tests/unit/grip_contact/test_simscape_grip_topology_export.py
 \end{verbatim}
 
+\subsection{Simscape Physical Grip Contact and Codegen Kernel (HRG-GS-M12, \#13334)}
+\textbf{Model Topology, Releasing the Hand--Club Welds, and Block-Budget Assessment.}
+Whereas \path{GolfSwing3D_Human.slx} (\texttt{HRG-GS-M11}, \#13333) closes the two-handed grip through a rigid kinematic loop, \texttt{HRG-GS-M12} (\#13334) defines a standalone physical grip-contact fixture model \path{GS3DX_GripContact.slx} (\texttt{gs3dx\_names().variants.grip\_contact}, built programmatically by \path{exploratory_gs3dx/tools/gs3dx_build_grip_contact.m}) that removes all hand--club \texttt{Weld Joint} blocks and drives the 6-DOF club exclusively through the shared pad--grip contact law:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textit{Free 6-DOF Club with Diagonalized Principal Inertia}: The club body attaches to \texttt{Club Init Pose} through a Simscape Multibody \texttt{6-DOF Joint} (\texttt{Club 6DOF Joint}) at \texttt{Club\_Origin}. Because the Pinocchio G6 reference club (\texttt{simulate\_grip\_contact} in \path{src/engines/physics_engines/pinocchio/python/grip_contact_sim.py}, exported from \path{full_body_spec_anthro_driver.json}) has mass $m_{\mathrm{club}} = 0.422098\,\mathrm{kg}$, center of mass $\mathbf{c}_{\mathrm{club}} = [0.619773, 0, 0]^{\top}\,\mathrm{m}$, and a symmetric inertia tensor about $\mathbf{c}_{\mathrm{club}}$ with nonzero off-diagonal product $I_{xy} = -3.7707\times 10^{-4}\,\mathrm{kg\cdot m^2}$, \path{scripts/export_simscape_grip_contact_inputs.py} computes the eigendecomposition $\mathbf{I}_{\mathrm{com}} = \mathbf{R}_{\mathrm{p}}\operatorname{diag}(I_1, I_2, I_3)\mathbf{R}_{\mathrm{p}}^{\top}$ with principal moments $(I_1, I_2, I_3) = (9.5205\times 10^{-4}, 8.3347\times 10^{-2}, 8.3821\times 10^{-2})\,\mathrm{kg\cdot m^2}$ and places \texttt{Club Inertia} on \texttt{Club COM Transform} with zero products of inertia.
+\item \textit{Prescribed Bilateral Hands via Piecewise Hermite Cubics}: \texttt{Hand\_L} and \texttt{Hand\_R} attach to their initial world poses via \texttt{Bushing Joint} blocks (\texttt{Hand L Prescribed Joint}, \texttt{Hand R Prescribed Joint}) with \texttt{MotionActuationMode = 'InputMotion'} across all six relative axes $(p_x, p_y, p_z, \phi_x, \phi_y, \phi_z)$. \path{scripts/export_simscape_grip_contact_inputs.py} exports piecewise Hermite cubic spline coefficients $(\mathbf{q}_{\mathrm{rel}}, \mathbf{b}, \mathbf{c}, \mathbf{d})$ on the $51$-sample $2\,\mathrm{ms}$ grid $[0, 0.10]\,\mathrm{s}$ from the Pinocchio G6 \texttt{hold} and \texttt{short\_swing} hand trajectories (\path{swing_q_driver.npz}).
+\item \textit{Reasoning-Only Estimate of Block Types Required for Full \texttt{GS3DX\_Human}}: Under the MathWorks Home license ceiling of $1{,}000$ compiled nonvirtual blocks and the $25$-block in-memory sensor reserve required by \texttt{gs3dx\_contact\_check} ($975$-block persistent limit), \texttt{GS3DX\_FullBody} compiles to $945$ blocks, \texttt{GS3DX\_FullBodyContact} to $967$ blocks, and \texttt{GS3DX\_Neck}/\texttt{GS3DX\_Human} to $975$ blocks ($0$ reserve headroom; see \path{exploratory_gs3dx/docs/BLOCK_BUDGET_FINDINGS.md}). By reasoning only (estimate, not compiled or measured in \texttt{GS3DX\_Human} and with no specific block-count totals), embedding physical grip contact into \texttt{GS3DX\_Human} would require deleting \texttt{Right Hand Weld} (\texttt{Weld Joint}) and adding a \texttt{6-DOF Joint} and principal-inertia \texttt{Rigid Transform} for the club, three \texttt{Transform Sensor} blocks (\texttt{Club}, \texttt{Hand\_L}, \texttt{Hand\_R} relative to \texttt{World}) with \texttt{PS-Simulink Converter} blocks for position, rotation, linear velocity, and angular velocity on each body, the \texttt{Grip Contact Kernel} \texttt{MATLAB Function} block, and \texttt{External Force and Torque} block(s) with \texttt{Simulink-PS Converter} and \texttt{Demux} routing blocks. Because \texttt{GS3DX\_Human} already has zero headroom below the $975$-block reserve gate, physical grip contact is isolated in the standalone \texttt{GS3DX\_GripContact} fixture model (\path{exploratory_gs3dx/docs/GRIP_CONTACT.md}).
+\end{enumerate}
+
+\textbf{Canonical Python-to-MATLAB Codegen Kernel (Stateless Law).}
+The generator \path{src/shared/python/grip_contact/matlab_kernel.py} (invoked via \path{scripts/export_simscape_grip_kernel.py} with \texttt{--check} drift verification) emits \path{exploratory_gs3dx/tools/generated/gs3dx_grip_contact_kernel.m} (\texttt{\%\#codegen} compliant: fixed-size arrays, no containers, no strings, no dynamic memory, no \texttt{persistent} variables) and \path{gs3dx_grip_contact_params.json} directly from the Python source of truth (\path{contact_topology.py}, \path{pair_contact.py}, and \path{topology_contact.py}).
+The shared pairwise contact law in \path{src/shared/python/grip_contact/pair_contact.py}---specifically \texttt{sphere\_capsule}, \texttt{capsule\_capsule}, and \texttt{\_sample\_contact} (which delegates to \texttt{sphere\_ground\_contact} and \texttt{torsional\_friction\_moment} in \path{src/shared/python/motion_matching/contact_law.py})---is \textbf{stateless}: it evaluates regularized tanh/Stribeck tangential friction with no tangential spring and no integrated slip state. Consequently, \texttt{gs3dx\_grip\_contact\_kernel} has no \texttt{z\_state} input and no \texttt{dz\_dt} output, and its exact signature is:
+\begin{verbatim}
+[F_club_w, M_club_w, F_hand_L_w, M_hand_L_w, F_hand_R_w, M_hand_R_w, ...
+ pair_normal_n, pair_tangent_n, pair_spin_nm, pair_penetration_m, ...
+ pair_slip_speed_m_s, pair_signed_dist_m, pair_force_club_w, ...
+ pair_moment_club_w, pair_contact_point_w] = gs3dx_grip_contact_kernel( ...
+ p_club, R_club, v_club, omega_club, ...
+ p_hand_L, R_hand_L, v_hand_L, omega_hand_L, ...
+ p_hand_R, R_hand_R, v_hand_R, omega_hand_R, ...
+ style_id)
+\end{verbatim}
+Given club state $(\mathbf{p}_C, \mathbf{R}_C, \mathbf{v}_C, \boldsymbol{\omega}_C)$, left/right hand states $(\mathbf{p}_h, \mathbf{R}_h, \mathbf{v}_h, \boldsymbol{\omega}_h)$ ($h \in \{\mathrm{L}, \mathrm{R}\}$), and style selector $\mathrm{style\_id} \in \{1, 2, 3\}$ (with squeeze preload $F_{\mathrm{sq}} = 1100\,\mathrm{N}$ per hand baked into the $(12 \times 17)$ pair tables), each active physical hand--grip pair $k$ is evaluated by:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textit{Geometry and Closest Points}: Sphere centers (via \texttt{closest\_point\_segment}) or capsule segments (via \texttt{closest\_points\_segments}) are transformed into world coordinates against the side's club grip capsule $(\mathbf{b}_{0,w}, \mathbf{b}_{1,w}, r_b)$ to compute signed distance $d_{\mathrm{signed},k} = d_k - r_{a,k} - r_{b,k}$, unilateral penetration $\delta_k = \max(0, -d_{\mathrm{signed},k})$, unit normal $\hat{\mathbf{n}}_k$, and contact point $\mathbf{p}_{c,k}$.
+\item \textit{Stateless Hunt--Crossley, Regularized Stribeck, and Torsional Spin Law}: With relative point velocity $\mathbf{v}_{\mathrm{rel},k}$ and relative angular velocity $\boldsymbol{\omega}_{\mathrm{rel},k}$, normal velocity $v_{n,k} = \hat{\mathbf{n}}_k \cdot \mathbf{v}_{\mathrm{rel},k}$, tangential velocity $\mathbf{v}_{t,k} = \mathbf{v}_{\mathrm{rel},k} - v_{n,k}\hat{\mathbf{n}}_k$, and slip speed $s_k = \|\mathbf{v}_{t,k}\|_2$, the kernel evaluates
+\begin{equation}
+f_{n,k} = \max\bigl(0,\, k_n \delta_k (1 - c_n v_{n,k})\bigr), \quad
+\mathbf{f}_{t,k} = -\mu(s_k) f_{n,k} \tanh(s_k / v_{\mathrm{tr}}) \frac{\mathbf{v}_{t,k}}{s_k}, \quad
+\mathbf{m}_{s,k} = -\mu_s f_{n,k} r_{\mathrm{patch}} \tanh(\omega_{n,k} / \omega_{\mathrm{tr}})\hat{\mathbf{n}}_k,
+\end{equation}
+and sums the resulting pair wrenches into net world-frame wrenches $(\mathbf{F}_{C,W}, \mathbf{M}_{C,W})$ about $\mathbf{p}_C$ and $(\mathbf{F}_{h,W}, \mathbf{M}_{h,W})$ about $\mathbf{p}_h$, satisfying exact action--reaction balance $\mathbf{F}_{C,W} + \mathbf{F}_{\mathrm{L},W} + \mathbf{F}_{\mathrm{R},W} = \mathbf{0}$.
+\end{enumerate}
+
+\textbf{R2025b Measured Values: Pending Orchestrator Run.}
+The generator writes $51$ constitutive golden vectors ($9$ named edge cases per style plus $24$ randomized 3D pose/twist states) to \path{exploratory_gs3dx/tests/fixtures/gs3dx_grip_pair_golden.json}. In MATLAB R2025b, \texttt{test\_gs3dx\_grip\_pair\_wrench} passed ($1$ test over all $51$ golden cases). All remaining model-build, compiled-block-count, simulation, qualification-probe, and Pinocchio parity rows in Table~\ref{tab:m12_r2025b_pending} are pending the orchestrator's R2025b run.
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Check / Metric} & \textbf{Style / Scenario} & \textbf{Gate / Tolerance} & \textbf{R2025b Measured Value} \\
+\midrule
+Golden test result (\texttt{test\_gs3dx\_grip\_pair\_wrench}) & All $3$ styles ($51$ golden cases) & $\le 10^{-10}$ rel / $\le 10^{-9}\,\mathrm{N}$ abs & \texttt{PASSED} ($1$ test, all $51$ cases) \\
+Compiled block count (\texttt{GS3DX\_GripContact}) & Uncompiled / compiled total & $\le 975$ compiled ($1{,}000 - 25$) & Pending orchestrator run \\
+Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{overlap} / \texttt{hold} & Peak $\le 5\%$, RMS $\le 2\%$ & Pending orchestrator run \\
+Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{overlap} / \texttt{short\_swing} & Peak $\le 5\%$, RMS $\le 2\%$ & Pending orchestrator run \\
+Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{interlock} / \texttt{hold} & Peak $\le 5\%$, RMS $\le 2\%$ & Pending orchestrator run \\
+Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{interlock} / \texttt{short\_swing} & Peak $\le 5\%$, RMS $\le 2\%$ & Pending orchestrator run \\
+Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{ten\_finger} / \texttt{hold} & Peak $\le 5\%$, RMS $\le 2\%$ & Pending orchestrator run \\
+Net-club-wrench parity vs.\ Pinocchio (peak / RMS) & \texttt{ten\_finger} / \texttt{short\_swing} & Peak $\le 5\%$, RMS $\le 2\%$ & Pending orchestrator run \\
+Timestep-convergence change (\texttt{max\_rel\_force\_diff}) & \texttt{overlap} / \texttt{short\_swing} & $\le 2\%$ relative force diff & Pending orchestrator run \\
+Save/reload difference ($\Delta F$, $\Delta M$) & \texttt{overlap} / \texttt{short\_swing} & $\le 10^{-11}\,\mathrm{N}$ / $\mathrm{N\cdot m}$ & Pending orchestrator run \\
+Frame-probe error at $t = 0$ ($\Delta p$, $\|\Delta R\|_F$) & All styles \& scenarios & $\le 10^{-8}\,\mathrm{m}$, $\le 10^{-8}$ Fro & Pending orchestrator run \\
+Force-sign check (\texttt{min\_normal\_push\_dot\_n}) & All styles (\texttt{hold}) & $> 0\,\mathrm{N}$ outward normal push & Pending orchestrator run \\
+\bottomrule
+\end{tabular}
+\caption{R2025b Measured Values: Pending Orchestrator Run (HRG-GS-M12, \#13334).}
+\label{tab:m12_r2025b_pending}
+\end{table}
+
+\textbf{Acceptance Criteria and Deferred R2025b Validation.}
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textit{Generator Freshness}: \path{scripts/export_simscape_grip_kernel.py --check} and \path{scripts/export_simscape_grip_contact_inputs.py --check} verify that \path{gs3dx_grip_contact_kernel.m}, \path{gs3dx_grip_contact_params.json}, \path{gs3dx_grip_pair_golden.json}, and \path{gs3dx_grip_contact_scenarios.json} match the Python source of truth byte-for-byte.
+\item \textit{MATLAB Unit Test}: \path{exploratory_gs3dx/tests/test_gs3dx_grip_pair_wrench.m} asserts \texttt{version('-release') == "2025b"} and verifies all $51$ constitutive golden vectors to $\le 10^{-10}$ relative and $\le 10^{-9}\,\mathrm{N}$ absolute error (\texttt{PASSED} in R2025b, $1$ test over all golden cases).
+\item \textit{Simscape Runner and Probes}: \path{exploratory_gs3dx/tools/gs3dx_grip_contact_run.m} is configured to build \texttt{GS3DX\_GripContact}, check the compiled block budget ($< 975$ blocks), simulate \texttt{hold} and \texttt{short\_swing} across \texttt{overlap}, \texttt{interlock}, and \texttt{ten\_finger}, and record in \path{gs3dx_grip_contact_receipt.json} (\texttt{simscape-grip-contact-receipt/v1}) the R2025b release, SHA-256 digests, $t=0$ frame probes, outward normal force-sign probes, timestep convergence, and save/close/reload reproducibility.
+\item \textit{Determinate Net-Wrench Parity and Deferred Receipt}: \path{src/shared/python/grip_contact/simscape_grip_contact.py} validates \texttt{simscape-grip-contact-series/v1} under Design-by-Contract (every \texttt{NaN} channel requires a non-empty \texttt{unavailable\_reasons} entry) and converts each run into a \texttt{ContactRun} and \texttt{TopologyKineticsSeries} for comparison against Pinocchio G6 (\texttt{PEAK\_TOLERANCE} $= 5\%$, \texttt{RMS\_TOLERANCE} $= 2\%$ on determinate \texttt{net\_force} and \texttt{net\_moment\_com}; per-hand split and hand--hand pairs remain \texttt{INDETERMINATE} per \S 19). Until the R2025b host commits \path{exploratory_gs3dx/receipts/grip_contact/}, the six parity tests in \path{tests/unit/grip_contact/test_simscape_grip_contact.py} skip cleanly without passing vacuously, tracked under deferred entry \texttt{HRG-GS-M12} (\#13334) in \path{docs/development/deferred-catalog-bundle.json}.
+\end{enumerate}
+
+\textbf{Limitations.}
+Because \texttt{GS3DX\_Human} already uses $975$ of $1{,}000$ compiled blocks under the Home license, physical grip contact is isolated in the standalone \texttt{GS3DX\_GripContact} two-hand + free-club fixture model with rigid-proxy hand segments (\texttt{Hand\_L}, \texttt{Hand\_R}) driven along prescribed trajectories rather than inside the full-body closed-loop humanoid. Allocated hand--hand contact pairs are unidentifiable under rigid-hand kinematics and are exported as \texttt{NaN} with a documented reason in \texttt{unavailable\_reasons}.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 scripts/export_simscape_grip_kernel.py --check
+python3 scripts/export_simscape_grip_contact_inputs.py --check
+python3 -m pytest tests/unit/grip_contact/test_simscape_grip_contact.py
+\end{verbatim}
+
 \subsection{Character Builder Grip Binding Admission (HRG-GS-M13, \#13335)}
 When the humanoid character builder and multi-engine exporters compose a golf
 club onto the anthropometric golfer topology, they emit and validate a
@@ -2573,13 +2652,28 @@ per event and term.
 with known values.  It checks the values at each event for both handedness
 choices, the provenance on every row, the reasons for missing values, the
 rejection of invalid events and inputs, schema validation, and the CSV
-header.  No best-fit or tour values are reported here.  Open items for
-\#13175: pelvis reversal and trunk terms, the API endpoint, the desktop and
+header.  No best-fit or tour values are reported here.
+
+\paragraph{API Endpoint.}
+\texttt{POST /biomechanics/anatomical-event-table}
+(\path{src/api/routes/biomechanics.py}) takes per-side calibrated humerus,
+forearm and hand frames (optional radius), the event frames, the time
+series, handedness, event source and receipt path.  It computes the angles
+with \texttt{wrist\_forearm\_angles} and the table with
+\texttt{anatomical\_event\_table}, and returns \texttt{to\_json\_dict} or,
+with \texttt{format: csv}, \texttt{to\_csv}.  It adds no computation, so a
+client gets the desktop export for the same bundle.  An invalid bundle is
+HTTP 422.  \path{tests/biomechanics/test_anatomical_event_table_api.py}
+compares the response with the shared functions called directly and
+validates it against the schema.
+
+Open items for \#13175: pelvis reversal and trunk terms, the desktop and
 web table (\texttt{feature\_parity.json}), and HUD captions in
 \texttt{native\_viewer\_export}.
 {\small
 \begin{verbatim}
 py -3 -m pytest -o addopts="" -q -n 0 tests/unit/anatomical_angles/test_event_table.py
+py -3 -m pytest -o addopts="" -q -n 0 tests/biomechanics/test_anatomical_event_table_api.py
 \end{verbatim}}
 
 \end{document}

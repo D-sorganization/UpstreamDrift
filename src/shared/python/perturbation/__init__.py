@@ -43,7 +43,13 @@ from .outcome_dispersion import (
 )
 from .perturbation_base import CanonicalPerturbationBatch
 from .robustness_score import compute_robustness_score
-from .statistics import MetricStatistics, compute_metric_statistics
+from .statistics import (
+    CV_NEAR_ZERO_MEAN,
+    CV_UNDEFINED_REASON,
+    MetricStatistics,
+    compute_metric_statistics,
+    safe_cv,
+)
 from .tools_variation_adapter import (
     ToolsVariationCapabilities,
     ToolsVariationCompatibilityError,
@@ -86,6 +92,9 @@ __all__ = [
     "compute_robustness_score",
     "MetricStatistics",
     "compute_metric_statistics",
+    "safe_cv",
+    "CV_NEAR_ZERO_MEAN",
+    "CV_UNDEFINED_REASON",
     "ToolsVariationCapabilities",
     "ToolsVariationCompatibilityError",
     "ToolsVariationGateway",

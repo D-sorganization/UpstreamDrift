@@ -26,7 +26,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `diagnostics.integrations_health`<br>Diagnostics + integrations-health panel | ✅ parity | `src/launchers/integrations_health_panel.py` | `src/api/routes/diagnostics.py` | `ui/src/components/ui/DiagnosticsPanel.tsx` | — |
 | `docs.document_library`<br>Document library / project map viewer | ⚪ exempt | `src/launchers/library_widget.py` | — | — | Desktop documentation browser; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `drake.gui_force_overlay`<br>Drake GUI force/torque arrows and live tension/compression shading | ✅ parity | `src/engines/physics_engines/drake/python/src/drake_force_overlay.py` | `src/api/routes/force_overlays.py` | `ui/src/components/visualization/ForceOverlay.tsx` | — |
-| `engines.dashboards`<br>Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio) | ⚪ exempt | `src/launchers/drake_dashboard.py` | — | — | Experimental desktop dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
+| `engines.dashboards`<br>Per-engine interactive dashboards (Drake, JaxSim, MuJoCo, Pinocchio) | ⚪ exempt | `src/launchers/drake_dashboard.py` | — | — | Experimental desktop dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `engines.load_and_simulate`<br>Engine load/probe + basic simulation loop | ✅ parity | `src/launchers/launcher_simulation.py` | `src/api/routes/engines.py` | `ui/src/pages/Simulation.tsx` | — |
 | `export.recordings_downloads`<br>Export/recording parity (HDF5/MAT/C3D/CSV/video, persisted recordings) | ✅ parity | `src/shared/python/data_io/export.py` | `src/api/routes/recordings.py` | `ui/src/components/simulation/RecordingsPanel.tsx` | — |
 | `export.video_speed_variants`<br>Time-based native video export with full-, half- and quarter-speed clips and an impact slow-motion clip | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | — | — | Headless CLI batch export of mp4 clips (60 fps, 1x, 0.5x and 0.25x, optional 0.1x impact window; the motion-matching video export writes the same three variants through export_video_variants) through each engine's desktop viewer; no web route renders or serves these clips, so there is no browser equivalent until one is added (GCV-14, #11720, epic #11706). |
@@ -110,6 +110,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `ground_reaction_plots` | `analysis.ground_reaction` |
 | `impact_parameters` | `analysis.impact_parameters` |
 | `injury_analysis` | `biomech.exercise_injury_dashboards` |
+| `jaxsim_dashboard` | `engines.dashboards` |
 | `launch_monitor_analytics` | `tools.launch_monitor_analytics` |
 | `matched_swing_browser` | `tools.matched_swing_browser` |
 | `matlab_suite` | `tools.matlab_suite` |

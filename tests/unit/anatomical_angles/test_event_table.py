@@ -176,7 +176,7 @@ def test_nan_without_reason_still_gets_a_reason() -> None:
     ("events", "match"),
     [
         ({"address": 0, "kickoff": 1}, "unknown event"),
-        ({"pelvis_reversal": 1}, "unknown event"),
+        ({"pelvis_reversal": 1}, "detected"),
         ({"address": 3, "top": 2}, "order"),
         ({"address": N}, "range"),
         ({"address": -1}, "range"),

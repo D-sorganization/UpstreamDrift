@@ -299,6 +299,19 @@ export interface AnalyzePayloadV2 {
 }
 
 /**
+ * Calibrated arm frames, swing-event frames and export provenance.
+ */
+export interface AnatomicalEventTableRequest {
+  time_s: number[];
+  events: Record<string, number>;
+  handedness: string;
+  event_source: string;
+  receipt_path: string;
+  arms: Record<string, ArmFrames>;
+  format: "json" | "csv";
+}
+
+/**
  * Appearance preferences for the web shell.
  */
 export interface AppearanceSettings {
@@ -306,6 +319,16 @@ export interface AppearanceSettings {
   theme_id: string;
   /** Root font scale multiplier (0.5–2.0). */
   font_scale: number;
+}
+
+/**
+ * Segment frames of one side; ``radius`` defaults to ``forearm``.
+ */
+export interface ArmFrames {
+  humerus: SegmentFrames;
+  forearm: SegmentFrames;
+  hand: SegmentFrames;
+  radius?: SegmentFrames | null;
 }
 
 export interface ArmShotRequest {
@@ -3375,6 +3398,15 @@ export interface ScatterAnalysisResponse {
   total_simulations: number;
   average_distance_from_hole: number;
   make_percentage: number;
+}
+
+/**
+ * World pose series of one calibrated segment (rotations ``(N, 3, 3)``).
+ */
+export interface SegmentFrames {
+  rotation_world: unknown[];
+  origin_world: unknown[];
+  calibration_id: string;
 }
 
 /**

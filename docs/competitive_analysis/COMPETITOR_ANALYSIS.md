@@ -183,7 +183,7 @@ considerations are tracked privately and are deliberately out of scope here; see
 | Competitor         | Products               | Key Features                                    | Price Range      | Market Position          |
 | ------------------ | ---------------------- | ----------------------------------------------- | ---------------- | ------------------------ |
 | **K-Motion**       | K-Vest, K-Coach        | Wireless Sensors (IMU), Biofeedback             | $2,500+          | Instruction / Coaching   |
-| **OPTICAL Golf**     | OPTICAL                  | Optical Motion Capture (Markers), "MRI of Golf" | $30,000+         | Research / Elite Fitting |
+| **OPTICAL Golf**   | OPTICAL                | Optical Motion Capture (Markers), "MRI of Golf" | $30,000+         | Research / Elite Fitting |
 | **Sportsbox AI**   | Sportsbox 3D           | Markerless Single-Cam 3D, Mobile App            | SaaS ($/mo)      | Accessible Coaching      |
 | **V1 Sports**      | V1 Pro, V1 Game        | Video Analysis, Pressure Integration            | SaaS             | Video Standard           |
 | **Hackmotion**     | Wrist Sensor           | Wrist Angle Biofeedback, Putting/Full Swing     | $300 - $1,000    | Specialized Training     |

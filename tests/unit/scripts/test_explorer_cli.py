@@ -22,6 +22,7 @@ from scripts.docker import explorer_cli as cli  # noqa: E402
 
 pytestmark = pytest.mark.unit
 
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 _GL_ERROR = cli.probe_gl()
 requires_render = pytest.mark.skipif(
     _GL_ERROR is not None, reason=f"no offscreen GL context: {_GL_ERROR}"
@@ -84,6 +85,23 @@ def test_load_trajectory_reads_npz_qpos(tmp_path: Path) -> None:
     qpos = cli.load_trajectory(path, nq=1)
 
     assert qpos.shape == (10, 1)
+
+
+def test_load_trajectory_reads_npz_q(tmp_path: Path) -> None:
+    path = tmp_path / "r.npz"
+    np.savez(path, q=np.linspace(0, 1, 10).reshape(10, 1))
+
+    qpos = cli.load_trajectory(path, nq=1)
+
+    assert qpos.shape == (10, 1)
+
+
+def test_load_trajectory_rejects_npz_without_qpos_or_q(tmp_path: Path) -> None:
+    path = tmp_path / "r.npz"
+    np.savez(path, invalid_key=np.zeros((5, 1)))
+
+    with pytest.raises(cli.ExplorerError, match="no 'qpos' or 'q' array"):
+        cli.load_trajectory(path, nq=1)
 
 
 def test_load_trajectory_reads_csv(tmp_path: Path) -> None:
@@ -180,6 +198,19 @@ def test_simulate_trajectory_fails_fast_when_mujoco_resets_unstable_state(
         cli.simulate_trajectory(model, duration_s=0.5, fps=10)
 
 
+def test_simulate_trajectory_fails_fast_on_anthro_driver_mjx_package() -> None:
+    """The anthro driver MJX model has a stiff weld equality constraint and zero
+    damping; unassisted passive simulation must fail fast rather than hang (#12942)."""
+    model_path = (
+        _REPO_ROOT
+        / "docs/development/full_body_models/evidence/ground_support/anthro_driver/mjx_package.xml"
+    )
+    model = cli.load_mujoco_model(str(model_path))
+
+    with pytest.raises(cli.ExplorerError, match="unstable"):
+        cli.simulate_trajectory(model, duration_s=0.5, fps=10)
+
+
 @pytest.mark.parametrize(("duration", "fps"), [(0.0, 10), (-1.0, 10), (1.0, 0)])
 def test_simulate_trajectory_rejects_bad_timing(
     model_path: Path, duration: float, fps: int
@@ -229,6 +260,36 @@ def test_export_replays_loaded_results(model_path: Path, tmp_path: Path) -> None
     )
 
     assert summary["frames"] == 7
+    assert summary["source"] == "results"
+
+
+@requires_render
+def test_export_replays_anthro_driver_mjx_package_with_results(
+    tmp_path: Path,
+) -> None:
+    """Exporting anthro driver mjx_package with recorded results succeeds (#12942)."""
+    model_path = (
+        _REPO_ROOT
+        / "docs/development/full_body_models/evidence/ground_support/anthro_driver/mjx_package.xml"
+    )
+    results = (
+        _REPO_ROOT / "tests/fixtures/results_playback/mujoco_fit/dynamics_record.npz"
+    )
+    out = tmp_path / "anthro_replay.mp4"
+
+    summary = cli.export_video(
+        model_arg=str(model_path),
+        out=out,
+        results=results,
+        duration_s=0.4,
+        fps=10,
+        width=160,
+        height=120,
+    )
+
+    assert out.is_file()
+    assert summary["frames"] == 4
+    assert summary["verified_frames"] == 4
     assert summary["source"] == "results"
 
 

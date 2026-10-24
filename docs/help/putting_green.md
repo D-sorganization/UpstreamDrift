@@ -16,13 +16,13 @@ surface, not a putter-fitting or impact-analysis tool.
 
 ## Inputs
 
-| Control       | Unit  | Range accepted | Default |
-| ------------- | ----- | -------------- | ------- |
-| Putter Speed  | m/s   | 0.5 to 8.0     | 2.5     |
-| Aim Angle     | deg   | -45 to 45      | 0       |
-| Cup Distance  | ft    | 1 to 30        | 10      |
-| Stimpmeter    | ft    | 6.0 to 14.0    | 10.0    |
-| Cross Slope   | deg   | 0 to 5         | 1.0     |
+| Control      | Unit | Range accepted | Default |
+| ------------ | ---- | -------------- | ------- |
+| Putter Speed | m/s  | 0.5 to 8.0     | 2.5     |
+| Aim Angle    | deg  | -45 to 45      | 0       |
+| Cup Distance | ft   | 1 to 30        | 10      |
+| Stimpmeter   | ft   | 6.0 to 14.0    | 10.0    |
+| Cross Slope  | deg  | 0 to 5         | 1.0     |
 
 - Every control is range-checked before the engine runs; an out-of-range or
   non-finite value raises rather than being silently clamped
@@ -112,6 +112,7 @@ Turf and stimpmeter references, with provenance classes, are collected in
   still computes.
 
 ## See Also
+
 - [ADR-0045: Putting Integration - One Experience, Two Preserved Physics Stacks](../adr/0045-putting-integration-one-experience-two-preserved-stacks.md)
 - [Putting Kinematics and Kinetics - Public-Data Review](../physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md)
 - [Terrain Engine](terrain_engine.md) - surface presets and material queries

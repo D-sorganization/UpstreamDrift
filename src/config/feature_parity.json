@@ -574,14 +574,19 @@
       "tiles": ["project_map"]
     },
     "engines.dashboards": {
-      "title": "Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio)",
+      "title": "Per-engine interactive dashboards (Drake, JaxSim, MuJoCo, Pinocchio)",
       "pyqt": "src/launchers/drake_dashboard.py",
       "api": null,
       "web": null,
       "status": "exempt",
       "reason": "Experimental desktop dashboards; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["drake_dashboard", "mujoco_dashboard", "pinocchio_dashboard"]
+      "tiles": [
+        "drake_dashboard",
+        "jaxsim_dashboard",
+        "mujoco_dashboard",
+        "pinocchio_dashboard"
+      ]
     },
     "biomech.exercise_injury_dashboards": {
       "title": "Exercise + injury-risk biomechanics dashboards",

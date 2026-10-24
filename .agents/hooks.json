@@ -1,0 +1,23 @@
+{
+  "fleet-agent-check": {
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -lc 'root=\"$(git rev-parse --show-toplevel)\"; exec python3 \"$root/scripts/agent-check-hook-bridge.py\" antigravity-post-tool'\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "bash -lc 'root=\"$(git rev-parse --show-toplevel)\"; exec python3 \"$root/scripts/agent-check-hook-bridge.py\" antigravity-stop'\"",
+        "timeout": 120
+      }
+    ]
+  }
+}
