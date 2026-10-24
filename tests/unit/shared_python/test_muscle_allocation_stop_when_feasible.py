@@ -24,6 +24,7 @@ from src.shared.python.biomechanics.muscle_allocation import (
     _ExcitationSearcher,
     _parse_allocation_request,
     allocate_muscle_excitations,
+    allocate_muscle_excitations_until_feasible,
 )
 
 pytestmark = pytest.mark.unit
@@ -93,34 +94,19 @@ def test_feasible_initial_candidate_returns_at_nfev_one_without_scipy(
     path = _path("m", {"hip": 0.05})
     target = _effort_at_prior(path, "hip")
     _forbid_scipy(monkeypatch)
-    result = allocate_muscle_excitations(
+    result = allocate_muscle_excitations_until_feasible(
         (path,),
         ("hip",),
         (target,),
         coordinate_effort_units=("N*m",),
         dt_s=DT,
         effort_tolerances=(1e-6,),
-        stop_when_feasible=True,
     )
     assert result.nfev == 1
     assert result.feasible
     assert result.status == "feasible"
     assert result.termination_reason == "declared_feasibility_satisfied"
     assert result.excitations["m"] == pytest.approx(path.previous_excitation)
-
-
-def test_stop_when_feasible_requires_a_bool() -> None:
-    path = _path("m", {"hip": 0.05})
-    with pytest.raises(ValueError, match="stop_when_feasible"):
-        allocate_muscle_excitations(
-            (path,),
-            ("hip",),
-            (0.0,),
-            coordinate_effort_units=("N*m",),
-            dt_s=DT,
-            effort_tolerances=(1.0,),
-            stop_when_feasible=1,  # type: ignore[arg-type]
-        )
 
 
 # --- scripted-optimizer scenarios -------------------------------------------------

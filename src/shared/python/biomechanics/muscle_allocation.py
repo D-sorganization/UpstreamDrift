@@ -634,6 +634,26 @@ def _finalize_allocation_result(
     )
 
 
+def _run_allocation(
+    paths: Sequence[MuscleRecruitmentPath],
+    coordinate_names: Sequence[str],
+    request: _ParsedAllocationRequest,
+    *,
+    stop_when_feasible: bool,
+) -> MuscleAllocationResult:
+    """Search and finalize one allocation for an already parsed request."""
+    _validate_recruitment_paths(paths, coordinate_names, request.dt)
+    boxes = [_bounds(path, request.dt) for path in paths]
+    outcome = _ExcitationSearcher(
+        paths,
+        coordinate_names,
+        request,
+        boxes,
+        stop_when_feasible=stop_when_feasible,
+    ).run()
+    return _finalize_allocation_result(paths, coordinate_names, request, boxes, outcome)
+
+
 def allocate_muscle_excitations(
     paths: Sequence[MuscleRecruitmentPath],
     coordinate_names: Sequence[str],
@@ -644,7 +664,6 @@ def allocate_muscle_excitations(
     effort_tolerances: Sequence[float],
     force_equilibrium_tolerance_n: float = 1e-4,
     max_nfev: int = 80,
-    stop_when_feasible: bool = False,
 ) -> MuscleAllocationResult:
     """Allocate a bounded single-step excitation vector without applying it.
 
@@ -656,17 +675,9 @@ def allocate_muscle_excitations(
     candidate and finite-difference objective probes; cached final reporting
     does not perform an uncounted equilibrium solve.
 
-    ``stop_when_feasible`` (default ``False``, which preserves the conservative
-    optimizer and budget behavior) stops during the first fully counted
-    evaluation whose outputs are finite and meet every declared coordinate and
-    force-equilibrium tolerance with raw excitations inside the declared bounds
-    and slew box. The returned candidate is that exact feasible witness, never
-    a lower-L2 infeasible one, and the result reports
-    ``termination_reason == "declared_feasibility_satisfied"``. This is
-    one-step surrogate feasibility, not minimum-energy recruitment.
+    See :func:`allocate_muscle_excitations_until_feasible` for the opt-in
+    variant that stops at the first declared-feasible witness.
     """
-    if not isinstance(stop_when_feasible, bool):
-        raise ValueError("stop_when_feasible must be a bool")
     request = _parse_allocation_request(
         coordinate_names,
         desired_generalized_effort,
@@ -676,13 +687,39 @@ def allocate_muscle_excitations(
         force_equilibrium_tolerance_n,
         max_nfev,
     )
-    _validate_recruitment_paths(paths, coordinate_names, request.dt)
-    boxes = [_bounds(path, request.dt) for path in paths]
-    outcome = _ExcitationSearcher(
-        paths,
+    return _run_allocation(paths, coordinate_names, request, stop_when_feasible=False)
+
+
+def allocate_muscle_excitations_until_feasible(
+    paths: Sequence[MuscleRecruitmentPath],
+    coordinate_names: Sequence[str],
+    desired_generalized_effort: Sequence[float],
+    *,
+    coordinate_effort_units: Sequence[EffortUnit],
+    dt_s: float,
+    effort_tolerances: Sequence[float],
+    force_equilibrium_tolerance_n: float = 1e-4,
+    max_nfev: int = 80,
+) -> MuscleAllocationResult:
+    """Opt-in ``stop_when_feasible`` variant of :func:`allocate_muscle_excitations`.
+
+    Takes the same arguments but stops during the first fully counted
+    evaluation whose outputs are finite and meet every declared coordinate and
+    force-equilibrium tolerance with raw excitations inside the declared bounds
+    and slew box. The returned candidate is that exact feasible witness, never
+    a lower-L2 infeasible one, and the result reports
+    ``termination_reason == "declared_feasibility_satisfied"``. This is
+    one-step surrogate feasibility, not minimum-energy recruitment. The default
+    :func:`allocate_muscle_excitations` keeps the conservative optimizer and
+    budget behavior.
+    """
+    request = _parse_allocation_request(
         coordinate_names,
-        request,
-        boxes,
-        stop_when_feasible=stop_when_feasible,
-    ).run()
-    return _finalize_allocation_result(paths, coordinate_names, request, boxes, outcome)
+        desired_generalized_effort,
+        coordinate_effort_units,
+        effort_tolerances,
+        dt_s,
+        force_equilibrium_tolerance_n,
+        max_nfev,
+    )
+    return _run_allocation(paths, coordinate_names, request, stop_when_feasible=True)
