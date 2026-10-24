@@ -63,6 +63,7 @@ def test_net_torque_is_invariant_over_the_sweep() -> None:
     np.testing.assert_allclose(sweep.net_torque.values, [20.0], atol=1e-12)
     assert sweep.net_torque.allocation_dependence is AllocationDependence.INVARIANT
     assert sweep.fiber_nullity == 2
+    assert sweep.fiber_dimension == 2
 
 
 def test_cocontraction_raises_muscle_noise_at_fixed_net_torque() -> None:

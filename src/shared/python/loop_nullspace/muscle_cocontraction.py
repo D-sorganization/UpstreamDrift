@@ -119,7 +119,13 @@ class SweepConfig:
 
 @dataclass(frozen=True)
 class CocontractionSweep:
-    """Result of :func:`cocontraction_sweep` (all records are NSX-81 typed)."""
+    """Result of :func:`cocontraction_sweep` (all records are NSX-81 typed).
+
+    ``fiber_nullity`` is ``dim ker G`` (the equality set before the box);
+    ``fiber_dimension`` is the dimension of the fibre itself, from its affine
+    hull, and is ``<= fiber_nullity`` (equal when a strictly box-feasible point
+    exists).
+    """
 
     status: SweepStatus
     reasons: tuple[str, ...]
@@ -136,6 +142,7 @@ class CocontractionSweep:
     stiffness_trace: QuantityRecord
     stiffness_min_eigenvalue: QuantityRecord
     non_claims: str = NON_CLAIMS
+    fiber_dimension: int | None = None
 
 
 def _record(
@@ -313,6 +320,7 @@ def cocontraction_sweep(
         engine_torque_gap=gap,
         level_range=(lo, hi),
         fiber_nullity=fiber.nullity,
+        fiber_dimension=fiber.hull_dimension,
         net_torque=_record(
             frame, fiber.target_torque, "N m", AllocationDependence.INVARIANT
         ),
