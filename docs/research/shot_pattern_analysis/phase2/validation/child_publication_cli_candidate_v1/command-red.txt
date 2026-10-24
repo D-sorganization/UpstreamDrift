@@ -11,7 +11,7 @@ mutation = 'commit'
 >       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
 ______ test_pin_generation_rejects_unqualified_environment[dirty_source] _______
 
 frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un1/frozen'), '47d732c2c855e3c2fa78d9d3cba46d5eeb24a0a7', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un1/execution.json'))
@@ -23,7 +23,7 @@ mutation = 'dirty_source'
 >       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
 ____ test_pin_generation_rejects_unqualified_environment[untracked_source] _____
 
 frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un2/frozen'), '47d732c2c855e3c2fa78d9d3cba46d5eeb24a0a7', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un2/execution.json'))
@@ -35,7 +35,7 @@ mutation = 'untracked_source'
 >       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
 _________ test_pin_generation_rejects_unqualified_environment[runtime] _________
 
 frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un3/frozen'), '47d732c2c855e3c2fa78d9d3cba46d5eeb24a0a7', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un3/execution.json'))
@@ -47,7 +47,7 @@ mutation = 'runtime'
 >       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
 _____ test_pin_generation_rejects_unqualified_environment[execution_hash] ______
 
 frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un4/frozen'), '47d732c2c855e3c2fa78d9d3cba46d5eeb24a0a7', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un4/execution.json'))
@@ -59,7 +59,7 @@ mutation = 'execution_hash'
 >       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
 _____________ test_pin_generation_probes_exact_source_and_runtime ______________
 
 frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_probes_exa0/frozen'), '5d96448a165d270dfc54c7fcc426126ea2d0ab8d', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_probes_exa0/execution.json'))
@@ -69,37 +69,37 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation
 >       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin,load_parent_pin
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:39: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:39: ModuleNotFoundError
 _______________ test_cli_has_no_automatic_review_acceptance_flag _______________
 
     def test_cli_has_no_automatic_review_acceptance_flag():
 >       from scripts.research.shot_pattern_analysis.revise_supplement_figures import parser
 E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.revise_supplement_figures'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:48: ModuleNotFoundError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:48: ModuleNotFoundError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

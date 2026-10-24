@@ -11,13 +11,13 @@
     "-ra",
     "--tb=short"
   ],
-  "cwd": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
+  "cwd": "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
   "env_overrides": {
     "QT_QPA_PLATFORM": "offscreen",
     "MPLBACKEND": "Agg",
     "MUJOCO_GL": "egl",
     "SDL_VIDEODRIVER": "dummy",
-    "PYTHONPATH": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift"
+    "PYTHONPATH": "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift"
   },
   "head": "14bd822fae4eca02d074196046408b3da1fde69d",
   "tools_pin": "86d0f28b1cc5acf61185e07e320c816c2d005512",

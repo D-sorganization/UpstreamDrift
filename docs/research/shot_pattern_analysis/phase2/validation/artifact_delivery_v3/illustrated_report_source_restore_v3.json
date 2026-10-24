@@ -167,7 +167,7 @@
   ],
   "schema": "shot-pattern-illustrated-source-restore/1",
   "selected_figures_verified": true,
-  "selection_file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/figure_selection.json",
+  "selection_file": "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/figure_selection.json",
   "selection_sha256": "0d065e7f9d6581ab9c1ec491aed5fe71d19c6e4f519ae8439455ae8cb97936e9",
   "simulation_or_compile_rerun": false,
   "tex_path": "shot_pattern_analysis.tex",

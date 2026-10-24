@@ -58,7 +58,7 @@
       "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
       "src/tools/shot_pattern_analysis/matched_matrix.py": "af547eb668d33f2e606bbab7f4a9b69749d7c79d61d2d381bfc0924cc3216732"
     },
-    "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+    "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
     "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
     "cargo_lock_present": false,
     "contact_backend": {
@@ -76,7 +76,7 @@
   "wrapper_sha256": "6b5c8bac66601a51d8ce04900c29b5e496bb0b9e46da3c3832746133c44ec907",
   "report_sources": {
     "src/tools/shot_pattern_analysis/matched_pair_social.py": "6b5c8bac66601a51d8ce04900c29b5e496bb0b9e46da3c3832746133c44ec907",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/render_canonical_pair_social.py": "15cb6972fad19837c48fec0781a8667988de1451036fc917bb2f1d0d8fb7e9a8",
+    "<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/render_canonical_pair_social.py": "15cb6972fad19837c48fec0781a8667988de1451036fc917bb2f1d0d8fb7e9a8",
     "src/tools/shot_pattern_analysis/matched_report.py": "9caf80abb414cad94c9aeae6fc85c2024502f6126f38b23df87e5d4ca1aa6237",
     "src/tools/shot_pattern_analysis/matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf"
   },

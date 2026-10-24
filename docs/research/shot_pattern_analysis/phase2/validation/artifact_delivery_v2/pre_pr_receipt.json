@@ -1,9 +1,9 @@
 {
   "affected_test_summary": "34 failed, 5861 passed, 48 skipped, 36 deselected, 1 xpassed, 1514 warnings, 7 errors, 21 subtests passed in 765.44s",
   "base_ref": "fa7ee92f5cddd753099d7418fc974b142b7ebb54",
-  "checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
+  "checkout": "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
   "classification_limit": "All 41 failed/error nodes were in unchanged test files outside this delivery diff. This is scope evidence only; no runtime-baseline claim was tested.",
-  "command": "python /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --from-ref <base> --to-ref <tested_head>",
+  "command": "python <owner-home>/Repositories/Repository_Management/scripts/pre_pr.py --from-ref <base> --to-ref <tested_head>",
   "exit_code": 1,
   "exit_marker": "/tmp/shot-pattern-delivery-resume/prepr-final-dac6618c58.exit",
   "failed_or_error_node_count": 41,

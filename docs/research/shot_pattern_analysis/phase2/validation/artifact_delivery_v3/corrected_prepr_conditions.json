@@ -1,17 +1,17 @@
 {
   "head": "cb5eff6dcd9df7d878f10578078b6fea69c8b681",
-  "cwd": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
+  "cwd": "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
   "command": [
     "/tmp/shot-pattern-validation-venv-20261009/bin/python",
-    "/home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py",
+    "<owner-home>/Repositories/Repository_Management/scripts/pre_pr.py",
     "--from-ref",
     "fa7ee92f5cddd753099d7418fc974b142b7ebb54",
     "--to-ref",
     "cb5eff6dcd9df7d878f10578078b6fea69c8b681"
   ],
   "env_overrides": {
-    "PYTHONPATH": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
-    "MYPYPATH": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
+    "PYTHONPATH": "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
+    "MYPYPATH": "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
     "QT_QPA_PLATFORM": "offscreen",
     "MPLBACKEND": "Agg",
     "MUJOCO_GL": "egl",

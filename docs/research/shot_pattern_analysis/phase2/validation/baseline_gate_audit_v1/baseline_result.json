@@ -4,7 +4,7 @@
   "source_gate_log_compressed_sha256": "373391d91bb4a5fc6ffe246a5a72827e582d0cb2b8c827cff7da5f4608708b18",
   "baseline_commit": "fa7ee92f5cddd753099d7418fc974b142b7ebb54",
   "tools_pin": "86d0f28b1cc5acf61185e07e320c816c2d005512",
-  "baseline_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-baseline-test-audit/UpstreamDrift",
+  "baseline_worktree": "<owner-home>/.codex/worktrees/shot-pattern-baseline-test-audit/UpstreamDrift",
   "command_argv": [
     "/tmp/shot-pattern-validation-venv-20261009/bin/python",
     "-m",
@@ -60,7 +60,7 @@
     "MPLBACKEND": "Agg",
     "MUJOCO_GL": "egl",
     "SDL_VIDEODRIVER": "dummy",
-    "PYTHONPATH": "/home/dieterolson/.codex/worktrees/shot-pattern-baseline-test-audit/UpstreamDrift"
+    "PYTHONPATH": "<owner-home>/.codex/worktrees/shot-pattern-baseline-test-audit/UpstreamDrift"
   },
   "interpreter": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
   "pytest_plugin_option": "-p no:pytestqt",

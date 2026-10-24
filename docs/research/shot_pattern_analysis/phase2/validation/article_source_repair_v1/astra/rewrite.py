@@ -9,7 +9,7 @@ cells = d["cells"]
 effects = d["effects"]
 controls = d["controls"]
 article = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex"
 )
 s = article.read_text()
 start = s.index(

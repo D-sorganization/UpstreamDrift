@@ -6,7 +6,7 @@ import re
 import sys
 from typing import Any
 
-ROOT = Path("/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
+ROOT = Path("<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
 P = ROOT / "docs/research/shot_pattern_analysis/phase2"
 OUT = Path("/tmp/p2-article-astra-review")  # nosec B108
 sys.path.insert(0, str(ROOT))

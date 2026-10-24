@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 from typing import Any
 
-ROOT = Path("/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
+ROOT = Path("<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
 P = ROOT / "docs/research/shot_pattern_analysis/phase2"
 ARTICLE = P.parent / "shot_pattern_analysis.tex"
 

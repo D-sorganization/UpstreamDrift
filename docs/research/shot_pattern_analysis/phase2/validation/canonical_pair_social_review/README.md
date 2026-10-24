@@ -52,7 +52,7 @@ From the presentation worktree, choose a fresh output directory:
 QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
 /tmp/shot-pattern-validation-venv-20261009/bin/python \
 docs/research/shot_pattern_analysis/phase2/validation/render_canonical_pair_social.py \
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift \
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift \
 /tmp/canonical-pair-social-new-review
 ```
 

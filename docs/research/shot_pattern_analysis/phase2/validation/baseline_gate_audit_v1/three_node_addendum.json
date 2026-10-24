@@ -20,7 +20,7 @@
     "MPLBACKEND": "Agg",
     "MUJOCO_GL": "egl",
     "SDL_VIDEODRIVER": "dummy",
-    "PYTHONPATH": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift"
+    "PYTHONPATH": "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift"
   },
   "current_exit_code": 0,
   "current_log_sha256": "ef4eddbd47df08b225397ed555a1315c12e8fe8f2cf6313c38262d91361158d4",

@@ -55,7 +55,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7565ac9bca10>
 E       AssertionError: Exported academic density PNG width expanded to 6270 px (> 4850 px); indicates unwrapped caption text extending beyond the canvas.
 E       assert 6270 <= 4850
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py:137: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py:137: AssertionError
 _ test_academic_and_social_overhead_covariance_caption_containment_and_separation _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_academic_and_social_overh0')
@@ -100,7 +100,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x756585247050>
 E       AssertionError: Exported academic overhead PNG width expanded to 6274 px (> 4850 px).
 E       assert 6274 <= 4850
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py:228: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py:228: AssertionError
 ___________ test_render_selected_pair_figures_closed_kind_rejection ____________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selected_pair_figu0')
@@ -110,9 +110,9 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selecte
 >       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
             render_selected_pair_figures,
         )
-E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:119: ImportError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:119: ImportError
 _______ test_render_selected_pair_figures_exact_metadata_and_path_parity _______
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selected_pair_figu1')
@@ -125,9 +125,9 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selecte
             _render_pair_figures,
             render_selected_pair_figures,
         )
-E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:153: ImportError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:153: ImportError
 ____ test_render_selected_pair_figures_selective_generation_no_extra_files _____
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selected_pair_figu2')
@@ -139,9 +139,9 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selecte
 >       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
             render_selected_pair_figures,
         )
-E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:197: ImportError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:197: ImportError
 ____________ test_render_selected_pair_figures_overhead_social_only ____________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selected_pair_figu3')
@@ -151,9 +151,9 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selecte
 >       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
             render_selected_pair_figures,
         )
-E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:220: ImportError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:220: ImportError
 __________ test_render_selected_pair_figures_incomplete_returns_empty __________
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selected_pair_figu4')
@@ -163,32 +163,32 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selecte
 >       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
             render_selected_pair_figures,
         )
-E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:240: ImportError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:240: ImportError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

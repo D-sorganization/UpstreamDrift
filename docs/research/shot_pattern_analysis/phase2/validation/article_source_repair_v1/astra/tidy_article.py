@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 
 p = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex"
 )
 s = p.read_text()
 s = re.sub(

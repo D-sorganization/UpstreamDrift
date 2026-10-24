@@ -25,9 +25,9 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76cf8e531460>
         with pytest.raises(RuntimeError, match="changed during supplement loading"):
 >           build_final_report.load_supplement_at_stable_receipt(tmp_path)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:567: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:567: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/scripts/research/shot_pattern_analysis/build_final_report.py:973: in load_supplement_at_stable_receipt
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/scripts/research/shot_pattern_analysis/build_final_report.py:973: in load_supplement_at_stable_receipt
     supplement = load_verified_supplement_publication(directory)
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
@@ -63,7 +63,7 @@ directory = PosixPath('/tmp/pytest-of-dieterolson/pytest-2196/test_supplement_lo
 >           raise ValueError("parent receipt changed during loading")
 E           ValueError: parent receipt changed during loading
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/scripts/research/shot_pattern_analysis/supplement_publication.py:321: ValueError
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/scripts/research/shot_pattern_analysis/supplement_publication.py:321: ValueError
 ___________ test_f6_draft_conclusions_provenance_truthful_v5_pending ___________
 
     def test_f6_draft_conclusions_provenance_truthful_v5_pending():
@@ -75,14 +75,14 @@ ___________ test_f6_draft_conclusions_provenance_truthful_v5_pending ___________
 >       content = path.read_text(encoding="utf-8")
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:1099: 
+<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:1099: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
     with self.open(mode='r', encoding=encoding, errors=errors) as f:
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = PosixPath('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md')
+self = PosixPath('<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md')
 mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
 
     def open(self, mode='r', buffering=-1, encoding=None,
@@ -95,32 +95,32 @@ mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
             encoding = io.text_encoding(encoding)
 >       return io.open(self, mode, buffering, encoding, errors, newline)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       FileNotFoundError: [Errno 2] No such file or directory: '/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md'
+E       FileNotFoundError: [Errno 2] No such file or directory: '<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md'
 
-/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+<owner-home>/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

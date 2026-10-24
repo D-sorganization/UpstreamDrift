@@ -21,7 +21,7 @@ from typing import Any
 
 
 DEFAULT_REPO = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift"
+    "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift"
 )
 STAGE = Path("/tmp/shot-pattern-delivery-resume/release-assets-v2")
 INVENTORY = Path(
