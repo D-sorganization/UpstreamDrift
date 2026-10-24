@@ -12,20 +12,20 @@ The Capture Rig workbench configures, calibrates, and monitors multi-camera spat
 
 ## Inputs
 
-| Input | Units | Description |
-| --- | --- | --- |
+| Input               | Units      | Description                                                 |
+| ------------------- | ---------- | ----------------------------------------------------------- |
 | Camera Stream Feeds | frames / s | Multi-view video streams from USB, GigE, or virtual cameras |
-| Calibration Target | mm | Geometric dimensions of calibration wand or checkerboard |
-| Shutter & Exposure | ms, EV | Sensor timing and lighting compensation settings |
+| Calibration Target  | mm         | Geometric dimensions of calibration wand or checkerboard    |
+| Shutter & Exposure  | ms, EV     | Sensor timing and lighting compensation settings            |
 
 ## Outputs
 
-| Output | Units | Description |
-| --- | --- | --- |
-| Intrinsic Matrices | pixels | Focal length, principal point, and radial distortion parameters |
-| Extrinsic Matrices | m, rad | 6-DoF transformation from camera frames to laboratory origin |
-| Reprojection Error | pixels | Mean Euclidean residual across calibration keypoints |
-| Calibration Quality | categorical | Pass/fail verdict based on geometric tolerance budgets |
+| Output              | Units       | Description                                                     |
+| ------------------- | ----------- | --------------------------------------------------------------- |
+| Intrinsic Matrices  | pixels      | Focal length, principal point, and radial distortion parameters |
+| Extrinsic Matrices  | m, rad      | 6-DoF transformation from camera frames to laboratory origin    |
+| Reprojection Error  | pixels      | Mean Euclidean residual across calibration keypoints            |
+| Calibration Quality | categorical | Pass/fail verdict based on geometric tolerance budgets          |
 
 ## Method
 

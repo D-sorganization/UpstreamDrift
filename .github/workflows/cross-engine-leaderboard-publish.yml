@@ -9,24 +9,16 @@
 # means the JSON accumulates automatically when each engine's
 # `fit_swing` runs with `UD_LEADERBOARD_PUBLISH=1`.
 #
-# Trigger / publication policy:
-#   * pull_request -> regenerate JSON, upload as artifact (no commit). Only
-#     on PRs labelled `ci:full`: the docker fleet lane is scarce (#12224).
+# Trigger / publication policy (#13572 / UD-CI-031):
 #   * push to main -> regenerate JSON, commit back with `[skip ci]`.
+#   * schedule -> nightly regeneration and artifact upload (no commit).
 #   * workflow_dispatch -> manual artifact-only run.
+#   PR artifact runs were removed: they were a top failure source on the
+#   docker fleet lane and never gated merge.
 
 name: cross-engine-leaderboard-publish
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, labeled]
-    paths:
-      - "src/engines/**"
-      - "scripts/run_cross_engine_leaderboard.py"
-      - "src/shared/python/motion_matching/leaderboard.py"
-      - "tests/cross_engine/test_leaderboard_writer.py"
-      - "tests/unit/motion_matching/test_leaderboard.py"
-      - ".github/workflows/cross-engine-leaderboard-publish.yml"
   push:
     branches:
       - main
@@ -35,31 +27,22 @@ on:
       - "scripts/run_cross_engine_leaderboard.py"
       - "src/shared/python/motion_matching/leaderboard.py"
       - ".github/workflows/cross-engine-leaderboard-publish.yml"
+  schedule:
+    # Nightly at 10:00 UTC, staggered after cross-engine-equivalence heavy lane.
+    - cron: "0 10 * * *"
   workflow_dispatch: {}
 
 permissions:
   contents: write
-  pull-requests: read
 
 concurrency:
-  # Label events other than ci:full get their own group so tagging a PR
-  # never cancels its in-flight run (#12224).
+  # Main, scheduled and dispatched runs are never cancelled once running.
   group: >-
-    cross-engine-leaderboard-publish-${{ format('{0}-{1}', github.ref, github.event.action == 'labeled' &&
-    github.event.label.name != 'ci:full' && 'label' || 'run') }}
-  cancel-in-progress: true
+    ${{ format('cross-engine-leaderboard-publish-{0}-{1}', github.event_name, github.ref) }}
+  cancel-in-progress: false
 
 jobs:
   publish:
-    # Fork PRs never run on the self-hosted fleet (RM#1989). PR artifact runs
-    # need the ci:full label; main publishing is unchanged (#12224).
-    if: >-
-      (!github.event.pull_request ||
-      github.event.pull_request.head.repo.full_name == github.repository) &&
-      (github.event_name != 'pull_request' ||
-      (contains(github.event.pull_request.labels.*.name, 'ci:full') &&
-      (github.event.action != 'labeled' ||
-      github.event.label.name == 'ci:full'))
     name: publish cross-engine leaderboard JSON
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
@@ -67,7 +50,7 @@ jobs:
     env:
       UD_LEADERBOARD_PUBLISH: "1"
       UD_LEADERBOARD_JSON_PATH: ${{ github.workspace }}/reports/cross_engine_leaderboard.json
-      GIT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      GIT_COMMIT: ${{ github.sha }}
 
     steps:
       - name: Checkout
@@ -155,10 +138,12 @@ jobs:
           if git diff --quiet -- reports/cross_engine_leaderboard.json; then
             echo "No changes to reports/cross_engine_leaderboard.json"
           else
-            echo "## Cross-engine leaderboard JSON diff" >> "$GITHUB_STEP_SUMMARY"
-            echo '```diff' >> "$GITHUB_STEP_SUMMARY"
-            git diff -- reports/cross_engine_leaderboard.json >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo "## Cross-engine leaderboard JSON diff"
+              echo '```diff'
+              git diff -- reports/cross_engine_leaderboard.json
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload leaderboard JSON artifact

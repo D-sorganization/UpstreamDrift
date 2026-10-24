@@ -15,29 +15,29 @@ same model, and export the trajectory as HDF5 - all without writing a script.
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Physics backend | `ode` / `mujoco` / `mjwarp` | Unavailable backends are annotated in the combo box (for example `mjwarp (GPU not available)`). `ode` is preselected because it is always available. |
-| Upper-segment mass | kg | Spin box, suffix ` kg`, initialised from `GolfModelParams.default()`. |
-| Clubhead mass | kg | Spin box, suffix ` kg`, same default source. |
-| Wrist damping | N*m*s/rad | Spin box, range 0.0 to 5.0, step 0.01, suffix ` N*m*s/rad`. |
-| Swing-plane inclination | deg | Spin box, range -90.0 to +90.0 deg, step 1.0 deg. Tilt from vertical; scales effective gravity. |
-| Gravity enabled | boolean | Unchecking gives a conservative, free swing. |
-| Horizon | steps | Spin box, range 10 to 5000 steps, default 300 steps. |
-| Time step | s | Spin box, range 0.0001 s to 0.1 s, step 0.001 s, default 0.005 s. |
-| Initial pose | rad | Not editable. Fixed at `_INITIAL_Q = (1.2, -0.6)` rad with zero initial velocity, so gravity drives a visible swing. |
+| Input                   | Unit / type                 | Notes                                                                                                                                                |
+| ----------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Physics backend         | `ode` / `mujoco` / `mjwarp` | Unavailable backends are annotated in the combo box (for example `mjwarp (GPU not available)`). `ode` is preselected because it is always available. |
+| Upper-segment mass      | kg                          | Spin box, suffix ` kg`, initialised from `GolfModelParams.default()`.                                                                                |
+| Clubhead mass           | kg                          | Spin box, suffix ` kg`, same default source.                                                                                                         |
+| Wrist damping           | N*m*s/rad                   | Spin box, range 0.0 to 5.0, step 0.01, suffix ` N*m*s/rad`.                                                                                          |
+| Swing-plane inclination | deg                         | Spin box, range -90.0 to +90.0 deg, step 1.0 deg. Tilt from vertical; scales effective gravity.                                                      |
+| Gravity enabled         | boolean                     | Unchecking gives a conservative, free swing.                                                                                                         |
+| Horizon                 | steps                       | Spin box, range 10 to 5000 steps, default 300 steps.                                                                                                 |
+| Time step               | s                           | Spin box, range 0.0001 s to 0.1 s, step 0.001 s, default 0.005 s.                                                                                    |
+| Initial pose            | rad                         | Not editable. Fixed at `_INITIAL_Q = (1.2, -0.6)` rad with zero initial velocity, so gravity drives a visible swing.                                 |
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| Rollout plot | rad vs s | `theta1 (shoulder)` and `theta2 (wrist)` versus time. |
-| Sweep plot | clubhead-speed proxy vs kg | X axis labelled `clubhead mass [kg]`; Y is `norm(final joint velocity)`, a proxy rather than a calibrated clubhead speed. |
-| Sweep summary | kg | Report pane names the mass range swept and the mass at which the proxy peaks. |
-| Cross-validation report | max absolute error, tolerance, pass/fail | One `ValidationReport` per compared quantity (mass matrices and integrated trajectories). |
-| HDF5 trace | file | Versioned trace of the last rollout. |
-| Backend capabilities line | read-only text | Updates when the backend selection changes. |
-| Status line | text | Progress / error messages. |
+| Output                    | Unit / type                              | Notes                                                                                                                     |
+| ------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Rollout plot              | rad vs s                                 | `theta1 (shoulder)` and `theta2 (wrist)` versus time.                                                                     |
+| Sweep plot                | clubhead-speed proxy vs kg               | X axis labelled `clubhead mass [kg]`; Y is `norm(final joint velocity)`, a proxy rather than a calibrated clubhead speed. |
+| Sweep summary             | kg                                       | Report pane names the mass range swept and the mass at which the proxy peaks.                                             |
+| Cross-validation report   | max absolute error, tolerance, pass/fail | One `ValidationReport` per compared quantity (mass matrices and integrated trajectories).                                 |
+| HDF5 trace                | file                                     | Versioned trace of the last rollout.                                                                                      |
+| Backend capabilities line | read-only text                           | Updates when the backend selection changes.                                                                               |
+| Status line               | text                                     | Progress / error messages.                                                                                                |
 
 ## Method
 
@@ -85,6 +85,7 @@ prints an install hint on `ImportError`. The tile's own reference document is
   writes an install hint to stderr and exits non-zero.
 
 ## See Also
+
 - [Simulation backends overview](../simulation_backends/README.md)
 - [Simulation backends user guide](../simulation_backends/USER_GUIDE.md)
 - [Cross-engine comparison reports](../simulation_backends/cross_engine_comparison.md)

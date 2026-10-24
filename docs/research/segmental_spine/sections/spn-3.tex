@@ -71,9 +71,12 @@ Pearcy's table.
 \paragraph{Loader.}
 \texttt{load\_coupling\_laws(path=None)} returns a read-only mapping from law
 id to entry metadata (citation, \texttt{verified\_from\_primary}, assumptions);
-\texttt{coupling\_law(law\_id)} returns a \texttt{LinearCouplingLaw};
+\texttt{load\_coupling\_law(law\_id, require\_verified=False)} builds a
+\texttt{CouplingLaw} (a \texttt{LinearCouplingLaw} or \texttt{ParityCouplingLaw});
+\texttt{coupling\_law(law\_id)} is an alias without the verification gate;
 \texttt{available\_laws(include\_pending=False)} lists ids. Unknown ids, pending
-laws, duplicate ids and malformed entries raise \texttt{ValueError}.
+laws, \texttt{require\_verified=True} on an unverified entry, duplicate ids and
+malformed entries raise \texttt{ValueError}.
 
 \paragraph{Limitations.}
 Static linear gains only; no state dependence. Regional shares apply to the

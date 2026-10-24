@@ -1,0 +1,47 @@
+# Fleet agent hook manifest (slice 1). Adapters in slice 2 call scripts/agent-check.
+schema_version: 1
+
+defaults:
+  timeout_seconds: 120
+
+checks:
+  - id: ruff-format
+    tool: ruff
+    kind: ruff-format
+    globs:
+      - "**/*.py"
+    timeout_seconds: 90
+
+  - id: ruff-check
+    tool: ruff
+    kind: ruff-check
+    globs:
+      - "**/*.py"
+    timeout_seconds: 120
+
+  - id: detect-secrets
+    tool: detect-secrets
+    kind: detect-secrets
+    globs:
+      - "**/*"
+    exclude_globs:
+      - "**/node_modules/**"
+      - "**/.venv/**"
+      - "**/package-lock.json"
+      - "**/uv.lock"
+      - "**/.secrets.baseline"
+    timeout_seconds: 180
+
+  - id: actionlint
+    tool: actionlint
+    kind: actionlint
+    globs:
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+    timeout_seconds: 90
+
+  - id: repo-regen
+    kind: repo-regen
+    globs:
+      - "**/*"
+    timeout_seconds: 300

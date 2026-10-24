@@ -74,6 +74,10 @@ from src.engines.physics_engines.opensim.python.msk_lift_model import (
     PENETRATION_LIMIT_M,
     LiftModelBuild,
 )
+from src.engines.physics_engines.opensim.python.msk_lift_simbody_kinematics import (
+    generalized_speeds_from_spline_derivatives,
+    spline_coordinate_derivatives,
+)
 from src.shared.python.biomechanics.ground_reaction import (
     ContactSet,
     analyze_ground_reaction,
@@ -111,6 +115,7 @@ __all__ = [
     "run_inverse_dynamics",
     "run_inverse_kinematics",
     "static_hold_grf",
+    "generalized_speeds_from_spline_derivatives",
 ]
 
 IK_MARKER_RMS_THRESHOLD_M = 0.02
@@ -790,22 +795,6 @@ def _splines(ik: IKResult, time_s: Array) -> Any:
     return osim.GCVSplineSet(table, osim.StdVectorString(), _GCV_DEGREE, 0.0)
 
 
-def _derivatives(splines: Any, n: int, t: float) -> tuple[Array, Array, Array]:
-    osim = import_opensim()
-    x = osim.Vector(1, float(t))
-    first, second = osim.StdVectorInt(), osim.StdVectorInt()
-    first.append(0)
-    second.append(0)
-    second.append(0)
-    values = np.empty((3, n))
-    for j in range(n):
-        f = splines.get(j)
-        values[0, j] = f.calcValue(x)
-        values[1, j] = f.calcDerivative(first, x)
-        values[2, j] = f.calcDerivative(second, x)
-    return values[0], values[1], values[2]
-
-
 def _external_body_forces(model: Any, state: Any, targets: LiftTargets, k: int) -> Any:
     """Applied external body wrenches (feet, hands, and bench support if present).
 
@@ -897,7 +886,10 @@ def run_inverse_dynamics(
     )
     rows, com = [], []
     for k, t in enumerate(targets.time_s):
-        q, u, udot_values = _derivatives(splines, len(names), float(t))
+        q, qd, qdd = spline_coordinate_derivatives(splines, len(names), float(t))
+        u, udot_values = generalized_speeds_from_spline_derivatives(
+            tuple(names), q, qd, qdd
+        )
         for j, name in enumerate(names):
             coords.get(name).setValue(state, float(q[j]), False)
             coords.get(name).setSpeedValue(state, float(u[j]))
@@ -924,7 +916,11 @@ def run_inverse_dynamics(
 
 
 def id_receipt(targets: LiftTargets, inverse: IDResult) -> dict[str, Any]:
-    """Residuals (with the Hicks 2015 gate) and joint-moment summary."""
+    """Residuals (with the Hicks 2015 gate) and joint-moment summary.
+
+    Hicks reference force is the peak magnitude of the net support reaction:
+    sum both feet plus every bench sphere (when present); hands/bar stay out.
+    """
     column = {n: j for j, n in enumerate(inverse.coordinates)}
     residuals: dict[str, dict[str, Any]] = {}
     peaks: dict[str, float] = {}
@@ -936,8 +932,10 @@ def id_receipt(targets: LiftTargets, inverse: IDResult) -> dict[str, Any]:
             "max_abs": float(np.abs(series).max()),
             "rms": float(np.sqrt(np.mean(series**2))),
         }
-    grf = targets.grf_force_n["left"] + targets.grf_force_n["right"]
-    peak_force = float(np.linalg.norm(grf, axis=1).max())
+    support = targets.grf_force_n["left"] + targets.grf_force_n["right"]
+    for force in getattr(targets, "bench_force_n", {}).values():
+        support = support + force
+    peak_force = float(np.linalg.norm(support, axis=1).max())
     max_force = RESIDUAL_FORCE_FRACTION * peak_force
     max_moment = RESIDUAL_MOMENT_FRACTION * inverse.com_height_m * peak_force
     forces = [peaks[n] for n in RESIDUAL_COORDINATES[3:]]

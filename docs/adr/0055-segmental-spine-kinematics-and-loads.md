@@ -84,12 +84,12 @@ measured composition error and state their tolerance in the receipt.
 Per-level Cardan angles do not sum to the global angles. Worked example (three
 levels, ZXY degrees, `(FE, LB, AR)`):
 
-| Level | FE | LB | AR |
-|---|---|---|---|
-| L3_L4 | −10 | 5 | −15 |
-| L2_L3 | −10 | 8 | −20 |
-| L1_L2 | −15 | 10 | −25 |
-| **Sum** | −35 | 23 | −60 |
+| Level                                                        | FE         | LB        | AR         |
+| ------------------------------------------------------------ | ---------- | --------- | ---------- |
+| L3_L4                                                        | −10        | 5         | −15        |
+| L2_L3                                                        | −10        | 8         | −20        |
+| L1_L2                                                        | −15        | 10        | −25        |
+| **Sum**                                                      | −35        | 23        | −60        |
 | **Composed** `anatomical_joint_angles(R_L3L4·R_L2L3·R_L1L2)` | **−25.36** | **31.83** | **−57.57** |
 
 The 9.6° flexion difference is far larger than measurement noise. The angle
@@ -122,11 +122,11 @@ never as a definition of global trunk motion.
 
 Three observables are produced and never conflated:
 
-| Observable | Definition | Includes |
-|---|---|---|
-| `GENERALIZED_EFFORT` | Inverse-dynamics generalized force on each spinal coordinate | Net effect of everything crossing the level; no split between muscles and joint |
-| `JOINT_REACTION` | OpenSim `JointReaction` resultant at the level, computed with static-optimization muscle forces applied | Intervertebral (bone-on-bone/disc) resultant after muscles carry their share |
-| `PASSIVE_ELEMENT` | Bushing, ligament and disc-stiffness element forces where the model has them | Passive structures only |
+| Observable           | Definition                                                                                              | Includes                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `GENERALIZED_EFFORT` | Inverse-dynamics generalized force on each spinal coordinate                                            | Net effect of everything crossing the level; no split between muscles and joint |
+| `JOINT_REACTION`     | OpenSim `JointReaction` resultant at the level, computed with static-optimization muscle forces applied | Intervertebral (bone-on-bone/disc) resultant after muscles carry their share    |
+| `PASSIVE_ELEMENT`    | Bushing, ligament and disc-stiffness element forces where the model has them                            | Passive structures only                                                         |
 
 For every observable:
 
@@ -189,19 +189,19 @@ SO(3) logarithm (rotation vector).
 Terms are versioned functions with explicit inputs. Existing implementations
 keep their numeric meaning under legacy ids; new ids are new measurands.
 
-| `term_id` | Definition | Inputs | Units / sign |
-|---|---|---|---|
-| `x_factor_jcs_axial` | `trail_axial_rotation` of `R_pelvis→thorax` (ZXY) | pelvis→thorax rotation, handedness | deg, backswing positive |
-| `x_factor_line_turn` | Upper-trunk line turn minus pelvis line turn in the horizontal plane (`swing_comparison/turn.py`) | marker or model points, `up` | deg, backswing positive |
-| `x_factor_position_proxy` | Legacy joint-position proxy (`api/services/analysis_service.py`, `analysis/swing_metrics.py::compute_x_factor`) | shoulder and hip joint positions | as implemented |
-| `x_factor_euler_yaw_legacy_v1` | Thorax yaw minus pelvis yaw from `[roll, pitch, yaw]` (`injury/spinal_load_analysis.py`) | thorax and pelvis Euler angles | as implemented |
-| `trunk_extension_jcs` | `θ_FE` of `R_pelvis→thorax` | pelvis→thorax rotation | deg, extension positive |
-| `trunk_lateral_flexion_jcs` | `lead_lateral_flexion` of `R_pelvis→thorax` | pelvis→thorax rotation, handedness | deg, lead-side positive |
-| `side_bend_tilt` | Lab-frame trunk-axis tilt split into components (`motion_matching/posture_metrics.py::SpineBend`) | trunk axis, `up`, `target` | deg |
-| `crunch_factor_legacy_v1` | `\|lateral°\| · \|rotation°\| / 100` (existing analyzer) | angle series | deg² / 100 |
-| `crunch_factor_rate` | Lateral flexion angle × axial rotation angular velocity (Sugaya, Tsuchiya & Moriya 1999, Science and Golf III; cited via Cole & Grimshaw 2014, primary unverified per #12737) | `trunk_lateral_flexion_jcs`, `x_factor_jcs_axial` series | deg·deg/s |
-| `early_extension` | Change in pelvis-to-target-line distance (or pelvis anterior translation) from address, with `trunk_extension_jcs` change reported alongside | pelvis position, `target`, `up`, events | m, toward the ball positive |
-| `reverse_spine_angle` | Trunk-axis tilt toward the target at the top, in the vertical plane containing the target line | trunk axis, `up`, `target`, top event | deg, toward target positive |
+| `term_id`                      | Definition                                                                                                                                                                    | Inputs                                                   | Units / sign                |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | --------------------------- |
+| `x_factor_jcs_axial`           | `trail_axial_rotation` of `R_pelvis→thorax` (ZXY)                                                                                                                             | pelvis→thorax rotation, handedness                       | deg, backswing positive     |
+| `x_factor_line_turn`           | Upper-trunk line turn minus pelvis line turn in the horizontal plane (`swing_comparison/turn.py`)                                                                             | marker or model points, `up`                             | deg, backswing positive     |
+| `x_factor_position_proxy`      | Legacy joint-position proxy (`api/services/analysis_service.py`, `analysis/swing_metrics.py::compute_x_factor`)                                                               | shoulder and hip joint positions                         | as implemented              |
+| `x_factor_euler_yaw_legacy_v1` | Thorax yaw minus pelvis yaw from `[roll, pitch, yaw]` (`injury/spinal_load_analysis.py`)                                                                                      | thorax and pelvis Euler angles                           | as implemented              |
+| `trunk_extension_jcs`          | `θ_FE` of `R_pelvis→thorax`                                                                                                                                                   | pelvis→thorax rotation                                   | deg, extension positive     |
+| `trunk_lateral_flexion_jcs`    | `lead_lateral_flexion` of `R_pelvis→thorax`                                                                                                                                   | pelvis→thorax rotation, handedness                       | deg, lead-side positive     |
+| `side_bend_tilt`               | Lab-frame trunk-axis tilt split into components (`motion_matching/posture_metrics.py::SpineBend`)                                                                             | trunk axis, `up`, `target`                               | deg                         |
+| `crunch_factor_legacy_v1`      | `\|lateral°\| · \|rotation°\| / 100` (existing analyzer)                                                                                                                      | angle series                                             | deg² / 100                  |
+| `crunch_factor_rate`           | Lateral flexion angle × axial rotation angular velocity (Sugaya, Tsuchiya & Moriya 1999, Science and Golf III; cited via Cole & Grimshaw 2014, primary unverified per #12737) | `trunk_lateral_flexion_jcs`, `x_factor_jcs_axial` series | deg·deg/s                   |
+| `early_extension`              | Change in pelvis-to-target-line distance (or pelvis anterior translation) from address, with `trunk_extension_jcs` change reported alongside                                  | pelvis position, `target`, `up`, events                  | m, toward the ball positive |
+| `reverse_spine_angle`          | Trunk-axis tilt toward the target at the top, in the vertical plane containing the target line                                                                                | trunk axis, `up`, `target`, top event                    | deg, toward target positive |
 
 `early_extension` and `reverse_spine_angle` are not functions of intervertebral
 rotations alone. Their extra inputs are mandatory and missing inputs raise.

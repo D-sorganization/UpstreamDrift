@@ -84,5 +84,6 @@ conversation state cheaply and holds no scarce GPU resource.
   assistant is conversation-only.
 
 ## See Also
+
 - [AI Assistant](chat_assistant.md) - the web equivalent of this tile
 - [Vendored Tools repository notes](../../vendor/README.md)

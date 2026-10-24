@@ -7812,6 +7812,138 @@ The implementation is in \texttt{full\_body\_ik.py},
 \texttt{pipeline/lane.py} and \texttt{pipeline/constants.py}. The tests are
 \texttt{test\_ik\_restart\_continuity.py} and \texttt{pipeline/test\_lane.py}.
 
+\section{Replay Reproducibility, Sensitivity and the Bounded Centre-of-Mass Correction (\#13112)}
+\label{sec:replay_sensitivity}
+
+\subsection{Question}
+Committed calibrated receipts did not reproduce on a later \texttt{main}, and
+a $\pm 5$~mm change of one segment's centre of mass moved the whole-swing FD
+marker RMS by 10--40~mm, almost entirely after impact. With the ZMP filter
+on, the pre-torsion 7-iron diverged once to 128.5~mm, its centre-of-mass
+correction reaching 0.83--1.04~m. This section separates three possible
+causes: non-determinism of the replay, physical sensitivity of the
+closed-loop dynamics, and differences in the inputs.
+
+\subsection{Determinism}
+The replay integrates the plant with fixed-step RK4 ($\Delta t = 1$~ms), with
+no random numbers, no threads and no adaptive step. Two runs of the
+calibrated driver and 7-iron commands on one host (DeskComputer,
+\texttt{main} at \texttt{6dd08fcb1c}) give receipts identical in every value
+except the wall-clock \texttt{elapsed\_s}. A unit test runs the tracked
+replay twice on separately built plants and requires a bit-identical
+record. Across hosts the driver run reproduces the committed ControlTower
+receipt to $4\times10^{-10}$~m in dynamics RMS, although the hip calibration
+differs at $10^{-16}$.
+
+\subsection{Sensitivity: Finite-Time Growth Rate}
+Let $q_\mathrm{track}$ be the tracked reference, $\hat q(t)$ its replay, and
+$\hat q_\varepsilon(t)$ the replay of $q_\mathrm{track} + \varepsilon\,u$ with
+$u$ a seeded, unit-RMS, time-constant direction over the coordinates. With
+$p_m(q)$ the model marker positions, the separation is
+\[
+  s(t) = \sqrt{\operatorname{mean}_m \lVert p_m(\hat q(t)) - p_m(\hat q_\varepsilon(t)) \rVert^2}
+\]
+and the finite-time growth rate over a window $W$ is the least-squares slope
+\[
+  \lambda_W = \arg\min_{\lambda} \min_{c} \sum_{t_f \in W} \bigl(\ln s(t_f) - c - \lambda t_f\bigr)^2 ,
+\]
+reported for $W = [0, t_I]$ and $W = [t_I, t_\mathrm{end}]$ with $t_I$ the
+ball impact of \S\ref{sec:fd_phase_split}, together with the amplification
+$\max_W s / \varepsilon$. A positive $\lambda$ with amplification growing as
+$e^{\lambda t}$ beyond any bound, and a response that stops scaling with
+$\varepsilon$, would indicate chaos.
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\hline
+Run & $\varepsilon$ & $\lambda_{\le I}$ (1/s) & $\lambda_{>I}$ (1/s) & Amp.\ at $t_I + 0.1$~s & Amp.\ at End \\
+\hline
+Driver & $10^{-6}$ & $-0.26$ & $1.40$ & 6.3 & 9.7 \\
+Driver & $10^{-3}$ & $-0.27$ & $1.43$ & 6.1 & 9.4 \\
+7-iron (ZMP) & $10^{-6}$ & $-0.28$ & $1.67$ & 4.8 & 8.1 \\
+7-iron (ZMP) & $10^{-3}$ & $-0.23$ & $1.67$ & 4.9 & 8.2 \\
+\hline
+\end{tabular}
+\end{center}
+
+The tracking contracts a perturbation before impact and lets it grow slowly
+after impact (e-folding 0.6--0.7~s, longer than the 0.5~s follow-through),
+and the response is linear over three decades of $\varepsilon$. The replay is
+therefore not chaotic for reference perturbations: it amplifies a difference
+by at most about ten. The receipt differences in the question come from
+inputs that differ by millimetres. On the 7-iron, the same command on the two
+hosts gives an IK RMS of 30.57 against 30.69~mm, and the ZMP filter's
+iterative re-solve turns that into a different reference (pass-1
+centre-of-mass shift 133.0 against 46.9~mm); after impact the replays then
+differ by 33~mm, while the address-to-impact RMS agrees to 0.004~mm. A
+segment-inertia change is a persistent model change, not a perturbation of
+the reference, and was not probed here; it remains open.
+
+\subsection{Bounded Centre-of-Mass Correction}
+The ZMP filter (\texttt{pipeline.dynamics.zmp\_filter}) solves Kajita's
+cart-table problem for a centre-of-mass shift $\delta c$ whose effect
+$\delta z = \delta c - (z_c/g)\,\delta\ddot c$ closes the gap between the
+reference zero-moment point and its projection into the support polygon.
+The correction re-poses a marker-matched reference; it applies no force. In
+the quasi-static limit it moves the zero-moment point by $\delta c$ itself.
+With planted feet the whole-body centre of mass must stay over the base of
+support, so no admissible correction carries it farther than the base's
+narrowest width $w_f$: a larger shift would move a centred centre of mass
+across the base. Each frame's shift is therefore clipped radially,
+\[
+  \delta c_f \leftarrow \delta c_f \min\bigl(1, w_f / \lVert \delta c_f \rVert\bigr),
+\]
+with $w_f$ the minimum width of the convex hull of the frame's contact
+spheres (rotating calipers; about one foot length in double stance and one
+foot width on a single foot). A gap larger than $w_f$ is an acceleration the
+reference demands, typically on a frame whose vertical reaction is barely
+above the unloaded threshold, and re-posing cannot fix it. The direction is
+kept. Each pass records the unbounded maximum, the smallest bound and the
+number of clipped frames. On the 7-iron the bound clips 49 frames of pass 1
+(smallest bound 69.4~mm, unbounded 133.0~mm) and none of passes 2 and 3; the
+dynamics RMS changes from 91.09 to 85.41~mm, address to impact from 33.71 to
+33.82~mm and after impact from 165.3 to 153.7~mm. The 0.83--1.04~m shift of
+the pre-torsion run cannot recur.
+
+\subsection{Acceptance Metric}
+Address-to-impact FD RMS, $\mathrm{RMS}_{\le I}$, is the reproducible
+dynamics metric: before impact the tracking contracts
+($\lambda_{\le I} < 0$), and across hosts it reproduced to $10^{-9}$~m
+(driver) and $4\times10^{-6}$~m (7-iron, despite a 0.1~mm IK difference).
+The receipts also report $\mathrm{RMS}_{(I, I+0.1\,\mathrm{s}]}$
+(\texttt{fd\_rms\_post\_impact\_window\_m}), the FD marker RMS over a fixed
+0.1~s after impact. The window covers the ball contact, the release and the
+start of the follow-through, and stops before the rest of the follow-through,
+where the reference IK branch is not unique (\S\ref{sec:fd_phase_split}).
+Its measured amplification is at most 6.3, so an input change below
+16~$\mu$m moves it by less than the stated reproducibility tolerance of
+0.1~mm. The whole-swing and whole after-impact RMS remain in the receipt but
+cannot rank model changes smaller than about ten times the input difference
+between the runs compared. These metrics are reported only; no gate reads
+them.
+
+\subsection{Reproduction}
+\begin{verbatim}
+python docs/development/full_body_models/evidence/ground_support/run_ground_support.py \
+  --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
+  --static-seeds --fix-club-markers --capture driver \
+  --replay-sensitivity [--replay-sensitivity-epsilon 1e-3] --out <run>
+python docs/development/full_body_models/evidence/ground_support/run_ground_support.py \
+  --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json \
+  --static-seeds --zmp-filter --fix-club-markers --capture iron \
+  --replay-sensitivity [--replay-sensitivity-epsilon 1e-3] --out <run>
+\end{verbatim}
+Compare two run directories with
+\texttt{replay\_sensitivity.compare\_receipts} on their \texttt{receipt.json}.
+
+\subsection{Limitations}
+The probe perturbs the reference, not the model's inertial parameters; the
+$\pm 5$~mm segment centre-of-mass experiment of the question is a different,
+persistent perturbation. The committed 7-iron ZMP receipt predates the bound
+and must be regenerated on the canonical host. The sensitivity measurements
+come from one host; the cross-host comparison uses the committed
+ControlTower receipts.
+
 \section{The \texttt{full-body-v2} Schema and Trunk Coordinate Migration (HRG-D1, \#13170)}
 \label{sec:full-body-v2}
 

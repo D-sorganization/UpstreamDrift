@@ -6,27 +6,32 @@ Schema: `neural-tools-integration/1.0.0`
 ## What Landed
 
 ### 1. Multi-Runner Framework Dispatch (`src/shared/python/training/runtime/runner_registry.py`)
+
 - Registered `neural_motion` framework alongside existing classical runners (`classical_motion_matching`, `surrogate_training`, `direct_collocation`).
 - `get_runner_for_framework("neural_motion")` dynamically dispatches to `NeuralMotionRunner`.
 - `available_frameworks()` returns the full immutable list of supported training framework keys.
 
 ### 2. Neural Motion Training Runner (`src/shared/python/training/runtime/adapters/neural_motion.py`)
+
 - `NeuralMotionRunner` implements the standard `TrainingJobRunner` protocol.
 - Emits fine-grained `ProgressSink` events (`STATUS_CHANGED`, `METRIC_RECORDED`) for real-time dashboard telemetry.
 - Produces verifiable `ModelCheckpointCard` outputs with SHA-256 digests and model contracts.
 - Respects cooperative cancellation via `CancelToken`, ensuring graceful early exit without resource leaks or corrupted checkpoints.
 
 ### 3. Portable Job Package Packaging (`src/shared/python/training/portable.py`)
+
 - `export_job_package`: bundles job configuration, manifest, and checkpoint artifacts into portable `.zip` archives with deterministic SHA-256 manifest verification.
 - `import_job_package`: extracts and verifies portable packages, strictly guarding against zip-slip directory traversal vulnerabilities (`ValueError: Potential directory traversal`).
 - Safely serializes mappingproxy hyperparameters via `dict()` wrapping.
 
 ### 4. Training Controller View Models (`src/tools/training_controller/view_model.py`, `controller.py`)
+
 - View models `ModelTopologyItem` and `DatasetSchemaItem` representing model architectures and dataset expectations.
 - `default_neural_motion_topologies()` provides standard neural topologies (`mlp_residual`, `transformer_sequence`, `diffusion_policy`).
 - `TrainingDashboardController.available_model_topologies()` and `available_dataset_schemas()` allow dynamic GUI inspection of model requirements and dataset formats.
 
 ### 5. Motion Matching GUI Integration (`src/tools/motion_matching/gui.py`)
+
 - Added `neural_group` controls:
   - Mode selector: `Classical Only`, `Neural Preview`, `Neural Verified`.
   - Topology / Checkpoint selector: dynamically populates available neural motion architectures.

@@ -43,6 +43,44 @@ def test_ensure_revolute_joint_actuators_noop_when_actuators_present() -> None:
     plant.AddJointActuator.assert_not_called()
 
 
+def _unfinalized_plant(joint_dofs: list[int]) -> MagicMock:
+    """Plant mock that, like real Drake, refuses ``num_velocities()`` pre-finalize."""
+    plant = MagicMock(name="UnfinalizedPlant")
+    joints = []
+    for i, dof in enumerate(joint_dofs):
+        joint = MagicMock(name=f"joint{i}")
+        joint.name.return_value = f"joint{i}"
+        joint.num_velocities.return_value = dof
+        joints.append(joint)
+    added: list[Any] = []
+    plant.num_joints.return_value = len(joints)
+    plant.get_joint.side_effect = lambda idx: joints[int(idx)]
+    plant.AddJointActuator.side_effect = lambda name, joint: added.append(joint)
+    plant.num_actuators.side_effect = lambda: len(added)
+    plant.num_velocities.side_effect = RuntimeError(
+        "Pre-finalize calls to 'num_velocities()' are not allowed"
+    )
+    return plant
+
+
+def test_ensure_revolute_joint_actuators_never_queries_nv_before_finalize() -> None:
+    """#13466: real Drake raises on pre-finalize ``num_velocities()``."""
+    plant = _unfinalized_plant([6, 1, 1, 0, 1])
+    with patch.dict(sys.modules, {"pydrake.multibody.tree": MagicMock()}):
+        sys.modules["pydrake.multibody.tree"].JointIndex = int
+        assert ensure_revolute_joint_actuators(plant) == 3
+    assert plant.AddJointActuator.call_count == 3
+
+
+def test_ensure_revolute_joint_actuators_rejects_multi_dof_internal_joint() -> None:
+    """A ball joint would leave DOFs unactuated: fail closed, never silently."""
+    plant = _unfinalized_plant([6, 1, 3])
+    with patch.dict(sys.modules, {"pydrake.multibody.tree": MagicMock()}):
+        sys.modules["pydrake.multibody.tree"].JointIndex = int
+        with pytest.raises(ValueError, match="joint2"):
+            ensure_revolute_joint_actuators(plant)
+
+
 _PYDRAKE_KEYS = [
     "pydrake",
     "pydrake.all",

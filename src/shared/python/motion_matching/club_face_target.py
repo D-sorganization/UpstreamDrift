@@ -452,6 +452,41 @@ def model_face_normals(
     return np.array([kin.body_poses(row, [frame])[frame][0] @ axis for row in rows])
 
 
+def model_club_soles(kin: Any, q: Array, spec: Mapping[str, Any]) -> Array:
+    """World club-body sole (spec origin) per row of ``q``.
+
+    The club-body frame origin is the sole point on the shaft axis
+    (:mod:`model_appearance.club_assembly`). Raises ``ValueError`` when the
+    spec has no club or ``q`` is not ``(frames, coordinates)``.
+    """
+    rows = np.asarray(q, dtype=float)
+    if rows.ndim != 2:
+        raise ValueError("q must be (frames, coordinates)")
+    _, club_body = require_club_assembly(spec)
+    poses = [kin.body_poses(row, [club_body])[club_body] for row in rows]
+    return np.array([pos for _, pos in poses], dtype=float)
+
+
+def sole_height_above_ground_m(
+    sole_world: Array, ground: Any, *, axis: int = 2
+) -> float:
+    """Signed height of ``sole_world`` above the ground plane along ``axis``.
+
+    Preconditions: ``sole_world`` is a finite 3-vector; ``ground`` exposes
+    ``height_m`` and a unit ``normal`` (defaults to Z-up when normal is +Z).
+    """
+    point = _finite_vector(sole_world, "sole_world")
+    height_m = float(ground.height_m)
+    normal = np.asarray(
+        ground.normal if hasattr(ground, "normal") else (0.0, 0.0, 1.0),
+        dtype=float,
+    )
+    if normal.shape == (3,) and np.linalg.norm(normal) > 1e-12:
+        normal = normal / np.linalg.norm(normal)
+        return float(point @ normal - height_m)
+    return float(point[axis] - height_m)
+
+
 def model_face_centres(
     kin: Any, q: Array, spec: Mapping[str, Any], frame: str = FACE_FRAME
 ) -> Array:

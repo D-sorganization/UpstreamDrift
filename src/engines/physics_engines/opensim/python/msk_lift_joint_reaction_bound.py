@@ -55,6 +55,18 @@ def mass_above_l5s1(model: Any) -> float:
     )
 
 
+def _disable_constraints_for_id(model: Any) -> None:
+    """Turn off couplers so prescribed accelerations match ``realizeAcceleration``.
+
+    Matches :func:`spine.inverse_dynamics.prepare_model_for_id` (ADR-0055 item 6)
+    and :mod:`spine.joint_reactions`: couplers prescribe kinematics only and must
+    not fight inverse dynamics on the self-hosted OpenSim fleet.
+    """
+    constraints = model.getConstraintSet()
+    for i in range(constraints.getSize()):
+        constraints.get(i).set_isEnforced(False)
+
+
 def prepare_reaction_model(model: Any) -> list[str]:
     """Add residual actuators on every coordinate and regularise massless bodies.
 
@@ -64,6 +76,7 @@ def prepare_reaction_model(model: Any) -> list[str]:
         model.getCoordinateSet().get(i).getName()
         for i in range(model.getCoordinateSet().getSize())
     ]
+    _disable_constraints_for_id(model)
     _add_residual_actuators(model, coord_names)
     _regularise_massless_bodies(model)
     return coord_names

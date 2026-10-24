@@ -12,21 +12,21 @@ The Motion Matching tool fits articulated multibody biomechanical models to obse
 
 ## Inputs
 
-| Input | Units | Description |
-| --- | --- | --- |
-| Marker Trajectories | mm | Optical C3D or markerless joint position streams |
-| Subject Mass & Height | kg, m | Subject anthropometric measurements for scaling |
-| Engine Backend | categorical | Selected solver engine (Pinocchio, MuJoCo, Drake, OpenSim) |
-| Convergence Tolerance | dimensionless | Residual threshold for kinematic error |
+| Input                 | Units         | Description                                                |
+| --------------------- | ------------- | ---------------------------------------------------------- |
+| Marker Trajectories   | mm            | Optical C3D or markerless joint position streams           |
+| Subject Mass & Height | kg, m         | Subject anthropometric measurements for scaling            |
+| Engine Backend        | categorical   | Selected solver engine (Pinocchio, MuJoCo, Drake, OpenSim) |
+| Convergence Tolerance | dimensionless | Residual threshold for kinematic error                     |
 
 ## Outputs
 
-| Output | Units | Description |
-| --- | --- | --- |
-| Generalized Coordinates $q(t)$ | rad, m | Segment joint angles and root pelvis position over time |
-| Generalized Velocities $\dot{q}(t)$ | rad/s, m/s | Joint angular velocities and linear motion |
-| Fit Residual | mm | Root-mean-square distance between modeled and measured markers |
-| Joint Torques $\tau(t)$ | N*m | Solved inverse-dynamics actuator forces |
+| Output                              | Units      | Description                                                    |
+| ----------------------------------- | ---------- | -------------------------------------------------------------- |
+| Generalized Coordinates $q(t)$      | rad, m     | Segment joint angles and root pelvis position over time        |
+| Generalized Velocities $\dot{q}(t)$ | rad/s, m/s | Joint angular velocities and linear motion                     |
+| Fit Residual                        | mm         | Root-mean-square distance between modeled and measured markers |
+| Joint Torques $\tau(t)$             | N*m        | Solved inverse-dynamics actuator forces                        |
 
 ## Method
 

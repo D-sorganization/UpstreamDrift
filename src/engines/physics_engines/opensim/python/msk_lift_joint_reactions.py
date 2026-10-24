@@ -19,6 +19,14 @@ from typing import Any
 import numpy as np
 
 from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
+from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_diagnostics import (
+    MSK_LIFT_JR_KINEMATICS_REVISION,
+    joint_reaction_source_fingerprint,
+)
+from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_frame import (
+    collect_frame_reaction_loads,
+    solve_lift_frame_inverse_dynamics,
+)
 from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_bound import (
     build_real_lift_bound_record,
     build_real_squat_bound_record,
@@ -48,8 +56,6 @@ from src.engines.physics_engines.opensim.python.spine._osim_helpers import (
 )
 from src.engines.physics_engines.opensim.python.spine.joint_reactions import (
     _add_residual_actuators,
-    _child_reaction,
-    _override,
     _regularise_massless_bodies,
     _residual_actuators,
 )
@@ -63,8 +69,10 @@ from src.shared.python.lifting.pack_audit.names import LIFTS
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "MSK_LIFT_JR_KINEMATICS_REVISION",
     "crosscheck_movement_optimizer_l5s1",
     "evaluate_lift_joint_reactions",
+    "joint_reaction_source_fingerprint",
     "static_hold_analytic_bound",
 ]
 
@@ -101,60 +109,16 @@ def _solve_frame_reaction(
     float,
     float,
 ]:
-    osim = import_opensim()
-    splines = context["splines"]
-    ik = context["ik"]
-    u_idx = context["u_index"]
-    coord_names = context["coord_names"]
-    res_acts = context["residuals"]
-    muscles = model.getMuscles()
-    m_names = context["muscle_names"]
-    forces = context["forces"]
-    t = float(context["times"][row])
-
-    qk, uk, udotk = ikid._derivatives(splines, len(ik.coordinates), t)
-    for name, val, spd in zip(ik.coordinates, qk, uk, strict=True):
-        c = model.getCoordinateSet().get(name)
-        c.setValue(state, float(val))
-        c.setSpeedValue(state, float(spd))
-    model.realizeVelocity(state)
-
-    for m_i, m_name in enumerate(m_names):
-        _override(muscles.get(m_name), state, float(forces[row, m_i]))
-    for act in res_acts:
-        _override(act, state, 0.0)
-
-    simbody_udot = osim.Vector(state.getNU(), 0.0)
-    for name, acc in zip(ik.coordinates, udotk, strict=True):
-        simbody_udot.set(u_idx[name], float(acc))
-
-    tau = osim.InverseDynamicsSolver(model).solve(state, simbody_udot)
-    for name, act in zip(coord_names, res_acts, strict=True):
-        _override(act, state, tau.get(u_idx[name]))
-
-    model.realizeAcceleration(state)
-    actual_udot = state.getUDot()
-    acc_err = max(
-        abs(actual_udot.get(u_idx[name]) - acc)
-        for name, acc in zip(ik.coordinates, udotk, strict=True)
-    )
-
-    f_back_g, _ = _child_reaction(context["joints"]["back"], state)
-    R_pelvis = transform_to_matrix(context["pelvis_body"].getTransformInGround(state))[
-        :3, :3
-    ]
-    f_l5s1 = R_pelvis.T @ f_back_g
-    R_torso = transform_to_matrix(context["torso_body"].getTransformInGround(state))[
-        :3, :3
-    ]
-    f_l5s1_torso = R_torso.T @ f_back_g
-
-    f_kr, _ = _child_reaction(context["joints"]["knee_r"], state)
-    f_kl, _ = _child_reaction(context["joints"]["knee_l"], state)
-    f_pr, _ = _child_reaction(context["joints"]["pat_r"], state)
-    f_pl, _ = _child_reaction(context["joints"]["pat_l"], state)
-    f_sr, _ = _child_reaction(context["joints"]["sh_r"], state)
-    f_sl, _ = _child_reaction(context["joints"]["sh_l"], state)
+    _, acc_err, qdd_norm = solve_lift_frame_inverse_dynamics(model, state, context, row)
+    (
+        f_l5s1,
+        f_l5s1_torso,
+        f_kr,
+        f_kl,
+        f_pr,
+        f_pl,
+        gh_norms,
+    ) = collect_frame_reaction_loads(context, state)
 
     return (
         f_l5s1,
@@ -163,9 +127,9 @@ def _solve_frame_reaction(
         f_kl,
         f_pr,
         f_pl,
-        np.array([np.linalg.norm(f_sr), np.linalg.norm(f_sl)]),
+        gh_norms,
         acc_err,
-        float(np.linalg.norm(udotk)),
+        qdd_norm,
     )
 
 
@@ -176,6 +140,7 @@ def _compute_reactions_timeseries(
     targets: Any,
     muscle_names: list[str],
     forces: np.ndarray,
+    reaction_context: dict[str, Any] | None = None,
 ) -> tuple[JointReactionSeries, np.ndarray, np.ndarray]:
     state = model.initSystem()
     u_idx = ikid._u_index(model, state)
@@ -191,7 +156,7 @@ def _compute_reactions_timeseries(
         "sh_r": model.getJointSet().get("acromial_r"),
         "sh_l": model.getJointSet().get("acromial_l"),
     }
-    context = {
+    context: dict[str, Any] = {
         "splines": splines,
         "ik": ik,
         "u_index": u_idx,
@@ -203,7 +168,10 @@ def _compute_reactions_timeseries(
         "joints": joints,
         "pelvis_body": model.getBodySet().get("pelvis"),
         "torso_body": model.getBodySet().get("torso"),
+        "acceleration_worst": {"error_rad_s2": 0.0},
     }
+    if reaction_context is not None:
+        reaction_context["acceleration_worst"] = context["acceleration_worst"]
 
     n = len(targets.time_s)
     c, ap, ml, res = np.zeros(n), np.zeros(n), np.zeros(n), np.zeros(n)
@@ -412,8 +380,15 @@ def evaluate_lift_joint_reactions(
     solve = _solve_lift_frames(basis, ik, inverse, leg_indices, targets.time_s)
 
     jr_model, coord_names = _setup_joint_reaction_model(model_path, loads_xml)
+    reaction_context: dict[str, Any] = {}
     reactions, torso_angles, qdd_norms = _compute_reactions_timeseries(
-        jr_model, coord_names, ik, targets, basis.muscle_names, solve.forces
+        jr_model,
+        coord_names,
+        ik,
+        targets,
+        basis.muscle_names,
+        solve.forces,
+        reaction_context,
     )
 
     m_above, real_lift_info = _min_acceleration_bound(
@@ -446,6 +421,11 @@ def evaluate_lift_joint_reactions(
         "bar_mass_kg": targets.bar_mass_kg,
         "peak_lumbar_moment_nm": _peak_lumbar_moment(ik.coordinates, inverse.tau),
         "qualification_info": osl4_qual,
+        "acceleration_realization": {
+            "stride": int(stride),
+            "worst_frame": reaction_context.get("acceleration_worst"),
+            "source_fingerprint": joint_reaction_source_fingerprint(),
+        },
     }
 
     return format_joint_reaction_solution(

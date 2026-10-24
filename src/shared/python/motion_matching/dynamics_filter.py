@@ -143,3 +143,79 @@ def cart_table_shift(
         solution, *_ = np.linalg.lstsq(rows[:, keep], rhs, rcond=None)
         shift[keep, axis] = solution
     return shift
+
+
+def _convex_hull(points_xy: Array) -> Array:
+    """Counter-clockwise convex hull of 2-D points (Andrew's monotone chain)."""
+    pts = np.unique(np.asarray(points_xy, dtype=float), axis=0)
+    if pts.shape[0] < 3:
+        return pts
+
+    def cross(o: Array, a: Array, b: Array) -> float:
+        return float((a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]))
+
+    lower: list[Array] = []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    upper: list[Array] = []
+    for p in pts[::-1]:
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return np.array(lower[:-1] + upper[:-1])
+
+
+def support_min_width(points_xy: Array) -> float:
+    """Narrowest width of the support polygon spanned by ``points_xy`` (m).
+
+    The minimum over directions of the polygon's extent, attained across one
+    of its convex-hull edges (rotating-calipers argument). For planted feet
+    this is the anteroposterior depth of the base of support, about one foot
+    length; on a single foot it is about the foot's width. Fewer than three
+    distinct points (a line or a point) have zero width.
+    """
+    pts = np.asarray(points_xy, dtype=float)
+    if pts.ndim != 2 or pts.shape[1] != 2 or not np.isfinite(pts).all():
+        raise ValueError("points_xy must be finite (points, 2)")
+    hull = _convex_hull(pts)
+    if hull.shape[0] < 3:
+        return 0.0
+    edges = np.roll(hull, -1, axis=0) - hull
+    normals = np.stack([edges[:, 1], -edges[:, 0]], axis=1)
+    normals /= np.sqrt(np.einsum("ij,ij->i", normals, normals))[:, None]
+    extent = normals @ hull.T  # (edges, vertices)
+    return float((extent.max(axis=1) - extent.min(axis=1)).min())
+
+
+def bound_com_shift(shift: Array, limit_m: Array | float) -> tuple[Array, Array]:
+    """Radially clip each frame's centre-of-mass shift to ``limit_m`` (#13112).
+
+    The cart-table correction is a re-posing of a marker-matched reference,
+    not a force: it moves the quasi-static zero-moment point by the shift
+    itself (``dz = dc`` when ``dc''`` vanishes). With planted feet the
+    whole-body centre of mass must stay over the base of support, so no
+    admissible correction carries it farther than the base's narrowest width
+    (one foot length in double stance): a larger shift would move a centred
+    centre of mass clean across the base. A gap larger than that is not a
+    centre-of-mass position error but an acceleration the reference demands
+    (typically a frame whose vertical reaction is barely above the unloaded
+    threshold, so its zero-moment point lies metres outside the feet), and
+    re-posing the body cannot fix it. The direction is kept; only the
+    magnitude is limited.
+
+    Returns:
+        (bounded shift (frames, 2), boolean mask of the clipped frames).
+    """
+    s = np.asarray(shift, dtype=float)
+    if s.ndim != 2 or s.shape[1] != 2 or not np.isfinite(s).all():
+        raise ValueError("shift must be finite (frames, 2)")
+    limit = np.broadcast_to(np.asarray(limit_m, dtype=float), (s.shape[0],))
+    if (limit < 0).any() or not np.isfinite(limit).all():
+        raise ValueError("limit must be finite and nonnegative")
+    norm = np.sqrt(np.einsum("ij,ij->i", s, s))
+    clipped = norm > limit
+    scale = np.ones_like(norm)
+    scale[clipped] = limit[clipped] / norm[clipped]
+    return s * scale[:, None], clipped

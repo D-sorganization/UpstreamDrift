@@ -21,6 +21,7 @@ import logging
 import os
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -302,17 +303,31 @@ def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
     return _render_lift_plots(solution, "squat", out_dir)
 
 
-def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
-    """Evaluate muscle activations and forces for all five lifts."""
+def measure(
+    stride: int = 5,
+    out_dir: Path = DEFAULT_OUT_DIR,
+    target_lifts: Sequence[str] | None = None,
+) -> dict[str, Any]:
+    """Evaluate muscle activations and forces for barbell lifts."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    receipts: dict[str, Any] = {}
+    receipts_file = out_dir / "receipts.json"
+    existing_lifts: dict[str, Any] = {}
+    if receipts_file.is_file():
+        try:
+            existing_data = json.loads(receipts_file.read_text(encoding="utf-8"))
+            existing_lifts = existing_data.get("lifts", {})
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning("Could not read existing receipts: %s", exc)
 
-    for lift in LIFTS:
+    eval_lifts = target_lifts if target_lifts is not None else LIFTS
+    receipts: dict[str, Any] = dict(existing_lifts)
+
+    for lift in eval_lifts:
         logger.info("Evaluating muscles for %s...", lift)
         res = evaluate_lift_muscles(lift, stride=stride, run_moco=True)
         if res["status"] == "complete":
             _render_lift_plots(res, lift, out_dir)
-            receipts[lift] = {
+            entry: dict[str, Any] = {
                 "lift": lift,
                 "status": "complete",
                 "classification": res["classification"],
@@ -337,6 +352,11 @@ def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
                 "moco": res["moco"],
                 "citation": res["citation"],
             }
+            if res.get("external_loads"):
+                entry["external_loads"] = res["external_loads"]
+            if res.get("limitations"):
+                entry["limitations"] = res["limitations"]
+            receipts[lift] = entry
         else:
             receipts[lift] = {
                 "lift": lift,
@@ -360,13 +380,18 @@ def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
                 "moco": None,
             }
 
+    ordered_receipts = {k: receipts[k] for k in LIFTS if k in receipts}
+    for k in receipts:
+        if k not in ordered_receipts:
+            ordered_receipts[k] = receipts[k]
+
     return {
         "generator": "scripts/measure_opensim_lift_muscles.py",
         "issue": "#13042 (OSL-4)",
         "source_commit": _git("rev-parse", "HEAD"),
         "reserve_share_threshold": RESERVE_SHARE_THRESHOLD,
         "citation": RAJAGOPAL_MODEL_CITATION,
-        "lifts": receipts,
+        "lifts": ordered_receipts,
     }
 
 
@@ -476,6 +501,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--table", action="store_true", help="Print Markdown summary table"
     )
+    parser.add_argument(
+        "--lifts",
+        nargs="+",
+        choices=LIFTS,
+        default=None,
+        help="Specific lifts to evaluate (defaults to all)",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -490,7 +522,7 @@ def main(argv: list[str] | None = None) -> int:
         print(render_per_lift_table(data))
         return 0
 
-    record = measure(stride=args.stride, out_dir=out_dir)
+    record = measure(stride=args.stride, out_dir=out_dir, target_lifts=args.lifts)
 
     out_file.parent.mkdir(parents=True, exist_ok=True)
     out_file.write_text(json.dumps(record, indent=2), encoding="utf-8")

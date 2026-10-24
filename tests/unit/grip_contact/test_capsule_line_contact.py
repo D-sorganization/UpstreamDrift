@@ -198,6 +198,42 @@ def test_line_contact_node_count_preconditions(
         line_contact_node_count(half_length, radius)
 
 
+def _assert_swap_invariant_wrench(
+    cap_a: ContactCapsule, cap_b: ContactCapsule, law: ContactParameters
+) -> None:
+    """``capsule_capsule(A,B)`` and ``capsule_capsule(B,A)`` agree on each body (#13508)."""
+    w_ab = capsule_capsule(cap_a, cap_b, law=law)
+    w_ba = capsule_capsule(cap_b, cap_a, law=law)
+    np.testing.assert_allclose(w_ab.force_a_n, w_ba.force_b_n, atol=1e-9)
+    np.testing.assert_allclose(w_ab.force_b_n, w_ba.force_a_n, atol=1e-9)
+    np.testing.assert_allclose(w_ab.moment_a_nm, w_ba.moment_b_nm, atol=1e-9)
+    np.testing.assert_allclose(w_ab.moment_b_nm, w_ba.moment_a_nm, atol=1e-9)
+    np.testing.assert_allclose(w_ab.contact_point_m, w_ba.contact_point_m, atol=1e-9)
+    np.testing.assert_allclose(w_ab.normal, -w_ba.normal, atol=1e-9)
+    assert w_ab.penetration_m == pytest.approx(w_ba.penetration_m, abs=1e-15)
+    assert w_ab.normal_force_mag_n == pytest.approx(w_ba.normal_force_mag_n, rel=1e-12)
+
+
+def test_capsule_capsule_swap_invariant_crossing_unequal_length(
+    law: ContactParameters,
+) -> None:
+    """Crossing capsules with different lengths use the same wrench either way (#13508)."""
+    short = ContactCapsule(np.zeros(3), np.array([0.0, 0.0, 0.08]), radius_m=0.01)
+    long = ContactCapsule(
+        np.array([0.015, 0.0, 0.04]),
+        np.array([0.015, 0.0, 0.12]),
+        radius_m=0.012,
+    )
+    _assert_swap_invariant_wrench(short, long, law)
+    _assert_swap_invariant_wrench(long, short, law)
+
+
+def test_hand_grip_capsule_ordering_unchanged(law: ContactParameters) -> None:
+    """Finger-on-grip still integrates along the finger when it is body A (#13508)."""
+    w = capsule_capsule(_finger(0.0), _grip(), law=law)
+    assert w.normal_force_mag_n == pytest.approx(law.stiffness_n_m * PRELOAD, rel=1e-12)
+
+
 def test_opensim_capsule_sphere_count_is_the_shared_rule() -> None:
     """OpenSim's capsule sphere chain uses the shared node count (single source)."""
     pytest.importorskip(

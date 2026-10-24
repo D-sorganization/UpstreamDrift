@@ -61,7 +61,7 @@ own embedding and lifecycle wiring.
   `visualization/rerun_renderer.py` — an opt-in `visualization` extra
   (`rerun-sdk`) consuming `ViewportOverlayPayload` and persisting `.rrd`
   review artifacts; first consumer is `simulation_backends/compare_cli.py
-  --export-rrd`. Rerun remains a recorded-diagnostics lane, not the embedded
+--export-rrd`. Rerun remains a recorded-diagnostics lane, not the embedded
   app-shell viewport (`supports_embedding=False` still stands).
 
 ## Validation

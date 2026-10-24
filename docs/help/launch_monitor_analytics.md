@@ -23,21 +23,21 @@ launcher. Declared capabilities: `launch_monitor_import`,
 
 ## Inputs
 
-| Input | Description | Unit |
-| --- | --- | --- |
-| Record files | CSV, TSV, XLS, XLSX and JSON shot exports | - |
-| Vendor header profile | detected or chosen; TrackMan, Foresight, FlightScope, Garmin Golf, SkyTrak, Uneekor, Full Swing, Rapsodo, GSPro / Open Connect, plus a generic mapping | - |
-| Column mapping, source unit, sign convention | confirmed per field in the import dialog | as declared per field |
-| Session metadata | player, session, device model, software version | - |
-| Trusted player identifier and its evidence | required for player-covariation and player grouping | - |
-| Session identifier and order column | declared independently of player identity | - |
-| Outlier threshold | modified-Z threshold for robust outlier flagging | dimensionless |
-| Filters | player, club, session, monitor, time, tag, or value | - |
-| Correlation method | Pearson, Spearman or Kendall | - |
-| Model family | linear, ridge, lasso, elastic net, or an optional shallow MLP | - |
-| Holdout scheme | grouped holdout, normally by session | - |
-| `LAUNCH_MONITOR_DATA_ROOT` | root of an authorized private data checkout | filesystem path |
-| `UPSTREAMDRIFT_LAUNCH_MONITOR_DATASET_ROOTS` | server-side JSON map of opaque aliases to authorized checkout roots | - |
+| Input                                        | Description                                                                                                                                            | Unit                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| Record files                                 | CSV, TSV, XLS, XLSX and JSON shot exports                                                                                                              | -                     |
+| Vendor header profile                        | detected or chosen; TrackMan, Foresight, FlightScope, Garmin Golf, SkyTrak, Uneekor, Full Swing, Rapsodo, GSPro / Open Connect, plus a generic mapping | -                     |
+| Column mapping, source unit, sign convention | confirmed per field in the import dialog                                                                                                               | as declared per field |
+| Session metadata                             | player, session, device model, software version                                                                                                        | -                     |
+| Trusted player identifier and its evidence   | required for player-covariation and player grouping                                                                                                    | -                     |
+| Session identifier and order column          | declared independently of player identity                                                                                                              | -                     |
+| Outlier threshold                            | modified-Z threshold for robust outlier flagging                                                                                                       | dimensionless         |
+| Filters                                      | player, club, session, monitor, time, tag, or value                                                                                                    | -                     |
+| Correlation method                           | Pearson, Spearman or Kendall                                                                                                                           | -                     |
+| Model family                                 | linear, ridge, lasso, elastic net, or an optional shallow MLP                                                                                          | -                     |
+| Holdout scheme                               | grouped holdout, normally by session                                                                                                                   | -                     |
+| `LAUNCH_MONITOR_DATA_ROOT`                   | root of an authorized private data checkout                                                                                                            | filesystem path       |
+| `UPSTREAMDRIFT_LAUNCH_MONITOR_DATASET_ROOTS` | server-side JSON map of opaque aliases to authorized checkout roots                                                                                    | -                     |
 
 Canonical metric units come from the metric registry. A retained
 `source::<header>` field is labelled `source_declared` only when its unit is
@@ -46,19 +46,19 @@ reported as `unknown` and never silently promoted to canonical.
 
 ## Outputs
 
-| Output | Description |
-| --- | --- |
-| Canonical shot records | plus the retained original header, value, source unit, unit evidence, file SHA-256, source row, profile and warnings |
-| Treatment audit log | every derivation, filter, flag and exclusion, saved in a `.lmproject` file |
-| Derived fields | smash factor, face-to-path, roll distance, computed only where their inputs exist |
-| Correlation results | coefficient, pair count, p-value, Benjamini-Hochberg adjusted p-value, derived-variable markings, screened network edges |
-| PCA and VIF diagnostics | latent structure and multicollinearity |
-| Model reports | held-out R-squared, MAE, RMSE, linear coefficients, actual-versus-predicted and residual views |
-| Flexible-analysis results | pair-specific sample counts, adjusted p-values, Pearson confidence intervals, OLS coefficient uncertainty, R-squared and adjusted R-squared, residual diagnostics, selected units, group-specific results |
-| Dataset fingerprint | deterministic SHA-256 over ordered record content and identity fields |
-| Player-covariation views | pooled, within-player, between-player, per-player, and fixed and random Fisher-z meta-analysis with Q, tau-squared and I-squared |
-| Dispersion and longitudinal trend views | per the selected strata |
-| Exports | source references and source-joinable backing hashes rather than copied restricted row values |
+| Output                                  | Description                                                                                                                                                                                               |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Canonical shot records                  | plus the retained original header, value, source unit, unit evidence, file SHA-256, source row, profile and warnings                                                                                      |
+| Treatment audit log                     | every derivation, filter, flag and exclusion, saved in a `.lmproject` file                                                                                                                                |
+| Derived fields                          | smash factor, face-to-path, roll distance, computed only where their inputs exist                                                                                                                         |
+| Correlation results                     | coefficient, pair count, p-value, Benjamini-Hochberg adjusted p-value, derived-variable markings, screened network edges                                                                                  |
+| PCA and VIF diagnostics                 | latent structure and multicollinearity                                                                                                                                                                    |
+| Model reports                           | held-out R-squared, MAE, RMSE, linear coefficients, actual-versus-predicted and residual views                                                                                                            |
+| Flexible-analysis results               | pair-specific sample counts, adjusted p-values, Pearson confidence intervals, OLS coefficient uncertainty, R-squared and adjusted R-squared, residual diagnostics, selected units, group-specific results |
+| Dataset fingerprint                     | deterministic SHA-256 over ordered record content and identity fields                                                                                                                                     |
+| Player-covariation views                | pooled, within-player, between-player, per-player, and fixed and random Fisher-z meta-analysis with Q, tau-squared and I-squared                                                                          |
+| Dispersion and longitudinal trend views | per the selected strata                                                                                                                                                                                   |
+| Exports                                 | source references and source-joinable backing hashes rather than copied restricted row values                                                                                                             |
 
 ## Method
 
@@ -146,6 +146,7 @@ Security and retention rationale for dataset jobs:
   to the source dataset privacy and usage terms.
 
 ## See Also
+
 - [Launch Monitor Analytics user guide](../user_guide/launch_monitor_analytics.md)
 - [ADR 0037: immutable launch monitor dataset jobs](../adr/0037-immutable-launch-monitor-dataset-jobs.md)
 - [Analysis Tools calculation sheet](analysis_tools_api.md)

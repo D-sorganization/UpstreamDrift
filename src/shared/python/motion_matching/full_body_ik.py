@@ -83,6 +83,8 @@ class SolvePoseOptions:
     #: adds ``sqrt(weight) * (q - target)`` rows. A weak weight only decides
     #: coordinates the markers leave under-determined.
     posture_prior: Mapping[str, tuple[float, float]] | None = None
+    #: Penalise the club-body sole (spec origin) hovering above ``ground`` (#12969).
+    club_sole_weight: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -619,6 +621,16 @@ class BaseFullBodyIK:
     ) -> None:
         """Append ground penetration avoidance penalty rows."""
 
+    def _append_club_sole(
+        self,
+        rows: list[Array],
+        jacs: list[Array],
+        ground: Any,
+        weight: float,
+    ) -> None:
+        """Append club-body sole resting on the ground plane (#12969)."""
+        return
+
     def _append_anchors(
         self,
         rows: list[Array],
@@ -784,7 +796,13 @@ class BaseFullBodyIK:
             raise ValueError("At least three valid markers are required")
         if (
             opts.iterations < 1
-            or min(opts.prior_weight, opts.closure_weight, opts.ground_weight) < 0
+            or min(
+                opts.prior_weight,
+                opts.closure_weight,
+                opts.ground_weight,
+                opts.club_sole_weight,
+            )
+            < 0
         ):
             raise ValueError("Iterations must be positive and weights nonnegative")
         if opts.balance_weight < 0:
@@ -896,6 +914,7 @@ class BaseFullBodyIK:
         )
         self._append_closure(rows, jacs, opts.closure_weight, rot_w)
         self._append_ground(rows, jacs, ground, opts.ground_weight, prep.pinned)
+        self._append_club_sole(rows, jacs, ground, opts.club_sole_weight)
         self._append_anchors(rows, jacs, prep.planted, opts.ground_weight)
         self._append_balance(rows, jacs, ground, opts.balance_weight)
         self._append_com_target(rows, jacs, ground, prep.com_goal)

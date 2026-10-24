@@ -190,7 +190,7 @@ def _run_drake() -> tuple[np.ndarray, np.ndarray]:
             simulation_time_s=0.30,
             sample_rate_hz=1000.0,
             time_step_s=1.0e-3,
-            grip_body_name="right_hand",
+            grip_body_name="mid_hands",
         )
         plant = MultibodyPlant(options.time_step_s)
         sim_mod.load_humanoid_into_plant(plant, options.urdf_path)

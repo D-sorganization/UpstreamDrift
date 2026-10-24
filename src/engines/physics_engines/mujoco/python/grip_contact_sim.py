@@ -60,6 +60,7 @@ from src.shared.python.grip_contact.topology_contact import (
     map_site_to_hand_frame,
     topology_side_wrench,
 )
+from src.shared.python.motion_matching.contact_kernel import friction_secant_gain
 
 ENGINE = "mujoco_contact"
 DEFAULT_TIMESTEP_S = 1.0e-5
@@ -369,8 +370,44 @@ class ClubInHands:
         scale = TOPOLOGY_STEP_SCALE if active else (1.0 / TOPOLOGY_STEP_SCALE)
         opt = self.model.opt
         opt.impratio *= scale
-        self.model.pair_solreffriction[:, 0] *= scale
+        if active:
+            self.model.pair_solreffriction[:, 0] *= scale
+        else:  # undo the friction schedule too, exactly
+            self.model.pair_solreffriction[:, 0] = self._static_friction_time_s
         self._stepped = active
+
+    def _schedule_friction(self) -> None:
+        """Give every node friction row the shared law's secant slip gain (#13306).
+
+        An elliptic-cone friction row with ``solreffriction`` time ``t_f``
+        has reference damping ``B = 2 / (d_max t_f)`` and, for regulariser
+        ``R_f``, acts in the stepped regime as a viscous slip element of gain
+        ``c = B / R_f`` (loaded rows within 1.2 % of it, ten-finger hold).
+        The shared law's friction is ``|f_t| = g(v) f_n v`` (see
+        ``friction_secant_gain``), so ``t_f = 2 / (d_max g(v) f_n R_f)``
+        reproduces it at the row's current normal force and slip speed.
+        A fixed ``t_f`` can match one gain only, and the rows' slip speeds
+        and loads differ: the fixed calibration left the ten-finger hold's
+        net force 2.9 % RMS from the reference.  ``f_n``, ``v`` and ``R_f``
+        come from the previous step (a one-step lag); rows without load
+        keep their last time constant.
+        """
+        d, n, topo = self.data, self.data.ncon, self.topology_model
+        if n == 0 or topo is None:
+            return
+        contact = d.contact
+        adr = np.asarray(contact.efc_address[:n], dtype=int)
+        pair = self._geom_pair[np.asarray(contact.geom1[:n], dtype=int)]
+        live = (adr >= 0) & (pair >= 0)
+        adr, pair = adr[live], pair[live]
+        d_max = np.asarray(contact.solimp[:n, 1])[live]
+        f_n = np.maximum(d.efc_force[adr], 0.0)
+        speed = np.hypot(d.efc_vel[adr + 1], d.efc_vel[adr + 2])
+        gain = friction_secant_gain(speed, topo.law) * f_n
+        loaded = gain > 0.0
+        self.model.pair_solreffriction[pair[loaded], 0] = 2.0 / (
+            d_max[loaded] * gain[loaded] * d.efc_R[adr[loaded] + 1]
+        )
 
     def _rebuild(self) -> None:
         mj = self._mj
@@ -390,6 +427,7 @@ class ClubInHands:
         self.model = mj.MjModel.from_xml_string(xml)
         self.data = mj.MjData(self.model)
         self._stepped = False
+        self._static_friction_time_s = self.model.pair_solreffriction[:, 0].copy()
         self._club = int(self.model.body("club").id)
         self._hand = {s: int(self.model.body(f"hand_{s}").id) for s in self.pad_sides}
         self._offsets = {s: self.interface.frame(s).matrix() for s in SIDES}
@@ -404,6 +442,12 @@ class ClubInHands:
             for s in self.pad_sides:
                 for k in range(self.pad_count):
                     self._pad_geom[int(self.model.geom(f"pad_{s}{k}").id)] = (s, k)
+        #: contact pair of each node geom (-1 for other geoms), for the schedule
+        self._geom_pair = np.full(self.model.ngeom, -1, dtype=int)
+        for i in range(self.model.npair):
+            for g in (int(self.model.pair_geom1[i]), int(self.model.pair_geom2[i])):
+                if g in self._pad_geom:
+                    self._geom_pair[g] = i
 
     # ------------------------------------------------------------ placement
     def _set_free(self, body: int, rot: np.ndarray, pos: np.ndarray) -> None:
@@ -714,9 +758,12 @@ class ClubInHands:
         dt = self.timestep_s
         if steps > 0:
             self._set_step_scaling(True)
+        schedule = self.topology_model is not None
         for _ in range(steps):
             t = float(d.time)
             self.place_hands(t, velocity_time=t + 0.5 * dt)
+            if schedule:
+                self._schedule_friction()
             mj.mj_step(m, d)
 
     def sample(self) -> ContactSample:

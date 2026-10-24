@@ -86,6 +86,5 @@ Observations:
 - .github/workflows/auto-remediate-issues.yml
 - .github/workflows/auto-update-prs.yml
 - .github/workflows/ci-failure-digest.yml
-- .github/workflows/PR-Comment-Responder.yml
 - .github/copilot-instructions.md
 - git log (last 50 commit subjects)
