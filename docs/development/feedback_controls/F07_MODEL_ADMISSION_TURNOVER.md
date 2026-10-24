@@ -30,7 +30,7 @@ Eighteen focused tests passed with Python 3.12 and OpenSim
 `4.6-2026-06-22-85aaf64`, serial execution:
 
 ```powershell
-& C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe -m pytest tests/opensim/test_model_admission.py -o addopts='' -q
+& <owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe -m pytest tests/opensim/test_model_admission.py -o addopts='' -q
 ```
 
 Coverage includes actual native Millard/Thelen flags, locked/coupled coordinates,

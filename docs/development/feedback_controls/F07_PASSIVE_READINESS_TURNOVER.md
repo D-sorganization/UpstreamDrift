@@ -72,7 +72,7 @@ entries against a 75-entry ceiling, and an oversized Development Log. These
 findings are existing policy debt and are not reported as passing.
 
 The durable pre_pr log is
-`C:\Users\diete\Repositories\_temp\passive_receipt_pre_pr_final_20261012.log`
+`<owner-home>\Repositories\_temp\passive_receipt_pre_pr_final_20261012.log`
 (SHA-256
 `af6c98b0bb766dfd9ebf6f78b34b3526bff4b88b0a37f6d0432561cb55ea1030`).
 An earlier pre_pr attempt was interrupted during consistency tests after an

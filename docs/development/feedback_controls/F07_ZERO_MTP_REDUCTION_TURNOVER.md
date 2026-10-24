@@ -34,11 +34,11 @@ Reproduce with the qualified OpenSim 4.6 interpreter and explicit read-only
 donor path:
 
 ```powershell
-$env:CASADIPATH='C:/Users/diete/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim'
+$env:CASADIPATH='<owner-home>/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim'
 $env:PYTHONPATH=(Get-Location).Path
-$env:UD_RAJAGOPAL_SOURCE='C:/Users/diete/Repositories/UpstreamDrift/shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim'
-& 'C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/opensim/test_native_mtp_reduction.py -q
-& 'C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe' scripts/opensim/emit_zero_mtp_receipt.py --donor $env:UD_RAJAGOPAL_SOURCE --golf-model src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim --output docs/development/feedback_controls/F07_MTP_REDUCTION_NATIVE_RECEIPT.json
+$env:UD_RAJAGOPAL_SOURCE='<owner-home>/Repositories/UpstreamDrift/shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim'
+& '<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/opensim/test_native_mtp_reduction.py -q
+& '<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe' scripts/opensim/emit_zero_mtp_receipt.py --donor $env:UD_RAJAGOPAL_SOURCE --golf-model src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim --output docs/development/feedback_controls/F07_MTP_REDUCTION_NATIVE_RECEIPT.json
 ```
 
 The emitter requires an absent output path; use a fresh copy/path for a rerun.
