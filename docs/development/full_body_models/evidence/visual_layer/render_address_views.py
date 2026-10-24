@@ -46,7 +46,7 @@ from src.shared.python.motion_matching.visual_skeleton import (  # noqa: E402
 C3D = ROOT / "data/C3D_TA_Driver.c3d"
 
 NATIVE = Path(
-    "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native/docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81"
+    "<owner-home>/Repositories/Worktrees/UpstreamDrift-pinocchio-native/docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81"
 )
 HERE = Path(__file__).resolve().parent
 SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v2.json"

@@ -10,7 +10,7 @@
     "horizon_s": 1.65,
     "weld_stiffness": 200000.0,
     "weld_damping": 400.0,
-    "run": "C:\\Users\\diete\\AppData\\Local\\Temp\\claude\\C--Users-diete-Repositories\\3b2df4af-b4a6-4806-b7cf-2c6990c4d236\\scratchpad\\p6work\\iron_mjx-lbfgs"
+    "run": "<owner-home>\\AppData\\Local\\Temp\\claude\\C--Users-diete-Repositories\\3b2df4af-b4a6-4806-b7cf-2c6990c4d236\\scratchpad\\p6work\\iron_mjx-lbfgs"
   },
   "knots": 47,
   "actuated_coordinates": 38,

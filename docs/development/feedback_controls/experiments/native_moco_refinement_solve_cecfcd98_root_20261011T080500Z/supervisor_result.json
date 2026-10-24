@@ -1,6 +1,6 @@
 {
   "actual_worker_command": [
-    "C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe",
+    "<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe",
     "-m",
     "tests.opensim.native_moco_ladder_worker",
     "--rung",
@@ -13,7 +13,7 @@
     "docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\refinement_plan.json"
   ],
   "analysis_file_unchanged": true,
-  "analysis_path": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_mesh20_e1548c5179\\activation_residual_analysis.json",
+  "analysis_path": "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_mesh20_e1548c5179\\activation_residual_analysis.json",
   "analysis_sha256_after": "1195cdf39855accfd761e41410d8b23121cafbb28f0407d69e3a479d1e136116",
   "analysis_sha256_before": "1195cdf39855accfd761e41410d8b23121cafbb28f0407d69e3a479d1e136116",
   "attempt_id": "848866a47d1dcb315605dfce0ba9dab29bac209f898e60ea042096a8a34ddd16",
@@ -35,7 +35,7 @@
     "worker.stderr.log": "e95c9e6466f4a27443d7ff67b088f915e2f11f00b5b21cc3a3a3ca7fc8b41baa",
     "worker.stdout.log": "154decd8d4fd868aa7daae81871f23a5904e9cb1ecdbb847db61e49422a43f5a"
   },
-  "parent_directory": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_mesh20_e1548c5179\\plain",
+  "parent_directory": "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_mesh20_e1548c5179\\plain",
   "parent_hashes_after": {
     "replay_audit": "ad6f872d5f385f67a8ff60e014cd9d330f7311f4b2b4f49c7407e9bf5653f1db",
     "request": "86570790ab4fce02df7b8a1c899b0755a7518c36c541fa366a2dd467a6a8f1a9",
@@ -117,7 +117,7 @@
   },
   "physical_qualification": "unqualified",
   "plan_files_unchanged": true,
-  "plan_path": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_prep_05593eb896_root_20261011T073710Z\\refinement_plan.json",
+  "plan_path": "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_prep_05593eb896_root_20261011T073710Z\\refinement_plan.json",
   "plan_sha256": "746f731ce8f2c4002dcdc87c4dd346f98d5bc7ba00b2297c0da63f2b47df2770",
   "provenance_unchanged": true,
   "refinement_parent_hashes": {
@@ -148,7 +148,7 @@
       "osimMoco.dll": "c8553d8ee1c71ff3df9c4e3485e3dd2916ade712b2c28c28be6bf45f2b2a60ca"
     },
     "coverage": "bounded Python extension and Moco DLL fingerprint; not a closed dependency-runtime identity",
-    "directory": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim"
+    "directory": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim"
   },
   "runtime_fingerprint_before": {
     "components": {
@@ -158,7 +158,7 @@
       "osimMoco.dll": "c8553d8ee1c71ff3df9c4e3485e3dd2916ade712b2c28c28be6bf45f2b2a60ca"
     },
     "coverage": "bounded Python extension and Moco DLL fingerprint; not a closed dependency-runtime identity",
-    "directory": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim"
+    "directory": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim"
   },
   "sampled_tree_rss_threshold_bytes": 1073741824,
   "schema": "native-moco-single-refinement-invocation-v1",
@@ -191,7 +191,7 @@
   },
   "wall_timeout_seconds": 30,
   "worker_command": [
-    "C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe",
+    "<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe",
     "-m",
     "tests.opensim.native_moco_ladder_worker",
     "--rung",
@@ -205,22 +205,22 @@
   ],
   "worker_environment": {
     "BLIS_NUM_THREADS": "1",
-    "CASADIPATH": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim",
+    "CASADIPATH": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim",
     "MKL_NUM_THREADS": "1",
     "NUMEXPR_NUM_THREADS": "1",
     "OMP_NUM_THREADS": "1",
     "OPENBLAS_NUM_THREADS": "1",
-    "PYTHONPATH": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164",
+    "PYTHONPATH": "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164",
     "VECLIB_MAXIMUM_THREADS": "1"
   },
   "worker_interpreter_after": {
-    "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+    "path": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
     "sha256": "0b471133e110cfb53a061cad528ce8e517d7b9ac41a0a396c39ad795a487fc14"
   },
   "worker_interpreter_before": {
-    "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+    "path": "<owner-home>\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
     "sha256": "0b471133e110cfb53a061cad528ce8e517d7b9ac41a0a396c39ad795a487fc14"
   },
   "worker_interpreter_unchanged": true,
-  "working_directory": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164"
+  "working_directory": "<owner-home>\\Repositories\\Worktrees\\feedback-marker-calibration-12164"
 }

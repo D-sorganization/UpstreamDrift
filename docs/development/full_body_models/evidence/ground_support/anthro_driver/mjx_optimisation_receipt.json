@@ -1,7 +1,7 @@
 {
   "run": "anthro_driver",
   "settings": {
-    "run": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-visuals-10062\\docs\\development\\full_body_models\\evidence\\ground_support\\anthro_driver",
+    "run": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-visuals-10062\\docs\\development\\full_body_models\\evidence\\ground_support\\anthro_driver",
     "iterations": 16,
     "substeps": 6,
     "knot_spacing": 0.04,
