@@ -230,7 +230,31 @@ from src.shared.python.grip_contact.matlab_kernel import (
     DEFAULT_GOLDEN_JSON_PATH, build_golden_vectors_payload,
 )
 committed = json.loads(DEFAULT_GOLDEN_JSON_PATH.read_text(encoding="utf-8"))
-sys.exit(0 if build_golden_vectors_payload() == committed else 1)
+now = build_golden_vectors_payload()
+if now == committed:
+    sys.exit(0)
+
+def first_diff(a, b, path):
+    if isinstance(a, dict) and isinstance(b, dict) and a.keys() == b.keys():
+        return next((d for k in a if (d := first_diff(a[k], b[k], f"{path}.{k}"))), None)
+    if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
+        return next(
+            (d for i, (x, y) in enumerate(zip(a, b))
+             if (d := first_diff(x, y, f"{path}[{i}]"))),
+            None,
+        )
+    return None if a == b else f"{path}: committed={a!r} regenerated={b!r}"
+
+by_id = {c["case_id"]: c for c in committed["cases"]}
+diffs = [
+    d for c in now["cases"]
+    if (d := first_diff(by_id.get(c["case_id"]), c, c["case_id"]))
+]
+top = first_diff({k: v for k, v in committed.items() if k != "cases"},
+                 {k: v for k, v in now.items() if k != "cases"}, "$")
+print(f"{len(diffs)} differing case(s); top-level: {top}", file=sys.stderr)
+print("\\n".join(diffs[:5]), file=sys.stderr)
+sys.exit(1)
 """
 
 
@@ -243,6 +267,9 @@ def test_golden_vectors_are_bit_reproducible_under_another_blas_kernel() -> None
     1e-12 golden tolerance between a workstation and a CI runner. The Python
     kernel mirror and the case builder use fixed-order scalar 3-vector algebra
     instead; forcing the generic ``Prescott`` kernel must not change one bit.
+    The friction ``exp``/``tanh`` are computed with basic IEEE operations too,
+    because glibc and the MSVC runtime differ in the last ulp, so a fixture
+    generated on Windows must also regenerate exactly on Linux CI.
     """
     import os
     import subprocess

@@ -30,6 +30,17 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.grip_contact.bushing_law import BushingState, cross3
+from src.shared.python.grip_contact.deterministic_math import (
+    closest_point_segment3,
+    det_atan2,
+    det_exp,
+    det_sin_cos,
+    det_tanh,
+    dot3,
+    matmul3,
+    matvec3,
+    norm3,
+)
 from src.shared.python.grip_contact.generated_export_lock import (
     serialize_committed_export,
 )
@@ -82,52 +93,9 @@ def _fmt(val: float) -> str:
     return matlab_export_literal(val)
 
 
-def _dot3(a: Any, b: Any) -> float:
-    """``a . b`` for 3-vectors in fixed order with plain IEEE float operations.
-
-    The Python kernel mirror and the golden-vector builder use these helpers
-    instead of ``@`` / ``np.dot`` / ``np.linalg.norm``: those dispatch to BLAS,
-    whose rounding depends on the CPU kernel OpenBLAS selects. Near-cancelling
-    golden channels (the rest cases, ~1e-9 N left from ~40 N opposing forces)
-    then differed across runners by more than the 1e-12 golden tolerance
-    (#13552). Fixed-order scalar arithmetic is bit-reproducible everywhere.
-    """
-    return (float(a[0]) * float(b[0]) + float(a[1]) * float(b[1])) + float(
-        a[2]
-    ) * float(b[2])
-
-
-def _norm3(a: Any) -> float:
-    """Euclidean norm of a 3-vector via :func:`_dot3` (deterministic)."""
-    return math.sqrt(_dot3(a, a))
-
-
-def _matvec3(m: Any, v: Any) -> np.ndarray:
-    """``m @ v`` for a 3x3 matrix and 3-vector via :func:`_dot3`."""
-    return np.array([_dot3(m[0], v), _dot3(m[1], v), _dot3(m[2], v)], dtype=float)
-
-
-def _matmul3(a: Any, b: Any) -> np.ndarray:
-    """``a @ b`` for 3x3 matrices via :func:`_dot3` (deterministic)."""
-    bt = np.asarray(b, dtype=float).T
-    return np.array([[_dot3(a[i], bt[j]) for j in range(3)] for i in range(3)])
-
-
-def _closest_point_segment3(
-    point: np.ndarray, p0: np.ndarray, p1: np.ndarray
-) -> np.ndarray:
-    """Closest point on segment ``[p0, p1]`` (``pair_contact`` math, deterministic)."""
-    d = p1 - p0
-    d_sq = _dot3(d, d)
-    if d_sq < 1e-14:
-        return p0.copy()
-    t = min(1.0, max(0.0, _dot3(point - p0, d) / d_sq))
-    return p0 + t * d
-
-
 def _orthogonal_unit(axis: np.ndarray) -> np.ndarray:
     """Deterministic unit vector orthogonal to ``axis`` (matches ``pair_contact``)."""
-    nrm = _norm3(axis)
+    nrm = norm3(axis)
     if nrm < 1e-12:
         return np.array([1.0, 0.0, 0.0], dtype=float)
     unit = axis / nrm
@@ -137,7 +105,7 @@ def _orthogonal_unit(axis: np.ndarray) -> np.ndarray:
         else np.array([1.0, 0.0, 0.0], dtype=float)
     )
     ortho = cross3(unit, ref)
-    norm_v = _norm3(ortho)
+    norm_v = norm3(ortho)
     return ortho / norm_v if norm_v > 1e-12 else np.array([1.0, 0.0, 0.0], dtype=float)
 
 
@@ -426,9 +394,9 @@ def _eval_plane_contact_py(
     law: Mapping[str, float],
 ) -> tuple[float, float, float, float, np.ndarray, np.ndarray]:
     """Mirror of ``local_plane_contact`` in ``gs3dx_grip_contact_kernel.m``."""
-    v_n = _dot3(u_normal, v_rel)
+    v_n = dot3(u_normal, v_rel)
     v_t = v_rel - u_normal * v_n
-    slip_speed = _norm3(v_t)
+    slip_speed = norm3(v_t)
     if penetration <= 0.0:
         z3 = np.zeros(3, dtype=float)
         return 0.0, 0.0, 0.0, slip_speed, z3, z3.copy()
@@ -446,16 +414,16 @@ def _eval_plane_contact_py(
     normal_force = u_normal * f_n_mag
     if slip_speed > 0.0 and f_n_mag > 0.0:
         ratio = slip_speed / v_tr
-        mu = mu_d + (mu_s - mu_d) * math.exp(-(ratio * ratio)) + mu_v * slip_speed
-        f_t_mag = mu * f_n_mag * math.tanh(ratio)
+        mu = mu_d + (mu_s - mu_d) * det_exp(-(ratio * ratio)) + mu_v * slip_speed
+        f_t_mag = mu * f_n_mag * det_tanh(ratio)
         friction_force = (-v_t / slip_speed) * f_t_mag
     else:
         f_t_mag = 0.0
         friction_force = np.zeros(3, dtype=float)
     force_vec = normal_force + friction_force
     if f_n_mag > 0.0 and r_patch > 0.0:
-        spin_rate = _dot3(u_normal, omega_rel)
-        spin_signed = mu_s * f_n_mag * r_patch * math.tanh(spin_rate / omega_tr)
+        spin_rate = dot3(u_normal, omega_rel)
+        spin_signed = mu_s * f_n_mag * r_patch * det_tanh(spin_rate / omega_tr)
         spin_mag = abs(spin_signed)
         spin_vec = -u_normal * spin_signed
     else:
@@ -476,9 +444,9 @@ def _eval_sphere_node_py(
     b0_w, b1_w, r_b = seg_b
     p_a, _, v_a0, om_a = pose_a
     p_b, _, v_b0, om_b = pose_b
-    p_axis = _closest_point_segment3(center_w, b0_w, b1_w)
+    p_axis = closest_point_segment3(center_w, b0_w, b1_w)
     diff_v = p_axis - center_w
-    dist = _norm3(diff_v)
+    dist = norm3(diff_v)
     normal = diff_v / dist if dist > 1e-12 else _orthogonal_unit(b1_w - b0_w)
     sdist = dist - r_a - r_b
     pen = max(0.0, -sdist)
@@ -510,8 +478,8 @@ def _eval_pair_row_py(
     a0, a1, r_a = row[3:6], row[6:9], float(row[9])
     p_b, r_b_m = pose_b[0], pose_b[1]
     seg_b = (
-        p_b + _matvec3(r_b_m, row[10:13]),
-        p_b + _matvec3(r_b_m, row[13:16]),
+        p_b + matvec3(r_b_m, row[10:13]),
+        p_b + matvec3(r_b_m, row[13:16]),
         float(row[16]),
     )
     n_nodes = int(row[17])
@@ -523,7 +491,7 @@ def _eval_pair_row_py(
         node = a0 + (j / (n_nodes - 1)) * (a1 - a0) if n_nodes > 1 else a0
         n_fn, n_ft, n_sp, n_slp, n_pen, n_sd, n_fa, n_ma, n_fb, n_mb, n_cpt = (
             _eval_sphere_node_py(
-                pose_a[0] + _matvec3(pose_a[1], node), r_a, seg_b, pose_a, pose_b, law
+                pose_a[0] + matvec3(pose_a[1], node), r_a, seg_b, pose_a, pose_b, law
             )
         )
         fn, ft, sp = fn + w * n_fn, ft + w * n_ft, sp + w * n_sp
@@ -567,17 +535,17 @@ def evaluate_kernel_reference(
     )
 
     frames = params["club_grip_frames"]
-    dp_l = _matvec3(r_club, np.asarray(frames["L"]["position_m"], dtype=float))
+    dp_l = matvec3(r_club, np.asarray(frames["L"]["position_m"], dtype=float))
     pose_bl = (
         p_club + dp_l,
-        _matmul3(r_club, np.asarray(frames["L"]["rotation"], dtype=float)),
+        matmul3(r_club, np.asarray(frames["L"]["rotation"], dtype=float)),
         v_club + cross3(omega_club, dp_l),
         omega_club,
     )
-    dp_r = _matvec3(r_club, np.asarray(frames["R"]["position_m"], dtype=float))
+    dp_r = matvec3(r_club, np.asarray(frames["R"]["position_m"], dtype=float))
     pose_br = (
         p_club + dp_r,
-        _matmul3(r_club, np.asarray(frames["R"]["rotation"], dtype=float)),
+        matmul3(r_club, np.asarray(frames["R"]["rotation"], dtype=float)),
         v_club + cross3(omega_club, dp_r),
         omega_club,
     )
@@ -684,8 +652,8 @@ def _verify_against_topology_side_wrench(
 
 def _rot_from_axis_angle(axis: np.ndarray, angle_rad: float) -> np.ndarray:
     """Rodrigues rotation matrix for ``axis`` and ``angle_rad``."""
-    u = axis / _norm3(axis)
-    c, s = math.cos(angle_rad), math.sin(angle_rad)
+    u = axis / norm3(axis)
+    s, c = det_sin_cos(angle_rad)
     ux = np.array(
         [[0.0, -u[2], u[1]], [u[2], 0.0, -u[0]], [-u[1], u[0], 0.0]], dtype=float
     )
@@ -694,17 +662,17 @@ def _rot_from_axis_angle(axis: np.ndarray, angle_rad: float) -> np.ndarray:
 
 def _align_vector_rotation(v_from: np.ndarray, v_to: np.ndarray) -> np.ndarray:
     """Proper rotation matrix mapping unit direction of ``v_from`` onto ``v_to``."""
-    u1 = v_from / _norm3(v_from)
-    u2 = v_to / _norm3(v_to)
+    u1 = v_from / norm3(v_from)
+    u2 = v_to / norm3(v_to)
     cr = cross3(u1, u2)
-    nrm = _norm3(cr)
-    dt = min(1.0, max(-1.0, _dot3(u1, u2)))
+    nrm = norm3(cr)
+    dt = min(1.0, max(-1.0, dot3(u1, u2)))
     if nrm <= 1e-12:
         if dt > 0.0:
             return np.eye(3)
         ortho = _orthogonal_unit(u1)
         return _rot_from_axis_angle(ortho, math.pi)
-    return _rot_from_axis_angle(cr / nrm, math.atan2(nrm, dt))
+    return _rot_from_axis_angle(cr / nrm, det_atan2(nrm, dt))
 
 
 def _make_case(
@@ -797,12 +765,12 @@ def _build_style_edge_cases(
     jt_offset = b_mid_1 + np.array([0.0, ra_1 + rb_1 + 1.0e-9, 0.0]) - a0_1
     jt_in = _clone_inputs(
         base,
-        p_hand_l_m=(p_grip_l + _matvec3(r_grip, jt_offset)).tolist(),
+        p_hand_l_m=(p_grip_l + matvec3(r_grip, jt_offset)).tolist(),
         p_hand_r_m=far_r,
     )
     co_in = _clone_inputs(
         base,
-        p_hand_l_m=(p_grip_l + _matvec3(r_grip, b_mid_1 - a0_1)).tolist(),
+        p_hand_l_m=(p_grip_l + matvec3(r_grip, b_mid_1 - a0_1)).tolist(),
         p_hand_r_m=far_r,
     )
     v_co = [0.65, -0.35, 0.85]
@@ -818,8 +786,8 @@ def _build_style_edge_cases(
     pen_target = b_mid_1 + np.array([0.0, ra_1 + rb_1 - 0.002, 0.0]) - a0_1
     reb_in = _clone_inputs(
         jt_in,
-        p_hand_l_m=(p_grip_l + _matvec3(r_grip, pen_target)).tolist(),
-        v_hand_l_m_s=_matvec3(r_grip, np.array([0.0, 3.0, 0.0])).tolist(),
+        p_hand_l_m=(p_grip_l + matvec3(r_grip, pen_target)).tolist(),
+        v_hand_l_m_s=matvec3(r_grip, np.array([0.0, 3.0, 0.0])).tolist(),
     )
     col_in = _clone_inputs(base)
     if style == "ten_finger":
@@ -828,14 +796,14 @@ def _build_style_edge_cases(
         ca0, ca1 = cap_row[3:6], cap_row[6:9]
         cb_mid = 0.5 * (cap_row[10:13] + cap_row[13:16])
         ra_c, rb_c = float(cap_row[9]), float(cap_row[16])
-        r_hr_new = _matmul3(
+        r_hr_new = matmul3(
             r_grip, _align_vector_rotation(ca1 - ca0, np.array([1.0, 0.0, 0.0]))
         )
         target_mid = cb_mid + np.array([0.0, ra_c + rb_c - 0.004, 0.0])
         p_hr_new = (
             p_grip_r
-            + _matvec3(r_grip, target_mid)
-            - _matvec3(r_hr_new, 0.5 * (ca0 + ca1))
+            + matvec3(r_grip, target_mid)
+            - matvec3(r_hr_new, 0.5 * (ca0 + ca1))
         )
         col_in = _clone_inputs(
             base,
@@ -918,12 +886,12 @@ def build_golden_vectors_payload(
                 r_club=r_c.tolist(),
                 v_club_m_s=rng.uniform(-0.8, 0.8, size=3).tolist(),
                 omega_club_rad_s=rng.uniform(-6.0, 6.0, size=3).tolist(),
-                p_hand_l_m=(p_c + _matvec3(r_c, p_grip_l + dp_l_rnd)).tolist(),
-                r_hand_l=_matmul3(_matmul3(r_c, r_grip), dr_l).tolist(),
+                p_hand_l_m=(p_c + matvec3(r_c, p_grip_l + dp_l_rnd)).tolist(),
+                r_hand_l=matmul3(matmul3(r_c, r_grip), dr_l).tolist(),
                 v_hand_l_m_s=rng.uniform(-0.8, 0.8, size=3).tolist(),
                 omega_hand_l_rad_s=rng.uniform(-6.0, 6.0, size=3).tolist(),
-                p_hand_r_m=(p_c + _matvec3(r_c, p_grip_r + dp_r_rnd)).tolist(),
-                r_hand_r=_matmul3(_matmul3(r_c, r_grip), dr_r).tolist(),
+                p_hand_r_m=(p_c + matvec3(r_c, p_grip_r + dp_r_rnd)).tolist(),
+                r_hand_r=matmul3(matmul3(r_c, r_grip), dr_r).tolist(),
                 v_hand_r_m_s=rng.uniform(-0.8, 0.8, size=3).tolist(),
                 omega_hand_r_rad_s=rng.uniform(-6.0, 6.0, size=3).tolist(),
             )
