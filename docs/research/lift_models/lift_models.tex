@@ -2039,7 +2039,7 @@ with each solution's own start and final bar height ($h$ is the vertical barbell
 \item \textbf{Bar path:} bar rise $h - h_\mathrm{start}$ of the predictive solution, linearly interpolated onto the tracked window samples (the bundle's window bar path, which is the OSL-3 IK target) inside the shared $p$ interval. Reported: RMS and maximum absolute difference, and both means.
 \item \textbf{Joint angles:} the OSL-3 receipt keeps IK summaries, not coordinate trajectories. The only tracked joint angles are the OSL-4 window-start pose (hip flexion and knee angle, both sides), compared with the predictive angle at the window-start $p$.
 \item \textbf{Activations:} peak and mean activation per major muscle group, with the OSL-4 group definition (\texttt{\_summarize\_groups}), over the predictive samples inside the tracked window. The tracked side is the OSL-4 \texttt{MocoInverse} solve, which is unqualified and did not converge; the comparison carries that classification and status.
-\item \textbf{L5/S1 load:} unavailable on both sides. The OSL-5 deadlift joint-reaction receipt is unavailable (its recorded reason: no OSL-4 muscle solve, pending the OSL-3 bundles of #13041), and the predictive solution does not compute it.
+\item \textbf{L5/S1 load:} unavailable on both sides. The OSL-5 deadlift joint-reaction receipt is unavailable (its recorded reason: no OSL-4 muscle solve, pending the OSL-3 bundles of \#13041), and the predictive solution does not compute it.
 \end{itemize}
 A quantity that either side lacks is recorded as unavailable with its reason, never as zero. The comparison does not judge credibility: it reports differences, and the result stays exploratory until compared with measured data.
 
