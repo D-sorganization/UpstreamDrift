@@ -42,14 +42,14 @@ client = <starlette.testclient.TestClient object at 0x7bcb0c4a10a0>
 E       assert 401 == 200
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:300: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:300: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:09,600 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:09,600 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
 WARNING  src.api.database:database.py:229 SECURITY: No GOLF_ADMIN_PASSWORD environment variable set. Generated temporary admin password. Set GOLF_ADMIN_PASSWORD environment variable for production.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 WARNING  shared.python.ai.rag.simple_rag:simple_rag.py:27 scikit-learn not found. RAG functionality will be limited.
@@ -67,13 +67,13 @@ E           AssertionError: Preset follow_club failed
 E           assert 401 == 200
 E            +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:311: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:311: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:17,009 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:17,009 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 _____________ TestCameraPresetAPI.test_invalid_preset_returns_422 ______________
@@ -88,13 +88,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb0af3c8c0>
 E       assert 401 == 422
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:316: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:316: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:19,542 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:19,542 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 ________________ TestSpeedControlAPI.test_set_speed_returns_200 ________________
@@ -109,13 +109,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb0b7dfe00>
 E       assert 401 == 200
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:325: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:325: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:20,815 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:20,815 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 ____________________ TestSpeedControlAPI.test_default_speed ____________________
@@ -130,13 +130,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb0b7df0e0>
 E       assert 401 == 200
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:333: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:333: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:22,426 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:22,426 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 _______________ TestSpeedControlAPI.test_invalid_speed_rejected ________________
@@ -151,13 +151,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb0c4a0830>
 E       assert 401 == 422
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:338: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:338: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:24,266 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:24,266 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 ____________________ TestRecordingAPI.test_start_recording _____________________
@@ -175,13 +175,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb2d7ec230>
 E       assert 401 == 200
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:350: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:350: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:26,198 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:26,198 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 _____________________ TestRecordingAPI.test_stop_recording _____________________
@@ -204,13 +204,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb0af3fec0>
 E       assert 401 == 200
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:365: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:365: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:28,521 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:28,521 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 ______________________ TestRecordingAPI.test_export_empty ______________________
@@ -228,13 +228,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb0af3ee70>
 E       assert 401 == 200
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:375: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:375: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:29,813 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:29,813 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 ________________ TestSimulationStatsAPI.test_stats_returns_200 _________________
@@ -249,13 +249,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb30a389e0>
 E       assert 401 == 200
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:386: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:386: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:32,276 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:32,276 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 ________ TestActuatorEndpoints.test_get_actuators_no_engine_returns_400 ________
@@ -271,13 +271,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb2f6986b0>
 E       assert 401 == 400
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:403: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:403: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:33,718 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:33,718 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 _______ TestActuatorEndpoints.test_post_actuators_no_engine_returns_400 ________
@@ -292,13 +292,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb2f5f18b0>
 E       assert 401 == 400
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:408: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:408: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:34,921 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:34,921 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 ___________ TestForceEndpoints.test_get_forces_no_engine_returns_400 ___________
@@ -313,13 +313,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb56cf1ca0>
 E       assert 401 == 400
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:417: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:417: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:37,018 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:37,018 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 _________ TestMetricsEndpoints.test_get_metrics_no_engine_returns_400 __________
@@ -334,13 +334,13 @@ client = <starlette.testclient.TestClient object at 0x7bcb30ae6de0>
 E       assert 401 == 400
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:426: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:426: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:39,029 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:39,029 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 _____ TestControlFeaturesEndpoints.test_get_features_no_engine_returns_400 _____
@@ -355,127 +355,127 @@ client = <starlette.testclient.TestClient object at 0x7bcb30aa8d70>
 E       assert 401 == 400
 E        +  where 401 = <Response [401 Unauthorized]>.status_code
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:435: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:435: AssertionError
 ---------------------------- Captured stdout setup -----------------------------
-2026-10-09 10:37:40,600 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+2026-10-09 10:37:40,600 - shared.python.config.model_registry - INFO - Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 ------------------------------ Captured log setup ------------------------------
 WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
 WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
-INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
 WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
 ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
     warnings.warn(
 
 src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
 src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
 src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
 src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
     from ...utils.state_manager import state_manager
 
 src/shared/python/signal_toolkit/__init__.py:43
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
     from .polynomial_generator import PolynomialGeneratorWidget
 
 src/shared/python/signal_toolkit/__init__.py:52
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
     from .widget import SignalToolkitWidget
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
     from starlette.testclient import TestClient as TestClient  # noqa
 
 src/shared/python/motion_matching/loaders/c3d_body.py:36
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
     from ._optical import fill_short_gaps, y_up_to_z_up
 
 src/shared/python/motion_pipeline/orchestrator.py:147
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
     class PipelineConfig(BaseModel):
 
 src/shared/python/motion_pipeline/api.py:39
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
     class PipelineRequest(BaseModel):
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
     import zmq.eventloop.ioloop
 
 tests/api/test_physics_api.py: 15 warnings
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 tests/api/test_physics_api.py: 15 warnings
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 tests/api/test_physics_api.py: 15 warnings
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_physics_engines_strict_jacobian_standardization_mocked
 tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_get_sensors_implemented
 tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_contact_forces_use_mujoco_grf_sign_convention
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/mujoco_version.py:63: UserWarning: Could not validate MuJoCo version: __version__. Proceeding with fallback Jacobian handling.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/mujoco_version.py:63: UserWarning: Could not validate MuJoCo version: __version__. Proceeding with fallback Jacobian handling.
     _check_mujoco_version()
 
 tests/integration/test_physics_engines_strict.py::TestOpenSimStrict::test_inverse_dynamics_implemented
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:226: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:226: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = OpenSimPhysicsEngine()
 
 tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_loading_uses_gym
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:258: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:258: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = MyoSuitePhysicsEngine()
 
 tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_loading_without_sim_raises_and_rolls_back_state
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:275: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:275: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = MyoSuitePhysicsEngine()
 
 tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_step_uses_env_step_and_preserves_timestep
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:290: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:290: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = MyoSuitePhysicsEngine()
 
 tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_step_uses_last_control_action_when_available
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:315: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:315: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = MyoSuitePhysicsEngine()
 
 tests/integration/test_physics_interfaces.py::TestPhysicsEngines::test_myosuite_methods
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:56: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:56: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = MyoSuitePhysicsEngine()
 
 tests/integration/test_physics_interfaces.py::TestPhysicsEngines::test_opensim_methods
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:85: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:85: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
     engine = OpenSimPhysicsEngine()
 
 tests/launchers/test_simulation_guis.py::TestExternalToolsAdapter::test_get_video_analyzer_dockable_ui_is_self_contained
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/integration.py:57: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/integration.py:57: DeprecationWarning: __package__ != __spec__.parent
     from .theme_manager import ThemeManager
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
@@ -541,87 +541,87 @@ FAILED tests/api/test_physics_api.py::TestForceEndpoints::test_get_forces_no_eng
 FAILED tests/api/test_physics_api.py::TestMetricsEndpoints::test_get_metrics_no_engine_returns_400
 FAILED tests/api/test_physics_api.py::TestControlFeaturesEndpoints::test_get_features_no_engine_returns_400
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/bunker_shot_gui/shot3d.py:409: KeyboardInterrupt
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/bunker_shot_gui/shot3d.py:409: KeyboardInterrupt
 (to show a full traceback on KeyboardInterrupt use --full-trace)
 15 failed, 217 passed, 4 skipped, 21 deselected, 74 warnings in 368.41s (0:06:08)
 
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
     warnings.warn(
 
 src/shared/python/motion_matching/loaders/c3d_body.py:36
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
     from ._optical import fill_short_gaps, y_up_to_z_up
 
 src/shared/python/signal_toolkit/__init__.py:43
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
     from .polynomial_generator import PolynomialGeneratorWidget
 
 src/shared/python/signal_toolkit/__init__.py:52
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
     from .widget import SignalToolkitWidget
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
     from starlette.testclient import TestClient as TestClient  # noqa
 
 src/shared/python/motion_pipeline/orchestrator.py:147
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
     class PipelineConfig(BaseModel):
 
 src/shared/python/motion_pipeline/api.py:39
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
     class PipelineRequest(BaseModel):
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
     import zmq.eventloop.ioloop
 
 src/shared/python/config/model_registry.py:242
 src/shared/python/config/model_registry.py:242
 src/shared/python/config/model_registry.py:242
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 src/shared/python/config/model_registry.py:413
 src/shared/python/config/model_registry.py:413
 src/shared/python/config/model_registry.py:413
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 src/shared/python/config/model_registry.py:459
 src/shared/python/config/model_registry.py:459
 src/shared/python/config/model_registry.py:459
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
     from ..core import setup_logging
 
 scripts/research/proximal_distal_energy/run_experiments.py:49
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/proximal_distal_energy/run_experiments.py:49: DeprecationWarning: DynamicsProvider is deprecated and will be removed in a future release; use EquationsOfMotionProvider instead.
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/proximal_distal_energy/run_experiments.py:49: DeprecationWarning: DynamicsProvider is deprecated and will be removed in a future release; use EquationsOfMotionProvider instead.
     from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
@@ -646,7 +646,7 @@ SKIPPED [1] tests/research/test_optimize_article_pdf.py:9: could not import 'fit
 SKIPPED [1] tests/rust_bindings/test_mesh_convex_hull.py:17: upstream_mesh wheel not installed (run: maturin develop -m rust_core/upstream-mesh/Cargo.toml --features python)
 SKIPPED [1] tests/rust_bindings/test_mesh_decimation_primitives.py:21: upstream_mesh wheel not installed (run: maturin develop -m rust_core/upstream-mesh/Cargo.toml --features python)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_pytest/nodes.py:668: KeyboardInterrupt
+<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_pytest/nodes.py:668: KeyboardInterrupt
 (to show a full traceback on KeyboardInterrupt use --full-trace)
 [FAIL] Lint & Format
        FAIL: ruff format check failed:

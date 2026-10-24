@@ -12,11 +12,11 @@
       "family": "driver_academic_density",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.pdf",
         "sha256": "4756ed647aa30fc8fc0ed2951fb6ecf7232ad768c963283ffb6ee6e8da2ece73"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.png",
         "sha256": "1968a5a57e32114963696a51e30a90c1b2ddb96ce5df8c1f950a5385ba24056d"
       },
       "render": {
@@ -34,7 +34,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.pdf",
           "/tmp/p2-original-vector-visual-review/driver_academic_density_pdf"
         ]
       },
@@ -68,11 +68,11 @@
       "family": "driver_academic_density",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.svg",
         "sha256": "07426ab095e95fcf215d4ba27638210a04b603f0e3826b267b3d4525e08cec48"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.png",
         "sha256": "1968a5a57e32114963696a51e30a90c1b2ddb96ce5df8c1f950a5385ba24056d"
       },
       "render": {
@@ -83,10 +83,10 @@
           2722
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.svg",
           "/tmp/p2-original-vector-visual-review/driver_academic_density_svg.png"
         ]
       },
@@ -115,11 +115,11 @@
       "family": "driver_academic_overhead",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
         "sha256": "ca6ee369e6c26392394d9aba5cae9078e8d4c83d38b69cb84476e17acf2d4ef2"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
         "sha256": "835d738f24ae3730fd8ad3cc7de81aa0da2c7eb34f4138aa49db5cdfa911a814"
       },
       "render": {
@@ -137,7 +137,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
           "/tmp/p2-original-vector-visual-review/driver_academic_overhead_pdf"
         ]
       },
@@ -171,11 +171,11 @@
       "family": "driver_academic_overhead",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
         "sha256": "7c3d11152e9741c38bc41af26817c2dd968a6a421f12cfde5cb169910c7d3c02"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
         "sha256": "835d738f24ae3730fd8ad3cc7de81aa0da2c7eb34f4138aa49db5cdfa911a814"
       },
       "render": {
@@ -186,10 +186,10 @@
           1729
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
           "/tmp/p2-original-vector-visual-review/driver_academic_overhead_svg.png"
         ]
       },
@@ -218,11 +218,11 @@
       "family": "driver_social_density",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.pdf",
         "sha256": "99c1292009dc8a0405c2ffd2b59ee9f582f31228e664f23c54085a583527d265"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.png",
         "sha256": "ad7edad7d99a959d360baded24033c26849e586b9c2b94148c7f014efcd3edb8"
       },
       "render": {
@@ -240,7 +240,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.pdf",
           "/tmp/p2-original-vector-visual-review/driver_social_density_pdf"
         ]
       },
@@ -274,11 +274,11 @@
       "family": "driver_social_density",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.svg",
         "sha256": "2c29f98bbf403e7ac9f77ebe7337130c61605648978abae04fc0abe62172d174"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.png",
         "sha256": "ad7edad7d99a959d360baded24033c26849e586b9c2b94148c7f014efcd3edb8"
       },
       "render": {
@@ -289,10 +289,10 @@
           5071
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.svg",
           "/tmp/p2-original-vector-visual-review/driver_social_density_svg.png"
         ]
       },
@@ -321,11 +321,11 @@
       "family": "driver_social_overhead",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
         "sha256": "cb393b47aa895e693effdc1e937f137c95aa3ce736396ce9f576a29f92fa958c"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
         "sha256": "6ea7deaf5c9e763a8702cd26a10df16933e4a28408f083d672978fef1530f38e"
       },
       "render": {
@@ -343,7 +343,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
           "/tmp/p2-original-vector-visual-review/driver_social_overhead_pdf"
         ]
       },
@@ -377,11 +377,11 @@
       "family": "driver_social_overhead",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
         "sha256": "b4dd882ea0f7ce8c5d189015e74507585f0b2a73126cfe8cbeca790b2f61ccb9"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
         "sha256": "6ea7deaf5c9e763a8702cd26a10df16933e4a28408f083d672978fef1530f38e"
       },
       "render": {
@@ -392,10 +392,10 @@
           2560
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
           "/tmp/p2-original-vector-visual-review/driver_social_overhead_svg.png"
         ]
       },
@@ -424,11 +424,11 @@
       "family": "iron_academic_density",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.pdf",
         "sha256": "7aaac1219c2c09c725a4ad6b508cbdba2b7a93063e69322f4c06290b0815c98c"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
         "sha256": "5f05386740b6f3de8570b01bb4cbc6627c077c78e1462a33b31f1ba6ff648317"
       },
       "render": {
@@ -446,7 +446,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.pdf",
           "/tmp/p2-original-vector-visual-review/iron_academic_density_pdf"
         ]
       },
@@ -480,11 +480,11 @@
       "family": "iron_academic_density",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.svg",
         "sha256": "c94711e67e670c787749321738b33f016391e633de02e936fd6ef44be587990e"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
         "sha256": "5f05386740b6f3de8570b01bb4cbc6627c077c78e1462a33b31f1ba6ff648317"
       },
       "render": {
@@ -495,10 +495,10 @@
           2722
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.svg",
           "/tmp/p2-original-vector-visual-review/iron_academic_density_svg.png"
         ]
       },
@@ -527,11 +527,11 @@
       "family": "iron_academic_overhead",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.pdf",
         "sha256": "2b08d78dde86df136911102cf686d1916518a7ecd2c5ea84eb51b9c2654f3949"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.png",
         "sha256": "97f0627fb52e30c454b3589d0d64501103b18b63c03882734e11d28eea893822"
       },
       "render": {
@@ -549,7 +549,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.pdf",
           "/tmp/p2-original-vector-visual-review/iron_academic_overhead_pdf"
         ]
       },
@@ -583,11 +583,11 @@
       "family": "iron_academic_overhead",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.svg",
         "sha256": "1f2fc9d09519530fe9aca0c592e3fddd0bf00d003ea52553349e7ba1de0b26e0"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.png",
         "sha256": "97f0627fb52e30c454b3589d0d64501103b18b63c03882734e11d28eea893822"
       },
       "render": {
@@ -598,10 +598,10 @@
           1729
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.svg",
           "/tmp/p2-original-vector-visual-review/iron_academic_overhead_svg.png"
         ]
       },
@@ -630,11 +630,11 @@
       "family": "iron_social_density",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.pdf",
         "sha256": "8dd482a57c3638c206be16de01bfe4bc2a2c4e43ddde3336b35d37b35fd919c8"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
         "sha256": "d4a64b8f8ab4c20e60932b64197347b37393b20e23a41ed00978b40bf8f63bb5"
       },
       "render": {
@@ -652,7 +652,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.pdf",
           "/tmp/p2-original-vector-visual-review/iron_social_density_pdf"
         ]
       },
@@ -686,11 +686,11 @@
       "family": "iron_social_density",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.svg",
         "sha256": "4a4c0a5c5410a2c38da42c7f7e1f2578c4c3c6e7c57ba36ae8f7d7809ef6aabe"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
         "sha256": "d4a64b8f8ab4c20e60932b64197347b37393b20e23a41ed00978b40bf8f63bb5"
       },
       "render": {
@@ -701,10 +701,10 @@
           5071
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.svg",
           "/tmp/p2-original-vector-visual-review/iron_social_density_svg.png"
         ]
       },
@@ -733,11 +733,11 @@
       "family": "iron_social_overhead",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.pdf",
         "sha256": "5bdeb39c4fce09d23df875daacfbc8be04399a06bb1804199b8720f5ade3d090"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
         "sha256": "77feb526c4b519da2814c74102e0cdd3566eb9f584cb4e8cdc4031a77f27c1d6"
       },
       "render": {
@@ -755,7 +755,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.pdf",
           "/tmp/p2-original-vector-visual-review/iron_social_overhead_pdf"
         ]
       },
@@ -789,11 +789,11 @@
       "family": "iron_social_overhead",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.svg",
         "sha256": "b90c50c2ac222a09ddfb502e1d750c60f8045a7e3e1eb210a8a8555a2dbb2d8a"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
         "sha256": "77feb526c4b519da2814c74102e0cdd3566eb9f584cb4e8cdc4031a77f27c1d6"
       },
       "render": {
@@ -804,10 +804,10 @@
           2560
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.svg",
           "/tmp/p2-original-vector-visual-review/iron_social_overhead_svg.png"
         ]
       },
@@ -836,11 +836,11 @@
       "family": "pw_academic_density",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.pdf",
         "sha256": "fb20e58ac97d3aacf24264893d25b5c8cf15513b7d38ea16520f93d78f96d66c"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.png",
         "sha256": "40b0d4a08092ee771a860e2ee35e05a6ffc640e6d1305580ceb7ed0ba866512a"
       },
       "render": {
@@ -858,7 +858,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.pdf",
           "/tmp/p2-original-vector-visual-review/pw_academic_density_pdf"
         ]
       },
@@ -892,11 +892,11 @@
       "family": "pw_academic_density",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.svg",
         "sha256": "006728c5bfd91d2c7132c776ce9bedcee5eeba6c0fc61b4e3861f35b51801112"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.png",
         "sha256": "40b0d4a08092ee771a860e2ee35e05a6ffc640e6d1305580ceb7ed0ba866512a"
       },
       "render": {
@@ -907,10 +907,10 @@
           2722
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.svg",
           "/tmp/p2-original-vector-visual-review/pw_academic_density_svg.png"
         ]
       },
@@ -939,11 +939,11 @@
       "family": "pw_academic_overhead",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.pdf",
         "sha256": "ec0a3d0797120521269655acb6ab41fcc9451a387ac8d6d91a330f63a6b59699"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.png",
         "sha256": "6126ebb0945c95694b35565e9f654fb4cc4e17d2679712d44c6b8f2d388f3dd2"
       },
       "render": {
@@ -961,7 +961,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.pdf",
           "/tmp/p2-original-vector-visual-review/pw_academic_overhead_pdf"
         ]
       },
@@ -995,11 +995,11 @@
       "family": "pw_academic_overhead",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.svg",
         "sha256": "e218ef7bd3b0b074f1f0504af389b075456e04cd707d95375652032c12d75e12"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.png",
         "sha256": "6126ebb0945c95694b35565e9f654fb4cc4e17d2679712d44c6b8f2d388f3dd2"
       },
       "render": {
@@ -1010,10 +1010,10 @@
           1729
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.svg",
           "/tmp/p2-original-vector-visual-review/pw_academic_overhead_svg.png"
         ]
       },
@@ -1042,11 +1042,11 @@
       "family": "pw_social_density",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.pdf",
         "sha256": "d32f8f72a2c25c8395c761531e1398d335a5e6185299082ed3c8ea86444a6143"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.png",
         "sha256": "4618cfb1a033969e4b0807fbfc90855e49d8052ad2e8572315bed0e1bc27e91a"
       },
       "render": {
@@ -1064,7 +1064,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.pdf",
           "/tmp/p2-original-vector-visual-review/pw_social_density_pdf"
         ]
       },
@@ -1098,11 +1098,11 @@
       "family": "pw_social_density",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.svg",
         "sha256": "ef94ba62e40802a30da9d40cb9b07da5ff3bee997d4ff7e9485a8611b3968091"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.png",
         "sha256": "4618cfb1a033969e4b0807fbfc90855e49d8052ad2e8572315bed0e1bc27e91a"
       },
       "render": {
@@ -1113,10 +1113,10 @@
           5071
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.svg",
           "/tmp/p2-original-vector-visual-review/pw_social_density_svg.png"
         ]
       },
@@ -1145,11 +1145,11 @@
       "family": "pw_social_overhead",
       "format": "pdf",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.pdf",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.pdf",
         "sha256": "2a306a84370974dce49abbd39ffc7dc361069faeb2b4906eb9d8f514f5b21b4d"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.png",
         "sha256": "dbf7c64a669a69e9c459968bb59c0542b385196f9c3b7b47a147ffcf767ccd26"
       },
       "render": {
@@ -1167,7 +1167,7 @@
           "-r",
           "144",
           "-png",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.pdf",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.pdf",
           "/tmp/p2-original-vector-visual-review/pw_social_overhead_pdf"
         ]
       },
@@ -1201,11 +1201,11 @@
       "family": "pw_social_overhead",
       "format": "svg",
       "source": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.svg",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.svg",
         "sha256": "f572b67530df82a4f539c494da720cb70c4d8373327cbeb530787d095bb6daab"
       },
       "png_sibling": {
-        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.png",
+        "path": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.png",
         "sha256": "dbf7c64a669a69e9c459968bb59c0542b385196f9c3b7b47a147ffcf767ccd26"
       },
       "render": {
@@ -1216,10 +1216,10 @@
           2560
         ],
         "command": [
-          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "<owner-home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
           "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
-          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.svg",
+          "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.svg",
           "/tmp/p2-original-vector-visual-review/pw_social_overhead_svg.png"
         ]
       },
