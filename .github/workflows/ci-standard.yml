@@ -1004,6 +1004,9 @@ jobs:
       - name: Error-Handling Ratchet (issue #5911)
         run: python3 scripts/ci/check_error_handling_ratchet.py
 
+      - name: Private Path Leak Ratchet
+        run: python3 scripts/ci/check_private_path_leaks.py
+
       - name: Hardcoded-Style Ratchet (issue #8885)
         run: python3 scripts/ci/check_hardcoded_style_ratchet.py
 
@@ -2096,43 +2099,6 @@ jobs:
           fetch-depth: 0
       - name: Fetch pinned Tools packages
         uses: ./.github/actions/fetch-pinned-tools
-      # NSX-94 (#12723, PR #13717) runs the co-contraction trade-off on the
-      # real MyoSuite elbow from the pinned myo_sim gitlink; without it those
-      # tests skip. Fetch ONLY that one submodule, at its gitlink SHA, depth 1
-      # (same pattern as fetch-pinned-tools) instead of `submodules: recursive`,
-      # which would also pull opensim-models, human-gazebo and ud-tools over the
-      # fleet's slow uplink. Measured at the pin: ~59 MB of blobs (48 MB
-      # meshes, 9 MB scene) versus every model repository.
-      - name: Resolve pinned myo_sim revision
-        id: myo-pin
-        shell: bash
-        run: |
-          myo_sha=$(git ls-tree HEAD -- shared/models/myosuite/myo_sim | awk '{print $3}')
-          test -n "$myo_sha"
-          echo "sha=$myo_sha" >> "$GITHUB_OUTPUT"
-      # Cache the ~59 MB tree by gitlink SHA: the fleet shares one slow uplink,
-      # so only a cache miss fetches from GitHub.
-      - name: Cache pinned myo_sim
-        id: myo-cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
-        with:
-          path: shared/models/myosuite/myo_sim
-          key: myo-sim-${{ steps.myo-pin.outputs.sha }}
-      - name: Checkout pinned myo_sim (MyoSuite models)
-        if: steps.myo-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: MyoHub/myo_sim
-          ref: ${{ steps.myo-pin.outputs.sha }}
-          path: shared/models/myosuite/myo_sim
-          fetch-depth: 1
-          persist-credentials: false
-      - name: Verify pinned myo_sim checkout
-        shell: bash
-        run: |
-          actual=$(git -C shared/models/myosuite/myo_sim rev-parse HEAD)
-          test "$actual" = "${{ steps.myo-pin.outputs.sha }}"
-          test -f shared/models/myosuite/myo_sim/elbow/myoelbow_1dof6muscles.xml
       - name: Check for core test relevant changes
         id: core-test-changes
         shell: bash
