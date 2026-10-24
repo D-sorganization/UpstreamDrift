@@ -19,6 +19,11 @@ pytestmark = [
 ]
 
 
+def test_workflow_links_tier_contract_documentation() -> None:
+    workflow_text = (ROOT / ".github/workflows/ci-standard.yml").read_text()
+    assert "docs/operations/ci-standard-tiers.md" in workflow_text
+
+
 def test_event_classifier_drives_the_changed_paths_tier_output() -> None:
     changes = workflow()["jobs"]["changed-paths"]
     assert changes["outputs"]["tier"] == "${{ steps.tier.outputs.tier }}"

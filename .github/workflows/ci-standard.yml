@@ -1,6 +1,7 @@
 name: CI Standard
 # Workflow ownership, overlap decisions, and growth guardrails live in
 # .github/WORKFLOWS.md and are enforced by scripts/check_workflow_inventory.py.
+# Fast/full event tiers, path filters and flake policy: docs/operations/ci-standard-tiers.md (#13577).
 on:
   push:
     branches: [main]
