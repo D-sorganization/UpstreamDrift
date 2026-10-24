@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13743 | Correct the OpenSim ten_finger swing xfail reason: net_force now passes; the remaining 0.04 s gap is net_moment_com (#13560) |
+| 2026-10-24 | #13744 | Port gs3dx_vertical_share and gs3dx_contact_wrench with tests from the unmerged capture-contact commit 22419ee13 |
 | 2026-10-24 | #13741 | Capture Rig theme-compliance fixture discards a ThemeManager singleton orphaned by QApplication teardown (fixes flaky QSettings-deleted teardown errors) |
 | 2026-10-24 | #13724 | Route legacy chat UI builder imports to the pinned Tools module with shared module identity. |
 | 2026-10-24 | #13566 | Disable pytest-xvfb autoload for motion-matching smoke; document -p no:xvfb in run_motion_matching_smoke.sh |

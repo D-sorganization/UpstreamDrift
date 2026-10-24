@@ -456,6 +456,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13548 · Correct the OpenSim Ten_Finger Swing Xfail Reason: Net_Force Now Passes; the Remaining 0.04 s Gap Is Net_Moment_Com (#13560)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13548
+- **Branch:** merged via #13743
+- **PR:** #13743
+- **Paths:** see #13743
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`7c17a81d`; collated from changes/13548-correct-the-opensim-ten-finger-swing-xfa.md)
+- **Summary:** Correct the OpenSim ten_finger swing xfail reason: net_force now passes; the remaining 0.04 s gap is net_moment_com (#13560)
+- **Next step:** Shipped in PR #13743.
+
 ### DL-#13739 · Capture Rig Theme-Compliance Fixture Discards a ThemeManager Singleton Orphaned by QApplication Teardown (Fixes Flaky QSettings-Deleted Teardown Errors)
 
 - **State:** shipped
@@ -514,10 +527,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13270
 - **Branch:** merged via #13735
-- **PR:** #13735, #13733, #13732, #13734
+- **PR:** #13735, #13733, #13732, #13734, #13744
 - **Paths:** see #13735
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`8720d6a4`; collated from changes/13270-port-the-trail-foot-preload-chain-point.md)
+- **Last verified:** 2026-10-24 (`347e06b4`; collated from changes/13270-port-gs3dx-vertical-share-and-gs3dx-cont.md)
 - **Summary:** Port frame_rate, trunk_spin, hold_limit_jump, rebase_turns and reference_rate with tests from commit 22419ee13 and record the failed stance probes in FORWARD_DYNAMICS.md
 - **Next step:** Shipped in PR #13735.
 
