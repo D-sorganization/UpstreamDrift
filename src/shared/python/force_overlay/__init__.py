@@ -11,6 +11,8 @@ pinocchio, opensim).
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from .contracts import (
     DEFAULT_OVERLAY_UNITS,
     ForceTorqueFrame,
@@ -27,16 +29,45 @@ from .conversions import (
     move_wrench_point,
     world_wrench_from_local,
 )
-from .glyphs import (
-    ArrowGlyph,
-    ForceGlyphStyle,
-    GlyphSet,
-    LegendSpec,
-    TorqueArcGlyph,
-    build_glyphs,
-    scale_for_view,
-)
 from .series import ForceTorqueSeries
+
+# Glyph builders pull in ``plot_style`` and therefore matplotlib, which is an
+# optional dependency. Load them on first access so contract/conversion users
+# (grip contact, the URDF exporter) import without matplotlib.
+_LAZY_GLYPH_NAMES = frozenset(
+    {
+        "ArrowGlyph",
+        "ForceGlyphStyle",
+        "GlyphSet",
+        "LegendSpec",
+        "TorqueArcGlyph",
+        "build_glyphs",
+        "scale_for_view",
+    }
+)
+
+
+def __getattr__(name: str) -> Any:
+    """Resolve glyph exports lazily from :mod:`.glyphs` (PEP 562)."""
+    if name in _LAZY_GLYPH_NAMES:
+        from . import glyphs
+
+        value = getattr(glyphs, name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+if TYPE_CHECKING:
+    from .glyphs import (
+        ArrowGlyph,
+        ForceGlyphStyle,
+        GlyphSet,
+        LegendSpec,
+        TorqueArcGlyph,
+        build_glyphs,
+        scale_for_view,
+    )
 
 __all__ = [
     "ArrowGlyph",
