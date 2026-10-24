@@ -2741,6 +2741,16 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13741 | Capture Rig theme-compliance fixture discards a ThemeManager singleton orphaned by QApplication teardown (fixes flaky QSettings-deleted teardown errors) |
+| 2026-10-24 | #13724 | Route legacy chat UI builder imports to the pinned Tools module with shared module identity. |
+| 2026-10-24 | #13566 | Disable pytest-xvfb autoload for motion-matching smoke; document -p no:xvfb in run_motion_matching_smoke.sh |
+| 2026-10-24 | #13734 | Port the trail-foot preload chain, point momentum and capture segment and momentum tools with tests from the unmerged capture-contact commit 22419ee13 |
+| 2026-10-24 | #13732 | Port gs3dx_nearest_hull_point, gs3dx_hull_moment, gs3dx_support_residual and gs3dx_foot_contacts with tests from the unmerged capture-contact commit 22419ee13 |
+| 2026-10-24 | #13733 | Port gs3dx_foot_split and gs3dx_capture_foot_residual with tests from the unmerged capture-contact commit 22419ee13 |
+| 2026-10-24 | #13740 | GS3DX rigid-body stance proxy: gs3dx_rigid_stance (one rigid body at the golfer's mass and CoM on the six sole contacts, same contact law) and gs3dx_log_force_mux, with a MATLAB test and GROUND_CONTACT.md section; exporter and parity fixture follow in the next PR |
+| 2026-10-24 | #13736 | Wire the OSL-7 predictive-versus-tracked comparison into the predictive receipt (tracked_comparison row) |
+| 2026-10-24 | #13737 | Windows: set CASADIPATH from the OpenSim wheel dir so Moco finds the ipopt plugin |
+| 2026-10-24 | #13738 | R11: the R6 chain shaft runs in Drake (RevoluteSpring plus joint damping) and passes the same static, modal, topology and same-input parity gate as OpenSim and MyoSuite; Drake joins CHAIN_ENGINES |
 | 2026-10-24 | #13645 | Install the governed canonical admission publisher copy and protected CI caller with independently pinned private provider runtime and trusted copy drift checking. |
 | 2026-10-24 | #13735 | Port frame_rate, trunk_spin, hold_limit_jump, rebase_turns and reference_rate with tests from commit 22419ee13 and record the failed stance probes in FORWARD_DYNAMICS.md |
 | 2026-10-24 | #13726 | GS3DX GRF exporter: opt-in lock_joints (gs3dx_lock_joints, in memory) and DRY shared contact-geometry / sole-point / CSV / SHA-256 helpers; the locked-joint stance costs ~140 s wall per simulated ms |
