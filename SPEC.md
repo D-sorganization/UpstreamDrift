@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13772 | Fix tests/api assertions stale after the APIException error-envelope change; shared error_message fixture |
 | 2026-10-24 | #13788 | Reconcile neural motion matching and Simscape documentation with diagnostic receipts |
 | 2026-10-24 | #13756 | Private path leak ratchet, denylist patterns, and mechanical owner-home redaction consolidation. |
 | 2026-10-24 | #13769 | Add Cursor Cloud environment.json fleet bootstrap via Repository_Management scripts/cursor/bootstrap.sh. |

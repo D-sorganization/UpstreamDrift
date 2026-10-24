@@ -469,6 +469,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13771 · Fix Tests/Api Assertions Stale After the APIException Error-Envelope Change; Shared Error_Message Fixture
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13771
+- **Branch:** merged via #13772
+- **PR:** #13772
+- **Paths:** see #13772
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`982d54a1`; collated from changes/13771-fix-tests-api-assertions-stale-after-the.md)
+- **Summary:** Fix tests/api assertions stale after the APIException error-envelope change; shared error_message fixture
+- **Next step:** Shipped in PR #13772.
+
 ### DL-#13699 · Private Path Leak Ratchet, Denylist Patterns, and Mechanical Owner-Home Redaction Consolidation.
 
 - **State:** shipped
