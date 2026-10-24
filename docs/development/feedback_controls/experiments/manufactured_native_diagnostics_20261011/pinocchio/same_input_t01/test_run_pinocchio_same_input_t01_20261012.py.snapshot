@@ -172,10 +172,10 @@ class RunnerContractTests(unittest.TestCase):
 
     def test_frozen_t01_payload_passes_without_native_import(self) -> None:
         root = Path(
-            r"C:\Users\diete\Repositories\Worktrees\feedback-moco-state-binding-11791"
+            r"<owner-home>\Repositories\Worktrees\feedback-moco-state-binding-11791"
         )
         external = Path(
-            r"C:\Users\diete\Repositories\docs\development\feedback_controls_planning\mujoco_v1_zoh_history_refinement_20261011_root_attempt1"
+            r"<owner-home>\Repositories\docs\development\feedback_controls_planning\mujoco_v1_zoh_history_refinement_20261011_root_attempt1"
         )
         bundle = json.loads(
             (external / "frozen-t01-bundle.json").read_text(encoding="utf-8")
@@ -194,10 +194,10 @@ class RunnerContractTests(unittest.TestCase):
 
     def test_clock_row_inventory_and_initial_state_mutations_fail(self) -> None:
         root = Path(
-            r"C:\Users\diete\Repositories\Worktrees\feedback-moco-state-binding-11791"
+            r"<owner-home>\Repositories\Worktrees\feedback-moco-state-binding-11791"
         )
         external = Path(
-            r"C:\Users\diete\Repositories\docs\development\feedback_controls_planning\mujoco_v1_zoh_history_refinement_20261011_root_attempt1"
+            r"<owner-home>\Repositories\docs\development\feedback_controls_planning\mujoco_v1_zoh_history_refinement_20261011_root_attempt1"
         )
         bundle = json.loads(
             (external / "frozen-t01-bundle.json").read_text(encoding="utf-8")

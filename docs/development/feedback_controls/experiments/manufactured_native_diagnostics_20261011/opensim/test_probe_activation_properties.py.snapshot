@@ -100,7 +100,7 @@ class ProbeTests(unittest.TestCase):
         )
         if not cls.source.exists():
             cls.source = Path(
-                r"C:\Users\diete\Repositories\Worktrees\feedback-controls-main-integration-12202\docs\development\feedback_controls\experiments\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\solution_control_replay_inputs_final\source.osim"
+                r"<owner-home>\Repositories\Worktrees\feedback-controls-main-integration-12202\docs\development\feedback_controls\experiments\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\solution_control_replay_inputs_final\source.osim"
             )
 
     def fake_sdk(self, values: dict[str, float] | None = None) -> Any:

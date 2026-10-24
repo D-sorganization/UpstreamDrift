@@ -15,20 +15,20 @@ from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parent
 REPO = Path(
-    r"C:\Users\diete\Repositories\Worktrees\feedback-controls-main-integration-12202"
+    r"<owner-home>\Repositories\Worktrees\feedback-controls-main-integration-12202"
 )
 SUPERVISOR_SOURCE = REPO / "tests" / "opensim" / "native_moco_ladder_harness.py"
 SDK = Path(
-    r"C:\Users\diete\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim"
+    r"<owner-home>\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim"
 )
 INTERPRETER = Path(
-    r"C:\Users\diete\Repositories\.venv-feedback-opensim\Scripts\python.exe"
+    r"<owner-home>\Repositories\.venv-feedback-opensim\Scripts\python.exe"
 )
 SYSTEM_INTERPRETER = Path(
-    r"C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe"
+    r"<owner-home>\AppData\Local\Programs\Python\Python313\python.exe"
 )
 SOURCE = Path(
-    r"C:\Users\diete\Repositories\Worktrees\feedback-controls-main-integration-12202\docs\development\feedback_controls\experiments\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\solution_control_replay_inputs_final\source.osim"
+    r"<owner-home>\Repositories\Worktrees\feedback-controls-main-integration-12202\docs\development\feedback_controls\experiments\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\solution_control_replay_inputs_final\source.osim"
 )
 THREAD_CAPS = {
     "OMP_NUM_THREADS": "1",
