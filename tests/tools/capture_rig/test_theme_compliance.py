@@ -16,6 +16,7 @@ import os
 import re
 import sys
 from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -79,11 +80,18 @@ def _forget_deleted_windows(manager: ThemeManager) -> None:
         manager.main_window = None
 
 
-@pytest.fixture
-def theme_manager() -> Iterator[ThemeManager]:
+def _is_orphaned(manager: ThemeManager) -> bool:
+    """True when ``manager`` or its ``QSettings`` lost their C++ object."""
+    return sip.isdeleted(manager) or sip.isdeleted(manager.settings)
+
+
+@contextmanager
+def _isolated_theme_manager() -> Iterator[ThemeManager]:
     """A fresh singleton; any prior process-wide manager is restored after."""
     _app()
     prior = ThemeManager._instance
+    if prior is not None and _is_orphaned(prior):
+        prior = None  # its C++ side died with an earlier QApplication
     prior_theme = "Dark"
     if prior is not None:
         _forget_deleted_windows(prior)
@@ -98,6 +106,12 @@ def theme_manager() -> Iterator[ThemeManager]:
             ThemeManager._instance = prior
             _forget_deleted_windows(prior)
             prior.change_theme(prior_theme)
+
+
+@pytest.fixture
+def theme_manager() -> Iterator[ThemeManager]:
+    with _isolated_theme_manager() as manager:
+        yield manager
 
 
 @pytest.fixture
@@ -126,6 +140,30 @@ def test_deleted_main_window_is_cleared_before_restyling() -> None:
         _forget_deleted_windows(manager)
         assert manager.main_window is None
         manager.change_theme("Dark")
+    finally:
+        ThemeManager.reset_instance()
+
+
+def test_fixture_survives_a_singleton_orphaned_by_app_teardown() -> None:
+    """A destroyed QApplication takes the singleton and its QSettings with it.
+
+    PyQt deletes every parentless QObject when the ``QApplication`` is
+    destroyed, so a manager left in ``ThemeManager._instance`` by an earlier
+    test has a dead ``settings`` wrapper. Restoring it as the "prior" manager
+    raised ``RuntimeError: wrapped C/C++ object of type QSettings has been
+    deleted`` at fixture teardown (flaky CI, order dependent).
+    """
+    _app()
+    ThemeManager.reset_instance()
+    orphan = ThemeManager.instance()
+    sip.delete(orphan.settings)
+    sip.delete(orphan)
+    assert ThemeManager._instance is orphan
+    try:
+        with _isolated_theme_manager() as manager:
+            assert not sip.isdeleted(manager)
+            manager.change_theme("Light")
+        assert ThemeManager._instance is not orphan
     finally:
         ThemeManager.reset_instance()
 
