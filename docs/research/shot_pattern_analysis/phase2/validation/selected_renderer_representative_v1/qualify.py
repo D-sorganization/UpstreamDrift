@@ -11,12 +11,12 @@ import sys
 import unittest.mock
 import numpy as np
 
-MAIN = Path("/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
+MAIN = Path("<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
 CANDIDATE = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift"
+    "<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift"
 )
 BASELINE = Path(
-    "/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift"
+    "<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift"
 )
 PHASE = MAIN / "docs/research/shot_pattern_analysis/phase2"
 KINDS = frozenset(

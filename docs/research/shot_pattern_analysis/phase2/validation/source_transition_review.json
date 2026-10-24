@@ -53,7 +53,7 @@
       "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
       "src/tools/shot_pattern_analysis/matched_matrix.py": "c4d6fca9bd3620d3d1cf2069a8ef0cc4c8ecc486ba63f9c53bd83b2cd53c2d86"
     },
-    "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+    "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
     "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
     "cargo_lock_present": false,
     "contact_backend": {
@@ -122,7 +122,7 @@
       "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
       "src/tools/shot_pattern_analysis/matched_matrix.py": "6298d852fb984df004d0679b46c05fb3bc855fe20287347dcad1ff52b2b804fe"
     },
-    "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+    "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
     "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
     "cargo_lock_present": false,
     "contact_backend": {

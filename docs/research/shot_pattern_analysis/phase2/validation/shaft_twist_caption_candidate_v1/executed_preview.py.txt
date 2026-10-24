@@ -3,7 +3,7 @@ from pathlib import Path
 from matplotlib.figure import Figure
 from scripts.research.shot_pattern_analysis import build_final_figures as b
 from src.tools.shot_pattern_analysis.matched_report import load_validated_cell
-root=Path.cwd();main=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');data=main/'docs/research/shot_pattern_analysis/phase2/final_v1';out=root/'docs/research/shot_pattern_analysis/phase2/validation/shaft_twist_caption_candidate_v1';out.mkdir(exist_ok=True,parents=True)
+root=Path.cwd();main=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');data=main/'docs/research/shot_pattern_analysis/phase2/final_v1';out=root/'docs/research/shot_pattern_analysis/phase2/validation/shaft_twist_caption_candidate_v1';out.mkdir(exist_ok=True,parents=True)
 h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 source=Path(b.__file__);before=h(source);plan=json.loads((data/'matrix_plan.json').read_text());cells=[];inputs={}
 for profile in ['shaft_only','combined2']:
