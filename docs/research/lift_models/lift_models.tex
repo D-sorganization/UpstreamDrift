@@ -1979,85 +1979,65 @@ PYTHONPATH=$PWD QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg \
 \subsection{Predictive Moco Deadlift (OSL-7, Issue \#13044)}\label{sec:opensim-predictive-deadlift}
 
 \paragraph{Formulation and Problem Specification.}
-Issue \#13044 implements a direct-collocation predictive dynamic simulation of the barbell deadlift
-using OpenSim Moco with the \texttt{RajagopalLaiUhlrich2023} full-body model. Arm joints
-(\texttt{acromial}, \texttt{elbow}, \texttt{radioulnar}, and \texttt{radius\_hand} bilaterally) are welded in
-a hang pose, and distal foot joints (\texttt{mtp} and \texttt{subtalar}) are rigidly welded via
-\texttt{ModOpReplaceJointsWithWelds}, reducing multibody state coordinates to sagittal degrees of freedom.
-A $100\,\mathrm{kg}$ barbell is carried at the hands, and foot-ground interaction is represented by six smooth
-contact spheres (\texttt{SmoothSphereHalfSpaceForce}) per foot.
+Issue \#13044 implements a direct-collocation predictive simulation of the barbell deadlift with OpenSim Moco and the \texttt{RajagopalLaiUhlrich2023} full-body model. Elbows, forearms and wrists are welded straight; the shoulders keep flexion (\texttt{arm\_flex}) free and hold adduction and rotation at zero, so the straight arms can hang vertically under the shoulders. The \texttt{mtp} and \texttt{subtalar} joints are welded. A $100\,\mathrm{kg}$ bar is carried at the hands, and each foot touches the floor through calibrated \texttt{SmoothSphereHalfSpaceForce} spheres. Six pelvis residual \texttt{CoordinateActuator}s (three rotations, three translations) close the floating base.
 
-To ensure computational tractability and physical feasibility, a two-stage solve strategy with iterative formulation refinements is implemented:
-\begin{enumerate}
-\item \textbf{Stage~1 (Torque-Driven):} Lower-limb muscles are removed (\texttt{ModOpRemoveMuscles}), and
-bilateral torque actuators (\texttt{CoordinateActuator}s with $1000\,\mathrm{N\cdot m}$ optimal force) drive
-hip flexion, adduction, rotation, knee angle, ankle angle, and lumbar coordinates. Pelvis residual actuators
-(\texttt{CoordinateActuator}s on \texttt{pelvis\_tilt}, \texttt{pelvis\_tx}, \texttt{pelvis\_ty}) with optimal force $1\,\mathrm{N}$,
-control bounds $\pm 3530.4\,\mathrm{N}$ ($\pm 2mg$), and effort weight 100 prevent artificial dynamic lock during early iterations.
-\item \textbf{Stage~2 (Muscle-Driven):} If Stage~1 converges to numerical tolerance, Stage~2 evaluates the
-muscle-driven problem using 80 Rajagopal-family lower-limb muscle-tendon units with rigid tendons
-(\texttt{ModOpIgnoreTendonCompliance}) and smooth De~Groote--Fregly 2016 muscle dynamics
-(\texttt{ModOpReplaceMusclesWithDeGrooteFregly2016}), initialized from the Stage~1 solution trajectory.
-\end{enumerate}
+\textbf{Boundary poses.} \texttt{compute\_deadlift\_poses} solves the setup and lockout poses by bounded least squares (\texttt{scipy.optimize.least\_squares}) so that both are statically supported: the feet are flat with every sphere in contact ($-3$ to $0\,\mathrm{mm}$), the bar sits over midfoot, the hands hang vertically under the shoulders, and the trunk angle and setup bar height equal the bundle's (setup trunk $0.908\,\mathrm{rad}$, lockout trunk $0$, setup bar height $0.432\,\mathrm{m}$, read from \texttt{deadlift\_bundle.npz}). The solve requires a worst-equation residual of at most $10^{-6}$. Initial and final coordinates are bounded to within $0.05\,\mathrm{rad}$ ($0.01\,\mathrm{m}$ for translations) of these poses.
 
-The optimal control problem minimizes total control effort:
+\textbf{Cost.} Stage~1 (torque-driven) minimizes
 \begin{equation}
-\min_{\mathbf{u}} \int_{0}^{t_f} \left( \sum_{k=1}^{N_u} w_k u_k^2(t) \right) \,\mathrm{d}t
+J = \int_{0}^{t_f} \sum_{k} w_k u_k^2 \,\mathrm{d}t
+  + w_\text{feet} \int_{0}^{t_f} \sum_{s\in\{r,l\}} \left\lVert \mathbf{p}_{\text{calcn},s}(t) - \mathbf{p}_{\text{calcn},s}^\text{setup} \right\rVert^2 \mathrm{d}t,
 \end{equation}
-where $w_k = 1$ for joint actuators and $w_k = 100$ for pelvis residual actuators, subject to multibody system dynamics, kinematic joint bounds, foot-ground contact, and boundary conditions:
-\begin{align}
-\mathbf{q}(0) &\in \mathcal{Q}_\text{setup},\quad \dot{\mathbf{q}}(0) = \mathbf{0}, \\
-\mathbf{q}(t_f) &\in \mathcal{Q}_\text{lockout},\quad \dot{\mathbf{q}}(t_f) = \mathbf{0}, \\
-t_f &\in [0.5,\, 3.0]\,\mathrm{s}.
-\end{align}
-Setup and lockout poses are derived through kinematic forward simulation and 1-D root finding on contact sphere floor penetration ($1$--$5\,\mathrm{mm}$ penetration), and the solver is seeded using a smooth-step interpolation trajectory $S(\tau) = 3\tau^2 - 2\tau^3$ with zero initial and terminal velocities. Transcription uses Hermite--Simpson collocation with 15 mesh intervals (31 collocation points).
+with $w_k = 1$ for joint actuators ($1000\,\mathrm{N\,m}$ optimal torque), $w_k = 100$ for pelvis residuals (optimal force $1\,mg = 1765.2\,\mathrm{N}$ in runs K--S) and $w_\text{feet} = 10^4$. The planted-feet term is a \texttt{MocoTranslationTrackingGoal} holding both calcaneus origins at their setup-pose ground positions. Stage~2 (80 De~Groote--Fregly muscles) runs only if Stage~1 converges.
 
-\paragraph{Iterative Formulation Progression and Optimization Results.}
-To address the primal infeasibility observed in initial exploratory attempts, five progressive formulation runs were systematically executed and logged:
+\paragraph{Run History and Findings.}
+Seventeen ControlTower runs (C--S) are recorded with their receipts in \texttt{docs/development/lifting/evidence/opensim\_predictive/RUN\_HISTORY.md}. The findings are:
 \begin{enumerate}
-\item \textbf{Step~1 (\texttt{stage1\_r1.log}): Consistent Start and End Poses.} Replacing independent kinematic bounding boxes with root-solved floor-contact poses reduced unscaled constraint violation from $4.31 \times 10^7$ down to $9.68 \times 10^3$ ($>4400\times$ drop; scaled constraint violation $1.542$; objective $4.40$ in 100 iterations, $194.8\,\mathrm{s}$ in IPOPT).
-\item \textbf{Step~2 (\texttt{stage1\_r2.log}): Smooth-Step Physical Guess.} Seeding Hermite--Simpson collocation states and speeds with smooth-step polynomial interpolation avoided IPOPT restoration phase entirely, dropping unscaled constraint violation to $487.59$ and scaled constraint violation below unity to $0.719$ (objective $1.93$ in 100 iterations, $211.5\,\mathrm{s}$ in IPOPT).
-\item \textbf{Step~3 (\texttt{stage1\_r3.log}): Pelvis Residual Actuators.} Adding floating-base residual actuators with weight 100 permitted transient dynamic forces during ground contact initialization (100 iterations, objective $1.08 \times 10^6$, scaled violation $44.28$, unscaled violation $7224$, $175.0\,\mathrm{s}$ in IPOPT).
-\item \textbf{Step~4 (\texttt{stage1\_r4.log}): Joint Torque Capacity.} Raising actuator torque capacity from $500\,\mathrm{N\cdot m}$ to $1000\,\mathrm{N\cdot m}$ accommodated large joint extension requirements for the $180\,\mathrm{kg}$ lifter-plus-barbell system, reducing scaled constraint violation by $10\times$ from $44.28$ down to $4.856$ (unscaled $4985$; objective $1.95 \times 10^6$ in 100 iterations, $234.8\,\mathrm{s}$ in IPOPT).
-\item \textbf{Step~5 (\texttt{stage1\_torque.log}): Extended Solve.} With up to 3000 iterations allowed in the foreground under a $7200\,\mathrm{s}$ \texttt{timeout}, the solve was killed at iteration 1056. From the log: iteration~0 has objective $0$ and primal infeasibility $5.55\times10^{4}$; iteration~1048 reaches primal infeasibility $362$; iteration~1056 has objective $2.00\times10^{4}$, primal infeasibility $654$ and dual infeasibility $2.39\times10^{7}$. The large dual infeasibility indicates poor problem scaling (residual controls with optimal force 1 against $1000\,\mathrm{N\,m}$ joint actuators); this stage is not converged.
+\item Run H converged (646 iterations, scaled violation $2.2\times10^{-8}$) on the earlier hand-built poses, but it is not a credible deadlift: duration $0.553\,\mathrm{s}$ against the bundle's $2.0\,\mathrm{s}$, bar rise $0.409\,\mathrm{m}$ against $0.477\,\mathrm{m}$, and a peak pelvis residual of $0.326\,mg$ against the Hicks~2015 limit of $0.05\,mg$.
+\item The hand-built poses were infeasible: with welded shoulders, no setup pose put the bar over midfoot at the bundle trunk angle (pose residual $0.064\,\mathrm{m}$). Freeing shoulder flexion and solving the poses removed this.
+\item Without a foot goal the optimizer floats the lifter. At 11 sampled nodes of run N, the lowest foot sphere rises up to $56.7\,\mathrm{mm}$ and some spheres reach $332.6\,\mathrm{mm}$, while the pelvis vertical residual carries $1231$--$2356\,\mathrm{N}$. With the planted-feet goal (run P) the lowest sphere stays within $-9.4$ to $+0.2\,\mathrm{mm}$, but the feet still rock (some spheres reach $106.6\,\mathrm{mm}$) and the residual still carries $491$--$1765\,\mathrm{N}$.
+\item Stage~1 does not converge with foot contact in this formulation. Explicit (P) and implicit (R) dynamics, fixed duration (Q) and warm starts (S) all stop at 3000 iterations with scaled violations from $0.30$ to $30.6$ and peak residual ratios from $0.75$ to $0.92$. Stage~2 was never run.
 \end{enumerate}
-
-Because Stage~1 reached the wall-clock timeout ($7200\,\mathrm{s}$) before achieving numerical convergence tolerance, Stage~2 (muscle-driven) was not run. Predictive kinematic metrics are recorded as \textit{infeasible} and omitted from forward-dynamics comparison. Bundle kinematics computed dynamically from \texttt{deadlift\_bundle.npz} ($80\,\mathrm{kg}$, $1.78\,\mathrm{m}$ reference lifter) provide the ground-truth benchmark. All predictive results are explicitly classified as \textbf{exploratory}.
+All predictive results are \textbf{exploratory}. Converting this to a credible prediction needs an owner decision between welded feet (weld reaction reported as the ground reaction), a finer mesh with a contact-free warm start, or contact retuned for a $180\,\mathrm{kg}$ load.
 
 \begin{table}[h!]
 \centering\footnotesize\setlength{\tabcolsep}{6pt}
-\caption{Deadlift Kinematic and Performance Comparison: Bundle Kinematics vs Predictive Moco Baseline}\label{tab:predictive-deadlift-comparison}
-\begin{tabular}{lcccc}
+\caption{Deadlift Comparison: Bundle Kinematics vs Predictive Moco (Run R)}\label{tab:predictive-deadlift-comparison}
+\begin{tabular}{lccc}
 \toprule
-Quantity & Bundle Kinematics & Tracked OpenSim Solution & Predictive Moco Solution & Unit \\
+Quantity & Bundle Kinematics & Predictive Moco (Run R) & Unit \\
 \midrule
-Bar Start Height & 0.432 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
-Bar Final Height & 0.909 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
-Bar Vertical Rise & 0.477 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
-Peak Vertical Velocity & 0.561 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m\,s^{-1}}$ \\
-Lift Duration & 2.00 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{s}$ \\
+Bar Start Height & 0.432 & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
+Bar Final Height & 0.909 & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
+Bar Vertical Rise & 0.477 & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
+Peak Vertical Velocity & 0.561 & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m\,s^{-1}}$ \\
+Lift Duration & 2.00 & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{s}$ \\
 \midrule
-Stage 1 Solver Status & --- & \textit{unavailable}\textsuperscript{*} & Timeout\_Interrupted & --- \\
-Stage 1 Converged & --- & \textit{unavailable}\textsuperscript{*} & False & --- \\
-Stage 1 Iterations & --- & \textit{unavailable}\textsuperscript{*} & 1056 & --- \\
-Stage 1 Objective & --- & \textit{unavailable}\textsuperscript{*} & 20049.78 & --- \\
-Stage 1 Last-Iterate Primal Infeasibility (\texttt{inf\_pr}) & --- & \textit{unavailable}\textsuperscript{*} & 654 & --- \\
-Stage 1 Wall Clock & --- & \textit{unavailable}\textsuperscript{*} & killed at the 7200\,s \texttt{timeout} & --- \\
-Stage 2 Muscle Solve & --- & \textit{unavailable}\textsuperscript{*} & \textit{not run}\textsuperscript{\ddag} & --- \\
+Stage 1 Solver Status & --- & Maximum\_Iterations\_Exceeded & --- \\
+Stage 1 Iterations & --- & 3000 & --- \\
+Stage 1 Objective & --- & 216.20 & --- \\
+Stage 1 Scaled Constraint Violation & --- & 0.301 & --- \\
+Peak Pelvis Residual / $mg$ & --- & 0.923 & --- \\
+Peak Pelvis Residual Moment & --- & 648.9 & $\mathrm{N\,m}$ \\
+Stage 1 Wall Clock & --- & 5779 & $\mathrm{s}$ \\
+Stage 2 Muscle Solve & --- & \textit{not run}\textsuperscript{\ddag} & --- \\
 \bottomrule
 \end{tabular}
 \par\vspace{2pt}\raggedright\scriptsize
-\textsuperscript{*}Tracked OpenSim solution is unavailable: no OSL-3 deadlift IK/ID receipts on main yet (OSL-3 \#13041 is still open).\\
-\textsuperscript{\dag}Predictive kinematics omitted: solution terminated at an infeasible iterate (last-iterate primal infeasibility $654$; IPOPT printed no final constraint-violation block).\\
-\textsuperscript{\ddag}Stage~2 muscle-driven solve is conditioned on Stage~1 convergence and was not executed.
+\textsuperscript{\dag}Omitted: the final iterate is infeasible (scaled violation 0.301 against the 0.01 tolerance).\\
+\textsuperscript{\ddag}Stage~2 runs only after Stage~1 converges.\\
+The tracked OpenSim deadlift (OSL-3) receipt exists, but the predictive-versus-tracked comparison is not implemented yet.
 \end{table}
 
 \paragraph{Reproduction Command.}
+Run R, at commit \texttt{9dca083f4f}, on ControlTower:
 \begin{verbatim}
-QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
+UPSTREAMDRIFT_MSK_BASE_MODEL=<Rajagopal base model> \
     python3 scripts/measure_opensim_predictive_deadlift.py \
+    --out-dir ctout/evidence --log-dir ctout/logs \
     --mesh-intervals 15 --max-iterations 3000 \
-    --out-dir docs/development/lifting/evidence/opensim_predictive
+    --residual-force-scale 1 --residual-effort-weight 100 \
+    --fd-scheme forward --dynamics-mode implicit
 \end{verbatim}
 
 

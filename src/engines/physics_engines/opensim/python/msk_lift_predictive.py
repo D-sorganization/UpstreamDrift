@@ -22,21 +22,22 @@ import time
 from typing import Any
 
 import numpy as np
-from scipy.optimize import brentq
+from scipy.optimize import least_squares
 
 from src.engines.physics_engines.opensim.python.msk_lift_model import (
     _foot_spheres,
     _ground_points,
-    _lowest_point,
     build_lift_model,
 )
 from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
-    TRACKED_SOLUTION_UNAVAILABLE_REASON,
     _extract_bar_kinematics,
     _extract_residual_metrics,
     build_comparison_table,
+    bundle_pose_targets,
     compute_bundle_metrics,
     replay_bar_path_fk,
+    residual_moment_gate,
+    residual_moment_metrics,
 )
 from src.engines.physics_engines.opensim.python.musculoskeletal_solvers import (
     _moco_weld_joints,
@@ -47,12 +48,12 @@ from src.shared.python.motion_matching.same_input import InputBundle
 
 logger = logging.getLogger(__name__)
 
+#: Straight arms: elbows, forearms and wrists welded; the shoulders stay free
+#: so the arms can hang vertically while the trunk inclines (OSL-7, #13044).
 DEFAULT_ARM_WELDS = (
-    "acromial_r",
     "elbow_r",
     "radioulnar_r",
     "radius_hand_r",
-    "acromial_l",
     "elbow_l",
     "radioulnar_l",
     "radius_hand_l",
@@ -68,6 +69,35 @@ ZERO_CONSTRAINED_COORDS = (
     "hip_rotation_l",
     "lumbar_bending",
     "lumbar_rotation",
+    "arm_add_r",
+    "arm_rot_r",
+    "arm_add_l",
+    "arm_rot_l",
+)
+
+#: The base model's shoulder CoordinateActuators (10 N m optimal force),
+#: raised to the joint-torque scale once the shoulders are free.
+SHOULDER_ACTUATORS = (
+    "shoulder_flex_r",
+    "shoulder_add_r",
+    "shoulder_rot_r",
+    "shoulder_flex_l",
+    "shoulder_add_l",
+    "shoulder_rot_l",
+)
+
+#: Every floating-base coordinate gets a residual.  The out-of-plane ones
+#: (list, rotation, tz) are held at zero by the phase bounds, so without an
+#: actuator their equations of motion can only balance if every lateral load
+#: (the one-handed bar weld, asymmetric contact) cancels exactly, which made
+#: stage 1 dynamically infeasible (OSL-7, #13044).
+PELVIS_RESIDUAL_COORDINATES = (
+    "pelvis_tilt",
+    "pelvis_list",
+    "pelvis_rotation",
+    "pelvis_tx",
+    "pelvis_ty",
+    "pelvis_tz",
 )
 
 TORQUE_ACTUATED_COORDINATES = (
@@ -101,6 +131,10 @@ class PredictiveDeadliftConfig:
     effort_weight: float = 1.0
     terminal_lockout_weight: float = 10.0
     finite_difference_scheme: str = "forward"
+    residual_force_scale: float = 2.0
+    residual_effort_weight: float = 10.0
+    planted_feet_weight: float = 1.0e4
+    multibody_dynamics_mode: str = "explicit"
     exploratory: bool = True
 
     def __post_init__(self) -> None:
@@ -123,7 +157,7 @@ class PredictiveDeadliftConfig:
         if self.convergence_tolerance <= 0 or self.constraint_tolerance <= 0:
             raise ValueError("Tolerances must be positive")
         t_min, t_max = self.duration_bounds
-        if not (0.0 < t_min < t_max):
+        if not (0.0 < t_min <= t_max):
             raise ValueError(f"invalid duration_bounds: {self.duration_bounds}")
         if self.bar_mass_kg <= 0.0:
             raise ValueError(f"bar_mass_kg must be positive: {self.bar_mass_kg}")
@@ -135,6 +169,22 @@ class PredictiveDeadliftConfig:
             raise ValueError("Weights must be non-negative")
         if self.finite_difference_scheme not in {"central", "forward"}:
             raise ValueError("scheme must be 'central' or 'forward'")
+        if self.multibody_dynamics_mode not in {"explicit", "implicit"}:
+            raise ValueError("multibody_dynamics_mode must be 'explicit' or 'implicit'")
+        if self.residual_force_scale <= 0.0 or self.residual_effort_weight < 0.0:
+            raise ValueError(
+                "residual_force_scale must be positive and residual_effort_weight "
+                "non-negative"
+            )
+        if self.planted_feet_weight < 0.0:
+            raise ValueError(
+                f"planted_feet_weight must be non-negative: {self.planted_feet_weight}"
+            )
+
+    def residual_optimal_force_n(self) -> float:
+        """Residual optimal force: ``residual_force_scale`` times total weight."""
+        total = self.body_mass_kg + self.bar_mass_kg
+        return self.residual_force_scale * total * 9.80665
 
     def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary."""
@@ -151,6 +201,7 @@ class PredictiveDeadliftConfig:
             "height_m": self.height_m,
             "effort_weight": self.effort_weight,
             "terminal_lockout_weight": self.terminal_lockout_weight,
+            "planted_feet_weight": self.planted_feet_weight,
             "finite_difference_scheme": self.finite_difference_scheme,
             "exploratory": self.exploratory,
         }
@@ -160,42 +211,33 @@ def create_predictive_deadlift_spec(config: PredictiveDeadliftConfig) -> dict[st
     """Pure-Python problem specification builder for testing and receipts."""
     config.validate()
     welds = list(DEFAULT_ARM_WELDS) + ["mtp_r", "mtp_l", "subtalar_r", "subtalar_l"]
-    bounds = {
-        "pelvis_ty": {"initial": [0.58, 0.60], "final": [0.98, 1.01]},
-        "pelvis_tx": {"initial": [-0.01, 0.01], "final": [-0.01, 0.01]},
-        "pelvis_tilt": {"initial": [0.10, 0.20], "final": [-0.16, -0.06]},
-        "hip_flexion_r": {"initial": [1.30, 1.42], "final": [-0.05, 0.05]},
-        "hip_flexion_l": {"initial": [1.30, 1.42], "final": [-0.05, 0.05]},
-        "knee_angle_r": {"initial": [1.80, 1.92], "final": [0.0, 0.05]},
-        "knee_angle_l": {"initial": [1.80, 1.92], "final": [0.0, 0.05]},
-        "ankle_angle_r": {"initial": [0.30, 0.40], "final": [0.05, 0.16]},
-        "ankle_angle_l": {"initial": [0.30, 0.40], "final": [0.05, 0.16]},
-        "lumbar_extension": {"initial": [-0.05, 0.05], "final": [-0.05, 0.05]},
-    }
+    bounds = (
+        "initial and final values within POSE_BOUND of the setup and lockout "
+        "poses solved by compute_deadlift_poses"
+    )
     if config.actuation_mode == "torque":
         actuators = [
             "lumbar_ext",
             "lumbar_bend",
             "lumbar_rot",
+            *SHOULDER_ACTUATORS,
             *[f"torque_{c}" for c in TORQUE_ACTUATED_COORDINATES],
-            "residual_pelvis_tilt",
-            "residual_pelvis_tx",
-            "residual_pelvis_ty",
+            *[f"residual_{c}" for c in PELVIS_RESIDUAL_COORDINATES],
         ]
     else:
         actuators = [
             "lumbar_extension",
             "lumbar_bending",
             "lumbar_rotation",
+            *SHOULDER_ACTUATORS,
             "80_rajagopal_lower_limb_muscles",
-            "residual_pelvis_tilt",
-            "residual_pelvis_tx",
-            "residual_pelvis_ty",
+            *[f"residual_{c}" for c in PELVIS_RESIDUAL_COORDINATES],
         ]
     return {
         "exploratory": config.exploratory,
         "actuation_mode": config.actuation_mode,
-        "goals": ["effort", "terminal_lockout"],
+        "goals": ["effort", "planted_feet"],
+        "planted_feet_weight": config.planted_feet_weight,
         "mesh_intervals": config.mesh_intervals,
         "welded_joints": sorted(welds),
         "actuators": actuators,
@@ -247,211 +289,321 @@ def _add_torque_actuators(model: Any, optimal_force_nm: float) -> list[str]:
         model.addForce(ca)
         added.append(f"torque_{c_name}")
 
-    for name in ("lumbar_ext", "lumbar_bend", "lumbar_rot"):
-        f = model.getForceSet().get(name)
-        if f:
-            ca = osim.CoordinateActuator.safeDownCast(f)
-            if ca:
-                ca.setOptimalForce(optimal_force_nm)
-                added.append(name)
+    added += set_actuator_optimal_force(
+        model, ("lumbar_ext", "lumbar_bend", "lumbar_rot"), optimal_force_nm
+    )
     return added
 
 
-def _add_pelvis_residuals(model: Any, total_mass_kg: float) -> list[str]:
-    """Add CoordinateActuator residuals for floating pelvis coordinates (OSL-7)."""
+def set_actuator_optimal_force(
+    model: Any, names: tuple[str, ...], optimal_force_nm: float
+) -> list[str]:
+    """Set the optimal force of the model's named CoordinateActuators."""
+    require(
+        optimal_force_nm > 0.0, f"optimal force must be positive: {optimal_force_nm}"
+    )
     osim = import_opensim()
-    weight = total_mass_kg * 9.80665
-    bound = 2.0 * weight
+    for name in names:
+        ca = osim.CoordinateActuator.safeDownCast(model.getForceSet().get(name))
+        require(ca is not None, f"model has no CoordinateActuator {name!r}")
+        ca.setOptimalForce(optimal_force_nm)
+    return list(names)
+
+
+def _add_pelvis_residuals(model: Any, optimal_force_n: float) -> list[str]:
+    """Add CoordinateActuator residuals for floating pelvis coordinates (OSL-7).
+
+    Controls are nondimensional in [-1, 1]; the optimal force carries the
+    scale, so the effort goal sees O(1) residual controls like the joint
+    torques instead of raw newtons.
+    """
+    if optimal_force_n <= 0.0:
+        raise ValueError(f"optimal_force_n must be positive: {optimal_force_n}")
+    osim = import_opensim()
     added: list[str] = []
-    for coord in ("pelvis_tilt", "pelvis_tx", "pelvis_ty"):
+    for coord in PELVIS_RESIDUAL_COORDINATES:
         ca = osim.CoordinateActuator(coord)
         ca.setName(f"residual_{coord}")
-        ca.setOptimalForce(1.0)
-        ca.setMinControl(-bound)
-        ca.setMaxControl(bound)
+        ca.setOptimalForce(optimal_force_n)
+        ca.setMinControl(-1.0)
+        ca.setMaxControl(1.0)
         model.addForce(ca)
         added.append(f"residual_{coord}")
     return added
 
 
-def compute_deadlift_poses(
-    model: Any,
-    body_mass_kg: float = 80.0,
-    height_m: float = 1.78,
-    bar_mass_kg: float = 100.0,
-    target_bar_y: float = 0.4320,
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Compute consistent setup and lockout poses via FK and 1-D root finding (OSL-7).
+#: Contact-sphere floor penetration of the seated poses (m).
+POSE_FLOOR_PENETRATION_M = 0.003
+#: Largest equation residual a solved pose may keep (m).
+POSE_SOLVE_TOLERANCE_M = 1e-6
+PLANTED_FEET_FRAMES = ("/bodyset/calcn_r", "/bodyset/calcn_l")
+PLANTED_FEET_SAMPLES = 11
+PLANTED_FEET_TIME_MARGIN_S = 0.1
 
-    Places contact spheres at ~3 mm floor penetration and positions bar at
-    target_bar_y for setup and standing lockout for final pose.
+_LEG_POSE_KEYS = ("hip_flexion", "knee_angle", "ankle_angle")
+_TRUNK_POSE_KEYS = ("pelvis_tilt", "lumbar_extension", "pelvis_tx", "pelvis_ty")
+
+
+def _apply_pose(model: Any, state: Any, pose: dict[str, float]) -> None:
+    """Set a bilateral sagittal pose on ``state`` and realize positions."""
+    cset = model.getCoordinateSet()
+    for key in _LEG_POSE_KEYS:
+        for side in "rl":
+            cset.get(f"{key}_{side}").setValue(state, pose[key], False)
+    for side in "rl":
+        cset.get(f"arm_flex_{side}").setValue(state, pose["arm_flex"], False)
+    for key in _TRUNK_POSE_KEYS:
+        cset.get(key).setValue(state, pose[key], False)
+    model.realizePosition(state)
+
+
+def _pose_features(model: Any, state: Any, feet: list[Any]) -> dict[str, Any]:
+    """Translation-invariant geometry of the realized pose (x forward, y up)."""
+    bodies = model.getBodySet()
+    points = _ground_points(model, state, feet)
+    right = points[:3]
+    bar = bodies.get("barbell").getPositionInGround(state)
+    hip = bodies.get("femur_r").getPositionInGround(state)
+    shoulder = bodies.get("humerus_r").getPositionInGround(state)
+    return {
+        "points": points,
+        "trunk_rad": float(
+            np.arctan2(shoulder.get(0) - hip.get(0), shoulder.get(1) - hip.get(1))
+        ),
+        "bar_y_seated": float(bar.get(1) - points[:, 1].min())
+        - POSE_FLOOR_PENETRATION_M,
+        "bar_over_midfoot": float(bar.get(0) - right[:, 0].mean()),
+        "arm_lean": float(
+            bodies.get("hand_r").getPositionInGround(state).get(0) - shoulder.get(0)
+        ),
+        "foot_pitch": float(right[0, 1] - right[1:, 1].mean()),
+    }
+
+
+def _solve_pose(
+    model: Any,
+    state: Any,
+    feet: list[Any],
+    pose: dict[str, float],
+    free: tuple[str, ...],
+    equations: Any,
+) -> dict[str, float]:
+    """Solve the ``free`` coordinates so that ``equations(features)`` vanish."""
+
+    cset = model.getCoordinateSet()
+    names = {k: f"{k}_r" if k in (*_LEG_POSE_KEYS, "arm_flex") else k for k in free}
+    lower = [cset.get(names[k]).getRangeMin() for k in free]
+    upper = [cset.get(names[k]).getRangeMax() for k in free]
+
+    def residual(x: np.ndarray) -> np.ndarray:
+        _apply_pose(model, state, {**pose, **dict(zip(free, x, strict=True))})
+        return np.asarray(equations(_pose_features(model, state, feet)))
+
+    x0 = np.clip([pose[k] for k in free], lower, upper)
+    fit = least_squares(residual, x0, bounds=(lower, upper), xtol=1e-12)
+    worst = float(np.abs(fit.fun).max())
+    require(
+        worst <= POSE_SOLVE_TOLERANCE_M,
+        f"deadlift pose solve for {free} left a residual of {worst} m",
+    )
+    return {**pose, **dict(zip(free, (float(v) for v in fit.x), strict=True))}
+
+
+def _seat_pose(
+    model: Any,
+    state: Any,
+    feet: list[Any],
+    pose: dict[str, float],
+    foot_x_m: float,
+) -> dict[str, Any]:
+    """Translate a pose onto the floor with its right foot centred on ``foot_x_m``."""
+    pose = {**pose, "pelvis_tx": 0.0, "pelvis_ty": 0.0}
+    _apply_pose(model, state, pose)
+    points = _ground_points(model, state, feet)
+    pose["pelvis_tx"] = foot_x_m - float(points[:3, 0].mean())
+    pose["pelvis_ty"] = -float(points[:, 1].min()) - POSE_FLOOR_PENETRATION_M
+    _apply_pose(model, state, pose)
+    points = _ground_points(model, state, feet)
+    bar = model.getBodySet().get("barbell").getPositionInGround(state)
+    return {
+        **pose,
+        "bar_height_m": float(bar.get(1)),
+        "bar_x_m": float(bar.get(0)),
+        "com_x_m": float(model.calcMassCenterPosition(state).get(0)),
+        "sphere_x_m": points[:, 0].tolist(),
+        "sphere_y_m": points[:3, 1].tolist(),
+    }
+
+
+def compute_deadlift_poses(
+    model: Any, targets: dict[str, float], height_m: float = 1.78
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Statically consistent floor-setup and lockout poses (OSL-7).
+
+    ``targets`` comes from ``bundle_pose_targets``.  Both poses stand
+    flat-footed on the same planted feet with straight arms hanging
+    vertically, and incline the trunk (hip to shoulder) as the bundle's
+    optimizer does.  The lockout extends hips and knees and solves pelvis
+    tilt, ankle and shoulder flexion; the setup also solves hip and knee to
+    put the bar at the bundle's starting height over the midfoot.
+    Postcondition: every equation residual is at most ``POSE_SOLVE_TOLERANCE_M``.
     """
-    scale = height_m / 1.70
-    feet = _foot_spheres(scale)
+    for key in ("setup_trunk_rad", "lockout_trunk_rad", "setup_bar_height_m"):
+        require(key in targets, f"targets lacks {key!r}")
+    feet = _foot_spheres(height_m / 1.70)
     state = model.initSystem()
     cset = model.getCoordinateSet()
-    bar = model.getBodySet().get("barbell")
-
-    ankle_lock = float(cset.get("ankle_angle_r").getDefaultValue())
-    tilt_lock = float(cset.get("pelvis_tilt").getDefaultValue())
-    cset.get("hip_flexion_r").setValue(state, 0.0, False)
-    cset.get("hip_flexion_l").setValue(state, 0.0, False)
-    cset.get("knee_angle_r").setValue(state, 0.0, False)
-    cset.get("knee_angle_l").setValue(state, 0.0, False)
-    cset.get("ankle_angle_r").setValue(state, ankle_lock, False)
-    cset.get("ankle_angle_l").setValue(state, ankle_lock, False)
-    cset.get("pelvis_tilt").setValue(state, tilt_lock, False)
-    cset.get("lumbar_extension").setValue(state, 0.0, False)
-    cset.get("pelvis_tx").setValue(state, 0.0, False)
-    cset.get("pelvis_ty").setValue(state, 0.0, False)
-    model.realizePosition(state)
-    lp_lock = _lowest_point(model, state, feet)
-    pelvis_ty_lock = -lp_lock - 0.003
-    cset.get("pelvis_ty").setValue(state, pelvis_ty_lock, False)
-    model.realizePosition(state)
-    pts_lock = _ground_points(model, state, feet)
-    bar_pos_lock = bar.getPositionInGround(state)
-    lockout = {
+    base = {
         "hip_flexion": 0.0,
         "knee_angle": 0.0,
-        "ankle_angle": ankle_lock,
-        "pelvis_tilt": tilt_lock,
+        "ankle_angle": float(cset.get("ankle_angle_r").getDefaultValue()),
+        "pelvis_tilt": float(cset.get("pelvis_tilt").getDefaultValue()),
         "lumbar_extension": 0.0,
+        "arm_flex": float(cset.get("arm_flex_r").getDefaultValue()),
         "pelvis_tx": 0.0,
-        "pelvis_ty": pelvis_ty_lock,
-        "bar_height_m": float(bar_pos_lock.get(1)),
-        "bar_x_m": float(bar_pos_lock.get(0)),
-        "sphere_y_m": pts_lock[:3, 1].tolist(),
+        "pelvis_ty": 0.0,
+    }
+    lockout = _solve_pose(
+        model,
+        state,
+        feet,
+        base,
+        ("pelvis_tilt", "ankle_angle", "arm_flex"),
+        lambda f: (
+            f["foot_pitch"],
+            f["trunk_rad"] - targets["lockout_trunk_rad"],
+            f["arm_lean"],
+        ),
+    )
+    setup = _solve_pose(
+        model,
+        state,
+        feet,
+        {**lockout, "hip_flexion": 1.2, "knee_angle": 1.2, "arm_flex": 0.8},
+        ("hip_flexion", "knee_angle", "ankle_angle", "pelvis_tilt", "arm_flex"),
+        lambda f: (
+            f["bar_y_seated"] - targets["setup_bar_height_m"],
+            f["bar_over_midfoot"],
+            f["trunk_rad"] - targets["setup_trunk_rad"],
+            f["arm_lean"],
+            f["foot_pitch"],
+        ),
+    )
+    return (
+        _seat_pose(model, state, feet, setup, 0.0),
+        _seat_pose(model, state, feet, lockout, 0.0),
+    )
+
+
+#: Half-width of the initial and final value bounds around a solved pose.
+POSE_BOUND_RAD = 0.05
+POSE_BOUND_M = 0.01
+#: Path margin of the pelvis translations around the two poses (m).
+PATH_MARGIN_M = 0.1
+_POSE_COORDINATES = {
+    "hip_flexion": ("hip_flexion_r", "hip_flexion_l"),
+    "knee_angle": ("knee_angle_r", "knee_angle_l"),
+    "ankle_angle": ("ankle_angle_r", "ankle_angle_l"),
+    "arm_flex": ("arm_flex_r", "arm_flex_l"),
+    "pelvis_tilt": ("pelvis_tilt",),
+    "lumbar_extension": ("lumbar_extension",),
+    "pelvis_tx": ("pelvis_tx",),
+    "pelvis_ty": ("pelvis_ty",),
+}
+
+
+def planted_feet_reference(
+    model: Any, setup_pose: dict[str, float]
+) -> dict[str, list[float]]:
+    """Ground-frame origin of each calcaneus in the solved setup pose."""
+    state = model.initSystem()
+    _apply_pose(model, state, setup_pose)
+    bodies = model.getBodySet()
+    return {
+        path: [
+            float(v)
+            for v in np.asarray(
+                bodies.get(path.rsplit("/", 1)[1]).getPositionInGround(state).to_numpy()
+            )
+        ]
+        for path in PLANTED_FEET_FRAMES
     }
 
-    tilt_setup = 0.15
-    ankle_setup = 0.35
-    lumbar_setup = 0.0
 
-    def eval_setup_bar(hip: float) -> float:
-        knee = tilt_setup + hip + ankle_setup
-        cset.get("hip_flexion_r").setValue(state, hip, False)
-        cset.get("hip_flexion_l").setValue(state, hip, False)
-        cset.get("knee_angle_r").setValue(state, knee, False)
-        cset.get("knee_angle_l").setValue(state, knee, False)
-        cset.get("ankle_angle_r").setValue(state, ankle_setup, False)
-        cset.get("ankle_angle_l").setValue(state, ankle_setup, False)
-        cset.get("pelvis_tilt").setValue(state, tilt_setup, False)
-        cset.get("lumbar_extension").setValue(state, lumbar_setup, False)
-        cset.get("pelvis_tx").setValue(state, 0.0, False)
-        cset.get("pelvis_ty").setValue(state, 0.0, False)
-        model.realizePosition(state)
-        lp = _lowest_point(model, state, feet)
-        cset.get("pelvis_ty").setValue(state, -lp - 0.003, False)
-        model.realizePosition(state)
-        return float(bar.getPositionInGround(state).get(1))
+def _add_planted_feet_goal(
+    problem: Any, reference: dict[str, list[float]], t_end: float, weight: float
+) -> list[float]:
+    """Track both calcanei at fixed ground positions over ``[0, t_end]``.
 
-    hip_setup = float(brentq(lambda h: eval_setup_bar(h) - target_bar_y, 1.1, 1.6))
-    knee_setup = tilt_setup + hip_setup + ankle_setup
-    eval_setup_bar(hip_setup)
-    pelvis_ty_setup = float(cset.get("pelvis_ty").getValue(state))
-    pts_setup = _ground_points(model, state, feet)
-    bar_pos_setup = bar.getPositionInGround(state)
-    setup = {
-        "hip_flexion": hip_setup,
-        "knee_angle": knee_setup,
-        "ankle_angle": ankle_setup,
-        "pelvis_tilt": tilt_setup,
-        "lumbar_extension": lumbar_setup,
-        "pelvis_tx": 0.0,
-        "pelvis_ty": pelvis_ty_setup,
-        "bar_height_m": float(bar_pos_setup.get(1)),
-        "bar_x_m": float(bar_pos_setup.get(0)),
-        "sphere_y_m": pts_setup[:3, 1].tolist(),
-    }
-    return setup, lockout
+    A deadlift keeps the feet planted; without this goal the optimizer lifts
+    them and carries the body on the pelvis residual instead of the ground.
+    Returns the reference sample times (postcondition: they span ``t_end``).
+    """
+    require(t_end > 0.0, f"t_end must be positive: {t_end}")
+    osim = import_opensim()
+    labels = osim.StdVectorString()
+    for path in PLANTED_FEET_FRAMES:
+        labels.append(path)
+    table = osim.TimeSeriesTableVec3()
+    table.setColumnLabels(labels)
+    times = np.linspace(0.0, t_end + PLANTED_FEET_TIME_MARGIN_S, PLANTED_FEET_SAMPLES)
+    for t in times:
+        row = osim.RowVectorVec3(len(PLANTED_FEET_FRAMES))
+        for i, path in enumerate(PLANTED_FEET_FRAMES):
+            row[i] = osim.Vec3(*reference[path])
+        table.appendRow(float(t), row)
+    goal = osim.MocoTranslationTrackingGoal("planted_feet", weight)
+    goal.setTranslationReference(table)
+    goal.setFramePaths(labels)
+    problem.addGoal(goal)
+    return [float(t) for t in times]
+
+
+def _clip_bound(value: float, width: float, path: list[float]) -> list[float]:
+    """``value`` plus or minus ``width``, clipped to the path bounds."""
+    return [max(path[0], value - width), min(path[1], value + width)]
 
 
 def _configure_phase_bounds(
     phase: Any,
     model: Any,
-    setup_pose: dict[str, Any] | None = None,
-    lockout_pose: dict[str, Any] | None = None,
+    setup_pose: dict[str, Any],
+    lockout_pose: dict[str, Any],
 ) -> None:
-    """Set initial, final, and coordinate bounds for deadlift phase."""
+    """Bound the phase start and end on the solved setup and lockout poses.
+
+    Rotations may move over their model range along the path; the pelvis
+    translations over the two poses' envelope widened by ``PATH_MARGIN_M``.
+    Coordinates in ``ZERO_CONSTRAINED_COORDS`` are held at zero throughout.
+    """
     cset = model.getCoordinateSet()
-    if setup_pose is not None and lockout_pose is not None:
-        coord_map = {
-            "pelvis_ty": (
-                [setup_pose["pelvis_ty"] - 0.01, setup_pose["pelvis_ty"] + 0.01],
-                [lockout_pose["pelvis_ty"] - 0.01, lockout_pose["pelvis_ty"] + 0.01],
-                [0.5, 1.1],
-            ),
-            "pelvis_tx": ([-0.01, 0.01], [-0.01, 0.01], [-0.1, 0.1]),
-            "pelvis_tilt": (
-                [setup_pose["pelvis_tilt"] - 0.05, setup_pose["pelvis_tilt"] + 0.05],
-                [
-                    lockout_pose["pelvis_tilt"] - 0.05,
-                    lockout_pose["pelvis_tilt"] + 0.05,
-                ],
-                [-0.3, 0.3],
-            ),
-            "hip_flexion_r": (
-                [setup_pose["hip_flexion"] - 0.05, setup_pose["hip_flexion"] + 0.05],
-                [-0.05, 0.05],
-                [-0.1, 1.8],
-            ),
-            "hip_flexion_l": (
-                [setup_pose["hip_flexion"] - 0.05, setup_pose["hip_flexion"] + 0.05],
-                [-0.05, 0.05],
-                [-0.1, 1.8],
-            ),
-            "knee_angle_r": (
-                [setup_pose["knee_angle"] - 0.05, setup_pose["knee_angle"] + 0.05],
-                [0.0, 0.05],
-                [0.0, 2.2],
-            ),
-            "knee_angle_l": (
-                [setup_pose["knee_angle"] - 0.05, setup_pose["knee_angle"] + 0.05],
-                [0.0, 0.05],
-                [0.0, 2.2],
-            ),
-            "ankle_angle_r": (
-                [setup_pose["ankle_angle"] - 0.05, setup_pose["ankle_angle"] + 0.05],
-                [
-                    lockout_pose["ankle_angle"] - 0.05,
-                    lockout_pose["ankle_angle"] + 0.05,
-                ],
-                [-0.1, 0.6],
-            ),
-            "ankle_angle_l": (
-                [setup_pose["ankle_angle"] - 0.05, setup_pose["ankle_angle"] + 0.05],
-                [
-                    lockout_pose["ankle_angle"] - 0.05,
-                    lockout_pose["ankle_angle"] + 0.05,
-                ],
-                [-0.1, 0.6],
-            ),
-            "lumbar_extension": ([-0.05, 0.05], [-0.05, 0.05], [-0.3, 0.3]),
-        }
-        for name, (init_b, final_b, val_b) in coord_map.items():
-            joint_name = cset.get(name).getJoint().getName()
-            val = f"/jointset/{joint_name}/{name}/value"
-            spd = f"/jointset/{joint_name}/{name}/speed"
-            phase.setStateInfo(val, val_b, init_b, final_b)
-            phase.setStateInfo(spd, [-10.0, 10.0], [0.0, 0.0], [-0.5, 0.5])
-    else:
-        bounds_map = create_predictive_deadlift_spec(PredictiveDeadliftConfig())[
-            "coordinate_bounds"
-        ]
-        for coord_name, b in bounds_map.items():
-            joint_name = cset.get(coord_name).getJoint().getName()
-            val = f"/jointset/{joint_name}/{coord_name}/value"
-            spd = f"/jointset/{joint_name}/{coord_name}/speed"
-            phase.setStateInfo(val, [-3.14, 3.14], b["initial"], b["final"])
-            phase.setStateInfo(spd, [-10.0, 10.0], [0.0, 0.0], [-0.5, 0.5])
+    for key, coords in _POSE_COORDINATES.items():
+        start, end = float(setup_pose[key]), float(lockout_pose[key])
+        width = POSE_BOUND_M if key.startswith("pelvis_t") else POSE_BOUND_RAD
+        for name in coords:
+            coord = cset.get(name)
+            if key.startswith("pelvis_t"):
+                path = [
+                    min(start, end) - PATH_MARGIN_M,
+                    max(start, end) + PATH_MARGIN_M,
+                ]
+            else:
+                path = [coord.getRangeMin(), coord.getRangeMax()]
+            prefix = f"/jointset/{coord.getJoint().getName()}/{name}"
+            phase.setStateInfo(
+                f"{prefix}/value",
+                path,
+                _clip_bound(start, width, path),
+                _clip_bound(end, width, path),
+            )
+            phase.setStateInfo(
+                f"{prefix}/speed", [-10.0, 10.0], [0.0, 0.0], [-0.5, 0.5]
+            )
 
     for z in ZERO_CONSTRAINED_COORDS:
         joint_name = cset.get(z).getJoint().getName()
-        val = f"/jointset/{joint_name}/{z}/value"
-        spd = f"/jointset/{joint_name}/{z}/speed"
-        phase.setStateInfo(val, [0.0, 0.0], 0.0, 0.0)
-        phase.setStateInfo(spd, [0.0, 0.0], 0.0, 0.0)
+        phase.setStateInfo(f"/jointset/{joint_name}/{z}/value", [0.0, 0.0], 0.0, 0.0)
+        phase.setStateInfo(f"/jointset/{joint_name}/{z}/speed", [0.0, 0.0], 0.0, 0.0)
 
 
 def build_predictive_deadlift_study(
@@ -472,12 +624,13 @@ def build_predictive_deadlift_study(
     if config.actuation_mode == "torque":
         _add_torque_actuators(model, config.torque_optimal_force_nm)
 
-    _add_pelvis_residuals(model, config.body_mass_kg + config.bar_mass_kg)
+    set_actuator_optimal_force(
+        model, SHOULDER_ACTUATORS, config.torque_optimal_force_nm
+    )
+    _add_pelvis_residuals(model, config.residual_optimal_force_n())
+    pose_targets = bundle_pose_targets()
     setup_pose, lockout_pose = compute_deadlift_poses(
-        model,
-        body_mass_kg=config.body_mass_kg,
-        height_m=config.height_m,
-        bar_mass_kg=config.bar_mass_kg,
+        model, pose_targets, height_m=config.height_m
     )
 
     mp = osim.ModelProcessor(model)
@@ -504,14 +657,21 @@ def build_predictive_deadlift_study(
 
     effort = osim.MocoControlGoal("effort")
     effort.setWeight(config.effort_weight)
-    for coord in ("pelvis_tilt", "pelvis_tx", "pelvis_ty"):
-        effort.setWeightForControl(f"/forceset/residual_{coord}", 100.0)
+    for coord in PELVIS_RESIDUAL_COORDINATES:
+        effort.setWeightForControl(
+            f"/forceset/residual_{coord}", config.residual_effort_weight
+        )
     problem.addGoal(effort)
+    feet_reference = planted_feet_reference(model, setup_pose)
+    feet_times = _add_planted_feet_goal(
+        problem, feet_reference, config.duration_bounds[1], config.planted_feet_weight
+    )
     _configure_phase_bounds(phase, model, setup_pose, lockout_pose)
 
     solver = osim.MocoCasADiSolver.safeDownCast(study.initCasADiSolver())
     solver.set_num_mesh_intervals(config.mesh_intervals)
     solver.set_transcription_scheme("hermite-simpson")
+    solver.set_multibody_dynamics_mode(config.multibody_dynamics_mode)
     solver.set_optim_finite_difference_scheme(config.finite_difference_scheme)
     solver.set_optim_max_iterations(config.max_iterations)
     solver.set_optim_convergence_tolerance(config.convergence_tolerance)
@@ -519,8 +679,11 @@ def build_predictive_deadlift_study(
 
     meta = create_predictive_deadlift_spec(config)
     meta["model_name"] = model.getName()
+    meta["pose_targets"] = pose_targets
     meta["setup_pose"] = setup_pose
     meta["lockout_pose"] = lockout_pose
+    meta["planted_feet_reference"] = feet_reference
+    meta["planted_feet_times"] = feet_times
     return study, meta
 
 
@@ -635,7 +798,10 @@ def solve_predictive_deadlift(
     obj = float(solution.getObjective())
     tot_weight = (config.body_mass_kg + config.bar_mass_kg) * 9.80665
     res_peak, res_rms, res_ratio, res_assisted = _extract_residual_metrics(
-        solution, tot_weight
+        solution, tot_weight, config.residual_optimal_force_n()
+    )
+    moment_peak, moment_rms = residual_moment_metrics(
+        solution, config.residual_optimal_force_n()
     )
 
     record: dict[str, Any] = {
@@ -653,6 +819,8 @@ def solve_predictive_deadlift(
         "residual_rms_n": res_rms,
         "residual_ratio": res_ratio,
         "residual_assisted": res_assisted,
+        "residual_moment_peak_nm": moment_peak,
+        "residual_moment_rms_nm": moment_rms,
     }
 
     if converged:
@@ -660,6 +828,10 @@ def solve_predictive_deadlift(
             record.update(_extract_bar_kinematics(study, solution))
         except (RuntimeError, ValueError) as exc:
             logger.warning("FK replay failed on converged solution: %s", exc)
+    gate = residual_moment_gate(moment_peak, record.get("com_height_m"), tot_weight)
+    record.update(gate)
+    if gate["residual_moment_within_limit"] is False:
+        record["residual_assisted"] = True
 
     return record
 
@@ -690,6 +862,15 @@ def format_predictive_receipt(
         "residual_rms_n": solve_summary.get("residual_rms_n"),
         "residual_ratio": solve_summary.get("residual_ratio"),
         "residual_assisted": solve_summary.get("residual_assisted"),
+        "residual_optimal_force_n": config.residual_optimal_force_n(),
+        "residual_effort_weight": config.residual_effort_weight,
+        "planted_feet_weight": config.planted_feet_weight,
+        "residual_moment_peak_nm": solve_summary.get("residual_moment_peak_nm"),
+        "residual_moment_rms_nm": solve_summary.get("residual_moment_rms_nm"),
+        "residual_moment_limit_nm": solve_summary.get("residual_moment_limit_nm"),
+        "residual_moment_within_limit": solve_summary.get(
+            "residual_moment_within_limit"
+        ),
         "converged": solve_summary.get("converged", False),
         "solver_status": solve_summary.get("solver_status", "unknown"),
         "iterations": solve_summary.get("iterations"),
@@ -697,6 +878,9 @@ def format_predictive_receipt(
         "constraint_violation": solve_summary.get("constraint_violation"),
         "last_iterate_inf_pr": solve_summary.get("last_iterate_inf_pr"),
         "wall_clock_s": solve_summary.get("wall_clock_s"),
+        "pose_targets": solve_summary.get("pose_targets"),
+        "setup_pose": solve_summary.get("setup_pose"),
+        "lockout_pose": solve_summary.get("lockout_pose"),
         "comparison_table": comp_table,
         "reproduction_command": "python scripts/measure_opensim_predictive_deadlift.py",
     }

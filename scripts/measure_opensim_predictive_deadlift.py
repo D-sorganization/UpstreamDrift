@@ -21,6 +21,7 @@ import logging
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -37,7 +38,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.engines.physics_engines.opensim.python.msk_lift_predictive import (  # noqa: E402
-    TRACKED_SOLUTION_UNAVAILABLE_REASON,
     PredictiveDeadliftConfig,
     build_predictive_deadlift_study,
     compute_bundle_metrics,
@@ -57,15 +57,22 @@ DEFAULT_LOG_DIR = (
 BUNDLE_PATH = ROOT / "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
 
 
-def _git(*args: str) -> str:
-    """Run git command and return stdout."""
-    out = subprocess.run(
-        ["git", "-C", str(ROOT), *args],
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=True,
-    )
+def _git(*args: str) -> str | None:
+    """Run git command and return stdout, or ``None`` when git is unusable.
+
+    Container jobs mount a worktree whose ``.git`` points outside the
+    container; there the commit comes from ``UPSTREAMDRIFT_SOURCE_COMMIT``.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(ROOT), *args],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True,
+        )
+    except (subprocess.CalledProcessError, OSError):
+        return os.environ.get("UPSTREAMDRIFT_SOURCE_COMMIT")
     return out.stdout.strip()
 
 
@@ -241,7 +248,7 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 ## Result Status: Exploratory
 
 ### Stage 1: Torque-Driven Solve
-- **Actuation:** `CoordinateActuator`s (1000 N·m optimal force) on free coordinates; pelvis residuals (optimal force 1, weight 100); muscles removed
+- **Actuation:** `CoordinateActuator`s on free coordinates; six pelvis residuals (optimal force {receipt.get("residual_optimal_force_n")}, effort weight {receipt.get("residual_effort_weight")}); planted-feet goal weight {receipt.get("planted_feet_weight")}; muscles removed
 - **Solver Status:** `{stage1.get("solver_status", "unknown")}`
 - **Converged:** `{stage1.get("converged", False)}`
 - **Iterations:** {stage1.get("iterations")}
@@ -252,7 +259,12 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 - **Residual Peak:** {receipt.get("residual_peak_n")} N
 - **Residual RMS:** {receipt.get("residual_rms_n")} N
 - **Residual Ratio:** {receipt.get("residual_ratio")}
+- **Residual Moment Peak:** {receipt.get("residual_moment_peak_nm")} N·m (RMS {receipt.get("residual_moment_rms_nm")} N·m)
+- **Residual Moment Limit (1 % COM height × m g):** {receipt.get("residual_moment_limit_nm")} N·m (within: {receipt.get("residual_moment_within_limit")})
 - **Residual Assisted:** {receipt.get("residual_assisted")}
+- **Pose Targets (bundle):** {receipt.get("pose_targets")}
+- **Setup Pose:** {receipt.get("setup_pose")}
+- **Lockout Pose:** {receipt.get("lockout_pose")}
 
 ### Stage 2: Muscle-Driven Solve
 - **Actuation:** 80 Rajagopal lower-limb muscles (DeGroote-Fregly 2016)
@@ -284,22 +296,46 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
     logger.info("Saved %s", readme_path)
 
 
+def _load_guess(path: Path) -> Any:
+    """Load a saved Moco trajectory to warm-start a solve.
+
+    Raises:
+        ValueError: If *path* is not an existing file.
+    """
+    if not Path(path).is_file():
+        raise ValueError(f"guess trajectory not found: {path}")
+    from src.shared.python.engine_core.opensim_runtime import import_opensim
+
+    return import_opensim().MocoTrajectory(str(path))
+
+
 def run_stage1_solve(
     config: PredictiveDeadliftConfig,
     log_file: Path,
+    guess_path: Path | None = None,
 ) -> dict[str, Any]:
-    """Execute Stage 1 torque-driven solve with stdout/stderr captured to log_file."""
+    """Execute Stage 1 torque-driven solve with stdout/stderr captured to log_file.
+
+    With *guess_path*, the solve is warm-started from that saved trajectory
+    (for example an unconverged earlier run) instead of the smooth-step guess;
+    the summary records the path under ``warm_start``.
+    """
     logger.info("Building Stage 1 torque-driven study...")
     study, meta = build_predictive_deadlift_study(config)
+    initial_guess = None if guess_path is None else _load_guess(guess_path)
 
     logger.info("Solving Stage 1 with Moco (log -> %s)...", log_file)
     with _capture_output_to_file(log_file):
         summary = solve_predictive_deadlift(
             config,
             study=study,
+            initial_guess=initial_guess,
             setup_pose=meta.get("setup_pose"),
             lockout_pose=meta.get("lockout_pose"),
         )
+    summary["warm_start"] = None if guess_path is None else str(guess_path)
+    for key in ("pose_targets", "setup_pose", "lockout_pose"):
+        summary[key] = meta.get(key)
 
     # Enhance summary from parsed log
     parsed = _parse_solve_log(log_file)
@@ -313,6 +349,31 @@ def run_stage1_solve(
     return summary
 
 
+def stage2_guess_from_stage1(study2: Any, stage1_solution: Any) -> Any:
+    """Muscle-study guess seeded from the torque-driven stage-1 solution.
+
+    The two problems differ (torque actuators vs muscles, activation states),
+    so the stage-1 trajectory cannot be the guess directly.  The guess keeps
+    stage 1's time grid, its coordinate states, and every control both
+    problems share (the pelvis residuals and lumbar actuators); muscle
+    activations and excitations keep the solver's default guess.
+    """
+    from src.shared.python.engine_core.opensim_runtime import import_opensim
+
+    osim = import_opensim()
+    solver = osim.MocoCasADiSolver.safeDownCast(study2.updSolver())
+    guess = solver.createGuess()
+    guess.resampleWithNumTimes(stage1_solution.getNumTimes())
+    guess.setTime(stage1_solution.getTime())
+    guess.insertStatesTrajectory(stage1_solution.exportToStatesTable(), True)
+    stage1_controls = set(stage1_solution.getControlNames())
+    for name in guess.getControlNames():
+        if name in stage1_controls:
+            values = stage1_solution.getControl(name).to_numpy()
+            guess.setControl(name, osim.Vector(values))
+    return guess
+
+
 def _run_stage2_if_converged(
     stage1_summary: dict[str, Any],
     stage1_solution: Any,
@@ -320,6 +381,7 @@ def _run_stage2_if_converged(
     max_iterations: int,
     stage2_log: Path,
     out_dir: Path,
+    residual: dict[str, Any],
 ) -> dict[str, Any]:
     """Execute Stage 2 muscle-driven solve only if Stage 1 converged."""
     if not stage1_summary.get("converged", False):
@@ -338,19 +400,19 @@ def _run_stage2_if_converged(
         max_iterations=max_iterations,
         convergence_tolerance=1e-2,
         constraint_tolerance=1e-2,
-        duration_bounds=(0.5, 3.0),
         bar_mass_kg=100.0,
         body_mass_kg=80.0,
         height_m=1.78,
         effort_weight=1.0,
         terminal_lockout_weight=10.0,
-        finite_difference_scheme="forward",
         exploratory=True,
+        **residual,
     )
     study2, _ = build_predictive_deadlift_study(cfg_stage2)
+    guess2 = stage2_guess_from_stage1(study2, stage1_solution)
     with _capture_output_to_file(stage2_log):
         stage2_summary = solve_predictive_deadlift(
-            cfg_stage2, study=study2, initial_guess=stage1_solution
+            cfg_stage2, study=study2, initial_guess=guess2
         )
     parsed2 = _parse_solve_log(stage2_log)
     stage2_summary["iterations"] = parsed2["iterations"]
@@ -387,31 +449,32 @@ def _write_receipt_artifacts(out_dir: Path, receipt: dict[str, Any]) -> None:
 def run_measurement(
     out_dir: Path,
     log_dir: Path = DEFAULT_LOG_DIR,
-    mesh_intervals: int = 15,
-    max_iterations: int = 3000,
     from_log: Path | None = None,
+    residual: dict[str, float] | None = None,
+    solver: dict[str, Any] | None = None,
+    stage1_guess: Path | None = None,
+    command: str | None = None,
 ) -> dict[str, Any]:
     """Execute staged predictive deadlift measurement and generate honest evidence."""
     out_dir.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
+    residual = residual or {}
+    options: dict[str, Any] = {**residual, **(solver or {})}
     stage1_log = log_dir / "stage1_torque.log"
     stage2_log = log_dir / "stage2_muscle.log"
 
     cfg_stage1 = PredictiveDeadliftConfig(
         actuation_mode="torque",
         torque_optimal_force_nm=1000.0,
-        mesh_intervals=mesh_intervals,
-        max_iterations=max_iterations,
         convergence_tolerance=1e-2,
         constraint_tolerance=1e-2,
-        duration_bounds=(0.5, 3.0),
         bar_mass_kg=100.0,
         body_mass_kg=80.0,
         height_m=1.78,
         effort_weight=1.0,
         terminal_lockout_weight=10.0,
-        finite_difference_scheme="forward",
         exploratory=True,
+        **options,
     )
 
     t_start = time.perf_counter()
@@ -421,7 +484,7 @@ def run_measurement(
         stage1_summary["actuation_mode"] = "torque"
         stage1_solution = None
     else:
-        stage1_summary = run_stage1_solve(cfg_stage1, stage1_log)
+        stage1_summary = run_stage1_solve(cfg_stage1, stage1_log, stage1_guess)
         stage1_solution = stage1_summary.pop("solution", None)
 
     # Save Stage 1 solution file if available
@@ -437,10 +500,11 @@ def run_measurement(
     stage2_summary = _run_stage2_if_converged(
         stage1_summary,
         stage1_solution,
-        mesh_intervals,
-        max_iterations,
+        cfg_stage1.mesh_intervals,
+        cfg_stage1.max_iterations,
         stage2_log,
         out_dir,
+        options,
     )
 
     # Format receipt
@@ -451,9 +515,18 @@ def run_measurement(
     receipt["stage2_muscle"] = stage2_summary
     receipt["source_commit"] = _git("rev-parse", "HEAD")
     receipt["total_script_wall_clock_s"] = time.perf_counter() - t_start
+    if command is not None:
+        receipt["reproduction_command"] = command
 
     _write_receipt_artifacts(out_dir, receipt)
     return receipt
+
+
+def reproduction_command(argv: list[str]) -> str:
+    """Shell command that reruns this measurement with the same arguments."""
+    return shlex.join(
+        ["python3", "scripts/measure_opensim_predictive_deadlift.py", *argv]
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -472,6 +545,39 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--mesh-intervals", type=int, default=15)
     parser.add_argument("--max-iterations", type=int, default=3000)
+    parser.add_argument(
+        "--residual-force-scale",
+        type=float,
+        default=2.0,
+        help="Pelvis residual optimal force as a multiple of total weight",
+    )
+    parser.add_argument("--residual-effort-weight", type=float, default=10.0)
+    parser.add_argument(
+        "--planted-feet-weight",
+        type=float,
+        default=1.0e4,
+        help="Weight of the goal holding both calcanei at the setup pose",
+    )
+    parser.add_argument(
+        "--fd-scheme", choices=("forward", "central"), default="forward"
+    )
+    parser.add_argument(
+        "--dynamics-mode", choices=("explicit", "implicit"), default="explicit"
+    )
+    parser.add_argument(
+        "--duration-bounds",
+        type=float,
+        nargs=2,
+        metavar=("MIN_S", "MAX_S"),
+        default=None,
+        help="Final-time bounds; equal values fix the duration",
+    )
+    parser.add_argument(
+        "--stage1-guess",
+        type=Path,
+        default=None,
+        help="Warm-start stage 1 from a saved .sto trajectory",
+    )
     args = parser.parse_args(argv)
 
     out_dir = args.out_dir
@@ -484,9 +590,25 @@ def main(argv: list[str] | None = None) -> int:
     run_measurement(
         out_dir=out_dir,
         log_dir=args.log_dir,
-        mesh_intervals=args.mesh_intervals,
-        max_iterations=args.max_iterations,
         from_log=args.from_log,
+        residual={
+            "residual_force_scale": args.residual_force_scale,
+            "residual_effort_weight": args.residual_effort_weight,
+        },
+        solver={
+            "mesh_intervals": args.mesh_intervals,
+            "max_iterations": args.max_iterations,
+            "finite_difference_scheme": args.fd_scheme,
+            "multibody_dynamics_mode": args.dynamics_mode,
+            "planted_feet_weight": args.planted_feet_weight,
+            **(
+                {"duration_bounds": tuple(args.duration_bounds)}
+                if args.duration_bounds
+                else {}
+            ),
+        },
+        stage1_guess=args.stage1_guess,
+        command=reproduction_command(sys.argv[1:] if argv is None else argv),
     )
     return 0
 
