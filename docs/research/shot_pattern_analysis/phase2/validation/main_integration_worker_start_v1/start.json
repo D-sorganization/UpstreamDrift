@@ -1,6 +1,6 @@
 {
   "pid": 663960,
-  "cwd": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
+  "cwd": "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
   "branch": "codex/shot-pattern-main-integration",
   "model": "gemini-3.8-flash-high",
   "source_head": "2953c52b37001a8a3893e07943fb3cf2b6c38b45",

@@ -72,7 +72,7 @@
       "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
       "src/tools/shot_pattern_analysis/matched_matrix.py": "af547eb668d33f2e606bbab7f4a9b69749d7c79d61d2d381bfc0924cc3216732"
     },
-    "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+    "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
     "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
     "cargo_lock_present": false,
     "contact_backend": {

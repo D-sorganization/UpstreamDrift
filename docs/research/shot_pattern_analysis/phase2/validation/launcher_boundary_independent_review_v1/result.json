@@ -49,7 +49,7 @@
     "vendor/ud-tools/src/agent_context/service.py": "1702e355025087eeb6488d39677fc68874c1c982b28e5a3af6967b62ae1f7053",
     "vendor/ud-tools/src/agent_context/workspace.py": "9802ab77f37568c7cc56105625d54ea5b27bf250c853d9af73f3f5ff15fed08d"
   },
-  "agent_context_module": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools/src/agent_context/__init__.py",
+  "agent_context_module": "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools/src/agent_context/__init__.py",
   "python_executable": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
   "tools_head": "86d0f28b1cc5acf61185e07e320c816c2d005512",
   "command": [

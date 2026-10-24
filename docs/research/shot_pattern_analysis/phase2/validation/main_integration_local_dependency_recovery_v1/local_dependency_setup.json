@@ -7,18 +7,18 @@
         "clone",
         "--shared",
         "--no-checkout",
-        "/home/dieterolson/Repositories/UpstreamDrift/vendor/ud-tools",
-        "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools"
+        "<owner-home>/Repositories/UpstreamDrift/vendor/ud-tools",
+        "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools"
       ],
       "exit_code": 0,
       "stdout": "",
-      "stderr": "Cloning into '/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools'...\ndone.\n"
+      "stderr": "Cloning into '<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools'...\ndone.\n"
     },
     {
       "command": [
         "git",
         "-C",
-        "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools",
+        "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools",
         "checkout",
         "--detach",
         "86d0f28b1cc5acf61185e07e320c816c2d005512"
@@ -31,7 +31,7 @@
       "command": [
         "git",
         "-C",
-        "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools",
+        "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools",
         "status",
         "--porcelain"
       ],
@@ -43,7 +43,7 @@
       "command": [
         "git",
         "-C",
-        "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools",
+        "<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools",
         "rev-parse",
         "HEAD"
       ],

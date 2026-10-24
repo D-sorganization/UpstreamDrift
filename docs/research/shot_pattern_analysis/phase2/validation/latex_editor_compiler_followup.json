@@ -8,7 +8,7 @@
   "separate_pdf_compiled": false,
   "built_in_retry_after_new_cache_evidence": "compile-failed; same Tectonic src/config.rs:154:18 panic before parsing; uncached bundle and HTTP request failure",
   "host_followup": {
-    "cache_directory": "/home/dieterolson/.cache/Tectonic",
+    "cache_directory": "<owner-home>/.cache/Tectonic",
     "cache_present": true,
     "bundle_index_get_status": 200,
     "downloaded_bytes": 1276215,
