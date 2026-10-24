@@ -22,6 +22,7 @@ from src.shared.python.loop_nullspace.decomposition import (  # noqa: E402
     decompose,
 )
 from src.shared.python.loop_nullspace.envelopes import (  # noqa: E402
+    PARTIAL_ENVELOPE_FRAMES_CONVENTION,
     SIGN_ATOL_RTOL,
     BoundStatus,
     EnvelopeQuantity,
@@ -334,7 +335,7 @@ def test_records_partial_unbounded_frames_stay_family_dependent() -> None:
     assert rec.allocation_dependence is AllocationDependence.FAMILY_DEPENDENT
     assert np.isfinite(rec.values[0, 0]) and np.isfinite(rec.values[0, 1])
     assert np.isnan(rec.values[1, 1])
-    assert "C-ENVELOPE-PARTIAL-FRAMES" in rec.conventions
+    assert PARTIAL_ENVELOPE_FRAMES_CONVENTION in rec.conventions
 
 
 def test_records_fully_unbounded_quantity_stays_unavailable() -> None:
