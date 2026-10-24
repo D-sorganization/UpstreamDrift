@@ -114,7 +114,6 @@ const NON_STYLE_PHYSICAL_KEYS: ReadonlyArray<keyof PhysicalGripPicks> = [
   'trail_set_angle',
   'lead_below_butt',
   'hand_spacing',
-  'grip_style',
 ];
 
 export const PHYSICAL_KEYS: ReadonlyArray<keyof PhysicalGripPicks> = [
