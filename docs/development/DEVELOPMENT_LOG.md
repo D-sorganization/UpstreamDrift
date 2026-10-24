@@ -18,16 +18,29 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13578 · Adopt Fast-Tier Pytest Changed-Module Selection for Unit-Test-Gate
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13578
+- **Branch:** cursor/ci-fast-tier-devlog-archive-7ec5
+- **PR:** #13669
+- **Paths:** see #13669
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`670ce9da`; collated from changes/13578-adopt-fast-tier-pytest-changed-module-se.md)
+- **Summary:** Adopt fast-tier pytest changed-module selection for unit-test-gate
+- **Next step:** Merge PR
+
 ### DL-#13648 · Characterize the Existing KnowledgePack Search Contract Before Provider Synchronization.
 
 - **State:** in_review
 - **Owner:** unassigned
 - **Issue:** #13648
 - **Branch:** codex/13648-knowledgepack-search
-- **PR:** #13649
+- **PR:** #13649, #13667
 - **Paths:** tests/unit/ai/test_knowledge_pack_search.py
 - **Started:** 2026-10-23
-- **Last verified:** 2026-10-23 (`f5c47acf`; collated from changes/13648-extract-knowledgepack-bm25-search-behind.md)
+- **Last verified:** 2026-10-24 (`75a80849`; collated from changes/13648-extend-knowledgepack-search-characteriza.md)
 - **Summary:** Characterize the existing KnowledgePack search contract before provider synchronization.
 - **Next step:** Use these regression tests when synchronizing the provider-owned search implementation.
 
@@ -50,10 +63,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13650
 - **Branch:** codex/13650-theme-manager-fixture
-- **PR:** #13651
+- **PR:** #13651, #13667
 - **Paths:** see #13651
 - **Started:** 2026-10-23
-- **Last verified:** 2026-10-23 (`f4e52a4a`; collated from changes/13650-clear-deleted-thememanager-main-window-w.md)
+- **Last verified:** 2026-10-24 (`75a80849`; collated from changes/13650-isolate-capture-rig-theme-compliance-the.md)
 - **Summary:** Clear deleted ThemeManager main-window wrappers during test cleanup
 - **Next step:** Merge the Qt fixture cleanup fix.
 
