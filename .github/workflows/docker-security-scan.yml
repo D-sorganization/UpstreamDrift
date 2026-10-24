@@ -24,6 +24,10 @@ concurrency:
   group: docker-security-scan-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   trivy-scan:
     # Fork PRs never run on the self-hosted fleet (RM#1989).
@@ -33,9 +37,6 @@ jobs:
     timeout-minutes: 40
     name: Trivy Container Scan
     runs-on: d-sorg-fleet-docker
-    permissions:
-      security-events: write
-      contents: read
 
     steps:
       - name: Checkout code

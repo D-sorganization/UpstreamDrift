@@ -17,6 +17,9 @@ on:
       - "launch_golf_suite.py"
       - "scripts/ci/start_api_server.py"
 
+permissions:
+  contents: read
+
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
