@@ -41,6 +41,14 @@ def _model_xml(mass: float) -> str:
     ctrllimited="true" ctrlrange="-2 2"/></actuator></mujoco>"""
 
 
+def test_linearize_native_hinge_reads_inertia_on_modern_mujoco() -> None:
+    """MuJoCo 3.13+ removed ``MjData.qM``; admission must use ``full_mass_matrix``."""
+    mj = pytest.importorskip("mujoco")
+    model = mj.MjModel.from_xml_string(_model_xml(0.3))
+    discrete = linearize_native_hinge(model)
+    assert discrete.inertia_kg_m2 > 0
+
+
 def _problem(nominal: HingeDiscreteModel, perturbed: HingeDiscreteModel) -> MPCProblem:
     return MPCProblem(
         step=lambda x, u: nominal.A @ x + nominal.B @ u,
