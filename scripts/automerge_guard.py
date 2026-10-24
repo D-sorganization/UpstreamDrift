@@ -23,10 +23,6 @@ files present on ``main``. The reviewer's only remaining option was to close it.
 Every fleet code path that arms auto-merge must go through :func:`arm_auto_merge`
 rather than calling ``gh pr merge --auto`` directly. One seam, one policy.
 
-UD-CI-014 (#13579) is implemented in ``scripts/ci/shared_buildkit.py`` (merge
-``d5112d5546aaceca2cc69b36f0d9223ce0219a85``, PR #13598); this file is only cited
-in that issue's fleet boilerplate.
-
 This is the *arming* side of the fix. The enforcing side is the
 ``Merge-Hold-Guard.yml`` workflow deployed to each repo, which revokes arms this
 module failed to prevent (for example, from an agent that shells out on its
