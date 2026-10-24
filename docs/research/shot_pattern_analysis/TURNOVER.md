@@ -2,7 +2,7 @@
 
 ## Workspace and Authorization
 
-Resume in `/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift`, branch `codex/shot-pattern-analysis`. Do not edit the primary checkout or `vendor/ud-tools`. The user authorized the personal GitHub identity for this task. Use Gemini 3.8 Flash High through `agy` for issue/publication assistance. Do not bypass hooks, alter repository settings, force-push, or close issues before merged evidence.
+Resume in `<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift`, branch `codex/shot-pattern-analysis`. Do not edit the primary checkout or `vendor/ud-tools`. The user authorized the personal GitHub identity for this task. Use Gemini 3.8 Flash High through `agy` for issue/publication assistance. Do not bypass hooks, alter repository settings, force-push, or close issues before merged evidence.
 
 ## Saved Work and Acceptance State
 
@@ -24,7 +24,7 @@ revalidated. Final evidence is in `final_validation_receipt.json`, `pre_pr_valid
 
 ## Resume Commands
 
-Use `/home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python` and headless environment variables `QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy`.
+Use `<owner-home>/Repositories/UpstreamDrift/.venv/bin/python` and headless environment variables `QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy`.
 
 ```bash
 git status --short
@@ -32,7 +32,7 @@ git log -8 --oneline
 python -m src.tools.shot_pattern_analysis.matrix docs/research/shot_pattern_analysis/corrected_results
 python -m src.tools.shot_pattern_analysis.overview docs/research/shot_pattern_analysis/corrected_results --output-dir docs/research/shot_pattern_analysis/overview_v2
 python -m pytest tests/tools/shot_pattern_analysis tests/ui/tools/shot_pattern_analysis
-python /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --base-ref origin/main
+python <owner-home>/Repositories/Repository_Management/scripts/pre_pr.py --base-ref origin/main
 ```
 
 The matrix command now skips only verified complete bundles. Before running it, inspect the latest commits and this document so existing valid runs are preserved. Never run the expensive full matrix merely to regenerate scores or plots.
@@ -93,9 +93,9 @@ type checking passes 24 files without exclusions or suppressions.
 
 ```bash
 QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
-MYPYPATH="$PWD" PYTHONPATH=/home/dieterolson/Repositories/Repository_Management \
+MYPYPATH="$PWD" PYTHONPATH=<owner-home>/Repositories/Repository_Management \
 /tmp/shot-pattern-validation-venv-20261009/bin/python \
-/home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py \
+<owner-home>/Repositories/Repository_Management/scripts/pre_pr.py \
   --from-ref "$(git merge-base origin/main HEAD)" --to-ref HEAD
 ```
 

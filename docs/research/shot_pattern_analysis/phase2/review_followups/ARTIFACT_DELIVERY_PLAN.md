@@ -69,7 +69,7 @@ Run from STUDY only after DELIVERY includes the accepted final child v2 source a
 
 ```bash
 set -euo pipefail
-STUDY=/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift
+STUDY=<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift
 SOURCE="$STUDY/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair"
 OUT=/tmp/shot-pattern-delivery-resume/supplement-v2
 cd "$STUDY"
@@ -80,7 +80,7 @@ Verify the bundle from DELIVERY’s source-controlled API and save hashes before
 
 ```bash
 set -euo pipefail
-DELIVERY=/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift
+DELIVERY=<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift
 OUT=/tmp/shot-pattern-delivery-resume/supplement-v2
 cd "$DELIVERY"
 PYTHONPATH=. python - "$OUT" <<'PY'
@@ -148,7 +148,7 @@ gh release download "$TAG" --repo "$REPO" --dir "$RESTORE/supplement" --pattern 
 cmp "$STAGE/primary__archive_manifest.json" "$RESTORE/primary/primary__archive_manifest.json"
 cmp "$STAGE/control__archive_manifest.json" "$RESTORE/control/control__archive_manifest.json"
 cmp "$STAGE/supplement__archive_manifest.json" "$RESTORE/supplement/supplement__archive_manifest.json"
-cd /home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift
+cd <owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift
 PYTHONPATH=. python - "$RESTORE" <<'PY'
 import hashlib, json, sys
 from pathlib import Path
@@ -185,7 +185,7 @@ After the verified extraction, route the supplement into a fresh publication tre
 
 ```bash
 set -euo pipefail
-DELIVERY=/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift
+DELIVERY=<owner-home>/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift
 PHASE2_TREE=/tmp/shot-pattern-delivery-resume/publication/docs/research/shot_pattern_analysis/phase2
 mkdir -p "$PHASE2_TREE"
 cp --reflink=auto "$DELIVERY/docs/research/shot_pattern_analysis/phase2/REPORT.md" "$PHASE2_TREE/REPORT.md"

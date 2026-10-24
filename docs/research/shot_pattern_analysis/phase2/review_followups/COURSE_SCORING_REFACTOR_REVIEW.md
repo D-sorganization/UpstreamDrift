@@ -13,7 +13,7 @@ The source inspection confirms the original validation, boundary inclusion (`<=`
 From the isolated bounds worktree (or a later worktree containing both commits):
 
 ```sh
-OPENBLAS_NUM_THREADS=1 PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/check_course_scoring_refactor.py > NEW_RECEIPT.json
+OPENBLAS_NUM_THREADS=1 PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/check_course_scoring_refactor.py > NEW_RECEIPT.json
 ```
 
 `course_scoring_refactor_review.json` binds the checked old source, new scorer/helper/provenance sources, fixture, and reproducer. Ruff and scoped Mypy pass for the reproducer. The canonical source inventory now covers the helper and legacy gear utility. The latter is a coverage extension with a separately reviewed behavior repair; it must not be represented as globally unchanged physics. No original final-run acceptance is replaced by this scoring-only evidence.
