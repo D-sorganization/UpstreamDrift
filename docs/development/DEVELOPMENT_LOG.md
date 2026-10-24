@@ -456,6 +456,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13699 · Private Path Leak Ratchet, Denylist Patterns, and Mechanical Owner-Home Redaction Consolidation.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13699
+- **Branch:** merged via #13756
+- **PR:** #13756
+- **Paths:** see #13756
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`ed5ad50d`; collated from changes/13699-private-path-leak-ratchet.md)
+- **Summary:** Private path leak ratchet, denylist patterns, and mechanical owner-home redaction consolidation.
+- **Next step:** Shipped in PR #13756.
+
 ### DL-#13770 · Add Cursor Cloud Environment.Json Fleet Bootstrap via Repository_Management Scripts/Cursor/Bootstrap.Sh.
 
 - **State:** shipped
