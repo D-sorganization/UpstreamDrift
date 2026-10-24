@@ -19,6 +19,7 @@ from src.shared.python.body_part_viz.mujoco_axial_loads import (
     GripClosure,
     MujocoAxialLoadSource,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 pytestmark = pytest.mark.unit
 
@@ -53,8 +54,7 @@ def _forward(model, data):
 def _kkt(model, data, efforts):
     """Explicit KKT solve: (qacc, lambda) exactly like the full-body adapter."""
     _forward(model, data)
-    mass = np.zeros((model.nv, model.nv))
-    mujoco.mj_fullM(model, mass, data.qM)
+    mass = full_mass_matrix(mujoco, model, data)
     sites = [model.site(n).id for n in ("a", "b")]
     jac, drift = _evaluate_weld_closure(mujoco, model, data, sites)
     return _solve_kkt_with_multipliers(
