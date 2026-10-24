@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13689 | Forward-rollout root-residual test closes the #13179 axial-load acceptance |
+| 2026-10-24 | #13688 | Guard test enforcing the single paired Monte Carlo runner rule for strategy comparisons (NSX-91) |
+| 2026-10-24 | #13690 | NSX-45: user help and interpretation guide for loop null-space exploration (Refs #12577) |
+| 2026-10-24 | #13692 | Link the loop null-space help page (docs/help/loop_nullspace.md) from the React web UI via a FEATURE_HELP topic and a help button on LoopNullSpacePanel (NSX-45) |
 | 2026-10-24 | #13570 | Add conflict-disarm caller workflow (dry-run) and CI allowlists for RM reusable @main. |
 | 2026-10-24 | #13370 | fix(motion_matching): reclassify grip_style as physical pick and clean sidecar |
 | 2026-10-24 | #13623 | HRG-E3: lower-body, shoulder, elbow, and line turn terms in ISB and golf language |
