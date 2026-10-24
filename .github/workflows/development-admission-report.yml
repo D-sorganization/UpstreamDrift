@@ -1,0 +1,31 @@
+name: Publish Development Admission Report
+
+on:
+  workflow_run:
+    workflows: ["CI Standard"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+# Distinct from the callee group; separate attempts never cancel each other.
+concurrency:
+  group: admission-report-caller-${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}
+  cancel-in-progress: true
+
+jobs:
+  publish-admission-report:
+    name: Publish protected admission snapshot
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    uses: ./.github/workflows/reusable-admission-report-publisher.yml
+    with:
+      ci_workflow_id: 216580685
+      trusted_provider_commit: 5c573e3804494b47bf71c639107ae80f2cd4d6da
+      trusted_bundle_sha256: 5a2efd76cd0771e7437c58b6af23346501ee6d3d289f927220d51e257b86236b
+    secrets:
+      provider_app_id: ${{ secrets.JULES_APP_ID }}
+      provider_app_private_key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
