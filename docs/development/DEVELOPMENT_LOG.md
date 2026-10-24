@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13346 · Fix(Motion_Matching): Reclassify Grip_Style as Physical Pick and Clean Sidecar
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13346
+- **Branch:** fix/13346-grip-style-physical
+- **PR:** #13370
+- **Paths:** see #13370
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`60523ca6`; collated from changes/13346-fix-motion-matching-reclassify-grip-styl.md)
+- **Summary:** fix(motion_matching): reclassify grip_style as physical pick and clean sidecar
+- **Next step:** Merge the PR.
+
 ### DL-#13208 · Lock Per-Runner BuildKit Cache Regression Guards
 
 - **State:** in_review
@@ -416,6 +429,71 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#2195 · Add Conflict-Disarm Caller Workflow (Dry-Run) and CI Allowlists for RM Reusable @main.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #2195
+- **Branch:** merged via #13570
+- **PR:** #13570
+- **Paths:** see #13570
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`d2ff79a4`; collated from changes/2195-add-conflict-disarm-caller-workflow-dry.md)
+- **Summary:** Add conflict-disarm caller workflow (dry-run) and CI allowlists for RM reusable @main.
+- **Next step:** Shipped in PR #13570.
+
+### DL-#13579 · Record #13579 Closure Evidence (Docs/Operations/Evidence/shipped-even-issues-20261024.md)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13579
+- **Branch:** cursor/issue-closure-receipts-66dc
+- **PR:** #13685
+- **Paths:** see #13685
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`501afd4c`; collated from changes/13579-close-shipped-issue-with-receipt-regress.md)
+- **Summary:** Record #13579 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md)
+- **Next step:** Shipped in PR #13685.
+
+### DL-#13171 · HRG-E3: Lower-Body, Shoulder, Elbow, and Line Turn Terms in ISB and Golf Language
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13171
+- **Branch:** merged via #13623
+- **PR:** #13623
+- **Paths:** see #13623
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`addd8534`; collated from changes/13171-hrg-e3-lower-body-shoulder-elbow-and-lin.md)
+- **Summary:** HRG-E3: lower-body, shoulder, elbow, and line turn terms in ISB and golf language
+- **Next step:** Shipped in PR #13623.
+
+### DL-#13104 · Record #13104 Closure Evidence (Docs/Operations/Evidence/shipped-even-issues-20261024.md)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13104
+- **Branch:** cursor/issue-closure-receipts-66dc
+- **PR:** #13685
+- **Paths:** see #13685
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`501afd4c`; collated from changes/13104-close-shipped-issue-with-receipt-regress.md)
+- **Summary:** Record #13104 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md)
+- **Next step:** Shipped in PR #13685.
+
+### DL-#13072 · Record #13072 Closure Evidence (Docs/Operations/Evidence/shipped-even-issues-20261024.md)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13072
+- **Branch:** cursor/issue-closure-receipts-66dc
+- **PR:** #13685
+- **Paths:** see #13685
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`501afd4c`; collated from changes/13072-close-shipped-issue-with-receipt-regress.md)
+- **Summary:** Record #13072 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md)
+- **Next step:** Shipped in PR #13685.
 
 ### DL-#13683 · Route Native F02 and BoxFDDP Mass Reads Through Full_Mass_Matrix on MuJoCo 3.13+.
 
