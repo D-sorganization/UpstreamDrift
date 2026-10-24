@@ -224,6 +224,43 @@ def test_golden_vectors_are_built_from_the_exported_rounded_params() -> None:
             )
 
 
+_GOLDEN_UNDER_OTHER_BLAS = """
+import json, sys
+from src.shared.python.grip_contact.matlab_kernel import (
+    DEFAULT_GOLDEN_JSON_PATH, build_golden_vectors_payload,
+)
+committed = json.loads(DEFAULT_GOLDEN_JSON_PATH.read_text(encoding="utf-8"))
+sys.exit(0 if build_golden_vectors_payload() == committed else 1)
+"""
+
+
+@pytest.mark.unit
+def test_golden_vectors_are_bit_reproducible_under_another_blas_kernel() -> None:
+    """Regenerated goldens equal the committed ones exactly on any CPU (#13552).
+
+    The rest cases leave ~1e-9 N of ~40 N opposing forces, so BLAS rounding
+    that depends on the CPU kernel OpenBLAS selects moved them by more than the
+    1e-12 golden tolerance between a workstation and a CI runner. The Python
+    kernel mirror and the case builder use fixed-order scalar 3-vector algebra
+    instead; forcing the generic ``Prescott`` kernel must not change one bit.
+    """
+    import os
+    import subprocess
+    import sys
+
+    env = {**os.environ, "OPENBLAS_CORETYPE": "Prescott"}
+    result = subprocess.run(  # noqa: S603 - fixed interpreter and inline script
+        [sys.executable, "-c", _GOLDEN_UNDER_OTHER_BLAS],
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=300,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr[-2000:]
+
+
 @pytest.mark.unit
 def test_golden_vectors_cover_all_styles_and_edge_cases() -> None:
     """Golden vectors cover all styles, required edge cases, and match pair_contact."""
