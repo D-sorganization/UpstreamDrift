@@ -540,10 +540,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13270
 - **Branch:** merged via #13735
-- **PR:** #13735, #13733, #13732, #13734, #13744
+- **PR:** #13735, #13733, #13732, #13734, #13744, #13749
 - **Paths:** see #13735
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`347e06b4`; collated from changes/13270-port-gs3dx-vertical-share-and-gs3dx-cont.md)
+- **Last verified:** 2026-10-24 (`90f8c1de`; collated from changes/13270-port-gs3dx-com-shift-and-the-capture-con.md)
 - **Summary:** Port frame_rate, trunk_spin, hold_limit_jump, rebase_turns and reference_rate with tests from commit 22419ee13 and record the failed stance probes in FORWARD_DYNAMICS.md
 - **Next step:** Shipped in PR #13735.
 
