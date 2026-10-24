@@ -155,7 +155,7 @@ matlab/Scripts/Golf_GUI/
 
 ```matlab
 % Navigate to the Golf_GUI folder
-cd('C:\Users\diete\Repositories\Golf_Model\matlab\Scripts\Golf_GUI')
+cd('<owner-home>\Repositories\Golf_Model\matlab\Scripts\Golf_GUI')
 
 % Launch the new tabbed application
 launch_tabbed_app
