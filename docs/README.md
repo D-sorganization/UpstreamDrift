@@ -28,7 +28,7 @@ Welcome to UpstreamDrift - a professional biomechanical analysis and physics sim
 ### 1. Launch UpstreamDrift (Web UI)
 
 ```bash
-cd /home/user/UpstreamDrift
+cd <owner-home>/UpstreamDrift
 python launch_upstream_drift.py
 ```
 
