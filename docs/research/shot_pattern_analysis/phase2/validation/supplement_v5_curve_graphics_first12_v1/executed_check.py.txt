@@ -1,7 +1,7 @@
 from pathlib import Path
 import json,hashlib,re,html
 from PIL import Image,ImageDraw,ImageFont
-root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+root=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
 b=root/'docs/research/shot_pattern_analysis/phase2'; p=b/'supplement_report_v1/figures/comparisons'; v=b/'validation/supplement_v5_curve_graphics_first12_v1';v.mkdir(exist_ok=True)
 h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
 f=b/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json'; start=h(f)

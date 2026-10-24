@@ -1,7 +1,7 @@
 from pathlib import Path
 import json,hashlib,collections
 from datetime import datetime,timezone
-M=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');W=Path('/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift');b=M/'docs/research/shot_pattern_analysis/phase2';n=b/'supplement_report_v1';o=b/'presentation_preview_rejected_supplement_v3/supplement_report_v1';v=b/'validation/supplement_v5_numeric_review_v1';v.mkdir(exist_ok=True)
+M=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');W=Path('<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift');b=M/'docs/research/shot_pattern_analysis/phase2';n=b/'supplement_report_v1';o=b/'presentation_preview_rejected_supplement_v3/supplement_report_v1';v=b/'validation/supplement_v5_numeric_review_v1';v.mkdir(exist_ok=True)
 def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 files=sorted(p.name for p in o.iterdir() if p.is_file());before={str(p):h(p) for name in files for p in [n/name,o/name]}
 checks={name:{'old_sha256':h(o/name),'new_sha256':h(n/name),'bytes_equal':(o/name).read_bytes()==(n/name).read_bytes()} for name in files};assert all(x['bytes_equal'] for x in checks.values())

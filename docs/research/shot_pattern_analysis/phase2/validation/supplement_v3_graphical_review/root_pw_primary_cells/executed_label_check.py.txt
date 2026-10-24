@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import datetime, timezone
 import json, hashlib, subprocess, shutil
-p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');fig=p/'supplement_report_v1';out=p/'validation/supplement_v3_graphical_review/root_pw_primary_cells'
+p=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');fig=p/'supplement_report_v1';out=p/'validation/supplement_v3_graphical_review/root_pw_primary_cells'
 h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
 inventory=json.loads((out/'inventory.json').read_text())['files'];report=fig/'REPORT_SUPPLEMENT.json';rh=h(report);refs={x['cell']:x for x in json.loads(report.read_text())['unique_cells'] if x['source_protocol']=='pw-primary-face-bounds/1'};assert len(refs)==18
 checks=[]

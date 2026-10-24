@@ -1,7 +1,7 @@
 import csv,hashlib,json,collections,io
 from pathlib import Path
 from datetime import datetime,timezone
-p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');old=p/'presentation_preview_rejected_supplement_v2/supplement_report_v1';new=p/'supplement_report_v1';out=p/'validation/supplement_v3_numeric_comparison_review';out.mkdir(parents=True,exist_ok=True)
+p=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');old=p/'presentation_preview_rejected_supplement_v2/supplement_report_v1';new=p/'supplement_report_v1';out=p/'validation/supplement_v3_numeric_comparison_review';out.mkdir(parents=True,exist_ok=True)
 names=['REPORT_SUPPLEMENT_COMPARISONS.json','REPORT_SUPPLEMENT_COMPARISONS.csv','REPORT_SUPPLEMENT_COMPARISONS.md','REPORT_SUPPLEMENT.json','REPORT_SUPPLEMENT.csv'];files=[d/n for d in [old,new] for n in names];qualified=p/'validation/across_lean_interaction_review_v1/actual_control_effects.json';files.append(qualified);raw={str(f):f.read_bytes() for f in files};hashes={k:hashlib.sha256(v).hexdigest() for k,v in raw.items()}
 def read(d,n):return json.loads(raw[str(d/n)])
 def key(x):return x['comparison_kind'],tuple((s['protocol_id'],s['cell']) for s in x['sources'])

@@ -1,6 +1,6 @@
 from pathlib import Path
 import json,hashlib,datetime
-b=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');v=b/'validation/supplement_v5_initial_pair_review_v1';p=b/'supplement_report_v1/figures/comparisons'
+b=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');v=b/'validation/supplement_v5_initial_pair_review_v1';p=b/'supplement_report_v1/figures/comparisons'
 def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 x=json.loads((v/'pair_checks.json').read_text());assert h(b/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json')==x['report_sha256']
 for q in x['pairs']:

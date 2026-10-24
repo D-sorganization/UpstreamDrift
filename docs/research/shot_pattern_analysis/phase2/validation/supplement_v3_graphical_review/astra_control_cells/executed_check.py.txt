@@ -1,7 +1,7 @@
 from pathlib import Path
 import json,hashlib,re
 from datetime import datetime,timezone
-p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');o=p/'validation/supplement_v3_graphical_review/astra_control_cells';h=lambda x:hashlib.sha256(x.read_bytes()).hexdigest();a=json.loads((o/'inventory.json').read_text());rp=p/'supplement_report_v1/REPORT_SUPPLEMENT.json';assert h(rp)==a['report_sha256'];report=json.loads(rp.read_text());refs={r['cell']:r for r in report['unique_cells'] if r['config']['club']['shaft_lean_deg']==5};assert len(refs)==8
+p=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');o=p/'validation/supplement_v3_graphical_review/astra_control_cells';h=lambda x:hashlib.sha256(x.read_bytes()).hexdigest();a=json.loads((o/'inventory.json').read_text());rp=p/'supplement_report_v1/REPORT_SUPPLEMENT.json';assert h(rp)==a['report_sha256'];report=json.loads(rp.read_text());refs={r['cell']:r for r in report['unique_cells'] if r['config']['club']['shaft_lean_deg']==5};assert len(refs)==8
 checks=[];missing=[];bound={str(rp):h(rp)}
 for row in a['files']:
  x=p/row['path'];assert h(x)==row['sha256'];ref=next(r for cell,r in refs.items() if x.name.startswith(cell+'_'));src=Path(ref['source_root'])/ref['cell'];s=ref['summary'];c=ref['config'];n=c['noise']['standard_deviations'];social='_social' in x.stem;density='_density' in x.stem

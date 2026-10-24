@@ -1,6 +1,6 @@
 from pathlib import Path
 import json, hashlib, collections, datetime
-b=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+b=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
 v=b/'validation/supplement_v5_cell_graphics_review_v1'; n=b/'supplement_report_v1/figures/cells'
 def h(p): return hashlib.sha256(p.read_bytes()).hexdigest()
 old=v/'checks.json'; new=v/'cell_checks.json'
@@ -10,7 +10,7 @@ if old.exists():
 c=json.loads(new.read_text())
 assert {p.name:h(p) for p in n.iterdir() if p.is_file()}==c['asset_sha256']
 assert h(b/'supplement_report_v1/REPORT_SUPPLEMENT.json')==c['report_sha256']
-source=Path('/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift')
+source=Path('<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift')
 sources={'src/tools/shot_pattern_analysis/matched_pair_social.py':'16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369','src/tools/shot_pattern_analysis/matched_supplement_figures.py':'9254d7aede64f5aed19bd32f7cd5a8fb1b1899f6e18d000ba2096b228fc18246'}
 for p,s in sources.items(): assert h(source/p)==s
 full=['driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density_social.png','driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png','pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png','pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_overhead_social.png','pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density_social.png','pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png']

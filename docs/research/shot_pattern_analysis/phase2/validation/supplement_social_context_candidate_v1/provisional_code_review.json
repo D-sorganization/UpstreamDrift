@@ -1,6 +1,6 @@
 {
   "status": "provisional_changes_requested_not_acceptance",
-  "candidate_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift",
+  "candidate_worktree": "<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift",
   "source_sha256": {
     "src/tools/shot_pattern_analysis/matched_pair_social.py": "bf61361ce4fb323cd4e8cf6d48abb043a4b325eb19a17b02cde7ac30121d2c28",
     "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "59dd80e484b7ba280efe44465406c2f307be54693c4258f904121b17e9981b3b",

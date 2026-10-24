@@ -1,7 +1,7 @@
 from pathlib import Path
 import json,hashlib,re,html
 from PIL import Image,ImageDraw
-b=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');p=b/'supplement_report_v1/figures/comparisons';v=b/'validation/supplement_v5_initial_pair_review_v1';v.mkdir(exist_ok=True)
+b=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');p=b/'supplement_report_v1/figures/comparisons';v=b/'validation/supplement_v5_initial_pair_review_v1';v.mkdir(exist_ok=True)
 def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 report=b/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json'; rows=json.loads(report.read_text())['comparisons']; out=[]
 for k,pat in enumerate(['*rotation1_shaft_only_vs*lean5*_overhead_social.png','*rotation2_combined2_vs*lean10*_overhead_social.png']):

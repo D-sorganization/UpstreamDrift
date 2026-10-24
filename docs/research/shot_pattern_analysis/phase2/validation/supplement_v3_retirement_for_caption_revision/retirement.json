@@ -1,7 +1,7 @@
 {
   "status": "retired_and_preserved",
   "exit_code": -15,
-  "destination": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v3/supplement_report_v1",
+  "destination": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v3/supplement_report_v1",
   "files": {
     "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
     "REPORT_SUPPLEMENT.csv": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",

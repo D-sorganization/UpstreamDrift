@@ -1,8 +1,8 @@
 from pathlib import Path
 import hashlib,json,shutil,subprocess
 from datetime import datetime,timezone
-main=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
-candidate=Path('/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift')
+main=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+candidate=Path('<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift')
 out=Path('/tmp/p2-social-context-actual-candidate')
 dest=main/'docs/research/shot_pattern_analysis/phase2/validation/supplement_social_context_candidate_v1'
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
