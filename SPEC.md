@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13666 | Drake samples the canonical mid_hands/club_head frames like Pinocchio; legacy grip names are aliases only and a missing frame fails closed instead of falling back to right_hand or the shaft; Align Drake autodiff fit theta with canonical URDF actuator count; Hand off the HRG-GS grip parity residuals: AGENT_HANDOFF entry for epic #13297 and xfail reasons pointing at the open tracking issues #13547 (MuJoCo deflection) and #13548 (OpenSim ten_finger); Grip contact: add antagonist pads opposite the heel, trigger and ten-finger little-finger pads so the neutral-pose closure preload exerts zero net force and moment on the club |
 | 2026-10-24 | #13518 | CI: set rust-cache cache-bin false so post steps stop deleting the shared host rustup binary (Refs Repository_Management#2138) |
 | 2026-10-24 | #13665 | Audit near-zero-mean CV callers: return NaN with reason in cross-engine runner and pendulum variability summary; Add load_coupling_law require_verified gate for SPN-3 cited coupling data; Pull club sole to ground at address IK; record sole height in calibrated receipt; Lock canonical driver seeds closure and weight-fraction gates in CI (#13109) |
 | 2026-10-24 | #13674 | Bump transitive undici to 8.12.3 in ui/package-lock.json to clear HIGH npm audit advisories that ejected every merge-queue entry |
