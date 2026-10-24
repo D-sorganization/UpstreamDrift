@@ -4,6 +4,7 @@
 # .github/workflows/motion-matching-smoke.yml and runnable locally as-is, so the
 # scheduled lane and a developer's machine run the same command.
 #
+# `-p no:xvfb` avoids a second Xvfb when fleet images autoload pytest-xvfb (#13534).
 # `-m "slow ..."` overrides the pyproject addopts `-m "not slow ..."`, and
 # `--timeout=0` is required: full-body IK alone outlasts the default per-test
 # timeout and would hide the real failure (#12702). The owner-capture case
