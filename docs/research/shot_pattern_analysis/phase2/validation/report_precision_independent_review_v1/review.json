@@ -1,6 +1,6 @@
 {
   "status": "accepted_precision_candidate",
-  "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+  "worktree": "<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
   "head_before_commit": "1b1a5f17ec86668ed77baffdedd1eaf1a38c192d",
   "changed_files_sha256": {
     "scripts/research/shot_pattern_analysis/build_final_report.py": "b2d6ed3f6c8b11b5ea29dabe6defe12253415ba2bc9d3a2a39a637b337c0f53a",

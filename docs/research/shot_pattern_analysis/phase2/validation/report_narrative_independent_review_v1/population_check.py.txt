@@ -1,7 +1,7 @@
 import hashlib,json
 from pathlib import Path
 from src.tools.shot_pattern_analysis.matched_lean_control import _supported_endpoints
-main=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');b=main/'docs/research/shot_pattern_analysis/phase2';out=b/'validation/report_narrative_independent_review_v1';out.mkdir(exist_ok=True)
+main=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');b=main/'docs/research/shot_pattern_analysis/phase2';out=b/'validation/report_narrative_independent_review_v1';out.mkdir(exist_ok=True)
 sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 specs=[('driver','original_control/1','control_final_v1','driver-control-speed-bounds/1','supplement_final_v1/driver_control_speed'),('pitching_wedge','pw-primary-face-bounds/1','supplement_final_v1/pw_primary_face','pw-control-face-bounds/1','supplement_final_v1/pw_control_face')];results=[]
 for club,pa,ra,pb,rb in specs:

@@ -1,7 +1,7 @@
 {
   "session": 69662,
   "model": "gemini-3.8-flash-high",
-  "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+  "worktree": "<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
   "branch": "codex/shot-pattern-report-precision",
   "base": "1b1a5f17ec",
   "prompt": "/tmp/p2-report-precision-agy.txt",

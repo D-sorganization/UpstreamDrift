@@ -12,7 +12,7 @@
 -import json, sys, hashlib, collections
 +import sys
 +from typing import Any
- ROOT = Path('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
+ ROOT = Path('<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
  sys.path.insert(0, str(ROOT))
 -from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
 -from scripts.research.shot_pattern_analysis.supplement_publication import sha256
@@ -22,7 +22,7 @@
 +    from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
 +    return (sha256, reconstruct_pair)
 +sha256, reconstruct_pair = _load_public_apis()
- P = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+ P = Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
  OUT = Path('/tmp/shot-pattern-actual-pair-adapter-review')
  files = [P / 'supplement_report_v1' / n for n in ['REPORT_SUPPLEMENT.json', 'REPORT_SUPPLEMENT_COMPARISONS.json']]
 @@ -39,10 +48,11 @@
@@ -56,7 +56,7 @@
 +import re
 +import sys
 +from typing import Any
- ROOT = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+ ROOT = Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
  P = ROOT / 'docs/research/shot_pattern_analysis/phase2'
  OUT = Path('/tmp/p2-article-astra-review')
  sys.path.insert(0, str(ROOT))
@@ -199,7 +199,7 @@
 -from collections import Counter
 +import re
  D = Path('/tmp/p2-article-astra-review')
- R = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+ R = Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
  P = R / 'docs/research/shot_pattern_analysis/phase2'
 @@ -26,7 +29,15 @@
 
@@ -263,7 +263,7 @@
 +import sys
  from pathlib import Path
  import re
- p = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex')
+ p = Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex')
  s = p.read_text()
 -s = re.sub('\\\\begin\\{longtable\\}.*?\\\\end\\{longtable\\}', lambda m: re.sub('\\n\\s*\\n', '\n', m[0]), s, flags=re.S)
 +s = re.sub('\\\\begin\\{longtable\\}.*?\\\\end\\{longtable\\}', lambda m: re.sub('\\n\\s*\\n', '\n', m[0]), s, flags=re.DOTALL)
@@ -315,7 +315,7 @@
 -import hashlib, json, re, collections
 +import re
 +from typing import Any
- ROOT = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+ ROOT = Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
  P = ROOT / 'docs/research/shot_pattern_analysis/phase2'
  ARTICLE = P.parent / 'shot_pattern_analysis.tex'
 -h = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
@@ -421,7 +421,7 @@
 +from scripts.research.shot_pattern_analysis.build_final_figures import _supported_points
  from src.tools.shot_pattern_analysis import academic_plots as p
 -from scripts.research.shot_pattern_analysis.build_final_figures import _supported_points
- root = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_combined2')
+ root = Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_combined2')
  points, total = _supported_points(root)
 +
 +class TickGapRow(TypedDict):
@@ -500,8 +500,8 @@
  import sys
 +import unittest.mock
  import numpy as np
- MAIN = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
- CANDIDATE = Path('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
+ MAIN = Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+ CANDIDATE = Path('<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
 @@ -22,7 +23,7 @@
 
      return {str(p.relative_to(root)): digest(p) for folder in ['src/tools/shot_pattern_analysis', 'scripts/research/shot_pattern_analysis'] for p in (root / folder).rglob('*.py')}

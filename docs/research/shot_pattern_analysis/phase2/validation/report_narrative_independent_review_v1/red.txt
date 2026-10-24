@@ -67,7 +67,7 @@ _ test_select_bounds_control_pairs_strictly_identifies_sources_and_rejects_distr
 E       AssertionError: assert 2 == 1
 E        +  where 2 = len([{'comparison_kind': 'across_lean', 'status': 'conditional_only', 'common_six_n': 9995, 'total_n_per_population': 1000...arison_kind': 'across_lean', 'status': 'conditional_only', 'common_six_n': 9995, 'total_n_per_population': 10000, ...}])
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:787: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:787: AssertionError
 _ test_final_report_renders_bounds_control_section_and_deterministic_head_sensitivity _
 
     def test_final_report_renders_bounds_control_section_and_deterministic_head_sensitivity():
@@ -111,7 +111,7 @@ _ test_final_report_renders_bounds_control_section_and_deterministic_head_sensit
 >       assert "pw-control-face-bounds/1" in rendered
 E       AssertionError: assert 'pw-control-face-bounds/1' in '# Matched Shot Patterns: Final Conditional Simulation Report\n\n## Scope and Status\n\nThe primary within-lean matrix..._pdf docs/research/shot_pattern_analysis/phase2/REPORT.md docs/research/shot_pattern_analysis/phase2/REPORT.pdf\n```\n'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:854: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:854: AssertionError
 ___ test_bounds_control_rejects_wrong_first_protocol_and_duplicate_identity ____
 
     def test_bounds_control_rejects_wrong_first_protocol_and_duplicate_identity():
@@ -126,7 +126,7 @@ E
 E         Left contains one more item: {'comparison_kind': 'across_lean', 'status': 'conditional_only', 'common_six_n': 9995, 'total_n_per_population': 10000, ...}
 E         Use -v to get more diff
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:880: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:880: AssertionError
 __ test_bounds_control_preserves_actual_unavailable_reason_without_invention ___
 
     def test_bounds_control_preserves_actual_unavailable_reason_without_invention():
@@ -140,30 +140,30 @@ __ test_bounds_control_preserves_actual_unavailable_reason_without_invention ___
 E       assert False
 E        +  where False = any(<generator object test_bounds_control_preserves_actual_unavailable_reason_without_invention.<locals>.<genexpr> at 0x73b4b6a22190>)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:894: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:894: AssertionError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
