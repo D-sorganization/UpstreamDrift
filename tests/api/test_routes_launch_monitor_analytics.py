@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import Any
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -275,7 +278,7 @@ def test_v2_analyze_returns_traceable_contract_without_changing_v1(
 
 
 def test_v2_analyze_reports_missing_selected_column_as_contract_error(
-    client: TestClient,
+    client: TestClient, error_message: Callable[[Any], str]
 ) -> None:
     response = client.post(
         "/tools/launch-monitor-analytics/v2/analyze",
@@ -289,8 +292,8 @@ def test_v2_analyze_reports_missing_selected_column_as_contract_error(
         },
     )
     assert response.status_code == 400
-    assert "Columns not present" in response.json()["detail"]
-    assert "missing_metric" in response.json()["detail"]
+    assert "Columns not present" in error_message(response)
+    assert "missing_metric" in error_message(response)
 
 
 @pytest.mark.parametrize(
@@ -359,7 +362,9 @@ def test_v2_api_accepts_separate_session_and_order_evidence(
     assert payload["order_evidence"]["order_kind"] == "source_sequence"
 
 
-def test_analyze_rejects_aggregate_regression(client: TestClient) -> None:
+def test_analyze_rejects_aggregate_regression(
+    client: TestClient, error_message: Callable[[Any], str]
+) -> None:
     records = _records()
     for record in records:
         record["observation_kind"] = "aggregate"
@@ -376,7 +381,7 @@ def test_analyze_rejects_aggregate_regression(client: TestClient) -> None:
         },
     )
     assert response.status_code == 400
-    assert "Aggregate observations cannot enter regression" in response.json()["detail"]
+    assert "Aggregate observations cannot enter regression" in error_message(response)
 
 
 @pytest.mark.parametrize(
