@@ -395,7 +395,7 @@
 {"path": "chat/_qt/streaming.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/styling.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/terminal_mode.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/_qt/ui_builder.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/_qt/ui_builder.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/workspace.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_quick_bar_theme.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_router_protocol_adapters.py", "classification": "identical", "package": "chat", "spelling_only": false}
