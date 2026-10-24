@@ -1004,6 +1004,9 @@ jobs:
       - name: Error-Handling Ratchet (issue #5911)
         run: python3 scripts/ci/check_error_handling_ratchet.py
 
+      - name: Private Path Leak Ratchet
+        run: python3 scripts/ci/check_private_path_leaks.py
+
       - name: Hardcoded-Style Ratchet (issue #8885)
         run: python3 scripts/ci/check_hardcoded_style_ratchet.py
 
