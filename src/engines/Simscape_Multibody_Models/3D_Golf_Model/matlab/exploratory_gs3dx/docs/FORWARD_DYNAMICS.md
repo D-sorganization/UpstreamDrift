@@ -92,6 +92,47 @@ swing, per joint and in total. Record it for every run.
 | Even `quit(0, "force")` can hang after the last line; watch the log and kill the job's own MATLAB | The contiguous-frame probe held the lock 12 min after its last save (2026-09-30)                                                            |
 | Print a done marker last and let the runner kill the hung exit                                    | Scripts print `GS3DX_BATCH_DONE`; the lock runner kills its own MATLAB 90 s after it. Three probes in a row held the lock 10-15 min at exit |
 
+### Stance Probes That Failed (Do Not Repeat)
+
+Every probe below simulates `GS3DX_Human` from the capture address pose with
+the shifted-leg reference. None keeps a stance up to capture impact at
+1.319 s, and none reaches the 0.2 body-weight bar. Each was unsaved: no model
+file changed. The first-sample strike is the contact force at t = 0; "Tilt"
+and "pelvis z" are at 0.5 s unless noted. Evidence is the 2026-10-01 to
+2026-10-18 GS3DX handoff series (archived on `archive/gs3dx-exploratory-v2-20261018`).
+
+| Probe                                                                                         | First-sample strike        | Tilt / pelvis z at 0.5 s             | Outcome at 1.0 s                                                                 |
+| --------------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
+| Shifted-leg reference linearly resampled to the 654-sample time base                          | 0 N (force is 0 to 0.50 s) | 62.5 deg / -1.13 m (free fall)       | tilt 101 deg, pelvis -1.77 m; impact support not measured (impact is at 1.319 s) |
+| Resample + quiet start (21 positions matched, 21 rates 0, wrist gains 0) at ground z -0.95297 | right heel 3180 N          | 15.9 deg / -0.045 m, force 0         | tilt 108 deg, pelvis -1.93 m                                                     |
+| Address hold: leg reference angle frozen on its first sample, rate 0, with the quiet start    | right heel 3180 N          | 14.5 deg / 0.008 m, force 0          | tilt 114 deg, pelvis -1.85 m, 6717 N on the left heel                            |
+| Frozen upper body: every TrackAngle on its first column, every TrackRate 0, with the above    | right heel 3180 N          | 13.2 deg / -0.007 m, force 0         | tilt 124 deg, pelvis -1.88 m                                                     |
+| FootContactDamping x10 (1000 to 10000) with the frozen upper body                             | right heel 15513 N         | 15.2 deg / 0.010 m, force 0 at 0.6 s | tilt 117 deg, pelvis -1.83 m; larger damping makes the first strike larger       |
+
+Lessons that follow from the series:
+
+- **Only the right heel loads at address.** With the saved damping, the left
+  ankle sits 17.3 mm higher than the right (z -0.865495 m vs -0.882753 m), the
+  pelvis up vector is [0, -0.382683, 0.92388], and the ten contact forces are
+  0 except the right heel at 3180 N. Raising the ground into that heel does
+  not help.
+- **The 22.5 deg pelvis tilt is a composed rotation, not one start
+  parameter.** The saved hip starts are X -30.3159 deg (-13.1026 deg/s),
+  Y 41.0041 deg (-12.0027 deg/s), Z 131.077 deg (10.7556 deg/s); none is
+  22.5 deg, so zeroing a single angle does not level the pelvis (that level
+  check did not simulate).
+- **Not tuning knobs:** the leg reference time base, the leg reference
+  angle, the upper-body targets, and `FootContactDamping`. Do not change
+  `FootContactStiffness` either.
+- **Queued, not run:** read the pelvis rotation, apply the single rotation
+  about the facing axis that maps the measured up vector to [0, 0, 1],
+  convert back to `HipStartPosition` X-Y-Z (intrinsic sequence), zero the
+  three hip rates and stop at 0.02 s. Skip it if the middle angle reaches
+  80 deg.
+- A rigid-body proxy (one body, total mass and centre of mass, same six sole
+  contacts) is the affordable stance check for the contact law; see
+  `GROUND_CONTACT.md`, "Rigid-Body Stance Check".
+
 ## Why the Learning Drifts, and What to Do About It
 
 The two arms and the club form a closed loop. Any torque pattern that only
