@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 import json
 from pathlib import Path
 
@@ -210,6 +211,46 @@ def _edited(report, name, frame, **changes):
     for key, value in changes.items():
         b[key][frame] = value
     return out
+
+
+def test_partial_unbounded_records_reach_plot_model(report) -> None:
+    """#13150: mixed bounded and UNBOUNDED frames render without SHOW_REASON."""
+    from src.shared.python.loop_nullspace.envelopes import (
+        BoundStatus,
+        static_envelopes,
+    )
+    from src.shared.python.loop_nullspace.evidence import (
+        InputProvenance,
+        ModelProvenance,
+    )
+    from src.shared.python.loop_nullspace.report_serialization import envelope_dict
+    from tests.unit.loop_nullspace.test_envelopes import (
+        _analytic_quantities,
+        _analytic_set,
+    )
+
+    quantities = _analytic_quantities()
+    series = static_envelopes([_analytic_set(), _analytic_set()], quantities)
+    upper = np.array(series.upper, copy=True)
+    upper[1, 0] = np.nan
+    status_upper = list(series.status_upper)
+    row = list(status_upper[1])
+    row[0] = BoundStatus.UNBOUNDED
+    status_upper[1] = tuple(row)
+    series = dataclasses.replace(series, upper=upper, status_upper=tuple(status_upper))
+    model_prov = ModelProvenance("planar", "fixture")
+    source = InputProvenance("test", "partial-unbounded")
+    records = series.records(model_prov, source)
+    section = envelope_dict(series, records, (0, 1), {})
+    rep = copy.deepcopy(report)
+    rep["trajectory"]["analyzed_frame_indices"] = [0, 1]
+    rep["envelopes"] = section
+    decisions = report_decisions(rep, "research_view")
+    band_key = decision_key("envelopes", "tau_1")
+    assert decisions[band_key].action is DisplayAction.SHOW_BAND
+    model = build_plot_model(rep, decisions)
+    classes = [s.display_class for s in _band(model, "tau_1").segments]
+    assert DisplayClass.UNBOUNDED in classes
 
 
 def test_display_class_is_one_of_three(report, decisions) -> None:
