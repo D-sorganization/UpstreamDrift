@@ -7,7 +7,7 @@
     "/tmp/shot-pattern-validation-venv-20261009/bin/python",
     "/tmp/p2-supplement-report-v5.py"
   ],
-  "cwd": "/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift",
+  "cwd": "<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift",
   "log": "/tmp/p2-supplement-report-v5.log",
   "started_utc": "2026-10-10T11:01:20.212139+00:00",
   "wrapper_sha256": "a9ce9321c2ca2aeed346f6089625683c60321d2d83e29d8d2ff43029fee74961",

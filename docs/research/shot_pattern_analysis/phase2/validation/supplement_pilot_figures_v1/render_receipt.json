@@ -59,7 +59,7 @@
       "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
       "src/tools/shot_pattern_analysis/matched_matrix.py": "af547eb668d33f2e606bbab7f4a9b69749d7c79d61d2d381bfc0924cc3216732"
     },
-    "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+    "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
     "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
     "cargo_lock_present": false,
     "contact_backend": {
@@ -120,7 +120,7 @@
     "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
     "src/tools/shot_pattern_analysis/sensitivity.py": "b83b71d41e33f883f8f5765207e7f9e9ae2dd6f139b1d3cb544662011dcd07dc",
     "src/tools/shot_pattern_analysis/uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_pilot_figures_v1/render_diagnostics.py": "08cfb690f39be4ecf9a51f45e0037170c1151a748b1d0d870fb81e40bd164a9f"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_pilot_figures_v1/render_diagnostics.py": "08cfb690f39be4ecf9a51f45e0037170c1151a748b1d0d870fb81e40bd164a9f"
   },
   "input_sha256": {
     "docs/research/shot_pattern_analysis/phase2/supplement_pilot_v1/pw_primary_face/matrix_plan.json": "02db8f05f27e036a62ff209ecfa189bb4b3581e767a10c67a7914ed76942eba6",

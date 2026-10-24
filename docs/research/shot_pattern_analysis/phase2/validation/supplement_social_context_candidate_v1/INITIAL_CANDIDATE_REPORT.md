@@ -4,7 +4,7 @@
 - **Issue**: [#12115](https://github.com/D-sorganization/UpstreamDrift/issues/12115) - Identify Protocol and Target on Supplemental Social Figures
 - **Parent Issues**: #11975, #12000
 - **Branch**: `codex/shot-pattern-social-context`
-- **Worktree**: `/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift`
+- **Worktree**: `<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift`
 
 ## Problem Solved
 Standalone supplemental social cards (all 52 cell cards across 36 PW-primary and 16 control cards, plus 29 inspected pair-social-density SVGs) lacked `source_protocol` and numeric matched target distances. Without this context, standalone figures could not distinguish within-lean nominal matching from fixed-target controls, revised face bounds, or cross-protocol comparisons.

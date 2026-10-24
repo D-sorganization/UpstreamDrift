@@ -3,7 +3,7 @@
 ## Overview
 - **Issue**: #12115
 - **Branch**: `codex/shot-pattern-social-context`
-- **Worktree**: `/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift`
+- **Worktree**: `<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift`
 - **Superceded Candidate**: `b9f1ad05b4`
 - **Revised Commit**: `14f27706e4` (`14f27706e4e9e52ca1324a7a2bac59e86ab33ef9`)
 

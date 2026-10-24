@@ -7,8 +7,8 @@ import os
 from pathlib import Path
 import subprocess
 
-MAIN = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
-WORK = Path('/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift')
+MAIN = Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+WORK = Path('<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift')
 PHASE = MAIN / 'docs/research/shot_pattern_analysis/phase2'
 OUT = PHASE / 'supplement_report_v1'
 EVIDENCE = PHASE / 'validation/supplement_rendering_revision_v4'
