@@ -2110,7 +2110,16 @@ jobs:
           myo_sha=$(git ls-tree HEAD -- shared/models/myosuite/myo_sim | awk '{print $3}')
           test -n "$myo_sha"
           echo "sha=$myo_sha" >> "$GITHUB_OUTPUT"
+      # Cache the ~59 MB tree by gitlink SHA: the fleet shares one slow uplink,
+      # so only a cache miss fetches from GitHub.
+      - name: Cache pinned myo_sim
+        id: myo-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: shared/models/myosuite/myo_sim
+          key: myo-sim-${{ steps.myo-pin.outputs.sha }}
       - name: Checkout pinned myo_sim (MyoSuite models)
+        if: steps.myo-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: MyoHub/myo_sim
