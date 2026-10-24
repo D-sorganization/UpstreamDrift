@@ -136,9 +136,9 @@
     "details/driver_lean5_curve1_rotation1_shaft_only/density.png": "4c5c5f6fa448b885990b05afa4a6df8b08d6dc3a861466401caba60c1442e513",
     "details/driver_lean5_curve1_rotation1_shaft_only/density.pdf": "bae68a633903d04059bf2e925b057475db31121c907ee651cbd71d590fc81136"
   },
-  "destination": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_interrupted_control_v6/control_final_figures_v1",
+  "destination": "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_interrupted_control_v6/control_final_figures_v1",
   "snapshot": {
-    "source_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+    "source_worktree": "<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
     "source_commit": "c9c0fb194f2f20447992a6d75d4f1531e7756b21",
     "source_sha256": {
       "src/tools/shot_pattern_analysis/__init__.py": "7cb68928d3d01ff739e073100fe00336b71980fdffef3576abd2cf25acc25f4f",
@@ -305,7 +305,7 @@
         "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
         "src/tools/shot_pattern_analysis/matched_matrix.py": "af547eb668d33f2e606bbab7f4a9b69749d7c79d61d2d381bfc0924cc3216732"
       },
-      "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+      "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
       "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
       "cargo_lock_present": false,
       "contact_backend": {
@@ -394,7 +394,7 @@
             "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
             "src/tools/shot_pattern_analysis/matched_matrix.py": "6298d852fb984df004d0679b46c05fb3bc855fe20287347dcad1ff52b2b804fe"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "cargo_lock_present": false,
           "contact_backend": {
@@ -799,7 +799,7 @@
             "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
             "src/tools/shot_pattern_analysis/matched_matrix.py": "6298d852fb984df004d0679b46c05fb3bc855fe20287347dcad1ff52b2b804fe"
           },
-          "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+          "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
           "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
           "cargo_lock_present": false,
           "contact_backend": {

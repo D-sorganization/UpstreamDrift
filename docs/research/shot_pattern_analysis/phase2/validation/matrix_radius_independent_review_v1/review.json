@@ -1,7 +1,7 @@
 {
   "status": "accepted_for_full_regeneration",
   "scope": "Narrow circular-containment-radius caption correction, following eight-preview review at 56ea967f53",
-  "source_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+  "source_worktree": "<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
   "sources_sha256": {
     "src/tools/shot_pattern_analysis/matched_report_plots.py": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b",
     "tests/tools/shot_pattern_analysis/test_matched_report_plots.py": "f298bcc0242d87f138fc54c37ab14a636a4489238af796faf89a0046bbcbb57a"

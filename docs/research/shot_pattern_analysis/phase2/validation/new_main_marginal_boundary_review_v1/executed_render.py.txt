@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 from src.tools.shot_pattern_analysis import academic_plots as ap
-ROOT=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+ROOT=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
 OUT=ROOT/'validation/new_main_marginal_boundary_review_v1'
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 source_sha=sha(Path(ap.__file__));records=[]
