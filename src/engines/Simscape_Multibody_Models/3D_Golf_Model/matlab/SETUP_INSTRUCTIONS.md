@@ -43,8 +43,8 @@ configure_simulink_cache
 Or manually in MATLAB:
 
 1. Go to **Home > Preferences > Simulink > Code Generation**
-2. Set **Cache Folder** to: `C:\Users\diete\Repositories\Golf_Model\matlab\cache\simulink\cache`
-3. Set **Code Generation Folder** to: `C:\Users\diete\Repositories\Golf_Model\matlab\cache\simulink\codegen`
+2. Set **Cache Folder** to: `<owner-home>\Repositories\Golf_Model\matlab\cache\simulink\cache`
+3. Set **Code Generation Folder** to: `<owner-home>\Repositories\Golf_Model\matlab\cache\simulink\codegen`
 4. Click **Apply** and **OK**
 
 #### 2. Remove Backup_Scripts from MATLAB Path
