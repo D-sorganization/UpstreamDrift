@@ -1,4 +1,4 @@
-{"schema_version": 2, "tools_pin": "37a7477e45ff3169893a3993e0ce11965d45cd2a", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
+{"schema_version": 2, "tools_pin": "160c9c785e4559067e2b532f189227f662f50579", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
 {"path": "README.md", "classification": "tools-only", "package": "README.md", "spelling_only": false}
 {"path": "README_PACKAGE.md", "classification": "ud-only", "package": "README_PACKAGE.md", "spelling_only": false}
 {"path": "__init__.py", "classification": "diverged", "package": "__init__.py", "spelling_only": false}
@@ -13,15 +13,16 @@
 {"path": "ai/_onnx_preflight.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/_settings_model.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/access_policy.py", "classification": "diverged", "package": "ai", "spelling_only": true}
-{"path": "ai/adapters/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": true}
+{"path": "ai/adapters/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/anthropic_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/antigravity_cli_adapter.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/base.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/bitnet_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
-{"path": "ai/adapters/claude_code_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
-{"path": "ai/adapters/cli_provider_setup.py", "classification": "diverged", "package": "ai", "spelling_only": true}
+{"path": "ai/adapters/claude_code_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/cli_provider_setup.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/cline_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/adapters/codex_cli_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
-{"path": "ai/adapters/factory.py", "classification": "diverged", "package": "ai", "spelling_only": true}
+{"path": "ai/adapters/codex_cli_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/factory.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/gemini_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/gemini_cli_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/github_cli_provider.py", "classification": "diverged", "package": "ai", "spelling_only": true}
@@ -90,6 +91,7 @@
 {"path": "ai/knowledge/eval.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/manifest.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/pack.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/knowledge/search.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/sources.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/wizard.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/mcp/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": true}
@@ -431,7 +433,7 @@
 {"path": "chat/terminal_runtime.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/__init__.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/tests/test_chat_drift.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/tests/test_chat_drift.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat_routing_lifecycle.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat_ws_error_handling.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_credentials.py", "classification": "identical", "package": "chat", "spelling_only": false}
@@ -2321,6 +2323,7 @@
 {"path": "sidekick/agent/action_service.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/agent/canonical_tools.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/agent/chat_surface.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/agent/cli_bridge.py", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/agent/feature_catalog.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/agent/feature_discovery.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/agent/feature_types.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
@@ -2720,6 +2723,7 @@
 {"path": "sidekick/utils/paths.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/utils/state_manager.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/utils/unit_constants.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/voice.py", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/workspace_contract.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick_data_processing_bridge.py", "classification": "ud-only", "package": "sidekick_data_processing_bridge.py", "spelling_only": false}
 {"path": "signal_toolkit/__init__.py", "classification": "tools-only", "package": "signal_toolkit", "spelling_only": false}

@@ -10,8 +10,11 @@ sets up, and is only meant to be mixed into that class.
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import logging
+import mimetypes
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +33,59 @@ logger = logging.getLogger(__name__)
 # Lets the layout settle before scrolling to the newest bubble.
 _SCROLL_DEFER_MS = 10
 _SCROLL_TIMER_NAME = "chat-scroll-to-bottom"
+MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
+
+
+@dataclass(frozen=True)
+class AttachmentIntakeEntry:
+    """Librarian-compatible intake manifest entry for an attached file."""
+
+    sha256: str
+    filename: str
+    size_bytes: int
+    mime_type: str
+    path: str
+
+
+@dataclass(frozen=True)
+class ActionChipModel:
+    """Structured tool execution / confirmation card in the conversation stream."""
+
+    action_id: str
+    name: str
+    status: str
+    summary: str
+    requires_confirmation: bool = False
+
+
+def compute_attachment_intake(
+    path: Path, max_bytes: int = MAX_ATTACHMENT_BYTES
+) -> tuple[AttachmentIntakeEntry, bytes]:
+    """Read, validate, and hash an attached file for the Librarian intake manifest."""
+    if not path.exists() or not path.is_file():
+        raise ValueError(f"Attachment does not exist or is not a file: {path}")
+    data = path.read_bytes()
+    if not data:
+        raise ValueError(f"Attachment is empty: {path.name}")
+    if len(data) > max_bytes:
+        raise ValueError(f"Attachment {path.name} exceeds limit ({max_bytes} bytes)")
+    mime, _ = mimetypes.guess_type(path.name)
+    entry = AttachmentIntakeEntry(
+        sha256=hashlib.sha256(data).hexdigest(),
+        filename=path.name,
+        size_bytes=len(data),
+        mime_type=mime or "application/octet-stream",
+        path=str(path.resolve()),
+    )
+    return entry, data
+
+
+def format_action_chip_text(chip: ActionChipModel) -> str:
+    """Format an ActionChipModel into a structured chat stream representation."""
+    if not chip.name or not chip.status:
+        raise ValueError("ActionChipModel requires non-empty name and status")
+    badge = "CONFIRM REQUIRED" if chip.requires_confirmation else chip.status.upper()
+    return f"[ActionChip {badge}: {chip.name}#{chip.action_id}] {chip.summary}"
 
 
 class MessagingMixin:
@@ -37,19 +93,46 @@ class MessagingMixin:
 
     # ── Input affordances ───────────────────────────────────────────
 
+    def _ingest_attachment_path(
+        self, path: Path, max_bytes: int = MAX_ATTACHMENT_BYTES
+    ) -> tuple[AttachmentIntakeEntry, bool]:
+        entry, data = compute_attachment_intake(path, max_bytes=max_bytes)
+        manifest = getattr(self, "_attachment_manifest_by_sha", None)
+        if manifest is None:
+            manifest = {}
+            self._attachment_manifest_by_sha = manifest
+        is_dup = entry.sha256 in manifest
+        if not is_dup:
+            manifest[entry.sha256] = asdict(entry)
+            b64 = base64.b64encode(data).decode("ascii")
+            self._send_ws(
+                {
+                    "action": "file_upload",
+                    "filename": entry.filename,
+                    "sha256": entry.sha256,
+                    "content": b64,
+                }
+            )
+            self._add_bubble("user", f"[Uploaded file: {entry.filename}]")
+        else:
+            self._add_bubble(
+                "user", f"[Uploaded file (deduplicated): {entry.filename}]"
+            )
+        return entry, is_dup
+
+    def attachment_manifest(self) -> list[dict[str, Any]]:
+        return list(getattr(self, "_attachment_manifest_by_sha", {}).values())
+
+    def add_action_chip(self, chip: ActionChipModel) -> ChatMessageBubble:
+        return self._add_bubble("assistant", format_action_chip_text(chip))
+
     def _on_upload(self) -> None:
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Attach File", "", "All Files (*)"
         )
         if file_path:
-            path = Path(file_path)
             try:
-                data = path.read_bytes()
-                b64 = base64.b64encode(data).decode("ascii")
-                self._send_ws(
-                    {"action": "file_upload", "filename": path.name, "content": b64}
-                )
-                self._add_bubble("user", f"[Uploaded file: {path.name}]")
+                self._ingest_attachment_path(Path(file_path))
             except (OSError, ValueError) as exc:
                 self._status_label.setText(f"Upload failed: {exc}")
 
