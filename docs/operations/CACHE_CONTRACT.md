@@ -3,8 +3,9 @@
 This contract defines cache identity, sharing scope, and disk-pressure behavior
 for engine builds and Conda package downloads on self-hosted runners. It is the
 policy reference for Repository_Management #2224 and its consumer
-UpstreamDrift #13579. It does not assert that a cache is installed or that a
-host has passed rollout validation.
+UpstreamDrift #13579 and implements the per-host BuildKit sharing goal from
+#13208 (no per-runner `runner.tool_cache` BuildKit exports). It does not assert
+that a cache is installed or that a host has passed rollout validation.
 
 ## Cache Identity
 
