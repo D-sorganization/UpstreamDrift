@@ -76,10 +76,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12577
 - **Branch:** cursor/nsx-45-help-doc-3c3f
-- **PR:** #13607
+- **PR:** #13607, #13692, #13690
 - **Paths:** see #13607
 - **Started:** 2026-10-23
-- **Last verified:** 2026-10-23 (`b7d7977e`; collated from changes/12577-add-loop-null-space-interpretation-help.md)
+- **Last verified:** 2026-10-24 (`86a4e007`; collated from changes/12577-nsx-45-user-help-and-interpretation-guid.md)
 - **Summary:** Add loop null-space interpretation help and salvage tracking
 - **Next step:** Merge PR #13607 after checks pass.
 
@@ -430,6 +430,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#12720 · Guard Test Enforcing the Single Paired Monte Carlo Runner Rule for Strategy Comparisons (NSX-91)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12720
+- **Branch:** merged via #13688
+- **PR:** #13688
+- **Paths:** see #13688
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`bbaa4153`; collated from changes/12720-guard-test-enforcing-the-single-paired-m.md)
+- **Summary:** Guard test enforcing the single paired Monte Carlo runner rule for strategy comparisons (NSX-91)
+- **Next step:** Shipped in PR #13688.
+
 ### DL-#2195 · Add Conflict-Disarm Caller Workflow (Dry-Run) and CI Allowlists for RM Reusable @main.
 
 - **State:** shipped
@@ -540,10 +553,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13179
 - **Branch:** merged via #13682
-- **PR:** #13682
+- **PR:** #13682, #13689
 - **Paths:** see #13682
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`6078b022`; collated from changes/13179-use-full-mass-matrix-in-grip-weld-axial.md)
+- **Last verified:** 2026-10-24 (`2941e14f`; collated from changes/13179-forward-rollout-root-residual-test-close.md)
 - **Summary:** Use full_mass_matrix in grip-weld axial closure KKT tests for MuJoCo 3.13+.
 - **Next step:** Shipped in PR #13682.
 
