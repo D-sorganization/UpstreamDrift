@@ -28,6 +28,11 @@ pytestmark = [pytest.mark.unit]
 # A 1-DOF actuated pendulum so Drake exposes one actuator on the joint.
 _ACTUATED_PENDULUM_URDF = """<?xml version="1.0"?>
 <robot name="actuated_pendulum">
+  <link name="world"/>
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+  </joint>
   <link name="base_link">
     <inertial>
       <mass value="0.001"/>
