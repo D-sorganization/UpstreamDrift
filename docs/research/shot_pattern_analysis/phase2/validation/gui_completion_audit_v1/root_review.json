@@ -18,7 +18,7 @@
     "Unrequested facade exports are unnecessary."
   ],
   "isolation": {
-    "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+    "worktree": "<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
     "branch": "codex/shot-pattern-gui-scoring",
     "main_sources_frozen": true
   }

@@ -24,7 +24,7 @@ tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2170/test_resolved_table
 E                   AssertionError: numeric token split across lines: +7.462e-05
 E                   assert '+7.462e-05' in 'Partial Preview\nUpstreamDrift  |  Research Reference\nPage 1\nPartial Preview\nSelected Results\nResolved Zero-Lean ...99 /\n10,000\n9,999 /\n10,000\n+0.0010\n46 [+7.4\n06e-04,\n+0.0013\n32]\n-6.272e-\n04 [-9.68\n1e-04, -2\n.936e-04\n]\n'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_table_layout.py:36: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_table_layout.py:36: AssertionError
 ________ test_resolved_table_maps_all_cells_and_independent_populations ________
 
     def test_resolved_table_maps_all_cells_and_independent_populations():
@@ -34,34 +34,34 @@ ________ test_resolved_table_maps_all_cells_and_independent_populations ________
 >           assert cell['cell'] in text
 E           AssertionError: assert 'driver_lean0_curve1_rotation1_shaft_only' in '### Resolved Zero-Lean Curve and Variability Comparison\n\nThis resolved view integrates the qualified supplemental f... 10,000; 9,999 / 10,000 | 9,999 / 10,000 | +0.001046 [+7.406e-04, +0.001332] | -6.272e-04 [-9.681e-04, -2.936e-04] |\n'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_table_layout.py:43: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_table_layout.py:43: AssertionError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 ../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
-  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+  <owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
     warnings.warn(
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

@@ -1,7 +1,7 @@
 {
   "status": "accepted_gui_scoring_component_after_review_repairs",
   "scope": "Saved Model-Conditional Scoring Display and Offscreen Lifecycle; Not Scientific or Empirical Validation",
-  "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+  "worktree": "<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
   "source_sha256": {
     "src/tools/shot_pattern_analysis/matched_gui.py": "91cf57e85c39d46643787bcf7c0f16ef52699b276106cb5b1dd94c66dd6256ab",
     "src/tools/shot_pattern_analysis/README.md": "53854c73b35c025e862b3336e61160b9a1881afd7cb33b1ae41ae004a1fda2ae",

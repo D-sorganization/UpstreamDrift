@@ -3,7 +3,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import QApplication
 from src.tools.shot_pattern_analysis.gui import MainWidget
 from src.tools.shot_pattern_analysis.matched_gui import format_matched_course_scoring
-root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+root=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
 out=Path('/tmp/p2-gui-sg-independent');out.mkdir(exist_ok=True)
 app=QApplication.instance() or QApplication([])
 main=MainWidget();main.mode_tabs.setCurrentIndex(1);main.resize(1000,760);main.show();app.processEvents()

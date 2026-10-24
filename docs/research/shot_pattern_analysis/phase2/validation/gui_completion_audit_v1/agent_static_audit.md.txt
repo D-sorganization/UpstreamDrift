@@ -3,7 +3,7 @@
 **Audit Date**: October 9, 2026  
 **Auditor**: Antigravity (Gemini 3.8 Flash High)  
 **Target Repository**: `UpstreamDrift`  
-**Target Worktree**: `/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift`  
+**Target Worktree**: `<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift`  
 **Branch**: `codex/shot-pattern-matched-delivery`  
 **Audit Mode**: Read-only completion inspection (no production source, tests, validation receipts, or GUI state edited; live Monte Carlo processes protected and undisturbed; headless inspection only; no simulations executed; no GitHub mutations or issue closures).
 

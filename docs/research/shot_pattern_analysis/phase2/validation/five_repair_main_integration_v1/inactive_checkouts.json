@@ -1,7 +1,7 @@
 {
   "records": [
     {
-      "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift",
+      "worktree": "<owner-home>/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift",
       "head": "b37d46e49657e8540818e5725cfc55bd2e86538b",
       "restore": "git sparse-checkout disable",
       "ignored_noncache_files_preserved": {},
@@ -13,7 +13,7 @@
       ]
     },
     {
-      "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
+      "worktree": "<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
       "head": "a40cf86dc00fef9ec0f5a4e86b77d76e61090fab",
       "restore": "git sparse-checkout disable",
       "ignored_noncache_files_preserved": {

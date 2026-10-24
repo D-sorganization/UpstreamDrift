@@ -46,7 +46,7 @@ E         0     | 0.005    | 0.004597062764879343 ± 4.6e-05
 E         1     | 0.005    | 0.004531382987542545 ± 4.5e-05
 E         2     | 0.005    | 0.004658536119213675 ± 4.7e-05
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:40: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:40: AssertionError
 _ test_saved_interval_preserves_values_and_nonzero_width[-0.00392726220708177--0.003979629136146112--0.003872946949009742] _
 
 estimate = -0.00392726220708177, low = -0.003979629136146112
@@ -92,7 +92,7 @@ E         Index | Obtained | Expected
 E         0     | -0.004   | -0.00392726220708177 ± 3.9e-05 
 E         2     | -0.004   | -0.003872946949009742 ± 3.9e-05
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:40: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:40: AssertionError
 _ test_saved_interval_preserves_values_and_nonzero_width[-0.003284521591238346--0.0033180608278863878--0.003246621472447612] _
 
 estimate = -0.003284521591238346, low = -0.0033180608278863878
@@ -139,7 +139,7 @@ E         0     | -0.003   | -0.003284521591238346 ± 3.3e-05
 E         1     | -0.003   | -0.0033180608278863878 ± 3.3e-05
 E         2     | -0.003   | -0.003246621472447612 ± 3.2e-05
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:40: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:40: AssertionError
 _ test_saved_interval_preserves_values_and_nonzero_width[0.5000015-0.500001-0.500002] _
 
 estimate = 0.5000015, low = 0.500001, high = 0.500002
@@ -178,7 +178,7 @@ estimate = 0.5000015, low = 0.500001, high = 0.500002
 >       assert shown[1] < shown[2]
 E       assert 0.5 < 0.5
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:41: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:41: AssertionError
 _______________ test_small_mean_retains_numeric_accuracy[0.0015] _______________
 
 value = 0.0015
@@ -203,7 +203,7 @@ E         comparison failed
 E         Obtained: 0.002
 E         Expected: 0.0015 ± 1.5e-05
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:58: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:58: AssertionError
 _______ test_small_mean_retains_numeric_accuracy[-0.004597062764879343] ________
 
 value = -0.004597062764879343
@@ -228,30 +228,30 @@ E         comparison failed
 E         Obtained: -0.005
 E         Expected: -0.004597062764879343 ± 4.6e-05
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:58: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:58: AssertionError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

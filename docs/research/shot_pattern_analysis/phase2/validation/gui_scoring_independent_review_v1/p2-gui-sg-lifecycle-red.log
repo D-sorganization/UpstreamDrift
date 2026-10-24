@@ -28,7 +28,7 @@ event = 'run'
 >               assert started[0] != old_score
 E               AssertionError: assert 'Mean Strokes Gained: Previous Study Draw +0.250' != 'Mean Strokes Gained: Previous Study Draw +0.250'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1037: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1037: AssertionError
 __ test_new_study_lifecycle_does_not_present_previous_sg_as_current[failure] ___
 
 qapp = <PyQt6.QtWidgets.QApplication object at 0x796ed3b96350>
@@ -65,7 +65,7 @@ E            +  where 'Mean Strokes Gained: Previous Study Draw +0.250' = <built
 E            +    where <built-in method text of QLabel object at 0x796eb4c93cf0> = <PyQt6.QtWidgets.QLabel object at 0x796eb4c93cf0>.text
 E            +      where <PyQt6.QtWidgets.QLabel object at 0x796eb4c93cf0> = <src.tools.shot_pattern_analysis.matched_gui.MatchedStudyWidget object at 0x796eb4bd76b0>.scoring_label
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1042: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1042: AssertionError
 ___ test_new_study_lifecycle_does_not_present_previous_sg_as_current[cancel] ___
 
 qapp = <PyQt6.QtWidgets.QApplication object at 0x796ed3b96350>
@@ -102,30 +102,30 @@ E            +  where 'Mean Strokes Gained: Previous Study Draw +0.250' = <built
 E            +    where <built-in method text of QLabel object at 0x796eb4c50730> = <PyQt6.QtWidgets.QLabel object at 0x796eb4c50730>.text
 E            +      where <PyQt6.QtWidgets.QLabel object at 0x796eb4c50730> = <src.tools.shot_pattern_analysis.matched_gui.MatchedStudyWidget object at 0x796eb4c48050>.scoring_label
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1042: AssertionError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1042: AssertionError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

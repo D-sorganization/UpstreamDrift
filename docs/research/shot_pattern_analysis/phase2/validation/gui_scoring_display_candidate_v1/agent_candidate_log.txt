@@ -22,13 +22,13 @@ I have launched the pytest run on `test_matched_runner.py` and `test_scenario_sc
 
 ### 1. Changed Files
 
-- [`src/tools/shot_pattern_analysis/matched_gui.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py):
-  - Implemented the pure formatting helper [`format_matched_course_scoring()`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py#L24-L206) (following DbC, LoD, and DRY) to format saved `course_scoring` without recomputing physics or inventing schema.
-  - Added encapsulated `self.scoring_label` (`QLabel` with word wrap) to [`MatchedStudyWidget._build_ui()`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py#L488-L492).
-  - Updated [`MatchedStudyWidget._completed()`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py#L886-L892) to render saved course scoring, preserving existing nominal delivery metrics and per-pattern individual-supported counts in `self.result_label`.
-- [`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py):
+- [`src/tools/shot_pattern_analysis/matched_gui.py`](file://<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py):
+  - Implemented the pure formatting helper [`format_matched_course_scoring()`](file://<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py#L24-L206) (following DbC, LoD, and DRY) to format saved `course_scoring` without recomputing physics or inventing schema.
+  - Added encapsulated `self.scoring_label` (`QLabel` with word wrap) to [`MatchedStudyWidget._build_ui()`](file://<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py#L488-L492).
+  - Updated [`MatchedStudyWidget._completed()`](file://<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py#L886-L892) to render saved course scoring, preserving existing nominal delivery metrics and per-pattern individual-supported counts in `self.result_label`.
+- [`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py`](file://<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py):
   - Added 7 fixture-based unit/UI tests covering: initial red failure demonstration, 7-Iron/Wedge approach scoring, Driver tee scoring, conditional-only status, unavailable status with explicit reasons, custom-club no-published-baseline fallback, pure helper edge cases (null/non-finite values never turned into zeros), and launcher embedded height budget compliance (`<= 760` px).
-- [`src/tools/shot_pattern_analysis/README.md`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/README.md):
+- [`src/tools/shot_pattern_analysis/README.md`](file://<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/README.md):
   - Added narrowly focused documentation in step 5 noting that the results view displays saved conditional course scoring alongside solved nominals.
 
 ---
@@ -36,7 +36,7 @@ I have launched the pytest run on `test_matched_runner.py` and `test_scenario_sc
 ### 2. Design by Contract, Law of Demeter, and Truthful Terminology
 
 1. **Terminology Inspection**:
-   - Inspected `src/tools/shot_pattern_analysis/uncertainty.py` and `gui.py` to confirm the actual computation. The paired difference interval is computed via [`paired_mean_difference()`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/uncertainty.py#L51-L79), which generates a sampling-only Monte Carlo interval.
+   - Inspected `src/tools/shot_pattern_analysis/uncertainty.py` and `gui.py` to confirm the actual computation. The paired difference interval is computed via [`paired_mean_difference()`](file://<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/uncertainty.py#L51-L79), which generates a sampling-only Monte Carlo interval.
    - Used the exact provided terminology: `Paired Difference vs. Straight (95% Monte Carlo Interval): Draw: ...; Fade: ...` (not assuming bootstrap).
 2. **Displayed Presentation**:
    - **Scenario Context**: Discloses Driver tee shot (`400 m hole`, `30 m fairway corridor`, rough outside) vs Approach (`180.0 m fairway start`, `15 m green radius`, rough outside).

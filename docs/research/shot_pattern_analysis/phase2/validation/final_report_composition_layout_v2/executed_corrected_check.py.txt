@@ -1,6 +1,6 @@
 from pathlib import Path
 import sys,json,hashlib
-r=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');sys.path.insert(0,str(r));b=r/'docs/research/shot_pattern_analysis/phase2';v=b/'validation/final_report_composition_layout_v2'
+r=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');sys.path.insert(0,str(r));b=r/'docs/research/shot_pattern_analysis/phase2';v=b/'validation/final_report_composition_layout_v2'
 from scripts.research.shot_pattern_analysis.final_report_inputs import assemble_resolved_selected_cells,select_representative_interaction_pairs
 from scripts.research.shot_pattern_analysis.build_final_report import _conclusions_and_synthesis_lines,_resolved_selected_comparison_lines,_report_source_hashes
 from scripts.research.shot_pattern_analysis.report_tables import keyed_effect_table as render_effect_table

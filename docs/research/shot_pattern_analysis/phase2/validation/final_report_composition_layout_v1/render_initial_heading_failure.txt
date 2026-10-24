@@ -1,18 +1,18 @@
 Traceback (most recent call last):
   File "<frozen runpy>", line 198, in _run_module_as_main
   File "<frozen runpy>", line 88, in _run_code
-  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_pdf.py", line 543, in <module>
+  File "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_pdf.py", line 543, in <module>
     main()
-  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_pdf.py", line 538, in main
+  File "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_pdf.py", line 538, in main
     result = render_markdown_to_pdf(args.source, args.output, pandoc_binary=args.pandoc)
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_pdf.py", line 523, in render_markdown_to_pdf
+  File "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_pdf.py", line 523, in render_markdown_to_pdf
     doc.build(flow)
   File "/tmp/shot-pattern-validation-venv-20261009/lib/python3.12/site-packages/reportlab/platypus/doctemplate.py", line 1083, in build
     self.handle_flowable(flowables)
   File "/tmp/shot-pattern-validation-venv-20261009/lib/python3.12/site-packages/reportlab/platypus/doctemplate.py", line 951, in handle_flowable
     self.afterFlowable(S[0])
-  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_pdf.py", line 462, in afterFlowable
+  File "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_pdf.py", line 462, in afterFlowable
     self.canv.addOutlineEntry(
   File "/tmp/shot-pattern-validation-venv-20261009/lib/python3.12/site-packages/reportlab/pdfgen/canvas.py", line 535, in addOutlineEntry
     self._doc.outline.addOutlineEntry(key, level, title, closed=closed)
