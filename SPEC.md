@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13755 | Route motion-matching nightly smoke to GitHub-hosted runners on public repos.; Route nightly cross-engine validation to GitHub-hosted runners on public repos (Drake PyPI wheels). |
 | 2026-10-24 | #13470 | loop_nullspace: local solution-manifold continuation (predictor-corrector with rank gates) over ForceNullSpace (NSE-UD-2) |
 | 2026-10-24 | #13475 | loop_nullspace: classify_functional (numerical fibre identifiability with optional enclosing-radius bound) and attribution_quantities (per-source induced-acceleration envelopes); Decomposition now stores variable_scale |
 | 2026-10-24 | #13754 | Route motion-matching nightly smoke to GitHub-hosted runners on public repos. |

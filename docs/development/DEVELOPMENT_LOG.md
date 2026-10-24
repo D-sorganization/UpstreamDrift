@@ -488,10 +488,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12784
 - **Branch:** merged via #13754
-- **PR:** #13754
+- **PR:** #13754, #13755
 - **Paths:** see #13754
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`d718ffeb`; collated from changes/12784-motion-matching-smoke-hosted-runner.md)
+- **Last verified:** 2026-10-24 (`0f9ff771`; collated from changes/12784-motion-matching-smoke-hosted-runner.md)
 - **Summary:** Route motion-matching nightly smoke to GitHub-hosted runners on public repos.
 - **Next step:** Shipped in PR #13754.
 
@@ -1047,10 +1047,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13619
 - **Branch:** merged via #13635
-- **PR:** #13635
+- **PR:** #13635, #13755
 - **Paths:** see #13635
 - **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`8117cbc1`; collated from changes/13619-nightly-python-runtime.md)
+- **Last verified:** 2026-10-24 (`0f9ff771`; collated from changes/13619-nightly-hosted-runner-routing.md)
 - **Summary:** Use Python 3.12 for the reviewed nightly cross-engine dependencies.
 - **Next step:** Shipped in PR #13635.
 
