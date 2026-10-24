@@ -4329,8 +4329,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md": {
-      "sha256": "51e59ffc7f2a6873a485c8abe715a76ba04a9f64f5609ef5c01e67d071871b1d",
-      "bytes": 67294,
+      "sha256": "920e1b9d8e10ca74ec76e4f265f9816a0a7cb042b9dd71d869fca8eaba4c5815",
+      "bytes": 5746,
       "referenced_by": [
         "PD-CLAIM-313",
         "PD-CLAIM-314",
@@ -6413,8 +6413,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "6d61bc33d155c7f871eda1bbdf13eac7155ebf45efec3b786a9c7b4d3b715e01",
-      "bytes": 166049,
+      "sha256": "88930ff103802d606497bf5d2656761cbe0be9821cf2758138dd1056b50f1229",
+      "bytes": 167070,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
