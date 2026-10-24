@@ -1,4 +1,4 @@
-"""R11 (#12691): the R6 chain shaft in OpenSim, MyoSuite and Drake, against MuJoCo.
+"""R11 (#12691): the R6 chain shaft in every Python engine, against MuJoCo.
 
 Every engine builds the chain from the same chain spec
 (``apply_shaft_chain``); no engine carries its own shaft parameter.
@@ -13,7 +13,7 @@ Every engine builds the chain from the same chain spec
 3. Topology: coordinate order with the appended shaft coordinates, chain
    frames, total mass and the mass matrix agree with MuJoCo; at zero
    deflection the rigid-coordinate block equals the rigid club's.
-4. The refusal is lifted only for passing engines: Pinocchio (no chain
+4. The refusal is lifted only for passing engines: Simscape (no chain
    yet) still raises ``ShaftChainUnsupportedError``.
 """
 
@@ -63,13 +63,15 @@ REPLAY_S = 0.03
 OPENSIM_MARKS = (pytest.mark.requires_opensim, pytest.mark.integration)
 MYOSUITE_MARKS = (pytest.mark.requires_myosuite, pytest.mark.integration)
 DRAKE_MARKS = (pytest.mark.requires_drake, pytest.mark.integration)
+PINOCCHIO_MARKS = (pytest.mark.requires_pinocchio, pytest.mark.integration)
 ENGINES = [
     pytest.param("opensim", marks=OPENSIM_MARKS),
     pytest.param("myosuite", marks=MYOSUITE_MARKS),
     pytest.param("drake", marks=DRAKE_MARKS),
+    pytest.param("pinocchio", marks=PINOCCHIO_MARKS),
 ]
-#: Engines whose adapter reads its compiled springs back natively.
-NATIVE_SPRING_ENGINES = ("opensim", "drake")
+#: Engines whose adapter reports the springs it applies (``shaft_springs``).
+NATIVE_SPRING_ENGINES = ("opensim", "drake", "pinocchio")
 MODULES = {"drake": "pydrake.multibody.plant"}  # skips when pydrake is mocked
 
 
@@ -112,10 +114,12 @@ def plants(chain_bytes: bytes) -> dict[str, Any]:
     """Lazily built chain plants, one per engine (module cache)."""
     from src.shared.python.motion_matching.same_input import VectorPlant
 
-    # Import pydrake at module scope: tests/conftest.py drops engine modules
-    # first imported inside a test, and its native modules cannot re-import.
-    with contextlib.suppress(ImportError):
-        importlib.import_module("pydrake.all")
+    # Import pydrake and pinocchio at module scope: tests/conftest.py drops
+    # engine modules first imported inside a test, and their native modules
+    # cannot re-import.
+    for module in ("pydrake.all", "pinocchio"):
+        with contextlib.suppress(ImportError):
+            importlib.import_module(module)
     cache: dict[str, Any] = {}
 
     def get(engine: str) -> Any:
@@ -131,17 +135,17 @@ def plants(chain_bytes: bytes) -> dict[str, Any]:
 
 
 def test_chain_support_is_exactly_the_passing_engines() -> None:
-    assert {"mujoco", "opensim", "myosuite", "drake"} == set(CHAIN_ENGINES)
+    expected = {"mujoco", "opensim", "myosuite", "drake", "pinocchio"}
+    assert expected == set(CHAIN_ENGINES)
 
 
-@pytest.mark.parametrize("engine", ["pinocchio"])
-def test_engine_without_a_passing_gate_still_refuses(
-    chain_bytes: bytes, engine: str
-) -> None:
-    from src.shared.python.motion_matching.same_input import VectorPlant
+def test_engine_without_a_passing_gate_still_refuses(chain_bytes: bytes) -> None:
+    from src.shared.python.motion_matching.club_shaft_chain import (
+        require_engine_support,
+    )
 
     with pytest.raises(ShaftChainUnsupportedError, match="silent rigid replay"):
-        VectorPlant(engine, chain_bytes)
+        require_engine_support(chain_bytes, "simscape")
 
 
 # --- OpenSim export (pure XML) -------------------------------------------------
@@ -202,7 +206,17 @@ def _mass_matrix(engine: str, plant: Any, q: np.ndarray) -> np.ndarray:
         return plant._adapter.mass_matrix(plant._named(q))
     if engine == "drake":
         return plant._adapter.mass_and_bias(q, np.zeros(plant.nv))[0]
+    if engine == "pinocchio":  # native order, upper triangle from CRBA
+        raw = np.triu(plant._adapter.mass_matrix(plant._named(q)))
+        index = [plant._adapter._velocity_indices[n] for n in plant.coordinate_order]
+        return (raw + np.triu(raw, 1).T)[np.ix_(index, index)]
     return _mujoco_mass_matrix(plant, q)
+
+
+def _total_mass(engine: str, plant: Any) -> float:
+    if engine == "pinocchio":
+        return float(sum(inertia.mass for inertia in plant._adapter.model.inertias))
+    return float(plant._adapter.mass_kg)
 
 
 def _springs(engine: str, plant: Any) -> dict[str, tuple[float, float]]:
@@ -264,6 +278,7 @@ def test_mass_matrix_and_chain_frames_match_mujoco(
     [
         pytest.param("opensim", marks=OPENSIM_MARKS),
         pytest.param("drake", marks=DRAKE_MARKS),
+        pytest.param("pinocchio", marks=PINOCCHIO_MARKS),
     ],
 )
 def test_rigid_block_is_the_rigid_club_at_zero_deflection(
@@ -276,7 +291,8 @@ def test_rigid_block_is_the_rigid_club_at_zero_deflection(
 
     plant = plants["get"](engine)
     rigid = VectorPlant(engine, rigid_bytes)
-    assert plant._adapter.mass_kg == pytest.approx(rigid._adapter.mass_kg, rel=1e-12)
+    mass_kg = _total_mass(engine, plant)
+    assert mass_kg == pytest.approx(_total_mass(engine, rigid), rel=1e-12)
     q = record["q_chain"][400]
     mass = _mass_matrix(engine, plant, q)[: rigid.nv, : rigid.nv]
     mass_rigid = _mass_matrix(engine, rigid, q[: rigid.nv])
@@ -454,3 +470,19 @@ def test_drake_paths_without_shaft_springs_refuse_a_chain(
         adapter.affine_dynamics(q, v)
     with pytest.raises(DifferentialsUnavailable, match="chain shaft"):
         adapter.closed_loop_differentials(q, v)
+
+
+@pytest.mark.requires_pinocchio
+@pytest.mark.integration
+def test_pinocchio_paths_without_shaft_springs_refuse_a_chain(
+    plants: dict[str, Any], record: dict[str, np.ndarray]
+) -> None:
+    plant = plants["get"]("pinocchio")
+    zeros = plant._named(np.zeros(plant.nv))
+    with pytest.raises(ShaftChainUnsupportedError, match="acceleration_derivatives"):
+        plant._adapter.acceleration_derivatives(
+            plant._named(record["q_chain"][400]), zeros, zeros
+        )
+    with pytest.raises(ShaftChainUnsupportedError, match="constrained_acceleration"):
+        n = plant._adapter.model.nv
+        plant._adapter.constrained_acceleration(np.zeros(n), np.zeros(n), np.zeros(n))
