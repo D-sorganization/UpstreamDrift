@@ -1,7 +1,7 @@
 function audit_results = run_solver_convergence_matrix(repo)
 %RUN_SOLVER_CONVERGENCE_MATRIX Runs tolerance and step-size convergence matrix on candidate 100.
     arguments
-        repo (1,1) string = "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime"
+        repo (1,1) string = "<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime"
     end
 
     rel = version('-release');

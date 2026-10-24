@@ -4,102 +4,102 @@
   "all_branches_preserved": true,
   "checks": [
     {
-      "path": "C:/Users/diete/Repositories/.context-implementation/UpstreamDrift",
+      "path": "<owner-home>/Repositories/.context-implementation/UpstreamDrift",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_9810",
+      "path": "<owner-home>/Repositories/_wt_claude_9810",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_9813",
+      "path": "<owner-home>/Repositories/_wt_claude_9813",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_9815",
+      "path": "<owner-home>/Repositories/_wt_claude_9815",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_9816",
+      "path": "<owner-home>/Repositories/_wt_claude_9816",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_9846",
+      "path": "<owner-home>/Repositories/_wt_claude_9846",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_ingest",
+      "path": "<owner-home>/Repositories/_wt_claude_ingest",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_p1merge",
+      "path": "<owner-home>/Repositories/_wt_claude_p1merge",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_ud_9477",
+      "path": "<owner-home>/Repositories/_wt_ud_9477",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_ud_9495_thread",
+      "path": "<owner-home>/Repositories/_wt_ud_9495_thread",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-analysis-drawings-9932",
+      "path": "<owner-home>/Repositories/UpstreamDrift-analysis-drawings-9932",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942",
+      "path": "<owner-home>/Repositories/UpstreamDrift-analysis-metrics-9942",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-impact-claim-preservation",
+      "path": "<owner-home>/Repositories/UpstreamDrift-impact-claim-preservation",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-impact-provider-pin",
+      "path": "<owner-home>/Repositories/UpstreamDrift-impact-provider-pin",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-impact-reference",
+      "path": "<owner-home>/Repositories/UpstreamDrift-impact-reference",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-reference-9914",
+      "path": "<owner-home>/Repositories/UpstreamDrift-reference-9914",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-9407-install-path",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-9407-install-path",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capability-atlas",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-capability-atlas",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-setup",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-capture-setup",
       "absent": true,
       "branch_preserved": true
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-swing-editing",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-swing-editing",
       "absent": true,
       "branch_preserved": true
     }
@@ -107,167 +107,167 @@
   "missing_alternate_targets": [],
   "surviving_worktree_checks": [
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift",
+      "path": "<owner-home>/Repositories/UpstreamDrift",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/_codex_worktrees/upstream-fixed-hub-pin",
+      "path": "<owner-home>/Repositories/_codex_worktrees/upstream-fixed-hub-pin",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/_codex_worktrees/upstream-force-source-integration",
+      "path": "<owner-home>/Repositories/_codex_worktrees/upstream-force-source-integration",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/_codex_worktrees/upstream-force-source-main",
+      "path": "<owner-home>/Repositories/_codex_worktrees/upstream-force-source-main",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/_codex_worktrees/upstream-force-source-refinement",
+      "path": "<owner-home>/Repositories/_codex_worktrees/upstream-force-source-refinement",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_9812",
+      "path": "<owner-home>/Repositories/_wt_claude_9812",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_9844",
+      "path": "<owner-home>/Repositories/_wt_claude_9844",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_9845",
+      "path": "<owner-home>/Repositories/_wt_claude_9845",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_claude_model",
+      "path": "<owner-home>/Repositories/_wt_claude_model",
       "status_exit": 128,
       "error": "fatal: not a git repository: vendor/ud-tools/../../.git/modules/vendor/ud-tools"
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_ud_9499_spec",
+      "path": "<owner-home>/Repositories/_wt_ud_9499_spec",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/_wt_ud_9501_seam",
+      "path": "<owner-home>/Repositories/_wt_ud_9501_seam",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift/_wt_claude_base",
+      "path": "<owner-home>/Repositories/UpstreamDrift/_wt_claude_base",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-analysis-9926",
+      "path": "<owner-home>/Repositories/UpstreamDrift-analysis-9926",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-impact-acoustics",
+      "path": "<owner-home>/Repositories/UpstreamDrift-impact-acoustics",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-impact-authority",
+      "path": "<owner-home>/Repositories/UpstreamDrift-impact-authority",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-impact-provider",
+      "path": "<owner-home>/Repositories/UpstreamDrift-impact-provider",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift-shooting-convergence",
+      "path": "<owner-home>/Repositories/UpstreamDrift-shooting-convergence",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/UpstreamDrift_main_codex",
+      "path": "<owner-home>/Repositories/UpstreamDrift_main_codex",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-performance",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-capture-performance",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-wizard",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-capture-wizard",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-coaching-drawings",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-coaching-drawings",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-common-calibration",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-common-calibration",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-main-health",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-main-health",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-parameter-bounds",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-parameter-bounds",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-player-bag",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-player-bag",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-player-clubs",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-player-clubs",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-assets",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-reference-assets",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-controls",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-reference-controls",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-registration",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-reference-registration",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-rendering",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-reference-rendering",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-timing",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-reference-timing",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-tour",
       "status_exit": 0,
       "error": ""
     },
     {
-      "path": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-ubuntu-ci",
+      "path": "<owner-home>/Repositories/Worktrees/UpstreamDrift-ubuntu-ci",
       "status_exit": 0,
       "error": ""
     }

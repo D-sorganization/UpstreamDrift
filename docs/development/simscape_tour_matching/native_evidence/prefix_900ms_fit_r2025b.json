@@ -27571,7 +27571,7 @@
   ],
   "candidate_transfer": {
     "source_report_sha256": "9eb699478c82fa5837d143b795ea6eff5313c4c5eb1e95c57e2d867dc99c1c53",
-    "source_path": "C:\\Users\\diete\\SimscapeTour9921\\prefix-800ms-quartic-01\\first_prefix_fit.json",
+    "source_path": "<owner-home>\\SimscapeTour9921\\prefix-800ms-quartic-01\\first_prefix_fit.json",
     "semantics": "torque candidate only; fresh objective and evaluation history"
   },
   "initial_parameters": [

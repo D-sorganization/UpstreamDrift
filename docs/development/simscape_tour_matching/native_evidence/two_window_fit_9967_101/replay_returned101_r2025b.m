@@ -7,7 +7,7 @@ function report = replay_returned101_r2025b(repo)
 % 4. Robust 2-component pelvis yaw alignment (< 5.0%)
 % 5. Compact MAT saving (< 1 MB) without Simulink simulation objects
     arguments
-        repo (1,1) string = "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime"
+        repo (1,1) string = "<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime"
     end
 
     rel = version('-release');

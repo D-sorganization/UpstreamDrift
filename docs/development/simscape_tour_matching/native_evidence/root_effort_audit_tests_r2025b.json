@@ -8,7 +8,7 @@
   "green": {
     "native_TestCase_methods_passed": 3,
     "exit_code": 0,
-    "log": "C:/Users/diete/SimscapeTour9921/root-force-frame-green.log"
+    "log": "<owner-home>/SimscapeTour9921/root-force-frame-green.log"
   },
   "coverage": [
     "nonuniform native timestamps",

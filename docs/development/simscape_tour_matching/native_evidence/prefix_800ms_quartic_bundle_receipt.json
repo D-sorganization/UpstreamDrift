@@ -1,7 +1,7 @@
 {
-  "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\prefix-800ms-quartic-01-bundle.zip",
+  "archive": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\prefix-800ms-quartic-01-bundle.zip",
   "sha256": "e82adaf5ed0ef132705c4ecbdaab4f707fef1881ea662de6d05ff08c73677d7d",
-  "remote_archive": "C:/Users/diete/SimscapeTour9921/prefix-800ms-quartic-01-bundle.zip",
+  "remote_archive": "<owner-home>/SimscapeTour9921/prefix-800ms-quartic-01-bundle.zip",
   "zip_crc_verified": true,
   "files_sha256": {
     "checkpoints/first-prefix/evaluation-00001-f0e20db2ac9952f3178e08ccb356e702d27ef39ac875f5d464866db88698e824.json": "2bd61534027a854bd68ec1a1334e2e6dd85831a3d0a193f3e3a3cb268a1fad58",

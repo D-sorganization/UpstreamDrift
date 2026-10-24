@@ -37926,7 +37926,7 @@
   ],
   "candidate_transfer": {
     "source_report_sha256": "cf8562fc8b1fdd5df596e605a5ceda4cccf5f2254cbfcb404f0ac7f5693ece01",
-    "source_path": "C:\\Users\\diete\\SimscapeTour9921\\prefix-600ms-cubic-refine-02\\transfer_source_report.json",
+    "source_path": "<owner-home>\\SimscapeTour9921\\prefix-600ms-cubic-refine-02\\transfer_source_report.json",
     "semantics": "torque candidate only; fresh objective and evaluation history"
   },
   "initial_parameters": [

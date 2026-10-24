@@ -1,6 +1,6 @@
 [
   {
-    "worktree": "C:/Users/diete/Repositories/.context-implementation/UpstreamDrift",
+    "worktree": "<owner-home>/Repositories/.context-implementation/UpstreamDrift",
     "HEAD": "d9e3d1addd3ab4d9a5c24f8a4dd4e15c8c4da3ae",
     "branch": "refs/heads/feat/issue-9915-agent-context",
     "bytes": 1070518224,
@@ -48,7 +48,7 @@
     ]
   },
   {
-    "worktree": "C:/Users/diete/Repositories/_wt_claude_9810",
+    "worktree": "<owner-home>/Repositories/_wt_claude_9810",
     "HEAD": "24ad9a0778fec59b5979119ae435c7e4a3f790ca",
     "branch": "refs/heads/claude/9810-layout-model",
     "bytes": 624661330,
@@ -78,7 +78,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/_wt_claude_9813",
+    "worktree": "<owner-home>/Repositories/_wt_claude_9813",
     "HEAD": "3a40b1c0a45005b6834481e308ee0d76d78f062a",
     "branch": "refs/heads/claude/9813-multiview-panes",
     "bytes": 596745195,
@@ -107,7 +107,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/_wt_claude_9815",
+    "worktree": "<owner-home>/Repositories/_wt_claude_9815",
     "HEAD": "c9bde4f2e2fd37a609110a7937950dfd3f96a129",
     "branch": "refs/heads/claude/9815-multipicture",
     "bytes": 598220568,
@@ -136,7 +136,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/_wt_claude_9816",
+    "worktree": "<owner-home>/Repositories/_wt_claude_9816",
     "HEAD": "78a3f91768df76e07a68bd51ec1814c432f33dfb",
     "branch": "refs/heads/claude/9816-capture-rig-theme",
     "bytes": 598809817,
@@ -165,7 +165,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/_wt_claude_9846",
+    "worktree": "<owner-home>/Repositories/_wt_claude_9846",
     "HEAD": "dfeae3099fe038c88c6964a44d4a8e3da0171bf3",
     "branch": "refs/heads/claude/9846-video-central",
     "bytes": 598961968,
@@ -194,7 +194,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/_wt_claude_ingest",
+    "worktree": "<owner-home>/Repositories/_wt_claude_ingest",
     "HEAD": "0c455b578de865b2dbbc1b0eb3a42ff6e82f6842",
     "branch": "refs/heads/claude/9602-ingest-observations",
     "bytes": 601925672,
@@ -223,7 +223,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/_wt_claude_p1merge",
+    "worktree": "<owner-home>/Repositories/_wt_claude_p1merge",
     "HEAD": "99de5a28e97616b3b831f83a516d1e3c1030dadc",
     "branch": "refs/heads/docs/release-runbook-tagging",
     "bytes": 926747279,
@@ -256,7 +256,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/_wt_ud_9477",
+    "worktree": "<owner-home>/Repositories/_wt_ud_9477",
     "HEAD": "fa1cee09ac3490536b0ba0a4a2c4d57311951434",
     "branch": "refs/heads/fix/9477-physics-metrics-actuation",
     "bytes": 774183746,
@@ -285,7 +285,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/_wt_ud_9495_thread",
+    "worktree": "<owner-home>/Repositories/_wt_ud_9495_thread",
     "HEAD": "c235acd82f4084cfdf33ea6cfd152668c440b7a8",
     "branch": "refs/heads/fix/9233-research-source-sha256-drift",
     "bytes": 590268691,
@@ -315,7 +315,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-analysis-drawings-9932",
+    "worktree": "<owner-home>/Repositories/UpstreamDrift-analysis-drawings-9932",
     "HEAD": "1cc539e5482c312cb75ce06ca7cbb68ff5b01a35",
     "branch": "refs/heads/feat/9932-comparison-drawings",
     "bytes": 855528347,
@@ -345,7 +345,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942",
+    "worktree": "<owner-home>/Repositories/UpstreamDrift-analysis-metrics-9942",
     "HEAD": "b24d76a179a03ff972aedc25dd961f7111061737",
     "branch": "refs/heads/docs/9926-analysis-completion",
     "bytes": 858613072,
@@ -375,7 +375,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-claim-preservation",
+    "worktree": "<owner-home>/Repositories/UpstreamDrift-impact-claim-preservation",
     "HEAD": "fced8c0d62fcfadffb414b1ea850c0624ddc8713",
     "branch": "refs/heads/fix/9825-preserve-reviewed-claims",
     "bytes": 854700067,
@@ -406,7 +406,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-provider-pin",
+    "worktree": "<owner-home>/Repositories/UpstreamDrift-impact-provider-pin",
     "HEAD": "37790892f50d38b007b85bbb87aa58e9ceab2beb",
     "branch": "refs/heads/feat/9912-impact-provider-pin",
     "bytes": 592557308,
@@ -436,7 +436,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-reference",
+    "worktree": "<owner-home>/Repositories/UpstreamDrift-impact-reference",
     "HEAD": "aa08217c520c68867945b999a8c77425e6b3ae2b",
     "branch": "refs/heads/fix/9783-reviewed-renderer-reference",
     "bytes": 551615611,
@@ -465,7 +465,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-reference-9914",
+    "worktree": "<owner-home>/Repositories/UpstreamDrift-reference-9914",
     "HEAD": "0862e298e165fc5f0ee7e800c73960d71958807d",
     "branch": "refs/heads/docs/reference-9914-shipped",
     "bytes": 713545302,
@@ -495,7 +495,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-9407-install-path",
+    "worktree": "<owner-home>/Repositories/Worktrees/UpstreamDrift-9407-install-path",
     "HEAD": "6e0c93dbf55f42d758cc134c14ea3d12370abc08",
     "branch": "refs/heads/fix/9415-artifact-dir-hygiene",
     "bytes": 548766074,
@@ -523,7 +523,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capability-atlas",
+    "worktree": "<owner-home>/Repositories/Worktrees/UpstreamDrift-capability-atlas",
     "HEAD": "2d9fb871ff058d8df02618dafc0c2044b126e804",
     "branch": "refs/heads/feat/9850-capability-atlas",
     "bytes": 1006683493,
@@ -554,7 +554,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-setup",
+    "worktree": "<owner-home>/Repositories/Worktrees/UpstreamDrift-capture-setup",
     "HEAD": "501092b27387a120a629e48f85ae061488f8f859",
     "branch": "refs/heads/feat/9913-capture-journey",
     "bytes": 681381888,
@@ -584,7 +584,7 @@
     "noncache_ignored_examples": []
   },
   {
-    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-swing-editing",
+    "worktree": "<owner-home>/Repositories/Worktrees/UpstreamDrift-swing-editing",
     "HEAD": "4909ee460b6c932bc3f98d3bff20a77bafc745e6",
     "branch": "refs/heads/feat/9860-swing-editing",
     "bytes": 690131525,

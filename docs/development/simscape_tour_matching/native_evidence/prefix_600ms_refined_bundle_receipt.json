@@ -1,7 +1,7 @@
 {
-  "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\prefix-600ms-cubic-refine-02-bundle.zip",
+  "archive": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\prefix-600ms-cubic-refine-02-bundle.zip",
   "sha256": "6da7884767a01bfd4bf45fd1e26a7defecfc49a361c6c07168d5fb327fdeafe5",
-  "remote_archive": "C:/Users/diete/SimscapeTour9921/prefix-600ms-cubic-refine-02-bundle.zip",
+  "remote_archive": "<owner-home>/SimscapeTour9921/prefix-600ms-cubic-refine-02-bundle.zip",
   "zip_crc_verified": true,
   "files_sha256": {
     "prefix-600ms-cubic-refine-02/actuator_audit.json": "86c5bf8ac3302430d8122e5a96b51bb66b4054c0229847d0ba61b5975f876b4a",

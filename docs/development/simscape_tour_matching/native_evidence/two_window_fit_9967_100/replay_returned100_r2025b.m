@@ -4,7 +4,7 @@ function report = replay_returned100_r2025b(repo)
 % 1. Resolved geometry seed path from native_evidence/ (not reproduction/) -> 1.5 pm at t=0
 % 2. Preserved world translational forces without duplicate rot_wb multiplication -> 15 decimals effort match
     arguments
-        repo (1,1) string = "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime"
+        repo (1,1) string = "<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime"
     end
 
     rel = version('-release');

@@ -1,6 +1,6 @@
 {
-  "local_path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\velocity-seed-02-bundle.zip",
-  "remote_path": "C:/Users/diete/SimscapeTour9921/velocity-seed-02-bundle.zip",
+  "local_path": "<owner-home>\\Repositories\\simscape-tour-checkpoints\\velocity-seed-02-bundle.zip",
+  "remote_path": "<owner-home>/SimscapeTour9921/velocity-seed-02-bundle.zip",
   "sha256": "798e83a1f5916e9004d29ec9d0fef9e08c9266f2c8ccd7a5d0aa41f96af081ed",
   "source_base": "81a8086d9",
   "patch": "configure_capture_velocity_targets.m",

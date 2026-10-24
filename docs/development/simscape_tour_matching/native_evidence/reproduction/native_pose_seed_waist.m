@@ -1,5 +1,5 @@
-root='C:/Users/diete/SimscapeTour9921'; cd(root);
-repo='C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime';
+root='<owner-home>/SimscapeTour9921'; cd(root);
+repo='<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime';
 engine=fullfile(repo,'src','engines','Simscape_Multibody_Models','3D_Golf_Model','matlab');
 addpath(fullfile(engine,'src','model')); addpath(genpath(fullfile(engine,'src','functions'))); addpath(fullfile(engine,'motion_matching','shared'));
 assert(strcmp(version('-release'),'2025b'));

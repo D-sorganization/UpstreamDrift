@@ -10,7 +10,7 @@ function [report, replay] = replay_returned102_r2025b(repo, write_outputs)
 % raw_output carries CombinedSignalBus, e.g. for grip-wrench export, #11778).
 % WRITE_OUTPUTS = false skips writing the qualified JSON/MAT evidence files.
     arguments
-        repo (1,1) string = "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime"
+        repo (1,1) string = "<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime"
         write_outputs (1,1) logical = true
     end
 

@@ -5,47 +5,47 @@
   "branches_preserved": true,
   "results": [
     {
-      "path": "C:\\Users\\diete\\Repositories\\.context-implementation\\UpstreamDrift",
+      "path": "<owner-home>\\Repositories\\.context-implementation\\UpstreamDrift",
       "status": "skipped",
       "reason": "Unreviewed submodule artifacts"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9810",
+      "path": "<owner-home>\\Repositories\\_wt_claude_9810",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9813",
+      "path": "<owner-home>\\Repositories\\_wt_claude_9813",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9815",
+      "path": "<owner-home>\\Repositories\\_wt_claude_9815",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9816",
+      "path": "<owner-home>\\Repositories\\_wt_claude_9816",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9846",
+      "path": "<owner-home>\\Repositories\\_wt_claude_9846",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_ingest",
+      "path": "<owner-home>\\Repositories\\_wt_claude_ingest",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_p1merge",
+      "path": "<owner-home>\\Repositories\\_wt_claude_p1merge",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\_wt_ud_9495_thread",
+      "path": "<owner-home>\\Repositories\\_wt_ud_9495_thread",
       "head": "c235acd82f4084cfdf33ea6cfd152668c440b7a8",
       "branch": "refs/heads/fix/9233-research-source-sha256-drift",
       "status": "removed",
@@ -55,52 +55,52 @@
       "submodules_verified": true
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-analysis-drawings-9932",
+      "path": "<owner-home>\\Repositories\\UpstreamDrift-analysis-drawings-9932",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-analysis-metrics-9942",
+      "path": "<owner-home>\\Repositories\\UpstreamDrift-analysis-metrics-9942",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-impact-claim-preservation",
+      "path": "<owner-home>\\Repositories\\UpstreamDrift-impact-claim-preservation",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-impact-provider-pin",
+      "path": "<owner-home>\\Repositories\\UpstreamDrift-impact-provider-pin",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-impact-reference",
+      "path": "<owner-home>\\Repositories\\UpstreamDrift-impact-reference",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914",
+      "path": "<owner-home>\\Repositories\\UpstreamDrift-reference-9914",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-9407-install-path",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-9407-install-path",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-capability-atlas",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-capability-atlas",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-capture-setup",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-capture-setup",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     },
     {
-      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-swing-editing",
+      "path": "<owner-home>\\Repositories\\Worktrees\\UpstreamDrift-swing-editing",
       "status": "skipped",
       "reason": "Submodule refs not preserved remotely"
     }
