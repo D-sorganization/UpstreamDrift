@@ -20,6 +20,10 @@ on:
         required: false
         default: "Maintenance"
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:

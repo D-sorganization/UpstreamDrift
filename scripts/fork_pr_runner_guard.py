@@ -109,6 +109,8 @@ PR_CODE_TRIGGERS = frozenset(
 BASE_CONTEXT_TRIGGERS = frozenset(
     {"pull_request_target", "issue_comment", "workflow_run"}
 )
+#: Events that expose ``github.event.pull_request`` from an untrusted fork.
+FORK_PR_CONTEXT_TRIGGERS = frozenset({"pull_request_target"})
 
 #: The job-level ``if:`` guard: true off pull requests and for same-repo PRs,
 #: false for a fork PR and for a PR whose head repository was deleted.
@@ -195,6 +197,16 @@ def job_violations(
         violations.append(
             f"{wf_name}::{job_id}: runs on {', '.join(pr_events)} and can reach "
             f"a self-hosted runner without the fork guard; add "
+            f"'({SAME_REPO_GUARD}) && ...' to the job if:, or start runs-on with "
+            f"'{' && '.join(FORK_ROUTE_CONJUNCTS)} && <hosted label> || ...'"
+        )
+    fork_context = events & FORK_PR_CONTEXT_TRIGGERS
+    if fork_context and not (
+        requires_conjunct(job.get("if"), SAME_REPO_GUARD) or fork_routed(job)
+    ):
+        violations.append(
+            f"{wf_name}::{job_id}: runs on {', '.join(sorted(fork_context))} and "
+            f"can reach a self-hosted runner for a fork PR; add "
             f"'({SAME_REPO_GUARD}) && ...' to the job if:, or start runs-on with "
             f"'{' && '.join(FORK_ROUTE_CONJUNCTS)} && <hosted label> || ...'"
         )

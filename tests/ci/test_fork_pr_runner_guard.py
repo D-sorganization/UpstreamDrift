@@ -24,6 +24,12 @@ GUARD_IF = (
     "      (!github.event.pull_request ||\n"
     "      github.event.pull_request.head.repo.full_name == github.repository)\n"
 )
+FORK_ROUTED_RUNS_ON = (
+    "    runs-on: >-\n"
+    "      ${{ github.event.pull_request &&\n"
+    "      github.event.pull_request.head.repo.full_name != github.repository &&\n"
+    "      'ubuntu-latest' || 'd-sorg-fleet-docker' }}\n"
+)
 
 
 def _violations(tmp_path: Path, text: str) -> list[str]:
@@ -147,19 +153,46 @@ def test_misordered_or_self_hosted_fork_route_is_rejected(
     assert _violations(tmp_path, text)
 
 
-def test_pull_request_target_head_checkout_on_fleet_is_rejected(
+def test_pull_request_target_on_fleet_without_fork_route_is_rejected(
     tmp_path: Path,
 ) -> None:
     text = """\
         on: pull_request_target
         jobs:
           t:
-            runs-on: d-sorg-fleet
+            runs-on: d-sorg-fleet-docker
             steps:
-              - uses: actions/checkout@v7
-                with:
-                  ref: ${{ github.event.pull_request.head.sha }}
+              - run: echo safe
         """
+    violations = _violations(tmp_path, text)
+    assert len(violations) == 1
+    assert "fork PR" in violations[0]
+
+
+def test_pull_request_target_fork_routed_to_hosted_is_allowed(tmp_path: Path) -> None:
+    text = (
+        "on: pull_request_target\njobs:\n  t:\n    runs-on: >-\n"
+        "      ${{ github.event.pull_request &&\n"
+        "      github.event.pull_request.head.repo.full_name != github.repository &&\n"
+        "      'ubuntu-latest' || 'd-sorg-fleet-docker' }}\n"
+        "    steps:\n      - run: echo safe\n"
+    )
+    assert _violations(tmp_path, text) == []
+
+
+def test_pull_request_target_head_checkout_on_fleet_is_rejected(
+    tmp_path: Path,
+) -> None:
+    text = (
+        "on: pull_request_target\njobs:\n  t:\n"
+        + FORK_ROUTED_RUNS_ON
+        + """\
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+"""
+    )
     violations = _violations(tmp_path, text)
     assert len(violations) == 1
     assert "checks out PR head" in violations[0]
@@ -218,7 +251,8 @@ def test_head_ref_aliased_through_env_is_rejected(
     job_env = "    " + env.replace("\n  ", "\n      ") if level == "job" else ""
     text = (
         f"on: pull_request_target\n{workflow_env}jobs:\n  t:\n"
-        f"    runs-on: d-sorg-fleet\n{job_env}"
+        + FORK_ROUTED_RUNS_ON
+        + f"{job_env}"
         f"    steps:\n      - {step}\n"
     )
     violations = _violations(tmp_path, text)
@@ -227,17 +261,17 @@ def test_head_ref_aliased_through_env_is_rejected(
 
 
 def test_unreferenced_or_prefix_named_env_alias_is_allowed(tmp_path: Path) -> None:
-    text = """\
-        on: pull_request_target
-        env:
-          PR_SHA: ${{ github.event.pull_request.head.sha }}
-        jobs:
-          t:
-            runs-on: d-sorg-fleet
-            steps:
-              - uses: actions/checkout@v7
-              - run: echo "$PR_SHA_LABEL ${{ env.PR_SHAPE }}"
-        """
+    text = (
+        "on: pull_request_target\n"
+        "env:\n"
+        "  PR_SHA: ${{ github.event.pull_request.head.sha }}\n"
+        "jobs:\n"
+        "  t:\n"
+        + FORK_ROUTED_RUNS_ON
+        + "    steps:\n"
+        "      - uses: actions/checkout@v7\n"
+        '      - run: echo "$PR_SHA_LABEL ${{ env.PR_SHAPE }}"\n'
+    )
     assert _violations(tmp_path, text) == []
 
 
@@ -252,8 +286,9 @@ def test_unreferenced_or_prefix_named_env_alias_is_allowed(tmp_path: Path) -> No
 )
 def test_bracket_form_head_reference_is_rejected(tmp_path: Path, ref: str) -> None:
     text = (
-        "on: pull_request_target\njobs:\n  t:\n    runs-on: d-sorg-fleet\n"
-        "    steps:\n      - uses: actions/checkout@v7\n"
+        "on: pull_request_target\njobs:\n  t:\n"
+        + FORK_ROUTED_RUNS_ON
+        + "    steps:\n      - uses: actions/checkout@v7\n"
         f"        with:\n          ref: {ref}\n"
     )
     violations = _violations(tmp_path, text)
@@ -319,8 +354,9 @@ def test_checkout_of_head_repository_is_rejected(
 ) -> None:
     # Without a ref, actions/checkout takes the fork's default branch.
     text = (
-        "on: pull_request_target\njobs:\n  t:\n    runs-on: d-sorg-fleet\n"
-        "    steps:\n      - uses: actions/checkout@v7\n"
+        "on: pull_request_target\njobs:\n  t:\n"
+        + FORK_ROUTED_RUNS_ON
+        + "    steps:\n      - uses: actions/checkout@v7\n"
         f"        with:\n          repository: {repository}\n"
     )
     violations = _violations(tmp_path, text)
@@ -329,15 +365,15 @@ def test_checkout_of_head_repository_is_rejected(
 
 
 def test_base_context_job_without_head_checkout_is_allowed(tmp_path: Path) -> None:
-    text = """\
-        on: pull_request_target
-        jobs:
-          t:
-            runs-on: d-sorg-fleet
-            steps:
-              - uses: actions/checkout@v7
-              - run: gh api repos/x/y
-        """
+    text = (
+        "on: pull_request_target\njobs:\n  t:\n"
+        + FORK_ROUTED_RUNS_ON
+        + """\
+    steps:
+      - uses: actions/checkout@v7
+      - run: gh api repos/x/y
+"""
+    )
     assert _violations(tmp_path, text) == []
 
 

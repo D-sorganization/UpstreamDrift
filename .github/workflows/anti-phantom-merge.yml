@@ -27,9 +27,13 @@ name: Anti-Phantom-Merge Guard
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-  pull_request_target:
-    types: [labeled, unlabeled]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+      - unlabeled
 
 permissions:
   contents: read
@@ -37,8 +41,6 @@ permissions:
   issues: read
 
 concurrency:
-  # Separate groups per event type so label churn (pull_request_target) cannot
-  # cancel the authoritative pull_request run.
   group: anti-phantom-${{ github.event.pull_request.number }}-${{ github.event_name }}
   cancel-in-progress: true
 
@@ -60,8 +62,8 @@ jobs:
           git config --global http.lowSpeedLimit 0
           git config --global http.lowSpeedTime 999999
 
-      # SECURITY INVARIANT (RM#1989): this job also runs on pull_request_target
-      # with base-repo credentials, so it checks out TRUSTED BASE code only (it
+      # SECURITY INVARIANT (RM#1989): label events use pull_request (not
+      # pull_request_target), so it checks out TRUSTED BASE code only (it
       # runs scripts/ci/check_phantom_guard_paths.py from here) and reads the
       # PR's files and commits from the REST API. Never check out or fetch the
       # PR head in this workflow.
@@ -78,6 +80,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
+          PR_ACTION: ${{ github.event.action || '' }}
           SENDER: ${{ github.event.sender.login }}
         run: |
           set -euo pipefail
@@ -104,7 +107,8 @@ jobs:
           # most recently) has admin permission. For non-label events, check the
           # last user who applied the label via the timeline.
           actor="$SENDER"
-          if [ "$EVENT_NAME" != "pull_request_target" ]; then
+          if [ "$EVENT_NAME" = "pull_request" ] && \
+             [ "$PR_ACTION" != "labeled" ] && [ "$PR_ACTION" != "unlabeled" ]; then
             actor=$(gh api "repos/$REPO/issues/$PR_NUMBER/events" --paginate \
               --jq '[.[] | select(.event=="labeled" and .label.name=="phantom-guard-override")] | last | .actor.login' 2>/dev/null || echo "")
             if [ -z "$actor" ] || [ "$actor" = "null" ]; then
