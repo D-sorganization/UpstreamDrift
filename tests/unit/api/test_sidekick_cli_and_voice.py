@@ -119,6 +119,9 @@ def test_chat_voice_routes_status_and_transcription(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Voice status and transcribe endpoints enforce MIME/size checks and never auto-send."""
+    from src.shared.python.sidekick import voice as voice_module
+
+    monkeypatch.setattr(voice_module, "sweep_stale_voice_temp_files", lambda: 0)
     app = FastAPI()
     app.include_router(chat_ws.router, prefix="/api")
     client = TestClient(app)
@@ -161,7 +164,10 @@ def test_chat_voice_routes_status_and_transcription(
             assert mime_type == "audio/wav"
             return _FakeVoiceResult()
 
+    from src.shared.python.sidekick.voice import VoiceUnavailableError
+
     fake_mod.VoiceTranscriber = _FakeTranscriber  # type: ignore[attr-defined]
+    fake_mod.VoiceUnavailableError = VoiceUnavailableError  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "src.shared.python.sidekick.voice", fake_mod)
 
     ok_resp = client.post(

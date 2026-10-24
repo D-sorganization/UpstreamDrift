@@ -9,8 +9,13 @@ Tools issue #2744.
 
 from __future__ import annotations
 
+import importlib.util
 import logging
+import shutil
+import subprocess
+import tempfile
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 from PyQt6.QtCore import QThread, pyqtSignal
@@ -25,6 +30,15 @@ try:
 except ImportError:
     _SR_AVAILABLE = False
     sr = None
+
+
+def detect_local_whisper_engine() -> str:
+    """Return active local Whisper engine (faster-whisper, whisper.cpp, or none)."""
+    if importlib.util.find_spec("faster_whisper") is not None:
+        return "faster-whisper"
+    if shutil.which("whisper-cli") or shutil.which("whisper-cpp"):
+        return "whisper.cpp"
+    return "none"
 
 
 class _ListenWorker(QThread):
@@ -117,6 +131,74 @@ class VoiceInputManager:
     @property
     def available(self) -> bool:
         return _SR_AVAILABLE
+
+    def whisper_status(self) -> dict[str, Any]:
+        """Return structured status for local Whisper / voice input."""
+        engine = detect_local_whisper_engine()
+        is_avail = engine != "none" or _SR_AVAILABLE
+        detail = (
+            "ready"
+            if is_avail
+            else "voice_unavailable: install faster-whisper or SpeechRecognition"
+        )
+        return {
+            "available": is_avail,
+            "engine": engine
+            if engine != "none"
+            else ("speech_recognition" if _SR_AVAILABLE else "none"),
+            "model": "base.en",
+            "detail": detail,
+        }
+
+    def tooltip_text(self) -> str:
+        """Return composer microphone tooltip reflecting local voice status."""
+        status = self.whisper_status()
+        if status["available"]:
+            return f"Voice input ({status['engine']}, Ctrl+Shift+V)"
+        return "Voice input unavailable — install faster-whisper (Ctrl+Shift+V)"
+
+    def transcribe_wav_bytes(self, wav_bytes: bytes) -> str:
+        """Transcribe 16kHz PCM WAV bytes locally via faster-whisper or whisper.cpp."""
+        if (
+            not wav_bytes
+            or len(wav_bytes) < 44
+            or wav_bytes[:4] != b"RIFF"
+            or wav_bytes[8:12] != b"WAVE"
+        ):
+            raise ValueError("Invalid WAV header: expected RIFF/WAVE magic bytes")
+        engine = detect_local_whisper_engine()
+        if engine == "none":
+            raise RuntimeError("voice_unavailable: local Whisper engine not installed")
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+            tmp_path = Path(tmp.name)
+            tmp.write(wav_bytes)
+        try:
+            if engine == "faster-whisper":
+                fw_mod = importlib.import_module("faster_whisper")
+                model = fw_mod.WhisperModel(
+                    "base.en", device="cpu", compute_type="int8"
+                )
+                segments, _ = model.transcribe(str(tmp_path), beam_size=1)
+                return " ".join(
+                    s.text.strip() for s in segments if s.text.strip()
+                ).strip()
+            binary = (
+                shutil.which("whisper-cli")
+                or shutil.which("whisper-cpp")
+                or "whisper-cli"
+            )
+            proc = subprocess.run(
+                [binary, "-f", str(tmp_path), "-nt"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+            if proc.returncode != 0:
+                raise RuntimeError(f"whisper-cli exited with {proc.returncode}")
+            return proc.stdout.strip()
+        finally:
+            tmp_path.unlink(missing_ok=True)
 
     def start(self) -> None:
         """Start recording. No-op if already recording."""

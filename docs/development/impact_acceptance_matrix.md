@@ -7,7 +7,7 @@ This page restates it for review; the JSON is authoritative.
 | Field                                               | Value                                                                                                                                 |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | Audit snapshot (UpstreamDrift / Tools)              | `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / `3d93bb2c89813e17551814d3be7e895f791e29af` (2026-09-04)                                  |
-| Reconciled against (UpstreamDrift base / Tools pin) | `53b10400b2f4ecbdd464ea5ddfc33a41ce73f28c` / `8a11691b4e9aee7d04dfc39628a8269ca561b07d` (2026-10-12 UTC; protected provider PR #5573) |
+| Reconciled against (UpstreamDrift source / Tools pin) | `e97e6c98519c5b9933c5a38324c3ba0c01785b5f` / `160c9c785e4559067e2b532f189227f662f50579` (2026-10-24 UTC; merged Tools PR #5724) |
 | Release claim                                       | `code_verified_only`; no predictive-accuracy claim                                                                                    |
 | Supported Python matrix                             | 3.11 and 3.12 (CI Standard); 3.12 for the lock and Docker image                                                                       |
 
@@ -15,22 +15,22 @@ This page restates it for review; the JSON is authoritative.
 
 ### Current Provider Pin Reconciliation
 
-The protected Tools merge #5573 publishes `8a11691b4e9aee7d04dfc39628a8269ca561b07d`. From UpstreamDrift `53b10400b2f4ecbdd464ea5ddfc33a41ce73f28c`, all 28 applicable matrix/capability probes passed before advancing the reconciliation metadata; the exact-pin probe was excluded until that advance. The exact published checkout was built with Node 22.23.2/npm 10.9.8, then served and verified with Python 3.11.15, FastAPI 0.136.3 and httpx 0.28.1, matching the declared CI major/runtime dependency authority.
+The merged Tools PR #5724 publishes `160c9c785e4559067e2b532f189227f662f50579`. From UpstreamDrift source `e97e6c98519c5b9933c5a38324c3ba0c01785b5f`, all 28 applicable matrix/capability probes passed before advancing the reconciliation metadata; the exact-pin probe was excluded until that advance. The exact published checkout was built with Node 22.23.2/npm 10.9.8, then served and verified with Python 3.11, FastAPI and httpx from the isolated project validation environment.
 
-Verification covered 76 assets, five JavaScript assets, 2,801,426 bytes, exact revision/mount/digests and the missing-file 404. The served receipt is [`SHOT_PATTERN_PUBLISHED_TOOLS_IMPACT_SERVED_RECEIPT.json`](feedback_controls/SHOT_PATTERN_PUBLISHED_TOOLS_IMPACT_SERVED_RECEIPT.json). An initial artifact-generator invocation omitted the revision environment and was correctly rejected as `development`; the corrected invocation supplied the revision to the generator and passed. Both attempts are retained in the integration validation receipts. No asset-count or byte-count measurement is copied from the historical receipts below.
+Verification covered 76 assets, five JavaScript assets, 2,804,364 bytes, exact revision/mount/digests and the missing-file 404. The served receipt is [`SHOT_PATTERN_PUBLISHED_TOOLS_IMPACT_SERVED_RECEIPT.json`](feedback_controls/SHOT_PATTERN_PUBLISHED_TOOLS_IMPACT_SERVED_RECEIPT.json). The complete matrix and repository-standard checks are rerun after the reconciliation update; results are recorded in the PR validation receipt. No asset-count or byte-count measurement is copied from the historical receipts below.
 
 Reproduce from the published pin:
 
 ```bash
 cd vendor/ud-tools/src/rate_of_closure/web
 npm ci --no-audit --no-fund
-export ROC_RELEASE_REVISION=8a11691b4e9aee7d04dfc39628a8269ca561b07d
+export ROC_RELEASE_REVISION=160c9c785e4559067e2b532f189227f662f50579
 npm run build -- --base=/impact-explorer-app/
 node release/generateReleaseArtifacts.mjs
 cd ../../../../..
 python scripts/ci/verify_impact_explorer_bundle.py \
   --dist vendor/ud-tools/src/rate_of_closure/web/dist \
-  --expected-revision 8a11691b4e9aee7d04dfc39628a8269ca561b07d
+  --expected-revision 160c9c785e4559067e2b532f189227f662f50579
 python -m pytest tests/config/impact_acceptance/test_impact_acceptance_matrix.py
 ```
 
