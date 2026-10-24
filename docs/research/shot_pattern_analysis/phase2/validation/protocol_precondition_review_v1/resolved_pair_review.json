@@ -11,7 +11,7 @@
     "scripts/research/shot_pattern_analysis/supplement_publication.py": "7a3ee6f9ba8667c7887e817bf219a91b75cb28cbffdf605ed2e6cd82d7ad38f8"
   },
   "input_sha256": {
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
-    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
   }
 }

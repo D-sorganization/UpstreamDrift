@@ -3,7 +3,7 @@
 **Author**: AGY Gemini 3.8 Flash  
 **Reviewer**: Astra  
 **Branch**: `codex/shot-pattern-report-precision`  
-**Workspace**: `/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`  
+**Workspace**: `<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`  
 
 ---
 

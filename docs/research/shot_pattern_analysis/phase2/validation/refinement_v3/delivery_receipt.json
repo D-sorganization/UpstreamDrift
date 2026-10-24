@@ -15,8 +15,8 @@
     "editor": "Fails before parsing: uncached bundle fetch Rust panic #12120"
   },
   "outputs": {
-    "/home/dieterolson/Desktop/Shot Pattern Analysis - Illustrated Research Report.pdf": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
-    "/home/dieterolson/Desktop/Shot Pattern Analysis - One Page Summary.pdf": "438d1c64d534b25309e99b4b49a73138139e903744b1336be05065fa56c9af0b"
+    "<owner-home>/Desktop/Shot Pattern Analysis - Illustrated Research Report.pdf": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
+    "<owner-home>/Desktop/Shot Pattern Analysis - One Page Summary.pdf": "438d1c64d534b25309e99b4b49a73138139e903744b1336be05065fa56c9af0b"
   },
   "limitations": "Local report delivery only; PR/integration gates and revised public publication remain incomplete."
 }

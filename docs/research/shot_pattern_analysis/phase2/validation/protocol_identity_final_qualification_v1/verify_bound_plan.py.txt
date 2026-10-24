@@ -1,7 +1,7 @@
 from pathlib import Path
 import hashlib,json,re,runpy,sys
-ROOT=Path('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
-MAIN=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+ROOT=Path('<owner-home>/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
+MAIN=Path('<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
 PHASE=MAIN/'docs/research/shot_pattern_analysis/phase2'
 OUT=Path('/tmp/shot-pattern-protocol-identity-final-review')
 def sha(p):

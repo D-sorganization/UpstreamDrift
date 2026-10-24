@@ -61,15 +61,15 @@ ref_key = 'first', missing = True, renderer_kind = 'canonical'
             if renderer_kind == "canonical":
 >               _render_pair_figures(pair, out_dir)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
     return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
     first_label = _pair_condition_label(comparison, first)
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
     condition = _condition(ref)
                 ^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
@@ -81,7 +81,7 @@ ref = {'status': 'completed', 'cell': 'first', 'protocol_id': 'serialized-fallba
                  ^^^^^^^^^^^^^
 E       KeyError: 'config'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
 _ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-True-second] _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a1')
@@ -143,15 +143,15 @@ ref_key = 'second', missing = True, renderer_kind = 'canonical'
             if renderer_kind == "canonical":
 >               _render_pair_figures(pair, out_dir)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
     return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
     first_label = _pair_condition_label(comparison, first)
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
     condition = _condition(ref)
                 ^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
@@ -163,7 +163,7 @@ ref = {'status': 'completed', 'cell': 'first', 'source_protocol': 'original_prim
                  ^^^^^^^^^^^^^
 E       KeyError: 'config'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
 _ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-False-first] _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a2')
@@ -225,15 +225,15 @@ ref_key = 'first', missing = False, renderer_kind = 'canonical'
             if renderer_kind == "canonical":
 >               _render_pair_figures(pair, out_dir)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
     return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
     first_label = _pair_condition_label(comparison, first)
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
     condition = _condition(ref)
                 ^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
@@ -245,7 +245,7 @@ ref = {'status': 'completed', 'cell': 'first', 'source_protocol': None, 'protoco
                  ^^^^^^^^^^^^^
 E       KeyError: 'config'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
 _ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-False-second] _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a3')
@@ -307,15 +307,15 @@ ref_key = 'second', missing = False, renderer_kind = 'canonical'
             if renderer_kind == "canonical":
 >               _render_pair_figures(pair, out_dir)
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
     return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
     first_label = _pair_condition_label(comparison, first)
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
     condition = _condition(ref)
                 ^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
@@ -327,7 +327,7 @@ ref = {'status': 'completed', 'cell': 'first', 'source_protocol': 'original_prim
                  ^^^^^^^^^^^^^
 E       KeyError: 'config'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
 _ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-True-first] _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a4')
@@ -393,15 +393,15 @@ ref_key = 'first', missing = True, renderer_kind = 'selective'
                     pair, out_dir, figure_kinds=CLOSED_SELECTED_FIGURE_KINDS
                 )
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
     return _render_pair_figures_core(pair, output_dir, figure_kinds=figure_kinds)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
     first_label = _pair_condition_label(comparison, first)
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
     condition = _condition(ref)
                 ^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
@@ -413,7 +413,7 @@ ref = {'status': 'completed', 'cell': 'first', 'protocol_id': 'serialized-fallba
                  ^^^^^^^^^^^^^
 E       KeyError: 'config'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
 _ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-True-second] _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a5')
@@ -479,15 +479,15 @@ ref_key = 'second', missing = True, renderer_kind = 'selective'
                     pair, out_dir, figure_kinds=CLOSED_SELECTED_FIGURE_KINDS
                 )
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
     return _render_pair_figures_core(pair, output_dir, figure_kinds=figure_kinds)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
     first_label = _pair_condition_label(comparison, first)
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
     condition = _condition(ref)
                 ^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
@@ -499,7 +499,7 @@ ref = {'status': 'completed', 'cell': 'first', 'source_protocol': 'original_prim
                  ^^^^^^^^^^^^^
 E       KeyError: 'config'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
 _ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-False-first] _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a6')
@@ -565,15 +565,15 @@ ref_key = 'first', missing = False, renderer_kind = 'selective'
                     pair, out_dir, figure_kinds=CLOSED_SELECTED_FIGURE_KINDS
                 )
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
     return _render_pair_figures_core(pair, output_dir, figure_kinds=figure_kinds)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
     first_label = _pair_condition_label(comparison, first)
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
     condition = _condition(ref)
                 ^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
@@ -585,7 +585,7 @@ ref = {'status': 'completed', 'cell': 'first', 'source_protocol': None, 'protoco
                  ^^^^^^^^^^^^^
 E       KeyError: 'config'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
 _ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-False-second] _
 
 tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a7')
@@ -651,15 +651,15 @@ ref_key = 'second', missing = False, renderer_kind = 'selective'
                     pair, out_dir, figure_kinds=CLOSED_SELECTED_FIGURE_KINDS
                 )
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
     return _render_pair_figures_core(pair, output_dir, figure_kinds=figure_kinds)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
     first_label = _pair_condition_label(comparison, first)
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
     condition = _condition(ref)
                 ^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
@@ -671,30 +671,30 @@ ref = {'status': 'completed', 'cell': 'first', 'source_protocol': 'original_prim
                  ^^^^^^^^^^^^^
 E       KeyError: 'config'
 
-/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+<owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
 =============================== warnings summary ===============================
 src/shared/python/config/__init__.py:68
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
     from .model_variant_grouping import (
 
 src/shared/python/config/__init__.py:76
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
     from .model_source_providers import (
 
 src/shared/python/config/__init__.py:89
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
     from .provider_catalog import (
 
 src/shared/python/config/__init__.py:99
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
     from .setup_wizard import (
 
 src/shared/python/config/__init__.py:107
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
     from .standard_models import StandardModelManager
 
 src/shared/python/config/__init__.py:108
-  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+  <owner-home>/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
     from .settings import get_setting, load_settings, save_settings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

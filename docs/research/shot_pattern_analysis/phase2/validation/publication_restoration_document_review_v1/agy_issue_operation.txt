@@ -8,8 +8,8 @@
 ### Defect and Fix Acceptance Recorded
 
 1. **Defect & Evidence**:
-   - In [`docs/research/shot_pattern_analysis/phase2/data_archives/README.md`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/data_archives/README.md), the Python verification snippet maps archives directly from `final_v1` and `control_final_v1`, whereas the actual archive bundle directories under `docs/research/shot_pattern_analysis/phase2/data_archives/` are `final_primary_v1` (`source_name: "final_v1"`), `final_control_v1` (`source_name: "control_final_v1"`), and `supplement_final_v1`.
-   - Restoring only final datasets omits `control_pilot_v1/matrix_plan.json`, which [`load_reviewed_common_targets()`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py) requires and verifies against `FINAL_RUN_ACCEPTANCE.md` and `validation/independent_control_pilot_audit.json`.
+   - In [`docs/research/shot_pattern_analysis/phase2/data_archives/README.md`](file://<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/data_archives/README.md), the Python verification snippet maps archives directly from `final_v1` and `control_final_v1`, whereas the actual archive bundle directories under `docs/research/shot_pattern_analysis/phase2/data_archives/` are `final_primary_v1` (`source_name: "final_v1"`), `final_control_v1` (`source_name: "control_final_v1"`), and `supplement_final_v1`.
+   - Restoring only final datasets omits `control_pilot_v1/matrix_plan.json`, which [`load_reviewed_common_targets()`](file://<owner-home>/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py) requires and verifies against `FINAL_RUN_ACCEPTANCE.md` and `validation/independent_control_pilot_audit.json`.
 2. **Fix Acceptance Criteria**:
    - Explicit bundle-to-source directory mapping including `control_pilot_v1`.
    - Pre-extraction assertion verifying `manifest["source_name"]` matches the target destination.
