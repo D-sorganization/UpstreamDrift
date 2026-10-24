@@ -391,6 +391,71 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13518 · CI: Set Rust-Cache Cache-Bin False so Post Steps Stop Deleting the Shared Host Rustup Binary (Refs Repository_Management#2138)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13518
+- **Branch:** merged via #13518
+- **PR:** #13518
+- **Paths:** see #13518
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`00d8a71b`; collated from changes/13518-ci-set-rust-cache-cache-bin-false-so-pos.md)
+- **Summary:** CI: set rust-cache cache-bin false so post steps stop deleting the shared host rustup binary (Refs Repository_Management#2138)
+- **Next step:** Shipped in PR #13518.
+
+### DL-#13109 · Lock Canonical Driver Seeds Closure and Weight-Fraction Gates in CI (#13109)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13109
+- **Branch:** merged via #13665
+- **PR:** #13665
+- **Paths:** see #13665
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`2aeda180`; collated from changes/13109-lock-canonical-driver-seeds-closure-and.md)
+- **Summary:** Lock canonical driver seeds closure and weight-fraction gates in CI (#13109)
+- **Next step:** Shipped in PR #13665.
+
+### DL-#12969 · Pull Club Sole to Ground at Address IK; Record Sole Height in Calibrated Receipt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12969
+- **Branch:** merged via #13665
+- **PR:** #13665
+- **Paths:** see #13665
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`2aeda180`; collated from changes/12969-pull-club-sole-to-ground-at-address-ik-r.md)
+- **Summary:** Pull club sole to ground at address IK; record sole height in calibrated receipt
+- **Next step:** Shipped in PR #13665.
+
+### DL-#12743 · Add Load_Coupling_Law Require_Verified Gate for SPN-3 Cited Coupling Data
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12743
+- **Branch:** merged via #13665
+- **PR:** #13665
+- **Paths:** see #13665
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`2aeda180`; collated from changes/12743-add-load-coupling-law-require-verified-g.md)
+- **Summary:** Add load_coupling_law require_verified gate for SPN-3 cited coupling data
+- **Next step:** Shipped in PR #13665.
+
+### DL-#12711 · Audit Near-Zero-Mean CV Callers: Return NaN With Reason in Cross-Engine Runner and Pendulum Variability Summary
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12711
+- **Branch:** merged via #13665
+- **PR:** #13665
+- **Paths:** see #13665
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`2aeda180`; collated from changes/12711-audit-near-zero-mean-cv-callers-return-n.md)
+- **Summary:** Audit near-zero-mean CV callers: return NaN with reason in cross-engine runner and pendulum variability summary
+- **Next step:** Consume DisturbanceSpec in NSX-90 variability experiments
+
 ### DL-#13673 · Bump Transitive Undici to 8.12.3 in Ui/Package-Lock.Json to Clear HIGH Npm Audit Advisories That Ejected Every Merge-Queue Entry
 
 - **State:** shipped
