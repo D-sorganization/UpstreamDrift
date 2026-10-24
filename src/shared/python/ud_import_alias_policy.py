@@ -16,6 +16,7 @@ import importlib
 import importlib.util
 import sys
 from collections.abc import Callable
+from pathlib import Path
 from types import ModuleType
 from typing import Any, cast
 
@@ -54,15 +55,43 @@ UD_CANONICAL_SRC_ROOTS = frozenset({"humanoid_character_builder", "model_generat
 # spelling is served from UD's single copy instead of failing or loading a twin.
 UD_OWNED_SHARED_PYTHON_ROOTS = frozenset({"launcher_embed"})
 
+# Chat retains a UD-only _qt/runtime.py, so only this exact Tools-owned module
+# is opted into canonical loading; the package itself must keep its local path.
+_CHAT_UI_BUILDER_CANONICAL = "shared.python.chat._qt.ui_builder"
+_CHAT_UI_BUILDER_LEGACY = "src.shared.python.chat._qt.ui_builder"
+_CHAT_UI_BUILDER_RELATIVE = Path("chat/_qt/ui_builder.py")
+_TOOLS_SHARED_PYTHON = (
+    Path(__file__).resolve().parents[3]
+    / "vendor"
+    / "ud-tools"
+    / "src"
+    / "shared"
+    / "python"
+)
+
 
 class UdSharedImportAliasFinder(SharedImportAliasFinder):
-    """Decline ``src.shared.python`` aliasing for ud-canonical package roots.
+    """Apply UD ownership rules and exact pinned-provider aliases.
 
-    Also serves ``shared.python.<ud-owned root>`` from UD's ``src.shared.python``
-    copy so Tools adapters that import the bare spelling bind to one module.
+    Decline ``src.shared.python`` aliasing for ud-canonical package roots,
+    serve UD-owned modules from UD's copy, and route the chat UI builder module
+    to Tools without redirecting the rest of the locally extended chat package.
     """
 
     def find_spec(self, fullname: str, path: Any = None, target: Any = None) -> Any:
+        if fullname == _CHAT_UI_BUILDER_CANONICAL:
+            return self._pinned_chat_ui_builder_spec(fullname)
+        if fullname == _CHAT_UI_BUILDER_LEGACY:
+            canonical = importlib.import_module(_CHAT_UI_BUILDER_CANONICAL)
+            spec = importlib.util.spec_from_loader(
+                fullname,
+                cast(Any, _AliasLoader(canonical)),
+                origin=canonical.__file__,
+            )
+            if spec is not None:
+                spec.submodule_search_locations = getattr(canonical, "__path__", None)
+            return spec
+
         parts = fullname.split(".")
         if (
             len(parts) >= 3
@@ -81,6 +110,56 @@ class UdSharedImportAliasFinder(SharedImportAliasFinder):
                 spec.submodule_search_locations = getattr(canonical, "__path__", None)
             return spec
         return super().find_spec(fullname, path, target)
+
+    def _pinned_chat_ui_builder_spec(self, fullname: str) -> Any:
+        """Load the exact Tools-owned builder from vendor or an install."""
+        tools_root = _TOOLS_SHARED_PYTHON.resolve()
+        vendored_provider = (tools_root / _CHAT_UI_BUILDER_RELATIVE).resolve()
+        provider: Path | None = (
+            vendored_provider
+            if vendored_provider.is_relative_to(tools_root)
+            and vendored_provider.is_file()
+            else self._installed_chat_ui_builder_path()
+        )
+        if provider is None:
+            raise ModuleNotFoundError(
+                f"{fullname} requires the pinned Tools provider; no vendored or "
+                "installed Tools chat UI builder was found",
+                name=fullname,
+            )
+        spec = importlib.util.spec_from_file_location(fullname, provider)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Could not load pinned Tools provider for {fullname}")
+        return spec
+
+    def _installed_chat_ui_builder_path(self) -> Path | None:
+        """Find the exact canonical builder in installed Tools, never UD's copy."""
+        finder_position = next(
+            (index for index, finder in enumerate(sys.meta_path) if finder is self),
+            None,
+        )
+        if finder_position is not None:
+            sys.meta_path.pop(finder_position)
+        try:
+            spec = importlib.util.find_spec(_CHAT_UI_BUILDER_CANONICAL)
+        except (ImportError, ValueError):
+            return None
+        finally:
+            if finder_position is not None:
+                sys.meta_path.insert(finder_position, self)
+
+        if spec is None or spec.origin is None:
+            return None
+        provider = Path(spec.origin).resolve()
+        ud_shared_python = Path(__file__).resolve().parent
+        if (
+            provider.is_relative_to(ud_shared_python)
+            or provider.parts[-len(_CHAT_UI_BUILDER_RELATIVE.parts) :]
+            != _CHAT_UI_BUILDER_RELATIVE.parts
+            or not provider.is_file()
+        ):
+            return None
+        return provider
 
     def _parse(self, fullname: str) -> tuple[str | None, str]:
         parts = fullname.split(".")
