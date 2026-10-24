@@ -210,3 +210,27 @@ def test_main_exempts_only_the_spec_change_log_archive(
     assert mod.main() == 0
     (root / "docs" / "spec" / "OTHER.md").write_text(big)
     assert mod.main() == 1
+
+
+@pytest.mark.unit
+def test_proximal_distal_research_docs_within_budget() -> None:
+    """Issue #12851: governed research docs must stay under MAX_BYTES without exceptions."""
+    rel_paths = (
+        "docs/research/proximal_distal_energy_transfer/chapters/"
+        "_ch06c_spatial_cross_formulation.qmd",
+        "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md",
+        "docs/research/proximal_distal_energy_transfer/"
+        "DATA_DICTIONARY_ARTIFACTS_CORE.md",
+        "docs/research/proximal_distal_energy_transfer/"
+        "DATA_DICTIONARY_ARTIFACTS_EXTENDED.md",
+        "docs/research/proximal_distal_energy_transfer/"
+        "MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "docs/research/proximal_distal_energy_transfer/"
+        "MODEL_COMPLETION_CLAIM_REGISTER.md",
+        "docs/research/proximal_distal_energy_transfer/"
+        "MODEL_COMPLETION_MODEL_DISCREPANCY.md",
+    )
+    for rel in rel_paths:
+        path = mod.ROOT / rel
+        assert path.is_file(), rel
+        assert path.stat().st_size <= mod.MAX_BYTES, rel
