@@ -9,6 +9,9 @@ on:
     paths:
       - "**/*.pdf"
 
+permissions:
+  contents: read
+
 jobs:
   check-pdf-size:
     # Fork PRs never run on the self-hosted fleet (RM#1989).

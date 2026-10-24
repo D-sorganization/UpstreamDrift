@@ -55,7 +55,11 @@ concurrency:
 
 jobs:
   close-redundant:
-    runs-on: d-sorg-fleet-docker
+    # Fork pull_request_target runs stay on GitHub-hosted runners (RM#1989).
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 10
     steps:
       - name: Generate Jules app token
