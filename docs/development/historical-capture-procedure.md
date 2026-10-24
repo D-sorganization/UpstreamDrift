@@ -119,8 +119,8 @@ presentation rate; irregular or sparse clocks are rejected. Original frame PTS
 remain authoritative in the manifest, not the exported MP4's playback labels.
 
 Current deliverables are in
-`C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Overlay` and
-`C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Hogan Overlay`.
+`<owner-home>/Desktop/Necromatcher Review 2026-10-01/Tiger Overlay` and
+`<owner-home>/Desktop/Necromatcher Review 2026-10-01/Hogan Overlay`.
 The `Report` subfolder holds the compiled methods report; its editable
 standalone source is [Necromatcher Methods](necromatcher-methods.tex). The report
 documents source hashes, equations, failed constraints and repeatability; it is

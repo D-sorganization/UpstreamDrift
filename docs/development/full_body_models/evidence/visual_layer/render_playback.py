@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT))
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter  # noqa: E402
 
 NATIVE = Path(
-    "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native/docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81"
+    "<owner-home>/Repositories/Worktrees/UpstreamDrift-pinocchio-native/docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81"
 )
 HERE = Path(__file__).resolve().parent
 SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v2.json"

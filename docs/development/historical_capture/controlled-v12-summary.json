@@ -50,7 +50,7 @@
     }
   ],
   "full_independent_assessment": {
-    "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment.json",
+    "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment.json",
     "sha256": "sha256:fa6ab49aa07cebba96a4b92ed0b6f79e1ae01ff558926b0db7c3b9e1456a7abd"
   },
   "runs": [
@@ -85,11 +85,11 @@
         "continuous_nonlinear_certified": false
       },
       "fresh_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-tiger-speed-prior-control-fit-v12-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-tiger-speed-prior-control-fit-v12-audit.json",
         "sha256": "sha256:d7eb880893b77e74e8f43928d67a5fe346c13c1f46a7f02b60c0879321ae9dce"
       },
       "producer_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-tiger-speed-prior-control-fit-v12-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-tiger-speed-prior-control-fit-v12-audit.json",
         "sha256": "sha256:d83bf948de2182fcdf4c20b6af2a904505c1b0289f6e97d0f94b851e69214395"
       },
       "initial_restart_and_images": {
@@ -255,11 +255,11 @@
         "continuous_nonlinear_certified": false
       },
       "fresh_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-tiger-speed-prior-variant-fit-v12-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-tiger-speed-prior-variant-fit-v12-audit.json",
         "sha256": "sha256:0890e7eb6fc8f5aa461c8e08a4e728bb4d4b8b2c5fa923a42174f8d5e4da7cf4"
       },
       "producer_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-tiger-speed-prior-variant-fit-v12-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-tiger-speed-prior-variant-fit-v12-audit.json",
         "sha256": "sha256:357e4aebfdecfa96d6c31ba91ee9ec238d990d26dfe6adc33ae2a5f8102afaeb"
       },
       "initial_restart_and_images": {
@@ -425,11 +425,11 @@
         "continuous_nonlinear_certified": false
       },
       "fresh_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-hogan-probe-density-control-fit-v12-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-hogan-probe-density-control-fit-v12-audit.json",
         "sha256": "sha256:887da87d2ce13299d26d17a897b15eb8b82b6afd49bb83edf3b152d989dd0ecf"
       },
       "producer_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-hogan-probe-density-control-fit-v12-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-hogan-probe-density-control-fit-v12-audit.json",
         "sha256": "sha256:efaf6097b60b1370e56aae468fd40b2889076859776b43f1d245cf05e8a0ac9e"
       },
       "initial_restart_and_images": {
@@ -595,11 +595,11 @@
         "continuous_nonlinear_certified": false
       },
       "fresh_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-hogan-probe-density-variant-fit-v12-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-hogan-probe-density-variant-fit-v12-audit.json",
         "sha256": "sha256:35862927fd4cfb3f58f03d04c9602643d29838ef03dd7e2e5dcd304ec4f16078"
       },
       "producer_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-hogan-probe-density-variant-fit-v12-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-hogan-probe-density-variant-fit-v12-audit.json",
         "sha256": "sha256:bca8581d5b6c47b47e75b070ef0b94dc54a57d96b311a48692c40bf15306f84a"
       },
       "initial_restart_and_images": {

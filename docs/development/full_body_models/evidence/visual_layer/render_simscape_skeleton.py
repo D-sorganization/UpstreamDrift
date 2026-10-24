@@ -36,7 +36,7 @@ from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: E
 )
 
 NATIVE = Path(
-    "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native/docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81"
+    "<owner-home>/Repositories/Worktrees/UpstreamDrift-pinocchio-native/docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81"
 )
 HERE = Path(__file__).resolve().parent
 SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v2.json"
