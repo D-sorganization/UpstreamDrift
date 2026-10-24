@@ -7,12 +7,19 @@ drift apart (DRY).
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
+
+_ENV_COMPACT_SWING_PARQUET = "UD_COMPACT_SWING_PARQUET"
+_DEFAULT_REL_UNDER_HOME = Path("Repositories") / "data" / "TenThousandFiles.parquet"
 
 # Historical host-local Simscape dump referenced by MachineLearning docs and
 # per-step extractors. Frequently absent on developer hosts.
 DOCUMENTED_TEN_THOUSAND_FILES = Path(
-    r"C:\Users\diete\Repositories\data\TenThousandFiles.parquet"
+    os.environ.get(
+        _ENV_COMPACT_SWING_PARQUET,
+        str(Path.home() / _DEFAULT_REL_UNDER_HOME),
+    )
 )
 
 SWEEP_SYNTHETIC_REL = Path("data") / "sweep_synthetic"

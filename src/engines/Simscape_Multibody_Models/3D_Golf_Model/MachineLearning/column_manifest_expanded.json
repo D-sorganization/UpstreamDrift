@@ -1,5 +1,5 @@
 {
-  "schema_source": "C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet",
+  "schema_source": "<owner-home>\\Repositories\\data\\TenThousandFiles.parquet",
   "description": "Expanded instantaneous dynamics column selection. Inputs are kinematic positions, kinematic velocities, and applied force/torque controls. Targets are segment/joint accelerations.",
   "input_columns": {
     "time": ["time"],

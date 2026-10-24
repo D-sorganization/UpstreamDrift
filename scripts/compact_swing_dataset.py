@@ -28,8 +28,8 @@ Run manually (not in CI):
 .. code-block:: bash
 
     python3 scripts/compact_swing_dataset.py \
-        --src C:/Users/diete/Repositories/data/TenThousandFiles.parquet \
-        --out C:/Users/diete/Repositories/data/compact \
+        --src \"\$UD_COMPACT_SWING_PARQUET\" \
+        --out \"\$UD_COMPACT_SWING_OUT\" \
         --validate
 """
 
