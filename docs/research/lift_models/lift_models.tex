@@ -1991,7 +1991,7 @@ J = \int_{0}^{t_f} \sum_{k} w_k u_k^2 \,\mathrm{d}t
 with $w_k = 1$ for joint actuators ($1000\,\mathrm{N\,m}$ optimal torque), $w_k = 100$ for pelvis residuals (optimal force $1\,mg = 1765.2\,\mathrm{N}$ in runs K--S) and $w_\text{feet} = 10^4$. The planted-feet term is a \texttt{MocoTranslationTrackingGoal} holding both calcaneus origins at their setup-pose ground positions. Stage~2 (80 De~Groote--Fregly muscles) runs only if Stage~1 converges.
 
 \paragraph{Run History and Findings.}
-Seventeen ControlTower runs (C--S) are recorded with their receipts in \texttt{docs/development/lifting/evidence/opensim\_predictive/RUN\_HISTORY.md}. The findings are:
+Seventeen <host> runs (C--S) are recorded with their receipts in \texttt{docs/development/lifting/evidence/opensim\_predictive/RUN\_HISTORY.md}. The findings are:
 \begin{enumerate}
 \item Run H converged (646 iterations, scaled violation $2.2\times10^{-8}$) on the earlier hand-built poses, but it is not a credible deadlift: duration $0.553\,\mathrm{s}$ against the bundle's $2.0\,\mathrm{s}$, bar rise $0.409\,\mathrm{m}$ against $0.477\,\mathrm{m}$, and a peak pelvis residual of $0.326\,mg$ against the Hicks~2015 limit of $0.05\,mg$.
 \item The hand-built poses were infeasible: with welded shoulders, no setup pose put the bar over midfoot at the bundle trunk angle (pose residual $0.064\,\mathrm{m}$). Freeing shoulder flexion and solving the poses removed this.
@@ -2030,7 +2030,7 @@ The tracked OpenSim deadlift (OSL-3) receipt exists, but the predictive-versus-t
 \end{table}
 
 \paragraph{Reproduction Command.}
-Run R, at commit \texttt{9dca083f4f}, on ControlTower:
+Run R, at commit \texttt{9dca083f4f}, on <host>:
 \begin{verbatim}
 UPSTREAMDRIFT_MSK_BASE_MODEL=<Rajagopal base model> \
     python3 scripts/measure_opensim_predictive_deadlift.py \
