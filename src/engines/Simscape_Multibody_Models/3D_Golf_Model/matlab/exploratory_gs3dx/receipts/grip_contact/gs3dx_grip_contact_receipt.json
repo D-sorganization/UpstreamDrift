@@ -1,0 +1,39 @@
+{
+  "schema_version": "simscape-grip-contact-receipt/v1",
+  "matlab_release": "2025b",
+  "model_name": "GS3DX_GripContact",
+  "model_sha256": "9d178d1ffe18cc3ca6def521869874176a3cbcc5b76e1f403a7a8439c65d688e",
+  "input_sha256": "cead97c0efaa38f0e33bd5af92f78be9c14ce9a1c4c003789e129ebe02b5dea2",
+  "kernel_sha256": "b268b6148701818e26d37519bd9c4977580e715b77b781490115445d9996bdc2",
+  "solver": {
+    "solver_name": "ode15s",
+    "max_step_s": 0.0002,
+    "rel_tol": 1E-6,
+    "abs_tol": 1E-8
+  },
+  "block_budget": {
+    "nonvirtual_total": 48,
+    "compiled_total": 81,
+    "license_ceiling": 1000
+  },
+  "timestep_convergence": {
+    "baseline_max_step_s": 0.0002,
+    "refined_max_step_s": 0.0001,
+    "max_rel_force_diff": 0.00065069160112975026,
+    "passed": true
+  },
+  "save_reload_check": {
+    "max_abs_force_diff_n": 0,
+    "max_abs_moment_diff_nm": 0,
+    "passed": true
+  },
+  "frame_probes": {
+    "max_pos_err_m": 3.9252311467094379E-17,
+    "max_rot_err_fro": 1.0332933221703728E-11,
+    "passed": true
+  },
+  "force_sign_checks": {
+    "min_normal_push_dot_n": 42.773751462928175,
+    "passed": true
+  }
+}

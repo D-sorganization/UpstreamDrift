@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import copy
 import dataclasses
+import hashlib
 import json
 from pathlib import Path
 
@@ -91,15 +92,13 @@ POSES_JSON = REPO_ROOT / "tests/fixtures/club_face/address_poses.json"
 def _has_pinocchio() -> bool:
     try:
         import pinocchio  # noqa: F401
-
-        if type(pinocchio).__module__ == "unittest.mock":
-            return False
-        model_cls = getattr(pinocchio, "Model", None)
-        if model_cls is None or type(model_cls).__module__ == "unittest.mock":
-            return False
-        return isinstance(model_cls, type)
     except ImportError:
         return False
+    # The CI unit lane may mock pinocchio; only a real module has a Model class.
+    if type(pinocchio).__module__ == "unittest.mock":
+        return False
+    model_cls = getattr(pinocchio, "Model", None)
+    return isinstance(model_cls, type) and model_cls.__module__ != "unittest.mock"
 
 
 requires_pinocchio = pytest.mark.skipif(
@@ -197,6 +196,35 @@ def test_export_matlab_kernel_bundle_check_and_drift_detection(tmp_path: Path) -
 
 
 @pytest.mark.unit
+def test_golden_vectors_are_built_from_the_exported_rounded_params() -> None:
+    """Goldens come from the same canonicalized params the kernel is rendered from (#13552).
+
+    The exported kernel carries 11-decimal parameters; goldens computed from
+    the unrounded values miss it by ~1e-7 N, far outside the 1e-10 / 1e-9 N
+    golden tolerance.
+    """
+    raw_params = build_kernel_params_payload()
+    export_params = canonicalize_export_tree(raw_params)
+    committed = json.loads(DEFAULT_PARAMS_JSON_PATH.read_text(encoding="utf-8"))
+    assert committed == export_params
+
+    payload = build_golden_vectors_payload()
+    (base,) = [
+        c for c in payload["cases"] if c["case_id"] == "overlap_zero_rel_vel_rest"
+    ]
+    frames = export_params["club_grip_frames"]
+    assert base["inputs"]["p_hand_l_m"] == frames["L"]["position_m"]
+    assert base["inputs"]["r_hand_r"] == frames["R"]["rotation"]
+    for case in payload["cases"]:
+        out = evaluate_kernel_reference(export_params, case["style"], case["inputs"])
+        for key, value in out.items():
+            assert np.array_equal(np.asarray(case["expected"][key]), value), (
+                case["case_id"],
+                key,
+            )
+
+
+@pytest.mark.unit
 def test_golden_vectors_cover_all_styles_and_edge_cases() -> None:
     """Golden vectors cover all styles, required edge cases, and match pair_contact."""
     assert DEFAULT_GOLDEN_JSON_PATH.exists()
@@ -224,7 +252,9 @@ def test_golden_vectors_cover_all_styles_and_edge_cases() -> None:
     }
     assert required_categories.issubset(categories)
 
-    params = build_kernel_params_payload()
+    # The goldens are what the exported kernel computes: evaluate with the
+    # committed (canonicalized) params JSON the MATLAB kernel is rendered from.
+    params = json.loads(DEFAULT_PARAMS_JSON_PATH.read_text(encoding="utf-8"))
     for case in cases:
         inp = case["inputs"]
         exp = case["expected"]
@@ -266,6 +296,48 @@ def test_golden_vectors_cover_all_styles_and_edge_cases() -> None:
             rtol=1e-12,
             atol=1e-12,
         )
+
+
+@pytest.mark.unit
+def test_kernel_capsule_pairs_use_shared_line_contact_quadrature() -> None:
+    """Capsule rows integrate along the hand capsule like ``capsule_capsule`` (#13308).
+
+    The closest-point law snapped the little-finger contact ~8 mm once the
+    finger tilted past ``sin^2(theta) = 1e-10``; the line quadrature keeps the
+    contact point and club force continuous across that tilt.
+    """
+    from src.shared.python.grip_contact.pair_contact import line_contact_node_count
+
+    params = build_kernel_params_payload()
+    tbl = np.asarray(params["styles"]["ten_finger"]["pair_table"], dtype=float)
+    caps = [k for k, row in enumerate(tbl) if row[0] > 0.0 and row[2] == 2.0]
+    assert caps, "ten_finger must carry at least one capsule pair"
+    for k in caps:
+        row = tbl[k]
+        half_a = 0.5 * float(np.linalg.norm(row[6:9] - row[3:6]))
+        assert row[17] == line_contact_node_count(half_a, float(row[9]))
+
+    golden = json.loads(DEFAULT_GOLDEN_JSON_PATH.read_text(encoding="utf-8"))
+    (case,) = [
+        c
+        for c in golden["cases"]
+        if c["style"] == "ten_finger" and c["category"] == "near_collinear_capsules"
+    ]
+    k = caps[0]
+    points, forces = [], []
+    for angle in (0.0, 5.0e-6, 2.0e-5, 1.0e-4):
+        c, s = np.cos(angle), np.sin(angle)
+        tilt = np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
+        inp = dict(case["inputs"])
+        inp["r_hand_r"] = (np.asarray(inp["r_hand_r"]) @ tilt).tolist()
+        out = evaluate_kernel_reference(params, "ten_finger", inp)
+        assert out["pair_normal_n"][k] > 0.0
+        points.append(out["pair_contact_point_w_m"][k])
+        forces.append(out["f_club_w_n"])
+    jumps = np.linalg.norm(np.diff(np.asarray(points), axis=0), axis=1)
+    assert jumps.max() < 1.0e-4, jumps
+    f = np.asarray(forces)
+    assert np.linalg.norm(f[1] - f[0]) < 1.0e-3 * np.linalg.norm(f[0])
 
 
 @pytest.mark.unit
@@ -313,7 +385,9 @@ def test_export_scenarios_json_check_and_structure(tmp_path: Path) -> None:
     out_tmp = tmp_path / "scenarios.json"
     assert export_scenarios_json(out_tmp, check=False) == 0
     assert export_scenarios_json(out_tmp, check=True) == 0
-    out_tmp.write_text(out_tmp.read_text(encoding="utf-8") + " ", encoding="utf-8")
+    drifted = json.loads(out_tmp.read_text(encoding="utf-8"))
+    drifted["squeeze_per_hand_n"] = 1101.0
+    out_tmp.write_text(json.dumps(drifted), encoding="utf-8")
     assert export_scenarios_json(out_tmp, check=True) == 1
 
 
@@ -597,3 +671,23 @@ def test_simscape_r2025b_net_wrench_parity_against_pinocchio(
     )
     bad = net_club_wrench_errors(scaled, pin_run.series, club, interface)
     assert "net_force" in failing_net_wrench(bad)
+
+
+@pytest.mark.unit
+def test_r2025b_receipt_hashes_match_committed_kernel_and_inputs() -> None:
+    """The committed R2025b evidence was produced from the committed kernel and inputs.
+
+    A regenerated kernel (for example after a shared-law change) or changed
+    scenario inputs make this fail until the R2025b run is repeated.
+    """
+    receipt_path = DEFAULT_RECEIPT_DIR / "gs3dx_grip_contact_receipt.json"
+    if not receipt_path.exists():
+        pytest.skip("R2025b receipt not committed yet")
+    receipt = load_simscape_grip_contact_receipt(receipt_path)
+    generated = GS3DX_ROOT / "tools/generated"
+    for key, name in (
+        ("kernel_sha256", "gs3dx_grip_contact_kernel.m"),
+        ("input_sha256", "gs3dx_grip_contact_scenarios.json"),
+    ):
+        digest = hashlib.sha256((generated / name).read_bytes()).hexdigest()
+        assert receipt[key] == digest, f"{name} changed since the R2025b run"
