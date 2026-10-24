@@ -25,7 +25,7 @@
   "warning_count": 1,
   "findings": [
     {
-      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "path": "<owner-home>\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
       "line": null,
       "kind": "portfolio_wip_breach",
       "message": "19 concurrent WIP entries (in_progress) exceeds the 'golf' portfolio cap of 8.",

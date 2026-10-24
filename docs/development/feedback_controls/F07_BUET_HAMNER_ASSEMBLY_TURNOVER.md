@@ -28,12 +28,12 @@ carry no physiological admission threshold.
 Qualified replay of the calculation, with read-only local donor paths:
 
 ```powershell
-$env:CASADIPATH='C:/Users/diete/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim'
+$env:CASADIPATH='<owner-home>/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim'
 $env:PYTHONPATH=(Get-Location).Path
-$env:UD_BUET_SOURCE='C:/Users/diete/Repositories/docs/development/feedback_controls_planning/buet_raw_ranges_v1/source/Bilateral_Upper_Extremity_Trunk_Model_Markered.osim'
-$env:UD_HAMNER_SOURCE='C:/Users/diete/Repositories/UpstreamDrift/shared/models/opensim/opensim-models/Models/Hamner/FullBodyModel_Hamner2010_v2_0.osim'
-& 'C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/opensim/test_native_buet_hamner_assembly.py -q
-& 'C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m scripts.opensim.emit_buet_hamner_assembly_receipt --buet-source $env:UD_BUET_SOURCE --buet-sha256 b66a31e08087327f8756d587f471b0494a3d9d6f7f6d510de66beba4a9e79bf6 --hamner-source $env:UD_HAMNER_SOURCE --hamner-sha256 349ce7a44f1541794f2283cab73bb954270228f2f50808de549ec5097a1687cf --derived-output <fresh-owned-staging>/derived.osim --receipt-output <fresh-owned-staging>/receipt.json
+$env:UD_BUET_SOURCE='<owner-home>/Repositories/docs/development/feedback_controls_planning/buet_raw_ranges_v1/source/Bilateral_Upper_Extremity_Trunk_Model_Markered.osim'
+$env:UD_HAMNER_SOURCE='<owner-home>/Repositories/UpstreamDrift/shared/models/opensim/opensim-models/Models/Hamner/FullBodyModel_Hamner2010_v2_0.osim'
+& '<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/opensim/test_native_buet_hamner_assembly.py -q
+& '<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m scripts.opensim.emit_buet_hamner_assembly_receipt --buet-source $env:UD_BUET_SOURCE --buet-sha256 b66a31e08087327f8756d587f471b0494a3d9d6f7f6d510de66beba4a9e79bf6 --hamner-source $env:UD_HAMNER_SOURCE --hamner-sha256 349ce7a44f1541794f2283cab73bb954270228f2f50808de549ec5097a1687cf --derived-output <fresh-owned-staging>/derived.osim --receipt-output <fresh-owned-staging>/receipt.json
 ```
 
 The emitter requires both output paths to be fresh. Existing output and

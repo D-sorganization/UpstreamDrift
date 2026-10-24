@@ -55,9 +55,9 @@ interpreter and run:
 
 ```powershell
 $env:F04_NATIVE_RECEIPT='1'
-& 'C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/unit/motion_matching/test_native_control_coupling.py -q --junitxml=docs/development/feedback_controls/.f04-native-coupling.xml
-& 'C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/unit/motion_matching/test_f04_native_coupling_receipt.py -q
-& 'C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m scripts.f04_native_coupling_receipt --junit docs/development/feedback_controls/.f04-native-coupling.xml --host-alias windows-owned-opensim-env --output docs/development/feedback_controls/F04_NATIVE_COUPLING_RECEIPT_MJ38.json
+& '<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/unit/motion_matching/test_native_control_coupling.py -q --junitxml=docs/development/feedback_controls/.f04-native-coupling.xml
+& '<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/unit/motion_matching/test_f04_native_coupling_receipt.py -q
+& '<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m scripts.f04_native_coupling_receipt --junit docs/development/feedback_controls/.f04-native-coupling.xml --host-alias windows-owned-opensim-env --output docs/development/feedback_controls/F04_NATIVE_COUPLING_RECEIPT_MJ38.json
 ```
 
 The committed JSON binds passed JUnit evidence, required model/initial

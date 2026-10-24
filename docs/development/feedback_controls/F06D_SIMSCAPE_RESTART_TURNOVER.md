@@ -32,7 +32,7 @@ Run `test_native_simscape_restart(owned_output_directory)` with explicit
 in the owned Desk run directory, not in Git. Six diagnostic CSV hashes were
 verified against `native-restart-receipt.json`. Fleet staging retains receipts,
 stdout/stderr and source test failures. Desktop preview output is
-`C:/Users/diete/Desktop/Motion_Matching_Previews/simscape_native_restart_11921`;
+`<owner-home>/Desktop/Motion_Matching_Previews/simscape_native_restart_11921`;
 its producer verifies every CSV digest and records media hashes. This is a
 synthetic restart preview, never a golfer/capture-match video.
 
