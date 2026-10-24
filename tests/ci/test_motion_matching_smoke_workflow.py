@@ -50,6 +50,16 @@ def test_runs_the_slow_smoke_via_the_shared_script() -> None:
     assert "-p no:xvfb" in script  # fleet runners may autoload pytest-xvfb (#13534)
 
 
+def test_public_repo_routes_motion_matching_smoke_to_hosted_runner() -> None:
+    step = next(
+        step
+        for step in _doc()["jobs"]["pick-runner"]["steps"]
+        if step.get("id") == "check"
+    )
+    assert "ubuntu-latest" in step["run"]
+    assert "CI_RUNNER_MODE" in step["env"]
+
+
 def test_job_is_bounded_and_fleet_routed() -> None:
     doc = _doc()
     job = doc["jobs"]["smoke"]
