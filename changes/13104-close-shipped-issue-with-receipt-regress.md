@@ -1,5 +1,5 @@
 ---
 issue: 13104
-summary: "Close shipped issue with receipt regression tests"
+summary: "Record #13104 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md)"
 branch: "cursor/issue-closure-receipts-66dc"
 ---
