@@ -21,7 +21,7 @@ def test_git_executable_uses_git_exe_for_windows_worktree_pointer(
     tmp_path: Path,
 ) -> None:
     (tmp_path / ".git").write_text(
-        "gitdir: <owner-home>/Repositories/UpstreamDrift/.git/worktrees/wt\n",
+        "gitdir: C:/Users/example/Repositories/UpstreamDrift/.git/worktrees/wt\n",
         encoding="utf-8",
     )
 
