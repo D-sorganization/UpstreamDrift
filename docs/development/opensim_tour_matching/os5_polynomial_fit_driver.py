@@ -1,6 +1,6 @@
 """Driver for OpenSim degree-six polynomial effort profile and forward replay (OS-5).
 
-Executes on ControlTower with OpenSim 4.6 bindings:
+Executes on <host> with OpenSim 4.6 bindings:
 1. Loads discrete control trajectories from OS-4 dynamic tracking.
 2. Fits degree-6 polynomials (c0..c6 descending powers) to all 39 OpenSim actuators.
 3. Validates fit fidelity (R^2, max error, RMS error) and effort/rate bounds.
@@ -8,7 +8,7 @@ Executes on ControlTower with OpenSim 4.6 bindings:
 5. Replays continuous forward simulation via opensim.Manager (zero-feedback).
 6. Exports polynomial coefficients, forward states/controls, and cryptographic receipt.
 
-Verified on ControlTower runner for deliverable OS-5 (epic #10003).
+Verified on <host> runner for deliverable OS-5 (epic #10003).
 """
 
 from __future__ import annotations

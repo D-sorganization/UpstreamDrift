@@ -38,7 +38,7 @@ Source reviewed: Claude recovery ref `handoff/10341-opensim-20260918`, commit
    evidence of a functional full-body golf muscle model.
 5. The 1.813888889 s IK animation is kinematic evidence. The saved 0.60 s native
    replay is rejected. OpenSim 4.5 local viewing does not requalify results
-   produced with the 4.6 native runtime. Old ControlTower job IDs are snapshots;
+   produced with the 4.6 native runtime. Old <host> job IDs are snapshots;
    inspect current identity and preserve the owner's running work.
 
 ## Work Breakdown and Sequence

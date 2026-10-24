@@ -16,9 +16,9 @@ continuation replaces the old restart instructions for completed OS-2b/3b work.
 - Local uncommitted `docs/development/DEVELOPMENT_LOG.md` and untracked
   `evidence/os7_moco_g1/rungs/0850ms_diag_1iter/receipt.json` belong to the
   prior agent; do not reset/stash them or add them wholesale to another PR.
-- SSH `controltower`, WSL `ControlTower-Runner`; runtime Python
-  `/home/dieterolson/opensim-10003/bin/python` (prior probe OpenSim 4.6/Moco).
-- Current deployed tree: `/home/dieterolson/opensim-10341-runtime`, not the
+- SSH `controltower`, WSL `<host>-Runner`; runtime Python
+  `<owner-home>/opensim-10003/bin/python` (prior probe OpenSim 4.6/Moco).
+- Current deployed tree: `<owner-home>/opensim-10341-runtime`, not the
   older `opensim-10003-runtime`. It is a copied tree with no reported Git HEAD.
 - Deployed moco_tracking.py, moco_g1.py and os7_moco_g1_driver.py match the local
   commit after line-ending normalization. See the shared
@@ -32,13 +32,13 @@ continuation replaces the old restart instructions for completed OS-2b/3b work.
 ## Live Job Snapshot
 
 PID 3082595 was running at the recorded time. Verify current process identity
-before acting. Log `/home/dieterolson/os7_g1f.log`; output
-`/home/dieterolson/os7_g1f`. No completed receipt existed there at the snapshot.
+before acting. Log `<owner-home>/os7_g1f.log`; output
+`<owner-home>/os7_g1f`. No completed receipt existed there at the snapshot.
 Latest sampled iteration 236 showed large primal infeasibility (~4.69e4);
 this is not convergence. Do not terminate or duplicate the owner's job.
 
 Observed arguments: `--max-iterations 600 --replay-timeout-s 1800 --rungs 0.85
-1.813888889 --warm-start /home/dieterolson/os7_g1b/rungs/0600ms
+1.813888889 --warm-start <owner-home>/os7_g1b/rungs/0600ms
 --continue-on-failure --ik-smooth-frames 15 --inverse-warm-start`.
 
 `os7_g1f` is the inverse-warm-start attempt, not the older raw/smoothed-IK jobs.
@@ -99,15 +99,15 @@ separately; the existing receipts do not prove one unique cause of divergence.
 The following is the recorded command, **not an instruction to launch a duplicate**:
 
 ```bash
-cd /home/dieterolson/opensim-10341-runtime
-/home/dieterolson/opensim-10003/bin/python \
+cd <owner-home>/opensim-10341-runtime
+<owner-home>/opensim-10003/bin/python \
   docs/development/opensim_tour_matching/os7_moco_g1_driver.py \
   --model /mnt/c/Users/diete/opensim-10003/os3b-scale-ik/golf_humanoid_scaled_tour_markers.osim \
   --trc docs/development/opensim_tour_matching/evidence/tour_average_tracked.trc \
   --ik-states /mnt/c/Users/diete/opensim-10003/ik_states_full.sto \
-  --outdir /home/dieterolson/os7_g1f --max-iterations 600 \
+  --outdir <owner-home>/os7_g1f --max-iterations 600 \
   --replay-timeout-s 1800 --rungs 0.85 1.813888889 \
-  --warm-start /home/dieterolson/os7_g1b/rungs/0600ms \
+  --warm-start <owner-home>/os7_g1b/rungs/0600ms \
   --continue-on-failure --ik-smooth-frames 15 --inverse-warm-start
 ```
 

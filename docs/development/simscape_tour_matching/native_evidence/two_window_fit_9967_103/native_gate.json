@@ -9,7 +9,7 @@
   "g1_terminal_ceiling_m": 0.035,
   "matlab_release_required": "2025b",
   "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
-  "host": "DeskComputer",
+  "host": "<host>",
   "blocked_reasons": [
     "Native two_window_fit_9967_103 Fit has not been executed on a licensed R2025b host in this worktree.",
     "Source run-102 full-marker terminal (40.303 mm) exceeds G1 ceiling (35 mm).",

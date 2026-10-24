@@ -7,7 +7,7 @@ First sanitation report ever committed in this repo — see Findings below.
 ## Scope
 
 A scheduled sweep of worktree/branch/PR hygiene and root/docs clutter on
-`UpstreamDrift`, run from an isolated worktree on `DeskComputer`. Did not
+`UpstreamDrift`, run from an isolated worktree on `<host>`. Did not
 touch other agents' worktrees, did not merge or admin-override anything,
 did not file bulk remediation issues.
 

@@ -1,7 +1,7 @@
 """OS-2 preflight: qualify the isolated OpenSim runtime against packaged inputs.
 
-Runs only where ``import opensim`` succeeds (the ControlTower venv
-/home/dieterolson/opensim-10003). Loads golf_humanoid.osim through OpenSim,
+Runs only where ``import opensim`` succeeds (the <host> venv
+<owner-home>/opensim-10003). Loads golf_humanoid.osim through OpenSim,
 initialises the system, inventories bodies/coordinates/markers, reads the
 OS-1 TRC through OpenSim's own TRCFileAdapter, and writes a receipt. It does
 not calibrate markers, run IK or run Moco.

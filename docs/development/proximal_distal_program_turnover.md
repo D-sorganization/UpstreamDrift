@@ -107,7 +107,7 @@ It binds the exact evaluator revision/tree, seven evaluator-source hashes, and
 ## Validation Commands
 
 Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` and
-serial pytest (`-n 0`) on DeskComputer.
+serial pytest (`-n 0`) on <host>.
 
 ```powershell
 python -m pytest -n 0 -q tests/research/test_articulated_distributed_smoke_registration.py
@@ -135,7 +135,7 @@ input to #9153:
   `c5cfba35ecafa96054ef8cc872f2e91a9f7855db0b93cfa491f9b18ee3db80f4`.
 - Retained checkpoints: 93/830 total; shaft 48/48 and ground 45/48 for the
   completed nominal subset.
-- ControlTower VHDX: `F:\WSL\ControlTower-SSD\ext4.vhdx`, unreadable with
+- <host> VHDX: `F:\WSL\<host>-SSD\ext4.vhdx`, unreadable with
   Windows/WSL error `0x80070570`.
 - Do not retry WSL startup, run CHKDSK, repair, mount, copy, mutate, recreate,
   restart services, or launch a replacement campaign without explicit user

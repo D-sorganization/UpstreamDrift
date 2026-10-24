@@ -46,7 +46,7 @@
   },
   "python": "C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
   "repository_revision": "eb7b1b06a2d3a1e3afb1e03d63863b7f60871d16",
-  "runner_hint": "ControlTower with drake/pydrake venv; nightly-cross-engine.yml",
+  "runner_hint": "<host> with drake/pydrake venv; nightly-cross-engine.yml",
   "schema_version": 1,
   "scope": "native-engine pytest lane only; no model, fit, acceptance, or release claim",
   "source_freshness": {

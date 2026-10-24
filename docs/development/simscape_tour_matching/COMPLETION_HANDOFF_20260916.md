@@ -72,8 +72,8 @@ hashes and reproduce run102's uninterrupted prefix within established numerical
 tolerances. Record the exact command, dependency versions and time budget. Test
 identity restart, coefficient ordering/units, missing inputs, no double force
 rotation, and horizon changes that preserve the original polynomial function.
-Do not require MATLAB on this laptop: use explicit R2025b on DeskComputer or
-ControlTower, and the recorded Pinocchio WSL environment.
+Do not require MATLAB on this laptop: use explicit R2025b on <host> or
+<host>, and the recorded Pinocchio WSL environment.
 
 ### B. Establish What the Fixed Model Can Reach
 
