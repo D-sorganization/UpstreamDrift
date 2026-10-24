@@ -7,7 +7,7 @@
     "archive_path":  "docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md",
     "line_number":  791,
     "normalizer":  {
-                       "path":  "C:\\Users\\diete\\Repositories\\Repository_Management\\shared_scripts\\document_title_case.py",
+                       "path":  "<owner-home>\\Repositories\\Repository_Management\\shared_scripts\\document_title_case.py",
                        "raw_sha256":  "c6ec3c3243bb08dec0f0a31a5bf9306d3d948e40522f73bf97b8caa3f6f5131d",
                        "function":  "expected_title",
                        "source_commit":  "b67af31d5d313403c2a7f6f1b5aeeb0de3882a0e",

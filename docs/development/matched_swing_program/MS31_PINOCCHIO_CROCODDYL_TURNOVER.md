@@ -89,7 +89,7 @@ G1 gates (run-102 thresholds): whole <= 25 mm, early <= 12 mm, terminal
   Windows; native tests need the env above.
 
 Remote pattern that works (quoting through cmd.exe -> wsl -> bash mangles `$`
-and quotes): write a script locally, `scp -q script.sh controltower:C:/Users/diete/`,
+and quotes): write a script locally, `scp -q script.sh controltower:<owner-home>/`,
 run `ssh controltower "wsl -d ControlTower-Runner -- bash /mnt/c/Users/diete/script.sh"`,
 pipe through `tr -d '\r'`. Long runs: launch detached with
 `scripts/matched_swing/run_crocoddyl_fit.sh` and poll the log for `^EXIT`.

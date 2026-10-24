@@ -37,7 +37,7 @@
   "external_assessment_sha256": "sha256:f7f1be7ce6b6742895c279ff348773b6f758a2b25eca2594ed84358cf6c11818",
   "ground_diagnosis_sha256": "sha256:af703bf7c11d777134336bd6a569ffbac820006c68a815ad7d9a5e4710bcfe58",
   "repeatability_copy_receipt": {
-    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Normalized-Coverage V15 Numerical Evidence\\Repeatability Inputs\\repeatability-copy-receipt.json",
+    "path": "<owner-home>\\Desktop\\Necromatcher Review 2026-10-01\\Normalized-Coverage V15 Numerical Evidence\\Repeatability Inputs\\repeatability-copy-receipt.json",
     "sha256": "sha256:5f4588ebabaf35f71e6b5e58cd34b2e00c8489fb97661533cefe2221de37f255",
     "artifact_count": 17,
     "protocol_tests": 48
@@ -357,7 +357,7 @@
       "optimizer_message": "The maximum number of function evaluations is exceeded.",
       "runtime_s": 53.55562519998057,
       "fresh_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\normalized-coverage-v15-independent-assessment-tiger-normalized-coverage-control-fit-v15-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\normalized-coverage-v15-independent-assessment-tiger-normalized-coverage-control-fit-v15-audit.json",
         "sha256": "sha256:b21e8698c1bd52112109955905835716dbfed2153c8b1554c712d1e985653584"
       },
       "initial_spline_coefficient_sha256": "sha256:7fe01891f243ac56d3faf3d052b65409218349c471ff47dbeb8f5300553def04",
@@ -636,7 +636,7 @@
       "optimizer_message": "The maximum number of function evaluations is exceeded.",
       "runtime_s": 49.31700569999521,
       "fresh_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\normalized-coverage-v15-independent-assessment-tiger-normalized-coverage-variant-fit-v15-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\normalized-coverage-v15-independent-assessment-tiger-normalized-coverage-variant-fit-v15-audit.json",
         "sha256": "sha256:07f642d7665df42e9da1638b0d5c10de9336b036e7b5c10d033d1b04afc02609"
       },
       "initial_spline_coefficient_sha256": "sha256:7fe01891f243ac56d3faf3d052b65409218349c471ff47dbeb8f5300553def04",

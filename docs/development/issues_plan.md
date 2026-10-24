@@ -119,7 +119,7 @@ Create a dedicated section (or tool) for Markerless Motion Capture.
 **Description:**
 Update the application logo and favicon with the provided asset.
 
-- Asset path: `C:/Users/diete/.gemini/antigravity/brain/0e5dda19-c1e4-4b2b-963d-9e5edb8afe4a/uploaded_media_1769702712320.png`
+- Asset path: `<owner-home>/.gemini/antigravity/brain/0e5dda19-c1e4-4b2b-963d-9e5edb8afe4a/uploaded_media_1769702712320.png`
 - Apply to Window Icon, About Dialog, and Splash Screen.
 
 **Acceptance Criteria:**

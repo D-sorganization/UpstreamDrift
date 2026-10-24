@@ -3,7 +3,7 @@
   "reviewer": "Codex root",
   "capture_id": "tiger-usga-range-capture-v1",
   "capture_archive": {
-    "path": "C:\\Users\\diete\\AppData\\Local\\upstream-drift\\upstream-drift\\launcher\\necromatcher\\assets\\tiger-usga-range-capture-v1.zip",
+    "path": "<owner-home>\\AppData\\Local\\upstream-drift\\upstream-drift\\launcher\\necromatcher\\assets\\tiger-usga-range-capture-v1.zip",
     "bytes": 167593456,
     "sha256": "d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357"
   },
@@ -83,12 +83,12 @@
   },
   "source_gallery_manifests": [
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Tiger Both-Hands Source Review 2026-10-03 V1\\source-manifest.json",
+      "path": "<owner-home>\\Desktop\\Necromatcher Tiger Both-Hands Source Review 2026-10-03 V1\\source-manifest.json",
       "bytes": 18429,
       "sha256": "2520470a7aa5cfcd70df0d44757ee84e778cd190c72991c6d8866e9f51dd6648"
     },
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Tiger Both-Hands Source Review 2026-10-03 V2\\source-manifest.json",
+      "path": "<owner-home>\\Desktop\\Necromatcher Tiger Both-Hands Source Review 2026-10-03 V2\\source-manifest.json",
       "bytes": 27848,
       "sha256": "86a73c578b781012a85e8e25161212a4c854fb4531a457f6a1a34ac3673331af"
     }

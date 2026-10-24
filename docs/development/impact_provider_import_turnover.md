@@ -7,7 +7,7 @@ shaft, acoustic or experimental completion is implied.
 
 ## Workspace and Claim
 
-`C:/Users/diete/Repositories/UpstreamDrift-impact-provider`, branch
+`<owner-home>/Repositories/UpstreamDrift-impact-provider`, branch
 `fix/9735-impact-provider-imports`, base `dbc6727aa4f0d422b7adaf6957e658e8997f7f29`.
 The claim was free and the codex lease succeeded, session
 `impact-acoustics-01a07d8a-provider`, expiry 2026-09-08T04:17:08Z.
@@ -18,7 +18,7 @@ seam handoff before a fix; preserve all protected research records.
 
 ## Reproduction and Positive Control
 
-Tools provider source is `C:/Users/diete/Repositories/Tools-impact-coupling`;
+Tools provider source is `<owner-home>/Repositories/Tools-impact-coupling`;
 implementation `31ebe4993` and reproduction head `eb78179b5`. Its ignored `.venv`
 is Python 3.12.10 with system packages plus pytest-qt 4.5.0. The exact provider
 checkout has no production changes after these commits, only turnover updates.

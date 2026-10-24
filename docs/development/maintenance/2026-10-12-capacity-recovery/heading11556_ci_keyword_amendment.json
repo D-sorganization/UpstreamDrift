@@ -24,7 +24,7 @@
   "expected_title_implementations": [
     {
       "implementation": "UpstreamDrift",
-      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-devlog-capacity-12391-20261012\\scripts\\check_document_title_case.py",
+      "path": "<owner-home>\\Repositories\\UpstreamDrift-worktrees\\codex-devlog-capacity-12391-20261012\\scripts\\check_document_title_case.py",
       "raw_sha256": "47c216fa5789578509d5a3a804a6701ed297d5265c090160b40bf5d8a79f91d1",
       "git_blob_sha1": "c8291de890b216b765cc7d64cfbb02937a3a79cd",
       "old_expected_title": "### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo if: Exemption and Sink-Based Head-Checkout Analysis.",
@@ -33,7 +33,7 @@
     },
     {
       "implementation": "Repository_Management",
-      "path": "C:\\Users\\diete\\Repositories\\Repository_Management\\shared_scripts\\document_title_case.py",
+      "path": "<owner-home>\\Repositories\\Repository_Management\\shared_scripts\\document_title_case.py",
       "raw_sha256": "c6ec3c3243bb08dec0f0a31a5bf9306d3d948e40522f73bf97b8caa3f6f5131d",
       "git_blob_sha1": "c9a01ec2581df8d22ddad7af5a20a3570c0f4b9c",
       "old_expected_title": "### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo If: Exemption and Sink-Based Head-Checkout Analysis.",

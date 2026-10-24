@@ -190,7 +190,7 @@ uncontrolled recording establishes a grip mechanism.
 
 ## Turnover
 
-- Worktree: `C:/Users/diete/Repositories/UpstreamDrift-impact-acoustics`.
+- Worktree: `<owner-home>/Repositories/UpstreamDrift-impact-acoustics`.
 - Branch: `docs/9700-impact-acoustics-program`; commit `SELF`; PR #9706; initial implementation `077ae9df9`.
 - Completed: relevant implementation/test inventory, source ownership, state
   contract, study/validation design and linked implementation issues.

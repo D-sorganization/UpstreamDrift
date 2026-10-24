@@ -32,10 +32,10 @@ See `post_archive_conservation.json`, `post_archive_conservation_before_titlecas
 The fresh focused check used the pinned QA interpreter from the owned maintenance worktree:
 
 ```powershell
-C:/Users/diete/Repositories/_venvs/mpp-domain-12233/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/unit/repo_hygiene/test_deferred_catalog_hook.py
+<owner-home>/Repositories/_venvs/mpp-domain-12233/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/unit/repo_hygiene/test_deferred_catalog_hook.py
 ```
 
-It ran with `PYTHONDONTWRITEBYTECODE=1` and `PYTHONPATH=<owned worktree>;C:/Users/diete/Repositories/Repository_Management`; the actual executable, environment, exit code, and raw output digests are recorded in `source_proof_10783.json`. The earlier test output is retained separately because its exact interpreter environment was not recorded at the time.
+It ran with `PYTHONDONTWRITEBYTECODE=1` and `PYTHONPATH=<owned worktree>;<owner-home>/Repositories/Repository_Management`; the actual executable, environment, exit code, and raw output digests are recorded in `source_proof_10783.json`. The earlier test output is retained separately because its exact interpreter environment was not recorded at the time.
 
 The focused tests and named source bundle support only this scoped software status correction. They do not establish a transitive or fleet-wide source closure, completion of #1687, or empirical/physical/model qualification. The zero-day archive choice was an explicit retention override; this record does not change the archiver default.
 

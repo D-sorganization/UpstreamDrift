@@ -2,7 +2,7 @@
   "schema": "necromatcher/wrist-expansion-summary/1",
   "producer": "f570e5f421d84d54275f7c7b36ab3d4051aa0112",
   "finished_at_utc": "2026-10-02T20:18:29.899027+00:00",
-  "full_receipt_path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\wrist-expansion-v11-attempt2-receipt.json",
+  "full_receipt_path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\wrist-expansion-v11-attempt2-receipt.json",
   "full_receipt_sha256": "sha256:fa42d4c887ac0f7fbd940682d576e90b849dc1607b6d0cec48a5067688e00a3d",
   "driver_sha256": "sha256:6f0276adb596dfd56867adcbe79ced29ebfc3e82d6e7573068bd9105cbd4e619",
   "execution_brackets_match": true,
@@ -704,7 +704,7 @@
     }
   ],
   "independent_assessment": {
-    "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\wrist-expansion-v11-independent-assessment.json",
+    "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\wrist-expansion-v11-independent-assessment.json",
     "sha256": "sha256:1efb162a58fdaef064c25c7c52c6467b9ed1ce0a52f7561ea8b943524c7b24ff",
     "all_four_trials_independently_reproduced": true,
     "held_out_rms_pixels": {

@@ -59,13 +59,13 @@ and outputs add 33 exact files in `evidence/grid-preserving/`. All 54 manifest
 entries retain actual byte identities; no old entry or receipt is rewritten.
 
 The prior local preview remains at
-`C:/Users/diete/Desktop/Motion_Matching_Previews/moco_binding_11791/`.
+`<owner-home>/Desktop/Motion_Matching_Previews/moco_binding_11791/`.
 Its PNG/MP4/receipt bind the historical 20-mesh receipt. It was inspected but
 must not be relabeled as corrected evidence. Its .1 s horizon plays over 5 s;
 this is not real-time performance.
 
 The corrected 80-mesh preview is separately retained at
-`C:/Users/diete/Desktop/Motion_Matching_Previews/moco_binding_11949/` with
+`<owner-home>/Desktop/Motion_Matching_Previews/moco_binding_11949/` with
 `native_state_comparison.png`, `.mp4` and `preview-receipt.json`. Its source receipt
 hash is `da3c944109785a288aa9bffa9312a714d5658ef0207288f94dcd1e866861bcec`.
 The documentation worker verified both artifact hashes/sizes (82,955-byte PNG,

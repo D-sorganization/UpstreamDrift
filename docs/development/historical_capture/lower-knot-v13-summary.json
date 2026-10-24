@@ -38,7 +38,7 @@
     }
   },
   "full_independent_assessment": {
-    "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment.json",
+    "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment.json",
     "sha256": "sha256:e4e82f4a09b3e2d75f7894562efbfd15cd7f4dc5a364540da0fdc76495b78de9"
   },
   "runs": [
@@ -73,7 +73,7 @@
         "continuous_nonlinear_certified": false
       },
       "fresh_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-control-seed-v13-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-control-seed-v13-audit.json",
         "sha256": "sha256:3844172c72f3d279e4e8f45e047a76818b400197fc8d042325b5f8e103c61d44"
       },
       "source_and_probe_identities": {
@@ -191,7 +191,7 @@
         "continuous_nonlinear_certified": false
       },
       "fresh_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-control-fit-v13-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-control-fit-v13-audit.json",
         "sha256": "sha256:99eb2419763c37807eb854ec8d7492c5011030c97a19a70cee969c01054e130c"
       },
       "source_and_probe_identities": {
@@ -335,7 +335,7 @@
         "continuous_nonlinear_certified": false
       },
       "fresh_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-variant-seed-v13-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-variant-seed-v13-audit.json",
         "sha256": "sha256:116fe9561e0eb6d875cc4ec99e59ac93fc3c10ebd7cd5f3603015e017ceea7a9"
       },
       "source_and_probe_identities": {
@@ -453,7 +453,7 @@
         "continuous_nonlinear_certified": false
       },
       "fresh_full_audit": {
-        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-variant-fit-v13-audit.json",
+        "path": "<owner-home>\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-variant-fit-v13-audit.json",
         "sha256": "sha256:1587efb2b62f5e1aae612afdbb0e3d0935bf149f0bea5c080121e4afb77f4cb0"
       },
       "source_and_probe_identities": {

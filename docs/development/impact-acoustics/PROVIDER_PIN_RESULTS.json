@@ -13,8 +13,8 @@
     "wheel_bytes": 210496037,
     "fixture_sha256": "fcabcfc6017bc92ecfbfecfdaa585b6e506c9041b59f0b49f5d5a1fde23ea7fe",
     "origins": {
-      "shared.python.golf_club.shaft_model_data": "C:\\Users\\diete\\.cache\\codex-impact\\provider9912-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
-      "shared.python.theme.api": "C:\\Users\\diete\\.cache\\codex-impact\\provider9912-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py"
+      "shared.python.golf_club.shaft_model_data": "<owner-home>\\.cache\\codex-impact\\provider9912-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
+      "shared.python.theme.api": "<owner-home>\\.cache\\codex-impact\\provider9912-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py"
     },
     "versions": {
       "upstream-drift": "2.1.3",
@@ -66,11 +66,11 @@
       "wheel_bytes": 210512623,
       "fixture_sha256": "fcabcfc6017bc92ecfbfecfdaa585b6e506c9041b59f0b49f5d5a1fde23ea7fe",
       "origins": {
-        "shared.python.golf_club.shaft_model_data": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
-        "shared.python.theme.api": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py",
-        "shared.python.theme.color_derivation": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\shared\\python\\theme\\color_derivation.py",
-        "shared.python.theme.layout_metrics": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\src\\shared\\python\\theme\\layout_metrics.py",
-        "src.shared.python.realtime": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\src\\shared\\python\\realtime\\__init__.py"
+        "shared.python.golf_club.shaft_model_data": "<owner-home>\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
+        "shared.python.theme.api": "<owner-home>\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py",
+        "shared.python.theme.color_derivation": "<owner-home>\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\shared\\python\\theme\\color_derivation.py",
+        "shared.python.theme.layout_metrics": "<owner-home>\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\src\\shared\\python\\theme\\layout_metrics.py",
+        "src.shared.python.realtime": "<owner-home>\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\src\\shared\\python\\realtime\\__init__.py"
       },
       "versions": {
         "upstream-drift": "2.1.3",
@@ -189,13 +189,13 @@
       "wheel_bytes": 210520353,
       "fixture_sha256": "fcabcfc6017bc92ecfbfecfdaa585b6e506c9041b59f0b49f5d5a1fde23ea7fe",
       "origins": {
-        "shared.python.golf_club.shaft_model_data": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
-        "shared.python.theme.api": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py",
-        "shared.python.theme.color_derivation": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\theme\\color_derivation.py",
-        "shared.python.theme.layout_metrics": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\theme\\layout_metrics.py",
-        "src.shared.python.realtime": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\realtime\\__init__.py",
-        "shared.python.ui.function_generator_widget": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\ui\\function_generator_widget.py",
-        "shared.python.ui.toast": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\ui\\toast.py"
+        "shared.python.golf_club.shaft_model_data": "<owner-home>\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
+        "shared.python.theme.api": "<owner-home>\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py",
+        "shared.python.theme.color_derivation": "<owner-home>\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\theme\\color_derivation.py",
+        "shared.python.theme.layout_metrics": "<owner-home>\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\theme\\layout_metrics.py",
+        "src.shared.python.realtime": "<owner-home>\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\realtime\\__init__.py",
+        "shared.python.ui.function_generator_widget": "<owner-home>\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\ui\\function_generator_widget.py",
+        "shared.python.ui.toast": "<owner-home>\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\ui\\toast.py"
       },
       "versions": {
         "upstream-drift": "2.1.3",
