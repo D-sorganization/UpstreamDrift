@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13570 | Add conflict-disarm caller workflow (dry-run) and CI allowlists for RM reusable @main. |
+| 2026-10-24 | #13370 | fix(motion_matching): reclassify grip_style as physical pick and clean sidecar |
+| 2026-10-24 | #13623 | HRG-E3: lower-body, shoulder, elbow, and line turn terms in ISB and golf language |
+| 2026-10-24 | #13685 | Record #13072 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md); Record #13104 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md); Record #13579 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md) |
 | 2026-10-24 | #13684 | Route native F02 and BoxFDDP mass reads through full_mass_matrix on MuJoCo 3.13+. |
 | 2026-10-24 | #13664 | Wire subscription CLI adapters (Claude, Codex, Antigravity), simulation HostActionPort controls, and local Whisper VTT into Sidekick |
 | 2026-10-24 | #13680 | Pin live required-check export for UD-CI-031 |
