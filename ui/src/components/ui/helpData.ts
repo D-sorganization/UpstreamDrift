@@ -81,6 +81,7 @@ export const UI_HELP_TOPICS: Record<string, string> = {
   model_explorer: 'model_explorer',
   shot_tracer: 'ball_flight',
   project_map: 'project_map',
+  loop_nullspace_panel: 'loop_nullspace',
   // Settings
   settings_general: 'configuration',
   settings_engines: 'engine_selection',
@@ -140,6 +141,13 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     shortDescription: 'Complete map of all features and modules',
     category: 'tools',
     relatedTopics: ['engine_selection', 'analysis_tools'],
+  },
+  loop_nullspace: {
+    id: 'loop_nullspace',
+    title: 'Loop Null-Space Exploration',
+    shortDescription: 'Reading bands, representatives and indeterminate segments',
+    category: 'analysis',
+    relatedTopics: ['analysis_tools', 'visualization'],
   },
 };
 
@@ -335,6 +343,29 @@ Select an engine based on your primary analysis goals.`,
       'Check the Deprecated section before working on old code',
     ],
     seeAlso: ['engine_selection', 'analysis_tools'],
+  },
+
+  loop_nullspace: {
+    title: 'Loop Null-Space Exploration',
+    short: 'What a band, a representative and an indeterminate segment mean',
+    description: `Full help page: docs/help/loop_nullspace.md
+
+**What it shows**
+- Invariant: the same for every admissible load allocation, given the model
+- Band: the envelope of values still allowed after the declared hypotheses
+- Representative: one chosen prior drawn as a dashed line, not ground truth
+- Indeterminate segment: the sign class is not settled over the envelope
+
+**Non-claims**
+- Motion capture does not fix how load splits between the hands
+- Joint torque capacities are population priors, not the athlete
+- A certificate or restriction sensitivity panel is not validation`,
+    tips: [
+      'Read the withheld reason chip before using a number',
+      'A shaded segment is indeterminate, not zero',
+      'Presets are declared hypotheses, not measurements',
+    ],
+    seeAlso: ['analysis_tools', 'visualization'],
   },
 };
 

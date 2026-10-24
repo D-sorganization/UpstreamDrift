@@ -26,6 +26,7 @@ import {
   type SensitivityCatalogue,
 } from '@/api/loopNullSpace';
 import { useLoopNullspaceJob } from '@/api/useLoopNullspaceJob';
+import { HelpButton } from '../ui/HelpPanel';
 import { parseFrameIndices } from './loopNullSpace/format';
 import { PlotModelView } from './loopNullSpace/PlotModelView';
 import { VariabilityControls, type ControlsState } from './loopNullSpace/VariabilityControls';
@@ -127,7 +128,10 @@ export function LoopNullSpacePanel() {
       aria-label="Loop Null-Space Exploration"
       className="bg-gray-800 rounded-lg border border-gray-700 p-4"
     >
-      <h3 className="text-lg font-semibold text-gray-100 mb-3">Loop Null-Space Exploration</h3>
+      <div className="flex items-center gap-2 mb-3">
+        <h3 className="text-lg font-semibold text-gray-100">Loop Null-Space Exploration</h3>
+        <HelpButton topicId="loop_nullspace" tooltip="Open the Loop Null-Space help page" />
+      </div>
       <form onSubmit={submit} className="flex flex-wrap gap-3 items-end mb-3">
         <label className="text-xs text-gray-300 flex flex-col gap-1">
           Source
