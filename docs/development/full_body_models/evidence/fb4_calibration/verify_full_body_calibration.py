@@ -191,7 +191,7 @@ def run_remote_engine(engine_name: str, stride: int, iterations: int) -> dict[st
     )
     sys.stdout.flush()
 
-    remote_base = "/home/dieterolson/fb4_calibration_run"
+    remote_base = "<owner-home>/fb4_calibration_run"
     _sync_files_to_remote(remote_base)
 
     script = (

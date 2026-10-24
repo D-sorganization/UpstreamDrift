@@ -472,12 +472,12 @@
     "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
     "python": "3.12.12 (main, Oct 10 2025, 08:52:57) [GCC 11.4.0]",
     "source_imports": {
-      "bunkershot3d_package": "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/bunkershot3d/__init__.py",
+      "bunkershot3d_package": "<owner-home>/native_engine_parity_20261011_final_50203626/src/bunkershot3d/__init__.py",
       "bunkershot3d_package_sha256": "16fdb491cba2e67ca3574c8341aa6a393ae613c3845271c43ab6b2ca8255b39f",
       "source_import_paths": [
-        "/home/dieterolson/native_engine_parity_20261011_final_50203626/src",
-        "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/shared/python",
-        "/home/dieterolson/native_engine_parity_20261011_final_50203626"
+        "<owner-home>/native_engine_parity_20261011_final_50203626/src",
+        "<owner-home>/native_engine_parity_20261011_final_50203626/src/shared/python",
+        "<owner-home>/native_engine_parity_20261011_final_50203626"
       ]
     }
   },

@@ -271,7 +271,7 @@ Findings:
   reference (13.6°) is worse than its IK reference (7.9°).
 
 Evidence: `evidence/head_gaze/fd_neck_tracking.json`. Runs were made on
-ControlTower (`ud-sim`) at `b298115bb0` (IK rows) and `4a83b6b7cf` (gaze rows;
+<host> (`ud-sim`) at `b298115bb0` (IK rows) and `4a83b6b7cf` (gaze rows;
 the step order changed only for `--fd-neck gaze`). Reproduce with:
 
 ```
@@ -337,7 +337,7 @@ Findings:
   because head markers do not drive this neck.
 
 Evidence: `evidence/head_gaze/fd_neck_closed_loop.json`. The runs were made on
-ControlTower (`ud-sim`): the open-loop rows at `c1f9ee5a56` and the
+<host> (`ud-sim`): the open-loop rows at `c1f9ee5a56` and the
 closed-loop rows at `8a24ce41db`. The open-loop code path is the same at both
 commits, because the second commit only changes the hook. Canonical commands
 (`CANONICAL_RUN.md` §2A) plus `--fd-neck gaze` or `--fd-neck gaze-closed`:

@@ -25,13 +25,13 @@ or a topic branch off it; every step opens its own PR with `Refs #10062`.
   from `render_simscape_skeleton.py`. Capsule radii follow a uniform-density
   cylinder (`capsule_radius(mass_kg, length_m)`, 6 to 50 mm), one capsule per
   child joint plus the farthest centre of mass.
-- Local machine facts (DeskComputer): MuJoCo 3.3.4, PyQt6, matplotlib and
+- Local machine facts (<host>): MuJoCo 3.3.4, PyQt6, matplotlib and
   imageio are installed; `mujoco.Renderer` works offscreen at 240x320 (a
   540x720 context failed once; retry smaller). Pinocchio, Drake and OpenSim
   are not installed here; Pinocchio has Windows wheels (`pip install pin`),
   OpenSim 4.6 may (`pip install opensim`, verify), Drake has none (use
-  ControlTower, runtimes under `/home/dieterolson/drake-native-runtime-10022-*`,
-  or the ControlTower Docker images `upstream-drift:{slim,standard,biomech}`).
+  <host>, runtimes under `<owner-home>/drake-native-runtime-10022-*`,
+  or the <host> Docker images `upstream-drift:{slim,standard,biomech}`).
 
 ## Rules for Every Step
 
@@ -87,13 +87,13 @@ Goal: three engines animating one candidate.
   marker difference versus the Pinocchio replay per sample. Red test: the
   replay NPZ writer/reader roundtrip and the metric function against the
   archived Pinocchio numbers (whole 26.366 mm, terminal 46.305 mm).
-- Drake (ControlTower): first close the failed 0.85 s run-18 full-state parity
+- Drake (<host>): first close the failed 0.85 s run-18 full-state parity
   (`drake_native_matching/reproduction/diagnose_run18.py`), then replay
   returned81 with the KKT adapter, write the same NPZ, render via meshcat
   (`pip install meshcat` in the Drake runtime) with the shared skeleton
   translated to meshcat cylinders and spheres (`skeleton_world_segments`),
   capture frames to GIF. Launch with `systemd-run --user` and `run_job.py`.
-- Pinocchio (ControlTower): render the existing `returned-replay.npz` the same
+- Pinocchio (<host>): render the existing `returned-replay.npz` the same
   way for a like-for-like third animation.
 
 Done gate: three GIFs of the same candidate hash under `evidence/replays/`
@@ -124,7 +124,7 @@ playback GIF, metrics table against Pinocchio returned81 on the same window.
   against itself): mass matrix, FK of the 16 frames and closure residuals at
   20 random upper-body states, legs at zero. Record nonzero but tiny
   differences (1e-12 band) or explain exact zeros structurally.
-- FB-3-D: produce the missing receipt on ControlTower for the Drake builder
+- FB-3-D: produce the missing receipt on <host> for the Drake builder
   with the same four gates; render one default-pose frame through meshcat.
 - FB-3-M: add the visual layer to the FB-3-M evidence (default pose PNG).
 
@@ -150,5 +150,5 @@ listed tests, archive rendered evidence with a receipt naming the candidate
 hash, update HANDOFF.md and DL-#10062 in the same commit, push a topic
 branch, open a full PR with Refs #10062. Report the five uninterrupted
 metrics whenever a replay is produced; never report a rendered playback as a
-match. Remote jobs run on ControlTower via systemd-run --user and run_job.py.
+match. Remote jobs run on <host> via systemd-run --user and run_job.py.
 ```

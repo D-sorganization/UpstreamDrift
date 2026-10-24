@@ -45,7 +45,7 @@ MODELS = ROOT / "docs/development/full_body_models"
 FIXTURES = ROOT / "tests/fixtures/club_face"
 OUT = HERE / "parity"
 PLOTS = Path(
-    "/home/dieterolson/Videos/Parity Audit/golfer_realism/grip_kinetics/parity"
+    "<owner-home>/Videos/Parity Audit/golfer_realism/grip_kinetics/parity"
 )
 ENGINE_MODULES = {
     "mujoco": "src.engines.physics_engines.mujoco.python.grip_bushing",

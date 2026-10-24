@@ -2,7 +2,7 @@
   "commit": "ec249edfde74ecd3961d07c0c742ea154cb69d4d",
   "python": "3.12.10",
   "mujoco": "3.13.0",
-  "host": "DeskComputer",
+  "host": "<host>",
   "captures": ["driver", "iron"],
   "solvers": ["none", "shooting", "mjx-lbfgs"],
   "shooting_passes": 8,

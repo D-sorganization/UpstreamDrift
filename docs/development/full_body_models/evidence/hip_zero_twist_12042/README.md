@@ -1,7 +1,7 @@
 # Neutral Hip Zero-Twist: Pelvis Turn at Impact (#12042 Slice 3)
 
 MuJoCo calibrated runs with `--hip-zero-twist neutral` on both tour captures
-(capture-A driver, capture-B 7-iron). They ran on ControlTower (`ud-sim`) at
+(capture-A driver, capture-B 7-iron). They ran on <host> (`ud-sim`) at
 `7eb87c7c5c`. Each directory holds the run's `receipt.json` and its final
 scaled specification. The canonical receipts in
 `../ground_support/anthro_driver_seeds/` and

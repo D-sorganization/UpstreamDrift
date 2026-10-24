@@ -47,7 +47,7 @@ from src.shared.python.grip_contact.interface import GripInterface  # noqa: E402
 from src.shared.python.grip_contact.parity import GripKineticsSeries  # noqa: E402
 
 MODELS = ROOT / "docs/development/full_body_models"
-OUT_DIR = Path("/home/dieterolson/Videos/Parity Audit/golfer_realism/grip_kinetics")
+OUT_DIR = Path("<owner-home>/Videos/Parity Audit/golfer_realism/grip_kinetics")
 FPS = 60
 SPEED = 0.5
 SIZE = (1920, 1080)

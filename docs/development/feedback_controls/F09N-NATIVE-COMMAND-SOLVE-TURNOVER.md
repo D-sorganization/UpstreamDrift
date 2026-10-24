@@ -36,7 +36,7 @@ This wave has no private fit, online execution, contact or physiological claim.
 ## Actual TDD and Validation Evidence
 
 Durable receipts live in the workspace `docs/development/feedback_controls_planning`.
-The actual provider is MyoSuite 3.0.0 / MuJoCo 3.6.0 on DeskComputer, reusing the
+The actual provider is MyoSuite 3.0.0 / MuJoCo 3.6.0 on <host>, reusing the
 existing owned source stage and SDK environment.
 
 - `f09n-native-api-red.xml`: seven genuine missing-API failures before implementation.

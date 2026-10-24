@@ -82,7 +82,7 @@ appears only when the marker fit also has to hold the capture's leg posture.
 
 The canonical ground-support receipts (`anthro_driver_seeds`,
 `anthro_iron_seeds_zmp`) were **not** regenerated. The 7-iron result above needs
-the owner decision first, and the receipts are canonically made on ControlTower
+the owner decision first, and the receipts are canonically made on <host>
 (`ud-sim`), where host-to-host solver variation is 0.3 to 0.5 mm. Regenerate
 both receipts once the 7-iron decision is recorded. The regeneration is
 serialized before R4 (#12684).

@@ -18,7 +18,7 @@ is written by `scripts/diagnose_address_leg_yaw.py` and run on brick.
 | Address marker RMS (mm)                                  | 7.38          | 7.13         | 7.29          | 4.85         |
 
 All four runs are from the same host. The same pre-fix driver command on
-ControlTower (`ud-sim`) gave -2.07 deg and 7.45 mm, which matches the #12057
+<host> (`ud-sim`) gave -2.07 deg and 7.45 mm, which matches the #12057
 evidence; the difference is host-to-host solver variation.
 
 After the fix, the femur yaw at zero equals the measured hip zero-twist

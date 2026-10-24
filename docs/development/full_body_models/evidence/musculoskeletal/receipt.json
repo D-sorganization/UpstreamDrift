@@ -169,10 +169,10 @@
   "inputs": {
     "base_model": "/tmp/claude-1000/-home-dieterolson-Repositories-UpstreamDrift/16836c4a-59a5-46dd-92ff-37c7c6bab2f1/scratchpad/msk_models/osm/Models/Rajagopal/RajagopalLaiUhlrich2023.osim",
     "base_model_sha256": "8f30d0b64750b87eb7f705907862590535212b4afd7e919faa3fd7d1683d22ec",
-    "golf_model": "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-osv9b/docs/development/opensim_tour_matching/evidence/os7_moco_g1/inputs/golf_humanoid_scaled_tour_markers.osim",
+    "golf_model": "<owner-home>/Repositories/UpstreamDrift-worktrees/claude-osv9b/docs/development/opensim_tour_matching/evidence/os7_moco_g1/inputs/golf_humanoid_scaled_tour_markers.osim",
     "golf_model_sha256": "7dd1da1764bd8569d9e5de14eae6a249f8845e9fddf0f343796bef2ae8137381",
     "musculoskeletal_model_sha256": "d0e5d25895153afad57324391c35473c7336a79221f6112007cd529b8dfa3df7",
-    "states_file": "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-osv9b/docs/development/opensim_tour_matching/evidence/os7_moco_g1/inputs/ik_states_full.sto",
+    "states_file": "<owner-home>/Repositories/UpstreamDrift-worktrees/claude-osv9b/docs/development/opensim_tour_matching/evidence/os7_moco_g1/inputs/ik_states_full.sto",
     "states_file_sha256": "325796072973aad8b007c5f975253eaf62057b91924cada85e2dae381cd1c2cc"
   },
   "issue": "#11617",

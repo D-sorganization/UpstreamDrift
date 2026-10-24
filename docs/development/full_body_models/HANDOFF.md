@@ -269,7 +269,7 @@ Two implementations of the full-body program currently coexist in the repository
    `backswing_to_1s`); playback GIFs. Dynamics-only variants:
    `evidence/ground_support/downswing_experiment.py --run <run> --name <n> [...]`.
 3. Cross-engine: `evidence/setup_parity/verify_setup_parity.py --run <run>`
-   (Drake and Pinocchio on ControlTower over SSH; poses by coordinate name).
+   (Drake and Pinocchio on <host> over SSH; poses by coordinate name).
 4. Never rerun with `--recalibrate-upper`; keep one static-trial round;
    ranges act on the matching only (`range_of_motion.py`).
 5. Epics: #10162 (handoff, HO-0 landing #10186 first, then HO-1 to HO-10, tiered), #10113 (MM-1 to MM-10)

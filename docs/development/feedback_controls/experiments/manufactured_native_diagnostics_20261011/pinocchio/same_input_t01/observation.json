@@ -43,15 +43,15 @@
   "observation_sha256": "6f8a369f2721a1ac3307a9b7172c7c2ead643f8f2e871e6289bc704c3d0d8acb",
   "pinocchio_runtime": {
     "import_details": {
-      "bunkershot3d_package": "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/bunkershot3d/__init__.py",
+      "bunkershot3d_package": "<owner-home>/native_engine_parity_20261011_final_50203626/src/bunkershot3d/__init__.py",
       "bunkershot3d_package_sha256": "16fdb491cba2e67ca3574c8341aa6a393ae613c3845271c43ab6b2ca8255b39f",
       "source_import_paths": [
-        "/home/dieterolson/native_engine_parity_20261011_final_50203626/src",
-        "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/shared/python",
-        "/home/dieterolson/native_engine_parity_20261011_final_50203626"
+        "<owner-home>/native_engine_parity_20261011_final_50203626/src",
+        "<owner-home>/native_engine_parity_20261011_final_50203626/src/shared/python",
+        "<owner-home>/native_engine_parity_20261011_final_50203626"
       ]
     },
-    "module_origin": "/home/dieterolson/native_engine_parity_20261011_final_50203626/.venv312/lib/python3.12/site-packages/cmeel.prefix/lib/python3.12/site-packages/pinocchio/__init__.py",
+    "module_origin": "<owner-home>/native_engine_parity_20261011_final_50203626/.venv312/lib/python3.12/site-packages/cmeel.prefix/lib/python3.12/site-packages/pinocchio/__init__.py",
     "version": "3.8.0"
   },
   "policy": {

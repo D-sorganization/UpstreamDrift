@@ -26,7 +26,7 @@ COMMIT = "9e5f87c4dd31fc3137fc204d98337633fa5c4855"
 MANIFEST_SHA256 = "c5ec40129d3b28368142eadfb33e8e1464f7c6e4d4505dd5a6d2f86870d4f569"
 OVERLAY_COMMIT = "92738d3cab3865bf727ba96a9cca9388d52ef955"
 OVERLAY_ARTIFACT = Path(
-    "/home/dieterolson/native_engine_parity_telemetry_20261012/"
+    "<owner-home>/native_engine_parity_telemetry_20261012/"
     "facade_overlay_import_attempt2"
 )
 FACADE_INIT = Path("src/shared/python/motion_matching/same_input/__init__.py")

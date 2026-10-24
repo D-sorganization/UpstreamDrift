@@ -116,7 +116,7 @@ knee flexion in degrees. Full numbers are in
 
 - The canonical ground-support receipts (`anthro_driver_seeds`,
   `anthro_iron_seeds_zmp`) are not regenerated. Regenerate them once, after R3
-  and R4, on ControlTower (`ud-sim`), and report address, IK and FD RMS against
+  and R4, on <host> (`ud-sim`), and report address, IK and FD RMS against
   these numbers.
 - **Through the swing.** The knee residual acts at the address stage only. The
   trajectory IK, forward-dynamics frame 0 and the knee flexion through the first
@@ -154,7 +154,7 @@ are unchanged. A capture without a static window of at least
 a value.
 
 No canonical numbers are posted here. They come from the R10 re-fit (#12692)
-on ControlTower.
+on <host>.
 
 ## Design Manual
 

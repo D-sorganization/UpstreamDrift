@@ -8,7 +8,7 @@ Tests all four Done Gates:
 Plus forward accelerations combining contact forces and weld loop-closure dynamics.
 
 If real Drake is not available in the local environment, automatically executes
-on ControlTower via SSH and saves the resulting receipt.
+on <host> via SSH and saves the resulting receipt.
 """
 
 from __future__ import annotations
@@ -74,7 +74,7 @@ def _sync_files_to_remote(remote_base: str) -> None:
             "controltower",
             "wsl",
             "-d",
-            "ControlTower-Runner",
+            "<host>-Runner",
             "mkdir",
             "-p",
             f"{remote_base}/src/engines/physics_engines/drake/python",
@@ -131,7 +131,7 @@ def _sync_files_to_remote(remote_base: str) -> None:
                 "controltower",
                 "wsl",
                 "-d",
-                "ControlTower-Runner",
+                "<host>-Runner",
                 "tee",
                 remote_path,
             ],
@@ -145,22 +145,22 @@ def _sync_files_to_remote(remote_base: str) -> None:
 
 
 def run_remote_controltower() -> dict[str, Any]:
-    """Execute verification remotely on ControlTower and return the receipt."""
+    """Execute verification remotely on <host> and return the receipt."""
     sys.stdout.write(
-        "Real Drake not available locally. Dispatching to ControlTower...\n"
+        "Real Drake not available locally. Dispatching to <host>...\n"
     )
     sys.stdout.flush()
 
-    remote_base = "/home/dieterolson/fb3_pinocchio_test"
+    remote_base = "<owner-home>/fb3_pinocchio_test"
     _sync_files_to_remote(remote_base)
 
     script = (
         f"cd {remote_base}\n"
-        f"/home/dieterolson/drake-native-10022/bin/python "
+        f"<owner-home>/drake-native-10022/bin/python "
         f"docs/development/full_body_models/evidence/fb3_drake/verify_drake_full_body.py --local\n"
     ).encode()
     res = subprocess.run(
-        ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "bash"],
+        ["ssh", "controltower", "wsl", "-d", "<host>-Runner", "bash"],
         input=script,
         capture_output=True,
     )
@@ -177,7 +177,7 @@ def run_remote_controltower() -> dict[str, Any]:
     # Fetch receipt from remote
     fetch_cmd = f"cat {remote_base}/docs/development/full_body_models/evidence/fb3_drake/receipt.json\n".encode()
     res_fetch = subprocess.run(
-        ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "bash"],
+        ["ssh", "controltower", "wsl", "-d", "<host>-Runner", "bash"],
         input=fetch_cmd,
         capture_output=True,
     )

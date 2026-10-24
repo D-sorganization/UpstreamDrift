@@ -1,7 +1,7 @@
 {
   "checked_at_utc": "2026-09-18T01:43:45Z",
   "checkouts": {
-    "/home/dieterolson/ms31-crocoddyl": {
+    "<owner-home>/ms31-crocoddyl": {
       "exists": true,
       "git_head": "f356382a233a68cafe5e4975bea88f2eeaba3f76",
       "git_status": " M src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py\n M src/engines/physics_engines/pinocchio/python/full_body_fit.py\n M src/engines/physics_engines/pinocchio/python/marker_kinematics.py\n?? src/engines/physics_engines/pinocchio/python/candidate_playback.py\n?? src/engines/physics_engines/pinocchio/python/crocoddyl_action.py\n?? tests/integration/motion_matching/test_full_body_fit_native.py\n",
@@ -13,7 +13,7 @@
         "src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py": "0049f2cba68151219a8b47803f3c743e16fed6c39839ea724d97ddcecd1b4c4e"
       }
     },
-    "/home/dieterolson/opensim-10341-runtime": {
+    "<owner-home>/opensim-10341-runtime": {
       "exists": true,
       "git_head": "",
       "git_status": "",
@@ -25,7 +25,7 @@
     }
   },
   "runs": {
-    "/home/dieterolson/fits/w030r": {
+    "<owner-home>/fits/w030r": {
       "files": {
         "receipt.json": {
           "size": 8058,
@@ -312,7 +312,7 @@
         }
       }
     },
-    "/home/dieterolson/fits/driver_g1": {
+    "<owner-home>/fits/driver_g1": {
       "files": {
         "stage_0.30s.npz": {
           "size": 107170,
@@ -328,7 +328,7 @@
         }
       }
     },
-    "/home/dieterolson/os7_g1b": {
+    "<owner-home>/os7_g1b": {
       "files": {
         "receipt.json": {
           "size": 9414,
@@ -913,10 +913,10 @@
         }
       }
     },
-    "/home/dieterolson/os7_g1f": {
+    "<owner-home>/os7_g1f": {
       "files": {}
     },
-    "/home/dieterolson/os7_g1": {
+    "<owner-home>/os7_g1": {
       "files": {
         "receipt.json": {
           "size": 10285,
@@ -2011,10 +2011,10 @@
         }
       }
     },
-    "/home/dieterolson/os7_g1c": {
+    "<owner-home>/os7_g1c": {
       "files": {}
     },
-    "/home/dieterolson/os7_g1d": {
+    "<owner-home>/os7_g1d": {
       "files": {
         "receipt.json": {
           "size": 9480,
@@ -2604,13 +2604,13 @@
     }
   },
   "logs": {
-    "/home/dieterolson/fit_driver_g1.log": {
+    "<owner-home>/fit_driver_g1.log": {
       "tail": [
-        "START 2026-09-17T18:03:19-07:00 t_end=0.85 iter=120 --quiet --warm-start-candidate /home/dieterolson/fits/w030r/candidate.npz --continuation 0.30,0.45,0.60 --stage-iterations 30 --rk45-rtol 1e-4"
+        "START 2026-09-17T18:03:19-07:00 t_end=0.85 iter=120 --quiet --warm-start-candidate <owner-home>/fits/w030r/candidate.npz --continuation 0.30,0.45,0.60 --stage-iterations 30 --rk45-rtol 1e-4"
       ],
       "size": 195
     },
-    "/home/dieterolson/os7_g1e.log": {
+    "<owner-home>/os7_g1e.log": {
       "tail": [
         "[info] ------------------------------------------------------------------------",
         "[info] Elapsed real time: 3 second(s).",
@@ -2620,7 +2620,7 @@
       ],
       "size": 46574
     },
-    "/home/dieterolson/os7_g1b.log": {
+    "<owner-home>/os7_g1b.log": {
       "tail": [
         " 330r 7.5668861e+02 7.09e+07 1.21e+08   2.4 2.58e+01    -  6.86e-01 1.40e-02f  1",
         " 331r 7.5645205e+02 7.25e+07 1.25e+08   2.4 2.20e+01    -  1.00e+00 3.75e-03f  9",
@@ -2630,7 +2630,7 @@
       ],
       "size": 527856
     },
-    "/home/dieterolson/os7_g1c.log": {
+    "<owner-home>/os7_g1c.log": {
       "tail": [
         " 321r 1.2278836e+01 8.21e+05 1.24e+11   3.3 1.47e+09    -  3.66e-04 2.13e-05f  1",
         " 322r 1.2278553e+01 6.53e+05 6.83e+10   3.3 9.31e+07    -  1.38e-01 2.57e-04f  1",
@@ -2640,7 +2640,7 @@
       ],
       "size": 204190
     },
-    "/home/dieterolson/os7_g1f.log": {
+    "<owner-home>/os7_g1f.log": {
       "tail": [
         " 232  1.2258246e+01 1.06e+05 4.64e+05  -2.9 5.47e-01    -  1.11e-02 1.00e+00f  1",
         " 233  1.2125801e+01 8.41e+04 2.96e+05  -4.6 1.12e+00    -  3.32e-01 2.34e-01h  1",
@@ -2650,7 +2650,7 @@
       ],
       "size": 229985
     },
-    "/home/dieterolson/os7_g1.log": {
+    "<owner-home>/os7_g1.log": {
       "tail": [
         "  \"replay_club_mm\": 543.7,",
         "  \"replay_pelvis_yaw_deg\": 13.95,",
@@ -2660,7 +2660,7 @@
       ],
       "size": 799675
     },
-    "/home/dieterolson/os7_g1d.log": {
+    "<owner-home>/os7_g1d.log": {
       "tail": [
         "  \"replay_club_mm\": 1589.5,",
         "  \"replay_pelvis_yaw_deg\": 77.87,",
@@ -2671,5 +2671,5 @@
       "size": 349185
     }
   },
-  "processes": "your 131072x1 screen size is bogus. expect trouble\n3082595       40:14 /home/dieterolson/opensim-10003/bin/python docs/development/opensim_tour_matching/os7_moco_g1_driver.py --model /mnt/c/Users/diete/opensim-10003/os3b-scale-ik/golf_humanoid_scaled_tour_markers.osim --trc /home/dieterolson/opensim-10341-runtime/docs/development/opensim_tour_matching/evidence/tour_average_tracked.trc --ik-states /mnt/c/Users/diete/opensim-10003/ik_states_full.sto --outdir /home/dieterolson/os7_g1f --max-iterations 600 --replay-timeout-s 1800 --rungs 0.85 1.813888889 --warm-start /home/dieterolson/os7_g1b/rungs/0600ms --continue-on-failure --ik-smooth-frames 15 --inverse-warm-start\n3104448       37:03 bash -c echo START $(date -Is) t_end=0.85 iter=120 --quiet --warm-start-candidate /home/dieterolson/fits/w030r/candidate.npz --continuation 0.30,0.45,0.60 --stage-iterations 30 --rk45-rtol 1e-4 > /home/dieterolson/fit_driver_g1.log; /home/dieterolson/bin/micromamba run -n upstream-motion-runtime python -m src.engines.physics_engines.pinocchio.python.full_body_fit --document docs/development/full_body_models/evidence/ground_support/anthro_driver/full_body_spec_hipcal_scaled.json --attachments-receipt docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json --t-end 0.85 --max-iterations 120 --out /home/dieterolson/fits/driver_g1 --quiet --warm-start-candidate /home/dieterolson/fits/w030r/candidate.npz --continuation 0.30,0.45,0.60 --stage-iterations 30 --rk45-rtol 1e-4 >> /home/dieterolson/fit_driver_g1.log 2>&1; echo EXIT $? $(date -Is) >> /home/dieterolson/fit_driver_g1.log\n3104450       37:03 /home/dieterolson/bin/micromamba run -n upstream-motion-runtime python -m src.engines.physics_engines.pinocchio.python.full_body_fit --document docs/development/full_body_models/evidence/ground_support/anthro_driver/full_body_spec_hipcal_scaled.json --attachments-receipt docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json --t-end 0.85 --max-iterations 120 --out /home/dieterolson/fits/driver_g1 --quiet --warm-start-candidate /home/dieterolson/fits/w030r/candidate.npz --continuation 0.30,0.45,0.60 --stage-iterations 30 --rk45-rtol 1e-4\n3104452       37:03 python -m src.engines.physics_engines.pinocchio.python.full_body_fit --document docs/development/full_body_models/evidence/ground_support/anthro_driver/full_body_spec_hipcal_scaled.json --attachments-receipt docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json --t-end 0.85 --max-iterations 120 --out /home/dieterolson/fits/driver_g1 --quiet --warm-start-candidate /home/dieterolson/fits/w030r/candidate.npz --continuation 0.30,0.45,0.60 --stage-iterations 30 --rk45-rtol 1e-4"
+  "processes": "your 131072x1 screen size is bogus. expect trouble\n3082595       40:14 <owner-home>/opensim-10003/bin/python docs/development/opensim_tour_matching/os7_moco_g1_driver.py --model /mnt/c/Users/diete/opensim-10003/os3b-scale-ik/golf_humanoid_scaled_tour_markers.osim --trc <owner-home>/opensim-10341-runtime/docs/development/opensim_tour_matching/evidence/tour_average_tracked.trc --ik-states /mnt/c/Users/diete/opensim-10003/ik_states_full.sto --outdir <owner-home>/os7_g1f --max-iterations 600 --replay-timeout-s 1800 --rungs 0.85 1.813888889 --warm-start <owner-home>/os7_g1b/rungs/0600ms --continue-on-failure --ik-smooth-frames 15 --inverse-warm-start\n3104448       37:03 bash -c echo START $(date -Is) t_end=0.85 iter=120 --quiet --warm-start-candidate <owner-home>/fits/w030r/candidate.npz --continuation 0.30,0.45,0.60 --stage-iterations 30 --rk45-rtol 1e-4 > <owner-home>/fit_driver_g1.log; <owner-home>/bin/micromamba run -n upstream-motion-runtime python -m src.engines.physics_engines.pinocchio.python.full_body_fit --document docs/development/full_body_models/evidence/ground_support/anthro_driver/full_body_spec_hipcal_scaled.json --attachments-receipt docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json --t-end 0.85 --max-iterations 120 --out <owner-home>/fits/driver_g1 --quiet --warm-start-candidate <owner-home>/fits/w030r/candidate.npz --continuation 0.30,0.45,0.60 --stage-iterations 30 --rk45-rtol 1e-4 >> <owner-home>/fit_driver_g1.log 2>&1; echo EXIT $? $(date -Is) >> <owner-home>/fit_driver_g1.log\n3104450       37:03 <owner-home>/bin/micromamba run -n upstream-motion-runtime python -m src.engines.physics_engines.pinocchio.python.full_body_fit --document docs/development/full_body_models/evidence/ground_support/anthro_driver/full_body_spec_hipcal_scaled.json --attachments-receipt docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json --t-end 0.85 --max-iterations 120 --out <owner-home>/fits/driver_g1 --quiet --warm-start-candidate <owner-home>/fits/w030r/candidate.npz --continuation 0.30,0.45,0.60 --stage-iterations 30 --rk45-rtol 1e-4\n3104452       37:03 python -m src.engines.physics_engines.pinocchio.python.full_body_fit --document docs/development/full_body_models/evidence/ground_support/anthro_driver/full_body_spec_hipcal_scaled.json --attachments-receipt docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json --t-end 0.85 --max-iterations 120 --out <owner-home>/fits/driver_g1 --quiet --warm-start-candidate <owner-home>/fits/w030r/candidate.npz --continuation 0.30,0.45,0.60 --stage-iterations 30 --rk45-rtol 1e-4"
 }

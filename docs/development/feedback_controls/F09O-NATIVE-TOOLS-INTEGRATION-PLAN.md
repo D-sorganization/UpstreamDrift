@@ -21,7 +21,7 @@ revalidate the actual executed source, preserving the single replay authority.
    actual served-bundle verifier before changing impact acceptance metadata.
    Preserve the previous reconciliation and served receipt as historical proof.
 4. Stage exact integrated source and exact tracked Tools commit on the existing
-   owned DeskComputer native environment. Record hashes before and after the
+   owned <host> native environment. Record hashes before and after the
    actual SDK campaign, including the private loader and consumer tests.
 5. Run native F09i–F09n, shared bounded-search and private consumer tests. Existing
    source/state/callback mutation, first/final-knot limits, cancellation,

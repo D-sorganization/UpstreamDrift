@@ -43,7 +43,7 @@ count, all-row/all-engine retention, and unqualified status.
 Run the actual native test with the owned WSL runtime:
 
 ```powershell
-wsl.exe -d Ubuntu-24.04 -e bash -c 'cd /mnt/c/Users/diete/Repositories/Worktrees/UpstreamDrift-f09e-pinocchio-marker-11914 && /home/dieterolson/.venvs/codex-feedback-pinocchio-11900/bin/python -m pytest -q -c /dev/null --confcutdir=tests/unit/engines tests/unit/engines/test_feedback_native_markers.py -k pinocchio_markers'
+wsl.exe -d Ubuntu-24.04 -e bash -c 'cd /mnt/c/Users/diete/Repositories/Worktrees/UpstreamDrift-f09e-pinocchio-marker-11914 && <owner-home>/.venvs/codex-feedback-pinocchio-11900/bin/python -m pytest -q -c /dev/null --confcutdir=tests/unit/engines tests/unit/engines/test_feedback_native_markers.py -k pinocchio_markers'
 ```
 
 `-c /dev/null` avoids a repository pytest setting requiring the optional

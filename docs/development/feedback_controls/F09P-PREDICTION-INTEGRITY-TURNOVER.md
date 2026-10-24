@@ -29,7 +29,7 @@ checks instead of three, and the late handle-mutation rejection. Retain
 `f09p-boundaries-red-native.xml` in the workspace planning evidence folder.
 The final test also covers live-state mutation after preparation.
 
-The existing owned DeskComputer SDK environment ran baseline/candidate/baseline/
+The existing owned <host> SDK environment ran baseline/candidate/baseline/
 candidate in fresh processes, switching only the native-search source inside
 its owned stage. Each run made fourteen two-step predictions; the first two
 were excluded from timing statistics. Complete native-state hashes agree for

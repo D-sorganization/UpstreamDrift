@@ -80,7 +80,7 @@ with the engines (R10).
 
 - The canonical ground-support receipts (`anthro_driver`, `anthro_iron`,
   `anthro_driver_seeds`, `anthro_iron_seeds_zmp`) were regenerated in this
-  change on ControlTower with their documented commands and the default
+  change on <host> with their documented commands and the default
   `style` feet, hashed before seeding since #12820 (see
   `ground_support/CANONICAL_RUN.md` §2A for the control and the deltas). The
   calibrated 7-iron dynamics is 64.35 mm (G3 95 mm gate passes); with the feet

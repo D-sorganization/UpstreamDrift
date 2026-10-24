@@ -58,4 +58,4 @@ python3 docs/development/full_body_models/evidence/ground_support/run_ground_sup
   --capture iron --out <dir>
 ```
 
-The receipt carries `dynamics.centroidal_filter` (config, per-pass merit, accepted flag and zmp summary, before and after). Side-by-side finish renders live in `/home/dieterolson/Videos/Parity Audit/balance/`.
+The receipt carries `dynamics.centroidal_filter` (config, per-pass merit, accepted flag and zmp summary, before and after). Side-by-side finish renders live in `<owner-home>/Videos/Parity Audit/balance/`.
