@@ -9,8 +9,9 @@ Coordinate convention:
     q3 (phi2):   Angle of segment 3 relative to segment 2,
                  positive counterclockwise.
 
-All segments modeled as uniform rods with mass concentrated at the tip
-(point-mass approximation).
+Segments use the explicitly named point-mass approximation: segment mass is
+concentrated at its distal joint. The canonical distributed-inertia variant
+is defined in ``triple_pendulum_spec``.
 """
 
 from __future__ import annotations
@@ -22,7 +23,10 @@ import numpy as np
 import numpy.typing as npt
 
 from . import native_backend as _native_backend
-from .constants import GRAVITY_MSS
+from src.shared.python.pendulum_simulator.triple_pendulum_spec import (
+    POINT_MASS_TRIPLE_PENDULUM_SPEC,
+    TriplePendulumSpec,
+)
 from .validation import require_non_negative, require_positive
 
 # ---------------------------------------------------------------------------
@@ -47,16 +51,37 @@ class TriplePendulumParams:
     L1: float  # length of segment 1 (m)
     L2: float  # length of segment 2 (m)
     L3: float  # length of segment 3 (m)
-    g: float = GRAVITY_MSS  # gravitational acceleration (m/s^2)
-    # --- Dissipative parameters (default 0 = no losses) ---
-    b1: float = 0.0  # viscous damping at joint 1 (NÂ·mÂ·s/rad)
-    b2: float = 0.0  # viscous damping at joint 2 (NÂ·mÂ·s/rad)
-    b3: float = 0.0  # viscous damping at joint 3 (NÂ·mÂ·s/rad)
+    g: float = POINT_MASS_TRIPLE_PENDULUM_SPEC.gravity_m_s2
+    b1: float = POINT_MASS_TRIPLE_PENDULUM_SPEC.damping_nm_s_rad[0]
+    b2: float = POINT_MASS_TRIPLE_PENDULUM_SPEC.damping_nm_s_rad[1]
+    b3: float = POINT_MASS_TRIPLE_PENDULUM_SPEC.damping_nm_s_rad[2]
     mu1: float = 0.0  # Coulomb friction at joint 1 (NÂ·m, constant magnitude)
     mu2: float = 0.0  # Coulomb friction at joint 2 (NÂ·m, constant magnitude)
     mu3: float = 0.0  # Coulomb friction at joint 3 (NÂ·m, constant magnitude)
     # --- Scapula offset (#1152) ---
     scapula_offset_rad: float = 0.0  # angular offset of hub anchor (rad)
+
+    @classmethod
+    def from_point_mass_spec(
+        cls, spec: TriplePendulumSpec = POINT_MASS_TRIPLE_PENDULUM_SPEC
+    ) -> TriplePendulumParams:
+        """Build this legacy point-mass model from its named shared variant."""
+        if spec.inertia_model != "point_mass":
+            raise ValueError("spec.inertia_model must be 'point_mass'")
+        segments = spec.segments
+        damping = spec.damping_nm_s_rad
+        return cls(
+            m1=segments[0].mass_kg,
+            m2=segments[1].mass_kg,
+            m3=segments[2].mass_kg,
+            L1=segments[0].length_m,
+            L2=segments[1].length_m,
+            L3=segments[2].length_m,
+            g=spec.gravity_m_s2,
+            b1=damping[0],
+            b2=damping[1],
+            b3=damping[2],
+        )
 
     def __post_init__(self) -> None:
         require_positive("m1", self.m1)

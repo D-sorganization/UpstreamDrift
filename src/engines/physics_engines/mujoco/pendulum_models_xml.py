@@ -11,6 +11,9 @@ from src.shared.python.core.constants import (
     GOLF_BALL_RADIUS_M,
     GRAVITY_M_S2,
 )
+from src.shared.python.pendulum_simulator.triple_pendulum_spec import (
+    TRIPLE_PENDULUM_SPEC,
+)
 
 # Convert to float for use in f-strings
 _BALL_MASS = float(GOLF_BALL_MASS_KG)
@@ -136,8 +139,23 @@ DOUBLE_PENDULUM_XML = rf"""    <mujoco model="golf_double_pendulum">
 """
 
 
-TRIPLE_PENDULUM_XML = rf"""    <mujoco model="golf_triple_pendulum">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
+def _triple_pendulum_xml() -> str:
+    """Generate the distributed-inertia planar model from the shared spec."""
+    segments = TRIPLE_PENDULUM_SPEC.segments
+    grav_axis = {"xz": "0 1 0"}[TRIPLE_PENDULUM_SPEC.gravity_plane]
+    body_specs = tuple(
+        (
+            segment.length_m,
+            segment.mass_kg,
+            segment.center_of_mass_ratio,
+            segment.inertia_about_com,
+            TRIPLE_PENDULUM_SPEC.damping_nm_s_rad[index],
+        )
+        for index, segment in enumerate(segments)
+    )
+    (l1, m1, c1, i1, d1), (l2, m2, c2, i2, d2), (l3, m3, c3, i3, d3) = body_specs
+    return rf"""    <mujoco model="golf_triple_pendulum">
+  <option timestep="0.001" gravity="0 0 -{TRIPLE_PENDULUM_SPEC.gravity_m_s2}" integrator="RK4"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -154,32 +172,35 @@ TRIPLE_PENDULUM_XML = rf"""    <mujoco model="golf_triple_pendulum">
 
     <!-- Shoulder at about chest height -->
     <body name="shoulder_body" pos="0 0 1.2">
-      <joint name="shoulder" type="hinge" axis="0 0 1" limited="false"/>
+      <joint name="shoulder" type="hinge" axis="{grav_axis}" limited="false" damping="{d1}"/>
+      <inertial pos="0 0 {-l1 * c1}" mass="{m1}" diaginertia="{i1 * 0.5} {i1} {i1}"/>
 
       <!-- Upper arm -->
       <geom name="upper_arm" type="capsule"
-            fromto="0 0 0 0.35 0 0" size="0.03"
-            rgba="0.8 0.2 0.2 1"/>
+            fromto="0 0 0 0 0 {-l1}" size="0.03"
+            rgba="0.8 0.2 0.2 1" contype="0" conaffinity="0"/>
 
-      <body name="forearm_body" pos="0.35 0 0">
-        <joint name="elbow" type="hinge" axis="0 0 1" limited="false"/>
+      <body name="forearm_body" pos="0 0 {-l1}">
+        <joint name="elbow" type="hinge" axis="{grav_axis}" limited="false" damping="{d2}"/>
+        <inertial pos="0 0 {-l2 * c2}" mass="{m2}" diaginertia="{i2 * 0.5} {i2} {i2}"/>
 
         <!-- Forearm -->
         <geom name="forearm" type="capsule"
-              fromto="0 0 0 0.35 0 0" size="0.025"
-              rgba="0.2 0.2 0.8 1"/>
+              fromto="0 0 0 0 0 {-l2}" size="0.025"
+              rgba="0.2 0.2 0.8 1" contype="0" conaffinity="0"/>
 
-        <body name="club_body" pos="0.35 0 0">
-          <joint name="wrist" type="hinge" axis="0 0 1" limited="false"/>
+        <body name="club_body" pos="0 0 {-l2}">
+          <joint name="wrist" type="hinge" axis="{grav_axis}" limited="false" damping="{d3}"/>
+          <inertial pos="0 0 {-l3 * c3}" mass="{m3}" diaginertia="{i3 * 0.5} {i3} {i3}"/>
 
           <!-- Golf club shaft -->
           <geom name="club_shaft" type="capsule"
-                fromto="0 0 0 1.0 0 0" size="0.015"
-                rgba="0.2 0.8 0.2 1"/>
+                fromto="0 0 0 0 0 {-l3}" size="0.015"
+                rgba="0.2 0.8 0.2 1" contype="0" conaffinity="0"/>
 
           <!-- Clubhead -->
           <geom name="club_head" type="box" size="0.05 0.03 0.02"
-                pos="1.0 0 0" rgba="0.1 0.1 0.1 1"/>
+                pos="0 0 {-l3}" rgba="0.1 0.1 0.1 1" contype="0" conaffinity="0"/>
         </body>
       </body>
     </body>
@@ -192,3 +213,6 @@ TRIPLE_PENDULUM_XML = rf"""    <mujoco model="golf_triple_pendulum">
   </actuator>
 </mujoco>
 """
+
+
+TRIPLE_PENDULUM_XML = _triple_pendulum_xml()
