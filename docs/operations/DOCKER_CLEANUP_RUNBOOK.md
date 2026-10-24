@@ -89,7 +89,7 @@ Run in **Admin PowerShell**:
 
 ```powershell
 wsl --shutdown
-Optimize-VHD -Path "C:\Users\<USER>\AppData\Local\Docker\wsl\disk\docker_data.vhdx" -Mode Full
+Optimize-VHD -Path "<owner-home>\AppData\Local\Docker\wsl\disk\docker_data.vhdx" -Mode Full
 ```
 
 ## Rollback Commands

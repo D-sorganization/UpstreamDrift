@@ -283,7 +283,7 @@ thing automatically.
 ### 6.1 Set up the environment (once per session)
 
 ```matlab
-cd 'C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab'
+cd '<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab'
 setup_matlab_environment        % adds src/ subtree + motion_matching/shared/
 ```
 

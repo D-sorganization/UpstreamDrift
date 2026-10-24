@@ -92,8 +92,8 @@ explicitly unverified. Missing verification is never a zero or a pass.
 From the repository root, with the actual native provider selected:
 
 ```powershell
-& C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe -m scripts.diagnostics.native_path_work --output C:/Users/diete/Repositories/docs/development/feedback_controls_planning/native_model_evaluation/original_path_work_11856
-& C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe -m pytest tests/opensim/test_native_path_work.py -o addopts='' -q
+& <owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe -m scripts.diagnostics.native_path_work --output <owner-home>/Repositories/docs/development/feedback_controls_planning/native_model_evaluation/original_path_work_11856
+& <owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe -m pytest tests/opensim/test_native_path_work.py -o addopts='' -q
 python3 -m scripts.check_design_manual_governance
 ```
 

@@ -80,7 +80,7 @@ def test_discover_windows_exe_suffix_handled_by_which(
     # only need to confirm we don't mangle the path.
     def fake_which(name: str) -> str | None:
         if name == "claude":
-            return r"C:\Users\u\bin\claude.exe"
+            return r"<owner-home>\bin\claude.exe"
         return None
 
     monkeypatch.setattr(discovery.shutil, "which", fake_which)

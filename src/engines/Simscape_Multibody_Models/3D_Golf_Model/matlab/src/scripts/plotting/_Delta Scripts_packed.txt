@@ -1,5 +1,5 @@
 %%% MATLAB PROJECT PACKER - v1.0 %%%
-%%% Source Folder Base: C:\Users\diete\MATLAB Drive\Projects\Model Rebuild\Scripts\_Delta Scripts %%%
+%%% Source Folder Base: <owner-home>\MATLAB Drive\Projects\Model Rebuild\Scripts\_Delta Scripts %%%
 %%% Pack Time: 02-May-2025 09:29:41 %%%
 
 %%% START FILE: MASTER_SCRIPT_DeltaCharts_3D.m %%%
