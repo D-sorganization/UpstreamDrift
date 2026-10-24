@@ -4,8 +4,10 @@
 
 Issue #13577 separates event tiers without changing the required check name,
 `quality-gate`, runner policy, test tolerances, coverage floors or test commands.
-The reviewed required-check export is Repository_Management
-`docs/operations/ci-required-checks-live.json`, collected 2026-10-21 at 06:06 UTC:
+The reviewed required-check export is pinned at
+`scripts/config/ci-required-checks-live.json` (sourced from the live
+`Repository_Protections` ruleset export; see `tests/ci/test_ci_required_checks_live.py`).
+Collected 2026-10-24 UTC:
 UpstreamDrift's exported required context is `quality-gate`. No repository
 settings are changed by this implementation.
 
