@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13720 · Route Legacy Chat UI Builder Imports to the Pinned Tools Module With Shared Module Identity.
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #13720
+- **Branch:** codex/13720-chat-ui-retirement
+- **PR:** #13724
+- **Paths:** src/shared/python/ud_import_alias_policy.py,tests/unit/repo_hygiene/test_pinned_chat_ui_builder_alias.py
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`b46af31e`; collated from changes/13720-route-legacy-chat-ui-builder-imports-to.md)
+- **Summary:** Route legacy chat UI builder imports to the pinned Tools module with shared module identity.
+- **Next step:** Review the provider origin and identity regression, then merge this preparation change.
+
 ### DL-#13552 · Simscape Grip Kernel Follows the Shared Capsule Line-Contact Law; Ten_Finger Verifier Back to 1E-11; Structural Freshness Check for Generated JSON; Goldens Rebuilt From the Rounded Export Params; Committed R2025b Evidence
 
 - **State:** in_review
@@ -443,6 +456,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13739 · Capture Rig Theme-Compliance Fixture Discards a ThemeManager Singleton Orphaned by QApplication Teardown (Fixes Flaky QSettings-Deleted Teardown Errors)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13739
+- **Branch:** merged via #13741
+- **PR:** #13741
+- **Paths:** see #13741
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`88bf5384`; collated from changes/13739-capture-rig-theme-compliance-fixture-dis.md)
+- **Summary:** Capture Rig theme-compliance fixture discards a ThemeManager singleton orphaned by QApplication teardown (fixes flaky QSettings-deleted teardown errors)
+- **Next step:** Shipped in PR #13741.
+
+### DL-#13534 · Disable Pytest-Xvfb Autoload for Motion-Matching Smoke; Document -P No:Xvfb in Run_Motion_Matching_Smoke.Sh
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13534
+- **Branch:** merged via #13566
+- **PR:** #13566
+- **Paths:** see #13566
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`c474414f`; collated from changes/13534-motion-matching-smoke-xvfb-autoload.md)
+- **Summary:** Disable pytest-xvfb autoload for motion-matching smoke; document -p no:xvfb in run_motion_matching_smoke.sh
+- **Next step:** Shipped in PR #13566.
+
+### DL-#12691 · R11: The R6 Chain Shaft Runs in Drake (RevoluteSpring Plus Joint Damping) and Passes the Same Static, Modal, Topology and Same-Input Parity Gate as OpenSim and MyoSuite; Drake Joins CHAIN_ENGINES
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12691
+- **Branch:** merged via #13738
+- **PR:** #13738
+- **Paths:** see #13738
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`47653aa1`; collated from changes/12691-r11-the-r6-chain-shaft-runs-in-drake-rev.md)
+- **Summary:** R11: the R6 chain shaft runs in Drake (RevoluteSpring plus joint damping) and passes the same static, modal, topology and same-input parity gate as OpenSim and MyoSuite; Drake joins CHAIN_ENGINES
+- **Next step:** Shipped in PR #13738.
+
 ### DL-#13618 · Install the Governed Canonical Admission Publisher Copy and Protected CI Caller With Independently Pinned Private Provider Runtime and Trusted Copy Drift Checking.
 
 - **State:** shipped
@@ -462,10 +514,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13270
 - **Branch:** merged via #13735
-- **PR:** #13735
+- **PR:** #13735, #13733, #13732, #13734
 - **Paths:** see #13735
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`5f9f2831`; collated from changes/13270-port-frame-rate-trunk-spin-hold-limit-ju.md)
+- **Last verified:** 2026-10-24 (`8720d6a4`; collated from changes/13270-port-the-trail-foot-preload-chain-point.md)
 - **Summary:** Port frame_rate, trunk_spin, hold_limit_jump, rebase_turns and reference_rate with tests from commit 22419ee13 and record the failed stance probes in FORWARD_DYNAMICS.md
 - **Next step:** Shipped in PR #13735.
 
@@ -475,10 +527,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13255
 - **Branch:** merged via #13726
-- **PR:** #13726
+- **PR:** #13726, #13740
 - **Paths:** see #13726
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`470ce2e7`; collated from changes/13255-gs3dx-grf-exporter-opt-in-lock-joints-gs.md)
+- **Last verified:** 2026-10-24 (`0fc68fd8`; collated from changes/13255-gs3dx-rigid-body-stance-proxy-gs3dx-rigid-s.md)
 - **Summary:** GS3DX GRF exporter: opt-in lock_joints (gs3dx_lock_joints, in memory) and DRY shared contact-geometry / sole-point / CSV / SHA-256 helpers; the locked-joint stance costs ~140 s wall per simulated ms
 - **Next step:** Shipped in PR #13726.
 
@@ -696,10 +748,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13044
 - **Branch:** merged via #13512
-- **PR:** #13512, #13729, #13721
+- **PR:** #13512, #13729, #13721, #13737, #13736
 - **Paths:** see #13512
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`ee36eed8`; collated from changes/13044-osl-7-predictive-versus-tracked-deadlift.md)
+- **Last verified:** 2026-10-24 (`f72e2b0b`; collated from changes/13044-wire-the-osl-7-predictive-versus-tracked.md)
 - **Summary:** OSL-7 predictive deadlift: solved statically supported poses with free shoulders, a planted-feet goal, Hicks moment gate and a 17-run history; stage 1 still does not converge with foot contact
 - **Next step:** Shipped in PR #13512.
 
