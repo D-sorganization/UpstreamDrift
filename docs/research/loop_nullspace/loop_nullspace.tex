@@ -1492,8 +1492,14 @@ stiffness correctly failed closed; the tested geometry uses $0.18$ m.  A first
 asymmetric extensor path produced a near-zero moment arm and no antagonist; the
 pair uses mirrored attachments.  MyoSuite muscles are MuJoCo muscle actuators
 with a rigid tendon and tension linear in activation, so the frame is exact for
-the secant law and the series stiffness is the $k_T\to\infty$ limit; torque-driven
-engines (Pinocchio, Drake, Simscape) have no muscle fibre and fail closed with a
+the secant law and the series stiffness is the $k_T\to\infty$ limit.  The same
+sweep runs on the real MyoSuite elbow (\texttt{elbow/myoelbow\_1dof6muscles.xml}
+from the pinned \texttt{myo\_sim} checkout, six muscles, flexion $1.0$ rad).  At
+$2$ and $5$ N\,m the torque residual is below $10^{-13}$ N\,m, and the
+joint-stiffness and motor-noise traces both rise strictly with co-contraction.
+At $200$ N\,m the sweep is \texttt{NOT\_QUALIFIED}.  At $10$ N\,m the noise is
+not monotone at the lowest level, so no monotonicity is claimed there.
+Torque-driven engines (Pinocchio, Drake, Simscape) have no muscle fibre and fail closed with a
 pointer to NSX-93 (\#12722) and \texttt{H-DECLARED-JOINT-IMPEDANCE}.
 
 \paragraph{Reproduction.}  \texttt{python3 -m pytest tests/unit/loop\_nullspace/test\_muscle\_*.py
