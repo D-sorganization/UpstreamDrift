@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13552 · Simscape Grip Kernel Follows the Shared Capsule Line-Contact Law; Ten_Finger Verifier Back to 1E-11; Structural Freshness Check for Generated JSON; Goldens Rebuilt From the Rounded Export Params; Committed R2025b Evidence
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13552
+- **Branch:** claude/grip-13556-rounded-goldens
+- **PR:** #13677
+- **Paths:** see #13677
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`645410ff`; collated from changes/13552-simscape-line-contact-kernel.md)
+- **Summary:** Simscape grip kernel follows the shared capsule line-contact law; ten_finger verifier back to 1e-11; structural freshness check for generated JSON; goldens rebuilt from the rounded export params; committed R2025b evidence
+- **Next step:** Merge via queue. Any later change to the shared grip law or scenarios requires regenerating the kernel (scripts/export_simscape_grip_kernel.py) and rerunning R2025b (gs3dx_grip_contact_run); test_r2025b_receipt_hashes_match_committed_kernel_and_inputs fails until the receipts are refreshed.
+
 ### DL-#13346 · Fix(Motion_Matching): Reclassify Grip_Style as Physical Pick and Clean Sidecar
 
 - **State:** in_review
@@ -429,6 +442,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13017 · Fix DrakeKinematicsService.Set_Pose/Get_Link_Transforms Against a Real MultibodyPlant (Floating-Base Quaternion Layout, Body Enumeration)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13017
+- **Branch:** merged via #13715
+- **PR:** #13715
+- **Paths:** see #13715
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`ec120918`; collated from changes/13017-fix-drakekinematicsservice-set-pose-get.md)
+- **Summary:** Fix DrakeKinematicsService.set_pose/get_link_transforms against a real MultibodyPlant (floating-base quaternion layout, body enumeration)
+- **Next step:** Shipped in PR #13715.
+
+### DL-#12723 · NSX-94: Run the Co-Contraction Trade-Off Sweep on the Real Pinned MyoSuite Elbow (Myoelbow_1Dof6muscles); Replace the Never-Running Importorskip(Myo_Sim) Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12723
+- **Branch:** merged via #13717
+- **PR:** #13717
+- **Paths:** see #13717
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`7bd683e2`; collated from changes/12723-nsx-94-run-the-co-contraction-trade-off.md)
+- **Summary:** NSX-94: run the co-contraction trade-off sweep on the real pinned MyoSuite elbow (myoelbow_1dof6muscles); replace the never-running importorskip(myo_sim) test
+- **Next step:** Shipped in PR #13717.
+
+### DL-#12722 · NSX-93: Cross-Engine Conformance of the Declared Impedance and Delayed-Feedback Layer Through the Torque-Engine Derivative Seam (Pinocchio Reference, MuJoCo, Drake; Simscape UNAVAILABLE)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12722
+- **Branch:** merged via #13716
+- **PR:** #13716
+- **Paths:** see #13716
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`6d4d5583`; collated from changes/12722-nsx-93-cross-engine-conformance-of-the-d.md)
+- **Summary:** NSX-93: cross-engine conformance of the declared impedance and delayed-feedback layer through the torque-engine derivative seam (Pinocchio reference, MuJoCo, Drake; Simscape UNAVAILABLE)
+- **Next step:** Shipped in PR #13716.
+
+### DL-#12565 · Static_Envelopes Retries a NUMERICAL Warm-Started HiGHS Solve Cold (Anthro Plate Benchmark, Highspy 1.15.1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12565
+- **Branch:** merged via #13714
+- **PR:** #13714
+- **Paths:** see #13714
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`66f09f23`; collated from changes/12565-static-envelopes-retries-a-numerical-war.md)
+- **Summary:** static_envelopes retries a NUMERICAL warm-started HiGHS solve cold (anthro plate benchmark, highspy 1.15.1)
+- **Next step:** Shipped in PR #13714.
 
 ### DL-#12720 · Guard Test Enforcing the Single Paired Monte Carlo Runner Rule for Strategy Comparisons (NSX-91)
 
