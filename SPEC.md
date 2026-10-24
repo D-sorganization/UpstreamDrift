@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13769 | Add Cursor Cloud environment.json fleet bootstrap via Repository_Management scripts/cursor/bootstrap.sh. |
 | 2026-10-24 | #13751 | R11: the R6 chain shaft runs in Pinocchio (spec spring and damper torque before constraintDynamics) and passes the same static, modal, topology and same-input parity gate; Pinocchio joins CHAIN_ENGINES, only Simscape still refuses a chain |
 | 2026-10-24 | #13755 | Route motion-matching nightly smoke to GitHub-hosted runners on public repos.; Route nightly cross-engine validation to GitHub-hosted runners on public repos (Drake PyPI wheels). |
 | 2026-10-24 | #13470 | loop_nullspace: local solution-manifold continuation (predictor-corrector with rank gates) over ForceNullSpace (NSE-UD-2) |

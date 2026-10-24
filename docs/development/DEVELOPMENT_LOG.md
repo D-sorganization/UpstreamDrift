@@ -456,6 +456,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13770 · Add Cursor Cloud Environment.Json Fleet Bootstrap via Repository_Management Scripts/Cursor/Bootstrap.Sh.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13770
+- **Branch:** merged via #13769
+- **PR:** #13769
+- **Paths:** see #13769
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`08dffcd6`; collated from changes/13770-add-cursor-cloud-environment-json-fleet.md)
+- **Summary:** Add Cursor Cloud environment.json fleet bootstrap via Repository_Management scripts/cursor/bootstrap.sh.
+- **Next step:** Shipped in PR #13769.
+
 ### DL-#13462 · Loop_Nullspace: Local Solution-Manifold Continuation (Predictor-Corrector With Rank Gates) Over ForceNullSpace (NSE-UD-2)
 
 - **State:** shipped
