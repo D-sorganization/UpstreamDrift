@@ -77,7 +77,7 @@ launch_tabbed_app;
 Make sure you're in the correct directory:
 
 ```matlab
-cd('C:\Users\diete\Repositories\Golf_Model\matlab\Scripts\Golf_GUI');
+cd('<owner-home>\Repositories\Golf_Model\matlab\Scripts\Golf_GUI');
 launch_tabbed_app;
 ```
 

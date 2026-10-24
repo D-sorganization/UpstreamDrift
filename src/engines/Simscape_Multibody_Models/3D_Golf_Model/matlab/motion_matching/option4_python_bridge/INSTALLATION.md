@@ -82,7 +82,7 @@ If those don't match the matrix row above, fix it before continuing.
 ### 2. Activate your repo venv
 
 ```powershell
-cd C:\Users\diete\Repositories\UpstreamDrift
+cd <owner-home>\Repositories\UpstreamDrift
 .\.venv\Scripts\Activate.ps1
 ```
 
