@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13674 | Bump transitive undici to 8.12.3 in ui/package-lock.json to clear HIGH npm audit advisories that ejected every merge-queue entry |
+| 2026-10-24 | #13659 | Add .oss-scanner security-scan contract (project.yaml, offline audit Dockerfile, threat model) for the fleet scanner pilot |
+| 2026-10-24 | #13668 | Skip redundant OpenSim CI runs when unrelated PR labels are applied |
 | 2026-10-24 | #13671 | Bump ui lockfile (zod 4.6.7) to clear GHSA-mrhx-c7xc-m3w5 so the UI Security Audit and merge queue pass |
 | 2026-10-24 | #13425 | Model explorer headless export: support NPZ trajectories with 'q', document and verify results replay for anthro driver mjx_package with stiff weld constraint |
 | 2026-10-23 | #13661 | Critique physical grip-contact calibration and validation evidence |

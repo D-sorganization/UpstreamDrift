@@ -391,6 +391,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13673 · Bump Transitive Undici to 8.12.3 in Ui/Package-Lock.Json to Clear HIGH Npm Audit Advisories That Ejected Every Merge-Queue Entry
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13673
+- **Branch:** merged via #13674
+- **PR:** #13674
+- **Paths:** see #13674
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`d9279f35`; collated from changes/13673-bump-transitive-undici-to-8-12-3-in-ui-p.md)
+- **Summary:** Bump transitive undici to 8.12.3 in ui/package-lock.json to clear HIGH npm audit advisories that ejected every merge-queue entry
+- **Next step:** Shipped in PR #13674.
+
+### DL-#13658 · Add .oss-scanner Security-Scan Contract (project.yaml, Offline Audit Dockerfile, Threat Model) for the Fleet Scanner Pilot
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13658
+- **Branch:** merged via #13659
+- **PR:** #13659
+- **Paths:** see #13659
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`2ca23f54`; collated from changes/13658-add-oss-scanner-security-scan-contract-p.md)
+- **Summary:** Add .oss-scanner security-scan contract (project.yaml, offline audit Dockerfile, threat model) for the fleet scanner pilot
+- **Next step:** Shipped in PR #13659.
+
+### DL-#13638 · Skip Redundant OpenSim CI Runs When Unrelated PR Labels Are Applied
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13638
+- **Branch:** merged via #13668
+- **PR:** #13668
+- **Paths:** see #13668
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`23b3f4df`; collated from changes/13638-skip-opensim-unrelated-labels.md)
+- **Summary:** Skip redundant OpenSim CI runs when unrelated PR labels are applied
+- **Next step:** Shipped in PR #13668.
+
 ### DL-#13670 · Bump Ui Lockfile (Zod 4.6.7) to Clear GHSA-Mrhx-C7xc-M3w5 so the UI Security Audit and Merge Queue Pass
 
 - **State:** shipped
