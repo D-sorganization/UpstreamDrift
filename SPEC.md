@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-25 | #13810 | Retire the remaining local chat UI builder compatibility declarations |
+| 2026-10-25 | #13693 | Split proximal-distal research docs under doc size budget (#12851) |
 | 2026-10-25 | #13808 | Route remaining MATLAB and Simscape gravity literals through canonical standard gravity |
 | 2026-10-25 | #13657 | Pin Tools 160c9c, sync child APIs, reconcile impact evidence, and adapt voice routes |
 | 2026-10-25 | #13694 | Harden public-repo workflow fork boundaries and least-privilege permissions (RM#1989). |
