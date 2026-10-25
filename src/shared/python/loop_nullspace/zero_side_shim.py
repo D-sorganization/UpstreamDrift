@@ -57,33 +57,44 @@ def check_zero_side_consistency(
     if b.ndim != 1:
         raise ValueError("tau_rnea must be a 1-D vector")
     nv = b.size
+    act_set: set[int] = set()
+    for raw_idx in actuated_indices:
+        idx = int(raw_idx)
+        if idx < 0 or idx >= nv:
+            raise ValueError(f"actuated index {idx} out of range for nv={nv}")
+        act_set.add(idx)
+
     zero_set = {int(i) for i in zero_joint_indices}
     if not zero_set:
         raise ValueError("zero_joint_indices must be non-empty")
-    free_act = [int(i) for i in actuated_indices if int(i) not in zero_set]
-
-    s_free = np.zeros((nv, len(free_act)), dtype=np.float64)
-    for col, idx in enumerate(free_act):
+    for idx in sorted(zero_set):
         if idx < 0 or idx >= nv:
-            raise ValueError(f"actuated index {idx} out of range for nv={nv}")
-        s_free[idx, col] = 1.0
+            raise ValueError(f"zero joint index {idx} out of range for nv={nv}")
+        if idx not in act_set:
+            raise ValueError(f"zero joint index {idx} must belong to actuated_indices")
+    zero_rows = np.asarray(sorted(zero_set), dtype=np.intp)
+    b_zero = b[zero_rows]
 
-    blocks: list[Array] = [s_free]
+    blocks: list[Array] = []
     if j_ground is not None and j_ground.size > 0:
-        blocks.append(np.asarray(j_ground, dtype=np.float64).T)
+        jg = np.asarray(j_ground, dtype=np.float64)
+        blocks.append(jg[:, zero_rows].T)
     if j_grip is not None and j_grip.size > 0:
-        blocks.append(np.asarray(j_grip, dtype=np.float64).T)
-    a_mat = np.hstack(blocks) if blocks else np.zeros((nv, 0), dtype=np.float64)
+        jc = np.asarray(j_grip, dtype=np.float64)
+        blocks.append(jc[:, zero_rows].T)
+    a_mat = (
+        np.hstack(blocks) if blocks else np.zeros((zero_rows.size, 0), dtype=np.float64)
+    )
 
     if a_mat.shape[1] == 0:
-        res_norm = float(np.linalg.norm(b, ord=np.inf))
+        res_norm = float(np.linalg.norm(b_zero, ord=np.inf))
         rank = 0
     else:
-        sol, _, rank_val, _ = np.linalg.lstsq(a_mat, b, rcond=None)
-        res_norm = float(np.linalg.norm(a_mat @ sol - b, ord=np.inf))
+        sol, _, rank_val, _ = np.linalg.lstsq(a_mat, b_zero, rcond=None)
+        res_norm = float(np.linalg.norm(a_mat @ sol - b_zero, ord=np.inf))
         rank = int(rank_val)
 
-    scale = max(1.0, float(np.linalg.norm(b, ord=np.inf)))
+    scale = max(1.0, float(np.linalg.norm(b_zero, ord=np.inf)))
     res_scaled = res_norm / scale
     nullity = max(0, int(a_mat.shape[1]) - rank)
     if res_norm > atol:
