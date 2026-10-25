@@ -547,6 +547,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13463 · Muscle_Fiber: Affine-Hull-Aware Fibre Dimension (Implicit Equalities) and Hit-and-Run Sampling in Hull Coordinates; Corrected Dim Claims
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13463
+- **Branch:** claude/nse-ud3-13463
+- **PR:** #13467
+- **Paths:** see #13467
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`43911da1`; collated from changes/13463-muscle-fiber-affine-hull-aware-fibre-dim.md)
+- **Summary:** muscle_fiber: affine-hull-aware fibre dimension (implicit equalities) and hit-and-run sampling in hull coordinates; corrected dim claims
+- **Next step:** Shipped in PR #13467.
+
 ### DL-#12688 · R9a Evidence: MeshCat Appearance Render Script, MuJoCo Stills, and Receipt (#12688)
 
 - **State:** shipped
