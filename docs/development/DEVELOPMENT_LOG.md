@@ -482,6 +482,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13790 · Unify Triple-Pendulum Parameters and Correct MuJoCo Gravity Plane
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13790
+- **Branch:** merged via #13797
+- **PR:** #13797
+- **Paths:** see #13797
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`dd3ac27a`; collated from changes/13790-unify-triple-pendulum-parameters-and-cor.md)
+- **Summary:** Unify triple-pendulum parameters and correct MuJoCo gravity plane
+- **Next step:** Shipped in PR #13797.
+
+### DL-#13577 · Document Fast/Full Tier Contract Linkage in ci-standard.yml and Clarify Post-Merge P90 Observation Follow-Up (#13577).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13577
+- **Branch:** merged via #13697
+- **PR:** #13697
+- **Paths:** see #13697
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`11f00395`; collated from changes/13577-ci-fast-full-tier-closeout.md)
+- **Summary:** Document fast/full tier contract linkage in ci-standard.yml and clarify post-merge P90 observation follow-up (#13577).
+- **Next step:** Shipped in PR #13697.
+
+### DL-#13150 · Prove Partial UNBOUNDED Envelope Frames Reach the NSX Plot Model (#13150).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13150
+- **Branch:** merged via #13731
+- **PR:** #13731
+- **Paths:** see #13731
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`2c6b9b8f`; collated from changes/13150-prove-partial-unbounded-envelope-frames.md)
+- **Summary:** Prove partial UNBOUNDED envelope frames reach the NSX plot model (#13150).
+- **Next step:** Shipped in PR #13731.
+
+### DL-#12567 · Add a Zero-Side Consistency Shim for HARD_ZERO_TRAIL Allocation and Reject Algebraically Inconsistent Zero-Side Systems.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12567
+- **Branch:** merged via #13606
+- **PR:** #13606
+- **Paths:** see #13606
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`3853174f`; collated from changes/12567-add-a-zero-side-consistency-shim-for-har.md)
+- **Summary:** Add a zero-side consistency shim for HARD_ZERO_TRAIL allocation and reject algebraically inconsistent zero-side systems.
+- **Next step:** Shipped in PR #13606.
+
 ### DL-#13771 · Fix Tests/Api Assertions Stale After the APIException Error-Envelope Change; Shared Error_Message Fixture
 
 - **State:** shipped
