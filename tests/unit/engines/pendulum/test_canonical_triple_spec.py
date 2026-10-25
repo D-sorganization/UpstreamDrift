@@ -22,6 +22,10 @@ pytestmark = pytest.mark.unit
 
 
 def test_canonical_spec_drives_models_and_mujoco_xml() -> None:
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.models_pendulum import (
+        TRIPLE_PENDULUM_XML as COMPAT_TRIPLE_PENDULUM_XML,
+    )
+
     assert TRIPLE_PENDULUM_SPEC.gravity_m_s2 == float(GRAVITY_M_S2)
     assert COMPAT_TRIPLE_PENDULUM_XML is TRIPLE_PENDULUM_XML
     assert f'gravity="0 0 -{TRIPLE_PENDULUM_SPEC.gravity_m_s2}"' in TRIPLE_PENDULUM_XML
