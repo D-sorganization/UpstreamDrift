@@ -2741,6 +2741,11 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-25 | #13808 | Route remaining MATLAB and Simscape gravity literals through canonical standard gravity |
+| 2026-10-25 | #13657 | Pin Tools 160c9c, sync child APIs, reconcile impact evidence, and adapt voice routes |
+| 2026-10-25 | #13694 | Harden public-repo workflow fork boundaries and least-privilege permissions (RM#1989). |
+| 2026-10-25 | #13484 | OS-9 re-registers the tour-marker model on the address hold with anatomical priors and a plausibility gate; OS-8 trunk angles were from a mirrored registration |
+| 2026-10-25 | #13521 | joint reaction loads for deadlift, snatch, and clean and jerk |
 | 2026-10-25 | #13799 | Route UD-owned Python gravity values and MJCF gravity through the canonical constant, guarded by a tested literal scanner. |
 | 2026-10-25 | #13474 | Consolidate Pinocchio topology contact simulation onto shared G6 model to fix swing replay divergence |
 | 2026-10-25 | #13543 | HRG-E4 slice: desktop and web anatomical event table view with a shared golden fixture and a feature_parity gap entry (web fetch awaits #13538) |

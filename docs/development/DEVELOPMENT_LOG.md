@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13656 · Pin Tools 160C9c, Sync Child APIs, Reconcile Impact Evidence, and Adapt Voice Routes
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13656
+- **Branch:** codex/13656-knowledge-pin
+- **PR:** #13657
+- **Paths:** vendor/ud-tools,tests/unit/ai/test_vendor_knowledge_search_api.py
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`c920b8b8`; collated from changes/13656-knowledge-pack-sanitizer-pinned-tools.md)
+- **Summary:** Pin Tools 160c9c, sync child APIs, reconcile impact evidence, and adapt voice routes
+- **Next step:** Verify the pinned child copies, served impact bundle, sanitizer import, and voice routes in CI.
+
+### DL-#13434 · OS-9 Re-Registers the Tour-Marker Model on the Address Hold With Anatomical Priors and a Plausibility Gate; OS-8 Trunk Angles Were From a Mirrored Registration
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13434
+- **Branch:** fix/13434-static-address-registration
+- **PR:** #13484
+- **Paths:** see #13484
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`7ebc584c`; collated from changes/13434-os-9-re-registers-the-tour-marker-model.md)
+- **Summary:** OS-9 re-registers the tour-marker model on the address hold with anatomical priors and a plausibility gate; OS-8 trunk angles were from a mirrored registration
+- **Next step:** Owner: decide the address trunk screening bound (30.2 vs 30 deg, lumbar flexion); then re-run spine evidence #13427/#12769 on the OS-9 IK
+
 ### DL-#13791 · Route UD-Owned Python Gravity Values and MJCF Gravity Through the Canonical Constant, Guarded by a Tested Literal Scanner.
 
 - **State:** in_review
@@ -495,6 +521,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13798 · Route Remaining MATLAB and Simscape Gravity Literals Through Canonical Standard Gravity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13798
+- **Branch:** merged via #13808
+- **PR:** #13808
+- **Paths:** see #13808
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`0d43d5ca`; collated from changes/13798-route-matlab-gravity-canonical.md)
+- **Summary:** Route remaining MATLAB and Simscape gravity literals through canonical standard gravity
+- **Next step:** Shipped in PR #13808.
+
+### DL-#13043 · Joint Reaction Loads for Deadlift, Snatch, and Clean and Jerk
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13043
+- **Branch:** merged via #13521
+- **PR:** #13521
+- **Paths:** see #13521
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`5c867150`; collated from changes/13043-joint-reaction-loads-for-deadlift-snatch.md)
+- **Summary:** joint reaction loads for deadlift, snatch, and clean and jerk
+- **Next step:** Shipped in PR #13521.
+
 ### DL-#13304 · Consolidate Pinocchio Topology Contact Simulation Onto Shared G6 Model to Fix Swing Replay Divergence
 
 - **State:** shipped
@@ -540,10 +592,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13577
 - **Branch:** merged via #13697
-- **PR:** #13697
+- **PR:** #13697, #13694
 - **Paths:** see #13697
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-25 (`11f00395`; collated from changes/13577-ci-fast-full-tier-closeout.md)
+- **Last verified:** 2026-10-25 (`3bd0336a`; collated from changes/13577-public-repo-workflow-security.md)
 - **Summary:** Document fast/full tier contract linkage in ci-standard.yml and clarify post-merge P90 observation follow-up (#13577).
 - **Next step:** Shipped in PR #13697.
 
