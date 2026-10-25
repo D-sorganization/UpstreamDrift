@@ -6,6 +6,7 @@ failure/cancellation recovery contracts.
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 import datetime
 from dataclasses import dataclass, field
@@ -405,8 +406,12 @@ class InstalledWorkspaceJourneysCoordinator:
             spin = backspin_rpm
 
         # Calculate flight metrics deterministically from launch inputs
-        carry_distance_m = (speed**2 * np.sin(2 * np.radians(angle)) / 9.81) * 0.85
-        apex_height_m = (speed * np.sin(np.radians(angle))) ** 2 / (2 * 9.81)
+        carry_distance_m = (
+            speed**2 * np.sin(2 * np.radians(angle)) / float(GRAVITY_M_S2)
+        ) * 0.85
+        apex_height_m = (speed * np.sin(np.radians(angle))) ** 2 / (
+            2 * float(GRAVITY_M_S2)
+        )
 
         metrics = {
             "carry_distance_m": float(round(carry_distance_m, 2)),

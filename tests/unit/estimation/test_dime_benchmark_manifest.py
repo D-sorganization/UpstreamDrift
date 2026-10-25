@@ -16,6 +16,7 @@ from pathlib import Path
 import pytest
 import numpy as np
 
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.estimation.dime_manifest import (
     CANONICAL_DIME_UNITS,
     CapabilityStatus,
@@ -374,7 +375,11 @@ def test_green_shared_fixtures_contract() -> None:
     # 3. Native stance fixture
     stance = make_native_stance_fixture(n_frames=10, fps=100.0)
     assert stance.is_stance is True
-    assert np.isclose(stance.ground_reaction_force_z, stance.mass_kg * 9.81, atol=1e-4)
+    assert np.isclose(
+        stance.ground_reaction_force_z,
+        stance.mass_kg * float(GRAVITY_M_S2),
+        atol=1e-4,
+    )
     assert len(stance.frames) == 10
 
 

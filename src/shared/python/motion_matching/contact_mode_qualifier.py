@@ -22,6 +22,7 @@ Provides:
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -183,7 +184,7 @@ class ContactModeQualifier:
         contact_parameters: ContactParameters | None = None,
         hysteresis_parameters: HysteresisParameters | None = None,
         mass_kg: float = 75.0,
-        gravity_m_s2: Sequence[float] = (0.0, 0.0, -9.81),
+        gravity_m_s2: Sequence[float] = (0.0, 0.0, -float(GRAVITY_M_S2)),
     ) -> None:
         require(len(sphere_names) > 0, "Must have at least one contact sphere")
         require(mass_kg > 0.0, "mass_kg must be positive", mass_kg)

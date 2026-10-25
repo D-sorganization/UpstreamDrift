@@ -26,7 +26,9 @@ from src.shared.python.pendulum_simulator.simulation_triple import (
 )
 
 DP = PendulumParams(m1=5.0, m2=0.3, L1=0.65, L2=1.1, mClub=0.2)
-TP = TriplePendulumParams(m1=5.0, m2=0.3, m3=0.05, L1=0.65, L2=1.1, L3=0.1)
+TP = TriplePendulumParams(
+    m1=5.0, m2=0.3, m3=0.05, L1=0.65, L2=1.1, L3=0.1, b1=0.0, b2=0.0, b3=0.0
+)
 GP = GolferParams(
     m_hub=0.01,
     m_r_upper=2.0,

@@ -1,6 +1,6 @@
 <mujoco model="simple_pendulum">
   <compiler angle="degree" coordinate="local"/>
-  <option timestep="0.01" gravity="0 0 -9.81"/>
+  <option timestep="0.01" gravity="0 0 -9.80665"/>
   <worldbody>
     <light pos="0 0 5"/>
     <body name="pendulum" pos="0 0 2">

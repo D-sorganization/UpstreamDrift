@@ -37,6 +37,7 @@ Idealisation, stated up front
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 import math
 import time
@@ -239,7 +240,7 @@ class ShotSettings:
     time_step_s: float = 2.5e-4
     max_time_s: float = 0.200
     free_surface_height_m: float = 0.0
-    gravity_m_s2: float = 9.81
+    gravity_m_s2: float = float(GRAVITY_M_S2)
     include_gravity: bool = False
     start_at_first_contact: bool = True
     free_flight_lead_steps: float = 3.5

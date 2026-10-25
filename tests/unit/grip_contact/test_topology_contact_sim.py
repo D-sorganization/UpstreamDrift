@@ -223,12 +223,47 @@ def test_dbc_preconditions_reject_invalid_inputs() -> None:
 
 def test_per_pair_force_traces_equal_shared_law_evaluation() -> None:
     """Per-pair force traces equal shared-law evaluation at identical states to <= 1e-9 N."""
-    spec = GripSpec(style=GripStyle.OVERLAP)
+    spec = GripSpec(style=GripStyle.TEN_FINGER, trigger_finger=True)
     topo = contact_topology(spec)
     hands, club = _neutral_hands_and_club(spec)
     law = default_contact_parameters()
 
     pair_results, _, _ = evaluate_topology_wrenches(topo, hands, club, law)
+
+    grip_cap = ContactCapsule(
+        np.array([-0.1, 0.0, 0.0]),
+        np.array([1.0, 0.0, 0.0]),
+        topo.grip_radius_m,
+    )
+    for p in topo.hand_grip_pairs():
+        res = pair_results[p.name]
+        site_a = topo.site(p.site_a)
+        st_a = hands[site_a.hand]
+        r_eff = 1.0 / (1.0 / site_a.radius_m + 1.0 / topo.grip_radius_m)
+        patch = math.sqrt(2.0 * r_eff * 2.5e-4)
+        if site_a.primitive == "sphere":
+            prim_a: ContactSphere | ContactCapsule = ContactSphere(
+                np.asarray(site_a.centre_m, float), site_a.radius_m
+            )
+            direct_hg = sphere_capsule(
+                prim_a, grip_cap, st_a, club, law, patch_radius_m=patch
+            )
+        else:
+            prim_a = ContactCapsule(
+                np.asarray(site_a.centre_m, float)
+                - site_a.half_length_m * np.asarray(site_a.axis_m, float),
+                np.asarray(site_a.centre_m, float)
+                + site_a.half_length_m * np.asarray(site_a.axis_m, float),
+                site_a.radius_m,
+            )
+            direct_hg = capsule_capsule(
+                prim_a, grip_cap, st_a, club, law, patch_radius_m=patch
+            )
+        diff_f = float(np.linalg.norm(res.force_club_n - direct_hg.force_b_n))
+        diff_m = float(np.linalg.norm(res.moment_club_nm - direct_hg.moment_b_nm))
+        assert diff_f <= 1e-9, f"Pair {p.name} force mismatch: {diff_f} N > 1e-9 N"
+        assert diff_m <= 1e-9, f"Pair {p.name} moment mismatch: {diff_m} N*m > 1e-9 N*m"
+        assert abs(res.normal_force_mag_n - direct_hg.normal_force_mag_n) <= 1e-9
 
     # Validate hand-hand pairs match direct pair_contact evaluation to <= 1e-12 N
     for p in topo.hand_hand_pairs():
@@ -237,6 +272,8 @@ def test_per_pair_force_traces_equal_shared_law_evaluation() -> None:
         site_b = topo.site(p.site_b)
         st_a = hands[site_a.hand]
         st_b = hands[site_b.hand]
+        r_eff = 1.0 / (1.0 / site_a.radius_m + 1.0 / topo.grip_radius_m)
+        patch = math.sqrt(2.0 * r_eff * 2.5e-4)
         prim_a = (
             ContactSphere(np.asarray(site_a.centre_m, float), site_a.radius_m)
             if site_a.primitive == "sphere"
@@ -260,15 +297,19 @@ def test_per_pair_force_traces_equal_shared_law_evaluation() -> None:
             )
         )
         if isinstance(prim_a, ContactSphere) and isinstance(prim_b, ContactCapsule):
-            direct_w = sphere_capsule(prim_a, prim_b, st_a, st_b, law)
+            direct_w = sphere_capsule(
+                prim_a, prim_b, st_a, st_b, law, patch_radius_m=patch
+            )
         elif isinstance(prim_a, ContactCapsule) and isinstance(prim_b, ContactCapsule):
-            direct_w = capsule_capsule(prim_a, prim_b, st_a, st_b, law)
+            direct_w = capsule_capsule(
+                prim_a, prim_b, st_a, st_b, law, patch_radius_m=patch
+            )
         else:
             raise AssertionError(
                 f"Unexpected primitive types: {type(prim_a)}, {type(prim_b)}"
             )
 
-        diff = np.linalg.norm(res.force_a_n - direct_w.force_a_n)
+        diff = float(np.linalg.norm(res.force_a_n - direct_w.force_a_n))
         assert diff <= 1e-9, f"Pair {p.name} force mismatch: {diff} N > 1e-9 N"
         assert abs(res.normal_force_mag_n - direct_w.normal_force_mag_n) <= 1e-9
 
@@ -287,6 +328,68 @@ def _has_pinocchio_runtime() -> bool:
     return callable(builder)
 
 
+@pytest.mark.requires_pinocchio
+@pytest.mark.skipif(
+    not _has_pinocchio_runtime(), reason="real Pinocchio runtime required"
+)
+@pytest.mark.parametrize(
+    "style",
+    [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER],
+)
+def test_topology_club_in_hands_weld_pose_has_active_preload_contact(
+    style: GripStyle,
+) -> None:
+    """Regression (#13304): TopologyClubInHands maps sites to hand grip frames so t=0 preload and hold forces are active and match topology_side_wrench."""
+    from pathlib import Path
+    from src.engines.physics_engines.pinocchio.python import grip_bushing as bushing
+    from src.shared.python.grip_contact import GripInterface, load_coordinate_swing
+    from src.shared.python.grip_contact.topology_contact import topology_side_wrench
+
+    root = Path(__file__).resolve().parents[3]
+    models = root / "docs/development/full_body_models"
+    fixtures = root / "tests/fixtures/club_face"
+
+    spec_bytes = (models / "full_body_spec_anthro_driver.json").read_bytes()
+    spec = json.loads(spec_bytes)
+    names = spec["coordinate_order"]
+    swing = load_coordinate_swing(
+        fixtures / "swing_q_driver.npz",
+        fixtures / "address_poses.json",
+        "driver",
+        names,
+    )
+    interface = GripInterface.from_spec(spec)
+    topo = contact_topology(GripSpec(style=style))
+    sim = TopologyClubInHands(spec, list(swing.names), interface, topo)
+    source, y0 = bushing.initial_swing_state(sim, swing, swing.time_s, hold=True)
+    hands, frames, law_by_side = sim.wrenches(0.0, y0, source)
+    assert sim.topology_model is not None
+
+    for side in ("L", "R"):
+        sw = law_by_side[side]
+        expected = topology_side_wrench(
+            sim.topology_model, side, hands[side], frames[side]
+        )
+        assert sw.total_normal_force_n > 100.0
+        np.testing.assert_allclose(sw.force_n, expected.force_n, atol=1e-9)
+        np.testing.assert_allclose(sw.moment_nm, expected.moment_nm, atol=1e-9)
+
+    run_hold = simulate_topology_contact(
+        spec_bytes,
+        swing,
+        topology=topo,
+        interface=interface,
+        hold=True,
+        t_end_s=0.04,
+    )
+    for p in topo.hand_grip_pairs():
+        fn_trace = run_hold.pair_normal_force_n[p.name]
+        assert np.all(np.isfinite(fn_trace))
+        assert float(np.min(fn_trace)) > 1.0
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(600)
 @pytest.mark.requires_pinocchio
 @pytest.mark.skipif(
     not _has_pinocchio_runtime(), reason="real Pinocchio runtime required"
@@ -346,6 +449,9 @@ def test_pinocchio_simulation_swing_replay_and_timestep_halving() -> None:
             tolerances=tol_half,
             t_end_s=1.0,
         )
+
+        for p in topo.hand_grip_pairs():
+            assert float(np.max(run_nom.pair_normal_force_n[p.name])) > 1.0
 
         # Timestep halving changes peak pair force by < 2 %
         for p in topo.pairs:
