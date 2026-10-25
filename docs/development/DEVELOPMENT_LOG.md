@@ -547,6 +547,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13176 · Qualify HRG Full-Body-V2 Mass and Gravity in Drake
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13176
+- **Branch:** merged via #13820
+- **PR:** #13820
+- **Paths:** see #13820
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`2635d5aa`; collated from changes/13176-hrg-q1-drake-mass-gravity.md)
+- **Summary:** Qualify HRG full-body-v2 mass and gravity in Drake
+- **Next step:** Shipped in PR #13820.
+
 ### DL-#13796 · Add Benettin Largest Lyapunov Exponent Check and Receipt for Canonical Triple Pendulum
 
 - **State:** shipped
