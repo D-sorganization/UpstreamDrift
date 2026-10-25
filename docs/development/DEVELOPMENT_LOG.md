@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13758 · Add SO(3) Observability Evidence for Grip Fitting
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13758
+- **Branch:** staff/issue-remediator-13758-4adf95
+- **PR:** #13816
+- **Paths:** see #13816
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`652ea2e1`; collated from changes/13758-add-so-3-observability-evidence-for-grip.md)
+- **Summary:** Add SO(3) observability evidence for grip fitting
+- **Next step:** Use Jacobian evidence to select the neutral-prior fit change
+
 ### DL-#13656 · Pin Tools 160C9c, Sync Child APIs, Reconcile Impact Evidence, and Adapt Voice Routes
 
 - **State:** in_review

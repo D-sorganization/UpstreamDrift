@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-25 | #13816 | Add SO(3) observability evidence for grip fitting |
 | 2026-10-25 | #13813 | Add Benettin largest Lyapunov exponent check and receipt for canonical triple pendulum |
 | 2026-10-25 | #13807 | Explicitly load pytest-timeout in motion-matching smoke |
 | 2026-10-25 | #13810 | Retire the remaining local chat UI builder compatibility declarations |
