@@ -48,7 +48,7 @@ SPATIAL_DIM: int = 6
 SPATIAL_LIN_DIM: int = 3
 SPATIAL_ANG_DIM: int = 3
 
-# Physical constants - SI units
+# Physical constants - SI units (GRAVITY_M_S2 is the single cross-engine gravity source, #13791)
 GRAVITY_M_S2 = PhysicalConstant(
     9.80665, "m/s^2", "NIST CODATA 2018", "Standard gravity"
 )

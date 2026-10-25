@@ -32,7 +32,6 @@ tested on synthetic problems; ``centroidal_filter`` is the pipeline entry.
 """
 
 from __future__ import annotations
-from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, replace
@@ -45,7 +44,11 @@ from scipy.optimize import lsq_linear
 from scipy.spatial import ConvexHull, QhullError
 import scipy.sparse as sp
 
-GRAVITY_M_S2 = float(GRAVITY_M_S2)
+from src.shared.python.core.physics_constants import (
+    GRAVITY_M_S2 as _CANONICAL_GRAVITY_M_S2,
+)
+
+GRAVITY_M_S2: float = float(_CANONICAL_GRAVITY_M_S2)
 FRICTION_OCTAGON = tuple(np.arange(8) * np.pi / 4)
 OCTAGON_INSCRIBED = float(np.cos(np.pi / 8))
 UNLOADED_OUTSIDE_M = 1.0
