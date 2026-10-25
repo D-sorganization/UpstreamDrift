@@ -13,9 +13,10 @@ from pathlib import Path
 import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-pytest.importorskip("PyQt6.QtWidgets")
-
-from PyQt6.QtWidgets import QApplication  # noqa: E402
+try:
+    from PyQt6.QtWidgets import QApplication
+except (ImportError, OSError) as exc:
+    pytest.skip(f"PyQt6.QtWidgets not loadable: {exc}", allow_module_level=True)
 
 from src.shared.python.anatomical_angles.event_table_view import (  # noqa: E402
     MISSING_TEXT,
