@@ -330,7 +330,14 @@ async def get_chat_voice_status() -> Any:
     try:
         from src.shared.python.sidekick.voice import VoiceTranscriber
 
-        payload.update(VoiceTranscriber().status())
+        capability = VoiceTranscriber().detect_capability()
+        payload.update(
+            {
+                "available": capability.available,
+                "engine": capability.engine,
+                "model": capability.model,
+            }
+        )
     except ImportError:
         import importlib.util
 
@@ -373,18 +380,27 @@ async def transcribe_chat_voice(request: Request) -> Any:
             headers={"Cache-Control": "no-store"},
         )
     try:
-        from src.shared.python.sidekick.voice import VoiceTranscriber
+        from src.shared.python.sidekick.voice import (
+            VoiceTranscriber,
+            VoiceUnavailableError,
+        )
 
         res = VoiceTranscriber().transcribe_bytes(raw_bytes, mime_type=content_type)
         body = {
             "text": res.text,
             "duration_s": res.duration_s,
-            "language": res.language,
+            "language": getattr(res, "language", None),
             "engine": res.engine,
             "auto_send": False,
         }
         return JSONResponse(content=body, headers={"Cache-Control": "no-store"})
     except ImportError:
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Local Whisper engine is not installed."},
+            headers={"Cache-Control": "no-store"},
+        )
+    except VoiceUnavailableError:
         return JSONResponse(
             status_code=503,
             content={"detail": "Local Whisper engine is not installed."},
