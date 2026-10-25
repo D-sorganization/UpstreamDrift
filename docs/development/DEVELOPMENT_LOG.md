@@ -521,6 +521,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13796 · Add Benettin Largest Lyapunov Exponent Check and Receipt for Canonical Triple Pendulum
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13796
+- **Branch:** merged via #13813
+- **PR:** #13813
+- **Paths:** see #13813
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`ff962751`; collated from changes/13796-benettin-largest-lyapunov-exponent.md)
+- **Summary:** Add Benettin largest Lyapunov exponent check and receipt for canonical triple pendulum
+- **Next step:** Shipped in PR #13813.
+
 ### DL-#13804 · Explicitly Load Pytest-Timeout in Motion-Matching Smoke
 
 - **State:** shipped
