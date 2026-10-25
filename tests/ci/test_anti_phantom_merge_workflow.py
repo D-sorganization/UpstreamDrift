@@ -79,7 +79,5 @@ def test_concurrency_group_separates_event_types() -> None:
 def test_does_not_use_pull_request_target() -> None:
     data = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
     on = data.get("on", data.get(True))
-    if isinstance(on, dict):
-        assert "pull_request_target" not in on
-    elif isinstance(on, list):
+    if isinstance(on, (dict, list)):
         assert "pull_request_target" not in on
