@@ -11,12 +11,14 @@ import numpy as np
 if typing.TYPE_CHECKING:
     import collections.abc
 
-from src.shared.python.core.constants import GRAVITY_M_S2
+from src.shared.python.pendulum_simulator.triple_pendulum_spec import (
+    TRIPLE_PENDULUM_SPEC,
+)
 
 from ._rk4 import rk4_step
 
-GRAVITATIONAL_ACCELERATION = GRAVITY_M_S2
-DAMPING_DEFAULT = (0.35, 0.3, 0.25)
+GRAVITATIONAL_ACCELERATION = TRIPLE_PENDULUM_SPEC.gravity_m_s2
+DAMPING_DEFAULT = TRIPLE_PENDULUM_SPEC.damping_nm_s_rad
 
 
 @dataclass
@@ -49,27 +51,16 @@ class TriplePendulumParameters:
     @classmethod
     def default(cls) -> TriplePendulumParameters:
         """Create parameters with default three-segment properties."""
-        seg1 = TripleSegmentProperties(
-            length_m=0.75,
-            mass_kg=7.5,
-            center_of_mass_ratio=0.45,
-            inertia_about_com=(1.0 / 12.0) * 7.5 * 0.75**2,
+        segments = tuple(
+            TripleSegmentProperties(
+                length_m=segment.length_m,
+                mass_kg=segment.mass_kg,
+                center_of_mass_ratio=segment.center_of_mass_ratio,
+                inertia_about_com=segment.inertia_about_com,
+            )
+            for segment in TRIPLE_PENDULUM_SPEC.segments
         )
-        seg2 = TripleSegmentProperties(
-            length_m=0.6,
-            mass_kg=1.8,
-            center_of_mass_ratio=0.46,
-            inertia_about_com=(1.0 / 12.0) * 1.8 * 0.6**2,
-        )
-        seg3 = TripleSegmentProperties(
-            length_m=1.0,
-            mass_kg=0.35,
-            # Derived from Shaft(0.15kg, com=0.43) + Head(0.20kg, com=1.0)
-            center_of_mass_ratio=0.7557142857142858,
-            # Composite inertia of shaft + head
-            inertia_about_com=0.04034857142857143,
-        )
-        return cls((seg1, seg2, seg3))
+        return cls((segments[0], segments[1], segments[2]))
 
     @property
     def gravity(self) -> float:
