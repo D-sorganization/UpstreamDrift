@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13759 · Add Audited Per-Engine Hand Capability Matrix and Frame Contract
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13759
+- **Branch:** staff/issue-remediator-13759-d7f0a0
+- **PR:** #13803
+- **Paths:** docs/development/full_body_models/HANDS_AUDIT.md,tests/unit/full_body_models/test_hands_audit_inventory.py
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`36a0289e`; collated from changes/13759-add-audited-per-engine-hand-capability-m.md)
+- **Summary:** Add audited per-engine hand capability matrix and frame contract
+- **Next step:** Review and merge the hand audit PR.
+
 ### DL-#13778 · Reconcile Neural Motion Matching and Simscape Documentation With Diagnostic Receipts
 
 - **State:** in_review
@@ -37,12 +50,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #13720
 - **Branch:** codex/13720-chat-ui-retirement
-- **PR:** #13724
+- **PR:** #13724, #13747
 - **Paths:** src/shared/python/ud_import_alias_policy.py,tests/unit/repo_hygiene/test_pinned_chat_ui_builder_alias.py
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`b46af31e`; collated from changes/13720-route-legacy-chat-ui-builder-imports-to.md)
+- **Last verified:** 2026-10-25 (`f878603f`; collated from changes/13720-retire-chat-ui-builder-body.md)
 - **Summary:** Route legacy chat UI builder imports to the pinned Tools module with shared module identity.
-- **Next step:** Review the provider origin and identity regression, then merge this preparation change.
+- **Next step:** Review the focused provider-origin, export, parity, inventory, and canonical validation results before publishing this physical-retirement slice.
 
 ### DL-#13552 · Simscape Grip Kernel Follows the Shared Capsule Line-Contact Law; Ten_Finger Verifier Back to 1E-11; Structural Freshness Check for Generated JSON; Goldens Rebuilt From the Rounded Export Params; Committed R2025b Evidence
 

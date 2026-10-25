@@ -21,6 +21,7 @@ import re
 import numpy as np
 import pytest
 
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.estimation.mosaic.planar_chain import PlanarChain
 
 pytestmark = pytest.mark.unit
@@ -52,7 +53,7 @@ def _single_link() -> tuple[PlanarChain, np.ndarray, float]:
     chain = PlanarChain(link_lengths=np.array([length]), actuated=np.array([True]))
     i_o = i_c + mass * lc**2
     pi = np.array([mass, mass * lc, 0.0, i_o])
-    expected = -mass * 9.81 * lc / i_o
+    expected = -mass * float(GRAVITY_M_S2) * lc / i_o
     return chain, pi, expected
 
 

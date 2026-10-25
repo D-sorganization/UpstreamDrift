@@ -35,6 +35,7 @@ from src.shared.python.motion_matching.contact_mode_qualifier import (
     SupportState,
     verify_force_and_torque_limits,
 )
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 pytestmark = [pytest.mark.unit]
 
@@ -91,7 +92,7 @@ def test_static_weight_balance(standard_qualifier: ContactModeQualifier) -> None
     """Static double support balances total body weight with COP inside polygon."""
     qualifier = standard_qualifier
     mass_kg = 75.0
-    gravity_n = mass_kg * 9.81  # ~735.75 N
+    gravity_n = mass_kg * float(GRAVITY_M_S2)
 
     # Positions at ground level (z = 0.03 with radius = 0.03 -> contact point at z = 0.0)
     positions = {name: pos.copy() for name, pos in qualifier.nominal_positions.items()}

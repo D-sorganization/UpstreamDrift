@@ -15,6 +15,7 @@ otherwise.
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from dataclasses import asdict, dataclass
 from enum import Enum
@@ -756,7 +757,7 @@ def _check_physics_and_solver(request: CandidatePromotionRequest) -> list[str]:
     audit = request.physical_audit
     bw = audit.get("max_normal_force_body_weights")
     if bw is None and "max_normal_force_n" in audit:
-        bw = float(audit["max_normal_force_n"]) / (80.0 * 9.81)
+        bw = float(audit["max_normal_force_n"]) / (80.0 * float(GRAVITY_M_S2))
     if bw is not None and float(bw) > request.max_normal_force_bw:
         reasons.append(
             f"max normal force {float(bw):.2f} BW exceeds limit {request.max_normal_force_bw:.2f} BW"

@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.core.contracts import ContractViolationError
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.estimation.mosaic.planar_chain import (
     GRAVITY_DOWN,
     PlanarChain,
@@ -18,7 +19,7 @@ from src.shared.python.estimation.mosaic.planar_chain import (
 
 pytestmark = pytest.mark.unit
 
-G0 = 9.81
+G0 = float(GRAVITY_M_S2)
 
 
 def _double_pendulum() -> tuple[PlanarChain, np.ndarray, dict[str, float]]:
@@ -182,7 +183,7 @@ def test_rk4_rollout_conserves_energy_without_input() -> None:
 
 
 def test_gravity_constant_points_down() -> None:
-    np.testing.assert_allclose(GRAVITY_DOWN, [0.0, -9.81])
+    np.testing.assert_allclose(GRAVITY_DOWN, [0.0, -G0])
 
 
 def test_rejects_inconsistent_shapes() -> None:

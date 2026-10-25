@@ -14,6 +14,7 @@ under unilateral ground reaction constraints (f_{i, z} >= 0) and friction cone f
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -516,7 +517,7 @@ class SyntheticMultibodyFixture:
     def compute_mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
         m_mat = np.diag(self._get_mass_diag())
         b_vec = np.zeros(self._nv, dtype=np.float64)
-        b_vec[2] = self._mass_scale * 9.81
+        b_vec[2] = self._mass_scale * float(GRAVITY_M_S2)
         return m_mat, b_vec
 
     def compute_contact_jacobian(self, q: Array) -> Array:
@@ -599,7 +600,7 @@ class DrakeSyntheticForceAdapter(SyntheticMultibodyFixture):
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
         m_mat = np.diag(self._get_mass_diag())
         b_vec = np.zeros(self._nv, dtype=np.float64)
-        b_vec[2] = self._mass_scale * 9.81
+        b_vec[2] = self._mass_scale * float(GRAVITY_M_S2)
         b_vec += 0.05 * (v**2) * np.sign(v)
         return m_mat @ a + b_vec
 
@@ -634,7 +635,7 @@ class OpenSimForceAdapter(SyntheticMultibodyFixture):
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
         m_mat = np.diag(self._get_mass_diag())
         g_vec = np.zeros(self._nv, dtype=np.float64)
-        g_vec[2] = self._mass_scale * 9.81
+        g_vec[2] = self._mass_scale * float(GRAVITY_M_S2)
         c_vec = 0.04 * v * np.abs(v)
         return m_mat @ a + c_vec + g_vec
 
@@ -669,7 +670,7 @@ class SimscapeForceAdapter(SyntheticMultibodyFixture):
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
         m_mat = np.diag(self._get_mass_diag())
         g_load = np.zeros(self._nv, dtype=np.float64)
-        g_load[2] = self._mass_scale * 9.81
+        g_load[2] = self._mass_scale * float(GRAVITY_M_S2)
         c_coriolis = 0.03 * v * np.abs(v)
         return m_mat @ a + c_coriolis + g_load
 
@@ -703,7 +704,7 @@ class PinocchioSyntheticForceAdapter(SyntheticMultibodyFixture):
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
         m_mat = np.diag(self._get_mass_diag())
         b_vec = np.zeros(self._nv, dtype=np.float64)
-        b_vec[2] = self._mass_scale * 9.81
+        b_vec[2] = self._mass_scale * float(GRAVITY_M_S2)
         return m_mat @ a + b_vec
 
 
@@ -717,7 +718,7 @@ class MujocoSyntheticForceAdapter(SyntheticMultibodyFixture):
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
         m_mat = np.diag(self._get_mass_diag())
         b_vec = np.zeros(self._nv, dtype=np.float64)
-        b_vec[2] = self._mass_scale * 9.81
+        b_vec[2] = self._mass_scale * float(GRAVITY_M_S2)
         return m_mat @ a + b_vec
 
 

@@ -28,6 +28,7 @@ from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python.appearance_layer import _Assets
 from src.engines.physics_engines.mujoco.python.native_mjcf import _pose
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.model_appearance import head as head_model
 from src.shared.python.model_appearance.schema import AppearanceDocument
 
@@ -128,7 +129,9 @@ def _place(
     if anchor is not None:
         pose = offsets[anchor.body] @ head_model.head_frame_in_body(anchor, doc.head)
         return anchor.body, pose, anchor.length_m, anchor.source
-    gravity = np.asarray(spec.get("gravity_m_s2", [0.0, 0.0, -9.81]), dtype=float)
+    gravity = np.asarray(
+        spec.get("gravity_m_s2", [0.0, 0.0, -float(GRAVITY_M_S2)]), dtype=float
+    )
     found = _torso_frame(elements, -gravity)
     if found is None:
         return None

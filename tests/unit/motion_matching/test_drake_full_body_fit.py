@@ -36,6 +36,7 @@ from src.shared.python.motion_matching.pipeline.plant import get_plant
 from src.shared.python.motion_matching.polynomial_torque import (
     evaluate_polynomial_torque,
 )
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 pytestmark = pytest.mark.unit
 
@@ -78,7 +79,7 @@ def test_toy_2link_torque_recovery() -> None:
     # Re-evaluate inverse dynamics: check recovered torques reproduce acceleration
     l1, l2 = 1.0, 1.0
     m1, m2 = 1.0, 1.0
-    g = 9.81
+    g = float(GRAVITY_M_S2)
     for i in range(n_frames):
         q1, q2 = q_target[i, 0], q_target[i, 1]
         v1, v2 = v_target[i, 0], v_target[i, 1]
