@@ -123,3 +123,64 @@ def pinhole_for_lifting_view(
         translation_world_from_camera_m=cam_pos,
         image_size_px=(width, height),
     )
+
+
+def lift_video_schedule(
+    times_s: np.ndarray,
+    q: np.ndarray,
+    fps: int = 60,
+    speed: float = 1.0,
+) -> tuple[FrameSchedule, np.ndarray, np.ndarray]:
+    """Compute frame schedule, interpolated coordinates, and nearest solve indices."""
+    sched = FrameSchedule(times_s, fps=float(fps), speed=float(speed))
+    q_interp = sched.interpolate(q)
+    nearest = sched.nearest_indices()
+    return sched, q_interp, nearest
+
+
+def compute_lift_framing(
+    positions_m: np.ndarray,
+    bar_endpoints_m: np.ndarray | None = None,
+    view: str = "side",
+    fov_y_rad: float = VIEWER_FOV_Y_RAD,
+    image_size_px: tuple[int, int] = (800, 600),
+    margin: float = 0.08,
+    min_lifter_height_ratio: float = 0.60,
+) -> tuple[tuple[float, float, float], float]:
+    """Compute camera lookat and distance to dynamically frame lifter and barbell."""
+    pts_list = [positions_m.reshape(-1, 3)]
+    if bar_endpoints_m is not None:
+        pts_list.append(bar_endpoints_m.reshape(-1, 3))
+    all_pts = np.vstack(pts_list)
+    p_min = all_pts.min(axis=0)
+    p_max = all_pts.max(axis=0)
+    lookat = (
+        float((p_min[0] + p_max[0]) / 2.0),
+        float((p_min[1] + p_max[1]) / 2.0),
+        float((p_min[2] + p_max[2]) / 2.0),
+    )
+
+    _, pinhole_rot, _ = lift_camera_transforms(view, lookat, 1.0)
+    w, h = image_size_px
+    aspect = w / h
+    half_fov_y = fov_y_rad / 2.0
+    tan_y = math.tan(half_fov_y)
+    tan_x = aspect * tan_y
+
+    rel = all_pts - np.asarray(lookat)
+    cam_pts = rel @ pinhole_rot
+
+    x_cam = np.abs(cam_pts[:, 0])
+    y_cam = np.abs(cam_pts[:, 1])
+    z_cam = cam_pts[:, 2]
+
+    eff_margin = max(0.01, min(0.40, margin))
+    d_x = x_cam / ((1.0 - eff_margin) * tan_x) - z_cam
+    d_y = y_cam / ((1.0 - eff_margin) * tan_y) - z_cam
+    d_min = max(float(np.max(d_x)), float(np.max(d_y)))
+
+    lifter_pts = positions_m.reshape(-1, 3)
+    lifter_h = float(lifter_pts[:, 1].max() - lifter_pts[:, 1].min())
+    d_max_ratio = lifter_h / (2.0 * min_lifter_height_ratio * tan_y)
+    distance = float(np.clip(d_min, 1.5, max(d_min, d_max_ratio)))
+    return lookat, distance
