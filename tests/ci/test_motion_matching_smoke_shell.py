@@ -196,6 +196,7 @@ def test_smoke_script_routes_display_and_disables_pytest_xvfb(
         if argument == "-p"
     ]
     assert "no:xvfb" in plugin_options
+    assert "pytest_timeout" in plugin_options
     assert pytest_argv[:3] == ["-m", "pytest", "tests/integration/motion_matching"]
     assert "slow and not live_simulation" in pytest_argv
     assert "--timeout=0" in pytest_argv
