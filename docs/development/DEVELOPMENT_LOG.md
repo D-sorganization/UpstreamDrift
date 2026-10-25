@@ -89,10 +89,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #13720
 - **Branch:** codex/13720-chat-ui-retirement
-- **PR:** #13724, #13747
+- **PR:** #13724, #13747, #13810
 - **Paths:** src/shared/python/ud_import_alias_policy.py,tests/unit/repo_hygiene/test_pinned_chat_ui_builder_alias.py
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-25 (`f878603f`; collated from changes/13720-retire-chat-ui-builder-body.md)
+- **Last verified:** 2026-10-25 (`c68b4273`; collated from changes/13720-retire-the-remaining-local-chat-ui-build.md)
 - **Summary:** Route legacy chat UI builder imports to the pinned Tools module with shared module identity.
 - **Next step:** Review the focused provider-origin, export, parity, inventory, and canonical validation results before publishing this physical-retirement slice.
 
@@ -520,6 +520,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12851 · Split Proximal-Distal Research Docs Under Doc Size Budget (#12851)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12851
+- **Branch:** merged via #13693
+- **PR:** #13693
+- **Paths:** see #13693
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`691bdfdb`; collated from changes/12851-split-proximal-distal-research-docs-unde.md)
+- **Summary:** Split proximal-distal research docs under doc size budget (#12851)
+- **Next step:** Shipped in PR #13693.
 
 ### DL-#13798 · Route Remaining MATLAB and Simscape Gravity Literals Through Canonical Standard Gravity
 
