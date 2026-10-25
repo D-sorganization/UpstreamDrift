@@ -10,6 +10,8 @@ import json
 import os
 from pathlib import Path
 
+from unittest.mock import MagicMock
+
 import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -17,6 +19,8 @@ try:
     from PyQt6.QtWidgets import QApplication
 except (ImportError, OSError) as exc:
     pytest.skip(f"PyQt6.QtWidgets not loadable: {exc}", allow_module_level=True)
+if isinstance(QApplication, MagicMock):
+    pytest.skip("real PyQt6 required (found MagicMock stub)", allow_module_level=True)
 
 from src.shared.python.anatomical_angles.event_table_view import (  # noqa: E402
     MISSING_TEXT,
@@ -36,7 +40,10 @@ FIXTURE = (
 
 @pytest.fixture(scope="module")
 def app() -> QApplication:
-    return QApplication.instance() or QApplication([])
+    inst = QApplication.instance() or QApplication([])
+    if isinstance(inst, MagicMock):
+        pytest.skip("real PyQt6 required (found MagicMock stub)")
+    return inst
 
 
 @pytest.fixture(scope="module")

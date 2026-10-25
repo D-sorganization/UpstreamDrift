@@ -2,7 +2,7 @@
   "_comment": "Golden fixture for HRG-E4 (#13175): the event-table export document and the exact cells the desktop widget and the web table must show. Regenerate from tests/unit/anatomical_angles/test_event_table_view.py::build_document.",
   "document": {
     "schema": "upstreamdrift.anatomical_event_table",
-    "schema_version": 1,
+    "schema_version": 2,
     "units": {
       "angle": "deg",
       "time": "s"
@@ -20,6 +20,7 @@
         "time_s": 0.25
       }
     },
+    "undetected_events": {},
     "terms": {
       "lead_wrist_flexion_extension": {
         "unit": "deg",
@@ -98,7 +99,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/L/radius", "cal/L/hand"]
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
       },
       {
         "event": "top",
@@ -111,7 +115,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/L/radius", "cal/L/hand"]
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
       },
       {
         "event": "top",
@@ -124,7 +131,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/L/radius", "cal/L/hand"]
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
       },
       {
         "event": "top",
@@ -137,7 +147,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/L/humerus", "cal/L/forearm"]
+        "calibration": [
+          "cal/L/humerus",
+          "cal/L/forearm"
+        ]
       },
       {
         "event": "top",
@@ -150,7 +163,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/R/radius", "cal/R/hand"]
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
       },
       {
         "event": "top",
@@ -163,7 +179,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/R/radius", "cal/R/hand"]
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
       },
       {
         "event": "top",
@@ -176,7 +195,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/R/radius", "cal/R/hand"]
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
       },
       {
         "event": "top",
@@ -189,7 +211,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/R/humerus", "cal/R/forearm"]
+        "calibration": [
+          "cal/R/humerus",
+          "cal/R/forearm"
+        ]
       },
       {
         "event": "impact",
@@ -202,7 +227,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/L/radius", "cal/L/hand"]
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
       },
       {
         "event": "impact",
@@ -215,7 +243,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/L/radius", "cal/L/hand"]
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
       },
       {
         "event": "impact",
@@ -228,7 +259,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/L/radius", "cal/L/hand"]
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
       },
       {
         "event": "impact",
@@ -241,7 +275,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/L/humerus", "cal/L/forearm"]
+        "calibration": [
+          "cal/L/humerus",
+          "cal/L/forearm"
+        ]
       },
       {
         "event": "impact",
@@ -254,7 +291,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/R/radius", "cal/R/hand"]
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
       },
       {
         "event": "impact",
@@ -267,7 +307,10 @@
         "invalid_reason": "marker occluded",
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/R/radius", "cal/R/hand"]
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
       },
       {
         "event": "impact",
@@ -280,7 +323,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/R/radius", "cal/R/hand"]
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
       },
       {
         "event": "impact",
@@ -293,7 +339,10 @@
         "invalid_reason": null,
         "observability": "fitted_grip_rotation",
         "receipt_path": "receipts/fit/receipt.json",
-        "calibration": ["cal/R/humerus", "cal/R/forearm"]
+        "calibration": [
+          "cal/R/humerus",
+          "cal/R/forearm"
+        ]
       }
     ]
   },
@@ -473,16 +522,60 @@
     ]
   },
   "format_cases": [
-    [0.125, 2, "0.13"],
-    [-0.125, 2, "-0.13"],
-    [0.375, 2, "0.38"],
-    [2.675, 2, "2.67"],
-    [1.0005, 3, "1.000"],
-    [-0.0, 2, "0.00"],
-    [-0.001, 2, "0.00"],
-    [-12.3456, 2, "-12.35"],
-    [0.0, 3, "0.000"],
-    [123.4, 2, "123.40"],
-    [0.1234, 3, "0.123"]
+    [
+      0.125,
+      2,
+      "0.13"
+    ],
+    [
+      -0.125,
+      2,
+      "-0.13"
+    ],
+    [
+      0.375,
+      2,
+      "0.38"
+    ],
+    [
+      2.675,
+      2,
+      "2.67"
+    ],
+    [
+      1.0005,
+      3,
+      "1.000"
+    ],
+    [
+      -0.0,
+      2,
+      "0.00"
+    ],
+    [
+      -0.001,
+      2,
+      "0.00"
+    ],
+    [
+      -12.3456,
+      2,
+      "-12.35"
+    ],
+    [
+      0.0,
+      3,
+      "0.000"
+    ],
+    [
+      123.4,
+      2,
+      "123.40"
+    ],
+    [
+      0.1234,
+      3,
+      "0.123"
+    ]
   ]
 }
