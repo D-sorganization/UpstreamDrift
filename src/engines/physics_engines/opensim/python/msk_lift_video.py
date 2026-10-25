@@ -1,4 +1,4 @@
-"""Public lift video API (camera and overlays; render added in follow-up PRs)."""
+"""Public lift video API (camera, overlays, and motion solve; render in follow-up PR)."""
 
 from src.engines.physics_engines.opensim.python.msk_lift_video_framing import (
     BARBELL_LIFTS,
@@ -16,6 +16,11 @@ from src.engines.physics_engines.opensim.python.msk_lift_video_framing import (
     muscle_color_rgb,
     pinhole_for_lifting_view,
 )
+from src.engines.physics_engines.opensim.python.msk_lift_video_motion import (
+    solve_full_lift_motion_and_muscles,
+    solve_full_lift_motion_targets,
+    solve_lift_motion_and_muscles,
+)
 
 __all__ = [
     "BARBELL_LIFTS",
@@ -32,4 +37,7 @@ __all__ = [
     "lift_video_schedule",
     "muscle_color_rgb",
     "pinhole_for_lifting_view",
+    "solve_full_lift_motion_and_muscles",
+    "solve_full_lift_motion_targets",
+    "solve_lift_motion_and_muscles",
 ]

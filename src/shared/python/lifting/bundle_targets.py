@@ -168,6 +168,12 @@ class LiftTargets:
         return dict(zip(IK_LANDMARKS, self.positions_m[k], strict=True))
 
 
+def landmark_attachments(spec: Mapping[str, Any]) -> dict[str, tuple[str, tuple]]:
+    """IK landmark attachments for a lift bundle spec (body landmarks plus feet)."""
+    stations = _foot_stations(spec)
+    return {label: LANDMARK_ATTACHMENTS[label] for label in LANDMARK_LABELS} | stations
+
+
 def _foot_stations(spec: Mapping[str, Any]) -> dict[str, tuple[str, tuple]]:
     """Heel and forefoot stations on the calcanei from the spec's spheres."""
     spheres = {s["name"]: s for s in spec["contact"]["spheres"]}
@@ -374,10 +380,8 @@ def lift_targets(lift: str, path: Path, *, stride: int = 1) -> LiftTargets:
         raise ValueError("bundle carries no barbell record (LIFT-4 bar states)")
     spec = json.loads(bundle.spec_bytes)
     validate_tibial_torsion(spec)
+    attachments = landmark_attachments(spec)
     stations = _foot_stations(spec)
-    attachments = {
-        label: LANDMARK_ATTACHMENTS[label] for label in LANDMARK_LABELS
-    } | stations
     kin, body_mass = _kinematics(bundle.spec_bytes, attachments)
     frame = _lift_frame(kin, bundle.reference_q[0])
     indices = tuple(sorted({*range(0, bundle.steps + 1, stride), bundle.steps}))
