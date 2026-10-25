@@ -43,9 +43,11 @@ from src.shared.python.grip_contact.bushing_law import BushingState
 from src.shared.python.grip_contact.contact_run import ContactRun
 from src.shared.python.grip_contact.contact_topology import (
     ContactPair,
-    ContactSite,
     ContactTopology,
     contact_topology,
+)
+from src.shared.python.grip_contact.hand_hand_allocation import (
+    _primitive as _site_primitive,
 )
 from src.shared.python.grip_contact.pair_contact import (
     ContactCapsule,
@@ -139,21 +141,6 @@ class TopologyContactRun(ContactRun):
 
     pair_traces: Mapping[str, np.ndarray] = ()  # type: ignore[assignment]
     pair_normal_force_n: Mapping[str, np.ndarray] = ()  # type: ignore[assignment]
-
-
-def _site_primitive(site: ContactSite) -> ContactSphere | ContactCapsule:
-    """Construct a ContactSphere or ContactCapsule from a ContactSite."""
-    if site.primitive == "sphere":
-        return ContactSphere(
-            center_m=np.asarray(site.centre_m, dtype=float),
-            radius_m=site.radius_m,
-        )
-    p0, p1 = site.endpoints_m
-    return ContactCapsule(
-        p0_m=np.asarray(p0, dtype=float),
-        p1_m=np.asarray(p1, dtype=float),
-        radius_m=site.radius_m,
-    )
 
 
 def _resolve_hand_state(
@@ -274,6 +261,7 @@ def _evaluate_topology_pair(
         patch = patch_radius_m
     prim_a = _site_primitive(site_a)
     st_a = hand_states[site_a.hand]
+    prim_b: ContactSphere | ContactCapsule
     if pair.is_hand_grip:
         prim_b, st_b = grip_cap, club_state
     else:
@@ -484,9 +472,14 @@ def simulate_topology_contact(
         topology_model=topo_model,
     )
     traces_arr, normals_arr = _extract_pair_traces(base_run, topo_model)
+    series = replace(
+        base_run.series,
+        engine=ENGINE,
+        metadata={**base_run.series.metadata, "style": topo.style},
+    )
 
     return TopologyContactRun(
-        series=base_run.series,
+        series=series,
         normal_force_n=base_run.normal_force_n,
         roll_slip_rad=base_run.roll_slip_rad,
         axial_slip_m=base_run.axial_slip_m,
