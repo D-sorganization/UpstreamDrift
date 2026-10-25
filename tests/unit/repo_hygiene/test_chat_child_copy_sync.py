@@ -45,10 +45,11 @@ _MAX_PARAMS = 8
 
 
 def test_chat_ui_builder_implementation_is_retired_from_ud_copy() -> None:
-    """The pinned provider owns the public builder implementation."""
+    """The legacy path is absent so the pinned provider owns all declarations."""
     builder_path = _UD_CHAT / "_qt" / "ui_builder.py"
-    assert not _has_top_level_function(builder_path, "build_chat_dock_ui"), (
-        "build_chat_dock_ui must come from pinned Tools"
+    assert not builder_path.exists(), (
+        "the compatibility module must be removed; the import alias resolves "
+        "the legacy path directly to pinned Tools"
     )
 
 
@@ -109,11 +110,6 @@ def test_chat_child_copy_matches_pinned_tools_tree() -> None:
         if rel in _TEXT_WAIVERS:
             continue
         ud_file = _UD_CHAT / rel
-        if rel == "_qt/ui_builder.py":
-            assert not _has_top_level_function(ud_file, "build_chat_dock_ui"), (
-                "the pinned-provider contract owns this public export"
-            )
-            continue  # the alias suite pins origin, exports, and module identity
         if not ud_file.exists():
             continue  # retired path: served by the pinned tree via the seam finder
         if _norm(ud_file.read_text(encoding="utf-8")) != _norm(

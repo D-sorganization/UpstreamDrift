@@ -346,36 +346,6 @@ sys.modules[__name__] = load_provider_module("{name}")
     return ast.dump(actual_tree) == ast.dump(ast.parse(expected))
 
 
-def _is_retired_chat_ui_builder_subset(relative: Path) -> bool:
-    """Permit retiring definitions from chat/_qt/ui_builder.py (#13720)."""
-    if relative.as_posix() != "chat/_qt/ui_builder.py":
-        return False
-    canonical = _canonical_child_copy_text(relative)
-    local_path = _SHARED_ROOT / relative
-    if canonical is None or not local_path.is_file():
-        return False
-    try:
-        local_tree = ast.parse(
-            _normalise_seam_imports(local_path.read_text(encoding="utf-8"))
-        )
-        canon_tree = ast.parse(_normalise_seam_imports(canonical))
-    except (OSError, UnicodeDecodeError, SyntaxError):
-        return False
-    canon_defs = {
-        node.name: ast.dump(node)
-        for node in canon_tree.body
-        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-    }
-    local_defs = {
-        node.name: ast.dump(node)
-        for node in local_tree.body
-        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-    }
-    return bool(local_defs) and all(
-        canon_defs.get(name) == dumped for name, dumped in local_defs.items()
-    )
-
-
 def _direct_tools_edit_offenders(
     base: str,
     tools_paths: set[str],
@@ -391,7 +361,6 @@ def _direct_tools_edit_offenders(
         )
         and not _converges_on_canonical(relative)
         and not _is_pure_provider_alias(relative)
-        and not _is_retired_chat_ui_builder_subset(relative)
         and not _is_ud_canonical(relative)
         and not _is_deferred(relative)
         and not _is_split_ud_only(relative, tools_paths)
