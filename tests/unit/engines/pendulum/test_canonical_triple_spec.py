@@ -6,9 +6,6 @@ from double_pendulum_model.physics.triple_pendulum import (
     TriplePendulumDynamics,
     TriplePendulumState,
 )
-from mujoco_humanoid_golf.models_pendulum import (
-    TRIPLE_PENDULUM_XML as COMPAT_TRIPLE_PENDULUM_XML,
-)
 
 from src.engines.physics_engines.mujoco.pendulum_models_xml import TRIPLE_PENDULUM_XML
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
