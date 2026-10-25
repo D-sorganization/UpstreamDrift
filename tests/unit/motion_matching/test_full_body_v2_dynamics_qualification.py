@@ -20,7 +20,7 @@ and 1e-13 N m on a gravity vector whose largest entry is 775 N (relative
 1.3e-16). ``REL_TOL`` (1e-12 of the largest reference entry) keeps the same
 precision budget as the HRG-D2 FK qualification and is never loosened.
 
-Covered here: MuJoCo (MJCF export) and Pinocchio (native model). Drake,
+Covered here: MuJoCo (MJCF export), Pinocchio and Drake (native models).
 OpenSim and MyoSuite inertia/gravity parity, limits, closure, contact and
 inverse dynamics on a reference trajectory remain open on #13176.
 """
@@ -236,3 +236,37 @@ def test_pinocchio_mass_matrix_and_gravity_match_spec(doc, configs) -> None:
         return mass, np.asarray(gravity, dtype=float)[columns]
 
     _check("Pinocchio", doc, configs, mass_and_gravity)
+
+
+@pytest.mark.requires_drake
+def test_drake_mass_matrix_and_gravity_match_spec(doc, configs) -> None:
+    """Drake's native full-body model preserves v2 inertia and gravity."""
+    drake = pytest.importorskip("pydrake.all")
+    if not (
+        isinstance(drake, types.ModuleType)
+        and isinstance(getattr(drake, "MultibodyPlant", None), type)
+    ):
+        pytest.skip("pydrake is a stub or not the Drake multibody library")
+    from src.engines.physics_engines.drake.python.full_body_model import (
+        FullBodyDrakeModel,
+    )
+
+    model = FullBodyDrakeModel(doc)
+    order = doc["coordinate_order"]
+    q_indices = [model._joints[name].position_start() for name in order]
+    v_indices = [model._joints[name].velocity_start() for name in order]
+
+    def mass_and_gravity(q):
+        positions = np.zeros(model.plant.num_positions())
+        positions[q_indices] = [q[name] for name in order]
+        model.plant.SetPositions(
+            model.context,
+            positions,
+        )
+        full_mass = np.asarray(model.plant.CalcMassMatrix(model.context), dtype=float)
+        gravity_forces = np.asarray(
+            model.plant.CalcGravityGeneralizedForces(model.context), dtype=float
+        )
+        return full_mass[np.ix_(v_indices, v_indices)], -gravity_forces[v_indices]
+
+    _check("Drake", doc, configs, mass_and_gravity)
