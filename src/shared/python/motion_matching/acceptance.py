@@ -6,6 +6,7 @@ continuous-replay qualification evaluation (MMR-07, #11107).
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -105,7 +106,7 @@ class AcceptanceGates:
     # Physical limits (shared across horizons unless specified)
     max_normal_force_bw_multiplier: float = 3.0
     nominal_body_mass_kg: float = 80.0
-    gravity_m_s2: float = 9.81
+    gravity_m_s2: float = float(GRAVITY_M_S2)
     max_penetration_m: float = 0.010  # 10 mm
     max_closure_residual_m: float = 0.005  # 5 mm
     max_closure_residual_rad: float = 0.05  # 0.05 rad

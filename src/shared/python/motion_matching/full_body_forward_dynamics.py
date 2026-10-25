@@ -6,6 +6,7 @@ weld loop-closure constraints.
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
@@ -914,7 +915,8 @@ class FullBodySimulator:
         if hasattr(adapter, "mass_kg"):
             self.mass_kg = float(adapter.mass_kg)
             self.gravity = np.asarray(
-                getattr(adapter, "gravity", [0.0, 0.0, -9.81]), dtype=float
+                getattr(adapter, "gravity", [0.0, 0.0, -float(GRAVITY_M_S2)]),
+                dtype=float,
             )
             self._dof = np.arange(self.nv)
         elif hasattr(adapter, "model") and hasattr(adapter.model, "opt"):
@@ -933,7 +935,7 @@ class FullBodySimulator:
                 or spec.get("subject", {}).get("mass_kg", 75.0)
             )
             self.gravity = np.asarray(
-                spec.get("gravity_m_s2", [0.0, 0.0, -9.81]), dtype=float
+                spec.get("gravity_m_s2", [0.0, 0.0, -float(GRAVITY_M_S2)]), dtype=float
             )
             self._dof = np.arange(self.nv)
 

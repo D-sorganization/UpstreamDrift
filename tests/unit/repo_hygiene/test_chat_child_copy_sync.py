@@ -33,6 +33,7 @@ _DOCK = "_chat_dock_widget_qt.py"
 # Paths compared by contract rather than by text, with the reason.
 _TEXT_WAIVERS = {
     _DOCK: "Tools copy exceeds the 1,200-line budget; compared by contract below.",
+    "_qt/ui_builder.py": "Routed to pinned Tools via UdSharedImportAliasFinder (#13724); local copy retired in #13720.",
     # Chat tests pin UD-local drift hashes and are not a Tools-synced artefact.
     "tests/test_chat_drift.py": "UD-local baseline hashes.",
 }

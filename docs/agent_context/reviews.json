@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "40a7c15e936a1a5d927afbb1d6c3741b275548f277669b4cbf5a597982518edc",
+      "fingerprint": "986499cffcd7ef2c8c8fa15a57efb4280f28e073ca4d711b8b230c21714d487d",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "122475bfa6e445ee8a2d4e1f94eae41c3b0e6bce954d1eb8ea44a1e40662e052",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "37bf3ab847175fe42c353b91b89f183c271c46b353db72cc8a135da132228404",
+        "src/config/feature_parity.json": "9f621bbb75a6312a95a498d1af2a193e34d9ddd184c486179c701c3d94c4e982",
         "src/config/launcher_manifest.json": "26337829a1de75576be220e293c6d4f012f97303c0639401a8d902e76c418f37",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "7c868b0c444389fad39bdd30469abd32439f5bd11b9b5019c941ac0049e0763c",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Register jaxsim_dashboard on engines.dashboards in feature_parity.json (#12998 residual): tile inventory only; no launcher manifest or scientific qualification change. Verified feature_parity tests and generate_feature_parity_matrix --check."
+      "rationale": "Reviewed biomechanics.anatomical_event_table entry in capability_migration.json and feature_parity.json (#13175)."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",

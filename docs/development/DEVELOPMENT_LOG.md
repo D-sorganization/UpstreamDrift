@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13759 · Add Audited Per-Engine Hand Capability Matrix and Frame Contract
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13759
+- **Branch:** staff/issue-remediator-13759-d7f0a0
+- **PR:** #13803
+- **Paths:** docs/development/full_body_models/HANDS_AUDIT.md,tests/unit/full_body_models/test_hands_audit_inventory.py
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`36a0289e`; collated from changes/13759-add-audited-per-engine-hand-capability-m.md)
+- **Summary:** Add audited per-engine hand capability matrix and frame contract
+- **Next step:** Review and merge the hand audit PR.
+
 ### DL-#13778 · Reconcile Neural Motion Matching and Simscape Documentation With Diagnostic Receipts
 
 - **State:** in_review
@@ -37,12 +50,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #13720
 - **Branch:** codex/13720-chat-ui-retirement
-- **PR:** #13724
+- **PR:** #13724, #13747
 - **Paths:** src/shared/python/ud_import_alias_policy.py,tests/unit/repo_hygiene/test_pinned_chat_ui_builder_alias.py
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`b46af31e`; collated from changes/13720-route-legacy-chat-ui-builder-imports-to.md)
+- **Last verified:** 2026-10-25 (`f878603f`; collated from changes/13720-retire-chat-ui-builder-body.md)
 - **Summary:** Route legacy chat UI builder imports to the pinned Tools module with shared module identity.
-- **Next step:** Review the provider origin and identity regression, then merge this preparation change.
+- **Next step:** Review the focused provider-origin, export, parity, inventory, and canonical validation results before publishing this physical-retirement slice.
 
 ### DL-#13552 · Simscape Grip Kernel Follows the Shared Capsule Line-Contact Law; Ten_Finger Verifier Back to 1E-11; Structural Freshness Check for Generated JSON; Goldens Rebuilt From the Rounded Export Params; Committed R2025b Evidence
 
@@ -468,6 +481,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13790 · Unify Triple-Pendulum Parameters and Correct MuJoCo Gravity Plane
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13790
+- **Branch:** merged via #13797
+- **PR:** #13797
+- **Paths:** see #13797
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`dd3ac27a`; collated from changes/13790-unify-triple-pendulum-parameters-and-cor.md)
+- **Summary:** Unify triple-pendulum parameters and correct MuJoCo gravity plane
+- **Next step:** Shipped in PR #13797.
+
+### DL-#13577 · Document Fast/Full Tier Contract Linkage in ci-standard.yml and Clarify Post-Merge P90 Observation Follow-Up (#13577).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13577
+- **Branch:** merged via #13697
+- **PR:** #13697
+- **Paths:** see #13697
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`11f00395`; collated from changes/13577-ci-fast-full-tier-closeout.md)
+- **Summary:** Document fast/full tier contract linkage in ci-standard.yml and clarify post-merge P90 observation follow-up (#13577).
+- **Next step:** Shipped in PR #13697.
+
+### DL-#13150 · Prove Partial UNBOUNDED Envelope Frames Reach the NSX Plot Model (#13150).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13150
+- **Branch:** merged via #13731
+- **PR:** #13731
+- **Paths:** see #13731
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`2c6b9b8f`; collated from changes/13150-prove-partial-unbounded-envelope-frames.md)
+- **Summary:** Prove partial UNBOUNDED envelope frames reach the NSX plot model (#13150).
+- **Next step:** Shipped in PR #13731.
+
+### DL-#12567 · Add a Zero-Side Consistency Shim for HARD_ZERO_TRAIL Allocation and Reject Algebraically Inconsistent Zero-Side Systems.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12567
+- **Branch:** merged via #13606
+- **PR:** #13606
+- **Paths:** see #13606
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`3853174f`; collated from changes/12567-add-a-zero-side-consistency-shim-for-har.md)
+- **Summary:** Add a zero-side consistency shim for HARD_ZERO_TRAIL allocation and reject algebraically inconsistent zero-side systems.
+- **Next step:** Shipped in PR #13606.
 
 ### DL-#13771 · Fix Tests/Api Assertions Stale After the APIException Error-Envelope Change; Shared Error_Message Fixture
 

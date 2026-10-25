@@ -12,6 +12,7 @@ import json
 import logging
 import math
 import tempfile
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +28,7 @@ from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_frame im
     solve_lift_frame_inverse_dynamics,
 )
 from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_bound import (
+    build_real_lift_bound_record,
     build_real_squat_bound_record,
     mass_above_l5s1,
     muscles_crossing_joint,
@@ -61,6 +63,7 @@ from src.shared.python.contracts import require
 from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.engine_core.engine_availability import is_engine_available
 from src.shared.python.engine_core.opensim_runtime import import_opensim
+from src.shared.python.lifting.bundles import SAME_INPUT_LIFT_BUNDLES
 from src.shared.python.lifting.pack_audit.names import LIFTS
 
 logger = logging.getLogger(__name__)
@@ -235,12 +238,21 @@ OSL4_RECEIPT = (
 )
 
 
-def _read_osl4_qualification(path: Path = OSL4_RECEIPT) -> dict[str, Any]:
-    """Squat qualification copied from the OSL-4 muscle receipt.
+def _read_osl4_qualification(
+    lift: str | Path = "squat",
+    path: Path = OSL4_RECEIPT,
+) -> dict[str, Any]:
+    """Lift qualification copied from the OSL-4 muscle receipt.
 
-    Every value comes from the receipt. A missing receipt or squat record
+    Every value comes from the receipt. A missing receipt or lift record
     yields ``None`` values and a ``reason``, never a default.
     """
+    if isinstance(lift, Path):
+        path = lift
+        lift_name = "squat"
+    else:
+        lift_name = lift
+
     keys = (
         "classification",
         "reserve_share",
@@ -251,14 +263,31 @@ def _read_osl4_qualification(path: Path = OSL4_RECEIPT) -> dict[str, Any]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        return {**dict.fromkeys(keys), "reason": f"OSL-4 receipt unreadable: {exc}"}
-    squat = data.get("lifts", {}).get("squat")
-    if not isinstance(squat, dict):
-        return {**dict.fromkeys(keys), "reason": f"no squat record in {path.name}"}
-    record = {key: squat.get(key) for key in keys}
+        return {
+            **dict.fromkeys(keys),
+            "status": "unavailable",
+            "reason": f"OSL-4 receipt unreadable: {exc}",
+        }
+    lift_data = data.get("lifts", {}).get(lift_name)
+    if not isinstance(lift_data, dict):
+        return {
+            **dict.fromkeys(keys),
+            "status": "unavailable",
+            "reason": f"no {lift_name} record in {path.name}",
+        }
+    status = lift_data.get("status")
+    record = {key: lift_data.get(key) for key in keys}
+    record["status"] = status
+    if status == "unavailable":
+        record["reason"] = lift_data.get(
+            "reason", f"{lift_name} is unavailable in OSL-4 receipt"
+        )
     if record["reserve_share_threshold"] is None:
         record["reserve_share_threshold"] = data.get("reserve_share_threshold")
-    record["source"] = str(path.relative_to(path.parents[5]))
+    try:
+        record["source"] = str(path.relative_to(path.parents[5]))
+    except (ValueError, IndexError):
+        record["source"] = str(path)
     return record
 
 
@@ -269,6 +298,7 @@ def _min_acceleration_bound(
     qdd_norms: np.ndarray,
     muscle_names: list[str],
     forces: np.ndarray,
+    lift: str = "squat",
 ) -> tuple[float, dict[str, Any]]:
     """Mass above L5/S1 and the bound record at the least-accelerated frame."""
     min_k = int(np.argmin(qdd_norms))
@@ -279,18 +309,47 @@ def _min_acceleration_bound(
     crossing_force = float(
         sum(forces[min_k, muscle_names.index(m)] for m in crossing if m in muscle_names)
     )
-    real_squat_info = build_real_squat_bound_record(
+    real_lift_info = build_real_lift_bound_record(
         frame_idx=min_k,
         time_s=float(targets.time_s[min_k]),
         qdd_norm=float(qdd_norms[min_k]),
         w_above=w_above_val,
         c_pelvis=float(reactions.l5s1_comp_n[min_k]),
         c_torso=float(reactions.l5s1_torso_comp_n[min_k]),
-        crossing_force=crossing_force,
-        crossing_count=len(crossing),
+        crossing=(crossing_force, len(crossing)),
+        lift=lift,
     )
 
-    return float(m_above), real_squat_info
+    return float(m_above), real_lift_info
+
+
+def _unavailable_reason(lift: str, osl4_qual: dict[str, Any]) -> str | None:
+    """Why *lift* has no joint-reaction solve, or ``None`` when it can run."""
+    if osl4_qual.get("status") == "unavailable":
+        return str(osl4_qual.get("reason", f"no OSL-4 muscle solve for {lift}"))
+    if osl4_qual.get("mean_reserve_share") is None and "reason" in osl4_qual:
+        return str(osl4_qual["reason"])
+    if lift == "bench_press":
+        return (
+            "bench press joint reaction loads require a supine bench external-load "
+            "model (OSL-5 covers standing lifts only)"
+        )
+    bundle_path = SAME_INPUT_LIFT_BUNDLES.get(lift)
+    if bundle_path is None or not bundle_path.is_file():
+        return (
+            f"no LIFT-5 same-input bundle is registered for {lift!r} in "
+            "SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit"
+        )
+    if not is_engine_available("opensim"):
+        return "Native OpenSim runtime is not available in current environment"
+    return None
+
+
+def _peak_lumbar_moment(coordinates: Sequence[str], tau: np.ndarray) -> float | None:
+    """Peak absolute ``lumbar_extension`` ID moment (N m), if the model has it."""
+    if "lumbar_extension" not in coordinates:
+        return None
+    return float(np.max(np.abs(tau[:, coordinates.index("lumbar_extension")])))
 
 
 def evaluate_lift_joint_reactions(
@@ -301,25 +360,20 @@ def evaluate_lift_joint_reactions(
 ) -> dict[str, Any]:
     """Compute 3D joint reaction loads for *lift*.
 
-    Generic across all barbell lifts. Non-squat lifts return an honest
-    ``unavailable`` record explaining missing OSL-4 muscle solves.
+    Generic across all barbell lifts. Lifts lacking an OSL-4 muscle solve
+    return an honest ``unavailable`` record explaining why.
     """
     require(lift in LIFTS, f"unknown lift {lift!r}; choose from {list(LIFTS)}")
 
-    if lift != "squat":
-        return unavailable_joint_reaction_record(
-            lift,
-            "no OSL-4 muscle solve (needs OSL-3 #13041 bundles)",
-        )
-
-    if not is_engine_available("opensim"):
-        return unavailable_joint_reaction_record(
-            lift,
-            "Native OpenSim runtime is not available in current environment",
-        )
+    osl4_qual = _read_osl4_qualification(lift)
+    reason = _unavailable_reason(lift, osl4_qual)
+    if reason is not None:
+        return unavailable_joint_reaction_record(lift, reason)
 
     targets, build, ik, inverse = _run_lift_ik_id(lift, stride)
-    tmp = scratch_dir or Path(tempfile.mkdtemp(prefix="opensim_lift_reactions_squat_"))
+    tmp = scratch_dir or Path(
+        tempfile.mkdtemp(prefix=f"opensim_lift_reactions_{lift}_")
+    )
     model_path, _, loads_xml = _prepare_scratch_assets(
         lift, build.model, ik, targets, tmp
     )
@@ -342,35 +396,36 @@ def evaluate_lift_joint_reactions(
         reaction_context,
     )
 
-    m_above, real_squat_info = _min_acceleration_bound(
-        build.model, targets, reactions, qdd_norms, basis.muscle_names, solve.forces
+    m_above, real_lift_info = _min_acceleration_bound(
+        build.model,
+        targets,
+        reactions,
+        qdd_norms,
+        basis.muscle_names,
+        solve.forces,
+        lift=lift,
     )
 
     bw_n = targets.body_mass_kg * GRAVITY_FLOAT
     phase_segs = detect_motion_phases(lift, targets.time_s, ik.coordinates, ik.q)
     phases = summarize_phase_reactions(phase_segs, targets.time_s, reactions, bw_n)
-    cross_check = crosscheck_movement_optimizer_l5s1(
-        targets,
-        torso_angles,
-        (reactions.l5s1_torso_comp_n, reactions.l5s1_torso_ap_shear_n),
-        opensim_m_above_kg=float(m_above),
+    cross_check = (
+        crosscheck_movement_optimizer_l5s1(
+            targets,
+            torso_angles,
+            (reactions.l5s1_torso_comp_n, reactions.l5s1_torso_ap_shear_n),
+            opensim_m_above_kg=float(m_above),
+            lift=lift,
+        )
+        if lift in ("squat", "deadlift")
+        else None
     )
-    static_bound = static_hold_analytic_bound("squat", build.model, real_squat_info)
+    static_bound = static_hold_analytic_bound(lift, build.model, real_lift_info)
 
-    lumbar_idx = (
-        ik.coordinates.index("lumbar_extension")
-        if "lumbar_extension" in ik.coordinates
-        else None
-    )
-    peak_lumbar = (
-        float(np.max(np.abs(inverse.tau[:, lumbar_idx])))
-        if lumbar_idx is not None
-        else None
-    )
     extra_ctx = {
         "bar_mass_kg": targets.bar_mass_kg,
-        "peak_lumbar_moment_nm": peak_lumbar,
-        "qualification_info": _read_osl4_qualification(),
+        "peak_lumbar_moment_nm": _peak_lumbar_moment(ik.coordinates, inverse.tau),
+        "qualification_info": osl4_qual,
         "acceleration_realization": {
             "stride": int(stride),
             "worst_frame": reaction_context.get("acceleration_worst"),

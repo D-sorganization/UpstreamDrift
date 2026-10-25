@@ -8,6 +8,7 @@ This module provides bidirectional conversion between URDF and MJCF formats.
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 import logging
 from dataclasses import dataclass
@@ -66,7 +67,7 @@ class MJCFConfig:
     inertiafromgeom: bool = False
 
     # Option settings
-    gravity: tuple[float, float, float] = (0.0, 0.0, -9.81)
+    gravity: tuple[float, float, float] = (0.0, 0.0, -float(GRAVITY_M_S2))
     timestep: float = 0.002
 
     # Visual settings
