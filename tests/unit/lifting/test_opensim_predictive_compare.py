@@ -88,8 +88,11 @@ def test_tracked_reference_reads_the_real_receipts() -> None:
     assert tracked["bar"].unit == "m"
     assert tracked["start_pose_deg"]["hip_flexion_r_deg"] > 0.0
     assert tracked["muscle_classification"] == "unqualified"
-    assert "l5_s1" not in tracked
-    assert "OSL-5" in tracked["l5_s1_reason"]
+    if "l5_s1" in tracked:
+        assert isinstance(tracked["l5_s1"], dict)
+        assert tracked["l5_s1"]["compression_peak_n"] > 0.0
+    else:
+        assert "OSL-5" in tracked["l5_s1_reason"]
 
 
 def test_comparison_runs_every_quantity(tmp_path: Path) -> None:

@@ -214,6 +214,8 @@ def load_tracked_reference(
             f"OSL-5 deadlift joint reactions {reactions.get('status')!r}: "
             f"{reactions.get('reason', 'receipt unreadable')}"
         )
+    else:
+        tracked["l5_s1"] = reactions.get("l5_s1", {})
     return tracked
 
 
