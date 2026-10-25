@@ -1,0 +1,865 @@
+<mujoco model="myohand_bilateral_driver">
+  <compiler inertiafromgeom="auto" angle="radian" balanceinertia="true" boundmass="0.001" boundinertia=".0001" meshdir="../../myo_sim" texturedir="../../myo_sim"/>
+  <size njmax="1000" nconmax="400" nuser_jnt="1"/>
+  <option timestep="0.002"/>
+  <include file="../../myo_sim/scene/myosuite_scene.xml"/>
+  <default>
+    <default class="myohand">
+      <joint limited="true" damping="0.05" armature="1e-4" stiffness="0" />
+      <geom contype="0" conaffinity="0" condim="3" rgba="0.8 0.8 .8 1" margin="0.001" solref=".02 1" solimp=".8 .8 .01" material="geom" />
+      <site size="0.0012" rgba=".2 .6 .2 1" group="3" />
+      <tendon width="0.001" rgba=".95 .3 .3 1" limited="false" />
+      <default class="skin">
+        <geom type="capsule" group="4" contype="1" conaffinity="1" condim="3" rgba="0.8 0.7 .5 1" margin="0.001" material="MatSkin" />
+      </default>
+      <default class="wrap">
+        <geom rgba=".5 .5 .9 1" group="3" contype="0" conaffinity="0" />
+      </default>
+      <default class="muscle">
+        <muscle ctrllimited="true" ctrlrange="0 1" />
+      </default>
+    </default>
+  </default>
+
+
+  
+  <asset>
+    <mesh name="body_norighthand" file="../myo_sim/meshes/human_lowpoly_norighthand.stl" scale="1 1 1" />
+    <mesh name="thorax" file="../myo_sim/meshes/thorax.stl" scale="1 1 1" />
+    <mesh name="clavicle" file="../myo_sim/meshes/clavicle.stl" scale="1 1 1" />
+    <mesh name="scapula" file="../myo_sim/meshes/scapula.stl" scale="1 1 1" />
+    <mesh name="humerus" file="../myo_sim/meshes/humerus.stl" scale="1 1 1" />
+    <mesh name="ulna" file="../myo_sim/meshes/ulna.stl" scale="1 1 1" />
+    <mesh name="radius" file="../myo_sim/meshes/radius.stl" scale="1 1 1" />
+    <mesh name="lunate" file="../myo_sim/meshes/lunate.stl" scale="1 1 1" />
+    <mesh name="scaphoid" file="../myo_sim/meshes/scaphoid.stl" scale="1 1 1" />
+    <mesh name="pisiform" file="../myo_sim/meshes/pisiform.stl" scale="1 1 1" />
+    <mesh name="triquetrum" file="../myo_sim/meshes/triquetrum.stl" scale="1 1 1" />
+    <mesh name="capitate" file="../myo_sim/meshes/capitate.stl" scale="1 1 1" />
+    <mesh name="trapezium" file="../myo_sim/meshes/trapezium.stl" scale="1 1 1" />
+    <mesh name="1mc" file="../myo_sim/meshes/1mc.stl" scale="1 1 1" />
+    <mesh name="thumbprox" file="../myo_sim/meshes/thumbprox.stl" scale="1 1 1" />
+    <mesh name="thumbdist" file="../myo_sim/meshes/thumbdist.stl" scale="1 1 1" />
+    <mesh name="trapezoid" file="../myo_sim/meshes/trapezoid.stl" scale="1 1 1" />
+    <mesh name="hamate" file="../myo_sim/meshes/hamate.stl" scale="1 1 1" />
+    <mesh name="2mc" file="../myo_sim/meshes/2mc.stl" scale="1 1 1" />
+    <mesh name="2proxph" file="../myo_sim/meshes/2proxph.stl" scale="1 1 1" />
+    <mesh name="2midph" file="../myo_sim/meshes/2midph.stl" scale="1 1 1" />
+    <mesh name="2distph" file="../myo_sim/meshes/2distph.stl" scale="1 1 1" />
+    <mesh name="3mc" file="../myo_sim/meshes/3mc.stl" scale="1 1 1" />
+    <mesh name="3proxph" file="../myo_sim/meshes/3proxph.stl" scale="1 1 1" />
+    <mesh name="3midph" file="../myo_sim/meshes/3midph.stl" scale="1 1 1" />
+    <mesh name="3distph" file="../myo_sim/meshes/3distph.stl" scale="1 1 1" />
+    <mesh name="4mc" file="../myo_sim/meshes/4mc.stl" scale="1 1 1" />
+    <mesh name="4proxph" file="../myo_sim/meshes/4proxph.stl" scale="1 1 1" />
+    <mesh name="4midph" file="../myo_sim/meshes/4midph.stl" scale="1 1 1" />
+    <mesh name="4distph" file="../myo_sim/meshes/4distph.stl" scale="1 1 1" />
+    <mesh name="5mc" file="../myo_sim/meshes/5mc.stl" scale="1 1 1" />
+    <mesh name="5proxph" file="../myo_sim/meshes/5proxph.stl" scale="1 1 1" />
+    <mesh name="5midph" file="../myo_sim/meshes/5midph.stl" scale="1 1 1" />
+    <mesh name="5distph" file="../myo_sim/meshes/5distph.stl" scale="1 1 1" />
+
+    <texture name="texplane" type="2d" builtin="checker" rgb1=".2 .19 .2" rgb2=".1 0.11 0.11" width="50" height="50" />
+    <texture name="texgeom" type="cube" builtin="flat" mark="cross" width="127" height="1278" rgb1="0.7 0.7 0.7" rgb2="0.9 0.9 0.9" markrgb="1 1 1" random="0.01" />
+    <material name="MatPlane" reflectance="0.5" texture="texplane" texrepeat="4 4" texuniform="true" />
+    <material name="geom" texture="texgeom" texuniform="true" />
+    <material name="MatSkin" specular="0.2" shininess=".1" reflectance="0.5" rgba="0.9 .7 .5 1" />
+  <mesh name="lh_body_norighthand" file="../myo_sim/meshes/human_lowpoly_norighthand.stl" scale="1 1 -1" /><mesh name="lh_thorax" file="../myo_sim/meshes/thorax.stl" scale="1 1 -1" /><mesh name="lh_clavicle" file="../myo_sim/meshes/clavicle.stl" scale="1 1 -1" /><mesh name="lh_scapula" file="../myo_sim/meshes/scapula.stl" scale="1 1 -1" /><mesh name="lh_humerus" file="../myo_sim/meshes/humerus.stl" scale="1 1 -1" /><mesh name="lh_ulna" file="../myo_sim/meshes/ulna.stl" scale="1 1 -1" /><mesh name="lh_radius" file="../myo_sim/meshes/radius.stl" scale="1 1 -1" /><mesh name="lh_lunate" file="../myo_sim/meshes/lunate.stl" scale="1 1 -1" /><mesh name="lh_scaphoid" file="../myo_sim/meshes/scaphoid.stl" scale="1 1 -1" /><mesh name="lh_pisiform" file="../myo_sim/meshes/pisiform.stl" scale="1 1 -1" /><mesh name="lh_triquetrum" file="../myo_sim/meshes/triquetrum.stl" scale="1 1 -1" /><mesh name="lh_capitate" file="../myo_sim/meshes/capitate.stl" scale="1 1 -1" /><mesh name="lh_trapezium" file="../myo_sim/meshes/trapezium.stl" scale="1 1 -1" /><mesh name="lh_1mc" file="../myo_sim/meshes/1mc.stl" scale="1 1 -1" /><mesh name="lh_thumbprox" file="../myo_sim/meshes/thumbprox.stl" scale="1 1 -1" /><mesh name="lh_thumbdist" file="../myo_sim/meshes/thumbdist.stl" scale="1 1 -1" /><mesh name="lh_trapezoid" file="../myo_sim/meshes/trapezoid.stl" scale="1 1 -1" /><mesh name="lh_hamate" file="../myo_sim/meshes/hamate.stl" scale="1 1 -1" /><mesh name="lh_2mc" file="../myo_sim/meshes/2mc.stl" scale="1 1 -1" /><mesh name="lh_2proxph" file="../myo_sim/meshes/2proxph.stl" scale="1 1 -1" /><mesh name="lh_2midph" file="../myo_sim/meshes/2midph.stl" scale="1 1 -1" /><mesh name="lh_2distph" file="../myo_sim/meshes/2distph.stl" scale="1 1 -1" /><mesh name="lh_3mc" file="../myo_sim/meshes/3mc.stl" scale="1 1 -1" /><mesh name="lh_3proxph" file="../myo_sim/meshes/3proxph.stl" scale="1 1 -1" /><mesh name="lh_3midph" file="../myo_sim/meshes/3midph.stl" scale="1 1 -1" /><mesh name="lh_3distph" file="../myo_sim/meshes/3distph.stl" scale="1 1 -1" /><mesh name="lh_4mc" file="../myo_sim/meshes/4mc.stl" scale="1 1 -1" /><mesh name="lh_4proxph" file="../myo_sim/meshes/4proxph.stl" scale="1 1 -1" /><mesh name="lh_4midph" file="../myo_sim/meshes/4midph.stl" scale="1 1 -1" /><mesh name="lh_4distph" file="../myo_sim/meshes/4distph.stl" scale="1 1 -1" /><mesh name="lh_5mc" file="../myo_sim/meshes/5mc.stl" scale="1 1 -1" /><mesh name="lh_5proxph" file="../myo_sim/meshes/5proxph.stl" scale="1 1 -1" /><mesh name="lh_5midph" file="../myo_sim/meshes/5midph.stl" scale="1 1 -1" /><mesh name="lh_5distph" file="../myo_sim/meshes/5distph.stl" scale="1 1 -1" /></asset>
+
+
+  
+  <contact><exclude body1="rh_ulna" body2="rh_radius" /><exclude body1="lh_ulna" body2="lh_radius" /><exclude body1="rh_radius" body2="rh_firstmc" /><exclude body1="lh_radius" body2="lh_firstmc" /><exclude body1="rh_proxph2" body2="rh_proxph3" /><exclude body1="lh_proxph2" body2="lh_proxph3" /><exclude body1="rh_proxph3" body2="rh_proxph4" /><exclude body1="lh_proxph3" body2="lh_proxph4" /><exclude body1="rh_proxph4" body2="rh_proxph5" /><exclude body1="lh_proxph4" body2="lh_proxph5" /></contact>
+  <worldbody>
+    <include file="assets/myohand_right_chain.xml"/>
+    <include file="assets/myohand_left_chain.xml"/>
+  <body name="golf_club" pos="-1.085900 -0.446507 1.417510" quat="0.70710678 0 0 0.70710678">
+    <freejoint name="club_free"/>
+    <site name="grip_site_club_l" pos="0 -1.124 0" size="0.006"/>
+    <site name="grip_site_club_r" pos="0 -1.0478 0" size="0.006"/>
+    <geom name="club_shaft" type="capsule" fromto="0 -1.156 0 0 0 0" size="0.0065" mass="0.115" contype="1" conaffinity="1" rgba="0.75 0.75 0.8 1"/>
+    <geom name="club_head" type="ellipsoid" pos="0 0 0" size="0.06 0.032 0.05" mass="0.198" contype="1" conaffinity="1" rgba="0.1 0.1 0.15 1"/>
+  </body>
+  </worldbody>
+  <equality>
+  <joint name="lock_lh_pro_sup" joint1="lh_pro_sup" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_deviation" joint1="lh_deviation" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_flexion" joint1="lh_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_cmc_abduction" joint1="lh_cmc_abduction" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_cmc_flexion" joint1="lh_cmc_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_mp_flexion" joint1="lh_mp_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_ip_flexion" joint1="lh_ip_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_mcp2_flexion" joint1="lh_mcp2_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_mcp2_abduction" joint1="lh_mcp2_abduction" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_pm2_flexion" joint1="lh_pm2_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_md2_flexion" joint1="lh_md2_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_mcp3_flexion" joint1="lh_mcp3_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_mcp3_abduction" joint1="lh_mcp3_abduction" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_pm3_flexion" joint1="lh_pm3_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_md3_flexion" joint1="lh_md3_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_mcp4_flexion" joint1="lh_mcp4_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_mcp4_abduction" joint1="lh_mcp4_abduction" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_pm4_flexion" joint1="lh_pm4_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_md4_flexion" joint1="lh_md4_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_mcp5_flexion" joint1="lh_mcp5_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_mcp5_abduction" joint1="lh_mcp5_abduction" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_pm5_flexion" joint1="lh_pm5_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_lh_md5_flexion" joint1="lh_md5_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_pro_sup" joint1="rh_pro_sup" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_deviation" joint1="rh_deviation" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_flexion" joint1="rh_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_cmc_abduction" joint1="rh_cmc_abduction" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_cmc_flexion" joint1="rh_cmc_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_mp_flexion" joint1="rh_mp_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_ip_flexion" joint1="rh_ip_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_mcp2_flexion" joint1="rh_mcp2_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_mcp2_abduction" joint1="rh_mcp2_abduction" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_pm2_flexion" joint1="rh_pm2_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_md2_flexion" joint1="rh_md2_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_mcp3_flexion" joint1="rh_mcp3_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_mcp3_abduction" joint1="rh_mcp3_abduction" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_pm3_flexion" joint1="rh_pm3_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_md3_flexion" joint1="rh_md3_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_mcp4_flexion" joint1="rh_mcp4_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_mcp4_abduction" joint1="rh_mcp4_abduction" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_pm4_flexion" joint1="rh_pm4_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_md4_flexion" joint1="rh_md4_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_mcp5_flexion" joint1="rh_mcp5_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_mcp5_abduction" joint1="rh_mcp5_abduction" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_pm5_flexion" joint1="rh_pm5_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+  <joint name="lock_rh_md5_flexion" joint1="rh_md5_flexion" polycoef="0 0 0 0 0" active="true" solref="0.002 1" solimp="0.99 0.999 0.0001"/>
+</equality>
+  <tendon><spatial class="myohand" name="rh_ECRL_tendon">
+      <site site="rh_ECRL-P1" />
+      <geom geom="rh_Elbow_PT_ECRL_wrap" sidesite="rh_Elbow_PT_ECRL_site_ECRL_side" />
+      <site site="rh_ECRL-P2" />
+      <site site="rh_ECRL-P3" />
+      <geom geom="rh_ECRL_torus_wrap" sidesite="rh_ECRL_torus_site_ECRL_side" />
+      <site site="rh_ECRL-P4" />
+    </spatial><spatial class="myohand" name="rh_ECRB_tendon">
+      <site site="rh_ECRB-P1" />
+      <site site="rh_ECRB-P2" />
+      <site site="rh_ECRB-P3" />
+      <geom geom="rh_ECRB_torus_wrap" sidesite="rh_ECRB_torus_site_ECRB_side" />
+      <site site="rh_ECRB-P4" />
+    </spatial><spatial class="myohand" name="rh_ECU_tendon">
+      <site site="rh_ECU-P1" />
+      <site site="rh_ECU-P2" />
+      <site site="rh_ECU-P3" />
+      <site site="rh_ECU-P4" />
+      <site site="rh_ECU-P5" />
+      <geom geom="rh_ECU_torus_wrap" sidesite="rh_ECU_torus_site_ECU_side" />
+      <site site="rh_ECU-P6" />
+    </spatial><spatial class="myohand" name="rh_FCR_tendon">
+      <site site="rh_FCR-P1" />
+      <geom geom="rh_Elbow_PT_FCU_wrap" sidesite="rh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="rh_FCR-P2" />
+      <geom geom="rh_FCR_torus_wrap" sidesite="rh_FCR_torus_site_FCR_side" />
+      <site site="rh_FCR-P3" />
+    </spatial><spatial class="myohand" name="rh_FCU_tendon">
+      <site site="rh_FCU-P1" />
+      <geom geom="rh_Elbow_PT_FCU_wrap" sidesite="rh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="rh_FCU-P2" />
+      <site site="rh_FCU-P3" />
+      
+      <site site="rh_FCU-P4" />
+      <site site="rh_FCU-P5" />
+    </spatial><spatial class="myohand" name="rh_PL_tendon">
+      <site site="rh_PL-P1" />
+      <geom geom="rh_Elbow_PT_FCU_wrap" sidesite="rh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="rh_PL-P2" />
+      
+      <site site="rh_PL-P3" />
+      <site site="rh_PL-P4" />
+    </spatial><spatial class="myohand" name="rh_PT_tendon">
+      <site site="rh_PT-P1" />
+      <geom geom="rh_Elbow_PT_FCU_wrap" sidesite="rh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="rh_PT-P2" />
+      <site site="rh_PT-P3" />
+      <site site="rh_PT-P4" />
+      <site site="rh_PT-P5" />
+    </spatial><spatial class="myohand" name="rh_PQ_tendon">
+      <site site="rh_PQ-P1" />
+      <geom geom="rh_PQ2_wrap" sidesite="rh_PQ2_site_PQ_side" />
+      <site site="rh_PQ-P2" />
+    </spatial><spatial class="myohand" name="rh_FDS5_tendon">
+      <site site="rh_FDS5-P1" />
+      <geom geom="rh_Elbow_PT_FCU_wrap" sidesite="rh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="rh_FDS5-P2" />
+      <geom geom="rh_FDS_ellipsoid_wrap" sidesite="rh_FDS_ellipsoid_site_FDS5_side" />
+      <site site="rh_FDS5-P3" />
+      <site site="rh_FDS5-P4" />
+      <site site="rh_FDS5-P5" />
+      
+      <site site="rh_FDS5-P6" />
+      <site site="rh_FDS5-P7" />
+      <site site="rh_FDS5-P8" />
+    </spatial><spatial class="myohand" name="rh_FDS4_tendon">
+      <site site="rh_FDS4-P1" />
+      <geom geom="rh_Elbow_PT_FCU_wrap" sidesite="rh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="rh_FDS4-P2" />
+      <geom geom="rh_FDS_ellipsoid_wrap" sidesite="rh_FDS_ellipsoid_site_FDS4_side" />
+      <site site="rh_FDS4-P3" />
+      
+      <site site="rh_FDS4-P4" />
+      <site site="rh_FDS4-P5" />
+      
+      <site site="rh_FDS4-P6" />
+      <site site="rh_FDS4-P7" />
+      <site site="rh_FDS4-P8" />
+    </spatial><spatial class="myohand" name="rh_FDS3_tendon">
+      <site site="rh_FDS3-P1" />
+      <site site="rh_FDS3-P2" />
+      <geom geom="rh_FDS_ellipsoid_wrap" sidesite="rh_FDS_ellipsoid_site_FDS3_side" />
+      <site site="rh_FDS3-P3" />
+      <site site="rh_FDS3-P4" />
+      
+      <site site="rh_FDS3-P6" />
+      <site site="rh_FDS3-P7" />
+      <site site="rh_FDS3-P8" />
+    </spatial><spatial class="myohand" name="rh_FDS2_tendon">
+      <site site="rh_FDS2-P1" />
+      <site site="rh_FDS2-P2" />
+      <geom geom="rh_FDS_ellipsoid_wrap" sidesite="rh_FDS_ellipsoid_site_FDS2_side" />
+      <site site="rh_FDS2-P3" />
+      <site site="rh_FDS2-P4" />
+      <site site="rh_FDS2-P5" />
+      <site site="rh_FDS2-P6" />
+      <site site="rh_FDS2-P7" />
+      <site site="rh_FDS2-P8" />
+    </spatial><spatial class="myohand" name="rh_FDP5_tendon">
+      <site site="rh_FDP5-P1" />
+      <site site="rh_FDP5-P2" />
+      <geom geom="rh_FDP_ellipsoid_wrap" sidesite="rh_FDP_ellipsoid_site_FDP5_side" />
+      <site site="rh_FDP5-P3" />
+      <site site="rh_FDP5-P4" />
+      
+      <site site="rh_FDP5-P5" />
+      <site site="rh_FDP5-P6" />
+      <site site="rh_FDP5-P7" />
+      <site site="rh_FDP5-P8" />
+      <site site="rh_FDP5-P9" />
+      <site site="rh_FDP5-P10" />
+    </spatial><spatial class="myohand" name="rh_FDP4_tendon">
+      <site site="rh_FDP4-P1" />
+      <site site="rh_FDP4-P2" />
+      <geom geom="rh_FDP_ellipsoid_wrap" sidesite="rh_FDP_ellipsoid_site_FDP4_side" />
+      <site site="rh_FDP4-P3" />
+      <site site="rh_FDP4-P4" />
+      <geom geom="rh_4thmcp_ellipsoid_wrap" sidesite="rh_4thmcp_ellipsoid_site_FDP4_side" />
+      <site site="rh_FDP4-P5" />
+      <site site="rh_FDP4-P6" />
+      
+      <site site="rh_FDP4-P8" />
+      <site site="rh_FDP4-P9" />
+      <site site="rh_FDP4-P10" />
+    </spatial><spatial class="myohand" name="rh_FDP3_tendon">
+      <site site="rh_FDP3-P1" />
+      <site site="rh_FDP3-P2" />
+      <geom geom="rh_FDP_ellipsoid_wrap" sidesite="rh_FDP_ellipsoid_site_FDP3_side" />
+      <site site="rh_FDP3-P3" />
+      <site site="rh_FDP3-P4" />
+      <site site="rh_FDP3-P5" />
+      
+      <site site="rh_FDP3-P6" />
+      
+      <site site="rh_FDP3-P8" />
+      <site site="rh_FDP3-P9" />
+      <site site="rh_FDP3-P10" />
+    </spatial><spatial class="myohand" name="rh_FDP2_tendon">
+      <site site="rh_FDP2-P1" />
+      <site site="rh_FDP2-P2" />
+      <geom geom="rh_FDP_ellipsoid_wrap" sidesite="rh_FDP_ellipsoid_site_FDP2_side" />
+      <site site="rh_FDP2-P3" />
+      <site site="rh_FDP2-P4" />
+      <site site="rh_FDP2-P5" />
+      <geom geom="rh_2ndmcp_ellipsoid_wrap" sidesite="rh_2ndmcp_ellipsoid_site_FDP2_side" />
+      <site site="rh_FDP2-P6" />
+      <site site="rh_FDP2-P7" />
+      <site site="rh_FDP2-P8" />
+      <site site="rh_FDP2-P9" />
+      <site site="rh_FDP2-P10" />
+    </spatial><spatial class="myohand" name="rh_EDC5_tendon">
+      <site site="rh_EDC5-P1" />
+      <site site="rh_EDC5-P2" />
+      <site site="rh_EDC5-P3" />
+      <geom geom="rh_EDCL_torus_wrap" sidesite="rh_EDCL_torus_site_EDC5_side" />
+      <site site="rh_EDC5-P4" />
+      <geom geom="rh_5thmcp_ellipsoid_wrap" sidesite="rh_5thmcp_ellipsoid_site_EDC5_side" />
+      <site site="rh_EDC5-P5" />
+      <site site="rh_EDC5-P6" />
+      <geom geom="rh_Fifthpm_wrap" sidesite="rh_Fifthpm_site_EDC5_side" />
+      <site site="rh_EDC5-P7" />
+      <site site="rh_EDC5-P8" />
+      <geom geom="rh_Fifthmd_wrap" sidesite="rh_Fifthmd_site_EDC5_side" />
+      <site site="rh_EDC5-P9" />
+    </spatial><spatial class="myohand" name="rh_EDC4_tendon">
+      <site site="rh_EDC4-P1" />
+      <site site="rh_EDC4-P2" />
+      <site site="rh_EDC4-P3" />
+      <geom geom="rh_EDCR_torus_wrap" sidesite="rh_EDCR_torus_site_EDC4_side" />
+      <site site="rh_EDC4-P4" />
+      <geom geom="rh_4thmcp_ellipsoid_wrap" sidesite="rh_4thmcp_ellipsoid_site_EDC4_side" />
+      <site site="rh_EDC4-P5" />
+      <site site="rh_EDC4-P6" />
+      <geom geom="rh_Fourthpm_wrap" sidesite="rh_Fourthpm_site_EDC4_side" />
+      <site site="rh_EDC4-P7" />
+      <site site="rh_EDC4-P8" />
+      <geom geom="rh_Fourthmd_wrap" sidesite="rh_Fourthmd_site_EDC4_side" />
+      <site site="rh_EDC4-P9" />
+    </spatial><spatial class="myohand" name="rh_EDC3_tendon">
+      <site site="rh_EDC3-P1" />
+      <site site="rh_EDC3-P2" />
+      <site site="rh_EDC3-P3" />
+      <geom geom="rh_EDCM_torus_wrap" sidesite="rh_EDCM_torus_site_EDC3_side" />
+      <site site="rh_EDC3-P4" />
+      <geom geom="rh_3rdmcp_ellipsoid_wrap" sidesite="rh_3rdmcp_ellipsoid_site_EDC3_side" />
+      <site site="rh_EDC3-P5" />
+      <site site="rh_EDC3-P6" />
+      <geom geom="rh_Thirdpm_wrap" sidesite="rh_Thirdpm_site_EDC3_side" />
+      <site site="rh_EDC3-P7" />
+      <site site="rh_EDC3-P8" />
+      <geom geom="rh_Thirdmd_wrap" sidesite="rh_Thirdmd_site_EDC3_side" />
+      <site site="rh_EDC3-P9" />
+    </spatial><spatial class="myohand" name="rh_EDC2_tendon">
+      <site site="rh_EDC2-P1" />
+      <site site="rh_EDC2-P2" />
+      <site site="rh_EDC2-P3" />
+      <geom geom="rh_EDCI_torus_wrap" sidesite="rh_EDCI_torus_site_EDC2_side" />
+      <site site="rh_EDC2-P4" />
+      <geom geom="rh_2ndmcp_ellipsoid_wrap" sidesite="rh_2ndmcp_ellipsoid_site_EDC2_side" />
+      <site site="rh_EDC2-P5" />
+      <site site="rh_EDC2-P6" />
+      <geom geom="rh_Secondpm_wrap" sidesite="rh_Secondpm_site_EDC2_side" />
+      <site site="rh_EDC2-P7" />
+      <site site="rh_EDC2-P8" />
+      <geom geom="rh_Secondmd_wrap" sidesite="rh_Secondmd_site_EDC2_side" />
+      <site site="rh_EDC2-P9" />
+    </spatial><spatial class="myohand" name="rh_EDM_tendon">
+      <site site="rh_EDM-P1" />
+      <site site="rh_EDM-P2" />
+      <site site="rh_EDM-P3" />
+      <site site="rh_EDM-P4" />
+      <geom geom="rh_EDM_ellipsoid_wrap" sidesite="rh_EDM_ellipsoid_site_EDM_side" />
+      <site site="rh_EDM-P5" />
+      <site site="rh_EDM-P6" />
+      <geom geom="rh_5thmcp_ellipsoid_wrap" sidesite="rh_5thmcp_ellipsoid_site_EDC5_side" />
+      <site site="rh_EDM-P7" />
+      <geom geom="rh_Fifthpm_wrap" />
+      <site site="rh_EDM-P8" />
+      <geom geom="rh_Fifthmd_wrap" sidesite="rh_Fifthmd_site_EDC5_side" />
+      <site site="rh_EDM-P9" />
+    </spatial><spatial class="myohand" name="rh_EIP_tendon">
+      <site site="rh_EIP-P1" />
+      <site site="rh_EIP-P2" />
+      <site site="rh_EIP-P3" />
+      <geom geom="rh_ExtensorEllipse_ellipsoid_wrap" sidesite="rh_ExtensorEllipse_ellipsoid_site_EIP_side" />
+      <site site="rh_EIP-P4" />
+      <site site="rh_EIP-P5" />
+      <geom geom="rh_2ndmcp_ellipsoid_wrap" sidesite="rh_2ndmcp_ellipsoid_site_EIP_side" />
+      <site site="rh_EIP-P6" />
+      <site site="rh_EIP-P7" />
+      <geom geom="rh_Secondpm_wrap" sidesite="rh_Secondpm_site_EIP_side" />
+      <site site="rh_EIP-P8" />
+      <site site="rh_EIP-P9" />
+      <geom geom="rh_Secondmd_wrap" sidesite="rh_Secondmd_site_EIP_side" />
+      <site site="rh_EIP-P10" />
+      <site site="rh_EIP-P11" />
+    </spatial><spatial class="myohand" name="rh_EPL_tendon" springlength="0.2305">
+      <site site="rh_EPL-P1" />
+      <site site="rh_EPL-P2" />
+      <site site="rh_EPL-P3" />
+      <site site="rh_EPL-P4" />
+      <site site="rh_EPL-P5" />
+      <site site="rh_EPL-P6" />
+      <site site="rh_EPL-P7" />
+      <site site="rh_EPL-P8" />
+      <site site="rh_EPL-P9" />
+      <geom geom="rh_MPthumb_wrap" />
+      <site site="rh_EPL-P10" />
+      <site site="rh_EPL-P11" />
+      <geom geom="rh_IPthumb_wrap" sidesite="rh_IPthumb_site_EPL_side" />
+      <site site="rh_EPL-P12" />
+    </spatial><spatial class="myohand" name="rh_EPB_tendon">
+      <site site="rh_EPB-P1" />
+      <site site="rh_EPB-P2" />
+      <site site="rh_EPB-P3" />
+      <site site="rh_EPB-P4" />
+      <site site="rh_EPB-P5" />
+      <site site="rh_EPB-P6" />
+      <site site="rh_EPB-P7" />
+      <geom geom="rh_MPthumb_wrap" sidesite="rh_MPthumb_site_EPB_side" />
+      <site site="rh_EPB-P8" />
+    </spatial><spatial class="myohand" name="rh_FPL_tendon">
+      <site site="rh_FPL-P1" />
+      <site site="rh_FPL-P2" />
+      <site site="rh_FPL-P3" />
+      <site site="rh_FPL-P4" />
+      <site site="rh_FPL-P5" />
+      <geom geom="rh_FPL_ellipsoid_wrap" />
+      <site site="rh_FPL-P7" />
+      <site site="rh_FPL-P8" />
+      <geom geom="rh_MPthumb_wrap" sidesite="rh_MPthumb_site_FPL_side" />
+      <site site="rh_FPL-P9" />
+      <site site="rh_FPL-P10" />
+      <geom geom="rh_IPthumb_wrap" sidesite="rh_IPthumb_site_FPL_side" />
+      <site site="rh_FPL-P11" />
+    </spatial><spatial class="myohand" name="rh_APL_tendon">
+      <site site="rh_APL-P1" />
+      <site site="rh_APL-P2" />
+      <site site="rh_APL-P3" />
+      <site site="rh_APL-P4" />
+      <site site="rh_APL-P5" />
+      
+      <site site="rh_APL-P6" />
+      <site site="rh_APL-P7" />
+      <site site="rh_APL-P8" />
+    </spatial><spatial class="myohand" name="rh_OP_tendon">
+      <site site="rh_OP-P1" />
+      <site site="rh_OP-P2" />
+    </spatial><spatial class="myohand" name="rh_RI2_tendon">
+      <site site="rh_RI2-P1" />
+      <site site="rh_RI2-P2" />
+      <geom geom="rh_2ndmcp_ellipsoid_wrap" sidesite="rh_2ndmcp_ellipsoid_site_RI2_side" />
+      <site site="rh_RI2-P3" />
+    </spatial><spatial class="myohand" name="rh_LU_RB2_tendon">
+      <site site="rh_LU_RB2-P1" />
+      <site site="rh_LU_RB2-P2" />
+      <site site="rh_LU_RB2-P3" />
+      <site site="rh_LU_RB2-P4" />
+      <geom geom="rh_Secondpm_wrap" sidesite="rh_Secondpm_site_LU_RB2_side" />
+      <site site="rh_LU_RB2-P5" />
+      <site site="rh_LU_RB2-P6" />
+    </spatial><spatial class="myohand" name="rh_UI_UB2_tendon">
+      <site site="rh_UI_UB2-P1" />
+      <site site="rh_UI_UB2-P2" />
+      <site site="rh_UI_UB2-P3" />
+      <site site="rh_UI_UB2-P4" />
+      <geom geom="rh_Secondpm_wrap" sidesite="rh_Secondpm_site_UI_UB2_side" />
+      <site site="rh_UI_UB2-P5" />
+      <site site="rh_UI_UB2-P6" />
+    </spatial><spatial class="myohand" name="rh_RI3_tendon">
+      <site site="rh_RI3-P1" />
+      <site site="rh_RI3-P2" />
+      <site site="rh_RI3-P3" />
+    </spatial><spatial class="myohand" name="rh_LU_RB3_tendon">
+      <site site="rh_LU_RB3-P1" />
+      <site site="rh_LU_RB3-P2" />
+      <site site="rh_LU_RB3-P3" />
+      
+      <site site="rh_LU_RB3-P4" />
+      <geom geom="rh_Thirdpm_wrap" sidesite="rh_Thirdpm_site_LU_RB3_side" />
+      <site site="rh_LU_RB3-P5" />
+    </spatial><spatial class="myohand" name="rh_UI_UB3_tendon">
+      <site site="rh_UI_UB3-P1" />
+      <site site="rh_UI_UB3-P2" />
+      <site site="rh_UI_UB3-P3" />
+      <site site="rh_UI_UB3-P4" />
+      <geom geom="rh_Thirdpm_wrap" sidesite="rh_Thirdpm_site_UI_UB3_side" />
+      <site site="rh_UI_UB3-P5" />
+    </spatial><spatial class="myohand" name="rh_RI4_tendon">
+      <site site="rh_RI4-P1" />
+      <site site="rh_RI4-P2" />
+      <site site="rh_RI4-P3" />
+    </spatial><spatial class="myohand" name="rh_LU_RB4_tendon">
+      <site site="rh_LU_RB4-P1" />
+      <site site="rh_LU_RB4-P2" />
+      <site site="rh_LU_RB4-P3" />
+      <site site="rh_LU_RB4-P4" />
+      <site site="rh_LU_RB4-P5" />
+    </spatial><spatial class="myohand" name="rh_UI_UB4_tendon">
+      <site site="rh_UI_UB4-P1" />
+      <site site="rh_UI_UB4-P2" />
+      <geom geom="rh_4thmcp_ellipsoid_wrap" sidesite="rh_4thmcp_ellipsoid_site_UI_UB4_side" />
+      <site site="rh_UI_UB4-P3" />
+      <site site="rh_UI_UB4-P4" />
+      <geom geom="rh_Fourthpm_wrap" sidesite="rh_Fourthpm_site_UI_UB4_side" />
+      <site site="rh_UI_UB4-P5" />
+    </spatial><spatial class="myohand" name="rh_RI5_tendon">
+      <site site="rh_RI5-P1" />
+      <site site="rh_RI5-P2" />
+      <site site="rh_RI5-P3" />
+    </spatial><spatial class="myohand" name="rh_LU_RB5_tendon">
+      <site site="rh_LU_RB5-P1" />
+      <site site="rh_LU_RB5-P2" />
+      <geom geom="rh_5thmcp_ellipsoid_wrap" sidesite="rh_5thmcp_ellipsoid_site_LU_RB5_side" />
+      <site site="rh_LU_RB5-P3" />
+      <site site="rh_LU_RB5-P4" />
+      <geom geom="rh_Fifthpm_wrap" sidesite="rh_Fifthpm_site_LU_RB5_side" />
+      <site site="rh_LU_RB5-P5" />
+    </spatial><spatial class="myohand" name="rh_UI_UB5_tendon">
+      <site site="rh_UI_UB5-P1" />
+      <site site="rh_UI_UB5-P2" />
+      <geom geom="rh_5thmcp_ellipsoid_wrap" sidesite="rh_5thmcp_ellipsoid_site_UI_UB5_side" />
+      <site site="rh_UI_UB5-P3" />
+      <site site="rh_UI_UB5-P4" />
+      <geom geom="rh_Fifthpm_wrap" sidesite="rh_Fifthpm_site_UI_UB5_side" />
+      <site site="rh_UI_UB5-P5" />
+    </spatial><spatial class="myohand" name="lh_ECRL_tendon">
+      <site site="lh_ECRL-P1" />
+      <geom geom="lh_Elbow_PT_ECRL_wrap" sidesite="lh_Elbow_PT_ECRL_site_ECRL_side" />
+      <site site="lh_ECRL-P2" />
+      <site site="lh_ECRL-P3" />
+      <geom geom="lh_ECRL_torus_wrap" sidesite="lh_ECRL_torus_site_ECRL_side" />
+      <site site="lh_ECRL-P4" />
+    </spatial><spatial class="myohand" name="lh_ECRB_tendon">
+      <site site="lh_ECRB-P1" />
+      <site site="lh_ECRB-P2" />
+      <site site="lh_ECRB-P3" />
+      <geom geom="lh_ECRB_torus_wrap" sidesite="lh_ECRB_torus_site_ECRB_side" />
+      <site site="lh_ECRB-P4" />
+    </spatial><spatial class="myohand" name="lh_ECU_tendon">
+      <site site="lh_ECU-P1" />
+      <site site="lh_ECU-P2" />
+      <site site="lh_ECU-P3" />
+      <site site="lh_ECU-P4" />
+      <site site="lh_ECU-P5" />
+      <geom geom="lh_ECU_torus_wrap" sidesite="lh_ECU_torus_site_ECU_side" />
+      <site site="lh_ECU-P6" />
+    </spatial><spatial class="myohand" name="lh_FCR_tendon">
+      <site site="lh_FCR-P1" />
+      <geom geom="lh_Elbow_PT_FCU_wrap" sidesite="lh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="lh_FCR-P2" />
+      <geom geom="lh_FCR_torus_wrap" sidesite="lh_FCR_torus_site_FCR_side" />
+      <site site="lh_FCR-P3" />
+    </spatial><spatial class="myohand" name="lh_FCU_tendon">
+      <site site="lh_FCU-P1" />
+      <geom geom="lh_Elbow_PT_FCU_wrap" sidesite="lh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="lh_FCU-P2" />
+      <site site="lh_FCU-P3" />
+      
+      <site site="lh_FCU-P4" />
+      <site site="lh_FCU-P5" />
+    </spatial><spatial class="myohand" name="lh_PL_tendon">
+      <site site="lh_PL-P1" />
+      <geom geom="lh_Elbow_PT_FCU_wrap" sidesite="lh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="lh_PL-P2" />
+      
+      <site site="lh_PL-P3" />
+      <site site="lh_PL-P4" />
+    </spatial><spatial class="myohand" name="lh_PT_tendon">
+      <site site="lh_PT-P1" />
+      <geom geom="lh_Elbow_PT_FCU_wrap" sidesite="lh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="lh_PT-P2" />
+      <site site="lh_PT-P3" />
+      <site site="lh_PT-P4" />
+      <site site="lh_PT-P5" />
+    </spatial><spatial class="myohand" name="lh_PQ_tendon">
+      <site site="lh_PQ-P1" />
+      <geom geom="lh_PQ2_wrap" sidesite="lh_PQ2_site_PQ_side" />
+      <site site="lh_PQ-P2" />
+    </spatial><spatial class="myohand" name="lh_FDS5_tendon">
+      <site site="lh_FDS5-P1" />
+      <geom geom="lh_Elbow_PT_FCU_wrap" sidesite="lh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="lh_FDS5-P2" />
+      <geom geom="lh_FDS_ellipsoid_wrap" sidesite="lh_FDS_ellipsoid_site_FDS5_side" />
+      <site site="lh_FDS5-P3" />
+      <site site="lh_FDS5-P4" />
+      <site site="lh_FDS5-P5" />
+      
+      <site site="lh_FDS5-P6" />
+      <site site="lh_FDS5-P7" />
+      <site site="lh_FDS5-P8" />
+    </spatial><spatial class="myohand" name="lh_FDS4_tendon">
+      <site site="lh_FDS4-P1" />
+      <geom geom="lh_Elbow_PT_FCU_wrap" sidesite="lh_Elbow_PT_FCU_site_FCU_side" />
+      <site site="lh_FDS4-P2" />
+      <geom geom="lh_FDS_ellipsoid_wrap" sidesite="lh_FDS_ellipsoid_site_FDS4_side" />
+      <site site="lh_FDS4-P3" />
+      
+      <site site="lh_FDS4-P4" />
+      <site site="lh_FDS4-P5" />
+      
+      <site site="lh_FDS4-P6" />
+      <site site="lh_FDS4-P7" />
+      <site site="lh_FDS4-P8" />
+    </spatial><spatial class="myohand" name="lh_FDS3_tendon">
+      <site site="lh_FDS3-P1" />
+      <site site="lh_FDS3-P2" />
+      <geom geom="lh_FDS_ellipsoid_wrap" sidesite="lh_FDS_ellipsoid_site_FDS3_side" />
+      <site site="lh_FDS3-P3" />
+      <site site="lh_FDS3-P4" />
+      
+      <site site="lh_FDS3-P6" />
+      <site site="lh_FDS3-P7" />
+      <site site="lh_FDS3-P8" />
+    </spatial><spatial class="myohand" name="lh_FDS2_tendon">
+      <site site="lh_FDS2-P1" />
+      <site site="lh_FDS2-P2" />
+      <geom geom="lh_FDS_ellipsoid_wrap" sidesite="lh_FDS_ellipsoid_site_FDS2_side" />
+      <site site="lh_FDS2-P3" />
+      <site site="lh_FDS2-P4" />
+      <site site="lh_FDS2-P5" />
+      <site site="lh_FDS2-P6" />
+      <site site="lh_FDS2-P7" />
+      <site site="lh_FDS2-P8" />
+    </spatial><spatial class="myohand" name="lh_FDP5_tendon">
+      <site site="lh_FDP5-P1" />
+      <site site="lh_FDP5-P2" />
+      <geom geom="lh_FDP_ellipsoid_wrap" sidesite="lh_FDP_ellipsoid_site_FDP5_side" />
+      <site site="lh_FDP5-P3" />
+      <site site="lh_FDP5-P4" />
+      
+      <site site="lh_FDP5-P5" />
+      <site site="lh_FDP5-P6" />
+      <site site="lh_FDP5-P7" />
+      <site site="lh_FDP5-P8" />
+      <site site="lh_FDP5-P9" />
+      <site site="lh_FDP5-P10" />
+    </spatial><spatial class="myohand" name="lh_FDP4_tendon">
+      <site site="lh_FDP4-P1" />
+      <site site="lh_FDP4-P2" />
+      <geom geom="lh_FDP_ellipsoid_wrap" sidesite="lh_FDP_ellipsoid_site_FDP4_side" />
+      <site site="lh_FDP4-P3" />
+      <site site="lh_FDP4-P4" />
+      <geom geom="lh_4thmcp_ellipsoid_wrap" sidesite="lh_4thmcp_ellipsoid_site_FDP4_side" />
+      <site site="lh_FDP4-P5" />
+      <site site="lh_FDP4-P6" />
+      
+      <site site="lh_FDP4-P8" />
+      <site site="lh_FDP4-P9" />
+      <site site="lh_FDP4-P10" />
+    </spatial><spatial class="myohand" name="lh_FDP3_tendon">
+      <site site="lh_FDP3-P1" />
+      <site site="lh_FDP3-P2" />
+      <geom geom="lh_FDP_ellipsoid_wrap" sidesite="lh_FDP_ellipsoid_site_FDP3_side" />
+      <site site="lh_FDP3-P3" />
+      <site site="lh_FDP3-P4" />
+      <site site="lh_FDP3-P5" />
+      
+      <site site="lh_FDP3-P6" />
+      
+      <site site="lh_FDP3-P8" />
+      <site site="lh_FDP3-P9" />
+      <site site="lh_FDP3-P10" />
+    </spatial><spatial class="myohand" name="lh_FDP2_tendon">
+      <site site="lh_FDP2-P1" />
+      <site site="lh_FDP2-P2" />
+      <geom geom="lh_FDP_ellipsoid_wrap" sidesite="lh_FDP_ellipsoid_site_FDP2_side" />
+      <site site="lh_FDP2-P3" />
+      <site site="lh_FDP2-P4" />
+      <site site="lh_FDP2-P5" />
+      <geom geom="lh_2ndmcp_ellipsoid_wrap" sidesite="lh_2ndmcp_ellipsoid_site_FDP2_side" />
+      <site site="lh_FDP2-P6" />
+      <site site="lh_FDP2-P7" />
+      <site site="lh_FDP2-P8" />
+      <site site="lh_FDP2-P9" />
+      <site site="lh_FDP2-P10" />
+    </spatial><spatial class="myohand" name="lh_EDC5_tendon">
+      <site site="lh_EDC5-P1" />
+      <site site="lh_EDC5-P2" />
+      <site site="lh_EDC5-P3" />
+      <geom geom="lh_EDCL_torus_wrap" sidesite="lh_EDCL_torus_site_EDC5_side" />
+      <site site="lh_EDC5-P4" />
+      <geom geom="lh_5thmcp_ellipsoid_wrap" sidesite="lh_5thmcp_ellipsoid_site_EDC5_side" />
+      <site site="lh_EDC5-P5" />
+      <site site="lh_EDC5-P6" />
+      <geom geom="lh_Fifthpm_wrap" sidesite="lh_Fifthpm_site_EDC5_side" />
+      <site site="lh_EDC5-P7" />
+      <site site="lh_EDC5-P8" />
+      <geom geom="lh_Fifthmd_wrap" sidesite="lh_Fifthmd_site_EDC5_side" />
+      <site site="lh_EDC5-P9" />
+    </spatial><spatial class="myohand" name="lh_EDC4_tendon">
+      <site site="lh_EDC4-P1" />
+      <site site="lh_EDC4-P2" />
+      <site site="lh_EDC4-P3" />
+      <geom geom="lh_EDCR_torus_wrap" sidesite="lh_EDCR_torus_site_EDC4_side" />
+      <site site="lh_EDC4-P4" />
+      <geom geom="lh_4thmcp_ellipsoid_wrap" sidesite="lh_4thmcp_ellipsoid_site_EDC4_side" />
+      <site site="lh_EDC4-P5" />
+      <site site="lh_EDC4-P6" />
+      <geom geom="lh_Fourthpm_wrap" sidesite="lh_Fourthpm_site_EDC4_side" />
+      <site site="lh_EDC4-P7" />
+      <site site="lh_EDC4-P8" />
+      <geom geom="lh_Fourthmd_wrap" sidesite="lh_Fourthmd_site_EDC4_side" />
+      <site site="lh_EDC4-P9" />
+    </spatial><spatial class="myohand" name="lh_EDC3_tendon">
+      <site site="lh_EDC3-P1" />
+      <site site="lh_EDC3-P2" />
+      <site site="lh_EDC3-P3" />
+      <geom geom="lh_EDCM_torus_wrap" sidesite="lh_EDCM_torus_site_EDC3_side" />
+      <site site="lh_EDC3-P4" />
+      <geom geom="lh_3rdmcp_ellipsoid_wrap" sidesite="lh_3rdmcp_ellipsoid_site_EDC3_side" />
+      <site site="lh_EDC3-P5" />
+      <site site="lh_EDC3-P6" />
+      <geom geom="lh_Thirdpm_wrap" sidesite="lh_Thirdpm_site_EDC3_side" />
+      <site site="lh_EDC3-P7" />
+      <site site="lh_EDC3-P8" />
+      <geom geom="lh_Thirdmd_wrap" sidesite="lh_Thirdmd_site_EDC3_side" />
+      <site site="lh_EDC3-P9" />
+    </spatial><spatial class="myohand" name="lh_EDC2_tendon">
+      <site site="lh_EDC2-P1" />
+      <site site="lh_EDC2-P2" />
+      <site site="lh_EDC2-P3" />
+      <geom geom="lh_EDCI_torus_wrap" sidesite="lh_EDCI_torus_site_EDC2_side" />
+      <site site="lh_EDC2-P4" />
+      <geom geom="lh_2ndmcp_ellipsoid_wrap" sidesite="lh_2ndmcp_ellipsoid_site_EDC2_side" />
+      <site site="lh_EDC2-P5" />
+      <site site="lh_EDC2-P6" />
+      <geom geom="lh_Secondpm_wrap" sidesite="lh_Secondpm_site_EDC2_side" />
+      <site site="lh_EDC2-P7" />
+      <site site="lh_EDC2-P8" />
+      <geom geom="lh_Secondmd_wrap" sidesite="lh_Secondmd_site_EDC2_side" />
+      <site site="lh_EDC2-P9" />
+    </spatial><spatial class="myohand" name="lh_EDM_tendon">
+      <site site="lh_EDM-P1" />
+      <site site="lh_EDM-P2" />
+      <site site="lh_EDM-P3" />
+      <site site="lh_EDM-P4" />
+      <geom geom="lh_EDM_ellipsoid_wrap" sidesite="lh_EDM_ellipsoid_site_EDM_side" />
+      <site site="lh_EDM-P5" />
+      <site site="lh_EDM-P6" />
+      <geom geom="lh_5thmcp_ellipsoid_wrap" sidesite="lh_5thmcp_ellipsoid_site_EDC5_side" />
+      <site site="lh_EDM-P7" />
+      <geom geom="lh_Fifthpm_wrap" />
+      <site site="lh_EDM-P8" />
+      <geom geom="lh_Fifthmd_wrap" sidesite="lh_Fifthmd_site_EDC5_side" />
+      <site site="lh_EDM-P9" />
+    </spatial><spatial class="myohand" name="lh_EIP_tendon">
+      <site site="lh_EIP-P1" />
+      <site site="lh_EIP-P2" />
+      <site site="lh_EIP-P3" />
+      <geom geom="lh_ExtensorEllipse_ellipsoid_wrap" sidesite="lh_ExtensorEllipse_ellipsoid_site_EIP_side" />
+      <site site="lh_EIP-P4" />
+      <site site="lh_EIP-P5" />
+      <geom geom="lh_2ndmcp_ellipsoid_wrap" sidesite="lh_2ndmcp_ellipsoid_site_EIP_side" />
+      <site site="lh_EIP-P6" />
+      <site site="lh_EIP-P7" />
+      <geom geom="lh_Secondpm_wrap" sidesite="lh_Secondpm_site_EIP_side" />
+      <site site="lh_EIP-P8" />
+      <site site="lh_EIP-P9" />
+      <geom geom="lh_Secondmd_wrap" sidesite="lh_Secondmd_site_EIP_side" />
+      <site site="lh_EIP-P10" />
+      <site site="lh_EIP-P11" />
+    </spatial><spatial class="myohand" name="lh_EPL_tendon" springlength="0.2305">
+      <site site="lh_EPL-P1" />
+      <site site="lh_EPL-P2" />
+      <site site="lh_EPL-P3" />
+      <site site="lh_EPL-P4" />
+      <site site="lh_EPL-P5" />
+      <site site="lh_EPL-P6" />
+      <site site="lh_EPL-P7" />
+      <site site="lh_EPL-P8" />
+      <site site="lh_EPL-P9" />
+      <geom geom="lh_MPthumb_wrap" />
+      <site site="lh_EPL-P10" />
+      <site site="lh_EPL-P11" />
+      <geom geom="lh_IPthumb_wrap" sidesite="lh_IPthumb_site_EPL_side" />
+      <site site="lh_EPL-P12" />
+    </spatial><spatial class="myohand" name="lh_EPB_tendon">
+      <site site="lh_EPB-P1" />
+      <site site="lh_EPB-P2" />
+      <site site="lh_EPB-P3" />
+      <site site="lh_EPB-P4" />
+      <site site="lh_EPB-P5" />
+      <site site="lh_EPB-P6" />
+      <site site="lh_EPB-P7" />
+      <geom geom="lh_MPthumb_wrap" sidesite="lh_MPthumb_site_EPB_side" />
+      <site site="lh_EPB-P8" />
+    </spatial><spatial class="myohand" name="lh_FPL_tendon">
+      <site site="lh_FPL-P1" />
+      <site site="lh_FPL-P2" />
+      <site site="lh_FPL-P3" />
+      <site site="lh_FPL-P4" />
+      <site site="lh_FPL-P5" />
+      <geom geom="lh_FPL_ellipsoid_wrap" />
+      <site site="lh_FPL-P7" />
+      <site site="lh_FPL-P8" />
+      <geom geom="lh_MPthumb_wrap" sidesite="lh_MPthumb_site_FPL_side" />
+      <site site="lh_FPL-P9" />
+      <site site="lh_FPL-P10" />
+      <geom geom="lh_IPthumb_wrap" sidesite="lh_IPthumb_site_FPL_side" />
+      <site site="lh_FPL-P11" />
+    </spatial><spatial class="myohand" name="lh_APL_tendon">
+      <site site="lh_APL-P1" />
+      <site site="lh_APL-P2" />
+      <site site="lh_APL-P3" />
+      <site site="lh_APL-P4" />
+      <site site="lh_APL-P5" />
+      
+      <site site="lh_APL-P6" />
+      <site site="lh_APL-P7" />
+      <site site="lh_APL-P8" />
+    </spatial><spatial class="myohand" name="lh_OP_tendon">
+      <site site="lh_OP-P1" />
+      <site site="lh_OP-P2" />
+    </spatial><spatial class="myohand" name="lh_RI2_tendon">
+      <site site="lh_RI2-P1" />
+      <site site="lh_RI2-P2" />
+      <geom geom="lh_2ndmcp_ellipsoid_wrap" sidesite="lh_2ndmcp_ellipsoid_site_RI2_side" />
+      <site site="lh_RI2-P3" />
+    </spatial><spatial class="myohand" name="lh_LU_RB2_tendon">
+      <site site="lh_LU_RB2-P1" />
+      <site site="lh_LU_RB2-P2" />
+      <site site="lh_LU_RB2-P3" />
+      <site site="lh_LU_RB2-P4" />
+      <geom geom="lh_Secondpm_wrap" sidesite="lh_Secondpm_site_LU_RB2_side" />
+      <site site="lh_LU_RB2-P5" />
+      <site site="lh_LU_RB2-P6" />
+    </spatial><spatial class="myohand" name="lh_UI_UB2_tendon">
+      <site site="lh_UI_UB2-P1" />
+      <site site="lh_UI_UB2-P2" />
+      <site site="lh_UI_UB2-P3" />
+      <site site="lh_UI_UB2-P4" />
+      <geom geom="lh_Secondpm_wrap" sidesite="lh_Secondpm_site_UI_UB2_side" />
+      <site site="lh_UI_UB2-P5" />
+      <site site="lh_UI_UB2-P6" />
+    </spatial><spatial class="myohand" name="lh_RI3_tendon">
+      <site site="lh_RI3-P1" />
+      <site site="lh_RI3-P2" />
+      <site site="lh_RI3-P3" />
+    </spatial><spatial class="myohand" name="lh_LU_RB3_tendon">
+      <site site="lh_LU_RB3-P1" />
+      <site site="lh_LU_RB3-P2" />
+      <site site="lh_LU_RB3-P3" />
+      
+      <site site="lh_LU_RB3-P4" />
+      <geom geom="lh_Thirdpm_wrap" sidesite="lh_Thirdpm_site_LU_RB3_side" />
+      <site site="lh_LU_RB3-P5" />
+    </spatial><spatial class="myohand" name="lh_UI_UB3_tendon">
+      <site site="lh_UI_UB3-P1" />
+      <site site="lh_UI_UB3-P2" />
+      <site site="lh_UI_UB3-P3" />
+      <site site="lh_UI_UB3-P4" />
+      <geom geom="lh_Thirdpm_wrap" sidesite="lh_Thirdpm_site_UI_UB3_side" />
+      <site site="lh_UI_UB3-P5" />
+    </spatial><spatial class="myohand" name="lh_RI4_tendon">
+      <site site="lh_RI4-P1" />
+      <site site="lh_RI4-P2" />
+      <site site="lh_RI4-P3" />
+    </spatial><spatial class="myohand" name="lh_LU_RB4_tendon">
+      <site site="lh_LU_RB4-P1" />
+      <site site="lh_LU_RB4-P2" />
+      <site site="lh_LU_RB4-P3" />
+      <site site="lh_LU_RB4-P4" />
+      <site site="lh_LU_RB4-P5" />
+    </spatial><spatial class="myohand" name="lh_UI_UB4_tendon">
+      <site site="lh_UI_UB4-P1" />
+      <site site="lh_UI_UB4-P2" />
+      <geom geom="lh_4thmcp_ellipsoid_wrap" sidesite="lh_4thmcp_ellipsoid_site_UI_UB4_side" />
+      <site site="lh_UI_UB4-P3" />
+      <site site="lh_UI_UB4-P4" />
+      <geom geom="lh_Fourthpm_wrap" sidesite="lh_Fourthpm_site_UI_UB4_side" />
+      <site site="lh_UI_UB4-P5" />
+    </spatial><spatial class="myohand" name="lh_RI5_tendon">
+      <site site="lh_RI5-P1" />
+      <site site="lh_RI5-P2" />
+      <site site="lh_RI5-P3" />
+    </spatial><spatial class="myohand" name="lh_LU_RB5_tendon">
+      <site site="lh_LU_RB5-P1" />
+      <site site="lh_LU_RB5-P2" />
+      <geom geom="lh_5thmcp_ellipsoid_wrap" sidesite="lh_5thmcp_ellipsoid_site_LU_RB5_side" />
+      <site site="lh_LU_RB5-P3" />
+      <site site="lh_LU_RB5-P4" />
+      <geom geom="lh_Fifthpm_wrap" sidesite="lh_Fifthpm_site_LU_RB5_side" />
+      <site site="lh_LU_RB5-P5" />
+    </spatial><spatial class="myohand" name="lh_UI_UB5_tendon">
+      <site site="lh_UI_UB5-P1" />
+      <site site="lh_UI_UB5-P2" />
+      <geom geom="lh_5thmcp_ellipsoid_wrap" sidesite="lh_5thmcp_ellipsoid_site_UI_UB5_side" />
+      <site site="lh_UI_UB5-P3" />
+      <site site="lh_UI_UB5-P4" />
+      <geom geom="lh_Fifthpm_wrap" sidesite="lh_Fifthpm_site_UI_UB5_side" />
+      <site site="lh_UI_UB5-P5" />
+    </spatial></tendon>
+<actuator><muscle name="rh_ECRL" force="337.3" class="muscle" tendon="rh_ECRL_tendon" lengthrange="0.313191 0.341072" /><muscle name="rh_ECRB" force="252.2" class="muscle" tendon="rh_ECRB_tendon" lengthrange="0.26997 0.301495" /><muscle name="rh_ECU" force="192.9" class="muscle" tendon="rh_ECU_tendon" lengthrange="0.279041 0.306754" /><muscle name="rh_FCR" force="407.9" class="muscle" tendon="rh_FCR_tendon" lengthrange="0.295866 0.331494" /><muscle name="rh_FCU" force="479.8" class="muscle" tendon="rh_FCU_tendon" lengthrange="0.293357 0.332707" /><muscle name="rh_PL" force="101.0" class="muscle" tendon="rh_PL_tendon" lengthrange="0.311593 0.362396" /><muscle name="rh_PT" force="557.2" class="muscle" tendon="rh_PT_tendon" lengthrange="0.147243 0.170204" /><muscle name="rh_PQ" force="284.7" class="muscle" tendon="rh_PQ_tendon" lengthrange="0.0220792 0.0371669" /><muscle name="rh_FDS5" force="75.3" class="muscle" tendon="rh_FDS5_tendon" lengthrange="0.354916 0.423992" /><muscle name="rh_FDS4" force="171.2" class="muscle" tendon="rh_FDS4_tendon" lengthrange="0.422088 0.480218" /><muscle name="rh_FDS3" force="258.8" class="muscle" tendon="rh_FDS3_tendon" lengthrange="0.328489 0.390589" /><muscle name="rh_FDS2" force="162.5" class="muscle" tendon="rh_FDS2_tendon" lengthrange="0.330149 0.392331" /><muscle name="rh_FDP5" force="236.8" class="muscle" tendon="rh_FDP5_tendon" lengthrange="0.387224 0.450745" /><muscle name="rh_FDP4" force="172.9" class="muscle" tendon="rh_FDP4_tendon" lengthrange="0.348164 0.417976" /><muscle name="rh_FDP3" force="212.4" class="muscle" tendon="rh_FDP3_tendon" lengthrange="0.336078 0.398672" /><muscle name="rh_FDP2" force="197.3" class="muscle" tendon="rh_FDP2_tendon" lengthrange="0.336953 0.40261" /><muscle name="rh_EDC5" force="139.4" class="muscle" tendon="rh_EDC5_tendon" lengthrange="0.381709 0.426592" /><muscle name="rh_EDC4" force="109.2" class="muscle" tendon="rh_EDC4_tendon" lengthrange="0.391706 0.456154" /><muscle name="rh_EDC3" force="94.4" class="muscle" tendon="rh_EDC3_tendon" lengthrange="0.399791 0.456735" /><muscle name="rh_EDC2" force="48.8" class="muscle" tendon="rh_EDC2_tendon" lengthrange="0.395914 0.455475" /><muscle name="rh_EDM" force="72.4" class="muscle" tendon="rh_EDM_tendon" lengthrange="0.37707 0.417549" /><muscle name="rh_EIP" force="47.3" class="muscle" tendon="rh_EIP_tendon" lengthrange="0.245809 0.291046" /><muscle name="rh_EPL" force="88.3" class="muscle" tendon="rh_EPL_tendon" lengthrange="0.253147 0.327478" /><muscle name="rh_EPB" force="46" class="muscle" tendon="rh_EPB_tendon" lengthrange="0.146292 0.199276" /><muscle name="rh_FPL" force="201" class="muscle" tendon="rh_FPL_tendon" lengthrange="0.22287 0.27967" /><muscle name="rh_APL" force="116.7" class="muscle" tendon="rh_APL_tendon" lengthrange="0.204756 0.228384" /><muscle name="rh_OP" force="180" class="muscle" tendon="rh_OP_tendon" lengthrange="0.0314264 0.0518708" /><muscle name="rh_RI2" force="61.2" class="muscle" tendon="rh_RI2_tendon" lengthrange="0.0314087 0.0423628" /><muscle name="rh_LU_RB2" force="61.2" class="muscle" tendon="rh_LU_RB2_tendon" lengthrange="0.0898587 0.0998069" /><muscle name="rh_UI_UB2" force="61.2" class="muscle" tendon="rh_UI_UB2_tendon" lengthrange="0.0913261 0.105141" /><muscle name="rh_RI3" force="61.2" class="muscle" tendon="rh_RI3_tendon" lengthrange="0.0358365 0.0509725" /><muscle name="rh_LU_RB3" force="98" class="muscle" tendon="rh_LU_RB3_tendon" lengthrange="0.0827603 0.0988323" /><muscle name="rh_UI_UB3" force="98" class="muscle" tendon="rh_UI_UB3_tendon" lengthrange="0.0853434 0.0997261" /><muscle name="rh_RI4" force="97.0" class="muscle" tendon="rh_RI4_tendon" lengthrange="0.0435566 0.058459" /><muscle name="rh_LU_RB4" force="76.9" class="muscle" tendon="rh_LU_RB4_tendon" lengthrange="0.0797904 0.0909592" /><muscle name="rh_UI_UB4" force="76.9" class="muscle" tendon="rh_UI_UB4_tendon" lengthrange="0.0819919 0.0969029" /><muscle name="rh_RI5" force="59.9" class="muscle" tendon="rh_RI5_tendon" lengthrange="0.0425128 0.0462661" /><muscle name="rh_LU_RB5" force="47.9" class="muscle" tendon="rh_LU_RB5_tendon" lengthrange="0.0970142 0.100417" /><muscle name="rh_UI_UB5" force="47.9" class="muscle" tendon="rh_UI_UB5_tendon" lengthrange="0.0910226 0.0976845" /><muscle name="lh_ECRL" force="337.3" class="muscle" tendon="lh_ECRL_tendon" lengthrange="0.313191 0.341072" /><muscle name="lh_ECRB" force="252.2" class="muscle" tendon="lh_ECRB_tendon" lengthrange="0.26997 0.301495" /><muscle name="lh_ECU" force="192.9" class="muscle" tendon="lh_ECU_tendon" lengthrange="0.279041 0.306754" /><muscle name="lh_FCR" force="407.9" class="muscle" tendon="lh_FCR_tendon" lengthrange="0.295866 0.331494" /><muscle name="lh_FCU" force="479.8" class="muscle" tendon="lh_FCU_tendon" lengthrange="0.293357 0.332707" /><muscle name="lh_PL" force="101.0" class="muscle" tendon="lh_PL_tendon" lengthrange="0.311593 0.362396" /><muscle name="lh_PT" force="557.2" class="muscle" tendon="lh_PT_tendon" lengthrange="0.147243 0.170204" /><muscle name="lh_PQ" force="284.7" class="muscle" tendon="lh_PQ_tendon" lengthrange="0.0220792 0.0371669" /><muscle name="lh_FDS5" force="75.3" class="muscle" tendon="lh_FDS5_tendon" lengthrange="0.354916 0.423992" /><muscle name="lh_FDS4" force="171.2" class="muscle" tendon="lh_FDS4_tendon" lengthrange="0.422088 0.480218" /><muscle name="lh_FDS3" force="258.8" class="muscle" tendon="lh_FDS3_tendon" lengthrange="0.328489 0.390589" /><muscle name="lh_FDS2" force="162.5" class="muscle" tendon="lh_FDS2_tendon" lengthrange="0.330149 0.392331" /><muscle name="lh_FDP5" force="236.8" class="muscle" tendon="lh_FDP5_tendon" lengthrange="0.387224 0.450745" /><muscle name="lh_FDP4" force="172.9" class="muscle" tendon="lh_FDP4_tendon" lengthrange="0.348164 0.417976" /><muscle name="lh_FDP3" force="212.4" class="muscle" tendon="lh_FDP3_tendon" lengthrange="0.336078 0.398672" /><muscle name="lh_FDP2" force="197.3" class="muscle" tendon="lh_FDP2_tendon" lengthrange="0.336953 0.40261" /><muscle name="lh_EDC5" force="139.4" class="muscle" tendon="lh_EDC5_tendon" lengthrange="0.381709 0.426592" /><muscle name="lh_EDC4" force="109.2" class="muscle" tendon="lh_EDC4_tendon" lengthrange="0.391706 0.456154" /><muscle name="lh_EDC3" force="94.4" class="muscle" tendon="lh_EDC3_tendon" lengthrange="0.399791 0.456735" /><muscle name="lh_EDC2" force="48.8" class="muscle" tendon="lh_EDC2_tendon" lengthrange="0.395914 0.455475" /><muscle name="lh_EDM" force="72.4" class="muscle" tendon="lh_EDM_tendon" lengthrange="0.37707 0.417549" /><muscle name="lh_EIP" force="47.3" class="muscle" tendon="lh_EIP_tendon" lengthrange="0.245809 0.291046" /><muscle name="lh_EPL" force="88.3" class="muscle" tendon="lh_EPL_tendon" lengthrange="0.253147 0.327478" /><muscle name="lh_EPB" force="46" class="muscle" tendon="lh_EPB_tendon" lengthrange="0.146292 0.199276" /><muscle name="lh_FPL" force="201" class="muscle" tendon="lh_FPL_tendon" lengthrange="0.22287 0.27967" /><muscle name="lh_APL" force="116.7" class="muscle" tendon="lh_APL_tendon" lengthrange="0.204756 0.228384" /><muscle name="lh_OP" force="180" class="muscle" tendon="lh_OP_tendon" lengthrange="0.0314264 0.0518708" /><muscle name="lh_RI2" force="61.2" class="muscle" tendon="lh_RI2_tendon" lengthrange="0.0314087 0.0423628" /><muscle name="lh_LU_RB2" force="61.2" class="muscle" tendon="lh_LU_RB2_tendon" lengthrange="0.0898587 0.0998069" /><muscle name="lh_UI_UB2" force="61.2" class="muscle" tendon="lh_UI_UB2_tendon" lengthrange="0.0913261 0.105141" /><muscle name="lh_RI3" force="61.2" class="muscle" tendon="lh_RI3_tendon" lengthrange="0.0358365 0.0509725" /><muscle name="lh_LU_RB3" force="98" class="muscle" tendon="lh_LU_RB3_tendon" lengthrange="0.0827603 0.0988323" /><muscle name="lh_UI_UB3" force="98" class="muscle" tendon="lh_UI_UB3_tendon" lengthrange="0.0853434 0.0997261" /><muscle name="lh_RI4" force="97.0" class="muscle" tendon="lh_RI4_tendon" lengthrange="0.0435566 0.058459" /><muscle name="lh_LU_RB4" force="76.9" class="muscle" tendon="lh_LU_RB4_tendon" lengthrange="0.0797904 0.0909592" /><muscle name="lh_UI_UB4" force="76.9" class="muscle" tendon="lh_UI_UB4_tendon" lengthrange="0.0819919 0.0969029" /><muscle name="lh_RI5" force="59.9" class="muscle" tendon="lh_RI5_tendon" lengthrange="0.0425128 0.0462661" /><muscle name="lh_LU_RB5" force="47.9" class="muscle" tendon="lh_LU_RB5_tendon" lengthrange="0.0970142 0.100417" /><muscle name="lh_UI_UB5" force="47.9" class="muscle" tendon="lh_UI_UB5_tendon" lengthrange="0.0910226 0.0976845" /></actuator>
+</mujoco>

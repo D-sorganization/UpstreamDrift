@@ -31,13 +31,16 @@ from src.shared.python.neural_motion import (
     generate_neural_coverage_matrix,
     inspect_parquet_bounded,
 )
+from src.shared.python.motion_matching.surrogate.artifact_paths import (
+    DOCUMENTED_TEN_THOUSAND_FILES,
+)
 from src.shared.python.tour_baselines.registry import list_golf_models
 
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SWEEP_SYNTHETIC = REPO_ROOT / "data" / "sweep_synthetic"
-DOCUMENTED_10K = Path(r"C:\Users\diete\Repositories\data\TenThousandFiles.parquet")
+DOCUMENTED_10K = DOCUMENTED_TEN_THOUSAND_FILES
 
 
 def test_absent_ten_thousand_files_is_explicit_quarantine() -> None:

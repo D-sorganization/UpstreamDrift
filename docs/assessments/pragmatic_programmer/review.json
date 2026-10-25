@@ -9,11 +9,11 @@
       "title": "Duplicate code block",
       "description": "Found in 5 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\examples\\01_basic_simulation.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\migrate_api_keys.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\engines\\physics_engines\\mujoco\\python\\playground_experiments\\humanoid_cm_demo.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\engines\\physics_engines\\mujoco\\python\\playground_experiments\\mocapact_demo.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\tools\\matlab_utilities\\scripts\\matlab_quality_check.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\examples\\01_basic_simulation.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\migrate_api_keys.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\src\\engines\\physics_engines\\mujoco\\python\\playground_experiments\\humanoid_cm_demo.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\src\\engines\\physics_engines\\mujoco\\python\\playground_experiments\\mocapact_demo.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\src\\tools\\matlab_utilities\\scripts\\matlab_quality_check.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -23,9 +23,9 @@
       "title": "Duplicate code block",
       "description": "Found in 3 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\launch.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\migrate_csv_to_parquet.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\launch.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\migrate_csv_to_parquet.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -35,9 +35,9 @@
       "title": "Duplicate code block",
       "description": "Found in 3 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\launch.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\migrate_csv_to_parquet.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\launch.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\migrate_csv_to_parquet.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -47,9 +47,9 @@
       "title": "Duplicate code block",
       "description": "Found in 3 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\launchers\\assets\\optimize_assets.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\launch.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\src\\launchers\\assets\\optimize_assets.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\launch.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -59,8 +59,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\engines\\physics_engines\\pinocchio\\python\\motion_training\\training_pipeline.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\src\\engines\\physics_engines\\pinocchio\\python\\motion_training\\training_pipeline.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -70,8 +70,8 @@
       "title": "Duplicate code block",
       "description": "Found in 3 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\engines\\physics_engines\\pinocchio\\python\\motion_training\\training_pipeline.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\src\\engines\\physics_engines\\pinocchio\\python\\motion_training\\training_pipeline.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -81,7 +81,7 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -91,8 +91,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -102,8 +102,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -113,8 +113,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -124,8 +124,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -135,8 +135,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -146,8 +146,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -157,8 +157,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -168,8 +168,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -179,8 +179,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -190,8 +190,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -201,8 +201,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -212,8 +212,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -223,8 +223,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -234,8 +234,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -245,8 +245,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -256,8 +256,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -267,8 +267,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -278,8 +278,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -289,8 +289,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -300,8 +300,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -311,8 +311,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -322,8 +322,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -333,8 +333,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -344,8 +344,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -355,8 +355,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -366,8 +366,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -377,8 +377,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -388,8 +388,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -399,8 +399,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -410,8 +410,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -421,8 +421,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -432,8 +432,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -443,8 +443,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -454,8 +454,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -465,8 +465,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -476,8 +476,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -487,8 +487,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -498,8 +498,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -509,8 +509,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -520,8 +520,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -531,8 +531,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -542,8 +542,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -553,8 +553,8 @@
       "title": "Duplicate code block",
       "description": "Found in 2 locations",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -564,7 +564,7 @@
       "title": "God function: create_converter_left_content",
       "description": "Length 51 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\archive\\Data_Processor_Integrated.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\archive\\Data_Processor_Integrated.py"
       ],
       "recommendation": "Split function"
     },
@@ -574,7 +574,7 @@
       "title": "God function: calculate_grades",
       "description": "Length 55 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\generate_comprehensive_assessment.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\generate_comprehensive_assessment.py"
       ],
       "recommendation": "Split function"
     },
@@ -584,7 +584,7 @@
       "title": "God function: _create_body_params_tab",
       "description": "Length 54 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\urdf_builder_gui\\python\\urdf_builder_gui\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\urdf_builder_gui\\python\\urdf_builder_gui\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -594,7 +594,7 @@
       "title": "God function: _create_input_panel",
       "description": "Length 70 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\trc_vessel_designer\\python\\trc_vessel_designer\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\trc_vessel_designer\\python\\trc_vessel_designer\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -604,7 +604,7 @@
       "title": "God function: _create_input_panel",
       "description": "Length 51 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\steam_engine_calculator\\python\\steam_engine_calculator\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\steam_engine_calculator\\python\\steam_engine_calculator\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -614,7 +614,7 @@
       "title": "God function: _create_generation_tab",
       "description": "Length 54 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\shared\\python\\signal_toolkit\\widget_ui.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\shared\\python\\signal_toolkit\\widget_ui.py"
       ],
       "recommendation": "Split function"
     },
@@ -624,7 +624,7 @@
       "title": "God function: _create_calculus_tab",
       "description": "Length 57 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\shared\\python\\signal_toolkit\\widget_ui.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\shared\\python\\signal_toolkit\\widget_ui.py"
       ],
       "recommendation": "Split function"
     },
@@ -634,7 +634,7 @@
       "title": "God function: create_input_tab",
       "description": "Length 58 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\shared\\python\\upstream_drift_tools\\process_calculators\\wgs_reactor_calculator.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\shared\\python\\upstream_drift_tools\\process_calculators\\wgs_reactor_calculator.py"
       ],
       "recommendation": "Split function"
     },
@@ -644,7 +644,7 @@
       "title": "God function: _setup_ui",
       "description": "Length 54 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\shared\\python\\upstream_drift_tools\\process_calculators\\psa_package\\psa_gui.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\shared\\python\\upstream_drift_tools\\process_calculators\\psa_package\\psa_gui.py"
       ],
       "recommendation": "Split function"
     },
@@ -654,7 +654,7 @@
       "title": "God function: _setup_ui",
       "description": "Length 55 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\shared\\python\\theme\\dialogs\\theme_manager_dialog.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\shared\\python\\theme\\dialogs\\theme_manager_dialog.py"
       ],
       "recommendation": "Split function"
     },
@@ -664,7 +664,7 @@
       "title": "God function: _create_acid_gas_group",
       "description": "Length 65 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\scrubber_calculator\\python\\scrubber_calculator\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\scrubber_calculator\\python\\scrubber_calculator\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -674,7 +674,7 @@
       "title": "God function: _build_ui",
       "description": "Length 51 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\rotation_converter\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\rotation_converter\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -684,7 +684,7 @@
       "title": "God function: _create_adam_settings_tab",
       "description": "Length 65 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\optimizer_gui\\python\\optimizer_gui\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\optimizer_gui\\python\\optimizer_gui\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -694,7 +694,7 @@
       "title": "God function: _create_parameters_tab",
       "description": "Length 66 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\multi_param_analysis\\python\\multi_param_analysis\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\multi_param_analysis\\python\\multi_param_analysis\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -704,7 +704,7 @@
       "title": "God function: _create_manual_tab",
       "description": "Length 59 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\inertia_calculator\\python\\inertia_calculator\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\inertia_calculator\\python\\inertia_calculator\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -714,7 +714,7 @@
       "title": "God function: _create_body_params_tab",
       "description": "Length 72 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\humanoid_builder_gui\\python\\humanoid_builder_gui\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\humanoid_builder_gui\\python\\humanoid_builder_gui\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -724,7 +724,7 @@
       "title": "God function: _init_ui",
       "description": "Length 65 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\function_generator\\python\\function_generator\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\function_generator\\python\\function_generator\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -734,7 +734,7 @@
       "title": "God function: _create_parameter_widgets",
       "description": "Length 74 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\function_generator\\python\\function_generator\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\function_generator\\python\\function_generator\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -744,7 +744,7 @@
       "title": "God function: create_api_tab",
       "description": "Length 56 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\document_processing\\pdf_renamer\\src\\pdf_renamer\\gui.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\document_processing\\pdf_renamer\\src\\pdf_renamer\\gui.py"
       ],
       "recommendation": "Split function"
     },
@@ -754,7 +754,7 @@
       "title": "God function: _create_menu_bar",
       "description": "Length 54 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\data_processing\\data_processor\\python\\data_processor\\ui\\pyqt6\\main_window.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\data_processing\\data_processor\\python\\data_processor\\ui\\pyqt6\\main_window.py"
       ],
       "recommendation": "Split function"
     },
@@ -764,7 +764,7 @@
       "title": "God function: _create_advanced_tab",
       "description": "Length 67 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\data_processing\\data_processor\\python\\data_processor\\ui\\pyqt6\\main_window_tabs.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\data_processing\\data_processor\\python\\data_processor\\ui\\pyqt6\\main_window_tabs.py"
       ],
       "recommendation": "Split function"
     },
@@ -774,7 +774,7 @@
       "title": "God function: _create_plot_config_tab",
       "description": "Length 64 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\data_processing\\data_processor\\python\\data_processor\\ui\\pyqt6\\main_window_tabs.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\data_processing\\data_processor\\python\\data_processor\\ui\\pyqt6\\main_window_tabs.py"
       ],
       "recommendation": "Split function"
     },
@@ -784,7 +784,7 @@
       "title": "God function: _setup_ui",
       "description": "Length 54 > 50 lines",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\data_processing\\data_processor\\python\\data_processor\\ui\\pyqt6\\statistical_widgets.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\data_processing\\data_processor\\python\\data_processor\\ui\\pyqt6\\statistical_widgets.py"
       ],
       "recommendation": "Split function"
     },
@@ -794,7 +794,7 @@
       "title": "Hardcoded API Key",
       "description": "Secrets in code",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\tests\\unit\\api\\test_security.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\tests\\unit\\api\\test_security.py"
       ],
       "recommendation": "Use env vars"
     },
@@ -804,7 +804,7 @@
       "title": "Hardcoded API Key",
       "description": "Secrets in code",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\shared\\python\\ai\\adapters\\anthropic_adapter.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\src\\shared\\python\\ai\\adapters\\anthropic_adapter.py"
       ],
       "recommendation": "Use env vars"
     },
@@ -814,7 +814,7 @@
       "title": "Hardcoded API Key",
       "description": "Secrets in code",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\shared\\python\\ai\\adapters\\openai_adapter.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\src\\shared\\python\\ai\\adapters\\openai_adapter.py"
       ],
       "recommendation": "Use env vars"
     },
@@ -824,11 +824,11 @@
       "title": "High TODO count (16)",
       "description": "Accumulated technical debt",
       "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\generate_todo_fixme_register.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\pragmatic_programmer_review.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\refresh_completist_data.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\scan_for_incomplete_code.py"
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\generate_todo_fixme_register.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\pragmatic_programmer_review.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\refresh_completist_data.py",
+        "<owner-home>\\Repositories\\UpstreamDrift\\scripts\\scan_for_incomplete_code.py"
       ],
       "recommendation": "Review TODOs"
     }

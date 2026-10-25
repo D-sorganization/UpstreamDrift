@@ -30,7 +30,7 @@
                 <site name="RFAradius" pos="0.0005 -0.225 0.05"/>
                 <site name="RFAulna" pos="-0.022 -0.225 -0.022"/>
                 <body name="hand_r" pos="-0.008797 -0.235841 0.01361">
-                    <site name="grip_site_hand_r" pos="0 -0.05 0" size="0.005"/>
+                    <site name="grip_site_hand_r" pos="0.25 -0.0119 -0.200098" size="0.005"/>
                     <joint axis="0 0 1" name="wrist_flex_r" pos="0 0 0" range="-1.22173 1.22173"/>
                     <joint axis="1 0 0" name="wrist_dev_r" pos="0 0 0" range="-0.436332 0.610865"/>
                     <geom type="ellipsoid" size=".015 .07 .03" pos="0 -.06 0"/>

@@ -253,6 +253,11 @@ ELBOW_PIT_MARKERS: dict[str, tuple[str, str, str]] = {
 ELBOW_PIT_WEIGHT: float = 0.02
 ELBOW_PIT_WEIGHT_SWING: float = 0.01
 ADDRESS_BALANCE_WEIGHT: float = 3.0
+#: Weakly pull the spec club-body sole (origin) to the ground plane at address
+#: (#12969). Weight is in the same units as ``ground_weight`` (metres).
+ADDRESS_CLUB_SOLE_WEIGHT: float = 1.0e3
+#: Acceptance band for sole height above the calibrated ground plane (metres).
+CLUB_SOLE_GROUND_TOLERANCE_M: float = 0.01
 ELBOW_PIT_WEIGHTS_NEUTRAL: tuple[float, ...] = (0.02,)
 
 CALIBRATION_ITERATIONS: int = 3
@@ -260,6 +265,11 @@ CALIBRATION_PRIOR_FRAMES: float = 40.0
 SCALE_GRID: tuple[float, ...] = (0.94, 0.97, 1.00)
 
 DT_S: float = 1e-3
+#: Replay step of a chain-shaft spec (#12686). The chain's stiff link modes
+#: leave the explicit integrator's stability region at ``DT_S`` (the canonical
+#: driver replay went non-finite); 0.125 ms is the substep the chain was
+#: qualified at (``same_input.bundle.FINE_EFFORT_HOLD_DT_S``).
+CHAIN_DT_S: float = 1.25e-4
 OMEGA_RAD_S: float = 30.0
 BALANCE: tuple[float, float] = (60.0, 15.0)
 RATE_HZ: float = 360.0

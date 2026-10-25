@@ -315,7 +315,7 @@ def test_reset_layout_to_defaults_not_exists(launcher) -> None:
         patch("src.launchers.launcher_dialogs.Path.exists", return_value=False),
         patch(
             "src.launchers.launcher_dialogs.Path.home",
-            return_value=Path("C:/Users/test"),
+            return_value=Path("<owner-home>"),
         ),
     ):
         launcher._initialize_model_order = MagicMock()

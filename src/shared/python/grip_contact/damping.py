@@ -31,10 +31,14 @@ from dataclasses import replace
 from typing import Any
 
 import numpy as np
-from scipy.linalg import eigh
-from scipy.optimize import nnls
 
 from src.shared.python.grip_contact.club_dynamics import ClubDynamics
+from src.shared.python.grip_contact.deterministic_linalg import (
+    det_eigh_generalized,
+    det_matmul,
+    det_nnls,
+    det_quad_form,
+)
 from src.shared.python.grip_contact.parameters import BushingParameters
 
 DEFAULT_DAMPING_RATIO = 0.7
@@ -56,9 +60,9 @@ def _blocks(
         a = np.eye(6)
         a[:3, 3:] = -_skew(np.asarray(frame.position_m, dtype=float) - com)
         local = np.zeros((6, 6))
-        local[:3, :3] = rot @ np.diag(params_t) @ rot.T
-        local[3:, 3:] = rot @ np.diag(params_r) @ rot.T
-        total += a.T @ local @ a
+        local[:3, :3] = det_matmul(det_matmul(rot, np.diag(params_t)), rot.T)
+        local[3:, 3:] = det_matmul(det_matmul(rot, np.diag(params_r)), rot.T)
+        total += det_matmul(det_matmul(a.T, local), a)
     return total
 
 
@@ -82,9 +86,11 @@ def assemble_matrices(
 def modal_damping(interface: Any, club: ClubDynamics) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(frequencies_hz, damping_ratios)`` of the six club modes."""
     mass, k, c = assemble_matrices(interface, club)
-    w2, vec = eigh(k, mass)
+    w2, vec = det_eigh_generalized(k, mass)
     omega = np.sqrt(w2)
-    ratios = np.array([vec[:, j] @ c @ vec[:, j] / (2.0 * omega[j]) for j in range(6)])
+    ratios = np.array(
+        [det_quad_form(vec[:, j], c) / (2.0 * omega[j]) for j in range(6)]
+    )
     return omega / (2.0 * math.pi), ratios
 
 
@@ -107,7 +113,7 @@ def design_damping(
         )
     probe = _Probe(left, right, bushing)
     mass, k, _ = assemble_matrices(probe, club)
-    w2, vec = eigh(k, mass)
+    w2, vec = det_eigh_generalized(k, mass)
     omega = np.sqrt(w2)
     com = np.asarray(club.com_m, dtype=float)
     gain = np.zeros((6, 6))
@@ -116,8 +122,8 @@ def design_damping(
         unit[axis] = 1.0
         c_axis = _blocks(unit[:3].tolist(), unit[3:].tolist(), (left, right), com)
         for mode in range(6):
-            gain[mode, axis] = vec[:, mode] @ c_axis @ vec[:, mode] / (2 * omega[mode])
-    coeff, residual = nnls(gain, damping_ratio * np.ones(6))
+            gain[mode, axis] = det_quad_form(vec[:, mode], c_axis) / (2 * omega[mode])
+    coeff, residual = det_nnls(gain, damping_ratio * np.ones(6))
     if residual > 1e-6 * damping_ratio:
         raise ValueError("no non-negative damping realises the requested ratio")
     return replace(

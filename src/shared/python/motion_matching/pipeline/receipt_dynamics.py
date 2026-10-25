@@ -407,6 +407,24 @@ class FdPhaseReceipt(BaseModel):
         description="Capture frames after impact",
         json_schema_extra={"unit": "count", "stage": "dynamics"},
     )
+    post_impact_window_s: float | None = Field(
+        None,
+        gt=0,
+        description="Fixed after-impact window of the bounded FD metric (#13112)",
+        json_schema_extra={"unit": "s", "stage": "dynamics"},
+    )
+    fd_rms_post_impact_window_m: float | None = Field(
+        None,
+        ge=0,
+        description="FD marker RMS over the fixed window after impact (#13112)",
+        json_schema_extra={"unit": "m", "stage": "dynamics"},
+    )
+    post_impact_window_frames: int | None = Field(
+        None,
+        ge=0,
+        description="Capture frames in the fixed after-impact window",
+        json_schema_extra={"unit": "count", "stage": "dynamics"},
+    )
     clubhead_speed: ClubheadSpeedReceipt | None = Field(
         None,
         description="Face-centre clubhead speed of simulation, reference and capture",
@@ -451,6 +469,22 @@ class ZmpFilterPass(BaseModel):
         None,
         description="Maximum center-of-mass shift applied",
         json_schema_extra={"unit": "m", "stage": "dynamics"},
+    )
+    com_shift_unbounded_max_m: float | None = Field(
+        None,
+        description="Largest cart-table shift before the base-of-support bound (#13112)",
+        json_schema_extra={"unit": "m", "stage": "dynamics"},
+    )
+    com_shift_bound_min_m: float | None = Field(
+        None,
+        description="Smallest per-frame shift bound: narrowest base-of-support width (#13112)",
+        json_schema_extra={"unit": "m", "stage": "dynamics"},
+    )
+    com_shift_clipped_frames: int | None = Field(
+        None,
+        ge=0,
+        description="Frames whose shift the base-of-support bound clipped (#13112)",
+        json_schema_extra={"unit": "count", "stage": "dynamics"},
     )
     marker_rms_m: float | None = Field(
         None,
@@ -633,6 +667,11 @@ class DynamicsReceipt(BaseModel):
     finish_feasibility: FinishFeasibilityReceipt | None = Field(
         None,
         description="Finish-window feasibility metrics of reference and simulation",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
+    )
+    replay_sensitivity: dict[str, Any] | None = Field(
+        None,
+        description="Divergence of a 1e-6 perturbed replay, split at impact (#13112)",
         json_schema_extra={"unit": "compound", "stage": "dynamics"},
     )
     zmp_filter: ZmpFilterReport | None = Field(

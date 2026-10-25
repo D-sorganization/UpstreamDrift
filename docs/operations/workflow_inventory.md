@@ -97,7 +97,6 @@ Triggers abbreviations: `PR` = `pull_request`, `P` = `push`,
 | `Bot-CI-Trigger.yml`             | Bot CI Trigger                    | PR, S, WD   | Re-runs failed CI on bot PRs.                            |
 | `Code-Metrics.yml`               | Code Metrics                      | WD          | Emits LOC / complexity metrics.                          |
 | `Comment-to-Issue-Converter.yml` | Convert Review Comments to Issues | PR, RVC, WD | Converts actionable review comments into issues.         |
-| `PR-Comment-Responder.yml`       | PR Comment Collector              | IC, RVC     | Aggregates PR comments for downstream bots.              |
 | `Maintenance-Global-Control.yml` | Maintenance Global Control        | WD          | Global kill-switch for maintenance workflows.            |
 | `Manual-Run-All.yml`             | Manual Run All Workflows          | WD          | Operator-triggered fanout for recovery scenarios.        |
 | `Nightly-Doc-Organizer.yml`      | Nightly Documentation Organizer   | WD          | Tidies docs tree on a nightly (currently WD-only) basis. |

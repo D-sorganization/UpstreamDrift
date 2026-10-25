@@ -1304,6 +1304,28 @@ def _apply_unit_gate_quarantine(items: list[pytest.Item]) -> None:
             item.add_marker(marker)
 
 
+def _apply_quarantine_marker(items: list[pytest.Item]) -> None:
+    """In PR fast tier, skip tests marked @pytest.mark.quarantine.
+
+    Per RM-CI-030 / UD-CI-030 Quarantine Semantics:
+    PR fast tier skips quarantined tests (reported as skipped, not pass).
+    In merge_group, quarantined tests are executed.
+    """
+    if os.environ.get("GITHUB_EVENT_NAME") == "merge_group":
+        return
+    for item in items:
+        marker = item.get_closest_marker("quarantine")
+        if marker is not None:
+            issue = marker.kwargs.get("issue", "unspecified")
+            owner = marker.kwargs.get("owner", "unspecified")
+            expires = marker.kwargs.get("expires", "unspecified")
+            item.add_marker(
+                pytest.mark.skip(
+                    reason=f"quarantined (issue={issue}, owner={owner}, expires={expires})"
+                )
+            )
+
+
 def pytest_collection_modifyitems(
     config: pytest.Config, items: list[pytest.Item]
 ) -> None:
@@ -1315,6 +1337,7 @@ def pytest_collection_modifyitems(
     """
     _skip_fake_pyqt6_gui_items(items)
     _apply_unit_gate_quarantine(items)
+    _apply_quarantine_marker(items)
 
     unmarked = find_unmarked(items)  # type: ignore[arg-type]
     config._ud_unmarked_suite_count = len(unmarked)  # type: ignore[attr-defined]

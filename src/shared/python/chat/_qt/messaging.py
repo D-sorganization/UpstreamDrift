@@ -15,14 +15,21 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from PyQt6 import sip
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QApplication, QFileDialog
+
+from shared.python.ui.owned_timer import restart_owned_single_shot
 
 from . import exports as _exports
 from . import sessions as _sessions
 from .bubbles import ChatMessageBubble
 
 logger = logging.getLogger(__name__)
+
+# Lets the layout settle before scrolling to the newest bubble.
+_SCROLL_DEFER_MS = 10
+_SCROLL_TIMER_NAME = "chat-scroll-to-bottom"
 
 
 class MessagingMixin:
@@ -158,14 +165,31 @@ class MessagingMixin:
                 self._add_bubble(role, content)
 
     def _scroll_to_bottom(self) -> None:
-        QTimer.singleShot(
-            10,
-            lambda: (
+        scroll_area = self._scroll_area
+
+        def scroll_now() -> None:
+            scrollbar = scroll_area.verticalScrollBar()
+            if scrollbar is not None:
                 scrollbar.setValue(scrollbar.maximum())
-                if (scrollbar := self._scroll_area.verticalScrollBar()) is not None
-                else None
-            ),
+
+        # Scroll-area-owned so a deferred scroll never touches a deleted
+        # dock (Tools #5667). One named timer is restarted per request, so
+        # loading a long history queues a single scroll, not one per bubble.
+        restart_owned_single_shot(
+            scroll_area, _SCROLL_DEFER_MS, scroll_now, name=_SCROLL_TIMER_NAME
         )
+
+    def _stop_scroll_timer(self) -> None:
+        """Cancel a pending deferred scroll (called when the dock closes).
+
+        A closing dock must not run Qt layout work from a timer that fires
+        mid-teardown (Tools #5672). Safe if the scroll area is already gone.
+        """
+        scroll_area = getattr(self, "_scroll_area", None)
+        if scroll_area is None or sip.isdeleted(scroll_area):
+            return
+        for timer in scroll_area.findChildren(QTimer, _SCROLL_TIMER_NAME):
+            timer.stop()
 
     # ── Export / condense (Tools issues #2735, #2736) ───────────────
 

@@ -1,0 +1,6 @@
+{
+  "repositoryDependencies": [
+    "github.com/D-sorganization/Repository_Management"
+  ],
+  "install": "set -euo pipefail\nexport FLEET_RM_ROOT=\"${FLEET_RM_ROOT:-$HOME/Repository_Management}\"\nif [ ! -f \"$FLEET_RM_ROOT/scripts/cursor/bootstrap.sh\" ]; then\n  git clone --depth 1 https://github.com/D-sorganization/Repository_Management.git \"$FLEET_RM_ROOT\"\nfi\nbash \"$FLEET_RM_ROOT/scripts/cursor/bootstrap.sh\""
+}

@@ -35,12 +35,12 @@ current issue state or physical completion.
 | DV-9619  | [EPIC] Self-calibrating markerless mocap: learn camera placement and skeleton from observed swings, with strict outlier rejection | parked | Awaiting verified prerequisites | 2026-09-23  |
 | DV-9613  | Rig soak: three-camera sessions intermittently fail to open cameras (dshow I/O error) and a camera re-enumerates mid-series       | parked | Awaiting verified prerequisites | 2026-09-23  |
 | DV-9546  | Epic: Deliver and Qualify the Impact Zone and Impact Explorer Product                                                             | parked | Awaiting verified prerequisites | 2026-09-23  |
-| DV-11984 | Empirical Qualification of Contact and Delivery Covariance                                                                       | parked | Awaiting verified prerequisites | 2026-10-19  |
-| DV-11542 | MOSAIC-10: Multi-Swing Acquisition and Registration Across Real Golfer Trials                                                    | parked | Awaiting verified prerequisites | 2026-10-19  |
+| DV-11984 | Empirical Qualification of Contact and Delivery Covariance                                                                        | parked | Awaiting verified prerequisites | 2026-10-19  |
+| DV-11542 | MOSAIC-10: Multi-Swing Acquisition and Registration Across Real Golfer Trials                                                     | parked | Awaiting verified prerequisites | 2026-10-19  |
 | DV-12554 | NSX-05: External Validation Protocol for Closed-Loop Null-Space Exploration (Instrumented Grip, Surface EMG, and Held-Out Swings) | parked | Awaiting verified prerequisites | 2026-10-19  |
 | DV-12583 | NSX-55: Golf-Model Simscape Closed-Loop Export in MATLAB R2025b                                                                   | parked | Awaiting verified prerequisites | 2026-10-19  |
 | DV-12718 | NSX-89: Simscape Per-Frame Linearization Export in MATLAB R2025b                                                                  | parked | Awaiting verified prerequisites | 2026-10-19  |
-| DV-13061 | Open-FP Force Plate Hardware Qualification for Measured Vertical GRF                                                              | parked | Awaiting DV-13082                | 2026-10-19  |
+| DV-13061 | Open-FP Force Plate Hardware Qualification for Measured Vertical GRF                                                              | parked | Awaiting DV-13082               | 2026-10-19  |
 | DV-13082 | Qualified Open-FP Device Record for Measured Vertical Ground Reaction                                                             | parked | Awaiting verified prerequisites | 2026-10-19  |
 
 ## Blockers

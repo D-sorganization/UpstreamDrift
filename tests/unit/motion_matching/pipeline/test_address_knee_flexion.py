@@ -423,6 +423,7 @@ def test_off_mode_address_solve_is_unchanged(monkeypatch: pytest.MonkeyPatch) ->
     lane = SimpleNamespace(
         bounds={"knee_angle_r": (-2.0, 0.17)},
         anthropometric=False,
+        labels=(),  # Lane contract (#12969): no club markers, club sole off
         points=np.zeros((1, 1, 3)),
         valid=np.ones((1, 1), bool),
         ground=None,
@@ -501,3 +502,125 @@ def test_cli_knee_flexion_option_defaults_to_the_canonical_mode() -> None:
     assert tuple(action.choices) == MODES
     # a programmatic Namespace without the attribute keeps the legacy path
     assert address_knee.requested_mode(argparse.Namespace()) == "off"
+
+
+# ------------------------------------------- through dynamics (acceptance 4)
+
+
+def _knee_track(kin, q, flexions: dict[str, list[float]]) -> np.ndarray:
+    """Trajectory of ``q`` whose knees take the per-frame geometric flexions."""
+    names = list(kin.coordinate_order)
+    frames = len(flexions["right"])
+    track = np.repeat(np.asarray(q, dtype=float)[None, :], frames, axis=0)
+    for side in _SIDES:
+        col = names.index(f"knee_angle_{side[0]}")
+        for i, deg in enumerate(flexions[side]):
+            track[i, col] = address_knee.knee_coordinate_for_flexion(kin, q, side, deg)
+    return track
+
+
+def _window_inputs():
+    from src.shared.python.motion_matching.pipeline.lane import document_seed
+
+    document, kin = _spec_kin()
+    q = document_seed(document, kin)
+    targets = KneeTargets(
+        {"left": 28.6, "right": 26.2}, {"left": "capture", "right": "capture"}
+    )
+    ik = _knee_track(kin, q, {"right": [26.2] * 4, "left": [28.6] * 4})
+    return kin, q, targets, ik
+
+
+def test_window_report_compares_fd_frame0_with_the_ik_reference() -> None:
+    kin, _q, targets, ik = _window_inputs()
+    block = address_knee.knee_flexion_window_report(
+        kin, ik, ik.copy(), targets, np.arange(4)
+    )
+    assert block["enabled"] is True
+    assert block["band_deg"] == KNEE_FLEX_BAND_DEG
+    assert block["window_frames"] == 4
+    for side, target in (("right", 26.2), ("left", 28.6)):
+        knee = block["knees"][side]
+        assert knee["target_deg"] == target
+        assert knee["target_source"] == "capture"
+        assert knee["ik_frame0_deg"] == pytest.approx(target, abs=0.05)
+        assert knee["fd_minus_ik_frame0_deg"] == pytest.approx(0.0, abs=1e-9)
+        for stage in ("ik", "fd"):
+            assert knee[stage]["within_band"] is True
+            assert knee[stage]["hyperextended"] is False
+            assert knee[stage]["max_abs_error_deg"] == pytest.approx(0.0, abs=0.05)
+    assert block["knees"]["right"]["role"] == "trail"
+
+
+def test_window_report_flags_fd_drift_out_of_the_band() -> None:
+    kin, q, targets, ik = _window_inputs()
+    fd = _knee_track(kin, q, {"right": [27.0, 29.0, 33.5, 34.0], "left": [28.6] * 4})
+    block = address_knee.knee_flexion_window_report(kin, ik, fd, targets, np.arange(4))
+    right = block["knees"]["right"]
+    assert right["fd_frame0_deg"] == pytest.approx(27.0, abs=0.05)
+    assert right["fd_minus_ik_frame0_deg"] == pytest.approx(0.8, abs=0.1)
+    assert right["fd"]["max_deg"] == pytest.approx(34.0, abs=0.05)
+    assert right["fd"]["max_abs_error_deg"] == pytest.approx(7.8, abs=0.1)
+    assert right["fd"]["within_band"] is False
+    assert right["ik"]["within_band"] is True
+    assert block["knees"]["left"]["fd"]["within_band"] is True
+
+
+def test_window_report_ignores_frames_after_the_address_window() -> None:
+    kin, q, targets, _ik = _window_inputs()
+    fd = _knee_track(kin, q, {"right": [26.2, 26.2, 60.0], "left": [28.6] * 3})
+    block = address_knee.knee_flexion_window_report(kin, fd, fd, targets, np.arange(2))
+    assert block["window_frames"] == 2
+    assert block["knees"]["right"]["fd"]["within_band"] is True
+
+
+def test_window_report_flags_a_hyperextended_fd_knee() -> None:
+    kin, _q, targets, ik = _window_inputs()
+    fd = ik.copy()
+    col = list(kin.coordinate_order).index("knee_angle_r")
+    fd[2, col] = np.radians(5.0)  # the flexion side is negative on this model
+    block = address_knee.knee_flexion_window_report(kin, ik, fd, targets, np.arange(4))
+    assert block["knees"]["right"]["fd"]["hyperextended"] is True
+    assert block["knees"]["right"]["fd"]["within_band"] is False
+    assert block["knees"]["right"]["ik"]["hyperextended"] is False
+
+
+def test_window_report_preconditions() -> None:
+    kin, _q, targets, ik = _window_inputs()
+    assert address_knee.knee_flexion_window_report(kin, ik, ik, None, np.arange(4)) == {
+        "enabled": False
+    }
+    with pytest.raises(ValueError, match="shape"):
+        address_knee.knee_flexion_window_report(kin, ik, ik[:3], targets, np.arange(3))
+    for window in (np.arange(0), np.arange(5), np.array([-1, 0])):
+        with pytest.raises(ValueError, match="window"):
+            address_knee.knee_flexion_window_report(kin, ik, ik, targets, window)
+
+
+def test_dynamics_report_carries_the_window_block_only_with_knee_targets() -> None:
+    from types import SimpleNamespace as NS
+
+    from src.shared.python.motion_matching.pipeline.dynamics import (
+        knee_flexion_dynamics_block,
+    )
+
+    kin, _q, targets, ik = _window_inputs()
+    ik = np.concatenate([ik, ik])  # the static window needs MIN_WINDOW_FRAMES
+    frames = ik.shape[0]
+    labels = ("LWristTop", "RWristTop")
+    lane = NS(
+        knees=None,
+        points=np.zeros((frames, 2, 3)),
+        valid=np.ones((frames, 2), dtype=bool),
+        labels=labels,
+    )
+    assert knee_flexion_dynamics_block(lane, kin, ik, ik) is None
+    lane.knees = targets
+    block = knee_flexion_dynamics_block(lane, kin, ik, ik)
+    assert block is not None and block["enabled"] is True
+    assert block["window_frames"] == frames
+    # A capture without a static window is reported, never silently passed.
+    lane.points = lane.points[:3]
+    lane.valid = lane.valid[:3]
+    short = knee_flexion_dynamics_block(lane, kin, ik[:3], ik[:3])
+    assert short is not None and short["status"].startswith("unavailable")

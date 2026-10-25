@@ -21,31 +21,31 @@ The tile is named "Motion-Match Preview" but it launches the
 
 ## Inputs
 
-| Input | Unit / type | Notes |
-| --- | --- | --- |
-| Club source | `.xlsx`, `.mat` or `.c3d` | Toggleable between *Club only* and *Club + ball*. The bundled `Wiffle_ProV1_club_3D_data.xlsx` holds positions in **centimetres**, despite its own "Definitions" tab claiming inches. |
-| Body-markers source | `.c3d` | With a marker-set combo: `Anatomical 28` (default), `Lower body only`, `Upper body only`, `All markers`. |
-| Skeleton definition | `simscape_skeleton_<pose>.json` | Exported once from MATLAB by `export_default_skeleton.m` for Address / Top of Backswing / Impact. When absent, a fallback skeleton is derived by forward kinematics from the canonical reference-golfer pose. |
-| Forward-dynamics trajectory | `.csv` (optional) | Either the short-form `<joint>_X/Y/Z` schema or the long-form `<Joint>Logs_...GlobalPosition_1/2/3` raw-bus schema. |
-| Sample rate | Hz, integer, range 50-10000, default 1000, step 100 | Shared `AlignOptions` row. |
-| Duration | seconds, range 0.05-5.0, default 0.300, 3 decimal places, step 0.05 | Shared `AlignOptions` row. |
-| Time alignment | `impact` (default) or `address` | Radio pair. Decides which instant the sources are pinned to. |
-| Tx / Ty / Tz | **metres**, range -1.500 to +1.500, step 0.001 | Translation sliders. |
-| Rx / Ry / Rz | **degrees**, range -180.0 to +180.0, step 0.1 | Rotation sliders. Applied as `Rz @ Ry @ Rx`. |
-| Scale | dimensionless multiplier, range 0.50 to 2.00, step 0.01, default 1.00 | Uniform scale about the pivot. |
-| Frame | integer frame index | Scrubber plus spinbox. |
-| Playback frame rate | Hz (frames per second), range 1-240 | Playback spinbox, labelled `fps`. |
-| Playback speed multiplier | dimensionless | One of 0.1, 0.25, 0.5, 1.0, 2.0, 4.0. |
-| Trail length | frames, range 0-600, default 30 | Show-trail layer. |
+| Input                       | Unit / type                                                           | Notes                                                                                                                                                                                                         |
+| --------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Club source                 | `.xlsx`, `.mat` or `.c3d`                                             | Toggleable between _Club only_ and _Club + ball_. The bundled `Wiffle_ProV1_club_3D_data.xlsx` holds positions in **centimetres**, despite its own "Definitions" tab claiming inches.                         |
+| Body-markers source         | `.c3d`                                                                | With a marker-set combo: `Anatomical 28` (default), `Lower body only`, `Upper body only`, `All markers`.                                                                                                      |
+| Skeleton definition         | `simscape_skeleton_<pose>.json`                                       | Exported once from MATLAB by `export_default_skeleton.m` for Address / Top of Backswing / Impact. When absent, a fallback skeleton is derived by forward kinematics from the canonical reference-golfer pose. |
+| Forward-dynamics trajectory | `.csv` (optional)                                                     | Either the short-form `<joint>_X/Y/Z` schema or the long-form `<Joint>Logs_...GlobalPosition_1/2/3` raw-bus schema.                                                                                           |
+| Sample rate                 | Hz, integer, range 50-10000, default 1000, step 100                   | Shared `AlignOptions` row.                                                                                                                                                                                    |
+| Duration                    | seconds, range 0.05-5.0, default 0.300, 3 decimal places, step 0.05   | Shared `AlignOptions` row.                                                                                                                                                                                    |
+| Time alignment              | `impact` (default) or `address`                                       | Radio pair. Decides which instant the sources are pinned to.                                                                                                                                                  |
+| Tx / Ty / Tz                | **metres**, range -1.500 to +1.500, step 0.001                        | Translation sliders.                                                                                                                                                                                          |
+| Rx / Ry / Rz                | **degrees**, range -180.0 to +180.0, step 0.1                         | Rotation sliders. Applied as `Rz @ Ry @ Rx`.                                                                                                                                                                  |
+| Scale                       | dimensionless multiplier, range 0.50 to 2.00, step 0.01, default 1.00 | Uniform scale about the pivot.                                                                                                                                                                                |
+| Frame                       | integer frame index                                                   | Scrubber plus spinbox.                                                                                                                                                                                        |
+| Playback frame rate         | Hz (frames per second), range 1-240                                   | Playback spinbox, labelled `fps`.                                                                                                                                                                             |
+| Playback speed multiplier   | dimensionless                                                         | One of 0.1, 0.25, 0.5, 1.0, 2.0, 4.0.                                                                                                                                                                         |
+| Trail length                | frames, range 0-600, default 30                                       | Show-trail layer.                                                                                                                                                                                             |
 
 ## Outputs
 
-| Output | Unit / type | Notes |
-| --- | --- | --- |
-| `starting_pose_offsets.json` | 7 degrees of freedom: Tx/Ty/Tz in metres, Rx/Ry/Rz in degrees, Scale dimensionless | The deliverable. Consumed by `solve_starting_pose.m`, `fit_swing_full_pipeline.m` and `simulate_with_coefficients.m` through `opts.stage2_opts.sim.input_overrides`. |
-| `<sheet>_<timestamp>.session.json` | JSON | Full UI snapshot, so an alignment session can be resumed. |
-| On-screen 3D view | metres | Mocap markers, model skeleton, or both, with optional traces and auto-fitted axes. |
-| `MultiSourceTarget` (in-process) | dataclass | Emitted by the data-sources panel whenever a slot changes, or `None` when no slot is loaded. |
+| Output                             | Unit / type                                                                        | Notes                                                                                                                                                                |
+| ---------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `starting_pose_offsets.json`       | 7 degrees of freedom: Tx/Ty/Tz in metres, Rx/Ry/Rz in degrees, Scale dimensionless | The deliverable. Consumed by `solve_starting_pose.m`, `fit_swing_full_pipeline.m` and `simulate_with_coefficients.m` through `opts.stage2_opts.sim.input_overrides`. |
+| `<sheet>_<timestamp>.session.json` | JSON                                                                               | Full UI snapshot, so an alignment session can be resumed.                                                                                                            |
+| On-screen 3D view                  | metres                                                                             | Mocap markers, model skeleton, or both, with optional traces and auto-fitted axes.                                                                                   |
+| `MultiSourceTarget` (in-process)   | dataclass                                                                          | Emitted by the data-sources panel whenever a slot changes, or `None` when no slot is loaded.                                                                         |
 
 ## Method
 
@@ -95,6 +95,7 @@ notes and issue history are in its
   refinements (#4486).
 
 ## See Also
+
 - [Starting-Pose Matcher README](../../src/tools/starting_pose_matcher/README.md)
 - [Motion matching](../motion_matching/README.md)
 - [Surrogate training guide](../motion_matching/SURROGATE_TRAINING_GUIDE.md)

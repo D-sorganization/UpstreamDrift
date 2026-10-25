@@ -1,0 +1,9 @@
+{
+  "patterns": [
+    {
+      "id": "windows_user_home",
+      "description": "Windows per-user profile root (any username segment).",
+      "regex": "C:\\\\Users\\\\[^\\\\\\s\"'<>]+"
+    }
+  ]
+}

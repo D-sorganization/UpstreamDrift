@@ -36,8 +36,8 @@ concurrency:
   # cancelling each other (main was never verified: every run was cancelled by
   # the next push). PR/branch refs keep the per-ref group so superseded pushes
   # still cancel. RM #1507 / #9409.
-  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -125,6 +125,9 @@ jobs:
       - name: Run workflow inventory guard
         shell: bash
         run: python3 scripts/check_workflow_inventory.py
+      - name: Enforce Jules push/PR noise retirement contract
+        shell: bash
+        run: python3 scripts/ci/jules_push_pr_noise_retirement.py --check
 
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
@@ -226,6 +229,7 @@ jobs:
       code: ${{ steps.detect.outputs.code }}
       docs: ${{ steps.detect.outputs.docs }}
       publication: ${{ steps.detect.outputs.publication }}
+      tier: ${{ steps.tier.outputs.tier }}
     steps:
       - name: Enable long Git paths
         run: git config --global core.longpaths true
@@ -244,17 +248,29 @@ jobs:
           set -euo pipefail
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
 
-          # Only pull_request runs can be narrowed; push, schedule and
-          # workflow_dispatch always exercise the full suite.
+          # Only pull_request diffs narrow path-specific gates. Event tiers
+          # separately select fast PR/push or full queue/scheduled execution.
           if [ "$EVENT_NAME" != "pull_request" ]; then
             echo "Event '$EVENT_NAME' always runs the full suite."
-            echo "code=true" >> "$GITHUB_OUTPUT"
-            echo "docs=true" >> "$GITHUB_OUTPUT"
-            echo "publication=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "code=true"
+              echo "docs=true"
+              echo "publication=true"
+            } >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          # An empty diff is not evidence that every changed file is documentation.
+          if [ -z "$changed" ]; then
+            echo "::warning::Empty PR diff; retaining every path-specific gate."
+            {
+              echo "code=true"
+              echo "docs=true"
+              echo "publication=true"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           echo "Changed files:"
           echo "$changed"
 
@@ -308,15 +324,26 @@ jobs:
             esac
           done <<< "$changed"
 
-          echo "code=$code" >> "$GITHUB_OUTPUT"
-          echo "docs=$docs" >> "$GITHUB_OUTPUT"
-          echo "publication=$publication" >> "$GITHUB_OUTPUT"
+          {
+            echo "code=$code"
+            echo "docs=$docs"
+            echo "publication=$publication"
+          } >> "$GITHUB_OUTPUT"
           {
             echo "## Changed paths"
             echo "- non-docs changes: \`$code\`"
             echo "- docs-governance changes: \`$docs\`"
             echo "- publication authority changes: \`$publication\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Classify CI Event Tier
+        id: tier
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        # The pinned provider supplies event tier only; the detector above
+        # retains authority for docs/publication paths and failure handling.
+        run: python3 scripts/ci/classify_event_tier.py --event "$EVENT_NAME" < /dev/null >> "$GITHUB_OUTPUT"
 
   # ---------------------------------------------------------------------------
   # Quality gates are split into independent, parallel jobs (issue #7064) so a
@@ -649,7 +676,7 @@ jobs:
   security-scans:
     name: security-scans
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    if: needs.changed-paths.outputs.code == 'true' && needs.changed-paths.outputs.tier == 'full'
     runs-on: >-
       ${{ github.event.pull_request &&
       github.event.pull_request.head.repo.full_name != github.repository &&
@@ -977,6 +1004,9 @@ jobs:
       - name: Error-Handling Ratchet (issue #5911)
         run: python3 scripts/ci/check_error_handling_ratchet.py
 
+      - name: Private Path Leak Ratchet
+        run: python3 scripts/ci/check_private_path_leaks.py
+
       - name: Hardcoded-Style Ratchet (issue #8885)
         run: python3 scripts/ci/check_hardcoded_style_ratchet.py
 
@@ -1250,19 +1280,48 @@ jobs:
           QT_API: pyqt6
           UNIT_GATE_QUARANTINE: "1"
           REQUIRE_VENDORED_FALLBACK: "1"
+          CI_TIER: ${{ needs.changed-paths.outputs.tier }}
         run: |
           set +e
-          xvfb-run --auto-servernum python -m pytest \
-            -p no:xvfb \
-            -p scripts.ci.pytest_unit_gate_shard \
-            --unit-gate-shard=${{ matrix.shard }}/2 \
-            -m "unit and not slow and not live_simulation and not requires_gl and not requires_drake and not requires_opensim and not requires_mujoco and not requires_pinocchio and not requires_myosuite and not requires_jaxsim and not requires_nimble and not requires_rerun and not requires_casadi and not requires_crocoddyl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
-            -n 4 \
-            --timeout=60 \
-            --timeout-method=thread \
-            -p no:cacheprovider \
-            --no-cov \
+          pytest_targets=()
+          selection_meta="$RUNNER_TEMP/fast_tier_unit_gate_selection.txt"
+          modules_file="$RUNNER_TEMP/fast_tier_unit_gate_modules.txt"
+          if [ "$CI_TIER" = "fast" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags origin "${{ github.base_ref }}"
+            merge_base=$(git merge-base "origin/${{ github.base_ref }}" HEAD 2>/dev/null || echo "")
+            diff_base="${merge_base:-origin/${{ github.base_ref }}}"
+            git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD \
+              >"$RUNNER_TEMP/fast_tier_changed_paths.txt"
+            python3 scripts/ci/pytest_fast_tier_module_selection.py \
+              --tier fast \
+              --github-output "$selection_meta" \
+              --modules-out "$modules_file" \
+              <"$RUNNER_TEMP/fast_tier_changed_paths.txt"
+            selection_mode=$(grep '^mode=' "$selection_meta" | cut -d= -f2-)
+            if [ "$selection_mode" = "modules" ] && [ -s "$modules_file" ]; then
+              mapfile -t pytest_targets <"$modules_file"
+              echo "Fast-tier unit gate running ${#pytest_targets[@]} selected module(s)."
+            else
+              echo "Fast-tier unit gate falling back to full green-suite collection (${selection_mode:-unknown})."
+            fi
+          fi
+          pytest_cmd=(
+            xvfb-run --auto-servernum python -m pytest
+            -p no:xvfb
+            -p scripts.ci.pytest_unit_gate_shard
+            --unit-gate-shard=${{ matrix.shard }}/2
+            -m "unit and not slow and not live_simulation and not requires_gl and not requires_drake and not requires_opensim and not requires_mujoco and not requires_pinocchio and not requires_myosuite and not requires_jaxsim and not requires_nimble and not requires_rerun and not requires_casadi and not requires_crocoddyl and not requires_network and not requires_gpu and not requires_mocap_fixtures"
+            -n 4
+            --timeout=60
+            --timeout-method=thread
+            -p no:cacheprovider
+            --no-cov
             --tb=short
+          )
+          if [ "${#pytest_targets[@]}" -gt 0 ]; then
+            pytest_cmd+=("${pytest_targets[@]}")
+          fi
+          "${pytest_cmd[@]}"
           pytest_exit_code=$?
           set -e
           if [ "$pytest_exit_code" -eq 0 ]; then
@@ -1565,8 +1624,7 @@ jobs:
 
   quality-gate:
     name: quality-gate
-    needs:
-      [
+    needs: [
         agent-context,
         pick-runner,
         changed-paths,
@@ -1626,6 +1684,8 @@ jobs:
           PICK_RUNNER: ${{ needs.pick-runner.result }}
           CHANGED_PATHS: ${{ needs.changed-paths.result }}
           CODE_CHANGED: ${{ needs.changed-paths.outputs.code }}
+          CI_TIER: ${{ needs.changed-paths.outputs.tier }}
+          EVENT_NAME: ${{ github.event_name }}
           PUBLICATION_CHANGED: ${{ needs.changed-paths.outputs.publication }}
           CODE_QUALITY: ${{ needs.code-quality.result }}
           COMPANION_WORKFLOWS: ${{ needs.companion-workflows.result }}
@@ -1655,6 +1715,45 @@ jobs:
         run: |
           set -uo pipefail
           failed=0
+
+          case "${CI_TIER:-}" in
+            fast|full) ;;
+            *) echo "::error::Missing or invalid CI tier; refusing to approve."; exit 1 ;;
+          esac
+          case "$EVENT_NAME" in
+            pull_request|push) event_tier="fast" ;;
+            *) event_tier="full" ;;
+          esac
+          if [ "$CI_TIER" != "$event_tier" ]; then
+            echo "::error::CI tier does not match the event; refusing to approve."
+            exit 1
+          fi
+          case "$CODE_CHANGED" in
+            true) ;;
+            false)
+              if [ "$EVENT_NAME" != "pull_request" ]; then
+                echo "::error::Only a PR diff can waive code gates."
+                exit 1
+              fi
+              ;;
+            *) echo "::error::Invalid code-change output; refusing to approve."; exit 1 ;;
+          esac
+
+          # These expensive children remain in the static needs graph, so a
+          # failure/cancellation always reaches this aggregate. Only fast-tier
+          # skips of these exact jobs are expected (#13577).
+          expected_for_gate() {
+            local job="$1" default_result="$2"
+            if [ "$CI_TIER" = "fast" ]; then
+              case "$job" in
+                security-scans|tests|rust-wheel-parity|core-only-install|alembic-postgres-round-trip)
+                  echo "skipped"
+                  return
+                  ;;
+              esac
+            fi
+            echo "$default_result"
+          }
 
           gates="code-quality:$CODE_QUALITY"
           gates="$gates companion-workflows:$COMPANION_WORKFLOWS"
@@ -1686,6 +1785,7 @@ jobs:
           {
             echo "## Quality Gate Summary"
             echo ""
+            echo "- CI Tier: \`$CI_TIER\`"
             echo "- non-docs changes: \`$CODE_CHANGED\`"
             echo "- docs-governance changes: \`$DOCS_CHANGED\`"
             echo "- publication authority changes: \`$PUBLICATION_CHANGED\`"
@@ -1762,8 +1862,9 @@ jobs:
           for entry in $gates; do
             name="${entry%%:*}"
             result="${entry#*:}"
-            if [ "$result" != "$expected" ]; then
-              echo "::error::$name reported '$result', expected '$expected'."
+            required_result=$(expected_for_gate "$name" "$expected")
+            if [ "$result" != "$required_result" ]; then
+              echo "::error::$name reported '$result', expected '$required_result'."
               failed=1
             fi
           done
@@ -1776,8 +1877,9 @@ jobs:
           for entry in $fleet_gates; do
             name="${entry%%=*}"
             result="${entry#*=}"
-            if [ "$result" != "$fleet_expected" ]; then
-              echo "::error::$name reported '$result', expected '$fleet_expected'."
+            required_result=$(expected_for_gate "$name" "$fleet_expected")
+            if [ "$result" != "$required_result" ]; then
+              echo "::error::$name reported '$result', expected '$required_result'."
               failed=1
             fi
           done
@@ -1803,7 +1905,7 @@ jobs:
     if: >-
       (!github.event.pull_request ||
       github.event.pull_request.head.repo.full_name == github.repository) &&
-      (needs.changed-paths.outputs.code == 'true')
+      (needs.changed-paths.outputs.code == 'true' && needs.changed-paths.outputs.tier == 'full')
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
@@ -1949,7 +2051,7 @@ jobs:
 
   tests:
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    if: needs.changed-paths.outputs.code == 'true' && needs.changed-paths.outputs.tier == 'full'
     runs-on: >-
       ${{ github.event.pull_request &&
       github.event.pull_request.head.repo.full_name != github.repository &&
@@ -2094,12 +2196,14 @@ jobs:
       - name: Document Native Engine Coverage In Core Lane
         if: steps.core-test-changes.outputs.skip != 'true'
         run: |
-          echo "## Core CI Coverage" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- This lane installs core project dependencies plus \`[dev,gui-test]\`." >> "$GITHUB_STEP_SUMMARY"
-          echo "- MuJoCo coverage may run because MuJoCo is part of the base project dependencies." >> "$GITHUB_STEP_SUMMARY"
-          echo "- Drake, Pinocchio, OpenSim, and MyoSuite are optional extras and are not provisioned in this lane." >> "$GITHUB_STEP_SUMMARY"
-          echo "- Passing this job does not claim full native-engine integration coverage for those optional stacks." >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Core CI Coverage"
+            echo ""
+            echo "- This lane installs core project dependencies plus \`[dev,gui-test]\`."
+            echo "- MuJoCo coverage may run because MuJoCo is part of the base project dependencies."
+            echo "- Drake, Pinocchio, OpenSim, and MyoSuite are optional extras and are not provisioned in this lane."
+            echo "- Passing this job does not claim full native-engine integration coverage for those optional stacks."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Start Xvfb
         if: steps.core-test-changes.outputs.skip != 'true'
@@ -2120,9 +2224,11 @@ jobs:
             sleep 2
 
             if kill -0 "$xvfb_pid" 2>/dev/null; then
-              echo "DISPLAY=:${display_num}" >> "$GITHUB_ENV"
-              echo "UPSTREAMDRIFT_XVFB_PID=${xvfb_pid}" >> "$GITHUB_ENV"
-              echo "UPSTREAMDRIFT_XVFB_LOCKDIR=${lockdir}" >> "$GITHUB_ENV"
+              {
+                echo "DISPLAY=:${display_num}"
+                echo "UPSTREAMDRIFT_XVFB_PID=${xvfb_pid}"
+                echo "UPSTREAMDRIFT_XVFB_LOCKDIR=${lockdir}"
+              } >> "$GITHUB_ENV"
               echo "Started Xvfb on display :${display_num}"
               exit 0
             fi
@@ -2531,10 +2637,12 @@ jobs:
           QT_API: pyqt6
         run: |
           set -o pipefail
-          echo "## Cross-Engine Validator Core Unit Tests" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- This step exercises the dependency-free validator logic only." >> "$GITHUB_STEP_SUMMARY"
-          echo "- It does not install or verify Drake, Pinocchio, OpenSim, or MyoSuite." >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Cross-Engine Validator Core Unit Tests"
+            echo ""
+            echo "- This step exercises the dependency-free validator logic only."
+            echo "- It does not install or verify Drake, Pinocchio, OpenSim, or MyoSuite."
+          } >> "$GITHUB_STEP_SUMMARY"
           xvfb-run --auto-servernum python -m pytest tests/integration/test_cross_engine_validation.py \
             -p no:xvfb \
             --timeout=60 \
@@ -2656,7 +2764,7 @@ jobs:
     if: >-
       (!github.event.pull_request ||
       github.event.pull_request.head.repo.full_name == github.repository) &&
-      (needs.changed-paths.outputs.code == 'true')
+      (needs.changed-paths.outputs.code == 'true' && needs.changed-paths.outputs.tier == 'full')
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
     services:
@@ -2730,7 +2838,7 @@ jobs:
           python -m pip install "psycopg[binary]>=3.1"
       - name: Run Alembic PostgreSQL round-trip
         env:
-          ALEMBIC_ROUND_TRIP_DATABASE_URL: postgresql+psycopg://upstreamdrift:upstreamdrift@localhost:${{ job.services.postgres.ports[5432] }}/upstreamdrift_migrations
+          ALEMBIC_ROUND_TRIP_DATABASE_URL: postgresql+psycopg://upstreamdrift:upstreamdrift@localhost:${{ job.services.postgres.ports['5432'] }}/upstreamdrift_migrations
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
         run: |
           python3 - <<'PY'
@@ -2872,11 +2980,11 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           REQUIRE_DRIFT_GATES: "1"
         run: |
-          drift_suites="tests/integration/launch_monitor_drift/"
+          drift_suites=("tests/integration/launch_monitor_drift/")
           if [ -d tests/integration/putting_green_drift ]; then
-            drift_suites="$drift_suites tests/integration/putting_green_drift/"
+            drift_suites+=("tests/integration/putting_green_drift/")
           fi
-          python -m pytest $drift_suites \
+          python -m pytest "${drift_suites[@]}" \
             --timeout=120 \
             --timeout-method=thread \
             -v --tb=short
@@ -3438,15 +3546,19 @@ jobs:
       - name: Rust Quality Gate Summary
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
-          echo "## Rust Quality Gate (${{ matrix.os }})" >> $GITHUB_STEP_SUMMARY
-          echo "- rustfmt: formatted" >> $GITHUB_STEP_SUMMARY
-          echo "- clippy: no warnings" >> $GITHUB_STEP_SUMMARY
-          echo "- cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Rust Quality Gate (${{ matrix.os }})"
+            echo "- rustfmt: formatted"
+            echo "- clippy: no warnings"
+            echo "- cargo test: all tests pass"
+          } >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            echo "- cargo check --features python: all targets typecheck" >> $GITHUB_STEP_SUMMARY
-            echo "- maturin: wheel built" >> $GITHUB_STEP_SUMMARY
-            echo "- Python bindings and source adapters: verified" >> $GITHUB_STEP_SUMMARY
-            echo "- WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
+            {
+              echo "- cargo check --features python: all targets typecheck"
+              echo "- maturin: wheel built"
+              echo "- Python bindings and source adapters: verified"
+              echo "- WASM: target compiled and verified"
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
   rust-quickstart:
@@ -3604,7 +3716,7 @@ jobs:
   rust-wheel-parity:
     name: rust-wheel-parity
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    if: needs.changed-paths.outputs.code == 'true' && needs.changed-paths.outputs.tier == 'full'
     # In the required `quality-gate` aggregate's `needs`, so a fleet pin here
     # blocked every merge a second time. Pure `cargo`/`maturin` work with no
     # fleet-local state, so it follows the dispatcher like its siblings.

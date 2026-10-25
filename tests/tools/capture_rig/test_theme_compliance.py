@@ -16,6 +16,7 @@ import os
 import re
 import sys
 from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -25,7 +26,7 @@ pytest.importorskip("PyQt6")
 pytest.importorskip("cv2")
 
 from PyQt6 import sip
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QWidget
 
 from src.shared.python.theme.colors import BUILTIN_THEMES
 from src.shared.python.theme.style_constants import Styles
@@ -75,20 +76,104 @@ def _forget_deleted_windows(manager: ThemeManager) -> None:
         for ref in manager._registered_windows
         if ref() is not None and not sip.isdeleted(ref())
     ]
+    if manager.main_window is not None and sip.isdeleted(manager.main_window):
+        manager.main_window = None
+
+
+def _is_orphaned(manager: ThemeManager) -> bool:
+    """True when ``manager`` or its ``QSettings`` lost their C++ object."""
+    return sip.isdeleted(manager) or sip.isdeleted(manager.settings)
+
+
+@contextmanager
+def _isolated_theme_manager() -> Iterator[ThemeManager]:
+    """A fresh singleton; any prior process-wide manager is restored after."""
+    _app()
+    prior = ThemeManager._instance
+    if prior is not None and _is_orphaned(prior):
+        prior = None  # its C++ side died with an earlier QApplication
+    prior_theme = "Dark"
+    if prior is not None:
+        _forget_deleted_windows(prior)
+        prior_theme = prior.get_current_theme_name()
+    ThemeManager.reset_instance()
+    manager = ThemeManager.instance()
+    try:
+        yield manager
+    finally:
+        ThemeManager.reset_instance()
+        if prior is not None:
+            ThemeManager._instance = prior
+            _forget_deleted_windows(prior)
+            prior.change_theme(prior_theme)
 
 
 @pytest.fixture
 def theme_manager() -> Iterator[ThemeManager]:
-    """The singleton, with the operator's theme put back afterwards."""
-    _app()
-    manager = ThemeManager.instance()
-    _forget_deleted_windows(manager)
-    before = manager.get_current_theme_name()
-    try:
+    with _isolated_theme_manager() as manager:
         yield manager
+
+
+@pytest.fixture
+def polluted_theme_manager() -> Iterator[None]:
+    """Leave a stale singleton with a deleted ``main_window`` wrapper behind."""
+    _app()
+    ThemeManager.reset_instance()
+    window = QWidget()
+    manager = ThemeManager.instance(main_window=window)
+    sip.delete(window)
+    assert manager.main_window is not None
+    try:
+        yield
     finally:
+        ThemeManager.reset_instance()
+
+
+def test_deleted_main_window_is_cleared_before_restyling() -> None:
+    _app()
+    ThemeManager.reset_instance()
+    window = QWidget()
+    manager = ThemeManager.instance(main_window=window)
+    sip.delete(window)
+
+    try:
         _forget_deleted_windows(manager)
-        manager.change_theme(before)
+        assert manager.main_window is None
+        manager.change_theme("Dark")
+    finally:
+        ThemeManager.reset_instance()
+
+
+def test_fixture_survives_a_singleton_orphaned_by_app_teardown() -> None:
+    """A destroyed QApplication takes the singleton and its QSettings with it.
+
+    PyQt deletes every parentless QObject when the ``QApplication`` is
+    destroyed, so a manager left in ``ThemeManager._instance`` by an earlier
+    test has a dead ``settings`` wrapper. Restoring it as the "prior" manager
+    raised ``RuntimeError: wrapped C/C++ object of type QSettings has been
+    deleted`` at fixture teardown (flaky CI, order dependent).
+    """
+    _app()
+    ThemeManager.reset_instance()
+    orphan = ThemeManager.instance()
+    sip.delete(orphan.settings)
+    sip.delete(orphan)
+    assert ThemeManager._instance is orphan
+    try:
+        with _isolated_theme_manager() as manager:
+            assert not sip.isdeleted(manager)
+            manager.change_theme("Light")
+        assert ThemeManager._instance is not orphan
+    finally:
+        ThemeManager.reset_instance()
+
+
+def test_theme_manager_fixture_ignores_stale_singleton(
+    polluted_theme_manager: None,
+    theme_manager: ThemeManager,
+) -> None:
+    assert theme_manager.main_window is None
+    theme_manager.change_theme("Light")
 
 
 # -- static --------------------------------------------------------------------

@@ -106,7 +106,7 @@ def capped_cylinder_mesh(
         raise ValueError("axis and radial must be orthonormal")
     e2 = np.cross(ax, e1)
     origin = np.asarray(axis_point_m, dtype=float)
-    rings = int(math.ceil((hi - lo) / ring_pitch_m))
+    rings = max(1, int(math.ceil((hi - lo) / ring_pitch_m - 1e-12)))
     s = np.linspace(lo, hi, rings + 1)
     ang = 2.0 * math.pi * np.arange(segments) / segments
     ring_xy = radius_m * (np.outer(np.cos(ang), e1) + np.outer(np.sin(ang), e2))

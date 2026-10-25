@@ -6,7 +6,7 @@ Literal Python and MATLAB commands for the four operational tasks: train, fit, v
 
 ## Conventions
 
-- Run all Python commands from the **repo root** (`C:\Users\diete\Repositories\UpstreamDrift`).
+- Run all Python commands from the **repo root** (`<owner-home>\Repositories\UpstreamDrift`).
 - Always `python3`, never `python`, per [`CLAUDE.md`](../../../../../../../CLAUDE.md).
 - All output paths default to `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option2_nn_surrogate/models/<run_id>/` — `.gitignore`'d.
 - `<run_id>` defaults to a UTC timestamp; override with `--run-id`.

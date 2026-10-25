@@ -147,12 +147,12 @@ take any `#rrggbb` colour (HRG-B2, #13167). A custom colour is written as an
 entry of the document's `materials` map, authored in non-linear sRGB
 (`byte / 255`):
 
-| Control | Document field written |
-| --- | --- |
-| Custom Skin Color | `materials.custom_skin`; `skin_tone` is set to `custom_skin` |
-| Hair Color | `materials.custom_hair`; `head.headwear_material` is set to `custom_hair` (needs headwear `hair`) |
-| Shirt Color | the library material the clothing preset gives the torso (`polo_white`, `polo_navy`) is overridden by that name |
-| Trousers/Shorts Color | the preset's pants material (`trousers_charcoal`, `shorts_khaki`) is overridden by that name |
+| Control               | Document field written                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Custom Skin Color     | `materials.custom_skin`; `skin_tone` is set to `custom_skin`                                                    |
+| Hair Color            | `materials.custom_hair`; `head.headwear_material` is set to `custom_hair` (needs headwear `hair`)               |
+| Shirt Color           | the library material the clothing preset gives the torso (`polo_white`, `polo_navy`) is overridden by that name |
+| Trousers/Shorts Color | the preset's pants material (`trousers_charcoal`, `shorts_khaki`) is overridden by that name                    |
 
 Roughness, metallic and texture of the overridden material are kept, so only the
 colour changes; shoes and gloves keep their library materials. Every surface

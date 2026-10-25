@@ -20,12 +20,12 @@ None.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\motion_matching\dataset.py` (`SweepDataset`, `load_sweep_dataset`, schema validators)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\shared\load_sweep_dataset.m` (MATLAB shim)
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\test_dataset.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\shared\tests\test_load_sweep_dataset_matlab_shim.m`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\fixtures\synthetic_dataset\trials.parquet` (small fixture, 4 trials)
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\fixtures\synthetic_dataset\timesteps.parquet` (small fixture)
+- `<owner-home>\Repositories\UpstreamDrift\src\shared\python\motion_matching\dataset.py` (`SweepDataset`, `load_sweep_dataset`, schema validators)
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\shared\load_sweep_dataset.m` (MATLAB shim)
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\test_dataset.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\shared\tests\test_load_sweep_dataset_matlab_shim.m`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\fixtures\synthetic_dataset\trials.parquet` (small fixture, 4 trials)
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\fixtures\synthetic_dataset\timesteps.parquet` (small fixture)
 
 ## Public API
 

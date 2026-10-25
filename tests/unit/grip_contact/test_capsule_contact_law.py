@@ -3,8 +3,10 @@
 Issue #13300 (HRG-GS-G2).
 Acceptance criteria:
 - Zero force at separation (gap >= 0) to exactly 0.0 N; unilateral normal (never pulling) over 10^4 random poses.
-- Friction stays inside the cone |f_t| <= mu * |f_n| * (1 + 1e-9).
+- Friction stays inside the cone |f_t| <= mu * |f_n| * (1 + 1e-9) (per
+  line-contact node for capsule pairs, #13308).
 - Action/reaction: sum of forces and moments about any point <= 1e-12.
+- Capsule-capsule line contact (#13308) is unilateral node by node.
 - Degenerate (parallel, coincident) capsule pairs raise or return a documented finite result; property tests cover them.
 - The sphere-cylinder case agrees with the legacy path to <= 1e-12 N.
 """
@@ -28,6 +30,7 @@ from src.shared.python.grip_contact.pair_contact import (
     ContactSphere,
     PairWrench,
     capsule_capsule,
+    capsule_line_nodes,
     capsule_sphere,
     closest_point_segment,
     closest_points_segments,
@@ -177,11 +180,16 @@ def test_zero_force_at_separation_and_unilateral_normal_10k_poses(
             assert wrench.normal_force_mag_n == 0.0
             assert wrench.tangential_force_mag_n == 0.0
         else:
+            # Line contact (#13308): unilateral node by node; the resultant
+            # friction of differently oriented nodes may project on the mean
+            # normal, so the resultant itself is not checked against it.
             assert wrench.normal_force_mag_n >= 0.0
-            f_norm_b = float(np.dot(wrench.force_b_n, wrench.normal))
-            f_norm_a = float(np.dot(wrench.force_a_n, -wrench.normal))
-            assert f_norm_b >= -1e-12
-            assert f_norm_a >= -1e-12
+            for node in capsule_line_nodes(cap_a):
+                pw = sphere_capsule(
+                    node, cap_b, state_a, state_b, default_law, patch, spin_trans
+                )
+                assert float(np.dot(pw.force_b_n, pw.normal)) >= -1e-12
+                assert float(np.dot(pw.force_a_n, -pw.normal)) >= -1e-12
 
 
 def test_friction_cone_conformance(default_law: ContactParameters) -> None:
@@ -211,27 +219,32 @@ def test_friction_cone_conformance(default_law: ContactParameters) -> None:
         wrench = capsule_capsule(cap_a, cap_b, state_a, state_b, default_law)
         assert wrench.penetration_m > 0.0
 
-        f_t = wrench.tangential_force_mag_n
-        f_n = wrench.normal_force_mag_n
-        # Evaluate local mu(v_tangential)
-        v_rel = (
-            state_b.velocity_m_s
-            + np.cross(state_b.omega_rad_s, wrench.contact_point_m - state_b.position_m)
-        ) - (
-            state_a.velocity_m_s
-            + np.cross(state_a.omega_rad_s, wrench.contact_point_m - state_a.position_m)
-        )
-        v_t = v_rel - wrench.normal * float(np.dot(wrench.normal, v_rel))
-        speed = float(np.linalg.norm(v_t))
-        ratio = speed / default_law.transition_velocity_m_s
-        mu = (
-            default_law.dynamic_friction
-            + (default_law.static_friction - default_law.dynamic_friction)
-            * math.exp(-(ratio**2))
-            + default_law.viscous_friction * speed
-        )
-
-        assert f_t <= mu * f_n * (1.0 + 1e-9) + 1e-12
+        # Line contact (#13308): the cone holds at every node at that node's
+        # slip speed; the pair carries the node-weighted sum of the loads.
+        nodes = capsule_line_nodes(cap_a)
+        f_t_sum = 0.0
+        for node in nodes:
+            pw = sphere_capsule(node, cap_b, state_a, state_b, default_law)
+            f_t_sum += pw.tangential_force_mag_n / len(nodes)
+            v_rel = (
+                state_b.velocity_m_s
+                + np.cross(state_b.omega_rad_s, pw.contact_point_m - state_b.position_m)
+            ) - (
+                state_a.velocity_m_s
+                + np.cross(state_a.omega_rad_s, pw.contact_point_m - state_a.position_m)
+            )
+            v_t = v_rel - pw.normal * float(np.dot(pw.normal, v_rel))
+            speed = float(np.linalg.norm(v_t))
+            ratio = speed / default_law.transition_velocity_m_s
+            mu = (
+                default_law.dynamic_friction
+                + (default_law.static_friction - default_law.dynamic_friction)
+                * math.exp(-(ratio**2))
+                + default_law.viscous_friction * speed
+            )
+            f_t, f_n = pw.tangential_force_mag_n, pw.normal_force_mag_n
+            assert f_t <= mu * f_n * (1.0 + 1e-9) + 1e-12
+        assert wrench.tangential_force_mag_n == pytest.approx(f_t_sum, rel=1e-12)
 
 
 def test_action_reaction_forces_and_moments_about_arbitrary_points(

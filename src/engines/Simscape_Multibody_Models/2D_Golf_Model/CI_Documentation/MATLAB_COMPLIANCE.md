@@ -549,7 +549,7 @@ x = rand(100, 1);  % No seed set
 filename = sprintf('output_%s.mat', datestr(now));
 
 % ❌ Bad - System-dependent paths
-load('C:\Users\John\data.mat');
+load('<owner-home>\data.mat');
 
 % ✅ Good - Reproducible
 rng(42);
@@ -751,7 +751,7 @@ data = randn(100, 1);
 **Problem:**
 
 ```matlab
-load('C:\Users\Me\data.mat');  % ❌
+load('<owner-home>\data.mat');  % ❌
 ```
 
 **Solution:**

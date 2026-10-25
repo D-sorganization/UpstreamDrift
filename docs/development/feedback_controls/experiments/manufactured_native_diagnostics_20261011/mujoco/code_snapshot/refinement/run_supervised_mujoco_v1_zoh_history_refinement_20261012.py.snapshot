@@ -19,12 +19,12 @@ from mujoco_candidate_lift_bootstrap import (
     tools_status,
 )
 
-PLANNING = Path(r"C:/Users/diete/Repositories/docs/development/feedback_controls_planning")
-REPO = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
-SUPERVISOR_REPO = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-marker-calibration-12164")
+PLANNING = Path(r"<owner-home>/Repositories/docs/development/feedback_controls_planning")
+REPO = Path(r"<owner-home>/Repositories/Worktrees/feedback-moco-state-binding-11791")
+SUPERVISOR_REPO = Path(r"<owner-home>/Repositories/Worktrees/feedback-marker-calibration-12164")
 SUPERVISOR_REL = Path("tests/opensim/native_moco_ladder_harness.py")
 SUPERVISOR = SUPERVISOR_REPO / SUPERVISOR_REL
-CHILD = Path(r"C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe")
+CHILD = Path(r"<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe")
 MUJOCO_PACKAGE = CHILD.parent.parent / "Lib/site-packages/mujoco"
 SPEC = REPO / "docs/development/full_body_models/full_body_spec_v1.json"
 CANDIDATE = REPO / "docs/development/full_body_models/evidence/native_candidates/returned81_candidate.json"

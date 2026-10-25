@@ -3,7 +3,7 @@
 ## Transfer Summary
 
 Repository: `D-sorganization/UpstreamDrift`.
-Planning worktree: `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`.
+Planning worktree: `<owner-home>/Repositories/.worktrees/upstream-gspro-10188`.
 Branch: `docs/issue-10188-gspro-integration`.
 Baseline: `395d3de876d8f87b7b00785ef2f430d0e9387ce7`.
 Delivery commit: `SELF` means the commit containing this planning packet;
@@ -17,7 +17,7 @@ contains a source-backed review, proposed architecture, detailed GitHub work
 packages and a delegated acceptance runbook. It contains **no implementation**
 of the proposed outbound client, session service or codec.
 
-The original checkout at `C:/Users/diete/Repositories/UpstreamDrift` has another
+The original checkout at `<owner-home>/Repositories/UpstreamDrift` has another
 active branch and untracked user/agent work (`_wt_claude_base/`, `scratch/`,
 `sessions/`, `ui/src/api/vite-proxy-config.test.ts`). Leave it untouched. Use a
 new child worktree from current main once the planning PR lands; do not branch
@@ -118,7 +118,7 @@ git diff --check
 
 The documented `shared_scripts/development_log.py` is absent in this checkout.
 Use the authoritative checker from a local `Repository_Management` clone:
-`python3 C:/Users/diete/Repositories/Repository_Management/shared_scripts/development_log.py --repo-root .`.
+`python3 <owner-home>/Repositories/Repository_Management/shared_scripts/development_log.py --repo-root .`.
 Initial full-log validation found pre-existing missing commit SHAs in
 DL-#10003 and DL-#10062. DL-#10188 records its verified source baseline explicitly.
 Report those existing findings rather than rewriting another agent's evidence.

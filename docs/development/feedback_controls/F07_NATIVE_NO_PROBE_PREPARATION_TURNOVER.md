@@ -16,7 +16,7 @@ From the repository root on Windows, the focused test command was:
 
 ```powershell
 $env:PYTHONPATH = "."
-& C:\Users\diete\Repositories\_venvs\mpp-domain-12233\Scripts\python.exe -m pytest -q tests/unit/engines/opensim/test_native_moco_probe_mode.py tests/unit/engines/opensim/test_native_path_optimizer_domains.py
+& <owner-home>\Repositories\_venvs\mpp-domain-12233\Scripts\python.exe -m pytest -q tests/unit/engines/opensim/test_native_moco_probe_mode.py tests/unit/engines/opensim/test_native_path_optimizer_domains.py
 ```
 
 Result: 31 passed with one existing `state_manager` deprecation warning. Ruff check and format checks passed for the four changed Python files. The design-manual governance check passed: 62 QMD sources, zero registered calculations, and publication remains blocked.
@@ -25,8 +25,8 @@ The agent-context views were refreshed and checked with pinned `vendor/ud-tools`
 
 ```powershell
 $env:PYTHONPATH = "vendor/ud-tools/src"
-& C:\Users\diete\Repositories\_venvs\mpp-domain-12233\Scripts\python.exe -m agent_context --root . render
-& C:\Users\diete\Repositories\_venvs\mpp-domain-12233\Scripts\python.exe -m agent_context --root . check
+& <owner-home>\Repositories\_venvs\mpp-domain-12233\Scripts\python.exe -m agent_context --root . render
+& <owner-home>\Repositories\_venvs\mpp-domain-12233\Scripts\python.exe -m agent_context --root . check
 ```
 
 Both context commands passed. No SDK or native execution was performed.

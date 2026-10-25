@@ -37,11 +37,12 @@ No action needed. Results are consistent within scientific tolerances.
 **Symptom:** Positions diverge over long simulations (>1s)
 
 **Root Cause:**
-| Engine | Integrator | Order | Stability |
-|--------|-----------|-------|-----------|
-| MuJoCo | Semi-implicit Euler | 1st | Unconditional |
-| Drake | Runge-Kutta 3 | 3rd | Conditional |
-| Pinocchio | Euler | 1st | Conditional |
+
+| Engine    | Integrator          | Order | Stability     |
+| --------- | ------------------- | ----- | ------------- |
+| MuJoCo    | Semi-implicit Euler | 1st   | Unconditional |
+| Drake     | Runge-Kutta 3       | 3rd   | Conditional   |
+| Pinocchio | Euler               | 1st   | Conditional   |
 
 **Solution:**
 

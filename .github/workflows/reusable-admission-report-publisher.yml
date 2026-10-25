@@ -1,0 +1,158 @@
+name: Reusable Protected Admission Report Publisher
+
+on:
+  workflow_call:
+    inputs:
+      ci_workflow_id:
+        description: Numeric ID of the repository's approved CI workflow
+        required: true
+        type: number
+      trusted_provider_commit:
+        description: Independently approved full Repository_Management commit SHA
+        required: true
+        type: string
+      trusted_bundle_sha256:
+        description: Independently approved runtime bundle SHA-256
+        required: true
+        type: string
+    secrets:
+      provider_app_id:
+        description: Existing GitHub App ID authorized to read Repository_Management
+        required: true
+      provider_app_private_key:
+        description: Existing GitHub App private key for the scoped provider read token
+        required: true
+
+permissions:
+  contents: read
+
+# Each publisher attempt has its own group, so separate runs never cancel one another.
+concurrency:
+  group: admission-publisher-${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}
+  cancel-in-progress: true
+
+jobs:
+  publish-admission-report:
+    name: Publish immutable admission report
+    if: >-
+      ${{ (!github.event.pull_request ||
+          github.event.pull_request.head.repo.full_name == github.repository) &&
+          github.event_name == 'workflow_run' &&
+          github.event.action == 'completed' &&
+          github.event.workflow_run.status == 'completed' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.repository.full_name == github.repository &&
+          github.event.workflow_run.head_repository.full_name == github.repository &&
+          github.event.repository.default_branch != '' &&
+          github.event.workflow_run.head_branch != '' &&
+          github.event.workflow_run.head_branch == github.event.repository.default_branch &&
+          github.event.workflow_run.workflow_id == inputs.ci_workflow_id &&
+          github.event.workflow_run.id > 0 &&
+          github.event.workflow_run.run_attempt > 0 }}
+    runs-on: [self-hosted, Linux, X64, d-sorg-fleet-docker]
+    timeout-minutes: 10
+    steps:
+      - name: Validate pins before checkout
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+          SOURCE_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+          PROVIDER_COMMIT: ${{ inputs.trusted_provider_commit }}
+          BUNDLE_SHA256: ${{ inputs.trusted_bundle_sha256 }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$SOURCE_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$SOURCE_RUN_ATTEMPT" =~ ^[1-9][0-9]*$ ]]
+          [[ "$PROVIDER_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$BUNDLE_SHA256" =~ ^[0-9a-f]{64}$ ]]
+
+      - name: Mint scoped private provider read token
+        id: provider-read-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.provider_app_id }}
+          private-key: ${{ secrets.provider_app_private_key }}
+          owner: D-sorganization
+          repositories: Repository_Management
+          permission-contents: read
+
+      - name: Check out pinned canonical provider
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: D-sorganization/Repository_Management
+          ref: ${{ inputs.trusted_provider_commit }}
+          path: provider
+          token: ${{ steps.provider-read-token.outputs.token }}
+          persist-credentials: false
+          submodules: false
+
+      - name: Check out exact source subject
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.workflow_run.head_sha }}
+          path: subject
+          persist-credentials: false
+          submodules: false
+
+      - name: Set up isolated standard-library Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Build and externally verify pinned provider bundle
+        shell: bash
+        env:
+          PROVIDER_COMMIT: ${{ inputs.trusted_provider_commit }}
+          BUNDLE_SHA256: ${{ inputs.trusted_bundle_sha256 }}
+        run: |
+          set -euo pipefail
+          python provider/scripts/development_admission_bundle.py build \
+            --repo-root provider --commit "$PROVIDER_COMMIT" --output "$RUNNER_TEMP/provider-bundle"
+          python provider/scripts/development_admission_bundle.py verify \
+            --bundle "$RUNNER_TEMP/provider-bundle" \
+            --expected-commit "$PROVIDER_COMMIT" \
+            --expected-bundle-sha256 "$BUNDLE_SHA256"
+
+      - name: Validate source event and produce report plus receipt
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          CI_WORKFLOW_ID: ${{ inputs.ci_workflow_id }}
+          TRUSTED_PROVIDER_COMMIT: ${{ inputs.trusted_provider_commit }}
+          TRUSTED_BUNDLE_SHA256: ${{ inputs.trusted_bundle_sha256 }}
+          PUBLISHER_WORKFLOW_REF: ${{ github.workflow_ref }}
+          PUBLISHER_RUN_ID: ${{ github.run_id }}
+          PUBLISHER_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/admission-publication"
+          python provider/scripts/development_admission_publisher.py \
+            --event-file "$GITHUB_EVENT_PATH" \
+            --event-name "$EVENT_NAME" \
+            --repository "$REPOSITORY" \
+            --ci-workflow-id "$CI_WORKFLOW_ID" \
+            --subject-root subject \
+            --provider-root provider \
+            --provider-bundle "$RUNNER_TEMP/provider-bundle" \
+            --trusted-provider-commit "$TRUSTED_PROVIDER_COMMIT" \
+            --trusted-bundle-sha256 "$TRUSTED_BUNDLE_SHA256" \
+            --publisher-workflow-ref "$PUBLISHER_WORKFLOW_REF" \
+            --publisher-run-id "$PUBLISHER_RUN_ID" \
+            --publisher-run-attempt "$PUBLISHER_RUN_ATTEMPT" \
+            --output-dir "$RUNNER_TEMP/admission-publication"
+
+      - name: Upload bounded report and provenance receipt
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: admission-report-${{ github.event.workflow_run.id }}-${{ github.event.workflow_run.run_attempt }}-publisher-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/admission-publication/admission-report.json
+            ${{ runner.temp }}/admission-publication/admission-receipt.json
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6

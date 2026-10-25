@@ -6,7 +6,7 @@ from pathlib import Path
 
 from scripts.chore import patch_analyzers
 
-WORKSTATION_ROOT_LITERAL = "C:/Users/diete/Repositories/UpstreamDrift"
+WORKSTATION_ROOT_LITERAL = "<owner-home>/Repositories/UpstreamDrift"
 
 
 def _maintained_script_paths(repo_root: Path) -> list[Path]:

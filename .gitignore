@@ -326,3 +326,12 @@ PlayerInfo.bin
 
 # Licensed model files (e.g. SimTK spine models) are private (#13258)
 licensed_assets/
+
+# MATLAB Code Analyzer GUI exports (host-local absolute paths; regenerate locally)
+**/code_issues.csv
+
+# Moco binding experiment logs (stderr captures with host paths; not publication evidence)
+docs/development/moco_state_binding_11791/evidence/**/*.log.txt
+
+# Optional local hostname patterns for scripts/ci/check_private_path_leaks.py (never commit)
+scripts/config/fleet_hostname_denylist.local.txt

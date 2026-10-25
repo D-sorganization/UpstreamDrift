@@ -105,16 +105,42 @@ class DrakeKinematicsService:
                 "DrakeKinematicsService.set_pose: model not loaded; call load() first."
             )
         self._pose = pose
-        from src.shared.python.pose_interchange.adapters.drake import DrakeAdapter
+        self._plant.SetPositions(self._plant_context, self._positions_for(pose))
 
-        adapter = DrakeAdapter()
-        q_full = adapter.from_canonical(pose, model=self._plant)
+    def _positions_for(self, pose: CanonicalPose) -> npt.NDArray[np.float64]:
+        """Build a valid ``q`` for the loaded plant from a canonical pose.
 
-        nq = int(self._plant.num_positions())
-        q = np.zeros(nq, dtype=np.float64)
-        n = min(nq, q_full.shape[0])
-        q[:n] = q_full[:n]
-        self._plant.SetPositions(self._plant_context, q)
+        ``DrakeAdapter.from_canonical`` only understands a ``joint_layout``
+        mapping, not a ``MultibodyPlant``, and its free-flyer ``[xyz, rpy]``
+        prefix is not Drake's ``[quat_wxyz, xyz]`` floating-base layout.
+        Start from the plant's current (valid-quaternion) positions, place
+        the floating base through ``SetFreeBodyPose``, then write any
+        single-DOF joint whose name is a canonical joint field.
+        """
+        from pydrake.math import (  # type: ignore[import-not-found]
+            RigidTransform,
+            RollPitchYaw,
+        )
+        from pydrake.multibody.tree import BodyIndex  # type: ignore[import-not-found]
+
+        plant = self._plant
+        floating = sorted(int(i) for i in plant.GetFloatingBaseBodies())
+        if floating:
+            plant.SetFreeBodyPose(
+                self._plant_context,
+                plant.get_body(BodyIndex(floating[0])),
+                RigidTransform(
+                    RollPitchYaw(np.radians(pose.pelvis_rotation_xyz_deg)),
+                    np.asarray(pose.pelvis_translation_m, dtype=np.float64),
+                ),
+            )
+        q = np.array(plant.GetPositions(self._plant_context), dtype=np.float64)
+        for joint_index in plant.GetJointIndices():
+            joint = plant.get_joint(joint_index)
+            angle_deg = pose.joint_angles_deg.get(joint.name())
+            if angle_deg is not None and joint.num_positions() == 1:
+                q[joint.position_start()] = np.radians(angle_deg)
+        return q
 
     def get_link_transforms(self) -> dict[str, npt.NDArray[np.float64]]:
         if (
@@ -125,11 +151,11 @@ class DrakeKinematicsService:
                 "DrakeKinematicsService.get_link_transforms: model not loaded; call load() first."
             )
 
+        from pydrake.multibody.tree import BodyIndex  # type: ignore[import-not-found]
+
         transforms: dict[str, npt.NDArray[np.float64]] = {}
-        for body_index in self._plant.GetBodyIndices(
-            self._plant.world_model_instance()
-        ):
-            body = self._plant.get_body(body_index)
+        for body_index in range(self._plant.num_bodies()):
+            body = self._plant.get_body(BodyIndex(body_index))
             name = body.name()
             pose_in_world = self._plant.EvalBodyPoseInWorld(self._plant_context, body)
             transforms[name] = pose_in_world.GetAsMatrix4()

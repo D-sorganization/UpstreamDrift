@@ -43,6 +43,10 @@ from src.shared.python.loop_nullspace.autodiff_derivatives import (
     ModelDifferentials,
 )
 from src.shared.python.loop_nullspace.closure_convention import NativeClosureConvention
+from src.shared.python.motion_matching.club_shaft_chain import (
+    ShaftChainUnsupportedError,
+    passive_coordinates,
+)
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
@@ -206,6 +210,7 @@ class FullBodyDrakeModel:
             joint.set_velocity_limits(np.array([-np.inf]), np.array([np.inf]))
 
         self._init_closure_and_frames(specification, api)
+        self._init_shaft_springs(specification, api)
         self.closing_hand_side: str = closing_side_from_closure(
             specification["closure"]
         )
@@ -262,6 +267,72 @@ class FullBodyDrakeModel:
             )
             for frame in spec["frames"]
         }
+
+    def _init_shaft_springs(self, spec: Mapping[str, Any], api: Any) -> None:
+        """Chain-shaft springs and dampers as native Drake elements (#12691).
+
+        Each unactuated shaft coordinate gets a ``RevoluteSpring`` with the
+        spec stiffness and rest angle and the spec viscous joint damping, read
+        from the same primitives MuJoCo and OpenSim compile (no per-engine
+        constant).  Empty for the rigid club, which keeps its arithmetic.
+        """
+        self.passive_coordinates: tuple[str, ...] = passive_coordinates(spec)
+        primitives = {
+            p["coordinate"]: p for joint in spec["joints"] for p in joint["primitives"]
+        }
+        self._springs: dict[str, Any] = {}
+        for name in self.passive_coordinates:
+            primitive, joint = primitives[name], self._joints[name]
+            joint.set_default_damping(float(primitive["damping_n_m_s_rad"]))
+            self._springs[name] = self.plant.AddForceElement(
+                api.RevoluteSpring(
+                    joint,
+                    float(primitive["springref_rad"]),
+                    float(primitive["stiffness_n_m_rad"]),
+                )
+            )
+
+    def shaft_springs(self) -> dict[str, tuple[float, float, float]]:
+        """Chain-shaft springs as compiled: ``{coordinate: (k, rest, c)}``.
+
+        Read back from the plant's ``RevoluteSpring`` elements and joint
+        damping; empty for a rigid club.
+        """
+        return {
+            name: (
+                float(spring.default_stiffness()),
+                float(spring.default_nominal_angle()),
+                float(self._joints[name].default_damping()),
+            )
+            for name, spring in self._springs.items()
+        }
+
+    def _passive_force(self) -> Array:
+        """Plant-ordered shaft spring and damper force at the context state.
+
+        Drake's own ``CalcForceElementsContribution``: its generalized part
+        is the springs plus the joint damping (gravity enters only as body
+        forces; verified against MuJoCo's passive force by the R11 parity
+        test).  Zero for a rigid club.
+        """
+        if not self._springs:
+            return np.zeros(self.plant.num_velocities())
+        forces = self._api.MultibodyForces(self.plant)
+        self.plant.CalcForceElementsContribution(self.context, forces)
+        return np.array(forces.generalized_forces(), dtype=float)
+
+    def _unactuated(self, effort: Array) -> Array:
+        """Plant-ordered ``effort`` with the shaft coordinates zeroed."""
+        for name in self._springs:
+            effort[self._joints[name].velocity_start()] = 0.0
+        return effort
+
+    def _refuse_chain(self, method: str) -> None:
+        """DbC: a path that omits the shaft springs never sees a chain."""
+        if self._springs:
+            raise ShaftChainUnsupportedError(
+                f"Drake {method} does not apply the chain-shaft springs (#12691)"
+            )
 
     def _init_contact(self, spec: Mapping[str, Any]) -> None:
         c_spec = spec["contact"]
@@ -540,8 +611,9 @@ class FullBodyDrakeModel:
         a, b, jacobian, bias = self._closure_bias_and_jacobian()
 
         force = (
-            self._vector(primitive_efforts, self._v_indices)
+            self._unactuated(self._vector(primitive_efforts, self._v_indices))
             + tau_contact
+            + self._passive_force()
             + self.plant.CalcGravityGeneralizedForces(self.context)
             - self.plant.CalcBiasTerm(self.context)
         )
@@ -788,6 +860,7 @@ class FullBodyDrakeModel:
         rates: Mapping[str, float] | Array,
     ) -> tuple[Array, Array]:
         """Return (A, b) with a = A @ tau_actuated + b in canonical coordinate order."""
+        self._refuse_chain("affine_dynamics")
         q_vec, coords_dict, v_vec, rates_dict = self._coerce_state(coordinates, rates)
 
         self.plant.SetPositions(self.context, self.to_plant_positions(q_vec))
@@ -838,7 +911,8 @@ class FullBodyDrakeModel:
 
         ``h = CalcBiasTerm - CalcGravityGeneralizedForces`` is the
         Coriolis-plus-gravity vector on the same side as Pinocchio's
-        ``nonLinearEffects``.  Postcondition: ``M`` symmetric ``(n, n)``.
+        ``nonLinearEffects``, minus the chain-shaft spring and damper force
+        (zero for a rigid club, #12691).  Postcondition: ``M`` symmetric ``(n, n)``.
         """
         self._set_state(q, v)
         mass_plant = np.asarray(self.plant.CalcMassMatrix(self.context), dtype=float)
@@ -847,6 +921,7 @@ class FullBodyDrakeModel:
         bias = self._spec_vector(
             np.asarray(self.plant.CalcBiasTerm(self.context))
             - np.asarray(self.plant.CalcGravityGeneralizedForces(self.context))
+            - self._passive_force()  # chain-shaft springs, as MuJoCo's passive
         )
         return mass, bias
 
@@ -891,6 +966,10 @@ class FullBodyDrakeModel:
         fallback).  Postcondition: arrays in spec order, closure rows in
         :data:`CLOSURE_CONVENTION`.
         """
+        if self._springs:
+            raise DifferentialsUnavailable(
+                "the chain shaft's springs are not differentiated (#12691)"
+            )
         from pydrake.autodiffutils import InitializeAutoDiff  # noqa: PLC0415
 
         n = len(self.names)

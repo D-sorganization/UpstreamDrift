@@ -1,4 +1,4 @@
-"""MyoSuite golfer scene composition (MS-51, #10344).
+"""MyoSuite golfer scene composition (MS-51, #10344; HRG-GS-M7, #13329).
 
 Composes the pinned MyoHub ``myo_sim`` MyoBody-simple-upper MJCF with a
 club from :mod:`club_models`, dual-grip weld sites, and four foot contact
@@ -9,23 +9,28 @@ Design contracts
 - Public entry points validate preconditions and fail closed when the
   pinned ``myo_sim`` checkout is missing.
 - ``myosuite`` / MuJoCo SDKs are **not** imported here (Law of Demeter);
-  native load lives in tests and ``model_inventory`` native helpers.
+  native load lives in tests, ``golfer_grip_adapter``, and ``model_inventory``
+  native helpers.
 - Scene generation is pure XML composition over existing assets (DRY).
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import enum
 import hashlib
 import json
 import logging
-import re
-from dataclasses import dataclass
+import math
 from pathlib import Path
+import re
 from typing import Any
 
 from src.shared.python.contracts import postcondition, precondition
-from src.shared.python.model_appearance.grip_pose import DEFAULT_GRIP_POSE, Hand
+from src.shared.python.model_appearance.grip_pose import (
+    DEFAULT_GRIP_POSE,
+    Hand,
+)
 from src.shared.python.motion_matching.club_models import CLUBS, ClubSpec
 from src.shared.python.motion_matching.contact_law import ContactParameters
 
@@ -33,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 REPO_ROOT_DEFAULT = Path(__file__).resolve().parents[5]
 _ENGINE_ROOT = Path(__file__).resolve().parents[1]
+
 # Scenes live at shared/models/myosuite/golf/body so nested myo_sim includes
 # that use ../../myo_sim/... resolve the same way as stock body/*.xml.
 _DEFAULT_MODELS_DIR = (
@@ -65,6 +71,26 @@ _DEFAULT_CONTACT = ContactParameters(
     viscous_friction=0.0,
     transition_velocity_m_s=0.05,
 )
+
+# Pinned myo_sim@33f3ded946f5 qpos0 kinematic chain constants from root to hand_l/hand_r:
+# root has pos=(0, 0, 1) and euler=(0, 0, -1.57); sacrum has quat=(0.707035, 0.707179, 0, 0)
+# and all downstream spine/arm bodies have identity orientation at qpos0.
+# Cumulative local offset from sacrum to hand_l is (-0.099925, -0.082121, -0.200098) m
+# (and +0.200098 m in z for hand_r). Placing grip_site_hand_l/r at z = +/-0.200098 m
+# brings both hand grip sites to the sagittal midline (z_sacrum = 0) with exact
+# DEFAULT_GRIP_POSE.hand_spacing_m separation along +y_hand and x_hand = 0.25 m
+# anterior clearance so the club shaft has zero body contact at qpos0.
+_ROOT_POS_M: tuple[float, float, float] = (0.0, 0.0, 1.0)
+_ROOT_EULER_Z_RAD: float = -1.57
+_SACRUM_QUAT_RAW: tuple[float, float, float, float] = (0.707035, 0.707179, 0.0, 0.0)
+_HAND_L_OFFSET_IN_SACRUM_M: tuple[float, float, float] = (
+    -0.099925,
+    -0.082121,
+    -0.200098,
+)
+_HAND_GRIP_X_M: float = 0.25
+_HAND_GRIP_BASE_Y_M: float = -0.05
+_HAND_MIDLINE_Z_M: float = 0.200098
 
 
 class ClubKind(enum.Enum):
@@ -134,12 +160,69 @@ def _club_spec(kind: ClubKind) -> ClubSpec:
     return CLUBS["iron7"]
 
 
+def _hand_grip_site_local_pos(hand_name: str) -> tuple[float, float, float]:
+    """Return local ``(x, y, z)`` in ``hand_l`` or ``hand_r`` frame for weld coincidence at ``qpos0``."""
+    half_span = 0.5 * DEFAULT_GRIP_POSE.hand_spacing_m
+    if hand_name == "hand_l":
+        return (_HAND_GRIP_X_M, _HAND_GRIP_BASE_Y_M - half_span, _HAND_MIDLINE_Z_M)
+    if hand_name == "hand_r":
+        return (_HAND_GRIP_X_M, _HAND_GRIP_BASE_Y_M + half_span, -_HAND_MIDLINE_Z_M)
+    raise ValueError(f"Unsupported hand body name: {hand_name!r}")
+
+
+def _qpos0_hand_world_quat() -> tuple[float, float, float, float]:
+    """Return unit quaternion ``(w, x, y, z)`` of ``hand_l`` and ``hand_r`` at ``qpos0``."""
+    half_z = 0.5 * _ROOT_EULER_Z_RAD
+    rw, rx, ry, rz = math.cos(half_z), 0.0, 0.0, math.sin(half_z)
+    sw, sx, sy, sz = _SACRUM_QUAT_RAW
+    s_norm = math.hypot(sw, sx, sy, sz)
+    sw, sx, sy, sz = sw / s_norm, sx / s_norm, sy / s_norm, sz / s_norm
+    return (
+        rw * sw - rx * sx - ry * sy - rz * sz,
+        rw * sx + rx * sw + ry * sz - rz * sy,
+        rw * sy - rx * sz + ry * sw + rz * sx,
+        rw * sz + rx * sy - ry * sx + rz * sw,
+    )
+
+
+def _qpos0_club_world_pose(
+    club: ClubSpec,
+) -> tuple[tuple[float, float, float], tuple[float, float, float, float]]:
+    """Compute ``golf_club`` world ``(pos, quat)`` so both grip welds have zero residual at ``qpos0``."""
+    qw, qx, qy, qz = _qpos0_hand_world_quat()
+    site_l_x, site_l_y, site_l_z = _hand_grip_site_local_pos("hand_l")
+    club_site_l_y = -(
+        club.length_m - DEFAULT_GRIP_POSE.distance_below_butt_m(Hand.LEAD)
+    )
+    dx = _HAND_L_OFFSET_IN_SACRUM_M[0] + site_l_x
+    dy = _HAND_L_OFFSET_IN_SACRUM_M[1] + site_l_y - club_site_l_y
+    dz = _HAND_L_OFFSET_IN_SACRUM_M[2] + site_l_z
+
+    r00 = 1.0 - 2.0 * (qy * qy + qz * qz)
+    r01 = 2.0 * (qx * qy - qw * qz)
+    r02 = 2.0 * (qx * qz + qw * qy)
+    r10 = 2.0 * (qx * qy + qw * qz)
+    r11 = 1.0 - 2.0 * (qx * qx + qz * qz)
+    r12 = 2.0 * (qy * qz - qw * qx)
+    r20 = 2.0 * (qx * qz - qw * qy)
+    r21 = 2.0 * (qy * qz + qw * qx)
+    r22 = 1.0 - 2.0 * (qx * qx + qy * qy)
+
+    pos = (
+        _ROOT_POS_M[0] + r00 * dx + r01 * dy + r02 * dz,
+        _ROOT_POS_M[1] + r10 * dx + r11 * dy + r12 * dz,
+        _ROOT_POS_M[2] + r20 * dx + r21 * dy + r22 * dz,
+    )
+    return pos, (qw, qx, qy, qz)
+
+
 def _inject_hand_grip_sites(arm_chain_text: str, hand_name: str, site_name: str) -> str:
     """Insert a grip site immediately inside the named hand body."""
+    sx, sy, sz = _hand_grip_site_local_pos(hand_name)
     pattern = rf'(<body name="{re.escape(hand_name)}"[^>]*>)'
     replacement = (
         rf'\1\n                    <site name="{site_name}" '
-        rf'pos="0 -0.05 0" size="0.005"/>'
+        rf'pos="{sx:.6g} {sy:.6g} {sz:.6g}" size="0.005"/>'
     )
     updated, n = re.subn(pattern, replacement, arm_chain_text, count=1)
     if n != 1:
@@ -204,7 +287,6 @@ def _club_grip_site(name: str, club: ClubSpec, hand: Hand) -> str:
 
 def _worldbody_addons(club: ClubSpec, contact: ContactParameters) -> str:
     """Club + contact sphere bodies placed inside ``<worldbody>``."""
-    shaft_half = 0.5 * club.length_m
     head = club.head_half_size_m
     head_type = "ellipsoid" if club.head_shape == "ellipsoid" else "box"
     solref = f"{1.0 / contact.stiffness_n_m:.6g} {contact.dissipation_s_m:.6g}"
@@ -230,10 +312,13 @@ def _worldbody_addons(club: ClubSpec, contact: ContactParameters) -> str:
                 ]
             )
         )
-    club_y = -shaft_half
+    club_y = -club.length_m
+    (cx, cy, cz), (qw, qx, qy, qz) = _qpos0_club_world_pose(club)
+    club_pos_str = f"{cx:.12f} {cy:.12f} {cz:.12f}"
+    club_quat_str = f"{qw:.12f} {qx:.12f} {qy:.12f} {qz:.12f}"
     return "\n".join(
         [
-            '    <body name="golf_club" pos="0.3 0 1.0">',
+            f'    <body name="golf_club" pos="{club_pos_str}" quat="{club_quat_str}">',
             '      <freejoint name="club_free"/>',
             (
                 f'      <geom name="club_shaft" type="capsule" '

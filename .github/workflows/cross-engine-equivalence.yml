@@ -39,6 +39,9 @@ on:
       - "tests/unit/impact_parameters/test_adapters.py"
       - "tests/motion_matching/test_cross_engine_equivalence.py"
       - "tests/cross_engine/test_jaxsim_vs_pinocchio.py"
+      - "tests/cross_engine/test_flex_shaft_parity.py"
+      - "src/shared/python/motion_matching/club_shaft_chain.py"
+      - "src/engines/physics_engines/pinocchio/python/shaft_springs.py"
       - "tests/cross_engine/test_jaxsim_forward_sim.py"
       - "tests/fixtures/test_poses.json"
       - "src/shared/python/biomechanics/ground_reaction*.py"
@@ -65,6 +68,9 @@ on:
       - "tests/unit/impact_parameters/test_adapters.py"
       - "tests/motion_matching/test_cross_engine_equivalence.py"
       - "tests/cross_engine/test_jaxsim_vs_pinocchio.py"
+      - "tests/cross_engine/test_flex_shaft_parity.py"
+      - "src/shared/python/motion_matching/club_shaft_chain.py"
+      - "src/engines/physics_engines/pinocchio/python/shaft_springs.py"
       - "tests/cross_engine/test_jaxsim_forward_sim.py"
       - "tests/fixtures/test_poses.json"
       - "src/shared/python/biomechanics/ground_reaction*.py"
@@ -261,6 +267,7 @@ jobs:
             -o addopts="" \
             tests/motion_matching/test_cross_engine_equivalence.py \
             tests/cross_engine/test_jaxsim_vs_pinocchio.py \
+            tests/cross_engine/test_flex_shaft_parity.py \
             tests/cross_engine/test_jaxsim_forward_sim.py \
             tests/unit/impact_parameters/test_adapters.py \
             -v -rs --tb=short -p no:xvfb \

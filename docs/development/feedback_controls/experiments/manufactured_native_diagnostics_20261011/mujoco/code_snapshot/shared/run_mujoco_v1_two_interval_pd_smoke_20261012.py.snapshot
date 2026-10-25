@@ -26,8 +26,8 @@ from mujoco_v1_two_interval_pd_smoke import (
     validate_torso_rotational_mapping,
 )
 
-REPO = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
-PLANNING = Path(r"C:/Users/diete/Repositories/docs/development/feedback_controls_planning")
+REPO = Path(r"<owner-home>/Repositories/Worktrees/feedback-moco-state-binding-11791")
+PLANNING = Path(r"<owner-home>/Repositories/docs/development/feedback_controls_planning")
 SPEC = REPO / "docs/development/full_body_models/full_body_spec_v1.json"
 CANDIDATE = REPO / "docs/development/full_body_models/evidence/native_candidates/returned81_candidate.json"
 SEED = PLANNING / "mujoco_v1_zero_effort_20261011_root_attempt2/native-observation.json"

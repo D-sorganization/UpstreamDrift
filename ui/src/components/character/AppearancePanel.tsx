@@ -282,9 +282,17 @@ export function AppearancePanel({
     if (!picks) return;
     // Only the picture-only grip picks go in the sidecar; physical ones never do.
     const visualPicks = {
-      ...(grip.grip_style !== undefined && { grip_style: grip.grip_style }),
       ...(grip.grip_thumb_offset_deg !== undefined && {
         grip_thumb_offset_deg: grip.grip_thumb_offset_deg,
+      }),
+      ...(grip.grip_strength_deg !== undefined && {
+        grip_strength_deg: grip.grip_strength_deg,
+      }),
+      ...(grip.lead_roll_offset_deg !== undefined && {
+        lead_roll_offset_deg: grip.lead_roll_offset_deg,
+      }),
+      ...(grip.trail_roll_offset_deg !== undefined && {
+        trail_roll_offset_deg: grip.trail_roll_offset_deg,
       }),
     };
     setExporting(true);

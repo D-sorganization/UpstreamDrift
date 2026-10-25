@@ -20,11 +20,11 @@ monitoring per-batch sample diversity.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\train_cvae.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\dataset_adapter.py` (turns `SweepDataset` into `(kinematics, coefficients)` pairs — sharable with #028's adapter)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\kl_annealing.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option3\test_train_cvae.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option3\test_kl_annealing.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\train_cvae.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\dataset_adapter.py` (turns `SweepDataset` into `(kinematics, coefficients)` pairs — sharable with #028's adapter)
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option3_inverse_nn\python\kl_annealing.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option3\test_train_cvae.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option3\test_kl_annealing.py`
 
 ## Public API
 

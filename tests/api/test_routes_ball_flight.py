@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import json
 import math
+from collections.abc import Callable
 from typing import Any
 
 import pytest
@@ -392,42 +393,50 @@ def test_import_accepts_records_from_either_family(
 
 
 @requires_flight_interchange
-def test_import_rejects_unknown_top_level_field(client: TestClient) -> None:
+def test_import_rejects_unknown_top_level_field(
+    client: TestClient, error_message: Callable[[Any], str]
+) -> None:
     record = _tools_family_record()
     record["unexpected_field"] = "oops"
 
     response = client.post("/tools/ball-flight/import", json={"record": record})
 
     assert response.status_code == 400
-    assert "unknown trajectory fields" in response.json()["detail"]
-    assert "unexpected_field" in response.json()["detail"]
+    assert "unknown trajectory fields" in error_message(response)
+    assert "unexpected_field" in error_message(response)
 
 
 @requires_flight_interchange
-def test_import_rejects_missing_provenance(client: TestClient) -> None:
+def test_import_rejects_missing_provenance(
+    client: TestClient, error_message: Callable[[Any], str]
+) -> None:
     record = _tools_family_record()
     del record["provenance"]
 
     response = client.post("/tools/ball-flight/import", json={"record": record})
 
     assert response.status_code == 400
-    assert "missing trajectory fields" in response.json()["detail"]
-    assert "provenance" in response.json()["detail"]
+    assert "missing trajectory fields" in error_message(response)
+    assert "provenance" in error_message(response)
 
 
 @requires_flight_interchange
-def test_import_rejects_malformed_provenance(client: TestClient) -> None:
+def test_import_rejects_malformed_provenance(
+    client: TestClient, error_message: Callable[[Any], str]
+) -> None:
     record = _tools_family_record()
     record["provenance"] = {"model_family": "swing_sim.flight"}  # missing keys
 
     response = client.post("/tools/ball-flight/import", json={"record": record})
 
     assert response.status_code == 400
-    assert "provenance fields" in response.json()["detail"]
+    assert "provenance fields" in error_message(response)
 
 
 @requires_flight_interchange
-def test_import_rejects_a_wire_invalid_frame(client: TestClient) -> None:
+def test_import_rejects_a_wire_invalid_frame(
+    client: TestClient, error_message: Callable[[Any], str]
+) -> None:
     """A ``frame_id`` outside the wire's own declared enum is the reader's refusal."""
     record = _tools_family_record()
     record["frame_id"] = "not_a_real_frame"
@@ -435,11 +444,13 @@ def test_import_rejects_a_wire_invalid_frame(client: TestClient) -> None:
     response = client.post("/tools/ball-flight/import", json={"record": record})
 
     assert response.status_code == 400
-    assert "frame_id must be one of" in response.json()["detail"]
+    assert "frame_id must be one of" in error_message(response)
 
 
 @requires_flight_interchange
-def test_import_rejects_a_wire_valid_but_unsupported_frame(client: TestClient) -> None:
+def test_import_rejects_a_wire_valid_but_unsupported_frame(
+    client: TestClient, error_message: Callable[[Any], str]
+) -> None:
     """``app_xtarget_yup_zright`` is valid on the wire but not yet plottable here."""
     record = _tools_family_record()
     record["frame_id"] = APP_FRAME_ID
@@ -447,24 +458,28 @@ def test_import_rejects_a_wire_valid_but_unsupported_frame(client: TestClient) -
     response = client.post("/tools/ball-flight/import", json={"record": record})
 
     assert response.status_code == 400
-    detail = response.json()["detail"]
+    detail = error_message(response)
     assert "unsupported frame" in detail
     assert APP_FRAME_ID in detail
 
 
 @requires_flight_interchange
-def test_import_rejects_non_monotone_samples(client: TestClient) -> None:
+def test_import_rejects_non_monotone_samples(
+    client: TestClient, error_message: Callable[[Any], str]
+) -> None:
     record = _tools_family_record()
     record["samples"][2]["time_s"] = record["samples"][1]["time_s"]
 
     response = client.post("/tools/ball-flight/import", json={"record": record})
 
     assert response.status_code == 400
-    assert "strictly increasing" in response.json()["detail"]
+    assert "strictly increasing" in error_message(response)
 
 
 @requires_flight_interchange
-def test_import_rejects_non_finite_sample_value(client: TestClient) -> None:
+def test_import_rejects_non_finite_sample_value(
+    client: TestClient, error_message: Callable[[Any], str]
+) -> None:
     """A literal ``NaN`` cannot come from ``JSON.stringify`` (it emits ``null``),
     but a non-browser HTTP client can still send one; the server must refuse
     it rather than accept it via Python's permissive ``json`` module. Sent as
@@ -484,11 +499,13 @@ def test_import_rejects_non_finite_sample_value(client: TestClient) -> None:
     )
 
     assert response.status_code == 400, response.text
-    assert "finite" in response.json()["detail"]
+    assert "finite" in error_message(response)
 
 
 @requires_flight_interchange
-def test_import_rejects_ragged_channel_declaration(client: TestClient) -> None:
+def test_import_rejects_ragged_channel_declaration(
+    client: TestClient, error_message: Callable[[Any], str]
+) -> None:
     """A sample missing a channel every other sample declares is refused."""
     record = _tools_family_record()
     del record["samples"][1]["velocity_mps"]
@@ -496,7 +513,7 @@ def test_import_rejects_ragged_channel_declaration(client: TestClient) -> None:
     response = client.post("/tools/ball-flight/import", json={"record": record})
 
     assert response.status_code == 400
-    assert "sample fields must be exactly" in response.json()["detail"]
+    assert "sample fields must be exactly" in error_message(response)
 
 
 def test_import_rejects_non_object_record(client: TestClient) -> None:

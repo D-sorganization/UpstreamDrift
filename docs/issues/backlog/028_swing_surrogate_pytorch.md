@@ -19,12 +19,12 @@ prerequisite for the differentiable inversion in #029.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\swing_surrogate.py` (`SwingSurrogate`, `SwingSurrogateConfig`)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\train_surrogate.py` (training entry point)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\dataset_adapter.py` (turns `SweepDataset` into `(coeffs, kinematics)` pairs)
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option2\test_swing_surrogate.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option2\test_train_surrogate.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option2\test_dataset_adapter.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\swing_surrogate.py` (`SwingSurrogate`, `SwingSurrogateConfig`)
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\train_surrogate.py` (training entry point)
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\dataset_adapter.py` (turns `SweepDataset` into `(coeffs, kinematics)` pairs)
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option2\test_swing_surrogate.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option2\test_train_surrogate.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option2\test_dataset_adapter.py`
 
 ## Public API
 

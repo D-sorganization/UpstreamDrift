@@ -83,6 +83,8 @@ class SolvePoseOptions:
     #: adds ``sqrt(weight) * (q - target)`` rows. A weak weight only decides
     #: coordinates the markers leave under-determined.
     posture_prior: Mapping[str, tuple[float, float]] | None = None
+    #: Penalise the club-body sole (spec origin) hovering above ``ground`` (#12969).
+    club_sole_weight: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -596,6 +598,27 @@ class BaseFullBodyIK:
         """Jacobian of marker positions with respect to generalized coordinates."""
         raise NotImplementedError  # tracked: #10330
 
+    def shaft_rest_coordinates(self) -> tuple[str, ...]:
+        """Chain-shaft coordinates the IK holds at rest (0 rad), #12686.
+
+        A ``club.shaft.model = "chain"`` spec appends unactuated spring
+        coordinates. Free in the marker IK they fold the shaft to fit the club
+        markers (hundreds of degrees on the canonical driver), so the
+        kinematic reference keeps the shaft undeflected and deflection comes
+        from forward dynamics only. Read from the engine adapter when it
+        declares ``passive_coordinates``, else from the specification. Empty
+        for a rigid club, which leaves every solve unchanged.
+        """
+        from src.shared.python.motion_matching.club_shaft_chain import (
+            passive_coordinates,
+        )
+
+        adapter = getattr(self, "adapter", None)
+        names = getattr(adapter, "passive_coordinates", None)
+        if names is None:
+            names = passive_coordinates(self.specification)
+        return tuple(name for name in names if name in self.coordinate_order)
+
     def _axis_rows(self, targets: Any) -> list[Any]:
         """Convert axis targets into residual rows and Jacobians."""
         return []
@@ -618,6 +641,16 @@ class BaseFullBodyIK:
         pinned: Any,
     ) -> None:
         """Append ground penetration avoidance penalty rows."""
+
+    def _append_club_sole(
+        self,
+        rows: list[Array],
+        jacs: list[Array],
+        ground: Any,
+        weight: float,
+    ) -> None:
+        """Append club-body sole resting on the ground plane (#12969)."""
+        return
 
     def _append_anchors(
         self,
@@ -784,7 +817,13 @@ class BaseFullBodyIK:
             raise ValueError("At least three valid markers are required")
         if (
             opts.iterations < 1
-            or min(opts.prior_weight, opts.closure_weight, opts.ground_weight) < 0
+            or min(
+                opts.prior_weight,
+                opts.closure_weight,
+                opts.ground_weight,
+                opts.club_sole_weight,
+            )
+            < 0
         ):
             raise ValueError("Iterations must be positive and weights nonnegative")
         if opts.balance_weight < 0:
@@ -813,7 +852,8 @@ class BaseFullBodyIK:
         low, high = self._bounds(opts.bounds)
         q = np.clip(q, low, high)
         free = np.ones(len(q), dtype=bool)
-        for name, value in (opts.locked or {}).items():
+        rest = dict.fromkeys(self.shaft_rest_coordinates(), 0.0)
+        for name, value in (rest | dict(opts.locked or {})).items():
             if name not in self.coordinate_order:
                 raise ValueError(f"Unknown locked coordinate {name}")
             index = self.coordinate_order.index(name)
@@ -896,6 +936,7 @@ class BaseFullBodyIK:
         )
         self._append_closure(rows, jacs, opts.closure_weight, rot_w)
         self._append_ground(rows, jacs, ground, opts.ground_weight, prep.pinned)
+        self._append_club_sole(rows, jacs, ground, opts.club_sole_weight)
         self._append_anchors(rows, jacs, prep.planted, opts.ground_weight)
         self._append_balance(rows, jacs, ground, opts.balance_weight)
         self._append_com_target(rows, jacs, ground, prep.com_goal)

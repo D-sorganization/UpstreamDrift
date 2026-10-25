@@ -84,8 +84,34 @@ HRG_E2_TERMS = {
 }
 
 
+HRG_E3_TERMS = {
+    "pelvis_turn_isb",
+    "pelvis_anterior_tilt_isb",
+    "pelvis_lead_hip_up_isb",
+    "thorax_turn_isb",
+    "thorax_forward_bend_isb",
+    "thorax_lead_side_bend_isb",
+    "pelvis_turn_line",
+    "thorax_turn_line",
+} | {
+    f"{role}_{name}"
+    for role in ("lead", "trail")
+    for name in (
+        "hip_flexion",
+        "hip_abduction",
+        "hip_internal_rotation",
+        "knee_flexion",
+        "shoulder_plane_of_elevation",
+        "shoulder_elevation",
+        "shoulder_internal_rotation",
+        "shoulder_horizontal_adduction",
+        "elbow_flexion",
+    )
+}
+
+
 def test_registered_terms_are_the_adr_table() -> None:
-    assert set(registered_terms()) == EXPECTED_TERMS | HRG_E2_TERMS
+    assert set(registered_terms()) == EXPECTED_TERMS | HRG_E2_TERMS | HRG_E3_TERMS
 
 
 @pytest.mark.parametrize("term_id", sorted(EXPECTED_TERMS))

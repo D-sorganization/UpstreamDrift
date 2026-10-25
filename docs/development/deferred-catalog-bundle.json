@@ -18,7 +18,12 @@
       "category": "native_viewer_export",
       "host_requirement": "MATLAB R2025b (DeskComputer / ControlTower)",
       "export_script": "scripts/matlab/export_simscape_mechanics_explorer_views.m",
-      "view_presets": ["face_on", "down_the_line", "overhead", "perspective"],
+      "view_presets": [
+        "face_on",
+        "down_the_line",
+        "overhead",
+        "perspective"
+      ],
       "rationale": "Simscape Mechanics Explorer video export (smwritevideo) requires MATLAB R2025b host and cannot run on headless CI (brick)."
     },
     {
@@ -30,6 +35,45 @@
       "category": "bunkershot3d_solver",
       "host_requirement": "conda-forge python with pychrono (F3 grain simulation)",
       "rationale": "Real 3-D DEM grain simulation via pychrono requires specialized conda-forge binary packages not present in core pip environments. Deferred by owner ruling 2026-10-14 under #12536."
+    },
+    {
+      "id": "HRG-GS-M11",
+      "issue": 13333,
+      "epic_issue": 13298,
+      "title": "HRG-GS-M11: Simscape GolfSwing3D Grip Topology Load and Render Check (MATLAB R2025b Host, Deferred)",
+      "status": "deferred",
+      "category": "simscape_grip_topology_export",
+      "host_requirement": "MATLAB R2025b (DeskComputer / ControlTower, C:/Program Files/MATLAB/R2025b/bin/matlab.exe)",
+      "executable": "C:/Program Files/MATLAB/R2025b/bin/matlab.exe",
+      "export_script": "scripts/export_simscape_grip_topology.py",
+      "matlab_consumer": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_read_grip_topology.m",
+      "artifact_path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/appearance/gs3dx_grip_topology.json",
+      "rationale": "MATLAB R2025b load and render check of gs3dx_grip_topology.json via gs3dx_read_grip_topology.m requires a licensed Windows MATLAB R2025b host (C:/Program Files/MATLAB/R2025b/bin/matlab.exe) and cannot run on Linux headless CI."
+    },
+    {
+      "id": "HRG-GS-M12",
+      "issue": 13334,
+      "epic_issue": 13297,
+      "title": "HRG-GS-M12: Simscape Physical Grip Contact Build, Qualification, and Dynamic Parity (MATLAB R2025b Host, Deferred)",
+      "status": "deferred",
+      "category": "simscape_grip_contact_simulation",
+      "host_requirement": "MATLAB R2025b (DeskComputer / ControlTower, C:/Program Files/MATLAB/R2025b/bin/matlab.exe)",
+      "executable": "C:/Program Files/MATLAB/R2025b/bin/matlab.exe",
+      "export_script": "scripts/export_simscape_grip_kernel.py",
+      "scenario_export_script": "scripts/export_simscape_grip_contact_inputs.py",
+      "matlab_builder": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_build_grip_contact.m",
+      "matlab_runner": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_grip_contact_run.m",
+      "matlab_unittest": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/test_gs3dx_grip_pair_wrench.m",
+      "artifact_path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/receipts/grip_contact/gs3dx_grip_contact_receipt.json",
+      "rationale": "Building GS3DX_GripContact.slx, running test_gs3dx_grip_pair_wrench.m, and executing gs3dx_grip_contact_run.m across overlap/interlock/ten_finger hold and short_swing scenarios requires a licensed MATLAB R2025b + Simscape Multibody host (C:/Program Files/MATLAB/R2025b/bin/matlab.exe) and cannot run on headless Linux CI.",
+      "r2025b_execution": {
+        "date": "2026-10-19",
+        "host": "DeskComputer",
+        "release": "R2025b",
+        "receipt": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/receipts/grip_contact/gs3dx_grip_contact_receipt.json",
+        "result": "golden test passed; model built (81 compiled blocks); all 6 style/scenario runs pass determinate net-club-wrench parity vs Pinocchio; convergence, save/reload, frame-probe and force-sign checks pass",
+        "rerun_trigger": "test_r2025b_receipt_hashes_match_committed_kernel_and_inputs fails when the kernel or inputs change"
+      }
     }
   ]
 }

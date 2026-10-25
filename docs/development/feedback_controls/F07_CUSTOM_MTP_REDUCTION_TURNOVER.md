@@ -58,11 +58,11 @@ Reproduce the focused native checks with exact retained source and composed
 parent artifacts:
 
 ```powershell
-$env:CASADIPATH='C:/Users/diete/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim'
+$env:CASADIPATH='<owner-home>/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim'
 $env:PYTHONPATH=(Get-Location).Path
 $env:UD_BUET_HAMNER_ASSEMBLED_SOURCE='<owned-immutable-v4-source.osim>'
 $env:UD_BUET_HAMNER_COMPOSED_SUBTALAR_SOURCE='<owned-abdomen-subtalar.osim>'
-& 'C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/unit/engines/opensim/test_native_custom_mtp_contract.py tests/unit/engines/opensim/test_native_subtalar_reduction_contract.py tests/opensim/test_native_custom_mtp_reduction.py tests/opensim/test_native_subtalar_reduction.py -q
+& '<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/unit/engines/opensim/test_native_custom_mtp_contract.py tests/unit/engines/opensim/test_native_subtalar_reduction_contract.py tests/opensim/test_native_custom_mtp_reduction.py tests/opensim/test_native_subtalar_reduction.py -q
 ```
 
 The bounded emitter is `scripts/opensim/emit_zero_custom_mtp_receipt.py` with

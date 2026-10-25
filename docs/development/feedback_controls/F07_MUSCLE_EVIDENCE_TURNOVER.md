@@ -2,7 +2,7 @@
 
 ## Identity and Scope
 
-Repository: UpstreamDrift. Worktree: `C:/Users/diete/Repositories/Worktrees/feedback-muscle-evidence-11791`. Branch: `fix/feedback-muscle-evidence-11791`. Baseline: `44f091273884439bef43f61b90c1c10f68b77726`. Current commit: `SELF`; resolve with `git rev-parse HEAD`. Test-first commit: `d66e31ed2d`. PR: [#11814](https://github.com/D-sorganization/UpstreamDrift/pull/11814). Scoped child #11810 under F07 #11791 and #11784; this is a narrow evidence-integrity correction, not completion of either parent. The child claim was clear and a codex lease was posted before publication.
+Repository: UpstreamDrift. Worktree: `<owner-home>/Repositories/Worktrees/feedback-muscle-evidence-11791`. Branch: `fix/feedback-muscle-evidence-11791`. Baseline: `44f091273884439bef43f61b90c1c10f68b77726`. Current commit: `SELF`; resolve with `git rev-parse HEAD`. Test-first commit: `d66e31ed2d`. PR: [#11814](https://github.com/D-sorganization/UpstreamDrift/pull/11814). Scoped child #11810 under F07 #11791 and #11784; this is a narrow evidence-integrity correction, not completion of either parent. The child claim was clear and a codex lease was posted before publication.
 
 Owned paths: `tour_matching/muscle_qualification.py`, focused tests, calculation reference and this turnover. The coordinating task owns `muscle_replay.py`; do not modify it here. No capture or native full-body model is needed for this guard. No unrelated/user-owned changes observed.
 
@@ -10,7 +10,7 @@ Owned paths: `tour_matching/muscle_qualification.py`, focused tests, calculation
 
 The original orchestration invented a `QUALIFIED_SHORT_REPLAY` from fixed reserve/pelvic metrics, and set geometry, moment-arm, equilibrium and activation audit booleans without performing those audits. A standalone metrics container also defaulted to a qualified status.
 
-Using `C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe`:
+Using `<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe`:
 
 ```powershell
 python3 -m pytest tests/opensim/test_muscle_cmc.py --override-ini='addopts=' -q -k 'does_not_invent_native_evidence or constructing_short_replay_metrics'

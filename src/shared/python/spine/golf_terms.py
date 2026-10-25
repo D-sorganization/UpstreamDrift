@@ -31,7 +31,9 @@ from typing import Any, Literal
 
 import numpy as np
 
+from src.shared.python.anatomical_angles import limbs as _limbs
 from src.shared.python.anatomical_angles import terms as _wrist_terms
+from src.shared.python.anatomical_angles import trunk_pelvis as _trunk_pelvis
 from src.shared.python.contracts import ensure
 from src.shared.python.spine._golf_term_impl import (
     Handedness,
@@ -117,20 +119,30 @@ def _jcs_lateral(inputs: Mapping[str, Any], hand: Handedness) -> np.ndarray:
     return handed_sign(hand) * isb_spine_angles_deg(inputs[_ROT], _ROT)[:, 1]
 
 
-def _line_turn(inputs: Mapping[str, Any], hand: Handedness) -> np.ndarray:
-    up = unit_vector(inputs["up"], "up")
-    points = inputs["points"]
-    if not isinstance(points, Mapping):
-        raise TypeError("points must be a mapping of name -> (N, 3) array")
-    flat = {
-        k: rotate_to_z_up(_points_array(v, f"points[{k}]"), up)
-        for k, v in points.items()
-    }
-    pairs = inputs.get("point_pairs", MARKER_PAIRS)
-    metrics = compute_turn_lines(flat, inputs["t"], inputs["events"], pairs=pairs)
-    turn = np.array(metrics.x_factor.turn_deg, dtype=float)
-    # turn.py is positive for the right-handed backswing (clockwise from above)
-    return turn if hand == "right" else -turn
+def _line_turn_attr(
+    attr: str,
+) -> Callable[[Mapping[str, Any], Handedness], np.ndarray]:
+    def _fn(inputs: Mapping[str, Any], hand: Handedness) -> np.ndarray:
+        up = unit_vector(inputs["up"], "up")
+        points = inputs["points"]
+        if not isinstance(points, Mapping):
+            raise TypeError("points must be a mapping of name -> (N, 3) array")
+        flat = {
+            k: rotate_to_z_up(_points_array(v, f"points[{k}]"), up)
+            for k, v in points.items()
+        }
+        pairs = inputs.get("point_pairs", MARKER_PAIRS)
+        metrics = compute_turn_lines(flat, inputs["t"], inputs["events"], pairs=pairs)
+        turn = np.array(getattr(metrics, attr).turn_deg, dtype=float)
+        # turn.py is positive for the right-handed backswing (clockwise from above)
+        return turn if hand == "right" else -turn
+
+    return _fn
+
+
+_line_turn = _line_turn_attr("x_factor")
+_pelvis_line_turn = _line_turn_attr("pelvis")
+_thorax_line_turn = _line_turn_attr("upper_trunk")
 
 
 def _points_array(value: object, name: str) -> np.ndarray:
@@ -269,6 +281,26 @@ _TERMS: dict[str, _Term] = {
             + "; swing_comparison/turn.py (optional input point_pairs)",
         ),
         _term(
+            "pelvis_turn_line",
+            _pelvis_line_turn,
+            description="Pelvis line turn in horizontal plane from swing_comparison.turn",
+            frame=_LAB + "; points rotated so up is +Z before swing_comparison.turn",
+            sign_convention="turn.py positive in the right-handed backswing; negated for left",
+            units="deg",
+            required_inputs=("points", "t", "events", "up"),
+            reference=_ISB_ADR + "; swing_comparison/turn.py",
+        ),
+        _term(
+            "thorax_turn_line",
+            _thorax_line_turn,
+            description="Upper-trunk line turn in horizontal plane from swing_comparison.turn",
+            frame=_LAB + "; points rotated so up is +Z before swing_comparison.turn",
+            sign_convention="turn.py positive in the right-handed backswing; negated for left",
+            units="deg",
+            required_inputs=("points", "t", "events", "up"),
+            reference=_ISB_ADR + "; swing_comparison/turn.py",
+        ),
+        _term(
             "x_factor_position_proxy",
             _position_proxy,
             description="Legacy joint-coordinate proxy: shoulder minus hip rotation",
@@ -388,6 +420,40 @@ _TERMS.update(
             reference=_wrist_terms.wrist_term_reference(),
         )
         for w in _wrist_terms.wrist_term_specs()
+    }
+)
+
+# HRG-E3 (#13171): pelvis and thorax in the golfer's ISB lab frame.
+_TERMS.update(
+    {
+        s.term_id: _term(
+            s.term_id,
+            _trunk_pelvis.evaluator(s),  # type: ignore[arg-type]
+            description=s.description,
+            frame=_trunk_pelvis.term_frame(),
+            sign_convention=s.sign_convention,
+            units="deg",
+            required_inputs=_trunk_pelvis.required_inputs(s),
+            reference=_trunk_pelvis.term_reference(),
+        )
+        for s in _trunk_pelvis.term_specs()
+    }
+)
+
+# HRG-E3 (#13171): limbs (hip, knee, shoulder, elbow) terms extend this registry.
+_TERMS.update(
+    {
+        s.term_id: _term(
+            s.term_id,
+            _limbs.evaluator(s),  # type: ignore[arg-type]
+            description=s.formula,
+            frame=s.frame,
+            sign_convention=s.sign_convention,
+            units="deg",
+            required_inputs=(s.required_input,),
+            reference=s.reference,
+        )
+        for s in _limbs.limb_term_specs()
     }
 )
 
