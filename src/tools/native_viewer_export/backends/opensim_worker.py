@@ -367,6 +367,25 @@ def collect_framing_points(
     return sole_points(np.asarray(out, dtype=float), ground_h)
 
 
+def init_simbody_visualizer(
+    osim: Any,
+    model: Any,
+    *,
+    up_axis: int = 2,
+    ground_height: float = 0.0,
+) -> tuple[Any, Any]:
+    """Enable the Simbody visualizer with shared background and up-axis defaults."""
+    model.setUseVisualizer(True)
+    state = model.initSystem()
+    viz = model.updVisualizer().updSimbodyVisualizer()
+    viz.setBackgroundType(viz.GroundAndSky)
+    viz.setShowFrameRate(False)
+    viz.setShowSimTime(False)
+    viz.setSystemUpDirection(osim.CoordinateDirection(osim.CoordinateAxis(up_axis)))
+    viz.setGroundHeight(ground_height)
+    return state, viz
+
+
 def set_camera(
     osim: Any,
     viz: Any,
@@ -394,14 +413,9 @@ def main(job_path: str) -> None:
         osim, bundle.spec_bytes, appearance_for(job.appearance)
     )
     ball_coord = attach_ball(osim, model, job.ball) if job.ball else None
-    model.setUseVisualizer(True)
-    state = model.initSystem()
-    viz = model.updVisualizer().updSimbodyVisualizer()
-    viz.setBackgroundType(viz.GroundAndSky)
-    viz.setShowFrameRate(False)
-    viz.setShowSimTime(False)
-    viz.setSystemUpDirection(osim.CoordinateDirection(osim.CoordinateAxis(2)))
-    viz.setGroundHeight(ground_h)
+    state, viz = init_simbody_visualizer(
+        osim, model, up_axis=2, ground_height=ground_h
+    )
     coords = model.getCoordinateSet()
     glyph_sets = job.load_glyph_sets()
     time.sleep(3.0)
