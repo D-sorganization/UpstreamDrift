@@ -122,7 +122,7 @@ def compose_row(
     return path
 
 
-def main() -> None:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bundle", type=Path, help="same-input bundle .npz")
     parser.add_argument(
@@ -134,37 +134,39 @@ def main() -> None:
     parser.add_argument("--engines", default=",".join(ENGINES_DEFAULT))
     parser.add_argument("--swing", default="capture-A")
     parser.add_argument("--club", default="Driver")
-    args = parser.parse_args()
-    import imageio.v2 as imageio
+    return parser
 
-    from src.tools.native_viewer_export.backends.registry import make_backend
-    from src.tools.native_viewer_export.core import ExportSettings, load_swing_input
+
+def resolve_swing_input(
+    args: argparse.Namespace,
+) -> tuple[Any, str, str]:
+    from src.tools.native_viewer_export.core import load_swing_input
 
     if args.bundle is not None:
         swing = load_swing_input(args.bundle, swing=args.swing, club=args.club)
-        bundle_digest = bundle_sha256(args.bundle)
-        bundle_source = str(args.bundle)
-    elif args.datastore is not None:
+        return swing, bundle_sha256(args.bundle), str(args.bundle)
+    if args.datastore is not None:
         folder = args.datastore / CAPTURE_A_DRIVER
         swing = swing_from_datastore(folder, swing=args.swing, club=args.club)
-        bundle_digest = hashlib.sha256(swing.bundle.spec_bytes).hexdigest()
-        bundle_source = str(folder)
-    else:
-        raise SystemExit("pass --bundle or --datastore")
+        digest = hashlib.sha256(swing.bundle.spec_bytes).hexdigest()
+        return swing, digest, str(folder)
+    raise SystemExit("pass --bundle or --datastore")
 
-    phases = phase_indices(swing.bundle)
-    settings = ExportSettings(
-        views=VIEWS,
-        width=WIDTH,
-        height=HEIGHT,
-        hud=False,
-        overlays=False,
-        ball=False,
-        multiview=False,
-    )
-    args.out.mkdir(parents=True, exist_ok=True)
+
+def render_engine_stills(
+    swing: Any,
+    *,
+    out_dir: Path,
+    engines_csv: str,
+    phases: dict[str, int],
+    settings: Any,
+) -> dict[tuple[str, str, str], Path]:
+    import imageio.v2 as imageio
+
+    from src.tools.native_viewer_export.backends.registry import make_backend
+
     rendered: dict[tuple[str, str, str], Path] = {}
-    for engine in args.engines.split(","):
+    for engine in engines_csv.split(","):
         engine = engine.strip()
         if not engine:
             continue
@@ -175,30 +177,51 @@ def main() -> None:
         frames = backend.render(swing, settings, list(phases.values()), None)
         for phase, views in zip(phases, frames, strict=True):
             for view, image in views.items():
-                path = args.out / f"r9a_driver_{engine}_{view}_{phase}.png"
+                path = out_dir / f"r9a_driver_{engine}_{view}_{phase}.png"
                 imageio.imwrite(path, np.asarray(image))
                 rendered[(engine, view, phase)] = path
                 print(path)  # noqa: T201 - evidence script progress
+    return rendered
 
+
+def write_comparison_rows(
+    out_dir: Path,
+    *,
+    engines_csv: str,
+    phases: dict[str, int],
+    rendered: dict[tuple[str, str, str], Path],
+) -> None:
     meshcat = {k: v for k, v in rendered.items() if k[0] in {"drake", "pinocchio"}}
-    if "mujoco" in args.engines and meshcat:
-        for view in VIEWS:
-            for phase in phases:
-                engines_present = {
-                    e: rendered[(e, view, phase)]
-                    for e in ("drake", "pinocchio", "mujoco")
-                    if (e, view, phase) in rendered
-                }
-                if len(engines_present) >= 2:
-                    row = compose_row(
-                        args.out,
-                        label="meshcat_mujoco_compare",
-                        phase=phase,
-                        view=view,
-                        engine_paths=engines_present,
-                    )
-                    print(row)  # noqa: T201
+    if "mujoco" not in engines_csv or not meshcat:
+        return
+    for view in VIEWS:
+        for phase in phases:
+            engines_present = {
+                e: rendered[(e, view, phase)]
+                for e in ("drake", "pinocchio", "mujoco")
+                if (e, view, phase) in rendered
+            }
+            if len(engines_present) < 2:
+                continue
+            row = compose_row(
+                out_dir,
+                label="meshcat_mujoco_compare",
+                phase=phase,
+                view=view,
+                engine_paths=engines_present,
+            )
+            print(row)  # noqa: T201
 
+
+def write_appearance_receipt(
+    out_dir: Path,
+    *,
+    args: argparse.Namespace,
+    swing: Any,
+    bundle_digest: str,
+    bundle_source: str,
+    phases: dict[str, int],
+) -> Path:
     receipt = {
         "issue": "#12688",
         "epic": "#12678",
@@ -227,8 +250,45 @@ def main() -> None:
             f"--datastore {args.datastore or '<datastore>'} --out <dir>"
         ),
     }
-    receipt_path = args.out / "r9a_appearance_receipt.json"
+    receipt_path = out_dir / "r9a_appearance_receipt.json"
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    return receipt_path
+
+
+def main() -> None:
+    args = build_parser().parse_args()
+    from src.tools.native_viewer_export.core import ExportSettings
+
+    swing, bundle_digest, bundle_source = resolve_swing_input(args)
+    phases = phase_indices(swing.bundle)
+    settings = ExportSettings(
+        views=VIEWS,
+        width=WIDTH,
+        height=HEIGHT,
+        hud=False,
+        overlays=False,
+        ball=False,
+        multiview=False,
+    )
+    args.out.mkdir(parents=True, exist_ok=True)
+    rendered = render_engine_stills(
+        swing,
+        out_dir=args.out,
+        engines_csv=args.engines,
+        phases=phases,
+        settings=settings,
+    )
+    write_comparison_rows(
+        args.out, engines_csv=args.engines, phases=phases, rendered=rendered
+    )
+    receipt_path = write_appearance_receipt(
+        args.out,
+        args=args,
+        swing=swing,
+        bundle_digest=bundle_digest,
+        bundle_source=bundle_source,
+        phases=phases,
+    )
     print(receipt_path)  # noqa: T201
 
 
