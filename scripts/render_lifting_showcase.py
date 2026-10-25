@@ -187,9 +187,75 @@ def _render_variant_frames(
     return frames
 
 
+def _render_opensim_entry(
+    plan: LiftingShowcasePlan,
+    eng_dir: Path,
+    frames_per_variant: int,
+    full_motion: bool,
+) -> dict[str, Any]:
+    """Render real OpenSim lift videos or report unavailable status."""
+    if plan.lift == "bench_press":
+        return {
+            "engine": "opensim",
+            "status": "unavailable",
+            "reason": (
+                "bench press IK does not pose a supine lifter; "
+                "standing posture on bench is unphysical"
+            ),
+            "rendered_files": [],
+        }
+
+    from src.engines.physics_engines.opensim.python.msk_lift_video import (
+        BARBELL_LIFTS,
+        render_opensim_lift_video,
+    )
+
+    if plan.lift not in BARBELL_LIFTS:
+        eng_files: list[str] = []
+        for o in plan.overlays:
+            for v in plan.views:
+                for s in plan.speeds:
+                    fnames = _render_variant_frames(
+                        eng_dir, v, o, s, frames_per_variant
+                    )
+                    eng_files.extend(fnames)
+        return {
+            "engine": "opensim",
+            "status": "rendered",
+            "frame_count": len(eng_files),
+            "rendered_files": eng_files,
+        }
+
+    eng_files = []
+    limit = None if full_motion else frames_per_variant
+    for o in plan.overlays:
+        for v in plan.views:
+            for s in plan.speeds:
+                fname = f"{v}_{s}x_{o}.mp4"
+                out_path = eng_dir / fname
+                render_opensim_lift_video(
+                    lift=plan.lift,
+                    out_path=out_path,
+                    view=v,
+                    fps=plan.fps,
+                    speed=s,
+                    overlay=o,
+                    frames=limit,
+                )
+                eng_files.append(fname)
+
+    return {
+        "engine": "opensim",
+        "status": "rendered",
+        "frame_count": len(eng_files),
+        "rendered_files": eng_files,
+    }
+
+
 def render_lifting_showcase_smoke(
     plan: LiftingShowcasePlan,
     frames_per_variant: int = 1,
+    full_motion: bool = False,
 ) -> dict[str, Any]:
     """Execute a headless deterministic smoke render across requested engines."""
     manifest_entries: list[dict[str, Any]] = []
@@ -208,8 +274,15 @@ def render_lifting_showcase_smoke(
             )
             continue
 
-        eng_files: list[str] = []
         eng_dir = lift_dir / eng
+        if eng == "opensim":
+            entry = _render_opensim_entry(
+                plan, eng_dir, frames_per_variant, full_motion=full_motion
+            )
+            manifest_entries.append(entry)
+            continue
+
+        eng_files: list[str] = []
         for o in plan.overlays:
             for v in plan.views:
                 for s in plan.speeds:
