@@ -171,9 +171,7 @@ class LiftTargets:
 def landmark_attachments(spec: Mapping[str, Any]) -> dict[str, tuple[str, tuple]]:
     """IK landmark attachments for a lift bundle spec (body landmarks plus feet)."""
     stations = _foot_stations(spec)
-    return {
-        label: LANDMARK_ATTACHMENTS[label] for label in LANDMARK_LABELS
-    } | stations
+    return {label: LANDMARK_ATTACHMENTS[label] for label in LANDMARK_LABELS} | stations
 
 
 def _foot_stations(spec: Mapping[str, Any]) -> dict[str, tuple[str, tuple]]:
