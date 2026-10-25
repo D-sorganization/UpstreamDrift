@@ -64,6 +64,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0054](0054-closed-loop-null-space-exploration.md)                      | Closed-Loop Null-Space Exploration                                                | Accepted | 2026-10-14 |
 | [0055](0055-segmental-spine-kinematics-and-loads.md)                    | Segmental Spine Kinematics, Load Observables and Golf-Term Definitions            | Accepted | 2026-10-15 |
 | [0056](0056-canonical-golfer-kinematics-source.md)                      | Canonical Source for Golfer Kinematics and the Closure Jacobian                   | Accepted | 2026-10-15 |
+| [0057](0057-hrg-hx5-articulated-hand-option.md)                          | HRG-HX5 Articulated-Finger Hand Option                                             | Accepted | 2026-10-25 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.
