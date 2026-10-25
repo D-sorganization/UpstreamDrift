@@ -34,6 +34,10 @@ from numpy.typing import NDArray
 from src.shared.python.contracts import require
 from src.shared.python.loop_nullspace.qp_core import QPConstraints, solve_qp
 from src.shared.python.loop_nullspace.solvers import ConicSettings, SolveStatus
+from src.shared.python.loop_nullspace.zero_side_shim import (
+    ZeroSideConsistency,
+    check_zero_side_consistency,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -260,6 +264,12 @@ class ContactForceAllocator:
         atol: float = 1e-4,
     ) -> ContactForceAllocation:
         """Resolve torques and contact forces matching tau_rnea exactly under constraints."""
+        warnings.warn(
+            "ContactForceAllocator.allocate is a legacy shim; prefer "
+            "loop_nullspace.allocate_trajectory over the conic core.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         obj = AllocationObjective.from_string(objective)
         require(
             tau_rnea.shape == (self.nv,),
@@ -325,6 +335,32 @@ class ContactForceAllocator:
         trail_set: set[int] = (
             set(trail_arm_indices) if trail_arm_indices is not None else set()
         )
+        if obj == AllocationObjective.HARD_ZERO_TRAIL and trail_set:
+            zero_check = check_zero_side_consistency(
+                tau_rnea,
+                self.actuated_indices,
+                list(trail_set),
+                j_ground=j_ground,
+                j_grip=j_grip,
+                atol=atol,
+            )
+            if zero_check.status is ZeroSideConsistency.INCONSISTENT:
+                logger.info(
+                    "HARD_ZERO_TRAIL inconsistent: scaled residual %.3g",
+                    zero_check.residual_scaled,
+                )
+                return ContactForceAllocation(
+                    tau_actuated=np.zeros(self.n_actuated, dtype=np.float64),
+                    f_ground=np.zeros(self.n_ground_vars, dtype=np.float64),
+                    lambda_grip=np.zeros(self.n_grip_vars, dtype=np.float64),
+                    delta_tau_root=np.zeros(self.n_root_vars, dtype=np.float64),
+                    equilibrium_residual=zero_check.residual_norm,
+                    root_balance_residual=zero_check.residual_norm,
+                    success=False,
+                    objective=obj,
+                    is_physically_feasible=False,
+                    feasibility_status=FeasibilityStatus.INFEASIBLE_HARD_ZERO_TRAIL,
+                )
         if obj == AllocationObjective.MINIMUM_TRAIL_ARM and len(trail_set) > 0:
             for i, idx in enumerate(self.actuated_indices):
                 if idx in trail_set:
