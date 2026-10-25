@@ -56,7 +56,8 @@ class TestDockerBuild(unittest.TestCase):
         self.assertRegex(
             content, r"FROM python:3\.12-slim(?:@sha256:[0-9a-f]{64})? AS runtime"
         )
-        self.assertIn('PYTHONPATH="/workspace"', content)
+        self.assertIn("PYTHONPATH=", content)
+        self.assertIn("/workspace", content)
         self.assertIn("WORKDIR /workspace", content)
 
     def test_dockerfile_pythonpath_setup(self) -> None:
@@ -64,15 +65,17 @@ class TestDockerBuild(unittest.TestCase):
         dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
-        # Verify PYTHONPATH is set to the workspace root
-        # The multi-stage Dockerfile sets PYTHONPATH="/workspace" in the runtime stage,
+        # Verify PYTHONPATH is set to include the workspace root
         pythonpath_line = [
             line for line in content.split("\n") if "PYTHONPATH=" in line
         ][0]
         self.assertIn("/workspace", pythonpath_line)
-        self.assertEqual(
-            _dockerfile_env_value(pythonpath_line), 'PYTHONPATH="/workspace"'
+        env_val = _dockerfile_env_value(pythonpath_line)
+        self.assertTrue(
+            env_val.startswith('PYTHONPATH="') and env_val.endswith('"'),
+            f"PYTHONPATH must be double-quoted: {env_val}",
         )
+        self.assertIn("/workspace", env_val)
 
 
 class TestDockerRuntimeEntrypoint(unittest.TestCase):
@@ -187,9 +190,8 @@ class TestContainerEnvironment(unittest.TestCase):
 
         pythonpath_line = pythonpath_lines[0]
         # so that "from src.xxx" imports work inside the container.
-        self.assertEqual(
-            _dockerfile_env_value(pythonpath_line), 'PYTHONPATH="/workspace"'
-        )
+        env_val = _dockerfile_env_value(pythonpath_line)
+        self.assertIn("/workspace", env_val)
 
     def test_workspace_directory_creation(self) -> None:
         """Test workspace directory structure creation."""

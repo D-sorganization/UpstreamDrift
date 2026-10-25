@@ -1,9 +1,9 @@
 """Anti-phantom-merge never uses PR-head code and re-evaluates on every event.
 
-The workflow runs on ``pull_request`` and, for label events,
-``pull_request_target`` (base-repo credentials). It must therefore check out
-trusted base code only and read the PR's files and commits from the REST API,
-and the checks step must not be limited to one event (RM#1989).
+The workflow runs on ``pull_request`` only (including ``labeled`` /
+``unlabeled``). It must check out trusted base code only and read the PR's
+files and commits from the REST API, and the checks step must not be limited
+to one event (RM#1989).
 """
 
 from __future__ import annotations
@@ -74,3 +74,10 @@ def test_run_blocks_do_not_interpolate_untrusted_expressions() -> None:
 def test_concurrency_group_separates_event_types() -> None:
     data = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
     assert "github.event_name" in data["concurrency"]["group"]
+
+
+def test_does_not_use_pull_request_target() -> None:
+    data = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+    on = data.get("on", data.get(True))
+    if isinstance(on, (dict, list)):
+        assert "pull_request_target" not in on

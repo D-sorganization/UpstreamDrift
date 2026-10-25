@@ -37,6 +37,11 @@ concurrency:
   group: bot-ci-trigger-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  actions: write
+  pull-requests: read
+
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
@@ -65,6 +70,10 @@ jobs:
     timeout-minutes: 30
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    permissions:
+      contents: write
+      actions: write
+      pull-requests: read
     continue-on-error: true
     env:
       BOT_PAT_TOKEN: ${{ secrets.BOT_PAT }}
@@ -97,11 +106,11 @@ jobs:
             fi
           done < <(git log --format="%s" -n 5)
 
-          if [ $loop_count -ge 3 ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
+          if [ "$loop_count" -ge 3 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
             echo "::warning::Loop prevention: $loop_count CI trigger commits detected"
           else
-            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Find Bot PRs Without CI
@@ -159,7 +168,7 @@ jobs:
           prs_to_trigger=$(echo "$prs_to_trigger" | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs)
 
           echo "PRs to trigger: $prs_to_trigger"
-          echo "prs=$prs_to_trigger" >> $GITHUB_OUTPUT
+          echo "prs=$prs_to_trigger" >> "$GITHUB_OUTPUT"
 
           if [ -z "$prs_to_trigger" ]; then
             echo "No PRs need CI triggering"
@@ -223,6 +232,8 @@ jobs:
             if [ "$approved" -eq 0 ]; then
               echo "No pending pull_request runs approved, trying empty commit method"
 
+              git config --local --unset-all http.https://github.com/.extraheader || true
+              gh auth setup-git
               git fetch origin "$branch"
               git checkout "$branch"
 
@@ -247,15 +258,16 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "## Bot CI Trigger Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ steps.loop-check.outputs.skip }}" == "true" ]; then
-            echo "**Skipped**: Loop prevention triggered" >> $GITHUB_STEP_SUMMARY
-          elif [ -z "${{ steps.find-prs.outputs.prs }}" ]; then
-            echo "**No action needed**: All bot PRs have CI checks" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.token-check.outputs.can_trigger }}" != "true" ]; then
-            echo "**Detected PRs**: ${{ steps.find-prs.outputs.prs }} (CI trigger skipped: bot token unavailable or invalid)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "**Triggered CI for PRs**: ${{ steps.find-prs.outputs.prs }}" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## Bot CI Trigger Summary"
+            echo ""
+            if [ "${{ steps.loop-check.outputs.skip }}" == "true" ]; then
+              echo "**Skipped**: Loop prevention triggered"
+            elif [ -z "${{ steps.find-prs.outputs.prs }}" ]; then
+              echo "**No action needed**: All bot PRs have CI checks"
+            elif [ "${{ steps.token-check.outputs.can_trigger }}" != "true" ]; then
+              echo "**Detected PRs**: ${{ steps.find-prs.outputs.prs }} (CI trigger skipped: bot token unavailable or invalid)"
+            else
+              echo "**Triggered CI for PRs**: ${{ steps.find-prs.outputs.prs }}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

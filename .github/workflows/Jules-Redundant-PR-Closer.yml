@@ -55,7 +55,11 @@ concurrency:
 
 jobs:
   close-redundant:
-    runs-on: d-sorg-fleet-docker
+    # Fork pull_request_target runs stay on GitHub-hosted runners (RM#1989).
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 10
     steps:
       - name: Generate Jules app token
@@ -107,24 +111,19 @@ jobs:
           EVENT_PR_NUMBER: ${{ github.event.pull_request.number || '' }}
         run: |
           set -uo pipefail
-          DRY_FLAG=""
+          args=(--repo "$REPO_NAME")
           if [ "$DRY_RUN_INPUT" = "true" ]; then
-            DRY_FLAG="--dry-run"
+            args+=(--dry-run)
           fi
-          FILTER_FLAG=""
           if [ -n "$AGENT_FILTER" ]; then
-            FILTER_FLAG="--agent-filter $AGENT_FILTER"
+            args+=(--agent-filter "$AGENT_FILTER")
           fi
-          BACKSTOP_FLAG=""
           if [ "$PR_ACTION" = "closed" ] && [ -n "$EVENT_PR_NUMBER" ]; then
-            BACKSTOP_FLAG="--backstop-pr $EVENT_PR_NUMBER"
+            args+=(--backstop-pr "$EVENT_PR_NUMBER")
           fi
           # Fail-open: never let a coordination glitch fail the job.
           PYTHONPATH=".jules-tools" python -m scripts.close_redundant_agent_prs \
-            --repo "$REPO_NAME" \
-            $DRY_FLAG \
-            $FILTER_FLAG \
-            $BACKSTOP_FLAG || {
+            "${args[@]}" || {
               echo "::warning::redundant-PR closer exited non-zero; continuing"
               exit 0
             }

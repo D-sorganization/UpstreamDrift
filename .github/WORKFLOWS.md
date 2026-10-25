@@ -8,20 +8,19 @@ owners validate low-risk removals.
 
 ## Security Audit: `pull_request_target` Workflows (issue #5915)
 
-Audited 2026-05-23. Two workflows use `pull_request_target`; both are safe:
+Audited 2026-10-24 (RM `docs/security/public-repo-exposure-audit-2026-10.md`).
+One workflow uses `pull_request_target`:
 
 **`Jules-Redundant-PR-Closer.yml`** — trigger covers `opened/reopened/synchronize/closed`
 from forks but does **not** check out the PR head ref. It only checks out
-`Repository_Management` at `ref: main`. The app token grants
+`Repository_Management` at `ref: main`. Fork PRs route to `ubuntu-latest`; same-repo
+PRs use `d-sorg-fleet-docker`. The app token grants
 `contents:read / pull-requests:write / issues:write`; no secrets beyond the
 Jules app credentials are exposed. ✅ Safe.
 
-**`anti-phantom-merge.yml`** — uses `pull_request_target` only for `labeled/unlabeled`
-events (to honor admin overrides). On those events it checks out the PR head SHA to
-run `git diff` commands but does **not** execute any code from the checked-out tree.
-The `${{ github.token }}` used has `contents:read / pull-requests:write / issues:read`.
-The shell steps are defined in the base-branch workflow (not the PR head), so the
-checkout is read-only data, not executable code. ✅ Safe.
+**`anti-phantom-merge.yml`** — uses `pull_request` only (including `labeled` /
+`unlabeled`). It checks out trusted **base** SHA only and reads PR files/commits via
+the REST API; no `pull_request_target`. ✅ Safe.
 
 **Action item**: when adding new `pull_request_target` triggers, ensure no PR-head
 code is executed and no secrets beyond minimum necessary permissions are exposed.

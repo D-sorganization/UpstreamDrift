@@ -20,6 +20,10 @@ on:
         required: false
         default: "Maintenance"
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
@@ -70,11 +74,13 @@ jobs:
             git push
           fi
 
-          echo "## - Global Workflow Control" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ inputs.action }}" == "pause" ]; then
-            echo "- **Status:** -- **PAUSED**" >> $GITHUB_STEP_SUMMARY
-            echo "- **Reason:** ${{ inputs.reason }}" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- **Status:** -- **RESUMED**" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## - Global Workflow Control"
+            echo ""
+            if [ "${{ inputs.action }}" == "pause" ]; then
+              echo "- **Status:** -- **PAUSED**"
+              echo "- **Reason:** ${{ inputs.reason }}"
+            else
+              echo "- **Status:** -- **RESUMED**"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

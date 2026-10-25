@@ -1032,6 +1032,9 @@ jobs:
       - name: Workflow Run Trust Boundary Guard
         run: python3 scripts/check_workflow_run_trust_boundary.py
 
+      - name: Fork PR self-hosted runner guard (RM#1989)
+        run: python3 scripts/fork_pr_runner_guard.py
+
       - name: Workflow Context Availability Guard
         run: python3 scripts/ci/check_workflow_contexts.py
 
