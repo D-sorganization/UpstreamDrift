@@ -175,18 +175,9 @@ def test_mujoco_and_in_house_rk4_replay_same_torque_profile() -> None:
         state.theta1 + state.theta2 + state.theta3,
     )
     lengths = tuple(segment.length_m for segment in dynamics.parameters.segments)
-    actual_tip = np.array(
-        [
-            -sum(
-                length * np.sin(angle)
-                for length, angle in zip(lengths, angles, strict=True)
-            ),
-            0.0,
-            1.2
-            - sum(
-                length * np.cos(angle)
-                for length, angle in zip(lengths, angles, strict=True)
-            ),
-        ]
+    tip_x = -sum(seg_l * np.sin(a) for seg_l, a in zip(lengths, angles, strict=True))
+    tip_z = 1.2 - sum(
+        seg_l * np.cos(a) for seg_l, a in zip(lengths, angles, strict=True)
     )
+    actual_tip = np.array([tip_x, 0.0, tip_z])
     assert np.linalg.norm(expected_tip - actual_tip) <= 1e-6

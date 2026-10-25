@@ -71,16 +71,13 @@ TRIPLE_PENDULUM_SPEC = TriplePendulumSpec(
 )
 
 # Explicit point-mass variant for the legacy simulator's tip-mass equations.
+def _to_point_mass(s: TriplePendulumSegmentSpec) -> TriplePendulumSegmentSpec:
+    return TriplePendulumSegmentSpec(s.length_m, s.mass_kg, 1.0, s.inertia_about_com)
+
+
+_SEG0, _SEG1, _SEG2 = TRIPLE_PENDULUM_SPEC.segments
 POINT_MASS_TRIPLE_PENDULUM_SPEC = TriplePendulumSpec(
-    segments=tuple(
-        TriplePendulumSegmentSpec(
-            segment.length_m,
-            segment.mass_kg,
-            1.0,
-            segment.inertia_about_com,
-        )
-        for segment in TRIPLE_PENDULUM_SPEC.segments
-    ),
+    segments=(_to_point_mass(_SEG0), _to_point_mass(_SEG1), _to_point_mass(_SEG2)),
     damping_nm_s_rad=TRIPLE_PENDULUM_SPEC.damping_nm_s_rad,
     inertia_model="point_mass",
 )
