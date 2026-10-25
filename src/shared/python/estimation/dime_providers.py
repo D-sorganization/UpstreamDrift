@@ -7,6 +7,7 @@ Provides concrete dynamics providers implementing the DIME DimeDynamicsProvider 
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from typing import Any
 
@@ -255,7 +256,7 @@ class DeterministicFakeProvider(_BaseDynamicsProvider):
         self, state: DimeCompleteState, controls: np.ndarray
     ) -> AccelerationDecomposition:
         nv = self.capability.n_v
-        a_grav = -9.81 * np.ones(nv, dtype=np.float64)
+        a_grav = -float(GRAVITY_M_S2) * np.ones(nv, dtype=np.float64)
         a_drift = np.zeros(nv, dtype=np.float64)
         a_ctrl = np.zeros(nv, dtype=np.float64)
         if len(controls) > 0:
@@ -418,7 +419,9 @@ class UnderactuatedAnalyticProvider(_BaseDynamicsProvider):
         q = state.q
         v = state.v
         tau1 = float(controls[0]) if len(controls) > 0 else 0.0
-        a_grav = -9.81 * np.array([np.sin(q[0]), np.sin(q[1])], dtype=np.float64)
+        a_grav = -float(GRAVITY_M_S2) * np.array(
+            [np.sin(q[0]), np.sin(q[1])], dtype=np.float64
+        )
         a_drift = np.array([-0.1 * v[0], -0.1 * v[1]], dtype=np.float64)
         a_ctrl = np.array([0.0, tau1 * 0.5], dtype=np.float64)
         return AccelerationDecomposition(a_grav=a_grav, a_drift=a_drift, a_ctrl=a_ctrl)

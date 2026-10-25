@@ -6,6 +6,7 @@ unapproved cross-engine duplication.
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 import math
 from typing import Any
@@ -163,7 +164,7 @@ def check_rollout_dynamics(
             # Calculate nominal kinetic and potential energies
             ke = 0.5 * np.sum(v**2, axis=1)
             pe = (
-                9.81 * np.sum(q[:, :3], axis=1)
+                float(GRAVITY_M_S2) * np.sum(q[:, :3], axis=1)
                 if q.shape[1] >= 3
                 else np.zeros(len(time_arr))
             )

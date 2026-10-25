@@ -47,10 +47,19 @@ jobs:
     steps:
       - name: Set runner
         id: check
+        shell: bash
+        env:
+          CI_RUNNER_MODE: ${{ vars.CI_RUNNER_MODE }}
+          REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
         run: |
+          if [ "$REPOSITORY_PRIVATE" != "true" ] && [ "${CI_RUNNER_MODE:-auto}" != "local" ]; then
+            runner="ubuntu-latest"
+          else
+            runner="d-sorg-fleet-docker"
+          fi
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+          echo "runner=$runner" >> "$GITHUB_OUTPUT"
+          echo "Selected runner: $runner"
   run-heavy-tests:
     needs: pick-runner
     name: Heavy Integration Tests (${{ matrix.engine }})
@@ -68,7 +77,7 @@ jobs:
             marker: "live_simulation and requires_pinocchio"
             test-path: "tests/heavy_integration"
           - engine: drake
-            python-version: "3.11"
+            python-version: "3.12"
             marker: "requires_drake"
             test-path: "tests"
           - engine: jaxsim
@@ -157,6 +166,13 @@ jobs:
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           pip uninstall -y pytest-vcr pytest-recording || true
 
+      - name: Install reviewed Drake builds (drake lane)
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        run: |
+          if [ "${{ matrix.engine }}" = "drake" ]; then
+            pip install -e ".[drake]"
+          fi
+
       - name: Verify heavy dependencies
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
         run: |
@@ -180,6 +196,7 @@ jobs:
         timeout-minutes: 60
         shell: bash
         run: |
+          set -o pipefail
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
             pytest \
               -v \
@@ -199,11 +216,13 @@ jobs:
       - name: Summarize heavy test results
         if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine) }}
         run: |
-          echo "## Heavy Integration Test Report - UpstreamDrift" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Engine lane: ${{ matrix.engine }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Python version: ${{ inputs.python_version || matrix.python-version }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Heavy Integration Test Report - UpstreamDrift"
+            echo ""
+            echo "Engine lane: ${{ matrix.engine }}"
+            echo "Python version: ${{ inputs.python_version || matrix.python-version }}"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
           if [ -f "heavy_test_results_${{ matrix.engine }}.xml" ]; then
             python3 - <<'PYEOF'
           import os

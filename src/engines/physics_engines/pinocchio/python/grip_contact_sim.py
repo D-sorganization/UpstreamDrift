@@ -17,6 +17,7 @@ handling is needed.
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -50,6 +51,16 @@ class IntegratorTolerances:
     rtol: float = DEFAULT_RTOL
     atol: float = DEFAULT_ATOL
     max_step_s: float = DEFAULT_MAX_STEP_S
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.rtol) or self.rtol <= 0.0:
+            raise ValueError(f"rtol must be positive and finite, got {self.rtol}")
+        if not math.isfinite(self.atol) or self.atol <= 0.0:
+            raise ValueError(f"atol must be positive and finite, got {self.atol}")
+        if not math.isfinite(self.max_step_s) or self.max_step_s <= 0.0:
+            raise ValueError(
+                f"max_step_s must be positive and finite, got {self.max_step_s}"
+            )
 
 
 class ClubInHands(bushing.ClubOnBushings):
