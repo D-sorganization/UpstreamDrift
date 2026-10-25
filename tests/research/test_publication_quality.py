@@ -229,7 +229,7 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
     assert report["publication"]["fast_web_access"] is True
     assert report["navigation"] == {
         "outline_entries": 255,
-        "uri_links": 196,
+        "uri_links": 200,
         "internal_links": 0,
         "invalid_uri_links": [],
         "invalid_internal_links": [],

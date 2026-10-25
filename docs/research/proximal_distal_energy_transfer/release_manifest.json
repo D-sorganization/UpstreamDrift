@@ -330,8 +330,16 @@
       "bytes": 2789
     },
     "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md": {
-      "sha256": "77d2508328b245abd744c949c012587791da6a11881a9d43c66537d5d1f0062c",
-      "bytes": 57323
+      "sha256": "30f0213cdabeeaef1793c3a09fea41df0cf607db29c94306df3db9d4711f0b79",
+      "bytes": 1716
+    },
+    "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY_ARTIFACTS_CORE.md": {
+      "sha256": "58f642e0eb0d20b820b459b2681ee387ba457b7d08eb83120bd42d33da35d557",
+      "bytes": 28026
+    },
+    "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY_ARTIFACTS_EXTENDED.md": {
+      "sha256": "6aa2f12a40942c0577120448e4811112900fe41b1062512a10cd2b9aec0b2669",
+      "bytes": 28026
     },
     "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md": {
       "sha256": "f243857fe5fbab125fac69907995d0e454552c3f7952d8c1e047353cfbc6a567",
@@ -365,9 +373,17 @@
       "sha256": "ec4376d09b3e0bff2f4d8c765d5c1b965dd2ea1cbf0f05a016059495ddf00377",
       "bytes": 10802
     },
+    "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_CLAIM_REGISTER.md": {
+      "sha256": "1fc8596d993aa5beab5c40614a34e08c00ed805782c3c0eebbb838ecefb8b629",
+      "bytes": 16660
+    },
     "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md": {
-      "sha256": "51e59ffc7f2a6873a485c8abe715a76ba04a9f64f5609ef5c01e67d071871b1d",
-      "bytes": 67294
+      "sha256": "920e1b9d8e10ca74ec76e4f265f9816a0a7cb042b9dd71d869fca8eaba4c5815",
+      "bytes": 5746
+    },
+    "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_MODEL_DISCREPANCY.md": {
+      "sha256": "b10ea0282a8cbf3e874c0bb3d3ccf0ee44b0d5e2da1d3acf1ef0851a6178c780",
+      "bytes": 45229
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
       "sha256": "ef4acf66fb2e455a24f61511bb903e5718964e6ad53a8cdb385587c5253c9018",
@@ -506,8 +522,12 @@
       "bytes": 14331
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd": {
-      "sha256": "d65c6af5eee23a13e8a6b0e43ca3303590c8ce83df580b1b498cf8540d25d26d",
-      "bytes": 51717
+      "sha256": "c40d3ec8b752eb6e120ebf39edaedab6e85ccaf43d45c98241b45a6de661d46b",
+      "bytes": 12418
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd": {
+      "sha256": "0a58b6995613dacc09ce5d42e059dadb44039d96638ac9240b3be7da8d0245e7",
+      "bytes": 39298
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd": {
       "sha256": "a568b6f84034d3af743744269bf3bdfa8d3bcc4013c5593c3b802e6dd144f30f",
@@ -566,8 +586,8 @@
       "bytes": 15238
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd": {
-      "sha256": "3f04ba7a5567b3afc6a8029635373086eaba6aa63df4749d0f1e51d9d9a17ca3",
-      "bytes": 5903
+      "sha256": "1027489342cb2c464675d593cf579d65aeef007c524a894b149dca559ffe641b",
+      "bytes": 5976
     },
     "docs/research/proximal_distal_energy_transfer/data/advanced_biological_bridge.json": {
       "sha256": "ab074f55458dae1356f6fc3d88e291254d7498d715ea21000bc2ce055e2a0c85",
@@ -710,20 +730,20 @@
       "bytes": 11927
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_adjudication_summary.csv": {
-      "sha256": "0ecda6f2c27e7a4f1863c70792380e917960b000b0d9662abe65a238ce4aad5e",
-      "bytes": 676613
+      "sha256": "d5bf620163225acd799b2e6c7330d5d9c623e825164b6af8324f608a01240f2b",
+      "bytes": 676280
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_adjudication_summary.json": {
-      "sha256": "42580a084fb00818602eb5a6a1c615734e5091e4cb84be4b3baa0e414d97a62b",
-      "bytes": 942195
+      "sha256": "af6e975c0adf76e4035458e5dabaacb009f325df201e6cbe7d1c601881c2dd1e",
+      "bytes": 942146
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json": {
-      "sha256": "63df7e739680c4a85df0f10f36c3e36d73d758ea6d24e7b6c9cf43d7eb5e9947",
-      "bytes": 1651744
+      "sha256": "e662bf65acb3b3cd21cda643afc5416699d2b8dccc13017a6e162c61b3065284",
+      "bytes": 1651519
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_candidate_inventory.json": {
-      "sha256": "54fd06f9fce46ed99f668f3aaa90337316754cb441ae7d05001f8bc088dafc8b",
-      "bytes": 1203291
+      "sha256": "b85a826c4ae829a5e021203a0f69704aa9c6eae233286b109c2896e900e1c078",
+      "bytes": 1203112
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_numeric_comparison_evidence.json": {
       "sha256": "b36ac07809a5e58402b1422ee78a45756df6b604a5dccaf77f29856c7160d6ba",
@@ -1046,8 +1066,8 @@
       "bytes": 9392
     },
     "docs/research/proximal_distal_energy_transfer/data/release_claim_review.json": {
-      "sha256": "4503906b89a2d3257ddbccdac3927ab80f475e93a3810ea4aea02b418d0755d4",
-      "bytes": 216466
+      "sha256": "af611c5b509a6036104a8487d904df5c0e758f79669f49b929594ec747d24e28",
+      "bytes": 216208
     },
     "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz": {
       "sha256": "441647489d6ce7230480dcc3b7c7985f60d119d7ef7666d1a3480fa1691a385c",
@@ -2098,8 +2118,8 @@
       "bytes": 2013145
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd": {
-      "sha256": "0f963245c75dad095f50e64772ff4b68c8b97a877adbac57d6991ba60197733b",
-      "bytes": 20195
+      "sha256": "cde01f9886c6d1748e601f154eb3f14f09b5f5a64d844b60c337e4ac11b2ea03",
+      "bytes": 20255
     },
     "docs/research/proximal_distal_energy_transfer/references.bib": {
       "sha256": "c978a5db95187e363e10a230910adf250821e8ae4a5c5ada8f14aee28b71299c",
@@ -2610,8 +2630,8 @@
       "bytes": 9106
     },
     "scripts/research/proximal_distal_energy/migrate_claim_adjudication_v2.py": {
-      "sha256": "48b3e1617532bb97d6f05a3ed5c6b30db4e1d71accd48de245afa74660f7f6e7",
-      "bytes": 23827
+      "sha256": "51230ff9d90835a622c203b88f8a5d4eef0ce4b4f5a3fbb404098c0ea6bd3d7b",
+      "bytes": 24003
     },
     "scripts/research/proximal_distal_energy/momentum_geometry_atlas.py": {
       "sha256": "dc0b02014241feaf090073c93d49fe200bd3412a89ca2dab41ae60b07cd43427",
@@ -2722,12 +2742,12 @@
       "bytes": 10394
     },
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py": {
-      "sha256": "601759b0071c4dcdd9493c7701345669d208c810c876817d24ffcbb729473be4",
-      "bytes": 10753
+      "sha256": "459e2026bbd99c15be3fc04459bdc89ea7b583bd874d35a41e673a7f73140694",
+      "bytes": 10804
     },
     "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py": {
-      "sha256": "005e49130c338c86556b59ef0b694df829a6f4852fbb3ab81dbe0d53be4bcc2e",
-      "bytes": 20751
+      "sha256": "a726b375651736dc7ec62d1beaa7743c86f4a85d2e5c2fb895f2c534a393a5d4",
+      "bytes": 20726
     },
     "scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py": {
       "sha256": "33bc3a81f5866172f6e8929a05fa757da88940b1bd6b6bc202b3a15dd2392a82",

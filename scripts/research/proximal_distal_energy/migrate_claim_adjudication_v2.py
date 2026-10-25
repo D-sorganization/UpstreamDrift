@@ -75,10 +75,12 @@ PRE_CRBA_REQUALIFICATION_REVIEWED_SOURCE_DIGEST = (
 PRE_MANUFACTURED_PROVENANCE_REVIEWED_SOURCE_DIGEST = (
     "1d332fc867bcc119c7de18372efad26c79ac640f8996702adab9e1be16b64658"
 )
-# #9825: reviewed provenance-only census update from 113 to 118 document entries.
-# Claim identities, scientific statements and the explicit outcome partition agree.
-REVIEWED_SOURCE_DIGEST = (
+PRE_CHAPTER_SPLIT_REVIEWED_SOURCE_DIGEST = (
     "2711476282ffac75ab1ea5d0fd8c7150c245f40df1088cb42b6c6d5dccf02aaa"
+)
+# #12851: split _ch06c into spatial_cross_formulation and subject_scaled_closure under size budget.
+REVIEWED_SOURCE_DIGEST = (
+    "10ecd8e856fc6dace7087e347041a2a03ab7ebbd86fcd439038c600ce079cd78"
 )
 MIGRATABLE_SOURCE_DIGESTS = frozenset(
     {
@@ -102,6 +104,7 @@ MIGRATABLE_SOURCE_DIGESTS = frozenset(
         PRE_PORTABLE_LINK_REVIEWED_SOURCE_DIGEST,
         PRE_CRBA_REQUALIFICATION_REVIEWED_SOURCE_DIGEST,
         PRE_MANUFACTURED_PROVENANCE_REVIEWED_SOURCE_DIGEST,
+        PRE_CHAPTER_SPLIT_REVIEWED_SOURCE_DIGEST,
         REVIEWED_SOURCE_DIGEST,
     }
 )
@@ -226,7 +229,11 @@ PRE_PORTABLE_LINK_REVIEWER_PROJECTION_CANDIDATE_IDS = (
 REVIEWER_PROJECTION_CANDIDATE_IDS = (
     PRE_PORTABLE_LINK_REVIEWER_PROJECTION_CANDIDATE_IDS
     - {"PD-CAND-ab4689630944a0fe", "PD-CAND-5c439e1412704d16"}
-) | {"PD-CAND-a9f37172857a4493", "PD-CAND-5fc9c4d85d6c025c"}
+) - {"PD-CAND-123f2ade588fd4b1"} | {
+    "PD-CAND-a9f37172857a4493",
+    "PD-CAND-5fc9c4d85d6c025c",
+    "PD-CAND-0e186dd605d24462",
+}
 
 # These sets are the exhaustive finding-level review authority for the locked
 # 328-claim snapshot. They are intentionally explicit: no claim can inherit an

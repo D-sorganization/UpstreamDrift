@@ -103,7 +103,8 @@ The absence of a `contradicted` row does not mean that every mechanism survived 
 | ch06bb shaft beam reference | 2 | 2 / 0 / 0 | project authored only |
 | ch06bbb forward modal shaft | 7 | 7 / 0 / 0 | project authored only |
 | ch06bc torque allocation preload | 7 | 7 / 0 / 0 | project authored only |
-| ch06c spatial cross formulation | 44 | 44 / 0 / 0 | project authored only |
+| ch06c spatial cross formulation | 8 | 8 / 0 / 0 | project authored only |
+| ch06c subject scaled closure | 36 | 36 / 0 / 0 | project authored only |
 | ch06ca articulated ground | 1 | 1 / 0 / 0 | project authored only |
 | ch06cb spatial cross tail | 6 | 6 / 0 / 0 | project authored only |
 | ch06cc spatial forward contact | 8 | 8 / 0 / 0 | project authored only |

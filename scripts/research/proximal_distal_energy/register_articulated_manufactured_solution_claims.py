@@ -39,9 +39,7 @@ def _find(candidates: list[dict[str, Any]], prefix: str) -> dict[str, Any]:
     matches = [
         candidate
         for candidate in candidates
-        if str(candidate["source_path"]).endswith(
-            "_ch06c_spatial_cross_formulation.qmd"
-        )
+        if str(candidate["source_path"]).endswith("_ch06c_subject_scaled_closure.qmd")
         and str(candidate["text"]).startswith(prefix)
     ]
     if len(matches) != 1:
@@ -166,7 +164,12 @@ def _refresh_claims(
     outcome. Preserve registry order and leave input records unmodified.
     """
     merged = {claim["claim_id"]: dict(claim) for claim in existing}
-    refresh_fields = {"evidence_artifacts", "last_verified_on"}
+    refresh_fields = {
+        "candidate_ids",
+        "source_locations",
+        "evidence_artifacts",
+        "last_verified_on",
+    }
     for update in updates:
         claim_id = update["claim_id"]
         previous = merged.get(claim_id)

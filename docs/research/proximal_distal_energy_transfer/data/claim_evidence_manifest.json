@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "63df7e739680c4a85df0f10f36c3e36d73d758ea6d24e7b6c9cf43d7eb5e9947"
+    "sha256": "e662bf65acb3b3cd21cda643afc5416699d2b8dccc13017a6e162c61b3065284"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -4329,8 +4329,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md": {
-      "sha256": "51e59ffc7f2a6873a485c8abe715a76ba04a9f64f5609ef5c01e67d071871b1d",
-      "bytes": 67294,
+      "sha256": "920e1b9d8e10ca74ec76e4f265f9816a0a7cb042b9dd71d869fca8eaba4c5815",
+      "bytes": 5746,
       "referenced_by": [
         "PD-CLAIM-313",
         "PD-CLAIM-314",
@@ -6413,8 +6413,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "6d61bc33d155c7f871eda1bbdf13eac7155ebf45efec3b786a9c7b4d3b715e01",
-      "bytes": 166049,
+      "sha256": "e8c7d4e83fa3bc64c68503cbbebcbf4c210bc22223384aa3dc24cf350c3c314e",
+      "bytes": 167070,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -7293,8 +7293,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py": {
-      "sha256": "601759b0071c4dcdd9493c7701345669d208c810c876817d24ffcbb729473be4",
-      "bytes": 10753,
+      "sha256": "459e2026bbd99c15be3fc04459bdc89ea7b583bd874d35a41e673a7f73140694",
+      "bytes": 10804,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -7304,8 +7304,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py": {
-      "sha256": "005e49130c338c86556b59ef0b694df829a6f4852fbb3ab81dbe0d53be4bcc2e",
-      "bytes": 20751,
+      "sha256": "a726b375651736dc7ec62d1beaa7743c86f4a85d2e5c2fb895f2c534a393a5d4",
+      "bytes": 20726,
       "referenced_by": [
         "PD-CLAIM-302",
         "PD-CLAIM-303",

@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "2711476282ffac75ab1ea5d0fd8c7150c245f40df1088cb42b6c6d5dccf02aaa",
+    "source_digest": "10ecd8e856fc6dace7087e347041a2a03ab7ebbd86fcd439038c600ce079cd78",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -8315,7 +8315,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-bc0368729ddb9738",
+      "candidate_id": "PD-CAND-72821d0a6f77156d",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-260"
@@ -8325,7 +8325,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-7b6cd5358472b395",
+      "candidate_id": "PD-CAND-7943490da279086d",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-260"
@@ -8335,7 +8335,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-80616653a4fc60a7",
+      "candidate_id": "PD-CAND-96cc5267ffd36e15",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-260"
@@ -8345,7 +8345,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-61fd28d25644237b",
+      "candidate_id": "PD-CAND-3180bbb73e161ed9",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-261"
@@ -8355,7 +8355,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-25e950386030ec2e",
+      "candidate_id": "PD-CAND-66b9b44e5ed37028",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence but asserts no standalone scientific result.",
@@ -8375,7 +8375,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-9c65c424209437d6",
+      "candidate_id": "PD-CAND-5e7ae0ac43e49756",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-263"
@@ -8385,7 +8385,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-c39cc01504847772",
+      "candidate_id": "PD-CAND-8d02cb35e9a6d404",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-263"
@@ -8406,7 +8406,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-684ed6cb396eac0e",
+      "candidate_id": "PD-CAND-55928fee2b33ef1d",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-264"
@@ -8416,7 +8416,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-7dafe186014d706a",
+      "candidate_id": "PD-CAND-f9acf850a16260bf",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence but asserts no standalone scientific result.",
@@ -8436,7 +8436,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-e0ad5489b710c46d",
+      "candidate_id": "PD-CAND-e8dfcb87f9086380",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-268"
@@ -8446,7 +8446,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-89c1d22cda081ec4",
+      "candidate_id": "PD-CAND-5b8717a968a48f60",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-268"
@@ -8456,7 +8456,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-f885f0bb4a96dc0b",
+      "candidate_id": "PD-CAND-bcbd08df0d33511a",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-270"
@@ -8466,7 +8466,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-b33f294ebe6557dd",
+      "candidate_id": "PD-CAND-0277ffe25e486555",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-272"
@@ -8487,7 +8487,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-7e070a6970d80cd1",
+      "candidate_id": "PD-CAND-85176e6dedd384d9",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-274"
@@ -8497,7 +8497,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-0aa4b71d948b8837",
+      "candidate_id": "PD-CAND-349579daef4485a0",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-274"
@@ -8507,7 +8507,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-87e213384de0e497",
+      "candidate_id": "PD-CAND-3af6e29259a0e363",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-275"
@@ -8517,7 +8517,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-1f4f302cb0b2f89e",
+      "candidate_id": "PD-CAND-1577985f6fa181b3",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence but asserts no standalone result.",
@@ -8525,7 +8525,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-9655875f1ecca182",
+      "candidate_id": "PD-CAND-07a44c48ce8fe7b6",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-276"
@@ -8535,7 +8535,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-69ce6fbe0b7ad718",
+      "candidate_id": "PD-CAND-681801cc60154bf0",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-277"
@@ -8545,7 +8545,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-224641a8fdb8b3b0",
+      "candidate_id": "PD-CAND-7ea2639532134528",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-277"
@@ -8555,7 +8555,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-176a798e2ec65e4d",
+      "candidate_id": "PD-CAND-c74cceec33c515e0",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-277"
@@ -8565,7 +8565,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-f54a05315d133b05",
+      "candidate_id": "PD-CAND-0a1d08a0b41d7690",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-279"
@@ -8575,7 +8575,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-953d8ae1b6c6e44a",
+      "candidate_id": "PD-CAND-0a8fdab16d99cf37",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence without a standalone claim.",
@@ -8583,7 +8583,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-1f7a6919ec787c86",
+      "candidate_id": "PD-CAND-a2f12260c985f887",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-280"
@@ -8593,7 +8593,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-8064bb0d998454db",
+      "candidate_id": "PD-CAND-99d46eb6c600b69f",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-280"
@@ -8603,7 +8603,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-ec6763ca703d4a39",
+      "candidate_id": "PD-CAND-fe41e3b33d8474b7",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence without a standalone claim.",
@@ -8611,7 +8611,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-d062d3a7b7e089ee",
+      "candidate_id": "PD-CAND-fcca6baa8a6896e6",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-262"
@@ -9161,7 +9161,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-5d3b0ab4a7bb6634",
+      "candidate_id": "PD-CAND-6fdc67d8837f322f",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-283"
@@ -9171,7 +9171,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-9df3c7b592db9af9",
+      "candidate_id": "PD-CAND-bf95f05dcfd103a2",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-283"
@@ -9181,7 +9181,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-297e909147a30490",
+      "candidate_id": "PD-CAND-3c156e7e4150aa83",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence without a standalone claim.",
@@ -9189,7 +9189,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-c21acd8fffa5704e",
+      "candidate_id": "PD-CAND-046e84c2b07eeb24",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-284"
@@ -9199,7 +9199,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-f6e7da9a2c420424",
+      "candidate_id": "PD-CAND-4ffca815dbf95dad",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-285"
@@ -9209,7 +9209,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-76ea04ded2d830ea",
+      "candidate_id": "PD-CAND-dbb396562f20ab8e",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-286"
@@ -9219,7 +9219,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-0a0a52b22a81c843",
+      "candidate_id": "PD-CAND-008f9a3c3adcafe1",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-286"
@@ -9229,7 +9229,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-637aabb92dc1e8ad",
+      "candidate_id": "PD-CAND-2c1147cf9f6a237e",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-289"
@@ -9239,7 +9239,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-7a6aeabd1f23b68f",
+      "candidate_id": "PD-CAND-fa465fd1d447b3cb",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-289"
@@ -9249,7 +9249,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-4809ea0d2f316f61",
+      "candidate_id": "PD-CAND-458f7897f5a52f14",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-289"
@@ -9259,7 +9259,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-51f06505262bb0ec",
+      "candidate_id": "PD-CAND-372e935f7a51fff3",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-290"
@@ -9269,7 +9269,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-d67a0c886671892b",
+      "candidate_id": "PD-CAND-1424d94c84b040d5",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-291"
@@ -9279,7 +9279,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-ee105a0c11986c3f",
+      "candidate_id": "PD-CAND-531a0166a34dfaba",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-291"
@@ -9289,7 +9289,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-95c12aebd9fa8926",
+      "candidate_id": "PD-CAND-e613baf5a6115a19",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-292"
@@ -9299,7 +9299,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-6fbe8e8800c2f739",
+      "candidate_id": "PD-CAND-3897c6f2f8c83de3",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to governed evidence without a standalone claim.",
@@ -9359,7 +9359,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-12eb97d219020156",
+      "candidate_id": "PD-CAND-6c63427ee4200c8f",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-292",
@@ -9732,7 +9732,7 @@
       "last_verified_on": "2026-08-16"
     },
     {
-      "candidate_id": "PD-CAND-d65894f827877c37",
+      "candidate_id": "PD-CAND-3c6d532b918f02b5",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-287"
@@ -9742,7 +9742,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-2b1147e55fb570e6",
+      "candidate_id": "PD-CAND-5ebd400b6ea1e5b2",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to governed evidence without a standalone claim.",
@@ -9750,7 +9750,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-1109890d6fa7a70a",
+      "candidate_id": "PD-CAND-969e561aabf2d774",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-286"
@@ -9760,7 +9760,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-f5a95edc89ff9322",
+      "candidate_id": "PD-CAND-3c185d13e44605c5",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-286"
@@ -9770,7 +9770,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-42f3114a01bd2942",
+      "candidate_id": "PD-CAND-dd97338f8782f4ec",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-286"
@@ -9780,7 +9780,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-b48121dd9ea5996b",
+      "candidate_id": "PD-CAND-a1cef38ef91c546e",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-286"
@@ -9790,7 +9790,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-9447cc8112faefbc",
+      "candidate_id": "PD-CAND-c19cf1fb92fa4e35",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-288"
@@ -9800,7 +9800,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-cad03c125b926c56",
+      "candidate_id": "PD-CAND-94dbe04737fa6833",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-286"
@@ -9810,7 +9810,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-7c67493aebb3d214",
+      "candidate_id": "PD-CAND-719cdc4145597311",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-287"
@@ -9820,7 +9820,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-3c77a7f14c1abbc5",
+      "candidate_id": "PD-CAND-cbc2dd40cd4ffed5",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-287"
@@ -9830,7 +9830,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-35d8bb45577d0eb4",
+      "candidate_id": "PD-CAND-6e6da86d93cde3f7",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-278"
@@ -9840,7 +9840,7 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-9c9b2bca68b383f2",
+      "candidate_id": "PD-CAND-104f7d38184fbdee",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-297"
@@ -9850,7 +9850,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-4eababce66e4d2d7",
+      "candidate_id": "PD-CAND-dd0d24545be855cb",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-298"
@@ -9860,7 +9860,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-bcb77de4c0ae3d00",
+      "candidate_id": "PD-CAND-f06f5ff622213e07",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-299"
@@ -9870,7 +9870,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-02f649ae549c997f",
+      "candidate_id": "PD-CAND-e5835d904c145e0d",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-301"
@@ -9880,7 +9880,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-9738a80f08ee1d3c",
+      "candidate_id": "PD-CAND-50ea6cfef7859ad3",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-300"
@@ -9890,7 +9890,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-20d816aadf9d0765",
+      "candidate_id": "PD-CAND-dca4bde005bc7890",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-281"
@@ -9952,7 +9952,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-abef9430821cbc5f",
+      "candidate_id": "PD-CAND-9dfd24c80b4c05e2",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-271"
@@ -9962,7 +9962,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-cd15d8fbf1364bb7",
+      "candidate_id": "PD-CAND-048c877856b15fec",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence but asserts no standalone result.",
@@ -9970,7 +9970,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-959f63a01ba11134",
+      "candidate_id": "PD-CAND-d983f1afdbd0cdd8",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-273"
@@ -9980,7 +9980,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-c4ef9874ede7ab4c",
+      "candidate_id": "PD-CAND-d69faa5fbda74a75",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-284"
@@ -10003,7 +10003,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-ecc95da163c9a6ee",
+      "candidate_id": "PD-CAND-4a5846ea429c28cb",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-269"
@@ -10013,7 +10013,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-e19d1c7cc3444142",
+      "candidate_id": "PD-CAND-1ce5df43d2d740c3",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence but asserts no standalone scientific result.",
@@ -10021,7 +10021,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-c7706d90bb2e9b70",
+      "candidate_id": "PD-CAND-ab12c290a5fb8718",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-302",
@@ -10032,7 +10032,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-7f4b76fc9a62c083",
+      "candidate_id": "PD-CAND-8d7cbb24ca728885",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence without a standalone scientific claim.",
@@ -10040,7 +10040,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-e9afa1ac0f0bd50b",
+      "candidate_id": "PD-CAND-c4fd95382c57756f",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-303",
@@ -10051,7 +10051,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-23e9fcfa1d8ad2a9",
+      "candidate_id": "PD-CAND-c11da9994144b3de",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-304",
@@ -10062,7 +10062,7 @@
       "last_verified_on": "2026-08-21"
     },
     {
-      "candidate_id": "PD-CAND-3c8b3b8c8ce10560",
+      "candidate_id": "PD-CAND-0e5a07d1cfb5c511",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-262"
@@ -10826,7 +10826,7 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-a86c1bb981019bc9",
+      "candidate_id": "PD-CAND-e731d6c2f5981565",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-282",
@@ -11056,7 +11056,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-123f2ade588fd4b1",
+      "candidate_id": "PD-CAND-0e186dd605d24462",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11216,7 +11216,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-9d201451cc3eaca2",
+      "candidate_id": "PD-CAND-eca1268a84aa2715",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-275"
@@ -11557,7 +11557,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-506f6479feda769d",
+      "candidate_id": "PD-CAND-673fc1c4a2d5c45e",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-283"
@@ -27091,7 +27091,7 @@
     {
       "claim_id": "PD-CLAIM-297",
       "candidate_ids": [
-        "PD-CAND-9c9b2bca68b383f2"
+        "PD-CAND-104f7d38184fbdee"
       ],
       "statement": "The manufactured torque is independently evaluated by analytical Lagrange--Christoffel, MuJoCo mj_inverse, and Pinocchio RNEA, with a corruption killswitch.",
       "classification": "articulated_manufactured_solution_design",
@@ -27099,7 +27099,7 @@
       "audit_status": "independent_manufactured_solution_controls_executed",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:466"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:206"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
@@ -27145,7 +27145,7 @@
     {
       "claim_id": "PD-CLAIM-298",
       "candidate_ids": [
-        "PD-CAND-4eababce66e4d2d7"
+        "PD-CAND-dd0d24545be855cb"
       ],
       "statement": "All three inverse-dynamics comparisons are small but nonzero and semi-implicit Euler exhibits registered first-order convergence.",
       "classification": "articulated_manufactured_solution_result",
@@ -27153,7 +27153,7 @@
       "audit_status": "independent_manufactured_solution_controls_executed",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:475"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:215"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
@@ -27199,7 +27199,7 @@
     {
       "claim_id": "PD-CLAIM-299",
       "candidate_ids": [
-        "PD-CAND-bcb77de4c0ae3d00"
+        "PD-CAND-f06f5ff622213e07"
       ],
       "statement": "The free-club gravity-free zero-torque rollout has measured linear-momentum, angular-momentum, and kinetic-energy drift below the registered 0.02 relative bound.",
       "classification": "articulated_conservation_result",
@@ -27207,7 +27207,7 @@
       "audit_status": "independent_manufactured_solution_controls_executed",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:483"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:223"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
@@ -27265,7 +27265,7 @@
     {
       "claim_id": "PD-CLAIM-300",
       "candidate_ids": [
-        "PD-CAND-9738a80f08ee1d3c"
+        "PD-CAND-50ea6cfef7859ad3"
       ],
       "statement": "The coordinated constrained trajectory recovers the imposed multiplier through both native operators with nonzero cross-engine numerical residuals.",
       "classification": "articulated_constrained_manufactured_result",
@@ -27273,7 +27273,7 @@
       "audit_status": "independent_manufactured_solution_controls_executed",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:491"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:231"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
@@ -27319,7 +27319,7 @@
     {
       "claim_id": "PD-CLAIM-301",
       "candidate_ids": [
-        "PD-CAND-02f649ae549c997f"
+        "PD-CAND-e5835d904c145e0d"
       ],
       "statement": "Manufactured-solution controls verify numerical operators and integration order but do not validate a human swing, biological torque, or coaching strategy.",
       "classification": "articulated_manufactured_solution_inference_boundary",
@@ -27327,7 +27327,7 @@
       "audit_status": "independent_manufactured_solution_controls_executed",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:502"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:242"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
@@ -27373,9 +27373,9 @@
     {
       "claim_id": "PD-CLAIM-283",
       "candidate_ids": [
-        "PD-CAND-5d3b0ab4a7bb6634",
-        "PD-CAND-9df3c7b592db9af9",
-        "PD-CAND-506f6479feda769d"
+        "PD-CAND-6fdc67d8837f322f",
+        "PD-CAND-bf95f05dcfd103a2",
+        "PD-CAND-673fc1c4a2d5c45e"
       ],
       "statement": "A registered articulated atlas distinguishes bilateral, tension-only, and dead-zone attachment laws under common-displacement, matched-extension, reversal, and isolated event controls.",
       "classification": "typed_articulated_slack_design",
@@ -27383,9 +27383,9 @@
       "audit_status": "typed_articulated_slack_events_and_matched_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:647",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:669",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:662"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:388",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:410",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:403"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.json",
@@ -27423,8 +27423,8 @@
     {
       "claim_id": "PD-CLAIM-284",
       "candidate_ids": [
-        "PD-CAND-c4ef9874ede7ab4c",
-        "PD-CAND-c21acd8fffa5704e",
+        "PD-CAND-d69faa5fbda74a75",
+        "PD-CAND-046e84c2b07eeb24",
         "PD-CAND-2e2b3509fd4670c9",
         "PD-CAND-44e0e4668df0e7ba"
       ],
@@ -27434,8 +27434,8 @@
       "audit_status": "typed_articulated_slack_events_and_matched_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:683",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:691",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:424",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:432",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:604",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:610"
       ],
@@ -27487,12 +27487,12 @@
     {
       "claim_id": "PD-CLAIM-285",
       "candidate_ids": [
-        "PD-CAND-f6e7da9a2c420424",
+        "PD-CAND-4ffca815dbf95dad",
         "PD-CAND-bda8987fb3c0996f",
         "PD-CAND-79a2fb9aff1cc9ce",
         "PD-CAND-2e2b3509fd4670c9",
         "PD-CAND-44e0e4668df0e7ba",
-        "PD-CAND-a86c1bb981019bc9",
+        "PD-CAND-e731d6c2f5981565",
         "PD-CAND-0e5d5314a405698d"
       ],
       "statement": "Changing the law and preload match can reverse open/taut classification, but the atlas does not establish slack benefit, necessity, intentionality, self-correction, timing economy, delivery advantage, or human strategy.",
@@ -27501,12 +27501,12 @@
       "audit_status": "typed_articulated_slack_events_and_matched_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:699",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:440",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:587",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:604",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:610",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:377",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182"
       ],
       "evidence_artifacts": [
@@ -27545,9 +27545,9 @@
     {
       "claim_id": "PD-CLAIM-289",
       "candidate_ids": [
-        "PD-CAND-637aabb92dc1e8ad",
-        "PD-CAND-7a6aeabd1f23b68f",
-        "PD-CAND-4809ea0d2f316f61"
+        "PD-CAND-2c1147cf9f6a237e",
+        "PD-CAND-fa465fd1d447b3cb",
+        "PD-CAND-458f7897f5a52f14"
       ],
       "statement": "A passive augmented articulated model couples two tip-normalized bending coordinates and one twist coordinate to native rigid dynamics while retaining a named energy and passivity ledger and exact rigid reduction.",
       "classification": "articulated_passive_shaft_formulation",
@@ -27555,9 +27555,9 @@
       "audit_status": "articulated_shaft_mechanism_and_boundary_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:823",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:837",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:850"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:564",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:578",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:591"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -27602,7 +27602,7 @@
     {
       "claim_id": "PD-CLAIM-290",
       "candidate_ids": [
-        "PD-CAND-51f06505262bb0ec",
+        "PD-CAND-372e935f7a51fff3",
         "PD-CAND-bf1c55e354cd8bd6"
       ],
       "statement": "The articulated bending coordinate reproduces the frozen 5.2399 Hz first FE mode and the declared tapered-section torsion coordinate is 70.1260 Hz; the six-mode authority shows materially greater one-mode error under short loading.",
@@ -27611,7 +27611,7 @@
       "audit_status": "articulated_shaft_mechanism_and_boundary_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:858",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:599",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:211"
       ],
       "evidence_artifacts": [
@@ -27681,8 +27681,8 @@
       "candidate_ids": [
         "PD-CAND-61fd7d95e06327e9",
         "PD-CAND-6c690d4f4d4a97b0",
-        "PD-CAND-d67a0c886671892b",
-        "PD-CAND-ee105a0c11986c3f",
+        "PD-CAND-1424d94c84b040d5",
+        "PD-CAND-531a0166a34dfaba",
         "PD-CAND-bf1c55e354cd8bd6"
       ],
       "statement": "All 384 registered fine-grid trajectories pass linear-domain, power, work-energy refinement, activation, and MuJoCo--Pinocchio gates through 50 ms after two coarser torsion probes fail closed.",
@@ -27693,8 +27693,8 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:872",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:887",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:613",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:628",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:211"
       ],
       "evidence_artifacts": [
@@ -27763,12 +27763,12 @@
     {
       "claim_id": "PD-CLAIM-292",
       "candidate_ids": [
-        "PD-CAND-12eb97d219020156",
+        "PD-CAND-6c63427ee4200c8f",
         "PD-CAND-1838289af000fbed",
         "PD-CAND-61fd7d95e06327e9",
         "PD-CAND-66d5d2a169f5d47a",
         "PD-CAND-6c690d4f4d4a97b0",
-        "PD-CAND-95c12aebd9fa8926",
+        "PD-CAND-e613baf5a6115a19",
         "PD-CAND-b927f3a0c6a4132b",
         "PD-CAND-bf1c55e354cd8bd6"
       ],
@@ -27778,12 +27778,12 @@
       "audit_status": "articulated_shaft_mechanism_and_boundary_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:911",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:652",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:780",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:761",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:898",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:639",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:211"
       ],
@@ -27873,7 +27873,7 @@
     {
       "claim_id": "PD-CLAIM-293",
       "candidate_ids": [
-        "PD-CAND-12eb97d219020156",
+        "PD-CAND-6c63427ee4200c8f",
         "PD-CAND-23a5405a8339d96a",
         "PD-CAND-2c4a85fe3da9c0ad",
         "PD-CAND-4227942ef5fed003",
@@ -27896,7 +27896,7 @@
       "audit_status": "finite_ground_mechanism_and_adverse_match_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:911",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:652",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:634",
@@ -28258,7 +28258,7 @@
     {
       "claim_id": "PD-CLAIM-271",
       "candidate_ids": [
-        "PD-CAND-abef9430821cbc5f"
+        "PD-CAND-9dfd24c80b4c05e2"
       ],
       "statement": "The registered horizon matrix advances every profile--span--phase state through four horizons under nominal conditions and nine one-factor adverse or null branches using paired MuJoCo and Pinocchio inertia-and-bias operators with a shared projected contact law and state update.",
       "classification": "closed_state_forward_horizon_design",
@@ -28266,7 +28266,7 @@
       "audit_status": "paired_inertia_bias_transport_horizon_adverse_load_and_energy_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:371"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:112"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
@@ -28302,7 +28302,7 @@
       "claim_id": "PD-CLAIM-272",
       "candidate_ids": [
         "PD-CAND-b30af9f570f239dc",
-        "PD-CAND-b33f294ebe6557dd"
+        "PD-CAND-0277ffe25e486555"
       ],
       "statement": "All 2,160 registered horizon cases pass the declared trajectory, wrench, normalized-energy, and work--energy closure gates; no first failure is observed through 50 ms.",
       "classification": "closed_state_inertia_bias_transport_validity_horizon_result",
@@ -28311,7 +28311,7 @@
       "adjudication_outcome": "supported",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:384"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:125"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
@@ -28369,7 +28369,7 @@
     {
       "claim_id": "PD-CLAIM-273",
       "candidate_ids": [
-        "PD-CAND-959f63a01ba11134",
+        "PD-CAND-d983f1afdbd0cdd8",
         "PD-CAND-b927f3a0c6a4132b",
         "PD-CAND-b30af9f570f239dc"
       ],
@@ -28379,7 +28379,7 @@
       "audit_status": "paired_inertia_bias_transport_horizon_adverse_load_and_energy_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:396",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:137",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
@@ -28439,10 +28439,10 @@
     {
       "claim_id": "PD-CLAIM-260",
       "candidate_ids": [
-        "PD-CAND-7b6cd5358472b395",
-        "PD-CAND-80616653a4fc60a7",
+        "PD-CAND-7943490da279086d",
+        "PD-CAND-96cc5267ffd36e15",
         "PD-CAND-9bdb0446f034d972",
-        "PD-CAND-bc0368729ddb9738"
+        "PD-CAND-72821d0a6f77156d"
       ],
       "statement": "Across six deterministic de Leva design profiles, three grip spans, and 61 prescribed states, anatomical hand points miss the declared grips by 0.171--0.616 m even though every local bilateral contact Jacobian has rank six and condition number 5.35--6.40.",
       "classification": "subject_scaled_spatial_contact_closure_audit",
@@ -28450,10 +28450,10 @@
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:269",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:281",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:10",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:22",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:76",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:263"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:4"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -28560,7 +28560,7 @@
     {
       "claim_id": "PD-CLAIM-261",
       "candidate_ids": [
-        "PD-CAND-61fd28d25644237b"
+        "PD-CAND-3180bbb73e161ed9"
       ],
       "statement": "The two-point force map retains rank five and one axial null mode, axial augmentation restores rank six, and the prescribed force couple scales linearly with grip span; these controls do not establish anatomical contact feasibility.",
       "classification": "contact_geometry_and_measurement_rank_controls",
@@ -28568,7 +28568,7 @@
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:289"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:30"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -28622,12 +28622,12 @@
     {
       "claim_id": "PD-CLAIM-262",
       "candidate_ids": [
-        "PD-CAND-d062d3a7b7e089ee",
+        "PD-CAND-fcca6baa8a6896e6",
         "PD-CAND-82680571f384e429",
-        "PD-CAND-c7706d90bb2e9b70",
-        "PD-CAND-e9afa1ac0f0bd50b",
-        "PD-CAND-23e9fcfa1d8ad2a9",
-        "PD-CAND-3c8b3b8c8ce10560",
+        "PD-CAND-ab12c290a5fb8718",
+        "PD-CAND-c4fd95382c57756f",
+        "PD-CAND-c11da9994144b3de",
+        "PD-CAND-0e5a07d1cfb5c511",
         "PD-CAND-835a6693b1ec920e",
         "PD-CAND-486d990beccd488d",
         "PD-CAND-ded05e6b455a660d",
@@ -28642,7 +28642,7 @@
         "PD-CAND-b451fd96c1fa7304",
         "PD-CAND-6119e3caac796012",
         "PD-CAND-8a39be3ed786afcb",
-        "PD-CAND-a86c1bb981019bc9"
+        "PD-CAND-e731d6c2f5981565"
       ],
       "statement": "The bounded articulated attachment screen advances closed states through 5 ms with independent-engine controls, but timing, recovery, and slack claims still require longer calibrated forward contact with typed unilateral loss and distributed structure.",
       "classification": "articulated_spatial_completion_gate",
@@ -28650,12 +28650,12 @@
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:608",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:349",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:13",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:510",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:525",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:535",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:617",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:251",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:266",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:276",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:358",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:9",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:24",
@@ -28670,7 +28670,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:688",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:377"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -28738,9 +28738,9 @@
       "claim_id": "PD-CLAIM-263",
       "candidate_ids": [
         "PD-CAND-9bdb0446f034d972",
-        "PD-CAND-9c65c424209437d6",
+        "PD-CAND-5e7ae0ac43e49756",
         "PD-CAND-9dd9306ab117189e",
-        "PD-CAND-c39cc01504847772"
+        "PD-CAND-8d02cb35e9a6d404"
       ],
       "statement": "All 234 registered profile, grip-span, and phase configurations close both point contacts while holding the club pose fixed; every achieved constraint Jacobian has rank six, the worst closure residual is 1.16e-10 m, the minimum engineering-limit margin is 0.103 rad, and the minimum coarse collision clearance is 30.9 mm.",
       "classification": "subject_scaled_closed_contact_inverse_kinematics_screen",
@@ -28749,9 +28749,9 @@
       "adjudication_outcome": "supported",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:76",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:299",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:40",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:55",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:310"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:51"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -28848,10 +28848,10 @@
     {
       "claim_id": "PD-CLAIM-264",
       "candidate_ids": [
-        "PD-CAND-684ed6cb396eac0e",
+        "PD-CAND-55928fee2b33ef1d",
         "PD-CAND-9dd9306ab117189e",
         "PD-CAND-9bdb0446f034d972",
-        "PD-CAND-a86c1bb981019bc9"
+        "PD-CAND-e731d6c2f5981565"
       ],
       "statement": "Closed-contact inverse kinematics is a necessary geometric gate and does not establish anatomy, contact force, work, passivity, timing demand, self-correction, slack benefit, or human strategy.",
       "classification": "closed_contact_inference_boundary",
@@ -28859,10 +28859,10 @@
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:318",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:59",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:55",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:76",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:377"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -29205,8 +29205,8 @@
     {
       "claim_id": "PD-CLAIM-268",
       "candidate_ids": [
-        "PD-CAND-e0ad5489b710c46d",
-        "PD-CAND-89c1d22cda081ec4"
+        "PD-CAND-e8dfcb87f9086380",
+        "PD-CAND-5b8717a968a48f60"
       ],
       "statement": "All 234 subject-scaled closed states map into the engine-neutral forward-contact coordinates with maximum position and velocity closure errors of 1.16e-10 m and 1.29 mm/s, respectively, and exact closure creates zero contact preload.",
       "classification": "closed_state_forward_initialization_mapping",
@@ -29214,8 +29214,8 @@
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:329",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:340"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:70",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:81"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -29302,7 +29302,7 @@
     {
       "claim_id": "PD-CLAIM-269",
       "candidate_ids": [
-        "PD-CAND-ecc95da163c9a6ee"
+        "PD-CAND-4a5846ea429c28cb"
       ],
       "statement": "MuJoCo and Pinocchio receive identical digested initial states and pass the existing trajectory, contact-wrench, and normalized-energy transport gates for all 54 profile-span-phase cases in the 4 ms spanning initialization audit while sharing the projected contact law and state update.",
       "classification": "closed_state_short_horizon_inertia_bias_transport_audit",
@@ -29310,7 +29310,7 @@
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:348"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:89"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -29387,8 +29387,8 @@
     {
       "claim_id": "PD-CLAIM-270",
       "candidate_ids": [
-        "PD-CAND-f885f0bb4a96dc0b",
-        "PD-CAND-a86c1bb981019bc9"
+        "PD-CAND-bcbd08df0d33511a",
+        "PD-CAND-e731d6c2f5981565"
       ],
       "statement": "The closed-state bridge removes an initialization gap but does not establish calibrated equipment, articulated anatomical dynamics, tissue loading, passive transfer, delivery benefit, slack benefit, or human strategy.",
       "classification": "closed_state_forward_bridge_inference_boundary",
@@ -29396,8 +29396,8 @@
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:358",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:99",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:377"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -31797,7 +31797,7 @@
     {
       "claim_id": "PD-CLAIM-302",
       "candidate_ids": [
-        "PD-CAND-c7706d90bb2e9b70"
+        "PD-CAND-ab12c290a5fb8718"
       ],
       "statement": "A MuJoCo-native branch uses two connect equalities, mj_step, and qfrc_constraint from the same initial state as a projected bilateral compliant-contact branch.",
       "classification": "native_constraint_formulation_discrepancy_design",
@@ -31805,7 +31805,7 @@
       "audit_status": "native_constraint_integrator_and_formulation_discrepancy_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:510"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:251"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
@@ -31843,7 +31843,7 @@
     {
       "claim_id": "PD-CLAIM-303",
       "candidate_ids": [
-        "PD-CAND-e9afa1ac0f0bd50b"
+        "PD-CAND-c4fd95382c57756f"
       ],
       "statement": "The native equality and projected compliant-contact branches produce a nonzero trajectory discrepancy while the disabled-equality killswitch produces zero native constraint force.",
       "classification": "native_constraint_formulation_discrepancy_result",
@@ -31851,7 +31851,7 @@
       "audit_status": "native_constraint_integrator_and_formulation_discrepancy_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:525"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:266"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
@@ -31889,7 +31889,7 @@
     {
       "claim_id": "PD-CLAIM-304",
       "candidate_ids": [
-        "PD-CAND-23e9fcfa1d8ad2a9",
+        "PD-CAND-c11da9994144b3de",
         "PD-CAND-bda8987fb3c0996f",
         "PD-CAND-64e3d4dfc5ee4bc3",
         "PD-CAND-79a2fb9aff1cc9ce",
@@ -31902,7 +31902,7 @@
       "audit_status": "native_constraint_integrator_and_formulation_discrepancy_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:535",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:276",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:573",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:587",
@@ -31945,9 +31945,9 @@
     {
       "claim_id": "PD-CLAIM-277",
       "candidate_ids": [
-        "PD-CAND-69ce6fbe0b7ad718",
-        "PD-CAND-224641a8fdb8b3b0",
-        "PD-CAND-176a798e2ec65e4d"
+        "PD-CAND-681801cc60154bf0",
+        "PD-CAND-7ea2639532134528",
+        "PD-CAND-c74cceec33c515e0"
       ],
       "statement": "Finite bilateral Kelvin-Voigt forces are projected through the hand and club Jacobians at all 234 closed states without direct club actuation.",
       "classification": "subject_scaled_articulated_contact_projection_design",
@@ -31955,9 +31955,9 @@
       "audit_status": "articulated_contact_projection_power_geometry_and_initial_acceleration_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:549",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:556",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:563"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:290",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:297",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:304"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
@@ -32005,7 +32005,7 @@
     {
       "claim_id": "PD-CLAIM-278",
       "candidate_ids": [
-        "PD-CAND-35d8bb45577d0eb4"
+        "PD-CAND-6e6da86d93cde3f7"
       ],
       "statement": "All 234 states pass contact, passivity, geometry-control, and native MuJoCo-Pinocchio initial-acceleration gates.",
       "classification": "subject_scaled_articulated_contact_projection_result",
@@ -32013,7 +32013,7 @@
       "audit_status": "articulated_contact_projection_power_geometry_and_initial_acceleration_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:573"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:314"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
@@ -32061,7 +32061,7 @@
     {
       "claim_id": "PD-CLAIM-279",
       "candidate_ids": [
-        "PD-CAND-f54a05315d133b05"
+        "PD-CAND-0a1d08a0b41d7690"
       ],
       "statement": "The same-state contact-projection result does not establish forward contact, contact loss, delivery, anatomy, equipment, muscle action, human transfer, slack benefit, timing economy, or coaching strategy.",
       "classification": "subject_scaled_articulated_contact_projection_inference_boundary",
@@ -32069,7 +32069,7 @@
       "audit_status": "articulated_contact_projection_power_geometry_and_initial_acceleration_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:580"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:321"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
@@ -32249,8 +32249,8 @@
     {
       "claim_id": "PD-CLAIM-280",
       "candidate_ids": [
-        "PD-CAND-1f7a6919ec787c86",
-        "PD-CAND-8064bb0d998454db"
+        "PD-CAND-a2f12260c985f887",
+        "PD-CAND-99d46eb6c600b69f"
       ],
       "statement": "A preregistered cross-profile, phase, adverse-control, refinement, and inertia-and-bias transport matrix advances the articulated bilateral-attachment model for five milliseconds without active torque or direct club actuation.",
       "classification": "bounded_articulated_forward_contact_design",
@@ -32258,8 +32258,8 @@
       "audit_status": "bounded_articulated_forward_contact_refinement_and_adverse_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:590",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:599"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:331",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:340"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json",
@@ -32294,7 +32294,7 @@
     {
       "claim_id": "PD-CLAIM-281",
       "candidate_ids": [
-        "PD-CAND-20d816aadf9d0765"
+        "PD-CAND-dca4bde005bc7890"
       ],
       "statement": "The registered five-millisecond articulated trajectories pass attachment-retention, power, work-energy, refinement, and MuJoCo-Pinocchio inertia-and-bias transport gates while sharing their contact law and state update.",
       "classification": "bounded_articulated_forward_contact_result",
@@ -32302,7 +32302,7 @@
       "audit_status": "bounded_articulated_forward_contact_refinement_and_adverse_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:627"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:368"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json",
@@ -32337,7 +32337,7 @@
     {
       "claim_id": "PD-CLAIM-282",
       "candidate_ids": [
-        "PD-CAND-a86c1bb981019bc9"
+        "PD-CAND-e731d6c2f5981565"
       ],
       "statement": "The bounded bilateral-attachment result does not establish late-downswing persistence, unilateral contact or slack, distributed grip or shaft behavior, muscle action, human transfer, timing economy, or coaching strategy.",
       "classification": "bounded_articulated_forward_contact_inference_boundary",
@@ -32345,7 +32345,7 @@
       "audit_status": "bounded_articulated_forward_contact_refinement_and_adverse_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:377"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json",
@@ -32380,13 +32380,13 @@
     {
       "claim_id": "PD-CLAIM-286",
       "candidate_ids": [
-        "PD-CAND-76ea04ded2d830ea",
-        "PD-CAND-0a0a52b22a81c843",
-        "PD-CAND-1109890d6fa7a70a",
-        "PD-CAND-f5a95edc89ff9322",
-        "PD-CAND-42f3114a01bd2942",
-        "PD-CAND-cad03c125b926c56",
-        "PD-CAND-b48121dd9ea5996b",
+        "PD-CAND-dbb396562f20ab8e",
+        "PD-CAND-008f9a3c3adcafe1",
+        "PD-CAND-969e561aabf2d774",
+        "PD-CAND-3c185d13e44605c5",
+        "PD-CAND-dd97338f8782f4ec",
+        "PD-CAND-94dbe04737fa6833",
+        "PD-CAND-a1cef38ef91c546e",
         "PD-CAND-b7b46260431e11bb"
       ],
       "statement": "A registered articulated atlas compares frictionless and equipment-provisional finite-friction one-, three-, and five-fiber tension grips with equal total stiffness/damping, complete velocity reversal, state-registered free lengths, and nested 4--50 ms horizons.",
@@ -32395,13 +32395,13 @@
       "audit_status": "distributed_grip_friction_horizon_and_events_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:709",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:758",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:720",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:729",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:733",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:745",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:767",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:450",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:499",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:461",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:470",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:474",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:486",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:508",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
       ],
       "evidence_artifacts": [
@@ -32470,9 +32470,9 @@
     {
       "claim_id": "PD-CLAIM-287",
       "candidate_ids": [
-        "PD-CAND-7c67493aebb3d214",
-        "PD-CAND-d65894f827877c37",
-        "PD-CAND-3c77a7f14c1abbc5",
+        "PD-CAND-719cdc4145597311",
+        "PD-CAND-3c6d532b918f02b5",
+        "PD-CAND-cbc2dd40cd4ffed5",
         "PD-CAND-b7b46260431e11bb"
       ],
       "statement": "All 576 nominal trajectories pass registered power, passivity, work-energy, geometry, refinement, and MuJoCo--Pinocchio gates through 50 ms; 24 disengaged-start probes contain opening and reattachment with exact active-set parity, finite-friction speed effects have mixed signs, and 144 ideal stick projections satisfy their velocity constraint with nonnegative kinetic-energy capture.",
@@ -32481,9 +32481,9 @@
       "audit_status": "distributed_grip_friction_horizon_and_events_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:782",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:794",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:805",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:523",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:535",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:546",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
       ],
       "evidence_artifacts": [
@@ -32572,7 +32572,7 @@
     {
       "claim_id": "PD-CLAIM-288",
       "candidate_ids": [
-        "PD-CAND-9447cc8112faefbc",
+        "PD-CAND-c19cf1fb92fa4e35",
         "PD-CAND-66d5d2a169f5d47a",
         "PD-CAND-61fd7d95e06327e9",
         "PD-CAND-b7b46260431e11bb"
@@ -32583,7 +32583,7 @@
       "audit_status": "distributed_grip_friction_horizon_and_events_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:814",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:555",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:761",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
@@ -32631,8 +32631,8 @@
     {
       "claim_id": "PD-CLAIM-274",
       "candidate_ids": [
-        "PD-CAND-7e070a6970d80cd1",
-        "PD-CAND-0aa4b71d948b8837"
+        "PD-CAND-85176e6dedd384d9",
+        "PD-CAND-349579daef4485a0"
       ],
       "statement": "The articulated common-state gate independently assembles the same subject-scaled 20-coordinate tree in native MuJoCo and robotics Pinocchio at all 234 closed states.",
       "classification": "subject_scaled_articulated_inertia_design",
@@ -32640,8 +32640,8 @@
       "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:410",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:420"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:151",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:161"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
@@ -32701,8 +32701,8 @@
     {
       "claim_id": "PD-CLAIM-275",
       "candidate_ids": [
-        "PD-CAND-87e213384de0e497",
-        "PD-CAND-9d201451cc3eaca2"
+        "PD-CAND-3af6e29259a0e363",
+        "PD-CAND-eca1268a84aa2715"
       ],
       "statement": "All 234 states pass native mass-matrix, bias-force, inverse-dynamics, symmetry, and positive-definiteness gates.",
       "classification": "subject_scaled_articulated_inertia_result",
@@ -32710,8 +32710,8 @@
       "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:431",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:439"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:172",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:180"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
@@ -32761,7 +32761,7 @@
     {
       "claim_id": "PD-CLAIM-276",
       "candidate_ids": [
-        "PD-CAND-9655875f1ecca182"
+        "PD-CAND-07a44c48ce8fe7b6"
       ],
       "statement": "Native articulated inertia parity does not establish forward contact, anatomy, grip or shaft behavior, muscles, human transfer, timing economy, slack benefit, or coaching strategy.",
       "classification": "subject_scaled_articulated_inertia_inference_boundary",
@@ -32769,7 +32769,7 @@
       "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:455"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_subject_scaled_closure.qmd:196"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
