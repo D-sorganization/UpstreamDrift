@@ -1,22 +1,4 @@
-"""NSE-UD-4a (#13464): the after-one-solution example and its mapping document.
-
-The example script ``docs/research/loop_nullspace/after_one_solution_example.py``
-walks the post-fit workflow on the generic planar fixture, the sympy-backed
-solution-manifold circle and a three-muscle segment fibre.  These tests run it
-and check every number it reports against an independent statement of the
-property, so the document claims nothing the tests do not verify.
-
-Tolerances (derived):
-
-* ``INVARIANT_TOL = 1e-8``: the normalised annihilation residual of a selector in
-  ``range(A^T)`` is roundoff of an SVD null space, a few ``1e-15``; ``1e-8`` is the
-  tolerance the NSE-UD-1 tests use.
-* Sampled values are compared with LP bounds and with the absolute bound to
-  ``1e-9``, the LP feasibility tolerance of the envelope solver.
-* The circle ``F(u) = |u|^2 - 1`` has residual ``h^2`` at the tangent predictor
-  and ``F^2 / (4 |u|^2) <= F^2 / 4`` after one Newton update, so the corrected
-  residual is far below ``CHART_TOL = 1e-10``.
-"""
+"""NSE-UD-4a (#13464): smoke tests for after_one_solution.md and its example script."""
 
 from __future__ import annotations
 

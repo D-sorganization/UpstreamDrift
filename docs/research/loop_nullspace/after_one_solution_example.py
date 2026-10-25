@@ -1,24 +1,4 @@
-"""After-one-solution workflow on generic fixtures (NSE-UD-4a, #13464).
-
-Run from the repository root::
-
-    PYTHONPATH=. python3 docs/research/loop_nullspace/after_one_solution_example.py
-
-Companion to ``after_one_solution.md``.  Three small, self-contained settings:
-
-* the generic planar two-arm fixture (``loop_nullspace.fixtures``), decomposed
-  once into ``x = x_p + N z`` and given a *declared* box on the reduced
-  coordinates ``z`` (an invented feasible set, not a golfer);
-* the circle ``F(u) = |u|^2 - 1`` and the cross ``F(u) = u1 u2`` as the smallest
-  smooth and rank-dropping nonlinear solution sets;
-* a three-muscle segment fibre ``G = [40 40 0]`` N m with ``b = 80`` N m, whose
-  true fibre is one-dimensional although ``dim ker G = 2``.
-
-No spatial (pinocchio) fixture is used.  Nothing here is a result about any
-golfer.  :func:`run_example` returns plain Python numbers and strings so that
-``tests/unit/loop_nullspace/test_after_one_solution_example.py`` can check each
-one against an independent statement of the property.
-"""
+"""Runnable after-one-solution workflow (NSE-UD-4a, #13464). See ``after_one_solution.md``."""
 
 from __future__ import annotations
 
