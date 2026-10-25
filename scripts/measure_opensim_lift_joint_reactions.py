@@ -309,6 +309,10 @@ def _render_header_section(receipts: dict[str, Any], commit: str) -> str:
         if complete_lifts
         else "unavailable"
     )
+    unavail_lifts = [k for k in LIFTS if k not in complete_lifts]
+    unavail_str = (
+        ", ".join(_lift_title(k) for k in unavail_lifts) if unavail_lifts else "none"
+    )
 
     return f"""# OpenSim Barbell Lift Joint Reaction Load Receipts (OSL-5, #13043)
 
@@ -332,8 +336,8 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 - **Lifter Mass**: {lifter_str}
 - **Barbell Mass**: {bar_str}
 - **Motion Window**: {window_str}
-- **Completed Lifts ({len(complete_lifts)}/5)**: {completed_str}
-- **Unavailable Lifts (1/5)**: Bench Press (supine posture limitation)
+- **Completed Lifts ({len(complete_lifts)}/{len(LIFTS)})**: {completed_str}
+- **Unavailable Lifts ({len(unavail_lifts)}/{len(LIFTS)})**: {unavail_str}
 - **Inherited OSL-4 Qualification**: {qual_cls}"""
 
 

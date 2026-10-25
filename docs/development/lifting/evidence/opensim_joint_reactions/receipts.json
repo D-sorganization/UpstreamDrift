@@ -1,7 +1,7 @@
 {
   "generator": "scripts/measure_opensim_lift_joint_reactions.py",
   "issue": "#13043 (OSL-5)",
-  "source_commit": "bf10d600d0c4860fe1be6877ab22187fa0476df4",
+  "source_commit": "21ff345f69e878a40addca929291305731bab41f",
   "timestamp_utc": "2026-10-20T04:11:33.541834+00:00",
   "model_source": "RajagopalLaiUhlrich2023",
   "l5_s1_joint": "back",

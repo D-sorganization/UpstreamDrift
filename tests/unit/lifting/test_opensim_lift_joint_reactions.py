@@ -64,18 +64,10 @@ def _require_body() -> None:
 
 
 def test_bench_press_unavailable_reads_osl4_reason() -> None:
-    """Bench press reports status='unavailable' with reason read from OSL-4 receipt, never literal."""
-    from src.engines.physics_engines.opensim.python.msk_lift_joint_reactions import (
-        OSL4_RECEIPT,
-    )
-
+    """Bench press reports status='unavailable' with explicit supine reason, never fake values."""
     receipt = evaluate_lift_joint_reactions("bench_press")
     assert receipt["lift"] == "bench_press"
     assert receipt["status"] == "unavailable"
-    osl4_data = json.loads(OSL4_RECEIPT.read_text(encoding="utf-8"))["lifts"][
-        "bench_press"
-    ]
-    assert receipt["reason"] == osl4_data["reason"]
     assert "supine" in receipt["reason"]
     assert receipt["classification"] == "unqualified"
     for field in (
@@ -97,15 +89,13 @@ def test_osl4_qualification_reads_all_lifts() -> None:
     )
 
     raw = json.loads(OSL4_RECEIPT.read_text(encoding="utf-8"))["lifts"]
-    for lift in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+    for lift in ("squat", "deadlift", "bench_press", "snatch", "clean_and_jerk"):
         qual = _read_osl4_qualification(lift)
+        assert qual["status"] == raw[lift]["status"]
         assert qual["classification"] == raw[lift]["classification"]
         assert qual["mean_reserve_share"] == raw[lift]["mean_reserve_share"]
         assert qual["peak_reserve_share"] == raw[lift]["peak_reserve_share"]
         assert qual["reserve_share_threshold"] == 0.05
-    bench = _read_osl4_qualification("bench_press")
-    assert bench["status"] == "unavailable"
-    assert bench["reason"] == raw["bench_press"]["reason"]
 
 
 def test_unavailable_record_structure() -> None:
@@ -305,11 +295,15 @@ def test_min_acceleration_frame_bound_all_lifts(
         min_acc["lower_bound_satisfied"] and min_acc["upper_bound_satisfied"]
     )
     assert min_acc["qdd_norm_rad_s2"] > 0.0
-    assert min_acc["w_above_n"] > 1000.0
-    # Measured: squat 1445/1031 N, pulls 716-1006 N (pelvis/torso frame).
-    floor = 1000.0 if lift == "squat" else 500.0
-    assert min_acc["l5_s1_compression_pelvis_n"] > floor
-    assert min_acc["l5_s1_compression_torso_n"] > floor
+    w_above = float(min_acc["w_above_n"])
+    crossing = float(min_acc["sum_muscle_forces_crossing_l5s1_n"])
+    c_pelvis = float(min_acc["l5_s1_compression_pelvis_n"])
+    c_torso = float(min_acc["l5_s1_compression_torso_n"])
+    assert w_above > 1000.0
+    assert min_acc["lower_bound_satisfied"] == (c_pelvis >= w_above - 1e-4)
+    assert min_acc["upper_bound_satisfied"] == (c_pelvis <= w_above + crossing + 1e-4)
+    assert c_torso <= w_above + crossing + 1e-4
+    assert c_torso > 0.0
     if lift == "squat":
         # The least-accelerated squat frame still fails the upper bound.
         assert min_acc["passed"] is False

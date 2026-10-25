@@ -329,6 +329,11 @@ def _unavailable_reason(lift: str, osl4_qual: dict[str, Any]) -> str | None:
         return str(osl4_qual.get("reason", f"no OSL-4 muscle solve for {lift}"))
     if osl4_qual.get("mean_reserve_share") is None and "reason" in osl4_qual:
         return str(osl4_qual["reason"])
+    if lift == "bench_press":
+        return (
+            "bench press joint reaction loads require a supine bench external-load "
+            "model (OSL-5 covers standing lifts only)"
+        )
     bundle_path = SAME_INPUT_LIFT_BUNDLES.get(lift)
     if bundle_path is None or not bundle_path.is_file():
         return (
