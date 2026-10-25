@@ -12,6 +12,13 @@ from pathlib import Path
 WORKFLOW_GLOB_PATTERNS = ("*.yml", "*.yaml")
 USES_PATTERN = re.compile(r"^\s*(?:-\s*)?uses:\s*['\"]?([^'\"\s#]+)")
 COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+# Fleet reusable workflows in private Repository_Management float on @main (RM #2195).
+RM_REUSABLE_WORKFLOW_MAIN_REFS = frozenset(
+    {
+        "D-sorganization/Repository_Management/.github/workflows/"
+        "reusable-conflict-disarm.yml@main",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -66,6 +73,8 @@ def audit_workflow_file(path: Path) -> list[UnpinnedAction]:
             continue
 
         if COMMIT_SHA_PATTERN.fullmatch(ref) is None:
+            if reference in RM_REUSABLE_WORKFLOW_MAIN_REFS:
+                continue
             findings.append(
                 UnpinnedAction(path, line_number, reference, "ref is not a full SHA")
             )

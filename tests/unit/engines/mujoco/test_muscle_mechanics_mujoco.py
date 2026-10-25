@@ -2,7 +2,8 @@
 
 A two-muscle antagonist elbow written as MJCF (spatial tendons, ``muscle``
 actuators) stands in for MyoSuite, which shares exactly this actuator model; a
-second test loads a real MyoSuite elbow when the package is installed.
+second set runs the frame and the co-contraction sweep on the real MyoSuite
+elbow (``myoelbow_1dof6muscles``) from the pinned ``myo_sim`` checkout.
 
 Oracles (all independent of the provider's own difference):
 
@@ -19,6 +20,8 @@ Oracles (all independent of the provider's own difference):
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -26,6 +29,10 @@ mujoco = pytest.importorskip("mujoco")
 
 from src.engines.physics_engines.myosuite.python.muscle_mechanics import (  # noqa: E402
     mujoco_muscle_frame,
+)
+from src.engines.physics_engines.myosuite.python.golfer_scene import (  # noqa: E402
+    MYO_SIM_RELATIVE,
+    REPO_ROOT_DEFAULT,
 )
 from src.shared.python.loop_nullspace.evidence import AllocationDependence  # noqa: E402
 from src.shared.python.loop_nullspace.muscle_capability import (  # noqa: E402
@@ -211,19 +218,73 @@ def test_registry_declares_a_rigid_tendon_for_this_provider() -> None:
         reg.require_series_tendon("myosuite")
 
 
-@pytest.mark.requires_myosuite
-def test_real_myosuite_elbow_builds_a_rigid_tendon_frame() -> None:
-    myo_sim = pytest.importorskip("myo_sim")
-    from pathlib import Path
+# The real MyoSuite elbow comes from the pinned ``myo_sim`` gitlink (the same
+# path the golfer scene resolves), not from an installed ``myo_sim`` package --
+# no such top-level package exists, so an ``importorskip`` never ran this test.
+MYO_ELBOW = Path("elbow") / "myoelbow_1dof6muscles.xml"
+MYO_ELBOW_FLEXION = 1.0  # rad; mid-range of r_elbow_flex
+# Joint torques (N m) inside the six-muscle capacity at that flexion, and one
+# far outside it (the largest reachable flexion torque there is ~1e2 N m).
+MYO_TORQUES = (2.0, 5.0)
+MYO_UNREACHABLE_TORQUE = 200.0
 
-    root = Path(myo_sim.__file__).resolve().parent
-    hits = sorted(root.rglob("myoelbow_1dof6muscles.xml"))
-    if not hits:
-        pytest.skip("MyoSuite elbow model not found in myo_sim")
-    model = mujoco.MjModel.from_xml_path(str(hits[0]))
+
+@pytest.fixture(scope="module")
+def myo_elbow_frame():
+    path = REPO_ROOT_DEFAULT / MYO_SIM_RELATIVE / MYO_ELBOW
+    if not path.is_file():
+        pytest.skip(
+            f"pinned myo_sim not checked out at {MYO_SIM_RELATIVE} "
+            "(run scripts/setup_myosuite_models.sh)"
+        )
+    model = mujoco.MjModel.from_xml_path(str(path))
     data = mujoco.MjData(model)
-    data.qpos[0] = 1.0
+    data.qpos[0] = MYO_ELBOW_FLEXION
     mujoco.mj_forward(model, data)
-    frame = mujoco_muscle_frame(model, data)
+    return mujoco_muscle_frame(model, data)
+
+
+def _myo_sweep(frame, torque: float):
+    cfg = SweepConfig(
+        noise=muscle_noise_spec(frame, kappa=0.05),
+        dt=1e-3,
+        stiffness_model=StiffnessModel.ENGINE_CURVE,
+        n_levels=7,
+    )
+    return cocontraction_sweep(
+        frame, np.array([torque]), total_activation(frame.n_muscles), cfg
+    )
+
+
+def test_real_myosuite_elbow_builds_a_rigid_tendon_frame(myo_elbow_frame) -> None:
+    frame = myo_elbow_frame
     assert frame.n_muscles == 6 and frame.tendon is TendonKind.RIGID
+    assert frame.coordinates == ("r_elbow_flex",)
     assert frame.linearity_residual() < 1e-9
+    arms = frame.moment_arms[:, 0]
+    assert np.any(arms > 0.0) and np.any(arms < 0.0)  # antagonists exist
+
+
+@pytest.mark.parametrize("torque", MYO_TORQUES)
+def test_real_myosuite_elbow_cocontraction_tradeoff(myo_elbow_frame, torque) -> None:
+    sweep = _myo_sweep(myo_elbow_frame, torque)
+    assert sweep.status is SweepStatus.COMPUTED
+    assert np.max(sweep.torque_residual) < 1e-12
+    assert np.max(sweep.engine_torque_gap) < 1e-9 * torque
+    assert (
+        sweep.noise_trace.allocation_dependence is AllocationDependence.FAMILY_DEPENDENT
+    )
+    stiffness = sweep.stiffness_trace.values.ravel()
+    noise = sweep.noise_trace.values.ravel()
+    assert np.all(np.isfinite(stiffness)) and np.all(np.isfinite(noise))
+    # The trade-off: co-contraction buys joint stiffness and costs motor noise.
+    assert np.all(np.diff(stiffness) > 0.0)
+    assert np.all(np.diff(noise) > 0.0)
+
+
+def test_real_myosuite_elbow_unreachable_torque_is_not_qualified(
+    myo_elbow_frame,
+) -> None:
+    sweep = _myo_sweep(myo_elbow_frame, MYO_UNREACHABLE_TORQUE)
+    assert sweep.status is SweepStatus.NOT_QUALIFIED
+    assert sweep.reasons

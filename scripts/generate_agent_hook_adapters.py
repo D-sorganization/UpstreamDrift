@@ -20,6 +20,7 @@ def main(argv: list[str] | None = None) -> int:
         SUPPORTED_TARGETS,
         check_adapters,
         generate_adapters,
+        load_runtime_descriptor,
     )
 
     parser = argparse.ArgumentParser(description=__doc__)
@@ -39,6 +40,11 @@ def main(argv: list[str] | None = None) -> int:
         default=Path.cwd(),
         help="repository root (default: cwd)",
     )
+    parser.add_argument(
+        "--runtime-descriptor",
+        type=Path,
+        help="absolute protected host runtime.json installed outside the checkout",
+    )
     args = parser.parse_args(argv)
     targets = frozenset(t.strip() for t in args.targets.split(",") if t.strip())
     unknown = targets - SUPPORTED_TARGETS
@@ -47,13 +53,22 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     root = args.repo_root.resolve()
     if args.check:
-        drift = check_adapters(root, targets=targets)
+        runtime = (
+            load_runtime_descriptor(args.runtime_descriptor, root)
+            if args.runtime_descriptor
+            else None
+        )
+        drift = check_adapters(root, targets=targets, runtime=runtime)
         if drift:
             for path in drift:
                 print(f"drift: {path}", file=sys.stderr)
             return 1
         return 0
-    generate_adapters(root, targets=targets, write=True)
+    if not args.runtime_descriptor:
+        print("runtime is not installed; run scripts/install_trusted_agent_hooks.py", file=sys.stderr)
+        return 2
+    runtime = load_runtime_descriptor(args.runtime_descriptor, root)
+    generate_adapters(root, targets=targets, runtime=runtime, write=True)
     return 0
 
 

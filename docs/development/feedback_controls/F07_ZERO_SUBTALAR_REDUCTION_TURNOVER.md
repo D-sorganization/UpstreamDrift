@@ -41,10 +41,10 @@ To repeat the scoped native tests in the qualified existing runtime, set
 its hash above before running:
 
 ```powershell
-$env:CASADIPATH='C:/Users/diete/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim'
+$env:CASADIPATH='<owner-home>/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim'
 $env:PYTHONPATH=(Get-Location).Path
 $env:UD_BUET_HAMNER_ASSEMBLED_SOURCE='<owned-immutable-v4-source.osim>'
-& 'C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/unit/engines/opensim/test_native_subtalar_reduction_contract.py tests/opensim/test_native_subtalar_reduction.py -q
+& '<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/unit/engines/opensim/test_native_subtalar_reduction_contract.py tests/opensim/test_native_subtalar_reduction.py -q
 ```
 
 The native TDD first failed on the missing module; source-preserving test

@@ -19,12 +19,6 @@
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "reason": "Issue #12042 temporary exception while turn metrics, weld projection, and IK restart policies are decomposed from pipeline CLI.",
       "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/shared/python/grip_contact/matlab_kernel.py",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "reason": "Issue #13334 temporary exception for canonical MATLAB grip contact codegen kernel and constitutive golden vector generator; scheduled for decomposition across codegen and golden generator modules.",
-      "expires_on": "2026-11-30"
     }
   ]
 }

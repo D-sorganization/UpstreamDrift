@@ -1,6 +1,6 @@
 {
   "evidence_class": "exploratory_native_centered_fd_no_qualification",
-  "source_model": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\shared\\models\\myosuite\\myo_sim\\arm\\myoarm.xml",
+  "source_model": "<owner-home>\\Repositories\\UpstreamDrift\\shared\\models\\myosuite\\myo_sim\\arm\\myoarm.xml",
   "source_model_sha256": "7134c21c82a7d403f7900aa99f5a7d58d67515893ab23b38fcecb9ed59a29062",
   "script_sha256": "811adf255ff361c009dcd426aacaa009e017a75519d407d30238d0597bd69ed8",
   "mujoco_version": "3.8.0",

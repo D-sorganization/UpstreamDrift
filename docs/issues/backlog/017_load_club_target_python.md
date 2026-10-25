@@ -22,12 +22,12 @@ optional import).
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\motion_matching\club_target.py` (`ClubTarget`, `SourceProvenance`, `AlignOptions`)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\motion_matching\loaders.py` (`load_club_target_excel`, `load_club_target_c3d`, `synthesize_target_from_coefficients`)
-- `C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\motion_matching\time_alignment.py` (impact detection, resampling, SLERP)
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\test_club_target.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\test_loaders.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\test_time_alignment.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\shared\python\motion_matching\club_target.py` (`ClubTarget`, `SourceProvenance`, `AlignOptions`)
+- `<owner-home>\Repositories\UpstreamDrift\src\shared\python\motion_matching\loaders.py` (`load_club_target_excel`, `load_club_target_c3d`, `synthesize_target_from_coefficients`)
+- `<owner-home>\Repositories\UpstreamDrift\src\shared\python\motion_matching\time_alignment.py` (impact detection, resampling, SLERP)
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\test_club_target.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\test_loaders.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\test_time_alignment.py`
 
 ## Public API
 

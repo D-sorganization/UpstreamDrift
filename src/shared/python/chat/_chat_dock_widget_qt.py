@@ -814,6 +814,7 @@ class ChatDockWidget(StreamingMixin, TerminalModeMixin, MessagingMixin, QDockWid
             self._stop_state_timer.stop()
         except (AttributeError, RuntimeError):
             pass
+        self._stop_scroll_timer()
         if self._socket:
             self._socket.close()
         super().closeEvent(event)

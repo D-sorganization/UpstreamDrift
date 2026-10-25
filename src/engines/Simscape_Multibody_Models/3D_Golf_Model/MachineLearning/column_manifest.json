@@ -1,5 +1,5 @@
 {
-  "schema_source": "C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet",
+  "schema_source": "<owner-home>\\Repositories\\data\\TenThousandFiles.parquet",
   "description": "Initial causal dynamics column selection for learning instantaneous state/load to acceleration mapping from the 3D golf swing Simscape dataset.",
   "input_columns": {
     "time": ["time"],

@@ -556,10 +556,12 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 > Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/pr-lifecycle.md.
 
 1. **Before pushing, run `python -m scripts.pre_pr` (RM-6).** Push once.
-2. **Open or update your lane PR ready (never as a draft).** If blocked, use a `Blocked:` section in a ready PR (see [lane-prs.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-prs.md)). Arm squash auto-merge with `scripts/automerge_guard.py` (or `gh pr merge --auto --squash`) immediately; then end the session. Do not schedule check-ins, subscribe to PR activity, or enable Auto-fix.
+2. **Open or update your lane PR ready (never as a draft).** “Ready” means **non-draft**, not “request a human reviewer.” Fleet branch rules require **zero** approving reviews and no code-owner review gate — **agents never request human reviewers** (`gh pr edit --add-reviewer`, `gh pr create --reviewer`, REST/GraphQL `requested_reviewers`, or equivalent). If blocked, use a `Blocked:` section in a ready PR (see [lane-prs.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-prs.md)). Arm squash auto-merge with `scripts/automerge_guard.py` (or `gh pr merge --auto --squash`) immediately; then end the session. Do not schedule check-ins, subscribe to PR activity, or enable Auto-fix.
 3. **If CI goes red, Runner Dashboard dispatches the fix (RD-1).** Do not revive the original session.
 4. **A follow-up hours later goes in a new session with a one-paragraph brief.**
 5. **Don't switch models mid-session (it throws away the prompt cache).**
+6. **PR size and stacking.** Every PR must stay under 500 changed lines. Target `main` directly; never stack PRs. Deletion-only PRs may exceed 500 lines.
+7. **Issue closure evidence.** Include `Closes #<issue>` on a real newline in PR descriptions (never literal `\\n`). Never run `gh issue close` unless citing a verified merged PR `#<num>` in `--comment` or after applying an exempt label (`duplicate`, `wontfix`, `invalid`, `not-planned`, `roadmap`).
 
 <!-- END FLEET-MANAGED: pr-lifecycle -->
 
@@ -575,6 +577,10 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 - **A personal token carries admin rights — do not use them.** Whatever the token, the rules below still apply.
 - **Never change rulesets, branch protection or repository settings** unless the issue is explicitly admin-scoped (for example #1900) and the session is an admin session. Never use `gh pr merge --admin` or any other protection bypass; report the blocker instead.
 - **Never touch another session's PR state.** Do not convert it to or from draft, disable its auto-merge, or close it. Only the redundant-PR closer closes PRs.
+- **On Dieter's Windows hosts, `gh` is the fleet App wrapper (#2188).** `C:/Users/diete/.claude/fleet-gh/bin` is first on `PATH` via the `fleet-gh-app` block in PowerShell `profile.ps1`. In an agent process (Claude Code, Cursor, Codex, agy, or `FLEET_AGENT_SESSION=1`) it mints an App token for `D-sorganization` repos — `gh` runs as the bot regardless of `GH_TOKEN` / `GITHUB_TOKEN`. Dieter's own terminal keeps his personal login (#2303). **Agents keep using `gh` (bot identity); never impersonate Dieter.**
+- **Owner-only GitHub actions** (repo archive, settings/admin, removing his reviewer requests) that Dieter runs himself: advise `gh-personal <args>` (`FLEET_GH_PERSONAL=1`, keyring login). Do **not** advise unsetting `GH_TOKEN`/`GITHUB_TOKEN` or `gh auth switch` — they do not work with the wrapper.
+- **`GraphQL: Resource not accessible by integration` on an admin call** means the App lacks that permission. Hand the exact `gh-personal …` command to Dieter; do not retry as the bot.
+- **Subscription logins only (no pay-per-use API keys).** Agents run under provider subscriptions (Claude Pro/Max, Codex/ChatGPT Plus/Team, Cursor, Gemini); never inject or commit metered model API keys (e.g. `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`).
 
 <!-- END FLEET-MANAGED: agent-identity -->
 
@@ -618,7 +624,7 @@ remote, not only on the machine where it was written.
 
 1. **Work on a feature branch, never `main`.** Open a PR from that branch; do not commit on the default branch.
 2. **Commit at every meaningful checkpoint** — at least after each passing test step and before any handoff, pause, or end of session — **and push to `origin`.** Unpushed commits are not handed off.
-3. **Always open PRs ready for review** (never as drafts). Arm squash auto-merge immediately via `python scripts/automerge_guard.py <owner/repo> <pr> --arm --strategy squash` or `gh pr merge --auto --squash`. If work is blocked, still open a ready PR whose body has a `Blocked:` section explaining why; CI and branch protection are the gates, not a human “mark ready” step.
+3. **Always open PRs ready (non-draft).** Agents never request human reviewers on PRs — CI, branch protection, and the merge queue are the only gates. Arm squash auto-merge immediately via `python scripts/automerge_guard.py <owner/repo> <pr> --arm --strategy squash` or `gh pr merge --auto --squash`. If work is blocked, still open a ready PR whose body has a `Blocked:` section explaining why; CI and branch protection are the gates, not a human “mark ready” step.
 4. **Before reporting done or handing off, run `git status`.** A dirty working tree or unpushed commits means the work is not done.
 5. **Do not commit secrets or local environment files** (for example `.env`); use `.env.example` patterns and keep credentials out of git.
 

@@ -4,7 +4,7 @@ Literal commands for the day-to-day operations on this bridge. Windows-first per
 
 For first-time install (Python env, matlabengine pip package, MATLAB toolboxes, license setup), see [INSTALLATION.md](INSTALLATION.md).
 
-All commands assume the repo is checked out at `C:\Users\diete\Repositories\UpstreamDrift` and the working directory is the repo root.
+All commands assume the repo is checked out at `<owner-home>\Repositories\UpstreamDrift` and the working directory is the repo root.
 
 ## 0. Pre-flight checks
 

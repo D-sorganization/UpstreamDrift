@@ -2741,6 +2741,63 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-24 | #13772 | Fix tests/api assertions stale after the APIException error-envelope change; shared error_message fixture |
+| 2026-10-24 | #13788 | Reconcile neural motion matching and Simscape documentation with diagnostic receipts |
+| 2026-10-24 | #13756 | Private path leak ratchet, denylist patterns, and mechanical owner-home redaction consolidation. |
+| 2026-10-24 | #13769 | Add Cursor Cloud environment.json fleet bootstrap via Repository_Management scripts/cursor/bootstrap.sh. |
+| 2026-10-24 | #13751 | R11: the R6 chain shaft runs in Pinocchio (spec spring and damper torque before constraintDynamics) and passes the same static, modal, topology and same-input parity gate; Pinocchio joins CHAIN_ENGINES, only Simscape still refuses a chain |
+| 2026-10-24 | #13755 | Route motion-matching nightly smoke to GitHub-hosted runners on public repos.; Route nightly cross-engine validation to GitHub-hosted runners on public repos (Drake PyPI wheels). |
+| 2026-10-24 | #13470 | loop_nullspace: local solution-manifold continuation (predictor-corrector with rank gates) over ForceNullSpace (NSE-UD-2) |
+| 2026-10-24 | #13475 | loop_nullspace: classify_functional (numerical fibre identifiability with optional enclosing-radius bound) and attribution_quantities (per-source induced-acceleration envelopes); Decomposition now stores variable_scale |
+| 2026-10-24 | #13754 | Route motion-matching nightly smoke to GitHub-hosted runners on public repos. |
+| 2026-10-24 | #13749 | Port gs3dx_com_shift and the capture contact-solve test (PR6 of the #13270 series) |
+| 2026-10-24 | #13727 | Make the grip MJCF independent of the BLAS kernel and libm: deterministic damping design and pad ring trig |
+| 2026-10-24 | #13748 | Add the Simscape rigid-body stance exporter, R2025b fixture/receipt and Python GCV-2 parity test (rigid body at total mass/CoM on the six GS3DX sole contacts; net GRF +0.087% of weight, split within 0.43%, CoP within 1 mm) |
+| 2026-10-24 | #13746 | Run tests/cross_engine/test_flex_shaft_parity.py in the cross-engine equivalence workflow and add its sources to the path filters. |
+| 2026-10-24 | #13743 | Correct the OpenSim ten_finger swing xfail reason: net_force now passes; the remaining 0.04 s gap is net_moment_com (#13560) |
+| 2026-10-24 | #13744 | Port gs3dx_vertical_share and gs3dx_contact_wrench with tests from the unmerged capture-contact commit 22419ee13 |
+| 2026-10-24 | #13741 | Capture Rig theme-compliance fixture discards a ThemeManager singleton orphaned by QApplication teardown (fixes flaky QSettings-deleted teardown errors) |
+| 2026-10-24 | #13724 | Route legacy chat UI builder imports to the pinned Tools module with shared module identity. |
+| 2026-10-24 | #13566 | Disable pytest-xvfb autoload for motion-matching smoke; document -p no:xvfb in run_motion_matching_smoke.sh |
+| 2026-10-24 | #13734 | Port the trail-foot preload chain, point momentum and capture segment and momentum tools with tests from the unmerged capture-contact commit 22419ee13 |
+| 2026-10-24 | #13732 | Port gs3dx_nearest_hull_point, gs3dx_hull_moment, gs3dx_support_residual and gs3dx_foot_contacts with tests from the unmerged capture-contact commit 22419ee13 |
+| 2026-10-24 | #13733 | Port gs3dx_foot_split and gs3dx_capture_foot_residual with tests from the unmerged capture-contact commit 22419ee13 |
+| 2026-10-24 | #13740 | GS3DX rigid-body stance proxy: gs3dx_rigid_stance (one rigid body at the golfer's mass and CoM on the six sole contacts, same contact law) and gs3dx_log_force_mux, with a MATLAB test and GROUND_CONTACT.md section; exporter and parity fixture follow in the next PR |
+| 2026-10-24 | #13736 | Wire the OSL-7 predictive-versus-tracked comparison into the predictive receipt (tracked_comparison row) |
+| 2026-10-24 | #13737 | Windows: set CASADIPATH from the OpenSim wheel dir so Moco finds the ipopt plugin |
+| 2026-10-24 | #13738 | R11: the R6 chain shaft runs in Drake (RevoluteSpring plus joint damping) and passes the same static, modal, topology and same-input parity gate as OpenSim and MyoSuite; Drake joins CHAIN_ENGINES |
+| 2026-10-24 | #13645 | Install the governed canonical admission publisher copy and protected CI caller with independently pinned private provider runtime and trusted copy drift checking. |
+| 2026-10-24 | #13735 | Port frame_rate, trunk_spin, hold_limit_jump, rebase_turns and reference_rate with tests from commit 22419ee13 and record the failed stance probes in FORWARD_DYNAMICS.md |
+| 2026-10-24 | #13726 | GS3DX GRF exporter: opt-in lock_joints (gs3dx_lock_joints, in memory) and DRY shared contact-geometry / sole-point / CSV / SHA-256 helpers; the locked-joint stance costs ~140 s wall per simulated ms |
+| 2026-10-24 | #13691 | Add opt-in allocate_muscle_excitations_until_feasible (stop_when_feasible) for bounded muscle allocation: stops during a counted evaluation on an exact feasible witness and reports declared_feasibility_satisfied |
+| 2026-10-24 | #13721 | OSL-7: predictive-versus-tracked deadlift comparison (bar path, window-start joint angles, group activations, L5/S1 status) aligned by bar-rise fraction; receipt wiring follows in a second PR |
+| 2026-10-24 | #13729 | Escape # in lift_models.tex so compile-latex-references passes (OSL-7 follow-up) |
+| 2026-10-24 | #13723 | CI: the tests job checks out only the pinned myo_sim gitlink (depth 1) so the NSX-94 real-MyoSuite co-contraction tests run instead of skipping |
+| 2026-10-24 | #13719 | Chain shaft runs through the ground-support pipeline: IK holds chain coordinates at rest, face targets accept the tip link, replay uses the 0.125 ms substep |
+| 2026-10-24 | #13677 | Simscape grip kernel follows the shared capsule line-contact law; ten_finger verifier back to 1e-11; structural freshness check for generated JSON; goldens rebuilt from the rounded export params; committed R2025b evidence |
+| 2026-10-24 | #13715 | Fix DrakeKinematicsService.set_pose/get_link_transforms against a real MultibodyPlant (floating-base quaternion layout, body enumeration) |
+| 2026-10-24 | #13717 | NSX-94: run the co-contraction trade-off sweep on the real pinned MyoSuite elbow (myoelbow_1dof6muscles); replace the never-running importorskip(myo_sim) test |
+| 2026-10-24 | #13716 | NSX-93: cross-engine conformance of the declared impedance and delayed-feedback layer through the torque-engine derivative seam (Pinocchio reference, MuJoCo, Drake; Simscape UNAVAILABLE) |
+| 2026-10-24 | #13714 | static_envelopes retries a NUMERICAL warm-started HiGHS solve cold (anthro plate benchmark, highspy 1.15.1) |
+| 2026-10-24 | #13689 | Forward-rollout root-residual test closes the #13179 axial-load acceptance |
+| 2026-10-24 | #13688 | Guard test enforcing the single paired Monte Carlo runner rule for strategy comparisons (NSX-91) |
+| 2026-10-24 | #13690 | NSX-45: user help and interpretation guide for loop null-space exploration (Refs #12577) |
+| 2026-10-24 | #13692 | Link the loop null-space help page (docs/help/loop_nullspace.md) from the React web UI via a FEATURE_HELP topic and a help button on LoopNullSpacePanel (NSX-45) |
+| 2026-10-24 | #13570 | Add conflict-disarm caller workflow (dry-run) and CI allowlists for RM reusable @main. |
+| 2026-10-24 | #13370 | fix(motion_matching): reclassify grip_style as physical pick and clean sidecar |
+| 2026-10-24 | #13623 | HRG-E3: lower-body, shoulder, elbow, and line turn terms in ISB and golf language |
+| 2026-10-24 | #13685 | Record #13072 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md); Record #13104 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md); Record #13579 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md) |
+| 2026-10-24 | #13684 | Route native F02 and BoxFDDP mass reads through full_mass_matrix on MuJoCo 3.13+. |
+| 2026-10-24 | #13664 | Wire subscription CLI adapters (Claude, Codex, Antigravity), simulation HostActionPort controls, and local Whisper VTT into Sidekick |
+| 2026-10-24 | #13680 | Pin live required-check export for UD-CI-031 |
+| 2026-10-24 | #13551 | Bump vendor/ud-tools to Tools 37a7477 (owned restartable UI timers, Tools #5670; chat dock stops scroll timers on close, Tools #5674) and re-sync src/shared/python/chat |
+| 2026-10-24 | #13565 | Drake samples the canonical mid_hands/club_head frames like Pinocchio; legacy grip names are aliases only and a missing frame fails closed instead of falling back to right_hand or the shaft; Align Drake autodiff fit theta with canonical URDF actuator count |
+| 2026-10-24 | #13681 | Lock per-runner BuildKit cache regression guards |
+| 2026-10-24 | #13682 | Use full_mass_matrix in grip-weld axial closure KKT tests for MuJoCo 3.13+. |
+| 2026-10-24 | #13446 | Lock canonical driver seeds closure and weight-fraction gates in CI (#13109) |
+| 2026-10-24 | #13512 | OSL-7 predictive deadlift: solved statically supported poses with free shoulders, a planted-feet goal, Hicks moment gate and a 17-run history; stage 1 still does not converge with foot contact |
+| 2026-10-24 | #13667 | Extend KnowledgePack search characterization with repo scope and blank queries.; Isolate Capture Rig theme-compliance ThemeManager fixture from stale singletons. |
+| 2026-10-24 | #13669 | Adopt fast-tier pytest changed-module selection for unit-test-gate |
 | 2026-10-24 | #13666 | Drake samples the canonical mid_hands/club_head frames like Pinocchio; legacy grip names are aliases only and a missing frame fails closed instead of falling back to right_hand or the shaft; Align Drake autodiff fit theta with canonical URDF actuator count; Hand off the HRG-GS grip parity residuals: AGENT_HANDOFF entry for epic #13297 and xfail reasons pointing at the open tracking issues #13547 (MuJoCo deflection) and #13548 (OpenSim ten_finger); Grip contact: add antagonist pads opposite the heel, trigger and ten-finger little-finger pads so the neutral-pose closure preload exerts zero net force and moment on the club |
 | 2026-10-24 | #13518 | CI: set rust-cache cache-bin false so post steps stop deleting the shared host rustup binary (Refs Repository_Management#2138) |
 | 2026-10-24 | #13665 | Audit near-zero-mean CV callers: return NaN with reason in cross-engine runner and pendulum variability summary; Add load_coupling_law require_verified gate for SPN-3 cited coupling data; Pull club sole to ground at address IK; record sole height in calibrated receipt; Lock canonical driver seeds closure and weight-fraction gates in CI (#13109) |

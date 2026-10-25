@@ -91,6 +91,22 @@ HRG_E3_TERMS = {
     "thorax_turn_isb",
     "thorax_forward_bend_isb",
     "thorax_lead_side_bend_isb",
+    "pelvis_turn_line",
+    "thorax_turn_line",
+} | {
+    f"{role}_{name}"
+    for role in ("lead", "trail")
+    for name in (
+        "hip_flexion",
+        "hip_abduction",
+        "hip_internal_rotation",
+        "knee_flexion",
+        "shoulder_plane_of_elevation",
+        "shoulder_elevation",
+        "shoulder_internal_rotation",
+        "shoulder_horizontal_adduction",
+        "elbow_flexion",
+    )
 }
 
 

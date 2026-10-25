@@ -99,7 +99,7 @@ function Slider({
 }
 
 /**
- * Grip presets and sliders (HRG-GR4, #13205).
+ * Grip presets and sliders (HRG-GR4, #13205, #13346).
  *
  * Strength, style, palm diagonal and spacing are physical: the Build button
  * asks the server for the new model revision (hashes), which needs a refit.

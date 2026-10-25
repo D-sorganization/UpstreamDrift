@@ -21,10 +21,10 @@ inversion call.
 
 ## File targets
 
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\invert_via_surrogate.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\projected_adam.py` (custom Adam variant that projects onto coefficient bounds)
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option2\test_invert_via_surrogate.py`
-- `C:\Users\diete\Repositories\UpstreamDrift\tests\motion_matching\option2\test_projected_adam.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\invert_via_surrogate.py`
+- `<owner-home>\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option2_nn_surrogate\python\projected_adam.py` (custom Adam variant that projects onto coefficient bounds)
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option2\test_invert_via_surrogate.py`
+- `<owner-home>\Repositories\UpstreamDrift\tests\motion_matching\option2\test_projected_adam.py`
 
 ## Public API
 

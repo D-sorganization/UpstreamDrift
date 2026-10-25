@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import Any
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -94,7 +97,7 @@ def test_covariation_api_returns_traceable_population_result(
 
 
 def test_covariation_api_fails_closed_without_trusted_player_identity(
-    client: TestClient,
+    client: TestClient, error_message: Callable[[Any], str]
 ) -> None:
     response = client.post(
         "/tools/launch-monitor-analytics/v2/player-covariation",
@@ -109,7 +112,7 @@ def test_covariation_api_fails_closed_without_trusted_player_identity(
     )
 
     assert response.status_code == 400
-    assert "trusted player identity" in response.json()["detail"]
+    assert "trusted player identity" in error_message(response)
 
 
 def test_covariation_api_rejects_forbidden_pseudo_identity(
@@ -139,7 +142,7 @@ def test_covariation_api_rejects_forbidden_pseudo_identity(
 
 
 def test_covariation_api_reports_missing_selected_columns_structurally(
-    client: TestClient,
+    client: TestClient, error_message: Callable[[Any], str]
 ) -> None:
     response = client.post(
         "/tools/launch-monitor-analytics/v2/player-covariation",
@@ -155,7 +158,7 @@ def test_covariation_api_reports_missing_selected_columns_structurally(
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "Columns not present in dataset: not_in_source"
+    assert error_message(response) == "Columns not present in dataset: not_in_source"
 
 
 def test_pair_scan_api_returns_ranked_and_unavailable_pairs(

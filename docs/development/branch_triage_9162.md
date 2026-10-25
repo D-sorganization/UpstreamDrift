@@ -1,7 +1,7 @@
 # Local Branch Triage (#9162)
 
 Disposition ledger for every local branch in the primary UpstreamDrift
-checkout (`C:/Users/diete/Repositories/UpstreamDrift`), resolving issue #9162.
+checkout (`<owner-home>/Repositories/UpstreamDrift`), resolving issue #9162.
 The fleet development-log rollout (Repository_Management#1460) found 250
 local branches ahead of `main`; by the time of this triage (2026-09-15) the
 checkout carried **386** local heads. The log was bootstrapped with

@@ -18,7 +18,10 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
 %   for every loaded contact as a geometry check.
 %
 %   OPTS fields: stop_time (0.30 s), n_rows (31), rest (true: the standing
-%   test; the impact drive tips the body over, see GROUND_CONTACT.md).
+%   test; the impact drive tips the body over, see GROUND_CONTACT.md),
+%   lock_joints (false: true locks every joint but the pelvis root with
+%   GS3DX_LOCK_JOINTS, in memory, so the body stands as one rigid body on
+%   its sole contacts: the stance compared with the Python engines).
 %
 %   Preconditions: MATLAB R2025b (asserted); REPO is an UpstreamDrift checkout.
 %   Postconditions: CSV (LF line endings) and receipt exist in OUT_DIR; the
@@ -32,6 +35,7 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
     if ~isfield(opts, 'stop_time'); opts.stop_time = 0.30; end
     if ~isfield(opts, 'n_rows');    opts.n_rows    = 31;   end
     if ~isfield(opts, 'rest');      opts.rest      = true; end
+    if ~isfield(opts, 'lock_joints'); opts.lock_joints = false; end
     assert(opts.stop_time > 0 && opts.n_rows >= 2, 'BadOpts: stop_time > 0, n_rows >= 2');
 
     rel = version('-release');
@@ -42,8 +46,16 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
     addpath(root);
     info = gs3dx_setup();
     mdl = char(gs3dx_names().variants.contact);
-    geo = local_geometry(mdl);
+    geo = gs3dx_contact_geometry(mdl);
     if ~isfolder(out_dir); mkdir(out_dir); end
+
+    locked = {};
+    edited = {};
+    if opts.lock_joints
+        load_system(mdl);   % GS3DX_CONTACT_CHECK runs the loaded, locked model
+        [locked, edited] = gs3dx_lock_joints(mdl);
+    end
+    discard = onCleanup(@() cellfun(@(bd) close_system(bd, 0), edited)); %#ok<NASGU> scope guard
 
     tic;
     c = gs3dx_contact_check(info, rest=opts.rest, stop_time=opts.stop_time);
@@ -52,28 +64,13 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
     assert(isfield(c.feet.L, 'R') && isfield(c.feet.R, 'R'), ...
         'NoAnkleRotation: AnkleLogs carries no Rotation_Transform');
 
-    up = [0; 0; 1];
-    corners = struct('name', {'Heel', 'ToeIn', 'ToeOut'}, ...
-        'x', {-geo.FootHeelOffset * geo.FootLength, ...
-              (1 - geo.FootHeelOffset) * geo.FootLength, ...
-              (1 - geo.FootHeelOffset) * geo.FootLength}, ...
-        'y', {0, -1, 1});   % -1 = inside, as in gs3dx_build_contact
     n_t = numel(c.t);
-    labels = strings(1, 0);
-    points = zeros(3, 0, n_t);
-    points_alt = points;   % with R transposed: orientation diagnostic only
-    for side = struct('P', {'L', 'R'}, 'sign', {1, -1})
-        foot = c.feet.(side.P);
-        for k = 1:numel(corners)
-            off = [corners(k).x; side.sign * corners(k).y * geo.FootContactWidth / 2; ...
-                -geo.AnkleHeight + geo.FootContactRadius];
-            centre = foot.p + squeeze(pagemtimes(foot.R, off));
-            centre_alt = foot.p + squeeze(pagemtimes(pagetranspose(foot.R), off));
-            labels(end + 1) = string(side.P) + corners(k).name; %#ok<AGROW>
-            points(:, end + 1, :) = reshape(centre - geo.FootContactRadius * up, 3, 1, []); %#ok<AGROW>
-            points_alt(:, end + 1, :) = reshape(centre_alt - geo.FootContactRadius * up, 3, 1, []); %#ok<AGROW>
-        end
-    end
+    labels = ["LHeel", "LToeIn", "LToeOut", "RHeel", "RToeIn", "RToeOut"];
+    feet_alt = struct( ...
+        'L', struct('p', c.feet.L.p, 'R', pagetranspose(c.feet.L.R)), ...
+        'R', struct('p', c.feet.R.p, 'R', pagetranspose(c.feet.R.R)));
+    [~, points] = gs3dx_sole_contact_points(geo, c.feet);
+    [~, points_alt] = gs3dx_sole_contact_points(geo, feet_alt);   % R transposed: orientation diagnostic only
     forces = c.contacts;   % 3 x 6 x N, World, ground on foot, same order
     assert(isequal(size(forces), size(points)), 'ContactCountMismatch');
 
@@ -94,7 +91,7 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
     header = [header, "COMLogs_GlobalPosition_" + string(1:3), "GroundContactLogs_GroundHeight"];
     data = [data, c.com(:, idx).', repmat(ground_z, numel(idx), 1)];
     csv_path = fullfile(out_dir, 'simscape_gs3dx_grf_fixture.csv');
-    local_write_csv(csv_path, header, data);
+    gs3dx_write_csv(csv_path, header, data);
 
     g = 9.80665;
     receipt = struct();
@@ -102,8 +99,10 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
     receipt.matlab_release = rel;
     receipt.matlab_version = version;
     receipt.model = mdl;
-    receipt.model_sha256 = local_sha256(fullfile(info.models_dir, [mdl '.slx']));
+    receipt.model_sha256 = gs3dx_sha256(fullfile(info.models_dir, [mdl '.slx']));
     receipt.rest = opts.rest;
+    receipt.lock_joints = opts.lock_joints;
+    receipt.locked_joint_count = numel(locked);
     receipt.stop_time_s = opts.stop_time;
     receipt.sim_wall_clock_s = elapsed_s;
     receipt.mass_kg = c.mass;
@@ -121,44 +120,10 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
     receipt.samples = n_t;
     receipt.fixture_rows = numel(idx);
     receipt.fixture_csv = 'simscape_gs3dx_grf_fixture.csv';
-    receipt.fixture_sha256 = local_sha256(csv_path);
+    receipt.fixture_sha256 = gs3dx_sha256(csv_path);
     receipt.convention = 'ground on foot, world Z-up, SI; point = sphere lowest point';
     fid = fopen(fullfile(out_dir, 'simscape_gs3dx_grf_receipt.json'), 'w');
     fprintf(fid, '%s\n', jsonencode(receipt, 'PrettyPrint', true));
     fclose(fid);
     fprintf('%s\n', jsonencode(receipt, 'PrettyPrint', true));
-end
-
-function geo = local_geometry(mdl)
-    load_system(mdl);
-    cleanup = onCleanup(@() close_system(mdl, 0));
-    ws = get_param(mdl, 'ModelWorkspace');
-    geo = struct();
-    for n = ["FootHeelOffset", "FootLength", "FootContactWidth", "AnkleHeight", ...
-             "FootContactRadius", "GroundOffset", "GroundRotation"]
-        v = getVariable(ws, char(n));
-        if isa(v, 'Simulink.Parameter'); v = v.Value; end
-        geo.(n) = double(v);
-    end
-    assert(norm(geo.GroundRotation(:, 3) - [0; 0; 1]) < 1e-12, ...
-        'GroundNotLevel: the plane normal must be world +Z');
-end
-
-function local_write_csv(path, header, data)
-    fid = fopen(path, 'w');   % binary mode: LF line endings
-    fprintf(fid, '%s\n', strjoin(header, ','));
-    fmt = [char(strjoin(repmat("%.17g", 1, size(data, 2)), ',')), '\n'];
-    assert(size(fmt, 1) == 1, 'BadFormat: row format must be one char row');
-    fprintf(fid, fmt, data.');
-    fclose(fid);
-end
-
-function hex = local_sha256(path)
-    fid = fopen(path, 'r');
-    assert(fid > 0, 'CannotOpen: %s', path);
-    bytes = fread(fid, inf, '*uint8');
-    fclose(fid);
-    md = java.security.MessageDigest.getInstance('SHA-256');
-    digest = typecast(md.digest(bytes), 'uint8');
-    hex = lower(reshape(dec2hex(digest, 2).', 1, []));
 end

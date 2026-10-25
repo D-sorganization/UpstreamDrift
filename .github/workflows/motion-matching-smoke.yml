@@ -43,10 +43,19 @@ jobs:
     steps:
       - name: Set runner
         id: check
+        shell: bash
+        env:
+          CI_RUNNER_MODE: ${{ vars.CI_RUNNER_MODE }}
+          REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
         run: |
+          if [ "$REPOSITORY_PRIVATE" != "true" ] && [ "${CI_RUNNER_MODE:-auto}" != "local" ]; then
+            runner="ubuntu-latest"
+          else
+            runner="d-sorg-fleet-docker"
+          fi
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+          echo "runner=$runner" >> "$GITHUB_OUTPUT"
+          echo "Selected runner: $runner"
 
   smoke:
     needs: pick-runner
@@ -95,6 +104,9 @@ jobs:
           OPENBLAS_NUM_THREADS: "1"
           OMP_NUM_THREADS: "1"
           MKL_NUM_THREADS: "1"
+          # Fleet runners may autoload pytest-xvfb; disable autoload so only
+          # `-p no:xvfb` in run_motion_matching_smoke.sh applies (#13534).
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
         run: |
           set -o pipefail
           bash scripts/ci/run_motion_matching_smoke.sh \

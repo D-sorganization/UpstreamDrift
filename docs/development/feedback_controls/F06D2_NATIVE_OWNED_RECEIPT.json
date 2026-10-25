@@ -43,7 +43,7 @@
   "issue": 11942,
   "loaded_source_admission": {
     "evidence_log": "native-configuration-tests-v5.out",
-    "loaded_model_filename": "C:\\Users\\diete\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
+    "loaded_model_filename": "<owner-home>\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
     "source_path_checked": true,
     "wrong_path_identifier": "NativeOwned:LoadedModelPathMismatch"
   },
@@ -188,7 +188,7 @@
         "schema_version": "simscape-diagnostic-config/1.0.0"
       },
       "effective_configuration_sha256": "c8d6873d216ed54e74b5814ab1a5431fe86523262e80f089723cf75423bfdb2c",
-      "loaded_model_filename": "C:\\Users\\diete\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
+      "loaded_model_filename": "<owner-home>\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
       "runtime_id": "25.2.0.3177638 (R2025b) Update 5",
       "runtime_release": "2025b",
       "solver_id": "ode23t",
@@ -389,7 +389,7 @@
         "schema_version": "simscape-diagnostic-config/1.0.0"
       },
       "effective_configuration_sha256": "c8d6873d216ed54e74b5814ab1a5431fe86523262e80f089723cf75423bfdb2c",
-      "loaded_model_filename": "C:\\Users\\diete\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
+      "loaded_model_filename": "<owner-home>\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
       "runtime_id": "25.2.0.3177638 (R2025b) Update 5",
       "runtime_release": "2025b",
       "solver_id": "ode23t",

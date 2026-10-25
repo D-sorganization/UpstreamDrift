@@ -1,0 +1,10 @@
+{
+  "provider_bundle_sha256": "5a2efd76cd0771e7437c58b6af23346501ee6d3d289f927220d51e257b86236b",
+  "provider_commit": "5c573e3804494b47bf71c639107ae80f2cd4d6da",
+  "provider_repository": "D-sorganization/Repository_Management",
+  "schema_version": 1,
+  "source_ci_workflow_id": 216580685,
+  "source_ci_workflow_path": ".github/workflows/ci-standard.yml",
+  "workflow_sha256": "8bb9194ef6fa081ddbd77879ad1ace5cc4c652b9fdbcf82db07372d73d5d5706",
+  "workflow_source_path": ".github/workflows/reusable-admission-report-publisher.yml"
+}

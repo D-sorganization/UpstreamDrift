@@ -62,7 +62,7 @@ def test_root_transform_must_be_declared_and_proper():
 def test_prepared_probe_uses_existing_kinematic_apis_only():
     from pathlib import Path
 
-    repo = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
+    repo = Path(r"<owner-home>/Repositories/Worktrees/feedback-moco-state-binding-11791")
     model_source = (repo / "src/engines/physics_engines/mujoco/python/full_body_model.py").read_text(encoding="utf-8")
     ik_source = (repo / "src/engines/physics_engines/mujoco/python/full_body_ik.py").read_text(encoding="utf-8")
     assert "class NativeMujocoFullBodyModel" in model_source
@@ -90,7 +90,7 @@ def test_exact_v1_source_and_candidate_prefix_and_root_axis():
     import json
     from pathlib import Path
 
-    repo = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
+    repo = Path(r"<owner-home>/Repositories/Worktrees/feedback-moco-state-binding-11791")
     spec = json.loads((repo / "docs/development/full_body_models/full_body_spec_v1.json").read_text(encoding="utf-8"))
     candidate = json.loads((repo / "docs/development/full_body_models/evidence/native_candidates/returned81_candidate.json").read_text(encoding="utf-8"))
     assert len(spec["coordinate_order"]) == 41
@@ -135,7 +135,7 @@ def test_native_api_methods_are_owned_by_constructed_facades():
     import ast
     from pathlib import Path
 
-    repo = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
+    repo = Path(r"<owner-home>/Repositories/Worktrees/feedback-moco-state-binding-11791")
     ik_path = repo / "src/engines/physics_engines/mujoco/python/full_body_ik.py"
     model_path = repo / "src/engines/physics_engines/mujoco/python/full_body_model.py"
     ik_tree = ast.parse(ik_path.read_text(encoding="utf-8"))

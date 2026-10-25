@@ -3,6 +3,8 @@
 Tests the CrossEngineValidator against actual physics engines to ensure
 MuJoCo, Drake, and Pinocchio produce consistent results per Guideline M2/P3.
 
+Nightly cross-engine workflow runner selection (#13619) is validated in tests/ci/test_nightly_cross_engine_workflow.py.
+
 This module implements the acceptance test suite required by Section M2
 of the Project Design Guidelines.
 """

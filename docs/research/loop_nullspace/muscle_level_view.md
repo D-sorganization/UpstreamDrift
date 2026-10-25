@@ -292,6 +292,12 @@ with OpenSim and MuJoCo-muscle providers; the calculation-level reference is
 (the torque-envelope pullback) and Stage 5 (a MyoFullBody swing frame) remain
 open, and Stage 6 stays a deferred validation.
 
+The MuJoCo-muscle provider is also exercised on a real MyoSuite model. The
+co-contraction sweep runs on `elbow/myoelbow_1dof6muscles.xml` from the pinned
+`shared/models/myosuite/myo_sim` checkout, in the `test_real_myosuite_elbow_*`
+tests of `tests/unit/engines/mujoco/test_muscle_mechanics_mujoco.py`. Those tests
+skip only when that checkout is absent.
+
 ## Non-Claims
 
 - No stiffness, co-contraction level or muscle activation is inferred from

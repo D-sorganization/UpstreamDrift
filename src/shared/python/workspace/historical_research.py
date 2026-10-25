@@ -292,7 +292,8 @@ def _image_counts(
 
 def _sanitized(value: Any) -> None:
     if isinstance(value, str) and re.search(
-        r"(?<![A-Za-z])[A-Za-z]:[/\\]|(?:^|\s)/(?:Users|home|tmp)/|\\\\", value
+        r"(?<![A-Za-z])[A-Za-z]:[/\\]|(?:^|\s)/(?:Users|home|tmp)/|\\\\|<owner-home>",
+        value,
     ):
         raise ValueError("Local machine paths cannot enter sanitized research JSON")
     if isinstance(value, dict):

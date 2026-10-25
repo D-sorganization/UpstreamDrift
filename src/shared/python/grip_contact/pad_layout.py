@@ -45,6 +45,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from src.shared.python.grip_contact.deterministic_math import det_sin_cos
 from src.shared.python.grip_contact.parameters import BushingParameters
 
 #: Grip radius [m]: the spec's own hand standoff (``RHandStandoff`` placement
@@ -119,12 +120,12 @@ class PadLayout:
         """Pad centres ``(pad_count, 3)`` in the grip frame of ``side``."""
         centre = self.axis_offset_grip_frame(side)
         phase = 0.0 if side == "L" else math.pi / self.pads_per_ring
-        angles = (
-            phase + 2.0 * math.pi * np.arange(self.pads_per_ring) / self.pads_per_ring
-        )
-        ring = self.centre_radius_m * np.column_stack(
-            [np.zeros_like(angles), np.cos(angles), np.sin(angles)]
-        )
+        n_ring = self.pads_per_ring
+        # det_sin_cos, not np.sin/np.cos: the SIMD trig kernels differ by 1 ulp
+        # between CPUs and libm builds, and these positions are written into
+        # the byte-compared MJCF text (#13720).
+        trig = [det_sin_cos(phase + 2.0 * math.pi * k / n_ring) for k in range(n_ring)]
+        ring = self.centre_radius_m * np.array([[0.0, c, s] for s, c in trig])
         out = []
         for a in self.axial_offsets_m():
             shifted = ring.copy()

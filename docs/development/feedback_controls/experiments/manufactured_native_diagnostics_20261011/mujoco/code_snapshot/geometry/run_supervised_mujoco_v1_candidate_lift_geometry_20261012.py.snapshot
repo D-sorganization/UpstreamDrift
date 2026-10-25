@@ -17,9 +17,9 @@ from mujoco_candidate_lift_bootstrap import (
     tools_status,
 )
 
-PLANNING = Path(r"C:/Users/diete/Repositories/docs/development/feedback_controls_planning")
-REPO = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
-SUPERVISOR_REPO = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-marker-calibration-12164")
+PLANNING = Path(r"<owner-home>/Repositories/docs/development/feedback_controls_planning")
+REPO = Path(r"<owner-home>/Repositories/Worktrees/feedback-moco-state-binding-11791")
+SUPERVISOR_REPO = Path(r"<owner-home>/Repositories/Worktrees/feedback-marker-calibration-12164")
 SUPERVISOR_REL = Path("tests/opensim/native_moco_ladder_harness.py")
 SPEC = REPO / "docs/development/full_body_models/full_body_spec_v1.json"
 CANDIDATE = REPO / "docs/development/full_body_models/evidence/native_candidates/returned81_candidate.json"
@@ -61,7 +61,7 @@ NATIVE_SOURCES = tuple(REPO / rel for rel in (
     "src/shared/python/motion_matching/same_input/integrator.py",
     "src/engines/physics_engines/mujoco/python/native_full_body_replay.py",
 ))
-CHILD = Path(r"C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe")
+CHILD = Path(r"<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe")
 SUPERVISOR = SUPERVISOR_REPO / SUPERVISOR_REL
 MUJOCO_PACKAGE = CHILD.parent.parent / "Lib/site-packages/mujoco"
 FILE_SET = (SPEC, CANDIDATE, SEED_RECEIPT, FEEDBACK_SEED_RECEIPT, HELPER, DRIVER, TESTS, WRAPPER, BOOTSTRAP, BOOTSTRAP_TESTS, BOOTSTRAP_PREFLIGHT, ACCEL_DRIVER, ACCEL_CORE, ACCEL_TESTS, FEEDBACK_DRIVER, FEEDBACK_CORE, FEEDBACK_TESTS, *BOOTSTRAP_SOURCES, *NATIVE_SOURCES)

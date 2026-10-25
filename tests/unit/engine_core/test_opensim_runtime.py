@@ -156,3 +156,91 @@ def test_module_import_is_stdlib_only() -> None:
         cwd=Path(__file__).resolve().parents[3],
     )
     assert result.returncode == 0, result.stderr
+
+
+# --- CASADIPATH for the Moco ipopt plugin on Windows (OSL-7, #13044) ---------
+
+
+def _fake_opensim_dir(tmp_path: Path, *, with_ipopt: bool = True) -> Path:
+    package = tmp_path / "site-packages" / "opensim"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    if with_ipopt:
+        (package / opensim_runtime.CASADI_IPOPT_PLUGIN).write_bytes(b"")
+    return package
+
+
+def test_casadipath_points_at_the_opensim_package_on_windows(tmp_path: Path) -> None:
+    package = _fake_opensim_dir(tmp_path)
+    env: dict[str, str] = {}
+    result = opensim_runtime.ensure_casadi_plugin_path(
+        package, environ=env, platform="win32"
+    )
+    assert result == str(package)
+    assert env == {"CASADIPATH": str(package)}
+
+
+def test_casadipath_is_never_overridden(tmp_path: Path) -> None:
+    package = _fake_opensim_dir(tmp_path)
+    env = {"CASADIPATH": "D:/mine"}
+    assert (
+        opensim_runtime.ensure_casadi_plugin_path(
+            package, environ=env, platform="win32"
+        )
+        is None
+    )
+    assert env == {"CASADIPATH": "D:/mine"}
+
+
+@pytest.mark.parametrize("platform", ["linux", "darwin"])
+def test_casadipath_has_no_effect_off_windows(tmp_path: Path, platform: str) -> None:
+    package = _fake_opensim_dir(tmp_path)
+    env: dict[str, str] = {}
+    assert (
+        opensim_runtime.ensure_casadi_plugin_path(
+            package, environ=env, platform=platform
+        )
+        is None
+    )
+    assert env == {}
+
+
+def test_casadipath_needs_the_ipopt_plugin_in_the_package(tmp_path: Path) -> None:
+    package = _fake_opensim_dir(tmp_path, with_ipopt=False)
+    env: dict[str, str] = {}
+    assert (
+        opensim_runtime.ensure_casadi_plugin_path(
+            package, environ=env, platform="win32"
+        )
+        is None
+    )
+    assert env == {}
+
+
+def test_import_opensim_sets_casadipath_from_the_loaded_package(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    package = _fake_opensim_dir(tmp_path)
+    fake = ModuleType("opensim")
+    fake.__file__ = str(package / "__init__.py")
+    monkeypatch.setitem(sys.modules, "opensim", fake)
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setenv("CASADIPATH", "x")  # records the unset state for undo
+    monkeypatch.delenv("CASADIPATH")
+    assert opensim_runtime.import_opensim(importer=_fake_importer(None, fake)) is fake
+    import os
+
+    assert os.environ["CASADIPATH"] == str(package)
+
+
+def test_import_opensim_ignores_a_module_without_a_file(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setitem(sys.modules, "opensim", ModuleType("opensim"))
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setenv("CASADIPATH", "x")  # records the unset state for undo
+    monkeypatch.delenv("CASADIPATH")
+    opensim_runtime.import_opensim(importer=_fake_importer(None, "stub"))
+    import os
+
+    assert "CASADIPATH" not in os.environ

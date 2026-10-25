@@ -56,11 +56,11 @@ source qualification remains blocked even if longer replay becomes possible.
 Reproduce on the retained exact source and preparation receipt:
 
 ```powershell
-$env:CASADIPATH='C:/Users/diete/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim'
+$env:CASADIPATH='<owner-home>/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim'
 $env:PYTHONPATH=(Get-Location).Path
 $env:OPEN_SIM_EXACT_557_SOURCE='<retained-03-custom-mtp.osim>'
 $env:OPEN_SIM_EXACT_557_PREPARATION='<retained-single-equilibrium-v2-receipt.json>'
-& 'C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/opensim/test_native_exact_557_profile.py tests/opensim/test_native_constrained_muscle.py tests/opensim/test_native_muscle_bundle.py -q
+& '<owner-home>/Repositories/.venv-feedback-opensim/Scripts/python.exe' -m pytest tests/opensim/test_native_exact_557_profile.py tests/opensim/test_native_constrained_muscle.py tests/opensim/test_native_muscle_bundle.py -q
 ```
 
 The focused TDD suite was RED on a missing exact profile, then 44 native
