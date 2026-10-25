@@ -618,11 +618,36 @@ p_{\mathrm{hand}} = p_{\mathrm{axis\_offset}} + \begin{bmatrix} x_{\mathrm{site}
 \end{equation}
 At the weld pose, every physical pad--grip site's surface gap is exactly $-0.250$\,mm, satisfying the $\pm 0.5$\,mm neutral preload contract. The preload is an internal squeeze, so it must be self-equilibrated on the club. Before \#13555 three pads had no ring partner across the grip (\texttt{lead\_heel\_pad\_butt}, \texttt{ten\_finger\_little\_finger\_grip} and \texttt{trail\_index\_trigger\_grip}), which put a $42.774$\,N radial force and a $2.5$--$5.5$\,N\,m couple on the club at $t = 0$, depending on the style. Each is now opposed by an antagonist pad diametrically across the grip at the same axial station and the same preload: \texttt{lead\_butt\_fingers} (the lead little and ring fingers, which in every grip style wrap the butt opposite the hypothenar heel pad), \texttt{trail\_thumb\_pad} (the trail thumb, which closes against the shaft opposite a pulled-back trigger index finger) and \texttt{trail\_hypothenar} (the trail hypothenar eminence, which in a ten-finger grip lies across the grip from the trail little finger that no longer overlaps or interlocks the lead hand). Sphere--cylinder normal forces act radially through the grip axis, so each pad and its antagonist exert equal, collinear forces that cancel in force and moment; the net hand--grip wrench on the club at $t = 0$ is zero for every style and trigger option. Seating the unpaired pads tangent (gap $0$) also zeroes the $t = 0$ wrench, but it was rejected: it leaves pads at contact onset, where engine calibrations that assume every pad at the preload (the MuJoCo per-site \texttt{solref} fit and the OpenSim Elastic Foundation offset) break and the heel chatters in the separated scenarios.
 
-\textbf{Pinocchio Adapter.} \texttt{ClubInHands} in \path{src/engines/physics_engines/pinocchio/python/grip_contact_sim.py} accepts an optional
-\texttt{topology\_model: TopologyContactModel}. When supplied, \texttt{wrenches()} evaluates \texttt{topology\_side\_wrench} and caches per-pair
-wrenches in \texttt{last\_pads}. \texttt{simulate\_grip\_contact} integrates the club equations of motion using SciPy Radau implicit integration
-and logs per-pair normal and tangential force traces in \texttt{ContactRun.pair\_normal\_force\_n} and \texttt{ContactRun.pair\_tangential\_force\_n}.
-Unavailable channels (such as allocated hand--hand pairs) are recorded as \texttt{NaN} with explanatory reasons in \texttt{channel\_reasons}.
+\textbf{Pinocchio Adapter and Consolidation.} \texttt{ClubInHands} in \path{src/engines/physics_engines/pinocchio/python/grip_contact_sim.py}
+accepts an optional \texttt{topology\_model: TopologyContactModel}. When supplied, \texttt{wrenches()} evaluates \texttt{topology\_side\_wrench}
+and caches per-pair wrenches in \texttt{last\_pads}. \texttt{simulate\_grip\_contact} integrates the club equations of motion using SciPy Radau
+implicit integration and logs per-pair normal and tangential force traces in \texttt{ContactRun.pair\_normal\_force\_n} and
+\texttt{ContactRun.pair\_tangential\_force\_n}. Unavailable channels (such as allocated hand--hand pairs) are recorded as \texttt{NaN} with
+explanatory reasons in \texttt{channel\_reasons}. The secondary entry point in \path{src/engines/physics_engines/pinocchio/python/topology_contact_sim.py}
+(\texttt{TopologyClubInHands}, \texttt{simulate\_topology\_contact}, and \texttt{evaluate\_topology\_wrenches}) delegates directly to
+\texttt{ClubInHands}, \texttt{build\_topology\_model(..., squeeze\_per\_hand\_n=1100.0)}, \texttt{simulate\_grip\_contact}, and the shared G2
+pairwise kernels (\texttt{sphere\_capsule}, \texttt{capsule\_sphere}, \texttt{capsule\_capsule}), while \texttt{ClubOnBushings.derivatives}
+reuses the club state already computed by \texttt{evaluate()} rather than invoking Pinocchio forward kinematics twice per RHS call.
+
+\textbf{Failed Experiment and Divergence Diagnosis (\#13414 vs \#13422).} An initial parallel implementation of
+\texttt{TopologyClubInHands.wrenches} (\texttt{d7005811aa}, \#13414) computed the local club grip frames
+\texttt{frames = \{s: club.frame(self.\_offsets[s]) for s in SIDES\}} and discarded them, passing the raw club body frame
+(\texttt{club = self.club\_state(y)}, located near the clubhead at $[0.0627, 0.0522, 0.1207]$\,m at $t=0$) and unmapped butt-origin site
+coordinates instead of the club grip frames (\texttt{frames["L"]} at $[0.9145, -0.0053, 0.8547]$\,m, \texttt{frames["R"]} at
+$[0.8483, -0.0234, 0.8128]$\,m) and hand-frame-mapped sites (\texttt{map\_site\_to\_hand\_frame}). Because the club body origin sits
+$\approx 1.12$\,m from the hand frames, every physical hand--grip pair evaluated to $\delta_i = 0$\,m and $f_{n,i} = 0$\,N at $t=0$ and
+throughout the replay. With zero contact wrench, the club underwent pure gravitational free fall ($z$ dropped from $+0.1207$\,m to
+$-2.9747$\,m, $v_z = -7.9599$\,m/s) and the ODE right-hand side had identically zero sensitivity to club position
+($\partial \dot{y} / \partial y_{0:3} \equiv 0$). SciPy Radau's finite-difference Jacobian routine (\texttt{\_dense\_num\_jac}) therefore
+multiplied \texttt{jac\_factor[0:3]} by $10$ on each Jacobian update until IEEE \texttt{float64} overflow around step 3000 ($t \approx 0.578$\,s)
+and a non-finite position perturbation at step 4204 ($t = 0.80338550$\,s, $h = 2.0 \times 10^{-3}$\,s), raising
+\texttt{ValueError: position\_m must be a finite 3-vector} in \texttt{BushingState.\_\_post\_init\_\_}. Consolidating
+\texttt{TopologyClubInHands} onto \texttt{ClubInHands} with \texttt{build\_topology\_model} restores the hand-frame site mapping and preload
+offset ($0.250$\,mm per-site penetration at $t=0$, $42.81$\,N per site; $214.0$\,N total normal preload on the lead hand and $171.2$\,N on the
+trail hand for overlap/interlock, $214.0$\,N for ten-finger). Over the full $1.0$\,s driver swing replay ($h_{\max} = 2 \times 10^{-4}$\,s vs
+$1 \times 10^{-4}$\,s), peak pair normal forces are $42.77$--$72.36$\,N for overlap and interlock ($\mathrm{nfev} = 37{,}029$ nominal /
+$71{,}412$ halved, maximum timestep-halving relative change $0.000000\% < 2\%$) and $45.60$--$76.87$\,N for ten-finger
+($\mathrm{nfev} = 36{,}743$ nominal / $71{,}149$ halved, maximum timestep-halving relative change $0.000015\% < 2\%$).
 
 \textbf{Parameters.} Stiffness $k = 1.6 \times 10^5$\,N/m, dissipation $d = 0.5$\,s/m, static and dynamic friction coefficient $\mu = 0.90$,
 velocity transition $v_{\mathrm{trans}} = 0.01$\,m/s, patch radius $r_{\mathrm{patch}} \approx 4.47$\,mm matched to $1100$\,N squeeze per hand.
@@ -633,8 +658,8 @@ velocity transition $v_{\mathrm{trans}} = 0.01$\,m/s, patch radius $r_{\mathrm{p
 \item Friction cone constraint: $\|f_t\| \le \mu f_n$ (with regularized Stribeck allowance).
 \item Action--reaction balance: $f_a + f_b = 0$ and net moment about arbitrary points $\le 10^{-12}$\,N$\cdot$m.
 \item Resultant wrench matches sum of individual pair wrenches to $\le 10^{-12}$.
-\item Per-pair force traces match \texttt{topology\_side\_wrench} re-evaluated at recorded states to $\le 10^{-9}$\,N across overlap, interlock, and ten-finger styles.
-\item Timestep halving ($2 \times 10^{-4}$\,s vs $1 \times 10^{-4}$\,s) changes peak pair normal force by $< 2\%$ ($0.0000\%$ observed across all three styles).
+\item Per-pair force traces match \texttt{topology\_side\_wrench} and shared pairwise kernels re-evaluated at recorded states to $\le 10^{-9}$\,N across overlap, interlock, and ten-finger styles.
+\item Timestep halving ($2 \times 10^{-4}$\,s vs $1 \times 10^{-4}$\,s) changes peak pair normal force by $< 2\%$ ($0.000000\%$ for overlap/interlock and $0.000015\%$ for ten-finger over the $1.0$\,s swing replay).
 \end{enumerate}
 
 \textbf{Limitations.} Hand segments are treated as rigid bodies driven by prescribed kinematics without articulated finger degrees of freedom;
@@ -643,7 +668,8 @@ hand--hand pairs are allocated (reporting only, HRG-GS-G3) and do not exert phys
 \textbf{Reproduction Command.}
 \begin{verbatim}
 python3 -m pytest tests/unit/grip_contact/test_topology_contact.py \
-    tests/unit/grip_contact/test_pinocchio_topology_grip.py
+    tests/unit/grip_contact/test_pinocchio_topology_grip.py \
+    tests/unit/grip_contact/test_topology_contact_sim.py
 \end{verbatim}
 
 \subsection{Batched One-Side Contact Evaluation (HRG-GS-G6 Follow-Up, \#13384)}

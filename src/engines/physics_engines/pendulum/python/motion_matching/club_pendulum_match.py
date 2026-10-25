@@ -6,6 +6,7 @@ contracts and seed mapping live in
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 import math
 from typing import Any
@@ -208,19 +209,22 @@ def _integrate_triple(
         return profile.evaluate(t)
 
     for i in range(n - 1):
-        dt = float(times[i + 1] - times[i])
-        if dt <= 0.0:
-            dt = 1e-4
-        # RK4
-        k1 = equations_of_motion(state, cur_t, params, torque_func)
-        k2 = equations_of_motion(
-            state + 0.5 * dt * k1, cur_t + 0.5 * dt, params, torque_func
-        )
-        k3 = equations_of_motion(
-            state + 0.5 * dt * k2, cur_t + 0.5 * dt, params, torque_func
-        )
-        k4 = equations_of_motion(state + dt * k3, cur_t + dt, params, torque_func)
-        state = state + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        dt_frame = float(times[i + 1] - times[i])
+        if dt_frame <= 0.0:
+            dt_frame = 1e-4
+        substeps = max(1, math.ceil(dt_frame / 1e-3))
+        dt = dt_frame / substeps
+        for _ in range(substeps):
+            k1 = equations_of_motion(state, cur_t, params, torque_func)
+            k2 = equations_of_motion(
+                state + 0.5 * dt * k1, cur_t + 0.5 * dt, params, torque_func
+            )
+            k3 = equations_of_motion(
+                state + 0.5 * dt * k2, cur_t + 0.5 * dt, params, torque_func
+            )
+            k4 = equations_of_motion(state + dt * k3, cur_t + dt, params, torque_func)
+            state = state + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+            cur_t += dt
         cur_t = float(times[i + 1])
         states[i + 1] = state
     return states
@@ -274,7 +278,7 @@ def _triple_initial_state(
 ) -> tuple[TriplePendulumParams, np.ndarray, np.ndarray, float]:
     """Build params, q0/v0, and first-frame RMSE for a triple fit."""
     params = TriplePendulumParams(
-        m1=5.0, m2=7.5, m3=0.35, L1=l_hub, L2=l_arm, L3=l_club, g=9.81
+        m1=5.0, m2=7.5, m3=0.35, L1=l_hub, L2=l_arm, L3=l_club, g=float(GRAVITY_M_S2)
     )
     q0 = (
         np.asarray(q0_override, dtype=np.float64)

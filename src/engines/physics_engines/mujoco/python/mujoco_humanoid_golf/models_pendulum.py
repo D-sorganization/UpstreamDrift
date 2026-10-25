@@ -6,6 +6,9 @@ two-link inclined plane with universal joint, and gimbal joint demonstration.
 
 from __future__ import annotations
 
+from src.engines.physics_engines.mujoco.pendulum_models_xml import (  # noqa: F401
+    TRIPLE_PENDULUM_XML,
+)
 from src.shared.python.core import constants
 
 GRAVITY_M_S2 = float(constants.GRAVITY_M_S2)
@@ -126,65 +129,6 @@ DOUBLE_PENDULUM_XML = rf"""    <mujoco model="golf_double_pendulum">
 
   <actuator>
     <motor name="shoulder_motor" joint="shoulder" gear="1"/>
-    <motor name="wrist_motor" joint="wrist" gear="1"/>
-  </actuator>
-</mujoco>
-"""
-
-
-TRIPLE_PENDULUM_XML = rf"""    <mujoco model="golf_triple_pendulum">
-  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}"
-          integrator="RK4"/>
-
-  <visual>
-    <global offwidth="1024" offheight="1024"/>
-    <map znear="0.01" zfar="20"/>
-    <headlight diffuse="0.8 0.8 0.8"/>
-  </visual>
-
-  <worldbody>
-    <!-- Ground plane -->
-    <geom name="floor" type="plane" size="5 5 0.1" rgba="0.8 0.8 0.8 1"/>
-
-    <!-- Side camera for a classic golf view -->
-    <camera name="side" pos="-3 0 1.3" euler="0 20 0"/>
-
-    <!-- Shoulder at about chest height -->
-    <body name="shoulder_body" pos="0 0 1.2">
-      <joint name="shoulder" type="hinge" axis="0 0 1" limited="false"/>
-
-      <!-- Upper arm -->
-      <geom name="upper_arm" type="capsule"
-            fromto="0 0 0 0.35 0 0" size="0.03"
-            rgba="0.8 0.2 0.2 1"/>
-
-      <body name="forearm_body" pos="0.35 0 0">
-        <joint name="elbow" type="hinge" axis="0 0 1" limited="false"/>
-
-        <!-- Forearm -->
-        <geom name="forearm" type="capsule"
-              fromto="0 0 0 0.35 0 0" size="0.025"
-              rgba="0.2 0.2 0.8 1"/>
-
-        <body name="club_body" pos="0.35 0 0">
-          <joint name="wrist" type="hinge" axis="0 0 1" limited="false"/>
-
-          <!-- Golf club shaft -->
-          <geom name="club_shaft" type="capsule"
-                fromto="0 0 0 1.0 0 0" size="0.015"
-                rgba="0.2 0.8 0.2 1"/>
-
-          <!-- Clubhead -->
-          <geom name="club_head" type="box" size="0.05 0.03 0.02"
-                pos="1.0 0 0" rgba="0.1 0.1 0.1 1"/>
-        </body>
-      </body>
-    </body>
-  </worldbody>
-
-  <actuator>
-    <motor name="shoulder_motor" joint="shoulder" gear="1"/>
-    <motor name="elbow_motor" joint="elbow" gear="1"/>
     <motor name="wrist_motor" joint="wrist" gear="1"/>
   </actuator>
 </mujoco>
