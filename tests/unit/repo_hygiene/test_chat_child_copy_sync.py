@@ -44,6 +44,36 @@ _CONFIG_CLASSES = (
 _MAX_PARAMS = 8
 
 
+def test_chat_ui_builder_implementation_is_retired_from_ud_copy() -> None:
+    """The pinned provider owns the public builder implementation."""
+    builder_path = _UD_CHAT / "_qt" / "ui_builder.py"
+    assert not _has_top_level_function(builder_path, "build_chat_dock_ui"), (
+        "build_chat_dock_ui must come from pinned Tools"
+    )
+
+
+def test_pinned_chat_ui_builder_defines_the_public_implementation() -> None:
+    """The exact pinned provider owns all three public builder symbols."""
+    provider = require_vendor_path(_TOOLS_CHAT / "_qt" / "ui_builder.py")
+    tree = ast.parse(provider.read_text(encoding="utf-8"))
+    classes = {node.name for node in tree.body if isinstance(node, ast.ClassDef)}
+    functions = {
+        node.name
+        for node in tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    }
+    assert "ChatDockView" in classes
+    assert {"mirror_chat_dock_view", "build_chat_dock_ui"} <= functions
+
+
+def _has_top_level_function(path: Path, name: str) -> bool:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    return any(
+        isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name
+        for node in tree.body
+    )
+
+
 def _norm(text: str) -> str:
     text = text.replace("\r\n", "\n")
     # Allowed differences: import-prefix spelling, and the one expression that
@@ -79,6 +109,11 @@ def test_chat_child_copy_matches_pinned_tools_tree() -> None:
         if rel in _TEXT_WAIVERS:
             continue
         ud_file = _UD_CHAT / rel
+        if rel == "_qt/ui_builder.py":
+            assert not _has_top_level_function(ud_file, "build_chat_dock_ui"), (
+                "the pinned-provider contract owns this public export"
+            )
+            continue  # the alias suite pins origin, exports, and module identity
         if not ud_file.exists():
             continue  # retired path: served by the pinned tree via the seam finder
         if _norm(ud_file.read_text(encoding="utf-8")) != _norm(
