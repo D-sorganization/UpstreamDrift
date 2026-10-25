@@ -560,6 +560,8 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 3. **If CI goes red, Runner Dashboard dispatches the fix (RD-1).** Do not revive the original session.
 4. **A follow-up hours later goes in a new session with a one-paragraph brief.**
 5. **Don't switch models mid-session (it throws away the prompt cache).**
+6. **PR size and stacking.** Every PR must stay under 500 changed lines. Target `main` directly; never stack PRs. Deletion-only PRs may exceed 500 lines.
+7. **Issue closure evidence.** Include `Closes #<issue>` on a real newline in PR descriptions (never literal `\\n`). Never run `gh issue close` unless citing a verified merged PR `#<num>` in `--comment` or after applying an exempt label (`duplicate`, `wontfix`, `invalid`, `not-planned`, `roadmap`).
 
 <!-- END FLEET-MANAGED: pr-lifecycle -->
 
@@ -575,9 +577,10 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 - **A personal token carries admin rights — do not use them.** Whatever the token, the rules below still apply.
 - **Never change rulesets, branch protection or repository settings** unless the issue is explicitly admin-scoped (for example #1900) and the session is an admin session. Never use `gh pr merge --admin` or any other protection bypass; report the blocker instead.
 - **Never touch another session's PR state.** Do not convert it to or from draft, disable its auto-merge, or close it. Only the redundant-PR closer closes PRs.
-- **On Dieter's Windows hosts, `gh` is the fleet App wrapper (#2188).** `C:/Users/diete/.claude/fleet-gh/bin` is first on `PATH` via the `fleet-gh-app` block in PowerShell `profile.ps1`. For `D-sorganization` repos it always mints an App token — `gh` runs as the bot regardless of `GH_TOKEN` / `GITHUB_TOKEN`. That is intentional. **Agents keep using `gh` (bot identity); never impersonate Dieter.**
+- **On Dieter's Windows hosts, `gh` is the fleet App wrapper (#2188).** `C:/Users/diete/.claude/fleet-gh/bin` is first on `PATH` via the `fleet-gh-app` block in PowerShell `profile.ps1`. In an agent process (Claude Code, Cursor, Codex, agy, or `FLEET_AGENT_SESSION=1`) it mints an App token for `D-sorganization` repos — `gh` runs as the bot regardless of `GH_TOKEN` / `GITHUB_TOKEN`. Dieter's own terminal keeps his personal login (#2303). **Agents keep using `gh` (bot identity); never impersonate Dieter.**
 - **Owner-only GitHub actions** (repo archive, settings/admin, removing his reviewer requests) that Dieter runs himself: advise `gh-personal <args>` (`FLEET_GH_PERSONAL=1`, keyring login). Do **not** advise unsetting `GH_TOKEN`/`GITHUB_TOKEN` or `gh auth switch` — they do not work with the wrapper.
 - **`GraphQL: Resource not accessible by integration` on an admin call** means the App lacks that permission. Hand the exact `gh-personal …` command to Dieter; do not retry as the bot.
+- **Subscription logins only (no pay-per-use API keys).** Agents run under provider subscriptions (Claude Pro/Max, Codex/ChatGPT Plus/Team, Cursor, Gemini); never inject or commit metered model API keys (e.g. `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`).
 
 <!-- END FLEET-MANAGED: agent-identity -->
 
