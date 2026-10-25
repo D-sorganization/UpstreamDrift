@@ -2678,4 +2678,38 @@ py -3 -m pytest -o addopts="" -q -n 0 tests/unit/anatomical_angles/test_event_ta
 py -3 -m pytest -o addopts="" -q -n 0 tests/biomechanics/test_anatomical_event_table_api.py
 \end{verbatim}}
 
+\subsection{Prior-Constrained Address Registration (OS-9, \#13434)}
+\paragraph{Problem and Rejected Alternatives.}
+The OS-3b tour-marker model (\path{golf_humanoid_scaled_tour_markers.osim})
+seeded calibration at $q = 0$ (+x heading while the capture golfer faces $-x$)
+with a free $0.5\text{ m}$ offset bound, converging to a mirrored local minimum
+($42^\circ$ trunk axial rotation and $53^\circ$ lateral bend at address).
+Two partial fixes were tested and rejected: trunk-only marker replacement with
+locked lumbar (left limbs mirrored; swing IK RMS rose from $4.85\text{ cm}$ to
+$9.99\text{ cm}$) and waist-cluster heading seed alone (preserved sidedness but
+left offsets $0.3\text{--}0.6\text{ m}$ from anatomical landmarks).
+
+\paragraph{Method, Priors, and Plausibility Gate.}
+\path{tour_matching/static_address_registration.py} detects the quiet address
+hold (frames 0--80, $0.22\text{ s}$, median trunk speed $< 0.05\text{ m/s}$)
+and seeds pelvis orientation from the waist-cluster basis (residual
+$5 \times 10^{-16}\text{ rad}$).  \path{tour_matching/anatomical_marker_priors.py}
+defines 28 declared anatomical priors anchored to the scaled model's joint
+centres with admissible ball radii $r_i \in \{0.04, 0.06, 0.10\}\text{ m}$
+(bony, soft-tissue/belt, and head landmarks).  Six alternating IK and
+ball-projected placement iterations with prior weight $w_p = 81$ frame-equivalents
+produce \path{golf_humanoid_scaled_tour_markers_address_registered.osim}.
+\path{tour_matching/marker_plausibility.py} enforces per-marker ball membership,
+sidedness, parent-body assignment, and trunk-rotation bounds ($30^\circ$ address,
+$75^\circ$ top, $60^\circ$ impact).  Full-swing continuous IK (frames 0--529)
+has mean RMS $6.84\text{ cm}$ (unqualified kinematic input; forward dynamics
+remains open).
+{\small
+\begin{verbatim}
+python3 docs/development/opensim_tour_matching/os9_address_registration.py
+python3 -m pytest tests/opensim/test_anatomical_marker_priors.py \
+  tests/opensim/test_marker_plausibility.py \
+  tests/opensim/test_static_address_registration.py -q
+\end{verbatim}}
+
 \end{document}
