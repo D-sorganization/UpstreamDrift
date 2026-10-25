@@ -347,9 +347,6 @@ def build_chat_dock_ui(dock: Any) -> ChatDockView:
     # Input row
     input_row = QHBoxLayout()
     view.input_edit = QPlainTextEdit()
-    view.input_edit.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-    view.input_edit.setEnabled(True)
-    view.input_edit.setReadOnly(False)
     install_enter_submit(view.input_edit, dock._on_send)
     view.input_edit.setMinimumHeight(60)
     view.input_edit.setMaximumHeight(150)
@@ -388,13 +385,9 @@ def build_chat_dock_ui(dock: Any) -> ChatDockView:
     )
     input_row.addWidget(view.screenshot_btn)
 
-    mic_tooltip_fn = getattr(dock._voice_manager, "tooltip_text", None)
-    mic_tooltip = (
-        mic_tooltip_fn() if callable(mic_tooltip_fn) else "Voice input (Ctrl+Shift+V)"
-    )
     view.mic_btn = _make_icon_button(
         "\U0001f3a4",
-        mic_tooltip,
+        "Voice input (Ctrl+Shift+V)",
         bg_alt,
         text_primary,
         border,
@@ -465,18 +458,35 @@ def build_chat_dock_ui(dock: Any) -> ChatDockView:
 
 
 def _make_icon_button(
-    text: str, tooltip: str, bg: str, fg: str, border: str, on_clicked: Any
+    text: str,
+    tooltip: str,
+    bg: str,
+    fg: str,
+    border: str,
+    on_clicked: Any,
 ) -> QPushButton:
     """DRY helper for the small fixed-width icon buttons (upload, screenshot, mic)."""
-    style = (
-        f"QPushButton {{ background-color: {bg}; color: {fg}; border-radius: 4px; padding: 4px; }}"
+    btn = QPushButton(text)
+    btn.setToolTip(tooltip)
+    btn.setFixedWidth(28)
+    btn.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+    btn.setStyleSheet(
+        "QPushButton {"
+        f"  background-color: {bg}; color: {fg};"
+        "  border-radius: 4px; padding: 4px;"
+        "}"
         f"QPushButton:hover {{ background-color: {border}; }}"
     )
-    return _make_action_button(text, tooltip, 28, style, on_clicked)
+    btn.clicked.connect(on_clicked)
+    return btn
 
 
 def _make_action_button(
-    text: str, tooltip: str, width: int, style: str, on_clicked: Any
+    text: str,
+    tooltip: str,
+    width: int,
+    style: str,
+    on_clicked: Any,
 ) -> QPushButton:
     """DRY helper for the right-aligned action buttons (Send/Steer/Stop)."""
     btn = QPushButton(text)
