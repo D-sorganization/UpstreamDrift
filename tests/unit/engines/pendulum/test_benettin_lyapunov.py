@@ -76,7 +76,6 @@ def test_harmonic_oscillator_lle_vanishes() -> None:
         dt=0.01,
         d0=1e-8,
         deriv_fn=_harmonic_deriv,
-        system_name="harmonic_oscillator",
     )
 
     assert isinstance(receipt, BenettinReceipt)
@@ -109,7 +108,6 @@ def test_lorenz_chaotic_reference_lle() -> None:
         dt=0.005,
         d0=1e-8,
         deriv_fn=_lorenz_deriv,
-        system_name="lorenz_1963",
     )
 
     assert 0.8 <= receipt.largest_lyapunov_exponent <= 1.0
