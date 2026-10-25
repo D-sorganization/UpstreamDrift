@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-25 | #13799 | Route UD-owned Python gravity values and MJCF gravity through the canonical constant, guarded by a tested literal scanner. |
+| 2026-10-25 | #13474 | Consolidate Pinocchio topology contact simulation onto shared G6 model to fix swing replay divergence |
+| 2026-10-25 | #13543 | HRG-E4 slice: desktop and web anatomical event table view with a shared golden fixture and a feature_parity gap entry (web fetch awaits #13538) |
+| 2026-10-25 | #13696 | Repair heavy drake/jaxsim CI lanes and align analytic Drake pendulum reference inertia and gravity (#13017). |
 | 2026-10-25 | #13797 | Unify triple-pendulum parameters and correct MuJoCo gravity plane |
 | 2026-10-25 | #13697 | Document fast/full tier contract linkage in ci-standard.yml and clarify post-merge P90 observation follow-up (#13577). |
 | 2026-10-25 | #13731 | Prove partial UNBOUNDED envelope frames reach the NSX plot model (#13150). |

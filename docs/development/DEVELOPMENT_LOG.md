@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13791 · Route UD-Owned Python Gravity Values and MJCF Gravity Through the Canonical Constant, Guarded by a Tested Literal Scanner.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13791
+- **Branch:** staff/issue-remediator-13791-0c6d70
+- **PR:** #13799
+- **Paths:** src Python gravity users, owned MuJoCo MJCF, tests/unit/core gravity guard
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`3f7dcf04`; collated from changes/13791-route-ud-owned-python-gravity-values-and.md)
+- **Summary:** Route UD-owned Python gravity values and MJCF gravity through the canonical constant, guarded by a tested literal scanner.
+- **Next step:** Review the ready PR; follow-up #13798 covers the deferred MATLAB/Simscape literals.
+
 ### DL-#13759 · Add Audited Per-Engine Hand Capability Matrix and Frame Contract
 
 - **State:** in_review
@@ -482,6 +495,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13304 · Consolidate Pinocchio Topology Contact Simulation Onto Shared G6 Model to Fix Swing Replay Divergence
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13304
+- **Branch:** merged via #13474
+- **PR:** #13474
+- **Paths:** see #13474
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`c1d832e8`; collated from changes/13304-consolidate-pinocchio-topology-contact-s.md)
+- **Summary:** Consolidate Pinocchio topology contact simulation onto shared G6 model to fix swing replay divergence
+- **Next step:** Shipped in PR #13474.
+
+### DL-#13175 · HRG-E4 Slice: Desktop and Web Anatomical Event Table View With a Shared Golden Fixture and a Feature_Parity Gap Entry (Web Fetch Awaits #13538)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13175
+- **Branch:** merged via #13543
+- **PR:** #13543
+- **Paths:** see #13543
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`0e1c15d9`; collated from changes/13175-hrg-e4-slice-desktop-and-web-anatomical.md)
+- **Summary:** HRG-E4 slice: desktop and web anatomical event table view with a shared golden fixture and a feature_parity gap entry (web fetch awaits #13538)
+- **Next step:** Shipped in PR #13543.
+
 ### DL-#13790 · Unify Triple-Pendulum Parameters and Correct MuJoCo Gravity Plane
 
 - **State:** shipped
@@ -748,10 +787,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13017
 - **Branch:** merged via #13715
-- **PR:** #13715
+- **PR:** #13715, #13696
 - **Paths:** see #13715
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`ec120918`; collated from changes/13017-fix-drakekinematicsservice-set-pose-get.md)
+- **Last verified:** 2026-10-25 (`e5b10108`; collated from changes/13017-heavy-drake-lane-fixes.md)
 - **Summary:** Fix DrakeKinematicsService.set_pose/get_link_transforms against a real MultibodyPlant (floating-base quaternion layout, body enumeration)
 - **Next step:** Shipped in PR #13715.
 
