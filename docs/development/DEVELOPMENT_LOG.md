@@ -547,6 +547,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13464 · Docs: After-One-Solution Workflow Mapping, Runnable Example and Smoke Test for Loop_Nullspace
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13464
+- **Branch:** merged via #13493
+- **PR:** #13493
+- **Paths:** see #13493
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`ed446ef4`; collated from changes/13464-docs-after-one-solution-workflow-mapping.md)
+- **Summary:** Docs: after-one-solution workflow mapping, runnable example and smoke test for loop_nullspace
+- **Next step:** Shipped in PR #13493.
+
 ### DL-#13463 · Muscle_Fiber: Affine-Hull-Aware Fibre Dimension (Implicit Equalities) and Hit-and-Run Sampling in Hull Coordinates; Corrected Dim Claims
 
 - **State:** shipped

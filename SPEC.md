@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-25 | #13493 | Docs: after-one-solution workflow mapping, runnable example and smoke test for loop_nullspace |
 | 2026-10-25 | #13467 | muscle_fiber: affine-hull-aware fibre dimension (implicit equalities) and hit-and-run sampling in hull coordinates; corrected dim claims |
 | 2026-10-25 | #13448 | R9a evidence: MeshCat appearance render script, MuJoCo stills, and receipt (#12688) |
 | 2026-10-25 | #13820 | Qualify HRG full-body-v2 mass and gravity in Drake |
