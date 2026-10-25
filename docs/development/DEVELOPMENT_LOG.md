@@ -521,6 +521,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13804 · Explicitly Load Pytest-Timeout in Motion-Matching Smoke
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13804
+- **Branch:** merged via #13807
+- **PR:** #13807
+- **Paths:** see #13807
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`e41edfb7`; collated from changes/13804-explicitly-load-pytest-timeout-in-motion.md)
+- **Summary:** Explicitly load pytest-timeout in motion-matching smoke
+- **Next step:** Shipped in PR #13807.
+
 ### DL-#12851 · Split Proximal-Distal Research Docs Under Doc Size Budget (#12851)
 
 - **State:** shipped

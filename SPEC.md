@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-25 | #13807 | Explicitly load pytest-timeout in motion-matching smoke |
 | 2026-10-25 | #13810 | Retire the remaining local chat UI builder compatibility declarations |
 | 2026-10-25 | #13693 | Split proximal-distal research docs under doc size budget (#12851) |
 | 2026-10-25 | #13808 | Route remaining MATLAB and Simscape gravity literals through canonical standard gravity |
