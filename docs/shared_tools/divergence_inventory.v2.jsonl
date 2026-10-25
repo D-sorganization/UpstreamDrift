@@ -1870,6 +1870,7 @@
 {"path": "pendulum_simulator/__init__.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/__main__.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/_canonical_golfer.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
+{"path": "pendulum_simulator/benettin_lyapunov.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/club_forces.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/constants.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/constraint_solver.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
