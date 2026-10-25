@@ -215,22 +215,23 @@ def _edited(report, name, frame, **changes):
 
 def test_partial_unbounded_records_reach_plot_model(report) -> None:
     """#13150: mixed bounded and UNBOUNDED frames render without SHOW_REASON."""
+    from src.shared.python.loop_nullspace import registry
     from src.shared.python.loop_nullspace.envelopes import (
         BoundStatus,
         static_envelopes,
     )
-    from src.shared.python.loop_nullspace.evidence import (
-        InputProvenance,
-        ModelProvenance,
-    )
     from src.shared.python.loop_nullspace.report_serialization import envelope_dict
-    from tests.unit.loop_nullspace.test_envelopes import (
-        _analytic_quantities,
-        _analytic_set,
-    )
 
-    quantities = _analytic_quantities()
-    series = static_envelopes([_analytic_set(), _analytic_set()], quantities)
+    traj, engine = planar_trajectory(), planar_engine()
+    hyp = registry.load_registry().preset(PRESET)
+    kept, decs, _ = facade._decompose_all(traj, AnalysisOptions())
+    snaps = [traj.snapshots[p] for p in kept]
+    idx = [traj.frame_indices[p] for p in kept]
+    sets = [
+        facade._frame_set(d, s, i, hyp, engine)
+        for d, s, i in zip(decs, snaps, idx, strict=True)
+    ]
+    series = static_envelopes(sets, facade._quantities(sets, snaps, engine))
     upper = np.array(series.upper, copy=True)
     upper[1, 0] = np.nan
     status_upper = list(series.status_upper)
@@ -238,13 +239,9 @@ def test_partial_unbounded_records_reach_plot_model(report) -> None:
     row[0] = BoundStatus.UNBOUNDED
     status_upper[1] = tuple(row)
     series = dataclasses.replace(series, upper=upper, status_upper=tuple(status_upper))
-    model_prov = ModelProvenance("planar", "fixture")
-    source = InputProvenance("test", "partial-unbounded")
-    records = series.records(model_prov, source)
-    section = envelope_dict(series, records, (0, 1), {})
+    records = series.records(engine.model_provenance, traj.provenance)
     rep = copy.deepcopy(report)
-    rep["trajectory"]["analyzed_frame_indices"] = [0, 1]
-    rep["envelopes"] = section
+    rep["envelopes"] = envelope_dict(series, records, idx, {})
     decisions = report_decisions(rep, "research_view")
     band_key = decision_key("envelopes", "tau_1")
     assert decisions[band_key].action is DisplayAction.SHOW_BAND
