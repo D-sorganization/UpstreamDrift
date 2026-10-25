@@ -45,8 +45,12 @@ def test_advanced_chapter_declares_adapter_and_biology_boundaries() -> None:
 
 
 def test_falsification_matrix_registers_new_hypotheses() -> None:
-    text = (ARTICLE / "MODEL_COMPLETION_FALSIFICATION_MATRIX.md").read_text(
-        encoding="utf-8"
+    text = "\n".join(
+        (ARTICLE / name).read_text(encoding="utf-8")
+        for name in (
+            "MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+            "MODEL_COMPLETION_MODEL_DISCREPANCY.md",
+        )
     )
     assert "H7: Frame and Adapter Consistency" in text
     assert "H8: Biological Redundancy and History" in text
