@@ -6413,7 +6413,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "136d20776b1b4b7e8ee5ec1dca65f34b6aba1f5c0329976db24a4b2b36c59ff6",
+      "sha256": "e8c7d4e83fa3bc64c68503cbbebcbf4c210bc22223384aa3dc24cf350c3c314e",
       "bytes": 167070,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -7293,8 +7293,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py": {
-      "sha256": "0e5d861a5afa7365029cd8795a5b5dfc0936e598b2f0b11050cb1a28d4a6b322",
-      "bytes": 10826,
+      "sha256": "459e2026bbd99c15be3fc04459bdc89ea7b583bd874d35a41e673a7f73140694",
+      "bytes": 10804,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -7304,8 +7304,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py": {
-      "sha256": "6af41435dd641bab09c4e4ad77982e9a6239c5f775b3a86214298de0639a9487",
-      "bytes": 20748,
+      "sha256": "a726b375651736dc7ec62d1beaa7743c86f4a85d2e5c2fb895f2c534a393a5d4",
+      "bytes": 20726,
       "referenced_by": [
         "PD-CLAIM-302",
         "PD-CLAIM-303",
