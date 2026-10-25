@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13762 · Specify HRG-HX5 Hand Proxy Decision and Implementation Acceptance Gates
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13762
+- **Branch:** staff/issue-remediator-13762-b36738
+- **PR:** #13817
+- **Paths:** docs/adr/0057-hrg-hx5-articulated-hand-option.md, docs/adr/README.md, docs/development/full_body_models/HANDS_AUDIT.md
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`83720aa2`; collated from changes/13762-specify-hrg-hx5-hand-proxy-decision-and.md)
+- **Summary:** Specify HRG-HX5 hand proxy decision and implementation acceptance gates
+- **Next step:** Open a follow-up runtime issue after HX6 licensing clearance.
+
 ### DL-#13758 · Add SO(3) Observability Evidence for Grip Fitting
 
 - **State:** in_review
