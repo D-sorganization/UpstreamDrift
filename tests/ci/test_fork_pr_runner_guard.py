@@ -266,9 +266,7 @@ def test_unreferenced_or_prefix_named_env_alias_is_allowed(tmp_path: Path) -> No
         "env:\n"
         "  PR_SHA: ${{ github.event.pull_request.head.sha }}\n"
         "jobs:\n"
-        "  t:\n"
-        + FORK_ROUTED_RUNS_ON
-        + "    steps:\n"
+        "  t:\n" + FORK_ROUTED_RUNS_ON + "    steps:\n"
         "      - uses: actions/checkout@v7\n"
         '      - run: echo "$PR_SHA_LABEL ${{ env.PR_SHAPE }}"\n'
     )

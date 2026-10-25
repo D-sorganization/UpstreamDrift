@@ -202,11 +202,13 @@ jobs:
       - name: Summarize heavy test results
         if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine) }}
         run: |
-          echo "## Heavy Integration Test Report - UpstreamDrift" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Engine lane: ${{ matrix.engine }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Python version: ${{ inputs.python_version || matrix.python-version }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Heavy Integration Test Report - UpstreamDrift"
+            echo ""
+            echo "Engine lane: ${{ matrix.engine }}"
+            echo "Python version: ${{ inputs.python_version || matrix.python-version }}"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
           if [ -f "heavy_test_results_${{ matrix.engine }}.xml" ]; then
             python3 - <<'PYEOF'
           import os
