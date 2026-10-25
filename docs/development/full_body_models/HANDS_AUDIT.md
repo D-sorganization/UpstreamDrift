@@ -2,6 +2,12 @@
 
 This audit covers every model id in [`grip_capability_inventory.json`](../../../src/config/grip_capability_inventory.json). The table reports the per-asset capability record; `No` means the capability is not available for that model asset. A rigid proxy does not imply articulated fingers. `Finger DOF` counts independent finger joints, excluding wrist joints.
 
+The specification for a future full-body articulated-finger hand option,
+including the capsule, frozen-phalanx, and MyoHand tradeoffs and required
+acceptance tests, is [ADR-0057](../../adr/0057-hrg-hx5-articulated-hand-option.md).
+It is a docs-only decision; it does not qualify the separate MyoHand research
+fixture for product use.
+
 ## Per-Asset Hand Capability Matrix
 
 | Model ID | Hands and Finger DOF | Club Attachment | Pad-Grip Contact | Physical Hand-Hand Contact | Native Visual Styles | Asset Path |
