@@ -4,7 +4,7 @@ function h = gs3dx_trail_preload(t, fz, t_on, preload, ki)
 %   H = GS3DX_TRAIL_PRELOAD(T, FZ, T_ON, PRELOAD, KI) returns 1xN metres,
 %   nonnegative.  T and FZ are 1xN.  T_ON, PRELOAD (N, upward) and KI
 %   (m per N per s) are scalars.  KI defaults to 1e-4.  T_ON defaults to 1.35.
-%   PRELOAD defaults to 0.1*80*9.81.  For t < t_on, h is 0.  For t >= t_on,
+%   PRELOAD defaults to 0.1*80*9.80665.  For t < t_on, h is 0.  For t >= t_on,
 %       dh/dt = ki * max(preload - fz, 0)
 %   integrated with cumulative trapezoid from the first sample at or after t_on.
 %
@@ -14,7 +14,7 @@ function h = gs3dx_trail_preload(t, fz, t_on, preload, ki)
         ki = 1e-4;
     end
     if nargin < 4 || isempty(preload)
-        preload = 0.1 * 80 * 9.81;
+        preload = 0.1 * 80 * 9.80665;
     end
     if nargin < 3 || isempty(t_on)
         t_on = 1.35;

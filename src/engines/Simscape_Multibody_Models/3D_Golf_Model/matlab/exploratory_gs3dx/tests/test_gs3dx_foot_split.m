@@ -13,7 +13,7 @@ classdef test_gs3dx_foot_split < matlab.unittest.TestCase
     methods (Test)
         function quiet_stance_equal_split(testCase)
             M = 80;
-            g = 9.81;
+            g = 9.80665;
             fz = M * g;
             f_required = [0; 0; fz];
             p_com = [0; 0; 1];
@@ -29,7 +29,7 @@ classdef test_gs3dx_foot_split < matlab.unittest.TestCase
 
         function com_over_left_foot(testCase)
             M = 80;
-            g = 9.81;
+            g = 9.80665;
             fz = M * g;
             f_required = [0; 0; fz];
             p_com = [-0.15; 0; 1];
@@ -42,7 +42,7 @@ classdef test_gs3dx_foot_split < matlab.unittest.TestCase
 
         function com_outside_left_residual_moment(testCase)
             M = 80;
-            g = 9.81;
+            g = 9.80665;
             fz = M * g;
             f_required = [0; 0; fz];
             p_com = [-0.25; 0; 1];
@@ -65,7 +65,7 @@ classdef test_gs3dx_foot_split < matlab.unittest.TestCase
 
         function horizontal_excess_goes_to_residual(testCase)
             M = 80;
-            g = 9.81;
+            g = 9.80665;
             fz = M * g;
             mu = 0.8;
             f_required = [800; 0; fz];

@@ -16,9 +16,9 @@ function r = gs3dx_capture_foot_residual(k, jc, varargin)
 %   matches the waist-origin frame used for JC ankles.
 %
 %   R.force_rms_bw   RMS of the pelvis force residual (N), divided by
-%                    K.mass * 9.81 (body weights).
+%                    K.mass * 9.80665 (body weights).
 %   R.moment_rms_nm  RMS of the pelvis moment residual (N*m).
-%   R.moment_rms_bw  R.moment_rms_nm / (K.mass * 9.81 * 1 m), dimensionless
+%   R.moment_rms_bw  R.moment_rms_nm / (K.mass * 9.80665 * 1 m), dimensionless
 %                    in metre-body-weights (the divisor uses a 1 m lever arm).
 %   R.moment_vertical_rms_nm, R.moment_horizontal_rms_nm
 %                    Same RMS, but the moment is split by zeroing the horizontal
@@ -26,7 +26,7 @@ function r = gs3dx_capture_foot_residual(k, jc, varargin)
 %                    products (vertical-only forces: CoP offset; horizontal-only:
 %                    lever arm from ankle height).  The two parts sum to the
 %                    split moment at each frame.
-%   R.impact_fz_bw   K.grf(3, K.impact_frame) / (K.mass * 9.81); the capture
+%   R.impact_fz_bw   K.grf(3, K.impact_frame) / (K.mass * 9.80665); the capture
 %                    impact-frame vertical GRF, not a recomputed peak.
 
     mu = 0.8;
@@ -108,7 +108,7 @@ function r = gs3dx_capture_foot_residual(k, jc, varargin)
     assert(err <= 1e-6 || err / scale <= 1e-6, 'gs3dx:foot_residual', ...
         'Moment vertical/horizontal split must reconstruct the foot-split moment');
 
-    g = 9.81;
+    g = 9.80665;
     bw = k.mass * g;
     force_norm = vecnorm(s.force);
     moment_norm = vecnorm(s.moment);

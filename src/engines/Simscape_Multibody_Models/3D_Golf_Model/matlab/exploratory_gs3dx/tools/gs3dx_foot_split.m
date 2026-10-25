@@ -4,7 +4,7 @@ function s = gs3dx_foot_split(f_required, p_com, feet, mu)
 %   S = GS3DX_FOOT_SPLIT(F_REQUIRED, P_COM, FEET, MU) distributes the total
 %   external force the ground must supply (World, Z-up, Newtons) between two
 %   foot contact points.  F_REQUIRED is 3xN, equal to M*(a_com - g) when the
-%   motion is given (positive Z is up; quiet stance is about [0;0;+M*9.81]).
+%   motion is given (positive Z is up; quiet stance is about [0;0;+M*9.80665]).
 %   P_COM is 3xN (m).  FEET has .p_L and .p_R (3xN).  MU is Coulomb friction
 %   (default 0.8).  Closed form per frame; excess force and moment go to the
 %   pelvis residual wrench at P_COM.  See docs/FORWARD_DYNAMICS.md idea 2.
