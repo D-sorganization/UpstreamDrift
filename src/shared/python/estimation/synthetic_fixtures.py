@@ -1,6 +1,7 @@
 """Reusable fixtures for synthetic estimation success-metric tests."""
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from dataclasses import dataclass
 
@@ -173,7 +174,7 @@ def make_fixed_base_pendulum_fixture(
     theta_dot_0: float = 0.0,
     mass_kg: float = 1.0,
     length_m: float = 1.0,
-    gravity_m_s2: float = 9.81,
+    gravity_m_s2: float = float(GRAVITY_M_S2),
 ) -> FixedBasePendulumFixture:
     """Construct deterministic fixed-base pendulum fixture with exact harmonic truth.
 
@@ -378,7 +379,7 @@ def make_native_stance_fixture(
     n_frames: int = 10,
     fps: float = 100.0,
     mass_kg: float = 75.0,
-    gravity_m_s2: float = 9.81,
+    gravity_m_s2: float = float(GRAVITY_M_S2),
 ) -> NativeStanceFixture:
     """Construct native stance fixture with static equilibrium contact forces.
 

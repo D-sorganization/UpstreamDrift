@@ -20,6 +20,7 @@ leading batch of ``N`` samples (time nodes, trials, or both flattened).
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 from dataclasses import dataclass, field
 from typing import TypeAlias
@@ -32,7 +33,7 @@ from src.shared.python.estimation.mosaic.inertial import PLANAR_PARAMETERS_PER_B
 
 FloatArray: TypeAlias = npt.NDArray[np.float64]
 
-GRAVITY_DOWN: FloatArray = np.array([0.0, -9.81], dtype=np.float64)
+GRAVITY_DOWN: FloatArray = np.array([0.0, -float(GRAVITY_M_S2)], dtype=np.float64)
 _RK4_WEIGHTS = (1.0, 2.0, 2.0, 1.0)
 
 

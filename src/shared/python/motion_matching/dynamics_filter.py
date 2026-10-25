@@ -30,8 +30,12 @@ from typing import TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.core.physics_constants import (
+    GRAVITY_M_S2 as _CANONICAL_GRAVITY_M_S2,
+)
+
 Array: TypeAlias = NDArray[np.float64]
-GRAVITY_M_S2 = 9.81
+GRAVITY_M_S2: float = float(_CANONICAL_GRAVITY_M_S2)
 
 
 def _hull_edges(hull_xy: Array) -> tuple[Array, Array]:

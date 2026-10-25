@@ -37,6 +37,9 @@ Feature scale L             Fr     micro-inertial I  d/L
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import (
+    GRAVITY_M_S2 as _CANONICAL_GRAVITY_M_S2,
+)
 
 import math
 from collections.abc import Iterable, Mapping
@@ -68,12 +71,12 @@ __all__ = [
     "worst_of",
 ]
 
-GRAVITY_M_S2 = 9.81
+GRAVITY_M_S2 = float(_CANONICAL_GRAVITY_M_S2)
 """Standard gravity used throughout the F0 tier.
 
-Pinned here because the material-scaling table in the research addendum
-(``xi_n = rho_c * g * f_hat(mu)``) reproduces only with ``g = 9.81``, not
-with 9.80665.
+The material-scaling table's rounded reference values were calculated with
+``g = 9.81``. Standard gravity changes those values by about 0.035%, below
+the table's reported precision.
 """
 
 RFT_FROUDE_LIMIT = 0.4

@@ -35,6 +35,7 @@ absent, :func:`require_casadi` raises with an install hint.
 """
 
 from __future__ import annotations
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 import warnings
 from collections.abc import Mapping
@@ -75,7 +76,7 @@ _INSTALL_HINT = (
 
 Transcription = Literal["finite_difference", "multiple_shooting"]
 
-_GRAVITY = np.array([0.0, 0.0, -9.81])
+_GRAVITY = np.array([0.0, 0.0, -float(GRAVITY_M_S2)])
 
 # Numerical reference defaults in rad / rad/s, never measurement uncertainty.
 _REFERENCE_RTOL = 1e-8
