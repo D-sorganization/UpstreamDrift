@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T14:52:09Z",
+  "generated_at": "2026-10-25T15:43:26Z",
   "rows": [
     {
       "acceptance": null,
@@ -200,6 +200,31 @@
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/anthropometry/scan_grip_roll_receipt.json",
       "sha256": "40ef331b0b258812fabbe3c3c2524643c103d6af6b24d8956b97ccf1434d804b"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "96c8a0b8cfdac80bb44726e9c5b7a9daedc19d1f00bac21396adad1567a3a8dc",
+      "capture": null,
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/appearance/engines/drake_pinocchio/r9a_appearance_receipt.json",
+      "sha256": "dea14de9aff576bfb932f7158f02b6d0fcbfa0f2a9db2edc03c682669021712b"
     },
     {
       "acceptance": null,
@@ -6494,5 +6519,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 159
+  "total_receipts": 160
 }
