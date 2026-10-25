@@ -13,7 +13,7 @@ classdef test_gs3dx_capture_foot_residual < matlab.unittest.TestCase
     methods (Test)
         function balanced_stance_near_zero_residual(testCase)
             m = 80;
-            g = 9.81;
+            g = 9.80665;
             n = 5;
             k.t = (0:n - 1) / 100;
             k.grf = repmat([0; 0; m * g], 1, n);
@@ -32,7 +32,7 @@ classdef test_gs3dx_capture_foot_residual < matlab.unittest.TestCase
 
         function com_outside_left_foot_moment(testCase)
             m = 80;
-            g = 9.81;
+            g = 9.80665;
             n = 5;
             k.t = (0:n - 1) / 100;
             k.grf = repmat([0; 0; m * g], 1, n);
@@ -51,7 +51,7 @@ classdef test_gs3dx_capture_foot_residual < matlab.unittest.TestCase
 
         function centred_stance_horizontal_force_lever_moment(testCase)
             m = 80;
-            g = 9.81;
+            g = 9.80665;
             n = 5;
             k.t = (0:n - 1) / 100;
             k.grf = repmat([100; 0; m * g], 1, n);
@@ -68,7 +68,7 @@ classdef test_gs3dx_capture_foot_residual < matlab.unittest.TestCase
 
         function com_offset_cancels_constant_com_shift(testCase)
             m = 80;
-            g = 9.81;
+            g = 9.80665;
             n = 5;
             k.t = (0:n - 1) / 100;
             k.grf = repmat([0; 0; m * g], 1, n);

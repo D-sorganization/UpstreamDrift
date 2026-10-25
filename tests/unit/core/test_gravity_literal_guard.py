@@ -35,27 +35,6 @@ ALLOWLIST: dict[str, str] = {
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Scripts/Dataset Generator/golf_swing_dataset_20251030/trial_002_20251030_192719.csv": (
         "Recorded capture data; values are observations, not source constants."
     ),
-    "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/tests/test_matlab_quality.m": (
-        "MATLAB quality rule contains its forbidden-number exemplar; migrate in #13798."
-    ),
-    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/test_gs3dx_capture_foot_residual.m": (
-        "MATLAB/Simscape source is deferred to filed follow-up #13798."
-    ),
-    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/test_gs3dx_foot_split.m": (
-        "MATLAB/Simscape source is deferred to filed follow-up #13798."
-    ),
-    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_capture_foot_residual.m": (
-        "MATLAB/Simscape source is deferred to filed follow-up #13798."
-    ),
-    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_foot_split.m": (
-        "MATLAB/Simscape source is deferred to filed follow-up #13798."
-    ),
-    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_kinematic_grf.m": (
-        "MATLAB/Simscape source is deferred to filed follow-up #13798."
-    ),
-    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_trail_preload.m": (
-        "MATLAB/Simscape source is deferred to filed follow-up #13798."
-    ),
 }
 
 

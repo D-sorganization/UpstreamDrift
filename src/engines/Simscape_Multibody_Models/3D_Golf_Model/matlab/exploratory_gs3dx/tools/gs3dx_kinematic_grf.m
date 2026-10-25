@@ -6,7 +6,7 @@ function k = gs3dx_kinematic_grf(opts)
 %   segment table (GS3DX_ANTHROPOMETRY), and from Newton's second law the
 %   total external force on the golfer:
 %
-%       GRF(t) = M * (a_com(t) - g),   g = [0 0 -9.81] m/s^2 (Z-up).
+%       GRF(t) = M * (a_com(t) - g),   g = [0 0 -9.80665] m/s^2 (Z-up).
 %
 %   The system is the body and the club it holds; only the feet touch the
 %   ground, so this is the sum of both feet's ground reaction forces,
@@ -122,7 +122,7 @@ function k = gs3dx_kinematic_grf(opts)
     com_f = filtfilt(b, aa, com.').';
     dt = 1 / fs;
     acc = gradient(gradient(com_f, dt), dt);
-    g = [0; 0; -9.81];
+    g = [0; 0; -9.80665];
     k.t = (0:cap.n_frames - 1) * dt;
     S = cap.target_frame;
     k.com = S.' * com_f;

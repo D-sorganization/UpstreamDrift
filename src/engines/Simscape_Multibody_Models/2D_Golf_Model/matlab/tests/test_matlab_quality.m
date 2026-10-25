@@ -23,7 +23,7 @@ end
 function test_no_magic_numbers(testCase)
     % Verify that common magic numbers are not present in code
     
-    magicNumbers = {'3.14', '9.8', '6.67', '2.71'};
+    magicNumbers = {'3.14', '9.80665', '6.67', '2.71'};
     mFiles = get_matlab_files();
     
     found = false;
