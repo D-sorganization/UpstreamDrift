@@ -1,0 +1,581 @@
+{
+  "_comment": "Golden fixture for HRG-E4 (#13175): the event-table export document and the exact cells the desktop widget and the web table must show. Regenerate from tests/unit/anatomical_angles/test_event_table_view.py::build_document.",
+  "document": {
+    "schema": "upstreamdrift.anatomical_event_table",
+    "schema_version": 2,
+    "units": {
+      "angle": "deg",
+      "time": "s"
+    },
+    "handedness": "right",
+    "event_source": "swing_comparison.events.detect_events",
+    "reference": "Wu et al. 2005, J Biomech 38:981 (ISB part II) 4.3-4.4",
+    "events": {
+      "top": {
+        "frame": 1,
+        "time_s": 0.1234
+      },
+      "impact": {
+        "frame": 2,
+        "time_s": 0.25
+      }
+    },
+    "undetected_events": {},
+    "terms": {
+      "lead_wrist_flexion_extension": {
+        "unit": "deg",
+        "role": "lead",
+        "profile": "isb_wrist",
+        "frame": "isb_wrist ZXY on R_radius->hand; X volar, Y proximal, Z=XxY",
+        "sign_convention": "flexion positive, extension negative; same sense both hands, handedness picks the side",
+        "description": "Lead-hand wrist flexion extension; observability = fitted_grip_rotation (model-estimated, not measured hand anatomy)"
+      },
+      "lead_wrist_ulnar_deviation": {
+        "unit": "deg",
+        "role": "lead",
+        "profile": "isb_wrist",
+        "frame": "isb_wrist ZXY on R_radius->hand; X volar, Y proximal, Z=XxY",
+        "sign_convention": "ulnar positive, radial negative; same sense both hands, handedness picks the side",
+        "description": "Lead-hand wrist ulnar deviation; observability = fitted_grip_rotation (model-estimated, not measured hand anatomy)"
+      },
+      "lead_wrist_axial_rotation": {
+        "unit": "deg",
+        "role": "lead",
+        "profile": "isb_wrist",
+        "frame": "isb_wrist ZXY on R_radius->hand; X volar, Y proximal, Z=XxY",
+        "sign_convention": "pronation sense positive (third wrist angle); same sense both hands, handedness picks the side",
+        "description": "Lead-hand wrist axial rotation; observability = fitted_grip_rotation (model-estimated, not measured hand anatomy)"
+      },
+      "lead_forearm_pronation": {
+        "unit": "deg",
+        "role": "lead",
+        "profile": "isb_elbow",
+        "frame": "isb_elbow ZXY on R_humerus->forearm",
+        "sign_convention": "pronation positive, supination negative",
+        "description": "Lead-hand forearm pronation, separate from the wrist third angle; observability = fitted_grip_rotation"
+      },
+      "trail_wrist_flexion_extension": {
+        "unit": "deg",
+        "role": "trail",
+        "profile": "isb_wrist",
+        "frame": "isb_wrist ZXY on R_radius->hand; X volar, Y proximal, Z=XxY",
+        "sign_convention": "flexion positive, extension negative; same sense both hands, handedness picks the side",
+        "description": "Trail-hand wrist flexion extension; observability = fitted_grip_rotation (model-estimated, not measured hand anatomy)"
+      },
+      "trail_wrist_ulnar_deviation": {
+        "unit": "deg",
+        "role": "trail",
+        "profile": "isb_wrist",
+        "frame": "isb_wrist ZXY on R_radius->hand; X volar, Y proximal, Z=XxY",
+        "sign_convention": "ulnar positive, radial negative; same sense both hands, handedness picks the side",
+        "description": "Trail-hand wrist ulnar deviation; observability = fitted_grip_rotation (model-estimated, not measured hand anatomy)"
+      },
+      "trail_wrist_axial_rotation": {
+        "unit": "deg",
+        "role": "trail",
+        "profile": "isb_wrist",
+        "frame": "isb_wrist ZXY on R_radius->hand; X volar, Y proximal, Z=XxY",
+        "sign_convention": "pronation sense positive (third wrist angle); same sense both hands, handedness picks the side",
+        "description": "Trail-hand wrist axial rotation; observability = fitted_grip_rotation (model-estimated, not measured hand anatomy)"
+      },
+      "trail_forearm_pronation": {
+        "unit": "deg",
+        "role": "trail",
+        "profile": "isb_elbow",
+        "frame": "isb_elbow ZXY on R_humerus->forearm",
+        "sign_convention": "pronation positive, supination negative",
+        "description": "Trail-hand forearm pronation, separate from the wrist third angle; observability = fitted_grip_rotation"
+      }
+    },
+    "rows": [
+      {
+        "event": "top",
+        "frame": 1,
+        "time_s": 0.1234,
+        "term_id": "lead_wrist_flexion_extension",
+        "role": "lead",
+        "side": "L",
+        "value_deg": 13.370000000000001,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
+      },
+      {
+        "event": "top",
+        "frame": 1,
+        "time_s": 0.1234,
+        "term_id": "lead_wrist_ulnar_deviation",
+        "role": "lead",
+        "side": "L",
+        "value_deg": -2.13,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
+      },
+      {
+        "event": "top",
+        "frame": 1,
+        "time_s": 0.1234,
+        "term_id": "lead_wrist_axial_rotation",
+        "role": "lead",
+        "side": "L",
+        "value_deg": -17.63,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
+      },
+      {
+        "event": "top",
+        "frame": 1,
+        "time_s": 0.1234,
+        "term_id": "lead_forearm_pronation",
+        "role": "lead",
+        "side": "L",
+        "value_deg": 43.62,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/L/humerus",
+          "cal/L/forearm"
+        ]
+      },
+      {
+        "event": "top",
+        "frame": 1,
+        "time_s": 0.1234,
+        "term_id": "trail_wrist_flexion_extension",
+        "role": "trail",
+        "side": "R",
+        "value_deg": -18.63,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
+      },
+      {
+        "event": "top",
+        "frame": 1,
+        "time_s": 0.1234,
+        "term_id": "trail_wrist_ulnar_deviation",
+        "role": "trail",
+        "side": "R",
+        "value_deg": -34.13,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
+      },
+      {
+        "event": "top",
+        "frame": 1,
+        "time_s": 0.1234,
+        "term_id": "trail_wrist_axial_rotation",
+        "role": "trail",
+        "side": "R",
+        "value_deg": -49.63,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
+      },
+      {
+        "event": "top",
+        "frame": 1,
+        "time_s": 0.1234,
+        "term_id": "trail_forearm_pronation",
+        "role": "trail",
+        "side": "R",
+        "value_deg": 11.620000000000001,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/R/humerus",
+          "cal/R/forearm"
+        ]
+      },
+      {
+        "event": "impact",
+        "frame": 2,
+        "time_s": 0.25,
+        "term_id": "lead_wrist_flexion_extension",
+        "role": "lead",
+        "side": "L",
+        "value_deg": 14.739999999999998,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
+      },
+      {
+        "event": "impact",
+        "frame": 2,
+        "time_s": 0.25,
+        "term_id": "lead_wrist_ulnar_deviation",
+        "role": "lead",
+        "side": "L",
+        "value_deg": -0.7599999999999998,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
+      },
+      {
+        "event": "impact",
+        "frame": 2,
+        "time_s": 0.25,
+        "term_id": "lead_wrist_axial_rotation",
+        "role": "lead",
+        "side": "L",
+        "value_deg": -16.259999999999998,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/L/radius",
+          "cal/L/hand"
+        ]
+      },
+      {
+        "event": "impact",
+        "frame": 2,
+        "time_s": 0.25,
+        "term_id": "lead_forearm_pronation",
+        "role": "lead",
+        "side": "L",
+        "value_deg": 44.99,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/L/humerus",
+          "cal/L/forearm"
+        ]
+      },
+      {
+        "event": "impact",
+        "frame": 2,
+        "time_s": 0.25,
+        "term_id": "trail_wrist_flexion_extension",
+        "role": "trail",
+        "side": "R",
+        "value_deg": -17.259999999999998,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
+      },
+      {
+        "event": "impact",
+        "frame": 2,
+        "time_s": 0.25,
+        "term_id": "trail_wrist_ulnar_deviation",
+        "role": "trail",
+        "side": "R",
+        "value_deg": null,
+        "invalid_reason": "marker occluded",
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
+      },
+      {
+        "event": "impact",
+        "frame": 2,
+        "time_s": 0.25,
+        "term_id": "trail_wrist_axial_rotation",
+        "role": "trail",
+        "side": "R",
+        "value_deg": -48.26,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/R/radius",
+          "cal/R/hand"
+        ]
+      },
+      {
+        "event": "impact",
+        "frame": 2,
+        "time_s": 0.25,
+        "term_id": "trail_forearm_pronation",
+        "role": "trail",
+        "side": "R",
+        "value_deg": 12.99,
+        "invalid_reason": null,
+        "observability": "fitted_grip_rotation",
+        "receipt_path": "receipts/fit/receipt.json",
+        "calibration": [
+          "cal/R/humerus",
+          "cal/R/forearm"
+        ]
+      }
+    ]
+  },
+  "view": {
+    "caption": "Events from swing_comparison.events.detect_events; right-handed; angles in deg, time in s; reference: Wu et al. 2005, J Biomech 38:981 (ISB part II) 4.3-4.4",
+    "columns": [
+      "Event",
+      "Frame",
+      "Time (s)",
+      "Term",
+      "Side",
+      "Value (deg)",
+      "Observability",
+      "Note"
+    ],
+    "rows": [
+      [
+        "top",
+        "1",
+        "0.123",
+        "lead_wrist_flexion_extension",
+        "lead (L)",
+        "13.37",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "top",
+        "1",
+        "0.123",
+        "lead_wrist_ulnar_deviation",
+        "lead (L)",
+        "-2.13",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "top",
+        "1",
+        "0.123",
+        "lead_wrist_axial_rotation",
+        "lead (L)",
+        "-17.63",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "top",
+        "1",
+        "0.123",
+        "lead_forearm_pronation",
+        "lead (L)",
+        "43.62",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "top",
+        "1",
+        "0.123",
+        "trail_wrist_flexion_extension",
+        "trail (R)",
+        "-18.63",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "top",
+        "1",
+        "0.123",
+        "trail_wrist_ulnar_deviation",
+        "trail (R)",
+        "-34.13",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "top",
+        "1",
+        "0.123",
+        "trail_wrist_axial_rotation",
+        "trail (R)",
+        "-49.63",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "top",
+        "1",
+        "0.123",
+        "trail_forearm_pronation",
+        "trail (R)",
+        "11.62",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "impact",
+        "2",
+        "0.250",
+        "lead_wrist_flexion_extension",
+        "lead (L)",
+        "14.74",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "impact",
+        "2",
+        "0.250",
+        "lead_wrist_ulnar_deviation",
+        "lead (L)",
+        "-0.76",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "impact",
+        "2",
+        "0.250",
+        "lead_wrist_axial_rotation",
+        "lead (L)",
+        "-16.26",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "impact",
+        "2",
+        "0.250",
+        "lead_forearm_pronation",
+        "lead (L)",
+        "44.99",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "impact",
+        "2",
+        "0.250",
+        "trail_wrist_flexion_extension",
+        "trail (R)",
+        "-17.26",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "impact",
+        "2",
+        "0.250",
+        "trail_wrist_ulnar_deviation",
+        "trail (R)",
+        "missing",
+        "fitted_grip_rotation",
+        "marker occluded"
+      ],
+      [
+        "impact",
+        "2",
+        "0.250",
+        "trail_wrist_axial_rotation",
+        "trail (R)",
+        "-48.26",
+        "fitted_grip_rotation",
+        ""
+      ],
+      [
+        "impact",
+        "2",
+        "0.250",
+        "trail_forearm_pronation",
+        "trail (R)",
+        "12.99",
+        "fitted_grip_rotation",
+        ""
+      ]
+    ]
+  },
+  "format_cases": [
+    [
+      0.125,
+      2,
+      "0.13"
+    ],
+    [
+      -0.125,
+      2,
+      "-0.13"
+    ],
+    [
+      0.375,
+      2,
+      "0.38"
+    ],
+    [
+      2.675,
+      2,
+      "2.67"
+    ],
+    [
+      1.0005,
+      3,
+      "1.000"
+    ],
+    [
+      -0.0,
+      2,
+      "0.00"
+    ],
+    [
+      -0.001,
+      2,
+      "0.00"
+    ],
+    [
+      -12.3456,
+      2,
+      "-12.35"
+    ],
+    [
+      0.0,
+      3,
+      "0.000"
+    ],
+    [
+      123.4,
+      2,
+      "123.40"
+    ],
+    [
+      0.1234,
+      3,
+      "0.123"
+    ]
+  ]
+}
