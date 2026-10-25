@@ -176,9 +176,7 @@ def _find(candidates: list[dict[str, Any]], prefix: str) -> dict[str, Any]:
     matches = [
         candidate
         for candidate in candidates
-        if str(candidate["source_path"]).endswith(
-            "_ch06c_spatial_cross_formulation.qmd"
-        )
+        if str(candidate["source_path"]).endswith("_ch06c_subject_scaled_closure.qmd")
         and str(candidate["text"]).startswith(prefix)
     ]
     if len(matches) != 1:
