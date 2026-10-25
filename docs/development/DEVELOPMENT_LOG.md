@@ -547,6 +547,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#12688 · R9a Evidence: MeshCat Appearance Render Script, MuJoCo Stills, and Receipt (#12688)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12688
+- **Branch:** merged via #13448
+- **PR:** #13448
+- **Paths:** see #13448
+- **Started:** 2026-10-25
+- **Last verified:** 2026-10-25 (`8861c3ad`; collated from changes/12688-r9a-evidence-meshcat-appearance-render-s.md)
+- **Summary:** R9a evidence: MeshCat appearance render script, MuJoCo stills, and receipt (#12688)
+- **Next step:** Shipped in PR #13448.
+
 ### DL-#13176 · Qualify HRG Full-Body-V2 Mass and Gravity in Drake
 
 - **State:** shipped
