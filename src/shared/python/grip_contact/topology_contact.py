@@ -65,6 +65,7 @@ from src.shared.python.grip_contact.pad_contact import (
     FRICTION_TRANSITION_M_S,
     GripCylinder,
     PadContactModel,
+    PadLayout,
     build_pad_model,
 )
 from src.shared.python.grip_contact.pair_contact import (
@@ -958,6 +959,7 @@ def build_topology_model(
     pads = build_pad_model(
         interface,
         squeeze_per_hand_n,
+        layout=PadLayout(grip_radius_m=topo.grip_radius_m),
         friction_transition_m_s=friction_transition_m_s,
     )
     return TopologyContactModel.from_pad_model(pads, topo)
