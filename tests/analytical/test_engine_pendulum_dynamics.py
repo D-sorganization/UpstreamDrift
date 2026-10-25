@@ -54,7 +54,11 @@ OPENSIM_OSIM = (
 # Analytic model parameters (source of truth = the checked-in fixtures).
 DRAKE_MASS_KG = 1.0
 DRAKE_L_COM_M = 1.0  # point mass at the rod tip
-DRAKE_INERTIA_ABOUT_PIVOT = DRAKE_MASS_KG * DRAKE_L_COM_M**2  # ≈ 1.0
+DRAKE_ROD_IZZ_COM = 0.001  # rod COM inertia in simple_pendulum.urdf
+DRAKE_EE_INERTIA_ABOUT_PIVOT = 0.001000001  # fixed end-effector link inertia
+DRAKE_INERTIA_ABOUT_PIVOT = (
+    DRAKE_MASS_KG * DRAKE_L_COM_M**2 + DRAKE_ROD_IZZ_COM + DRAKE_EE_INERTIA_ABOUT_PIVOT
+)
 
 OPENSIM_MASS_KG = 1.0
 OPENSIM_L_COM_M = 0.5
@@ -87,6 +91,11 @@ def _make_drake_engine() -> object:
 
     engine = DrakePhysicsEngine()
     engine.load_from_path(str(DRAKE_URDF))
+    # Align Drake's default 9.81 m/s² field with the fleet gravity constant so
+    # cross-engine analytic checks use one source of truth (#13017).
+    engine.plant.mutable_gravity_field().set_gravity_vector(
+        np.array([0.0, 0.0, -GRAVITY_M_S2])
+    )
     return engine
 
 
