@@ -18,16 +18,94 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13778 · Reconcile Neural Motion Matching and Simscape Documentation With Diagnostic Receipts
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13778
+- **Branch:** staff/issue-remediator-13778-ebd00a
+- **PR:** #13788
+- **Paths:** see #13788
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`4da07ebf`; collated from changes/13778-reconcile-neural-motion-matching-and-sim.md)
+- **Summary:** Reconcile neural motion matching and Simscape documentation with diagnostic receipts
+- **Next step:** Review the receipt-backed prose and merge PR
+
+### DL-#13720 · Route Legacy Chat UI Builder Imports to the Pinned Tools Module With Shared Module Identity.
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #13720
+- **Branch:** codex/13720-chat-ui-retirement
+- **PR:** #13724
+- **Paths:** src/shared/python/ud_import_alias_policy.py,tests/unit/repo_hygiene/test_pinned_chat_ui_builder_alias.py
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`b46af31e`; collated from changes/13720-route-legacy-chat-ui-builder-imports-to.md)
+- **Summary:** Route legacy chat UI builder imports to the pinned Tools module with shared module identity.
+- **Next step:** Review the provider origin and identity regression, then merge this preparation change.
+
+### DL-#13552 · Simscape Grip Kernel Follows the Shared Capsule Line-Contact Law; Ten_Finger Verifier Back to 1E-11; Structural Freshness Check for Generated JSON; Goldens Rebuilt From the Rounded Export Params; Committed R2025b Evidence
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13552
+- **Branch:** claude/grip-13556-rounded-goldens
+- **PR:** #13677
+- **Paths:** see #13677
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`645410ff`; collated from changes/13552-simscape-line-contact-kernel.md)
+- **Summary:** Simscape grip kernel follows the shared capsule line-contact law; ten_finger verifier back to 1e-11; structural freshness check for generated JSON; goldens rebuilt from the rounded export params; committed R2025b evidence
+- **Next step:** Merge via queue. Any later change to the shared grip law or scenarios requires regenerating the kernel (scripts/export_simscape_grip_kernel.py) and rerunning R2025b (gs3dx_grip_contact_run); test_r2025b_receipt_hashes_match_committed_kernel_and_inputs fails until the receipts are refreshed.
+
+### DL-#13346 · Fix(Motion_Matching): Reclassify Grip_Style as Physical Pick and Clean Sidecar
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13346
+- **Branch:** fix/13346-grip-style-physical
+- **PR:** #13370
+- **Paths:** see #13370
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`60523ca6`; collated from changes/13346-fix-motion-matching-reclassify-grip-styl.md)
+- **Summary:** fix(motion_matching): reclassify grip_style as physical pick and clean sidecar
+- **Next step:** Merge the PR.
+
+### DL-#13208 · Lock Per-Runner BuildKit Cache Regression Guards
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13208
+- **Branch:** cursor/close-13208-docker-cache-doc-66dc
+- **PR:** #13681
+- **Paths:** see #13681
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`3b9cd5a6`; collated from changes/13208-lock-per-runner-buildkit-cache-regressio.md)
+- **Summary:** Lock per-runner BuildKit cache regression guards
+- **Next step:** Merge PR #13681
+
+### DL-#13578 · Adopt Fast-Tier Pytest Changed-Module Selection for Unit-Test-Gate
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13578
+- **Branch:** cursor/ci-fast-tier-devlog-archive-7ec5
+- **PR:** #13669
+- **Paths:** see #13669
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`670ce9da`; collated from changes/13578-adopt-fast-tier-pytest-changed-module-se.md)
+- **Summary:** Adopt fast-tier pytest changed-module selection for unit-test-gate
+- **Next step:** Merge PR
+
 ### DL-#13648 · Characterize the Existing KnowledgePack Search Contract Before Provider Synchronization.
 
 - **State:** in_review
 - **Owner:** unassigned
 - **Issue:** #13648
 - **Branch:** codex/13648-knowledgepack-search
-- **PR:** #13649
+- **PR:** #13649, #13667
 - **Paths:** tests/unit/ai/test_knowledge_pack_search.py
 - **Started:** 2026-10-23
-- **Last verified:** 2026-10-23 (`f5c47acf`; collated from changes/13648-extract-knowledgepack-bm25-search-behind.md)
+- **Last verified:** 2026-10-24 (`75a80849`; collated from changes/13648-extend-knowledgepack-search-characteriza.md)
 - **Summary:** Characterize the existing KnowledgePack search contract before provider synchronization.
 - **Next step:** Use these regression tests when synchronizing the provider-owned search implementation.
 
@@ -37,10 +115,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12577
 - **Branch:** cursor/nsx-45-help-doc-3c3f
-- **PR:** #13607
+- **PR:** #13607, #13692, #13690
 - **Paths:** see #13607
 - **Started:** 2026-10-23
-- **Last verified:** 2026-10-23 (`b7d7977e`; collated from changes/12577-add-loop-null-space-interpretation-help.md)
+- **Last verified:** 2026-10-24 (`86a4e007`; collated from changes/12577-nsx-45-user-help-and-interpretation-guid.md)
 - **Summary:** Add loop null-space interpretation help and salvage tracking
 - **Next step:** Merge PR #13607 after checks pass.
 
@@ -50,10 +128,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13650
 - **Branch:** codex/13650-theme-manager-fixture
-- **PR:** #13651
+- **PR:** #13651, #13667
 - **Paths:** see #13651
 - **Started:** 2026-10-23
-- **Last verified:** 2026-10-23 (`f4e52a4a`; collated from changes/13650-clear-deleted-thememanager-main-window-w.md)
+- **Last verified:** 2026-10-24 (`75a80849`; collated from changes/13650-isolate-capture-rig-theme-compliance-the.md)
 - **Summary:** Clear deleted ThemeManager main-window wrappers during test cleanup
 - **Next step:** Merge the Qt fixture cleanup fix.
 
@@ -391,6 +469,409 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13771 · Fix Tests/Api Assertions Stale After the APIException Error-Envelope Change; Shared Error_Message Fixture
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13771
+- **Branch:** merged via #13772
+- **PR:** #13772
+- **Paths:** see #13772
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`982d54a1`; collated from changes/13771-fix-tests-api-assertions-stale-after-the.md)
+- **Summary:** Fix tests/api assertions stale after the APIException error-envelope change; shared error_message fixture
+- **Next step:** Shipped in PR #13772.
+
+### DL-#13699 · Private Path Leak Ratchet, Denylist Patterns, and Mechanical Owner-Home Redaction Consolidation.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13699
+- **Branch:** merged via #13756
+- **PR:** #13756
+- **Paths:** see #13756
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`ed5ad50d`; collated from changes/13699-private-path-leak-ratchet.md)
+- **Summary:** Private path leak ratchet, denylist patterns, and mechanical owner-home redaction consolidation.
+- **Next step:** Shipped in PR #13756.
+
+### DL-#13770 · Add Cursor Cloud Environment.Json Fleet Bootstrap via Repository_Management Scripts/Cursor/Bootstrap.Sh.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13770
+- **Branch:** merged via #13769
+- **PR:** #13769
+- **Paths:** see #13769
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`08dffcd6`; collated from changes/13770-add-cursor-cloud-environment-json-fleet.md)
+- **Summary:** Add Cursor Cloud environment.json fleet bootstrap via Repository_Management scripts/cursor/bootstrap.sh.
+- **Next step:** Shipped in PR #13769.
+
+### DL-#13462 · Loop_Nullspace: Local Solution-Manifold Continuation (Predictor-Corrector With Rank Gates) Over ForceNullSpace (NSE-UD-2)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13462
+- **Branch:** merged via #13470
+- **PR:** #13470
+- **Paths:** see #13470
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`dbd72379`; collated from changes/13462-loop-nullspace-local-solution-manifold-c.md)
+- **Summary:** loop_nullspace: local solution-manifold continuation (predictor-corrector with rank gates) over ForceNullSpace (NSE-UD-2)
+- **Next step:** Shipped in PR #13470.
+
+### DL-#13461 · Loop_Nullspace: Classify_Functional (Numerical Fibre Identifiability With Optional Enclosing-Radius Bound) and Attribution_Quantities (Per-Source Induced-Acceleration Envelopes); Decomposition Now Stores Variable_Scale
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13461
+- **Branch:** merged via #13475
+- **PR:** #13475
+- **Paths:** see #13475
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`eb00e096`; collated from changes/13461-loop-nullspace-classify-functional-numer.md)
+- **Summary:** loop_nullspace: classify_functional (numerical fibre identifiability with optional enclosing-radius bound) and attribution_quantities (per-source induced-acceleration envelopes); Decomposition now stores variable_scale
+- **Next step:** Shipped in PR #13475.
+
+### DL-#12784 · Route Motion-Matching Nightly Smoke to GitHub-Hosted Runners on Public Repos.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12784
+- **Branch:** merged via #13754
+- **PR:** #13754, #13755
+- **Paths:** see #13754
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`0f9ff771`; collated from changes/12784-motion-matching-smoke-hosted-runner.md)
+- **Summary:** Route motion-matching nightly smoke to GitHub-hosted runners on public repos.
+- **Next step:** Shipped in PR #13754.
+
+### DL-#13725 · Make the Grip MJCF Independent of the BLAS Kernel and Libm: Deterministic Damping Design and Pad Ring Trig
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13725
+- **Branch:** merged via #13727
+- **PR:** #13727
+- **Paths:** see #13727
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`8f67942d`; collated from changes/13725-make-the-grip-mjcf-independent-of-the-bl.md)
+- **Summary:** Make the grip MJCF independent of the BLAS kernel and libm: deterministic damping design and pad ring trig
+- **Next step:** Shipped in PR #13727.
+
+### DL-#13548 · Correct the OpenSim Ten_Finger Swing Xfail Reason: Net_Force Now Passes; the Remaining 0.04 s Gap Is Net_Moment_Com (#13560)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13548
+- **Branch:** merged via #13743
+- **PR:** #13743
+- **Paths:** see #13743
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`7c17a81d`; collated from changes/13548-correct-the-opensim-ten-finger-swing-xfa.md)
+- **Summary:** Correct the OpenSim ten_finger swing xfail reason: net_force now passes; the remaining 0.04 s gap is net_moment_com (#13560)
+- **Next step:** Shipped in PR #13743.
+
+### DL-#13739 · Capture Rig Theme-Compliance Fixture Discards a ThemeManager Singleton Orphaned by QApplication Teardown (Fixes Flaky QSettings-Deleted Teardown Errors)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13739
+- **Branch:** merged via #13741
+- **PR:** #13741
+- **Paths:** see #13741
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`88bf5384`; collated from changes/13739-capture-rig-theme-compliance-fixture-dis.md)
+- **Summary:** Capture Rig theme-compliance fixture discards a ThemeManager singleton orphaned by QApplication teardown (fixes flaky QSettings-deleted teardown errors)
+- **Next step:** Shipped in PR #13741.
+
+### DL-#13534 · Disable Pytest-Xvfb Autoload for Motion-Matching Smoke; Document -P No:Xvfb in Run_Motion_Matching_Smoke.Sh
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13534
+- **Branch:** merged via #13566
+- **PR:** #13566
+- **Paths:** see #13566
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`c474414f`; collated from changes/13534-motion-matching-smoke-xvfb-autoload.md)
+- **Summary:** Disable pytest-xvfb autoload for motion-matching smoke; document -p no:xvfb in run_motion_matching_smoke.sh
+- **Next step:** Shipped in PR #13566.
+
+### DL-#12691 · R11: The R6 Chain Shaft Runs in Drake (RevoluteSpring Plus Joint Damping) and Passes the Same Static, Modal, Topology and Same-Input Parity Gate as OpenSim and MyoSuite; Drake Joins CHAIN_ENGINES
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12691
+- **Branch:** merged via #13738
+- **PR:** #13738, #13746, #13751
+- **Paths:** see #13738
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`b443e958`; collated from changes/12691-r11-the-r6-chain-shaft-runs-in-pinocchio.md)
+- **Summary:** R11: the R6 chain shaft runs in Drake (RevoluteSpring plus joint damping) and passes the same static, modal, topology and same-input parity gate as OpenSim and MyoSuite; Drake joins CHAIN_ENGINES
+- **Next step:** Shipped in PR #13738.
+
+### DL-#13618 · Install the Governed Canonical Admission Publisher Copy and Protected CI Caller With Independently Pinned Private Provider Runtime and Trusted Copy Drift Checking.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13618
+- **Branch:** merged via #13645
+- **PR:** #13645
+- **Paths:** see #13645
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`89280c80`; collated from changes/13618-protected-admission-publication.md)
+- **Summary:** Install the governed canonical admission publisher copy and protected CI caller with independently pinned private provider runtime and trusted copy drift checking.
+- **Next step:** Shipped in PR #13645.
+
+### DL-#13270 · Port Frame_Rate, Trunk_Spin, Hold_Limit_Jump, Rebase_Turns and Reference_Rate With Tests From Commit 22419Ee13 and Record the Failed Stance Probes in FORWARD_DYNAMICS.md
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13270
+- **Branch:** merged via #13735
+- **PR:** #13735, #13733, #13732, #13734, #13744, #13749
+- **Paths:** see #13735
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`90f8c1de`; collated from changes/13270-port-gs3dx-com-shift-and-the-capture-con.md)
+- **Summary:** Port frame_rate, trunk_spin, hold_limit_jump, rebase_turns and reference_rate with tests from commit 22419ee13 and record the failed stance probes in FORWARD_DYNAMICS.md
+- **Next step:** Shipped in PR #13735.
+
+### DL-#13255 · GS3DX GRF Exporter: Opt-In Lock_Joints (Gs3dx_Lock_Joints, in Memory) and DRY Shared Contact-Geometry / Sole-Point / CSV / SHA-256 Helpers; the Locked-Joint Stance Costs ~140 s Wall per Simulated ms
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13255
+- **Branch:** merged via #13726
+- **PR:** #13726, #13740, #13748
+- **Paths:** see #13726
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`13cf33f7`; collated from changes/13255-add-the-simscape-rigid-body-stance-expor.md)
+- **Summary:** GS3DX GRF exporter: opt-in lock_joints (gs3dx_lock_joints, in memory) and DRY shared contact-geometry / sole-point / CSV / SHA-256 helpers; the locked-joint stance costs ~140 s wall per simulated ms
+- **Next step:** Shipped in PR #13726.
+
+### DL-#13256 · Add Opt-In Allocate_Muscle_Excitations_Until_Feasible (Stop_When_Feasible) for Bounded Muscle Allocation: Stops During a Counted Evaluation on an Exact Feasible Witness and Reports Declared_Feasibility_Satisfied
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13256
+- **Branch:** merged via #13691
+- **PR:** #13691
+- **Paths:** see #13691
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`669f4613`; collated from changes/13256-add-opt-in-stop-when-feasible-to-bounded.md)
+- **Summary:** Add opt-in allocate_muscle_excitations_until_feasible (stop_when_feasible) for bounded muscle allocation: stops during a counted evaluation on an exact feasible witness and reports declared_feasibility_satisfied
+- **Next step:** Shipped in PR #13691.
+
+### DL-#12686 · Chain Shaft Runs Through the Ground-Support Pipeline: IK Holds Chain Coordinates at Rest, Face Targets Accept the Tip Link, Replay Uses the 0.125 ms Substep
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12686
+- **Branch:** merged via #13719
+- **PR:** #13719
+- **Paths:** see #13719
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`c206545a`; collated from changes/12686-chain-shaft-runs-through-the-ground-supp.md)
+- **Summary:** Chain shaft runs through the ground-support pipeline: IK holds chain coordinates at rest, face targets accept the tip link, replay uses the 0.125 ms substep
+- **Next step:** Shipped in PR #13719.
+
+### DL-#13017 · Fix DrakeKinematicsService.Set_Pose/Get_Link_Transforms Against a Real MultibodyPlant (Floating-Base Quaternion Layout, Body Enumeration)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13017
+- **Branch:** merged via #13715
+- **PR:** #13715
+- **Paths:** see #13715
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`ec120918`; collated from changes/13017-fix-drakekinematicsservice-set-pose-get.md)
+- **Summary:** Fix DrakeKinematicsService.set_pose/get_link_transforms against a real MultibodyPlant (floating-base quaternion layout, body enumeration)
+- **Next step:** Shipped in PR #13715.
+
+### DL-#12723 · NSX-94: Run the Co-Contraction Trade-Off Sweep on the Real Pinned MyoSuite Elbow (Myoelbow_1Dof6muscles); Replace the Never-Running Importorskip(Myo_Sim) Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12723
+- **Branch:** merged via #13717
+- **PR:** #13717, #13723
+- **Paths:** see #13717
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`5b486938`; collated from changes/12723-ci-the-tests-job-checks-out-only-the-pin.md)
+- **Summary:** NSX-94: run the co-contraction trade-off sweep on the real pinned MyoSuite elbow (myoelbow_1dof6muscles); replace the never-running importorskip(myo_sim) test
+- **Next step:** Shipped in PR #13717.
+
+### DL-#12722 · NSX-93: Cross-Engine Conformance of the Declared Impedance and Delayed-Feedback Layer Through the Torque-Engine Derivative Seam (Pinocchio Reference, MuJoCo, Drake; Simscape UNAVAILABLE)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12722
+- **Branch:** merged via #13716
+- **PR:** #13716
+- **Paths:** see #13716
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`6d4d5583`; collated from changes/12722-nsx-93-cross-engine-conformance-of-the-d.md)
+- **Summary:** NSX-93: cross-engine conformance of the declared impedance and delayed-feedback layer through the torque-engine derivative seam (Pinocchio reference, MuJoCo, Drake; Simscape UNAVAILABLE)
+- **Next step:** Shipped in PR #13716.
+
+### DL-#12565 · Static_Envelopes Retries a NUMERICAL Warm-Started HiGHS Solve Cold (Anthro Plate Benchmark, Highspy 1.15.1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12565
+- **Branch:** merged via #13714
+- **PR:** #13714
+- **Paths:** see #13714
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`66f09f23`; collated from changes/12565-static-envelopes-retries-a-numerical-war.md)
+- **Summary:** static_envelopes retries a NUMERICAL warm-started HiGHS solve cold (anthro plate benchmark, highspy 1.15.1)
+- **Next step:** Shipped in PR #13714.
+
+### DL-#12720 · Guard Test Enforcing the Single Paired Monte Carlo Runner Rule for Strategy Comparisons (NSX-91)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12720
+- **Branch:** merged via #13688
+- **PR:** #13688
+- **Paths:** see #13688
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`bbaa4153`; collated from changes/12720-guard-test-enforcing-the-single-paired-m.md)
+- **Summary:** Guard test enforcing the single paired Monte Carlo runner rule for strategy comparisons (NSX-91)
+- **Next step:** Shipped in PR #13688.
+
+### DL-#2195 · Add Conflict-Disarm Caller Workflow (Dry-Run) and CI Allowlists for RM Reusable @main.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #2195
+- **Branch:** merged via #13570
+- **PR:** #13570
+- **Paths:** see #13570
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`d2ff79a4`; collated from changes/2195-add-conflict-disarm-caller-workflow-dry.md)
+- **Summary:** Add conflict-disarm caller workflow (dry-run) and CI allowlists for RM reusable @main.
+- **Next step:** Shipped in PR #13570.
+
+### DL-#13579 · Record #13579 Closure Evidence (Docs/Operations/Evidence/shipped-even-issues-20261024.md)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13579
+- **Branch:** cursor/issue-closure-receipts-66dc
+- **PR:** #13685
+- **Paths:** see #13685
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`501afd4c`; collated from changes/13579-close-shipped-issue-with-receipt-regress.md)
+- **Summary:** Record #13579 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md)
+- **Next step:** Shipped in PR #13685.
+
+### DL-#13171 · HRG-E3: Lower-Body, Shoulder, Elbow, and Line Turn Terms in ISB and Golf Language
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13171
+- **Branch:** merged via #13623
+- **PR:** #13623
+- **Paths:** see #13623
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`addd8534`; collated from changes/13171-hrg-e3-lower-body-shoulder-elbow-and-lin.md)
+- **Summary:** HRG-E3: lower-body, shoulder, elbow, and line turn terms in ISB and golf language
+- **Next step:** Shipped in PR #13623.
+
+### DL-#13104 · Record #13104 Closure Evidence (Docs/Operations/Evidence/shipped-even-issues-20261024.md)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13104
+- **Branch:** cursor/issue-closure-receipts-66dc
+- **PR:** #13685
+- **Paths:** see #13685
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`501afd4c`; collated from changes/13104-close-shipped-issue-with-receipt-regress.md)
+- **Summary:** Record #13104 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md)
+- **Next step:** Shipped in PR #13685.
+
+### DL-#13072 · Record #13072 Closure Evidence (Docs/Operations/Evidence/shipped-even-issues-20261024.md)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13072
+- **Branch:** cursor/issue-closure-receipts-66dc
+- **PR:** #13685
+- **Paths:** see #13685
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`501afd4c`; collated from changes/13072-close-shipped-issue-with-receipt-regress.md)
+- **Summary:** Record #13072 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md)
+- **Next step:** Shipped in PR #13685.
+
+### DL-#13683 · Route Native F02 and BoxFDDP Mass Reads Through Full_Mass_Matrix on MuJoCo 3.13+.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13683
+- **Branch:** merged via #13684
+- **PR:** #13684
+- **Paths:** see #13684
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`5a385701`; collated from changes/13683-route-native-f02-and-boxfddp-mass-reads.md)
+- **Summary:** Route native F02 and BoxFDDP mass reads through full_mass_matrix on MuJoCo 3.13+.
+- **Next step:** Shipped in PR #13684.
+
+### DL-#13660 · Wire Subscription CLI Adapters (Claude, Codex, Antigravity), Simulation HostActionPort Controls, and Local Whisper VTT Into Sidekick
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13660
+- **Branch:** merged via #13664
+- **PR:** #13664
+- **Paths:** see #13664
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`434ae1bd`; collated from changes/13660-sidekick-cli-voice.md)
+- **Summary:** Wire subscription CLI adapters (Claude, Codex, Antigravity), simulation HostActionPort controls, and local Whisper VTT into Sidekick
+- **Next step:** Shipped in PR #13664.
+
+### DL-#13479 · Bump Vendor/Ud-Tools to Tools 37A7477 (Owned Restartable UI Timers, Tools #5670; Chat Dock Stops Scroll Timers on Close, Tools #5674) and Re-Sync Src/Shared/Python/Chat
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13479
+- **Branch:** merged via #13551
+- **PR:** #13551
+- **Paths:** see #13551
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`60f260f9`; collated from changes/13479-bump-vendor-ud-tools-to-tools-37a7477-chat-timers.md)
+- **Summary:** Bump vendor/ud-tools to Tools 37a7477 (owned restartable UI timers, Tools #5670; chat dock stops scroll timers on close, Tools #5674) and re-sync src/shared/python/chat
+- **Next step:** Shipped in PR #13551.
+
+### DL-#13179 · Use Full_Mass_Matrix in Grip-Weld Axial Closure KKT Tests for MuJoCo 3.13+.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13179
+- **Branch:** merged via #13682
+- **PR:** #13682, #13689
+- **Paths:** see #13682
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`2941e14f`; collated from changes/13179-forward-rollout-root-residual-test-close.md)
+- **Summary:** Use full_mass_matrix in grip-weld axial closure KKT tests for MuJoCo 3.13+.
+- **Next step:** Shipped in PR #13682.
+
+### DL-#13044 · OSL-7 Predictive Deadlift: Solved Statically Supported Poses With Free Shoulders, a Planted-Feet Goal, Hicks Moment Gate and a 17-Run History; Stage 1 Still Does Not Converge With Foot Contact
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13044
+- **Branch:** merged via #13512
+- **PR:** #13512, #13729, #13721, #13737, #13736
+- **Paths:** see #13512
+- **Started:** 2026-10-24
+- **Last verified:** 2026-10-24 (`f72e2b0b`; collated from changes/13044-wire-the-osl-7-predictive-versus-tracked.md)
+- **Summary:** OSL-7 predictive deadlift: solved statically supported poses with free shoulders, a planted-feet goal, Hicks moment gate and a 17-run history; stage 1 still does not converge with foot contact
+- **Next step:** Shipped in PR #13512.
+
 ### DL-#13555 · Grip Contact: Add Antagonist Pads Opposite the Heel, Trigger and Ten-Finger Little-Finger Pads so the Neutral-Pose Closure Preload Exerts Zero Net Force and Moment on the Club
 
 - **State:** shipped
@@ -423,10 +904,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13531
 - **Branch:** merged via #13666
-- **PR:** #13666
+- **PR:** #13666, #13565
 - **Paths:** see #13666
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`955dd563`; collated from changes/13531-align-drake-autodiff-fit-theta-with-cano.md)
+- **Last verified:** 2026-10-24 (`5343a4af`; collated from changes/13531-align-drake-autodiff-fit-theta-with-cano.md)
 - **Summary:** Align Drake autodiff fit theta with canonical URDF actuator count
 - **Next step:** Shipped in PR #13666.
 
@@ -436,10 +917,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13450
 - **Branch:** merged via #13666
-- **PR:** #13666
+- **PR:** #13666, #13565
 - **Paths:** see #13666
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`955dd563`; collated from changes/13450-drake-samples-the-canonical-mid-hands-cl.md)
+- **Last verified:** 2026-10-24 (`5343a4af`; collated from changes/13450-drake-samples-the-canonical-mid-hands-cl.md)
 - **Summary:** Drake samples the canonical mid_hands/club_head frames like Pinocchio; legacy grip names are aliases only and a missing frame fails closed instead of falling back to right_hand or the shaft
 - **Next step:** Shipped in PR #13666.
 
@@ -462,10 +943,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13109
 - **Branch:** merged via #13665
-- **PR:** #13665
+- **PR:** #13665, #13446
 - **Paths:** see #13665
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`2aeda180`; collated from changes/13109-lock-canonical-driver-seeds-closure-and.md)
+- **Last verified:** 2026-10-24 (`b15fdbd9`; collated from changes/13109-lock-canonical-driver-seeds-closure-and.md)
 - **Summary:** Lock canonical driver seeds closure and weight-fraction gates in CI (#13109)
 - **Next step:** Shipped in PR #13665.
 
@@ -618,10 +1099,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13619
 - **Branch:** merged via #13635
-- **PR:** #13635
+- **PR:** #13635, #13755
 - **Paths:** see #13635
 - **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`8117cbc1`; collated from changes/13619-nightly-python-runtime.md)
+- **Last verified:** 2026-10-24 (`0f9ff771`; collated from changes/13619-nightly-hosted-runner-routing.md)
 - **Summary:** Use Python 3.12 for the reviewed nightly cross-engine dependencies.
 - **Next step:** Shipped in PR #13635.
 
@@ -657,10 +1138,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13572
 - **Branch:** merged via #13616
-- **PR:** #13616, #13631
+- **PR:** #13616, #13631, #13680
 - **Paths:** see #13616
 - **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`7c43857e`; collated from changes/13572-use-curl-for-actionlint-bootstrap-script.md)
+- **Last verified:** 2026-10-24 (`9497fdb6`; collated from changes/13572-pin-live-required-check-export-for-ud-ci.md)
 - **Summary:** Gate workflow edits with actionlint; fix cross-engine leaderboard publish concurrency expression
 - **Next step:** Shipped in PR #13616.
 

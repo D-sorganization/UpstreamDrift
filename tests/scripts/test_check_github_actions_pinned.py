@@ -1,6 +1,10 @@
 from pathlib import Path
 
+import pytest
+
 from scripts.check_github_actions_pinned import audit_workflows
+
+pytestmark = pytest.mark.unit
 
 
 def write_workflow(path: Path, content: str) -> None:
@@ -43,6 +47,23 @@ jobs:
     assert len(findings) == 1
     assert findings[0].line_number == 6
     assert findings[0].reference == "actions/checkout@v4"
+
+
+def test_audit_workflows_allows_rm_conflict_disarm_reusable_on_main(
+    tmp_path: Path,
+) -> None:
+    workflow_dir = tmp_path / ".github" / "workflows"
+    write_workflow(
+        workflow_dir / "conflict-disarm.yml",
+        """
+name: Conflict Disarm
+jobs:
+  disarm:
+    uses: D-sorganization/Repository_Management/.github/workflows/reusable-conflict-disarm.yml@main
+""",
+    )
+
+    assert audit_workflows(workflow_dir) == []
 
 
 def test_audit_workflows_rejects_external_uses_without_ref(tmp_path: Path) -> None:

@@ -82,7 +82,7 @@ native moment arm on both fixtures; the fixed-path full derivative passes the
 0.03 m/rad at every tested stencil. The result classifies the workless identity
 only and does not establish a runtime defect or donor acceptance. Dedicated
 OpenSim 4.6 validation ran
-`$env:CASADIPATH='C:\Users\diete\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim'; & 'C:\Users\diete\Repositories\.venv-feedback-opensim\Scripts\python.exe' -m pytest -q -o addopts= tests/unit/engines/opensim/test_native_path_work_audit.py tests/opensim/test_native_path_work.py`:
+`$env:CASADIPATH='<owner-home>\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim'; & '<owner-home>\Repositories\.venv-feedback-opensim\Scripts\python.exe' -m pytest -q -o addopts= tests/unit/engines/opensim/test_native_path_work_audit.py tests/opensim/test_native_path_work.py`:
 24 tests passed (7 generic contract tests and 17 native test cases). The two
 fixture cases each sample three coordinates with two finite-difference steps,
 for 12 force-derived arm observations total. Each uses native unit-tension

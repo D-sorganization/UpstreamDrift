@@ -294,6 +294,34 @@ class LauncherHostActionPort:
                     "required": ["tool_id"],
                 },
             ),
+            HostCapability(
+                capability_id="host.simulation.get_status",
+                summary="Inspect active biomechanical/physics engine and simulation status.",
+                params_schema={"type": "object", "properties": {}, "required": []},
+            ),
+            HostCapability(
+                capability_id="host.simulation.configure",
+                summary="Configure simulation parameters (timestep, duration, integrator).",
+                params_schema={
+                    "type": "object",
+                    "properties": {
+                        "timestep": {"type": "number"},
+                        "duration": {"type": "number"},
+                        "integrator": {"type": "string"},
+                    },
+                    "required": [],
+                },
+            ),
+            HostCapability(
+                capability_id="host.simulation.run",
+                summary="Trigger a host-authorized simulation run.",
+                params_schema={"type": "object", "properties": {}, "required": []},
+            ),
+            HostCapability(
+                capability_id="host.simulation.summarize_metrics",
+                summary="Summarize kinematic and kinetic metrics from the latest run.",
+                params_schema={"type": "object", "properties": {}, "required": []},
+            ),
         )
 
     def invoke(
@@ -308,6 +336,8 @@ class LauncherHostActionPort:
                     ok=False, error="tool_id must be a non-empty string"
                 )
             return self._open_tile(tool_id.strip())
+        if capability_id.startswith("host.simulation."):
+            return self._invoke_simulation(capability_id, params)
         return HostInvocationResult(
             ok=False, error=f"unknown launcher capability: {capability_id!r}"
         )
@@ -330,6 +360,69 @@ class LauncherHostActionPort:
         if callable(open_tool_ids):
             return sorted(str(tool_id) for tool_id in open_tool_ids())
         return []
+
+    def _invoke_simulation(
+        self, capability_id: str, params: Mapping[str, Any]
+    ) -> HostInvocationResult:
+        target = getattr(self._launcher, "orchestrator", None) or self._launcher
+        if capability_id == "host.simulation.get_status":
+            getter = getattr(target, "get_simulation_status", None)
+            state = (
+                getter()
+                if callable(getter)
+                else {"engine": getattr(target, "active_engine", "none")}
+            )
+            return HostInvocationResult(
+                ok=True,
+                value=dict(state) if isinstance(state, Mapping) else {"state": state},
+            )
+        if capability_id == "host.simulation.configure":
+            timestep = params.get("timestep", 0.002)
+            duration = params.get("duration", 1.0)
+            if (
+                not isinstance(timestep, (int, float))
+                or timestep <= 0
+                or timestep > 1.0
+            ):
+                return HostInvocationResult(
+                    ok=False, error="timestep must be in (0, 1.0]"
+                )
+            if (
+                not isinstance(duration, (int, float))
+                or duration <= 0
+                or duration > 600.0
+            ):
+                return HostInvocationResult(
+                    ok=False, error="duration must be in (0, 600.0]"
+                )
+            cfg_fn = getattr(target, "configure_simulation", None)
+            if callable(cfg_fn):
+                cfg_fn(**dict(params))
+            return HostInvocationResult(
+                ok=True,
+                value={
+                    "configured": True,
+                    "timestep": float(timestep),
+                    "duration": float(duration),
+                },
+            )
+        if capability_id == "host.simulation.run":
+            run_fn = getattr(target, "run_simulation", None)
+            if not callable(run_fn):
+                return HostInvocationResult(
+                    ok=False, error="host does not expose run_simulation"
+                )
+            result = run_fn(**dict(params))
+            return HostInvocationResult(
+                ok=True, value={"status": "completed", "result": result}
+            )
+        if capability_id == "host.simulation.summarize_metrics":
+            sum_fn = getattr(target, "summarize_simulation_metrics", None)
+            metrics = sum_fn() if callable(sum_fn) else {}
+            return HostInvocationResult(ok=True, value={"metrics": metrics})
+        return HostInvocationResult(
+            ok=False, error=f"unknown launcher capability: {capability_id!r}"
+        )
 
     def _open_tile(self, tool_id: str) -> HostInvocationResult:
         opener = getattr(self._launcher, "open_sidekick_tab", None)

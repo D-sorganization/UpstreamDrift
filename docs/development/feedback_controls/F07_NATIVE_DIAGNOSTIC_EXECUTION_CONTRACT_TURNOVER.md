@@ -93,8 +93,8 @@ passed 24 tests under the pinned SDK. Post-merge ledger/context/monolith
 freshness tests passed 19 tests.
 
 The SDK interpreter was
-`C:\Users\diete\Repositories\.venv-feedback-opensim\Scripts\python.exe`,
-with `CASADIPATH=C:\Users\diete\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim`
+`<owner-home>\Repositories\.venv-feedback-opensim\Scripts\python.exe`,
+with `CASADIPATH=<owner-home>\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim`
 and BLAS/OpenMP worker counts set to one. Normal merge hooks passed. The bounded
 557-component preparation/probe remains runtime-viable only over `[0, 0.001] s`;
 no optimizer or replay ran for that private source. The full-capture source,

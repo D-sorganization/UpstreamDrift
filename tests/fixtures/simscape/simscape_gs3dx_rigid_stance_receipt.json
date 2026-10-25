@@ -1,0 +1,38 @@
+{
+  "issue": "#11709",
+  "check": "rigid_body_stance",
+  "matlab_release": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "source_model": "GS3DX_FullBodyContact",
+  "source_model_sha256": "0df5e17384ddf91f3f7051872279e666ddc7ec1eb714d7f506d0a24dcb799391",
+  "probe_time_s": 0.004,
+  "stop_time_s": 2,
+  "solver": "ode23t",
+  "rel_tol": 1e-6,
+  "inertia_radius_m": 0.15,
+  "output_dt_s": 0.001,
+  "mass_kg": 109.38781783574679,
+  "weight_n": 1072.7280437789261,
+  "ground_height_m": -1.0012,
+  "com_probe_m": [
+    -0.0075128397874082717, -0.085363194178595114, 0.17850872725816833
+  ],
+  "sphere_points_m": [
+    [0.287179830908632, 0.040283055195937056, -0.99120000000000053],
+    [0.21509499256957337, -0.22931986778827673, -0.99120000000000053],
+    [0.32487757690725833, -0.23623247772513262, -0.99120000000000053],
+    [-0.30530872810190235, 0.054668181146455913, -0.99120000000000041],
+    [-0.21877689004966983, -0.2106508739613564, -0.99120000000000041],
+    [-0.32802632217414029, -0.22347902973218864, -0.99120000000000041]
+  ],
+  "rigid_rig_compiled_blocks": 44,
+  "sim_wall_clock_s": 2.8056199,
+  "settled_window_s": [1.5, 2],
+  "settled_slip_m": 0.00983907480319163,
+  "settled_sink_m": 0.00223630202232894,
+  "samples": 2001,
+  "fixture_rows": 31,
+  "fixture_csv": "simscape_gs3dx_rigid_stance_fixture.csv",
+  "fixture_sha256": "cdf186e0413f28b3aad7cc12045695c355da276c65cc7c566928b71410cc6e83",
+  "convention": "ground on body, world Z-up, SI; point = sphere lowest point, fixed in the rigid body; net Fz/weight, left/right split and CoP are left to the Python-side GCV-1/GCV-2 reduction (src.engines.simscape.ground_contact), not recomputed here, so the pass/fail criteria have exactly one implementation"
+}

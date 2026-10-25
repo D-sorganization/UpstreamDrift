@@ -204,3 +204,48 @@ def test_drawn_contact_point_wrenches_match_the_forward_line_of_action(case) -> 
     assert np.abs(at_point - vec(e)).max() > TOLERANCE_NM  # the shift matters
     net = lambda ws: sum(np.asarray(w.force_n) for w in ws)  # noqa: E731
     np.testing.assert_allclose(net(moved), net(drawn), atol=1e-12)
+
+
+ROLLOUT_FRAMES = 30
+ROLLOUT_DT_S = 1e-3
+ROLLOUT_IMPACT_FRAMES = frozenset({20, 21, 22})  # flagged unavailable, excluded
+ROLLOUT_ROOT_BOUND_N = 1e-6
+
+
+def test_root_residual_stays_bounded_along_a_forward_rollout(case) -> None:
+    """Closed-loop root residual over a downswing-like rollout (#13179).
+
+    A forward rollout supplies the prescribed accelerations. Every frame not
+    flagged as ball impact must return the applied efforts through the inverse
+    (closure + ground free moment), so the root coordinates carry no residual
+    beyond the stated bound. Impact frames are excluded, never counted as zero.
+    """
+    source, q0, v0, efforts, _, bodies = case
+    names = source.coordinate_order
+    axial = MujocoAxialLoadSource(source.model, axis_policy="kinematic")
+    vec = source._vector
+    root = [i for i, n in enumerate(names) if n.startswith(("Translation", "Rotation"))]
+    q = {
+        n: (-0.001 if n.startswith("Translation") and n.endswith("Z") else x)
+        for n, x in q0.items()
+    }
+    v = {n: 0.1 * x for n, x in v0.items()}
+    efforts = {n: 0.1 * x for n, x in efforts.items()}
+    checked = 0
+    for frame in range(ROLLOUT_FRAMES):
+        accel, _ = source.solve_with_multipliers(q, v, efforts)
+        if frame not in ROLLOUT_IMPACT_FRAMES:
+            ground = _site_centre_wrenches(source, q, v, bodies)
+            closure = source.closure_wrench(q, v, efforts)
+            required = axial.required_generalized_force(
+                vec(q), vec(v), vec(accel), ground, closure
+            )
+            residual = np.abs(required - vec(efforts))
+            assert residual.max() <= TOLERANCE_NM, (frame, residual.max())
+            if root:
+                assert residual[root].max() <= ROLLOUT_ROOT_BOUND_N
+            checked += 1
+        for name, a in accel.items():
+            v[name] += ROLLOUT_DT_S * a
+            q[name] += ROLLOUT_DT_S * v[name]
+    assert checked == ROLLOUT_FRAMES - len(ROLLOUT_IMPACT_FRAMES)

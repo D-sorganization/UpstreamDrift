@@ -120,9 +120,9 @@ def simulate_with_coefficients(
 
 ### 4.1 Engine Implementation Modules
 
-- **MuJoCo**: [`src.engines.physics_engines.mujoco.python.motion_matching.simulate`](file:///C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour/src/engines/physics_engines/mujoco/python/motion_matching/simulate.py)
-- **Pinocchio**: [`src.engines.physics_engines.pinocchio.python.motion_matching.simulate`](file:///C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour/src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py)
-- **Drake**: [`src.engines.physics_engines.drake.python.motion_matching.simulate`](file:///C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour/src/engines/physics_engines/drake/python/motion_matching/simulate.py)
+- **MuJoCo**: [`src.engines.physics_engines.mujoco.python.motion_matching.simulate`](file:///<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-tour/src/engines/physics_engines/mujoco/python/motion_matching/simulate.py)
+- **Pinocchio**: [`src.engines.physics_engines.pinocchio.python.motion_matching.simulate`](file:///<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-tour/src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py)
+- **Drake**: [`src.engines.physics_engines.drake.python.motion_matching.simulate`](file:///<owner-home>/Repositories/Worktrees/UpstreamDrift-simscape-tour/src/engines/physics_engines/drake/python/motion_matching/simulate.py)
 
 ### 4.2 Cross-Engine Parity Acceptance Gate & Physical Qualification Ladder
 

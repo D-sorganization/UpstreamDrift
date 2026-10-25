@@ -93,3 +93,32 @@ def test_real_drake_kinematics_scenario_matches_mock(tmp_path: Path) -> None:
 
     _assert_valid_se3_dict(mock_result)
     _assert_valid_se3_dict(real_result)
+
+
+@pytest.mark.live_simulation
+@pytest.mark.requires_drake
+def test_real_drake_set_pose_places_floating_base(tmp_path: Path) -> None:
+    """Pelvis pose lands on the floating base with a valid quaternion (#13017)."""
+    pytest.importorskip("pydrake")
+    from dataclasses import replace
+
+    from src.shared.python.pose_interchange.services.drake import (
+        DrakeKinematicsService,
+    )
+
+    urdf = tmp_path / "parity_tiny.urdf"
+    urdf.write_text(_TINY_URDF, encoding="utf-8")
+    real = DrakeKinematicsService()
+    real.load(urdf)
+    pose = replace(
+        canonical_from_reference_setup(),
+        pelvis_translation_m=np.array([1.0, 2.0, 3.0]),
+        pelvis_rotation_xyz_deg=np.zeros(3),
+    )
+    real.set_pose(pose)
+    base = real.get_link_transforms()["base_link"]
+    np.testing.assert_allclose(base[:3, 3], [1.0, 2.0, 3.0], atol=1e-12)
+    np.testing.assert_allclose(base[:3, :3], np.eye(3), atol=1e-12)
+    # joint_a sits 0.5 m above the base on a (zero-angle) revolute joint.
+    link = real.get_link_transforms()["link_a"]
+    np.testing.assert_allclose(link[:3, 3], [1.0, 2.0, 3.5], atol=1e-12)

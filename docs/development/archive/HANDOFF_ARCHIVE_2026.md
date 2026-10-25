@@ -548,7 +548,7 @@
 
 - Repository: `D-sorganization/UpstreamDrift`
 - Branch: `feat/cov-2-register-sources-11270`
-- Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-2-11270`
+- Worktree: `<owner-home>\Repositories\UpstreamDrift-worktrees\cov-2-11270`
 - Commit: `SELF`
 - Governing issue: #11270 (parent epic #11268)
 - Objective: [COV-2] Register capture-O video sources into the capture registry and public catalog, extract and validate timing evidence from container/stream metadata, define non-overlapping swing candidate intervals with view classification, and implement pure usability grading under DbC.
@@ -618,7 +618,7 @@
 
 - Repository: `D-sorganization/UpstreamDrift`
 - Branch: `feat/cov-1-acquisition-11269`
-- Worktree: `c:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-1-11269`
+- Worktree: `<owner-home>\Repositories\UpstreamDrift-worktrees\cov-1-11269`
 - Commit: `SELF`
 - Governing issue: #11269 (parent epic #11268)
 - Objective: [COV-1] Implement `build_acquisition_receipt` for acquiring the capture-session video album into the capture data store with strict provenance, lineage tracking, ffprobe metadata embedding, SHA-256 verification, and fail-closed validation under DbC.
@@ -1564,7 +1564,7 @@ Owner priority is the integrated historical-player workspace (#11232), with libr
 
 ## Active: Tiger 2000 and Ben Hogan
 
-- Repository/worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-historical-capture`.
+- Repository/worktree: `<owner-home>/Repositories/Worktrees/UpstreamDrift-historical-capture`.
 - Branch: `feat/historical-player-capture-11226`; implementation commit: ab2c869813a2b2be2f14b512ee34647694614377; handoff refresh: SELF.
 - PR: https://github.com/D-sorganization/UpstreamDrift/pull/11231; open, CI pending. Epics: #11226 (Tiger), #11229 (Hogan); shared runner: #11230.
 - Objective: complete both source-grounded historical reconstructions and make future players repeatable.
@@ -1573,7 +1573,7 @@ Owner priority is the integrated historical-player workspace (#11232), with libr
   container PTS, lossless decoded PNGs, source/frame/observations/model/code hashes.
 - Source authority: `docs/development/historical_capture/source-catalog.json`.
 - Procedure: `docs/development/historical-capture-procedure.md`.
-- Media/results: `C:/Users/diete/Downloads/historical-capture/` (outside Git).
+- Media/results: `<owner-home>/Downloads/historical-capture/` (outside Git).
 - Tiger download: requested t_J6Vik3Tss, complete 1080p50 video, separate audio,
   metadata/description, and losslessly remuxed video with audio. Uploader claims
   2000; upload date is 2022-06-10 and does not verify the recording year.
@@ -1660,7 +1660,7 @@ Shared runner #11230, Tiger #11226 and Hogan #11229: streaming extraction is imp
 # Current Handoff — Restore the High-Severity UI Npm Audit Gate (#11184)
 
 - Repository: D-sorganization/UpstreamDrift
-- Worktree: `C:/Users/diete/Repositories/Worktrees/luna-upstream11184-20260930`
+- Worktree: `<owner-home>/Repositories/Worktrees/luna-upstream11184-20260930`
 - Branch: `fix/main-npm-audit-11184`
 - Commit: `SELF` (publication metadata update; implementation commit `d3b3a27bea36070c2db3a06e6e7be727a30e9667`)
 - Pull request: [#11187](https://github.com/D-sorganization/UpstreamDrift/pull/11187), draft with `agent:codex` label; branch `fix/main-npm-audit-11184`.
@@ -2084,7 +2084,7 @@ One Low: Bolt speedup claims without benchmark fixtures.
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-ud-parity-fixture-optin`
+- Working directory: `<owner-home>/Repositories/UpstreamDrift-worktrees/claude-ud-parity-fixture-optin`
 - Branch: `fix/ball-flight-parity-fixture-opt-in` (kept current by merging `origin/main`)
 - Implementation commit: `SELF`
 - Pull request: #11012 — merged to `main` as PR #11012
@@ -2317,7 +2317,7 @@ One Low: Bolt speedup claims without benchmark fixtures.
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-ud-9411-probe`
+- Working directory: `<owner-home>/Repositories/UpstreamDrift-worktrees/claude-ud-9411-probe`
 - Branch: `claude/ud-9411-unquarantine-passing`
 - Baseline commit: `b8c27a7d2` (origin/main, after #10988)
 - Implementation commit: `SELF`
@@ -2428,7 +2428,7 @@ candidate IDs>` → 90 passed, 11 failed (re-quarantined).
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-ud-9406-shadow`
+- Working directory: `<owner-home>/Repositories/UpstreamDrift-worktrees/claude-ud-9406-shadow`
 - Branch: `claude/ud-9406-sidekick-shadow-retire`
 - Baseline commit: `b8c27a7d2` (origin/main, after #10988)
 - Implementation commit: `SELF`

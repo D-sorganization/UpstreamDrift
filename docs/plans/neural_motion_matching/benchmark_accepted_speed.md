@@ -10,7 +10,9 @@
 
 ## 1. Executive Summary
 
-NM-10 delivers the comparative benchmark suite evaluating matched swing speedup, data efficiency, and financial/compute break-even economics across the 5 canonical techniques:
+The historical NM-10 receipt contains estimates for the five canonical
+techniques below. These values are reproduced from a DIAGNOSTIC receipt; they
+are not measurements or qualified benchmark results:
 
 1. `cold_solver`: Classical iterative trajectory optimization / inverse kinematics initialized from rest.
 2. `retrieval_solver`: Nearest-neighbor trajectory database lookup followed by classical polish.
@@ -18,7 +20,8 @@ NM-10 delivers the comparative benchmark suite evaluating matched swing speedup,
 4. `forward_surrogate_polish`: Learned forward dynamics surrogate integrated into classical optimization.
 5. `learned_proposal_polish`: Verified neural motion generator proposing candidates to native polish and mandatory dynamic replay verification (NM-08 / NM-09 pipeline).
 
-All measurements strictly enforce:
+The benchmark specification states these evaluation requirements; this
+diagnostic receipt does not show that they were executed:
 
 - Acceptance rate denominator includes rejected proposals and refinement failures.
 - Non-positive savings ($\le 0$) result in an explicit `no break-even` designation.
@@ -87,4 +90,8 @@ The benchmark pipeline strictly distinguishes **descriptive acceptance gain** fr
   - Wall-time break-even: **9,412 queries**.
   - Financial break-even: **4,737 queries**.
 
-All production-promoted physical models amortize upfront training costs within **< 10,000 production queries**. Models with non-positive savings are rejected fail-closed with "no break-even".
+The receipt's estimated break-even values do not establish amortization for
+production models. No production promotion or break-even result is established
+by this diagnostic record. Models with non-positive savings must be reported
+as having no break-even; this is a benchmark contract, not a result recorded
+here.

@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { LoopNullSpacePanel } from './LoopNullSpacePanel';
+import { FEATURE_HELP, HELP_TOPICS, UI_HELP_TOPICS } from '../ui/helpData';
 import { PlotModelView } from './loopNullSpace/PlotModelView';
 import { DISPLAY_CLASS_TEXT, fmt, fmtList, parseFrameIndices } from './loopNullSpace/format';
 import * as api from '@/api/loopNullSpace';
@@ -330,5 +331,31 @@ describe('LoopNullSpacePanel presets', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Run' }));
     expect(screen.getByTestId('nsx-form-error')).toHaveTextContent('No preset');
     expect(submit).not.toHaveBeenCalled();
+  });
+});
+
+describe('LoopNullSpacePanel help affordance (NSX-45, #12577)', () => {
+  beforeEach(() => {
+    vi.spyOn(api, 'fetchLoopNullspacePresets').mockResolvedValue(PRESETS);
+    vi.spyOn(api, 'fetchLoopNullspaceSensitivityOptions').mockRejectedValue(new Error('none'));
+  });
+
+  it('offers a help button that opens the loop_nullspace topic', async () => {
+    render(<LoopNullSpacePanel />);
+    const button = await screen.findByRole('button', {
+      name: 'Help: Loop Null-Space Exploration',
+    });
+    fireEvent.click(button);
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getAllByText('Loop Null-Space Exploration').length).toBeGreaterThan(0);
+    expect(dialog).toHaveTextContent('docs/help/loop_nullspace.md');
+  });
+
+  it('keys the help topic to the docs/help page it documents', () => {
+    expect(FEATURE_HELP['loop_nullspace']).toBeDefined();
+    expect(HELP_TOPICS['loop_nullspace'].id).toBe('loop_nullspace');
+    expect(UI_HELP_TOPICS['loop_nullspace_panel']).toBe('loop_nullspace');
+    const docPath = resolve(__dirname, '../../../../docs/help/loop_nullspace.md');
+    expect(() => readFileSync(docPath, 'utf8')).not.toThrow();
   });
 });

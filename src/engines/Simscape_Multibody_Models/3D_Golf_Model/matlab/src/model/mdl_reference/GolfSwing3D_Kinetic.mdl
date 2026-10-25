@@ -3465,7 +3465,7 @@ __MWOPC_PART_BEGIN__ /simulink/blockdiagram.xml
       </Object>
     </ConcurrentExecutionSettings>
     <ModelWorkspace>
-      <P Name="WSSourceFileName">C:\Users\diete\MATLAB Drive\_Golf Swing Model Rebuild\_Simscape Rebuild\Input.mat</P>
+      <P Name="WSSourceFileName"><owner-home>\MATLAB Drive\_Golf Swing Model Rebuild\_Simscape Rebuild\Input.mat</P>
     </ModelWorkspace>
     <System Ref="system_root"/>
   </Model>

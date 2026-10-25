@@ -20,6 +20,7 @@ from types import ModuleType
 
 import pytest
 
+from src.shared.python.engine_core import opensim_runtime
 from tests.helpers.native_runtime_boundary import (
     BOUNDARY_SKIP_PREFIX,
     require_runtime_boundary,
@@ -32,7 +33,10 @@ SKIP_REASON = "OpenSim Python bindings are not installed"
 
 def import_opensim() -> ModuleType:
     """Import and return the OpenSim SDK module (no boundary check, no skip)."""
-    return importlib.import_module("opensim")
+    module = importlib.import_module("opensim")
+    # Windows: let Moco find the wheel's bundled ipopt plugin (OSL-7, #13044).
+    opensim_runtime._configure_casadi_for_loaded_opensim()
+    return module
 
 
 def require_opensim() -> ModuleType:

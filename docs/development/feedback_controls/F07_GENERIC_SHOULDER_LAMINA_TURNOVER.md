@@ -137,18 +137,18 @@ remains the historical receipt for the prior worker bytes.
 The native test command used the dedicated OpenSim environment:
 
 ```powershell
-$env:GENERIC_SHOULDER_FIXTURE_ROOT='C:\Users\diete\Repositories\docs\development\feedback_controls_planning'
-$env:CASADIPATH='C:\Users\diete\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim'
-& 'C:\Users\diete\Repositories\.venv-feedback-opensim\Scripts\python.exe' -m pytest -q -o addopts= tests/opensim/test_generic_shoulder_lamina.py
+$env:GENERIC_SHOULDER_FIXTURE_ROOT='<owner-home>\Repositories\docs\development\feedback_controls_planning'
+$env:CASADIPATH='<owner-home>\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim'
+& '<owner-home>\Repositories\.venv-feedback-opensim\Scripts\python.exe' -m pytest -q -o addopts= tests/opensim/test_generic_shoulder_lamina.py
 ```
 
 The CLI v6 command used the same source and retained author-right meshes, with
 no development provider override:
 
 ```powershell
-$env:PYTHONPATH='C:\Users\diete\Repositories\Worktrees\feedback-controls-main-integration-12202'
-$env:CASADIPATH='C:\Users\diete\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim'
-& 'C:\Users\diete\Repositories\.venv-feedback-opensim\Scripts\python.exe' scripts/opensim/derive_generic_shoulder_lamina.py --source 'C:\Users\diete\Repositories\docs\development\feedback_controls_planning\composed_reduction_12161_v2\03-custom-mtp.osim' --right-clavicle 'C:\Users\diete\Repositories\docs\development\feedback_controls_planning\generic_shoulder_mesh_triage_v1\clavicle.vtp' --right-scapula 'C:\Users\diete\Repositories\docs\development\feedback_controls_planning\generic_shoulder_mesh_triage_v1\scapula.vtp' --output 'C:\Users\diete\Repositories\docs\development\feedback_controls_planning\generic_shoulder_lamina_12211_v6'
+$env:PYTHONPATH='<owner-home>\Repositories\Worktrees\feedback-controls-main-integration-12202'
+$env:CASADIPATH='<owner-home>\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim'
+& '<owner-home>\Repositories\.venv-feedback-opensim\Scripts\python.exe' scripts/opensim/derive_generic_shoulder_lamina.py --source '<owner-home>\Repositories\docs\development\feedback_controls_planning\composed_reduction_12161_v2\03-custom-mtp.osim' --right-clavicle '<owner-home>\Repositories\docs\development\feedback_controls_planning\generic_shoulder_mesh_triage_v1\clavicle.vtp' --right-scapula '<owner-home>\Repositories\docs\development\feedback_controls_planning\generic_shoulder_mesh_triage_v1\scapula.vtp' --output '<owner-home>\Repositories\docs\development\feedback_controls_planning\generic_shoulder_lamina_12211_v6'
 ```
 
 ## Provider Source Revalidation (2026-10-10)

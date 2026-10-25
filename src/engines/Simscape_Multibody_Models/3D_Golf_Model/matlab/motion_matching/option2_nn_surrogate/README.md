@@ -4,17 +4,15 @@
 
 > **What.** Train a neural network `f_θ : coefficients → club_kinematic_trajectory` on the random-sweep parquet dataset, then fit a measured swing by gradient descent on the input coefficients (Adam) with the surrogate weights frozen.
 >
-> **Why.** Per-fit cost drops from minutes (Option 1) to **seconds**. Setup cost is medium-to-high — needs a trained surrogate, which needs the parquet dataset.
+> **Performance status.** No measured per-fit runtime or validated surrogate result is available in this repository. Do not infer a speedup from this proposed workflow.
 
 ## Status
 
-Greenfield. Docs scaffolded; implementation delegated to issues #028–#031. **Blocked on the parquet dataset landing in the repo** — see [Dependencies](#dependencies).
+Diagnostic documentation scaffold only. The `models/` directory contains no tracked trained checkpoints (only `.gitkeep`), and no validated Option 2 result is recorded. The parquet dataset is also a prerequisite for training; see [Dependencies](#dependencies).
 
 ## When to use this option
 
-- High-volume fitting after the surrogate is trained (sweep many swings, many subjects).
-- Warm-starting Option 1 (`fmincon` polish) — see [APPROACH.md § Hybrid](APPROACH.md#hybrid-handoff-to-option-1).
-- Sensitivity analysis: differentiable `∂kinematics/∂coefficients` is useful in its own right.
+These are proposed use cases only. They have not been demonstrated by a trained checkpoint or a validated Simscape comparison.
 
 When **not** to use it:
 
@@ -33,7 +31,7 @@ When **not** to use it:
 | `config.py`             | `TrainConfig`, `InvertOptions`, `SurrogateConfig` dataclasses.                                                             |
 | `fit_swing_surrogate.m` | MATLAB shim that calls the Python entry-point via `pyrunfile`.                                                             |
 | `tests/`                | `pytest` suite per [TESTING.md](TESTING.md).                                                                               |
-| `models/`               | Trained checkpoint store. Contents `.gitignore`'d (only `.gitkeep` is tracked).                                            |
+| `models/`               | Intended checkpoint store; no trained checkpoint is tracked (only `.gitkeep`).                                             |
 | `notebooks/`            | Exploration notebooks. Contents `.gitignore`'d.                                                                            |
 | `visualization/`        | Option-specific viz (training curves, residual histograms, inversion progress).                                            |
 

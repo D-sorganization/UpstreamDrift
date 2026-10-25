@@ -11,6 +11,7 @@ from numpy.typing import NDArray
 from src.engines.physics_engines.mujoco.python.native_torque_replay import (
     _validate_unit_motors,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 Array: TypeAlias = NDArray[np.float64]
 
@@ -104,7 +105,7 @@ def linearize_native_hinge(model: Any) -> HingeDiscreteModel:
     data = mj.MjData(model)
     data.qpos[0], data.qvel[0] = 0.37, 0.91
     mj.mj_forward(model, data)
-    inertia = float(data.qM[0])
+    inertia = float(full_mass_matrix(mj, model, data)[0, 0])
     damping = float(model.dof_damping[0])
     dt = float(model.opt.timestep)
     if (

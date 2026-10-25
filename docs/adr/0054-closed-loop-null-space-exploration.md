@@ -113,6 +113,21 @@ admission to `output_policy.py` and does not restate that policy's rules.
 Options B and C were not adopted. The calibration requirements of
 `output_policy.py` are unchanged.
 
+**D8. Nonlinear solution sets: local continuation only (NSE-UD-2, #13462).**
+`manifold_continuation.py` moves along `F(u) = 0` from an admitted point by a
+tangent predictor and a minimum-norm Newton corrector built on
+`ForceNullSpace` (no second solver stack, no direct `pinv`/`null_space`).
+`variable_scale` is carried by the `ForceNullSpace` basis and is applied once;
+the stored tangent basis satisfies `J N = 0` and `N^T S^-2 N = I` for
+`S = diag(variable_scale)`, i.e. it is orthonormal in the declared scaling, not
+in raw coordinates. Guarantees are local: at constant Jacobian rank the
+implicit function theorem gives a smooth manifold of dimension `n - rank`, and
+a rank change raises `ManifoldSingularityError` (for example `F = u1 u2` at the
+origin). The predictor leaves a residual `O(h^2)` and the corrector converges
+locally and quadratically; no higher order is claimed. Continuation does not
+certify coverage of a connected component, and the minimum-norm correction is
+not the nearest-point projection onto the solution set.
+
 ## Alternatives Considered
 
 - **A new provider protocol for closed-loop snapshots.** Rejected: it

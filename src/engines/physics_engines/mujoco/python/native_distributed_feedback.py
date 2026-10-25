@@ -25,6 +25,7 @@ from src.engines.physics_engines.mujoco.python.native_torque_replay import (
     _load_native,
     replay_native_torque_bundle,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.estimation.mosaic.local_policy import (
     LinearizedDynamics,
     tvlqr_gains,
@@ -88,8 +89,7 @@ class NativeMuJoCoTangentModel:
         data = mj.MjData(self.model)
         data.qpos[:] = self._configuration(q)
         mj.mj_forward(self.model, data)
-        mass = np.empty((self.nv, self.nv), dtype=np.float64)
-        mj.mj_fullM(self.model, mass, data.qM)
+        mass = full_mass_matrix(mj, self.model, data)
         if not np.isfinite(mass).all():
             raise ValueError("native mass matrix is nonfinite")
         return np.asarray(np.linalg.inv(mass), dtype=np.float64)

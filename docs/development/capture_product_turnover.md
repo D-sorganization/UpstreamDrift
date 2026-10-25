@@ -16,7 +16,7 @@ authoritative. Do not recreate epics or replace existing implementations.
 | Calibration and model revision status | `Worktrees/UpstreamDrift-common-calibration`, `feat/9899-calibration-revision-status` | PR #9959, based on #9954. Initial implementation `1229dd7aa` is published; final turnover commit adds model-lineage validation and CI size fixes. Use current HEAD for the final revision.                                                                               |
 | Canonical ruler scale                 | `Worktrees/Tools-calibration-numerics`, `feat/5168-linear-reference-scale`            | Tools PR #5169 merged as `d4ab52a926cbd74d10b881a700c0c4f12f89728f`; implementation and API repair `3d7beb203a71dcfa47d77ebe9fa318d181924867`, followed by turnover documentation. The private Gasification checkout check still fails; merge alone does not qualify it. |
 
-All paths above are relative to `C:/Users/diete/Repositories`. PR #9955's Bioptim
+All paths above are relative to `<owner-home>/Repositories`. PR #9955's Bioptim
 scalar-bound fix is already merged as `32410babfd1e4741fa0c53bf05dd8403a51bf233`.
 Never force-push or push directly to main. Do not confuse the common-calibration
 worktree's current branch with the retained camera-setup branch.

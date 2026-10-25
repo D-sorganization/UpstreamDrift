@@ -99,6 +99,14 @@ def test_no_workflow_uses_per_runner_type_local_or_gha_cache() -> None:
         assert "cache-to:" not in content, f"{wf.name} must not specify cache-to"
 
 
+def test_docker_workflows_do_not_use_per_runner_tool_cache_paths() -> None:
+    """#13208: duplicated per-runner buildx local caches must not return."""
+    for wf in _get_docker_build_workflows():
+        content = wf.read_text(encoding="utf-8")
+        assert "runner.tool_cache" not in content, wf.name
+        assert "buildx-cache/upstream-drift" not in content, wf.name
+
+
 def test_buildkit_gc_policy_matches_fleet_cache_contract() -> None:
     """scripts/ci/buildkitd.ud.toml must match the GC numbers documented in CACHE_CONTRACT.md."""
     content = BUILDKITD_CONFIG.read_text(encoding="utf-8")

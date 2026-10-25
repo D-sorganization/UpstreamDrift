@@ -272,7 +272,7 @@ def test_synthetic_public_summary_generator_privacy_invariants() -> None:
     )
     # Add mock private traces in source summaries metadata
     summary_input["metadata"] = {
-        "private_path": "C:\\Users\\diete\\AppData\\Local\\capture-O-video\\originals\\VID_20261002.MP4",
+        "private_path": "<owner-home>\\AppData\\Local\\capture-O-video\\originals\\VID_20261002.MP4",
         "frame_index": "cov-01_frame_000123",
         "c3d_file": "private_capture_O.c3d",
     }

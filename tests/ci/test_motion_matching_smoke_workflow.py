@@ -47,6 +47,17 @@ def test_runs_the_slow_smoke_via_the_shared_script() -> None:
     assert "tests/integration/motion_matching" in script
     assert '-m "slow' in script  # overrides the addopts "not slow" deselection
     assert "--timeout=0" in script  # IK alone outlasts the default per-test timeout
+    assert "-p no:xvfb" in script  # fleet runners may autoload pytest-xvfb (#13534)
+
+
+def test_public_repo_routes_motion_matching_smoke_to_hosted_runner() -> None:
+    step = next(
+        step
+        for step in _doc()["jobs"]["pick-runner"]["steps"]
+        if step.get("id") == "check"
+    )
+    assert "ubuntu-latest" in step["run"]
+    assert "CI_RUNNER_MODE" in step["env"]
 
 
 def test_job_is_bounded_and_fleet_routed() -> None:
@@ -59,6 +70,7 @@ def test_job_is_bounded_and_fleet_routed() -> None:
         s for s in job["steps"] if "run_motion_matching_smoke" in s.get("run", "")
     )
     assert 20 <= run_step["timeout-minutes"] <= 40  # --timeout=0 needs a hard stop
+    assert run_step["env"]["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] == "1"
     assert doc["permissions"]["issues"] == "write"
     assert "concurrency" in doc
 

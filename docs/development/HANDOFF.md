@@ -1,3 +1,12 @@
+# Canonical Golfer Drake Alignment — #13531 / #13450
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `cursor/canonical-golfer-alignment-6336`; PR: not created.
+- Governing issues: #13531 (autodiff fit theta vs `CANONICAL_URDF` actuator count), #13450 (fit/simulate grip frame parity).
+- Completed: cherry-picked grip-frame fix from `fix/13450-drake-grip-frame-parity`; added `resolve_plant_n_actuators` / `count_actuators_for_urdf`; autodiff fit uses shared resolver; `n_joints_hint` validates instead of overriding; recovery tests size theta from the real plant.
+- Validation: `python3 -m pytest tests/engines/drake/test_drake_fit_actuator_alignment_13531.py tests/engines/drake/test_drake_grip_body_resolution_13450.py tests/engines/drake/test_drake_fit_swing_autodiff.py -m unit -q` (pass; live Drake tests skip without pydrake).
+- Skipped: open PR #13553 (same #13450 lane; consolidated here). Did not touch #13564, #12634, NSE drafts, or MS-14 #10333.
+- Next step: push branch, open PR, confirm CI heavy Drake lane.
+
 # Project Steward Pass — 2026-10-19
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `staff/project-steward-task-2307c8`; draft PR opened from this branch (`docs(project): steward status 2026-10-19`).

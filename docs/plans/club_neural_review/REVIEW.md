@@ -106,7 +106,7 @@ and the closed PINN epic
 designs, not new current speed/accuracy evidence. Documented old timings and
 model-release assumptions are not acceptance gates. R2025b is required for new Simscape
 acceptance, regardless of older runbooks. The documented
-`C:/Users/diete/Repositories/data/TenThousandFiles.parquet` does not exist at that path
+`<owner-home>/Repositories/data/TenThousandFiles.parquet` does not exist at that path
 on this host. Tracked discovery found `data/sweep_synthetic/{trials,timesteps}.parquet`;
 those are test fixtures. Other machines may hold real datasets/checkpoints, but none is
 qualified by this review. First worker inventories exact hashes, retrieval locations,
