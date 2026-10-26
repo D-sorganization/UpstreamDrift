@@ -28,6 +28,7 @@ from src.shared.python.grip_contact.contact_topology import (
     pair_surface_gap_m,
     site_grip_surface_gap_m,
 )
+from src.shared.python.model_appearance.hand_size import REFERENCE_HAND_LENGTH_M
 from src.shared.python.model_appearance.grip_pose import GripStyle as PoseGripStyle
 from src.shared.python.model_appearance.schema import physics_spec_sha256
 from src.shared.python.motion_matching.execution.grip_rotation import (
@@ -243,12 +244,15 @@ def test_every_site_lies_on_or_within_one_pad_radius_at_neutral_pose(
         )
 
 
-@pytest.mark.parametrize("hand_length_m", [0.14, 0.165, 0.19, 0.215, 0.24])
+@pytest.mark.parametrize(
+    "hand_length_m",
+    [0.14, 0.165, REFERENCE_HAND_LENGTH_M, 0.215, 0.24],
+)
 def test_anatomy_scaling_scales_radii_proportionally(hand_length_m: float) -> None:
-    """Site radii scale linearly with L / 0.19 for little, index, thumb, and heel pad."""
+    """Site radii scale linearly with L / L0 for little, index, thumb, and heel pad."""
     spec = GripSpec(style=GripStyle.OVERLAP, trigger_finger=True)
     topo = contact_topology(spec, anatomy=HandAnatomy(hand_length_m=hand_length_m))
-    scale = hand_length_m / 0.19
+    scale = hand_length_m / REFERENCE_HAND_LENGTH_M
 
     assert topo.site("trail_little_finger").radius_m == pytest.approx(
         0.0075 * scale, rel=1e-12

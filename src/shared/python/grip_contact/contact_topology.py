@@ -22,6 +22,12 @@ import numpy as np
 
 from src.shared.python.contracts import require
 from src.shared.python.grip_contact.pad_layout import GRIP_RADIUS_M
+from src.shared.python.model_appearance.hand_size import (
+    DEFAULT_HAND_LENGTH_M,
+    HAND_LENGTH_RANGE_M,
+    REFERENCE_HAND_LENGTH_M,
+    validate_hand_length_m,
+)
 from src.shared.python.grip_contact.pair_contact import closest_points_segments
 
 if TYPE_CHECKING:
@@ -39,13 +45,7 @@ GRIP: Final[str] = "grip"
 #: no net force or moment on the club (GRIP_PARITY_DECISIONS.md section 20).
 DEFAULT_TOPOLOGY_PRELOAD_M: Final[float] = 2.5e-4
 
-#: Reference adult hand length L0 (m) from distal wrist crease to middle fingertip.
-DEFAULT_HAND_LENGTH_M: Final[float] = 0.19
-
-#: Valid anthropometric range for hand length L (m).
-HAND_LENGTH_RANGE_M: Final[tuple[float, float]] = (0.14, 0.24)
-
-#: Base site radii (m) at the reference hand length L0 = 0.19 m.
+#: Base site radii (m) at :data:`~model_appearance.hand_size.REFERENCE_HAND_LENGTH_M`.
 BASE_LITTLE_FINGER_RADIUS_M: Final[float] = 0.0075
 BASE_INDEX_FINGER_RADIUS_M: Final[float] = 0.0080
 BASE_THUMB_RADIUS_M: Final[float] = 0.0095
@@ -106,27 +106,21 @@ class HandAnatomy:
         ``hand_length_m`` is a finite real number in ``[0.14, 0.24]`` m.
     Postconditions:
         Little finger, index, thumb, and heel-pad radii equal their reference
-        values scaled by ``hand_length_m / 0.19``.
+        values scaled by ``hand_length_m / L0`` (``L0`` =
+        :data:`~model_appearance.hand_size.REFERENCE_HAND_LENGTH_M`).
     """
 
     hand_length_m: float = DEFAULT_HAND_LENGTH_M
 
     def __post_init__(self) -> None:
-        if isinstance(self.hand_length_m, bool) or not isinstance(
-            self.hand_length_m, int | float
-        ):
-            raise TypeError("hand_length_m must be a finite real number")
-        lo, hi = HAND_LENGTH_RANGE_M
-        require(
-            math.isfinite(self.hand_length_m) and lo <= self.hand_length_m <= hi,
-            f"hand_length_m must be in [{lo}, {hi}] m, got {self.hand_length_m}",
+        object.__setattr__(
+            self, "hand_length_m", validate_hand_length_m(self.hand_length_m)
         )
-        object.__setattr__(self, "hand_length_m", float(self.hand_length_m))
 
     @property
     def scale(self) -> float:
-        """Dimensionless anatomical scale factor ``L / 0.19``."""
-        return self.hand_length_m / DEFAULT_HAND_LENGTH_M
+        """Dimensionless anatomical scale factor ``L / L0``."""
+        return self.hand_length_m / REFERENCE_HAND_LENGTH_M
 
     @property
     def little_finger_radius_m(self) -> float:

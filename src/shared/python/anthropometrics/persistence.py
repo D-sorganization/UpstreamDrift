@@ -157,6 +157,8 @@ def _subject_to_dict(record: SubjectAnthropometrics) -> dict[str, Any]:
             float(record.age_years) if record.age_years is not None else None
         ),
         "sex": record.sex,
+        "hand_length_m": float(record.hand_length_m),
+        "hand_breadth_m": float(record.hand_breadth_m),
         "source_method": record.source_method,
         "segments": [
             {"name": name, "properties": _segment_to_dict(props)}
@@ -236,6 +238,8 @@ def _subject_from_dict(payload: dict[str, Any]) -> SubjectAnthropometrics:
     age_raw = payload.get("age_years")
     age_years = float(age_raw) if age_raw is not None else None
 
+    hand_length_raw = payload.get("hand_length_m")
+    hand_breadth_raw = payload.get("hand_breadth_m")
     return SubjectAnthropometrics(
         subject_id=str(payload["subject_id"]),
         height_m=float(payload["height_m"]),
@@ -244,6 +248,10 @@ def _subject_from_dict(payload: dict[str, Any]) -> SubjectAnthropometrics:
         source_method=str(payload["source_method"]),
         age_years=age_years,
         sex=str(payload.get("sex", "unspecified")),
+        hand_length_m=(float(hand_length_raw) if hand_length_raw is not None else None),
+        hand_breadth_m=(
+            float(hand_breadth_raw) if hand_breadth_raw is not None else None
+        ),
     )
 
 

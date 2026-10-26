@@ -14,6 +14,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from src.shared.python.model_appearance.hand_size import (
+    resolve_hand_breadth_m,
+    resolve_hand_length_m,
+)
+
 from ._types import Sex
 from .segment_properties import SegmentProperties
 
@@ -47,6 +52,10 @@ class SubjectAnthropometrics:
       every ``name`` is a unique non-empty string.
     * If provided, ``age_years`` is a non-negative finite float.
     * ``sex`` is one of ``"M"``, ``"F"``, ``"unspecified"``.
+    * ``hand_length_m`` and ``hand_breadth_m`` are positive finite lengths
+      in SI metres, defaulting from ``height_m`` and ``sex`` (ANSUR II pooled
+      or sex-stratified priors; see :mod:`model_appearance.hand_size`) unless
+      explicit overrides are supplied at construction.
     """
 
     subject_id: str
@@ -56,6 +65,8 @@ class SubjectAnthropometrics:
     source_method: str
     age_years: float | None = None
     sex: str = Sex.UNSPECIFIED.value
+    hand_length_m: float | None = None
+    hand_breadth_m: float | None = None
 
     def __post_init__(self) -> None:
         _require_non_empty_str(self.subject_id, "subject_id")
@@ -106,3 +117,14 @@ class SubjectAnthropometrics:
             raise ValueError(
                 f"sex must be one of {sorted(valid_sex)}, got {self.sex!r}"
             )
+
+        length_override = self.hand_length_m
+        breadth_override = self.hand_breadth_m
+        resolved_length = resolve_hand_length_m(
+            self.height_m, self.sex, override_m=length_override
+        )
+        resolved_breadth = resolve_hand_breadth_m(
+            resolved_length, self.sex, override_m=breadth_override
+        )
+        object.__setattr__(self, "hand_length_m", resolved_length)
+        object.__setattr__(self, "hand_breadth_m", resolved_breadth)
