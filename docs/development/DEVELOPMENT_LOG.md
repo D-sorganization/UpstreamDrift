@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13780 · ML-WS-3: Capture-A Post-Impact Replay Audit Receipt and Tests
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13780
+- **Branch:** cursor/ml-ws-3-replay-post-impact-1bfa
+- **PR:** #13841
+- **Paths:** see #13841
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`f85d5895`; collated from changes/13780-ml-ws-3-capture-a-post-impact-replay-aud.md)
+- **Summary:** ML-WS-3: capture-A post-impact replay audit receipt and tests
+- **Next step:** Merge PR #13841; open ML-WS-3b for follow-through reference branching.
+
 ### DL-#13762 · Specify HRG-HX5 Hand Proxy Decision and Implementation Acceptance Gates
 
 - **State:** in_review
@@ -546,6 +559,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13045 · Feat(Lifting): Barbell Visual Geometry and Lift Video Camera Framing
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13045
+- **Branch:** merged via #13823
+- **PR:** #13823, #13845
+- **Paths:** see #13823
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`dfe2d50c`; collated from changes/13045-lift-video-overlays.md)
+- **Summary:** feat(lifting): barbell visual geometry and lift video camera framing
+- **Next step:** Shipped in PR #13823.
 
 ### DL-#13464 · Docs: After-One-Solution Workflow Mapping, Runnable Example and Smoke Test for Loop_Nullspace
 
