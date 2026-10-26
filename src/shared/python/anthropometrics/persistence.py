@@ -146,6 +146,12 @@ def _segment_to_dict(seg: SegmentProperties) -> dict[str, Any]:
     }
 
 
+def _require_hand_dimension(value: float | None, label: str) -> float:
+    if value is None:
+        raise TypeError(f"{label} must be resolved before persistence")
+    return float(value)
+
+
 def _subject_to_dict(record: SubjectAnthropometrics) -> dict[str, Any]:
     """Return the JSON-serialisable dict form of *record*."""
     return {
@@ -157,8 +163,10 @@ def _subject_to_dict(record: SubjectAnthropometrics) -> dict[str, Any]:
             float(record.age_years) if record.age_years is not None else None
         ),
         "sex": record.sex,
-        "hand_length_m": float(record.hand_length_m),
-        "hand_breadth_m": float(record.hand_breadth_m),
+        "hand_length_m": float(_require_hand_dimension(record.hand_length_m, "hand_length_m")),
+        "hand_breadth_m": float(
+            _require_hand_dimension(record.hand_breadth_m, "hand_breadth_m")
+        ),
         "source_method": record.source_method,
         "segments": [
             {"name": name, "properties": _segment_to_dict(props)}

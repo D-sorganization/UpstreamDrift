@@ -96,6 +96,13 @@ def test_hand_length_dbc_rejects_invalid(bad: float | bool) -> None:
 
 
 @pytest.mark.unit
+def test_physics_constants_hand_length_matches_reference() -> None:
+    from src.shared.python.core.physics_constants import HAND_LENGTH_M
+
+    assert float(HAND_LENGTH_M) == pytest.approx(hand_size.REFERENCE_HAND_LENGTH_M)
+
+
+@pytest.mark.unit
 def test_breadth_ratio_dbc_rejects_out_of_band() -> None:
     with pytest.raises(ValueError, match="hand_breadth_m/hand_length_m"):
         hand_size.validate_breadth_length_ratio(0.05, 0.19)

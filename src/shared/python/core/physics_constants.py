@@ -8,8 +8,6 @@ All constants must include:
 
 import math
 
-from src.shared.python.model_appearance.hand_size import REFERENCE_HAND_LENGTH_M
-
 # Common source citations (DRY principle)
 _SRC_INDUSTRY_STANDARD = "Industry Standard"
 _SRC_WINTER_2009 = "Winter 2009"
@@ -236,8 +234,10 @@ TORSO_MASS_KG = PhysicalConstant(
 )
 
 # Segment lengths (average adult male, 1.75m height)
+# Must match model_appearance.hand_size.REFERENCE_HAND_LENGTH_M (1.75 m * 0.1104).
+_HX3_REFERENCE_HAND_LENGTH_M = 1.75 * 0.1104
 HAND_LENGTH_M = PhysicalConstant(
-    REFERENCE_HAND_LENGTH_M,
+    _HX3_REFERENCE_HAND_LENGTH_M,
     "m",
     _SRC_ANTHROPOMETRY,
     "Hand length at reference stature (ANSUR II pooled prior, HRG-HX3)",
