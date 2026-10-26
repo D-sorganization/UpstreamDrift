@@ -1,4 +1,4 @@
-"""Public lift video API (camera slice; expanded in follow-up PRs)."""
+"""Public lift video API (camera and overlays; render added in follow-up PRs)."""
 
 from src.engines.physics_engines.opensim.python.msk_lift_video_framing import (
     BARBELL_LIFTS,
@@ -9,8 +9,11 @@ from src.engines.physics_engines.opensim.python.msk_lift_video_framing import (
     VIEWER_FOV_Y_RAD,
     LiftVideoConfig,
     compute_lift_framing,
+    draw_lift_legend,
+    extract_lift_wrenches,
     lift_camera_transforms,
     lift_video_schedule,
+    muscle_color_rgb,
     pinhole_for_lifting_view,
 )
 
@@ -23,7 +26,10 @@ __all__ = [
     "VIEWER_FOV_Y_RAD",
     "LiftVideoConfig",
     "compute_lift_framing",
+    "draw_lift_legend",
+    "extract_lift_wrenches",
     "lift_camera_transforms",
     "lift_video_schedule",
+    "muscle_color_rgb",
     "pinhole_for_lifting_view",
 ]
