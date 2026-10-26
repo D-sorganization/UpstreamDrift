@@ -163,7 +163,9 @@ def _subject_to_dict(record: SubjectAnthropometrics) -> dict[str, Any]:
             float(record.age_years) if record.age_years is not None else None
         ),
         "sex": record.sex,
-        "hand_length_m": float(_require_hand_dimension(record.hand_length_m, "hand_length_m")),
+        "hand_length_m": float(
+            _require_hand_dimension(record.hand_length_m, "hand_length_m")
+        ),
         "hand_breadth_m": float(
             _require_hand_dimension(record.hand_breadth_m, "hand_breadth_m")
         ),
