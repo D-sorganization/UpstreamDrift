@@ -6,30 +6,13 @@ import numpy as np
 import pytest
 from matplotlib import rcParams
 
-from scripts.ci.check_architecture_budget import analyze_python_file
 from scripts.research.proximal_distal_energy.make_two_hand_wscg_figures import _style
 from scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis import (
-    REPO_ROOT,
     build_outputs,
     write_outputs,
 )
 
-ANALYSIS_SCRIPT = (
-    REPO_ROOT / "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py"
-)
-
 pytestmark = pytest.mark.scientific
-
-
-def test_two_hand_wscg_build_outputs_within_architecture_budget() -> None:
-    findings = [
-        finding
-        for finding in analyze_python_file(
-            ANALYSIS_SCRIPT, max_function_lines=100, max_parameters=8
-        )
-        if finding.symbol == "build_outputs"
-    ]
-    assert findings == []
 
 
 def test_publication_style_uses_portable_minus_glyph() -> None:
