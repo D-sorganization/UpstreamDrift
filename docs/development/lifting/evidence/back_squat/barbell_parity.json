@@ -1,6 +1,6 @@
 {
   "bundle": "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz",
-  "bundle_spec_sha256": "a35950b3680227bc5417b831b5e39a7eed40dd9f3673e71f7b472872496d7d76",
+  "bundle_spec_sha256": "50b4fff064bf1e7eb3aa6aae8d6df3c1d2550bee57cd6fe448b4050afe03c9d7",
   "engines": {
     "drake": {
       "bar_acceleration": 8.554191355258922e-09,

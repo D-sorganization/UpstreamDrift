@@ -30,6 +30,7 @@ about 90 deg under the grip. The origin is on the grip axis
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 
 import numpy as np
 from numpy.typing import NDArray
@@ -42,7 +43,15 @@ from src.shared.python.model_appearance.club_assembly import (
     clubface_vector,
 )
 from src.shared.python.model_appearance.geometry import Mesh
-from src.shared.python.model_appearance.grip_hand_mesh import build_grip_hand_mesh
+from src.shared.python.model_appearance.grip_hand_mesh import (
+    DEFAULT_HAND_MESH_PARAMS,
+    HandMeshParams,
+    build_grip_hand_mesh,
+)
+from src.shared.python.hand_size import (
+    DEFAULT_HAND_LENGTH_M,
+    hand_mesh_scale,
+)
 from src.shared.python.model_appearance.grip_pose import (
     DEFAULT_GRIP_POSE,
     GripPose,
@@ -110,22 +119,39 @@ def grip_hand_frame(
     return frame
 
 
-def _placed_hand(club: ClubAssembly, hand: Hand, pose: GripPose) -> Mesh:
+def _mesh_params(hand_length_m: float | None) -> HandMeshParams:
+    length = DEFAULT_HAND_LENGTH_M if hand_length_m is None else float(hand_length_m)
+    return replace(DEFAULT_HAND_MESH_PARAMS, scale=hand_mesh_scale(length))
+
+
+def _placed_hand(
+    club: ClubAssembly,
+    hand: Hand,
+    pose: GripPose,
+    *,
+    hand_length_m: float | None = None,
+) -> Mesh:
     """One hand in the club frame, wrapped on the thickest grip radius it spans."""
+    params = _mesh_params(hand_length_m)
     depth = pose.distance_below_butt_m(hand)
     nominal = build_grip_hand_mesh(
-        hand, grip_radius_m=grip_radius_at(club, depth), pose=pose
+        hand, grip_radius_m=grip_radius_at(club, depth), pose=pose, params=params
     )
     nearest, _ = nominal.on_grip_extent_below_butt_m()
     radius = grip_radius_at(club, min(max(nearest, 0.0), club.grip_length_m))
-    baked = build_grip_hand_mesh(hand, grip_radius_m=radius, pose=pose).mesh
+    baked = build_grip_hand_mesh(
+        hand, grip_radius_m=radius, pose=pose, params=params
+    ).mesh
     frame = grip_hand_frame(club, hand, pose)
     vertices = baked.vertices @ frame[:3, :3].T + frame[:3, 3]
     return Mesh(vertices, baked.faces)
 
 
 def grip_hand_meshes(
-    club: ClubAssembly, pose: GripPose = DEFAULT_GRIP_POSE
+    club: ClubAssembly,
+    pose: GripPose = DEFAULT_GRIP_POSE,
+    *,
+    hand_length_m: float | None = None,
 ) -> dict[str, Mesh]:
     """``{"lead_hand", "trail_hand"}`` meshes wrapped on ``club``'s grip.
 
@@ -137,11 +163,20 @@ def grip_hand_meshes(
     """
     _check_club(club)
     _check_pose(pose)
-    return {label: _placed_hand(club, hand, pose) for hand, label in HAND_PARTS.items()}
+    return {
+        label: _placed_hand(club, hand, pose, hand_length_m=hand_length_m)
+        for hand, label in HAND_PARTS.items()
+    }
 
 
 def assembly_meshes_with_hands(
-    club: ClubAssembly, pose: GripPose = DEFAULT_GRIP_POSE
+    club: ClubAssembly,
+    pose: GripPose = DEFAULT_GRIP_POSE,
+    *,
+    hand_length_m: float | None = None,
 ) -> dict[str, Mesh]:
     """Shaft, grip and head of :func:`assembly_meshes`, then both grip hands."""
-    return {**assembly_meshes(club), **grip_hand_meshes(club, pose)}
+    return {
+        **assembly_meshes(club),
+        **grip_hand_meshes(club, pose, hand_length_m=hand_length_m),
+    }
