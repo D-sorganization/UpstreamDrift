@@ -2,17 +2,56 @@
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 from matplotlib import rcParams
 
+from scripts.ci.check_architecture_budget import analyze_python_file
 from scripts.research.proximal_distal_energy.make_two_hand_wscg_figures import _style
 from scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis import (
+    JSON_PATH,
+    REPO_ROOT,
     build_outputs,
     write_outputs,
 )
+from scripts.research.proximal_distal_energy.run_two_hand_wscg_case import (
+    committed_case_metric_keys,
+)
+
+CASE_SCRIPT = (
+    REPO_ROOT / "scripts/research/proximal_distal_energy/run_two_hand_wscg_case.py"
+)
+SCRIPT_HASH_KEY = (
+    "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py"
+)
 
 pytestmark = pytest.mark.scientific
+
+
+def test_two_hand_wscg_analyze_case_within_architecture_budget() -> None:
+    findings = [
+        finding
+        for finding in analyze_python_file(
+            CASE_SCRIPT, max_function_lines=100, max_parameters=8
+        )
+        if finding.symbol == "_analyze_case"
+    ]
+    assert findings == []
+
+
+def test_two_hand_wscg_json_matches_committed_except_source_hash() -> None:
+    record, _ = build_outputs()
+    committed = json.loads(JSON_PATH.read_text(encoding="utf-8"))
+
+    def _mask_source_hash(payload: dict) -> dict:
+        masked = json.loads(json.dumps(payload))
+        masked["source_sha256"][SCRIPT_HASH_KEY] = "masked"
+        return masked
+
+    assert _mask_source_hash(record) == _mask_source_hash(committed)
+    assert tuple(record["cases"]["base"].keys()) == committed_case_metric_keys()
 
 
 def test_publication_style_uses_portable_minus_glyph() -> None:
