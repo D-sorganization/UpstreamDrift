@@ -573,6 +573,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13760 · ANSUR II Stature-Tied Hand Length and Breadth (HRG-HX3).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13760
+- **Branch:** merged via #13840
+- **PR:** #13840
+- **Paths:** see #13840
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`eed5077d`; collated from changes/13760-ansur-ii-stature-tied-hand-length-and-br.md)
+- **Summary:** ANSUR II stature-tied hand length and breadth (HRG-HX3).
+- **Next step:** Shipped in PR #13840.
+
 ### DL-#13045 · Feat(Lifting): Barbell Visual Geometry and Lift Video Camera Framing
 
 - **State:** shipped
