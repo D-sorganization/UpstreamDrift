@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-26 | #13860 | Add WSCG masked-JSON parity test scaffold for budget-split PRs. |
 | 2026-10-26 | #13856 | Remove stale urdf_exporter _add_revolute_joint parameters budget exception. |
 | 2026-10-26 | #13832 | feat(lifting): CLI scripts for OSL-8 showcase lift videos; feat(lifting): render_opensim_lift_video public API for OSL-8 export |
 | 2026-10-26 | #13833 | feat(lifting): headless OpenSim lift render worker and video export facade |
