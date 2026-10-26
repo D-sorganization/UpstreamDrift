@@ -82,6 +82,12 @@ _REQUIRED_GATE_TOLERANCE_FIELDS = (
     "constraint_velocity_tolerance_m_s",
     "constraint_virtual_power_tolerance_w",
 )
+_ANTHROPOMETRY_SOURCE_PATHS = (
+    "src/shared/python/anthropometrics/estimators/from_de_leva.py",
+    "src/shared/python/anthropometrics/estimators/_base.py",
+    "src/shared/python/body_segment_parameters/de_leva_1996.py",
+    "src/shared/python/body_segment_parameters/data/de_leva_1996_table4.json",
+)
 SOURCE_PATHS = (
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
@@ -93,6 +99,8 @@ SOURCE_PATHS = (
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
     "scripts/research/proximal_distal_energy/spatial_full_body.py",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+    *_ANTHROPOMETRY_SOURCE_PATHS,
+    "tests/ci/test_articulated_manufactured_authority_anthropometry_provenance_red.py",
     "tests/research/test_articulated_manufactured_solution.py",
     "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
     "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
@@ -102,6 +110,23 @@ SOURCE_PATHS = (
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def governed_source_sha256() -> dict[str, str]:
+    """Return the governed per-path digest map for publication authority."""
+
+    return {path: _sha256(ROOT / path) for path in SOURCE_PATHS}
+
+
+def governed_source_fingerprint() -> str:
+    """Return a stable aggregate digest over governed source paths."""
+
+    payload = json.dumps(
+        governed_source_sha256(),
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def canonical_record_bytes(record: dict[str, Any]) -> bytes:
@@ -292,7 +317,7 @@ def build_record(profile: RecordProfile = "authority") -> dict[str, Any]:
             "The conservation rollout isolates the free club subtree because the pelvis tree is world-supported.",
             "Agreement verifies the declared model and operators, not anatomy or coaching strategy.",
         ],
-        "source_sha256": {path: _sha256(ROOT / path) for path in SOURCE_PATHS},
+        "source_sha256": governed_source_sha256(),
     }
 
 
@@ -499,7 +524,7 @@ def validate_generated_record(
     limitations = record.get("limitations")
     if not isinstance(limitations, list) or not limitations:
         raise ValueError("generated identity has no limitations")
-    expected_sources = {path: _sha256(ROOT / path) for path in SOURCE_PATHS}
+    expected_sources = governed_source_sha256()
     if record.get("source_sha256") != expected_sources:
         raise ValueError("generated identity has stale governed source hashes")
     if not all(_registered_gates(record)):
