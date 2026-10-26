@@ -1,9 +1,6 @@
-"""Per-case WSCG force reconstruction helpers (imported lazily from the audit runner)."""
-
 from __future__ import annotations
 
 import json
-from functools import lru_cache
 from typing import Any
 
 import numpy as np
@@ -19,26 +16,32 @@ from scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis import (
 )
 from src.shared.python.contracts import ensure, require
 
+_PLOT_ARRAY_KEYS = (
+    "time", "lead_position", "trail_position", "midpoint", "lead_force", "trail_force",
+    "lead_axial", "trail_axial", "lead_normal", "trail_normal", "resultant",
+    "force_moment", "free_torque", "equivalent_couple", "contact_force_power",
+    "source_angular_power", "rigid_force_power", "deformation_power", "contact_power",
+    "decomposed_force_power", "contact_omega_rad_s", "grip_separation",
+)
+
 
 def _require_case_analysis_inputs(name: str, data: np.ndarray) -> None:
     if name not in CASE_NAMES:
         raise ValueError(f"unknown case {name!r}")
     time = np.asarray(data["time_s"], dtype=float)
-    require(time.ndim == 1, "time_s must be one-dimensional")
-    require(time.size >= 2, "time_s must contain at least two samples")
-    require(np.all(np.isfinite(time)), "time_s must be finite")
+    require(
+        time.ndim == 1 and time.size >= 2 and np.all(np.isfinite(time)),
+        "time_s must be a finite one-dimensional series with at least two samples",
+    )
     sample_count = int(time.size)
     for column in ("clubhead_speed_mph", "lead_linear_power_w", "trail_linear_power_w"):
         values = np.asarray(data[column], dtype=float)
-        require(values.ndim == 1, f"{column} must be one-dimensional")
-        require(values.size == sample_count, f"{column} length must match time_s")
-        require(np.all(np.isfinite(values)), f"{column} must be finite")
-
-
-@lru_cache(maxsize=1)
-def committed_case_metric_keys() -> tuple[str, ...]:
-    record = json.loads(JSON_PATH.read_text(encoding="utf-8"))
-    return tuple(record["cases"]["base"].keys())
+        require(
+            values.ndim == 1
+            and values.size == sample_count
+            and np.all(np.isfinite(values)),
+            f"{column} must be a finite one-dimensional series matching time_s",
+        )
 
 
 def _case_grip_wrench_signals(data: np.ndarray, geometry: np.ndarray) -> dict[str, Any]:
@@ -81,6 +84,9 @@ def _case_grip_wrench_signals(data: np.ndarray, geometry: np.ndarray) -> dict[st
     maximum_in_plane_force = float(
         np.max(np.linalg.norm(reconstructed_local_forces[..., :2], axis=2))
     )
+    max_out_of_plane_force_n = float(
+        max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
+    )
 
     resultant = lead_force + trail_force
     force_moment_global = np.cross(lead_position - midpoint, lead_force) + np.cross(
@@ -113,8 +119,7 @@ def _case_grip_wrench_signals(data: np.ndarray, geometry: np.ndarray) -> dict[st
         "reconstructed_local_forces": reconstructed_local_forces,
         "archived_local_forces": archived_local_forces,
         "maximum_in_plane_force": maximum_in_plane_force,
-        "lead_out": lead_out,
-        "trail_out": trail_out,
+        "max_out_of_plane_force_n": max_out_of_plane_force_n,
         "lead_velocity": lead_velocity,
         "trail_velocity": trail_velocity,
         "grip_vector": grip_vector,
@@ -164,31 +169,6 @@ def _case_power_channels(data: np.ndarray, grip: dict[str, Any]) -> dict[str, An
     }
 
 
-def _case_wrench_signal_bundle(
-    data: np.ndarray, geometry: np.ndarray
-) -> dict[str, Any]:
-    grip = _case_grip_wrench_signals(data, geometry)
-    return {**grip, **_case_power_channels(data, grip)}
-
-
-def _command_torque_metric_entries(
-    lead_command: np.ndarray,
-    trail_command: np.ndarray,
-    free_torque: np.ndarray,
-) -> dict[str, float]:
-    return {
-        "maximum_abs_individual_command_torque_nm": float(
-            max(np.max(np.abs(lead_command)), np.max(np.abs(trail_command)))
-        ),
-        "maximum_abs_net_command_torque_nm": float(
-            np.max(np.abs(lead_command + trail_command))
-        ),
-        "maximum_free_torque_command_residual_nm": float(
-            np.max(np.abs(free_torque - lead_command - trail_command))
-        ),
-    }
-
-
 def _case_metrics_record(
     data: np.ndarray,
     bundle: dict[str, Any],
@@ -221,19 +201,10 @@ def _case_metrics_record(
                 )
             )
         ),
-        "maximum_out_of_plane_hand_force_n": float(
-            max(
-                np.max(np.abs(bundle["lead_out"])),
-                np.max(np.abs(bundle["trail_out"])),
-            )
-        ),
+        "maximum_out_of_plane_hand_force_n": bundle["max_out_of_plane_force_n"],
         "maximum_in_plane_hand_force_n": bundle["maximum_in_plane_force"],
         "maximum_out_of_plane_to_in_plane_force_ratio": float(
-            max(
-                np.max(np.abs(bundle["lead_out"])),
-                np.max(np.abs(bundle["trail_out"])),
-            )
-            / bundle["maximum_in_plane_force"]
+            bundle["max_out_of_plane_force_n"] / bundle["maximum_in_plane_force"]
         ),
         "maximum_local_force_projection_residual_n": float(
             np.max(
@@ -276,8 +247,14 @@ def _case_metrics_record(
         "late_crossing_resampling": _resampling_sensitivity(
             time, equivalent_couple, float(crossing["late"]["time_s"])
         ),
-        **_command_torque_metric_entries(
-            lead_command, trail_command, bundle["free_torque"]
+        "maximum_abs_individual_command_torque_nm": float(
+            max(np.max(np.abs(lead_command)), np.max(np.abs(trail_command)))
+        ),
+        "maximum_abs_net_command_torque_nm": float(
+            np.max(np.abs(lead_command + trail_command))
+        ),
+        "maximum_free_torque_command_residual_nm": float(
+            np.max(np.abs(bundle["free_torque"] - lead_command - trail_command))
         ),
         **interval_metrics,
     }
@@ -287,7 +264,8 @@ def _analyze_case(
     name: str, data: np.ndarray, geometry: np.ndarray
 ) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     _require_case_analysis_inputs(name, data)
-    bundle = _case_wrench_signal_bundle(data, geometry)
+    grip = _case_grip_wrench_signals(data, geometry)
+    bundle = {**grip, **_case_power_channels(data, grip)}
     crossing = _crossing_record(bundle["time"], bundle["equivalent_couple"])
     interval_metrics = _interval_signal_metrics(
         bundle["time"],
@@ -297,32 +275,12 @@ def _analyze_case(
     )
     metrics = _case_metrics_record(data, bundle, crossing, interval_metrics)
     ensure(
-        tuple(metrics.keys()) == committed_case_metric_keys(),
+        tuple(metrics.keys())
+        == tuple(
+            json.loads(JSON_PATH.read_text(encoding="utf-8"))["cases"]["base"].keys()
+        ),
         "case metrics must preserve committed key order",
     )
-    arrays = {
-        "time": bundle["time"],
-        "lead_position": bundle["lead_position"],
-        "trail_position": bundle["trail_position"],
-        "midpoint": bundle["midpoint"],
-        "lead_force": bundle["lead_force"],
-        "trail_force": bundle["trail_force"],
-        "lead_axial": bundle["lead_axial"],
-        "trail_axial": bundle["trail_axial"],
-        "lead_normal": bundle["lead_normal"],
-        "trail_normal": bundle["trail_normal"],
-        "resultant": bundle["resultant"],
-        "force_moment": bundle["force_moment"],
-        "free_torque": bundle["free_torque"],
-        "equivalent_couple": bundle["equivalent_couple"],
-        "contact_force_power": bundle["contact_force_power"],
-        "source_angular_power": bundle["source_angular_power"],
-        "rigid_force_power": bundle["rigid_force_power"],
-        "deformation_power": bundle["deformation_power"],
-        "contact_power": bundle["contact_power"],
-        "decomposed_force_power": bundle["decomposed_force_power"],
-        "contact_omega_rad_s": bundle["contact_omega_rad_s"],
-        "grip_separation": bundle["grip_separation"],
-        "clubhead_speed_mph": data["clubhead_speed_mph"],
-    }
+    arrays = {key: bundle[key] for key in _PLOT_ARRAY_KEYS}
+    arrays["clubhead_speed_mph"] = data["clubhead_speed_mph"]
     return metrics, arrays
