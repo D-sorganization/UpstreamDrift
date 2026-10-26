@@ -115,13 +115,13 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 980 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 978 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 975 | `src/api/routes/simulation_ws.py` |
-| 975 | `src/shared/python/grip_contact/contact_topology.py` |
 | 974 | `src/launchers/embedded_host.py` |
 | 973 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_camera_system.py` |
 | 973 | `src/shared/python/estimation/dime_observation_factors.py` |
 | 973 | `src/shared/python/motion_matching/club_only/fast_matching.py` |
 | 973 | `src/shared/python/motion_matching/pipeline/dynamics.py` |
 | 971 | `src/engines/physics_engines/mujoco/python/humanoid_grip_adapter.py` |
+| 969 | `src/shared/python/grip_contact/contact_topology.py` |
 | 967 | `src/shared/python/motion_matching/club_only/matrix_qualification.py` |
 | 966 | `src/launchers/launcher_process_manager.py` |
 | 965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py` |
