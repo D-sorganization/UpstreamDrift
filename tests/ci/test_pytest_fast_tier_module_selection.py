@@ -84,3 +84,54 @@ def test_workflow_wires_fast_tier_selection_on_pull_requests() -> None:
     assert "pytest_fast_tier_module_selection.py" in run
     assert run_step["env"]["CI_TIER"] == "${{ needs.changed-paths.outputs.tier }}"
     assert 'github.event_name }}" = "pull_request"' in run
+
+
+def test_tracked_src_change_also_selects_monolith_register_test(
+    tmp_path: Path,
+) -> None:
+    """A src/ edit can push a file over the LOC threshold (#13842)."""
+    for rel in (
+        "tests/unit/test_widget.py",
+        "tests/scripts/test_monolith_register.py",
+    ):
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / rel).write_text("", encoding="utf-8")
+    decision = select_modules(
+        tier="fast",
+        changed_files=("src/engines/widget.py",),
+        repo_root=tmp_path,
+        config=SelectionConfig(("pyproject.toml",), ()),
+    )
+    assert decision.mode == "modules"
+    assert "tests/scripts/test_monolith_register.py" in decision.modules
+    assert "tests/unit/test_widget.py" in decision.modules
+
+
+def test_register_doc_change_selects_monolith_register_test(tmp_path: Path) -> None:
+    for rel in ("tests/unit/test_a.py", "tests/scripts/test_monolith_register.py"):
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / rel).write_text("", encoding="utf-8")
+    decision = select_modules(
+        tier="fast",
+        changed_files=(
+            "tests/unit/test_a.py",
+            "docs/development/monolith_refactor_register.md",
+        ),
+        repo_root=tmp_path,
+        config=SelectionConfig(("pyproject.toml",), ()),
+    )
+    assert decision.mode == "modules"
+    assert "tests/scripts/test_monolith_register.py" in decision.modules
+
+
+def test_unrelated_change_does_not_add_monolith_register_test(tmp_path: Path) -> None:
+    for rel in ("tests/unit/test_a.py", "tests/scripts/test_monolith_register.py"):
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / rel).write_text("", encoding="utf-8")
+    decision = select_modules(
+        tier="fast",
+        changed_files=("tests/unit/test_a.py",),
+        repo_root=tmp_path,
+        config=SelectionConfig(("pyproject.toml",), ()),
+    )
+    assert decision.modules == ("tests/unit/test_a.py",)
