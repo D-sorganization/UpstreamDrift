@@ -573,6 +573,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13851 · Remove Stale Urdf_Exporter _Add_Revolute_Joint Parameters Budget Exception.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13851
+- **Branch:** merged via #13856
+- **PR:** #13856
+- **Paths:** see #13856
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`a6699390`; collated from changes/13851-remove-stale-urdf-exporter-add-revolute.md)
+- **Summary:** Remove stale urdf_exporter _add_revolute_joint parameters budget exception.
+- **Next step:** Shipped in PR #13856.
+
 ### DL-#13760 · ANSUR II Stature-Tied Hand Length and Breadth (HRG-HX3).
 
 - **State:** shipped
