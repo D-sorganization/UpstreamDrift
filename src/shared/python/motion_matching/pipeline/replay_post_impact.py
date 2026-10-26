@@ -162,9 +162,15 @@ def assert_post_impact_acceptance(report: Mapping[str, Any]) -> None:
 
 def _attachments_from_receipt(
     receipt: Mapping[str, Any],
-) -> dict[str, tuple[str, tuple[float, ...]]]:
+) -> dict[str, tuple[str, tuple[float, float, float]]]:
     raw = receipt["ik"]["attachments_m"]
-    return {k: (v["body"], tuple(v["offset_m"])) for k, v in raw.items()}
+    out: dict[str, tuple[str, tuple[float, float, float]]] = {}
+    for label, entry in raw.items():
+        offset = tuple(float(x) for x in entry["offset_m"])
+        if len(offset) != 3:
+            raise ValueError(f"attachment {label} offset must be a 3-vector")
+        out[str(label)] = (str(entry["body"]), offset)
+    return out
 
 
 def _interpolate_track(
