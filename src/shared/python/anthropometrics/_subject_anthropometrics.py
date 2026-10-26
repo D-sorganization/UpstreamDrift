@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from src.shared.python.model_appearance.hand_size import (
+from src.shared.python.anthropometrics.hand_size import (
     resolve_hand_breadth_m,
     resolve_hand_length_m,
 )
@@ -54,7 +54,7 @@ class SubjectAnthropometrics:
     * ``sex`` is one of ``"M"``, ``"F"``, ``"unspecified"``.
     * ``hand_length_m`` and ``hand_breadth_m`` are positive finite lengths
       in SI metres, defaulting from ``height_m`` and ``sex`` (ANSUR II pooled
-      or sex-stratified priors; see :mod:`model_appearance.hand_size`) unless
+      or sex-stratified priors; see :mod:`anthropometrics.hand_size`) unless
       explicit overrides are supplied at construction.
     """
 

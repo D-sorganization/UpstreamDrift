@@ -234,7 +234,7 @@ TORSO_MASS_KG = PhysicalConstant(
 )
 
 # Segment lengths (average adult male, 1.75m height)
-# Must match model_appearance.hand_size.REFERENCE_HAND_LENGTH_M (1.75 m * 0.1104).
+# Must match anthropometrics.hand_size.REFERENCE_HAND_LENGTH_M (1.75 m * 0.1104).
 _HX3_REFERENCE_HAND_LENGTH_M = 1.75 * 0.1104
 HAND_LENGTH_M = PhysicalConstant(
     _HX3_REFERENCE_HAND_LENGTH_M,

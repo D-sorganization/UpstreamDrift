@@ -7,7 +7,7 @@ import math
 import pytest
 
 from src.shared.python.anthropometrics._types import Sex
-from src.shared.python.model_appearance import hand_size
+from src.shared.python.anthropometrics import hand_size
 
 # ANSUR II public CSVs (handlength/stature, handbreadth/handlength), per-subject
 # ratios. Datasets sha256 0547aea0... (male n=4082) and ed7e800a... (female n=1986).

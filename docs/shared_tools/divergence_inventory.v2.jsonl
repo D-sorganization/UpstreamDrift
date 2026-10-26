@@ -214,6 +214,7 @@
 {"path": "anthropometrics/estimators/from_zatsiorsky.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/ratios/dempster_1955.json", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/ratios/zatsiorsky_seluyanov_1985.json", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
+{"path": "anthropometrics/hand_size.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/persistence.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/pipeline.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/readers/__init__.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
