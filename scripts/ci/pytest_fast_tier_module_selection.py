@@ -21,6 +21,13 @@ from typing import Iterable, Literal, Sequence
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _CONFIG_PATH = _REPO_ROOT / "scripts/config/pytest_fast_tier_shared_core_globs.json"
 
+# The monolith register (#7131) is derived from every tracked ``src/`` .py/.m
+# file, so no stem-based mapping can see drift. Any such change must also run
+# its cheap guard test on the PR tier instead of failing later in merge_group.
+MONOLITH_REGISTER_TEST = "tests/scripts/test_monolith_register.py"
+_MONOLITH_REGISTER_DOC = "docs/development/monolith_refactor_register.md"
+_MONOLITH_REGISTER_SCRIPT = "scripts/gen_monolith_register.py"
+
 
 @dataclass(frozen=True)
 class SelectionConfig:
@@ -108,6 +115,12 @@ def _modules_for_source(rel: str, repo_root: Path) -> tuple[str, ...]:
     return _tracked_test_modules(repo_root, hits)
 
 
+def _affects_monolith_register(path: str) -> bool:
+    if path in (_MONOLITH_REGISTER_DOC, _MONOLITH_REGISTER_SCRIPT):
+        return True
+    return path.startswith("src/") and path.endswith((".py", ".m"))
+
+
 def select_modules(
     *,
     tier: str,
@@ -144,6 +157,9 @@ def select_modules(
 
     if not modules:
         return SelectionDecision("full", (), "no_mapped_modules")
+    if any(_affects_monolith_register(path) for path in cleaned):
+        if (root / MONOLITH_REGISTER_TEST).is_file():
+            modules.add(MONOLITH_REGISTER_TEST)
     return SelectionDecision("modules", tuple(sorted(modules)), "mapped")
 
 
