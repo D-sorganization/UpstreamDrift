@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +13,7 @@ import numpy as np
 from scripts.research.proximal_distal_energy.two_hand_wrench import (
     find_zero_crossings,
 )
+from src.shared.python.contracts import ensure, require
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OUTPUT_ROOT = REPO_ROOT / "docs" / "research" / "proximal_distal_energy_transfer"
@@ -31,6 +33,41 @@ OUT_OF_PLANE_AXIS = np.array([0.0, -1.0, 1.0]) / np.sqrt(2.0)
 SCHEMA_VERSION = "wscg-two-hand-wrench-audit-v2"
 JSON_PATH = DATA_DIR / "two_hand_wscg_analysis.json"
 NPZ_PATH = DATA_DIR / "two_hand_wscg_analysis.npz"
+_CASE_METRIC_KEYS = (
+    "sample_count",
+    "time_step_s",
+    "grip_separation_mean_m",
+    "grip_separation_range_m",
+    "maximum_resultant_reconstruction_residual_n",
+    "maximum_couple_reconstruction_residual_nm",
+    "maximum_out_of_plane_hand_force_n",
+    "maximum_in_plane_hand_force_n",
+    "maximum_out_of_plane_to_in_plane_force_ratio",
+    "maximum_local_force_projection_residual_n",
+    "maximum_internal_force_power_identity_residual_w",
+    "maximum_archived_linear_power_discrepancy_w",
+    "maximum_abs_deformation_power_w",
+    "minimum_equivalent_couple_nm",
+    "minimum_couple_time_s",
+    "force_moment_at_minimum_nm",
+    "free_torque_at_minimum_nm",
+    "reconstructed_force_power_at_minimum_w",
+    "clubhead_speed_at_minimum_mph",
+    "maximum_clubhead_speed_mph",
+    "maximum_clubhead_speed_time_s",
+    "negative_duration_s",
+    "negative_angular_impulse_nm_s",
+    "crossings",
+    "late_crossing_resampling",
+    "maximum_abs_individual_command_torque_nm",
+    "maximum_abs_net_command_torque_nm",
+    "maximum_free_torque_command_residual_nm",
+    "negative_interval_duration_s",
+    "negative_interval_reconstructed_force_work_j",
+    "negative_interval_archived_linear_work_j",
+    "negative_interval_reconstructed_force_power_negative_fraction",
+    "negative_interval_force_power_sign_disagreement_fraction",
+)
 
 
 def _sha256(path: Path) -> str:
@@ -73,6 +110,22 @@ def _vector(data: np.ndarray, stem: str, unit: str) -> np.ndarray:
     if not np.all(np.isfinite(result)):
         raise ValueError(f"{stem} contains non-finite values")
     return result
+
+
+def _require_case_analysis_inputs(name: str, data: np.ndarray) -> None:
+    """Validate case name and equal-length finite sample columns."""
+    if name not in CASE_NAMES:
+        raise ValueError(f"unknown case {name!r}")
+    time = np.asarray(data["time_s"], dtype=float)
+    require(time.ndim == 1, "time_s must be one-dimensional")
+    require(time.size >= 2, "time_s must contain at least two samples")
+    require(np.all(np.isfinite(time)), "time_s must be finite")
+    sample_count = int(time.size)
+    for column in ("clubhead_speed_mph", "lead_linear_power_w", "trail_linear_power_w"):
+        values = np.asarray(data[column], dtype=float)
+        require(values.ndim == 1, f"{column} must be one-dimensional")
+        require(values.size == sample_count, f"{column} length must match time_s")
+        require(np.all(np.isfinite(values)), f"{column} must be finite")
 
 
 def _crossing_record(time: np.ndarray, values: np.ndarray) -> dict[str, Any]:
@@ -174,23 +227,72 @@ def _interval_signal_metrics(
     }
 
 
-def _analyze_case(
-    name: str, data: np.ndarray, geometry: np.ndarray
-) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    time = data["time_s"]
-    lead_position, trail_position, midpoint = geometry
-    lead_force = _vector(data, "lead_force_global", "n")
-    trail_force = _vector(data, "trail_force_global", "n")
-    lead_torque = _vector(data, "lead_free_torque_global", "nm")
-    trail_torque = _vector(data, "trail_free_torque_global", "nm")
-    lead_velocity = _vector(data, "lead_velocity_global", "m_s")
-    trail_velocity = _vector(data, "trail_velocity_global", "m_s")
-    source_resultant = _vector(data, "resultant_force_global_source", "n")
-    source_couple_global = _vector(
-        data, "equivalent_midpoint_couple_global_source", "nm"
-    )
-    source_couple_local = _vector(data, "equivalent_midpoint_couple_local_source", "nm")
+@dataclass(frozen=True, slots=True)
+class _CaseForceState:
+    time: np.ndarray
+    lead_position: np.ndarray
+    trail_position: np.ndarray
+    midpoint: np.ndarray
+    lead_force: np.ndarray
+    trail_force: np.ndarray
+    lead_torque: np.ndarray
+    trail_torque: np.ndarray
+    lead_velocity: np.ndarray
+    trail_velocity: np.ndarray
+    source_resultant: np.ndarray
+    source_couple_global: np.ndarray
+    source_couple_local: np.ndarray
+    grip_vector: np.ndarray
+    grip_separation: np.ndarray
+    lead_axial: np.ndarray
+    trail_axial: np.ndarray
+    lead_normal: np.ndarray
+    trail_normal: np.ndarray
+    lead_out: np.ndarray
+    trail_out: np.ndarray
+    reconstructed_local_forces: np.ndarray
+    archived_local_forces: np.ndarray
+    maximum_in_plane_force: float
+    resultant: np.ndarray
+    force_moment_global: np.ndarray
+    free_torque_global: np.ndarray
+    reconstructed_couple_global: np.ndarray
+    force_moment: np.ndarray
+    free_torque: np.ndarray
+    equivalent_couple: np.ndarray
+    contact_force_power: np.ndarray
+    source_linear_power: np.ndarray
+    source_angular_power: np.ndarray
+    relative_velocity: np.ndarray
+    differential_force: np.ndarray
+    contact_omega_rad_s: np.ndarray
+    rigid_relative_velocity: np.ndarray
+    deformation_power: np.ndarray
+    rigid_force_power: np.ndarray
+    decomposed_force_power: np.ndarray
+    contact_power: np.ndarray
 
+
+def _projected_hand_local_forces(
+    data: np.ndarray,
+    lead_position: np.ndarray,
+    trail_position: np.ndarray,
+    lead_force: np.ndarray,
+    trail_force: np.ndarray,
+) -> tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    float,
+]:
+    """Project global hand forces into the grip frame and compare to archived locals."""
     grip_vector = trail_position - lead_position
     grip_separation = np.linalg.norm(grip_vector, axis=1)
     axial_axis = grip_vector / grip_separation[:, None]
@@ -216,17 +318,33 @@ def _analyze_case(
     maximum_in_plane_force = float(
         np.max(np.linalg.norm(reconstructed_local_forces[..., :2], axis=2))
     )
-
-    resultant = lead_force + trail_force
-    force_moment_global = np.cross(lead_position - midpoint, lead_force) + np.cross(
-        trail_position - midpoint, trail_force
+    return (
+        grip_vector,
+        grip_separation,
+        lead_axial,
+        trail_axial,
+        lead_normal,
+        trail_normal,
+        lead_out,
+        trail_out,
+        reconstructed_local_forces,
+        archived_local_forces,
+        maximum_in_plane_force,
     )
-    free_torque_global = lead_torque + trail_torque
-    reconstructed_couple_global = force_moment_global + free_torque_global
-    force_moment = force_moment_global @ OUT_OF_PLANE_AXIS
-    free_torque = free_torque_global @ OUT_OF_PLANE_AXIS
-    equivalent_couple = source_couple_local[:, 2]
 
+
+def _midpoint_power_decomposition(
+    data: np.ndarray,
+    *,
+    lead_force: np.ndarray,
+    trail_force: np.ndarray,
+    lead_velocity: np.ndarray,
+    trail_velocity: np.ndarray,
+    grip_vector: np.ndarray,
+    resultant: np.ndarray,
+    force_moment: np.ndarray,
+) -> tuple[np.ndarray, ...]:
+    """Decompose internal force power into rigid and deformation channels."""
     midpoint_velocity = 0.5 * (lead_velocity + trail_velocity)
     contact_force_power = np.sum(
         lead_force * lead_velocity + trail_force * trail_velocity, axis=1
@@ -250,54 +368,280 @@ def _analyze_case(
     )
     decomposed_force_power = rigid_force_power + deformation_power
     contact_power = source_linear_power + source_angular_power
+    return (
+        contact_force_power,
+        source_linear_power,
+        source_angular_power,
+        relative_velocity,
+        differential_force,
+        contact_omega_rad_s,
+        rigid_relative_velocity,
+        deformation_power,
+        rigid_force_power,
+        decomposed_force_power,
+        contact_power,
+    )
 
-    crossing = _crossing_record(time, equivalent_couple)
+
+@dataclass(frozen=True, slots=True)
+class _MidpointWrench:
+    resultant: np.ndarray
+    force_moment_global: np.ndarray
+    free_torque_global: np.ndarray
+    reconstructed_couple_global: np.ndarray
+    force_moment: np.ndarray
+    free_torque: np.ndarray
+    equivalent_couple: np.ndarray
+
+
+def _midpoint_wrench_components(
+    lead_position: np.ndarray,
+    trail_position: np.ndarray,
+    midpoint: np.ndarray,
+    lead_force: np.ndarray,
+    trail_force: np.ndarray,
+    lead_torque: np.ndarray,
+    trail_torque: np.ndarray,
+    source_couple_local: np.ndarray,
+) -> _MidpointWrench:
+    """Reconstruct the archived midpoint wrench and scalar couple channel."""
+    resultant = lead_force + trail_force
+    force_moment_global = np.cross(lead_position - midpoint, lead_force) + np.cross(
+        trail_position - midpoint, trail_force
+    )
+    free_torque_global = lead_torque + trail_torque
+    reconstructed_couple_global = force_moment_global + free_torque_global
+    force_moment = force_moment_global @ OUT_OF_PLANE_AXIS
+    free_torque = free_torque_global @ OUT_OF_PLANE_AXIS
+    equivalent_couple = source_couple_local[:, 2]
+    return _MidpointWrench(
+        resultant=resultant,
+        force_moment_global=force_moment_global,
+        free_torque_global=free_torque_global,
+        reconstructed_couple_global=reconstructed_couple_global,
+        force_moment=force_moment,
+        free_torque=free_torque,
+        equivalent_couple=equivalent_couple,
+    )
+
+
+def _archived_wrench_vectors(
+    data: np.ndarray,
+) -> tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+]:
+    """Load archived global wrench columns for one case row."""
+    return (
+        _vector(data, "lead_force_global", "n"),
+        _vector(data, "trail_force_global", "n"),
+        _vector(data, "lead_free_torque_global", "nm"),
+        _vector(data, "trail_free_torque_global", "nm"),
+        _vector(data, "lead_velocity_global", "m_s"),
+        _vector(data, "trail_velocity_global", "m_s"),
+        _vector(data, "resultant_force_global_source", "n"),
+        _vector(data, "equivalent_midpoint_couple_global_source", "nm"),
+        _vector(data, "equivalent_midpoint_couple_local_source", "nm"),
+    )
+
+
+def _compose_case_force_state(
+    time: np.ndarray,
+    geometry: np.ndarray,
+    archived_vectors: tuple[np.ndarray, ...],
+    grip_frame: tuple[np.ndarray | float, ...],
+    wrench: _MidpointWrench,
+    power: tuple[np.ndarray, ...],
+) -> _CaseForceState:
+    """Materialize the frozen case state from reconstructed intermediates."""
+    lead_position, trail_position, midpoint = geometry
+    (
+        lead_force,
+        trail_force,
+        lead_torque,
+        trail_torque,
+        lead_velocity,
+        trail_velocity,
+        source_resultant,
+        source_couple_global,
+        source_couple_local,
+    ) = archived_vectors
+    (
+        grip_vector,
+        grip_separation,
+        lead_axial,
+        trail_axial,
+        lead_normal,
+        trail_normal,
+        lead_out,
+        trail_out,
+        reconstructed_local_forces,
+        archived_local_forces,
+        maximum_in_plane_force,
+    ) = grip_frame
+    (
+        contact_force_power,
+        source_linear_power,
+        source_angular_power,
+        relative_velocity,
+        differential_force,
+        contact_omega_rad_s,
+        rigid_relative_velocity,
+        deformation_power,
+        rigid_force_power,
+        decomposed_force_power,
+        contact_power,
+    ) = power
+    return _CaseForceState(
+        time=time,
+        lead_position=lead_position,
+        trail_position=trail_position,
+        midpoint=midpoint,
+        lead_force=lead_force,
+        trail_force=trail_force,
+        lead_torque=lead_torque,
+        trail_torque=trail_torque,
+        lead_velocity=lead_velocity,
+        trail_velocity=trail_velocity,
+        source_resultant=source_resultant,
+        source_couple_global=source_couple_global,
+        source_couple_local=source_couple_local,
+        grip_vector=grip_vector,
+        grip_separation=grip_separation,
+        lead_axial=lead_axial,
+        trail_axial=trail_axial,
+        lead_normal=lead_normal,
+        trail_normal=trail_normal,
+        lead_out=lead_out,
+        trail_out=trail_out,
+        reconstructed_local_forces=reconstructed_local_forces,
+        archived_local_forces=archived_local_forces,
+        maximum_in_plane_force=maximum_in_plane_force,
+        resultant=wrench.resultant,
+        force_moment_global=wrench.force_moment_global,
+        free_torque_global=wrench.free_torque_global,
+        reconstructed_couple_global=wrench.reconstructed_couple_global,
+        force_moment=wrench.force_moment,
+        free_torque=wrench.free_torque,
+        equivalent_couple=wrench.equivalent_couple,
+        contact_force_power=contact_force_power,
+        source_linear_power=source_linear_power,
+        source_angular_power=source_angular_power,
+        relative_velocity=relative_velocity,
+        differential_force=differential_force,
+        contact_omega_rad_s=contact_omega_rad_s,
+        rigid_relative_velocity=rigid_relative_velocity,
+        deformation_power=deformation_power,
+        rigid_force_power=rigid_force_power,
+        decomposed_force_power=decomposed_force_power,
+        contact_power=contact_power,
+    )
+
+
+def _reconstruct_case_force_state(
+    data: np.ndarray, geometry: np.ndarray
+) -> _CaseForceState:
+    """Rebuild forces, couples, and power decomposition for one archived case."""
+    time = data["time_s"]
+    lead_position, trail_position, midpoint = geometry
+    archived_vectors = _archived_wrench_vectors(data)
+    grip_frame = _projected_hand_local_forces(
+        data,
+        lead_position,
+        trail_position,
+        archived_vectors[0],
+        archived_vectors[1],
+    )
+    wrench = _midpoint_wrench_components(
+        lead_position,
+        trail_position,
+        midpoint,
+        archived_vectors[0],
+        archived_vectors[1],
+        archived_vectors[2],
+        archived_vectors[3],
+        archived_vectors[8],
+    )
+    power = _midpoint_power_decomposition(
+        data,
+        lead_force=archived_vectors[0],
+        trail_force=archived_vectors[1],
+        lead_velocity=archived_vectors[4],
+        trail_velocity=archived_vectors[5],
+        grip_vector=grip_frame[0],
+        resultant=wrench.resultant,
+        force_moment=wrench.force_moment,
+    )
+    return _compose_case_force_state(
+        time, geometry, archived_vectors, grip_frame, wrench, power
+    )
+
+
+def _assemble_case_metrics(
+    data: np.ndarray,
+    state: _CaseForceState,
+    crossing: dict[str, Any],
+    interval_metrics: dict[str, float],
+) -> dict[str, Any]:
+    """Assemble the per-case metrics record in the committed key order."""
+    time = state.time
+    equivalent_couple = state.equivalent_couple
     minimum_index = int(np.argmin(equivalent_couple))
     negative = equivalent_couple < 0.0
     negative_impulse = float(np.trapezoid(np.minimum(equivalent_couple, 0.0), time))
     lead_command = data["lead_command_torque_nm"]
     trail_command = data["trail_command_torque_nm"]
-    interval_metrics = _interval_signal_metrics(
-        time, crossing, contact_force_power, source_linear_power
-    )
     metrics: dict[str, Any] = {
         "sample_count": int(time.size),
         "time_step_s": float(np.median(np.diff(time))),
-        "grip_separation_mean_m": float(np.mean(grip_separation)),
+        "grip_separation_mean_m": float(np.mean(state.grip_separation)),
         "grip_separation_range_m": [
-            float(np.min(grip_separation)),
-            float(np.max(grip_separation)),
+            float(np.min(state.grip_separation)),
+            float(np.max(state.grip_separation)),
         ],
         "maximum_resultant_reconstruction_residual_n": float(
-            np.max(np.abs(resultant - source_resultant))
+            np.max(np.abs(state.resultant - state.source_resultant))
         ),
         "maximum_couple_reconstruction_residual_nm": float(
-            np.max(np.abs(reconstructed_couple_global - source_couple_global))
+            np.max(
+                np.abs(state.reconstructed_couple_global - state.source_couple_global)
+            )
         ),
         "maximum_out_of_plane_hand_force_n": float(
-            max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
+            max(np.max(np.abs(state.lead_out)), np.max(np.abs(state.trail_out)))
         ),
-        "maximum_in_plane_hand_force_n": maximum_in_plane_force,
+        "maximum_in_plane_hand_force_n": state.maximum_in_plane_force,
         "maximum_out_of_plane_to_in_plane_force_ratio": float(
-            max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
-            / maximum_in_plane_force
+            max(np.max(np.abs(state.lead_out)), np.max(np.abs(state.trail_out)))
+            / state.maximum_in_plane_force
         ),
         "maximum_local_force_projection_residual_n": float(
-            np.max(np.abs(reconstructed_local_forces - archived_local_forces))
+            np.max(
+                np.abs(state.reconstructed_local_forces - state.archived_local_forces)
+            )
         ),
         "maximum_internal_force_power_identity_residual_w": float(
-            np.max(np.abs(contact_force_power - decomposed_force_power))
+            np.max(np.abs(state.contact_force_power - state.decomposed_force_power))
         ),
         "maximum_archived_linear_power_discrepancy_w": float(
-            np.max(np.abs(contact_force_power - source_linear_power))
+            np.max(np.abs(state.contact_force_power - state.source_linear_power))
         ),
-        "maximum_abs_deformation_power_w": float(np.max(np.abs(deformation_power))),
+        "maximum_abs_deformation_power_w": float(
+            np.max(np.abs(state.deformation_power))
+        ),
         "minimum_equivalent_couple_nm": float(equivalent_couple[minimum_index]),
         "minimum_couple_time_s": float(time[minimum_index]),
-        "force_moment_at_minimum_nm": float(force_moment[minimum_index]),
-        "free_torque_at_minimum_nm": float(free_torque[minimum_index]),
+        "force_moment_at_minimum_nm": float(state.force_moment[minimum_index]),
+        "free_torque_at_minimum_nm": float(state.free_torque[minimum_index]),
         "reconstructed_force_power_at_minimum_w": float(
-            contact_force_power[minimum_index]
+            state.contact_force_power[minimum_index]
         ),
         "clubhead_speed_at_minimum_mph": float(
             data["clubhead_speed_mph"][minimum_index]
@@ -319,35 +663,63 @@ def _analyze_case(
             np.max(np.abs(lead_command + trail_command))
         ),
         "maximum_free_torque_command_residual_nm": float(
-            np.max(np.abs(free_torque - lead_command - trail_command))
+            np.max(np.abs(state.free_torque - lead_command - trail_command))
         ),
         **interval_metrics,
     }
-    arrays = {
-        "time": time,
+    ensure(
+        tuple(metrics.keys()) == _CASE_METRIC_KEYS,
+        "case metrics must preserve committed key order",
+    )
+    return metrics
+
+
+def _assemble_case_output_arrays(
+    data: np.ndarray, geometry: np.ndarray, state: _CaseForceState
+) -> dict[str, np.ndarray]:
+    """Collect plot-ready arrays for one case."""
+    lead_position, trail_position, midpoint = geometry
+    return {
+        "time": state.time,
         "lead_position": lead_position,
         "trail_position": trail_position,
         "midpoint": midpoint,
-        "lead_force": lead_force,
-        "trail_force": trail_force,
-        "lead_axial": lead_axial,
-        "trail_axial": trail_axial,
-        "lead_normal": lead_normal,
-        "trail_normal": trail_normal,
-        "resultant": resultant,
-        "force_moment": force_moment,
-        "free_torque": free_torque,
-        "equivalent_couple": equivalent_couple,
-        "contact_force_power": contact_force_power,
-        "source_angular_power": source_angular_power,
-        "rigid_force_power": rigid_force_power,
-        "deformation_power": deformation_power,
-        "contact_power": contact_power,
-        "decomposed_force_power": decomposed_force_power,
-        "contact_omega_rad_s": contact_omega_rad_s,
-        "grip_separation": grip_separation,
+        "lead_force": state.lead_force,
+        "trail_force": state.trail_force,
+        "lead_axial": state.lead_axial,
+        "trail_axial": state.trail_axial,
+        "lead_normal": state.lead_normal,
+        "trail_normal": state.trail_normal,
+        "resultant": state.resultant,
+        "force_moment": state.force_moment,
+        "free_torque": state.free_torque,
+        "equivalent_couple": state.equivalent_couple,
+        "contact_force_power": state.contact_force_power,
+        "source_angular_power": state.source_angular_power,
+        "rigid_force_power": state.rigid_force_power,
+        "deformation_power": state.deformation_power,
+        "contact_power": state.contact_power,
+        "decomposed_force_power": state.decomposed_force_power,
+        "contact_omega_rad_s": state.contact_omega_rad_s,
+        "grip_separation": state.grip_separation,
         "clubhead_speed_mph": data["clubhead_speed_mph"],
     }
+
+
+def _analyze_case(
+    name: str, data: np.ndarray, geometry: np.ndarray
+) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    _require_case_analysis_inputs(name, data)
+    state = _reconstruct_case_force_state(data, geometry)
+    crossing = _crossing_record(state.time, state.equivalent_couple)
+    interval_metrics = _interval_signal_metrics(
+        state.time,
+        crossing,
+        state.contact_force_power,
+        state.source_linear_power,
+    )
+    metrics = _assemble_case_metrics(data, state, crossing, interval_metrics)
+    arrays = _assemble_case_output_arrays(data, geometry, state)
     return metrics, arrays
 
 
@@ -418,53 +790,40 @@ def _geometry_sweep(arrays: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
     }
 
 
-def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    """Build the machine-readable audit and plot-ready arrays."""
-    loaded = {name: _load_case(name) for name in CASE_NAMES}
-    base = loaded["base"]
-    geometry = np.stack(
+def _audit_provenance_block() -> dict[str, Any]:
+    return {
+        "source": "Archived WSCG/Simscape output tables",
+        "source_table_sha256": {
+            name.upper(): _sha256(MATLAB_TABLE_DIR / f"{name.upper()}.mat")
+            for name in CASE_NAMES
+        },
+        "force_direction": "Force exerted by each wrist on the club",
+        "lead_hand": "left wrist in the archived right-handed model",
+        "local_axes": (
+            "+x from lead to trail contact; +z out of the declared model plane; "
+            "+y = +z cross +x"
+        ),
+        "moment_sign": "positive about +z by the right-hand rule",
+        "counterfactual_contract": (
+            "ZTCF recomputes reactions on the BASE state history with commanded "
+            "joint torques and kill damping set to zero; it is pointwise, not a "
+            "new forward rollout."
+        ),
+    }
+
+
+def _shared_case_geometry(base: np.ndarray) -> np.ndarray:
+    return np.stack(
         (
             _vector(base, "lead_position", "m"),
             _vector(base, "trail_position", "m"),
             _vector(base, "midpoint_position", "m"),
         )
     )
-    record: dict[str, Any] = {
-        "schema_version": SCHEMA_VERSION,
-        "source_sha256": _source_hashes(),
-        "provenance": {
-            "source": "Archived WSCG/Simscape output tables",
-            "source_table_sha256": {
-                name.upper(): _sha256(MATLAB_TABLE_DIR / f"{name.upper()}.mat")
-                for name in CASE_NAMES
-            },
-            "force_direction": "Force exerted by each wrist on the club",
-            "lead_hand": "left wrist in the archived right-handed model",
-            "local_axes": (
-                "+x from lead to trail contact; +z out of the declared model plane; "
-                "+y = +z cross +x"
-            ),
-            "moment_sign": "positive about +z by the right-hand rule",
-            "counterfactual_contract": (
-                "ZTCF recomputes reactions on the BASE state history with commanded "
-                "joint torques and kill damping set to zero; it is pointwise, not a "
-                "new forward rollout."
-            ),
-        },
-        "cases": {},
-    }
-    arrays: dict[str, np.ndarray] = {}
-    case_arrays: dict[str, dict[str, np.ndarray]] = {}
-    for name, data in loaded.items():
-        metrics, computed = _analyze_case(name, data, geometry)
-        record["cases"][name] = metrics
-        case_arrays[name] = computed
-        arrays.update({f"{name}__{key}": value for key, value in computed.items()})
 
-    base_couple = case_arrays["base"]["equivalent_couple"]
-    ztcf_couple = case_arrays["ztcf"]["equivalent_couple"]
-    delta_couple = case_arrays["delta"]["equivalent_couple"]
-    record["state_match"] = {
+
+def _state_match_block(loaded: dict[str, np.ndarray]) -> dict[str, Any]:
+    return {
         "maximum_contact_position_difference_m": float(
             max(
                 np.max(
@@ -504,7 +863,15 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "the residuals are reported rather than rounded to exact zero."
         ),
     }
-    record["decomposition"] = {
+
+
+def _decomposition_block(
+    case_arrays: dict[str, dict[str, np.ndarray]],
+) -> dict[str, Any]:
+    base_couple = case_arrays["base"]["equivalent_couple"]
+    ztcf_couple = case_arrays["ztcf"]["equivalent_couple"]
+    delta_couple = case_arrays["delta"]["equivalent_couple"]
+    return {
         "maximum_abs_base_minus_ztcf_minus_delta_couple_residual_nm": float(
             np.max(np.abs(base_couple - ztcf_couple - delta_couple))
         ),
@@ -517,6 +884,13 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "sense, but it is not an unforced future trajectory."
         ),
     }
+
+
+def _attach_geometry_sweep_summary(
+    record: dict[str, Any],
+    arrays: dict[str, np.ndarray],
+    case_arrays: dict[str, dict[str, np.ndarray]],
+) -> None:
     sweep = _geometry_sweep(case_arrays["ztcf"])
     arrays.update({f"sweep__{key}": value for key, value in sweep.items()})
     record["geometry_sweep"] = {
@@ -533,6 +907,29 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             )
         ),
     }
+
+
+def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    """Build the machine-readable audit and plot-ready arrays."""
+    loaded = {name: _load_case(name) for name in CASE_NAMES}
+    geometry = _shared_case_geometry(loaded["base"])
+    record: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "source_sha256": _source_hashes(),
+        "provenance": _audit_provenance_block(),
+        "cases": {},
+    }
+    arrays: dict[str, np.ndarray] = {}
+    case_arrays: dict[str, dict[str, np.ndarray]] = {}
+    for name, data in loaded.items():
+        metrics, computed = _analyze_case(name, data, geometry)
+        record["cases"][name] = metrics
+        case_arrays[name] = computed
+        arrays.update({f"{name}__{key}": value for key, value in computed.items()})
+
+    record["state_match"] = _state_match_block(loaded)
+    record["decomposition"] = _decomposition_block(case_arrays)
+    _attach_geometry_sweep_summary(record, arrays, case_arrays)
     return record, arrays
 
 

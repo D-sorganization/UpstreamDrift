@@ -2,17 +2,105 @@
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 from matplotlib import rcParams
 
+from scripts.ci.check_architecture_budget import analyze_python_file
 from scripts.research.proximal_distal_energy.make_two_hand_wscg_figures import _style
 from scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis import (
+    JSON_PATH,
+    REPO_ROOT,
+    _CASE_METRIC_KEYS,
+    _load_case,
+    _midpoint_wrench_components,
+    _reconstruct_case_force_state,
+    _require_case_analysis_inputs,
+    _shared_case_geometry,
     build_outputs,
     write_outputs,
 )
 
+ANALYSIS_SCRIPT = (
+    REPO_ROOT / "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py"
+)
+SCRIPT_HASH_KEY = (
+    "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py"
+)
+
 pytestmark = pytest.mark.scientific
+
+
+def test_two_hand_wscg_functions_within_architecture_budget() -> None:
+    findings = analyze_python_file(
+        ANALYSIS_SCRIPT, max_function_lines=100, max_parameters=8
+    )
+    assert findings == []
+
+
+def test_two_hand_wscg_json_matches_committed_except_source_hash() -> None:
+    record, _ = build_outputs()
+    committed = json.loads(JSON_PATH.read_text(encoding="utf-8"))
+
+    def _mask_source_hash(payload: dict) -> dict:
+        masked = json.loads(json.dumps(payload))
+        masked["source_sha256"][SCRIPT_HASH_KEY] = "masked"
+        return masked
+
+    assert _mask_source_hash(record) == _mask_source_hash(committed)
+
+
+def test_require_case_analysis_inputs_rejects_unknown_case() -> None:
+    data = _load_case("base")
+    with pytest.raises(ValueError, match="unknown case"):
+        _require_case_analysis_inputs("not-a-case", data)
+
+
+def test_reconstruct_case_force_state_preserves_metric_key_order() -> None:
+    from scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis import (
+        _analyze_case,
+    )
+
+    base = _load_case("base")
+    geometry = _shared_case_geometry(base)
+    state = _reconstruct_case_force_state(base, geometry)
+    metrics, _ = _analyze_case("base", base, geometry)
+    assert tuple(metrics.keys()) == _CASE_METRIC_KEYS
+    assert state.equivalent_couple.shape == base["time_s"].shape
+
+
+def test_midpoint_wrench_components_reconstructs_archived_couple_channel() -> None:
+    base = _load_case("base")
+    geometry = _shared_case_geometry(base)
+    lead_position, trail_position, midpoint = geometry
+    lead_force = np.column_stack(
+        [base[f"lead_force_global_{axis}_n"] for axis in "xyz"]
+    )
+    trail_force = np.column_stack(
+        [base[f"trail_force_global_{axis}_n"] for axis in "xyz"]
+    )
+    lead_torque = np.column_stack(
+        [base[f"lead_free_torque_global_{axis}_nm"] for axis in "xyz"]
+    )
+    trail_torque = np.column_stack(
+        [base[f"trail_free_torque_global_{axis}_nm"] for axis in "xyz"]
+    )
+    source_couple_local = np.column_stack(
+        [base[f"equivalent_midpoint_couple_local_source_{axis}_nm"] for axis in "xyz"]
+    )
+    wrench = _midpoint_wrench_components(
+        lead_position,
+        trail_position,
+        midpoint,
+        lead_force,
+        trail_force,
+        lead_torque,
+        trail_torque,
+        source_couple_local,
+    )
+    np.testing.assert_allclose(wrench.equivalent_couple, source_couple_local[:, 2])
 
 
 def test_publication_style_uses_portable_minus_glyph() -> None:
