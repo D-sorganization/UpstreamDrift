@@ -1,10 +1,8 @@
-"""Canonical planar three-link pendulum parameters shared by engine adapters.
-
-The Option A humanoid swing-and-recovery fixture (#13837) reuses the first two
-segments as a planar double pendulum; see ``humanoid_robotics.option_a.plant``.
-"""
+"""Canonical planar three-link pendulum parameters shared by engine adapters."""
 
 from __future__ import annotations
+
+# #13837 Option A imports the first two segments via humanoid_robotics.option_a.plant.
 
 import math
 from dataclasses import dataclass

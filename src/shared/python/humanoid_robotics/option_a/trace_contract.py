@@ -69,15 +69,3 @@ def canonical_payload_bytes(bundle: Mapping[str, Any]) -> bytes:
 
 def payload_sha256(bundle: Mapping[str, Any]) -> str:
     return hashlib.sha256(canonical_payload_bytes(bundle)).hexdigest()
-
-
-def export_reference_npz(bundle: dict[str, Any], path: str) -> None:
-    validate_trace_bundle(bundle)
-    np.savez_compressed(
-        path,
-        **{k: bundle[k] for k in bundle if k != "payload_sha256"},
-        payload_sha256=np.asarray(bundle["payload_sha256"]),
-        perturbation_metadata_json=np.asarray(
-            json.dumps(bundle["perturbation_metadata"], sort_keys=True)
-        ),
-    )

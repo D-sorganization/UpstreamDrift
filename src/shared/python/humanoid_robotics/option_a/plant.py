@@ -110,19 +110,6 @@ def linearize_step(
     return a, b
 
 
-def euler_step_state(
-    model: Any, qpos: np.ndarray, qvel: np.ndarray, ctrl: np.ndarray
-) -> np.ndarray:
-    import mujoco as mj
-
-    data = mj.MjData(model)
-    data.qpos[:] = qpos
-    data.qvel[:] = qvel
-    data.ctrl[:] = ctrl
-    mj.mj_step(model, data)
-    return np.concatenate([data.qpos, data.qvel])
-
-
 def transition_fd_agrees_with_rollout(
     model: Any,
     states: list[tuple[np.ndarray, np.ndarray]],
@@ -141,6 +128,15 @@ def transition_fd_agrees_with_rollout(
         np.abs(command) >= TORQUE_LIMIT_NM - _DERIV_EPS
     ):
         raise ValueError("ctrl must be interior to actuator bounds")
+
+    def _step(ctrl: np.ndarray, qpos: np.ndarray, qvel: np.ndarray) -> np.ndarray:
+        data = mj.MjData(model)
+        data.qpos[:] = qpos
+        data.qvel[:] = qvel
+        data.ctrl[:] = ctrl
+        mj.mj_step(model, data)
+        return np.concatenate([data.qpos, data.qvel])
+
     for qpos, qvel in states:
         data = mj.MjData(model)
         data.qpos[:] = qpos
@@ -150,17 +146,13 @@ def transition_fd_agrees_with_rollout(
         for j in range(model.nu):
             du = np.zeros(model.nu)
             du[j] = _DERIV_EPS
-            fd = (
-                euler_step_state(model, qpos, qvel, command + du)
-                - euler_step_state(model, qpos, qvel, command - du)
-            ) / (2.0 * _DERIV_EPS)
+            fd = (_step(command + du, qpos, qvel) - _step(command - du, qpos, qvel)) / (
+                2.0 * _DERIV_EPS
+            )
             if not np.allclose(b[:, j], fd, atol=atol, rtol=0.0):
                 raise ValueError("B column disagrees with finite-difference rollout")
         if not np.allclose(
-            a @ x + b @ command,
-            euler_step_state(model, qpos, qvel, command),
-            atol=atol,
-            rtol=0.0,
+            a @ x + b @ command, _step(command, qpos, qvel), atol=atol, rtol=0.0
         ):
             raise ValueError("A@x + B@u disagrees with finite-difference rollout")
 
