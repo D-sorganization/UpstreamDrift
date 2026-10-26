@@ -22,7 +22,7 @@ import numpy as np
 
 from src.shared.python.contracts import require
 from src.shared.python.grip_contact.pad_layout import GRIP_RADIUS_M
-from src.shared.python.anthropometrics.hand_size import (
+from src.shared.python.hand_size import (
     DEFAULT_HAND_LENGTH_M,
     HAND_LENGTH_RANGE_M,
     REFERENCE_HAND_LENGTH_M,
@@ -45,7 +45,7 @@ GRIP: Final[str] = "grip"
 #: no net force or moment on the club (GRIP_PARITY_DECISIONS.md section 20).
 DEFAULT_TOPOLOGY_PRELOAD_M: Final[float] = 2.5e-4
 
-#: Base site radii (m) at :data:`~anthropometrics.hand_size.REFERENCE_HAND_LENGTH_M`.
+#: Base site radii (m) at :data:`~hand_size.REFERENCE_HAND_LENGTH_M`.
 BASE_LITTLE_FINGER_RADIUS_M: Final[float] = 0.0075
 BASE_INDEX_FINGER_RADIUS_M: Final[float] = 0.0080
 BASE_THUMB_RADIUS_M: Final[float] = 0.0095
@@ -107,7 +107,7 @@ class HandAnatomy:
     Postconditions:
         Little finger, index, thumb, and heel-pad radii equal their reference
         values scaled by ``hand_length_m / L0`` (``L0`` =
-        :data:`~anthropometrics.hand_size.REFERENCE_HAND_LENGTH_M`).
+        :data:`~hand_size.REFERENCE_HAND_LENGTH_M`).
     """
 
     hand_length_m: float = DEFAULT_HAND_LENGTH_M

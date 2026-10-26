@@ -28,7 +28,7 @@ from src.shared.python.grip_contact.contact_topology import (
     pair_surface_gap_m,
     site_grip_surface_gap_m,
 )
-from src.shared.python.anthropometrics.hand_size import REFERENCE_HAND_LENGTH_M
+from src.shared.python.hand_size import REFERENCE_HAND_LENGTH_M
 from src.shared.python.model_appearance.grip_pose import GripStyle as PoseGripStyle
 from src.shared.python.model_appearance.schema import physics_spec_sha256
 from src.shared.python.motion_matching.execution.grip_rotation import (

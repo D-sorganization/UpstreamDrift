@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from anthropometrics import SegmentProperties, Sex, SubjectAnthropometrics
-from src.shared.python.anthropometrics import hand_size
+from src.shared.python import hand_size
 
 
 def _segment(name: str = "hand_left") -> SegmentProperties:

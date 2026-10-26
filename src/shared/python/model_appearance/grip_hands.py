@@ -48,7 +48,7 @@ from src.shared.python.model_appearance.grip_hand_mesh import (
     HandMeshParams,
     build_grip_hand_mesh,
 )
-from src.shared.python.anthropometrics.hand_size import (
+from src.shared.python.hand_size import (
     DEFAULT_HAND_LENGTH_M,
     hand_mesh_scale,
 )

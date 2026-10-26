@@ -44,7 +44,7 @@ from src.shared.python.core.handedness import (
     DEFAULT_HANDEDNESS,
     validate_handedness,
 )
-from src.shared.python.anthropometrics.hand_size import (
+from src.shared.python.hand_size import (
     resolve_hand_breadth_m,
     resolve_hand_length_m,
 )
