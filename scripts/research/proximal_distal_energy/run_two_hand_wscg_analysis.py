@@ -418,53 +418,40 @@ def _geometry_sweep(arrays: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
     }
 
 
-def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    """Build the machine-readable audit and plot-ready arrays."""
-    loaded = {name: _load_case(name) for name in CASE_NAMES}
-    base = loaded["base"]
-    geometry = np.stack(
+def _audit_provenance_block() -> dict[str, Any]:
+    return {
+        "source": "Archived WSCG/Simscape output tables",
+        "source_table_sha256": {
+            name.upper(): _sha256(MATLAB_TABLE_DIR / f"{name.upper()}.mat")
+            for name in CASE_NAMES
+        },
+        "force_direction": "Force exerted by each wrist on the club",
+        "lead_hand": "left wrist in the archived right-handed model",
+        "local_axes": (
+            "+x from lead to trail contact; +z out of the declared model plane; "
+            "+y = +z cross +x"
+        ),
+        "moment_sign": "positive about +z by the right-hand rule",
+        "counterfactual_contract": (
+            "ZTCF recomputes reactions on the BASE state history with commanded "
+            "joint torques and kill damping set to zero; it is pointwise, not a "
+            "new forward rollout."
+        ),
+    }
+
+
+def _shared_case_geometry(base: np.ndarray) -> np.ndarray:
+    return np.stack(
         (
             _vector(base, "lead_position", "m"),
             _vector(base, "trail_position", "m"),
             _vector(base, "midpoint_position", "m"),
         )
     )
-    record: dict[str, Any] = {
-        "schema_version": SCHEMA_VERSION,
-        "source_sha256": _source_hashes(),
-        "provenance": {
-            "source": "Archived WSCG/Simscape output tables",
-            "source_table_sha256": {
-                name.upper(): _sha256(MATLAB_TABLE_DIR / f"{name.upper()}.mat")
-                for name in CASE_NAMES
-            },
-            "force_direction": "Force exerted by each wrist on the club",
-            "lead_hand": "left wrist in the archived right-handed model",
-            "local_axes": (
-                "+x from lead to trail contact; +z out of the declared model plane; "
-                "+y = +z cross +x"
-            ),
-            "moment_sign": "positive about +z by the right-hand rule",
-            "counterfactual_contract": (
-                "ZTCF recomputes reactions on the BASE state history with commanded "
-                "joint torques and kill damping set to zero; it is pointwise, not a "
-                "new forward rollout."
-            ),
-        },
-        "cases": {},
-    }
-    arrays: dict[str, np.ndarray] = {}
-    case_arrays: dict[str, dict[str, np.ndarray]] = {}
-    for name, data in loaded.items():
-        metrics, computed = _analyze_case(name, data, geometry)
-        record["cases"][name] = metrics
-        case_arrays[name] = computed
-        arrays.update({f"{name}__{key}": value for key, value in computed.items()})
 
-    base_couple = case_arrays["base"]["equivalent_couple"]
-    ztcf_couple = case_arrays["ztcf"]["equivalent_couple"]
-    delta_couple = case_arrays["delta"]["equivalent_couple"]
-    record["state_match"] = {
+
+def _state_match_block(loaded: dict[str, np.ndarray]) -> dict[str, Any]:
+    return {
         "maximum_contact_position_difference_m": float(
             max(
                 np.max(
@@ -504,7 +491,15 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "the residuals are reported rather than rounded to exact zero."
         ),
     }
-    record["decomposition"] = {
+
+
+def _decomposition_block(
+    case_arrays: dict[str, dict[str, np.ndarray]],
+) -> dict[str, Any]:
+    base_couple = case_arrays["base"]["equivalent_couple"]
+    ztcf_couple = case_arrays["ztcf"]["equivalent_couple"]
+    delta_couple = case_arrays["delta"]["equivalent_couple"]
+    return {
         "maximum_abs_base_minus_ztcf_minus_delta_couple_residual_nm": float(
             np.max(np.abs(base_couple - ztcf_couple - delta_couple))
         ),
@@ -517,6 +512,13 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "sense, but it is not an unforced future trajectory."
         ),
     }
+
+
+def _attach_geometry_sweep_summary(
+    record: dict[str, Any],
+    arrays: dict[str, np.ndarray],
+    case_arrays: dict[str, dict[str, np.ndarray]],
+) -> None:
     sweep = _geometry_sweep(case_arrays["ztcf"])
     arrays.update({f"sweep__{key}": value for key, value in sweep.items()})
     record["geometry_sweep"] = {
@@ -533,6 +535,29 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             )
         ),
     }
+
+
+def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    """Build the machine-readable audit and plot-ready arrays."""
+    loaded = {name: _load_case(name) for name in CASE_NAMES}
+    geometry = _shared_case_geometry(loaded["base"])
+    record: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "source_sha256": _source_hashes(),
+        "provenance": _audit_provenance_block(),
+        "cases": {},
+    }
+    arrays: dict[str, np.ndarray] = {}
+    case_arrays: dict[str, dict[str, np.ndarray]] = {}
+    for name, data in loaded.items():
+        metrics, computed = _analyze_case(name, data, geometry)
+        record["cases"][name] = metrics
+        case_arrays[name] = computed
+        arrays.update({f"{name}__{key}": value for key, value in computed.items()})
+
+    record["state_match"] = _state_match_block(loaded)
+    record["decomposition"] = _decomposition_block(case_arrays)
+    _attach_geometry_sweep_summary(record, arrays, case_arrays)
     return record, arrays
 
 
