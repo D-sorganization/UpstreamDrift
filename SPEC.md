@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-26 | #13843 | Fast-tier test selection now runs the monolith register test for src/ changes |
 | 2026-10-26 | #13841 | ML-WS-3: capture-A post-impact replay audit receipt and tests |
 | 2026-10-26 | #13845 | feat(lifting): lift video force overlays, muscle coloring, and HUD legend |
 | 2026-10-26 | #13823 | feat(lifting): barbell visual geometry and lift video camera framing |

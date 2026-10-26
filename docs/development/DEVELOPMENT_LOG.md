@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13842 · Fast-Tier Test Selection Now Runs the Monolith Register Test for Src/ Changes
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13842
+- **Branch:** fix/13842-fast-tier-monolith-register
+- **PR:** #13843
+- **Paths:** see #13843
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`b0dd190b`; collated from changes/13842-fast-tier-test-selection-now-runs-the-mo.md)
+- **Summary:** Fast-tier test selection now runs the monolith register test for src/ changes
+- **Next step:** Merge the PR.
+
 ### DL-#13780 · ML-WS-3: Capture-A Post-Impact Replay Audit Receipt and Tests
 
 - **State:** in_review
