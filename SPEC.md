@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-27 | #13889 | \ Zero friction cone capacity in tension\ |
+| 2026-10-27 | #13908 | \ Rotate backspin axis with azimuth and align sidespin with vertical\ |
 | 2026-10-27 | #13855 | Per-engine step-size convergence study and exact torque switch-time handling |
 | 2026-10-27 | #13900 | Render workers put the interpreter's base_prefix lib dir first on LD_LIBRARY_PATH, because opensim's Linux __init__ overwrites it with PATH; this fixes the requires_opensim _ctypes ABI failure |
 | 2026-10-27 | #13897 | Lift render worker PYTHONPATH uses shared worker_env() (repo roots only), fixing requires_opensim _ctypes ABI failure |
