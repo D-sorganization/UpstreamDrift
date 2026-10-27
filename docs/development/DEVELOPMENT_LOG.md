@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13902 · Remove Unused Signature Bind and Memoize Inspect.Signature in Contract Decorators
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13902
+- **Branch:** fix/13902-precondition-signature-overhead
+- **PR:** #13919
+- **Paths:** see #13919
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`8a1791c8`; collated from changes/13902-dbc-decorator-overhead.md)
+- **Summary:** Remove unused signature bind and memoize inspect.signature in contract decorators
+- **Next step:** Merge PR
+
 ### DL-#13873 · Soft-Fail Divergent Rollout Evaluations in MuJoCo Fit_Swing With Finite Penalty
 
 - **State:** in_review
