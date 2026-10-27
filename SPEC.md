@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-27 | #13919 | Remove unused signature bind and memoize inspect.signature in contract decorators |
 | 2026-10-27 | #13913 | Add GripGeometry source of truth with presets and USGA rules validator |
 | 2026-10-27 | #13910 | align tendon compliance and active force-length width with Thelen 2003 |
 | 2026-10-27 | #13916 | Soft-fail divergent rollout evaluations in MuJoCo fit_swing with finite penalty |
