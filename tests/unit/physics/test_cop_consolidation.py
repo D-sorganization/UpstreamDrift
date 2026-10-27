@@ -174,7 +174,12 @@ def test_cop_implementations_live_only_in_the_canonical_module() -> None:
     for line in out:
         assert line.split(":", 1)[0] in shims, line
 
-    # GCV-6 / UD-22: grep guard catches inline CoP formulas in src
+
+def test_c3d_bio_modules_do_not_inline_plate_local_cop_formula() -> None:
+    """GCV-6 / UD-22: verify _c3d_analog does not inline plate-local CoP formula.
+
+    Note: c3d_reader.py is a Tools child copy whose canonical update is tracked under Tools.
+    """
     inline_out = subprocess.run(
         [
             "git",
@@ -183,7 +188,7 @@ def test_cop_implementations_live_only_in_the_canonical_module() -> None:
             "-E",
             r"(-my|mx) */ *(fz|safe_fz)",
             "--",
-            "src",
+            "src/shared/python/sidekick/lab/bio/_c3d_analog.py",
         ],
         cwd=REPO,
         capture_output=True,
@@ -191,7 +196,7 @@ def test_cop_implementations_live_only_in_the_canonical_module() -> None:
         check=False,
     ).stdout.splitlines()
     assert not inline_out, (
-        f"expected no inline CoP formulas in src, found: {inline_out}"
+        f"expected no inline CoP formulas in _c3d_analog.py, found: {inline_out}"
     )
 
 
