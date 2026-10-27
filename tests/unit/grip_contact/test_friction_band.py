@@ -153,3 +153,25 @@ def test_unilateral_friction_capacity() -> None:
     assert unilateral_friction_capacity(-10.0, mu) == 0.0
     assert unilateral_friction_capacity(0.0, mu) == 0.0
     assert math.isclose(unilateral_friction_capacity(50.0, mu), 30.0, rel_tol=1e-12)
+
+
+def test_engine_adapters_derive_friction_from_shared_law() -> None:
+    """Guard test: engine adapters must derive friction from shared law."""
+    import inspect
+    from src.engines.physics_engines.drake.python import grip_contact_sim as drake_sim
+    from src.engines.physics_engines.mujoco.python import grip_contact_sim as mj_sim
+    from src.engines.physics_engines.opensim.python import (
+        grip_contact_osim_sim as osim_sim,
+    )
+
+    drake_src = inspect.getsource(drake_sim)
+    assert "law.static_friction" in drake_src
+    assert "law.dynamic_friction" in drake_src
+
+    mj_src = inspect.getsource(mj_sim)
+    assert "law.static_friction" in mj_src
+
+    osim_src = inspect.getsource(osim_sim)
+    # The deliberate OpenSim mapping static_friction = law.dynamic_friction is documented behaviour
+    assert "static_friction=law.dynamic_friction" in osim_src
+    assert "dynamic_friction=law.dynamic_friction" in osim_src

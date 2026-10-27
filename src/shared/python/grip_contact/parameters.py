@@ -149,6 +149,7 @@ class ContactMaterial:
     dynamic_friction: float = 0.7
     viscous_friction: float = 0.0
     status: str = "placeholder (phase 2)"
+    source: str = "placeholder (phase 2)"
 
     def __post_init__(self) -> None:
         for name in ("stiffness_n_m2", "dissipation_s_m", "viscous_friction"):
