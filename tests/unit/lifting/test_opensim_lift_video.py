@@ -231,3 +231,47 @@ def test_render_worker_pythonpath_excludes_parent_stdlib(
     assert str(_REPO) in entries
     assert env["NATIVE_VIEWER_XVFB"] == "1"
     assert env["UPSTREAMDRIFT_MSK_BASE_MODEL"] == "unused.osim"
+
+
+def test_worker_env_restores_interpreter_libdir_after_opensim_clobber() -> None:
+    """#13896: opensim's Linux ``__init__`` sets ``LD_LIBRARY_PATH = PATH``.
+
+    A worker spawned after ``import opensim`` must still load its own
+    ``libpython`` (not the system one), so the interpreter LIBDIR leads.
+    """
+    from src.tools.native_viewer_export.backends._subprocess import (
+        with_interpreter_libdir,
+    )
+
+    shared = {"LIBDIR": "/py/lib", "Py_ENABLE_SHARED": 1}
+    env = with_interpreter_libdir(
+        {"LD_LIBRARY_PATH": "/usr/bin:/bin"}, platform="linux", config=shared.get
+    )
+    assert env["LD_LIBRARY_PATH"] == "/py/lib:/usr/bin:/bin"
+
+    unset = with_interpreter_libdir({}, platform="linux", config=shared.get)
+    assert unset["LD_LIBRARY_PATH"] == "/py/lib"
+
+    present = {"LD_LIBRARY_PATH": "/py/lib:/x"}
+    assert (
+        with_interpreter_libdir(present, platform="linux", config=shared.get) == present
+    )
+
+    static = {"LIBDIR": "/py/lib", "Py_ENABLE_SHARED": 0}
+    assert with_interpreter_libdir({}, platform="linux", config=static.get) == {}
+    assert with_interpreter_libdir({}, platform="win32", config=shared.get) == {}
+
+
+def test_worker_env_applies_interpreter_libdir(monkeypatch: pytest.MonkeyPatch) -> None:
+    """#13896: ``worker_env`` routes through the LIBDIR guard."""
+    from src.tools.native_viewer_export.backends import _subprocess
+
+    seen: list[dict[str, str]] = []
+
+    def spy(env: dict[str, str], **_kw: object) -> dict[str, str]:
+        seen.append(env)
+        return {**env, "SPY": "1"}
+
+    monkeypatch.setattr(_subprocess, "with_interpreter_libdir", spy)
+    assert _subprocess.worker_env()["SPY"] == "1"
+    assert len(seen) == 1
