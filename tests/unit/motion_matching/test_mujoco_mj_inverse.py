@@ -115,8 +115,8 @@ def test_mj_inverse_matches_kkt_without_contact() -> None:
     np.testing.assert_allclose(
         mj[sim.actuated],
         kkt[sim.actuated],
-        rtol=KKT_EQUIVALENCE_RTOL,
-        atol=5.0,
+        rtol=1e-6,
+        atol=1e-6,
     )
 
 
@@ -149,3 +149,23 @@ def test_mj_inverse_tracking_replay_within_discretization_budget(
     )
     assert coarse <= REPLAY_DISCRETIZATION_RMS_RAD
     assert fine <= coarse + REPLAY_DISCRETIZATION_RMS_RAD
+
+
+@pytest.mark.parametrize("use_contact", [False, True])
+def test_replay_refinement(use_contact: bool) -> None:
+    """Halving dt must not worsen tracking; budget < signal amplitude (UD-16)."""
+    simulator = _full_body_simulator()
+    q_ref = _stable_replay_reference(simulator, use_contact=use_contact)
+
+    coarse = _replay_rms(
+        simulator, q_ref, dt_s=REPLAY_DT_S, steps=REPLAY_STEPS, use_mj_inverse=True
+    )
+    fine_dt = REPLAY_DT_S / DISCRETIZATION_REFINEMENT_FACTOR
+    fine_steps = REPLAY_STEPS * DISCRETIZATION_REFINEMENT_FACTOR
+    fine = _replay_rms(
+        simulator, q_ref, dt_s=fine_dt, steps=fine_steps, use_mj_inverse=True
+    )
+    assert coarse <= 0.03, f"Coarse RMS {coarse} exceeds signal amplitude budget 0.03"
+    assert fine <= coarse, (
+        f"Refinement worsened tracking: fine {fine} > coarse {coarse}"
+    )
