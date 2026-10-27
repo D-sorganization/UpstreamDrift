@@ -253,6 +253,8 @@ def _evaluate_precondition(
     func: Callable[..., Any],
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
+    cond_sig: inspect.Signature | None = None,
+    func_sig: inspect.Signature | None = None,
 ) -> bool:
     """Try to evaluate a precondition, using argument-name binding as a fallback.
 
@@ -267,10 +269,14 @@ def _evaluate_precondition(
     """
     if condition is None:
         raise ValueError("condition must be provided")
+    if cond_sig is None:
+        cond_sig = inspect.signature(condition)
     try:
-        inspect.signature(condition).bind(*args, **kwargs)
+        cond_sig.bind(*args, **kwargs)
     except TypeError:
-        return _evaluate_precondition_by_name(condition, func, args, kwargs)
+        return _evaluate_precondition_by_name(
+            condition, func, args, kwargs, cond_sig=cond_sig, func_sig=func_sig
+        )
     except ValueError:
         pass
 
@@ -288,18 +294,22 @@ def _evaluate_precondition_by_name(
     func: Callable[..., Any],
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
+    cond_sig: inspect.Signature | None = None,
+    func_sig: inspect.Signature | None = None,
 ) -> bool:
     """Evaluate a precondition from decorated-function argument names."""
 
     # Fallback: bind the decorated function's args, then select only the
     # parameters the condition function expects.
     try:
-        func_sig = inspect.signature(func)
+        if func_sig is None:
+            func_sig = inspect.signature(func)
         bound = func_sig.bind(*args, **kwargs)
         bound.apply_defaults()
         all_arguments: dict[str, Any] = dict(bound.arguments)
 
-        cond_sig = inspect.signature(condition)
+        if cond_sig is None:
+            cond_sig = inspect.signature(condition)
         call_args = {
             name: all_arguments[name]
             for name in cond_sig.parameters
@@ -326,14 +336,20 @@ def precondition(
     if condition is None:
         raise ValueError("condition must be provided")
 
+    cond_sig = inspect.signature(condition)
+
     def decorator(func: F) -> F:
+        func_sig = inspect.signature(func)
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             if not _contracts_enabled():
                 return func(*args, **kwargs)
 
             try:
-                result = _evaluate_precondition(condition, func, args, kwargs)
+                result = _evaluate_precondition(
+                    condition, func, args, kwargs, cond_sig=cond_sig, func_sig=func_sig
+                )
             except PreconditionEvaluationError as exc:
                 if _current_contract_level() == ContractLevel.ENFORCE:
                     raise
