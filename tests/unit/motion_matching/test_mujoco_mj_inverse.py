@@ -19,13 +19,15 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (
 )
 from src.engines.physics_engines.mujoco.python.inverse_dynamics import (
     DISCRETIZATION_REFINEMENT_FACTOR,
-    KKT_EQUIVALENCE_RTOL,
-    REPLAY_DISCRETIZATION_RMS_RAD,
     REPLAY_DT_S,
     REPLAY_STEPS,
     inverse_dynamics_mj_inverse,
     tracking_controller_mj_inverse,
 )
+
+KKT_EQUIVALENCE_RTOL = 1e-6
+KKT_EQUIVALENCE_ATOL = 1e-6
+REPLAY_DISCRETIZATION_RMS_RAD = 0.03
 
 pytestmark = [
     pytest.mark.unit,
@@ -54,6 +56,7 @@ def _replay_rms(
     dt_s: float,
     steps: int,
     use_mj_inverse: bool,
+    preload: bool = True,
 ) -> float:
     duration_s = dt_s * (steps - 1)
     times = np.linspace(0.0, duration_s, steps)
@@ -83,7 +86,7 @@ def _replay_rms(
         )
     from src.shared.python.motion_matching import full_body_forward_dynamics as fs
 
-    q0 = fs.preload_feet(simulator, reference[0])
+    q0 = fs.preload_feet(simulator, reference[0]) if preload else reference[0].copy()
     v0 = np.zeros(simulator.nv)
     record = simulator.run(
         q0,
@@ -116,7 +119,7 @@ def test_mj_inverse_matches_kkt_without_contact() -> None:
         mj[sim.actuated],
         kkt[sim.actuated],
         rtol=KKT_EQUIVALENCE_RTOL,
-        atol=5.0,
+        atol=KKT_EQUIVALENCE_ATOL,
     )
 
 
@@ -140,12 +143,54 @@ def test_mj_inverse_tracking_replay_within_discretization_budget(
     q_ref = _stable_replay_reference(simulator, use_contact=use_contact)
 
     coarse = _replay_rms(
-        simulator, q_ref, dt_s=REPLAY_DT_S, steps=REPLAY_STEPS, use_mj_inverse=True
+        simulator,
+        q_ref,
+        dt_s=REPLAY_DT_S,
+        steps=REPLAY_STEPS,
+        use_mj_inverse=True,
+        preload=use_contact,
     )
     fine_dt = REPLAY_DT_S / DISCRETIZATION_REFINEMENT_FACTOR
     fine_steps = REPLAY_STEPS * DISCRETIZATION_REFINEMENT_FACTOR
     fine = _replay_rms(
-        simulator, q_ref, dt_s=fine_dt, steps=fine_steps, use_mj_inverse=True
+        simulator,
+        q_ref,
+        dt_s=fine_dt,
+        steps=fine_steps,
+        use_mj_inverse=True,
+        preload=use_contact,
     )
     assert coarse <= REPLAY_DISCRETIZATION_RMS_RAD
-    assert fine <= coarse + REPLAY_DISCRETIZATION_RMS_RAD
+    assert fine <= coarse
+
+
+@pytest.mark.parametrize("use_contact", [False, True])
+def test_replay_refinement(use_contact: bool) -> None:
+    """Halving dt must not worsen tracking; budget < signal amplitude (UD-16)."""
+    simulator = _full_body_simulator()
+    q_ref = _stable_replay_reference(simulator, use_contact=use_contact)
+
+    coarse = _replay_rms(
+        simulator,
+        q_ref,
+        dt_s=REPLAY_DT_S,
+        steps=REPLAY_STEPS,
+        use_mj_inverse=True,
+        preload=use_contact,
+    )
+    fine_dt = REPLAY_DT_S / DISCRETIZATION_REFINEMENT_FACTOR
+    fine_steps = REPLAY_STEPS * DISCRETIZATION_REFINEMENT_FACTOR
+    fine = _replay_rms(
+        simulator,
+        q_ref,
+        dt_s=fine_dt,
+        steps=fine_steps,
+        use_mj_inverse=True,
+        preload=use_contact,
+    )
+    assert coarse <= REPLAY_DISCRETIZATION_RMS_RAD, (
+        f"Coarse RMS {coarse} exceeds signal amplitude budget {REPLAY_DISCRETIZATION_RMS_RAD}"
+    )
+    assert fine <= coarse, (
+        f"Refinement worsened tracking: fine {fine} > coarse {coarse}"
+    )

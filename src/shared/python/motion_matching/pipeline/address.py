@@ -125,7 +125,11 @@ def posture_summary(kin: Any, q: np.ndarray) -> dict[str, Any]:
     links = {}
     for side in ("L", "R"):
         v = site(f"{side}S") - hub
-        links[side] = float(np.degrees(np.arcsin(-v[2] / np.linalg.norm(v))))
+        norm_v = float(np.linalg.norm(v))
+        if norm_v <= 0.0 or not np.isfinite(norm_v):
+            raise ValueError(f"zero-norm clavicle link vector for side '{side}'")
+        ratio = float(np.clip(-v[2] / norm_v, -1.0, 1.0))
+        links[side] = float(np.degrees(np.arcsin(ratio)))
     return {
         "spine_bend_deg": bend.__dict__,
         "clavicle_link_below_horizontal_deg": links,

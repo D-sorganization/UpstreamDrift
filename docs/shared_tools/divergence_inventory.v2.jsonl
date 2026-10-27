@@ -884,8 +884,10 @@
 {"path": "grip_contact/deterministic_math.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/elastic_foundation.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/force_decomposition.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/friction_band.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/generated_export_lock.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/generated_freshness.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/grip_geometry.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/grip_mesh.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/hand_drift.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/hand_hand_allocation.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
@@ -1014,6 +1016,11 @@
 {"path": "humanoid_character_builder/tests/test_urdf_inertia_export.py", "classification": "tools-only", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/validation/__init__.py", "classification": "identical", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/validation/physics_validator.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": true}
+{"path": "humanoid_robotics/__init__.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
+{"path": "humanoid_robotics/option_a/__init__.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
+{"path": "humanoid_robotics/option_a/fixture.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
+{"path": "humanoid_robotics/option_a/plant.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
+{"path": "humanoid_robotics/option_a/trace_contract.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "impact_parameters/__init__.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/adapters/__init__.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/adapters/club_face.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
@@ -1653,6 +1660,7 @@
 {"path": "motion_matching/simscape_run_manifest.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/simscape_topology.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/solver_benchmark.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/solver_status.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/sparse_collocation_spike.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/stability_matrix.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/surrogate/__init__.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1947,6 +1955,7 @@
 {"path": "pendulum_simulator/simulation_golfer_gpu.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/simulation_result_base.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/simulation_triple.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
+{"path": "pendulum_simulator/step_convergence.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/torque_utils.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/triple_pendulum_spec.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/upper_body_replay.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}

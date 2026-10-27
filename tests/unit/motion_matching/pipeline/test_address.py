@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -160,3 +161,80 @@ def test_solve_address_stage_requires_static_seeds_for_fit_closure() -> None:
     )
     with pytest.raises(ValueError, match="--fit-closure needs --static-seeds"):
         solve_address_stage(inputs)
+
+
+def _mock_kin_for_posture(
+    site_positions: dict[str, np.ndarray],
+) -> tuple[Any, np.ndarray]:
+    from unittest.mock import MagicMock
+
+    kin = MagicMock()
+    del kin.posture_summary  # exercise address.posture_summary implementation
+    adapter = MagicMock()
+    model = MagicMock()
+    data = MagicMock()
+
+    site_map = {"Spine": "Spine", "Hub": "Hub", "LS": "LS", "RS": "RS"}
+    adapter.metadata = {"frame_sites": site_map}
+    model.site.side_effect = lambda name: MagicMock(id=name)
+
+    data.site_xpos = {
+        "Spine": site_positions.get("Spine", np.array([0.0, 0.0, 0.2])),
+        "Hub": site_positions.get("Hub", np.array([0.0, 0.0, 0.4])),
+        "LS": site_positions.get("LS", np.array([-0.2, 0.0, 0.4])),
+        "RS": site_positions.get("RS", np.array([0.2, 0.0, 0.4])),
+    }
+
+    joint_map = {"hip_flexion_r": "hip_r", "hip_flexion_l": "hip_l"}
+    model.joint.side_effect = lambda name: MagicMock(id=joint_map[name])
+    data.xanchor = {
+        "hip_r": np.array([0.1, 0.0, 0.0]),
+        "hip_l": np.array([-0.1, 0.0, 0.0]),
+    }
+
+    adapter.model = model
+    adapter.data = data
+    kin.adapter = adapter
+    return kin, np.zeros(10)
+
+
+def test_posture_summary_zero_norm_raises_value_error() -> None:
+    """UD-32: Zero-norm clavicle link vector raises typed ValueError naming the side."""
+    from src.shared.python.motion_matching.pipeline.address import posture_summary
+
+    # Left shoulder coincident with Hub -> zero-norm vector for side L
+    kin, q = _mock_kin_for_posture(
+        {
+            "Hub": np.array([0.0, 0.0, 0.4]),
+            "LS": np.array([0.0, 0.0, 0.4]),
+        }
+    )
+    with pytest.raises(ValueError, match="zero-norm.*'L'"):
+        posture_summary(kin, q)
+
+    # Right shoulder coincident with Hub -> zero-norm vector for side R
+    kin_r, q_r = _mock_kin_for_posture(
+        {
+            "Hub": np.array([0.0, 0.0, 0.4]),
+            "RS": np.array([0.0, 0.0, 0.4]),
+        }
+    )
+    with pytest.raises(ValueError, match="zero-norm.*'R'"):
+        posture_summary(kin_r, q_r)
+
+
+def test_posture_summary_clips_arcsin_ratio() -> None:
+    """UD-32: Arcsin argument is clipped to [-1, 1], avoiding NaN from roundoff."""
+    from src.shared.python.motion_matching.pipeline.address import posture_summary
+
+    # Pure vertical drop along -Z: -v[2] / norm(v) == 1.0
+    kin, q = _mock_kin_for_posture(
+        {
+            "Hub": np.array([0.0, 0.0, 0.4]),
+            "LS": np.array([0.0, 0.0, 0.2]),  # v = [0, 0, -0.2], -v[2]/||v|| = 1.0
+            "RS": np.array([0.0, 0.0, 0.6]),  # v = [0, 0, 0.2], -v[2]/||v|| = -1.0
+        }
+    )
+    res = posture_summary(kin, q)
+    assert np.isclose(res["clavicle_link_below_horizontal_deg"]["L"], 90.0)
+    assert np.isclose(res["clavicle_link_below_horizontal_deg"]["R"], -90.0)

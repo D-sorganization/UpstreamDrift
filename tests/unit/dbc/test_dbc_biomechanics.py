@@ -90,7 +90,7 @@ class TestForceLengthActivePostconditions(unittest.TestCase):
     def test_very_long_fiber_gives_near_zero(self) -> None:
         model = self._make_model()
         fl = model.force_length_active(2.0)
-        self.assertLess(fl, 0.1)
+        self.assertLess(fl, 0.15)  # Near zero (~0.108 per Thelen 2003 gamma=0.45)
 
     def test_output_non_negative(self) -> None:
         model = self._make_model()

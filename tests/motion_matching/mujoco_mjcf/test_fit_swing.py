@@ -279,7 +279,7 @@ def test_fit_result_provenance_schema(synth_pair_upper, sim_opts_short) -> None:
     assert result.theta_optimal.shape == (_n_joints(sim_opts_short.variant) * 7,)
     assert np.isfinite(result.theta_optimal).all()
     assert result.final_rmse_m >= 0.0 and np.isfinite(result.final_rmse_m)
-    assert result.final_total_work_J >= 0.0
+    assert result.final_total_work_J is not None and result.final_total_work_J >= 0.0
     assert isinstance(result.method, str) and result.method == "SLSQP"
     assert isinstance(result.solver_options, dict)
     assert "maxiter" in result.solver_options
@@ -323,3 +323,61 @@ def test_target_hash_is_sha256_and_sensitive(synth_pair_upper, sim_opts_short) -
     assert res_a.target_hash != res_b.target_hash, (
         "target_hash must change when impact_idx changes"
     )
+
+
+def test_divergent_rollout_soft_fail(
+    synth_pair_upper, sim_opts_short, monkeypatch
+) -> None:
+    """A divergent intermediate probe returns a large finite cost so SLSQP does not abort (UD-03)."""
+    target, _, _ = synth_pair_upper
+    options = FitOptions(
+        sim=sim_opts_short,
+        minimizer=MinimizerOptions(maxiter=3, warm_start_scale=0.01),
+        rng_seed=0,
+    )
+    from src.engines.physics_engines.mujoco.python.motion_matching import fit_swing
+
+    real_sim_for_cost = fit_swing._simulate_for_cost
+    call_count = 0
+
+    def mock_sim_for_cost(theta, sim_opts, tgt):
+        nonlocal call_count
+        call_count += 1
+        # Make the 2nd evaluation fail with a divergent RuntimeError
+        if call_count == 2:
+            raise RuntimeError("rollout diverged: non-finite qpos")
+        return real_sim_for_cost(theta, sim_opts, tgt)
+
+    monkeypatch.setattr(fit_swing, "_simulate_for_cost", mock_sim_for_cost)
+
+    # On main, this raises RuntimeError: objective evaluation failed: rollout diverged
+    result = fit_swing_mujoco(target, options)
+    assert isinstance(result, FitResult)
+    assert call_count > 2, (
+        "SLSQP should continue evaluating after the soft-failed probe"
+    )
+    assert any(c >= 1e6 for c in result.history), (
+        "History should record the large finite penalty"
+    )
+
+
+def test_final_divergent_result_status_failed(
+    synth_pair_upper, sim_opts_short, monkeypatch
+) -> None:
+    """If all evaluations or the final simulation diverge, solver_status must be 'failed' (UD-03)."""
+    target, _, _ = synth_pair_upper
+    options = FitOptions(
+        sim=sim_opts_short,
+        minimizer=MinimizerOptions(maxiter=2, warm_start_scale=0.01),
+        rng_seed=0,
+    )
+    from src.engines.physics_engines.mujoco.python.motion_matching import fit_swing
+
+    def mock_sim_for_cost(theta, sim_opts, tgt):
+        raise RuntimeError("always divergent")
+
+    monkeypatch.setattr(fit_swing, "_simulate_for_cost", mock_sim_for_cost)
+
+    result = fit_swing_mujoco(target, options)
+    assert result.solver_status == "failed"
+    assert result.final_cost >= 1e6

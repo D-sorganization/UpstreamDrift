@@ -412,6 +412,24 @@
       "expires_on": "2026-12-31"
     },
     {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "symbol": "_analytical_jacobian",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 13871,
+      "reason": "Issue #13871: Pre-existing analytical Jacobian calculation in fit_swing exceeds 100 lines.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "symbol": "fit_swing_pinocchio",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 13871,
+      "reason": "Issue #13871: Pre-existing fit_swing_pinocchio pipeline coordinator exceeds 100 lines.",
+      "expires_on": "2026-12-31"
+    },
+    {
       "path": "src/shared/python/analysis/nonlinear_dynamics.py",
       "symbol": "NonlinearDynamicsMixin.estimate_lyapunov_exponent",
       "rule": "function-lines",
@@ -446,15 +464,6 @@
       "issue": 9762,
       "reason": "Pre-existing on origin/main: solve_swing_ddp is byte-identical to the origin/main version (162 lines, 10 parameters) and already exceeded both budgets before this change. PR #9768 (epic #9762) touched five lines elsewhere in crocoddyl_backend.py -- routing the anthropometric link inertials of #9755 into the Pinocchio model -- and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violations surfaced as if they were new. They were surfaced, not introduced, by #9768. The nine violations this PR did author were fixed by decomposition instead (options objects for solve_swing_casadi and build_max_speed_ocp, a module-level mixin for the bioptim adapter, per-backend functions in the parity benchmark); decomposing the Crocoddyl solver as well would put an unreviewed refactor of a second backend inside a bioptim-integration diff. Tracked in #9762.",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/model_converter/urdf_exporter.py",
-      "symbol": "_add_revolute_joint",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/physics-team",
-      "issue": 9965,
-      "reason": "Issue #9965: XML joint builder requires explicit URDF kinematic and dynamic attributes.",
-      "expires_on": "2026-10-31"
     },
     {
       "path": "docs/development/simscape_tour_matching/native_evidence/reproduction/constrained_sextic_transition_fit.py",
@@ -920,6 +929,33 @@
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 12065,
       "reason": "Issue #12065: CMCMatchingSolver.match solves computed muscle control matching with fallback handling (107 lines > 100).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "symbol": "fit_swing_opensim",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 13874,
+      "reason": "Issue #13874: fit_swing_opensim executes end-to-end opensim trajectory fitting with least-squares optimization (124 lines > 100).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "symbol": "_analytical_jacobian",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 13874,
+      "reason": "Issue #13874: _analytical_jacobian computes forward sensitivity chain rule across simulation horizon (174 lines > 100).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "symbol": "fit_swing_pinocchio",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 13874,
+      "reason": "Issue #13874: fit_swing_pinocchio executes end-to-end pinocchio trajectory fitting with analytical/FD Jacobians (173 lines > 100).",
       "expires_on": "2026-12-31"
     }
   ]

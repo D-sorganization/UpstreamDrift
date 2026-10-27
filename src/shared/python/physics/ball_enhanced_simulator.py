@@ -12,11 +12,14 @@ via the ``track_altitude_density`` flag and uses
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import numpy as np
 
 from src.shared.python.core.contracts import postcondition, precondition
+from src.shared.python.core.physics_constants import AIR_VISCOSITY_KG_M_S
+from src.shared.python.physics.aerodynamics import _rust_facade
+from src.shared.python.physics.aerodynamics._rust_facade import AerodynamicsSpec
 from src.shared.python.physics.atmosphere import (
     MAX_VALID_ALTITUDE_M,
     MIN_VALID_ALTITUDE_M,
@@ -72,6 +75,9 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
         randomization_config: RandomizationConfig | None = None,
         seed: int | None = None,
         track_altitude_density: bool = False,
+        force_provider: (
+            Callable[[np.ndarray, np.ndarray, float, np.ndarray], np.ndarray] | None
+        ) = None,
     ) -> None:
         """Initialize enhanced simulator.
 
@@ -93,6 +99,10 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
                 ISA tracking; any non-``None``
                 ``environment.sea_level_pressure_pa`` is propagated to each
                 per-step density update.
+            force_provider: Optional callable ``(velocity, spin, time, position) -> total_aero_force``
+                [N] for evaluating aerodynamic forces. When omitted, defaults
+                to routing deterministic drag and Magnus forces through the
+                Rust facade (:func:`compute_total_force`) with pure-Python fallback.
         """
         # Import here to avoid circular dependency
         from src.shared.python.physics.aerodynamics import (
@@ -111,6 +121,8 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
         self.randomization_config = randomization_config or RandomizationConfig()
         self._seed = seed
         self.track_altitude_density = bool(track_altitude_density)
+        self.force_provider = force_provider
+        self._force_provider = force_provider
 
         # Initialize wind model
         self._wind_model = WindModel(self.wind_config, seed=seed)
@@ -129,6 +141,113 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             randomization=self._randomizer,
             air_density=self.environment.air_density,
         )
+
+    def _default_force_provider(
+        self,
+        velocity: np.ndarray,
+        spin: np.ndarray,
+        time: float,
+        position: np.ndarray,
+    ) -> np.ndarray:
+        """Evaluate deterministic aerodynamic total force via the Rust facade.
+
+        Routes through :func:`compute_total_force` which uses the Rust
+        ``upstream_physics`` kernel when available and falls back to pure
+        Python otherwise. Gusts, turbulence, and altitude wind gradient are
+        evaluated here in Python via :class:`WindModel` and subtracted from
+        ``velocity`` before evaluating aerodynamic forces.
+
+        Args:
+            velocity: Ball velocity in world frame [m/s], shape (3,).
+            spin: Ball angular velocity [rad/s], shape (3,).
+            time: Current simulation time [s].
+            position: Ball position in world frame [m], shape (3,).
+
+        Returns:
+            Total aerodynamic force [N], shape (3,).
+        """
+        if not self.aero_config.enabled:
+            return np.zeros(3, dtype=float)
+
+        wind = np.zeros(3, dtype=float)
+        if self._wind_model is not None:
+            wind = self._wind_model.get_wind_at(time, position)
+
+        rel_velocity = velocity - wind
+
+        current_density = getattr(
+            self._aero_engine,
+            "_current_air_density",
+            self.environment.air_density,
+        )
+
+        spec = AerodynamicsSpec(
+            mass=self.ball.mass,
+            radius=self.aero_config.ball_radius,
+            drag_coefficient=self.aero_config.drag_coefficient,
+            spin_decay_rate=self.aero_config.spin_decay_rate,
+            air_density=current_density,
+            air_viscosity=float(AIR_VISCOSITY_KG_M_S),
+            air_temperature=float(getattr(self.environment, "temperature", 15.0))
+            + 273.15,
+            air_pressure=float(
+                getattr(self.environment, "sea_level_pressure_pa", 101_325.0)
+                or 101_325.0
+            ),
+            drag_enabled=self.aero_config.is_drag_active(),
+            lift_enabled=self.aero_config.is_lift_active(),
+            magnus_enabled=self.aero_config.is_magnus_active(),
+            wind=(0.0, 0.0, 0.0),
+        )
+
+        return _rust_facade.compute_total_force(spec, rel_velocity, spin)
+
+    def _compute_total_aero_force(
+        self,
+        velocity: np.ndarray,
+        spin: np.ndarray,
+        time: float,
+        position: np.ndarray,
+    ) -> np.ndarray:
+        """Compute aerodynamic total force using injected provider or default facade."""
+        if self._force_provider is not None:
+            f = self._force_provider(velocity, spin, time, position)
+            return np.asarray(f, dtype=float)
+        return self._default_force_provider(velocity, spin, time, position)
+
+    def _evaluate_step_forces(
+        self,
+        velocity: np.ndarray,
+        spin: np.ndarray,
+        t: float,
+        position: np.ndarray,
+        gravity_acc: np.ndarray,
+    ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+        """Calculate step forces and acceleration."""
+        gravity_force = self.ball.mass * gravity_acc
+        if self._force_provider is not None:
+            aero_total = self._compute_total_aero_force(velocity, spin, t, position)
+            total_force = aero_total + gravity_force
+            forces = {
+                "gravity": gravity_force,
+                "drag": np.zeros(3, dtype=float),
+                "lift": np.zeros(3, dtype=float),
+                "magnus": np.zeros(3, dtype=float),
+                "total": aero_total,
+            }
+        else:
+            aero_forces = self._aero_engine.compute_forces(
+                velocity, spin, t=t, position=position
+            )
+            total_force = aero_forces["total"] + gravity_force
+            forces = {
+                "gravity": gravity_force,
+                "drag": aero_forces["drag"],
+                "lift": aero_forces["lift"],
+                "magnus": aero_forces["magnus"],
+            }
+        acceleration = total_force / self.ball.mass
+        return acceleration, forces
 
     @precondition(
         lambda self, launch, max_time=10.0, dt=0.01, include_gravity=True: (
@@ -199,23 +318,10 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             # so the integrator sees thinner air at higher Z (issue #3504).
             self._update_air_density_for_position(position)
 
-            # Calculate forces
-            aero_forces = self._aero_engine.compute_forces(
-                velocity, spin, t=t, position=position
+            # Calculate forces & acceleration
+            acceleration, forces = self._evaluate_step_forces(
+                velocity, spin, t, position, gravity_acc
             )
-
-            # Total acceleration
-            gravity_force = self.ball.mass * gravity_acc
-            total_force = aero_forces["total"] + gravity_force
-            acceleration = total_force / self.ball.mass
-
-            # Store trajectory point
-            forces = {
-                "gravity": gravity_force,
-                "drag": aero_forces["drag"],
-                "lift": aero_forces["lift"],
-                "magnus": aero_forces["magnus"],
-            }
 
             trajectory.append(
                 TrajectoryPoint(
@@ -276,9 +382,9 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             if p is None:
                 raise ValueError("p must be provided")
             self._update_air_density_for_position(p)
-            aero_forces = self._aero_engine.compute_forces(v, spin, t=time, position=p)
+            aero_force = self._compute_total_aero_force(v, spin, time, p)
             gravity_force = self.ball.mass * gravity_acc
-            total_force = aero_forces["total"] + gravity_force
+            total_force = aero_force + gravity_force
             accel = total_force / self.ball.mass
             return v, accel
 

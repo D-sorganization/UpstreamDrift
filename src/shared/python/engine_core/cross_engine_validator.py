@@ -217,11 +217,13 @@ class CrossEngineValidator(ContractChecker):
             ),
             (
                 lambda: (
-                    self.WARNING_THRESHOLD
+                    0.0
+                    < self.WARNING_THRESHOLD
+                    <= 1.0
                     < self.ERROR_THRESHOLD
                     < self.BLOCKER_THRESHOLD
                 ),
-                "Severity thresholds must be ordered: WARNING < ERROR < BLOCKER",
+                "Severity thresholds must be ordered: 0 < WARNING <= 1.0 < ERROR < BLOCKER",
             ),
         ]
 
@@ -239,9 +241,9 @@ class CrossEngineValidator(ContractChecker):
         "inertia": 1e-9,  # kg m²
     }
 
-    # Severity thresholds (Assessment C Finding C-003)
-    # Classify deviation severity by multiples of tolerance
-    WARNING_THRESHOLD = 2.0  # 2× tolerance → warning (acceptable with caution)
+    # Severity thresholds (Assessment C Finding C-003, updated per UD-18)
+    # WARNING is a fraction of tolerance for deviations approaching the limit (still within tolerance)
+    WARNING_THRESHOLD = 0.8  # 80% of tolerance → warning (approaching tolerance limit)
     ERROR_THRESHOLD = 10.0  # 10× tolerance → error (investigation required)
     BLOCKER_THRESHOLD = 100.0  # 100× tolerance → blocker (fundamental model error)
 
@@ -546,14 +548,12 @@ class CrossEngineValidator(ContractChecker):
         # Log with appropriate severity level
         self._log_result(
             severity=severity,
-            engine1_name=engine1_name,
-            engine2_name=engine2_name,
+            engine_names=(engine1_name, engine2_name),
             metric=metric,
             max_dev=max_dev,
             tol=tol,
             deviation=deviation,
-            engine1_state=engine1_state,
-            engine2_state=engine2_state,
+            states=(engine1_state, engine2_state),
         )
 
         return ValidationResult(
@@ -568,7 +568,10 @@ class CrossEngineValidator(ContractChecker):
         )
 
     def _classify_severity(self, max_dev: float, tolerance: float) -> tuple[bool, str]:
-        """Classify deviation severity based on threshold multipliers (C-003).
+        """Classify deviation severity based on threshold multipliers (C-003, UD-18).
+
+        Per UD-18: passed = bool(max_dev <= tolerance). The WARNING band is reserved
+        for deviations within tolerance but approaching the limit (> WARNING_THRESHOLD).
 
         Args:
             max_dev: Maximum deviation observed.
@@ -581,13 +584,28 @@ class CrossEngineValidator(ContractChecker):
             raise ValueError("max_dev must be provided")
         ratio = max_dev / tolerance if tolerance > 0 else float("inf")
 
-        if ratio <= 1.0:
-            return True, "PASSED"
         if ratio <= self.WARNING_THRESHOLD:
-            return True, "WARNING"  # Acceptable with caution
-        if ratio <= self.ERROR_THRESHOLD:
-            return False, "ERROR"  # Investigation required
-        return False, "BLOCKER"  # Fundamental model error
+            passed, severity = True, "PASSED"
+        elif ratio <= 1.0:
+            passed, severity = (
+                True,
+                "WARNING",
+            )  # Acceptable, but approaching tolerance limit
+        elif ratio <= self.ERROR_THRESHOLD:
+            passed, severity = (
+                False,
+                "ERROR",
+            )  # Exceeds tolerance, investigation required
+        else:
+            passed, severity = False, "BLOCKER"  # Fundamental model error
+
+        # DbC Contract (UD-18): deviation > tolerance => passed=False
+        if max_dev > tolerance and passed:
+            raise AssertionError(
+                f"DbC contract violated: deviation ({max_dev}) > tolerance ({tolerance}) but passed is True"
+            )
+
+        return passed, severity
 
     def _build_message(self, severity: str, max_dev: float, tol: float) -> str:
         """Build appropriate message based on severity."""
@@ -596,7 +614,7 @@ class CrossEngineValidator(ContractChecker):
         if severity == "PASSED":  # noqa: SIM116
             return ""
         if severity == "WARNING":
-            return f"Deviation {max_dev:.2e} acceptable but exceeds base tolerance {tol:.2e}"
+            return f"Deviation {max_dev:.2e} approaches tolerance limit {tol:.2e}"
         if severity == "ERROR":
             return f"Deviation {max_dev:.2e} exceeds tolerance {tol:.2e} - investigation required"
         # BLOCKER
@@ -605,18 +623,18 @@ class CrossEngineValidator(ContractChecker):
     def _log_result(
         self,
         severity: str,
-        engine1_name: str,
-        engine2_name: str,
+        engine_names: tuple[str, str],
         metric: str,
         max_dev: float,
         tol: float,
         deviation: np.ndarray,
-        engine1_state: np.ndarray,
-        engine2_state: np.ndarray,
+        states: tuple[np.ndarray, np.ndarray],
     ) -> None:
         """Log validation result with appropriate severity level."""
         if severity is None:
             raise ValueError("severity must be provided")
+        engine1_name, engine2_name = engine_names
+        engine1_state, engine2_state = states
         ratio = max_dev / tol if tol > 0 else float("inf")
         worst_idx = int(np.argmax(deviation))
 
@@ -633,7 +651,7 @@ class CrossEngineValidator(ContractChecker):
         elif severity == "WARNING":
             logger.warning(
                 f"⚠️ {base_msg}\n"
-                f"  Status: Acceptable with caution (2-{self.ERROR_THRESHOLD:.0f}× tolerance)"
+                f"  Status: Approaching tolerance limit ({self.WARNING_THRESHOLD * 100:.0f}%-100% of tolerance)"
             )
         elif severity == "ERROR":
             logger.error(

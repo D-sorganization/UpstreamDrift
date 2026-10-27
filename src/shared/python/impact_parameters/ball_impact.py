@@ -34,9 +34,10 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.core.physics_constants import GOLF_BALL_MASS_KG
 from src.shared.python.model_appearance.ball import BALL_RADIUS_M
 
-BALL_MASS_KG: float = 0.04593
+BALL_MASS_KG: float = GOLF_BALL_MASS_KG
 COR_LIMIT: float = 0.830
 CONTACT_DURATION_S: float = 4.5e-4
 

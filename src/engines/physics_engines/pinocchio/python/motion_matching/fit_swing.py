@@ -99,10 +99,20 @@ from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.cost import (
     CostOptions,
     SimOutput,
+    _regularizer_term,
     compute_cost,
 )
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
+from src.shared.python.motion_matching.solver_status import (
+    make_provenance_fields,
+    map_scipy_status,
+)
 from src.shared.python.motion_matching.validate_theta import validate_theta
+
+try:
+    import pinocchio
+except ImportError:
+    pinocchio = None  # type: ignore[assignment]
 
 from .simulate import (
     COEFFS_PER_JOINT,
@@ -117,6 +127,7 @@ __all__ = [
     "FitOptions",
     "FitResult",
     "fit_swing_pinocchio",
+    "orientation_residual_gradient_axis",
     "polynomial_basis",
     "polynomial_torque_chain_rule",
     "rotmat_to_quat_wxyz",
@@ -262,6 +273,49 @@ def rotmat_to_quat_wxyz(R: NDArray[np.float64]) -> NDArray[np.float64]:
     return rotmat_to_quat(R)
 
 
+def orientation_residual_gradient_axis(
+    q_sim: NDArray[np.float64],
+    q_target: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Compute the world-frame rotation axis unit vector ``u`` such that ``∂theta / ∂phi = u^T``.
+
+    For the geodesic orientation error ``theta = 2 * arccos(|<q_sim, q_target>|)``,
+    an infinitesimal world-frame rotation ``delta_phi`` applied to ``q_sim``
+    perturbs ``theta`` according to ``delta_theta = u^T delta_phi + O(||delta_phi||^2)``.
+
+    Args:
+        q_sim: Unit quaternion ``[w, x, y, z]`` for the simulated orientation.
+        q_target: Unit quaternion ``[w, x, y, z]`` for the target orientation.
+
+    Returns:
+        3-element unit vector in the world frame along which rotation increases
+        the orientation residual. Returns zeros if orientations are identical.
+    """
+    qs = np.asarray(q_sim, dtype=np.float64).reshape(4)
+    qt = np.asarray(q_target, dtype=np.float64).reshape(4)
+    if not (np.all(np.isfinite(qs)) and np.all(np.isfinite(qt))):
+        raise ValueError(
+            "orientation_residual_gradient_axis requires finite quaternions"
+        )
+
+    dot = float(np.dot(qs, qt))
+    if dot < 0.0:
+        qt = -qt
+
+    # Relative rotation q_rel = q_sim * q_target^{-1} in world frame
+    qw, qx, qy, qz = qs
+    tw, tx, ty, tz = qt
+    rx = qw * (-tx) + qx * tw + qy * (-tz) - qz * (-ty)
+    ry = qw * (-ty) - qx * (-tz) + qy * tw + qz * (-tx)
+    rz = qw * (-tz) + qx * (-ty) - qy * (-tx) + qz * tw
+    r_vec = np.array([rx, ry, rz], dtype=np.float64)
+
+    v_norm = float(np.linalg.norm(r_vec))
+    if v_norm > 1e-10:
+        return r_vec / v_norm
+    return np.zeros(3, dtype=np.float64)
+
+
 # --------------------------------------------------------------------------- #
 # SimOut -> SimOutput adapter (cost-function input)
 # --------------------------------------------------------------------------- #
@@ -347,6 +401,7 @@ def _build_residual_vector(
     out: SimOut,
     target: ClubTarget,
     opts: CostOptions,
+    theta: NDArray[np.float64] | None = None,
 ) -> NDArray[np.float64]:
     """Assemble the residual vector ``r`` such that ``||r||^2 ≈ J``.
 
@@ -377,7 +432,27 @@ def _build_residual_vector(
     w_anc = np.sqrt(opts.w_anchor_impact)
     r_anc = w_anc * da  # (3,)
 
-    return np.concatenate([r_butt, r_ch, r_anc, r_ori])
+    # Regulariser residual -- scalar with weight sqrt(lambda_).
+    if opts.lambda_ > 0.0:
+        sim_cost_in = _simout_to_costinput(out)
+        theta_arr = np.zeros(0, dtype=np.float64) if theta is None else theta
+        reg_val = _regularizer_term(theta_arr, sim_cost_in, opts)
+        r_reg = np.array(
+            [np.sqrt(opts.lambda_ * max(0.0, float(reg_val)))], dtype=np.float64
+        )
+    else:
+        r_reg = np.array([0.0], dtype=np.float64)
+
+    r = np.concatenate([r_butt, r_ch, r_anc, r_ori, r_reg])
+
+    # DbC Postcondition: residual layout equals the docstring
+    expected_len = 7 * n + 4
+    if r.shape != (expected_len,):
+        raise ValueError(
+            f"Residual layout does not match docstring: expected length {expected_len} "
+            f"(3n butt + 3n clubhead + 3 anchor + n orientation + 1 regularizer), got {r.shape}"
+        )
+    return r
 
 
 def _residual_and_simout(
@@ -397,7 +472,7 @@ def _residual_and_simout(
         local_target = _resample_clubtarget_to_grid(target, out.t)
     else:
         local_target = target
-    r = _build_residual_vector(out, local_target, cost_options)
+    r = _build_residual_vector(out, local_target, cost_options, theta=theta)
 
     # Light-touch history hook: record ||r||^2 / 2 (the LM objective).
     history.append(0.5 * float(np.dot(r, r)))
@@ -485,8 +560,8 @@ def _analytical_jacobian(
     # Forward sensitivity state: S_q == d q / d theta, S_qd == d qd / d theta.
     nq = int(model.nq)
     nv = int(model.nv)
-    S_q = np.zeros((nq, nx), dtype=np.float64)
-    S_qd = np.zeros((nv, nx), dtype=np.float64)
+    S_q: NDArray[np.float64] = np.zeros((nq, nx), dtype=np.float64)
+    S_qd: NDArray[np.float64] = np.zeros((nv, nx), dtype=np.float64)
 
     impact_k = int(local_target.impact_idx) - 1
     dt = float(sim_options.dt)
@@ -528,21 +603,13 @@ def _analytical_jacobian(
         J_ch[3 * i : 3 * i + 3, :] = w_pos * dp_ch  # type: ignore[assignment]
 
         # Orientation residual: theta = 2 * arccos(|<q_sim, q_meas>|).
-        # d theta / d S_q = (sign(dot) / sqrt(1 - dot^2)) *
-        #                   ( - q_meas^T (1/2 H(q_sim)) ) * J_ang @ S_q_v
-        # We use the simpler small-angle approximation that the residual
-        # angle is well-approximated by the body-frame angular delta and
-        # that ∂angle / ∂q ≈ J_ang_world projected along the rotation
-        # axis between q_sim and q_meas. For the recovery test the
-        # residual is near-zero, so any direction in the tangent plane
-        # gives a valid descent direction; LM is forgiving.
+        # Under world-frame angular velocity / perturbation delta_phi of the
+        # clubhead, d theta / d phi = u^T where u is the unit rotation axis
+        # of the relative rotation R_sim @ R_tar^T.
         q_sim_i = sim_quats[i]
         q_tar_i = target_quats[i]
-        dot = float(np.dot(q_sim_i, q_tar_i))
-        sgn = 1.0 if dot >= 0.0 else -1.0
-        # axis-angle gradient: dangle / dq ~ projection along axis.
-        # Use ang_jac directly weighted by 1.0 (small-angle limit).
-        J_ori_row = sgn * (J_ch_ori.sum(axis=0)) @ S_q_v  # (nx,)
+        u_axis = orientation_residual_gradient_axis(q_sim_i, q_tar_i)
+        J_ori_row = (u_axis @ J_ch_ori) @ S_q_v  # (nx,)
         J_ori[i, :] = w_ori * J_ori_row  # type: ignore[assignment]
 
         if i == impact_k:
@@ -577,12 +644,22 @@ def _analytical_jacobian(
         S_q_new_v = S_q_v + dt * S_qd
         S_qd_new = S_qd + dt * S_qdd
         if nq == nv:
-            S_q = S_q_new_v
+            S_q = S_q_new_v  # type: ignore[assignment]
         else:
             S_q[-nv:, :] = S_q_new_v
-        S_qd = S_qd_new
+        S_qd = S_qd_new  # type: ignore[assignment]
 
-    return np.vstack([J_butt, J_ch, J_anc, J_ori])
+    # Regulariser Jacobian row: ∂r_reg / ∂theta.
+    if cost_options.lambda_ > 0.0 and cost_options.regularizer == "coeff_l2":
+        norm_th = float(np.linalg.norm(theta))
+        if norm_th > 1e-12:
+            J_reg = (np.sqrt(cost_options.lambda_) * (theta / norm_th)).reshape(1, -1)
+        else:
+            J_reg = np.zeros((1, nx), dtype=np.float64)
+    else:
+        J_reg = np.zeros((1, nx), dtype=np.float64)
+
+    return np.vstack([J_butt, J_ch, J_anc, J_ori, J_reg])
 
 
 # --------------------------------------------------------------------------- #
@@ -635,14 +712,22 @@ def fit_swing_pinocchio(  # noqa: C901
     n_joints = int(model.nv)
     nx = n_joints * COEFFS_PER_JOINT
 
+    # ---- Torque bounds from canonical model definition -------------- #
+    from src.engines.physics_engines.pinocchio.python.simulate_with_coefficients import (
+        polynomial_torque_bounds,
+    )
+
+    lb, ub = polynomial_torque_bounds(n_joints)
+
     # ---- Initial guess --------------------------------------------- #
     if opts.theta0 is not None:
         theta0 = np.asarray(opts.theta0, dtype=np.float64).copy()
         if theta0.shape != (nx,):
             raise ValueError(f"theta0 has shape {theta0.shape}; expected ({nx},)")
+        theta0 = np.clip(theta0, lb, ub)
     else:
         rng = np.random.default_rng(opts.rng_seed)
-        theta0 = opts.theta0_scale * rng.standard_normal(nx)
+        theta0 = np.clip(opts.theta0_scale * rng.standard_normal(nx), lb, ub)
 
     # ---- Residual + Jacobian closures ----------------------------- #
     history: list[float] = []
@@ -670,34 +755,34 @@ def fit_swing_pinocchio(  # noqa: C901
             )
 
         jac_arg: Any = _jac
-        method_label = "lm-analytical"
+        method_label = "trf-analytical"
     elif opts.jac_mode == "finite_difference":
         jac_arg = "2-point"
-        method_label = "lm-fd"
+        method_label = "trf-fd"
     else:
         raise ValueError(
             "jac_mode must be 'analytical' or 'finite_difference'; "
             f"got {opts.jac_mode!r}"
         )
 
-    # ---- Run LM ---------------------------------------------------- #
+    # ---- Run bounded least_squares (TRF) --------------------------- #
     if opts.verbose:
         logger.info(
-            "fit_swing_pinocchio: starting LM (%s) with theta0 |.| = %.3e, max_iter=%d",
+            "fit_swing_pinocchio: starting TRF (%s) with theta0 |.| = %.3e, max_iter=%d",
             method_label,
             float(np.linalg.norm(theta0)),
             opts.max_iter,
         )
 
     t_start = _time.perf_counter()
-    # scipy's "lm" mode does not accept bounds; if a future caller needs
-    # box-constrained LM they should switch to method="trf" via FitOptions
-    # extension. The parity spec calls for vanilla LM here.
+    # Parity spec §2.3: use bounded Trust Region Reflective ('trf') with
+    # torque-coefficient box bounds matching MuJoCo, Drake, and OpenSim.
     result = least_squares(
         fun=_residual,
         x0=theta0,
         jac=jac_arg,
-        method="lm",
+        bounds=(lb, ub),
+        method="trf",
         max_nfev=opts.max_iter * (nx + 1),
         ftol=opts.ftol,
         xtol=opts.xtol,
@@ -713,6 +798,14 @@ def fit_swing_pinocchio(  # noqa: C901
         n_joints=n_joints,
         name="theta_optimal",
     )
+
+    # DbC Postcondition: solution respects the box bounds
+    tol = 1e-8
+    if np.any(theta_opt < lb - tol) or np.any(theta_opt > ub + tol):
+        raise ValueError(
+            "Optimal theta violates polynomial torque box bounds: "
+            f"min diff {float(np.min(theta_opt - lb)):.3e}, max diff {float(np.max(theta_opt - ub)):.3e}"
+        )
 
     # ---- Canonical cost via the shared compute_cost ---------------- #
     def _shared_cost_sim_fn(theta_flat: NDArray[np.float64]) -> SimOutput:
@@ -735,21 +828,22 @@ def fit_swing_pinocchio(  # noqa: C901
         theta_opt, target, _shared_cost_sim_fn, opts.cost_options
     )
 
+    prov = make_provenance_fields(pinocchio, "pin", "pinocchio", target=target)
     return FitResult(
         theta_optimal=theta_opt,
         final_cost=float(cost_total),
         final_rmse_m=float("nan"),
-        solver_status="success" if bool(result.success) else "failed",
+        solver_status=map_scipy_status(result),
         iterations=int(getattr(result, "nfev", len(history))),
         n_evaluations=int(getattr(result, "nfev", len(history))),
         wall_clock_s=float(elapsed),
         message=str(result.message),
         history=tuple(history),
         method=method_label,
-        git_commit="unknown",
-        engine_version="unknown",
-        target_hash="unknown",
-        timestamp_utc="unknown",
+        git_commit=prov["git_commit"],
+        engine_version=prov["engine_version"],
+        target_hash=prov["target_hash"],
+        timestamp_utc=prov["timestamp_utc"],
         cost_breakdown=cost_breakdown,
         n_jac_eval=int(n_jac_eval_counter[0]),
         meta={
