@@ -18,6 +18,175 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13903 · EnhancedBallFlightSimulator: Route Deterministic Aero Through Rust Facade (UD-03)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13903
+- **Branch:** fix/13903-enhanced-simulator-rust-facade
+- **PR:** #13929
+- **Paths:** see #13929
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`19f532dd`; collated from changes/13903-enhanced-simulator-rust-facade.md)
+- **Summary:** EnhancedBallFlightSimulator: route deterministic aero through Rust facade (UD-03)
+- **Next step:** Merge PR
+
+### DL-#13874 · Unify Solver_Status Contract and Provenance Across All Four Physics Engines
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13874
+- **Branch:** fix/13874-solver-status-contract
+- **PR:** #13920
+- **Paths:** see #13920
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`28be4a7a`; collated from changes/13874-solver-status-contract.md)
+- **Summary:** Unify solver_status contract and provenance across all four physics engines
+- **Next step:** Merge PR
+
+### DL-#13871 · Project Pinocchio Analytical Orientation Jacobian Onto Relative Rotation Axis (UD-01)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13871
+- **Branch:** fix/13871-pinocchio-orientation-jacobian
+- **PR:** #13924
+- **Paths:** see #13924
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`29f340df`; collated from changes/13871-pinocchio-orientation-jacobian.md)
+- **Summary:** Project Pinocchio analytical orientation Jacobian onto relative rotation axis (UD-01)
+- **Next step:** Merge PR
+
+### DL-#13876 · Tighten MuJoCo Mj_Inverse Test Tolerances and Replay Refinement (UD-15, UD-16)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13876
+- **Branch:** fix/13876-mujoco-mj-inverse-tolerances
+- **PR:** #13925
+- **Paths:** see #13925
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`70be2a3e`; collated from changes/13876-mujoco-mj-inverse-tolerances.md)
+- **Summary:** Tighten MuJoCo mj_inverse test tolerances and replay refinement (UD-15, UD-16)
+- **Next step:** Merge PR
+
+### DL-#13867 · Branch Orientation Cost on Q_Orientation_Repr and Enforce Body_Marker Precondition
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13867
+- **Branch:** fix/13867-q-orientation-repr-and-body-marker-term
+- **PR:** #13917
+- **Paths:** see #13917
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`dd68977a`; collated from changes/13867-q-orientation-repr-and-body-marker-term.md)
+- **Summary:** Branch orientation cost on q_orientation_repr and enforce body_marker precondition
+- **Next step:** Merge PR
+
+### DL-#13866 · Enforce 1E-6 Relative Tolerance in Ball Flight Rust/Python Parity Test
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13866
+- **Branch:** fix/13866-ball-flight-parity-rel-1e6
+- **PR:** #13921
+- **Paths:** see #13921
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`517f1074`; collated from changes/13866-ball-flight-parity-rel-1e6.md)
+- **Summary:** Enforce 1e-6 relative tolerance in ball flight Rust/Python parity test
+- **Next step:** Merge PR
+
+### DL-#13902 · Remove Unused Signature Bind and Memoize Inspect.Signature in Contract Decorators
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13902
+- **Branch:** fix/13902-precondition-signature-overhead
+- **PR:** #13919
+- **Paths:** see #13919
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`8a1791c8`; collated from changes/13902-dbc-decorator-overhead.md)
+- **Summary:** Remove unused signature bind and memoize inspect.signature in contract decorators
+- **Next step:** Merge PR
+
+### DL-#13873 · Soft-Fail Divergent Rollout Evaluations in MuJoCo Fit_Swing With Finite Penalty
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13873
+- **Branch:** fix/13873-mujoco-divergent-rollout-soft-fail
+- **PR:** #13916
+- **Paths:** see #13916
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`4cf42e83`; collated from changes/13873-mujoco-divergent-rollout-soft-fail.md)
+- **Summary:** Soft-fail divergent rollout evaluations in MuJoCo fit_swing with finite penalty
+- **Next step:** Merge PR
+
+### DL-#13879 · \ Route C3D Analog and Reader CoP Through Canonical Center of Pressure\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13879
+- **Branch:** fix/13879-cop-c3d-analog-canonical
+- **PR:** #13907
+- **Paths:** see #13907
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`67d3db29`; collated from changes/13879-route-c3d-analog-and-reader-cop-through.md)
+- **Summary:** \ Route C3D analog and reader CoP through canonical center of pressure\
+- **Next step:** \Merge PR 13907\
+
+### DL-#13877 · \ Fail Cross-Engine Validation When Deviation Exceeds Tolerance\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13877
+- **Branch:** fix/13877-cross-engine-validator-tolerance
+- **PR:** #13906
+- **Paths:** see #13906
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`2bbbb020`; collated from changes/13877-fail-cross-engine-validation-when-deviat.md)
+- **Summary:** \ Fail cross-engine validation when deviation exceeds tolerance\
+- **Next step:** \Merge PR 13906\
+
+### DL-#13837 · Option A MuJoCo Swing-Recovery Trace Fixture; Reuses Triple_Pendulum_Spec Segments in Humanoid_Robotics.Option_a.Plant.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13837
+- **Branch:** cursor/humanoid-option-a-swing-recovery-f3e4
+- **PR:** #13838
+- **Paths:** see #13838
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`7c90712e`; collated from changes/13837-add-option-a-mujoco-swing-and-recovery-t.md)
+- **Summary:** Option A MuJoCo swing-recovery trace fixture; reuses triple_pendulum_spec segments in humanoid_robotics.option_a.plant.
+- **Next step:** Merge PR #13838 after CI is green.
+
+### DL-#13880 · \ Zero Friction Cone Capacity in Tension\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13880
+- **Branch:** fix/13880-friction-cone-tension
+- **PR:** #13889
+- **Paths:** see #13889
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`43d5476c`; collated from changes/13880-zero-friction-cone-capacity-in-tension.md)
+- **Summary:** \ Zero friction cone capacity in tension\
+- **Next step:** \Merge PR 13889\
+
+### DL-#13865 · \ Rotate Backspin Axis With Azimuth and Align Sidespin With Vertical\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13865
+- **Branch:** fix/13865-ball-flight-spin-vector
+- **PR:** #13908
+- **Paths:** see #13908
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`51776474`; collated from changes/13865-rotate-backspin-axis-with-azimuth-and-al.md)
+- **Summary:** \ Rotate backspin axis with azimuth and align sidespin with vertical\
+- **Next step:** \Open PR for UD 13865\
+
 ### DL-#13842 · Fast-Tier Test Selection Now Runs the Monolith Register Test for Src/ Changes
 
 - **State:** in_review
@@ -572,6 +741,123 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13891 · Add GripGeometry Source of Truth With Presets and USGA Rules Validator
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13891
+- **Branch:** merged via #13913
+- **PR:** #13913
+- **Paths:** see #13913
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`51ab07b9`; collated from changes/13891-add-gripgeometry-source-of-truth-with-pr.md)
+- **Summary:** Add GripGeometry source of truth with presets and USGA rules validator
+- **Next step:** Shipped in PR #13913.
+
+### DL-#13881 · Align Tendon Compliance and Active Force-Length Width With Thelen 2003
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13881
+- **Branch:** merged via #13910
+- **PR:** #13910
+- **Paths:** see #13910
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`1a917a95`; collated from changes/13881-align-tendon-compliance-and-active-force.md)
+- **Summary:** align tendon compliance and active force-length width with Thelen 2003
+- **Next step:** Shipped in PR #13910.
+
+### DL-#13890 · Implement Cited GripFrictionBand and Combined Squeeze Vector Bound
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13890
+- **Branch:** merged via #13911
+- **PR:** #13911
+- **Paths:** see #13911
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`61d679a6`; collated from changes/13890-implement-cited-gripfrictionband-and-com.md)
+- **Summary:** implement cited GripFrictionBand and combined squeeze vector bound
+- **Next step:** Shipped in PR #13911.
+
+### DL-#13775 · Regenerate the Proximal-Distal Release Claim Review and Manifests After the de Leva Provenance Change.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13775
+- **Branch:** merged via #13839
+- **PR:** #13839
+- **Paths:** see #13839
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`0963aa38`; collated from changes/13775-regenerate-the-proximal-distal-release-c.md)
+- **Summary:** Regenerate the proximal-distal release claim review and manifests after the de Leva provenance change.
+- **Next step:** Shipped in PR #13839.
+
+### DL-#13792 · Per-Engine Step-Size Convergence Study and Exact Torque Switch-Time Handling
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13792
+- **Branch:** merged via #13855
+- **PR:** #13855
+- **Paths:** see #13855
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`1a76ba08`; collated from changes/13792-step-convergence-study-and-switch-time.md)
+- **Summary:** Per-engine step-size convergence study and exact torque switch-time handling
+- **Next step:** Shipped in PR #13855.
+
+### DL-#13899 · Render Workers Put the Interpreter's Base_Prefix Lib Dir First on LD_LIBRARY_PATH, Because Opensim's Linux __Init__ Overwrites It With PATH; This Fixes the Requires_Opensim _Ctypes ABI Failure
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13899
+- **Branch:** merged via #13900
+- **PR:** #13900
+- **Paths:** see #13900
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`ce1dd79e`; collated from changes/13899-render-worker-ld-library-path.md)
+- **Summary:** Render workers put the interpreter's base_prefix lib dir first on LD_LIBRARY_PATH, because opensim's Linux __init__ overwrites it with PATH; this fixes the requires_opensim _ctypes ABI failure
+- **Next step:** Shipped in PR #13900.
+
+### DL-#13896 · Lift Render Worker PYTHONPATH Uses Shared Worker_Env() (Repo Roots Only), Fixing Requires_Opensim _Ctypes ABI Failure
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13896
+- **Branch:** merged via #13897
+- **PR:** #13897
+- **Paths:** see #13897
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`ed08a3f2`; collated from changes/13896-lift-render-worker-pythonpath-uses-share.md)
+- **Summary:** Lift render worker PYTHONPATH uses shared worker_env() (repo roots only), fixing requires_opensim _ctypes ABI failure
+- **Next step:** Shipped in PR #13897.
+
+### DL-#13852 · Add WSCG Masked-JSON Parity Test Scaffold for Budget-Split PRs.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13852
+- **Branch:** merged via #13860
+- **PR:** #13860
+- **Paths:** see #13860
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`c4e2a518`; collated from changes/13852-wscg-test-scaffold.md)
+- **Summary:** Add WSCG masked-JSON parity test scaffold for budget-split PRs.
+- **Next step:** Shipped in PR #13860.
+
+### DL-#13851 · Remove Stale Urdf_Exporter _Add_Revolute_Joint Parameters Budget Exception.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13851
+- **Branch:** merged via #13856
+- **PR:** #13856
+- **Paths:** see #13856
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`a6699390`; collated from changes/13851-remove-stale-urdf-exporter-add-revolute.md)
+- **Summary:** Remove stale urdf_exporter _add_revolute_joint parameters budget exception.
+- **Next step:** Shipped in PR #13856.
 
 ### DL-#13760 · ANSUR II Stature-Tied Hand Length and Breadth (HRG-HX3).
 

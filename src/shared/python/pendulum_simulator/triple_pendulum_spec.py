@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+# #13837 Option A imports the first two segments via humanoid_robotics.option_a.plant.
+
 import math
 from dataclasses import dataclass
 

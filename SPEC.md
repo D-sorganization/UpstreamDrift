@@ -2741,6 +2741,28 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-27 | #13929 | EnhancedBallFlightSimulator: route deterministic aero through Rust facade (UD-03) |
+| 2026-10-27 | #13920 | Unify solver_status contract and provenance across all four physics engines |
+| 2026-10-27 | #13924 | Project Pinocchio analytical orientation Jacobian onto relative rotation axis (UD-01) |
+| 2026-10-27 | #13925 | Tighten MuJoCo mj_inverse test tolerances and replay refinement (UD-15, UD-16) |
+| 2026-10-27 | #13917 | Branch orientation cost on q_orientation_repr and enforce body_marker precondition |
+| 2026-10-27 | #13921 | Enforce 1e-6 relative tolerance in ball flight Rust/Python parity test |
+| 2026-10-27 | #13919 | Remove unused signature bind and memoize inspect.signature in contract decorators |
+| 2026-10-27 | #13913 | Add GripGeometry source of truth with presets and USGA rules validator |
+| 2026-10-27 | #13910 | align tendon compliance and active force-length width with Thelen 2003 |
+| 2026-10-27 | #13916 | Soft-fail divergent rollout evaluations in MuJoCo fit_swing with finite penalty |
+| 2026-10-27 | #13911 | implement cited GripFrictionBand and combined squeeze vector bound |
+| 2026-10-27 | #13907 | \ Route C3D analog and reader CoP through canonical center of pressure\ |
+| 2026-10-27 | #13839 | Regenerate the proximal-distal release claim review and manifests after the de Leva provenance change. |
+| 2026-10-27 | #13906 | \ Fail cross-engine validation when deviation exceeds tolerance\ |
+| 2026-10-27 | #13838 | Option A MuJoCo swing-recovery trace fixture; reuses triple_pendulum_spec segments in humanoid_robotics.option_a.plant. |
+| 2026-10-27 | #13889 | \ Zero friction cone capacity in tension\ |
+| 2026-10-27 | #13908 | \ Rotate backspin axis with azimuth and align sidespin with vertical\ |
+| 2026-10-27 | #13855 | Per-engine step-size convergence study and exact torque switch-time handling |
+| 2026-10-27 | #13900 | Render workers put the interpreter's base_prefix lib dir first on LD_LIBRARY_PATH, because opensim's Linux __init__ overwrites it with PATH; this fixes the requires_opensim _ctypes ABI failure |
+| 2026-10-27 | #13897 | Lift render worker PYTHONPATH uses shared worker_env() (repo roots only), fixing requires_opensim _ctypes ABI failure |
+| 2026-10-26 | #13860 | Add WSCG masked-JSON parity test scaffold for budget-split PRs. |
+| 2026-10-26 | #13856 | Remove stale urdf_exporter _add_revolute_joint parameters budget exception. |
 | 2026-10-26 | #13832 | feat(lifting): CLI scripts for OSL-8 showcase lift videos; feat(lifting): render_opensim_lift_video public API for OSL-8 export |
 | 2026-10-26 | #13833 | feat(lifting): headless OpenSim lift render worker and video export facade |
 | 2026-10-26 | #13835 | feat(lifting): full-motion lift targets and muscle solve adapter for video |

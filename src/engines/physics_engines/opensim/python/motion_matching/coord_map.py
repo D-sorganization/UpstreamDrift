@@ -480,17 +480,16 @@ def quat_canonical_to_eigen(q_wxyz: np.ndarray) -> np.ndarray:
 #
 # The fixed rotation from OpenSim → Simscape coordinates is therefore
 #     x_sim = x_os
-#     y_sim = z_os
+#     y_sim = -z_os
 #     z_sim = y_os
 #
-# This is a *handedness-preserving* axis permutation (det = +1) — the
-# matrix corresponds to swapping the Y and Z axes which, combined with
-# leaving the third row sign positive, keeps the right-hand rule.
+# This is a handedness-preserving rotation (det = +1), equivalent to a
+# +90 deg rotation about the X axis (matching R_ZUP_FROM_OPENSIM_GROUND).
 
 _R_YUP_TO_ZUP: Final[np.ndarray] = np.array(
     [
         [1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0],
+        [0.0, 0.0, -1.0],
         [0.0, 1.0, 0.0],
     ],
     dtype=np.float64,
@@ -518,8 +517,8 @@ def frame_y_up_to_z_up(v: np.ndarray) -> np.ndarray:
 
 
 def frame_z_up_to_y_up(v: np.ndarray) -> np.ndarray:
-    """Inverse of :func:`frame_y_up_to_z_up`. The matrix is its own transpose-inverse."""
+    """Inverse of :func:`frame_y_up_to_z_up`. Rotation matrix inverse is its transpose."""
     v = np.asarray(v, dtype=np.float64)
     if v.shape[-1] != 3:
         raise ValueError(f"frame_z_up_to_y_up: last axis must be 3, got {v.shape}")
-    return v @ _R_YUP_TO_ZUP  # inverse of the swap is the swap itself
+    return v @ _R_YUP_TO_ZUP  # (v @ R.T)^-1 in row-vector form is v @ R

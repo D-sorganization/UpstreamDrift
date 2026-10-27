@@ -142,10 +142,10 @@ class TestCrossEngineValidator:
         assert severity == "PASSED"
 
     def test_severity_classification_warning(self) -> None:
-        """Test WARNING severity for deviations slightly above tolerance."""
+        """Test WARNING severity for deviations approaching tolerance limit."""
         validator = CrossEngineValidator()
-        passed, severity = validator._classify_severity(1.5e-6, 1e-6)
-        assert passed  # Still acceptable
+        passed, severity = validator._classify_severity(0.9e-6, 1e-6)
+        assert passed  # Still within tolerance
         assert severity == "WARNING"
 
     def test_severity_classification_error(self) -> None:

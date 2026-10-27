@@ -205,3 +205,198 @@ class TestFitOptionsInvariants:
         opts = FitOptions()
         with pytest.raises(FrozenInstanceError):
             opts.max_iter = 100  # type: ignore[misc]
+
+
+# --------------------------------------------------------------------------- #
+# orientation_residual_gradient_axis & test_orientation_jacobian_fd (UD-01)
+# --------------------------------------------------------------------------- #
+
+
+class TestOrientationResidualGradient:
+    """Analytical gradient of geodesic angle matches finite difference to 1e-6 (UD-01)."""
+
+    def test_orientation_jacobian_fd(self) -> None:
+        """Analytic orientation row matches finite-difference Jacobian to 1e-6."""
+        orientation_residual_gradient_axis = getattr(
+            fit_swing_mod, "orientation_residual_gradient_axis", None
+        )
+        assert orientation_residual_gradient_axis is not None, (
+            "orientation_residual_gradient_axis must be implemented in fit_swing"
+        )
+
+        rng = np.random.default_rng(42)
+        # Random axis and angle for target vs sim
+        axis = rng.standard_normal(3)
+        axis = axis / np.linalg.norm(axis)
+        angle = 0.35  # ~20 degrees
+        q_target = np.array([1.0, 0.0, 0.0, 0.0])
+        # q_sim rotated by angle about axis
+        q_sim = np.concatenate([[np.cos(angle / 2.0)], np.sin(angle / 2.0) * axis])
+
+        u_analytic = orientation_residual_gradient_axis(q_sim, q_target)
+
+        # Finite difference gradient with respect to world angular perturbation delta_phi
+        eps = 1e-7
+        u_fd = np.zeros(3)
+        for k in range(3):
+            dphi = np.zeros(3)
+            dphi[k] = eps
+            # Perturb q_sim by delta_phi: q_pert = [1, 0.5 * dphi] * q_sim
+            qw, qx, qy, qz = q_sim
+            pw, px, py, pz = 1.0, 0.5 * dphi[0], 0.5 * dphi[1], 0.5 * dphi[2]
+            q_plus = np.array(
+                [
+                    pw * qw - px * qx - py * qy - pz * qz,
+                    pw * qx + px * qw + py * qz - pz * qy,
+                    pw * qy - px * qz + py * qw + pz * qx,
+                    pw * qz + px * qy - py * qx + pz * qw,
+                ]
+            )
+            q_plus = q_plus / np.linalg.norm(q_plus)
+
+            dot_orig = np.clip(abs(float(np.dot(q_sim, q_target))), -1.0, 1.0)
+            dot_plus = np.clip(abs(float(np.dot(q_plus, q_target))), -1.0, 1.0)
+            theta_orig = 2.0 * np.arccos(dot_orig)
+            theta_plus = 2.0 * np.arccos(dot_plus)
+            u_fd[k] = (theta_plus - theta_orig) / eps
+
+        np.testing.assert_allclose(u_analytic, u_fd, rtol=1e-5, atol=1e-6)
+
+
+# --------------------------------------------------------------------------- #
+# UD-02 (#13872): Residual regulariser and torque bounds
+# --------------------------------------------------------------------------- #
+
+
+class TestResidualAndBoundsUD02:
+    """Acceptance for UD-02 (#13872):
+    1. _build_residual_vector includes regulariser residual (scalar weighted by sqrt(lambda_)).
+    2. Residual vector layout matches docstring: [r_butt, r_ch, r_anc, r_ori, r_reg] with length 7*N + 4.
+    3. fit_swing_pinocchio enforces torque coefficient box bounds via method='trf'.
+    """
+
+    def test_residual_includes_regulariser(self) -> None:
+        from src.shared.python.motion_matching.club_target import (
+            ClubTarget,
+            SourceProvenance,
+        )
+        from src.shared.python.motion_matching.cost import CostOptions
+
+        N = 10
+        t = np.linspace(0.0, 0.05, N)
+        out = simulate_mod.SimOut(
+            time=t,
+            q=np.zeros((N, 2)),
+            qd=np.zeros((N, 2)),
+            qdd=np.zeros((N, 2)),
+            tau=np.zeros((N, 2)),
+            grip=np.zeros((N, 3)),
+            grip_quat=np.tile([1.0, 0.0, 0.0, 0.0], (N, 1)),
+            clubhead=np.zeros((N, 3)),
+            club_quat=np.tile([1.0, 0.0, 0.0, 0.0], (N, 1)),
+        )
+        target = ClubTarget(
+            time=t,
+            butt=np.zeros((N, 3)),
+            clubhead=np.zeros((N, 3)),
+            club_quat=np.tile([1.0, 0.0, 0.0, 0.0], (N, 1)),
+            impact_idx=5,
+            source=SourceProvenance(
+                filename="synth",
+                format="synth",
+                subject_id="sub",
+                trial_id="t1",
+                sha256="0" * 64,
+            ),
+        )
+        opts = CostOptions(lambda_=1e-4, regularizer="coeff_l2")
+        theta = np.ones(14, dtype=np.float64) * 2.0  # dot(theta, theta) = 14 * 4 = 56
+
+        _build_residual_vector = fit_swing_mod._build_residual_vector
+        r = _build_residual_vector(out, target, opts, theta=theta)
+
+        # Expected layout: [r_pos_butt (3N), r_pos_clubhead (3N), r_anchor (3),
+        #                   r_orientation (N), r_regularizer (1)]
+        expected_len = 7 * N + 4
+        assert len(r) == expected_len, (
+            f"Residual vector length must be 7*N + 4 = {expected_len}, got {len(r)}"
+        )
+        expected_r_reg = np.sqrt(opts.lambda_ * np.dot(theta, theta))
+        assert r[-1] == pytest.approx(expected_r_reg)
+
+    def test_least_squares_respects_torque_bounds(self) -> None:
+        from unittest.mock import MagicMock, patch
+
+        from src.engines.physics_engines.pinocchio.python.simulate_with_coefficients import (
+            polynomial_torque_bounds,
+        )
+        from src.shared.python.motion_matching.club_target import (
+            ClubTarget,
+            SourceProvenance,
+        )
+
+        N = 10
+        t = np.linspace(0.0, 0.05, N)
+        target = ClubTarget(
+            time=t,
+            butt=np.zeros((N, 3)),
+            clubhead=np.zeros((N, 3)),
+            club_quat=np.tile([1.0, 0.0, 0.0, 0.0], (N, 1)),
+            impact_idx=5,
+            source=SourceProvenance(
+                filename="synth",
+                format="synth",
+                subject_id="sub",
+                trial_id="t1",
+                sha256="0" * 64,
+            ),
+        )
+
+        n_joints = 2
+        nx = n_joints * simulate_mod.COEFFS_PER_JOINT
+        lb, ub = polynomial_torque_bounds(n_joints)
+
+        mock_result = MagicMock()
+        mock_result.x = np.clip(np.zeros(nx), lb, ub)
+        mock_result.cost = 0.0
+        mock_result.nfev = 5
+        mock_result.njev = 2
+        mock_result.status = 1
+        mock_result.message = "Converged"
+
+        mock_model = MagicMock()
+        mock_model.nv = n_joints
+
+        dummy_simout = simulate_mod.SimOut(
+            time=t,
+            q=np.zeros((N, n_joints)),
+            qd=np.zeros((N, n_joints)),
+            qdd=np.zeros((N, n_joints)),
+            tau=np.zeros((N, n_joints)),
+            grip=np.zeros((N, 3)),
+            grip_quat=np.tile([1.0, 0.0, 0.0, 0.0], (N, 1)),
+            clubhead=np.zeros((N, 3)),
+            club_quat=np.tile([1.0, 0.0, 0.0, 0.0], (N, 1)),
+        )
+
+        with (
+            patch.object(fit_swing_mod, "_get_cached_model", return_value=mock_model),
+            patch.object(
+                fit_swing_mod, "simulate_with_coefficients", return_value=dummy_simout
+            ),
+            patch("scipy.optimize.least_squares", return_value=mock_result) as mock_lsq,
+        ):
+            fit_opts = fit_swing_mod.FitOptions(max_iter=5)
+            fit_res = fit_swing_mod.fit_swing_pinocchio(target, fit_opts)
+
+            assert mock_lsq.called
+            _, lsq_kwargs = mock_lsq.call_args
+            assert lsq_kwargs.get("method") == "trf", (
+                f"least_squares must use bounded method 'trf', got {lsq_kwargs.get('method')!r}"
+            )
+            assert "bounds" in lsq_kwargs, "least_squares must receive bounds parameter"
+            b_lb, b_ub = lsq_kwargs["bounds"]
+            np.testing.assert_allclose(b_lb, lb)
+            np.testing.assert_allclose(b_ub, ub)
+            assert np.all(fit_res.theta_optimal >= lb)
+            assert np.all(fit_res.theta_optimal <= ub)

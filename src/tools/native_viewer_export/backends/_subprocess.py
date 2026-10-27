@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 import json
 import os
 from pathlib import Path
 from typing import Any
 import subprocess
 import sys
+import sysconfig
 import tempfile
 
 import numpy as np
@@ -37,7 +38,37 @@ def worker_env(extra: dict[str, str] | None = None) -> dict[str, str]:
     env.setdefault("MPLBACKEND", "Agg")
     env.setdefault("QT_QPA_PLATFORM", "offscreen")
     env.update(extra or {})
-    return env
+    return with_interpreter_libdir(env)
+
+
+def with_interpreter_libdir(
+    env: dict[str, str],
+    *,
+    platform: str = sys.platform,
+    config: Callable[[str], Any] = sysconfig.get_config_var,
+    base_prefix: str = sys.base_prefix,
+) -> dict[str, str]:
+    """Lead ``LD_LIBRARY_PATH`` with this interpreter's ``libpython`` dir (#13896).
+
+    The opensim Linux wheel's ``__init__`` sets ``LD_LIBRARY_PATH = PATH``,
+    dropping the ``libpython`` directory a shared-build interpreter (e.g.
+    setup-python's tool cache) needs. A worker started after ``import opensim``
+    would otherwise link the system ``libpython`` against this interpreter's
+    stdlib and fail on ``_ctypes``. The dir is ``<base_prefix>/lib`` because
+    relocated builds report ``LIBDIR`` as their build prefix. No-op off Linux,
+    for static builds, or when the shared library is not found there.
+    """
+    soname = config("INSTSONAME")
+    if not platform.startswith("linux") or not config("Py_ENABLE_SHARED") or not soname:
+        return env
+    lib = Path(base_prefix) / "lib"
+    if not (lib / str(soname)).is_file():
+        return env
+    libdir = lib.as_posix()
+    current = env.get("LD_LIBRARY_PATH", "")
+    if libdir in current.split(":"):
+        return env
+    return {**env, "LD_LIBRARY_PATH": ":".join(p for p in (libdir, current) if p)}
 
 
 def stage_job(

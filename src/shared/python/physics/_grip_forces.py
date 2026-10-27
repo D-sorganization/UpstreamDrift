@@ -102,9 +102,12 @@ def compute_pressure_visualization(
     else:
         normalized_pressures = np.zeros(n_contacts)
 
-    grip_axis = grip_axis / math.hypot(
-        grip_axis[0], grip_axis[1], grip_axis[2]
-    )  # ⚡ Bolt: math.hypot avoids NumPy overhead
+    axis_norm = math.hypot(grip_axis[0], grip_axis[1], grip_axis[2])
+    if axis_norm <= 1e-9:
+        raise ValueError(
+            f"grip_axis must be a non-zero 3D vector, got norm={axis_norm}"
+        )
+    grip_axis = grip_axis / axis_norm  # ⚡ Bolt: math.hypot avoids NumPy overhead
     relative_pos = positions - grip_center
 
     grip_axis_positions = np.dot(relative_pos, grip_axis)

@@ -37,10 +37,10 @@ _HASH_FROZEN_ROWS: tuple[tuple[str, str, str], ...] = (
     ),
 )
 
-# Snapshot from main @ a6699390f (post-#13856): exception inventory keys only.
-_MAIN_EXCEPTION_KEY_COUNT = 103
+# Snapshot from main @ b0c6bcc2f7: exception inventory keys only.
+_MAIN_EXCEPTION_KEY_COUNT = 108
 _MAIN_EXCEPTION_KEYS_SHA256 = (
-    "16b21ec5ff3bf6bad7234184a789f1cecd15ec577ffe5002985b10da0cbb7f75"
+    "21a2934ee76c29ae6d0935926623a1f373172c2c7e2b8b812e87a6f96cc1eaa5"
 )
 
 

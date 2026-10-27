@@ -1,0 +1,6 @@
+{
+  "schema_version": "humanoid_option_a.trace/v1",
+  "seed": 13837,
+  "payload_sha256": "5cf24ee312282f292fcee47526fd14d96b491c463e701821d495686fef0b558c",
+  "npz": "reference_trace_v1.npz"
+}
