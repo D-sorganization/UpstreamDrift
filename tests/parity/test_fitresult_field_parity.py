@@ -149,3 +149,38 @@ def test_deprecated_alias_emits_warning_and_returns_canonical(
         f"DeprecationWarning for {alias!r} must mention canonical name "
         f"{canonical!r}; got: {dep[0].message!r}"
     )
+
+
+@pytest.mark.unit
+def test_opensim_status_nonsuccess_is_failure() -> None:
+    """UD-04: non-success with finite fun => failure, not warning."""
+    from types import SimpleNamespace
+    from src.shared.python.motion_matching.solver_status import map_scipy_status
+
+    scipy_result = SimpleNamespace(
+        success=False,
+        fun=123.45,
+        message="Positive directional derivative for linesearch",
+        nit=15,
+    )
+    assert map_scipy_status(scipy_result) == "failed"
+
+
+@pytest.mark.unit
+def test_solver_status_contract_all_engines() -> None:
+    """UD-05: shared status mapping gives identical labels for identical scipy results."""
+    from types import SimpleNamespace
+    from src.shared.python.motion_matching.solver_status import map_scipy_status
+
+    # Success with finite fun -> success
+    assert map_scipy_status(SimpleNamespace(success=True, fun=0.01, message="Optimization terminated successfully")) == "success"
+
+    # Non-success with finite fun -> failed (never warning)
+    assert map_scipy_status(SimpleNamespace(success=False, fun=0.05, message="Iteration limit reached")) == "failed"
+    assert map_scipy_status(SimpleNamespace(success=False, fun=0.05, message="More than 3*n iterations in LSQ subproblem")) == "failed"
+    assert map_scipy_status(SimpleNamespace(success=False, fun=0.05, message="Inequality constraints incompatible")) == "failed"
+
+    # Non-finite fun -> failed even if success flag is True
+    assert map_scipy_status(SimpleNamespace(success=True, fun=float("nan"), message="ok")) == "failed"
+    assert map_scipy_status(SimpleNamespace(success=False, fun=float("inf"), message="overflow")) == "failed"
+    assert map_scipy_status(None) == "failed"
