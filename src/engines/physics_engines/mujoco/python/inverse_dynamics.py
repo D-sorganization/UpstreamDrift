@@ -17,9 +17,7 @@ from src.shared.python.motion_matching.full_body_forward_dynamics import (
 
 REPLAY_STEPS = 50
 REPLAY_DT_S = 0.001
-REPLAY_DISCRETIZATION_RMS_RAD = 0.17
 DISCRETIZATION_REFINEMENT_FACTOR = 2
-KKT_EQUIVALENCE_RTOL = 0.75
 
 
 def _wanted_actuated_accelerations(
