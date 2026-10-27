@@ -102,7 +102,16 @@ from src.shared.python.motion_matching.cost import (
     compute_cost,
 )
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
+from src.shared.python.motion_matching.solver_status import (
+    make_provenance_fields,
+    map_scipy_status,
+)
 from src.shared.python.motion_matching.validate_theta import validate_theta
+
+try:
+    import pinocchio
+except ImportError:
+    pinocchio = None  # type: ignore[assignment]
 
 from .simulate import (
     COEFFS_PER_JOINT,
@@ -771,21 +780,22 @@ def fit_swing_pinocchio(  # noqa: C901
         theta_opt, target, _shared_cost_sim_fn, opts.cost_options
     )
 
+    prov = make_provenance_fields(pinocchio, "pin", "pinocchio", target=target)
     return FitResult(
         theta_optimal=theta_opt,
         final_cost=float(cost_total),
         final_rmse_m=float("nan"),
-        solver_status="success" if bool(result.success) else "failed",
+        solver_status=map_scipy_status(result),
         iterations=int(getattr(result, "nfev", len(history))),
         n_evaluations=int(getattr(result, "nfev", len(history))),
         wall_clock_s=float(elapsed),
         message=str(result.message),
         history=tuple(history),
         method=method_label,
-        git_commit="unknown",
-        engine_version="unknown",
-        target_hash="unknown",
-        timestamp_utc="unknown",
+        git_commit=prov["git_commit"],
+        engine_version=prov["engine_version"],
+        target_hash=prov["target_hash"],
+        timestamp_utc=prov["timestamp_utc"],
         cost_breakdown=cost_breakdown,
         n_jac_eval=int(n_jac_eval_counter[0]),
         meta={

@@ -939,6 +939,33 @@
       "issue": 12065,
       "reason": "Issue #12065: CMCMatchingSolver.match solves computed muscle control matching with fallback handling (107 lines > 100).",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "symbol": "fit_swing_opensim",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 13874,
+      "reason": "Issue #13874: fit_swing_opensim executes end-to-end opensim trajectory fitting with least-squares optimization (124 lines > 100).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "symbol": "_analytical_jacobian",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 13874,
+      "reason": "Issue #13874: _analytical_jacobian computes forward sensitivity chain rule across simulation horizon (174 lines > 100).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "symbol": "fit_swing_pinocchio",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 13874,
+      "reason": "Issue #13874: fit_swing_pinocchio executes end-to-end pinocchio trajectory fitting with analytical/FD Jacobians (173 lines > 100).",
+      "expires_on": "2026-12-31"
     }
   ]
 }
