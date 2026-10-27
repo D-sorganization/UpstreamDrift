@@ -714,7 +714,7 @@ jobs:
           "$RUNNER_TEMP/articulated-manufactured-rolling-venv/bin/python" -m pip install \
             "defusedxml>=0.7,<1" "pydantic>=2.12,<3" "PyYAML>=6.0,<7" \
             "numpy>=2.2,<3" "scipy>=1.13,<2" \
-            "mujoco>=3.6,<4" "pin>=2.6,<5" "pytest>=8,<10"
+            "mujoco>=3.6,<4" "pin>=2.6,<5" "pytest>=8,<9.2.0"
           "$RUNNER_TEMP/articulated-manufactured-rolling-venv/bin/python" -m pip check
       - name: Run Non-Vacuous Rolling and Killswitch Contracts
         run: |

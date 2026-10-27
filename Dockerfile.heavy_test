@@ -43,7 +43,7 @@ RUN pip install --upgrade pip==26.2.1 setuptools==84.2.1 wheel
 
 # ── Testing infrastructure (mirrors reusable-heavy-tests.yml) ────────────────
 RUN pip install \
-    pytest \
+    "pytest>=9.0.3,<9.2.0" \
     pytest-cov \
     pytest-timeout \
     pytest-xdist \
