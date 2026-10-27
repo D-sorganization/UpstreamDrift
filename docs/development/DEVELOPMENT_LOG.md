@@ -573,6 +573,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13792 · Per-Engine Step-Size Convergence Study and Exact Torque Switch-Time Handling
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13792
+- **Branch:** merged via #13855
+- **PR:** #13855
+- **Paths:** see #13855
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`1a76ba08`; collated from changes/13792-step-convergence-study-and-switch-time.md)
+- **Summary:** Per-engine step-size convergence study and exact torque switch-time handling
+- **Next step:** Shipped in PR #13855.
+
 ### DL-#13899 · Render Workers Put the Interpreter's Base_Prefix Lib Dir First on LD_LIBRARY_PATH, Because Opensim's Linux __Init__ Overwrites It With PATH; This Fixes the Requires_Opensim _Ctypes ABI Failure
 
 - **State:** shipped
