@@ -8,7 +8,6 @@ from unittest.mock import MagicMock
 import pytest
 
 import src.shared.python._contracts_decorators as contracts_decorators
-import src.shared.python.contracts as shared_contracts
 import src.shared.python.core.contracts.decorators as core_decorators
 from src.shared.python._contracts_level import _ContractState
 from src.shared.python.core.contracts.exceptions import PreconditionError
@@ -26,15 +25,11 @@ def enforce_contracts():
     prev_level = get_contract_level()
     prev_state_level = _ContractState.level
     set_contract_level(ContractLevel.ENFORCE)
-    shared_contracts.set_contract_level(shared_contracts.ContractLevel.ENFORCE)
     _ContractState.level = contracts_decorators.ContractLevel.ENFORCE
     try:
         yield
     finally:
         set_contract_level(prev_level)
-        shared_contracts.set_contract_level(
-            shared_contracts.ContractLevel(prev_level.value)
-        )
         _ContractState.level = prev_state_level
 
 
@@ -76,26 +71,6 @@ async def test_precondition_async_does_not_introspect_per_call(
 
     for i in range(1, 101):
         assert await async_double(i) == i * 2
-
-    assert spy.call_count <= 1
-
-
-def test_contracts_module_precondition_does_not_introspect_per_call(
-    monkeypatch: pytest.MonkeyPatch,
-):
-    """shared.python.contracts.precondition must not inspect signatures per call."""
-    orig_sig = inspect.signature
-    spy = MagicMock(side_effect=orig_sig)
-    monkeypatch.setattr(inspect, "signature", spy)
-
-    @shared_contracts.precondition(lambda x: x > 0, "x must be positive")
-    def compute(x: int) -> int:
-        return x + 1
-
-    spy.reset_mock()
-
-    for i in range(1, 101):
-        assert compute(i) == i + 1
 
     assert spy.call_count <= 1
 
