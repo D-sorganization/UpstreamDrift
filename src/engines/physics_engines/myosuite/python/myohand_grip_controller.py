@@ -33,6 +33,7 @@ from scipy.spatial.transform import Rotation
 from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
     BimanualGraspSynthesis,
 )
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.grip_contact.binding import GripStepReport
 from src.shared.python.grip_contact.bushing_law import BushingState
 from src.shared.python.grip_contact.contact_topology import (
@@ -88,6 +89,9 @@ _TRAJECTORY_CACHE: dict[
 ] = {}
 
 
+_DEFAULT_GRAVITY_M_S2: tuple[float, float, float] = (0.0, 0.0, -float(GRAVITY_M_S2))
+
+
 @dataclass(frozen=True)
 class ClubInertialProperties:
     """Analytical rigid-body inertial properties of ``golf_club`` derived from ``ClubSpec``."""
@@ -95,7 +99,7 @@ class ClubInertialProperties:
     mass_kg: float
     com_local_m: tuple[float, float, float]
     inertia_com_kg_m2: np.ndarray
-    gravity_m_s2: tuple[float, float, float] = (0.0, 0.0, -9.81)
+    gravity_m_s2: tuple[float, float, float] = _DEFAULT_GRAVITY_M_S2
 
     def __post_init__(self) -> None:
         if not math.isfinite(self.mass_kg) or self.mass_kg <= 0.0:
@@ -115,7 +119,7 @@ class ClubInertialProperties:
     def from_club_spec(
         cls,
         club: ClubSpec,
-        gravity_m_s2: tuple[float, float, float] = (0.0, 0.0, -9.81),
+        gravity_m_s2: tuple[float, float, float] = _DEFAULT_GRAVITY_M_S2,
     ) -> ClubInertialProperties:
         """Compute analytical mass, COM, and COM inertia tensor from ``ClubSpec`` primitive geoms."""
         if not isinstance(club, ClubSpec):
