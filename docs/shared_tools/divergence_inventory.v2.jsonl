@@ -887,6 +887,7 @@
 {"path": "grip_contact/friction_band.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/generated_export_lock.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/generated_freshness.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/grip_geometry.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/grip_mesh.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/hand_drift.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/hand_hand_allocation.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
