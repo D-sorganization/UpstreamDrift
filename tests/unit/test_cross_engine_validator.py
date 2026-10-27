@@ -84,6 +84,31 @@ class TestCrossEngineValidator(unittest.TestCase):
         self.assertFalse(res.passed)
         self.assertEqual(res.severity, "BLOCKER")
 
+    def test_classify_severity_fails_beyond_tolerance(self) -> None:
+        """UD-18: deviation > tol => passed=False."""
+        tol = 1e-6
+        # Just beyond tolerance
+        passed, severity = self.validator._classify_severity(tol * 1.0001, tol)
+        self.assertFalse(passed)
+        self.assertEqual(severity, "ERROR")
+
+        # 1.5x tolerance (previously returned passed=True with WARNING)
+        passed, severity = self.validator._classify_severity(tol * 1.5, tol)
+        self.assertFalse(passed)
+        self.assertEqual(severity, "ERROR")
+
+        # Via compare_states: deviation > tolerance must fail validation
+        res = self.validator.compare_states(
+            "engine1",
+            np.array([1.0]),
+            "engine2",
+            np.array([1.0 + tol * 1.5]),
+            metric="position",
+        )
+        self.assertFalse(res.passed)
+        self.assertEqual(res.severity, "ERROR")
+        self.assertEqual(res.tolerance, tol)
+
     def test_invalid_metric(self) -> None:
         """Test unknown metric raises ValueError."""
         with self.assertRaises(ValueError):
