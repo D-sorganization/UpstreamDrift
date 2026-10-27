@@ -46,6 +46,16 @@ from src.shared.python.grip_contact.force_decomposition import (
     ForceDecomposition,
     decompose_hand_forces,
 )
+from src.shared.python.grip_contact.grip_geometry import (
+    GRIP_GEOMETRY_PRESETS,
+    STATION_LOWER_M,
+    STATION_UPPER_M,
+    USGA_MAX_GRIP_DIAMETER_M,
+    GripGeometry,
+    check_standoff_compatibility,
+    get_grip_preset,
+    validate_usga_rules,
+)
 from src.shared.python.grip_contact.interface import (
     R_APPEARANCE_TO_SHARED,
     R_SHARED_TO_APPEARANCE,
@@ -319,6 +329,14 @@ __all__ = [
     "required_hand_moment_nm",
     "BushingParameters",
     "ContactMaterial",
+    "GRIP_GEOMETRY_PRESETS",
+    "GripGeometry",
+    "STATION_LOWER_M",
+    "STATION_UPPER_M",
+    "USGA_MAX_GRIP_DIAMETER_M",
+    "check_standoff_compatibility",
+    "get_grip_preset",
+    "validate_usga_rules",
     "shared_to_appearance_grip_frame",
     "condition_trajectory",
     "classify_parity_quantity",
