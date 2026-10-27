@@ -30,7 +30,10 @@ from src.shared.python.core.contracts.decorators import (
     precondition,
 )
 
-from ._geodesic import quaternion_geodesic_angles
+from ._geodesic import (
+    quaternion_geodesic_angles,
+    rotmat_frobenius_distances,
+)
 from typing import TYPE_CHECKING
 from .club_target import ClubTarget
 
@@ -179,10 +182,15 @@ def _position_term(sim_out: SimOutput, target: ClubTarget | MultiSourceTarget) -
 
 
 def _orientation_term(
-    sim_out: SimOutput, target: ClubTarget | MultiSourceTarget
+    sim_out: SimOutput,
+    target: ClubTarget | MultiSourceTarget,
+    opts: CostOptions,
 ) -> float:
     club: Any = getattr(target, "club", target)
-    """``mean_n( d_geo(R_sim, R_meas)^2 )`` via quaternion dot."""
+    """Orientation residual via quaternion geodesic or rotation-matrix Frobenius."""
+    if opts.q_orientation_repr == "rotmat":
+        distances = rotmat_frobenius_distances(sim_out.club_quat, club.club_quat)
+        return float(np.mean(distances * distances))
     angles = quaternion_geodesic_angles(sim_out.club_quat, club.club_quat)
     return float(np.mean(angles * angles))
 
@@ -203,12 +211,18 @@ def _anchor_term(sim_out: SimOutput, target: ClubTarget | MultiSourceTarget) -> 
 
 
 def _body_marker_term(
-    sim_out: SimOutput, target: ClubTarget | MultiSourceTarget
+    sim_out: SimOutput,
+    target: ClubTarget | MultiSourceTarget,
+    opts: CostOptions,
 ) -> float:
     """``mean_n( ||r_marker_sim - r_marker_meas||^2 )`` over all markers."""
     if not hasattr(target, "body") or target.body is None:
         return 0.0
     if sim_out.marker_xyz is None:
+        if opts.w_body_marker > 0.0:
+            raise ValueError(
+                "sim_out.marker_xyz is None but w_body_marker > 0 requested"
+            )
         return 0.0
     db = sim_out.marker_xyz - target.body.marker_xyz
     # ⚡ Bolt: np.einsum is ~2.7x faster than np.sum(db * db, axis=2) by avoiding temporary arrays
@@ -392,9 +406,9 @@ def compute_cost(
     _check_traj(sim_out.club_quat, n, 4, "sim_out.club_quat")
 
     pos = opts.w_position * _position_term(sim_out, target)
-    ori = opts.w_orientation * _orientation_term(sim_out, target)
+    ori = opts.w_orientation * _orientation_term(sim_out, target, opts)
     anc = opts.w_anchor_impact * _anchor_term(sim_out, target)
-    body_marker = opts.w_body_marker * _body_marker_term(sim_out, target)
+    body_marker = opts.w_body_marker * _body_marker_term(sim_out, target, opts)
     reg = opts.lambda_ * _regularizer_term(theta, sim_out, opts)
     total = pos + ori + anc + body_marker + reg
 
