@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13873 · Soft-Fail Divergent Rollout Evaluations in MuJoCo Fit_Swing With Finite Penalty
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13873
+- **Branch:** fix/13873-mujoco-divergent-rollout-soft-fail
+- **PR:** #13916
+- **Paths:** see #13916
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`4cf42e83`; collated from changes/13873-mujoco-divergent-rollout-soft-fail.md)
+- **Summary:** Soft-fail divergent rollout evaluations in MuJoCo fit_swing with finite penalty
+- **Next step:** Merge PR
+
 ### DL-#13879 · \ Route C3D Analog and Reader CoP Through Canonical Center of Pressure\
 
 - **State:** in_review
@@ -637,6 +650,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13891 · Add GripGeometry Source of Truth With Presets and USGA Rules Validator
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13891
+- **Branch:** merged via #13913
+- **PR:** #13913
+- **Paths:** see #13913
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`51ab07b9`; collated from changes/13891-add-gripgeometry-source-of-truth-with-pr.md)
+- **Summary:** Add GripGeometry source of truth with presets and USGA rules validator
+- **Next step:** Shipped in PR #13913.
+
+### DL-#13881 · Align Tendon Compliance and Active Force-Length Width With Thelen 2003
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13881
+- **Branch:** merged via #13910
+- **PR:** #13910
+- **Paths:** see #13910
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`1a917a95`; collated from changes/13881-align-tendon-compliance-and-active-force.md)
+- **Summary:** align tendon compliance and active force-length width with Thelen 2003
+- **Next step:** Shipped in PR #13910.
 
 ### DL-#13890 · Implement Cited GripFrictionBand and Combined Squeeze Vector Bound
 
