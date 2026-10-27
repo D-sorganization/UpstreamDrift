@@ -548,14 +548,12 @@ class CrossEngineValidator(ContractChecker):
         # Log with appropriate severity level
         self._log_result(
             severity=severity,
-            engine1_name=engine1_name,
-            engine2_name=engine2_name,
+            engine_names=(engine1_name, engine2_name),
             metric=metric,
             max_dev=max_dev,
             tol=tol,
             deviation=deviation,
-            engine1_state=engine1_state,
-            engine2_state=engine2_state,
+            states=(engine1_state, engine2_state),
         )
 
         return ValidationResult(
@@ -625,18 +623,18 @@ class CrossEngineValidator(ContractChecker):
     def _log_result(
         self,
         severity: str,
-        engine1_name: str,
-        engine2_name: str,
+        engine_names: tuple[str, str],
         metric: str,
         max_dev: float,
         tol: float,
         deviation: np.ndarray,
-        engine1_state: np.ndarray,
-        engine2_state: np.ndarray,
+        states: tuple[np.ndarray, np.ndarray],
     ) -> None:
         """Log validation result with appropriate severity level."""
         if severity is None:
             raise ValueError("severity must be provided")
+        engine1_name, engine2_name = engine_names
+        engine1_state, engine2_state = states
         ratio = max_dev / tol if tol > 0 else float("inf")
         worst_idx = int(np.argmax(deviation))
 
