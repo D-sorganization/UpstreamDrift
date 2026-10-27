@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13879 · \ Route C3D Analog and Reader CoP Through Canonical Center of Pressure\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13879
+- **Branch:** fix/13879-cop-c3d-analog-canonical
+- **PR:** #13907
+- **Paths:** see #13907
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`67d3db29`; collated from changes/13879-route-c3d-analog-and-reader-cop-through.md)
+- **Summary:** \ Route C3D analog and reader CoP through canonical center of pressure\
+- **Next step:** \Merge PR 13907\
+
 ### DL-#13877 · \ Fail Cross-Engine Validation When Deviation Exceeds Tolerance\
 
 - **State:** in_review
@@ -624,6 +637,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13890 · Implement Cited GripFrictionBand and Combined Squeeze Vector Bound
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13890
+- **Branch:** merged via #13911
+- **PR:** #13911
+- **Paths:** see #13911
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`61d679a6`; collated from changes/13890-implement-cited-gripfrictionband-and-com.md)
+- **Summary:** implement cited GripFrictionBand and combined squeeze vector bound
+- **Next step:** Shipped in PR #13911.
 
 ### DL-#13775 · Regenerate the Proximal-Distal Release Claim Review and Manifests After the de Leva Provenance Change.
 
