@@ -301,7 +301,7 @@ def fit_swing_opensim(
     bounds: list[tuple[float, float]] = list(zip(lb.tolist(), ub.tolist(), strict=True))
 
     t0 = time.perf_counter()
-    res: Any = minimize(
+    res: Any = minimize(  # type: ignore[call-overload]
         J,
         theta0,
         method=options.method,

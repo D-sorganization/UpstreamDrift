@@ -5,3 +5,5 @@ dl_state: "in_review"
 next_step: "Merge PR"
 branch: "fix/13874-solver-status-contract"
 ---
+
+Update divergence inventory for solver_status.py and add type ignore on OpenSim minimize call-overload.
