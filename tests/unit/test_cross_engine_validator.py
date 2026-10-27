@@ -3,6 +3,7 @@
 import unittest
 
 import numpy as np
+import pytest
 from src.shared.python.engine_core.cross_engine_validator import (
     CrossEngineValidator,
 )
@@ -84,6 +85,7 @@ class TestCrossEngineValidator(unittest.TestCase):
         self.assertFalse(res.passed)
         self.assertEqual(res.severity, "BLOCKER")
 
+    @pytest.mark.unit
     def test_classify_severity_fails_beyond_tolerance(self) -> None:
         """UD-18: deviation > tol => passed=False."""
         tol = 1e-6
