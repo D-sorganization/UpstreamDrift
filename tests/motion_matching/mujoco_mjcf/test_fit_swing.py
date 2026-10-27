@@ -279,7 +279,7 @@ def test_fit_result_provenance_schema(synth_pair_upper, sim_opts_short) -> None:
     assert result.theta_optimal.shape == (_n_joints(sim_opts_short.variant) * 7,)
     assert np.isfinite(result.theta_optimal).all()
     assert result.final_rmse_m >= 0.0 and np.isfinite(result.final_rmse_m)
-    assert result.final_total_work_J >= 0.0
+    assert result.final_total_work_J is not None and result.final_total_work_J >= 0.0
     assert isinstance(result.method, str) and result.method == "SLSQP"
     assert isinstance(result.solver_options, dict)
     assert "maxiter" in result.solver_options
