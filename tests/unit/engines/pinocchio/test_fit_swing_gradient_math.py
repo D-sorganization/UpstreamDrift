@@ -205,3 +205,59 @@ class TestFitOptionsInvariants:
         opts = FitOptions()
         with pytest.raises(FrozenInstanceError):
             opts.max_iter = 100  # type: ignore[misc]
+
+
+# --------------------------------------------------------------------------- #
+# orientation_residual_gradient_axis & test_orientation_jacobian_fd (UD-01)
+# --------------------------------------------------------------------------- #
+
+
+class TestOrientationResidualGradient:
+    """Analytical gradient of geodesic angle matches finite difference to 1e-6 (UD-01)."""
+
+    def test_orientation_jacobian_fd(self) -> None:
+        """Analytic orientation row matches finite-difference Jacobian to 1e-6."""
+        orientation_residual_gradient_axis = getattr(
+            fit_swing_mod, "orientation_residual_gradient_axis", None
+        )
+        assert orientation_residual_gradient_axis is not None, (
+            "orientation_residual_gradient_axis must be implemented in fit_swing"
+        )
+
+        rng = np.random.default_rng(42)
+        # Random axis and angle for target vs sim
+        axis = rng.standard_normal(3)
+        axis = axis / np.linalg.norm(axis)
+        angle = 0.35  # ~20 degrees
+        q_target = np.array([1.0, 0.0, 0.0, 0.0])
+        # q_sim rotated by angle about axis
+        q_sim = np.concatenate([[np.cos(angle / 2.0)], np.sin(angle / 2.0) * axis])
+
+        u_analytic = orientation_residual_gradient_axis(q_sim, q_target)
+
+        # Finite difference gradient with respect to world angular perturbation delta_phi
+        eps = 1e-7
+        u_fd = np.zeros(3)
+        for k in range(3):
+            dphi = np.zeros(3)
+            dphi[k] = eps
+            # Perturb q_sim by delta_phi: q_pert = [1, 0.5 * dphi] * q_sim
+            qw, qx, qy, qz = q_sim
+            pw, px, py, pz = 1.0, 0.5 * dphi[0], 0.5 * dphi[1], 0.5 * dphi[2]
+            q_plus = np.array(
+                [
+                    pw * qw - px * qx - py * qy - pz * qz,
+                    pw * qx + px * qw + py * qz - pz * qy,
+                    pw * qy - px * qz + py * qw + pz * qx,
+                    pw * qz + px * qy - py * qx + pz * qw,
+                ]
+            )
+            q_plus = q_plus / np.linalg.norm(q_plus)
+
+            dot_orig = np.clip(abs(float(np.dot(q_sim, q_target))), -1.0, 1.0)
+            dot_plus = np.clip(abs(float(np.dot(q_plus, q_target))), -1.0, 1.0)
+            theta_orig = 2.0 * np.arccos(dot_orig)
+            theta_plus = 2.0 * np.arccos(dot_plus)
+            u_fd[k] = (theta_plus - theta_orig) / eps
+
+        np.testing.assert_allclose(u_analytic, u_fd, rtol=1e-5, atol=1e-6)

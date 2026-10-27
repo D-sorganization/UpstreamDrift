@@ -117,6 +117,7 @@ __all__ = [
     "FitOptions",
     "FitResult",
     "fit_swing_pinocchio",
+    "orientation_residual_gradient_axis",
     "polynomial_basis",
     "polynomial_torque_chain_rule",
     "rotmat_to_quat_wxyz",
@@ -260,6 +261,49 @@ def rotmat_to_quat_wxyz(R: NDArray[np.float64]) -> NDArray[np.float64]:
     from src.shared.python.math_utils.quaternion import rotmat_to_quat
 
     return rotmat_to_quat(R)
+
+
+def orientation_residual_gradient_axis(
+    q_sim: NDArray[np.float64],
+    q_target: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Compute the world-frame rotation axis unit vector ``u`` such that ``∂theta / ∂phi = u^T``.
+
+    For the geodesic orientation error ``theta = 2 * arccos(|<q_sim, q_target>|)``,
+    an infinitesimal world-frame rotation ``delta_phi`` applied to ``q_sim``
+    perturbs ``theta`` according to ``delta_theta = u^T delta_phi + O(||delta_phi||^2)``.
+
+    Args:
+        q_sim: Unit quaternion ``[w, x, y, z]`` for the simulated orientation.
+        q_target: Unit quaternion ``[w, x, y, z]`` for the target orientation.
+
+    Returns:
+        3-element unit vector in the world frame along which rotation increases
+        the orientation residual. Returns zeros if orientations are identical.
+    """
+    qs = np.asarray(q_sim, dtype=np.float64).reshape(4)
+    qt = np.asarray(q_target, dtype=np.float64).reshape(4)
+    if not (np.all(np.isfinite(qs)) and np.all(np.isfinite(qt))):
+        raise ValueError(
+            "orientation_residual_gradient_axis requires finite quaternions"
+        )
+
+    dot = float(np.dot(qs, qt))
+    if dot < 0.0:
+        qt = -qt
+
+    # Relative rotation q_rel = q_sim * q_target^{-1} in world frame
+    qw, qx, qy, qz = qs
+    tw, tx, ty, tz = qt
+    rx = qw * (-tx) + qx * tw + qy * (-tz) - qz * (-ty)
+    ry = qw * (-ty) - qx * (-tz) + qy * tw + qz * (-tx)
+    rz = qw * (-tz) + qx * (-ty) - qy * (-tx) + qz * tw
+    r_vec = np.array([rx, ry, rz], dtype=np.float64)
+
+    v_norm = float(np.linalg.norm(r_vec))
+    if v_norm > 1e-10:
+        return r_vec / v_norm
+    return np.zeros(3, dtype=np.float64)
 
 
 # --------------------------------------------------------------------------- #
@@ -485,8 +529,8 @@ def _analytical_jacobian(
     # Forward sensitivity state: S_q == d q / d theta, S_qd == d qd / d theta.
     nq = int(model.nq)
     nv = int(model.nv)
-    S_q = np.zeros((nq, nx), dtype=np.float64)
-    S_qd = np.zeros((nv, nx), dtype=np.float64)
+    S_q: NDArray[np.float64] = np.zeros((nq, nx), dtype=np.float64)
+    S_qd: NDArray[np.float64] = np.zeros((nv, nx), dtype=np.float64)
 
     impact_k = int(local_target.impact_idx) - 1
     dt = float(sim_options.dt)
@@ -528,21 +572,13 @@ def _analytical_jacobian(
         J_ch[3 * i : 3 * i + 3, :] = w_pos * dp_ch  # type: ignore[assignment]
 
         # Orientation residual: theta = 2 * arccos(|<q_sim, q_meas>|).
-        # d theta / d S_q = (sign(dot) / sqrt(1 - dot^2)) *
-        #                   ( - q_meas^T (1/2 H(q_sim)) ) * J_ang @ S_q_v
-        # We use the simpler small-angle approximation that the residual
-        # angle is well-approximated by the body-frame angular delta and
-        # that ∂angle / ∂q ≈ J_ang_world projected along the rotation
-        # axis between q_sim and q_meas. For the recovery test the
-        # residual is near-zero, so any direction in the tangent plane
-        # gives a valid descent direction; LM is forgiving.
+        # Under world-frame angular velocity / perturbation delta_phi of the
+        # clubhead, d theta / d phi = u^T where u is the unit rotation axis
+        # of the relative rotation R_sim @ R_tar^T.
         q_sim_i = sim_quats[i]
         q_tar_i = target_quats[i]
-        dot = float(np.dot(q_sim_i, q_tar_i))
-        sgn = 1.0 if dot >= 0.0 else -1.0
-        # axis-angle gradient: dangle / dq ~ projection along axis.
-        # Use ang_jac directly weighted by 1.0 (small-angle limit).
-        J_ori_row = sgn * (J_ch_ori.sum(axis=0)) @ S_q_v  # (nx,)
+        u_axis = orientation_residual_gradient_axis(q_sim_i, q_tar_i)
+        J_ori_row = (u_axis @ J_ch_ori) @ S_q_v  # (nx,)
         J_ori[i, :] = w_ori * J_ori_row  # type: ignore[assignment]
 
         if i == impact_k:

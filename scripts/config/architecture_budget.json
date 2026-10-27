@@ -421,6 +421,24 @@
       "expires_on": "2026-12-31"
     },
     {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "symbol": "_analytical_jacobian",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 13871,
+      "reason": "Issue #13871: Pre-existing analytical Jacobian calculation in fit_swing exceeds 100 lines.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "symbol": "fit_swing_pinocchio",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 13871,
+      "reason": "Issue #13871: Pre-existing fit_swing_pinocchio pipeline coordinator exceeds 100 lines.",
+      "expires_on": "2026-12-31"
+    },
+    {
       "path": "src/shared/python/analysis/nonlinear_dynamics.py",
       "symbol": "NonlinearDynamicsMixin.estimate_lyapunov_exponent",
       "rule": "function-lines",
