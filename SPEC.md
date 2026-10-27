@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-27 | #13839 | Regenerate the proximal-distal release claim review and manifests after the de Leva provenance change. |
 | 2026-10-27 | #13906 | \ Fail cross-engine validation when deviation exceeds tolerance\ |
 | 2026-10-27 | #13838 | Option A MuJoCo swing-recovery trace fixture; reuses triple_pendulum_spec segments in humanoid_robotics.option_a.plant. |
 | 2026-10-27 | #13889 | \ Zero friction cone capacity in tension\ |

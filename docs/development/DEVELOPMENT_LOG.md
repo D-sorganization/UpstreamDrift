@@ -625,6 +625,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13775 · Regenerate the Proximal-Distal Release Claim Review and Manifests After the de Leva Provenance Change.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13775
+- **Branch:** merged via #13839
+- **PR:** #13839
+- **Paths:** see #13839
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`0963aa38`; collated from changes/13775-regenerate-the-proximal-distal-release-c.md)
+- **Summary:** Regenerate the proximal-distal release claim review and manifests after the de Leva provenance change.
+- **Next step:** Shipped in PR #13839.
+
 ### DL-#13792 · Per-Engine Step-Size Convergence Study and Exact Torque Switch-Time Handling
 
 - **State:** shipped
