@@ -41,6 +41,7 @@ from src.engines.physics_engines.opensim.python.msk_lift_video_motion import (
 from src.engines.physics_engines.opensim.python.musculoskeletal_swing import (
     resolve_base_model,
 )
+from src.tools.native_viewer_export.backends._subprocess import worker_env
 
 __all__ = [
     "BARBELL_LIFTS",
@@ -170,14 +171,13 @@ def render_opensim_lift_video(
             str(worker_script),
             str(job_file),
         ]
-        env = {**os.environ}
+        env = worker_env()
         if "UPSTREAMDRIFT_MSK_BASE_MODEL" not in env:
             try:
                 env["UPSTREAMDRIFT_MSK_BASE_MODEL"] = str(resolve_base_model())
             except FileNotFoundError:
                 pass
         env["NATIVE_VIEWER_XVFB"] = "1"
-        env["PYTHONPATH"] = os.pathsep.join(sys.path)
 
         proc = subprocess.run(  # noqa: S603 - fixed argv
             cmd,

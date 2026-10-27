@@ -195,3 +195,39 @@ def test_bar_body_origin_matches_bundle(lift: str) -> None:
     assert max_err <= receipt_err + 1e-4, (
         f"{lift}: max measured bar error {max_err * 1000:.2f} mm > receipt {receipt_err * 1000:.2f} mm"
     )
+
+
+def test_render_worker_pythonpath_excludes_parent_stdlib(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """#13896: worker PYTHONPATH holds only repo roots, never stdlib/lib-dynload."""
+    import os
+    import subprocess
+    import sysconfig
+    from types import SimpleNamespace
+
+    from src.engines.physics_engines.opensim.python import msk_lift_video
+
+    captured: dict[str, dict[str, str]] = {}
+
+    def fake_run(*_args: object, **kwargs: object) -> SimpleNamespace:
+        captured["env"] = dict(kwargs["env"])  # type: ignore[call-overload]
+        raise RuntimeError("stop before result.json")
+
+    monkeypatch.setattr(msk_lift_video.subprocess, "run", fake_run)
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setenv("UPSTREAMDRIFT_MSK_BASE_MODEL", "unused.osim")
+
+    with pytest.raises(RuntimeError, match="stop before result.json"):
+        render_opensim_lift_video(lift="squat", out_path=tmp_path / "squat.mp4")
+
+    env = captured["env"]
+    entries = [p for p in env["PYTHONPATH"].split(os.pathsep) if p]
+    paths = sysconfig.get_paths()
+    banned = {Path(paths["stdlib"]), Path(paths["platstdlib"])}
+    for entry in entries:
+        assert Path(entry) not in banned
+        assert Path(entry).name != "lib-dynload"
+    assert str(_REPO) in entries
+    assert env["NATIVE_VIEWER_XVFB"] == "1"
+    assert env["UPSTREAMDRIFT_MSK_BASE_MODEL"] == "unused.osim"
