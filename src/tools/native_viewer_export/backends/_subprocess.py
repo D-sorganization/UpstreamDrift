@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 import json
 import os
 from pathlib import Path
 from typing import Any
 import subprocess
 import sys
+import sysconfig
 import tempfile
 
 import numpy as np
@@ -37,7 +38,30 @@ def worker_env(extra: dict[str, str] | None = None) -> dict[str, str]:
     env.setdefault("MPLBACKEND", "Agg")
     env.setdefault("QT_QPA_PLATFORM", "offscreen")
     env.update(extra or {})
-    return env
+    return with_interpreter_libdir(env)
+
+
+def with_interpreter_libdir(
+    env: dict[str, str],
+    *,
+    platform: str = sys.platform,
+    config: Callable[[str], Any] = sysconfig.get_config_var,
+) -> dict[str, str]:
+    """Lead ``LD_LIBRARY_PATH`` with this interpreter's ``LIBDIR`` (#13896).
+
+    The opensim Linux wheel's ``__init__`` sets ``LD_LIBRARY_PATH = PATH``,
+    dropping the ``libpython`` directory a shared-build interpreter (e.g.
+    setup-python's tool cache) needs. A worker started after ``import opensim``
+    would otherwise link the system ``libpython`` against this interpreter's
+    stdlib and fail on ``_ctypes``. No-op off Linux or for static builds.
+    """
+    libdir = config("LIBDIR")
+    if not platform.startswith("linux") or not config("Py_ENABLE_SHARED") or not libdir:
+        return env
+    current = env.get("LD_LIBRARY_PATH", "")
+    if libdir in current.split(":"):
+        return env
+    return {**env, "LD_LIBRARY_PATH": ":".join(p for p in (libdir, current) if p)}
 
 
 def stage_job(
