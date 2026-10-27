@@ -46,6 +46,14 @@ from src.shared.python.grip_contact.force_decomposition import (
     ForceDecomposition,
     decompose_hand_forces,
 )
+from src.shared.python.grip_contact.friction_band import (
+    GRIP_FRICTION_BANDS,
+    GripFrictionBand,
+    combined_squeeze_n,
+    get_friction_band,
+    governing_branch,
+    unilateral_friction_capacity,
+)
 from src.shared.python.grip_contact.interface import (
     R_APPEARANCE_TO_SHARED,
     R_SHARED_TO_APPEARANCE,
@@ -319,6 +327,12 @@ __all__ = [
     "required_hand_moment_nm",
     "BushingParameters",
     "ContactMaterial",
+    "GRIP_FRICTION_BANDS",
+    "GripFrictionBand",
+    "combined_squeeze_n",
+    "get_friction_band",
+    "governing_branch",
+    "unilateral_friction_capacity",
     "shared_to_appearance_grip_frame",
     "condition_trajectory",
     "classify_parity_quantity",
