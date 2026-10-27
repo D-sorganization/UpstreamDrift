@@ -99,6 +99,7 @@ from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.cost import (
     CostOptions,
     SimOutput,
+    _regularizer_term,
     compute_cost,
 )
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
@@ -400,6 +401,7 @@ def _build_residual_vector(
     out: SimOut,
     target: ClubTarget,
     opts: CostOptions,
+    theta: NDArray[np.float64] | None = None,
 ) -> NDArray[np.float64]:
     """Assemble the residual vector ``r`` such that ``||r||^2 ≈ J``.
 
@@ -430,7 +432,27 @@ def _build_residual_vector(
     w_anc = np.sqrt(opts.w_anchor_impact)
     r_anc = w_anc * da  # (3,)
 
-    return np.concatenate([r_butt, r_ch, r_anc, r_ori])
+    # Regulariser residual -- scalar with weight sqrt(lambda_).
+    if opts.lambda_ > 0.0:
+        sim_cost_in = _simout_to_costinput(out)
+        theta_arr = np.zeros(0, dtype=np.float64) if theta is None else theta
+        reg_val = _regularizer_term(theta_arr, sim_cost_in, opts)
+        r_reg = np.array(
+            [np.sqrt(opts.lambda_ * max(0.0, float(reg_val)))], dtype=np.float64
+        )
+    else:
+        r_reg = np.array([0.0], dtype=np.float64)
+
+    r = np.concatenate([r_butt, r_ch, r_anc, r_ori, r_reg])
+
+    # DbC Postcondition: residual layout equals the docstring
+    expected_len = 7 * n + 4
+    if r.shape != (expected_len,):
+        raise ValueError(
+            f"Residual layout does not match docstring: expected length {expected_len} "
+            f"(3n butt + 3n clubhead + 3 anchor + n orientation + 1 regularizer), got {r.shape}"
+        )
+    return r
 
 
 def _residual_and_simout(
@@ -450,7 +472,7 @@ def _residual_and_simout(
         local_target = _resample_clubtarget_to_grid(target, out.t)
     else:
         local_target = target
-    r = _build_residual_vector(out, local_target, cost_options)
+    r = _build_residual_vector(out, local_target, cost_options, theta=theta)
 
     # Light-touch history hook: record ||r||^2 / 2 (the LM objective).
     history.append(0.5 * float(np.dot(r, r)))
@@ -622,12 +644,22 @@ def _analytical_jacobian(
         S_q_new_v = S_q_v + dt * S_qd
         S_qd_new = S_qd + dt * S_qdd
         if nq == nv:
-            S_q = S_q_new_v
+            S_q = S_q_new_v  # type: ignore[assignment]
         else:
             S_q[-nv:, :] = S_q_new_v
-        S_qd = S_qd_new
+        S_qd = S_qd_new  # type: ignore[assignment]
 
-    return np.vstack([J_butt, J_ch, J_anc, J_ori])
+    # Regulariser Jacobian row: ∂r_reg / ∂theta.
+    if cost_options.lambda_ > 0.0 and cost_options.regularizer == "coeff_l2":
+        norm_th = float(np.linalg.norm(theta))
+        if norm_th > 1e-12:
+            J_reg = (np.sqrt(cost_options.lambda_) * (theta / norm_th)).reshape(1, -1)
+        else:
+            J_reg = np.zeros((1, nx), dtype=np.float64)
+    else:
+        J_reg = np.zeros((1, nx), dtype=np.float64)
+
+    return np.vstack([J_butt, J_ch, J_anc, J_ori, J_reg])
 
 
 # --------------------------------------------------------------------------- #
@@ -680,14 +712,22 @@ def fit_swing_pinocchio(  # noqa: C901
     n_joints = int(model.nv)
     nx = n_joints * COEFFS_PER_JOINT
 
+    # ---- Torque bounds from canonical model definition -------------- #
+    from src.engines.physics_engines.pinocchio.python.simulate_with_coefficients import (
+        polynomial_torque_bounds,
+    )
+
+    lb, ub = polynomial_torque_bounds(n_joints)
+
     # ---- Initial guess --------------------------------------------- #
     if opts.theta0 is not None:
         theta0 = np.asarray(opts.theta0, dtype=np.float64).copy()
         if theta0.shape != (nx,):
             raise ValueError(f"theta0 has shape {theta0.shape}; expected ({nx},)")
+        theta0 = np.clip(theta0, lb, ub)
     else:
         rng = np.random.default_rng(opts.rng_seed)
-        theta0 = opts.theta0_scale * rng.standard_normal(nx)
+        theta0 = np.clip(opts.theta0_scale * rng.standard_normal(nx), lb, ub)
 
     # ---- Residual + Jacobian closures ----------------------------- #
     history: list[float] = []
@@ -715,34 +755,34 @@ def fit_swing_pinocchio(  # noqa: C901
             )
 
         jac_arg: Any = _jac
-        method_label = "lm-analytical"
+        method_label = "trf-analytical"
     elif opts.jac_mode == "finite_difference":
         jac_arg = "2-point"
-        method_label = "lm-fd"
+        method_label = "trf-fd"
     else:
         raise ValueError(
             "jac_mode must be 'analytical' or 'finite_difference'; "
             f"got {opts.jac_mode!r}"
         )
 
-    # ---- Run LM ---------------------------------------------------- #
+    # ---- Run bounded least_squares (TRF) --------------------------- #
     if opts.verbose:
         logger.info(
-            "fit_swing_pinocchio: starting LM (%s) with theta0 |.| = %.3e, max_iter=%d",
+            "fit_swing_pinocchio: starting TRF (%s) with theta0 |.| = %.3e, max_iter=%d",
             method_label,
             float(np.linalg.norm(theta0)),
             opts.max_iter,
         )
 
     t_start = _time.perf_counter()
-    # scipy's "lm" mode does not accept bounds; if a future caller needs
-    # box-constrained LM they should switch to method="trf" via FitOptions
-    # extension. The parity spec calls for vanilla LM here.
+    # Parity spec §2.3: use bounded Trust Region Reflective ('trf') with
+    # torque-coefficient box bounds matching MuJoCo, Drake, and OpenSim.
     result = least_squares(
         fun=_residual,
         x0=theta0,
         jac=jac_arg,
-        method="lm",
+        bounds=(lb, ub),
+        method="trf",
         max_nfev=opts.max_iter * (nx + 1),
         ftol=opts.ftol,
         xtol=opts.xtol,
@@ -758,6 +798,14 @@ def fit_swing_pinocchio(  # noqa: C901
         n_joints=n_joints,
         name="theta_optimal",
     )
+
+    # DbC Postcondition: solution respects the box bounds
+    tol = 1e-8
+    if np.any(theta_opt < lb - tol) or np.any(theta_opt > ub + tol):
+        raise ValueError(
+            "Optimal theta violates polynomial torque box bounds: "
+            f"min diff {float(np.min(theta_opt - lb)):.3e}, max diff {float(np.max(theta_opt - ub)):.3e}"
+        )
 
     # ---- Canonical cost via the shared compute_cost ---------------- #
     def _shared_cost_sim_fn(theta_flat: NDArray[np.float64]) -> SimOutput:
