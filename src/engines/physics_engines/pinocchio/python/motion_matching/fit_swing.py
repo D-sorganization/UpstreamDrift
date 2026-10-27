@@ -644,10 +644,10 @@ def _analytical_jacobian(
         S_q_new_v = S_q_v + dt * S_qd
         S_qd_new = S_qd + dt * S_qdd
         if nq == nv:
-            S_q = S_q_new_v
+            S_q = S_q_new_v  # type: ignore[assignment]
         else:
             S_q[-nv:, :] = S_q_new_v
-        S_qd = S_qd_new
+        S_qd = S_qd_new  # type: ignore[assignment]
 
     # Regulariser Jacobian row: ∂r_reg / ∂theta.
     if cost_options.lambda_ > 0.0 and cost_options.regularizer == "coeff_l2":
