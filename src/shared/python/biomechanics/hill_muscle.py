@@ -19,6 +19,7 @@ Reference:
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -96,13 +97,15 @@ class HillMuscleModel:
                 Default 0.45 from Thelen (2003).
         """
         self.params = params
-        gamma = (
-            force_length_gamma if force_length_gamma is not None else force_length_width
-        )
-        self._force_length_gamma = (
-            gamma if gamma is not None else self.DEFAULT_FORCE_LENGTH_GAMMA
-        )
-        self._force_length_width = self._force_length_gamma
+        if force_length_gamma is not None:
+            self._force_length_gamma = force_length_gamma
+            self._force_length_width = math.sqrt(force_length_gamma)
+        elif force_length_width is not None:
+            self._force_length_width = force_length_width
+            self._force_length_gamma = force_length_width**2
+        else:
+            self._force_length_gamma = self.DEFAULT_FORCE_LENGTH_GAMMA
+            self._force_length_width = math.sqrt(self.DEFAULT_FORCE_LENGTH_GAMMA)
 
     def force_length_active(self, l_norm: float) -> float:
         """Active force-length relationship (Gaussian curve).

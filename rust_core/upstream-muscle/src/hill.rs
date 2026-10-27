@@ -18,9 +18,9 @@
 
 /// Default width of the active force-length Gaussian curve, dimensionless.
 ///
-/// From Thelen (2003), J. Biomech. Eng., 125(1), pp. 70-77; matches
-/// `HillMuscleModel.DEFAULT_FORCE_LENGTH_GAMMA = 0.45` in the Python source.
-pub const DEFAULT_FORCE_LENGTH_WIDTH: f64 = 0.45;
+/// From Thelen (2003), J. Biomech. Eng., 125(1), pp. 70-77; width sqrt(gamma)
+/// corresponding to DEFAULT_FORCE_LENGTH_GAMMA = 0.45.
+pub const DEFAULT_FORCE_LENGTH_WIDTH: f64 = 0.6708203932499369;
 pub const DEFAULT_FORCE_LENGTH_GAMMA: f64 = 0.45;
 
 /// Stiffness coefficient of the passive (PEE) exponential spring in
@@ -74,10 +74,12 @@ pub fn f_l_with_gamma(l_norm: f64, gamma: f64) -> f64 {
     (-(d * d) / gamma).exp()
 }
 
-/// Backward compatible alias for [`f_l_with_gamma`].
+/// Variant of [`f_l`] that takes an explicit Gaussian width parameter.
+///
+/// Converts width w to shape parameter gamma = w^2.
 #[inline]
 pub fn f_l_with_width(l_norm: f64, width: f64) -> f64 {
-    f_l_with_gamma(l_norm, width)
+    f_l_with_gamma(l_norm, width * width)
 }
 
 // ── Passive force-length (PEE) ───────────────────────────────────────────────
