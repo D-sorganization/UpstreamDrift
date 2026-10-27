@@ -36,6 +36,7 @@ are safe. Parallel fits MUST use ``multiprocessing`` (not threads).
 from __future__ import annotations
 
 import hashlib
+import logging
 import platform
 import time
 from dataclasses import dataclass, field
@@ -52,6 +53,7 @@ from src.shared.python.core.contracts.decorators import (
 )
 from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.cost import (
+    CostBreakdown,
     CostOptions,
     SimOutput,
     compute_cost,
@@ -64,7 +66,13 @@ from .jacobians import JacobianCache, compute_cost_gradient_analytical
 from .simulate import SimOptions, SimOut, simulate_with_coefficients
 from .torque_driver import polynomial_torque_bounds
 
+logger = logging.getLogger(__name__)
+
+#: Large finite penalty returned for divergent rollouts so SLSQP can step away (UD-03).
+DIVERGENT_COST_PENALTY: float = 1e9
+
 __all__ = [
+    "DIVERGENT_COST_PENALTY",
     "FitOptions",
     "FitResult",
     "MinimizerOptions",
@@ -245,7 +253,7 @@ def _check_args(target: ClubTarget, options: FitOptions) -> bool:
 def _check_result(result: FitResult) -> bool:
     return (
         isinstance(result, FitResult)
-        and np.isfinite(result.final_rmse_m)
+        and (result.solver_status == "failed" or np.isfinite(result.final_rmse_m))
         and result.final_rmse_m >= 0.0
         and len(result.target_hash) == 64
     )
@@ -353,9 +361,12 @@ def _solve_theta(
             cost, _ = compute_cost(theta, target, _sim_fn, options.cost)
         except (ValueError, RuntimeError) as exc:
             # Soft-fail: a divergent rollout returns a large finite cost
-            # so SLSQP can still take a step away from this region.
-            history.append(float("inf"))
-            raise RuntimeError(f"objective evaluation failed: {exc}") from exc
+            # so SLSQP can still take a step away from this region (UD-03).
+            logger.warning(
+                "Rollout evaluation diverged at evaluation %d: %s", n_eval, exc
+            )
+            history.append(DIVERGENT_COST_PENALTY)
+            return float(DIVERGENT_COST_PENALTY)
         history.append(float(cost))
         return float(cost)
 
@@ -427,12 +438,28 @@ def _finalize_fit_result(
         n_joints=n_joints,
         name="theta_optimal",
     )
-    final_sim_out = _simulate_for_cost(theta_star, sim_opts, target)
-    final_cost, breakdown = compute_cost(
-        theta_star, target, lambda _t: final_sim_out, options.cost
-    )
-    rmse_m = _final_rmse_m(final_sim_out, target)
-    work_J = compute_total_work(final_sim_out)
+    try:
+        final_sim_out = _simulate_for_cost(theta_star, sim_opts, target)
+        final_cost, breakdown = compute_cost(
+            theta_star, target, lambda _t: final_sim_out, options.cost
+        )
+        rmse_m = _final_rmse_m(final_sim_out, target)
+        work_J = compute_total_work(final_sim_out)
+        is_divergent = False
+    except (ValueError, RuntimeError) as exc:
+        logger.warning("Final rollout evaluation diverged: %s", exc)
+        final_cost = float(DIVERGENT_COST_PENALTY)
+        breakdown = CostBreakdown(
+            position=float(DIVERGENT_COST_PENALTY),
+            orientation=0.0,
+            impact_anchor=0.0,
+            body_marker=0.0,
+            regularizer=0.0,
+            total=float(DIVERGENT_COST_PENALTY),
+        )
+        rmse_m = float(DIVERGENT_COST_PENALTY)
+        work_J = float(DIVERGENT_COST_PENALTY)
+        is_divergent = True
 
     duration_s = time.perf_counter() - t_wall_start
     solver_options = {
@@ -448,9 +475,15 @@ def _finalize_fit_result(
         final_cost=final_cost,
         final_rmse_m=rmse_m,
         solver_status=(
-            "success"
-            if bool(res.success)
-            else ("warning" if "iteration" in str(res.message).lower() else "failed")
+            "failed"
+            if is_divergent
+            else (
+                "success"
+                if bool(res.success)
+                else (
+                    "warning" if "iteration" in str(res.message).lower() else "failed"
+                )
+            )
         ),
         iterations=int(getattr(res, "nit", 0)),
         n_evaluations=outcome.n_eval,
