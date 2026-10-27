@@ -132,3 +132,12 @@ def test_swing_span_must_increase() -> None:
 
 def test_cor_of_one_is_allowed() -> None:
     assert _collide(cor=1.0).cor == 1.0
+
+
+def test_ud_27_ball_mass_uses_canonical_physics_constant() -> None:
+    """UD-27: BALL_MASS_KG must route to core/physics_constants.GOLF_BALL_MASS_KG."""
+    from src.shared.python.core.physics_constants import GOLF_BALL_MASS_KG
+
+    assert bi.BALL_MASS_KG is GOLF_BALL_MASS_KG, (
+        f"BALL_MASS_KG must be canonical GOLF_BALL_MASS_KG from physics_constants, got {type(bi.BALL_MASS_KG)}"
+    )

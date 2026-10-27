@@ -26,9 +26,6 @@ ALLOWLIST: dict[str, str] = {
     "src/engines/physics_engines/mujoco/myo_sim/body/myoupperbody.xml": (
         "Vendored MyoSuite model asset; preserve upstream source unchanged."
     ),
-    "src/engines/physics_engines/myosuite/python/myohand_grip_controller.py": (
-        "Hand/grip controller is explicitly outside this issue's edit boundary."
-    ),
     "src/tools/shot_pattern_analysis/academic_plots.py": (
         "9.8 is the plot height in inches, not a gravity value."
     ),
@@ -87,3 +84,16 @@ def test_owned_source_uses_canonical_gravity_constant() -> None:
 
 def test_gravity_allowlist_entries_have_reasons() -> None:
     assert all(reason.strip() for reason in ALLOWLIST.values())
+
+
+def test_ud_31_tuple_literal_detected() -> None:
+    """UD-31: AST lint guard catches 9.81 in tuple literals and negative forms."""
+    source = "gravity = (0.0, 0.0, -9.81)"
+    tree = ast.parse(source)
+    has_literal = any(
+        isinstance(node, ast.Constant)
+        and isinstance(node.value, float)
+        and node.value in {9.8, 9.81}
+        for node in ast.walk(tree)
+    )
+    assert has_literal
