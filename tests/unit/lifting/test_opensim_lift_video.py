@@ -233,33 +233,43 @@ def test_render_worker_pythonpath_excludes_parent_stdlib(
     assert env["UPSTREAMDRIFT_MSK_BASE_MODEL"] == "unused.osim"
 
 
-def test_worker_env_restores_interpreter_libdir_after_opensim_clobber() -> None:
+def test_worker_env_restores_interpreter_libdir_after_opensim_clobber(
+    tmp_path: Path,
+) -> None:
     """#13896: opensim's Linux ``__init__`` sets ``LD_LIBRARY_PATH = PATH``.
 
     A worker spawned after ``import opensim`` must still load its own
-    ``libpython`` (not the system one), so the interpreter LIBDIR leads.
+    ``libpython`` (not the system one), so the interpreter's lib dir leads.
+    setup-python builds are relocated: ``LIBDIR`` names the build prefix, so
+    the lib dir comes from ``base_prefix``.
     """
     from src.tools.native_viewer_export.backends._subprocess import (
         with_interpreter_libdir,
     )
 
-    shared = {"LIBDIR": "/py/lib", "Py_ENABLE_SHARED": 1}
-    env = with_interpreter_libdir(
-        {"LD_LIBRARY_PATH": "/usr/bin:/bin"}, platform="linux", config=shared.get
-    )
-    assert env["LD_LIBRARY_PATH"] == "/py/lib:/usr/bin:/bin"
+    lib = tmp_path / "lib"
+    lib.mkdir()
+    (lib / "libpython3.12.so.1.0").write_bytes(b"")
+    shared = {
+        "LIBDIR": "/opt/hostedtoolcache/Python/3.12.15/x64/lib",
+        "Py_ENABLE_SHARED": 1,
+        "INSTSONAME": "libpython3.12.so.1.0",
+    }
+    kw = {"platform": "linux", "config": shared.get, "base_prefix": str(tmp_path)}
+    libdir = lib.as_posix()
 
-    unset = with_interpreter_libdir({}, platform="linux", config=shared.get)
-    assert unset["LD_LIBRARY_PATH"] == "/py/lib"
+    env = with_interpreter_libdir({"LD_LIBRARY_PATH": "/usr/bin:/bin"}, **kw)
+    assert env["LD_LIBRARY_PATH"] == f"{libdir}:/usr/bin:/bin"
+    assert with_interpreter_libdir({}, **kw)["LD_LIBRARY_PATH"] == libdir
 
-    present = {"LD_LIBRARY_PATH": "/py/lib:/x"}
-    assert (
-        with_interpreter_libdir(present, platform="linux", config=shared.get) == present
-    )
+    present = {"LD_LIBRARY_PATH": f"{libdir}:/x"}
+    assert with_interpreter_libdir(present, **kw) == present
 
-    static = {"LIBDIR": "/py/lib", "Py_ENABLE_SHARED": 0}
-    assert with_interpreter_libdir({}, platform="linux", config=static.get) == {}
-    assert with_interpreter_libdir({}, platform="win32", config=shared.get) == {}
+    static = {**shared, "Py_ENABLE_SHARED": 0}
+    assert with_interpreter_libdir({}, **{**kw, "config": static.get}) == {}
+    assert with_interpreter_libdir({}, **{**kw, "platform": "win32"}) == {}
+    missing = {**kw, "base_prefix": str(tmp_path / "nowhere")}
+    assert with_interpreter_libdir({}, **missing) == {}
 
 
 def test_worker_env_applies_interpreter_libdir(monkeypatch: pytest.MonkeyPatch) -> None:
