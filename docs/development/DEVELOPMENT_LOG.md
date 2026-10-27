@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13880 · \ Zero Friction Cone Capacity in Tension\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13880
+- **Branch:** fix/13880-friction-cone-tension
+- **PR:** #13889
+- **Paths:** see #13889
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`43d5476c`; collated from changes/13880-zero-friction-cone-capacity-in-tension.md)
+- **Summary:** \ Zero friction cone capacity in tension\
+- **Next step:** \Merge PR 13889\
+
+### DL-#13865 · \ Rotate Backspin Axis With Azimuth and Align Sidespin With Vertical\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13865
+- **Branch:** fix/13865-ball-flight-spin-vector
+- **PR:** #13908
+- **Paths:** see #13908
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`51776474`; collated from changes/13865-rotate-backspin-axis-with-azimuth-and-al.md)
+- **Summary:** \ Rotate backspin axis with azimuth and align sidespin with vertical\
+- **Next step:** \Open PR for UD 13865\
+
 ### DL-#13842 · Fast-Tier Test Selection Now Runs the Monolith Register Test for Src/ Changes
 
 - **State:** in_review
