@@ -114,6 +114,8 @@ def build_plate_dataframe(
     ground_height: float,
 ) -> pd.DataFrame | None:
     """Build a DataFrame for a single force plate, or None if channels missing."""
+    if plate_num is None:
+        raise ValueError("plate_num must be provided")
     missing_keys = required_keys - set(channels.keys())
     if missing_keys:
         logger.warning(

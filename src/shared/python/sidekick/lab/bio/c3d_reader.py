@@ -659,41 +659,16 @@ class C3DDataReader:
         ground_height: float,
     ) -> pd.DataFrame | None:
         """Build a DataFrame for a single force plate, or None if channels missing."""
-        if plate_num is None:
-            raise ValueError("plate_num must be provided")
-        missing_keys = required_keys - set(channels.keys())
-        if missing_keys:
-            _logger.warning(
-                f"Force plate {plate_num} missing channels: {missing_keys}. Skipping."
-            )
-            return None
+        from ._c3d_analog import build_plate_dataframe
 
-        plate_df = pd.DataFrame(
-            {
-                "sample": analog_wide["sample"],
-                "plate": plate_num,
-                "fx": analog_wide[channels["fx"]].to_numpy(),
-                "fy": analog_wide[channels["fy"]].to_numpy(),
-                "fz": analog_wide[channels["fz"]].to_numpy(),
-                "mx": analog_wide[channels["mx"]].to_numpy(),
-                "my": analog_wide[channels["my"]].to_numpy(),
-                "mz": analog_wide[channels["mz"]].to_numpy(),
-            }
+        return build_plate_dataframe(
+            plate_num=plate_num,
+            channels=channels,
+            required_keys=required_keys,
+            analog_wide=analog_wide,
+            compute_cop=compute_cop,
+            ground_height=ground_height,
         )
-
-        if compute_cop:
-            fz = plate_df["fz"].to_numpy()
-            mx = plate_df["mx"].to_numpy()
-            my = plate_df["my"].to_numpy()
-
-            min_force_threshold = 10.0  # [N] minimum force for valid COP
-            valid_contact = np.abs(fz) > min_force_threshold
-
-            plate_df["cop_x"] = np.where(valid_contact, -my / fz, np.nan)
-            plate_df["cop_y"] = np.where(valid_contact, mx / fz, np.nan)
-            plate_df["cop_z"] = np.where(valid_contact, ground_height, np.nan)
-
-        return plate_df
 
     def get_force_plate_count(self) -> int:
         """Return the number of detected force plates."""
