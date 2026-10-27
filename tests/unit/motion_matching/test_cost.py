@@ -256,6 +256,7 @@ class DummyMultiTarget:
         self.time = club.time
 
 
+@pytest.mark.unit
 def test_body_marker_term() -> None:
     from src.shared.python.motion_matching.cost import CostOptions, compute_cost
 
@@ -286,6 +287,7 @@ def test_body_marker_term() -> None:
     assert abs(terms.body_marker - 1e-6) < 1e-15
 
 
+@pytest.mark.unit
 def test_q_orientation_repr_changes_cost() -> None:
     """Selecting 'rotmat' vs 'quaternion' produces different orientation costs (UD-19)."""
     target = make_target(n=10)
@@ -330,6 +332,7 @@ def test_q_orientation_repr_changes_cost() -> None:
     assert abs(terms_rotmat.orientation - expected_frob_sq) < 1e-10
 
 
+@pytest.mark.unit
 def test_body_marker_missing_raises_when_weighted() -> None:
     """When w_body_marker > 0 and sim_out.marker_xyz is None, raise ValueError (UD-19)."""
     target_club = make_target(n=10)
