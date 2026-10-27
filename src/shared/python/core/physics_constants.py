@@ -234,7 +234,14 @@ TORSO_MASS_KG = PhysicalConstant(
 )
 
 # Segment lengths (average adult male, 1.75m height)
-HAND_LENGTH_M = PhysicalConstant(0.19, "m", _SRC_ANTHROPOMETRY, "Average hand length")
+# Must match hand_size.REFERENCE_HAND_LENGTH_M (1.75 m * 0.1104).
+_HX3_REFERENCE_HAND_LENGTH_M = 1.75 * 0.1104
+HAND_LENGTH_M = PhysicalConstant(
+    _HX3_REFERENCE_HAND_LENGTH_M,
+    "m",
+    _SRC_ANTHROPOMETRY,
+    "Hand length at reference stature (ANSUR II pooled prior, HRG-HX3)",
+)
 FOREARM_LENGTH_M = PhysicalConstant(
     0.27, "m", _SRC_ANTHROPOMETRY, "Average forearm length"
 )

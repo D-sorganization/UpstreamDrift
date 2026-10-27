@@ -103,6 +103,8 @@ def test_round_trip_full_sixteen_segments(tmp_path: Path) -> None:
     assert loaded.source_method == original.source_method
     assert loaded.age_years == pytest.approx(original.age_years)
     assert loaded.sex == original.sex
+    assert loaded.hand_length_m == pytest.approx(original.hand_length_m)
+    assert loaded.hand_breadth_m == pytest.approx(original.hand_breadth_m)
     assert len(loaded.segments) == 16
     assert tuple(name for name, _ in loaded.segments) == SIXTEEN_SEGMENTS
 

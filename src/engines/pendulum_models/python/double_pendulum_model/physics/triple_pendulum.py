@@ -383,11 +383,30 @@ class TriplePendulumDynamics:
         state: TriplePendulumState,
         dt: float,
         control: tuple[float, float, float],
+        integrator: str = "rk4",
     ) -> TriplePendulumState:
-        """Advance the state by one RK4 integration step."""
-
+        """Advance the state by one integration step."""
         if not (_t is not None):
             raise ValueError("_t must be provided")
+
+        if integrator != "rk4":
+            if integrator in ("semi_implicit", "semi_implicit_euler", "euler"):
+                acc1, acc2, acc3 = self.forward_dynamics(state, control)
+                w1, w2, w3 = (
+                    state.omega1 + dt * acc1,
+                    state.omega2 + dt * acc2,
+                    state.omega3 + dt * acc3,
+                )
+                is_semi = integrator != "euler"
+                return TriplePendulumState(
+                    theta1=state.theta1 + dt * (w1 if is_semi else state.omega1),
+                    theta2=state.theta2 + dt * (w2 if is_semi else state.omega2),
+                    theta3=state.theta3 + dt * (w3 if is_semi else state.omega3),
+                    omega1=w1,
+                    omega2=w2,
+                    omega3=w3,
+                )
+            raise ValueError(f"unknown integrator: {integrator!r}")
 
         def _derivs(_time: float, vec: tuple[float, ...]) -> tuple[float, ...]:
             """Velocity and acceleration derivatives for the state vector."""

@@ -59,12 +59,13 @@ IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
     # snapshot (ankle_l 3.8 ... bar 1.2 mm) is replaced because the solution
     # now covers the whole lift; measurements on #11745.
     "clean_and_jerk": {
-        "ankle_l": 0.0716,
-        "ankle_r": 0.0744,
-        "knee_l": 0.0698,
-        "knee_r": 0.0664,
-        "hip_l": 0.0566,
-        "hip_r": 0.0577,
+        # #13760 lift-body hand size: whole-lift regen; bounds re-derived (0.1 mm).
+        "ankle_l": 0.0720,
+        "ankle_r": 0.0748,
+        "knee_l": 0.0702,
+        "knee_r": 0.0668,
+        "hip_l": 0.0570,
+        "hip_r": 0.0578,
         "shoulder_l": 0.0273,
         "shoulder_r": 0.0297,
         "bar": 0.0565,

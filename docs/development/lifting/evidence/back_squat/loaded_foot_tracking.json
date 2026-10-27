@@ -14,7 +14,7 @@
     "root_efforts": "zero",
     "substeps": 64
   },
-  "bundle_spec_sha256": "aedbf64e35f5707798fd7047f0d8f3485c5c72d5c446ef600b195a6c75a3ed34",
+  "bundle_spec_sha256": "50b4fff064bf1e7eb3aa6aae8d6df3c1d2550bee57cd6fe448b4050afe03c9d7",
   "committed_policy_run_reproduces_bundle": true,
   "generator": "scripts/measure_loaded_foot_tracking.py",
   "issue": 13104,
@@ -95,7 +95,7 @@
         "max_rate_per_s": 45119.57217523147,
         "real_stability_limit": 2.785293563405282,
         "samples": 40,
-        "substep_s": 6.25e-5
+        "substep_s": 6.25e-05
       },
       "substeps": 16,
       "wall_s": 1255.051483371004
@@ -122,7 +122,7 @@
         "max_rate_per_s": 89367.23404494842,
         "real_stability_limit": 2.785293563405282,
         "samples": 40,
-        "substep_s": 3.125e-5
+        "substep_s": 3.125e-05
       },
       "substeps": 32,
       "wall_s": 1503.4834242680226
@@ -149,7 +149,7 @@
         "max_rate_per_s": 141248.30612619885,
         "real_stability_limit": 2.785293563405282,
         "samples": 40,
-        "substep_s": 1.5625e-5
+        "substep_s": 1.5625e-05
       },
       "substeps": 64,
       "wall_s": 1910.5930899690138
@@ -176,7 +176,7 @@
         "max_rate_per_s": 141248.28899239094,
         "real_stability_limit": 2.785293563405282,
         "samples": 40,
-        "substep_s": 7.8125e-6
+        "substep_s": 7.8125e-06
       },
       "substeps": 128,
       "wall_s": 2156.2091713740374
@@ -203,7 +203,7 @@
         "max_rate_per_s": 121301.27751346127,
         "real_stability_limit": 2.785293563405282,
         "samples": 40,
-        "substep_s": 1.5625e-5
+        "substep_s": 1.5625e-05
       },
       "substeps": 64,
       "wall_s": 1309.9013120520394
@@ -230,7 +230,7 @@
         "max_rate_per_s": 132791.70061681498,
         "real_stability_limit": 2.785293563405282,
         "samples": 40,
-        "substep_s": 1.5625e-5
+        "substep_s": 1.5625e-05
       },
       "substeps": 64,
       "wall_s": 1276.9915799180162
@@ -257,7 +257,7 @@
         "max_rate_per_s": 141624.0265798237,
         "real_stability_limit": 2.785293563405282,
         "samples": 40,
-        "substep_s": 1.5625e-5
+        "substep_s": 1.5625e-05
       },
       "substeps": 64,
       "wall_s": 1165.9893188879942
@@ -269,19 +269,28 @@
       "max_coordinate_rad": 0.024548798588638645,
       "max_root_translation_m": 0.0009532556901865551,
       "rows": 201,
-      "substeps": [16, 32]
+      "substeps": [
+        16,
+        32
+      ]
     },
     {
       "max_coordinate_rad": 0.02003024684833758,
       "max_root_translation_m": 0.0003721002083961556,
       "rows": 201,
-      "substeps": [32, 64]
+      "substeps": [
+        32,
+        64
+      ]
     },
     {
-      "max_coordinate_rad": 3.236877193016352e-8,
-      "max_root_translation_m": 2.5140908868626077e-9,
+      "max_coordinate_rad": 3.236877193016352e-08,
+      "max_root_translation_m": 2.5140908868626077e-09,
       "rows": 201,
-      "substeps": [64, 128]
+      "substeps": [
+        64,
+        128
+      ]
     }
   ],
   "window": {

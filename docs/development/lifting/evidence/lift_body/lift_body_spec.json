@@ -3903,7 +3903,7 @@
  },
  "upper_body_schema_version": 1,
  "upper_body_qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",
- "upper_body_sha256": "6bfdf511cbac4bf22d8e9796b16f11d9845e8aabff7d2505a5a8621932f34c95",
+ "upper_body_sha256": "54e7c8e016d82cbf3cf51311bef4159f02d4bb72c0859e172eecdb44674a84ba",
  "upper_body_counts": {
   "bodies": 15,
   "joints": 14,
@@ -4252,7 +4252,9 @@
    ]
   },
   "source": "de Leva 1996 male table",
-  "de_leva_table_sha256": "f3aff01daf746bd965d888622d74461563a4b7ef2331ae03cdc75f87a18f524b"
+  "de_leva_table_sha256": "f3aff01daf746bd965d888622d74461563a4b7ef2331ae03cdc75f87a18f524b",
+  "hand_length_m": 0.196512,
+  "hand_breadth_m": 0.088233888
  },
  "de_leva_table_sha256": "f3aff01daf746bd965d888622d74461563a4b7ef2331ae03cdc75f87a18f524b",
  "anthropometry": {

@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "e662bf65acb3b3cd21cda643afc5416699d2b8dccc13017a6e162c61b3065284"
+    "sha256": "c62b753363b669d190e24349b70941b13b44820911bea1defe5a95d481908d55"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -12,8 +12,8 @@
   },
   "summary": {
     "claim_count": 328,
-    "evidence_reference_count": 2571,
-    "local_artifact_count": 430,
+    "evidence_reference_count": 2596,
+    "local_artifact_count": 435,
     "external_url_count": 78
   },
   "claims": {
@@ -2827,6 +2827,11 @@
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
         "scripts/research/proximal_distal_energy/spatial_full_body.py",
         "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "src/shared/python/anthropometrics/estimators/from_de_leva.py",
+        "src/shared/python/anthropometrics/estimators/_base.py",
+        "src/shared/python/body_segment_parameters/de_leva_1996.py",
+        "src/shared/python/body_segment_parameters/data/de_leva_1996_table4.json",
+        "tests/ci/test_articulated_manufactured_authority_anthropometry_provenance_red.py",
         "tests/research/test_articulated_manufactured_solution.py",
         "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
         "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
@@ -2851,6 +2856,11 @@
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
         "scripts/research/proximal_distal_energy/spatial_full_body.py",
         "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "src/shared/python/anthropometrics/estimators/from_de_leva.py",
+        "src/shared/python/anthropometrics/estimators/_base.py",
+        "src/shared/python/body_segment_parameters/de_leva_1996.py",
+        "src/shared/python/body_segment_parameters/data/de_leva_1996_table4.json",
+        "tests/ci/test_articulated_manufactured_authority_anthropometry_provenance_red.py",
         "tests/research/test_articulated_manufactured_solution.py",
         "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
         "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
@@ -2875,6 +2885,11 @@
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
         "scripts/research/proximal_distal_energy/spatial_full_body.py",
         "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "src/shared/python/anthropometrics/estimators/from_de_leva.py",
+        "src/shared/python/anthropometrics/estimators/_base.py",
+        "src/shared/python/body_segment_parameters/de_leva_1996.py",
+        "src/shared/python/body_segment_parameters/data/de_leva_1996_table4.json",
+        "tests/ci/test_articulated_manufactured_authority_anthropometry_provenance_red.py",
         "tests/research/test_articulated_manufactured_solution.py",
         "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
         "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
@@ -2899,6 +2914,11 @@
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
         "scripts/research/proximal_distal_energy/spatial_full_body.py",
         "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "src/shared/python/anthropometrics/estimators/from_de_leva.py",
+        "src/shared/python/anthropometrics/estimators/_base.py",
+        "src/shared/python/body_segment_parameters/de_leva_1996.py",
+        "src/shared/python/body_segment_parameters/data/de_leva_1996_table4.json",
+        "tests/ci/test_articulated_manufactured_authority_anthropometry_provenance_red.py",
         "tests/research/test_articulated_manufactured_solution.py",
         "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
         "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
@@ -2923,6 +2943,11 @@
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
         "scripts/research/proximal_distal_energy/spatial_full_body.py",
         "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "src/shared/python/anthropometrics/estimators/from_de_leva.py",
+        "src/shared/python/anthropometrics/estimators/_base.py",
+        "src/shared/python/body_segment_parameters/de_leva_1996.py",
+        "src/shared/python/body_segment_parameters/data/de_leva_1996_table4.json",
+        "tests/ci/test_articulated_manufactured_authority_anthropometry_provenance_red.py",
         "tests/research/test_articulated_manufactured_solution.py",
         "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
         "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
@@ -4643,8 +4668,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json": {
-      "sha256": "15d00b5e81b07b4f65aebe707f06f6686a6daf98a4536fda28d6ba682aa157fd",
-      "bytes": 6631,
+      "sha256": "2575313718dffe18292eafb89c2fc3b51290ed197b74ffdc8b6172f2efa8d383",
+      "bytes": 7331,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -6413,7 +6438,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "e8c7d4e83fa3bc64c68503cbbebcbf4c210bc22223384aa3dc24cf350c3c314e",
+      "sha256": "c5ebad0bff2f2dcc1512cb60a33e58a1facaac0b426ec287632ee21ce58af8ea",
       "bytes": 167070,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -7446,8 +7471,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py": {
-      "sha256": "4a4bca19d482122c631c72313f0c305957a2ac337c0e51c7a54ba543379dd183",
-      "bytes": 32015,
+      "sha256": "f3eabeafdcfc5d06cf3b5cb4a5b3b29de13c9765f014231353f5b735cd4ec179",
+      "bytes": 32879,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -8215,6 +8240,28 @@
         "PD-CLAIM-096"
       ]
     },
+    "src/shared/python/anthropometrics/estimators/_base.py": {
+      "sha256": "bc91d7c83920f9cb53b82681c8bb3119beb54745bfd0ee35dc82a2e8d85a9a10",
+      "bytes": 8659,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
+      ]
+    },
+    "src/shared/python/anthropometrics/estimators/from_de_leva.py": {
+      "sha256": "ef07007658b0e2dc8f8c310c366e8119074097a6d386a760847523ccb061104f",
+      "bytes": 4333,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
+      ]
+    },
     "src/shared/python/biomechanics/force_source_attribution.py": {
       "sha256": "0cbf1122cc1749b863950120074740dce6c8393f1af5971ae5d0a86b9632a86d",
       "bytes": 2314,
@@ -8222,6 +8269,28 @@
         "PD-CLAIM-305",
         "PD-CLAIM-306",
         "PD-CLAIM-307"
+      ]
+    },
+    "src/shared/python/body_segment_parameters/data/de_leva_1996_table4.json": {
+      "sha256": "f9afb52b883ede994b1048f8b759611a890b20af663287921290e30cbda104c4",
+      "bytes": 14008,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
+      ]
+    },
+    "src/shared/python/body_segment_parameters/de_leva_1996.py": {
+      "sha256": "aff003de696bc888a19abc0578c12ca40cb3b3585c3218958a40f1a9dc93754d",
+      "bytes": 7131,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
       ]
     },
     "src/shared/python/physics/contact_reaction_decomposition.py": {
@@ -8237,6 +8306,17 @@
       "bytes": 25214,
       "referenced_by": [
         "PD-CLAIM-095"
+      ]
+    },
+    "tests/ci/test_articulated_manufactured_authority_anthropometry_provenance_red.py": {
+      "sha256": "995dbe88b89548257a6d8276d1fe3e846535c4873c14fc0dd58817ac2690863c",
+      "bytes": 2174,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
       ]
     },
     "tests/ci/test_articulated_manufactured_authority_provenance_red.py": {

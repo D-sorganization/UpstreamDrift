@@ -1,58 +1,17 @@
 {
-  "lift": "clean_and_jerk",
   "bundle": "docs/development/lifting/evidence/clean_and_jerk/clean_and_jerk_bundle.npz",
-  "bundle_spec_sha256": "617433abe253d7a658372efb4463aec9dfe7f59256628450d8bae7ec36f6e4d8",
+  "bundle_spec_sha256": "403ffa3d7f21abf35938cf17227b2846749fe3f7bf2ba87a491c4726c918f639",
   "bundle_steps": 200,
   "dt_s": 0.001,
-  "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
-  "source_commit": "5aac442dff9407c45d1cababcd4db01b855f3436",
-  "generator": "scripts/measure_lift_bar_path_parity.py",
   "engines": {
-    "mujoco": {
-      "engine": "mujoco",
-      "steps": 200,
-      "duration_s": 0.2,
-      "failure": null,
-      "max_bar_deviation_m": 0.0,
-      "final_bar_deviation_m": 0.0,
-      "max_coordinate_error_rad": 0.0,
-      "worst_final_coordinate": "TranslationInputX",
-      "segmented": {
-        "segment_steps": 20,
-        "segments": 10,
-        "max_coordinate_error_rad": 0.0,
-        "max_frame_error_m": 0.0,
-        "worst_segment_start_s": 0.0,
-        "coordinate_error_rad_by_segment": [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ]
-      },
-      "wall_time_s": 149.9
-    },
     "drake": {
-      "engine": "drake",
-      "steps": 200,
       "duration_s": 0.2,
+      "engine": "drake",
       "failure": null,
-      "max_bar_deviation_m": 3.032186981054764e-15,
       "final_bar_deviation_m": 2.8314353463649484e-15,
+      "max_bar_deviation_m": 3.032186981054764e-15,
       "max_coordinate_error_rad": 2.1904136490724646e-12,
-      "worst_final_coordinate": "subtalar_angle_r",
       "segmented": {
-        "segment_steps": 20,
-        "segments": 10,
-        "max_coordinate_error_rad": 1.5909148998183298e-14,
-        "max_frame_error_m": 2.1535178908206137e-15,
-        "worst_segment_start_s": 0.18,
         "coordinate_error_rad_by_segment": [
           3.1259717037102064e-15,
           5.8321403262340255e-15,
@@ -64,55 +23,55 @@
           5.8256351131991124e-15,
           9.992007221626409e-15,
           1.5909148998183298e-14
-        ]
-      },
-      "wall_time_s": 127.5
-    },
-    "pinocchio": {
-      "engine": "pinocchio",
-      "steps": 200,
-      "duration_s": 0.2,
-      "failure": null,
-      "max_bar_deviation_m": 4.2660093992130494e-14,
-      "final_bar_deviation_m": 4.2660093992130494e-14,
-      "max_coordinate_error_rad": 1.4018534597037835e-12,
-      "worst_final_coordinate": "subtalar_angle_r",
-      "segmented": {
+        ],
+        "max_coordinate_error_rad": 1.5909148998183298e-14,
+        "max_frame_error_m": 2.1535178908206137e-15,
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 1.0436096431476471e-14,
-        "max_frame_error_m": 2.480671553895456e-15,
-        "worst_segment_start_s": 0.16,
-        "coordinate_error_rad_by_segment": [
-          3.634245682171411e-15,
-          2.6645352591003757e-15,
-          2.9976021664879227e-15,
-          2.26554885962571e-15,
-          3.887515309664025e-15,
-          3.544040061420617e-15,
-          2.220446049250313e-15,
-          6.8833827526759706e-15,
-          1.0436096431476471e-14,
-          9.769962616701378e-15
-        ]
+        "worst_segment_start_s": 0.18
       },
-      "wall_time_s": 88.2
+      "steps": 200,
+      "wall_time_s": 127.5,
+      "worst_final_coordinate": "subtalar_angle_r"
+    },
+    "mujoco": {
+      "duration_s": 0.2,
+      "engine": "mujoco",
+      "failure": null,
+      "final_bar_deviation_m": 0.0,
+      "max_bar_deviation_m": 0.0,
+      "max_coordinate_error_rad": 0.0,
+      "segmented": {
+        "coordinate_error_rad_by_segment": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_coordinate_error_rad": 0.0,
+        "max_frame_error_m": 0.0,
+        "segment_steps": 20,
+        "segments": 10,
+        "worst_segment_start_s": 0.0
+      },
+      "steps": 200,
+      "wall_time_s": 149.9,
+      "worst_final_coordinate": "TranslationInputX"
     },
     "opensim": {
-      "engine": "opensim",
-      "steps": 200,
       "duration_s": 0.2,
+      "engine": "opensim",
       "failure": null,
-      "max_bar_deviation_m": 2.7048516914496868e-15,
       "final_bar_deviation_m": 2.7048516914496868e-15,
+      "max_bar_deviation_m": 2.7048516914496868e-15,
       "max_coordinate_error_rad": 9.619991435394493e-13,
-      "worst_final_coordinate": "subtalar_angle_r",
       "segmented": {
-        "segment_steps": 20,
-        "segments": 10,
-        "max_coordinate_error_rad": 8.829742492721948e-15,
-        "max_frame_error_m": 1.041481514324134e-15,
-        "worst_segment_start_s": 0.02,
         "coordinate_error_rad_by_segment": [
           1.7867651802561113e-15,
           8.829742492721948e-15,
@@ -124,9 +83,50 @@
           4.336808689942018e-15,
           4.322930902134203e-15,
           8.002279394681011e-15
-        ]
+        ],
+        "max_coordinate_error_rad": 8.829742492721948e-15,
+        "max_frame_error_m": 1.041481514324134e-15,
+        "segment_steps": 20,
+        "segments": 10,
+        "worst_segment_start_s": 0.02
       },
-      "wall_time_s": 152.0
+      "steps": 200,
+      "wall_time_s": 152.0,
+      "worst_final_coordinate": "subtalar_angle_r"
+    },
+    "pinocchio": {
+      "duration_s": 0.2,
+      "engine": "pinocchio",
+      "failure": null,
+      "final_bar_deviation_m": 4.2660093992130494e-14,
+      "max_bar_deviation_m": 4.2660093992130494e-14,
+      "max_coordinate_error_rad": 1.4018534597037835e-12,
+      "segmented": {
+        "coordinate_error_rad_by_segment": [
+          3.634245682171411e-15,
+          2.6645352591003757e-15,
+          2.9976021664879227e-15,
+          2.26554885962571e-15,
+          3.887515309664025e-15,
+          3.544040061420617e-15,
+          2.220446049250313e-15,
+          6.8833827526759706e-15,
+          1.0436096431476471e-14,
+          9.769962616701378e-15
+        ],
+        "max_coordinate_error_rad": 1.0436096431476471e-14,
+        "max_frame_error_m": 2.480671553895456e-15,
+        "segment_steps": 20,
+        "segments": 10,
+        "worst_segment_start_s": 0.16
+      },
+      "steps": 200,
+      "wall_time_s": 88.2,
+      "worst_final_coordinate": "subtalar_angle_r"
     }
-  }
+  },
+  "generator": "scripts/measure_lift_bar_path_parity.py",
+  "lift": "clean_and_jerk",
+  "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
+  "source_commit": "5aac442dff9407c45d1cababcd4db01b855f3436"
 }

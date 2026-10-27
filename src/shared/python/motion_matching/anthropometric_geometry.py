@@ -44,6 +44,10 @@ from src.shared.python.core.handedness import (
     DEFAULT_HANDEDNESS,
     validate_handedness,
 )
+from src.shared.python.hand_size import (
+    resolve_hand_breadth_m,
+    resolve_hand_length_m,
+)
 from src.shared.python.motion_matching.anthropometry import (
     DE_LEVA_MALE,
     de_leva_table_sha256,
@@ -319,6 +323,8 @@ def build_upper_body(
 
     if stature_m is None or mass_kg is None or stature_m <= 0 or mass_kg <= 0:
         raise ValueError("Stature and mass must be positive")
+    hand_length_m = resolve_hand_length_m(stature_m)
+    hand_breadth_m = resolve_hand_breadth_m(hand_length_m)
     if trunk_scale <= 0 or arm_scale <= 0 or shoulder_scale <= 0:
         raise ValueError("Scale factors must be positive")
     if tuple(native_dict["coordinate_order"]) != COORDINATES:
@@ -616,6 +622,8 @@ def build_upper_body(
             "grip_rotation_deg": {k: list(v) for k, v in grip_rotation.items()},
             "source": "de Leva 1996 male table",
             "de_leva_table_sha256": de_leva_table_sha256(),
+            "hand_length_m": hand_length_m,
+            "hand_breadth_m": hand_breadth_m,
             **({} if handedness == DEFAULT_HANDEDNESS else {"handedness": handedness}),
         },
         "coordinate_ranges_deg": {k: list(v) for k, v in COORDINATE_RANGES_DEG.items()},
