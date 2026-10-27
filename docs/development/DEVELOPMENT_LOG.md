@@ -573,6 +573,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13896 · Lift Render Worker PYTHONPATH Uses Shared Worker_Env() (Repo Roots Only), Fixing Requires_Opensim _Ctypes ABI Failure
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13896
+- **Branch:** merged via #13897
+- **PR:** #13897
+- **Paths:** see #13897
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`ed08a3f2`; collated from changes/13896-lift-render-worker-pythonpath-uses-share.md)
+- **Summary:** Lift render worker PYTHONPATH uses shared worker_env() (repo roots only), fixing requires_opensim _ctypes ABI failure
+- **Next step:** Shipped in PR #13897.
+
 ### DL-#13852 · Add WSCG Masked-JSON Parity Test Scaffold for Budget-Split PRs.
 
 - **State:** shipped
