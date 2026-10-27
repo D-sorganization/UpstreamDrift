@@ -313,9 +313,9 @@
       "symbol": "make_figure",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/physics-team",
-      "issue": 9153,
-      "reason": "Issue #9153: the 102-line deterministic figure writer is hash-frozen in the completed two-replay CRBA requalification. Splitting two lines after observing the replay would invalidate the prospective figure-source authority and require two new native executions; defer the behavior-preserving helper extraction until the protected evidence lands.",
-      "expires_on": "2026-10-31"
+      "issue": 13853,
+      "reason": "Issue #13853: script source is hash-pinned by native requalification evidence; refactor lands with the next native requalification run (renewed once, 2026-10-26, owner-approved).",
+      "expires_on": "2027-01-31"
     },
     {
       "path": "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
@@ -452,9 +452,9 @@
       "symbol": "_evaluate_controls",
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/physics-team",
-      "issue": 9151,
-      "reason": "Issue #9151: the native evidence artifact is hash-bound to this preregistered control evaluator. A context-object decomposition would invalidate the exact successful Ubuntu evidence source digest and requires a fresh native rerun; retain the explicit operator inputs temporarily and remove this exception with the next forward-attribution implementation.",
-      "expires_on": "2026-10-31"
+      "issue": 13853,
+      "reason": "Issue #13853: script source is hash-pinned by native requalification evidence; refactor lands with the next native requalification run (renewed once, 2026-10-26, owner-approved).",
+      "expires_on": "2027-01-31"
     },
     {
       "path": "src/shared/python/optimization/crocoddyl_backend.py",
