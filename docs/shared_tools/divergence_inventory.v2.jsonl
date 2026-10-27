@@ -1014,6 +1014,11 @@
 {"path": "humanoid_character_builder/tests/test_urdf_inertia_export.py", "classification": "tools-only", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/validation/__init__.py", "classification": "identical", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/validation/physics_validator.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": true}
+{"path": "humanoid_robotics/__init__.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
+{"path": "humanoid_robotics/option_a/__init__.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
+{"path": "humanoid_robotics/option_a/fixture.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
+{"path": "humanoid_robotics/option_a/plant.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
+{"path": "humanoid_robotics/option_a/trace_contract.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "impact_parameters/__init__.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/adapters/__init__.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/adapters/club_face.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
