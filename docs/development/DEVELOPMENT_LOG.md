@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13935 · Bump Dnspython 2.8.0 to 2.9.0 in Both Lock Files to Clear CVE-2026-114605 From Pip-Audit
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13935
+- **Branch:** claude/13935-dnspython-cve
+- **PR:** #13936
+- **Paths:** see #13936
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`725b14e0`; collated from changes/13935-bump-dnspython-2-8-0-to-2-9-0-in-both-lo.md)
+- **Summary:** Bump dnspython 2.8.0 to 2.9.0 in both lock files to clear CVE-2026-114605 from pip-audit
+- **Next step:** Merge the PR.
+
+### DL-#13872 · Pinocchio Residual: Append Regulariser Row and Impose Torque Bounds (UD-02)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13872
+- **Branch:** fix/13872-pinocchio-residual-regularizer
+- **PR:** #13927
+- **Paths:** see #13927
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`e9825c55`; collated from changes/13872-pinocchio-residual-regularizer.md)
+- **Summary:** Pinocchio residual: append regulariser row and impose torque bounds (UD-02)
+- **Next step:** Merge PR
+
 ### DL-#13903 · EnhancedBallFlightSimulator: Route Deterministic Aero Through Rust Facade (UD-03)
 
 - **State:** in_review
@@ -741,6 +767,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13854 · Renew Hash-Frozen Research Budget Exceptions to 2027-01-31 Under #13853.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13854
+- **Branch:** merged via #13862
+- **PR:** #13862
+- **Paths:** see #13862
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`441d4390`; collated from changes/13854-renew-hash-frozen-research-budget-except.md)
+- **Summary:** Renew hash-frozen research budget exceptions to 2027-01-31 under #13853.
+- **Next step:** Shipped in PR #13862.
 
 ### DL-#13891 · Add GripGeometry Source of Truth With Presets and USGA Rules Validator
 
