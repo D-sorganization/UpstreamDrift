@@ -173,3 +173,71 @@ def test_cop_implementations_live_only_in_the_canonical_module() -> None:
     assert out, "expected the deprecation shims"
     for line in out:
         assert line.split(":", 1)[0] in shims, line
+
+    # GCV-6 / UD-22: grep guard catches inline CoP formulas in src
+    inline_out = subprocess.run(
+        [
+            "git",
+            "grep",
+            "-n",
+            "-E",
+            r"(-my|mx) */ *(fz|safe_fz)",
+            "--",
+            "src",
+        ],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stdout.splitlines()
+    assert not inline_out, (
+        f"expected no inline CoP formulas in src, found: {inline_out}"
+    )
+
+
+def test_single_cop_implementation() -> None:
+    """UD-22: CoP from _c3d_analog equals canonical compute_cop."""
+    import pandas as pd
+    from src.shared.python.sidekick.lab.bio._c3d_analog import build_plate_dataframe
+
+    analog_wide = pd.DataFrame(
+        {
+            "sample": [0],
+            "fx": [100.0],
+            "fy": [50.0],
+            "fz": [500.0],
+            "mx": [20.0],
+            "my": [-30.0],
+            "mz": [5.0],
+        }
+    )
+    channels = {"fx": "fx", "fy": "fy", "fz": "fz", "mx": "mx", "my": "my", "mz": "mz"}
+    required_keys = {"fx", "fy", "fz", "mx", "my", "mz"}
+    ground_height = 0.05
+
+    plate_df = build_plate_dataframe(
+        plate_num=1,
+        channels=channels,
+        required_keys=required_keys,
+        analog_wide=analog_wide,
+        compute_cop=True,
+        ground_height=ground_height,
+    )
+    assert plate_df is not None
+
+    expected_cop = center_of_pressure(
+        force=[100.0, 50.0, 500.0],
+        moment_about_origin=[20.0, -30.0, 5.0],
+        ground_height_m=ground_height,
+        min_fz=10.0,
+    )
+    assert expected_cop is not None
+    np.testing.assert_allclose(
+        [
+            plate_df["cop_x"].iloc[0],
+            plate_df["cop_y"].iloc[0],
+            plate_df["cop_z"].iloc[0],
+        ],
+        expected_cop,
+        atol=1e-12,
+    )
