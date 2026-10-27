@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13877 · \ Fail Cross-Engine Validation When Deviation Exceeds Tolerance\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13877
+- **Branch:** fix/13877-cross-engine-validator-tolerance
+- **PR:** #13906
+- **Paths:** see #13906
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`2bbbb020`; collated from changes/13877-fail-cross-engine-validation-when-deviat.md)
+- **Summary:** \ Fail cross-engine validation when deviation exceeds tolerance\
+- **Next step:** \Merge PR 13906\
+
+### DL-#13837 · Option A MuJoCo Swing-Recovery Trace Fixture; Reuses Triple_Pendulum_Spec Segments in Humanoid_Robotics.Option_a.Plant.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13837
+- **Branch:** cursor/humanoid-option-a-swing-recovery-f3e4
+- **PR:** #13838
+- **Paths:** see #13838
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`7c90712e`; collated from changes/13837-add-option-a-mujoco-swing-and-recovery-t.md)
+- **Summary:** Option A MuJoCo swing-recovery trace fixture; reuses triple_pendulum_spec segments in humanoid_robotics.option_a.plant.
+- **Next step:** Merge PR #13838 after CI is green.
+
 ### DL-#13880 · \ Zero Friction Cone Capacity in Tension\
 
 - **State:** in_review
@@ -598,6 +624,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13775 · Regenerate the Proximal-Distal Release Claim Review and Manifests After the de Leva Provenance Change.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13775
+- **Branch:** merged via #13839
+- **PR:** #13839
+- **Paths:** see #13839
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`0963aa38`; collated from changes/13775-regenerate-the-proximal-distal-release-c.md)
+- **Summary:** Regenerate the proximal-distal release claim review and manifests after the de Leva provenance change.
+- **Next step:** Shipped in PR #13839.
 
 ### DL-#13792 · Per-Engine Step-Size Convergence Study and Exact Torque Switch-Time Handling
 
