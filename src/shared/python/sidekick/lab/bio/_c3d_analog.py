@@ -13,6 +13,7 @@ import pandas as pd
 
 from ...utils.logging import get_logger
 from ._c3d_models import C3DMetadata, ForcePlateCalibration
+from src.shared.python.biomechanics.ground_reaction import center_of_pressure
 
 logger = get_logger(__name__)
 
@@ -134,16 +135,33 @@ def build_plate_dataframe(
     )
 
     if compute_cop:
+        fx = plate_df["fx"].to_numpy()
+        fy = plate_df["fy"].to_numpy()
         fz = plate_df["fz"].to_numpy()
         mx = plate_df["mx"].to_numpy()
         my = plate_df["my"].to_numpy()
+        mz = plate_df["mz"].to_numpy()
 
-        min_force_threshold = 10.0
-        valid_contact = np.abs(fz) > min_force_threshold
+        n_samples = len(plate_df)
+        cop_x = np.full(n_samples, np.nan)
+        cop_y = np.full(n_samples, np.nan)
+        cop_z = np.full(n_samples, np.nan)
 
-        plate_df["cop_x"] = np.where(valid_contact, -my / fz, np.nan)
-        plate_df["cop_y"] = np.where(valid_contact, mx / fz, np.nan)
-        plate_df["cop_z"] = np.where(valid_contact, ground_height, np.nan)
+        for i in range(n_samples):
+            f_vec = [float(fx[i]), float(fy[i]), float(fz[i])]
+            m_vec = [float(mx[i]), float(my[i]), float(mz[i])]
+            if np.all(np.isfinite(f_vec)) and np.all(np.isfinite(m_vec)):
+                cop = center_of_pressure(
+                    f_vec, m_vec, ground_height_m=ground_height, min_fz=10.0
+                )
+                if cop is not None:
+                    cop_x[i] = cop[0]
+                    cop_y[i] = cop[1]
+                    cop_z[i] = cop[2]
+
+        plate_df["cop_x"] = cop_x
+        plate_df["cop_y"] = cop_y
+        plate_df["cop_z"] = cop_z
 
     return plate_df
 
