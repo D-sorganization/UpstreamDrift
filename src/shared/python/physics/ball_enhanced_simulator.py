@@ -215,6 +215,40 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             return np.asarray(f, dtype=float)
         return self._default_force_provider(velocity, spin, time, position)
 
+    def _evaluate_step_forces(
+        self,
+        velocity: np.ndarray,
+        spin: np.ndarray,
+        t: float,
+        position: np.ndarray,
+        gravity_acc: np.ndarray,
+    ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+        """Calculate step forces and acceleration."""
+        gravity_force = self.ball.mass * gravity_acc
+        if self._force_provider is not None:
+            aero_total = self._compute_total_aero_force(velocity, spin, t, position)
+            total_force = aero_total + gravity_force
+            forces = {
+                "gravity": gravity_force,
+                "drag": np.zeros(3, dtype=float),
+                "lift": np.zeros(3, dtype=float),
+                "magnus": np.zeros(3, dtype=float),
+                "total": aero_total,
+            }
+        else:
+            aero_forces = self._aero_engine.compute_forces(
+                velocity, spin, t=t, position=position
+            )
+            total_force = aero_forces["total"] + gravity_force
+            forces = {
+                "gravity": gravity_force,
+                "drag": aero_forces["drag"],
+                "lift": aero_forces["lift"],
+                "magnus": aero_forces["magnus"],
+            }
+        acceleration = total_force / self.ball.mass
+        return acceleration, forces
+
     @precondition(
         lambda self, launch, max_time=10.0, dt=0.01, include_gravity=True: (
             launch is not None and launch.velocity >= 0
@@ -284,32 +318,10 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             # so the integrator sees thinner air at higher Z (issue #3504).
             self._update_air_density_for_position(position)
 
-            # Calculate forces
-            if self._force_provider is not None:
-                aero_total = self._compute_total_aero_force(velocity, spin, t, position)
-                gravity_force = self.ball.mass * gravity_acc
-                total_force = aero_total + gravity_force
-                acceleration = total_force / self.ball.mass
-                forces = {
-                    "gravity": gravity_force,
-                    "drag": np.zeros(3, dtype=float),
-                    "lift": np.zeros(3, dtype=float),
-                    "magnus": np.zeros(3, dtype=float),
-                    "total": aero_total,
-                }
-            else:
-                aero_forces = self._aero_engine.compute_forces(
-                    velocity, spin, t=t, position=position
-                )
-                gravity_force = self.ball.mass * gravity_acc
-                total_force = aero_forces["total"] + gravity_force
-                acceleration = total_force / self.ball.mass
-                forces = {
-                    "gravity": gravity_force,
-                    "drag": aero_forces["drag"],
-                    "lift": aero_forces["lift"],
-                    "magnus": aero_forces["magnus"],
-                }
+            # Calculate forces & acceleration
+            acceleration, forces = self._evaluate_step_forces(
+                velocity, spin, t, position, gravity_acc
+            )
 
             trajectory.append(
                 TrajectoryPoint(
