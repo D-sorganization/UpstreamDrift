@@ -45,7 +45,7 @@ except ImportError:
 
 # Solver parameters
 MAX_ITERATIONS = 100  # Maximum Newton-Raphson iterations
-TOLERANCE = 1e-6  # Convergence tolerance [m]
+TOLERANCE = 1e-9  # Convergence tolerance [m]
 INITIAL_GUESS_RATIO = 0.9  # l_CE / l_opt initial guess
 
 

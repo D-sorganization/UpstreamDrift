@@ -79,7 +79,9 @@ class HillMuscleModel:
     #: Default width of the active force-length Gaussian curve.
     #: From Thelen (2003), J. Biomech. Eng., 125(1), pp. 70-77.
     DEFAULT_FORCE_LENGTH_GAMMA: float = 0.45
-    DEFAULT_FORCE_LENGTH_WIDTH: float = 0.45  # Backward compatible alias for gamma
+    DEFAULT_FORCE_LENGTH_WIDTH: float = (
+        0.6708203932499369  # sqrt(gamma) per Thelen (2003)
+    )
     DEFAULT_TENDON_STRAIN_AT_FMAX: float = 0.04  # Thelen (2003) reference strain
 
     def __init__(
