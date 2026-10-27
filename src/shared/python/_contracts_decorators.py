@@ -20,6 +20,8 @@ def _evaluate_precondition(
     func: Callable[..., Any],
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
+    cond_sig: inspect.Signature | None = None,
+    func_sig: inspect.Signature | None = None,
 ) -> bool:
     """Try to evaluate a precondition, using argument-name binding.
 
@@ -34,12 +36,14 @@ def _evaluate_precondition(
     """
     # Try name-based binding first
     try:
-        func_sig = inspect.signature(func)
+        if func_sig is None:
+            func_sig = inspect.signature(func)
         bound = func_sig.bind(*args, **kwargs)
         bound.apply_defaults()
         all_arguments: dict[str, Any] = dict(bound.arguments)
 
-        cond_sig = inspect.signature(condition)
+        if cond_sig is None:
+            cond_sig = inspect.signature(condition)
         cond_params = set(cond_sig.parameters)
 
         if cond_params and cond_params <= set(all_arguments):
@@ -68,14 +72,19 @@ def precondition(
     The *condition* callable may accept either the same arguments as the
     decorated function, or a subset matched by parameter name.
     """
+    cond_sig = inspect.signature(condition)
 
     def decorator(func: F) -> F:
         if _ContractState.level == ContractLevel.OFF:
             return func
 
+        func_sig = inspect.signature(func)
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            result = _evaluate_precondition(condition, func, args, kwargs)
+            result = _evaluate_precondition(
+                condition, func, args, kwargs, cond_sig=cond_sig, func_sig=func_sig
+            )
 
             if not result:
                 _handle_violation("pre-condition", message)

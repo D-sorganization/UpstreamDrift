@@ -68,12 +68,6 @@ def precondition(  # noqa: C901
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 if not enabled or get_contract_level() == ContractLevel.OFF:
                     return await func(*args, **kwargs)
-                sig = inspect.signature(func)
-                try:
-                    bound = sig.bind(*args, **kwargs)
-                    bound.apply_defaults()
-                except TypeError:
-                    pass
                 try:
                     result = condition(*args, **kwargs)
                 except (RuntimeError, TypeError, ValueError) as e:
@@ -97,14 +91,6 @@ def precondition(  # noqa: C901
             # Check level at call time so runtime changes to contract level take effect
             if not enabled or get_contract_level() == ContractLevel.OFF:
                 return func(*args, **kwargs)
-
-            # Bind arguments to get named parameters
-            sig = inspect.signature(func)
-            try:
-                bound = sig.bind(*args, **kwargs)
-                bound.apply_defaults()
-            except TypeError:
-                bound = None
 
             # Evaluate the condition
             try:
