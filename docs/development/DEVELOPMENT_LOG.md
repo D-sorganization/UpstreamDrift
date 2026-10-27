@@ -573,6 +573,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13899 · Render Workers Put the Interpreter's Base_Prefix Lib Dir First on LD_LIBRARY_PATH, Because Opensim's Linux __Init__ Overwrites It With PATH; This Fixes the Requires_Opensim _Ctypes ABI Failure
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13899
+- **Branch:** merged via #13900
+- **PR:** #13900
+- **Paths:** see #13900
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`ce1dd79e`; collated from changes/13899-render-worker-ld-library-path.md)
+- **Summary:** Render workers put the interpreter's base_prefix lib dir first on LD_LIBRARY_PATH, because opensim's Linux __init__ overwrites it with PATH; this fixes the requires_opensim _ctypes ABI failure
+- **Next step:** Shipped in PR #13900.
+
 ### DL-#13896 · Lift Render Worker PYTHONPATH Uses Shared Worker_Env() (Repo Roots Only), Fixing Requires_Opensim _Ctypes ABI Failure
 
 - **State:** shipped
