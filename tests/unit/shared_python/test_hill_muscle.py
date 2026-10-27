@@ -29,6 +29,7 @@ def test_force_length_active_at_optimal(muscle_model) -> None:
     assert np.isclose(muscle_model.force_length_active(1.0), 1.0)
 
 
+@pytest.mark.unit
 def test_active_fl_width_thelen(muscle_model) -> None:
     """FL(l) uses gamma=0.45 shape from Thelen 2003 (UD-10)."""
     # FL(1.0) = 1.0
@@ -103,6 +104,7 @@ def test_tendon_force(muscle_model) -> None:
     assert f_stretch > 0
 
 
+@pytest.mark.unit
 def test_tendon_force_at_reference_strain(muscle_model) -> None:
     """F_T(epsilon ≈ 0.033-0.04) ≈ F_max (Zajac/Thelen), not at epsilon=0.316 (UD-09)."""
     # At slack length strain = 0 -> F_T = 0
