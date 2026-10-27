@@ -45,7 +45,7 @@ class TestCrossEngineValidator(unittest.TestCase):
     def test_compare_states_warning(self) -> None:
         """Test validation in warning range."""
         tol = self.validator.TOLERANCES["position"]
-        dev = tol * 1.5  # < 2.0 (WARNING_THRESHOLD)
+        dev = tol * 0.9  # > 0.8 (WARNING_THRESHOLD) and <= 1.0
         res = self.validator.compare_states(
             "engine1",
             np.array([1.0]),
