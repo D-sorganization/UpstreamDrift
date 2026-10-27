@@ -35,7 +35,6 @@ are safe. Parallel fits MUST use ``multiprocessing`` (not threads).
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import platform
 import time
@@ -158,12 +157,9 @@ def _hash_target(target: ClubTarget) -> str:
     The hash MUST be stable for identical numeric content, so we serialize
     the contiguous float64 buffers in a fixed order, not the Python repr.
     """
-    h = hashlib.sha256()
-    for arr in (target.time, target.butt, target.clubhead, target.club_quat):
-        a = np.ascontiguousarray(arr, dtype=np.float64)
-        h.update(a.tobytes())
-    h.update(int(target.impact_idx).to_bytes(8, "little", signed=True))
-    return h.hexdigest()
+    from src.shared.python.motion_matching.solver_status import hash_target
+
+    return hash_target(target)
 
 
 def _git_commit_short() -> str:
