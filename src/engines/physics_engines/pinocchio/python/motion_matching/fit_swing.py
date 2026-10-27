@@ -494,8 +494,8 @@ def _analytical_jacobian(
     # Forward sensitivity state: S_q == d q / d theta, S_qd == d qd / d theta.
     nq = int(model.nq)
     nv = int(model.nv)
-    S_q = np.zeros((nq, nx), dtype=np.float64)
-    S_qd = np.zeros((nv, nx), dtype=np.float64)
+    S_q: NDArray[np.float64] = np.zeros((nq, nx), dtype=np.float64)
+    S_qd: NDArray[np.float64] = np.zeros((nv, nx), dtype=np.float64)
 
     impact_k = int(local_target.impact_idx) - 1
     dt = float(sim_options.dt)

@@ -6,4 +6,4 @@ next_step: "Merge PR"
 branch: "fix/13874-solver-status-contract"
 ---
 
-Update divergence inventory for solver_status.py and add type ignore on OpenSim minimize call-overload.
+Update divergence inventory for solver_status.py, add type ignore on OpenSim minimize call-overload, and add type annotations for Pinocchio state-Jacobian matrices.
