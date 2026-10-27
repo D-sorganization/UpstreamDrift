@@ -17,6 +17,20 @@ from numpy.typing import NDArray
 __all__ = ["quaternion_geodesic_angles", "rotmat_frobenius_distances"]
 
 
+def _quaternion_abs_dot_products(
+    q1: NDArray[np.float64],
+    q2: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Validate shapes and return clamped absolute dot products in [0, 1]."""
+    if q1.shape != q2.shape:
+        raise ValueError(f"shape mismatch: q1 {q1.shape} vs q2 {q2.shape}")
+    if q1.ndim != 2 or q1.shape[1] != 4:
+        raise ValueError(f"quaternions must have shape (N, 4); got {q1.shape}")
+    # ⚡ Bolt: np.einsum is ~3x faster than np.sum(q1 * q2, axis=1)
+    dots = np.abs(np.einsum("ij,ij->i", q1, q2))
+    return np.clip(dots, -1.0, 1.0)
+
+
 def quaternion_geodesic_angles(
     q1: NDArray[np.float64],
     q2: NDArray[np.float64],
@@ -33,13 +47,7 @@ def quaternion_geodesic_angles(
     Raises:
         ValueError: If shapes mismatch or are not ``(N, 4)``.
     """
-    if q1.shape != q2.shape:
-        raise ValueError(f"shape mismatch: q1 {q1.shape} vs q2 {q2.shape}")
-    if q1.ndim != 2 or q1.shape[1] != 4:
-        raise ValueError(f"quaternions must have shape (N, 4); got {q1.shape}")
-    # ⚡ Bolt: np.einsum is ~3x faster than np.sum(q1 * q2, axis=1)
-    dots = np.abs(np.einsum("ij,ij->i", q1, q2))
-    dots = np.clip(dots, -1.0, 1.0)
+    dots = _quaternion_abs_dot_products(q1, q2)
     return 2.0 * np.arccos(dots)
 
 
@@ -63,11 +71,6 @@ def rotmat_frobenius_distances(
     Raises:
         ValueError: If shapes mismatch or are not ``(N, 4)``.
     """
-    if q1.shape != q2.shape:
-        raise ValueError(f"shape mismatch: q1 {q1.shape} vs q2 {q2.shape}")
-    if q1.ndim != 2 or q1.shape[1] != 4:
-        raise ValueError(f"quaternions must have shape (N, 4); got {q1.shape}")
-    dots = np.abs(np.einsum("ij,ij->i", q1, q2))
-    dots = np.clip(dots, -1.0, 1.0)
+    dots = _quaternion_abs_dot_products(q1, q2)
     frob_sq = np.maximum(0.0, 8.0 * (1.0 - dots * dots))
     return np.sqrt(frob_sq)
