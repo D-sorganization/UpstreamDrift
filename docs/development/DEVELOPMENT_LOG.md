@@ -878,10 +878,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13852
 - **Branch:** merged via #13860
-- **PR:** #13860
+- **PR:** #13860, #13937
 - **Paths:** see #13860
 - **Started:** 2026-10-26
-- **Last verified:** 2026-10-26 (`c4e2a518`; collated from changes/13852-wscg-test-scaffold.md)
+- **Last verified:** 2026-10-27 (`d4a74be4`; collated from changes/13852-wscg-case-split-1.md)
 - **Summary:** Add WSCG masked-JSON parity test scaffold for budget-split PRs.
 - **Next step:** Shipped in PR #13860.
 
