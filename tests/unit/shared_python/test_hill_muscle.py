@@ -29,6 +29,15 @@ def test_force_length_active_at_optimal(muscle_model) -> None:
     assert np.isclose(muscle_model.force_length_active(1.0), 1.0)
 
 
+def test_active_fl_width_thelen(muscle_model) -> None:
+    """FL(l) uses gamma=0.45 shape from Thelen 2003 (UD-10)."""
+    # FL(1.0) = 1.0
+    assert np.isclose(muscle_model.force_length_active(1.0), 1.0)
+    # At l=1.4, Thelen (2003) gives exp(-(0.4)^2 / 0.45) ≈ 0.7008
+    f_1_4 = muscle_model.force_length_active(1.4)
+    assert np.isclose(f_1_4, 0.7008, atol=0.01)
+
+
 def test_force_length_active_bell_curve(muscle_model) -> None:
     """Test bell curve shape of active force-length relationship."""
     # Force should be lower at shorter and longer lengths
@@ -92,6 +101,17 @@ def test_tendon_force(muscle_model) -> None:
     # Above slack
     f_stretch = muscle_model.tendon_force(1.05)
     assert f_stretch > 0
+
+
+def test_tendon_force_at_reference_strain(muscle_model) -> None:
+    """F_T(epsilon ≈ 0.033-0.04) ≈ F_max (Zajac/Thelen), not at epsilon=0.316 (UD-09)."""
+    # At slack length strain = 0 -> F_T = 0
+    assert muscle_model.tendon_force(1.0) == 0.0
+    # At reference strain (1.04, 4% strain per Thelen 2003) F_T ≈ 1.0 F_max (within 2%)
+    f_ref = muscle_model.tendon_force(1.04)
+    assert np.isclose(f_ref, 1.0, atol=0.02)
+    # Monotonicity
+    assert muscle_model.tendon_force(1.05) > f_ref
 
 
 def test_compute_muscle_force_isometric_max(muscle_model, muscle_params) -> None:
