@@ -173,14 +173,86 @@ def test_solver_status_contract_all_engines() -> None:
     from src.shared.python.motion_matching.solver_status import map_scipy_status
 
     # Success with finite fun -> success
-    assert map_scipy_status(SimpleNamespace(success=True, fun=0.01, message="Optimization terminated successfully")) == "success"
+    assert (
+        map_scipy_status(
+            SimpleNamespace(
+                success=True, fun=0.01, message="Optimization terminated successfully"
+            )
+        )
+        == "success"
+    )
 
     # Non-success with finite fun -> failed (never warning)
-    assert map_scipy_status(SimpleNamespace(success=False, fun=0.05, message="Iteration limit reached")) == "failed"
-    assert map_scipy_status(SimpleNamespace(success=False, fun=0.05, message="More than 3*n iterations in LSQ subproblem")) == "failed"
-    assert map_scipy_status(SimpleNamespace(success=False, fun=0.05, message="Inequality constraints incompatible")) == "failed"
+    assert (
+        map_scipy_status(
+            SimpleNamespace(success=False, fun=0.05, message="Iteration limit reached")
+        )
+        == "failed"
+    )
+    assert (
+        map_scipy_status(
+            SimpleNamespace(
+                success=False,
+                fun=0.05,
+                message="More than 3*n iterations in LSQ subproblem",
+            )
+        )
+        == "failed"
+    )
+    assert (
+        map_scipy_status(
+            SimpleNamespace(
+                success=False, fun=0.05, message="Inequality constraints incompatible"
+            )
+        )
+        == "failed"
+    )
 
     # Non-finite fun -> failed even if success flag is True
-    assert map_scipy_status(SimpleNamespace(success=True, fun=float("nan"), message="ok")) == "failed"
-    assert map_scipy_status(SimpleNamespace(success=False, fun=float("inf"), message="overflow")) == "failed"
+    assert (
+        map_scipy_status(SimpleNamespace(success=True, fun=float("nan"), message="ok"))
+        == "failed"
+    )
+    assert (
+        map_scipy_status(
+            SimpleNamespace(success=False, fun=float("inf"), message="overflow")
+        )
+        == "failed"
+    )
     assert map_scipy_status(None) == "failed"
+
+
+@pytest.mark.unit
+def test_provenance_values_format_and_types() -> None:
+    """UD-05: provenance helper generates populated, well-formed values."""
+    from datetime import datetime
+    from types import SimpleNamespace
+    from src.shared.python.motion_matching.solver_status import (
+        hash_target,
+        make_provenance_fields,
+    )
+
+    # Empty target produces "unknown" hash
+    assert hash_target(None) == "unknown"
+
+    # Synthetic dummy target (SimpleNamespace satisfying duck typing)
+    t = np.linspace(0, 0.3, 10)
+    target = SimpleNamespace(
+        time=t,
+        butt=np.zeros((10, 3)),
+        clubhead=np.zeros((10, 3)),
+        club_quat=np.tile(np.array([1.0, 0.0, 0.0, 0.0]), (10, 1)),
+        impact_idx=5,
+    )
+    thash = hash_target(target)
+    assert len(thash) == 64
+    assert all(c in "0123456789abcdef" for c in thash)
+
+    prov = make_provenance_fields(None, "opensim", target=target)
+    assert isinstance(prov["git_commit"], str) and prov["git_commit"]
+    assert isinstance(prov["engine_version"], str) and prov["engine_version"]
+    assert prov["target_hash"] == thash
+    assert isinstance(prov["timestamp_utc"], str)
+
+    parsed_dt = datetime.fromisoformat(prov["timestamp_utc"])
+    assert parsed_dt.tzinfo is not None

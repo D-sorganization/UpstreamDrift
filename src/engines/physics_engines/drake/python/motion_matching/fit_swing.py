@@ -40,7 +40,16 @@ from numpy.typing import NDArray
 from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.cost import CostOptions
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
+from src.shared.python.motion_matching.solver_status import (
+    make_provenance_fields,
+    map_scipy_status,
+)
 from src.shared.python.motion_matching.validate_theta import validate_theta
+
+try:
+    import pydrake
+except ImportError:
+    pydrake = None  # type: ignore[assignment]
 
 from .compute_cost_drake import compute_cost_drake
 from .simulate import COEFFS_PER_JOINT, SimOptions, SimOut, simulate_with_coefficients
@@ -155,14 +164,7 @@ def _default_simulate_fn(sim_options: SimOptions) -> SimulateFn:
 
 def _scipy_status(res: Any) -> str:
     """Map a ``scipy.OptimizeResult`` to the canonical solver_status string."""
-    if bool(res.success):
-        return "success"
-    # SLSQP returns success=False when maxiter is hit but the iterate is
-    # often still usable; classify those as warning rather than failed.
-    msg = (str(res.message) or "").lower()
-    if "iteration" in msg or "maximum" in msg:
-        return "warning"
-    return "failed"
+    return map_scipy_status(res)
 
 
 def _final_rmse_m(
@@ -299,6 +301,7 @@ def fit_swing_drake(
     except Exception:  # pragma: no cover - defensive  # noqa: BLE001
         rmse_m = float("nan")
 
+    prov = make_provenance_fields(pydrake, "drake", "pydrake", target=target)
     return FitResult(
         theta_optimal=theta_opt,
         final_cost=float(res.fun),
@@ -310,8 +313,5 @@ def fit_swing_drake(
         message=str(res.message),
         history=tuple(history),
         method=opts.method,
-        git_commit="unknown",
-        engine_version="unknown",
-        target_hash="unknown",
-        timestamp_utc="unknown",
+        **prov,
     )

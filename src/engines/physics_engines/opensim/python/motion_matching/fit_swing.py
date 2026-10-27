@@ -53,7 +53,16 @@ from src.shared.python.motion_matching.cost import (
     compute_cost,
 )
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
+from src.shared.python.motion_matching.solver_status import (
+    make_provenance_fields,
+    map_scipy_status,
+)
 from src.shared.python.motion_matching.validate_theta import validate_theta
+
+try:
+    import opensim
+except ImportError:
+    opensim = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -301,12 +310,9 @@ def fit_swing_opensim(
     )
     elapsed = time.perf_counter() - t0
 
-    success = bool(res.success)
-    if success:
-        status = "success"
-    elif np.isfinite(float(res.fun)):
-        status = "warning"
-    else:
+    status = map_scipy_status(res)
+    final_cost = float(res.fun)
+    if not np.isfinite(final_cost):
         status = "failed"
 
     # Spec §2.2: post-fit ``theta_optimal`` must satisfy length+finiteness
@@ -323,9 +329,10 @@ def fit_swing_opensim(
         name="theta_optimal",
     )
 
+    prov = make_provenance_fields(opensim, "opensim", target=target)
     result = FitResult(
         theta_optimal=theta_opt.copy(),
-        final_cost=float(res.fun),
+        final_cost=final_cost,
         final_rmse_m=float("nan"),
         solver_status=status,
         iterations=int(getattr(res, "nit", 0)),
@@ -334,16 +341,14 @@ def fit_swing_opensim(
         message=str(res.message),
         history=tuple(history),
         method=str(options.method),
-        git_commit="unknown",
-        engine_version="unknown",
-        target_hash="unknown",
-        timestamp_utc="unknown",
+        **prov,
     )
 
     # Postcondition: history should be non-empty and end at the reported cost
     # within floating-point tolerance.
     assert result.history, "FitResult.history must not be empty"
-    assert np.isfinite(result.final_cost), "FitResult.cost must be finite"
+    if not np.isfinite(result.final_cost):
+        result.solver_status = "failed"
     assert result.theta_optimal.shape == (d,), (
         f"FitResult.theta shape {result.theta_optimal.shape} != ({d},)"
     )

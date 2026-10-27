@@ -60,7 +60,16 @@ from src.shared.python.motion_matching.cost import (
     compute_total_work,
 )
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
+from src.shared.python.motion_matching.solver_status import (
+    make_provenance_fields,
+    map_scipy_status,
+)
 from src.shared.python.motion_matching.validate_theta import validate_theta
+
+try:
+    import mujoco
+except ImportError:
+    mujoco = None  # type: ignore[assignment]
 
 from .jacobians import JacobianCache, compute_cost_gradient_analytical
 from .simulate import SimOptions, SimOut, simulate_with_coefficients
@@ -470,31 +479,19 @@ def _finalize_fit_result(
         "platform": platform.platform(),
     }
 
+    prov = make_provenance_fields(mujoco, "mujoco", target=target)
     return FitResult(
         theta_optimal=theta_star,
         final_cost=final_cost,
         final_rmse_m=rmse_m,
-        solver_status=(
-            "failed"
-            if is_divergent
-            else (
-                "success"
-                if bool(res.success)
-                else (
-                    "warning" if "iteration" in str(res.message).lower() else "failed"
-                )
-            )
-        ),
+        solver_status="failed" if is_divergent else map_scipy_status(res),
         iterations=int(getattr(res, "nit", 0)),
         n_evaluations=outcome.n_eval,
         wall_clock_s=duration_s,
         message=str(res.message),
         history=outcome.history,
         method=options.method,
-        git_commit=_git_commit_short(),
-        engine_version=_mujoco_version(),
-        target_hash=_hash_target(target),
-        timestamp_utc=timestamp_utc,
+        **prov,
         cost_breakdown=breakdown,
         final_total_work_J=work_J,
         solver_options=solver_options,
