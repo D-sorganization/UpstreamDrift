@@ -19,6 +19,7 @@ Reference:
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -77,29 +78,43 @@ class HillMuscleModel:
 
     #: Default width of the active force-length Gaussian curve.
     #: From Thelen (2003), J. Biomech. Eng., 125(1), pp. 70-77.
-    DEFAULT_FORCE_LENGTH_WIDTH: float = 0.56
+    DEFAULT_FORCE_LENGTH_GAMMA: float = 0.45
+    DEFAULT_FORCE_LENGTH_WIDTH: float = (
+        0.6708203932499369  # sqrt(gamma) per Thelen (2003)
+    )
+    DEFAULT_TENDON_STRAIN_AT_FMAX: float = 0.04  # Thelen (2003) reference strain
 
     def __init__(
         self,
         params: MuscleParameters,
         force_length_width: float | None = None,
+        force_length_gamma: float | None = None,
     ) -> None:
         """Initialize muscle model.
 
         Args:
             params: MuscleParameters dataclass
-            force_length_width: Width of the active force-length Gaussian
-                curve (dimensionless). Default 0.56 from Thelen (2003).
+            force_length_width: Alias for Gaussian shape parameter gamma (dimensionless).
+            force_length_gamma: Gaussian shape parameter gamma (dimensionless).
+                Default 0.45 from Thelen (2003).
         """
         self.params = params
-        self._force_length_width = (
-            force_length_width
-            if force_length_width is not None
-            else self.DEFAULT_FORCE_LENGTH_WIDTH
-        )
+        if force_length_gamma is not None:
+            self._force_length_gamma = force_length_gamma
+            self._force_length_width = math.sqrt(force_length_gamma)
+        elif force_length_width is not None:
+            self._force_length_width = force_length_width
+            self._force_length_gamma = force_length_width**2
+        else:
+            self._force_length_gamma = self.DEFAULT_FORCE_LENGTH_GAMMA
+            self._force_length_width = math.sqrt(self.DEFAULT_FORCE_LENGTH_GAMMA)
 
     def force_length_active(self, l_norm: float) -> float:
-        """Active force-length relationship (Gaussian-like curve).
+        """Active force-length relationship (Gaussian curve).
+
+        From Thelen (2003), J. Biomech. Eng., 125(1), pp. 70-77, Eq. 2:
+            f_L = exp(-(l_norm - 1)^2 / gamma)
+        with shape parameter gamma = 0.45.
 
         Args:
             l_norm: Normalized fiber length (l_CE / l_opt)
@@ -107,14 +122,12 @@ class HillMuscleModel:
         Returns:
             Force multiplier [0, 1]
         """
-        # Width parameter for the Gaussian force-length curve.
-        # Value of 0.56 from Thelen (2003), "Adjustment of Muscle Mechanics
-        # Model Parameters to Simulate Dynamic Contractions in Older Adults",
-        # J. Biomech. Eng., 125(1), pp. 70-77.
         if l_norm is None:
             raise ValueError("l_norm must be provided")
-        width = self._force_length_width
-        return float(np.exp(-((l_norm - 1.0) ** 2) / width**2))
+        if l_norm <= 0:
+            return 0.0
+        gamma = self._force_length_gamma
+        return float(np.exp(-((l_norm - 1.0) ** 2) / gamma))
 
     def force_length_passive(self, l_norm: float) -> float:
         """Passive force-length relationship (Exponential spring).
@@ -144,7 +157,7 @@ class HillMuscleModel:
                    Negative = shortening (concentric)
 
         Returns:
-            Force multiplier [0, 1.8]
+            Force multiplier [0, 1.4]
         """
         # Concentric (shortening)
         if v_norm is None:
@@ -160,11 +173,19 @@ class HillMuscleModel:
         # Force increases up to ~1.4x F_max
         return float((1 + v_norm * 1.4 / 0.10) / (1 + v_norm / 0.10))
 
-    def tendon_force(self, l_tendon_norm: float) -> float:
-        """Tendon force-length relationship (Non-linear spring).
+    def tendon_force(
+        self, l_tendon_norm: float, epsilon_0: float | None = None
+    ) -> float:
+        """Tendon force-length relationship (Non-linear toe + linear spring).
+
+        From Thelen (2003), J. Biomech. Eng., 125(1), pp. 70-77, Eq. 3,
+        and Zajac (1989):
+        Normalized tendon force reaches F_max (1.0) at the reference strain
+        epsilon_0 (typically 0.033 - 0.04).
 
         Args:
             l_tendon_norm: Normalized tendon length (l_tendon / l_slack)
+            epsilon_0: Tendon strain at F_max (default 0.04 per Thelen 2003).
 
         Returns:
             Force multiplier [0, inf)
@@ -173,11 +194,19 @@ class HillMuscleModel:
             raise ValueError("l_tendon_norm must be provided")
         if l_tendon_norm <= 1.0:
             return 0.0
-        # Non-linear stiffening region (toe region)
-        # Often modeled as exponential or quadratic.
-        # Here using a simple quadratic for stability.
         strain = l_tendon_norm - 1.0
-        return float(10.0 * strain**2)  # Stiffness coefficient
+        eps_0 = (
+            epsilon_0 if epsilon_0 is not None else self.DEFAULT_TENDON_STRAIN_AT_FMAX
+        )
+        f_toe = 0.33
+        k_toe = 3.0
+        eps_toe = 0.609 * eps_0
+        k_lin = 1.75 / eps_0
+        if strain <= eps_toe:
+            return float(
+                f_toe * (np.exp(k_toe * strain / eps_toe) - 1.0) / (np.exp(k_toe) - 1.0)
+            )
+        return float(f_toe + k_lin * (strain - eps_toe))
 
     def compute_force(self, state: MuscleState) -> float:
         """Compute total muscle force generated at the tendon.

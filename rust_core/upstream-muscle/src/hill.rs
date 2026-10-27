@@ -18,18 +18,17 @@
 
 /// Default width of the active force-length Gaussian curve, dimensionless.
 ///
-/// From Thelen (2003), J. Biomech. Eng., 125(1), pp. 70-77; matches
-/// `HillMuscleModel.DEFAULT_FORCE_LENGTH_WIDTH = 0.56` in the Python source.
-pub const DEFAULT_FORCE_LENGTH_WIDTH: f64 = 0.56;
+/// From Thelen (2003), J. Biomech. Eng., 125(1), pp. 70-77; width sqrt(gamma)
+/// corresponding to DEFAULT_FORCE_LENGTH_GAMMA = 0.45.
+pub const DEFAULT_FORCE_LENGTH_WIDTH: f64 = 0.6708203932499369;
+pub const DEFAULT_FORCE_LENGTH_GAMMA: f64 = 0.45;
 
 /// Stiffness coefficient of the passive (PEE) exponential spring in
 /// `force_length_passive`. Matches `k_passive = 4.0` in the Python source.
 pub const K_PASSIVE: f64 = 4.0;
 
-/// Stiffness coefficient of the quadratic tendon (SEE) curve in
-/// `tendon_force`. Matches the literal `10.0 * strain**2` in the Python
-/// source.
-pub const K_TENDON: f64 = 10.0;
+/// Reference tendon strain at F_max (~0.04 per Thelen 2003 / 0.033 Zajac 1989).
+pub const DEFAULT_TENDON_STRAIN_AT_FMAX: f64 = 0.04;
 
 /// Hill hyperbola shape parameter for the concentric branch of `f_v`.
 /// Matches the literal `0.25` in the Python source's denominator.
@@ -59,17 +58,28 @@ pub const ECCENTRIC_SHAPE: f64 = 0.10;
 /// `force_length_width` of [`DEFAULT_FORCE_LENGTH_WIDTH`].
 #[inline]
 pub fn f_l(l_norm: f64) -> f64 {
-    f_l_with_width(l_norm, DEFAULT_FORCE_LENGTH_WIDTH)
+    f_l_with_gamma(l_norm, DEFAULT_FORCE_LENGTH_GAMMA)
+}
+
+/// Variant of [`f_l`] that takes an explicit Gaussian shape parameter gamma.
+///
+/// Mirrors the `force_length_gamma` (or `force_length_width`) constructor argument on the
+/// Python `HillMuscleModel`.
+#[inline]
+pub fn f_l_with_gamma(l_norm: f64, gamma: f64) -> f64 {
+    if l_norm <= 0.0 {
+        return 0.0;
+    }
+    let d = l_norm - 1.0;
+    (-(d * d) / gamma).exp()
 }
 
 /// Variant of [`f_l`] that takes an explicit Gaussian width parameter.
 ///
-/// Mirrors the optional `force_length_width` constructor argument on the
-/// Python `HillMuscleModel`.
+/// Converts width w to shape parameter gamma = w^2.
 #[inline]
 pub fn f_l_with_width(l_norm: f64, width: f64) -> f64 {
-    let d = l_norm - 1.0;
-    (-(d * d) / (width * width)).exp()
+    f_l_with_gamma(l_norm, width * width)
 }
 
 // ── Passive force-length (PEE) ───────────────────────────────────────────────
@@ -123,18 +133,31 @@ pub fn f_v(v_norm: f64) -> f64 {
 /// Tendon (series-elastic) force-length curve, `f_t(l_tendon_norm)`.
 ///
 /// `l_tendon_norm = l_tendon / l_slack`. Below slack the tendon carries no
-/// force; above slack the simple quadratic `K_TENDON * strain^2` of the
-/// Python source applies (intentionally simple for stability — the toe
-/// region in OpenSim's full curve is approximated here).
+/// force; above slack the cited Thelen (2003) / Zajac (1989) tendon curve
+/// applies, reaching F_max at reference strain `DEFAULT_TENDON_STRAIN_AT_FMAX`.
 ///
 /// Equivalent to `HillMuscleModel.tendon_force`.
 #[inline]
 pub fn f_t(l_tendon_norm: f64) -> f64 {
+    f_t_with_reference_strain(l_tendon_norm, DEFAULT_TENDON_STRAIN_AT_FMAX)
+}
+
+/// Tendon force with customizable reference strain epsilon_0.
+#[inline]
+pub fn f_t_with_reference_strain(l_tendon_norm: f64, eps_0: f64) -> f64 {
     if l_tendon_norm <= 1.0 {
         return 0.0;
     }
     let strain = l_tendon_norm - 1.0;
-    K_TENDON * strain * strain
+    let f_toe = 0.33;
+    let k_toe = 3.0;
+    let eps_toe = 0.609 * eps_0;
+    let k_lin = 1.75 / eps_0;
+    if strain <= eps_toe {
+        f_toe * ((k_toe * strain / eps_toe).exp() - 1.0) / (k_toe.exp() - 1.0)
+    } else {
+        f_toe + k_lin * (strain - eps_toe)
+    }
 }
 
 #[cfg(test)]
@@ -147,6 +170,11 @@ mod tests {
         assert_relative_eq!(f_l(1.0), 1.0, epsilon = 1e-12);
         assert!(f_l(0.5) < 1.0);
         assert!(f_l(1.5) < 1.0);
+    }
+
+    #[test]
+    fn f_l_at_1_4_matches_thelen_2003() {
+        assert_relative_eq!(f_l(1.4), 0.7007827, epsilon = 1e-4);
     }
 
     #[test]
@@ -206,9 +234,9 @@ mod tests {
     }
 
     #[test]
-    fn f_t_quadratic_above_slack() {
-        // Doubling the strain quadruples the force.
-        assert_relative_eq!(f_t(1.10), K_TENDON * 0.01, epsilon = 1e-12);
-        assert_relative_eq!(f_t(1.20), K_TENDON * 0.04, epsilon = 1e-12);
+    fn f_t_at_reference_strain_near_fmax() {
+        // At reference strain 1.04, F_T ≈ 1.0 (within 2%)
+        assert_relative_eq!(f_t(1.04), 1.01425, epsilon = 1e-4);
+        assert!(f_t(1.05) > f_t(1.04));
     }
 }

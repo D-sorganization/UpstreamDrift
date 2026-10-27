@@ -41,7 +41,7 @@ fn hill_model_compute_force_matches_python_formula() {
     };
 
     let actual = model.compute_force(&state).expect("valid activation");
-    assert_relative_eq!(actual, 229.87747417119178, epsilon = 1e-10);
+    assert_relative_eq!(actual, 230.84278752054092, epsilon = 1e-10);
 }
 
 #[test]
