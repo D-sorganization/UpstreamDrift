@@ -52,6 +52,7 @@ from src.shared.python.motion_matching.cost import (
     SimOutput,
     compute_cost,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
 from src.shared.python.motion_matching.solver_status import (
     make_provenance_fields,
@@ -60,7 +61,7 @@ from src.shared.python.motion_matching.solver_status import (
 from src.shared.python.motion_matching.validate_theta import validate_theta
 
 try:
-    import opensim
+    opensim = import_opensim()
 except ImportError:
     opensim = None  # type: ignore[assignment]
 
