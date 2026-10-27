@@ -56,6 +56,7 @@ class TestFrictionCone:
         )
         assert not result
 
+    @pytest.mark.unit
     def test_friction_zero_in_tension(self) -> None:
         """Tensile normal force (Fn <= 0) must provide zero tangential friction capacity (UD-29)."""
         # When normal_force is negative (tension), any non-zero tangent force must be outside cone
