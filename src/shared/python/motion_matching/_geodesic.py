@@ -14,7 +14,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-__all__ = ["quaternion_geodesic_angles"]
+__all__ = ["quaternion_geodesic_angles", "rotmat_frobenius_distances"]
 
 
 def quaternion_geodesic_angles(
@@ -41,3 +41,33 @@ def quaternion_geodesic_angles(
     dots = np.abs(np.einsum("ij,ij->i", q1, q2))
     dots = np.clip(dots, -1.0, 1.0)
     return 2.0 * np.arccos(dots)
+
+
+def rotmat_frobenius_distances(
+    q1: NDArray[np.float64],
+    q2: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Frobenius distance ||R1 - R2||_F between matching rotation matrices of q1 and q2.
+
+    For unit quaternions q1 and q2, the squared Frobenius distance between
+    their corresponding 3x3 rotation matrices in SO(3) is:
+        ||R1 - R2||_F^2 = 8 * (1 - (q1 . q2)^2)
+
+    Args:
+        q1: Unit-norm quaternions, shape ``(N, 4)`` ordered ``[w, x, y, z]``.
+        q2: Unit-norm quaternions, shape ``(N, 4)`` ordered ``[w, x, y, z]``.
+
+    Returns:
+        ``(N,)`` array of Frobenius norm distances.
+
+    Raises:
+        ValueError: If shapes mismatch or are not ``(N, 4)``.
+    """
+    if q1.shape != q2.shape:
+        raise ValueError(f"shape mismatch: q1 {q1.shape} vs q2 {q2.shape}")
+    if q1.ndim != 2 or q1.shape[1] != 4:
+        raise ValueError(f"quaternions must have shape (N, 4); got {q1.shape}")
+    dots = np.abs(np.einsum("ij,ij->i", q1, q2))
+    dots = np.clip(dots, -1.0, 1.0)
+    frob_sq = np.maximum(0.0, 8.0 * (1.0 - dots * dots))
+    return np.sqrt(frob_sq)

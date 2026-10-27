@@ -279,10 +279,10 @@ def test_body_marker_term() -> None:
     }
     from src.shared.python.motion_matching.cost import SimOutput
 
-    sim = SimOutput(**sim_dict)
+    sim = SimOutput(**sim_dict)  # type: ignore[arg-type]
 
     opts = CostOptions(w_body_marker=2.0)
-    _, terms = compute_cost(np.zeros(7), target, _const_sim_fn(sim), opts)
+    _, terms = compute_cost(np.zeros(7), target, _const_sim_fn(sim), opts)  # type: ignore[arg-type]
     assert abs(terms.body_marker - 1e-6) < 1e-15
 
 
@@ -339,4 +339,4 @@ def test_body_marker_missing_raises_when_weighted() -> None:
 
     opts = CostOptions(w_body_marker=1.0)
     with pytest.raises(ValueError, match="marker_xyz"):
-        compute_cost(np.zeros(7), target, _const_sim_fn(sim), opts)
+        compute_cost(np.zeros(7), target, _const_sim_fn(sim), opts)  # type: ignore[arg-type]
