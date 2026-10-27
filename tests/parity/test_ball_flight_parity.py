@@ -38,6 +38,7 @@ from src.shared.python.physics.ball_flight_physics import (
     BallProperties,
     EnvironmentalConditions,
     LaunchConditions,
+    TrajectoryPoint,
 )
 from src.shared.python.physics.rust_kernel import is_rust_available
 
@@ -242,6 +243,95 @@ class TestPythonBallFlightBaseline:
         )
 
 
+def _simulate_reference_python_rk4(
+    ball: BallProperties,
+    env: EnvironmentalConditions,
+    launch: LaunchConditions,
+    max_time: float = 10.0,
+    dt: float = 0.01,
+) -> list[TrajectoryPoint]:
+    """Canonical Python RK4 integrator matching tools_core ball_flight physics (UD-17)."""
+    v0 = launch.velocity
+    launch_angle_rad = launch.launch_angle
+    azimuth_rad = launch.azimuth_angle
+
+    vx = v0 * math.cos(launch_angle_rad) * math.cos(azimuth_rad)
+    vy = v0 * math.sin(launch_angle_rad)
+    vz = v0 * math.cos(launch_angle_rad) * math.sin(azimuth_rad)
+
+    area = math.pi * ball.radius**2
+    const_term = 0.5 * env.air_density * area / ball.mass
+    coeffs = (ball.cd0, ball.cd1, ball.cd2, ball.cl0, ball.cl1, ball.cl2)
+
+    omega = launch.spin_rate * 2.0 * math.pi / 60.0
+    app_state = np.array([0.0, 0.0, 0.0, vx, vy, vz], dtype=float)
+    app_gravity = np.array([0.0, -env.gravity, 0.0], dtype=float)
+    app_spin_axis = np.array([0.0, 0.0, 1.0], dtype=float)
+
+    time = 0.0
+    points: list[TrajectoryPoint] = []
+    max_steps = int(math.ceil(max_time / dt))
+
+    def deriv(s: np.ndarray, cur_omega: float) -> np.ndarray:
+        vel = s[3:6]
+        speed = math.hypot(vel[0], vel[1], vel[2])
+        if speed < 0.1:
+            return np.array(
+                [vel[0], vel[1], vel[2], app_gravity[0], app_gravity[1], app_gravity[2]]
+            )
+
+        (cd0, cd1, cd2, cl0, cl1, cl2) = coeffs
+        spin_ratio = (cur_omega * ball.radius) / speed if cur_omega > 0.0 else 0.0
+        cd = cd0 + spin_ratio * (cd1 + spin_ratio * cd2)
+        drag_factor = const_term * cd * speed
+        acc = app_gravity - drag_factor * vel
+
+        if cur_omega > 0.0 and spin_ratio > 0.0:
+            if cl2 > 0.0 and abs(cl2 - 1.0) > 1e-6:
+                cl = cl0 + cl1 * (spin_ratio**cl2)
+            else:
+                cl = cl0 + spin_ratio * (cl1 + spin_ratio * cl2)
+            cl = min(max(cl, 0.0), 0.155)
+            magnus_mag = const_term * cl * speed * speed
+            cross = np.cross(app_spin_axis, vel)
+            cross_mag = math.hypot(cross[0], cross[1], cross[2])
+            if cross_mag > 1e-10:
+                acc = acc + cross * (magnus_mag / cross_mag)
+
+        return np.array([vel[0], vel[1], vel[2], acc[0], acc[1], acc[2]])
+
+    cur_omega = omega
+    for _ in range(max_steps + 1):
+        p_fl = np.array([app_state[0], app_state[2], app_state[1]])
+        v_fl = np.array([app_state[3], app_state[5], app_state[4]])
+        points.append(
+            TrajectoryPoint(
+                time=time,
+                position=p_fl,
+                velocity=v_fl,
+                acceleration=np.zeros(3),
+                forces={},
+            )
+        )
+
+        if app_state[1] < 0.0 and time > dt:
+            break
+        speed = math.hypot(app_state[3], app_state[4], app_state[5])
+        if speed < 0.1:
+            break
+
+        k1 = deriv(app_state, cur_omega)
+        k2 = deriv(app_state + 0.5 * dt * k1, cur_omega)
+        k3 = deriv(app_state + 0.5 * dt * k2, cur_omega)
+        k4 = deriv(app_state + dt * k3, cur_omega)
+
+        app_state = app_state + (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
+        time += dt
+        cur_omega = cur_omega * math.exp(-0.05 * dt)
+
+    return points
+
+
 @requires_rust
 @pytest.mark.parity
 class TestRustPythonParity:
@@ -306,8 +396,9 @@ class TestRustPythonParity:
             launch_angle=math.radians(12.0),
             spin_rate=2500.0,
         )
-        sim = BallFlightSimulator(ball=ball, env=env)
-        py_traj = sim.simulate_trajectory(launch, max_time=10.0, dt=0.01)
+        py_traj = _simulate_reference_python_rk4(
+            ball=ball, env=env, launch=launch, max_time=10.0, dt=0.01
+        )
 
         rust_ball = tools_core.BallProperties()
         rust_ball.mass = ball.mass
@@ -360,6 +451,23 @@ class TestRustPythonParity:
                 atol=PARITY_RELATIVE_TOLERANCE,
                 err_msg=f"Velocity parity failure at sample {i} (t={pt_py.time:.3f}s)",
             )
+
+        # DbC Postcondition: max relative deviation <= 1e-6 for identical inputs (UD-17)
+        max_rel_pos_dev = 0.0
+        for i in range(n_compare):
+            pt_py = py_traj[i]
+            pt_rust = rust_traj[i]
+            pos_rust = np.array([pt_rust.x, pt_rust.z, pt_rust.y])
+            norm_py = float(np.linalg.norm(pt_py.position))
+            diff_pos = float(np.linalg.norm(pos_rust - pt_py.position))
+            rel_dev = diff_pos / max(norm_py, 1.0)
+            if rel_dev > max_rel_pos_dev:
+                max_rel_pos_dev = rel_dev
+
+        assert max_rel_pos_dev <= PARITY_RELATIVE_TOLERANCE, (
+            f"DbC contract violation: max relative deviation {max_rel_pos_dev:.3e} "
+            f"exceeds bound {PARITY_RELATIVE_TOLERANCE:.3e}"
+        )
 
 
 @pytest.mark.unit
