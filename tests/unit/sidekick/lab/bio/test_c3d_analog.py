@@ -224,8 +224,8 @@ def test_build_plate_dataframe_cop() -> None:
     # First two rows: |fz|=0 < threshold -> NaN; last two rows: 100 N -> valid
     assert np.isnan(out["cop_x"].iloc[0])
     assert np.isnan(out["cop_z"].iloc[0])
-    assert out["cop_x"].iloc[2] == pytest.approx(10.0 / 100.0)
-    assert out["cop_y"].iloc[2] == pytest.approx(5.0 / 100.0)
+    assert out["cop_x"].iloc[2] == pytest.approx((0.05 * 1.0 + 10.0) / 100.0)
+    assert out["cop_y"].iloc[2] == pytest.approx((5.0 + 0.05 * 2.0) / 100.0)
     assert out["cop_z"].iloc[2] == pytest.approx(0.05)
 
 
