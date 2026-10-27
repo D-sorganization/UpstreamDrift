@@ -63,6 +63,39 @@ def test_generate_contact_sheet_dimensions(tmp_path: Path) -> None:
     assert img.shape == (200, 450, 3)
 
 
+def test_generate_contact_sheet_samples_osl4_window(tmp_path: Path) -> None:
+    """Contact sheet biases two panels to the OSL-4 force window when indices are given."""
+    # Distinct solid colors per frame so sampled panels are identifiable.
+    frames = [
+        np.full((80, 120, 3), (i * 35) % 256, dtype=np.uint8) for i in range(20)
+    ]
+    window_indices = tuple(range(8, 14))
+    out_sheet = tmp_path / "sheet_window.png"
+    generate_contact_sheet(
+        frames,
+        out_sheet,
+        count=6,
+        window_frame_indices=window_indices,
+    )
+    import imageio.v2 as imageio
+
+    sheet = imageio.imread(str(out_sheet))
+    assert sheet.shape == (160, 360, 3)
+
+    w_start, w_end = window_indices[0], window_indices[-1]
+    w_mid1 = w_start + (w_end - w_start) // 3
+    w_mid2 = w_start + 2 * (w_end - w_start) // 3
+    expected_indices = (0, w_start // 2, w_mid1, w_mid2, w_end + (19 - w_end) // 2, 19)
+    for panel, frame_idx in enumerate(expected_indices):
+        row, col = panel // 3, panel % 3
+        patch = sheet[
+            row * 80 : (row + 1) * 80,
+            col * 120 : (col + 1) * 120,
+            :,
+        ]
+        assert np.all(patch == frames[frame_idx])
+
+
 @pytest.mark.requires_opensim
 def test_marker_set_cleared_for_showcase() -> None:
     """Experimental and tracking markers are cleared so floating red spheres are not rendered."""
