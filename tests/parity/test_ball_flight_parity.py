@@ -29,6 +29,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pytest
 
 # Python reference implementation
@@ -47,10 +48,17 @@ requires_rust = pytest.mark.skipif(
     reason="upstream-physics Rust kernel not available in this lane",
 )
 
-# Tolerance for Rust/Python parity (RK4 with same dt should agree closely)
-POSITION_TOLERANCE_M = 0.5  # meters — allow small drift from implementation differences
-HEIGHT_TOLERANCE_M = 0.3
-TIME_TOLERANCE_S = 0.05
+# Documented DbC parity tolerance (line 19: "Tolerance bounds (1e-6 relative)")
+PARITY_RELATIVE_TOLERANCE = 1e-6
+POSITION_TOLERANCE_M = (
+    PARITY_RELATIVE_TOLERANCE  # Replaced 0.5m gate with 1e-6 relative (UD-17)
+)
+HEIGHT_TOLERANCE_M = (
+    PARITY_RELATIVE_TOLERANCE  # Replaced 0.3m gate with 1e-6 relative (UD-17)
+)
+TIME_TOLERANCE_S = (
+    PARITY_RELATIVE_TOLERANCE  # Replaced 0.05s gate with 1e-6 relative (UD-17)
+)
 
 # Fixture directory — path is pinned by src/config/capability_migration.json
 FIXTURE_DIR = Path(__file__).parent.parent / "parity_fixtures" / "ball_flight"
@@ -169,6 +177,7 @@ def write_vectors(vectors: dict[str, Any], path: Path) -> None:
 
 
 @requires_rust
+@pytest.mark.parity
 class TestPythonBallFlightBaseline:
     """Generate and verify Python ball flight baseline values.
 
@@ -234,6 +243,7 @@ class TestPythonBallFlightBaseline:
 
 
 @requires_rust
+@pytest.mark.parity
 class TestRustPythonParity:
     """Verify Rust tools_core ball flight matches Python reference.
 
@@ -283,6 +293,73 @@ class TestRustPythonParity:
         )
         assert "70" in repr(rust_lc)
         assert "2500" in repr(rust_lc)
+
+    @pytest.mark.parity
+    def test_ball_flight_parity_rel_1e6(self) -> None:
+        """Same RK4/dt Rust vs Python within 1e-6 relative as documented (UD-17)."""
+        import tools_core
+
+        ball = BallProperties()
+        env = EnvironmentalConditions()
+        launch = LaunchConditions(
+            velocity=70.0,
+            launch_angle=math.radians(12.0),
+            spin_rate=2500.0,
+        )
+        sim = BallFlightSimulator(ball=ball, env=env)
+        py_traj = sim.simulate_trajectory(launch, max_time=10.0, dt=0.01)
+
+        rust_ball = tools_core.BallProperties()
+        rust_ball.mass = ball.mass
+        rust_ball.diameter = 2.0 * ball.radius
+        rust_ball.cd0 = ball.cd0
+        rust_ball.cd1 = ball.cd1
+        rust_ball.cd2 = ball.cd2
+        rust_ball.cl0 = ball.cl0
+        rust_ball.cl1 = ball.cl1
+        rust_ball.cl2 = ball.cl2
+
+        rust_env = tools_core.EnvironmentalConditions()
+        rust_env.air_density = env.air_density
+        rust_env.gravity = env.gravity
+
+        rust_launch = tools_core.LaunchConditions(
+            velocity=launch.velocity,
+            launch_angle=math.degrees(launch.launch_angle),
+            azimuth_angle=math.degrees(launch.azimuth_angle),
+            spin_rate=launch.spin_rate,
+        )
+        rust_launch.set_spin_axis(0.0, 0.0, 1.0)
+
+        rust_traj = tools_core.simulate_trajectory(
+            rust_ball, rust_env, rust_launch, 10.0, 0.01
+        )
+
+        assert len(rust_traj) > 0
+        assert len(py_traj) > 0
+
+        # Sample comparison at 1e-6 relative tolerance per trajectory sample
+        n_compare = min(len(py_traj), len(rust_traj))
+        for i in range(n_compare):
+            pt_py = py_traj[i]
+            pt_rust = rust_traj[i]
+            pos_rust = np.array([pt_rust.x, pt_rust.z, pt_rust.y])
+            vel_rust = np.array([pt_rust.vx, pt_rust.vz, pt_rust.vy])
+
+            np.testing.assert_allclose(
+                pos_rust,
+                pt_py.position,
+                rtol=PARITY_RELATIVE_TOLERANCE,
+                atol=PARITY_RELATIVE_TOLERANCE,
+                err_msg=f"Position parity failure at sample {i} (t={pt_py.time:.3f}s)",
+            )
+            np.testing.assert_allclose(
+                vel_rust,
+                pt_py.velocity,
+                rtol=PARITY_RELATIVE_TOLERANCE,
+                atol=PARITY_RELATIVE_TOLERANCE,
+                err_msg=f"Velocity parity failure at sample {i} (t={pt_py.time:.3f}s)",
+            )
 
 
 @pytest.mark.unit
