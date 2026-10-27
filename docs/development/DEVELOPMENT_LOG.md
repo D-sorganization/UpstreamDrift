@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13871 · Project Pinocchio Analytical Orientation Jacobian Onto Relative Rotation Axis (UD-01)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13871
+- **Branch:** fix/13871-pinocchio-orientation-jacobian
+- **PR:** #13924
+- **Paths:** see #13924
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`29f340df`; collated from changes/13871-pinocchio-orientation-jacobian.md)
+- **Summary:** Project Pinocchio analytical orientation Jacobian onto relative rotation axis (UD-01)
+- **Next step:** Merge PR
+
 ### DL-#13876 · Tighten MuJoCo Mj_Inverse Test Tolerances and Replay Refinement (UD-15, UD-16)
 
 - **State:** in_review
