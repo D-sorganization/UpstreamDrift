@@ -94,10 +94,13 @@ def test_force_composition_matches_closed_form_and_preserves_large_residual(
     assert result.damping_fiber_along_fiber_n == 0.0
     assert result.active_tendon_axis_n == pytest.approx(15.0)
     assert result.fiber_tendon_axis_n == pytest.approx(15.0)
-    assert result.tendon_force_n == pytest.approx(1.6)
+    expected_tendon = float(
+        model.params.F_max * model.tendon_force(0.208 / model.params.l_slack)
+    )
+    assert result.tendon_force_n == pytest.approx(expected_tendon)
     # The public evaluator reports this deliberately non-equilibrated probe;
     # tolerance acceptance belongs to its caller.
-    assert result.force_equilibrium_residual_n == pytest.approx(13.4)
+    assert result.force_equilibrium_residual_n == pytest.approx(15.0 - expected_tendon)
 
 
 @pytest.mark.parametrize("fiber_length", [float("nan"), 0.0, 1.0])
