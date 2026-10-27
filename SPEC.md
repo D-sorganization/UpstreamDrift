@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-27 | #13936 | Bump dnspython 2.8.0 to 2.9.0 in both lock files to clear CVE-2026-114605 from pip-audit |
+| 2026-10-27 | #13927 | Pinocchio residual: append regulariser row and impose torque bounds (UD-02) |
+| 2026-10-27 | #13862 | Renew hash-frozen research budget exceptions to 2027-01-31 under #13853. |
 | 2026-10-27 | #13929 | EnhancedBallFlightSimulator: route deterministic aero through Rust facade (UD-03) |
 | 2026-10-27 | #13920 | Unify solver_status contract and provenance across all four physics engines |
 | 2026-10-27 | #13924 | Project Pinocchio analytical orientation Jacobian onto relative rotation axis (UD-01) |
