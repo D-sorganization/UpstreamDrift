@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13867 · Branch Orientation Cost on Q_Orientation_Repr and Enforce Body_Marker Precondition
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13867
+- **Branch:** fix/13867-q-orientation-repr-and-body-marker-term
+- **PR:** #13917
+- **Paths:** see #13917
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`dd68977a`; collated from changes/13867-q-orientation-repr-and-body-marker-term.md)
+- **Summary:** Branch orientation cost on q_orientation_repr and enforce body_marker precondition
+- **Next step:** Merge PR
+
+### DL-#13866 · Enforce 1E-6 Relative Tolerance in Ball Flight Rust/Python Parity Test
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13866
+- **Branch:** fix/13866-ball-flight-parity-rel-1e6
+- **PR:** #13921
+- **Paths:** see #13921
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`517f1074`; collated from changes/13866-ball-flight-parity-rel-1e6.md)
+- **Summary:** Enforce 1e-6 relative tolerance in ball flight Rust/Python parity test
+- **Next step:** Merge PR
+
 ### DL-#13902 · Remove Unused Signature Bind and Memoize Inspect.Signature in Contract Decorators
 
 - **State:** in_review
