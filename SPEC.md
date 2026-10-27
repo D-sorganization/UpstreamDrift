@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-27 | #13920 | Unify solver_status contract and provenance across all four physics engines |
 | 2026-10-27 | #13924 | Project Pinocchio analytical orientation Jacobian onto relative rotation axis (UD-01) |
 | 2026-10-27 | #13925 | Tighten MuJoCo mj_inverse test tolerances and replay refinement (UD-15, UD-16) |
 | 2026-10-27 | #13917 | Branch orientation cost on q_orientation_repr and enforce body_marker precondition |

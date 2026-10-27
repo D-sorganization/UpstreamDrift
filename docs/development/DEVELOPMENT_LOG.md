@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13874 · Unify Solver_Status Contract and Provenance Across All Four Physics Engines
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13874
+- **Branch:** fix/13874-solver-status-contract
+- **PR:** #13920
+- **Paths:** see #13920
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`28be4a7a`; collated from changes/13874-solver-status-contract.md)
+- **Summary:** Unify solver_status contract and provenance across all four physics engines
+- **Next step:** Merge PR
+
 ### DL-#13871 · Project Pinocchio Analytical Orientation Jacobian Onto Relative Rotation Axis (UD-01)
 
 - **State:** in_review
