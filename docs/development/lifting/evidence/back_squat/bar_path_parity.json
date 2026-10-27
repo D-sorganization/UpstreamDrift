@@ -1,58 +1,17 @@
 {
-  "lift": "back_squat",
   "bundle": "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz",
-  "bundle_spec_sha256": "aedbf64e35f5707798fd7047f0d8f3485c5c72d5c446ef600b195a6c75a3ed34",
+  "bundle_spec_sha256": "50b4fff064bf1e7eb3aa6aae8d6df3c1d2550bee57cd6fe448b4050afe03c9d7",
   "bundle_steps": 200,
   "dt_s": 0.001,
-  "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
-  "source_commit": "f83f2a32846d4a95d9d66a0d6a7048800a88e039",
-  "generator": "scripts/measure_lift_bar_path_parity.py",
   "engines": {
-    "mujoco": {
-      "engine": "mujoco",
-      "steps": 200,
-      "duration_s": 0.2,
-      "failure": null,
-      "max_bar_deviation_m": 0.0,
-      "final_bar_deviation_m": 0.0,
-      "max_coordinate_error_rad": 0.0,
-      "worst_final_coordinate": "TranslationInputX",
-      "segmented": {
-        "segment_steps": 20,
-        "segments": 10,
-        "max_coordinate_error_rad": 0.0,
-        "max_frame_error_m": 0.0,
-        "worst_segment_start_s": 0.0,
-        "coordinate_error_rad_by_segment": [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ]
-      },
-      "wall_time_s": 449.0
-    },
     "drake": {
-      "engine": "drake",
-      "steps": 200,
       "duration_s": 0.2,
+      "engine": "drake",
       "failure": null,
-      "max_bar_deviation_m": 5.713863483137715e-11,
       "final_bar_deviation_m": 5.713863483137715e-11,
+      "max_bar_deviation_m": 5.713863483137715e-11,
       "max_coordinate_error_rad": 6.003485708561129e-09,
-      "worst_final_coordinate": "RSInputX",
       "segmented": {
-        "segment_steps": 20,
-        "segments": 10,
-        "max_coordinate_error_rad": 3.645972412869014e-13,
-        "max_frame_error_m": 1.324220228800549e-14,
-        "worst_segment_start_s": 0.14,
         "coordinate_error_rad_by_segment": [
           1.461053500406706e-13,
           1.27675647831893e-13,
@@ -64,55 +23,55 @@
           3.645972412869014e-13,
           3.518296765037121e-13,
           3.1885605267234496e-13
-        ]
-      },
-      "wall_time_s": 874.7
-    },
-    "pinocchio": {
-      "engine": "pinocchio",
-      "steps": 200,
-      "duration_s": 0.2,
-      "failure": null,
-      "max_bar_deviation_m": 2.2523122015032126e-11,
-      "final_bar_deviation_m": 2.2523122015032126e-11,
-      "max_coordinate_error_rad": 2.3905872836849085e-09,
-      "worst_final_coordinate": "RSInputX",
-      "segmented": {
+        ],
+        "max_coordinate_error_rad": 3.645972412869014e-13,
+        "max_frame_error_m": 1.324220228800549e-14,
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 3.3795188869589765e-13,
-        "max_frame_error_m": 1.623632969278489e-14,
-        "worst_segment_start_s": 0.14,
-        "coordinate_error_rad_by_segment": [
-          1.2467804566540508e-13,
-          9.936496070395151e-14,
-          9.203748874142548e-14,
-          1.5620837956475953e-13,
-          1.6608936448392342e-13,
-          1.80855330711438e-13,
-          2.723377079405509e-13,
-          3.3795188869589765e-13,
-          3.3228975127030935e-13,
-          2.9398705692074145e-13
-        ]
+        "worst_segment_start_s": 0.14
       },
-      "wall_time_s": 432.3
+      "steps": 200,
+      "wall_time_s": 874.7,
+      "worst_final_coordinate": "RSInputX"
+    },
+    "mujoco": {
+      "duration_s": 0.2,
+      "engine": "mujoco",
+      "failure": null,
+      "final_bar_deviation_m": 0.0,
+      "max_bar_deviation_m": 0.0,
+      "max_coordinate_error_rad": 0.0,
+      "segmented": {
+        "coordinate_error_rad_by_segment": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_coordinate_error_rad": 0.0,
+        "max_frame_error_m": 0.0,
+        "segment_steps": 20,
+        "segments": 10,
+        "worst_segment_start_s": 0.0
+      },
+      "steps": 200,
+      "wall_time_s": 449.0,
+      "worst_final_coordinate": "TranslationInputX"
     },
     "opensim": {
-      "engine": "opensim",
-      "steps": 200,
       "duration_s": 0.2,
+      "engine": "opensim",
       "failure": null,
-      "max_bar_deviation_m": 1.549022719921674e-11,
       "final_bar_deviation_m": 1.549022719921674e-11,
+      "max_bar_deviation_m": 1.549022719921674e-11,
       "max_coordinate_error_rad": 1.6113976819553955e-09,
-      "worst_final_coordinate": "RSInputX",
       "segmented": {
-        "segment_steps": 20,
-        "segments": 10,
-        "max_coordinate_error_rad": 2.4202861936828413e-14,
-        "max_frame_error_m": 7.014216177188511e-15,
-        "worst_segment_start_s": 0.12,
         "coordinate_error_rad_by_segment": [
           1.27675647831893e-14,
           2.2648549702353193e-14,
@@ -124,9 +83,50 @@
           1.2455314557513475e-14,
           7.105427357601002e-15,
           6.328271240363392e-15
-        ]
+        ],
+        "max_coordinate_error_rad": 2.4202861936828413e-14,
+        "max_frame_error_m": 7.014216177188511e-15,
+        "segment_steps": 20,
+        "segments": 10,
+        "worst_segment_start_s": 0.12
       },
-      "wall_time_s": 976.5
+      "steps": 200,
+      "wall_time_s": 976.5,
+      "worst_final_coordinate": "RSInputX"
+    },
+    "pinocchio": {
+      "duration_s": 0.2,
+      "engine": "pinocchio",
+      "failure": null,
+      "final_bar_deviation_m": 2.2523122015032126e-11,
+      "max_bar_deviation_m": 2.2523122015032126e-11,
+      "max_coordinate_error_rad": 2.3905872836849085e-09,
+      "segmented": {
+        "coordinate_error_rad_by_segment": [
+          1.2467804566540508e-13,
+          9.936496070395151e-14,
+          9.203748874142548e-14,
+          1.5620837956475953e-13,
+          1.6608936448392342e-13,
+          1.80855330711438e-13,
+          2.723377079405509e-13,
+          3.3795188869589765e-13,
+          3.3228975127030935e-13,
+          2.9398705692074145e-13
+        ],
+        "max_coordinate_error_rad": 3.3795188869589765e-13,
+        "max_frame_error_m": 1.623632969278489e-14,
+        "segment_steps": 20,
+        "segments": 10,
+        "worst_segment_start_s": 0.14
+      },
+      "steps": 200,
+      "wall_time_s": 432.3,
+      "worst_final_coordinate": "RSInputX"
     }
-  }
+  },
+  "generator": "scripts/measure_lift_bar_path_parity.py",
+  "lift": "back_squat",
+  "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
+  "source_commit": "f83f2a32846d4a95d9d66a0d6a7048800a88e039"
 }

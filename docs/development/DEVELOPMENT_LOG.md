@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13842 · Fast-Tier Test Selection Now Runs the Monolith Register Test for Src/ Changes
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13842
+- **Branch:** fix/13842-fast-tier-monolith-register
+- **PR:** #13843
+- **Paths:** see #13843
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`b0dd190b`; collated from changes/13842-fast-tier-test-selection-now-runs-the-mo.md)
+- **Summary:** Fast-tier test selection now runs the monolith register test for src/ changes
+- **Next step:** Merge the PR.
+
+### DL-#13780 · ML-WS-3: Capture-A Post-Impact Replay Audit Receipt and Tests
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13780
+- **Branch:** cursor/ml-ws-3-replay-post-impact-1bfa
+- **PR:** #13841
+- **Paths:** see #13841
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`f85d5895`; collated from changes/13780-ml-ws-3-capture-a-post-impact-replay-aud.md)
+- **Summary:** ML-WS-3: capture-A post-impact replay audit receipt and tests
+- **Next step:** Merge PR #13841; open ML-WS-3b for follow-through reference branching.
+
 ### DL-#13762 · Specify HRG-HX5 Hand Proxy Decision and Implementation Acceptance Gates
 
 - **State:** in_review
@@ -546,6 +572,97 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13792 · Per-Engine Step-Size Convergence Study and Exact Torque Switch-Time Handling
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13792
+- **Branch:** merged via #13855
+- **PR:** #13855
+- **Paths:** see #13855
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`1a76ba08`; collated from changes/13792-step-convergence-study-and-switch-time.md)
+- **Summary:** Per-engine step-size convergence study and exact torque switch-time handling
+- **Next step:** Shipped in PR #13855.
+
+### DL-#13899 · Render Workers Put the Interpreter's Base_Prefix Lib Dir First on LD_LIBRARY_PATH, Because Opensim's Linux __Init__ Overwrites It With PATH; This Fixes the Requires_Opensim _Ctypes ABI Failure
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13899
+- **Branch:** merged via #13900
+- **PR:** #13900
+- **Paths:** see #13900
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`ce1dd79e`; collated from changes/13899-render-worker-ld-library-path.md)
+- **Summary:** Render workers put the interpreter's base_prefix lib dir first on LD_LIBRARY_PATH, because opensim's Linux __init__ overwrites it with PATH; this fixes the requires_opensim _ctypes ABI failure
+- **Next step:** Shipped in PR #13900.
+
+### DL-#13896 · Lift Render Worker PYTHONPATH Uses Shared Worker_Env() (Repo Roots Only), Fixing Requires_Opensim _Ctypes ABI Failure
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13896
+- **Branch:** merged via #13897
+- **PR:** #13897
+- **Paths:** see #13897
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`ed08a3f2`; collated from changes/13896-lift-render-worker-pythonpath-uses-share.md)
+- **Summary:** Lift render worker PYTHONPATH uses shared worker_env() (repo roots only), fixing requires_opensim _ctypes ABI failure
+- **Next step:** Shipped in PR #13897.
+
+### DL-#13852 · Add WSCG Masked-JSON Parity Test Scaffold for Budget-Split PRs.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13852
+- **Branch:** merged via #13860
+- **PR:** #13860
+- **Paths:** see #13860
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`c4e2a518`; collated from changes/13852-wscg-test-scaffold.md)
+- **Summary:** Add WSCG masked-JSON parity test scaffold for budget-split PRs.
+- **Next step:** Shipped in PR #13860.
+
+### DL-#13851 · Remove Stale Urdf_Exporter _Add_Revolute_Joint Parameters Budget Exception.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13851
+- **Branch:** merged via #13856
+- **PR:** #13856
+- **Paths:** see #13856
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`a6699390`; collated from changes/13851-remove-stale-urdf-exporter-add-revolute.md)
+- **Summary:** Remove stale urdf_exporter _add_revolute_joint parameters budget exception.
+- **Next step:** Shipped in PR #13856.
+
+### DL-#13760 · ANSUR II Stature-Tied Hand Length and Breadth (HRG-HX3).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13760
+- **Branch:** merged via #13840
+- **PR:** #13840
+- **Paths:** see #13840
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`eed5077d`; collated from changes/13760-ansur-ii-stature-tied-hand-length-and-br.md)
+- **Summary:** ANSUR II stature-tied hand length and breadth (HRG-HX3).
+- **Next step:** Shipped in PR #13840.
+
+### DL-#13045 · Feat(Lifting): Barbell Visual Geometry and Lift Video Camera Framing
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13045
+- **Branch:** merged via #13823
+- **PR:** #13823, #13845, #13835, #13833, #13832
+- **Paths:** see #13823
+- **Started:** 2026-10-26
+- **Last verified:** 2026-10-26 (`b8436dd8`; collated from changes/13045-lift-video-render-api.md)
+- **Summary:** feat(lifting): barbell visual geometry and lift video camera framing
+- **Next step:** Shipped in PR #13823.
 
 ### DL-#13464 · Docs: After-One-Solution Workflow Mapping, Runnable Example and Smoke Test for Loop_Nullspace
 

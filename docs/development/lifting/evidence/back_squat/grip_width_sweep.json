@@ -1,505 +1,506 @@
 {
   "0.75": {
-    "width_m": 0.75,
-    "reach_miss_mm": {
-      "L": 0.002432065173946202,
-      "R": 1.5062740213299466
-    },
-    "range_violations_max_overshoot_rad": 4.182409054642733e-5,
-    "range_violations": {
-      "arm_flex_r": {
-        "frames": 2,
-        "range_min_rad": -1.57079633,
-        "range_max_rad": 1.57079633,
-        "min_rad": 1.5706582921272334,
-        "max_rad": 1.5708342678714822
-      },
-      "arm_rot_r": {
-        "frames": 2,
-        "range_min_rad": -1.57079633,
-        "range_max_rad": 1.57079633,
-        "min_rad": -1.5708381540905465,
-        "max_rad": -1.5706499248814614
-      },
-      "elbow_flex_r": {
-        "frames": 2,
-        "range_min_rad": 0.0,
-        "range_max_rad": 2.618,
-        "min_rad": 2.617986559184392,
-        "max_rad": 2.618000878811761
-      },
-      "pro_sup_r": {
-        "frames": 2,
-        "range_min_rad": 0.0,
-        "range_max_rad": 2.09,
-        "min_rad": -3.249296137958386e-5,
-        "max_rad": 0.00011350495508349473
-      },
-      "pro_sup_l": {
-        "frames": 2,
-        "range_min_rad": 0.0,
-        "range_max_rad": 2.09,
-        "min_rad": -2.9719017383077648e-5,
-        "max_rad": 0.00010254312782424342
-      }
-    },
+    "elapsed_s": 4144.496107816696,
+    "max_lambda": 59.36768719521033,
+    "mode_coord": "SpineInputX",
     "near_bound_coords": [
       "arm_flex_r at max (1.5708 vs 1.5708, diff=1.01e-10)",
       "arm_rot_r at min (-1.5708 vs -1.5708, diff=2.80e-10)",
       "elbow_flex_r at max (2.6180 vs 2.6180, diff=2.47e-06)"
     ],
-    "wrists": {
-      "LWInputX": {
-        "rad": 0.20788137465061168,
-        "deg": 11.910725406857908
-      },
-      "LWInputY": {
-        "rad": 0.7259449060557817,
-        "deg": 41.59357927601732
-      },
-      "RWInputX": {
-        "rad": -0.04961407569057717,
-        "deg": -2.8426771415126875
-      },
-      "RWInputY": {
-        "rad": -0.36557484562172543,
-        "deg": -20.94589575027149
-      }
-    },
-    "max_lambda": 59.36768719521033,
-    "mode_coord": "SpineInputX",
     "parity": {
       "drake": {
-        "coord_rad": 6.003485708561129e-9,
+        "coord_rad": 6.003485708561129e-09,
         "frame_m": 5.713863483137715e-11
       },
-      "pinocchio": {
-        "coord_rad": 2.3905872836849085e-9,
-        "frame_m": 2.2523122015032126e-11
-      },
       "opensim": {
-        "coord_rad": 1.6113976819553955e-9,
+        "coord_rad": 1.6113976819553955e-09,
         "frame_m": 1.549022719921674e-11
+      },
+      "pinocchio": {
+        "coord_rad": 2.3905872836849085e-09,
+        "frame_m": 2.2523122015032126e-11
       }
     },
-    "elapsed_s": 4144.496107816696
-  },
-  "0.8": {
-    "width_m": 0.8,
-    "reach_miss_mm": {
-      "L": 29.05658249445075,
-      "R": 3.779187221297925
-    },
-    "range_violations_max_overshoot_rad": 0.0010349094093624611,
     "range_violations": {
       "arm_flex_r": {
-        "frames": 11,
-        "range_min_rad": -1.57079633,
+        "frames": 2,
+        "max_rad": 1.5708342678714822,
+        "min_rad": 1.5706582921272334,
         "range_max_rad": 1.57079633,
-        "min_rad": 1.5714533115041,
-        "max_rad": 1.5716356305980692
+        "range_min_rad": -1.57079633
       },
       "arm_rot_r": {
-        "frames": 11,
-        "range_min_rad": -1.57079633,
+        "frames": 2,
+        "max_rad": -1.5706499248814614,
+        "min_rad": -1.5708381540905465,
         "range_max_rad": 1.57079633,
-        "min_rad": -1.571818278047093,
-        "max_rad": -1.5715993831117896
+        "range_min_rad": -1.57079633
       },
-      "pro_sup_r": {
-        "frames": 11,
-        "range_min_rad": 0.0,
-        "range_max_rad": 2.09,
-        "min_rad": -0.0007865302300262481,
-        "max_rad": -0.0006179459189613803
-      },
-      "arm_flex_l": {
-        "frames": 11,
-        "range_min_rad": -1.57079633,
-        "range_max_rad": 1.57079633,
-        "min_rad": 1.571429926833092,
-        "max_rad": 1.5716063506234073
-      },
-      "arm_rot_l": {
-        "frames": 11,
-        "range_min_rad": -1.57079633,
-        "range_max_rad": 1.57079633,
-        "min_rad": -1.5718312394093625,
-        "max_rad": -1.5716110027349504
+      "elbow_flex_r": {
+        "frames": 2,
+        "max_rad": 2.618000878811761,
+        "min_rad": 2.617986559184392,
+        "range_max_rad": 2.618,
+        "range_min_rad": 0.0
       },
       "pro_sup_l": {
-        "frames": 11,
-        "range_min_rad": 0.0,
+        "frames": 2,
+        "max_rad": 0.00010254312782424342,
+        "min_rad": -2.9719017383077648e-05,
         "range_max_rad": 2.09,
-        "min_rad": -0.0007542004194481677,
-        "max_rad": -0.0005938442175104565
+        "range_min_rad": 0.0
+      },
+      "pro_sup_r": {
+        "frames": 2,
+        "max_rad": 0.00011350495508349473,
+        "min_rad": -3.249296137958386e-05,
+        "range_max_rad": 2.09,
+        "range_min_rad": 0.0
       }
     },
+    "range_violations_max_overshoot_rad": 4.182409054642733e-05,
+    "reach_miss_mm": {
+      "L": 0.002432065173946202,
+      "R": 1.5062740213299466
+    },
+    "width_m": 0.75,
+    "wrists": {
+      "LWInputX": {
+        "deg": 11.910725406857908,
+        "rad": 0.20788137465061168
+      },
+      "LWInputY": {
+        "deg": 41.59357927601732,
+        "rad": 0.7259449060557817
+      },
+      "RWInputX": {
+        "deg": -2.8426771415126875,
+        "rad": -0.04961407569057717
+      },
+      "RWInputY": {
+        "deg": -20.94589575027149,
+        "rad": -0.36557484562172543
+      }
+    }
+  },
+  "0.8": {
+    "elapsed_s": 2734.8294274806976,
+    "max_lambda": 158.40489151047836,
+    "mode_coord": "LWInputY",
     "near_bound_coords": [
       "arm_flex_l at max (1.5708 vs 1.5708, diff=2.22e-16)",
       "arm_rot_l at min (-1.5708 vs -1.5708, diff=2.22e-16)",
       "arm_flex_r at max (1.5708 vs 1.5708, diff=2.22e-16)",
       "arm_rot_r at min (-1.5708 vs -1.5708, diff=2.22e-16)"
     ],
-    "wrists": {
-      "LWInputX": {
-        "rad": 0.42763142242987073,
-        "deg": 24.50147569240764
-      },
-      "LWInputY": {
-        "rad": 0.8240926665861124,
-        "deg": 47.21703172306596
-      },
-      "RWInputX": {
-        "rad": -0.696863583904577,
-        "deg": -39.92734225409299
-      },
-      "RWInputY": {
-        "rad": 0.5836857657665383,
-        "deg": 33.44273094028419
-      }
-    },
-    "max_lambda": 158.40489151047836,
-    "mode_coord": "LWInputY",
     "parity": {
       "drake": {
         "coord_rad": 2.10117927315176,
         "frame_m": 0.022472261044230182
       },
-      "pinocchio": {
-        "coord_rad": 2.018797849500312,
-        "frame_m": 0.0219775731399768
-      },
       "opensim": {
         "coord_rad": 0.20041759678883553,
         "frame_m": 0.0022941315386736695
+      },
+      "pinocchio": {
+        "coord_rad": 2.018797849500312,
+        "frame_m": 0.0219775731399768
       }
     },
-    "elapsed_s": 2734.8294274806976
-  },
-  "0.82": {
-    "width_m": 0.82,
-    "reach_miss_mm": {
-      "L": 10.686400913667718,
-      "R": 6.30008764656704
-    },
-    "range_violations_max_overshoot_rad": 0.0005695076813554412,
     "range_violations": {
-      "arm_flex_r": {
-        "frames": 11,
-        "range_min_rad": -1.57079633,
-        "range_max_rad": 1.57079633,
-        "min_rad": 1.5710759913817836,
-        "max_rad": 1.5712590094858445
-      },
-      "arm_rot_r": {
-        "frames": 11,
-        "range_min_rad": -1.57079633,
-        "range_max_rad": 1.57079633,
-        "min_rad": -1.5713570670339325,
-        "max_rad": -1.5711394130423735
-      },
-      "pro_sup_r": {
-        "frames": 11,
-        "range_min_rad": 0.0,
-        "range_max_rad": 2.09,
-        "min_rad": -0.00042938869989438556,
-        "max_rad": -0.00026287744558645907
-      },
       "arm_flex_l": {
         "frames": 11,
-        "range_min_rad": -1.57079633,
+        "max_rad": 1.5716063506234073,
+        "min_rad": 1.571429926833092,
         "range_max_rad": 1.57079633,
-        "min_rad": 1.571055589552036,
-        "max_rad": 1.5712261608873912
+        "range_min_rad": -1.57079633
+      },
+      "arm_flex_r": {
+        "frames": 11,
+        "max_rad": 1.5716356305980692,
+        "min_rad": 1.5714533115041,
+        "range_max_rad": 1.57079633,
+        "range_min_rad": -1.57079633
       },
       "arm_rot_l": {
         "frames": 11,
-        "range_min_rad": -1.57079633,
+        "max_rad": -1.5716110027349504,
+        "min_rad": -1.5718312394093625,
         "range_max_rad": 1.57079633,
-        "min_rad": -1.5713658376813555,
-        "max_rad": -1.5711449363032726
+        "range_min_rad": -1.57079633
+      },
+      "arm_rot_r": {
+        "frames": 11,
+        "max_rad": -1.5715993831117896,
+        "min_rad": -1.571818278047093,
+        "range_max_rad": 1.57079633,
+        "range_min_rad": -1.57079633
       },
       "pro_sup_l": {
         "frames": 11,
-        "range_min_rad": 0.0,
+        "max_rad": -0.0005938442175104565,
+        "min_rad": -0.0007542004194481677,
         "range_max_rad": 2.09,
-        "min_rad": -0.0003925585303979988,
-        "max_rad": -0.0002400974379604073
+        "range_min_rad": 0.0
+      },
+      "pro_sup_r": {
+        "frames": 11,
+        "max_rad": -0.0006179459189613803,
+        "min_rad": -0.0007865302300262481,
+        "range_max_rad": 2.09,
+        "range_min_rad": 0.0
       }
     },
+    "range_violations_max_overshoot_rad": 0.0010349094093624611,
+    "reach_miss_mm": {
+      "L": 29.05658249445075,
+      "R": 3.779187221297925
+    },
+    "width_m": 0.8,
+    "wrists": {
+      "LWInputX": {
+        "deg": 24.50147569240764,
+        "rad": 0.42763142242987073
+      },
+      "LWInputY": {
+        "deg": 47.21703172306596,
+        "rad": 0.8240926665861124
+      },
+      "RWInputX": {
+        "deg": -39.92734225409299,
+        "rad": -0.696863583904577
+      },
+      "RWInputY": {
+        "deg": 33.44273094028419,
+        "rad": 0.5836857657665383
+      }
+    }
+  },
+  "0.82": {
+    "elapsed_s": 3708.2114913463593,
+    "max_lambda": 167.4486664645501,
+    "mode_coord": "RWInputX",
     "near_bound_coords": [
       "arm_flex_l at max (1.5708 vs 1.5708, diff=1.91e-13)",
       "arm_rot_l at min (-1.5708 vs -1.5708, diff=2.22e-16)",
       "arm_flex_r at max (1.5708 vs 1.5708, diff=1.56e-13)",
       "arm_rot_r at min (-1.5708 vs -1.5708, diff=1.28e-12)"
     ],
-    "wrists": {
-      "LWInputX": {
-        "rad": 0.42763797471122145,
-        "deg": 24.50185111047522
-      },
-      "LWInputY": {
-        "rad": -0.9458601088365829,
-        "deg": -54.1937922461209
-      },
-      "RWInputX": {
-        "rad": -0.6976515906552008,
-        "deg": -39.97249171513155
-      },
-      "RWInputY": {
-        "rad": 0.2439758294824831,
-        "deg": 13.978785332549721
-      }
-    },
-    "max_lambda": 167.4486664645501,
-    "mode_coord": "RWInputX",
     "parity": {
       "drake": {
         "coord_rad": 15.543844725923117,
         "frame_m": 0.024690025830566006
       },
-      "pinocchio": {
-        "coord_rad": 15.467497349794138,
-        "frame_m": 0.024777663721934733
-      },
       "opensim": {
         "coord_rad": 4.127749104821942,
         "frame_m": 0.024772810715354678
+      },
+      "pinocchio": {
+        "coord_rad": 15.467497349794138,
+        "frame_m": 0.024777663721934733
       }
     },
-    "elapsed_s": 3708.2114913463593
-  },
-  "0.85": {
-    "width_m": 0.85,
-    "reach_miss_mm": {
-      "L": 0.0020639214282684765,
-      "R": 9.462266476823862
-    },
-    "range_violations_max_overshoot_rad": 0.0003249149137829477,
     "range_violations": {
+      "arm_flex_l": {
+        "frames": 11,
+        "max_rad": 1.5712261608873912,
+        "min_rad": 1.571055589552036,
+        "range_max_rad": 1.57079633,
+        "range_min_rad": -1.57079633
+      },
       "arm_flex_r": {
         "frames": 11,
-        "range_min_rad": -1.57079633,
+        "max_rad": 1.5712590094858445,
+        "min_rad": 1.5710759913817836,
         "range_max_rad": 1.57079633,
-        "min_rad": 1.570872775209956,
-        "max_rad": 1.5710432160694074
+        "range_min_rad": -1.57079633
+      },
+      "arm_rot_l": {
+        "frames": 11,
+        "max_rad": -1.5711449363032726,
+        "min_rad": -1.5713658376813555,
+        "range_max_rad": 1.57079633,
+        "range_min_rad": -1.57079633
       },
       "arm_rot_r": {
         "frames": 11,
-        "range_min_rad": -1.57079633,
+        "max_rad": -1.5711394130423735,
+        "min_rad": -1.5713570670339325,
         "range_max_rad": 1.57079633,
-        "min_rad": -1.571121244913783,
-        "max_rad": -1.5709040899560898
-      },
-      "pro_sup_r": {
-        "frames": 11,
-        "range_min_rad": 0.0,
-        "range_max_rad": 2.09,
-        "min_rad": -0.00024998252580344494,
-        "max_rad": -8.308262011830001e-5
+        "range_min_rad": -1.57079633
       },
       "pro_sup_l": {
         "frames": 11,
-        "range_min_rad": 0.0,
+        "max_rad": -0.0002400974379604073,
+        "min_rad": -0.0003925585303979988,
         "range_max_rad": 2.09,
-        "min_rad": -0.00022846833944076237,
-        "max_rad": -7.383169424735491e-5
+        "range_min_rad": 0.0
+      },
+      "pro_sup_r": {
+        "frames": 11,
+        "max_rad": -0.00026287744558645907,
+        "min_rad": -0.00042938869989438556,
+        "range_max_rad": 2.09,
+        "range_min_rad": 0.0
       }
     },
+    "range_violations_max_overshoot_rad": 0.0005695076813554412,
+    "reach_miss_mm": {
+      "L": 10.686400913667718,
+      "R": 6.30008764656704
+    },
+    "width_m": 0.82,
+    "wrists": {
+      "LWInputX": {
+        "deg": 24.50185111047522,
+        "rad": 0.42763797471122145
+      },
+      "LWInputY": {
+        "deg": -54.1937922461209,
+        "rad": -0.9458601088365829
+      },
+      "RWInputX": {
+        "deg": -39.97249171513155,
+        "rad": -0.6976515906552008
+      },
+      "RWInputY": {
+        "deg": 13.978785332549721,
+        "rad": 0.2439758294824831
+      }
+    }
+  },
+  "0.85": {
+    "elapsed_s": 1543.9470002651215,
+    "max_lambda": 66.98008356654012,
+    "mode_coord": "RSInputX",
     "near_bound_coords": [
       "arm_rot_l at min (-1.5699 vs -1.5708, diff=8.50e-04)",
       "arm_flex_r at max (1.5708 vs 1.5708, diff=1.11e-15)",
       "arm_rot_r at min (-1.5708 vs -1.5708, diff=2.22e-16)"
     ],
-    "wrists": {
-      "LWInputX": {
-        "rad": 0.32988444922113175,
-        "deg": 18.900986667368567
-      },
-      "LWInputY": {
-        "rad": 0.3737388732310055,
-        "deg": 21.41366007611152
-      },
-      "RWInputX": {
-        "rad": -0.39954293328952106,
-        "deg": -22.89212381176656
-      },
-      "RWInputY": {
-        "rad": -0.27025035932176983,
-        "deg": -15.484205001031397
-      }
-    },
-    "max_lambda": 66.98008356654012,
-    "mode_coord": "RSInputX",
     "parity": {
       "drake": {
-        "coord_rad": 2.425096656821779e-8,
+        "coord_rad": 2.425096656821779e-08,
         "frame_m": 1.4909848637261568e-10
       },
-      "pinocchio": {
-        "coord_rad": 3.706497198052716e-8,
-        "frame_m": 2.2826912434280636e-10
-      },
       "opensim": {
-        "coord_rad": 2.080310324004131e-8,
+        "coord_rad": 2.080310324004131e-08,
         "frame_m": 1.2918702769167632e-10
+      },
+      "pinocchio": {
+        "coord_rad": 3.706497198052716e-08,
+        "frame_m": 2.2826912434280636e-10
       }
     },
-    "elapsed_s": 1543.9470002651215
-  },
-  "0.88": {
-    "width_m": 0.88,
-    "reach_miss_mm": {
-      "L": 0.002009058062991208,
-      "R": 11.774367743432474
-    },
-    "range_violations_max_overshoot_rad": 0.00042158082628152016,
     "range_violations": {
       "arm_flex_r": {
         "frames": 11,
-        "range_min_rad": -1.57079633,
+        "max_rad": 1.5710432160694074,
+        "min_rad": 1.570872775209956,
         "range_max_rad": 1.57079633,
-        "min_rad": 1.570931210166665,
-        "max_rad": 1.571099921538427
+        "range_min_rad": -1.57079633
       },
       "arm_rot_r": {
         "frames": 11,
-        "range_min_rad": -1.57079633,
+        "max_rad": -1.5709040899560898,
+        "min_rad": -1.571121244913783,
         "range_max_rad": 1.57079633,
-        "min_rad": -1.5712179108262816,
-        "max_rad": -1.5709917875145807
-      },
-      "pro_sup_r": {
-        "frames": 11,
-        "range_min_rad": 0.0,
-        "range_max_rad": 2.09,
-        "min_rad": -0.00032266919407167354,
-        "max_rad": -0.0001497205492662538
+        "range_min_rad": -1.57079633
       },
       "pro_sup_l": {
         "frames": 11,
-        "range_min_rad": 0.0,
+        "max_rad": -7.383169424735491e-05,
+        "min_rad": -0.00022846833944076237,
         "range_max_rad": 2.09,
-        "min_rad": -0.00029806030139884317,
-        "max_rad": -0.0001363085478625546
+        "range_min_rad": 0.0
+      },
+      "pro_sup_r": {
+        "frames": 11,
+        "max_rad": -8.308262011830001e-05,
+        "min_rad": -0.00024998252580344494,
+        "range_max_rad": 2.09,
+        "range_min_rad": 0.0
       }
     },
+    "range_violations_max_overshoot_rad": 0.0003249149137829477,
+    "reach_miss_mm": {
+      "L": 0.0020639214282684765,
+      "R": 9.462266476823862
+    },
+    "width_m": 0.85,
+    "wrists": {
+      "LWInputX": {
+        "deg": 18.900986667368567,
+        "rad": 0.32988444922113175
+      },
+      "LWInputY": {
+        "deg": 21.41366007611152,
+        "rad": 0.3737388732310055
+      },
+      "RWInputX": {
+        "deg": -22.89212381176656,
+        "rad": -0.39954293328952106
+      },
+      "RWInputY": {
+        "deg": -15.484205001031397,
+        "rad": -0.27025035932176983
+      }
+    }
+  },
+  "0.88": {
+    "elapsed_s": 4463.571092367172,
+    "max_lambda": 70.59105212216107,
+    "mode_coord": "RSInputX",
     "near_bound_coords": [
       "arm_flex_r at max (1.5708 vs 1.5708, diff=8.88e-16)",
       "arm_rot_r at min (-1.5708 vs -1.5708, diff=2.22e-16)"
     ],
-    "wrists": {
-      "LWInputX": {
-        "rad": 0.38115955372425553,
-        "deg": 21.8388337494898
-      },
-      "LWInputY": {
-        "rad": 0.31479694508986045,
-        "deg": 18.036536357260527
-      },
-      "RWInputX": {
-        "rad": -0.4815137253859187,
-        "deg": -27.588704242234467
-      },
-      "RWInputY": {
-        "rad": -0.2522795200834581,
-        "deg": -14.454551758368039
-      }
-    },
-    "max_lambda": 70.59105212216107,
-    "mode_coord": "RSInputX",
     "parity": {
       "drake": {
-        "coord_rad": 1.212936306949075e-8,
+        "coord_rad": 1.212936306949075e-08,
         "frame_m": 4.831517573831888e-11
       },
-      "pinocchio": {
-        "coord_rad": 8.840250709241104e-8,
-        "frame_m": 4.574306942606458e-10
-      },
       "opensim": {
-        "coord_rad": 3.987029306706802e-8,
+        "coord_rad": 3.987029306706802e-08,
         "frame_m": 2.188227909075846e-10
+      },
+      "pinocchio": {
+        "coord_rad": 8.840250709241104e-08,
+        "frame_m": 4.574306942606458e-10
       }
     },
-    "elapsed_s": 4463.571092367172
-  },
-  "0.9": {
-    "width_m": 0.9,
-    "reach_miss_mm": {
-      "L": 0.003678226152134538,
-      "R": 13.270516490246445
-    },
-    "range_violations_max_overshoot_rad": 0.0004877894663202209,
     "range_violations": {
       "arm_flex_r": {
         "frames": 11,
-        "range_min_rad": -1.57079633,
+        "max_rad": 1.571099921538427,
+        "min_rad": 1.570931210166665,
         "range_max_rad": 1.57079633,
-        "min_rad": 1.5709682403416259,
-        "max_rad": 1.571135996094418
+        "range_min_rad": -1.57079633
       },
       "arm_rot_r": {
         "frames": 11,
-        "range_min_rad": -1.57079633,
+        "max_rad": -1.5709917875145807,
+        "min_rad": -1.5712179108262816,
         "range_max_rad": 1.57079633,
-        "min_rad": -1.5712841194663203,
-        "max_rad": -1.5710522777754699
-      },
-      "pro_sup_r": {
-        "frames": 11,
-        "range_min_rad": 0.0,
-        "range_max_rad": 2.09,
-        "min_rad": -0.0003721631237878858,
-        "max_rad": -0.00019533344868715368
+        "range_min_rad": -1.57079633
       },
       "pro_sup_l": {
         "frames": 11,
-        "range_min_rad": 0.0,
+        "max_rad": -0.0001363085478625546,
+        "min_rad": -0.00029806030139884317,
         "range_max_rad": 2.09,
-        "min_rad": -0.0003456716128682788,
-        "max_rad": -0.0001794731517933681
+        "range_min_rad": 0.0
+      },
+      "pro_sup_r": {
+        "frames": 11,
+        "max_rad": -0.0001497205492662538,
+        "min_rad": -0.00032266919407167354,
+        "range_max_rad": 2.09,
+        "range_min_rad": 0.0
       }
     },
+    "range_violations_max_overshoot_rad": 0.00042158082628152016,
+    "reach_miss_mm": {
+      "L": 0.002009058062991208,
+      "R": 11.774367743432474
+    },
+    "width_m": 0.88,
+    "wrists": {
+      "LWInputX": {
+        "deg": 21.8388337494898,
+        "rad": 0.38115955372425553
+      },
+      "LWInputY": {
+        "deg": 18.036536357260527,
+        "rad": 0.31479694508986045
+      },
+      "RWInputX": {
+        "deg": -27.588704242234467,
+        "rad": -0.4815137253859187
+      },
+      "RWInputY": {
+        "deg": -14.454551758368039,
+        "rad": -0.2522795200834581
+      }
+    }
+  },
+  "0.9": {
+    "elapsed_s": 4763.794544458389,
+    "max_lambda": 73.02968219621762,
+    "mode_coord": "RSInputX",
     "near_bound_coords": [
       "arm_flex_r at max (1.5708 vs 1.5708, diff=2.22e-16)",
       "arm_rot_r at min (-1.5708 vs -1.5708, diff=2.22e-16)"
     ],
-    "wrists": {
-      "LWInputX": {
-        "rad": 0.41340088174935175,
-        "deg": 23.686125771224674
-      },
-      "LWInputY": {
-        "rad": 0.27278809878493004,
-        "deg": 15.629606761774271
-      },
-      "RWInputX": {
-        "rad": -0.5298602015273648,
-        "deg": -30.35875327946926
-      },
-      "RWInputY": {
-        "rad": -0.2407201911887515,
-        "deg": -13.792250998697728
-      }
-    },
-    "max_lambda": 73.02968219621762,
-    "mode_coord": "RSInputX",
     "parity": {
       "drake": {
-        "coord_rad": 6.296805521444071e-9,
+        "coord_rad": 6.296805521444071e-09,
         "frame_m": 6.299031031434552e-11
       },
-      "pinocchio": {
-        "coord_rad": 7.379749811242675e-8,
-        "frame_m": 3.9376483211226417e-10
-      },
       "opensim": {
-        "coord_rad": 3.05412231060842e-8,
+        "coord_rad": 3.05412231060842e-08,
         "frame_m": 1.7590099970387375e-10
+      },
+      "pinocchio": {
+        "coord_rad": 7.379749811242675e-08,
+        "frame_m": 3.9376483211226417e-10
       }
     },
-    "elapsed_s": 4763.794544458389
-  }
+    "range_violations": {
+      "arm_flex_r": {
+        "frames": 11,
+        "max_rad": 1.571135996094418,
+        "min_rad": 1.5709682403416259,
+        "range_max_rad": 1.57079633,
+        "range_min_rad": -1.57079633
+      },
+      "arm_rot_r": {
+        "frames": 11,
+        "max_rad": -1.5710522777754699,
+        "min_rad": -1.5712841194663203,
+        "range_max_rad": 1.57079633,
+        "range_min_rad": -1.57079633
+      },
+      "pro_sup_l": {
+        "frames": 11,
+        "max_rad": -0.0001794731517933681,
+        "min_rad": -0.0003456716128682788,
+        "range_max_rad": 2.09,
+        "range_min_rad": 0.0
+      },
+      "pro_sup_r": {
+        "frames": 11,
+        "max_rad": -0.00019533344868715368,
+        "min_rad": -0.0003721631237878858,
+        "range_max_rad": 2.09,
+        "range_min_rad": 0.0
+      }
+    },
+    "range_violations_max_overshoot_rad": 0.0004877894663202209,
+    "reach_miss_mm": {
+      "L": 0.003678226152134538,
+      "R": 13.270516490246445
+    },
+    "width_m": 0.9,
+    "wrists": {
+      "LWInputX": {
+        "deg": 23.686125771224674,
+        "rad": 0.41340088174935175
+      },
+      "LWInputY": {
+        "deg": 15.629606761774271,
+        "rad": 0.27278809878493004
+      },
+      "RWInputX": {
+        "deg": -30.35875327946926,
+        "rad": -0.5298602015273648
+      },
+      "RWInputY": {
+        "deg": -13.792250998697728,
+        "rad": -0.2407201911887515
+      }
+    }
+  },
+  "bundle_spec_sha256": "50b4fff064bf1e7eb3aa6aae8d6df3c1d2550bee57cd6fe448b4050afe03c9d7"
 }

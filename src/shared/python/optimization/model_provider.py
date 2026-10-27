@@ -177,7 +177,8 @@ _HAND_MASS_FRACTION = 0.12
 _PELVIS_TRUNK_SPLIT = 0.5
 _TRUNK_RADIUS_FRACTION = 0.08  # of golfer height (~0.14 m)
 _LIMB_RADIUS = 0.04  # m, upper arm / forearm
-_HAND_LENGTH = 0.08  # m, along the club axis from the wrist
+# Wrist-to-grip offset along the club axis (not anthropometric hand length).
+_WRIST_TO_GRIP_OFFSET_M = 0.08
 _GRIP_LENGTH = 0.25  # m, along the shaft from the butt
 _CLUBHEAD_RADIUS = 0.045  # m, equivalent solid sphere
 _CLUB_SHAFT_RADIUS = 0.006  # m
@@ -291,7 +292,7 @@ def swing_segment_inertials(
     fore_mass = _FOREARM_MASS_FRACTION * arm_mass
     hand_mass = _HAND_MASS_FRACTION * arm_mass
     shaft_parts = [
-        (hand_mass, -0.5 * _HAND_LENGTH, _HAND_LENGTH),
+        (hand_mass, -0.5 * _WRIST_TO_GRIP_OFFSET_M, _WRIST_TO_GRIP_OFFSET_M),
         (grip_mass, -0.5 * _GRIP_LENGTH, _GRIP_LENGTH),
         (shaft_mass, -0.5 * shaft_length, shaft_length),
     ]

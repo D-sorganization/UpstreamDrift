@@ -465,8 +465,10 @@ def test_mujoco_free_joint_mj_inverse_frame_conversion_convention(
     from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
         MyoHandBilateralGripAdapter,
     )
+    from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
     adapter = MyoHandBilateralGripAdapter(model_id, contact_mode="shared")
+    adapter._model.opt.gravity[:] = [0.0, 0.0, -float(GRAVITY_M_S2)]
     rot_club = Rotation.from_euler("XYZ", [0.32, -0.41, 0.68]).as_matrix()
     q_xyzw = Rotation.from_matrix(rot_club).as_quat()
     q_wxyz = np.array([q_xyzw[3], q_xyzw[0], q_xyzw[1], q_xyzw[2]], dtype=float)

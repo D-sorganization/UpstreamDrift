@@ -349,10 +349,10 @@ def test_frame_y_up_to_z_up_basic():
     v_yup = np.array([0.0, 1.0, 0.0])
     v_zup = frame_y_up_to_z_up(v_yup)
     np.testing.assert_allclose(v_zup, np.array([0.0, 0.0, 1.0]))
-    # OpenSim +Z (right) → Simscape +Y (right).
+    # OpenSim +Z (subject right) -> world -Y (preserving right-handedness, det = +1).
     v_yup = np.array([0.0, 0.0, 1.0])
     v_zup = frame_y_up_to_z_up(v_yup)
-    np.testing.assert_allclose(v_zup, np.array([0.0, 1.0, 0.0]))
+    np.testing.assert_allclose(v_zup, np.array([0.0, -1.0, 0.0]))
     # OpenSim +X (anterior) stays as Simscape +X (target line).
     v_yup = np.array([1.0, 0.0, 0.0])
     v_zup = frame_y_up_to_z_up(v_yup)
@@ -371,6 +371,28 @@ def test_frame_round_trip():
 def test_frame_rejects_wrong_last_axis():
     with pytest.raises(ValueError, match="last axis"):
         frame_y_up_to_z_up(np.zeros(2))
+
+
+@pytest.mark.unit
+def test_axis_permutation_det_plus_one():
+    """UD-11: _R_YUP_TO_ZUP must be a proper rotation (det = +1, orthonormal)."""
+    from src.engines.physics_engines.opensim.python.motion_matching.coord_map import (
+        _R_YUP_TO_ZUP,
+    )
+
+    det = float(np.linalg.det(_R_YUP_TO_ZUP))
+    np.testing.assert_allclose(
+        det,
+        1.0,
+        atol=1e-12,
+        err_msg=f"_R_YUP_TO_ZUP has det = {det:.1f}, which is a reflection (det = -1), not a proper rotation.",
+    )
+    np.testing.assert_allclose(
+        _R_YUP_TO_ZUP @ _R_YUP_TO_ZUP.T,
+        np.eye(3),
+        atol=1e-12,
+        err_msg="_R_YUP_TO_ZUP must be orthonormal",
+    )
 
 
 # ---------------------------------------------------------------------------
