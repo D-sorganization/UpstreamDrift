@@ -1250,7 +1250,7 @@
       "bytes": 187268
     },
     "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json": {
-      "sha256": "1254e70ab8966d6e0779f459c77e625616ef2151563a9346e31c5b655ff5847e",
+      "sha256": "5f9a4231f16ea8085976c8d3af0a3ef58b5e8f5d39338649932239bc2f906aa5",
       "bytes": 32901
     },
     "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz": {
@@ -3106,8 +3106,12 @@
       "bytes": 25114
     },
     "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py": {
-      "sha256": "1f61d5b119c242909c8cb5a466f2ef543ab45dcdb3a2b0f4ca11a57f13feb8b2",
-      "bytes": 21864
+      "sha256": "b9452898b22c529b1fbad8280286f8800a74bbfd01841d492f1737817cc5eca3",
+      "bytes": 20941
+    },
+    "scripts/research/proximal_distal_energy/run_two_hand_wscg_case.py": {
+      "sha256": "a75eb252a3022f3c694f3969d0ae3355468dcb7b7e4c1ab3fdd729bca727d090",
+      "bytes": 4866
     },
     "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py": {
       "sha256": "ee674e0697be9229c66739c2f73f9de2034c3e6961eb5e00acb01cd2ebd4c11d",

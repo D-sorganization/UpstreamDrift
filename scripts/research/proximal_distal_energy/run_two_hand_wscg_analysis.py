@@ -177,55 +177,38 @@ def _interval_signal_metrics(
 def _analyze_case(
     name: str, data: np.ndarray, geometry: np.ndarray
 ) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    time = data["time_s"]
-    lead_position, trail_position, midpoint = geometry
-    lead_force = _vector(data, "lead_force_global", "n")
-    trail_force = _vector(data, "trail_force_global", "n")
-    lead_torque = _vector(data, "lead_free_torque_global", "nm")
-    trail_torque = _vector(data, "trail_free_torque_global", "nm")
+    from scripts.research.proximal_distal_energy.run_two_hand_wscg_case import (
+        _case_grip_wrench_signals,
+        _require_case_analysis_inputs,
+    )
+
+    _require_case_analysis_inputs(name, data)
+    grip = _case_grip_wrench_signals(data, geometry)
+    time = grip["time"]
+    lead_position = grip["lead_position"]
+    trail_position = grip["trail_position"]
+    midpoint = grip["midpoint"]
+    lead_force = grip["lead_force"]
+    trail_force = grip["trail_force"]
     lead_velocity = _vector(data, "lead_velocity_global", "m_s")
     trail_velocity = _vector(data, "trail_velocity_global", "m_s")
-    source_resultant = _vector(data, "resultant_force_global_source", "n")
-    source_couple_global = _vector(
-        data, "equivalent_midpoint_couple_global_source", "nm"
-    )
-    source_couple_local = _vector(data, "equivalent_midpoint_couple_local_source", "nm")
-
     grip_vector = trail_position - lead_position
-    grip_separation = np.linalg.norm(grip_vector, axis=1)
-    axial_axis = grip_vector / grip_separation[:, None]
-    normal_axis = np.cross(OUT_OF_PLANE_AXIS, axial_axis)
-    lead_axial = np.sum(lead_force * axial_axis, axis=1)
-    trail_axial = np.sum(trail_force * axial_axis, axis=1)
-    lead_normal = np.sum(lead_force * normal_axis, axis=1)
-    trail_normal = np.sum(trail_force * normal_axis, axis=1)
-    lead_out = lead_force @ OUT_OF_PLANE_AXIS
-    trail_out = trail_force @ OUT_OF_PLANE_AXIS
-    reconstructed_local_forces = np.stack(
-        (
-            np.column_stack((lead_axial, lead_normal, lead_out)),
-            np.column_stack((trail_axial, trail_normal, trail_out)),
-        )
-    )
-    archived_local_forces = np.stack(
-        (
-            _vector(data, "lead_force_local_source", "n"),
-            _vector(data, "trail_force_local_source", "n"),
-        )
-    )
-    maximum_in_plane_force = float(
-        np.max(np.linalg.norm(reconstructed_local_forces[..., :2], axis=2))
-    )
-
-    resultant = lead_force + trail_force
-    force_moment_global = np.cross(lead_position - midpoint, lead_force) + np.cross(
-        trail_position - midpoint, trail_force
-    )
-    free_torque_global = lead_torque + trail_torque
-    reconstructed_couple_global = force_moment_global + free_torque_global
-    force_moment = force_moment_global @ OUT_OF_PLANE_AXIS
-    free_torque = free_torque_global @ OUT_OF_PLANE_AXIS
-    equivalent_couple = source_couple_local[:, 2]
+    grip_separation = grip["grip_separation"]
+    lead_axial = grip["lead_axial"]
+    trail_axial = grip["trail_axial"]
+    lead_normal = grip["lead_normal"]
+    trail_normal = grip["trail_normal"]
+    resultant = grip["resultant"]
+    force_moment = grip["force_moment"]
+    free_torque = grip["free_torque"]
+    equivalent_couple = grip["equivalent_couple"]
+    maximum_in_plane_force = grip["maximum_in_plane_force"]
+    max_out_of_plane_force_n = grip["max_out_of_plane_force_n"]
+    source_resultant = grip["source_resultant"]
+    source_couple_global = grip["source_couple_global"]
+    reconstructed_couple_global = grip["reconstructed_couple_global"]
+    reconstructed_local_forces = grip["reconstructed_local_forces"]
+    archived_local_forces = grip["archived_local_forces"]
 
     midpoint_velocity = 0.5 * (lead_velocity + trail_velocity)
     contact_force_power = np.sum(
@@ -274,13 +257,10 @@ def _analyze_case(
         "maximum_couple_reconstruction_residual_nm": float(
             np.max(np.abs(reconstructed_couple_global - source_couple_global))
         ),
-        "maximum_out_of_plane_hand_force_n": float(
-            max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
-        ),
+        "maximum_out_of_plane_hand_force_n": max_out_of_plane_force_n,
         "maximum_in_plane_hand_force_n": maximum_in_plane_force,
         "maximum_out_of_plane_to_in_plane_force_ratio": float(
-            max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
-            / maximum_in_plane_force
+            max_out_of_plane_force_n / maximum_in_plane_force
         ),
         "maximum_local_force_projection_residual_n": float(
             np.max(np.abs(reconstructed_local_forces - archived_local_forces))
