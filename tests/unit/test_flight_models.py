@@ -178,6 +178,46 @@ class TestUnifiedLaunchConditions:
             abs(spin[2]) < 1e-10
         )  # No Z component, "Assertion failed: abs(spin[2]) < 1e-10  # No Z component"
 
+    def test_pure_sidespin_no_vertical_magnus(self) -> None:
+        """UD-07: z-up; pure sidespin => Magnus z-component ~ 0, lateral != 0."""
+        launch = UnifiedLaunchConditions.from_imperial(
+            ball_speed_mph=100.0,
+            launch_angle_deg=10.0,
+            azimuth_angle_deg=30.0,
+            spin_rate_rpm=3000.0,
+            spin_axis_angle_deg=90.0,  # Pure sidespin
+        )
+        spin = launch.get_spin_vector()
+        vel = launch.get_initial_velocity()
+        vu = vel / np.linalg.norm(vel)
+        spin_norm = np.linalg.norm(spin)
+        assert spin_norm > 0
+
+        magnus_dir = np.cross(spin / spin_norm, vu)
+        # Pure sidespin must produce zero vertical Magnus force (Z component ~ 0)
+        assert abs(magnus_dir[2]) == pytest.approx(0.0, abs=1e-10)
+        # Lateral component must be non-zero
+        assert abs(magnus_dir[0]) > 0.1 or abs(magnus_dir[1]) > 0.1
+
+    def test_pure_backspin_perpendicular_to_velocity(self) -> None:
+        """UD-07: pure backspin is perpendicular to velocity at any azimuth."""
+        launch = UnifiedLaunchConditions.from_imperial(
+            ball_speed_mph=100.0,
+            launch_angle_deg=12.0,
+            azimuth_angle_deg=45.0,
+            spin_rate_rpm=3000.0,
+            spin_axis_angle_deg=0.0,  # Pure backspin
+        )
+        spin = launch.get_spin_vector()
+        vel = launch.get_initial_velocity()
+        vu = vel / np.linalg.norm(vel)
+        spin_norm = np.linalg.norm(spin)
+        assert spin_norm > 0
+
+        # Post: spin_vector · velocity_hat ~ 0 for pure backspin
+        dot = float(np.dot(spin / spin_norm, vu))
+        assert abs(dot) == pytest.approx(0.0, abs=1e-10)
+
     def test_wind_vector_headwind(self) -> None:
         """Test wind vector for headwind."""
         launch = UnifiedLaunchConditions.from_imperial(

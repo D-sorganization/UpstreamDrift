@@ -222,15 +222,30 @@ class UnifiedLaunchConditions:
         )
 
     def get_spin_vector(self) -> np.ndarray:
-        """Compute the 3D spin vector from spin rate and axis angle."""
-        omega = self.spin_rate * 2 * math.pi / 60
+        """Compute the 3D spin vector from spin rate, axis angle, and azimuth.
+
+        Frame definition (UD-07):
+            Z-up world frame where the ball launches with horizontal azimuth angle
+            around +Z (+X forward when azimuth = 0, +Y left).
+            - Backspin acts about the horizontal axis perpendicular to the azimuth
+              direction: [sin(azimuth), -cos(azimuth), 0], producing upward Magnus lift.
+            - Sidespin acts about the vertical (z-up) axis: [0, 0, 1], producing
+              lateral curvature without vertical lift.
+
+        Returns:
+            Angular velocity vector [rad/s] as an array of shape (3,).
+        """
+        omega = self.spin_rate * 2.0 * math.pi / 60.0
         backspin = omega * math.cos(self.spin_axis_angle)
         sidespin = omega * math.sin(self.spin_axis_angle)
+        ca = math.cos(self.azimuth_angle)
+        sa = math.sin(self.azimuth_angle)
+
         return np.array(
             [
-                sidespin * math.sin(self.azimuth_angle),
-                -backspin,
-                sidespin * math.cos(self.azimuth_angle),
+                backspin * sa,
+                -backspin * ca,
+                sidespin,
             ]
         )
 
