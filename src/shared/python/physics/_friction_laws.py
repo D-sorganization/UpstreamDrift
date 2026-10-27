@@ -27,10 +27,17 @@ def check_friction_cone(
     tangent_force: np.ndarray,
     friction_coefficient: float,
 ) -> bool:
+    """Check whether tangential force is within the Coulomb friction cone.
+
+    Convention:
+        normal_force: Compression-positive normal force [N]. Tensile (negative)
+                      or zero normal force provides zero tangential friction
+                      capacity (unilateral contact).
+    """
     if normal_force is None:
         raise ValueError("normal_force must be provided")
     tangent_magnitude = _magnitude(tangent_force)
-    max_tangent = friction_coefficient * abs(normal_force)
+    max_tangent = friction_coefficient * max(normal_force, 0.0)
     return bool(tangent_magnitude <= max_tangent)
 
 

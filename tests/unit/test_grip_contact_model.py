@@ -56,6 +56,34 @@ class TestFrictionCone:
         )
         assert not result
 
+    def test_friction_zero_in_tension(self) -> None:
+        """Tensile normal force (Fn <= 0) must provide zero tangential friction capacity (UD-29)."""
+        # When normal_force is negative (tension), any non-zero tangent force must be outside cone
+        result_negative_fn = check_friction_cone(
+            normal_force=-10.0,
+            tangent_force=np.array([1.0, 0.0, 0.0]),
+            friction_coefficient=0.8,
+        )
+        assert not result_negative_fn, (
+            "Tensile normal force must have zero friction capacity; non-zero tangent should be outside cone"
+        )
+
+        # Zero normal force with non-zero tangent force must also be outside cone
+        result_zero_fn = check_friction_cone(
+            normal_force=0.0,
+            tangent_force=np.array([1.0, 0.0, 0.0]),
+            friction_coefficient=0.8,
+        )
+        assert not result_zero_fn
+
+        # Zero normal force with exactly zero tangent force is trivially at the vertex
+        result_zero_both = check_friction_cone(
+            normal_force=0.0,
+            tangent_force=np.zeros(3),
+            friction_coefficient=0.8,
+        )
+        assert result_zero_both
+
 
 class TestForceDecomposition:
     """Tests for contact force decomposition."""
