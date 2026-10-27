@@ -234,7 +234,7 @@ def test_render_worker_pythonpath_excludes_parent_stdlib(
 
 
 def test_worker_env_restores_interpreter_libdir_after_opensim_clobber(
-    tmp_path: Path,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """#13896: opensim's Linux ``__init__`` sets ``LD_LIBRARY_PATH = PATH``.
 
@@ -247,15 +247,16 @@ def test_worker_env_restores_interpreter_libdir_after_opensim_clobber(
         with_interpreter_libdir,
     )
 
-    lib = tmp_path / "lib"
-    lib.mkdir()
+    monkeypatch.chdir(tmp_path)  # relative prefix: no drive colon on Windows
+    lib = Path("pfx") / "lib"
+    lib.mkdir(parents=True)
     (lib / "libpython3.12.so.1.0").write_bytes(b"")
     shared = {
         "LIBDIR": "/opt/hostedtoolcache/Python/3.12.15/x64/lib",
         "Py_ENABLE_SHARED": 1,
         "INSTSONAME": "libpython3.12.so.1.0",
     }
-    kw = {"platform": "linux", "config": shared.get, "base_prefix": str(tmp_path)}
+    kw = {"platform": "linux", "config": shared.get, "base_prefix": "pfx"}
     libdir = lib.as_posix()
 
     env = with_interpreter_libdir({"LD_LIBRARY_PATH": "/usr/bin:/bin"}, **kw)
@@ -268,7 +269,7 @@ def test_worker_env_restores_interpreter_libdir_after_opensim_clobber(
     static = {**shared, "Py_ENABLE_SHARED": 0}
     assert with_interpreter_libdir({}, **{**kw, "config": static.get}) == {}
     assert with_interpreter_libdir({}, **{**kw, "platform": "win32"}) == {}
-    missing = {**kw, "base_prefix": str(tmp_path / "nowhere")}
+    missing = {**kw, "base_prefix": "nowhere"}
     assert with_interpreter_libdir({}, **missing) == {}
 
 
