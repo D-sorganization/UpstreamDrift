@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13903 · EnhancedBallFlightSimulator: Route Deterministic Aero Through Rust Facade (UD-03)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13903
+- **Branch:** fix/13903-enhanced-simulator-rust-facade
+- **PR:** #13929
+- **Paths:** see #13929
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`19f532dd`; collated from changes/13903-enhanced-simulator-rust-facade.md)
+- **Summary:** EnhancedBallFlightSimulator: route deterministic aero through Rust facade (UD-03)
+- **Next step:** Merge PR
+
 ### DL-#13874 · Unify Solver_Status Contract and Provenance Across All Four Physics Engines
 
 - **State:** in_review
