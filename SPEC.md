@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-27 | #13925 | Tighten MuJoCo mj_inverse test tolerances and replay refinement (UD-15, UD-16) |
 | 2026-10-27 | #13917 | Branch orientation cost on q_orientation_repr and enforce body_marker precondition |
 | 2026-10-27 | #13921 | Enforce 1e-6 relative tolerance in ball flight Rust/Python parity test |
 | 2026-10-27 | #13919 | Remove unused signature bind and memoize inspect.signature in contract decorators |

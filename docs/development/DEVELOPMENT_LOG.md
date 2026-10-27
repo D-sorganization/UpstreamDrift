@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13876 · Tighten MuJoCo Mj_Inverse Test Tolerances and Replay Refinement (UD-15, UD-16)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13876
+- **Branch:** fix/13876-mujoco-mj-inverse-tolerances
+- **PR:** #13925
+- **Paths:** see #13925
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`70be2a3e`; collated from changes/13876-mujoco-mj-inverse-tolerances.md)
+- **Summary:** Tighten MuJoCo mj_inverse test tolerances and replay refinement (UD-15, UD-16)
+- **Next step:** Merge PR
+
 ### DL-#13867 · Branch Orientation Cost on Q_Orientation_Repr and Enforce Body_Marker Precondition
 
 - **State:** in_review
