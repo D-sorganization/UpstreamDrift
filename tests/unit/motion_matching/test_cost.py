@@ -284,3 +284,59 @@ def test_body_marker_term() -> None:
     opts = CostOptions(w_body_marker=2.0)
     _, terms = compute_cost(np.zeros(7), target, _const_sim_fn(sim), opts)
     assert abs(terms.body_marker - 1e-6) < 1e-15
+
+
+def test_q_orientation_repr_changes_cost() -> None:
+    """Selecting 'rotmat' vs 'quaternion' produces different orientation costs (UD-19)."""
+    target = make_target(n=10)
+    sim = _matching_sim(target)
+    # Rotate club_quat by 45 degrees around Z axis: [cos(pi/8), 0, 0, sin(pi/8)]
+    theta_half = np.pi / 8.0
+    dq = np.array([np.cos(theta_half), 0.0, 0.0, np.sin(theta_half)])
+    # Multiply quaternions: [w, x, y, z] * [cos, 0, 0, sin]
+    rotated_quat = np.zeros_like(sim.club_quat)
+    for i in range(len(rotated_quat)):
+        w1, x1, y1, z1 = sim.club_quat[i]
+        w2, x2, y2, z2 = dq
+        rotated_quat[i] = [
+            w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+            w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+            w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+        ]
+    sim_rot = SimOutput(
+        butt=sim.butt,
+        clubhead=sim.clubhead,
+        club_quat=rotated_quat,
+        time=sim.time,
+        tau=sim.tau,
+        omega=sim.omega,
+    )
+    opts_quat = CostOptions(q_orientation_repr="quaternion", w_orientation=1.0)
+    opts_rotmat = CostOptions(q_orientation_repr="rotmat", w_orientation=1.0)
+
+    _, terms_quat = compute_cost(np.zeros(7), target, _const_sim_fn(sim_rot), opts_quat)
+    _, terms_rotmat = compute_cost(
+        np.zeros(7), target, _const_sim_fn(sim_rot), opts_rotmat
+    )
+
+    # For 45 deg = pi/4 rad:
+    # Geodesic angle is pi/4 -> cost is (pi/4)^2 approx 0.61685
+    # Frobenius norm squared is 4*(1 - cos(pi/4)) = 4*(1 - 1/sqrt(2)) approx 1.17157
+    assert terms_quat.orientation > 0.0
+    assert terms_rotmat.orientation > 0.0
+    assert terms_quat.orientation != terms_rotmat.orientation
+    expected_frob_sq = 4.0 * (1.0 - np.cos(np.pi / 4.0))
+    assert abs(terms_rotmat.orientation - expected_frob_sq) < 1e-10
+
+
+def test_body_marker_missing_raises_when_weighted() -> None:
+    """When w_body_marker > 0 and sim_out.marker_xyz is None, raise ValueError (UD-19)."""
+    target_club = make_target(n=10)
+    target = DummyMultiTarget(target_club, np.zeros((10, 2, 3)))
+    sim = _matching_sim(target_club)
+    assert sim.marker_xyz is None
+
+    opts = CostOptions(w_body_marker=1.0)
+    with pytest.raises(ValueError, match="marker_xyz"):
+        compute_cost(np.zeros(7), target, _const_sim_fn(sim), opts)
