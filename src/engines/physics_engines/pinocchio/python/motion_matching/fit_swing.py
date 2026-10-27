@@ -756,7 +756,10 @@ def fit_swing_pinocchio(  # noqa: C901
         message=str(result.message),
         history=tuple(history),
         method=method_label,
-        **prov,
+        git_commit=prov["git_commit"],
+        engine_version=prov["engine_version"],
+        target_hash=prov["target_hash"],
+        timestamp_utc=prov["timestamp_utc"],
         cost_breakdown=cost_breakdown,
         n_jac_eval=int(n_jac_eval_counter[0]),
         meta={

@@ -313,5 +313,8 @@ def fit_swing_drake(
         message=str(res.message),
         history=tuple(history),
         method=opts.method,
-        **prov,
+        git_commit=prov["git_commit"],
+        engine_version=prov["engine_version"],
+        target_hash=prov["target_hash"],
+        timestamp_utc=prov["timestamp_utc"],
     )

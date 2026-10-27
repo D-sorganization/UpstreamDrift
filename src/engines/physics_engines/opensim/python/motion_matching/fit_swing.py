@@ -341,14 +341,16 @@ def fit_swing_opensim(
         message=str(res.message),
         history=tuple(history),
         method=str(options.method),
-        **prov,
+        git_commit=prov["git_commit"],
+        engine_version=prov["engine_version"],
+        target_hash=prov["target_hash"],
+        timestamp_utc=prov["timestamp_utc"],
     )
 
     # Postcondition: history should be non-empty and end at the reported cost
     # within floating-point tolerance.
     assert result.history, "FitResult.history must not be empty"
-    if not np.isfinite(result.final_cost):
-        result.solver_status = "failed"
+    assert np.isfinite(result.final_cost), "FitResult.cost must be finite"
     assert result.theta_optimal.shape == (d,), (
         f"FitResult.theta shape {result.theta_optimal.shape} != ({d},)"
     )
