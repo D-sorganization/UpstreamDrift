@@ -148,9 +148,7 @@ def plot_error_timecourse(  # noqa: C901
     if t.size and impact_idx_0b >= 0:
         impact_t = float(t[impact_idx_0b])
         for ax_i in axes:
-            ax_i.axvline(
-                impact_t, color=COLOR_ERROR, linestyle=":", linewidth=1
-            )
+            ax_i.axvline(impact_t, color=COLOR_ERROR, linestyle=":", linewidth=1)
 
     fig.suptitle(f"Error timecourse — {result.trial_id}", fontsize=TITLE_FONTSIZE + 1)
     fig.tight_layout()
