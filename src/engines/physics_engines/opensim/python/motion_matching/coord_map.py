@@ -24,10 +24,12 @@ The four conventions that differ between the engines:
    ``+y`` to the golfer's right per ``golf_humanoid_topology.yaml``).
    See :func:`frame_y_up_to_z_up`.
 
-2. **Quaternion ordering.** OpenSim returns quaternions through Eigen's
-   ``[x, y, z, w]`` ordering. The canonical ``SimOut`` schema and the
-   Simscape pipeline use ``[w, x, y, z]``. See
-   :func:`quat_eigen_to_canonical`.
+2. **Quaternion ordering.** Native OpenSim / SimTK quaternions from
+   ``SimTK::Rotation::convertRotationToQuaternion`` are scalar-first
+   ``[w, x, y, z]`` (matching the canonical ``SimOut`` schema and the
+   Simscape pipeline). For external feeds or libraries using Eigen's
+   vector-first ``[x, y, z, w]`` convention, :func:`quat_eigen_to_canonical`
+   and :func:`quat_canonical_to_eigen` provide bidirectional conversion.
 
 3. **Joint-angle sign conventions.** Several Rajagopal coordinates are
    the negative of the Simscape equivalent. The :data:`OPENSIM_TO_SIMSCAPE`
@@ -437,11 +439,11 @@ def from_simscape(q_simscape: np.ndarray) -> np.ndarray:
 def quat_eigen_to_canonical(q_xyzw: np.ndarray) -> np.ndarray:
     """Convert Eigen-style ``[x, y, z, w]`` quaternions to canonical ``[w, x, y, z]``.
 
-    OpenSim's ``SimTK::Rotation::convertRotationToQuaternion`` returns
-    ``[x, y, z, w]`` (Eigen convention). The canonical ``SimOut.grip_quat``
-    schema and the Simscape pipeline use ``[w, x, y, z]``. Apply this
-    conversion at the SimOut boundary, never in the middle of a
-    computation.
+    Note that native OpenSim / SimTK quaternions from
+    ``SimTK::Rotation::convertRotationToQuaternion`` are scalar-first
+    ``[w, x, y, z]``, already matching canonical ``SimOut`` format.
+    This helper is provided when ingesting external Eigen-convention
+    ``[x, y, z, w]`` quaternions at the boundary.
 
     Accepts ``(4,)`` or ``(N, 4)`` shapes. The last axis is the
     quaternion-element axis.
@@ -458,7 +460,7 @@ def quat_eigen_to_canonical(q_xyzw: np.ndarray) -> np.ndarray:
 
 
 def quat_canonical_to_eigen(q_wxyz: np.ndarray) -> np.ndarray:
-    """Inverse of :func:`quat_eigen_to_canonical` (``[w, x, y, z]`` → ``[x, y, z, w]``)."""
+    """Inverse of :func:`quat_eigen_to_canonical` (canonical scalar-first ``[w, x, y, z]`` → Eigen ``[x, y, z, w]``)."""
     q = np.asarray(q_wxyz, dtype=np.float64)
     if q.shape[-1] != 4:
         raise ValueError(f"quat_canonical_to_eigen: last axis must be 4, got {q.shape}")

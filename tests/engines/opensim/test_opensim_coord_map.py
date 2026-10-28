@@ -404,10 +404,16 @@ def test_simtk_quaternion_docs_accuracy():
     func_doc = cm.quat_eigen_to_canonical.__doc__ or ""
 
     # Must not claim SimTK convertRotationToQuaternion returns [x, y, z, w]
-    assert "SimTK::Rotation::convertRotationToQuaternion`` returns\n    ``[x, y, z, w]``" not in func_doc, (
+    assert (
+        "SimTK::Rotation::convertRotationToQuaternion`` returns\n    ``[x, y, z, w]``"
+        not in func_doc
+    ), (
         "quat_eigen_to_canonical docstring incorrectly claims SimTK returns Eigen [x, y, z, w]"
     )
-    assert "OpenSim returns quaternions through Eigen's\n   ``[x, y, z, w]``" not in mod_doc, (
+    assert (
+        "OpenSim returns quaternions through Eigen's\n   ``[x, y, z, w]``"
+        not in mod_doc
+    ), (
         "coord_map module docstring incorrectly claims OpenSim returns quaternions through Eigen [x, y, z, w]"
     )
     # Must document scalar-first for SimTK
