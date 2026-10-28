@@ -217,9 +217,7 @@ def run_pendulum_sensitivity_study(
     dt: float = 0.001,
     fd_step: float = 1e-6,
     tolerance: float = 0.20,
-    epsilon: float = 1e-6,
-    initial_angles: tuple[float, float, float] = (-1.5, 0.5, 0.2),
-    initial_velocities: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    initial_state: Sequence[float] | None = None,
 ) -> SensitivityReceipt:
     if not math.isfinite(fd_step) or fd_step <= 0.0:
         raise ValueError(f"fd_step must be finite and positive, got {fd_step}")
@@ -255,9 +253,18 @@ def run_pendulum_sensitivity_study(
         raise TypeError(f"unsupported engine adapter type: {type(engine)}")
 
     num_steps = int(round(t_end / dt))
+    init_x = (
+        np.asarray(initial_state, dtype=np.float64)
+        if initial_state is not None
+        else np.array([-1.5, 0.5, 0.2, 0.0, 0.0, 0.0], dtype=np.float64)
+    )
+    if init_x.shape != (6,):
+        raise ValueError(
+            f"initial_state must have 6 elements, got shape {init_x.shape}"
+        )
     _, transitions = propagate_state_transition_matrix(
         _step_fn,
-        np.array(list(initial_angles) + list(initial_velocities), dtype=np.float64),
+        init_x,
         [profile.evaluate(k * dt) for k in range(num_steps)],
         [k * dt for k in range(num_steps)],
         dt,
@@ -278,7 +285,7 @@ def run_pendulum_sensitivity_study(
         sigma_max=sigma_max,
         ftle_per_s=ftle,
         agreement_horizon_s=compute_agreement_horizon(
-            tolerance=tolerance, epsilon=epsilon, ftle=ftle
+            tolerance=tolerance, epsilon=min(fd_step, 1e-6), ftle=ftle
         ),
         dominant_direction=tuple(float(v) for v in vt[0]),
         fd_step=fd_step,
