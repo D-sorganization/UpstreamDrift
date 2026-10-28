@@ -141,7 +141,9 @@ class TestFiniteDifferenceQdd:
 
         qdd = finite_difference_qdd(v_log, sample_rate_hz=sample_rate_hz, enabled=True)
         assert qdd.shape == v_log.shape
-        np.testing.assert_allclose(qdd, np.broadcast_to(a_true, qdd.shape), rtol=1e-12, atol=1e-12)
+        np.testing.assert_allclose(
+            qdd, np.broadcast_to(a_true, qdd.shape), rtol=1e-12, atol=1e-12
+        )
 
     def test_quadratic_velocity_interior_accuracy(self) -> None:
         """For quadratic velocity v(t) = t^2, central difference interior recovers 2*t."""
@@ -159,11 +161,15 @@ class TestFiniteDifferenceQdd:
     def test_disabled_or_insufficient_samples(self) -> None:
         """When disabled or shape[0] < 2, finite_difference_qdd returns zeros."""
         v_log = np.ones((5, 3))
-        qdd_disabled = finite_difference_qdd(v_log, sample_rate_hz=1000.0, enabled=False)
+        qdd_disabled = finite_difference_qdd(
+            v_log, sample_rate_hz=1000.0, enabled=False
+        )
         np.testing.assert_array_equal(qdd_disabled, np.zeros((5, 3)))
 
         v_single = np.ones((1, 3))
-        qdd_single = finite_difference_qdd(v_single, sample_rate_hz=1000.0, enabled=True)
+        qdd_single = finite_difference_qdd(
+            v_single, sample_rate_hz=1000.0, enabled=True
+        )
         np.testing.assert_array_equal(qdd_single, np.zeros((1, 3)))
 
 
