@@ -18,6 +18,123 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13962 · Require _Advance_to to Reach Target Time Within Substep Budget (UD-37)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13962
+- **Branch:** fix/13962-mujoco-advance-to-substep-budget
+- **PR:** #13963
+- **Paths:** see #13963
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`5e855a22`; collated from changes/13962-mujoco-advance-to-substep-budget.md)
+- **Summary:** Require _advance_to to reach target time within substep budget (UD-37)
+- **Next step:** Merge PR
+
+### DL-#13959 · Enforce Both Upper Bound and Zero Transverse Force in Check_Static_Equilibrium (UD-30)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13959
+- **Branch:** fix/13959-grip-static-equilibrium
+- **PR:** #13960
+- **Paths:** see #13960
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`15e55478`; collated from changes/13959-grip-static-equilibrium.md)
+- **Summary:** Enforce both upper bound and zero transverse force in check_static_equilibrium (UD-30)
+- **Next step:** Merge the PR into main.
+
+### DL-#13956 · Allow MacDonaldHanzelyModel and Constant-Coefficient Models to Use Declared Cl Without 0.155 Constant-Spin Clamp
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13956
+- **Branch:** fix/13956-flight-models-lift-cap
+- **PR:** #13958
+- **Paths:** see #13958
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`eb8b7140`; collated from changes/13956-flight-models-lift-cap.md)
+- **Summary:** Allow MacDonaldHanzelyModel and constant-coefficient models to use declared cl without 0.155 constant-spin clamp
+- **Next step:** Merge the PR into main.
+
+### DL-#13953 · OpenSim: Correct SimTK Quaternion Ordering Documentation in Coord_Map (UD-12)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13953
+- **Branch:** fix/13953-opensim-simtk-quat-docs
+- **PR:** #13954
+- **Paths:** see #13954
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`f838b4e2`; collated from changes/13953-opensim-simtk-quat-docs.md)
+- **Summary:** OpenSim: correct SimTK quaternion ordering documentation in coord_map (UD-12)
+- **Next step:** Merge PR
+
+### DL-#13949 · Pinocchio Viz: Adjust 1-Based Impact_Idx to 0-Based Indexing in Error_Timecourse (UD-23)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13949
+- **Branch:** fix/13949-pinocchio-viz-impact-idx
+- **PR:** #13950
+- **Paths:** see #13950
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`2f369c5a`; collated from changes/13949-pinocchio-viz-impact-idx.md)
+- **Summary:** Pinocchio viz: adjust 1-based impact_idx to 0-based indexing in error_timecourse (UD-23)
+- **Next step:** Merge PR
+
+### DL-#13947 · Restore Docstrings in Motion_Matching Cost Term Helpers (UD-20)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13947
+- **Branch:** fix/13947-cost-term-docstrings
+- **PR:** #13948
+- **Paths:** see #13948
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`b5182571`; collated from changes/13947-cost-term-docstrings.md)
+- **Summary:** Restore docstrings in motion_matching cost term helpers (UD-20)
+- **Next step:** Merge PR
+
+### DL-#13869 · Architecture Budget: Full-Scan Mode With Checked-In Baseline Ratchet (UD-25)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13869
+- **Branch:** fix/13869-architecture-budget-baseline
+- **PR:** #13934
+- **Paths:** see #13934
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`d652ae11`; collated from changes/13869-architecture-budget-baseline.md)
+- **Summary:** Architecture budget: full-scan mode with checked-in baseline ratchet (UD-25)
+- **Next step:** Merge PR
+
+### DL-#13868 · Motion Matching: Architecture Guard and Canonical _Geodesic Helpers (UD-24)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13868
+- **Branch:** fix/13868-quaternion-helper-guard
+- **PR:** #13933
+- **Paths:** see #13933
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`d86cf2e5`; collated from changes/13868-quaternion-helper-guard.md)
+- **Summary:** Motion matching: architecture guard and canonical _geodesic helpers (UD-24)
+- **Next step:** Merge PR
+
+### DL-#13761 · HRG-HX4 Part 2: Bushing_Wrench Force_Limit_N Caps the Bushing Force Magnitude, Direction Kept, Moment Unchanged, Default None Unlimited and Bit-Identical (Option C, Python Bushing Law Only)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13761
+- **Branch:** claude/13761-bushing-force-cap
+- **PR:** #13941
+- **Paths:** see #13941
+- **Started:** 2026-10-27
+- **Last verified:** 2026-10-27 (`ae59243b`; collated from changes/13761-hrg-hx4-part-2-bushing-wrench-force-limi.md)
+- **Summary:** HRG-HX4 part 2: bushing_wrench force_limit_n caps the bushing force magnitude, direction kept, moment unchanged, default None unlimited and bit-identical (option c, Python bushing law only)
+- **Next step:** After the field PR and this cap land, thread GripPose limits into the bushing engines through the inventory check and set their weld_bushing flags
+
 ### DL-#13935 · Bump Dnspython 2.8.0 to 2.9.0 in Both Lock Files to Clear CVE-2026-114605 From Pip-Audit
 
 - **State:** in_review
@@ -768,6 +885,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13945 · Pin Pytest <9.2.0 Across Repository Dependencies and CI Workflows
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13945
+- **Branch:** merged via #13945
+- **PR:** #13945
+- **Paths:** see #13945
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`9aba9431`; collated from changes/13945-pin-pytest-below-9-2-0.md)
+- **Summary:** Pin pytest <9.2.0 across repository dependencies and CI workflows
+- **Next step:** Shipped in PR #13945.
+
 ### DL-#13854 · Renew Hash-Frozen Research Budget Exceptions to 2027-01-31 Under #13853.
 
 - **State:** shipped
@@ -878,10 +1008,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13852
 - **Branch:** merged via #13860
-- **PR:** #13860
+- **PR:** #13860, #13937, #13942
 - **Paths:** see #13860
 - **Started:** 2026-10-26
-- **Last verified:** 2026-10-26 (`c4e2a518`; collated from changes/13852-wscg-test-scaffold.md)
+- **Last verified:** 2026-10-28 (`148b711d`; collated from changes/13852-wscg-case-split-2.md)
 - **Summary:** Add WSCG masked-JSON parity test scaffold for budget-split PRs.
 - **Next step:** Shipped in PR #13860.
 
@@ -917,10 +1047,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13045
 - **Branch:** merged via #13823
-- **PR:** #13823, #13845, #13835, #13833, #13832
+- **PR:** #13823, #13845, #13835, #13833, #13832, #13944
 - **Paths:** see #13823
 - **Started:** 2026-10-26
-- **Last verified:** 2026-10-26 (`b8436dd8`; collated from changes/13045-lift-video-render-api.md)
+- **Last verified:** 2026-10-28 (`01da1de0`; collated from changes/13045-osl4-contact-sheet-test.md)
 - **Summary:** feat(lifting): barbell visual geometry and lift video camera framing
 - **Next step:** Shipped in PR #13823.
 

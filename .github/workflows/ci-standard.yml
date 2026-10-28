@@ -1607,7 +1607,7 @@ jobs:
       - name: Initialize the Pinned Context Provider
         run: git submodule update --init vendor/ud-tools
       - name: Install Dependency-Free Context Package and Test Tools
-        run: python3 -m pip install ./vendor/ud-tools/packages/agent-context pytest PyYAML pydantic numpy
+        run: python3 -m pip install ./vendor/ud-tools/packages/agent-context "pytest>=9.0.3,<9.2.0" PyYAML pydantic numpy
       # The README.md/index.html views are generated on demand (#12544): render
       # them before any step reads them, so `check` compares freshly rendered
       # views and still fails on stale reviews, contracts, evidence or pins.
@@ -1973,7 +1973,7 @@ jobs:
           set -euo pipefail
           . .venv-core-only/bin/activate
           python -m ensurepip --upgrade || true
-          python3 -m pip install pytest pytest-asyncio pytest-timeout
+          python3 -m pip install "pytest>=9.0.3,<9.2.0" pytest-asyncio pytest-timeout
           python3 -m pytest \
             tests/architecture/test_core_public_api.py \
             tests/unit/test_core_install_isolation.py \

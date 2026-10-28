@@ -31,6 +31,32 @@ OUT_OF_PLANE_AXIS = np.array([0.0, -1.0, 1.0]) / np.sqrt(2.0)
 SCHEMA_VERSION = "wscg-two-hand-wrench-audit-v2"
 JSON_PATH = DATA_DIR / "two_hand_wscg_analysis.json"
 NPZ_PATH = DATA_DIR / "two_hand_wscg_analysis.npz"
+# Plot-ready per-case arrays, in the archived NPZ key order.
+_CASE_GRIP_ARRAY_KEYS = (
+    "time",
+    "lead_position",
+    "trail_position",
+    "midpoint",
+    "lead_force",
+    "trail_force",
+    "lead_axial",
+    "trail_axial",
+    "lead_normal",
+    "trail_normal",
+    "resultant",
+    "force_moment",
+    "free_torque",
+    "equivalent_couple",
+)
+_CASE_POWER_ARRAY_KEYS = (
+    "contact_force_power",
+    "source_angular_power",
+    "rigid_force_power",
+    "deformation_power",
+    "contact_power",
+    "decomposed_force_power",
+    "contact_omega_rad_s",
+)
 
 
 def _sha256(path: Path) -> str:
@@ -177,175 +203,22 @@ def _interval_signal_metrics(
 def _analyze_case(
     name: str, data: np.ndarray, geometry: np.ndarray
 ) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    time = data["time_s"]
-    lead_position, trail_position, midpoint = geometry
-    lead_force = _vector(data, "lead_force_global", "n")
-    trail_force = _vector(data, "trail_force_global", "n")
-    lead_torque = _vector(data, "lead_free_torque_global", "nm")
-    trail_torque = _vector(data, "trail_free_torque_global", "nm")
-    lead_velocity = _vector(data, "lead_velocity_global", "m_s")
-    trail_velocity = _vector(data, "trail_velocity_global", "m_s")
-    source_resultant = _vector(data, "resultant_force_global_source", "n")
-    source_couple_global = _vector(
-        data, "equivalent_midpoint_couple_global_source", "nm"
-    )
-    source_couple_local = _vector(data, "equivalent_midpoint_couple_local_source", "nm")
-
-    grip_vector = trail_position - lead_position
-    grip_separation = np.linalg.norm(grip_vector, axis=1)
-    axial_axis = grip_vector / grip_separation[:, None]
-    normal_axis = np.cross(OUT_OF_PLANE_AXIS, axial_axis)
-    lead_axial = np.sum(lead_force * axial_axis, axis=1)
-    trail_axial = np.sum(trail_force * axial_axis, axis=1)
-    lead_normal = np.sum(lead_force * normal_axis, axis=1)
-    trail_normal = np.sum(trail_force * normal_axis, axis=1)
-    lead_out = lead_force @ OUT_OF_PLANE_AXIS
-    trail_out = trail_force @ OUT_OF_PLANE_AXIS
-    reconstructed_local_forces = np.stack(
-        (
-            np.column_stack((lead_axial, lead_normal, lead_out)),
-            np.column_stack((trail_axial, trail_normal, trail_out)),
-        )
-    )
-    archived_local_forces = np.stack(
-        (
-            _vector(data, "lead_force_local_source", "n"),
-            _vector(data, "trail_force_local_source", "n"),
-        )
-    )
-    maximum_in_plane_force = float(
-        np.max(np.linalg.norm(reconstructed_local_forces[..., :2], axis=2))
+    """Return one case's audit metrics and plot-ready arrays."""
+    from scripts.research.proximal_distal_energy.run_two_hand_wscg_case import (
+        _case_grip_wrench_signals,
+        _case_metrics_record,
+        _case_power_channels,
+        _require_case_analysis_inputs,
     )
 
-    resultant = lead_force + trail_force
-    force_moment_global = np.cross(lead_position - midpoint, lead_force) + np.cross(
-        trail_position - midpoint, trail_force
-    )
-    free_torque_global = lead_torque + trail_torque
-    reconstructed_couple_global = force_moment_global + free_torque_global
-    force_moment = force_moment_global @ OUT_OF_PLANE_AXIS
-    free_torque = free_torque_global @ OUT_OF_PLANE_AXIS
-    equivalent_couple = source_couple_local[:, 2]
-
-    midpoint_velocity = 0.5 * (lead_velocity + trail_velocity)
-    contact_force_power = np.sum(
-        lead_force * lead_velocity + trail_force * trail_velocity, axis=1
-    )
-    source_linear_power = data["lead_linear_power_w"] + data["trail_linear_power_w"]
-    source_angular_power = data["lead_angular_power_w"] + data["trail_angular_power_w"]
-    relative_velocity = trail_velocity - lead_velocity
-    differential_force = 0.5 * (trail_force - lead_force)
-    contact_omega_rad_s = np.sum(
-        np.cross(grip_vector, relative_velocity) * OUT_OF_PLANE_AXIS, axis=1
-    ) / np.sum(grip_vector**2, axis=1)
-    rigid_relative_velocity = contact_omega_rad_s[:, None] * np.cross(
-        OUT_OF_PLANE_AXIS, grip_vector
-    )
-    deformation_power = np.sum(
-        differential_force * (relative_velocity - rigid_relative_velocity), axis=1
-    )
-    rigid_force_power = (
-        np.sum(resultant * midpoint_velocity, axis=1)
-        + force_moment * contact_omega_rad_s
-    )
-    decomposed_force_power = rigid_force_power + deformation_power
-    contact_power = source_linear_power + source_angular_power
-
-    crossing = _crossing_record(time, equivalent_couple)
-    minimum_index = int(np.argmin(equivalent_couple))
-    negative = equivalent_couple < 0.0
-    negative_impulse = float(np.trapezoid(np.minimum(equivalent_couple, 0.0), time))
-    lead_command = data["lead_command_torque_nm"]
-    trail_command = data["trail_command_torque_nm"]
-    interval_metrics = _interval_signal_metrics(
-        time, crossing, contact_force_power, source_linear_power
-    )
-    metrics: dict[str, Any] = {
-        "sample_count": int(time.size),
-        "time_step_s": float(np.median(np.diff(time))),
-        "grip_separation_mean_m": float(np.mean(grip_separation)),
-        "grip_separation_range_m": [
-            float(np.min(grip_separation)),
-            float(np.max(grip_separation)),
-        ],
-        "maximum_resultant_reconstruction_residual_n": float(
-            np.max(np.abs(resultant - source_resultant))
-        ),
-        "maximum_couple_reconstruction_residual_nm": float(
-            np.max(np.abs(reconstructed_couple_global - source_couple_global))
-        ),
-        "maximum_out_of_plane_hand_force_n": float(
-            max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
-        ),
-        "maximum_in_plane_hand_force_n": maximum_in_plane_force,
-        "maximum_out_of_plane_to_in_plane_force_ratio": float(
-            max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
-            / maximum_in_plane_force
-        ),
-        "maximum_local_force_projection_residual_n": float(
-            np.max(np.abs(reconstructed_local_forces - archived_local_forces))
-        ),
-        "maximum_internal_force_power_identity_residual_w": float(
-            np.max(np.abs(contact_force_power - decomposed_force_power))
-        ),
-        "maximum_archived_linear_power_discrepancy_w": float(
-            np.max(np.abs(contact_force_power - source_linear_power))
-        ),
-        "maximum_abs_deformation_power_w": float(np.max(np.abs(deformation_power))),
-        "minimum_equivalent_couple_nm": float(equivalent_couple[minimum_index]),
-        "minimum_couple_time_s": float(time[minimum_index]),
-        "force_moment_at_minimum_nm": float(force_moment[minimum_index]),
-        "free_torque_at_minimum_nm": float(free_torque[minimum_index]),
-        "reconstructed_force_power_at_minimum_w": float(
-            contact_force_power[minimum_index]
-        ),
-        "clubhead_speed_at_minimum_mph": float(
-            data["clubhead_speed_mph"][minimum_index]
-        ),
-        "maximum_clubhead_speed_mph": float(np.max(data["clubhead_speed_mph"])),
-        "maximum_clubhead_speed_time_s": float(
-            time[int(np.argmax(data["clubhead_speed_mph"]))]
-        ),
-        "negative_duration_s": float(np.sum(negative) * np.median(np.diff(time))),
-        "negative_angular_impulse_nm_s": negative_impulse,
-        "crossings": crossing,
-        "late_crossing_resampling": _resampling_sensitivity(
-            time, equivalent_couple, float(crossing["late"]["time_s"])
-        ),
-        "maximum_abs_individual_command_torque_nm": float(
-            max(np.max(np.abs(lead_command)), np.max(np.abs(trail_command)))
-        ),
-        "maximum_abs_net_command_torque_nm": float(
-            np.max(np.abs(lead_command + trail_command))
-        ),
-        "maximum_free_torque_command_residual_nm": float(
-            np.max(np.abs(free_torque - lead_command - trail_command))
-        ),
-        **interval_metrics,
-    }
+    _require_case_analysis_inputs(name, data)
+    grip = _case_grip_wrench_signals(data, geometry)
+    power = _case_power_channels(data, grip)
+    metrics = _case_metrics_record(data, grip, power)
     arrays = {
-        "time": time,
-        "lead_position": lead_position,
-        "trail_position": trail_position,
-        "midpoint": midpoint,
-        "lead_force": lead_force,
-        "trail_force": trail_force,
-        "lead_axial": lead_axial,
-        "trail_axial": trail_axial,
-        "lead_normal": lead_normal,
-        "trail_normal": trail_normal,
-        "resultant": resultant,
-        "force_moment": force_moment,
-        "free_torque": free_torque,
-        "equivalent_couple": equivalent_couple,
-        "contact_force_power": contact_force_power,
-        "source_angular_power": source_angular_power,
-        "rigid_force_power": rigid_force_power,
-        "deformation_power": deformation_power,
-        "contact_power": contact_power,
-        "decomposed_force_power": decomposed_force_power,
-        "contact_omega_rad_s": contact_omega_rad_s,
-        "grip_separation": grip_separation,
+        **{key: grip[key] for key in _CASE_GRIP_ARRAY_KEYS},
+        **{key: power[key] for key in _CASE_POWER_ARRAY_KEYS},
+        "grip_separation": grip["grip_separation"],
         "clubhead_speed_mph": data["clubhead_speed_mph"],
     }
     return metrics, arrays

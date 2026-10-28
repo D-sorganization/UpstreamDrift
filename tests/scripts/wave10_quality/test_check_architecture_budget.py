@@ -173,3 +173,160 @@ def test_main_fails_when_changed_production_file_exceeds_budget(
     monkeypatch.setattr(mod, "_changed_python_files", lambda repo, base: [production])
 
     assert mod.main(["--config-path", "scripts/config/architecture_budget.json"]) == 1
+
+
+@pytest.mark.unit
+def test_architecture_budget_full_scan(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Full-scan mode (--all) scans all tracked production files against baseline (UD-25)."""
+    config_path = tmp_path / "scripts" / "config" / "architecture_budget.json"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text(
+        json.dumps(
+            {
+                "max_function_lines": 10,
+                "max_parameters": 3,
+                "exceptions": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    baseline_path = (
+        tmp_path / "scripts" / "config" / "architecture_budget_baseline.json"
+    )
+    baseline_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "description": "test baseline",
+                "entries": [
+                    {
+                        "path": "src/legacy.py",
+                        "symbol": "grandfathered",
+                        "rule": "function-lines",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    legacy = tmp_path / "src" / "legacy.py"
+    legacy.parent.mkdir()
+    legacy.write_text(
+        "def grandfathered(a, b):\n"
+        + "".join(f"    x_{i} = {i}\n" for i in range(15))
+        + "    return a + b\n",
+        encoding="utf-8",
+    )
+    clean_changed = tmp_path / "src" / "clean.py"
+    clean_changed.write_text("def ok():\n    return 1\n", encoding="utf-8")
+
+    monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
+    monkeypatch.setattr(
+        mod, "_changed_python_files", lambda repo, base: [clean_changed]
+    )
+    monkeypatch.setattr(
+        mod, "_tracked_python_files", lambda repo: [legacy, clean_changed]
+    )
+
+    # Changed-only mode ignores unchanged legacy.py
+    assert mod.main(["--config-path", "scripts/config/architecture_budget.json"]) == 0
+
+    # Full-scan mode scans legacy.py; with baseline it passes
+    assert (
+        mod.main(
+            [
+                "--config-path",
+                "scripts/config/architecture_budget.json",
+                "--all",
+                "--baseline-path",
+                "scripts/config/architecture_budget_baseline.json",
+            ]
+        )
+        == 0
+    )
+
+
+@pytest.mark.unit
+def test_architecture_budget_full_scan_fails_on_new_violation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Full-scan mode fails if any violation is not in the baseline (UD-25 DbC postcondition)."""
+    config_path = tmp_path / "scripts" / "config" / "architecture_budget.json"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text(
+        json.dumps(
+            {
+                "max_function_lines": 10,
+                "max_parameters": 3,
+                "exceptions": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    baseline_path = (
+        tmp_path / "scripts" / "config" / "architecture_budget_baseline.json"
+    )
+    baseline_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "description": "test baseline",
+                "entries": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    production = tmp_path / "src" / "new_bad.py"
+    production.parent.mkdir()
+    production.write_text(
+        "def new_violation(a, b, c, d):\n    return a + b + c + d\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
+    monkeypatch.setattr(mod, "_tracked_python_files", lambda repo: [production])
+
+    assert (
+        mod.main(
+            [
+                "--config-path",
+                "scripts/config/architecture_budget.json",
+                "--all",
+                "--baseline-path",
+                "scripts/config/architecture_budget_baseline.json",
+            ]
+        )
+        == 1
+    )
+
+
+@pytest.mark.unit
+def test_checked_in_architecture_budget_baseline_matches_repository() -> None:
+    """Repository-wide architecture budget baseline exists and covers all current findings."""
+    repo_root = Path(__file__).resolve().parents[3]
+    baseline_path = (
+        repo_root / "scripts" / "config" / "architecture_budget_baseline.json"
+    )
+    assert baseline_path.is_file(), f"Checked-in baseline missing: {baseline_path}"
+
+    config = mod._load_config(
+        repo_root, Path("scripts/config/architecture_budget.json")
+    )
+    baseline_entries = mod._load_baseline(
+        repo_root, Path("scripts/config/architecture_budget_baseline.json")
+    )
+
+    paths = mod._tracked_python_files(repo_root)
+    violations = mod.collect_violations(
+        repo_root=repo_root,
+        paths=paths,
+        config=config,
+        baseline=baseline_entries,
+    )
+    assert violations == [], (
+        f"Unexpected architecture violations outside baseline: {violations}"
+    )

@@ -2741,6 +2741,19 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #13963 | Require _advance_to to reach target time within substep budget (UD-37) |
+| 2026-10-28 | #13945 | Pin pytest <9.2.0 across repository dependencies and CI workflows |
+| 2026-10-28 | #13944 | Add OSL-4 window sampling unit test for lift contact sheets |
+| 2026-10-28 | #13960 | Enforce both upper bound and zero transverse force in check_static_equilibrium (UD-30) |
+| 2026-10-28 | #13958 | Allow MacDonaldHanzelyModel and constant-coefficient models to use declared cl without 0.155 constant-spin clamp |
+| 2026-10-28 | #13954 | OpenSim: correct SimTK quaternion ordering documentation in coord_map (UD-12) |
+| 2026-10-28 | #13950 | Pinocchio viz: adjust 1-based impact_idx to 0-based indexing in error_timecourse (UD-23) |
+| 2026-10-28 | #13942 | Extract the WSCG case power channels and metrics record into run_two_hand_wscg_case, reduce _analyze_case to a short shell and retire its issue 9233 budget exception (part 2). |
+| 2026-10-28 | #13948 | Restore docstrings in motion_matching cost term helpers (UD-20) |
+| 2026-10-28 | #13934 | Architecture budget: full-scan mode with checked-in baseline ratchet (UD-25) |
+| 2026-10-28 | #13933 | Motion matching: architecture guard and canonical _geodesic helpers (UD-24) |
+| 2026-10-27 | #13941 | HRG-HX4 part 2: bushing_wrench force_limit_n caps the bushing force magnitude, direction kept, moment unchanged, default None unlimited and bit-identical (option c, Python bushing law only) |
+| 2026-10-27 | #13937 | Extract the WSCG case input contract and grip-wrench signals into run_two_hand_wscg_case, part 1 of the _analyze_case budget split. |
 | 2026-10-27 | #13936 | Bump dnspython 2.8.0 to 2.9.0 in both lock files to clear CVE-2026-114605 from pip-audit |
 | 2026-10-27 | #13927 | Pinocchio residual: append regulariser row and impose torque bounds (UD-02) |
 | 2026-10-27 | #13862 | Renew hash-frozen research budget exceptions to 2027-01-31 under #13853. |

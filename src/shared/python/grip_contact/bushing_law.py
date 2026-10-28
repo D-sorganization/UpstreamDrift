@@ -169,8 +169,21 @@ def body_xyz_n_matrix(angles_rad: np.ndarray) -> np.ndarray:
     )
 
 
+def _cap_magnitude(force: np.ndarray, limit_n: float | None) -> np.ndarray:
+    """``force`` scaled to at most ``limit_n`` newtons, direction kept."""
+    if limit_n is None:
+        return force
+    magnitude = float(np.linalg.norm(force))
+    if magnitude <= limit_n:
+        return force
+    return force * (limit_n / magnitude)
+
+
 def bushing_wrench(
-    params: BushingParameters, hand: BushingState, club: BushingState
+    params: BushingParameters,
+    hand: BushingState,
+    club: BushingState,
+    force_limit_n: float | None = None,
 ) -> BushingWrench:
     """Wrench of the bushing ``params`` on the club frame (see module docstring).
 
@@ -178,12 +191,23 @@ def bushing_wrench(
     the relative rotation is away from the X-Y-Z gimbal lock.
     Postcondition: with zero rates the force equals ``-R_1 K_t delta`` exactly.
 
+    ``force_limit_n`` is the per-hand grip force cap (``grip_force_limit_n``,
+    HRG-HX4, #13761; option (c): enforced only here). ``None``, the default,
+    is unlimited and leaves the law bit-identical. A finite cap scales the
+    force down to that magnitude, keeping its direction; a force already at
+    or below the cap and the moment are unchanged. No torque limit is defined.
+
     Raises:
         TypeError: if ``params`` is not a :class:`BushingParameters`.
-        ValueError: at the gimbal lock.
+        ValueError: at the gimbal lock, or if ``force_limit_n`` is not a
+            finite number > 0 N.
     """
     if not isinstance(params, BushingParameters):
         raise TypeError("params must be BushingParameters")
+    if force_limit_n is not None and not (
+        math.isfinite(force_limit_n) and force_limit_n > 0.0
+    ):
+        raise ValueError(f"force_limit_n must be finite and > 0 N, got {force_limit_n}")
     r1, r2 = hand.rotation, club.rotation
     arm = club.position_m - hand.position_m
     translation = r1.T @ arm
@@ -202,7 +226,7 @@ def bushing_wrench(
         + np.asarray(params.rotational_damping_nms_rad) * angle_rates
     )
     return BushingWrench(
-        force_n=r1 @ f_delta,
+        force_n=_cap_magnitude(r1 @ f_delta, force_limit_n),
         moment_nm=r2 @ (n_matrix.T @ f_theta),
         angles_rad=angles,
         translation_m=translation,

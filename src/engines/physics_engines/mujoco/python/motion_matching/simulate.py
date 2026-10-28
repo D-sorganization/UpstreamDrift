@@ -484,16 +484,21 @@ def _initial_tau(
 
 
 def _advance_to(model: Any, data: Any, t_target: float, max_substeps: int) -> bool:
-    """Step until ``data.time`` reaches ``t_target``; return False on divergence."""
+    """Step until ``data.time`` reaches ``t_target``; return False on divergence or budget exhaustion."""
     import mujoco
 
+    half_dt = 0.5 * float(model.opt.timestep)
     substeps = 0
-    while data.time + 1e-12 < t_target and substeps < max_substeps:
+    while data.time + half_dt < t_target and substeps < max_substeps:
         mujoco.mj_step(model, data)
         substeps += 1
         if not np.all(np.isfinite(data.qpos)) or not np.all(np.isfinite(data.qvel)):
             return False
-    return True
+    return bool(
+        (data.time + half_dt >= t_target)
+        and np.all(np.isfinite(data.qpos))
+        and np.all(np.isfinite(data.qvel))
+    )
 
 
 def _run_rollout(

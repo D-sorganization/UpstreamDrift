@@ -111,7 +111,7 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/mo-venv"
           source "$RUNNER_TEMP/mo-venv/bin/activate"
-          python -m pip install --upgrade pip maturin "numpy<2" scipy pytest
+          python -m pip install --upgrade pip maturin "numpy<2" scipy "pytest>=9.0.3,<9.2.0"
           python -m maturin build --release \
             -m vendor/ud-tools/src/movement_optimizer/rust_core/Cargo.toml
           echo "Wheel built:"

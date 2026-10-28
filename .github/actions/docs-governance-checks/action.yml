@@ -35,7 +35,7 @@ runs:
         python3 -m venv "$RUNNER_TEMP/docs-governance-venv"
         echo "$RUNNER_TEMP/docs-governance-venv/bin" >> "$GITHUB_PATH"
         "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install --upgrade pip
-        "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install pytest pytest-asyncio pytest-timeout pypdf
+        "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install "pytest>=9.0.3,<9.2.0" pytest-asyncio pytest-timeout pypdf
 
     - name: Validate documentation catalog
       shell: bash
