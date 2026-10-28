@@ -92,26 +92,77 @@ class GripContactModel:
         self,
         club_weight: float,
         gravity_direction: np.ndarray = np.array([0.0, 0.0, -1.0]),
+        tolerance: float = 0.01,
     ) -> dict[str, bool | float]:
+        """Check whether contact forces satisfy static equilibrium under gravity.
+
+        Static equilibrium (Newton's 1st law, UD-30) requires:
+        1. Vertical support force balances the downward gravitational load
+           within tolerance: |support_ratio - 1.0| <= tolerance. Over-supporting
+           (support_ratio > 1.0 + tolerance) produces upward acceleration and is
+           not in equilibrium.
+        2. Transverse (orthogonal to gravity) contact forces are negligible:
+           transverse_magnitude <= tolerance * club_weight.
+
+        Args:
+            club_weight: Gravitational force magnitude of the club in Newtons (> 0).
+            gravity_direction: Direction vector of gravity (default [0, 0, -1]).
+            tolerance: Relative balance tolerance (default 0.01 = 1%).
+
+        Returns:
+            Dict containing equilibrium verdict, support ratio, and force diagnostics.
+        """
         if club_weight is None:
             raise ValueError("club_weight must be provided")
-        if self.current_state is None:
-            return {"equilibrium": False, "support_ratio": 0.0}
+        if not np.isfinite(club_weight) or club_weight <= 0.0:
+            raise ValueError(
+                f"club_weight must be positive and finite; got {club_weight!r}"
+            )
+        if tolerance <= 0.0 or not np.isfinite(tolerance):
+            raise ValueError(
+                f"tolerance must be positive and finite; got {tolerance!r}"
+            )
 
-        total_contact_force = np.zeros(3)
+        g_dir = np.asarray(gravity_direction, dtype=np.float64)
+        g_norm = float(np.linalg.norm(g_dir))
+        if g_norm <= 0.0 or not np.isfinite(g_norm):
+            raise ValueError("gravity_direction must be non-zero and finite")
+        g_unit = g_dir / g_norm
+        support_unit = -g_unit
+
+        if self.current_state is None or not self.current_state.contacts:
+            return {
+                "equilibrium": False,
+                "support_ratio": 0.0,
+                "total_normal_force": 0.0,
+                "required_force": float(club_weight),
+                "transverse_force": 0.0,
+                "net_force": float(club_weight),
+            }
+
+        total_contact_force = np.zeros(3, dtype=np.float64)
         for c in self.current_state.contacts:
             total_contact_force += c.normal_force * c.normal + c.tangent_force
 
-        support_magnitude = np.dot(total_contact_force, -gravity_direction)
-        support_ratio = support_magnitude / club_weight if club_weight > 0 else 0
+        support_magnitude = float(np.dot(total_contact_force, support_unit))
+        transverse_force_vec = total_contact_force - support_magnitude * support_unit
+        transverse_magnitude = float(np.linalg.norm(transverse_force_vec))
 
-        equilibrium = support_ratio >= 0.99
+        support_ratio = support_magnitude / club_weight
+        net_force_vec = total_contact_force + club_weight * g_unit
+        net_force_magnitude = float(np.linalg.norm(net_force_vec))
+
+        vertical_balanced = abs(support_ratio - 1.0) <= tolerance
+        transverse_negligible = transverse_magnitude <= tolerance * club_weight
+        equilibrium = bool(vertical_balanced and transverse_negligible)
 
         return {
             "equilibrium": equilibrium,
             "support_ratio": float(support_ratio),
-            "total_normal_force": self.current_state.total_normal_force,
+            "total_normal_force": float(self.current_state.total_normal_force),
             "required_force": float(club_weight),
+            "transverse_force": float(transverse_magnitude),
+            "net_force": float(net_force_magnitude),
         }
 
     def check_slip_margin(self) -> dict[str, float]:

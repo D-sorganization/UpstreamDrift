@@ -667,7 +667,9 @@ class TestStaticEquilibrium:
     """Tests for static equilibrium evaluation in GripContactModel (UD-30, #13959)."""
 
     @pytest.mark.unit
-    def test_static_equilibrium_true_when_balanced_without_transverse_force(self) -> None:
+    def test_static_equilibrium_true_when_balanced_without_transverse_force(
+        self,
+    ) -> None:
         """Properly balanced vertical support with zero transverse force is in equilibrium."""
         model = GripContactModel()
         contact = ContactPoint(
@@ -749,3 +751,15 @@ class TestStaticEquilibrium:
             "Large transverse force orthogonal to gravity must not be reported as static equilibrium"
         )
 
+    @pytest.mark.unit
+    def test_static_equilibrium_rejects_invalid_inputs(self) -> None:
+        """Preconditions: non-positive club_weight or zero gravity_direction must raise ValueError."""
+        model = GripContactModel()
+        with pytest.raises(ValueError, match="club_weight"):
+            model.check_static_equilibrium(club_weight=0.0)
+        with pytest.raises(ValueError, match="club_weight"):
+            model.check_static_equilibrium(club_weight=-5.0)
+        with pytest.raises(ValueError, match="gravity_direction"):
+            model.check_static_equilibrium(
+                club_weight=5.0, gravity_direction=np.zeros(3)
+            )
