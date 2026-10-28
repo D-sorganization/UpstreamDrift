@@ -205,6 +205,7 @@ jobs:
 
       - name: Document Optional-Stack Lane Identity
         run: |
+          # shellcheck disable=SC2129
           echo "## Optional-Stack Verification Lane" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "This is the **optional-stack verification lane** (issue #2368)." >> "$GITHUB_STEP_SUMMARY"
@@ -498,6 +499,7 @@ jobs:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
         run: |
+          # shellcheck disable=SC2016
           echo "### Unit Tests (Optional Stack)" >> "$GITHUB_STEP_SUMMARY"
           set +e
           set -o pipefail
@@ -566,6 +568,7 @@ jobs:
         # A future PR can harden this into a skip-count gate.
         if: always()
         run: |
+          # shellcheck disable=SC2129
           echo "### Skip Visibility Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "The following test files reported skips in the optional-stack lane." >> "$GITHUB_STEP_SUMMARY"
