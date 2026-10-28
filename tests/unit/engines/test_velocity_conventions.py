@@ -236,4 +236,3 @@ def test_single_floating_body_zero_linear_velocity_contract_documented() -> None
     assert "zero linear base velocity" in doc
     assert "#13789" in doc
     assert "Coriolis" in doc
-

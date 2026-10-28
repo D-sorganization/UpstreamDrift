@@ -198,6 +198,24 @@ def single_floating_body_h_g(
     ordered as ``[angular; linear]``. Angular components are torques in N*m;
     linear components are forces in N.
 
+    Contract:
+        Evaluates the single-body bias wrench at zero linear base velocity
+        (v = 0), so the returned linear bias components (h[3:]) are identically
+        zero by definition across all representations (``BODY_FIXED``,
+        ``INERTIAL``, ``MIXED``).
+
+        In spatial rigid-body dynamics:
+        - For ``INERTIAL`` and ``MIXED`` representations where the base origin
+          coincides with the center of mass, linear acceleration in the
+          inertial frame uncouples from angular rotation, yielding zero linear
+          Coriolis/centrifugal bias.
+        - For ``BODY_FIXED`` representation with non-zero linear base velocity
+          v_B, the linear Coriolis bias force is m * (omega_B x v_B). Because
+          this analytic helper accepts no linear velocity parameter, it
+          strictly evaluates at zero linear base velocity. Cross-engine parity
+          tracking and non-zero velocity sensitivity contracts are cataloged
+          under Epic #13789.
+
     Args:
         mass_kg: Body mass in kilograms.
         inertia_body_kg_m2: 3x3 body-frame inertia matrix in kg*m^2.
