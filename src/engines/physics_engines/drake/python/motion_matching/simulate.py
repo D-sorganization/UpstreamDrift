@@ -531,7 +531,12 @@ def simulate_with_coefficients(
     options: SimOptions | None = None,
     initial_pose: dict[str, Any] | None = None,
 ) -> SimOut:
-    """Drake forward simulation from a torque-polynomial coefficient vector."""
+    """Drake forward simulation from a torque-polynomial coefficient vector.
+
+    Contract (Issue #13971 / Epic #13789, UD-36):
+    When options.compute_qdd is True, SimOut.qdd is populated using discrete
+    central finite differences via finite_difference_qdd from velocity logs.
+    """
     # ---- 0. Argument normalization -------------------------------------
     theta = normalize_theta(theta)
     opts = options if options is not None else SimOptions()

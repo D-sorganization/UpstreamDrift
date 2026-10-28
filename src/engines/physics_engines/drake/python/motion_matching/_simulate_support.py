@@ -423,7 +423,15 @@ def apply_initial_pose(
 def finite_difference_qdd(
     v_log: NDArray[np.float64], sample_rate_hz: float, enabled: bool
 ) -> NDArray[np.float64]:
-    """Central/one-sided finite-difference accelerations from the velocity log."""
+    """Central/one-sided finite-difference accelerations from the velocity log.
+
+    Contract (Issue #13971 / Epic #13789, UD-36):
+    Populates generalized accelerations using discrete central finite
+    differences (v[t+dt] - v[t-dt]) / (2*dt) sampled at sample_rate_hz (typically
+    1 kHz) with one-sided differences at boundaries. Continuous acceleration
+    sampling via MultibodyPlant generalized acceleration output port is
+    cataloged under Epic #13789.
+    """
     qdd = np.zeros_like(v_log)
     if enabled and v_log.shape[0] >= 2:
         dt = 1.0 / sample_rate_hz
