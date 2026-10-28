@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13962 · Require _Advance_to to Reach Target Time Within Substep Budget (UD-37)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13962
+- **Branch:** fix/13962-mujoco-advance-to-substep-budget
+- **PR:** #13963
+- **Paths:** see #13963
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`5e855a22`; collated from changes/13962-mujoco-advance-to-substep-budget.md)
+- **Summary:** Require _advance_to to reach target time within substep budget (UD-37)
+- **Next step:** Merge PR
+
 ### DL-#13959 · Enforce Both Upper Bound and Zero Transverse Force in Check_Static_Equilibrium (UD-30)
 
 - **State:** in_review
@@ -871,6 +884,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13945 · Pin Pytest <9.2.0 Across Repository Dependencies and CI Workflows
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13945
+- **Branch:** merged via #13945
+- **PR:** #13945
+- **Paths:** see #13945
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`9aba9431`; collated from changes/13945-pin-pytest-below-9-2-0.md)
+- **Summary:** Pin pytest <9.2.0 across repository dependencies and CI workflows
+- **Next step:** Shipped in PR #13945.
 
 ### DL-#13854 · Renew Hash-Frozen Research Budget Exceptions to 2027-01-31 Under #13853.
 

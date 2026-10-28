@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #13963 | Require _advance_to to reach target time within substep budget (UD-37) |
+| 2026-10-28 | #13945 | Pin pytest <9.2.0 across repository dependencies and CI workflows |
 | 2026-10-28 | #13944 | Add OSL-4 window sampling unit test for lift contact sheets |
 | 2026-10-28 | #13960 | Enforce both upper bound and zero transverse force in check_static_equilibrium (UD-30) |
 | 2026-10-28 | #13958 | Allow MacDonaldHanzelyModel and constant-coefficient models to use declared cl without 0.155 constant-spin clamp |
