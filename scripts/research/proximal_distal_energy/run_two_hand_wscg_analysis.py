@@ -291,93 +291,82 @@ def _geometry_sweep(arrays: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
     }
 
 
-def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    """Build the machine-readable audit and plot-ready arrays."""
-    loaded = {name: _load_case(name) for name in CASE_NAMES}
-    base = loaded["base"]
-    geometry = np.stack(
-        (
-            _vector(base, "lead_position", "m"),
-            _vector(base, "trail_position", "m"),
-            _vector(base, "midpoint_position", "m"),
-        )
-    )
-    record: dict[str, Any] = {
-        "schema_version": SCHEMA_VERSION,
-        "source_sha256": _source_hashes(),
-        "provenance": {
-            "source": "Archived WSCG/Simscape output tables",
-            "source_table_sha256": {
-                name.upper(): _sha256(MATLAB_TABLE_DIR / f"{name.upper()}.mat")
-                for name in CASE_NAMES
-            },
-            "force_direction": "Force exerted by each wrist on the club",
-            "lead_hand": "left wrist in the archived right-handed model",
-            "local_axes": (
-                "+x from lead to trail contact; +z out of the declared model plane; "
-                "+y = +z cross +x"
-            ),
-            "moment_sign": "positive about +z by the right-hand rule",
-            "counterfactual_contract": (
-                "ZTCF recomputes reactions on the BASE state history with commanded "
-                "joint torques and kill damping set to zero; it is pointwise, not a "
-                "new forward rollout."
-            ),
-        },
-        "cases": {},
-    }
-    arrays: dict[str, np.ndarray] = {}
-    case_arrays: dict[str, dict[str, np.ndarray]] = {}
-    for name, data in loaded.items():
-        metrics, computed = _analyze_case(name, data, geometry)
-        record["cases"][name] = metrics
-        case_arrays[name] = computed
-        arrays.update({f"{name}__{key}": value for key, value in computed.items()})
+_CONTACT_POSITION_STEMS = ("lead_position", "trail_position", "midpoint_position")
+_CONTACT_VELOCITY_STEMS = ("lead_velocity_global", "trail_velocity_global")
+# Index of the unrotated (0 deg) sample in the geometry sweep's orientation grid.
+_SWEEP_REFERENCE_INDEX = 120
 
-    base_couple = case_arrays["base"]["equivalent_couple"]
-    ztcf_couple = case_arrays["ztcf"]["equivalent_couple"]
-    delta_couple = case_arrays["delta"]["equivalent_couple"]
-    record["state_match"] = {
-        "maximum_contact_position_difference_m": float(
-            max(
-                np.max(
-                    np.abs(
-                        _vector(loaded["base"], name, "m")
-                        - _vector(loaded["ztcf"], name, "m")
-                    )
-                )
-                for name in (
-                    "lead_position",
-                    "trail_position",
-                    "midpoint_position",
-                )
-            )
+
+def _provenance_record() -> dict[str, Any]:
+    """Describe the archived source tables and the sign and axis conventions."""
+    return {
+        "source": "Archived WSCG/Simscape output tables",
+        "source_table_sha256": {
+            name.upper(): _sha256(MATLAB_TABLE_DIR / f"{name.upper()}.mat")
+            for name in CASE_NAMES
+        },
+        "force_direction": "Force exerted by each wrist on the club",
+        "lead_hand": "left wrist in the archived right-handed model",
+        "local_axes": (
+            "+x from lead to trail contact; +z out of the declared model plane; "
+            "+y = +z cross +x"
         ),
-        "maximum_contact_velocity_difference_m_s": float(
-            max(
-                np.max(
-                    np.abs(
-                        _vector(loaded["base"], name, "m_s")
-                        - _vector(loaded["ztcf"], name, "m_s")
-                    )
-                )
-                for name in ("lead_velocity_global", "trail_velocity_global")
-            )
+        "moment_sign": "positive about +z by the right-hand rule",
+        "counterfactual_contract": (
+            "ZTCF recomputes reactions on the BASE state history with commanded "
+            "joint torques and kill damping set to zero; it is pointwise, not a "
+            "new forward rollout."
         ),
-        "maximum_clubhead_speed_difference_mph": float(
+    }
+
+
+def _max_state_difference(
+    loaded: dict[str, np.ndarray], stems: tuple[str, ...], unit: str
+) -> float:
+    """Largest BASE-minus-ZTCF absolute difference over the named vector stems."""
+    return float(
+        max(
             np.max(
                 np.abs(
-                    loaded["base"]["clubhead_speed_mph"]
-                    - loaded["ztcf"]["clubhead_speed_mph"]
+                    _vector(loaded["base"], stem, unit)
+                    - _vector(loaded["ztcf"], stem, unit)
                 )
             )
+            for stem in stems
+        )
+    )
+
+
+def _state_match_record(loaded: dict[str, np.ndarray]) -> dict[str, Any]:
+    """Report how closely the exported ZTCF state history matches BASE."""
+    speed_difference = (
+        loaded["base"]["clubhead_speed_mph"] - loaded["ztcf"]["clubhead_speed_mph"]
+    )
+    return {
+        "maximum_contact_position_difference_m": _max_state_difference(
+            loaded, _CONTACT_POSITION_STEMS, "m"
+        ),
+        "maximum_contact_velocity_difference_m_s": _max_state_difference(
+            loaded, _CONTACT_VELOCITY_STEMS, "m_s"
+        ),
+        "maximum_clubhead_speed_difference_mph": float(
+            np.max(np.abs(speed_difference))
         ),
         "interpretation": (
             "The exported ZTCF state matches BASE to the recorded cache precision; "
             "the residuals are reported rather than rounded to exact zero."
         ),
     }
-    record["decomposition"] = {
+
+
+def _decomposition_record(
+    case_arrays: dict[str, dict[str, np.ndarray]],
+) -> dict[str, Any]:
+    """Check BASE = ZTCF + DELTA for the equivalent couple."""
+    base_couple = case_arrays["base"]["equivalent_couple"]
+    ztcf_couple = case_arrays["ztcf"]["equivalent_couple"]
+    delta_couple = case_arrays["delta"]["equivalent_couple"]
+    return {
         "maximum_abs_base_minus_ztcf_minus_delta_couple_residual_nm": float(
             np.max(np.abs(base_couple - ztcf_couple - delta_couple))
         ),
@@ -390,21 +379,61 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "sense, but it is not an unforced future trajectory."
         ),
     }
-    sweep = _geometry_sweep(case_arrays["ztcf"])
-    arrays.update({f"sweep__{key}": value for key, value in sweep.items()})
-    record["geometry_sweep"] = {
+
+
+def _geometry_sweep_record(
+    ztcf_arrays: dict[str, np.ndarray], sweep: dict[str, np.ndarray]
+) -> dict[str, Any]:
+    """Summarize the ZTCF contact-geometry sweep."""
+    co_rotated = sweep["co_rotated_force_moment_nm"]
+    return {
         "source_case": "ztcf",
-        "source_time_s": float(case_arrays["ztcf"]["time"][int(sweep["source_index"])]),
+        "source_time_s": float(ztcf_arrays["time"][int(sweep["source_index"])]),
         "spacing_scale_range": [0.0, 2.0],
         "orientation_range_deg": [-120.0, 120.0],
         "maximum_co_rotation_residual_nm": float(
-            np.max(
-                np.abs(
-                    sweep["co_rotated_force_moment_nm"]
-                    - sweep["co_rotated_force_moment_nm"][120]
-                )
-            )
+            np.max(np.abs(co_rotated - co_rotated[_SWEEP_REFERENCE_INDEX]))
         ),
+    }
+
+
+def _analyze_all_cases(
+    loaded: dict[str, np.ndarray], geometry: np.ndarray
+) -> tuple[dict[str, Any], dict[str, dict[str, np.ndarray]]]:
+    """Run the per-case audit for every case, in ``CASE_NAMES`` order."""
+    metrics: dict[str, Any] = {}
+    case_arrays: dict[str, dict[str, np.ndarray]] = {}
+    for name, data in loaded.items():
+        metrics[name], case_arrays[name] = _analyze_case(name, data, geometry)
+    return metrics, case_arrays
+
+
+def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    """Build the machine-readable audit and plot-ready arrays.
+
+    Postcondition: the record keys and the array keys keep the published order,
+    because ``write_outputs`` serializes them as-is and the JSON is byte-compared.
+    """
+    loaded = {name: _load_case(name) for name in CASE_NAMES}
+    geometry = np.stack(
+        [_vector(loaded["base"], stem, "m") for stem in _CONTACT_POSITION_STEMS]
+    )
+    case_metrics, case_arrays = _analyze_all_cases(loaded, geometry)
+    arrays: dict[str, np.ndarray] = {
+        f"{name}__{key}": value
+        for name, computed in case_arrays.items()
+        for key, value in computed.items()
+    }
+    sweep = _geometry_sweep(case_arrays["ztcf"])
+    arrays.update({f"sweep__{key}": value for key, value in sweep.items()})
+    record: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "source_sha256": _source_hashes(),
+        "provenance": _provenance_record(),
+        "cases": case_metrics,
+        "state_match": _state_match_record(loaded),
+        "decomposition": _decomposition_record(case_arrays),
+        "geometry_sweep": _geometry_sweep_record(case_arrays["ztcf"], sweep),
     }
     return record, arrays
 

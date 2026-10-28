@@ -38,10 +38,10 @@ _HASH_FROZEN_ROWS: tuple[tuple[str, str, str], ...] = (
 )
 
 # Snapshot from main @ b0c6bcc2f7 (exception inventory keys only), minus the
-# WSCG ``_analyze_case`` row retired by #13852.
-_MAIN_EXCEPTION_KEY_COUNT = 107
+# WSCG ``_analyze_case`` and ``build_outputs`` rows retired by #13852.
+_MAIN_EXCEPTION_KEY_COUNT = 106
 _MAIN_EXCEPTION_KEYS_SHA256 = (
-    "c062fcfe7be5bd72575a735ec1ed0c245e2af186ef6614b05370abb991c55d93"
+    "14036b4ab879cd56cdedf567887aaf6a7180f3f25106d1becf04a9f4d5094e88"
 )
 
 

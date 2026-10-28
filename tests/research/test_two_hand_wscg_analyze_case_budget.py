@@ -1,4 +1,4 @@
-"""Budget guard: WSCG ``_analyze_case`` fits the function-lines budget (#13852)."""
+"""Budget guard: WSCG ``_analyze_case`` and ``build_outputs`` fit the budget (#13852)."""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ pytestmark = pytest.mark.unit
 
 _BUDGET_PATH = REPO_ROOT / "scripts" / "config" / "architecture_budget.json"
 _SCRIPT_KEY = ANALYSIS_SCRIPT.relative_to(REPO_ROOT).as_posix()
+_BUDGETED_FUNCTIONS = ("_analyze_case", "build_outputs")
 
 
 def _function_node(name: str) -> ast.FunctionDef:
@@ -27,19 +28,21 @@ def _function_node(name: str) -> ast.FunctionDef:
     return matches[0]
 
 
-def test_analyze_case_within_function_line_budget() -> None:
+@pytest.mark.parametrize("name", _BUDGETED_FUNCTIONS)
+def test_function_within_function_line_budget(name: str) -> None:
     config = json.loads(_BUDGET_PATH.read_text(encoding="utf-8"))
-    node = _function_node("_analyze_case")
+    node = _function_node(name)
     assert node.end_lineno is not None
     lines = node.end_lineno - node.lineno + 1
     assert lines <= int(config["max_function_lines"]), lines
 
 
-def test_analyze_case_has_no_budget_exception() -> None:
+@pytest.mark.parametrize("name", _BUDGETED_FUNCTIONS)
+def test_function_has_no_budget_exception(name: str) -> None:
     config = json.loads(_BUDGET_PATH.read_text(encoding="utf-8"))
     rows = [
         entry
         for entry in config["exceptions"]
-        if entry["path"] == _SCRIPT_KEY and entry["symbol"] == "_analyze_case"
+        if entry["path"] == _SCRIPT_KEY and entry["symbol"] == name
     ]
     assert rows == []
