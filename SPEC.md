@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #13986 | \ Verify engine Docker cache contract and guard against uncontracted conda environment creation per CACHE_CONTRACT.md\ |
 | 2026-10-28 | #13982 | Drake motion matching: catalog finite-difference generalized accelerations in simulate_with_coefficients (UD-36) |
 | 2026-10-28 | #13980 | Catalog constant static friction contract in contact_law_kernel for torsional_moment_kernel and link Epic #13757 (UD-33) |
 | 2026-10-28 | #13983 | OpenSim spine: catalog coordinate unit-speed probing in inverse_dynamics _u_indices (UD-39) |

@@ -1619,10 +1619,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13579
 - **Branch:** cursor/issue-closure-receipts-66dc
-- **PR:** #13685
+- **PR:** #13685, #13986
 - **Paths:** see #13685
 - **Started:** 2026-10-24
-- **Last verified:** 2026-10-24 (`501afd4c`; collated from changes/13579-close-shipped-issue-with-receipt-regress.md)
+- **Last verified:** 2026-10-28 (`dd75bc61`; collated from changes/13579-engine-docker-cache-contract.md)
 - **Summary:** Record #13579 closure evidence (docs/operations/evidence/shipped-even-issues-20261024.md)
 - **Next step:** Shipped in PR #13685.
 
