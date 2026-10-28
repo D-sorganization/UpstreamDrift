@@ -102,6 +102,8 @@ def build_overlay_feed(
     show_force: bool = True,
     show_torque: bool = True,
     palm_thumb: bool = False,
+    hand_mobility: str | None = None,
+    hand_mobility_mode: str = "constrained",
 ) -> tuple[OverlayFeed, tuple[float, float, float]]:
     """Overlay feed for ``swing`` plus the framing look-at point.
 
@@ -118,7 +120,9 @@ def build_overlay_feed(
     ``show_torque`` choose the glyph kinds drawn. With ``palm_thumb`` each loaded
     frame also carries the allocated trail-palm-on-lead-thumb normal force
     (HRG-H1, #13189), drawn independently of the other vectors; it is reporting
-    only and leaves the compiled model unchanged.
+    only and leaves the compiled model unchanged. With ``hand_mobility``
+    (``mobility``, ``force`` or ``both``) each frame also carries the per-hand
+    mobility / effective-mass ellipsoids (#14004) in ``hand_mobility_mode``.
 
     Raises ``BackendUnavailable`` when MuJoCo is not installed.
     """
@@ -171,6 +175,15 @@ def build_overlay_feed(
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
     style = default_glyph_style(body_mass_kg=float(source.total_mass_kg))
+    ellipsoids_at = None
+    if hand_mobility is not None:
+        from src.tools.native_viewer_export.hand_mobility_glyphs import (
+            hand_mobility_glyphs,
+        )
+
+        ellipsoids_at = lambda i: hand_mobility_glyphs(  # noqa: E731
+            swing.hand_mobility_at(i, hand_mobility_mode), hand_mobility
+        )
     feed = OverlayFeed(
         provider.frame_at,
         style,
@@ -178,6 +191,7 @@ def build_overlay_feed(
         show_force=show_force,
         show_torque=show_torque,
         show_palm_thumb=palm_thumb,
+        ellipsoids_at=ellipsoids_at,
     )
     return feed, lookat
 

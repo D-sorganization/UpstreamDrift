@@ -73,6 +73,22 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
         "contact patch (an equivalent of the grip closure force, not a "
         "measured contact; unloaded frames draw nothing; default: off)",
     )
+    p.add_argument(
+        "--hand-mobility",
+        choices=("mobility", "force", "both"),
+        default=None,
+        help="draw per-hand ellipsoids at the grip points (MuJoCo viewer): "
+        "mobility (kg^-1), force (the inertial dual, effective mass in kg; not a "
+        "force capacity) or both; fixed scale 0.10 m per sqrt(unit), clamped to "
+        "0.01..0.40 m (default: off)",
+    )
+    p.add_argument(
+        "--hand-mobility-mode",
+        choices=("constrained", "unconstrained"),
+        default="constrained",
+        help="constrained: both hands on the club (rigid closure); "
+        "unconstrained: closure released, a debug view (default constrained)",
+    )
     shade = p.add_argument_group(
         "segment shading",
         "Translucent tension/compression shading of the golfer's segments "
@@ -377,6 +393,8 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         force_vectors=args.force_vectors,
         torque_vectors=args.torque_vectors,
         palm_thumb_force=args.palm_thumb_force,
+        hand_mobility=args.hand_mobility,
+        hand_mobility_mode=args.hand_mobility_mode,
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
@@ -420,6 +438,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 show_force=settings.force_vectors,
                 show_torque=settings.torque_vectors,
                 palm_thumb=settings.palm_thumb_force,
+                hand_mobility=settings.hand_mobility,
+                hand_mobility_mode=settings.hand_mobility_mode,
             ),
         )
     except (ValueError, FileNotFoundError) as exc:

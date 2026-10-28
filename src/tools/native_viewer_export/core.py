@@ -128,6 +128,10 @@ class ExportSettings:
     #: allocated trail-palm-on-lead-thumb normal force arrow (HRG-H1, #13189);
     #: independent of the force and torque vectors, needs ``overlays``
     palm_thumb_force: bool = False
+    #: per-hand mobility / effective-mass ellipsoids (HCM-3, #14004): ``None``
+    #: (off), ``"mobility"``, ``"force"`` or ``"both"``; MuJoCo viewer only
+    hand_mobility: str | None = None
+    hand_mobility_mode: str = "constrained"
 
     @property
     def shading_enabled(self) -> bool:
@@ -211,6 +215,18 @@ class ExportSettings:
         return (speed,)
 
 
+@functools.lru_cache(maxsize=2)
+def _hand_source(spec_bytes: bytes) -> Any:
+    """Cached ``HandMobilitySource`` of a specification (compiled once per export)."""
+    try:
+        from src.engines.physics_engines.mujoco.python.hand_mobility import (
+            HandMobilitySource,
+        )
+    except ImportError as exc:
+        raise BackendUnavailable(f"mujoco is not available: {exc}") from exc
+    return HandMobilitySource(spec_bytes)
+
+
 @dataclass(frozen=True)
 class SwingInput:
     """A same-input bundle plus the engine rollout states to display."""
@@ -237,6 +253,18 @@ class SwingInput:
             raise ValueError(f"rollout q has shape {self.q.shape}, expected {expected}")
         if not np.isfinite(self.q).all():
             raise ValueError("rollout q must be finite")
+
+    def hand_mobility_at(self, index: int, mode: str = "constrained") -> dict[str, Any]:
+        """Lead/trail ``HandMobility`` at state ``index`` (MuJoCo plant, #14004).
+
+        Raises ``BackendUnavailable`` without MuJoCo, ``ValueError`` on a bad
+        ``index`` or ``mode``.
+        """
+        if not 0 <= index < self.n_states:
+            raise ValueError(f"index {index} outside 0..{self.n_states - 1}")
+        return _hand_source(self.bundle.spec_bytes).hand_mobility(
+            self.q[index], mode=mode
+        )
 
     @property
     def n_states(self) -> int:
@@ -391,6 +419,8 @@ class OverlayFeed:
     #: the allocated palm-on-thumb arrow (``PALM_THUMB_LABEL``), drawn only when
     #: set and independent of ``show_force``/``show_torque``
     show_palm_thumb: bool = False
+    #: ellipsoids by state index (hand mobility, #14004), added to every glyph set
+    ellipsoids_at: Callable[[int], tuple[Any, ...]] | None = None
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
@@ -423,7 +453,10 @@ class OverlayFeed:
             )
         if allocated and self.show_palm_thumb:
             frame = replace(frame, wrenches=(*frame.wrenches, *allocated))
-        return build(frame, self.style)
+        glyphs = build(frame, self.style)
+        if self.ellipsoids_at is not None:
+            glyphs = replace(glyphs, ellipsoids=self.ellipsoids_at(index))
+        return glyphs
 
     def axial_at(self, index: int) -> Any:
         """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""
@@ -442,6 +475,12 @@ class OverlayFeed:
         if glyphs is None:
             return ""
         text = legend_text(glyphs)
+        if glyphs.ellipsoids:
+            from src.tools.native_viewer_export.hand_mobility_glyphs import (
+                hand_mobility_legend,
+            )
+
+            text += " | " + hand_mobility_legend(glyphs.ellipsoids)
         allocated_arrows = [
             a
             for a in glyphs.arrows
@@ -615,8 +654,14 @@ def _resampled(
     )
     if feed is None:
         return resampled, None
-    source = feed.frame_at
-    return resampled, replace(feed, frame_at=lambda i: source(int(nearest[i])))
+    source, ellipsoids = feed.frame_at, feed.ellipsoids_at
+    return resampled, replace(
+        feed,
+        frame_at=lambda i: source(int(nearest[i])),
+        ellipsoids_at=None
+        if ellipsoids is None
+        else lambda i: ellipsoids(int(nearest[i])),
+    )
 
 
 def _strip_outcome(
