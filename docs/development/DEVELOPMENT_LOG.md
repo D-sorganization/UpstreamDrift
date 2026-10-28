@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13953 · OpenSim: Correct SimTK Quaternion Ordering Documentation in Coord_Map (UD-12)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13953
+- **Branch:** fix/13953-opensim-simtk-quat-docs
+- **PR:** #13954
+- **Paths:** see #13954
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`f838b4e2`; collated from changes/13953-opensim-simtk-quat-docs.md)
+- **Summary:** OpenSim: correct SimTK quaternion ordering documentation in coord_map (UD-12)
+- **Next step:** Merge PR
+
+### DL-#13949 · Pinocchio Viz: Adjust 1-Based Impact_Idx to 0-Based Indexing in Error_Timecourse (UD-23)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13949
+- **Branch:** fix/13949-pinocchio-viz-impact-idx
+- **PR:** #13950
+- **Paths:** see #13950
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`2f369c5a`; collated from changes/13949-pinocchio-viz-impact-idx.md)
+- **Summary:** Pinocchio viz: adjust 1-based impact_idx to 0-based indexing in error_timecourse (UD-23)
+- **Next step:** Merge PR
+
 ### DL-#13947 · Restore Docstrings in Motion_Matching Cost Term Helpers (UD-20)
 
 - **State:** in_review
@@ -930,10 +956,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13852
 - **Branch:** merged via #13860
-- **PR:** #13860, #13937
+- **PR:** #13860, #13937, #13942
 - **Paths:** see #13860
 - **Started:** 2026-10-26
-- **Last verified:** 2026-10-27 (`d4a74be4`; collated from changes/13852-wscg-case-split-1.md)
+- **Last verified:** 2026-10-28 (`148b711d`; collated from changes/13852-wscg-case-split-2.md)
 - **Summary:** Add WSCG masked-JSON parity test scaffold for budget-split PRs.
 - **Next step:** Shipped in PR #13860.
 
