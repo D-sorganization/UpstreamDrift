@@ -106,6 +106,13 @@ from .drake_force_overlay import (  # noqa: E402
     illustration_base_rgba,
 )
 from .drake_meshcat_sink import DrakeMeshcatSink  # noqa: E402
+from .drake_meshed_golfer import build_meshed_golfer  # noqa: E402
+
+SPEC_PREFIX = "spec:"
+MESHED_GOLFER_SPEC = (
+    Path(__file__).resolve().parents[6]
+    / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+)
 
 # Constants
 TIME_STEP_S = 0.001
@@ -186,6 +193,16 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         self.available_models: list[dict] = [
             {"name": "Default Golf Model", "path": None}
         ]  # noqa: E501
+        if MESHED_GOLFER_SPEC.is_file():
+            # The same v2 golfer (and body meshes) MuJoCo shows, not the boxes.
+            self.current_urdf_path = SPEC_PREFIX + str(MESHED_GOLFER_SPEC)
+            self.available_models.insert(
+                0,
+                {
+                    "name": "Full-Body Golfer (v2, meshed)",
+                    "path": self.current_urdf_path,
+                },
+            )
         self._scan_urdf_models()
 
         # Initialize Simulation
@@ -282,7 +299,11 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
                 self.meshcat = None
 
         # Build Diagram
-        if self.current_urdf_path:
+        if self.current_urdf_path and self.current_urdf_path.startswith(SPEC_PREFIX):
+            self._build_meshed_golfer_diagram(
+                Path(self.current_urdf_path[len(SPEC_PREFIX) :])
+            )
+        elif self.current_urdf_path:
             self._build_custom_urdf_diagram(self.current_urdf_path)
         else:
             params = GolfModelParams()
@@ -366,6 +387,13 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
                 )
                 break
         self._force_overlay = overlay
+
+    def _build_meshed_golfer_diagram(self, spec_path: Path) -> None:
+        """Build the v2 specification golfer with the shared body meshes."""
+        golfer = build_meshed_golfer(spec_path.read_bytes(), meshcat=self.meshcat)
+        self._meshed_golfer = golfer  # keeps the OBJ temp directory alive
+        self.plant = golfer.plant
+        self.diagram = golfer.diagram
 
     def _build_custom_urdf_diagram(self, urdf_path: str) -> None:
         """Build a simple diagram for a custom URDF."""
