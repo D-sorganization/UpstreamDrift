@@ -27,14 +27,25 @@ CANONICAL_GRAVITY_INERTIAL: tuple[float, float, float] = (0.0, 0.0, -9.80665)
 class VelocityRepresentation(str, Enum):
     """Supported floating-base velocity representations.
 
+    Origin Convention:
+        All three representations evaluate linear velocity at the base reference
+        point / center of mass (COM, v_COM) rather than the world origin O.
+        For spatial vector engines using Featherstone algebra at the world
+        origin (such as JaxSim or Drake), spatial velocity evaluated at O is
+        v_O = v_COM - omega_W x p_COM. When the body origin coincides with the
+        world origin (p_COM = 0), v_O = v_COM. Kinematic coordinate
+        transformations for bodies displaced from the world origin are cataloged
+        under Epic #13789.
+
     Values:
         BODY_FIXED: Angular and linear components are expressed in the base
-            body frame.
+            body frame at the base reference point / center of mass.
         INERTIAL: Angular and linear components are expressed in the inertial
-            world frame.
+            world frame at the base reference point / center of mass.
         MIXED: Angular components are expressed in the base body frame while
-            linear components are expressed in the inertial world frame. This
-            matches JaxSim's default floating-base convention.
+            linear components are expressed in the inertial world frame at the
+            base reference point / center of mass. This matches JaxSim's
+            default floating-base convention.
     """
 
     BODY_FIXED = "body_fixed"
