@@ -117,7 +117,7 @@ def _spin_ratio_lift_coefficient(spin_ratio: float, max_coefficient: float) -> f
     """Calibrate low-spin lift without letting high-spin shots balloon."""
     if spin_ratio <= 0.0 or max_coefficient <= 0.0:
         return 0.0
-    return _capped_lift_coefficient(min(max_coefficient, 1.7 * spin_ratio))
+    return min(max_coefficient, 1.7 * spin_ratio)
 
 
 class FlightModelType(Enum):
