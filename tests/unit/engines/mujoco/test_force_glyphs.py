@@ -336,3 +336,104 @@ def test_clamped_arrow_adds_white_marker_past_the_tip() -> None:
     marker = scene.geoms[1]
     np.testing.assert_allclose(marker.rgba, [1.0, 1.0, 1.0, 1.0], atol=1e-6)
     np.testing.assert_allclose(marker.pos, [0.0, 0.0, 1.0], atol=1e-9)
+
+
+# --- Ellipsoid glyphs (#14003) -------------------------------------------------
+
+_ELLIPSOID_XML = (
+    "<mujoco><worldbody><geom type='sphere' size='0.1'/></worldbody></mujoco>"
+)
+
+
+def _ellipsoid_scene(maxgeom: int = 50):
+    model = mujoco.MjModel.from_xml_string(_ELLIPSOID_XML)
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    scene = mujoco.MjvScene(model, maxgeom=maxgeom)
+    mujoco.mjv_updateScene(
+        model,
+        data,
+        mujoco.MjvOption(),
+        None,
+        mujoco.MjvCamera(),
+        mujoco.mjtCatBit.mjCAT_ALL,
+        scene,
+    )
+    return scene
+
+
+def _rot_z(angle: float) -> np.ndarray:
+    c, s = math.cos(angle), math.sin(angle)
+    return np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
+
+
+def test_ellipsoid_adds_one_geom_with_size_and_orientation() -> None:
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
+        add_ellipsoids_to_scene,
+    )
+    from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
+
+    scene = _ellipsoid_scene()
+    before = scene.ngeom
+    axes = _rot_z(0.6)
+    glyph = EllipsoidGlyph(
+        (0.1, -0.2, 0.3), axes, (0.05, 0.03, 0.02), (0.1, 0.5, 0.9, 0.4), "lead"
+    )
+    receipt = add_ellipsoids_to_scene(scene, (glyph,))
+    assert (receipt.added, receipt.dropped) == (1, 0)
+    assert scene.ngeom == before + 1
+    geom = scene.geoms[before]
+    assert geom.type == int(mujoco.mjtGeom.mjGEOM_ELLIPSOID)
+    np.testing.assert_allclose(geom.size, (0.05, 0.03, 0.02), atol=1e-6)
+    np.testing.assert_allclose(geom.pos, (0.1, -0.2, 0.3), atol=1e-6)
+    np.testing.assert_allclose(np.asarray(geom.mat).reshape(3, 3), axes, atol=1e-6)
+    np.testing.assert_allclose(geom.rgba, (0.1, 0.5, 0.9, 0.4), atol=1e-6)
+
+
+def test_ellipsoids_do_not_overflow_full_scene() -> None:
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
+        add_ellipsoids_to_scene,
+    )
+    from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
+
+    scene = _ellipsoid_scene(maxgeom=3)
+    glyph = EllipsoidGlyph(
+        (0.0, 0.0, 0.0), np.eye(3), (0.05, 0.05, 0.05), (1, 0, 0, 0.5), "x"
+    )
+    receipt = add_ellipsoids_to_scene(scene, (glyph,) * 5)
+    assert scene.ngeom <= scene.maxgeom
+    assert receipt.added + receipt.dropped == 5
+    assert receipt.dropped >= 1
+
+
+def test_add_ellipsoids_rejects_bad_types() -> None:
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
+        add_ellipsoids_to_scene,
+    )
+
+    with pytest.raises(TypeError):
+        add_ellipsoids_to_scene(object(), ())
+    with pytest.raises(TypeError):
+        add_ellipsoids_to_scene(_ellipsoid_scene(), (object(),))
+
+
+def test_apply_scene_overlays_draws_ellipsoids_from_glyph_set() -> None:
+    from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
+    from src.tools.native_viewer_export.backends._scene_overlays import (
+        apply_scene_overlays,
+    )
+
+    scene = _ellipsoid_scene()
+    before = scene.ngeom
+    glyph = EllipsoidGlyph(
+        (0.0, 0.0, 0.0), np.eye(3), (0.05, 0.05, 0.05), (1, 0, 0, 0.5), "x"
+    )
+    gs = GlyphSet(
+        time_s=0.0,
+        arrows=(),
+        torque_arcs=(),
+        legend=LegendSpec(),
+        ellipsoids=(glyph,),
+    )
+    apply_scene_overlays(None, scene, 0, None, None, [gs])
+    assert scene.ngeom == before + 1
