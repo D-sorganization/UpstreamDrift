@@ -405,6 +405,16 @@ def contact_law_kernel(
     1. Contact onset at $\\delta = 0$ (and damping liftoff at $1 - c v_n = 0$).
     2. Zero tangential speed at $v_t = 0$ ($\\|v_t\\|_2 = 0$).
     3. Stick/slip transition knee around $|v_t| \\sim v_{\\mathrm{tr}}$.
+
+    Friction coupling contract (Issue #13970 / Epic #13757, UD-33):
+    - Tangential friction force evaluates an effective velocity-dependent
+      friction coefficient mu(speed) transitioning from static_friction to
+      dynamic_friction plus viscous_friction.
+    - Spin moment (torsional resistance) currently evaluates via
+      ``torsional_moment_kernel`` using constant ``params.static_friction``,
+      decoupled from tangential slip velocity and dynamic friction drop.
+    - Coupled limit surfaces (e.g. Contensou-type combined slip-spin ellipsoidal
+      friction limit) are tracked under Epic #13757 (HRG-HX).
     """
     ops, delta, v_n, v_t, omega_n, zero, is_vec, zero_vt = _prepare_kernel_arrays(
         penetration_m, normal_velocity_m_s, tangential_velocity_m_s, spin_rate_rad_s, xp

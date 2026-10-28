@@ -827,7 +827,9 @@ def test_smooth_contact_law_kernel_is_separate_and_c_infinity_at_kinks(
 
 
 @pytest.mark.unit
-def test_contact_law_kernel_torsional_moment_static_friction_contract_documented() -> None:
+def test_contact_law_kernel_torsional_moment_static_friction_contract_documented() -> (
+    None
+):
     """Issue #13970 / UD-33: verify contact_law_kernel documents constant static friction contract and #13757."""
     import inspect
 
@@ -839,7 +841,9 @@ def test_contact_law_kernel_torsional_moment_static_friction_contract_documented
 
 
 @pytest.mark.unit
-def test_contact_law_kernel_evaluates_spin_moment_with_static_friction_independent_of_linear_slip() -> None:
+def test_contact_law_kernel_evaluates_spin_moment_with_static_friction_independent_of_linear_slip() -> (
+    None
+):
     """Issue #13970 / UD-33: verify torsional spin moment is evaluated with static friction independent of linear slip velocity."""
     params = ContactKernelParams(
         stiffness_n_m=1e5,
@@ -868,8 +872,9 @@ def test_contact_law_kernel_evaluates_spin_moment_with_static_friction_independe
     )
     # Spin moment must be non-zero and identical because torsional_moment_kernel uses params.static_friction
     assert res_stick.spin_moment_nm != 0.0
-    assert float(res_stick.spin_moment_nm) == pytest.approx(float(res_slip.spin_moment_nm))
+    assert float(res_stick.spin_moment_nm) == pytest.approx(
+        float(res_slip.spin_moment_nm)
+    )
     # Tangential forces differ due to velocity-dependent mu(v)
     assert float(res_stick.tangential_force_n) == 0.0
     assert float(res_slip.tangential_force_n) != 0.0
-
