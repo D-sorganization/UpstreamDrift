@@ -395,6 +395,33 @@ def test_axis_permutation_det_plus_one():
     )
 
 
+@pytest.mark.unit
+def test_simtk_quaternion_docs_accuracy():
+    """UD-12 (issue #13953): coord_map docs must accurately state SimTK scalar-first ordering."""
+    import src.engines.physics_engines.opensim.python.motion_matching.coord_map as cm
+
+    mod_doc = cm.__doc__ or ""
+    func_doc = cm.quat_eigen_to_canonical.__doc__ or ""
+
+    # Must not claim SimTK convertRotationToQuaternion returns [x, y, z, w]
+    assert (
+        "SimTK::Rotation::convertRotationToQuaternion`` returns\n    ``[x, y, z, w]``"
+        not in func_doc
+    ), (
+        "quat_eigen_to_canonical docstring incorrectly claims SimTK returns Eigen [x, y, z, w]"
+    )
+    assert (
+        "OpenSim returns quaternions through Eigen's\n   ``[x, y, z, w]``"
+        not in mod_doc
+    ), (
+        "coord_map module docstring incorrectly claims OpenSim returns quaternions through Eigen [x, y, z, w]"
+    )
+    # Must document scalar-first for SimTK
+    assert "scalar-first" in func_doc or "scalar-first" in mod_doc, (
+        "coord_map docs must mention that SimTK quaternions are scalar-first"
+    )
+
+
 # ---------------------------------------------------------------------------
 # Live-OpenSim validation (gated behind requires_opensim)
 # ---------------------------------------------------------------------------

@@ -343,3 +343,17 @@ def test_body_marker_missing_raises_when_weighted() -> None:
     opts = CostOptions(w_body_marker=1.0)
     with pytest.raises(ValueError, match="marker_xyz"):
         compute_cost(np.zeros(7), target, _const_sim_fn(sim), opts)  # type: ignore[arg-type]
+
+
+@pytest.mark.unit
+def test_cost_term_helpers_have_docstrings() -> None:
+    """Term helpers (_position_term, _orientation_term, _anchor_term) must have valid docstrings (UD-20)."""
+    from src.shared.python.motion_matching.cost import (
+        _anchor_term,
+        _orientation_term,
+        _position_term,
+    )
+
+    for fn in (_position_term, _orientation_term, _anchor_term):
+        assert fn.__doc__ is not None, f"{fn.__name__} has None __doc__"
+        assert len(fn.__doc__.strip()) > 0, f"{fn.__name__} has empty __doc__"

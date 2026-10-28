@@ -1,0 +1,961 @@
+{
+  "schema_version": 1,
+  "description": "Baseline of grandfathered architecture budget violations (UD-25, #13869). Ratchet policy: entries may only be removed, never added.",
+  "entries": [
+    {
+      "path": "scripts/ci/generate_portfolio_demo_output.py",
+      "symbol": "generate_portfolio_demo_output",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/demo_surrogate_match.py",
+      "symbol": "run_match",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/mypy_autofix_agent.py",
+      "symbol": "run_agent",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_ground.py",
+      "symbol": "evaluate_ground_coupled_grip",
+      "rule": "parameters"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_ground.py",
+      "symbol": "ground_state_energy",
+      "rule": "parameters"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_ground_diagnostic.py",
+      "symbol": "run_articulated_ground_diagnostic",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
+      "symbol": "integrate_articulated_ground",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
+      "symbol": "solve_conditional_base_equilibrium",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
+      "symbol": "solve_conditional_base_equilibrium",
+      "rule": "parameters"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_ground_posthoc_sensitivity.py",
+      "symbol": "build_ground_posthoc_sensitivity",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
+      "symbol": "_gates",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
+      "symbol": "_record",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
+      "symbol": "_record",
+      "rule": "parameters"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/audit_results_chapter.py",
+      "symbol": "build_audit",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/counterfactual_ensemble.py",
+      "symbol": "evaluate_killswitch_ensemble",
+      "rule": "parameters"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/e1c_impact_sensitivity.py",
+      "symbol": "evaluate_sensitivity",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/forward_contact_validity_horizon.py",
+      "symbol": "run_validity_horizon_study",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/forward_two_arm.py",
+      "symbol": "rollout_forward_two_arm",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/make_forward_two_arm_figures.py",
+      "symbol": "_couple_killswitch_figure",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/make_moving_base_flexible_figures.py",
+      "symbol": "_force_geometry",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/momentum_question_readiness.py",
+      "symbol": "build_readiness_audit",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/moving_base_flexible_club.py",
+      "symbol": "rollout",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py",
+      "symbol": "rollout",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_bilateral_wrench_identifiability_claims.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_bilateral_wrench_sensor_qualification_claims.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_forward_modal_claims.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_frames_biology_claims.py",
+      "symbol": "_claim",
+      "rule": "parameters"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_frames_biology_claims.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_momentum_question_claims.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_proximal_dose_claims.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_results_chapter_claims.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_torque_allocation_claims.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_uncertainty_claims.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/rotating_base_two_hand.py",
+      "symbol": "rollout",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_advanced_biological_bridge.py",
+      "symbol": "build_study",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+      "symbol": "_run_study_uncached",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_hand_path_attribution_study.py",
+      "symbol": "_analyze",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_hand_path_attribution_study.py",
+      "symbol": "_make_figures",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_interaction_force_study.py",
+      "symbol": "build_evidence",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+      "symbol": "build_study",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_moving_base_flexible_study.py",
+      "symbol": "run_study",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py",
+      "symbol": "build_study",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+      "symbol": "build_outputs",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py",
+      "symbol": "run_study",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+      "symbol": "run_study",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_torque_allocation_preload_study.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_transmission_robustness_study.py",
+      "symbol": "_gap_register",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_transmission_robustness_study.py",
+      "symbol": "run_study",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py",
+      "symbol": "run_study",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+      "symbol": "run_engine_trace",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+      "symbol": "run_closed_contact_feasibility_atlas",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+      "symbol": "solve_closed_contact_configuration",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+      "symbol": "run_subject_scaled_geometry_atlas",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/torque_allocation_preload.py",
+      "symbol": "evaluate_continuous_role_reversal",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+      "symbol": "two_arm_joint_transfer_trajectory",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/two_hand_preactivation_hypothesis.py",
+      "symbol": "_render_figure",
+      "rule": "function-lines"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/two_hand_preactivation_hypothesis.py",
+      "symbol": "build_study",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/api/aip/dispatcher.py",
+      "symbol": "dispatch",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/api/migrations/versions/20260323_0000_0001_initial_schema.py",
+      "symbol": "upgrade",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/bunkershot3d/calibration/angle_of_repose.py",
+      "symbol": "_mujoco_angle_of_repose",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/bunkershot3d/solvers/mpm/envelope.py",
+      "symbol": "evaluate_f1_envelope",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/bunkershot3d/solvers/mpm/grid.py",
+      "symbol": "PlaneStrainGrid.interpolate",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/export_torque_polynomials.py",
+      "symbol": "export_polynomial_inputs",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/optimize_body_kinematics_for_club.py",
+      "symbol": "optimize_body_kinematics",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/optimize_body_kinematics_for_club.py",
+      "symbol": "optimize_body_kinematics",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/optimize_torques_for_desired_kinematics.py",
+      "symbol": "optimize_torques",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/optimize_torques_for_desired_kinematics.py",
+      "symbol": "optimize_torques",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/prepare_frame_by_frame_search.py",
+      "symbol": "build_search_manifest",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/prepare_frame_by_frame_search.py",
+      "symbol": "build_search_manifest",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/replay_matching_workflow.py",
+      "symbol": "replay",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/replay_matching_workflow.py",
+      "symbol": "replay",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/run_matching_pareto_sweep.py",
+      "symbol": "optimize_sequence",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/run_matching_pareto_sweep.py",
+      "symbol": "run_single",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/run_matching_pareto_sweep.py",
+      "symbol": "run_sweep",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/two_stage_optimizer.py",
+      "symbol": "run_two_stage",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/lower_body_model/launch_pyqt6.py",
+      "symbol": "ControlPanel.__init__",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/perturbation/analyzer.py",
+      "symbol": "DrakePerturbationAnalyzer._simulate",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/control_system.py",
+      "symbol": "ActuatorControl.__init__",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/aba.py",
+      "symbol": "_aba_backward_body_inertia",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/aba.py",
+      "symbol": "_aba_backward_pass",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/aba.py",
+      "symbol": "_aba_forward_accelerations",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/aba.py",
+      "symbol": "_aba_forward_kinematics",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/aba.py",
+      "symbol": "_aba_propagate_to_parent",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/aba.py",
+      "symbol": "_aba_run_passes",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/crba.py",
+      "symbol": "_crba_mass_matrix",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/rnea.py",
+      "symbol": "_rnea_backward_pass",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/rnea.py",
+      "symbol": "_rnea_forward_pass_body",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/perturbation/analyzer.py",
+      "symbol": "MuJoCoPerturbationAnalyzer._simulate",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/club_target_adapter.py",
+      "symbol": "load_robneal_target",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/viz/error_timecourse.py",
+      "symbol": "plot_error_timecourse",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/pinocchio_recorder.py",
+      "symbol": "PinocchioRecorder.record_frame",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/launchers/launcher_provider_compatibility.py",
+      "symbol": "evaluate_launcher_model_compatibility",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/launchers/mcp_servers_preferences.py",
+      "symbol": "_build_mcp_servers_section",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/motion_capture/freemocap_ingest/__main__.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/motion_capture/freemocap_ingest/launcher.py",
+      "symbol": "FreeMoCapLauncher.launch",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/ai/adapters/factory.py",
+      "symbol": "AdapterFactory.create",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/ai/gui/assistant/panel.py",
+      "symbol": "AIAssistantPanel.refresh_theme",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/ai/integrations/notion.py",
+      "symbol": "_markdown_to_notion_blocks",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/ai/mcp/presets.py",
+      "symbol": "_build_stdio_preset",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/ai/tool_bridge.py",
+      "symbol": "ChatToolBridge.handle_tool_call",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/ai/tools/agent_control.py",
+      "symbol": "create_agent_tools_for_registry",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/anthropometrics/engine_adapters/opensim.py",
+      "symbol": "OpenSimAdapter.import_back",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/anthropometrics/estimators/_base.py",
+      "symbol": "build_subject_from_ratio_table",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/anthropometrics/estimators/_base.py",
+      "symbol": "build_subject_from_ratio_table",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/anthropometrics/estimators/from_inertia_calc.py",
+      "symbol": "build_segment_properties_with_inertia",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/anthropometrics/estimators/from_mocap.py",
+      "symbol": "estimate_segment_lengths_from_markers",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/anthropometrics/readers/urdf_inertial.py",
+      "symbol": "read_urdf_inertial",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/biomechanics/rust_muscle.py",
+      "symbol": "step_full",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/body_part_viz/urdf_bridge.py",
+      "symbol": "shape_to_urdf_visual",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/calc_backend/routers/pressure_drop_v2.py",
+      "symbol": "calculate_pressure_drop",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/chat/_qt/bubbles.py",
+      "symbol": "ChatMessageBubble.__init__",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/chat/websocket_protocol.py",
+      "symbol": "run_chat_websocket_protocol",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/estimation/residuals.py",
+      "symbol": "reprojection_residual",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/feature_registry/installer.py",
+      "symbol": "install_feature",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/humanoid_character_builder/generators/_link_generation.py",
+      "symbol": "generate_link",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/humanoid_character_builder/generators/urdf_xml_builder.py",
+      "symbol": "build_urdf_xml",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/model_generation/converters/simscape/_body_conversion.py",
+      "symbol": "convert_body_to_link",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/model_generation/converters/simscape/_joint_conversion.py",
+      "symbol": "convert_joint_block",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/model_generation/converters/simscape/_joint_conversion.py",
+      "symbol": "convert_transform_to_joint",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/model_generation/library/_model_operations.py",
+      "symbol": "add_local_model",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/motion_matching/diagnostics/body_target_video.py",
+      "symbol": "save_body_target_video",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/motion_matching/diagnostics/body_target_video.py",
+      "symbol": "save_c3d_body_video",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/motion_matching/inverse/training.py",
+      "symbol": "train_inverse_cvae",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/motion_matching/inverse/training.py",
+      "symbol": "train_inverse_cvae",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/motion_matching/inverse_timestep/training.py",
+      "symbol": "train_timestep_inverse",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/motion_matching/inverse_timestep/training.py",
+      "symbol": "train_timestep_inverse",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/motion_matching/surrogate/perstep/optimize.py",
+      "symbol": "_build_optimization_context",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/motion_matching/surrogate/train.py",
+      "symbol": "_run_training_loop",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/motion_matching/surrogate/train_10k.py",
+      "symbol": "main",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/motion_pipeline/matching/torque_mujoco.py",
+      "symbol": "MuJoCoTorqueMatchingSolver.match",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/motion_pipeline/orchestrator.py",
+      "symbol": "MotionPipeline.run",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/motion_pipeline/scaling/anthropometric.py",
+      "symbol": "scale_skeleton",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/optimization/swing_bridge.py",
+      "symbol": "SwingOptimizationBridge.optimize_swing",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/analysis_tab.py",
+      "symbol": "AnalysisTab.__init__",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/analysis_tab.py",
+      "symbol": "AnalysisTab._compute_and_plot_surface",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/controls_widget_golfer.py",
+      "symbol": "ControlsWidgetGolfer.get_params",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/controls_widget_triple.py",
+      "symbol": "ControlsWidgetTriple._build_physics_section",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "symbol": "OptimizationWidget._build_ui",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "symbol": "_OptimizerWorker.__init__",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "symbol": "_cmaes_step",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/panel_builders.py",
+      "symbol": "build_double_panel",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/panel_builders.py",
+      "symbol": "wire_toolstrip",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/simulation_panel.py",
+      "symbol": "SimulationPanel.__init__",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/torque_preview_widget.py",
+      "symbol": "TorquePreviewWidget.paintEvent",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/optimizer_gpu.py",
+      "symbol": "optimize_simple_torque_profile",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/optimizer_gpu.py",
+      "symbol": "optimize_torque_profile",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/physics/water_hazard.py",
+      "symbol": "water_entry_kinematics",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/pose_estimation/keypoint_offsets.py",
+      "symbol": "estimate_keypoint_offset",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/putting_dynamics/solver.py",
+      "symbol": "simulate_ball",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/sidekick/calculators/electrical/electrical_model.py",
+      "symbol": "ThreePhaseElectricalModelEnhanced.calculate_system_state",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/calculators/mechanical/trc_geometry.py",
+      "symbol": "_calculate_layer_cone_volume",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/_acid_gas_calculator.py",
+      "symbol": "AcidGasDewpointCalculator.calculate_dewpoint_mixture",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/acid_gas_dewpoint_calculator.py",
+      "symbol": "AcidGasDewpointCalculator.calculate_dewpoint_mixture",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/acid_gas_dewpoint_calculator.py",
+      "symbol": "AcidGasDewpointCalculator.calculate_vapor_pressure",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/baghouse_calculator.py",
+      "symbol": "BaghouseCalculator.calculate",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/baghouse_calculator.py",
+      "symbol": "BaghouseCalculator.calculate",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/flare_calculator.py",
+      "symbol": "FlareCalculator.calculate_flare_size",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/multi_param_analysis.py",
+      "symbol": "_evaluate_single_point",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/optimization.py",
+      "symbol": "_compute_gradient_component",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/optimization.py",
+      "symbol": "run_adam_optimization",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/optimization.py",
+      "symbol": "run_adam_optimization",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/_legacy.py",
+      "symbol": "PressureDropCalculator.calculate_pressure_drop",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/_pressure_drop_validation.py",
+      "symbol": "validate_inputs",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/engine/compressible_flow.py",
+      "symbol": "calculate_compressible_flow_correction",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/engine/pressure_drop_calculation_engine.py",
+      "symbol": "PressureDropCalculationEngine._build_results",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
+      "symbol": "calculate_pressure_drop",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
+      "symbol": "calculate_pressure_drop_custom_gas",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
+      "symbol": "calculate_pressure_drop_syngas",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
+      "symbol": "_build_pressure_drop_inputs",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
+      "symbol": "calculate_pressure_drop",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
+      "symbol": "calculate_pressure_drop_custom_gas",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
+      "symbol": "calculate_pressure_drop_syngas",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_validation.py",
+      "symbol": "validate_inputs",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/ui/tools_sidebar/api.py",
+      "symbol": "create_tools_sidebar",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/ui/tools_sidebar/api.py",
+      "symbol": "install_tools_sidebar",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/ui/tools_sidebar/calculator_runtime.py",
+      "symbol": "SidekickCalculatorWidget.__init__",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/sidekick/ui/tools_sidebar/data_explorer_tab.py",
+      "symbol": "SidekickDataExplorerWidget._build_ui",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/shared/python/sidekick/ui/widgets/unit_aware_input.py",
+      "symbol": "UnitAwareInput.__init__",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/shared/python/validation_pkg/statistical_analysis.py",
+      "symbol": "StatisticalAnalyzer.__init__",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/tools/freemocap_sidecar/run_freemocap.py",
+      "symbol": "run_freemocap_sidecar",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/tools/hmr2_sidecar/run_hmr2.py",
+      "symbol": "run_hmr2_sidecar",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
+      "symbol": "_BuildersMixin._build_playback_box",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
+      "symbol": "_BuildersMixin._build_transform_box",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
+      "symbol": "_BuildersMixin._build_view_box",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
+      "symbol": "_SessionMixin._apply_session",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui_source_panel.py",
+      "symbol": "DataSourcesPanel._build_ui",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/live_view_controller.py",
+      "symbol": "LiveViewController.set_target",
+      "rule": "function-lines"
+    },
+    {
+      "path": "src/unreal_integration/data_frame.py",
+      "symbol": "UnrealDataFrame.__init__",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/unreal_integration/data_frame.py",
+      "symbol": "UnrealDataFrame.__new__",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/unreal_integration/skeleton.py",
+      "symbol": "JointState.__init__",
+      "rule": "parameters"
+    },
+    {
+      "path": "src/unreal_integration/skeleton.py",
+      "symbol": "JointState.__new__",
+      "rule": "parameters"
+    }
+  ]
+}

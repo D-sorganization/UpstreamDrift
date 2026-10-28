@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #13948 | Restore docstrings in motion_matching cost term helpers (UD-20) |
+| 2026-10-28 | #13934 | Architecture budget: full-scan mode with checked-in baseline ratchet (UD-25) |
+| 2026-10-28 | #13933 | Motion matching: architecture guard and canonical _geodesic helpers (UD-24) |
 | 2026-10-27 | #13941 | HRG-HX4 part 2: bushing_wrench force_limit_n caps the bushing force magnitude, direction kept, moment unchanged, default None unlimited and bit-identical (option c, Python bushing law only) |
 | 2026-10-27 | #13937 | Extract the WSCG case input contract and grip-wrench signals into run_two_hand_wscg_case, part 1 of the _analyze_case budget split. |
 | 2026-10-27 | #13936 | Bump dnspython 2.8.0 to 2.9.0 in both lock files to clear CVE-2026-114605 from pip-audit |

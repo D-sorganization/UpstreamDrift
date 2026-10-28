@@ -17,6 +17,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = Path("scripts/config/architecture_budget.json")
+DEFAULT_BASELINE_PATH = Path("scripts/config/architecture_budget_baseline.json")
 DEFAULT_BASE_REF = "origin/main"
 
 EXCLUDED_PARTS = {
@@ -270,10 +271,102 @@ def _collect_active_exceptions(
     return active, invalid
 
 
+def _load_baseline(repo_root: Path, baseline_path: Path) -> set[tuple[str, str, str]]:
+    """Load architecture budget baseline findings.
+
+    DbC:
+        precondition: ``baseline_path`` exists relative to ``repo_root``.
+        postcondition: returns a set of (path, symbol, rule) triples.
+    """
+    full_path = repo_root / baseline_path
+    if not full_path.is_file():
+        raise FileNotFoundError(
+            f"architecture budget baseline file not found: {full_path}"
+        )
+    raw = json.loads(full_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("architecture budget baseline must be a JSON object")
+    entries: set[tuple[str, str, str]] = set()
+    for item in raw.get("entries", []):
+        if isinstance(item, dict):
+            p = str(item.get("path", "")).strip()
+            s = str(item.get("symbol", "")).strip()
+            r = str(item.get("rule", "")).strip()
+            if p and s and r:
+                entries.add((p, s, r))
+    return entries
+
+
+def _write_baseline(
+    repo_root: Path,
+    baseline_path: Path,
+    findings: list[tuple[str, str, str]],
+) -> None:
+    """Write architecture budget baseline findings to JSON.
+
+    DbC:
+        precondition: ``repo_root`` is an existing directory.
+        postcondition: baseline file is written with deterministically sorted entries.
+    """
+    full_path = repo_root / baseline_path
+    full_path.parent.mkdir(parents=True, exist_ok=True)
+    sorted_entries = [
+        {"path": p, "symbol": s, "rule": r} for p, s, r in sorted(set(findings))
+    ]
+    data = {
+        "schema_version": 1,
+        "description": (
+            "Baseline of grandfathered architecture budget violations (UD-25, #13869). "
+            "Ratchet policy: entries may only be removed, never added."
+        ),
+        "entries": sorted_entries,
+    }
+    full_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def collect_unexcepted_findings(
+    *,
+    repo_root: Path,
+    paths: list[Path],
+    config: dict[str, Any],
+) -> list[tuple[str, str, str]]:
+    """Return all unexcepted (path, symbol, rule) findings across specified paths."""
+    max_function_lines = int(config.get("max_function_lines", 100))
+    max_parameters = int(config.get("max_parameters", 8))
+    active_exceptions, _ = _collect_active_exceptions(config)
+    findings_list: list[tuple[str, str, str]] = []
+    for path in sorted(paths):
+        if not _is_production_python(path, repo_root):
+            continue
+        rel = path.relative_to(repo_root).as_posix()
+        findings = analyze_python_file(
+            path,
+            max_function_lines=max_function_lines,
+            max_parameters=max_parameters,
+        )
+        for finding in findings:
+            key = (rel, finding.symbol, finding.rule)
+            if key not in active_exceptions:
+                findings_list.append(key)
+    return findings_list
+
+
 def collect_violations(
-    *, repo_root: Path, paths: list[Path], config: dict[str, Any]
+    *,
+    repo_root: Path,
+    paths: list[Path],
+    config: dict[str, Any],
+    baseline: set[tuple[str, str, str]] | None = None,
 ) -> list[str]:
-    """Return architecture budget violations for production Python files."""
+    """Return architecture budget violations for production Python files.
+
+    DbC:
+        precondition: ``repo_root`` is an existing directory.
+        postcondition: any violation returned exceeds budget and is not covered
+            by active exceptions or baseline.
+        invariant: baseline entries grandfather existing findings; new violations
+            outside baseline always fail.
+    """
     if not repo_root.is_dir():
         raise ValueError(f"repo_root must be an existing directory: {repo_root}")
 
@@ -295,6 +388,8 @@ def collect_violations(
             key = (rel, finding.symbol, finding.rule)
             if key in active_exceptions:
                 continue
+            if baseline is not None and key in baseline:
+                continue
             violations.append(finding.format(repo_root))
 
     return violations
@@ -309,6 +404,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Path to JSON config relative to repository root.",
     )
     parser.add_argument(
+        "--baseline-path",
+        type=Path,
+        default=DEFAULT_BASELINE_PATH,
+        help="Path to JSON baseline relative to repository root.",
+    )
+    parser.add_argument(
         "--base-ref",
         default=DEFAULT_BASE_REF,
         help="Base ref for changed-file scanning.",
@@ -318,6 +419,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Scan all tracked Python files instead of changed files.",
     )
+    parser.add_argument(
+        "--write-baseline",
+        action="store_true",
+        help="Write current unexcepted findings to the baseline file.",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -325,15 +431,39 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         config = _load_config(repo_root, args.config_path)
+        if args.write_baseline:
+            paths = _tracked_python_files(repo_root)
+            unexcepted = collect_unexcepted_findings(
+                repo_root=repo_root, paths=paths, config=config
+            )
+            _write_baseline(repo_root, args.baseline_path, unexcepted)
+            logger.info(
+                "Wrote %d baseline entries to %s",
+                len(unexcepted),
+                args.baseline_path,
+            )
+            return 0
+
         paths = (
             _tracked_python_files(repo_root)
             if args.all
             else _changed_python_files(repo_root, args.base_ref)
         )
+
+        baseline: set[tuple[str, str, str]] | None = None
+        baseline_file = repo_root / args.baseline_path
+        if baseline_file.is_file():
+            baseline = _load_baseline(repo_root, args.baseline_path)
+        elif args.baseline_path != DEFAULT_BASELINE_PATH:
+            raise FileNotFoundError(
+                f"Architecture budget baseline not found: {args.baseline_path}"
+            )
+
         violations = collect_violations(
             repo_root=repo_root,
             paths=paths,
             config=config,
+            baseline=baseline,
         )
     except (OSError, RuntimeError, SyntaxError, ValueError) as exc:
         logger.error("architecture budget failed: %s", exc)
@@ -349,7 +479,10 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    logger.info("OK: Changed production Python files are within architecture budgets.")
+    scan_label = "Tracked" if args.all else "Changed"
+    logger.info(
+        "OK: %s production Python files are within architecture budgets.", scan_label
+    )
     return 0
 
 
