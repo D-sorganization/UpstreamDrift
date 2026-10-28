@@ -23,6 +23,7 @@ from src.shared.python.physics.flight_models import (
     TrajectoryPoint,
     UnifiedLaunchConditions,
     WaterlooPennerModel,
+    _spin_ratio_lift_coefficient,
     compare_models,
 )
 
@@ -358,6 +359,21 @@ class TestMacDonaldHanzelyModel:
         assert result_fast.carry_distance < result_slow.carry_distance, (
             "Assertion failed: result_fast.carry_distance < result_slow.carry_distance"
         )
+
+    def test_ud_08_spin_ratio_lift_coefficient_respects_model_cl(self) -> None:
+        """Test that spin-ratio lift calculation respects model declared cl (UD-08, #13956).
+
+        MacDonaldHanzelyModel declares cl = 0.20 and constant-coefficient models
+        (e.g., Nathan cl = 0.24, J. Cole cl = 0.22) declare cl > 0.155.
+        _spin_ratio_lift_coefficient must not truncate at the constant-spin
+        module cap (0.155).
+        """
+        # Low spin ratio: linear scaling 1.7 * spin_ratio applies
+        assert _spin_ratio_lift_coefficient(0.05, 0.20) == pytest.approx(1.7 * 0.05)
+        # Moderate-to-high spin ratio: capped at model's declared max_coefficient, NOT 0.155
+        assert _spin_ratio_lift_coefficient(0.25, 0.20) == pytest.approx(0.20)
+        assert _spin_ratio_lift_coefficient(0.25, 0.24) == pytest.approx(0.24)
+        assert _spin_ratio_lift_coefficient(0.25, 0.18) == pytest.approx(0.18)
 
 
 # =============================================================================
