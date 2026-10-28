@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from importlib import import_module
 from typing import Any
@@ -39,10 +39,14 @@ from src.shared.python.grip_contact import (
     hand_frame_states,
 )
 from src.shared.python.grip_contact.bushing_law import cross3
+from src.shared.python.grip_contact.capability_inventory import (
+    load_grip_capability_inventory,
+)
 from src.shared.python.grip_contact.contact_topology import (
     GripStyle,
     contact_topology,
 )
+from src.shared.python.grip_contact.grip_force_limit import finite_limit_n
 from src.shared.python.grip_contact.hand_drift import (
     HandDrift,
     hand_relative_drift,
@@ -60,6 +64,11 @@ from src.shared.python.grip_contact.topology_contact import (
     build_topology_model,
     topology_hand_hand_wrenches,
     topology_side_wrench,
+)
+from src.shared.python.model_appearance.grip_pose import (
+    DEFAULT_GRIP_POSE,
+    GripPose,
+    Hand,
 )
 from src.shared.python.motion_matching.full_body_v2 import separate_v2_hands
 from src.shared.python.motion_matching.grip_contract import GripSpec
@@ -129,10 +138,22 @@ class ClubOnBushings:
         spec: dict[str, Any],
         names: list[str],
         interface: GripInterface,
+        *,
+        grip_pose: GripPose = DEFAULT_GRIP_POSE,
     ) -> None:
         pin = _pin()
         self._pin = pin
         self.interface = interface
+        self.grip_pose = grip_pose
+        inventory = load_grip_capability_inventory()
+        self._force_limits: dict[str, float | None] = {}
+        for hand in Hand:
+            limit = grip_pose.grip_force_limit_n(hand)
+            inventory.require_grip_force_limit_enforceable(
+                ENGINE, "weld_bushing", limit
+            )
+            side = grip_pose.side(hand)
+            self._force_limits[side] = finite_limit_n(limit)
         self.kinematics = WeldClubKinematics(spec, names)
         club = ClubDynamics.from_spec(spec)
         model = pin.Model()
@@ -186,7 +207,12 @@ class ClubOnBushings:
     ) -> dict[str, Any]:
         """Per-side wrench on the club frame: the shared bushing law."""
         return {
-            s: bushing_wrench(self.interface.bushing, hands[s], frames[s])
+            s: bushing_wrench(
+                self.interface.bushing,
+                hands[s],
+                frames[s],
+                force_limit_n=self._force_limits.get(s),
+            )
             for s in SIDES
         }
 
@@ -305,6 +331,8 @@ def simulate_grip_bushing(
     atol: float = DEFAULT_ATOL,
     max_step_s: float = DEFAULT_MAX_STEP_S,
     t_end_s: float | None = None,
+    *,
+    grip_pose: GripPose = DEFAULT_GRIP_POSE,
 ) -> GripKineticsSeries:
     """Integrate the free club on two bushings over the prescribed swing.
 
@@ -313,7 +341,7 @@ def simulate_grip_bushing(
     """
     spec = json.loads(spec_bytes)
     interface = interface or GripInterface.from_spec(spec)
-    sim = ClubOnBushings(spec, list(swing.names), interface)
+    sim = ClubOnBushings(spec, list(swing.names), interface, grip_pose=grip_pose)
     spline = CoordinateSpline(swing.time_s, swing.q)
     times = swing.time_s
     if t_end_s is not None:
@@ -375,6 +403,8 @@ def probe_bushing_forces(
     swing: CoordinateSwing,
     translation_hand_m: np.ndarray,
     interface: GripInterface | None = None,
+    *,
+    grip_pose: GripPose = DEFAULT_GRIP_POSE,
 ) -> BushingProbe:
     """Bushing forces for the club displaced by ``translation_hand_m``.
 
@@ -383,7 +413,7 @@ def probe_bushing_forces(
     """
     spec = json.loads(spec_bytes)
     interface = interface or GripInterface.from_spec(spec)
-    sim = ClubOnBushings(spec, list(swing.names), interface)
+    sim = ClubOnBushings(spec, list(swing.names), interface, grip_pose=grip_pose)
     pin = sim._pin  # noqa: SLF001
     q0 = np.asarray(swing.q[0], float)
     still = np.zeros_like(q0)
@@ -604,11 +634,20 @@ def simulate_separated_v2_grip_styles(
     rtol: float = DEFAULT_RTOL,
     atol: float = DEFAULT_ATOL,
     max_step_s: float = DEFAULT_MAX_STEP_S,
+    *,
+    grip_pose: GripPose = DEFAULT_GRIP_POSE,
 ) -> dict[GripStyle, SeparatedGripRun]:
     """Integrate the separated-v2 club once and collect per-style contact traces without cross-style merging."""
     style_tuple = tuple(GripStyle(s) for s in styles)
     if not style_tuple:
         raise ValueError("styles must contain at least one GripStyle")
+    inventory = load_grip_capability_inventory()
+    force_limits: dict[str, float | None] = {}
+    for hand in Hand:
+        limit = grip_pose.grip_force_limit_n(hand)
+        inventory.require_grip_force_limit_enforceable(ENGINE, "weld_bushing", limit)
+        side = grip_pose.side(hand)
+        force_limits[side] = finite_limit_n(limit)
     spec = json.loads(spec_bytes)
     if not spec.get("hand_separation", {}).get("enabled"):
         spec = separate_v2_hands(spec)
@@ -639,7 +678,15 @@ def simulate_separated_v2_grip_styles(
         hands = hand_eval(t)
         club = ClubOnBushings.club_state(y)
         frames = {s: club.frame(offsets[s]) for s in SIDES}
-        law = {s: bushing_wrench(interface.bushing, hands[s], frames[s]) for s in SIDES}
+        law = {
+            s: bushing_wrench(
+                interface.bushing,
+                hands[s],
+                frames[s],
+                force_limit_n=force_limits.get(s),
+            )
+            for s in SIDES
+        }
         force = law["L"].force_n + law["R"].force_n
         moment = (
             law["L"].moment_nm
@@ -674,7 +721,14 @@ def simulate_separated_v2_grip_styles(
         raise RuntimeError(f"separated v2 club integration failed: {sol.message}")
     return {
         st: _collect_separated_run(
-            sol.y, times, hand_eval, interface, club_dyn, st, int(sol.nfev)
+            sol.y,
+            times,
+            hand_eval,
+            interface,
+            club_dyn,
+            st,
+            int(sol.nfev),
+            force_limits=force_limits,
         )
         for st in style_tuple
     }
@@ -688,6 +742,8 @@ def simulate_separated_v2_grip(
     rtol: float = DEFAULT_RTOL,
     atol: float = DEFAULT_ATOL,
     max_step_s: float = DEFAULT_MAX_STEP_S,
+    *,
+    grip_pose: GripPose = DEFAULT_GRIP_POSE,
 ) -> SeparatedGripRun:
     """Simulate separated-hand ``full-body-v2`` grip retention and physical hand-hand contact (#13309).
 
@@ -704,6 +760,7 @@ def simulate_separated_v2_grip(
         rtol=rtol,
         atol=atol,
         max_step_s=max_step_s,
+        grip_pose=grip_pose,
     )[target_style]
 
 
@@ -715,7 +772,9 @@ def _collect_separated_run(
     club_dyn: ClubDynamics,
     style: GripStyle,
     nfev: int,
+    force_limits: Mapping[str, float | None] | None = None,
 ) -> SeparatedGripRun:
+    force_limits = force_limits or {}
     offsets = {s: interface.frame(s).matrix() for s in SIDES}
     topo = contact_topology(GripSpec(style=style))
     topo_model = build_topology_model(interface, topology=topo)
@@ -731,7 +790,15 @@ def _collect_separated_run(
         hands = hand_eval(float(t))
         club = ClubOnBushings.club_state(y)
         frames = {s: club.frame(offsets[s]) for s in SIDES}
-        law = {s: bushing_wrench(interface.bushing, hands[s], frames[s]) for s in SIDES}
+        law = {
+            s: bushing_wrench(
+                interface.bushing,
+                hands[s],
+                frames[s],
+                force_limit_n=force_limits.get(s),
+            )
+            for s in SIDES
+        }
         topo_law = {
             s: topology_side_wrench(topo_model, s, hands[s], frames[s]) for s in SIDES
         }
