@@ -179,11 +179,13 @@ def load_simscape_golden_baseline() -> SimscapeGoldenBaseline:
 
 
 def simscape_baseline_or_skip() -> SimscapeGoldenBaseline:
-    """Return the Simscape baseline, or skip as withheld/not-validated."""
+    """Return the Simscape baseline, or skip as withheld/not-validated (#12013, #13789)."""
     try:
         return load_simscape_golden_baseline()
     except BaselineProvenanceError as exc:
-        pytest.skip(f"Simscape baseline unavailable (not validated): {exc}")
+        pytest.skip(
+            f"Simscape baseline unavailable (not validated; prerequisite for cross-engine parity under #13789): {exc}"
+        )
 
 
 # --------------------------------------------------------------------------- #
@@ -649,7 +651,9 @@ def test_parity_tolerance_gate_boundary_conditions() -> None:
 
 
 def test_engine_dynamic_availability_guards() -> None:
-    """Engine availability guards execute without exceptions and return booleans."""
+    """Engine availability guards execute without exceptions and reflect installed engine status."""
+    import importlib.util
+
     mj = is_mujoco_available()
     pin = is_pinocchio_available()
     drake = is_drake_available()
@@ -657,6 +661,20 @@ def test_engine_dynamic_availability_guards() -> None:
     assert isinstance(mj, bool)
     assert isinstance(pin, bool)
     assert isinstance(drake, bool)
+
+    # In environments where a package is discoverable, guard must return True
+    if importlib.util.find_spec("mujoco") is not None:
+        assert mj is True, (
+            "is_mujoco_available() returned False despite mujoco package being discoverable"
+        )
+    if importlib.util.find_spec("pinocchio") is not None:
+        assert pin is True, (
+            "is_pinocchio_available() returned False despite pinocchio package being discoverable"
+        )
+    if importlib.util.find_spec("pydrake") is not None:
+        assert drake is True, (
+            "is_drake_available() returned False despite pydrake package being discoverable"
+        )
 
 
 def test_simscape_baseline_or_skip_diagnostic_records_prerequisite() -> None:
