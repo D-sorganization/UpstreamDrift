@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13947 · Restore Docstrings in Motion_Matching Cost Term Helpers (UD-20)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13947
+- **Branch:** fix/13947-cost-term-docstrings
+- **PR:** #13948
+- **Paths:** see #13948
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`b5182571`; collated from changes/13947-cost-term-docstrings.md)
+- **Summary:** Restore docstrings in motion_matching cost term helpers (UD-20)
+- **Next step:** Merge PR
+
 ### DL-#13869 · Architecture Budget: Full-Scan Mode With Checked-In Baseline Ratchet (UD-25)
 
 - **State:** in_review
