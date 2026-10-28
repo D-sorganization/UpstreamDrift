@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #13983 | OpenSim spine: catalog coordinate unit-speed probing in inverse_dynamics _u_indices (UD-39) |
 | 2026-10-28 | #13976 | Clarify VelocityRepresentation origin convention in docstrings, documenting evaluation at base reference point / center of mass vs Featherstone world origin O and linking Epic #13789 (UD-13) |
 | 2026-10-28 | #13973 | Enforce engine availability assertion and cite Simscape baseline prerequisite (UD-26) |
 | 2026-10-28 | #13975 | Clarify and assert zero-linear-velocity contract in single_floating_body_h_g, documenting zero linear Coriolis bias under center-of-mass frame conventions and linking Epic #13789 (UD-14) |

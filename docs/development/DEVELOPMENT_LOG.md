@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13972 · OpenSim Spine: Catalog Coordinate Unit-Speed Probing in Inverse_Dynamics _U_Indices (UD-39)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13972
+- **Branch:** test/13972-catalog-coordinate-unit-speed-probing
+- **PR:** #13983
+- **Paths:** see #13983
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`03f7e9b2`; collated from changes/13972-catalog-coordinate-unit-speed-probing.md)
+- **Summary:** OpenSim spine: catalog coordinate unit-speed probing in inverse_dynamics _u_indices (UD-39)
+- **Next step:** Merge PR
+
 ### DL-#13969 · Clarify VelocityRepresentation Origin Convention in Docstrings, Documenting Evaluation at Base Reference Point / Center of Mass vs Featherstone World Origin O and Linking Epic #13789 (UD-13)
 
 - **State:** in_review
