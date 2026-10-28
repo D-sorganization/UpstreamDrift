@@ -66,9 +66,7 @@ def test_generate_contact_sheet_dimensions(tmp_path: Path) -> None:
 def test_generate_contact_sheet_samples_osl4_window(tmp_path: Path) -> None:
     """Contact sheet biases two panels to the OSL-4 force window when indices are given."""
     # Distinct solid colors per frame so sampled panels are identifiable.
-    frames = [
-        np.full((80, 120, 3), (i * 35) % 256, dtype=np.uint8) for i in range(20)
-    ]
+    frames = [np.full((80, 120, 3), (i * 35) % 256, dtype=np.uint8) for i in range(20)]
     window_indices = tuple(range(8, 14))
     out_sheet = tmp_path / "sheet_window.png"
     generate_contact_sheet(
