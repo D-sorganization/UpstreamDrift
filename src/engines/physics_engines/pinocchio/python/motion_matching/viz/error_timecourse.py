@@ -139,13 +139,17 @@ def plot_error_timecourse(  # noqa: C901
     ax.set_ylabel("Joint torques (N·m)", fontsize=AXES_FONTSIZE)
     ax.set_xlabel("time (s)", fontsize=AXES_FONTSIZE)
 
-    # Impact line across all panels.
-    impact_idx = int(getattr(target, "impact_idx", n - 1))
-    impact_idx = max(0, min(impact_idx, n - 1))
-    if t.size:
+    # Impact line across all panels (target.impact_idx is 1-based per CLUB_IK_SPEC).
+    raw_impact = getattr(target, "impact_idx", None)
+    if raw_impact is not None:
+        impact_idx_0b = max(0, min(int(raw_impact) - 1, n - 1))
+    else:
+        impact_idx_0b = n - 1
+    if t.size and impact_idx_0b >= 0:
+        impact_t = float(t[impact_idx_0b])
         for ax_i in axes:
             ax_i.axvline(
-                float(t[impact_idx]), color=COLOR_ERROR, linestyle=":", linewidth=1
+                impact_t, color=COLOR_ERROR, linestyle=":", linewidth=1
             )
 
     fig.suptitle(f"Error timecourse — {result.trial_id}", fontsize=TITLE_FONTSIZE + 1)
