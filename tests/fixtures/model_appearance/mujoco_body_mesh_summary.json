@@ -220,8 +220,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": [
       {
-        "bbox_max": [0.035954, 0.035954, 0.018],
-        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "bbox_max": [0.032929, 0.032929, 0.018],
+        "bbox_min": [-0.032929, -0.032929, -0.163262],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -229,8 +229,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": [
       {
-        "bbox_max": [0.035954, 0.035954, 0.018],
-        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "bbox_max": [0.032929, 0.032929, 0.018],
+        "bbox_min": [-0.032929, -0.032929, -0.163262],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -261,8 +261,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": [
       {
-        "bbox_max": [0.035954, 0.035954, 0.018],
-        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "bbox_max": [0.032929, 0.032929, 0.018],
+        "bbox_min": [-0.032929, -0.032929, -0.163262],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -270,8 +270,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": [
       {
-        "bbox_max": [0.035954, 0.035954, 0.018],
-        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "bbox_max": [0.032929, 0.032929, 0.018],
+        "bbox_min": [-0.032929, -0.032929, -0.163262],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -567,8 +567,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": [
       {
-        "bbox_max": [0.035954, 0.035954, 0.018],
-        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "bbox_max": [0.032929, 0.032929, 0.018],
+        "bbox_min": [-0.032929, -0.032929, -0.163262],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -576,8 +576,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": [
       {
-        "bbox_max": [0.035954, 0.035954, 0.018],
-        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "bbox_max": [0.032929, 0.032929, 0.018],
+        "bbox_min": [-0.032929, -0.032929, -0.163262],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -608,8 +608,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": [
       {
-        "bbox_max": [0.035954, 0.035954, 0.018],
-        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "bbox_max": [0.032929, 0.032929, 0.018],
+        "bbox_min": [-0.032929, -0.032929, -0.163262],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -617,8 +617,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": [
       {
-        "bbox_max": [0.035954, 0.035954, 0.018],
-        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "bbox_max": [0.032929, 0.032929, 0.018],
+        "bbox_min": [-0.032929, -0.032929, -0.163262],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -914,8 +914,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": [
       {
-        "bbox_max": [0.1704, 0.035954, 0.035954],
-        "bbox_min": [-0.018, -0.035954, -0.035954],
+        "bbox_max": [0.1704, 0.03292, 0.03292],
+        "bbox_min": [-0.018, -0.03292, -0.03292],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -923,8 +923,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": [
       {
-        "bbox_max": [0.035954, 0.035954, 0.1704],
-        "bbox_min": [-0.035954, -0.035954, -0.018],
+        "bbox_max": [0.03292, 0.03292, 0.1704],
+        "bbox_min": [-0.03292, -0.03292, -0.018],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -955,8 +955,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": [
       {
-        "bbox_max": [0.1704, 0.035954, 0.035954],
-        "bbox_min": [-0.018, -0.035954, -0.035954],
+        "bbox_max": [0.1704, 0.03292, 0.03292],
+        "bbox_min": [-0.018, -0.03292, -0.03292],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -964,8 +964,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": [
       {
-        "bbox_max": [0.035954, 0.035954, 0.1704],
-        "bbox_min": [-0.035954, -0.035954, -0.018],
+        "bbox_max": [0.03292, 0.03292, 0.1704],
+        "bbox_min": [-0.03292, -0.03292, -0.018],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794

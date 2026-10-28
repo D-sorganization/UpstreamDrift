@@ -963,6 +963,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13992 · Graft Pelvis_Frame_From_Spec Accepts HIP_MIRROR-Conjugated Hips
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13992
+- **Branch:** merged via #13999
+- **PR:** #13999
+- **Paths:** see #13999
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`05ba1f99`; collated from changes/13992-graft-pelvis-frame-from-spec-accepts-hip.md)
+- **Summary:** Graft pelvis_frame_from_spec accepts HIP_MIRROR-conjugated hips
+- **Next step:** Shipped in PR #13999.
+
 ### DL-#13793 · Add Sensitivity Fields (FTLE, Sigma-Max, Agreement Horizon) to Pendulum Parity Receipts (SAP-4)
 
 - **State:** shipped

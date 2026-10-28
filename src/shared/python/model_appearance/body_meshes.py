@@ -264,6 +264,7 @@ class _Segment:
     end: np.ndarray
     radius: float
     aspect: float
+    end_scale: float = 1.0
 
 
 def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Segment]:
@@ -277,7 +278,13 @@ def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Se
         radius = min(radius, _MAX_RADIUS_OVER_LENGTH * cap.length_m())
         aspect = library.PART_ASPECT.get(part, 1.0)
         out.append(
-            _Segment(np.asarray(cap.start_m), np.asarray(cap.end_m), radius, aspect)
+            _Segment(
+                np.asarray(cap.start_m),
+                np.asarray(cap.end_m),
+                radius,
+                aspect,
+                library.distal_scale(part),
+            )
         )
     return out
 
@@ -395,7 +402,7 @@ def _pelvis_segment(
     shape = _pelvis_shape(ctx, body, size, scale)
     centre = np.asarray(shape.centre)
     return _PelvisSegment(
-        centre, centre + shape.top * shape.up, shape.half_width, 1.0, shape
+        centre, centre + shape.top * shape.up, shape.half_width, 1.0, shape=shape
     )
 
 
@@ -417,6 +424,7 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
         seg.radius,
         geometry.LoftOptions(
             aspect=seg.aspect,
+            end_scale=seg.end_scale,
             rings=library.LOFT_RINGS,
             sides=library.LOFT_SIDES,
             width_hint=width_hint_for(ctx.sections, body, seg.start, seg.end),
