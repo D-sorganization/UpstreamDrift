@@ -963,6 +963,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13793 · Add Sensitivity Fields (FTLE, Sigma-Max, Agreement Horizon) to Pendulum Parity Receipts (SAP-4)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13793
+- **Branch:** merged via #13988
+- **PR:** #13988
+- **Paths:** see #13988
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`fd233d9c`; collated from changes/13793-sensitivity-receipts.md)
+- **Summary:** Add sensitivity fields (FTLE, sigma-max, agreement horizon) to pendulum parity receipts (SAP-4)
+- **Next step:** Shipped in PR #13988.
+
 ### DL-#13945 · Pin Pytest <9.2.0 Across Repository Dependencies and CI Workflows
 
 - **State:** shipped
