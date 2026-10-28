@@ -40,6 +40,9 @@ import pytest
 
 # Module under test is importable without pydrake — all pydrake imports
 # inside ``simulate_with_coefficients`` are lazy.
+from src.engines.physics_engines.drake.python.motion_matching._simulate_support import (
+    finite_difference_qdd,
+)
 from src.engines.physics_engines.drake.python.motion_matching.simulate import (
     COEFFS_PER_JOINT,
     SimOptions,
@@ -66,6 +69,7 @@ class TestSimOptions:
         assert opts.urdf_path is None
         assert opts.grip_body_name == "mid_hands"
         assert opts.clubhead_body_name == "club_head"
+        assert opts.compute_qdd is True
 
     @pytest.mark.parametrize(
         "kwargs",
@@ -112,6 +116,55 @@ class TestEvaluateTorquePolynomial:
             evaluate_torque_polynomial(np.array([np.nan] * 7), 0.0, n_joints=1)
         with pytest.raises(ValueError, match="1-D"):
             evaluate_torque_polynomial(np.zeros((2, 7)), 0.0, n_joints=2)
+
+
+class TestFiniteDifferenceQdd:
+    """Finite-difference generalized accelerations from velocity log (UD-36, #13971)."""
+
+    def test_ud_36_contract_documented(self) -> None:
+        """Issue #13971 / Epic #13789 (UD-36) contract must be documented in docstrings."""
+        doc_support = finite_difference_qdd.__doc__ or ""
+        assert "13971" in doc_support, "finite_difference_qdd must cite Issue #13971"
+        assert "13789" in doc_support, "finite_difference_qdd must cite Epic #13789"
+
+        doc_sim = simulate_with_coefficients.__doc__ or ""
+        assert "13971" in doc_sim, "simulate_with_coefficients must cite Issue #13971"
+        assert "13789" in doc_sim, "simulate_with_coefficients must cite Epic #13789"
+
+    def test_constant_acceleration(self) -> None:
+        """For linear velocity v(t) = a * t, finite difference recovers constant acceleration."""
+        sample_rate_hz = 1000.0
+        dt = 1.0 / sample_rate_hz
+        t = np.arange(10) * dt
+        a_true = np.array([2.5, -4.0])
+        v_log = np.outer(t, a_true)
+
+        qdd = finite_difference_qdd(v_log, sample_rate_hz=sample_rate_hz, enabled=True)
+        assert qdd.shape == v_log.shape
+        np.testing.assert_allclose(qdd, np.broadcast_to(a_true, qdd.shape), rtol=1e-12, atol=1e-12)
+
+    def test_quadratic_velocity_interior_accuracy(self) -> None:
+        """For quadratic velocity v(t) = t^2, central difference interior recovers 2*t."""
+        sample_rate_hz = 1000.0
+        dt = 1.0 / sample_rate_hz
+        t = np.arange(100) * dt
+        v_log = (t**2)[:, np.newaxis]
+
+        qdd = finite_difference_qdd(v_log, sample_rate_hz=sample_rate_hz, enabled=True)
+        expected_interior = (2.0 * t[1:-1])[:, np.newaxis]
+        np.testing.assert_allclose(qdd[1:-1], expected_interior, rtol=1e-10, atol=1e-10)
+        assert qdd[0, 0] == pytest.approx(dt, rel=1e-6)
+        assert qdd[-1, 0] == pytest.approx(2.0 * t[-1] - dt, rel=1e-6)
+
+    def test_disabled_or_insufficient_samples(self) -> None:
+        """When disabled or shape[0] < 2, finite_difference_qdd returns zeros."""
+        v_log = np.ones((5, 3))
+        qdd_disabled = finite_difference_qdd(v_log, sample_rate_hz=1000.0, enabled=False)
+        np.testing.assert_array_equal(qdd_disabled, np.zeros((5, 3)))
+
+        v_single = np.ones((1, 3))
+        qdd_single = finite_difference_qdd(v_single, sample_rate_hz=1000.0, enabled=True)
+        np.testing.assert_array_equal(qdd_single, np.zeros((1, 3)))
 
 
 class TestSimOutShape:
@@ -495,6 +548,31 @@ def test_mocked_simulate_clean_run_reports_success(
     assert np.all(np.isfinite(out.potential_energy))
     assert np.all(np.isfinite(out.grip))
     assert np.all(np.isfinite(out.clubhead))
+
+
+@pytest.mark.unit
+def test_mocked_simulate_compute_qdd_toggle(
+    _mocked_pydrake: dict[str, MagicMock],
+) -> None:
+    """Issue #13971 / Epic #13789 (UD-36): compute_qdd controls qdd evaluation."""
+    n_joints = 19
+    theta = np.zeros(n_joints * COEFFS_PER_JOINT)
+
+    # 1. compute_qdd = True (default) evaluates finite-difference qdd
+    opts_enabled = SimOptions(
+        simulation_time_s=0.01, sample_rate_hz=1000.0, compute_qdd=True
+    )
+    out_enabled = simulate_with_coefficients(theta, options=opts_enabled)
+    assert out_enabled.qdd.shape == out_enabled.qd.shape
+    assert np.all(np.isfinite(out_enabled.qdd))
+
+    # 2. compute_qdd = False returns all zeros
+    opts_disabled = SimOptions(
+        simulation_time_s=0.01, sample_rate_hz=1000.0, compute_qdd=False
+    )
+    out_disabled = simulate_with_coefficients(theta, options=opts_disabled)
+    assert out_disabled.qdd.shape == out_disabled.qd.shape
+    np.testing.assert_array_equal(out_disabled.qdd, np.zeros_like(out_disabled.qd))
 
 
 # ---------------------------------------------------------------------------
