@@ -6,8 +6,22 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 from src.engines.physics_engines.opensim.python import musculoskeletal_graft as g
+from src.shared.python.motion_matching.execution.spec_builder import (
+    mirror_document_hip,
+)
 
+SIDES = ("r", "l")
 pytestmark = pytest.mark.unit
+
+
+#: Builder axis layout S: follower z (the twist axis) runs up the femur (+y).
+_LAYOUT = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, -1.0, 0.0]])
+
+
+def _follower() -> np.ndarray:
+    c = np.eye(4)
+    c[:3, :3] = _LAYOUT
+    return c
 
 
 def _spec(twist_r: float = -25.0, twist_l: float = 40.0, skew: float = 0.0) -> dict:
@@ -15,9 +29,17 @@ def _spec(twist_r: float = -25.0, twist_l: float = 40.0, skew: float = 0.0) -> d
     joints = []
     for side, twist, y in (("r", twist_r, -0.1), ("l", twist_l, 0.1)):
         p = np.eye(4)
-        p[:3, :3] = axes @ g.rotation_z(twist) + (skew if side == "l" else 0.0)
+        p[:3, :3] = axes @ _LAYOUT @ g.rotation_z(twist) + (
+            skew if side == "l" else 0.0
+        )
         p[:3, 3] = [0.0, y, -0.05]
-        joints.append({"name": f"hip_{side}", "parent_to_base": p.tolist()})
+        joints.append(
+            {
+                "name": f"hip_{side}",
+                "parent_to_base": p.tolist(),
+                "child_to_follower": _follower().tolist(),
+            }
+        )
     return {
         "joints": joints,
         "subject": {"hip_zero_twist_deg": {"r": twist_r, "l": twist_l}},
@@ -39,6 +61,27 @@ def test_pelvis_frame_rejects_inconsistent_sides_and_missing_data() -> None:
         g.pelvis_frame_from_spec(_spec(skew=0.05))
     with pytest.raises(ValueError, match="hip_zero_twist_deg"):
         g.pelvis_frame_from_spec({"joints": [], "subject": {}})
+
+
+def test_pelvis_frame_is_invariant_to_hip_mirroring() -> None:
+    """#13992: HIP_MIRROR-conjugated hips flip the twist sense about z."""
+    reference = g.pelvis_frame_from_spec(_spec())[0]
+    for sides in (("r",), ("l",), ("r", "l")):
+        spec = _spec()
+        for side in sides:
+            assert mirror_document_hip(spec, side)
+        rotation, centres, residual = g.pelvis_frame_from_spec(spec)
+        np.testing.assert_allclose(rotation, reference, atol=1e-9)
+        assert residual < 1e-9
+        np.testing.assert_allclose(centres["r"], [0.0, -0.1, -0.05])
+
+
+def test_mirrored_hips_still_reject_inconsistent_sides() -> None:
+    spec = _spec(skew=0.05)
+    for side in SIDES:
+        mirror_document_hip(spec, side)
+    with pytest.raises(ValueError, match="disagree"):
+        g.pelvis_frame_from_spec(spec)
 
 
 def test_map_pelvis_point_preserves_hip_centre_relation() -> None:

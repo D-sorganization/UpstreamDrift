@@ -32,6 +32,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 from scipy.spatial.transform import Rotation
 
+from src.shared.python.motion_matching.hip_calibration import hip_is_mirrored
 from src.shared.python.motion_matching.full_body_schema import (
     SchemaFeatureUnavailableError,
     require_full_body_schema,
@@ -82,9 +83,17 @@ def pelvis_frame_from_spec(
     axes: dict[str, Array] = {}
     centres: dict[str, Array] = {}
     for side in SIDES:
-        parent = np.asarray(joints[f"hip_{side}"]["parent_to_base"], dtype=float)
+        joint = joints[f"hip_{side}"]
+        parent = np.asarray(joint["parent_to_base"], dtype=float)
         require(parent.shape == (4, 4), "parent_to_base must be 4x4")
-        axes[side] = parent[:3, :3] @ rotation_z(-float(twist[side]))
+        follower = np.asarray(joint.get("child_to_follower", np.eye(4)), dtype=float)
+        require(follower.shape == (4, 4), "child_to_follower must be 4x4")
+        # A HIP_MIRROR hip (conjugated by diag(1,-1,-1)) flips the twist sense
+        # about z; its follower carries the same mirror, which ``.T`` undoes.
+        sign = -1.0 if hip_is_mirrored({"child_to_follower": follower}) else 1.0
+        axes[side] = (
+            parent[:3, :3] @ rotation_z(-sign * float(twist[side])) @ follower[:3, :3].T
+        )
         centres[side] = parent[:3, 3].copy()
     residual = float(np.abs(axes["r"] - axes["l"]).max())
     if residual > PELVIS_AXES_TOLERANCE:
