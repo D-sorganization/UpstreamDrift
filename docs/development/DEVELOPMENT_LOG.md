@@ -128,12 +128,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13761
 - **Branch:** claude/13761-bushing-force-cap
-- **PR:** #13941
+- **PR:** #13941, #13939
 - **Paths:** see #13941
 - **Started:** 2026-10-27
-- **Last verified:** 2026-10-27 (`ae59243b`; collated from changes/13761-hrg-hx4-part-2-bushing-wrench-force-limi.md)
+- **Last verified:** 2026-10-28 (`bea503a3`; collated from changes/13761-hrg-hx4-part-1-per-hand-grippose-grip-fo.md)
 - **Summary:** HRG-HX4 part 2: bushing_wrench force_limit_n caps the bushing force magnitude, direction kept, moment unchanged, default None unlimited and bit-identical (option c, Python bushing law only)
-- **Next step:** After the field PR and this cap land, thread GripPose limits into the bushing engines through the inventory check and set their weld_bushing flags
+- **Next step:** Land the bushing-law force cap, then set the mujoco weld_bushing flag and route GripPose limits through the inventory check
 
 ### DL-#13935 · Bump Dnspython 2.8.0 to 2.9.0 in Both Lock Files to Clear CVE-2026-114605 From Pip-Audit
 

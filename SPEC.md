@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #13939 | HRG-HX4 part 1: per-hand GripPose grip_force_limit_n (default unlimited), validation, and fail-closed force_limit_enforcement inventory flag; every engine raises on a finite limit until the bushing-law cap lands (option c) |
 | 2026-10-28 | #13963 | Require _advance_to to reach target time within substep budget (UD-37) |
 | 2026-10-28 | #13945 | Pin pytest <9.2.0 across repository dependencies and CI workflows |
 | 2026-10-28 | #13944 | Add OSL-4 window sampling unit test for lift contact sheets |
