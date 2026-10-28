@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13869 · Architecture Budget: Full-Scan Mode With Checked-In Baseline Ratchet (UD-25)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13869
+- **Branch:** fix/13869-architecture-budget-baseline
+- **PR:** #13934
+- **Paths:** see #13934
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`d652ae11`; collated from changes/13869-architecture-budget-baseline.md)
+- **Summary:** Architecture budget: full-scan mode with checked-in baseline ratchet (UD-25)
+- **Next step:** Merge PR
+
+### DL-#13868 · Motion Matching: Architecture Guard and Canonical _Geodesic Helpers (UD-24)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13868
+- **Branch:** fix/13868-quaternion-helper-guard
+- **PR:** #13933
+- **Paths:** see #13933
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`d86cf2e5`; collated from changes/13868-quaternion-helper-guard.md)
+- **Summary:** Motion matching: architecture guard and canonical _geodesic helpers (UD-24)
+- **Next step:** Merge PR
+
 ### DL-#13761 · HRG-HX4 Part 2: Bushing_Wrench Force_Limit_N Caps the Bushing Force Magnitude, Direction Kept, Moment Unchanged, Default None Unlimited and Bit-Identical (Option C, Python Bushing Law Only)
 
 - **State:** in_review
