@@ -74,6 +74,17 @@ class TestGetConductivity:
         c_pd = g.get_conductivity(1200.0, power_density=1000)
         assert c_pd >= c0
 
+    def test_conductivity_does_not_depend_on_power_density(self) -> None:
+        """Issue #13938: sigma must evaluate at glass temperature only, independent of power_density."""
+        g = GlassPropertiesInterface()
+        for temp in (800.0, 1000.0, 1200.0, 1400.0):
+            c0 = g.get_conductivity(temp, power_density=0.0)
+            c1 = g.get_conductivity(temp, power_density=1e6)
+            assert c0 == c1
+            d0 = g._default_conductivity_model(temp, power_density=0.0)
+            d1 = g._default_conductivity_model(temp, power_density=1e6)
+            assert d0 == d1
+
 
 class TestGetResistivity:
     def test_resistivity_is_inverse_of_conductivity(self) -> None:
