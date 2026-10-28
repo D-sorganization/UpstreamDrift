@@ -6,7 +6,8 @@ operational-space inertia).  Unlike the kinematic manipulability in
 loop-closure Jacobian ``Jc`` (e.g. the other hand holding the club) reduces
 the mobility to that of the constrained system.
 
-Units: for k = 3 the mobility is [m/s per N] = [s kg^-1].  For k = 6 the rows
+Units: for k = 3 the mobility is [kg^-1]: acceleration per unit force
+(equivalently velocity change per unit impulse).  For k = 6 the rows
 are ordered [linear; angular] and the blocks are not commensurate; pass
 ``scales`` (a ``CharacteristicScales``) to rescale the angular rows by 1/L so that all
 rows are [m/s]-equivalent (angular velocity times L).
@@ -136,7 +137,7 @@ def _eigh_psd(mobility: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 def velocity_ellipsoid(mobility: np.ndarray) -> Ellipsoid:
-    """Velocity ellipsoid: radii ``sqrt(max(lambda, 0))`` per unit force."""
+    """Mobility (velocity) ellipsoid: radii ``sqrt(max(lambda, 0))`` [kg^-1/2]."""
     lam, vec = _eigh_psd(mobility)
     return Ellipsoid(vec, np.sqrt(np.maximum(lam, 0.0)), np.zeros(lam.shape, bool))
 
@@ -144,11 +145,14 @@ def velocity_ellipsoid(mobility: np.ndarray) -> Ellipsoid:
 def force_ellipsoid(
     mobility: np.ndarray, *, tol: float = EPSILON_SINGULARITY_DETECTION
 ) -> Ellipsoid:
-    """Force ellipsoid: radii ``1/sqrt(lambda)`` (force per unit velocity).
+    """Force ellipsoid: radii ``1/sqrt(lambda)`` [kg^1/2], the inertial dual.
+
+    ``1/lambda`` along each axis is the effective mass [kg] there.  This is an
+    inertial property of the (constrained) system, not a force capacity.
 
     Eigenvalues at or below ``tol * max(lambda_max, 1)`` (the unit floor keeps
-    round-off noise on a locked system singular) are flagged in ``singular`` and clamped to that floor, so radii
-    stay finite (cap = ``1/sqrt(floor)``) and renderers can special-case them.
+    round-off noise on a locked system singular) are flagged in ``singular``
+    and clamped to that floor, so radii stay finite (cap = ``1/sqrt(floor)``) and renderers can special-case them.
     """
     if not tol > 0:
         raise ValueError("tol must be positive")
