@@ -37,6 +37,11 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
+from src.shared.python.grip_contact.grip_force_limit import (
+    UNLIMITED,
+    GripForceLimit,
+    validate_grip_force_limit,
+)
 from src.shared.python.core.handedness import (
     DEFAULT_HANDEDNESS,
     Handedness,
@@ -154,6 +159,11 @@ class GripPose:
     lead_roll_offset_deg: float = 0.0
     #: Visual roll offset for the trail hand in degrees ([-30, 30]).
     trail_roll_offset_deg: float = 0.0
+    #: Cap in newtons on the lead hand's total pad normal force (HRG-HX4). A
+    #: force, not ``grip_strength_deg`` (the visual roll). ``"unlimited"`` or > 0.
+    lead_grip_force_limit_n: GripForceLimit = UNLIMITED
+    #: Same, for the trail hand.
+    trail_grip_force_limit_n: GripForceLimit = UNLIMITED
     #: ``"right"`` or ``"left"``; the lead hand is on the left of a right-hander.
     handedness: Handedness = DEFAULT_HANDEDNESS
 
@@ -182,6 +192,8 @@ class GripPose:
         )
         require(self.hand_spacing_m > 0.0, "hand_spacing_m must be positive")
         validate_handedness(self.handedness)
+        for name in ("lead_grip_force_limit_n", "trail_grip_force_limit_n"):
+            validate_grip_force_limit(getattr(self, name), name)
         ensure(
             self.distance_below_butt_m(Hand.TRAIL)
             > self.distance_below_butt_m(Hand.LEAD),
@@ -194,6 +206,13 @@ class GripPose:
         if hand is Hand.LEAD:
             return self.lead_below_butt_m
         return self.lead_below_butt_m + self.hand_spacing_m
+
+    def grip_force_limit_n(self, hand: Hand) -> GripForceLimit:
+        """Force limit of ``hand`` in newtons, or ``"unlimited"`` (the default)."""
+        require(isinstance(hand, Hand), f"hand must be a Hand, got {hand!r}")
+        if hand is Hand.LEAD:
+            return self.lead_grip_force_limit_n
+        return self.trail_grip_force_limit_n
 
     def side(self, hand: Hand) -> Side:
         """Anatomical side (``"L"``/``"R"``) of ``hand`` for this golfer."""

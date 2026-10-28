@@ -20,6 +20,12 @@ from pathlib import Path
 import re
 from typing import Any
 
+from src.shared.python.grip_contact.grip_force_limit import (
+    UNLIMITED,
+    GripForceLimit,
+    validate_grip_force_limit,
+)
+
 CURRENT_SCHEMA = "grip-capability-inventory/v1"
 REPO_ROOT_DEFAULT = Path(__file__).resolve().parents[4]
 DEFAULT_INVENTORY_PATH = (
@@ -31,6 +37,8 @@ REQUIRED_FEATURES = frozenset(
 )
 VALID_FINGER_MODES = frozenset({"none", "rigid_proxy", "articulated"})
 TRACKING_ISSUE_PATTERN = re.compile(r"^#\d+$")
+#: Mechanisms that can carry a ``grip_force_limit_n`` (HRG-HX4, #13761).
+FORCE_LIMIT_MECHANISMS = ("pad_contact", "weld_bushing")
 
 
 @dataclass(frozen=True)
@@ -144,12 +152,64 @@ class GripCapabilityInventory:
     description: str
     models: Mapping[str, ModelGripCapability]
     excluded: Mapping[str, ExcludedModel]
+    #: engine -> mechanism -> can enforce a finite ``grip_force_limit_n``.
+    #: An engine or mechanism that is absent cannot (fail closed).
+    force_limit_enforcement: Mapping[str, Mapping[str, bool]] = field(
+        default_factory=dict
+    )
 
     def __post_init__(self) -> None:
         """Validate inventory-level schema."""
         if self.schema != CURRENT_SCHEMA:
             raise ValueError(
                 f"Unsupported grip capability inventory schema: {self.schema!r} (expected {CURRENT_SCHEMA!r})"
+            )
+        for engine, flags in self.force_limit_enforcement.items():
+            unknown = set(flags) - set(FORCE_LIMIT_MECHANISMS)
+            if unknown or not all(isinstance(v, bool) for v in flags.values()):
+                raise ValueError(
+                    f"force_limit_enforcement[{engine!r}] must map "
+                    f"{FORCE_LIMIT_MECHANISMS} to bool, got {dict(flags)!r}"
+                )
+
+    def enforces_grip_force_limit(self, engine: str, mechanism: str) -> bool:
+        """Whether ``engine`` enforces a finite limit on ``mechanism`` (absent: no)."""
+        flags = self.force_limit_enforcement.get(engine, {})
+        return bool(flags.get(mechanism, False))
+
+    def force_limit_enforcement_report(self) -> dict[str, Any]:
+        """Per-engine enforcement of a finite limit; the default stays ``unlimited``."""
+        engines = {m.engine for m in self.models.values()}
+        engines |= set(self.force_limit_enforcement)
+        return {
+            "default": UNLIMITED,
+            "engines": {
+                e: {
+                    mech: self.enforces_grip_force_limit(e, mech)
+                    for mech in FORCE_LIMIT_MECHANISMS
+                }
+                for e in sorted(engines)
+            },
+        }
+
+    def require_grip_force_limit_enforceable(
+        self, engine: str, mechanism: str, limit: GripForceLimit
+    ) -> None:
+        """Fail closed: a finite ``limit`` needs an engine that can enforce it.
+
+        Preconditions: ``limit`` passes :func:`validate_grip_force_limit` and
+        ``mechanism`` is one of :data:`FORCE_LIMIT_MECHANISMS`.
+        Raises ``ValueError`` if the limit is finite and ``engine`` is unknown
+        or does not enforce it on ``mechanism``; ``"unlimited"`` always passes.
+        """
+        if validate_grip_force_limit(limit) == UNLIMITED:
+            return
+        if mechanism not in FORCE_LIMIT_MECHANISMS:
+            raise ValueError(f"unknown force-limit mechanism {mechanism!r}")
+        if not self.enforces_grip_force_limit(engine, mechanism):
+            raise ValueError(
+                f"engine {engine!r} cannot enforce a finite grip_force_limit_n "
+                f"({limit} N) on {mechanism}; use 'unlimited'"
             )
 
     def get_model(self, model_id: str) -> ModelGripCapability | None:
@@ -259,6 +319,10 @@ def load_grip_capability_inventory(
         description=str(data.get("description", "")),
         models=models_dict,
         excluded=excluded_dict,
+        force_limit_enforcement={
+            str(e): dict(flags)
+            for e, flags in data.get("force_limit_enforcement", {}).items()
+        },
     )
 
 
