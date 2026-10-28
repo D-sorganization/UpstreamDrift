@@ -165,7 +165,7 @@ jobs:
             trimesh \
             c3d \
             ezdxf \
-            pytest pytest-cov pytest-timeout pytest-xdist
+            "pytest>=9.0.3,<9.2.0" pytest-cov pytest-timeout pytest-xdist
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           pip uninstall -y pytest-vcr pytest-recording || true
 

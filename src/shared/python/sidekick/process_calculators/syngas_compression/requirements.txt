@@ -4,5 +4,5 @@ numpy>=2.0.1  # Array operations and numerical calculations
 scipy>=1.13.1  # Scientific algorithms (optimization, integration)
 
 # Testing
-pytest>=9.0.3  # Testing framework
+pytest>=9.0.3,<9.2.0  # Testing framework (cap: 9.2 breaks pytest-benchmark/nested approx)
 pytest-cov>=4.0.0  # Coverage plugin for pytest

@@ -52,4 +52,4 @@ def test_docs_governance_workflow_installs_pytest_asyncio() -> None:
 
     assert len(install_steps) == 1
     install_command = install_steps[0]["run"]
-    assert "pytest pytest-asyncio pytest-timeout" in install_command
+    assert '"pytest>=9.0.3,<9.2.0" pytest-asyncio pytest-timeout' in install_command
