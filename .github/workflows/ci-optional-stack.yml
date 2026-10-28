@@ -499,7 +499,6 @@ jobs:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
         run: |
-          # shellcheck disable=SC2016
           echo "### Unit Tests (Optional Stack)" >> "$GITHUB_STEP_SUMMARY"
           set +e
           set -o pipefail
@@ -531,6 +530,7 @@ jobs:
           )
           for target in "${unit_targets[@]}"; do
             echo "## Optional-stack unit target: $target" | tee -a /tmp/unit-test-results.txt
+            # shellcheck disable=SC2016
             run_with_heartbeat "optional-stack unit target $target" bash -o pipefail -c '
               xvfb-run --auto-servernum pytest "$1" \
                 -p no:xvfb \
