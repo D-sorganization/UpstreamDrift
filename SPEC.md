@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #13973 | Enforce engine availability assertion and cite Simscape baseline prerequisite (UD-26) |
 | 2026-10-28 | #13975 | Clarify and assert zero-linear-velocity contract in single_floating_body_h_g, documenting zero linear Coriolis bias under center-of-mass frame conventions and linking Epic #13789 (UD-14) |
 | 2026-10-28 | #13939 | HRG-HX4 part 1: per-hand GripPose grip_force_limit_n (default unlimited), validation, and fail-closed force_limit_enforcement inventory flag; every engine raises on a finite limit until the bushing-law cap lands (option c) |
 | 2026-10-28 | #13963 | Require _advance_to to reach target time within substep budget (UD-37) |
