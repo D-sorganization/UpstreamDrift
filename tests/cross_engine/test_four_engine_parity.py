@@ -50,6 +50,7 @@ from tests.cross_engine.baseline_provenance import (
     require_producing_engine,
 )
 from src.shared.python.engine_core.engine_availability import (
+    is_dependency_present,
     is_drake_available,
     is_mujoco_available,
     is_pinocchio_available,
@@ -179,11 +180,13 @@ def load_simscape_golden_baseline() -> SimscapeGoldenBaseline:
 
 
 def simscape_baseline_or_skip() -> SimscapeGoldenBaseline:
-    """Return the Simscape baseline, or skip as withheld/not-validated."""
+    """Return the Simscape baseline, or skip as withheld/not-validated (#12013, #13789)."""
     try:
         return load_simscape_golden_baseline()
     except BaselineProvenanceError as exc:
-        pytest.skip(f"Simscape baseline unavailable (not validated): {exc}")
+        pytest.skip(
+            f"Simscape baseline unavailable (not validated; prerequisite for cross-engine parity under #13789): {exc}"
+        )
 
 
 # --------------------------------------------------------------------------- #
@@ -649,7 +652,7 @@ def test_parity_tolerance_gate_boundary_conditions() -> None:
 
 
 def test_engine_dynamic_availability_guards() -> None:
-    """Engine availability guards execute without exceptions and return booleans."""
+    """Engine availability guards execute without exceptions and reflect installed engine status."""
     mj = is_mujoco_available()
     pin = is_pinocchio_available()
     drake = is_drake_available()
@@ -657,3 +660,26 @@ def test_engine_dynamic_availability_guards() -> None:
     assert isinstance(mj, bool)
     assert isinstance(pin, bool)
     assert isinstance(drake, bool)
+
+    # In environments where a package is discoverable, guard must return True
+    if is_dependency_present("mujoco"):
+        assert mj is True, (
+            "is_mujoco_available() returned False despite mujoco package being discoverable"
+        )
+    if is_dependency_present("pinocchio"):
+        assert pin is True, (
+            "is_pinocchio_available() returned False despite pinocchio package being discoverable"
+        )
+    if is_dependency_present("drake"):
+        assert drake is True, (
+            "is_drake_available() returned False despite pydrake package being discoverable"
+        )
+
+
+def test_simscape_baseline_or_skip_diagnostic_records_prerequisite() -> None:
+    """simscape_baseline_or_skip must provide clear diagnostic citing prerequisite #12013 and epic #13789."""
+    with pytest.raises(pytest.skip.Exception) as exc_info:
+        simscape_baseline_or_skip()
+    msg = str(exc_info.value)
+    assert "#12013" in msg
+    assert "#13789" in msg
