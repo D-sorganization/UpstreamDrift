@@ -1021,10 +1021,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13045
 - **Branch:** merged via #13823
-- **PR:** #13823, #13845, #13835, #13833, #13832
+- **PR:** #13823, #13845, #13835, #13833, #13832, #13944
 - **Paths:** see #13823
 - **Started:** 2026-10-26
-- **Last verified:** 2026-10-26 (`b8436dd8`; collated from changes/13045-lift-video-render-api.md)
+- **Last verified:** 2026-10-28 (`01da1de0`; collated from changes/13045-osl4-contact-sheet-test.md)
 - **Summary:** feat(lifting): barbell visual geometry and lift video camera framing
 - **Next step:** Shipped in PR #13823.
 
