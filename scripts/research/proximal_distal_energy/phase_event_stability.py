@@ -15,12 +15,6 @@ from typing import TypeAlias
 import numpy as np
 import numpy.typing as npt
 
-from src.shared.python.pendulum_simulator.sensitivity import (
-    FiniteTimeSpectra,
-    StateScales as SharedStateScales,
-    finite_time_spectra,
-    normalized_transition,
-)
 from src.shared.python.simulation_backends import GolfModelParams, make_backend
 from src.shared.python.simulation_backends.protocol import SimState, SimulationBackend
 
@@ -49,8 +43,10 @@ def _square_matrix(name: str, value: npt.ArrayLike) -> FloatArray:
 
 
 @dataclass(frozen=True, slots=True)
-class StateScales(SharedStateScales):
+class StateScales:
     """Positive scales for the four analytical state coordinates."""
+
+    values: tuple[float, ...]
 
     def __post_init__(self) -> None:
         values = tuple(float(value) for value in self.values)
@@ -59,6 +55,20 @@ class StateScales(SharedStateScales):
         ):
             raise ValueError("state scales must contain four finite positive values")
         object.__setattr__(self, "values", values)
+
+    @property
+    def array(self) -> FloatArray:
+        """Return a defensive NumPy representation."""
+
+        return np.asarray(self.values, dtype=float)
+
+
+@dataclass(frozen=True, slots=True)
+class FiniteTimeSpectra:
+    """Singular values and finite-time exponents for transition maps."""
+
+    singular_values: FloatArray
+    exponents_per_s: FloatArray
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,6 +117,18 @@ class DirectEventSensitivity:
     status: str
     derivative_s_per_scaled_state: FloatArray | None
     crossing_statuses: tuple[str, ...]
+
+
+def normalized_transition(
+    transition: npt.ArrayLike, state_scales: StateScales
+) -> FloatArray:
+    """Map a dimensional state transition into declared scaled coordinates."""
+
+    matrix = _square_matrix("transition", transition)
+    scales = state_scales.array
+    if matrix.shape != (scales.size, scales.size):
+        raise ValueError("transition dimension must match state scales")
+    return matrix * scales[np.newaxis, :] / scales[:, np.newaxis]
 
 
 def _step_state(
@@ -402,6 +424,35 @@ def first_positive_crossing(
     event_time = float(times[index] + fraction * (times[index + 1] - times[index]))
     status = "transverse_candidate" if indices.size == 1 else "multiple"
     return Crossing(status, int(indices.size), index, fraction, event_time)
+
+
+def finite_time_spectra(
+    transitions: npt.ArrayLike, elapsed_time_s: npt.ArrayLike
+) -> FiniteTimeSpectra:
+    """Compute singular spectra and local finite-window exponents.
+
+    The first exponent row is ``NaN`` because a zero-duration Lyapunov rate is
+    undefined.  Singular values remain available at the initial identity map.
+    """
+
+    maps = np.asarray(transitions, dtype=float)
+    times = _vector("elapsed_time_s", elapsed_time_s)
+    if (
+        maps.ndim != 3
+        or maps.shape[0] != times.size
+        or maps.shape[1] == 0
+        or maps.shape[1] != maps.shape[2]
+        or not np.all(np.isfinite(maps))
+    ):
+        raise ValueError("transitions must be finite square maps on the time grid")
+    if times.size < 2 or times[0] != 0.0 or np.any(np.diff(times) <= 0.0):
+        raise ValueError("elapsed time must start at zero and increase strictly")
+    singular = np.asarray(
+        [np.linalg.svd(matrix, compute_uv=False) for matrix in maps], dtype=float
+    )
+    exponents = np.full_like(singular, np.nan)
+    exponents[1:] = np.log(singular[1:]) / times[1:, np.newaxis]
+    return FiniteTimeSpectra(singular_values=singular, exponents_per_s=exponents)
 
 
 def event_time_sensitivity(
