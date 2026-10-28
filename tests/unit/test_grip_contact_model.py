@@ -661,3 +661,105 @@ class TestDynamicSwingValidation:
         margins = model.check_slip_margin()
         assert not margins["any_slipping"]
         assert margins["min_margin"] > 0
+
+
+class TestStaticEquilibrium:
+    """Tests for static equilibrium evaluation in GripContactModel (UD-30, #13959)."""
+
+    @pytest.mark.unit
+    def test_static_equilibrium_true_when_balanced_without_transverse_force(
+        self,
+    ) -> None:
+        """Properly balanced vertical support with zero transverse force is in equilibrium."""
+        model = GripContactModel()
+        contact = ContactPoint(
+            position=np.zeros(3),
+            normal=np.array([0.0, 0.0, 1.0]),
+            normal_force=10.0,
+            tangent_force=np.zeros(3),
+            slip_velocity=np.zeros(3),
+            state=ContactState.STICKING,
+            body_name="club_grip",
+        )
+        model.current_state = GripContactState(
+            timestamp=0.0,
+            contacts=[contact],
+            total_normal_force=10.0,
+            total_tangent_force=np.zeros(3),
+            num_sticking=1,
+            num_slipping=0,
+            center_of_pressure=np.zeros(3),
+        )
+
+        res = model.check_static_equilibrium(club_weight=10.0)
+        assert bool(res["equilibrium"]) is True
+        assert res["support_ratio"] == pytest.approx(1.0)
+
+    @pytest.mark.unit
+    def test_static_equilibrium_fails_when_over_supported(self) -> None:
+        """Excess vertical contact force (e.g. 1.5x weight) accelerates upward and is not equilibrium."""
+        model = GripContactModel()
+        contact = ContactPoint(
+            position=np.zeros(3),
+            normal=np.array([0.0, 0.0, 1.0]),
+            normal_force=15.0,
+            tangent_force=np.zeros(3),
+            slip_velocity=np.zeros(3),
+            state=ContactState.STICKING,
+            body_name="club_grip",
+        )
+        model.current_state = GripContactState(
+            timestamp=0.0,
+            contacts=[contact],
+            total_normal_force=15.0,
+            total_tangent_force=np.zeros(3),
+            num_sticking=1,
+            num_slipping=0,
+            center_of_pressure=np.zeros(3),
+        )
+
+        res = model.check_static_equilibrium(club_weight=10.0)
+        assert res["equilibrium"] is False, (
+            "Over-supporting the club (1.5x weight) must not be reported as static equilibrium"
+        )
+
+    @pytest.mark.unit
+    def test_static_equilibrium_fails_with_large_transverse_force(self) -> None:
+        """Large transverse force orthogonal to gravity produces net acceleration and is not equilibrium."""
+        model = GripContactModel()
+        contact = ContactPoint(
+            position=np.zeros(3),
+            normal=np.array([0.0, 0.0, 1.0]),
+            normal_force=10.0,
+            tangent_force=np.array([25.0, 0.0, 0.0]),  # 2.5x weight sideways
+            slip_velocity=np.zeros(3),
+            state=ContactState.STICKING,
+            body_name="club_grip",
+        )
+        model.current_state = GripContactState(
+            timestamp=0.0,
+            contacts=[contact],
+            total_normal_force=10.0,
+            total_tangent_force=np.array([25.0, 0.0, 0.0]),
+            num_sticking=1,
+            num_slipping=0,
+            center_of_pressure=np.zeros(3),
+        )
+
+        res = model.check_static_equilibrium(club_weight=10.0)
+        assert res["equilibrium"] is False, (
+            "Large transverse force orthogonal to gravity must not be reported as static equilibrium"
+        )
+
+    @pytest.mark.unit
+    def test_static_equilibrium_rejects_invalid_inputs(self) -> None:
+        """Preconditions: non-positive club_weight or zero gravity_direction must raise ValueError."""
+        model = GripContactModel()
+        with pytest.raises(ValueError, match="club_weight"):
+            model.check_static_equilibrium(club_weight=0.0)
+        with pytest.raises(ValueError, match="club_weight"):
+            model.check_static_equilibrium(club_weight=-5.0)
+        with pytest.raises(ValueError, match="gravity_direction"):
+            model.check_static_equilibrium(
+                club_weight=5.0, gravity_direction=np.zeros(3)
+            )
