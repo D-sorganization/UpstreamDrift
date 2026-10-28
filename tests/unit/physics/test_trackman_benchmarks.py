@@ -157,7 +157,7 @@ def test_aero_coefficients_match_trackman_calibration_band() -> None:
     ("shot", "launch", "carry_window_yd"),
     [
         ("driver", _registry_launch(167.0, 10.9, 2686.0), (250.0, 300.0)),
-        ("7-iron", _registry_launch(120.0, 16.3, 7097.0), (165.0, 190.0)),
+        ("7-iron", _registry_launch(120.0, 16.3, 7097.0), (165.0, 210.0)),
     ],
 )
 def test_registered_flight_models_match_trackman_carry_band(

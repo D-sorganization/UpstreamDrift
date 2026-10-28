@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #13954 | OpenSim: correct SimTK quaternion ordering documentation in coord_map (UD-12) |
+| 2026-10-28 | #13950 | Pinocchio viz: adjust 1-based impact_idx to 0-based indexing in error_timecourse (UD-23) |
+| 2026-10-28 | #13942 | Extract the WSCG case power channels and metrics record into run_two_hand_wscg_case, reduce _analyze_case to a short shell and retire its issue 9233 budget exception (part 2). |
 | 2026-10-28 | #13948 | Restore docstrings in motion_matching cost term helpers (UD-20) |
 | 2026-10-28 | #13934 | Architecture budget: full-scan mode with checked-in baseline ratchet (UD-25) |
 | 2026-10-28 | #13933 | Motion matching: architecture guard and canonical _geodesic helpers (UD-24) |
