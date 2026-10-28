@@ -24,6 +24,7 @@ from src.tools.native_viewer_export.backends._scene_overlays import (  # noqa: E
 )
 from src.tools.native_viewer_export.core import OverlayFeed  # noqa: E402
 from src.tools.native_viewer_export.hand_mobility_glyphs import (  # noqa: E402
+    MASS_SCALE_M,
     MAX_RADIUS_M,
     MIN_RADIUS_M,
     hand_mobility_glyphs,
@@ -85,7 +86,7 @@ def test_fixed_scale_clamp_flag_and_wording(mobilities) -> None:
         assert "effective mass (kg)" in g.label and "force capacity" not in g.label
     force = hand_mobility_glyphs(mobilities, "force")[0]
     top = max(mobilities["lead"].effective_mass_kg)
-    assert ("[clamped]" in force.label) == (0.10 * np.sqrt(top) > MAX_RADIUS_M)
+    assert ("[clamped]" in force.label) == (MASS_SCALE_M * np.sqrt(top) > MAX_RADIUS_M)
     assert "effective mass" in OverlayFeed.legend(
         _feed(mobilities, "both").glyphs_at(0)
     )

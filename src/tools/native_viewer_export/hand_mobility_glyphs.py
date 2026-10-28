@@ -2,8 +2,9 @@
 
 One FIXED scale per clip, shared by both hands and all frames, so sizes compare
 across hands and time: the mobility ellipsoid has radius
-``0.10 m * sqrt(lambda / 1 kg^-1)`` and its inertial dual (effective mass)
-``0.10 m * sqrt(m_eff / 1 kg)``, both clamped to [0.01, 0.40] m.  A clamped
+``0.10 m * sqrt(lambda / 1 kg^-1)`` and its inertial dual (effective mass) its
+own scale, ``0.05 m * sqrt(m_eff / 1 kg)`` (the two never share a scale), both
+clamped to [0.01, 0.40] m.  A clamped
 glyph is flagged in its label and drawn fainter.  Labels speak of effective
 mass (kg), an inertial property, never a force capacity.
 """
@@ -19,7 +20,8 @@ from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
 from src.shared.python.force_overlay.palette import hand_ellipsoid_rgba
 
 KINDS: Final = ("mobility", "force", "both")
-SCALE_M: Final = 0.10  # radius at 1 kg^-1 (mobility) or 1 kg (effective mass)
+SCALE_M: Final = 0.10  # mobility radius at 1 kg^-1
+MASS_SCALE_M: Final = 0.05  # effective-mass radius at 1 kg
 MIN_RADIUS_M: Final = 0.01
 MAX_RADIUS_M: Final = 0.40
 CLAMPED_ALPHA_FACTOR: Final = 0.5
@@ -55,7 +57,7 @@ def hand_mobility_glyphs(
             if name == "mobility":
                 radii = SCALE_M * np.sqrt(np.asarray(hm.mobility_eigenvalues))
             else:
-                radii = SCALE_M * np.sqrt(np.asarray(hm.effective_mass_kg))
+                radii = MASS_SCALE_M * np.sqrt(np.asarray(hm.effective_mass_kg))
             clamped = bool((radii < MIN_RADIUS_M).any() or (radii > MAX_RADIUS_M).any())
             alpha = base[3] * (CLAMPED_ALPHA_FACTOR if clamped else 1.0)
             glyph = EllipsoidGlyph(

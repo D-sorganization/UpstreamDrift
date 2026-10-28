@@ -118,8 +118,8 @@ def label_variant_hex(label: str, base_hex: str) -> str:
 #: (#14003). Defined once; lead is blue and trail is orange so they stay
 #: distinguishable (also under common colour-vision deficiencies).
 HAND_ELLIPSOID_PALETTE: Final[dict[str, tuple[float, float, float, float]]] = {
-    "lead": (0.0, 0.447, 0.698, 0.45),
-    "trail": (0.835, 0.369, 0.0, 0.45),
+    "lead": (0.0, 0.447, 0.698, 0.3),
+    "trail": (0.835, 0.369, 0.0, 0.3),
 }
 
 
