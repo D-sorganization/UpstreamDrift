@@ -1,26 +1,4 @@
 {
   "schema_version": 1,
-  "waivers": [
-    {
-      "vuln": "CVE-2026-116577",
-      "package": "tornado",
-      "reason": "Newly published CVE; upgrade to tornado 6.6 pending lockfile refresh",
-      "tracked_in": "#13434",
-      "expires_on": "2026-11-15"
-    },
-    {
-      "vuln": "CVE-2026-115927",
-      "package": "tornado",
-      "reason": "Newly published CVE; upgrade to tornado 6.6 pending lockfile refresh",
-      "tracked_in": "#13434",
-      "expires_on": "2026-11-15"
-    },
-    {
-      "vuln": "CVE-2026-116578",
-      "package": "tornado",
-      "reason": "Newly published CVE; upgrade to tornado 6.6 pending lockfile refresh",
-      "tracked_in": "#13434",
-      "expires_on": "2026-11-15"
-    }
-  ]
+  "waivers": []
 }
