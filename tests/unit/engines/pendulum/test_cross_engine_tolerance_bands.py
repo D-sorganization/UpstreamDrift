@@ -19,6 +19,8 @@ from src.shared.python.pendulum_simulator.tolerance_bands import (
     compute_cross_engine_tolerance_band,
 )
 
+pytestmark = [pytest.mark.unit]
+
 
 def test_red_plant_five_percent_mass_matrix_error_detected() -> None:
     """A planted 5% mass matrix error on a same-spec pair is caught by derived band.
