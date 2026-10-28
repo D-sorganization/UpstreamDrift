@@ -183,3 +183,25 @@ def test_state_transition_matches_direct_double_pendulum_perturbations() -> None
     assert rollout.transition.shape == (25, 4, 4)
     np.testing.assert_array_equal(rollout.transition[0], np.eye(4))
     np.testing.assert_allclose(direct, predicted, rtol=2e-5, atol=2e-7)
+
+
+def test_shared_sensitivity_parity_with_research_implementation() -> None:
+    """Issue #13793: Verify shared sensitivity machinery matches research baseline."""
+    from src.shared.python.pendulum_simulator.sensitivity import (
+        StateScales as SharedStateScales,
+        finite_time_spectra as shared_finite_time_spectra,
+        normalized_transition as shared_normalized_transition,
+    )
+
+    scales = StateScales((1.0, 2.0, 3.0, 4.0))
+    shared_scales = SharedStateScales((1.0, 2.0, 3.0, 4.0))
+    mat = np.eye(4) * 2.0
+    res_local = normalized_transition(mat, scales)
+    res_shared = shared_normalized_transition(mat, shared_scales)
+    np.testing.assert_allclose(res_local, res_shared)
+
+    transitions = np.array([np.eye(4), np.eye(4) * 1.5])
+    times = np.array([0.0, 0.1])
+    spec_local = finite_time_spectra(transitions, times)
+    spec_shared = shared_finite_time_spectra(transitions, times)
+    np.testing.assert_allclose(spec_local.singular_values, spec_shared.singular_values)
