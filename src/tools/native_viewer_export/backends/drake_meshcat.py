@@ -216,7 +216,7 @@ class DrakeMeshcatBackend:
             with MeshcatPage(
                 meshcat.web_url(), settings.width, settings.height
             ) as page:
-                looks = view_lookats(settings, indices, overlay)
+                looks = view_lookats(settings, indices, swing)
                 for pos, k in enumerate(indices):
                     set_state(k)
                     update_meshcat_frame(ball, glyphs, overlay, swing, k, shading)
