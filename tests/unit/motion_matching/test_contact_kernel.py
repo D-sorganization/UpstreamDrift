@@ -824,3 +824,57 @@ def test_smooth_contact_law_kernel_is_separate_and_c_infinity_at_kinks(
     assert float(smooth_tight.spin_moment_nm) == pytest.approx(
         float(qual.spin_moment_nm), rel=1e-9
     )
+
+
+@pytest.mark.unit
+def test_contact_law_kernel_torsional_moment_static_friction_contract_documented() -> (
+    None
+):
+    """Issue #13970 / UD-33: verify contact_law_kernel documents constant static friction contract and #13757."""
+    import inspect
+
+    doc = inspect.getdoc(contact_law_kernel) or ""
+    assert "static_friction" in doc
+    assert "torsional" in doc or "spin" in doc
+    assert "#13757" in doc
+    assert "#13970" in doc
+
+
+@pytest.mark.unit
+def test_contact_law_kernel_evaluates_spin_moment_with_static_friction_independent_of_linear_slip() -> (
+    None
+):
+    """Issue #13970 / UD-33: verify torsional spin moment is evaluated with static friction independent of linear slip velocity."""
+    params = ContactKernelParams(
+        stiffness_n_m=1e5,
+        dissipation_s_m=0.1,
+        static_friction=0.8,
+        dynamic_friction=0.4,
+        viscous_friction=0.0,
+        transition_velocity_m_s=0.01,
+        patch_radius_m=0.02,
+        spin_transition_rad_s=1.0,
+    )
+    # Zero linear slip vs high linear slip
+    res_stick = contact_law_kernel(
+        penetration_m=0.005,
+        normal_velocity_m_s=0.0,
+        tangential_velocity_m_s=0.0,
+        params=params,
+        spin_rate_rad_s=5.0,
+    )
+    res_slip = contact_law_kernel(
+        penetration_m=0.005,
+        normal_velocity_m_s=0.0,
+        tangential_velocity_m_s=1.0,  # 100x transition velocity -> dynamic friction
+        params=params,
+        spin_rate_rad_s=5.0,
+    )
+    # Spin moment must be non-zero and identical because torsional_moment_kernel uses params.static_friction
+    assert res_stick.spin_moment_nm != 0.0
+    assert float(res_stick.spin_moment_nm) == pytest.approx(
+        float(res_slip.spin_moment_nm)
+    )
+    # Tangential forces differ due to velocity-dependent mu(v)
+    assert float(res_stick.tangential_force_n) == 0.0
+    assert float(res_slip.tangential_force_n) != 0.0

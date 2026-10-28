@@ -405,6 +405,9 @@ def contact_law_kernel(
     1. Contact onset at $\\delta = 0$ (and damping liftoff at $1 - c v_n = 0$).
     2. Zero tangential speed at $v_t = 0$ ($\\|v_t\\|_2 = 0$).
     3. Stick/slip transition knee around $|v_t| \\sim v_{\\mathrm{tr}}$.
+
+    Contract (Issue #13970 / Epic #13757, UD-33): torsional spin moment
+    evaluates with constant static_friction decoupled from slip speed.
     """
     ops, delta, v_n, v_t, omega_n, zero, is_vec, zero_vt = _prepare_kernel_arrays(
         penetration_m, normal_velocity_m_s, tangential_velocity_m_s, spin_rate_rad_s, xp
