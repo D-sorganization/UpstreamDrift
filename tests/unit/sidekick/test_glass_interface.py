@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 from sidekick.calculators.electrical.glass_interface import (
     GlassPropertiesInterface,
 )
+
+pytestmark = [pytest.mark.unit]
 
 
 class TestGlassPropertiesInterfaceInit:
@@ -73,6 +77,18 @@ class TestGetConductivity:
         c0 = g.get_conductivity(1200.0, power_density=0)
         c_pd = g.get_conductivity(1200.0, power_density=1000)
         assert c_pd >= c0
+
+    @pytest.mark.unit
+    def test_conductivity_independent_of_power_density(self) -> None:
+        """Glass conductivity evaluates strictly at glass temperature without Joule heating bias (#13938)."""
+        g = GlassPropertiesInterface()
+        for t in [800.0, 1000.0, 1200.0, 1400.0]:
+            c0 = g.get_conductivity(t, power_density=0.0)
+            c_high = g.get_conductivity(t, power_density=1e6)
+            assert c0 == pytest.approx(c_high)
+            assert g._default_conductivity_model(t, 0.0) == pytest.approx(
+                g._default_conductivity_model(t, 1e6)
+            )
 
 
 class TestGetResistivity:
