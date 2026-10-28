@@ -657,3 +657,12 @@ def test_engine_dynamic_availability_guards() -> None:
     assert isinstance(mj, bool)
     assert isinstance(pin, bool)
     assert isinstance(drake, bool)
+
+
+def test_simscape_baseline_or_skip_diagnostic_records_prerequisite() -> None:
+    """simscape_baseline_or_skip must provide clear diagnostic citing prerequisite #12013 and epic #13789."""
+    with pytest.raises(pytest.skip.Exception) as exc_info:
+        simscape_baseline_or_skip()
+    msg = str(exc_info.value)
+    assert "#12013" in msg
+    assert "#13789" in msg
