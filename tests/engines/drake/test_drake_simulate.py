@@ -118,6 +118,7 @@ class TestEvaluateTorquePolynomial:
             evaluate_torque_polynomial(np.zeros((2, 7)), 0.0, n_joints=2)
 
 
+@pytest.mark.unit
 class TestFiniteDifferenceQdd:
     """Finite-difference generalized accelerations from velocity log (UD-36, #13971)."""
 
