@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13969 · Clarify VelocityRepresentation Origin Convention in Docstrings, Documenting Evaluation at Base Reference Point / Center of Mass vs Featherstone World Origin O and Linking Epic #13789 (UD-13)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13969
+- **Branch:** doc/13969-clarify-inertial-spatial-velocity-origin
+- **PR:** #13976
+- **Paths:** see #13976
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`2ba8eb82`; collated from changes/13969-clarify-inertial-spatial-velocity-origin.md)
+- **Summary:** Clarify VelocityRepresentation origin convention in docstrings, documenting evaluation at base reference point / center of mass vs Featherstone world origin O and linking Epic #13789 (UD-13)
+- **Next step:** Address kinematic coordinate transformations for bodies displaced from world origin under Epic #13789
+
 ### DL-#13967 · Enforce Engine Availability Assertion and Cite Simscape Baseline Prerequisite (UD-26)
 
 - **State:** in_review
