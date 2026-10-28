@@ -116,3 +116,15 @@ def test_buildkit_gc_policy_matches_fleet_cache_contract() -> None:
     assert 'reservedSpace = "5GB"' in content
     assert 'maxUsedSpace = "30GB"' in content
     assert 'minFreeSpace = "20%"' in content
+
+
+def _get_all_workflows() -> list[Path]:
+    """Return all GitHub workflow files in .github/workflows."""
+    return sorted(WORKFLOWS_DIR.glob("*.yml"))
+
+
+def test_conda_env_steps_use_host_local_pkgs_dir() -> None:
+    """Parametrised across all workflows: any conda step must set CONDA_PKGS_DIRS (#13579)."""
+    raise NotImplementedError(
+        "TDD red: test_conda_env_steps_use_host_local_pkgs_dir not implemented"
+    )
