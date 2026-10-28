@@ -6018,7 +6018,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json": {
-      "sha256": "5f9a4231f16ea8085976c8d3af0a3ef58b5e8f5d39338649932239bc2f906aa5",
+      "sha256": "c8717363798eb01b63056550ae6141ef41dcd7f0f7664524dc970fd3b9b11903",
       "bytes": 32901,
       "referenced_by": [
         "PD-CLAIM-002",
@@ -6438,8 +6438,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "1abb229efb7af0bbd641b05d9e0f4be8796ab10a120934f604a888ec4b2a5c52",
-      "bytes": 167256,
+      "sha256": "f2b0074649d0428164773708e0f520f7a823a77311fbdd56c72ba059096748d6",
+      "bytes": 167257,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -7905,8 +7905,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py": {
-      "sha256": "b9452898b22c529b1fbad8280286f8800a74bbfd01841d492f1737817cc5eca3",
-      "bytes": 20941,
+      "sha256": "624c57d6b2e625d5a3c64aa7738ff53df38ac6f606198007998c98b0cd644e63",
+      "bytes": 15372,
       "referenced_by": [
         "PD-CLAIM-104",
         "PD-CLAIM-105",
