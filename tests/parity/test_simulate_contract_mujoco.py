@@ -241,7 +241,9 @@ def test_advance_to_returns_false_when_substep_budget_exhausted() -> None:
     t_target = 5.0 * float(model.opt.timestep)
 
     success = _advance_to(model, data, t_target, max_substeps=1)
-    assert not success, "_advance_to must fail when substep budget is exhausted before target"
+    assert not success, (
+        "_advance_to must fail when substep budget is exhausted before target"
+    )
     assert data.time + 0.5 * model.opt.timestep < t_target
 
 
@@ -262,4 +264,3 @@ def test_advance_to_returns_true_when_budget_sufficient() -> None:
     success = _advance_to(model, data, t_target, max_substeps=10)
     assert success, "_advance_to must succeed when budget is sufficient"
     assert abs(data.time - t_target) <= 0.5 * model.opt.timestep
-
