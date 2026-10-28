@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13972 · OpenSim Spine: Catalog Coordinate Unit-Speed Probing in Inverse_Dynamics _U_Indices (UD-39)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13972
+- **Branch:** test/13972-catalog-coordinate-unit-speed-probing
+- **PR:** #13983
+- **Paths:** see #13983
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`03f7e9b2`; collated from changes/13972-catalog-coordinate-unit-speed-probing.md)
+- **Summary:** OpenSim spine: catalog coordinate unit-speed probing in inverse_dynamics _u_indices (UD-39)
+- **Next step:** Merge PR
+
+### DL-#13970 · Catalog Constant Static Friction Contract in Contact_Law_Kernel for Torsional_Moment_Kernel and Link Epic #13757 (UD-33)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13970
+- **Branch:** test/13970-catalog-torsional-moment-static-friction
+- **PR:** #13980
+- **Paths:** see #13980
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`eac54cbe`; collated from changes/13970-catalog-torsional-moment-static-friction.md)
+- **Summary:** Catalog constant static friction contract in contact_law_kernel for torsional_moment_kernel and link Epic #13757 (UD-33)
+- **Next step:** Develop coupled slip-spin friction limit surface under Epic #13757 (HRG-HX)
+
 ### DL-#13969 · Clarify VelocityRepresentation Origin Convention in Docstrings, Documenting Evaluation at Base Reference Point / Center of Mass vs Featherstone World Origin O and Linking Epic #13789 (UD-13)
 
 - **State:** in_review
