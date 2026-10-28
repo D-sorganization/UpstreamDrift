@@ -230,6 +230,7 @@ def test_single_floating_body_rejects_non_finite_mass(bad_mass: float) -> None:
         )
 
 
+@pytest.mark.unit
 def test_single_floating_body_zero_linear_velocity_contract_documented() -> None:
     """Issue #13968 / UD-14: verify single_floating_body_h_g documents zero linear velocity contract and #13789."""
     doc = inspect.getdoc(single_floating_body_h_g) or ""
