@@ -219,3 +219,47 @@ def test_q_width_matches_model_nq() -> None:
     assert out.tau.shape[1] == nu
     # Every timestep keeps the canonical width (no ragged frames).
     assert all(row.size == nq for row in out.q)
+
+
+# --------------------------------------------------------------------------- #
+# Advance-To Substep Budget Contract (UD-37, #13962)
+# --------------------------------------------------------------------------- #
+
+
+def test_advance_to_returns_false_when_substep_budget_exhausted() -> None:
+    """_advance_to must return False if max_substeps is reached before t_target."""
+    import mujoco
+    from src.engines.physics_engines.mujoco._golf_swing_upper_body_xml import (
+        UPPER_BODY_GOLF_SWING_XML,
+    )
+    from src.engines.physics_engines.mujoco.python.motion_matching.simulate import (
+        _advance_to,
+    )
+
+    model = mujoco.MjModel.from_xml_string(UPPER_BODY_GOLF_SWING_XML)
+    data = mujoco.MjData(model)
+    t_target = 5.0 * float(model.opt.timestep)
+
+    success = _advance_to(model, data, t_target, max_substeps=1)
+    assert not success, "_advance_to must fail when substep budget is exhausted before target"
+    assert data.time + 0.5 * model.opt.timestep < t_target
+
+
+def test_advance_to_returns_true_when_budget_sufficient() -> None:
+    """_advance_to must return True and reach t_target when budget is sufficient."""
+    import mujoco
+    from src.engines.physics_engines.mujoco._golf_swing_upper_body_xml import (
+        UPPER_BODY_GOLF_SWING_XML,
+    )
+    from src.engines.physics_engines.mujoco.python.motion_matching.simulate import (
+        _advance_to,
+    )
+
+    model = mujoco.MjModel.from_xml_string(UPPER_BODY_GOLF_SWING_XML)
+    data = mujoco.MjData(model)
+    t_target = 5.0 * float(model.opt.timestep)
+
+    success = _advance_to(model, data, t_target, max_substeps=10)
+    assert success, "_advance_to must succeed when budget is sufficient"
+    assert abs(data.time - t_target) <= 0.5 * model.opt.timestep
+
