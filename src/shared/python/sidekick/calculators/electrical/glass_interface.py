@@ -157,13 +157,9 @@ class GlassPropertiesInterface:
         - Minimized dict lookups by using local variables
         - Single exp() call path
         """
-        # Apply power density heating effect upfront
         if temperature_celsius is None:
             raise ValueError("temperature_celsius must be provided")
         temp_kelvin = temperature_celsius + 273.15
-        if power_density > 0:
-            # Local heating from power density
-            temp_kelvin += power_density * 0.0001
 
         # Arrhenius equation: σ = σ₀ * exp(-Ea/R * (1/T - 1/T_ref))
         # Pre-computed: _arrhenius_ref_term = -Ea/(R * T_ref)
