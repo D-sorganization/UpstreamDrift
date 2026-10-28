@@ -172,8 +172,8 @@ def compute_total_work(sim_out: SimOutput) -> float:
 
 
 def _position_term(sim_out: SimOutput, target: ClubTarget | MultiSourceTarget) -> float:
-    club: Any = getattr(target, "club", target)
     """``mean_n( ||r_butt_diff||^2 + ||r_ch_diff||^2 )``."""
+    club: Any = getattr(target, "club", target)
     db = sim_out.butt - club.butt
     dc = sim_out.clubhead - club.clubhead
     # ⚡ Bolt: np.vdot is ~3-4x faster than np.sum(x*x, axis=1)
@@ -186,8 +186,8 @@ def _orientation_term(
     target: ClubTarget | MultiSourceTarget,
     opts: CostOptions,
 ) -> float:
-    club: Any = getattr(target, "club", target)
     """Orientation residual via quaternion geodesic or rotation-matrix Frobenius."""
+    club: Any = getattr(target, "club", target)
     if opts.q_orientation_repr == "rotmat":
         distances = rotmat_frobenius_distances(sim_out.club_quat, club.club_quat)
         return float(np.mean(distances * distances))
@@ -196,12 +196,12 @@ def _orientation_term(
 
 
 def _anchor_term(sim_out: SimOutput, target: ClubTarget | MultiSourceTarget) -> float:
-    club: Any = getattr(target, "club", target)
     """``||r_ch_sim(t_impact) - r_ch_meas(t_impact)||^2``.
 
     MATLAB uses 1-based indexing; ``ClubTarget.impact_idx`` follows that
     convention so this helper subtracts 1 here.
     """
+    club: Any = getattr(target, "club", target)
     n = club.clubhead.shape[0]
     k = int(club.impact_idx)
     if not (1 <= k <= n):
