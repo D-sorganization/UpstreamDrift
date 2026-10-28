@@ -160,6 +160,8 @@ class LoftOptions:
     sides: int = 20
     # Direction of the full-radius (width) semi-axis; required when aspect != 1.
     width_hint: Array | None = None
+    # Radius at the ``end`` over the radius at ``start`` (linear taper, 1 = none).
+    end_scale: float = 1.0
 
 
 def lofted_segment(
@@ -193,6 +195,8 @@ def lofted_segment(
     length = float(np.linalg.norm(p1 - p0))
     if length <= 1e-9 or rings < 4 or sides < 6:
         raise ValueError("Segment needs positive length, rings >= 4, sides >= 6")
+    if not 0.0 < opts.end_scale <= 1.0:  # NaN fails too
+        raise ValueError("taper end_scale must be in (0, 1]")
     if aspect != 1.0:
         require(
             width_hint is not None,
@@ -222,7 +226,9 @@ def lofted_segment(
     ring_dirs = np.outer(np.cos(phi), u) + aspect * np.outer(np.sin(phi), v)
     verts: list[Array] = []
     for s in stations:
-        r = radius * thickness * profile(float(s))
+        frac = min(1.0, max(0.0, float(s) / length))
+        taper = 1.0 + (opts.end_scale - 1.0) * frac
+        r = radius * thickness * profile(float(s)) * taper
         verts.extend(p0 + a * s + r * ring_dirs)
     face_list = _ring_faces(len(stations), sides)
     n = len(verts)
