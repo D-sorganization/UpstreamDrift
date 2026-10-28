@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13971 · Drake Motion Matching: Catalog Finite-Difference Generalized Accelerations in Simulate_With_Coefficients (UD-36)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13971
+- **Branch:** test/13971-catalog-finite-difference-qdd-drake
+- **PR:** #13982
+- **Paths:** see #13982
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`934b44df`; collated from changes/13971-catalog-finite-difference-qdd-drake.md)
+- **Summary:** Drake motion matching: catalog finite-difference generalized accelerations in simulate_with_coefficients (UD-36)
+- **Next step:** Merge PR
+
+### DL-#13970 · Catalog Constant Static Friction Contract in Contact_Law_Kernel for Torsional_Moment_Kernel and Link Epic #13757 (UD-33)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13970
+- **Branch:** test/13970-catalog-torsional-moment-static-friction
+- **PR:** #13980
+- **Paths:** see #13980
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`eac54cbe`; collated from changes/13970-catalog-torsional-moment-static-friction.md)
+- **Summary:** Catalog constant static friction contract in contact_law_kernel for torsional_moment_kernel and link Epic #13757 (UD-33)
+- **Next step:** Develop coupled slip-spin friction limit surface under Epic #13757 (HRG-HX)
+
 ### DL-#13972 · OpenSim Spine: Catalog Coordinate Unit-Speed Probing in Inverse_Dynamics _U_Indices (UD-39)
 
 - **State:** in_review
