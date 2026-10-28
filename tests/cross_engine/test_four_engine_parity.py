@@ -50,6 +50,7 @@ from tests.cross_engine.baseline_provenance import (
     require_producing_engine,
 )
 from src.shared.python.engine_core.engine_availability import (
+    is_dependency_present,
     is_drake_available,
     is_mujoco_available,
     is_pinocchio_available,
@@ -652,8 +653,6 @@ def test_parity_tolerance_gate_boundary_conditions() -> None:
 
 def test_engine_dynamic_availability_guards() -> None:
     """Engine availability guards execute without exceptions and reflect installed engine status."""
-    import importlib.util
-
     mj = is_mujoco_available()
     pin = is_pinocchio_available()
     drake = is_drake_available()
@@ -663,15 +662,15 @@ def test_engine_dynamic_availability_guards() -> None:
     assert isinstance(drake, bool)
 
     # In environments where a package is discoverable, guard must return True
-    if importlib.util.find_spec("mujoco") is not None:
+    if is_dependency_present("mujoco"):
         assert mj is True, (
             "is_mujoco_available() returned False despite mujoco package being discoverable"
         )
-    if importlib.util.find_spec("pinocchio") is not None:
+    if is_dependency_present("pinocchio"):
         assert pin is True, (
             "is_pinocchio_available() returned False despite pinocchio package being discoverable"
         )
-    if importlib.util.find_spec("pydrake") is not None:
+    if is_dependency_present("drake"):
         assert drake is True, (
             "is_drake_available() returned False despite pydrake package being discoverable"
         )
