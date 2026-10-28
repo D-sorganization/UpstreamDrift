@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #13960 | Enforce both upper bound and zero transverse force in check_static_equilibrium (UD-30) |
+| 2026-10-28 | #13958 | Allow MacDonaldHanzelyModel and constant-coefficient models to use declared cl without 0.155 constant-spin clamp |
 | 2026-10-28 | #13954 | OpenSim: correct SimTK quaternion ordering documentation in coord_map (UD-12) |
 | 2026-10-28 | #13950 | Pinocchio viz: adjust 1-based impact_idx to 0-based indexing in error_timecourse (UD-23) |
 | 2026-10-28 | #13942 | Extract the WSCG case power channels and metrics record into run_two_hand_wscg_case, reduce _analyze_case to a short shell and retire its issue 9233 budget exception (part 2). |

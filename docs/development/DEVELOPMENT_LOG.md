@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13959 · Enforce Both Upper Bound and Zero Transverse Force in Check_Static_Equilibrium (UD-30)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13959
+- **Branch:** fix/13959-grip-static-equilibrium
+- **PR:** #13960
+- **Paths:** see #13960
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`15e55478`; collated from changes/13959-grip-static-equilibrium.md)
+- **Summary:** Enforce both upper bound and zero transverse force in check_static_equilibrium (UD-30)
+- **Next step:** Merge the PR into main.
+
+### DL-#13956 · Allow MacDonaldHanzelyModel and Constant-Coefficient Models to Use Declared Cl Without 0.155 Constant-Spin Clamp
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13956
+- **Branch:** fix/13956-flight-models-lift-cap
+- **PR:** #13958
+- **Paths:** see #13958
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`eb8b7140`; collated from changes/13956-flight-models-lift-cap.md)
+- **Summary:** Allow MacDonaldHanzelyModel and constant-coefficient models to use declared cl without 0.155 constant-spin clamp
+- **Next step:** Merge the PR into main.
+
 ### DL-#13953 · OpenSim: Correct SimTK Quaternion Ordering Documentation in Coord_Map (UD-12)
 
 - **State:** in_review
