@@ -114,7 +114,7 @@ RUN pip install --no-deps /wheels/*.whl && \
 # Trivy/pip-audit gate GHSA-6v7p-g79w-8964, CVE-2025-47273, and
 # PYSEC-2026-3447 at the final image.
 RUN pip install --upgrade --no-cache-dir \
-    "msgpack==1.2.1" \
+    "msgpack==1.2.3" \
     "setuptools==84.2.1"
 
 # Audit the *resolved* environment inside the image (issue #7159 D2). The
