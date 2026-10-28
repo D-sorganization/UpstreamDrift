@@ -4,9 +4,9 @@
  * Web parity with the canonical PyQt `AnatomicalEventTableWidget`: it renders
  * the event-table export document through `buildEventTableView`, the mirror of
  * the Python view, so both surfaces show the same text. A missing value shows
- * its reason as the cell title as well as in the Note column. Fetching the
- * document from `POST /biomechanics/anatomical-event-table` is wired
- * separately once that endpoint is on main.
+ * its reason as the cell title as well as in the Note column. The document is
+ * fetched from `POST /api/biomechanics/anatomical-event-table` by
+ * `AnatomicalEventTableFromApi`; this component stays presentational.
  */
 
 import {
