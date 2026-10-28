@@ -119,6 +119,7 @@ def test_u_indices_numerical_tolerance() -> None:
 
 def test_u_indices_ambiguous_or_unmapped_raises() -> None:
     """Invariant error when coordinate maps to multiple or zero speeds."""
+
     # Coordinate that doesn't set any speed
     class _DeadCoord(_MockCoord):
         def setSpeedValue(self, state: _MockState, val: float) -> None:

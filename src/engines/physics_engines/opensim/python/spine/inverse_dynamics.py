@@ -302,14 +302,25 @@ def _is_rotational(model: object, name: str) -> bool:
 
 
 def _u_indices(model: object, state: object) -> dict[str, int]:
-    """Map each coordinate to its mobility (speed) index by unit-speed probing."""
+    """Map each coordinate to its mobility (speed) index by unit-speed probing.
+
+    Contract (Issue #13972 / Epic #12735, UD-39):
+    Coordinates are mapped to their canonical mobility index in state vector u
+    by zeroing all mobilities, setting the target coordinate's speed to 1.0,
+    and searching for matching mobilities with numerical tolerance.
+    Each coordinate must isolate to exactly one mobility index.
+    """
     n_u = state.getNU()  # type: ignore[attr-defined]
     out: dict[str, int] = {}
     for name in _coordinate_names(model):
         for i in range(n_u):
             state.updU().set(i, 0.0)  # type: ignore[attr-defined]
         _coordinate(model, name).setSpeedValue(state, 1.0)  # type: ignore[attr-defined]
-        hits = [i for i in range(n_u) if state.getU().get(i) == 1.0]  # type: ignore[attr-defined]
+        hits = [
+            i
+            for i in range(n_u)
+            if abs(float(state.getU().get(i)) - 1.0) < 1e-5  # type: ignore[attr-defined]
+        ]
         invariant(len(hits) == 1, f"coordinate {name!r} maps to {hits} speeds")
         out[name] = hits[0]
     for i in range(n_u):
