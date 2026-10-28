@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13967 · Enforce Engine Availability Assertion and Cite Simscape Baseline Prerequisite (UD-26)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13967
+- **Branch:** test/13967-cross-engine-parity-guards
+- **PR:** #13973
+- **Paths:** see #13973
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`7ec71954`; collated from changes/13967-cross-engine-parity-guards.md)
+- **Summary:** Enforce engine availability assertion and cite Simscape baseline prerequisite (UD-26)
+- **Next step:** Merge PR
+
 ### DL-#13968 · Clarify and Assert Zero-Linear-Velocity Contract in Single_Floating_Body_H_G, Documenting Zero Linear Coriolis Bias Under Center-of-Mass Frame Conventions and Linking Epic #13789 (UD-14)
 
 - **State:** in_review
