@@ -239,6 +239,7 @@ def test_single_floating_body_zero_linear_velocity_contract_documented() -> None
     assert "Coriolis" in doc
 
 
+@pytest.mark.unit
 def test_velocity_representation_origin_convention_documented() -> None:
     """Issue #13969 / UD-13: verify VelocityRepresentation documents origin convention and #13789."""
     doc = inspect.getdoc(VelocityRepresentation) or ""
