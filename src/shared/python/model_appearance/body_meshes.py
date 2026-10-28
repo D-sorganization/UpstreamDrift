@@ -75,6 +75,7 @@ from src.shared.python.model_appearance.cross_section import (
     width_hint_for,
 )
 from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
+from src.shared.python.model_appearance.hand_spec import ResolvedHandSpec
 from src.shared.python.model_appearance.pelvis_width import (
     PelvisWidth,
     resolve_pelvis_width,
@@ -223,7 +224,10 @@ def section_size(spec: Mapping[str, Any], body: str) -> SectionSize:
 
 
 def club_meshes(
-    club: ClubAssembly, finish: str, doc: AppearanceDocument
+    club: ClubAssembly,
+    finish: str,
+    doc: AppearanceDocument,
+    hands: ResolvedHandSpec | None = None,
 ) -> list[tuple[str, geometry.Mesh, str]]:
     """Shaft, grip, mesh head (GCV-11) and both grip hands (OSV-2), club frame.
 
@@ -231,7 +235,7 @@ def club_meshes(
     """
     return [
         (label, mesh, club_part_material(label, finish, doc))
-        for label, mesh in assembly_meshes_with_hands(club).items()
+        for label, mesh in assembly_meshes_with_hands(club, hands=hands).items()
     ]
 
 
