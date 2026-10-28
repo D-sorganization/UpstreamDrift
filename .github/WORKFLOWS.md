@@ -124,3 +124,11 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | development-log-archive.yml          | schedule/workflow_dispatch                                | @infra    | contents/pull-requests: write                               | KEEP: nightly archiver for terminal dev-log rows via `development_log.py --archive` and a bot PR.      | n/a                      |
 | wizard-pack.yml                      | push/pull_request/workflow_dispatch                       | @core     | contents: read                                              | KEEP: builds and verifies Sidekick Drift Wizard SQLite knowledge pack artifact (#10943).               | n/a                      |
 | jules-push-pr-noise-disable.yml      | push/workflow_dispatch                                    | @infra    | actions: write                                              | KEEP: disable orphan Jules push/PR noise workflows after batch-1 retirement (#13575).                  | n/a                      |
+
+## Engine and Conda Cache Contract (Issue #13579)
+
+Per `docs/ci-cd/CACHE_CONTRACT.md` (Repository_Management #2224), engine image layer caching uses host-shared BuildKit builders (`ud-buildkit`) via `scripts/ci/shared_buildkit.py ensure`.
+
+- **BuildKit Layer Cache:** Scoped to host builder `ud-buildkit` with GC thresholds configured in `scripts/ci/buildkitd.ud.toml`. Per-runner `type=local` or `type=gha` exports are forbidden.
+- **Conda Package Caching:** Not Applicable (N/A). UpstreamDrift CI does not create or resolve Conda environments on self-hosted runners (all workloads execute in containerized Docker images or with host Python/pip). Any future workflow introducing Conda environment creation must configure `CONDA_PKGS_DIRS` on a host-local path per CACHE_CONTRACT.md, as enforced by `tests/unit/scripts/test_engine_cache_contract.py`.
+

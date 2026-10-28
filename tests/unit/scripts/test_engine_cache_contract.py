@@ -116,3 +116,52 @@ def test_buildkit_gc_policy_matches_fleet_cache_contract() -> None:
     assert 'reservedSpace = "5GB"' in content
     assert 'maxUsedSpace = "30GB"' in content
     assert 'minFreeSpace = "20%"' in content
+
+
+def _get_all_workflows() -> list[Path]:
+    """Return all GitHub workflow files in .github/workflows."""
+    return sorted(WORKFLOWS_DIR.glob("*.yml"))
+
+
+def _validate_conda_steps_in_content(content: str, source_name: str) -> None:
+    """Validate that any workflow step creating a conda env uses CONDA_PKGS_DIRS on host-local path."""
+    lines = content.splitlines()
+    for idx, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            continue
+        if any(
+            cmd in stripped
+            for cmd in (
+                "conda env create",
+                "conda create",
+                "mamba env create",
+                "mamba create",
+                "micromamba create",
+            )
+        ):
+            assert "CONDA_PKGS_DIRS" in content, (
+                f"{source_name}:{idx} creates a conda environment without CONDA_PKGS_DIRS host-local cache path"
+            )
+
+
+@pytest.mark.parametrize("wf", _get_all_workflows(), ids=lambda p: p.name)
+def test_conda_env_steps_use_host_local_pkgs_dir(wf: Path) -> None:
+    """Parametrised across all workflows: any conda step must set CONDA_PKGS_DIRS (#13579)."""
+    content = wf.read_text(encoding="utf-8")
+    _validate_conda_steps_in_content(content, wf.name)
+
+
+def test_conda_env_guard_fails_when_pkgs_dir_missing() -> None:
+    """Guards against uncontracted conda steps: fixture workflow without CONDA_PKGS_DIRS fails (#13579)."""
+    fixture_content = (
+        "name: Fixture Conda Step\n"
+        "jobs:\n"
+        "  build:\n"
+        "    runs-on: self-hosted\n"
+        "    steps:\n"
+        "      - name: Create Conda Env\n"
+        "        run: conda env create -f environment.yml\n"
+    )
+    with pytest.raises(AssertionError, match="without CONDA_PKGS_DIRS"):
+        _validate_conda_steps_in_content(fixture_content, "fixture.yml")
