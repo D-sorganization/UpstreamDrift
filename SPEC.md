@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #13989 | Split WSCG build_outputs into record helpers under the 100-line budget and retire its issue 9233 budget exception (part 3, closes the 2026-10-31 budget rows) |
 | 2026-10-28 | #13988 | Add sensitivity fields (FTLE, sigma-max, agreement horizon) to pendulum parity receipts (SAP-4) |
 | 2026-10-28 | #13986 | \ Verify engine Docker cache contract and guard against uncontracted conda environment creation per CACHE_CONTRACT.md\ |
 | 2026-10-28 | #13982 | Drake motion matching: catalog finite-difference generalized accelerations in simulate_with_coefficients (UD-36) |
