@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13968 · Clarify and Assert Zero-Linear-Velocity Contract in Single_Floating_Body_H_G, Documenting Zero Linear Coriolis Bias Under Center-of-Mass Frame Conventions and Linking Epic #13789 (UD-14)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13968
+- **Branch:** doc/13968-single-floating-body-linear-velocity-contract
+- **PR:** #13975
+- **Paths:** see #13975
+- **Started:** 2026-10-28
+- **Last verified:** 2026-10-28 (`7296e223`; collated from changes/13968-single-floating-body-linear-velocity-contract.md)
+- **Summary:** Clarify and assert zero-linear-velocity contract in single_floating_body_h_g, documenting zero linear Coriolis bias under center-of-mass frame conventions and linking Epic #13789 (UD-14)
+- **Next step:** Address non-zero linear velocity sensitivity contracts in multi-body floating base models under Epic #13789
+
 ### DL-#13962 · Require _Advance_to to Reach Target Time Within Substep Budget (UD-37)
 
 - **State:** in_review
