@@ -9000,8 +9000,8 @@
       ]
     },
     "tests/research/test_phase_event_stability.py": {
-      "sha256": "a7277c9f3ec7bb6c5e17f9b29b0689f3c075dfcd3b2d41ee87ddda2d0320d93d",
-      "bytes": 6180,
+      "sha256": "df3cce5113f54e7fa00ee941fb00b0e5514cf8b92700a480b8ea5524a32306e2",
+      "bytes": 7187,
       "referenced_by": [
         "PD-CLAIM-315",
         "PD-CLAIM-316"
