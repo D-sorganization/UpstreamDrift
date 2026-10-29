@@ -19,6 +19,8 @@ from src.shared.python.pendulum_simulator.triple_pendulum_spec import (
     TRIPLE_PENDULUM_SPEC,
 )
 
+pytestmark = pytest.mark.unit
+
 SETUP_ARGS = {
     "dt_s": 0.001,
     "integrator": "rk4",
