@@ -18,6 +18,7 @@ import json
 import logging
 import os
 from pathlib import Path
+import shlex
 import subprocess
 import sys
 from typing import Any, Final
@@ -78,6 +79,8 @@ class ShowcasePlan:
     overlays: bool = False
     decorative_ball: bool = True
     skip_unavailable: bool = False
+    v2_spec: Path | None = None  # full-body-v2 spec: render trunk stills, not clips
+    command: str = ""  # echoed into the stills manifest
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -135,6 +138,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--skip-unavailable",
         action="store_true",
         help="record unavailable engines in manifest rather than failing",
+    )
+    p.add_argument(
+        "--v2-spec",
+        type=Path,
+        default=None,
+        help="full-body-v2 spec JSON that every --swing bundle must carry; renders "
+        "labelled address/top/impact stills of the trunk visuals instead of clips",
     )
     return p
 
@@ -219,6 +229,11 @@ def plan_from_args(args: argparse.Namespace) -> ShowcasePlan:
     if args.fps <= 0:
         raise ValueError(f"fps must be positive, got {args.fps}")
 
+    if args.v2_spec is not None:
+        from scripts.render_v2_trunk_stills import load_v2_spec
+
+        load_v2_spec(args.v2_spec)
+
     plan = ShowcasePlan(
         capture=args.capture,
         swings=swings,
@@ -231,6 +246,7 @@ def plan_from_args(args: argparse.Namespace) -> ShowcasePlan:
         overlays=args.overlays,
         decorative_ball=not args.no_ball,
         skip_unavailable=args.skip_unavailable,
+        v2_spec=args.v2_spec,
     )
     settings_for(plan)
     return plan
@@ -474,12 +490,31 @@ def run_showcase(
     return manifest_path
 
 
+def _main_v2_stills(plan: ShowcasePlan, argv: Sequence[str] | None) -> int:
+    """Render the labelled address/top/impact trunk stills of ``plan.v2_spec``."""
+    from scripts.render_v2_trunk_stills import StillsError, render_v2_stills
+    from src.tools.native_viewer_export.core import BackendUnavailable
+
+    echo = ["python3", "-m", "scripts.render_golfer_realism_showcase"]
+    plan = replace(plan, command=shlex.join(echo + list(argv or sys.argv[1:])))
+    settings = replace(settings_for(plan), overlays=False, hud=False)
+    try:
+        manifest = render_v2_stills(plan, settings)
+    except (ValueError, StillsError, BackendUnavailable) as exc:
+        sys.stderr.write(f"error: {exc}\n")
+        return 2 if isinstance(exc, ValueError) else 1
+    sys.stdout.write(f"v2 trunk stills rendered; manifest {manifest}\n")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI entry point for golfer realism showcase."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     args = build_parser().parse_args(argv)
     try:
         plan = plan_from_args(args)
+        if plan.v2_spec is not None:
+            return _main_v2_stills(plan, argv)
         unavailable = check_engines(plan)
     except (ValueError, FileNotFoundError) as exc:
         sys.stderr.write(f"error: {exc}\n")

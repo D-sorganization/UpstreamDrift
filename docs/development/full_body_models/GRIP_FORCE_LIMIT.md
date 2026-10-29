@@ -29,5 +29,4 @@ limit. `GripCapabilityInventory.require_grip_force_limit_enforceable` raises
 always passes. `force_limit_enforcement_report()` states the default and each
 engine's flags.
 
-Current state: every flag is `false`. A flag may only be set to `true` in the
-same change that wires and tests the cap for that engine and mechanism.
+Current state: `weld_bushing` is `true` for MuJoCo and Pinocchio (HRG-HX4 Part 3, closing #13761), where `ClubOnBushings` enforces the force cap via `bushing_wrench(..., force_limit_n=...)`. `pad_contact` and all other engines remain `false` (fail closed).

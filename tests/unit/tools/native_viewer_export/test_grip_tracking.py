@@ -16,6 +16,7 @@ from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     OverlayFeed,
+    SwingInput,
     view_lookats,
 )
 from src.tools.native_viewer_export.runner import write_grip_json
@@ -31,21 +32,32 @@ def _feed(points: list) -> OverlayFeed:
     )
 
 
-def test_focus_at_reads_grip_midpoint_and_caches_frames() -> None:
-    calls: list[int] = []
+class _Swing:
+    """Stub swing whose ``grip_midpoint_at`` replays fixed points (None = unknown)."""
 
-    def frame_at(k: int) -> SimpleNamespace:
-        calls.append(k)
-        return SimpleNamespace(metadata={"grip_midpoint_m": (k, 0.0, 1.0)})
+    def __init__(self, points: list) -> None:
+        self.points = points
 
-    feed = OverlayFeed(frame_at)
-    assert feed.focus_at(3) == (3.0, 0.0, 1.0)
-    assert feed.focus_at(3) == (3.0, 0.0, 1.0)
-    assert calls == [3]
+    def grip_midpoint_at(self, index: int):
+        return self.points[index]
 
 
-def test_focus_at_none_without_grip_metadata() -> None:
-    assert _feed([None]).focus_at(0) is None
+_DRIVER_SPEC_PATH = (
+    Path(__file__).resolve().parents[4]
+    / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+)
+
+
+def _driver_swing(n: int = 3) -> SwingInput:
+    """Real ``SwingInput`` on the driver spec with a small, varied pose sequence."""
+    spec = _DRIVER_SPEC_PATH.read_bytes()
+    order = tuple(json.loads(spec)["coordinate_order"])
+    rng = np.random.default_rng(0)
+    q = rng.uniform(-0.2, 0.2, size=(n, len(order)))
+    bundle = SimpleNamespace(
+        spec_bytes=spec, coordinate_order=order, reference_q=q, dt_s=0.01
+    )
+    return SwingInput(bundle, q, "s", "driver", "mujoco")  # type: ignore[arg-type]
 
 
 def test_view_lookats_target_is_grip_midpoint_over_time() -> None:
@@ -56,7 +68,7 @@ def test_view_lookats_target_is_grip_midpoint_over_time() -> None:
         multiview=False,
         lookat_m=(0.0, 0.0, 0.9),
     )
-    looks = view_lookats(settings, [0, 1, 2], _feed(points))
+    looks = view_lookats(settings, [0, 1, 2], _Swing(points))
     assert looks["hands_closeup"][0] == pytest.approx((0.1, 0.2, 1.0))
     # missing sample holds the last finite point, never the origin
     assert looks["hands_closeup"][1] == pytest.approx((0.1, 0.2, 1.0))
@@ -64,15 +76,69 @@ def test_view_lookats_target_is_grip_midpoint_over_time() -> None:
     assert all(p == pytest.approx((0.0, 0.0, 0.9)) for p in looks["face_on"])
 
 
-def test_view_lookats_without_overlay_keeps_static_lookat() -> None:
+def test_hands_closeup_tracks_grip_midpoint_without_overlay() -> None:
+    """#13994: the focus is kinematic (club pose), within 1 mm, overlay or not."""
+    pytest.importorskip("mujoco")
+    from src.shared.python.model_appearance.club_assembly import assembly_from_spec
+    from src.shared.python.model_appearance.grip_hands import grip_hand_frame
+    from src.shared.python.model_appearance.grip_pose import Hand
+    from src.tools.native_viewer_export.club_pose import ClubPoseModel
+
+    swing = _driver_swing()
     settings = replace(
         ExportSettings(),
         views=("hands_closeup",),
         multiview=False,
         lookat_m=(0.0, 0.0, 0.9),
     )
-    looks = view_lookats(settings, [0, 1], None)
-    assert looks["hands_closeup"] == [pytest.approx((0.0, 0.0, 0.9))] * 2
+    looks = view_lookats(settings, [0, 1, 2], swing)["hands_closeup"]
+    model = ClubPoseModel(swing.bundle.spec_bytes)
+    club = assembly_from_spec(model.spec)
+    mid_body = np.append(
+        0.5
+        * (
+            grip_hand_frame(club, Hand.LEAD)[:3, 3]
+            + grip_hand_frame(club, Hand.TRAIL)[:3, 3]
+        ),
+        1.0,
+    )
+    for k, look in enumerate(looks):
+        coords = dict(zip(swing.bundle.coordinate_order, swing.q[k], strict=True))
+        expected = (model.body_world(coords) @ mid_body)[:3]
+        assert np.linalg.norm(np.asarray(look) - expected) < 1e-3
+    assert not np.allclose(looks[0], looks[2])  # it moves with the pose
+
+
+def test_overlay_on_and_off_give_the_same_lookat_path() -> None:
+    pytest.importorskip("mujoco")
+    swing = _driver_swing()
+    settings = replace(
+        ExportSettings(),
+        views=("hands_closeup",),
+        multiview=False,
+        overlays=False,
+    )
+    off = view_lookats(settings, [0, 1, 2], swing)
+    on = view_lookats(replace(settings, overlays=True), [0, 1, 2], swing)
+    assert on == off
+
+
+def test_hands_closeup_without_club_raises_value_error() -> None:
+    pytest.importorskip("mujoco")
+    swing = _driver_swing()
+    spec = json.loads(swing.bundle.spec_bytes)
+    spec["frames"] = [f for f in spec["frames"] if f["name"] != "Clubhead"]
+    swing.bundle.spec_bytes = json.dumps(spec).encode()
+    settings = replace(
+        ExportSettings(),
+        views=("hands_closeup",),
+        multiview=False,
+    )
+    with pytest.raises(ValueError, match="hands_closeup.*club"):
+        view_lookats(settings, [0], swing)
+    # a fixed view needs no club pose
+    fixed = replace(settings, views=("face_on",))
+    assert view_lookats(fixed, [0], swing)["face_on"]
 
 
 def test_worker_job_lookat_for_roundtrip(tmp_path: Path) -> None:
