@@ -455,7 +455,7 @@ class DrakeCapabilitySource:
             )
             return HandMobility(
                 hand=h,
-                centre=tuple(float(coord) for coord in p[:3]),
+                centre=(float(p[0]), float(p[1]), float(p[2])),
                 mobility=w_mat,
                 mobility_axes=v_spec.axes,
                 mobility_eigenvalues=np.clip(v_spec.radii**2, 0.0, None),
