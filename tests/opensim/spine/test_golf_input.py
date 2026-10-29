@@ -17,8 +17,12 @@ from scipy.spatial.transform import Rotation
 from src.engines.physics_engines.opensim.python.spine.golf_input import (
     GolfTrunkInput,
     back_joint_rotation,
+    check_trunk_plausibility,
     read_golf_humanoid_motion,
     resample,
+)
+from src.engines.physics_engines.opensim.python.tour_matching.marker_plausibility import (
+    ImplausibleInputError,
 )
 from tests.helpers.opensim_support import require_opensim
 
@@ -37,16 +41,29 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _write_sto(path: Path, t: np.ndarray, cols: dict[str, np.ndarray], deg: bool):
+def _write_sto(
+    path: Path,
+    t: np.ndarray,
+    cols: dict[str, np.ndarray],
+    deg: bool,
+    events: dict[str, float] | None = None,
+):
     lines = [
         "synthetic",
         "version=1",
         f"nRows={len(t)}",
         f"nColumns={len(cols) + 1}",
         f"inDegrees={'yes' if deg else 'no'}",
-        "endheader",
-        "time\t" + "\t".join(cols),
     ]
+    if events:
+        for name, ev_t in events.items():
+            lines.append(f"event_{name}={ev_t}")
+    lines.extend(
+        [
+            "endheader",
+            "time\t" + "\t".join(cols),
+        ]
+    )
     for i, ti in enumerate(t):
         row = [f"{ti:.12f}"] + [f"{cols[k][i]:.15g}" for k in cols]
         lines.append("\t".join(row))
@@ -69,6 +86,19 @@ def _synthetic(tmp_path: Path, deg: bool = False) -> tuple[Path, np.ndarray]:
     path = tmp_path / "synthetic_states.sto"
     _write_sto(path, t, cols, deg)
     return path, q
+
+
+def _implausible_synthetic(tmp_path: Path) -> Path:
+    t = np.linspace(0.0, 0.5, 6)
+    # Row 0: non-physiological ~65.4 deg torso-in-pelvis posture (OS-8 address)
+    q = np.zeros((len(t), 3))
+    q[0] = [np.radians(13.2), np.radians(55.1), np.radians(-41.8)]
+    cols = {n: q[:, i] for i, n in enumerate(LUMBAR)}
+    cols["hip_flexion_r"] = 0.2 * t
+    cols["pelvis_tx"] = 0.1 * t
+    path = tmp_path / "implausible_states.sto"
+    _write_sto(path, t, cols, deg=False, events={"address": 0.0})
+    return path
 
 
 @pytest.mark.unit
@@ -164,6 +194,35 @@ def test_slerp_resample_endpoints_and_no_wrap_artifacts():
         resample(data, 0.0)
 
 
+@pytest.mark.unit
+def test_check_trunk_plausibility_rejects_implausible_address():
+    t = np.linspace(0.0, 0.5, 6)
+    # 65.4 deg rotation at address (time 0.0)
+    rot_65 = Rotation.from_euler("ZXY", [13.2, 55.1, -41.8], degrees=True).as_matrix()
+    rots = np.tile(np.eye(3), (6, 1, 1))
+    rots[0] = rot_65
+    events = {"address": 0.0}
+
+    with pytest.raises(ImplausibleInputError, match="address"):
+        check_trunk_plausibility(t, rots, events, allow_implausible=False)
+
+    # With allow_implausible=True, it reports but does not raise
+    report = check_trunk_plausibility(t, rots, events, allow_implausible=True)
+    assert not report.passed
+    assert "address" in report.failures()
+
+
+@pytest.mark.unit
+def test_check_trunk_plausibility_passes_physiological_trunk():
+    t = np.linspace(0.0, 0.5, 6)
+    rot_20 = Rotation.from_rotvec([np.radians(20.0), 0.0, 0.0]).as_matrix()
+    rots = np.tile(np.eye(3), (6, 1, 1))
+    rots[0] = rot_20
+    events = {"address": 0.0}
+    report = check_trunk_plausibility(t, rots, events, allow_implausible=False)
+    assert report.passed
+
+
 @pytest.mark.requires_opensim
 @pytest.mark.integration
 def test_evidence_file_loads_with_finite_rotations():
@@ -180,3 +239,23 @@ def test_evidence_file_loads_with_finite_rotations():
     for r in data.pelvis_to_thorax[::50]:
         assert np.allclose(r @ r.T, np.eye(3), atol=1e-9)
         assert np.linalg.det(r) == pytest.approx(1.0, abs=1e-9)
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_read_golf_motion_rejects_implausible_trunk(tmp_path):
+    require_opensim()
+    path = _implausible_synthetic(tmp_path)
+    with pytest.raises(ImplausibleInputError, match="address"):
+        read_golf_humanoid_motion(path, MODEL)
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_allow_implausible_is_explicit_and_recorded(tmp_path):
+    require_opensim()
+    path = _implausible_synthetic(tmp_path)
+    data = read_golf_humanoid_motion(path, MODEL, allow_implausible=True)
+    assert isinstance(data, GolfTrunkInput)
+    assert data.allow_implausible is True
+    assert data.source.get("allow_implausible") == "true"
