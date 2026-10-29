@@ -166,6 +166,7 @@
 {"path": "analysis/biomechanics_display.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
 {"path": "analysis/coordination_metrics.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
 {"path": "analysis/cross_engine.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
+{"path": "analysis/cross_engine_receipt.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
 {"path": "analysis/dataclasses.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
 {"path": "analysis/energy_metrics.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
 {"path": "analysis/grf_metrics.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
