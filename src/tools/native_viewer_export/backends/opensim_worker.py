@@ -87,9 +87,17 @@ def grab_window() -> np.ndarray:
     """RGB image of the OpenSim visualizer window (via xwininfo + xwd)."""
     wid = None
     for _ in range(20):
-        tree = subprocess.run(  # noqa: S603, S607 - fixed argv
-            ["xwininfo", "-root", "-tree"], capture_output=True, text=True, check=False
-        ).stdout
+        try:
+            tree = subprocess.run(  # noqa: S603, S607 - fixed argv
+                ["xwininfo", "-root", "-tree"],
+                capture_output=True,
+                text=True,
+                check=False,
+            ).stdout
+        except FileNotFoundError as exc:
+            raise RuntimeError(
+                "xwininfo is not installed (needed to find the OpenSim visualizer window)"
+            ) from exc
         ids = [line.split()[0] for line in tree.splitlines() if "OpenSim" in line]
         if ids:
             wid = ids[0]
@@ -97,10 +105,16 @@ def grab_window() -> np.ndarray:
         time.sleep(0.5)
     if wid is None:
         raise RuntimeError("OpenSim visualizer window not found")
-    raw = subprocess.run(  # noqa: S603, S607 - fixed argv
-        ["xwd", "-id", wid, "-silent"], capture_output=True, check=True
-    ).stdout
+    try:
+        raw = subprocess.run(  # noqa: S603, S607 - fixed argv
+            ["xwd", "-id", wid, "-silent"], capture_output=True, check=True
+        ).stdout
+    except FileNotFoundError as exc:
+        raise RuntimeError(
+            "xwd is not installed (needed to capture the OpenSim visualizer window)"
+        ) from exc
     head = struct.unpack(">25I", raw[:100])
+
     header_size, width, height, bytes_per_line, n_colors = (
         head[0],
         head[4],
@@ -437,9 +451,11 @@ def main(job_path: str) -> None:
     ]
     fit_looks = {v: fitted_lookat_m(v, points, job.lookat_m) for v in fitted}
     distances = {
-        v: fitted_distance_m(v, points, fit_looks[v], None, FOV_Y_RAD, aspect)
-        if v in fit_looks
-        else job.distance_m
+        v: (
+            fitted_distance_m(v, points, fit_looks[v], None, FOV_Y_RAD, aspect)
+            if v in fit_looks
+            else job.distance_m
+        )
         for v in job.views
     }
     for pos, k in enumerate(job.indices):

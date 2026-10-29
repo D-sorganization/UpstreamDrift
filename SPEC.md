@@ -2741,7 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-29 | #14062 | Guard xwininfo and xwd dependency checks in OpenSim visualizer capture |
 | 2026-10-29 | #14058 | Correct 6x6 mobility scaling by multiplying angular rows by L |
+
 | 2026-10-29 | #14056 | CAP-1: acceleration_capacity ellipsoid and drift_acceleration in operational_space |
 | 2026-10-29 | #14054 | CAP-2: torque-limit provider adapting CapacityVector to (B, tau_lo, tau_hi) with provenance |
 | 2026-10-29 | #14034 | ML-WS-8: ProposalInitializer protocol and --neural-mode preview warm-start hook into MJX knot optimiser |
