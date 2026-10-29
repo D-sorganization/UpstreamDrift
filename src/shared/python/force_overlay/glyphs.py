@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from types import MappingProxyType
 from typing import Any, Literal, Mapping, Sequence
 
@@ -20,6 +20,7 @@ from src.shared.python.plot_style import FORCE_KIND_PALETTE
 
 __all__ = [
     "ArrowGlyph",
+    "EllipsoidGlyph",
     "ForceGlyphStyle",
     "GlyphSet",
     "LegendSpec",
@@ -464,6 +465,88 @@ class TorqueArcGlyph:
 
 
 @dataclass(frozen=True)
+class EllipsoidGlyph:
+    """Renderer-neutral oriented ellipsoid (e.g. hand force/mobility ellipsoid).
+
+    ``axes`` holds the ellipsoid principal axes as the columns of a rotation
+    matrix (world frame); ``radii`` are the semi-axis lengths along them.
+    Preconditions (``ValueError``): finite 3-vector ``centre``; ``axes`` 3x3
+    orthonormal within 1e-6 (a left-handed basis is repaired by flipping its
+    last axis); finite positive ``radii``; ``rgba`` in [0, 1].
+    Postcondition: fields are stored as tuples and ``det(axes) == +1``.
+    """
+
+    centre: tuple[float, float, float]
+    axes: tuple[tuple[float, float, float], ...]
+    radii: tuple[float, float, float]
+    rgba: tuple[float, float, float, float]
+    label: str = ""
+
+    def __post_init__(self) -> None:
+        centre = np.asarray(self.centre, dtype=float)
+        if centre.shape != (3,) or not np.isfinite(centre).all():
+            raise ValueError(f"centre must be a finite 3-vector, got {self.centre!r}")
+        axes = np.asarray(self.axes, dtype=float)
+        if axes.shape != (3, 3) or not np.isfinite(axes).all():
+            raise ValueError("axes must be a finite 3x3 matrix")
+        if not np.allclose(axes.T @ axes, np.eye(3), atol=1e-6):
+            raise ValueError("axes must have orthonormal columns (within 1e-6)")
+        if np.linalg.det(axes) < 0.0:
+            axes = axes.copy()
+            axes[:, 2] *= -1.0
+        radii = np.asarray(self.radii, dtype=float)
+        if radii.shape != (3,) or not np.isfinite(radii).all() or (radii <= 0).any():
+            raise ValueError(
+                f"radii must be 3 finite positive values, got {self.radii!r}"
+            )
+        rgba = np.asarray(self.rgba, dtype=float)
+        if rgba.shape != (4,) or not ((rgba >= 0.0) & (rgba <= 1.0)).all():
+            raise ValueError(f"rgba must be 4 values in [0, 1], got {self.rgba!r}")
+        object.__setattr__(self, "centre", tuple(float(v) for v in centre))
+        object.__setattr__(
+            self, "axes", tuple(tuple(float(v) for v in r) for r in axes)
+        )
+        object.__setattr__(self, "radii", tuple(float(v) for v in radii))
+        object.__setattr__(self, "rgba", tuple(float(v) for v in rgba))
+
+    def with_clamped_radii(
+        self, min_radius_m: float, max_radius_m: float
+    ) -> EllipsoidGlyph:
+        """Return a copy whose radii are clamped to the display scale."""
+        if not (0.0 < min_radius_m <= max_radius_m) or not math.isfinite(max_radius_m):
+            raise ValueError(
+                "min_radius_m/max_radius_m must satisfy 0 < min <= max < inf, "
+                f"got {min_radius_m}, {max_radius_m}"
+            )
+        radii = tuple(
+            min(max(float(r), min_radius_m), max_radius_m) for r in self.radii
+        )
+        clamped: tuple[float, float, float] = (radii[0], radii[1], radii[2])
+        return replace(self, radii=clamped)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert ellipsoid glyph to JSON dictionary."""
+        return {
+            "centre": list(self.centre),
+            "axes": [list(r) for r in self.axes],
+            "radii": list(self.radii),
+            "rgba": list(self.rgba),
+            "label": self.label,
+        }
+
+    @classmethod
+    def from_dict(cls, d: Mapping[str, Any]) -> EllipsoidGlyph:
+        """Reconstruct ellipsoid glyph from JSON dictionary."""
+        return cls(
+            centre=tuple(d["centre"]),
+            axes=tuple(tuple(r) for r in d["axes"]),
+            radii=tuple(d["radii"]),
+            rgba=tuple(d["rgba"]),
+            label=str(d.get("label", "")),
+        )
+
+
+@dataclass(frozen=True)
 class LegendSpec:
     """Renderer-neutral legend specification containing scales and metadata."""
 
@@ -550,21 +633,34 @@ class GlyphSet:
     torque_arcs: tuple[TorqueArcGlyph, ...]
     legend: LegendSpec
     schema_version: str = SCHEMA_VERSION
+    #: Optional ellipsoids (#14003); omitted from the JSON when empty so
+    #: existing serialized glyph sets are byte-identical.
+    ellipsoids: tuple[EllipsoidGlyph, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize glyph set to canonical JSON dictionary."""
-        return {
+        out: dict[str, Any] = {
             "schema_version": self.schema_version,
             "time_s": self.time_s,
             "arrows": [a.to_dict() for a in self.arrows],
             "torque_arcs": [t.to_dict() for t in self.torque_arcs],
             "legend": self.legend.to_dict(),
         }
+        if self.ellipsoids:
+            out["ellipsoids"] = [e.to_dict() for e in self.ellipsoids]
+        return out
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> GlyphSet:
         """Construct glyph set from dictionary, rejecting invalid schemas/keys."""
-        valid_keys = {"schema_version", "time_s", "arrows", "torque_arcs", "legend"}
+        valid_keys = {
+            "schema_version",
+            "time_s",
+            "arrows",
+            "torque_arcs",
+            "legend",
+            "ellipsoids",
+        }
         unknown = set(data.keys()) - valid_keys
         if unknown:
             raise ValueError(f"Unknown keys in GlyphSet: {sorted(unknown)}")
@@ -579,7 +675,16 @@ class GlyphSet:
         arrows = tuple(ArrowGlyph.from_dict(a) for a in data["arrows"])
         torque_arcs = tuple(TorqueArcGlyph.from_dict(t) for t in data["torque_arcs"])
         legend = LegendSpec.from_dict(data["legend"])
-        return cls(time_s=time_s, arrows=arrows, torque_arcs=torque_arcs, legend=legend)
+        ellipsoids = tuple(
+            EllipsoidGlyph.from_dict(e) for e in data.get("ellipsoids", ())
+        )
+        return cls(
+            time_s=time_s,
+            arrows=arrows,
+            torque_arcs=torque_arcs,
+            legend=legend,
+            ellipsoids=ellipsoids,
+        )
 
 
 def _compute_arc_basis(

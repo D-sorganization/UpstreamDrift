@@ -78,6 +78,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py` |
 | 1063 | `src/bunkershot3d/metrics/divot.py` |
 | 1062 | `src/shared/python/grip_contact/binding.py` |
+| 1057 | `src/shared/python/force_overlay/glyphs.py` |
 | 1057 | `src/shared/python/physics/flight_models.py` |
 | 1053 | `src/engines/model_inventory.py` |
 | 1053 | `src/shared/python/motion_matching/pinocchio_g2_g3.py` |
@@ -130,7 +131,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 962 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m` |
 | 959 | `src/engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
-| 955 | `src/shared/python/force_overlay/glyphs.py` |
 | 955 | `src/shared/python/pendulum_simulator/gui/simulation_panel.py` |
 | 954 | `src/shared/python/grip_contact/pair_contact.py` |
 | 954 | `src/tools/shot_pattern_analysis/matched_gui.py` |

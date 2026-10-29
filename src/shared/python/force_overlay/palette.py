@@ -16,6 +16,8 @@ __all__ = [
     "get_kind_rgba",
     "label_variant_hex",
     "hex_to_rgba",
+    "HAND_ELLIPSOID_PALETTE",
+    "hand_ellipsoid_rgba",
 ]
 
 # Official palette registered for force overlay wrench categories.
@@ -110,3 +112,22 @@ def label_variant_hex(label: str, base_hex: str) -> str:
             ]
             return "#" + "".join(f"{c:02X}" for c in chans)
     return base_hex
+
+
+#: Semi-transparent RGBA per hand for the hand-mobility / force ellipsoids
+#: (#14003). Defined once; lead is blue and trail is orange so they stay
+#: distinguishable (also under common colour-vision deficiencies).
+HAND_ELLIPSOID_PALETTE: Final[dict[str, tuple[float, float, float, float]]] = {
+    "lead": (0.0, 0.447, 0.698, 0.45),
+    "trail": (0.835, 0.369, 0.0, 0.45),
+}
+
+
+def hand_ellipsoid_rgba(hand: str) -> tuple[float, float, float, float]:
+    """Return the ellipsoid RGBA of ``hand`` (``"lead"`` or ``"trail"``)."""
+    try:
+        return HAND_ELLIPSOID_PALETTE[hand]
+    except KeyError:
+        raise ValueError(
+            f"hand must be one of {sorted(HAND_ELLIPSOID_PALETTE)}, got {hand!r}"
+        ) from None

@@ -19,14 +19,22 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
+<<<<<<< HEAD
       "fingerprint": "2d526631dcd5698f5d5d1ff3a84f44a1ae3a635d2f5248c352cdf2879984fd64",
+=======
+      "fingerprint": "b283a377cbe3a8b0b13284c7f08c7b2243dcd0f3293b366f60806c38e00a707b",
+>>>>>>> origin/main
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "122475bfa6e445ee8a2d4e1f94eae41c3b0e6bce954d1eb8ea44a1e40662e052",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
+<<<<<<< HEAD
         "src/config/feature_parity.json": "025f5a1873ee7f50ddd33ff7c7afbddb1f4417b941e34180b0ab7b70c5a0dc90",
+=======
+        "src/config/feature_parity.json": "da7751370c67885191c811656200715f8ef1e87d5c14a163da6b45da987004ce",
+>>>>>>> origin/main
         "src/config/launcher_manifest.json": "26337829a1de75576be220e293c6d4f012f97303c0639401a8d902e76c418f37",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "7c868b0c444389fad39bdd30469abd32439f5bd11b9b5019c941ac0049e0763c",
@@ -36,7 +44,11 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
+<<<<<<< HEAD
       "rationale": "PR #13175 adds web AnatomicalEventTableFromApi client; regenerated capability atlas and re-reviewed launcher-atlas inputs after main merge."
+=======
+      "rationale": "Reviewed tools.native_viewer_export entry in feature_parity.json for interface-ellipsoid options (#14046)."
+>>>>>>> origin/main
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",

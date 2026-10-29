@@ -1002,6 +1002,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13795 · Correct Cross_Engine_V1 Dependency Status: The CC-7/9/10 Draft PRs Were Closed Unmerged, No Comparison Has Been Run
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13795
+- **Branch:** merged via #14017
+- **PR:** #14017
+- **Paths:** see #14017
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`5d97b9b8`; collated from changes/13795-correct-cross-engine-v1-dependency-statu.md)
+- **Summary:** Correct cross_engine_v1 dependency status: the CC-7/9/10 draft PRs were closed unmerged, no comparison has been run
+- **Next step:** Shipped in PR #14017.
+
+### DL-#12684 · R4 Cross-Engine Address Knee Flexion Check Over the Committed Receipts (Scripts/address_knee_engine_check.py): Per-Engine Disagreement Over 0.1 Deg, Unavailable Engines With Reasons, Fail-Closed on Malformed Receipts
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12684
+- **Branch:** merged via #14014
+- **PR:** #14014
+- **Paths:** see #14014
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`8aee5888`; collated from changes/12684-r4-cross-engine-address-knee-flexion-che.md)
+- **Summary:** R4 cross-engine address knee flexion check over the committed receipts (scripts/address_knee_engine_check.py): per-engine disagreement over 0.1 deg, unavailable engines with reasons, fail-closed on malformed receipts
+- **Next step:** Shipped in PR #14014.
+
 ### DL-#14040 · CAP-1: Acceleration_Capacity Ellipsoid and Drift_Acceleration in Operational_Space
 
 - **State:** shipped
