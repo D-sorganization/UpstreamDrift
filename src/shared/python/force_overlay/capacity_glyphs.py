@@ -23,6 +23,10 @@ __all__ = [
 ]
 
 
+def _vec3(point: np.ndarray) -> tuple[float, float, float]:
+    return (float(point[0]), float(point[1]), float(point[2]))
+
+
 @dataclass(frozen=True)
 class LineSegmentGlyph:
     """One world-space line segment for a renderer-neutral wireframe."""
@@ -73,8 +77,8 @@ def _tick_segment(
     perp /= np.linalg.norm(perp)
     half = 0.5 * tick_m * perp
     return LineSegmentGlyph(
-        start=tuple(float(v) for v in tip - half),
-        end=tuple(float(v) for v in tip + half),
+        start=_vec3(tip - half),
+        end=_vec3(tip + half),
         rgba=rgba,
         width_m=width_m,
         dashed=dashed,
@@ -107,8 +111,8 @@ def capacity_wire_segments(
         end = centre + radius * direction
         axis_segments.append(
             LineSegmentGlyph(
-                start=tuple(start),
-                end=tuple(end),
+                start=_vec3(start),
+                end=_vec3(end),
                 rgba=rgba,
                 width_m=line_width_m,
                 dashed=dashed,
@@ -137,8 +141,8 @@ def capacity_wire_segments(
     for k in range(rim_samples):
         segments.append(
             LineSegmentGlyph(
-                start=tuple(rim_pts[k]),
-                end=tuple(rim_pts[k + 1]),
+                start=_vec3(rim_pts[k]),
+                end=_vec3(rim_pts[k + 1]),
                 rgba=rgba,
                 width_m=0.75 * line_width_m,
                 dashed=dashed,

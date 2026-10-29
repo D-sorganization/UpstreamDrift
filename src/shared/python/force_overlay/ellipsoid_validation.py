@@ -41,8 +41,13 @@ def validate_oriented_ellipsoid_fields(
     if rgba_arr.shape != (4,) or not ((rgba_arr >= 0.0) & (rgba_arr <= 1.0)).all():
         raise ValueError(f"rgba must be 4 values in [0, 1], got {rgba!r}")
     return (
-        tuple(float(v) for v in centre_arr),
+        (float(centre_arr[0]), float(centre_arr[1]), float(centre_arr[2])),
         axes_arr,
-        tuple(float(v) for v in radii_arr),
-        tuple(float(v) for v in rgba_arr),
+        (float(radii_arr[0]), float(radii_arr[1]), float(radii_arr[2])),
+        (
+            float(rgba_arr[0]),
+            float(rgba_arr[1]),
+            float(rgba_arr[2]),
+            float(rgba_arr[3]),
+        ),
     )
