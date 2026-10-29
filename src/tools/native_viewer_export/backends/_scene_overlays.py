@@ -12,6 +12,7 @@ from collections.abc import Sequence
 from typing import Any
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
+    add_ellipsoids_to_scene,
     add_glyphs_to_scene,
 )
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
@@ -40,4 +41,7 @@ def apply_scene_overlays(
     if axial_frames is not None and shading is not None:
         apply_mujoco_scene_colors(model, scene, axial_frames[position], shading)
     if glyph_sets is not None:
-        add_glyphs_to_scene(scene, glyph_sets[position])
+        frame = glyph_sets[position]
+        add_glyphs_to_scene(scene, frame)
+        if frame.ellipsoids:
+            add_ellipsoids_to_scene(scene, frame.ellipsoids)

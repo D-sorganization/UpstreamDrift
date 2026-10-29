@@ -17,6 +17,7 @@ Usage Example:
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -24,7 +25,7 @@ import mujoco
 import numpy as np
 import numpy.typing as npt
 
-from src.shared.python.force_overlay.glyphs import GlyphSet
+from src.shared.python.force_overlay.glyphs import EllipsoidGlyph, GlyphSet
 
 logger = logging.getLogger(__name__)
 
@@ -216,6 +217,40 @@ def add_glyphs_to_scene(
         else:
             dropped += 1
 
+    return SceneGlyphReceipt(added=added, dropped=dropped)
+
+
+def add_ellipsoids_to_scene(
+    scene: mujoco.MjvScene, ellipsoids: Sequence[EllipsoidGlyph]
+) -> SceneGlyphReceipt:
+    """Draw oriented ellipsoids as ``mjGEOM_ELLIPSOID`` geoms (#14003).
+
+    ``size`` is the glyph radii and ``mat`` is the row-major flatten of the
+    rotation matrix whose columns are the ellipsoid axes (MuJoCo's geom
+    ``xmat`` convention). Geoms beyond ``scene.maxgeom`` are dropped and
+    counted, never written. Call after ``mjv_updateScene``.
+    """
+    if not isinstance(scene, mujoco.MjvScene):
+        raise TypeError(f"scene must be a mujoco.MjvScene, got {type(scene).__name__}")
+    added = dropped = 0
+    for glyph in ellipsoids:
+        if not isinstance(glyph, EllipsoidGlyph):
+            raise TypeError(
+                f"ellipsoids must be EllipsoidGlyph, got {type(glyph).__name__}"
+            )
+        if scene.ngeom >= scene.maxgeom:
+            dropped += 1
+            continue
+        mujoco.mjv_initGeom(
+            scene.geoms[scene.ngeom],
+            int(mujoco.mjtGeom.mjGEOM_ELLIPSOID),
+            np.asarray(glyph.radii, dtype=np.float64),
+            np.asarray(glyph.centre, dtype=np.float64),
+            np.asarray(glyph.axes, dtype=np.float64).ravel(),
+            np.asarray(glyph.rgba, dtype=np.float32),
+        )
+        scene.ngeom += 1
+        added += 1
     return SceneGlyphReceipt(added=added, dropped=dropped)
 
 
