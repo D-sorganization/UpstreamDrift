@@ -50,6 +50,8 @@ class ClubPoseModel:
             clubface_centre,
             clubface_vector,
         )
+        from src.shared.python.model_appearance.grip_hands import grip_hand_frame
+        from src.shared.python.model_appearance.grip_pose import Hand
 
         self.spec: dict[str, Any] = json.loads(spec_bytes)
         club = assembly_from_spec(self.spec)
@@ -60,6 +62,9 @@ class ClubPoseModel:
         self._centre_body = np.asarray(clubface_centre(club), dtype=float)
         self._normal_body = np.asarray(clubface_vector(club), dtype=float)
         self._source = MujocoOverlaySource(spec_bytes)
+        lead = grip_hand_frame(club, Hand.LEAD)[:3, 3]
+        trail = grip_hand_frame(club, Hand.TRAIL)[:3, 3]
+        self._grip_midpoint_body = np.append(0.5 * (lead + trail), 1.0)
 
     @property
     def ground_height_m(self) -> float:
@@ -69,6 +74,14 @@ class ClubPoseModel:
         """World 4x4 of the spec club-body frame at ``coords``."""
         site = self._source.frame_poses(dict(coords))["Clubhead"]
         return np.asarray(site @ self._placement_inv, dtype=float)
+
+    def grip_midpoint_world(self, coords: Mapping[str, float]) -> Array:
+        """World point midway between the lead and trail hands on the grip.
+
+        Kinematic only (default grip pose on the club body at ``coords``); it
+        does not depend on any force overlay.
+        """
+        return np.asarray(self.body_world(coords) @ self._grip_midpoint_body)[:3]
 
     def face_world(self, coords: Mapping[str, float]) -> FaceWorld:
         """World face centre, normal, toe and grip axes at ``coords``."""

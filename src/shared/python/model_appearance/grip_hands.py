@@ -58,6 +58,8 @@ from src.shared.python.model_appearance.grip_pose import (
     Hand,
 )
 
+from src.shared.python.model_appearance.hand_spec import ResolvedHandSpec
+
 Array = NDArray[np.float64]
 
 #: Mesh label of each hand, as drawn next to ``shaft``, ``grip`` and ``head``.
@@ -174,8 +176,15 @@ def assembly_meshes_with_hands(
     pose: GripPose = DEFAULT_GRIP_POSE,
     *,
     hand_length_m: float | None = None,
+    hands: ResolvedHandSpec | None = None,
 ) -> dict[str, Mesh]:
-    """Shaft, grip and head of :func:`assembly_meshes`, then both grip hands."""
+    """Shaft, grip and head of :func:`assembly_meshes`, then both grip hands.
+
+    ``hands`` (#13995), when given, supplies the pose and hand length and
+    overrides ``pose`` and ``hand_length_m``.
+    """
+    if hands is not None:
+        pose, hand_length_m = hands.pose, hands.hand_length_m
     return {
         **assembly_meshes(club),
         **grip_hand_meshes(club, pose, hand_length_m=hand_length_m),

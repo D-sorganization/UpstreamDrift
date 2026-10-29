@@ -110,7 +110,7 @@ def stage_job(
         glyphs_path=str(glyphs_path) if glyphs_path else None,
         lookats={
             v: [list(p) for p in points]
-            for v, points in view_lookats(settings, indices, overlay).items()
+            for v, points in view_lookats(settings, indices, swing).items()
         },
         ball=swing.ball.to_dict() if swing.ball is not None else None,
         ball_visible=visible,
