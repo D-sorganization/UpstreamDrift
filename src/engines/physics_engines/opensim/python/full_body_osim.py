@@ -39,6 +39,7 @@ from src.shared.python.club_body_names import (
 from src.shared.python.grip_contact import GripInterface
 from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
+from src.shared.python.model_appearance.hand_spec import resolved_hand_spec
 
 logger = logging.getLogger(__name__)
 
@@ -885,7 +886,7 @@ def _write_club_assets(spec: Mapping[str, Any], directory: Path) -> None:
     club = assembly_from_spec(spec)
     if club is None:
         return
-    club_visuals.write_club_assets(club, directory)
+    club_visuals.write_club_assets(club, directory, resolved_hand_spec(spec))
     logger.info("Wrote club meshes to %s", directory)
 
 

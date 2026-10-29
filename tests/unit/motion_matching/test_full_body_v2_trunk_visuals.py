@@ -5,7 +5,8 @@ Each segment carries its own de Leva solid (pelvis, middle_trunk,
 upper_trunk) and its own ``visual_hints`` ellipsoid, so the visual layer
 draws three rigid trunk visuals that follow the lumbar and thoracic joints.
 
-Model-level checks only (this box has no GL context; renders are deferred):
+Model-level checks (the stills need a GL host, see
+``tests/unit/scripts/test_render_v2_trunk_stills.py``):
 
 * every trunk body gets its own visual geom on the right MJCF body;
 * the visuals leave the compiled physics unchanged;
@@ -304,3 +305,18 @@ def test_trunk_visuals_leave_compiled_physics_unchanged(v2_doc, v2_bytes, mode) 
         mujoco.mj_forward(model, data)
     np.testing.assert_array_equal(datas[0].xpos, datas[1].xpos)
     np.testing.assert_array_equal(datas[0].qacc, datas[1].qacc)
+
+
+# --- Still render CLI (GL call mocked; the stills themselves need a GL host) ----
+
+
+def test_still_render_cli_accepts_v2_spec(v2_bytes, tmp_path: Path) -> None:
+    """The showcase CLI takes a full-body-v2 spec for the address/top/impact stills."""
+    from scripts import render_golfer_realism_showcase as showcase
+
+    spec = tmp_path / "full_body_v2.json"
+    spec.write_bytes(v2_bytes)
+    argv = ["--swing", "driver=bundle.npz", "--v2-spec", str(spec)]
+    args = showcase.build_parser().parse_args(argv)
+    assert args.v2_spec == spec
+    assert showcase.build_parser().parse_args(["--swing", "d=b.npz"]).v2_spec is None

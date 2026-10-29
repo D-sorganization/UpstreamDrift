@@ -54,3 +54,37 @@ def test_worker_accepts_a_virtual_display(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setenv("NATIVE_VIEWER_XVFB", "1")
     monkeypatch.setenv("DISPLAY", ":99")
     assert require_virtual_display() == ":99"
+
+
+def test_grab_window_raises_when_xwininfo_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.tools.native_viewer_export.backends import opensim_worker
+
+    def fake_run(*_args: object, **_kwargs: object) -> None:
+        raise FileNotFoundError(2, "No such file or directory: 'xwininfo'")
+
+    monkeypatch.setattr(opensim_worker.subprocess, "run", fake_run)
+    with pytest.raises(RuntimeError, match="xwininfo is not installed"):
+        opensim_worker.grab_window()
+
+
+def test_grab_window_raises_when_xwd_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from types import SimpleNamespace
+
+    from src.tools.native_viewer_export.backends import opensim_worker
+
+    def fake_run(cmd: list[str], *_args: object, **_kwargs: object) -> SimpleNamespace:
+        if cmd[0] == "xwininfo":
+            return SimpleNamespace(
+                stdout='0x123456 (has no name): ()  "OpenSim Visualizer"\n'
+            )
+        if cmd[0] == "xwd":
+            raise FileNotFoundError(2, "No such file or directory: 'xwd'")
+        raise AssertionError(f"unexpected command: {cmd}")
+
+    monkeypatch.setattr(opensim_worker.subprocess, "run", fake_run)
+    with pytest.raises(RuntimeError, match="xwd is not installed"):
+        opensim_worker.grab_window()

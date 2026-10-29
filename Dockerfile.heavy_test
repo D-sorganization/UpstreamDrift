@@ -108,7 +108,7 @@ RUN if [ -f "pyproject.toml" ]; then \
 
 # Keep late transitive installs from restoring scanner-known vulnerable tools.
 RUN pip install --upgrade --no-cache-dir \
-    msgpack==1.2.1 \
+    msgpack==1.2.3 \
     setuptools==84.2.1
 
 # The finished test image executes pytest but never installs packages at run
