@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-29 | #14034 | ML-WS-8: ProposalInitializer protocol and --neural-mode preview warm-start hook into MJX knot optimiser |
+| 2026-10-29 | #14033 | HRG-HX4 part 3: wire GripPose grip_force_limit_n through require_grip_force_limit_enforceable to MuJoCo and Pinocchio ClubOnBushings, enable weld_bushing in capability inventory, and verify club retention below limit and slip above limit |
 | 2026-10-29 | #14032 | Bump tornado 6.5.10 to 6.6 for CVE-2026-116577, CVE-2026-115927 and CVE-2026-116578, and msgpack 1.2.1 to 1.2.3 in the Docker images for CVE-2026-114613 (no audit waiver) |
 | 2026-10-29 | #14029 | Catch TypeError and probe availability in cross-engine builder and degrade uninitialized engines to stub |
 | 2026-10-29 | #14026 | MuJoCo adapter for per-hand constrained mobility W = J A J^T and effective masses at each grip point (HCM-3a) |
