@@ -76,6 +76,35 @@ HQ_CRF = 18
 PREVIEW_CRF = 23
 MAX_CRF = 51
 
+ELLIPSOID_KINDS: tuple[str, ...] = (
+    "mobility",
+    "effective-mass",
+    "acceleration-capacity",
+    "force-capacity",
+)
+DEFAULT_ELLIPSOID_SCALE: str = "auto"
+
+
+def parse_ellipsoid_scale(text: str) -> str:
+    """Parse --ellipsoid-scale {auto,fixed:<m>} (raises ValueError)."""
+    cleaned = str(text).strip()
+    if cleaned == "auto":
+        return "auto"
+    if cleaned.startswith("fixed:"):
+        raw = cleaned[len("fixed:") :].strip()
+        try:
+            val = float(raw)
+        except ValueError:
+            raise ValueError(
+                f"--ellipsoid-scale fixed:<m> requires a positive finite number of metres, got {text!r}"
+            ) from None
+        if not (math.isfinite(val) and val > 0.0):
+            raise ValueError(
+                f"--ellipsoid-scale fixed:<m> requires a positive finite number of metres, got {text!r}"
+            )
+        return f"fixed:{val:g}"
+    raise ValueError(f"--ellipsoid-scale must be 'auto' or 'fixed:<m>', got {text!r}")
+
 
 class BackendUnavailable(RuntimeError):
     """A backend's optional dependency or runtime is missing."""
@@ -128,6 +157,10 @@ class ExportSettings:
     #: allocated trail-palm-on-lead-thumb normal force arrow (HRG-H1, #13189);
     #: independent of the force and torque vectors, needs ``overlays``
     palm_thumb_force: bool = False
+    #: whole-system interface capability and mobility ellipsoids (CAP-6, #14038, #14046)
+    interface_ellipsoids: tuple[str, ...] = ()
+    ellipsoid_scale: str = DEFAULT_ELLIPSOID_SCALE
+    drift_arrow: bool = False
 
     @property
     def shading_enabled(self) -> bool:
@@ -192,11 +225,30 @@ class ExportSettings:
             raise ValueError("the 2x2 grid needs exactly four views")
         if self.shading is not None and not isinstance(self.shading, ForceColorScale):
             raise TypeError("shading must be a ForceColorScale or None")
-        for flag in ("force_vectors", "torque_vectors", "palm_thumb_force"):
+        for flag in (
+            "force_vectors",
+            "torque_vectors",
+            "palm_thumb_force",
+            "drift_arrow",
+        ):
             if not isinstance(getattr(self, flag), bool):
                 raise TypeError(f"{flag} must be bool")
         if self.palm_thumb_force and not self.overlays:
             raise ValueError("palm_thumb_force needs overlays (omit --no-overlay)")
+        if not isinstance(self.interface_ellipsoids, (tuple, list)):
+            raise TypeError("interface_ellipsoids must be a sequence of strings")
+        for kind in self.interface_ellipsoids:
+            if not isinstance(kind, str) or kind not in ELLIPSOID_KINDS:
+                raise ValueError(
+                    f"interface_ellipsoids items must be in {ELLIPSOID_KINDS}, got {kind!r}"
+                )
+        parse_ellipsoid_scale(self.ellipsoid_scale)
+        if self.interface_ellipsoids and not self.overlays:
+            raise ValueError(
+                "interface_ellipsoids requires overlays=True (omit --no-overlay)"
+            )
+        if self.drift_arrow and not self.overlays:
+            raise ValueError("drift_arrow requires overlays=True (omit --no-overlay)")
 
     def effective_speeds(self, dt_s: float) -> tuple[float, ...]:
         """Speeds to export; a deprecated ``stride`` maps to its equivalent speed."""

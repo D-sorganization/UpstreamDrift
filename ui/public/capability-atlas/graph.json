@@ -909,7 +909,7 @@
       "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
       "pending_decision": false,
       "tiles": [],
-      "notes": "Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --visual-grip-strength, --lead-roll-offset, --trail-roll-offset and --grip-thumb-offset-deg (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --grip-style, --lead-shaft-rotation, ...; HRG-GS-G1, #13346) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder.",
+      "notes": "Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --visual-grip-strength, --lead-roll-offset, --trail-roll-offset and --grip-thumb-offset-deg (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --grip-style, --lead-shaft-rotation, ...; HRG-GS-G1, #13346) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder; whole-system interface capability and mobility ellipsoids (--interface-ellipsoid {mobility,effective-mass,acceleration-capacity,force-capacity}, --ellipsoid-scale {auto,fixed:<m>}, --drift-arrow; CAP-6, #14038, #14046), with --hand-mobility supported as a backward-compatible alias.",
       "id": "tools.native_viewer_export"
     },
     {
@@ -3322,7 +3322,7 @@
   "inputs": {
     "src/config/models.yaml": "7c868b0c444389fad39bdd30469abd32439f5bd11b9b5019c941ac0049e0763c",
     "src/config/launcher_manifest.json": "26337829a1de75576be220e293c6d4f012f97303c0639401a8d902e76c418f37",
-    "src/config/feature_parity.json": "9f621bbb75a6312a95a498d1af2a193e34d9ddd184c486179c701c3d94c4e982",
+    "src/config/feature_parity.json": "da7751370c67885191c811656200715f8ef1e87d5c14a163da6b45da987004ce",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
