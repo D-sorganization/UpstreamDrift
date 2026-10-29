@@ -12,6 +12,10 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from src.shared.python.force_overlay.ellipsoid_validation import (
+    validate_oriented_ellipsoid_fields,
+)
+
 __all__ = [
     "CapacityWireGlyph",
     "LineSegmentGlyph",
@@ -42,33 +46,17 @@ class CapacityWireGlyph:
     label: str = ""
 
     def __post_init__(self) -> None:
-        centre = np.asarray(self.centre, dtype=float)
-        if centre.shape != (3,) or not np.isfinite(centre).all():
-            raise ValueError(f"centre must be a finite 3-vector, got {self.centre!r}")
-        axes = np.asarray(self.axes, dtype=float)
-        if axes.shape != (3, 3) or not np.isfinite(axes).all():
-            raise ValueError("axes must be a finite 3x3 matrix")
-        if not np.allclose(axes.T @ axes, np.eye(3), atol=1e-6):
-            raise ValueError("axes must have orthonormal columns (within 1e-6)")
-        if np.linalg.det(axes) < 0.0:
-            axes = axes.copy()
-            axes[:, 2] *= -1.0
-        radii = np.asarray(self.radii, dtype=float)
-        if radii.shape != (3,) or not np.isfinite(radii).all() or (radii <= 0).any():
-            raise ValueError(
-                f"radii must be 3 finite positive values, got {self.radii!r}"
-            )
-        rgba = np.asarray(self.rgba, dtype=float)
-        if rgba.shape != (4,) or not ((rgba >= 0.0) & (rgba <= 1.0)).all():
-            raise ValueError(f"rgba must be 4 values in [0, 1], got {self.rgba!r}")
-        object.__setattr__(self, "centre", tuple(float(v) for v in centre))
+        centre_t, axes_mat, radii_t, rgba_t = validate_oriented_ellipsoid_fields(
+            self.centre, self.axes, self.radii, self.rgba
+        )
+        object.__setattr__(self, "centre", centre_t)
         object.__setattr__(
             self,
             "axes",
-            tuple(tuple(float(axes[j, i]) for j in range(3)) for i in range(3)),
+            tuple(tuple(float(axes_mat[j, i]) for j in range(3)) for i in range(3)),
         )
-        object.__setattr__(self, "radii", tuple(float(v) for v in radii))
-        object.__setattr__(self, "rgba", tuple(float(v) for v in rgba))
+        object.__setattr__(self, "radii", radii_t)
+        object.__setattr__(self, "rgba", rgba_t)
 
 
 def _tick_segment(
