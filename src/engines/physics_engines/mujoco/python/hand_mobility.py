@@ -21,7 +21,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Final
+from typing import Any, Final
 
 import numpy as np
 
@@ -32,6 +32,11 @@ from src.engines.physics_engines.mujoco.python.overlay_source import (
     MujocoOverlaySource,
 )
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+from src.shared.python.loop_nullspace.capacity import CapacitySubject
+from src.shared.python.loop_nullspace.torque_limits import (
+    TorqueLimits,
+    torque_limits_for,
+)
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 from src.shared.python.model_appearance.grip_hands import grip_hand_frame
 from src.shared.python.model_appearance.grip_pose import (
@@ -40,6 +45,9 @@ from src.shared.python.model_appearance.grip_pose import (
     Hand,
 )
 from src.shared.python.spatial_algebra.operational_space import (
+    CapacityEllipsoid,
+    acceleration_capacity,
+    force_capacity,
     force_ellipsoid,
     mobility_matrix,
     velocity_ellipsoid,
@@ -71,12 +79,19 @@ class HandMobility:
     condition: float
     singular: np.ndarray
     provenance: Mapping[str, object]
+    acceleration_capacity: CapacityEllipsoid | None = None
+    force_capacity: CapacityEllipsoid | None = None
 
 
 class HandMobilitySource(MujocoOverlaySource):
-    """``MujocoOverlaySource`` that also reports per-hand mobility."""
+    """``MujocoOverlaySource`` that also reports per-hand mobility and capacity."""
 
-    def __init__(self, model_bytes: bytes, pose: GripPose = DEFAULT_GRIP_POSE) -> None:
+    def __init__(
+        self,
+        model_bytes: bytes,
+        pose: GripPose = DEFAULT_GRIP_POSE,
+        torque_limits: TorqueLimits | CapacitySubject | Mapping[str, Any] | None = None,
+    ) -> None:
         super().__init__(model_bytes)
         spec = json.loads(model_bytes)
         club = assembly_from_spec(spec)
@@ -94,8 +109,28 @@ class HandMobilitySource(MujocoOverlaySource):
         self.topology = (
             f"rigid 6-D closure {names[0]} <-> {names[1]} (explicit KKT; the MJCF "
             "weld equality is compliant and not used); both grip points are "
-            f"taken on body {names[1]}"
+            f"taken on body {names[1]} (welded lead hand topology: lead hand is "
+            "welded to the club in v2 golfer, so lead and trail share one rigid body)"
         )
+        self._torque_limits = self._resolve_torque_limits(torque_limits, spec)
+
+    def _resolve_torque_limits(
+        self,
+        source: TorqueLimits | CapacitySubject | Mapping[str, Any] | None,
+        spec: Mapping[str, Any],
+    ) -> TorqueLimits | None:
+        if isinstance(source, TorqueLimits):
+            return source
+        if isinstance(source, CapacitySubject):
+            return torque_limits_for(source, self.coordinate_order)
+        if isinstance(source, Mapping):
+            return torque_limits_for(source, self.coordinate_order)
+        if "subject" in spec:
+            try:
+                return torque_limits_for(spec, self.coordinate_order)
+            except Exception:
+                return None
+        return None
 
     def grip_point_world(
         self, hand: str, coordinates: Mapping[str, float]
@@ -127,24 +162,85 @@ class HandMobilitySource(MujocoOverlaySource):
         self._forward(coordinates)
         return coordinates
 
-    def _mobility_at(
-        self, point: np.ndarray, rows: int, constrained: bool
-    ) -> np.ndarray:
+    def _task_matrices(
+        self, point: np.ndarray, constrained: bool, rows: int = 3
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
         mj, model, data = self._mj, self.model, self.data
         jacp = np.zeros((3, model.nv))
         jacr = np.zeros((3, model.nv))
         mj.mj_jac(model, data, jacp, jacr, point, self._club_body)
         jac = jacp if rows == 3 else np.vstack((jacp, jacr))
         mass = full_mass_matrix(mj, model, data)
-        closure = _evaluate_weld_closure(mj, model, data, self._closure)[0]
-        return mobility_matrix(jac, mass, closure if constrained else None)
+        closure = (
+            _evaluate_weld_closure(mj, model, data, self._closure)[0]
+            if constrained
+            else None
+        )
+        return jac, mass, closure
 
-    def hand_mobility(
-        self, q: np.ndarray, *, mode: str = "constrained"
-    ) -> dict[str, HandMobility]:
-        """Lead and trail 3x3 mobility at state ``q`` (``coordinate_order``)."""
+    def _mobility_at(
+        self, point: np.ndarray, rows: int, constrained: bool
+    ) -> np.ndarray:
+        jac, mass, closure = self._task_matrices(point, constrained, rows=rows)
+        return mobility_matrix(jac, mass, closure)
+
+    def _capacity_task(
+        self,
+        q: np.ndarray,
+        hand: str,
+        mode: str,
+        torque_limits: TorqueLimits | None,
+        label: str,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None, TorqueLimits]:
         if mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
+        if hand not in HANDS:
+            raise ValueError(f"hand must be one of {HANDS}, got {hand!r}")
+        limits = torque_limits or self._torque_limits
+        if limits is None:
+            raise ValueError(f"{label} capacity requires torque limits")
+        coordinates = self._set_state(q)
+        point = self.grip_point_world(hand, coordinates)
+        J, M, Jc = self._task_matrices(point, mode == "constrained")
+        return J, M, Jc, limits
+
+    def acceleration_capacity(
+        self,
+        q: np.ndarray,
+        hand: str,
+        *,
+        mode: str = "constrained",
+        torque_limits: TorqueLimits | None = None,
+    ) -> CapacityEllipsoid:
+        """Acceleration-capacity ellipsoid at ``hand``'s grip point [m/s^2]."""
+        J, M, Jc, limits = self._capacity_task(
+            q, hand, mode, torque_limits, "acceleration"
+        )
+        return acceleration_capacity(J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc)
+
+    def force_capacity(
+        self,
+        q: np.ndarray,
+        hand: str,
+        *,
+        mode: str = "constrained",
+        torque_limits: TorqueLimits | None = None,
+    ) -> CapacityEllipsoid:
+        """Dynamically consistent force-capacity ellipsoid at ``hand``'s grip point [N]."""
+        J, M, Jc, limits = self._capacity_task(q, hand, mode, torque_limits, "force")
+        return force_capacity(J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc)
+
+    def hand_mobility(
+        self,
+        q: np.ndarray,
+        *,
+        mode: str = "constrained",
+        torque_limits: TorqueLimits | None = None,
+    ) -> dict[str, HandMobility]:
+        """Lead and trail 3x3 mobility and capability at state ``q`` (``coordinate_order``)."""
+        if mode not in MODES:
+            raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
+        limits = torque_limits or self._torque_limits
         coordinates = self._set_state(q)
         armature = np.asarray(self.model.dof_armature, dtype=float)
         provenance = {
@@ -153,6 +249,14 @@ class HandMobilitySource(MujocoOverlaySource):
             "frame": "world",
             "mode": mode,
             "point": "grip_hand_frame origin on the club",
+            "welded_lead_hand": True,
+            "caption": (
+                "Lead hand is welded to the club in v2 golfer topology; "
+                "lead and trail share rigid body kinematics on the club."
+            ),
+            "torque_limit_source": limits.source_id if limits is not None else None,
+            "assumed_slots": limits.assumed_slots if limits is not None else 0,
+            "verified_slots": limits.verified_slots if limits is not None else 0,
         }
         out: dict[str, HandMobility] = {}
         for hand in HANDS:
@@ -162,6 +266,16 @@ class HandMobilitySource(MujocoOverlaySource):
             dual = force_ellipsoid(w)
             eig = np.maximum(lam.radii**2, 0.0)
             mass_eff = dual.radii**2
+
+            acc_cap: CapacityEllipsoid | None = None
+            f_cap: CapacityEllipsoid | None = None
+            if limits is not None:
+                J, M, Jc = self._task_matrices(point, mode == "constrained")
+                acc_cap = acceleration_capacity(
+                    J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc
+                )
+                f_cap = force_capacity(J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc)
+
             out[hand] = HandMobility(
                 hand=hand,
                 centre=(float(point[0]), float(point[1]), float(point[2])),
@@ -172,5 +286,7 @@ class HandMobilitySource(MujocoOverlaySource):
                 condition=float(mass_eff.max() / mass_eff.min()),
                 singular=dual.singular,
                 provenance=provenance,
+                acceleration_capacity=acc_cap,
+                force_capacity=f_cap,
             )
         return out

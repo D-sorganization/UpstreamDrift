@@ -2743,6 +2743,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 | --- | --- | --- |
 | 2026-10-29 | #14017 | Correct cross_engine_v1 dependency status: the CC-7/9/10 draft PRs were closed unmerged, no comparison has been run |
 | 2026-10-29 | #14014 | R4 cross-engine address knee flexion check over the committed receipts (scripts/address_knee_engine_check.py): per-engine disagreement over 0.1 deg, unavailable engines with reasons, fail-closed on malformed receipts |
+| 2026-10-29 | #14046 | CAP-6 (#14038): Exporter option --interface-ellipsoid with a --hand-mobility alias |
+| 2026-10-29 | #14043 | CAP-4 (#14038): MuJoCo capability adapter at the hand-club interfaces |
 | 2026-10-29 | #14035 | HRG-D3: render_golfer_realism_showcase --v2-spec renders labelled address/top/impact stills of the full-body-v2 trunk visuals; GL stills still need a GL host |
 | 2026-10-29 | #14062 | Guard xwininfo and xwd dependency checks in OpenSim visualizer capture |
 | 2026-10-29 | #14058 | Correct 6x6 mobility scaling by multiplying angular rows by L |
@@ -3212,7 +3214,6 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 | 2026-10-15 | #12597 | NSX-20: convex solver backends (highspy LP session with basis reuse, Clarabel SOCP), loop-nullspace extra, benchmark |
 | 2026-10-15 | #12596 | Add NSX-00 mathematical specification, SymPy golden fixtures, ADR-0054, hypothesis registry seed, and contract appendix; Add NSX-05 deferred-validation record DV-12554 and external validation protocol |
 | 2026-10-15 | #12541 | BunkerShot3D: particle playback panel embedded in the shot viewport (Open particle trajectory action, play/pause/step, time scrubber in simulation seconds, playback time scale, camera presets, y=0 clipping toggle, visible frame stamp, reader errors shown for rejected artifacts, a stated reason for every disabled control, keyboard shortcuts and focus order). Workbench parity gap now points at follow-up #12536. |
-| 2026-10-29 | #14046 | CAP-6 (#14038): Exporter option --interface-ellipsoid with a --hand-mobility alias |
 <!-- prettier-ignore-end -->
 ---
 
