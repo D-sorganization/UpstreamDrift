@@ -28,7 +28,10 @@ from src.shared.python.core.error_utils import (
 from ..dependencies import get_logger, get_simulation_service, get_task_manager
 from ..models.requests import SimulationRequest
 from ..models.responses import SimulationResponse
+from ..models.sim_run import RunRecord, RunRequest
 from ..rate_limit import get_limit, limiter
+
+__all__ = ["RunRecord", "RunRequest", "router"]
 
 if TYPE_CHECKING:
     from ..services.simulation_service import SimulationService
