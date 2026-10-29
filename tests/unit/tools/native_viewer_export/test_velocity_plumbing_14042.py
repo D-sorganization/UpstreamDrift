@@ -151,3 +151,22 @@ def test_hand_mobility_source_evaluates_drift_and_jdot_v() -> None:
     assert lead.jdot_v is not None
     np.testing.assert_allclose(lead.jdot_v, jdot_v)
     np.testing.assert_allclose(lead.drift_acceleration, drift)
+
+
+def test_resampled_swing_input_interpolates_velocity() -> None:
+    from src.tools.native_viewer_export.core import (
+        ClipPlan,
+        ExportSettings,
+        _resampled,
+    )
+
+    b = _test_bundle(steps=20)
+    swing = SwingInput(b, b.reference_q, "driver", "Driver", "mujoco", v=b.reference_v)
+    settings = ExportSettings(fps=60)
+    plan = ClipPlan(suffix="_test", speed=1.0)
+
+    resampled_swing, _ = _resampled(swing, None, settings, plan)
+    assert resampled_swing.v is not None
+    assert resampled_swing.v.shape == resampled_swing.q.shape
+    assert resampled_swing.v.shape[0] == len(resampled_swing.sample_times_s)
+    np.testing.assert_allclose(resampled_swing.v, 2.0, atol=1e-5)

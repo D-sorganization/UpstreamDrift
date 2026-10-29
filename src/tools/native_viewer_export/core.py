@@ -737,6 +737,7 @@ def _resampled(
     resampled = replace(
         swing,
         q=schedule.interpolate(swing.q),
+        v=schedule.interpolate(swing.v) if swing.v is not None else None,
         sample_times_s=tuple(float(t) for t in times),
     )
     if feed is None:
