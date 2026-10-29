@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-29 | #14093 | Versioned schemas for RunRequest, RunRecord, and ResultEnvelope exported from pydantic models |
+| 2026-10-29 | #14084 | Design-manual Chapter 69 documenting interface capability ellipsoids, operational-space equations, Okabe-Ito styling, and governance integration |
+| 2026-10-29 | #14083 | Cross-engine parity test suite asserting matrices, ranks, eigenvalues (1%), axes (2°), and capacity ellipsoids across MuJoCo, Drake, and Pinocchio |
+| 2026-10-29 | #14075 | Drake capability adapter emitting acceleration and force capacity ellipsoids per grip point |
 | 2026-10-29 | #14069 | Capacity wireframe glyphs for MuJoCo, Meshcat, and matplotlib render backends (CAP-5b) |
 | 2026-10-29 | #14078 | Carry velocities v through SwingInput and expose interface bias force and point_jdot_v |
 | 2026-10-29 | #14073 | Linear radius scaling, legend scale bar formatting, dashed clamp styling, and Okabe-Ito yellow trail hue rule for capability ellipsoids |
