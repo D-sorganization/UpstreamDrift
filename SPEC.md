@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-29 | #14017 | Correct cross_engine_v1 dependency status: the CC-7/9/10 draft PRs were closed unmerged, no comparison has been run |
+| 2026-10-29 | #14014 | R4 cross-engine address knee flexion check over the committed receipts (scripts/address_knee_engine_check.py): per-engine disagreement over 0.1 deg, unavailable engines with reasons, fail-closed on malformed receipts |
 | 2026-10-29 | #14035 | HRG-D3: render_golfer_realism_showcase --v2-spec renders labelled address/top/impact stills of the full-body-v2 trunk visuals; GL stills still need a GL host |
 | 2026-10-29 | #14062 | Guard xwininfo and xwd dependency checks in OpenSim visualizer capture |
 | 2026-10-29 | #14058 | Correct 6x6 mobility scaling by multiplying angular rows by L |
