@@ -963,6 +963,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14041 · CAP-2: Torque-Limit Provider Adapting CapacityVector to (B, Tau_Lo, Tau_Hi) With Provenance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14041
+- **Branch:** merged via #14054
+- **PR:** #14054
+- **Paths:** see #14054
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`cfef12fb`; collated from changes/14041-cap-2-torque-limit-provider-adapting-cap.md)
+- **Summary:** CAP-2: torque-limit provider adapting CapacityVector to (B, tau_lo, tau_hi) with provenance
+- **Next step:** Shipped in PR #14054.
+
 ### DL-#13785 · ML-WS-8: ProposalInitializer Protocol and --Neural-Mode Preview Warm-Start Hook Into MJX Knot Optimiser
 
 - **State:** shipped
