@@ -159,6 +159,34 @@ def _limits(name: str, v: object, nu: int) -> np.ndarray:
     return arr
 
 
+def _validated_actuators(
+    B: np.ndarray,
+    tau_lo: np.ndarray,
+    tau_hi: np.ndarray,
+    nv: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    b_mat = _finite_matrix("B", B)
+    if b_mat.shape[0] != nv:
+        raise ValueError(f"B must have {nv} rows, got {b_mat.shape[0]}")
+    nu = b_mat.shape[1]
+    lo = _limits("tau_lo", tau_lo, nu)
+    hi = _limits("tau_hi", tau_hi, nu)
+    if not (np.all(lo < 0) and np.all(hi > 0)):
+        raise ValueError("torque limits must satisfy tau_lo < 0 < tau_hi")
+    return b_mat, lo, hi
+
+
+def _projected_task_compliance(
+    J: np.ndarray,
+    M: np.ndarray,
+    Jc: np.ndarray | None,
+    factor: tuple[np.ndarray, bool],
+) -> np.ndarray:
+    if Jc is not None and Jc.shape[0] > 0:
+        return J @ kkt_projector(M, Jc)
+    return cho_solve(factor, J.T).T
+
+
 def acceleration_capacity(
     J: np.ndarray,
     M: np.ndarray,
@@ -201,20 +229,9 @@ def acceleration_capacity(
     if not tol > 0:
         raise ValueError("tol must be positive")
     J, M, Jc, factor = _validated_task(J, M, Jc)
-    B = _finite_matrix("B", B)
-    nv = M.shape[0]
-    if B.shape[0] != nv:
-        raise ValueError(f"B must have {nv} rows, got {B.shape[0]}")
-    nu = B.shape[1]
-    lo = _limits("tau_lo", tau_lo, nu)
-    hi = _limits("tau_hi", tau_hi, nu)
-    if not (np.all(lo < 0) and np.all(hi > 0)):
-        raise ValueError("torque limits must satisfy tau_lo < 0 < tau_hi")
+    B, lo, hi = _validated_actuators(B, tau_lo, tau_hi, M.shape[0])
 
-    if Jc is not None and Jc.shape[0] > 0:
-        JA = J @ kkt_projector(M, Jc)
-    else:
-        JA = cho_solve(factor, J.T).T
+    JA = _projected_task_compliance(J, M, Jc, factor)
     JAB = JA @ B
     G = JAB * ((hi - lo) / 2)[None, :]
     lam, vec = np.linalg.eigh(0.5 * (G @ G.T + (G @ G.T).T))
@@ -272,15 +289,7 @@ def force_capacity(
     k = J.shape[0]
     if scales is not None and k != 6:
         raise ValueError("scales applies to a 6-row J only")
-    B = _finite_matrix("B", B)
-    nv = M.shape[0]
-    if B.shape[0] != nv:
-        raise ValueError(f"B must have {nv} rows, got {B.shape[0]}")
-    nu = B.shape[1]
-    lo = _limits("tau_lo", tau_lo, nu)
-    hi = _limits("tau_hi", tau_hi, nu)
-    if not (np.all(lo < 0) and np.all(hi > 0)):
-        raise ValueError("torque limits must satisfy tau_lo < 0 < tau_hi")
+    B, lo, hi = _validated_actuators(B, tau_lo, tau_hi, M.shape[0])
 
     W = mobility_matrix(J, M, Jc, scales=scales)
     lam_w, vec_w = np.linalg.eigh(0.5 * (W + W.T))
@@ -288,10 +297,7 @@ def force_capacity(
     floor = tol * max(lam_w_max, 1.0)
     W_inv = vec_w @ np.diag(1.0 / np.maximum(lam_w, floor)) @ vec_w.T
 
-    if Jc is not None and Jc.shape[0] > 0:
-        JA = J @ kkt_projector(M, Jc)
-    else:
-        JA = cho_solve(factor, J.T).T
+    JA = _projected_task_compliance(J, M, Jc, factor)
     if scales is not None:
         length = scales.moment / scales.force
         scale = np.concatenate([np.ones(3), np.full(3, length)])
@@ -300,11 +306,10 @@ def force_capacity(
     JAB = JA @ B
     Ga = JAB * ((hi - lo) / 2)[None, :]
     mid = (hi + lo) / 2
-    centre_a = JAB @ mid
 
     Gf = W_inv @ Ga
     Qf = Gf @ Gf.T
-    centre_f = W_inv @ centre_a
+    centre_f = W_inv @ (JAB @ mid)
 
     lam_f, vec_f = np.linalg.eigh(0.5 * (Qf + Qf.T))
     lam_f = np.maximum(lam_f, 0.0)
