@@ -263,6 +263,25 @@ class ExportSettings:
         return (speed,)
 
 
+@functools.lru_cache(maxsize=4)
+def _hand_source(
+    spec_bytes: bytes,
+    torque_limit_source: str | None = None,
+) -> Any:
+    """Cached ``HandMobilitySource`` of a specification (compiled once per export).
+
+    The cache key includes ``torque_limit_source`` so alternate torque capacities
+    compile distinct instances (#14043).
+    """
+    try:
+        from src.engines.physics_engines.mujoco.python.hand_mobility import (
+            HandMobilitySource,
+        )
+    except ImportError as exc:
+        raise BackendUnavailable(f"mujoco is not available: {exc}") from exc
+    return HandMobilitySource(spec_bytes)
+
+
 @dataclass(frozen=True)
 class SwingInput:
     """A same-input bundle plus the engine rollout states to display."""
@@ -289,6 +308,23 @@ class SwingInput:
             raise ValueError(f"rollout q has shape {self.q.shape}, expected {expected}")
         if not np.isfinite(self.q).all():
             raise ValueError("rollout q must be finite")
+
+    def hand_mobility_at(
+        self,
+        index: int,
+        mode: str = "constrained",
+        torque_limit_source: str | None = None,
+    ) -> dict[str, Any]:
+        """Lead/trail ``HandMobility`` at state ``index`` (MuJoCo plant, #14004, #14043).
+
+        Raises ``BackendUnavailable`` without MuJoCo, ``ValueError`` on a bad
+        ``index`` or ``mode``.
+        """
+        if not 0 <= index < self.n_states:
+            raise ValueError(f"index {index} outside 0..{self.n_states - 1}")
+        return _hand_source(
+            self.bundle.spec_bytes, torque_limit_source=torque_limit_source
+        ).hand_mobility(self.q[index], mode=mode)
 
     @property
     def n_states(self) -> int:

@@ -2741,8 +2741,18 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-29 | #14055 | Add interface-ellipsoid kind/provenance contracts and engine parity ledger (CAP-0) |
+| 2026-10-29 | #14028 | Drake GUI no longer crashes after MeshCat starts and opens the v2 meshed golfer with a Drake-vs-MuJoCo parity check |
+| 2026-10-29 | #14022 | EllipsoidGlyph + MuJoCo ellipsoid drawing for native_viewer_export |
+| 2026-10-29 | #14018 | Add the cross-engine perturbation receipt contract (spec hash, g, dt, integrator, seed, interpolation mode per engine) and its fail-closed validator; the generator and deferred receipt follow separately |
+| 2026-10-29 | #14013 | fix(motion-matching): L-BFGS-B stop reason is fail-closed (ABNORMAL exits are error, not max_iterations) and a non-finite trial no longer ends the run or freezes best-iterate tracking |
+| 2026-10-29 | #14015 | HRG-Q1: OpenSim mass-matrix and gravity qualification cell against the spec-derived v2 reference (skips without OpenSim) |
+| 2026-10-29 | #14019 | NSX-83: add the ClubheadSeries to RigidClubState adapter and constant-twist event location feeding the shared impact outcome map. |
+| 2026-10-29 | #14016 | NSX-24: route ContactForceAllocator and MultiEngineTorqueAllocator through one feasible_set_from_frame seam (bitwise-identical numerics; allocate_trajectory routing still open) |
 | 2026-10-29 | #14017 | Correct cross_engine_v1 dependency status: the CC-7/9/10 draft PRs were closed unmerged, no comparison has been run |
 | 2026-10-29 | #14014 | R4 cross-engine address knee flexion check over the committed receipts (scripts/address_knee_engine_check.py): per-engine disagreement over 0.1 deg, unavailable engines with reasons, fail-closed on malformed receipts |
+| 2026-10-29 | #14046 | CAP-6 (#14038): Exporter option --interface-ellipsoid with a --hand-mobility alias |
+| 2026-10-29 | #14043 | CAP-4 (#14038): MuJoCo capability adapter at the hand-club interfaces |
 | 2026-10-29 | #14035 | HRG-D3: render_golfer_realism_showcase --v2-spec renders labelled address/top/impact stills of the full-body-v2 trunk visuals; GL stills still need a GL host |
 | 2026-10-29 | #14062 | Guard xwininfo and xwd dependency checks in OpenSim visualizer capture |
 | 2026-10-29 | #14058 | Correct 6x6 mobility scaling by multiplying angular rows by L |
@@ -3212,7 +3222,6 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 | 2026-10-15 | #12597 | NSX-20: convex solver backends (highspy LP session with basis reuse, Clarabel SOCP), loop-nullspace extra, benchmark |
 | 2026-10-15 | #12596 | Add NSX-00 mathematical specification, SymPy golden fixtures, ADR-0054, hypothesis registry seed, and contract appendix; Add NSX-05 deferred-validation record DV-12554 and external validation protocol |
 | 2026-10-15 | #12541 | BunkerShot3D: particle playback panel embedded in the shot viewport (Open particle trajectory action, play/pause/step, time scrubber in simulation seconds, playback time scale, camera presets, y=0 clipping toggle, visible frame stamp, reader errors shown for rejected artifacts, a stated reason for every disabled control, keyboard shortcuts and focus order). Workbench parity gap now points at follow-up #12536. |
-| 2026-10-29 | #14046 | CAP-6 (#14038): Exporter option --interface-ellipsoid with a --hand-mobility alias |
 <!-- prettier-ignore-end -->
 ---
 
