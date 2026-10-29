@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/sim-run-v1.json",
+  "title": "SimulationRunProtocol_v1",
+  "description": "Versioned schemas for headless simulation runs (Epic #14085 / #14086).",
+  "type": "object",
+  "properties": {
+    "request": {"$ref": "#/$defs/RunRequest"},
+    "record": {"$ref": "#/$defs/RunRecord"},
+    "result": {"$ref": "#/$defs/ResultEnvelope"}
+  },
+  "$defs": {
+    "Provenance": {
+      "description": "Reproducibility and identity provenance for a completed simulation run.",
+      "properties": {
+        "repo_sha": {"description": "Git commit SHA of running codebase", "title": "Repo Sha", "type": "string"},
+        "engine_type": {"description": "Physics engine identifier", "title": "Engine Type", "type": "string"},
+        "engine_version": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description": "Engine version string", "title": "Engine Version"},
+        "input_sha256": {"description": "SHA-256 digest of input JSON", "title": "Input Sha256", "type": "string"},
+        "created_at": {"description": "ISO 8601 submission timestamp", "title": "Created At", "type": "string"},
+        "completed_at": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description": "ISO 8601 completion timestamp", "title": "Completed At"},
+        "host": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description": "Worker host or runner identifier", "title": "Host"}
+      },
+      "required": ["repo_sha", "engine_type", "input_sha256", "created_at"],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ResultEnvelope": {
+      "description": "Output envelope holding simulation results, provenance, and validation status.",
+      "properties": {
+        "schema_version": {"const": "1.0.0", "default": "1.0.0", "description": "Envelope version", "title": "Schema Version", "type": "string"},
+        "run_id": {"description": "Unique run identifier", "title": "Run Id", "type": "string"},
+        "provenance": {"$ref": "#/$defs/Provenance", "description": "Execution provenance metadata"},
+        "validation_status": {"default": "unvalidated", "description": "Validation status", "enum": ["valid", "invalid", "unvalidated"], "title": "Validation Status", "type": "string"},
+        "validation_errors": {"description": "Validation errors", "items": {"type": "string"}, "title": "Validation Errors", "type": "array"},
+        "success": {"description": "Whether simulation completed successfully", "title": "Success", "type": "boolean"},
+        "data": {"additionalProperties": true, "description": "Simulation trajectory data", "title": "Data", "type": "object"},
+        "analysis_results": {"anyOf": [{"additionalProperties": true, "type": "object"}, {"type": "null"}], "default": null, "description": "Analysis results", "title": "Analysis Results"},
+        "artifacts": {"description": "Relative artifact paths", "items": {"type": "string"}, "title": "Artifacts", "type": "array"},
+        "error": {"anyOf": [{"$ref": "#/$defs/SimulationErrorInfo"}, {"type": "null"}], "default": null, "description": "Structured error details"}
+      },
+      "required": ["run_id", "provenance", "success"],
+      "title": "ResultEnvelope",
+      "type": "object"
+    },
+    "RunRequest": {
+      "description": "Headless simulation run request specification inheriting engine and bound checks.",
+      "properties": {
+        "engine_type": {"description": "Physics engine to use (mujoco, drake, etc.)", "title": "Engine Type", "type": "string"},
+        "model_path": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description": "Path to model file", "title": "Model Path"},
+        "duration": {"default": 1.0, "description": "Simulation duration in seconds", "exclusiveMinimum": 0, "maximum": 300.0, "title": "Duration", "type": "number"},
+        "timestep": {"anyOf": [{"exclusiveMinimum": 0, "maximum": 0.1, "type": "number"}, {"type": "null"}], "default": null, "description": "Simulation timestep", "title": "Timestep"},
+        "initial_state": {"anyOf": [{"additionalProperties": true, "type": "object"}, {"type": "null"}], "default": null, "description": "Initial joint positions/velocities", "title": "Initial State"},
+        "control_inputs": {
+          "anyOf": [{"items": {"additionalProperties": true, "type": "object"}, "maxItems": 100000, "type": "array"}, {"type": "null"}],
+          "default": null,
+          "description": "Control sequence",
+          "title": "Control Inputs"
+        },
+        "analysis_config": {"anyOf": [{"additionalProperties": true, "type": "object"}, {"type": "null"}], "default": null, "description": "Analysis configuration", "title": "Analysis Config"},
+        "run_id": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description": "Optional unique identifier for the simulation run", "title": "Run Id"},
+        "allow_remainder_step": {"default": true, "description": "Whether to permit a variable remainder step for non-divisible durations", "title": "Allow Remainder Step", "type": "boolean"},
+        "schema_version": {"const": "1.0.0", "default": "1.0.0", "description": "RunRequest version", "title": "Schema Version", "type": "string"},
+        "tags": {"additionalProperties": {"type": "string"}, "description": "Caller-provided tags", "title": "Tags", "type": "object"},
+        "timeout_seconds": {"default": 300.0, "description": "Worker timeout in seconds", "exclusiveMinimum": 0, "maximum": 600.0, "title": "Timeout Seconds", "type": "number"}
+      },
+      "required": ["engine_type"],
+      "title": "RunRequest",
+      "type": "object"
+    },
+    "SimulationErrorInfo": {
+      "description": "Structured error outcome for simulation failures (issue #11149, R09).",
+      "properties": {
+        "code": {"description": "Stable machine-readable error code", "title": "Code", "type": "string"},
+        "message": {"description": "Safe user-facing error message", "title": "Message", "type": "string"},
+        "stage": {"description": "Pipeline stage where failure occurred: preparation, execution, analysis, persistence", "title": "Stage", "type": "string"},
+        "run_id": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description": "Run or correlation identifier", "title": "Run Id"},
+        "retriable": {"default": false, "description": "Whether the operation can be retried", "title": "Retriable", "type": "boolean"},
+        "retry_guidance": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description": "Actionable retry guidance", "title": "Retry Guidance"},
+        "details": {
+          "anyOf": [{"additionalProperties": true, "type": "object"}, {"type": "null"}],
+          "default": null,
+          "description": "Safe contextual metadata without leaking internals",
+          "title": "Details"
+        }
+      },
+      "required": ["code", "message", "stage"],
+      "title": "SimulationErrorInfo",
+      "type": "object"
+    },
+    "RunRecord": {
+      "description": "Durable lifecycle record for a simulation run.",
+      "properties": {
+        "schema_version": {"const": "1.0.0", "default": "1.0.0", "description": "RunRecord version", "title": "Schema Version", "type": "string"},
+        "run_id": {"description": "Unique durable run identifier", "title": "Run Id", "type": "string"},
+        "status": {"description": "Current lifecycle state", "enum": ["queued", "running", "succeeded", "failed", "expired"], "title": "Status", "type": "string"},
+        "request": {"$ref": "#/$defs/RunRequest", "description": "Original run request"},
+        "created_at": {"description": "ISO 8601 creation timestamp", "title": "Created At", "type": "string"},
+        "started_at": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description": "ISO 8601 start timestamp", "title": "Started At"},
+        "completed_at": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description": "ISO 8601 completion timestamp", "title": "Completed At"},
+        "expires_at": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description": "ISO 8601 quota expiration timestamp", "title": "Expires At"},
+        "result": {"anyOf": [{"$ref": "#/$defs/ResultEnvelope"}, {"type": "null"}], "default": null, "description": "Result envelope if completed"},
+        "error": {"anyOf": [{"$ref": "#/$defs/SimulationErrorInfo"}, {"type": "null"}], "default": null, "description": "Structured error details"}
+      },
+      "required": ["run_id", "status", "request", "created_at"],
+      "title": "RunRecord",
+      "type": "object"
+    }
+  }
+}
