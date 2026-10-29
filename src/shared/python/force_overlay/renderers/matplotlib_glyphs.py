@@ -18,16 +18,38 @@ from src.shared.python.force_overlay.glyphs import (
     TorqueArcGlyph,
     clamped_tip_shift,
 )
+from src.shared.python.force_overlay.capacity_glyphs import LineSegmentGlyph
 from src.shared.python.motion_matching.diagnostics._skeleton_render import (
     equalize_3d_axes,
 )
 from src.shared.python.plot_style import FORCE_KIND_PALETTE
 
 __all__ = [
+    "draw_capacity_wire_3d",
     "draw_glyphs_3d",
     "draw_legend",
     "equalize_3d_axes",
 ]
+
+
+def draw_capacity_wire_3d(ax: Any, segments: Sequence[LineSegmentGlyph]) -> list[Any]:
+    """Plot capacity wireframe segments as 3D line artists."""
+    artists: list[Any] = []
+    for seg in segments:
+        xs = (seg.start[0], seg.end[0])
+        ys = (seg.start[1], seg.end[1])
+        zs = (seg.start[2], seg.end[2])
+        (line,) = ax.plot(
+            xs,
+            ys,
+            zs,
+            color=seg.rgba[:3],
+            alpha=float(seg.rgba[3]),
+            linewidth=max(0.5, seg.width_m * 400.0),
+            linestyle="--" if seg.dashed else "-",
+        )
+        artists.append(line)
+    return artists
 
 
 def _build_cone_facets(

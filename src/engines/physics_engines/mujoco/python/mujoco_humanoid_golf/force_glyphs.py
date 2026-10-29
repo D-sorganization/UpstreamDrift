@@ -25,6 +25,11 @@ import mujoco
 import numpy as np
 import numpy.typing as npt
 
+from src.shared.python.force_overlay.capacity_glyphs import (
+    CapacityWireGlyph,
+    LineSegmentGlyph,
+    capacity_wire_segments,
+)
 from src.shared.python.force_overlay.glyphs import EllipsoidGlyph, GlyphSet
 
 logger = logging.getLogger(__name__)
@@ -217,6 +222,39 @@ def add_glyphs_to_scene(
         else:
             dropped += 1
 
+    return SceneGlyphReceipt(added=added, dropped=dropped)
+
+
+def add_capacity_wire_to_scene(
+    scene: mujoco.MjvScene,
+    wireframes: Sequence[CapacityWireGlyph] | Sequence[LineSegmentGlyph],
+    *,
+    rim_samples: int = 32,
+) -> SceneGlyphReceipt:
+    """Draw capacity ellipsoids as line primitives (CAP-5b, #14045)."""
+    if not isinstance(scene, mujoco.MjvScene):
+        raise TypeError(f"scene must be a mujoco.MjvScene, got {type(scene).__name__}")
+    segments: list[LineSegmentGlyph] = []
+    for item in wireframes:
+        if isinstance(item, CapacityWireGlyph):
+            segments.extend(capacity_wire_segments(item, rim_samples=rim_samples))
+        elif isinstance(item, LineSegmentGlyph):
+            segments.append(item)
+        else:
+            raise TypeError(
+                "wireframes must be CapacityWireGlyph or LineSegmentGlyph, "
+                f"got {type(item).__name__}"
+            )
+    capsule_type = int(mujoco.mjtGeom.mjGEOM_CAPSULE)
+    added = dropped = 0
+    for seg in segments:
+        from_pt = np.asarray(seg.start, dtype=np.float64)
+        to_pt = np.asarray(seg.end, dtype=np.float64)
+        width = 2.0 * float(seg.width_m)
+        if _append_connector(scene, capsule_type, width, from_pt, to_pt, seg.rgba):
+            added += 1
+        else:
+            dropped += 1
     return SceneGlyphReceipt(added=added, dropped=dropped)
 
 
