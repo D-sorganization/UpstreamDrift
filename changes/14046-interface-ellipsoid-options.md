@@ -1,7 +1,6 @@
 ---
-title: "CAP-6 (#14038): Exporter Option --Interface-Ellipsoid With a --Hand-Mobility Alias"
 issue: 14046
-type: feat
+title: "CAP-6 (#14038): Exporter Option --Interface-Ellipsoid With a --Hand-Mobility Alias"
+summary: "CAP-6: Exporter option --interface-ellipsoid with a --hand-mobility alias"
+branch: "feat/14046-interface-ellipsoid-options"
 ---
-
-Added `--interface-ellipsoid {mobility,effective-mass,acceleration-capacity,force-capacity}` (repeatable), `--ellipsoid-scale {auto,fixed:<m>}` and `--drift-arrow` to native-viewer export CLI, with `--hand-mobility` as backward-compatible alias and updated feature-parity notes.
