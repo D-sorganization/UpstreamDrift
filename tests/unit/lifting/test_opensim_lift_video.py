@@ -248,9 +248,9 @@ def test_bar_body_origin_matches_bundle(lift: str) -> None:
 
     assert len(measured_errors) >= 3
     max_err = max(measured_errors)
-    assert (
-        max_err <= receipt_err + 1e-4
-    ), f"{lift}: max measured bar error {max_err * 1000:.2f} mm > receipt {receipt_err * 1000:.2f} mm"
+    assert max_err <= receipt_err + 1e-4, (
+        f"{lift}: max measured bar error {max_err * 1000:.2f} mm > receipt {receipt_err * 1000:.2f} mm"
+    )
 
 
 def test_render_worker_pythonpath_excludes_parent_stdlib(
