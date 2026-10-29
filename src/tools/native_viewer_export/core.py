@@ -252,6 +252,24 @@ class SwingInput:
         """Swing time of every state of the original (unresampled) rollout."""
         return np.arange(self._source_steps(), dtype=float) * self.bundle.dt_s
 
+    def grip_midpoint_at(self, index: int) -> tuple[float, float, float]:
+        """World grip midpoint at state ``index`` from the club pose (kinematic).
+
+        Raises ``ValueError`` when the specification has no club and
+        ``BackendUnavailable`` when MuJoCo is missing.
+        """
+        try:
+            model = _club_pose_model(self.bundle.spec_bytes)
+        except ImportError as exc:
+            raise BackendUnavailable(
+                f"mujoco is not available for the hands close-up: {exc}"
+            ) from exc
+        coords = dict(
+            zip(self.bundle.coordinate_order, map(float, self.q[index]), strict=True)
+        )
+        point = model.grip_midpoint_world(coords)
+        return (float(point[0]), float(point[1]), float(point[2]))
+
     def _source_steps(self) -> int:
         reference = self.bundle.reference_q
         return int(reference.shape[0])
@@ -429,14 +447,6 @@ class OverlayFeed:
         """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""
         return getattr(self._frame(index), "axial_loads", None)
 
-    def focus_at(self, index: int) -> tuple[float, float, float] | None:
-        """Grip midpoint of state ``index`` (camera focus), or ``None`` if unknown."""
-        metadata = getattr(self._frame(index), "metadata", None) or {}
-        point = metadata.get("grip_midpoint_m")
-        if point is None:
-            return None
-        return (float(point[0]), float(point[1]), float(point[2]))
-
     @staticmethod
     def legend(glyphs: GlyphSet | None) -> str:
         if glyphs is None:
@@ -459,21 +469,36 @@ class OverlayFeed:
         return text
 
 
+@functools.lru_cache(maxsize=4)
+def _club_pose_model(spec_bytes: bytes) -> Any:
+    from src.tools.native_viewer_export.club_pose import ClubPoseModel
+
+    return ClubPoseModel(spec_bytes)
+
+
 def view_lookats(
-    settings: ExportSettings, indices: Sequence[int], overlay: OverlayFeed | None
+    settings: ExportSettings, indices: Sequence[int], swing: Any
 ) -> dict[str, list[tuple[float, float, float]]]:
     """Look-at point per view and frame (``indices`` order).
 
-    A tracking view (``hands_closeup``) follows the overlay's grip midpoint; a
-    fixed view, or a tracking view without an overlay, keeps
-    ``settings.lookat_m``.
+    A tracking view (``hands_closeup``) follows ``swing.grip_midpoint_at``, the
+    kinematic grip midpoint from the club pose, so the path is the same with
+    the overlay on or off; a fixed view keeps ``settings.lookat_m``.
+
+    Raises ``ValueError`` if a tracking view is requested for a specification
+    without a club.
     """
     focus: list[tuple[float, float, float] | None] | None = None
     out: dict[str, list[tuple[float, float, float]]] = {}
     for name in settings.views:
         preset = get_view_preset(name)
-        if preset.tracks is not None and overlay is not None and focus is None:
-            focus = [overlay.focus_at(k) for k in indices]
+        if preset.tracks is not None and focus is None:
+            try:
+                focus = [swing.grip_midpoint_at(k) for k in indices]
+            except ValueError as exc:
+                raise ValueError(
+                    f"the {name} view tracks the grip and needs a club pose: {exc}"
+                ) from exc
         out[name] = tracked_lookats(
             preset,
             settings.lookat_m,

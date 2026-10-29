@@ -22,6 +22,7 @@ from src.shared.python.model_appearance.club_assembly import (
 from src.shared.python.model_appearance.defaults import default_appearance
 from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
+from src.shared.python.model_appearance.hand_spec import resolved_hand_spec
 from src.shared.python.model_appearance.geometry import Mesh
 
 DEFAULT_FINISH = "satin_steel"
@@ -58,7 +59,9 @@ def club_parts(
     if club is None or body is None:
         return None
     parts = []
-    for name, mesh in assembly_meshes_with_hands(club).items():
+    for name, mesh in assembly_meshes_with_hands(
+        club, hands=resolved_hand_spec(spec)
+    ).items():
         rgba = library.library_materials(doc)[
             club_part_material(name, finish, doc)
         ].rgba

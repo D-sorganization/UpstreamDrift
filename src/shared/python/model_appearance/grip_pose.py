@@ -208,7 +208,10 @@ class GripPose:
         return self.lead_below_butt_m + self.hand_spacing_m
 
     def grip_force_limit_n(self, hand: Hand) -> GripForceLimit:
-        """Force limit of ``hand`` in newtons, or ``"unlimited"`` (the default)."""
+        """Force limit of ``hand`` in newtons, or ``"unlimited"`` (the default).
+
+        Enforced in physics engines via ``require_grip_force_limit_enforceable`` (#13761).
+        """
         require(isinstance(hand, Hand), f"hand must be a Hand, got {hand!r}")
         if hand is Hand.LEAD:
             return self.lead_grip_force_limit_n

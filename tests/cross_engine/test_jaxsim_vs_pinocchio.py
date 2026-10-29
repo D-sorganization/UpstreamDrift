@@ -24,6 +24,9 @@ from src.engines.physics_engines.jaxsim import JaxSimBackend
 from src.shared.python.engine_core.velocity_conventions import (
     CANONICAL_GRAVITY_INERTIAL,
 )
+from src.shared.python.pendulum_simulator.tolerance_bands import (
+    compute_cross_engine_tolerance_band,
+)
 
 pytestmark = [
     pytest.mark.gate,
@@ -31,8 +34,13 @@ pytestmark = [
     pytest.mark.requires_pinocchio,
 ]
 
-MATRIX_RTOL = 0.20
-VECTOR_RTOL = 0.20
+_PARITY_BAND = compute_cross_engine_tolerance_band(
+    is_pointwise=True,
+    epsilon_model=0.20,
+    floor=1e-6,
+)
+MATRIX_RTOL = _PARITY_BAND.tolerance
+VECTOR_RTOL = _PARITY_BAND.tolerance
 ABS_TOL = 1e-7
 
 _PIN_TO_CANONICAL = np.array([3, 4, 5, 0, 1, 2], dtype=int)

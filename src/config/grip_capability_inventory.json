@@ -664,7 +664,7 @@
     }
   ],
   "force_limit_enforcement": {
-    "mujoco": { "pad_contact": false, "weld_bushing": false },
+    "mujoco": { "pad_contact": false, "weld_bushing": true },
     "drake": { "pad_contact": false, "weld_bushing": false },
     "humanoid_character_builder": {
       "pad_contact": false,
@@ -673,7 +673,7 @@
     "jaxsim": { "pad_contact": false, "weld_bushing": false },
     "myosuite": { "pad_contact": false, "weld_bushing": false },
     "opensim": { "pad_contact": false, "weld_bushing": false },
-    "pinocchio": { "pad_contact": false, "weld_bushing": false },
+    "pinocchio": { "pad_contact": false, "weld_bushing": true },
     "simscape": { "pad_contact": false, "weld_bushing": false }
   },
   "excluded": [

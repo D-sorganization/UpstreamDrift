@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14053 · Correct 6X6 Mobility Scaling by Multiplying Angular Rows by L
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14053
+- **Branch:** fix/14053-mobility-scales
+- **PR:** #14058
+- **Paths:** see #14058
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`d5705ebb`; collated from changes/14053-correct-6x6-mobility-scaling-by-multiply.md)
+- **Summary:** Correct 6x6 mobility scaling by multiplying angular rows by L
+- **Next step:** Merge the PR.
+
 ### DL-#13971 · Drake Motion Matching: Catalog Finite-Difference Generalized Accelerations in Simulate_With_Coefficients (UD-36)
 
 - **State:** in_review
@@ -206,12 +219,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13761
 - **Branch:** claude/13761-bushing-force-cap
-- **PR:** #13941, #13939
+- **PR:** #13941, #13939, #14033
 - **Paths:** see #13941
 - **Started:** 2026-10-27
-- **Last verified:** 2026-10-28 (`bea503a3`; collated from changes/13761-hrg-hx4-part-1-per-hand-grippose-grip-fo.md)
+- **Last verified:** 2026-10-29 (`6c3b0bea`; collated from changes/13761-hrg-hx4-part-3-bushing-force-limit-wiring.md)
 - **Summary:** HRG-HX4 part 2: bushing_wrench force_limit_n caps the bushing force magnitude, direction kept, moment unchanged, default None unlimited and bit-identical (option c, Python bushing law only)
-- **Next step:** Land the bushing-law force cap, then set the mujoco weld_bushing flag and route GripPose limits through the inventory check
+- **Next step:** Merged and closes #13761
 
 ### DL-#13935 · Bump Dnspython 2.8.0 to 2.9.0 in Both Lock Files to Clear CVE-2026-114605 From Pip-Audit
 
@@ -962,6 +975,136 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14040 · CAP-1: Acceleration_Capacity Ellipsoid and Drift_Acceleration in Operational_Space
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14040
+- **Branch:** merged via #14056
+- **PR:** #14056
+- **Paths:** see #14056
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`bc8dad19`; collated from changes/14040-cap-1-acceleration-capacity-ellipsoid-an.md)
+- **Summary:** CAP-1: acceleration_capacity ellipsoid and drift_acceleration in operational_space
+- **Next step:** Shipped in PR #14056.
+
+### DL-#14041 · CAP-2: Torque-Limit Provider Adapting CapacityVector to (B, Tau_Lo, Tau_Hi) With Provenance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14041
+- **Branch:** merged via #14054
+- **PR:** #14054
+- **Paths:** see #14054
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`cfef12fb`; collated from changes/14041-cap-2-torque-limit-provider-adapting-cap.md)
+- **Summary:** CAP-2: torque-limit provider adapting CapacityVector to (B, tau_lo, tau_hi) with provenance
+- **Next step:** Shipped in PR #14054.
+
+### DL-#13785 · ML-WS-8: ProposalInitializer Protocol and --Neural-Mode Preview Warm-Start Hook Into MJX Knot Optimiser
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13785
+- **Branch:** merged via #14034
+- **PR:** #14034
+- **Paths:** see #14034
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`a0ee91aa`; collated from changes/13785-ml-ws-8-neural-mode-preview-warm-start.md)
+- **Summary:** ML-WS-8: ProposalInitializer protocol and --neural-mode preview warm-start hook into MJX knot optimiser
+- **Next step:** Shipped in PR #14034.
+
+### DL-#14031 · Bump Tornado 6.5.10 to 6.6 for CVE-2026-116577, CVE-2026-115927 and CVE-2026-116578, and Msgpack 1.2.1 to 1.2.3 in the Docker Images for CVE-2026-114613 (No Audit Waiver)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14031
+- **Branch:** merged via #14032
+- **PR:** #14032
+- **Paths:** see #14032
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`292f8195`; collated from changes/14031-bump-tornado-6-5-10-to-6-6-for-cve-2026.md)
+- **Summary:** Bump tornado 6.5.10 to 6.6 for CVE-2026-116577, CVE-2026-115927 and CVE-2026-116578, and msgpack 1.2.1 to 1.2.3 in the Docker images for CVE-2026-114613 (no audit waiver)
+- **Next step:** Shipped in PR #14032.
+
+### DL-#14010 · Catch TypeError and Probe Availability in Cross-Engine Builder and Degrade Uninitialized Engines to Stub
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14010
+- **Branch:** merged via #14029
+- **PR:** #14029
+- **Paths:** see #14029
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`891d03fb`; collated from changes/14010-cross-engine-probe-unusable-engines.md)
+- **Summary:** Catch TypeError and probe availability in cross-engine builder and degrade uninitialized engines to stub
+- **Next step:** Shipped in PR #14029.
+
+### DL-#14004 · MuJoCo Adapter for Per-Hand Constrained Mobility W = J A J^T and Effective Masses at Each Grip Point (HCM-3A)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14004
+- **Branch:** merged via #14026
+- **PR:** #14026
+- **Paths:** see #14026
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`5dc17c7c`; collated from changes/14004-mujoco-adapter-for-per-hand-constrained.md)
+- **Summary:** MuJoCo adapter for per-hand constrained mobility W = J A J^T and effective masses at each grip point (HCM-3a)
+- **Next step:** Shipped in PR #14026.
+
+### DL-#14002 · Add Operational-Space Mobility Matrix, Velocity/Force Ellipsoids and Spatial Transport
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14002
+- **Branch:** merged via #14020
+- **PR:** #14020
+- **Paths:** see #14020
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`42ea10f3`; collated from changes/14002-add-operational-space-mobility-matrix-ve.md)
+- **Summary:** Add operational-space mobility matrix, velocity/force ellipsoids and spatial transport
+- **Next step:** Shipped in PR #14020.
+
+### DL-#13995 · Thread One ResolvedHandSpec (Grip Style, Strength, Handedness, Hand Length) Through Every Engine Emitter
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13995
+- **Branch:** merged via #14021
+- **PR:** #14021
+- **Paths:** see #14021
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`78189f73`; collated from changes/13995-thread-one-resolvedhandspec-grip-style-s.md)
+- **Summary:** Thread one ResolvedHandSpec (grip style, strength, handedness, hand length) through every engine emitter
+- **Next step:** Shipped in PR #14021.
+
+### DL-#13994 · Hands Close-Up Camera Tracks the Kinematic Grip Midpoint From the Club Pose, With the Overlay on or Off
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13994
+- **Branch:** merged via #14001
+- **PR:** #14001
+- **Paths:** see #14001
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`77a17e4b`; collated from changes/13994-hands-close-up-camera-tracks-the-kinemat.md)
+- **Summary:** Hands close-up camera tracks the kinematic grip midpoint from the club pose, with the overlay on or off
+- **Next step:** Shipped in PR #14001.
+
+### DL-#13993 · Taper the Shared Visual Forearm 20 Percent Toward the Wrist (Appearance Only; Inertias Unchanged)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13993
+- **Branch:** merged via #14008
+- **PR:** #14008
+- **Paths:** see #14008
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`831b01a9`; collated from changes/13993-taper-the-shared-visual-forearm-20-perce.md)
+- **Summary:** Taper the shared visual forearm 20 percent toward the wrist (appearance only; inertias unchanged)
+- **Next step:** Shipped in PR #14008.
 
 ### DL-#13992 · Graft Pelvis_Frame_From_Spec Accepts HIP_MIRROR-Conjugated Hips
 
