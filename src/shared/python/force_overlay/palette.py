@@ -115,11 +115,12 @@ def label_variant_hex(label: str, base_hex: str) -> str:
 
 
 #: Semi-transparent RGBA per hand for the hand-mobility / force ellipsoids
-#: (#14003). Defined once; lead is blue and trail is orange so they stay
-#: distinguishable (also under common colour-vision deficiencies).
+#: (#14003, #14044). Defined once; lead is blue (#0072B2) and trail is yellow
+#: (#F0E442) so they stay distinguishable (also under common colour-vision
+#: deficiencies) and eliminate hue clash with muscle (#D55E00).
 HAND_ELLIPSOID_PALETTE: Final[dict[str, tuple[float, float, float, float]]] = {
     "lead": (0.0, 0.447, 0.698, 0.45),
-    "trail": (0.835, 0.369, 0.0, 0.45),
+    "trail": (0.941, 0.894, 0.259, 0.45),
 }
 
 
