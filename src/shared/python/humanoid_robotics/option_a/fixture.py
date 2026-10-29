@@ -14,6 +14,7 @@ from .plant import (
     linearize_step,
 )
 from .trace_contract import (
+    FAILURE_DEFINITION,
     FAILURE_DEFINITION_ID,
     RECOVERY_THRESHOLD_RAD,
     TRACE_SCHEMA_VERSION,
@@ -119,12 +120,15 @@ def run_swing_recovery_fixture(seed: int = 13837) -> dict[str, Any]:
 
     bundle: dict[str, Any] = {
         "schema_version": TRACE_SCHEMA_VERSION,
+        "failure_definition": FAILURE_DEFINITION,
         "failure_definition_id": FAILURE_DEFINITION_ID,
         "seed": seed,
         "mujoco_version": mj.__version__,
         "timestep_s": dt,
         "torque_limit_nm": TORQUE_LIMIT_NM,
         "perturbation_metadata": metadata,
+        "q_ref_k": q_ref,
+        "v_ref_k": v_ref,
         "x_k": np.asarray(rows_x, dtype=np.float64),
         "u_k": np.asarray(rows_u, dtype=np.float64),
         "A_k": np.asarray(rows_a, dtype=np.float64),
