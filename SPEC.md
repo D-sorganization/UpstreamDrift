@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-29 | #14067 | CAP-7: Dynamically consistent force-capacity core |
+| 2026-10-29 | #14064 | CAP-6: Exporter option --interface-ellipsoid with a --hand-mobility alias |
 | 2026-10-29 | #14055 | Add interface-ellipsoid kind/provenance contracts and engine parity ledger (CAP-0) |
 | 2026-10-29 | #14028 | Drake GUI no longer crashes after MeshCat starts and opens the v2 meshed golfer with a Drake-vs-MuJoCo parity check |
 | 2026-10-29 | #14022 | EllipsoidGlyph + MuJoCo ellipsoid drawing for native_viewer_export |

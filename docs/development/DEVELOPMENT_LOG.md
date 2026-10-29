@@ -1015,6 +1015,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14047 · CAP-7 (#14038): Dynamically Consistent Force-Capacity Core
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14047
+- **Branch:** feat/14047-force-capacity-core
+- **PR:** #14067
+- **Paths:** see #14067
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`89f99a0a`; collated from changes/14047-cap-7-dynamically-consistent-force-capac.md)
+- **Summary:** CAP-7: Dynamically consistent force-capacity core
+- **Next step:** Shipped in PR #14067.
+
+### DL-#14046 · CAP-6 (#14038): Exporter Option --Interface-Ellipsoid With a --Hand-Mobility Alias
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14046
+- **Branch:** feat/14046-interface-ellipsoid-options
+- **PR:** #14064
+- **Paths:** see #14064
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`05491337`; collated from changes/14046-interface-ellipsoid-options.md)
+- **Summary:** CAP-6: Exporter option --interface-ellipsoid with a --hand-mobility alias
+- **Next step:** Shipped in PR #14064.
+
 ### DL-#14039 · Add Interface-Ellipsoid Kind/Provenance Contracts and Engine Parity Ledger (CAP-0)
 
 - **State:** shipped
