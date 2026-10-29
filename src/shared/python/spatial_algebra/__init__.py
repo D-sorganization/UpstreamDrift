@@ -18,6 +18,13 @@ from .joints import (
     S_RZ,
     jcalc,
 )
+from .operational_space import (
+    Ellipsoid,
+    force_ellipsoid,
+    mobility_matrix,
+    transport_spatial_mobility,
+    velocity_ellipsoid,
+)
 from .pose6dof import (
     EntityPlacement,
     PlacementGroup,
@@ -72,6 +79,12 @@ __all__ = [
     "S_RX",
     "S_RY",
     "S_RZ",
+    # Operational-space mobility
+    "Ellipsoid",
+    "force_ellipsoid",
+    "mobility_matrix",
+    "transport_spatial_mobility",
+    "velocity_ellipsoid",
     # Spatial operations
     "crf",
     "crm",
