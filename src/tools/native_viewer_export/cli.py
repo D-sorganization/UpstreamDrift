@@ -48,33 +48,8 @@ from src.tools.native_viewer_export.runner import ExportJob, run_export
 logger = logging.getLogger(__name__)
 
 
-def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
-    """Add the overlay and segment-shading options."""
-    p.add_argument(
-        "--no-overlay",
-        action="store_true",
-        help="disable every overlay (force and torque vectors, segment shading)",
-    )
-    p.add_argument(
-        "--force-vectors",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="draw straight force arrows (default: on)",
-    )
-    p.add_argument(
-        "--torque-vectors",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="draw curling joint-torque arcs (default: on)",
-    )
-    p.add_argument(
-        "--palm-thumb-force",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="draw the allocated trail-palm-on-lead-thumb normal force at the "
-        "contact patch (an equivalent of the grip closure force, not a "
-        "measured contact; unloaded frames draw nothing; default: off)",
-    )
+def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
+    """Add interface capability and mobility ellipsoid options (CAP-6, #14038, #14046)."""
     p.add_argument(
         "--interface-ellipsoid",
         action="append",
@@ -106,6 +81,36 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
         help="backward-compatible alias for '--interface-ellipsoid mobility' "
         "(CAP-6, #14038, #14046)",
     )
+
+
+def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
+    """Add the overlay and segment-shading options."""
+    p.add_argument(
+        "--no-overlay",
+        action="store_true",
+        help="disable every overlay (force and torque vectors, segment shading)",
+    )
+    p.add_argument(
+        "--force-vectors",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="draw straight force arrows (default: on)",
+    )
+    p.add_argument(
+        "--torque-vectors",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="draw curling joint-torque arcs (default: on)",
+    )
+    p.add_argument(
+        "--palm-thumb-force",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="draw the allocated trail-palm-on-lead-thumb normal force at the "
+        "contact patch (an equivalent of the grip closure force, not a "
+        "measured contact; unloaded frames draw nothing; default: off)",
+    )
+    _add_ellipsoid_arguments(p)
     shade = p.add_argument_group(
         "segment shading",
         "Translucent tension/compression shading of the golfer's segments "
