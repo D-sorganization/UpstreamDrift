@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
+from pathlib import Path
+
 import pytest
 
 from sidekick.calculators.electrical.glass_interface import (
@@ -9,6 +13,46 @@ from sidekick.calculators.electrical.glass_interface import (
 )
 
 pytestmark = [pytest.mark.unit]
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _assert_pinned_tools_default_model_ignores_power_density() -> None:
+    """Exercise the pinned Tools tree in an isolated interpreter (#13938)."""
+    snippet = """
+import sys
+from pathlib import Path
+
+root = Path.cwd()
+vendor = root / "vendor/ud-tools"
+for suffix in ("src/shared/python", "src", "src/python/src"):
+    sys.path.insert(0, str(vendor / suffix))
+from sidekick.calculators.electrical.glass_interface import GlassPropertiesInterface
+
+g = GlassPropertiesInterface()
+model = g._default_conductivity_model
+assert model(1200.0, 0.0) == model(1200.0, 1e6)
+assert model(900.0, 0.0) == model(900.0, 5e5)
+for temp in (800.0, 1200.0, 1400.0):
+    assert g.get_conductivity(temp, power_density=0) == g.get_conductivity(
+        temp, power_density=1e6
+    )
+"""
+    import os
+
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    completed = subprocess.run(
+        [sys.executable, "-c", snippet],
+        cwd=_REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    if completed.returncode != 0:
+        msg = completed.stderr or completed.stdout or "pinned Tools probe failed"
+        raise AssertionError(msg)
 
 
 class TestGlassPropertiesInterfaceInit:
@@ -72,19 +116,8 @@ class TestGetConductivity:
         c = g.get_conductivity(1200.0)
         assert c > 0.0
 
-    def test_conductivity_independent_of_power_density(self) -> None:
-        g = GlassPropertiesInterface()
-        temperatures = (800.0, 1200.0, 1400.0)
-        for temp in temperatures:
-            c_zero = g.get_conductivity(temp, power_density=0)
-            c_high = g.get_conductivity(temp, power_density=1e6)
-            assert c_zero == c_high
-
-    def test_default_model_conductivity_independent_of_power_density(self) -> None:
-        g = GlassPropertiesInterface()
-        model = g._default_conductivity_model
-        assert model(1200.0, 0.0) == model(1200.0, 1e6)
-        assert model(900.0, 0.0) == model(900.0, 5e5)
+    def test_pinned_tools_conductivity_independent_of_power_density(self) -> None:
+        _assert_pinned_tools_default_model_ignores_power_density()
 
 
 class TestGetResistivity:
