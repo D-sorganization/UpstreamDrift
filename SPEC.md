@@ -2741,6 +2741,14 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-29 | #14055 | Add interface-ellipsoid kind/provenance contracts and engine parity ledger (CAP-0) |
+| 2026-10-29 | #14028 | Drake GUI no longer crashes after MeshCat starts and opens the v2 meshed golfer with a Drake-vs-MuJoCo parity check |
+| 2026-10-29 | #14022 | EllipsoidGlyph + MuJoCo ellipsoid drawing for native_viewer_export |
+| 2026-10-29 | #14018 | Add the cross-engine perturbation receipt contract (spec hash, g, dt, integrator, seed, interpolation mode per engine) and its fail-closed validator; the generator and deferred receipt follow separately |
+| 2026-10-29 | #14013 | fix(motion-matching): L-BFGS-B stop reason is fail-closed (ABNORMAL exits are error, not max_iterations) and a non-finite trial no longer ends the run or freezes best-iterate tracking |
+| 2026-10-29 | #14015 | HRG-Q1: OpenSim mass-matrix and gravity qualification cell against the spec-derived v2 reference (skips without OpenSim) |
+| 2026-10-29 | #14019 | NSX-83: add the ClubheadSeries to RigidClubState adapter and constant-twist event location feeding the shared impact outcome map. |
+| 2026-10-29 | #14016 | NSX-24: route ContactForceAllocator and MultiEngineTorqueAllocator through one feasible_set_from_frame seam (bitwise-identical numerics; allocate_trajectory routing still open) |
 | 2026-10-29 | #14017 | Correct cross_engine_v1 dependency status: the CC-7/9/10 draft PRs were closed unmerged, no comparison has been run |
 | 2026-10-29 | #14014 | R4 cross-engine address knee flexion check over the committed receipts (scripts/address_knee_engine_check.py): per-engine disagreement over 0.1 deg, unavailable engines with reasons, fail-closed on malformed receipts |
 | 2026-10-29 | #14035 | HRG-D3: render_golfer_realism_showcase --v2-spec renders labelled address/top/impact stills of the full-body-v2 trunk visuals; GL stills still need a GL host |

@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12712 · NSX-83: Add the ClubheadSeries to RigidClubState Adapter and Constant-Twist Event Location Feeding the Shared Impact Outcome Map.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12712
+- **Branch:** claude/ud-12712-1
+- **PR:** #14019
+- **Paths:** see #14019
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`3a0aba29`; collated from changes/12712-nsx-83-add-the-clubheadseries-to-rigidcl.md)
+- **Summary:** NSX-83: add the ClubheadSeries to RigidClubState adapter and constant-twist event location feeding the shared impact outcome map.
+- **Next step:** Merge the PR; then wire NSX-90/91/92 to impact_outcome_map and add Tools launch-angle/spin-rate.
+
 ### DL-#14061 · Guard Xwininfo and Xwd Dependency Checks in OpenSim Visualizer Capture
 
 - **State:** in_review
@@ -1002,16 +1015,68 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14039 · Add Interface-Ellipsoid Kind/Provenance Contracts and Engine Parity Ledger (CAP-0)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14039
+- **Branch:** merged via #14055
+- **PR:** #14055
+- **Paths:** see #14055
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`494cbba4`; collated from changes/14039-add-interface-ellipsoid-kind-provenance.md)
+- **Summary:** Add interface-ellipsoid kind/provenance contracts and engine parity ledger (CAP-0)
+- **Next step:** Shipped in PR #14055.
+
+### DL-#14027 · Drake GUI No Longer Crashes After MeshCat Starts and Opens the V2 Meshed Golfer With a Drake-vs-MuJoCo Parity Check
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14027
+- **Branch:** merged via #14028
+- **PR:** #14028
+- **Paths:** see #14028
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`1a7cee00`; collated from changes/14027-drake-gui-no-longer-crashes-after-meshca.md)
+- **Summary:** Drake GUI no longer crashes after MeshCat starts and opens the v2 meshed golfer with a Drake-vs-MuJoCo parity check
+- **Next step:** Shipped in PR #14028.
+
+### DL-#14003 · EllipsoidGlyph + MuJoCo Ellipsoid Drawing for Native_Viewer_Export
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14003
+- **Branch:** merged via #14022
+- **PR:** #14022
+- **Paths:** see #14022
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`30684dd5`; collated from changes/14003-ellipsoidglyph-mujoco-ellipsoid-drawing.md)
+- **Summary:** EllipsoidGlyph + MuJoCo ellipsoid drawing for native_viewer_export
+- **Next step:** Shipped in PR #14022.
+
+### DL-#13779 · Fix(Motion-Matching): L-BFGS-B Stop Reason Is Fail-Closed (ABNORMAL Exits Are Error, Not Max_Iterations) and a Non-Finite Trial No Longer Ends the Run or Freezes Best-Iterate Tracking
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13779
+- **Branch:** merged via #14013
+- **PR:** #14013
+- **Paths:** see #14013
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`939ec1d6`; collated from changes/13779-fix-motion-matching-l-bfgs-b-stop-reason.md)
+- **Summary:** fix(motion-matching): L-BFGS-B stop reason is fail-closed (ABNORMAL exits are error, not max_iterations) and a non-finite trial no longer ends the run or freezes best-iterate tracking
+- **Next step:** Shipped in PR #14013.
+
 ### DL-#13795 · Correct Cross_Engine_V1 Dependency Status: The CC-7/9/10 Draft PRs Were Closed Unmerged, No Comparison Has Been Run
 
 - **State:** shipped
 - **Owner:** unassigned
 - **Issue:** #13795
 - **Branch:** merged via #14017
-- **PR:** #14017
+- **PR:** #14017, #14018
 - **Paths:** see #14017
 - **Started:** 2026-10-29
-- **Last verified:** 2026-10-29 (`5d97b9b8`; collated from changes/13795-correct-cross-engine-v1-dependency-statu.md)
+- **Last verified:** 2026-10-29 (`28f0ee65`; collated from changes/13795-add-the-cross-engine-perturbation-receip.md)
 - **Summary:** Correct cross_engine_v1 dependency status: the CC-7/9/10 draft PRs were closed unmerged, no comparison has been run
 - **Next step:** Shipped in PR #14017.
 
@@ -1398,10 +1463,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13176
 - **Branch:** merged via #13820
-- **PR:** #13820
+- **PR:** #13820, #14015
 - **Paths:** see #13820
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-25 (`2635d5aa`; collated from changes/13176-hrg-q1-drake-mass-gravity.md)
+- **Last verified:** 2026-10-29 (`e9545fa7`; collated from changes/13176-hrg-q1-opensim-mass-matrix-and-gravity-q.md)
 - **Summary:** Qualify HRG full-body-v2 mass and gravity in Drake
 - **Next step:** Shipped in PR #13820.
 
@@ -1541,10 +1606,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12567
 - **Branch:** merged via #13606
-- **PR:** #13606
+- **PR:** #13606, #14016
 - **Paths:** see #13606
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-25 (`3853174f`; collated from changes/12567-add-a-zero-side-consistency-shim-for-har.md)
+- **Last verified:** 2026-10-29 (`2639f4cd`; collated from changes/12567-nsx24-frame-seam.md)
 - **Summary:** Add a zero-side consistency shim for HARD_ZERO_TRAIL allocation and reject algebraically inconsistent zero-side systems.
 - **Next step:** Shipped in PR #13606.
 
