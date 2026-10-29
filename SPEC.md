@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-29 | #14071 | MuJoCo capability adapter emitting acceleration and force capacity ellipsoids per grip point |
+| 2026-10-29 | #14012 | HRG-E4: web anatomical event table fetches its document from the API (client + container); feature_parity note corrected |
 | 2026-10-29 | #14067 | CAP-7: Dynamically consistent force-capacity core |
 | 2026-10-29 | #14064 | CAP-6: Exporter option --interface-ellipsoid with a --hand-mobility alias |
 | 2026-10-29 | #14055 | Add interface-ellipsoid kind/provenance contracts and engine parity ledger (CAP-0) |
