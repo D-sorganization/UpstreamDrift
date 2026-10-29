@@ -2746,6 +2746,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 | 2026-10-29 | #14012 | HRG-E4: web anatomical event table fetches its document from the API (client + container); feature_parity note corrected |
 | 2026-10-29 | #14067 | CAP-7: Dynamically consistent force-capacity core |
 | 2026-10-29 | #14064 | CAP-6: Exporter option --interface-ellipsoid with a --hand-mobility alias |
+| 2026-10-29 | #14044 | CAP-5a (#14038): Ellipsoid display builder: linear percentile scale, legend scale bar, clamp styling and hue rule |
 | 2026-10-29 | #14055 | Add interface-ellipsoid kind/provenance contracts and engine parity ledger (CAP-0) |
 | 2026-10-29 | #14028 | Drake GUI no longer crashes after MeshCat starts and opens the v2 meshed golfer with a Drake-vs-MuJoCo parity check |
 | 2026-10-29 | #14022 | EllipsoidGlyph + MuJoCo ellipsoid drawing for native_viewer_export |
