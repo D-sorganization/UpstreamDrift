@@ -254,7 +254,7 @@ class TestContainerEnvironment(unittest.TestCase):
         ):
             dockerfile = (get_repo_root() / dockerfile_name).read_text()
             self.assertIn(
-                "msgpack==1.2.1",
+                "msgpack==1.2.3",
                 dockerfile,
                 f"{dockerfile_name} must pin the Trivy-fixed msgpack release",
             )
