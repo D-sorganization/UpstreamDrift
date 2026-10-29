@@ -1230,6 +1230,7 @@
 {"path": "loop_nullspace/strategy_spec.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/strategy_stability.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/tangent_linearization.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/torque_limits.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/trajectory_envelope.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/trajectory_system.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/variability_cli.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -1262,6 +1263,7 @@
 {"path": "model_appearance/grip_hand_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/grip_hands.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/grip_pose.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/hand_spec.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/head.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/head_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/library.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -1639,6 +1641,7 @@
 {"path": "motion_matching/posture_metrics.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/prefix_fit.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/projection_2d.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/proposal_initializer.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/provenance.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/provider.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/provider_registry.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1958,6 +1961,7 @@
 {"path": "pendulum_simulator/simulation_result_base.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/simulation_triple.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/step_convergence.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
+{"path": "pendulum_simulator/tolerance_bands.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/torque_utils.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/triple_pendulum_spec.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/upper_body_replay.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}

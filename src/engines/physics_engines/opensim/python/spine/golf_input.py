@@ -28,12 +28,21 @@ from typing import Any
 import numpy as np
 from scipy.spatial.transform import Rotation, Slerp
 
+from src.engines.physics_engines.opensim.python.tour_matching.marker_plausibility import (
+    TRUNK_ROTATION_LIMITS_DEG,
+    ImplausibleInputError,
+    PlausibilityReport,
+    assess_trunk_rotation,
+    require_plausible,
+)
 from src.shared.python.contracts import ensure
 from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 __all__ = [
     "GolfTrunkInput",
+    "ImplausibleInputError",
     "back_joint_rotation",
+    "check_trunk_plausibility",
     "read_golf_coordinates",
     "read_golf_humanoid_motion",
     "resample",
@@ -113,6 +122,7 @@ class GolfTrunkInput:
     other_coordinates: Mapping[str, np.ndarray]
     events: Mapping[str, float]
     source: Mapping[str, str]
+    allow_implausible: bool = False
 
     def __post_init__(self) -> None:
         time_s = _frozen(self.time_s)
@@ -148,6 +158,7 @@ class GolfTrunkInput:
         object.__setattr__(
             self, "source", {str(k): str(v) for k, v in self.source.items()}
         )
+        object.__setattr__(self, "allow_implausible", bool(self.allow_implausible))
 
 
 def _sha256(path: Path) -> str:
@@ -266,8 +277,48 @@ def _open_motion(
     return model, time_s, values, events
 
 
+def check_trunk_plausibility(
+    time_s: np.ndarray,
+    pelvis_to_thorax: np.ndarray,
+    events: Mapping[str, float],
+    *,
+    allow_implausible: bool = False,
+    limits: Mapping[str, float] = TRUNK_ROTATION_LIMITS_DEG,
+) -> PlausibilityReport:
+    """Assess torso-in-pelvis rotation against declared screening bounds (#13434).
+
+    For each event in ``limits`` that is present in ``events``, finds the closest
+    sample index in ``time_s``, computes the total torso-in-pelvis rotation
+    magnitude in degrees, and evaluates it with :func:`assess_trunk_rotation`.
+
+    Raises:
+        ImplausibleInputError: if any check fails and ``allow_implausible`` is False.
+    """
+    times = np.asarray(time_s, dtype=float)
+    screened_limits = {e: float(lim) for e, lim in limits.items() if e in events}
+    if not screened_limits:
+        return PlausibilityReport()
+
+    rotations: dict[str, float] = {}
+    for event in screened_limits:
+        t_event = float(events[event])
+        idx = int(np.argmin(np.abs(times - t_event)))
+        rot_mat = pelvis_to_thorax[idx]
+        rot_deg = float(np.degrees(Rotation.from_matrix(rot_mat).magnitude()))
+        rotations[event] = rot_deg
+
+    checks = assess_trunk_rotation(rotations, limits=screened_limits)
+    report = PlausibilityReport(trunk=checks)
+    if not allow_implausible:
+        require_plausible(report)
+    return report
+
+
 def read_golf_coordinates(
-    motion_path: Path, model_path: Path
+    motion_path: Path,
+    model_path: Path,
+    *,
+    allow_implausible: bool = False,
 ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
     """Every model coordinate series of a golf ``.sto``/``.mot`` (radians, metres).
 
@@ -287,7 +338,12 @@ def read_golf_coordinates(
     return time_s, values
 
 
-def read_golf_humanoid_motion(motion_path: Path, model_path: Path) -> GolfTrunkInput:
+def read_golf_humanoid_motion(
+    motion_path: Path,
+    model_path: Path,
+    *,
+    allow_implausible: bool = False,
+) -> GolfTrunkInput:
     """Read a ``.sto``/``.mot`` golf swing and evaluate the trunk natively.
 
     Coordinates are matched to the model by name or by ``/.../<name>/value``
@@ -297,7 +353,9 @@ def read_golf_humanoid_motion(motion_path: Path, model_path: Path) -> GolfTrunkI
 
     Preconditions: both files exist with suffix ``.sto``/``.mot``/``.osim``;
     the file holds the three lumbar coordinates and a strictly increasing time
-    column (``FileNotFoundError``/``ValueError``).
+    column (``FileNotFoundError``/``ValueError``). Plausibility screening
+    evaluates available event times; if trunk rotation exceeds declared limits,
+    ``ImplausibleInputError`` is raised unless ``allow_implausible=True`` (#13434).
 
     Postconditions: ``pelvis_to_thorax`` is the torso frame in the pelvis frame
     including offset frames; ``source`` has the basename and SHA-256 only.
@@ -307,15 +365,23 @@ def read_golf_humanoid_motion(motion_path: Path, model_path: Path) -> GolfTrunkI
     if missing:
         raise ValueError(f"motion file lacks lumbar coordinates: {missing}")
     rots, poses = _evaluate_frames(model, values, time_s.shape[0])
+    check_trunk_plausibility(time_s, rots, events, allow_implausible=allow_implausible)
     skip = set(_LUMBAR) | set(_PELVIS)
     others = {k: v for k, v in values.items() if k not in skip}
+    source = {
+        "file": Path(motion_path).name,
+        "sha256": _sha256(Path(motion_path)),
+    }
+    if allow_implausible:
+        source["allow_implausible"] = "true"
     result = GolfTrunkInput(
         time_s=time_s,
         pelvis_to_thorax=rots,
         pelvis_pose_ground=poses,
         other_coordinates=others,
         events=events,
-        source={"file": Path(motion_path).name, "sha256": _sha256(Path(motion_path))},
+        source=source,
+        allow_implausible=allow_implausible,
     )
     ensure(
         result.pelvis_to_thorax.shape[0] == time_s.shape[0],
@@ -368,4 +434,5 @@ def resample(input: GolfTrunkInput, rate_hz: float) -> GolfTrunkInput:  # noqa: 
         other_coordinates=others,
         events=input.events,
         source=input.source,
+        allow_implausible=input.allow_implausible,
     )

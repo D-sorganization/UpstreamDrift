@@ -118,9 +118,23 @@ def test_characteristic_length_scales_rotational_block():
     M = np.eye(6) * 2.0
     base = mobility_matrix(J, M)
     scaled = mobility_matrix(J, M, scales=CharacteristicScales())
-    s = np.diag([1, 1, 1, 20, 20, 20])
-    # angular rows divided by L = 5/100 = 0.05 (factor 20): S base S
+    s = np.diag([1, 1, 1, 0.05, 0.05, 0.05])
+    # angular rows multiplied by L = 5/100 = 0.05: S base S
     np.testing.assert_allclose(scaled, s @ base @ s, rtol=1e-12)
+
+
+def test_point_mass_plus_rotor_has_uniform_scaled_mobility():
+    """Point mass m plus rotor of inertia I = m*L^2 has uniform 1/m mobility across all 6x6 blocks (#14053)."""
+    m = 2.0
+    scales = CharacteristicScales(force=100.0, moment=5.0)
+    length = scales.moment / scales.force  # 0.05 m
+    inertia_rotor = m * length**2  # 0.005 kg*m^2
+    M = np.diag([m, m, m, inertia_rotor, inertia_rotor, inertia_rotor])
+    J = np.eye(6)
+    scaled = mobility_matrix(J, M, scales=scales)
+    # Scaled 6x6 mobility should have uniform kg^-1 units equal to (1/m) * I_6
+    expected = (1.0 / m) * np.eye(6)
+    np.testing.assert_allclose(scaled, expected, atol=1e-12)
 
 
 @pytest.mark.parametrize(

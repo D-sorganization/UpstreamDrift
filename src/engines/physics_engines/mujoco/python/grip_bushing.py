@@ -48,7 +48,16 @@ from src.shared.python.grip_contact import (
     hand_frame_states,
 )
 from src.shared.python.grip_contact.bushing_law import cross3
+from src.shared.python.grip_contact.capability_inventory import (
+    load_grip_capability_inventory,
+)
+from src.shared.python.grip_contact.grip_force_limit import finite_limit_n
 from src.shared.python.grip_contact.parity import BushingProbe, GripKineticsSeries
+from src.shared.python.model_appearance.grip_pose import (
+    DEFAULT_GRIP_POSE,
+    GripPose,
+    Hand,
+)
 
 ENGINE = "mujoco"
 DEFAULT_TIMESTEP_S = 1.0e-4
@@ -176,11 +185,23 @@ class ClubOnBushings:
         interface: GripInterface,
         timestep_s: float,
         loader: ModelLoader = default_loader,
+        *,
+        grip_pose: GripPose = DEFAULT_GRIP_POSE,
     ) -> None:
         mj = _mujoco()
         spec = json.loads(spec_bytes)
         self._mj = mj
         self.interface = interface
+        self.grip_pose = grip_pose
+        inventory = load_grip_capability_inventory()
+        self._force_limits: dict[str, float | None] = {}
+        for hand in Hand:
+            limit = grip_pose.grip_force_limit_n(hand)
+            inventory.require_grip_force_limit_enforceable(
+                ENGINE, "weld_bushing", limit
+            )
+            side = grip_pose.side(hand)
+            self._force_limits[side] = finite_limit_n(limit)
         self.kinematics = WeldClubKinematics(spec_bytes, names, loader)
         gravity = np.asarray(spec["gravity_m_s2"], float)
         xml = club_mjcf(ClubDynamics.from_spec(spec), gravity, timestep_s)
@@ -215,7 +236,12 @@ class ClubOnBushings:
         frames = {s: club.frame(self._offsets[s]) for s in SIDES}
         wrenches = {}
         for s in SIDES:
-            w = bushing_wrench(self.interface.bushing, hands[s], frames[s])
+            w = bushing_wrench(
+                self.interface.bushing,
+                hands[s],
+                frames[s],
+                force_limit_n=self._force_limits.get(s),
+            )
             self._mj.mj_applyFT(
                 m,
                 d,
@@ -276,6 +302,8 @@ def simulate_grip_bushing(
     t_end_s: float | None = None,
     loader: ModelLoader = default_loader,
     engine: str = ENGINE,
+    *,
+    grip_pose: GripPose = DEFAULT_GRIP_POSE,
 ) -> GripKineticsSeries:
     """Integrate the free club on two bushings over the prescribed swing.
 
@@ -287,7 +315,14 @@ def simulate_grip_bushing(
     """
     spec = json.loads(spec_bytes)
     interface = interface or GripInterface.from_spec(spec)
-    sim = ClubOnBushings(spec_bytes, list(swing.names), interface, timestep_s, loader)
+    sim = ClubOnBushings(
+        spec_bytes,
+        list(swing.names),
+        interface,
+        timestep_s,
+        loader,
+        grip_pose=grip_pose,
+    )
     spline = CoordinateSpline(swing.time_s, swing.q)
     sim.hand_source = spline.evaluate
     times = swing.time_s
@@ -330,6 +365,8 @@ def probe_bushing_forces(
     translation_hand_m: np.ndarray,
     interface: GripInterface | None = None,
     loader: ModelLoader = default_loader,
+    *,
+    grip_pose: GripPose = DEFAULT_GRIP_POSE,
 ) -> BushingProbe:
     """Bushing forces for the club displaced by ``translation_hand_m``.
 
@@ -340,7 +377,12 @@ def probe_bushing_forces(
     spec = json.loads(spec_bytes)
     interface = interface or GripInterface.from_spec(spec)
     sim = ClubOnBushings(
-        spec_bytes, list(swing.names), interface, DEFAULT_TIMESTEP_S, loader
+        spec_bytes,
+        list(swing.names),
+        interface,
+        DEFAULT_TIMESTEP_S,
+        loader,
+        grip_pose=grip_pose,
     )
     q0 = np.asarray(swing.q[0], float)
     still = np.zeros_like(q0)

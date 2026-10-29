@@ -12,6 +12,7 @@ import logging
 from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 
 from src.shared.python.force_overlay.bundle_provider import BundleOverlayProvider
 from src.tools.native_viewer_export.core import (
@@ -182,23 +183,16 @@ def build_overlay_feed(
     return feed, lookat
 
 
-def detect_impact_time_s(swing: SwingInput) -> float:
-    """Impact time of ``swing`` from the shared checked rule (one detector).
+def face_centre_trajectory(
+    swing: SwingInput,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Source times ``(n,)`` and face-centre world path ``(n, 3)`` of ``swing``.
 
-    The head trajectory is the face centre, the one clubhead measurement
-    point (#12682): the ``Clubhead`` frame of the specification export placed
-    by MuJoCo forward kinematics at every state of ``swing.q``, carrying the
-    rendered face centre of the club assembly
-    (``club_face_target.face_centre_in_frame``) through
-    ``club_face_target.face_centre_path``. Impact is
-    ``model_appearance.club_face.ball_passage`` (OSV-10), the sub-sample
-    instant the face centre comes closest to its address position, with its
-    height and ball-radius checks; the receipt (``fd_phase``) and the fixture
-    speed timing use the same point.
+    The face centre (#12682) is the ``Clubhead`` frame placed by MuJoCo forward
+    kinematics at every state of ``swing.q``, carrying the club's face centre.
 
     Raises ``BackendUnavailable`` without MuJoCo and ``ValueError`` when the
-    specification has no club on the ``Clubhead`` frame or no frame is a
-    valid impact.
+    specification has no club on the ``Clubhead`` frame.
     """
     try:
         from src.engines.physics_engines.mujoco.python.overlay_source import (
@@ -206,7 +200,6 @@ def detect_impact_time_s(swing: SwingInput) -> float:
         )
     except ImportError as exc:
         raise BackendUnavailable(f"mujoco is not available: {exc}") from exc
-    from src.shared.python.model_appearance.club_face import ball_passage
     from src.shared.python.motion_matching.club_face_target import (
         FACE_FRAME,
         face_centre_in_frame,
@@ -226,6 +219,22 @@ def detect_impact_time_s(swing: SwingInput) -> float:
         dtype=float,
     ).reshape(-1, 4, 4)
     head = face_centre_path(poses[:, :3, :3], poses[:, :3, 3], centre)
-    times = np.asarray(swing.source_times_s, dtype=float)
+    return np.asarray(swing.source_times_s, dtype=float), head
+
+
+def detect_impact_time_s(swing: SwingInput) -> float:
+    """Impact time of ``swing`` from the shared checked rule (one detector).
+
+    Impact is ``model_appearance.club_face.ball_passage`` (OSV-10) of the
+    :func:`face_centre_trajectory`: the sub-sample instant the face centre
+    comes closest to its address position, with height and ball-radius checks.
+
+    Raises ``BackendUnavailable`` without MuJoCo and ``ValueError`` when the
+    specification has no club on the ``Clubhead`` frame or no frame is a
+    valid impact.
+    """
+    from src.shared.python.model_appearance.club_face import ball_passage
+
+    times, head = face_centre_trajectory(swing)
     t_impact, _, _ = ball_passage(times, head)
     return t_impact

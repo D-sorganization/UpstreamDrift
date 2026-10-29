@@ -41,6 +41,29 @@ def _require_body() -> None:
         pytest.skip(f"muscle-bearing body not available: {exc}")
 
 
+def _require_display_tools() -> None:
+    import shutil
+
+    for tool in ("xvfb-run", "xwd", "xwininfo"):
+        if shutil.which(tool) is None:
+            pytest.skip(f"{tool} is not installed (needed for virtual display capture)")
+
+
+def test_require_display_tools_skips_when_tool_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import shutil
+
+    def fake_which(tool: str) -> str | None:
+        if tool == "xwininfo":
+            return None
+        return f"/usr/bin/{tool}"
+
+    monkeypatch.setattr(shutil, "which", fake_which)
+    with pytest.raises(pytest.skip.Exception, match="xwininfo is not installed"):
+        _require_display_tools()
+
+
 def test_bench_press_unavailable_status(tmp_path: Path) -> None:
     """Bench press video export reports unavailable without invoking OpenSim."""
     result = render_opensim_lift_video(
@@ -121,6 +144,7 @@ def test_headless_lift_video_render_smoke(tmp_path: Path) -> None:
     """Renders a 2-frame smoke clip headless and verifies model occupies frame."""
     _real_opensim()
     _require_body()
+    _require_display_tools()
 
     out_mp4 = tmp_path / "squat_smoke.mp4"
     result = render_opensim_lift_video(
@@ -180,6 +204,7 @@ def test_bar_body_origin_matches_bundle(lift: str) -> None:
     _require_body()
 
     receipt = json.loads(IK_ID_RECEIPTS_PATH.read_text(encoding="utf-8"))
+
     receipt_err = float(
         receipt["lifts"][lift]["ik_id"]["ik"]["marker_error"]["per_marker_max_m"]["bar"]
     )

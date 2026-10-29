@@ -35,6 +35,7 @@ from src.shared.python.model_appearance.club_head_mesh import load_club_head
 from src.shared.python.model_appearance.club_shaft_mesh import tapered_tube
 from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
+from src.shared.python.model_appearance.hand_spec import resolved_hand_spec
 from src.shared.python.model_appearance.schema import AppearanceDocument
 
 #: ``(label, mesh in the spec body frame, material name)`` of one drawn part.
@@ -162,7 +163,7 @@ def club_meshes_by_body(
     order. Chain shaft: shaft pieces labelled ``shaft`` (club body) and
     ``shaft_link<i>``; the head on the tip link. Every label is unique.
     """
-    parts = assembly_meshes_with_hands(club)
+    parts = assembly_meshes_with_hands(club, hands=resolved_hand_spec(spec))
     layout = chain_layout(spec)
     if layout is None:
         body = club_body_name(spec)
