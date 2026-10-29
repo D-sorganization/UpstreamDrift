@@ -7,6 +7,8 @@ import math
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.shared.python.force_overlay.glyphs import (
     EllipsoidGlyph,
     GlyphSet,

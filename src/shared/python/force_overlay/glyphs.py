@@ -518,8 +518,11 @@ class EllipsoidGlyph:
                 "min_radius_m/max_radius_m must satisfy 0 < min <= max < inf, "
                 f"got {min_radius_m}, {max_radius_m}"
             )
-        radii = tuple(min(max(r, min_radius_m), max_radius_m) for r in self.radii)
-        return replace(self, radii=radii)
+        radii = tuple(
+            min(max(float(r), min_radius_m), max_radius_m) for r in self.radii
+        )
+        clamped: tuple[float, float, float] = (radii[0], radii[1], radii[2])
+        return replace(self, radii=clamped)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert ellipsoid glyph to JSON dictionary."""

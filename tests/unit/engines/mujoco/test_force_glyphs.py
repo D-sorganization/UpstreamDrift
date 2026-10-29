@@ -7,6 +7,8 @@ import math
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 mujoco = pytest.importorskip("mujoco")
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
