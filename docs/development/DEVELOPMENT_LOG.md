@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14053 · Correct 6X6 Mobility Scaling by Multiplying Angular Rows by L
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14053
+- **Branch:** fix/14053-mobility-scales
+- **PR:** #14058
+- **Paths:** see #14058
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`d5705ebb`; collated from changes/14053-correct-6x6-mobility-scaling-by-multiply.md)
+- **Summary:** Correct 6x6 mobility scaling by multiplying angular rows by L
+- **Next step:** Merge the PR.
+
 ### DL-#13971 · Drake Motion Matching: Catalog Finite-Difference Generalized Accelerations in Simulate_With_Coefficients (UD-36)
 
 - **State:** in_review
@@ -962,6 +975,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14040 · CAP-1: Acceleration_Capacity Ellipsoid and Drift_Acceleration in Operational_Space
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14040
+- **Branch:** merged via #14056
+- **PR:** #14056
+- **Paths:** see #14056
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`bc8dad19`; collated from changes/14040-cap-1-acceleration-capacity-ellipsoid-an.md)
+- **Summary:** CAP-1: acceleration_capacity ellipsoid and drift_acceleration in operational_space
+- **Next step:** Shipped in PR #14056.
+
+### DL-#14041 · CAP-2: Torque-Limit Provider Adapting CapacityVector to (B, Tau_Lo, Tau_Hi) With Provenance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14041
+- **Branch:** merged via #14054
+- **PR:** #14054
+- **Paths:** see #14054
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`cfef12fb`; collated from changes/14041-cap-2-torque-limit-provider-adapting-cap.md)
+- **Summary:** CAP-2: torque-limit provider adapting CapacityVector to (B, tau_lo, tau_hi) with provenance
+- **Next step:** Shipped in PR #14054.
 
 ### DL-#13785 · ML-WS-8: ProposalInitializer Protocol and --Neural-Mode Preview Warm-Start Hook Into MJX Knot Optimiser
 
