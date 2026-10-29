@@ -643,6 +643,27 @@ def _build_se3_hand_source(
     return evaluate_hands
 
 
+def _evaluate_grip_bushing_interaction(
+    y: np.ndarray,
+    hands: dict[str, Any],
+    offsets: dict[str, Any],
+    bushing: Any,
+    force_limits: Mapping[str, float | None],
+) -> tuple[Any, dict[str, Any], dict[str, Any]]:
+    club = ClubOnBushings.club_state(y)
+    frames = {s: club.frame(offsets[s]) for s in SIDES}
+    law = {
+        s: bushing_wrench(
+            bushing,
+            hands[s],
+            frames[s],
+            force_limit_n=force_limits.get(s),
+        )
+        for s in SIDES
+    }
+    return club, frames, law
+
+
 def simulate_separated_v2_grip_styles(
     spec_bytes: bytes,
     swing: CoordinateSwing,
@@ -679,17 +700,9 @@ def simulate_separated_v2_grip_styles(
 
     def rhs(t: float, y: np.ndarray) -> np.ndarray:
         hands = hand_eval(t)
-        club = ClubOnBushings.club_state(y)
-        frames = {s: club.frame(offsets[s]) for s in SIDES}
-        law = {
-            s: bushing_wrench(
-                interface.bushing,
-                hands[s],
-                frames[s],
-                force_limit_n=force_limits.get(s),
-            )
-            for s in SIDES
-        }
+        club, frames, law = _evaluate_grip_bushing_interaction(
+            y, hands, offsets, interface.bushing, force_limits
+        )
         force = law["L"].force_n + law["R"].force_n
         moment = (
             law["L"].moment_nm
@@ -791,17 +804,9 @@ def _collect_separated_run(
     for k, t in enumerate(times):
         y = sol_y[:, k]
         hands = hand_eval(float(t))
-        club = ClubOnBushings.club_state(y)
-        frames = {s: club.frame(offsets[s]) for s in SIDES}
-        law = {
-            s: bushing_wrench(
-                interface.bushing,
-                hands[s],
-                frames[s],
-                force_limit_n=force_limits.get(s),
-            )
-            for s in SIDES
-        }
+        club, frames, law = _evaluate_grip_bushing_interaction(
+            y, hands, offsets, interface.bushing, force_limits
+        )
         topo_law = {
             s: topology_side_wrench(topo_model, s, hands[s], frames[s]) for s in SIDES
         }
