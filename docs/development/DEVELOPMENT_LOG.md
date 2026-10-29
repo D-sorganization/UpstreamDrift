@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14044 · CAP-5a (#14038): Ellipsoid Display Builder: Linear Percentile Scale, Legend Scale Bar, Clamp Styling, and Hue Rule
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14044
+- **Branch:** feat/14044-ellipsoid-display-builder
+- **PR:** #14073
+- **Paths:** see #14073
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`6008e7b3`; collated from changes/14044-ellipsoid-display-builder.md)
+- **Summary:** Linear radius scaling, legend scale bar formatting, dashed clamp styling, and Okabe-Ito yellow trail hue rule for capability ellipsoids
+- **Next step:** Shipped in PR #14073.
+
 ### DL-#14049 · CAP-9 (#14038): Pinocchio Capability Adapter at the Hand-Club Interfaces
 
 - **State:** shipped
