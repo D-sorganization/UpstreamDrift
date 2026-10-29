@@ -118,8 +118,8 @@ def test_characteristic_length_scales_rotational_block():
     M = np.eye(6) * 2.0
     base = mobility_matrix(J, M)
     scaled = mobility_matrix(J, M, scales=CharacteristicScales())
-    s = np.diag([1, 1, 1, 20, 20, 20])
-    # angular rows divided by L = 5/100 = 0.05 (factor 20): S base S
+    s = np.diag([1, 1, 1, 0.05, 0.05, 0.05])
+    # angular rows multiplied by L = 5/100 = 0.05: S base S
     np.testing.assert_allclose(scaled, s @ base @ s, rtol=1e-12)
 
 
