@@ -68,11 +68,19 @@ class TestGetConductivity:
         c = g.get_conductivity(1200.0)
         assert c > 0.0
 
-    def test_power_density_increases_conductivity(self) -> None:
+    def test_conductivity_independent_of_power_density(self) -> None:
         g = GlassPropertiesInterface()
-        c0 = g.get_conductivity(1200.0, power_density=0)
-        c_pd = g.get_conductivity(1200.0, power_density=1000)
-        assert c_pd >= c0
+        temperatures = (800.0, 1200.0, 1400.0)
+        for temp in temperatures:
+            c_zero = g.get_conductivity(temp, power_density=0)
+            c_high = g.get_conductivity(temp, power_density=1e6)
+            assert c_zero == c_high
+
+    def test_default_model_conductivity_independent_of_power_density(self) -> None:
+        g = GlassPropertiesInterface()
+        model = g._default_conductivity_model
+        assert model(1200.0, 0.0) == model(1200.0, 1e6)
+        assert model(900.0, 0.0) == model(900.0, 5e5)
 
 
 class TestGetResistivity:
