@@ -1015,6 +1015,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14086 · Sim-Run: Run Request/Record/Result JSON Schemas Derived From API Contracts
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14086
+- **Branch:** feat/14086-sim-run-schemas
+- **PR:** #14093
+- **Paths:** see #14093
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`acd9a864`; collated from changes/14086-sim-run-schemas.md)
+- **Summary:** Versioned schemas for RunRequest, RunRecord, and ResultEnvelope exported from pydantic models
+- **Next step:** Shipped in PR #14093.
+
+### DL-#14052 · CAP-12 (#14038): Design-Manual Equations, HQ Renders and Docs for Capability Ellipsoids
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14052
+- **Branch:** feat/14052-design-manual-capability-ellipsoids
+- **PR:** #14084
+- **Paths:** see #14084
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`08fde17c`; collated from changes/14052-design-manual-capability-ellipsoids.md)
+- **Summary:** Design-manual Chapter 69 documenting interface capability ellipsoids, operational-space equations, Okabe-Ito styling, and governance integration
+- **Next step:** Shipped in PR #14084.
+
+### DL-#14050 · CAP-10 (#14038): Cross-Engine Parity Qualification for Interface Ellipsoids
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14050
+- **Branch:** feat/14050-cross-engine-interface-ellipsoids-parity
+- **PR:** #14083
+- **Paths:** see #14083
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`7e316bbd`; collated from changes/14050-cross-engine-interface-ellipsoids-parity.md)
+- **Summary:** Cross-engine parity test suite asserting matrices, ranks, eigenvalues (1%), axes (2°), and capacity ellipsoids across MuJoCo, Drake, and Pinocchio
+- **Next step:** Shipped in PR #14083.
+
+### DL-#14048 · CAP-8 (#14038): Drake Capability Adapter at the Hand-Club Interfaces
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14048
+- **Branch:** feat/14048-drake-capability-adapter
+- **PR:** #14075
+- **Paths:** see #14075
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`751e22fe`; collated from changes/14048-drake-capability-adapter.md)
+- **Summary:** Drake capability adapter emitting acceleration and force capacity ellipsoids per grip point
+- **Next step:** Shipped in PR #14075.
+
 ### DL-#14045 · Capacity Wireframe Glyphs for MuJoCo, Meshcat, and Matplotlib Render Backends (CAP-5B)
 
 - **State:** shipped
