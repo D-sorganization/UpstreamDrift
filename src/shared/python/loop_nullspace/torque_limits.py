@@ -125,9 +125,7 @@ def resolve_torque_limits(
     """Resolve optional torque limits from an explicit object, subject, spec, or mapping."""
     if isinstance(source, TorqueLimits):
         return source
-    if isinstance(source, CapacitySubject):
-        return torque_limits_for(source, coordinate_order)
-    if isinstance(source, Mapping):
+    if isinstance(source, (CapacitySubject, Mapping)):
         return torque_limits_for(source, coordinate_order)
     if "subject" in spec:
         try:

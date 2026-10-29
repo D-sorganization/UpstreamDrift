@@ -268,12 +268,17 @@ class DrakeCapabilitySource:
         pose: GripPose = DEFAULT_GRIP_POSE,
         torque_limits: TorqueLimits | CapacitySubject | Mapping[str, Any] | None = None,
     ) -> None:
-        if isinstance(spec_bytes, bytes):
-            self._spec: dict[str, Any] = json.loads(spec_bytes.decode("utf-8"))
-            raw_bytes = spec_bytes
-        elif isinstance(spec_bytes, str):
-            self._spec = json.loads(spec_bytes)
-            raw_bytes = spec_bytes.encode("utf-8")
+        if isinstance(spec_bytes, (bytes, str)):
+            self._spec: dict[str, Any] = json.loads(
+                spec_bytes.decode("utf-8")
+                if isinstance(spec_bytes, bytes)
+                else spec_bytes
+            )
+            raw_bytes = (
+                spec_bytes
+                if isinstance(spec_bytes, bytes)
+                else spec_bytes.encode("utf-8")
+            )
         else:
             self._spec = dict(spec_bytes)
             raw_bytes = json.dumps(self._spec).encode("utf-8")
@@ -288,12 +293,11 @@ class DrakeCapabilitySource:
         if club is None:
             raise ValueError("the specification has no club for the grip points")
         self._grip_points: dict[str, np.ndarray] = {
-            "lead": np.asarray(
-                grip_hand_frame(club, Hand.LEAD, pose)[:3, 3], dtype=float
-            ),
-            "trail": np.asarray(
-                grip_hand_frame(club, Hand.TRAIL, pose)[:3, 3], dtype=float
-            ),
+            h: np.asarray(
+                grip_hand_frame(club, getattr(Hand, h.upper()), pose)[:3, 3],
+                dtype=float,
+            )
+            for h in ("lead", "trail")
         }
         self.topology: str = (
             "rigid 6-D closure on Drake (explicit KKT weld closure); both grip points "
