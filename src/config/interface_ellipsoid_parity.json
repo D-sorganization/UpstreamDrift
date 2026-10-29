@@ -1,0 +1,167 @@
+{
+  "description": "Engine capability parity for interface ellipsoids (epic #14038); separate from feature_parity.json (PyQt vs web).",
+  "engines": {
+    "mujoco": {
+      "mobility": {
+        "status": "gap",
+        "issue": 14004
+      },
+      "effective-mass": {
+        "status": "gap",
+        "issue": 14004
+      },
+      "acceleration-capacity": {
+        "status": "gap",
+        "issue": 14043
+      },
+      "force-capacity": {
+        "status": "gap",
+        "issue": 14043
+      }
+    },
+    "drake": {
+      "mobility": {
+        "status": "gap",
+        "issue": 14048
+      },
+      "effective-mass": {
+        "status": "gap",
+        "issue": 14048
+      },
+      "acceleration-capacity": {
+        "status": "gap",
+        "issue": 14048
+      },
+      "force-capacity": {
+        "status": "gap",
+        "issue": 14048
+      }
+    },
+    "pinocchio": {
+      "mobility": {
+        "status": "gap",
+        "issue": 14049
+      },
+      "effective-mass": {
+        "status": "gap",
+        "issue": 14049
+      },
+      "acceleration-capacity": {
+        "status": "gap",
+        "issue": 14049
+      },
+      "force-capacity": {
+        "status": "gap",
+        "issue": 14049
+      }
+    },
+    "opensim": {
+      "mobility": {
+        "status": "gap",
+        "issue": 14051
+      },
+      "effective-mass": {
+        "status": "gap",
+        "issue": 14051
+      },
+      "acceleration-capacity": {
+        "status": "gap",
+        "issue": 14051
+      },
+      "force-capacity": {
+        "status": "gap",
+        "issue": 14051
+      }
+    },
+    "myosuite": {
+      "mobility": {
+        "status": "exempt",
+        "reason": "No closed-loop club snapshot; muscle-actuated plant without a welded-hand interface."
+      },
+      "effective-mass": {
+        "status": "exempt",
+        "reason": "No closed-loop club snapshot; muscle-actuated plant without a welded-hand interface."
+      },
+      "acceleration-capacity": {
+        "status": "exempt",
+        "reason": "No closed-loop club snapshot; muscle-actuated plant without a welded-hand interface."
+      },
+      "force-capacity": {
+        "status": "exempt",
+        "reason": "No closed-loop club snapshot; muscle-actuated plant without a welded-hand interface."
+      }
+    },
+    "simscape": {
+      "mobility": {
+        "status": "exempt",
+        "reason": "Simscape Multibody exposes no closed-loop snapshot (mass matrix and constraint Jacobian) to Python."
+      },
+      "effective-mass": {
+        "status": "exempt",
+        "reason": "Simscape Multibody exposes no closed-loop snapshot (mass matrix and constraint Jacobian) to Python."
+      },
+      "acceleration-capacity": {
+        "status": "exempt",
+        "reason": "Simscape Multibody exposes no closed-loop snapshot (mass matrix and constraint Jacobian) to Python."
+      },
+      "force-capacity": {
+        "status": "exempt",
+        "reason": "Simscape Multibody exposes no closed-loop snapshot (mass matrix and constraint Jacobian) to Python."
+      }
+    },
+    "jaxsim": {
+      "mobility": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      },
+      "effective-mass": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      },
+      "acceleration-capacity": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      },
+      "force-capacity": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      }
+    },
+    "pendulum": {
+      "mobility": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      },
+      "effective-mass": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      },
+      "acceleration-capacity": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      },
+      "force-capacity": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      }
+    },
+    "putting_green": {
+      "mobility": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      },
+      "effective-mass": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      },
+      "acceleration-capacity": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      },
+      "force-capacity": {
+        "status": "exempt",
+        "reason": "Toy or non-club engine with no hand-club interface to take an ellipsoid at."
+      }
+    }
+  }
+}
