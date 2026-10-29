@@ -12,6 +12,9 @@ verbatim into ``docs/spec/CHANGELOG_ARCHIVE.md``. These tests pin that
 
 Wave 2 (issue #13095) rotated the 315 oldest live rows (dated up to 2026-10-14)
 into a second marked block, ``change-log-rows-wave2``, the same way.
+
+Wave 3 (issue #14095) rotated the 369 oldest live rows (dated up to 2026-10-24)
+into a third marked block, ``change-log-rows-wave3``, the same way.
 """
 
 from __future__ import annotations
@@ -52,9 +55,18 @@ BASELINE = {
     "change-log-rows-wave2": (
         "7d74b091d904f2696c7dea345b3212199076c23212bbf907b879ae9f5eb4b512"
     ),
+    # Wave 3 (#14095): the live table header plus the 369 oldest rows (dated up
+    # to 2026-10-24), verbatim from SPEC.md at origin/main 08fde17c39.
+    "change-log-rows-wave3": (
+        "1d3613addb327432fcb9524e9458551485932f93bebfa5e0c7cf8849ad69cf43"
+    ),
 }
 #: Archived rows per marked block; the sum is what the archive must conserve.
-BASELINE_ROW_COUNTS = {"change-log-rows": 1113, "change-log-rows-wave2": 315}
+BASELINE_ROW_COUNTS = {
+    "change-log-rows": 1113,
+    "change-log-rows-wave2": 315,
+    "change-log-rows-wave3": 369,
+}
 BASELINE_ROW_COUNT = BASELINE_ROW_COUNTS["change-log-rows"]
 _ROW = re.compile(r"^\| \d{4}-\d{2}-\d{2} \| (?:#\d+|n/a) \|", re.MULTILINE)
 _ROW_LINE = re.compile(r"^\| \d{4}-\d{2}-\d{2} \| (?:#\d+|n/a) \|.*$", re.MULTILINE)
@@ -101,6 +113,15 @@ def test_wave2_rows_were_moved_not_copied() -> None:
 
 
 @pytest.mark.unit
+def test_wave3_rows_were_moved_not_copied() -> None:
+    """No wave-3 row may linger in the live table next to its archived copy."""
+    archived = set(_ROW_LINE.findall(_block(_read(ARCHIVE), "change-log-rows-wave3")))
+    live = set(_ROW_LINE.findall(_read(SPEC)))
+    assert len(archived) == BASELINE_ROW_COUNTS["change-log-rows-wave3"]
+    assert not archived & live
+
+
+@pytest.mark.unit
 def test_the_duplicate_gate_reads_every_archived_row_block() -> None:
     """The change-log gate sees the wave-2 rows now that they left SPEC.md."""
     path = REPO_ROOT / "scripts" / "ci" / "check_spec_changelog_duplicates.py"
@@ -110,10 +131,11 @@ def test_the_duplicate_gate_reads_every_archived_row_block() -> None:
     sys.modules[spec.name] = gate
     spec.loader.exec_module(gate)
     keys = {row.key for row in gate._load_archive_rows(gate._load_spec_changelog())}
-    wave2 = _block(_read(ARCHIVE), "change-log-rows-wave2")
-    wave2_keys = {line.split(" | ")[1] for line in _ROW_LINE.findall(wave2)}
-    assert len(wave2_keys) == BASELINE_ROW_COUNTS["change-log-rows-wave2"]
-    assert wave2_keys <= keys
+    for wave in ("change-log-rows-wave2", "change-log-rows-wave3"):
+        block = _block(_read(ARCHIVE), wave)
+        wave_keys = {line.split(" | ")[1] for line in _ROW_LINE.findall(block)}
+        assert len(wave_keys) == BASELINE_ROW_COUNTS[wave]
+        assert wave_keys <= keys
 
 
 def test_archive_is_not_the_live_spec() -> None:
