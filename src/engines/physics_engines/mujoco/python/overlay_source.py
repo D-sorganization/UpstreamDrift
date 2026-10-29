@@ -159,7 +159,9 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
             return GripClosure.unavailable(f"closure solve failed: {exc}")
 
     def club_frame_world(
-        self, coordinates: Mapping[str, float]
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float] | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:
         """World rotation (3x3) and origin of the *specification* club frame.
 
@@ -169,7 +171,7 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
         world pose is ``club_frame @ placement_b``, so the club frame is
         ``site_pose @ inv(placement_b)``. Read-only (#13189).
         """
-        self._forward(coordinates)
+        self._forward(coordinates, rates)
         site = self._closure[1]
         pose = np.eye(4)
         pose[:3, :3] = np.asarray(self.data.site_xmat[site], dtype=float).reshape(3, 3)
@@ -180,9 +182,68 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
         frame = pose @ np.linalg.inv(placement)
         return frame[:3, :3].copy(), frame[:3, 3].copy()
 
-    def _forward(self, coordinates: Mapping[str, float]) -> None:
+    def _forward(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float] | None = None,
+    ) -> None:
         self.data.qpos[:] = self._vector(coordinates)
-        self._mj.mj_fwdPosition(self.model, self.data)
+        if rates is not None:
+            self.data.qvel[:] = self._vector(rates)
+            self._mj.mj_forward(self.model, self.data)
+        else:
+            self._mj.mj_fwdPosition(self.model, self.data)
+
+    def bias_force(
+        self,
+        coordinates: Mapping[str, float] | np.ndarray,
+        rates: Mapping[str, float] | np.ndarray | None = None,
+    ) -> np.ndarray:
+        """Generalised bias force vector h(q, v) = C(q, v)v + g(q) [N or N*m]."""
+        if isinstance(coordinates, (np.ndarray, Sequence)) and not isinstance(
+            coordinates, (str, bytes, Mapping)
+        ):
+            coords_map: Mapping[str, float] = dict(
+                zip(
+                    self.coordinate_order,
+                    np.asarray(coordinates, dtype=float).tolist(),
+                    strict=True,
+                )
+            )
+        else:
+            coords_map = coordinates
+        if (
+            rates is not None
+            and isinstance(rates, (np.ndarray, Sequence))
+            and not isinstance(rates, (str, bytes, Mapping))
+        ):
+            rates_map: Mapping[str, float] | None = dict(
+                zip(
+                    self.coordinate_order,
+                    np.asarray(rates, dtype=float).tolist(),
+                    strict=True,
+                )
+            )
+        else:
+            rates_map = rates
+        self._forward(coords_map, rates_map)
+        return np.asarray(self.data.qfrc_bias, dtype=float).copy()
+
+    def point_jdot_v(
+        self,
+        point: Sequence[float] | np.ndarray,
+        body: str | int,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float] | None = None,
+    ) -> np.ndarray:
+        """3-vector J̇(q, v) v [m/s^2] at ``point`` on ``body``."""
+        self._forward(coordinates, rates)
+        body_id = body if isinstance(body, int) else int(self.model.body(body).id)
+        pt = np.asarray(point, dtype=float)
+        jdot_pos = np.zeros((3, self.model.nv))
+        jdot_rot = np.zeros((3, self.model.nv))
+        self._mj.mj_jacDot(self.model, self.data, jdot_pos, jdot_rot, pt, body_id)
+        return jdot_pos @ self.data.qvel
 
     def joint_frames(
         self, coordinates: Mapping[str, float]

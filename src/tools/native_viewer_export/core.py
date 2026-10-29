@@ -293,6 +293,7 @@ class SwingInput:
     rollout_engine: str
     sample_times_s: tuple[float, ...] | None = None  # set on resampled swings
     ball: BallPlacement | None = None  # decorative ball, set once per export
+    v: NDArray[np.float64] | None = None
 
     @property
     def reference_shape(self) -> tuple[int, ...]:
@@ -308,6 +309,13 @@ class SwingInput:
             raise ValueError(f"rollout q has shape {self.q.shape}, expected {expected}")
         if not np.isfinite(self.q).all():
             raise ValueError("rollout q must be finite")
+        if self.v is not None:
+            if self.v.shape != expected:
+                raise ValueError(
+                    f"rollout v has shape {self.v.shape}, expected {expected}"
+                )
+            if not np.isfinite(self.v).all():
+                raise ValueError("rollout v must be finite")
 
     def hand_mobility_at(
         self,
@@ -322,9 +330,10 @@ class SwingInput:
         """
         if not 0 <= index < self.n_states:
             raise ValueError(f"index {index} outside 0..{self.n_states - 1}")
+        v_idx = self.v[index] if self.v is not None else None
         return _hand_source(
             self.bundle.spec_bytes, torque_limit_source=torque_limit_source
-        ).hand_mobility(self.q[index], mode=mode)
+        ).hand_mobility(self.q[index], v=v_idx, mode=mode)
 
     @property
     def n_states(self) -> int:
@@ -388,15 +397,19 @@ def load_swing_input(
 ) -> SwingInput:
     """Load a bundle and optionally an engine rollout ``.npz`` holding ``q``."""
     bundle = InputBundle.load(Path(bundle_path))
+    v: NDArray[np.float64] | None = None
     if rollout_path is None:
         q = bundle.reference_q
+        v = bundle.reference_v
         rollout_engine = bundle.reference_engine
     else:
         with np.load(Path(rollout_path)) as data:
             if "q" not in data.files:
                 raise ValueError(f"{rollout_path} has no 'q' array")
             q = np.asarray(data["q"], dtype=float)
-    return SwingInput(bundle, q, swing, club, rollout_engine)
+            if "v" in data.files:
+                v = np.asarray(data["v"], dtype=float)
+    return SwingInput(bundle, q, swing, club, rollout_engine, v=v)
 
 
 def load_receipt_rollout(
@@ -724,6 +737,7 @@ def _resampled(
     resampled = replace(
         swing,
         q=schedule.interpolate(swing.q),
+        v=schedule.interpolate(swing.v) if swing.v is not None else None,
         sample_times_s=tuple(float(t) for t in times),
     )
     if feed is None:
