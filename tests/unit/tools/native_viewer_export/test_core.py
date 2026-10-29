@@ -271,3 +271,37 @@ def test_default_glyph_style_rejects_nonpositive_mass() -> None:
 
     with pytest.raises(ValueError):
         default_glyph_style(body_mass_kg=0.0)
+
+
+def test_hand_source_cache_key_includes_torque_limit_source(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.tools.native_viewer_export.core import _hand_source
+    import src.tools.native_viewer_export.core as core_mod
+
+    instances = []
+
+    class DummyHandSource:
+        def __init__(self, spec_bytes: bytes) -> None:
+            instances.append(self)
+
+    monkeypatch.setattr(core_mod, "HandMobilitySource", DummyHandSource, raising=False)
+    # Patch the import inside _hand_source
+    import sys
+
+    dummy_module = type(sys)("dummy_hand_mobility")
+    dummy_module.HandMobilitySource = DummyHandSource
+    monkeypatch.setitem(
+        sys.modules,
+        "src.engines.physics_engines.mujoco.python.hand_mobility",
+        dummy_module,
+    )
+
+    _hand_source.cache_clear()
+    s1 = _hand_source(b"spec_1", torque_limit_source="source_a")
+    s2 = _hand_source(b"spec_1", torque_limit_source="source_a")
+    assert s1 is s2
+
+    s3 = _hand_source(b"spec_1", torque_limit_source="source_b")
+    assert s3 is not s1
+    assert len(instances) == 2
