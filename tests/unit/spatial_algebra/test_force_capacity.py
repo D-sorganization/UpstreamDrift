@@ -86,7 +86,7 @@ def test_symmetric_limits_zero_centre_asymmetric_shift():
     assert np.linalg.norm(asym.centre) > 0
 
 
-def test_closure_keeps_force_capacity_consistent():
+def test_closure_khatib_duality_exact():
     rng = np.random.default_rng(7)
     nv = 4
     Lm = rng.normal(size=(nv, nv))
@@ -96,12 +96,39 @@ def test_closure_keeps_force_capacity_consistent():
     B = np.eye(nv)
     lo, hi = -np.full(nv, 10.0), np.full(nv, 10.0)
 
-    cap_constrained = force_capacity(J, M, B, lo, hi, Jc=Jc)
-    cap_free = force_capacity(J, M, B, lo, hi)
+    cap_f = force_capacity(J, M, B, lo, hi, Jc=Jc)
+    cap_a = acceleration_capacity(J, M, B, lo, hi, Jc=Jc)
 
-    # Closure removes degrees of freedom
-    assert np.all(cap_constrained.radii <= cap_free.radii + 1e-9)
-    assert cap_constrained.radii.max() < cap_free.radii.max()
+    W = mobility_matrix(J, M, Jc=Jc)
+    lam_w, vec_w = np.linalg.eigh(0.5 * (W + W.T))
+    floor = 1e-9 * max(float(lam_w.max()), 1.0)
+    W_inv = vec_w @ np.diag(1.0 / np.maximum(lam_w, floor)) @ vec_w.T
+
+    Qa = (cap_a.axes * cap_a.radii**2) @ cap_a.axes.T
+    Qf_expected = W_inv @ Qa @ W_inv
+    Qf_actual = (cap_f.axes * cap_f.radii**2) @ cap_f.axes.T
+
+    np.testing.assert_allclose(Qf_actual, Qf_expected, atol=1e-9)
+    np.testing.assert_allclose(cap_f.centre, W_inv @ cap_a.centre, atol=1e-9)
+
+
+def test_six_dof_spatial_force_capacity_with_scales():
+    from src.shared.python.loop_nullspace.decomposition import CharacteristicScales
+
+    rng = np.random.default_rng(42)
+    nv = 6
+    Lm = rng.normal(size=(nv, nv))
+    M = Lm @ Lm.T + nv * np.eye(nv)
+    J = rng.normal(size=(6, nv))
+    B = np.eye(nv)
+    lo, hi = -np.full(nv, 10.0), np.full(nv, 10.0)
+    scales = CharacteristicScales(moment=5.0, force=100.0)
+
+    cap = force_capacity(J, M, B, lo, hi, scales=scales)
+    assert cap.radii.shape == (6,)
+    assert cap.axes.shape == (6, 6)
+    assert np.all(cap.radii > 0)
+    np.testing.assert_allclose(cap.centre, 0.0, atol=1e-12)
 
 
 @pytest.mark.parametrize(

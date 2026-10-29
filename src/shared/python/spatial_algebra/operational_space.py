@@ -35,6 +35,7 @@ __all__ = [
     "Ellipsoid",
     "acceleration_capacity",
     "drift_acceleration",
+    "force_capacity",
     "force_ellipsoid",
     "mobility_matrix",
     "transport_spatial_mobility",
@@ -220,6 +221,95 @@ def acceleration_capacity(
     lam = np.maximum(lam, 0.0)
     singular = lam <= tol * max(float(lam.max()), 1.0)
     return CapacityEllipsoid(vec, np.sqrt(lam), singular, JAB @ ((hi + lo) / 2))
+
+
+def force_capacity(
+    J: np.ndarray,
+    M: np.ndarray,
+    B: np.ndarray,
+    tau_lo: np.ndarray,
+    tau_hi: np.ndarray,
+    Jc: np.ndarray | None = None,
+    *,
+    tol: float = EPSILON_SINGULARITY_DETECTION,
+    scales: CharacteristicScales | None = None,
+) -> CapacityEllipsoid:
+    """Zero-velocity, dynamically consistent force-capacity ellipsoid.
+
+    Khatib operational-space duality under actuator torque limits:
+    ``Q_f = W_c^-1 Q_a W_c^-1`` with ``lambda`` eliminated by the closure projector
+    when ``Jc`` is given, using the existing singular floor on ``W_c``.
+
+    With ``G_a = J A B T``, ``A`` the unconstrained or closure-projected inverse mass,
+    ``T = diag((tau_hi - tau_lo)/2)``, and ``W_c = mobility_matrix(J, M, Jc, scales=scales)``:
+    - ``W_c = V diag(lambda) V^T`` with singular floor ``floor = tol * max(lambda_max, 1.0)``;
+    - ``W_c^-1 = V diag(1 / max(lambda, floor)) V^T``;
+    - ``G_f = W_c^-1 G_a``;
+    - ``Q_f = G_f G_f^T = W_c^-1 Q_a W_c^-1``; radii are ``sqrt(eig(Q_f))`` [N];
+    - the centre is ``W_c^-1 J A B (tau_hi + tau_lo)/2`` [N].
+
+    Axes with ``eig <= tol * max(eig_max, 1.0)`` are flagged in ``singular``.
+
+    Args:
+        J: (k, nv) task Jacobian, k in {3, 6}.
+        M: (nv, nv) symmetric positive-definite mass matrix.
+        B: (nv, nu) map from actuator torques to generalised forces.
+        tau_lo, tau_hi: (nu,) finite limits with ``tau_lo < 0 < tau_hi``.
+        Jc: optional (c, nv) closure Jacobian (may be rank deficient).
+        tol: singularity tolerance floor.
+        scales: optional :class:`CharacteristicScales` for 6-row task Jacobians.
+
+    Returns:
+        :class:`CapacityEllipsoid` in force space [N] (or [N; N*m]).
+
+    Raises:
+        ValueError: on bad shapes, non-finite values, non-SPD ``M``, limits
+            that do not bracket zero strictly, or ``scales`` with k != 6.
+    """
+    if not tol > 0:
+        raise ValueError("tol must be positive")
+    J, M, Jc, factor = _validated_task(J, M, Jc)
+    k = J.shape[0]
+    if scales is not None and k != 6:
+        raise ValueError("scales applies to a 6-row J only")
+    B = _finite_matrix("B", B)
+    nv = M.shape[0]
+    if B.shape[0] != nv:
+        raise ValueError(f"B must have {nv} rows, got {B.shape[0]}")
+    nu = B.shape[1]
+    lo = _limits("tau_lo", tau_lo, nu)
+    hi = _limits("tau_hi", tau_hi, nu)
+    if not (np.all(lo < 0) and np.all(hi > 0)):
+        raise ValueError("torque limits must satisfy tau_lo < 0 < tau_hi")
+
+    W = mobility_matrix(J, M, Jc, scales=scales)
+    lam_w, vec_w = np.linalg.eigh(0.5 * (W + W.T))
+    lam_w_max = float(lam_w.max()) if lam_w.size else 0.0
+    floor = tol * max(lam_w_max, 1.0)
+    W_inv = vec_w @ np.diag(1.0 / np.maximum(lam_w, floor)) @ vec_w.T
+
+    if Jc is not None and Jc.shape[0] > 0:
+        JA = J @ kkt_projector(M, Jc)
+    else:
+        JA = cho_solve(factor, J.T).T
+    if scales is not None:
+        length = scales.moment / scales.force
+        scale = np.concatenate([np.ones(3), np.full(3, length)])
+        JA = JA * scale[:, None]
+
+    JAB = JA @ B
+    Ga = JAB * ((hi - lo) / 2)[None, :]
+    mid = (hi + lo) / 2
+    centre_a = JAB @ mid
+
+    Gf = W_inv @ Ga
+    Qf = Gf @ Gf.T
+    centre_f = W_inv @ centre_a
+
+    lam_f, vec_f = np.linalg.eigh(0.5 * (Qf + Qf.T))
+    lam_f = np.maximum(lam_f, 0.0)
+    singular_f = lam_f <= tol * max(float(lam_f.max()), 1.0)
+    return CapacityEllipsoid(vec_f, np.sqrt(lam_f), singular_f, centre_f)
 
 
 def drift_acceleration(
