@@ -180,21 +180,40 @@ class HandMobilitySource(MujocoOverlaySource):
         self._forward(coordinates, rates)
         return coordinates
 
-    def bias_force(self, q: np.ndarray, v: np.ndarray | None = None) -> np.ndarray:
+    def bias_force(
+        self,
+        coordinates: Mapping[str, float] | np.ndarray,
+        rates: Mapping[str, float] | np.ndarray | None = None,
+    ) -> np.ndarray:
         """Generalised bias force h(q, v) [N or N*m] (length nv)."""
-        coords = self._set_state(q, v)
-        rates = (
+        if isinstance(coordinates, Mapping):
+            q_vec = np.array(
+                [coordinates[name] for name in self.coordinate_order], dtype=float
+            )
+        else:
+            q_vec = np.asarray(coordinates, dtype=float)
+        if rates is not None:
+            if isinstance(rates, Mapping):
+                v_vec: np.ndarray | None = np.array(
+                    [rates[name] for name in self.coordinate_order], dtype=float
+                )
+            else:
+                v_vec = np.asarray(rates, dtype=float)
+        else:
+            v_vec = None
+        coords = self._set_state(q_vec, v_vec)
+        r_map = (
             dict(
                 zip(
                     self.coordinate_order,
-                    np.asarray(v, dtype=float).tolist(),
+                    v_vec.tolist(),
                     strict=True,
                 )
             )
-            if v is not None
+            if v_vec is not None
             else None
         )
-        return super().bias_force(coords, rates)
+        return super().bias_force(coords, r_map)
 
     def grip_jdot_v(self, hand: str, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """3-vector J̇(q, v) v [m/s^2] at ``hand``'s grip point on the club body."""

@@ -196,16 +196,42 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
 
     def bias_force(
         self,
-        coordinates: Mapping[str, float],
-        rates: Mapping[str, float] | None = None,
+        coordinates: Mapping[str, float] | np.ndarray,
+        rates: Mapping[str, float] | np.ndarray | None = None,
     ) -> np.ndarray:
         """Generalised bias force vector h(q, v) = C(q, v)v + g(q) [N or N*m]."""
-        self._forward(coordinates, rates)
+        if isinstance(coordinates, (np.ndarray, Sequence)) and not isinstance(
+            coordinates, (str, bytes, Mapping)
+        ):
+            coords_map: Mapping[str, float] = dict(
+                zip(
+                    self.coordinate_order,
+                    np.asarray(coordinates, dtype=float).tolist(),
+                    strict=True,
+                )
+            )
+        else:
+            coords_map = coordinates
+        if (
+            rates is not None
+            and isinstance(rates, (np.ndarray, Sequence))
+            and not isinstance(rates, (str, bytes, Mapping))
+        ):
+            rates_map: Mapping[str, float] | None = dict(
+                zip(
+                    self.coordinate_order,
+                    np.asarray(rates, dtype=float).tolist(),
+                    strict=True,
+                )
+            )
+        else:
+            rates_map = rates
+        self._forward(coords_map, rates_map)
         return np.asarray(self.data.qfrc_bias, dtype=float).copy()
 
     def point_jdot_v(
         self,
-        point: Sequence[float],
+        point: Sequence[float] | np.ndarray,
         body: str | int,
         coordinates: Mapping[str, float],
         rates: Mapping[str, float] | None = None,
