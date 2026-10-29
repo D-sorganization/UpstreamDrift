@@ -196,8 +196,9 @@ def _render_markdown(report: dict[str, Any]) -> str:
         lines.extend(_comparison_table(report["comparisons"]))
     else:
         lines.append(
-            "No live adapter comparison rows are claimed yet. Current `origin/main` "
-            "does not include the CC-7 harness or both canonical-v2 adapters."
+            "No live adapter comparison rows are claimed yet. The CC-7 harness and "
+            "both canonical-v2 adapters were draft PRs that were closed unmerged, "
+            "so `origin/main` does not include them and no comparison has been run."
         )
     lines.extend(
         [
@@ -261,7 +262,7 @@ def _comparison_dict(row: Comparison) -> dict[str, Any]:
 
 def _default_pending_source() -> dict[str, Any]:
     return {
-        "status": "blocked_by_draft_dependencies",
+        "status": "blocked_by_closed_unmerged_dependencies",
         "engines": ["mujoco-canonical-v2", "pinocchio-canonical-v2"],
         "dependencies": _default_dependencies(),
         "comparisons": [],
@@ -272,17 +273,17 @@ def _default_dependencies() -> list[dict[str, str]]:
     return [
         {
             "name": "CC-7 conformance harness",
-            "status": "draft PR #6826",
+            "status": "draft PR #6826, closed unmerged 2026-05-31",
             "url": "https://github.com/D-sorganization/UpstreamDrift/pull/6826",
         },
         {
             "name": "CC-9 Pinocchio canonical-v2 adapter",
-            "status": "draft PR #6828",
+            "status": "draft PR #6828, closed unmerged 2026-05-31",
             "url": "https://github.com/D-sorganization/UpstreamDrift/pull/6828",
         },
         {
             "name": "CC-10 MuJoCo canonical-v2 adapter",
-            "status": "draft PR #6829",
+            "status": "draft PR #6829, closed unmerged 2026-05-31",
             "url": "https://github.com/D-sorganization/UpstreamDrift/pull/6829",
         },
     ]

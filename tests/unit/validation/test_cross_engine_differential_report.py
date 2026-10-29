@@ -110,8 +110,8 @@ def test_default_report_documents_dependency_block(tmp_path: Path) -> None:
         generated_at="2026-05-31T00:00:00+00:00",
     )
 
-    assert report["status"] == "blocked_by_draft_dependencies"
+    assert report["status"] == "blocked_by_closed_unmerged_dependencies"
     assert report["comparisons"] == []
     markdown = (tmp_path / "report.md").read_text(encoding="utf-8")
     assert "No live adapter comparison rows are claimed yet" in markdown
-    assert "draft PR #6828" in markdown
+    assert "draft PR #6828, closed unmerged 2026-05-31" in markdown
