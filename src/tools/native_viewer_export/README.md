@@ -48,7 +48,7 @@ python3 -m src.tools.native_viewer_export \
   grip midpoint, labelled with the split method; unavailable is shown, never
   zero) and writes `<swing>_<engine>_grip_wrench.json`. Drake uses its own KKT
   multiplier; the other viewers show the MuJoCo plant at that engine's pose.
-  `--views hands_closeup --no-grid` follows the grip midpoint per frame.
+  `--views hands_closeup --no-grid` follows the kinematic grip midpoint per frame (club pose, so `--no-overlay` and no `--grip` track the hands too).
   `--no-hud` writes clean frames. `--speeds= --impact-window 0.6
 --impact-speed 0.25` writes only the 0.25x impact clip. Impact time is
   `--impact-time`, else the bundle provenance `impact_time_s`, else
