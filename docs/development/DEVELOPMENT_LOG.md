@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14049 · CAP-9 (#14038): Pinocchio Capability Adapter at the Hand-Club Interfaces
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14049
+- **Branch:** feat/14049-pinocchio-capability-adapter
+- **PR:** #14076
+- **Paths:** see #14076
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`e0ede838`; collated from changes/14049-pinocchio-capability-adapter.md)
+- **Summary:** Pinocchio capability adapter emitting acceleration and force capacity ellipsoids per grip point
+- **Next step:** Shipped in PR #14076.
+
 ### DL-#13938 · Evaluate Glass Conductivity From Temperature Only; Drop Power-Density Heating in Default Model.
 
 - **State:** shipped
