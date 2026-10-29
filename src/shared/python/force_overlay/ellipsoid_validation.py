@@ -31,10 +31,12 @@ def validate_oriented_ellipsoid_fields(
         axes_arr = axes_arr.copy()
         axes_arr[:, 2] *= -1.0
     radii_arr = np.asarray(radii, dtype=float)
-    if radii_arr.shape != (3,) or not np.isfinite(radii_arr).all() or (radii_arr <= 0).any():
-        raise ValueError(
-            f"radii must be 3 finite positive values, got {radii!r}"
-        )
+    if (
+        radii_arr.shape != (3,)
+        or not np.isfinite(radii_arr).all()
+        or (radii_arr <= 0).any()
+    ):
+        raise ValueError(f"radii must be 3 finite positive values, got {radii!r}")
     rgba_arr = np.asarray(rgba, dtype=float)
     if rgba_arr.shape != (4,) or not ((rgba_arr >= 0.0) & (rgba_arr <= 1.0)).all():
         raise ValueError(f"rgba must be 4 values in [0, 1], got {rgba!r}")

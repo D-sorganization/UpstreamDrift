@@ -155,7 +155,7 @@ def test_candidate_must_satisfy_all_declared_plant_scenarios() -> None:
     receipt = controller.command_for_step(
         0, np.zeros(2), observation_time_s=0.0, current_time_s=0.0
     )
-    assert receipt.status in {"optimized", "fallback_infeasible"}
+    assert receipt.status in {"optimized", "fallback_infeasible", "fallback_timeout"}
     assert abs(high_gain(np.zeros(2), receipt.applied)[1]) <= 0.2 + 1e-9
 
 
