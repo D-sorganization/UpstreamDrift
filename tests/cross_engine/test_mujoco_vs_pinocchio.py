@@ -48,6 +48,9 @@ from src.shared.python.engine_core.engine_availability import (
     MUJOCO_AVAILABLE,
     PINOCCHIO_AVAILABLE,
 )
+from src.shared.python.pendulum_simulator.tolerance_bands import (
+    compute_cross_engine_tolerance_band,
+)
 
 # Runtime imports guarded by availability flags (not TYPE_CHECKING)
 # so that test functions can call mujoco.* and pinocchio.* at runtime.
@@ -214,18 +217,21 @@ class TestCrossEngineInverseDynamics:
         # Pinocchio inverse dynamics
         tau_pinocchio = pinocchio.rnea(pin_model, pin_data, q, v, a)
 
-        # Compare — cross-engine tolerance is 20% because MuJoCo and Pinocchio
-        # compute inertia from different model representations (MJCF composite
-        # geoms vs. programmatic Inertia), so the effective M(q) differs by
-        # O(10%).  This is a cross-engine plausibility check, not a regression
-        # test.
+        # Compare — sensitivity-derived tolerance band accounting for model mismatch
+        # (MJCF composite geoms vs. programmatic Inertia, differing by O(10%)).
         rel_error = np.abs(tau_mujoco - tau_pinocchio) / (np.abs(tau_pinocchio) + 1e-10)
+        band = compute_cross_engine_tolerance_band(
+            is_pointwise=True,
+            epsilon_model=0.20,
+            floor=1e-6,
+        )
 
-        assert rel_error[0] < 0.2, (
+        assert rel_error[0] < band.tolerance, (
             f"Inverse dynamics mismatch in motion: "
             f"MuJoCo={tau_mujoco[0]:.6e}, "
             f"Pinocchio={tau_pinocchio[0]:.6e}, "
-            f"rel_error={rel_error[0]:.2e}"
+            f"rel_error={rel_error[0]:.2e}, "
+            f"tol={band.tolerance:.2e}"
         )
 
 
@@ -261,18 +267,21 @@ class TestCrossEngineMassMatrix:
             # Pinocchio mass matrix
             M_pinocchio = pinocchio.crba(pin_model, pin_data, q)
 
-            # Compare — cross-engine tolerance is 20%.  The MuJoCo model
-            # derives inertia from density*geometry (capsule rod + sphere mass),
-            # while the Pinocchio model uses an explicit parallel-axis-theorem
-            # calculation.  The two conventions yield different effective M(q)
-            # values for this simple pendulum.
+            # Compare — sensitivity-derived tolerance band accounting for model mismatch
+            # (density*geometry capsule+sphere in MuJoCo vs explicit parallel-axis in Pinocchio).
             rel_error = np.abs(M_mujoco - M_pinocchio) / (np.abs(M_pinocchio) + 1e-10)
+            band = compute_cross_engine_tolerance_band(
+                is_pointwise=True,
+                epsilon_model=0.50,
+                floor=1e-6,
+            )
 
-            assert rel_error[0, 0] < 0.5, (
+            assert rel_error[0, 0] < band.tolerance, (
                 f"Mass matrix mismatch at θ={theta:.3f}: "
                 f"MuJoCo={M_mujoco[0, 0]:.6e}, "
                 f"Pinocchio={M_pinocchio[0, 0]:.6e}, "
-                f"rel_error={rel_error[0, 0]:.2e}"
+                f"rel_error={rel_error[0, 0]:.2e}, "
+                f"tol={band.tolerance:.2e}"
             )
 
     def test_mujoco_vs_pinocchio_mass_matrix_positive_definite(self) -> None:
@@ -418,16 +427,21 @@ class TestCrossEngineEnergyConsistency:
         # Pinocchio kinetic energy
         ke_pinocchio = pinocchio.computeKineticEnergy(pin_model, pin_data, q, v)
 
-        # Compare — cross-engine tolerance is 20%.  KE = 0.5 * v^T M(q) v
-        # and the mass matrices differ between engines (see mass matrix test),
-        # so kinetic energy inherits the same O(10-50%) offset.
+        # Compare — sensitivity-derived tolerance band for kinetic energy inheriting
+        # the mass matrix model mismatch between engines.
         rel_error = abs(ke_mujoco - ke_pinocchio) / (abs(ke_pinocchio) + 1e-10)
+        band = compute_cross_engine_tolerance_band(
+            is_pointwise=True,
+            epsilon_model=0.50,
+            floor=1e-6,
+        )
 
-        assert rel_error < 0.5, (
+        assert rel_error < band.tolerance, (
             f"Kinetic energy mismatch: "
             f"MuJoCo={ke_mujoco:.6e}, "
             f"Pinocchio={ke_pinocchio:.6e}, "
-            f"rel_error={rel_error:.2e}"
+            f"rel_error={rel_error:.2e}, "
+            f"tol={band.tolerance:.2e}"
         )
 
 
@@ -488,18 +502,22 @@ class TestCrossEngineIntegration:
         tau_pin_direct = pinocchio.rnea(pin_model, pin_data, q, v, a)
 
         # === Cross-engine comparison ===
-        # Tolerance is 20% — different engines, different inertia derivations.
-        # The internal-consistency checks below (1e-10) verify that each engine
-        # is self-consistent; this check only verifies cross-engine plausibility.
+        # Sensitivity-derived tolerance band accounting for model mismatch across engines.
         rel_error = abs(tau_mj_direct[0] - tau_pin_direct[0]) / (
             abs(tau_pin_direct[0]) + 1e-10
         )
+        band = compute_cross_engine_tolerance_band(
+            is_pointwise=True,
+            epsilon_model=0.20,
+            floor=1e-6,
+        )
 
-        assert rel_error < 0.2, (
+        assert rel_error < band.tolerance, (
             f"Equation of motion mismatch: "
             f"MuJoCo={tau_mj_direct[0]:.6e}, "
             f"Pinocchio={tau_pin_direct[0]:.6e}, "
-            f"rel_error={rel_error:.2e}"
+            f"rel_error={rel_error:.2e}, "
+            f"tol={band.tolerance:.2e}"
         )
 
         # === Internal consistency (each engine) ===

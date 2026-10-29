@@ -263,6 +263,23 @@ PART_RADIUS_M: dict[str, float] = {
     "foot": 0.040,
     "head": 0.095,
 }
+# Distal (far-end) radius over the proximal radius per part. Visual only (#13993):
+# the forearm narrows 20 % toward the wrist so it is no wider than the hand.
+PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.8}
+
+
+def validate_distal_scale(scale: float) -> float:
+    """Return ``scale`` if it is a finite taper factor in (0, 1], else raise."""
+    if not (isinstance(scale, int | float) and 0.0 < scale <= 1.0):
+        raise ValueError(f"taper (distal scale) must be in (0, 1], got {scale!r}")
+    return float(scale)
+
+
+def distal_scale(part: str) -> float:
+    """Distal-over-proximal radius of ``part`` (1.0 = no taper)."""
+    return validate_distal_scale(PART_DISTAL_SCALE.get(part, 1.0))
+
+
 # Depth/width aspect of the cross-section (1 = round).
 PART_ASPECT: dict[str, float] = {"torso": 0.72, "pelvis": 0.78, "foot": 0.7}
 GARMENT_THICKNESS = 1.08

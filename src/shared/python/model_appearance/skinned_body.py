@@ -37,6 +37,7 @@ from src.shared.python.model_appearance.geometry import LoftOptions, lofted_segm
 from src.shared.python.model_appearance.library import (
     PART_ASPECT,
     PART_RADIUS_M,
+    distal_scale,
     classify_body,
 )
 from src.shared.python.motion_matching.full_body_spec import order_directed_tree
@@ -237,6 +238,7 @@ def build_skinned_body(
                 radius,
                 LoftOptions(
                     aspect=aspect,
+                    end_scale=distal_scale(part),
                     rings=rings,
                     sides=sides,
                     width_hint=width_hint_for(

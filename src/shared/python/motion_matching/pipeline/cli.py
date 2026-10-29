@@ -1008,11 +1008,15 @@ def _apply_trajectory_optimiser(
     _write_receipt(out_dir, receipt)
     raw_method = getattr(args, "mjx_method", "adam")
     method: Literal["adam", "lbfgs"] = "lbfgs" if raw_method == "lbfgs" else "adam"
+    neural_mode = getattr(args, "neural_mode", "classical")
+    allow_fallback = not bool(getattr(args, "no_neural_fallback", False))
     opt_summary = run_trajectory_optimiser(
         trajectory_optimiser,
         out_dir,
         iterations=getattr(args, "mjx_iterations", DEFAULT_MJX_ITERATIONS),
         method=method,
+        neural_mode=neural_mode,
+        allow_fallback=allow_fallback,
     )
     if opt_summary is not None:
         npz_path = out_dir / "mjx_optimised_reference.npz"
@@ -1023,6 +1027,10 @@ def _apply_trajectory_optimiser(
             lane, kin, sim, q_opt, tracking_backend=getattr(args, "tracking", "kkt")
         )
         receipt["trajectory_optimiser"] = opt_summary
+        if "neural_proposal" in opt_summary:
+            receipt.setdefault("neural", {})["proposal"] = opt_summary[
+                "neural_proposal"
+            ]
 
 
 def _feasibility_filters(

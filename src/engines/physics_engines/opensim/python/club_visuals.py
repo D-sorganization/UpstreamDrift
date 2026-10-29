@@ -30,6 +30,7 @@ from src.shared.python.model_appearance.club_assembly import (
     club_part_material,
 )
 from src.shared.python.model_appearance.grip_hands import grip_hand_meshes
+from src.shared.python.model_appearance.hand_spec import ResolvedHandSpec
 from src.shared.python.model_appearance.club_head_mesh import load_club_head
 from src.shared.python.model_appearance.mesh_io import stl_bytes
 from src.shared.python.engine_core.opensim_runtime import import_opensim
@@ -76,8 +77,16 @@ def _write_stls(
     return digests
 
 
+def _hand_kwargs(hands: ResolvedHandSpec | None) -> dict[str, Any]:
+    if hands is None:
+        return {}
+    return {"pose": hands.pose, "hand_length_m": hands.hand_length_m}
+
+
 def write_club_assets(
-    club: ClubAssembly, directory: Path = GEOMETRY_DIR
+    club: ClubAssembly,
+    directory: Path = GEOMETRY_DIR,
+    hands: ResolvedHandSpec | None = None,
 ) -> dict[str, Path]:
     """Write the club's STLs and merge their provenance into the manifest.
 
@@ -92,7 +101,9 @@ def write_club_assets(
     paths = asset_paths(club.head_alias, out)
     digests = _write_stls(assembly_meshes(club), club.head_alias, paths)
     hand_paths = hand_asset_paths(club.head_alias, out)
-    hand_digests = _write_stls(grip_hand_meshes(club), club.head_alias, hand_paths)
+    hand_digests = _write_stls(
+        grip_hand_meshes(club, **_hand_kwargs(hands)), club.head_alias, hand_paths
+    )
     params = {
         "head_alias": club.head_alias,
         "length_m": club.length_m,
