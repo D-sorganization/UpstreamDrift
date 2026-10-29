@@ -185,6 +185,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 866 | `src/engines/feedback_observation_qualification.py` |
 | 864 | `src/tools/shot_pattern_analysis/matched_report_plots.py` |
 | 864 | `src/tools/simulation_backends_launcher/gui.py` |
+| 862 | `src/engines/physics_engines/pinocchio/python/grip_bushing.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
 | 861 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |

@@ -2750,6 +2750,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 | 2026-10-29 | #14008 | Taper the shared visual forearm 20 percent toward the wrist (appearance only; inertias unchanged) |
 | 2026-10-28 | #14010 | Real-engine probe catches TypeError and verifies engine usability before tagging real backend |
 | 2026-10-28 | #14030 | Wire fail-closed trunk plausibility screening gate into OpenSim golf motion input (#13434) |
+| 2026-10-28 | #13761 | HRG-HX4 part 3: wire GripPose grip_force_limit_n to MuJoCo and Pinocchio ClubOnBushings through require_grip_force_limit_enforceable, set weld_bushing: true in capability inventory, and verify club retention below limit and slip above limit |
 | 2026-10-28 | #14023 | Replace fixed 20% cross-engine bound with sensitivity-derived tolerance bands (SAP-5) |
 | 2026-10-28 | #13999 | Graft pelvis_frame_from_spec accepts HIP_MIRROR-conjugated hips |
 | 2026-10-28 | #13989 | Split WSCG build_outputs into record helpers under the 100-line budget and retire its issue 9233 budget exception (part 3, closes the 2026-10-31 budget rows) |
