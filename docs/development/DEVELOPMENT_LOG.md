@@ -1015,6 +1015,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14045 · Capacity Wireframe Glyphs for MuJoCo, Meshcat, and Matplotlib Render Backends (CAP-5B)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14045
+- **Branch:** merged via #14069
+- **PR:** #14069
+- **Paths:** see #14069
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`b7c1d88d`; collated from changes/14045-capacity-wireframe-glyphs-for-render-back.md)
+- **Summary:** Capacity wireframe glyphs for MuJoCo, Meshcat, and matplotlib render backends (CAP-5b)
+- **Next step:** Shipped in PR #14069.
+
+### DL-#14042 · CAP-3 (#14038): Velocity Plumbing in Native-Viewer Exporter Path
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14042
+- **Branch:** feat/14042-velocity-plumbing
+- **PR:** #14078
+- **Paths:** see #14078
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`eb7cc923`; collated from changes/14042-velocity-plumbing.md)
+- **Summary:** Carry velocities v through SwingInput and expose interface bias force and point_jdot_v
+- **Next step:** Shipped in PR #14078.
+
 ### DL-#14044 · CAP-5a (#14038): Ellipsoid Display Builder: Linear Percentile Scale, Legend Scale Bar, Clamp Styling, and Hue Rule
 
 - **State:** shipped
