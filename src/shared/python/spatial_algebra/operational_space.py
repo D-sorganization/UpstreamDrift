@@ -9,8 +9,8 @@ the mobility to that of the constrained system.
 Units: for k = 3 the mobility is [kg^-1]: acceleration per unit force
 (equivalently velocity change per unit impulse).  For k = 6 the rows
 are ordered [linear; angular] and the blocks are not commensurate; pass
-``scales`` (a ``CharacteristicScales``) to rescale the angular rows by 1/L so that all
-rows are [m/s]-equivalent (angular velocity times L).
+``scales`` (a ``CharacteristicScales``) to rescale the angular rows by L so that all
+rows are [m/s]-equivalent (angular velocity times L), yielding uniform [kg^-1] blocks.
 
 Reference: Khatib (1987), "A unified approach for motion and force control of
 robot manipulators: the operational space formulation".
@@ -108,9 +108,9 @@ def mobility_matrix(
         J: (k, nv) task Jacobian, k in {3, 6} (rows [linear; angular]).
         M: (nv, nv) symmetric positive-definite joint-space mass matrix.
         Jc: optional (c, nv) closure Jacobian; may be rank deficient.
-        scales: if given (k = 6 only), angular rows and columns are divided
+        scales: if given (k = 6 only), angular rows and columns are multiplied
             by the characteristic length ``scales.moment / scales.force`` [m]
-            (0.05 m for the defaults) so the blocks share units.
+            (0.05 m for the defaults) so all blocks share the uniform unit [kg^-1].
 
     Returns:
         Symmetric positive-semidefinite (k, k) array; Loewner-below the
@@ -132,7 +132,7 @@ def mobility_matrix(
 
     if scales is not None:
         length = scales.moment / scales.force
-        scale = np.concatenate([np.ones(3), np.full(3, 1.0 / length)])
+        scale = np.concatenate([np.ones(3), np.full(3, length)])
         result = result * scale[:, None] * scale[None, :]
     return 0.5 * (result + result.T)
 
