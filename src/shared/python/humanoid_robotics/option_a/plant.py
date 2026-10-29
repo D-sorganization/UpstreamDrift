@@ -164,3 +164,22 @@ def gravity_bias_at_pose(model: Any, qpos: np.ndarray) -> np.ndarray:
     data.qpos[:] = qpos
     mj.mj_forward(model, data)
     return np.array(data.qfrc_bias, dtype=np.float64)
+
+
+def distal_tip_position_m(
+    qpos: np.ndarray,
+    spec: DoublePendulumSpec = OPTION_A_DOUBLE_PENDULUM_SPEC,
+    *,
+    anchor_z_m: float = 1.0,
+) -> np.ndarray:
+    """Planar task-space position (x, z) of the distal link tip in metres."""
+    if qpos.shape != (2,):
+        raise ValueError("qpos must be length-2 for the Option A plant")
+    q0, q1 = float(qpos[0]), float(qpos[1])
+    l1, l2 = spec.segments[0].length_m, spec.segments[1].length_m
+    end1_x = l1 * np.sin(q0)
+    end1_z = anchor_z_m - l1 * np.cos(q0)
+    q_sum = q0 + q1
+    tip_x = end1_x + l2 * np.sin(q_sum)
+    tip_z = end1_z - l2 * np.cos(q_sum)
+    return np.array([tip_x, tip_z], dtype=np.float64)
