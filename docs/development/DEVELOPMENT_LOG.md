@@ -963,6 +963,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14040 · CAP-1: Acceleration_Capacity Ellipsoid and Drift_Acceleration in Operational_Space
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14040
+- **Branch:** merged via #14056
+- **PR:** #14056
+- **Paths:** see #14056
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`bc8dad19`; collated from changes/14040-cap-1-acceleration-capacity-ellipsoid-an.md)
+- **Summary:** CAP-1: acceleration_capacity ellipsoid and drift_acceleration in operational_space
+- **Next step:** Shipped in PR #14056.
+
 ### DL-#14041 · CAP-2: Torque-Limit Provider Adapting CapacityVector to (B, Tau_Lo, Tau_Hi) With Provenance
 
 - **State:** shipped
