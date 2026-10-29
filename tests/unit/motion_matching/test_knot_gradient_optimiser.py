@@ -483,3 +483,86 @@ def test_lbfgs_max_evaluations_honoured() -> None:
     assert result.stop_reason == "max_evaluations"
     assert len(result.history) <= 4
     assert call_count <= 4
+
+
+def _rosenbrock(x: np.ndarray) -> float:
+    return float(np.sum(100.0 * (x[1:] - x[:-1] ** 2) ** 2 + (1.0 - x[:-1]) ** 2))
+
+
+def test_lbfgs_abnormal_line_search_exit_is_error_not_max_iterations() -> None:
+    """A wrong-sign gradient makes SciPy report ABNORMAL; that is not a budget stop."""
+    evaluations = 0
+
+    def val_and_grad(x: np.ndarray) -> tuple[tuple[float, float], np.ndarray]:
+        nonlocal evaluations
+        evaluations += 1
+        cost = float(np.sum(x**2))
+        return (cost, cost), -2.0 * x
+
+    settings = LbfgsSettings(max_iterations=50)
+    result = lbfgs_minimise(val_and_grad, np.array([1.0, 1.0]), settings)
+
+    assert evaluations < settings.max_iterations
+    assert result.stop_reason == "error"
+    assert not result.non_finite_encountered
+
+
+def test_lbfgs_iteration_cap_is_reported_as_max_iterations() -> None:
+    def val_and_grad(x: np.ndarray) -> tuple[tuple[float, float], np.ndarray]:
+        cost = _rosenbrock(x)
+        grad = np.array(
+            [
+                (_rosenbrock(x + 1e-7 * np.eye(x.size)[i]) - cost) / 1e-7
+                for i in range(x.size)
+            ]
+        )
+        return (cost, cost), grad
+
+    result = lbfgs_minimise(
+        val_and_grad, np.full(4, -1.2), LbfgsSettings(max_iterations=2)
+    )
+
+    assert result.stop_reason == "max_iterations"
+
+
+def test_lbfgs_single_non_finite_trial_does_not_end_run_or_freeze_best() -> None:
+    """One NaN probe must neither abort L-BFGS-B nor freeze best-iterate tracking."""
+    evaluations = 0
+    bad_evaluation = 5
+
+    def val_and_grad(x: np.ndarray) -> tuple[tuple[float, float], np.ndarray]:
+        nonlocal evaluations
+        evaluations += 1
+        if evaluations == bad_evaluation:
+            return (np.nan, np.nan), np.full_like(x, np.nan)
+        cost = _rosenbrock(x)
+        grad = np.array(
+            [
+                (_rosenbrock(x + 1e-7 * np.eye(x.size)[i]) - cost) / 1e-7
+                for i in range(x.size)
+            ]
+        )
+        return (cost, cost), grad
+
+    result = lbfgs_minimise(
+        val_and_grad, np.full(3, -1.2), LbfgsSettings(max_iterations=100)
+    )
+
+    finite = [r["objective"] for r in result.history if np.isfinite(r["objective"])]
+    assert len(result.history) > bad_evaluation + 3, "run was aborted by the NaN probe"
+    assert result.best_iteration > bad_evaluation - 1
+    assert result.best_objective == pytest.approx(min(finite))
+    assert result.best_objective < 1e-3
+    assert result.stop_reason == "non_finite_cost"
+    assert result.non_finite_encountered
+
+
+def test_lbfgs_clean_run_does_not_flag_non_finite() -> None:
+    result = lbfgs_minimise(
+        lambda x: ((float(x @ x), float(x @ x)), 2.0 * x),
+        np.array([1.0, -2.0]),
+        LbfgsSettings(max_iterations=50),
+    )
+
+    assert result.stop_reason == "converged"
+    assert not result.non_finite_encountered

@@ -20,9 +20,11 @@ and 1e-13 N m on a gravity vector whose largest entry is 775 N (relative
 1.3e-16). ``REL_TOL`` (1e-12 of the largest reference entry) keeps the same
 precision budget as the HRG-D2 FK qualification and is never loosened.
 
-Covered here: MuJoCo (MJCF export), Pinocchio and Drake (native models).
-OpenSim and MyoSuite inertia/gravity parity, limits, closure, contact and
-inverse dynamics on a reference trajectory remain open on #13176.
+Covered here: MuJoCo (MJCF export), Pinocchio, Drake (native models) and
+OpenSim (``OpenSimFullBodyParityAdapter.mass_and_bias`` at zero velocity, where
+the inverse-dynamics bias is the gravity generalized force). MyoSuite
+inertia/gravity parity, limits, closure, contact and inverse dynamics on a
+reference trajectory remain open on #13176.
 """
 
 from __future__ import annotations
@@ -37,6 +39,7 @@ import pytest
 
 from src.shared.python.model_appearance.skinned_body import _primitive_transform
 from src.shared.python.motion_matching import full_body_v2_geometry as geo
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
@@ -270,3 +273,28 @@ def test_drake_mass_matrix_and_gravity_match_spec(doc, configs) -> None:
         return full_mass[np.ix_(v_indices, v_indices)], -gravity_forces[v_indices]
 
     _check("Drake", doc, configs, mass_and_gravity)
+
+
+@pytest.mark.requires_opensim
+def test_opensim_mass_matrix_and_gravity_match_spec(doc, configs) -> None:
+    """OpenSim/Simbody's v2 model preserves inertia and gravity (HRG-Q1 cell)."""
+    osim = require_opensim()
+    if not (
+        isinstance(osim, types.ModuleType)
+        and isinstance(getattr(osim, "__version__", None), str)
+        and isinstance(getattr(osim, "Model", None), type)
+    ):
+        pytest.skip("opensim is a stub or not the OpenSim modelling library")
+    from src.engines.physics_engines.opensim.python.full_body_parity import (
+        OpenSimFullBodyParityAdapter,
+    )
+
+    adapter = OpenSimFullBodyParityAdapter(json.dumps(doc, sort_keys=True).encode())
+    order = doc["coordinate_order"]
+    assert adapter.coordinate_order == tuple(order)
+    rest = np.zeros(len(order))
+
+    def mass_and_gravity(q):
+        return adapter.mass_and_bias(np.array([q[n] for n in order]), rest)
+
+    _check("OpenSim", doc, configs, mass_and_gravity)

@@ -16,6 +16,9 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.physics_engines.drake.python.src.drake_meshed_golfer import (
+    register_scene_visuals,
+)
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
     MeshcatGlyphRenderer,
 )
@@ -73,30 +76,8 @@ class DrakeMeshcatBackend:
     def _register_visuals(
         self, plant: Any, inst: Any, links: Mapping[str, str], scene: SceneVisuals
     ) -> None:
-        """Translate the shared scene items into Drake visual geometry.
-
-        Drake's URDF links are in the spec body frame, so an item's pose is
-        its spec-frame pose (visual only; the plant's dynamics are untouched).
-        """
-        from pydrake.geometry import Box, Capsule, Ellipsoid, Mesh
-        from pydrake.math import RigidTransform, RotationMatrix
-
-        for item in scene.items:
-            if item.kind == "mesh":
-                shape: Any = Mesh(item.mesh_path)
-            elif item.kind == "capsule":
-                shape = Capsule(*item.size)
-            elif item.kind == "ellipsoid":
-                shape = Ellipsoid(*item.size)
-            else:
-                shape = Box(*item.size)
-            plant.RegisterVisualGeometry(
-                plant.GetBodyByName(links[item.body], inst),
-                RigidTransform(RotationMatrix(item.rotation), item.translation),  # type: ignore[arg-type]
-                shape,
-                item.name,
-                np.array(item.rgba),
-            )
+        """Translate the shared scene items into Drake visual geometry."""
+        register_scene_visuals(plant, inst, dict(links), scene)
 
     def _build(
         self, swing: SwingInput

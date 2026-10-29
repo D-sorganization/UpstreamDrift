@@ -639,3 +639,29 @@ class DrakeUIMixin:
             if self.visualizer:
                 self.visualizer.update_frame_transforms(context)
                 self.visualizer.update_com_transforms(context)
+
+    def _populate_manip_checkboxes(self: Any) -> None:
+        """Populate checkboxes for manipulability analysis.
+
+        Restored: the #12441 refactor dropped it while ``_init_simulation`` still
+        calls it, so the Drake GUI crashed right after MeshCat started and the
+        browser tab lost its server ("failed to connect").
+        """
+        if not self.manip_analyzer or not self.manip_body_layout:
+            return
+
+        while self.manip_body_layout.count():
+            item = self.manip_body_layout.takeAt(0)
+            widget = item.widget() if item is not None else None
+            if widget is not None:
+                widget.deleteLater()
+        self.manip_checkboxes.clear()
+
+        cols = 3
+        for i, name in enumerate(self.manip_analyzer.find_potential_bodies()):
+            chk = QtWidgets.QCheckBox(name)
+            chk.toggled.connect(self._on_visualization_changed)
+            self.manip_checkboxes[name] = chk
+            self.manip_body_layout.addWidget(chk, i // cols, i % cols)
+            if any(x in name.lower() for x in ["club", "hand", "wrist"]):
+                chk.setChecked(True)
