@@ -175,7 +175,13 @@ StopReason = Literal[
     "non_finite_gradient",
     "converged",
     "max_evaluations",
+    "error",
 ]
+
+# A non-finite trial is shown to SciPy as this multiple of the worst finite total
+# seen so far. Infinity with a zero gradient makes L-BFGS-B declare convergence on
+# the spot, ending the run; a finite penalty makes the line search back off.
+_NON_FINITE_PENALTY_FACTOR = 1.0e3
 
 
 @dataclass(frozen=True)
@@ -187,6 +193,7 @@ class KnotOptimisationResult:
     best_iteration: int
     history: tuple[dict[str, float], ...]
     stop_reason: StopReason
+    non_finite_encountered: bool = False
 
     def __post_init__(self) -> None:
         if isinstance(self.best_x, np.ndarray):
@@ -284,6 +291,29 @@ def adam_minimise(
     )
 
 
+def _scipy_stop_reason(
+    res: Any, n_evaluations: int, settings: LbfgsSettings, non_finite: bool
+) -> StopReason:
+    """Map a SciPy L-BFGS-B result onto ``StopReason``, failing closed.
+
+    Only an explicit iteration-limit message yields ``max_iterations``; any exit
+    SciPy does not describe as success or as a budget stop is ``error``.
+    """
+    message = str(res.message).upper()
+    if non_finite:
+        return "non_finite_cost"
+    if res.success:
+        return "converged"
+    if "EVALUATIONS" in message or (
+        settings.max_evaluations is not None
+        and n_evaluations >= settings.max_evaluations
+    ):
+        return "max_evaluations"
+    if "ITERATIONS" in message:
+        return "max_iterations"
+    return "error"
+
+
 def lbfgs_minimise(
     value_and_grad: ValueAndGrad,
     x0: Any,
@@ -296,8 +326,16 @@ def lbfgs_minimise(
     ``value_and_grad(x)`` returns ``((total, objective), grad)``. Every function
     evaluation is recorded as a history row with keys produced by ``_evaluate``
     (iteration index starting at 0, total, objective, max_abs_x). ``history[0]``
-    is the evaluation at ``x0``. A non-finite cost returns infinity and zero
-    gradient to SciPy and ends with ``stop_reason="non_finite_cost"``.
+    is the evaluation at ``x0``. A non-finite cost is shown to SciPy as a large
+    finite penalty (infinity only before any finite evaluation) with zero gradient
+    so one bad trial does not end the run; the run then reports
+    ``stop_reason="non_finite_cost"``.
+
+    The stop reason is fail-closed: ``converged`` only when SciPy reports
+    success; ``max_iterations`` / ``max_evaluations`` only for SciPy's own budget
+    exits; ``non_finite_cost`` when any trial was non-finite (also recorded in
+    ``non_finite_encountered``); anything else, such as a line-search ABNORMAL
+    exit, is ``error``. Best-iterate tracking continues after a non-finite trial.
     """
     require(callable(value_and_grad), "value_and_grad must be callable")
     require(isinstance(settings, LbfgsSettings), "settings must be LbfgsSettings")
@@ -316,9 +354,11 @@ def lbfgs_minimise(
     best_objective = float("inf")
     best_iteration = 0
     non_finite_encountered = False
+    worst_finite_total: float | None = None
 
     def fun(x_flat: np.ndarray) -> tuple[float, np.ndarray]:
         nonlocal best_x, best_objective, best_iteration, non_finite_encountered
+        nonlocal worst_finite_total
         k = len(history)
         x = x_flat.reshape(shape)
         row, grad, cost_ok, _grad_ok = _evaluate(value_and_grad, x, k, np)
@@ -327,8 +367,14 @@ def lbfgs_minimise(
             on_iteration(k, x, row["total"], row["objective"])
         if not cost_ok:
             non_finite_encountered = True
-            return float("inf"), np.zeros_like(x_flat, dtype=np.float64)
-        if not non_finite_encountered and row["objective"] < best_objective:
+            penalty = (
+                float("inf")
+                if worst_finite_total is None
+                else _NON_FINITE_PENALTY_FACTOR * (1.0 + worst_finite_total)
+            )
+            return penalty, np.zeros_like(x_flat, dtype=np.float64)
+        worst_finite_total = max(worst_finite_total or 0.0, abs(row["total"]))
+        if row["objective"] < best_objective:
             best_x = x.copy()
             best_objective = row["objective"]
             best_iteration = k
@@ -345,19 +391,13 @@ def lbfgs_minimise(
         options={"maxiter": settings.max_iterations, "maxfun": max_fun},
     )
 
-    stop: StopReason
-    if non_finite_encountered:
-        stop = "non_finite_cost"
-    elif res.success:
-        stop = "converged"
-    elif "EVALUATION" in str(res.message).upper() or (
-        settings.max_evaluations is not None
-        and len(history) >= settings.max_evaluations
-    ):
-        stop = "max_evaluations"
-    else:
-        stop = "max_iterations"
+    stop = _scipy_stop_reason(res, len(history), settings, non_finite_encountered)
 
     return KnotOptimisationResult(
-        best_x, best_objective, best_iteration, tuple(history), stop
+        best_x,
+        best_objective,
+        best_iteration,
+        tuple(history),
+        stop,
+        non_finite_encountered=non_finite_encountered,
     )

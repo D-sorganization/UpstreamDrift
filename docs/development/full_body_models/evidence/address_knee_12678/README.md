@@ -112,6 +112,25 @@ knee flexion in degrees. Full numbers are in
   which is 8.7 deg of geometric hyperextension, on both captures. With either
   mode on, it cannot.
 
+## Cross-Engine Check Over the Committed Receipts (#12684, Acceptance 5)
+
+`python3 -m scripts.address_knee_engine_check` compares each engine's committed
+`address.knee_flexion_deg.knees.<side>.model_deg` with the MuJoCo reference of the same
+capture, candidate, base spec and foot-progression mode. It reads receipts only, so it needs
+no engine SDK. A disagreement above 0.1 deg is reported per engine and side (exit 1); an
+engine without a usable receipt is reported `unavailable` with its reason, never as 0; a
+malformed or non-comparable receipt fails closed (exit 2).
+
+On the committed receipts, driver Drake agrees with MuJoCo (largest delta 9e-6 deg).
+Driver Pinocchio (SDK blocked), driver OpenSim (historical receipt without an address
+block), driver MyoSuite and every iron engine except MuJoCo (no receipt) are
+`unavailable`, each with its reason.
+
+The two driver receipts have different `spec_canonical_sha256` values, because the Drake run
+fits its own hip calibration; they share the capture, candidate, base spec and foot mode.
+This is a check of the engines' fitted address poses, not of one `q` replayed in every
+engine; the replay is still R10 (#12692).
+
 ## Not Done Here (Left for R10, #12692)
 
 - The canonical ground-support receipts (`anthro_driver_seeds`,
