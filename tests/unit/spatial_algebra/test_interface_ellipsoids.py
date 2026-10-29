@@ -13,6 +13,8 @@ from src.shared.python.spatial_algebra.interface_ellipsoids import (
     load_parity_ledger,
 )
 
+pytestmark = pytest.mark.unit
+
 ROOT = Path(__file__).resolve().parents[3]
 ENGINES_DIR = ROOT / "src" / "engines" / "physics_engines"
 K = InterfaceEllipsoidKind
