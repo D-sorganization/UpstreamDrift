@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14043 · CAP-4 (#14038): MuJoCo Capability Adapter at the Hand-Club Interfaces
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14043
+- **Branch:** feat/14043-mujoco-capability-adapter
+- **PR:** #14071
+- **Paths:** see #14071
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`a6bad706`; collated from changes/14043-mujoco-capability-adapter.md)
+- **Summary:** MuJoCo capability adapter emitting acceleration and force capacity ellipsoids per grip point
+- **Next step:** Shipped in PR #14071.
+
 ### DL-#14047 · CAP-7 (#14038): Dynamically Consistent Force-Capacity Core
 
 - **State:** shipped
@@ -1580,10 +1593,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13175
 - **Branch:** merged via #13543
-- **PR:** #13543
+- **PR:** #13543, #14012
 - **Paths:** see #13543
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-25 (`0e1c15d9`; collated from changes/13175-hrg-e4-slice-desktop-and-web-anatomical.md)
+- **Last verified:** 2026-10-29 (`fecb06f9`; collated from changes/13175-hrg-e4-web-anatomical-event-table-fetche.md)
 - **Summary:** HRG-E4 slice: desktop and web anatomical event table view with a shared golden fixture and a feature_parity gap entry (web fetch awaits #13538)
 - **Next step:** Shipped in PR #13543.
 
