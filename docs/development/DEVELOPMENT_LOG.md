@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14095 · Rotate SPEC.md Section 12 Change-Log Archive Wave 3
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14095
+- **Branch:** fix/14095-spec-archive-wave-3
+- **PR:** #14096
+- **Paths:** see #14096
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`84d6430c`; collated from changes/14095-rotate-spec-md-wave3.md)
+- **Summary:** Rotate the 369 oldest SPEC.md section 12 rows (dated up to 2026-10-24) verbatim into a third pinned block of docs/spec/CHANGELOG_ARCHIVE.md; SPEC.md 349,968 to 269,881 bytes under the unchanged 350,000-byte cap; the change-log gate reads every archived row block
+- **Next step:** Shipped in PR #14096.
+
 ### DL-#14086 · Sim-Run: Run Request/Record/Result JSON Schemas Derived From API Contracts
 
 - **State:** shipped
