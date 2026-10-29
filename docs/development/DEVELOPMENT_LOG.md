@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14061 · Guard Xwininfo and Xwd Dependency Checks in OpenSim Visualizer Capture
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14061
+- **Branch:** fix/14061-opensim-ci-xwininfo
+- **PR:** #14062
+- **Paths:** see #14062
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`4c39130c`; collated from changes/14061-opensim-xwininfo-guard.md)
+- **Summary:** Guard xwininfo and xwd dependency checks in OpenSim visualizer capture
+- **Next step:** Merge the PR.
+
+### DL-#13174 · HRG-D3: Render_Golfer_Realism_Showcase --V2-Spec Renders Labelled Address/Top/Impact Stills of the Full-Body-V2 Trunk Visuals; GL Stills Still Need a GL Host
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13174
+- **Branch:** claude/ud-13174-1
+- **PR:** #14035
+- **Paths:** see #14035
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`6584e56c`; collated from changes/13174-v2-trunk-stills.md)
+- **Summary:** HRG-D3: render_golfer_realism_showcase --v2-spec renders labelled address/top/impact stills of the full-body-v2 trunk visuals; GL stills still need a GL host
+- **Next step:** Run the stills command on a GL host with MuJoCo and attach the three PNGs to the issue.
+
 ### DL-#14053 · Correct 6X6 Mobility Scaling by Multiplying Angular Rows by L
 
 - **State:** in_review
