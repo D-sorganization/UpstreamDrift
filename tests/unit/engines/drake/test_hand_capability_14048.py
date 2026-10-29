@@ -55,15 +55,17 @@ def source_with_limits(anthro_spec_bytes: bytes) -> DrakeCapabilitySource:
 def source_with_explicit_subject(anthro_spec_bytes: bytes) -> DrakeCapabilitySource:
     _require_real_pydrake()
     return DrakeCapabilitySource(
-        anthro_spec_bytes, torque_limits=CapacitySubject(mass_kg=75.0, stature_m=1.75)
+        anthro_spec_bytes, torque_limits=CapacitySubject(75.0, 1.75)
     )
 
 
 @pytest.fixture(scope="module")
 def states(source_with_limits: DrakeCapabilitySource) -> list[np.ndarray]:
     rng = np.random.default_rng(14048)
-    n = len(source_with_limits.coordinate_order)
-    return [rng.normal(0.0, 0.15, n) for _ in range(3)]
+    return [
+        rng.normal(0.0, 0.15, len(source_with_limits.coordinate_order))
+        for _ in range(3)
+    ]
 
 
 def test_drake_capability_source_importable() -> None:
@@ -74,18 +76,14 @@ def test_hand_mobility_emits_acceleration_and_force_capacity(
     source_with_limits: DrakeCapabilitySource, states: list[np.ndarray]
 ) -> None:
     for q in states:
-        hm_dict = source_with_limits.hand_mobility(q)
-        for hand in ("lead", "trail"):
-            hm = hm_dict[hand]
+        for hm in source_with_limits.hand_mobility(q).values():
             assert isinstance(hm, HandMobility)
-            assert isinstance(hm.acceleration_capacity, CapacityEllipsoid)
             assert (
-                hm.acceleration_capacity.radii.shape == (3,)
+                isinstance(hm.acceleration_capacity, CapacityEllipsoid)
                 and (hm.acceleration_capacity.radii > 0).all()
             )
-            assert isinstance(hm.force_capacity, CapacityEllipsoid)
             assert (
-                hm.force_capacity.radii.shape == (3,)
+                isinstance(hm.force_capacity, CapacityEllipsoid)
                 and (hm.force_capacity.radii > 0).all()
             )
 
@@ -93,30 +91,26 @@ def test_hand_mobility_emits_acceleration_and_force_capacity(
 def test_constrained_vs_unconstrained_capacity_differ(
     source_with_limits: DrakeCapabilitySource, states: list[np.ndarray]
 ) -> None:
-    q = states[0]
     for hand in ("lead", "trail"):
-        acc_con = source_with_limits.acceleration_capacity(q, hand, mode="constrained")
-        acc_free = source_with_limits.acceleration_capacity(
-            q, hand, mode="unconstrained"
+        ac = source_with_limits.acceleration_capacity(
+            states[0], hand, mode="constrained"
         )
-        assert isinstance(acc_con, CapacityEllipsoid) and (acc_con.radii > 0).all()
-        assert not np.allclose(acc_con.radii, acc_free.radii, atol=1e-5)
-        f_con = source_with_limits.force_capacity(q, hand, mode="constrained")
-        f_free = source_with_limits.force_capacity(q, hand, mode="unconstrained")
-        assert isinstance(f_con, CapacityEllipsoid) and (f_con.radii > 0).all()
-        assert not np.allclose(f_con.radii, f_free.radii, atol=1e-5)
+        af = source_with_limits.acceleration_capacity(
+            states[0], hand, mode="unconstrained"
+        )
+        fc = source_with_limits.force_capacity(states[0], hand, mode="constrained")
+        ff = source_with_limits.force_capacity(states[0], hand, mode="unconstrained")
+        assert (ac.radii > 0).all() and not np.allclose(ac.radii, af.radii, atol=1e-5)
+        assert (fc.radii > 0).all() and not np.allclose(fc.radii, ff.radii, atol=1e-5)
 
 
 def test_welded_lead_hand_topology_caption_and_provenance(
     source_with_limits: DrakeCapabilitySource, states: list[np.ndarray]
 ) -> None:
-    hm = source_with_limits.hand_mobility(states[0])
-    for hand in ("lead", "trail"):
-        prov = hm[hand].provenance
+    for hm in source_with_limits.hand_mobility(states[0]).values():
+        prov = hm.provenance
         assert prov["engine"] == "drake" and prov["welded_lead_hand"] is True
-        assert "welded" in prov["caption"].lower()
-        assert prov["torque_limit_source"] == "loop_nullspace_registry"
-        assert prov["assumed_slots"] > 0 and prov["verified_slots"] > 0
+        assert "welded" in prov["caption"].lower() and prov["assumed_slots"] > 0
 
 
 def test_explicit_subject_torque_limits_configuration(

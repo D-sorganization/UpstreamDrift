@@ -47,9 +47,7 @@ from src.shared.python.loop_nullspace.derivative_capability import (
 )
 from src.shared.python.loop_nullspace.torque_limits import (
     TorqueLimits,
-    effective_torque_limits_for_capacity,
-    resolve_torque_limits,
-    validate_capacity_hand_mode,
+    torque_limits_for,
 )
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 from src.shared.python.model_appearance.grip_hands import grip_hand_frame
@@ -304,9 +302,21 @@ class DrakeCapabilitySource:
             "are taken on the club body (welded lead hand topology: lead hand is welded "
             "to the club in v2 golfer, so lead and trail share one rigid body)"
         )
-        self._torque_limits = resolve_torque_limits(
-            torque_limits, self._spec, self.coordinate_order
-        )
+        self._torque_limits = self._resolve_torque_limits(torque_limits, self._spec)
+
+    def _resolve_torque_limits(
+        self,
+        source: TorqueLimits | CapacitySubject | Mapping[str, Any] | None,
+        spec: Mapping[str, Any],
+    ) -> TorqueLimits | None:
+        if source is not None:
+            if isinstance(source, TorqueLimits):
+                return source
+            return torque_limits_for(source, self.coordinate_order)
+        sub = spec.get("subject")
+        if sub is not None and isinstance(sub, Mapping):
+            return torque_limits_for(sub, self.coordinate_order)
+        return None
 
     def grip_point_world(
         self, hand: str, coordinates: Mapping[str, float] | Array
@@ -358,12 +368,15 @@ class DrakeCapabilitySource:
         torque_limits: TorqueLimits | None,
         label: str,
     ) -> tuple[Array, Array, Array | None, TorqueLimits]:
-        validate_capacity_hand_mode(hand, mode, hands=HANDS, modes=MODES)
-        limits = effective_torque_limits_for_capacity(
-            torque_limits, self._torque_limits, label=label
-        )
-        J, M, Jc = self._task_matrices(hand, q, mode == "constrained")
-        return J, M, Jc, limits
+        if hand not in HANDS or mode not in MODES:
+            raise ValueError(
+                f"hand must be in {HANDS} and mode in {MODES}, got hand={hand!r}, mode={mode!r}"
+            )
+        lim = torque_limits if torque_limits is not None else self._torque_limits
+        if lim is None:
+            raise ValueError(f"{label} capacity requires torque limits")
+        J, M, Jc = self._task_matrices(hand, q, constrained=mode == "constrained")
+        return J, M, Jc, lim
 
     def acceleration_capacity(
         self,
@@ -402,7 +415,7 @@ class DrakeCapabilitySource:
         if mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
         limits = torque_limits or self._torque_limits
-        provenance = {
+        provenance: dict[str, Any] = {
             "engine": "drake",
             "coordinates": self.coordinate_order,
             "frame": "world",
@@ -417,41 +430,44 @@ class DrakeCapabilitySource:
             "assumed_slots": limits.assumed_slots if limits is not None else 0,
             "verified_slots": limits.verified_slots if limits is not None else 0,
         }
-        out: dict[str, HandMobility] = {}
-        for hand in HANDS:
-            point = self.grip_point_world(hand, q)
-            J, M, Jc = self._task_matrices(hand, q, mode == "constrained")
-            w = mobility_matrix(J, M, Jc)
 
-            acc_cap: CapacityEllipsoid | None = None
-            f_cap: CapacityEllipsoid | None = None
-            if limits is not None:
-                acc_cap = self.acceleration_capacity(
-                    q, hand, mode=mode, torque_limits=limits
-                )
-                f_cap = self.force_capacity(q, hand, mode=mode, torque_limits=limits)
-
-            v_ell = velocity_ellipsoid(w)
-            f_ell = force_ellipsoid(w)
-            m_eff = f_ell.radii**2
-            c_val = (
-                float(m_eff.max() / m_eff.min()) if m_eff.min() > 0.0 else float("inf")
+        def _make_record(h: str) -> HandMobility:
+            p = self.grip_point_world(h, q)
+            jac, mass, jc = self._task_matrices(h, q, mode == "constrained")
+            w_mat = mobility_matrix(jac, mass, jc)
+            v_spec = velocity_ellipsoid(w_mat)
+            f_spec = force_ellipsoid(w_mat)
+            eff_mass = f_spec.radii**2
+            cond = (
+                float(eff_mass.max() / eff_mass.min())
+                if eff_mass.min() > 0.0
+                else float("inf")
             )
-
-            out[hand] = HandMobility(
-                hand=hand,
-                centre=(float(point[0]), float(point[1]), float(point[2])),
-                mobility=w,
-                mobility_axes=v_ell.axes,
-                mobility_eigenvalues=np.maximum(v_ell.radii**2, 0.0),
-                effective_mass_kg=m_eff,
-                condition=c_val,
-                singular=np.asarray(f_ell.singular, dtype=bool),
+            ac = (
+                self.acceleration_capacity(q, h, mode=mode, torque_limits=limits)
+                if limits
+                else None
+            )
+            fc = (
+                self.force_capacity(q, h, mode=mode, torque_limits=limits)
+                if limits
+                else None
+            )
+            return HandMobility(
+                hand=h,
+                centre=tuple(float(coord) for coord in p[:3]),
+                mobility=w_mat,
+                mobility_axes=v_spec.axes,
+                mobility_eigenvalues=np.clip(v_spec.radii**2, 0.0, None),
+                effective_mass_kg=eff_mass,
+                condition=cond,
+                singular=np.asarray(f_spec.singular, dtype=bool),
                 provenance=provenance,
-                acceleration_capacity=acc_cap,
-                force_capacity=f_cap,
+                acceleration_capacity=ac,
+                force_capacity=fc,
             )
-        return out
+
+        return {hand: _make_record(hand) for hand in HANDS}
 
 
 def _spatial(inertia: RigidInertia) -> SpatialInertia:

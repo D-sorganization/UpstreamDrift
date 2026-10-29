@@ -35,9 +35,7 @@ from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.loop_nullspace.capacity import CapacitySubject
 from src.shared.python.loop_nullspace.torque_limits import (
     TorqueLimits,
-    effective_torque_limits_for_capacity,
-    resolve_torque_limits,
-    validate_capacity_hand_mode,
+    torque_limits_for,
 )
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 from src.shared.python.model_appearance.grip_hands import grip_hand_frame
@@ -119,9 +117,25 @@ class HandMobilitySource(MujocoOverlaySource):
             f"taken on body {names[1]} (welded lead hand topology: lead hand is "
             "welded to the club in v2 golfer, so lead and trail share one rigid body)"
         )
-        self._torque_limits = resolve_torque_limits(
-            torque_limits, spec, self.coordinate_order
-        )
+        self._torque_limits = self._resolve_torque_limits(torque_limits, spec)
+
+    def _resolve_torque_limits(
+        self,
+        source: TorqueLimits | CapacitySubject | Mapping[str, Any] | None,
+        spec: Mapping[str, Any],
+    ) -> TorqueLimits | None:
+        if isinstance(source, TorqueLimits):
+            return source
+        if isinstance(source, CapacitySubject):
+            return torque_limits_for(source, self.coordinate_order)
+        if isinstance(source, Mapping):
+            return torque_limits_for(source, self.coordinate_order)
+        if "subject" in spec:
+            try:
+                return torque_limits_for(spec, self.coordinate_order)
+            except Exception:
+                return None
+        return None
 
     def grip_point_world(
         self, hand: str, coordinates: Mapping[str, float]
@@ -274,10 +288,13 @@ class HandMobilitySource(MujocoOverlaySource):
         torque_limits: TorqueLimits | None,
         label: str,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None, TorqueLimits]:
-        validate_capacity_hand_mode(hand, mode, hands=HANDS, modes=MODES)
-        limits = effective_torque_limits_for_capacity(
-            torque_limits, self._torque_limits, label=label
-        )
+        if mode not in MODES:
+            raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
+        if hand not in HANDS:
+            raise ValueError(f"hand must be one of {HANDS}, got {hand!r}")
+        limits = torque_limits or self._torque_limits
+        if limits is None:
+            raise ValueError(f"{label} capacity requires torque limits")
         coordinates = self._set_state(q)
         point = self.grip_point_world(hand, coordinates)
         J, M, Jc = self._task_matrices(point, mode == "constrained")
