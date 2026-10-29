@@ -134,13 +134,13 @@
       "title": "Anatomical Event Table of Wrist and Forearm Terms at Swing Events",
       "status": "gap",
       "pyqt": "src/shared/python/ui/anatomical_event_table_widget.py",
-      "api": null,
+      "api": "src/api/routes/biomechanics.py",
       "web": "ui/src/components/analysis/anatomicalEventTable/AnatomicalEventTable.tsx",
       "issue": 13175,
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "HRG-E4 (#13175). Both surfaces render the event-table export document (anatomical_angles.event_table.to_json_dict) as text through one view: anatomical_angles/event_table_view.py on the desktop and its mirror eventTableView.ts on the web. The golden fixture ui/src/components/analysis/anatomicalEventTable/fixtures/eventTableView.json is the shared export of one bundle plus the exact cells, and the PyQt and vitest suites both assert it, so the values are identical. Gap until the web table fetches its document from POST /biomechanics/anatomical-event-table (#13538, not yet on main); then set api to src/api/routes/biomechanics.py and status to parity. Neither table is wired to a launcher tile or page yet.",
+      "notes": "HRG-E4 (#13175). Both surfaces render the event-table export document (anatomical_angles.event_table.to_json_dict) as text through one view: anatomical_angles/event_table_view.py on the desktop and its mirror eventTableView.ts on the web. The golden fixture ui/src/components/analysis/anatomicalEventTable/fixtures/eventTableView.json is the shared export of one bundle plus the exact cells, and the PyQt and vitest suites both assert it, so the values are identical. The web table now fetches its document from POST /api/biomechanics/anatomical-event-table (#13538, on main) through ui/src/api/anatomicalEventTable.ts and the AnatomicalEventTableFromApi container, which requests format json. Gap until a launcher tile or page hosts the table on both surfaces (the tiles field is empty); then set status to parity.",
       "id": "biomechanics.anatomical_event_table"
     },
     {
@@ -3322,7 +3322,7 @@
   "inputs": {
     "src/config/models.yaml": "7c868b0c444389fad39bdd30469abd32439f5bd11b9b5019c941ac0049e0763c",
     "src/config/launcher_manifest.json": "26337829a1de75576be220e293c6d4f012f97303c0639401a8d902e76c418f37",
-    "src/config/feature_parity.json": "9f621bbb75a6312a95a498d1af2a193e34d9ddd184c486179c701c3d94c4e982",
+    "src/config/feature_parity.json": "025f5a1873ee7f50ddd33ff7c7afbddb1f4417b941e34180b0ab7b70c5a0dc90",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
