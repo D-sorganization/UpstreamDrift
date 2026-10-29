@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-28 | #14010 | Real-engine probe catches TypeError and verifies engine usability before tagging real backend |
 | 2026-10-28 | #14030 | Wire fail-closed trunk plausibility screening gate into OpenSim golf motion input (#13434) |
 | 2026-10-28 | #14023 | Replace fixed 20% cross-engine bound with sensitivity-derived tolerance bands (SAP-5) |
 | 2026-10-28 | #13999 | Graft pelvis_frame_from_spec accepts HIP_MIRROR-conjugated hips |

@@ -12,6 +12,7 @@ Contract under test:
 
 from __future__ import annotations
 
+import sys
 from typing import Any
 
 import pytest
@@ -71,6 +72,47 @@ class TestBuildEngineWithBackend:
 
     def test_pendulum_stub_is_stub_backend(self) -> None:
         engine, backend = ce.build_engine_with_backend("pendulum_stub")
+        assert backend == ce.BACKEND_STUB
+        assert isinstance(engine, ce.StubEngine)
+
+    def test_drake_absent_returns_stub_backend_without_raising(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """When pydrake is absent, DrakePhysicsEngine raises TypeError on DiagramBuilder().
+
+        try_build_real_engine and build_engine_with_backend must catch TypeError
+        and degrade cleanly to BACKEND_STUB (#14010).
+        """
+        monkeypatch.setitem(sys.modules, "pydrake", None)  # type: ignore[assignment]
+        assert ce.try_build_real_engine("drake") is None
+        engine, backend = ce.build_engine_with_backend("drake")
+        assert backend == ce.BACKEND_STUB
+        assert isinstance(engine, ce.StubEngine)
+
+    def test_pinocchio_absent_returns_stub_backend(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """When pinocchio is absent, PinocchioPhysicsEngine constructs without a model.
+
+        The probe must not tag an uninstalled/unusable pinocchio as BACKEND_REAL (#14010).
+        """
+        monkeypatch.setitem(sys.modules, "pinocchio", None)  # type: ignore[assignment]
+        assert ce.try_build_real_engine("pinocchio") is None
+        engine, backend = ce.build_engine_with_backend("pinocchio")
+        assert backend == ce.BACKEND_STUB
+        assert isinstance(engine, ce.StubEngine)
+
+    def test_uninitialized_engine_reports_stub_backend(self) -> None:
+        """An engine without a loaded model (is_initialized is False) cannot run physics."""
+        from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+            PinocchioPhysicsEngine,
+        )
+
+        uninit = PinocchioPhysicsEngine()
+        assert uninit.is_initialized is False
+        engine, backend = ce.build_engine_with_backend(
+            "pinocchio", try_real=lambda _: uninit
+        )
         assert backend == ce.BACKEND_STUB
         assert isinstance(engine, ce.StubEngine)
 
