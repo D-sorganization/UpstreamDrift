@@ -34,6 +34,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.engine_core.engine_availability import is_engine_available
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
     CrossEnginePerturbationRunner,
@@ -134,25 +135,40 @@ def try_build_real_engine(name: str) -> Any | None:
     """
     try:
         if name == "mujoco":
+            if not is_engine_available("mujoco"):
+                return None
             from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (  # noqa: PLC0415
                 MuJoCoPhysicsEngine,
             )
 
-            return MuJoCoPhysicsEngine()  # type: ignore[abstract]
+            engine = MuJoCoPhysicsEngine()  # type: ignore[abstract]
+            if hasattr(engine, "is_initialized") and not engine.is_initialized:
+                return None
+            return engine
         if name == "drake":
+            if not is_engine_available("drake"):
+                return None
             from src.engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: PLC0415
                 DrakePhysicsEngine,
             )
 
-            return DrakePhysicsEngine()  # type: ignore[abstract]
+            engine = DrakePhysicsEngine()  # type: ignore[abstract]
+            if hasattr(engine, "is_initialized") and not engine.is_initialized:
+                return None
+            return engine
         if name == "pinocchio":
+            if not is_engine_available("pinocchio"):
+                return None
             from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (  # noqa: PLC0415
                 PinocchioPhysicsEngine,
             )
 
-            return PinocchioPhysicsEngine()
+            engine = PinocchioPhysicsEngine()
+            if hasattr(engine, "is_initialized") and not engine.is_initialized:
+                return None
+            return engine
 
-    except (ImportError, ValueError, RuntimeError):  # noqa: BLE001
+    except (ImportError, ValueError, RuntimeError, TypeError):  # noqa: BLE001
         logger.warning("Engine '%s' unavailable — will use stub", name, exc_info=False)
     return None
 
@@ -202,6 +218,12 @@ def build_engine_with_backend(
     builder = try_real if try_real is not None else try_build_real_engine
     real = builder(name)
     if real is not None:
+        if hasattr(real, "is_initialized") and not real.is_initialized:
+            logger.warning(
+                "Engine '%s' returned an uninitialized instance — degrading to stub",
+                name,
+            )
+            return StubEngine(name), BACKEND_STUB
         return real, BACKEND_REAL
     return StubEngine(name), BACKEND_STUB
 

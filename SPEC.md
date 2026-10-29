@@ -2741,6 +2741,25 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-29 | #14062 | Guard xwininfo and xwd dependency checks in OpenSim visualizer capture |
+| 2026-10-29 | #14058 | Correct 6x6 mobility scaling by multiplying angular rows by L |
+
+| 2026-10-29 | #14056 | CAP-1: acceleration_capacity ellipsoid and drift_acceleration in operational_space |
+| 2026-10-29 | #14054 | CAP-2: torque-limit provider adapting CapacityVector to (B, tau_lo, tau_hi) with provenance |
+| 2026-10-29 | #14034 | ML-WS-8: ProposalInitializer protocol and --neural-mode preview warm-start hook into MJX knot optimiser |
+| 2026-10-29 | #14033 | HRG-HX4 part 3: wire GripPose grip_force_limit_n through require_grip_force_limit_enforceable to MuJoCo and Pinocchio ClubOnBushings, enable weld_bushing in capability inventory, and verify club retention below limit and slip above limit |
+| 2026-10-29 | #14032 | Bump tornado 6.5.10 to 6.6 for CVE-2026-116577, CVE-2026-115927 and CVE-2026-116578, and msgpack 1.2.1 to 1.2.3 in the Docker images for CVE-2026-114613 (no audit waiver) |
+| 2026-10-29 | #14029 | Catch TypeError and probe availability in cross-engine builder and degrade uninitialized engines to stub |
+| 2026-10-29 | #14026 | MuJoCo adapter for per-hand constrained mobility W = J A J^T and effective masses at each grip point (HCM-3a) |
+| 2026-10-29 | #14020 | Add operational-space mobility matrix, velocity/force ellipsoids and spatial transport |
+| 2026-10-29 | #14021 | Thread one ResolvedHandSpec (grip style, strength, handedness, hand length) through every engine emitter |
+| 2026-10-29 | #14001 | Hands close-up camera tracks the kinematic grip midpoint from the club pose, with the overlay on or off |
+| 2026-10-29 | #14008 | Taper the shared visual forearm 20 percent toward the wrist (appearance only; inertias unchanged) |
+| 2026-10-28 | #14010 | Real-engine probe catches TypeError and verifies engine usability before tagging real backend |
+| 2026-10-28 | #14030 | Wire fail-closed trunk plausibility screening gate into OpenSim golf motion input (#13434) |
+| 2026-10-28 | #13761 | HRG-HX4 part 3: wire GripPose grip_force_limit_n to MuJoCo and Pinocchio ClubOnBushings through require_grip_force_limit_enforceable, set weld_bushing: true in capability inventory, and verify club retention below limit and slip above limit |
+| 2026-10-28 | #14023 | Replace fixed 20% cross-engine bound with sensitivity-derived tolerance bands (SAP-5) |
+| 2026-10-28 | #13999 | Graft pelvis_frame_from_spec accepts HIP_MIRROR-conjugated hips |
 | 2026-10-28 | #13989 | Split WSCG build_outputs into record helpers under the 100-line budget and retire its issue 9233 budget exception (part 3, closes the 2026-10-31 budget rows) |
 | 2026-10-28 | #13988 | Add sensitivity fields (FTLE, sigma-max, agreement horizon) to pendulum parity receipts (SAP-4) |
 | 2026-10-28 | #13986 | \ Verify engine Docker cache contract and guard against uncontracted conda environment creation per CACHE_CONTRACT.md\ |

@@ -111,7 +111,7 @@ RUN set -eux; \
 
 # Reassert scanner-fixed transitives after profile-specific dependency installs.
 RUN pip install --upgrade --no-cache-dir \
-    "msgpack==1.2.1" \
+    "msgpack==1.2.3" \
     "setuptools==84.2.1"
 
 # ---- Stage 2: runtime ------------------------------------------------------
