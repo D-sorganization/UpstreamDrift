@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import json
-from typing import TypeAlias
+from collections.abc import Mapping
+from typing import Any, Final, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.physics_engines.mujoco.python.hand_mobility import HandMobility
 from src.engines.physics_engines.pinocchio.python.closed_loop_derivatives import (
     PinocchioAnalyticDerivatives,
 )
@@ -26,6 +28,7 @@ from src.shared.python.biomechanics.club_inertia_partition import (
 )
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
+from src.shared.python.loop_nullspace.capacity import CapacitySubject
 from src.shared.python.loop_nullspace.closure_convention import (
     NativeClosureConvention,
 )
@@ -39,12 +42,34 @@ from src.shared.python.loop_nullspace.derivative_capability import (
 )
 from src.shared.python.loop_nullspace.evidence import FootContact
 from src.shared.python.loop_nullspace.ground_contact import ContactCandidate
+from src.shared.python.loop_nullspace.torque_limits import (
+    TorqueLimits,
+    torque_limits_for,
+)
+from src.shared.python.model_appearance.club_assembly import assembly_from_spec
+from src.shared.python.model_appearance.grip_hands import grip_hand_frame
+from src.shared.python.model_appearance.grip_pose import (
+    DEFAULT_GRIP_POSE,
+    GripPose,
+    Hand,
+)
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import (
     actuated_coordinate_indices,
 )
+from src.shared.python.spatial_algebra.operational_space import (
+    CapacityEllipsoid,
+    acceleration_capacity,
+    force_capacity,
+    force_ellipsoid,
+    mobility_matrix,
+    velocity_ellipsoid,
+)
 
 Array: TypeAlias = NDArray[np.float64]
+
+HANDS: Final = ("lead", "trail")
+MODES: Final = ("constrained", "unconstrained")
 
 
 class PinocchioForceAdapter:
@@ -498,6 +523,237 @@ class PinocchioForceAdapter:
             loop_support_indices=self._plant.closure_path_velocity_indices(),
             coordinate_order=self._names,
         )
+
+    def hand_mobility_source(
+        self,
+        pose: GripPose = DEFAULT_GRIP_POSE,
+        torque_limits: TorqueLimits | CapacitySubject | Mapping[str, Any] | None = None,
+    ) -> PinocchioCapabilitySource:
+        """Construct a PinocchioCapabilitySource sharing this adapter's spec (#14049)."""
+        return PinocchioCapabilitySource(
+            json.dumps(self._spec).encode("utf-8"), pose, torque_limits
+        )
+
+
+class PinocchioCapabilitySource:
+    """Pinocchio interface capability and mobility source on the v2 golfer (#14049)."""
+
+    def __init__(
+        self,
+        spec_bytes: bytes | str | Mapping[str, Any],
+        pose: GripPose = DEFAULT_GRIP_POSE,
+        torque_limits: TorqueLimits | CapacitySubject | Mapping[str, Any] | None = None,
+    ) -> None:
+        if isinstance(spec_bytes, bytes):
+            self._spec: dict[str, Any] = json.loads(spec_bytes.decode("utf-8"))
+            raw_bytes = spec_bytes
+        elif isinstance(spec_bytes, str):
+            self._spec = json.loads(spec_bytes)
+            raw_bytes = spec_bytes.encode("utf-8")
+        else:
+            self._spec = dict(spec_bytes)
+            raw_bytes = json.dumps(self._spec).encode("utf-8")
+
+        self._adapter = PinocchioForceAdapter(raw_bytes)
+        self._plant = self._adapter._plant
+        self._pin = self._adapter._pin
+        self._model = self._adapter._model
+        self._data = self._adapter._data
+        pin = self._pin
+        self._ref_frame = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+        self.coordinate_order: tuple[str, ...] = self._adapter.coordinate_order
+
+        body_b = self._spec["closure"]["body_b"]
+        self._club_joint, self._club_body_pose = self._plant.body_placement(body_b)
+
+        club = assembly_from_spec(self._spec)
+        if club is None:
+            raise ValueError("the specification has no club for the grip points")
+        self._grip_points: dict[str, np.ndarray] = {
+            "lead": np.asarray(
+                grip_hand_frame(club, Hand.LEAD, pose)[:3, 3], dtype=float
+            ),
+            "trail": np.asarray(
+                grip_hand_frame(club, Hand.TRAIL, pose)[:3, 3], dtype=float
+            ),
+        }
+        self.topology: str = (
+            "rigid 6-D closure on Pinocchio (explicit KKT weld closure); both grip points "
+            "are taken on the club body (welded lead hand topology: lead hand is welded "
+            "to the club in v2 golfer, so lead and trail share one rigid body)"
+        )
+        self._torque_limits = self._resolve_torque_limits(torque_limits, self._spec)
+
+    def _resolve_torque_limits(
+        self,
+        source: TorqueLimits | CapacitySubject | Mapping[str, Any] | None,
+        spec: Mapping[str, Any],
+    ) -> TorqueLimits | None:
+        if source is not None:
+            if isinstance(source, TorqueLimits):
+                return source
+            return torque_limits_for(source, self.coordinate_order)
+        subject_dict = spec.get("subject")
+        if subject_dict is not None and isinstance(subject_dict, Mapping):
+            return torque_limits_for(subject_dict, self.coordinate_order)
+        return None
+
+    def grip_point_world(
+        self, hand: str, coordinates: Mapping[str, float] | Array
+    ) -> Array:
+        """3-vector: position of ``hand``'s grip frame origin in world [m]."""
+        if hand not in HANDS:
+            raise ValueError(f"hand must be one of {HANDS}, got {hand!r}")
+        q_vec = (
+            self._plant.configuration(coordinates)
+            if isinstance(coordinates, Mapping)
+            else self._adapter._checked(coordinates, "configuration")
+        )
+        self._pin.forwardKinematics(self._model, self._data, q_vec)
+        point_in_joint = self._club_body_pose.act(self._grip_points[hand])
+        placement = self._data.oMi[self._club_joint]
+        return np.asarray(placement.act(point_in_joint), dtype=float).copy()
+
+    def _task_matrices(
+        self, hand: str, q: Array, constrained: bool
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
+        if hand not in HANDS:
+            raise ValueError(f"hand must be one of {HANDS}, got {hand!r}")
+        q_vec = self._adapter._checked(q, "configuration")
+        self._pin.computeJointJacobians(self._model, self._data, q_vec)
+        point_in_joint = self._club_body_pose.act(self._grip_points[hand])
+        placement = self._data.oMi[self._club_joint]
+        point_world = placement.act(point_in_joint)
+
+        jac6 = self._pin.getJointJacobian(
+            self._model, self._data, self._club_joint, self._ref_frame
+        )
+        lever = point_world - placement.translation
+        skew = np.array(
+            [
+                [0.0, -lever[2], lever[1]],
+                [lever[2], 0.0, -lever[0]],
+                [-lever[1], lever[0], 0.0],
+            ],
+            dtype=float,
+        )
+        J = np.asarray(jac6[:3] - skew @ jac6[3:], dtype=float).copy()
+
+        M = np.asarray(
+            self._pin.crba(self._model, self._data, q_vec), dtype=float
+        ).copy()
+
+        Jc: np.ndarray | None = None
+        if constrained:
+            Jc = self._adapter.compute_grip_jacobian(q_vec)
+        return J, M, Jc
+
+    def _capacity_task(
+        self,
+        q: Array,
+        hand: str,
+        mode: str,
+        torque_limits: TorqueLimits | None,
+        kind: str,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None, TorqueLimits]:
+        if mode not in MODES:
+            raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
+        limits = torque_limits or self._torque_limits
+        if limits is None:
+            raise ValueError(
+                f"Cannot evaluate {kind} capacity: no torque limits configured "
+                "on PinocchioCapabilitySource and none passed to call"
+            )
+        J, M, Jc = self._task_matrices(hand, q, mode == "constrained")
+        return J, M, Jc, limits
+
+    def acceleration_capacity(
+        self,
+        q: Array,
+        hand: str,
+        *,
+        mode: str = "constrained",
+        torque_limits: TorqueLimits | None = None,
+    ) -> CapacityEllipsoid:
+        """3-D acceleration capacity ellipsoid at ``hand``'s grip point [m/s^2]."""
+        J, M, Jc, limits = self._capacity_task(
+            q, hand, mode, torque_limits, "acceleration"
+        )
+        return acceleration_capacity(J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc)
+
+    def force_capacity(
+        self,
+        q: Array,
+        hand: str,
+        *,
+        mode: str = "constrained",
+        torque_limits: TorqueLimits | None = None,
+    ) -> CapacityEllipsoid:
+        """3-D force capacity ellipsoid at ``hand``'s grip point [N]."""
+        J, M, Jc, limits = self._capacity_task(q, hand, mode, torque_limits, "force")
+        return force_capacity(J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc)
+
+    def hand_mobility(
+        self,
+        q: Array,
+        *,
+        mode: str = "constrained",
+        torque_limits: TorqueLimits | None = None,
+    ) -> dict[str, HandMobility]:
+        """Lead and trail 3x3 mobility and capability at state ``q`` (``coordinate_order``)."""
+        if mode not in MODES:
+            raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
+        limits = torque_limits or self._torque_limits
+        provenance = {
+            "engine": "pinocchio",
+            "coordinates": self.coordinate_order,
+            "frame": "world",
+            "mode": mode,
+            "point": "grip_hand_frame origin on the club",
+            "welded_lead_hand": True,
+            "caption": (
+                "Lead hand is welded to the club in v2 golfer topology; "
+                "lead and trail share rigid body kinematics on the club."
+            ),
+            "torque_limit_source": limits.source_id if limits is not None else None,
+            "assumed_slots": limits.assumed_slots if limits is not None else 0,
+            "verified_slots": limits.verified_slots if limits is not None else 0,
+        }
+        out: dict[str, HandMobility] = {}
+        for hand in HANDS:
+            point = self.grip_point_world(hand, q)
+            J, M, Jc = self._task_matrices(hand, q, mode == "constrained")
+            w = mobility_matrix(J, M, Jc)
+
+            acc_cap: CapacityEllipsoid | None = None
+            f_cap: CapacityEllipsoid | None = None
+            if limits is not None:
+                acc_cap = self.acceleration_capacity(
+                    q, hand, mode=mode, torque_limits=limits
+                )
+                f_cap = self.force_capacity(q, hand, mode=mode, torque_limits=limits)
+
+            v_ell = velocity_ellipsoid(w)
+            f_ell = force_ellipsoid(w)
+            m_eff = f_ell.radii**2
+            c_val = (
+                float(m_eff.max() / m_eff.min()) if m_eff.min() > 0.0 else float("inf")
+            )
+
+            out[hand] = HandMobility(
+                hand=hand,
+                centre=(float(point[0]), float(point[1]), float(point[2])),
+                mobility=w,
+                mobility_axes=v_ell.axes,
+                mobility_eigenvalues=np.maximum(v_ell.radii**2, 0.0),
+                effective_mass_kg=m_eff,
+                condition=c_val,
+                singular=np.asarray(f_ell.singular, dtype=bool),
+                provenance=provenance,
+                acceleration_capacity=acc_cap,
+                force_capacity=f_cap,
+            )
+        return out
 
 
 def _spatial(inertia: RigidInertia) -> SpatialInertia:

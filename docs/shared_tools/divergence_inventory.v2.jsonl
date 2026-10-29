@@ -689,6 +689,7 @@
 {"path": "force_overlay/capacity_glyphs.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
 {"path": "force_overlay/contracts.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
 {"path": "force_overlay/conversions.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
+{"path": "force_overlay/ellipsoid_display.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
 {"path": "force_overlay/ellipsoid_validation.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
 {"path": "force_overlay/glyphs.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
 {"path": "force_overlay/grip_frame.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
