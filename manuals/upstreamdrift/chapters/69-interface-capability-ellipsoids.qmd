@@ -1,0 +1,111 @@
+# Operational-Space Capability Ellipsoids at Interface Points
+
+## Status
+
+Evidence class: derived, provisional. This chapter records the operational-space
+capability framework delivered by epic #14038 (CAP-1 through CAP-12). It defines
+the multibody acceleration and force capacities at segment interfaces, notably
+the hand-club interfaces (`lead_grip`, `trail_grip`, and `grip_midpoint`). The
+registry blocker `UP-CAP-interface-capability-ellipsoids` stays open until UP-D1
+inventories the pathway and a panel confirms full scientific qualification.
+
+## Purpose
+
+At any segment interface during the golf swing, quantify and visualise the
+multibody system's ability to create motion or resist/apply loading. Inertial
+properties describe resistance to external forces, while capacity ellipsoids
+incorporate actuator effort limits ($T = \operatorname{diag}(\tau_{\max})$) and
+system dynamics:
+
+| Kind | Dimension | Physical Meaning | Governing Matrix / Metric | Units |
+|---|---|---|---|---|
+| `mobility` | $3 \times 3$ | External push acceleration ease | $W = J A J^{\top}$ | $\text{kg}^{-1}$ |
+| `effective-mass` | $3 \times 3$ | Perceived inertia per direction | $\Lambda = W^{-1}$ (dual) | $\text{kg}$ |
+| `acceleration-capacity` | $3 \times 3$ | Achievable interface accelerations | $Q_a = J A S T^2 S^{\top} A^{\top} J^{\top}$, offset $c_a$ | $\text{m/s}^2$ |
+| `force-capacity` | $3 \times 3$ | Achievable static/dynamic contact force | $Q_f = (J S T^{-2} S^{\top} J^{\top})^{-1}$ | $\text{N}$ |
+
+## Governing Equations
+
+### 1. Operational-Space Mobility and Effective Mass
+
+Let generalized coordinates be $q \in \mathbb{R}^n$, generalized velocities
+$v \in \mathbb{R}^m$, generalized mass matrix $M(q)$, and inverse mass matrix
+(or closed-loop KKT projector) $A = M^{-1}$. For an interface point with
+translational Jacobian $J(q) = \partial p / \partial q \in \mathbb{R}^{3 \times m}$:
+
+$$W = J A J^{\top} \qquad (\text{kg}^{-1})$$
+
+The operational-space effective mass matrix $\Lambda(q)$ is the dual:
+
+$$\Lambda = W^{-1} = (J M^{-1} J^{\top})^{-1} \qquad (\text{kg})$$
+
+Eigenvalues $\lambda_i(W)$ yield semi-axis lengths $r_i = \sqrt{\lambda_i(W)}$,
+whose directions are given by eigenvectors $u_i$.
+
+### 2. Dynamic Acceleration Capacity
+
+Given actuation selection matrix $S$ and diagonal actuator torque limits
+$T = \operatorname{diag}(\tau_{\max, 1}, \dots, \tau_{\max, k})$, the unit torque
+sphere $\|\tilde{\tau}\|_2 \le 1$ with $\tau = S T \tilde{\tau}$ maps to interface
+linear accelerations $\ddot{x} = J \ddot{q} + \dot{J} \dot{q}$. With generalized
+bias forces $h(q, v)$ (Coriolis, centrifugal, gravity):
+
+$$M \ddot{q} + h = S \tau \implies \ddot{q} = A(S T \tilde{\tau} - h)$$
+
+Substituting into the interface acceleration equation yields:
+
+$$\ddot{x} = \underbrace{J A (-h) + \dot{J}\dot{q}}_{c_a\ (\text{drift centre offset})} + J A S T \tilde{\tau}$$
+
+The acceleration capacity ellipsoid $Q_a$ and its centre offset $c_a$ are:
+
+$$Q_a = J A S T^2 S^{\top} A^{\top} J^{\top} \qquad (\text{m}^2/\text{s}^4)$$
+$$c_a = J A (-h) + \dot{J}\dot{q} \qquad (\text{m/s}^2)$$
+
+Semi-axis lengths are $r_{a, i} = \sqrt{\lambda_i(Q_a)}$ in $\text{m/s}^2$, centred
+at $p + c_a$.
+
+### 3. Force Capacity (Static and Dynamically Consistent)
+
+Under actuator torque limits $\|\tilde{\tau}\|_2 \le 1$, the static interface
+forces $F \in \mathbb{R}^3$ producible by joint torques satisfy $\tau = S^{\top} J^{\top} F$:
+
+$$Q_f = (J S T^{-2} S^{\top} J^{\top})^{-1} \qquad (\text{N}^2)$$
+
+Semi-axis lengths are $r_{f, i} = \sqrt{\lambda_i(Q_f)}$ in $\text{N}$. In closed
+kinematic loops (e.g. bilateral grip), $A$ applies the KKT closure projector.
+
+## Interface Points & Conventions
+
+The interface registry standardises interface naming across all dynamics engines:
+
+- `lead_grip`: Hand-club interface at the lead hand (left for right-handed golfer).
+- `trail_grip`: Hand-club interface at the trail hand (right for right-handed golfer).
+- `grip_midpoint`: Geometric midpoint $r_M = \tfrac{1}{2}(r_{\text{lead}} + r_{\text{trail}})$.
+
+Sign convention follows ADR-0052: wrenches represent loading exerted by the hand
+onto the club.
+
+## Visual Representation and Style Contracts
+
+To avoid cognitive and perceptual interference across concurrent glyphs:
+
+1. **Identity Hue (Okabe-Ito Palette)**:
+   - `lead_grip`: Okabe-Ito Blue (`#0072B2`).
+   - `trail_grip`: Okabe-Ito Vermillion (`#D55E00`).
+   - Additional interface points draw subsequent Okabe-Ito hues (Sky Blue, Orange, etc.).
+2. **Kind Encoding by Style**:
+   - `mobility` / `effective-mass`: Translucent shell ($\alpha \approx 0.25 - 0.35$).
+   - `acceleration-capacity` / `force-capacity`: Wireframe or outline with principal axis lines and end ticks.
+3. **Scaling and Clamping**:
+   - Radii employ linear scaling mapping the 95th-percentile semi-axis to target screen dimension ($\approx 0.09\text{ m}$ close-up, $\approx 0.15\text{ m}$ full-body).
+   - Values exceeding bounding limits are clamped and rendered with dashed outlines.
+   - The HUD displays physical values in SI units with an explicit legend reference scale bar.
+
+## Cross-Engine Parity Acceptance Criteria
+
+Qualification across MuJoCo, Drake, and Pinocchio enforces strict numerical parity:
+
+- Interface coordinates agree within $1\text{ mm}$ ($10^{-3}\text{ m}$).
+- Mobility and capacity eigenvalues agree within $1\%$ relative tolerance (`rtol=0.01`, `atol=1e-4`).
+- Non-repeated principal axes agree within $2^\circ$ angular separation.
+- Drift acceleration centre offsets agree within $10^{-3}\text{ m/s}^2$.
