@@ -17,20 +17,16 @@
     },
     "drake": {
       "mobility": {
-        "status": "gap",
-        "issue": 14048
+        "status": "parity"
       },
       "effective-mass": {
-        "status": "gap",
-        "issue": 14048
+        "status": "parity"
       },
       "acceleration-capacity": {
-        "status": "gap",
-        "issue": 14048
+        "status": "parity"
       },
       "force-capacity": {
-        "status": "gap",
-        "issue": 14048
+        "status": "parity"
       }
     },
     "pinocchio": {
