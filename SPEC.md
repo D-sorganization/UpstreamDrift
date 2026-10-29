@@ -2742,6 +2742,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-29 | #14073 | Linear radius scaling, legend scale bar formatting, dashed clamp styling, and Okabe-Ito yellow trail hue rule for capability ellipsoids |
+| 2026-10-29 | #14048 | CAP-8 (#14038): Drake capability adapter at the hand-club interfaces |
 | 2026-10-29 | #14076 | Pinocchio capability adapter emitting acceleration and force capacity ellipsoids per grip point |
 | 2026-10-29 | #14065 | Evaluate glass conductivity from temperature only; drop power-density heating in default model. |
 | 2026-10-29 | #14071 | MuJoCo capability adapter emitting acceleration and force capacity ellipsoids per grip point |

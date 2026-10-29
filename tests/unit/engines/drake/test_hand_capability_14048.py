@@ -20,11 +20,24 @@ from src.shared.python.spatial_algebra.operational_space import (  # noqa: E402
     CapacityEllipsoid,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 ROOT = Path(__file__).resolve().parents[4]
 ANTHRO_SPEC = (
     ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
 )
+
+
+def _require_real_pydrake() -> None:
+    pytest.importorskip("pydrake")
+    try:
+        import pydrake.all as api
+
+        if type(api).__module__ == "unittest.mock" or not hasattr(
+            api, "MultibodyPlant"
+        ):
+            pytest.skip("Real pydrake installation required (found mock)")
+    except ImportError:
+        pytest.skip("pydrake not installed")
 
 
 @pytest.fixture(scope="module")
@@ -34,13 +47,13 @@ def anthro_spec_bytes() -> bytes:
 
 @pytest.fixture(scope="module")
 def source_with_limits(anthro_spec_bytes: bytes) -> DrakeCapabilitySource:
-    pytest.importorskip("pydrake")
+    _require_real_pydrake()
     return DrakeCapabilitySource(anthro_spec_bytes)
 
 
 @pytest.fixture(scope="module")
 def source_with_explicit_subject(anthro_spec_bytes: bytes) -> DrakeCapabilitySource:
-    pytest.importorskip("pydrake")
+    _require_real_pydrake()
     subj = CapacitySubject(mass_kg=75.0, stature_m=1.75)
     return DrakeCapabilitySource(anthro_spec_bytes, torque_limits=subj)
 
@@ -137,7 +150,7 @@ def test_explicit_subject_torque_limits_configuration(
 def test_missing_torque_limits_raises(
     anthro_spec_bytes: bytes, states: list[np.ndarray]
 ) -> None:
-    pytest.importorskip("pydrake")
+    _require_real_pydrake()
     spec = json.loads(anthro_spec_bytes.decode("utf-8"))
     del spec["subject"]
     spec_no_subject = json.dumps(spec).encode("utf-8")
