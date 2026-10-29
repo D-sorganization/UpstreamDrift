@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14053 · Correct 6X6 Mobility Scaling by Multiplying Angular Rows by L
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14053
+- **Branch:** fix/14053-mobility-scales
+- **PR:** #14058
+- **Paths:** see #14058
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`d5705ebb`; collated from changes/14053-correct-6x6-mobility-scaling-by-multiply.md)
+- **Summary:** Correct 6x6 mobility scaling by multiplying angular rows by L
+- **Next step:** Merge the PR.
+
 ### DL-#13971 · Drake Motion Matching: Catalog Finite-Difference Generalized Accelerations in Simulate_With_Coefficients (UD-36)
 
 - **State:** in_review
