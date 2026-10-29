@@ -103,7 +103,11 @@ def test_overlay_source_bias_force_and_point_jdot_v() -> None:
     )
 
     # Jdot_v at origin of lead hand / club body
-    club_body_id = src.model.body("club").id if "club" in [src.model.body(i).name for i in range(src.model.nbody)] else 1
+    club_body_id = (
+        src.model.body("club").id
+        if "club" in [src.model.body(i).name for i in range(src.model.nbody)]
+        else 1
+    )
     pt = [0.0, 0.0, 0.0]
     jdot_v_zero = src.point_jdot_v(pt, club_body_id, coords, rates_zero)
     jdot_v_fast = src.point_jdot_v(pt, club_body_id, coords, rates_fast)

@@ -52,6 +52,9 @@ from src.shared.python.spatial_algebra.operational_space import (
     mobility_matrix,
     velocity_ellipsoid,
 )
+from src.shared.python.spatial_algebra.operational_space import (
+    drift_acceleration as _calc_drift_acceleration,
+)
 
 MODES: Final = ("constrained", "unconstrained")
 HANDS: Final = ("lead", "trail")
@@ -81,6 +84,8 @@ class HandMobility:
     provenance: Mapping[str, object]
     acceleration_capacity: CapacityEllipsoid | None = None
     force_capacity: CapacityEllipsoid | None = None
+    drift_acceleration: np.ndarray | None = None
+    jdot_v: np.ndarray | None = None
 
 
 class HandMobilitySource(MujocoOverlaySource):
@@ -149,7 +154,9 @@ class HandMobilitySource(MujocoOverlaySource):
         point = self.grip_point_world(hand, coordinates)
         return self._mobility_at(point, 6, constrained)
 
-    def _set_state(self, q: np.ndarray) -> dict[str, float]:
+    def _set_state(
+        self, q: np.ndarray, v: np.ndarray | None = None
+    ) -> dict[str, float]:
         values = np.asarray(q, dtype=float)
         if (
             values.shape != (len(self.coordinate_order),)
@@ -159,8 +166,78 @@ class HandMobilitySource(MujocoOverlaySource):
                 f"q must be {len(self.coordinate_order)} finite coordinates"
             )
         coordinates = dict(zip(self.coordinate_order, values.tolist(), strict=True))
-        self._forward(coordinates)
+        rates: dict[str, float] | None = None
+        if v is not None:
+            v_values = np.asarray(v, dtype=float)
+            if (
+                v_values.shape != (len(self.coordinate_order),)
+                or not np.isfinite(v_values).all()
+            ):
+                raise ValueError(
+                    f"v must be {len(self.coordinate_order)} finite velocities"
+                )
+            rates = dict(zip(self.coordinate_order, v_values.tolist(), strict=True))
+        self._forward(coordinates, rates)
         return coordinates
+
+    def bias_force(self, q: np.ndarray, v: np.ndarray | None = None) -> np.ndarray:
+        """Generalised bias force h(q, v) [N or N*m] (length nv)."""
+        coords = self._set_state(q, v)
+        rates = (
+            dict(
+                zip(
+                    self.coordinate_order,
+                    np.asarray(v, dtype=float).tolist(),
+                    strict=True,
+                )
+            )
+            if v is not None
+            else None
+        )
+        return super().bias_force(coords, rates)
+
+    def grip_jdot_v(self, hand: str, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """3-vector J̇(q, v) v [m/s^2] at ``hand``'s grip point on the club body."""
+        coords = self._set_state(q, v)
+        point = self.grip_point_world(hand, coords)
+        return self.point_jdot_v(point, self._club_body, coords)
+
+    def drift_acceleration(
+        self,
+        q: np.ndarray,
+        v: np.ndarray,
+        hand: str,
+        *,
+        mode: str = "constrained",
+    ) -> np.ndarray:
+        """3-vector drift acceleration c = J a0 + J̇v at ``hand``'s grip point [m/s^2]."""
+        if mode not in MODES:
+            raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
+        if hand not in HANDS:
+            raise ValueError(f"hand must be one of {HANDS}, got {hand!r}")
+        coords = self._set_state(q, v)
+        point = self.grip_point_world(hand, coords)
+        mj, model, data = self._mj, self.model, self.data
+        jacp = np.zeros((3, model.nv))
+        jacr = np.zeros((3, model.nv))
+        mj.mj_jac(model, data, jacp, jacr, point, self._club_body)
+        mass = full_mass_matrix(mj, model, data)
+        h = np.asarray(data.qfrc_bias, dtype=float).copy()
+        jdot_pos = np.zeros((3, model.nv))
+        jdot_rot = np.zeros((3, model.nv))
+        mj.mj_jacDot(model, data, jdot_pos, jdot_rot, point, self._club_body)
+        jdot_v = jdot_pos @ data.qvel
+
+        if mode == "constrained":
+            closure_jac, closure_drift = _evaluate_weld_closure(
+                mj, model, data, self._closure
+            )
+        else:
+            closure_jac, closure_drift = None, None
+
+        return _calc_drift_acceleration(
+            jacp, mass, h, jdot_v, Jc=closure_jac, Jcdot_v=closure_drift
+        )
 
     def _task_matrices(
         self, point: np.ndarray, constrained: bool, rows: int = 3
@@ -234,6 +311,7 @@ class HandMobilitySource(MujocoOverlaySource):
         self,
         q: np.ndarray,
         *,
+        v: np.ndarray | None = None,
         mode: str = "constrained",
         torque_limits: TorqueLimits | None = None,
     ) -> dict[str, HandMobility]:
@@ -241,7 +319,7 @@ class HandMobilitySource(MujocoOverlaySource):
         if mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
         limits = torque_limits or self._torque_limits
-        coordinates = self._set_state(q)
+        coordinates = self._set_state(q, v)
         armature = np.asarray(self.model.dof_armature, dtype=float)
         provenance = {
             "topology": self.topology,
@@ -276,6 +354,12 @@ class HandMobilitySource(MujocoOverlaySource):
                 )
                 f_cap = force_capacity(J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc)
 
+            drift_acc: np.ndarray | None = None
+            jdot_v: np.ndarray | None = None
+            if v is not None:
+                drift_acc = self.drift_acceleration(q, v, hand, mode=mode)
+                jdot_v = self.grip_jdot_v(hand, q, v)
+
             out[hand] = HandMobility(
                 hand=hand,
                 centre=(float(point[0]), float(point[1]), float(point[2])),
@@ -288,5 +372,7 @@ class HandMobilitySource(MujocoOverlaySource):
                 provenance=provenance,
                 acceleration_capacity=acc_cap,
                 force_capacity=f_cap,
+                drift_acceleration=drift_acc,
+                jdot_v=jdot_v,
             )
         return out

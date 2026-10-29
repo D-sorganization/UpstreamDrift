@@ -7,6 +7,8 @@ from dataclasses import dataclass, replace
 import logging
 from pathlib import Path
 
+import numpy as np
+
 from src.shared.python.biomechanics.grip_plot_model import (
     build_grip_plot_series,
     plot_series_to_json,
@@ -81,10 +83,21 @@ def _swing_for(job: ExportJob, bundle: InputBundle, engine: str) -> SwingInput:
     receipt = (job.receipts or {}).get(engine)
     if receipt is None:
         return SwingInput(
-            bundle, bundle.reference_q, job.swing, job.club, bundle.reference_engine
+            bundle,
+            bundle.reference_q,
+            job.swing,
+            job.club,
+            bundle.reference_engine,
+            v=bundle.reference_v,
         )
     q, rollout_engine = load_receipt_rollout(receipt, bundle)
-    return SwingInput(bundle, q, job.swing, job.club, rollout_engine)
+    npz = Path(receipt).with_suffix(".npz")
+    v = None
+    if npz.exists():
+        with np.load(npz) as data:
+            if "v" in data.files:
+                v = np.asarray(data["v"], dtype=float)
+    return SwingInput(bundle, q, job.swing, job.club, rollout_engine, v=v)
 
 
 def run_export(
