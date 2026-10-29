@@ -1,6 +1,7 @@
 {
-  "schema_version": "humanoid_option_a.trace/v1",
+  "schema_version": "humanoid_option_a.trace/v2",
   "seed": 13837,
-  "payload_sha256": "5cf24ee312282f292fcee47526fd14d96b491c463e701821d495686fef0b558c",
-  "npz": "reference_trace_v1.npz"
+  "payload_sha256": "6d933396693b25a750de080ac2985d76a68a965796e262846f7a37cc3aab142c",
+  "failure_definition_id": "affine_drift.option_a.failure_definition/v1",
+  "npz": "reference_trace_v2.npz"
 }

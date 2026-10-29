@@ -37,13 +37,50 @@ from src.shared.python.motion_matching.execution.grip_selection import (
 )
 from src.tools.native_viewer_export.core import (
     DEFAULT_SPEEDS,
+    ELLIPSOID_KINDS,
     ENGINES,
     ExportSettings,
+    parse_ellipsoid_scale,
 )
 from src.tools.native_viewer_export.overlay import build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 
 logger = logging.getLogger(__name__)
+
+
+def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
+    """Add interface capability and mobility ellipsoid options (CAP-6, #14038, #14046)."""
+    p.add_argument(
+        "--interface-ellipsoid",
+        action="append",
+        choices=ELLIPSOID_KINDS,
+        default=None,
+        metavar="KIND",
+        help="whole-multibody capability or mobility ellipsoid at segment interfaces "
+        "(repeatable; choices: mobility, effective-mass, acceleration-capacity, "
+        "force-capacity; CAP-6, #14038, #14046)",
+    )
+    p.add_argument(
+        "--ellipsoid-scale",
+        default="auto",
+        metavar="SCALE",
+        help="ellipsoid scaling: 'auto' (clip-wide 95th-percentile scale) or 'fixed:<m>' "
+        "in metres (default 'auto'; CAP-6, #14038)",
+    )
+    p.add_argument(
+        "--drift-arrow",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="draw drift acceleration arrow at the interface ellipsoid centre "
+        "(default: off; CAP-6, #14038)",
+    )
+    p.add_argument(
+        "--hand-mobility",
+        action="store_true",
+        default=False,
+        help="backward-compatible alias for '--interface-ellipsoid mobility' "
+        "(CAP-6, #14038, #14046)",
+    )
 
 
 def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
@@ -73,6 +110,7 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
         "contact patch (an equivalent of the grip closure force, not a "
         "measured contact; unloaded frames draw nothing; default: off)",
     )
+    _add_ellipsoid_arguments(p)
     shade = p.add_argument_group(
         "segment shading",
         "Translucent tension/compression shading of the golfer's segments "
@@ -362,6 +400,10 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
     width, height = (
         parse_size(args.size) if args.size is not None else (base.width, base.height)
     )
+    ellipsoids = list(args.interface_ellipsoid or [])
+    if getattr(args, "hand_mobility", False) and "mobility" not in ellipsoids:
+        ellipsoids.append("mobility")
+    ellipsoid_scale = parse_ellipsoid_scale(getattr(args, "ellipsoid_scale", "auto"))
     return replace(
         base,
         views=tuple(v for v in args.views.split(",") if v),
@@ -377,6 +419,9 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         force_vectors=args.force_vectors,
         torque_vectors=args.torque_vectors,
         palm_thumb_force=args.palm_thumb_force,
+        interface_ellipsoids=tuple(ellipsoids),
+        ellipsoid_scale=ellipsoid_scale,
+        drift_arrow=bool(getattr(args, "drift_arrow", False)),
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
