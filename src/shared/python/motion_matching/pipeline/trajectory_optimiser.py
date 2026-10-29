@@ -39,6 +39,42 @@ def validate_trajectory_optimiser(name: str) -> str:
     return key
 
 
+def _resolve_neural_proposal(
+    package: Any,
+    settings: Any,
+    proposal_initializer: Any,
+    allow_fallback: bool,
+) -> tuple[np.ndarray | None, dict[str, Any]]:
+    from src.engines.physics_engines.mujoco.python.motion_matching.mjx_knot_optimiser import (
+        _prepare,
+    )
+    from src.shared.python.motion_matching.proposal_initializer import (
+        StubProposalInitializer,
+        validate_proposal,
+    )
+    from src.tools.motion_matching.neural_cli import NeuralRunRejectedError
+
+    initializer = proposal_initializer or StubProposalInitializer()
+    prop_delta, source_id, prop_sha = initializer.propose(package)
+    problem = _prepare(package, settings)
+    is_valid, reason = validate_proposal(prop_delta, problem.delta_shape)
+    if is_valid:
+        return prop_delta, {
+            "source": source_id,
+            "sha256": prop_sha,
+            "accepted": True,
+            "fallback_reason": None,
+        }
+    if not allow_fallback:
+        raise NeuralRunRejectedError(f"rejected neural proposal: {reason}")
+    return None, {
+        "source": source_id,
+        "sha256": prop_sha,
+        "accepted": False,
+        "fallback_reason": reason,
+    }
+
+
 @precondition(lambda name, *_, **__: isinstance(name, str), "name must be a string")
 def run_trajectory_optimiser(
     name: str,
@@ -77,18 +113,12 @@ def run_trajectory_optimiser(
     from src.engines.physics_engines.mujoco.python.motion_matching.mjx_knot_optimiser import (
         KnotOptimisationSettings,
         load_mjx_package,
-        _prepare,
         optimisation_receipt,
         optimise_reference,
     )
     from src.shared.python.motion_matching.execution.mjx_export import (
         export_mjx_package,
     )
-    from src.shared.python.motion_matching.proposal_initializer import (
-        StubProposalInitializer,
-        validate_proposal,
-    )
-    from src.tools.motion_matching.neural_cli import NeuralRunRejectedError
 
     run = Path(out_dir)
     export_mjx_package(run)
@@ -99,28 +129,12 @@ def run_trajectory_optimiser(
     neural_proposal_receipt: dict[str, Any] | None = None
 
     if neural_mode == "preview":
-        initializer = proposal_initializer or StubProposalInitializer()
-        prop_delta, source_id, prop_sha = initializer.propose(package)
-        problem = _prepare(package, settings)
-        is_valid, reason = validate_proposal(prop_delta, problem.delta_shape)
-        if is_valid:
-            init_delta = prop_delta
-            neural_proposal_receipt = {
-                "source": source_id,
-                "sha256": prop_sha,
-                "accepted": True,
-                "fallback_reason": None,
-            }
-        else:
-            if not allow_fallback:
-                raise NeuralRunRejectedError(f"rejected neural proposal: {reason}")
-            init_delta = None
-            neural_proposal_receipt = {
-                "source": source_id,
-                "sha256": prop_sha,
-                "accepted": False,
-                "fallback_reason": reason,
-            }
+        init_delta, neural_proposal_receipt = _resolve_neural_proposal(
+            package,
+            settings,
+            proposal_initializer,
+            allow_fallback,
+        )
 
     t0 = time.perf_counter()
     result = optimise_reference(package, settings, init_delta=init_delta)

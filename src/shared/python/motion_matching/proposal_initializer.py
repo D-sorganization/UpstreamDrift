@@ -50,9 +50,10 @@ class StubProposalInitializer:
         if self._delta is not None:
             delta = self._delta
         else:
-            knots = len(package.q_track)
-            actuated = len(package.meta["coordinate_order"]) - 1
-            delta = np.zeros((knots, actuated), dtype=np.float32)
+            q_track = package.arrays.get("q_track")
+            knots = len(q_track) if q_track is not None else 0
+            actuated = len(package.meta.get("coordinate_order", [])) - 1
+            delta = np.zeros((knots, max(actuated, 0)), dtype=np.float32)
 
         sha = hashlib.sha256(delta.tobytes()).hexdigest()
         return delta, self.source_id, sha
