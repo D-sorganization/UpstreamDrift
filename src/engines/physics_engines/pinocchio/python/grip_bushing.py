@@ -130,6 +130,35 @@ class WeldClubKinematics:
         )
 
 
+def _resolve_grip_force_limits(grip_pose: GripPose) -> dict[str, float | None]:
+    inventory = load_grip_capability_inventory()
+    force_limits: dict[str, float | None] = {}
+    for hand in Hand:
+        limit = grip_pose.grip_force_limit_n(hand)
+        inventory.require_grip_force_limit_enforceable(ENGINE, "weld_bushing", limit)
+        side = grip_pose.side(hand)
+        force_limits[side] = finite_limit_n(limit)
+    return force_limits
+
+
+def _build_free_club_pin_model(
+    pin: Any, spec: dict[str, Any], club_dyn: ClubDynamics
+) -> tuple[Any, Any]:
+    club_model = pin.Model()
+    club_model.gravity.linear[:] = np.asarray(spec["gravity_m_s2"], float)
+    c_joint = club_model.addJoint(
+        0, pin.JointModelFreeFlyer(), pin.SE3.Identity(), "club"
+    )
+    club_model.appendBodyToJoint(
+        c_joint,
+        pin.Inertia(
+            club_dyn.mass_kg, np.asarray(club_dyn.com_m), club_dyn.inertia_com_kg_m2
+        ),
+        pin.SE3.Identity(),
+    )
+    return club_model, club_model.createData()
+
+
 class ClubOnBushings:
     """Free-flyer club driven by the shared bushing law through ``aba``."""
 
@@ -145,15 +174,7 @@ class ClubOnBushings:
         self._pin = pin
         self.interface = interface
         self.grip_pose = grip_pose
-        inventory = load_grip_capability_inventory()
-        self._force_limits: dict[str, float | None] = {}
-        for hand in Hand:
-            limit = grip_pose.grip_force_limit_n(hand)
-            inventory.require_grip_force_limit_enforceable(
-                ENGINE, "weld_bushing", limit
-            )
-            side = grip_pose.side(hand)
-            self._force_limits[side] = finite_limit_n(limit)
+        self._force_limits = _resolve_grip_force_limits(grip_pose)
         self.kinematics = WeldClubKinematics(spec, names)
         club = ClubDynamics.from_spec(spec)
         model = pin.Model()
@@ -641,13 +662,7 @@ def simulate_separated_v2_grip_styles(
     style_tuple = tuple(GripStyle(s) for s in styles)
     if not style_tuple:
         raise ValueError("styles must contain at least one GripStyle")
-    inventory = load_grip_capability_inventory()
-    force_limits: dict[str, float | None] = {}
-    for hand in Hand:
-        limit = grip_pose.grip_force_limit_n(hand)
-        inventory.require_grip_force_limit_enforceable(ENGINE, "weld_bushing", limit)
-        side = grip_pose.side(hand)
-        force_limits[side] = finite_limit_n(limit)
+    force_limits = _resolve_grip_force_limits(grip_pose)
     spec = json.loads(spec_bytes)
     if not spec.get("hand_separation", {}).get("enabled"):
         spec = separate_v2_hands(spec)
@@ -655,19 +670,7 @@ def simulate_separated_v2_grip_styles(
     kin = SeparatedHandsKinematics(spec, list(swing.names))
     club_dyn = ClubDynamics.from_spec(spec)
     pin = _pin()
-    club_model = pin.Model()
-    club_model.gravity.linear[:] = np.asarray(spec["gravity_m_s2"], float)
-    c_joint = club_model.addJoint(
-        0, pin.JointModelFreeFlyer(), pin.SE3.Identity(), "club"
-    )
-    club_model.appendBodyToJoint(
-        c_joint,
-        pin.Inertia(
-            club_dyn.mass_kg, np.asarray(club_dyn.com_m), club_dyn.inertia_com_kg_m2
-        ),
-        pin.SE3.Identity(),
-    )
-    club_data = club_model.createData()
+    club_model, club_data = _build_free_club_pin_model(pin, spec, club_dyn)
     offsets = {s: interface.frame(s).matrix() for s in SIDES}
     spline = CoordinateSpline(swing.time_s, swing.q)
     times = swing.time_s
