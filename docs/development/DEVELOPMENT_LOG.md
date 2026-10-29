@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13938 · Evaluate Glass Conductivity From Temperature Only; Drop Power-Density Heating in Default Model.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13938
+- **Branch:** merged via #14065
+- **PR:** #14065
+- **Paths:** see #14065
+- **Started:** 2026-10-29
+- **Last verified:** 2026-10-29 (`0bbbe4e3`; collated from changes/13938-evaluate-glass-conductivity-from-tempera.md)
+- **Summary:** Evaluate glass conductivity from temperature only; drop power-density heating in default model.
+- **Next step:** Shipped in PR #14065.
+
 ### DL-#14043 · CAP-4 (#14038): MuJoCo Capability Adapter at the Hand-Club Interfaces
 
 - **State:** shipped
