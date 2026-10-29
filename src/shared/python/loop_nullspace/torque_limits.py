@@ -26,6 +26,8 @@ from src.shared.python.loop_nullspace.capacity import (
 
 REGISTRY_SOURCE_ID = "loop_nullspace_registry"
 PLACEHOLDER_SOURCES = frozenset({"control_interface", "placeholder"})
+CAPACITY_HANDS: tuple[str, ...] = ("lead", "trail")
+CAPACITY_MODES: tuple[str, ...] = ("constrained", "unconstrained")
 
 
 @dataclass(frozen=True)
@@ -113,3 +115,50 @@ def torque_limits_for(
         verified_slots=len(vec.verified_slots),
         warnings=vec.warnings,
     )
+
+
+def resolve_torque_limits(
+    source: TorqueLimits | CapacitySubject | Mapping[str, Any] | None,
+    spec: Mapping[str, Any],
+    coordinate_order: Sequence[str],
+) -> TorqueLimits | None:
+    """Resolve optional torque limits from an explicit object, subject, spec, or mapping."""
+    if isinstance(source, TorqueLimits):
+        return source
+    if isinstance(source, CapacitySubject):
+        return torque_limits_for(source, coordinate_order)
+    if isinstance(source, Mapping):
+        return torque_limits_for(source, coordinate_order)
+    if "subject" in spec:
+        try:
+            return torque_limits_for(spec, coordinate_order)
+        except Exception:
+            return None
+    return None
+
+
+def validate_capacity_hand_mode(
+    hand: str,
+    mode: str,
+    *,
+    hands: Sequence[str] = CAPACITY_HANDS,
+    modes: Sequence[str] = CAPACITY_MODES,
+) -> None:
+    """Validate hand and closure mode labels for capacity ellipsoid tasks."""
+    if mode not in modes:
+        raise ValueError(f"mode must be one of {modes}, got {mode!r}")
+    if hand not in hands:
+        raise ValueError(f"hand must be one of {hands}, got {hand!r}")
+
+
+def effective_torque_limits_for_capacity(
+    torque_limits: TorqueLimits | None,
+    default_limits: TorqueLimits | None,
+    *,
+    label: str,
+) -> TorqueLimits:
+    """Return explicit or default torque limits, or raise if neither is set."""
+    limits = torque_limits or default_limits
+    if limits is None:
+        raise ValueError(f"{label} capacity requires torque limits")
+    return limits

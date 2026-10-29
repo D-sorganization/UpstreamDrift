@@ -47,7 +47,9 @@ from src.shared.python.loop_nullspace.derivative_capability import (
 )
 from src.shared.python.loop_nullspace.torque_limits import (
     TorqueLimits,
-    torque_limits_for,
+    effective_torque_limits_for_capacity,
+    resolve_torque_limits,
+    validate_capacity_hand_mode,
 )
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 from src.shared.python.model_appearance.grip_hands import grip_hand_frame
@@ -298,25 +300,9 @@ class DrakeCapabilitySource:
             "are taken on the club body (welded lead hand topology: lead hand is welded "
             "to the club in v2 golfer, so lead and trail share one rigid body)"
         )
-        self._torque_limits = self._resolve_torque_limits(torque_limits, self._spec)
-
-    def _resolve_torque_limits(
-        self,
-        source: TorqueLimits | CapacitySubject | Mapping[str, Any] | None,
-        spec: Mapping[str, Any],
-    ) -> TorqueLimits | None:
-        if isinstance(source, TorqueLimits):
-            return source
-        if isinstance(source, CapacitySubject):
-            return torque_limits_for(source, self.coordinate_order)
-        if isinstance(source, Mapping):
-            return torque_limits_for(source, self.coordinate_order)
-        if "subject" in spec:
-            try:
-                return torque_limits_for(spec, self.coordinate_order)
-            except Exception:
-                return None
-        return None
+        self._torque_limits = resolve_torque_limits(
+            torque_limits, self._spec, self.coordinate_order
+        )
 
     def grip_point_world(
         self, hand: str, coordinates: Mapping[str, float] | Array
@@ -368,13 +354,10 @@ class DrakeCapabilitySource:
         torque_limits: TorqueLimits | None,
         label: str,
     ) -> tuple[Array, Array, Array | None, TorqueLimits]:
-        if mode not in MODES:
-            raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
-        if hand not in HANDS:
-            raise ValueError(f"hand must be one of {HANDS}, got {hand!r}")
-        limits = torque_limits or self._torque_limits
-        if limits is None:
-            raise ValueError(f"{label} capacity requires torque limits")
+        validate_capacity_hand_mode(hand, mode, hands=HANDS, modes=MODES)
+        limits = effective_torque_limits_for_capacity(
+            torque_limits, self._torque_limits, label=label
+        )
         J, M, Jc = self._task_matrices(hand, q, mode == "constrained")
         return J, M, Jc, limits
 
