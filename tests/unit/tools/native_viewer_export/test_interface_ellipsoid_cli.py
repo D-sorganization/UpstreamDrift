@@ -104,7 +104,7 @@ def test_export_settings_contracts_and_dbc() -> None:
     with pytest.raises(ValueError, match="interface_ellipsoids"):
         ExportSettings(interface_ellipsoids=("unknown-kind",))
 
-    with pytest.raises(ValueError, match="ellipsoid_scale"):
+    with pytest.raises(ValueError, match="--ellipsoid-scale"):
         ExportSettings(ellipsoid_scale="bad-scale")
 
     with pytest.raises(TypeError, match="drift_arrow"):
@@ -112,7 +112,9 @@ def test_export_settings_contracts_and_dbc() -> None:
 
 
 def test_feature_parity_json_entry_updated() -> None:
-    path = Path("src/config/feature_parity.json")
+    path = (
+        Path(__file__).resolve().parents[4] / "src" / "config" / "feature_parity.json"
+    )
     assert path.exists()
     data = json.loads(path.read_text(encoding="utf-8"))
     feat = data["features"]["tools.native_viewer_export"]
