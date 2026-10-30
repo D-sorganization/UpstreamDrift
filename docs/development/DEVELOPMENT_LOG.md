@@ -1801,10 +1801,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13176
 - **Branch:** merged via #13820
-- **PR:** #13820, #14015
+- **PR:** #13820, #14015, #14127
 - **Paths:** see #13820
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-29 (`e9545fa7`; collated from changes/13176-hrg-q1-opensim-mass-matrix-and-gravity-q.md)
+- **Last verified:** 2026-10-30 (`e1164326`; collated from changes/13176-limits-qualification.md)
 - **Summary:** Qualify HRG full-body-v2 mass and gravity in Drake
 - **Next step:** Shipped in PR #13820.
 
@@ -1892,10 +1892,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13175
 - **Branch:** merged via #13543
-- **PR:** #13543, #14012, #14113
+- **PR:** #13543, #14012, #14113, #14128
 - **Paths:** see #13543
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-30 (`4935a0b4`; collated from changes/13175-hrg-e4-hud-event-captions.md)
+- **Last verified:** 2026-10-30 (`0443234f`; collated from changes/13175-expose-the-api-backed-anatomical-event-t.md)
 - **Summary:** HRG-E4 slice: desktop and web anatomical event table view with a shared golden fixture and a feature_parity gap entry (web fetch awaits #13538)
 - **Next step:** Shipped in PR #13543.
 
