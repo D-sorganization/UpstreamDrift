@@ -487,6 +487,12 @@ jobs:
       - name: Fetch pinned Tools packages
         uses: ./.github/actions/fetch-pinned-tools
 
+      - name: Install Pinocchio runtime libraries
+        if: matrix.engine == 'pinocchio'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgomp1
+
       - name: Install ${{ matrix.engine }} parity dependencies
         shell: bash
         run: |
