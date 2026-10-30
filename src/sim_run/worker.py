@@ -32,6 +32,7 @@ from src.sim_run.models import (
     SCHEMA_VERSION_V1,
 )
 from src.sim_run.store import SimulationRunStore
+from src.sim_run.validation import validate_result
 
 logger = logging.getLogger(__name__)
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -99,6 +100,30 @@ def _make_preexec(limits: LinuxLimits | None) -> Callable[[], None] | None:
     return _preexec
 
 
+def get_repo_sha(repo_root: Path | None = None) -> str:
+    """Retrieve Git commit SHA of the current repository or runner environment."""
+    env_sha = os.environ.get("GITHUB_SHA") or os.environ.get("GIT_COMMIT")
+    if env_sha and len(env_sha.strip()) == 40:
+        return env_sha.strip()
+    try:
+        root = repo_root or _REPO_ROOT
+        res = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            timeout=5.0,
+            check=False,
+        )
+        if res.returncode == 0:
+            out = res.stdout.strip()
+            if len(out) == 40 and all(c in "0123456789abcdefABCDEF" for c in out):
+                return out
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return "0" * 40
+
+
 def run_simulation_job(request: RunRequest, run_id: str) -> ResultEnvelope:
     """Headless simulation solver dispatcher returning ResultEnvelope."""
     now = datetime.now(timezone.utc).isoformat()
@@ -106,9 +131,9 @@ def run_simulation_job(request: RunRequest, run_id: str) -> ResultEnvelope:
         schema_version=SCHEMA_VERSION_V1,
         run_id=run_id,
         provenance=Provenance(
-            repo_sha="HEAD",
+            repo_sha=get_repo_sha(),
             engine_type=str(request.engine_type),
-            engine_version=None,
+            engine_version="1.0.0",
             input_sha256=hashlib.sha256(
                 request.model_dump_json().encode("utf-8")
             ).hexdigest(),
@@ -209,15 +234,31 @@ class SimulationWorkerPool:
                 "Worker process finished without writing output envelope",
             )
         try:
-            data = json.loads(out.read_text(encoding="utf-8"))
-            return self.store.transition(
-                run_id, "succeeded", result=ResultEnvelope.model_validate(data)
-            )
-        except (json.JSONDecodeError, ValueError, TypeError) as exc:
+            raw_data = json.loads(out.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
             return _fail(
                 "invalid_result_envelope",
                 f"Failed to parse result envelope: {exc}",
             )
+
+        is_valid, envelope, val_errors = validate_result(raw_data)
+        if not is_valid:
+            diag = "; ".join(val_errors)
+            err = SimulationErrorInfo(
+                code="validation_failed",
+                stage="validation",
+                message=f"Simulation run '{run_id}' failed result validation: {diag}",
+                details={"validation_errors": val_errors},
+            )
+            return self.store.transition(run_id, "failed", result=envelope, error=err)
+
+        if envelope is None or not envelope.success:
+            failure_err = envelope.error if envelope else None
+            return self.store.transition(
+                run_id, "failed", result=envelope, error=failure_err
+            )
+
+        return self.store.transition(run_id, "succeeded", result=envelope)
 
     def execute_run(
         self,
