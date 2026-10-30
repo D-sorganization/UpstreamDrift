@@ -32,7 +32,23 @@ from numpy.typing import NDArray
 from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
 
+from src.shared.python.motion_matching._geodesic import (
+    quaternion_geodesic_angles,
+    rotmat_to_quaternion,
+)
+
 Array: TypeAlias = NDArray[np.float64]
+
+#: Default per-hand neutral extrinsic x-y-z Euler triples (HRG-GR1 / HRG-HX1):
+#: left/lead hand is ``(-75.0, 0.0, 0.0)`` (``M_{0,L} = R_x(-50 deg)``);
+#: right/trail hand is the mirrored neutral ``(75.0, 0.0, 180.0)``
+#: (``M_{0,R} = R_x(-50 deg) R_z(180 deg)``).
+_DEFAULT_NEUTRAL_EULER_BY_SIDE_DEG: dict[str, tuple[float, float, float]] = {
+    "L": (-75.0, 0.0, 0.0),
+    "lead": (-75.0, 0.0, 0.0),
+    "R": (75.0, 0.0, 180.0),
+    "trail": (75.0, 0.0, 180.0),
+}
 
 
 #: Wrist chain after the pronation joint: ``Rz(pronation) @ base @ Rx(cock) @
@@ -167,13 +183,43 @@ def excess_deg(
     return np.maximum(0.0, np.maximum(r[:, 0] - a, a - r[:, 1]))
 
 
+def _prior_weight(value: float) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float, np.number)):
+        raise ValueError(
+            f"neutral_prior_weight_deg2 must be a finite non-negative float, got {value!r}"
+        )
+    w = float(value)
+    if not np.isfinite(w) or w < 0.0:
+        raise ValueError(
+            f"neutral_prior_weight_deg2 must be a finite non-negative float, got {value!r}"
+        )
+    return w
+
+
+def _resolve_neutral_euler(
+    neutral_rotation_deg: Sequence[float] | Array | None, side: str
+) -> tuple[float, float, float]:
+    if not isinstance(side, str) or side not in _DEFAULT_NEUTRAL_EULER_BY_SIDE_DEG:
+        raise ValueError(
+            f"side must be one of {sorted(_DEFAULT_NEUTRAL_EULER_BY_SIDE_DEG)}, got {side!r}"
+        )
+    if neutral_rotation_deg is None:
+        return _DEFAULT_NEUTRAL_EULER_BY_SIDE_DEG[side]
+    e = np.asarray(neutral_rotation_deg, dtype=float)
+    if e.shape != (3,) or not np.isfinite(e).all():
+        raise ValueError("neutral_rotation_deg must be three finite angles")
+    return (float(e[0]), float(e[1]), float(e[2]))
+
+
 class ExcessObjective:
     """The ROM-excess cost of a stack of relative rotations (shared by the
     legacy search and the HRG-GR3 modes, so the cost is defined once).
 
     ``cost(rotation)`` is the weighted root-mean-square excess, in degrees,
-    of ``relative @ rotation`` beyond ``ranges_deg``; ``angles_deg`` returns
-    the decomposed coordinates. ``ValueError`` for bad shapes or weights.
+    of ``relative @ rotation`` beyond ``ranges_deg``, plus an optional
+    geodesic neutral prior ``neutral_prior_weight_deg2 * d_SO3(rotation,
+    neutral_rotation)^2``; ``angles_deg`` returns the decomposed coordinates.
+    ``ValueError`` for bad shapes or weights.
     """
 
     def __init__(
@@ -182,21 +228,46 @@ class ExcessObjective:
         wrist_base: Array,
         ranges_deg: Sequence[Sequence[float]],
         weights: Sequence[float] | None = None,
+        *,
+        neutral_prior_weight_deg2: float = 0.0,
+        neutral_rotation_deg: Sequence[float] | Array | None = None,
+        side: str = "L",
     ) -> None:
         self.relative = _matrices(relative)
         self.wrist_base = _base(wrist_base)
         self.ranges = np.asarray(ranges_deg, dtype=float)
         self.weights = np.ones(3) if weights is None else np.asarray(weights, float)
-        if self.weights.shape != (3,) or (self.weights < 0).any():
+        if (
+            self.weights.shape != (3,)
+            or not np.isfinite(self.weights).all()
+            or (self.weights < 0).any()
+        ):
             raise ValueError("weights must be three non-negative numbers")
+        self.neutral_prior_weight_deg2 = _prior_weight(neutral_prior_weight_deg2)
+        self.side = side
+        self.neutral_rotation_deg = _resolve_neutral_euler(neutral_rotation_deg, side)
+        self.neutral_rotation = grip_rotation(self.neutral_rotation_deg)
+        self._neutral_q = rotmat_to_quaternion(self.neutral_rotation[np.newaxis, :, :])
 
     def angles_deg(self, rotation: Array) -> Array:
         turned: Array = np.asarray(self.relative @ rotation)
         return np.degrees(wrist_angles(turned, self.wrist_base))
 
+    def neutral_deviation_deg(self, rotation: Array) -> float:
+        r = np.asarray(rotation, dtype=float)
+        if r.shape != (3, 3) or not np.isfinite(r).all():
+            raise ValueError("rotation must be a finite 3x3 matrix")
+        q = rotmat_to_quaternion(r[np.newaxis, :, :])
+        angle_rad = float(quaternion_geodesic_angles(q, self._neutral_q)[0])
+        return float(np.degrees(angle_rad))
+
     def cost(self, rotation: Array) -> float:
         ex = excess_deg(self.angles_deg(rotation), self.ranges) * self.weights
-        return float(np.sqrt(np.mean(ex**2)))
+        rom_cost = float(np.sqrt(np.mean(ex**2)))
+        if self.neutral_prior_weight_deg2 == 0.0:
+            return rom_cost
+        dev_deg = self.neutral_deviation_deg(rotation)
+        return float(rom_cost + self.neutral_prior_weight_deg2 * (dev_deg**2))
 
 
 @dataclass(frozen=True)
@@ -210,6 +281,9 @@ class GripFit:
     cost_after: float
     max_excess_before_deg: tuple[float, float, float]
     max_excess_after_deg: tuple[float, float, float]
+    neutral_deviation_before_deg: float = 0.0
+    neutral_deviation_after_deg: float = 0.0
+    neutral_prior_weight_deg2: float = 0.0
 
     def as_document(self) -> dict[str, object]:
         return {
@@ -249,6 +323,8 @@ def fit_grip_rotation(
     grid_half_deg: float = 90.0,
     grid_step_deg: float = 15.0,
     weights: Sequence[float] | None = None,
+    neutral_prior_weight_deg2: float = 0.0,
+    side: str | Sequence[float] | Array = "L",
 ) -> GripFit:
     """Fit the constant follower-side rotation that keeps the wrist
     coordinates inside ``ranges_deg`` over the whole swing.
@@ -256,11 +332,23 @@ def fit_grip_rotation(
     ``relative`` holds, per frame, the rotation from the proximal forearm to
     the hand body with the current document; the fitted rotation ``E`` is
     the one under which ``relative @ E`` decomposes into the smallest
-    root-mean-square excess beyond the ranges. A grid over extrinsic x-y-z
-    angles seeds a Nelder-Mead refinement. Postcondition: ``cost_after <=
-    cost_before`` (the identity is in the grid).
+    root-mean-square excess beyond the ranges (plus an optional geodesic
+    prior ``neutral_prior_weight_deg2 * d_SO3(E, G(neutral_rotation_deg))^2``,
+    where ``side`` selects ``"L"``/``"R"`` or an explicit 3-angle target).
+    A grid over extrinsic x-y-z angles seeds a Nelder-Mead refinement.
+    Postcondition: ``cost_after <= cost_before`` (the identity is in the grid).
     """
-    objective = ExcessObjective(relative, wrist_base, ranges_deg, weights)
+    side_key = side if isinstance(side, str) else "L"
+    neutral_deg = None if isinstance(side, str) else side
+    objective = ExcessObjective(
+        relative,
+        wrist_base,
+        ranges_deg,
+        weights,
+        neutral_prior_weight_deg2=neutral_prior_weight_deg2,
+        neutral_rotation_deg=neutral_deg,
+        side=side_key,
+    )
     r = objective.ranges
     if grid_half_deg <= 0 or grid_step_deg <= 0:
         raise ValueError("grid extent and step must be positive")
@@ -275,7 +363,10 @@ def fit_grip_rotation(
     ticks = np.union1d(ticks, [0.0])
     best: Array = np.zeros(3, dtype=float)
     best_cost = cost(best)
-    for candidate in product(ticks, ticks, ticks):
+    candidates: list[tuple[float, float, float]] = list(product(ticks, ticks, ticks))
+    if objective.neutral_prior_weight_deg2 > 0.0:
+        candidates.append(objective.neutral_rotation_deg)
+    for candidate in candidates:
         trial: Array = np.array(candidate, dtype=float)
         c = cost(trial)
         if c < best_cost - 1e-12:
@@ -296,4 +387,11 @@ def fit_grip_rotation(
         cost_after=best_cost,
         max_excess_before_deg=tuple(excess_deg(before, r).max(axis=0)),
         max_excess_after_deg=tuple(excess_deg(after, r).max(axis=0)),
+        neutral_deviation_before_deg=objective.neutral_deviation_deg(
+            grip_rotation(np.zeros(3))
+        ),
+        neutral_deviation_after_deg=objective.neutral_deviation_deg(
+            grip_rotation(best)
+        ),
+        neutral_prior_weight_deg2=objective.neutral_prior_weight_deg2,
     )

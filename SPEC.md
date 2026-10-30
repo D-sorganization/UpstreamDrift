@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-30 | #14117 | Add the grip_contact hand_on_club_acceptance module: one shared numeric hand-on-club acceptance evaluator (palm gap, lead finger wrap, V and thumb azimuth, trail gap, wrist residual, wrench feasibility, render contact sheet) with a per-engine report where unavailable engines are never reported as zero (#13998) |
 | 2026-10-30 | #14114 | Per-hand force and mobility ellipsoids at hand-club interface in MuJoCo videos |
 | 2026-10-30 | #14119 | Attach visual grip hands to wrist follower frame and scale wrist-to-grip origins by hand length |
 | 2026-10-30 | #14112 | Add SAP-4b drive-mode switch and paired STM sensitivity receipt |
