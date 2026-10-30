@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13996 · Attach Visual Grip Hands to Wrist Follower Frame and Scale Wrist-to-Grip Origins by Hand Length
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13996
+- **Branch:** merged via #14119
+- **PR:** #14119
+- **Paths:** see #14119
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`a581aeb2`; collated from changes/13996-attach-visual-grip-hands-to-wrist-follow.md)
+- **Summary:** Attach visual grip hands to wrist follower frame and scale wrist-to-grip origins by hand length
+- **Next step:** Shipped in PR #14119.
+
 ### DL-#13886 · Add SAP-4B Drive-Mode Switch and Paired STM Sensitivity Receipt
 
 - **State:** shipped
