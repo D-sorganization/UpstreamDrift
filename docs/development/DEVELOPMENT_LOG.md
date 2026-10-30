@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14088 · Sim-Run: Isolated Worker Subprocess With Timeout and Reaping
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14088
+- **Branch:** feat/14088-sim-run-worker-process
+- **PR:** #14100
+- **Paths:** see #14100
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`cbe0e25b`; collated from changes/14088-sim-run-worker-subprocess.md)
+- **Summary:** Runs execute in isolated worker subprocess outside event loop with wall-clock timeout and concurrency bound; worker reaped before cleanup; Linux rlimits applied and documented as verified only on Linux.
+- **Next step:** Shipped in PR #14100.
+
 ### DL-#14087 · Sim-Run: Durable Run Store With Run IDs, Disk Quota and Visible Expiration
 
 - **State:** shipped
