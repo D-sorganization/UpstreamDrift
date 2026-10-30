@@ -160,8 +160,79 @@ def hand_from_euler(euler_deg: Sequence[float] | Array) -> HandAngles:
     )
 
 
-#: Published neutral transform: ``alpha = gamma = 0``, ``psi = 40`` deg.
+#: Published neutral transform for the left/lead hand: ``alpha = gamma = 0``,
+#: ``psi = 40`` deg, i.e. ``M_{0,L} = R_x(-50 deg)``.
 NEUTRAL_EULER_DEG: Euler = hand_to_euler(HandAngles())
+NEUTRAL_GRIP_MATRIX: Array = grip_matrix(0.0, PALM_DIAGONAL_DEG, 0.0)
+_HAND_MIRROR_LEFT: Final[Array] = np.diag([-1.0, 1.0, 1.0])
+_HAND_MIRROR_RIGHT: Final[Array] = np.diag([1.0, -1.0, 1.0])
+
+
+def _canonical_euler_deg(values: Sequence[float] | Array) -> Euler:
+    out = [
+        0.0
+        if abs(float(v)) < 1e-12
+        else (180.0 if abs(abs(float(v)) - 180.0) < 1e-12 else float(v))
+        for v in values
+    ]
+    return (out[0], out[1], out[2])
+
+
+def mirror_grip_matrix(matrix: Array) -> Array:
+    """Mirror a hand-offset rotation ``M in SO(3)`` between left and right hands.
+
+    ``mirror_grip_matrix(M) = diag(-1, 1, 1) @ M @ diag(1, -1, 1)`` maps
+    ``(alpha, psi, gamma) -> (-alpha, psi, 180 deg - gamma)``, preserves
+    ``SO(3)``, and is an exact involution.
+    """
+    m = np.asarray(matrix, dtype=float)
+    require(
+        m.shape == (3, 3)
+        and bool(np.isfinite(m).all())
+        and bool(np.allclose(m @ m.T, np.eye(3), atol=1e-9))
+        and bool(np.isclose(np.linalg.det(m), 1.0, atol=1e-9)),
+        "matrix must be a 3x3 proper rotation in SO(3)",
+    )
+    return np.asarray(_HAND_MIRROR_LEFT @ m @ _HAND_MIRROR_RIGHT, dtype=float)
+
+
+def mirror_grip_euler(euler_deg: Sequence[float] | Array) -> Euler:
+    """Extrinsic x-y-z Euler triple of the mirrored hand offset ``mirror_grip_matrix(M)``."""
+    e = np.asarray(euler_deg, dtype=float)
+    require(
+        e.shape == (3,) and bool(np.isfinite(e).all()),
+        "euler_deg must be three finite angles",
+    )
+    m = _rot("x", GRIP_ULNAR_OFFSET_DEG) @ grip_rotation(e)
+    g_mirrored = _rot("x", -GRIP_ULNAR_OFFSET_DEG) @ mirror_grip_matrix(m)
+    return _canonical_euler_deg(
+        Rotation.from_matrix(g_mirrored).as_euler("xyz", degrees=True)
+    )
+
+
+#: Mirrored neutral transform for the right/trail hand: ``M_{0,R} = R_x(-50 deg) R_z(180 deg)``.
+MIRRORED_NEUTRAL_GRIP_MATRIX: Array = mirror_grip_matrix(NEUTRAL_GRIP_MATRIX)
+MIRRORED_NEUTRAL_EULER_DEG: Euler = mirror_grip_euler(NEUTRAL_EULER_DEG)
+NEUTRAL_GRIP_MATRIX_BY_SIDE: dict[Side, Array] = {
+    "L": NEUTRAL_GRIP_MATRIX,
+    "R": MIRRORED_NEUTRAL_GRIP_MATRIX,
+}
+NEUTRAL_EULER_BY_SIDE_DEG: dict[Side, Euler] = {
+    "L": NEUTRAL_EULER_DEG,
+    "R": MIRRORED_NEUTRAL_EULER_DEG,
+}
+
+
+def neutral_grip_matrix(side: Side = "L") -> Array:
+    """Published per-hand neutral offset matrix ``M_{0,side}`` for ``"L"`` or ``"R"``."""
+    require(side in ("L", "R"), f"side must be 'L' or 'R', got {side!r}")
+    return NEUTRAL_GRIP_MATRIX_BY_SIDE[side].copy()
+
+
+def neutral_euler_deg(side: Side = "L") -> Euler:
+    """Published per-hand neutral extrinsic x-y-z Euler triple for ``"L"`` or ``"R"``."""
+    require(side in ("L", "R"), f"side must be 'L' or 'R', got {side!r}")
+    return NEUTRAL_EULER_BY_SIDE_DEG[side]
 
 
 def follower_rotation(native_rotation: Array, angles: HandAngles) -> Array:
