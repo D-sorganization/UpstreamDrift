@@ -111,6 +111,11 @@ class SimulationRunStore:
             status="queued",
             request=request,
             created_at=_iso_now(),
+            started_at=None,
+            completed_at=None,
+            expires_at=None,
+            result=None,
+            error=None,
         )
         self._atomic_write_record(assigned_id, record)
         return record
