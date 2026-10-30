@@ -95,19 +95,24 @@ def palm_thumb_patch_for_spec(spec_bytes: bytes) -> tuple[Any, float]:
     return patch, float(friction)
 
 
-def _extract_physical_radii(hm: Any, kind: str) -> tuple[np.ndarray, np.ndarray]:
+def _extract_physical_radii(hm: Any, kind: str) -> tuple[np.ndarray, tuple[float, ...]]:
     """Return (axes, radii) for a given ellipsoid kind."""
     if kind == "mobility":
-        return hm.mobility_axes, np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
-    if kind == "effective-mass":
-        return hm.mobility_axes, 1.0 / np.sqrt(
-            np.maximum(hm.mobility_eigenvalues, 1e-9)
-        )
-    if kind == "force-capacity" and hm.force_capacity is not None:
-        return hm.force_capacity.axes, hm.force_capacity.radii
-    if kind == "acceleration-capacity" and hm.acceleration_capacity is not None:
-        return hm.acceleration_capacity.axes, hm.acceleration_capacity.radii
-    return hm.mobility_axes, np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
+        axes = hm.mobility_axes
+        r = np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
+    elif kind == "effective-mass":
+        axes = hm.mobility_axes
+        r = 1.0 / np.sqrt(np.maximum(hm.mobility_eigenvalues, 1e-9))
+    elif kind == "force-capacity" and hm.force_capacity is not None:
+        axes = hm.force_capacity.axes
+        r = hm.force_capacity.radii
+    elif kind == "acceleration-capacity" and hm.acceleration_capacity is not None:
+        axes = hm.acceleration_capacity.axes
+        r = hm.acceleration_capacity.radii
+    else:
+        axes = hm.mobility_axes
+        r = np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
+    return axes, tuple(map(float, r))
 
 
 def _build_hand_ellipsoid_feed(
