@@ -9,13 +9,14 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.force_overlay.bundle_provider import BundleOverlayProvider
+from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
 from src.tools.native_viewer_export.core import (
     BackendUnavailable,
     OverlayFeed,
@@ -94,6 +95,153 @@ def palm_thumb_patch_for_spec(spec_bytes: bytes) -> tuple[Any, float]:
     return patch, float(friction)
 
 
+def _extract_physical_radii(hm: Any, kind: str) -> tuple[np.ndarray, np.ndarray]:
+    """Return (axes, radii) for a given ellipsoid kind."""
+    if kind == "mobility":
+        return hm.mobility_axes, np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
+    if kind == "effective-mass":
+        return hm.mobility_axes, 1.0 / np.sqrt(
+            np.maximum(hm.mobility_eigenvalues, 1e-9)
+        )
+    if kind == "force-capacity" and hm.force_capacity is not None:
+        return hm.force_capacity.axes, hm.force_capacity.radii
+    if kind == "acceleration-capacity" and hm.acceleration_capacity is not None:
+        return hm.acceleration_capacity.axes, hm.acceleration_capacity.radii
+    return hm.mobility_axes, np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
+
+
+def _build_hand_ellipsoid_feed(
+    swing: SwingInput,
+    active_ellipsoids: Sequence[str],
+    hand_mobility_mode: str,
+    ellipsoid_scale: str,
+) -> tuple[
+    Callable[[int], tuple[EllipsoidGlyph, ...]], Callable[[int], tuple[str, ...]]
+]:
+    """Build ellipsoid glyph emitter and HUD capability formatter."""
+    from src.shared.python.force_overlay.ellipsoid_display import (
+        EllipsoidDisplayBuilder,
+        EllipsoidDisplayScale,
+        format_hud_capability,
+    )
+
+    _hm_cache: dict[int, Any] = {}
+
+    def _get_hm(idx: int) -> dict[str, Any]:
+        if idx not in _hm_cache:
+            _hm_cache[idx] = swing.hand_mobility_at(idx, mode=hand_mobility_mode)
+        return _hm_cache[idx]
+
+    builders: dict[str, EllipsoidDisplayBuilder] = {}
+    scales: dict[str, EllipsoidDisplayScale] = {}
+    for kind in active_ellipsoids:
+        semi_axes_series: list[list[float]] = []
+        stride = max(1, swing.n_states // 20)
+        for idx in range(0, swing.n_states, stride):
+            hm_sample = _get_hm(idx)
+            for h in ("lead", "trail"):
+                _, r = _extract_physical_radii(hm_sample[h], kind)
+                semi_axes_series.append(list(r))
+        scale = EllipsoidDisplayScale.compute(
+            semi_axes_series,
+            target_radius_m=0.09,
+            kind=kind,
+            mode=ellipsoid_scale,
+        )
+        scales[kind] = scale
+        builders[kind] = EllipsoidDisplayBuilder(scale)
+
+    def hand_ellipsoids_fn(index: int) -> tuple[EllipsoidGlyph, ...]:
+        hm_map = _get_hm(index)
+        glyphs_list: list[EllipsoidGlyph] = []
+        for kind in active_ellipsoids:
+            builder = builders[kind]
+            for hand in ("lead", "trail"):
+                hm = hm_map[hand]
+                axes, radii_phys = _extract_physical_radii(hm, kind)
+                disp = builder.build_glyph(
+                    hm.centre,
+                    axes,
+                    radii_phys,
+                    hand,
+                    label=f"{hand} {kind}",
+                )
+                glyphs_list.append(
+                    EllipsoidGlyph(
+                        disp.centre,
+                        disp.axes,
+                        disp.radii,
+                        disp.rgba,
+                        disp.label,
+                    )
+                )
+        return tuple(glyphs_list)
+
+    def hand_hud_lines_fn(index: int) -> tuple[str, ...]:
+        hm_map = _get_hm(index)
+        lines: list[str] = []
+        for kind in active_ellipsoids:
+            scale = scales[kind]
+            lead_hm, trail_hm = hm_map["lead"], hm_map["trail"]
+            _, lead_r = _extract_physical_radii(lead_hm, kind)
+            _, trail_r = _extract_physical_radii(trail_hm, kind)
+            lead_hud = format_hud_capability(
+                "lead", kind, lead_r, scale.unit, lead_hm.condition
+            )
+            trail_hud = format_hud_capability(
+                "trail", kind, trail_r, scale.unit, trail_hm.condition
+            )
+            lines.append(f"{lead_hud} | {trail_hud}")
+        return tuple(lines)
+
+    return hand_ellipsoids_fn, hand_hud_lines_fn
+
+
+def _resolve_active_ellipsoids(
+    hand_mobility: bool | str,
+    interface_ellipsoids: Sequence[str],
+) -> list[str]:
+    """Resolve active ellipsoid kinds from CLI and config flags."""
+    active: list[str] = list(interface_ellipsoids)
+    if hand_mobility:
+        if hand_mobility in ("velocity", "mobility", True):
+            if "mobility" not in active:
+                active.append("mobility")
+        elif hand_mobility == "force":
+            if "effective-mass" not in active:
+                active.append("effective-mass")
+        elif hand_mobility == "both":
+            if "mobility" not in active:
+                active.append("mobility")
+            if "effective-mass" not in active:
+                active.append("effective-mass")
+    return active
+
+
+def _apply_palm_thumb(
+    provider: BundleOverlayProvider, source: Any, spec_bytes: bytes
+) -> None:
+    """Configure allocated palm-thumb contact overlay on the provider."""
+    spec = json.loads(spec_bytes)
+    friction = spec.get("contact", {}).get("parameters", {}).get("static_friction")
+    if friction is None:
+        raise ValueError("the specification has no contact static_friction")
+    try:
+        from src.shared.python.motion_matching.execution.grip_rotation import (
+            grip_spec_of,
+        )
+
+        grip_spec = grip_spec_of(spec)
+    except (ValueError, KeyError):
+        from src.shared.python.motion_matching.grip_contract import GripSpec
+
+        grip_spec = GripSpec()
+    from src.shared.python.grip_contact.contact_topology import contact_topology
+
+    topo = contact_topology(grip_spec)
+    provider.with_allocated_contacts(source, topo, static_friction=float(friction))
+
+
 def build_overlay_feed(
     swing: SwingInput,
     engine: str,
@@ -155,178 +303,22 @@ def build_overlay_feed(
         if impact is not None:
             provider.with_axial_impact_window(impact, float(swing.bundle.dt_s))
     if palm_thumb:
-        spec = json.loads(swing.bundle.spec_bytes)
-        friction = spec.get("contact", {}).get("parameters", {}).get("static_friction")
-        if friction is None:
-            raise ValueError("the specification has no contact static_friction")
-        try:
-            from src.shared.python.motion_matching.execution.grip_rotation import (
-                grip_spec_of,
-            )
-
-            grip_spec = grip_spec_of(spec)
-        except (ValueError, KeyError):
-            from src.shared.python.motion_matching.grip_contract import GripSpec
-
-            grip_spec = GripSpec()
-        from src.shared.python.grip_contact.contact_topology import contact_topology
-
-        topo = contact_topology(grip_spec)
-        provider.with_allocated_contacts(source, topo, static_friction=float(friction))
+        _apply_palm_thumb(provider, source, swing.bundle.spec_bytes)
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
     style = default_glyph_style(body_mass_kg=float(source.total_mass_kg))
 
-    active_ellipsoids: list[str] = list(interface_ellipsoids)
-    if hand_mobility:
-        if hand_mobility in ("velocity", "mobility", True):
-            if "mobility" not in active_ellipsoids:
-                active_ellipsoids.append("mobility")
-        elif hand_mobility == "force":
-            if "effective-mass" not in active_ellipsoids:
-                active_ellipsoids.append("effective-mass")
-        elif hand_mobility == "both":
-            if "mobility" not in active_ellipsoids:
-                active_ellipsoids.append("mobility")
-            if "effective-mass" not in active_ellipsoids:
-                active_ellipsoids.append("effective-mass")
-
+    active_ellipsoids = _resolve_active_ellipsoids(hand_mobility, interface_ellipsoids)
     hand_ellipsoids_fn = None
     hand_hud_lines_fn = None
     if active_ellipsoids:
-        from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
-        from src.shared.python.force_overlay.ellipsoid_display import (
-            EllipsoidDisplayBuilder,
-            EllipsoidDisplayScale,
-            format_hud_capability,
+        hand_ellipsoids_fn, hand_hud_lines_fn = _build_hand_ellipsoid_feed(
+            swing,
+            active_ellipsoids,
+            hand_mobility_mode,
+            ellipsoid_scale,
         )
-
-        _hm_cache: dict[int, Any] = {}
-
-        def _get_hm(idx: int) -> dict[str, Any]:
-            if idx not in _hm_cache:
-                _hm_cache[idx] = swing.hand_mobility_at(idx, mode=hand_mobility_mode)
-            return _hm_cache[idx]
-
-        builders: dict[str, EllipsoidDisplayBuilder] = {}
-        scales: dict[str, EllipsoidDisplayScale] = {}
-        for kind in active_ellipsoids:
-            semi_axes_series: list[list[float]] = []
-            stride = max(1, swing.n_states // 20)
-            for idx in range(0, swing.n_states, stride):
-                hm_sample = _get_hm(idx)
-                for h in ("lead", "trail"):
-                    hm_h = hm_sample[h]
-                    if kind == "mobility":
-                        r = np.sqrt(np.maximum(hm_h.mobility_eigenvalues, 0.0))
-                    elif kind == "effective-mass":
-                        r = 1.0 / np.sqrt(np.maximum(hm_h.mobility_eigenvalues, 1e-9))
-                    elif kind == "force-capacity" and hm_h.force_capacity is not None:
-                        r = hm_h.force_capacity.radii
-                    elif (
-                        kind == "acceleration-capacity"
-                        and hm_h.acceleration_capacity is not None
-                    ):
-                        r = hm_h.acceleration_capacity.radii
-                    else:
-                        r = np.sqrt(np.maximum(hm_h.mobility_eigenvalues, 0.0))
-                    semi_axes_series.append(list(r))
-            scale = EllipsoidDisplayScale.compute(
-                semi_axes_series,
-                target_radius_m=0.09,
-                kind=kind,
-                mode=ellipsoid_scale,
-            )
-            scales[kind] = scale
-            builders[kind] = EllipsoidDisplayBuilder(scale)
-
-        def hand_ellipsoids_fn(index: int) -> tuple[EllipsoidGlyph, ...]:
-            hm_map = _get_hm(index)
-            glyphs_list: list[EllipsoidGlyph] = []
-            for kind in active_ellipsoids:
-                builder = builders[kind]
-                for hand in ("lead", "trail"):
-                    hm = hm_map[hand]
-                    if kind == "mobility":
-                        axes = hm.mobility_axes
-                        radii_phys = np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
-                    elif kind == "effective-mass":
-                        axes = hm.mobility_axes
-                        radii_phys = 1.0 / np.sqrt(
-                            np.maximum(hm.mobility_eigenvalues, 1e-9)
-                        )
-                    elif kind == "force-capacity" and hm.force_capacity is not None:
-                        axes = hm.force_capacity.axes
-                        radii_phys = hm.force_capacity.radii
-                    elif (
-                        kind == "acceleration-capacity"
-                        and hm.acceleration_capacity is not None
-                    ):
-                        axes = hm.acceleration_capacity.axes
-                        radii_phys = hm.acceleration_capacity.radii
-                    else:
-                        axes = hm.mobility_axes
-                        radii_phys = np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
-                    disp = builder.build_glyph(
-                        hm.centre,
-                        axes,
-                        radii_phys,
-                        hand,
-                        label=f"{hand} {kind}",
-                    )
-                    glyphs_list.append(
-                        EllipsoidGlyph(
-                            disp.centre,
-                            disp.axes,
-                            disp.radii,
-                            disp.rgba,
-                            disp.label,
-                        )
-                    )
-            return tuple(glyphs_list)
-
-        def hand_hud_lines_fn(index: int) -> tuple[str, ...]:
-            hm_map = _get_hm(index)
-            lines: list[str] = []
-            for kind in active_ellipsoids:
-                scale = scales[kind]
-                lead_hm, trail_hm = hm_map["lead"], hm_map["trail"]
-                if kind == "mobility":
-                    lead_r = np.sqrt(np.maximum(lead_hm.mobility_eigenvalues, 0.0))
-                    trail_r = np.sqrt(np.maximum(trail_hm.mobility_eigenvalues, 0.0))
-                elif kind == "effective-mass":
-                    lead_r = 1.0 / np.sqrt(
-                        np.maximum(lead_hm.mobility_eigenvalues, 1e-9)
-                    )
-                    trail_r = 1.0 / np.sqrt(
-                        np.maximum(trail_hm.mobility_eigenvalues, 1e-9)
-                    )
-                elif (
-                    kind == "force-capacity"
-                    and lead_hm.force_capacity is not None
-                    and trail_hm.force_capacity is not None
-                ):
-                    lead_r = lead_hm.force_capacity.radii
-                    trail_r = trail_hm.force_capacity.radii
-                elif (
-                    kind == "acceleration-capacity"
-                    and lead_hm.acceleration_capacity is not None
-                    and trail_hm.acceleration_capacity is not None
-                ):
-                    lead_r = lead_hm.acceleration_capacity.radii
-                    trail_r = trail_hm.acceleration_capacity.radii
-                else:
-                    lead_r = np.sqrt(np.maximum(lead_hm.mobility_eigenvalues, 0.0))
-                    trail_r = np.sqrt(np.maximum(trail_hm.mobility_eigenvalues, 0.0))
-                lead_hud = format_hud_capability(
-                    "lead", kind, lead_r, scale.unit, lead_hm.condition
-                )
-                trail_hud = format_hud_capability(
-                    "trail", kind, trail_r, scale.unit, trail_hm.condition
-                )
-                lines.append(f"{lead_hud} | {trail_hud}")
-            return tuple(lines)
 
     feed = OverlayFeed(
         provider.frame_at,
