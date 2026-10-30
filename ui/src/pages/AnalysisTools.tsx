@@ -16,6 +16,7 @@ import { ImpactParametersPanel } from '@/components/analysis/ImpactParametersPan
 import { GripWrenchCharts } from '@/components/analysis/GripWrenchCharts';
 import { GroundReactionCharts } from '@/components/analysis/GroundReactionCharts';
 import { LoopNullSpacePanel } from '@/components/analysis/LoopNullSpacePanel';
+import { AnatomicalEventTablePanel } from '@/components/analysis/anatomicalEventTable/AnatomicalEventTablePanel';
 import { PlotsSection } from '@/components/analysis/PlotsSection';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 export type {
@@ -189,6 +190,7 @@ export function AnalysisToolsPage() {
 
             {/* Impact parameters relative to the target line (GCV-17, #11723) */}
             <ImpactParametersPanel />
+            <AnatomicalEventTablePanel />
 
             {/* Club grip force and torque plots (GCV-10, #11716) */}
             <GripWrenchCharts />
