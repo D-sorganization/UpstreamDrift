@@ -440,7 +440,7 @@ def integrate_drive_mode_stm(
     phi_win = np.linalg.solve(trans[w_idx].T, trans[-1].T).T
     phi_norm = normalized_transition(phi_win, scales)
     s_vals = tuple(float(v) for v in np.linalg.svd(phi_norm, compute_uv=False))
-    lens = np.array([seg.length_m for seg in dm._CANONICAL_DYN.parameters.segments])
+    lens = np.array([seg.length_m for seg in dyn.parameters.segments])
     xf, h, eye = states[-1], 1e-7, np.eye(6)
 
     def _vtip(s: FloatArray) -> float:
