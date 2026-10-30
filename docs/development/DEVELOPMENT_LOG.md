@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13886 · Add SAP-4B Drive-Mode Switch and Paired STM Sensitivity Receipt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13886
+- **Branch:** merged via #14112
+- **PR:** #14112
+- **Paths:** see #14112
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`bc186952`; collated from changes/13886-add-sap-4b-drive-mode-switch-and-paired.md)
+- **Summary:** Add SAP-4b drive-mode switch and paired STM sensitivity receipt
+- **Next step:** Shipped in PR #14112.
+
 ### DL-#14109 · Disarm Unit-Gate Hang Watchdog on Pytest_Unconfigure
 
 - **State:** shipped
