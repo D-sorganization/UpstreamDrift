@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14089 · Sim-Run: Result Validation and Provenance Gate Before Succeeded
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14089
+- **Branch:** feat/14089-sim-run-result-validation
+- **PR:** #14103
+- **Paths:** see #14103
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`8c2dc6fc`; collated from changes/14089-sim-run-validation-gate.md)
+- **Summary:** Result envelope records repo SHA, engine version, and input sha256; numerical integrity gate recursively catches NaN and Inf in outputs; schema-invalid or NaN-emitting runs force failed state with structured diagnostics.
+- **Next step:** Shipped in PR #14103.
+
 ### DL-#14088 · Sim-Run: Isolated Worker Subprocess With Timeout and Reaping
 
 - **State:** shipped
