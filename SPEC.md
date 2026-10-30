@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-30 | #14126 | Install Pinocchio runtime library for parity CI |
+| 2026-10-30 | #14125 | Explain unverified torque-capacity proxies without changing values or verification status. |
 | 2026-10-30 | #14116 | Encodes the per-hand neutral transform M_0 and explicit left/right mirror involution in grip_contract, adds an optional geodesic neutral prior to ExcessObjective and fit_grip_rotation with DbC validation, and adds observability, neutral-envelope regression, and wrist child_to_follower contract unit tests. |
 | 2026-10-30 | #14117 | Add the grip_contact hand_on_club_acceptance module: one shared numeric hand-on-club acceptance evaluator (palm gap, lead finger wrap, V and thumb azimuth, trail gap, wrist residual, wrench feasibility, render contact sheet) with a per-engine report where unavailable engines are never reported as zero (#13998); Adds the shared numeric hand-on-club acceptance evaluator covering palm-to-grip gap (at most 3 mm), lead finger wrap (at least 240 deg), lead thumb and V azimuth prior conformity, trail-hand gap series (at most 5 mm), wrist-to-template attachment residual (at most 3 mm), per-hand wrench feasibility, and render contact-sheet specification across engines. |
 | 2026-10-30 | #14114 | Per-hand force and mobility ellipsoids at hand-club interface in MuJoCo videos |

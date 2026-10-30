@@ -1015,6 +1015,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14122 · Install Pinocchio Runtime Library for Parity CI
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14122
+- **Branch:** merged via #14126
+- **PR:** #14126
+- **Paths:** see #14126
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`e289527e`; collated from changes/14122-install-pinocchio-runtime-library-for-pa.md)
+- **Summary:** Install Pinocchio runtime library for parity CI
+- **Next step:** Shipped in PR #14126.
+
+### DL-#12553 · Explain Unverified Torque-Capacity Proxies Without Changing Values or Verification Status.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12553
+- **Branch:** merged via #14125
+- **PR:** #14125
+- **Paths:** see #14125
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`e66a0a20`; collated from changes/12553-explain-unverified-torque-capacity-proxi.md)
+- **Summary:** Explain unverified torque-capacity proxies without changing values or verification status.
+- **Next step:** Shipped in PR #14125.
+
 ### DL-#13998 · Numeric Hand-on-Club Acceptance Gates With Per-Engine Report and Render Contract
 
 - **State:** shipped
