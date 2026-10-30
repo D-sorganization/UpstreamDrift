@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .cli import main as run_cli
 from .models import (
     Provenance,
     ResultEnvelope,
@@ -54,6 +55,7 @@ __all__ = [
     "export_schemas",
     "get_repo_sha",
     "reap_subprocess",
+    "run_cli",
     "run_simulation_job",
     "validate_numerical_integrity",
     "validate_provenance",
