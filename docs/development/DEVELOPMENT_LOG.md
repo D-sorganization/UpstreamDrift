@@ -505,10 +505,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13758
 - **Branch:** staff/issue-remediator-13758-4adf95
-- **PR:** #13816
+- **PR:** #13816, #14116
 - **Paths:** see #13816
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-25 (`652ea2e1`; collated from changes/13758-add-so-3-observability-evidence-for-grip.md)
+- **Last verified:** 2026-10-30 (`30025fe5`; collated from changes/13758-grip-neutral-prior-and-mirror-contract.md)
 - **Summary:** Add SO(3) observability evidence for grip fitting
 - **Next step:** Use Jacobian evidence to select the neutral-prior fit change
 
@@ -1014,6 +1014,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13998 · Numeric Hand-on-Club Acceptance Gates With Per-Engine Report and Render Contract
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13998
+- **Branch:** agy-c/13998-hand-on-club-acceptance
+- **PR:** #14117
+- **Paths:** see #14117
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`e1bf681d`; collated from changes/13998-hand-on-club-acceptance-gates.md)
+- **Summary:** Adds the shared numeric hand-on-club acceptance evaluator covering palm-to-grip gap (at most 3 mm), lead finger wrap (at least 240 deg), lead thumb and V azimuth prior conformity, trail-hand gap series (at most 5 mm), wrist-to-template attachment residual (at most 3 mm), per-hand wrench feasibility, and render contact-sheet specification across engines.
+- **Next step:** Shipped in PR #14117.
 
 ### DL-#13996 · Attach Visual Grip Hands to Wrist Follower Frame and Scale Wrist-to-Grip Origins by Hand Length
 
