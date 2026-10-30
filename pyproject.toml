@@ -373,6 +373,8 @@ upstream-drift = "launch_upstream_drift:main"
 # build_hooks.py requires the exact Tools gitlink and assembles parent modules
 # before the UpstreamDrift-owned extensions classified in the ownership manifest.
 sidekick = "sidekick.__main__:main"
+# Headless simulation batch runner CLI (Epic #14085 / #14090).
+ud-sim = "src.sim_run.cli:main"
 
 [project.entry-points."upstream_drift.engines"]
 # Third-party engines register here via pyproject.toml:
