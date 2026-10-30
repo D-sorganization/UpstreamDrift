@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -27,6 +28,19 @@ from src.tools.native_viewer_export.core import (
 logger = logging.getLogger(__name__)
 
 LOOKAT_HEIGHT_M = 0.9
+
+
+@dataclass(frozen=True)
+class OverlayOptions:
+    """Configurable display toggles and ellipsoid options for build_overlay_feed."""
+
+    show_force: bool = True
+    show_torque: bool = True
+    palm_thumb: bool = False
+    hand_mobility: bool | str = False
+    hand_mobility_mode: str = "constrained"
+    interface_ellipsoids: Sequence[str] = ()
+    ellipsoid_scale: str = "auto"
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -254,13 +268,8 @@ def build_overlay_feed(
     grip: bool = False,
     axial: bool = False,
     impact_time_s: float | None = None,
-    show_force: bool = True,
-    show_torque: bool = True,
     palm_thumb: bool = False,
-    hand_mobility: bool | str = False,
-    hand_mobility_mode: str = "constrained",
-    interface_ellipsoids: Sequence[str] = (),
-    ellipsoid_scale: str = "auto",
+    options: OverlayOptions | None = None,
 ) -> tuple[OverlayFeed, tuple[float, float, float]]:
     """Overlay feed for ``swing`` plus the framing look-at point.
 
@@ -273,11 +282,9 @@ def build_overlay_feed(
     closure wrench is solved from the bundle efforts and injected; around ball
     impact (``impact_time_s``, default the shared detector's; frames within one
     bundle step) the loads are unavailable, as the impact impulse is not
-    modelled (#13179). ``show_force`` and
-    ``show_torque`` choose the glyph kinds drawn. With ``palm_thumb`` each loaded
-    frame also carries the allocated trail-palm-on-lead-thumb normal force
-    (HRG-H1, #13189), drawn independently of the other vectors; it is reporting
-    only and leaves the compiled model unchanged.
+    modelled (#13179). Options in ``options`` (or ``palm_thumb``) configure
+    vector kinds (``show_force``, ``show_torque``), palm-thumb normal force
+    (HRG-H1, #13189), and hand mobility/force interface ellipsoids (HCM-3, #14004).
 
     Raises ``BackendUnavailable`` when MuJoCo is not installed.
     """
@@ -289,6 +296,11 @@ def build_overlay_feed(
         raise BackendUnavailable(
             f"mujoco is not available for overlays: {exc}"
         ) from exc
+    opts = options or OverlayOptions()
+    show_force = opts.show_force
+    show_torque = opts.show_torque
+    effective_palm_thumb = palm_thumb or opts.palm_thumb
+
     source = MujocoOverlaySource(swing.bundle.spec_bytes)
     grip_source, grip_name = (
         _grip_source(swing, engine, source) if grip else (None, None)
@@ -307,22 +319,24 @@ def build_overlay_feed(
         impact = _impact_or_none(swing) if impact_time_s is None else impact_time_s
         if impact is not None:
             provider.with_axial_impact_window(impact, float(swing.bundle.dt_s))
-    if palm_thumb:
+    if effective_palm_thumb:
         _apply_palm_thumb(provider, source, swing.bundle.spec_bytes)
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
     style = default_glyph_style(body_mass_kg=float(source.total_mass_kg))
 
-    active_ellipsoids = _resolve_active_ellipsoids(hand_mobility, interface_ellipsoids)
+    active_ellipsoids = _resolve_active_ellipsoids(
+        opts.hand_mobility, opts.interface_ellipsoids
+    )
     hand_ellipsoids_fn = None
     hand_hud_lines_fn = None
     if active_ellipsoids:
         hand_ellipsoids_fn, hand_hud_lines_fn = _build_hand_ellipsoid_feed(
             swing,
             active_ellipsoids,
-            hand_mobility_mode,
-            ellipsoid_scale,
+            opts.hand_mobility_mode,
+            opts.ellipsoid_scale,
         )
 
     feed = OverlayFeed(
@@ -331,7 +345,7 @@ def build_overlay_feed(
         grip_analyses=provider.grip_analyses if grip else None,
         show_force=show_force,
         show_torque=show_torque,
-        show_palm_thumb=palm_thumb,
+        show_palm_thumb=effective_palm_thumb,
         hand_ellipsoids=hand_ellipsoids_fn,
         hand_hud_lines=hand_hud_lines_fn,
     )

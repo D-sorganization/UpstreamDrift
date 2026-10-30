@@ -42,7 +42,7 @@ from src.tools.native_viewer_export.core import (
     ExportSettings,
     parse_ellipsoid_scale,
 )
-from src.tools.native_viewer_export.overlay import build_overlay_feed
+from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 
 logger = logging.getLogger(__name__)
@@ -494,12 +494,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 build_overlay_feed,
                 grip=settings.grip,
                 axial=settings.shading_enabled,
-                show_force=settings.force_vectors,
-                show_torque=settings.torque_vectors,
-                palm_thumb=settings.palm_thumb_force,
-                interface_ellipsoids=settings.interface_ellipsoids,
-                ellipsoid_scale=settings.ellipsoid_scale,
-                hand_mobility_mode=settings.hand_mobility_mode,
+                options=OverlayOptions(
+                    show_force=settings.force_vectors,
+                    show_torque=settings.torque_vectors,
+                    palm_thumb=settings.palm_thumb_force,
+                    interface_ellipsoids=settings.interface_ellipsoids,
+                    ellipsoid_scale=settings.ellipsoid_scale,
+                    hand_mobility_mode=settings.hand_mobility_mode,
+                ),
             ),
         )
     except (ValueError, FileNotFoundError) as exc:

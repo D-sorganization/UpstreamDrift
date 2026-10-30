@@ -101,7 +101,10 @@ def test_swing_overlay_adds_two_ellipsoid_geoms_per_frame(source, states) -> Non
     import mujoco
     from src.shared.python.motion_matching.same_input import InputBundle
     from src.tools.native_viewer_export.core import SwingInput
-    from src.tools.native_viewer_export.overlay import build_overlay_feed
+    from src.tools.native_viewer_export.overlay import (
+        OverlayOptions,
+        build_overlay_feed,
+    )
     from src.tools.native_viewer_export.backends._scene_overlays import (
         apply_scene_overlays,
     )
@@ -123,7 +126,13 @@ def test_swing_overlay_adds_two_ellipsoid_geoms_per_frame(source, states) -> Non
     )
     swing = SwingInput(bundle, q, "s", "driver", "mujoco")
     feed, _ = build_overlay_feed(
-        swing, "mujoco", hand_mobility=True, show_force=False, show_torque=False
+        swing,
+        "mujoco",
+        options=OverlayOptions(
+            hand_mobility=True,
+            show_force=False,
+            show_torque=False,
+        ),
     )
 
     dummy_model = mujoco.MjModel.from_xml_string("<mujoco><worldbody/></mujoco>")

@@ -3,15 +3,6 @@
   "max_parameters": 8,
   "exceptions": [
     {
-      "path": "src/tools/native_viewer_export/overlay.py",
-      "symbol": "build_overlay_feed",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 14004,
-      "reason": "Issue #14004: HCM-3 added hand mobility and interface ellipsoid parameters to build_overlay_feed.",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/shared/python/workspace/necromatcher_video.py",
       "symbol": "export_fit_video",
       "rule": "parameters",
