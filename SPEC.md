@@ -2741,6 +2741,12 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-30 | #14114 | Per-hand force and mobility ellipsoids at hand-club interface in MuJoCo videos |
+| 2026-10-30 | #14119 | Attach visual grip hands to wrist follower frame and scale wrist-to-grip origins by hand length |
+| 2026-10-30 | #14112 | Add SAP-4b drive-mode switch and paired STM sensitivity receipt |
+| 2026-10-30 | #14113 | Adds an optional --event-captions flag to src.tools.native_viewer_export (and ExportSettings.event_captions / HudInfo.event_caption) that draws the active anatomical swing event line (Event: address, Event: top, Event: pelvis reversal, Event: impact, Event: finish) along the bottom HUD when enabled. |
+| 2026-10-30 | #14111 | Disarm the root conftest hang watchdog in pytest_unconfigure (ignore SIGUSR1, close the dump pipe, and terminate/reap the watchdog subprocess) and exit the watchdog immediately on stdin EOF so late SIGUSR1 signals during interpreter shutdown cannot kill pytest with exit code 138. |
+| 2026-10-30 | #14110 | Adds the HRG-H2 (hrg-h2-palm-thumb-pad-v1) compliant palm-thumb pad subsection to docs/research/human_realistic_golfer/human_realistic_golfer.tex documenting the separated_v2 sphere-capsule contact law, 2.0 mm hand-drift gate, preload sensitivity, timestep-halving impact convergence, and unit test verification. |
 | 2026-10-30 | #14108 | Adds stdio Model Context Protocol (MCP) JSON-RPC 2.0 adapter exposing describe_engines, submit_run, get_run, and fetch_artifact tools over the headless simulation run service with Private Mode and auth checks at the service boundary. |
 | 2026-10-30 | #14107 | Adds CI smoke verification running a minimal case through the ud-sim CLI, asserting zero Qt imports in sys.modules and verified succeeded status with contract and falsification testing. |
 | 2026-10-30 | #14105 | Implements ud-sim run batch CLI dispatching simulation cases through SimulationRunStore and SimulationWorkerPool, writing run records and output envelopes to configurable results root, returning non-zero exit on failure, with console script registration and CLI-API equivalence falsifying tests. |

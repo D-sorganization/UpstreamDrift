@@ -71,6 +71,22 @@ LEAD_V_AZIMUTH_MAX_DEG: float = 90.0
 #: Rajagopal models do not use it: their hand grip frames come from the
 #: committed address calibration (``msk_club.HAND_GRIP_POINT_M``).
 HAND_GRIP_ANCHOR_IN_HAND_M: tuple[float, float, float] = (0.0, -0.06, 0.0)
+#: Calibrated grip anchor in the OpenSim Rajagopal hand frame (metres, #13996):
+#: palm side (+x) of the metacarpal heads, mid-hand (y along forearm, z radial).
+RAJAGOPAL_HAND_GRIP_POINT_M: tuple[float, float, float] = (0.022, -0.085, 0.0)
+
+
+def wrist_grip_offset_m(hand_length_m: float | None = None) -> float:
+    """Anthropometric wrist-to-grip offset distance (metres, #13996).
+
+    Scales ``||HAND_GRIP_ANCHOR_IN_HAND_M||`` (0.06 m at reference hand length
+    0.193 m) linearly by :func:`hand_size.hand_mesh_scale`.
+    """
+    from src.shared.python.hand_size import DEFAULT_HAND_LENGTH_M, hand_mesh_scale
+
+    length = DEFAULT_HAND_LENGTH_M if hand_length_m is None else float(hand_length_m)
+    return float(np.linalg.norm(HAND_GRIP_ANCHOR_IN_HAND_M)) * hand_mesh_scale(length)
+
 
 #: Hand-centre spacing along the shaft.  3 in (0.0762 m): the separation of the
 #: trail closure placement and the lead wrist joint in the native Simscape spec

@@ -372,3 +372,56 @@ def test_receipt_records_grip_provenance_and_revision(base) -> None:
     receipt = _receipt(out)
     assert receipt["grip_provenance"] == out["subject"]["grip_provenance"]
     assert receipt["spec_revision"] == out["spec_revision"]
+
+
+def _wrist_origin_in_club(doc: dict, side: str) -> np.ndarray:
+    if side == "L":
+        joint = next(j for j in doc["joints"] if j["child"].endswith("Clubface Vector"))
+        return np.asarray(joint["child_to_follower"], dtype=float)[:3, 3]
+    closure = doc["closure"]
+    pa = np.asarray(closure["placement_a"], dtype=float)
+    pb = np.asarray(closure["placement_b"], dtype=float)
+    joint = next(j for j in doc["joints"] if j["child"].endswith("RHandStandoff"))
+    c2f_r = np.asarray(joint["child_to_follower"], dtype=float)
+    return (pb @ np.linalg.inv(pa) @ c2f_r)[:3, 3]
+
+
+def _radial_distance_from_grip_axis(doc: dict, side: str) -> float:
+    axis_pt = np.asarray(doc["closure"]["placement_b"], dtype=float)[:3, 3]
+    origin = _wrist_origin_in_club(doc, side)
+    return float(np.hypot(origin[0] - axis_pt[0], origin[2] - axis_pt[2]))
+
+
+def test_wrist_origin_distance_from_grip_axis_is_anthropometric(base) -> None:
+    """After apply_grip_config, LW and RW sit at scaled HAND_GRIP_ANCHOR_IN_HAND_M (#13996)."""
+    from src.shared.python.hand_size import hand_mesh_scale
+    from src.shared.python.model_appearance.grip_pose import (
+        HAND_GRIP_ANCHOR_IN_HAND_M,
+        RAJAGOPAL_HAND_GRIP_POINT_M,
+        wrist_grip_offset_m,
+    )
+    from src.shared.python.motion_matching.execution.grip_rotation import (
+        wrist_template_attachment_residuals_m,
+    )
+
+    anchor_norm = float(np.linalg.norm(HAND_GRIP_ANCHOR_IN_HAND_M))
+    for hand_len in (0.145, 0.193, 0.240):
+        doc_in = copy.deepcopy(base)
+        doc_in["subject"]["hand_length_m"] = hand_len
+        out = apply_grip_config(doc_in, _cfg())
+        expected = anchor_norm * hand_mesh_scale(hand_len)
+        assert expected == pytest.approx(wrist_grip_offset_m(hand_len), abs=1e-12)
+        assert 0.045 <= expected <= 0.075
+        for side in ("L", "R"):
+            dist = _radial_distance_from_grip_axis(out, side)
+            assert dist == pytest.approx(expected, abs=1e-9), (side, hand_len, dist)
+
+        residuals = wrist_template_attachment_residuals_m(out, frames=50)
+        assert set(residuals) == {"L", "R"}
+        for side, series in residuals.items():
+            assert series.shape == (50,)
+            assert float(np.max(series)) <= 0.003, (side, float(np.max(series)))
+
+    from src.engines.physics_engines.opensim.python import msk_club
+
+    assert msk_club.HAND_GRIP_POINT_M == RAJAGOPAL_HAND_GRIP_POINT_M

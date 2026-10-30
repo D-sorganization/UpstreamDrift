@@ -8,7 +8,7 @@ dependency skips cleanly instead of failing.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 import functools
 import math
@@ -44,6 +44,7 @@ from src.tools.native_viewer_export.compositor import (
     draw_hud,
     draw_impact_card,
     draw_label,
+    event_caption_for_time,
 )
 from src.tools.native_viewer_export.impact_card import impact_card_for
 from src.tools.native_viewer_export.shading import shading_legend
@@ -161,6 +162,10 @@ class ExportSettings:
     interface_ellipsoids: tuple[str, ...] = ()
     ellipsoid_scale: str = DEFAULT_ELLIPSOID_SCALE
     drift_arrow: bool = False
+    #: optional HUD swing event caption line (HRG-E4, #13175); off by default
+    event_captions: bool = False
+    #: kinematic closure mode for hand mobility ellipsoids (HCM-3, #14004)
+    hand_mobility_mode: str = "constrained"
 
     @property
     def shading_enabled(self) -> bool:
@@ -230,6 +235,7 @@ class ExportSettings:
             "torque_vectors",
             "palm_thumb_force",
             "drift_arrow",
+            "event_captions",
         ):
             if not isinstance(getattr(self, flag), bool):
                 raise TypeError(f"{flag} must be bool")
@@ -249,6 +255,10 @@ class ExportSettings:
             )
         if self.drift_arrow and not self.overlays:
             raise ValueError("drift_arrow requires overlays=True (omit --no-overlay)")
+        if self.hand_mobility_mode not in ("constrained", "unconstrained"):
+            raise ValueError(
+                f"hand_mobility_mode must be 'constrained' or 'unconstrained', got {self.hand_mobility_mode!r}"
+            )
 
     def effective_speeds(self, dt_s: float) -> tuple[float, ...]:
         """Speeds to export; a deprecated ``stride`` maps to its equivalent speed."""
@@ -510,6 +520,10 @@ class OverlayFeed:
     #: the allocated palm-on-thumb arrow (``PALM_THUMB_LABEL``), drawn only when
     #: set and independent of ``show_force``/``show_torque``
     show_palm_thumb: bool = False
+    #: hand capability/mobility ellipsoids generator (HCM-3, #14004)
+    hand_ellipsoids: Callable[[int], tuple[Any, ...]] | None = None
+    #: hand capability/mobility HUD text lines generator (HCM-3, #14004)
+    hand_hud_lines: Callable[[int], tuple[str, ...]] | None = None
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
@@ -542,7 +556,18 @@ class OverlayFeed:
             )
         if allocated and self.show_palm_thumb:
             frame = replace(frame, wrenches=(*frame.wrenches, *allocated))
-        return build(frame, self.style)
+        gs = build(frame, self.style)
+        if self.hand_ellipsoids is not None:
+            extra_e = self.hand_ellipsoids(index)
+            if extra_e:
+                gs = replace(gs, ellipsoids=(*gs.ellipsoids, *extra_e))
+        return gs
+
+    def hud_lines_at(self, index: int) -> tuple[str, ...]:
+        """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004)."""
+        if self.hand_hud_lines is not None:
+            return self.hand_hud_lines(index)
+        return ()
 
     def axial_at(self, index: int) -> Any:
         """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""
@@ -772,6 +797,27 @@ class ClipOverlays:
     strip: StripRenderer | None = None
 
 
+def _swing_event_caption(swing: SwingInput, time_s: float, impact_s: float) -> str:
+    """Resolve the HUD event caption at ``time_s`` from provenance or swing timing."""
+    provenance = swing.bundle.provenance
+    for key in ("event_table", "anatomical_event_table", "events"):
+        candidate = provenance.get(key)
+        if isinstance(candidate, Mapping):
+            return event_caption_for_time(time_s, candidate)
+    end_s = (
+        float(swing.source_times_s[-1])
+        if swing.source_times_s.size
+        else max(time_s, impact_s)
+    )
+    fallback: dict[str, float] = {"address": 0.0}
+    if impact_s > 0.0:
+        fallback["top"] = 0.5 * impact_s
+        fallback["pelvis_reversal"] = 0.55 * impact_s
+    fallback["impact"] = impact_s
+    fallback["finish"] = max(end_s, impact_s)
+    return event_caption_for_time(time_s, fallback)
+
+
 def _export_clip(
     backend: NativeBackend,
     swing: SwingInput,
@@ -807,6 +853,7 @@ def _export_clip(
             if glyphs is not None:
                 glyph_counts.append(len(glyphs.arrows) + len(glyphs.torque_arcs))
             t = shown.time_s(k)
+            extra_lines = shown_feed.hud_lines_at(k) if shown_feed is not None else ()
             hud = HudInfo(
                 t,
                 viewer,
@@ -817,6 +864,10 @@ def _export_clip(
                 shading_legend=shading_legend(settings.shading)
                 if settings.shading is not None and settings.shading_enabled
                 else "",
+                event_caption=_swing_event_caption(shown, t, impact)
+                if settings.event_captions
+                else "",
+                extra_lines=extra_lines,
             )
             labelled = {
                 v: draw_label(tiles[v], get_view_preset(v).label, (8, 6))

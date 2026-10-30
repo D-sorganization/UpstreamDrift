@@ -91,6 +91,36 @@ def test_hand_mobility_backward_compatible_alias() -> None:
     s3 = _settings("--interface-ellipsoid", "mobility", "--hand-mobility")
     assert s3.interface_ellipsoids == ("mobility",)
 
+    # Parametric choices (HCM-3, #14004)
+    assert _settings("--hand-mobility", "velocity").interface_ellipsoids == (
+        "mobility",
+    )
+    assert _settings("--hand-mobility", "force").interface_ellipsoids == (
+        "effective-mass",
+    )
+    assert _settings("--hand-mobility", "both").interface_ellipsoids == (
+        "mobility",
+        "effective-mass",
+    )
+
+
+def test_hand_mobility_mode() -> None:
+    assert _settings().hand_mobility_mode == "constrained"
+    assert (
+        _settings("--hand-mobility-mode", "unconstrained").hand_mobility_mode
+        == "unconstrained"
+    )
+    assert (
+        _settings("--hand-mobility-mode", "constrained").hand_mobility_mode
+        == "constrained"
+    )
+
+    with pytest.raises(SystemExit):
+        cli.build_parser().parse_args([*BASE, "--hand-mobility-mode", "invalid"])
+
+    with pytest.raises(ValueError, match="hand_mobility_mode"):
+        ExportSettings(hand_mobility_mode="invalid")
+
 
 def test_ellipsoid_settings_require_overlays() -> None:
     with pytest.raises(ValueError, match="interface_ellipsoids requires overlays=True"):
@@ -121,5 +151,6 @@ def test_feature_parity_json_entry_updated() -> None:
     notes = feat.get("notes", "")
     assert "--interface-ellipsoid" in notes
     assert "--hand-mobility" in notes
+    assert "--hand-mobility-mode" in notes
     assert "--ellipsoid-scale" in notes
     assert "--drift-arrow" in notes
