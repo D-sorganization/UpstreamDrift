@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .cli import main as run_cli
+from .mcp import SecurityPolicy, SimulationMcpServer, run_stdio_loop
 from .models import (
     Provenance,
     ResultEnvelope,
@@ -47,6 +48,8 @@ __all__ = [
     "RunStatus",
     "RunStoreError",
     "SCHEMA_VERSION_V1",
+    "SecurityPolicy",
+    "SimulationMcpServer",
     "SimulationRunStore",
     "SimulationWorkerPool",
     "ValidationStatus",
@@ -57,6 +60,7 @@ __all__ = [
     "reap_subprocess",
     "run_cli",
     "run_simulation_job",
+    "run_stdio_loop",
     "validate_numerical_integrity",
     "validate_provenance",
     "validate_result",
