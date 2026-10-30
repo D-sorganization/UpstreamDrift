@@ -22,6 +22,29 @@ SPEC_FILES = ("full_body_spec_anthro_driver.json", "full_body_spec_anthro_iron7.
 G = 9.80665
 
 
+def test_every_unverified_slot_has_a_specific_reason() -> None:
+    registry = json.loads(
+        (ROOT / "src/config/loop_nullspace_registry.json").read_text("utf-8")
+    )
+    unresolved = [
+        entry
+        for entry in registry["torque_capacity"]
+        if entry["verification_status"] != "VERIFIED"
+    ]
+    for entry in unresolved:
+        label = f"{entry['joint_slot']}/{entry['direction']}"
+        note = entry["source"]["note"]
+        assert note.strip() and note != "No source read for this slot.", label
+        assert entry["rationale"].strip(), label
+        assert entry["assumed"] is True, label
+    slots = tuple(dict.fromkeys(entry["joint_slot"] for entry in unresolved))
+    if slots:
+        vector = capacity_for(slots, CapacitySubject(78.0, 1.71))
+        assert set(vector.assumed_slots) == set(slots)
+        assert not vector.verified_slots
+        assert vector.warnings and "ASSUMED" in vector.warnings[0]
+
+
 def _spec(name: str) -> dict:
     return json.loads((SPECS / name).read_text(encoding="utf-8"))
 
