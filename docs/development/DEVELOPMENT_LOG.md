@@ -1463,10 +1463,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14004
 - **Branch:** merged via #14026
-- **PR:** #14026
+- **PR:** #14026, #14114
 - **Paths:** see #14026
 - **Started:** 2026-10-29
-- **Last verified:** 2026-10-29 (`5dc17c7c`; collated from changes/14004-mujoco-adapter-for-per-hand-constrained.md)
+- **Last verified:** 2026-10-30 (`e68db5ea`; collated from changes/14004-per-hand-force-and-mobility-ellipsoids-a.md)
 - **Summary:** MuJoCo adapter for per-hand constrained mobility W = J A J^T and effective masses at each grip point (HCM-3a)
 - **Next step:** Shipped in PR #14026.
 
