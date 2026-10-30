@@ -13,7 +13,12 @@ from src.shared.python.model_appearance.grip_pose import GripPose, GripStyle, Ha
 from src.shared.python.motion_matching import anthropometric_geometry as geometry
 from src.shared.python.motion_matching.grip_contract import (
     GRIP_STRENGTH_PRESETS_DEG,
+    MIRRORED_NEUTRAL_EULER_DEG,
+    MIRRORED_NEUTRAL_GRIP_MATRIX,
+    NEUTRAL_EULER_BY_SIDE_DEG,
     NEUTRAL_EULER_DEG,
+    NEUTRAL_GRIP_MATRIX,
+    NEUTRAL_GRIP_MATRIX_BY_SIDE,
     PALM_PRESETS_DEG,
     GripSpec,
     HandAngles,
@@ -22,6 +27,10 @@ from src.shared.python.motion_matching.grip_contract import (
     grip_matrix,
     hand_from_euler,
     hand_to_euler,
+    mirror_grip_euler,
+    mirror_grip_matrix,
+    neutral_euler_deg,
+    neutral_grip_matrix,
     to_grip_rotation,
 )
 from src.shared.python.motion_matching.grip_fit import grip_rotation
@@ -275,3 +284,60 @@ def test_dbc_rejects_bad_values_and_the_singularity() -> None:
         hand_from_euler((1.0, 2.0))
     with pytest.raises(AttributeError):
         GripSpec.preset("neutral").lead.alpha_deg = 1.0  # type: ignore[misc]
+
+
+def test_mirror_grip_matrix_is_involution_and_preserves_so3() -> None:
+    """Right-hand neutral is the mirrored left-hand neutral at 180 deg offset."""
+    assert pytest.approx((75.0, 0.0, 180.0), abs=1e-9) == MIRRORED_NEUTRAL_EULER_DEG
+    assert NEUTRAL_EULER_BY_SIDE_DEG["L"] == NEUTRAL_EULER_DEG
+    assert NEUTRAL_EULER_BY_SIDE_DEG["R"] == MIRRORED_NEUTRAL_EULER_DEG
+    assert np.allclose(NEUTRAL_GRIP_MATRIX_BY_SIDE["L"], NEUTRAL_GRIP_MATRIX)
+    assert np.allclose(NEUTRAL_GRIP_MATRIX_BY_SIDE["R"], MIRRORED_NEUTRAL_GRIP_MATRIX)
+
+    geodesic_deg = np.degrees(
+        np.linalg.norm(
+            Rotation.from_matrix(
+                NEUTRAL_GRIP_MATRIX.T @ MIRRORED_NEUTRAL_GRIP_MATRIX
+            ).as_rotvec()
+        )
+    )
+    assert geodesic_deg == pytest.approx(180.0, abs=1e-9)
+    assert mirror_grip_euler(NEUTRAL_EULER_DEG) == pytest.approx(
+        MIRRORED_NEUTRAL_EULER_DEG, abs=1e-9
+    )
+    assert mirror_grip_euler(MIRRORED_NEUTRAL_EULER_DEG) == pytest.approx(
+        NEUTRAL_EULER_DEG, abs=1e-9
+    )
+
+    rng = np.random.default_rng(13758)
+    for _ in range(50):
+        angles = HandAngles(
+            alpha_deg=float(rng.uniform(-45.0, 45.0)),
+            psi_deg=float(rng.uniform(20.0, 70.0)),
+            gamma_deg=float(rng.uniform(-60.0, 60.0)),
+        )
+        m = grip_matrix(angles.alpha_deg, angles.psi_deg, angles.gamma_deg)
+        mirrored = mirror_grip_matrix(m)
+        assert np.allclose(mirrored @ mirrored.T, np.eye(3), atol=1e-12)
+        assert np.linalg.det(mirrored) == pytest.approx(1.0, abs=1e-12)
+        assert np.allclose(mirror_grip_matrix(mirrored), m, atol=1e-12)
+        euler = hand_to_euler(angles)
+        euler_round_trip = mirror_grip_euler(mirror_grip_euler(euler))
+        assert np.allclose(
+            grip_rotation(euler_round_trip), grip_rotation(euler), atol=1e-12
+        )
+
+
+def test_neutral_grip_helpers_validate_side_and_mirror_dbc() -> None:
+    assert np.allclose(neutral_grip_matrix("L"), NEUTRAL_GRIP_MATRIX)
+    assert np.allclose(neutral_grip_matrix("R"), MIRRORED_NEUTRAL_GRIP_MATRIX)
+    assert neutral_euler_deg("L") == NEUTRAL_EULER_DEG
+    assert neutral_euler_deg("R") == MIRRORED_NEUTRAL_EULER_DEG
+    with pytest.raises(ValueError, match="side"):
+        neutral_grip_matrix("X")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="side"):
+        neutral_euler_deg("X")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="SO\\(3\\)"):
+        mirror_grip_matrix(np.diag([1.0, 1.0, -1.0]))
+    with pytest.raises(ValueError, match="three"):
+        mirror_grip_euler((1.0, 2.0))
