@@ -20,10 +20,18 @@ from .store import (
     RunStoreError,
     SimulationRunStore,
 )
+from .worker import (
+    LinuxLimits,
+    SimulationWorkerPool,
+    apply_linux_rlimits,
+    reap_subprocess,
+    run_simulation_job,
+)
 
 __all__ = [
     "ALLOWED_TRANSITIONS",
     "InvalidStateTransitionError",
+    "LinuxLimits",
     "Provenance",
     "ResultEnvelope",
     "RunNotFoundError",
@@ -33,7 +41,11 @@ __all__ = [
     "RunStoreError",
     "SCHEMA_VERSION_V1",
     "SimulationRunStore",
+    "SimulationWorkerPool",
     "ValidationStatus",
+    "apply_linux_rlimits",
     "export_schema",
     "export_schemas",
+    "reap_subprocess",
+    "run_simulation_job",
 ]
