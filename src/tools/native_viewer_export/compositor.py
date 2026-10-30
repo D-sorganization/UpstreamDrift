@@ -169,6 +169,8 @@ class HudInfo:
     shading_legend: str = ""
     #: optional anatomical swing event caption (HRG-E4, #13175); off by default
     event_caption: str = ""
+    #: optional capability/mobility HUD lines (HCM-3, #14004, #14038)
+    extra_lines: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not math.isfinite(self.time_s):
@@ -205,6 +207,7 @@ class HudInfo:
                 else f"Event: {self.event_caption}"
             )
             out.append(caption)
+        out.extend(self.extra_lines)
         return out
 
 

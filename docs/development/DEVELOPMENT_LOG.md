@@ -1015,6 +1015,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13996 · Attach Visual Grip Hands to Wrist Follower Frame and Scale Wrist-to-Grip Origins by Hand Length
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13996
+- **Branch:** merged via #14119
+- **PR:** #14119
+- **Paths:** see #14119
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`a581aeb2`; collated from changes/13996-attach-visual-grip-hands-to-wrist-follow.md)
+- **Summary:** Attach visual grip hands to wrist follower frame and scale wrist-to-grip origins by hand length
+- **Next step:** Shipped in PR #14119.
+
+### DL-#13886 · Add SAP-4B Drive-Mode Switch and Paired STM Sensitivity Receipt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13886
+- **Branch:** merged via #14112
+- **PR:** #14112
+- **Paths:** see #14112
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`bc186952`; collated from changes/13886-add-sap-4b-drive-mode-switch-and-paired.md)
+- **Summary:** Add SAP-4b drive-mode switch and paired STM sensitivity receipt
+- **Next step:** Shipped in PR #14112.
+
 ### DL-#14109 · Disarm Unit-Gate Hang Watchdog on Pytest_Unconfigure
 
 - **State:** shipped
@@ -1437,10 +1463,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14004
 - **Branch:** merged via #14026
-- **PR:** #14026
+- **PR:** #14026, #14114
 - **Paths:** see #14026
 - **Started:** 2026-10-29
-- **Last verified:** 2026-10-29 (`5dc17c7c`; collated from changes/14004-mujoco-adapter-for-per-hand-constrained.md)
+- **Last verified:** 2026-10-30 (`e68db5ea`; collated from changes/14004-per-hand-force-and-mobility-ellipsoids-a.md)
 - **Summary:** MuJoCo adapter for per-hand constrained mobility W = J A J^T and effective masses at each grip point (HCM-3a)
 - **Next step:** Shipped in PR #14026.
 

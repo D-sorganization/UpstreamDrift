@@ -94,3 +94,71 @@ def test_bad_inputs_raise(source) -> None:
         source.hand_mobility(np.zeros(len(source.coordinate_order)), mode="x")
     with pytest.raises(ValueError, match="finite"):
         source.hand_mobility(np.zeros(3))
+
+
+def test_swing_overlay_adds_two_ellipsoid_geoms_per_frame(source, states) -> None:
+    """A swing with the hand mobility overlay adds exactly two ellipsoid geoms per frame (HCM-3, #14004)."""
+    import mujoco
+    from src.shared.python.motion_matching.same_input import InputBundle
+    from src.tools.native_viewer_export.core import SwingInput
+    from src.tools.native_viewer_export.overlay import (
+        OverlayOptions,
+        build_overlay_feed,
+    )
+    from src.tools.native_viewer_export.backends._scene_overlays import (
+        apply_scene_overlays,
+    )
+
+    spec_dict = load_full_body_spec(FULL, json.loads(UPPER.read_text(encoding="utf-8")))
+    spec = json.dumps(spec_dict).encode("utf-8")
+    coords = tuple(spec_dict["coordinate_order"])
+    q = np.array(states)
+    bundle = InputBundle(
+        spec_bytes=spec,
+        coordinate_order=coords,
+        dt_s=0.01,
+        q0=q[0],
+        v0=np.zeros_like(q[0]),
+        efforts=np.zeros((len(q) - 1, len(coords))),
+        reference_q=q,
+        reference_v=np.zeros_like(q),
+        reference_engine="mujoco",
+    )
+    swing = SwingInput(bundle, q, "s", "driver", "mujoco")
+    feed, _ = build_overlay_feed(
+        swing,
+        "mujoco",
+        options=OverlayOptions(
+            hand_mobility=True,
+            show_force=False,
+            show_torque=False,
+        ),
+    )
+
+    dummy_model = mujoco.MjModel.from_xml_string("<mujoco><worldbody/></mujoco>")
+    dummy_data = mujoco.MjData(dummy_model)
+
+    for k in range(len(states)):
+        scene = mujoco.MjvScene(dummy_model, maxgeom=100)
+        mujoco.mjv_updateScene(
+            dummy_model,
+            dummy_data,
+            mujoco.MjvOption(),
+            None,
+            mujoco.MjvCamera(),
+            mujoco.mjtCatBit.mjCAT_ALL,
+            scene,
+        )
+        before = scene.ngeom
+        glyphs = feed.glyphs_at(k)
+        assert len(glyphs.ellipsoids) == 2
+        apply_scene_overlays(dummy_model, scene, 0, None, None, [glyphs])
+        assert scene.ngeom == before + 2
+        for g in (scene.geoms[before], scene.geoms[before + 1]):
+            assert g.type == int(mujoco.mjtGeom.mjGEOM_ELLIPSOID)
+
+    hud_lines = feed.hud_lines_at(0)
+    assert len(hud_lines) >= 1
+    assert "Lead mobility:" in hud_lines[0]
+    assert "Trail mobility:" in hud_lines[0]
+    assert "cond=" in hud_lines[0]
