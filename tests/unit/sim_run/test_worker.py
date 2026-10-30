@@ -136,15 +136,10 @@ def test_successful_worker_execution(
     run_store: SimulationRunStore, sample_request: RunRequest
 ) -> None:
     """Valid worker execution produces succeeded status and populated ResultEnvelope."""
-    record = run_store.create_run(sample_request)
-    finished = SimulationWorkerPool(run_store, max_concurrency=2).execute_run(
-        record.run_id
-    )
-    assert finished.status == "succeeded" and finished.result
-    assert (
-        finished.result.success
-        and finished.result.provenance.engine_type == "golf_swing_pendulum"
-    )
+    rec = run_store.create_run(sample_request)
+    fin = SimulationWorkerPool(run_store, max_concurrency=2).execute_run(rec.run_id)
+    assert fin.status == "succeeded" and fin.result and fin.result.success
+    assert fin.result.provenance.engine_type == "golf_swing_pendulum"
 
 
 @pytest.mark.unit
@@ -152,18 +147,13 @@ def test_worker_nonzero_exit_failed(
     run_store: SimulationRunStore, sample_request: RunRequest
 ) -> None:
     """Non-zero worker exit code results in failed status with worker_error code."""
-    record = run_store.create_run(sample_request)
-    failing_cmd = [sys.executable, "-c", "import sys; sys.exit(2)"]
-    finished = SimulationWorkerPool(run_store, max_concurrency=2).execute_run(
-        record.run_id, worker_cmd=failing_cmd
+    rec = run_store.create_run(sample_request)
+    fin = SimulationWorkerPool(run_store, max_concurrency=2).execute_run(
+        rec.run_id,
+        worker_cmd=[sys.executable, "-c", "import sys; sys.exit(2)"],
     )
-
-    assert (
-        finished.status == "failed"
-        and finished.error
-        and finished.error.code == "worker_error"
-    )
-    assert finished.error.details and finished.error.details.get("exit_code") == 2
+    assert fin.status == "failed" and fin.error and fin.error.code == "worker_error"
+    assert fin.error.details and fin.error.details.get("exit_code") == 2
 
 
 @pytest.mark.unit

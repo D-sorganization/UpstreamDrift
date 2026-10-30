@@ -102,20 +102,20 @@ def _make_preexec(limits: LinuxLimits | None) -> Callable[[], None] | None:
 def run_simulation_job(request: RunRequest, run_id: str) -> ResultEnvelope:
     """Headless simulation solver dispatcher returning ResultEnvelope."""
     now = datetime.now(timezone.utc).isoformat()
-    raw = request.model_dump_json().encode("utf-8")
-    prov = Provenance(
-        repo_sha="HEAD",
-        engine_type=str(request.engine_type),
-        engine_version=None,
-        input_sha256=hashlib.sha256(raw).hexdigest(),
-        created_at=now,
-        completed_at=now,
-        host=platform.node(),
-    )
     return ResultEnvelope(
         schema_version=SCHEMA_VERSION_V1,
         run_id=run_id,
-        provenance=prov,
+        provenance=Provenance(
+            repo_sha="HEAD",
+            engine_type=str(request.engine_type),
+            engine_version=None,
+            input_sha256=hashlib.sha256(
+                request.model_dump_json().encode("utf-8")
+            ).hexdigest(),
+            created_at=now,
+            completed_at=now,
+            host=platform.node(),
+        ),
         validation_status="valid",
         validation_errors=[],
         success=True,
@@ -153,6 +153,72 @@ class SimulationWorkerPool:
         self.repo_root = repo_root or _REPO_ROOT
         self._semaphore = threading.BoundedSemaphore(max_concurrency)
 
+    def _build_cmd(
+        self, run_id: str, record: RunRecord, worker_cmd: list[str] | None
+    ) -> tuple[list[str], Path]:
+        run_dir = self.store.get_run_dir(run_id)
+        run_dir.mkdir(parents=True, exist_ok=True)
+        inp, out = run_dir / "input.json", run_dir / "output.json"
+        inp.write_text(record.request.model_dump_json(indent=2), encoding="utf-8")
+        if worker_cmd:
+            return list(worker_cmd), out
+        return [
+            self.python_executable,
+            "-m",
+            "src.sim_run.worker",
+            "--input",
+            str(inp),
+            "--output",
+            str(out),
+            "--run-id",
+            run_id,
+        ], out
+
+    def _resolve_record(
+        self,
+        run_id: str,
+        proc: subprocess.Popen[Any],
+        out: Path,
+        timed_out: bool,
+        timeout: float,
+        stderr: str,
+    ) -> RunRecord:
+        def _fail(
+            code: str, msg: str, details: dict[str, Any] | None = None
+        ) -> RunRecord:
+            err = SimulationErrorInfo(
+                code=code, stage="execution", message=msg, details=details
+            )
+            return self.store.transition(run_id, "failed", error=err)
+
+        if timed_out:
+            return _fail(
+                "timeout",
+                f"Simulation run '{run_id}' exceeded wall-clock timeout of {timeout}s",
+                {"timeout_seconds": timeout, "exit_code": proc.returncode},
+            )
+        if proc.returncode != 0:
+            return _fail(
+                "worker_error",
+                f"Worker process exited with code {proc.returncode}",
+                {"exit_code": proc.returncode, "stderr": (stderr or "")[:1000]},
+            )
+        if not out.is_file():
+            return _fail(
+                "missing_output",
+                "Worker process finished without writing output envelope",
+            )
+        try:
+            data = json.loads(out.read_text(encoding="utf-8"))
+            return self.store.transition(
+                run_id, "succeeded", result=ResultEnvelope.model_validate(data)
+            )
+        except (json.JSONDecodeError, ValueError, TypeError) as exc:
+            return _fail(
+                "invalid_result_envelope",
+                f"Failed to parse result envelope: {exc}",
+            )
+
     def execute_run(
         self,
         run: str | RunRecord,
@@ -178,26 +244,7 @@ class SimulationWorkerPool:
                 or record.request.timeout_seconds
                 or self.default_timeout_seconds
             )
-            run_dir = self.store.get_run_dir(run_id)
-            run_dir.mkdir(parents=True, exist_ok=True)
-            inp, out = run_dir / "input.json", run_dir / "output.json"
-            inp.write_text(record.request.model_dump_json(indent=2), encoding="utf-8")
-
-            cmd = (
-                list(worker_cmd)
-                if worker_cmd
-                else [
-                    self.python_executable,
-                    "-m",
-                    "src.sim_run.worker",
-                    "--input",
-                    str(inp),
-                    "--output",
-                    str(out),
-                    "--run-id",
-                    run_id,
-                ]
-            )
+            cmd, out = self._build_cmd(run_id, record, worker_cmd)
 
             env = dict(os.environ)
             pypath = env.get("PYTHONPATH", "")
@@ -227,44 +274,7 @@ class SimulationWorkerPool:
                 if on_cleanup:
                     on_cleanup()
 
-            def _fail(
-                code: str, msg: str, details: dict[str, Any] | None = None
-            ) -> RunRecord:
-                err = SimulationErrorInfo(
-                    code=code, stage="execution", message=msg, details=details
-                )
-                return self.store.transition(run_id, "failed", error=err)
-
-            if timed_out:
-                return _fail(
-                    "timeout",
-                    f"Simulation run '{run_id}' exceeded wall-clock timeout of {timeout}s",
-                    {"timeout_seconds": timeout, "exit_code": proc.returncode},
-                )
-
-            if proc.returncode != 0:
-                return _fail(
-                    "worker_error",
-                    f"Worker process exited with code {proc.returncode}",
-                    {"exit_code": proc.returncode, "stderr": (stderr or "")[:1000]},
-                )
-
-            if not out.is_file():
-                return _fail(
-                    "missing_output",
-                    "Worker process finished without writing output envelope",
-                )
-
-            try:
-                data = json.loads(out.read_text(encoding="utf-8"))
-                return self.store.transition(
-                    run_id, "succeeded", result=ResultEnvelope.model_validate(data)
-                )
-            except (json.JSONDecodeError, ValueError, TypeError) as exc:
-                return _fail(
-                    "invalid_result_envelope",
-                    f"Failed to parse result envelope: {exc}",
-                )
+            return self._resolve_record(run_id, proc, out, timed_out, timeout, stderr)
         finally:
             self._semaphore.release()
 
