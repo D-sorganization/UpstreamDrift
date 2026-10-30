@@ -85,6 +85,7 @@ describe('AnalysisToolsPage', () => {
     render(<AnalysisToolsPage />);
     expect(screen.getByText(/No metrics loaded/)).toBeTruthy();
     expect(screen.getByText(/Click "Load Statistics"/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Compute Event Table' })).toBeInTheDocument();
   });
 
   it('fetches and renders the live metrics snapshot', async () => {
