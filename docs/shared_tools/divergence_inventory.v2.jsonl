@@ -1898,6 +1898,7 @@
 {"path": "pendulum_simulator/counterfactual_golfer.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/cross_engine_perturbation.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/data_extractor.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
+{"path": "pendulum_simulator/drive_modes.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/dynamics_quantities.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/force_colors.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/golfer_constraints.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}

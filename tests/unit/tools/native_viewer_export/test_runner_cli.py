@@ -210,3 +210,29 @@ def test_cli_reports_bad_input(tmp_path: Path, capsys) -> None:
 
 def test_backend_unavailable_is_an_exception() -> None:
     assert issubclass(BackendUnavailable, Exception)
+
+
+def test_event_captions_cli_flag_and_export_settings(tmp_path: Path) -> None:
+    """--event-captions defaults off and wires into ExportSettings.event_captions (#13175)."""
+    base_args = [
+        "--bundle",
+        str(tmp_path / "b.npz"),
+        "--out",
+        str(tmp_path / "out"),
+        "--swing",
+        "driver",
+    ]
+    parsed_default = cli.build_parser().parse_args(base_args)
+    settings_default = cli.build_settings(parsed_default)
+    assert settings_default.event_captions is False
+
+    parsed_on = cli.build_parser().parse_args([*base_args, "--event-captions"])
+    settings_on = cli.build_settings(parsed_on)
+    assert settings_on.event_captions is True
+
+    parsed_off = cli.build_parser().parse_args([*base_args, "--no-event-captions"])
+    settings_off = cli.build_settings(parsed_off)
+    assert settings_off.event_captions is False
+
+    with pytest.raises(TypeError, match="event_captions"):
+        ExportSettings(event_captions="yes")  # type: ignore[arg-type]

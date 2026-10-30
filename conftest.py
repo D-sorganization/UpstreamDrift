@@ -40,7 +40,7 @@ _WATCHDOG_SRC = "\n".join(
         "def _pump():",
         "    while True:",
         "        line=sys.stdin.readline()",
-        "        if not line: break",
+        "        if not line: os._exit(0)",
         "        sys.stderr.write('[hang-watchdog] '+line)",
         "        sys.stderr.flush()",
         "t=threading.Thread(target=_pump,daemon=True)",
@@ -87,6 +87,9 @@ def _install_stack_dump_handler(dump_file):
     return _dump_all_threads
 
 
+_ACTIVE_WATCHDOGS: list[tuple[object, object]] = []
+
+
 def _arm_hang_forensics(config) -> None:
     import signal as _signal
 
@@ -106,7 +109,7 @@ def _arm_hang_forensics(config) -> None:
         dump_file = _os.fdopen(pipe_w, "w")
         _install_stack_dump_handler(dump_file)
         dump_dest = _os.fdopen(real_fd, "w")
-        _subprocess.Popen(
+        proc = _subprocess.Popen(
             [_sys.executable, "-c", _WATCHDOG_SRC, str(_os.getpid())],
             stdin=pipe_r,
             stdout=_subprocess.DEVNULL,
@@ -114,11 +117,37 @@ def _arm_hang_forensics(config) -> None:
             close_fds=True,
         )
         _os.close(pipe_r)
+        with contextlib.suppress(Exception):
+            dump_dest.close()
+        _ACTIVE_WATCHDOGS.append((proc, dump_file))
+
+
+def _disarm_hang_forensics(config=None) -> None:
+    """Disarm the watchdog before interpreter teardown resets SIGUSR1 to SIG_DFL (#14109)."""
+    import signal as _signal
+
+    if not _ACTIVE_WATCHDOGS:
+        return
+    if hasattr(_signal, "SIGUSR1"):
+        with contextlib.suppress(Exception):
+            _signal.signal(_signal.SIGUSR1, _signal.SIG_IGN)
+    while _ACTIVE_WATCHDOGS:
+        proc, dump_file = _ACTIVE_WATCHDOGS.pop()
+        with contextlib.suppress(Exception):
+            dump_file.close()  # type: ignore[attr-defined]
+        with contextlib.suppress(Exception):
+            proc.terminate()  # type: ignore[attr-defined]
+        with contextlib.suppress(Exception):
+            proc.wait(timeout=2)  # type: ignore[attr-defined]
 
 
 def pytest_configure(config) -> None:
     if _os.environ.get("UNIT_GATE_QUARANTINE") == "1":
         _arm_hang_forensics(config)
+
+
+def pytest_unconfigure(config) -> None:
+    _disarm_hang_forensics(config)
 
 
 # ---------------------------------------------------------------------------
