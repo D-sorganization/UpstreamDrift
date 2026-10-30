@@ -120,6 +120,8 @@ class HudInfo:
     ms_from_impact: float | None = None
     #: tension/compression shading key line (its own line when non-empty)
     shading_legend: str = ""
+    #: optional capability/mobility HUD lines (HCM-3, #14004, #14038)
+    extra_lines: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not math.isfinite(self.time_s):
@@ -147,6 +149,7 @@ class HudInfo:
             out.append(self.legend)
         if self.shading_legend:
             out.append(self.shading_legend)
+        out.extend(self.extra_lines)
         return out
 
 

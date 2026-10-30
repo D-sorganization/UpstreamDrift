@@ -76,10 +76,21 @@ def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
     )
     p.add_argument(
         "--hand-mobility",
-        action="store_true",
-        default=False,
-        help="backward-compatible alias for '--interface-ellipsoid mobility' "
-        "(CAP-6, #14038, #14046)",
+        nargs="?",
+        const="velocity",
+        default=None,
+        choices=("velocity", "force", "both", "mobility"),
+        help="hand mobility overlay: 'velocity'/'mobility' (velocity ellipsoid), "
+        "'force' (force ellipsoid), 'both' (both ellipsoids), or flag alias for "
+        "'--interface-ellipsoid mobility' (HCM-3, #14004, #14046)",
+    )
+    p.add_argument(
+        "--hand-mobility-mode",
+        choices=("constrained", "unconstrained"),
+        default="constrained",
+        help="kinematic closure mode for hand mobility ellipsoids: "
+        "'constrained' (both hands on club) or 'unconstrained' (hand alone) "
+        "(default: constrained; HCM-3, #14004)",
     )
 
 
@@ -401,9 +412,21 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         parse_size(args.size) if args.size is not None else (base.width, base.height)
     )
     ellipsoids = list(args.interface_ellipsoid or [])
-    if getattr(args, "hand_mobility", False) and "mobility" not in ellipsoids:
-        ellipsoids.append("mobility")
+    hand_mob = getattr(args, "hand_mobility", None)
+    if hand_mob:
+        if hand_mob in ("velocity", "mobility", True):
+            if "mobility" not in ellipsoids:
+                ellipsoids.append("mobility")
+        elif hand_mob == "force":
+            if "effective-mass" not in ellipsoids:
+                ellipsoids.append("effective-mass")
+        elif hand_mob == "both":
+            if "mobility" not in ellipsoids:
+                ellipsoids.append("mobility")
+            if "effective-mass" not in ellipsoids:
+                ellipsoids.append("effective-mass")
     ellipsoid_scale = parse_ellipsoid_scale(getattr(args, "ellipsoid_scale", "auto"))
+    hand_mobility_mode = getattr(args, "hand_mobility_mode", "constrained")
     return replace(
         base,
         views=tuple(v for v in args.views.split(",") if v),
@@ -422,6 +445,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         interface_ellipsoids=tuple(ellipsoids),
         ellipsoid_scale=ellipsoid_scale,
         drift_arrow=bool(getattr(args, "drift_arrow", False)),
+        hand_mobility_mode=hand_mobility_mode,
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
@@ -465,6 +489,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 show_force=settings.force_vectors,
                 show_torque=settings.torque_vectors,
                 palm_thumb=settings.palm_thumb_force,
+                interface_ellipsoids=settings.interface_ellipsoids,
+                ellipsoid_scale=settings.ellipsoid_scale,
+                hand_mobility_mode=settings.hand_mobility_mode,
             ),
         )
     except (ValueError, FileNotFoundError) as exc:

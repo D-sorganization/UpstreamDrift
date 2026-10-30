@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
@@ -103,6 +104,10 @@ def build_overlay_feed(
     show_force: bool = True,
     show_torque: bool = True,
     palm_thumb: bool = False,
+    hand_mobility: bool | str = False,
+    hand_mobility_mode: str = "constrained",
+    interface_ellipsoids: Sequence[str] = (),
+    ellipsoid_scale: str = "auto",
 ) -> tuple[OverlayFeed, tuple[float, float, float]]:
     """Overlay feed for ``swing`` plus the framing look-at point.
 
@@ -172,6 +177,157 @@ def build_overlay_feed(
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
     style = default_glyph_style(body_mass_kg=float(source.total_mass_kg))
+
+    active_ellipsoids: list[str] = list(interface_ellipsoids)
+    if hand_mobility:
+        if hand_mobility in ("velocity", "mobility", True):
+            if "mobility" not in active_ellipsoids:
+                active_ellipsoids.append("mobility")
+        elif hand_mobility == "force":
+            if "effective-mass" not in active_ellipsoids:
+                active_ellipsoids.append("effective-mass")
+        elif hand_mobility == "both":
+            if "mobility" not in active_ellipsoids:
+                active_ellipsoids.append("mobility")
+            if "effective-mass" not in active_ellipsoids:
+                active_ellipsoids.append("effective-mass")
+
+    hand_ellipsoids_fn = None
+    hand_hud_lines_fn = None
+    if active_ellipsoids:
+        from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
+        from src.shared.python.force_overlay.ellipsoid_display import (
+            EllipsoidDisplayBuilder,
+            EllipsoidDisplayScale,
+            format_hud_capability,
+        )
+
+        _hm_cache: dict[int, Any] = {}
+
+        def _get_hm(idx: int) -> dict[str, Any]:
+            if idx not in _hm_cache:
+                _hm_cache[idx] = swing.hand_mobility_at(idx, mode=hand_mobility_mode)
+            return _hm_cache[idx]
+
+        builders: dict[str, EllipsoidDisplayBuilder] = {}
+        scales: dict[str, EllipsoidDisplayScale] = {}
+        for kind in active_ellipsoids:
+            semi_axes_series: list[list[float]] = []
+            stride = max(1, swing.n_states // 20)
+            for idx in range(0, swing.n_states, stride):
+                hm_sample = _get_hm(idx)
+                for h in ("lead", "trail"):
+                    hm_h = hm_sample[h]
+                    if kind == "mobility":
+                        r = np.sqrt(np.maximum(hm_h.mobility_eigenvalues, 0.0))
+                    elif kind == "effective-mass":
+                        r = 1.0 / np.sqrt(np.maximum(hm_h.mobility_eigenvalues, 1e-9))
+                    elif kind == "force-capacity" and hm_h.force_capacity is not None:
+                        r = hm_h.force_capacity.radii
+                    elif (
+                        kind == "acceleration-capacity"
+                        and hm_h.acceleration_capacity is not None
+                    ):
+                        r = hm_h.acceleration_capacity.radii
+                    else:
+                        r = np.sqrt(np.maximum(hm_h.mobility_eigenvalues, 0.0))
+                    semi_axes_series.append(list(r))
+            scale = EllipsoidDisplayScale.compute(
+                semi_axes_series,
+                target_radius_m=0.09,
+                kind=kind,
+                mode=ellipsoid_scale,
+            )
+            scales[kind] = scale
+            builders[kind] = EllipsoidDisplayBuilder(scale)
+
+        def hand_ellipsoids_fn(index: int) -> tuple[EllipsoidGlyph, ...]:
+            hm_map = _get_hm(index)
+            glyphs_list: list[EllipsoidGlyph] = []
+            for kind in active_ellipsoids:
+                builder = builders[kind]
+                for hand in ("lead", "trail"):
+                    hm = hm_map[hand]
+                    if kind == "mobility":
+                        axes = hm.mobility_axes
+                        radii_phys = np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
+                    elif kind == "effective-mass":
+                        axes = hm.mobility_axes
+                        radii_phys = 1.0 / np.sqrt(
+                            np.maximum(hm.mobility_eigenvalues, 1e-9)
+                        )
+                    elif kind == "force-capacity" and hm.force_capacity is not None:
+                        axes = hm.force_capacity.axes
+                        radii_phys = hm.force_capacity.radii
+                    elif (
+                        kind == "acceleration-capacity"
+                        and hm.acceleration_capacity is not None
+                    ):
+                        axes = hm.acceleration_capacity.axes
+                        radii_phys = hm.acceleration_capacity.radii
+                    else:
+                        axes = hm.mobility_axes
+                        radii_phys = np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
+                    disp = builder.build_glyph(
+                        hm.centre,
+                        axes,
+                        radii_phys,
+                        hand,
+                        label=f"{hand} {kind}",
+                    )
+                    glyphs_list.append(
+                        EllipsoidGlyph(
+                            disp.centre,
+                            disp.axes,
+                            disp.radii,
+                            disp.rgba,
+                            disp.label,
+                        )
+                    )
+            return tuple(glyphs_list)
+
+        def hand_hud_lines_fn(index: int) -> tuple[str, ...]:
+            hm_map = _get_hm(index)
+            lines: list[str] = []
+            for kind in active_ellipsoids:
+                scale = scales[kind]
+                lead_hm, trail_hm = hm_map["lead"], hm_map["trail"]
+                if kind == "mobility":
+                    lead_r = np.sqrt(np.maximum(lead_hm.mobility_eigenvalues, 0.0))
+                    trail_r = np.sqrt(np.maximum(trail_hm.mobility_eigenvalues, 0.0))
+                elif kind == "effective-mass":
+                    lead_r = 1.0 / np.sqrt(
+                        np.maximum(lead_hm.mobility_eigenvalues, 1e-9)
+                    )
+                    trail_r = 1.0 / np.sqrt(
+                        np.maximum(trail_hm.mobility_eigenvalues, 1e-9)
+                    )
+                elif (
+                    kind == "force-capacity"
+                    and lead_hm.force_capacity is not None
+                    and trail_hm.force_capacity is not None
+                ):
+                    lead_r = lead_hm.force_capacity.radii
+                    trail_r = trail_hm.force_capacity.radii
+                elif (
+                    kind == "acceleration-capacity"
+                    and lead_hm.acceleration_capacity is not None
+                    and trail_hm.acceleration_capacity is not None
+                ):
+                    lead_r = lead_hm.acceleration_capacity.radii
+                    trail_r = trail_hm.acceleration_capacity.radii
+                else:
+                    lead_r = np.sqrt(np.maximum(lead_hm.mobility_eigenvalues, 0.0))
+                    trail_r = np.sqrt(np.maximum(trail_hm.mobility_eigenvalues, 0.0))
+                lead_hud = format_hud_capability(
+                    "lead", kind, lead_r, scale.unit, lead_hm.condition
+                )
+                trail_hud = format_hud_capability(
+                    "trail", kind, trail_r, scale.unit, trail_hm.condition
+                )
+                lines.append(f"{lead_hud} | {trail_hud}")
+            return tuple(lines)
+
     feed = OverlayFeed(
         provider.frame_at,
         style,
@@ -179,6 +335,8 @@ def build_overlay_feed(
         show_force=show_force,
         show_torque=show_torque,
         show_palm_thumb=palm_thumb,
+        hand_ellipsoids=hand_ellipsoids_fn,
+        hand_hud_lines=hand_hud_lines_fn,
     )
     return feed, lookat
 
