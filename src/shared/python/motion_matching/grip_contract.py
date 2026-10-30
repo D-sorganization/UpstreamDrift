@@ -137,6 +137,16 @@ def hand_to_euler(angles: HandAngles) -> Euler:
     return (float(e[0]), float(e[1]), float(e[2]))
 
 
+def _euler_to_offset_matrix(euler_deg: Sequence[float] | Array) -> Array:
+    """Total hand offset ``M = R_x(25) G(e)`` of a validated extrinsic triple."""
+    e = np.asarray(euler_deg, dtype=float)
+    require(
+        e.shape == (3,) and bool(np.isfinite(e).all()),
+        "euler_deg must be three finite angles",
+    )
+    return np.asarray(_rot("x", GRIP_ULNAR_OFFSET_DEG) @ grip_rotation(e))
+
+
 def hand_from_euler(euler_deg: Sequence[float] | Array) -> HandAngles:
     """Golf angles of a stored extrinsic x-y-z triple (closed form, exact).
 
@@ -144,12 +154,7 @@ def hand_from_euler(euler_deg: Sequence[float] | Array) -> HandAngles:
     offset is singular (``psi`` of 0 or 180 deg).  The result is validated as
     :class:`HandAngles`, so a triple outside its ranges also raises.
     """
-    e = np.asarray(euler_deg, dtype=float)
-    require(
-        e.shape == (3,) and bool(np.isfinite(e).all()),
-        "euler_deg must be three finite angles",
-    )
-    m = _rot("x", GRIP_ULNAR_OFFSET_DEG) @ grip_rotation(e)
+    m = _euler_to_offset_matrix(euler_deg)
     if abs(m[1, 2]) > 1.0 - _SINGULAR_TOL:
         raise ValueError("grip rotation is singular: palm diagonal at 0 or 180 deg")
     beta = math.asin(-m[1, 2])
@@ -198,12 +203,7 @@ def mirror_grip_matrix(matrix: Array) -> Array:
 
 def mirror_grip_euler(euler_deg: Sequence[float] | Array) -> Euler:
     """Extrinsic x-y-z Euler triple of the mirrored hand offset ``mirror_grip_matrix(M)``."""
-    e = np.asarray(euler_deg, dtype=float)
-    require(
-        e.shape == (3,) and bool(np.isfinite(e).all()),
-        "euler_deg must be three finite angles",
-    )
-    m = _rot("x", GRIP_ULNAR_OFFSET_DEG) @ grip_rotation(e)
+    m = _euler_to_offset_matrix(euler_deg)
     g_mirrored = _rot("x", -GRIP_ULNAR_OFFSET_DEG) @ mirror_grip_matrix(m)
     return _canonical_euler_deg(
         Rotation.from_matrix(g_mirrored).as_euler("xyz", degrees=True)
