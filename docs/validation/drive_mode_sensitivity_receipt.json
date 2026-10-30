@@ -9,9 +9,7 @@
       "drive_mode": "torque_undamped",
       "impedance_hypotheses": ["H-DECLARED-JOINT-IMPEDANCE"],
       "sigma_max_window": 3.22524,
-      "singular_values_window": [
-        3.22524, 1.844631, 1.455093, 0.814355, 0.510122, 0.304138
-      ],
+      "singular_values_window": [3.22524, 1.844631, 1.455093, 0.814355, 0.510122, 0.304138],
       "ftle_window": 7.806716,
       "det_phi_window": 1.093758,
       "directional_gains": {
@@ -24,9 +22,7 @@
       "drive_mode": "torque_canonical",
       "impedance_hypotheses": ["H-DECLARED-JOINT-IMPEDANCE"],
       "sigma_max_window": 2.620546,
-      "singular_values_window": [
-        2.620546, 1.75921, 1.235341, 0.732272, 0.478982, 0.167501
-      ],
+      "singular_values_window": [2.620546, 1.75921, 1.235341, 0.732272, 0.478982, 0.167501],
       "ftle_window": 6.422552,
       "det_phi_window": 0.334584,
       "directional_gains": {
@@ -39,9 +35,7 @@
       "drive_mode": "joint_impedance",
       "impedance_hypotheses": ["H-DECLARED-JOINT-IMPEDANCE"],
       "sigma_max_window": 1.763086,
-      "singular_values_window": [
-        1.763086, 1.01807, 0.640855, 0.477068, 0.13468, 0.005996
-      ],
+      "singular_values_window": [1.763086, 1.01807, 0.640855, 0.477068, 0.13468, 0.005996],
       "ftle_window": 3.780437,
       "det_phi_window": 0.000443,
       "directional_gains": {
