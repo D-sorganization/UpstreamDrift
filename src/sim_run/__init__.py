@@ -20,10 +20,16 @@ from .store import (
     RunStoreError,
     SimulationRunStore,
 )
+from .validation import (
+    validate_numerical_integrity,
+    validate_provenance,
+    validate_result,
+)
 from .worker import (
     LinuxLimits,
     SimulationWorkerPool,
     apply_linux_rlimits,
+    get_repo_sha,
     reap_subprocess,
     run_simulation_job,
 )
@@ -46,6 +52,10 @@ __all__ = [
     "apply_linux_rlimits",
     "export_schema",
     "export_schemas",
+    "get_repo_sha",
     "reap_subprocess",
     "run_simulation_job",
+    "validate_numerical_integrity",
+    "validate_provenance",
+    "validate_result",
 ]

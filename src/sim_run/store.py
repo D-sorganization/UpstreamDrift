@@ -177,9 +177,9 @@ class SimulationRunStore:
             updates["started_at"] = started_at or record.started_at or now
         elif new_status in ("succeeded", "failed"):
             updates["completed_at"] = completed_at or record.completed_at or now
-            if new_status == "succeeded" and result is not None:
+            if result is not None:
                 updates["result"] = result
-            elif new_status == "failed" and error is not None:
+            if error is not None:
                 updates["error"] = error
         elif new_status == "expired":
             updates["expires_at"] = expires_at or now
