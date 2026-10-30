@@ -108,17 +108,16 @@ def resolved_hand_spec(spec_document: Mapping[str, Any]) -> ResolvedHandSpec:
     ``ValueError`` for an unknown grip style or a hand length outside the
     ``hand_size`` range.
     """
-    # Imported here: grip_rotation pulls the motion-matching package.
-    from src.shared.python.motion_matching.execution.grip_rotation import (
-        grip_spec_of,
-    )
-
     subject = spec_document.get("subject", {})
-    pose = (
-        grip_spec_of(spec_document).pose()
-        if subject.get("grip_config") is not None
-        else DEFAULT_GRIP_POSE
-    )
+    if subject.get("grip_config") is not None:
+        # Imported here: grip_rotation pulls the motion-matching package.
+        from src.shared.python.motion_matching.execution.grip_rotation import (
+            grip_spec_of,
+        )
+
+        pose = grip_spec_of(spec_document).pose()
+    else:
+        pose = DEFAULT_GRIP_POSE
     override = subject.get("hand_length_m")
     stature = subject.get("stature_m")
     if override is None and stature is None:
