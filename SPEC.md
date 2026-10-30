@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-30 | #14119 | Attach visual grip hands to wrist follower frame and scale wrist-to-grip origins by hand length |
 | 2026-10-30 | #14112 | Add SAP-4b drive-mode switch and paired STM sensitivity receipt |
 | 2026-10-30 | #14113 | Adds an optional --event-captions flag to src.tools.native_viewer_export (and ExportSettings.event_captions / HudInfo.event_caption) that draws the active anatomical swing event line (Event: address, Event: top, Event: pelvis reversal, Event: impact, Event: finish) along the bottom HUD when enabled. |
 | 2026-10-30 | #14111 | Disarm the root conftest hang watchdog in pytest_unconfigure (ignore SIGUSR1, close the dump pipe, and terminate/reap the watchdog subprocess) and exit the watchdog immediately on stdin EOF so late SIGUSR1 signals during interpreter shutdown cannot kill pytest with exit code 138. |
