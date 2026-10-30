@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14087 · Sim-Run: Durable Run Store With Run IDs, Disk Quota and Visible Expiration
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14087
+- **Branch:** feat/14087-sim-run-store
+- **PR:** #14098
+- **Paths:** see #14098
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`e1ee48de`; collated from changes/14087-sim-run-durable-store.md)
+- **Summary:** Atomic per-run record under configurable results root; strict illegal lifecycle state transitions (e.g. succeeded->running raises); disk quota pruning marking pruned runs visibly expired.
+- **Next step:** Shipped in PR #14098.
+
 ### DL-#14095 · Rotate SPEC.md Section 12 Change-Log Archive Wave 3
 
 - **State:** shipped
