@@ -2501,6 +2501,47 @@ PYTHONPATH=.:src pytest -o addopts="" -q \
     tests/unit/grip_contact/test_grip_binding_manifests.py
 \end{verbatim}
 
+\subsection{Compliant Palm--Thumb Pad Pair (HRG-H2, \#13190)}
+\textbf{Diagnostic Scope and Spec Revision.} The compliant palm--thumb pad (\path{src/shared/python/grip_contact/palm_thumb_pad.py}) isolates the physical \texttt{trail\_palm\_lead\_thumb} hand--hand contact pair of the grip topology---the trail thenar sphere acting against the lead thumb capsule---and evaluates it through the single shared G2 sphere--capsule contact law (\texttt{topology\_hand\_hand\_pair\_wrench}: Hunt--Crossley unilateral normal compliance plus Stribeck tangential friction). Following the HRG-GS-G3 (\#13301) and HRG-GS-G11 (\#13309) governance split, the pad is physical only when \texttt{hand\_separation.mode == "separated\_v2"} with independent \texttt{LHandBody} and \texttt{RHandStandoff} bodies. Calling \texttt{palm\_thumb\_pad\_spec\_revision(spec)} on a separated \texttt{full-body-v2} specification emits a deep-copied diagnostic revision (\texttt{revision = "hrg-h2-palm-thumb-pad-v1"}, \texttt{diagnostic\_only = True}, \texttt{native\_collision = False}) that records \texttt{parent\_spec\_sha256} and computes a distinct top-level \texttt{spec\_sha256} while leaving the parent document and \texttt{upper\_body\_sha256} physics slice unchanged. Welded specifications (\texttt{separate\_hands=False}) are refused fail-closed with \texttt{SchemaFeatureUnavailableError}. Because native engine collision geometry is disabled on the pad geoms, every engine consumes the identical analytical force law.
+
+\textbf{Hand-Drift Gate and Contract Bounds.} Before reporting any pad force, \texttt{hand\_drift\_gate} validates the prescribed trail-in-lead hand drift (\texttt{HandDrift}) against \texttt{HAND\_DRIFT\_GATE\_MM} ($2.0\text{ mm}$):
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Drift Gate ($\text{limit} = 2.0\text{ mm}$):} Peak drift along and across the grip axis must both be finite and strictly below $2.0\text{ mm}$. When either component is $\ge 2.0\text{ mm}$ or non-finite, \texttt{palm\_thumb\_pad\_force} returns \texttt{available = False} with \texttt{NaN} force components and an explicit diagnostic reason string (never silently zero).
+\item \textbf{Unilateral Separation ($\le 1.0\times 10^{-8}\text{ N}$):} At an isolated $1.0\text{ mm}$ surface separation ($\delta = 0.0\text{ m}$, closing speed $0.5\,\mathbf{n} + (0, 0.3, 0)\text{ m/s}$), normal, tangential, and resultant trail-hand forces are $0.0\text{ N} \le \texttt{SEPARATION\_FORCE\_TOL\_N} = 1.0\times 10^{-8}\text{ N}$. Across closing speeds $[-5.0, +5.0]\text{ m/s}$ and depths $[0.0, 1.0]\text{ mm}$, $F_n \ge 0.0\text{ N}$ and $\mathbf{F}_{\mathrm{trail}}\cdot\mathbf{n} \le 1.0\times 10^{-8}\text{ N}$ (zero tensile adhesion).
+\item \textbf{Friction Cone and Action--Reaction ($\le 1.0\times 10^{-8}$):} The friction-cone residual $\max(0, F_t - \mu_s F_n)$ satisfies $\le \texttt{FRICTION\_CONE\_TOL\_N} = 1.0\times 10^{-8}\text{ N}$ (measured $0.0\text{ N}$), and the normalised action--reaction error $\|\mathbf{F}_{\mathrm{lead}} + \mathbf{F}_{\mathrm{trail}}\| / \max(\|\mathbf{F}_{\mathrm{lead}}\|, \|\mathbf{F}_{\mathrm{trail}}\|)$ satisfies $\le \texttt{ACTION\_REACTION\_TOL} = 1.0\times 10^{-8}$ (measured $0.0$, pointwise sum $\le 10^{-12}\text{ N}$).
+\item \textbf{Preload and Sensitivity:} At the neutral calibration pose of \path{full_body_spec_anthro_driver.json} across \texttt{overlap}, \texttt{interlock}, and \texttt{ten\_finger}, the pad carries preload penetration $\delta_0 = 0.250\text{ mm}$ ($2.5\times 10^{-4}\text{ m}$) and static normal force $F_{n,0} = 42.6731\text{ N}$. Central-difference perturbation (\texttt{palm\_thumb\_preload\_sensitivity}, $\pm 10\%$ of $\delta_0$) reports local stiffness $\mathrm{d}F_n/\mathrm{d}\delta = 170,692.43\text{ N/m}$ ($1.7069\times 10^{5}\text{ N/m}$) and log-elasticity $(\delta_0/F_{n,0})\,\mathrm{d}F_n/\mathrm{d}\delta = 1.0$.
+\item \textbf{Timestep-Halving Impact Convergence ($\le 1\%$):} Integrating a 1-D trail-hand impact against the stationary lead thumb (\texttt{palm\_thumb\_impact\_response}, \texttt{timestep\_halving\_sensitivity}, $m = 0.5\text{ kg}$, approach speed $v_0 = 0.2\text{ m/s}$, initial gap $0.20\text{ mm}$, duration $0.01\text{ s}$) with velocity-Verlet and midpoint velocity updates at $\Delta t = 2.0\times 10^{-5}\text{ s}$ (coarse) and $\Delta t / 2 = 1.0\times 10^{-5}\text{ s}$ (fine) yields peak normal force $57.0546\text{ N}$ (relative change $1.0\times 10^{-8} \le \texttt{TIMESTEP\_SENSITIVITY\_TOL} = 0.01$) and normal impulse $0.194684\text{ N}\cdot\text{s}$ (relative change $4.2\times 10^{-7} \le 0.01$, bounded above by full momentum reversal $2 m v_0 = 0.20\text{ N}\cdot\text{s}$).
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\begin{tabular}{llllr}
+\toprule
+\textbf{Check / Quantity} & \textbf{Function / Symbol} & \textbf{Measured Value} & \textbf{Contract Bound} & \textbf{Status} \\
+\midrule
+Hand-drift gate limit & \texttt{HAND\_DRIFT\_GATE\_MM} & $< 2.0\text{ mm}$ along \& across & $< 2.0\text{ mm}$ (else \texttt{NaN}+reason) & pass \\
+Isolated $1\text{ mm}$ separation force & \texttt{SEPARATION\_FORCE\_TOL\_N} & $0.0\text{ N}$ ($\delta = 0.0\text{ m}$) & $\le 1.0\times 10^{-8}\text{ N}$ & pass \\
+Friction-cone residual & \texttt{FRICTION\_CONE\_TOL\_N} & $0.0\text{ N}$ & $\le 1.0\times 10^{-8}\text{ N}$ & pass \\
+Action--reaction relative error & \texttt{ACTION\_REACTION\_TOL} & $0.0$ & $\le 1.0\times 10^{-8}$ & pass \\
+Neutral preload penetration $\delta_0$ & \texttt{palm\_thumb\_pad\_force} & $0.250\text{ mm}$ ($2.5\times 10^{-4}\text{ m}$) & $> 0\text{ m}$ & reported \\
+Neutral preload normal force $F_{n,0}$ & \texttt{palm\_thumb\_pad\_force} & $42.6731\text{ N}$ & $> 0\text{ N}$ & reported \\
+Preload stiffness $\mathrm{d}F_n/\mathrm{d}\delta$ & \texttt{palm\_thumb\_preload\_sensitivity} & $170,692.43\text{ N/m}$ (elasticity $1.0$) & finite $> 0\text{ N/m}$ & reported \\
+Impact peak force ($\Delta t$ vs.\ $\Delta t/2$) & \texttt{timestep\_halving\_sensitivity} & $57.0546\text{ N}$ (rel.\ diff $1.0\times 10^{-8}$) & $\le 1.0\%$ ($0.01$) & pass \\
+Impact impulse ($\Delta t$ vs.\ $\Delta t/2$) & \texttt{timestep\_halving\_sensitivity} & $0.194684\text{ N}\cdot\text{s}$ (rel.\ diff $4.2\times 10^{-7}$) & $\le 1.0\%$ ($0.01$) & pass \\
+\bottomrule
+\end{tabular}
+\caption{Measured HRG-H2 (\texttt{hrg-h2-palm-thumb-pad-v1}) compliant palm--thumb pad verification numbers on \path{full_body_spec_anthro_driver.json} from \path{tests/unit/grip_contact/test_palm_thumb_pad.py}.}
+\label{tab:h2_palm_thumb_pad_contract}
+\end{table}
+
+\textbf{Limitations and Non-Claims.} The compliant palm--thumb pad is a diagnostic analytical contact model for the isolated \texttt{trail\_palm\_lead\_thumb} sphere--capsule pair in \texttt{separated\_v2} mode, not a calibrated measurement of in-vivo thenar soft-tissue pressure distribution.
+
+\textbf{Reproduction.}
+\begin{verbatim}
+PYTHONPATH=.:src pytest -o addopts="" -q tests/unit/grip_contact/test_palm_thumb_pad.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 

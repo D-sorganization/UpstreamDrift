@@ -6,7 +6,7 @@ outline and the fill pass and garbles the labels. Pure numpy and Pillow.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import math
 from typing import Any
@@ -108,6 +108,53 @@ def draw_label(
     return np.asarray(pil).copy()
 
 
+_EVENT_DISPLAY_NAMES: dict[str, str] = {
+    "address": "address",
+    "pelvis_reversal": "pelvis reversal",
+    "top": "top",
+    "impact": "impact",
+    "finish": "finish",
+}
+
+
+def event_caption_for_time(
+    time_s: float,
+    events: Mapping[str, Any] | None = None,
+) -> str:
+    """Resolve the active anatomical event caption name at ``time_s`` (#13175).
+
+    Accepts either an ``anatomical_event_table`` document (with an ``"events"``
+    mapping) or a flat mapping of event names to ``{"time_s": ...}`` / float
+    timestamps. Raises ``ValueError`` when ``time_s`` is not finite.
+    """
+    if not math.isfinite(time_s):
+        raise ValueError("time_s must be finite")
+    if events is None or not isinstance(events, Mapping):
+        return "address"
+    raw_events = events.get("events", events)
+    if not isinstance(raw_events, Mapping) or not raw_events:
+        return "address"
+    parsed: list[tuple[float, int, str]] = []
+    for idx, (name, entry) in enumerate(raw_events.items()):
+        t_val: float | None = None
+        if isinstance(entry, Mapping) and "time_s" in entry:
+            t_val = float(entry["time_s"])
+        elif isinstance(entry, (int, float)):
+            t_val = float(entry)
+        if t_val is not None and math.isfinite(t_val):
+            parsed.append((t_val, idx, str(name)))
+    if not parsed:
+        return "address"
+    parsed.sort(key=lambda item: (item[0], item[1]))
+    chosen = parsed[0][2]
+    for event_time_s, _idx, name in parsed:
+        if event_time_s <= time_s + 1e-9:
+            chosen = name
+        else:
+            break
+    return _EVENT_DISPLAY_NAMES.get(chosen, chosen.replace("_", " "))
+
+
 @dataclass(frozen=True)
 class HudInfo:
     """Heads-up display content: time, engine, club and overlay legend."""
@@ -120,6 +167,8 @@ class HudInfo:
     ms_from_impact: float | None = None
     #: tension/compression shading key line (its own line when non-empty)
     shading_legend: str = ""
+    #: optional anatomical swing event caption (HRG-E4, #13175); off by default
+    event_caption: str = ""
     #: optional capability/mobility HUD lines (HCM-3, #14004, #14038)
     extra_lines: tuple[str, ...] = ()
 
@@ -132,6 +181,8 @@ class HudInfo:
             raise ValueError("speed must be positive and finite")
         if self.ms_from_impact is not None and not math.isfinite(self.ms_from_impact):
             raise ValueError("ms_from_impact must be finite")
+        if not isinstance(self.event_caption, str):
+            raise TypeError("event_caption must be a str")
 
     def lines(self) -> list[str]:
         """Text lines, the legend only when present.
@@ -149,6 +200,13 @@ class HudInfo:
             out.append(self.legend)
         if self.shading_legend:
             out.append(self.shading_legend)
+        if self.event_caption:
+            caption = (
+                self.event_caption
+                if self.event_caption.startswith("Event:")
+                else f"Event: {self.event_caption}"
+            )
+            out.append(caption)
         out.extend(self.extra_lines)
         return out
 

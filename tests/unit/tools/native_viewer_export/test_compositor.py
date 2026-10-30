@@ -10,6 +10,7 @@ from src.tools.native_viewer_export.compositor import (
     compose_grid,
     draw_hud,
     draw_label,
+    event_caption_for_time,
     grid_geometry,
 )
 
@@ -83,3 +84,54 @@ def test_hud_shows_time_engine_club_and_legend() -> None:
 def test_hud_validates_time() -> None:
     with pytest.raises(ValueError, match="finite"):
         HudInfo(float("nan"), "Drake", "Driver", "")
+
+
+def test_hud_event_caption_names_the_current_event() -> None:
+    """HUD event captions default off; when enabled, append 'Event: <name>' as the last line."""
+    default_hud = HudInfo(0.25, "Drake", "Driver", "green=GRF")
+    assert default_hud.event_caption == ""
+    assert all(not line.startswith("Event:") for line in default_hud.lines())
+
+    document = {
+        "schema": "upstreamdrift.anatomical_event_table",
+        "events": {
+            "address": {"frame": 0, "time_s": 0.0},
+            "top": {"frame": 40, "time_s": 0.40},
+            "pelvis_reversal": {"frame": 45, "time_s": 0.45},
+            "impact": {"frame": 80, "time_s": 0.80},
+            "finish": {"frame": 100, "time_s": 1.00},
+        },
+    }
+    expected_sequence = [
+        (0.0, "address"),
+        (0.20, "address"),
+        (0.40, "top"),
+        (0.45, "pelvis reversal"),
+        (0.80, "impact"),
+        (1.00, "finish"),
+    ]
+    for t_s, expected_name in expected_sequence:
+        name = event_caption_for_time(t_s, document)
+        assert name == expected_name
+        hud = HudInfo(
+            time_s=t_s,
+            engine="Drake",
+            club="Driver",
+            legend="green=GRF",
+            shading_legend="red=tension",
+            event_caption=name,
+        )
+        lines = hud.lines()
+        assert lines[-1] == f"Event: {expected_name}"
+
+    base_img = draw_hud(_tile(0, h=120, w=280), default_hud)
+    captioned_img = draw_hud(
+        _tile(0, h=120, w=280),
+        HudInfo(0.25, "Drake", "Driver", "green=GRF", event_caption="impact"),
+    )
+    assert not np.array_equal(base_img, captioned_img)
+
+    with pytest.raises(TypeError, match="event_caption"):
+        HudInfo(0.0, "Drake", "Driver", "", event_caption=123)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="finite"):
+        event_caption_for_time(float("nan"), document)

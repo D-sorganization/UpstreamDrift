@@ -241,6 +241,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="clean frames: no view label, HUD or legend text",
     )
     p.add_argument(
+        "--event-captions",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="draw an anatomical swing event caption line ('Event: <name>') in the "
+        "HUD (default: off; HRG-E4, #13175)",
+    )
+    p.add_argument(
         "--impact-time",
         type=float,
         default=None,
@@ -449,6 +456,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
+        event_captions=bool(getattr(args, "event_captions", False)),
         ball=not args.no_ball,
         appearance=build_appearance(args),
         **(
