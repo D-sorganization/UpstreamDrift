@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-30 | #14100 | Runs execute in isolated worker subprocess outside event loop with wall-clock timeout and concurrency bound; worker reaped before cleanup; Linux rlimits applied and documented as verified only on Linux. |
 | 2026-10-30 | #14098 | Atomic per-run record under configurable results root; strict illegal lifecycle state transitions (e.g. succeeded->running raises); disk quota pruning marking pruned runs visibly expired. |
 | 2026-10-29 | #14096 | Rotate the 369 oldest SPEC.md section 12 rows (dated up to 2026-10-24) verbatim into a third pinned block of docs/spec/CHANGELOG_ARCHIVE.md; SPEC.md 349,968 to 269,881 bytes under the unchanged 350,000-byte cap; the change-log gate reads every archived row block |
 | 2026-10-29 | #14093 | Versioned schemas for RunRequest, RunRecord, and ResultEnvelope exported from pydantic models |
