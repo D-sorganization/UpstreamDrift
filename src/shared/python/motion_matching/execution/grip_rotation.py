@@ -11,13 +11,18 @@ discard its hand-tuned contact parameters:
 from __future__ import annotations
 
 import copy
+import math
 from collections.abc import Mapping, Sequence
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.core.handedness import subject_handedness
-from src.shared.python.model_appearance.grip_pose import GripStyle
+from src.shared.python.hand_size import DEFAULT_HAND_LENGTH_M, resolve_hand_length_m
+from src.shared.python.model_appearance.grip_pose import (
+    GripStyle,
+    wrist_grip_offset_m,
+)
 from src.shared.python.model_appearance.schema import physics_spec_sha256
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 from src.shared.python.motion_matching.grip_contract import (
@@ -146,6 +151,45 @@ def _shift_hands(out: dict[str, Any], lead: float, trail: float) -> None:
             frame["placement"] = _shift_y(frame["placement"], lead)
 
 
+def _resolve_document_hand_length_m(document: Mapping[str, Any]) -> float:
+    subject = document.get("subject", {})
+    override = subject.get("hand_length_m")
+    stature = subject.get("stature_m")
+    if override is None and stature is None:
+        return DEFAULT_HAND_LENGTH_M
+    return resolve_hand_length_m(
+        stature, str(subject.get("sex", "unspecified")), override_m=override
+    )
+
+
+def _place_wrist_origins(out: dict[str, Any]) -> None:
+    """Place LW and RW wrist origins at the scaled HAND_GRIP_ANCHOR_IN_HAND_M offset (#13996)."""
+    offset_m = wrist_grip_offset_m(_resolve_document_hand_length_m(out))
+    pb = np.asarray(out["closure"]["placement_b"], dtype=float)
+    x_axis, z_axis = float(pb[0, 3]), float(pb[2, 3])
+    joint_l = _wrist_joint(out, "L")
+    c2f_l = np.asarray(joint_l["child_to_follower"], dtype=float).copy()
+    dx, dz = float(c2f_l[0, 3]) - x_axis, float(c2f_l[2, 3]) - z_axis
+    radial = math.hypot(dx, dz)
+    scale = offset_m / radial if radial > 1e-9 else 1.0
+    c2f_l[0, 3] = x_axis + dx * scale
+    c2f_l[2, 3] = z_axis + dz * scale
+    joint_l["child_to_follower"] = c2f_l.tolist()
+    pa = np.asarray(out["closure"]["placement_a"], dtype=float).copy()
+    c2f_r = np.asarray(_wrist_joint(out, "R")["child_to_follower"], dtype=float)
+    delta_r = pb[:3, :3] @ pa[:3, :3].T @ (c2f_r[:3, 3] - pa[:3, 3])
+    radial_r = math.hypot(float(delta_r[0]), float(delta_r[2]))
+    scale_r = offset_m / radial_r if radial_r > 1e-9 else 1.0
+    pa[:3, 3] = c2f_r[:3, 3] - (c2f_r[:3, 3] - pa[:3, 3]) * scale_r
+    out["closure"]["placement_a"] = pa.tolist()
+    club = next(b for b in out["bodies"] if b["name"].endswith(_CLUB_SUFFIX))
+    for frame in out["frames"]:
+        if frame["body"] == club["name"] and frame["name"] == "LW":
+            fp = np.asarray(frame["placement"], dtype=float).copy()
+            fp[0, 3], fp[2, 3] = float(c2f_l[0, 3]), float(c2f_l[2, 3])
+            frame["placement"] = fp.tolist()
+
+
 def _shift_closure(out: dict[str, Any], grip: GripSpec) -> None:
     """Place the lead wrist and the trail closure along the shaft.
 
@@ -168,8 +212,37 @@ def _shift_closure(out: dict[str, Any], grip: GripSpec) -> None:
         out["closure"]["placement_b"], new_trail - trail_y
     )
     _shift_hands(out, new_lead - lead_y, new_trail - trail_y)
+    _place_wrist_origins(out)
     if "wrist_to_head_m" in out["club"]:
         out["club"]["wrist_to_head_m"] = -new_lead
+
+
+def wrist_template_attachment_residuals_m(
+    document: Mapping[str, Any], *, frames: int = 100
+) -> dict[str, np.ndarray]:
+    """Per-hand anatomical wrist-to-template attachment residual series over a swing (#13996)."""
+    if frames <= 0:
+        raise ValueError(f"frames must be positive, got {frames}")
+    target_offset_m = wrist_grip_offset_m(_resolve_document_hand_length_m(document))
+    pb = np.asarray(document["closure"]["placement_b"], dtype=float)
+    pa = np.asarray(document["closure"]["placement_a"], dtype=float)
+    c2f_l = np.asarray(
+        _wrist_joint(dict(document), "L")["child_to_follower"], dtype=float
+    )
+    c2f_r = np.asarray(
+        _wrist_joint(dict(document), "R")["child_to_follower"], dtype=float
+    )
+    p_wrist = {
+        "L": c2f_l[:3, 3],
+        "R": (pb @ np.linalg.inv(pa) @ c2f_r)[:3, 3],
+    }
+    x_axis, z_axis = float(pb[0, 3]), float(pb[2, 3])
+    residuals: dict[str, np.ndarray] = {}
+    for side, pw in p_wrist.items():
+        radial = math.hypot(float(pw[0]) - x_axis, float(pw[2]) - z_axis)
+        gap_m = abs(radial - target_offset_m)
+        residuals[side] = np.full(frames, gap_m, dtype=float)
+    return residuals
 
 
 def grip_spec_of(document: Mapping[str, Any]) -> GripSpec:

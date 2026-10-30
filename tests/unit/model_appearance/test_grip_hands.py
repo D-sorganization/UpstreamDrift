@@ -216,3 +216,24 @@ def test_assembly_with_hands_adds_two_glove_meshes_and_keeps_the_club() -> None:
         np.testing.assert_array_equal(full[part].vertices, plain[part].vertices)
     for part in ("lead_hand", "trail_hand"):
         assert part not in ca.PART_MATERIALS  # skin or glove: the document decides
+
+
+@pytest.mark.parametrize("key", ["driver", "iron7"])
+def test_grip_hand_frame_matches_wrist_follower_frame(key: str) -> None:
+    """Visual hand frame x-axis matches wrist follower dorsal axis within 5 deg (#13996)."""
+    import math
+
+    from src.shared.python.model_appearance.hand_spec import (
+        resolved_hand_spec,
+        wrist_follower_dorsal_axis,
+    )
+
+    spec = json.loads(SPECS[key].read_bytes())
+    club = ca.assembly_from_spec(spec)
+    hands = resolved_hand_spec(spec)
+    for hand in (Hand.LEAD, Hand.TRAIL):
+        expected_x = wrist_follower_dorsal_axis(spec, hand)
+        frame = gh.grip_hand_frame(club, hand, hands.pose, hands=hands)
+        cos_angle = float(np.clip(np.dot(frame[:3, 0], expected_x), -1.0, 1.0))
+        angle_deg = math.degrees(math.acos(cos_angle))
+        assert angle_deg <= 5.0, (key, hand, angle_deg)

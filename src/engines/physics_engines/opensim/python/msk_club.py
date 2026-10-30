@@ -57,6 +57,7 @@ from src.shared.python.model_appearance.club_assembly import (
     assembly_from_spec,
     clubface_centre,
 )
+from src.shared.python.model_appearance.grip_pose import RAJAGOPAL_HAND_GRIP_POINT_M
 from src.shared.python.motion_matching.grip_contract import GripSpec
 
 OPENSIM_DIR = Path(__file__).resolve().parents[1]
@@ -95,9 +96,8 @@ CLUB_GRIP_FRAMES = {"L": "club_grip_offset", "R": "club_trail_grip_offset"}
 HAND_GRIP_FRAMES = {"L": "hand_l_grip_offset", "R": "hand_r_grip_offset"}
 #: Point in the Rajagopal hand frame the shaft axis passes through: palm side
 #: (+x) of the metacarpal heads, mid-hand (y along the forearm, z radial).
-#: From the hand bone meshes (metacarpal heads at y = -0.085, proximal
-#: phalanges at x up to 0.022, scale 0.85); identical for both hands.
-HAND_GRIP_POINT_M = (0.022, -0.085, 0.0)
+#: Routed from the shared grip_pose spec adapter (#13996).
+HAND_GRIP_POINT_M = RAJAGOPAL_HAND_GRIP_POINT_M
 _SOCKETS = {"L": "/bodyset/hand_l", "R": "/bodyset/hand_r"}
 DEFAULT_HOLD_SQUEEZE_N = 1100.0
 GRAVITY_M_S2 = (0.0, -9.80665, 0.0)
