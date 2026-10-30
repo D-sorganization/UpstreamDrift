@@ -324,8 +324,7 @@ def fit_grip_rotation(
     grid_step_deg: float = 15.0,
     weights: Sequence[float] | None = None,
     neutral_prior_weight_deg2: float = 0.0,
-    neutral_rotation_deg: Sequence[float] | Array | None = None,
-    side: str = "L",
+    side: str | Sequence[float] | Array = "L",
 ) -> GripFit:
     """Fit the constant follower-side rotation that keeps the wrist
     coordinates inside ``ranges_deg`` over the whole swing.
@@ -334,18 +333,21 @@ def fit_grip_rotation(
     the hand body with the current document; the fitted rotation ``E`` is
     the one under which ``relative @ E`` decomposes into the smallest
     root-mean-square excess beyond the ranges (plus an optional geodesic
-    prior ``neutral_prior_weight_deg2 * d_SO3(E, G(neutral_rotation_deg))^2``).
+    prior ``neutral_prior_weight_deg2 * d_SO3(E, G(neutral_rotation_deg))^2``,
+    where ``side`` selects ``"L"``/``"R"`` or an explicit 3-angle target).
     A grid over extrinsic x-y-z angles seeds a Nelder-Mead refinement.
     Postcondition: ``cost_after <= cost_before`` (the identity is in the grid).
     """
+    side_key = side if isinstance(side, str) else "L"
+    neutral_deg = None if isinstance(side, str) else side
     objective = ExcessObjective(
         relative,
         wrist_base,
         ranges_deg,
         weights,
         neutral_prior_weight_deg2=neutral_prior_weight_deg2,
-        neutral_rotation_deg=neutral_rotation_deg,
-        side=side,
+        neutral_rotation_deg=neutral_deg,
+        side=side_key,
     )
     r = objective.ranges
     if grid_half_deg <= 0 or grid_step_deg <= 0:

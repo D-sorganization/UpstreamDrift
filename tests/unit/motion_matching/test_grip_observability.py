@@ -82,9 +82,7 @@ def test_fit_grip_rotation_rejects_invalid_neutral_target_or_side() -> None:
     with pytest.raises(ValueError, match="side"):
         grip_fit.fit_grip_rotation(relative, BASE, ranges, side="invalid")
     with pytest.raises(ValueError, match="neutral_rotation_deg"):
-        grip_fit.fit_grip_rotation(
-            relative, BASE, ranges, neutral_rotation_deg=(0.0, 1.0)
-        )
+        grip_fit.fit_grip_rotation(relative, BASE, ranges, side=(0.0, 1.0))
 
 
 @pytest.mark.parametrize("side", ["L", "R"])
