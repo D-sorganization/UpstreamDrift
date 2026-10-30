@@ -8,7 +8,7 @@ dependency skips cleanly instead of failing.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 import functools
 import math
@@ -44,6 +44,7 @@ from src.tools.native_viewer_export.compositor import (
     draw_hud,
     draw_impact_card,
     draw_label,
+    event_caption_for_time,
 )
 from src.tools.native_viewer_export.impact_card import impact_card_for
 from src.tools.native_viewer_export.shading import shading_legend
@@ -161,6 +162,8 @@ class ExportSettings:
     interface_ellipsoids: tuple[str, ...] = ()
     ellipsoid_scale: str = DEFAULT_ELLIPSOID_SCALE
     drift_arrow: bool = False
+    #: optional HUD swing event caption line (HRG-E4, #13175); off by default
+    event_captions: bool = False
 
     @property
     def shading_enabled(self) -> bool:
@@ -230,6 +233,7 @@ class ExportSettings:
             "torque_vectors",
             "palm_thumb_force",
             "drift_arrow",
+            "event_captions",
         ):
             if not isinstance(getattr(self, flag), bool):
                 raise TypeError(f"{flag} must be bool")
@@ -772,6 +776,27 @@ class ClipOverlays:
     strip: StripRenderer | None = None
 
 
+def _swing_event_caption(swing: SwingInput, time_s: float, impact_s: float) -> str:
+    """Resolve the HUD event caption at ``time_s`` from provenance or swing timing."""
+    provenance = swing.bundle.provenance
+    for key in ("event_table", "anatomical_event_table", "events"):
+        candidate = provenance.get(key)
+        if isinstance(candidate, Mapping):
+            return event_caption_for_time(time_s, candidate)
+    end_s = (
+        float(swing.source_times_s[-1])
+        if swing.source_times_s.size
+        else max(time_s, impact_s)
+    )
+    fallback: dict[str, float] = {"address": 0.0}
+    if impact_s > 0.0:
+        fallback["top"] = 0.5 * impact_s
+        fallback["pelvis_reversal"] = 0.55 * impact_s
+    fallback["impact"] = impact_s
+    fallback["finish"] = max(end_s, impact_s)
+    return event_caption_for_time(time_s, fallback)
+
+
 def _export_clip(
     backend: NativeBackend,
     swing: SwingInput,
@@ -816,6 +841,9 @@ def _export_clip(
                 ms_from_impact=(t - impact) * 1000.0,
                 shading_legend=shading_legend(settings.shading)
                 if settings.shading is not None and settings.shading_enabled
+                else "",
+                event_caption=_swing_event_caption(shown, t, impact)
+                if settings.event_captions
                 else "",
             )
             labelled = {

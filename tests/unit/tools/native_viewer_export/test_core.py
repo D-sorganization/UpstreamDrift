@@ -305,3 +305,41 @@ def test_hand_source_cache_key_includes_torque_limit_source(
     s3 = _hand_source(b"spec_1", torque_limit_source="source_b")
     assert s3 is not s1
     assert len(instances) == 2
+
+
+def test_export_swing_event_captions_draws_hud_event_line(tmp_path: Path) -> None:
+    sink_off: dict = {}
+    sink_on: dict = {}
+    export_swing(
+        _FakeBackend(),
+        _swing(20),
+        ExportSettings(
+            views=("face_on",),
+            multiview=False,
+            width=240,
+            height=120,
+            fps=50,
+            speeds=(1.0,),
+            event_captions=False,
+        ),
+        tmp_path / "off",
+        writer_factory=lambda p, fps: _Writer(p, fps, sink_off),
+    )
+    export_swing(
+        _FakeBackend(),
+        _swing(20),
+        ExportSettings(
+            views=("face_on",),
+            multiview=False,
+            width=240,
+            height=120,
+            fps=50,
+            speeds=(1.0,),
+            event_captions=True,
+        ),
+        tmp_path / "on",
+        writer_factory=lambda p, fps: _Writer(p, fps, sink_on),
+    )
+    frame_off = sink_off["driver_fake_face_on_1x.mp4"].frames[0]
+    frame_on = sink_on["driver_fake_face_on_1x.mp4"].frames[0]
+    assert not np.array_equal(frame_off, frame_on)
