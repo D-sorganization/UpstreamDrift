@@ -53,12 +53,23 @@ class _FakeConfig:
 
 class _FakePopen:
     calls: list[list[str]] = []
+    instances: list[_FakePopen] = []
 
     def __init__(self, args: list[str], **kwargs: Any) -> None:
         _FakePopen.calls.append(args)
+        _FakePopen.instances.append(self)
+        self.terminated = False
+        self.waited = False
         stderr = kwargs.get("stderr")
         if stderr is not None:
             stderr.close()
+
+    def terminate(self) -> None:
+        self.terminated = True
+
+    def wait(self, timeout: float | None = None) -> int:
+        self.waited = True
+        return 0
 
 
 @pytest.fixture
@@ -87,15 +98,25 @@ def armed(monkeypatch: pytest.MonkeyPatch) -> Iterator[dict[str, Any]]:
     monkeypatch.setattr(faulthandler, "dump_traceback", _record_dump)
     monkeypatch.setattr(subprocess, "Popen", _FakePopen)
     _FakePopen.calls = []
+    _FakePopen.instances = []
 
     module = _load_root_conftest()
-    module._arm_hang_forensics(_FakeConfig())
+    cfg = _FakeConfig()
+    module._arm_hang_forensics(cfg)
+    installed["module"] = module
+    installed["config"] = cfg
     yield installed
     # Recover the pipe the handler writes to (via the recorded dump call) and
     # close it so the test leaks no file descriptor.
-    if "handler" in installed:
-        installed["handler"](_FAKE_SIGUSR1, None)
-        installed["dumps"][-1][0].close()
+    if "handler" in installed and callable(installed["handler"]):
+        with pytest.MonkeyPatch.context():
+            try:
+                installed["handler"](_FAKE_SIGUSR1, None)
+                installed["dumps"][-1][0].close()
+            except ValueError:
+                pass
+    if hasattr(module, "_disarm_hang_forensics"):
+        module._disarm_hang_forensics(cfg)
 
 
 def test_watchdog_installs_a_python_level_sigusr1_handler(
@@ -116,3 +137,58 @@ def test_handler_dumps_every_thread_through_faulthandler(armed: dict[str, Any]) 
     dump_file, all_threads = dumps[0]
     assert all_threads is True
     assert dump_file.fileno() >= 0, "the dump must go to the watchdog pipe fd"
+
+
+def test_pytest_unconfigure_disarms_watchdog_and_ignores_sigusr1(
+    armed: dict[str, Any],
+) -> None:
+    """Issue #14109: disarm watchdog before Py_FinalizeEx resets SIGUSR1 to SIG_DFL."""
+    armed["handler"](_FAKE_SIGUSR1, None)
+    dump_file, _ = armed["dumps"][-1]
+    assert not dump_file.closed
+
+    module = armed["module"]
+    assert hasattr(module, "pytest_unconfigure"), (
+        "conftest.py must define pytest_unconfigure to disarm the hang watchdog"
+    )
+    module.pytest_unconfigure(armed["config"])
+
+    assert armed.get("signum") == _FAKE_SIGUSR1
+    assert armed.get("handler") == signal.SIG_IGN, (
+        "pytest_unconfigure must set SIGUSR1 to SIG_IGN before interpreter shutdown"
+    )
+    assert dump_file.closed, "pytest_unconfigure must close the dump pipe"
+    assert len(_FakePopen.instances) == 1
+    assert _FakePopen.instances[0].terminated, (
+        "pytest_unconfigure must terminate the watchdog subprocess"
+    )
+    assert _FakePopen.instances[0].waited, (
+        "pytest_unconfigure must reap the watchdog subprocess"
+    )
+
+
+def test_watchdog_script_exits_immediately_on_stdin_eof() -> None:
+    """Issue #14109: closing the parent pipe must make the watchdog exit without waiting 10s."""
+    import os
+
+    module = _load_root_conftest()
+    proc = subprocess.Popen(
+        [sys.executable, "-c", module._WATCHDOG_SRC, str(os.getpid())],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+    )
+    try:
+        assert proc.stdin is not None
+        proc.stdin.write(b"thread dump line\n")
+        proc.stdin.close()
+        rc = proc.wait(timeout=2.0)
+        assert rc == 0
+        assert proc.stderr is not None
+        err = proc.stderr.read().decode("utf-8", errors="replace")
+        assert "[hang-watchdog] thread dump line" in err
+    finally:
+        proc.kill()
+        proc.wait()
+        if proc.stderr is not None:
+            proc.stderr.close()
