@@ -1015,6 +1015,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14109 · Disarm Unit-Gate Hang Watchdog on Pytest_Unconfigure
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14109
+- **Branch:** agy-c/14109-disarm-hang-watchdog
+- **PR:** #14111
+- **Paths:** see #14111
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`f6c2b3f8`; collated from changes/14109-disarm-hang-watchdog.md)
+- **Summary:** Disarm the root conftest hang watchdog in pytest_unconfigure (ignore SIGUSR1, close the dump pipe, and terminate/reap the watchdog subprocess) and exit the watchdog immediately on stdin EOF so late SIGUSR1 signals during interpreter shutdown cannot kill pytest with exit code 138.
+- **Next step:** Shipped in PR #14111.
+
+### DL-#13190 · HRG-H2: Compliant Palm-Thumb Pad Reference Subsection
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13190
+- **Branch:** docs/hrg-h2-palm-thumb-pad-reference-13190
+- **PR:** #14110
+- **Paths:** see #14110
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`a83c36d1`; collated from changes/13190-hrg-h2-palm-thumb-pad-reference.md)
+- **Summary:** Adds the HRG-H2 (hrg-h2-palm-thumb-pad-v1) compliant palm-thumb pad subsection to docs/research/human_realistic_golfer/human_realistic_golfer.tex documenting the separated_v2 sphere-capsule contact law, 2.0 mm hand-drift gate, preload sensitivity, timestep-halving impact convergence, and unit test verification.
+- **Next step:** Shipped in PR #14110.
+
 ### DL-#14092 · Sim-Run: Stdio Simulation MCP Adapter
 
 - **State:** shipped
