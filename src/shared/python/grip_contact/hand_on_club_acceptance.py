@@ -221,26 +221,7 @@ def _evaluate_wrench(
     return True
 
 
-def evaluate_engine_hand_on_club(fixture: HandOnClubFixture) -> HandOnClubReport:
-    """Single DRY hand-on-club acceptance evaluator shared by every engine."""
-    require(isinstance(fixture, HandOnClubFixture), "fixture must be HandOnClubFixture")
-    require(
-        isinstance(fixture.engine, str) and bool(fixture.engine.strip()),
-        "engine must be a non-empty string",
-    )
-    if not fixture.available:
-        require(
-            bool(fixture.unavailable_reason.strip()),
-            "unavailable engine must supply a non-empty unavailable_reason",
-        )
-        return HandOnClubReport(
-            engine=fixture.engine,
-            status="unavailable",
-            available=False,
-            passed=False,
-            reason=fixture.unavailable_reason,
-        )
-
+def _validate_available_fixture(fixture: HandOnClubFixture) -> np.ndarray:
     require(
         MIN_AZIMUTH_PRIOR_TOLERANCE_DEG
         <= fixture.azimuth_tolerance_deg
@@ -269,7 +250,36 @@ def evaluate_engine_hand_on_club(fixture: HandOnClubFixture) -> HandOnClubReport
         ),
         "wrist_attachment_residual_mm must have non-negative finite lead and trail",
     )
+    return trail_series
 
+
+def evaluate_engine_hand_on_club(fixture: HandOnClubFixture) -> HandOnClubReport:
+    """Single DRY hand-on-club acceptance evaluator shared by every engine."""
+    require(isinstance(fixture, HandOnClubFixture), "fixture must be HandOnClubFixture")
+    require(
+        isinstance(fixture.engine, str) and bool(fixture.engine.strip()),
+        "engine must be a non-empty string",
+    )
+    if not fixture.available:
+        require(
+            bool(fixture.unavailable_reason.strip()),
+            "unavailable engine must supply a non-empty unavailable_reason",
+        )
+        return HandOnClubReport(
+            engine=fixture.engine,
+            status="unavailable",
+            available=False,
+            passed=False,
+            reason=fixture.unavailable_reason,
+        )
+
+    return _evaluate_available_fixture(fixture, _validate_available_fixture(fixture))
+
+
+def _evaluate_available_fixture(
+    fixture: HandOnClubFixture, trail_series: np.ndarray
+) -> HandOnClubReport:
+    """Measure every gate for an available engine fixture and build its report."""
     lead_mesh = build_grip_hand_mesh(
         Hand.LEAD,
         grip_radius_m=fixture.grip_radius_m,

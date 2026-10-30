@@ -37,9 +37,7 @@ def test_default_qualified_template_passes_all_acceptance_gates() -> None:
     assert (
         report.trail_hand_gap_max_mm is not None
         and report.trail_hand_gap_max_mm <= MAX_TRAIL_HAND_GAP_MM
-    )
-    assert (
-        report.wrist_attachment_residual_max_mm is not None
+        and report.wrist_attachment_residual_max_mm is not None
         and report.wrist_attachment_residual_max_mm <= MAX_WRIST_ATTACHMENT_RESIDUAL_MM
     )
     assert report.wrench_feasible is True and report.render_evidence_compliant is True
@@ -54,7 +52,6 @@ def test_floating_hand_10mm_and_90deg_roll_error_both_fail_report() -> None:
         floating.palm_to_grip_gap_max_mm is not None
         and floating.palm_to_grip_gap_max_mm >= 10.0
     )
-
     rolled = evaluate_engine_hand_on_club(
         HandOnClubFixture(engine="mujoco", roll_error_deg=90.0)
     )
