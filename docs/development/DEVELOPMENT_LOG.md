@@ -1015,6 +1015,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14092 · Sim-Run: Stdio Simulation MCP Adapter
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14092
+- **Branch:** feat/14092-sim-mcp
+- **PR:** #14108
+- **Paths:** see #14108
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`29d77f03`; collated from changes/14092-sim-mcp-adapter.md)
+- **Summary:** Adds stdio Model Context Protocol (MCP) JSON-RPC 2.0 adapter exposing describe_engines, submit_run, get_run, and fetch_artifact tools over the headless simulation run service with Private Mode and auth checks at the service boundary.
+- **Next step:** Shipped in PR #14108.
+
+### DL-#14091 · Sim-Run: No-Qt Docker Smoke Test Running One Case via Docker/Ud-Sim
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14091
+- **Branch:** feat/14091-no-qt-docker-smoke
+- **PR:** #14107
+- **Paths:** see #14107
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`819bc132`; collated from changes/14091-no-qt-docker-smoke-test.md)
+- **Summary:** Adds CI smoke verification running a minimal case through the ud-sim CLI, asserting zero Qt imports in sys.modules and verified succeeded status with contract and falsification testing.
+- **Next step:** Shipped in PR #14107.
+
+### DL-#14090 · Sim-Run: Headless Ud-Sim Run JSON Batch CLI Over Run Service
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14090
+- **Branch:** feat/14090-sim-run-cli
+- **PR:** #14105
+- **Paths:** see #14105
+- **Started:** 2026-10-30
+- **Last verified:** 2026-10-30 (`b17f1096`; collated from changes/14090-headless-ud-sim-run-cli.md)
+- **Summary:** Implements ud-sim run batch CLI dispatching simulation cases through SimulationRunStore and SimulationWorkerPool, writing run records and output envelopes to configurable results root, returning non-zero exit on failure, with console script registration and CLI-API equivalence falsifying tests.
+- **Next step:** Shipped in PR #14105.
+
 ### DL-#14089 · Sim-Run: Result Validation and Provenance Gate Before Succeeded
 
 - **State:** shipped
