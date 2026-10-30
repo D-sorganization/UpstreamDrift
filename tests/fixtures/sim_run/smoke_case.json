@@ -1,0 +1,10 @@
+{
+  "case_id": "smoke-case-001",
+  "engine_type": "pendulum",
+  "parameters": {
+    "length": 1.0,
+    "mass": 0.5
+  },
+  "duration": 1.0,
+  "timestep": 0.01
+}
