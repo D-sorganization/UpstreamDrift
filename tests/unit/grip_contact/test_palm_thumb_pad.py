@@ -348,3 +348,51 @@ def test_spec_revision_refuses_welded_documents(v1_spec: dict) -> None:
         palm_thumb_pad_spec_revision(welded)
     with pytest.raises(TypeError):
         palm_thumb_pad_spec_revision([])  # type: ignore[arg-type]
+
+
+@pytest.mark.unit
+def test_hrg_h2_reference_section_documents_contract_and_measured_numbers(
+    interface: GripInterface,
+) -> None:
+    """HRG-H2 subsection in human_realistic_golfer.tex cites the contract and measured test numbers."""
+    import re
+
+    model, lead, trail, pad = _neutral(interface)
+    preload = palm_thumb_preload_sensitivity(model, lead, trail)
+    setup = ImpactSetup(
+        mass_kg=0.5, approach_speed_m_s=0.2, initial_gap_m=2.0e-4, duration_s=0.01
+    )
+    halving = timestep_halving_sensitivity(
+        model, _frame(interface.left), _frame(interface.right), setup, dt_s=2.0e-5
+    )
+
+    assert pad.penetration_m == pytest.approx(2.5e-4, rel=1e-6)
+    assert pad.normal_force_n == pytest.approx(42.673108, rel=1e-6)
+    assert preload["stiffness_n_m"] == pytest.approx(170692.4316, rel=1e-6)
+    assert preload["elasticity"] == pytest.approx(1.0, rel=1e-6)
+    assert halving["fine"].peak_normal_force_n == pytest.approx(57.054634, rel=1e-6)
+    assert halving["fine"].impulse_n_s == pytest.approx(0.19468436, rel=1e-6)
+
+    tex_path = ROOT / "docs/research/human_realistic_golfer/human_realistic_golfer.tex"
+    tex = tex_path.read_text(encoding="utf-8")
+    heading = r"\subsection{Compliant Palm--Thumb Pad Pair (HRG-H2, \#13190)}"
+    assert heading in tex
+    start = tex.index(heading)
+    end = tex.index(r"\section{Appearance}", start)
+    h2_sec = tex[start:end]
+
+    for token in (
+        PALM_THUMB_PAD_REVISION,
+        r"trail\_palm\_lead\_thumb",
+        r"separated\_v2",
+        "42.6731",
+        "0.250",
+        "170,692.43",
+        "57.0546",
+        "0.194684",
+        "2.0",
+    ):
+        assert token in h2_sec, f"Missing {token!r} in HRG-H2 reference section"
+
+    assert re.search(r"\b[0-9a-f]{8,64}\b", h2_sec) is None
+    assert re.search(r"/home/", h2_sec) is None
