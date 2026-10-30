@@ -1827,10 +1827,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13175
 - **Branch:** merged via #13543
-- **PR:** #13543, #14012
+- **PR:** #13543, #14012, #14113
 - **Paths:** see #13543
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-29 (`fecb06f9`; collated from changes/13175-hrg-e4-web-anatomical-event-table-fetche.md)
+- **Last verified:** 2026-10-30 (`4935a0b4`; collated from changes/13175-hrg-e4-hud-event-captions.md)
 - **Summary:** HRG-E4 slice: desktop and web anatomical event table view with a shared golden fixture and a feature_parity gap entry (web fetch awaits #13538)
 - **Next step:** Shipped in PR #13543.
 
