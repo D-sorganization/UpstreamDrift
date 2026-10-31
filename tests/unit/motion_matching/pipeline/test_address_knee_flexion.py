@@ -624,3 +624,39 @@ def test_dynamics_report_carries_the_window_block_only_with_knee_targets() -> No
     lane.valid = lane.valid[:3]
     short = knee_flexion_dynamics_block(lane, kin, ik[:3], ik[:3])
     assert short is not None and short["status"].startswith("unavailable")
+
+
+# ------------------------------------------- cross-engine harness (#14131)
+
+
+def test_address_knee_flexion_matches_across_engines_committed_receipts() -> None:
+    """Receipt-based cross-engine contract for #12684 item 5 (harness only, #14131).
+
+    Live engine FK replay stays on the strong parent (#12684); this test exercises
+    the committed-receipt comparator so unavailable engines report a reason and
+    never masquerade agreement as zero flexion.
+    """
+    from scripts import address_knee_engine_check as chk
+
+    report = chk.build_report()
+    assert report["tolerance_deg"] == pytest.approx(chk.TOLERANCE_DEG)
+    assert pytest.approx(0.1) == chk.TOLERANCE_DEG
+
+    driver = report["cases"]["driver"]
+    assert driver["ok"] is True
+    drake = driver["engines"]["drake"]
+    assert drake["available"] is True
+    assert max(abs(v) for v in drake["delta_deg"].values()) <= chk.TOLERANCE_DEG
+    for engine in ("pinocchio", "opensim", "myosuite"):
+        entry = driver["engines"][engine]
+        assert entry["available"] is False
+        assert entry["model_deg"] is None
+        assert entry["reason"]
+
+    iron = report["cases"]["iron"]
+    assert iron["ok"] is True
+    for engine in ("drake", "pinocchio", "opensim", "myosuite"):
+        entry = iron["engines"][engine]
+        assert entry["available"] is False
+        assert entry["model_deg"] is None
+        assert engine in entry["reason"]
