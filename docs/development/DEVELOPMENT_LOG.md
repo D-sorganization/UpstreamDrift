@@ -1034,10 +1034,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14141
 - **Branch:** merged via #14145
-- **PR:** #14145
+- **PR:** #14145, #14149
 - **Paths:** see #14145
 - **Started:** 2026-10-31
-- **Last verified:** 2026-10-31 (`075fcb21`; collated from changes/14141-putting-v4-pr1-characterize.md)
+- **Last verified:** 2026-10-31 (`86c7fb67`; collated from changes/14141-putting-v4-pr2a-fixture-schema.md)
 - **Summary:** Characterize putting_dynamics contracts with invariant tests and postconditions (putting v4 PR 1)
 - **Next step:** Shipped in PR #14145.
 
