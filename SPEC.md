@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-31 | #14133 | Install Spec Kit Antigravity skills for all speckit Gemini command TOMLs. |
 | 2026-10-30 | #14127 | Add engine limit qualification with numeric hard-range gap diagnostics and separate report-only trunk checks. |
 | 2026-10-30 | #14128 | Expose the API-backed anatomical event table on the Analysis Tools page with explicit calibrated-frame submission and refusal feedback. |
 | 2026-10-30 | #14126 | Install Pinocchio runtime library for parity CI |

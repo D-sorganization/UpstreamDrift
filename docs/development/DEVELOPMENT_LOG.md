@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14132 · Install Spec Kit Antigravity Skills for All Speckit Gemini Command TOMLs.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14132
+- **Branch:** merged via #14133
+- **PR:** #14133
+- **Paths:** see #14133
+- **Started:** 2026-10-31
+- **Last verified:** 2026-10-31 (`a021cbe8`; collated from changes/14132-install-speckit-agy-skills-layout.md)
+- **Summary:** Install Spec Kit Antigravity skills for all speckit Gemini command TOMLs.
+- **Next step:** Shipped in PR #14133.
+
 ### DL-#14122 · Install Pinocchio Runtime Library for Parity CI
 
 - **State:** shipped
