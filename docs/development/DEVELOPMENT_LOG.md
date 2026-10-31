@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14131 · Live Cross-Engine Address Knee Harness: Same Spec and Q Through Each Installed Engine's FK vs MuJoCo at 0.1 Deg.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14131
+- **Branch:** merged via #14134
+- **PR:** #14134
+- **Paths:** see #14134
+- **Started:** 2026-10-31
+- **Last verified:** 2026-10-31 (`5a1cd349`; collated from changes/14131-address-knee-cross-engine-harness.md)
+- **Summary:** Live cross-engine address knee harness: same spec and q through each installed engine's FK vs MuJoCo at 0.1 deg.
+- **Next step:** Shipped in PR #14134.
+
 ### DL-#14132 · Install Spec Kit Antigravity Skills for All Speckit Gemini Command TOMLs.
 
 - **State:** shipped
