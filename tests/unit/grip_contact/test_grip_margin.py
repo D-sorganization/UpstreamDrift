@@ -122,6 +122,11 @@ def test_contract_rejects_non_finite_inputs_and_reports() -> None:
         GripMarginReport(
             0.5, FLOOR, {}, math.nan, 0, 0, 0.0, np.zeros(6), np.zeros(6), None
         )
+    for bound in (0.0, -1.07):
+        with pytest.raises(ValueError, match="mu_bias_bound"):
+            GripMarginReport(
+                0.5, FLOOR, {}, 0.5, 0, 0, 0.0, np.zeros(6), np.zeros(6), bound
+            )
     with pytest.raises(ValueError, match="frames"):
         grip_margin_report(_series(), np.ones((4, 3)), np.zeros((5, 1)), 0.01, 0.5)
 
