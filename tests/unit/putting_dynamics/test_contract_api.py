@@ -33,6 +33,7 @@ _EXPECTED_EXPORTS = {
     "FixtureSource",
     "FrictionField",
     "FrictionParams",
+    "GrassType",
     "HeightField",
     "Mode",
     "PuttResult",
@@ -40,6 +41,8 @@ _EXPECTED_EXPORTS = {
     "ReferenceFixture",
     "SurfaceSpec",
     "TrajectorySample",
+    "TurfCondition",
+    "TurfSpec",
     # functions
     "ball_kinetic_energy_j",
     "bumpy_friction_field",

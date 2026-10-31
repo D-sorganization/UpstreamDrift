@@ -98,6 +98,11 @@ from .surfaces import (
     bumpy_friction_field,
     bumpy_height_field,
 )
+from .turf import (
+    GrassType,
+    TurfCondition,
+    TurfSpec,
+)
 from .types import (
     BallState,
     CollisionReport,
@@ -132,6 +137,7 @@ __all__ = [
     "FixtureSource",
     "FrictionField",
     "FrictionParams",
+    "GrassType",
     "HeightField",
     "Mode",
     "PuttResult",
@@ -139,6 +145,8 @@ __all__ = [
     "ReferenceFixture",
     "SurfaceSpec",
     "TrajectorySample",
+    "TurfCondition",
+    "TurfSpec",
     "ball_kinetic_energy_j",
     "bumpy_friction_field",
     "bumpy_height_field",
