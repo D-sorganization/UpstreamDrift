@@ -895,6 +895,7 @@
 {"path": "grip_contact/grip_force_limit.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/grip_geometry.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/grip_mesh.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/grip_size_sweep.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/hand_drift.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/hand_hand_allocation.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/hand_on_club_acceptance.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
