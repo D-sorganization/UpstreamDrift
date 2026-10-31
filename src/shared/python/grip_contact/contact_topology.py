@@ -12,7 +12,7 @@ radial distance from the shaft centreline.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 import math
 from dataclasses import dataclass
 from enum import Enum
@@ -21,7 +21,11 @@ from typing import TYPE_CHECKING, Any, Final
 import numpy as np
 
 from src.shared.python.contracts import require
-from src.shared.python.grip_contact.pad_layout import GRIP_RADIUS_M
+from src.shared.python.grip_contact.grip_geometry import GripGeometry
+from src.shared.python.grip_contact.pad_layout import (
+    GRIP_RADIUS_M,
+    required_squeeze_n,
+)
 from src.shared.python.hand_size import (
     DEFAULT_HAND_LENGTH_M,
     HAND_LENGTH_RANGE_M,
@@ -35,6 +39,9 @@ if TYPE_CHECKING:
 
 #: Sentinel partner identifier for a club-grip cylinder contact pair.
 GRIP: Final[str] = "grip"
+
+#: Grip surface radius (m) as a function of the axial station ``x`` (m).
+_RadiusAt = Callable[[float], float]
 
 
 #: Default neutral-pose preload penetration (m), within the 0.5 mm tolerance.
@@ -322,6 +329,23 @@ class ContactTopology:
     hand_length_m: float
     sites: tuple[ContactSite, ...]
     pairs: tuple[ContactPair, ...]
+    #: Tapered grip (#13892); ``None`` means the constant ``grip_radius_m``.
+    grip_geometry: GripGeometry | None = None
+    #: Lead and trail grip-line stations ``x`` (m below the butt).
+    hand_stations_m: tuple[float, float] | None = None
+
+    def grip_radius_at(self, x_m: float) -> float:
+        """Grip surface radius (m) at axial station ``x_m`` (m below the butt)."""
+        if self.grip_geometry is None:
+            return self.grip_radius_m
+        return self.grip_geometry.radius_at(x_m)
+
+    def hand_grip_radius_m(self, hand: str) -> float:
+        """Grip radius (m) at ``hand``'s grip line (lead upper, trail lower)."""
+        require(hand in HAND_ROLES, f"hand must be one of {HAND_ROLES}, got {hand!r}")
+        if self.hand_stations_m is None:
+            return self.grip_radius_m
+        return self.grip_radius_at(self.hand_stations_m[HAND_ROLES.index(hand)])
 
     def site(self, name: str) -> ContactSite:
         """Return the :class:`ContactSite` named ``name`` or raise ``KeyError``."""
@@ -368,12 +392,19 @@ def _cyl_point(x: float, rho: float, theta_rad: float) -> tuple[float, float, fl
 
 
 def site_grip_surface_gap_m(
-    site: ContactSite, grip_radius_m: float = GRIP_RADIUS_M
+    site: ContactSite,
+    grip_radius_m: float = GRIP_RADIUS_M,
+    *,
+    grip_geometry: GripGeometry | None = None,
 ) -> float:
-    """Signed distance (m) between ``site``'s outer surface and the grip cylinder.
+    """Signed distance (m) between ``site``'s outer surface and the grip.
 
+    With ``grip_geometry`` the grip radius is ``radius_at(s)`` at the site's
+    axial station ``s = centre_m[0]``; otherwise it is ``grip_radius_m``.
     Negative values indicate preload penetration; zero indicates exact tangency.
     """
+    if grip_geometry is not None:
+        grip_radius_m = grip_geometry.radius_at(site.centre_m[0])
     radial_centre = math.hypot(site.centre_m[1], site.centre_m[2])
     return (radial_centre - float(grip_radius_m)) - site.radius_m
 
@@ -393,7 +424,9 @@ def pair_surface_gap_m(topology: ContactTopology, pair: ContactPair) -> float:
     """
     site_a = topology.site(pair.site_a)
     if pair.site_b == GRIP:
-        return site_grip_surface_gap_m(site_a, topology.grip_radius_m)
+        return site_grip_surface_gap_m(
+            site_a, topology.grip_radius_at(site_a.centre_m[0])
+        )
     site_b = topology.site(pair.site_b)
     dist = _segment_distance_m(site_a, site_b)
     return dist - (site_a.radius_m + site_b.radius_m)
@@ -416,46 +449,27 @@ def _four_hand_pad_sites(
     x_origin: float,
     alpha_rad: float,
     anatomy: HandAnatomy,
-    grip_radius_m: float,
+    radius_at: _RadiusAt,
     preload_m: float,
 ) -> tuple[ContactSite, ...]:
     r_palm = anatomy.palm_pad_radius_m
     r_finger = anatomy.finger_pad_radius_m
-    rho_palm = grip_radius_m + r_palm - preload_m
-    rho_finger = grip_radius_m + r_finger - preload_m
+
+    def pad(segment: str, x: float, radius: float, theta: float) -> ContactSite:
+        return ContactSite(
+            name=f"{hand}_{segment}",
+            hand=hand,
+            segment=segment,
+            primitive="sphere",
+            centre_m=_cyl_point(x, radius_at(x) + radius - preload_m, theta),
+            radius_m=radius,
+        )
+
     return (
-        ContactSite(
-            name=f"{hand}_palm_proximal",
-            hand=hand,
-            segment="palm_proximal",
-            primitive="sphere",
-            centre_m=_cyl_point(x_origin - 0.015, rho_palm, alpha_rad + math.pi),
-            radius_m=r_palm,
-        ),
-        ContactSite(
-            name=f"{hand}_palm_distal",
-            hand=hand,
-            segment="palm_distal",
-            primitive="sphere",
-            centre_m=_cyl_point(x_origin + 0.015, rho_palm, alpha_rad + math.pi),
-            radius_m=r_palm,
-        ),
-        ContactSite(
-            name=f"{hand}_finger_proximal",
-            hand=hand,
-            segment="finger_proximal",
-            primitive="sphere",
-            centre_m=_cyl_point(x_origin - 0.012, rho_finger, alpha_rad),
-            radius_m=r_finger,
-        ),
-        ContactSite(
-            name=f"{hand}_finger_distal",
-            hand=hand,
-            segment="finger_distal",
-            primitive="sphere",
-            centre_m=_cyl_point(x_origin + 0.012, rho_finger, alpha_rad),
-            radius_m=r_finger,
-        ),
+        pad("palm_proximal", x_origin - 0.015, r_palm, alpha_rad + math.pi),
+        pad("palm_distal", x_origin + 0.015, r_palm, alpha_rad + math.pi),
+        pad("finger_proximal", x_origin - 0.012, r_finger, alpha_rad),
+        pad("finger_distal", x_origin + 0.012, r_finger, alpha_rad),
     )
 
 
@@ -465,29 +479,27 @@ class _FingerGeom:
     r_mid: float
     r_lit: float
     hl: float
-    rho_idx_grip: float
-    rho_mid_grip: float
-    rho_lit_grip: float
+    radius_at: _RadiusAt
+    preload_m: float
+
+    def rho_on_grip(self, x: float, radius: float) -> float:
+        """Centre distance from the axis of a site of ``radius`` resting at ``x``."""
+        return self.radius_at(x) + radius - self.preload_m
 
 
 def _finger_geometry(
     anatomy: HandAnatomy,
-    grip_radius_m: float,
+    radius_at: _RadiusAt,
     preload_m: float,
 ) -> _FingerGeom:
-    """Compute shared radii, half-length, and radial offsets for finger sites."""
-    r_idx = anatomy.index_finger_radius_m
-    r_mid = anatomy.index_finger_radius_m
-    r_lit = anatomy.little_finger_radius_m
-    hl = 0.008 * anatomy.scale
+    """Compute shared radii and half-length for finger sites."""
     return _FingerGeom(
-        r_idx=r_idx,
-        r_mid=r_mid,
-        r_lit=r_lit,
-        hl=hl,
-        rho_idx_grip=grip_radius_m + r_idx - preload_m,
-        rho_mid_grip=grip_radius_m + r_mid - preload_m,
-        rho_lit_grip=grip_radius_m + r_lit - preload_m,
+        r_idx=anatomy.index_finger_radius_m,
+        r_mid=anatomy.index_finger_radius_m,
+        r_lit=anatomy.little_finger_radius_m,
+        hl=0.008 * anatomy.scale,
+        radius_at=radius_at,
+        preload_m=preload_m,
     )
 
 
@@ -533,18 +545,19 @@ def _overlap_finger_sites(
     x_lead: float,
     alpha_lead: float,
     anatomy: HandAnatomy,
-    grip_radius_m: float,
+    radius_at: _RadiusAt,
     preload_m: float,
 ) -> tuple[ContactSite, ContactSite, ContactSite]:
     """Return sites for overlap grip style."""
-    g = _finger_geometry(anatomy, grip_radius_m, preload_m)
+    g = _finger_geometry(anatomy, radius_at, preload_m)
     x_mid = x_lead + 0.022
     x_idx = x_lead + 0.036
-    rho_lit = g.rho_idx_grip + (g.r_idx + g.r_lit - preload_m)
+    rho_idx = g.rho_on_grip(x_idx, g.r_idx)
+    rho_lit = rho_idx + (g.r_idx + g.r_lit - preload_m)
     return _finger_sites(
         g,
-        _cyl_point(x_mid, g.rho_mid_grip, alpha_lead - 0.15),
-        _cyl_point(x_idx, g.rho_idx_grip, alpha_lead),
+        _cyl_point(x_mid, g.rho_on_grip(x_mid, g.r_mid), alpha_lead - 0.15),
+        _cyl_point(x_idx, rho_idx, alpha_lead),
         _cyl_point(x_idx, rho_lit, alpha_lead),
     )
 
@@ -553,23 +566,25 @@ def _interlock_finger_sites(
     x_lead: float,
     alpha_lead: float,
     anatomy: HandAnatomy,
-    grip_radius_m: float,
+    radius_at: _RadiusAt,
     preload_m: float,
 ) -> tuple[ContactSite, ContactSite, ContactSite]:
     """Return sites for interlock grip style."""
-    g = _finger_geometry(anatomy, grip_radius_m, preload_m)
+    g = _finger_geometry(anatomy, radius_at, preload_m)
     x_slot = x_lead + 0.032
+    rho_mid = g.rho_on_grip(x_slot, g.r_mid)
+    rho_lit = g.rho_on_grip(x_slot, g.r_lit)
     target_mid_lit = g.r_mid + g.r_lit - preload_m
-    cos_dtheta = (g.rho_mid_grip**2 + g.rho_lit_grip**2 - target_mid_lit**2) / (
-        2.0 * g.rho_mid_grip * g.rho_lit_grip
+    cos_dtheta = (rho_mid**2 + rho_lit**2 - target_mid_lit**2) / (
+        2.0 * rho_mid * rho_lit
     )
     dtheta = math.acos(max(-1.0, min(1.0, cos_dtheta)))
-    rho_idx_wrap = g.rho_lit_grip + (g.r_lit + g.r_idx - preload_m)
+    rho_idx_wrap = rho_lit + (g.r_lit + g.r_idx - preload_m)
     return _finger_sites(
         g,
-        _cyl_point(x_slot, g.rho_mid_grip, alpha_lead - dtheta),
+        _cyl_point(x_slot, rho_mid, alpha_lead - dtheta),
         _cyl_point(x_slot, rho_idx_wrap, alpha_lead),
-        _cyl_point(x_slot, g.rho_lit_grip, alpha_lead),
+        _cyl_point(x_slot, rho_lit, alpha_lead),
     )
 
 
@@ -577,22 +592,32 @@ def _ten_finger_sites(
     x_lead: float,
     alpha_lead: float,
     anatomy: HandAnatomy,
-    grip_radius_m: float,
+    radius_at: _RadiusAt,
     preload_m: float,
 ) -> tuple[ContactSite, ContactSite, ContactSite]:
-    """Return sites for ten-finger grip style."""
-    g = _finger_geometry(anatomy, grip_radius_m, preload_m)
+    """Return sites for ten-finger grip style.
+
+    The trail little finger abuts the lead index finger along the grip. On a
+    tapered grip its resting radius depends on its own station, so the abutment
+    is a fixed point; the taper slope (~0.015) makes three iterations exact to
+    far below the preload, and a constant radius converges on the first.
+    """
+    g = _finger_geometry(anatomy, radius_at, preload_m)
     x_mid = x_lead + 0.022
     x_idx = x_lead + 0.036
+    rho_idx = g.rho_on_grip(x_idx, g.r_idx)
     target_idx_lit = g.r_idx + g.r_lit - preload_m
-    radial_diff = g.rho_idx_grip - g.rho_lit_grip
-    dx_abut = math.sqrt(max(0.0, target_idx_lit**2 - radial_diff**2))
-    x_lit = x_idx + dx_abut
+    x_lit = x_idx
+    for _ in range(3):
+        rho_lit = g.rho_on_grip(x_lit, g.r_lit)
+        radial_diff = rho_idx - rho_lit
+        dx_abut = math.sqrt(max(0.0, target_idx_lit**2 - radial_diff**2))
+        x_lit = x_idx + dx_abut
     return _finger_sites(
         g,
-        _cyl_point(x_mid, g.rho_mid_grip, alpha_lead - 0.15),
-        _cyl_point(x_idx, g.rho_idx_grip, alpha_lead),
-        _cyl_point(x_lit, g.rho_lit_grip, alpha_lead),
+        _cyl_point(x_mid, g.rho_on_grip(x_mid, g.r_mid), alpha_lead - 0.15),
+        _cyl_point(x_idx, rho_idx, alpha_lead),
+        _cyl_point(x_lit, g.rho_on_grip(x_lit, g.r_lit), alpha_lead),
     )
 
 
@@ -601,19 +626,17 @@ def _interhand_finger_sites(
     x_lead: float,
     alpha_lead: float,
     anatomy: HandAnatomy,
-    grip_radius_m: float,
+    radius_at: _RadiusAt,
     preload_m: float,
 ) -> tuple[ContactSite, ContactSite, ContactSite]:
     """Return ``(lead_middle, lead_index, trail_little_finger)`` for ``style``."""
     if style is GripStyle.OVERLAP:
-        return _overlap_finger_sites(
-            x_lead, alpha_lead, anatomy, grip_radius_m, preload_m
-        )
+        return _overlap_finger_sites(x_lead, alpha_lead, anatomy, radius_at, preload_m)
     if style is GripStyle.INTERLOCK:
         return _interlock_finger_sites(
-            x_lead, alpha_lead, anatomy, grip_radius_m, preload_m
+            x_lead, alpha_lead, anatomy, radius_at, preload_m
         )
-    return _ten_finger_sites(x_lead, alpha_lead, anatomy, grip_radius_m, preload_m)
+    return _ten_finger_sites(x_lead, alpha_lead, anatomy, radius_at, preload_m)
 
 
 def _build_pairs(style: GripStyle, trigger_finger: bool) -> tuple[ContactPair, ...]:
@@ -723,7 +746,7 @@ def _antagonist_site_names(style: GripStyle, trigger_finger: bool) -> list[str]:
 def _antagonist_sites(
     unopposed: Mapping[str, ContactSite],
     hand_anatomy: HandAnatomy,
-    r_grip: float,
+    radius_at: _RadiusAt,
     preload: float,
 ) -> list[ContactSite]:
     """Antagonist pads diametrically opposite the unpaired hand-grip pads.
@@ -758,7 +781,7 @@ def _antagonist_sites(
                 hand=hand,
                 segment=segment,
                 primitive="sphere",
-                centre_m=_cyl_point(x, r_grip + radius - preload, theta),
+                centre_m=_cyl_point(x, radius_at(x) + radius - preload, theta),
                 radius_m=radius,
             )
         )
@@ -769,18 +792,19 @@ def _lead_heel_site(
     x_lead: float,
     alpha_lead: float,
     hand_anatomy: HandAnatomy,
-    r_grip: float,
+    radius_at: _RadiusAt,
     preload: float,
 ) -> ContactSite:
     """Return the lead heel pad ContactSite."""
     r_heel = hand_anatomy.heel_pad_radius_m
+    x_heel = x_lead - 0.020
     return ContactSite(
         name="lead_heel_pad",
         hand="lead",
         segment="heel_pad",
         primitive="sphere",
         centre_m=_cyl_point(
-            x_lead - 0.020, r_grip + r_heel - preload, alpha_lead + math.pi
+            x_heel, radius_at(x_heel) + r_heel - preload, alpha_lead + math.pi
         ),
         radius_m=r_heel,
     )
@@ -791,16 +815,16 @@ def _thumb_palm_sites(
     alpha_lead: float,
     thumb_offset_deg: float,
     hand_anatomy: HandAnatomy,
-    r_grip: float,
+    radius_at: _RadiusAt,
     preload: float,
 ) -> tuple[ContactSite, ContactSite]:
     """Return (lead_thumb, trail_palm_pocket) ContactSites."""
     r_thumb = hand_anatomy.thumb_radius_m
     r_pocket = hand_anatomy.palm_pad_radius_m
     theta_thumb = alpha_lead + math.radians(thumb_offset_deg)
-    rho_thumb = r_grip + r_thumb - preload
-    rho_pocket = rho_thumb + (r_thumb + r_pocket - preload)
     x_thumb = x_lead + 0.045
+    rho_thumb = radius_at(x_thumb) + r_thumb - preload
+    rho_pocket = rho_thumb + (r_thumb + r_pocket - preload)
     lead_thumb = _capsule_site(
         name="lead_thumb",
         hand="lead",
@@ -824,17 +848,18 @@ def _trail_trigger_site(
     x_trail: float,
     alpha_trail: float,
     hand_anatomy: HandAnatomy,
-    r_grip: float,
+    radius_at: _RadiusAt,
     preload: float,
 ) -> ContactSite:
     """Trail index-finger trigger capsule placed 32 mm below the trail hand line."""
     r_trig = hand_anatomy.index_finger_radius_m
+    x_trig = x_trail + 0.032
     return ContactSite(
         name="trail_index_trigger",
         hand="trail",
         segment="index_trigger",
         primitive="capsule",
-        centre_m=_cyl_point(x_trail + 0.032, r_grip + r_trig - preload, alpha_trail),
+        centre_m=_cyl_point(x_trig, radius_at(x_trig) + r_trig - preload, alpha_trail),
         radius_m=r_trig,
         half_length_m=0.008 * hand_anatomy.scale,
     )
@@ -844,7 +869,7 @@ def _opposed_antagonist_sites(
     spec: GripSpec,
     sites: list[ContactSite],
     hand_anatomy: HandAnatomy,
-    r_grip: float,
+    radius_at: _RadiusAt,
     preload: float,
 ) -> list[ContactSite]:
     """Antagonist pads for ``spec``, each opposing its partner site in ``sites``."""
@@ -860,7 +885,7 @@ def _opposed_antagonist_sites(
             for name in _antagonist_site_names(spec.style, spec.trigger_finger)
         },
         hand_anatomy,
-        r_grip,
+        radius_at,
         preload,
     )
 
@@ -869,7 +894,8 @@ def contact_topology(
     spec: GripSpec | None = None,
     anatomy: HandAnatomy | float | None = None,
     *,
-    grip_radius_m: float = GRIP_RADIUS_M,
+    grip_radius_m: float | None = None,
+    grip_geometry: GripGeometry | None = None,
 ) -> ContactTopology:
     """Build the engine-agnostic :class:`ContactTopology` for ``spec`` and ``anatomy``.
 
@@ -877,12 +903,17 @@ def contact_topology(
         ``spec`` is a :class:`GripSpec` (or ``None`` for a default spec);
         ``anatomy`` is a :class:`HandAnatomy`, a hand length ``L`` in
         ``[0.14, 0.24]`` m, or ``None`` (default ``0.19`` m);
-        ``grip_radius_m > 0``.
+        ``grip_radius_m > 0`` (default :data:`GRIP_RADIUS_M`); or, not both,
+        ``grip_geometry`` (#13892), whose ``radius_at(s)`` places each pad at
+        its own axial station ``s`` (m below the butt), which must lie within
+        ``[0, grip_geometry.length_m]`` (``ValueError`` otherwise).
     Postconditions:
         Every returned site lies on or within one pad radius of the grip
         surface or its partner site at the neutral pose (surface gap/penetration
         magnitude ``<= 0.5`` mm), and the pair table matches ``spec.style`` and
-        ``spec.trigger_finger``.
+        ``spec.trigger_finger``. With ``grip_geometry``, ``grip_radius_m`` is
+        the lead-station radius; engines that model one cylinder of that
+        radius are exact only for zero taper.
     """
     from src.shared.python.motion_matching.grip_contract import GripSpec
 
@@ -891,39 +922,32 @@ def contact_topology(
     elif not isinstance(spec, GripSpec):
         raise TypeError(f"spec must be a GripSpec, got {type(spec).__name__}")
     hand_anatomy = _coerce_anatomy(anatomy)
-    require(
-        not isinstance(grip_radius_m, bool)
-        and isinstance(grip_radius_m, int | float)
-        and math.isfinite(grip_radius_m)
-        and grip_radius_m > 0.0,
-        f"grip_radius_m must be a positive finite float, got {grip_radius_m!r}",
-    )
-    r_grip = float(grip_radius_m)
     preload = DEFAULT_TOPOLOGY_PRELOAD_M
 
     x_lead = float(spec.lead_below_butt_m)
     extra_ten_finger = 0.012 if spec.style is GripStyle.TEN_FINGER else 0.0
     x_trail = x_lead + float(spec.hand_spacing_m) + extra_ten_finger
+    radius_at = _grip_radius_at(grip_radius_m, grip_geometry)
     alpha_lead = math.radians(spec.lead.alpha_deg)
     alpha_trail = math.radians(spec.trail.alpha_deg)
 
     lead_pads = _four_hand_pad_sites(
-        "lead", x_lead, alpha_lead, hand_anatomy, r_grip, preload
+        "lead", x_lead, alpha_lead, hand_anatomy, radius_at, preload
     )
     trail_pads = _four_hand_pad_sites(
-        "trail", x_trail, alpha_trail, hand_anatomy, r_grip, preload
+        "trail", x_trail, alpha_trail, hand_anatomy, radius_at, preload
     )
-    lead_heel = _lead_heel_site(x_lead, alpha_lead, hand_anatomy, r_grip, preload)
+    lead_heel = _lead_heel_site(x_lead, alpha_lead, hand_anatomy, radius_at, preload)
     lead_thumb, trail_palm_pocket = _thumb_palm_sites(
         x_lead,
         alpha_lead,
         spec.lead_thumb_offset_deg,
         hand_anatomy,
-        r_grip,
+        radius_at,
         preload,
     )
     lead_middle, lead_index, trail_little = _interhand_finger_sites(
-        spec.style, x_lead, alpha_lead, hand_anatomy, r_grip, preload
+        spec.style, x_lead, alpha_lead, hand_anatomy, radius_at, preload
     )
 
     sites: list[ContactSite] = [
@@ -938,18 +962,89 @@ def contact_topology(
     ]
     if spec.trigger_finger:
         sites.append(
-            _trail_trigger_site(x_trail, alpha_trail, hand_anatomy, r_grip, preload)
+            _trail_trigger_site(x_trail, alpha_trail, hand_anatomy, radius_at, preload)
         )
-    sites += _opposed_antagonist_sites(spec, sites, hand_anatomy, r_grip, preload)
+    sites += _opposed_antagonist_sites(spec, sites, hand_anatomy, radius_at, preload)
+    if grip_geometry is not None:
+        _require_sites_within_grip(sites, grip_geometry)
     pairs = _build_pairs(spec.style, spec.trigger_finger)
     return ContactTopology(
         style=spec.style,
         trigger_finger=spec.trigger_finger,
-        grip_radius_m=r_grip,
+        grip_radius_m=radius_at(x_lead),
         hand_length_m=hand_anatomy.hand_length_m,
         sites=tuple(sites),
         pairs=pairs,
+        grip_geometry=grip_geometry,
+        hand_stations_m=(x_lead, x_trail),
     )
+
+
+def _grip_radius_at(
+    grip_radius_m: float | None, grip_geometry: GripGeometry | None
+) -> _RadiusAt:
+    """Grip radius by station: ``radius_at`` of the geometry, else a constant."""
+    if grip_geometry is not None:
+        if grip_radius_m is not None:
+            raise ValueError("pass grip_radius_m or grip_geometry, not both")
+        if not isinstance(grip_geometry, GripGeometry):
+            raise TypeError(
+                f"grip_geometry must be a GripGeometry, got {type(grip_geometry).__name__}"
+            )
+        return grip_geometry.radius_at
+    radius = GRIP_RADIUS_M if grip_radius_m is None else grip_radius_m
+    require(
+        not isinstance(radius, bool)
+        and isinstance(radius, int | float)
+        and math.isfinite(radius)
+        and radius > 0.0,
+        f"grip_radius_m must be a positive finite float, got {radius!r}",
+    )
+    constant = float(radius)
+    return lambda _x_m: constant
+
+
+def _require_sites_within_grip(
+    sites: list[ContactSite], grip_geometry: GripGeometry
+) -> None:
+    """Every site's axial station must lie on the grip, ``0 <= s <= length``."""
+    for site in sites:
+        s_m = site.centre_m[0]
+        if not 0.0 <= s_m <= grip_geometry.length_m:
+            raise ValueError(
+                f"site {site.name!r} at s = {s_m:.4f} m lies outside the grip "
+                f"[0, {grip_geometry.length_m:.4f}] m"
+            )
+
+
+def per_hand_required_squeeze_n(
+    peak_axial_force_n: float,
+    peak_axial_torque_nm: float,
+    peak_transverse_force_n: float,
+    friction: float,
+    topology: ContactTopology,
+) -> dict[str, float]:
+    """Required squeeze of each hand at the grip radius of its own station.
+
+    Applies :func:`~pad_layout.required_squeeze_n` per hand with
+    :meth:`ContactTopology.hand_grip_radius_m`, so on a tapered grip the
+    torque branch needs ``r_lead / r_trail`` more squeeze from the trail hand,
+    while the axial and transverse branches do not depend on the radius.
+
+    Raises:
+        ValueError: on a negative demand or non-positive friction (as
+            :func:`~pad_layout.required_squeeze_n`).
+    """
+    return {
+        hand: required_squeeze_n(
+            peak_axial_force_n,
+            peak_axial_torque_nm,
+            peak_transverse_force_n,
+            friction,
+            topology.hand_grip_radius_m(hand),
+        )
+        for hand in HAND_ROLES
+    }
 
 
 def coerce_contact_topology(

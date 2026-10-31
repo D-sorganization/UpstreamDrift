@@ -22,6 +22,7 @@ from src.shared.python.grip_contact.contact_topology import (
 )
 from src.shared.python.grip_contact.grip_geometry import (
     GRIP_GEOMETRY_PRESETS,
+    GripGeometry,
     STATION_LOWER_M,
     STATION_UPPER_M,
     get_grip_preset,
@@ -38,7 +39,9 @@ SPECS = tuple(
 MU = 0.8
 
 
-@pytest.mark.parametrize("spec", SPECS, ids=lambda s: f"{s.style.value}-{s.trigger_finger}")
+@pytest.mark.parametrize(
+    "spec", SPECS, ids=lambda s: f"{s.style.value}-{s.trigger_finger}"
+)
 def test_legacy_spec_standoff_reproduces_constant_radius_bit_for_bit(
     spec: GripSpec,
 ) -> None:
@@ -71,7 +74,9 @@ def test_surface_gap_is_zero_for_a_point_on_the_surface_at_each_station(
     )
 
 
-@pytest.mark.parametrize("spec", SPECS, ids=lambda s: f"{s.style.value}-{s.trigger_finger}")
+@pytest.mark.parametrize(
+    "spec", SPECS, ids=lambda s: f"{s.style.value}-{s.trigger_finger}"
+)
 @pytest.mark.parametrize("preset", ["mens_standard", "midsize", "undersize", "ladies"])
 def test_tapered_topology_keeps_every_pair_at_the_preload(
     spec: GripSpec, preset: str
@@ -131,10 +136,12 @@ def test_frustum_normal_tilt_changes_squeeze_by_under_one_percent() -> None:
 
 
 def test_pad_outside_the_grip_length_is_rejected() -> None:
-    short = get_grip_preset("mens_standard")
-    spec = GripSpec(lead_below_butt_m=0.20)
+    """The default trail hand (s ~ 0.108 m) does not fit on a 0.10 m grip."""
+    short = GripGeometry(
+        d_upper_m=0.02286, d_lower_m=0.01981, length_m=0.10, preset="custom"
+    )
     with pytest.raises(ValueError, match="outside the grip"):
-        contact_topology(spec, grip_geometry=short)
+        contact_topology(grip_geometry=short)
 
 
 def test_radius_and_geometry_together_are_rejected() -> None:
@@ -145,4 +152,4 @@ def test_radius_and_geometry_together_are_rejected() -> None:
 @pytest.mark.parametrize("hand_length_m", [0.10, 0.30])
 def test_hand_length_outside_bounds_is_rejected(hand_length_m: float) -> None:
     with pytest.raises(ValueError):
-        contact_topology(hand_length_m, grip_geometry=get_grip_preset("midsize"))
+        contact_topology(None, hand_length_m, grip_geometry=get_grip_preset("midsize"))
