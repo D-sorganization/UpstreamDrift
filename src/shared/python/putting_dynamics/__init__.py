@@ -67,6 +67,14 @@ from .friction import (
     sliding_mu,
     stimp_to_rolling_mu,
 )
+from .reference_fixtures import (
+    DEFAULT_FIXTURES_PATH,
+    VALID_APPLIES_TO,
+    ExpectedValue,
+    FixtureSource,
+    ReferenceFixture,
+    load_reference_fixtures,
+)
 from .solver import (
     DT_S,
     HOLE_RADIUS_M,
@@ -98,6 +106,7 @@ from .utils import (
 )
 
 __all__ = [
+    "DEFAULT_FIXTURES_PATH",
     "DEFAULT_SLIDING_MU",
     "DEFAULT_STATIC_MU",
     "DT_S",
@@ -106,14 +115,18 @@ __all__ = [
     "LOFT_SWEEP_MAX_DEG",
     "LOFT_SWEEP_MIN_DEG",
     "STIMP_RELEASE_SPEED_MPS",
+    "VALID_APPLIES_TO",
     "BallState",
     "CollisionReport",
+    "ExpectedValue",
+    "FixtureSource",
     "FrictionField",
     "FrictionParams",
     "HeightField",
     "Mode",
     "PuttResult",
     "PutterState",
+    "ReferenceFixture",
     "SurfaceSpec",
     "TrajectorySample",
     "ball_kinetic_energy_j",
@@ -124,6 +137,7 @@ __all__ = [
     "energy_balance_error_j",
     "grain_factor",
     "is_static_hold",
+    "load_reference_fixtures",
     "m_to_feet",
     "m_to_yards",
     "mps_to_mph",

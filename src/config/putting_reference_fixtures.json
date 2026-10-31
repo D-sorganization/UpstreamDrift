@@ -1,0 +1,289 @@
+{
+  "schema_version": "1.0.0",
+  "fixtures": [
+    {
+      "fixture_id": "grober2011_stimp10_mu_formula_identity",
+      "quantity": "rolling_resistance_coefficient",
+      "inputs": {
+        "stimp_ft": 10.0
+      },
+      "expected": {
+        "value": 0.056019153963940034,
+        "units": "dimensionless",
+        "tolerance_rel": 1e-6,
+        "tolerance_basis": "Formula-identity check, not a measurement: Grober (2011) restates mu_r = v_release^2 / (2 g S) term-for-term, and this value is that closed form evaluated with UD's own STIMP_RELEASE_SPEED_MPS=1.83 and GRAVITY_M_S2=9.80665. The tight relative tolerance only has to absorb floating-point representation, since it checks the implementation against the published method rather than an independent measurement."
+      },
+      "source": {
+        "citation": "R. D. Grober, \"The Geometry of Putting on a Planar Surface,\" arXiv:1106.1698 (2011), Appendix A, p.7.",
+        "doi_or_url": "https://arxiv.org/abs/1106.1698",
+        "locator": "arXiv:1106.1698v1, p.7, drag-force / Stimp-distance derivation (PDF downloaded and read directly, not a search summary).",
+        "verified": true
+      },
+      "applies_to": ["python", "js", "pyqt6"],
+      "maps_to": "stimp_to_rolling_mu"
+    },
+    {
+      "fixture_id": "usga_stimpmeter_release_speed_mps",
+      "quantity": "stimpmeter_release_speed",
+      "inputs": {},
+      "expected": {
+        "value": 1.83,
+        "units": "m/s",
+        "tolerance_abs": 0.005,
+        "tolerance_basis": "Grober (2011, p.6) directly quotes Holmes' corrected Stimpmeter release speed as 6.0 ft/s = 1.8288 m/s; +/-0.005 m/s covers the ft/s -> m/s rounding to 1.83. The underlying Holmes 'Dialogue concerning the Stimpmeter' (Physics Teacher) attribution is itself a secondary citation inside Grober's paper and was not independently located, so this fixture is marked unverified despite the number being read directly."
+      },
+      "source": {
+        "citation": "R. D. Grober, arXiv:1106.1698 (2011), p.6, citing B. W. Holmes, \"Dialogue concerning the Stimpmeter,\" The Physics Teacher (full volume/year not recovered).",
+        "doi_or_url": "https://arxiv.org/abs/1106.1698",
+        "locator": "arXiv:1106.1698v1, p.6 (read directly); the Holmes Physics Teacher citation it reproduces is secondary and incomplete.",
+        "verified": false
+      },
+      "applies_to": ["python", "js", "pyqt6"],
+      "maps_to": "STIMP_RELEASE_SPEED_MPS"
+    },
+    {
+      "fixture_id": "usga_stimpmeter_release_angle_deg",
+      "quantity": "stimpmeter_release_angle",
+      "inputs": {
+        "bar_length_in": 36,
+        "notch_from_tapered_end_in": 30,
+        "v_groove_included_angle_deg": 145
+      },
+      "expected": {
+        "value": 20,
+        "units": "deg",
+        "tolerance_abs": 2,
+        "tolerance_basis": "The USGA instruction sheet states the ball releases 'when the Stimpmeter is raised to an angle of approximately 20 degrees'; +/-2 deg covers the source's own word 'approximately', not a precision engineering tolerance."
+      },
+      "source": {
+        "citation": "\"STIMPMETER Instructions,\" reprinted in Hole Notes (Minnesota GCSA member magazine), August 2000, pp.24,29-30 (verbatim reproduction of the USGA's own instruction sheet).",
+        "doi_or_url": "https://archive.lib.msu.edu/tic/holen/article/2000aug24.pdf",
+        "locator": "p.29, release-angle step (PDF downloaded and read directly).",
+        "verified": true
+      },
+      "applies_to": ["python", "js", "pyqt6"],
+      "pending_reason": "putting_dynamics has no public Stimpmeter ramp-rollout function (stimp_to_rolling_mu takes a stimp reading as given, it does not derive one from a simulated ramp roll-off); this fixture documents the USGA ramp geometry for a future helper rather than checking an existing one. Not part of step 2/10 of #14141 -- tracked for a later PR."
+    },
+    {
+      "fixture_id": "usga_ball_mass_max_kg",
+      "quantity": "golf_ball_mass_max",
+      "inputs": {},
+      "expected": {
+        "value": 0.04593,
+        "units": "kg",
+        "tolerance_abs": 0.0001,
+        "tolerance_basis": "USGA/R&A Equipment Rule 4.2a (historically numbered Rule 5-1) caps ball mass at 1.620 oz = 45.9333 g; +/-0.1 g covers oz -> g rounding."
+      },
+      "source": {
+        "citation": "USGA/R&A Rules of Golf Equipment Rule 4.2a, \"Weight and Size\" (historically Rule 5-1).",
+        "doi_or_url": "https://www.usga.org/content/usga/home-page/rules-hub/equipment-rules.html",
+        "locator": "Cross-corroborated by independent rules-summary pages (e.g. golfinfluence.com, golfbit.com) that all state 1.620 oz / 45.93 g; the current official R&A/USGA rule-book PDF text itself was not independently read, hence 'verified: false'.",
+        "verified": false
+      },
+      "applies_to": ["python"],
+      "maps_to": null
+    },
+    {
+      "fixture_id": "usga_ball_diameter_min_m",
+      "quantity": "golf_ball_diameter_min",
+      "inputs": {},
+      "expected": {
+        "value": 0.04267,
+        "units": "m",
+        "tolerance_abs": 0.00001,
+        "tolerance_basis": "USGA/R&A Equipment Rule 4.2a (historically Rule 5-2) caps minimum ball diameter at 1.680 in = 42.672 mm; +/-0.01 mm covers in -> mm rounding."
+      },
+      "source": {
+        "citation": "USGA/R&A Rules of Golf Equipment Rule 4.2a, \"Weight and Size\" (historically Rule 5-2).",
+        "doi_or_url": "https://www.usga.org/content/usga/home-page/rules-hub/equipment-rules.html",
+        "locator": "Cross-corroborated by independent rules-summary pages (golfinfluence.com, golfbit.com); official rule-book PDF text not independently read, hence 'verified: false'.",
+        "verified": false
+      },
+      "applies_to": ["python"],
+      "maps_to": null
+    },
+    {
+      "fixture_id": "penner2002_center_capture_speed_mps",
+      "quantity": "max_center_entry_capture_speed",
+      "inputs": {
+        "hole_radius_m": 0.053975,
+        "ball_radius_m": 0.021335,
+        "impact_offset_m": 0.0
+      },
+      "expected": {
+        "value": 1.63,
+        "units": "m/s",
+        "tolerance_abs": 0.02,
+        "tolerance_basis": "Two independent secondary sources (R. Long's 2020 honours thesis quoting Penner directly; an unrelated search synthesis of the Canadian Journal of Physics record) converge on 1.63 m/s for the center-entry capture bound. UD's capture_speed_mps() uses its own rounded USGA hole radius (0.054 m vs the exact 0.053975 m used here), which accounts for the residual ~0.007-0.01 m/s gap."
+      },
+      "source": {
+        "citation": "A. R. Penner, \"The physics of putting,\" Can. J. Phys. 80(2), 83-96 (2002), as quoted by R. Long, honours thesis, St. Francis Xavier University (2020).",
+        "doi_or_url": "https://doi.org/10.1139/p01-137",
+        "locator": "Long (2020) thesis, eq.2 / p.6 (secondary quotation); the primary Canadian Journal of Physics paper is paywalled and was not independently read.",
+        "verified": false
+      },
+      "applies_to": ["python", "js", "pyqt6"],
+      "maps_to": "capture_speed_mps"
+    },
+    {
+      "fixture_id": "holmes1991_front_of_hole_speed_mps",
+      "quantity": "front_of_hole_entry_speed_bound",
+      "inputs": {},
+      "expected": {
+        "value": 1.31,
+        "units": "m/s",
+        "tolerance_abs": 0.05,
+        "tolerance_basis": "Sheppard, Hurrion & Collinson (2016) secondarily cite Holmes (1991) for 'v < 1.31 m/s' as the speed at which a ball still falls in at the FRONT of the hole -- a different quantity from the center-crossing capture bound (~1.63-1.64 m/s; see penner2002_center_capture_speed_mps). The tolerance is a placeholder pending the primary Holmes text; it is not claimed to be reconciled against capture_speed_mps."
+      },
+      "source": {
+        "citation": "Sheppard, J.J., Hurrion, P.D., & Collinson, A.R., \"An Investigation into Golf Ball Speed at Hole Entry,\" World Scientific Congress of Golf, St Andrews (2016), citing B. W. Holmes (1991).",
+        "doi_or_url": "https://www.quinticballroll.com/research-papers/Quintic-An-Investigation-in-to-Golf-Ball-Speed-at-Hole-Entry.pdf",
+        "locator": "Conference paper, quoting 'Ball velocity was consistently less than the velocity required to fall in at the front of the hole, v < 1.31 m/s (Holmes, 1991)' -- secondary citation, not independently verified against the primary AJP 59(2):129 text.",
+        "verified": false
+      },
+      "applies_to": ["python"],
+      "pending_reason": "This is a different quantity from capture_speed_mps's center-crossing bound (1.63-1.64 m/s) and cannot yet be reconciled against any putting_dynamics function without reading the primary Holmes (1991) AJP text. To be reconciled in step 3/5 of #14141, not step 2/10."
+    },
+    {
+      "fixture_id": "drane2014_sliding_deceleration_mu",
+      "quantity": "sliding_phase_mu",
+      "inputs": {
+        "deceleration_m_s2": 1.75,
+        "gravity_m_s2": 9.80665
+      },
+      "expected": {
+        "value": 0.17845033727113746,
+        "units": "dimensionless",
+        "tolerance_abs": 0.02,
+        "tolerance_basis": "Drane et al. (2014), secondarily quoted via the Whiston (Swansea SR-311) dissertation, report a constant skid-phase deceleration of 1.75 m/s^2 on artificial turf, implying mu_slide ~= 0.178 (a/g). +/-0.02 covers rounding in the secondary quotation; it is NOT widened to cover UD's DEFAULT_SLIDING_MU=0.40, which this fixture is expected to disagree with pending reconciliation."
+      },
+      "source": {
+        "citation": "P. Drane, M. Duffy, J. Fournier, J. Sherwood, M. Breed, \"The Behavior of Golf Ball Putting on Artificial Turf,\" Procedia Engineering 72, 599-604 (2014); quoted via R. P. J. Whiston's SR-311 dissertation, Swansea University (the Drane paper itself was not independently fetched).",
+        "doi_or_url": "not independently located -- secondary citation only, see locator",
+        "locator": "Reported as 'a constant deceleration of 1.75 m/s^2' in Whiston's dissertation, which cites Drane et al. (2014) by reference-list entry; the Procedia Engineering article itself was not read directly.",
+        "verified": false
+      },
+      "applies_to": ["python"],
+      "maps_to": "DEFAULT_SLIDING_MU",
+      "pending_reason": "UD's DEFAULT_SLIDING_MU=0.40 (rust_core/upstream-physics/src/contact.rs default) is a flat engineering choice; Drane et al.'s secondarily-cited fixed-rate skid deceleration on artificial turf implies mu_slide ~= 0.18 -- a known, documented disagreement. Do not change DEFAULT_SLIDING_MU or loosen this tolerance to make the check pass; reconcile in step 3/5 of #14141."
+    },
+    {
+      "fixture_id": "drane2014_rolling_deceleration_mu",
+      "quantity": "rolling_phase_mu",
+      "inputs": {
+        "deceleration_m_s2": 0.4,
+        "gravity_m_s2": 9.80665
+      },
+      "expected": {
+        "value": 0.040788648519117135,
+        "units": "dimensionless",
+        "tolerance_abs": 0.01,
+        "tolerance_basis": "Drane et al. (2014), secondarily quoted via Whiston, report a constant rolling-phase deceleration of 0.4 m/s^2 on artificial turf, implying mu_roll ~= 0.041. UD has no single stimp-independent rolling-mu constant to compare directly -- rolling_mu is always derived per-green from stimp_to_rolling_mu(stimp_ft) -- so there is no function target for this fixture yet."
+      },
+      "source": {
+        "citation": "P. Drane, M. Duffy, J. Fournier, J. Sherwood, M. Breed, \"The Behavior of Golf Ball Putting on Artificial Turf,\" Procedia Engineering 72, 599-604 (2014); quoted via R. P. J. Whiston's SR-311 dissertation, Swansea University (the Drane paper itself was not independently fetched).",
+        "doi_or_url": "not independently located -- secondary citation only, see locator",
+        "locator": "Reported as 'a constant deceleration of 0.4 m/s^2' in Whiston's dissertation, which cites Drane et al. (2014) by reference-list entry; the Procedia Engineering article itself was not read directly.",
+        "verified": false
+      },
+      "applies_to": ["python"],
+      "pending_reason": "No stimp-independent rolling-mu constant exists in putting_dynamics to compare directly against this artificial-turf, constant-deceleration figure (UD's model is stimp- and speed-dependent, not a flat rolling constant). Reconcile alongside the sliding-mu disagreement in step 3/5 of #14141."
+    },
+    {
+      "fixture_id": "whiston_swansea_skid_deceleration_range",
+      "quantity": "sliding_phase_mu_range",
+      "inputs": {
+        "speed_bin_min_mph": 3,
+        "speed_bin_max_mph": 6
+      },
+      "expected": {
+        "min": 0.22953811954133166,
+        "max": 0.49711165382674005,
+        "units": "dimensionless",
+        "tolerance_abs": 0.01,
+        "tolerance_basis": "Whiston (Swansea SR-311 undergraduate dissertation) measured sliding-phase deceleration of 2.251-4.875 m/s^2 across a 3-6 mph initial-speed range (Titleist Pro V1 ball, Scotty Cameron Newport 2 putter, indoor artificial turf, small N in some bins per the paper's own caveat); converted to mu via a/g. The 0.01 margin is numerical slack only, not a claimed measurement precision, given the source's small-N caveat and indoor artificial-turf conditions."
+      },
+      "source": {
+        "citation": "R. P. J. Whiston, \"Biomechanical Analysis: Different Phases Of Motion Of A Golf Ball During A Golf Putt Across A Range Of Speeds,\" SR-311 Dissertation, Swansea University (undergraduate project; year not stated in the extracted text).",
+        "doi_or_url": "https://www.quinticballroll.com/research-papers/Phases-of-Motion-of-a-Golf-Ball.pdf",
+        "locator": "Tables 1-3 (PDF downloaded and read directly).",
+        "verified": true
+      },
+      "applies_to": ["python"],
+      "maps_to": "DEFAULT_SLIDING_MU"
+    },
+    {
+      "fixture_id": "quintic_zero_skid_fraction_range",
+      "quantity": "skid_distance_fraction_of_total",
+      "inputs": {},
+      "expected": {
+        "min": 0.10,
+        "max": 0.25,
+        "units": "dimensionless",
+        "tolerance_abs": 0.0,
+        "tolerance_basis": "Practitioner reference (Quintic/Hurrion 'Numbers Explained'), not peer-reviewed: 'The point of Zero Skid occurs after 10-25% of the total distance travelled (depending on the surface).' The quoted range is used verbatim as the tolerance band itself; no additional numeric slack is claimed given the low source credibility."
+      },
+      "source": {
+        "citation": "\"Quintic Ball Roll -- Numbers Explained\" (Dr Paul Hurrion / Quintic Consultancy practitioner reference document; no publication year stated in the extracted text).",
+        "doi_or_url": "https://www.quintic.com/downloads/Quintic%20Ball%20Roll%20-%20Numbers%20Explained.pdf",
+        "locator": "'Zero Skid' section (PDF downloaded and read directly); practitioner material, not peer-reviewed.",
+        "verified": true
+      },
+      "applies_to": ["python"],
+      "pending_reason": "putting_dynamics only exposes skid_distance_m/total_distance_m as fields on a PuttResult returned by a full simulate_strike() call with a representative putter+surface+hole configuration; no standalone function checks this ratio in isolation yet, and the source is practitioner-only (not peer-reviewed). Pending a representative fixture configuration; reconcile alongside the step-3/5 friction work for #14141."
+    },
+    {
+      "fixture_id": "broadie2012_shotlink_50pct_putt_distance_ft",
+      "quantity": "fifty_percent_one_putt_make_distance",
+      "inputs": {},
+      "expected": {
+        "value": 8.0,
+        "units": "ft",
+        "tolerance_abs": 0.0,
+        "tolerance_basis": "Broadie (2012) directly states, from over eight million PGA Tour ShotLink-tracked shots (2003-2010): 'PGA TOUR golfers one-putt 50% of the time from a distance of eight feet.' The paper itself notes this figure is era/surface-dependent (Cochran & Stobbs 1968: 7 ft; Pelz: 6-7 ft), so it is recorded as a dataset-specific point, not a universal constant, with zero extra slack."
+      },
+      "source": {
+        "citation": "Mark Broadie, \"Assessing Golfer Performance on the PGA Tour,\" Interfaces 42(2), 146-165 (2012).",
+        "doi_or_url": "https://doi.org/10.1287/inte.1120.0626",
+        "locator": "Working-paper PDF p.11-12 (downloaded and read directly): columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf",
+        "verified": true
+      },
+      "applies_to": ["python"],
+      "pending_reason": "putting_dynamics has no make-probability or strokes-gained outcome function yet; this fixture seeds the future probability-of-capture / strokes-gained layer referenced in epic #14141 and is out of scope for the current physics-kernel (skid/roll/capture) unit tests."
+    },
+    {
+      "fixture_id": "putter_cor_external",
+      "quantity": "putter_face_coefficient_of_restitution",
+      "inputs": {},
+      "expected": {
+        "units": "dimensionless",
+        "tolerance_basis": "No peer-reviewed or methodologically documented external measurement of putter-face COR was located (search covered Penner 2002, Holmes 1991, Drane et al. 2014, and Quintic/Hurrion practitioner materials). USGA/R&A equipment rules explicitly exempt putters from the spring-like-effect/COR limit that caps driver and iron faces at COR<=0.822+/-0.008 (Pendulum Test Protocol), so there is no regulatory ceiling to borrow either. UD's GROUND_RESTITUTION=0.78 and the Gemini vendor source's StrokeParameters.cor (0.79/0.820, internally inconsistent between its own dataclass default and a hardcoded impact-path value) are both uncited internal engineering assumptions, not externally measured constants."
+      },
+      "source": {
+        "citation": "USGA/R&A Rules of Golf Equipment Rule 4.2 interpretations (putter exemption from the spring-like-effect/COR limit); no qualifying peer-reviewed putter-COR measurement was located.",
+        "doi_or_url": "https://www.usga.org/content/usga/home-page/rules-hub/equipment-rules.html",
+        "locator": "USGA/R&A equipment-rules pages describing the putter COR exemption (search synthesis across several rules pages, not one primary document); the absence of a qualifying external measurement is the documented finding, not an unsearched gap.",
+        "verified": false
+      },
+      "applies_to": ["python"],
+      "pending_reason": "No external, citable, peer-reviewed putter-face COR measurement exists. Both UD's GROUND_RESTITUTION and the Gemini vendor source's cor defaults are uncited engineering assumptions on both sides of the port. Pending a specific biomechanics measurement; do not fabricate a target value to make this pass."
+    },
+    {
+      "fixture_id": "putter_smash_factor_external",
+      "quantity": "putter_ball_speed_ratio",
+      "inputs": {},
+      "expected": {
+        "units": "dimensionless",
+        "tolerance_basis": "No putter-specific experimental source for a ball-speed/clubhead-speed ratio was located. The commonly repeated 'putter smash factor ~1.5' figure traces to the unrelated USGA/R&A DRIVER COR cap (<=0.830, implying a max theoretical smash factor of 1.50) being reused in golf-instruction content, not a dedicated putter measurement. Quintic/Hurrion practitioner material gives only a repeatability ('Impact Ratio' consistency) metric across 6-10 putts, not a mean ratio, so it does not qualify either."
+      },
+      "source": {
+        "citation": "Common golf-instruction claim of putter smash factor ~1.5, traced to the unrelated USGA/R&A driver COR cap (<=0.830); no putter-specific experimental source located.",
+        "doi_or_url": "not applicable -- no qualifying external source found",
+        "locator": "Quintic/Hurrion 'Numbers Explained' gives only an 'Impact Ratio' repeatability grading (<0.02 elite to >0.08 poor across 6-10 putts), a consistency metric, not a mean smash-factor value; no further qualifying source was located.",
+        "verified": false
+      },
+      "applies_to": ["python"],
+      "pending_reason": "No external, citable, peer-reviewed putter-face ball-speed/clubhead-speed ratio measurement exists; the widely repeated '1.5' figure is a misapplied driver-COR figure, not a putter measurement. Pending a dedicated source; do not fabricate a target value to make this pass."
+    }
+  ]
+}

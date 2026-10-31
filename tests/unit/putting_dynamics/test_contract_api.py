@@ -15,6 +15,7 @@ pytestmark = pytest.mark.unit
 
 _EXPECTED_EXPORTS = {
     # constants
+    "DEFAULT_FIXTURES_PATH",
     "DEFAULT_SLIDING_MU",
     "DEFAULT_STATIC_MU",
     "DT_S",
@@ -23,15 +24,19 @@ _EXPECTED_EXPORTS = {
     "LOFT_SWEEP_MAX_DEG",
     "LOFT_SWEEP_MIN_DEG",
     "STIMP_RELEASE_SPEED_MPS",
+    "VALID_APPLIES_TO",
     # types
     "BallState",
     "CollisionReport",
+    "ExpectedValue",
+    "FixtureSource",
     "FrictionField",
     "FrictionParams",
     "HeightField",
     "Mode",
     "PuttResult",
     "PutterState",
+    "ReferenceFixture",
     "SurfaceSpec",
     "TrajectorySample",
     # functions
@@ -43,6 +48,7 @@ _EXPECTED_EXPORTS = {
     "energy_balance_error_j",
     "grain_factor",
     "is_static_hold",
+    "load_reference_fixtures",
     "m_to_feet",
     "m_to_yards",
     "mps_to_mph",
