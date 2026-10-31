@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-31 | #14152 | MuJoCo static-hold mu_crit calibration of the pad contact (Euler, implicitfast: hold/slip at 1.001 mu_crit, no declared bias) and GripMarginReport mu_bias_bound validation |
 | 2026-10-31 | #14149 | Add shared putting reference-fixture schema, loader and first externally sourced fixtures (putting v4 step 2a) |
 | 2026-10-31 | #14148 | Pure two-hand grip-margin metric: per-pad Coulomb margin, UNLOADED floor, slip events, grasp-map internal wrench and GripMarginReport |
 | 2026-10-31 | #14145 | Characterize putting_dynamics contracts with invariant tests and postconditions (putting v4 PR 1) |
