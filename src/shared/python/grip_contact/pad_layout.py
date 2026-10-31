@@ -60,6 +60,7 @@ __all__ = [
     "MatchedPadParameters",
     "PadLayout",
     "matched_pad_parameters",
+    "peak_bushing_demand",
     "required_squeeze_n",
     "squeeze_from_bushing_series",
 ]
@@ -217,21 +218,18 @@ def required_squeeze_n(
     )
 
 
-def squeeze_from_bushing_series(
+def peak_bushing_demand(
     force_on_club_n: Mapping[str, np.ndarray],
     torque_on_club_nm: Mapping[str, np.ndarray],
     club_rotation: np.ndarray,
     grip_axis_club: np.ndarray,
-    friction: float,
-    grip_radius_m: float,
-) -> float:
-    """Squeeze of one hand that carries the largest per-hand demand of a run.
+) -> tuple[float, float, float]:
+    """Peak axial force, axial torque and transverse force of a bushing run.
 
     ``force_on_club_n`` and ``torque_on_club_nm`` are the per-hand series of a
     bushing run (world axes), ``club_rotation`` the ``(n, 3, 3)`` club
-    rotations and ``grip_axis_club`` the grip axis in the club frame.  The
-    demand is the largest over both hands and all samples, then
-    :func:`required_squeeze_n`.
+    rotations and ``grip_axis_club`` the grip axis in the club frame.  Peaks
+    are over every side and sample, so a one-side mapping gives that hand's.
 
     Raises:
         ValueError: on a shape mismatch.
@@ -250,4 +248,22 @@ def squeeze_from_bushing_series(
         f_perp = max(
             f_perp, float(np.linalg.norm(f - along[:, None] * axis, axis=1).max())
         )
-    return required_squeeze_n(f_ax, t_ax, f_perp, friction, grip_radius_m)
+    return f_ax, t_ax, f_perp
+
+
+def squeeze_from_bushing_series(
+    force_on_club_n: Mapping[str, np.ndarray],
+    torque_on_club_nm: Mapping[str, np.ndarray],
+    club_rotation: np.ndarray,
+    grip_axis_club: np.ndarray,
+    friction: float,
+    grip_radius_m: float,
+) -> float:
+    """Squeeze of one hand carrying the run's largest per-hand demand:
+    :func:`required_squeeze_n` of :func:`peak_bushing_demand` (both hands).
+
+    Raises:
+        ValueError: on a shape mismatch.
+    """
+    series = (force_on_club_n, torque_on_club_nm, club_rotation, grip_axis_club)
+    return required_squeeze_n(*peak_bushing_demand(*series), friction, grip_radius_m)
