@@ -16,8 +16,7 @@ The Stimpmeter is a 36 in aluminum bar with a V-groove track.  A ball
 is placed in a notch :data:`STIMPMETER_NOTCH_DISTANCE_M` (30 in) from
 the lower end; the bar is slowly raised until the ball starts rolling,
 which happens at :data:`STIMPMETER_RELEASE_ANGLE_DEG` (~20 deg)
-(Holmes, via Grober, "A Phenomenological Theory of Golf Putting",
-arXiv:1106.1698, p.6; the measured release speed there is ``v_release
+(Holmes, via R. D. Grober, arXiv:1106.1698 (2011), p.6; the measured release speed there is ``v_release
 ~= 6.0 ft/s = 1.83 m/s`` -- the same :data:`~.friction.STIMP_RELEASE_SPEED_MPS`
 already used by :func:`~.friction.stimp_to_rolling_mu`).  The official
 procedure (USGA "Stimpmeter Instructions", Hole Notes, Aug 2000) rolls
@@ -183,9 +182,7 @@ def stimpmeter_rollout_ft(
             ``heading_rad`` is not finite.
     """
     require_finite(release_speed_mps, "release_speed_mps")
-    require(
-        release_speed_mps > 0.0, "release_speed_mps must be > 0", release_speed_mps
-    )
+    require(release_speed_mps > 0.0, "release_speed_mps must be > 0", release_speed_mps)
     require_finite(heading_rad, "heading_rad")
 
     vx_mps = release_speed_mps * math.cos(heading_rad)
