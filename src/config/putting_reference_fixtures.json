@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0.0",
+  "fixtures": [
+    {
+      "fixture_id": "grober2011_stimp10_mu_formula_identity",
+      "quantity": "rolling_resistance_coefficient",
+      "inputs": {
+        "stimp_ft": 10.0,
+        "release_speed_mps": 1.83,
+        "gravity_m_s2": 9.80665
+      },
+      "expected": {
+        "value": 0.056019153963940034,
+        "units": "dimensionless",
+        "tolerance_rel": 1e-06,
+        "tolerance_basis": "Formula-identity check, not a measurement: Grober (2011) gives mu_r = v_release^2 / (2 g S); the value is that closed form evaluated from the listed inputs (v_release = 1.83 m/s per Holmes via Grober p.6, standard gravity, S = 10 ft). The relative tolerance only absorbs floating-point representation."
+      },
+      "source": {
+        "citation": "R. D. Grober, \"The Geometry of Putting on a Planar Surface,\" arXiv:1106.1698 (2011), Appendix A, p.7.",
+        "doi_or_url": "https://arxiv.org/abs/1106.1698",
+        "locator": "arXiv:1106.1698v1, p.7, drag-force / Stimp-distance derivation (PDF downloaded and read directly, not a search summary).",
+        "verified": true
+      },
+      "applies_to": [
+        "python",
+        "js",
+        "pyqt6"
+      ],
+      "maps_to": "putting_dynamics.stimp_to_rolling_mu"
+    },
+    {
+      "fixture_id": "usga_stimpmeter_release_speed_mps",
+      "quantity": "stimpmeter_release_speed",
+      "inputs": {},
+      "expected": {
+        "value": 1.83,
+        "units": "m/s",
+        "tolerance_abs": 0.005,
+        "tolerance_basis": "Grober (2011, p.6) directly quotes Holmes' corrected Stimpmeter release speed as 6.0 ft/s = 1.8288 m/s; +/-0.005 m/s covers the ft/s -> m/s rounding to 1.83. The underlying Holmes 'Dialogue concerning the Stimpmeter' (Physics Teacher) attribution is itself a secondary citation inside Grober's paper and was not independently located, so this fixture is marked unverified despite the number being read directly."
+      },
+      "source": {
+        "citation": "R. D. Grober, arXiv:1106.1698 (2011), p.6, citing B. W. Holmes, \"Dialogue concerning the Stimpmeter,\" The Physics Teacher (full volume/year not recovered).",
+        "doi_or_url": "https://arxiv.org/abs/1106.1698",
+        "locator": "arXiv:1106.1698v1, p.6 (read directly); the Holmes Physics Teacher citation it reproduces is secondary and incomplete.",
+        "verified": false
+      },
+      "applies_to": [
+        "python",
+        "js",
+        "pyqt6"
+      ],
+      "maps_to": "putting_dynamics.STIMP_RELEASE_SPEED_MPS"
+    },
+    {
+      "fixture_id": "usga_stimpmeter_release_angle_deg",
+      "quantity": "stimpmeter_release_angle",
+      "inputs": {
+        "bar_length_in": 36,
+        "notch_from_tapered_end_in": 30,
+        "v_groove_included_angle_deg": 145
+      },
+      "expected": {
+        "value": 20,
+        "units": "deg",
+        "tolerance_abs": 2,
+        "tolerance_basis": "The USGA instruction sheet states the ball releases 'when the Stimpmeter is raised to an angle of approximately 20 degrees'; +/-2 deg covers the source's own word 'approximately', not a precision engineering tolerance."
+      },
+      "source": {
+        "citation": "\"STIMPMETER Instructions,\" reprinted in Hole Notes (Minnesota GCSA member magazine), August 2000, pp.24,29-30 (verbatim reproduction of the USGA's own instruction sheet).",
+        "doi_or_url": "https://archive.lib.msu.edu/tic/holen/article/2000aug24.pdf",
+        "locator": "p.29, release-angle step (PDF downloaded and read directly).",
+        "verified": true
+      },
+      "applies_to": [
+        "python",
+        "js",
+        "pyqt6"
+      ],
+      "pending_reason": "putting_dynamics has no public Stimpmeter ramp-rollout function (stimp_to_rolling_mu takes a stimp reading as given, it does not derive one from a simulated ramp roll-off); this fixture documents the USGA ramp geometry for a future helper rather than checking an existing one. Not part of step 2/10 of #14141 -- tracked for a later PR."
+    }
+  ]
+}
