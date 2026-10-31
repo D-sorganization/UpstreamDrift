@@ -2,8 +2,7 @@
 
 Design of record (``research/step9_plan.md`` row 9a): these four tools join
 the shared stdio server rather than vendoring the retired Gemini
-``putting_mcp_server.py`` (different tool surface; its capture formula is
-independently restated from Holmes/Penner below, not copied). Every
+``putting_mcp_server.py`` (different tool surface). Every
 handler is a pure computation, so Private Mode's
 ``check_execution_allowed`` never applies — only ``check_auth`` does, as
 for the read-only ``get_run``/``fetch_artifact`` tools.
@@ -29,9 +28,6 @@ from src.shared.python.putting_dynamics import (
     solve_aim,
     stimp_to_rolling_mu,
 )
-
-#: Holmes (1991), via Penner (2002): chord-dependent off-axis capture bound.
-_PENNER_CAPTURE_EXPONENT = 0.75
 
 
 class _SecurityCheck(Protocol):
@@ -81,13 +77,6 @@ def _surface_from_args(arguments: dict[str, Any]) -> SurfaceSpec:
     return SurfaceSpec(
         height=height, friction_field=FrictionField.uniform(), friction=friction
     )
-
-
-def _max_capture_speed_mps(entry_offset_m: float) -> float:
-    """Chord-dependent capture bound (Holmes 1991 / Penner 2002): ``v_max *
-    (1 - (b / R_h)**2) ** 0.75``; ``b = 0`` reproduces ``capture_speed_mps()``."""
-    ratio = entry_offset_m / HOLE_RADIUS_M
-    return capture_speed_mps() * (1.0 - ratio**2) ** _PENNER_CAPTURE_EXPONENT
 
 
 def tool_specs() -> list[dict[str, Any]]:
@@ -212,7 +201,7 @@ def tool_putting_capture_speed(
     )
     return _envelope(
         {
-            "max_capture_speed_mps": _max_capture_speed_mps(entry_offset_m),
+            "max_capture_speed_mps": capture_speed_mps(entry_offset_m),
             "entry_offset_m": entry_offset_m,
         }
     )

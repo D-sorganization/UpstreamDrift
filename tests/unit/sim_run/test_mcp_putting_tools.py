@@ -105,6 +105,9 @@ def test_capture_speed_falls_with_offset(client: InProcessMcpClient) -> None:
         client.tool("putting_capture_speed", {"entry_offset_m": 0.5 * HOLE_RADIUS_M})
     )
     assert off_axis["max_capture_speed_mps"] < centre["max_capture_speed_mps"]
+    assert off_axis["max_capture_speed_mps"] == pytest.approx(
+        capture_speed_mps(0.5 * HOLE_RADIUS_M)
+    )
 
 
 @pytest.mark.unit
