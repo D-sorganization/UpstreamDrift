@@ -25,6 +25,7 @@ _EXPECTED_EXPORTS = {
     "LOFT_SWEEP_MIN_DEG",
     "STIMP_RELEASE_SPEED_MPS",
     # types
+    "AimSolution",
     "BallState",
     "CollisionReport",
     "ExpectedValue",
@@ -32,6 +33,7 @@ _EXPECTED_EXPORTS = {
     "FrictionField",
     "FrictionParams",
     "HeightField",
+    "LineReading",
     "Mode",
     "PuttResult",
     "PutterState",
@@ -51,13 +53,16 @@ _EXPECTED_EXPORTS = {
     "m_to_feet",
     "m_to_yards",
     "mps_to_mph",
+    "read_line",
     "rolling_mu",
     "rolling_mu_to_stimp",
     "simulate_ball",
     "simulate_strike",
     "sliding_mu",
+    "solve_aim",
     "stimp_to_rolling_mu",
     "strike",
+    "struck_ball_state",
     "sweep_dynamic_loft",
 }
 

@@ -7,12 +7,15 @@ resistance, static rolling hold with steep-slope restart, optional
 grain anisotropy), a two-body putter-ball collision with finite putter
 effective mass, dynamic-loft sweeps, hosel-position face twist, and a
 mode-machine RK4 solver (airborne rise/settle -> slide -> roll ->
-rest) with hole capture.
+rest) with hole capture, and simulation-based green reading
+(:mod:`.green_reading`: elevation/slope sampling plus a speed+heading
+aim solver) for callers that need a recommended line and pace rather
+than a single trajectory.
 
 Package layout mirrors ``src.shared.python.physics.impact_model``
-(types / surfaces / friction / collision / solver / utils behind this
-façade); consume the package through this module — the submodule
-internals are not a public surface (Law of Demeter).
+(types / surfaces / friction / collision / solver / green_reading /
+utils behind this façade); consume the package through this module —
+the submodule internals are not a public surface (Law of Demeter).
 
 Reused shared infrastructure (AGENTS.md section A; also credited in
 each submodule):
@@ -67,6 +70,12 @@ from .friction import (
     sliding_mu,
     stimp_to_rolling_mu,
 )
+from .green_reading import (
+    AimSolution,
+    LineReading,
+    read_line,
+    solve_aim,
+)
 from .reference_fixtures import (
     DEFAULT_FIXTURES_PATH,
     ExpectedValue,
@@ -80,6 +89,7 @@ from .solver import (
     capture_speed_mps,
     simulate_ball,
     simulate_strike,
+    struck_ball_state,
 )
 from .surfaces import (
     FrictionField,
@@ -114,6 +124,7 @@ __all__ = [
     "LOFT_SWEEP_MAX_DEG",
     "LOFT_SWEEP_MIN_DEG",
     "STIMP_RELEASE_SPEED_MPS",
+    "AimSolution",
     "BallState",
     "CollisionReport",
     "ExpectedValue",
@@ -121,6 +132,7 @@ __all__ = [
     "FrictionField",
     "FrictionParams",
     "HeightField",
+    "LineReading",
     "Mode",
     "PuttResult",
     "PutterState",
@@ -139,12 +151,15 @@ __all__ = [
     "m_to_feet",
     "m_to_yards",
     "mps_to_mph",
+    "read_line",
     "rolling_mu",
     "rolling_mu_to_stimp",
     "simulate_ball",
     "simulate_strike",
     "sliding_mu",
+    "solve_aim",
     "stimp_to_rolling_mu",
     "strike",
+    "struck_ball_state",
     "sweep_dynamic_loft",
 ]

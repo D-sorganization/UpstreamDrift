@@ -243,3 +243,54 @@ class TestStrikeToRoll:
         )
         result = simulate_strike(putter, surface)
         assert all(s.height_m == 0.0 for s in result.samples)
+
+
+class TestStrikeFromAnyStartAndHeading:
+    """#14141 step 7b: the start/heading generalisation must be a pure
+    rotation + translation of the origin/heading-0 strike (DRY: both
+    ``/read-green`` aim solving and the default-arg callers share one
+    code path, :func:`~src.shared.python.putting_dynamics.solver.
+    struck_ball_state`)."""
+
+    def test_defaults_are_bit_for_bit_unchanged(self) -> None:
+        surface = SurfaceSpec.flat_uniform(stimp_ft=10.0)
+        putter = PutterState(
+            head_mass_kg=0.35, moi_kg_m2=4.5e-4, loft_deg=3.0, speed_mps=1.8
+        )
+        baseline = simulate_strike(putter, surface)
+        explicit = simulate_strike(
+            putter, surface, start_x_m=0.0, start_y_m=0.0, heading_rad=0.0
+        )
+        assert baseline.rest_x_m == explicit.rest_x_m
+        assert baseline.rest_y_m == explicit.rest_y_m
+        assert baseline.total_distance_m == explicit.total_distance_m
+
+    def test_rotated_and_translated_strike_matches_a_rigid_transform(self) -> None:
+        surface = SurfaceSpec.flat_uniform(stimp_ft=10.0)
+        putter = PutterState(
+            head_mass_kg=0.35, moi_kg_m2=4.5e-4, loft_deg=3.0, speed_mps=1.8
+        )
+        baseline = simulate_strike(putter, surface)
+
+        start_x, start_y, heading = 2.0, -3.0, math.pi / 3.0
+        cos_h, sin_h = math.cos(heading), math.sin(heading)
+        rotated = simulate_strike(
+            putter,
+            surface,
+            start_x_m=start_x,
+            start_y_m=start_y,
+            heading_rad=heading,
+        )
+
+        # Flat, homogeneous friction is rotation-invariant, so the rest
+        # point is the baseline's rest point rotated by `heading` and
+        # translated to the new start (rigid transform); distance is
+        # invariant under either operation.
+        dx, dy = baseline.rest_x_m, baseline.rest_y_m
+        expected_x = start_x + dx * cos_h - dy * sin_h
+        expected_y = start_y + dx * sin_h + dy * cos_h
+        assert rotated.rest_x_m == pytest.approx(expected_x, abs=1e-9)
+        assert rotated.rest_y_m == pytest.approx(expected_y, abs=1e-9)
+        assert rotated.total_distance_m == pytest.approx(
+            baseline.total_distance_m, rel=1e-9
+        )
