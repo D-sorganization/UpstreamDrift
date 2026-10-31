@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14137 · Ci: OSV Monitor Uses the Runnable Osv-Scanner-Action Subpath; Findings No Longer Fail the Monitor Step
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14137
+- **Branch:** merged via #14138
+- **PR:** #14138
+- **Paths:** see #14138
+- **Started:** 2026-10-31
+- **Last verified:** 2026-10-31 (`b82a8a74`; collated from changes/14137-ci-osv-monitor-uses-the-runnable-osv-sca.md)
+- **Summary:** ci: OSV Monitor uses the runnable osv-scanner-action subpath; findings no longer fail the monitor step
+- **Next step:** Shipped in PR #14138.
+
 ### DL-#14131 · Live Cross-Engine Address Knee Harness: Same Spec and Q Through Each Installed Engine's FK vs MuJoCo at 0.1 Deg.
 
 - **State:** shipped
