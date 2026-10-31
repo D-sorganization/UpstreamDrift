@@ -1974,6 +1974,7 @@
 {"path": "pendulum_simulator/tolerance_bands.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/torque_utils.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/triple_pendulum_spec.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
+{"path": "pendulum_simulator/unified_perturbation_study.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/upper_body_replay.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/validation.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "perturbation/__init__.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
