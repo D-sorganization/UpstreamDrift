@@ -1015,6 +1015,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14141 · Characterize Putting_Dynamics Contracts With Invariant Tests and Postconditions (Putting V4 PR 1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14141
+- **Branch:** merged via #14145
+- **PR:** #14145
+- **Paths:** see #14145
+- **Started:** 2026-10-31
+- **Last verified:** 2026-10-31 (`075fcb21`; collated from changes/14141-putting-v4-pr1-characterize.md)
+- **Summary:** Characterize putting_dynamics contracts with invariant tests and postconditions (putting v4 PR 1)
+- **Next step:** Shipped in PR #14145.
+
 ### DL-#13892 · Per-Hand Grip Radius: Contact_Topology(Grip_Geometry=...) Places Every Pad on GripGeometry.Radius_at(s) at Its Own Station, With per_Hand_Required_Squeeze_N (HRG-GD4 PR 1)
 
 - **State:** shipped
