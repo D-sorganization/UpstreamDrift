@@ -1,0 +1,12 @@
+{
+  "integration": "agy",
+  "version": "0.8.12.dev0",
+  "installed_at": "2026-10-31T03:15:00+00:00",
+  "files": {
+    ".agents/skills/speckit-git-commit/SKILL.md": "3adb1f3639c522a192a9adaad797b1da19f35b3081671c2508456373cf36d220",
+    ".agents/skills/speckit-git-feature/SKILL.md": "7aa86c26b14573da65bb4f57ea21b67aafd62db03137d55d97c269e3be1ed27a",
+    ".agents/skills/speckit-git-initialize/SKILL.md": "0f5dd75165230b2c32ff9e3bc6ec59aac3f97d7b88a29c69b9786f8825f2e72a",
+    ".agents/skills/speckit-git-remote/SKILL.md": "ba0e9305eef46c9ef42d713c37653a32d98da7876fe6c49cc6321a3c7758f585",
+    ".agents/skills/speckit-git-validate/SKILL.md": "e18df9149b0d59adffff09ce08492f462df0469f8a993bef71e6bdba2e5af05b"
+  }
+}
