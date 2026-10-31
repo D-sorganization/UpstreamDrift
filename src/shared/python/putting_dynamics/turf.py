@@ -1,42 +1,20 @@
 """Turf model for putting_dynamics (epic #14141, putting v4 step 4b).
 
 Migration source: ``src/engines/physics_engines/putting_green/python/
-turf_properties.py`` (``TurfProperties``, ``GrassType``, ``TurfCondition``).
-That module is left untouched by this step (callers migrate in step 7,
-duplicates are removed in step 10) — this module only adds the converged
-model to the shared core.
+turf_properties.py``, which now imports :class:`GrassType` and
+:class:`TurfCondition` from here so the tables have one home.
 
-**One law, not two.** ADR-0045 preserves two roll models in their existing
-homes: ``ud-legacy-roll/1`` (the engine's agronomic-factor law) and
-``usga-stimp-roll/1`` (:func:`~.friction.stimp_to_rolling_mu`). Per the
-putting-v4 panel decision the shared core converges on one documented
-model, built on ``usga-stimp-roll/1`` because it is the law consistent with
-the external Grober (2011) / USGA Stimpmeter fixture. The legacy law is not
-ported; it stays in the engine, unchanged, as ADR-0045 records.
+**One law.** ADR-0045 keeps ``ud-legacy-roll/1`` in the engine; the
+shared core uses ``usga-stimp-roll/1`` only (Grober 2011 / USGA fixture).
 
-Ported from the migration source, re-expressed through shared types:
+Every table value below is an **uncited engineering default**. Grain is
+stored as an angle: the engine's ``1 - g cos(theta_v - theta_grain)``
+with ``theta_grain = atan2(grain_y, grain_x)`` is exactly
+:func:`~.friction.grain_factor`.
 
-* :class:`GrassType` / :class:`TurfCondition` — same members and numeric
-  defaults as the migration source, whose citations (USGA, Haake 1989) are
-  background only; every value below is an **uncited engineering default**.
-* :class:`TurfSpec` — a frozen, DbC-checked descriptor that renders onto
-  :class:`~.friction.FrictionParams` / :class:`~.surfaces.SurfaceSpec`
-  through :func:`~.friction.stimp_to_rolling_mu` alone.
-
-Grain mapping (exact, not an approximation): the migration source stores
-grain as a 2-D unit vector and computes
-``decel *= 1 - grain_strength * cos(theta_v - theta_grain)`` where
-``theta_grain = atan2(grain_direction.y, grain_direction.x)``. The shared
-:func:`~.friction.grain_factor` computes the identical
-``1 - grain_strength * cos(theta_v - theta_grain)`` from
-``grain_direction_rad`` directly. The two are the same formula under a
-change of representation, so :class:`TurfSpec` stores the angle.
-
-Deliberately **not** ported (no shared-core hook yet; tracked for step 5):
-the height-of-cut multiplier (fit to the legacy base law), the compaction
-speed factor and the cross-grain lateral curve (``simulate_ball`` consumes
-only :class:`~.friction.FrictionParams`). ``compaction_factor`` is carried
-as validated metadata only.
+Not ported (no shared-core hook; see step 5): the height-of-cut
+multiplier (fitted to the legacy law), the compaction speed factor and
+the cross-grain lateral curve. ``compaction_factor`` is metadata only.
 """
 
 from __future__ import annotations
@@ -48,7 +26,12 @@ from typing import Any
 
 from src.shared.python.contracts import ensure, require, require_finite
 
-from .friction import DEFAULT_STATIC_MU, FrictionParams, stimp_to_rolling_mu
+from .friction import (
+    DEFAULT_STATIC_MU,
+    FrictionParams,
+    require_grain,
+    stimp_to_rolling_mu,
+)
 from .surfaces import SurfaceSpec
 
 __all__ = [
@@ -57,23 +40,13 @@ __all__ = [
     "TurfSpec",
 ]
 
-#: Lower stimp bound for :class:`TurfSpec`, tightened from
-#: :func:`~.friction.stimp_to_rolling_mu`'s own floor of 3 ft. Below ~3.92
-#: ft the FROSTED condition multiplier (1.4, the largest) would push
-#: ``mu_roll0`` past :class:`~.friction.FrictionParams`'s upper bound of
-#: 0.2; 4.0 ft keeps every condition's headroom positive while matching
-#: real-world green speeds (greens are not stimped below ~4-5 ft in
-#: practice).
+#: Stimp bounds [ft]. Below ~3.92 ft the FROSTED multiplier (1.4) would push
+#: ``mu_roll0`` past ``FrictionParams``' 0.2 ceiling.
 _MIN_STIMP_FT = 4.0
 _MAX_STIMP_FT = 16.0
 
-#: Static-over-kinetic headroom applied in :meth:`TurfSpec.to_friction_params`.
-#: :data:`~.friction.DEFAULT_STATIC_MU` (0.08) is calibrated against a
-#: typical stimp-10 green and is too small for slow/cold greens whose
-#: condition-scaled ``mu_roll0`` already exceeds it; scaling by this margin
-#: instead of using the flat default preserves the "classic static >
-#: kinetic ordering" (see :mod:`.friction`'s module docstring) for every
-#: in-range ``(stimp_ft, condition)`` combination.
+#: Keeps static friction above kinetic on slow or frosted greens, where the
+#: flat ``DEFAULT_STATIC_MU`` (0.08) would fall below ``mu_roll0``.
 _STATIC_MU_MARGIN = 1.1
 
 
@@ -151,28 +124,16 @@ class TurfCondition(Enum):
 
 @dataclass(frozen=True)
 class TurfSpec:
-    """Converged turf descriptor — the UD turf model (provisional).
-
-    Renders onto :class:`~.friction.FrictionParams` /
-    :class:`~.surfaces.SurfaceSpec` through :func:`stimp_to_rolling_mu`
-    alone (``usga-stimp-roll/1``); see the module docstring for why the
-    migration source's legacy roll law is not ported.
+    """The UD turf model (provisional), rendered through the USGA law only.
 
     Attributes:
         stimp_ft: Stimpmeter reading [feet], in
             ``[_MIN_STIMP_FT, _MAX_STIMP_FT]``.
         grass_type: Grass type; supplies the ``grain_strength`` default.
-        condition: Environmental condition; its
-            :attr:`~TurfCondition.friction_multiplier` scales
-            ``mu_roll0`` exactly once, in :meth:`to_friction_params`.
-        grain_strength: Grain-anisotropy amplitude in ``[0, 0.9)``;
-            defaults to ``grass_type.default_grain_strength`` when
-            omitted.
-        grain_direction_rad: Down-grain direction [rad]; equivalent to
-            the migration source's 2-D grain vector via
-            ``atan2(y, x)`` (see module docstring).
-        compaction_factor: Soil firmness in ``(0, 1]``; carried as
-            descriptive metadata only (see module docstring).
+        condition: Its ``friction_multiplier`` scales ``mu_roll0`` once.
+        grain_strength: In ``[0, 0.9)``; defaults from ``grass_type``.
+        grain_direction_rad: Down-grain direction [rad] (``atan2(y, x)``).
+        compaction_factor: Soil firmness in ``(0, 1]``; metadata only.
     """
 
     stimp_ft: float
@@ -203,18 +164,7 @@ class TurfSpec:
         if grain_strength is None:
             grain_strength = self.grass_type.default_grain_strength
             object.__setattr__(self, "grain_strength", grain_strength)
-        require_finite(grain_strength, "grain_strength")
-        require(
-            0.0 <= grain_strength < 0.9,
-            "grain_strength in [0, 0.9)",
-            grain_strength,
-        )
-        require_finite(self.grain_direction_rad, "grain_direction_rad")
-        require(
-            abs(self.grain_direction_rad) <= 2.0 * math.pi,
-            "grain direction within +/- 2 pi",
-            self.grain_direction_rad,
-        )
+        require_grain(grain_strength, self.grain_direction_rad)
         require_finite(self.compaction_factor, "compaction_factor")
         require(
             0.0 < self.compaction_factor <= 1.0,
