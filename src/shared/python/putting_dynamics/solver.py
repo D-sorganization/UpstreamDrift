@@ -98,6 +98,8 @@ _G = float(GRAVITY_M_S2)
 
 #: Ball radius as a plain float for the inner loop.
 _R_BALL = float(GOLF_BALL_RADIUS_M)
+#: Largest entry offset evaluated; a grazing entry has a ~zero bound.
+_RIM_OFFSET_M = HOLE_RADIUS_M * (1.0 - 1e-9)
 
 _State = tuple[float, float, float, float, float]
 
@@ -136,13 +138,56 @@ def _ensure_putt_postconditions(result: PuttResult) -> None:
     )
 
 
-def capture_speed_mps() -> float:
-    """Full-chord capture bound ``2 R sqrt(g / (2 r))`` (module credit).
+def _roll_onset_state(state: _State, speed: float) -> tuple[_State, float]:
+    """Project a sliding state onto pure roll (#14141 step 5).
+
+    Ground friction acts at the contact point, so the ball's angular
+    momentum about that point, ``m R (v + (2/5) s)`` with contact-surface
+    speed ``s = omega R``, is unchanged by it. Pure roll (``v = s``)
+    therefore starts at ``v_roll = (v + 0.4 s) / 1.4`` -- the rigid-sphere
+    textbook result. Snapping ``s`` up to ``v`` instead (the earlier pin)
+    added rotational energy for an under-spun ball.
+
+    Postcondition: kinetic energy does not increase.
+    """
+    v_roll = (speed + 0.4 * state[4]) / 1.4
+    scale = v_roll / speed if speed > 0.0 else 0.0
+    rolled = (state[0], state[1], state[2] * scale, state[3] * scale, v_roll)
+    ensure(
+        v_roll**2 * 1.4 <= speed**2 + 0.4 * state[4] ** 2 + 1e-12,
+        "roll onset cannot add kinetic energy",
+        (speed, state[4], v_roll),
+    )
+    return rolled, v_roll
+
+
+def capture_speed_mps(entry_offset_m: float = 0.0) -> float:
+    """Chord-limited capture bound ``2 sqrt(R^2 - b^2) sqrt(g / (2 r))``.
+
+    A ball entering at perpendicular offset ``b`` from the hole centre
+    crosses a chord ``2 sqrt(R^2 - b^2)`` and must fall one ball radius
+    while doing so (module credit). ``b = 0`` gives the full-diameter
+    bound.
+
+    Args:
+        entry_offset_m: Perpendicular entry offset ``b`` [m],
+            ``|b| < HOLE_RADIUS_M``.
 
     Returns:
-        The dead-centre capture bound [m/s], ~1.64.
+        The capture bound [m/s]: ~1.64 at the centre, falling to 0 at
+        the rim.
+
+    Raises:
+        ValueError: If the offset is not finite or reaches the rim.
     """
-    return 2.0 * HOLE_RADIUS_M * math.sqrt(_G / (2.0 * _R_BALL))
+    require_finite(entry_offset_m, "entry_offset_m")
+    require(
+        abs(entry_offset_m) < HOLE_RADIUS_M,
+        "entry offset must lie inside the hole",
+        entry_offset_m,
+    )
+    chord = 2.0 * math.sqrt(HOLE_RADIUS_M**2 - entry_offset_m**2)
+    return chord * math.sqrt(_G / (2.0 * _R_BALL))
 
 
 def _derivative(state: _State, sliding: bool, surface: SurfaceSpec) -> _State:
@@ -198,6 +243,7 @@ class _Recorder:
         )
         self.speed_at_hole: float | None = None
         self.holed = False
+        self.capture_bound = 0.0
 
     def record(
         self,
@@ -221,15 +267,25 @@ class _Recorder:
             )
         )
 
-    def check_hole(self, x: float, y: float, speed: float, on_ground: bool) -> bool:
-        """Track hole crossing; True when captured."""
+    def check_hole(
+        self, x: float, y: float, vx: float, vy: float, on_ground: bool
+    ) -> bool:
+        """Track hole crossing; True when captured.
+
+        The entry offset is fixed at first entry from the velocity
+        direction: ``b = |v_hat x (hole - position)|``.
+        """
         if self.hole is None or not on_ground:
             return False
-        if math.hypot(x - self.hole[0], y - self.hole[1]) > HOLE_RADIUS_M:
+        dx, dy = self.hole[0] - x, self.hole[1] - y
+        if math.hypot(dx, dy) > HOLE_RADIUS_M:
             return False
+        speed = math.hypot(vx, vy)
         if self.speed_at_hole is None:
             self.speed_at_hole = speed
-        if speed <= capture_speed_mps():
+            offset = abs(vx * dy - vy * dx) / speed if speed > 0.0 else 0.0
+            self.capture_bound = capture_speed_mps(min(offset, _RIM_OFFSET_M))
+        if speed <= self.capture_bound:
             self.holed = True
             return True
         return False
@@ -359,13 +415,14 @@ def simulate_ball(
             )
             if crossed_zero or within_one_step:
                 sliding = False
+                state, speed = _roll_onset_state(state, speed)
         if not sliding:
             # Pin the contact-surface speed to pure roll.
             state = (state[0], state[1], state[2], state[3], speed)
         spin = state[4] / _R_BALL
         mode = Mode.SLIDE if sliding else Mode.ROLL
         rec.record(t, state[0], state[1], 0.0, speed, spin, mode)
-        if rec.check_hole(state[0], state[1], speed, on_ground=True):
+        if rec.check_hole(state[0], state[1], state[2], state[3], on_ground=True):
             break
 
     last = rec.samples[-1]
