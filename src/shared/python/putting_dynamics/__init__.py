@@ -74,6 +74,13 @@ from .solver import (
     simulate_ball,
     simulate_strike,
 )
+from .stimpmeter import (
+    STIMPMETER_NOTCH_DISTANCE_M,
+    STIMPMETER_RELEASE_ANGLE_DEG,
+    measure_stimp_ft,
+    ramp_release_speed_mps,
+    stimpmeter_rollout_ft,
+)
 from .surfaces import (
     FrictionField,
     HeightField,
@@ -105,6 +112,8 @@ __all__ = [
     "HOLE_RADIUS_M",
     "LOFT_SWEEP_MAX_DEG",
     "LOFT_SWEEP_MIN_DEG",
+    "STIMPMETER_NOTCH_DISTANCE_M",
+    "STIMPMETER_RELEASE_ANGLE_DEG",
     "STIMP_RELEASE_SPEED_MPS",
     "BallState",
     "CollisionReport",
@@ -126,13 +135,16 @@ __all__ = [
     "is_static_hold",
     "m_to_feet",
     "m_to_yards",
+    "measure_stimp_ft",
     "mps_to_mph",
+    "ramp_release_speed_mps",
     "rolling_mu",
     "rolling_mu_to_stimp",
     "simulate_ball",
     "simulate_strike",
     "sliding_mu",
     "stimp_to_rolling_mu",
+    "stimpmeter_rollout_ft",
     "strike",
     "sweep_dynamic_loft",
 ]
