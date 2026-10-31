@@ -10,12 +10,16 @@ R3's ``target_source`` vocabulary.
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
+from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 import numpy as np
 import pytest
 
+from scripts import address_knee_engine_check as chk
 from src.shared.python.motion_matching import address_knee
 from src.shared.python.motion_matching.address_knee import (
     CANONICAL_KNEE_FLEXION,
@@ -626,8 +630,153 @@ def test_dynamics_report_carries_the_window_block_only_with_knee_targets() -> No
     assert short is not None and short["status"].startswith("unavailable")
 
 
-
 # ------------------------------------------- cross-engine harness (#14131)
+# Live contract: the SAME spec and address q through every installed engine's FK,
+# measured with ``address_knee.model_knee_flexion_deg`` and compared with MuJoCo
+# at ``chk.TOLERANCE_DEG``. An engine without an SDK or a spec-driven FK adapter
+# is reported unavailable with the reason; it is never counted as agreement.
+
+_GROUND = Path(__file__).resolve().parents[4] / (
+    "docs/development/full_body_models/evidence/ground_support"
+)
+_LIVE_SPEC = _GROUND / "anthro_driver_seeds/full_body_spec_hipcal_scaled.json"
+#: Address frame: frame 0 of the committed MuJoCo tracking trajectory. The receipt
+#: does not commit its address-solve q, so this is a fixed shared pose, not the
+#: receipt's ``model_deg`` (that comparison stays with chk / #12684).
+_LIVE_Q = _GROUND / "anthro_driver_seeds/dynamics_record.npz"
+
+
+class _EngineUnavailable(Exception):
+    """An engine cannot run here; the message is the reported reason."""
+
+
+def _cross_engine_knee(q: np.ndarray, builders: dict[str, Any]) -> dict[str, Any]:
+    """Compare each engine's geometric knee flexion at ``q`` with the reference.
+
+    ``builders`` maps engine -> zero-argument callable returning a kinematics
+    object with ``body_poses`` or raising ``_EngineUnavailable(reason)``. Any
+    other exception propagates (fail closed). ``ok`` needs at least one compared
+    engine and no ``|delta| > chk.TOLERANCE_DEG``.
+    """
+    try:
+        ref = address_knee.model_knee_flexion_deg(builders[chk.REFERENCE](), q)
+    except _EngineUnavailable as exc:
+        raise ValueError(f"reference {chk.REFERENCE} unavailable: {exc}") from exc
+    engines: dict[str, Any] = {}
+    disagreements: list[dict[str, Any]] = []
+    for engine, build in builders.items():
+        if engine == chk.REFERENCE:
+            continue
+        try:
+            knees = address_knee.model_knee_flexion_deg(build(), q)
+        except _EngineUnavailable as exc:
+            engines[engine] = chk.unavailable(str(exc))
+            continue
+        delta = {s: knees[s] - ref[s] for s in chk.SIDES}
+        engines[engine] = {"available": True, "model_deg": knees, "delta_deg": delta}
+        disagreements += [
+            {"engine": engine, "side": s, "delta_deg": delta[s]}
+            | {"tolerance_deg": chk.TOLERANCE_DEG}
+            for s in chk.SIDES
+            if abs(delta[s]) > chk.TOLERANCE_DEG
+        ]
+    compared = [e for e, entry in engines.items() if entry["available"]]
+    return {
+        "reference_deg": ref,
+        "engines": engines,
+        "compared": compared,
+        "disagreements": disagreements,
+        "ok": bool(compared) and not disagreements,
+    }
+
+
+def _import_sdk(module: str) -> None:
+    try:
+        sdk = importlib.import_module(module)
+    except ImportError as exc:
+        raise _EngineUnavailable(f"{module} not importable: {exc}") from exc
+    if type(sdk).__module__ == "unittest.mock":
+        raise _EngineUnavailable(f"{module} is a mock/stub, not a real runtime")
+
+
+def _live_builders(spec: dict[str, Any]) -> dict[str, Any]:
+    attachments = {
+        label: (att["body"], tuple(float(v) for v in att["offset_m"]))
+        for label, att in spec["marker_attachments"].items()
+        if att.get("offset_m") is not None
+    }
+
+    def mujoco() -> Any:
+        _import_sdk("mujoco")
+        from src.engines.physics_engines.mujoco.python.full_body_ik import (
+            FullBodyMarkerKinematics,
+        )
+        from src.engines.physics_engines.mujoco.python.full_body_model import (
+            NativeMujocoFullBodyModel,
+        )
+
+        model = NativeMujocoFullBodyModel(json.dumps(spec).encode())
+        return FullBodyMarkerKinematics(model, attachments)
+
+    def drake() -> Any:
+        _import_sdk("pydrake.all")
+        from src.engines.physics_engines.drake.python.full_body_ik import (
+            DrakeFullBodyIK,
+        )
+
+        return DrakeFullBodyIK(spec, attachments=attachments)
+
+    def pinocchio() -> Any:
+        _import_sdk("pinocchio")
+        from src.engines.physics_engines.pinocchio.python.full_body_ik import (
+            PinocchioFullBodyIK,
+        )
+
+        if not hasattr(PinocchioFullBodyIK, "body_poses"):
+            raise _EngineUnavailable(
+                "PinocchioFullBodyIK has no body_poses FK adapter "
+                "(pose_fn covers marker bodies only, no talus)"
+            )
+        return PinocchioFullBodyIK(spec)
+
+    def no_adapter(engine: str, module: str) -> Any:
+        def build() -> Any:
+            _import_sdk(module)
+            raise _EngineUnavailable(f"no full-body-spec FK adapter for {engine}")
+
+        return build
+
+    return {
+        "mujoco": mujoco,
+        "drake": drake,
+        "pinocchio": pinocchio,
+        "opensim": no_adapter("opensim", "opensim"),
+        "myosuite": no_adapter("myosuite", "myosuite"),
+    }
+
+
+@pytest.mark.requires_mujoco
+def test_address_knee_flexion_matches_across_engines() -> None:
+    """Installed engines agree with MuJoCo within 0.1 deg at one shared address q."""
+    spec = json.loads(_LIVE_SPEC.read_text(encoding="utf-8"))
+    q = np.load(_LIVE_Q)["q_track"][0]
+    assert q.shape == (len(spec["coordinate_order"]),)
+    try:
+        report = _cross_engine_knee(q, _live_builders(spec))
+    except ValueError as exc:
+        pytest.skip(str(exc))
+    summary = {
+        e: v.get("reason") or v["delta_deg"] for e, v in report["engines"].items()
+    }
+    assert set(report["engines"]) == set(chk.ENGINES) - {chk.REFERENCE}
+    for entry in report["engines"].values():
+        assert entry["available"] or (entry["reason"] and entry["model_deg"] is None)
+    assert not report["disagreements"], summary
+    if not report["compared"]:
+        pytest.skip(f"no engine besides {chk.REFERENCE} can run here: {summary}")
+    assert report["ok"] is True
+
+
 # Unit fixtures below (``_FakeKin``) are control-flow fixtures, NOT scientific
 # receipts: they only prove the harness separates agree / disagree / unavailable.
 
