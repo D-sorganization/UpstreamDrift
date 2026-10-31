@@ -191,7 +191,7 @@
         "python"
       ],
       "maps_to": "putting_dynamics.DEFAULT_SLIDING_MU",
-      "pending_reason": "UD's DEFAULT_SLIDING_MU=0.40 (rust_core/upstream-physics/src/contact.rs default) is a flat engineering choice; Drane et al.'s secondarily-cited fixed-rate skid deceleration on artificial turf implies mu_slide ~= 0.18 -- a known, documented disagreement. Do not change DEFAULT_SLIDING_MU or loosen this tolerance to make the check pass; reconcile in the roll/friction migration (step 5) of #14141."
+      "pending_reason": "UD's DEFAULT_SLIDING_MU=0.40 (rust_core/upstream-physics/src/contact.rs default) is a flat engineering choice; Drane et al.'s secondarily-cited fixed-rate skid deceleration on artificial turf implies mu_slide ~= 0.18 -- a known, documented disagreement. Step 5 of #14141 reviewed this and keeps it open as a domain mismatch: the Drane figure comes from artificial turf, not a natural putting green, so it cannot calibrate the green's sliding friction. Do not change DEFAULT_SLIDING_MU or loosen this tolerance to make the check pass; the fixture stays pending until a measured natural-green skid deceleration is sourced."
     },
     {
       "fixture_id": "drane2014_rolling_deceleration_mu",
@@ -215,7 +215,7 @@
       "applies_to": [
         "python"
       ],
-      "pending_reason": "No stimp-independent rolling-mu constant exists in putting_dynamics to compare directly against this artificial-turf, constant-deceleration figure (UD's model is stimp- and speed-dependent, not a flat rolling constant). Reconcile alongside the sliding-mu disagreement in step 5 of #14141."
+      "pending_reason": "No stimp-independent rolling-mu constant exists in putting_dynamics to compare directly against this artificial-turf, constant-deceleration figure (UD's model is stimp- and speed-dependent, not a flat rolling constant). Step 5 of #14141 keeps this open as the same artificial-turf domain mismatch; it stays pending until a natural-green measurement is sourced."
     },
     {
       "fixture_id": "whiston_swansea_skid_deceleration_range",
