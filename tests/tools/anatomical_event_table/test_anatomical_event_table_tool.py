@@ -103,9 +103,7 @@ def test_opened_export_shows_the_golden_cells(app, golden, tmp_path) -> None:
     assert panel.error_label.text() == ""
 
 
-@pytest.mark.parametrize(
-    "text", ["not json", "[1, 2]", json.dumps({"schema": "nope"})]
-)
+@pytest.mark.parametrize("text", ["not json", "[1, 2]", json.dumps({"schema": "nope"})])
 def test_bad_file_reports_an_error_and_keeps_the_table(
     app, golden, tmp_path, text
 ) -> None:

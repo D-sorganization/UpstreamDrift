@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Table frame and header row -->
+  <rect x="12" y="16" width="76" height="68" rx="4" stroke="white" stroke-width="4" fill="none" opacity="0.9" />
+  <line x1="12" y1="32" x2="88" y2="32" stroke="white" stroke-width="4" opacity="0.9" />
+  <!-- Event columns -->
+  <line x1="37" y1="16" x2="37" y2="84" stroke="white" stroke-width="2.5" opacity="0.6" />
+  <line x1="62" y1="16" x2="62" y2="84" stroke="white" stroke-width="2.5" opacity="0.6" />
+  <!-- Angle rows -->
+  <line x1="12" y1="50" x2="88" y2="50" stroke="white" stroke-width="2.5" opacity="0.6" />
+  <line x1="12" y1="67" x2="88" y2="67" stroke="white" stroke-width="2.5" opacity="0.6" />
+  <!-- Wrist angle marker -->
+  <path d="M44,60 L55,42 L55,60" stroke="#56B4E9" stroke-width="3.5" fill="none" stroke-linejoin="round" opacity="0.95" />
+  <path d="M70,78 A9,9 0 0 1 79,69" stroke="#ffb74d" stroke-width="3" fill="none" opacity="0.95" />
+</svg>

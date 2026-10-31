@@ -1239,6 +1239,22 @@
       }
     },
     {
+      "id": "anatomical_event_table",
+      "name": "Anatomical Event Table",
+      "description": "Wrist, forearm, trunk and pelvis terms at address, top, pelvis reversal, impact and finish, from an event-table export",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/anatomical_event_table/__main__.py",
+      "logo": "anatomical_event_table.svg",
+      "status": "gui_ready",
+      "capabilities": ["anatomical_angles", "swing_events", "event_table"],
+      "order": 56,
+      "web": {
+        "mode": "route",
+        "route": "/tools/analysis"
+      }
+    },
+    {
       "id": "ground_reaction_plots",
       "name": "Ground Reaction Plots",
       "description": "Ground reaction under each foot and in total over time: vertical force in body weights, load share, centre-of-pressure path, free moment and moment about the centre of mass",
