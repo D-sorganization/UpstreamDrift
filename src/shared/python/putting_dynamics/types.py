@@ -130,7 +130,7 @@ class PutterState:
     moi_kg_m2: float
     loft_deg: float
     speed_mps: float
-    cor: float = PUTTER_FACE_COR
+    cor: float = float(PUTTER_FACE_COR)
     hosel_toe_m: float = 0.0
     hosel_forward_m: float = 0.0
 

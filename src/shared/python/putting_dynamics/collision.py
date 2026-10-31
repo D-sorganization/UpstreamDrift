@@ -101,7 +101,7 @@ __all__ = [
 #: Green-contact restitution for the post-impact hop settle; re-exported
 #: here (unchanged value) for API stability — the single source is now
 #: ``physics_constants.GREEN_RESTITUTION`` (#14141 step 3).
-GROUND_RESTITUTION = GREEN_RESTITUTION
+GROUND_RESTITUTION = float(GREEN_RESTITUTION)
 
 #: Dynamic-loft sweep bounds [deg] (epic #8345 P3).
 LOFT_SWEEP_MIN_DEG = -4.0

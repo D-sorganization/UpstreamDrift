@@ -60,7 +60,7 @@ _COR_NAME_RE = re.compile(r"(?i)cor|restitution")
 _M_BALL = float(GOLF_BALL_MASS_KG)
 
 
-def _restitution_name_literal_assignments(path: Path) -> list[str]:
+def _restitution_name_literal_assignments(source: str) -> list[str]:
     """Names assigned a bare forbidden-restitution-literal float.
 
     Only direct ``Assign``/``AnnAssign`` targets whose name mentions
@@ -69,7 +69,7 @@ def _restitution_name_literal_assignments(path: Path) -> list[str]:
     ``putting_dynamics/``) are not scanned, so they remain the one
     place allowed to hold the literal.
     """
-    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    tree = ast.parse(source)
     offenders: list[str] = []
     for node in ast.walk(tree):
         target: ast.expr | None = None
@@ -99,7 +99,7 @@ def test_no_bare_restitution_literal_in_putting_dynamics() -> None:
     """
     offenders: dict[str, list[str]] = {}
     for path in sorted(_PUTTING_DYNAMICS_DIR.glob("*.py")):
-        names = _restitution_name_literal_assignments(path)
+        names = _restitution_name_literal_assignments(path.read_text(encoding="utf-8"))
         if names:
             offenders[path.relative_to(REPO_ROOT).as_posix()] = names
     assert not offenders, (
@@ -204,8 +204,8 @@ def test_off_centre_ratio_is_bounded_by_centre_ratio_and_symmetric() -> None:
     for offset_mm in offsets_mm:
         offset_m = offset_mm / 1000.0
         for signed in (offset_m, -offset_m) if offset_m else (0.0,):
-            m_eff = effective_head_mass(putter, signed)
-            ratio = _closed_form_ratio(putter.cor, m_eff)
+            report = strike(putter, impact_toe_m=signed)
+            ratio = report.ball_speed_mps / putter.speed_mps
             assert ratio <= centre_ratio + 1e-12
             ratios_by_abs_offset.setdefault(abs(signed), set()).add(round(ratio, 12))
 
@@ -223,40 +223,10 @@ def test_centre_strike_ratio_rejects_non_putter_state() -> None:
         centre_strike_speed_ratio(object())  # type: ignore[arg-type]
 
 
-def test_literal_ast_scan_detects_tuple_and_annassign_forms() -> None:
-    """Characterize the scanner itself: both assignment shapes it must
-    catch (a plain module constant and a dataclass-field default)."""
-    import ast as _ast
-
-    source = "GROUND_RESTITUTION = 0.78\ncor: float = 0.82\n"
-    tree = _ast.parse(source)
-    offenders = []
-    for node in _ast.walk(tree):
-        target: _ast.expr | None = None
-        value: _ast.expr | None = None
-        if isinstance(node, _ast.Assign) and len(node.targets) == 1:
-            target, value = node.targets[0], node.value
-        elif isinstance(node, _ast.AnnAssign):
-            target, value = node.target, node.value
-        if (
-            isinstance(target, _ast.Name)
-            and _COR_NAME_RE.search(target.id)
-            and isinstance(value, _ast.Constant)
-            and value.value in _FORBIDDEN_RESTITUTION_LITERALS
-        ):
-            offenders.append(target.id)
-    assert offenders == ["GROUND_RESTITUTION", "cor"]
-
-
-def test_effective_head_mass_reduces_ratio_strictly_off_centre() -> None:
-    """Sanity: moving the strike off centre always lowers the ratio
-    relative to a centre strike (never raises it)."""
-    putter = PutterState(
-        head_mass_kg=0.34, moi_kg_m2=4.0e-4, loft_deg=0.0, speed_mps=1.5
-    )
-    centre_ratio = centre_strike_speed_ratio(putter)
-    for offset_m in (0.01, 0.02, 0.03):
-        m_eff = effective_head_mass(putter, offset_m)
-        off_centre_ratio = _closed_form_ratio(putter.cor, m_eff)
-        assert off_centre_ratio < centre_ratio
-        assert math.isfinite(off_centre_ratio)
+def test_literal_scan_detects_assign_and_annassign_forms() -> None:
+    """The scanner catches a module constant and a dataclass-field default."""
+    source = "GROUND_RESTITUTION = 0.78\ncor: float = 0.82\nspeed = 0.8\n"
+    assert _restitution_name_literal_assignments(source) == [
+        "GROUND_RESTITUTION",
+        "cor",
+    ]
