@@ -1,0 +1,113 @@
+"""Committed unified cross-engine perturbation receipt (SAP-6, #13795)."""
+
+from __future__ import annotations
+
+import json
+import math
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from src.shared.python.analysis.cross_engine import METRIC_KEYS
+from src.shared.python.analysis.cross_engine_receipt import (
+    SETUP_FIELDS,
+    STATUS_MEASURED,
+    triple_pendulum_spec_hash,
+    validate_receipt,
+)
+from src.shared.python.pendulum_simulator.step_convergence import (
+    InHouseTripleAdapter,
+    MuJoCoTripleAdapter,
+)
+from src.shared.python.pendulum_simulator.triple_pendulum_spec import (
+    TRIPLE_PENDULUM_SPEC,
+)
+from src.shared.python.pendulum_simulator.unified_perturbation_study import (
+    STUDY,
+    SteppableTripleEngine,
+    run_unified_study,
+)
+
+pytestmark = pytest.mark.unit
+
+ROOT = Path(__file__).resolve().parents[4]
+RECEIPT = ROOT / "docs/validation/cross_engine_perturbation_receipt.json"
+DOC = ROOT / "docs/validation/cross_engine_perturbation.md"
+
+
+def _receipt() -> dict:
+    return json.loads(RECEIPT.read_text(encoding="utf-8"))
+
+
+def test_receipt_records_one_shared_setup_for_every_engine() -> None:
+    receipt = _receipt()
+    validate_receipt(receipt)
+    assert receipt["status"] == STATUS_MEASURED
+    setup = receipt["setup"]
+    assert setup["spec_hash"] == triple_pendulum_spec_hash(TRIPLE_PENDULUM_SPEC)
+    assert setup["gravity_m_s2"] == TRIPLE_PENDULUM_SPEC.gravity_m_s2
+    assert (setup["dt_s"], setup["integrator"]) == (STUDY.dt_s, STUDY.integrator)
+    assert (setup["seed"], setup["interpolation_mode"]) == (STUDY.seed, "zoh")
+    assert len(receipt["engines"]) >= 2
+    for entry in receipt["engines"].values():
+        assert entry["counted"] and entry["backend"] == "real"
+        assert {field: entry[field] for field in SETUP_FIELDS} == setup
+
+
+def test_receipt_carries_the_within_engine_sensitivity_band() -> None:
+    band = _receipt()["sensitivity_context"]["within_engine_trial_cv"]
+    for engine in _receipt()["engines"]:
+        assert set(band[engine]) == set(METRIC_KEYS)
+
+
+def test_doc_states_every_measured_cv() -> None:
+    doc = DOC.read_text(encoding="utf-8")
+    for metric, cv in _receipt()["cv_summary"].items():
+        shown = "undefined" if cv["cv"] is None else f"{cv['cv']:.3e}"
+        assert f"| {metric} | {shown} |" in doc
+
+
+def test_regeneration_reproduces_the_committed_receipt() -> None:
+    pytest.importorskip("mujoco")
+    fresh = run_unified_study()
+    committed = _receipt()
+    assert fresh["setup"] == committed["setup"]
+    for metric, cv in committed["cv_summary"].items():
+        got = fresh["cv_summary"][metric]["cv"]
+        assert got == pytest.approx(cv["cv"], rel=1e-6, abs=1e-15)
+
+
+def test_independent_adapters_agree_on_energy_and_tip_velocity() -> None:
+    pytest.importorskip("mujoco")
+    engines = [SteppableTripleEngine(a) for a in (InHouseTripleAdapter(), MuJoCoTripleAdapter())]
+    for engine in engines:
+        engine.reset()
+        assert math.isfinite(engine.get_total_energy())
+    assert engines[0].get_total_energy() == pytest.approx(
+        engines[1].get_total_energy(), rel=1e-9
+    )
+    for engine in engines:
+        for _ in range(50):
+            engine.set_control(np.zeros(3))
+            engine.step(STUDY.dt_s)
+    np.testing.assert_allclose(
+        engines[0].get_end_effector_velocity(),
+        engines[1].get_end_effector_velocity(),
+        atol=1e-6,
+    )
+
+
+@pytest.mark.parametrize("dt", [0.0, -1e-3, math.nan])
+def test_step_rejects_invalid_dt(dt: float) -> None:
+    engine = SteppableTripleEngine(InHouseTripleAdapter())
+    engine.reset()
+    with pytest.raises(ValueError, match="dt"):
+        engine.step(dt)
+
+
+def test_step_rejects_wrong_control_width() -> None:
+    engine = SteppableTripleEngine(InHouseTripleAdapter())
+    engine.reset()
+    with pytest.raises(ValueError, match="control"):
+        engine.set_control(np.zeros(2))
