@@ -650,6 +650,10 @@ class _EngineUnavailable(Exception):
     """An engine cannot run here; the message is the reported reason."""
 
 
+class _ReferenceUnavailable(ValueError):
+    """The reference engine cannot run here, so nothing can be compared."""
+
+
 def _cross_engine_knee(q: np.ndarray, builders: dict[str, Any]) -> dict[str, Any]:
     """Compare each engine's geometric knee flexion at ``q`` with the reference.
 
@@ -661,7 +665,8 @@ def _cross_engine_knee(q: np.ndarray, builders: dict[str, Any]) -> dict[str, Any
     try:
         ref = address_knee.model_knee_flexion_deg(builders[chk.REFERENCE](), q)
     except _EngineUnavailable as exc:
-        raise ValueError(f"reference {chk.REFERENCE} unavailable: {exc}") from exc
+        msg = f"reference {chk.REFERENCE} unavailable: {exc}"
+        raise _ReferenceUnavailable(msg) from exc
     engines: dict[str, Any] = {}
     disagreements: list[dict[str, Any]] = []
     for engine, build in builders.items():
@@ -756,10 +761,10 @@ def _live_builders(spec: dict[str, Any]) -> dict[str, Any]:
 
 
 def _live_report(q: np.ndarray, builders: dict[str, Any]) -> dict[str, Any]:
-    """``_cross_engine_knee``, skipping when the reference cannot run here."""
+    """``_cross_engine_knee``, skipping only when the reference cannot run here."""
     try:
         return _cross_engine_knee(q, builders)
-    except ValueError as exc:
+    except _ReferenceUnavailable as exc:
         pytest.skip(str(exc))
 
 
@@ -852,7 +857,7 @@ def test_harness_with_no_comparable_engine_is_not_ok() -> None:
 
 
 def test_harness_requires_the_reference_engine() -> None:
-    with pytest.raises(ValueError, match="reference"):
+    with pytest.raises(_ReferenceUnavailable, match="reference"):
         _cross_engine_knee(
             np.zeros(3), {"mujoco": _gap("no mujoco"), "drake": _fixed(_REF)}
         )
