@@ -49,6 +49,8 @@ from src.shared.python.lifting.pack_audit.names import LIFTS  # noqa: E402
 logger = logging.getLogger("measure_opensim_lift_joint_reactions")
 DEFAULT_OUT_DIR = ROOT / "docs/development/lifting/evidence/opensim_joint_reactions"
 DEFAULT_RECEIPT = DEFAULT_OUT_DIR / "receipts.json"
+BENCH_SUMMARY = DEFAULT_OUT_DIR / "bench_press_summary.json"
+_PROVENANCE_KEYS = ("generator", "issue", "source_commit", "timestamp_utc")
 
 
 def _git(*args: str) -> str:
@@ -535,6 +537,14 @@ def render_evidence_readme(receipts: dict[str, Any], commit: str) -> str:
     return "\n\n".join(sections) + "\n"
 
 
+def bench_summary(full_receipt: dict[str, Any]) -> dict[str, Any]:
+    """Compact bench record: its receipt entry without the per-frame series."""
+    bench = full_receipt["lifts"]["bench_press"]
+    return {k: full_receipt[k] for k in _PROVENANCE_KEYS} | {
+        "bench_press": {k: v for k, v in bench.items() if k != "timeseries"}
+    }
+
+
 def _write_evidence_readme(
     out_dir: Path,
     receipts: dict[str, Any],
@@ -614,6 +624,10 @@ def main() -> None:
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(full_receipt, f, indent=2)
     logger.info("Wrote receipt: %s", args.out)
+    summary_path = args.plot_dir / BENCH_SUMMARY.name
+    summary_path.write_text(
+        json.dumps(bench_summary(full_receipt), indent=2) + "\n", encoding="utf-8"
+    )
 
     _write_evidence_readme(args.plot_dir, receipts, commit)
     logger.info("Wrote evidence README: %s", args.plot_dir / "README.md")

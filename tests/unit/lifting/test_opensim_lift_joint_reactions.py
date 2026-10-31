@@ -63,8 +63,10 @@ def _require_body() -> None:
 # -------------------------------------------------------------------------
 
 
-_RECEIPT = Path(
-    "docs/development/lifting/evidence/opensim_joint_reactions/receipts.json"
+_BENCH_SUMMARY = (
+    Path(__file__).resolve().parents[3]
+    / "docs/development/lifting/evidence/opensim_joint_reactions"
+    / "bench_press_summary.json"
 )
 #: The contact equilibrium solves the vertical root to 1e-12 m (OSL-3), so the
 #: supports carry the weight to well under 1e-6 of it.
@@ -72,7 +74,7 @@ _SUPPORT_REL_TOL = 1e-6
 
 
 def _committed_bench() -> dict[str, Any]:
-    return json.loads(_RECEIPT.read_text(encoding="utf-8"))["lifts"]["bench_press"]
+    return json.loads(_BENCH_SUMMARY.read_text(encoding="utf-8"))["bench_press"]
 
 
 def test_bench_press_joint_reactions_use_bench_contact() -> None:
@@ -93,7 +95,7 @@ def test_bench_press_joint_reactions_use_bench_contact() -> None:
     ):
         assert math.isfinite(value)
     assert bench["phases"]
-    assert bench["timeseries"]["time_s"]
+    assert "timeseries" not in bench
     assert bench["classification"] == _osl4_bench_classification()
 
 
