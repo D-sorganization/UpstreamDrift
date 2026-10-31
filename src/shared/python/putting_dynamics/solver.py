@@ -396,23 +396,9 @@ def struck_ball_state(
     y_m: float = 0.0,
     heading_rad: float = 0.0,
 ) -> BallState:
-    """Ball state immediately after impact, placed at ``(x, y)``.
+    """Post-impact ball at ``(x, y)``, launched along ``heading_rad``.
 
-    Rotates the collision's launch velocity (defined along the putter's
-    own forward axis) onto ``heading_rad`` and places the ball at the
-    given start point; the defaults (origin, heading 0) reproduce the
-    putter's own forward axis exactly, so a caller that omits them gets
-    the same ball state as before this helper existed.
-
-    Args:
-        report: Impact report from :func:`~.collision.strike`.
-        x_m: Ball start x [m].
-        y_m: Ball start y [m].
-        heading_rad: Heading of the putter's forward axis in the world
-            frame, CCW from +x [rad].
-
-    Returns:
-        The post-impact :class:`~.types.BallState`.
+    The defaults (origin, heading 0) are the putter's own forward axis.
     """
     require_finite(x_m, "x_m")
     require_finite(y_m, "y_m")
@@ -453,9 +439,7 @@ def simulate_strike(
         hole_y_m: Hole center y [m]; hole disabled when None.
         start_x_m: Ball start x [m]; defaults to the origin.
         start_y_m: Ball start y [m]; defaults to the origin.
-        heading_rad: Putter forward-axis heading, CCW from +x [rad];
-            defaults to 0 (bit-for-bit identical to a caller that never
-            mentions heading or a start point).
+        heading_rad: Putter forward-axis heading, CCW from +x [rad].
 
     Returns:
         The integrated :class:`~.types.PuttResult` with its

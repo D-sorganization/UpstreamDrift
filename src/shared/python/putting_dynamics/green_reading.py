@@ -1,37 +1,22 @@
-"""Simulation-based green reading: line profile and aim solving (#14141 7b).
+"""Green reading by simulation (epic #14141, putting v4 step 7b).
 
-Reused shared infrastructure (AGENTS.md section A discovery):
+Replaces the legacy engine's cross-slope heuristic and stimp speed
+estimate (``putting_green/_surface_analysis.py`` and
+``putter_stroke.estimate_required_speed``, both uncited) with the shared
+solver itself: a recommended line and pace are whatever
+:func:`~.solver.simulate_strike` says rolls the ball to the hole, so a
+reading always agrees with the trajectory any other caller would see.
 
-* DbC helpers from ``src.shared.python.contracts``.
-* The strike + mode-machine solver in :mod:`.solver`
-  (:func:`~.solver.simulate_strike`); this module reads a green by
-  *simulation* rather than a separate closed-form heuristic, so a
-  recommendation always agrees with the trajectory another caller of
-  :mod:`.solver` would see for the same surface.
-
-Model
------
-:func:`read_line` samples :class:`~.surfaces.HeightField` elevation and
-gradient along the straight ``start`` -> ``end`` segment — a thin
-wrapper with no physics of its own, used for the elevation/slope
-profile a UI plots alongside the aim recommendation.
-
-:func:`solve_aim` finds the putter-head speed and heading so a struck
-ball's rest point lands ``past_hole_m`` beyond the hole along the aim
-line, or is holed. Two nested 1-D root-finds, both bounded:
-
-* **Speed** (inner, bisection): for a fixed heading, the along-heading
-  rest distance is monotone non-decreasing in head speed except for a
-  flat "captured" plateau at the hole distance (a holed putt never
-  overruns); bisection against the target distance — treating a holed
-  result as sitting on that plateau — finds the slowest speed that
-  reaches the target without relying on a separate closed form.
-* **Heading** (outer, secant): the lateral miss of the rest point from
-  the straight ``start`` -> ``hole`` line, extended past the hole, is
-  driven to zero. A holed putt has zero miss by definition. The first
-  secant step is the small-angle estimate ``-miss / distance``; it
-  converges in a handful of iterations because the miss is close to
-  linear in heading for putting-sized slopes and distances.
+* :func:`read_line` samples elevation and gradient along a straight
+  segment (no physics; the profile a UI plots).
+* :func:`solve_aim` finds the putter-head speed and heading that would
+  stop the ball ``past_hole_m`` beyond the hole if there were no cup
+  (the usual definition of a read's pace), then reports whether that
+  putt drops with the cup in play. Speed is
+  bracketed by doubling and then bisected on the along-line rest
+  distance; heading is solved by secant on the lateral miss, starting
+  from the small-angle step ``-miss / distance``. Both loops are
+  bounded, so the solve is deterministic.
 """
 
 from __future__ import annotations
@@ -43,101 +28,82 @@ from src.shared.python.contracts import ensure, require, require_finite
 
 from .solver import simulate_strike
 from .surfaces import SurfaceSpec
-from .types import PutterState
+from .types import PutterState, PuttResult
 
-__all__ = [
-    "AimSolution",
-    "LineReading",
-    "read_line",
-    "solve_aim",
-]
+__all__ = ["AimSolution", "LineReading", "read_line", "solve_aim"]
 
-#: Putter-head speed search bracket [m/s] (within `PutterState`'s own
-#: ``(0, 10]`` contract; 8 m/s covers putts well beyond any realistic
-#: green while keeping the exponential bracket search's worst case
-#: cheap).
+#: Putter-head speed search bracket [m/s], inside ``PutterState``'s bounds.
 _SPEED_MIN_MPS = 0.05
 _SPEED_MAX_MPS = 8.0
-
-#: Bounded iteration caps (module docstring: deterministic, bounded).
 _MAX_SPEED_ITERATIONS = 30
 _MAX_HEADING_ITERATIONS = 12
-
-#: Convergence tolerances [m] (sub-cm; a few cm is the documented
-#: real-world precision this module targets, so these leave headroom
-#: without burning extra RK4-step-bounded simulation iterations).
+#: Convergence tolerances [m]; well inside the few-cm precision a read needs.
 _SPEED_DISTANCE_TOL_M = 5e-3
 _HEADING_MISS_TOL_M = 5e-3
+
+_Point = tuple[float, float]
+
+
+def _require_point(point: _Point, name: str) -> None:
+    require_finite(point[0], f"{name}[0]")
+    require_finite(point[1], f"{name}[1]")
 
 
 @dataclass(frozen=True)
 class LineReading:
-    """Sampled elevation/slope profile along a straight putt line.
+    """Elevation and slope sampled along a straight putt line.
 
     Attributes:
-        positions_m: Sampled ``(x, y)`` points from ``start`` to
-            ``end``, inclusive of both ends.
-        elevations_m: Surface elevation at each sampled point [m].
+        positions_m: Sampled ``(x, y)`` points, both ends included.
+        elevations_m: Surface elevation at each point [m].
         slopes: Surface gradient ``(dh/dx, dh/dy)`` at each point.
-        distance_m: Straight-line ``start`` -> ``end`` distance [m].
+        distance_m: Straight-line length of the segment [m].
     """
 
-    positions_m: tuple[tuple[float, float], ...]
+    positions_m: tuple[_Point, ...]
     elevations_m: tuple[float, ...]
-    slopes: tuple[tuple[float, float], ...]
+    slopes: tuple[_Point, ...]
     distance_m: float
 
-    def __post_init__(self) -> None:
-        """Cheap invariants on one line reading (characterization)."""
-        require(
-            len(self.positions_m) == len(self.elevations_m) == len(self.slopes),
-            "positions, elevations and slopes must share a length",
-            (len(self.positions_m), len(self.elevations_m), len(self.slopes)),
-        )
-        require(len(self.positions_m) >= 2, "a line needs >= 2 samples")
-        for x, y in self.positions_m:
-            require_finite(x, "positions_m.x")
-            require_finite(y, "positions_m.y")
-        for elevation in self.elevations_m:
-            require_finite(elevation, "elevations_m")
-        for gx, gy in self.slopes:
-            require_finite(gx, "slopes.x")
-            require_finite(gy, "slopes.y")
-        require_finite(self.distance_m, "distance_m")
-        require(self.distance_m >= 0.0, "distance_m must be >= 0", self.distance_m)
+
+@dataclass(frozen=True)
+class AimSolution:
+    """Solved line and pace for one putt.
+
+    Attributes:
+        putter_speed_mps: Putter-head speed at impact [m/s].
+        heading_rad: Putter forward-axis heading, CCW from +x [rad].
+        aim_point_xy: Point at the hole's distance along ``heading_rad``.
+        break_m: Signed offset of the aim point from the hole, positive
+            to the left of the start-to-hole line [m].
+        rest_xy: Where the solved putt stops with the cup in play.
+        holed: Whether the solved putt drops.
+        converged: Whether the heading solve met its tolerance.
+    """
+
+    putter_speed_mps: float
+    heading_rad: float
+    aim_point_xy: _Point
+    break_m: float
+    rest_xy: _Point
+    holed: bool
+    converged: bool
 
 
 def read_line(
-    surface: SurfaceSpec,
-    start_xy: tuple[float, float],
-    end_xy: tuple[float, float],
-    num_samples: int = 20,
+    surface: SurfaceSpec, start_xy: _Point, end_xy: _Point, num_samples: int = 20
 ) -> LineReading:
-    """Sample elevation and slope along the segment ``start`` -> ``end``.
-
-    Args:
-        surface: Green description.
-        start_xy: Line start ``(x, y)`` [m].
-        end_xy: Line end ``(x, y)`` [m].
-        num_samples: Number of evenly spaced samples; must be >= 2.
-
-    Returns:
-        A populated :class:`LineReading`.
+    """Sample elevation and slope along ``start`` -> ``end``.
 
     Raises:
-        ValueError: If an input is non-finite or ``num_samples < 2``.
+        ValueError: If a point is not finite or ``num_samples < 2``.
     """
-    require_finite(start_xy[0], "start_xy[0]")
-    require_finite(start_xy[1], "start_xy[1]")
-    require_finite(end_xy[0], "end_xy[0]")
-    require_finite(end_xy[1], "end_xy[1]")
+    _require_point(start_xy, "start_xy")
+    _require_point(end_xy, "end_xy")
     require(num_samples >= 2, "num_samples must be >= 2", num_samples)
-    sx, sy = start_xy
-    ex, ey = end_xy
-    positions = tuple(
-        (sx + t * (ex - sx), sy + t * (ey - sy))
-        for t in (i / (num_samples - 1) for i in range(num_samples))
-    )
+    (sx, sy), (ex, ey) = start_xy, end_xy
+    steps = [i / (num_samples - 1) for i in range(num_samples)]
+    positions = tuple((sx + t * (ex - sx), sy + t * (ey - sy)) for t in steps)
     return LineReading(
         positions_m=positions,
         elevations_m=tuple(surface.height.elevation(x, y) for x, y in positions),
@@ -147,206 +113,119 @@ def read_line(
 
 
 @dataclass(frozen=True)
-class AimSolution:
-    """Solved aim line for one putt (module docstring algorithm).
+class _AimProblem:
+    """Fixed inputs shared by every trial strike of one solve."""
 
-    Attributes:
-        putter_speed_mps: Putter-head speed at impact [m/s].
-        heading_rad: Putter forward-axis heading, CCW from +x [rad].
-        aim_point_xy: Point at the hole's distance along ``heading_rad``
-            from the start — where the golfer should aim.
-        break_m: Signed lateral offset of ``aim_point_xy`` from the
-            hole, measured perpendicular to the straight start-hole
-            line (sign flips with the slope's cross-component).
-        rest_xy: Where the simulated ball actually came to rest (or the
-            hole, when holed).
-        converged: Whether the heading root-find met its tolerance
-            within :data:`_MAX_HEADING_ITERATIONS`.
-    """
+    surface: SurfaceSpec
+    putter: PutterState
+    start: _Point
+    hole: _Point
 
-    putter_speed_mps: float
-    heading_rad: float
-    aim_point_xy: tuple[float, float]
-    break_m: float
-    rest_xy: tuple[float, float]
-    converged: bool
-
-    def __post_init__(self) -> None:
-        """Cheap invariants on one aim solution (characterization)."""
-        require_finite(self.putter_speed_mps, "putter_speed_mps")
-        require_finite(self.heading_rad, "heading_rad")
-        require_finite(self.aim_point_xy[0], "aim_point_xy[0]")
-        require_finite(self.aim_point_xy[1], "aim_point_xy[1]")
-        require_finite(self.break_m, "break_m")
-        require_finite(self.rest_xy[0], "rest_xy[0]")
-        require_finite(self.rest_xy[1], "rest_xy[1]")
-        require(
-            isinstance(self.converged, bool), "converged must be a bool", self.converged
+    def strike(
+        self, heading: float, speed: float, with_hole: bool = False
+    ) -> PuttResult:
+        """One trial strike from the start along ``heading``."""
+        (sx, sy), (hx, hy) = self.start, self.hole
+        return simulate_strike(
+            replace(self.putter, speed_mps=speed),
+            self.surface,
+            hole_x_m=hx if with_hole else None,
+            hole_y_m=hy if with_hole else None,
+            start_x_m=sx,
+            start_y_m=sy,
+            heading_rad=heading,
         )
 
+    def along(self, heading: float, speed: float) -> tuple[_Point, float]:
+        """Cup-free rest point and its distance along ``heading``."""
+        result = self.strike(heading, speed)
+        dx, dy = result.rest_x_m - self.start[0], result.rest_y_m - self.start[1]
+        rest = (result.rest_x_m, result.rest_y_m)
+        return rest, dx * math.cos(heading) + dy * math.sin(heading)
 
-def _strike_along_distance(
-    surface: SurfaceSpec,
-    putter_template: PutterState,
-    start_xy: tuple[float, float],
-    hole_xy: tuple[float, float],
-    heading: float,
-    speed_mps: float,
-) -> tuple[float, float, bool, float]:
-    """One strike at ``speed_mps``; returns rest, holed, and along-distance.
-
-    A holed putt never overruns, so its along-heading distance is
-    reported as the straight start-hole distance (module docstring: the
-    speed bisection then treats it as sitting on the under-target side
-    of the bracket, never as an overshoot).
-    """
-    sx, sy = start_xy
-    hx, hy = hole_xy
-    result = simulate_strike(
-        replace(putter_template, speed_mps=speed_mps),
-        surface,
-        hole_x_m=hx,
-        hole_y_m=hy,
-        start_x_m=sx,
-        start_y_m=sy,
-        heading_rad=heading,
-    )
-    if result.holed:
-        along = math.hypot(hx - sx, hy - sy)
-    else:
-        along = (result.rest_x_m - sx) * math.cos(heading) + (
-            result.rest_y_m - sy
-        ) * math.sin(heading)
-    return result.rest_x_m, result.rest_y_m, result.holed, along
-
-
-def _rest_for_heading(
-    surface: SurfaceSpec,
-    putter_template: PutterState,
-    start_xy: tuple[float, float],
-    hole_xy: tuple[float, float],
-    heading: float,
-    target_distance_m: float,
-) -> tuple[float, float, float, bool]:
-    """Bisect putter speed so the along-heading rest distance hits target.
-
-    An exponential search first brackets the answer (most putts need a
-    putter speed well under :data:`_SPEED_MAX_MPS`, so this avoids
-    repeatedly simulating expensive, far-too-fast strikes), then
-    bisection narrows the bracket to :data:`_SPEED_DISTANCE_TOL_M`.
-
-    Returns:
-        ``(rest_x_m, rest_y_m, speed_mps, holed)`` for the converged
-        (or iteration-capped) speed.
-    """
-    rest_x, rest_y, holed, along = _strike_along_distance(
-        surface, putter_template, start_xy, hole_xy, heading, _SPEED_MIN_MPS
-    )
-    diff = along - target_distance_m
-    lo, hi = _SPEED_MIN_MPS, _SPEED_MIN_MPS
-    while diff < 0.0 and hi < _SPEED_MAX_MPS:
-        lo = hi
-        hi = min(2.0 * hi, _SPEED_MAX_MPS)
-        rest_x, rest_y, holed, along = _strike_along_distance(
-            surface, putter_template, start_xy, hole_xy, heading, hi
-        )
-        diff = along - target_distance_m
-    speed = hi
-    for _ in range(_MAX_SPEED_ITERATIONS):
-        if abs(diff) <= _SPEED_DISTANCE_TOL_M or hi <= lo:
-            break
-        speed = 0.5 * (lo + hi)
-        rest_x, rest_y, holed, along = _strike_along_distance(
-            surface, putter_template, start_xy, hole_xy, heading, speed
-        )
-        diff = along - target_distance_m
-        if diff < 0.0:
-            lo = speed
-        else:
-            hi = speed
-    return rest_x, rest_y, speed, holed
+    def pace(self, heading: float, target_m: float) -> tuple[_Point, float]:
+        """Cup-free rest point and the speed whose roll reaches ``target_m``."""
+        lo = hi = _SPEED_MIN_MPS
+        rest, along = self.along(heading, hi)
+        while along < target_m and hi < _SPEED_MAX_MPS:
+            lo, hi = hi, min(2.0 * hi, _SPEED_MAX_MPS)
+            rest, along = self.along(heading, hi)
+        speed = hi
+        for _ in range(_MAX_SPEED_ITERATIONS):
+            if abs(along - target_m) <= _SPEED_DISTANCE_TOL_M or hi <= lo:
+                break
+            speed = 0.5 * (lo + hi)
+            rest, along = self.along(heading, speed)
+            lo, hi = (speed, hi) if along < target_m else (lo, speed)
+        return rest, speed
 
 
 def solve_aim(
     surface: SurfaceSpec,
-    start_xy: tuple[float, float],
-    hole_xy: tuple[float, float],
+    start_xy: _Point,
+    hole_xy: _Point,
     putter_template: PutterState,
     past_hole_m: float = 0.3,
 ) -> AimSolution:
-    """Solve the putter speed and heading that holes (or just passes) the hole.
+    """Solve the putter-head speed and heading for one putt.
 
     Args:
         surface: Green description.
-        start_xy: Ball start ``(x, y)`` [m].
-        hole_xy: Hole center ``(x, y)`` [m]; must differ from ``start_xy``.
-        putter_template: Putter head whose ``speed_mps`` is replaced by
-            the solved value; every other field (mass, MOI, loft, COR,
-            hosel) is used as given.
-        past_hole_m: Desired rest-point overrun past the hole along the
-            aim line when the putt is not holed [m]; must be > 0.
+        start_xy: Ball start [m].
+        hole_xy: Hole centre [m]; must differ from ``start_xy``.
+        putter_template: Head whose ``speed_mps`` is replaced by the
+            solved value; mass, MOI, loft, COR and hosel are kept.
+        past_hole_m: Target overrun beyond the hole when not holed [m].
 
     Returns:
-        The solved :class:`AimSolution`.
+        The :class:`AimSolution`.
 
     Raises:
-        ValueError: If an input is non-finite, ``past_hole_m <= 0``, or
-            ``start_xy == hole_xy``.
+        ValueError: On non-finite input, ``past_hole_m <= 0`` or a start
+            on the hole.
     """
-    require_finite(start_xy[0], "start_xy[0]")
-    require_finite(start_xy[1], "start_xy[1]")
-    require_finite(hole_xy[0], "hole_xy[0]")
-    require_finite(hole_xy[1], "hole_xy[1]")
+    _require_point(start_xy, "start_xy")
+    _require_point(hole_xy, "hole_xy")
     require_finite(past_hole_m, "past_hole_m")
     require(past_hole_m > 0.0, "past_hole_m must be > 0", past_hole_m)
-    sx, sy = start_xy
-    hx, hy = hole_xy
+    (sx, sy), (hx, hy) = start_xy, hole_xy
     distance = math.hypot(hx - sx, hy - sy)
     require(distance > 1e-6, "start_xy and hole_xy must differ", distance)
-    heading0 = math.atan2(hy - sy, hx - sx)
-    perp = (-math.sin(heading0), math.cos(heading0))
-    target_distance = distance + past_hole_m
+    problem = _AimProblem(surface, putter_template, start_xy, hole_xy)
+    direct = math.atan2(hy - sy, hx - sx)
+    left = (-math.sin(direct), math.cos(direct))
 
-    def lateral_miss(heading: float) -> tuple[float, float, float, float, bool]:
-        rest_x, rest_y, speed, holed = _rest_for_heading(
-            surface, putter_template, start_xy, hole_xy, heading, target_distance
-        )
-        miss = 0.0 if holed else (rest_x - hx) * perp[0] + (rest_y - hy) * perp[1]
-        return miss, rest_x, rest_y, speed, holed
+    def miss(heading: float) -> tuple[float, float]:
+        rest, speed = problem.pace(heading, distance + past_hole_m)
+        return (rest[0] - hx) * left[0] + (rest[1] - hy) * left[1], speed
 
-    heading_prev = heading0
-    miss_prev, rest_x, rest_y, speed, holed = lateral_miss(heading_prev)
-    heading_curr = heading0 - miss_prev / distance
-    miss_curr, rest_x, rest_y, speed, holed = lateral_miss(heading_curr)
-    converged = abs(miss_curr) <= _HEADING_MISS_TOL_M
+    prev_heading = direct
+    prev_miss, speed = miss(prev_heading)
+    heading = direct - prev_miss / distance
+    cur_miss, speed = miss(heading)
     for _ in range(_MAX_HEADING_ITERATIONS):
-        if converged:
+        if abs(cur_miss) <= _HEADING_MISS_TOL_M or cur_miss == prev_miss:
             break
-        denom = miss_curr - miss_prev
-        if abs(denom) < 1e-12:
-            break
-        heading_next = heading_curr - miss_curr * (heading_curr - heading_prev) / denom
-        heading_prev, miss_prev = heading_curr, miss_curr
-        heading_curr = heading_next
-        miss_curr, rest_x, rest_y, speed, holed = lateral_miss(heading_curr)
-        converged = abs(miss_curr) <= _HEADING_MISS_TOL_M
+        step = cur_miss * (heading - prev_heading) / (cur_miss - prev_miss)
+        prev_heading, prev_miss = heading, cur_miss
+        heading -= step
+        cur_miss, speed = miss(heading)
 
-    aim_point = (
-        sx + distance * math.cos(heading_curr),
-        sy + distance * math.sin(heading_curr),
-    )
-    break_m = (aim_point[0] - hx) * perp[0] + (aim_point[1] - hy) * perp[1]
+    final = problem.strike(heading, speed, with_hole=True)
+    aim = (sx + distance * math.cos(heading), sy + distance * math.sin(heading))
     solution = AimSolution(
         putter_speed_mps=speed,
-        heading_rad=heading_curr,
-        aim_point_xy=aim_point,
-        break_m=break_m,
-        rest_xy=(hx, hy) if holed else (rest_x, rest_y),
-        converged=bool(converged),
+        heading_rad=heading,
+        aim_point_xy=aim,
+        break_m=(aim[0] - hx) * left[0] + (aim[1] - hy) * left[1],
+        rest_xy=(final.rest_x_m, final.rest_y_m),
+        holed=final.holed,
+        converged=abs(cur_miss) <= _HEADING_MISS_TOL_M,
     )
     ensure(
-        _SPEED_MIN_MPS <= solution.putter_speed_mps <= _SPEED_MAX_MPS,
-        "solved speed must stay within the putter-head search bracket",
-        solution.putter_speed_mps,
+        _SPEED_MIN_MPS <= solution.putter_speed_mps <= _SPEED_MAX_MPS
+        and math.isfinite(solution.heading_rad),
+        "solved speed and heading must be finite and inside the search bracket",
+        solution,
     )
     return solution

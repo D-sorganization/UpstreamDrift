@@ -204,11 +204,11 @@ def test_scatter_names_the_usga_stimp_roll_model(client: TestClient) -> None:
     assert response.json()["roll_model"] == "usga-stimp-roll/1"
 
 
-def test_read_green_names_the_usga_stimp_roll_model(client: TestClient) -> None:
-    """``/read-green`` now runs the shared core too (epic #14141 step 7b)."""
+def test_read_green_names_the_ud_legacy_roll_model(client: TestClient) -> None:
+    """``/read-green`` is the only remaining route on the legacy UD engine."""
     response = client.post("/tools/putting-green/read-green", json={})
     assert response.status_code == 200, response.text
-    assert response.json()["roll_model"] == "usga-stimp-roll/1"
+    assert response.json()["roll_model"] == "ud-legacy-roll/1"
 
 
 def test_simulate_3d_names_the_usga_stimp_roll_model(client: TestClient) -> None:
@@ -218,28 +218,20 @@ def test_simulate_3d_names_the_usga_stimp_roll_model(client: TestClient) -> None
     assert response.json()["roll_model"] == "usga-stimp-roll/1"
 
 
-def test_every_roll_out_route_names_the_same_model(client: TestClient) -> None:
-    """ADR-0045: after step 7b no route runs the legacy UD engine any more.
+def test_the_two_routes_report_different_models(client: TestClient) -> None:
+    """ADR-0045: the divergence is named, never silent.
 
-    Every roll-out response names the shared core's model, so there is no
-    longer a divergence to call out — the regression to guard against is a
-    route silently drifting back onto a different (unnamed) model.
+    ``/read-green`` is the sole surviving legacy-engine route; every other
+    route now runs the shared core, so it is the correct counterpart here.
     """
-    read_green = client.post("/tools/putting-green/read-green", json={}).json()[
+    legacy = client.post("/tools/putting-green/read-green", json={}).json()[
         "roll_model"
     ]
-    simulate = client.post(
+    usga = client.post(
         "/tools/putting-green/simulate",
         json={"direction_x": 0.0, "direction_y": 1.0},
     ).json()["roll_model"]
-    scatter = client.post(
-        "/tools/putting-green/scatter",
-        json={"direction_x": 0.0, "direction_y": 1.0, "n_simulations": 1},
-    ).json()["roll_model"]
-    simulate_3d = client.post("/tools/putting-green/simulate-3d", json={}).json()[
-        "roll_model"
-    ]
-    assert {read_green, simulate, scatter, simulate_3d} == {"usga-stimp-roll/1"}
+    assert legacy != usga
 
 
 def test_response_models_refuse_an_unnamed_result() -> None:

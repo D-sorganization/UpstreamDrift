@@ -6,18 +6,20 @@ Provides REST endpoints for the putting green simulation tool page:
 - Get aim-line assist calculations
 - Scatter analysis for practice mode
 
-Roll-model provenance (ADR-0045 F1, issue #9343; migrated #14141 steps 7a+7b):
-    The legacy UD roll law (``ud-legacy-roll/1``) is preserved in
-    ``src.engines.physics_engines.putting_green`` but no route runs it any
-    more: every route in this module — ``/simulate``, ``/scatter``,
-    ``/contours``, ``/simulate-3d`` and, as of step 7b, ``/read-green`` — runs
-    the surface-aware model in ``src.shared.python.putting_dynamics``, which
-    restates the Tools stimpmeter law (``usga-stimp-roll/1``). ``roll_model``
-    is a required response field: a handler that fails to set it raises
-    rather than emitting an unnamed result. ``/contours`` reports surface
-    geometry only — no roll model is involved, so it carries no name (it
-    reads the shared flat height field, but a flat green's elevations are
-    zero either way).
+Roll-model provenance (ADR-0045 F1, issue #9343; migrated #14141 step 7a):
+    Two roll models are preserved and both are reachable from this router, so
+    every response that reports a roll-out result names the model that produced
+    it. ``/read-green`` is now the only route running the UD engine
+    (``ud-legacy-roll/1``); ``/simulate``, ``/scatter``, ``/contours`` and
+    ``/simulate-3d`` all run the surface-aware model in
+    ``src.shared.python.putting_dynamics``, which restates the Tools
+    stimpmeter law (``usga-stimp-roll/1``). The two differ by the ~2.854
+    roll-out ratio pinned in Tools#4819, so their numbers must never be
+    compared without the names. ``roll_model`` is a required response field:
+    a handler that fails to set it raises rather than emitting an unnamed
+    result. ``/contours`` reports surface geometry only — no roll model is
+    involved, so it carries no name (it now reads the shared flat height
+    field, but a flat green's elevations are zero either way).
 
 See issue #1206
 """
@@ -285,11 +287,7 @@ def _struck_ball(
     engine, so the ball leaves through the shared impact model
     (:func:`~src.shared.python.putting_dynamics.strike`) and skids into roll.
     """
-    from src.shared.python.putting_dynamics import (
-        PutterState,
-        strike,
-        struck_ball_state,
-    )
+    from src.shared.python.putting_dynamics import BallState, PutterState, strike
 
     dir_x, dir_y = direction
     require(
@@ -303,8 +301,14 @@ def _struck_ball(
             speed_mps=stroke_speed_mps,
         )
     )
-    ball = struck_ball_state(
-        report, x_m=x_m, y_m=y_m, heading_rad=math.atan2(dir_y, dir_x)
+    ground_speed = report.horizontal_speed_mps
+    ball = BallState(
+        x_m=x_m,
+        y_m=y_m,
+        vx_mps=ground_speed * dir_x,
+        vy_mps=ground_speed * dir_y,
+        vz_mps=max(report.vertical_speed_mps, 0.0),
+        spin_rad_s=report.spin_rad_s,
     )
     return ball, report
 
@@ -507,47 +511,43 @@ async def simulate_putt(
 @router.post("/read-green", response_model=GreenReadingResponse)
 @handle_api_errors
 async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
-    """Read the green between the ball and the target by simulation.
+    """Read green between ball and target positions.
 
-    Runs ``usga-stimp-roll/1`` (epic #14141 step 7b):
-    :func:`~src.shared.python.putting_dynamics.read_line` samples the
-    elevation/slope profile and
-    :func:`~src.shared.python.putting_dynamics.solve_aim` finds the
-    putter-head speed and heading that hole (or just pass) the target by
-    simulating the strike with :func:`~src.shared.python.putting_dynamics.
-    simulate_strike`, rather than a separate closed-form heuristic. The
-    request carries no slope inputs, so the green is flat, matching the
-    legacy engine's default surface. See issue #1206.
+    See issue #1206
     """
-    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-        USGA_STIMP_ROLL_MODEL,
+    from src.engines.physics_engines.putting_green.python.green_surface import (
+        GreenSurface,
     )
-    from src.shared.python.putting_dynamics import PutterState, read_line, solve_aim
+    from src.engines.physics_engines.putting_green.python.simulator import (
+        ROLL_MODEL_FIELD,
+        PuttingGreenSimulator,
+    )
+    from src.engines.physics_engines.putting_green.python.turf_properties import (
+        TurfProperties,
+    )
 
-    surface, half_w, half_h = _build_flat_putting_surface(
-        request.stimp_rating, request.green_width, request.green_height
+    turf = TurfProperties(stimp_rating=request.stimp_rating)
+    green = GreenSurface(
+        width=request.green_width,
+        height=request.green_height,
+        turf=turf,
     )
-    ball_xy = _to_surface_frame(request.ball_x, request.ball_y, half_w, half_h)
-    target_xy = _to_surface_frame(request.target_x, request.target_y, half_w, half_h)
+    green.set_hole_position(np.array([request.target_x, request.target_y]))
 
-    line = read_line(surface, ball_xy, target_xy)
-    putter_template = PutterState(
-        head_mass_kg=_DEFAULT_HEAD_MASS_KG,
-        moi_kg_m2=_DEFAULT_HEAD_MOI_KG_M2,
-        loft_deg=_DEFAULT_LOFT_DEG,
-        speed_mps=1.0,
+    sim = PuttingGreenSimulator(green=green)
+    reading = sim.read_green(
+        np.array([request.ball_x, request.ball_y]),
+        np.array([request.target_x, request.target_y]),
     )
-    solution = solve_aim(surface, ball_xy, target_xy, putter_template)
-    aim_x, aim_y = _from_surface_frame(*solution.aim_point_xy, half_w, half_h)
 
     return GreenReadingResponse(
-        roll_model=USGA_STIMP_ROLL_MODEL,
-        distance=line.distance_m,
-        total_break=abs(solution.break_m),
-        recommended_speed=solution.putter_speed_mps,
-        aim_point=[aim_x, aim_y],
-        elevations=list(line.elevations_m),
-        slopes=[list(s) for s in line.slopes],
+        roll_model=str(reading[ROLL_MODEL_FIELD]),
+        distance=float(reading["distance"]),
+        total_break=float(reading["total_break"]),
+        recommended_speed=float(reading["recommended_speed"]),
+        aim_point=reading["aim_point"].tolist(),
+        elevations=[float(e) for e in reading["elevations"]],
+        slopes=[s.tolist() for s in reading["slopes"]],
     )
 
 

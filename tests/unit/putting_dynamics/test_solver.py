@@ -246,11 +246,7 @@ class TestStrikeToRoll:
 
 
 class TestStrikeFromAnyStartAndHeading:
-    """#14141 step 7b: the start/heading generalisation must be a pure
-    rotation + translation of the origin/heading-0 strike (DRY: both
-    ``/read-green`` aim solving and the default-arg callers share one
-    code path, :func:`~src.shared.python.putting_dynamics.solver.
-    struck_ball_state`)."""
+    """A start point and heading only move and rotate the default strike."""
 
     def test_defaults_are_bit_for_bit_unchanged(self) -> None:
         surface = SurfaceSpec.flat_uniform(stimp_ft=10.0)
@@ -282,10 +278,7 @@ class TestStrikeFromAnyStartAndHeading:
             heading_rad=heading,
         )
 
-        # Flat, homogeneous friction is rotation-invariant, so the rest
-        # point is the baseline's rest point rotated by `heading` and
-        # translated to the new start (rigid transform); distance is
-        # invariant under either operation.
+        # Flat, homogeneous friction is rotation invariant.
         dx, dy = baseline.rest_x_m, baseline.rest_y_m
         expected_x = start_x + dx * cos_h - dy * sin_h
         expected_y = start_y + dx * sin_h + dy * cos_h

@@ -7,10 +7,7 @@ resistance, static rolling hold with steep-slope restart, optional
 grain anisotropy), a two-body putter-ball collision with finite putter
 effective mass, dynamic-loft sweeps, hosel-position face twist, and a
 mode-machine RK4 solver (airborne rise/settle -> slide -> roll ->
-rest) with hole capture, and simulation-based green reading
-(:mod:`.green_reading`: elevation/slope sampling plus a speed+heading
-aim solver) for callers that need a recommended line and pace rather
-than a single trajectory.
+rest) with hole capture, and simulation-based green reading.
 
 Package layout mirrors ``src.shared.python.physics.impact_model``
 (types / surfaces / friction / collision / solver / green_reading /
