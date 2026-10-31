@@ -219,6 +219,45 @@ class CollisionReport:
     attachment_impulse_n_s: tuple[float, float, float]
     attachment_moment_n_m_s: tuple[float, float, float]
 
+    def __post_init__(self) -> None:
+        """Cheap invariants on the impact report (characterization).
+
+        Postconditions: every field is finite; the launch and
+        putter-slowdown speeds and both dissipation/impulse magnitudes
+        are non-negative; the attachment wrench components are 3-tuples
+        of finite floats.
+        """
+        for name in (
+            "ball_speed_mps",
+            "launch_angle_deg",
+            "horizontal_speed_mps",
+            "vertical_speed_mps",
+            "spin_rad_s",
+            "effective_loft_deg",
+            "putter_dv_mps",
+            "impulse_n_s",
+            "contact_time_proxy_s",
+            "kinetic_energy_loss_j",
+            "face_twist_rad_s",
+            "twist_moment_n_m_s",
+        ):
+            require_finite(getattr(self, name), name)
+        require(
+            self.ball_speed_mps >= 0.0, "ball speed must be >= 0", self.ball_speed_mps
+        )
+        require(self.putter_dv_mps >= 0.0, "putter_dv must be >= 0", self.putter_dv_mps)
+        require(self.impulse_n_s >= 0.0, "impulse must be >= 0", self.impulse_n_s)
+        require(
+            self.kinetic_energy_loss_j >= 0.0,
+            "energy loss must be >= 0",
+            self.kinetic_energy_loss_j,
+        )
+        for name in ("attachment_impulse_n_s", "attachment_moment_n_m_s"):
+            wrench = getattr(self, name)
+            require(len(wrench) == 3, f"{name} must have 3 components", wrench)
+            for component in wrench:
+                require_finite(component, name)
+
 
 @dataclass(frozen=True)
 class TrajectorySample:
@@ -241,6 +280,20 @@ class TrajectorySample:
     speed_mps: float
     spin_rad_s: float
     mode: Mode
+
+    def __post_init__(self) -> None:
+        """Cheap invariants on one solver sample (characterization).
+
+        Postconditions: all numeric fields are finite; sample time and
+        height are non-negative; ground-plane speed is non-negative;
+        ``mode`` is a :class:`Mode` member.
+        """
+        for name in ("t_s", "x_m", "y_m", "height_m", "speed_mps", "spin_rad_s"):
+            require_finite(getattr(self, name), name)
+        require(self.t_s >= 0.0, "sample time must be >= 0", self.t_s)
+        require(self.height_m >= 0.0, "height must be >= 0", self.height_m)
+        require(self.speed_mps >= 0.0, "speed must be >= 0", self.speed_mps)
+        require(isinstance(self.mode, Mode), "mode must be a Mode member", self.mode)
 
 
 @dataclass(frozen=True)
@@ -270,6 +323,41 @@ class PuttResult:
     time_s: float
     skid_distance_m: float
     speed_at_hole_mps: float | None
+
+    def __post_init__(self) -> None:
+        """Cheap invariants on one integrated putt (characterization).
+
+        Postconditions: at least one sample exists; the rest position,
+        total distance, elapsed time and skid distance are finite; the
+        distances and time are non-negative; skid never exceeds the
+        total path length; a reported hole-crossing speed is finite
+        and non-negative.
+        """
+        require(len(self.samples) > 0, "a putt must have at least one sample")
+        for name in (
+            "rest_x_m",
+            "rest_y_m",
+            "total_distance_m",
+            "time_s",
+            "skid_distance_m",
+        ):
+            require_finite(getattr(self, name), name)
+        require(
+            self.total_distance_m >= 0.0, "distance must be >= 0", self.total_distance_m
+        )
+        require(self.time_s >= 0.0, "time must be >= 0", self.time_s)
+        require(
+            self.skid_distance_m <= self.total_distance_m + 1e-9,
+            "skid cannot exceed the total path",
+            (self.skid_distance_m, self.total_distance_m),
+        )
+        if self.speed_at_hole_mps is not None:
+            require_finite(self.speed_at_hole_mps, "speed_at_hole_mps")
+            require(
+                self.speed_at_hole_mps >= 0.0,
+                "speed_at_hole must be >= 0",
+                self.speed_at_hole_mps,
+            )
 
     @property
     def final_mode(self) -> Mode:
