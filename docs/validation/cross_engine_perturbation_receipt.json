@@ -1,0 +1,78 @@
+{
+  "schema": "upstreamdrift.cross_engine_perturbation_receipt.v1",
+  "status": "measured",
+  "setup": {
+    "spec_hash": "cde02870bbc81f0173261176de3ce87c711e8c41b37e8809e4fca815c8e7c89f",
+    "gravity_m_s2": 9.80665,
+    "dt_s": 0.001,
+    "integrator": "rk4",
+    "seed": 42,
+    "interpolation_mode": "zoh"
+  },
+  "n_trials": 10,
+  "t_end_s": 1.5,
+  "noise_amplitude_nm": 0.1,
+  "engines": {
+    "in_house_triple": {
+      "spec_hash": "cde02870bbc81f0173261176de3ce87c711e8c41b37e8809e4fca815c8e7c89f",
+      "gravity_m_s2": 9.80665,
+      "dt_s": 0.001,
+      "integrator": "rk4",
+      "seed": 42,
+      "interpolation_mode": "zoh",
+      "backend": "real",
+      "counted": true,
+      "means": {
+        "total_energy_final": 89.97018604872704,
+        "end_effector_speed_final": 5.816501277235902,
+        "peak_end_effector_speed": 11.771680051961336
+      }
+    },
+    "mujoco_triple": {
+      "spec_hash": "cde02870bbc81f0173261176de3ce87c711e8c41b37e8809e4fca815c8e7c89f",
+      "gravity_m_s2": 9.80665,
+      "dt_s": 0.001,
+      "integrator": "rk4",
+      "seed": 42,
+      "interpolation_mode": "zoh",
+      "backend": "real",
+      "counted": true,
+      "means": {
+        "total_energy_final": 89.97018604872703,
+        "end_effector_speed_final": 5.816501277235902,
+        "peak_end_effector_speed": 11.771680051961335
+      }
+    }
+  },
+  "cv_summary": {
+    "total_energy_final": {
+      "cv": 1.1168801774105406e-16,
+      "reason": null
+    },
+    "end_effector_speed_final": {
+      "cv": 0.0,
+      "reason": null
+    },
+    "peak_end_effector_speed": {
+      "cv": 1.0670303316116203e-16,
+      "reason": null
+    }
+  },
+  "stubbed_engines": [],
+  "setup_attestation": "declared_by_harness_not_read_back_from_engine",
+  "sensitivity_context": {
+    "within_engine_trial_cv": {
+      "in_house_triple": {
+        "total_energy_final": 0.00015477885653675765,
+        "end_effector_speed_final": 0.0010276649049391726,
+        "peak_end_effector_speed": 0.000329400399659939
+      },
+      "mujoco_triple": {
+        "total_energy_final": 0.00015477885653687507,
+        "end_effector_speed_final": 0.0010276649049390204,
+        "peak_end_effector_speed": 0.00032940039966022547
+      }
+    },
+    "drive_mode_receipt": "docs/validation/drive_mode_sensitivity_receipt.json"
+  }
+}

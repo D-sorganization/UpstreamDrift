@@ -26,6 +26,8 @@ from src.shared.python.pendulum_simulator.triple_pendulum_spec import (
 from src.shared.python.pendulum_simulator.unified_perturbation_study import (
     STUDY,
     SteppableTripleEngine,
+    UnifiedStudy,
+    receipt_cvs_match,
     run_unified_study,
 )
 
@@ -68,19 +70,25 @@ def test_doc_states_every_measured_cv() -> None:
         assert f"| {metric} | {shown} |" in doc
 
 
+@pytest.mark.slow
 def test_regeneration_reproduces_the_committed_receipt() -> None:
     pytest.importorskip("mujoco")
-    fresh = run_unified_study()
-    committed = _receipt()
-    assert fresh["setup"] == committed["setup"]
-    for metric, cv in committed["cv_summary"].items():
-        got = fresh["cv_summary"][metric]["cv"]
-        assert got == pytest.approx(cv["cv"], rel=1e-6, abs=1e-15)
+    assert receipt_cvs_match(run_unified_study(), _receipt())
+
+
+def test_short_study_is_measured_with_one_setup() -> None:
+    pytest.importorskip("mujoco")
+    receipt = run_unified_study(study=UnifiedStudy(t_end_s=0.05, n_trials=2))
+    assert receipt["status"] == STATUS_MEASURED
+    assert {e["dt_s"] for e in receipt["engines"].values()} == {STUDY.dt_s}
 
 
 def test_independent_adapters_agree_on_energy_and_tip_velocity() -> None:
     pytest.importorskip("mujoco")
-    engines = [SteppableTripleEngine(a) for a in (InHouseTripleAdapter(), MuJoCoTripleAdapter())]
+    engines = [
+        SteppableTripleEngine(a)
+        for a in (InHouseTripleAdapter(), MuJoCoTripleAdapter())
+    ]
     for engine in engines:
         engine.reset()
         assert math.isfinite(engine.get_total_energy())
