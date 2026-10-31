@@ -132,7 +132,7 @@ def _parse_fixture(data: Any) -> ReferenceFixture:
     applies_to = data.get("applies_to")
     require(
         isinstance(applies_to, list)
-        and applies_to
+        and len(applies_to) > 0
         and set(applies_to) <= VALID_APPLIES_TO,
         f"{context}: 'applies_to' must be a non-empty subset of "
         f"{sorted(VALID_APPLIES_TO)} (unknown runner)",
@@ -167,9 +167,9 @@ def _parse_fixture(data: Any) -> ReferenceFixture:
             citation=_text(raw_source, "citation", context),
             doi_or_url=_text(raw_source, "doi_or_url", context),
             locator=_text(raw_source, "locator", context),
-            verified=verified,
+            verified=bool(verified),
         ),
-        applies_to=tuple(applies_to),
+        applies_to=tuple(applies_to or ()),
         maps_to=data.get("maps_to"),
         pending_reason=pending,
     )
@@ -199,7 +199,7 @@ def load_reference_fixtures(path: Path | None = None) -> tuple[ReferenceFixture,
         "fixture file: 'fixtures' must be a non-empty list",
         entries,
     )
-    fixtures = tuple(_parse_fixture(entry) for entry in entries)
+    fixtures = tuple(_parse_fixture(entry) for entry in entries or ())
     ids = [fixture.fixture_id for fixture in fixtures]
     ensure(len(set(ids)) == len(ids), "fixture file: duplicate fixture_id", ids)
     return fixtures
