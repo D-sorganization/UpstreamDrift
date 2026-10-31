@@ -201,6 +201,36 @@ DRIVER_COR = PhysicalConstant(
     "USGA/R&A CT limit (~0.83 equivalent COR)",
     "Coefficient of restitution for driver",
 )
+
+# Putter-face and green-contact restitution (putting-v4 step 3, #14141).
+# Unlike DRIVER_COR above, these are *not* backed by a USGA/R&A rule or a
+# peer-reviewed measurement: the putter is exempt from the USGA/R&A COR
+# (CT) limit that bounds DRIVER_COR, and no external putter-face-COR
+# fixture was found when this constant was introduced. Both values simply
+# restate the uncited engineering default already hardcoded twice in this
+# repo (``rust_core/upstream-physics/src/contact.rs``: ``cor: 0.78``,
+# "Typical golf green COR") so there is exactly one Python source instead
+# of two independently-drifting literals. Treat as a placeholder pending a
+# real external putter-COR fixture; do not cite this as a measured value.
+_SRC_UNCITED_CONTACT_RS_DEFAULT = (
+    "Uncited engineering default restated from "
+    "rust_core/upstream-physics/src/contact.rs (cor: 0.78); no "
+    "peer-reviewed putter/green-COR source found, USGA/R&A exempts "
+    "putters from the COR limit; external fixture pending (#14141)"
+)
+PUTTER_FACE_COR = PhysicalConstant(
+    0.78,
+    "dimensionless",
+    _SRC_UNCITED_CONTACT_RS_DEFAULT,
+    "Putter face coefficient of restitution at putt speeds",
+)
+GREEN_RESTITUTION = PhysicalConstant(
+    0.78,
+    "dimensionless",
+    _SRC_UNCITED_CONTACT_RS_DEFAULT,
+    "Green-contact coefficient of restitution for the post-impact ball bounce",
+)
+
 TYPICAL_CONTACT_DURATION_S = PhysicalConstant(
     0.0005, "s", "High-speed video studies", "Typical ball-clubface contact time"
 )
