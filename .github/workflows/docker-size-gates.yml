@@ -114,11 +114,8 @@ jobs:
           # Runtime image budget: slim venv (~1 GB) + src/ models (~650 MB) + base + libs - 4 GB
           MAX_SIZE_MB=4000
 
-          # Get size in bytes
-          IMAGE_SIZE_BYTES=$(docker image inspect upstream-drift:runtime --format='{{.Size}}')
-
-          # Convert to MB
-          IMAGE_SIZE_MB=$((IMAGE_SIZE_BYTES / 1024 / 1024))
+          # Compressed content size, independent of the Docker Engine version (#14146)
+          IMAGE_SIZE_MB=$(python3 scripts/ci/image_content_size.py upstream-drift:runtime)
 
           echo "Image size: ${IMAGE_SIZE_MB} MB"
           echo "Budget: ${MAX_SIZE_MB} MB"
@@ -223,8 +220,8 @@ jobs:
       - name: Verify size budget (profile=${{ matrix.profile }}, budget=${{ matrix.max_size_mb }} MB)
         run: |
           MAX_SIZE_MB=${{ matrix.max_size_mb }}
-          IMAGE_SIZE_BYTES=$(docker image inspect upstream-drift:${{ matrix.profile }} --format='{{.Size}}')
-          IMAGE_SIZE_MB=$((IMAGE_SIZE_BYTES / 1024 / 1024))
+          # Compressed content size, independent of the Docker Engine version (#14146)
+          IMAGE_SIZE_MB=$(python3 scripts/ci/image_content_size.py upstream-drift:${{ matrix.profile }})
 
           echo "Profile : ${{ matrix.profile }}"
           echo "Size    : ${IMAGE_SIZE_MB} MB"
