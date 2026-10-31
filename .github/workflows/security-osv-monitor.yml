@@ -22,12 +22,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Run OSV scanner action
-        uses: google/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36
+        # The repository root action.yml has no `runs:`; the runnable action is the subpath (#14137).
+        uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36
+        # Findings must not fail the monitor; the SLA triage export below reports them.
+        continue-on-error: true
         with:
           scan-args: |
             --recursive
             ./
-          fail-on-vuln: false
 
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
         with:
