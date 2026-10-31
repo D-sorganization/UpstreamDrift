@@ -157,20 +157,15 @@ class TestMechanicalEnergyNeverIncreasesOnAFlatGreen:
             for earlier, later in zip(energies, energies[1:], strict=False)
         )
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason=(
-            "FINDING (#14141 PR1): the slide->roll 'within_one_step'"
-            " early-pin in simulate_ball snaps spin up to rolling speed"
-            " for an under-spun start, injecting ~2e-5 J of KE. Physics"
-            " fix deferred to the roll/friction migration PR (#14141)."
-        ),
+    @pytest.mark.parametrize(
+        "v0_mps,spin_scale", [(2.2, 0.8), (1.8, 0.5), (2.5, 0.7), (1.5, 0.95)]
     )
-    def test_under_spun_start_has_a_tiny_energy_bump_at_the_roll_transition(
-        self,
+    def test_under_spun_start_never_gains_energy_at_the_roll_transition(
+        self, v0_mps: float, spin_scale: float
     ) -> None:
+        """Fixed in step 5 (#14141): the slide->roll pin conserves angular
+        momentum about the contact point instead of snapping spin up."""
         surface = SurfaceSpec.flat_uniform(stimp_ft=10.0)
-        v0_mps, spin_scale = 2.2, 0.8
         ball = BallState(
             x_m=0.0, y_m=0.0, vx_mps=v0_mps, spin_rad_s=spin_scale * v0_mps / _R
         )
@@ -183,6 +178,23 @@ class TestMechanicalEnergyNeverIncreasesOnAFlatGreen:
             later <= earlier + 1e-9
             for earlier, later in zip(energies, energies[1:], strict=False)
         )
+
+    def test_roll_transition_conserves_contact_angular_momentum(self) -> None:
+        """Closed form: friction acts at the contact point, so angular
+        momentum about it, ``m R (v + (2/5) s)`` with ``s = omega R``, is
+        conserved through the slide phase; pure roll therefore starts at
+        ``v_roll = (v0 + 0.4 s0) / 1.4`` (rigid-sphere textbook result)."""
+        surface = SurfaceSpec.flat_uniform(stimp_ft=10.0)
+        v0, s0 = 2.0, 0.6
+        result = simulate_ball(
+            BallState(x_m=0.0, y_m=0.0, vx_mps=v0, spin_rad_s=s0 / _R), surface
+        )
+        first_roll = next(s for s in result.samples if s.mode is Mode.ROLL)
+        expected = (v0 + 0.4 * s0) / 1.4
+        # Rolling resistance acts during the slide too, slowing the ball by
+        # at most mu_r g t_slide; allow that much below the closed form.
+        assert first_roll.speed_mps <= expected + 1e-6
+        assert first_roll.speed_mps >= expected - 0.05
 
 
 class TestLateralMirrorSymmetry:
