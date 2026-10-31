@@ -626,37 +626,87 @@ def test_dynamics_report_carries_the_window_block_only_with_knee_targets() -> No
     assert short is not None and short["status"].startswith("unavailable")
 
 
+
 # ------------------------------------------- cross-engine harness (#14131)
+# Unit fixtures below (``_FakeKin``) are control-flow fixtures, NOT scientific
+# receipts: they only prove the harness separates agree / disagree / unavailable.
 
 
-def test_address_knee_flexion_matches_across_engines_committed_receipts() -> None:
-    """Receipt-based cross-engine contract for #12684 item 5 (harness only, #14131).
+class _FakeKin:
+    """Unit fixture: a straight leg bent by ``bend_deg`` per side at the knee."""
 
-    Live engine FK replay stays on the strong parent (#12684); this test exercises
-    the committed-receipt comparator so unavailable engines report a reason and
-    never masquerade agreement as zero flexion.
-    """
-    from scripts import address_knee_engine_check as chk
+    def __init__(self, bend_deg: dict[str, float]) -> None:
+        self.bend = bend_deg
 
-    report = chk.build_report()
-    assert report["tolerance_deg"] == pytest.approx(chk.TOLERANCE_DEG)
-    assert pytest.approx(0.1) == chk.TOLERANCE_DEG
+    def body_poses(self, q: np.ndarray, names: list[str]) -> dict[str, tuple]:
+        out = {}
+        for side, sfx in (("left", "l"), ("right", "r")):
+            a = np.radians(self.bend[side])
+            out[f"femur_{sfx}"] = (np.eye(3), np.array([0.0, 0.0, 1.0]))
+            out[f"tibia_{sfx}"] = (np.eye(3), np.zeros(3))
+            out[f"talus_{sfx}"] = (np.eye(3), np.array([np.sin(a), 0.0, -np.cos(a)]))
+        return {n: out[n] for n in names}
 
-    driver = report["cases"]["driver"]
-    assert driver["ok"] is True
-    drake = driver["engines"]["drake"]
-    assert drake["available"] is True
-    assert max(abs(v) for v in drake["delta_deg"].values()) <= chk.TOLERANCE_DEG
-    for engine in ("pinocchio", "opensim", "myosuite"):
-        entry = driver["engines"][engine]
-        assert entry["available"] is False
-        assert entry["model_deg"] is None
-        assert entry["reason"]
 
-    iron = report["cases"]["iron"]
-    assert iron["ok"] is True
-    for engine in ("drake", "pinocchio", "opensim", "myosuite"):
-        entry = iron["engines"][engine]
-        assert entry["available"] is False
-        assert entry["model_deg"] is None
-        assert engine in entry["reason"]
+def _fixed(bend: dict[str, float]):
+    return lambda: _FakeKin(bend)
+
+
+def _gap(reason: str):
+    def build() -> None:
+        raise _EngineUnavailable(reason)
+
+    return build
+
+
+_REF = {"left": 20.0, "right": 18.0}
+
+
+def test_harness_reports_per_engine_disagreement_beyond_tolerance() -> None:
+    off = {"left": 20.0 + 0.5, "right": 18.0}
+    report = _cross_engine_knee(
+        np.zeros(3), {"mujoco": _fixed(_REF), "drake": _fixed(off)}
+    )
+    assert report["ok"] is False
+    assert report["compared"] == ["drake"]
+    (bad,) = report["disagreements"]
+    assert (bad["engine"], bad["side"]) == ("drake", "left")
+    assert bad["delta_deg"] == pytest.approx(0.5, abs=1e-9)
+    assert bad["tolerance_deg"] == 0.1
+
+
+def test_harness_never_counts_an_unavailable_engine_as_agreement() -> None:
+    report = _cross_engine_knee(
+        np.zeros(3),
+        {"mujoco": _fixed(_REF), "drake": _fixed(_REF), "opensim": _gap("no adapter")},
+    )
+    assert report["ok"] is True
+    assert report["compared"] == ["drake"]
+    gap = report["engines"]["opensim"]
+    assert gap["available"] is False
+    assert gap["model_deg"] is None and gap["delta_deg"] is None
+    assert gap["reason"] == "no adapter"
+    assert report["engines"]["drake"]["delta_deg"]["left"] == pytest.approx(0.0)
+
+
+def test_harness_with_no_comparable_engine_is_not_ok() -> None:
+    report = _cross_engine_knee(
+        np.zeros(3), {"mujoco": _fixed(_REF), "drake": _gap("pydrake missing")}
+    )
+    assert report["compared"] == []
+    assert report["ok"] is False
+
+
+def test_harness_requires_the_reference_engine() -> None:
+    with pytest.raises(ValueError, match="reference"):
+        _cross_engine_knee(
+            np.zeros(3), {"mujoco": _gap("no mujoco"), "drake": _fixed(_REF)}
+        )
+
+
+def test_harness_fails_closed_on_an_unexpected_engine_error() -> None:
+    def broken() -> None:
+        raise RuntimeError("FK exploded")
+
+    with pytest.raises(RuntimeError, match="FK exploded"):
+        _cross_engine_knee(np.zeros(3), {"mujoco": _fixed(_REF), "drake": broken})
