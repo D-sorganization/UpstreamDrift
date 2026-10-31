@@ -80,6 +80,32 @@ def _nums(values: Any) -> str:
     return " ".join(format(float(v), ".17g") for v in values)
 
 
+def pad_option_xml(timestep_s: float, gravity: Any, integrator: str = "Euler") -> str:
+    """``<option>`` of the pad path: elliptic cone, ``impratio`` 10."""
+    return (
+        f'<option timestep="{timestep_s:.17g}" integrator="{integrator}" '
+        f'cone="elliptic" impratio="10" gravity="{_nums(gravity)}"/>'
+    )
+
+
+def pad_pair_xml(
+    geom1: str,
+    geom2: str,
+    mu: float,
+    torsional: float,
+    solref: tuple[float, float],
+    friction_time_s: float,
+) -> str:
+    """``condim=6`` ``<pair>`` of one pad on the grip (or a calibration body)."""
+    return (
+        f'<pair geom1="{geom1}" geom2="{geom2}" condim="6" '
+        f'friction="{mu:.17g} {mu:.17g} {torsional:.17g} 1e-5 1e-5" '
+        f'solref="{solref[0]:.17g} {solref[1]:.17g}" '
+        f'solreffriction="{friction_time_s:.17g} 1" '
+        f'solimp="{IMPEDANCE} {IMPEDANCE} 0.001 0.5 2"/>'
+    )
+
+
 def line_node_geom_name(site: str, node: int) -> str:
     """MJCF geom name of axial line-contact node ``node`` of capsule ``site``."""
     return f"{site}_node{node}"
@@ -230,13 +256,15 @@ def contact_mjcf(
                     f'<geom name="pad_{side}{k}" type="sphere" size="{pads.layout.pad_radius_m:.17g}" '
                     f'pos="{_nums(pos)}" contype="0" conaffinity="0" mass="0"/>'
                 )
-                ref = solref[(side, k)]
                 pairs.append(
-                    f'<pair geom1="pad_{side}{k}" geom2="grip" condim="6" '
-                    f'friction="{mu:.17g} {mu:.17g} {torsional:.17g} 1e-5 1e-5" '
-                    f'solref="{ref[0]:.17g} {ref[1]:.17g}" '
-                    f'solreffriction="{friction_time_s:.17g} 1" '
-                    f'solimp="{IMPEDANCE} {IMPEDANCE} 0.001 0.5 2"/>'
+                    pad_pair_xml(
+                        f"pad_{side}{k}",
+                        "grip",
+                        mu,
+                        torsional,
+                        solref[(side, k)],
+                        friction_time_s,
+                    )
                 )
             bodies.append(
                 f'<body name="hand_{side}"><freejoint name="hand_{side}_free"/>'
@@ -244,10 +272,7 @@ def contact_mjcf(
                 + "".join(geoms)
                 + "</body>"
             )
-        option_xml = (
-            f'<option timestep="{timestep_s:.17g}" integrator="Euler" '
-            f'cone="elliptic" impratio="10" gravity="{_nums(gravity)}"/>'
-        )
+        option_xml = pad_option_xml(timestep_s, gravity)
     return (
         '<mujoco model="grip_contact"><compiler inertiafromgeom="false"/>'
         + option_xml

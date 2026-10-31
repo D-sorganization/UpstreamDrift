@@ -1,0 +1,34 @@
+{
+  "issue": 13885,
+  "rig": {
+    "block_mass_kg": 1.0,
+    "squeeze_n": 50.0,
+    "timestep_s": 1e-05,
+    "settle_s": 0.05,
+    "hold_s": 0.1
+  },
+  "pad_solref": [
+    0.02,
+    1.0
+  ],
+  "slip_speed_m_s": 0.001,
+  "bias_band": 0.05,
+  "bisection_tol_ratio": 0.005,
+  "calibrations": [
+    {
+      "integrator": "Euler",
+      "mu_crit": 0.0980665,
+      "transition_mu": 0.09816226806640625,
+      "ratio": 1.0009765625,
+      "declared_bias": null
+    },
+    {
+      "integrator": "implicitfast",
+      "mu_crit": 0.0980665,
+      "transition_mu": 0.09816226806640625,
+      "ratio": 1.0009765625,
+      "declared_bias": null
+    }
+  ],
+  "reproduce": "python3 -m scripts.grip.mujoco_mu_crit_calibration"
+}
