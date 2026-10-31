@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14146 · Docker Size Gates Measure Compressed Content Size via the Engine API Instead of .Size, Whose Meaning Changed Between Docker Engine 29.1.3 And 29.9.2
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14146
+- **Branch:** brick/ci-toolchain/14146-docker-size-measure
+- **PR:** #14153
+- **Paths:** see #14153
+- **Started:** 2026-10-31
+- **Last verified:** 2026-10-31 (`06c2d8d5`; collated from changes/14146-docker-size-gates-measure-compressed-con.md)
+- **Summary:** Docker size gates measure compressed content size via the Engine API instead of .Size, whose meaning changed between Docker Engine 29.1.3 and 29.9.2
+- **Next step:** Merge after acceptance review
+
 ### DL-#13885 · Pure Two-Hand Grip-Margin Metric: Per-Pad Coulomb Margin, UNLOADED Floor, Slip Events, Grasp-Map Internal Wrench and GripMarginReport
 
 - **State:** in_review

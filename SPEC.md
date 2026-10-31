@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-31 | #14153 | Docker size gates measure compressed content size via the Engine API instead of .Size, whose meaning changed between Docker Engine 29.1.3 and 29.9.2 |
 | 2026-10-31 | #14159 | Route putter COR and green restitution through shared constants; centre-strike ratio closed form with off-centre limits (putting v4 step 3) |
 | 2026-10-31 | #14155 | Add remaining externally sourced putting reference fixtures: USGA ball limits, Penner/Holmes capture, Drane/Whiston/Quintic skid-roll, Broadie ShotLink, putter COR pending (putting v4 step 2b) |
 | 2026-10-31 | #14152 | MuJoCo static-hold mu_crit calibration of the pad contact (Euler, implicitfast: hold/slip at 1.001 mu_crit, no declared bias) and GripMarginReport mu_bias_bound validation |
