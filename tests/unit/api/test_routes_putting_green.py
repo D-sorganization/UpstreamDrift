@@ -22,8 +22,12 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from src.api.dependencies import get_engine_manager, get_task_manager  # noqa: E402
 from src.api.routes.putting_green import router  # noqa: E402
-from src.shared.python.core.physics_constants import GRAVITY_M_S2  # noqa: E402
-from src.shared.python.putting_dynamics import stimp_to_rolling_mu  # noqa: E402
+from src.shared.python.core.physics_constants import GOLF_BALL_MASS_KG  # noqa: E402
+from src.shared.python.putting_dynamics import (  # noqa: E402
+    PutterState,
+    SurfaceSpec,
+    simulate_strike,
+)
 
 
 class MockGreen:
@@ -267,44 +271,43 @@ def test_simulate_rejects_positive_wind_speed(client: TestClient) -> None:
 # -- Closed-form physics on the shared core (epic #14141 step 7a) --
 
 
-def test_simulate_putt_rollout_matches_closed_form(client: TestClient) -> None:
-    """A pure-roll start on a flat stimp-10 green rolls out ``v0^2/(2 mu g)``.
+def test_simulate_putt_launch_obeys_the_impact_closed_form(client: TestClient) -> None:
+    """``speed`` is putter-head speed, as in the legacy engine.
 
-    Mirrors ``test_pure_roll_start_skips_the_skid_phase`` in
-    ``tests/unit/putting_dynamics/test_solver.py`` (same tolerance): the
-    shared core's ``BallState`` with ``spin_rad_s = v0 / R`` starts in pure
-    roll (no skid), so the rollout distance is exactly the stimp closed
-    form, never a value read back off a prior run.
+    The ball cannot leave faster than the one-dimensional impact limit
+    ``(1 + e) M v / (M + m)``, and the putt must match the shared strike
+    path used by ``/simulate-3d`` for the same head and green.
     """
-    speed = 2.0
-    stimp = 10.0
+    speed = 1.5
     response = client.post(
         "/tools/putting-green/simulate",
         json={
             "ball_x": 5.0,
-            "ball_y": 10.0,
+            "ball_y": 3.0,
             "speed": speed,
             "direction_x": 0.0,
             "direction_y": 1.0,
-            "stimp_rating": stimp,
-            "green_width": 20.0,
-            "green_height": 20.0,
+            "stimp_rating": 10.0,
             "hole_x": 10.0,
-            "hole_y": 15.0,
+            "hole_y": 19.0,
         },
     )
     assert response.status_code == 200, response.text
     data = response.json()
-    mu_roll = stimp_to_rolling_mu(stimp)
-    expected_distance = speed**2 / (2.0 * mu_roll * float(GRAVITY_M_S2))
-    assert data["total_distance"] == pytest.approx(expected_distance, rel=0.01)
+    head_m = 0.35
+    ball_m = float(GOLF_BALL_MASS_KG)
+    impact_limit = (1.0 + 0.78) * head_m * speed / (head_m + ball_m)
+    assert math.hypot(*data["velocities"][0]) <= impact_limit + 1e-9
+
+    reference = simulate_strike(
+        PutterState(
+            head_mass_kg=head_m, moi_kg_m2=4.5e-4, loft_deg=3.0, speed_mps=speed
+        ),
+        SurfaceSpec.flat_uniform(stimp_ft=10.0, extent_m=20.0),
+    )
+    assert data["total_distance"] == pytest.approx(reference.total_distance_m, rel=1e-6)
     assert not data["holed"]
 
-    # On a flat, uniform, isotropic surface the ball never turns: velocity
-    # stays parallel to the initial heading the whole way, and (judgment
-    # call) `speed` maps to a pure-rolling start, so friction only ever
-    # decelerates -- no skid-phase speed kink (contrast
-    # ``test_five_sevenths_transition_speed`` at the solver level).
     speeds = [math.hypot(vx, vy) for vx, vy in data["velocities"]]
     assert all(a >= b - 1e-6 for a, b in zip(speeds, speeds[1:], strict=False))
     for vx, vy in data["velocities"]:

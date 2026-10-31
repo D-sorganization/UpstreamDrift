@@ -38,9 +38,21 @@ from src.api.rate_limit import get_limit, limiter
 from src.shared.python.core.contracts import PostconditionError, precondition, require
 
 if TYPE_CHECKING:
-    from src.shared.python.putting_dynamics import HeightField, PutterState, SurfaceSpec
+    from src.shared.python.putting_dynamics import (
+        BallState,
+        CollisionReport,
+        HeightField,
+        PutterState,
+        SurfaceSpec,
+    )
 
 router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
+
+#: Putter head used when a request carries only a stroke speed (shared by
+#: ``/simulate-3d`` defaults and the 2-D routes).
+_DEFAULT_HEAD_MASS_KG = 0.35
+_DEFAULT_HEAD_MOI_KG_M2 = 4.5e-4
+_DEFAULT_LOFT_DEG = 3.0
 
 
 # -- Request / Response Models --
@@ -157,9 +169,9 @@ class Putt3DSimulationRequest(BaseModel):
     """Physics and visualization inputs for one three-dimensional putt."""
 
     putter_speed_mps: float = Field(1.8, gt=0.0, le=10.0)
-    loft_deg: float = Field(3.0, ge=-6.0, le=10.0)
-    head_mass_kg: float = Field(0.35, ge=0.1, le=1.0)
-    head_moi_kg_m2: float = Field(4.5e-4, ge=1e-5, le=1e-2)
+    loft_deg: float = Field(_DEFAULT_LOFT_DEG, ge=-6.0, le=10.0)
+    head_mass_kg: float = Field(_DEFAULT_HEAD_MASS_KG, ge=0.1, le=1.0)
+    head_moi_kg_m2: float = Field(_DEFAULT_HEAD_MOI_KG_M2, ge=1e-5, le=1e-2)
     coefficient_of_restitution: float = Field(0.78, gt=0.0, lt=1.0)
     hosel_toe_m: float = Field(0.0, ge=-0.08, le=0.08)
     hosel_forward_m: float = Field(0.0, ge=-0.05, le=0.05)
@@ -270,6 +282,41 @@ def _from_surface_frame(
 ) -> tuple[float, float]:
     """Surface-centred coordinates -> green-local ``(0..width, 0..height)``."""
     return x_m + half_width, y_m + half_height
+
+
+def _struck_ball(
+    stroke_speed_mps: float, direction: tuple[float, float], x_m: float, y_m: float
+) -> tuple[BallState, CollisionReport]:
+    """Ball state after the default putter strikes it along ``direction``.
+
+    ``speed`` in the 2-D requests is the putter-head speed, as in the legacy
+    engine, so the ball leaves through the shared impact model
+    (:func:`~src.shared.python.putting_dynamics.strike`) and skids into roll.
+    """
+    from src.shared.python.putting_dynamics import BallState, PutterState, strike
+
+    dir_x, dir_y = direction
+    require(
+        abs(math.hypot(dir_x, dir_y) - 1.0) < 1e-9, "direction must be a unit vector"
+    )
+    report = strike(
+        PutterState(
+            head_mass_kg=_DEFAULT_HEAD_MASS_KG,
+            moi_kg_m2=_DEFAULT_HEAD_MOI_KG_M2,
+            loft_deg=_DEFAULT_LOFT_DEG,
+            speed_mps=stroke_speed_mps,
+        )
+    )
+    ground_speed = report.horizontal_speed_mps
+    ball = BallState(
+        x_m=x_m,
+        y_m=y_m,
+        vx_mps=ground_speed * dir_x,
+        vy_mps=ground_speed * dir_y,
+        vz_mps=max(report.vertical_speed_mps, 0.0),
+        spin_rad_s=report.spin_rad_s,
+    )
+    return ball, report
 
 
 def _build_putting_3d_surface(
@@ -427,8 +474,7 @@ async def simulate_putt(
     from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
         USGA_STIMP_ROLL_MODEL,
     )
-    from src.shared.python.core.physics_constants import GOLF_BALL_RADIUS_M
-    from src.shared.python.putting_dynamics import BallState, simulate_ball
+    from src.shared.python.putting_dynamics import simulate_ball
 
     surface, half_w, half_h = _build_flat_putting_surface(
         payload.stimp_rating, payload.green_width, payload.green_height
@@ -443,20 +489,10 @@ async def simulate_putt(
     ball_x, ball_y = _to_surface_frame(payload.ball_x, payload.ball_y, half_w, half_h)
     hole_x, hole_y = _to_surface_frame(payload.hole_x, payload.hole_y, half_w, half_h)
 
-    # The legacy engine runs `speed` through a putter-head-to-ball COR
-    # transfer (PutterStroke.compute_launch_velocity) and gives the ball a
-    # small loft-driven backspin before it skids into roll. This request
-    # carries no putter mass/COR/loft inputs, so the shared core instead
-    # treats `speed` as the ball's own ground speed with a pure-rolling
-    # start (spin matched to the forward speed; no skid phase).
-    ball = BallState(
-        x_m=ball_x,
-        y_m=ball_y,
-        vx_mps=payload.speed * dir_x,
-        vy_mps=payload.speed * dir_y,
-        spin_rad_s=payload.speed / float(GOLF_BALL_RADIUS_M),
+    ball, report = _struck_ball(payload.speed, (dir_x, dir_y), ball_x, ball_y)
+    result = simulate_ball(
+        ball, surface, hole_x_m=hole_x, hole_y_m=hole_y, collision=report
     )
-    result = simulate_ball(ball, surface, hole_x_m=hole_x, hole_y_m=hole_y)
 
     positions = [
         list(_from_surface_frame(s.x_m, s.y_m, half_w, half_h)) for s in result.samples
@@ -537,13 +573,11 @@ async def scatter_analysis(
     from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
         USGA_STIMP_ROLL_MODEL,
     )
-    from src.shared.python.core.physics_constants import GOLF_BALL_RADIUS_M
-    from src.shared.python.putting_dynamics import BallState, simulate_ball
+    from src.shared.python.putting_dynamics import simulate_ball
 
     surface, half_w, half_h = _build_flat_putting_surface(
         request.stimp_rating, request.green_width, request.green_height
     )
-    ball_radius_m = float(GOLF_BALL_RADIUS_M)
 
     direction = np.array([request.direction_x, request.direction_y])
     norm = math.hypot(float(direction[0]), float(direction[1]))
@@ -573,13 +607,7 @@ async def scatter_analysis(
         putt_dir_x = cos_a * dir_x - sin_a * dir_y
         putt_dir_y = sin_a * dir_x + cos_a * dir_y
 
-        ball = BallState(
-            x_m=ball_x,
-            y_m=ball_y,
-            vx_mps=speed * putt_dir_x,
-            vy_mps=speed * putt_dir_y,
-            spin_rad_s=speed / ball_radius_m,
-        )
+        ball, _ = _struck_ball(speed, (putt_dir_x, putt_dir_y), ball_x, ball_y)
         result = simulate_ball(ball, surface, hole_x_m=hole_x, hole_y_m=hole_y)
         final_positions.append(
             list(_from_surface_frame(result.rest_x_m, result.rest_y_m, half_w, half_h))
