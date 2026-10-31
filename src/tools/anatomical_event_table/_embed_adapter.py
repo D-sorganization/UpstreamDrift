@@ -1,8 +1,4 @@
-"""Embeddable-tool adapter for the anatomical event table (HRG-E4, #13175).
-
-PyQt6 is imported lazily inside :meth:`create_main_widget` so headless CI can
-introspect the adapter.  ``cleanup`` is idempotent.
-"""
+"""Embed adapter for the anatomical event table; PyQt6 is imported lazily (#13175)."""
 
 from __future__ import annotations
 

@@ -1,10 +1,7 @@
-"""Desktop panel hosting the anatomical event table (HRG-E4, #13175).
+"""Desktop panel for the anatomical event table (HRG-E4, #13175).
 
-Opens an event-table export document (``anatomical_angles.event_table``
-``to_json``, the body ``POST /api/biomechanics/anatomical-event-table``
-returns) and shows it in the shared :class:`AnatomicalEventTableWidget`. It
-never substitutes sample data: an unreadable or invalid file is reported and
-the table keeps what it showed.
+Opens an event-table export (``event_table.to_json``, the API route's body) in
+the shared widget; an invalid file is reported and never replaced by samples.
 """
 
 from __future__ import annotations

@@ -1,9 +1,4 @@
-"""Desktop host for the anatomical event table (HRG-E4 final slice, #13175).
-
-The launcher tile opens an event-table export document (the body the API
-returns) and shows it in the shared widget, so a missing or invalid file
-leaves the table untouched and never shows sample data.
-"""
+"""Desktop tile for the anatomical event table (HRG-E4 final slice, #13175)."""
 
 from __future__ import annotations
 
