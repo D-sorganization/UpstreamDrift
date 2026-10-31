@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-31 | #14148 | Pure two-hand grip-margin metric: per-pad Coulomb margin, UNLOADED floor, slip events, grasp-map internal wrench and GripMarginReport |
 | 2026-10-31 | #14145 | Characterize putting_dynamics contracts with invariant tests and postconditions (putting v4 PR 1) |
 | 2026-10-31 | #14144 | Grip-size sweep CLI and receipt: hand length to Golf Pride bins (stylion-to-crease corrected), per-hand radius, squeeze, torque branch, governing branch and pad normals |
 | 2026-10-31 | #14140 | Per-hand grip radius: contact_topology(grip_geometry=...) places every pad on GripGeometry.radius_at(s) at its own station, with per_hand_required_squeeze_n (HRG-GD4 PR 1) |
