@@ -133,6 +133,29 @@ def _ensure_putt_postconditions(result: PuttResult) -> None:
     )
 
 
+def _roll_onset_state(state: _State, speed: float) -> tuple[_State, float]:
+    """Project a sliding state onto pure roll (#14141 step 5).
+
+    Ground friction acts at the contact point, so the ball's angular
+    momentum about that point, ``m R (v + (2/5) s)`` with contact-surface
+    speed ``s = omega R``, is unchanged by it. Pure roll (``v = s``)
+    therefore starts at ``v_roll = (v + 0.4 s) / 1.4`` -- the rigid-sphere
+    textbook result. Snapping ``s`` up to ``v`` instead (the earlier pin)
+    added rotational energy for an under-spun ball.
+
+    Postcondition: kinetic energy does not increase.
+    """
+    v_roll = (speed + 0.4 * state[4]) / 1.4
+    scale = v_roll / speed if speed > 0.0 else 0.0
+    rolled = (state[0], state[1], state[2] * scale, state[3] * scale, v_roll)
+    ensure(
+        v_roll**2 * 1.4 <= speed**2 + 0.4 * state[4] ** 2 + 1e-12,
+        "roll onset cannot add kinetic energy",
+        (speed, state[4], v_roll),
+    )
+    return rolled, v_roll
+
+
 def capture_speed_mps() -> float:
     """Full-chord capture bound ``2 R sqrt(g / (2 r))`` (module credit).
 
@@ -356,6 +379,7 @@ def simulate_ball(
             )
             if crossed_zero or within_one_step:
                 sliding = False
+                state, speed = _roll_onset_state(state, speed)
         if not sliding:
             # Pin the contact-surface speed to pure roll.
             state = (state[0], state[1], state[2], state[3], speed)
