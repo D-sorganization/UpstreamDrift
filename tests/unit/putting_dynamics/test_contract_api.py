@@ -39,6 +39,7 @@ _EXPECTED_EXPORTS = {
     "bumpy_friction_field",
     "bumpy_height_field",
     "capture_speed_mps",
+    "centre_strike_speed_ratio",
     "effective_head_mass",
     "energy_balance_error_j",
     "grain_factor",

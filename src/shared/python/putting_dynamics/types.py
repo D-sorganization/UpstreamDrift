@@ -5,6 +5,9 @@ Reused shared infrastructure (AGENTS.md section A discovery):
 * DbC helpers from ``src.shared.python.contracts``.
 * Golf-ball constants from ``src.shared.python.core.physics_constants``
   (USGA Rule 5 values; single source, not re-declared here).
+* ``PUTTER_FACE_COR`` from the same module for ``PutterState.cor``'s
+  default (uncited engineering default, #14141 step 3 — see that
+  constant's ``source`` for the honest provenance note).
 * Layout mirrors ``src.shared.python.physics.impact_model``
   (types / solver / utils split with a curated façade).
 
@@ -25,6 +28,7 @@ import math
 from dataclasses import dataclass
 
 from src.shared.python.contracts import require, require_finite
+from src.shared.python.core.physics_constants import PUTTER_FACE_COR
 
 __all__ = [
     "BallState",
@@ -113,7 +117,9 @@ class PutterState:
         loft_deg: Dynamic loft presented at impact [deg]; the sweep
             helper spans -4 to +8.
         speed_mps: Head speed at impact along the putt line [m/s].
-        cor: Face coefficient of restitution at putt speeds.
+        cor: Face coefficient of restitution at putt speeds; defaults
+            to the shared ``PUTTER_FACE_COR`` constant (single source
+            with ``collision.GROUND_RESTITUTION``, #14141).
         hosel_toe_m: Shaft-attachment offset toward the toe [m]
             (negative = heel-side, anser-style).
         hosel_forward_m: Shaft-attachment offset toward the target [m]
@@ -124,7 +130,7 @@ class PutterState:
     moi_kg_m2: float
     loft_deg: float
     speed_mps: float
-    cor: float = 0.78
+    cor: float = PUTTER_FACE_COR
     hosel_toe_m: float = 0.0
     hosel_forward_m: float = 0.0
 

@@ -10,9 +10,11 @@ Reused shared infrastructure (AGENTS.md section A discovery):
   ``feat/putting-vertical``, epic Tools#4125 H3) — the vendored Tools
   snapshot predates that branch, so the formulas are restated with
   credit instead of imported (UD vendors Tools; no import cycle).
-* The ground restitution used by the post-impact hop settle is the
-  green-contact default in
-  ``rust_core/upstream-physics/src/contact.rs`` (``cor = 0.78``).
+* The ground restitution used by the post-impact hop settle is
+  ``src.shared.python.core.physics_constants.GREEN_RESTITUTION``, an
+  uncited engineering default restated from
+  ``rust_core/upstream-physics/src/contact.rs`` (single source with
+  ``PutterState.cor``'s default, #14141 step 3).
 
 Model
 -----
@@ -81,6 +83,7 @@ from src.shared.python.contracts import ensure, require, require_finite
 from src.shared.python.core.physics_constants import (
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,
+    GREEN_RESTITUTION,
 )
 
 from .types import CollisionReport, PutterState
@@ -89,14 +92,16 @@ __all__ = [
     "GROUND_RESTITUTION",
     "LOFT_SWEEP_MAX_DEG",
     "LOFT_SWEEP_MIN_DEG",
+    "centre_strike_speed_ratio",
     "effective_head_mass",
     "strike",
     "sweep_dynamic_loft",
 ]
 
-#: Green-contact restitution for the post-impact hop settle — the
-#: default in ``rust_core/upstream-physics/src/contact.rs``.
-GROUND_RESTITUTION = 0.78
+#: Green-contact restitution for the post-impact hop settle; re-exported
+#: here (unchanged value) for API stability — the single source is now
+#: ``physics_constants.GREEN_RESTITUTION`` (#14141 step 3).
+GROUND_RESTITUTION = GREEN_RESTITUTION
 
 #: Dynamic-loft sweep bounds [deg] (epic #8345 P3).
 LOFT_SWEEP_MIN_DEG = -4.0
@@ -136,6 +141,48 @@ def effective_head_mass(putter: PutterState, impact_toe_m: float) -> float:
     m_eff = 1.0 / (1.0 / putter.head_mass_kg + impact_toe_m**2 / putter.moi_kg_m2)
     ensure(0.0 < m_eff <= putter.head_mass_kg, "m_eff in (0, M]", m_eff)
     return m_eff
+
+
+def centre_strike_speed_ratio(putter: PutterState) -> float:
+    """Ball/head speed ratio for a centred, square (zero-loft) strike.
+
+    Closed-form two-body normal impact with coefficient of
+    restitution ``e``: 1-D impulse-momentum for a head of mass ``M``
+    striking a stationary ball of mass ``m`` at relative approach
+    speed ``V`` gives post-impact ball speed::
+
+        v_ball = (1 + e) * M / (M + m) * V
+
+    This is the standard restitution-coefficient derivation for a
+    collinear two-body collision (e.g. Cross & Nathan, *The Physics of
+    Baseball and Softball*, Springer 2015, ch. 5; or any classical-
+    mechanics treatment of 1-D impact with restitution): momentum
+    conservation plus ``e = (v_ball - v_head') / V`` eliminates the
+    post-impact head speed ``v_head'`` and leaves this ratio.
+
+    The Gemini-suite "1.595" figure is *not* a universal constant —
+    it is this ratio evaluated at one particular ``(e, M, m)`` triple
+    for a centre strike, and it is undefined off-centre: an
+    off-centre strike replaces ``M`` with the smaller effective mass
+    from :func:`effective_head_mass`, which strictly lowers the ratio
+    (see ``tests/unit/putting_dynamics/test_strike_assumptions.py``).
+
+    Args:
+        putter: Valid putter state; only ``cor`` and ``head_mass_kg``
+            are used (the ratio does not depend on strike speed).
+
+    Returns:
+        Ball/head speed ratio, strictly within ``(0, 2)``.
+
+    Raises:
+        ValueError: If ``putter`` is not a :class:`PutterState`
+            (its own ``__post_init__`` enforces validity).
+    """
+    require(isinstance(putter, PutterState), "putter must be a PutterState", putter)
+    m_ball = float(GOLF_BALL_MASS_KG)
+    ratio = (1.0 + putter.cor) * putter.head_mass_kg / (putter.head_mass_kg + m_ball)
+    ensure(0.0 < ratio < 2.0, "centre-strike ratio must be in (0, 2)", ratio)
+    return ratio
 
 
 def strike(putter: PutterState, impact_toe_m: float = 0.0) -> CollisionReport:

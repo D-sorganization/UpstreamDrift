@@ -28,7 +28,9 @@ each submodule):
 * Tools ``swing_sim.variation.engine`` — keyed per-field RNG stream
   discipline for the bumpy fields.
 * ``rust_core/upstream-physics/src/contact.rs`` — green restitution
-  (0.78) and sliding friction (0.4) defaults.
+  and sliding friction (0.4) defaults; the restitution value is
+  routed through ``physics_constants.GREEN_RESTITUTION`` (single
+  source with the putter-face COR default, #14141 step 3).
 
 Quick start::
 
@@ -51,6 +53,7 @@ from .collision import (
     GROUND_RESTITUTION,
     LOFT_SWEEP_MAX_DEG,
     LOFT_SWEEP_MIN_DEG,
+    centre_strike_speed_ratio,
     effective_head_mass,
     strike,
     sweep_dynamic_loft,
@@ -120,6 +123,7 @@ __all__ = [
     "bumpy_friction_field",
     "bumpy_height_field",
     "capture_speed_mps",
+    "centre_strike_speed_ratio",
     "effective_head_mass",
     "energy_balance_error_j",
     "grain_factor",
