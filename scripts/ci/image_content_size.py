@@ -83,14 +83,36 @@ def content_size_bytes(inspect: Mapping[str, Any], architecture: str) -> int:
             "image store and Engine API 1.48+"
         )
     for manifest in manifests:
-        platform = manifest.get("Descriptor", {}).get("platform", {})
         if (
             manifest.get("Kind") == "image"
             and manifest.get("Available")
-            and platform.get("architecture") == architecture
+            and _architecture(manifest) == architecture
         ):
             return int(manifest["Size"]["Content"])
-    raise MeasurementError(f"no available image manifest for {architecture}")
+    raise MeasurementError(
+        f"no available image manifest for {architecture}: {_summary(manifests)}"
+    )
+
+
+def _architecture(manifest: Mapping[str, Any]) -> str | None:
+    # A buildx tarball loaded by build-push-action has no platform on its
+    # descriptor; the daemon reports it under ImageData instead.
+    image_platform = manifest.get("ImageData", {}).get("Platform", {})
+    descriptor_platform = manifest.get("Descriptor", {}).get("platform", {})
+    return image_platform.get("architecture") or descriptor_platform.get("architecture")
+
+
+def _summary(manifests: Sequence[Mapping[str, Any]]) -> str:
+    return json.dumps(
+        [
+            {
+                "Kind": manifest.get("Kind"),
+                "Available": manifest.get("Available"),
+                "architecture": _architecture(manifest),
+            }
+            for manifest in manifests
+        ]
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:

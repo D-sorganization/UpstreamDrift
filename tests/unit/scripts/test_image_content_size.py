@@ -49,6 +49,26 @@ def test_picks_the_daemon_architecture_when_several_platforms_are_present() -> N
     assert ics.content_size_bytes(payload, "amd64") == 70
 
 
+def test_reads_the_platform_of_a_loaded_image_from_image_data() -> None:
+    # build-push-action loads a buildx tarball: one OCI manifest whose
+    # descriptor carries no platform; the platform sits in ImageData.
+    payload = {
+        "Manifests": [
+            {
+                "Kind": "image",
+                "Available": True,
+                "Descriptor": {
+                    "mediaType": "application/vnd.oci.image.manifest.v1+json"
+                },
+                "ImageData": {"Platform": {"architecture": "amd64", "os": "linux"}},
+                "Size": {"Content": 590_000_000, "Total": 1_959_000_000},
+            }
+        ]
+    }
+
+    assert ics.content_size_bytes(payload, "amd64") == 590_000_000
+
+
 def test_fails_closed_without_per_manifest_sizes() -> None:
     # A daemon without the containerd image store returns no Manifests; falling
     # back to .Size would silently change what the budgets measure.
