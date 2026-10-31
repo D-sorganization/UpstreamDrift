@@ -76,7 +76,7 @@
         "js",
         "pyqt6"
       ],
-      "pending_reason": "putting_dynamics has no public Stimpmeter ramp-rollout function (stimp_to_rolling_mu takes a stimp reading as given, it does not derive one from a simulated ramp roll-off); this fixture documents the USGA ramp geometry for a future helper rather than checking an existing one. Not part of step 2/10 of #14141 -- tracked for a later PR."
+      "maps_to": "putting_dynamics.STIMPMETER_RELEASE_ANGLE_DEG"
     },
     {
       "fixture_id": "usga_ball_mass_max_kg",
