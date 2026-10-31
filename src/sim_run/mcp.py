@@ -2,7 +2,8 @@
 
 Epic #14085 / Child Task #14092:
 Thin stdio MCP adapter exposing 4 simulation run service tools:
-describe_engines, submit_run, get_run, fetch_artifact.
+describe_engines, submit_run, get_run, fetch_artifact. Epic #14141 step 9a
+adds 4 putting computation tools (see :mod:`.putting_tools`).
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from . import putting_tools
 from .models import RunRequest, export_schemas
 from .store import RunNotFoundError, SimulationRunStore
 from .worker import SimulationBusyError, SimulationWorkerPool
@@ -200,6 +202,7 @@ class SimulationMcpServer:
                 {**a, "run_id": "string", "artifact_name": "string"},
                 ["run_id", "artifact_name"],
             ),
+            *putting_tools.tool_specs(),
         ]
 
     def handle_request(self, request: dict[str, Any]) -> dict[str, Any]:
@@ -221,11 +224,26 @@ class SimulationMcpServer:
             elif method == "tools/list":
                 res = {"tools": self._tools()}
             elif method == "tools/call":
+                # Putting tools are pure computations (no filesystem/process
+                # side effects), so only auth applies; Private Mode's
+                # check_execution_allowed() never gates them.
                 handlers = {
                     "describe_engines": self.tool_describe_engines,
                     "submit_run": self.tool_submit_run,
                     "get_run": self.tool_get_run,
                     "fetch_artifact": self.tool_fetch_artifact,
+                    "putting_simulate_putt": lambda args: (
+                        putting_tools.tool_putting_simulate_putt(self.security, args)
+                    ),
+                    "putting_read_green": lambda args: (
+                        putting_tools.tool_putting_read_green(self.security, args)
+                    ),
+                    "putting_stimpmeter": lambda args: (
+                        putting_tools.tool_putting_stimpmeter(self.security, args)
+                    ),
+                    "putting_capture_speed": lambda args: (
+                        putting_tools.tool_putting_capture_speed(self.security, args)
+                    ),
                 }
                 handler = handlers.get(str(params.get("name")))
                 if not handler:
