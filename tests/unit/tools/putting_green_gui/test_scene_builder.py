@@ -1,19 +1,27 @@
 """Tests for the headless putting-green scene builder.
 
-These exercise the real :class:`PuttingGreenSimulator` wiring with no Qt
-dependency, so they run in any environment and cover the physics-to-render
-translation that backs the GUI.
+These exercise the shared ``putting_dynamics`` wiring with no Qt
+dependency. Holing configs are derived with :func:`solve_aim` on the
+builder's own surface, never tuned to a model's output (epic #14141 7d).
 """
 
 from __future__ import annotations
 
+import ast
+import inspect
+import math
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
+from src.shared.python.putting_dynamics import PutterState, solve_aim
+from src.tools.putting_green_gui import _scene_builder
 from src.tools.putting_green_gui._scene_builder import (
     _FT_TO_M,
     PuttConfig,
     PuttScene,
+    _setup_grid_and_surface,
     build_putt_scene,
 )
 
@@ -76,17 +84,35 @@ def test_trajectory_rides_the_terrain() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_flat_straight_putt_holes() -> None:
-    scene = build_putt_scene(
-        PuttConfig(
-            putter_speed_ms=2.2,
-            aim_deg=0.0,
-            cup_distance_m=12.0 * _FT_TO_M,
-            slope_deg=0.0,
-        )
+def _solved(distance_ft: float, slope_deg: float) -> tuple[PuttConfig, float]:
+    """The config ``solve_aim`` prescribes on the builder's surface."""
+    base = PuttConfig(cup_distance_m=distance_ft * _FT_TO_M, slope_deg=slope_deg)
+    ball_x, cup_x, *_, mid_y, _gx, _gy, _gz, surface = _setup_grid_and_surface(
+        base, base.cup_distance_m
     )
-    assert scene.holed is True
-    assert scene.final_distance_to_cup_m < 0.1
+    aim = solve_aim(surface, (ball_x, mid_y), (cup_x, mid_y), PutterState.typical(1))
+    assert aim.holed and aim.converged
+    config = replace(
+        base,
+        putter_speed_ms=aim.putter_speed_mps,
+        aim_deg=math.degrees(aim.heading_rad),
+    )
+    return config, aim.heading_rad
+
+
+def test_solved_flat_straight_putt_holes() -> None:
+    config, heading = _solved(12.0, 0.0)
+    assert heading == pytest.approx(0.0, abs=1e-3)
+    assert build_putt_scene(config).holed is True
+
+
+def test_half_the_solved_pace_finishes_short() -> None:
+    config, _ = _solved(12.0, 0.0)
+    scene = build_putt_scene(
+        replace(config, putter_speed_ms=config.putter_speed_ms / 2)
+    )
+    assert scene.holed is False
+    assert scene.trajectory_xyz[-1, 0] < scene.cup_xyz[0]
 
 
 def test_cross_slope_straight_putt_breaks_and_misses() -> None:
@@ -103,16 +129,21 @@ def test_cross_slope_straight_putt_breaks_and_misses() -> None:
     assert scene.holed is False
 
 
-def test_playing_the_break_can_hole_the_putt() -> None:
-    holed = build_putt_scene(
-        PuttConfig(
-            putter_speed_ms=2.6,
-            aim_deg=4.0,
-            cup_distance_m=15.0 * _FT_TO_M,
-            slope_deg=3.0,
-        )
-    )
-    assert holed.holed is True
+def test_playing_the_break_aims_uphill_and_holes() -> None:
+    # The cross-slope rises toward +y, so the read must aim above the hole.
+    config, heading = _solved(15.0, 1.5)
+    assert heading > 0.0
+    assert build_putt_scene(config).holed is True
+
+
+def test_scene_names_the_shared_roll_model() -> None:
+    assert build_putt_scene(PuttConfig()).roll_model == "usga-stimp-roll/1"
+
+
+def test_scene_builder_imports_nothing_from_the_legacy_engine() -> None:
+    tree = ast.parse(inspect.getsource(_scene_builder))
+    modules = [n.module or "" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)]
+    assert not [m for m in modules if m.startswith("src.engines")]
 
 
 def test_roll_modes_are_rollmode_labels() -> None:

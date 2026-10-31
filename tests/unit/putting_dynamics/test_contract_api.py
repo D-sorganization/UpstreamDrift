@@ -24,6 +24,7 @@ _EXPECTED_EXPORTS = {
     "LOFT_SWEEP_MAX_DEG",
     "LOFT_SWEEP_MIN_DEG",
     "STIMP_RELEASE_SPEED_MPS",
+    "USGA_STIMP_ROLL_MODEL",
     # types
     "AimSolution",
     "BallState",

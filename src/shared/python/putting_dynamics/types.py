@@ -90,6 +90,13 @@ class BallState:
         return math.hypot(self.vx_mps, self.vy_mps)
 
 
+#: Head of :meth:`PutterState.typical` (uncited engineering defaults: a
+#: common blade/mallet mass, MOI and loft, not a measured putter).
+TYPICAL_HEAD_MASS_KG = 0.35
+TYPICAL_HEAD_MOI_KG_M2 = 4.5e-4
+TYPICAL_LOFT_DEG = 3.0
+
+
 @dataclass(frozen=True)
 class PutterState:
     """Putter head at impact.
@@ -166,6 +173,18 @@ class PutterState:
             abs(self.hosel_forward_m) <= 0.05,
             "hosel forward offset within +/- 0.05 m",
             self.hosel_forward_m,
+        )
+
+    @classmethod
+    def typical(cls, speed_mps: float) -> PutterState:
+        """A typical putter head swung at ``speed_mps``, for callers that
+        have only a stroke speed (API routes, GUI scene builder; #14141 7d).
+        """
+        return cls(
+            head_mass_kg=TYPICAL_HEAD_MASS_KG,
+            moi_kg_m2=TYPICAL_HEAD_MOI_KG_M2,
+            loft_deg=TYPICAL_LOFT_DEG,
+            speed_mps=speed_mps,
         )
 
 
