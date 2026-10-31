@@ -32,7 +32,8 @@ grain as a 2-D unit vector and computes
 ``grain_direction_rad`` directly. The two are the same formula under a
 change of representation, so :class:`TurfSpec` stores the angle.
 
-Deliberately **not** ported (no shared-core hook yet; tracked for step 5):
+Permanently **not** ported (reasons pinned in
+``tests/unit/putting_dynamics/test_engine_parity.py``):
 the height-of-cut multiplier (fit to the legacy base law), the compaction
 speed factor and the cross-grain lateral curve (``simulate_ball`` consumes
 only :class:`~.friction.FrictionParams`). ``compaction_factor`` is carried
