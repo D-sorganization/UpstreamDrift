@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import hashlib
-import sys
+import platform
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +13,14 @@ from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 # Bumped when joint-reaction kinematics or realization order changes; CI asserts this.
 MSK_LIFT_JR_KINEMATICS_REVISION = 6
+
+
+_REPO_ROOT = Path(__file__).resolve().parents[5]
+
+
+def _repo_path(path: Path) -> str:
+    """*path* relative to the repository, so receipts carry no host paths."""
+    return path.relative_to(_REPO_ROOT).as_posix()
 
 
 def _source_sha256(path: Path) -> str:
@@ -38,15 +46,15 @@ def joint_reaction_source_fingerprint() -> dict[str, Any]:
     frame_path = parent / "msk_lift_joint_reaction_frame.py"
     return {
         "kinematics_revision": MSK_LIFT_JR_KINEMATICS_REVISION,
-        "joint_reactions_module": str(parent / "msk_lift_joint_reactions.py"),
-        "joint_reaction_frame_module": str(frame_path),
-        "simbody_kinematics_module": str(kin_path),
+        "joint_reactions_module": _repo_path(parent / "msk_lift_joint_reactions.py"),
+        "joint_reaction_frame_module": _repo_path(frame_path),
+        "simbody_kinematics_module": _repo_path(kin_path),
         "simbody_kinematics_sha256": _source_sha256(kin_path),
         "joint_reaction_frame_sha256": _source_sha256(frame_path),
         "opensim_version": str(osim.GetVersion()),
         "numpy_version": str(np.__version__),
         "scipy_version": str(scipy.__version__),
-        "python_executable": sys.executable,
+        "python_version": platform.python_version(),
         "constraints_enforced_for_id": False,
         "realization_order": (
             "disable couplers; coordinates+setTime; muscle+residual overrides; "

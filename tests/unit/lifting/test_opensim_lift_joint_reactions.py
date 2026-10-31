@@ -134,6 +134,24 @@ def test_bench_press_is_not_hard_coded_unavailable() -> None:
         assert jr._unavailable_reason("bench_press", qual) is None
 
 
+@pytest.mark.requires_opensim
+def test_source_fingerprint_has_no_host_paths() -> None:
+    """Committed receipts carry repo-relative module paths, not host paths."""
+    from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_diagnostics import (
+        joint_reaction_source_fingerprint,
+    )
+
+    _real_opensim()
+    fingerprint = joint_reaction_source_fingerprint()
+    for key in (
+        "joint_reactions_module",
+        "joint_reaction_frame_module",
+        "simbody_kinematics_module",
+    ):
+        assert fingerprint[key].startswith("src/engines/"), fingerprint[key]
+    assert not any(str(Path.home()) in str(v) for v in fingerprint.values())
+
+
 def test_osl4_qualification_reads_all_lifts() -> None:
     """_read_osl4_qualification reads each lift from receipt without hard-coding."""
     from src.engines.physics_engines.opensim.python.msk_lift_joint_reactions import (
