@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 47 parity · 6 gap · 16 exempt (12 pending decision in #7460).
+**Summary:** 48 parity · 5 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -19,7 +19,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `analysis.impact_parameters`<br>Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line | ✅ parity | `src/tools/impact_parameters_panel/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/ImpactParametersPanel.tsx` | — |
 | `analysis.static_plots`<br>Static analysis plots (20+ plot types) | ✅ parity | `vendor/ud-tools/src/shared/python/plot_engine/pyqt6_widget.py` | `src/api/routes/analysis_plots.py` | `ui/src/components/analysis/PlotsSection.tsx` | — |
 | `biomech.exercise_injury_dashboards`<br>Exercise + injury-risk biomechanics dashboards | ⚪ exempt | `src/launchers/exercise_dashboard.py` | — | — | Desktop biomechanics dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
-| `biomechanics.anatomical_event_table`<br>Anatomical Event Table of Wrist and Forearm Terms at Swing Events | 🔴 gap | `src/shared/python/ui/anatomical_event_table_widget.py` | `src/api/routes/biomechanics.py` | `ui/src/components/analysis/anatomicalEventTable/AnatomicalEventTable.tsx` | #13175 |
+| `biomechanics.anatomical_event_table`<br>Anatomical Event Table of Wrist and Forearm Terms at Swing Events | ✅ parity | `src/shared/python/ui/anatomical_event_table_widget.py` | `src/api/routes/biomechanics.py` | `ui/src/components/analysis/anatomicalEventTable/AnatomicalEventTable.tsx` | — |
 | `canonical_core.workspaces`<br>Canonical-core estimation/comparison workspaces | ✅ parity | `src/tools/canonical_core/estimation.py` | — | `ui/src/pages/CanonicalCoreShell.tsx` | — |
 | `chat.live_context`<br>Live app/engine context in chat | ✅ parity | `src/launchers/launcher_sidekick_sidebar.py` | `src/api/services/chat_app_context.py` | `ui/src/components/ui/ChatContextChip.tsx` | — |
 | `chat.transport`<br>AI chat transport (message send/stream) | ✅ parity | `src/launchers/launcher_sidekick_sidebar.py` | `src/api/routes/chat_ws.py` | `ui/src/pages/Chat.tsx` | — |
@@ -90,6 +90,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `actuator_controls` | `simulation.controls_wiring` |
 | `aip` | `platform.aip_protocol` |
 | `analysis_tools_api` | `analysis.analysis_tools_api` |
+| `anatomical_event_table` | `biomechanics.anatomical_event_table` |
 | `biomech_exercise` | `biomech.exercise_injury_dashboards` |
 | `bunkershot3d` | `tools.bunkershot3d_workbench` |
 | `canonical_core_comparison` | `canonical_core.workspaces` |

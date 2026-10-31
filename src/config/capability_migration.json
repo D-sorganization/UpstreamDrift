@@ -502,6 +502,18 @@
       "evidence": "src/tools/grip_wrench_plots/gui.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "anatomical_event_table": {
+      "id": "anatomical_event_table",
+      "name": "Anatomical Event Table",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/anatomical_event_table/gui.py",
+      "acceptance_owner": "tests/tools/anatomical_event_table/test_anatomical_event_table_tool.py"
+    },
     "spine_viewer": {
       "id": "spine_viewer",
       "name": "Spine Viewer",
