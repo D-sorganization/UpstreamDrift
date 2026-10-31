@@ -6,31 +6,19 @@ That module is left untouched by this step (callers migrate in step 7,
 duplicates are removed in step 10) — this module only adds the converged
 model to the shared core.
 
-**One law, not two.** ADR-0045 (`docs/adr/0045-...md`) names and preserves
-two roll-physics models as a user-visible choice in their existing homes:
-``ud-legacy-roll/1`` (the engine's agronomic-factor law — see the
-migration source's ``rolling_friction_coefficient`` docstring for its exact
-closed form — with height-of-cut/condition/grain adjustments) and
-``usga-stimp-roll/1`` (the stimpmeter-geometry law already in
-:mod:`.friction`, ``stimp_to_rolling_mu``). That ADR governs the two
-*existing* stacks; it does not require a *new* shared module to carry both.
-Per the putting-v4 panel decision, the shared core converges on exactly one
-documented model — provisionally "the UD turf model", built on
-``usga-stimp-roll/1`` because it is the law consistent with the external
-Grober (2011) / USGA Stimpmeter fixture (``stimp_to_rolling_mu(10) ~=
-0.056``, inside the published 0.05-0.07 tournament band). The engine's
-legacy law is **not** ported here; it stays exactly where ADR-0045 put it,
-in the engine, preserved and unchanged.
+**One law, not two.** ADR-0045 preserves two roll models in their existing
+homes: ``ud-legacy-roll/1`` (the engine's agronomic-factor law) and
+``usga-stimp-roll/1`` (:func:`~.friction.stimp_to_rolling_mu`). Per the
+putting-v4 panel decision the shared core converges on one documented
+model, built on ``usga-stimp-roll/1`` because it is the law consistent with
+the external Grober (2011) / USGA Stimpmeter fixture. The legacy law is not
+ported; it stays in the engine, unchanged, as ADR-0045 records.
 
 Ported from the migration source, re-expressed through shared types:
 
-* :class:`GrassType` / :class:`TurfCondition` — same enum members and
-  same numeric defaults as the migration source. The migration source's
-  module docstring cites USGA Stimpmeter and Haake (1989) only as general
-  background; neither citation ties to any individual grain-strength,
-  mowing-height, or condition-multiplier number below, so every such
-  value is commented as an **uncited engineering default** (not an
-  external fixture) exactly like the migration source left it.
+* :class:`GrassType` / :class:`TurfCondition` — same members and numeric
+  defaults as the migration source, whose citations (USGA, Haake 1989) are
+  background only; every value below is an **uncited engineering default**.
 * :class:`TurfSpec` — a frozen, DbC-checked descriptor that renders onto
   :class:`~.friction.FrictionParams` / :class:`~.surfaces.SurfaceSpec`
   through :func:`~.friction.stimp_to_rolling_mu` alone.
@@ -42,28 +30,13 @@ grain as a 2-D unit vector and computes
 :func:`~.friction.grain_factor` computes the identical
 ``1 - grain_strength * cos(theta_v - theta_grain)`` from
 ``grain_direction_rad`` directly. The two are the same formula under a
-change of representation (vector angle vs. stored angle); no information
-is lost. :class:`TurfSpec` therefore stores the angle directly instead of
-re-deriving it from a vector every call.
+change of representation, so :class:`TurfSpec` stores the angle.
 
-Deliberately **not** ported (no shared-core hook exists for these; track
-for step 4c/5):
-
-* The migration source's height-of-cut multiplier on ``mu`` — that
-  correction was fit to the engine's legacy base coefficient, not to the
-  stimp law, and stacking it here would silently change the single
-  documented mu_roll0. :class:`GrassType` still exposes
-  :attr:`~GrassType.default_height_mm` for callers that want the
-  informational value, but :meth:`TurfSpec.to_friction_params` does not
-  apply it.
-* The migration source's ``compute_speed_factor`` (compaction-based
-  overall speed multiplier) and ``apply_grain_to_velocity`` (cross-grain
-  lateral curve) — the shared :func:`~.solver.simulate_ball` mode machine
-  has no hook for either a global speed multiplier or a lateral
-  grain-curve term; it only consumes :class:`~.friction.FrictionParams`
-  through :func:`~.friction.rolling_mu` / :func:`~.friction.sliding_mu`.
-  ``compaction_factor`` is carried on :class:`TurfSpec` as DbC-validated
-  descriptive metadata only.
+Deliberately **not** ported (no shared-core hook yet; tracked for step 5):
+the height-of-cut multiplier (fit to the legacy base law), the compaction
+speed factor and the cross-grain lateral curve (``simulate_ball`` consumes
+only :class:`~.friction.FrictionParams`). ``compaction_factor`` is carried
+as validated metadata only.
 """
 
 from __future__ import annotations
@@ -257,8 +230,7 @@ class TurfSpec:
         ``mu_static >= mu_roll0`` holds for every in-range stimp/condition
         combination (see :data:`_STATIC_MU_MARGIN`).
         """
-        grain_strength = self.grain_strength
-        assert grain_strength is not None  # set in __post_init__
+        grain_strength = float(self.grain_strength or 0.0)
         mu_roll0 = (
             stimp_to_rolling_mu(self.stimp_ft) * self.condition.friction_multiplier
         )
@@ -299,24 +271,10 @@ class TurfSpec:
                 "condition": TurfCondition.NORMAL,
                 "grain_strength": 0.08,
             },
-            "tournament_standard": {
-                "stimp_ft": 10.5,
-                "condition": TurfCondition.NORMAL,
-                "grain_strength": 0.1,
-            },
             "municipal_slow": {
                 "stimp_ft": 8.0,
                 "grass_type": GrassType.POA_ANNUA,
                 "grain_strength": 0.2,
-            },
-            "augusta_like": {
-                "stimp_ft": 13.5,
-                "condition": TurfCondition.DRY,
-                "grain_strength": 0.05,
-            },
-            "practice_green": {
-                "stimp_ft": 9.5,
-                "grain_strength": 0.12,
             },
             "bermuda_summer": {
                 "stimp_ft": 9.0,
@@ -324,11 +282,6 @@ class TurfSpec:
                 "condition": TurfCondition.DRY,
                 "grain_strength": 0.4,
                 "grain_direction_rad": math.pi / 4.0,
-            },
-            "links_fescue": {
-                "stimp_ft": 10.0,
-                "grass_type": GrassType.FESCUE,
-                "grain_strength": 0.2,
             },
             "wet_morning": {
                 "stimp_ft": 10.0,
