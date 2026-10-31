@@ -73,13 +73,7 @@ class PuttSimulationRequest(BaseModel):
     green_height: float = Field(20.0, description="Green height [m]", gt=0)
     hole_x: float = Field(10.0, description="Hole X position [m]")
     hole_y: float = Field(15.0, description="Hole Y position [m]")
-    wind_speed: float = Field(
-        0.0,
-        description=(
-            "Wind speed [m/s]; must be 0 — the shared putting core has no wind model"
-        ),
-        ge=0,
-    )
+    wind_speed: float = Field(0.0, description="Wind speed [m/s]", ge=0)
     wind_direction_x: float = Field(1.0, description="Wind direction X")
     wind_direction_y: float = Field(0.0, description="Wind direction Y")
 
