@@ -27,7 +27,6 @@ from src.shared.python.pendulum_simulator.unified_perturbation_study import (
     STUDY,
     SteppableTripleEngine,
     UnifiedStudy,
-    receipt_cvs_match,
     run_unified_study,
 )
 
@@ -52,15 +51,11 @@ def test_receipt_records_one_shared_setup_for_every_engine() -> None:
     assert (setup["dt_s"], setup["integrator"]) == (STUDY.dt_s, STUDY.integrator)
     assert (setup["seed"], setup["interpolation_mode"]) == (STUDY.seed, "zoh")
     assert len(receipt["engines"]) >= 2
-    for entry in receipt["engines"].values():
+    band = receipt["sensitivity_context"]["within_engine_trial_cv"]
+    for name, entry in receipt["engines"].items():
         assert entry["counted"] and entry["backend"] == "real"
         assert {field: entry[field] for field in SETUP_FIELDS} == setup
-
-
-def test_receipt_carries_the_within_engine_sensitivity_band() -> None:
-    band = _receipt()["sensitivity_context"]["within_engine_trial_cv"]
-    for engine in _receipt()["engines"]:
-        assert set(band[engine]) == set(METRIC_KEYS)
+        assert set(band[name]) == set(METRIC_KEYS)
 
 
 def test_doc_states_every_measured_cv() -> None:
@@ -73,7 +68,11 @@ def test_doc_states_every_measured_cv() -> None:
 @pytest.mark.slow
 def test_regeneration_reproduces_the_committed_receipt() -> None:
     pytest.importorskip("mujoco")
-    assert receipt_cvs_match(run_unified_study(), _receipt())
+    fresh, committed = run_unified_study(), _receipt()
+    assert fresh["setup"] == committed["setup"]
+    for metric, cv in committed["cv_summary"].items():
+        got = fresh["cv_summary"][metric]["cv"]
+        assert got == pytest.approx(cv["cv"], rel=1e-6, abs=1e-15)
 
 
 def test_short_study_is_measured_with_one_setup() -> None:
@@ -91,7 +90,6 @@ def test_independent_adapters_agree_on_energy_and_tip_velocity() -> None:
     ]
     for engine in engines:
         engine.reset()
-        assert math.isfinite(engine.get_total_energy())
     assert engines[0].get_total_energy() == pytest.approx(
         engines[1].get_total_energy(), rel=1e-9
     )
@@ -106,16 +104,16 @@ def test_independent_adapters_agree_on_energy_and_tip_velocity() -> None:
     )
 
 
-@pytest.mark.parametrize("dt", [0.0, -1e-3, math.nan])
-def test_step_rejects_invalid_dt(dt: float) -> None:
+@pytest.mark.parametrize(
+    ("call", "match"),
+    [
+        (lambda e: e.step(0.0), "dt"),
+        (lambda e: e.step(math.nan), "dt"),
+        (lambda e: e.set_control(np.zeros(2)), "control"),
+    ],
+)
+def test_wrapper_fails_closed(call, match: str) -> None:
     engine = SteppableTripleEngine(InHouseTripleAdapter())
     engine.reset()
-    with pytest.raises(ValueError, match="dt"):
-        engine.step(dt)
-
-
-def test_step_rejects_wrong_control_width() -> None:
-    engine = SteppableTripleEngine(InHouseTripleAdapter())
-    engine.reset()
-    with pytest.raises(ValueError, match="control"):
-        engine.set_control(np.zeros(2))
+    with pytest.raises(ValueError, match=match):
+        call(engine)

@@ -72,7 +72,6 @@
         "end_effector_speed_final": 0.0010276649049390204,
         "peak_end_effector_speed": 0.00032940039966022547
       }
-    },
-    "drive_mode_receipt": "docs/validation/drive_mode_sensitivity_receipt.json"
+    }
   }
 }

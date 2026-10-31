@@ -1,11 +1,8 @@
 """Unified cross-engine perturbation study on the canonical triple pendulum (#13795).
 
-Re-runs the #2021 perturbation study with one setup for every engine: the
-canonical :data:`TRIPLE_PENDULUM_SPEC` (one gravity constant), the RK4 step
-that SAP-3 (#13792) shows converged at 1 ms, one noise seed and zero-order-hold
-control. The in-house dynamics and MuJoCo each compute their own state, tip
-velocity and energy; the receipt is assembled by
-:func:`cross_engine_receipt.build_receipt`.
+Re-runs the #2021 study with one setup for every engine (canonical spec, one g,
+1 ms RK4 per SAP-3 #13792, one seed, zero-order hold). In-house dynamics and
+MuJoCo each compute their own state, tip velocity and energy.
 
 Design by Contract
 ------------------
@@ -19,7 +16,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any
 
 import numpy as np
 
@@ -43,27 +40,7 @@ from src.shared.python.pendulum_simulator.triple_pendulum_spec import (
 )
 
 N_JOINTS = 3
-
-
-class ObservableTripleAdapter(Protocol):
-    """A step-convergence adapter that also reports state, tip velocity and energy."""
-
-    @property
-    def engine_name(self) -> str: ...
-
-    def reset(self) -> None: ...
-
-    def configure(self, integrator: str, dt: float) -> None: ...
-
-    def step(
-        self, t: float, dt: float, control: tuple[float, float, float]
-    ) -> None: ...
-
-    def joint_state(self) -> tuple[np.ndarray, np.ndarray]: ...
-
-    def tip_velocity(self) -> np.ndarray: ...
-
-    def total_energy(self) -> float: ...
+TripleAdapter = InHouseTripleAdapter | MuJoCoTripleAdapter
 
 
 @dataclass(frozen=True)
@@ -85,7 +62,7 @@ STUDY = UnifiedStudy()
 class SteppableTripleEngine:
     """Expose an adapter through the perturbation runner's ``SteppableEngine`` API."""
 
-    def __init__(self, adapter: ObservableTripleAdapter, study: UnifiedStudy = STUDY):
+    def __init__(self, adapter: TripleAdapter, study: UnifiedStudy = STUDY):
         self._adapter = adapter
         self._study = study
         self._control = (0.0, 0.0, 0.0)
@@ -131,7 +108,7 @@ def _trial_cv(result: CrossEngineRunResult) -> dict[str, float | None]:
 
 
 def run_unified_study(
-    adapters: list[ObservableTripleAdapter] | None = None,
+    adapters: list[TripleAdapter] | None = None,
     study: UnifiedStudy = STUDY,
 ) -> dict[str, Any]:
     """Run every adapter on the shared setup and return the validated receipt."""
@@ -166,30 +143,7 @@ def run_unified_study(
         noise_amplitude_nm=study.noise_amplitude_nm,
     )
     receipt["sensitivity_context"] = {
-        "within_engine_trial_cv": {n: _trial_cv(r) for n, r in results.items()},
-        "drive_mode_receipt": "docs/validation/drive_mode_sensitivity_receipt.json",
+        "within_engine_trial_cv": {n: _trial_cv(r) for n, r in results.items()}
     }
     validate_receipt(receipt)
     return receipt
-
-
-def receipt_cvs_match(fresh: dict[str, Any], committed: dict[str, Any]) -> bool:
-    """True when both receipts share a setup and agree on every cross-engine CV."""
-    if fresh["setup"] != committed["setup"]:
-        return False
-    for metric, cv in committed["cv_summary"].items():
-        got, want = fresh["cv_summary"][metric]["cv"], cv["cv"]
-        if (got is None) != (want is None):
-            return False
-        if got is not None and not math.isclose(got, want, rel_tol=1e-6, abs_tol=1e-15):
-            return False
-    return True
-
-
-__all__ = [
-    "STUDY",
-    "SteppableTripleEngine",
-    "UnifiedStudy",
-    "receipt_cvs_match",
-    "run_unified_study",
-]

@@ -260,16 +260,10 @@ class MuJoCoTripleAdapter:
 
     def tip_velocity(self) -> np.ndarray:
         """World-frame linear velocity (m/s) of the club-head geom."""
-        self._mujoco.mj_forward(self.model, self.data)
-        res = np.zeros(6)
-        self._mujoco.mj_objectVelocity(
-            self.model,
-            self.data,
-            self._mujoco.mjtObj.mjOBJ_GEOM,
-            self._head_geom_id,
-            res,
-            0,
-        )
+        mj, res = self._mujoco, np.zeros(6)
+        mj.mj_forward(self.model, self.data)
+        geom = mj.mjtObj.mjOBJ_GEOM
+        mj.mj_objectVelocity(self.model, self.data, geom, self._head_geom_id, res, 0)
         return res[3:].copy()
 
     def total_energy(self) -> float:
