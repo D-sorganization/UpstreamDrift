@@ -1,11 +1,13 @@
-"""Putting MCP tools for `SimulationMcpServer` (epic #14141, putting v4 step 9a).
+"""Putting MCP tools for `SimulationMcpServer` (epic #14141, putting v4 step 9a/9b).
 
-Design of record (``research/step9_plan.md`` row 9a): these four tools join
+Design of record (``research/step9_plan.md`` rows 9a/9b): these tools join
 the shared stdio server rather than vendoring the retired Gemini
 ``putting_mcp_server.py`` (different tool surface). Every
 handler is a pure computation, so Private Mode's
 ``check_execution_allowed`` never applies — only ``check_auth`` does, as
-for the read-only ``get_run``/``fetch_artifact`` tools.
+for the read-only ``get_run``/``fetch_artifact`` tools. The step 9b
+``putting_make_probability`` tool is a seeded Monte Carlo estimate,
+not a calibrated player or tour figure.
 """
 
 from __future__ import annotations
@@ -17,16 +19,16 @@ from typing import Any, Protocol
 from src.shared.python.putting_dynamics import (
     HOLE_RADIUS_M,
     USGA_STIMP_ROLL_MODEL,
-    FrictionField,
-    FrictionParams,
-    HeightField,
     PutterState,
     SurfaceSpec,
     capture_speed_mps,
     measure_stimp_ft,
     simulate_strike,
     solve_aim,
-    stimp_to_rolling_mu,
+)
+from src.shared.python.sg_optimizer.shot_model.putting_physics import (
+    StrokeNoise,
+    simulated_make_probability,
 )
 
 
@@ -72,11 +74,7 @@ def _surface_from_args(arguments: dict[str, Any]) -> SurfaceSpec:
     slope_aspect_deg = _require_number(
         arguments, "slope_aspect_deg", 0.0, minimum=-360.0, maximum=360.0
     )
-    friction = FrictionParams(mu_roll0=stimp_to_rolling_mu(stimp_ft))
-    height = HeightField.planar(grade_percent=slope_pct, aspect_deg=slope_aspect_deg)
-    return SurfaceSpec(
-        height=height, friction_field=FrictionField.uniform(), friction=friction
-    )
+    return SurfaceSpec.planar_uniform(stimp_ft, slope_pct, slope_aspect_deg)
 
 
 def tool_specs() -> list[dict[str, Any]]:
@@ -123,6 +121,27 @@ def tool_specs() -> list[dict[str, Any]]:
             "inputSchema": {
                 "type": "object",
                 "properties": {**auth, "entry_offset_m": {"type": "number"}},
+            },
+        },
+        {
+            "name": "putting_make_probability",
+            "description": (
+                "Seeded Monte Carlo make-% estimate from stroke/read noise "
+                "(not a calibrated player or tour figure)."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    **auth,
+                    **surface,
+                    "distance_ft": {"type": "number"},
+                    "face_sd_deg": {"type": "number"},
+                    "speed_cv": {"type": "number"},
+                    "read_sd_deg": {"type": "number"},
+                    "n_trials": {"type": "number"},
+                    "seed": {"type": "number"},
+                },
+                "required": ["distance_ft"],
             },
         },
     ]
@@ -203,5 +222,49 @@ def tool_putting_capture_speed(
         {
             "max_capture_speed_mps": capture_speed_mps(entry_offset_m),
             "entry_offset_m": entry_offset_m,
+        }
+    )
+
+
+def tool_putting_make_probability(
+    security: _SecurityCheck, arguments: dict[str, Any]
+) -> dict[str, Any]:
+    """Seeded Monte Carlo make-% estimate; not a calibrated tour figure."""
+    security.check_auth(arguments.get("auth_token"))
+    stimp_ft = _require_number(arguments, "stimp_ft", 10.0, minimum=3.0, maximum=16.0)
+    slope_pct = _require_number(arguments, "slope_pct", 0.0, minimum=0.0, maximum=10.0)
+    slope_aspect_deg = _require_number(
+        arguments, "slope_aspect_deg", 90.0, minimum=-360.0, maximum=360.0
+    )
+    distance_ft = _require_number(arguments, "distance_ft", minimum=0.3, maximum=98.0)
+    noise = StrokeNoise(
+        face_sd_deg=_require_number(
+            arguments, "face_sd_deg", 0.0, minimum=0.0, maximum=45.0
+        ),
+        speed_cv=_require_number(arguments, "speed_cv", 0.0, minimum=0.0, maximum=2.0),
+        read_sd_deg=_require_number(
+            arguments, "read_sd_deg", 0.0, minimum=0.0, maximum=45.0
+        ),
+    )
+    n_trials = int(
+        _require_number(arguments, "n_trials", 32.0, minimum=1.0, maximum=200.0)
+    )
+    seed = int(_require_number(arguments, "seed", 0.0, minimum=0.0, maximum=2**31 - 1))
+    make_probability = simulated_make_probability(
+        distance_ft,
+        noise,
+        stimp_ft=stimp_ft,
+        slope_pct=slope_pct,
+        slope_aspect_deg=slope_aspect_deg,
+        n_trials=n_trials,
+        seed=seed,
+    )
+    return _envelope(
+        {
+            "make_probability": make_probability,
+            "n_trials": n_trials,
+            "standard_error": math.sqrt(
+                make_probability * (1.0 - make_probability) / n_trials
+            ),
         }
     )

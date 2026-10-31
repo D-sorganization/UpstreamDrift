@@ -1,4 +1,4 @@
-"""Putting MCP tool tests on the shared stdio adapter (epic #14141 step 9a).
+"""Putting MCP tool tests on the shared stdio adapter (epic #14141 steps 9a/9b).
 
 Reuses ``test_mcp_adapter.py``'s in-process JSON-RPC client; assertions
 are invariants/parity with ``putting_dynamics``, never output snapshots.
@@ -23,6 +23,7 @@ _PUTTING_TOOL_NAMES = {
     "putting_read_green",
     "putting_stimpmeter",
     "putting_capture_speed",
+    "putting_make_probability",
 }
 #: Short putt used throughout so `solve_aim`'s bisection stays fast.
 _SHORT_DISTANCE_M = 1.5
@@ -111,6 +112,18 @@ def test_capture_speed_falls_with_offset(client: InProcessMcpClient) -> None:
 
 
 @pytest.mark.unit
+def test_make_probability_round_trip_reports_standard_error(
+    client: InProcessMcpClient,
+) -> None:
+    # Zero noise on a flat green holes every replay (sg_optimizer invariant).
+    args = {"distance_ft": 6.0, "slope_pct": 0.0, "n_trials": 4, "seed": 0}
+    payload = _result_payload(client.tool("putting_make_probability", args))
+    assert payload["make_probability"] == 1.0
+    assert payload["standard_error"] == pytest.approx(0.0)
+    assert payload["n_trials"] == 4
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "name,args",
     [
@@ -119,6 +132,8 @@ def test_capture_speed_falls_with_offset(client: InProcessMcpClient) -> None:
         ("putting_read_green", {"distance_m": 0.0}),
         ("putting_stimpmeter", {"stimp_ft": 100.0}),
         ("putting_capture_speed", {"entry_offset_m": HOLE_RADIUS_M * 2}),
+        ("putting_make_probability", {}),
+        ("putting_make_probability", {"distance_ft": 6.0, "n_trials": 0}),
     ],
 )
 def test_invalid_arguments_return_invalid_params_error(

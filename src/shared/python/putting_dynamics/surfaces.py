@@ -476,3 +476,33 @@ class SurfaceSpec:
             friction_field=FrictionField.uniform(extent_m=extent_m),
             friction=params,
         )
+
+    @staticmethod
+    def planar_uniform(
+        stimp_ft: float = 10.0,
+        slope_pct: float = 0.0,
+        slope_aspect_deg: float = 0.0,
+        extent_m: float = _DEFAULT_EXTENT_M,
+    ) -> SurfaceSpec:
+        """Planar, uniform-friction green at a stimp speed and slope.
+
+        Shared by MCP's ``sim_run.putting_tools._surface_from_args`` and
+        ``sg_optimizer.shot_model.putting_physics`` (DRY, #14141 step 9b).
+
+        Args:
+            stimp_ft: Green speed [ft], used to derive rolling friction.
+            slope_pct: Slope grade [%], in [0, 10].
+            slope_aspect_deg: Downhill direction, CCW from +x [deg].
+            extent_m: Side length of the square grid [m].
+        """
+        from .friction import stimp_to_rolling_mu
+
+        friction = FrictionParams(mu_roll0=stimp_to_rolling_mu(stimp_ft))
+        height = HeightField.planar(
+            grade_percent=slope_pct, aspect_deg=slope_aspect_deg, extent_m=extent_m
+        )
+        return SurfaceSpec(
+            height=height,
+            friction_field=FrictionField.uniform(extent_m=extent_m),
+            friction=friction,
+        )

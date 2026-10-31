@@ -2,8 +2,8 @@
 
 Epic #14085 / Child Task #14092:
 Thin stdio MCP adapter exposing 4 simulation run service tools:
-describe_engines, submit_run, get_run, fetch_artifact. Epic #14141 step 9a
-adds 4 putting computation tools (see :mod:`.putting_tools`).
+describe_engines, submit_run, get_run, fetch_artifact. Epic #14141 steps
+9a/9b add 5 putting computation tools (see :mod:`.putting_tools`).
 """
 
 from __future__ import annotations
@@ -243,6 +243,9 @@ class SimulationMcpServer:
                     ),
                     "putting_capture_speed": lambda args: (
                         putting_tools.tool_putting_capture_speed(self.security, args)
+                    ),
+                    "putting_make_probability": lambda args: (
+                        putting_tools.tool_putting_make_probability(self.security, args)
                     ),
                 }
                 handler = handlers.get(str(params.get("name")))
