@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13892 · Per-Hand Grip Radius: Contact_Topology(Grip_Geometry=...) Places Every Pad on GripGeometry.Radius_at(s) at Its Own Station, With per_Hand_Required_Squeeze_N (HRG-GD4 PR 1)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13892
+- **Branch:** claude/13892-per-hand-grip-radius
+- **PR:** #14140
+- **Paths:** see #14140
+- **Started:** 2026-10-31
+- **Last verified:** 2026-10-31 (`783f8b08`; collated from changes/13892-per-hand-grip-radius-contact-topology-gr.md)
+- **Summary:** Per-hand grip radius: contact_topology(grip_geometry=...) places every pad on GripGeometry.radius_at(s) at its own station, with per_hand_required_squeeze_n (HRG-GD4 PR 1)
+- **Next step:** PR 2: grip-size sweep CLI keyed to hand_length_m (Golf Pride bins).
+
 ### DL-#12712 · NSX-83: Add the ClubheadSeries to RigidClubState Adapter and Constant-Twist Event Location Feeding the Shared Impact Outcome Map.
 
 - **State:** in_review

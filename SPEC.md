@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-31 | #14140 | Per-hand grip radius: contact_topology(grip_geometry=...) places every pad on GripGeometry.radius_at(s) at its own station, with per_hand_required_squeeze_n (HRG-GD4 PR 1) |
 | 2026-10-31 | #14138 | ci: OSV Monitor uses the runnable osv-scanner-action subpath; findings no longer fail the monitor step |
 | 2026-10-31 | #14134 | Live cross-engine address knee harness: same spec and q through each installed engine's FK vs MuJoCo at 0.1 deg. |
 | 2026-10-31 | #14133 | Install Spec Kit Antigravity skills for all speckit Gemini command TOMLs. |
