@@ -56,6 +56,7 @@ class AnatomicalEventTablePanel(QWidget):
         self.error_label.setText("")
 
     def _choose_file(self) -> None:
+        # noqa: gui-thread/ok - opens a modal file dialog; the export JSON is small.
         name, _ = QFileDialog.getOpenFileName(
             self, "Open Event Table JSON", "", "JSON (*.json)"
         )
