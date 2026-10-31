@@ -26,9 +26,20 @@ from double_pendulum_model.physics.triple_pendulum import (
     TriplePendulumDynamics,
     TriplePendulumState,
 )
+from src.shared.python.pendulum_simulator.physics_base import (
+    kinetic_energy_from_M,
+    total_energy_from_parts,
+)
 from src.shared.python.pendulum_simulator.triple_pendulum_spec import (
     TRIPLE_PENDULUM_SPEC,
 )
+
+#: Shoulder pivot height (m) of the canonical model, matching the MuJoCo XML.
+PIVOT_HEIGHT_M = 1.2
+_SEGMENTS = TRIPLE_PENDULUM_SPEC.segments
+_LENGTHS_M = np.array([seg.length_m for seg in _SEGMENTS])
+_MASSES_KG = np.array([seg.mass_kg for seg in _SEGMENTS])
+_COM_RATIOS = np.array([seg.center_of_mass_ratio for seg in _SEGMENTS])
 
 
 @dataclass(frozen=True)
@@ -151,20 +162,40 @@ class InHouseTripleAdapter:
             t, self.state, dt, control, integrator=self.integrator
         )
 
+    def joint_state(self) -> tuple[np.ndarray, np.ndarray]:
+        """Relative joint angles (rad) and rates (rad/s)."""
+        s = self.state
+        q = np.array([s.theta1, s.theta2, s.theta3], dtype=np.float64)
+        return q, np.array([s.omega1, s.omega2, s.omega3], dtype=np.float64)
+
     def tip_position(self) -> np.ndarray:
-        lengths = tuple(seg.length_m for seg in TRIPLE_PENDULUM_SPEC.segments)
-        angles = (
-            self.state.theta1,
-            self.state.theta1 + self.state.theta2,
-            self.state.theta1 + self.state.theta2 + self.state.theta3,
-        )
-        tip_x = -sum(
-            seg_l * math.sin(a) for seg_l, a in zip(lengths, angles, strict=True)
-        )
-        tip_z = 1.2 - sum(
-            seg_l * math.cos(a) for seg_l, a in zip(lengths, angles, strict=True)
-        )
+        angles, _ = self._absolute()
+        tip_x = -float(np.sum(_LENGTHS_M * np.sin(angles)))
+        tip_z = PIVOT_HEIGHT_M - float(np.sum(_LENGTHS_M * np.cos(angles)))
         return np.array([tip_x, 0.0, tip_z], dtype=np.float64)
+
+    def tip_velocity(self) -> np.ndarray:
+        """World-frame tip velocity (m/s), the time derivative of tip_position."""
+        angles, rates = self._absolute()
+        vx = -float(np.sum(_LENGTHS_M * np.cos(angles) * rates))
+        vz = float(np.sum(_LENGTHS_M * np.sin(angles) * rates))
+        return np.array([vx, 0.0, vz], dtype=np.float64)
+
+    def total_energy(self) -> float:
+        """Kinetic plus gravitational energy (J), world z = 0 datum as in MuJoCo."""
+        _, v = self.joint_state()
+        kinetic = kinetic_energy_from_M(self.dynamics.mass_matrix(self.state), v)
+        angles, _ = self._absolute()
+        joint_z = PIVOT_HEIGHT_M - np.concatenate(
+            ([0.0], np.cumsum(_LENGTHS_M * np.cos(angles))[:-1])
+        )
+        com_z = joint_z - _COM_RATIOS * _LENGTHS_M * np.cos(angles)
+        g = TRIPLE_PENDULUM_SPEC.gravity_m_s2
+        return total_energy_from_parts(kinetic, float(np.sum(_MASSES_KG * g * com_z)))
+
+    def _absolute(self) -> tuple[np.ndarray, np.ndarray]:
+        q, v = self.joint_state()
+        return np.cumsum(q), np.cumsum(v)
 
 
 class MuJoCoTripleAdapter:
@@ -219,6 +250,28 @@ class MuJoCoTripleAdapter:
 
     def tip_position(self) -> np.ndarray:
         return np.array(self.data.geom_xpos[self._head_geom_id], dtype=np.float64)
+
+    def joint_state(self) -> tuple[np.ndarray, np.ndarray]:
+        """Relative joint angles (rad) and rates (rad/s)."""
+        return (
+            np.array(self.data.qpos, dtype=np.float64),
+            np.array(self.data.qvel, dtype=np.float64),
+        )
+
+    def tip_velocity(self) -> np.ndarray:
+        """World-frame linear velocity (m/s) of the club-head geom."""
+        mj, res = self._mujoco, np.zeros(6)
+        mj.mj_forward(self.model, self.data)
+        geom = mj.mjtObj.mjOBJ_GEOM
+        mj.mj_objectVelocity(self.model, self.data, geom, self._head_geom_id, res, 0)
+        return res[3:].copy()
+
+    def total_energy(self) -> float:
+        """MuJoCo's own kinetic plus potential energy (J)."""
+        self._mujoco.mj_forward(self.model, self.data)
+        self._mujoco.mj_energyPos(self.model, self.data)
+        self._mujoco.mj_energyVel(self.model, self.data)
+        return float(np.sum(self.data.energy))
 
 
 @dataclass(frozen=True)
