@@ -133,3 +133,10 @@ def test_parity_entry_is_hosted_by_the_tile_on_both_surfaces() -> None:
         "upstream_drift.embeddable_tools"
     ]
     assert embeddable[TILE] == _ADAPTER_MODULE
+
+
+def test_panel_passes_the_gui_thread_blocking_ratchet() -> None:
+    from scripts.ci.check_gui_thread_blocking_ratchet import find_unmigrated_files
+
+    gui = ROOT / "src/tools/anatomical_event_table/gui.py"
+    assert gui not in find_unmigrated_files()
