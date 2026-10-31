@@ -81,3 +81,23 @@ def test_same_speed_lips_out_near_the_rim() -> None:
 def test_slow_ball_near_the_rim_still_drops() -> None:
     offset = 0.8 * HOLE_RADIUS_M
     assert _roll_into_hole(0.8 * capture_speed_mps(offset), offset)
+
+
+def test_lip_out_records_entry_speed_and_rolls_past() -> None:
+    offset = 0.8 * HOLE_RADIUS_M
+    speed = 0.9 * capture_speed_mps()
+    start_x = -math.sqrt(HOLE_RADIUS_M**2 - offset**2) - 0.002
+    ball = BallState(x_m=start_x, y_m=offset, vx_mps=speed, spin_rad_s=speed / _R)
+    surface = SurfaceSpec.flat_uniform(stimp_ft=10.0)
+    result = simulate_ball(ball, surface, hole_x_m=0.0, hole_y_m=0.0)
+    assert not result.holed
+    assert result.speed_at_hole_mps == pytest.approx(speed, rel=0.01)
+    assert result.rest_x_m > HOLE_RADIUS_M
+
+
+def test_ball_that_misses_the_hole_records_no_entry() -> None:
+    ball = BallState(x_m=-1.0, y_m=1.2 * HOLE_RADIUS_M, vx_mps=1.0, spin_rad_s=1.0 / _R)
+    surface = SurfaceSpec.flat_uniform(stimp_ft=10.0)
+    result = simulate_ball(ball, surface, hole_x_m=0.0, hole_y_m=0.0)
+    assert not result.holed
+    assert result.speed_at_hole_mps is None
