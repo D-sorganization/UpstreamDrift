@@ -149,6 +149,12 @@ def strike(putter: PutterState, impact_toe_m: float = 0.0) -> CollisionReport:
     Returns:
         The full :class:`~.types.CollisionReport`.
 
+    Postconditions:
+        The launch speed is in ``(0, 2 * putter.speed_mps]``, the head
+        slowdown and energy loss are non-negative, and every reported
+        speed/spin/wrench component is finite (enforced by the
+        :class:`~.types.CollisionReport` invariants).
+
     Raises:
         ValueError: If inputs are out of physical range.
     """

@@ -99,6 +99,40 @@ _R_BALL = float(GOLF_BALL_RADIUS_M)
 _State = tuple[float, float, float, float, float]
 
 
+def _ensure_putt_postconditions(result: PuttResult) -> None:
+    """Shared postconditions for any integrated putt (characterization).
+
+    Covers both :func:`simulate_ball` and :func:`simulate_strike`:
+    every sample speed is finite and non-negative, and sample times
+    are monotone non-decreasing.
+
+    The putt must end captured, at rest (:attr:`~.types.Mode.REST`),
+    or — the documented escape valve for a slope steeper than the
+    rolling-resistance bound, see :mod:`.friction` module docstring
+    ("on slopes steeper than the rolling resistance a rolling ball
+    cannot decelerate to rest at all") — still rolling at the
+    ``_MAX_TIME_S`` integration cap.
+    """
+    ensure(
+        all(math.isfinite(s.speed_mps) and s.speed_mps >= 0.0 for s in result.samples),
+        "every sample speed must be finite and non-negative",
+        result.samples[-1].speed_mps,
+    )
+    ensure(
+        all(
+            a.t_s <= b.t_s
+            for a, b in zip(result.samples, result.samples[1:], strict=False)
+        ),
+        "sample times must be monotone non-decreasing",
+    )
+    timed_out = result.time_s >= _MAX_TIME_S - DT_S
+    ensure(
+        result.holed or result.final_mode is Mode.REST or timed_out,
+        "a putt must end captured, at rest, or at the integration time cap",
+        (result.holed, result.final_mode, result.time_s),
+    )
+
+
 def capture_speed_mps() -> float:
     """Full-chord capture bound ``2 R sqrt(g / (2 r))`` (module credit).
 
@@ -253,6 +287,12 @@ def simulate_ball(
     Returns:
         The integrated :class:`~.types.PuttResult`.
 
+    Postconditions:
+        Every sample speed is finite and non-negative, sample times
+        are monotone non-decreasing, and the putt ends captured, at
+        rest, or at the integration time cap (see
+        :func:`_ensure_putt_postconditions`).
+
     Raises:
         ValueError: If the hole position is half-specified.
     """
@@ -334,7 +374,7 @@ def simulate_ball(
         "skid cannot exceed the total path",
         (rec.skid_distance, rec.distance),
     )
-    return PuttResult(
+    result = PuttResult(
         samples=tuple(rec.samples),
         collision=collision,
         holed=rec.holed,
@@ -345,6 +385,8 @@ def simulate_ball(
         skid_distance_m=rec.skid_distance,
         speed_at_hole_mps=rec.speed_at_hole,
     )
+    _ensure_putt_postconditions(result)
+    return result
 
 
 def simulate_strike(
@@ -369,6 +411,9 @@ def simulate_strike(
     Returns:
         The integrated :class:`~.types.PuttResult` with its
         :class:`~.types.CollisionReport` attached.
+
+    Postconditions:
+        Same guarantees as :func:`simulate_ball`, which enforces them.
     """
     report = strike(putter, impact_toe_m=impact_toe_m)
     ball = BallState(
