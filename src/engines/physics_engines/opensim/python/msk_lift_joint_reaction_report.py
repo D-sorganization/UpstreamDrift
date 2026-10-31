@@ -237,6 +237,7 @@ def format_joint_reaction_solution(
         "bar_mass_kg": None if bar_mass is None else round(float(bar_mass), 2),
         "acceleration_error_max": float(reactions.max_acc_error),
         "acceleration_realization": ctx.get("acceleration_realization"),
+        "external_load_source": ctx.get("external_load_source"),
         "l5_s1": l5s1,
         "knee_tibiofemoral": tf,
         "knee_patellofemoral": pf,

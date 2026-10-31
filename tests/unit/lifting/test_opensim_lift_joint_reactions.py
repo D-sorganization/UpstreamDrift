@@ -63,7 +63,9 @@ def _require_body() -> None:
 # -------------------------------------------------------------------------
 
 
-_RECEIPT = Path("docs/development/lifting/evidence/opensim_joint_reactions/receipts.json")
+_RECEIPT = Path(
+    "docs/development/lifting/evidence/opensim_joint_reactions/receipts.json"
+)
 #: The contact equilibrium solves the vertical root to 1e-12 m (OSL-3), so the
 #: supports carry the weight to well under 1e-6 of it.
 _SUPPORT_REL_TOL = 1e-6
@@ -75,7 +77,7 @@ def _committed_bench() -> dict[str, Any]:
 
 def test_bench_press_joint_reactions_use_bench_contact() -> None:
     """The bench receipt is complete and loaded by the shared bench contact."""
-    from src.engines.physics_engines.opensim.python.msk_lift_ik_id import (
+    from src.engines.physics_engines.opensim.python.msk_lift_model import (
         BENCH_EXTERNAL_LOAD_SOURCE,
     )
 
@@ -110,9 +112,7 @@ def test_bench_static_hold_supports_carry_body_and_bar() -> None:
     support = bound["bench_static_hold_support"]
     assert set(support["support_vertical_n"]) >= {"bench"}
     carried = sum(support["support_vertical_n"].values())
-    assert math.isclose(
-        carried, support["expected_weight_n"], rel_tol=_SUPPORT_REL_TOL
-    )
+    assert math.isclose(carried, support["expected_weight_n"], rel_tol=_SUPPORT_REL_TOL)
     assert abs(support["relative_error"]) <= _SUPPORT_REL_TOL
     assert support["passed"] is True
     supine = bound["bench_press_min_acceleration_frame"]
@@ -311,7 +311,7 @@ def test_bench_press_live_solve_uses_bench_contact(
     lift_reaction_solutions: dict[str, dict[str, Any]],
 ) -> None:
     """The live bench solve applies the bench contact and balances its supports."""
-    from src.engines.physics_engines.opensim.python.msk_lift_ik_id import (
+    from src.engines.physics_engines.opensim.python.msk_lift_model import (
         BENCH_EXTERNAL_LOAD_SOURCE,
     )
 
