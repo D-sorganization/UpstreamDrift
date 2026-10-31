@@ -98,6 +98,14 @@ def test_cross_slope_aims_uphill(aspect_deg: float) -> None:
     assert solution.converged
     downhill_left = aspect_deg > 0.0
     assert (solution.break_m < 0.0) == downhill_left
+    # The path, not just the rest point, must cross the hole (regression).
+    assert solution.holed
+
+
+def test_heading_solve_stays_bracketed_on_a_steep_slope() -> None:
+    # Near the rolling-hold limit an unguarded secant ran off to -192 rad.
+    solution = solve_aim(_planar(5.0, 90.0), (0.0, 0.0), (1.0, 0.0), _PUTTER)
+    assert abs(solution.heading_rad) < math.pi / 2
 
 
 def test_cross_slope_break_is_mirror_symmetric() -> None:

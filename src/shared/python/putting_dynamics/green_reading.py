@@ -9,14 +9,12 @@ reading always agrees with the trajectory any other caller would see.
 
 * :func:`read_line` samples elevation and gradient along a straight
   segment (no physics; the profile a UI plots).
-* :func:`solve_aim` finds the putter-head speed and heading that would
-  stop the ball ``past_hole_m`` beyond the hole if there were no cup
-  (the usual definition of a read's pace), then reports whether that
-  putt drops with the cup in play. Speed is
-  bracketed by doubling and then bisected on the along-line rest
-  distance; heading is solved by secant on the lateral miss, starting
-  from the small-angle step ``-miss / distance``. Both loops are
-  bounded, so the solve is deterministic.
+* :func:`solve_aim` finds the putter-head speed that would stop the ball
+  ``past_hole_m`` beyond the hole with no cup (a read's usual pace) and
+  the heading whose path crosses the hole, then reports whether it drops.
+  Speed: doubling bracket then bisection. Heading: clamped secant on the
+  lateral miss, safeguarded by bisection inside a sign-change bracket.
+  Both loops are bounded, so the solve is deterministic.
 """
 
 from __future__ import annotations
@@ -37,6 +35,8 @@ _SPEED_MIN_MPS = 0.05
 _SPEED_MAX_MPS = 8.0
 _MAX_SPEED_ITERATIONS = 30
 _MAX_HEADING_ITERATIONS = 12
+#: Largest heading change per secant step [rad] (~14 deg).
+_MAX_HEADING_STEP_RAD = 0.25
 #: Convergence tolerances [m]; well inside the few-cm precision a read needs.
 _SPEED_DISTANCE_TOL_M = 5e-3
 _HEADING_MISS_TOL_M = 5e-3
@@ -136,28 +136,40 @@ class _AimProblem:
             heading_rad=heading,
         )
 
-    def along(self, heading: float, speed: float) -> tuple[_Point, float]:
-        """Cup-free rest point and its distance along ``heading``."""
+    def along(self, heading: float, speed: float) -> tuple[PuttResult, float]:
+        """Cup-free result and its rest distance along ``heading``."""
         result = self.strike(heading, speed)
         dx, dy = result.rest_x_m - self.start[0], result.rest_y_m - self.start[1]
-        rest = (result.rest_x_m, result.rest_y_m)
-        return rest, dx * math.cos(heading) + dy * math.sin(heading)
+        return result, dx * math.cos(heading) + dy * math.sin(heading)
 
-    def pace(self, heading: float, target_m: float) -> tuple[_Point, float]:
-        """Cup-free rest point and the speed whose roll reaches ``target_m``."""
+    def pace(self, heading: float, target_m: float) -> tuple[PuttResult, float]:
+        """Cup-free result and the speed whose roll reaches ``target_m``."""
         lo = hi = _SPEED_MIN_MPS
-        rest, along = self.along(heading, hi)
+        result, along = self.along(heading, hi)
         while along < target_m and hi < _SPEED_MAX_MPS:
             lo, hi = hi, min(2.0 * hi, _SPEED_MAX_MPS)
-            rest, along = self.along(heading, hi)
+            result, along = self.along(heading, hi)
         speed = hi
         for _ in range(_MAX_SPEED_ITERATIONS):
             if abs(along - target_m) <= _SPEED_DISTANCE_TOL_M or hi <= lo:
                 break
             speed = 0.5 * (lo + hi)
-            rest, along = self.along(heading, speed)
+            result, along = self.along(heading, speed)
             lo, hi = (speed, hi) if along < target_m else (lo, speed)
-        return rest, speed
+        return result, speed
+
+    def lateral_at_hole(self, result: PuttResult) -> float:
+        """Signed offset, left of start->hole, where the path reaches the
+        hole's distance along that line (the rest point if it never does)."""
+        (sx, sy), (hx, hy) = self.start, self.hole
+        distance = math.hypot(hx - sx, hy - sy)
+        ux, uy = (hx - sx) / distance, (hy - sy) / distance
+        point = (result.rest_x_m, result.rest_y_m)
+        for sample in result.samples:
+            if (sample.x_m - sx) * ux + (sample.y_m - sy) * uy >= distance:
+                point = (sample.x_m, sample.y_m)
+                break
+        return (point[1] - hy) * ux - (point[0] - hx) * uy
 
 
 def solve_aim(
@@ -196,19 +208,30 @@ def solve_aim(
     left = (-math.sin(direct), math.cos(direct))
 
     def miss(heading: float) -> tuple[float, float]:
-        rest, speed = problem.pace(heading, distance + past_hole_m)
-        return (rest[0] - hx) * left[0] + (rest[1] - hy) * left[1], speed
+        result, speed = problem.pace(heading, distance + past_hole_m)
+        return problem.lateral_at_hole(result), speed
 
-    prev_heading = direct
-    prev_miss, speed = miss(prev_heading)
-    heading = direct - prev_miss / distance
+    # The miss grows with heading (CCW moves the rest point left), so a
+    # sign change brackets the root; secant steps are clamped and fall back
+    # to bisection whenever they leave the bracket.
+    heading = direct
     cur_miss, speed = miss(heading)
+    prev: tuple[float, float] | None = None
+    bracket: dict[bool, float] = {}
     for _ in range(_MAX_HEADING_ITERATIONS):
-        if abs(cur_miss) <= _HEADING_MISS_TOL_M or cur_miss == prev_miss:
+        bracket[cur_miss > 0.0] = heading
+        if abs(cur_miss) <= _HEADING_MISS_TOL_M or (prev and prev[1] == cur_miss):
             break
-        step = cur_miss * (heading - prev_heading) / (cur_miss - prev_miss)
-        prev_heading, prev_miss = heading, cur_miss
-        heading -= step
+        step = cur_miss / distance
+        if prev is not None:
+            step = cur_miss * (heading - prev[0]) / (cur_miss - prev[1])
+        nxt = heading - max(-_MAX_HEADING_STEP_RAD, min(_MAX_HEADING_STEP_RAD, step))
+        if len(bracket) == 2 and not min(bracket.values()) < nxt < max(
+            bracket.values()
+        ):
+            nxt = 0.5 * (bracket[True] + bracket[False])
+        prev = (heading, cur_miss)
+        heading = nxt
         cur_miss, speed = miss(heading)
 
     final = problem.strike(heading, speed, with_hole=True)
