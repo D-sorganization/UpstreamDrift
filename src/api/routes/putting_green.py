@@ -6,18 +6,20 @@ Provides REST endpoints for the putting green simulation tool page:
 - Get aim-line assist calculations
 - Scatter analysis for practice mode
 
-Roll-model provenance (ADR-0045 F1, issue #9343):
+Roll-model provenance (ADR-0045 F1, issue #9343; migrated #14141 step 7a):
     Two roll models are preserved and both are reachable from this router, so
     every response that reports a roll-out result names the model that produced
-    it. ``/simulate``, ``/scatter`` and ``/read-green`` run the UD engine
-    (``ud-legacy-roll/1``); ``/simulate-3d`` runs the surface-aware strike model
-    in ``src.shared.python.putting_dynamics``, which restates the Tools
+    it. ``/read-green`` is now the only route running the UD engine
+    (``ud-legacy-roll/1``); ``/simulate``, ``/scatter``, ``/contours`` and
+    ``/simulate-3d`` all run the surface-aware model in
+    ``src.shared.python.putting_dynamics``, which restates the Tools
     stimpmeter law (``usga-stimp-roll/1``). The two differ by the ~2.854
     roll-out ratio pinned in Tools#4819, so their numbers must never be
     compared without the names. ``roll_model`` is a required response field:
     a handler that fails to set it raises rather than emitting an unnamed
     result. ``/contours`` reports surface geometry only — no roll model is
-    involved, so it carries no name.
+    involved, so it carries no name (it now reads the shared flat height
+    field, but a flat green's elevations are zero either way).
 
 See issue #1206
 """
@@ -33,7 +35,7 @@ from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.api.rate_limit import get_limit, limiter
-from src.shared.python.core.contracts import PostconditionError, precondition
+from src.shared.python.core.contracts import PostconditionError, precondition, require
 
 if TYPE_CHECKING:
     from src.shared.python.putting_dynamics import HeightField, PutterState, SurfaceSpec
@@ -59,7 +61,13 @@ class PuttSimulationRequest(BaseModel):
     green_height: float = Field(20.0, description="Green height [m]", gt=0)
     hole_x: float = Field(10.0, description="Hole X position [m]")
     hole_y: float = Field(15.0, description="Hole Y position [m]")
-    wind_speed: float = Field(0.0, description="Wind speed [m/s]", ge=0)
+    wind_speed: float = Field(
+        0.0,
+        description=(
+            "Wind speed [m/s]; must be 0 — the shared putting core has no wind model"
+        ),
+        ge=0,
+    )
     wind_direction_x: float = Field(1.0, description="Wind direction X")
     wind_direction_y: float = Field(0.0, description="Wind direction Y")
 
@@ -225,6 +233,45 @@ class Putt3DSimulationResponse(BaseModel):
 # -- Endpoints --
 
 
+def _build_flat_putting_surface(
+    stimp_rating: float, green_width: float, green_height: float
+) -> tuple[SurfaceSpec, float, float]:
+    """Flat, homogeneous shared-core surface sized to cover one green.
+
+    ``/simulate``, ``/scatter`` and ``/contours`` describe their green as a
+    legacy flat surface spanning ``(0, 0)`` to ``(width, height)``; the
+    shared :class:`~src.shared.python.putting_dynamics.HeightField` /
+    :class:`~src.shared.python.putting_dynamics.FrictionField` grids are
+    centred on the origin instead (see ``putting_dynamics/surfaces.py``).
+
+    Returns the flat shared surface plus the ``(half_width, half_height)``
+    translation that maps a green-local point into the surface's centred
+    frame; callers translate in with :func:`_to_surface_frame`, simulate,
+    and translate results back out with :func:`_from_surface_frame` so
+    responses stay in the legacy green-local frame the existing schema and
+    frontend already use.
+    """
+    from src.shared.python.putting_dynamics import SurfaceSpec
+
+    extent_m = min(200.0, max(1.0, green_width, green_height))
+    surface = SurfaceSpec.flat_uniform(stimp_ft=stimp_rating, extent_m=extent_m)
+    return surface, green_width / 2.0, green_height / 2.0
+
+
+def _to_surface_frame(
+    x_m: float, y_m: float, half_width: float, half_height: float
+) -> tuple[float, float]:
+    """Green-local ``(0..width, 0..height)`` -> surface-centred coordinates."""
+    return x_m - half_width, y_m - half_height
+
+
+def _from_surface_frame(
+    x_m: float, y_m: float, half_width: float, half_height: float
+) -> tuple[float, float]:
+    """Surface-centred coordinates -> green-local ``(0..width, 0..height)``."""
+    return x_m + half_width, y_m + half_height
+
+
 def _build_putting_3d_surface(
     payload: Putt3DSimulationRequest, extent_m: float = 20.0
 ) -> tuple[SurfaceSpec, HeightField, PutterState]:
@@ -365,60 +412,69 @@ async def simulate_putt_3d(
 async def simulate_putt(
     request: Request, payload: PuttSimulationRequest
 ) -> PuttSimulationResponse:
-    """Simulate a single putt with given parameters.
+    """Simulate a single putt on the shared surface-aware putting core.
 
-    See issue #1206
+    Runs ``usga-stimp-roll/1`` (epic #14141 step 7a); only ``/read-green``
+    still runs the legacy UD engine. See issue #1206.
     """
-    from src.engines.physics_engines.putting_green.python.green_surface import (
-        GreenSurface,
+    del request
+    require(
+        payload.wind_speed == 0.0,
+        "Wind is not modelled by the shared putting core "
+        "(src.shared.python.putting_dynamics); set wind_speed to 0",
+        payload.wind_speed,
     )
-    from src.engines.physics_engines.putting_green.python.putter_stroke import (
-        StrokeParameters,
+    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
+        USGA_STIMP_ROLL_MODEL,
     )
-    from src.engines.physics_engines.putting_green.python.simulator import (
-        PuttingGreenSimulator,
-        SimulationConfig,
-    )
-    from src.engines.physics_engines.putting_green.python.turf_properties import (
-        TurfProperties,
-    )
+    from src.shared.python.core.physics_constants import GOLF_BALL_RADIUS_M
+    from src.shared.python.putting_dynamics import BallState, simulate_ball
 
-    turf = TurfProperties(stimp_rating=payload.stimp_rating)
-    green = GreenSurface(
-        width=payload.green_width,
-        height=payload.green_height,
-        turf=turf,
+    surface, half_w, half_h = _build_flat_putting_surface(
+        payload.stimp_rating, payload.green_width, payload.green_height
     )
-    green.set_hole_position(np.array([payload.hole_x, payload.hole_y]))
-
-    config = SimulationConfig(record_trajectory=True)
-    sim = PuttingGreenSimulator(green=green, config=config)
-
-    if payload.wind_speed > 0:
-        sim.set_wind(
-            payload.wind_speed,
-            np.array([payload.wind_direction_x, payload.wind_direction_y]),
-        )
 
     direction = np.array([payload.direction_x, payload.direction_y])
     norm = math.hypot(float(direction[0]), float(direction[1]))
     if norm > 0:
         direction = direction / norm
+    dir_x, dir_y = float(direction[0]), float(direction[1])
 
-    stroke = StrokeParameters(speed=payload.speed, direction=direction)
-    result = sim.simulate_putt(
-        stroke, ball_position=np.array([payload.ball_x, payload.ball_y])
+    ball_x, ball_y = _to_surface_frame(payload.ball_x, payload.ball_y, half_w, half_h)
+    hole_x, hole_y = _to_surface_frame(payload.hole_x, payload.hole_y, half_w, half_h)
+
+    # The legacy engine runs `speed` through a putter-head-to-ball COR
+    # transfer (PutterStroke.compute_launch_velocity) and gives the ball a
+    # small loft-driven backspin before it skids into roll. This request
+    # carries no putter mass/COR/loft inputs, so the shared core instead
+    # treats `speed` as the ball's own ground speed with a pure-rolling
+    # start (spin matched to the forward speed; no skid phase).
+    ball = BallState(
+        x_m=ball_x,
+        y_m=ball_y,
+        vx_mps=payload.speed * dir_x,
+        vy_mps=payload.speed * dir_y,
+        spin_rad_s=payload.speed / float(GOLF_BALL_RADIUS_M),
+    )
+    result = simulate_ball(ball, surface, hole_x_m=hole_x, hole_y_m=hole_y)
+
+    positions = [
+        list(_from_surface_frame(s.x_m, s.y_m, half_w, half_h)) for s in result.samples
+    ]
+    velocities = [[s.speed_mps * dir_x, s.speed_mps * dir_y] for s in result.samples]
+    final_position = list(
+        _from_surface_frame(result.rest_x_m, result.rest_y_m, half_w, half_h)
     )
 
     return PuttSimulationResponse(
-        roll_model=result.roll_model,
-        positions=result.positions.tolist(),
-        velocities=result.velocities.tolist(),
-        times=result.times.tolist(),
+        roll_model=USGA_STIMP_ROLL_MODEL,
+        positions=positions,
+        velocities=velocities,
+        times=[s.t_s for s in result.samples],
         holed=result.holed,
-        final_position=result.final_position.tolist(),
-        total_distance=result.total_distance,
-        duration=result.duration,
+        final_position=final_position,
+        total_distance=result.total_distance_m,
+        duration=result.time_s,
     )
 
 
@@ -474,51 +530,65 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
 async def scatter_analysis(
     request: ScatterAnalysisRequest,
 ) -> ScatterAnalysisResponse:
-    """Run scatter analysis with multiple putts.
+    """Run scatter analysis with multiple putts on the shared putting core.
 
-    See issue #1206
+    Runs ``usga-stimp-roll/1`` (epic #14141 step 7a). See issue #1206.
     """
-    from src.engines.physics_engines.putting_green.python.green_surface import (
-        GreenSurface,
+    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
+        USGA_STIMP_ROLL_MODEL,
     )
-    from src.engines.physics_engines.putting_green.python.putter_stroke import (
-        StrokeParameters,
-    )
-    from src.engines.physics_engines.putting_green.python.simulator import (
-        PuttingGreenSimulator,
-    )
-    from src.engines.physics_engines.putting_green.python.turf_properties import (
-        TurfProperties,
-    )
+    from src.shared.python.core.physics_constants import GOLF_BALL_RADIUS_M
+    from src.shared.python.putting_dynamics import BallState, simulate_ball
 
-    turf = TurfProperties(stimp_rating=request.stimp_rating)
-    green = GreenSurface(
-        width=request.green_width,
-        height=request.green_height,
-        turf=turf,
+    surface, half_w, half_h = _build_flat_putting_surface(
+        request.stimp_rating, request.green_width, request.green_height
     )
-
-    sim = PuttingGreenSimulator(green=green)
+    ball_radius_m = float(GOLF_BALL_RADIUS_M)
 
     direction = np.array([request.direction_x, request.direction_y])
     norm = math.hypot(float(direction[0]), float(direction[1]))
     if norm > 0:
         direction = direction / norm
+    dir_x, dir_y = float(direction[0]), float(direction[1])
 
-    stroke = StrokeParameters(speed=request.speed, direction=direction)
-    results = sim.simulate_scatter(
-        start_position=np.array([request.ball_x, request.ball_y]),
-        stroke_params=stroke,
-        n_simulations=request.n_simulations,
-        speed_variance=request.speed_variance,
-        direction_variance_deg=request.direction_variance_deg,
+    ball_x, ball_y = _to_surface_frame(request.ball_x, request.ball_y, half_w, half_h)
+    # Scatter keeps the legacy engine's default hole at the green centre
+    # (GreenSurface puts it at width/2, height/2); the request carries no
+    # hole position of its own.
+    hole_x, hole_y = _to_surface_frame(
+        request.green_width / 2.0, request.green_height / 2.0, half_w, half_h
     )
 
-    final_positions = [r.final_position.tolist() for r in results]
-    holed_count = sum(1 for r in results if r.holed)
-    hole_pos = green.hole_position
+    # Same seed (0) the legacy `PuttingGreenSimulator` falls back to when
+    # no `random_seed`/`rng` is supplied (see `_sim_core.py.__init__`), so
+    # repeated calls stay deterministic.
+    rng = np.random.default_rng(0)
+
+    final_positions: list[list[float]] = []
+    holed_count = 0
+    for _ in range(request.n_simulations):
+        speed = max(0.1, request.speed + rng.normal(0.0, request.speed_variance))
+        angle_var = rng.normal(0.0, request.direction_variance_deg * math.pi / 180.0)
+        cos_a, sin_a = math.cos(angle_var), math.sin(angle_var)
+        putt_dir_x = cos_a * dir_x - sin_a * dir_y
+        putt_dir_y = sin_a * dir_x + cos_a * dir_y
+
+        ball = BallState(
+            x_m=ball_x,
+            y_m=ball_y,
+            vx_mps=speed * putt_dir_x,
+            vy_mps=speed * putt_dir_y,
+            spin_rad_s=speed / ball_radius_m,
+        )
+        result = simulate_ball(ball, surface, hole_x_m=hole_x, hole_y_m=hole_y)
+        final_positions.append(
+            list(_from_surface_frame(result.rest_x_m, result.rest_y_m, half_w, half_h))
+        )
+        if result.holed:
+            holed_count += 1
 
     if final_positions:
+        hole_pos = np.array([request.green_width / 2.0, request.green_height / 2.0])
         # Vectorized sum of squares avoids repeated np.linalg.norm calls.
         diffs = np.array(final_positions, dtype=float) - hole_pos
         avg_dist = float(np.mean(np.sqrt(np.einsum("ij,ij->i", diffs, diffs))))
@@ -526,12 +596,14 @@ async def scatter_analysis(
         avg_dist = float("nan")
 
     return ScatterAnalysisResponse(
-        roll_model=sim.roll_model,
+        roll_model=USGA_STIMP_ROLL_MODEL,
         final_positions=final_positions,
         holed_count=holed_count,
-        total_simulations=len(results),
+        total_simulations=len(final_positions),
         average_distance_from_hole=avg_dist,
-        make_percentage=(holed_count / len(results) * 100 if results else 0),
+        make_percentage=(
+            holed_count / len(final_positions) * 100 if final_positions else 0
+        ),
     )
 
 
@@ -551,19 +623,16 @@ async def get_green_contours(
 ) -> GreenContourResponse:
     """Get green elevation contour data for 2D visualization.
 
-    See issue #1206
+    Reads the shared flat :class:`~src.shared.python.putting_dynamics.
+    HeightField` (epic #14141 step 7a); a flat green's elevations are
+    zero everywhere, matching the legacy engine's default flat surface.
+    No roll model is involved, so this response carries no ``roll_model``
+    field. See issue #1206.
     """
     if not (width is not None):
         raise ValueError("width must be provided")
-    from src.engines.physics_engines.putting_green.python.green_surface import (
-        GreenSurface,
-    )
-    from src.engines.physics_engines.putting_green.python.turf_properties import (
-        TurfProperties,
-    )
 
-    turf = TurfProperties(stimp_rating=stimp_rating)
-    green = GreenSurface(width=width, height=height, turf=turf)
+    surface, half_w, half_h = _build_flat_putting_surface(stimp_rating, width, height)
 
     xs = np.linspace(0, width, resolution)
     ys = np.linspace(0, height, resolution)
@@ -572,9 +641,10 @@ async def get_green_contours(
 
     for i in range(resolution):
         for j in range(resolution):
-            elevations[i, j] = green.get_elevation_at(
-                np.array([grid_x[i, j], grid_y[i, j]])
+            sx, sy = _to_surface_frame(
+                float(grid_x[i, j]), float(grid_y[i, j]), half_w, half_h
             )
+            elevations[i, j] = surface.height.elevation(sx, sy)
 
     return GreenContourResponse(
         width=width,
@@ -582,5 +652,5 @@ async def get_green_contours(
         grid_x=grid_x.tolist(),
         grid_y=grid_y.tolist(),
         elevations=elevations.tolist(),
-        hole_position=green.hole_position.tolist(),
+        hole_position=[width / 2.0, height / 2.0],
     )
