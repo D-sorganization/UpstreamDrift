@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-31 | #14159 | Route putter COR and green restitution through shared constants; centre-strike ratio closed form with off-centre limits (putting v4 step 3) |
+| 2026-10-31 | #14155 | Add remaining externally sourced putting reference fixtures: USGA ball limits, Penner/Holmes capture, Drane/Whiston/Quintic skid-roll, Broadie ShotLink, putter COR pending (putting v4 step 2b) |
 | 2026-10-31 | #14152 | MuJoCo static-hold mu_crit calibration of the pad contact (Euler, implicitfast: hold/slip at 1.001 mu_crit, no declared bias) and GripMarginReport mu_bias_bound validation |
 | 2026-10-31 | #14149 | Add shared putting reference-fixture schema, loader and first externally sourced fixtures (putting v4 step 2a) |
 | 2026-10-31 | #14148 | Pure two-hand grip-margin metric: per-pad Coulomb margin, UNLOADED floor, slip events, grasp-map internal wrench and GripMarginReport |
