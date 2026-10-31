@@ -755,16 +755,21 @@ def _live_builders(spec: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _live_report(q: np.ndarray, builders: dict[str, Any]) -> dict[str, Any]:
+    """``_cross_engine_knee``, skipping when the reference cannot run here."""
+    try:
+        return _cross_engine_knee(q, builders)
+    except ValueError as exc:
+        pytest.skip(str(exc))
+
+
 @pytest.mark.requires_mujoco
 def test_address_knee_flexion_matches_across_engines() -> None:
     """Installed engines agree with MuJoCo within 0.1 deg at one shared address q."""
     spec = json.loads(_LIVE_SPEC.read_text(encoding="utf-8"))
     q = np.load(_LIVE_Q)["q_track"][0]
     assert q.shape == (len(spec["coordinate_order"]),)
-    try:
-        report = _cross_engine_knee(q, _live_builders(spec))
-    except ValueError as exc:
-        pytest.skip(str(exc))
+    report = _live_report(q, _live_builders(spec))
     summary = {
         e: v.get("reason") or v["delta_deg"] for e, v in report["engines"].items()
     }
@@ -859,3 +864,17 @@ def test_harness_fails_closed_on_an_unexpected_engine_error() -> None:
 
     with pytest.raises(RuntimeError, match="FK exploded"):
         _cross_engine_knee(np.zeros(3), {"mujoco": _fixed(_REF), "drake": broken})
+
+
+def test_live_run_fails_on_an_engine_value_error_instead_of_skipping() -> None:
+    """A degenerate pose from a non-reference engine is a failure, not a SKIP."""
+
+    class _Degenerate:
+        def body_poses(self, q: np.ndarray, names: list[str]) -> dict[str, tuple]:
+            raise ValueError("non-finite knee pose")
+
+    try:
+        with pytest.raises(ValueError, match="non-finite"):
+            _live_report(np.zeros(3), {"mujoco": _fixed(_REF), "drake": _Degenerate})
+    except pytest.skip.Exception as exc:
+        pytest.fail(f"engine fault was reported as a SKIP: {exc}")
