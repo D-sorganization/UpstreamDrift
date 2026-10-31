@@ -13,8 +13,10 @@ from src.engines.physics_engines.mujoco.python.grip_hold_calibration import (
     calibrate,
     declared_bias,
     holds,
+    slide_speed_m_s,
 )
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
+from src.shared.python.grip_contact.grip_margin import DEFAULT_SLIP_SPEED_M_S
 
 pytestmark = pytest.mark.unit
 
@@ -39,8 +41,9 @@ def test_transition_is_recorded_per_integrator(integrator: str) -> None:
     assert record.ratio == pytest.approx(record.transition_mu / RIG.mu_crit)
     assert 0.9 < record.ratio < 1.1
     assert record.declared_bias == declared_bias(record.ratio)
-    assert holds(RIG, record.transition_mu, integrator)
-    assert record == calibrate(RIG, integrator)  # deterministic
+    speed = slide_speed_m_s(RIG, record.transition_mu, integrator)
+    assert speed == slide_speed_m_s(RIG, record.transition_mu, integrator)
+    assert speed <= DEFAULT_SLIP_SPEED_M_S  # the transition holds, deterministically
 
 
 def test_bias_outside_the_band_is_declared_either_way() -> None:

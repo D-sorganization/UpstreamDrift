@@ -120,8 +120,10 @@ class GripMarginReport:
     mu_bias_bound: float | None
 
     def __post_init__(self) -> None:
+        if self.mu_bias_bound is not None:
+            _require_positive("mu_bias_bound", self.mu_bias_bound)
         scalars = [self.friction, self.normal_floor_n, self.min_margin]
-        scalars += [self.slip_duration_s, self.mu_bias_bound or 1.0]
+        scalars.append(self.slip_duration_s)
         vectors = np.concatenate([self.net_wrench, self.internal_wrench])
         if not (all(map(math.isfinite, scalars)) and np.all(np.isfinite(vectors))):
             raise ValueError("grip margin report must be finite")
