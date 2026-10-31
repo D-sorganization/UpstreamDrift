@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13885 · Pure Two-Hand Grip-Margin Metric: Per-Pad Coulomb Margin, UNLOADED Floor, Slip Events, Grasp-Map Internal Wrench and GripMarginReport
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13885
+- **Branch:** brick/issues-ud/13885-grip-margin-metric
+- **PR:** #14148
+- **Paths:** see #14148
+- **Started:** 2026-10-31
+- **Last verified:** 2026-10-31 (`eba9ef0c`; collated from changes/13885-grip-margin-metric.md)
+- **Summary:** Pure two-hand grip-margin metric: per-pad Coulomb margin, UNLOADED floor, slip events, grasp-map internal wrench and GripMarginReport
+- **Next step:** PR 1 mu_crit calibration and PR 3 scripted swing receipt
+
 ### DL-#12712 · NSX-83: Add the ClubheadSeries to RigidClubState Adapter and Constant-Twist Event Location Feeding the Shared Impact Outcome Map.
 
 - **State:** in_review
