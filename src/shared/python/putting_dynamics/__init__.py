@@ -28,7 +28,9 @@ each submodule):
 * Tools ``swing_sim.variation.engine`` — keyed per-field RNG stream
   discipline for the bumpy fields.
 * ``rust_core/upstream-physics/src/contact.rs`` — green restitution
-  (0.78) and sliding friction (0.4) defaults.
+  and sliding friction (0.4) defaults; the restitution value is
+  routed through ``physics_constants.GREEN_RESTITUTION`` (single
+  source with the putter-face COR default, #14141 step 3).
 
 Quick start::
 
@@ -51,6 +53,7 @@ from .collision import (
     GROUND_RESTITUTION,
     LOFT_SWEEP_MAX_DEG,
     LOFT_SWEEP_MIN_DEG,
+    centre_strike_speed_ratio,
     effective_head_mass,
     strike,
     sweep_dynamic_loft,
@@ -89,12 +92,24 @@ from .solver import (
     simulate_strike,
     struck_ball_state,
 )
+from .stimpmeter import (
+    STIMPMETER_NOTCH_DISTANCE_M,
+    STIMPMETER_RELEASE_ANGLE_DEG,
+    measure_stimp_ft,
+    ramp_release_speed_mps,
+    stimpmeter_rollout_ft,
+)
 from .surfaces import (
     FrictionField,
     HeightField,
     SurfaceSpec,
     bumpy_friction_field,
     bumpy_height_field,
+)
+from .turf import (
+    GrassType,
+    TurfCondition,
+    TurfSpec,
 )
 from .types import (
     BallState,
@@ -121,6 +136,8 @@ __all__ = [
     "HOLE_RADIUS_M",
     "LOFT_SWEEP_MAX_DEG",
     "LOFT_SWEEP_MIN_DEG",
+    "STIMPMETER_NOTCH_DISTANCE_M",
+    "STIMPMETER_RELEASE_ANGLE_DEG",
     "STIMP_RELEASE_SPEED_MPS",
     "USGA_STIMP_ROLL_MODEL",
     "AimSolution",
@@ -130,6 +147,7 @@ __all__ = [
     "FixtureSource",
     "FrictionField",
     "FrictionParams",
+    "GrassType",
     "HeightField",
     "LineReading",
     "Mode",
@@ -138,10 +156,13 @@ __all__ = [
     "ReferenceFixture",
     "SurfaceSpec",
     "TrajectorySample",
+    "TurfCondition",
+    "TurfSpec",
     "ball_kinetic_energy_j",
     "bumpy_friction_field",
     "bumpy_height_field",
     "capture_speed_mps",
+    "centre_strike_speed_ratio",
     "effective_head_mass",
     "energy_balance_error_j",
     "grain_factor",
@@ -149,7 +170,9 @@ __all__ = [
     "load_reference_fixtures",
     "m_to_feet",
     "m_to_yards",
+    "measure_stimp_ft",
     "mps_to_mph",
+    "ramp_release_speed_mps",
     "read_line",
     "rolling_mu",
     "rolling_mu_to_stimp",
@@ -158,6 +181,7 @@ __all__ = [
     "sliding_mu",
     "solve_aim",
     "stimp_to_rolling_mu",
+    "stimpmeter_rollout_ft",
     "strike",
     "struck_ball_state",
     "sweep_dynamic_loft",

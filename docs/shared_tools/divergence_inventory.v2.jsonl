@@ -1974,6 +1974,7 @@
 {"path": "pendulum_simulator/tolerance_bands.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/torque_utils.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/triple_pendulum_spec.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
+{"path": "pendulum_simulator/unified_perturbation_study.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/upper_body_replay.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/validation.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "perturbation/__init__.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
@@ -2249,7 +2250,9 @@
 {"path": "putting_dynamics/green_reading.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "putting_dynamics/reference_fixtures.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "putting_dynamics/solver.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
+{"path": "putting_dynamics/stimpmeter.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "putting_dynamics/surfaces.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
+{"path": "putting_dynamics/turf.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "putting_dynamics/types.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "putting_dynamics/utils.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "pyproject.toml", "classification": "ud-only", "package": "pyproject.toml", "spelling_only": false}

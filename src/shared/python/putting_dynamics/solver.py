@@ -41,8 +41,10 @@ multipliers.
 The airborne phase (post-impact rise) is ballistic (no drag at putt
 speeds, documented) with symplectic-Euler height updates; each ground
 contact reflects the vertical speed with the green restitution
-``e = 0.78`` (``rust_core/upstream-physics/src/contact.rs``) and hands
-off to the ground modes once the remaining hop apex is below a
+``GROUND_RESTITUTION`` (``physics_constants.GREEN_RESTITUTION``, an
+uncited engineering default restated from
+``rust_core/upstream-physics/src/contact.rs``, #14141 step 3) and
+hands off to the ground modes once the remaining hop apex is below a
 millimetre.  Spin is frozen during flight and bounce (documented
 simplification: no bounce friction impulse).
 """

@@ -17,78 +17,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from enum import Enum
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
-
-class GrassType(Enum):
-    """Types of grass commonly found on putting greens."""
-
-    BENT_GRASS = "bent_grass"
-    BERMUDA = "bermuda"
-    POA_ANNUA = "poa_annua"
-    FESCUE = "fescue"
-    RYE_GRASS = "rye_grass"
-    PASPALUM = "paspalum"
-    ZOYSIA = "zoysia"
-
-    @property
-    def default_grain_strength(self) -> float:
-        """Default grain strength for this grass type."""
-        grain_strengths = {
-            GrassType.BENT_GRASS: 0.1,
-            GrassType.BERMUDA: 0.4,  # Bermuda has strong grain
-            GrassType.POA_ANNUA: 0.15,
-            GrassType.FESCUE: 0.2,
-            GrassType.RYE_GRASS: 0.15,
-            GrassType.PASPALUM: 0.35,
-            GrassType.ZOYSIA: 0.25,
-        }
-        return grain_strengths.get(self, 0.15)
-
-    @property
-    def default_height_mm(self) -> float:
-        """Default height of cut for this grass type."""
-        heights = {
-            GrassType.BENT_GRASS: 3.0,
-            GrassType.BERMUDA: 3.5,
-            GrassType.POA_ANNUA: 3.2,
-            GrassType.FESCUE: 4.0,
-            GrassType.RYE_GRASS: 3.5,
-            GrassType.PASPALUM: 3.5,
-            GrassType.ZOYSIA: 3.8,
-        }
-        return heights.get(self, 3.5)
-
-
-class TurfCondition(Enum):
-    """Environmental conditions affecting turf behavior."""
-
-    DRY = "dry"
-    NORMAL = "normal"
-    WET = "wet"
-    DEWY = "dewy"
-    FROSTED = "frosted"
-    RECENTLY_MOWED = "recently_mowed"
-    AFTERNOON_GROWTH = "afternoon_growth"
-
-    @property
-    def friction_multiplier(self) -> float:
-        """Multiplier applied to base friction coefficient."""
-        multipliers = {
-            TurfCondition.DRY: 0.9,
-            TurfCondition.NORMAL: 1.0,
-            TurfCondition.WET: 1.3,
-            TurfCondition.DEWY: 1.15,
-            TurfCondition.FROSTED: 1.4,
-            TurfCondition.RECENTLY_MOWED: 0.95,
-            TurfCondition.AFTERNOON_GROWTH: 1.05,
-        }
-        return multipliers.get(self, 1.0)
+# One source for the grass and condition tables (epic #14141 step 4b).
+from src.shared.python.putting_dynamics import GrassType, TurfCondition
 
 
 @dataclass(frozen=True)

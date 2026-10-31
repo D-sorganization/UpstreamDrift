@@ -108,6 +108,18 @@ STIMP_RELEASE_SPEED_MPS = 1.83
 USGA_STIMP_ROLL_MODEL = "usga-stimp-roll/1"
 
 
+def require_grain(strength: float, direction_rad: float) -> None:
+    """Grain preconditions shared by FrictionParams and TurfSpec."""
+    require_finite(strength, "grain_strength")
+    require(0.0 <= strength < 0.9, "grain_strength in [0, 0.9)", strength)
+    require_finite(direction_rad, "grain_direction_rad")
+    require(
+        abs(direction_rad) <= 2.0 * math.pi,
+        "grain direction within +/- 2 pi",
+        direction_rad,
+    )
+
+
 @dataclass(frozen=True)
 class FrictionParams:
     """Friction-law parameters for one green.
@@ -153,18 +165,7 @@ class FrictionParams:
             "k_v must be in [0, 2] s/m",
             self.k_v_per_mps,
         )
-        require_finite(self.grain_strength, "grain_strength")
-        require(
-            0.0 <= self.grain_strength < 0.9,
-            "grain_strength in [0, 0.9)",
-            self.grain_strength,
-        )
-        require_finite(self.grain_direction_rad, "grain_direction_rad")
-        require(
-            abs(self.grain_direction_rad) <= 2.0 * math.pi,
-            "grain direction within +/- 2 pi",
-            self.grain_direction_rad,
-        )
+        require_grain(self.grain_strength, self.grain_direction_rad)
         require_finite(self.v_stop_mps, "v_stop_mps")
         require(
             0.0 < self.v_stop_mps <= 0.1,

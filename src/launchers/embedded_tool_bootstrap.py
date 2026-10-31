@@ -56,6 +56,7 @@ FALLBACK_ADAPTER_MODULES = (
     "src.tools.matched_swing_browser._embed_adapter",
     "src.tools.impact_parameters_panel._embed_adapter",
     "src.tools.grip_wrench_plots._embed_adapter",
+    "src.tools.anatomical_event_table._embed_adapter",
     "src.tools.ground_reaction_plots._embed_adapter",
     "src.tools.necromatcher._embed_adapter",
     "src.tools.spine_viewer._embed_adapter",

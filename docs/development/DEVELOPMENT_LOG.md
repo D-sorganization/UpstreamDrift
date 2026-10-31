@@ -24,12 +24,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13885
 - **Branch:** brick/issues-ud/13885-grip-margin-metric
-- **PR:** #14148
+- **PR:** #14148, #14152
 - **Paths:** see #14148
 - **Started:** 2026-10-31
-- **Last verified:** 2026-10-31 (`eba9ef0c`; collated from changes/13885-grip-margin-metric.md)
+- **Last verified:** 2026-10-31 (`da728201`; collated from changes/13885-mujoco-mu-crit-calibration.md)
 - **Summary:** Pure two-hand grip-margin metric: per-pad Coulomb margin, UNLOADED floor, slip events, grasp-map internal wrench and GripMarginReport
-- **Next step:** PR 1 mu_crit calibration and PR 3 scripted swing receipt
+- **Next step:** PR 3 scripted swing receipt with grip_force_limit_n
 
 ### DL-#12712 · NSX-83: Add the ClubheadSeries to RigidClubState Adapter and Constant-Twist Event Location Feeding the Shared Impact Outcome Map.
 
@@ -1034,10 +1034,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14141
 - **Branch:** merged via #14145
-- **PR:** #14145, #14149
+- **PR:** #14145, #14149, #14155, #14159
 - **Paths:** see #14145
 - **Started:** 2026-10-31
-- **Last verified:** 2026-10-31 (`86c7fb67`; collated from changes/14141-putting-v4-pr2a-fixture-schema.md)
+- **Last verified:** 2026-10-31 (`504e231c`; collated from changes/14141-putting-v4-step3-constants.md)
 - **Summary:** Characterize putting_dynamics contracts with invariant tests and postconditions (putting v4 PR 1)
 - **Next step:** Shipped in PR #14145.
 
