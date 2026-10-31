@@ -16,12 +16,12 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 
 ## Evidence Summary
 
-- **Source Commit**: `bf10d600d0c4860fe1be6877ab22187fa0476df4`
+- **Source Commit**: `5dcdbd0286db051c28f33e5a973e8086226ed36d`
 - **Lifter Mass**: 80.31 kg (Body Weight = 787.60 N)
 - **Barbell Mass**: 100.00 kg
 - **Motion Window**: 0.00 s to 0.20 s (41 frames)
-- **Completed Lifts (4/5)**: Squat, Deadlift, Snatch, Clean And Jerk
-- **Unavailable Lifts (1/5)**: Bench Press (supine posture limitation)
+- **Completed Lifts (5/5)**: Back Squat, Deadlift, Bench Press, Snatch, Clean and Jerk
+- **Unavailable Lifts (0/5)**: none
 - **Inherited OSL-4 Qualification**: unqualified
 
 ### Measured Reaction Loads
@@ -30,60 +30,75 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 
 | Joint | Metric | Qualification | Mean (N) | Peak (N) | Mean (BW) | Peak (BW) |
 |---|---|---|---|---|---|---|
-| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1579.34 | 1683.68 | 2.01 | 2.14 |
-| **L5/S1 AP Shear** | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -956.80 | -989.17 | -1.21 | -1.26 |
-| **L5/S1 Torso Compression** | +F_y (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1104.80 | 1158.96 | unavailable | unavailable |
-| **L5/S1 Torso AP Shear** | +F_x (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1480.72 | -1555.61 | unavailable | unavailable |
-| **Knee Tibiofemoral** | Resultant 3D norm | unqualified | 10154.70 | 11997.23 | 12.89 | 15.23 |
-| **Knee Patellofemoral** | Resultant 3D norm | unqualified | 9295.12 | 12205.34 | 11.80 | 15.50 |
-| **Shoulder Glenohumeral** | Resultant 3D norm | unqualified | 714.06 | 732.58 | 0.91 | 0.93 |
+| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1704.28 | 2035.72 | 2.16 | 2.58 |
+| **L5/S1 AP Shear** | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1193.05 | -1383.43 | -1.51 | -1.76 |
+| **L5/S1 Torso Compression** | +F_y (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1127.77 | 1314.33 | unavailable | unavailable |
+| **L5/S1 Torso AP Shear** | +F_x (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1749.27 | -2082.33 | unavailable | unavailable |
+| **Knee Tibiofemoral** | Resultant 3D norm | unqualified | 10354.04 | 12251.54 | 13.15 | 15.56 |
+| **Knee Patellofemoral** | Resultant 3D norm | unqualified | 9394.15 | 12205.29 | 11.93 | 15.50 |
+| **Shoulder Glenohumeral** | Resultant 3D norm | unqualified | 802.98 | 943.20 | 1.02 | 1.20 |
 
-- **Peak Lumbar Actuator Moment**: 665.62 N·m (ideal coordinate actuator; no active erector spinae in Rajagopal)
+- **Peak Lumbar Actuator Moment**: 770.29 N·m (ideal coordinate actuator; no active erector spinae in Rajagopal)
 - **Segmental Spine Reference**: Use segmental spine model (#12735) for multi-segment spinal load with active trunk muscles
 
 #### Deadlift
 
 | Joint | Metric | Qualification | Mean (N) | Peak (N) | Mean (BW) | Peak (BW) |
 |---|---|---|---|---|---|---|
-| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1031.58 | 1126.71 | 1.31 | 1.43 |
-| **L5/S1 AP Shear** | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -818.82 | -878.01 | -1.04 | -1.11 |
-| **L5/S1 Torso Compression** | +F_y (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 945.98 | 1040.64 | unavailable | unavailable |
-| **L5/S1 Torso AP Shear** | +F_x (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -919.34 | -983.80 | unavailable | unavailable |
-| **Knee Tibiofemoral** | Resultant 3D norm | unqualified | 9457.62 | 11027.46 | 12.01 | 14.00 |
-| **Knee Patellofemoral** | Resultant 3D norm | unqualified | 5806.06 | 7568.23 | 7.37 | 9.61 |
-| **Shoulder Glenohumeral** | Resultant 3D norm | unqualified | 526.94 | 538.66 | 0.67 | 0.68 |
+| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1035.25 | 1344.15 | 1.31 | 1.71 |
+| **L5/S1 AP Shear** | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -740.90 | -911.16 | -0.94 | -1.16 |
+| **L5/S1 Torso Compression** | +F_y (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 957.28 | 1252.27 | unavailable | unavailable |
+| **L5/S1 Torso AP Shear** | +F_x (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -841.36 | -1033.73 | unavailable | unavailable |
+| **Knee Tibiofemoral** | Resultant 3D norm | unqualified | 9611.73 | 11315.30 | 12.20 | 14.37 |
+| **Knee Patellofemoral** | Resultant 3D norm | unqualified | 5847.96 | 7554.74 | 7.43 | 9.59 |
+| **Shoulder Glenohumeral** | Resultant 3D norm | unqualified | 500.33 | 641.21 | 0.64 | 0.81 |
 
-- **Peak Lumbar Actuator Moment**: 487.28 N·m (ideal coordinate actuator; no active erector spinae in Rajagopal)
+- **Peak Lumbar Actuator Moment**: 472.57 N·m (ideal coordinate actuator; no active erector spinae in Rajagopal)
+- **Segmental Spine Reference**: Use segmental spine model (#12735) for multi-segment spinal load with active trunk muscles
+
+#### Bench Press
+
+| Joint | Metric | Qualification | Mean (N) | Peak (N) | Mean (BW) | Peak (BW) |
+|---|---|---|---|---|---|---|
+| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 7.88 | 345.51 | 0.01 | 0.44 |
+| **L5/S1 AP Shear** | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -55.60 | 757.13 | -0.07 | 0.96 |
+| **L5/S1 Torso Compression** | +F_y (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 13.91 | 362.87 | unavailable | unavailable |
+| **L5/S1 Torso AP Shear** | +F_x (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -61.07 | 742.56 | unavailable | unavailable |
+| **Knee Tibiofemoral** | Resultant 3D norm | unqualified | 2435.16 | 5897.99 | 3.09 | 7.49 |
+| **Knee Patellofemoral** | Resultant 3D norm | unqualified | 2401.98 | 6132.56 | 3.05 | 7.79 |
+| **Shoulder Glenohumeral** | Resultant 3D norm | unqualified | 1126.83 | 1621.56 | 1.43 | 2.06 |
+
+- **Peak Lumbar Actuator Moment**: 370.73 N·m (ideal coordinate actuator; no active erector spinae in Rajagopal)
 - **Segmental Spine Reference**: Use segmental spine model (#12735) for multi-segment spinal load with active trunk muscles
 
 #### Snatch
 
 | Joint | Metric | Qualification | Mean (N) | Peak (N) | Mean (BW) | Peak (BW) |
 |---|---|---|---|---|---|---|
-| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1034.51 | 1477.06 | 1.31 | 1.88 |
-| **L5/S1 AP Shear** | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -954.10 | -1402.93 | -1.21 | -1.78 |
-| **L5/S1 Torso Compression** | +F_y (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 942.44 | 1415.07 | unavailable | unavailable |
-| **L5/S1 Torso AP Shear** | +F_x (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1043.01 | -1464.53 | unavailable | unavailable |
-| **Knee Tibiofemoral** | Resultant 3D norm | unqualified | 9921.70 | 12617.83 | 12.60 | 16.02 |
-| **Knee Patellofemoral** | Resultant 3D norm | unqualified | 2418.29 | 5777.86 | 3.07 | 7.34 |
-| **Shoulder Glenohumeral** | Resultant 3D norm | unqualified | 536.60 | 554.39 | 0.68 | 0.70 |
+| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1334.69 | 2085.73 | 1.69 | 2.65 |
+| **L5/S1 AP Shear** | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1081.81 | -1869.91 | -1.37 | -2.37 |
+| **L5/S1 Torso Compression** | +F_y (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1242.18 | 2049.38 | unavailable | unavailable |
+| **L5/S1 Torso AP Shear** | +F_x (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1207.48 | -1977.48 | unavailable | unavailable |
+| **Knee Tibiofemoral** | Resultant 3D norm | unqualified | 10415.72 | 13675.05 | 13.22 | 17.36 |
+| **Knee Patellofemoral** | Resultant 3D norm | unqualified | 2389.28 | 5890.89 | 3.03 | 7.48 |
+| **Shoulder Glenohumeral** | Resultant 3D norm | unqualified | 751.64 | 1268.20 | 0.95 | 1.61 |
 
-- **Peak Lumbar Actuator Moment**: 1145.59 N·m (ideal coordinate actuator; no active erector spinae in Rajagopal)
+- **Peak Lumbar Actuator Moment**: 634.21 N·m (ideal coordinate actuator; no active erector spinae in Rajagopal)
 - **Segmental Spine Reference**: Use segmental spine model (#12735) for multi-segment spinal load with active trunk muscles
 
 #### Clean and Jerk
 
 | Joint | Metric | Qualification | Mean (N) | Peak (N) | Mean (BW) | Peak (BW) |
 |---|---|---|---|---|---|---|
-| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1127.55 | 1337.21 | 1.43 | 1.70 |
-| **L5/S1 AP Shear** | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1027.45 | -1317.43 | -1.30 | -1.67 |
-| **L5/S1 Torso Compression** | +F_y (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 979.69 | 1177.60 | unavailable | unavailable |
-| **L5/S1 Torso AP Shear** | +F_x (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1180.83 | -1451.76 | unavailable | unavailable |
-| **Knee Tibiofemoral** | Resultant 3D norm | unqualified | 8255.45 | 12178.43 | 10.48 | 15.46 |
-| **Knee Patellofemoral** | Resultant 3D norm | unqualified | 956.58 | 5115.51 | 1.21 | 6.50 |
-| **Shoulder Glenohumeral** | Resultant 3D norm | unqualified | 551.03 | 585.77 | 0.70 | 0.74 |
+| **L5/S1 Axial Compression** | +F_y (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1687.88 | 2747.32 | 2.14 | 3.49 |
+| **L5/S1 AP Shear** | +F_x (pelvis frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1304.11 | -2129.96 | -1.66 | -2.70 |
+| **L5/S1 Torso Compression** | +F_y (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | 1504.08 | 2488.53 | unavailable | unavailable |
+| **L5/S1 Torso AP Shear** | +F_x (torso frame) | lower bound: no trunk muscles; the lumbar moment is an ideal actuator | -1526.60 | -2438.01 | unavailable | unavailable |
+| **Knee Tibiofemoral** | Resultant 3D norm | unqualified | 9918.83 | 12607.93 | 12.59 | 16.01 |
+| **Knee Patellofemoral** | Resultant 3D norm | unqualified | 839.85 | 5089.58 | 1.07 | 6.46 |
+| **Shoulder Glenohumeral** | Resultant 3D norm | unqualified | 909.85 | 1490.19 | 1.16 | 1.89 |
 
-- **Peak Lumbar Actuator Moment**: 1296.56 N·m (ideal coordinate actuator; no active erector spinae in Rajagopal)
+- **Peak Lumbar Actuator Moment**: 1105.89 N·m (ideal coordinate actuator; no active erector spinae in Rajagopal)
 - **Segmental Spine Reference**: Use segmental spine model (#12735) for multi-segment spinal load with active trunk muscles
 
 ### Static-Hold Analytic Bound & Dynamic Frame Checks
@@ -92,32 +107,41 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 - **Default Pose Upper Mass ($m_{\text{above}}$)**: 136.4979 kg, Weight = 1338.59 N, Measured Compression = 1338.59 N (Diff: 2.2737e-13 N)
 - **Muscles Crossing L5/S1**: 0 (sum crossing forces = 0.0000 N)
 - **Default Pose Status**: **PASSED** (Evaluates all-zero default pose; checks frame and sign self-consistency only (not verifying lift))
-- **Dynamic Minimal-Acceleration Frame**: Frame 39 ($t = 0.1950$ s, $\|\ddot{q}\| = 20.1178$ rad/s²)
-- **Dynamic Weight Above ($W_{\text{above}}$)**: 1338.59 N, Pelvis Compression = 1445.38 N, Torso Compression = 1031.19 N
+- **Dynamic Minimal-Acceleration Frame**: Frame 39 ($t = 0.1950$ s, $\|\ddot{q}\| = 20.1100$ rad/s²)
+- **Dynamic Weight Above ($W_{\text{above}}$)**: 1338.59 N, Pelvis Compression = 1309.47 N, Torso Compression = 892.24 N
 - **Dynamic Bound Status**: **FAILED** (Evaluated (pelvis-frame compression) on the solved squat frame with the smallest generalized acceleration norm; the static bound ignores that frame's acceleration and the ideal lumbar actuator.)
 
 #### Deadlift Analytic Bound
 - **Default Pose Upper Mass ($m_{\text{above}}$)**: 136.4979 kg, Weight = 1338.59 N, Measured Compression = 1338.59 N (Diff: 2.2737e-13 N)
 - **Muscles Crossing L5/S1**: 0 (sum crossing forces = 0.0000 N)
 - **Default Pose Status**: **PASSED** (Evaluates all-zero default pose; checks frame and sign self-consistency only (not verifying lift))
-- **Dynamic Minimal-Acceleration Frame**: Frame 7 ($t = 0.0350$ s, $\|\ddot{q}\| = 2.5631$ rad/s²)
-- **Dynamic Weight Above ($W_{\text{above}}$)**: 1338.59 N, Pelvis Compression = 1005.87 N, Torso Compression = 931.54 N
+- **Dynamic Minimal-Acceleration Frame**: Frame 8 ($t = 0.0400$ s, $\|\ddot{q}\| = 2.3663$ rad/s²)
+- **Dynamic Weight Above ($W_{\text{above}}$)**: 1338.59 N, Pelvis Compression = 1022.49 N, Torso Compression = 957.11 N
 - **Dynamic Bound Status**: **FAILED** (Evaluated (pelvis-frame compression) on the solved deadlift frame with the smallest generalized acceleration norm; the static bound ignores that frame's acceleration and the ideal lumbar actuator.)
+
+#### Bench Press Analytic Bound
+- **Default Pose Upper Mass ($m_{\text{above}}$)**: 136.4979 kg, Weight = 1338.59 N, Measured Compression = 1338.59 N (Diff: 6.9198e-05 N)
+- **Muscles Crossing L5/S1**: 0 (sum crossing forces = 0.0000 N)
+- **Default Pose Status**: **PASSED** (Evaluates all-zero default pose; checks frame and sign self-consistency only (not verifying lift))
+- **Dynamic Minimal-Acceleration Frame**: Frame 7 ($t = 0.0350$ s, $\|\ddot{q}\| = 18.7041$ rad/s²)
+- **Dynamic Weight Above ($W_{\text{above}}$)**: 1338.59 N, Pelvis Compression = 132.21 N, Torso Compression = 142.88 N
+- **Dynamic Bound Status**: **unavailable** (not applicable: supine on the bench, the trunk weight is carried by the bench contact, not through L5/S1)
+- **Bench Static-Hold Support Balance**: right = 249.96 N, left = 25.23 N, bench = 1493.08 N; expected (body + bar) x g = 1768.27 N, relative error -2.04e-14 **PASSED**
 
 #### Snatch Analytic Bound
 - **Default Pose Upper Mass ($m_{\text{above}}$)**: 136.4979 kg, Weight = 1338.59 N, Measured Compression = 1338.59 N (Diff: 2.2737e-13 N)
 - **Muscles Crossing L5/S1**: 0 (sum crossing forces = 0.0000 N)
 - **Default Pose Status**: **PASSED** (Evaluates all-zero default pose; checks frame and sign self-consistency only (not verifying lift))
-- **Dynamic Minimal-Acceleration Frame**: Frame 6 ($t = 0.0300$ s, $\|\ddot{q}\| = 10.6142$ rad/s²)
-- **Dynamic Weight Above ($W_{\text{above}}$)**: 1338.59 N, Pelvis Compression = 899.69 N, Torso Compression = 822.54 N
+- **Dynamic Minimal-Acceleration Frame**: Frame 6 ($t = 0.0300$ s, $\|\ddot{q}\| = 10.6144$ rad/s²)
+- **Dynamic Weight Above ($W_{\text{above}}$)**: 1338.59 N, Pelvis Compression = 891.59 N, Torso Compression = 828.49 N
 - **Dynamic Bound Status**: **FAILED** (Evaluated (pelvis-frame compression) on the solved snatch frame with the smallest generalized acceleration norm; the static bound ignores that frame's acceleration and the ideal lumbar actuator.)
 
 #### Clean and Jerk Analytic Bound
 - **Default Pose Upper Mass ($m_{\text{above}}$)**: 136.4979 kg, Weight = 1338.59 N, Measured Compression = 1338.59 N (Diff: 2.2737e-13 N)
 - **Muscles Crossing L5/S1**: 0 (sum crossing forces = 0.0000 N)
 - **Default Pose Status**: **PASSED** (Evaluates all-zero default pose; checks frame and sign self-consistency only (not verifying lift))
-- **Dynamic Minimal-Acceleration Frame**: Frame 2 ($t = 0.0100$ s, $\|\ddot{q}\| = 20.5182$ rad/s²)
-- **Dynamic Weight Above ($W_{\text{above}}$)**: 1338.59 N, Pelvis Compression = 801.23 N, Torso Compression = 716.25 N
+- **Dynamic Minimal-Acceleration Frame**: Frame 2 ($t = 0.0100$ s, $\|\ddot{q}\| = 21.9364$ rad/s²)
+- **Dynamic Weight Above ($W_{\text{above}}$)**: 1338.59 N, Pelvis Compression = 701.48 N, Torso Compression = 632.78 N
 - **Dynamic Bound Status**: **FAILED** (Evaluated (pelvis-frame compression) on the solved clean_and_jerk frame with the smallest generalized acceleration norm; the static bound ignores that frame's acceleration and the ideal lumbar actuator.)
 
 ### Movement Optimizer L5/S1 Cross-Check
@@ -128,12 +152,12 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 - **Angle Definitions**:
   - OpenSim: Sagittal tilt of torso frame relative to vertical in ground: atan2(R_torso[0, 1], R_torso[1, 1])
   - Movement Optimizer: Torso inclination angle theta from vertical in 2D sagittal plane
-- **Aligned Movement Optimizer (Torso Frame)**: Compression Mean = 724.87 N, Peak = 757.79 N; ADR-0055 AP Shear Mean = -1083.96 N, Peak = -1089.23 N
+- **Aligned Movement Optimizer (Torso Frame)**: Compression Mean = 724.87 N, Peak = 757.83 N; ADR-0055 AP Shear Mean = -1083.96 N, Peak = -1089.23 N
 - **Pre-Evaluation Tolerance**: 50.00 N (Tolerance Satisfied: FAILED)
 - **Residual Differences (OpenSim Torso vs Aligned Movement Optimizer)**:
-  - Compression Mean Residual: 379.93 N (Peak: 439.34 N)
-  - AP Shear Mean Residual: -396.77 N (Peak: 466.98 N)
-- **Model Difference Analysis**: Movement Optimizer is a planar rigid-body estimate (gravity and torso inertia, no muscles); OpenSim is a 3D JointReaction with no trunk muscles. Rotated into the torso frame with matched m_above (136.50 kg), the residual is 379.93 N compression (max |439.34| N) and -396.77 N AP shear (max |466.98| N) against the 50.0 N tolerance. The residual is not yet decomposed into its sources (pelvis acceleration, 3D coupling, contact).
+  - Compression Mean Residual: 402.90 N (Peak: 594.78 N)
+  - AP Shear Mean Residual: -665.31 N (Peak: 993.70 N)
+- **Model Difference Analysis**: Movement Optimizer is a planar rigid-body estimate (gravity and torso inertia, no muscles); OpenSim is a 3D JointReaction with no trunk muscles. Rotated into the torso frame with matched m_above (136.50 kg), the residual is 402.90 N compression (max |594.78| N) and -665.31 N AP shear (max |993.70| N) against the 50.0 N tolerance. The residual is not yet decomposed into its sources (pelvis acceleration, 3D coupling, contact).
 
 #### Deadlift Movement Optimizer Cross-Check
 - **Model**: planar_ergonomic_l5s1_estimate
@@ -141,16 +165,16 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 - **Angle Definitions**:
   - OpenSim: Sagittal tilt of torso frame relative to vertical in ground: atan2(R_torso[0, 1], R_torso[1, 1])
   - Movement Optimizer: Torso inclination angle theta from vertical in 2D sagittal plane
-- **Aligned Movement Optimizer (Torso Frame)**: Compression Mean = 936.18 N, Peak = 957.64 N; ADR-0055 AP Shear Mean = -979.61 N, Peak = -1004.19 N
+- **Aligned Movement Optimizer (Torso Frame)**: Compression Mean = 937.72 N, Peak = 958.06 N; ADR-0055 AP Shear Mean = -978.42 N, Peak = -1003.95 N
 - **Pre-Evaluation Tolerance**: 50.00 N (Tolerance Satisfied: FAILED)
 - **Residual Differences (OpenSim Torso vs Aligned Movement Optimizer)**:
-  - Compression Mean Residual: 9.80 N (Peak: 101.78 N)
-  - AP Shear Mean Residual: 60.27 N (Peak: 146.48 N)
-- **Model Difference Analysis**: Movement Optimizer is a planar rigid-body estimate (gravity and torso inertia, no muscles); OpenSim is a 3D JointReaction with no trunk muscles. Rotated into the torso frame with matched m_above (136.50 kg), the residual is 9.80 N compression (max |101.78| N) and 60.27 N AP shear (max |146.48| N) against the 50.0 N tolerance. The residual is not yet decomposed into its sources (pelvis acceleration, 3D coupling, contact).
+  - Compression Mean Residual: 19.55 N (Peak: 318.33 N)
+  - AP Shear Mean Residual: 137.06 N (Peak: 308.75 N)
+- **Model Difference Analysis**: Movement Optimizer is a planar rigid-body estimate (gravity and torso inertia, no muscles); OpenSim is a 3D JointReaction with no trunk muscles. Rotated into the torso frame with matched m_above (136.50 kg), the residual is 19.55 N compression (max |318.33| N) and 137.06 N AP shear (max |308.75| N) against the 50.0 N tolerance. The residual is not yet decomposed into its sources (pelvis acceleration, 3D coupling, contact).
 
 ### Status of Unavailable Lifts
 
-- **Bench Press (`bench_press`)**: `unavailable` — reason: `bench press IK does not pose a supine lifter; standing posture on bench is unphysical`
+- none: every lift has a complete joint reaction solve
 
 Values are explicitly `null` (never synthetic zeros).
 
@@ -171,6 +195,10 @@ Values are explicitly `null` (never synthetic zeros).
 ### Clean and Jerk
 - **L5/S1 Reactions**: ![Clean and Jerk L5/S1](clean_and_jerk_l5s1_joint_reaction_loads.png)
 - **Knee & Shoulder Reactions**: ![Clean and Jerk Knee and Shoulder](clean_and_jerk_knee_and_shoulder_joint_reactions.png)
+
+### Bench Press
+- **L5/S1 Reactions**: ![Bench Press L5/S1](bench_press_l5s1_joint_reaction_loads.png)
+- **Knee & Shoulder Reactions**: ![Bench Press Knee and Shoulder](bench_press_knee_and_shoulder_joint_reactions.png)
 
 ## Reproduction Commands
 
