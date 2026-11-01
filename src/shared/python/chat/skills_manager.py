@@ -1,6 +1,6 @@
 """Agentic skills and workflows manager.
 
-Parses .agents/skills and .agent/workflows directories and provides them
+Parses .agents/skills and .agents/workflows directories and provides them
 as explicit function-calling tools or slash commands.
 """
 
@@ -42,11 +42,9 @@ class SkillsManager:
 
     def _discover(self) -> None:
         """Scan directories for skills and workflows."""
-        # Check .agents/skills and .agent/workflows
+        # The legacy .agent/ tree is retired fleet-wide (RM #2567); read .agents/ only.
         skills_dir = self.workspace_root / ".agents" / "skills"
-        workflows_dir = self.workspace_root / ".agent" / "workflows"
-        if not workflows_dir.exists():
-            workflows_dir = self.workspace_root / ".agents" / "workflows"
+        workflows_dir = self.workspace_root / ".agents" / "workflows"
 
         if skills_dir.exists():
             for entry in skills_dir.iterdir():
