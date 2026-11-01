@@ -1402,6 +1402,18 @@
       "evidence": "src/tools/drift_control/__init__.py",
       "acceptance_owner": "tests/config/test_registry_exclusions.py"
     },
+    "putting_analytics_gui": {
+      "id": "putting_analytics_gui",
+      "name": "Tools Package: putting_analytics_gui",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/tools/putting_analytics_gui/__init__.py",
+      "acceptance_owner": "tests/config/test_registry_exclusions.py"
+    },
     "sg_optimizer": {
       "id": "sg_optimizer",
       "name": "Tools Package: sg_optimizer",
