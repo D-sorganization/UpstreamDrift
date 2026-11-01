@@ -169,6 +169,10 @@ class ExportSettings:
     event_captions: bool = False
     #: kinematic closure mode for hand mobility ellipsoids (HCM-3, #14004)
     hand_mobility_mode: str = "constrained"
+    #: segment intersection points for whole-body mobility (HCM-5, #14006)
+    mobility_points: str = "hands"
+    max_mobility_points: int = 8
+    mobility_condition_cutoff: float | None = None
 
     @property
     def shading_enabled(self) -> bool:
@@ -262,6 +266,15 @@ class ExportSettings:
             raise ValueError(
                 f"hand_mobility_mode must be 'constrained' or 'unconstrained', got {self.hand_mobility_mode!r}"
             )
+        if not isinstance(self.mobility_points, str):
+            raise TypeError("mobility_points must be a str")
+        if self.max_mobility_points < 1:
+            raise ValueError("max_mobility_points must be a positive integer")
+        if (
+            self.mobility_condition_cutoff is not None
+            and self.mobility_condition_cutoff <= 0.0
+        ):
+            raise ValueError("mobility_condition_cutoff must be positive")
 
     def effective_speeds(self, dt_s: float) -> tuple[float, ...]:
         """Speeds to export; a deprecated ``stride`` maps to its equivalent speed."""
@@ -395,6 +408,35 @@ class SwingInput:
             return source.hand_mobility(self.q[index], v=v_idx, mode=mode)
         except TypeError:
             return source.hand_mobility(self.q[index], mode=mode)
+
+    def segment_mobility_at(
+        self,
+        index: int,
+        points: Sequence[Any] | None = None,
+        mode: str = "constrained",
+        torque_limit_source: str | None = None,
+        engine: str | None = None,
+    ) -> dict[str, Any]:
+        """Mobility at state ``index`` for declarative ``points`` (HCM-5, #14006)."""
+        if not 0 <= index < self.n_states:
+            raise ValueError(f"index {index} outside 0..{self.n_states - 1}")
+        if points is None:
+            return self.hand_mobility_at(
+                index, mode=mode, torque_limit_source=torque_limit_source, engine=engine
+            )
+        v_idx = self.v[index] if self.v is not None else None
+        src = _hand_source(
+            self.bundle.spec_bytes,
+            torque_limit_source=torque_limit_source,
+            engine=engine or self.rollout_engine or "mujoco",
+        )
+        if not hasattr(src, "segment_mobility"):
+            from src.engines.physics_engines.mujoco.python.hand_mobility import (
+                HandMobilitySource,
+            )
+
+            src = HandMobilitySource(self.bundle.spec_bytes)
+        return src.segment_mobility(points, self.q[index], v=v_idx, mode=mode)
 
     @property
     def n_states(self) -> int:
