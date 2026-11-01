@@ -132,6 +132,48 @@ def _extract_physical_radii(hm: Any, kind: str) -> tuple[np.ndarray, tuple[float
     return axes, tuple(map(float, r))
 
 
+def _lookup_point_mobility(m: dict[str, Any], pt: Any) -> Any:
+    return m.get(pt.name) or (
+        m.get("lead" if "lead" in pt.name else "trail") if pt.group == "hands" else None
+    )
+
+
+def _build_hand_hud_lines_fn(
+    get_hm: Callable[[int], dict[str, Any]],
+    resolved_pts: Sequence[Any],
+    active_ellipsoids: Sequence[str],
+    scales: dict[str, Any],
+    mobility_condition_cutoff: float | None = None,
+) -> Callable[[int], tuple[str, ...]]:
+    from src.shared.python.force_overlay.ellipsoid_display import format_hud_capability
+
+    is_hands = len(resolved_pts) == 2 and {p.group for p in resolved_pts} == {"hands"}
+
+    def hand_hud_lines_fn(index: int) -> tuple[str, ...]:
+        hm_map, lines = get_hm(index), []
+        for kind in active_ellipsoids:
+            scale, parts = scales[kind], []
+            for pt in resolved_pts:
+                hm = _lookup_point_mobility(hm_map, pt)
+                if hm is not None and (
+                    mobility_condition_cutoff is None
+                    or hm.condition <= mobility_condition_cutoff
+                ):
+                    _, r = _extract_physical_radii(hm, kind)
+                    lbl = (
+                        ("lead" if "lead" in pt.name else "trail")
+                        if is_hands
+                        else pt.name
+                    )
+                    parts.append(
+                        format_hud_capability(lbl, kind, r, scale.unit, hm.condition)
+                    )
+            lines.append(" | ".join(parts))
+        return tuple(lines)
+
+    return hand_hud_lines_fn
+
+
 def _build_hand_ellipsoid_feed(
     swing: SwingInput,
     active_ellipsoids: Sequence[str],
@@ -148,7 +190,6 @@ def _build_hand_ellipsoid_feed(
     from src.shared.python.force_overlay.ellipsoid_display import (
         EllipsoidDisplayBuilder,
         EllipsoidDisplayScale,
-        format_hud_capability,
     )
     from src.shared.python.spatial_algebra.segment_intersection import (
         resolve_intersection_points,
@@ -175,22 +216,15 @@ def _build_hand_ellipsoid_feed(
                 )
         return _hm_cache[idx]
 
-    def _lookup(m: dict[str, Any], pt: Any) -> Any:
-        return m.get(pt.name) or (
-            m.get("lead" if "lead" in pt.name else "trail")
-            if pt.group == "hands"
-            else None
-        )
-
     builders: dict[str, EllipsoidDisplayBuilder] = {}
     scales: dict[str, EllipsoidDisplayScale] = {}
+    stride = max(1, swing.n_states // 20)
     for kind in active_ellipsoids:
         semi_axes_series: list[list[float]] = []
-        stride = max(1, swing.n_states // 20)
         for idx in range(0, swing.n_states, stride):
             hm_sample = _get_hm(idx)
             for pt in resolved_pts:
-                hm = _lookup(hm_sample, pt)
+                hm = _lookup_point_mobility(hm_sample, pt)
                 if hm is not None:
                     _, r = _extract_physical_radii(hm, kind)
                     semi_axes_series.append(list(r))
@@ -209,7 +243,7 @@ def _build_hand_ellipsoid_feed(
         for kind in active_ellipsoids:
             builder = builders[kind]
             for pt in resolved_pts:
-                hm = _lookup(hm_map, pt)
+                hm = _lookup_point_mobility(hm_map, pt)
                 if hm is None or (
                     mobility_condition_cutoff is not None
                     and hm.condition > mobility_condition_cutoff
@@ -229,32 +263,10 @@ def _build_hand_ellipsoid_feed(
                 )
         return tuple(glyphs_list)
 
-    def hand_hud_lines_fn(index: int) -> tuple[str, ...]:
-        hm_map, lines = _get_hm(index), []
-        is_hands = len(resolved_pts) == 2 and {p.group for p in resolved_pts} == {
-            "hands"
-        }
-        for kind in active_ellipsoids:
-            scale, parts = scales[kind], []
-            for pt in resolved_pts:
-                hm = _lookup(hm_map, pt)
-                if hm is not None and (
-                    mobility_condition_cutoff is None
-                    or hm.condition <= mobility_condition_cutoff
-                ):
-                    _, r = _extract_physical_radii(hm, kind)
-                    lbl = (
-                        ("lead" if "lead" in pt.name else "trail")
-                        if is_hands
-                        else pt.name
-                    )
-                    parts.append(
-                        format_hud_capability(lbl, kind, r, scale.unit, hm.condition)
-                    )
-            lines.append(" | ".join(parts))
-        return tuple(lines)
-
-    return hand_ellipsoids_fn, hand_hud_lines_fn
+    hud_fn = _build_hand_hud_lines_fn(
+        _get_hm, resolved_pts, active_ellipsoids, scales, mobility_condition_cutoff
+    )
+    return hand_ellipsoids_fn, hud_fn
 
 
 def _resolve_active_ellipsoids(
