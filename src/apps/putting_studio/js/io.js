@@ -296,6 +296,7 @@ window.PuttingSimulatorAPI = {
 
 window.onload = () => {
   handleResize();
+  rebuildGreenDispersionBatch();
   drawSGCaptureChart();
   requestAnimationFrame(animate);
 };
