@@ -7,6 +7,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `perturbation_analysis` | Perturbation Analysis | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
+| `putting_analytics_gui` | Tools Package: putting_analytics_gui | `tile` | `analysis` | — | `core` | 🔵 planned | `src/tools/putting_analytics_gui/__init__.py` | `tests/config/test_registry_exclusions.py` |
 | `rate_of_closure` | Rate of Closure Impact Explorer | `tile` | `analysis` | — | `tools` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `render.body_appearance` | Golfer body appearance with a visible head, face and neck in every engine render | `feature` | `analysis` | — | `core` | 🔵 planned | `src/shared/python/model_appearance/head.py` | `tests/unit/model_appearance/test_head_model.py` |
 | `render.club_head_and_ball` | Realistic Club Head And Ball Rendering | `feature` | `analysis` | — | `core` | 🔵 planned | `src/shared/python/model_appearance/club_head_mesh.py` | `tests/unit/model_appearance/test_club_head_mesh.py` |
