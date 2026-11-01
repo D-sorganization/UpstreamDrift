@@ -21,6 +21,8 @@ from src.shared.python.putting_analytics.perceived_green import (
 from src.shared.python.putting_analytics.roll_model import BatchRollModel
 from src.shared.python.putting_dynamics.surfaces import HeightField, SurfaceSpec
 
+pytestmark = pytest.mark.unit
+
 DISTANCE_FT = 10.0
 FALLS_TOWARD_MINUS_Y = 270.0  # downhill to the right of a putt along +x
 # Test-only miss pricing, shaped like a putting curve; not reference data.
