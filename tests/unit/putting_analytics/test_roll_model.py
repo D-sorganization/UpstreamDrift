@@ -9,6 +9,8 @@ from src.shared.python.putting_analytics.expected_putts import PuttAction
 from src.shared.python.putting_analytics.roll_model import BatchRollModel
 from src.shared.python.putting_dynamics.surfaces import HeightField, SurfaceSpec
 
+pytestmark = pytest.mark.unit
+
 FLAT = SurfaceSpec.flat_uniform(10.0)
 
 

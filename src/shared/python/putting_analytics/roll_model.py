@@ -52,7 +52,9 @@ class BatchRollModel:
 
     def nominal_speed_mps(self, distance_ft: float, pace_ft_past: float) -> float:
         """Start speed that rolls ``pace_ft_past`` beyond the hole (module law)."""
-        decel = self.surface.friction.mu_roll0 + self.surface.height.gradient(0, 0)[0]
+        surface = self.surface
+        friction, height = surface.friction, surface.height
+        decel = friction.mu_roll0 + height.gradient(0, 0)[0]
         require(decel > 0.0, "green too steep downhill for a nominal pace", decel)
         roll_m = (distance_ft + pace_ft_past) * FT_M
         require(roll_m > 0.0, "planned roll must be positive", roll_m)

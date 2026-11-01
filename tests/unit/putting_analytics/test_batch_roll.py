@@ -28,6 +28,8 @@ from src.shared.python.putting_dynamics.surfaces import (
 )
 from src.shared.python.putting_dynamics.types import BallState
 
+pytestmark = pytest.mark.unit
+
 PARITY_TOL_M = 1e-9  # rest-position agreement with the scalar solver
 HOLE = (2.0, 0.0)
 
