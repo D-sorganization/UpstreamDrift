@@ -1,4 +1,4 @@
-"""Open the putting analytics window: ``python -m src.tools.putting_analytics``."""
+"""Open the putting analytics window: ``python -m src.tools.putting_analytics_gui``."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ WINDOW_SIZE = (1100, 760)
 def main() -> int:
     """Launch the standalone window; returns a process exit code."""
     return run_standalone_widget(
-        "src.tools.putting_analytics.gui:MainWidget", WINDOW_SIZE
+        "src.tools.putting_analytics_gui.gui:MainWidget", WINDOW_SIZE
     )
 
 

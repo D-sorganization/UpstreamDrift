@@ -950,8 +950,8 @@
       "feature_id": "tools.putting_analytics",
       "title": "Putting analytics studies",
       "status": "gap",
-      "pyqt": "src/tools/putting_analytics/gui.py",
-      "api": null,
+      "pyqt": "src/tools/putting_analytics_gui/gui.py",
+      "api": "src/api/routes/putting_analytics.py",
       "web": null,
       "issue": 14235,
       "reason": null,
@@ -959,7 +959,7 @@
       "tiles": [
         "putting_analytics"
       ],
-      "notes": "Desktop tool over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The /tools/putting-analytics API routes land in PR 14233; point api at src/api/routes/putting_analytics.py once that merges.",
+      "notes": "Desktop tool over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The /tools/putting-analytics API routes serve the same studies.",
       "id": "tools.putting_analytics"
     },
     {
@@ -1806,8 +1806,8 @@
       "id": "putting_analytics",
       "title": "Putting Analytics",
       "description": "Best aim and pace, misread cost and putt-class library studies on the shared putting service, priced by your own expected-putts curve. Install: pip install -e '.[gui-tools]'.",
-      "path": "src/tools/putting_analytics/__main__.py",
-      "launch_target": "src/tools/putting_analytics/__main__.py",
+      "path": "src/tools/putting_analytics_gui/__main__.py",
+      "launch_target": "src/tools/putting_analytics_gui/__main__.py",
       "category": "tool",
       "status": "ready",
       "capabilities": [
@@ -3366,9 +3366,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "4dec0c1726ef74f87f0e0644d40f920e51c8e5ac11064620402a3fb3c11c4344",
-    "src/config/launcher_manifest.json": "6eb236255de68bdf2d649b77a6986521d4ada57c24de350fa35fdb14f3ab3a4b",
-    "src/config/feature_parity.json": "9a0ce3fb44c066078426c7c93a147626db0e070d1652b243e28f2d013fc7932a",
+    "src/config/models.yaml": "58d58762c2854bac4034d4cf71f3681913ca654ae98048fc81abb91ae90a8a90",
+    "src/config/launcher_manifest.json": "6b480f79eb7be85b50918f7c3871449e170a651a36015a7d203ec0744f9ecd41",
+    "src/config/feature_parity.json": "7bcf9466f45acd47f65042c3c5758a3b86d5e4bcce23397eb7ba07cde58be061",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

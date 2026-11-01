@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from src.shared.python.putting_analytics import service
-from src.tools.putting_analytics.core import (
+from src.tools.putting_analytics_gui.core import (
     MODES,
     SERVICE_FUNCTIONS,
     StudyForm,

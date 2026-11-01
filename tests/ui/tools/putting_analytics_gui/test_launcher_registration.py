@@ -16,7 +16,7 @@ from src.launchers.embedded_tool_bootstrap import FALLBACK_ADAPTER_MODULES
 
 ROOT = Path(__file__).resolve().parents[4]
 TOOL_ID = "putting_analytics"
-ADAPTER = "src.tools.putting_analytics._embed_adapter"
+ADAPTER = "src.tools.putting_analytics_gui._embed_adapter"
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 
@@ -46,7 +46,7 @@ def test_tool_has_a_launcher_tile_and_adapter_registration() -> None:
 def test_embed_adapter_import_does_not_load_pyqt() -> None:
     code = (
         f"import importlib, sys; importlib.import_module({ADAPTER!r}); "
-        "assert 'src.tools.putting_analytics.gui' not in sys.modules; "
+        "assert 'src.tools.putting_analytics_gui.gui' not in sys.modules; "
         "assert 'PyQt6' not in sys.modules"
     )
     result = subprocess.run(
@@ -74,7 +74,7 @@ def test_embed_adapter_lifecycle_is_idempotent() -> None:
     except (ImportError, OSError) as exc:
         pytest.skip(f"PyQt6 not loadable: {exc}")
     _app = QApplication.instance() or QApplication([])
-    from src.tools.putting_analytics._embed_adapter import (
+    from src.tools.putting_analytics_gui._embed_adapter import (
         PuttingAnalyticsEmbedAdapter,
     )
 

@@ -14,9 +14,9 @@ weighted library of putt classes. It calls the same service as the MCP putting
 tools and the `/tools/putting-analytics` API, so all three give the same
 answer for the same inputs.
 
-Entry point `src/tools/putting_analytics/__main__.py`, which opens
-`src/tools/putting_analytics/gui.py`. Run it with
-`python -m src.tools.putting_analytics`, or launch the tile from the
+Entry point `src/tools/putting_analytics_gui/__main__.py`, which opens
+`src/tools/putting_analytics_gui/gui.py`. Run it with
+`python -m src.tools.putting_analytics_gui`, or launch the tile from the
 UpstreamDrift launcher.
 
 ## Inputs

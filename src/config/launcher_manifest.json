@@ -1089,7 +1089,7 @@
       "description": "Best aim and pace, misread cost and putt-class library studies on the shared putting service, priced by your own expected-putts curve. Install: pip install -e '.[gui-tools]'.",
       "category": "tool",
       "type": "special_app",
-      "path": "src/tools/putting_analytics/__main__.py",
+      "path": "src/tools/putting_analytics_gui/__main__.py",
       "logo": "putting_analytics.svg",
       "status": "ready",
       "capabilities": [

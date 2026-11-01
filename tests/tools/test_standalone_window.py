@@ -38,7 +38,7 @@ class _FakeWidget:
 def test_rejects_a_widget_path_without_a_class_name() -> None:
     with pytest.raises(ValueError, match="module:ClassName"):
         standalone_window.run_standalone_widget(
-            "src.tools.putting_analytics.gui", (1, 1)
+            "src.tools.putting_analytics_gui.gui", (1, 1)
         )
 
 

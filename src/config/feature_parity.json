@@ -116,13 +116,13 @@
     },
     "tools.putting_analytics": {
       "title": "Putting analytics studies",
-      "pyqt": "src/tools/putting_analytics/gui.py",
-      "api": null,
+      "pyqt": "src/tools/putting_analytics_gui/gui.py",
+      "api": "src/api/routes/putting_analytics.py",
       "web": null,
       "status": "gap",
       "issue": 14235,
       "tiles": ["putting_analytics"],
-      "notes": "Desktop tool over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The /tools/putting-analytics API routes land in PR 14233; point api at src/api/routes/putting_analytics.py once that merges."
+      "notes": "Desktop tool over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The /tools/putting-analytics API routes serve the same studies."
     },
     "tools.golf_simulator": {
       "title": "Golf Simulator capability-aware controls and replay submission",

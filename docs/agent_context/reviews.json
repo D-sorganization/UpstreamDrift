@@ -19,24 +19,24 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "8ace1ccc155f434f96ab730f5a1422bf1ba4844d020201fa88ebcfb3917c920e",
+      "fingerprint": "85593e06610d688ba8e920ef3479c173e5896d1c2be0a483b373a8da1efee68f",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "122475bfa6e445ee8a2d4e1f94eae41c3b0e6bce954d1eb8ea44a1e40662e052",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "9a0ce3fb44c066078426c7c93a147626db0e070d1652b243e28f2d013fc7932a",
-        "src/config/launcher_manifest.json": "6eb236255de68bdf2d649b77a6986521d4ada57c24de350fa35fdb14f3ab3a4b",
+        "src/config/feature_parity.json": "7bcf9466f45acd47f65042c3c5758a3b86d5e4bcce23397eb7ba07cde58be061",
+        "src/config/launcher_manifest.json": "6b480f79eb7be85b50918f7c3871449e170a651a36015a7d203ec0744f9ecd41",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
-        "src/config/models.yaml": "4dec0c1726ef74f87f0e0644d40f920e51c8e5ac11064620402a3fb3c11c4344",
+        "src/config/models.yaml": "58d58762c2854bac4034d4cf71f3681913ca654ae98048fc81abb91ae90a8a90",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Re-reviewed launcher-atlas after adding the putting_analytics tile to models.yaml and launcher_manifest.json and a tools.putting_analytics gap entry (issue 14235) to feature_parity.json (#14177); regenerated the atlas, generate_capability_atlas --check and tests/scripts/test_capability_atlas.py plus the capture_rig goal tests pass, contract unchanged."
+      "rationale": "Re-reviewed launcher-atlas after renaming the putting analytics tool package to src/tools/putting_analytics_gui (it shadowed src/shared/python/putting_analytics) and pointing the tools.putting_analytics parity entry's api at src/api/routes/putting_analytics.py (#14177); regenerated the atlas, generate_capability_atlas --check and tests/scripts/test_capability_atlas.py plus the capture_rig goal tests pass, contract unchanged."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",

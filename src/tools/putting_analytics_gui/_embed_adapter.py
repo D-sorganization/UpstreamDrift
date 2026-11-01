@@ -25,7 +25,7 @@ class PuttingAnalyticsEmbedAdapter:
 
     def create_main_widget(self, parent: Any) -> Any:
         if self._widget is None:
-            from src.tools.putting_analytics.gui import MainWidget
+            from src.tools.putting_analytics_gui.gui import MainWidget
 
             self._widget = MainWidget(parent=parent)
         return self._widget

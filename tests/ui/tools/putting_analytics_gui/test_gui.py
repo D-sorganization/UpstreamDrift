@@ -43,7 +43,7 @@ def _fill(widget: Any) -> None:
 
 
 def test_bad_input_is_reported_without_starting_a_study(qapp: Any) -> None:
-    from src.tools.putting_analytics.gui import MainWidget
+    from src.tools.putting_analytics_gui.gui import MainWidget
 
     widget = MainWidget()
     widget.run_study()
@@ -54,7 +54,7 @@ def test_bad_input_is_reported_without_starting_a_study(qapp: Any) -> None:
 
 @pytest.mark.parametrize("index", [0, 1, 2])
 def test_each_study_fills_the_table(qapp: Any, index: int) -> None:
-    from src.tools.putting_analytics.gui import MainWidget
+    from src.tools.putting_analytics_gui.gui import MainWidget
 
     widget = MainWidget()
     _fill(widget)
@@ -68,7 +68,7 @@ def test_each_study_fills_the_table(qapp: Any, index: int) -> None:
 
 
 def test_service_rejection_is_shown(qapp: Any) -> None:
-    from src.tools.putting_analytics.gui import MainWidget
+    from src.tools.putting_analytics_gui.gui import MainWidget
 
     widget = MainWidget()
     _fill(widget)
@@ -82,7 +82,7 @@ def test_service_rejection_is_shown(qapp: Any) -> None:
 
 def test_objective_choices_are_the_ones_the_service_accepts(qapp: Any) -> None:
     from src.shared.python.putting_analytics.optimize import OBJECTIVES
-    from src.tools.putting_analytics.gui import MainWidget
+    from src.tools.putting_analytics_gui.gui import MainWidget
 
     widget = MainWidget()
     choices = [widget.objective.itemText(i) for i in range(widget.objective.count())]
@@ -92,7 +92,7 @@ def test_objective_choices_are_the_ones_the_service_accepts(qapp: Any) -> None:
 
 def test_studies_run_on_the_shared_async_action_bar(qapp: Any) -> None:
     from src.tools.async_action import AsyncActionBar
-    from src.tools.putting_analytics.gui import MainWidget
+    from src.tools.putting_analytics_gui.gui import MainWidget
 
     widget = MainWidget()
     assert isinstance(widget.action_bar, AsyncActionBar)
@@ -108,7 +108,7 @@ def test_an_unexpected_error_is_not_called_a_rejection(
     qapp: Any, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     from src.shared.python.putting_analytics import service
-    from src.tools.putting_analytics.gui import MainWidget
+    from src.tools.putting_analytics_gui.gui import MainWidget
 
     def _boom(_args: Any) -> Any:
         raise RuntimeError("integrator diverged")

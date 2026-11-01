@@ -691,7 +691,7 @@
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
-      "evidence": "src/tools/putting_analytics/__main__.py",
+      "evidence": "src/tools/putting_analytics_gui/__main__.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
     "shadow_tracker": {
@@ -2131,7 +2131,7 @@
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
-      "evidence": "src/tools/putting_analytics/gui.py",
+      "evidence": "src/tools/putting_analytics_gui/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_registry.py"
     },
     "tools.matlab_suite": {
