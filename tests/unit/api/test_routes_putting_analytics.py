@@ -24,7 +24,11 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from src.api.rate_limit import limiter  # noqa: E402
 from src.api.routes.putting_analytics import router  # noqa: E402
-from src.shared.python.putting_analytics import service  # noqa: E402
+from src.shared.python.putting_analytics import (  # noqa: E402
+    service,
+    service_curve,
+    service_variance,
+)
 
 PREFIX = "/tools/putting-analytics"
 
@@ -96,6 +100,30 @@ def test_library_study_matches_the_shared_service(client: TestClient) -> None:
     assert response.json() == service.library_study(body)
 
 
+VARIANCE_BODY: dict[str, Any] = {
+    "baseline": BASELINE,
+    "classes": [{"distance_ft": 6.0, "count": 2.0}],
+    "factors": ["face", "speed"],
+    "base_samples": 8,
+    "n_samples": 32,
+    "n_bootstrap": 10,
+    "seed": 2,
+}
+CURVE_BODY: dict[str, Any] = {"distances_ft": [3.0, 10.0], "n": 60, "seed": 2}
+
+
+def test_variance_study_matches_the_shared_service(client: TestClient) -> None:
+    response = client.post(f"{PREFIX}/variance-study", json=VARIANCE_BODY)
+    assert response.status_code == 200, response.text
+    assert response.json() == service_variance.variance_study(VARIANCE_BODY)
+
+
+def test_simulated_curve_matches_the_shared_service(client: TestClient) -> None:
+    response = client.post(f"{PREFIX}/simulated-curve", json=CURVE_BODY)
+    assert response.status_code == 200, response.text
+    assert response.json() == service_curve.curve_study(CURVE_BODY)
+
+
 @pytest.mark.parametrize(
     ("path", "body", "fragment"),
     [
@@ -104,6 +132,8 @@ def test_library_study_matches_the_shared_service(client: TestClient) -> None:
         ("optimize", _study(n=service.MAX_ROLLOUTS), "candidates x n"),
         ("misread-cost", _study(), "reads"),
         ("library-study", _study(), "classes"),
+        ("variance-study", {**VARIANCE_BODY, "factors": ["strike"]}, "factors"),
+        ("simulated-curve", {**CURVE_BODY, "n": 1}, "'n'"),
     ],
 )
 def test_service_rejections_are_400s(
@@ -127,6 +157,12 @@ def test_limits_report_the_service_caps(client: TestClient) -> None:
     assert limits["stimp_range"] == list(service.STIMP_RANGE)
     assert "flat" in limits["orientations"]
     assert set(limits["objectives"]) == {"sg", "must_make"}
+    assert limits["variance_factors"] == list(service_variance.MODELLED_FACTORS)
+    assert limits["max_variance_rollouts"] == service_variance.MAX_VARIANCE_ROLLOUTS
+    assert limits["max_curve_rollouts"] == service_curve.MAX_CURVE_ROLLOUTS
+    assert limits["default_curve_distances_ft"] == list(
+        service_curve.DEFAULT_CURVE_GRID_FT
+    )
 
 
 def test_route_import_does_not_load_the_roll_model() -> None:
@@ -135,12 +171,13 @@ def test_route_import_does_not_load_the_roll_model() -> None:
         "src.api.routes.putting_analytics",
         "src.shared.python.putting_analytics.service",
         "src.shared.python.putting_analytics.roll_model",
+        "src.shared.python.putting_analytics.service_variance",
+        "src.shared.python.putting_analytics.service_curve",
     )
     saved = {name: sys.modules.pop(name, None) for name in names}
     try:
         importlib.import_module(names[0])
-        assert names[1] not in sys.modules
-        assert names[2] not in sys.modules
+        assert not [name for name in names[1:] if name in sys.modules]
     finally:
         for name, module in saved.items():
             sys.modules.pop(name, None)

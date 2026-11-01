@@ -2256,6 +2256,7 @@
 {"path": "putting_analytics/roll_model.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/sampling.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/service.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
+{"path": "putting_analytics/service_curve.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/service_variance.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/sg_curve.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/skill.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
