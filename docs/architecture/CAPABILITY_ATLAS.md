@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**72 launcher tiles · 70 feature contracts.**
+**72 launcher tiles · 71 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -255,6 +255,7 @@ flowchart LR
 | Pose Studio interactive pose editing | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/pose_studio/__main__.py) |
 | Putting analytics studies | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/putting_analytics_gui/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/putting_analytics.py) |
 | Putting green simulation | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/putting_green/python/simulator.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/putting_green.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/PuttingGreen.tsx) |
+| Standalone offline putting studio (HTML client of the shared putting core) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/putting_green_gui/_scene_builder.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/apps/putting_studio/index.html) |
 | Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | gap | [pyqt](https://github.com/D-sorganization/Tools/blob/main/src/rate_of_closure/launch_pyqt6.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/local_server.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/ImpactExplorer.tsx) |
 | Shot Pattern Analysis Workbench | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/shot_pattern_analysis/gui.py) |
 | Segmental spine study execution and model asset selection | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/spine_viewer/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/spine_viewer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/SpineViewer.tsx) |

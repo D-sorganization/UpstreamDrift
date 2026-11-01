@@ -10,9 +10,10 @@ dependencies, so it cannot `import` the Python package directly.
 ## Sunset Criterion
 
 This copy is replaced by a generated or bridged core (Pyodide/WASM, or
-codegen from the Python source) once that core passes a measured
-offline asset-size and startup budget, to be set in the final studio slice, 8l (epic
-#14141).
+codegen from the Python source) once that core passes the measured
+offline budget in `tests/apps/putting_studio/test_studio_budget.py`: a
+1,000,000-byte bundle and a 2 s headless load (835 KB and 163 ms measured
+for this copy on 2026-11-01). Tracked in #14200.
 
 ## Until Then
 
