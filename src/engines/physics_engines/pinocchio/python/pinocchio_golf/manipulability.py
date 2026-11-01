@@ -1,6 +1,17 @@
-"""Manipulability Analysis Module for Pinocchio Engine."""
+"""Kinematic Manipulability Analysis Module for Pinocchio Engine (HCM-4, #14005).
+
+NOTE: This module evaluates purely *kinematic* manipulability ellipsoids
+(Yoshikawa, 1985: M_v = J J^T) based on frame Jacobians alone. It does not
+incorporate the robot or golfer mass matrix M(q).
+
+For full dynamic, operational-space mobility (Khatib, 1987: W = J M^-1 J^T)
+and constrained hand/club force and mobility ellipsoids, see:
+- ``src.engines.physics_engines.pinocchio.python.force_adapter.PinocchioCapabilitySource``
+- ``src.shared.python.spatial_algebra.operational_space``
+"""
 
 from dataclasses import dataclass
+from typing import ClassVar
 
 import numpy as np
 import pinocchio as pin
@@ -35,7 +46,19 @@ class ManipulabilityResult:
 
 
 class PinocchioManipulabilityAnalyzer:
-    """Analyzes mechanism manipulability using Pinocchio."""
+    """Analyzes mechanism manipulability using Pinocchio (kinematic-only, HCM-4 #14005).
+
+    Calculates Yoshikawa (1985) kinematic manipulability M_v = J J^T.
+    For dynamic operational-space mobility (W = J M^-1 J^T), use
+    ``PinocchioCapabilitySource`` from ``pinocchio.python.force_adapter``.
+    """
+
+    is_kinematic_only: ClassVar[bool] = True
+
+    @property
+    def is_dynamic(self) -> bool:
+        """Return False: this analyzer evaluates purely kinematic manipulability."""
+        return False
 
     def __init__(self, model: pin.Model, data: pin.Data) -> None:
         """Initialize the analyzer."""
