@@ -18,6 +18,123 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14177 · Putting Optimizer and Misread-Cost MCP Tools
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14177
+- **Branch:** claude/putting-tools-14177
+- **PR:** #14203
+- **Paths:** see #14203
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`6955fe0e`; collated from changes/14177-putting-optimizer-and-misread-cost-mcp-t.md)
+- **Summary:** Putting Optimizer and Misread-Cost MCP Tools
+- **Next step:** Add variance and putt-study tools after #14174 and #14175 land
+
+### DL-#14176 · Add Putting Reference Data and Validation Harness
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14176
+- **Branch:** claude/putting-validation-14176
+- **PR:** #14198
+- **Paths:** see #14198
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`5bc0c637`; collated from changes/14176-add-putting-reference-data-and-validatio.md)
+- **Summary:** Add Putting Reference Data and Validation Harness
+- **Next step:** Calibrate presets once the batch roll and skill sampler merge
+
+### DL-#14175 · Add Putting Analytics Variance Attribution and Error-Source Elimination
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14175
+- **Branch:** claude/putting-variance-14175
+- **PR:** #14196
+- **Paths:** see #14196
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`57a5a9f8`; collated from changes/14175-add-putting-analytics-variance-attributi.md)
+- **Summary:** Add Putting Analytics Variance Attribution and Error-Source Elimination
+- **Next step:** Merge after 14188
+
+### DL-#14174 · Add Putting Analytics Putt Library and Aggregate Report
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14174
+- **Branch:** claude/putting-library-14174
+- **PR:** #14197
+- **Paths:** see #14197
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`bb30e42a`; collated from changes/14174-add-putting-analytics-putt-library-and-a.md)
+- **Summary:** Add Putting Analytics Putt Library and Aggregate Report
+- **Next step:** Merge after 14181
+
+### DL-#14173 · Plan on the Perceived Green and Execute on the True Green
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14173
+- **Branch:** claude/putting-perceived-green-14173
+- **PR:** #14199
+- **Paths:** see #14199
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`437a429e`; collated from changes/14173-plan-on-the-perceived-green-and-execute.md)
+- **Summary:** Plan on the Perceived Green and Execute on the True Green
+- **Next step:** Add aspect misreads and per-class read-cost reporting over the putt library
+
+### DL-#14171 · Add BatchRollModel PuttOutcomeModel Adapter
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14171
+- **Branch:** claude/putting-roll-model-14171
+- **PR:** #14195, #14194
+- **Paths:** see #14195
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`2dd6c08d`; collated from changes/14171-add-vectorised-batch-roll-integrator.md)
+- **Summary:** Add BatchRollModel PuttOutcomeModel Adapter
+- **Next step:** Merge after 14181; then the BatchRollModel adapter PR
+
+### DL-#14170 · Putting Analytics: Expected Putts and Aim/Pace Optimiser
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14170
+- **Branch:** claude/project-thread-sfn9g4
+- **PR:** #14181
+- **Paths:** see #14181
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`2403e048`; collated from changes/14170-putting-analytics-expected-putts.md)
+- **Summary:** Add putting_analytics: skill-conditioned expected-putts curve solved exactly, aim and pace optimiser for strokes-gained and must-make objectives, and strokes gained against both the player's own curve and a tour reference (epic #14168)
+- **Next step:** Land #14169 skill profile and dispersion sampler, then wire a putting_dynamics outcome model (#14171)
+
+### DL-#14169 · Putting Analytics: Skill Profile and Dispersion Sampler
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14169
+- **Branch:** claude/putting-skill-sampler-14169
+- **PR:** #14188
+- **Paths:** see #14188
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`ab03503c`; collated from changes/14169-add-putting-analytics-skill-profile-stro.md)
+- **Summary:** Add putting_analytics skill profile (stroke face, path, speed, strike and green-read dispersion) and a per-channel seeded Monte Carlo sampler whose single-channel ablations leave other draws identical (epic #14168)
+- **Next step:** Wire the profile into a putting_dynamics PuttOutcomeModel (#14171)
+
+### DL-#14146 · Docker Size Gates Measure Compressed Content Size via the Engine API Instead of .Size, Whose Meaning Changed Between Docker Engine 29.1.3 And 29.9.2
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14146
+- **Branch:** brick/ci-toolchain/14146-docker-size-measure
+- **PR:** #14153
+- **Paths:** see #14153
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`06c2d8d5`; collated from changes/14146-docker-size-gates-measure-compressed-con.md)
+- **Summary:** Docker size gates measure compressed content size via the Engine API instead of .Size, whose meaning changed between Docker Engine 29.1.3 and 29.9.2
+- **Next step:** Merge after acceptance review
+
 ### DL-#13885 · Pure Two-Hand Grip-Margin Metric: Per-Pad Coulomb Margin, UNLOADED Floor, Slip Events, Grasp-Map Internal Wrench and GripMarginReport
 
 - **State:** in_review
@@ -1028,16 +1145,172 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14216 · Development Log Reconciled: 51 Active Entries Whose PRs All Merged and Issues Closed Move to Shipped (75 to 24 Active), Unblocking the WIP Ceiling
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14216
+- **Branch:** merged via #14217
+- **PR:** #14217
+- **Paths:** see #14217
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`c825eb47`; collated from changes/14216-development-log-reconciled-51-active-ent.md)
+- **Summary:** Development log reconciled: 51 active entries whose PRs all merged and issues closed move to shipped (75 to 24 active), unblocking the WIP ceiling
+- **Next step:** Shipped in PR #14217.
+
+### DL-#14206 · Conflict Disarm Runs Its Job Inline (Reading RM's Conflict_Disarm Script via an App-Token Checkout) Instead of Calling an Internal Repository_Management Reusable Workflow, Which a Public Repo Cannot Do, so It No Longer Fails Every Run With 0 Jobs
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14206
+- **Branch:** merged via #14207
+- **PR:** #14207
+- **Paths:** see #14207
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`8fe5f2b8`; collated from changes/14206-inline-conflict-disarm.md)
+- **Summary:** Conflict Disarm runs its job inline (reading RM's conflict_disarm script via an App-token checkout) instead of calling an internal Repository_Management reusable workflow, which a public repo cannot do, so it no longer fails every run with 0 jobs
+- **Next step:** Shipped in PR #14207.
+
+### DL-#14201 · Guard the Removed Legacy .agent/ Tree and Fence the GAAI Ci-Watch-and-Fix Skill in Project Rules (RM #2567).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14201
+- **Branch:** merged via #14211
+- **PR:** #14211
+- **Paths:** see #14211
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`8cf45c0a`; collated from changes/14201-agent-guard-fence.md)
+- **Summary:** Guard the removed legacy .agent/ tree and fence the GAAI ci-watch-and-fix skill in project rules (RM #2567).
+- **Next step:** Shipped in PR #14211.
+
+### DL-#14193 · Putting_Dynamics: Resolve Roll Onset When Initial Slip Is Within One Step, Preventing Zero-Friction RK4 Chattering
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14193
+- **Branch:** merged via #14208
+- **PR:** #14208
+- **Paths:** see #14208
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`3e644158`; collated from changes/14193-putting-dynamics-tiny-slip-roll-onset.md)
+- **Summary:** putting_dynamics: resolve roll onset when initial slip is within one step, preventing zero-friction RK4 chattering
+- **Next step:** Shipped in PR #14208.
+
+### DL-#14180 · Docs: Root REVIEW.md With UpstreamDrift Review Rules (RM #2565 Rollout)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14180
+- **Branch:** merged via #14182
+- **PR:** #14182
+- **Paths:** see #14182
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`b8b14446`; collated from changes/14180-review-md.md)
+- **Summary:** docs: root REVIEW.md with UpstreamDrift review rules (RM #2565 rollout)
+- **Next step:** Shipped in PR #14182.
+
+### DL-#14178 · CI Apt Installer Bounds Each Apt-Get Attempt (APT_ATTEMPT_TIMEOUT, Default 420s) and Sets 30s Acquire Timeouts, so a Stalled Mirror Download Is Retried Instead of Holding a Merge-Queue Job to Its 150-Minute Timeout
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14178
+- **Branch:** merged via #14179
+- **PR:** #14179
+- **Paths:** see #14179
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`06d8b53f`; collated from changes/14178-apt-attempt-timeout.md)
+- **Summary:** CI apt installer bounds each apt-get attempt (APT_ATTEMPT_TIMEOUT, default 420s) and sets 30s acquire timeouts, so a stalled mirror download is retried instead of holding a merge-queue job to its 150-minute timeout
+- **Next step:** Shipped in PR #14179.
+
+### DL-#14172 · Add Putting Analytics Stochastic Green Sampler
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14172
+- **Branch:** claude/putting-green-sampler-14172
+- **PR:** #14192
+- **Paths:** see #14192
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`01dc574b`; collated from changes/14172-add-putting-analytics-stochastic-green-s.md)
+- **Summary:** Add Putting Analytics Stochastic Green Sampler
+- **Next step:** Shipped in PR #14192.
+
+### DL-#14164 · Docker Size Gates Tag Each Build per Run, Label It, and Always Remove the Run's Image Plus This Workflow's Dangling Images, so the Shared Runner Disk No Longer Fills
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14164
+- **Branch:** merged via #14165
+- **PR:** #14165
+- **Paths:** see #14165
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`24281956`; collated from changes/14164-docker-size-gates-tag-each-build-per-run.md)
+- **Summary:** Docker size gates tag each build per run, label it, and always remove the run's image plus this workflow's dangling images, so the shared runner disk no longer fills
+- **Next step:** Shipped in PR #14165.
+
+### DL-#14006 · HCM-5: Force and Mobility Matrices at Any Segment Intersection
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14006
+- **Branch:** feat/14006-segment-intersection-mobility
+- **PR:** #14205
+- **Paths:** see #14205
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`3a575a27`; collated from changes/14006-segment-intersection-mobility.md)
+- **Summary:** Implements declarative segment intersection extraction and point mobility evaluation across kinematics frames, adds condition number cutoff pruning to eliminate near-singular glyph clutter, and exposes --mobility-points, --max-mobility-points, and --mobility-condition-cutoff CLI flags in native viewer export.
+- **Next step:** Shipped in PR #14205.
+
+### DL-#14005 · Hand-Club Mobility Parity for Pinocchio: Label Kinematic Manipulability Analyzer, Route Native Viewer Export Through Pinocchio Capability Source, and Add TDD Parity Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14005
+- **Branch:** merged via #14189
+- **PR:** #14189
+- **Paths:** see #14189
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`1946da6a`; collated from changes/14005-pinocchio-hand-mobility-parity.md)
+- **Summary:** Hand-club mobility parity for Pinocchio: label kinematic manipulability analyzer, route native viewer export through Pinocchio capability source, and add TDD parity tests
+- **Next step:** Shipped in PR #14189.
+
+### DL-#13786 · Benchmark Harness Gains an Mjx-Warm-Start Arm Scored Only on Shared-Simulator Replay RMS With the L-BFGS-60 Iteration and Wall-Clock Budget; Stub-Only Until #13783-#13785
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13786
+- **Branch:** merged via #14190
+- **PR:** #14190
+- **Paths:** see #14190
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`bb9214ba`; collated from changes/13786-warm-start-arm.md)
+- **Summary:** Benchmark harness gains an mjx-warm-start arm scored only on shared-simulator replay RMS with the L-BFGS-60 iteration and wall-clock budget; stub-only until #13783-#13785
+- **Next step:** Shipped in PR #14190.
+
+### DL-#13560 · MuJoCo Grip Samples Read Zero-Slip Pairs Frictionless, Matching the Shared Law's Zero Friction at Rest; the Ten_Finger Hold Net_Moment_Com Xfail Is Removed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13560
+- **Branch:** merged via #14185
+- **PR:** #14185
+- **Paths:** see #14185
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`9a132afd`; collated from changes/13560-mujoco-resting-friction.md)
+- **Summary:** MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed
+- **Next step:** Shipped in PR #14185.
+
 ### DL-#14141 · Characterize Putting_Dynamics Contracts With Invariant Tests and Postconditions (Putting V4 PR 1)
 
 - **State:** shipped
 - **Owner:** unassigned
 - **Issue:** #14141
 - **Branch:** merged via #14145
-- **PR:** #14145, #14149, #14155, #14159
+- **PR:** #14145, #14149, #14155, #14159, #14160, #14163, #14166, #14167, #14184, #14187, #14202, #14191, #14209, #14210, #14213, #14215
 - **Paths:** see #14145
 - **Started:** 2026-10-31
-- **Last verified:** 2026-10-31 (`504e231c`; collated from changes/14141-putting-v4-step3-constants.md)
+- **Last verified:** 2026-11-01 (`31fcf448`; collated from changes/14141-putting-v4-step8b-studio-vendor.md)
 - **Summary:** Characterize putting_dynamics contracts with invariant tests and postconditions (putting v4 PR 1)
 - **Next step:** Shipped in PR #14145.
 
@@ -1489,10 +1762,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13795
 - **Branch:** merged via #14017
-- **PR:** #14017, #14018
+- **PR:** #14017, #14018, #14162
 - **Paths:** see #14017
 - **Started:** 2026-10-29
-- **Last verified:** 2026-10-29 (`28f0ee65`; collated from changes/13795-add-the-cross-engine-perturbation-receip.md)
+- **Last verified:** 2026-11-01 (`002d5c3a`; collated from changes/13795-unified-perturbation-receipt.md)
 - **Summary:** Correct cross_engine_v1 dependency status: the CC-7/9/10 draft PRs were closed unmerged, no comparison has been run
 - **Next step:** Shipped in PR #14017.
 
@@ -1944,10 +2217,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13043
 - **Branch:** merged via #13521
-- **PR:** #13521
+- **PR:** #13521, #14183
 - **Paths:** see #13521
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-25 (`5c867150`; collated from changes/13043-joint-reaction-loads-for-deadlift-snatch.md)
+- **Last verified:** 2026-11-01 (`fa421d71`; collated from changes/13043-bench-joint-reactions.md)
 - **Summary:** joint reaction loads for deadlift, snatch, and clean and jerk
 - **Next step:** Shipped in PR #13521.
 
@@ -1970,10 +2243,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13175
 - **Branch:** merged via #13543
-- **PR:** #13543, #14012, #14113, #14128
+- **PR:** #13543, #14012, #14113, #14128, #14157
 - **Paths:** see #13543
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-30 (`0443234f`; collated from changes/13175-expose-the-api-backed-anatomical-event-t.md)
+- **Last verified:** 2026-11-01 (`b3d2d1ed`; collated from changes/13175-desktop-event-table-tile.md)
 - **Summary:** HRG-E4 slice: desktop and web anatomical event table view with a shared golden fixture and a feature_parity gap entry (web fetch awaits #13538)
 - **Next step:** Shipped in PR #13543.
 
