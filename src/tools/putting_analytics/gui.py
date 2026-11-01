@@ -146,7 +146,7 @@ class MainWidget(QtWidgets.QWidget):
         self.status_label.setWordWrap(True)
         self.action_bar = AsyncActionBar()
         self.action_bar.set_trigger_buttons(self.run_button)
-        self.action_bar.cancel_button.setToolTip(_CANCEL_TOOLTIP)
+        self.action_bar.set_cancel_tooltip(_CANCEL_TOOLTIP)
         self.table = QtWidgets.QTableWidget(0, 2)
         self.table.setHorizontalHeaderLabels(["Quantity", "Value"])
         header = self.table.horizontalHeader()
