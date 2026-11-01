@@ -55,7 +55,7 @@ _UNIT_EPS = 1e-12  # keeps the inverse normal CDF finite at the cube edges
 
 
 @dataclass(frozen=True)
-class PuttOutcomes:
+class StrokeOutcomes:
     """Per-putt strokes taken, holed flag and leave distance (m)."""
 
     strokes: np.ndarray
@@ -67,7 +67,7 @@ class PuttOutcomes:
         require(len(shapes) == 1, "outcome arrays must share one shape", shapes)
 
 
-PuttModel = Callable[[ExecutionSample, ReadSample], PuttOutcomes]
+PuttModel = Callable[[ExecutionSample, ReadSample], StrokeOutcomes]
 
 
 @dataclass(frozen=True)
@@ -125,7 +125,7 @@ class ClassAttribution:
 
 def _simulate(
     model: PuttModel, profile: PuttingSkillProfile, z: Mapping[str, np.ndarray]
-) -> PuttOutcomes:
+) -> StrokeOutcomes:
     return model(
         execution_from_deviates(profile.stroke, z),
         read_from_deviates(profile.read, z),

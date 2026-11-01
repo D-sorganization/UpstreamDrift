@@ -14,7 +14,7 @@ from src.shared.python.putting_analytics.skill import (
 )
 from src.shared.python.putting_analytics.variance import (
     AttributionConfig,
-    PuttOutcomes,
+    StrokeOutcomes,
     attribute_variance,
     elimination_gains,
     sobol_attribution,
@@ -40,11 +40,11 @@ ADDITIVE_VARIANCE = {
 }
 
 
-def _outcomes(strokes: np.ndarray) -> PuttOutcomes:
-    return PuttOutcomes(strokes, strokes == 1.0, np.zeros_like(strokes))
+def _outcomes(strokes: np.ndarray) -> StrokeOutcomes:
+    return StrokeOutcomes(strokes, strokes == 1.0, np.zeros_like(strokes))
 
 
-def additive_model(ex: ExecutionSample, rd: ReadSample) -> PuttOutcomes:
+def additive_model(ex: ExecutionSample, rd: ReadSample) -> StrokeOutcomes:
     c = ADDITIVE_COEFFS
     strokes = (
         2.0
@@ -56,19 +56,19 @@ def additive_model(ex: ExecutionSample, rd: ReadSample) -> PuttOutcomes:
     return _outcomes(strokes)
 
 
-def interaction_model(ex: ExecutionSample, rd: ReadSample) -> PuttOutcomes:
+def interaction_model(ex: ExecutionSample, rd: ReadSample) -> StrokeOutcomes:
     return _outcomes(ex.face_deg * ex.path_deg)
 
 
 def make_toy_model(distance_m: float):
-    def toy(ex: ExecutionSample, rd: ReadSample) -> PuttOutcomes:
+    def toy(ex: ExecutionSample, rd: ReadSample) -> StrokeOutcomes:
         line = np.tan(np.radians(ex.start_line_error_deg(PROFILE.face_weight)))
         miss_m = distance_m * line
         pace_ok = np.abs(ex.speed_ratio - 1.0) < SPEED_WINDOW
         holed = (np.abs(miss_m) < CUP_RADIUS_M) & pace_ok
         leave = np.hypot(miss_m, 0.6 * distance_m * (ex.speed_ratio - 1.0))
         strokes = np.where(holed, 1.0, np.where(leave < 0.9, 2.0, 3.0))
-        return PuttOutcomes(strokes, holed, leave)
+        return StrokeOutcomes(strokes, holed, leave)
 
     return toy
 
