@@ -429,7 +429,7 @@
 {"path": "chat/quick_bar.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/router_factory.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/service_base.py", "classification": "diverged", "package": "chat", "spelling_only": true}
-{"path": "chat/skills_manager.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/skills_manager.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_contracts.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_providers.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_runtime.py", "classification": "identical", "package": "chat", "spelling_only": false}
