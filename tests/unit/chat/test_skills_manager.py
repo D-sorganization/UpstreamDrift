@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from src.shared.python.chat.skills_manager import SkillsManager
+
+pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 
 def _write_workflow(directory: Path, stem: str, title: str) -> None:
