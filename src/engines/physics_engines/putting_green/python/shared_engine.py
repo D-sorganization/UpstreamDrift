@@ -96,7 +96,7 @@ class SharedPuttingEngine(BasePhysicsEngine):
             engine_name="PuttingGreenShared",
             mass_matrix=CapabilityLevel.FULL,
             jacobian=CapabilityLevel.FULL,
-            contact_forces=CapabilityLevel.NONE,
+            contact_forces=CapabilityLevel.PARTIAL,
             inverse_dynamics=CapabilityLevel.FULL,
             drift_acceleration=CapabilityLevel.FULL,
             forward_sim=CapabilityLevel.FULL,
@@ -186,6 +186,18 @@ class SharedPuttingEngine(BasePhysicsEngine):
     def compute_gravity_forces(self) -> np.ndarray:
         """Mass-scaled slope acceleration at the current position."""
         return self.ball_mass * self._slope_accel(float(self._q[0]), float(self._q[1]))
+
+    def compute_contact_forces(self) -> np.ndarray:
+        """Green reaction on the ball, ``(fx, fy, fz)`` [N].
+
+        Rolling friction in the plane plus the normal support ``m g``
+        (small-slope form; a ``(q, v)`` state has no slide channel).
+        """
+        q_x, q_y = float(self._q[0]), float(self._q[1])
+        friction = self.ball_mass * (
+            self.compute_drift_acceleration() - self._slope_accel(q_x, q_y)
+        )
+        return np.array([friction[0], friction[1], self.ball_mass * _G])
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Force required for ``qacc`` on a point mass: ``M @ qacc``."""

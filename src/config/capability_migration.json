@@ -2251,7 +2251,7 @@
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
-      "evidence": "src/engines/physics_engines/putting_green/python/simulator.py",
+      "evidence": "src/tools/putting_green_gui/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
     "tools.putting_studio": {

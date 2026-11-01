@@ -108,7 +108,7 @@
     },
     "tools.putting_green": {
       "title": "Putting green simulation",
-      "pyqt": "src/engines/physics_engines/putting_green/python/simulator.py",
+      "pyqt": "src/tools/putting_green_gui/gui.py",
       "api": "src/api/routes/putting_green.py",
       "web": "ui/src/pages/PuttingGreen.tsx",
       "status": "parity",

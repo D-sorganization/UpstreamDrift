@@ -15,6 +15,7 @@ from src.engines.physics_engines.putting_green.python.shared_engine import (
     SharedPuttingEngine,
 )
 from src.engines.loaders import load_putting_green_engine
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
@@ -155,3 +156,17 @@ class TestDynamicsQueries:
         assert jac is not None
         assert np.allclose(jac["linear"], np.eye(2))
         assert engine.compute_jacobian("not-a-body") is None
+
+    def test_contact_force_at_rest_is_the_weight_on_a_flat_green(self) -> None:
+        engine = SharedPuttingEngine()
+        force = engine.compute_contact_forces()
+        assert force.shape == (3,)
+        assert np.allclose(force, [0.0, 0.0, engine.ball_mass * GRAVITY_M_S2])
+
+    def test_rolling_contact_friction_opposes_the_velocity(self) -> None:
+        engine = SharedPuttingEngine()
+        engine.set_state(np.zeros(2), np.array([1.5, 0.5]))
+        force = engine.compute_contact_forces()
+        _q, v = engine.get_state()
+        assert float(np.dot(force[:2], v)) < 0.0
+        assert force[2] == pytest.approx(engine.ball_mass * GRAVITY_M_S2)
