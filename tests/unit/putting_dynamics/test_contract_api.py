@@ -27,6 +27,7 @@ _EXPECTED_EXPORTS = {
     "STIMPMETER_RELEASE_ANGLE_DEG",
     "STIMP_RELEASE_SPEED_MPS",
     # types
+    "AimSolution",
     "BallState",
     "CollisionReport",
     "ExpectedValue",
@@ -35,6 +36,7 @@ _EXPECTED_EXPORTS = {
     "FrictionParams",
     "GrassType",
     "HeightField",
+    "LineReading",
     "Mode",
     "PuttResult",
     "PutterState",
@@ -59,14 +61,17 @@ _EXPECTED_EXPORTS = {
     "measure_stimp_ft",
     "mps_to_mph",
     "ramp_release_speed_mps",
+    "read_line",
     "rolling_mu",
     "rolling_mu_to_stimp",
     "simulate_ball",
     "simulate_strike",
     "sliding_mu",
+    "solve_aim",
     "stimp_to_rolling_mu",
     "stimpmeter_rollout_ft",
     "strike",
+    "struck_ball_state",
     "sweep_dynamic_loft",
 }
 
