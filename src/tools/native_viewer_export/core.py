@@ -11,6 +11,7 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 import functools
+import logging
 import math
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
@@ -18,6 +19,8 @@ import warnings
 
 import numpy as np
 from numpy.typing import NDArray
+
+logger = logging.getLogger(__name__)
 
 from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.shared.python.force_overlay.conversions import restrict_frame
@@ -166,6 +169,10 @@ class ExportSettings:
     event_captions: bool = False
     #: kinematic closure mode for hand mobility ellipsoids (HCM-3, #14004)
     hand_mobility_mode: str = "constrained"
+    #: segment intersection points for whole-body mobility (HCM-5, #14006)
+    mobility_points: str = "hands"
+    max_mobility_points: int = 8
+    mobility_condition_cutoff: float | None = None
 
     @property
     def shading_enabled(self) -> bool:
@@ -259,6 +266,15 @@ class ExportSettings:
             raise ValueError(
                 f"hand_mobility_mode must be 'constrained' or 'unconstrained', got {self.hand_mobility_mode!r}"
             )
+        if not isinstance(self.mobility_points, str):
+            raise TypeError("mobility_points must be a str")
+        if self.max_mobility_points < 1:
+            raise ValueError("max_mobility_points must be a positive integer")
+        if (
+            self.mobility_condition_cutoff is not None
+            and self.mobility_condition_cutoff <= 0.0
+        ):
+            raise ValueError("mobility_condition_cutoff must be positive")
 
     def effective_speeds(self, dt_s: float) -> tuple[float, ...]:
         """Speeds to export; a deprecated ``stride`` maps to its equivalent speed."""
@@ -273,16 +289,53 @@ class ExportSettings:
         return (speed,)
 
 
-@functools.lru_cache(maxsize=4)
+@functools.lru_cache(maxsize=8)
 def _hand_source(
     spec_bytes: bytes,
     torque_limit_source: str | None = None,
+    engine: str = "mujoco",
 ) -> Any:
-    """Cached ``HandMobilitySource`` of a specification (compiled once per export).
+    """Cached capability/mobility source of a specification (compiled once per export).
 
-    The cache key includes ``torque_limit_source`` so alternate torque capacities
-    compile distinct instances (#14043).
+    Dispatches to the requested engine's capability source when available (#14005, #14049),
+    falling back to MuJoCo. The cache key includes ``torque_limit_source`` and ``engine``
+    so alternate engines and limits compile distinct instances.
     """
+    if engine == "pinocchio":
+        try:
+            from src.engines.physics_engines.pinocchio.python.force_adapter import (
+                PinocchioCapabilitySource,
+            )
+
+            limits = (
+                torque_limit_source
+                if isinstance(torque_limit_source, Mapping)
+                else None
+            )
+            return PinocchioCapabilitySource(spec_bytes, torque_limits=limits)
+        except (ImportError, AttributeError, ValueError, RuntimeError) as exc:
+            logger.warning(
+                "PinocchioCapabilitySource unavailable for hand mobility; falling back to MuJoCo: %s",
+                exc,
+            )
+    elif engine == "drake":
+        try:
+            from src.engines.physics_engines.drake.python.force_adapter import (
+                DrakeCapabilitySource,
+            )
+
+            limits = (
+                torque_limit_source
+                if isinstance(torque_limit_source, Mapping)
+                else None
+            )
+            return DrakeCapabilitySource(spec_bytes, torque_limits=limits)
+        except (ImportError, AttributeError, ValueError, RuntimeError) as exc:
+            logger.warning(
+                "DrakeCapabilitySource unavailable for hand mobility; falling back to MuJoCo: %s",
+                exc,
+            )
+
     try:
         from src.engines.physics_engines.mujoco.python.hand_mobility import (
             HandMobilitySource,
@@ -332,18 +385,58 @@ class SwingInput:
         index: int,
         mode: str = "constrained",
         torque_limit_source: str | None = None,
+        engine: str | None = None,
     ) -> dict[str, Any]:
-        """Lead/trail ``HandMobility`` at state ``index`` (MuJoCo plant, #14004, #14043).
+        """Lead/trail ``HandMobility`` at state ``index`` (#14004, #14005, #14043).
 
-        Raises ``BackendUnavailable`` without MuJoCo, ``ValueError`` on a bad
+        Uses ``engine``'s native capability source if provided (defaulting to the
+        swing's ``rollout_engine`` or MuJoCo).
+
+        Raises ``BackendUnavailable`` if no engine is available, ``ValueError`` on a bad
         ``index`` or ``mode``.
         """
         if not 0 <= index < self.n_states:
             raise ValueError(f"index {index} outside 0..{self.n_states - 1}")
         v_idx = self.v[index] if self.v is not None else None
-        return _hand_source(
-            self.bundle.spec_bytes, torque_limit_source=torque_limit_source
-        ).hand_mobility(self.q[index], v=v_idx, mode=mode)
+        target_engine = engine or self.rollout_engine or "mujoco"
+        source = _hand_source(
+            self.bundle.spec_bytes,
+            torque_limit_source=torque_limit_source,
+            engine=target_engine,
+        )
+        try:
+            return source.hand_mobility(self.q[index], v=v_idx, mode=mode)
+        except TypeError:
+            return source.hand_mobility(self.q[index], mode=mode)
+
+    def segment_mobility_at(
+        self,
+        index: int,
+        points: Sequence[Any] | None = None,
+        mode: str = "constrained",
+        torque_limit_source: str | None = None,
+        engine: str | None = None,
+    ) -> dict[str, Any]:
+        """Mobility at state ``index`` for declarative ``points`` (HCM-5, #14006)."""
+        if not 0 <= index < self.n_states:
+            raise ValueError(f"index {index} outside 0..{self.n_states - 1}")
+        if points is None:
+            return self.hand_mobility_at(
+                index, mode=mode, torque_limit_source=torque_limit_source, engine=engine
+            )
+        v_idx = self.v[index] if self.v is not None else None
+        src = _hand_source(
+            self.bundle.spec_bytes,
+            torque_limit_source=torque_limit_source,
+            engine=engine or self.rollout_engine or "mujoco",
+        )
+        if not hasattr(src, "segment_mobility"):
+            from src.engines.physics_engines.mujoco.python.hand_mobility import (
+                HandMobilitySource,
+            )
+
+            src = HandMobilitySource(self.bundle.spec_bytes)
+        return src.segment_mobility(points, self.q[index], v=v_idx, mode=mode)
 
     @property
     def n_states(self) -> int:

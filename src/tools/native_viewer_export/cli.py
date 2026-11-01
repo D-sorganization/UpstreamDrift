@@ -92,6 +92,26 @@ def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
         "'constrained' (both hands on club) or 'unconstrained' (hand alone) "
         "(default: constrained; HCM-3, #14004)",
     )
+    p.add_argument(
+        "--mobility-points",
+        default="hands",
+        metavar="SELECTOR",
+        help="points for mobility overlays (default: hands; HCM-5, #14006)",
+    )
+    p.add_argument(
+        "--max-mobility-points",
+        type=int,
+        default=8,
+        metavar="N",
+        help="max points to display for clutter control (default: 8; HCM-5, #14006)",
+    )
+    p.add_argument(
+        "--mobility-condition-cutoff",
+        type=float,
+        default=None,
+        metavar="MAX_COND",
+        help="condition threshold to suppress ill-conditioned ellipsoids (HCM-5, #14006)",
+    )
 
 
 def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
@@ -434,6 +454,9 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
                 ellipsoids.append("effective-mass")
     ellipsoid_scale = parse_ellipsoid_scale(getattr(args, "ellipsoid_scale", "auto"))
     hand_mobility_mode = getattr(args, "hand_mobility_mode", "constrained")
+    mobility_points = getattr(args, "mobility_points", "hands")
+    max_mobility_points = getattr(args, "max_mobility_points", 8)
+    mobility_condition_cutoff = getattr(args, "mobility_condition_cutoff", None)
     return replace(
         base,
         views=tuple(v for v in args.views.split(",") if v),
@@ -453,6 +476,9 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         ellipsoid_scale=ellipsoid_scale,
         drift_arrow=bool(getattr(args, "drift_arrow", False)),
         hand_mobility_mode=hand_mobility_mode,
+        mobility_points=mobility_points,
+        max_mobility_points=max_mobility_points,
+        mobility_condition_cutoff=mobility_condition_cutoff,
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
@@ -501,6 +527,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                     interface_ellipsoids=settings.interface_ellipsoids,
                     ellipsoid_scale=settings.ellipsoid_scale,
                     hand_mobility_mode=settings.hand_mobility_mode,
+                    mobility_points=settings.mobility_points,
+                    max_mobility_points=settings.max_mobility_points,
+                    mobility_condition_cutoff=settings.mobility_condition_cutoff,
                 ),
             ),
         )
