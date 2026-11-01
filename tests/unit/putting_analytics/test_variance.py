@@ -21,6 +21,8 @@ from src.shared.python.putting_analytics.variance import (
     strokes_gained_per_round,
 )
 
+pytestmark = pytest.mark.unit
+
 CUP_RADIUS_M = 0.054
 SPEED_WINDOW = 0.15  # holed only while |speed ratio - 1| is inside this
 PROFILE = PuttingSkillProfile(
