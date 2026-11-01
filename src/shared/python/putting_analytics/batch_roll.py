@@ -112,9 +112,8 @@ class _Field:
         """Bilinear (roll, slide) multipliers, as ``FrictionField.multipliers``."""
         if self.uniform:
             return 1.0, 1.0
-        ix, iy, tx, ty = _cell(
-            x, y, self.f.origin_m, self.f.spacing_m, self.f.roll_multiplier.shape
-        )
+        roll_grid = self.f.roll_multiplier
+        ix, iy, tx, ty = _cell(x, y, self.f.origin_m, self.f.spacing_m, roll_grid.shape)
         w00, w10 = (1 - tx) * (1 - ty), tx * (1 - ty)
         w01, w11 = (1 - tx) * ty, tx * ty
         return tuple(
@@ -122,7 +121,7 @@ class _Field:
             + g[iy, ix + 1] * w10
             + g[iy + 1, ix] * w01
             + g[iy + 1, ix + 1] * w11
-            for g in (self.f.roll_multiplier, self.f.slide_multiplier)
+            for g in (roll_grid, self.f.slide_multiplier)
         )
 
 
