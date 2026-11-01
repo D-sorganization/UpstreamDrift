@@ -28,6 +28,7 @@ import math
 from dataclasses import dataclass
 
 from src.shared.python.contracts import require, require_finite
+from ._checks import require_finite_scalar
 from src.shared.python.core.physics_constants import PUTTER_FACE_COR
 
 __all__ = [
@@ -74,8 +75,8 @@ class BallState:
 
     def __post_init__(self) -> None:
         for name in ("x_m", "y_m", "height_m", "vx_mps", "vy_mps", "vz_mps"):
-            require_finite(getattr(self, name), name)
-        require_finite(self.spin_rad_s, "spin_rad_s")
+            require_finite_scalar(getattr(self, name), name)
+        require_finite_scalar(self.spin_rad_s, "spin_rad_s")
         require(self.height_m >= 0.0, "height must be >= 0", self.height_m)
         require(
             abs(self.x_m) <= 200.0 and abs(self.y_m) <= 200.0,
@@ -295,7 +296,7 @@ class TrajectorySample:
         ``mode`` is a :class:`Mode` member.
         """
         for name in ("t_s", "x_m", "y_m", "height_m", "speed_mps", "spin_rad_s"):
-            require_finite(getattr(self, name), name)
+            require_finite_scalar(getattr(self, name), name)
         require(self.t_s >= 0.0, "sample time must be >= 0", self.t_s)
         require(self.height_m >= 0.0, "height must be >= 0", self.height_m)
         require(self.speed_mps >= 0.0, "speed must be >= 0", self.speed_mps)

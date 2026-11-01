@@ -69,6 +69,7 @@ import math
 from dataclasses import dataclass
 
 from src.shared.python.contracts import ensure, require, require_finite
+from ._checks import require_finite_scalar
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 __all__ = [
@@ -251,9 +252,9 @@ def rolling_mu(
     Raises:
         ValueError: If inputs are out of range.
     """
-    require_finite(speed_mps, "speed_mps")
+    require_finite_scalar(speed_mps, "speed_mps")
     require(speed_mps >= 0.0, "speed must be non-negative", speed_mps)
-    require_finite(spatial_multiplier, "spatial_multiplier")
+    require_finite_scalar(spatial_multiplier, "spatial_multiplier")
     require(spatial_multiplier > 0.0, "multiplier must be > 0", spatial_multiplier)
     mu = (
         params.mu_roll0
@@ -286,7 +287,7 @@ def sliding_mu(
     Raises:
         ValueError: If inputs are out of range.
     """
-    require_finite(spatial_multiplier, "spatial_multiplier")
+    require_finite_scalar(spatial_multiplier, "spatial_multiplier")
     require(spatial_multiplier > 0.0, "multiplier must be > 0", spatial_multiplier)
     mu = (
         params.mu_slide
@@ -320,8 +321,8 @@ def is_static_hold(
     Raises:
         ValueError: If inputs are out of range.
     """
-    require_finite(slope_magnitude, "slope_magnitude")
+    require_finite_scalar(slope_magnitude, "slope_magnitude")
     require(slope_magnitude >= 0.0, "slope must be >= 0", slope_magnitude)
-    require_finite(spatial_multiplier, "spatial_multiplier")
+    require_finite_scalar(spatial_multiplier, "spatial_multiplier")
     require(spatial_multiplier > 0.0, "multiplier must be > 0", spatial_multiplier)
     return slope_magnitude <= params.mu_static * spatial_multiplier
