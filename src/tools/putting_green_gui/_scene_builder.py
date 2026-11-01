@@ -2,10 +2,13 @@
 
 This module owns *all* of the putting-green domain logic for the GUI: it
 turns user-facing controls (putter speed, aim, cup distance, stimp, slope)
-into a real :class:`PuttingGreenSimulator` run and packages the result as a
-render-ready :class:`PuttScene`.  Keeping it free of any Qt/OpenGL import means
-the physics wiring is exhaustively unit-testable in a headless environment,
-and the GUI layer stays a thin renderer (DRY / Law of Demeter).
+into a real strike-and-roll simulation on the shared
+:mod:`src.shared.python.putting_dynamics` core (epic #14141 step 7d; the
+legacy ``src.engines.physics_engines.putting_green`` engine is retired by a
+later step) and packages the result as a render-ready :class:`PuttScene`.
+Keeping it free of any Qt/OpenGL import means the physics wiring is
+exhaustively unit-testable in a headless environment, and the GUI layer
+stays a thin renderer (DRY / Law of Demeter).
 
 Design by Contract:
     * :func:`build_putt_scene` validates every control against its documented
@@ -17,24 +20,38 @@ Design by Contract:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 import numpy as np
 
-from src.engines.physics_engines.putting_green.python.green_surface import GreenSurface
-from src.engines.physics_engines.putting_green.python.putter_stroke import (
-    StrokeParameters,
-)
-from src.engines.physics_engines.putting_green.python.simulator import (
-    PuttingGreenSimulator,
-    SimulationConfig,
-)
-from src.engines.physics_engines.putting_green.python.turf_properties import (
-    TurfProperties,
+from src.shared.python.putting_dynamics import (
+    HOLE_RADIUS_M,
+    FrictionField,
+    FrictionParams,
+    HeightField,
+    Mode,
+    PutterState,
+    USGA_STIMP_ROLL_MODEL,
+    PuttResult,
+    SurfaceSpec,
+    simulate_strike,
+    stimp_to_rolling_mu,
 )
 
 _FT_TO_M = 0.3048
 _BALL_LIFT_M = 0.021  # half a golf-ball diameter, so the path rides the surface
+
+#: Shared-solver mode -> legacy ``RollMode``-style label (export/colour code
+#: dependency). The shared solver's brief post-impact AIRBORNE hop has no
+#: legacy analogue; it is rendered with the SLIDING colour since the ball
+#: has not yet settled into a pure roll.
+_ROLL_MODE_LABELS = {
+    Mode.AIRBORNE: "RollMode.SLIDING",
+    Mode.SLIDE: "RollMode.SLIDING",
+    Mode.ROLL: "RollMode.ROLLING",
+    Mode.REST: "RollMode.STOPPED",
+}
 
 # Documented control ranges (mirrored by the GUI spin-box bounds).  All
 # internal state is SI (issue #8886); the historical 1-30 ft distance range
@@ -52,6 +69,11 @@ class PuttConfig:
 
     All fields are SI (metres, m/s, degrees) per the repository's unit
     policy (issue #8886) -- there is no mixed-unit-system field here.
+
+    ``integrator`` and ``timestep_s`` are kept for API compatibility with
+    existing callers; the shared solver (epic #14141 step 7d) always
+    integrates with its own fixed-step RK4 (``putting_dynamics.solver.DT_S``)
+    and does not consult either field.
     """
 
     putter_speed_ms: float = 2.5
@@ -139,10 +161,10 @@ def _perpendicular_break(
     return float(np.max(cross)) if cross.size else 0.0
 
 
-def _setup_grid_and_green(
+def _setup_grid_and_surface(
     config: PuttConfig, dist_m: float
 ) -> tuple[
-    float, float, float, float, float, np.ndarray, np.ndarray, np.ndarray, GreenSurface
+    float, float, float, float, float, np.ndarray, np.ndarray, np.ndarray, SurfaceSpec
 ]:
     margin_back, margin_front = 0.9, 1.4
     ball_x = margin_back
@@ -152,40 +174,37 @@ def _setup_grid_and_green(
     mid_y = height_y / 2.0
 
     res = config.grid_resolution
-    nx = max(2, int(round(res * width_x / max(width_x, height_y))))
-    ny = max(2, int(round(res * height_y / max(width_x, height_y))))
-    grid_x = np.linspace(0.0, width_x, nx)
-    grid_y = np.linspace(0.0, height_y, ny)
+    max_dim = max(width_x, height_y)
+    spacing = min(max(max_dim / (res - 1), 0.001), 10.0)
+    nx = max(2, int(round(width_x / spacing)) + 1)
+    ny = max(2, int(round(height_y / spacing)) + 1)
+    grid_x = np.arange(nx) * spacing
+    grid_y = np.arange(ny) * spacing
     grid_z = _cross_slope_heightmap(grid_x, grid_y, mid_y, config.slope_deg)
 
-    turf = TurfProperties(stimp_rating=config.stimp)
-    green = GreenSurface(width=width_x, height=height_y, turf=turf)
-    green.set_heightmap(grid_z, smooth=False)
-    green.set_hole_position(np.array([cup_x, mid_y]))
-    return ball_x, cup_x, width_x, height_y, mid_y, grid_x, grid_y, grid_z, green
+    surface = SurfaceSpec(
+        height=HeightField(heights_m=grid_z, spacing_m=spacing, origin_m=(0.0, 0.0)),
+        friction_field=FrictionField.uniform(),
+        friction=FrictionParams(mu_roll0=stimp_to_rolling_mu(config.stimp)),
+    )
+    return ball_x, cup_x, width_x, height_y, mid_y, grid_x, grid_y, grid_z, surface
 
 
 def _compute_scene_trajectory(
-    result: object,
-    green: GreenSurface,
-    ball_xy: np.ndarray,
+    result: PuttResult,
+    height_field: HeightField,
 ) -> tuple[np.ndarray, list[str]]:
-    positions = np.asarray(getattr(result, "positions", []), dtype=float).reshape(-1, 2)
-    if positions.shape[0] == 0:
-        positions = ball_xy.reshape(1, 2)
-    elevations = np.array([green.get_elevation_at(p) for p in positions])
-    trajectory_xyz = np.column_stack([positions, elevations + _BALL_LIFT_M])
-
-    modes = getattr(result, "modes", None) or []
-    roll_modes = [str(m) for m in modes]
-    if len(roll_modes) < positions.shape[0]:
-        roll_modes += ["RollMode.STOPPED"] * (positions.shape[0] - len(roll_modes))
-    roll_modes = roll_modes[: positions.shape[0]]
+    samples = result.samples
+    positions = np.array([(s.x_m, s.y_m) for s in samples], dtype=float).reshape(-1, 2)
+    floor = np.array([height_field.elevation(x, y) for x, y in positions])
+    airborne = np.array([s.height_m for s in samples], dtype=float)
+    trajectory_xyz = np.column_stack([positions, floor + airborne + _BALL_LIFT_M])
+    roll_modes = [_ROLL_MODE_LABELS[s.mode] for s in samples]
     return trajectory_xyz, roll_modes
 
 
 def _compute_scene_lines(
-    green: GreenSurface,
+    height_field: HeightField,
     ball_xy: np.ndarray,
     ball_x: float,
     mid_y: float,
@@ -193,8 +212,8 @@ def _compute_scene_lines(
     direction: np.ndarray,
     dist_m: float,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    cup_z = float(green.get_elevation_at(np.array([cup_x, mid_y])))
-    start_z = float(green.get_elevation_at(ball_xy))
+    cup_z = height_field.elevation(cup_x, mid_y)
+    start_z = height_field.elevation(ball_xy[0], ball_xy[1])
     start_xyz = np.array([ball_x, mid_y, start_z + _BALL_LIFT_M])
     cup_xyz = np.array([cup_x, mid_y, cup_z])
 
@@ -205,7 +224,7 @@ def _compute_scene_lines(
             [
                 aim_end[0],
                 aim_end[1],
-                float(green.get_elevation_at(aim_end)) + _BALL_LIFT_M,
+                height_field.elevation(aim_end[0], aim_end[1]) + _BALL_LIFT_M,
             ],
         ]
     )
@@ -216,7 +235,7 @@ def _compute_scene_lines(
 
 
 def build_putt_scene(config: PuttConfig) -> PuttScene:
-    """Run the real putting-green engine and package a render-ready scene.
+    """Strike and roll the ball on the shared putting core and package a scene.
 
     Args:
         config: Validated putt configuration.
@@ -239,38 +258,34 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         grid_x,
         grid_y,
         grid_z,
-        green,
-    ) = _setup_grid_and_green(config, dist_m)
+        surface,
+    ) = _setup_grid_and_surface(config, dist_m)
+    height_field = surface.height
 
-    sim = PuttingGreenSimulator(
-        green=green,
-        config=SimulationConfig(
-            integrator=config.integrator,
-            record_trajectory=True,
-            timestep=config.timestep_s,
-        ),
+    aim_rad = math.radians(config.aim_deg)
+    direction = np.array([math.cos(aim_rad), math.sin(aim_rad)])
+    putter = PutterState.typical(config.putter_speed_ms)
+    ball_xy = np.array([ball_x, mid_y])
+    result = simulate_strike(
+        putter,
+        surface,
+        hole_x_m=cup_x,
+        hole_y_m=mid_y,
+        start_x_m=ball_x,
+        start_y_m=mid_y,
+        heading_rad=aim_rad,
     )
 
-    aim_rad = np.radians(config.aim_deg)
-    direction = np.array([np.cos(aim_rad), np.sin(aim_rad)])
-    stroke = StrokeParameters(speed=config.putter_speed_ms, direction=direction)
-    ball_xy = np.array([ball_x, mid_y])
-    result = sim.simulate_putt(stroke, ball_position=ball_xy)
-
-    trajectory_xyz, roll_modes = _compute_scene_trajectory(result, green, ball_xy)
+    trajectory_xyz, roll_modes = _compute_scene_trajectory(result, height_field)
     positions = trajectory_xyz[:, :2]
 
     start_xyz, cup_xyz, aim_line_xyz, target_line_xyz = _compute_scene_lines(
-        green, ball_xy, ball_x, mid_y, cup_x, direction, dist_m
+        height_field, ball_xy, ball_x, mid_y, cup_x, direction, dist_m
     )
 
-    final_xy = np.asarray(result.final_position, dtype=float).reshape(-1)[:2]
-    final_distance = float(np.hypot(*(final_xy - np.array([cup_x, mid_y]))))
-    launch_speed = (
-        float(np.hypot(*np.asarray(result.velocities[0], dtype=float).reshape(-1)[:2]))
-        if len(result.velocities)
-        else config.putter_speed_ms
-    )
+    cup_xy = np.array([cup_x, mid_y])
+    final_distance = float(math.hypot(result.rest_x_m - cup_x, result.rest_y_m - mid_y))
+    launch_speed = result.samples[0].speed_mps
 
     return PuttScene(
         grid_x=grid_x,
@@ -282,13 +297,13 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         cup_xyz=cup_xyz,
         aim_line_xyz=aim_line_xyz,
         target_line_xyz=target_line_xyz,
-        hole_radius_m=float(green.hole_radius),
+        hole_radius_m=HOLE_RADIUS_M,
         green_size=(width_x, height_y),
         holed=bool(result.holed),
         final_distance_to_cup_m=final_distance,
-        total_roll_m=float(result.total_distance),
-        duration_s=float(result.duration),
-        peak_break_m=_perpendicular_break(positions, ball_xy, np.array([cup_x, mid_y])),
+        total_roll_m=float(result.total_distance_m),
+        duration_s=float(result.time_s),
+        peak_break_m=_perpendicular_break(positions, ball_xy, cup_xy),
         launch_speed_ms=launch_speed,
-        roll_model=result.roll_model,
+        roll_model=USGA_STIMP_ROLL_MODEL,
     )
