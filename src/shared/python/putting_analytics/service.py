@@ -77,9 +77,8 @@ class StrokeNoise:
         self, rng: np.random.Generator, n: int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Per-putt (line error [deg], speed ratio)."""
-        return rng.normal(0.0, self.line_sd_deg, n), np.exp(
-            rng.normal(0.0, self.speed_sd, n)
-        )
+        line_err = rng.normal(0.0, self.line_sd_deg, n)
+        return line_err, np.exp(rng.normal(0.0, self.speed_sd, n))
 
 
 @dataclass(frozen=True)
@@ -171,16 +170,9 @@ def study_from_args(args: Mapping[str, Any]) -> PuttStudy:
     )
 
 
-def _evaluation_dict(evaluation: ActionEvaluation) -> dict[str, float]:
-    action = evaluation.action
-    return {
-        "aim_offset_deg": action.aim_offset_deg,
-        "pace_ft_past": action.pace_ft_past,
-        "make_rate": evaluation.make_rate,
-        "make_rate_se": evaluation.make_rate_se,
-        "expected_strokes": evaluation.expected_strokes,
-        "expected_strokes_se": evaluation.expected_strokes_se,
-    }
+def _evaluation_dict(evaluation: ActionEvaluation) -> dict[str, Any]:
+    """``{"action": {aim_offset_deg, pace_ft_past}, make_rate, ...}``."""
+    return dataclasses.asdict(evaluation)
 
 
 def _ranked(evaluations: list[ActionEvaluation], objective: str) -> list[Any]:

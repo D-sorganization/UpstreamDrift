@@ -1,16 +1,14 @@
 """Putting-study tools for the simulation MCP adapter (#14177).
 
-Two tools, both thin wrappers over
-:mod:`src.shared.python.putting_analytics.service`:
+Two thin wrappers over :mod:`src.shared.python.putting_analytics.service`:
 
 * ``optimize_putt`` -- best aim and pace for one putt, by strokes gained
   against the caller's expected-putts curve or by make rate (``must_make``).
 * ``putting_misread_cost`` -- expected-strokes cost of a set of green reads
   (slope and speed misjudgements) against a perfect read.
 
-The service is imported lazily so listing tools never loads numpy or the roll
-integrator. Specs are written out by hand because the arguments include
-arrays and objects, which the adapter's simple ``_tool_spec`` cannot express.
+The service is imported lazily so listing tools never loads the roll
+integrator. Specs are hand-written: ``_tool_spec`` cannot express arrays.
 """
 
 from __future__ import annotations
@@ -28,11 +26,7 @@ _STUDY_PROPERTIES: dict[str, Any] = {
     "auth_token": {"type": "string"},
     "distance_ft": {**_NUMBER, "description": "Putt length, feet (0, 100]."},
     "grade_pct": {**_NUMBER, "description": "Green slope, percent [0, 10]."},
-    "aspect_deg": {
-        **_NUMBER,
-        "description": "Direction the green falls toward, degrees CCW from the "
-        "ball-to-hole line.",
-    },
+    "aspect_deg": {**_NUMBER, "description": "Fall line, deg CCW of the hole line."},
     "stimp": {**_NUMBER, "description": "Green speed, feet [5, 16]."},
     "line_sd_deg": {**_NUMBER, "description": "Start-line error SD, degrees."},
     "speed_sd": {**_NUMBER, "description": "Log speed-ratio error SD."},
@@ -86,20 +80,14 @@ def putting_tool_specs() -> list[dict[str, Any]]:
     ]
 
 
-def _text(payload: dict[str, Any]) -> dict[str, Any]:
-    return {"content": [{"type": "text", "text": json.dumps(payload)}]}
+def _service_tool(function_name: str) -> ToolHandler:
+    def run(arguments: dict[str, Any]) -> dict[str, Any]:
+        from src.shared.python.putting_analytics import service
 
+        payload = getattr(service, function_name)(arguments)
+        return {"content": [{"type": "text", "text": json.dumps(payload)}]}
 
-def _optimize(arguments: dict[str, Any]) -> dict[str, Any]:
-    from src.shared.python.putting_analytics import service
-
-    return _text(service.optimize_putt(arguments))
-
-
-def _misread(arguments: dict[str, Any]) -> dict[str, Any]:
-    from src.shared.python.putting_analytics import service
-
-    return _text(service.misread_cost(arguments))
+    return run
 
 
 def putting_tool_handlers(check_auth: Callable[[Any], None]) -> dict[str, ToolHandler]:
@@ -113,6 +101,6 @@ def putting_tool_handlers(check_auth: Callable[[Any], None]) -> dict[str, ToolHa
         return handler
 
     return {
-        "optimize_putt": guarded(_optimize),
-        "putting_misread_cost": guarded(_misread),
+        "optimize_putt": guarded(_service_tool("optimize_putt")),
+        "putting_misread_cost": guarded(_service_tool("misread_cost")),
     }

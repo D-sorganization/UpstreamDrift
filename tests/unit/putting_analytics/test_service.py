@@ -46,7 +46,7 @@ def test_optimize_putt_returns_ranked_json_floats() -> None:
 
 def test_flat_green_prefers_the_straight_line() -> None:
     result = service.optimize_putt(_args(aims_deg=[-4.0, 0.0, 4.0], paces_ft=[1.0]))
-    assert result["best"]["aim_offset_deg"] == 0.0
+    assert result["best"]["action"]["aim_offset_deg"] == 0.0
 
 
 def test_must_make_ranks_by_make_rate() -> None:
