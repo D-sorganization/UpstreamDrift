@@ -2244,6 +2244,9 @@
 {"path": "programmatic_pid/title_block.py", "classification": "tools-only", "package": "programmatic_pid", "spelling_only": false}
 {"path": "programmatic_pid/types.py", "classification": "tools-only", "package": "programmatic_pid", "spelling_only": false}
 {"path": "programmatic_pid/validation.py", "classification": "tools-only", "package": "programmatic_pid", "spelling_only": false}
+{"path": "putting_analytics/__init__.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
+{"path": "putting_analytics/expected_putts.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
+{"path": "putting_analytics/optimize.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_dynamics/__init__.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "putting_dynamics/_checks.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "putting_dynamics/collision.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
