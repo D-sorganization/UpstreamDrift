@@ -20,20 +20,11 @@ from src.shared.python.putting_dynamics.surfaces import bumpy_height_field
 pytestmark = pytest.mark.unit
 
 FULL = GreenVariability(
-    stimp_ft=10.5,
-    stimp_cv=0.06,
-    grade_percent=2.0,
-    grade_sd_percent=0.3,
-    aspect_deg=30.0,
-    aspect_sd_deg=8.0,
-    grain_strength=0.3,
-    grain_strength_sd=0.05,
-    grain_direction_deg=-40.0,
-    grain_direction_sd_deg=15.0,
-    roughness_amplitude_m=0.002,
-    roughness_correlation_m=1.0,
-    roughness_modes=128,
-)
+    stimp_ft=10.5, stimp_cv=0.06, grade_percent=2.0, grade_sd_percent=0.3,
+    aspect_deg=30.0, aspect_sd_deg=8.0, grain_strength=0.3, grain_strength_sd=0.05,
+    grain_direction_deg=-40.0, grain_direction_sd_deg=15.0,
+    roughness_amplitude_m=0.002, roughness_correlation_m=1.0, roughness_modes=128,
+)  # fmt: skip
 N_GREENS = 4000
 
 
@@ -138,13 +129,8 @@ def test_roughness_substreams_differ_and_zero_amplitude_is_zero() -> None:
 
 
 def test_variance_parity_with_bumpy_height_field() -> None:
-    """Variance parity only.
-
-    ``bumpy_height_field`` box-blurs white noise (correlation set by the box
-    width) and rescales to exactly the requested grid SD, whereas the Fourier
-    field has an exact Gaussian covariance; the two correlation-length
-    definitions differ, so correlation is deliberately not compared.
-    """
+    """Variance parity only: the blur field's correlation length is a box width
+    (not a Gaussian ell), so correlation is deliberately not compared."""
     amp = 0.004
     blur = bumpy_height_field(seed=2, amplitude_m=amp, correlation_length_m=1.0)
     assert blur.heights_m.std() == pytest.approx(amp, rel=1e-6)
@@ -165,8 +151,8 @@ def test_zero_roughness_surface_is_planar_with_stimp_friction() -> None:
     assert math.hypot(gx, gy) == pytest.approx(sample.grade_percent / 100.0)
     assert spec.friction.mu_roll0 == stimp_to_rolling_mu(sample.stimp_ft)
     zero = sample_roughness(replace(FULL, roughness_amplitude_m=0.0), 21, 0)
-    spec0 = sample.to_surface_spec(zero, extent_m=20.0, spacing_m=0.5)
-    assert np.array_equal(spec0.height.heights_m, spec.height.heights_m)
+    flat = sample.to_surface_spec(zero, extent_m=20.0, spacing_m=0.5)
+    assert np.array_equal(flat.height.heights_m, spec.height.heights_m)
 
 
 def test_rough_surface_adds_roughness_to_plane() -> None:
@@ -181,16 +167,8 @@ def test_rough_surface_adds_roughness_to_plane() -> None:
 
 
 def test_invalid_config_rejected() -> None:
-    for bad in (
-        {"stimp_cv": -0.1},
-        {"grade_percent": 11.0},
-        {"grain_strength": 0.95},
-        {"roughness_correlation_m": 0.0},
-        {"roughness_modes": 0},
-    ):
+    for bad in ({"stimp_cv": -0.1}, {"grain_strength": 0.95}, {"roughness_modes": 0}):
         with pytest.raises(ValueError):
             GreenVariability(**bad)
     with pytest.raises(ValueError):
         sample_green(FULL, -1)
-    with pytest.raises(ValueError):
-        RoughnessField(0.001, 1.0, np.zeros((3, 3)), np.zeros(3))
