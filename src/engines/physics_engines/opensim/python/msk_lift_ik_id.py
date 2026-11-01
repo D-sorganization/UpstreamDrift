@@ -73,6 +73,7 @@ from src.engines.physics_engines.opensim.python.msk_lift_model import (
     GENERIC_STATURE_M,
     PENETRATION_LIMIT_M,
     LiftModelBuild,
+    external_load_sources,
 )
 from src.engines.physics_engines.opensim.python.msk_lift_simbody_kinematics import (
     generalized_speeds_from_spline_derivatives,
@@ -942,19 +943,9 @@ def id_receipt(targets: LiftTargets, inverse: IDResult) -> dict[str, Any]:
     moments = [peaks[n] for n in RESIDUAL_COORDINATES[:3]]
     joints = [n for n in inverse.coordinates if n not in RESIDUAL_COORDINATES]
     external_loads = {
-        "feet": "GCV-1 foot wrench of the bundle's shared-law contact "
-        "(kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
-        "hands": "GCV-7 per-hand bushing wrench of the bundle bar "
-        "(BushingSample.grip_analysis), negated onto hand_l/hand_r at the "
-        "model's grip point; the barbell body is massless in ID",
+        **external_load_sources(targets),
         "model_forces": "removed (muscles, actuators, contact); gravity kept",
     }
-    if targets.bench_force_n:
-        external_loads["bench"] = (
-            "shared-law back-sphere contact wrench of the bundle (VectorPlant), "
-            "applied to torso (back_RPSH, back_LPSH) and pelvis (back_RPSI, back_LPSI) "
-            "at the contact points"
-        )
     return {
         "solver": "OpenSim InverseDynamicsSolver; quintic GCV spline derivatives, "
         "no low-pass filter (InverseDynamicsTool default)",

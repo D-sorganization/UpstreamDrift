@@ -263,3 +263,44 @@ def static_hold_analytic_bound(
         "muscles_crossing_l5s1_count": crossing_count,
         "note": "frame_sign_self_consistency_at_default_pose",
     }
+
+
+def supine_bench_bound(
+    bound: dict[str, Any], support: dict[str, Any], rel_tol: float = 1e-6
+) -> dict[str, Any]:
+    """Replace the standing L5/S1 bound with the bench's support balance.
+
+    Supine, the bench carries the trunk weight, so ``W_above <= compression``
+    does not hold and its verdict is withheld (``passed`` ``None``) while the
+    measured frame stays on record.  The check that applies is the OSL-3 hold
+    balance *support* (:func:`msk_lift_ik_id.static_hold_grf`): feet plus
+    bench carry (body + bar) x g within *rel_tol* (the equilibrium solves the
+    vertical root to 1e-12 m).
+
+    Postconditions: the result's ``passed`` needs both the default-pose
+    self-consistency and the support balance.
+    """
+    require(rel_tol > 0.0, f"rel_tol must be positive, got {rel_tol}")
+    require("bench" in support["support_vertical_n"], "support has no bench")
+    balanced = bool(abs(support["relative_error"]) <= rel_tol)
+    frame = dict(bound["bench_press_min_acceleration_frame"])
+    frame.update(
+        passed=None,
+        lower_bound_satisfied=None,
+        upper_bound_satisfied=None,
+        reason="not applicable: supine on the bench, the trunk weight is carried "
+        "by the bench contact, not through L5/S1",
+    )
+    return {
+        **bound,
+        "bench_press_min_acceleration_frame": frame,
+        "bench_static_hold_support": {
+            "passed": balanced,
+            "relative_tolerance": rel_tol,
+            "expected_weight_n": support["expected_weight_n"],
+            "support_vertical_n": support["support_vertical_n"],
+            "relative_error": support["relative_error"],
+            "method": support["method"],
+        },
+        "passed": bool(bound["passed"]) and balanced,
+    }
