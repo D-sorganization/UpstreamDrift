@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-01 | #14219 | Conflict Disarm App token scoped to UpstreamDrift and Repository_Management with contents read, pull-requests write and issues write |
+| 2026-11-01 | #14220 | Skill-Profile Roll Model Adapter for Putting Variance Attribution |
+| 2026-11-01 | #14221 | Putting v4 step 8c: standalone studio markup part 1 (header, 3D studio view) with a model-output validation notice and no baked-in result values |
 | 2026-11-01 | #14217 | Development log reconciled: 51 active entries whose PRs all merged and issues closed move to shipped (75 to 24 active), unblocking the WIP ceiling |
 | 2026-11-01 | #14207 | Conflict Disarm runs its job inline (reading RM's conflict_disarm script via an App-token checkout) instead of calling an internal Repository_Management reusable workflow, which a public repo cannot do, so it no longer fails every run with 0 jobs |
 | 2026-11-01 | #14211 | Guard the removed legacy .agent/ tree and fence the GAAI ci-watch-and-fix skill in project rules (RM #2567). |

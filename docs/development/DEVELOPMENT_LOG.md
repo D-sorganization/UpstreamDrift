@@ -24,12 +24,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14177
 - **Branch:** claude/putting-tools-14177
-- **PR:** #14203
+- **PR:** #14203, #14220
 - **Paths:** see #14203
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-01 (`6955fe0e`; collated from changes/14177-putting-optimizer-and-misread-cost-mcp-t.md)
+- **Last verified:** 2026-11-01 (`31b5bfab`; collated from changes/14177-skill-roll-model-adapter.md)
 - **Summary:** Putting Optimizer and Misread-Cost MCP Tools
-- **Next step:** Add variance and putt-study tools after #14174 and #14175 land
+- **Next step:** Add the putting_variance_attribution MCP tool on top of this adapter
 
 ### DL-#14176 · Add Putting Reference Data and Validation Harness
 
@@ -1145,6 +1145,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14214 · Conflict Disarm App Token Scoped to UpstreamDrift and Repository_Management With Contents Read, Pull-Requests Write and Issues Write
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14214
+- **Branch:** merged via #14219
+- **PR:** #14219
+- **Paths:** see #14219
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-01 (`31539870`; collated from changes/14214-conflict-disarm-app-token-scoped-to-upst.md)
+- **Summary:** Conflict Disarm App token scoped to UpstreamDrift and Repository_Management with contents read, pull-requests write and issues write
+- **Next step:** Shipped in PR #14219.
+
 ### DL-#14216 · Development Log Reconciled: 51 Active Entries Whose PRs All Merged and Issues Closed Move to Shipped (75 to 24 Active), Unblocking the WIP Ceiling
 
 - **State:** shipped
@@ -1307,10 +1320,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14141
 - **Branch:** merged via #14145
-- **PR:** #14145, #14149, #14155, #14159, #14160, #14163, #14166, #14167, #14184, #14187, #14202, #14191, #14209, #14210, #14213, #14215
+- **PR:** #14145, #14149, #14155, #14159, #14160, #14163, #14166, #14167, #14184, #14187, #14202, #14191, #14209, #14210, #14213, #14215, #14221
 - **Paths:** see #14145
 - **Started:** 2026-10-31
-- **Last verified:** 2026-11-01 (`31fcf448`; collated from changes/14141-putting-v4-step8b-studio-vendor.md)
+- **Last verified:** 2026-11-01 (`08538465`; collated from changes/14141-putting-v4-step8c-studio-markup.md)
 - **Summary:** Characterize putting_dynamics contracts with invariant tests and postconditions (putting v4 PR 1)
 - **Next step:** Shipped in PR #14145.
 
