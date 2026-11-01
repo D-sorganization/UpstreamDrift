@@ -2258,6 +2258,9 @@
 {"path": "putting_dynamics/turf.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "putting_dynamics/types.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "putting_dynamics/utils.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
+{"path": "putting_validation/__init__.py", "classification": "ud-only", "package": "putting_validation", "spelling_only": false}
+{"path": "putting_validation/harness.py", "classification": "ud-only", "package": "putting_validation", "spelling_only": false}
+{"path": "putting_validation/reference_data.py", "classification": "ud-only", "package": "putting_validation", "spelling_only": false}
 {"path": "pyproject.toml", "classification": "ud-only", "package": "pyproject.toml", "spelling_only": false}
 {"path": "qt_utils/wheel_event_filter.py", "classification": "ud-only", "package": "qt_utils", "spelling_only": false}
 {"path": "realtime/__init__.py", "classification": "diverged", "package": "realtime", "spelling_only": false}
