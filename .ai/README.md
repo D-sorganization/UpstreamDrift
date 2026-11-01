@@ -13,13 +13,6 @@ The single sources of truth for repository policies and shared infrastructure re
 
 ## Agent Framework Directory Map
 
-### `.agent` — Agent Skills and Workflows
-
-Contains cross-agent reusable skills and composite workflow declarations:
-
-- `.agent/skills/`: Executable skill procedures and definitions.
-- `.agent/workflows/`: Multi-step orchestration routines.
-
 ### `.claude` — Claude Configuration and Skills
 
 Houses Claude-specific workspace commands, prompt augmentations, and tool skills:
