@@ -33,6 +33,9 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import Any, Literal, NamedTuple
 
+import numpy as np
+
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.motion_pipeline.contracts import (
     JointDef,
     JointLimit,
@@ -450,7 +453,10 @@ def build_pinocchio_model(
             "pip install 'upstream-drift[pinocchio]'"
         )
     pin = import_module("pinocchio")
-    return pin.buildModelFromXML(swing_urdf(golfer, club, inertials=inertials))
+    model = pin.buildModelFromXML(swing_urdf(golfer, club, inertials=inertials))
+    # Pinocchio defaults to 9.81; the CasADi model uses the shared constant (#14227).
+    model.gravity.linear = np.array([0.0, 0.0, -float(GRAVITY_M_S2)])
+    return model
 
 
 def build_drake_plant(
