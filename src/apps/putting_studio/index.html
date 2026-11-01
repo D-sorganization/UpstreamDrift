@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Counterbalanced Dual-Hand Torque &amp; Off-Plane Putting Studio</title>
+  <link rel="stylesheet" href="vendor/tailwind.min.css">
+  <link rel="stylesheet" href="css/studio.css">
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Header & Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-950/90 sticky top-0 z-30 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-sky-400 font-bold text-lg">τ</div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">
+            3D Counterbalanced Dual-Hand Torque &amp; Off-Plane Putting Studio
+          </h1>
+          <p class="text-xs text-slate-400">
+            4-Point Force-Couple Mechanics (P_L,pky, P_L,idx, P_R,pky, P_R,idx) &bull; Midpoint Torques (M_L, M_R) &bull; 70&deg; Inclined Plane Constraint
+          </p>
+        </div>
+      </div>
+
+      <!-- View Mode Tabs -->
+      <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-lg border border-slate-800">
+        <button id="tabBtn3D" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-sky-600 text-white transition">
+          1. Interactive 3D Vector Studio
+        </button>
+        <button id="tabBtnGreenRoll" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition">
+          2. Ball Impact &amp; Green Roll Simulator
+        </button>
+        <button id="tabBtnVideo" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition">
+          2. HD Video Playback (MP4)
+        </button>
+        <button id="tabBtnTurnover" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition">
+          3. Equations &amp; Turnover Guide
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- TAB 1: INTERACTIVE 3D THREE.JS VECTOR STUDIO                              -->
+  <!-- ========================================================================= -->
+  <main id="view3DStudio" class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+    <!-- Left/Center 8 Cols: 3D WebGL Viewport + Playback Transport Bar -->
+    <div class="lg:col-span-8 flex flex-col gap-3">
+      <div class="glass-card rounded-xl overflow-hidden flex flex-col relative">
+        <!-- Top Overlay Bar inside 3D Viewport -->
+        <div class="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 bg-slate-950/80 border-b border-slate-800 text-xs">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span id="phaseBadge" class="px-2.5 py-0.5 rounded-full font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/40">
+              ADDRESS / STROKE
+            </span>
+            <span id="lieStatusBadge" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mono">
+              <span class="math-sym">&phi;</span><sub>lie</sub> = +0.005&deg;
+            </span>
+            <span id="impactParamsBadge" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/40 mono font-semibold">
+              Face <span class="math-sym">&phi;</span><sub>f</sub> = +0.12&deg; &bull; Path <span class="math-sym">&psi;</span><sub>p</sub> = +0.08&deg;
+            </span>
+            <span id="makeRate3DBadge" class="px-2.5 py-0.5 rounded-full font-bold bg-emerald-600/30 text-emerald-200 border border-emerald-400/50 mono">
+              Make: 85.7% (30/35)
+            </span>
+          </div>
+          <!-- Camera View Presets & Zoom to Fit -->
+          <div class="flex flex-wrap items-center gap-1">
+            <span class="text-slate-400 mr-1">Camera:</span>
+            <button id="camGripBtn" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 font-medium">Grip Zoom</button>
+            <button id="camFullBtn" class="px-2 py-1 rounded bg-sky-600/30 border border-sky-500/50 text-sky-200 hover:bg-sky-600/50 font-semibold">Full Plane</button>
+            <button id="camDtlBtn" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700">Down-the-Line</button>
+            <button id="camFaceBtn" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700">Face-On</button>
+            <button id="zoomFitBtn" class="px-2.5 py-1 rounded bg-amber-500/25 border border-amber-400/60 text-amber-200 hover:bg-amber-500/40 font-extrabold ml-1" title="Auto-frame entire club, hand arc, and vectors">&#x26F6; Zoom to Fit</button>
+            <button id="toggleLegendBtn" class="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold shadow-lg shadow-emerald-500/25 tracking-tight" title="Show or Hide Vector & Green Legends (Shortcut: L)">Hide Legend</button>
+            <button id="toggleAdvBtn" class="px-2 py-1 rounded bg-purple-600/30 border border-purple-500/50 text-purple-200 hover:bg-purple-600/50 font-medium">Adv. Noise/Strike (ON)</button>
+          </div>
+        </div>
+
+        <!-- Three.js 3D Canvas Container with Golf Course Environment -->
+        <div id="threeContainer" class="w-full h-[450px] sm:h-[500px] relative golf-sky-bg cursor-grab active:cursor-grabbing select-none overflow-hidden" style="touch-action: none;">
+          <!-- Dynamic 3D Heavy-Font Vector Callout Labels Layer -->
+          <div id="vectorLabelsLayer" class="absolute inset-0 pointer-events-none overflow-hidden z-10">
+            <div id="lblFLpky" class="vec-label-3d bg-slate-950/90 border-2 border-sky-400 text-sky-200">F_L,pky</div>
+            <div id="lblFLidx" class="vec-label-3d bg-slate-950/90 border-2 border-blue-400 text-blue-200">F_L,idx</div>
+            <div id="lblFRpky" class="vec-label-3d bg-slate-950/90 border-2 border-amber-400 text-amber-200">F_R,pky</div>
+            <div id="lblFRidx" class="vec-label-3d bg-slate-950/90 border-2 border-orange-500 text-orange-200">F_R,idx</div>
+            <div id="lblTauL"  class="vec-label-3d bg-slate-950/92 border-2 border-cyan-300 text-cyan-200">&#x21BA; &tau;_L</div>
+            <div id="lblTauR"  class="vec-label-3d bg-slate-950/92 border-2 border-orange-400 text-orange-200">&#x21BB; &tau;_R</div>
+            <div id="lblTauNet" class="vec-label-3d bg-slate-950/95 border-2 border-emerald-400 text-emerald-200">&#x21BB; &tau;_net</div>
+          </div>
+
+          <!-- Prominent Floating Legend Toggle Pill & Live Impact Rebound Speed Telemetry (Top-Left of 3D Viewport) -->
+          <div class="absolute top-3 left-3 flex flex-wrap items-center gap-2 z-20">
+
+            <div id="reboundSpeedPill" class="px-3 py-1.5 rounded-full bg-slate-950/88 border border-cyan-400/50 text-[11px] mono text-cyan-200 font-semibold shadow-xl pointer-events-none">
+              Club <span id="valClubPrePost">1.12&rarr;0.89 m/s</span> &bull; Ball Rebound <span id="valBallRebound" class="text-emerald-300 font-extrabold">1.79 m/s (2.00x Through-Swing)</span>
+            </div>
+          </div>
+
+          <!-- Vector Color Legend Overlay (Sleek Modern Glassmorphic Card with Close Button) -->
+          <div id="legendOverlay" class="absolute bottom-3 left-3 bg-slate-950/92 backdrop-blur-md border border-emerald-500/40 rounded-2xl p-3.5 text-xs space-y-1.5 max-w-sm transition-all duration-200 shadow-2xl z-20">
+            <div class="font-black text-white text-xs tracking-wide uppercase border-b border-slate-800 pb-1 mb-1">3D Force Vectors &amp; Curved Rotational Torques</div>
+            <div class="flex items-center gap-2 font-bold text-sky-200"><span class="w-3.5 h-2 rounded bg-sky-400 inline-block"></span><span><strong class="font-black text-white">F_L,pky (7cm):</strong> Left Pinky (+Push Fwd / -Down-Plane)</span></div>
+            <div class="flex items-center gap-2 font-bold text-blue-200"><span class="w-3.5 h-2 rounded bg-blue-500 inline-block"></span><span><strong class="font-black text-white">F_L,idx (17cm):</strong> Left Forefinger (-Push Back / +Up-Plane)</span></div>
+            <div class="flex items-center gap-2 font-bold text-cyan-200"><span class="w-3.5 h-3.5 rounded-full border-2 border-cyan-300 inline-block"></span><span><strong class="font-black text-white">&#x21BA; &tau;_L (M_L 12cm):</strong> Curved Left Torque (-Back &amp; +Gravity Support)</span></div>
+            <div class="flex items-center gap-2 font-bold text-amber-200"><span class="w-3.5 h-2 rounded bg-amber-400 inline-block"></span><span><strong class="w-auto font-black text-white">F_R,pky (15cm):</strong> Right Pinky (-Pull Back / +Up-Plane)</span></div>
+            <div class="flex items-center gap-2 font-bold text-orange-200"><span class="w-3.5 h-2 rounded bg-orange-500 inline-block"></span><span><strong class="font-black text-white">F_R,idx (25cm):</strong> Right Forefinger (+Push Fwd / -Down-Plane)</span></div>
+            <div class="flex items-center gap-2 font-bold text-orange-200"><span class="w-3.5 h-3.5 rounded-full border-2 border-orange-400 inline-block"></span><span><strong class="font-black text-white">&#x21BB; &tau;_R (M_R 20cm):</strong> Curved Right Torque (+Downswing &amp; -Plane Lock)</span></div>
+            <div class="flex items-center gap-2 font-bold text-emerald-200"><span class="w-3.5 h-3.5 rounded-full border-2 border-emerald-400 inline-block"></span><span><strong class="font-black text-white">&#x21BB; &tau;_net (Center):</strong> Resultant Net Curved Torque + Moving Butt Arc</span></div>
+          </div>
+
+          <!-- Interactive Trackpad / Pinch Zoom Control Bar -->
+          <div class="absolute top-3 right-3 bg-slate-950/90 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 flex items-center gap-2 shadow-xl z-20">
+            <button id="zoomOutBtn" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 font-black text-sm flex items-center justify-center leading-none" title="Zoom Out">&minus;</button>
+            <input id="zoomRangeSlider" type="range" min="0.22" max="22.00" step="0.05" value="2.45" class="w-20 sm:w-24 h-1.5 bg-slate-700 rounded cursor-pointer" title="Zoom Distance">
+            <button id="zoomInBtn" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 font-black text-sm flex items-center justify-center leading-none" title="Zoom In">+</button>
+            <button id="zoomFitOverlayBtn" class="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/50 text-amber-200 font-bold text-[11px]">Fit</button>
+            <span class="hidden sm:inline text-[10px] text-slate-400 font-semibold">Pinch / Drag / Shift+Pan</span>
+          </div>
+        </div>
+
+        <!-- Video-Style Animation Playback Controls & Scrubber -->
+        <div class="p-3.5 bg-slate-950 border-t border-slate-800 flex flex-col gap-2.5">
+          <div class="flex items-center gap-3">
+            <button id="playPauseBtn" class="px-4 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition">
+              <span id="playIcon">&#9654;</span> <span id="playText">Pause</span>
+            </button>
+            <input id="timeScrubber" type="range" min="0" max="2.80" step="0.005" value="0.817" class="flex-1 h-2 bg-slate-800 rounded-lg cursor-pointer">
+            <span id="timeDisplay" class="mono text-xs font-semibold text-sky-400 w-20 text-right">0.600 s</span>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <!-- Keyframe Jump Buttons -->
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span class="text-slate-400">Jump:</span>
+              <button data-jump="0.00" class="jumpBtn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300">Address (0.00s)</button>
+              <button data-jump="0.30" class="jumpBtn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300">Mid-Back (0.30s)</button>
+              <button data-jump="0.60" class="jumpBtn px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-semibold">Top Reversal (0.60s)</button>
+              <button data-jump="0.76" class="jumpBtn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300">Downswing (0.76s)</button>
+              <button data-jump="0.817" class="jumpBtn px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-semibold">Impact (0.817s)</button>
+              <button data-jump="1.85" class="jumpBtn px-2 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-200 font-semibold">Ball Roll (1.85s)</button>
+            </div>
+
+            <!-- Playback Speed -->
+            <div class="flex items-center gap-1">
+              <span class="text-slate-400">Speed:</span>
+              <button data-speed="0.15" class="speedBtn px-2 py-1 rounded bg-slate-900 border border-slate-700 text-slate-300">0.15x</button>
+              <button data-speed="0.35" class="speedBtn px-2 py-1 rounded bg-sky-600/30 border border-sky-500 text-sky-200 font-semibold">0.35x</button>
+              <button data-speed="1.0" class="speedBtn px-2 py-1 rounded bg-slate-900 border border-slate-700 text-slate-300">1.0x</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Synchronized Telemetry Plots (Torque Counterbalance & Off-Plane Lie Deviation) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="glass-card rounded-xl p-3">
+          <div class="text-xs font-bold text-slate-200 mb-1.5 flex items-center justify-between">
+            <span>Counterbalanced Midpoint Torques (&tau;_L, &tau;_R, &tau;_&perp;)</span>
+            <span class="mono text-[11px] text-emerald-400" id="netTorqueReadout">&tau;_net = +0.01 N&middot;m</span>
+          </div>
+          <div class="relative h-44 w-full">
+            <canvas id="torqueChartCanvas" class="w-full h-full"></canvas>
+          </div>
+        </div>
+        <div class="glass-card rounded-xl p-3">
+          <div class="text-xs font-bold text-slate-200 mb-1.5 flex items-center justify-between">
+            <span>Off-Plane Lie Deviation &phi;(t) [Counterbalanced vs Slack]</span>
+            <span class="mono text-[11px] text-sky-400" id="offPlaneReadout">&Delta;&phi; = 19.0x tighter</span>
+          </div>
+          <div class="relative h-44 w-full">
+            <canvas id="phiChartCanvas" class="w-full h-full"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right 4 Cols: Live 4-Point Force & 2-Midpoint Torque Vector Inspector + Physics Sliders -->
+    <div class="lg:col-span-4 flex flex-col gap-3">
+
+      <!-- Interactive Biomechanical Parameters -->
+      <div class="glass-card rounded-xl p-4 space-y-3">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-sky-400">Interactive Physics Controls</h2>
+
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-300 font-medium">Counterbalance Preload (&tau;<sub>preload</sub>)</span>
+            <span id="preloadValLbl" class="mono font-bold text-sky-400">0.85 N&middot;m (8.5 N/finger)</span>
+          </div>
+          <input id="preloadSlider" type="range" min="0.00" max="2.00" step="0.05" value="0.60" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-300 font-medium">Stroke Lie Plane Angle (&psi;)</span>
+            <span id="lieValLbl" class="mono font-bold text-sky-400">70.0&deg; (20&deg; tilt)</span>
+          </div>
+          <input id="lieSlider" type="range" min="60" max="78" step="1" value="70" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-300 font-bold">Club Butt Hand-Arc Travel (<span class="text-amber-300">Moving Butt Arc</span>)</span>
+            <span id="buttArcValLbl" class="mono font-bold text-amber-300">0.36 m Arc (Natural Hand Path)</span>
+          </div>
+          <input id="buttArcSlider" type="range" min="0.00" max="0.55" step="0.02" value="0.36" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+        </div>
+
+        <div>
+          <label class="text-[11px] text-slate-400 block mb-1">Putter Balance Type (Head CG Offset &amp; MOI)</label>
+          <select id="putterTypeSelect" class="w-full bg-slate-900 border border-sky-500/50 rounded px-2.5 py-1.5 text-xs font-semibold text-sky-200">
+            <option value="lab">Zero-Torque / LAB (e_face=0, e_back=0, On-Axis CG)</option>
+            <option value="fb">Face-Balanced Mallet (e_face=0, e_back=26mm Rear CG)</option>
+            <option value="th" selected>Toe-Hang Blade 45&deg; (e_face=15mm Toe, e_back=12mm)</option>
+            <option value="cb">Heavy Counterbalanced Mallet (+75g Grip Butt Weight)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-3 gap-1.5 bg-slate-950/90 p-2 rounded-lg border border-slate-800 text-center">
+          <div>
+            <div class="text-[10px] text-slate-400">Shaft Torque |&tau;_s|</div>
+            <div id="valShaftTorque" class="mono text-xs font-bold text-purple-300">+12.4 mN&middot;m</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">Impact Face SD &sigma;_&phi;</div>
+            <div id="valFaceSD" class="mono text-xs font-bold text-emerald-400">0.365&deg; vs 1.30&deg;</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">15-ft Make Rate</div>
+            <div id="valMake15" class="mono text-xs font-bold text-sky-400">92.1% vs 27.0%</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <div>
+            <label class="text-[11px] text-slate-400 block mb-1">Vector Projection Mode</label>
+            <select id="vecModeSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+              <option value="total">Full 3D Vectors (In + Off Plane)</option>
+              <option value="inplane">In-Plane Stroke Couple Only</option>
+              <option value="offplane">Off-Plane Stabilizing Only</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[11px] text-slate-400 block mb-1">Unbalanced Ghost Club</label>
+            <button id="toggleGhostBtn" class="w-full py-1.5 px-2 rounded bg-orange-500/20 border border-orange-500/50 text-orange-300 text-xs font-semibold">
+              Showing Ghost Droop (ON)
+            </button>
+          </div>
+        </div>
+
+        <!-- Advanced Features Panel: Off-Plane Tension, Smooth Motor Noise & Live Strike Map -->
+        <div id="advancedFeaturesPanel" class="pt-2 border-t border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-purple-300">Advanced Noise, Tension &amp; Strike Inspector</span>
+            <span id="offPlaneProofBadge" class="text-[10px] mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">&tau;_L,&perp;&gt;0 Supports vs &tau;_R,&perp;&lt;0</span>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300 font-medium">Off-Plane Tension (&tau;<sub>preload,&perp;</sub>)</span>
+              <span id="offPreloadValLbl" class="mono font-bold text-purple-300">0.55 N&middot;m (Left +1.54 / Right -0.55)</span>
+            </div>
+            <input id="offPreloadSlider" type="range" min="0.00" max="1.20" step="0.05" value="0.55" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300 font-medium">Smooth C&sup2; Motor Noise (&sigma;<sub>noise</sub>)</span>
+              <span id="noiseValLbl" class="mono font-bold text-amber-300">0.25x (Smooth OU Active)</span>
+            </div>
+            <input id="noiseSlider" type="range" min="0.00" max="2.50" step="0.05" value="0.25" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+          </div>
+          <div class="bg-slate-950/90 p-2 rounded-lg border border-slate-800">
+            <div class="flex items-center justify-between text-[11px] mb-1">
+              <span class="text-slate-400 font-semibold">Live Clubface Strike Impact Map:</span>
+              <span id="strikeSpotLbl" class="mono text-emerald-400 font-bold">x_hit = +0.4 mm (COR 99.8%)</span>
+            </div>
+            <canvas id="strikeFaceCanvas" width="280" height="54" class="w-full h-12 rounded bg-slate-900 border border-slate-800"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Component Visibility Checkboxes Panel (Show / Hide All Scene Elements) -->
+      <div class="glass-card rounded-xl p-3.5 space-y-2.5 border-l-4 border-l-emerald-500">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Scene Component Visibility</h3>
+          <div class="flex items-center gap-1">
+            <button id="showAllCompBtn" class="px-2 py-0.5 rounded bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/50 text-emerald-200 text-[10px] font-bold">Show All</button>
+            <button id="hideAllCompBtn" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[10px] font-bold">Club Only</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px] bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkClub" checked class="rounded accent-emerald-500"><span>3D Putter Club &amp; Head</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkForceVecs" checked class="rounded accent-sky-400"><span>4 Force Vectors (<span class="math-vec">F&#8407;</span>)</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkHandTorques" checked class="rounded accent-cyan-400"><span>Curved Hand Torques (<span class="math-vec">&tau;</span><sub>L</sub>, <span class="math-vec">&tau;</span><sub>R</sub>)</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkNetTorque" checked class="rounded accent-emerald-400"><span>Curved Net Torque (<span class="math-vec">&tau;</span><sub>net</sub>)</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkImpactVecs" checked class="rounded accent-amber-400"><span>Impact Face &amp; Path Vecs</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkButtArc" checked class="rounded accent-yellow-400"><span>Moving Butt Arc &amp; Arms</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkStrokePlane" checked class="rounded accent-blue-400"><span>70&deg; Lie Plane &amp; Head Arc</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkBallTraces3D" checked class="rounded accent-teal-400"><span>3D Multi-Trial Ball Traces</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkGreenEnv" checked class="rounded accent-green-500"><span>Oblong Green &amp; Course</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkStartHoleLine" checked class="rounded accent-emerald-400"><span>Target Line to Hole &amp; Start Ray</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkGreenGrid" checked class="rounded accent-emerald-400"><span>Undulating Slope Grid Overlay</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer" title="The orange wireframe overlay shows the off-plane droop of an unbalanced slack grip"><input type="checkbox" id="chkGhostClub" class="rounded accent-orange-500"><span class="text-orange-300">Orange Slack Ghost (Off)</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkVecLabels" class="rounded accent-purple-400"><span>3D Vector Symbol Tags</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chkLiveTorqueCards" class="rounded accent-slate-400"><span>Torque Readout Panels</span></label>
+        </div>
+      </div>
+
+      <!-- Impact Delivery Parameters & Multi-Trial Make Rate Card -->
+      <div class="glass-card rounded-xl p-3.5 space-y-2 border-l-4 border-l-amber-400">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-amber-300">Impact Parameters (<span class="math-sym">t</span><sub>imp</sub> = 0.817 s) &amp; Multi-Trial Dispersion</h3>
+          <button id="saveScenarioQuickBtn" class="px-2 py-0.5 rounded bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold">+ Save Scenario</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/85 p-2.5 rounded-lg border border-slate-800">
+          <div>
+            <div class="text-[10px] text-slate-400">Impact Face Angle <span class="math-sym">&phi;</span><sub>face</sub></div>
+            <div id="valImpactFace" class="mono font-bold text-amber-300">+0.14&deg; (SD 0.25&deg;)</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">Clubhead Path <span class="math-sym">&psi;</span><sub>path</sub></div>
+            <div id="valImpactPath" class="mono font-bold text-purple-300">+0.08&deg; (SD 0.21&deg;)</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">Face-to-Path <span class="math-sym">&Delta;&psi;</span> &amp; Launch</div>
+            <div id="valFaceToPath" class="mono font-bold text-cyan-300">+0.06&deg; &rarr; <span class="math-sym">&psi;</span><sub>0</sub> +0.13&deg;</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">Multi-Trial Make % (<span id="lblNTrials">35</span> Putts)</div>
+            <div id="valLiveMakePct" class="mono font-black text-emerald-400 text-sm">85.7% Holed</div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-[11px] mb-1">
+            <span class="text-slate-300 font-medium">Monte Carlo Trial Traces on Green (<span class="math-sym">N</span><sub>trials</sub>)</span>
+            <span id="nTrialsValLbl" class="mono font-bold text-emerald-300">35 Trials Overlaid</span>
+          </div>
+          <input id="nTrialsSlider" type="range" min="10" max="80" step="5" value="35" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+        </div>
+      </div>
+
+      <!-- Apples-to-Apples Nominal Equivalence, Perturbation Impulse & Grip Pressure U-Curve Explorer (v3.3) -->
+      <div class="glass-card rounded-xl p-3.5 space-y-2.5 border-l-4 border-l-cyan-400">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-300">Apples-to-Apples Stabilization vs. Moment-of-Force Explorer</h3>
+          <span id="gripRegimeBadge" class="text-[10px] mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">Optimal Zone (90.3% Make)</span>
+        </div>
+        <p class="text-[11px] text-slate-300 leading-snug">
+          Both the <b class="text-orange-300">Moment-of-Force (<span class="math-sym">&tau;</span><sub>preload</sub>=0)</b> and <b class="text-cyan-300">Stabilized (<span class="math-sym">&tau;</span><sub>preload</sub>&gt;0)</b> players apply the exact same inverse-dynamics task moment <span class="math-sym">&tau;<sub>task</sub>(t)</span>. Unperturbed strokes are <b>100% identical</b> (<span class="math-sym">&Delta;&theta;=0, &Delta;&phi;=0</span>); counter-torques isolate perturbation rejection vs. high-tension SDN tremor.
+        </p>
+
+        <div class="grid grid-cols-3 gap-1 text-[10px]">
+          <button id="pertZeroBtn" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-semibold">Unperturbed (0 N&middot;m)</button>
+          <button id="pertImpulseBtn" class="px-2 py-1 rounded bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-400 text-cyan-200 font-bold">0.25 N&middot;m Gust (t=0.72s)</button>
+          <button id="pertToeBtn" class="px-2 py-1 rounded bg-amber-500/25 hover:bg-amber-500/40 border border-amber-400/60 text-amber-200 font-semibold">+10mm Toe Strike</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-300">Disturbance <span class="math-sym">&delta;&tau;</span><sub>pert</sub></span>
+              <span id="pertImpulseValLbl" class="mono font-bold text-cyan-300">0.25 N&middot;m</span>
+            </div>
+            <input id="pertImpulseSlider" type="range" min="0.00" max="0.40" step="0.05" value="0.25" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-300">Toe Mishit <span class="math-sym">e<sub>x</sub></span></span>
+              <span id="toeOffsetValLbl" class="mono font-bold text-amber-300">+10.0 mm</span>
+            </div>
+            <input id="toeOffsetSlider" type="range" min="0.0" max="15.0" step="1.0" value="10.0" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/90 p-2 rounded-lg border border-slate-800">
+          <div>
+            <div class="text-[10px] text-slate-400">Perturbed Face Error (<span class="math-sym">&phi;</span><sub>imp</sub>)</div>
+            <div id="valPertFaceComp" class="mono font-bold text-cyan-300">+0.23&deg; vs +1.40&deg; (0 N&middot;m)</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">Effective Head-Grip MOI (<span class="math-sym">I</span><sub>eff</sub>)</div>
+            <div id="valEffMOIComp" class="mono font-bold text-emerald-300">25,194 vs 11,521 g&middot;cm&sup2;</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">Total Face SD <span class="math-sym">&sigma;(&phi;<sub>tot</sub>)</span> (Ext + SDN)</div>
+            <div id="valSweepTotErr" class="mono font-bold text-amber-300">0.357&deg; (Min @ 0.60 N&middot;m)</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">10-ft Breaking Putt Make %</div>
+            <div id="valSweepMakePct" class="mono font-black text-emerald-400">90.1% vs 51.4% (0 N&middot;m)</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/90 p-2 rounded-lg border border-slate-800">
+          <div class="flex items-center justify-between text-[10px] text-slate-300 mb-1">
+            <span class="font-bold">Grip Pressure Optimization Curve (<span class="math-sym">&tau;</span><sub>preload</sub> &isin; [0, 2.0] N&middot;m)</span>
+            <span class="mono text-cyan-300">Cyan: &sigma;<sub>tot</sub>(U) &bull; Green: Make %</span>
+          </div>
+          <canvas id="gripSweepCanvas" width="320" height="105" class="w-full h-24 rounded bg-slate-900/90"></canvas>
+        </div>
+      </div>
+
+      <!-- Optional Torque Readout Cards (Hidden by default per user request: "Don't show the values of the torque on the screen with live readouts") -->
+      <div id="liveTorqueCardsWrapper" class="hidden space-y-3">
+      <!-- Left Hand Couple Live Readout -->
+      <div class="glass-card rounded-xl p-3.5 border-l-4 border-l-sky-500 space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400">Left Hand Force Couple (M_L = 12 cm)</h3>
+          <span class="text-[11px] mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-300">Negative Torque &tau;_L</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80">
+          <div>
+            <div class="text-[11px] text-slate-400">1. Left Pinky (P_L,pky @ 7cm)</div>
+            <div class="font-black text-sky-300 mono mt-0.5 text-sm" id="valFLpkyIn">+9.05 N (Push Fwd)</div>
+            <div class="text-xs font-extrabold text-purple-300 mono" id="valFLpkyOff">-4.48 N (Down-Plane)</div>
+          </div>
+          <div>
+            <div class="text-[11px] text-slate-400">2. Left Forefinger (P_L,idx @ 17cm)</div>
+            <div class="font-black text-blue-300 mono mt-0.5 text-sm" id="valFLidxIn">-9.05 N (Push Back)</div>
+            <div class="text-xs font-extrabold text-purple-300 mono" id="valFLidxOff">+4.48 N (Up-Plane)</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-xs pt-1 px-1">
+          <span class="text-slate-300 font-medium">Midpoint M_L Torque (&tau;<sub>L</sub>):</span>
+          <span class="mono font-bold text-cyan-300" id="valTauML">-0.91 N&middot;m (in) | +0.45 N&middot;m (off)</span>
+        </div>
+      </div>
+
+      <!-- Right Hand Couple Live Readout -->
+      <div class="glass-card rounded-xl p-3.5 border-l-4 border-l-orange-500 space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-orange-400">Right Hand Force Couple (M_R = 20 cm)</h3>
+          <span class="text-[11px] mono px-2 py-0.5 rounded bg-orange-500/15 text-orange-300">Positive Torque &tau;_R</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80">
+          <div>
+            <div class="text-[11px] text-slate-400">3. Right Pinky (P_R,pky @ 15cm)</div>
+            <div class="font-black text-amber-300 mono mt-0.5 text-sm" id="valFRpkyIn">-9.15 N (Pull Back)</div>
+            <div class="text-xs font-extrabold text-purple-300 mono" id="valFRpkyOff">-4.48 N (Down-Plane)</div>
+          </div>
+          <div>
+            <div class="text-[11px] text-slate-400">4. Right Forefinger Base (P_R,idx @ 25cm)</div>
+            <div class="font-black text-orange-300 mono mt-0.5 text-sm" id="valFRidxIn">+9.15 N (Push Fwd)</div>
+            <div class="text-xs font-extrabold text-purple-300 mono" id="valFRidxOff">+4.48 N (Up-Plane)</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-xs pt-1 px-1">
+          <span class="text-slate-300 font-medium">Midpoint M_R Torque (&tau;<sub>R</sub>):</span>
+          <span class="mono font-bold text-orange-300" id="valTauMR">+0.92 N&middot;m (in) | +0.45 N&middot;m (off)</span>
+        </div>
+      </div>
+      </div>
+
+      <!-- 3D Structural Truss & Zero-Shear Summary Card -->
+      <div class="glass-card rounded-xl p-3.5 text-xs space-y-1.5">
+        <div class="font-bold text-emerald-400 flex items-center justify-between">
+          <span>Zero-Shear Pure Couple Balance</span>
+          <span class="mono">&Sigma;F_shear = 0.00 N</span>
+        </div>
+        <p class="text-slate-300 leading-relaxed text-[11.5px]">
+          Because each hand uses an opposing finger pair (<b class="text-sky-300">Forefinger + Pinky</b>), net lateral translation cancels inside each hand while the two midpoint torques <b class="text-cyan-300">&tau;<sub>L</sub></b> and <b class="text-orange-300">&tau;<sub>R</sub></b> counterbalance across the shaft and lock the club onto the 70&deg; plane.
+        </p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- TAB 2B: INTERACTIVE BALL IMPACT & GREEN ROLL DISPERSION SIMULATOR         -->
+  <!-- ========================================================================= -->
+  <section id="viewGreenRoll" class="hidden flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+    <div class="lg:col-span-8 flex flex-col gap-3">
+      <div class="glass-card rounded-xl p-4 flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-white">UpstreamDrift Ball Impact &amp; Putting Green Roll Simulator (Skid &rarr; Pure Roll &rarr; Cup)</h2>
+            <p class="text-xs text-slate-400">Compare 4-Point Counterbalanced (Cyan) vs. Unbalanced Slack Grip (Orange/Red) on Flat &amp; Breaking Greens</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button id="presetFlatGreenBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold">Flat Green (0% Slope)</button>
+            <button id="presetSlopedGreenBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold">Sloped Green (2.2% Break)</button>
+            <button id="solveAimpointBtn" class="px-2.5 py-1 rounded-lg text-xs font-bold">&#x1F3AF; Auto-Solve Optimal AimPoint</button>
+            <button id="rerollMonteCarloBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium">Run New 40-Putt Batch</button>
+            <button id="runBatch100Btn" class="px-2.5 py-1 rounded-lg text-xs font-semibold">Run 100 Putts</button>
+            <button id="runBatch1000Btn" class="px-2.5 py-1 rounded-lg text-xs font-bold">Run 1,000 Putts</button>
+            <button id="stimpmeterModeBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold">Stimpmeter Ramp Mode</button>
+            <button id="exportJsonBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium">Export JSON</button>
+            <button id="loadJsonBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium">Load JSON</button>
+            <input id="loadJsonInput" type="file" accept=".json,application/json" class="hidden">
+          </div>
+        </div>
+
+        <div class="relative w-full h-[390px] sm:h-[430px] rounded-xl overflow-hidden border border-emerald-900/60 bg-emerald-950/40">
+          <canvas id="greenRollCanvas" class="w-full h-full block photoreal-green-canvas"></canvas>
+          <div id="greenLegendBox" class="absolute top-3 left-3 bg-slate-950/88 border border-slate-800 rounded-lg p-2.5 text-[11px] space-y-1 pointer-events-none">
+            <div class="font-bold text-slate-200">Ball Roll &amp; Dispersion Legend (10 ft / 3.048 m Putt)</div>
+            <div class="flex items-center gap-2"><span class="w-3 h-1.5 rounded bg-cyan-400 inline-block"></span><span><b>4-Point Counterbalanced:</b> Tight Skid-to-Roll &amp; High Capture</span></div>
+            <div class="flex items-center gap-2"><span class="w-3 h-1.5 rounded bg-red-500 inline-block"></span><span><b>Unbalanced Slack Grip:</b> Wide Face/Speed Scatter (&ldquo;Amateur Side&rdquo; Misses)</span></div>
+            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span><span><b>Dashed Amber Line:</b> Skid (SLIDING) &rarr; Pure Roll (ROLLING) Transition</span></div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 bg-slate-950 p-3 rounded-lg border border-slate-800">
+          <button id="rollPlayPauseBtn" class="px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs">Replay Putt Roll</button>
+          <input id="rollTimeScrubber" type="range" min="0" max="3.6" step="0.02" value="1.8" class="flex-1 h-2 bg-slate-800 rounded-lg cursor-pointer">
+          <span id="rollTimeLbl" class="mono text-xs text-emerald-400 w-20 text-right">t = 1.80 s</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-4 flex flex-col gap-3">
+      <div class="glass-card rounded-xl p-4 space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Green Surface &amp; Impact Controls</h3>
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-300 font-medium">Lateral Cross-Slope Break (%)</span>
+            <span id="crossSlopeValLbl" class="mono font-bold text-emerald-400">2.2% (Left-to-Right Break)</span>
+          </div>
+          <input id="crossSlopeSlider" type="range" min="-3.5" max="3.5" step="0.1" value="2.2" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-300 font-medium">Uphill / Downhill Grade (%)</span>
+            <span id="uphillSlopeValLbl" class="mono font-bold text-sky-400">+0.4% (Slight Uphill)</span>
+          </div>
+          <input id="uphillSlopeSlider" type="range" min="-1.5" max="1.5" step="0.1" value="0.4" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-300 font-medium">USGA Green Stimpmeter Rating</span>
+            <span id="stimpValLbl" class="mono font-bold text-amber-300">11.5 ft (&mu;_roll = 0.0487)</span>
+          </div>
+          <input id="stimpSlider" type="range" min="8.5" max="14.0" step="0.5" value="11.5" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-300 font-medium">Uphill Aim Compensation Angle</span>
+            <span id="aimAngleValLbl" class="mono font-bold text-cyan-300">+6.0&deg; Uphill Aim</span>
+          </div>
+          <input id="aimAngleSlider" type="range" min="-12.0" max="12.0" step="0.5" value="6.0" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+        </div>
+        <div class="pt-1.5 border-t border-slate-800/80 grid grid-cols-2 gap-2">
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-300">Putt Distance (0&ndash;45 ft)</span>
+              <span id="puttDistValLbl" class="mono font-bold text-emerald-300">10.0 ft</span>
+            </div>
+            <input id="puttDistSlider" type="range" min="2.0" max="45.0" step="1.0" value="10.0" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-300">Capture Speed <span class="math-sym">v<sub>entry</sub></span></span>
+              <span id="captureSpeedValLbl" class="mono font-bold text-cyan-300">0.58 m/s</span>
+            </div>
+            <input id="captureSpeedSlider" type="range" min="0.20" max="1.35" step="0.02" value="0.58" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-300">Turf Roughness (<span class="math-sym">&sigma;<sub>z</sub></span>)</span>
+              <span id="roughnessValLbl" class="mono font-bold text-amber-300">0.35 mm</span>
+            </div>
+            <input id="roughnessSlider" type="range" min="0.00" max="1.00" step="0.05" value="0.35" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-300">Green-Read Error (<span class="math-sym">&sigma;<sub>read</sub></span>)</span>
+              <span id="greenReadValLbl" class="mono font-bold text-purple-300">0.25%</span>
+            </div>
+            <input id="greenReadSlider" type="range" min="0.00" max="0.90" step="0.05" value="0.25" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px]">
+          <label class="flex items-center gap-1.5 cursor-pointer text-emerald-200">
+            <input type="checkbox" id="chkStartHoleLine2D" checked class="accent-emerald-400">
+            <span>Target Line to Hole &amp; Start Ray</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer text-emerald-200">
+            <input type="checkbox" id="chkGreenGrid2D" checked class="accent-emerald-400">
+            <span>Topographic Slope Grid</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer text-emerald-200">
+            <input type="checkbox" id="chkPhotoFilter2D" checked class="accent-emerald-400">
+            <span>Photoreal HD Filter</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-xl p-4 space-y-2.5 border-l-4 border-l-emerald-500">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Live Dispersion &amp; Impact Telemetry (40 Putts)</h3>
+        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+          <div>
+            <div class="text-[11px] text-slate-400">4-Pt Counterbalanced Make %</div>
+            <div id="greenMakeCB" class="mono text-base font-bold text-cyan-300">78.0%</div>
+          </div>
+          <div>
+            <div class="text-[11px] text-slate-400">Unbalanced Slack Make %</div>
+            <div id="greenMakeUN" class="mono text-base font-bold text-red-400">30.0%</div>
+          </div>
+          <div>
+            <div class="text-[11px] text-slate-400">Skid-to-Roll Distance</div>
+            <div id="greenSkidDist" class="mono text-xs font-bold text-amber-300">36.8 cm (SLIDING)</div>
+          </div>
+          <div>
+            <div class="text-[11px] text-slate-400">Lateral Scatter SD (&sigma;_Y)</div>
+            <div id="greenLatSD" class="mono text-xs font-bold text-emerald-300">3.4 cm vs 11.8 cm</div>
+          </div>
+        </div>
+        <p class="text-[11.5px] text-slate-300 leading-relaxed">
+          <b>Holmes / Penner USGA Cup Capture &amp; Lip-Out Physics:</b> A ball entering the 108 mm cup at impact offset <span class="math-sym">b</span> is captured only if its speed is below the chord threshold <span class="math-sym">v<sub>crit</sub>(b) = v<sub>0,max</sub>(1 &minus; (b/R<sub>h</sub>)<sup>2</sup>)<sup>0.75</sup></span>; faster off-center hits lip out and deflect laterally.
+        </p>
+      </div>
+    </div>
+
+    <!-- Player-Specific Bellman Strokes Gained (SG_player), Capture Speed Strategy & 6-Channel Variance Lab -->
+    <div class="lg:col-span-12 glass-card rounded-xl p-4 space-y-3 border-t-2 border-t-emerald-500/60">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+        <div>
+          <h3 class="text-sm sm:text-base font-bold text-white">Player-Specific Bellman Strokes Gained (<span class="math-sym">SG<sub>player</sub></span>), Capture Speed Strategy &amp; 6-Channel Variance Attribution</h3>
+          <p class="text-xs text-slate-400">Evaluated from the player&rsquo;s own skill &amp; counter-torque Bellman curve <span class="math-sym">E<sub>player</sub>(d) = 1 + (1 &minus; P<sub>make</sub>(d))E<sub>player</sub>(d<sub>leave</sub>)</span> across 0&ndash;45 ft on varying breaks (not PGA Tour averages)</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span id="cumulativeMakeBadge" class="mono px-2.5 py-1 rounded-lg bg-emerald-950/90 border border-emerald-500/50 text-emerald-300 font-bold">Cumulative Make: 82.5% (33/40)</span>
+          <button id="runSpread45Btn" class="px-3 py-1 rounded-lg text-xs font-bold">Simulate 0&ndash;45 ft Spread (1,000 Putts)</button>
+          <button id="resetCumulativeBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium">Reset Cumulative</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+        <div class="lg:col-span-7 bg-slate-950/85 border border-slate-800 rounded-xl p-3">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="font-bold text-emerald-300">Capture Speed (<span class="math-sym">v<sub>entry</sub></span>) Strategy &amp; 0&ndash;45 ft Player Expected Strokes <span class="math-sym">E<sub>player</sub>(d)</span></span>
+            <span id="optCaptureSpeedBadge" class="mono text-[11px] text-cyan-300 font-semibold">Optimal <span class="math-sym">v<sub>entry</sub><sup>*</sup></span>: 0.65 m/s (Stabilized) vs 0.38 m/s (Poor/Slack)</span>
+          </div>
+          <div class="w-full h-44">
+            <canvas id="sgCaptureChartCanvas" class="w-full h-full block"></canvas>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-slate-950/85 p-2.5 rounded-lg border border-slate-800">
+            <div class="text-[11px] text-slate-400">Player Expected Strokes <span class="math-sym">E<sub>player</sub>(d)</span></div>
+            <div id="valEPlayer" class="mono text-sm font-bold text-emerald-300">1.22 strokes (vs 1.71 Slack)</div>
+          </div>
+          <div class="bg-slate-950/85 p-2.5 rounded-lg border border-slate-800">
+            <div class="text-[11px] text-slate-400">Counter-Torque <span class="math-sym">SG<sub>player</sub></span> Gain</div>
+            <div id="valSGPlayerGain" class="mono text-sm font-bold text-cyan-300">+0.49 strokes / putt</div>
+          </div>
+          <div class="bg-slate-950/85 p-2.5 rounded-lg border border-slate-800">
+            <div class="text-[11px] text-slate-400">Optimal Capture Speed Strategy</div>
+            <div id="valOptPaceStrat" class="mono text-xs font-bold text-amber-300">0.65 m/s (Firm) vs 0.38 m/s (Die-In)</div>
+          </div>
+          <div class="bg-slate-950/85 p-2.5 rounded-lg border border-slate-800">
+            <div class="text-[11px] text-slate-400">Stimpmeter Calibration Read</div>
+            <div id="valStimpReadout" class="mono text-xs font-bold text-purple-300">Eff. Stimp 11.4 ft &bull; Aim +5.8&deg;</div>
+          </div>
+          <div class="col-span-2 bg-slate-950/90 p-2.5 rounded-lg border border-emerald-900/50 space-y-1">
+            <div class="font-bold text-[11px] text-emerald-400 uppercase tracking-wider">6-Channel 18-Hole Strokes Gained Variance Attribution</div>
+            <div id="val6ChannelBreakdown" class="mono text-[11px] text-slate-300 grid grid-cols-3 gap-1">
+              <span>Counter-Torque: <b id="chGainCT" class="text-emerald-300">+2.42 SG</b></span>
+              <span>Face Angle SD: <b id="chLossFace" class="text-cyan-300">-1.65 SG</b></span>
+              <span>Green Read <span class="math-sym">&sigma;<sub>read</sub></span>: <b id="chLossRead" class="text-purple-300">-1.18 SG</b></span>
+              <span>Impact Spot/Pace: <b id="chLossSpot" class="text-amber-300">-0.84 SG</b></span>
+              <span>Surface Roughness: <b id="chLossRough" class="text-orange-300">-0.56 SG</b></span>
+              <span>Club Path SD: <b id="chLossPath" class="text-sky-300">-0.31 SG</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full-Width Saved Scenarios Distribution Comparison Table & Chart -->
+    <div class="lg:col-span-12 glass-card rounded-xl p-4 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+        <div>
+          <h3 class="text-sm font-bold text-white">Saved Scenarios Comparison &amp; Outcome Distributions</h3>
+          <p class="text-xs text-slate-400">Save multiple grip/preload/putter/slope configurations to compare Make %, Lip-Out %, Face Angle SD <span class="math-sym">&sigma;(&phi;<sub>f</sub>)</span>, Path SD <span class="math-sym">&sigma;(&psi;<sub>p</sub>)</span>, and Radial Dispersion <span class="math-sym">&sigma;<sub>r</sub></span></p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <input id="scenarioNameInput" type="text" placeholder="Custom Scenario Name..." value="4-Pt Counterbalanced (0.85 N·m)" class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white w-52">
+          <button id="saveScenarioBtn" class="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold">+ Save Current Scenario</button>
+          <button id="clearScenariosBtn" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300">Reset Presets</button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-slate-700 text-slate-300">
+              <th class="py-2 px-2">Scenario Name</th>
+              <th class="py-2 px-2">Putter &amp; Preload (<span class="math-sym">&tau;<sub>&parallel;</sub> / &tau;<sub>&perp;</sub></span>)</th>
+              <th class="py-2 px-2">Noise <span class="math-sym">&sigma;</span> &amp; Butt Arc</th>
+              <th class="py-2 px-2">Green Slope &amp; Stimp</th>
+              <th class="py-2 px-2">Face SD <span class="math-sym">&sigma;(&phi;<sub>f</sub>)</span></th>
+              <th class="py-2 px-2">Path SD <span class="math-sym">&sigma;(&psi;<sub>p</sub>)</span></th>
+              <th class="py-2 px-2">Radial Miss SD <span class="math-sym">&sigma;<sub>r</sub></span></th>
+              <th class="py-2 px-2">Lip-Out %</th>
+              <th class="py-2 px-2">Make %</th>
+            </tr>
+          </thead>
+          <tbody id="scenarioTableBody" class="divide-y divide-slate-800/80 mono text-[11px]"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- TAB 2: HD SCIENTIFIC VIDEO PLAYBACK (MP4)                                 -->
+  <!-- ========================================================================= -->
+  <section id="viewVideoPlayer" class="hidden flex-1 max-w-6xl w-full mx-auto p-4 flex-col gap-4">
+    <div class="glass-card rounded-xl p-4 flex flex-col items-center gap-4">
+      <div class="w-full flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div>
+          <h2 class="text-base font-bold text-white">Pre-Rendered 180-Frame HD Scientific Animation (MP4, 30 fps)</h2>
+          <p class="text-xs text-slate-400">Synchronized 4-Panel Telemetry: 3D Grip Close-Up, 3D 70&deg; Lie Plane, Counterbalanced Torques, and Off-Plane Error &phi;(t)</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <button id="vidStepBackBtn" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200">-1 Frame</button>
+          <button id="vidStepFwdBtn" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200">+1 Frame</button>
+          <button id="vidSlowBtn" class="px-2.5 py-1 rounded bg-sky-600/30 border border-sky-500 text-sky-200 font-semibold">0.5x Slow-Mo</button>
+          <button id="vidNormBtn" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200">1.0x Normal</button>
+        </div>
+      </div>
+
+      <video id="scientificVideo" class="w-full max-w-5xl rounded-lg border border-slate-800 shadow-2xl" controls playsinline>
+      </video>
+      <p class="text-sm text-slate-400 mt-2">
+        The recorded demonstration clip for this tab is distributed separately
+        and is not embedded in this standalone studio build.
+      </p>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- TAB 3: MATHEMATICAL ARCHITECTURE & DEVELOPER TURNOVER DOCUMENT            -->
+  <!-- ========================================================================= -->
+  <section id="viewTurnoverDoc" class="hidden flex-1 max-w-5xl w-full mx-auto p-4 flex-col gap-4">
+    <div class="glass-card rounded-xl p-6 space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-sky-400">Engineering Handoff &amp; System Specification</span>
+          <h2 class="text-xl font-bold text-white mt-0.5">Developer &amp; Agent Turnover Document: 3D Counterbalanced Putting Suite</h2>
+        </div>
+        <button id="copyTurnoverBtn" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
+          Copy Turnover Spec to Clipboard
+        </button>
+      </div>
+
+      <div id="turnoverContentText" class="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+          <h3 class="font-bold text-sky-400 text-sm">1. Coordinate Frames &amp; 3D Basis Vectors</h3>
+          <p>The putter swings about pivot hub <span class="mono text-white">O = (0,0,0)</span> on an inclined stroke plane tilted at lie angle <span class="mono text-white">&psi; = 70&deg;</span> from horizontal (<span class="mono text-white">&beta; = 20&deg;</span> from vertical):</p>
+          <ul class="list-disc pl-5 space-y-1 mono text-xs text-slate-300">
+            <li><b>&hat;e_s(&theta;, &phi;):</b> Radial unit vector along the putter shaft from pivot to clubhead.</li>
+            <li><b>&hat;e_&theta;(&theta;):</b> In-plane tangential unit vector (positive toward target/downswing).</li>
+            <li><b>&hat;e_&perp;(&theta;, &phi;) = &hat;e_s &times; &hat;e_&theta;:</b> Off-plane normal vector perpendicular to the 70&deg; stroke plane.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+          <h3 class="font-bold text-orange-400 text-sm">2. 4-Point Contact Forces &amp; 2 Midpoint Torque Equations</h3>
+          <p>Each hand applies an opposing force couple along shaft coordinate <span class="mono text-white">s</span>, eliminating lateral hub shear (<span class="mono text-emerald-400">&Sigma;F_L,&theta; = 0, &Sigma;F_R,&theta; = 0</span>) while generating counterbalanced midpoint torques:</p>
+          <ul class="list-disc pl-5 space-y-1.5 text-xs">
+            <li><b>Left Pinky (P_L,pky @ s = 0.07 m):</b> <span class="mono text-sky-300">F_L,pky = +F_L,&parallel;(t) &hat;e_&theta; - F_L,&perp;(t) &hat;e_&perp;</span> (pushes forward in-plane, pulls down-plane).</li>
+            <li><b>Left Forefinger (P_L,idx @ s = 0.17 m):</b> <span class="mono text-sky-300">F_L,idx = -F_L,&parallel;(t) &hat;e_&theta; + F_L,&perp;(t) &hat;e_&perp;</span> (pushes back in-plane, pushes up-plane).</li>
+            <li><b>Left Midpoint Torque (M_L @ s = 0.12 m, d_L = 0.10 m):</b> <span class="mono text-cyan-300">&tau;_L = -d_L F_L,&parallel; &hat;e_&perp; - d_L F_L,&perp; &hat;e_&theta;</span> (Negative backswing torque <span class="mono">&tau;_L,&parallel; &le; -0.85 N&middot;m</span> + off-plane anti-droop torque).</li>
+            <li><b>Right Pinky (P_R,pky @ s = 0.15 m):</b> <span class="mono text-amber-300">F_R,pky = -F_R,&parallel;(t) &hat;e_&theta; - F_R,&perp;(t) &hat;e_&perp;</span> (pulls back in-plane, pulls down-plane).</li>
+            <li><b>Base of Right Forefinger (P_R,idx @ s = 0.25 m):</b> <span class="mono text-orange-300">F_R,idx = +F_R,&parallel;(t) &hat;e_&theta; + F_R,&perp;(t) &hat;e_&perp;</span> (pushes forward in-plane, pushes up-plane).</li>
+            <li><b>Right Midpoint Torque (M_R @ s = 0.20 m, d_R = 0.10 m):</b> <span class="mono text-orange-300">&tau;_R = +d_R F_R,&parallel; &hat;e_&perp; - d_R F_R,&perp; &hat;e_&theta;</span> (Positive downswing torque <span class="mono">&tau;_R,&parallel; &ge; +0.85 N&middot;m</span> + off-plane anti-droop torque).</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+          <h3 class="font-bold text-purple-400 text-sm">3. 4-Channel Variability Decomposition &amp; Putter Balance Type Interaction</h3>
+          <p>Total impact face-angle variance decomposes into four biomechanical channels: <span class="mono text-white">&sigma;_total&sup2; = &sigma;_hub-shear&sup2; + &sigma;_backlash&sup2; + &sigma;_off-plane&sup2; + &sigma;_shaft-twist&sup2;(e_face, e_back)</span>. A putter head with CG offsets <span class="mono text-white">(e_face, e_back)</span> perpendicular to the shaft axis generates parasitic shaft-axis torque <span class="mono text-purple-300">&tau;_head,s(t) = -M_h L &theta;&#776;(t) e_face + M_h g sin(&beta;)(e_back cos(&theta;) - e_face sin(&theta;))</span>:</p>
+          <ul class="list-disc pl-5 space-y-1 text-xs">
+            <li><b>Toe-Hang Blade (45&deg;, e_face=15mm, e_back=12mm, Peak |&tau;_s|=77 mN&middot;m):</b> Strong inertial opening torque during downswing acceleration. Switching from Unbalanced to 4-Pt Counterbalanced cuts Face SD from <b>1.303&deg; to 0.365&deg;</b> (15-ft make rate jumps from <b>27.0% to 92.1%</b>).</li>
+            <li><b>Face-Balanced Mallet (0&deg;, e_face=0mm, e_back=26mm, Peak |&tau;_s|=31 mN&middot;m):</b> Zero inertial toe-lag torque, but deep rearward CG creates gravitational closing torque on the 70&deg; lie plane if the shaft droops. 4-Pt Counterbalanced off-plane lock cuts Face SD from <b>0.957&deg; to 0.312&deg;</b> (15-ft make rate <b>96.6% vs. 37.2%</b>).</li>
+            <li><b>Zero-Torque / Lie-Angle Balanced (e_face=0mm, e_back=0mm, Peak |&tau;_s|=0 mN&middot;m):</b> Shaft axis passes directly through 3D head CG, eliminating both inertial and gravitational shaft twist (Face SD <b>0.305&deg;</b> in 4-Pt Counterbalanced vs. <b>0.804&deg;</b> in Unbalanced).</li>
+            <li><b>Heavy Counterbalanced Mallet (+75g Butt Weight, MOI=5,800 g&middot;cm&sup2;):</b> Raises system rotational inertia to filter high-frequency signal-dependent motor noise, achieving the lowest Face SD of <b>0.268&deg;</b> (<b>98.2%</b> 15-ft make rate).</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+          <h3 class="font-bold text-cyan-400 text-sm">4. AffineDrift &amp; UpstreamDrift Integration Architecture (TDD, DbC, LoD, DRY)</h3>
+          <p>The Python engine (<span class="mono text-white">putting_dynamics_v3.py</span>) and 16-test verification suite (<span class="mono text-white">test_putting_dynamics_v3.py</span>) are structured for zero-friction incorporation into both <b>D-Sorganization/UpstreamDrift</b> and <b>AffineDrift</b>:</p>
+          <ul class="list-disc pl-5 space-y-1 text-xs">
+            <li><b>Control-Affine Tangent Bundle Decomposition (<span class="mono text-emerald-300">AffineDriftDecomposition</span>):</b> Formulates the state derivative on <span class="math-sym">x = [&theta;, &phi;, &theta;&#775;, &phi;&#775;]<sup>T</sup></span> as <span class="math-sym">x&#775; = f<sub>drift</sub>(x) + G<sub>control</sub>(x) u</span>, where <span class="math-sym">f<sub>drift</sub>(x)</span> encapsulates gravitational pendulum torque, off-plane gravitational lie-droop <span class="math-sym">&tau;<sub>g,&perp;</sub>(&theta;) = &minus;M g L<sub>com</sub> sin&beta; cos&theta;</span>, and centrifugal Euler whip, and <span class="math-sym">G<sub>control</sub>(x)</span> maps the 4 dual-axis midpoint torque inputs <span class="math-sym">u = [&tau;<sub>L,&parallel;</sub>, &tau;<sub>R,&parallel;</sub>, &tau;<sub>L,&perp;</sub>, &tau;<sub>R,&perp;</sub>]<sup>T</sup></span>.</li>
+            <li><b>Design by Contract (DbC):</b> Enforced via runtime <span class="mono">require()</span> preconditions, <span class="mono">ensure()</span> postconditions, and <span class="mono">check_invariant()</span> invariants.</li>
+            <li><b>Law of Demeter (LoD) &amp; DRY:</b> <span class="mono">GreenSurface</span> exposes direct facade properties (<span class="mono">green.effective_friction</span>, <span class="mono">green.stimp_rating</span>, <span class="mono">green.evaluate_cup_interaction()</span>) and shared mathematical kernels (<span class="mono">minimum_jerk_polynomial()</span>, <span class="mono">smooth_hyperbolic_split()</span>, <span class="mono">compute_exact_impact_time()</span>).</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+          <h3 class="font-bold text-emerald-400 text-sm">5. Off-Plane Lie-Angle Constraint &amp; Extension Roadmap for Next Agent</h3>
+          <p>To keep off-plane deviation <span class="mono text-white">&phi;(t) = 0</span> on the 70&deg; plane, the off-plane force couples satisfy <span class="mono text-emerald-300">d_L F_L,&perp; + d_R F_R,&perp; = M g L_com sin(&beta;) cos(&theta;) - I_Cross &theta;&#775;&sup2; cos(&theta;)</span>. Future agents can extend this suite by:</p>
+          <ul class="list-disc pl-5 space-y-1 text-xs">
+            <li>Adding <b>6-DOF Shaft Axial Twist (&gamma;)</b> via palmar friction torque couples around <span class="mono">&hat;e_s</span> to model off-center heel/toe impact gear-effect twist.</li>
+            <li>Connecting real IMU / force-sensing resistor (FSR) grip sensor streams into <span class="mono">simulate_3d_counterbalanced_system()</span> in the Colab Notebook.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-lg border border-cyan-500/40 space-y-2">
+          <h3 class="font-bold text-cyan-300 text-sm">6. Apples-to-Apples Nominal Equivalence &amp; Grip Pressure Optimization (v3.3)</h3>
+          <p>To avoid comparing a poorly executed swing pattern to a good one, v3.3 decomposes the 4-channel hand actuation into orthogonal subspaces <span class="mono text-white">u(t) = A<sub>couple</sub><sup>+</sup> &tau;<sub>task</sub>(t) + N<sub>null</sub> &tau;<sub>preload</sub></span>:</p>
+          <ul class="list-disc pl-5 space-y-1 text-xs">
+            <li><b>Unperturbed Baseline Equivalence (<span class="mono text-emerald-300">test_17</span>):</b> Both the Moment-of-Force player (<span class="mono">&tau;<sub>preload</sub> = 0</span>) and the Counter-Torqued Stabilized player (<span class="mono">&tau;<sub>preload</sub> &gt; 0</span>) supply the exact same inverse-dynamics task moment <span class="mono">&tau;<sub>task</sub>(t)</span>. With zero perturbation and zero motor noise, both execute the <b>exact same trajectory and ball roll</b> (<span class="mono">&Delta;&theta;(t) = 0, &Delta;&phi;(t) = 0</span> to <span class="mono">10<sup>&minus;12</sup></span>).</li>
+            <li><b>Perturbation Impulse &amp; Eccentric Recoil Rejection (<span class="mono text-cyan-300">test_18, test_19</span>):</b> Under a <span class="mono">0.25 N&middot;m</span> mid-downswing disturbance (<span class="mono">t = 0.72 s</span>) or a <span class="mono">+10 mm</span> toe mishit, locking the 4 grip contacts at <span class="mono">&tau;<sub>preload</sub> = 0.60 N&middot;m</span> raises axial stiffness <span class="mono">K<sub>face</sub></span> from <span class="mono">1.80</span> to <span class="mono">10.50 N&middot;m/rad</span> and effective MOI <span class="mono">I<sub>eff</sub></span> from <span class="mono">11,521</span> to <span class="mono">25,194 g&middot;cm<sup>2</sup></span>, cutting impact face twist by <b>83.2%</b> (<span class="mono">+0.235&deg; vs. +1.401&deg;</span>).</li>
+            <li><b>Convex U-Shaped Grip Pressure Tradeoff (<span class="mono text-amber-300">test_20</span>):</b> Sweeping <span class="mono">&tau;<sub>preload</sub> &isin; [0, 2.0] N&middot;m</span> reveals an optimal sweet spot at <span class="mono">&tau;<sub>preload</sub><sup>*</sup> &isin; [0.50, 0.75] N&middot;m</span> (<span class="mono">6.25&ndash;9.4 N/finger</span>, <b>90.3%</b> make rate, <span class="mono">&sigma;<sub>&phi;,tot</sub> = 0.357&deg;</span>) before supralinear Harris-Wolpert Signal-Dependent Motor Noise (<span class="mono">&propto; &tau;<sub>preload</sub><sup>1.42</sup></span>) degrades high-tension ("strangle-grip") putting accuracy.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="vendor/three.min.js"></script>
+  <script src="js/putting_physics.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/scene3d_a.js"></script>
+  <script src="js/scene3d_b.js"></script>
+  <script src="js/green3d.js"></script>
+  <script src="js/charts2d.js"></script>
+  <script src="js/controls_a.js"></script>
+  <script src="js/controls_b.js"></script>
+  <script src="js/controls_c.js"></script>
+  <script src="js/io.js"></script>
+</body>
+</html>
