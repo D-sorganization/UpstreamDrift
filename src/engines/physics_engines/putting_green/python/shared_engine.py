@@ -66,9 +66,9 @@ class SharedPuttingEngine(BasePhysicsEngine):
         self.model = self._surface
         self.model_name_str = "putting_green"
         self._is_initialized = True
-        self._q = np.zeros(2)
-        self._v = np.zeros(2)
-        self._v0 = np.zeros(2)
+        self._q: np.ndarray = np.zeros(2)
+        self._v: np.ndarray = np.zeros(2)
+        self._v0: np.ndarray = np.zeros(2)
         self._time = 0.0
         self._traj_t0 = 0.0
         self._result: PuttResult | None = None
