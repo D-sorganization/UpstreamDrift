@@ -2,6 +2,28 @@
 
 # UpstreamDrift Project Status
 
+Refreshed by project-steward on 2026-11-01: added DV-14176 from the validated
+`docs/development/planning/catalog.json` as a parked feature. Its simulator and
+skill-sampler prerequisites (#14171 and #14169) have since merged; published/licensed
+reference data and its provenance remain unavailable. No deferred feature has moved
+to done. Since the 2026-10-19 refresh, merged work relevant to
+the premier golf-modeling focus includes putting simulation, reference fixtures,
+skill sampling, expected-putts/strokes-gained optimization and variance attribution
+(PRs #14149, #14155, #14170, #14171, #14181, #14192, #14194, #14195, #14196,
+#14197, #14198, #14203, #14218, #14220 and #14226). The putting analytics epic
+#14168 remains open; its published-data calibration record DV-14176 remains parked.
+GitHub currently shows 87 open issues and 6 open PRs (5 ready, 1 draft). The latest
+main workflow batch started 2026-11-01 12:47 UTC and still had CI Standard and
+Docker checks in progress at the time of this refresh; several other workflows in
+that batch completed successfully, so main CI is pending rather than fully green.
+
+The Board-proposal dry-run template is available in the Repository_Management
+checkout, but this run could not submit the overdue architectural resourcing
+proposal: the authorized `submit_proposal` fleet tool returned “requires approval,
+but approval policy is never.” No proposal was filed through another channel.
+The pending decisions remain listed below; a later steward run with the proposal
+tool available should link the resulting Board proposal here.
+
 Refreshed by project-steward on 2026-10-19: added DV-11984, DV-11542, DV-12554,
 DV-12583, DV-12718, DV-13061 and DV-13082 (catalog `docs/development/planning/catalog.json`
 additions since the 2026-10-06 refresh) as parked features and their prerequisites
@@ -42,6 +64,7 @@ current issue state or physical completion.
 | DV-12718 | NSX-89: Simscape Per-Frame Linearization Export in MATLAB R2025b                                                                  | parked | Awaiting verified prerequisites | 2026-10-19  |
 | DV-13061 | Open-FP Force Plate Hardware Qualification for Measured Vertical GRF                                                              | parked | Awaiting DV-13082               | 2026-10-19  |
 | DV-13082 | Qualified Open-FP Device Record for Measured Vertical Ground Reaction                                                             | parked | Awaiting verified prerequisites | 2026-10-19  |
+| DV-14176 | Putting Analytics: Calibrate Skill Presets Against Published Reference Data                                                       | parked | Awaiting verified prerequisites | 2026-11-01  |
 
 ## Blockers
 
@@ -98,6 +121,9 @@ none of it supplies the missing external evidence.
 - DV-13082: Decide how to obtain an assembled open-fp plate pair with all eight load cells reading and production MCU firmware (M2/M3); prerequisite evidence remains unavailable.
 - DV-13082: Decide how to obtain a per-device calibration file, reference masses and a reference scale for the M4 static checks; prerequisite evidence remains unavailable.
 - DV-13082: Decide how to obtain a golfer and capture session for the M6 real-swing and false-trigger checks, and a named owner accountable for the device and qualification session; prerequisite evidence remains unavailable.
+- DV-14176: Board decision pending on whether to resource the [Owner Plan](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-14176.md) (first recorded 2026-11-01); accountable owner, licensed-data access and execution capacity remain unverified.
+- DV-14176: Decide how to obtain Broadie (2014) table A.5 tour make-percentage and expected-putts values with source page references; prerequisite evidence remains unavailable.
+- DV-14176: Decide whether licensing permits use of a PGA Tour ShotLink extract and obtain published amateur make-rate tables for scratch, 10 and 20 handicap; prerequisite evidence remains unavailable.
 
 ## Reactivation
 
