@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 48 parity · 5 gap · 16 exempt (12 pending decision in #7460).
+**Summary:** 48 parity · 6 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -72,6 +72,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.native_viewer_export`<br>Native per-engine viewer video export (CLI) | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | — | — | Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673). |
 | `tools.necromatcher`<br>Historical Player Library And Source Review | ✅ parity | `src/tools/necromatcher/gui.py` | `src/api/routes/necromatcher.py` | `ui/src/pages/Necromatcher.tsx` | — |
 | `tools.pose_editing`<br>Pose Studio interactive pose editing | ⚪ exempt | `src/tools/pose_studio/__main__.py` | — | — | Interactive 3D pose editing and shared scene-bound native reference points/planes (#9942); desktop-only candidate pending #7460. — **pending decision (#7460)** |
+| `tools.putting_analytics`<br>Putting analytics studies | 🔴 gap | `src/tools/putting_analytics/gui.py` | — | — | #14235 |
 | `tools.putting_green`<br>Putting green simulation | ✅ parity | `src/engines/physics_engines/putting_green/python/simulator.py` | `src/api/routes/putting_green.py` | `ui/src/pages/PuttingGreen.tsx` | — |
 | `tools.rate_of_closure`<br>Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | 🔴 gap | `vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py` | `src/api/local_server.py` | `ui/src/pages/ImpactExplorer.tsx` | #11987 |
 | `tools.shot_pattern_analysis`<br>Shot Pattern Analysis Workbench | ⚪ exempt | `src/tools/shot_pattern_analysis/gui.py` | — | — | The current product surface is a local PyQt6 launcher and headless CLI for deterministic physics simulation and local CSV, JSON, and PNG exports. There is no API route or React page, so browser parity is not claimed. |
@@ -132,6 +133,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `pinocchio_golf` | `engines.load_and_simulate` |
 | `pose_studio` | `tools.pose_editing` |
 | `project_map` | `docs.document_library` |
+| `putting_analytics` | `tools.putting_analytics` |
 | `putting_green` | `tools.putting_green` |
 | `rate_of_closure` | `tools.rate_of_closure` |
 | `realtime_ws` | `simulation.realtime_ws_stream` |

@@ -776,6 +776,22 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "putting_analytics"
+    help: "docs/help/putting_analytics.md"
+    name: "Putting Analytics"
+    description: "Best aim and pace, misread cost and putt-class library studies on the shared putting service, priced by your own expected-putts curve. Install: pip install -e '.[gui-tools]'."
+    type: "special_app"
+    path: "src/tools/putting_analytics/__main__.py"
+    capabilities:
+      - "putting_analytics"
+      - "putting"
+      - "strokes_gained"
+    launcher:
+      category: "tool"
+      logo: "assets/putting_green_modern.png"
+      status: "ready"
+      default_launch: "tab"
+
   - id: "rate_of_closure"
     help: "docs/help/rate_of_closure.md"
     name: "Rate of Closure Impact Explorer"

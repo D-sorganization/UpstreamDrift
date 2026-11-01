@@ -682,6 +682,18 @@
       "evidence": "src/tools/shot_pattern_analysis/__main__.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "putting_analytics": {
+      "id": "putting_analytics",
+      "name": "Putting Analytics",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/putting_analytics/__main__.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
     "shadow_tracker": {
       "id": "shadow_tracker",
       "name": "Shadow Tracker",
@@ -2109,6 +2121,18 @@
       "alias_target": null,
       "evidence": "src/tools/shot_pattern_analysis/gui.py",
       "acceptance_owner": "tests/config/test_feature_parity_registry.py"
+    },
+    "tools.putting_analytics": {
+      "id": "tools.putting_analytics",
+      "name": "Putting analytics studies",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/putting_analytics/gui.py",
+      "acceptance_owner": "tests/config/feature_parity/test_registry.py"
     },
     "tools.matlab_suite": {
       "id": "tools.matlab_suite",

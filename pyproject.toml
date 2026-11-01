@@ -416,6 +416,7 @@ anatomical_event_table = "src.tools.anatomical_event_table._embed_adapter"
 ground_reaction_plots = "src.tools.ground_reaction_plots._embed_adapter"
 spine_viewer = "src.tools.spine_viewer._embed_adapter"
 shot_pattern_analysis = "src.tools.shot_pattern_analysis._embed_adapter"
+putting_analytics = "src.tools.putting_analytics._embed_adapter"
 necromatcher = "src.tools.necromatcher._embed_adapter"
 
 [project.urls]

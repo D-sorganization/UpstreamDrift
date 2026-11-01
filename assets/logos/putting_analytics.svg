@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Hole and flagstick -->
+  <ellipse cx="72" cy="78" rx="10" ry="4" fill="white" opacity="0.9" />
+  <path d="M72,78 L72,24" stroke="white" stroke-width="3" opacity="0.9" />
+  <path d="M72,24 L88,30 L72,36 Z" fill="#E69F00" opacity="0.95" />
+  <!-- Candidate breaking putt lines -->
+  <path d="M16,82 Q40,52 70,76" stroke="#0072B2" stroke-width="3" fill="none" opacity="0.95" />
+  <path d="M16,82 Q44,62 70,78" stroke="white" stroke-width="3" fill="none" opacity="0.6" stroke-dasharray="4 4" />
+  <circle cx="16" cy="82" r="5" fill="white" opacity="0.95" />
+</svg>
