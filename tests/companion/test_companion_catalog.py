@@ -64,7 +64,7 @@ def test_model_registry_explicit_local_only_ignores_hybrid_environment(
     )
 
     assert registry.discovery_mode == "local-only"
-    assert len(registry.get_all_models()) == 71
+    assert len(registry.get_all_models()) == 72
 
 
 def test_catalog_reconciles_current_registries_without_schema_count_constants(
@@ -76,11 +76,11 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
     catalog = _catalog_module().build_catalog(REPO_ROOT, require_clean=False)
 
     assert catalog["summary"] == {
-        "raw_launcher_records": 62,
-        "local_model_records": 71,
-        "program_records": 84,
-        "feature_records": 69,
-        "feature_surface_paths": 160,
+        "raw_launcher_records": 63,
+        "local_model_records": 72,
+        "program_records": 85,
+        "feature_records": 70,
+        "feature_surface_paths": 162,
         "workflow_records": 15,
         "executable_workflow_records": 14,
         "single_source_program_records": 35,
@@ -88,14 +88,14 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "current_documentation_records": 4,
         "engine_capability_records": 17,
         "qualified_engine_capability_records": 4,
-        "undocumented_visible_program_records": 70,
+        "undocumented_visible_program_records": 71,
         "known_gap_records": 1,
-        "screenshot_records": 84,
+        "screenshot_records": 85,
         "captured_screenshot_records": 6,
-        "pending_screenshot_records": 78,
+        "pending_screenshot_records": 79,
     }
-    assert len({record["id"] for record in catalog["programs"]}) == 84
-    assert len({record["id"] for record in catalog["features"]}) == 69
+    assert len({record["id"] for record in catalog["programs"]}) == 85
+    assert len({record["id"] for record in catalog["features"]}) == 70
 
     schema_text = SCHEMA_PATH.read_text(encoding="utf-8")
     for current_count in (55, 63, 77, 51, 95):
@@ -564,7 +564,7 @@ def test_screenshots_payload_is_governed_with_captured_and_pending_records() -> 
     captured = [r for r in screenshots["records"] if r["status"] == "captured"]
     pending = [r for r in screenshots["records"] if r["status"] == "pending"]
     assert len(captured) == 6
-    assert len(pending) == 78
+    assert len(pending) == 79
 
     for record in pending:
         assert record["status"] == "pending"
@@ -604,7 +604,7 @@ def test_screenshots_payload_is_governed_with_captured_and_pending_records() -> 
         assert record["caption"] is not None
 
     # The top-level manifest inventory contains the governed records with source_commit
-    assert len(payloads.catalog["screenshots"]) == 84
+    assert len(payloads.catalog["screenshots"]) == 85
     assert all("source_commit" in r for r in payloads.catalog["screenshots"])
 
 

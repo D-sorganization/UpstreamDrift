@@ -688,6 +688,11 @@
       "reason": "Legacy launcher tile for putting simulator; no golfer anatomy or hands."
     },
     {
+      "id": "putting_analytics",
+      "name": "Putting Analytics",
+      "reason": "Statistical putting studies on a ball-roll model with stroke noise; no golfer anatomy or hands."
+    },
+    {
       "id": "pendulum_simulator",
       "name": "Pendulum Simulator",
       "reason": "Double/triple rigid-link pendulum swing simulator; no golfer anatomy or hands."

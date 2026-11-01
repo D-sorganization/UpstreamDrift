@@ -23,13 +23,6 @@ exclusions:
       Headless research CLI (python -m src.tools.drift_control) computing
       drift-to-control force ratios from NPZ trajectories; terminal-only
       analysis workflow with no dockable or windowed UI.
-  - package: putting_analytics_gui
-    reason: >-
-      Temporary: this pull request lands only the pure-data layer of the
-      putting analytics window; the PyQt6 window and its launcher tile
-      follow in the next two pull requests, and the tile pull request
-      removes this exclusion.
-    issue: "#14177"
   - package: sg_optimizer
     reason: >-
       Phase 1 ships the headless CLI only; the PyQt6 tile is deliberately

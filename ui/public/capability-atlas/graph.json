@@ -947,6 +947,22 @@
       "id": "tools.pose_editing"
     },
     {
+      "feature_id": "tools.putting_analytics",
+      "title": "Putting analytics studies",
+      "status": "gap",
+      "pyqt": "src/tools/putting_analytics_gui/gui.py",
+      "api": "src/api/routes/putting_analytics.py",
+      "web": null,
+      "issue": 14235,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "putting_analytics"
+      ],
+      "notes": "Desktop tool over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The /tools/putting-analytics API routes serve the same studies.",
+      "id": "tools.putting_analytics"
+    },
+    {
       "feature_id": "tools.putting_green",
       "title": "Putting green simulation",
       "status": "parity",
@@ -1784,6 +1800,20 @@
         "shot_pattern_analysis",
         "shot_dispersion",
         "impact_physics"
+      ]
+    },
+    {
+      "id": "putting_analytics",
+      "title": "Putting Analytics",
+      "description": "Best aim and pace, misread cost and putt-class library studies on the shared putting service, priced by your own expected-putts curve. Install: pip install -e '.[gui-tools]'.",
+      "path": "src/tools/putting_analytics_gui/__main__.py",
+      "launch_target": "src/tools/putting_analytics_gui/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "putting_analytics",
+        "putting",
+        "strokes_gained"
       ]
     },
     {
@@ -3336,9 +3366,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "a692079871da5a75b34d1b12b1cc8c957247913005bbe8cafa6fc68bf74b2901",
-    "src/config/launcher_manifest.json": "79cc4fdf17da668b378ba6778dff70acc578c15646706c7558ba49a4d1c3be74",
-    "src/config/feature_parity.json": "aebde1b7981394c365eebc92886404ed751dddcc06a65b2bff9911082db012a7",
+    "src/config/models.yaml": "58d58762c2854bac4034d4cf71f3681913ca654ae98048fc81abb91ae90a8a90",
+    "src/config/launcher_manifest.json": "6b480f79eb7be85b50918f7c3871449e170a651a36015a7d203ec0744f9ecd41",
+    "src/config/feature_parity.json": "7bcf9466f45acd47f65042c3c5758a3b86d5e4bcce23397eb7ba07cde58be061",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
