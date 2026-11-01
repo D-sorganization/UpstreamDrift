@@ -97,6 +97,7 @@ def putting_library_study(
 def putting_analytics_limits() -> dict[str, Any]:
     """Input bounds and work caps enforced by the putting studies."""
     from src.shared.python.putting_analytics import library, service
+    from src.shared.python.putting_analytics.optimize import OBJECTIVES
 
     return {
         "max_distance_ft": service.MAX_DISTANCE_FT,
@@ -106,7 +107,7 @@ def putting_analytics_limits() -> dict[str, Any]:
         "pace_range_ft": list(service.PACE_RANGE_FT),
         "default_aims_deg": list(service.DEFAULT_AIMS_DEG),
         "default_paces_ft": list(service.DEFAULT_PACES_FT),
-        "objectives": list(service.OBJECTIVES),
+        "objectives": list(OBJECTIVES),
         "max_rollouts": service.MAX_ROLLOUTS,
         "max_misread_rollouts": service.MAX_MISREAD_ROLLOUTS,
         "max_library_classes": service.MAX_LIBRARY_CLASSES,
