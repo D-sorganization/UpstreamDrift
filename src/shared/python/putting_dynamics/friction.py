@@ -76,6 +76,7 @@ __all__ = [
     "DEFAULT_SLIDING_MU",
     "DEFAULT_STATIC_MU",
     "STIMP_RELEASE_SPEED_MPS",
+    "USGA_STIMP_ROLL_MODEL",
     "FrictionParams",
     "grain_factor",
     "is_static_hold",
@@ -102,6 +103,10 @@ _FOOT_M = 0.3048
 #: USGA stimpmeter release speed [m/s] (~6.0 ft/s).  Restated from the
 #: Tools ``swing_sim.putting.roll`` derivation (see module docstring).
 STIMP_RELEASE_SPEED_MPS = 1.83
+
+#: Provenance name of the only roll law in this core (ADR-0045 F1); every
+#: putt result surfaced to a user carries it.
+USGA_STIMP_ROLL_MODEL = "usga-stimp-roll/1"
 
 
 def require_grain(strength: float, direction_rad: float) -> None:

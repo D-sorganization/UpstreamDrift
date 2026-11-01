@@ -34,6 +34,11 @@ from pydantic import BaseModel, Field
 from src.api.middleware.error_handler import handle_api_errors
 from src.api.rate_limit import get_limit, limiter
 from src.shared.python.core.contracts import PostconditionError, precondition, require
+from src.shared.python.putting_dynamics.types import (
+    TYPICAL_HEAD_MASS_KG,
+    TYPICAL_HEAD_MOI_KG_M2,
+    TYPICAL_LOFT_DEG,
+)
 
 if TYPE_CHECKING:
     from src.shared.python.putting_dynamics import (
@@ -48,9 +53,9 @@ router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
 
 #: Putter head used when a request carries only a stroke speed (shared by
 #: ``/simulate-3d`` defaults and the 2-D routes).
-_DEFAULT_HEAD_MASS_KG = 0.35
-_DEFAULT_HEAD_MOI_KG_M2 = 4.5e-4
-_DEFAULT_LOFT_DEG = 3.0
+_DEFAULT_HEAD_MASS_KG = TYPICAL_HEAD_MASS_KG
+_DEFAULT_HEAD_MOI_KG_M2 = TYPICAL_HEAD_MOI_KG_M2
+_DEFAULT_LOFT_DEG = TYPICAL_LOFT_DEG
 
 
 # -- Request / Response Models --
@@ -280,12 +285,7 @@ def _default_putter(speed_mps: float) -> PutterState:
     """The default putter head swung at ``speed_mps``."""
     from src.shared.python.putting_dynamics import PutterState
 
-    return PutterState(
-        head_mass_kg=_DEFAULT_HEAD_MASS_KG,
-        moi_kg_m2=_DEFAULT_HEAD_MOI_KG_M2,
-        loft_deg=_DEFAULT_LOFT_DEG,
-        speed_mps=speed_mps,
-    )
+    return PutterState.typical(speed_mps)
 
 
 def _struck_ball(
@@ -376,9 +376,7 @@ async def simulate_putt_3d(
 ) -> Putt3DSimulationResponse:
     """Run the canonical surface-aware strike model for R3F playback."""
     del request
-    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-        USGA_STIMP_ROLL_MODEL,
-    )
+    from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_strike
 
     extent_m = 20.0
@@ -462,9 +460,7 @@ async def simulate_putt(
         "(src.shared.python.putting_dynamics); set wind_speed to 0",
         payload.wind_speed,
     )
-    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-        USGA_STIMP_ROLL_MODEL,
-    )
+    from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_ball
 
     surface, half_w, half_h = _build_flat_putting_surface(
@@ -520,9 +516,7 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
     request carries no slope inputs, so the green is flat, matching the
     legacy engine's default surface. See issue #1206.
     """
-    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-        USGA_STIMP_ROLL_MODEL,
-    )
+    from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import read_line, solve_aim
 
     surface, half_w, half_h = _build_flat_putting_surface(
@@ -559,9 +553,7 @@ async def scatter_analysis(
 
     Runs ``usga-stimp-roll/1`` (epic #14141 step 7a). See issue #1206.
     """
-    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-        USGA_STIMP_ROLL_MODEL,
-    )
+    from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_ball
 
     surface, half_w, half_h = _build_flat_putting_surface(

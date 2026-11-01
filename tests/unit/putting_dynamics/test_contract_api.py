@@ -26,6 +26,7 @@ _EXPECTED_EXPORTS = {
     "STIMPMETER_NOTCH_DISTANCE_M",
     "STIMPMETER_RELEASE_ANGLE_DEG",
     "STIMP_RELEASE_SPEED_MPS",
+    "USGA_STIMP_ROLL_MODEL",
     # types
     "AimSolution",
     "BallState",
