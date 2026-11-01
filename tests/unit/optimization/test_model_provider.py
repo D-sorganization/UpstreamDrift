@@ -64,6 +64,31 @@ def test_mujoco_model_when_available() -> None:
     assert model.nq == 7
 
 
+def test_pinocchio_model_uses_the_shared_gravity_constant() -> None:
+    """#14227: #13799 moved the CasADi model to GRAVITY_M_S2 but the pinocchio
+    model kept pinocchio's 9.81 default, so their RNEAs disagreed."""
+    from types import SimpleNamespace
+    from unittest.mock import patch
+
+    import numpy as np
+
+    from src.shared.python.core.physics_constants import GRAVITY_M_S2
+    from src.shared.python.optimization import model_provider
+
+    # Hermetic: tests/unit/conftest.py may stub pinocchio with a MagicMock.
+    built = SimpleNamespace(gravity=SimpleNamespace(linear=np.array([0, 0, -9.81])))
+    fake_pin = SimpleNamespace(buildModelFromXML=lambda _xml: built)
+    with (
+        patch.object(model_provider, "_module_available", return_value=True),
+        patch.object(model_provider, "import_module", return_value=fake_pin),
+    ):
+        model = model_provider.build_pinocchio_model()
+
+    np.testing.assert_array_equal(
+        model.gravity.linear, [0.0, 0.0, -float(GRAVITY_M_S2)]
+    )
+
+
 def test_pinocchio_builder_degrades_with_hint() -> None:
     from unittest.mock import patch
 
