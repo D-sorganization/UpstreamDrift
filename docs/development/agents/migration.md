@@ -13,7 +13,7 @@ policy to `CLAUDE.md`.
 | --------- | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | .gaai/    | Canonical | @core   | Owns governance rules, memory, backlog, skills, hooks, and orchestration docs.                                                                     |
 | .claude/  | Mirror    | @core   | Contains Claude command shims and duplicated skill entries; migrate durable content into `.gaai/core/compat/` or `.gaai/project/` before deletion. |
-| .agent/   | Legacy    | @agents | Contains older skill and workflow shims; compare with `.gaai/core/skills/` before removing duplicates.                                             |
+| .agent/   | Removed   | @agents | Deleted in #14201; the skills duplicated `.claude/skills/`. agy and Codex read `.agents/` instead.                                                 |
 | .kiro/    | Legacy    | @agents | Tool-specific steering/config root; migrate unique steering guidance into `.gaai/project/contexts/rules/` before deletion.                         |
 | .jules/   | Legacy    | @agents | Jules-specific automation configuration; migrate unique ownership metadata into `.gaai/project/` and `.github/WORKFLOWS.md` before deletion.       |
 
@@ -26,5 +26,5 @@ policy to `CLAUDE.md`.
 - Workflow automation owned by agents must have a row in `.github/WORKFLOWS.md`
   with an explicit owner and `KEEP`, `MERGE`, `DELETE`, or `DISABLE` in the
   purpose cell.
-- Removing `.claude/`, `.agent/`, `.kiro/`, or `.jules/` is intentionally left to
+- Removing `.claude/`, `.kiro/`, or `.jules/` is intentionally left to
   a smaller follow-up after owners verify tool references.
