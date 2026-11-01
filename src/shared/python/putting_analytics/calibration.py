@@ -19,6 +19,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 import numpy as np
+import numpy.typing as npt
 from scipy.optimize import minimize
 
 from src.shared.python.contracts import require
@@ -145,9 +146,10 @@ def fit_profile(
 ) -> CalibrationFit:
     """Scale ``base``'s line and pace spreads to match ``target`` (RMS, points)."""
     rates = rates or _seeded_rates(settings)
-    bounds = [tuple(math.log(b) for b in settings.scale_bounds)] * 2
+    low, high = (math.log(b) for b in settings.scale_bounds)
+    bounds: list[tuple[float, float]] = [(low, high)] * 2
 
-    def error(log_scales: np.ndarray) -> float:
+    def error(log_scales: npt.NDArray[np.float64]) -> float:
         line, pace = (float(v) for v in np.exp(log_scales))
         return compare(scaled_profile(base, line, pace), target, rates).rms_error_pct
 
