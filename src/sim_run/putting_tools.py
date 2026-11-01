@@ -8,6 +8,8 @@ Thin wrappers over :mod:`src.shared.python.putting_analytics.service`:
   (slope and speed misjudgements) against a perfect read.
 * ``putting_library_study`` -- weighted report over a library of putt classes:
   expected putts per round, make rate by band, optimal pace and strokes gained.
+* ``putting_variance_attribution`` -- which error source (face, path, speed,
+  green reading) costs the player the most strokes, per class and per round.
 
 The service is imported lazily so listing tools never loads the roll
 integrator (the class library module is plain data). Specs are
@@ -16,6 +18,7 @@ hand-written: ``_tool_spec`` cannot express arrays.
 
 from __future__ import annotations
 
+import importlib
 import json
 from collections.abc import Callable
 from typing import Any
@@ -67,6 +70,27 @@ _CLASS = {
 }
 
 
+_SKILL_PROPERTIES: dict[str, Any] = {
+    "face_sd_deg": {**_NUMBER, "description": "Face-angle SD, degrees [0, 10]."},
+    "path_sd_deg": {**_NUMBER, "description": "Path SD, degrees [0, 15]."},
+    "speed_cv": {**_NUMBER, "description": "Start-speed CV [0, 0.5]."},
+    "face_bias_deg": _NUMBER,
+    "speed_bias": _NUMBER,
+    "grade_rel_sd": {**_NUMBER, "description": "Slope-read relative SD [0, 1]."},
+    "aspect_sd_deg": {**_NUMBER, "description": "Fall-line read SD, degrees."},
+    "stimp_rel_sd": {**_NUMBER, "description": "Speed-read relative SD [0, 0.5]."},
+    "grade_rel_bias": _NUMBER,
+    "face_weight": {**_NUMBER, "description": "Face share of start line [0, 1]."},
+    "pace_ft_past": {**_NUMBER, "description": "Intended pace, feet past."},
+    "factors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "base_samples": {"type": "integer", "description": "Sobol base samples."},
+    "n_samples": {"type": "integer", "description": "Putts per elimination run."},
+    "n_bootstrap": {"type": "integer"},
+    "reduction": {**_NUMBER, "description": "Spread kept by a partial cut (0, 1]."},
+    "first_putts_per_round": {**_NUMBER, "description": "Default 18."},
+}
+
+
 def _spec(
     name: str,
     description: str,
@@ -102,13 +126,25 @@ def putting_tool_specs() -> list[dict[str, Any]]:
             classes,
             required=(),
         ),
+        _variance_spec(classes),
     ]
 
 
-def _service_tool(function_name: str) -> ToolHandler:
-    def run(arguments: dict[str, Any]) -> dict[str, Any]:
-        from src.shared.python.putting_analytics import service
+def _variance_spec(classes: dict[str, Any]) -> dict[str, Any]:
+    spec = _spec(
+        "putting_variance_attribution",
+        "Strokes gained per round by removing each putting error source",
+        classes,
+        required=(),
+    )
+    spec["inputSchema"]["properties"].update(_SKILL_PROPERTIES)
+    return spec
 
+
+def _service_tool(function_name: str, module: str = "service") -> ToolHandler:
+    def run(arguments: dict[str, Any]) -> dict[str, Any]:
+        package = "src.shared.python.putting_analytics"
+        service = importlib.import_module(f"{package}.{module}")
         payload = getattr(service, function_name)(arguments)
         return {"content": [{"type": "text", "text": json.dumps(payload)}]}
 
@@ -129,4 +165,7 @@ def putting_tool_handlers(check_auth: Callable[[Any], None]) -> dict[str, ToolHa
         "optimize_putt": guarded(_service_tool("optimize_putt")),
         "putting_misread_cost": guarded(_service_tool("misread_cost")),
         "putting_library_study": guarded(_service_tool("library_study")),
+        "putting_variance_attribution": guarded(
+            _service_tool("variance_study", "service_variance")
+        ),
     }
