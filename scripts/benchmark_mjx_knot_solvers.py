@@ -26,6 +26,7 @@ from typing import Any
 
 from src.shared.python.motion_matching.solver_benchmark import (
     MJX_SOLVERS,
+    WARM_START_SOLVER,
     aggregate_seeded_rows,
     promotion_decision,
     render_report,
@@ -36,6 +37,11 @@ from src.shared.python.motion_matching.solver_benchmark import (
 REPO = Path(__file__).resolve().parents[1]
 FULL_BODY = "docs/development/full_body_models"
 EVIDENCE = REPO / FULL_BODY / "evidence/mjx_benchmark"
+# The L-BFGS rows the warm-start arm is judged against (40.8 / 42.6 mm).
+LBFGS60_EVIDENCE = REPO / FULL_BODY / "evidence/mjx_benchmark_lbfgs60"
+LBFGS60_MJX_ITERATIONS = 60
+# ML-WS-6/7/8: the surrogate and the warm-start solver the arm needs to run.
+WARM_START_BLOCKERS = (13783, 13784, 13785)
 # The canonical calibrated runs (CANONICAL_RUN.md, section 2A).
 CAPTURES: dict[str, list[str]] = {
     "driver": [
@@ -54,7 +60,14 @@ CAPTURES: dict[str, list[str]] = {
         "--zmp-filter",
     ],
 }
-SOLVER_ORDER = ("none", "shooting", "mjx-adam", "mjx-lbfgs", "ipopt")
+SOLVER_ORDER = (
+    "none",
+    "shooting",
+    "mjx-adam",
+    "mjx-lbfgs",
+    WARM_START_SOLVER,
+    "ipopt",
+)
 # Where the benchmark departs from the #11058 solver list, and why.
 SOLVER_NOTES = (
     "SciPy arm: `mjx-lbfgs` runs L-BFGS-B over the same `delta_knots` on the "
@@ -90,6 +103,69 @@ def solver_args(solver: str, *, shooting_passes: int, mjx_iterations: int) -> li
             str(mjx_iterations),
         ]
     raise ValueError(f"solver {solver!r} is not a pipeline solver")
+
+
+def warm_start_arm_budget(
+    capture: str, *, mjx_iterations: int, reference: Path = LBFGS60_EVIDENCE
+) -> dict[str, Any]:
+    """The L-BFGS-60 row's budget for ``capture``: same iterations, same clock.
+
+    Raises ``ValueError`` unless ``mjx_iterations`` is the L-BFGS-60 budget.
+    """
+    if capture not in CAPTURES:
+        raise ValueError(f"unknown capture {capture!r}")
+    if mjx_iterations != LBFGS60_MJX_ITERATIONS:
+        raise ValueError(
+            f"warm-start arm needs mjx_iterations={LBFGS60_MJX_ITERATIONS} "
+            f"(the L-BFGS-60 budget), got {mjx_iterations}"
+        )
+    run_path = reference / f"{capture}_mjx-lbfgs" / "run.json"
+    run = json.loads(run_path.read_text(encoding="utf-8"))
+    return {
+        "mjx_iterations": mjx_iterations,
+        "wall_clock_budget_s": float(run["wall_clock_s"]),
+    }
+
+
+def warm_start_solver_args(capture: str, *, mjx_iterations: int) -> list[str]:
+    """The L-BFGS ``mjx-knots`` flags seeded from the warm-start proposal."""
+    warm_start_arm_budget(capture, mjx_iterations=mjx_iterations)
+    lbfgs = solver_args("mjx-lbfgs", shooting_passes=0, mjx_iterations=mjx_iterations)
+    return [*lbfgs, "--mjx-warm-start-proposal"]
+
+
+def warm_start_row_from_receipt(
+    capture: str,
+    receipt: dict[str, Any],
+    *,
+    wall_clock_s: float,
+    budget: dict[str, Any],
+) -> dict[str, Any]:
+    """Score a warm-start run on the shared-simulator replay RMS alone.
+
+    The MJX plant and surrogate RMS fields never reach the row. Raises
+    ``KeyError`` when the receipt has no ``shared_simulator_replay``.
+    """
+    row = row_from_receipt(
+        capture, WARM_START_SOLVER, receipt, wall_clock_s=wall_clock_s
+    )
+    row["rms_source"] = "trajectory_optimiser.shared_simulator_replay"
+    row["within_wall_clock_budget"] = wall_clock_s <= budget["wall_clock_budget_s"]
+    row.update(budget)
+    return row
+
+
+def warm_start_unavailable_reason() -> str:
+    blockers = ", ".join(f"#{n}" for n in WARM_START_BLOCKERS)
+    return f"warm-start proposal not available until {blockers} land"
+
+
+def blocked_reason(solver: str) -> str:
+    """Why ``solver`` has no pipeline run on this host."""
+    if solver == WARM_START_SOLVER:
+        return warm_start_unavailable_reason()
+    # An importable binding still has no pipeline stage here.
+    return ipopt_unavailable_reason() or "IPOPT importable but has no pipeline stage"
 
 
 def ipopt_unavailable_reason() -> str | None:
@@ -180,12 +256,14 @@ def load_rows_for_case(
     rows: list[dict[str, Any]] = []
     for case_dir in matching:
         case = _resolve_case(case_dir)
-        if solver == "ipopt":
+        if solver in ("ipopt", WARM_START_SOLVER):
             note = case / "unavailable.json"
             reason = (
                 json.loads(note.read_text(encoding="utf-8"))["reason"]
                 if note.is_file()
                 else "no IPOPT binding"
+                if solver == "ipopt"
+                else warm_start_unavailable_reason()
             )
             rows.append(unavailable_row(capture, solver, reason))
             continue
@@ -315,12 +393,10 @@ def main(argv: list[str] | None = None) -> int:
         )
         for capture in args.captures:
             for solver in args.solvers:
-                if solver == "ipopt":
-                    reason = ipopt_unavailable_reason()
-                    case = evidence / f"{capture}_ipopt"
+                if solver in ("ipopt", WARM_START_SOLVER):
+                    case = evidence / f"{capture}_{solver}"
                     case.mkdir(parents=True, exist_ok=True)
-                    # An importable binding still has no pipeline stage here.
-                    reason = reason or "IPOPT importable but has no pipeline stage"
+                    reason = blocked_reason(solver)
                     (case / "unavailable.json").write_text(
                         json.dumps({"reason": reason}, indent=2) + "\n",
                         encoding="utf-8",

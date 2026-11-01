@@ -37,6 +37,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.shared.python.contracts import ensure, require, require_finite
+from ._checks import require_finite_scalar
 
 __all__ = [
     "FrictionField",
@@ -185,13 +186,17 @@ class HeightField:
             origin_m=(-extent_m / 2.0, -extent_m / 2.0),
         )
 
-    def elevation(self, x_m: float, y_m: float) -> float:
-        """Bilinear surface elevation at a point [m]."""
-        require_finite(x_m, "x_m")
-        require_finite(y_m, "y_m")
-        ix, iy, tx, ty = _bilinear_setup(
+    def _cell(self, x_m: float, y_m: float) -> tuple[int, int, float, float]:
+        """Grid cell and in-cell fractions for a finite point."""
+        require_finite_scalar(x_m, "x_m")
+        require_finite_scalar(y_m, "y_m")
+        return _bilinear_setup(
             x_m, y_m, self.origin_m, self.spacing_m, self.heights_m.shape
         )
+
+    def elevation(self, x_m: float, y_m: float) -> float:
+        """Bilinear surface elevation at a point [m]."""
+        ix, iy, tx, ty = self._cell(x_m, y_m)
         h = self.heights_m
         return float(
             h[iy, ix] * (1 - tx) * (1 - ty)
@@ -202,11 +207,7 @@ class HeightField:
 
     def gradient(self, x_m: float, y_m: float) -> tuple[float, float]:
         """Exact gradient of the bilinear patch, ``(dh/dx, dh/dy)``."""
-        require_finite(x_m, "x_m")
-        require_finite(y_m, "y_m")
-        ix, iy, tx, ty = _bilinear_setup(
-            x_m, y_m, self.origin_m, self.spacing_m, self.heights_m.shape
-        )
+        ix, iy, tx, ty = self._cell(x_m, y_m)
         h = self.heights_m
         dhdx = (
             (h[iy, ix + 1] - h[iy, ix]) * (1 - ty)
@@ -279,8 +280,8 @@ class FrictionField:
 
     def multipliers(self, x_m: float, y_m: float) -> tuple[float, float]:
         """Bilinear ``(roll, slide)`` multipliers at a point."""
-        require_finite(x_m, "x_m")
-        require_finite(y_m, "y_m")
+        require_finite_scalar(x_m, "x_m")
+        require_finite_scalar(y_m, "y_m")
         ix, iy, tx, ty = _bilinear_setup(
             x_m, y_m, self.origin_m, self.spacing_m, self.roll_multiplier.shape
         )

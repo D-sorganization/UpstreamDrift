@@ -77,6 +77,7 @@ __all__ = [
     "capture_speed_mps",
     "simulate_ball",
     "simulate_strike",
+    "struck_ball_state",
 ]
 
 #: USGA hole radius [m] (4.25 in diameter).
@@ -448,17 +449,46 @@ def simulate_ball(
     return result
 
 
+def struck_ball_state(
+    report: CollisionReport,
+    x_m: float = 0.0,
+    y_m: float = 0.0,
+    heading_rad: float = 0.0,
+) -> BallState:
+    """Post-impact ball at ``(x, y)``, launched along ``heading_rad``.
+
+    The defaults (origin, heading 0) are the putter's own forward axis.
+    """
+    require_finite(x_m, "x_m")
+    require_finite(y_m, "y_m")
+    require_finite(heading_rad, "heading_rad")
+    ground_speed = report.horizontal_speed_mps
+    return BallState(
+        x_m=x_m,
+        y_m=y_m,
+        height_m=0.0,
+        vx_mps=ground_speed * math.cos(heading_rad),
+        vy_mps=ground_speed * math.sin(heading_rad),
+        vz_mps=max(report.vertical_speed_mps, 0.0),
+        spin_rad_s=report.spin_rad_s,
+    )
+
+
 def simulate_strike(
     putter: PutterState,
     surface: SurfaceSpec,
     impact_toe_m: float = 0.0,
     hole_x_m: float | None = None,
     hole_y_m: float | None = None,
+    start_x_m: float = 0.0,
+    start_y_m: float = 0.0,
+    heading_rad: float = 0.0,
 ) -> PuttResult:
     """Strike the ball with a putter and integrate the full putt.
 
-    Chains :func:`~.collision.strike` (impulse + hosel twist), the
-    airborne rise/settle phase, and the surface mode machine.
+    Chains :func:`~.collision.strike` (impulse + hosel twist),
+    :func:`struck_ball_state` (placement and heading), the airborne
+    rise/settle phase, and the surface mode machine.
 
     Args:
         putter: Putter head at impact.
@@ -466,6 +496,9 @@ def simulate_strike(
         impact_toe_m: Strike offset toe-ward of the head CG [m].
         hole_x_m: Hole center x [m]; hole disabled when None.
         hole_y_m: Hole center y [m]; hole disabled when None.
+        start_x_m: Ball start x [m]; defaults to the origin.
+        start_y_m: Ball start y [m]; defaults to the origin.
+        heading_rad: Putter forward-axis heading, CCW from +x [rad].
 
     Returns:
         The integrated :class:`~.types.PuttResult` with its
@@ -475,15 +508,7 @@ def simulate_strike(
         Same guarantees as :func:`simulate_ball`, which enforces them.
     """
     report = strike(putter, impact_toe_m=impact_toe_m)
-    ball = BallState(
-        x_m=0.0,
-        y_m=0.0,
-        height_m=0.0,
-        vx_mps=report.horizontal_speed_mps,
-        vy_mps=0.0,
-        vz_mps=max(report.vertical_speed_mps, 0.0),
-        spin_rad_s=report.spin_rad_s,
-    )
+    ball = struck_ball_state(report, start_x_m, start_y_m, heading_rad)
     return simulate_ball(
         ball,
         surface,
