@@ -17,6 +17,7 @@ from PyQt6 import QtCore, QtWidgets
 
 from src.tools.putting_analytics.core import (
     MODES,
+    OBJECTIVES,
     SERVICE_FUNCTIONS,
     Rows,
     StudyForm,
@@ -97,7 +98,7 @@ class MainWidget(QtWidgets.QWidget):
         self.line_sd = _spin(0.0, 10.0, 1.0)
         self.speed_sd = _spin(0.0, 1.0, 0.08, 3)
         self.objective = QtWidgets.QComboBox()
-        self.objective.addItems(["sg", "make_rate"])
+        self.objective.addItems(list(OBJECTIVES))
         self.rollouts = QtWidgets.QSpinBox()
         self.rollouts.setRange(1, 10_000)
         self.rollouts.setValue(200)

@@ -16,6 +16,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
+from src.shared.python.putting_analytics.optimize import OBJECTIVES
+
 MODES: tuple[str, ...] = ("optimize", "misread_cost", "library_study")
 SERVICE_FUNCTIONS: dict[str, str] = {
     "optimize": "optimize_putt",

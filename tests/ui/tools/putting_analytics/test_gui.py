@@ -78,3 +78,13 @@ def test_service_rejection_is_shown(qapp: Any) -> None:
     assert widget.table.rowCount() == 0
     assert "rejected" in widget.status_label.text()
     assert widget.cleanup()
+
+
+def test_objective_choices_are_the_ones_the_service_accepts(qapp: Any) -> None:
+    from src.shared.python.putting_analytics.optimize import OBJECTIVES
+    from src.tools.putting_analytics.gui import MainWidget
+
+    widget = MainWidget()
+    choices = [widget.objective.itemText(i) for i in range(widget.objective.count())]
+    assert tuple(choices) == OBJECTIVES
+    assert widget.cleanup()
