@@ -1,4 +1,4 @@
-# HRG-D3 trunk visual stills (#13174)
+# HRG-D3 Trunk Visual Stills (#13174)
 
 Address, top and impact MuJoCo stills of the full-body-v2 pelvis, abdomen and thorax visuals.
 
