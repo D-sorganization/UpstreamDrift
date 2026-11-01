@@ -2254,6 +2254,18 @@
       "evidence": "src/engines/physics_engines/putting_green/python/simulator.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "tools.putting_studio": {
+      "id": "tools.putting_studio",
+      "name": "Standalone offline putting studio",
+      "entity_kind": "feature",
+      "primary_workspace": "putting",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/apps/putting_studio/index.html",
+      "acceptance_owner": "tests/apps/putting_studio/test_studio_budget.py"
+    },
     "tools.rate_of_closure": {
       "id": "tools.rate_of_closure",
       "name": "Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite)",
