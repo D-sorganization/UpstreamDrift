@@ -3,7 +3,8 @@
 Epic #14085 / Child Task #14092:
 Thin stdio MCP adapter exposing 4 simulation run service tools:
 describe_engines, submit_run, get_run, fetch_artifact; plus the putting-study
-tools optimize_putt and putting_misread_cost (#14177, see ``putting_tools``).
+tools optimize_putt, putting_misread_cost and putting_library_study (#14177,
+see ``putting_tools``).
 """
 
 from __future__ import annotations
