@@ -50,17 +50,12 @@ _READ = {
 
 
 def _spec(name: str, description: str, extra: dict[str, Any]) -> dict[str, Any]:
-    properties = {**_STUDY_PROPERTIES, **extra}
-    required = ["distance_ft", "baseline", *extra]
-    return {
-        "name": name,
-        "description": description,
-        "inputSchema": {
-            "type": "object",
-            "properties": properties,
-            "required": required,
-        },
+    schema = {
+        "type": "object",
+        "properties": {**_STUDY_PROPERTIES, **extra},
+        "required": ["distance_ft", "baseline", *extra],
     }
+    return {"name": name, "description": description, "inputSchema": schema}
 
 
 def putting_tool_specs() -> list[dict[str, Any]]:
