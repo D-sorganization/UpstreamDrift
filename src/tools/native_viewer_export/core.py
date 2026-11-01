@@ -294,9 +294,12 @@ def _hand_source(
                 PinocchioCapabilitySource,
             )
 
-            return PinocchioCapabilitySource(
-                spec_bytes, torque_limits=torque_limit_source
+            limits = (
+                torque_limit_source
+                if isinstance(torque_limit_source, Mapping)
+                else None
             )
+            return PinocchioCapabilitySource(spec_bytes, torque_limits=limits)
         except (ImportError, AttributeError, ValueError, RuntimeError) as exc:
             logger.warning(
                 "PinocchioCapabilitySource unavailable for hand mobility; falling back to MuJoCo: %s",
@@ -308,7 +311,12 @@ def _hand_source(
                 DrakeCapabilitySource,
             )
 
-            return DrakeCapabilitySource(spec_bytes, torque_limits=torque_limit_source)
+            limits = (
+                torque_limit_source
+                if isinstance(torque_limit_source, Mapping)
+                else None
+            )
+            return DrakeCapabilitySource(spec_bytes, torque_limits=limits)
         except (ImportError, AttributeError, ValueError, RuntimeError) as exc:
             logger.warning(
                 "DrakeCapabilitySource unavailable for hand mobility; falling back to MuJoCo: %s",

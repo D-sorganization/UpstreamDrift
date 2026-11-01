@@ -75,10 +75,10 @@ class PinocchioManipulabilityAnalyzer:
         if body_name is None:
             raise ValueError("body_name must be provided")
         if not self.model.existFrame(body_name):
-            # Try body name if frame not found?
-            if self.model.existBodyName(body_name):
-                # Get the body's frame, usually named same or similar
-                # For now just fail gracefully
+            # Try body name if frame not found
+            if hasattr(self.model, "existBodyName") and bool(
+                self.model.existBodyName(body_name)  # type: ignore[attr-defined]
+            ):
                 return None
             return None
 
@@ -88,7 +88,7 @@ class PinocchioManipulabilityAnalyzer:
         if q is not None:
             pin.forwardKinematics(self.model, self.data, q)
             pin.updateFramePlacements(self.model, self.data)
-            pin.computeJointJacobians(self.model, self.data)
+            pin.computeJointJacobians(self.model, self.data, q)
 
         # Get Full Jacobian (6xN), locally world aligned
         try:
