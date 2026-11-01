@@ -11,7 +11,8 @@ scalar laws by a test.
 Capture has two rules:
 
 * ``"point"``: the solver's rule (centre inside the cup at the end of a
-  step, speed at most ``capture_speed_mps()``), kept for parity.
+  step, speed at most the chord bound ``capture_speed_mps(b)`` for the
+  entry offset ``b`` fixed at first entry), kept for parity.
 * ``"effective_radius"`` (default): per step, the closest approach of the
   step's segment to the cup centre must lie within the shrinking hole
   ``R_eff(v) = R sqrt(1 - (v / v_cap)^2)`` (Holmes 1991; Penner 2002, as
@@ -126,10 +127,7 @@ class _Field:
 
 
 def _effective_mu(surface, speed, vx, vy, sliding, mults):  # type: ignore[no-untyped-def]
-    """Array form of ``friction.rolling_mu`` / ``friction.sliding_mu``.
-
-    ``sliding`` may be ``None`` when no ball is sliding.
-    """
+    """Array ``friction.rolling_mu`` / ``sliding_mu``; ``sliding=None``: none slide."""
     p = surface.friction
     grain = 1.0
     if p.grain_strength != 0.0:
@@ -174,11 +172,7 @@ def _rk4(state, sliding, surface, field):  # type: ignore[no-untyped-def]
 
 
 def _settle(state, sliding, surface, field):  # type: ignore[no-untyped-def]
-    """Rest check before a step; returns the mask of balls held at rest.
-
-    Restarts the others on a steep slope with a tiny downhill roll, as the
-    solver's ``_restart_state``.
-    """
+    """Mask of balls held at rest; restarts steep ones downhill (``_restart_state``)."""
     v_stop = surface.friction.v_stop_mps
     speed = np.hypot(state[2], state[3])
     near = (speed <= v_stop) & (np.abs(state[4]) <= v_stop)
@@ -234,6 +228,15 @@ def _approach(p0, p1, v0, v1, hole, rule):  # type: ignore[no-untyped-def]
     return np.hypot(w[0] - t * d[0], w[1] - t * d[1]), v0 + t * (v1 - v0)
 
 
+def _entry_bounds(state, hole):  # type: ignore[no-untyped-def]
+    """Chord capture bound per ball from its entry offset, as the solver."""
+    speed = np.hypot(state[2], state[3])
+    cross = np.abs(state[2] * (hole[1] - state[1]) - state[3] * (hole[0] - state[0]))
+    offset = np.divide(cross, speed, out=np.zeros_like(speed), where=speed > 0.0)
+    rim = HOLE_RADIUS_M * (1.0 - 1e-9)  # the solver's grazing-entry clamp
+    return [capture_speed_mps(min(float(b), rim)) for b in offset]
+
+
 def roll_batch(
     start: np.ndarray,
     surface: SurfaceSpec,
@@ -273,7 +276,7 @@ def _roll_chunk(start, surface, field, hole_xy_m, capture):  # type: ignore[no-u
     n = start.shape[1]
     out, ids, state = np.empty((2, n)), np.arange(n), start.copy()
     holed, near_any = np.zeros(n, dtype=bool), np.zeros(n, dtype=bool)
-    at_hole = np.full(n, np.nan)
+    at_hole, bound = np.full(n, np.nan), np.zeros(n)
     speed = np.hypot(state[2], state[3])
     sliding = ~np.isclose(state[4], speed, rtol=0.0, atol=_SLIP_EPS)
     v_cap, t = capture_speed_mps(), 0.0
@@ -293,9 +296,10 @@ def _roll_chunk(start, surface, field, hole_xy_m, capture):  # type: ignore[no-u
             continue
         first = near & np.isnan(at_hole[ids])
         at_hole[ids[first]] = v_at[first]
+        bound[ids[first]] = _entry_bounds(state[:, first], hole_xy_m)
         near_any[ids[near]] = True
         if capture == "point":
-            caught = near & (v_at <= v_cap)
+            caught = near & (v_at <= bound[ids])
         else:
             caught = near & (v_at < v_cap) & (dist <= effective_hole_radius_m(v_at))
         if caught.any():
