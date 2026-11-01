@@ -128,9 +128,10 @@ def surface_from_args(args: Mapping[str, Any]) -> SurfaceSpec:
 def baseline_from_args(args: Mapping[str, Any]) -> ExpectedPuttsCurve:
     """Miss-pricing curve from ``baseline = {distances_ft, expected_putts}``."""
     raw = args.get("baseline")
-    _check(isinstance(raw, Mapping), "'baseline' must give distances_ft and E(d)")
-    distances = np.asarray(_floats(raw, "distances_ft", ()))
-    putts = np.asarray(_floats(raw, "expected_putts", ()))
+    if not isinstance(raw, Mapping):
+        raise ValueError("'baseline' must give distances_ft and E(d)")
+    distances = np.asarray(_floats(raw, "distances_ft", ()), dtype=float)
+    putts = np.asarray(_floats(raw, "expected_putts", ()), dtype=float)
     return ExpectedPuttsCurve(distances, putts)
 
 
@@ -212,7 +213,8 @@ def optimize_putt(args: Mapping[str, Any]) -> dict[str, Any]:
 
 def _reads_from_args(args: Mapping[str, Any]) -> list[GreenRead]:
     raw = args.get("reads")
-    _check(isinstance(raw, list) and len(raw) > 0, "'reads' must be a non-empty list")
+    if not isinstance(raw, list) or not raw:
+        raise ValueError("'reads' must be a non-empty list")
     reads = []
     for read in raw:
         _check(isinstance(read, Mapping), "each read must be an object")
