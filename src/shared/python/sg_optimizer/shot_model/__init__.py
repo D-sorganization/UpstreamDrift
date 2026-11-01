@@ -22,15 +22,27 @@ from src.shared.python.sg_optimizer.shot_model.putting import (
     leave_distance_distribution,
     make_probability,
 )
+from src.shared.python.sg_optimizer.shot_model.putting_provider import (
+    CurvePuttingProvider,
+    LogisticPuttingProvider,
+    PuttingProvider,
+    SimulatedPuttingCurve,
+    putting_provider,
+)
 
 __all__ = [
     "BaselineBag",
     "ClubBaseline",
     "ClubSkill",
+    "CurvePuttingProvider",
+    "LogisticPuttingProvider",
     "PlayerProfile",
+    "PuttingProvider",
     "PuttingSkill",
+    "SimulatedPuttingCurve",
     "TiltedBivariateGaussian",
     "leave_distance_distribution",
     "load_baseline",
     "make_probability",
+    "putting_provider",
 ]

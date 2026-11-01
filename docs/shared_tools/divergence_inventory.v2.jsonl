@@ -1,4 +1,4 @@
-{"schema_version": 2, "tools_pin": "0616724eb8d537b1335166240e2526a1efcf75ba", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
+{"schema_version": 2, "tools_pin": "0b5a1eba4175808c62b5ce192e2e206b6cb0f3c2", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
 {"path": "README.md", "classification": "tools-only", "package": "README.md", "spelling_only": false}
 {"path": "README_PACKAGE.md", "classification": "ud-only", "package": "README_PACKAGE.md", "spelling_only": false}
 {"path": "__init__.py", "classification": "diverged", "package": "__init__.py", "spelling_only": false}
@@ -2257,6 +2257,7 @@
 {"path": "putting_analytics/sampling.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/service.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/service_variance.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
+{"path": "putting_analytics/sg_curve.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/skill.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/skill_roll_model.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/variance.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
@@ -2352,6 +2353,7 @@
 {"path": "sg_optimizer/shot_model/distributions.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/player_profile.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/putting.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/shot_model/putting_provider.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "shadow_tracker/AGENTS.md", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/README.md", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/__init__.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
