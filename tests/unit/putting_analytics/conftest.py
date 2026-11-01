@@ -22,10 +22,8 @@ class ConstantMakeModel:
     def simulate(
         self, distance_ft: float, action: PuttAction, n: int, seed: int
     ) -> PuttOutcomes:
-        if distance_ft <= 1.0:
-            holed = np.ones(n, bool)
-        else:
-            holed = np.random.default_rng(seed).random(n) < self.make_probability
+        draw = np.random.default_rng(seed).random(n)
+        holed = (distance_ft <= 1.0) | (draw < self.make_probability)
         return PuttOutcomes(holed, np.where(holed, 0.0, 0.5))
 
 
@@ -61,11 +59,7 @@ def toy_model() -> ToyBreakModel:
 
 @pytest.fixture
 def actions() -> list[PuttAction]:
-    return [
-        PuttAction(aim, pace)
-        for aim in (0.0, 1.0, 2.0, 3.0, 4.0)
-        for pace in (0.5, 1.0, 1.5, 2.0, 3.0, 4.0)
-    ]
+    return [PuttAction(a, p) for a in range(5) for p in (0.5, 1, 1.5, 2, 3, 4)]
 
 
 @pytest.fixture

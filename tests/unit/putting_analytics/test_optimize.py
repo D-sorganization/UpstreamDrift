@@ -49,19 +49,21 @@ def test_must_make_hits_harder_and_trades_strokes_for_makes(
     assert 0.0 < sg.make_rate_se < 0.02 and 0.0 < sg.expected_strokes_se < 0.02
 
 
-def test_policy_value_is_self_consistent(toy_model, solved, grid) -> None:
-    curve, policy = solved
+def test_strokes_gained_against_own_curve_and_tour(solved, grid, actions) -> None:
+    weak = ToyBreakModel(line_sd_deg=2.0, speed_cv=0.15)
+    player, policy = optimal_expected_putts(weak, grid, actions, N, 11)
+    tour, _ = solved
     index = list(grid).index(10)
     seed = distance_seed(11, index)
-    [evaluation] = evaluate_actions(toy_model, 10.0, [policy[index]], curve, N, seed)
-    assert strokes_gained(curve, 10.0, evaluation) == pytest.approx(0.0, abs=1e-9)
-
-
-def test_better_skill_lowers_expected_putts(grid, actions) -> None:
-    sharp = ToyBreakModel(line_sd_deg=0.5, speed_cv=0.04)
-    base, _ = optimal_expected_putts(ToyBreakModel(), grid, actions, N, 11)
-    better, _ = optimal_expected_putts(sharp, grid, actions, N, 11)
-    assert better(15.0) < base(15.0) - 0.05
+    best = strokes_gained(
+        10.0, weak.simulate(10.0, policy[index], N, seed), player, tour
+    )
+    assert player(15.0) > tour(15.0) + 0.05  # worse skill, more putts
+    assert best.sg_player == pytest.approx(0.0, abs=1e-9)
+    assert best.sg_tour < -3 * best.sg_tour_se < 0
+    for action in actions:
+        other = weak.simulate(10.0, action, N, seed)
+        assert strokes_gained(10.0, other, player, tour).sg_player <= 1e-9
 
 
 def test_unknown_objective_is_rejected(toy_model, solved, actions) -> None:

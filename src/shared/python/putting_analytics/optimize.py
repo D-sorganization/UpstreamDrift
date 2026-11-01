@@ -2,9 +2,8 @@
 
 Every candidate action at one distance is simulated with the same seed
 (common random numbers), so comparisons between actions are not swamped by
-sampling noise. Decisions should use the player's own curve from
-:func:`optimal_expected_putts`; strokes gained against a reference field needs
-evaluations made against that reference curve.
+sampling noise. Decisions use the player's own curve; :func:`strokes_gained`
+reports SG against that curve and against a reference field, side by side.
 """
 
 from __future__ import annotations
@@ -42,20 +41,23 @@ class ActionEvaluation:
     expected_strokes_se: float
 
 
+def _strokes(outcomes: PuttOutcomes, baseline: ExpectedPuttsCurve) -> np.ndarray:
+    """Per-sample strokes to hole out: 1, plus ``baseline``(leave) after a miss."""
+    return 1.0 + np.where(outcomes.holed, 0.0, baseline(outcomes.leave_ft))
+
+
+def _mean_se(samples: np.ndarray) -> tuple[float, float]:
+    spread = float(np.std(samples, ddof=1)) if samples.size > 1 else 0.0
+    return float(samples.mean()), spread / float(np.sqrt(samples.size))
+
+
 def evaluate_outcomes(
     action: PuttAction, outcomes: PuttOutcomes, baseline: ExpectedPuttsCurve
 ) -> ActionEvaluation:
     """Summarise ``outcomes``; a miss costs 1 + ``baseline``(leave) strokes."""
-    strokes = 1.0 + np.where(outcomes.holed, 0.0, baseline(outcomes.leave_ft))
-    n, p = strokes.size, outcomes.make_rate
-    spread = float(np.std(strokes, ddof=1)) if n > 1 else 0.0
-    return ActionEvaluation(
-        action,
-        p,
-        float(np.sqrt(p * (1 - p) / n)),
-        float(strokes.mean()),
-        float(spread / np.sqrt(n)),
-    )
+    n, p = outcomes.holed.size, outcomes.make_rate
+    mean, se = _mean_se(_strokes(outcomes, baseline))
+    return ActionEvaluation(action, p, float(np.sqrt(p * (1 - p) / n)), mean, se)
 
 
 def evaluate_actions(
@@ -87,14 +89,35 @@ def best_action(
     return min(evaluations, key=lambda e: (-e.make_rate, e.expected_strokes))
 
 
-def strokes_gained(
-    reference: ExpectedPuttsCurve, distance_ft: float, evaluation: ActionEvaluation
-) -> float:
-    """Expected strokes gained versus ``reference``.
+@dataclass(frozen=True)
+class StrokesGained:
+    """Mean strokes gained per putt, with Monte Carlo standard errors.
 
-    ``evaluation`` must have been made with ``reference`` as its baseline.
+    ``sg_player`` is against the player's own E(d), so their best strategy is 0;
+    ``sg_tour`` is against a reference field's E(d), as published stats quote.
     """
-    return float(reference(distance_ft)) - evaluation.expected_strokes
+
+    sg_player: float
+    sg_player_se: float
+    sg_tour: float
+    sg_tour_se: float
+
+
+def strokes_gained(
+    distance_ft: float,
+    outcomes: PuttOutcomes,
+    player: ExpectedPuttsCurve,
+    tour: ExpectedPuttsCurve,
+) -> StrokesGained:
+    """SG = E(start) - 1 - E(leave) per putt, one curve for both ends of each value.
+
+    Mixing them (tour E at the start, player E for the comeback) measures neither.
+    """
+
+    def against(curve: ExpectedPuttsCurve) -> tuple[float, float]:
+        return _mean_se(float(curve(distance_ft)) - _strokes(outcomes, curve))
+
+    return StrokesGained(*against(player), *against(tour))
 
 
 def optimal_expected_putts(
