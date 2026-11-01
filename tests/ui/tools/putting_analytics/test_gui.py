@@ -88,3 +88,37 @@ def test_objective_choices_are_the_ones_the_service_accepts(qapp: Any) -> None:
     choices = [widget.objective.itemText(i) for i in range(widget.objective.count())]
     assert tuple(choices) == OBJECTIVES
     assert widget.cleanup()
+
+
+def test_studies_run_on_the_shared_async_action_bar(qapp: Any) -> None:
+    from src.tools.async_action import AsyncActionBar
+    from src.tools.putting_analytics.gui import MainWidget
+
+    widget = MainWidget()
+    assert isinstance(widget.action_bar, AsyncActionBar)
+    _fill(widget)
+    widget.run_study()
+    assert widget.is_running and not widget.run_button.isEnabled()
+    _wait_until_idle(qapp, widget)
+    assert widget.run_button.isEnabled()
+    assert widget.cleanup()
+
+
+def test_an_unexpected_error_is_not_called_a_rejection(
+    qapp: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from src.shared.python.putting_analytics import service
+    from src.tools.putting_analytics.gui import MainWidget
+
+    def _boom(_args: Any) -> Any:
+        raise RuntimeError("integrator diverged")
+
+    monkeypatch.setattr(service, "optimize_putt", _boom)
+    widget = MainWidget()
+    _fill(widget)
+    widget.run_study()
+    _wait_until_idle(qapp, widget)
+    text = widget.status_label.text()
+    assert "failed" in text and "integrator diverged" in text
+    assert "rejected" not in text
+    assert widget.cleanup()
