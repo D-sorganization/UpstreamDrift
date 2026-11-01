@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
@@ -13,6 +14,8 @@ from src.shared.python.sg_optimizer.shot_model.putting_provider import (
     PuttingProvider,
     SimulatedPuttingCurve,
 )
+
+pytestmark = pytest.mark.unit
 
 GRID = (2.0, 4.0, 8.0, 15.0, 30.0, 60.0)
 distance = st.floats(min_value=0.5, max_value=90.0, allow_nan=False)

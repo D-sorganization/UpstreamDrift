@@ -19,6 +19,8 @@ from src.shared.python.sg_optimizer.shot_model.putting_provider import (
     putting_provider,
 )
 
+pytestmark = pytest.mark.unit
+
 # Shape of a low-dispersion simulated player (simulate_putting_curve, n=500).
 TOUR_CURVE = SimulatedPuttingCurve(
     distances_ft=(2.0, 3.0, 6.0, 10.0, 20.0, 30.0, 60.0),
