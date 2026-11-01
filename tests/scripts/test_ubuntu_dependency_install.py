@@ -61,6 +61,10 @@ test "$(find "$sources" -type f | wc -l)" -eq 1
 cp "$sources/ubuntu.sources" "$APT_PROOF"
 case " $* " in
   *' update '*)
+    if [ "${HANG_ONCE:-0}" = 1 ] && [ ! -f "$APT_PROOF.hung" ]; then
+      touch "$APT_PROOF.hung"
+      exec env PATH=/usr/bin:/bin sleep 60
+    fi
     if [ "${FAIL_UPDATE:-0}" = 1 ]; then exit 100; fi
     if [ "${FAIL_ONCE:-0}" = 1 ] && [ ! -f "$APT_PROOF.failed" ]; then
       touch "$APT_PROOF.failed"
@@ -106,6 +110,8 @@ def test_isolates_sources_and_indexes_preserving_signatures(
         assert "Dir::Cache::srcpkgcache=" in call
         assert "DPkg::Lock::Timeout=300" in call
         assert "APT::Update::Error-Mode=any" in call
+        assert "Acquire::http::Timeout=30" in call
+        assert "Acquire::https::Timeout=30" in call
         assert "allow-unauthenticated" not in call
         assert "trusted=yes" not in call
     assert calls[0].endswith("update")
@@ -134,6 +140,21 @@ def test_persistent_apt_failure_is_not_ignored(
 def test_transient_failure_retries_then_installs(installer: InstallerFixture) -> None:
     command, env, root = installer
     env["FAIL_ONCE"] = "1"
+    result = subprocess.run(
+        command, env=env, capture_output=True, text=True, timeout=30
+    )
+    assert result.returncode == 0, result.stderr
+    calls = (root / "apt.log").read_text().splitlines()
+    assert len(calls) == 3
+    assert calls[0] == calls[1]
+    assert "install -y" in calls[2]
+
+
+def test_hung_attempt_is_killed_and_retried(installer: InstallerFixture) -> None:
+    """A stalled apt-get never exits, so only a per-attempt bound retries it (#14178)."""
+    command, env, root = installer
+    env["HANG_ONCE"] = "1"
+    env["APT_ATTEMPT_TIMEOUT"] = "1"
     result = subprocess.run(
         command, env=env, capture_output=True, text=True, timeout=30
     )

@@ -461,6 +461,41 @@
         "evidence": null
       },
       "activation_issue": null
+    },
+    {
+      "id": "DV-14176",
+      "title": "Putting Analytics: Calibrate Skill Presets Against Published Reference Data",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/14176",
+      "source_snapshot": "source-14176.json",
+      "record": "DV-14176.md",
+      "disposition": "split",
+      "kind": "external-review",
+      "status": "deferred",
+      "rationale": "Calibrating the tour, scratch, 10 and 20 handicap putting presets needs published or licensed reference tables (Broadie table A.5 values, PGA Tour ShotLink, amateur make rates) that are not in this repository, plus the batch-roll simulator (#14171) and skill sampler (#14169). The reference registry and comparison harness are software and stay in the open issue; no preset is called calibrated until residuals against real reference data are recorded.",
+      "prerequisites": [
+        {
+          "name": "Broadie (2014) table A.5 tour make percentage and expected putts by distance, entered from the published source with page references",
+          "evidence": null
+        },
+        {
+          "name": "PGA Tour ShotLink extract (license permitting use here) and published amateur make-rate tables for scratch, 10 and 20 handicap",
+          "evidence": null
+        },
+        {
+          "name": "Batch-roll putting simulator (#14171) and skill sampler (#14169) merged",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Calibrate tour, scratch, 10 and 20 handicap stroke and read dispersions so the simulated make-percentage curve falls within the reference band, and record the fit, residuals and assumptions.",
+        "Show by test that the calibrated tour profile reproduces the reference make-percentage curve within a stated tolerance, and that the derived E_player(d) is within tolerance of the tour expected-putts table.",
+        "No preset is called calibrated without the provenance record and residuals; if licensed data stays unavailable, the issue stays open with this entry instead of tuning to the model's own output."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
     }
   ]
 }

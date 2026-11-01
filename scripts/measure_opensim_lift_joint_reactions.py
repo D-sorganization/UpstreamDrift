@@ -49,6 +49,8 @@ from src.shared.python.lifting.pack_audit.names import LIFTS  # noqa: E402
 logger = logging.getLogger("measure_opensim_lift_joint_reactions")
 DEFAULT_OUT_DIR = ROOT / "docs/development/lifting/evidence/opensim_joint_reactions"
 DEFAULT_RECEIPT = DEFAULT_OUT_DIR / "receipts.json"
+BENCH_SUMMARY = DEFAULT_OUT_DIR / "bench_press_summary.json"
+_PROVENANCE_KEYS = ("generator", "issue", "source_commit", "timestamp_utc")
 
 
 def _git(*args: str) -> str:
@@ -276,7 +278,7 @@ def _fmt_status(val: Any) -> str:
 def _render_header_section(receipts: dict[str, Any], commit: str) -> str:
     complete_lifts = [
         k
-        for k in ("squat", "deadlift", "snatch", "clean_and_jerk")
+        for k in LIFTS
         if isinstance(receipts.get(k), dict) and receipts[k].get("status") == "complete"
     ]
     squat = receipts.get("squat") or {}
@@ -374,7 +376,7 @@ def _render_loads_table(receipts: dict[str, Any]) -> str:
             receipts.get("lift", "squat"), receipts
         )
     sub_tables = []
-    for lift in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+    for lift in LIFTS:
         sol = receipts.get(lift)
         if isinstance(sol, dict):
             sub_tables.append(_render_single_lift_table(lift, sol))
@@ -405,7 +407,24 @@ def _render_single_bound(lift: str, sol: dict[str, Any]) -> str:
 - **Default Pose Status**: **{_fmt_status(def_pose.get("passed"))}** ({def_pose.get("note") or "unavailable"})
 - **Dynamic Minimal-Acceleration Frame**: Frame {_fmt_val(min_acc.get("frame_index"), "d")} ($t = {_fmt_val(min_acc.get("time_s"), ".4f")}$ s, $\\|\\ddot{{q}}\\| = {_fmt_val(min_acc.get("qdd_norm_rad_s2"), ".4f")}$ rad/s²)
 - **Dynamic Weight Above ($W_{{\\text{{above}}}}$)**: {_fmt_val(min_acc.get("w_above_n"))} N, Pelvis Compression = {_fmt_val(min_acc.get("l5_s1_compression_pelvis_n"))} N, Torso Compression = {_fmt_val(min_acc.get("l5_s1_compression_torso_n"))} N
-- **Dynamic Bound Status**: **{_fmt_status(min_acc.get("passed"))}** ({min_acc.get("note") or "unavailable"})"""
+- **Dynamic Bound Status**: **{_fmt_status(min_acc.get("passed"))}** ({min_acc.get("reason") or min_acc.get("note") or "unavailable"})""" + _render_support_balance(
+        bound
+    )
+
+
+def _render_support_balance(bound: dict[str, Any]) -> str:
+    support = bound.get("bench_static_hold_support")
+    if not isinstance(support, dict):
+        return ""
+    loads = ", ".join(
+        f"{k} = {_fmt_val(v)} N" for k, v in support["support_vertical_n"].items()
+    )
+    return (
+        f"\n- **Bench Static-Hold Support Balance**: {loads}; expected "
+        f"(body + bar) x g = {_fmt_val(support.get('expected_weight_n'))} N, "
+        f"relative error {_fmt_val(support.get('relative_error'), '.2e')} "
+        f"**{_fmt_status(support.get('passed'))}**"
+    )
 
 
 def _render_analytic_bound_section(receipts: dict[str, Any]) -> str:
@@ -415,7 +434,7 @@ def _render_analytic_bound_section(receipts: dict[str, Any]) -> str:
             + _render_single_bound(receipts.get("lift", "squat"), receipts)
         )
     sub = []
-    for lift in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+    for lift in LIFTS:
         sol = receipts.get(lift)
         if isinstance(sol, dict):
             sub.append(_render_single_bound(lift, sol))
@@ -463,16 +482,9 @@ def _render_other_lifts_section(receipts: dict[str, Any]) -> str:
     for lk, sol in receipts.items():
         if isinstance(sol, dict) and sol.get("status") == "unavailable":
             unavail[lk] = sol.get("reason", "unavailable")
-    if not unavail:
-        bench = receipts.get("bench_press")
-        reason = (
-            bench.get("reason", "unavailable")
-            if isinstance(bench, dict)
-            else "unavailable"
-        )
-        unavail["bench_press"] = reason
-
     lines = ["### Status of Unavailable Lifts\n"]
+    if not unavail:
+        lines.append("- none: every lift has a complete joint reaction solve")
     for lk, r in unavail.items():
         title = _lift_title(lk)
         lines.append(f"- **{title} (`{lk}`)**: `unavailable` — reason: `{r}`")
@@ -499,6 +511,10 @@ def _render_footer_section() -> str:
 - **L5/S1 Reactions**: ![Clean and Jerk L5/S1](clean_and_jerk_l5s1_joint_reaction_loads.png)
 - **Knee & Shoulder Reactions**: ![Clean and Jerk Knee and Shoulder](clean_and_jerk_knee_and_shoulder_joint_reactions.png)
 
+### Bench Press
+- **L5/S1 Reactions**: ![Bench Press L5/S1](bench_press_l5s1_joint_reaction_loads.png)
+- **Knee & Shoulder Reactions**: ![Bench Press Knee and Shoulder](bench_press_knee_and_shoulder_joint_reactions.png)
+
 ## Reproduction Commands
 
 ```bash
@@ -519,6 +535,14 @@ def render_evidence_readme(receipts: dict[str, Any], commit: str) -> str:
         _render_footer_section(),
     ]
     return "\n\n".join(sections) + "\n"
+
+
+def bench_summary(full_receipt: dict[str, Any]) -> dict[str, Any]:
+    """Compact bench record: its receipt entry without the per-frame series."""
+    bench = full_receipt["lifts"]["bench_press"]
+    return {k: full_receipt[k] for k in _PROVENANCE_KEYS} | {
+        "bench_press": {k: v for k, v in bench.items() if k != "timeseries"}
+    }
 
 
 def _write_evidence_readme(
@@ -559,7 +583,7 @@ def main() -> None:
         sol = evaluate_lift_joint_reactions(lift, stride=args.stride)
         receipts[lift] = sol
 
-    for lift_name in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+    for lift_name in LIFTS:
         sol = receipts.get(lift_name)
         if (
             isinstance(sol, dict)
@@ -600,6 +624,10 @@ def main() -> None:
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(full_receipt, f, indent=2)
     logger.info("Wrote receipt: %s", args.out)
+    summary_path = args.plot_dir / BENCH_SUMMARY.name
+    summary_path.write_text(
+        json.dumps(bench_summary(full_receipt), indent=2) + "\n", encoding="utf-8"
+    )
 
     _write_evidence_readme(args.plot_dir, receipts, commit)
     logger.info("Wrote evidence README: %s", args.plot_dir / "README.md")

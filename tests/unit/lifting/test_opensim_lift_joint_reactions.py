@@ -63,22 +63,95 @@ def _require_body() -> None:
 # -------------------------------------------------------------------------
 
 
-def test_bench_press_unavailable_reads_osl4_reason() -> None:
-    """Bench press reports status='unavailable' with explicit supine reason, never fake values."""
-    receipt = evaluate_lift_joint_reactions("bench_press")
-    assert receipt["lift"] == "bench_press"
-    assert receipt["status"] == "unavailable"
-    assert "supine" in receipt["reason"]
-    assert receipt["classification"] == "unqualified"
-    for field in (
-        "l5_s1",
-        "knee_tibiofemoral",
-        "knee_patellofemoral",
-        "shoulder_glenohumeral",
-        "cross_check_movement_optimizer",
-        "phases",
+_BENCH_SUMMARY = (
+    Path(__file__).resolve().parents[3]
+    / "docs/development/lifting/evidence/opensim_joint_reactions"
+    / "bench_press_summary.json"
+)
+#: The contact equilibrium solves the vertical root to 1e-12 m (OSL-3), so the
+#: supports carry the weight to well under 1e-6 of it.
+_SUPPORT_REL_TOL = 1e-6
+
+
+def _committed_bench() -> dict[str, Any]:
+    return json.loads(_BENCH_SUMMARY.read_text(encoding="utf-8"))["bench_press"]
+
+
+def test_bench_press_joint_reactions_use_bench_contact() -> None:
+    """The bench receipt is complete and loaded by the shared bench contact."""
+    from src.engines.physics_engines.opensim.python.msk_lift_model import (
+        BENCH_EXTERNAL_LOAD_SOURCE,
+    )
+
+    bench = _committed_bench()
+    assert bench["status"] == "complete", bench.get("reason")
+    assert bench["external_load_source"]["bench"] == BENCH_EXTERNAL_LOAD_SOURCE
+    assert "back-sphere contact" in BENCH_EXTERNAL_LOAD_SOURCE
+    for value in (
+        bench["l5_s1"]["compression_mean_n"],
+        bench["l5_s1"]["compression_peak_n"],
+        bench["knee_tibiofemoral"]["resultant_mean_n"],
+        bench["shoulder_glenohumeral"]["resultant_mean_n"],
     ):
-        assert receipt[field] is None
+        assert math.isfinite(value)
+    assert bench["phases"]
+    assert "timeseries" not in bench
+    assert bench["classification"] == _osl4_bench_classification()
+
+
+def _osl4_bench_classification() -> str:
+    from src.engines.physics_engines.opensim.python.msk_lift_joint_reactions import (
+        OSL4_RECEIPT,
+    )
+
+    lifts = json.loads(OSL4_RECEIPT.read_text(encoding="utf-8"))["lifts"]
+    return str(lifts["bench_press"]["classification"])
+
+
+def test_bench_static_hold_supports_carry_body_and_bar() -> None:
+    """Feet plus bench carry (body + bar) x g; the standing bound is not applied."""
+    bound = _committed_bench()["static_hold_analytic_bound"]
+    support = bound["bench_static_hold_support"]
+    assert set(support["support_vertical_n"]) >= {"bench"}
+    carried = sum(support["support_vertical_n"].values())
+    assert math.isclose(carried, support["expected_weight_n"], rel_tol=_SUPPORT_REL_TOL)
+    assert abs(support["relative_error"]) <= _SUPPORT_REL_TOL
+    assert support["passed"] is True
+    supine = bound["bench_press_min_acceleration_frame"]
+    assert supine["passed"] is None
+    assert "supine" in supine["reason"]
+    assert bound["passed"] is True
+
+
+def test_bench_press_is_not_hard_coded_unavailable() -> None:
+    """A complete OSL-4 bench solve with a bundle runs; no bench special case."""
+    from unittest import mock
+
+    from src.engines.physics_engines.opensim.python import (
+        msk_lift_joint_reactions as jr,
+    )
+
+    qual = jr._read_osl4_qualification("bench_press")
+    with mock.patch.object(jr, "is_engine_available", return_value=True):
+        assert jr._unavailable_reason("bench_press", qual) is None
+
+
+@pytest.mark.requires_opensim
+def test_source_fingerprint_has_no_host_paths() -> None:
+    """Committed receipts carry repo-relative module paths, not host paths."""
+    from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_diagnostics import (
+        joint_reaction_source_fingerprint,
+    )
+
+    _real_opensim()
+    fingerprint = joint_reaction_source_fingerprint()
+    for key in (
+        "joint_reactions_module",
+        "joint_reaction_frame_module",
+        "simbody_kinematics_module",
+    ):
+        assert fingerprint[key].startswith("src/engines/"), fingerprint[key]
+    assert not any(str(Path.home()) in str(v) for v in fingerprint.values())
 
 
 def test_osl4_qualification_reads_all_lifts() -> None:
@@ -166,7 +239,7 @@ def lift_reaction_solutions() -> dict[str, dict[str, Any]]:
     _real_opensim()
     _require_body()
     solutions: dict[str, dict[str, Any]] = {}
-    for lift in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+    for lift in LIFTS:
         receipt = evaluate_lift_joint_reactions(lift, stride=5)
         assert receipt["status"] == "complete", f"{lift}: {receipt.get('reason', '')}"
         solutions[lift] = receipt
@@ -250,6 +323,23 @@ def test_complete_lifts_joint_reactions_computed(
     assert gh["joint_r"] == "acromial_r"
     assert gh["joint_l"] == "acromial_l"
     assert gh["resultant_mean_n"] > 100.0
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_bench_press_live_solve_uses_bench_contact(
+    lift_reaction_solutions: dict[str, dict[str, Any]],
+) -> None:
+    """The live bench solve applies the bench contact and balances its supports."""
+    from src.engines.physics_engines.opensim.python.msk_lift_model import (
+        BENCH_EXTERNAL_LOAD_SOURCE,
+    )
+
+    bench = lift_reaction_solutions["bench_press"]
+    assert bench["external_load_source"]["bench"] == BENCH_EXTERNAL_LOAD_SOURCE
+    support = bench["static_hold_analytic_bound"]["bench_static_hold_support"]
+    assert abs(support["relative_error"]) <= _SUPPORT_REL_TOL
+    assert math.isfinite(bench["l5_s1"]["compression_peak_n"])
 
 
 @pytest.mark.requires_opensim
