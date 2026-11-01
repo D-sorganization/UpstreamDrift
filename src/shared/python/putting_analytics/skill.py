@@ -1,7 +1,8 @@
 """Putting skill profile: stroke execution and green-reading dispersion.
 
-All spreads are one standard deviation. No preset is calibrated yet; presets
-wait for validation against published make rates (#14176).
+All spreads are one standard deviation. The calibrated tour preset is
+:data:`src.shared.python.putting_analytics.calibration.TOUR_AVERAGE`, fitted to
+published PGA Tour make rates (#14177).
 """
 
 from __future__ import annotations
