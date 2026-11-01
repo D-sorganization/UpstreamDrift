@@ -134,6 +134,7 @@ def _build_hand_ellipsoid_feed(
     active_ellipsoids: Sequence[str],
     hand_mobility_mode: str,
     ellipsoid_scale: str,
+    engine: str = "mujoco",
 ) -> tuple[
     Callable[[int], tuple[EllipsoidGlyph, ...]], Callable[[int], tuple[str, ...]]
 ]:
@@ -148,7 +149,9 @@ def _build_hand_ellipsoid_feed(
 
     def _get_hm(idx: int) -> dict[str, Any]:
         if idx not in _hm_cache:
-            _hm_cache[idx] = swing.hand_mobility_at(idx, mode=hand_mobility_mode)
+            _hm_cache[idx] = swing.hand_mobility_at(
+                idx, mode=hand_mobility_mode, engine=engine
+            )
         return _hm_cache[idx]
 
     builders: dict[str, EllipsoidDisplayBuilder] = {}
@@ -337,6 +340,7 @@ def build_overlay_feed(
             active_ellipsoids,
             opts.hand_mobility_mode,
             opts.ellipsoid_scale,
+            engine=engine,
         )
 
     feed = OverlayFeed(
