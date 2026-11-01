@@ -96,6 +96,76 @@ def test_bad_reads_raise_value_error(reads: Any) -> None:
         service.misread_cost(_args(reads=reads))
 
 
+CLASSES = [
+    {"distance_ft": 4.0, "count": 3.0},
+    {"distance_ft": 12.0, "slope_pct": 2.0, "orientation": "right_to_left"},
+]
+
+
+def _library_args(**overrides: Any) -> dict[str, Any]:
+    args = {**_args(n=8), "classes": CLASSES}
+    del args["distance_ft"]
+    return {**args, **overrides}
+
+
+def test_library_study_weights_classes_by_count() -> None:
+    report = service.library_study(_library_args())
+    json.dumps(report)
+    assert report["schema_version"] == 1 and report["samples_per_action"] == 8
+    assert [c["weight"] for c in report["classes"]] == pytest.approx([0.75, 0.25])
+    for entry in report["classes"]:
+        assert entry["expected_putts"]["se"] >= 0.0
+    assert service.library_study(_library_args()) == report  # seeded
+
+
+@pytest.mark.parametrize(
+    ("orientation", "aspect_deg"),
+    [("uphill", 180.0), ("left_to_right", 270.0), ("right_to_left", 90.0)],
+)
+def test_class_surface_falls_along_the_orientation(
+    orientation: str, aspect_deg: float
+) -> None:
+    putt_class = service.library_from_args(
+        {
+            "classes": [
+                {"distance_ft": 10.0, "slope_pct": 2.0, "orientation": orientation}
+            ]
+        }
+    ).classes[0]
+    slope = service.class_surface(putt_class).height.gradient(0.0, 0.0)
+    want = service.surface_from_args({"grade_pct": 2.0, "aspect_deg": aspect_deg})
+    assert slope == pytest.approx(want.height.gradient(0.0, 0.0))
+
+
+def test_library_grid_stops_at_the_longest_class() -> None:
+    assert service._grid_covering(12.0)[-1] == 15.0
+    assert service._grid_covering(60.0) == service.LIBRARY_GRID_FT
+
+
+@pytest.mark.parametrize(
+    "classes",
+    [
+        None,
+        [],
+        ["x"],
+        [{"distance_ft": 1.0}],
+        [{"distance_ft": 5.0, "slope_pct": 2.0}],  # sloped but "flat"
+        [{"distance_ft": 5.0, "orientation": "uphill"}],  # flat but "uphill"
+        [{"distance_ft": 5.0, "count": 0.0}],
+        [{"distance_ft": 5.0}, {"distance_ft": 5.0}],
+        [{"distance_ft": 5.0}] * (service.MAX_LIBRARY_CLASSES + 1),
+    ],
+)
+def test_bad_library_raises_value_error(classes: Any) -> None:
+    with pytest.raises(ValueError):
+        service.library_study(_library_args(classes=classes))
+
+
+def test_library_study_refuses_work_over_the_cap() -> None:
+    with pytest.raises(ValueError, match="grid"):
+        service.library_study(_library_args(n=service.MAX_LIBRARY_ROLLOUTS // 4))
+
+
 def _call(server: SimulationMcpServer, name: str, args: dict[str, Any]) -> Any:
     request = {
         "jsonrpc": "2.0",
@@ -114,7 +184,7 @@ def test_mcp_lists_and_runs_the_putting_tools() -> None:
     server = _server()
     listing = server.handle_request({"jsonrpc": "2.0", "id": 0, "method": "tools/list"})
     names = {tool["name"] for tool in listing["result"]["tools"]}
-    assert {"optimize_putt", "putting_misread_cost"} <= names
+    assert {"optimize_putt", "putting_misread_cost", "putting_library_study"} <= names
     response = _call(server, "optimize_putt", _args())
     payload = json.loads(response["result"]["content"][0]["text"])
     assert payload["best"]["expected_strokes"] >= 1.0
@@ -125,3 +195,9 @@ def test_mcp_maps_bad_arguments_and_auth_to_json_rpc_errors() -> None:
     assert _call(_server(), "optimize_putt", {})["error"]["code"] == -32602
     denied = _call(_server("secret"), "putting_misread_cost", _args())
     assert denied["error"]["code"] == -32000
+
+
+def test_mcp_runs_the_library_study() -> None:
+    response = _call(_server(), "putting_library_study", _library_args())
+    report = json.loads(response["result"]["content"][0]["text"])
+    assert report["totals"]["expected_putts_per_round"]["mean"] > 0.0
