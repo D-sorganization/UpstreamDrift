@@ -29,21 +29,29 @@ apt_options=(
   -o DPkg::Lock::Timeout=300
   -o APT::Get::Lock-Timeout=300
   -o APT::Update::Error-Mode=any
+  -o Acquire::http::Timeout=30
+  -o Acquire::https::Timeout=30
   -o Dir::Etc::sourcelist=/dev/null
   -o "Dir::Etc::sourceparts=$workspace/sources"
   -o "Dir::State::lists=$workspace/lists"
   -o "Dir::Cache::pkgcache=$workspace/pkgcache.bin"
   -o "Dir::Cache::srcpkgcache=$workspace/srcpkgcache.bin"
 )
+# A stalled download never exits, so bound each attempt or the retry loop
+# never runs (#14178). The bound exceeds the 300s lock wait above.
+attempt_timeout="${APT_ATTEMPT_TIMEOUT:-420}"
+apt_attempt() {
+  timeout --kill-after=30 "$attempt_timeout" sudo apt-get "${apt_options[@]}" "$@"
+}
 apt_retry() {
   for attempt in {1..12}; do
-    if sudo apt-get "${apt_options[@]}" "$@"; then
+    if apt_attempt "$@"; then
       return 0
     fi
-    echo "apt-get $* failed on attempt $attempt; retrying after backoff" >&2
+    echo "apt-get $* failed or timed out on attempt $attempt; retrying after backoff" >&2
     sleep 10
   done
-  sudo apt-get "${apt_options[@]}" "$@"
+  apt_attempt "$@"
 }
 
 apt_retry update
