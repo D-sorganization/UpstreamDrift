@@ -30,8 +30,72 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Inlined from Repository_Management's reusable-conflict-disarm.yml (#14206):
+  # a public repository cannot call an internal repository's reusable
+  # workflow (every run failed with 0 jobs), so the job runs here and reads
+  # RM's scripts through an App-token checkout, as collate-changes.yml does.
+  # API-only sweep: disable auto-merge on CONFLICTING armed PRs, apply
+  # ``conflict:disarmed``, and clear the label after a clean rebase.
   disarm:
-    uses: D-sorganization/Repository_Management/.github/workflows/reusable-conflict-disarm.yml@main
-    with:
-      dry_run: ${{ inputs.dry_run || 'true' }}
-      exclude_prs: ${{ inputs.exclude_prs || '12634' }}
+    name: Conflict disarm sweep
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 15
+    steps:
+      - name: Generate fleet app token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.JULES_APP_ID }}
+          private-key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout Repository_Management (conflict disarm script)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: D-sorganization/Repository_Management
+          ref: main
+          path: .rm-tools
+          token: ${{ steps.app-token.outputs.token }}
+          sparse-checkout: scripts
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+
+      - name: Run conflict disarm sweep
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run || 'true' }}
+          EXCLUDE_PRS: ${{ inputs.exclude_prs || '12634' }}
+        run: |
+          set -uo pipefail
+          DRY_FLAG="--dry-run"
+          if [ "$DRY_RUN_INPUT" = "false" ]; then
+            DRY_FLAG=""
+          fi
+          PYTHONPATH=".rm-tools" python -m scripts.conflict_disarm \
+            --repo "$GITHUB_REPOSITORY" \
+            --app-token "$APP_TOKEN" \
+            --github-token "$GH_TOKEN" \
+            --exclude-prs "$EXCLUDE_PRS" \
+            $DRY_FLAG | tee "$RUNNER_TEMP/conflict-disarm-summary.json"
+
+      - name: Summary
+        if: always()
+        env:
+          DRY_RUN_INPUT: ${{ inputs.dry_run || 'true' }}
+          EXCLUDE_PRS: ${{ inputs.exclude_prs || '12634' }}
+        run: |
+          {
+            echo "## Conflict disarm"
+            echo ""
+            echo "- **Repo:** $GITHUB_REPOSITORY"
+            echo "- **Dry run:** $DRY_RUN_INPUT"
+            echo "- **Excluded PRs:** $EXCLUDE_PRS"
+            if [ -f "$RUNNER_TEMP/conflict-disarm-summary.json" ]; then
+              echo "- **Result:** \`$(cat "$RUNNER_TEMP/conflict-disarm-summary.json")\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

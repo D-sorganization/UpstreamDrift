@@ -13,7 +13,6 @@ policy to `CLAUDE.md`.
 | --------- | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | .gaai/    | Canonical | @core   | Owns governance rules, memory, backlog, skills, hooks, and orchestration docs.                                                                     |
 | .claude/  | Mirror    | @core   | Contains Claude command shims and duplicated skill entries; migrate durable content into `.gaai/core/compat/` or `.gaai/project/` before deletion. |
-| .agent/   | Legacy    | @agents | Contains older skill and workflow shims; compare with `.gaai/core/skills/` before removing duplicates.                                             |
 | .kiro/    | Legacy    | @agents | Tool-specific steering/config root; migrate unique steering guidance into `.gaai/project/contexts/rules/` before deletion.                         |
 | .jules/   | Legacy    | @agents | Jules-specific automation configuration; migrate unique ownership metadata into `.gaai/project/` and `.github/WORKFLOWS.md` before deletion.       |
 
