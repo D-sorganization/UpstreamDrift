@@ -11,14 +11,18 @@ nominal otherwise; the optimiser searches pace, so it needs no more.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 import numpy as np
 
 from src.shared.python.contracts import require
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
-from src.shared.python.putting_analytics.batch_roll import Capture, roll_batch
+from src.shared.python.putting_analytics.batch_roll import (
+    BatchRollResult,
+    Capture,
+    roll_batch,
+)
 from src.shared.python.putting_analytics.expected_putts import (
     PuttAction,
     PuttOutcomes,
@@ -56,19 +60,49 @@ class BatchRollModel:
         require(roll_m > 0.0, "planned roll must be positive", roll_m)
         return float(np.sqrt(2.0 * GRAVITY_M_S2 * decel * roll_m))
 
+    def roll_many(
+        self, distance_ft: float, actions: Sequence[PuttAction], n: int, seed: int
+    ) -> BatchRollResult:
+        """``n`` putts of every action in one batch, action-major (rows k*n..).
+
+        Every action shares the same execution noise draws (common random
+        numbers), and each putt rolls exactly as it would alone.
+        """
+        require(distance_ft > 0.0 and n > 0, "need a positive distance and count")
+        require(len(actions) > 0, "need at least one action")
+        line_err, ratio = self.execution(np.random.default_rng(seed), n)
+        aim = np.repeat([a.aim_offset_deg for a in actions], n)
+        nominal = [self.nominal_speed_mps(distance_ft, a.pace_ft_past) for a in actions]
+        heading = np.radians(aim + np.tile(line_err, len(actions)))
+        speed = np.repeat(nominal, n) * np.tile(ratio, len(actions))
+        zeros = np.zeros(speed.size)
+        start = np.stack(
+            (zeros, zeros, speed * np.cos(heading), speed * np.sin(heading), speed)
+        )
+        return roll_batch(start, self.surface, (distance_ft * FT_M, 0.0), self.capture)
+
+    def roll(
+        self, distance_ft: float, action: PuttAction, n: int, seed: int
+    ) -> BatchRollResult:
+        """Raw batch result (rest positions in metres, hole at ``(d, 0)``)."""
+        return self.roll_many(distance_ft, (action,), n, seed)
+
+    def simulate_many(
+        self, distance_ft: float, actions: Sequence[PuttAction], n: int, seed: int
+    ) -> list[PuttOutcomes]:
+        """Outcomes of every action, rolled together on common noise."""
+        result = self.roll_many(distance_ft, actions, n, seed)
+        leave_m = np.hypot(result.rest_x_m - distance_ft * FT_M, result.rest_y_m)
+        leave_ft = np.where(result.holed, 0.0, leave_m / FT_M)
+        return [
+            PuttOutcomes(
+                result.holed[k * n : (k + 1) * n], leave_ft[k * n : (k + 1) * n]
+            )
+            for k in range(len(actions))
+        ]
+
     def simulate(
         self, distance_ft: float, action: PuttAction, n: int, seed: int
     ) -> PuttOutcomes:
         """Roll ``n`` putts of ``action``; the same seed gives the same outcomes."""
-        require(distance_ft > 0.0 and n > 0, "need a positive distance and count")
-        line_err, ratio = self.execution(np.random.default_rng(seed), n)
-        heading = np.radians(action.aim_offset_deg + line_err)
-        speed = self.nominal_speed_mps(distance_ft, action.pace_ft_past) * ratio
-        zeros = np.zeros(n)
-        start = np.stack(
-            (zeros, zeros, speed * np.cos(heading), speed * np.sin(heading), speed)
-        )
-        hole = (distance_ft * FT_M, 0.0)
-        result = roll_batch(start, self.surface, hole, self.capture)
-        leave_m = np.hypot(result.rest_x_m - hole[0], result.rest_y_m - hole[1])
-        return PuttOutcomes(result.holed, np.where(result.holed, 0.0, leave_m / FT_M))
+        return self.simulate_many(distance_ft, (action,), n, seed)[0]
