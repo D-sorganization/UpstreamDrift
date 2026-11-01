@@ -1,0 +1,1 @@
+CI: `scripts/ci/install_ubuntu_dependencies.sh` bounds each `apt-get` attempt with `timeout` (default 420s, `APT_ATTEMPT_TIMEOUT`) and sets 30s HTTP/HTTPS acquire timeouts, so a stalled mirror download is killed and retried instead of holding a merge-queue job until its 150-minute timeout (#14178).
