@@ -7,9 +7,8 @@ Provides REST endpoints for the putting green simulation tool page:
 - Scatter analysis for practice mode
 
 Roll-model provenance (ADR-0045 F1, issue #9343; migrated #14141 steps 7a-7c):
-    The legacy UD roll law (``ud-legacy-roll/1``) is preserved in
-    ``src.engines.physics_engines.putting_green`` but no route runs it any
-    more: every route in this module — ``/simulate``, ``/scatter``,
+    The legacy UD roll law (``ud-legacy-roll/1``) is retired (ADR-0058)
+    and no route runs it: every route in this module — ``/simulate``, ``/scatter``,
     ``/contours``, ``/simulate-3d`` and, as of step 7c, ``/read-green`` — runs
     the surface-aware model in ``src.shared.python.putting_dynamics``, which
     restates the Tools stimpmeter law (``usga-stimp-roll/1``). ``roll_model``

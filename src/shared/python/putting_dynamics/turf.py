@@ -4,8 +4,8 @@ Migration source: ``src/engines/physics_engines/putting_green/python/
 turf_properties.py``, which now imports :class:`GrassType` and
 :class:`TurfCondition` from here so the tables have one home.
 
-**One law.** ADR-0045 keeps ``ud-legacy-roll/1`` in the engine; the
-shared core uses ``usga-stimp-roll/1`` only (Grober 2011 / USGA fixture).
+**One law.** The shared core uses ``usga-stimp-roll/1`` only (Grober
+2011 / USGA fixture); ``ud-legacy-roll/1`` is retired (ADR-0058).
 
 Every table value below is an **uncited engineering default**. Grain is
 stored as an angle: the engine's ``1 - g cos(theta_v - theta_grain)``

@@ -29,7 +29,7 @@ _PACKAGE_DIR = pathlib.Path(__file__).resolve().parents[3] / (
 
 class TestLegacyLawNotPorted:
     def test_0_196_does_not_appear_in_the_shared_package(self) -> None:
-        """ud-legacy-roll/1 stays in the engine (ADR-0045)."""
+        """ud-legacy-roll/1 is retired and must not return (ADR-0058)."""
         offenders = [
             path
             for path in _PACKAGE_DIR.glob("*.py")
