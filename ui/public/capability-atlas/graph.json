@@ -979,6 +979,20 @@
       "id": "tools.putting_green"
     },
     {
+      "feature_id": "tools.putting_studio",
+      "title": "Standalone offline putting studio (HTML client of the shared putting core)",
+      "status": "gap",
+      "pyqt": "src/tools/putting_green_gui/_scene_builder.py",
+      "api": null,
+      "web": "src/apps/putting_studio/index.html",
+      "issue": 14200,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Opens from file:// with vendored three.js/Tailwind (epic #14141 step 8). Its JS physics is a temporary copy gated by shared fixtures (SUNSET.md); the grip/torque explorer has no PyQt6 counterpart yet.",
+      "id": "tools.putting_studio"
+    },
+    {
       "feature_id": "tools.rate_of_closure",
       "title": "Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite)",
       "status": "gap",
@@ -3368,7 +3382,7 @@
   "inputs": {
     "src/config/models.yaml": "58d58762c2854bac4034d4cf71f3681913ca654ae98048fc81abb91ae90a8a90",
     "src/config/launcher_manifest.json": "6b480f79eb7be85b50918f7c3871449e170a651a36015a7d203ec0744f9ecd41",
-    "src/config/feature_parity.json": "7bcf9466f45acd47f65042c3c5758a3b86d5e4bcce23397eb7ba07cde58be061",
+    "src/config/feature_parity.json": "e2a0a3d03d85e965a9e8ea4c1e89fd707089fa423b4c905e2784bbe6c08e3fd1",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

@@ -124,6 +124,15 @@
       "tiles": ["putting_analytics"],
       "notes": "Desktop tool over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The /tools/putting-analytics API routes serve the same studies."
     },
+    "tools.putting_studio": {
+      "title": "Standalone offline putting studio (HTML client of the shared putting core)",
+      "pyqt": "src/tools/putting_green_gui/_scene_builder.py",
+      "api": null,
+      "web": "src/apps/putting_studio/index.html",
+      "status": "gap",
+      "issue": 14200,
+      "notes": "Opens from file:// with vendored three.js/Tailwind (epic #14141 step 8). Its JS physics is a temporary copy gated by shared fixtures (SUNSET.md); the grip/torque explorer has no PyQt6 counterpart yet."
+    },
     "tools.golf_simulator": {
       "title": "Golf Simulator capability-aware controls and replay submission",
       "pyqt": "src/tools/golf_simulator/gui.py",
