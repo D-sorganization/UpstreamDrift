@@ -18,7 +18,7 @@ from typing import Any
 from PyQt6 import QtWidgets
 
 from src.tools.async_action import AsyncActionBar, WorkerContext
-from src.tools.putting_analytics.core import (
+from src.tools.putting_analytics_gui.core import (
     MODES,
     OBJECTIVES,
     SERVICE_FUNCTIONS,
