@@ -37,6 +37,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.shared.python.contracts import ensure, require, require_finite
+from ._checks import require_finite_scalar
 
 __all__ = [
     "FrictionField",
@@ -187,8 +188,8 @@ class HeightField:
 
     def elevation(self, x_m: float, y_m: float) -> float:
         """Bilinear surface elevation at a point [m]."""
-        require_finite(x_m, "x_m")
-        require_finite(y_m, "y_m")
+        require_finite_scalar(x_m, "x_m")
+        require_finite_scalar(y_m, "y_m")
         ix, iy, tx, ty = _bilinear_setup(
             x_m, y_m, self.origin_m, self.spacing_m, self.heights_m.shape
         )
@@ -202,8 +203,8 @@ class HeightField:
 
     def gradient(self, x_m: float, y_m: float) -> tuple[float, float]:
         """Exact gradient of the bilinear patch, ``(dh/dx, dh/dy)``."""
-        require_finite(x_m, "x_m")
-        require_finite(y_m, "y_m")
+        require_finite_scalar(x_m, "x_m")
+        require_finite_scalar(y_m, "y_m")
         ix, iy, tx, ty = _bilinear_setup(
             x_m, y_m, self.origin_m, self.spacing_m, self.heights_m.shape
         )
@@ -279,8 +280,8 @@ class FrictionField:
 
     def multipliers(self, x_m: float, y_m: float) -> tuple[float, float]:
         """Bilinear ``(roll, slide)`` multipliers at a point."""
-        require_finite(x_m, "x_m")
-        require_finite(y_m, "y_m")
+        require_finite_scalar(x_m, "x_m")
+        require_finite_scalar(y_m, "y_m")
         ix, iy, tx, ty = _bilinear_setup(
             x_m, y_m, self.origin_m, self.spacing_m, self.roll_multiplier.shape
         )
