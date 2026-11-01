@@ -791,11 +791,41 @@ class ClubInHands:
                 self._schedule_friction()
             mj.mj_step(m, d)
 
+    def _resting_pairs(self) -> np.ndarray:
+        """Node pairs in contact with zero slip on every row (after forward)."""
+        d, n = self.data, self.data.ncon
+        if n == 0 or self.topology_model is None:
+            return np.zeros(0, dtype=int)
+        contact = d.contact
+        adr = np.asarray(contact.efc_address[:n], dtype=int)
+        pair = self._geom_pair[np.asarray(contact.geom1[:n], dtype=int)]
+        live = (adr >= 0) & (pair >= 0)
+        adr, pair = adr[live], pair[live]
+        slipping = np.hypot(d.efc_vel[adr + 1], d.efc_vel[adr + 2]) > 0.0
+        return np.setdiff1d(pair, pair[slipping])
+
     def sample(self) -> ContactSample:
-        """Exact hand pose at the current time, forward, and the contact wrench."""
-        hands = self.place_hands(float(self.data.time))
-        self._mj.mj_forward(self.model, self.data)
-        return self.read(hands)
+        """Exact hand pose at the current time, forward, and the contact wrench.
+
+        The shared law's friction ``g(v) f_n v`` is zero at zero slip, but
+        MuJoCo's soft friction rows answer the applied load with a regulariser
+        force even at rest (the at-rest t = 0 hold, #13560).  Pairs resting on
+        every row are therefore read frictionless (``condim`` 1), then restored.
+        """
+        mj, m, d = self._mj, self.model, self.data
+        hands = self.place_hands(float(d.time))
+        mj.mj_forward(m, d)
+        resting = self._resting_pairs()
+        if resting.size == 0:
+            return self.read(hands)
+        condim = m.pair_dim[resting].copy()
+        m.pair_dim[resting] = 1  # frictionless rows
+        try:
+            mj.mj_forward(m, d)
+            return self.read(hands)
+        finally:  # restore, and forward again so the stepping sees friction rows
+            m.pair_dim[resting] = condim
+            mj.mj_forward(m, d)
 
 
 def _stack(samples: list[ContactSample]) -> dict[str, Any]:

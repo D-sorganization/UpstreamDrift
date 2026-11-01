@@ -615,8 +615,8 @@ _DETERMINATE_ENGINE_CASES = [
         id="drake-ten_finger-swing",
     ),
     # MuJoCo (G8): passes all determinate quantities across all styles and motions
-    # (the per-row friction gain schedule closed the ten_finger hold gap, #13306)
-    # except ten_finger hold net_moment_com since #13555 (#13560)
+    # (the per-row friction gain schedule closed the ten_finger hold gap, #13306;
+    # the at-rest t = 0 sample carries the law's zero friction, #13560)
     pytest.param(
         "mujoco",
         GripStyle.OVERLAP,
@@ -635,10 +635,7 @@ _DETERMINATE_ENGINE_CASES = [
         "mujoco",
         GripStyle.TEN_FINGER,
         "hold",
-        marks=[
-            pytest.mark.requires_mujoco,
-            _net_moment_xfail("MuJoCo ten_finger hold", "peak 0.631% / RMS 2.266%"),
-        ],
+        marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-hold",
     ),
     pytest.param(
