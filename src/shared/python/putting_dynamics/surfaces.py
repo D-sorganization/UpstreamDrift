@@ -186,13 +186,17 @@ class HeightField:
             origin_m=(-extent_m / 2.0, -extent_m / 2.0),
         )
 
-    def elevation(self, x_m: float, y_m: float) -> float:
-        """Bilinear surface elevation at a point [m]."""
+    def _cell(self, x_m: float, y_m: float) -> tuple[int, int, float, float]:
+        """Grid cell and in-cell fractions for a finite point."""
         require_finite_scalar(x_m, "x_m")
         require_finite_scalar(y_m, "y_m")
-        ix, iy, tx, ty = _bilinear_setup(
+        return _bilinear_setup(
             x_m, y_m, self.origin_m, self.spacing_m, self.heights_m.shape
         )
+
+    def elevation(self, x_m: float, y_m: float) -> float:
+        """Bilinear surface elevation at a point [m]."""
+        ix, iy, tx, ty = self._cell(x_m, y_m)
         h = self.heights_m
         return float(
             h[iy, ix] * (1 - tx) * (1 - ty)
@@ -203,11 +207,7 @@ class HeightField:
 
     def gradient(self, x_m: float, y_m: float) -> tuple[float, float]:
         """Exact gradient of the bilinear patch, ``(dh/dx, dh/dy)``."""
-        require_finite_scalar(x_m, "x_m")
-        require_finite_scalar(y_m, "y_m")
-        ix, iy, tx, ty = _bilinear_setup(
-            x_m, y_m, self.origin_m, self.spacing_m, self.heights_m.shape
-        )
+        ix, iy, tx, ty = self._cell(x_m, y_m)
         h = self.heights_m
         dhdx = (
             (h[iy, ix + 1] - h[iy, ix]) * (1 - ty)
