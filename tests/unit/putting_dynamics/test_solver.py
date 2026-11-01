@@ -287,3 +287,47 @@ class TestStrikeFromAnyStartAndHeading:
         assert rotated.total_distance_m == pytest.approx(
             baseline.total_distance_m, rel=1e-9
         )
+
+
+class TestTinySlipRollOnset:
+    """Regression tests for tiny initial slip near roll onset (#14193)."""
+
+    @pytest.mark.parametrize(
+        "f",
+        [0.99, 0.999, 0.9999, 1.0001, 1.001, 1.01],
+    )
+    def test_tiny_initial_slip_transitions_to_roll_and_rest(self, f: float) -> None:
+        surface = SurfaceSpec.flat_uniform(11.0)
+        v = 1.5
+        ball = BallState(
+            x_m=0.0,
+            y_m=0.0,
+            vx_mps=v,
+            vy_mps=0.0,
+            spin_rad_s=f * v / _R,
+        )
+        result = simulate_ball(ball, surface)
+        assert result.final_mode is Mode.REST
+        assert result.time_s < 10.0
+        # Reference rollout for f = 1.0 is ~2.25 m. Tiny slip should stop within 3 cm.
+        pure_roll = simulate_ball(
+            BallState(0.0, 0.0, vx_mps=v, spin_rad_s=v / _R), surface
+        )
+        assert result.rest_x_m == pytest.approx(pure_roll.rest_x_m, abs=0.03)
+        assert result.total_distance_m == pytest.approx(
+            pure_roll.total_distance_m, abs=0.03
+        )
+
+    def test_tiny_slip_on_slope_transitions_to_roll(self) -> None:
+        surface = _sloped_surface(grade=3.0, aspect=0.0, stimp=10.0)
+        v = 1.5
+        ball = BallState(
+            x_m=0.0,
+            y_m=0.0,
+            vx_mps=v,
+            vy_mps=0.0,
+            spin_rad_s=0.999 * v / _R,
+        )
+        result = simulate_ball(ball, surface)
+        assert result.final_mode is Mode.REST
+        assert result.time_s < 10.0

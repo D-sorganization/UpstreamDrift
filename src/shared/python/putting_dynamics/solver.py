@@ -399,6 +399,16 @@ def simulate_ball(
             if restarted is None:
                 break
             state, sliding = restarted, False
+        if sliding:
+            slip = speed - state[4]
+            heading = math.atan2(state[3], state[2]) if speed > 0.0 else 0.0
+            _roll_mult, slide_mult = surface.friction_field.multipliers(
+                state[0], state[1]
+            )
+            mu = sliding_mu(surface.friction, slide_mult, heading)
+            if abs(slip) <= 3.5 * mu * _G * DT_S:
+                sliding = False
+                state, speed = _roll_onset_state(state, speed)
         prev = state
         previous_slip = math.hypot(prev[2], prev[3]) - prev[4]
         state = _rk4_step(state, sliding, surface)
@@ -413,7 +423,8 @@ def simulate_ball(
             within_one_step = (
                 abs(current_slip) <= abs(current_slip - previous_slip) + 1e-12
             )
-            if crossed_zero or within_one_step:
+            chattering = abs(current_slip - previous_slip) <= 1e-12
+            if crossed_zero or within_one_step or chattering:
                 sliding = False
                 state, speed = _roll_onset_state(state, speed)
         if not sliding:
