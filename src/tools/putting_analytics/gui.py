@@ -3,18 +3,21 @@
 The window only collects inputs and shows rows: :mod:`.core` builds the service
 arguments and formats answers, and the studies themselves run in
 :mod:`src.shared.python.putting_analytics.service` (the same functions the MCP
-tools and the ``/tools/putting-analytics`` API call). Each study runs on a
-worker thread because a large rollout count takes a few seconds.
+tools and the ``/tools/putting-analytics`` API call). Each study runs off the
+GUI thread through the shared :class:`src.tools.async_action.AsyncActionBar`
+because a large rollout count takes a few seconds. The studies cannot stop
+part-way, so Cancel discards the result when the running study returns.
 """
 
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
-from PyQt6 import QtCore, QtWidgets
+from PyQt6 import QtWidgets
 
+from src.tools.async_action import AsyncActionBar, WorkerContext
 from src.tools.putting_analytics.core import (
     MODES,
     OBJECTIVES,
@@ -27,7 +30,6 @@ from src.tools.putting_analytics.core import (
 
 logger = logging.getLogger(__name__)
 
-SHUTDOWN_WAIT_MS = 5_000
 _MODE_LABELS = {
     "optimize": "Best aim and pace",
     "misread_cost": "Cost of misreads",
@@ -40,26 +42,24 @@ _CLASSES_HINT = (
 )
 
 
-class StudyWorker(QtCore.QObject):
-    """Run one service call off the GUI thread."""
+_CANCEL_TOOLTIP = (
+    "A study cannot stop part-way; Cancel discards its result when it returns."
+)
+_REJECTION_PREFIX = "ValueError: "
 
-    finished = QtCore.pyqtSignal(object)
-    failed = QtCore.pyqtSignal(str)
 
-    def __init__(self, function_name: str, args: Mapping[str, Any]) -> None:
-        super().__init__()
-        self._function_name = function_name
-        self._args = dict(args)
+def _study_work(
+    function_name: str, args: Mapping[str, Any]
+) -> Callable[[WorkerContext], Any]:
+    """Build the worker callable for one service study (runs off the GUI thread)."""
+    frozen_args = dict(args)
 
-    def run(self) -> None:
+    def work(_ctx: WorkerContext) -> Any:
         from src.shared.python.putting_analytics import service
 
-        try:
-            result = getattr(service, self._function_name)(self._args)
-        except ValueError as exc:
-            self.failed.emit(str(exc))
-            return
-        self.finished.emit(result)
+        return getattr(service, function_name)(frozen_args)
+
+    return work
 
 
 def _spin(low: float, high: float, value: float, decimals: int = 2) -> Any:
@@ -75,8 +75,6 @@ class MainWidget(QtWidgets.QWidget):
 
     def __init__(self, parent: Any | None = None) -> None:
         super().__init__(parent)
-        self._thread: Any | None = None
-        self._worker: StudyWorker | None = None
         self._mode = MODES[0]
         self._closed = False
         self.setWindowTitle("Putting Analytics")
@@ -146,12 +144,16 @@ class MainWidget(QtWidgets.QWidget):
             "Enter your own expected-putts curve; no reference data ships."
         )
         self.status_label.setWordWrap(True)
+        self.action_bar = AsyncActionBar()
+        self.action_bar.set_trigger_buttons(self.run_button)
+        self.action_bar.cancel_button.setToolTip(_CANCEL_TOOLTIP)
         self.table = QtWidgets.QTableWidget(0, 2)
         self.table.setHorizontalHeaderLabels(["Quantity", "Value"])
         header = self.table.horizontalHeader()
         if header is not None:
             header.setStretchLastSection(True)
         layout.addWidget(self.status_label)
+        layout.addWidget(self.action_bar)
         layout.addWidget(self.table, 1)
         return panel
 
@@ -182,7 +184,7 @@ class MainWidget(QtWidgets.QWidget):
 
     @property
     def is_running(self) -> bool:
-        return self._thread is not None
+        return self.action_bar.is_running
 
     def run_study(self) -> None:
         """Validate the form and start the selected study on a worker thread."""
@@ -197,20 +199,14 @@ class MainWidget(QtWidgets.QWidget):
         self._start_worker(mode, args)
 
     def _start_worker(self, mode: str, args: Mapping[str, Any]) -> None:
-        thread = QtCore.QThread(self)
-        worker = StudyWorker(SERVICE_FUNCTIONS[mode], args)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        # Bound methods (not lambdas) so Qt queues the result onto this thread.
-        worker.finished.connect(self._show)
-        worker.failed.connect(self._fail)
-        worker.finished.connect(thread.quit)
-        worker.failed.connect(thread.quit)
-        thread.finished.connect(self._worker_done)
-        self._thread, self._worker, self._mode = thread, worker, mode
-        self.run_button.setEnabled(False)
+        self._mode = mode
         self.status_label.setText(f"Running: {_MODE_LABELS[mode]}...")
-        thread.start()
+        self.action_bar.start(
+            _MODE_LABELS[mode],
+            _study_work(SERVICE_FUNCTIONS[mode], args),
+            on_finished=self._show,
+            on_failed=self._fail,
+        )
 
     def _show(self, result: Mapping[str, Any]) -> None:
         if self._closed:
@@ -219,16 +215,13 @@ class MainWidget(QtWidgets.QWidget):
         self.status_label.setText(f"Done: {_MODE_LABELS[self._mode]}.")
 
     def _fail(self, message: str) -> None:
-        if not self._closed:
-            self.status_label.setText(f"The study rejected the inputs: {message}")
-
-    def _worker_done(self) -> None:
-        thread = self._thread
-        self._thread, self._worker = None, None
-        if thread is not None:
-            thread.deleteLater()
-        if not self._closed:
-            self.run_button.setEnabled(True)
+        if self._closed:
+            return
+        if message.startswith(_REJECTION_PREFIX):
+            reason = message.removeprefix(_REJECTION_PREFIX)
+            self.status_label.setText(f"The study rejected the inputs: {reason}")
+            return
+        self.status_label.setText(f"The study failed: {message}")
 
     def show_rows(self, rows: Rows) -> None:
         self.table.setRowCount(len(rows))
@@ -237,26 +230,28 @@ class MainWidget(QtWidgets.QWidget):
             self.table.setItem(index, 1, QtWidgets.QTableWidgetItem(value))
 
     def cleanup(self) -> bool:
-        """Join the active worker; ``False`` if it outlived the wait."""
+        """Cancel and join the active study; ``False`` if it outlived the wait."""
         self._closed = True
-        thread = self._thread
-        if thread is None:
-            return True
-        thread.quit()
-        stopped = bool(thread.wait(SHUTDOWN_WAIT_MS))
+        stopped = self.action_bar.shutdown()
         if not stopped:
             logger.warning("Putting study still running at shutdown")
         return stopped
 
     def delete_when_idle(self) -> None:
-        """Defer deletion until a worker that outlived shutdown finishes."""
-        if self._thread is None:
+        """Defer deletion until a study that outlived shutdown finishes."""
+        if not self.is_running:
             self.deleteLater()
             return
-        self._thread.finished.connect(self.deleteLater)
+        self.action_bar.finished.connect(self._delete_if_idle)
+        self.action_bar.failed.connect(self._delete_if_idle)
+        self.action_bar.cancelled.connect(self._delete_if_idle)
+
+    def _delete_if_idle(self, *_args: object) -> None:
+        if not self.is_running:
+            self.deleteLater()
 
     def is_dirty(self) -> bool:
         return False
 
 
-__all__ = ["MainWidget", "StudyWorker"]
+__all__ = ["MainWidget"]
