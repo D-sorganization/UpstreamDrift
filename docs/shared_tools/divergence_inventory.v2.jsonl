@@ -2248,6 +2248,7 @@
 {"path": "putting_analytics/batch_roll.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/expected_putts.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/optimize.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
+{"path": "putting_analytics/perceived_green.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/roll_model.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_dynamics/__init__.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
 {"path": "putting_dynamics/collision.py", "classification": "ud-only", "package": "putting_dynamics", "spelling_only": false}
