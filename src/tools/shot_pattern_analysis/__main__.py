@@ -158,21 +158,11 @@ def main(argv: list[str] | None = None) -> int:
 
 def launch_gui() -> int:
     """Open the optional standalone desktop window when invoked without flags."""
-    try:
-        from PyQt6.QtWidgets import QApplication
-        from src.tools.shot_pattern_analysis.gui import MainWidget
-    except (ImportError, OSError) as exc:
-        sys.stderr.write(
-            "The desktop window requires the GUI extra. Install with:\n"
-            "  pip install -e '.[gui-tools]'\n"
-            f"Import error: {exc}\n"
-        )
-        return 1
-    app = QApplication(sys.argv)
-    widget = MainWidget()
-    widget.resize(1200, 900)
-    widget.show()
-    return app.exec()
+    from src.tools.standalone_window import run_standalone_widget
+
+    return run_standalone_widget(
+        "src.tools.shot_pattern_analysis.gui:MainWidget", (1200, 900)
+    )
 
 
 if __name__ == "__main__":
