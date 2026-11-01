@@ -48,12 +48,12 @@ jobs:
           app-id: ${{ secrets.JULES_APP_ID }}
           private-key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          # Only what the sweep uses: read RM scripts, and disarm, label and
-          # comment on UD pull requests (#14214).
+          # Only what the sweep uses. contents: write because auto-merge and merge-queue
+          # mutations (dequeue, disable auto-merge) are refused under read (RM #1499); #14214.
           repositories: |
             UpstreamDrift
             Repository_Management
-          permission-contents: read
+          permission-contents: write
           permission-pull-requests: write
           permission-issues: write
 

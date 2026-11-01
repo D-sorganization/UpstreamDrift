@@ -67,7 +67,7 @@ def test_conflict_disarm_app_token_is_scoped_to_ud_and_rm() -> None:
 
     assert repositories == {"UpstreamDrift", "Repository_Management"}
     assert permissions == {
-        "permission-contents": "read",
+        "permission-contents": "write",
         "permission-pull-requests": "write",
         "permission-issues": "write",
     }
