@@ -9,6 +9,7 @@ from pathlib import Path
 ALLOWLIST: frozenset[str] = frozenset(
     {
         "README.md",
+        "REVIEW.md",  # repo review rules (RM #2565, UD #14180)
         "LICENSE",
         "CHANGELOG.md",
         "CONTRIBUTING.md",

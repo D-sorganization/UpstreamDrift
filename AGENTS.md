@@ -526,9 +526,7 @@ Full rule: [fleet-rules/deferred-validation.md](https://github.com/D-sorganizati
 
 <!-- BEGIN FLEET-MANAGED: pr-queue-consolidation -->
 
-### PR Queue Consolidation
-
-**Backstop** when [lane PRs](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-prs.md) did not keep the queue small: with 6 or more open non-draft PRs under strict branch protection, or runner use at 70 % or more, consolidate eligible PRs into one branch and PR instead of draining them serially. Never fold in drafts, workflow changes or another live session's PRs.
+Disabled by owner (Dieter, 2026-10-26); never consolidate PRs.
 
 Full rule: [fleet-rules/pr-queue-consolidation.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/pr-queue-consolidation.md) (synced from Repository_Management; edit the source there).
 
@@ -556,12 +554,12 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 > Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/pr-lifecycle.md.
 
 1. **Before pushing, run `python -m scripts.pre_pr` (RM-6).** Push once.
-2. **Open or update your lane PR ready (never as a draft).** “Ready” means **non-draft**, not “request a human reviewer.” Fleet branch rules require **zero** approving reviews and no code-owner review gate — **agents never request human reviewers** (`gh pr edit --add-reviewer`, `gh pr create --reviewer`, REST/GraphQL `requested_reviewers`, or equivalent). If blocked, use a `Blocked:` section in a ready PR (see [lane-prs.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-prs.md)). Arm squash auto-merge with `scripts/automerge_guard.py` (or `gh pr merge --auto --squash`) immediately; then end the session. Do not schedule check-ins, subscribe to PR activity, or enable Auto-fix.
+2. **Open or update your lane PR ready (never as a draft).** “Ready” means non-draft; agents never request human reviewers. If blocked, use a `Blocked:` section (see [lane-prs.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-prs.md)). Arm auto-merge with `scripts/automerge_guard.py`; let the repository or merge queue select the method, then end the session. Do not schedule check-ins, subscribe to PR activity, or enable Auto-fix.
 3. **If CI goes red, Runner Dashboard dispatches the fix (RD-1).** Do not revive the original session.
 4. **A follow-up hours later goes in a new session with a one-paragraph brief.**
 5. **Don't switch models mid-session (it throws away the prompt cache).**
 6. **PR size and stacking.** Every PR must stay under 500 changed lines. Target `main` directly; never stack PRs. Deletion-only PRs may exceed 500 lines.
-7. **Issue closure evidence.** Include `Closes #<issue>` on a real newline in PR descriptions (never literal `\\n`). Never run `gh issue close` unless citing a verified merged PR `#<num>` in `--comment` or after applying an exempt label (`duplicate`, `wontfix`, `invalid`, `not-planned`, `roadmap`).
+7. **Issue closure evidence.** Include `Closes #<issue>` on a real newline in PR descriptions (never literal `\n`). Never run `gh issue close` unless citing a verified merged PR `#<num>` in `--comment` or after applying an exempt label (`duplicate`, `wontfix`, `invalid`, `not-planned`, `roadmap`).
 
 <!-- END FLEET-MANAGED: pr-lifecycle -->
 
@@ -573,8 +571,8 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 
 > Managed centrally; edit `Repository_Management/fleet-rules/agent-identity.md` ([#1917](https://github.com/D-sorganization/Repository_Management/issues/1917)).
 
-- **The owner's personal token is an approved identity.** Agents may run `gh`/`git` under the owner's personal token (`ghp_`, `github_pat_`, `gho_`); this is owner-approved (2026-10-10) and is never a reason to stop, refuse or ask. A GitHub App bot identity (`d-sorgclaudeagent`, `d-sorgcodexagent`, …) is used automatically where a host has one configured. Setup: [docs/agents/session-setup.md](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agents/session-setup.md).
-- **A personal token carries admin rights — do not use them.** Whatever the token, the rules below still apply.
+- **Fleet App bot identity only (owner ruling 2026-10-28, retires the prior personal-token clause).** Agents run `gh`/`git` as the fleet App bot. A GitHub App bot identity (`d-sorgclaudeagent`, `d-sorgcodexagent`, …) is used automatically where a host has one configured. Setup: [docs/agents/session-setup.md](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agents/session-setup.md).
+- **The owner's personal token (`ghp_`, `github_pat_`, `gho_`) is not an approved agent identity.** Use `gh-personal` only when the owner explicitly asks for an owner-run task. Otherwise, if the bot identity is unavailable or a write would run under a personal login, STOP, make no write, and report it.
 - **Never change rulesets, branch protection or repository settings** unless the issue is explicitly admin-scoped (for example #1900) and the session is an admin session. Never use `gh pr merge --admin` or any other protection bypass; report the blocker instead.
 - **Never touch another session's PR state.** Do not convert it to or from draft, disable its auto-merge, or close it. Only the redundant-PR closer closes PRs.
 - **On Dieter's Windows hosts, `gh` is the fleet App wrapper (#2188).** `C:/Users/diete/.claude/fleet-gh/bin` is first on `PATH` via the `fleet-gh-app` block in PowerShell `profile.ps1`. In an agent process (Claude Code, Cursor, Codex, agy, or `FLEET_AGENT_SESSION=1`) it mints an App token for `D-sorganization` repos — `gh` runs as the bot regardless of `GH_TOKEN` / `GITHUB_TOKEN`. Dieter's own terminal keeps his personal login (#2303). **Agents keep using `gh` (bot identity); never impersonate Dieter.**
@@ -590,7 +588,7 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 
 ### Merge Queue
 
-- Every fleet repository merges through the GitHub merge queue. Arm PRs **only** with `python scripts/automerge_guard.py <owner>/<repo> <pr> --arm --strategy squash`; never `gh pr merge --admin`.
+- Every fleet repository merges through the GitHub merge queue. Arm PRs **only** with `python scripts/automerge_guard.py <owner>/<repo> <pr> --arm`; never pass a merge-method flag or use `gh pr merge --admin`.
 - **Never update PR branches to keep up with `main`** (`gh pr update-branch`, Auto-Update PRs workflows, rebasing a green PR). Rebase only for a real conflict. A queued PR reads `auto_merge: null`; do not re-arm or push to it.
 - Workflows that report a required check must trigger on `merge_group:`, and a `push:` trigger needs `branches-ignore: ["gh-readonly-queue/**"]`. Never edit the merge-queue rulesets without an owner decision on #1900.
 
@@ -624,7 +622,7 @@ remote, not only on the machine where it was written.
 
 1. **Work on a feature branch, never `main`.** Open a PR from that branch; do not commit on the default branch.
 2. **Commit at every meaningful checkpoint** — at least after each passing test step and before any handoff, pause, or end of session — **and push to `origin`.** Unpushed commits are not handed off.
-3. **Always open PRs ready (non-draft).** Agents never request human reviewers on PRs — CI, branch protection, and the merge queue are the only gates. Arm squash auto-merge immediately via `python scripts/automerge_guard.py <owner/repo> <pr> --arm --strategy squash` or `gh pr merge --auto --squash`. If work is blocked, still open a ready PR whose body has a `Blocked:` section explaining why; CI and branch protection are the gates, not a human “mark ready” step.
+3. **Always open PRs ready (non-draft).** Agents never request human reviewers on PRs — CI, branch protection, and the merge queue are the only gates. Arm auto-merge immediately via `python scripts/automerge_guard.py <owner/repo> <pr> --arm`; the repository or merge queue selects the method. If work is blocked, still open a ready PR whose body has a `Blocked:` section explaining why; CI and branch protection are the gates, not a human “mark ready” step.
 4. **Before reporting done or handing off, run `git status`.** A dirty working tree or unpushed commits means the work is not done.
 5. **Do not commit secrets or local environment files** (for example `.env`); use `.env.example` patterns and keep credentials out of git.
 
@@ -636,7 +634,7 @@ remote, not only on the machine where it was written.
 
 ### Lane PRs (One Open PR per Work Lane)
 
-Default workflow: one open non-draft PR per work lane on branch `<agent>/<lane-slug>` (or label `agent:<id>`). Push further fixes to that branch; do not open a second PR for the same lane. When a repo has more than 10 open non-draft PRs, the Orchestrator maintains a lane plan (UpstreamDrift #13340 format). [PR queue consolidation](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/pr-queue-consolidation.md) is the backstop when the queue is already large.
+Default workflow: one open non-draft PR per work lane on branch `<agent>/<lane-slug>` (or label `agent:<id>`). Push further fixes to that branch; do not open a second PR for the same lane. Cap: three non-draft open PRs per agent per repo. Over 10 open non-draft PRs in a repo, the Orchestrator keeps a lane plan (UpstreamDrift #13340 format). [PR queue consolidation](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/pr-queue-consolidation.md) is the backstop for a large queue.
 
 Full rule: [fleet-rules/lane-prs.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-prs.md) (synced from Repository_Management; edit the source there).
 
