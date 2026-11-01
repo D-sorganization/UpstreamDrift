@@ -77,6 +77,7 @@ __all__ = [
     "capture_speed_mps",
     "simulate_ball",
     "simulate_strike",
+    "struck_ball_state",
 ]
 
 #: USGA hole radius [m] (4.25 in diameter).
@@ -97,6 +98,8 @@ _G = float(GRAVITY_M_S2)
 
 #: Ball radius as a plain float for the inner loop.
 _R_BALL = float(GOLF_BALL_RADIUS_M)
+#: Largest entry offset evaluated; a grazing entry has a ~zero bound.
+_RIM_OFFSET_M = HOLE_RADIUS_M * (1.0 - 1e-9)
 
 _State = tuple[float, float, float, float, float]
 
@@ -158,13 +161,33 @@ def _roll_onset_state(state: _State, speed: float) -> tuple[_State, float]:
     return rolled, v_roll
 
 
-def capture_speed_mps() -> float:
-    """Full-chord capture bound ``2 R sqrt(g / (2 r))`` (module credit).
+def capture_speed_mps(entry_offset_m: float = 0.0) -> float:
+    """Chord-limited capture bound ``2 sqrt(R^2 - b^2) sqrt(g / (2 r))``.
+
+    A ball entering at perpendicular offset ``b`` from the hole centre
+    crosses a chord ``2 sqrt(R^2 - b^2)`` and must fall one ball radius
+    while doing so (module credit). ``b = 0`` gives the full-diameter
+    bound.
+
+    Args:
+        entry_offset_m: Perpendicular entry offset ``b`` [m],
+            ``|b| < HOLE_RADIUS_M``.
 
     Returns:
-        The dead-centre capture bound [m/s], ~1.64.
+        The capture bound [m/s]: ~1.64 at the centre, falling to 0 at
+        the rim.
+
+    Raises:
+        ValueError: If the offset is not finite or reaches the rim.
     """
-    return 2.0 * HOLE_RADIUS_M * math.sqrt(_G / (2.0 * _R_BALL))
+    require_finite(entry_offset_m, "entry_offset_m")
+    require(
+        abs(entry_offset_m) < HOLE_RADIUS_M,
+        "entry offset must lie inside the hole",
+        entry_offset_m,
+    )
+    chord = 2.0 * math.sqrt(HOLE_RADIUS_M**2 - entry_offset_m**2)
+    return chord * math.sqrt(_G / (2.0 * _R_BALL))
 
 
 def _derivative(state: _State, sliding: bool, surface: SurfaceSpec) -> _State:
@@ -220,6 +243,7 @@ class _Recorder:
         )
         self.speed_at_hole: float | None = None
         self.holed = False
+        self.capture_bound = 0.0
 
     def record(
         self,
@@ -243,15 +267,25 @@ class _Recorder:
             )
         )
 
-    def check_hole(self, x: float, y: float, speed: float, on_ground: bool) -> bool:
-        """Track hole crossing; True when captured."""
+    def check_hole(
+        self, x: float, y: float, vx: float, vy: float, on_ground: bool
+    ) -> bool:
+        """Track hole crossing; True when captured.
+
+        The entry offset is fixed at first entry from the velocity
+        direction: ``b = |v_hat x (hole - position)|``.
+        """
         if self.hole is None or not on_ground:
             return False
-        if math.hypot(x - self.hole[0], y - self.hole[1]) > HOLE_RADIUS_M:
+        dx, dy = self.hole[0] - x, self.hole[1] - y
+        if math.hypot(dx, dy) > HOLE_RADIUS_M:
             return False
+        speed = math.hypot(vx, vy)
         if self.speed_at_hole is None:
             self.speed_at_hole = speed
-        if speed <= capture_speed_mps():
+            offset = abs(vx * dy - vy * dx) / speed if speed > 0.0 else 0.0
+            self.capture_bound = capture_speed_mps(min(offset, _RIM_OFFSET_M))
+        if speed <= self.capture_bound:
             self.holed = True
             return True
         return False
@@ -365,6 +399,16 @@ def simulate_ball(
             if restarted is None:
                 break
             state, sliding = restarted, False
+        if sliding:
+            slip = speed - state[4]
+            heading = math.atan2(state[3], state[2]) if speed > 0.0 else 0.0
+            _roll_mult, slide_mult = surface.friction_field.multipliers(
+                state[0], state[1]
+            )
+            mu = sliding_mu(surface.friction, slide_mult, heading)
+            if abs(slip) <= 3.5 * mu * _G * DT_S:
+                sliding = False
+                state, speed = _roll_onset_state(state, speed)
         prev = state
         previous_slip = math.hypot(prev[2], prev[3]) - prev[4]
         state = _rk4_step(state, sliding, surface)
@@ -379,7 +423,8 @@ def simulate_ball(
             within_one_step = (
                 abs(current_slip) <= abs(current_slip - previous_slip) + 1e-12
             )
-            if crossed_zero or within_one_step:
+            chattering = abs(current_slip - previous_slip) <= 1e-12
+            if crossed_zero or within_one_step or chattering:
                 sliding = False
                 state, speed = _roll_onset_state(state, speed)
         if not sliding:
@@ -388,7 +433,7 @@ def simulate_ball(
         spin = state[4] / _R_BALL
         mode = Mode.SLIDE if sliding else Mode.ROLL
         rec.record(t, state[0], state[1], 0.0, speed, spin, mode)
-        if rec.check_hole(state[0], state[1], speed, on_ground=True):
+        if rec.check_hole(state[0], state[1], state[2], state[3], on_ground=True):
             break
 
     last = rec.samples[-1]
@@ -415,17 +460,46 @@ def simulate_ball(
     return result
 
 
+def struck_ball_state(
+    report: CollisionReport,
+    x_m: float = 0.0,
+    y_m: float = 0.0,
+    heading_rad: float = 0.0,
+) -> BallState:
+    """Post-impact ball at ``(x, y)``, launched along ``heading_rad``.
+
+    The defaults (origin, heading 0) are the putter's own forward axis.
+    """
+    require_finite(x_m, "x_m")
+    require_finite(y_m, "y_m")
+    require_finite(heading_rad, "heading_rad")
+    ground_speed = report.horizontal_speed_mps
+    return BallState(
+        x_m=x_m,
+        y_m=y_m,
+        height_m=0.0,
+        vx_mps=ground_speed * math.cos(heading_rad),
+        vy_mps=ground_speed * math.sin(heading_rad),
+        vz_mps=max(report.vertical_speed_mps, 0.0),
+        spin_rad_s=report.spin_rad_s,
+    )
+
+
 def simulate_strike(
     putter: PutterState,
     surface: SurfaceSpec,
     impact_toe_m: float = 0.0,
     hole_x_m: float | None = None,
     hole_y_m: float | None = None,
+    start_x_m: float = 0.0,
+    start_y_m: float = 0.0,
+    heading_rad: float = 0.0,
 ) -> PuttResult:
     """Strike the ball with a putter and integrate the full putt.
 
-    Chains :func:`~.collision.strike` (impulse + hosel twist), the
-    airborne rise/settle phase, and the surface mode machine.
+    Chains :func:`~.collision.strike` (impulse + hosel twist),
+    :func:`struck_ball_state` (placement and heading), the airborne
+    rise/settle phase, and the surface mode machine.
 
     Args:
         putter: Putter head at impact.
@@ -433,6 +507,9 @@ def simulate_strike(
         impact_toe_m: Strike offset toe-ward of the head CG [m].
         hole_x_m: Hole center x [m]; hole disabled when None.
         hole_y_m: Hole center y [m]; hole disabled when None.
+        start_x_m: Ball start x [m]; defaults to the origin.
+        start_y_m: Ball start y [m]; defaults to the origin.
+        heading_rad: Putter forward-axis heading, CCW from +x [rad].
 
     Returns:
         The integrated :class:`~.types.PuttResult` with its
@@ -442,15 +519,7 @@ def simulate_strike(
         Same guarantees as :func:`simulate_ball`, which enforces them.
     """
     report = strike(putter, impact_toe_m=impact_toe_m)
-    ball = BallState(
-        x_m=0.0,
-        y_m=0.0,
-        height_m=0.0,
-        vx_mps=report.horizontal_speed_mps,
-        vy_mps=0.0,
-        vz_mps=max(report.vertical_speed_mps, 0.0),
-        spin_rad_s=report.spin_rad_s,
-    )
+    ball = struck_ball_state(report, start_x_m, start_y_m, heading_rad)
     return simulate_ball(
         ball,
         surface,

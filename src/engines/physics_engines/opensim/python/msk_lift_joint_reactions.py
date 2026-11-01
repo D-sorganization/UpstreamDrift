@@ -34,6 +34,7 @@ from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_bound im
     muscles_crossing_joint,
     prepare_reaction_model,
     static_hold_analytic_bound,
+    supine_bench_bound,
 )
 from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_report import (
     JointReactionSeries,
@@ -41,6 +42,9 @@ from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_report i
     format_joint_reaction_solution,
     summarize_phase_reactions,
     unavailable_joint_reaction_record,
+)
+from src.engines.physics_engines.opensim.python.msk_lift_model import (
+    external_load_sources,
 )
 from src.engines.physics_engines.opensim.python.msk_lift_muscles import (
     MuscleBasis,
@@ -329,11 +333,6 @@ def _unavailable_reason(lift: str, osl4_qual: dict[str, Any]) -> str | None:
         return str(osl4_qual.get("reason", f"no OSL-4 muscle solve for {lift}"))
     if osl4_qual.get("mean_reserve_share") is None and "reason" in osl4_qual:
         return str(osl4_qual["reason"])
-    if lift == "bench_press":
-        return (
-            "bench press joint reaction loads require a supine bench external-load "
-            "model (OSL-5 covers standing lifts only)"
-        )
     bundle_path = SAME_INPUT_LIFT_BUNDLES.get(lift)
     if bundle_path is None or not bundle_path.is_file():
         return (
@@ -421,11 +420,14 @@ def evaluate_lift_joint_reactions(
         else None
     )
     static_bound = static_hold_analytic_bound(lift, build.model, real_lift_info)
+    if targets.bench_force_n:
+        static_bound = supine_bench_bound(static_bound, ikid.static_hold_grf(build))
 
     extra_ctx = {
         "bar_mass_kg": targets.bar_mass_kg,
         "peak_lumbar_moment_nm": _peak_lumbar_moment(ik.coordinates, inverse.tau),
         "qualification_info": osl4_qual,
+        "external_load_source": external_load_sources(targets),
         "acceleration_realization": {
             "stride": int(stride),
             "worst_frame": reaction_context.get("acceleration_worst"),

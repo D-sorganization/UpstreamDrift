@@ -745,6 +745,34 @@ def test_scheduled_node_friction_rows_follow_shared_law_ten_finger() -> None:
     assert sim.model.opt.impratio == pytest.approx(static_impratio, rel=1e-12)
 
 
+def test_resting_sample_carries_zero_law_friction_ten_finger() -> None:
+    """The at-rest t = 0 sample carries the shared law's zero friction (#13560).
+
+    Before any step MuJoCo's soft friction rows answered gravity with a
+    regulariser force of 2-11 mN per pair, a net moment of 16 mN m that the
+    balanced reference preload (#13555) does not have; it set the ten-finger
+    hold's net-moment RMS to 2.27 %.  Sampling restores the pair ``condim``.
+    """
+    module = _mujoco_sim_module()
+    spec_bytes, _, names, swing, interface, topo_model = _setup(
+        style=GripStyle.TEN_FINGER
+    )
+    q0 = np.asarray(swing.q[0], float)
+    sim = module.ClubInHands(
+        spec_bytes, names, interface, pads=None, topology_model=topo_model
+    )
+    sim.calibrate(q0)
+    sim.hold_pose(q0)
+    condim = sim.model.pair_dim.copy()
+    smp = sim.sample()
+    for side in ("L", "R"):
+        wrench = smp.side_wrenches[side]
+        for pair in wrench.pair_wrenches.values():
+            assert pair.tangential_force_mag_n == pytest.approx(0.0, abs=1e-9)
+    np.testing.assert_array_equal(sim.model.pair_dim, condim)
+    sim.advance(10)  # the friction schedule reads the restored rows
+
+
 def test_two_pad_hyperstatic_penalty_vs_mujoco_cone_divergence() -> None:
     """Minimal 2-pad hyperstatic test (#13306) proving why MuJoCo cone QP diverges from penalty split."""
     import mujoco

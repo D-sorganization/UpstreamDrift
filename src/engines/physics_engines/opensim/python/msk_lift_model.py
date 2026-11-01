@@ -109,6 +109,27 @@ _BACK_SPHERES = (
     ("RPSI", "pelvis", 0.04),
     ("LPSI", "pelvis", 0.04),
 )
+BENCH_EXTERNAL_LOAD_SOURCE = (
+    "shared-law back-sphere contact wrench of the bundle (VectorPlant), "
+    "applied to torso (back_RPSH, back_LPSH) and pelvis (back_RPSI, back_LPSI) "
+    "at the contact points"
+)
+
+
+def external_load_sources(targets: Any) -> dict[str, str]:
+    """External wrench provenance, one source for ID and joint reactions."""
+    sources = {
+        "feet": "GCV-1 foot wrench of the bundle's shared-law contact "
+        "(kinetics_parity.bundle_kinetics), applied to calcn_l/calcn_r",
+        "hands": "GCV-7 per-hand bushing wrench of the bundle bar "
+        "(BushingSample.grip_analysis), negated onto hand_l/hand_r at the "
+        "model's grip point; the barbell body is massless in ID",
+    }
+    if targets.bench_force_n:
+        sources["bench"] = BENCH_EXTERNAL_LOAD_SOURCE
+    return sources
+
+
 #: Contact stiffness (Pa) of every sphere: OpenSim_Models PR #476
 #: (``shared/contact/policy.py`` ``CONTACT_STIFFNESS``), which seats an 80 kg
 #: lifter plus a 120 kg bar 4.3 mm deep on eight 0.02 m spheres.

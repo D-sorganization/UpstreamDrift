@@ -12,7 +12,7 @@ stored as an angle: the engine's ``1 - g cos(theta_v - theta_grain)``
 with ``theta_grain = atan2(grain_y, grain_x)`` is exactly
 :func:`~.friction.grain_factor`.
 
-Not ported (no shared-core hook; see step 5): the height-of-cut
+Permanently not ported (reasons in ``test_engine_parity.py``): the
 multiplier (fitted to the legacy law), the compaction speed factor and
 the cross-grain lateral curve. ``compaction_factor`` is metadata only.
 """

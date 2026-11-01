@@ -243,3 +243,91 @@ class TestStrikeToRoll:
         )
         result = simulate_strike(putter, surface)
         assert all(s.height_m == 0.0 for s in result.samples)
+
+
+class TestStrikeFromAnyStartAndHeading:
+    """A start point and heading only move and rotate the default strike."""
+
+    def test_defaults_are_bit_for_bit_unchanged(self) -> None:
+        surface = SurfaceSpec.flat_uniform(stimp_ft=10.0)
+        putter = PutterState(
+            head_mass_kg=0.35, moi_kg_m2=4.5e-4, loft_deg=3.0, speed_mps=1.8
+        )
+        baseline = simulate_strike(putter, surface)
+        explicit = simulate_strike(
+            putter, surface, start_x_m=0.0, start_y_m=0.0, heading_rad=0.0
+        )
+        assert baseline.rest_x_m == explicit.rest_x_m
+        assert baseline.rest_y_m == explicit.rest_y_m
+        assert baseline.total_distance_m == explicit.total_distance_m
+
+    def test_rotated_and_translated_strike_matches_a_rigid_transform(self) -> None:
+        surface = SurfaceSpec.flat_uniform(stimp_ft=10.0)
+        putter = PutterState(
+            head_mass_kg=0.35, moi_kg_m2=4.5e-4, loft_deg=3.0, speed_mps=1.8
+        )
+        baseline = simulate_strike(putter, surface)
+
+        start_x, start_y, heading = 2.0, -3.0, math.pi / 3.0
+        cos_h, sin_h = math.cos(heading), math.sin(heading)
+        rotated = simulate_strike(
+            putter,
+            surface,
+            start_x_m=start_x,
+            start_y_m=start_y,
+            heading_rad=heading,
+        )
+
+        # Flat, homogeneous friction is rotation invariant.
+        dx, dy = baseline.rest_x_m, baseline.rest_y_m
+        expected_x = start_x + dx * cos_h - dy * sin_h
+        expected_y = start_y + dx * sin_h + dy * cos_h
+        assert rotated.rest_x_m == pytest.approx(expected_x, abs=1e-9)
+        assert rotated.rest_y_m == pytest.approx(expected_y, abs=1e-9)
+        assert rotated.total_distance_m == pytest.approx(
+            baseline.total_distance_m, rel=1e-9
+        )
+
+
+class TestTinySlipRollOnset:
+    """Regression tests for tiny initial slip near roll onset (#14193)."""
+
+    @pytest.mark.parametrize(
+        "f",
+        [0.99, 0.999, 0.9999, 1.0001, 1.001, 1.01],
+    )
+    def test_tiny_initial_slip_transitions_to_roll_and_rest(self, f: float) -> None:
+        surface = SurfaceSpec.flat_uniform(11.0)
+        v = 1.5
+        ball = BallState(
+            x_m=0.0,
+            y_m=0.0,
+            vx_mps=v,
+            vy_mps=0.0,
+            spin_rad_s=f * v / _R,
+        )
+        result = simulate_ball(ball, surface)
+        assert result.final_mode is Mode.REST
+        assert result.time_s < 10.0
+        # Reference rollout for f = 1.0 is ~2.25 m. Tiny slip should stop within 3 cm.
+        pure_roll = simulate_ball(
+            BallState(0.0, 0.0, vx_mps=v, spin_rad_s=v / _R), surface
+        )
+        assert result.rest_x_m == pytest.approx(pure_roll.rest_x_m, abs=0.03)
+        assert result.total_distance_m == pytest.approx(
+            pure_roll.total_distance_m, abs=0.03
+        )
+
+    def test_tiny_slip_on_slope_transitions_to_roll(self) -> None:
+        surface = _sloped_surface(grade=3.0, aspect=0.0, stimp=10.0)
+        v = 1.5
+        ball = BallState(
+            x_m=0.0,
+            y_m=0.0,
+            vx_mps=v,
+            vy_mps=0.0,
+            spin_rad_s=0.999 * v / _R,
+        )
+        result = simulate_ball(ball, surface)
+        assert result.final_mode is Mode.REST
+        assert result.time_s < 10.0

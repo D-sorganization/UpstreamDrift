@@ -1,0 +1,12 @@
+{
+  "number": 14176,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/14176",
+  "title": "Putting Analytics: Validate Make Rates and Expected Putts Against Published Data and Calibrate Skill Presets",
+  "body": "Part of #14168. Follows the fleet deferred-validation standard: acceptance that needs external data is recorded and deferred, never faked.\n\n## Scope\n- Reference data with provenance: Broadie (2014) tour make % and expected putts by distance (already cited for `sg_optimizer.shot_model.putting`), PGA Tour ShotLink where licensed, and published amateur make-rate tables.\n- Calibrate tour / scratch / 10 / 20 handicap stroke and read dispersions so the simulated make-% curve on the library falls within the reference band; record the fit, residuals and assumptions.\n- A test that the calibrated tour profile reproduces the reference make-% curve within stated tolerance, and that the derived E_player(d) is within tolerance of the tour expected-putts table.\n\n## Acceptance\n- No preset is called calibrated without the provenance record and residuals.\n- If licensed data is unavailable, the issue stays open with a deferred-validation entry rather than tuning to the model's own output.\n",
+  "updated_at": "2026-10-31T23:52:43Z",
+  "labels": [
+    "enhancement",
+    "agent:claude"
+  ],
+  "state": "open"
+}

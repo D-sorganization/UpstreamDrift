@@ -1,7 +1,6 @@
 {
   "schema_version": 1,
   "entries": [
-    ".agent",
     ".agents",
     ".ai",
     ".benchmarks",
@@ -38,6 +37,7 @@
     "LICENSE",
     "Makefile",
     "README.md",
+    "REVIEW.md",
     "SECURITY.md",
     "SPEC.md",
     "VERSION",

@@ -63,6 +63,9 @@ from src.engines.physics_engines.putting_green.python.green_surface import Green
 from src.engines.physics_engines.putting_green.python.turf_properties import (
     TurfProperties,
 )
+from src.shared.python.putting_dynamics.friction import (
+    USGA_STIMP_ROLL_MODEL as _SHARED_USGA_STIMP_ROLL_MODEL,
+)
 from src.shared.python.core.physics_constants import (
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,
@@ -73,8 +76,9 @@ from src.shared.python.core.physics_constants import (
 #: Provenance name of the roll model implemented in this module (ADR-0045 F1).
 UD_LEGACY_ROLL_MODEL = "ud-legacy-roll/1"
 
-#: Provenance name of the preserved counterpart model (Tools stimpmeter law).
-USGA_STIMP_ROLL_MODEL = "usga-stimp-roll/1"
+#: Provenance name of the preserved counterpart model (Tools stimpmeter law),
+#: owned by the shared core since epic #14141 step 7d.
+USGA_STIMP_ROLL_MODEL = _SHARED_USGA_STIMP_ROLL_MODEL
 
 #: Key under which every putt result document carries its roll-model name.
 ROLL_MODEL_FIELD = "roll_model"

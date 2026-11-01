@@ -21,8 +21,11 @@ from src.shared.python.core.contracts import require
 
 G1_TARGET_M = 0.025
 MJX_SOLVERS = frozenset({"mjx-adam", "mjx-lbfgs"})
+# ML-WS-9 (#13786): scored like the MJX arms, but not a promotion candidate here.
+WARM_START_SOLVER = "mjx-warm-start"
 PIPELINE_SOLVERS = frozenset({"none", "shooting"})
-SOLVERS = PIPELINE_SOLVERS | MJX_SOLVERS | {"ipopt"}
+REPLAY_SCORED_SOLVERS = MJX_SOLVERS | {WARM_START_SOLVER}
+SOLVERS = PIPELINE_SOLVERS | REPLAY_SCORED_SOLVERS | {"ipopt"}
 
 
 def _downswing_min(weight_fraction: Mapping[str, Any] | None) -> float | None:
@@ -44,7 +47,10 @@ def row_from_receipt(
     mjx_receipt: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Score one pipeline run; raises ``ValueError`` if a required field is absent."""
-    require(solver in PIPELINE_SOLVERS | MJX_SOLVERS, f"unknown solver {solver!r}")
+    require(
+        solver in PIPELINE_SOLVERS | REPLAY_SCORED_SOLVERS,
+        f"unknown solver {solver!r}",
+    )
     require(wall_clock_s >= 0.0, "wall_clock_s must be >= 0")
     dynamics = receipt["dynamics"]
     stage_timings: dict[str, float] = {}

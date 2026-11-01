@@ -7,12 +7,12 @@ resistance, static rolling hold with steep-slope restart, optional
 grain anisotropy), a two-body putter-ball collision with finite putter
 effective mass, dynamic-loft sweeps, hosel-position face twist, and a
 mode-machine RK4 solver (airborne rise/settle -> slide -> roll ->
-rest) with hole capture.
+rest) with hole capture, and simulation-based green reading.
 
 Package layout mirrors ``src.shared.python.physics.impact_model``
-(types / surfaces / friction / collision / solver / utils behind this
-façade); consume the package through this module — the submodule
-internals are not a public surface (Law of Demeter).
+(types / surfaces / friction / collision / solver / green_reading /
+utils behind this façade); consume the package through this module —
+the submodule internals are not a public surface (Law of Demeter).
 
 Reused shared infrastructure (AGENTS.md section A; also credited in
 each submodule):
@@ -62,6 +62,7 @@ from .friction import (
     DEFAULT_SLIDING_MU,
     DEFAULT_STATIC_MU,
     STIMP_RELEASE_SPEED_MPS,
+    USGA_STIMP_ROLL_MODEL,
     FrictionParams,
     grain_factor,
     is_static_hold,
@@ -69,6 +70,12 @@ from .friction import (
     rolling_mu_to_stimp,
     sliding_mu,
     stimp_to_rolling_mu,
+)
+from .green_reading import (
+    AimSolution,
+    LineReading,
+    read_line,
+    solve_aim,
 )
 from .reference_fixtures import (
     DEFAULT_FIXTURES_PATH,
@@ -83,6 +90,7 @@ from .solver import (
     capture_speed_mps,
     simulate_ball,
     simulate_strike,
+    struck_ball_state,
 )
 from .stimpmeter import (
     STIMPMETER_NOTCH_DISTANCE_M,
@@ -131,6 +139,8 @@ __all__ = [
     "STIMPMETER_NOTCH_DISTANCE_M",
     "STIMPMETER_RELEASE_ANGLE_DEG",
     "STIMP_RELEASE_SPEED_MPS",
+    "USGA_STIMP_ROLL_MODEL",
+    "AimSolution",
     "BallState",
     "CollisionReport",
     "ExpectedValue",
@@ -139,6 +149,7 @@ __all__ = [
     "FrictionParams",
     "GrassType",
     "HeightField",
+    "LineReading",
     "Mode",
     "PuttResult",
     "PutterState",
@@ -162,13 +173,16 @@ __all__ = [
     "measure_stimp_ft",
     "mps_to_mph",
     "ramp_release_speed_mps",
+    "read_line",
     "rolling_mu",
     "rolling_mu_to_stimp",
     "simulate_ball",
     "simulate_strike",
     "sliding_mu",
+    "solve_aim",
     "stimp_to_rolling_mu",
     "stimpmeter_rollout_ft",
     "strike",
+    "struck_ball_state",
     "sweep_dynamic_loft",
 ]

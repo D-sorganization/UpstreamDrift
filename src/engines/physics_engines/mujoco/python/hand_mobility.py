@@ -19,7 +19,7 @@ there are related by ``transport_spatial_mobility``.
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Final
 
@@ -59,7 +59,13 @@ from src.shared.python.spatial_algebra.operational_space import (
 MODES: Final = ("constrained", "unconstrained")
 HANDS: Final = ("lead", "trail")
 
-__all__ = ["HANDS", "MODES", "HandMobility", "HandMobilitySource"]
+__all__ = [
+    "HANDS",
+    "MODES",
+    "HandMobility",
+    "HandMobilitySource",
+    "SegmentMobility",
+]
 
 
 @dataclass(frozen=True)
@@ -86,6 +92,9 @@ class HandMobility:
     force_capacity: CapacityEllipsoid | None = None
     drift_acceleration: np.ndarray | None = None
     jdot_v: np.ndarray | None = None
+
+
+SegmentMobility = HandMobility
 
 
 class HandMobilitySource(MujocoOverlaySource):
@@ -259,12 +268,17 @@ class HandMobilitySource(MujocoOverlaySource):
         )
 
     def _task_matrices(
-        self, point: np.ndarray, constrained: bool, rows: int = 3
+        self,
+        point: np.ndarray,
+        constrained: bool,
+        rows: int = 3,
+        body_id: int | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
         mj, model, data = self._mj, self.model, self.data
+        bid = self._club_body if body_id is None else body_id
         jacp = np.zeros((3, model.nv))
         jacr = np.zeros((3, model.nv))
-        mj.mj_jac(model, data, jacp, jacr, point, self._club_body)
+        mj.mj_jac(model, data, jacp, jacr, point, bid)
         jac = jacp if rows == 3 else np.vstack((jacp, jacr))
         mass = full_mass_matrix(mj, model, data)
         closure = (
@@ -395,3 +409,116 @@ class HandMobilitySource(MujocoOverlaySource):
                 jdot_v=jdot_v,
             )
         return out
+
+    def point_mobility(
+        self,
+        point: Any,
+        q: np.ndarray,
+        *,
+        v: np.ndarray | None = None,
+        mode: str = "constrained",
+        torque_limits: TorqueLimits | None = None,
+    ) -> HandMobility:
+        """Operational-space mobility at a general segment intersection point (HCM-5, #14006)."""
+        if mode not in MODES:
+            raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
+        from src.shared.python.spatial_algebra.segment_intersection import (
+            IntersectionPoint,
+        )
+
+        if not isinstance(point, IntersectionPoint):
+            raise TypeError(f"point must be an IntersectionPoint, got {type(point)}")
+
+        limits, coords = torque_limits or self._torque_limits, self._set_state(q, v)
+        mj, model, data = self._mj, self.model, self.data
+        role = "lead" if "lead" in point.name else "trail"
+        if point.group == "hands":
+            pt_world, body_id = self.grip_point_world(role, coords), self._club_body
+        else:
+            bid = mj.mj_name2id(model, mj.mjtObj.mjOBJ_BODY, point.body)
+            body_id = bid if bid >= 0 else self._club_body
+            rot, pos = data.xmat[body_id].reshape(3, 3), data.xpos[body_id]
+            pt_world = pos + rot @ np.asarray(point.anchor_local, dtype=float)
+
+        jacp, mass, closure = self._task_matrices(
+            pt_world, mode == "constrained", body_id=body_id
+        )
+        w = mobility_matrix(jacp, mass, closure)
+        lam, dual = velocity_ellipsoid(w), force_ellipsoid(w)
+        eig, mass_eff = np.maximum(lam.radii**2, 0.0), dual.radii**2
+        acc_cap = (
+            acceleration_capacity(
+                jacp, mass, limits.B, limits.tau_lo, limits.tau_hi, closure
+            )
+            if limits is not None
+            else None
+        )
+        f_cap = (
+            force_capacity(jacp, mass, limits.B, limits.tau_lo, limits.tau_hi, closure)
+            if limits is not None
+            else None
+        )
+
+        drift_acc, jdot_v = None, None
+        if v is not None:
+            jdot_pos, jdot_rot = np.zeros((3, model.nv)), np.zeros((3, model.nv))
+            mj.mj_jacDot(model, data, jdot_pos, jdot_rot, pt_world, body_id)
+            jdot_v = jdot_pos @ data.qvel
+            h = np.asarray(data.qfrc_bias, dtype=float).copy()
+            c_jac, c_drift = (
+                _evaluate_weld_closure(mj, model, data, self._closure)
+                if mode == "constrained"
+                else (None, None)
+            )
+            drift_acc = _calc_drift_acceleration(
+                jacp, mass, h, jdot_v, Jc=c_jac, Jcdot_v=c_drift
+            )
+
+        prov: dict[str, Any] = {
+            "point": point.name,
+            "group": point.group,
+            "body": point.body,
+            "frame": "world",
+            "mode": mode,
+        }
+        if limits is not None:
+            prov.update(
+                {
+                    "torque_limit_source": limits.source_id,
+                    "assumed_slots": limits.assumed_slots,
+                    "verified_slots": limits.verified_slots,
+                }
+            )
+
+        return HandMobility(
+            hand=point.name,
+            centre=(float(pt_world[0]), float(pt_world[1]), float(pt_world[2])),
+            mobility=w,
+            mobility_axes=lam.axes,
+            mobility_eigenvalues=eig,
+            effective_mass_kg=mass_eff,
+            condition=float(mass_eff.max() / max(mass_eff.min(), 1e-12)),
+            singular=dual.singular,
+            provenance=prov,
+            acceleration_capacity=acc_cap,
+            force_capacity=f_cap,
+            drift_acceleration=drift_acc,
+            jdot_v=jdot_v,
+        )
+
+    def segment_mobility(
+        self,
+        points: Sequence[Any],
+        q: np.ndarray,
+        *,
+        v: np.ndarray | None = None,
+        mode: str = "constrained",
+        torque_limits: TorqueLimits | None = None,
+    ) -> dict[str, HandMobility]:
+        """Mobility at each point in ``points`` (HCM-5, #14006)."""
+        return {
+            p.name: self.point_mobility(
+                p, q, v=v, mode=mode, torque_limits=torque_limits
+            )
+            for p in points
+        }
