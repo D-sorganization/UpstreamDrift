@@ -49,3 +49,25 @@ def test_conflict_disarm_runs_the_rm_script_inline() -> None:
     assert checkout["with"]["path"] == ".rm-tools"
     assert sweep["env"]["DRY_RUN_INPUT"] == "${{ inputs.dry_run || 'true' }}"
     assert sweep["env"]["EXCLUDE_PRS"] == "${{ inputs.exclude_prs || '12634' }}"
+
+
+def test_conflict_disarm_app_token_is_scoped_to_ud_and_rm() -> None:
+    """#14214: the token reaches only the repos and permissions the sweep uses."""
+    (job,) = _jobs(CONFLICT_DISARM).values()
+    token = next(step for step in job["steps"] if step.get("id") == "app-token")
+    inputs = token["with"]
+
+    repositories = {
+        name.strip()
+        for name in str(inputs.get("repositories", "")).replace(",", "\n").split()
+    }
+    permissions = {
+        key: value for key, value in inputs.items() if key.startswith("permission-")
+    }
+
+    assert repositories == {"UpstreamDrift", "Repository_Management"}
+    assert permissions == {
+        "permission-contents": "read",
+        "permission-pull-requests": "write",
+        "permission-issues": "write",
+    }

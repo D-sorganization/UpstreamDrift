@@ -48,6 +48,14 @@ jobs:
           app-id: ${{ secrets.JULES_APP_ID }}
           private-key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          # Only what the sweep uses: read RM scripts, and disarm, label and
+          # comment on UD pull requests (#14214).
+          repositories: |
+            UpstreamDrift
+            Repository_Management
+          permission-contents: read
+          permission-pull-requests: write
+          permission-issues: write
 
       - name: Checkout Repository_Management (conflict disarm script)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
