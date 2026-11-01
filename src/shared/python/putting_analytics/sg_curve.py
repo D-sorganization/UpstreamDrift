@@ -16,7 +16,7 @@ distance at modest sample sizes.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 
 import numpy as np
 
@@ -33,6 +33,7 @@ from src.shared.python.putting_analytics.skill_roll_model import (
     ReadLattice,
     SkillRollModel,
 )
+from src.shared.python.putting_analytics.variance import StrokeOutcomes
 from src.shared.python.sg_optimizer.shot_model.putting_provider import (
     REFERENCE_STIMP,
     SimulatedPuttingCurve,
@@ -68,6 +69,37 @@ def _fill(grid: np.ndarray, fits: list[tuple[float, float] | None]) -> np.ndarra
     return np.stack(columns, axis=1)
 
 
+def _outcomes(
+    profile: PuttingSkillProfile, grid: np.ndarray, n: int, seed: int
+) -> Iterator[StrokeOutcomes]:
+    """Roll the same ``n`` seeded putts at every distance of ``grid``."""
+    execution = sample_execution(profile.stroke, n, seed)
+    read = sample_read(profile.read, n, seed)
+    lattice = ReadLattice.from_dispersion(profile.read)
+    green = PlaneGreen(0.0, 0.0, REFERENCE_STIMP)
+    for distance in grid:
+        model = SkillRollModel(
+            green,
+            float(distance),
+            _PRICING_BASELINE,
+            lattice,
+            face_weight=profile.face_weight,
+        )
+        yield model(execution, read)
+
+
+def simulated_make_rates(
+    profile: PuttingSkillProfile,
+    distances_ft: Sequence[float],
+    n: int = 2000,
+    seed: int = 0,
+) -> tuple[float, ...]:
+    """Make rate of ``profile`` at each distance; no leave fit, so no miss floor."""
+    require(n >= 1, "n must be at least 1", n)
+    grid = validated_grid(distances_ft)
+    return tuple(float(out.holed.mean()) for out in _outcomes(profile, grid, n, seed))
+
+
 def simulate_putting_curve(
     profile: PuttingSkillProfile,
     distances_ft: Sequence[float] = DEFAULT_CURVE_GRID_FT,
@@ -82,20 +114,8 @@ def simulate_putting_curve(
     """
     require(n >= MIN_MISSES, f"n must be at least {MIN_MISSES}", n)
     grid = validated_grid(distances_ft)
-    execution = sample_execution(profile.stroke, n, seed)
-    read = sample_read(profile.read, n, seed)
-    lattice = ReadLattice.from_dispersion(profile.read)
-    green = PlaneGreen(0.0, 0.0, REFERENCE_STIMP)
     make, fits = [], []
-    for distance in grid:
-        model = SkillRollModel(
-            green,
-            float(distance),
-            _PRICING_BASELINE,
-            lattice,
-            face_weight=profile.face_weight,
-        )
-        out = model(execution, read)
+    for out in _outcomes(profile, grid, n, seed):
         make.append(float(out.holed.mean()))
         fits.append(_leave_fit(out.leave_m[~out.holed] / FT_M))
     leave = _fill(grid, fits)
