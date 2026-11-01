@@ -15,6 +15,71 @@
       "path": "tests/unit/chat/test_chat_dock_decomposition.py",
       "issue": "#12803",
       "reason": "Covered the UD-only chat/_qt/runtime.py delegation, retired when the ChatDockWidget child copies were re-synced byte-identical from Tools (vendor/ud-tools 46c781802c08); the dock and its _qt mixins are now covered by the Tools-synced chat/tests/test_chat_drift.py and test_tools_child_copy_contract.py."
+    },
+    {
+      "path": "tests/heavy_integration/test_putting_green_engine.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/engines/putting_green/test_shared_engine.py (shared-core PhysicsEngine adapter, step 10a)."
+    },
+    {
+      "path": "tests/integration/putting_green/__init__.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: package marker for the retired legacy integration tests; shared-core coverage lives in tests/unit/putting_dynamics/."
+    },
+    {
+      "path": "tests/integration/putting_green/putting_simulation/test_checkpoint_replay.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/engines/putting_green/test_shared_engine.py (engine state get/set and reset on the shared core)."
+    },
+    {
+      "path": "tests/integration/putting_green/putting_simulation/test_end_to_end_putting.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/putting_dynamics/test_contract_api.py and test_engine_parity.py."
+    },
+    {
+      "path": "tests/integration/putting_green/putting_simulation/test_green_reading.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/putting_dynamics/test_green_reading.py."
+    },
+    {
+      "path": "tests/integration/putting_green/putting_simulation/test_physics_accuracy.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/putting_dynamics/test_solver.py, test_friction.py and test_reference_fixtures.py (cited external fixtures)."
+    },
+    {
+      "path": "tests/integration/putting_green/putting_simulation/test_putter_interaction.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/putting_dynamics/test_collision.py and test_strike_assumptions.py."
+    },
+    {
+      "path": "tests/integration/putting_green/putting_simulation/test_topography_loading.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/engines/putting_green/test_green_surface.py and tests/unit/putting_dynamics/test_surfaces.py."
+    },
+    {
+      "path": "tests/integration/putting_green/test_putting_simulation.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/putting_dynamics/test_contract_api.py and tests/unit/engines/putting_green/test_shared_engine.py."
+    },
+    {
+      "path": "tests/unit/engines/putting_green/test_ball_roll_physics.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/putting_dynamics/test_solver.py and test_friction.py."
+    },
+    {
+      "path": "tests/unit/engines/putting_green/test_putter_stroke.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/putting_dynamics/test_collision.py and test_strike_assumptions.py."
+    },
+    {
+      "path": "tests/unit/engines/putting_green/test_roll_model_provenance.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/putting_dynamics/test_characterization.py and test_stimpmeter.py (usga-stimp-roll/1 provenance)."
+    },
+    {
+      "path": "tests/unit/engines/putting_green/test_simulator.py",
+      "issue": "#14141",
+      "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/engines/putting_green/test_shared_engine.py."
     }
   ]
 }
