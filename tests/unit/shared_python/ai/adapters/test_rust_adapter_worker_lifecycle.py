@@ -16,6 +16,8 @@ import pytest
 
 from src.shared.python.ai.adapters import rust_adapter
 
+pytestmark = pytest.mark.unit
+
 QtWidgets = pytest.importorskip("PyQt6.QtWidgets")
 
 

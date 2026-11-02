@@ -28,7 +28,7 @@
 {"path": "ai/adapters/github_cli_provider.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/ollama_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/openai_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/adapters/rust_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
+{"path": "ai/adapters/rust_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/agents_md_loader.py", "classification": "ud-only", "package": "ai", "spelling_only": false}
 {"path": "ai/auth/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/auth/authentication.py", "classification": "diverged", "package": "ai", "spelling_only": false}
