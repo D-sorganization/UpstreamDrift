@@ -64,6 +64,9 @@ describe('Workspace Catalog Metadata (ORG-06)', () => {
     expect(getWorkspaceForTool('tools_movement_optimizer')).toBe('optimize_train');
     expect(getWorkspaceForTool('cross_engine_dashboard')).toBe('results_compare');
     expect(getWorkspaceForTool('character_builder')).toBe('dev_research');
+    // #14262: planned tools are not destinations in a primary workspace.
+    expect(getWorkspaceForTool('canonical_core_estimation')).toBe('dev_research');
+    expect(getWorkspaceForTool('canonical_core_comparison')).toBe('dev_research');
   });
 
   it('resolves workspaces by slug for bookmarkable URLs', () => {

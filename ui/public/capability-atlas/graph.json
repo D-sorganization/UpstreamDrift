@@ -1950,7 +1950,7 @@
       "path": "src/tools/canonical_core/estimation.py",
       "launch_target": "src/tools/canonical_core/estimation.py",
       "category": "biomechanics",
-      "status": "experimental",
+      "status": "planned",
       "capabilities": [
         "canonical_core",
         "estimation",
@@ -1965,7 +1965,7 @@
       "path": "src/tools/canonical_core/comparison.py",
       "launch_target": "src/tools/canonical_core/comparison.py",
       "category": "biomechanics",
-      "status": "experimental",
+      "status": "planned",
       "capabilities": [
         "canonical_core",
         "comparison",
@@ -3380,8 +3380,8 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "58d58762c2854bac4034d4cf71f3681913ca654ae98048fc81abb91ae90a8a90",
-    "src/config/launcher_manifest.json": "573e2a2ec33a32373daf47b95393eca2bb55a6a8f0a3ff8b90aeb0bb5ef1e84f",
+    "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
+    "src/config/launcher_manifest.json": "344fd2a8afc251e632fcfa66e5213e5eef3a30b03c681d11cb3ce66e2894ee33",
     "src/config/feature_parity.json": "fb709511c481cfdd50674d7568224163736c7b7b47540f8889114d95f80fa360",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"

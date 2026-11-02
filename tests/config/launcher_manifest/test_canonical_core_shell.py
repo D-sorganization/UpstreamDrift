@@ -47,3 +47,16 @@ def test_api_manifest_serializes_canonical_core_shell_metadata(
 
     assert set(tiles) == {"canonical_core_estimation", "canonical_core_comparison"}
     assert tiles["canonical_core_estimation"]["shell_surfaces"] == ["pyqt6", "react"]
+
+
+@pytest.mark.parametrize(
+    "tile_id", ["canonical_core_estimation", "canonical_core_comparison"]
+)
+def test_canonical_core_tiles_are_marked_planned(
+    manifest: LauncherManifest, tile_id: str
+) -> None:
+    """#14262: no estimation/comparison service exists yet, so the manifest
+    must say ``planned`` and the shells must not offer them as destinations."""
+    tiles = {tile["id"]: tile for tile in manifest.to_dict()["tiles"]}
+
+    assert tiles[tile_id]["status"] == "planned"

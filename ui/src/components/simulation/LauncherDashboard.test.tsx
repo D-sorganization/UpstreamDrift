@@ -130,6 +130,22 @@ describe('LauncherDashboard', () => {
     // Tile Grid Rendering (#1171)
     // ────────────────────────────────────────────────────────────
     describe('tile grid rendering (#1171)', () => {
+    it('keeps planned tools off home (#14262)', () => {
+        const planned: LauncherTile = {
+            ...MOCK_TILES[0],
+            id: 'canonical_core_estimation',
+            name: 'Canonical-Core Estimation',
+            status: 'planned',
+        };
+        renderWithRouter(
+            <LauncherDashboard {...defaultProps} tiles={[...MOCK_TILES, planned]} />,
+        );
+
+        expect(screen.queryByText('Canonical-Core Estimation')).not.toBeInTheDocument();
+        expect(document.getElementById('tile-canonical_core_estimation')).toBeNull();
+        expect(screen.getByText('Model Explorer')).toBeInTheDocument();
+    });
+
     it('renders all tiles from the manifest', () => {
         renderWithRouter(<LauncherDashboard {...defaultProps} />);
 
