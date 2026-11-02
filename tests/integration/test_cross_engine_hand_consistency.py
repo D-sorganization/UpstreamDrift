@@ -11,8 +11,10 @@ draws grip hands, so only OpenSim carries a hand length. The other engines
 report it as unrepresentable with a reason; no quantity passes silently.
 Simscape and the MyoSuite golfer are reported, never gating.
 
-The hand-frame assertion (0.5 deg) is the issue's second slice. Related:
-#13176 (cross-engine tests) and #13560.
+The hand frame is the hand-on-forearm rotation M (HX1, #13758): each
+engine's forward kinematics must reproduce the specification's M within
+0.5 deg over seeded wrist configurations. Related: #13176 (cross-engine
+tests) and #13560.
 """
 
 from __future__ import annotations
@@ -25,6 +27,13 @@ pytestmark = pytest.mark.integration
 
 MASS_TOL_KG = 1e-9
 LENGTH_TOL_M = 1e-12
+FRAME_TOL_DEG = 0.5
+N_FRAME_CONFIGS = 24
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _engines_loaded() -> None:
+    hc.preload_engines()
 
 
 @pytest.fixture(scope="module")
@@ -49,6 +58,17 @@ def test_hand_mass_and_length_agree_across_flagship_exports(doc, engine) -> None
     for hand, length in reading.length_m.items():
         assert length == pytest.approx(expected_length, abs=LENGTH_TOL_M), (
             f"{engine} {hand} hand length {length!r} m, spec {expected_length!r} m"
+        )
+
+
+@pytest.mark.parametrize("engine", hc.GATING_ENGINES)
+def test_hand_frame_agrees_within_half_degree(doc, engine) -> None:
+    configs = hc.wrist_configurations(doc, N_FRAME_CONFIGS)
+    worst = hc.worst_hand_frame_error_deg(engine, doc, configs)
+    assert set(worst) == set(hc.HANDS)
+    for hand, error in worst.items():
+        assert error <= FRAME_TOL_DEG, (
+            f"{engine} {hand} hand-on-forearm rotation off by {error:.3e} deg"
         )
 
 
