@@ -30,7 +30,7 @@ The only simulation tools in scope are:
 Do not add `cancel_run`, `list_runs`, arbitrary filesystem reads, another
 execution lifecycle, or engine-specific shortcuts in this relay.
 
-## Trust And Security Boundary
+## Trust and Security Boundary
 
 - Keep ingress on the same host and on stdio. Do not bind a TCP, UDP, or Unix
   socket for Grok Bot and do not bridge to the remote hub.
