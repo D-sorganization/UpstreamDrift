@@ -249,6 +249,7 @@ jobs:
         # skipped assertions.
         shell: bash
         run: |
+          [[ "$RUNNER_OS" == Linux ]] || { echo "JaxSim parity lane requires Linux" >&2; exit 1; }
           python -c "import jax, jaxlib, jaxsim"
           python3 scripts/ci/check_pinocchio_dynamics_api.py
 
@@ -273,15 +274,19 @@ jobs:
             -v -rs --tb=short -p no:xvfb \
             --junitxml=test-results/cross-engine-equivalence-junit.xml
 
-      - name: Assert JaxSim parity cases actually ran (issue #6881)
-        # Even with deps present, a JUnit report of only skipped JaxSim parity
-        # cases must not green this required gate. This post-pytest assertion
-        # fails unless at least one JaxSim/Pinocchio parity case passed.
+      - name: Assert JaxSim parity cases actually ran (issue #14290)
+        # Require each analytical case by exact JUnit classname and node name.
         shell: bash
         run: |
-          python3 scripts/ci/require_junit_test_passed.py \
-            test-results/cross-engine-equivalence-junit.xml \
-            test_jaxsim_pinocchio_free_body_dynamics_terms_match
+          set -euo pipefail
+          junit=test-results/cross-engine-equivalence-junit.xml
+          python3 scripts/ci/require_junit_test_passed.py "$junit" \
+            --required-classname tests.cross_engine.test_jaxsim_vs_pinocchio \
+            --required-case 'test_jaxsim_pinocchio_free_body_dynamics_terms_match[identity-angular-only]' \
+            --required-case 'test_jaxsim_pinocchio_free_body_dynamics_terms_match[identity-mixed-velocity]' \
+            --required-case 'test_jaxsim_pinocchio_free_body_dynamics_terms_match[rotated-world-origin]' \
+            --receipt-output test-results/cross-engine-equivalence-receipt.json \
+            --source-revision "$GITHUB_SHA"
 
       - name: Assert clubhead-series parity cases actually ran (GCV-16 #11722)
         # Every CI lane outside this job lacks Drake/Pinocchio, so the GCV-16
@@ -307,6 +312,7 @@ jobs:
           path: |
             output/cross_engine_equivalence/**
             test-results/cross-engine-equivalence-junit.xml
+            test-results/cross-engine-equivalence-receipt.json
           if-no-files-found: warn
 
       - name: Summarize results
