@@ -12,7 +12,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { apiFetch, describeApiError } from "@/api/fetch";
-import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
+import { ToolShell } from "@/components/layout/ToolShell";
 import { ResearchGolfSimulator } from "@/components/necromatcher/ResearchGolfSimulator";
 import { useInRouterContext, useLocation } from "react-router";
 
@@ -291,8 +291,25 @@ function ManualGolfSimulatorPage() {
     }
   };
 
+  const primaryDisabledReason = isDisconnected
+    ? "Simulator disconnected"
+    : undefined;
+
   return (
-    <WorkspaceShell>
+    <ToolShell
+      workspaceId="shot_course_lab"
+      toolId="golf_simulator"
+      toolName="Golf Simulator"
+      description="Capability-aware controls for local physics and GSPro simulator integration"
+      primaryActionDisabledReason={primaryDisabledReason}
+      nextStep={{
+        title: "Analyze Ball Flight",
+        description:
+          "Review aerodynamic dispersion, apex height, and landing angles in Ball Flight Analysis",
+        actionLabel: "Open Ball Flight",
+        href: "/tools/ball-flight",
+      }}
+    >
       <div className="space-y-6 w-full min-w-0 max-w-4xl mx-auto p-4 text-gray-200">
         <h1 className="text-xl font-bold">Golf Simulator Console</h1>
         {errorMsg && (
@@ -492,7 +509,7 @@ function ManualGolfSimulatorPage() {
           </div>
         </section>
       </div>
-    </WorkspaceShell>
+    </ToolShell>
   );
 }
 

@@ -84,7 +84,7 @@ describe("SwingObjectiveLabPage", () => {
   it("renders title, controls, and run button", async () => {
     render(<SwingObjectiveLabPage />);
 
-    expect(screen.getByText("Swing Objective Lab")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Swing Objective Lab" })).toBeInTheDocument();
     expect(screen.getByTestId("preset-select")).toBeInTheDocument();
     expect(screen.getByTestId("duration-input")).toBeInTheDocument();
     expect(screen.getByTestId("hub-torque-input")).toBeInTheDocument();
