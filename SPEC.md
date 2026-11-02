@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14327 | Keep the dashboard launch footer clear of the floating diagnostics badge: the footer reserves DIAGNOSTICS_BADGE_CLEARANCE and the badge is icon-only below md |
 | 2026-11-02 | #14322 | rust_adapter joins the stream worker QThread after its event loop quits (pair of Tools#5951) |
 | 2026-11-02 | #14325 | Use a local CC0 HDR with fallback scene lighting on all three affected pages |
 | 2026-11-02 | #14324 | Controls get a 44px hit area on coarse pointers (touch-target utility, primitives and a native-control base rule), and arbitrary text sizes under 12px are raised to text-xs |

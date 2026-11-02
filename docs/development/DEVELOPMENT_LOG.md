@@ -1171,6 +1171,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14255 · Keep the Dashboard Launch Footer Clear of the Floating Diagnostics Badge: The Footer Reserves DIAGNOSTICS_BADGE_CLEARANCE and the Badge Is Icon-Only Below Md
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14255
+- **Branch:** merged via #14327
+- **PR:** #14327
+- **Paths:** see #14327
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`33b26dff`; collated from changes/14255-keep-the-dashboard-launch-footer-clear-o.md)
+- **Summary:** Keep the dashboard launch footer clear of the floating diagnostics badge: the footer reserves DIAGNOSTICS_BADGE_CLEARANCE and the badge is icon-only below md
+- **Next step:** Shipped in PR #14327.
+
 ### DL-#14321 · Rust_Adapter Joins the Stream Worker QThread After Its Event Loop Quits (Pair of Tools#5951)
 
 - **State:** shipped
