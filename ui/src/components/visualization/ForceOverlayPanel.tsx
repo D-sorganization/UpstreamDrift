@@ -229,7 +229,7 @@ export function ForceOverlayPanel({
       {config.enabled && (
         <div className="space-y-3">
           {/* Source indicator */}
-          <div className="text-[10px] text-gray-400 flex items-center justify-between">
+          <div className="text-xs text-gray-400 flex items-center justify-between">
             <span>Stream Source:</span>
             <span
               className={

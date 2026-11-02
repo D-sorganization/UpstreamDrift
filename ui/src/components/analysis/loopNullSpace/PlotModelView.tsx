@@ -117,7 +117,7 @@ function EnvelopesSection({ model }: { model: NSXPlotModel }) {
       {bands.map((b) => (
         <BandOrReason key={b.quantity_id} band={b} overlay={overlays.get(b.quantity_id)} />
       ))}
-      <table data-testid="nsx-frame-status" className="text-[10px] text-gray-300 w-full">
+      <table data-testid="nsx-frame-status" className="text-xs text-gray-300 w-full">
         <caption className="text-left text-gray-200">Frame status</caption>
         <thead>
           <tr className="text-left text-gray-400">
@@ -223,7 +223,7 @@ function DiagnosticsSection({ model }: { model: NSXPlotModel }) {
           complementarity {fmt(d.kkt.complementarity)}
         </p>
       )}
-      <table data-testid="nsx-rank-table" className="text-[10px] text-gray-300 w-full">
+      <table data-testid="nsx-rank-table" className="text-xs text-gray-300 w-full">
         <caption className="text-left text-gray-200">Rank and condition</caption>
         <thead>
           <tr className="text-left text-gray-400">
@@ -259,7 +259,7 @@ export function PlotModelView({ model }: { model: NSXPlotModel }) {
         {model.engine_name}; registry {model.registry_version}; frames:{' '}
         {model.frame_indices.join(', ')}
       </p>
-      <ul data-testid="nsx-non-claims" className="text-[11px] text-gray-400 list-disc pl-4 mb-3">
+      <ul data-testid="nsx-non-claims" className="text-xs text-gray-400 list-disc pl-4 mb-3">
         {model.non_claims.map((c) => (
           <li key={c}>{c}</li>
         ))}

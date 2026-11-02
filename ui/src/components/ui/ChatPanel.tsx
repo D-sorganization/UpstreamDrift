@@ -652,7 +652,7 @@ export function ChatPanel({
           </span>
           {sessionId && (
             <span
-              className="text-[10px] font-mono"
+              className="text-xs font-mono"
               style={{ color: 'var(--sidekick-color-text-subtle)' }}
               title={`Session ${sessionId}`}
             >
@@ -767,7 +767,7 @@ export function ChatPanel({
                   onClick={() => retryLastUserMessage(m.id)}
                   aria-label="Retry"
                   data-testid="chat-retry"
-                  className="sidekick-focus-ring text-[11px] flex items-center gap-1 px-2 py-0.5 rounded border opacity-70 hover:opacity-100"
+                  className="sidekick-focus-ring text-xs flex items-center gap-1 px-2 py-0.5 rounded border opacity-70 hover:opacity-100"
                   style={{
                     borderColor: 'var(--sidekick-color-border)',
                     color: 'var(--sidekick-color-text-subtle)',

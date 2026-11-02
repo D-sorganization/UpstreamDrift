@@ -356,11 +356,11 @@ export function MatchedSwingsPage() {
           >
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium capitalize">{run.engine}</span>
-              <span className={`text-[10px] px-2 py-0.5 rounded ${verdictBadgeClass(run.verdict)}`}>
+              <span className={`text-xs px-2 py-0.5 rounded ${verdictBadgeClass(run.verdict)}`}>
                 {run.verdict}
               </span>
             </div>
-            <div className="text-[11px] text-gray-400 mt-1 truncate">
+            <div className="text-xs text-gray-400 mt-1 truncate">
               {run.lane} · {run.capture ?? '—'} · {run.id.slice(0, 12)}…
             </div>
           </button>
@@ -526,7 +526,7 @@ export function MatchedSwingsPage() {
         {receiptJson && (
           <details className="text-xs">
             <summary className="cursor-pointer text-gray-300">Receipt JSON</summary>
-            <pre className="mt-1 max-h-48 overflow-auto rounded bg-gray-950 p-2 text-[11px] text-gray-300">
+            <pre className="mt-1 max-h-48 overflow-auto rounded bg-gray-950 p-2 text-xs text-gray-300">
               {JSON.stringify(receiptJson, null, 2)}
             </pre>
           </details>
@@ -535,7 +535,7 @@ export function MatchedSwingsPage() {
         {parityJson && (
           <details className="text-xs">
             <summary className="cursor-pointer text-gray-300">Parity Report JSON</summary>
-            <pre className="mt-1 max-h-48 overflow-auto rounded bg-gray-950 p-2 text-[11px] text-gray-300">
+            <pre className="mt-1 max-h-48 overflow-auto rounded bg-gray-950 p-2 text-xs text-gray-300">
               {JSON.stringify(parityJson, null, 2)}
             </pre>
           </details>

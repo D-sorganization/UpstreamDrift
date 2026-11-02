@@ -84,7 +84,7 @@ export function ChatContextChip({ refreshMs = 15_000 }: ChatContextChipProps = {
 
   return (
     <span
-      className="text-[10px] font-mono flex items-center gap-1 px-2 py-0.5 rounded border"
+      className="text-xs font-mono flex items-center gap-1 px-2 py-0.5 rounded border"
       data-testid="chat-context-chip"
       title="Live app context visible to the assistant"
       style={{

@@ -89,7 +89,7 @@ export function EngineComparisonPanel({ viewModel, onToggleEngine, disabled }: P
                   {column.displayName}
                 </h4>
                 <span
-                  className={`shrink-0 rounded px-2 py-0.5 text-[10px] ${
+                  className={`shrink-0 rounded px-2 py-0.5 text-xs ${
                     column.hasFrame
                       ? 'bg-emerald-500/15 text-emerald-300'
                       : 'bg-gray-700 text-gray-400'

@@ -12,7 +12,7 @@ export function DecisionBadges({ decision, testId }: { decision: DecisionView; t
     ['Conditioning', decision.conditioning_chips],
   ];
   return (
-    <div data-testid={testId} className="flex flex-wrap gap-1 text-[10px] text-gray-200">
+    <div data-testid={testId} className="flex flex-wrap gap-1 text-xs text-gray-200">
       {decision.label && (
         <span className="rounded border border-gray-500 px-1 font-semibold">
           Label: {decision.label}

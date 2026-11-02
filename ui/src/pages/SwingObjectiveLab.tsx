@@ -493,7 +493,7 @@ export function SwingObjectiveLabPage(): React.ReactElement {
                                   )}, evaluated on ${formatObjectiveName(colKey)}: ${scoreText}%`}
                                 >
                                   <div className="text-sm">{scoreText}%</div>
-                                  <div className="text-[10px] text-gray-400 font-sans">
+                                  <div className="text-xs text-gray-400 font-sans">
                                     {isDiagonal
                                       ? "Self (100%)"
                                       : `${scoreText}% of max`}

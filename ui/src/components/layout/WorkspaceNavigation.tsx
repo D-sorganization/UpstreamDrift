@@ -83,7 +83,7 @@ export function WorkspaceSidebar({ onNavigate, className = '' }: WorkspaceSideba
         <span>Home</span>
       </NavLink>
 
-      <div className="pt-2 pb-1 px-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+      <div className="pt-2 pb-1 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
         Task Workspaces
       </div>
 
@@ -109,7 +109,7 @@ export function WorkspaceSidebar({ onNavigate, className = '' }: WorkspaceSideba
         );
       })}
 
-      <div className="pt-3 pb-1 px-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+      <div className="pt-3 pb-1 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
         Utilities & Dev
       </div>
 
@@ -245,7 +245,7 @@ export function WorkspaceView({ workspace, isTauri }: WorkspaceViewProps) {
 
                 {action.kind === 'native-only-explanation' && (
                   <div className="flex flex-col gap-1.5 w-full">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/20 text-amber-300 border border-amber-600/40 w-fit">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-600/40 w-fit">
                       <Monitor className="w-3 h-3" aria-hidden={true} />
                       {action.badge}
                     </span>

@@ -566,5 +566,14 @@ describe('LauncherDashboard', () => {
             expect(nav.className).toContain('flex-wrap');
             expect(nav.className).not.toContain('overflow-x-auto');
         });
+
+        it('gives header actions and workspace links a touch-target hit area (#14281)', () => {
+            renderWithRouter(<LauncherDashboard {...defaultProps} />);
+            expect(screen.getByRole('link', { name: 'Capability Map' })).toHaveClass('touch-target');
+            const nav = screen.getByRole('navigation', { name: 'Task Workspaces' });
+            const links = within(nav).getAllByRole('link');
+            expect(links.length).toBeGreaterThan(0);
+            for (const link of links) expect(link).toHaveClass('touch-target');
+        });
     });
 });

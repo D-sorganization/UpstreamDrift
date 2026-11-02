@@ -25,7 +25,7 @@ export function PropertyInspector({ node }: PropertyInspectorProps) {
       <div className="space-y-1">
         {Object.entries(node.properties).map(([key, value]) => (
           <div key={key} className="flex justify-between text-xs">
-            <span className="text-gray-400 font-mono text-[11px]">{key}</span>
+            <span className="text-gray-400 font-mono text-xs">{key}</span>
             <span className="text-gray-300 font-mono ml-2 truncate max-w-[150px]" title={String(value)}>
               {typeof value === 'number' ? value.toFixed(4) : String(value)}
             </span>
@@ -34,12 +34,12 @@ export function PropertyInspector({ node }: PropertyInspectorProps) {
       </div>
 
       {node.parent_id && (
-        <div className="text-[11px] text-gray-400 border-t border-gray-700/50 pt-2 font-mono">
+        <div className="text-xs text-gray-400 border-t border-gray-700/50 pt-2 font-mono">
           Parent: {node.parent_id}
         </div>
       )}
       {node.children.length > 0 && (
-        <div className="text-[11px] text-gray-400 font-mono truncate" title={node.children.join(', ')}>
+        <div className="text-xs text-gray-400 font-mono truncate" title={node.children.join(', ')}>
           Children: {node.children.join(', ')}
         </div>
       )}

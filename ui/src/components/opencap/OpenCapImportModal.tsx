@@ -165,7 +165,7 @@ export const OpenCapImportModal: React.FC<OpenCapImportModalProps> = ({
                     }`}
                   >
                     <span>{trial}</span>
-                    <div className="flex items-center gap-2 text-[10px]">
+                    <div className="flex items-center gap-2 text-xs">
                       {trial.toLowerCase() === 'neutral' && (
                         <span className="rounded bg-gray-700 px-1.5 py-0.5 text-gray-300">
                           static

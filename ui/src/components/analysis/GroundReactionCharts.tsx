@@ -300,7 +300,7 @@ function ChartFrame({
         <rect x={x0} y={y0} width={x1 - x0} height={y1 - y0} fill="none" stroke="#4b5563" />
         {children}
       </svg>
-      <div className="flex gap-3 text-[10px] text-gray-400">
+      <div className="flex gap-3 text-xs text-gray-400">
         {legend.map((r) => (
           <span key={r.label}>
             <span style={{ color: r.color }}>&#9632;</span> {r.label}

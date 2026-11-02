@@ -335,7 +335,7 @@ export function ModelExplorerPage() {
           {!error && !frankensteinMode && (
             <div className="flex-1 flex flex-col gap-3 min-w-0">
               <div className="space-y-1">
-                <label htmlFor="single-select" className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                <label htmlFor="single-select" className="text-xs uppercase font-bold text-gray-400 tracking-wider">
                   Select Model
                 </label>
                 <select
@@ -377,7 +377,7 @@ export function ModelExplorerPage() {
               {/* Source Tree Area */}
               <div className="flex-1 flex flex-col gap-3 min-w-0 h-full">
                 <div className="space-y-1">
-                  <label htmlFor="source-select" className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                  <label htmlFor="source-select" className="text-xs uppercase font-bold text-gray-400 tracking-wider">
                     Select Source
                   </label>
                   <select
@@ -414,7 +414,7 @@ export function ModelExplorerPage() {
               {/* Target Tree Area */}
               <div className="flex-1 flex flex-col gap-3 min-w-0 h-full">
                 <div className="space-y-1">
-                  <label htmlFor="target-select" className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                  <label htmlFor="target-select" className="text-xs uppercase font-bold text-gray-400 tracking-wider">
                     Select Target
                   </label>
                   <select
@@ -456,13 +456,13 @@ export function ModelExplorerPage() {
       rightPanel={
         <>
         <div className="p-4 border-b border-gray-850">
-          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
             Properties
           </h3>
           <PropertyInspector node={selectedNode} />
         </div>
         <div className="flex-1 overflow-y-auto p-4">
-          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
             Joint Manipulator
           </h3>
           <JointManipulator

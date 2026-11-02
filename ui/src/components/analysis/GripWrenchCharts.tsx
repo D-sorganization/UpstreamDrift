@@ -104,7 +104,7 @@ function Chart({
           ),
         )}
       </svg>
-      <div className="flex gap-3 text-[10px] text-gray-400">
+      <div className="flex gap-3 text-xs text-gray-400">
         {series.map((s) => (
           <span key={s.trace}>
             <span style={{ color: s.color }}>&#9632;</span> {s.label}
@@ -215,7 +215,7 @@ export function GripWrenchCharts({ runId = null }: { runId?: string | null }) {
             </label>
           </div>
           {missing && (
-            <div className="text-[11px] text-amber-400/80 mb-2" data-testid="grip-unavailable-note">
+            <div className="text-xs text-amber-400/80 mb-2" data-testid="grip-unavailable-note">
               Gaps are unavailable samples (split or free torque not provided), not zero.
             </div>
           )}
