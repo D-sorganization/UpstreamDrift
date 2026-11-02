@@ -1,7 +1,6 @@
 import { appendFile, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 const count = 3;
 const version = '12.6.1';
 const categories = ['performance', 'accessibility', 'best-practices', 'seo'];

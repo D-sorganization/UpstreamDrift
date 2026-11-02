@@ -26,22 +26,22 @@ test('missing built assets return 404 instead of the SPA document', async ({ pag
   expect(response?.status()).toBe(404);
 });
 test('Chromium denies external HTTP and records the HTTPS CONNECT attempt', async ({ page }) => {
-  const policy = async () => {
-    const response = await page.goto('/__network-policy');
-    expect(response?.ok()).toBeTruthy();
-    return JSON.parse(await page.locator('body').innerText()).requests;
-  };
+  const policy = async () => (await page.context().request.get('/__network-policy')).json()
+    .then((body) => body.requests as { method: string; target: string; blocked: boolean }[]);
+  const count = (requests: Awaited<ReturnType<typeof policy>>, method: string, target: string) =>
+    requests.filter((request) => request.method === method && request.target === target && request.blocked).length;
   await page.goto('/');
-  expect((await policy()).some((request: { target: string; blocked: boolean }) =>
+  const before = await policy();
+  expect(before.some((request) =>
     request.target.startsWith('http://127.0.0.1:4173/') && !request.blocked)).toBeTruthy();
+  const httpBefore = count(before, 'GET', 'http://example.invalid/');
   const response = await page.goto('http://example.invalid/');
   expect(response?.status()).toBe(403);
   expect(response?.headers()['x-browser-network-policy']).toBe('blocked');
   const afterHttp = await policy();
-  expect(afterHttp.some((request: { method: string; target: string; blocked: boolean }) =>
-    request.method === 'GET' && request.target === 'http://example.invalid/' && request.blocked)).toBeTruthy();
+  expect(count(afterHttp, 'GET', 'http://example.invalid/')).toBeGreaterThan(httpBefore);
+  const httpsBefore = count(afterHttp, 'CONNECT', 'example.invalid:443');
   await page.goto('https://example.invalid/').catch(() => undefined);
   const afterHttps = await policy();
-  expect(afterHttps.some((request: { method: string; target: string; blocked: boolean }) =>
-    request.method === 'CONNECT' && request.target === 'example.invalid:443' && request.blocked)).toBeTruthy();
+  expect(count(afterHttps, 'CONNECT', 'example.invalid:443')).toBeGreaterThan(httpsBefore);
 });

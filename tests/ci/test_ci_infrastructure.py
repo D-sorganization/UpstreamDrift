@@ -29,6 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # issue #13364 (they carry the RM#1989 fork guard).
 QUALITY_GATE_FLEET_GATES = (
     "frontend-tests",
+    "frontend-mobile-baseline",
     "core-only-install",
     "dependency-consistency",
     "alembic-postgres-round-trip",
