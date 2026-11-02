@@ -31,6 +31,7 @@ import type { LauncherTile } from '@/api/useLauncherManifest';
 import type { ManifestLoadState } from '@/api/useLauncherManifest';
 import type { LauncherWindowRecord } from '@/api/launcherWindowRegistry';
 import { canLaunchNativeWindow, resolveTileLaunchAction } from '@/api/webLaunch';
+import { DIAGNOSTICS_BADGE_CLEARANCE } from '@/components/ui/DiagnosticsPanel';
 import type { TileLaunchAction } from '@/api/webLaunch';
 
 interface Props {
@@ -503,7 +504,7 @@ export function LauncherDashboard({
 
             {/* Sticky bottom bar — Launch button always visible (fixes #1165) */}
             <footer
-                className="flex items-center justify-between px-6 py-3 bg-gray-800/95 border-t border-gray-700 flex-shrink-0 backdrop-blur-sm"
+                className={`flex items-center justify-between gap-3 pl-6 ${DIAGNOSTICS_BADGE_CLEARANCE} py-3 bg-gray-800/95 border-t border-gray-700 flex-shrink-0 backdrop-blur-sm`}
                 id="launch-footer"
             >
                 <div className="flex items-center gap-3 text-sm text-gray-400">

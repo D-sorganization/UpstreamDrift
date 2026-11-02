@@ -8,7 +8,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { DiagnosticsPanel } from './DiagnosticsPanel';
+import { DIAGNOSTICS_BADGE_CLEARANCE, DiagnosticsPanel } from './DiagnosticsPanel';
 import type {
   FullDiagnosticsReport,
   IntegrationsHealthReport,
@@ -223,5 +223,16 @@ describe('DiagnosticsPanel (browser mode, issue #7458)', () => {
     await openPanel();
     expect(screen.queryByText('Start')).not.toBeInTheDocument();
     expect(screen.queryByText('Stop')).not.toBeInTheDocument();
+  });
+
+  it('keeps the floating badge compact on phones with its accessible name (#14255)', () => {
+    render(<DiagnosticsPanel />);
+    const toggle = screen.getByRole('button', { name: 'Toggle diagnostics panel' });
+    expect(screen.getByText('Backend')).toHaveClass('hidden', 'md:inline');
+    expect(toggle).toContainElement(screen.getByText('Backend'));
+  });
+
+  it('exports the right-padding that bottom bars reserve for the badge (#14255)', () => {
+    expect(DIAGNOSTICS_BADGE_CLEARANCE.split(' ')).toEqual(['pr-20', 'md:pr-32']);
   });
 });

@@ -18,6 +18,7 @@ import { render } from '@testing-library/react';
 import { screen, fireEvent, within } from '@testing-library/dom';
 import { MemoryRouter } from 'react-router';
 import { LauncherDashboard } from './LauncherDashboard';
+import { DIAGNOSTICS_BADGE_CLEARANCE } from '@/components/ui/DiagnosticsPanel';
 import type { LauncherTile } from '@/api/useLauncherManifest';
 
 const renderWithRouter = (ui: React.ReactElement) =>
@@ -565,6 +566,13 @@ describe('LauncherDashboard', () => {
             const nav = screen.getByRole('navigation', { name: 'Task Workspaces' });
             expect(nav.className).toContain('flex-wrap');
             expect(nav.className).not.toContain('overflow-x-auto');
+        });
+
+        it('reserves room for the floating diagnostics badge in the launch footer (#14255)', () => {
+            const { container } = renderWithRouter(<LauncherDashboard {...defaultProps} />);
+            const footer = container.querySelector('#launch-footer');
+            expect(footer).not.toBeNull();
+            expect(footer).toHaveClass(...DIAGNOSTICS_BADGE_CLEARANCE.split(' '));
         });
 
         it('gives header actions and workspace links a touch-target hit area (#14281)', () => {
