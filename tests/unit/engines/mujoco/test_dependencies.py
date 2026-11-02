@@ -26,36 +26,56 @@ def test_mujoco_import() -> None:
         pytest.fail("MuJoCo library not found. Install with: pip install mujoco")
 
 
+_TWO_DOF_XML = """
+<mujoco>
+  <worldbody>
+    <body>
+      <joint name="hinge" type="hinge" axis="0 1 0"/>
+      <geom type="sphere" size="0.1"/>
+      <body pos="0 0 -0.5">
+        <joint name="slide" type="slide" axis="0 0 1"/>
+        <geom type="sphere" size="0.1"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>
+"""
+
+
 def test_numpy_compatibility() -> None:
-    """Verify numpy compatibility with MuJoCo."""
+    """qpos is a finite float64 ndarray of shape (nq,) that supports read/write."""
     import mujoco
     import numpy as np
 
-    # Create a simple MjData struct
-    model = mujoco.MjModel.from_xml_string("<mujoco/>")
+    model = mujoco.MjModel.from_xml_string(_TWO_DOF_XML)
     data = mujoco.MjData(model)
 
-    # Check if we can access data as numpy arrays (if supported by bindings)
-    # Note: Modern dm_control or mujoco bindings usually support this
-    try:
-        qpos = data.qpos
-        assert isinstance(qpos, np.ndarray | object)  # Depending on binding version
-    except AttributeError as e:
-        logger.warning(f"Direct numpy access check warning: {e}")
+    assert model.nq == 2
+    qpos = data.qpos
+    assert isinstance(qpos, np.ndarray)
+    assert qpos.shape == (model.nq,)
+    assert qpos.dtype == np.float64
+    assert np.all(np.isfinite(qpos))
+
+    data.qpos[:] = [0.25, -0.1]
+    mujoco.mj_forward(model, data)
+    np.testing.assert_array_equal(data.qpos, [0.25, -0.1])
+    assert np.all(np.isfinite(data.xpos))
+    # Writes go through to the underlying MjData buffer, not a copy.
+    assert np.shares_memory(qpos, data.qpos)
 
 
-def test_rendering_backend() -> None:
-    """Check if a rendering backend is available (GL)."""
-    # This is often platform specific and might fail in headless CI without Xvfb
-    # We just check if we can import the GL context creator
-    try:
-        from mujoco import MjRenderContextOffscreen  # noqa: F401
-    except ImportError:
-        logger.warning("MjRenderContextOffscreen not available (might be old version)")
-    except Exception as e:  # noqa: BLE001, F841
-        # It's okay if it fails to initialize in this test,
-        # we just want to know if the symbol exists
-        pass
+def test_rendering_api_symbols_present() -> None:
+    """Import-only probe: the rendering API symbols exist.
+
+    Headless rendering is not a required capability of this dependency suite,
+    so no GL context is created and no window is ever opened. A missing
+    symbol in a provisioned MuJoCo install fails.
+    """
+    import mujoco
+
+    for name in ("Renderer", "MjrContext", "MjvScene"):
+        assert hasattr(mujoco, name), f"mujoco.{name} missing"
 
 
 def test_optional_dependencies() -> None:
