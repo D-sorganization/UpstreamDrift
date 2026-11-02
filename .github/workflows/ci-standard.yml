@@ -3089,6 +3089,8 @@ jobs:
 
   frontend-tests:
     needs: [pick-runner, changed-paths]
+    outputs:
+      ui_skip: ${{ steps.frontend-changes.outputs.skip }}
     # Fork PRs never run on the self-hosted fleet (RM#1989).
     if: >-
       (!github.event.pull_request ||
@@ -3132,6 +3134,15 @@ jobs:
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Validate frontend skip decision
+        id: validate-frontend-skip
+        env:
+          FRONTEND_SKIP: ${{ steps.frontend-changes.outputs.skip }}
+        run: |
+          case "$FRONTEND_SKIP" in
+            true|false) ;;
+            *) echo "::error::Frontend skip decision must be true or false."; exit 1 ;;
+          esac
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         if: steps.frontend-changes.outputs.skip != 'true'
@@ -3162,12 +3173,12 @@ jobs:
 
   frontend-mobile-baseline:
     name: Frontend Mobile Baseline
-    needs: [changed-paths, frontend-tests]
+    needs: [pick-runner, changed-paths, frontend-tests]
     if: >-
       (!github.event.pull_request ||
       github.event.pull_request.head.repo.full_name == github.repository) &&
       (needs.changed-paths.outputs.code == 'true')
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(needs.pick-runner.outputs.mode == 'hosted' && '["ubuntu-latest"]' || '["self-hosted","Linux","d-sorg-fleet-docker","d-sorg-fleet-public-heavy"]') }}
     timeout-minutes: 30
     permissions:
       contents: read
@@ -3176,44 +3187,45 @@ jobs:
         working-directory: ./ui
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Check for frontend changes
-        id: frontend-changes
-        working-directory: .
-        run: |
-          if [ "${{ github.event_name }}" != "pull_request" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
-          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-          if git diff --quiet "origin/${{ github.base_ref }}" HEAD -- ui; then echo "skip=true" >> "$GITHUB_OUTPUT"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: needs.frontend-tests.outputs.ui_skip != 'true'
         with:
           node-version: "24"
           cache: "npm"
           cache-dependency-path: ui/package-lock.json
       - name: Install Dependencies
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: needs.frontend-tests.outputs.ui_skip != 'true'
         run: npm ci
       - name: Build Dashboard
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: needs.frontend-tests.outputs.ui_skip != 'true'
         run: npm run build
-      - name: Install Chromium on ephemeral hosted runner
-        if: steps.frontend-changes.outputs.skip != 'true'
+      - name: Install Chromium for selected runner
+        if: needs.frontend-tests.outputs.ui_skip != 'true'
         run: |
           export PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers"
           echo "PLAYWRIGHT_BROWSERS_PATH=$PLAYWRIGHT_BROWSERS_PATH" >> "$GITHUB_ENV"
-          npx playwright install --with-deps chromium
+          if [ "${{ needs.pick-runner.outputs.mode }}" = "hosted" ]; then
+            npx playwright install --with-deps chromium
+          else
+            npx playwright install chromium
+            if ! node --input-type=module -e 'import { chromium } from "@playwright/test"; const browser = await chromium.launch(); await browser.close()'; then
+              echo "::error::Chromium cannot launch with the installed self-hosted system libraries. Refusing to install host packages."
+              exit 1
+            fi
+          fi
           echo "CHROME_PATH=$(node --input-type=module -e 'import { chromium } from "@playwright/test"; process.stdout.write(chromium.executablePath())')" >> "$GITHUB_ENV"
       - name: Validate Lighthouse receipt checks
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: needs.frontend-tests.outputs.ui_skip != 'true'
         run: npm run test:lighthouse-receipt
       - name: Run mobile browser smoke tests
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: needs.frontend-tests.outputs.ui_skip != 'true'
         run: npm run test:mobile
       - name: Clear stale Lighthouse reports
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: needs.frontend-tests.outputs.ui_skip != 'true'
         working-directory: .
         run: node -e "require('node:fs').rmSync('.lighthouseci',{recursive:true,force:true})"
       - name: Collect Lighthouse mobile baseline
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: needs.frontend-tests.outputs.ui_skip != 'true'
         uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18
         with:
           urls: http://127.0.0.1:4173/
@@ -3222,11 +3234,11 @@ jobs:
           uploadArtifacts: false
           temporaryPublicStorage: false
       - name: Validate collected Lighthouse reports
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: needs.frontend-tests.outputs.ui_skip != 'true'
         working-directory: .
         run: node ui/e2e/validate-lighthouse-reports.mjs .lighthouseci http://127.0.0.1:4173/
       - name: Upload sanitized mobile score receipt
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: needs.frontend-tests.outputs.ui_skip != 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: lighthouse-mobile-baseline-${{ github.run_id }}-${{ github.run_attempt }}

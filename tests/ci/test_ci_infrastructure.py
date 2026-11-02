@@ -11,8 +11,10 @@ This file addresses infrastructure issues identified in CI pipeline failures.
 
 import json
 import logging
+import os
 import re
 import runpy
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -40,6 +42,208 @@ QUALITY_GATE_FLEET_GATES = (
     "workflow-inventory",
     "urdf-layering",
 )
+
+
+def _bash_path(path: Path) -> str:
+    return (
+        f"/{path.drive[0].lower()}{path.as_posix()[2:]}"
+        if os.name == "nt"
+        else str(path)
+    )
+
+
+def _posix_bash() -> str:
+    if os.name == "nt":
+        path = (
+            Path(os.environ.get("PROGRAMFILES", "C:/Program Files"))
+            / "Git/bin/bash.exe"
+        )
+        bash = str(path) if path.is_file() else None
+        if not bash:
+            pytest.skip(
+                "Git Bash is unavailable; required Linux CI runs workflow behavior cases"
+            )
+    else:
+        bash = shutil.which("bash")
+        assert bash, "Required Linux CI must provide Bash for workflow behavior tests"
+    return bash
+
+
+@pytest.mark.parametrize(
+    ("mode", "private", "fork", "expected_mode", "runner"),
+    [
+        ("auto", "false", "true", "hosted", "ubuntu-latest"),
+        ("auto", "false", "false", "hosted", "ubuntu-latest"),
+        ("local", "false", "false", "local", "d-sorg-fleet-docker"),
+        ("local", "true", "false", "local", "d-sorg-fleet-docker"),
+    ],
+    ids=[
+        "fork-hosted",
+        "public-auto-hosted",
+        "public-local-fleet",
+        "private-local-fleet",
+    ],
+)
+def test_mobile_browser_runner_selection_preserves_hosted_and_local_policy(
+    tmp_path: Path,
+    mode: str,
+    private: str,
+    fork: str,
+    expected_mode: str,
+    runner: str,
+) -> None:
+    workflow = yaml.safe_load(
+        (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+    )
+    picker = workflow["jobs"]["pick-runner"]
+    frontend = workflow["jobs"]["frontend-tests"]
+    mobile = workflow["jobs"]["frontend-mobile-baseline"]
+    assert "pick-runner" in mobile["needs"]
+    assert (
+        frontend["outputs"]["ui_skip"] == "${{ steps.frontend-changes.outputs.skip }}"
+    )
+    validate = next(
+        step for step in frontend["steps"] if step.get("id") == "validate-frontend-skip"
+    )
+    assert (
+        validate["env"]["FRONTEND_SKIP"] == "${{ steps.frontend-changes.outputs.skip }}"
+    )
+    assert "Check for frontend changes" not in {
+        step.get("name") for step in mobile["steps"]
+    }
+    assert all(
+        step.get("if") == "needs.frontend-tests.outputs.ui_skip != 'true'"
+        for step in mobile["steps"][1:]
+    )
+    assert mobile["runs-on"] == (
+        "${{ fromJSON(needs.pick-runner.outputs.mode == 'hosted' && '[\"ubuntu-latest\"]' "
+        '|| \'["self-hosted","Linux","d-sorg-fleet-docker","d-sorg-fleet-public-heavy"]\') }}'
+    )
+    install = next(
+        step
+        for step in mobile["steps"]
+        if step.get("name") == "Install Chromium for selected runner"
+    )["run"]
+    assert (
+        "--with-deps chromium" in install
+        and "npx playwright install chromium" in install
+    )
+    assert (
+        "needs.pick-runner.outputs.mode" in install
+        and "Chromium cannot launch" in install
+    )
+    assert "sudo" not in install and "$RUNNER_TEMP/playwright-browsers" in install
+    bash = _posix_bash()
+    step = next(step for step in picker["steps"] if step.get("id") == "check")
+    env = {
+        **os.environ,
+        "CI_RUNNER_MODE": mode,
+        "REPOSITORY_PRIVATE": private,
+        "RUNNER_LABEL": "d-sorg-fleet-docker",
+        "FORK_PR": fork,
+        "GITHUB_OUTPUT": "output",
+        "GITHUB_STEP_SUMMARY": "summary",
+    }
+    subprocess.run([bash, "-e", "-c", step["run"]], check=True, cwd=tmp_path, env=env)
+    values = dict(
+        line.split("=", 1) for line in (tmp_path / "output").read_text().splitlines()
+    )
+    assert values["mode"] == expected_mode
+    assert values["runner"] == runner
+    change_check = next(
+        step for step in frontend["steps"] if step.get("id") == "frontend-changes"
+    )
+    for event in ("push", "merge_group"):
+        script = change_check["run"].replace("${{ github.event_name }}", event)
+        subprocess.run([bash, "-e", "-c", script], check=True, cwd=tmp_path, env=env)
+        assert "skip=false" in (tmp_path / "output").read_text()
+    for value, succeeds in (
+        ("true", True),
+        ("false", True),
+        ("", False),
+        ("unexpected", False),
+    ):
+        result = subprocess.run(
+            [bash, "-e", "-c", validate["run"]],
+            cwd=tmp_path,
+            env={**env, "FRONTEND_SKIP": value},
+            capture_output=True,
+        )
+        assert (result.returncode == 0) is succeeds
+
+
+@pytest.mark.parametrize(
+    ("mode", "fail_launch", "expected", "succeeds"),
+    [
+        ("hosted", "false", "npx playwright install --with-deps chromium", True),
+        ("local", "false", "npx playwright install chromium", True),
+        (
+            "local",
+            "true",
+            "Chromium cannot launch with the installed self-hosted system libraries",
+            False,
+        ),
+    ],
+    ids=[
+        "hosted-installs-system-deps",
+        "local-never-installs-system-deps",
+        "local-launch-fails-closed",
+    ],
+)
+def test_mobile_browser_install_step_behavior(
+    tmp_path: Path, mode: str, fail_launch: str, expected: str, succeeds: bool
+) -> None:
+    workflow = yaml.safe_load(
+        (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+    )
+    step = next(
+        step
+        for step in workflow["jobs"]["frontend-mobile-baseline"]["steps"]
+        if step.get("name") == "Install Chromium for selected runner"
+    )
+    bash = _posix_bash()
+    run = step["run"].replace("${{ needs.pick-runner.outputs.mode }}", mode)
+    harness = (
+        """
+npx() { printf 'npx %s\\n' "$*" >> "$CALL_LOG"; }
+node() {
+  printf 'node %s\\n' "$*" >> "$CALL_LOG"
+  case "$*" in
+    *chromium.launch*) [ "$LAUNCH_FAIL" != true ] ;;
+    *) printf '/tmp/chromium\\n' ;;
+  esac
+}
+"""
+        + run
+    )
+    env = {
+        **os.environ,
+        "CALL_LOG": _bash_path(tmp_path / "calls"),
+        "GITHUB_ENV": _bash_path(tmp_path / "github-env"),
+        "RUNNER_TEMP": _bash_path(tmp_path),
+        "LAUNCH_FAIL": fail_launch,
+    }
+    result = subprocess.run(
+        [bash, "-e", "-c", harness],
+        cwd=tmp_path,
+        env=env,
+        text=True,
+        capture_output=True,
+    )
+    assert (result.returncode == 0) is succeeds
+    log = (tmp_path / "calls").read_text()
+    assert expected in (result.stderr + result.stdout + log)
+    if mode == "local":
+        assert "--with-deps" not in log
+        assert "chromium.launch()" in log
+    else:
+        assert "chromium.launch()" not in log
+    if fail_launch == "true":
+        assert "CHROME_PATH=" not in (tmp_path / "github-env").read_text()
 
 
 def test_pre_push_hook_keeps_pytest_failure_and_gives_repair_guidance(
