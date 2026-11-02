@@ -2531,15 +2531,18 @@ Impact peak force ($\Delta t$ vs.\ $\Delta t/2$) & \texttt{timestep\_halving\_se
 Impact impulse ($\Delta t$ vs.\ $\Delta t/2$) & \texttt{timestep\_halving\_sensitivity} & $0.194684\text{ N}\cdot\text{s}$ (rel.\ diff $4.2\times 10^{-7}$) & $\le 1.0\%$ ($0.01$) & pass \\
 \bottomrule
 \end{tabular}
-\caption{Measured HRG-H2 (\texttt{hrg-h2-palm-thumb-pad-v1}) compliant palm--thumb pad verification numbers on \path{full_body_spec_anthro_driver.json} from \path{tests/unit/grip_contact/test_palm_thumb_pad.py}.}
+\caption{Measured HRG-H2 (\texttt{hrg-h2-palm-thumb-pad-v1}) compliant palm--thumb pad verification numbers on \texttt{full\_body\_spec\_anthro\_driver.json} from \texttt{tests/unit/grip\_contact/test\_palm\_thumb\_pad.py}.}
 \label{tab:h2_palm_thumb_pad_contract}
 \end{table}
+
+\textbf{Cross-Engine Parity (\#13190 PR 2).} No engine evaluates the pad natively: each gating engine (MuJoCo, Drake, Pinocchio, OpenSim) supplies only its own forward kinematics of the two grip-hand frames (\texttt{grip\_bushing[side].hand\_frame} on \texttt{hand\_body}, exported as spec frames of the separated flagship driver), and the force is always \texttt{palm\_thumb\_pad\_force} (overlap topology, zero-drift gate). The trail wrist follows a circle of amplitude $0.002\text{ rad}$ in \texttt{RWInputX}/\texttt{RWInputY} at $10\text{ Hz}$, sampled 21 times over one period; frame velocities are central differences of the frame poses with step $10^{-5}\text{ s}$, identical for every source. The specification has no closed-grip configuration (the grip-hand frames are $\approx 0.38\text{ m}$ apart at zero and at the address seed), so each side is placed on its grip interface frame $G_s$ by one fixed rigid map $A_s = G_s\,S_s(q_0)^{-1}$ computed from the spec-analytic frame $S_s$ at zero and applied to every source alike; an engine's frame offset or motion error therefore reaches the force unchanged. Along the circle the spec-reference normal force runs from $42.68\text{ N}$ (the neutral preload above) to $19.92\text{ N}$, positive at every sample. Against that reference, the normal force and the force on the trail hand of all four engines satisfy \texttt{PEAK\_TOLERANCE} $= 0.05$ and \texttt{RMS\_TOLERANCE} $= 0.02$ (\texttt{compute\_quantity\_error}); the measured relative errors are $\le 8\times 10^{-10}$. Shifting the trail grip-hand frame by $0.05\text{ mm}$ gives a $19.7\%$ peak normal-force error, which the gate rejects. The parity covers kinematics only: a rigid offset common to both hand frames, and engine dynamics, are outside it.
 
 \textbf{Limitations and Non-Claims.} The compliant palm--thumb pad is a diagnostic analytical contact model for the isolated \texttt{trail\_palm\_lead\_thumb} sphere--capsule pair in \texttt{separated\_v2} mode, not a calibrated measurement of in-vivo thenar soft-tissue pressure distribution.
 
 \textbf{Reproduction.}
 \begin{verbatim}
 PYTHONPATH=.:src pytest -o addopts="" -q tests/unit/grip_contact/test_palm_thumb_pad.py
+PYTHONPATH=.:src pytest -o addopts="" -q tests/integration/test_palm_thumb_pad_parity.py
 \end{verbatim}
 
 \section{Appearance}
