@@ -10,7 +10,7 @@ import { KeypointOverlay } from '@/components/visualization/KeypointOverlay';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { apiFetchForm } from '@/api/fetch';
-import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
+import { ToolShell } from '@/components/layout/ToolShell';
 import {
   VideoForceOverlay,
   type ProjectedGlyphSetPayload,
@@ -626,14 +626,32 @@ export function VideoAnalyzerPage() {
     </div>
   );
 
+  const primaryDisabledReason = !file
+    ? 'Select a video file to enable pose analysis'
+    : loading
+      ? 'Analyzing video frames…'
+      : undefined;
+
   return (
-    <WorkspaceShell
+    <ToolShell
+      workspaceId="capture_analyze"
+      toolId="video_analyzer"
+      toolName="Video Analyzer"
+      description="Video-based swing analysis with pose estimation, joint angles, and force overlays"
+      primaryActionDisabledReason={primaryDisabledReason}
       leftPanel={leftPanel}
       rightPanel={rightPanel}
       leftPanelLabel="Controls"
       rightPanelLabel="Analysis Results"
+      nextStep={{
+        title: 'Compare Swing Objectives',
+        description:
+          'Evaluate competing downswing optimization objectives in Optimize & Train',
+        actionLabel: 'Go to Swing Objective Lab',
+        href: '/tools/swing-objective-lab',
+      }}
     >
       {mainContent}
-    </WorkspaceShell>
+    </ToolShell>
   );
 }

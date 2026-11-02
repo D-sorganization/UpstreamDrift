@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14337 · Document a Bounded Local-Only Grok Bot Simulation Caller Path
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14337
+- **Branch:** codex/14337-local-grok-simulation-relay-plan
+- **PR:** #14359
+- **Paths:** docs/agents/grok-simulation-relay.md
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`b385be55`; collated from changes/14337-grok-simulation-relay.md)
+- **Summary:** Document a bounded local-only Grok Bot simulation caller path
+- **Next step:** Merge the PR.
+
 ### DL-#14272 · Record Evidence-Based Deployment Boundary
 
 - **State:** in_review
@@ -232,12 +245,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13885
 - **Branch:** brick/issues-ud/13885-grip-margin-metric
-- **PR:** #14148, #14152
+- **PR:** #14148, #14152, #14347
 - **Paths:** see #14148
 - **Started:** 2026-10-31
-- **Last verified:** 2026-10-31 (`da728201`; collated from changes/13885-mujoco-mu-crit-calibration.md)
+- **Last verified:** 2026-11-02 (`be3b8bc5`; collated from changes/13885-grip-margin-swing-receipt.md)
 - **Summary:** Pure two-hand grip-margin metric: per-pad Coulomb margin, UNLOADED floor, slip events, grasp-map internal wrench and GripMarginReport
-- **Next step:** PR 3 scripted swing receipt with grip_force_limit_n
+- **Next step:** Merge after CI; closes scripted swing acceptance for #13885.
 
 ### DL-#12712 · NSX-83: Add the ClubheadSeries to RigidClubState Adapter and Constant-Twist Event Location Feeding the Shared Impact Outcome Map.
 
@@ -1736,10 +1749,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13560
 - **Branch:** merged via #14185
-- **PR:** #14185
+- **PR:** #14185, #14351
 - **Paths:** see #14185
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-01 (`9a132afd`; collated from changes/13560-mujoco-resting-friction.md)
+- **Last verified:** 2026-11-02 (`1377299a`; collated from changes/13560-opensim-net-moment-diagnosis.md)
 - **Summary:** MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed
 - **Next step:** Shipped in PR #14185.
 
@@ -2594,10 +2607,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13176
 - **Branch:** merged via #13820
-- **PR:** #13820, #14015, #14127
+- **PR:** #13820, #14015, #14127, #14357
 - **Paths:** see #13820
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-30 (`e1164326`; collated from changes/13176-limits-qualification.md)
+- **Last verified:** 2026-11-02 (`fa7aa74e`; collated from changes/13176-full-body-v2-closure-qualification.md)
 - **Summary:** Qualify HRG full-body-v2 mass and gravity in Drake
 - **Next step:** Shipped in PR #13820.
 

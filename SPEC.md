@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14351 | OpenSim net_moment_com diagnosis artifact and decomposed trace helpers |
+| 2026-11-02 | #14357 | HRG-Q1 loop-closure row: full-body-v2 grip weld qualified against a spec-only reference on MuJoCo, Pinocchio, Drake and OpenSim (zero set and weld distance/angle to 1e-12). |
+| 2026-11-02 | #14359 | Document a bounded local-only Grok Bot simulation caller path |
+| 2026-11-02 | #14347 | MuJoCo scripted swing grip-margin receipt with grip_force_limit_n gates |
 | 2026-11-02 | #14353 | Record evidence-based deployment boundary |
 | 2026-11-02 | #14355 | Define mobile workflows and server-side runtime boundary |
 | 2026-11-02 | #14349 | Delete drifted local themes.json copy and consume Tools theme catalog with legacy id migration |

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 export interface WorkspaceShellProps {
+  /** Optional top bar or tool header spanning the full width above sidebars. */
+  topBar?: ReactNode;
   /** Left sidebar content (controls). Omit for a two-column layout. */
   leftPanel?: ReactNode;
   /** Right sidebar content (live data / inspectors). Omit to hide. */
@@ -36,6 +38,7 @@ const ASIDE_BASE =
  * size and overflows (see #7416).
  */
 export function WorkspaceShell({
+  topBar,
   leftPanel,
   rightPanel,
   bottomPanel,
@@ -53,8 +56,11 @@ export function WorkspaceShell({
 
   return (
     <div
-      className={`flex flex-col h-screen bg-gray-900 overflow-hidden ${className}`.trim()}
+      className={`flex flex-col ${className.includes('h-') ? '' : 'h-screen'} bg-gray-900 overflow-hidden ${className}`.trim()}
     >
+      {topBar != null && (
+        <div className="flex-shrink-0 z-10">{topBar}</div>
+      )}
       {/* Mobile/tablet top bar with drawer toggles (hidden at lg+). */}
       {(hasLeft || hasRight) && (
         <div className="flex lg:hidden items-center justify-between gap-2 bg-gray-800 border-b border-gray-700 px-3 py-2 flex-shrink-0">
