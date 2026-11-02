@@ -85,7 +85,7 @@ function NavButton({
             className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
             <Icon className="w-5 h-5" aria-hidden={true} />
-            <span className="text-sm font-medium hidden sm:inline">{label}</span>
+            <span className="text-sm font-medium hidden md:inline">{label}</span>
         </button>
     );
 }
@@ -343,14 +343,16 @@ export function LauncherDashboard({
     return (
         <div className="flex flex-col h-screen bg-gray-900">
             {/* Header */}
-            <header className="flex items-center justify-between px-6 py-4 bg-gray-800/80 border-b border-gray-700 flex-shrink-0">
+            {/* #14280: wrap instead of pushing actions off a phone screen; below md
+                the actions are icon-only (each keeps its aria-label). */}
+            <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 md:px-6 py-3 md:py-4 bg-gray-800/80 border-b border-gray-700 flex-shrink-0">
                 <div>
                     <h1 className="heading-page">Golf Modeling Suite</h1>
                     <p className="text-xs text-gray-400 mt-0.5">
                         {tiles.length} tiles · {engines.length} engines · {toolsAndExternal.length} tools
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <details className="relative">
                         <summary
                             role="button"
@@ -358,7 +360,7 @@ export function LauncherDashboard({
                             className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 bg-gray-700/40 hover:bg-gray-700/60 text-gray-200 rounded-lg border border-gray-600/60 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
                         >
                             <Monitor className="w-5 h-5" aria-hidden="true" />
-                            <span className="text-sm font-medium hidden sm:inline">Windows</span>
+                            <span className="text-sm font-medium hidden md:inline">Windows</span>
                             {launchedWindows.length > 0 && (
                                 <span className="rounded-full bg-blue-500/30 px-1.5 text-xs text-blue-100">
                                     {launchedWindows.length}
@@ -399,10 +401,11 @@ export function LauncherDashboard({
                     <NavButton to="/chat" label="Chat" icon={MessageSquare} />
                     <a
                         href="/capability-atlas/index.html"
+                        aria-label="Capability Map"
                         className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
                     >
                         <ExternalLink className="w-5 h-5" aria-hidden="true" />
-                        <span className="text-sm font-medium">Capability Map</span>
+                        <span className="text-sm font-medium hidden md:inline">Capability Map</span>
                     </a>
                     <button
                         id="help-button"
@@ -411,7 +414,7 @@ export function LauncherDashboard({
                         className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
                     >
                         <HelpCircle className="w-5 h-5" aria-hidden="true" />
-                        <span className="text-sm font-medium hidden sm:inline">Help</span>
+                        <span className="text-sm font-medium hidden md:inline">Help</span>
                     </button>
                 </div>
             </header>
@@ -419,7 +422,7 @@ export function LauncherDashboard({
             {/* Task Workspaces Bar (ORG-06, #10516) */}
             <nav
                 aria-label="Task Workspaces"
-                className="flex items-center gap-2 px-6 py-2.5 bg-gray-800/40 border-b border-gray-700/50 overflow-x-auto text-xs flex-shrink-0"
+                className="flex flex-wrap items-center gap-2 px-4 md:px-6 py-2.5 bg-gray-800/40 border-b border-gray-700/50 text-xs flex-shrink-0"
             >
                 <span className="font-semibold text-gray-400 uppercase tracking-wider text-[11px] mr-1">Workspaces:</span>
                 <NavLink

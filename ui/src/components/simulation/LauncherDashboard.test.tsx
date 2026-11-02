@@ -544,4 +544,27 @@ describe('LauncherDashboard', () => {
             expect(onFocusLaunchedTile).toHaveBeenCalledWith('model_explorer');
         });
     });
+
+    describe('phone header and workspace links (#14280)', () => {
+        it('wraps the header so actions never run off a narrow screen', () => {
+            renderWithRouter(<LauncherDashboard {...defaultProps} />);
+            const header = screen.getByRole('banner');
+            expect(header.className).toContain('flex-wrap');
+        });
+
+        it('shows header action labels only from md and keeps accessible names', () => {
+            renderWithRouter(<LauncherDashboard {...defaultProps} />);
+            const capabilityMap = screen.getByRole('link', { name: 'Capability Map' });
+            expect(capabilityMap).toHaveAttribute('aria-label', 'Capability Map');
+            const label = within(capabilityMap).getByText('Capability Map');
+            expect(label.className).toContain('hidden md:inline');
+        });
+
+        it('wraps workspace links instead of clipping them in a scroll strip', () => {
+            renderWithRouter(<LauncherDashboard {...defaultProps} />);
+            const nav = screen.getByRole('navigation', { name: 'Task Workspaces' });
+            expect(nav.className).toContain('flex-wrap');
+            expect(nav.className).not.toContain('overflow-x-auto');
+        });
+    });
 });
