@@ -30,6 +30,7 @@ import {
   resolveWorkspaceToolAction,
   type WorkspaceToolAction,
 } from '@/api/capabilityAdapter';
+import { getWorkspaceToolPresentation } from '@/config/workspaceToolPresentation';
 
 export interface WorkspaceSidebarProps {
   onNavigate?: (workspaceId: string) => void;
@@ -206,6 +207,12 @@ export function WorkspaceView({ workspace, isTauri }: WorkspaceViewProps) {
           const action: WorkspaceToolAction = resolveWorkspaceToolAction(toolId, {
             isTauri,
           });
+          const presentation = getWorkspaceToolPresentation(toolId);
+          const heading = presentation.displayName;
+          const summary =
+            action.kind === 'native-only-explanation'
+              ? action.explanation
+              : presentation.summary;
 
           return (
             <div
@@ -213,12 +220,8 @@ export function WorkspaceView({ workspace, isTauri }: WorkspaceViewProps) {
               className="flex flex-col justify-between p-4 bg-gray-800/80 border border-gray-700/80 rounded-xl shadow-md hover:border-gray-600 transition-colors"
             >
               <div>
-                <h3 className="text-base font-semibold text-white mb-1">{action.title}</h3>
-                <p className="text-xs text-gray-400 mb-3">
-                  {action.kind === 'native-only-explanation'
-                    ? action.explanation
-                    : `Access and configure ${action.title} in the ${workspace.title} task space.`}
-                </p>
+                <h3 className="text-base font-semibold text-white mb-1">{heading}</h3>
+                <p className="text-xs text-gray-400 mb-3">{summary}</p>
               </div>
 
               <div className="pt-2 border-t border-gray-700/40 flex items-center justify-between gap-2">
@@ -228,7 +231,7 @@ export function WorkspaceView({ workspace, isTauri }: WorkspaceViewProps) {
                     onClick={() => navigate(action.route)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                   >
-                    Open Tool
+                    Open in browser
                     <ExternalLink className="w-3.5 h-3.5" aria-hidden={true} />
                   </button>
                 )}
@@ -236,9 +239,9 @@ export function WorkspaceView({ workspace, isTauri }: WorkspaceViewProps) {
                 {action.kind === 'native-launch' && (
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                   >
-                    Launch Window
+                    Open desktop window
                     <Monitor className="w-3.5 h-3.5" aria-hidden={true} />
                   </button>
                 )}

@@ -193,6 +193,8 @@ describe('WorkspaceView and Shell Integration', () => {
 
     expect(screen.getByRole('heading', { name: /Capture & Analyze/i })).toBeInTheDocument();
     expect(screen.getByText(/Motion capture, video analysis/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'C3D Viewer' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Open in browser/i })).toBeInTheDocument();
   });
 });
 
