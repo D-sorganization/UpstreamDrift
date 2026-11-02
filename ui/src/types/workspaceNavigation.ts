@@ -168,6 +168,210 @@ export const SECONDARY_WORKSPACES: Record<string, WorkspaceMetadata> = {
   },
 };
 
+/** Hand-written card copy for a workspace member tool (#14261). */
+export interface ToolCardCopy {
+  displayName: string;
+  summary: string;
+}
+
+const MOVEMENT_OPTIMIZER: ToolCardCopy = {
+  displayName: 'Movement Optimizer',
+  summary: 'Optimize barbell and swing trajectories across physics engines.',
+};
+const PUTTING_GREEN: ToolCardCopy = {
+  displayName: 'Putting Green',
+  summary: 'Author greens and practice putts with ball-rolling physics.',
+};
+const CROSS_ENGINE_DASHBOARD: ToolCardCopy = {
+  displayName: 'Cross-Engine Dashboard',
+  summary: 'Compare perturbation robustness across physics engines.',
+};
+const MATLAB_MODELS: ToolCardCopy = {
+  displayName: 'MATLAB Models',
+  summary: 'MATLAB and Simscape models, dataset generators and tooling.',
+};
+
+/**
+ * Card copy for every workspace member, keyed by tool id. Names are written
+ * as authored (C3D, OpenPose, MediaPipe) rather than title-cased from the id,
+ * and legacy alias ids share their canonical tool's copy. A test requires an
+ * entry for every `memberToolIds` value.
+ */
+export const TOOL_CARD_COPY: Record<string, ToolCardCopy> = {
+  motion_capture: {
+    displayName: 'Motion Capture',
+    summary: 'Record and process markerless motion capture from the command line.',
+  },
+  video_analyzer: {
+    displayName: 'Video Analyzer',
+    summary: 'Extract poses and joint tracks from swing video.',
+  },
+  c3d_viewer: {
+    displayName: 'C3D Viewer',
+    summary: 'Visualize and analyze optical mocap data (.c3d).',
+  },
+  openpose_analysis: {
+    displayName: 'OpenPose',
+    summary: 'High-accuracy body pose estimation (academic license).',
+  },
+  mediapipe_analysis: {
+    displayName: 'MediaPipe',
+    summary: 'Fast pose estimation with Google MediaPipe.',
+  },
+  data_explorer: {
+    displayName: 'Data Explorer',
+    summary: 'Import, filter and visualize simulation datasets.',
+  },
+  data_processor: {
+    displayName: 'Data Processor',
+    summary: 'Filter, transform and summarize recorded signals.',
+  },
+  rate_of_closure: {
+    displayName: 'Rate of Closure',
+    summary: 'See how impact-point delivery differs from the tracked clubhead point.',
+  },
+  capture_rig: {
+    displayName: 'Capture Rig',
+    summary: 'Multi-camera capture, pose ingest and reconstruction.',
+  },
+  mujoco_unified: {
+    displayName: 'MuJoCo',
+    summary: 'Humanoid golf swing simulation and analysis.',
+  },
+  drake_golf: {
+    displayName: 'Drake',
+    summary: 'Drake robotics dynamics with MeshCat visualization.',
+  },
+  pinocchio_golf: {
+    displayName: 'Pinocchio',
+    summary: 'Rigid-body dynamics with analytical derivatives.',
+  },
+  opensim_golf: {
+    displayName: 'OpenSim',
+    summary: 'Musculoskeletal modeling for biomechanics.',
+  },
+  myosim_suite: {
+    displayName: 'MyoSuite',
+    summary: 'Muscle-actuated engine status; simulation needs the optional myosuite package.',
+  },
+  model_explorer: {
+    displayName: 'Model Explorer',
+    summary: 'Browse models and generate URDF and MJCF files.',
+  },
+  motion_target_preview: {
+    displayName: 'Motion-Match Preview',
+    summary: 'Preview motion-capture targets on a shared time grid.',
+  },
+  tour_matching_viewer: {
+    displayName: 'Tour Matching Viewer',
+    summary: 'Replay full-body matching candidates against tour capture in 3D.',
+  },
+  starting_pose_matcher: {
+    displayName: 'Starting-Pose Matcher',
+    summary: 'Legacy entry for Motion-Match Preview.',
+  },
+  putting_green: PUTTING_GREEN,
+  putting_green_gui: PUTTING_GREEN,
+  golf_simulator: {
+    displayName: 'Golf Simulator Console',
+    summary: 'Destination controls and replay submission for a connected simulator.',
+  },
+  bunkershot3d: {
+    displayName: 'BunkerShot3D',
+    summary: 'Design wedge soles against a dynamic bunker sand model.',
+  },
+  impact_explorer: {
+    displayName: 'Impact Explorer',
+    summary: 'Explore club-ball impact and the resulting ball flight.',
+  },
+  terrain: {
+    displayName: 'Terrain',
+    summary: 'Terrain presets, materials and the active course surface.',
+  },
+  swingset: {
+    displayName: 'SwingSet',
+    summary: 'Listed in this workspace but not yet registered as a launcher tool.',
+  },
+  tools_movement_optimizer: MOVEMENT_OPTIMIZER,
+  movement_optimizer: MOVEMENT_OPTIMIZER,
+  swing_objective_lab: {
+    displayName: 'Swing Objective Lab',
+    summary: 'Compare downswings optimized for speed against other objectives.',
+  },
+  training: {
+    displayName: 'Training Dashboard',
+    summary: 'Training-controller dashboard; the desktop view is still in progress.',
+  },
+  pendulum_simulator: {
+    displayName: 'Pendulum Simulator',
+    summary: 'Interactive double, triple and 8-DOF golfer pendulum dynamics.',
+  },
+  sg_optimizer: {
+    displayName: 'Strokes Gained Optimizer',
+    summary: 'Strokes-gained library and CLI; the desktop UI is planned.',
+  },
+  cross_engine_dashboard: CROSS_ENGINE_DASHBOARD,
+  cross_engine: CROSS_ENGINE_DASHBOARD,
+  analysis_tools_api: {
+    displayName: 'Analysis Tools',
+    summary: 'REST access to swing-metric and biomechanics analysis endpoints.',
+  },
+  dataset_generator: {
+    displayName: 'Dataset Generator',
+    summary: 'Generate, import and export swing datasets.',
+  },
+  matlab_suite: MATLAB_MODELS,
+  matlab_unified: MATLAB_MODELS,
+  character_builder: {
+    displayName: 'Character Builder',
+    summary: 'Build a golfer from stature, mass and proportions and export models.',
+  },
+  aip: {
+    displayName: 'AI Protocol (AIP)',
+    summary: 'Structured method dispatch for AI-driven simulation control.',
+  },
+  realtime_ws: {
+    displayName: 'Realtime WebSocket',
+    summary: 'Live simulation data stream over WebSocket pub-sub.',
+  },
+  actuator_controls: {
+    displayName: 'Actuator Controls',
+    summary: 'Tune actuator parameters and edit control schemes live.',
+  },
+  robotics_module: {
+    displayName: 'Robotics Module',
+    summary: 'Locomotion planning, contact mechanics and humanoid control.',
+  },
+  pid_generator: {
+    displayName: 'P&ID Generator',
+    summary: 'Create ISA-5.1 piping and instrumentation diagrams.',
+  },
+  unreal_integration: {
+    displayName: 'Unreal Integration',
+    summary: 'Unreal Engine streaming and VR visualization.',
+  },
+  perturbation_analysis: {
+    displayName: 'Perturbation Analysis',
+    summary: 'Cross-engine robustness analysis through perturbation testing.',
+  },
+  force_overlays: {
+    displayName: 'Force Overlays',
+    summary: 'Joint forces and torques overlaid on the 3D model.',
+  },
+  motion_pipeline: {
+    displayName: 'Motion Pipeline',
+    summary: 'Markerless mocap to forward dynamics: video in, motion out.',
+  },
+  canonical_core_comparison: {
+    displayName: 'Canonical-Core Comparison',
+    summary: 'Planned cross-engine canonical-state comparison; no service yet.',
+  },
+  canonical_core_estimation: {
+    displayName: 'Canonical-Core Estimation',
+    summary: 'Planned canonical-state estimation; no service yet.',
+  },
+};
+
 export const ALL_WORKSPACES: Record<string, WorkspaceMetadata> = {
   ...PRIMARY_WORKSPACES,
   ...SECONDARY_WORKSPACES,

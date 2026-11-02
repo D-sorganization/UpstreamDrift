@@ -14,8 +14,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter } from 'react-router';
 import {
+  ALL_WORKSPACES,
   PRIMARY_WORKSPACES,
   SECONDARY_WORKSPACES,
+  TOOL_CARD_COPY,
   getWorkspaceBySlug,
   getWorkspaceForTool,
   isPrimaryWorkspace,
@@ -206,3 +208,56 @@ describe('Route Titles for Workspaces', () => {
     expect(titleForPath('/workspaces/dev-research')).toBe('Developer & Research');
   });
 });
+
+describe('Workspace tool cards use authored copy (#14261)', () => {
+  const memberIds = [
+    ...new Set(Object.values(ALL_WORKSPACES).flatMap((ws) => ws.memberToolIds)),
+  ];
+
+  it('every workspace member has an authored display name and summary', () => {
+    const missing = memberIds.filter(
+      (id) => !TOOL_CARD_COPY[id]?.displayName.trim() || !TOOL_CARD_COPY[id]?.summary.trim(),
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it('renders names as authored, not machine title-cased', () => {
+    expect(resolveWorkspaceToolAction('c3d_viewer', { isTauri: false }).title).toBe('C3D Viewer');
+    expect(resolveWorkspaceToolAction('openpose_analysis', { isTauri: false }).title).toBe('OpenPose');
+    expect(resolveWorkspaceToolAction('mediapipe_analysis', { isTauri: false }).title).toBe('MediaPipe');
+  });
+
+  it('no card shows the template sentence', () => {
+    for (const ws of Object.values(ALL_WORKSPACES)) {
+      const { unmount } = render(
+        <MemoryRouter>
+          <WorkspaceView workspace={ws} isTauri={false} />
+        </MemoryRouter>,
+      );
+      expect(screen.queryByText(/Access and configure/i)).not.toBeInTheDocument();
+      unmount();
+    }
+    render(
+      <MemoryRouter>
+        <WorkspaceView workspace={PRIMARY_WORKSPACES.capture_analyze} isTauri={false} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('heading', { name: 'C3D Viewer' })).toBeInTheDocument();
+    expect(screen.getByText(TOOL_CARD_COPY.c3d_viewer.summary)).toBeInTheDocument();
+  });
+
+  it('uses one primary button style, labeled by destination', () => {
+    render(
+      <MemoryRouter>
+        <WorkspaceView workspace={PRIMARY_WORKSPACES.capture_analyze} isTauri />
+      </MemoryRouter>,
+    );
+    const open = screen.getAllByRole('button', { name: /^Open\b(?! in Window)/ });
+    const inWindow = screen.getAllByRole('button', { name: /Open in Window/ });
+    expect(open.length).toBeGreaterThan(0);
+    expect(inWindow.length).toBeGreaterThan(0);
+    expect(inWindow[0].className).toBe(open[0].className);
+    expect(screen.queryByRole('button', { name: /Open Tool|Launch Window/ })).not.toBeInTheDocument();
+  });
+});
+
