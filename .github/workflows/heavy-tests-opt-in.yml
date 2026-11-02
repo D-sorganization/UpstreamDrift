@@ -278,10 +278,8 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 90
     env:
-      {
-        RUSTUP_HOME: "${{ github.workspace }}/.rustup-home",
-        CARGO_HOME: "${{ github.workspace }}/.cargo-home",
-      }
+      RUSTUP_HOME: "${{ github.workspace }}/.rustup-home"
+      CARGO_HOME: "${{ github.workspace }}/.cargo-home"
     steps:
       - name: Verify supported Linux runner
         run: test "$(uname -s)" = "Linux"
@@ -315,6 +313,7 @@ jobs:
       - name: Verify offline model-fetch guard with a failing local network probe
         run: cargo test --manifest-path rust_core/ai_backend/Cargo.toml --features local-embeddings local_embed::tests --no-fail-fast
       - name: Prove collection is model-free before provisioning
+        shell: bash
         env:
           CI_LOCAL_EMBEDDINGS_EXPECTED: "1"
           UPSTREAM_DRIFT_MODEL_OFFLINE: "1"
@@ -337,6 +336,7 @@ jobs:
           print(f"Collected {len(ids)} node IDs before model provisioning")
           PY
       - name: Provision and verify pinned model artifacts
+        shell: bash
         run: python scripts/provision_local_embedding_model.py | tee local_embedding_model_receipt.json
       - name: Run local embeddings offline and fail on skips
         env:
