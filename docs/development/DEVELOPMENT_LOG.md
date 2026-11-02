@@ -1197,6 +1197,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14262 · Canonical-Core Estimation and Comparison Are Marked Planned: They Leave Home and the Results & Compare Workspace, Stay Reachable From Developer & Research, and the Desktop Chip Reads Planned Instead of Ready
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14262
+- **Branch:** merged via #14339
+- **PR:** #14339
+- **Paths:** see #14339
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`e5f0d867`; collated from changes/14262-canonical-core-estimation-and-comparison.md)
+- **Summary:** Canonical-core estimation and comparison are marked planned: they leave home and the Results & Compare workspace, stay reachable from Developer & Research, and the desktop chip reads Planned instead of Ready
+- **Next step:** Shipped in PR #14339.
+
 ### DL-#14263 · First-Run Onboarding Is a Non-Blocking Docked Panel Instead of a Full-Screen Modal, so Home Content Is Usable Immediately
 
 - **State:** shipped
