@@ -772,6 +772,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.06005,
+                0.04169913,
+                0.01509113
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00349407,
+                -0.0417
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.02250663,
+                -0.01575931
+              ],
+              "centroid_hand_m": [
+                0.02250663,
+                -0.01575931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
                 0.0615,
                 0.03220321,
                 0.01338431
@@ -1231,6 +1258,33 @@
               "finger": "palm",
               "name": "palm",
               "on_grip": true,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.03918518,
+                0.04169652
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.02680424,
+                0.00852443
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00711119,
+                0.02653931
+              ],
+              "centroid_hand_m": [
+                0.00711119,
+                0.02653931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
               "vertex_count": 1090
             },
             {
@@ -2825,6 +2879,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.06005,
+                0.04169913,
+                0.01509113
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00349407,
+                -0.0417
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.02250663,
+                -0.01575931
+              ],
+              "centroid_hand_m": [
+                0.02250663,
+                -0.01575931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
                 0.0615,
                 0.03220321,
                 0.01338431
@@ -3284,6 +3365,33 @@
               "finger": "palm",
               "name": "palm",
               "on_grip": true,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.03918518,
+                0.04169652
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.02680424,
+                0.00852443
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00711119,
+                0.02653931
+              ],
+              "centroid_hand_m": [
+                0.00711119,
+                0.02653931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
               "vertex_count": 1090
             },
             {
@@ -4926,6 +5034,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.06005,
+                0.04169913,
+                0.01509113
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00349407,
+                -0.0417
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.02250663,
+                -0.01575931
+              ],
+              "centroid_hand_m": [
+                0.02250663,
+                -0.01575931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
                 0.0615,
                 0.03220321,
                 0.01338431
@@ -5385,6 +5520,33 @@
               "finger": "palm",
               "name": "palm",
               "on_grip": true,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.03918518,
+                0.04169652
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.02680424,
+                0.00852443
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00711119,
+                0.02653931
+              ],
+              "centroid_hand_m": [
+                0.00711119,
+                0.02653931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
               "vertex_count": 1090
             },
             {
@@ -6959,6 +7121,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.06005,
+                0.04169913,
+                0.01509113
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00349407,
+                -0.0417
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.02250663,
+                -0.01575931
+              ],
+              "centroid_hand_m": [
+                0.02250663,
+                -0.01575931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
                 0.0615,
                 0.03220321,
                 0.01338431
@@ -7418,6 +7607,33 @@
               "finger": "palm",
               "name": "palm",
               "on_grip": true,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.03918518,
+                0.04169652
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.02680424,
+                0.00852443
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00711119,
+                0.02653931
+              ],
+              "centroid_hand_m": [
+                0.00711119,
+                0.02653931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
               "vertex_count": 1090
             },
             {
@@ -9080,6 +9296,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.06005,
+                0.04169913,
+                0.01509113
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00349407,
+                -0.0417
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.02250663,
+                -0.01575931
+              ],
+              "centroid_hand_m": [
+                0.02250663,
+                -0.01575931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
                 0.0615,
                 0.03220321,
                 0.01338431
@@ -9539,6 +9782,33 @@
               "finger": "palm",
               "name": "palm",
               "on_grip": true,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.03918518,
+                0.04169652
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.02680424,
+                0.00852443
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00711119,
+                0.02653931
+              ],
+              "centroid_hand_m": [
+                0.00711119,
+                0.02653931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
               "vertex_count": 1090
             },
             {
@@ -11187,6 +11457,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.06005,
+                0.04169913,
+                0.01509113
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00349407,
+                -0.0417
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.02250663,
+                -0.01575931
+              ],
+              "centroid_hand_m": [
+                0.02250663,
+                -0.01575931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
                 0.0615,
                 0.03220321,
                 0.01338431
@@ -11646,6 +11943,33 @@
               "finger": "palm",
               "name": "palm",
               "on_grip": true,
+              "vertex_count": 1090
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.03918518,
+                0.04169652
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.02680424,
+                0.00852443
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00711119,
+                0.02653931
+              ],
+              "centroid_hand_m": [
+                0.00711119,
+                0.02653931,
+                -0.00024
+              ],
+              "face_count": 2176,
+              "finger": "dorsum",
+              "name": "dorsum",
+              "on_grip": false,
               "vertex_count": 1090
             },
             {

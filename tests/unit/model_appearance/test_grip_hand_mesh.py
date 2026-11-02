@@ -241,4 +241,5 @@ def test_style_override_takes_precedence_over_the_pose():
         Hand.TRAIL, grip_radius_m=0.014, style=GripStyle.TEN_FINGER
     )
     assert result.style is GripStyle.TEN_FINGER
-    assert all(p.on_grip for p in result.components)
+    # The dorsum (#13997) rides on the palm and never rests on the grip.
+    assert all(p.on_grip for p in result.components if p.finger != "dorsum")
