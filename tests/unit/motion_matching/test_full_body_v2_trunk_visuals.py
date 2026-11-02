@@ -5,8 +5,10 @@ Each segment carries its own de Leva solid (pelvis, middle_trunk,
 upper_trunk) and its own ``visual_hints`` ellipsoid, so the visual layer
 draws three rigid trunk visuals that follow the lumbar and thoracic joints.
 
-Model-level checks (the stills need a GL host, see
-``tests/unit/scripts/test_render_v2_trunk_stills.py``):
+Model-level checks (GL still evidence lives under
+``docs/development/full_body_models/evidence/trunk_visuals/``; unit tests in
+``tests/unit/scripts/test_render_v2_trunk_stills.py`` and
+``tests/unit/scripts/test_trunk_visuals_evidence.py``):
 
 * every trunk body gets its own visual geom on the right MJCF body;
 * the visuals leave the compiled physics unchanged;
