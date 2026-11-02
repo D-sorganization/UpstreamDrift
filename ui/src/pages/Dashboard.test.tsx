@@ -10,6 +10,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import { MemoryRouter } from 'react-router';
+import { HelpPanel } from '@/components/ui/HelpPanel';
+import { useUIStore } from '@/stores';
 import { ToastProvider } from '@/components/ui/Toast';
 import {
     LAUNCHER_WINDOW_REGISTRY_KEY,
@@ -76,13 +78,28 @@ vi.mock('@/api/useLauncherManifest', () => ({
     useLauncherManifest: vi.fn(() => mockManifest),
 }));
 
+function GlobalHelpPanel() {
+    const isOpen = useUIStore((state) => state.helpOpen);
+    const setHelpOpen = useUIStore((state) => state.setHelpOpen);
+    return (
+        <HelpPanel
+            isOpen={isOpen}
+            onOpen={() => setHelpOpen(true)}
+            onClose={() => setHelpOpen(false)}
+        />
+    );
+}
+
 // Now import after mocking
 import { DashboardPage } from './Dashboard';
 
 const renderWithRouter = (ui: React.ReactElement) =>
     render(
         <MemoryRouter>
-            <ToastProvider>{ui}</ToastProvider>
+            <ToastProvider>
+                {ui}
+                <GlobalHelpPanel />
+            </ToastProvider>
         </MemoryRouter>
     );
 
@@ -91,6 +108,7 @@ describe('DashboardPage', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        useUIStore.getState().setHelpOpen(false);
         installMemoryStorage();
         window.localStorage.removeItem(LAUNCHER_WINDOW_REGISTRY_KEY);
         global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({}) });
@@ -111,6 +129,29 @@ describe('DashboardPage', () => {
     it('renders help button', () => {
         renderWithRouter(<DashboardPage />);
         expect(screen.getByRole('button', { name: /help/i })).toBeInTheDocument();
+    });
+
+    it('opens the help panel from the dashboard button and restores focus on Escape', () => {
+        renderWithRouter(<DashboardPage />);
+        const helpButton = screen.getByRole('button', { name: /help/i });
+        helpButton.focus();
+
+        fireEvent.click(helpButton);
+
+        const helpPanel = screen.getByRole('dialog', { name: 'Help panel' });
+        expect(helpPanel).toBeInTheDocument();
+        fireEvent.keyDown(helpPanel, { key: 'Escape' });
+
+        expect(screen.queryByRole('dialog', { name: 'Help panel' })).not.toBeInTheDocument();
+        expect(helpButton).toHaveFocus();
+    });
+
+    it('opens the help panel with F1', () => {
+        renderWithRouter(<DashboardPage />);
+
+        fireEvent.keyDown(window, { key: 'F1' });
+
+        expect(screen.getByRole('dialog', { name: 'Help panel' })).toBeInTheDocument();
     });
 
     it('renders launch button', () => {

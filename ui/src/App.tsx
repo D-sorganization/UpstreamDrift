@@ -250,7 +250,11 @@ function App() {
       <ToastProvider>
         <RoutedContent />
         <DiagnosticsPanel />
-        <HelpPanel isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+        <HelpPanel
+          isOpen={helpOpen}
+          onOpen={() => setHelpOpen(true)}
+          onClose={() => setHelpOpen(false)}
+        />
       </ToastProvider>
     </BrowserRouter>
   );
