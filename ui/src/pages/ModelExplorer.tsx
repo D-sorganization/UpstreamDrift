@@ -249,7 +249,7 @@ export function ModelExplorerPage() {
       leftPanel={
         <>
         {/* Top controls */}
-        <div className="p-4 border-b border-gray-850 space-y-4">
+        <div className="p-4 border-b border-gray-800 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-white tracking-tight">Model Explorer</h2>
             <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white cursor-pointer select-none">
@@ -387,7 +387,7 @@ export function ModelExplorerPage() {
                     onChange={(e) => {
                       if (e.target.value) loadSourceModel(e.target.value);
                     }}
-                    className="w-full bg-gray-805 text-gray-200 rounded-lg px-3 py-2 text-xs border border-gray-700/80 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full bg-gray-800 text-gray-200 rounded-lg px-3 py-2 text-xs border border-gray-700/80 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                   >
                     <option value="">Select source model...</option>
                     {models.map((m) => (
@@ -424,7 +424,7 @@ export function ModelExplorerPage() {
                     onChange={(e) => {
                       if (e.target.value) loadTargetModel(e.target.value);
                     }}
-                    className="w-full bg-gray-805 text-gray-200 rounded-lg px-3 py-2 text-xs border border-gray-700/80 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full bg-gray-800 text-gray-200 rounded-lg px-3 py-2 text-xs border border-gray-700/80 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                   >
                     <option value="">Select target model...</option>
                     {models.map((m) => (
@@ -455,7 +455,7 @@ export function ModelExplorerPage() {
       // widened Frankenstein tree pane for space (#7418).
       rightPanel={
         <>
-        <div className="p-4 border-b border-gray-850">
+        <div className="p-4 border-b border-gray-800">
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
             Properties
           </h3>

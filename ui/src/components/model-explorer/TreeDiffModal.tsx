@@ -50,7 +50,7 @@ export function TreeDiffModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-gray-850"
+            className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-gray-800"
             aria-label="Close modal"
           >
             ✕
@@ -119,7 +119,7 @@ export function TreeDiffModal({
                     {diff.modified.map((mod) => (
                       <div
                         key={mod.id}
-                        className="bg-gray-850/50 border border-gray-800 rounded-lg p-3 space-y-2"
+                        className="bg-gray-800/50 border border-gray-800 rounded-lg p-3 space-y-2"
                       >
                         <div className="text-xs font-bold text-gray-200 font-mono">
                           ~ {mod.id}

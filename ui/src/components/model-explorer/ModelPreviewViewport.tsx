@@ -40,7 +40,7 @@ export function ModelPreviewViewport({
       </Canvas>
 
       {activePreviewModel && (
-        <div className="absolute top-4 left-4 bg-gray-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-gray-850 shadow-xl">
+        <div className="absolute top-4 left-4 bg-gray-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-gray-800 shadow-xl">
           <span className="text-xs text-gray-200 font-mono">
             Preview: {activePreviewModel}
           </span>
