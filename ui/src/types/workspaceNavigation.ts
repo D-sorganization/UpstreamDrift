@@ -103,8 +103,6 @@ export const PRIMARY_WORKSPACES: Record<string, WorkspaceMetadata> = {
     memberToolIds: [
       'cross_engine_dashboard',
       'cross_engine',
-      'canonical_core_comparison',
-      'canonical_core_estimation',
       'analysis_tools_api',
       'dataset_generator',
       'matlab_suite',
@@ -162,6 +160,9 @@ export const SECONDARY_WORKSPACES: Record<string, WorkspaceMetadata> = {
       'perturbation_analysis',
       'force_overlays',
       'motion_pipeline',
+      // Planned tools (#14262): reachable here, never from primary workspaces or home.
+      'canonical_core_comparison',
+      'canonical_core_estimation',
     ],
     isPrimary: false,
   },

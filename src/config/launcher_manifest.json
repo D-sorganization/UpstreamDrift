@@ -807,7 +807,7 @@
       "path": "src/tools/canonical_core/estimation.py",
       "web_route": "/tools/canonical-core/estimation",
       "logo": "biomechanics.svg",
-      "status": "experimental",
+      "status": "planned",
       "default_launch": "tab",
       "shell_surfaces": ["pyqt6", "react"],
       "capabilities": [
@@ -831,7 +831,7 @@
       "path": "src/tools/canonical_core/comparison.py",
       "web_route": "/tools/canonical-core/comparison",
       "logo": "biomechanics.svg",
-      "status": "experimental",
+      "status": "planned",
       "default_launch": "tab",
       "shell_surfaces": ["pyqt6", "react"],
       "capabilities": [
@@ -1092,11 +1092,7 @@
       "path": "src/tools/putting_analytics_gui/__main__.py",
       "logo": "putting_analytics.svg",
       "status": "ready",
-      "capabilities": [
-        "putting_analytics",
-        "putting",
-        "strokes_gained"
-      ],
+      "capabilities": ["putting_analytics", "putting", "strokes_gained"],
       "order": 106,
       "web": {
         "mode": "native-window"

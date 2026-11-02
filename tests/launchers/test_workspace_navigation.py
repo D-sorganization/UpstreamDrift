@@ -119,7 +119,12 @@ class TestWorkspaceMembership:
 
         # Results & Compare
         assert get_workspace_for_tool("cross_engine_dashboard") == "results_compare"
-        assert get_workspace_for_tool("canonical_core_comparison") == "results_compare"
+        assert get_workspace_for_tool("dataset_generator") == "results_compare"
+
+    def test_planned_tools_stay_out_of_primary_workspaces(self) -> None:
+        """#14262: planned tools live only in Developer & Research."""
+        for tool_id in ("canonical_core_comparison", "canonical_core_estimation"):
+            assert get_workspace_for_tool(tool_id) == "dev_research"
 
     def test_developer_and_research_tools_in_secondary_workspace(self) -> None:
         """Requirement 3: Developer/research tools are secondary, not primary."""

@@ -129,8 +129,6 @@ PRIMARY_WORKSPACES: dict[str, WorkspaceInfo] = {
         member_tool_ids=(
             "cross_engine_dashboard",
             "cross_engine",
-            "canonical_core_comparison",
-            "canonical_core_estimation",
             "analysis_tools_api",
             "dataset_generator",
             "matlab_suite",
@@ -194,6 +192,10 @@ SECONDARY_WORKSPACES: dict[str, WorkspaceInfo] = {
             # golf/biomechanics workflow for grid attention.
             "pid_generator",
             "tools_calculator_hub",
+            # Planned tools (#14262): no estimation/comparison service exists
+            # yet, so they stay out of the primary task workspaces and home.
+            "canonical_core_comparison",
+            "canonical_core_estimation",
         ),
         is_primary=False,
     ),

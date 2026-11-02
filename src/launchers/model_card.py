@@ -878,6 +878,8 @@ class DraggableModelCard(QFrame):
         "stable": ("Ready", "success"),
         "beta": ("Beta", "info"),
         "experimental": ("Experimental", "info"),
+        # #14262: no working service yet; never a type-based "Ready".
+        "planned": ("Planned", "warning"),
         "alpha": ("Alpha", "warning"),
         "broken": ("Broken", "error"),
         "deprecated": ("Deprecated", "warning"),

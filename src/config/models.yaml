@@ -990,7 +990,7 @@ models:
     launcher:
       category: "biomechanics"
       logo: "biomechanics.svg"
-      status: "experimental"
+      status: "planned"
       default_launch: "tab"
       web_route: "/tools/canonical-core/estimation"
 
@@ -1008,7 +1008,7 @@ models:
     launcher:
       category: "biomechanics"
       logo: "biomechanics.svg"
-      status: "experimental"
+      status: "planned"
       default_launch: "tab"
       web_route: "/tools/canonical-core/comparison"
 
@@ -1166,7 +1166,6 @@ models:
       logo: "jaxsim.svg"
       status: "experimental"
       default_launch: "tab"
-
 
   # =============================================================================
   # PHYSICS-INFORMED NEURAL NETWORKS

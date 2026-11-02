@@ -245,3 +245,17 @@ def test_probe_failure_clears_pending_without_launch() -> None:
     mgr._on_dependency_probe_finished("opensim_golf", False, "missing")
     assert launched == [] and errors == ["missing"]
     assert launcher._pending_launch_model_id is None
+
+
+@pytest.mark.unit
+def test_tile_badge_says_planned_for_planned_tools() -> None:
+    """#14262: a planned tool must not fall through to a type-based "Ready"."""
+    tile = _tile()
+    tile.model = SimpleNamespace(
+        id="canonical_core_estimation",
+        type="special_app",
+        status="planned",
+        launcher=None,
+    )
+    text, css = DraggableModelCard._get_status_info(tile)
+    assert (text, css) == ("Planned", "warning")

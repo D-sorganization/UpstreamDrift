@@ -251,6 +251,16 @@ function isAnalysisTile(tile: LauncherTile): boolean {
     return /analysis|capture|viewer|mediapipe|openpose|c3d|video|data/.test(searchableText);
 }
 
+/**
+ * Planned tools (#14262) have no working destination yet, so home never
+ * offers them; they stay reachable from the Developer & Research workspace.
+ */
+const PLANNED_STATUS = 'planned';
+
+function isHomeDestination(tile: LauncherTile): boolean {
+    return tile.status !== PLANNED_STATUS;
+}
+
 function buildTileSections(tiles: LauncherTile[]): TileSection[] {
     const engines = tiles.filter((tile) => tile.category === 'physics_engine');
     const analysisTools = tiles.filter(
@@ -289,7 +299,7 @@ function buildTileSections(tiles: LauncherTile[]): TileSection[] {
 }
 
 export function LauncherDashboard({
-    tiles,
+    tiles: manifestTiles,
     loadState,
     error,
     selectedTileId,
@@ -302,6 +312,7 @@ export function LauncherDashboard({
     onRefetch,
     nativeWindowAllowed = canLaunchNativeWindow(),
 }: Props) {
+    const tiles = manifestTiles.filter(isHomeDestination);
     const engines = tiles.filter((t) => t.category === 'physics_engine');
     const toolsAndExternal = tiles.filter((t) => t.category !== 'physics_engine');
     const selectedTile = tiles.find((t) => t.id === selectedTileId);
