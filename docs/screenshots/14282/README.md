@@ -1,4 +1,4 @@
-# #14282: wide content scrolls instead of clipping
+# #14282: Wide Content Scrolls Instead of Clipping
 
 Captured with Playwright/Chromium against local Vite dev servers: `before` is
 main at the branch base, `after` is this branch. API responses were stubbed.
@@ -22,3 +22,8 @@ With stubbed values, the Analysis Tools grids did not overflow before the
 change; the live-data clipping reported in the issue is covered by
 `responsiveLayout.test.ts`. That test also covers Terrain and Data Explorer,
 which need a live terrain or dataset to render their grids.
+
+At 1280 the Lift Baseline tables are still wider than their card. Before the
+change the card clipped them silently, so the counts above read 0; now each
+table scrolls horizontally inside its card. Analysis Tools and Golf Simulator
+look the same at 1280.
