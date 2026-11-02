@@ -25,6 +25,15 @@ import {
  * Works in both Tauri and browser modes; only the backend start/stop
  * lifecycle controls are Tauri-specific.
  */
+/**
+ * Right padding a bottom bar must reserve so the floating badge (fixed
+ * bottom-4 right-4) never covers its controls (#14255). The badge is
+ * icon-only below `md` (44px with the touch-target rule) and about 91px wide
+ * with its label from `md`, so pr-20 (80px) and md:pr-32 (128px) leave an
+ * 8px+ gap after the 16px inset.
+ */
+export const DIAGNOSTICS_BADGE_CLEARANCE = 'pr-20 md:pr-32';
+
 export function DiagnosticsPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const [diagnostics, setDiagnostics] = useState<DiagnosticInfo | null>(null);
@@ -168,7 +177,7 @@ export function DiagnosticsPanel() {
         aria-label="Toggle diagnostics panel"
       >
         {backendHealth === 'healthy' ? '● ' : backendHealth === 'unreachable' ? '○ ' : '? '}
-        Backend
+        <span className="hidden md:inline">Backend</span>
       </button>
 
       {/* Panel */}
