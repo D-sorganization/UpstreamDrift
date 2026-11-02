@@ -2,9 +2,7 @@
 //!
 //! Uses [`ort`] (ONNX Runtime) + [`tokenizers`] to run a small sentence-
 //! transformers model (default: `sentence-transformers/all-MiniLM-L6-v2`,
-//! 384-dim) on-device. Artifact revision and SHA-256 digests live in
-//! `local_embedding_model.lock.json`. The model is cached under
-//! `$UPSTREAM_DRIFT_MODEL_CACHE` (or `~/.cache/upstream-drift/models/`).
+//! 384-dim on-device; model artifacts are revision-pinned and SHA-256 verified.
 //! Gated behind the `local-embeddings` Cargo feature so plain `cargo build`
 //! and the default maturin wheel stay slim. Consumers opt in by building
 //! with `--features local-embeddings`.
@@ -287,7 +285,6 @@ fn download_to(url: &str, dest: &Path, expected_sha256: &str) -> Result<(), Stri
     })?;
     Ok(())
 }
-
 fn ensure_artifact(
     url: &str,
     path: &Path,

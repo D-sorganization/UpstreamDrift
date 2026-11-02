@@ -40,7 +40,6 @@ YELLOW="\033[1;33m"
 RESET="\033[0m"
 
 echo -e "${BOLD}=====================================================================${RESET}"
-
 if [ "$LOCAL_EMBEDDINGS" = true ]; then
   LOCAL_EMBEDDINGS_VENV="$(mktemp -d)/venv"
   python -m venv "$LOCAL_EMBEDDINGS_VENV"

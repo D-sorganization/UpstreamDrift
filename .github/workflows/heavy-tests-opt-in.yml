@@ -5,7 +5,6 @@ name: Heavy Integration Tests (Opt-In)
 #   - Runner: d-sorg-fleet-docker (or dedicated runner if configured)
 #   - Marker: live_simulation (explicitly EXCLUDED from ci-standard.yml)
 #
-# Parity: mirrors scripts/ci/run_local_heavy_tests.sh.
 #         If you add a test here, add it there too and vice-versa.
 # -----------------------------------------------------------------------------
 
@@ -278,6 +277,11 @@ jobs:
     name: Pinned offline local embeddings
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 90
+    env:
+      {
+        RUSTUP_HOME: "${{ github.workspace }}/.rustup-home",
+        CARGO_HOME: "${{ github.workspace }}/.cargo-home",
+      }
     steps:
       - name: Verify supported Linux runner
         run: test "$(uname -s)" = "Linux"
