@@ -18,6 +18,14 @@ export type {
   TerrainTypeInfo,
 } from '@/api/useTerrain';
 
+function formatTerrainValues(values: number[] | undefined, separator: string): string {
+  return values?.length ? values.join(separator) : 'N/A';
+}
+
+function formatTerrainDegrees(values: number[] | undefined): string {
+  return values?.length ? `${values.join(' - ')}°` : 'N/A';
+}
+
 /**
  * TerrainPage - Full terrain engine tool page.
  */
@@ -81,9 +89,9 @@ export function TerrainPage() {
               {presets.length === 0 ? (
                 <div className="text-xs text-gray-400 italic text-center py-4">No presets available</div>
               ) : (
-                presets.map((preset: TerrainPreset) => (
+                presets.map((preset: TerrainPreset, index: number) => (
                   <button
-                    key={preset.id}
+                    key={`${preset.id}-${index}`}
                     onClick={() => setSelectedPreset(preset.id)}
                     className={`w-full text-left p-3 rounded-md transition-colors ${
                       selectedPreset === preset.id
@@ -106,8 +114,8 @@ export function TerrainPage() {
               {materials.length === 0 ? (
                 <div className="text-xs text-gray-400 italic text-center py-4">No materials available</div>
               ) : (
-                materials.map((mat: TerrainMaterial) => (
-                  <div key={mat.id} className="p-3 bg-gray-700/30 rounded-md border border-gray-600">
+                materials.map((mat: TerrainMaterial, index: number) => (
+                  <div key={`${mat.id}-${index}`} className="p-3 bg-gray-700/30 rounded-md border border-gray-600">
                     <div className="flex items-center gap-2">
                       <div
                         className="w-4 h-4 rounded-full border border-gray-500"
@@ -116,8 +124,8 @@ export function TerrainPage() {
                       <span className="text-sm font-medium text-gray-200">{mat.name}</span>
                     </div>
                     <div className="text-xs text-gray-400 mt-1 space-y-0.5">
-                      <div>Friction: {mat.friction_coefficient}</div>
-                      <div>Restitution: {mat.restitution}</div>
+                      <div>Friction: {mat.friction_coefficient ?? 'N/A'}</div>
+                      <div>Restitution: {mat.restitution ?? 'N/A'}</div>
                     </div>
                   </div>
                 ))
@@ -131,8 +139,8 @@ export function TerrainPage() {
               {terrainTypes.length === 0 ? (
                 <div className="text-xs text-gray-400 italic text-center py-4">No terrain types available</div>
               ) : (
-                terrainTypes.map((tt: TerrainTypeInfo) => (
-                  <div key={tt.id} className="p-3 bg-gray-700/30 rounded-md border border-gray-600">
+                terrainTypes.map((tt: TerrainTypeInfo, index: number) => (
+                  <div key={`${tt.id}-${index}`} className="p-3 bg-gray-700/30 rounded-md border border-gray-600">
                     <div className="text-sm font-medium text-gray-200">{tt.name}</div>
                     <div className="text-xs text-gray-400 mt-0.5">{tt.description}</div>
                   </div>
@@ -230,27 +238,27 @@ export function TerrainPage() {
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
                     <span className="text-gray-400">Dimensions</span>
-                    <div className="text-gray-200 font-mono">{activeTerrain.properties.dimensions.join(' x ')}</div>
+                    <div className="text-gray-200 font-mono">{formatTerrainValues(activeTerrain.properties.dimensions, ' x ')}</div>
                   </div>
                   <div>
                     <span className="text-gray-400">Resolution</span>
-                    <div className="text-gray-200 font-mono">{activeTerrain.properties.resolution}</div>
+                    <div className="text-gray-200 font-mono">{activeTerrain.properties.resolution ?? 'N/A'}</div>
                   </div>
                   <div>
                     <span className="text-gray-400">Elevation Range</span>
-                    <div className="text-gray-200 font-mono">{activeTerrain.properties.elevation_range.join(' - ')}</div>
+                    <div className="text-gray-200 font-mono">{formatTerrainValues(activeTerrain.properties.elevation_range, ' - ')}</div>
                   </div>
                   <div>
                     <span className="text-gray-400">Slope Range</span>
-                    <div className="text-gray-200 font-mono">{activeTerrain.properties.slope_range.join(' - ')}°</div>
+                    <div className="text-gray-200 font-mono">{formatTerrainDegrees(activeTerrain.properties.slope_range)}</div>
                   </div>
                 </div>
-                {activeTerrain.properties.features.length > 0 && (
+                {(activeTerrain.properties.features ?? []).length > 0 && (
                   <div className="mt-3">
                     <span className="text-gray-400 text-xs">Features: </span>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {activeTerrain.properties.features.map((f: string) => (
-                        <span key={f} className="px-2 py-0.5 bg-gray-700 text-gray-300 text-xs rounded">{f}</span>
+                      {(activeTerrain.properties.features ?? []).map((f: string, index: number) => (
+                        <span key={`${f}-${index}`} className="px-2 py-0.5 bg-gray-700 text-gray-300 text-xs rounded">{f}</span>
                       ))}
                     </div>
                   </div>

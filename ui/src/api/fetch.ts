@@ -29,6 +29,14 @@ import { getApiBase } from './backend';
  */
 export const DEFAULT_TIMEOUT_MS = 15_000;
 
+/** HTTP failure with its status preserved for callers with endpoint semantics. */
+export class ApiHttpError extends Error {
+  constructor(readonly status: number, message: string) {
+    super(message);
+    this.name = 'ApiHttpError';
+  }
+}
+
 /** Options accepted by `apiFetch` on top of the standard `RequestInit`. */
 export interface ApiFetchInit extends RequestInit {
   /** Abort after this many ms. Defaults to `DEFAULT_TIMEOUT_MS`; 0 disables. */
@@ -138,7 +146,10 @@ export async function apiFetchWithHeaders<T>(
     } catch {
       // Body was not valid JSON — that's fine, fall through to generic message
     }
-    throw new Error(detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`);
+    throw new ApiHttpError(
+      response.status,
+      detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`,
+    );
   }
 
   const data = (await response.json()) as T;
