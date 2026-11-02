@@ -1249,6 +1249,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14376 · Fix CANONICAL_ENGINE_TESTS Path for Opensim in Test_Fit_Result_Contract and Add Pytestmark Unit.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14376
+- **Branch:** merged via #14377
+- **PR:** #14377
+- **Paths:** see #14377
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`6555234c`; collated from changes/14376-canonical-engine-test-path.md)
+- **Summary:** Fix CANONICAL_ENGINE_TESTS path for opensim in test_fit_result_contract and add pytestmark unit.
+- **Next step:** Shipped in PR #14377.
+
 ### DL-#14268 · Mobile-Friendly Long-Running Job Status View
 
 - **State:** shipped
@@ -2659,10 +2672,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13176
 - **Branch:** merged via #13820
-- **PR:** #13820, #14015, #14127, #14357, #14363, #14369, #14372
+- **PR:** #13820, #14015, #14127, #14357, #14363, #14369, #14372, #14375
 - **Paths:** see #13820
 - **Started:** 2026-10-25
-- **Last verified:** 2026-11-02 (`d324e9fc`; collated from changes/13176-full-body-v2-id-qualification.md)
+- **Last verified:** 2026-11-02 (`0fd41583`; collated from changes/13176-full-body-v2-closeout.md)
 - **Summary:** Qualify HRG full-body-v2 mass and gravity in Drake
 - **Next step:** Shipped in PR #13820.
 
