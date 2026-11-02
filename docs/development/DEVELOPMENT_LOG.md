@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14253 · Replace Undefined Tailwind Gray Shades With Supported Palette Utilities Across the Model Explorer and Workspace UI
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14253
+- **Branch:** codex/fix-tailwind-gray-scale-14253-main
+- **PR:** #14329
+- **Paths:** see #14329
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`fde79256`; collated from changes/14253-replace-undefined-tailwind-gray-shades-w.md)
+- **Summary:** Replace undefined Tailwind gray shades with supported palette utilities across the model explorer and workspace UI
+- **Next step:** Capture matching desktop and phone after views, then obtain independent review before pushing.
+
 ### DL-#14250 · Use a Local CC0 HDR With Fallback Scene Lighting on All Three Affected Pages
 
 - **State:** in_review
