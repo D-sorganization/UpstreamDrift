@@ -31,20 +31,37 @@ describe('touch-target primitives (#14281)', () => {
   });
 });
 
-describe('touch-target CSS contract (#14281)', () => {
+describe('touch-target CSS contract (#14281, #14267)', () => {
   it('defines a coarse-pointer touch-target utility at 44px', () => {
     const utility = INDEX_CSS.match(/@utility touch-target\s*\{([\s\S]*?)\n\}/);
     expect(utility?.[1]).toMatch(/@media \(pointer: coarse\)/);
     expect(utility?.[1]).toMatch(/min-height: 44px/);
     expect(utility?.[1]).toMatch(/min-width: 44px/);
+    expect(utility?.[1]).toMatch(/touch-action: manipulation/);
   });
 
   it('lifts native buttons, selects, text inputs and checkbox labels on coarse pointers', () => {
-    const base = INDEX_CSS.match(/\/\* Coarse-pointer base \(#14281\)[\s\S]*?\n\}\n/);
+    const base = INDEX_CSS.match(/\/\* Coarse-pointer base \(#14281[\s\S]*?\n\}\n/);
     expect(base).not.toBeNull();
     for (const selector of ['button', 'select', 'input', 'label:has(']) {
       expect(base?.[0]).toContain(selector);
     }
     expect(base?.[0]).toMatch(/min-height: 44px/);
+  });
+
+  it('adapts range slider hit targets and thumb dimensions on coarse pointers (#14267)', () => {
+    const base = INDEX_CSS.match(/\/\* Coarse-pointer base \(#14281[\s\S]*?\n\}\n/);
+    expect(base?.[0]).toMatch(/input\[type='range'\]/);
+    expect(base?.[0]).toMatch(/touch-action: pan-x/);
+    expect(base?.[0]).toMatch(/webkit-slider-thumb/);
+    expect(base?.[0]).toMatch(/moz-range-thumb/);
+    expect(base?.[0]).toMatch(/width: 28px/);
+    expect(base?.[0]).toMatch(/height: 28px/);
+  });
+
+  it('ensures navigation links meet coarse-pointer touch targets (#14267)', () => {
+    const base = INDEX_CSS.match(/\/\* Coarse-pointer base \(#14281[\s\S]*?\n\}\n/);
+    expect(base?.[0]).toContain('nav a');
+    expect(base?.[0]).toContain("[role='navigation'] a");
   });
 });
