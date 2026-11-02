@@ -1,0 +1,68 @@
+{
+  "schema": "v2-trunk-stills-manifest/v1",
+  "generated_utc": "2026-11-01T06:20:13+00:00",
+  "capture": "capture-A",
+  "command": "python3 -m scripts.render_golfer_realism_showcase --v2-spec docs/development/full_body_models/evidence/trunk_visuals/full_body_v2_anthro_driver.json --swing driver=docs/development/full_body_models/evidence/trunk_visuals/driver_v2_bundle.npz --engines mujoco --views face_on,dtl --out docs/development/full_body_models/evidence/trunk_visuals/render_out --capture capture-A",
+  "stills": [
+    {
+      "file": "driver/stills/driver_mujoco_face_on_address_4063705ffaa9.png",
+      "swing": "driver",
+      "engine": "mujoco",
+      "view": "face_on",
+      "event": "address",
+      "frame": 0,
+      "time_s": 0.0,
+      "spec_sha256": "4063705ffaa9b4ceb4a33bc144c32590ef964087a7cd980089a0f04dc386bf9a"
+    },
+    {
+      "file": "driver/stills/driver_mujoco_down_the_line_address_4063705ffaa9.png",
+      "swing": "driver",
+      "engine": "mujoco",
+      "view": "down_the_line",
+      "event": "address",
+      "frame": 0,
+      "time_s": 0.0,
+      "spec_sha256": "4063705ffaa9b4ceb4a33bc144c32590ef964087a7cd980089a0f04dc386bf9a"
+    },
+    {
+      "file": "driver/stills/driver_mujoco_face_on_top_4063705ffaa9.png",
+      "swing": "driver",
+      "engine": "mujoco",
+      "view": "face_on",
+      "event": "top",
+      "frame": 1103,
+      "time_s": 1.103,
+      "spec_sha256": "4063705ffaa9b4ceb4a33bc144c32590ef964087a7cd980089a0f04dc386bf9a"
+    },
+    {
+      "file": "driver/stills/driver_mujoco_down_the_line_top_4063705ffaa9.png",
+      "swing": "driver",
+      "engine": "mujoco",
+      "view": "down_the_line",
+      "event": "top",
+      "frame": 1103,
+      "time_s": 1.103,
+      "spec_sha256": "4063705ffaa9b4ceb4a33bc144c32590ef964087a7cd980089a0f04dc386bf9a"
+    },
+    {
+      "file": "driver/stills/driver_mujoco_face_on_impact_4063705ffaa9.png",
+      "swing": "driver",
+      "engine": "mujoco",
+      "view": "face_on",
+      "event": "impact",
+      "frame": 1325,
+      "time_s": 1.325,
+      "spec_sha256": "4063705ffaa9b4ceb4a33bc144c32590ef964087a7cd980089a0f04dc386bf9a"
+    },
+    {
+      "file": "driver/stills/driver_mujoco_down_the_line_impact_4063705ffaa9.png",
+      "swing": "driver",
+      "engine": "mujoco",
+      "view": "down_the_line",
+      "event": "impact",
+      "frame": 1325,
+      "time_s": 1.325,
+      "spec_sha256": "4063705ffaa9b4ceb4a33bc144c32590ef964087a7cd980089a0f04dc386bf9a"
+    }
+  ]
+}
