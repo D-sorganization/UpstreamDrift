@@ -1,0 +1,27 @@
+{
+  "issue": 13174,
+  "spec_sha256": "4063705ffaa9b4ceb4a33bc144c32590ef964087a7cd980089a0f04dc386bf9a",
+  "verified_main_sha": "bb30e42a89c8af4463bb8d3106d66d6373b2a0e5",
+  "command": "python3 -m scripts.render_golfer_realism_showcase --v2-spec docs/development/full_body_models/evidence/trunk_visuals/full_body_v2_anthro_driver.json --swing driver=docs/development/full_body_models/evidence/trunk_visuals/driver_v2_bundle.npz --engines mujoco --views face_on,dtl --out docs/development/full_body_models/evidence/trunk_visuals/render_out --capture capture-A",
+  "event_frames": {
+    "address": 0,
+    "top": 1103,
+    "impact": 1325
+  },
+  "manifest": "render_out/v2_trunk_stills_manifest_capture-A.json",
+  "stills_sha256": {
+    "address": {
+      "face_on": "b53ab24e0ca51ba63b41bf6cb005ea2d9a0de1b50e8df75e6fd456b264fcdd89",
+      "down_the_line": "b72b5251ee3b85ce97c84560ae2b11a2376e8de56c61283ffae06faefa136f31"
+    },
+    "top": {
+      "face_on": "dd411384dde41313bba1b01f12526cf2a6a224a85e60b11ea5e12ad4a6677682",
+      "down_the_line": "43ed34619a4dfc338a68d8ca3363398b93a3256821fb22c8af664235d79fae3f"
+    },
+    "impact": {
+      "face_on": "e0cc20cd25e3fea3fbf01b25642fb7232b710abefb4adef6e36a001ea059a4b1",
+      "down_the_line": "d11b22188aa5999c5f2c90a390eb560cfffb043558717820b86bfcc905c9d41b"
+    }
+  },
+  "note": "Event frames from v1 same-input export face-centre rules; v2 trunk migration preserves times."
+}
