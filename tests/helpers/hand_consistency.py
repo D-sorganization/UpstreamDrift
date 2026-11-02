@@ -10,7 +10,6 @@ is an :class:`Unrepresentable` with a reason, never a passing value.
 from __future__ import annotations
 
 import json
-import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,6 +17,7 @@ from tempfile import TemporaryDirectory
 from typing import Any
 
 import pytest
+from defusedxml import ElementTree as ET
 
 from src.shared.python.model_appearance.hand_spec import resolved_hand_spec
 from src.shared.python.motion_matching.full_body_v2 import (
