@@ -14,6 +14,7 @@ import { AboutModal } from '@/components/ui/AboutModal';
 import { OnboardingOverlay } from '@/components/ui/OnboardingOverlay';
 import { useToast } from '@/components/ui/Toast';
 import { apiFetch } from '@/api/fetch';
+import { useUIStore } from '@/stores';
 import {
     loadLauncherWindowRecords,
     persistLauncherWindowRecords,
@@ -38,6 +39,7 @@ export function DashboardPage() {
         [launchedWindows, tiles]
     );
     const { showInfo, showError } = useToast();
+    const setHelpOpen = useUIStore((state) => state.setHelpOpen);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -90,9 +92,8 @@ export function DashboardPage() {
     );
 
     const handleShowHelp = useCallback(() => {
-        showInfo('Help system opening...');
-        // Future: open HelpDialog component
-    }, [showInfo]);
+        setHelpOpen(true);
+    }, [setHelpOpen]);
 
     return (
         <>
