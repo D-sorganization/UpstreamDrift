@@ -96,9 +96,6 @@ export function JobStatusView({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Badge tone={TONE_MAP[phase]}>{TITLE_MAP[phase]}</Badge>
-          <p className="font-medium text-white">
-            {phase === 'queued' ? 'Queued…' : phase === 'running' ? 'Solving…' : TITLE_MAP[phase]}
-          </p>
         </div>
         {jobId && (
           <span
