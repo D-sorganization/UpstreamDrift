@@ -20,7 +20,7 @@ import type {
   PresetListResponse,
   SwingComparisonResponse,
 } from "@/api/generated/types";
-import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
+import { ToolShell } from "@/components/layout/ToolShell";
 
 const OBJECTIVE_LABELS: Record<string, string> = {
   clubhead_speed: "Clubhead Speed",
@@ -159,50 +159,59 @@ export function SwingObjectiveLabPage(): React.ReactElement {
     URL.revokeObjectURL(url);
   };
 
+  const primaryDisabledReason = loading
+    ? "Optimization in progress…"
+    : undefined;
+
+  const headerActions = (
+    <div className="flex items-center gap-2">
+      {comparison && (
+        <button
+          type="button"
+          onClick={handleExportJson}
+          className="px-3 py-1.5 text-sm font-medium bg-gray-700 hover:bg-gray-600 text-gray-100 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          data-testid="export-json-btn"
+        >
+          Export JSON
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={handleRunComparison}
+        disabled={loading}
+        className="px-4 py-1.5 text-sm font-semibold bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:text-gray-400 text-white rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-2"
+        data-testid="run-comparison-btn"
+      >
+        {loading ? (
+          <>
+            <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <span>Optimizing…</span>
+          </>
+        ) : (
+          <span>Run Comparison</span>
+        )}
+      </button>
+    </div>
+  );
+
   return (
-    <WorkspaceShell>
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-700 bg-gray-800 px-4 py-3">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-100">
-            Swing Objective Lab
-          </h1>
-          <p className="text-sm text-gray-300">
-            Evaluate competing downswing optimization objectives under a shared
-            effort budget.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {comparison && (
-            <button
-              type="button"
-              onClick={handleExportJson}
-              className="px-3 py-1.5 text-sm font-medium bg-gray-700 hover:bg-gray-600 text-gray-100 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              data-testid="export-json-btn"
-            >
-              Export JSON
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={handleRunComparison}
-            disabled={loading}
-            className="px-4 py-1.5 text-sm font-semibold bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:text-gray-400 text-white rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-2"
-            data-testid="run-comparison-btn"
-          >
-            {loading ? (
-              <>
-                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Optimizing…</span>
-              </>
-            ) : (
-              <span>Run Comparison</span>
-            )}
-          </button>
-        </div>
-      </header>
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-6 max-w-7xl mx-auto p-4 text-gray-200">
-          {/* Controls Card */}
+    <ToolShell
+      workspaceId="optimize_train"
+      toolId="swing_objective_lab"
+      toolName="Swing Objective Lab"
+      description="Evaluate competing downswing optimization objectives under a shared effort budget."
+      actions={headerActions}
+      primaryActionDisabledReason={primaryDisabledReason}
+      nextStep={{
+        title: "Test Trajectory in Simulator",
+        description:
+          "Deploy optimized torque profiles to Golf Simulator for delivery and launch evaluation",
+        actionLabel: "Launch Simulator",
+        href: "/tools/golf-simulator",
+      }}
+    >
+      <div className="space-y-6 max-w-7xl mx-auto p-4 text-gray-200">
+        {/* Controls Card */}
           <section className="bg-gray-800/80 border border-gray-700 rounded-lg p-5 shadow-sm space-y-4">
             <h2 className="text-lg font-semibold text-gray-100 border-b border-gray-700 pb-2">
               Golfer Configuration & Shared Effort Budget
@@ -615,6 +624,6 @@ export function SwingObjectiveLabPage(): React.ReactElement {
           )}
         </div>
       </div>
-    </WorkspaceShell>
+    </ToolShell>
   );
 }
