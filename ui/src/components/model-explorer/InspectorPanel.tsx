@@ -17,7 +17,7 @@ export function PropertyInspector({ node }: PropertyInspectorProps) {
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <span className="text-sm font-semibold text-gray-200">{node.name}</span>
-        <span className="text-xs bg-gray-705 border border-gray-700 px-1.5 py-0.5 rounded text-gray-400">
+        <span className="text-xs bg-gray-700 border border-gray-700 px-1.5 py-0.5 rounded text-gray-400">
           {node.node_type}
         </span>
       </div>

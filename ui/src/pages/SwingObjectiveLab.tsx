@@ -462,7 +462,7 @@ export function SwingObjectiveLabPage(): React.ReactElement {
                     </thead>
                     <tbody>
                       {comparison.objective_keys.map((rowKey, rowIndex) => (
-                        <tr key={rowKey} className="hover:bg-gray-750/50">
+                        <tr key={rowKey} className="hover:bg-gray-800/50">
                           <th
                             scope="row"
                             className="p-3 border border-gray-700 font-semibold text-gray-200 bg-gray-900/50"
@@ -567,7 +567,7 @@ export function SwingObjectiveLabPage(): React.ReactElement {
                         const wristSatPct = ((sat[1] || 0) * 100).toFixed(1);
 
                         return (
-                          <tr key={key} className="hover:bg-gray-750/50">
+                          <tr key={key} className="hover:bg-gray-800/50">
                             <td className="p-3 border border-gray-700 font-semibold text-gray-200">
                               {formatObjectiveName(key)}
                             </td>
