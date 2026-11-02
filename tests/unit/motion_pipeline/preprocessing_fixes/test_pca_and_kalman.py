@@ -6,34 +6,41 @@ were declared in the strategy enums but had no working dispatch.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 np = pytest.importorskip("numpy")
 
-# The motion_pipeline.contracts module currently has a pre-existing
-# import-time error on origin/main (an unrelated @invariant decorator
-# regression tracked outside this PR). Skip the whole module rather than
-# fail collection, so this PR's tests do not appear as a regression while
-# that issue is being fixed in parallel.
-try:
-    from src.shared.python.motion_pipeline.contracts import (
-        Marker,
-        MarkerFrame,
-        MarkerTrajectory,
-    )
-    from src.shared.python.motion_pipeline.preprocessing.filter import (
-        FilterType,
-        apply_filter,
-    )
-    from src.shared.python.motion_pipeline.preprocessing.gap_fill import (
-        GapFillStrategy,
-        gap_fill,
-    )
-except Exception as exc:  # noqa: BLE001 # pragma: no cover - defensive
+# The only documented optional prerequisites are numpy (importorskip above)
+# and the pinned Tools tree that serves the retired shared.python modules.
+# Jobs that check out no submodule skip explicitly on that named
+# prerequisite; everywhere else product imports are deliberately unguarded
+# (UpstreamDrift#14292) so an import-time regression in motion_pipeline fails
+# collection instead of silently skipping the PCA gap-fill and Kalman cases.
+_PINNED_TOOLS = (
+    Path(__file__).resolve().parents[4] / "vendor/ud-tools/src/shared/python"
+)
+if not _PINNED_TOOLS.is_dir():
     pytest.skip(
-        f"motion_pipeline imports unavailable (pre-existing issue): {exc}",
+        f"pinned Tools tree absent ({_PINNED_TOOLS}); run "
+        "`git submodule update --init vendor/ud-tools`",
         allow_module_level=True,
     )
+
+from src.shared.python.motion_pipeline.contracts import (  # noqa: E402
+    Marker,
+    MarkerFrame,
+    MarkerTrajectory,
+)
+from src.shared.python.motion_pipeline.preprocessing.filter import (  # noqa: E402
+    FilterType,
+    apply_filter,
+)
+from src.shared.python.motion_pipeline.preprocessing.gap_fill import (  # noqa: E402
+    GapFillStrategy,
+    gap_fill,
+)
 
 
 # --------------------------------------------------------------------------- #
