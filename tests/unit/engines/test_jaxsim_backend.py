@@ -291,6 +291,30 @@ def test_jaxsim_backend_dynamics_terms_have_expected_shapes_and_invariants() -> 
     assert coriolis.shape == (7, 7)
 
 
+def _fail_bias(*_args: object) -> np.ndarray:
+    raise RuntimeError("injected backend failure")
+
+
+@pytest.mark.parametrize(
+    ("bias_api", "error", "message"),
+    [
+        (lambda *_: np.zeros((1, 7)), ValueError, "shape"),
+        (_fail_bias, RuntimeError, "injected backend failure"),
+    ],
+)
+def test_jaxsim_backend_rejects_invalid_or_failing_bias(
+    monkeypatch: pytest.MonkeyPatch,
+    bias_api: object,
+    error: type[Exception],
+    message: str,
+) -> None:
+    monkeypatch.setattr(
+        _FakeModelApi, "free_floating_bias_forces", staticmethod(bias_api)
+    )
+    with pytest.raises(error, match=message):
+        _backend().compute_bias_forces()
+
+
 def test_jaxsim_backend_inverse_dynamics_and_acceleration_decomposition() -> None:
     backend = _backend()
     qacc = np.arange(7, dtype=np.float64)
