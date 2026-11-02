@@ -12,6 +12,7 @@ from __future__ import annotations
 import ast
 import importlib
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -36,6 +37,8 @@ from src.shared.python.simulation_backends.protocol import (
 )
 
 OLD_NAME = "DynamicsProvider"
+# An AST hit is the bare identifier, so it always matches this; others skip parsing.
+_OLD_NAME_WORD = re.compile(rf"\b{OLD_NAME}\b")
 REPO_ROOT = Path(__file__).resolve().parents[3]
 # First-party code that must not import the deprecated name.
 SCANNED_ROOTS = ("src", "scripts", "tests")
@@ -120,7 +123,10 @@ def test_unknown_attribute_still_raises() -> None:
 
 
 def _uses_old_name(path: Path) -> list[int]:
-    tree = ast.parse(path.read_text(encoding="utf-8"))
+    source = path.read_text(encoding="utf-8")
+    if not _OLD_NAME_WORD.search(source):
+        return []
+    tree = ast.parse(source)
     lines = []
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
@@ -130,6 +136,31 @@ def _uses_old_name(path: Path) -> list[int]:
         ):
             lines.append(node.lineno)
     return lines
+
+
+@pytest.mark.unit
+def test_scan_parses_only_files_that_mention_the_old_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Parsing all ~11k first-party files took ~45 s idle and crossed the 60 s
+    thread-method timeout on loaded CI, whose ``os._exit`` killed the xdist
+    worker (#14310). Only a file containing the old name can be an offender."""
+    (tmp_path / "user.py").write_text(f"from m import {OLD_NAME}\n", encoding="utf-8")
+    (tmp_path / "new_name.py").write_text(
+        "x = DimeDynamicsProvider\n", encoding="utf-8"
+    )
+    (tmp_path / "plain.py").write_text("y = 1\n", encoding="utf-8")
+    parsed: list[str] = []
+    real_parse = ast.parse
+    monkeypatch.setattr(
+        ast,
+        "parse",
+        lambda src, *a, **k: parsed.append(src) or real_parse(src, *a, **k),
+    )
+    assert _uses_old_name(tmp_path / "user.py") == [1]
+    assert _uses_old_name(tmp_path / "new_name.py") == []
+    assert _uses_old_name(tmp_path / "plain.py") == []
+    assert len(parsed) == 1
 
 
 @pytest.mark.unit
