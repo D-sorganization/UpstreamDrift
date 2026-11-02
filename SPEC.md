@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14366 | Mobile-friendly long-running job status view |
+| 2026-11-02 | #14372 | HRG-Q1 inverse-dynamics row: full-body-v2 generalized forces along a seeded reference trajectory match a spec-only recursive Newton-Euler reference on MuJoCo, Pinocchio, Drake and OpenSim (1e-12 relative; measured 6.2e-16). |
+| 2026-11-02 | #14369 | HRG-Q1 contact row: full-body-v2 foot-sphere contact matches an independent spec-law reference on MuJoCo, Pinocchio, Drake and OpenSim (penetration 1e-12 m, forces 1e-12 relative). |
 | 2026-11-02 | #14364 | Adapt controls for touch and small screens |
 | 2026-11-02 | #14367 | Cross-engine hand-frame test (HRG-HX7 slice 2): each engine's hand-on-forearm rotation matches the specification within 0.5 deg over seeded configurations |
 | 2026-11-02 | #14358 | Cross-engine hand mass and length consistency test (HRG-HX7 slice 1): MuJoCo, Drake, Pinocchio and OpenSim hand body masses match the separated-hand spec; visual-only hand length is measured where exported and reported elsewhere |
