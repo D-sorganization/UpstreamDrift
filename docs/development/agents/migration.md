@@ -25,5 +25,5 @@ policy to `CLAUDE.md`.
 - Workflow automation owned by agents must have a row in `.github/WORKFLOWS.md`
   with an explicit owner and `KEEP`, `MERGE`, `DELETE`, or `DISABLE` in the
   purpose cell.
-- Removing `.claude/`, `.agent/`, `.kiro/`, or `.jules/` is intentionally left to
+- Removing `.claude/`, `.kiro/`, or `.jules/` is intentionally left to
   a smaller follow-up after owners verify tool references.

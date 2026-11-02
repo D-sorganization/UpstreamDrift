@@ -19,6 +19,20 @@ DEFAULT_DISTANCES_FT = (3.0, 6.0, 10.0, 15.0, 25.0, 40.0, 60.0)
 DEFAULT_SLOPES_PCT = (0.0, 2.0, 4.0)
 DEFAULT_STIMPS = (10.0, 12.0)
 
+#: Fall line of each break orientation: the direction the green falls toward,
+#: in degrees CCW of the ball-to-hole line (the ``aspect`` of
+#: ``HeightField.planar``). A right-to-left putt falls toward the golfer's left
+#: (+90 deg). "oblique" is taken as a quartering downhill putt that breaks right
+#: to left (45 deg); the issue leaves its exact angle open.
+ORIENTATION_ASPECT_DEG: dict[str, float] = {
+    FLAT: 0.0,
+    "uphill": 180.0,
+    "downhill": 0.0,
+    "left_to_right": 270.0,
+    "right_to_left": 90.0,
+    "oblique": 45.0,
+}
+
 
 @dataclass(frozen=True)
 class PuttClass:

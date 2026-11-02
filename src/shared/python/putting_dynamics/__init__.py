@@ -62,6 +62,7 @@ from .friction import (
     DEFAULT_SLIDING_MU,
     DEFAULT_STATIC_MU,
     STIMP_RELEASE_SPEED_MPS,
+    USGA_STIMP_ROLL_MODEL,
     FrictionParams,
     grain_factor,
     is_static_hold,
@@ -75,6 +76,15 @@ from .green_reading import (
     LineReading,
     read_line,
     solve_aim,
+)
+from .practice import (
+    PUTT_RESULT_SCHEMA,
+    PracticeFeedback,
+    load_putt_result,
+    practice_feedback,
+    putt_result_from_dict,
+    putt_result_to_dict,
+    save_putt_result,
 )
 from .reference_fixtures import (
     DEFAULT_FIXTURES_PATH,
@@ -138,6 +148,7 @@ __all__ = [
     "STIMPMETER_NOTCH_DISTANCE_M",
     "STIMPMETER_RELEASE_ANGLE_DEG",
     "STIMP_RELEASE_SPEED_MPS",
+    "USGA_STIMP_ROLL_MODEL",
     "AimSolution",
     "BallState",
     "CollisionReport",
@@ -183,4 +194,11 @@ __all__ = [
     "strike",
     "struck_ball_state",
     "sweep_dynamic_loft",
+    "PUTT_RESULT_SCHEMA",
+    "PracticeFeedback",
+    "load_putt_result",
+    "practice_feedback",
+    "putt_result_from_dict",
+    "putt_result_to_dict",
+    "save_putt_result",
 ]

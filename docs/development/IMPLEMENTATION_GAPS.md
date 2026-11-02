@@ -617,7 +617,7 @@ Current implementation uses constant spin or simple linear decay. Real ball spin
 
 - `src/shared/python/physics_parameters.py`
 - `src/engines/common/physics.py`
-- `src/engines/physics_engines/putting_green/python/putter_stroke.py`
+- `src/shared/python/putting_dynamics/collision.py`
 
 **Description:**
 

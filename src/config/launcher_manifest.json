@@ -176,10 +176,10 @@
     {
       "id": "putting_green",
       "name": "Putting Green",
-      "description": "Author and practice on realistic greens: surface presets, terrain import, wind, and ball-roll physics (ud-legacy-roll/1). Greens export to the Impact Explorer's putting analytics via the shared green-surface wire.",
+      "description": "Author and practice on realistic greens: surface presets, terrain import, and ball-roll physics on the shared putting core (usga-stimp-roll/1). Greens export to the Impact Explorer's putting analytics via the shared green-surface wire.",
       "category": "simulation",
       "type": "putting_green",
-      "path": "src/engines/physics_engines/putting_green/python/simulator.py",
+      "path": "src/tools/putting_green_gui/gui.py",
       "engine_type": "putting_green",
       "logo": "putting_green.svg",
       "status": "simulator",
@@ -1079,6 +1079,25 @@
         "impact_physics"
       ],
       "order": 55,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "putting_analytics",
+      "name": "Putting Analytics",
+      "description": "Best aim and pace, misread cost and putt-class library studies on the shared putting service, priced by your own expected-putts curve. Install: pip install -e '.[gui-tools]'.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/putting_analytics_gui/__main__.py",
+      "logo": "putting_analytics.svg",
+      "status": "ready",
+      "capabilities": [
+        "putting_analytics",
+        "putting",
+        "strokes_gained"
+      ],
+      "order": 106,
       "web": {
         "mode": "native-window"
       }

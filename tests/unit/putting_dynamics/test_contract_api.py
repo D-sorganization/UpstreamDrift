@@ -26,6 +26,7 @@ _EXPECTED_EXPORTS = {
     "STIMPMETER_NOTCH_DISTANCE_M",
     "STIMPMETER_RELEASE_ANGLE_DEG",
     "STIMP_RELEASE_SPEED_MPS",
+    "USGA_STIMP_ROLL_MODEL",
     # types
     "AimSolution",
     "BallState",
@@ -73,6 +74,14 @@ _EXPECTED_EXPORTS = {
     "strike",
     "struck_ball_state",
     "sweep_dynamic_loft",
+    # #14141 step 10c: practice feedback and putt-result documents.
+    "PUTT_RESULT_SCHEMA",
+    "PracticeFeedback",
+    "load_putt_result",
+    "practice_feedback",
+    "putt_result_from_dict",
+    "putt_result_to_dict",
+    "save_putt_result",
 }
 
 

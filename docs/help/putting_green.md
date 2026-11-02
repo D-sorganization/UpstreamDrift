@@ -10,7 +10,7 @@ status: complete
 
 Roll a putt across a sloped green and see whether it drops. You set the stroke
 speed, your aim, how far away the cup is, and how fast and how tilted the green
-is; the tile runs the putting-green roll engine and shows the ball track, the
+is; the tile runs the shared putting physics core and shows the ball track, the
 break, and whether the putt was holed. It is a green-authoring and roll-reading
 surface, not a putter-fitting or impact-analysis tool.
 
@@ -29,12 +29,13 @@ surface, not a putter-fitting or impact-analysis tool.
   (`_validate` in `src/tools/putting_green_gui/_scene_builder.py`).
 - Presets stamp speed and distance pairs only: Short (1.5 m/s, 5 ft),
   Medium (2.5 m/s, 15 ft), Long (4.0 m/s, 30 ft).
-- Not exposed on this tile, but fixed in the scene builder: integrator `rk4`,
-  timestep 0.002 s, terrain grid resolution 48. Cup distance is converted to
-  metres; the green is sized around the putt with fixed margins.
+- Not exposed on this tile, but fixed: the shared solver's RK4 at a 0.002 s
+  timestep (`putting_dynamics.solver.DT_S`) and a terrain grid resolution of
+  48. Cup distance is converted to metres; the green is sized around the putt
+  with fixed margins.
 - The Stimpmeter reading is the only turf control on the tile. Grass type,
-  height of cut, grain direction, and condition exist in
-  `TurfProperties` but are left at their defaults here.
+  condition, and grain exist in the shared `TurfSpec` but are left at their
+  defaults here.
 
 ## Outputs
 
@@ -53,37 +54,26 @@ surface, not a putter-fitting or impact-analysis tool.
 ## Method
 
 The GUI is a thin renderer. All domain logic is in
-`src/tools/putting_green_gui/_scene_builder.py`, which builds a `GreenSurface`
-with a uniform cross-slope heightmap, applies `TurfProperties(stimp_rating=...)`,
-and runs `PuttingGreenSimulator.simulate_putt`
-(`src/engines/physics_engines/putting_green/python/simulator.py`) with RK4 at a
-0.002 s timestep. Roll dynamics come from
-`src/engines/physics_engines/putting_green/python/ball_roll_physics.py`, which
-resolves the slide-to-roll transition, applies the turf friction law, and
-reports a `RollMode` per sample.
+`src/tools/putting_green_gui/_scene_builder.py`, which builds a shared
+`SurfaceSpec` (a uniform cross-slope `HeightField` with the friction from
+`stimp_to_rolling_mu`) and runs `simulate_strike` from
+`src/shared/python/putting_dynamics`. The shared solver resolves the airborne,
+slide and roll phases, applies the turf friction law, captures the ball with
+the offset-aware chord bound (Holmes 1991), and reports a motion mode per
+sample.
 
-**This repository preserves two putting roll models, and this tile uses exactly
-one of them.** Per
-[ADR-0045](../adr/0045-putting-integration-one-experience-two-preserved-stacks.md):
-
-- `ud-legacy-roll/1` (`UD_LEGACY_ROLL_MODEL`) - the agronomic law,
-  mu approximately 0.196/stimp, scaled by height-of-cut, condition, and grain
-  factors. This is the model `ball_roll_physics.py` implements, and therefore
-  the model behind this tile. Hole capture is a radius test plus a 1.5 m/s
-  lip-out heuristic.
-- `usga-stimp-roll/1` (`USGA_STIMP_ROLL_MODEL`) - the preserved counterpart,
-  mu approximately 0.559/stimp, derived from USGA stimpmeter geometry at a
-  1.83 m/s release speed, with Holmes/Penner speed-dependent hole capture.
-  Inside this repository that law lives in
-  `src/shared/python/putting_dynamics` and is reached by the `/simulate-3d`
-  route, not by this tile.
-
-The two laws share the `1/stimp` form but assume different stimpmeter release
-speeds, which pins the roll-out ratio between them at a constant of
-approximately 2.854. The divergence is physics, not a bug: each model is
-internally consistent. Because of that fixed factor, every result document the
-engine emits carries a `roll_model` field, and readers refuse a payload that
-does not name its model.
+**This tile runs the one active roll model, `usga-stimp-roll/1`.** Its rolling
+resistance follows the USGA Stimpmeter geometry (mu approximately
+0.559/stimp). The API routes, the MCP putting tools, the strokes-gained make
+probability and the putting engine use the same core.
+[ADR-0058](../adr/0058-one-shared-putting-core.md) retired the agronomic
+`ud-legacy-roll/1` law (mu approximately 0.196/stimp) that this tile ran
+before epic #14141, superseding decision 4 of
+[ADR-0045](../adr/0045-putting-integration-one-experience-two-preserved-stacks.md).
+At equal stimp and launch speed, putts now roll out about 2.854 times shorter
+than under the retired law. Every result names its `roll_model`, and readers
+refuse a payload that does not, so an archived legacy result is never mistaken
+for a current one.
 
 Turf and stimpmeter references, with provenance classes, are collected in
 [../physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md](../physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md).

@@ -1,6 +1,6 @@
 """Tests for the putting green simulator GUI.
 
-The GUI is a thin renderer over the real :class:`PuttingGreenSimulator`
+The GUI is a thin renderer over the shared putting physics core
 (via :mod:`src.tools.putting_green_gui._scene_builder`). Qt runs in
 ``offscreen`` mode so these stay headless-safe; OpenGL-specific assertions
 are skipped when ``pyqtgraph`` is unavailable.
@@ -180,8 +180,22 @@ def test_run_simulation_stores_scene_with_trajectory(
     assert len(widget._scene.roll_modes) == widget._scene.trajectory_xyz.shape[0]
 
 
+def _first_holing_speed_on_the_spin_grid(distance_m: float) -> float:
+    """Slowest 0.1 m/s speed the shared builder holes (no tuned constant)."""
+    from src.tools.putting_green_gui._scene_builder import PuttConfig, build_putt_scene
+
+    for tenths in range(5, 81):
+        config = PuttConfig(
+            putter_speed_ms=tenths / 10, cup_distance_m=distance_m, slope_deg=0.0
+        )
+        if build_putt_scene(config).holed:
+            return tenths / 10
+    raise AssertionError("no holing speed on the spin grid")
+
+
 def test_flat_straight_putt_reports_holed(widget: PuttingGreenWidget) -> None:
-    widget._speed_spin.setValue(2.2)
+    speed = _first_holing_speed_on_the_spin_grid(12.0 * _FT_TO_M)
+    widget._speed_spin.setValue(speed)
     widget._aim_spin.setValue(0.0)
     widget._distance_spin.setValue(12.0 * _FT_TO_M)
     widget._slope_spin.setValue(0.0)

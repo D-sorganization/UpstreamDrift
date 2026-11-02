@@ -48,6 +48,14 @@ jobs:
           app-id: ${{ secrets.JULES_APP_ID }}
           private-key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          # Only what the sweep uses. contents: write because auto-merge and merge-queue
+          # mutations (dequeue, disable auto-merge) are refused under read (RM #1499); #14214.
+          repositories: |
+            UpstreamDrift
+            Repository_Management
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
 
       - name: Checkout Repository_Management (conflict disarm script)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
