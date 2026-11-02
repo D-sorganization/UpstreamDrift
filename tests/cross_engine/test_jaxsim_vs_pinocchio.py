@@ -139,8 +139,10 @@ def _pin_matrix(value: object, name: str) -> np.ndarray:
 
 
 def _require_pinocchio_dynamics_api(pin: object) -> None:
-    """Skip partial Pinocchio installs that lack model or dynamics APIs."""
+    """Skip explicit mocks but reject broken real engine installations."""
 
+    if type(pin).__module__ == "unittest.mock":
+        pytest.skip("explicit Pinocchio mock")
     required = (
         "Model",
         "JointModelFreeFlyer",
@@ -152,7 +154,9 @@ def _require_pinocchio_dynamics_api(pin: object) -> None:
     )
     missing = [name for name in required if not hasattr(pin, name)]
     if missing:
-        pytest.skip(f"Pinocchio install lacks required dynamics APIs: {missing}")
+        raise RuntimeError(
+            f"partial Pinocchio install lacks required dynamics APIs: {missing}"
+        )
 
 
 def _jaxsim_terms(q: np.ndarray, v: np.ndarray) -> DynamicsTerms:
@@ -269,8 +273,6 @@ def test_jaxsim_pinocchio_free_body_dynamics_terms_match(
     q: np.ndarray,
     v: np.ndarray,
 ) -> None:
-    """JaxSim and Pinocchio agree on ``M,h,g,C`` within parity tolerances."""
-
     jaxsim_terms = _jaxsim_terms(q, v)
     pinocchio_terms = _pinocchio_terms(q, v)
 

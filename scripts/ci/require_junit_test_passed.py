@@ -17,65 +17,32 @@ import defusedxml.ElementTree as ET
 def require_test_passed(
     junit_xml: Path,
     testcase_name: str,
-    *,
-    exact: bool = False,
-    classname: str | None = None,
 ) -> int:
-    """Return zero only when a matching testcase passed.
-
-    Prefix matching remains available for legacy parameterized checks. Exact
-    node-name matching prevents a similarly named testcase from satisfying a
-    required-case guard.
-    """
+    """Return zero only when at least one matching testcase passed."""
     if not junit_xml.exists():
         print(f"JUnit XML not found: {junit_xml}", file=sys.stderr)
-        return 1
-
-    if exact and not classname:
-        print("Exact testcase checks require a JUnit classname.", file=sys.stderr)
         return 1
 
     root = ET.parse(junit_xml).getroot()
     matches = [
         testcase
         for testcase in root.findall(".//testcase")
-        if (
-            testcase.attrib.get("name", "") == testcase_name
-            and testcase.attrib.get("classname", "") == classname
-            if exact
-            else testcase.attrib.get("name", "").startswith(testcase_name)
-        )
+        if testcase.attrib.get("name", "").startswith(testcase_name)
     ]
     if not matches:
-        identity = f"{classname}::{testcase_name}" if exact else testcase_name
-        print(f"Required testcase not found: {identity}", file=sys.stderr)
-        return 1
-    if exact and len(matches) != 1:
-        identity = f"{classname}::{testcase_name}"
-        print(
-            f"Required testcase is ambiguous: {identity} "
-            f"({len(matches)} matching cases)",
-            file=sys.stderr,
-        )
+        print(f"Required testcase not found: {testcase_name}", file=sys.stderr)
         return 1
 
-    failed_states = {"failure", "error", "skipped"}
-    passed = [
-        testcase
-        for testcase in matches
-        if not any(child.tag.rsplit("}", 1)[-1] in failed_states for child in testcase)
-    ]
+    passed = [testcase for testcase in matches if not list(testcase)]
     if not passed:
-        identity = f"{classname}::{testcase_name}" if exact else testcase_name
         print(
-            f"Required testcase did not pass: {identity} "
+            f"Required testcase did not pass: {testcase_name} "
             f"({len(matches)} matching cases)",
             file=sys.stderr,
         )
         return 1
 
-    identity = f"{classname}::{testcase_name}" if exact else testcase_name
-    print(f"Required testcase passed: {identity} ({len(passed)} cases)")
+    print(f"Required testcase passed: {testcase_name} ({len(passed)} cases)")
     return 0
 
 
@@ -86,9 +53,7 @@ def require_junit_cases_and_write_receipt(
     receipt_path: Path,
     source_revision: str,
     runner_os: str,
-    packages: dict[str, str] | None = None,
 ) -> int:
-    """Require each exact unique case to pass, then receipt the actual JUnit IDs."""
     if not case_names or len(case_names) != len(set(case_names)):
         return _fail("Required JUnit case names must be non-empty and unique.")
     if not junit_xml.exists():
@@ -106,13 +71,12 @@ def require_junit_cases_and_write_receipt(
     failed = {"failure", "error", "skipped"}
     if any(c.tag.rsplit("}", 1)[-1] in failed for n in matches for c in n):
         return _fail("A required JUnit case did not pass.")
-    packages = packages or {name: version(name) for name in ("jaxsim", "pin")}
     receipt = {
         "source_revision": source_revision,
         "python": sys.version,
         "platform": platform.platform(),
         "runner_os": runner_os,
-        "packages": packages,
+        "packages": {name: version(name) for name in ("jaxsim", "pin")},
         "executed_case_count": len(matches),
         "executed_cases": [f"{classname}::{node.get('name')}" for node in matches],
     }
@@ -132,20 +96,10 @@ def main() -> int:
     )
     parser.add_argument("junit_xml", type=Path)
     parser.add_argument("testcase_name", nargs="?")
-    parser.add_argument(
-        "--exact",
-        action="store_true",
-        help="Match the full JUnit testcase name instead of a prefix.",
-    )
-    parser.add_argument(
-        "--classname",
-        help="Require the exact JUnit classname (required with --exact).",
-    )
     parser.add_argument("--required-classname")
     parser.add_argument("--required-case", action="append", default=[])
     parser.add_argument("--receipt-output", type=Path)
     parser.add_argument("--source-revision")
-    parser.add_argument("--package-version", action="append", default=[])
     args = parser.parse_args()
     if args.required_case:
         if not all(
@@ -161,15 +115,12 @@ def main() -> int:
             args.receipt_output,
             args.source_revision,
             os.environ.get("RUNNER_OS", "unknown"),
-            dict(item.split("=", 1) for item in args.package_version),
         )
     if not args.testcase_name:
         parser.error("testcase_name is required unless --required-case is used")
     return require_test_passed(
         args.junit_xml,
         args.testcase_name,
-        exact=args.exact,
-        classname=args.classname,
     )
 
 

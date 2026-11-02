@@ -2,6 +2,8 @@ import importlib.util
 import types
 from pathlib import Path
 
+import pytest
+
 SCRIPT_PATH = (
     Path(__file__).resolve().parents[2]
     / "scripts"
@@ -35,3 +37,16 @@ def test_missing_dynamics_api_accepts_complete_robotics_module() -> None:
     )
 
     assert module.missing_dynamics_api(robotics_module) == ()
+
+
+@pytest.mark.parametrize("broken", ["missing", "partial"])
+def test_required_lane_api_check_fails_on_missing_or_partial_pinocchio(
+    monkeypatch: pytest.MonkeyPatch, broken: str
+) -> None:
+    def import_module(_name: str) -> types.SimpleNamespace:
+        if broken == "missing":
+            raise ModuleNotFoundError("pinocchio is absent")
+        return types.SimpleNamespace(__version__="0.1")
+
+    monkeypatch.setattr(module.importlib, "import_module", import_module)
+    assert module.check_pinocchio_dynamics_api() == 1

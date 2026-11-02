@@ -11,18 +11,16 @@ def require_engine_array(
     expected_shape: tuple[int, ...],
     name: str,
 ) -> np.ndarray:
-    """Reject malformed real-engine outputs instead of skipping the parity case."""
-
-    if not isinstance(value, np.ndarray):
+    if (
+        not isinstance(value, np.ndarray)
+        or value.shape != expected_shape
+        or not np.issubdtype(value.dtype, np.number)
+        or np.iscomplexobj(value)
+        or not np.isfinite(value).all()
+    ):
         raise AssertionError(
-            f"{name} must be a numpy array, got {type(value).__name__}"
+            f"{name} must be a finite real numeric numpy array of shape "
+            f"{expected_shape}; got {type(value).__name__} "
+            f"{getattr(value, 'shape', None)}"
         )
-    if value.shape != expected_shape:
-        raise AssertionError(
-            f"{name} must have shape {expected_shape}, got {value.shape}"
-        )
-    if not np.issubdtype(value.dtype, np.number) or np.iscomplexobj(value):
-        raise AssertionError(f"{name} must contain real numeric values")
-    if not np.isfinite(value).all():
-        raise AssertionError(f"{name} must contain only finite values")
     return value
