@@ -32,6 +32,7 @@ import { ForceOverlayPanel } from '@/components/visualization/ForceOverlayPanel'
 import type { GlyphSetV1 } from '@/types/glyphs';
 import type { SimulationFrame } from '@/api/client';
 import { LivePlot } from '@/components/analysis/LivePlot';
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 import { ConnectionStatus } from '@/components/ui/ConnectionStatus';
 import { useToast } from '@/components/ui/Toast';
 
@@ -333,13 +334,13 @@ export function SimulationPage() {
   );
 
   return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
-      {/* #7441: every page needs exactly one top-level heading; the visible
-          sidebar/section headings start at h2, so this sr-only h1 anchors the
-          hierarchy without changing the visual design. */}
-      <h1 className="sr-only">Simulation</h1>
-      {/* Left Sidebar - Controls */}
-      <aside className="w-80 bg-gray-800 border-r border-gray-700 p-4 overflow-y-auto flex-shrink-0 z-10">
+    // #14279: WorkspaceShell docks both sidebars on wide screens and turns
+    // them into drawers below lg/xl, so the 3D view keeps the full width.
+    <WorkspaceShell
+      leftPanelLabel="Engine Controls"
+      rightPanelLabel="Live Data"
+      leftPanel={
+        <div className="p-4">
         <h2 className="heading-page mb-2">Golf Suite</h2>
         <p className="text-xs text-gray-400 mb-6">
           {loadedEngines.length} engine{loadedEngines.length !== 1 ? 's' : ''} loaded
@@ -429,10 +430,56 @@ export function SimulationPage() {
             onExportTrajectory={recordingSupported ? handleExportTrajectory : undefined}
           />
         </div>
-      </aside>
+        </div>
+      }
+      // Right Sidebar - Live Data
+      rightPanel={
+        <div className="p-4">
+        {/* See issue #1199: Force overlay controls */}
+        <div className="mb-4">
+          <ForceOverlayPanel
+            onGlyphsChange={setForceGlyphs}
+            isRunning={isRunning}
+            isConnected={connectionStatus === 'connected'}
+            socketForceOverlay={currentFrame?.force_overlay as GlyphSetV1 | null}
+          />
+        </div>
 
+        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Live Analysis</h3>
+
+        <div className="mb-6 border-b border-gray-700 pb-4">
+          <EngineComparisonPanel
+            viewModel={comparisonViewModel}
+            onToggleEngine={handleToggleComparisonEngine}
+            disabled={isRunning}
+          />
+        </div>
+
+        {currentFrame ? (
+          <div className="space-y-4">
+            <div className="bg-gray-700/50 p-3 rounded-md">
+              <h4 className="text-xs text-gray-400 mb-2">Simulation State</h4>
+              <pre className="text-xs text-green-400 font-mono overflow-auto max-h-40">
+                {JSON.stringify(currentFrame.state, null, 2)}
+              </pre>
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-gray-400 italic text-center mt-10">
+            {effectiveEngine
+              ? 'Start simulation to view live data'
+              : 'Load an engine to get started'}
+          </div>
+        )}
+        </div>
+      }
+    >
+      {/* #7441: every page needs exactly one top-level heading; the visible
+          sidebar/section headings start at h2, so this sr-only h1 anchors the
+          hierarchy without changing the visual design. */}
+      <h1 className="sr-only">Simulation</h1>
       {/* Main Content - 3D View + Analysis */}
-      <main className="flex-1 flex flex-col relative min-w-0">
+      <div className="flex-1 flex flex-col relative min-w-0 min-h-0">
         {/* 3D Visualization */}
         <div className="flex-1 relative bg-gray-950">
           <Scene3D
@@ -478,47 +525,7 @@ export function SimulationPage() {
         <div className="h-40 sm:h-48 lg:h-64 bg-gray-800 border-t border-gray-700 p-2">
           <LivePlot frames={frames} maxPoints={200} />
         </div>
-      </main>
-
-      {/* Right Sidebar - Live Data */}
-      <aside className="w-72 bg-gray-800 border-l border-gray-700 p-4 flex-shrink-0 z-10 overflow-y-auto">
-        {/* See issue #1199: Force overlay controls */}
-        <div className="mb-4">
-          <ForceOverlayPanel
-            onGlyphsChange={setForceGlyphs}
-            isRunning={isRunning}
-            isConnected={connectionStatus === 'connected'}
-            socketForceOverlay={currentFrame?.force_overlay as GlyphSetV1 | null}
-          />
-        </div>
-
-        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Live Analysis</h3>
-
-        <div className="mb-6 border-b border-gray-700 pb-4">
-          <EngineComparisonPanel
-            viewModel={comparisonViewModel}
-            onToggleEngine={handleToggleComparisonEngine}
-            disabled={isRunning}
-          />
-        </div>
-
-        {currentFrame ? (
-          <div className="space-y-4">
-            <div className="bg-gray-700/50 p-3 rounded-md">
-              <h4 className="text-xs text-gray-400 mb-2">Simulation State</h4>
-              <pre className="text-xs text-green-400 font-mono overflow-auto max-h-40">
-                {JSON.stringify(currentFrame.state, null, 2)}
-              </pre>
-            </div>
-          </div>
-        ) : (
-          <div className="text-sm text-gray-400 italic text-center mt-10">
-            {effectiveEngine
-              ? 'Start simulation to view live data'
-              : 'Load an engine to get started'}
-          </div>
-        )}
-      </aside>
-    </div>
+      </div>
+    </WorkspaceShell>
   );
 }

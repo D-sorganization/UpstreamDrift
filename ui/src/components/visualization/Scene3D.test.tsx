@@ -103,6 +103,14 @@ describe('Scene3D', () => {
       expect(screen.getByTestId('canvas-mock')).toBeInTheDocument();
     });
 
+    it('wraps the view toolbar inside the canvas width on phones (#14279)', () => {
+      render(<Scene3D engine="mujoco" frame={null} />);
+
+      const toolbar = screen.getByRole('button', { name: 'Front' }).parentElement?.parentElement;
+      expect(toolbar?.className).toContain('flex-wrap');
+      expect(toolbar?.className).toContain('max-w-[calc(100%-1rem)]');
+    });
+
     it('renders without frame data (idle state)', () => {
       render(<Scene3D engine="mujoco" frame={null} />);
 
