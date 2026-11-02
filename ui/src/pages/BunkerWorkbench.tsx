@@ -22,6 +22,7 @@ import {
   type BunkerWorkbenchComparisonV1,
   type BunkerWorkbenchEvaluationV1,
 } from '@/api/bunkerWorkbench';
+import { JobStatusView, type JobPhase } from '@/components/layout/JobStatusView';
 import { useBunkerJob, type BunkerJobView } from './useBunkerJob';
 
 interface DesignForm {
@@ -193,17 +194,18 @@ function resultOf(view: Extract<BunkerJobView, { phase: 'completed' }>): Result 
 
 function JobProgress(props: { status: BunkerJobStatusV1; onCancel: () => void }) {
   const { status, onCancel } = props;
-  const percent = Math.round(Math.min(100, Math.max(0, status.progress_percent)));
-  const text = `${percent}% of ${status.shots_planned} shots`;
+  const phase: JobPhase = status.status === 'pending' ? 'queued' : 'running';
   return (
-    <section className="flex flex-col gap-2 rounded border border-gray-700 bg-gray-800 p-3 text-sm">
-      <p>{status.status === 'pending' ? 'Queued…' : 'Solving…'}</p>
-      <progress aria-label="Bunker job progress" aria-valuetext={text} className="w-full" max={100} value={percent} />
-      <p className="text-xs text-gray-400">{text}</p>
-      <button type="button" className="self-start rounded bg-gray-700 px-3 py-1 text-white" onClick={onCancel}>
-        Cancel job
-      </button>
-    </section>
+    <JobStatusView
+      status={{
+        jobId: status.job_id,
+        phase,
+        progressPercent: status.progress_percent,
+        shotsPlanned: status.shots_planned,
+        label: 'Bunker job progress',
+      }}
+      onCancel={onCancel}
+    />
   );
 }
 
@@ -211,21 +213,17 @@ function JobOutcome(props: { view: BunkerJobView; onCancel: () => void }) {
   const { view, onCancel } = props;
   switch (view.phase) {
     case 'submitting':
-      return <p role="status">Submitting…</p>;
+      return <JobStatusView status={{ phase: 'submitting' }} />;
     case 'running':
       return <JobProgress status={view.status} onCancel={onCancel} />;
     case 'completed':
       return <ResultView result={resultOf(view)} />;
     case 'cancelled':
-      return <p role="status">Job cancelled; it produced no result.</p>;
+      return <JobStatusView status={{ phase: 'cancelled' }} />;
     case 'failed':
-      return <p role="alert" className="text-red-300">{view.message}</p>;
+      return <JobStatusView status={{ phase: 'failed', error: view.message }} />;
     case 'stale':
-      return (
-        <p role="alert" className="text-red-300">
-          Discarded a stale result: it does not answer the current submission. Run it again.
-        </p>
-      );
+      return <JobStatusView status={{ phase: 'stale' }} />;
     default:
       return (
         <p className="text-gray-400">Solve design A or compare A/B. Every result carries its tier, verdict and sources.</p>
