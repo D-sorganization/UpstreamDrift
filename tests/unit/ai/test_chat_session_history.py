@@ -1,12 +1,11 @@
 """Regression tests for chat UI session history (#5315).
 
-These tests guard the session create/load/delete/archive contract and
-ensure that the ChatSessionManager API (from src.shared.python.ai.gui)
-correctly persists and retrieves sessions.  Any PR that inadvertently
-removes these capabilities will fail this suite.
-
-The tests run headless (no PyQt6 required for core logic) by mocking
-the Qt signal emissions.
+These tests exercise the real ``ConversationContext`` persistence and a
+pure-Python stand-in that mirrors the session lifecycle contract without
+Qt. The stand-in is NOT the real ``ChatSessionManager``: real-manager
+lifecycle, signal and fault coverage lives in
+``tests/unit/ai/gui/test_chat_session_manager_lifecycle.py`` and ordering
+in ``tests/unit/ai/gui/test_chat_session_manager.py``.
 """
 
 from __future__ import annotations
