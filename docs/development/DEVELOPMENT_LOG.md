@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14337 · Document a Bounded Local-Only Grok Bot Simulation Caller Path
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14337
+- **Branch:** codex/14337-local-grok-simulation-relay-plan
+- **PR:** #14359
+- **Paths:** docs/agents/grok-simulation-relay.md
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`b385be55`; collated from changes/14337-grok-simulation-relay.md)
+- **Summary:** Document a bounded local-only Grok Bot simulation caller path
+- **Next step:** Merge the PR.
+
 ### DL-#14272 · Record Evidence-Based Deployment Boundary
 
 - **State:** in_review
@@ -232,12 +245,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13885
 - **Branch:** brick/issues-ud/13885-grip-margin-metric
-- **PR:** #14148, #14152
+- **PR:** #14148, #14152, #14347
 - **Paths:** see #14148
 - **Started:** 2026-10-31
-- **Last verified:** 2026-10-31 (`da728201`; collated from changes/13885-mujoco-mu-crit-calibration.md)
+- **Last verified:** 2026-11-02 (`be3b8bc5`; collated from changes/13885-grip-margin-swing-receipt.md)
 - **Summary:** Pure two-hand grip-margin metric: per-pad Coulomb margin, UNLOADED floor, slip events, grasp-map internal wrench and GripMarginReport
-- **Next step:** PR 3 scripted swing receipt with grip_force_limit_n
+- **Next step:** Merge after CI; closes scripted swing acceptance for #13885.
 
 ### DL-#12712 · NSX-83: Add the ClubheadSeries to RigidClubState Adapter and Constant-Twist Event Location Feeding the Shared Impact Outcome Map.
 
