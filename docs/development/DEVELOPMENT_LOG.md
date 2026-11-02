@@ -1197,6 +1197,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14263 · First-Run Onboarding Is a Non-Blocking Docked Panel Instead of a Full-Screen Modal, so Home Content Is Usable Immediately
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14263
+- **Branch:** merged via #14336
+- **PR:** #14336
+- **Paths:** see #14336
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`52a592cc`; collated from changes/14263-first-run-onboarding-is-a-non-blocking-d.md)
+- **Summary:** First-run onboarding is a non-blocking docked panel instead of a full-screen modal, so home content is usable immediately
+- **Next step:** Shipped in PR #14336.
+
 ### DL-#14256 · Non-JSON API Responses Raise a Typed ApiError and describeApiError Maps Them to Plain-Language Copy; Golf Simulator Shows 'Simulator API Not Reachable' With Retry and Explains Its Disabled Controls
 
 - **State:** shipped
