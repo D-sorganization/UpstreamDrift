@@ -291,6 +291,33 @@ def test_jaxsim_backend_dynamics_terms_have_expected_shapes_and_invariants() -> 
     assert coriolis.shape == (7, 7)
 
 
+def _backend_with_bias_api(bias_api: object) -> JaxSimBackend:
+    model_api = SimpleNamespace(
+        JaxSimModel=_FakeModelApi.JaxSimModel,
+        free_floating_mass_matrix=_FakeModelApi.free_floating_mass_matrix,
+        free_floating_bias_forces=bias_api,
+        free_floating_gravity_forces=_FakeModelApi.free_floating_gravity_forces,
+        free_floating_coriolis_matrix=_FakeModelApi.free_floating_coriolis_matrix,
+    )
+    backend = JaxSimBackend(
+        apis=make_mock_jaxsim_apis(
+            model_api=model_api,
+            data_api=_FakeDataApi,
+            frame_api=_FakeFrameApi,
+        )
+    )
+    backend.load_from_string("<sdf version='1.10'/>", extension="sdf")
+    return backend
+
+
+@pytest.mark.unit
+def test_jaxsim_backend_rejects_row_shaped_vector_output() -> None:
+    backend = _backend_with_bias_api(lambda *_: np.zeros((1, 7)))
+
+    with pytest.raises(ValueError, match="shape"):
+        backend.compute_bias_forces()
+
+
 def test_jaxsim_backend_inverse_dynamics_and_acceleration_decomposition() -> None:
     backend = _backend()
     qacc = np.arange(7, dtype=np.float64)

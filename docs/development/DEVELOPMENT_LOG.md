@@ -232,12 +232,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13174
 - **Branch:** claude/ud-13174-1
-- **PR:** #14035
+- **PR:** #14035, #14212
 - **Paths:** see #14035
 - **Started:** 2026-10-29
-- **Last verified:** 2026-10-29 (`6584e56c`; collated from changes/13174-v2-trunk-stills.md)
+- **Last verified:** 2026-11-02 (`99a4b0c5`; collated from changes/13174-attach-osmesa-mujoco-address-top-impact.md)
 - **Summary:** HRG-D3: render_golfer_realism_showcase --v2-spec renders labelled address/top/impact stills of the full-body-v2 trunk visuals; GL stills still need a GL host
-- **Next step:** Run the stills command on a GL host with MuJoCo and attach the three PNGs to the issue.
+- **Next step:** Merge PR; close #13174.
 
 ### DL-#14053 · Correct 6X6 Mobility Scaling by Multiplying Angular Rows by L
 

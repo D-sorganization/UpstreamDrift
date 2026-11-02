@@ -40,6 +40,42 @@
   --theme-link-hover: #024fa2;
   --theme-selection-bg: #b3d7ff;
   --theme-selection-text: #000000;
+
+  /* Sidekick aliases shared with the PyQt sidebar token contract. */
+  --sidekick-color-canvas: var(--theme-bg);
+  --sidekick-color-background: var(--theme-bg);
+  --sidekick-color-surface: var(--theme-group-bg);
+  --sidekick-color-surface-elevated: var(--theme-bg);
+  --sidekick-color-surface-raised: var(--theme-table-alt);
+  --sidekick-color-surface-muted: var(--theme-table-alt);
+  --sidekick-color-border: var(--theme-border);
+  --sidekick-color-border-strong: var(--theme-title-border);
+  --sidekick-color-text: var(--theme-text);
+  --sidekick-color-text-muted: var(--theme-text-secondary);
+  --sidekick-color-text-subtle: var(--theme-label);
+  --sidekick-color-accent: var(--theme-accent);
+  --sidekick-color-accent-hover: var(--theme-button-hover);
+  --sidekick-color-accent-soft: color-mix(in srgb, var(--theme-accent) 16%, transparent);
+  --sidekick-color-focus: var(--theme-focus);
+  --sidekick-color-selection: var(--theme-selection-bg);
+  --sidekick-color-selection-text: var(--theme-selection-text);
+  --sidekick-color-error: var(--theme-error);
+  --sidekick-color-danger: var(--theme-error);
+  --sidekick-color-warning: var(--theme-warning);
+  --sidekick-color-success: var(--theme-success);
+  --sidekick-color-info: var(--theme-info);
+  --sidekick-color-link: var(--theme-link);
+  --sidekick-color-link-hover: var(--theme-link-hover);
+  --sidekick-radius-lg: 8px;
+  --sidekick-radius-chat: 8px;
+  --sidekick-radius-md: 6px;
+  --sidekick-radius-control: 6px;
+  --sidekick-shadow-md: 0 12px 28px rgba(15, 23, 42, 0.14);
+  --sidekick-shadow-panel: var(--sidekick-shadow-md);
+  --sidekick-control-height: 28px;
+  --sidekick-size-control-height: var(--sidekick-control-height);
+  --sidekick-font-family: Arial;
+  --sidekick-font-size: 12px;
 }
 
 /* Dark mode automatic override (system preference fallback) */
