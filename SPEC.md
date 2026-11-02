@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14332 | Non-JSON API responses raise a typed ApiError and describeApiError maps them to plain-language copy; Golf Simulator shows 'Simulator API not reachable' with Retry and explains its disabled controls |
 | 2026-11-02 | #14331 | Wire dashboard Help and F1 to the global HelpPanel with focus-safe close and mobile layout |
 | 2026-11-02 | #14329 | Replace undefined Tailwind gray shades with supported palette utilities across the model explorer and workspace UI |
 | 2026-11-02 | #14327 | Keep the dashboard launch footer clear of the floating diagnostics badge: the footer reserves DIAGNOSTICS_BADGE_CLEARANCE and the badge is icon-only below md |
