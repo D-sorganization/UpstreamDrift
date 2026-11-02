@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14339 | Canonical-core estimation and comparison are marked planned: they leave home and the Results & Compare workspace, stay reachable from Developer & Research, and the desktop chip reads Planned instead of Ready |
 | 2026-11-02 | #14336 | First-run onboarding is a non-blocking docked panel instead of a full-screen modal, so home content is usable immediately |
 | 2026-11-02 | #14332 | Non-JSON API responses raise a typed ApiError and describeApiError maps them to plain-language copy; Golf Simulator shows 'Simulator API not reachable' with Retry and explains its disabled controls |
 | 2026-11-02 | #14331 | Wire dashboard Help and F1 to the global HelpPanel with focus-safe close and mobile layout |
