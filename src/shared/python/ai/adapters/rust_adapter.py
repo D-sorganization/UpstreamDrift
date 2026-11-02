@@ -327,7 +327,14 @@ class RustAgentAdapter(BaseAgentAdapter):
 
         # Spin the event loop until the worker is done; keeps the Qt UI
         # responsive (repaints, button clicks, etc.) while Rust blocks.
-        loop.exec()
+        try:
+            loop.exec()
+        finally:
+            # stream_finished fires before run() returns, so the thread may
+            # still be alive here; destroying a running QThread aborts the
+            # interpreter (#5951).
+            worker.stop()
+            worker.wait()
 
         if error_flag[0] is not None:
             try:

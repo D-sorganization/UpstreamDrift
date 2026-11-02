@@ -1,4 +1,4 @@
-{"schema_version": 2, "tools_pin": "0b5a1eba4175808c62b5ce192e2e206b6cb0f3c2", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
+{"schema_version": 2, "tools_pin": "5e85cc21fe0761d519a3cae6ac1504b78b1b1f96", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
 {"path": "README.md", "classification": "tools-only", "package": "README.md", "spelling_only": false}
 {"path": "README_PACKAGE.md", "classification": "ud-only", "package": "README_PACKAGE.md", "spelling_only": false}
 {"path": "__init__.py", "classification": "diverged", "package": "__init__.py", "spelling_only": false}
@@ -2709,7 +2709,7 @@
 {"path": "sidekick/theme/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/catppuccin_theme.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
-{"path": "sidekick/ui/design_tokens.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/ui/design_tokens.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/managers/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/managers/unit_preferences_manager.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/mixins/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
