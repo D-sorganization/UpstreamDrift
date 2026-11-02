@@ -1,0 +1,101 @@
+{
+  "candidate_engine": "opensim",
+  "cases": [
+    {
+      "determinate_errors": {
+        "net_force": {
+          "passes": true
+        },
+        "net_moment_com": {
+          "passes": false,
+          "peak_error": 0.05451,
+          "rms_error": 0.02512
+        }
+      },
+      "duration_s": 0.04,
+      "motion": "hold",
+      "source": "xfail_baseline",
+      "style": "overlap"
+    },
+    {
+      "determinate_errors": {
+        "net_force": {
+          "passes": true
+        },
+        "net_moment_com": {
+          "passes": false,
+          "peak_error": 0.05451,
+          "rms_error": 0.02512
+        }
+      },
+      "duration_s": 0.04,
+      "motion": "hold",
+      "source": "xfail_baseline",
+      "style": "interlock"
+    },
+    {
+      "determinate_errors": {
+        "net_force": {
+          "passes": true
+        },
+        "net_moment_com": {
+          "passes": false,
+          "peak_error": 0.00391,
+          "rms_error": 0.04059
+        }
+      },
+      "duration_s": 0.04,
+      "motion": "swing",
+      "source": "xfail_baseline",
+      "style": "overlap"
+    },
+    {
+      "determinate_errors": {
+        "net_force": {
+          "passes": true
+        },
+        "net_moment_com": {
+          "passes": false,
+          "peak_error": 0.00391,
+          "rms_error": 0.04059
+        }
+      },
+      "duration_s": 0.04,
+      "motion": "swing",
+      "source": "xfail_baseline",
+      "style": "interlock"
+    },
+    {
+      "determinate_errors": {
+        "net_force": {
+          "passes": true,
+          "peak_error": 0.00706,
+          "rms_error": 0.01011
+        },
+        "net_moment_com": {
+          "note": "RMS ~19.5 mN\u00b7m against ~0.475 N\u00b7m reference peak; net_force passes (#13548)",
+          "passes": false,
+          "peak_error": 0.02066,
+          "rms_error": 0.04104
+        }
+      },
+      "duration_s": 0.04,
+      "motion": "swing",
+      "source": "xfail_baseline",
+      "style": "ten_finger"
+    }
+  ],
+  "duration_s": 0.04,
+  "generated_by": "opensim_net_moment_diagnosis.py (xfail baseline; refresh on OpenSim lane)",
+  "hypothesis": "Since #13308 the Pinocchio reference uses the shared line-contact law; remaining OpenSim gaps on net_moment_com are friction and patch-torque mapping (tau_n = 0, surface lever), not the capsule law or net_force.",
+  "issue": 13560,
+  "opensim_available": false,
+  "peak_tolerance": 0.05,
+  "reference_engine": "pinocchio",
+  "repro": [
+    "PYTHONPATH=. python3 scripts/grip/opensim_net_moment_diagnosis.py",
+    "PYTHONPATH=. python3 scripts/grip/grip_style_parity_report.py --duration-s 0.04 --out /tmp/grip_parity",
+    "python3 -m pytest tests/unit/grip_contact/test_grip_style_parity_report.py -k 'opensim-overlap-hold' -m 'requires_opensim and slow' --timeout=600"
+  ],
+  "rms_tolerance": 0.02
+}
