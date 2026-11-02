@@ -154,7 +154,7 @@ function StatsPanel({ stats }: { stats: DatasetStats | null }) {
         >
           <div className="text-xs font-medium text-gray-300 mb-1">{col}</div>
           {colStats.mean != null ? (
-            <div className="grid grid-cols-3 gap-1 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 text-xs">
               <div>
                 <span className="text-gray-400">min</span>
                 <span className="text-gray-300 font-mono ml-1">

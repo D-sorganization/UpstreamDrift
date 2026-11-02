@@ -130,4 +130,14 @@ describe("GolfSimulatorPage", () => {
       expect(screen.getByTestId("status-badge")).toHaveTextContent("VISUALLY_VERIFIED");
     });
   });
+  it("keeps the console within the viewport at phone width (#14282)", async () => {
+    apiFetchMock.mockResolvedValueOnce({ destinations: [] });
+    render(<GolfSimulatorPage />);
+    const heading = await screen.findByRole("heading", { name: "Golf Simulator Console" });
+    expect(heading.parentElement).toHaveClass("w-full", "min-w-0", "max-w-4xl");
+    for (const control of ["Connect", "Stop", "Confirm Delivery"]) {
+      expect(screen.getByRole("button", { name: control }).parentElement).toHaveClass("flex-wrap");
+    }
+    expect(screen.getByLabelText("Operator Evidence")).toHaveClass("min-w-0");
+  });
 });

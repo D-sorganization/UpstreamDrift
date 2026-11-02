@@ -282,7 +282,7 @@ function ManualGolfSimulatorPage() {
 
   return (
     <WorkspaceShell>
-      <div className="space-y-6 max-w-4xl mx-auto p-4 text-gray-200">
+      <div className="space-y-6 w-full min-w-0 max-w-4xl mx-auto p-4 text-gray-200">
         <h1 className="text-xl font-bold">Golf Simulator Console</h1>
         {errorMsg && (
           <div role="alert" className="p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-sm">
@@ -292,7 +292,7 @@ function ManualGolfSimulatorPage() {
 
         {/* Header & Connection */}
         <section className="bg-gray-800 p-4 rounded-lg border border-gray-700 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 min-w-0">
             <label htmlFor="destination-select" className="text-sm font-medium">
               Destination:
             </label>
@@ -302,7 +302,7 @@ function ManualGolfSimulatorPage() {
               disabled={isArmed}
               value={selectedDest}
               onChange={(e) => setSelectedDest(e.target.value)}
-              className="bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              className="min-w-0 max-w-full bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
             >
               {destinations.length === 0 ? (
                 <>
@@ -405,7 +405,7 @@ function ManualGolfSimulatorPage() {
         {/* Monotonic Replay Transport */}
         <section className="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
           <h2 className="text-sm font-semibold text-gray-300">Replay Transport</h2>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => handleReplayAction("play")}
               disabled={sessionState === "DISCONNECTED"}
@@ -427,7 +427,7 @@ function ManualGolfSimulatorPage() {
             >
               Stop
             </button>
-            <span className="text-sm font-mono text-gray-400 ml-4">
+            <span className="text-sm font-mono text-gray-400 sm:ml-4">
               State: <span className="text-gray-200">{replayState}</span> | Time:{" "}
               <span className="text-gray-200">{replayTimeS.toFixed(2)}s</span>
             </span>
@@ -437,7 +437,7 @@ function ManualGolfSimulatorPage() {
         {/* Delivery Reconciliation / Uncertainty Recovery */}
         <section className="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
           <h2 className="text-sm font-semibold text-gray-300">Delivery Uncertainty Recovery</h2>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <input
               type="text"
               aria-label="Operator Evidence"
@@ -445,7 +445,7 @@ function ManualGolfSimulatorPage() {
               value={operatorEvidence}
               onChange={(e) => setOperatorEvidence(e.target.value)}
               disabled={!isUncertain}
-              className="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm disabled:opacity-40 focus:outline-none focus:border-blue-500"
+              className="flex-1 min-w-0 bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm disabled:opacity-40 focus:outline-none focus:border-blue-500"
             />
             <button
               onClick={handleReconcile}
