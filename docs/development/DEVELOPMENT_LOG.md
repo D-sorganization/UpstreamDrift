@@ -1197,6 +1197,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14256 · Non-JSON API Responses Raise a Typed ApiError and describeApiError Maps Them to Plain-Language Copy; Golf Simulator Shows 'Simulator API Not Reachable' With Retry and Explains Its Disabled Controls
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14256
+- **Branch:** merged via #14332
+- **PR:** #14332
+- **Paths:** see #14332
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`f575ace5`; collated from changes/14256-non-json-api-responses-raise-a-typed-api.md)
+- **Summary:** Non-JSON API responses raise a typed ApiError and describeApiError maps them to plain-language copy; Golf Simulator shows 'Simulator API not reachable' with Retry and explains its disabled controls
+- **Next step:** Shipped in PR #14332.
+
 ### DL-#14255 · Keep the Dashboard Launch Footer Clear of the Floating Diagnostics Badge: The Footer Reserves DIAGNOSTICS_BADGE_CLEARANCE and the Badge Is Icon-Only Below Md
 
 - **State:** shipped
