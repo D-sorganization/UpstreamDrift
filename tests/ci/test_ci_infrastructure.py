@@ -155,10 +155,12 @@ def test_mobile_browser_runner_selection_preserves_hosted_and_local_policy(
     change_check = next(
         step for step in frontend["steps"] if step.get("id") == "frontend-changes"
     )
+    output = tmp_path / "output"
     for event in ("push", "merge_group"):
+        output.unlink(missing_ok=True)
         script = change_check["run"].replace("${{ github.event_name }}", event)
         subprocess.run([bash, "-e", "-c", script], check=True, cwd=tmp_path, env=env)
-        assert "skip=false" in (tmp_path / "output").read_text()
+        assert output.read_text().splitlines() == ["skip=false"]
     for value, succeeds in (
         ("true", True),
         ("false", True),
@@ -175,25 +177,47 @@ def test_mobile_browser_runner_selection_preserves_hosted_and_local_policy(
 
 
 @pytest.mark.parametrize(
-    ("mode", "fail_launch", "expected", "succeeds"),
+    ("mode", "fail_launch", "fail_install", "expected", "succeeds"),
     [
-        ("hosted", "false", "npx playwright install --with-deps chromium", True),
-        ("local", "false", "npx playwright install chromium", True),
+        (
+            "hosted",
+            "false",
+            "false",
+            "npx playwright install --with-deps chromium",
+            True,
+        ),
+        ("local", "false", "false", "npx playwright install chromium", True),
         (
             "local",
             "true",
+            "false",
             "Chromium cannot launch with the installed self-hosted system libraries",
             False,
         ),
+        (
+            "hosted",
+            "false",
+            "true",
+            "npx playwright install --with-deps chromium",
+            False,
+        ),
+        ("local", "false", "true", "npx playwright install chromium", False),
     ],
     ids=[
         "hosted-installs-system-deps",
         "local-never-installs-system-deps",
         "local-launch-fails-closed",
+        "hosted-install-fails-closed",
+        "local-install-fails-closed",
     ],
 )
 def test_mobile_browser_install_step_behavior(
-    tmp_path: Path, mode: str, fail_launch: str, expected: str, succeeds: bool
+    tmp_path: Path,
+    mode: str,
+    fail_launch: str,
+    fail_install: str,
+    expected: str,
+    succeeds: bool,
 ) -> None:
     workflow = yaml.safe_load(
         (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
@@ -209,7 +233,7 @@ def test_mobile_browser_install_step_behavior(
     run = step["run"].replace("${{ needs.pick-runner.outputs.mode }}", mode)
     harness = (
         """
-npx() { printf 'npx %s\\n' "$*" >> "$CALL_LOG"; }
+npx() { printf 'npx %s\\n' "$*" >> "$CALL_LOG"; [ "$INSTALL_FAIL" != true ]; }
 node() {
   printf 'node %s\\n' "$*" >> "$CALL_LOG"
   case "$*" in
@@ -226,6 +250,7 @@ node() {
         "GITHUB_ENV": _bash_path(tmp_path / "github-env"),
         "RUNNER_TEMP": _bash_path(tmp_path),
         "LAUNCH_FAIL": fail_launch,
+        "INSTALL_FAIL": fail_install,
     }
     result = subprocess.run(
         [bash, "-e", "-c", harness],
@@ -237,7 +262,9 @@ node() {
     assert (result.returncode == 0) is succeeds
     log = (tmp_path / "calls").read_text()
     assert expected in (result.stderr + result.stdout + log)
-    if mode == "local":
+    if fail_install == "true":
+        assert "node " not in log
+    elif mode == "local":
         assert "--with-deps" not in log
         assert "chromium.launch()" in log
     else:
