@@ -86,15 +86,18 @@ def pad_wrenches_by_role(
             "ContactRun must include hand_states and club_states from the recorder"
         )
     roles: dict[str, list[PadWrench]] = {"lead": [], "trail": []}
-    n = run.series.time_s.size
-    for i in range(n):
+    series = run.series
+    frame_count = series.time_s.size
+    hand_states = run.hand_states
+    club_states = run.club_states
+    for i in range(frame_count):
         for side in SIDES:
             role = _role_for_side(spec, side)
             side_w = topology_side_wrench(
                 model,
                 side,
-                run.hand_states[side][i],
-                run.club_states[side][i],
+                hand_states[side][i],
+                club_states[side][i],
             )
             roles[role].append(
                 PadWrench(
@@ -113,8 +116,9 @@ def club_acceleration_m_s2(run: ContactRun, club_mass_kg: float) -> np.ndarray:
         raise ValueError(
             f"club_mass_kg must be positive and finite, got {club_mass_kg}"
         )
-    force_l = np.asarray(run.series.force_on_club_n["L"], float)
-    force_r = np.asarray(run.series.force_on_club_n["R"], float)
+    series = run.series
+    force_l = np.asarray(series.force_on_club_n["L"], float)
+    force_r = np.asarray(series.force_on_club_n["R"], float)
     return (force_l + force_r) / club_mass_kg
 
 
@@ -124,7 +128,8 @@ def pad_tangential_speed_m_s(
     model: TopologyContactModel,
 ) -> np.ndarray:
     """``(frames, pads)`` slip-speed proxy from roll and axial slip rates."""
-    time_s = run.series.time_s
+    series = run.series
+    time_s = series.time_s
     columns: list[np.ndarray] = []
     for role in ("lead", "trail"):
         side = (
@@ -148,9 +153,11 @@ def pad_tangential_speed_m_s(
 def peak_hand_force_n(run: ContactRun, spec: Mapping[str, Any]) -> dict[str, float]:
     """Peak per-hand force magnitude (N) keyed by lead/trail."""
     peaks: dict[str, float] = {}
+    series = run.series
+    forces = series.force_on_club_n
     for side in SIDES:
         role = _role_for_side(spec, side)
-        force = np.asarray(run.series.force_on_club_n[side], float)
+        force = np.asarray(forces[side], float)
         peaks[role] = float(np.max(np.linalg.norm(force, axis=1)))
     return peaks
 
@@ -187,7 +194,8 @@ def grip_margin_from_contact_run(
     assert_grip_force_limits(
         run, spec, cfg.lead_grip_force_limit_n, cfg.trail_grip_force_limit_n
     )
-    dt_s = float(np.mean(np.diff(run.series.time_s)))
+    series = run.series
+    dt_s = float(np.mean(np.diff(series.time_s)))
     club_mass = ClubDynamics.from_spec(spec).mass_kg
     return grip_margin_report(
         pad_wrenches_by_role(run, model, spec),
