@@ -8,6 +8,10 @@
  *
  * Dismissal is persisted through the onboardingPersistence adapter
  * (localStorage today; server-side settings arrive with #7457).
+ *
+ * Non-blocking (#14263): it renders as a compact panel above the launch
+ * footer, not a full-screen modal, so first run shows the home content
+ * immediately and the page stays usable while the panel is open.
  */
 
 import { useEffect, useState } from 'react';
@@ -50,60 +54,48 @@ export function OnboardingOverlay() {
   if (!visible || !copy) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      role="presentation"
+    <section
+      aria-label={copy.header}
+      className="fixed bottom-28 left-4 right-4 z-40 flex max-h-[50vh] flex-col rounded-xl border border-gray-700 bg-gray-900/95 p-4 shadow-2xl backdrop-blur-sm sm:right-auto sm:max-w-md"
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={copy.header}
-        className="w-full max-w-2xl rounded-xl border border-gray-700 bg-gray-900 p-8 shadow-2xl"
-      >
-        <h2 className="text-center text-2xl font-bold text-white">{copy.header}</h2>
-        <p className="mt-1 text-center text-sm text-gray-400">{copy.subtitle}</p>
+      <h2 className="text-base font-bold text-white">{copy.header}</h2>
+      <p className="text-xs text-gray-400">{copy.subtitle}</p>
 
-        <hr className="my-5 border-gray-700" />
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          {copy.cards.map((card) => (
-            <div
-              key={card.id ?? card.title}
-              className="flex flex-col gap-2 rounded-lg border border-gray-700/60 bg-gray-800/50 p-4"
+      <ul className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto">
+        {copy.cards.map((card) => (
+          <li key={card.id ?? card.title} className="rounded-lg border border-gray-700/60 bg-gray-800/50 p-2">
+            <h3 className="text-sm font-semibold text-white">{card.title}</h3>
+            <p className="text-xs leading-relaxed text-gray-400">{card.body}</p>
+            <a
+              href={card.link_url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-blue-300 hover:text-blue-200 hover:underline"
             >
-              <h3 className="text-sm font-bold text-white">{card.title}</h3>
-              <p className="flex-1 text-xs leading-relaxed text-gray-400">{card.body}</p>
-              <a
-                href={card.link_url}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-blue-300 hover:text-blue-200 hover:underline"
-              >
-                <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                {card.link_text}
-              </a>
-            </div>
-          ))}
-        </div>
+              <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              {card.link_text}
+            </a>
+          </li>
+        ))}
+      </ul>
 
-        <div className="mt-6 flex items-center justify-between gap-4">
-          <label className="flex items-center gap-2 text-sm text-gray-400">
-            <input
-              type="checkbox"
-              checked={dontShowAgain}
-              onChange={(e) => setDontShowAgain(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-600 bg-gray-800"
-            />
-            Don't show this welcome message again
-          </label>
-          <button
-            onClick={handleClose}
-            className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            Get Started
-          </button>
-        </div>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <label className="flex items-center gap-2 text-xs text-gray-400">
+          <input
+            type="checkbox"
+            checked={dontShowAgain}
+            onChange={(e) => setDontShowAgain(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-600 bg-gray-800"
+          />
+          Don't show this welcome message again
+        </label>
+        <button
+          onClick={handleClose}
+          className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          Get Started
+        </button>
       </div>
-    </div>
+    </section>
   );
 }
