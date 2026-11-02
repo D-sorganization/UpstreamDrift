@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14257 · Wire Dashboard Help and F1 to the Global HelpPanel With Focus-Safe Close and Mobile Layout
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14257
+- **Branch:** codex/dashboard-help-panel-14257-20261102
+- **PR:** #14331
+- **Paths:** see #14331
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`7e37e215`; collated from changes/14257-dashboard-help-panel.md)
+- **Summary:** Wire dashboard Help and F1 to the global HelpPanel with focus-safe close and mobile layout
+- **Next step:** Finish the focused UI checks, open the linked PR, and verify protected CI
+
 ### DL-#14253 · Replace Undefined Tailwind Gray Shades With Supported Palette Utilities Across the Model Explorer and Workspace UI
 
 - **State:** in_review
