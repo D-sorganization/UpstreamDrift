@@ -65,6 +65,7 @@ def test_numpy_compatibility() -> None:
     assert np.shares_memory(qpos, data.qpos)
 
 
+@pytest.mark.unit
 def test_rendering_api_symbols_present() -> None:
     """Import-only probe: the rendering API symbols exist.
 
