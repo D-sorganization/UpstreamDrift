@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14343 | Gate JaxSim/Pinocchio free-body parity on strict engine outputs and a rotated inertial oracle |
+| 2026-11-02 | #14342 | Workspace cards show authored tool names and one-line summaries instead of a template sentence, and both card actions share one primary button style labeled Open or Open in Window. |
+| 2026-11-02 | #14344 | Web launcher resolves models.yaml logo paths and hides ROC tile when bundle absent. |
 | 2026-11-02 | #14212 | Attach OSMesa MuJoCo address/top/impact trunk still evidence and receipt for HRG-D3 (#13174). |
 | 2026-11-02 | #14339 | Canonical-core estimation and comparison are marked planned: they leave home and the Results & Compare workspace, stay reachable from Developer & Research, and the desktop chip reads Planned instead of Ready |
 | 2026-11-02 | #14336 | First-run onboarding is a non-blocking docked panel instead of a full-screen modal, so home content is usable immediately |
