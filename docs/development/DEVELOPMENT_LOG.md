@@ -1145,6 +1145,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14310 · Stop the Deprecated-DynamicsProvider Scan From Timing Out and Killing an Xdist Worker: Only Files Containing the Name Are Parsed (42.8s to 2.3s).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14310
+- **Branch:** merged via #14313
+- **PR:** #14313
+- **Paths:** see #14313
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`e928a82f`; collated from changes/14310-stop-the-deprecated-dynamicsprovider-sca.md)
+- **Summary:** Stop the deprecated-DynamicsProvider scan from timing out and killing an xdist worker: only files containing the name are parsed (42.8s to 2.3s).
+- **Next step:** Shipped in PR #14313.
+
+### DL-#14309 · Conflict Disarm Now Calls the Public Fleet-Workflows Reusable Workflow Pinned to 367B182c Instead of an Inlined Sweep; Dry_Run and the PR 12634 Exclusion Are Unchanged, and a Contract Test Guards the Uses: Ref and the Full-SHA Pin
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14309
+- **Branch:** merged via #14312
+- **PR:** #14312
+- **Paths:** see #14312
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`fd844a1c`; collated from changes/14309-conflict-disarm-now-calls-the-public-fle.md)
+- **Summary:** Conflict Disarm now calls the public fleet-workflows reusable workflow pinned to 367b182c instead of an inlined sweep; dry_run and the PR 12634 exclusion are unchanged, and a contract test guards the uses: ref and the full-SHA pin
+- **Next step:** Shipped in PR #14312.
+
 ### DL-#14279 · Simulation, Model Explorer and Character Builder Move Onto WorkspaceShell: Below Lg the 3D View Fills the Width and Side Panels Open as Drawers From 44Px Toggles; the Scene3D View Toolbar Wraps on Phones
 
 - **State:** shipped
