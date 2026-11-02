@@ -1249,6 +1249,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14260 · Shared ToolShell With Persistent Navigation, Breadcrumb, and Actions Slot for Tool Pages
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14260
+- **Branch:** merged via #14352
+- **PR:** #14352
+- **Paths:** see #14352
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`91b0731c`; collated from changes/14260-shared-toolshell-with-persistent-navigat.md)
+- **Summary:** Shared ToolShell with persistent navigation, breadcrumb, and actions slot for tool pages
+- **Next step:** Shipped in PR #14352.
+
 ### DL-#14265 · Delete Drifted Local Themes.Json Copy and Consume Tools Theme Catalog With Legacy Id Migration
 
 - **State:** shipped
