@@ -1249,16 +1249,29 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14267 · Adapt Controls for Touch and Small Screens
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14267
+- **Branch:** agy/14267-adapt-controls-touch-mobile
+- **PR:** #14364
+- **Paths:** ui/src/index.css,ui/src/components/ui/touchTarget.test.tsx
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`6f70ba78`; collated from changes/14267-adapt-controls-for-touch-and-small-scree.md)
+- **Summary:** Adapt controls for touch and small screens
+- **Next step:** Shipped in PR #14364.
+
 ### DL-#13764 · Cross-Engine Hand Mass and Length Consistency Test (HRG-HX7 Slice 1): MuJoCo, Drake, Pinocchio and OpenSim Hand Body Masses Match the Separated-Hand Spec; Visual-Only Hand Length Is Measured Where Exported and Reported Elsewhere
 
 - **State:** shipped
 - **Owner:** unassigned
 - **Issue:** #13764
 - **Branch:** merged via #14358
-- **PR:** #14358
+- **PR:** #14358, #14367
 - **Paths:** see #14358
 - **Started:** 2026-11-02
-- **Last verified:** 2026-11-02 (`227d942f`; collated from changes/13764-cross-engine-hand-mass-and-length-consis.md)
+- **Last verified:** 2026-11-02 (`ad434661`; collated from changes/13764-cross-engine-hand-frame-test-hrg-hx7-sli.md)
 - **Summary:** Cross-engine hand mass and length consistency test (HRG-HX7 slice 1): MuJoCo, Drake, Pinocchio and OpenSim hand body masses match the separated-hand spec; visual-only hand length is measured where exported and reported elsewhere
 - **Next step:** Shipped in PR #14358.
 
