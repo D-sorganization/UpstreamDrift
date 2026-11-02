@@ -1145,6 +1145,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14289 · Pinned Offline Embedding Tests Fail on Bad Retrieval and Unexpected Initialization
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14289
+- **Branch:** merged via #14311
+- **PR:** #14311
+- **Paths:** see #14311
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`9ebf7a40`; collated from changes/14289-pinned-offline-local-embedding-tests.md)
+- **Summary:** Pinned offline embedding tests fail on bad retrieval and unexpected initialization
+- **Next step:** Shipped in PR #14311.
+
 ### DL-#14280 · Dashboard Header Wraps With Icon-Only Actions Below Md and the Task Workspaces Links Wrap Instead of Clipping, so Every Action Is Reachable at 390 And 768
 
 - **State:** shipped
