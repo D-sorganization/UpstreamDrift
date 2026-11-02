@@ -82,7 +82,7 @@ function NavButton({
                 onClick?.();
             }}
             aria-label={label}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="touch-target flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
             <Icon className="w-5 h-5" aria-hidden={true} />
             <span className="text-sm font-medium hidden md:inline">{label}</span>
@@ -136,7 +136,7 @@ function WebReachabilityBadge({ action }: { action: TileLaunchAction }) {
     return (
         <span
             title={action.reason}
-            className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border bg-gray-600/30 text-gray-300 border-gray-500/50"
+            className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border bg-gray-600/30 text-gray-300 border-gray-500/50"
         >
             <Monitor className="w-3 h-3" aria-hidden="true" />
             {action.badge}
@@ -210,7 +210,7 @@ function TileCard({
             </p>
 
             {/* Status chip */}
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${status.color}`}>
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${status.color}`}>
                 <CategoryIcon category={tile.category} />
                 {status.label}
             </span>
@@ -224,13 +224,13 @@ function TileCard({
                 {tile.capabilities.slice(0, 3).map((cap) => (
                     <span
                         key={cap}
-                        className="px-1.5 py-0.5 bg-gray-700/80 text-gray-400 text-[9px] rounded"
+                        className="px-1.5 py-0.5 bg-gray-700/80 text-gray-400 text-xs rounded"
                     >
                         {cap.replace(/_/g, ' ')}
                     </span>
                 ))}
                 {tile.capabilities.length > 3 && (
-                    <span className="px-1.5 py-0.5 text-gray-400 text-[9px]">
+                    <span className="px-1.5 py-0.5 text-gray-400 text-xs">
                         +{tile.capabilities.length - 3}
                     </span>
                 )}
@@ -402,7 +402,7 @@ export function LauncherDashboard({
                     <a
                         href="/capability-atlas/index.html"
                         aria-label="Capability Map"
-                        className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="touch-target flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
                     >
                         <ExternalLink className="w-5 h-5" aria-hidden="true" />
                         <span className="text-sm font-medium hidden md:inline">Capability Map</span>
@@ -411,7 +411,7 @@ export function LauncherDashboard({
                         id="help-button"
                         onClick={onShowHelp}
                         aria-label="Help"
-                        className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="touch-target flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
                     >
                         <HelpCircle className="w-5 h-5" aria-hidden="true" />
                         <span className="text-sm font-medium hidden md:inline">Help</span>
@@ -424,40 +424,40 @@ export function LauncherDashboard({
                 aria-label="Task Workspaces"
                 className="flex flex-wrap items-center gap-2 px-4 md:px-6 py-2.5 bg-gray-800/40 border-b border-gray-700/50 text-xs flex-shrink-0"
             >
-                <span className="font-semibold text-gray-400 uppercase tracking-wider text-[11px] mr-1">Workspaces:</span>
+                <span className="font-semibold text-gray-400 uppercase tracking-wider text-xs mr-1">Workspaces:</span>
                 <NavLink
                     to="/workspaces/capture-analyze"
-                    className="px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
+                    className="touch-target inline-flex items-center px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
                 >
                     Capture & Analyze
                 </NavLink>
                 <NavLink
                     to="/workspaces/model-match"
-                    className="px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
+                    className="touch-target inline-flex items-center px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
                 >
                     Model & Match
                 </NavLink>
                 <NavLink
                     to="/workspaces/shot-course-lab"
-                    className="px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
+                    className="touch-target inline-flex items-center px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
                 >
                     Shot & Course Lab
                 </NavLink>
                 <NavLink
                     to="/workspaces/optimize-train"
-                    className="px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
+                    className="touch-target inline-flex items-center px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
                 >
                     Optimize & Train
                 </NavLink>
                 <NavLink
                     to="/workspaces/results-compare"
-                    className="px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
+                    className="touch-target inline-flex items-center px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
                 >
                     Results & Compare
                 </NavLink>
                 <NavLink
                     to="/workspaces/dev-research"
-                    className="px-2.5 py-1 rounded bg-gray-700/30 hover:bg-gray-700/50 text-gray-300 border border-gray-600/30 whitespace-nowrap transition-colors"
+                    className="touch-target inline-flex items-center px-2.5 py-1 rounded bg-gray-700/30 hover:bg-gray-700/50 text-gray-300 border border-gray-600/30 whitespace-nowrap transition-colors"
                 >
                     Developer & Research
                 </NavLink>

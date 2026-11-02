@@ -406,7 +406,7 @@ export function SimulationPage() {
               onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
               className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
-            <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+            <div className="flex justify-between text-xs text-gray-400 mt-1">
               <span>0.1x</span>
               <span>1.0x (Real-time)</span>
               <span>5.0x</span>

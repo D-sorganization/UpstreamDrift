@@ -143,7 +143,7 @@ export function RecordingsPanel({ isRunning = false }: RecordingsPanelProps) {
                     <p className="text-xs text-gray-200 font-mono truncate" title={rec.id}>
                       {rec.id}
                     </p>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-xs text-gray-400">
                       {rec.engine ?? 'unknown engine'} · {rec.frames} frames
                       {rec.duration != null ? ` · ${rec.duration.toFixed(2)}s` : ''}
                     </p>
@@ -165,7 +165,7 @@ export function RecordingsPanel({ isRunning = false }: RecordingsPanelProps) {
                       href={recordingExportUrl(rec.id, key)}
                       download={`${rec.id}${info.extension}`}
                       aria-label={`Download ${rec.id} as ${info.name}`}
-                      className="px-2 py-0.5 text-[10px] rounded bg-gray-600 text-gray-200 hover:bg-gray-500"
+                      className="px-2 py-0.5 text-xs rounded bg-gray-600 text-gray-200 hover:bg-gray-500"
                     >
                       {info.name}
                     </a>

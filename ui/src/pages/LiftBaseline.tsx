@@ -173,7 +173,7 @@ function ComparisonsSection({ comparisons }: { comparisons: LiftView['comparison
                         return (
                           <td key={metric} className="px-2 py-1" title={m.reason ?? undefined}>
                             <span
-                              className={`px-1.5 py-0.5 rounded text-[10px] ${statusBadgeClass(m.status)}`}
+                              className={`px-1.5 py-0.5 rounded text-xs ${statusBadgeClass(m.status)}`}
                             >
                               {formatMeasurement(m, 3, 'm')} · {m.status}
                             </span>
@@ -203,23 +203,23 @@ function GapsList({ gaps }: { gaps: GapEntry[] }) {
           <div className="flex items-start justify-between gap-2">
             <h4 className="text-sm font-medium text-white">{gap.title}</h4>
             {gap.new_issue && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-700 text-amber-50">
+              <span className="text-xs px-1.5 py-0.5 rounded bg-amber-700 text-amber-50">
                 new
               </span>
             )}
           </div>
-          <p className="text-[11px] text-gray-400 mt-1">
+          <p className="text-xs text-gray-400 mt-1">
             {gap.key} · engines: {gap.engines.join(', ')} · {gap.lift_story}
           </p>
           {gap.evidence.length > 0 && (
-            <ul className="text-[11px] text-gray-300 mt-1 space-y-0.5">
+            <ul className="text-xs text-gray-300 mt-1 space-y-0.5">
               {gap.evidence.map((item, idx) => (
                 <li key={`${gap.key}-evidence-${idx}`}>• {item}</li>
               ))}
             </ul>
           )}
           {gap.issues.length > 0 && (
-            <p className="text-[11px] text-gray-400 mt-1">{gap.issues.join(', ')}</p>
+            <p className="text-xs text-gray-400 mt-1">{gap.issues.join(', ')}</p>
           )}
         </li>
       ))}

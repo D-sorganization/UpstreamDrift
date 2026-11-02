@@ -631,7 +631,7 @@ export function BallFlightPage() {
                     {r.coefficients &&
                       Object.keys(r.coefficients).length > 0 && (
                         <div
-                          className="text-[10px] text-gray-400 mt-0.5 font-mono"
+                          className="text-xs text-gray-400 mt-0.5 font-mono"
                           data-testid={`coefficients-${r.model_key}`}
                         >
                           {Object.entries(r.coefficients)

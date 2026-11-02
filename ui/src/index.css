@@ -1,6 +1,45 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+/* Touch targets (#14281): 44px minimum hit area on coarse pointers only, so
+ * mouse layouts are unchanged. The shared Button/Input/Select primitives apply
+ * the utility; the base rule below covers hand-rolled native controls. */
+@utility touch-target {
+  @media (pointer: coarse) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Coarse-pointer base (#14281): utilities still win, so a page can opt a
+ * control out with an explicit min-h-* class. Checkboxes and radios stay
+ * compact; the label that wraps them becomes the 44px hit area. */
+@layer base {
+  @media (pointer: coarse) {
+    button,
+    [role='button'],
+    [role='tab'],
+    select,
+    input:where(:not([type='checkbox'], [type='radio'], [type='hidden'], [type='file'])) {
+      min-height: 44px;
+    }
+    button,
+    [role='button'],
+    [role='tab'] {
+      min-width: 44px;
+    }
+    input:where([type='checkbox'], [type='radio']) {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+    label:has(> input:where([type='checkbox'], [type='radio'])) {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+}
+
 /* Typography scale (#7422): one enforced set of heading/label classes so
  * identical-rank headings look the same on every page and screen-reader
  * navigation has a consistent hierarchy. Plain CSS (not @apply) for

@@ -122,9 +122,9 @@ function HoselPositionControl() {
           }}
           title="Shaft attachment"
         />
-        <span className="absolute bottom-1 left-2 text-[10px]">Heel</span>
-        <span className="absolute bottom-1 right-2 text-[10px]">Toe</span>
-        <span className="absolute left-1 top-1 text-[10px]">Forward</span>
+        <span className="absolute bottom-1 left-2 text-xs">Heel</span>
+        <span className="absolute bottom-1 right-2 text-xs">Toe</span>
+        <span className="absolute left-1 top-1 text-xs">Forward</span>
       </div>
       <RangeControl
         label="Hosel Heel to Toe"

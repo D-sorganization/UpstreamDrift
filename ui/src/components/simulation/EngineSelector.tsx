@@ -151,7 +151,7 @@ export function EngineSelector({
                     {engine.capabilities.map((cap) => (
                       <span
                         key={cap}
-                        className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-600/50 text-gray-300 border border-gray-500/30"
+                        className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-600/50 text-gray-300 border border-gray-500/30"
                         title={cap.replace(/_/g, ' ')}
                       >
                         {cap.replace(/_/g, ' ')}
@@ -169,7 +169,7 @@ export function EngineSelector({
                 {isLoaded || isUnloading ? (
                   isConfirming ? (
                     <div className="flex items-center gap-1" role="group" aria-label="Confirm unload">
-                      <span className="text-[10px] text-gray-300 mr-1">Unload?</span>
+                      <span className="text-xs text-gray-300 mr-1">Unload?</span>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

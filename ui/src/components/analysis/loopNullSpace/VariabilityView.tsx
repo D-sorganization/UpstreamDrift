@@ -51,7 +51,7 @@ function Kernel({ s }: { s: SensitivityPanels }) {
       {!k.shown ? (
         <Why text={k.reason} />
       ) : (
-        <table className="text-[10px] text-gray-300 w-full">
+        <table className="text-xs text-gray-300 w-full">
           <caption className="text-left text-gray-200">
             {k.outcome} ({k.units}) per input;{' '}
             {k.is_band ? 'family band (lower..upper)' : 'allocation-invariant kernel'}
@@ -91,7 +91,7 @@ function Budget({ s }: { s: SensitivityPanels }) {
       {!b.shown ? (
         <Why text={b.reason} />
       ) : (
-        <table className="text-[10px] text-gray-300 w-full">
+        <table className="text-xs text-gray-300 w-full">
           <caption className="text-left text-gray-200">
             {b.outcome} variance ({b.units}) by input class
           </caption>
@@ -150,7 +150,7 @@ function Pareto({ s }: { s: SensitivityPanels }) {
         Mode: {p.mode}; ranking basis: {p.ranking_basis}
         {p.winner ? `; winner: ${p.winner}` : ''}
       </p>
-      <table className="text-[10px] text-gray-300 w-full">
+      <table className="text-xs text-gray-300 w-full">
         <thead>
           <tr className="text-left text-gray-400">
             <th scope="col">Arm</th>
@@ -179,7 +179,7 @@ function Pareto({ s }: { s: SensitivityPanels }) {
           ))}
         </tbody>
       </table>
-      <ul className="text-[11px] text-gray-400 list-disc pl-4">
+      <ul className="text-xs text-gray-400 list-disc pl-4">
         {p.fronts.map((f) => (
           <li key={f.name}>
             Front {f.name}: {f.labels.join(', ') || 'none'} (withheld: {f.withheld_count})
@@ -223,7 +223,7 @@ function Dispersion({ s }: { s: SensitivityPanels }) {
   const entries = [d.linear, ...d.arms].filter((e): e is DispersionEntry => e !== null);
   return (
     <>
-      <table className="text-[10px] text-gray-300 w-full">
+      <table className="text-xs text-gray-300 w-full">
         <caption className="text-left text-gray-200">
           {d.outcome} standard deviation ({d.units})
         </caption>
@@ -284,7 +284,7 @@ export function VariabilityView({ sensitivity: s }: { sensitivity: SensitivityPa
       )}
       <ul
         data-testid="nsx-var-non-claims"
-        className="text-[11px] text-gray-400 list-disc pl-4 mb-3"
+        className="text-xs text-gray-400 list-disc pl-4 mb-3"
       >
         {s.non_claims.map((c) => (
           <li key={c}>{c}</li>

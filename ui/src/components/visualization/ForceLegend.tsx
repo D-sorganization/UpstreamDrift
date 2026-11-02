@@ -42,14 +42,14 @@ export function ForceLegend({ glyphs, className = '' }: ForceLegendProps) {
     >
       <div className="flex items-center justify-between border-b border-white/10 pb-1 font-semibold text-gray-300">
         <span>Force & Torque Legend</span>
-        <span className="text-[10px] text-gray-400 uppercase font-mono">
+        <span className="text-xs text-gray-400 uppercase font-mono">
           {legend.engine}
         </span>
       </div>
 
       {/* Reference Scales */}
       {(hasForceRef || hasTorqueRef) && (
-        <div className="space-y-1 font-mono text-[11px] text-gray-300">
+        <div className="space-y-1 font-mono text-xs text-gray-300">
           {hasForceRef && (
             <div className="flex items-center justify-between gap-4">
               <span className="text-gray-400">Force Ref:</span>
@@ -74,7 +74,7 @@ export function ForceLegend({ glyphs, className = '' }: ForceLegendProps) {
       {/* Kind Swatches */}
       {legend.kinds_present?.length > 0 && (
         <div className="space-y-1 pt-1 border-t border-white/5">
-          <div className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">
+          <div className="text-xs uppercase tracking-wider text-gray-400 font-semibold">
             Kinds
           </div>
           <div className="grid grid-cols-1 gap-1">
@@ -99,7 +99,7 @@ export function ForceLegend({ glyphs, className = '' }: ForceLegendProps) {
 
       {/* Grip split (GCV-10): per-hand shades and the method behind the split */}
       {legend.grip_split_method && (
-        <div className="pt-1 border-t border-white/5 text-[11px] space-y-1" data-testid="grip-legend">
+        <div className="pt-1 border-t border-white/5 text-xs space-y-1" data-testid="grip-legend">
           <div>
             <span className="text-gray-400">Grip split: </span>
             <span className="font-mono text-sky-300" data-testid="grip-legend-split">
@@ -116,7 +116,7 @@ export function ForceLegend({ glyphs, className = '' }: ForceLegendProps) {
 
       {/* Unavailable Channels */}
       {legend.unavailable_labels?.length > 0 && (
-        <div className="pt-1 border-t border-white/5 text-[11px]">
+        <div className="pt-1 border-t border-white/5 text-xs">
           <span className="text-amber-400/80 font-medium">Unavailable: </span>
           <span className="text-gray-400 font-mono">
             {legend.unavailable_labels.join(', ')}
@@ -126,7 +126,7 @@ export function ForceLegend({ glyphs, className = '' }: ForceLegendProps) {
 
       {/* Source labels */}
       {legend.source_labels?.length > 0 && (
-        <div className="text-[10px] text-gray-400 font-mono pt-1">
+        <div className="text-xs text-gray-400 font-mono pt-1">
           Sources: {legend.source_labels.join(', ')}
         </div>
       )}

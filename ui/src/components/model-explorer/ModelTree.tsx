@@ -94,7 +94,7 @@ const TreeNodeComponent = memo(function TreeNodeComponent({
         {/* Node icon (decorative — the type is in the treeitem's aria-label) */}
         <span
           aria-hidden="true"
-          className={`text-[10px] font-bold ${iconColor} w-4 h-4 rounded bg-gray-900/50 flex items-center justify-center flex-shrink-0`}
+          className={`text-xs font-bold ${iconColor} w-4 h-4 rounded bg-gray-900/50 flex items-center justify-center flex-shrink-0`}
         >
           {icon}
         </span>
@@ -104,7 +104,7 @@ const TreeNodeComponent = memo(function TreeNodeComponent({
 
         {/* Joint type badge */}
         {node.node_type === 'joint' && node.properties.joint_type != null && (
-          <span className="text-[10px] text-gray-400 ml-1">
+          <span className="text-xs text-gray-400 ml-1">
             ({String(node.properties.joint_type)})
           </span>
         )}
@@ -118,7 +118,7 @@ const TreeNodeComponent = memo(function TreeNodeComponent({
                   e.stopPropagation();
                   onCopyComponent(node.id);
                 }}
-                className="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-1.5 py-0.5 rounded transition-colors"
+                className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-1.5 py-0.5 rounded transition-colors"
                 aria-label="Copy Component"
                 title="Copy single component to target"
               >
@@ -131,7 +131,7 @@ const TreeNodeComponent = memo(function TreeNodeComponent({
                   e.stopPropagation();
                   onCopyChain(node.id);
                 }}
-                className="text-[10px] bg-purple-600 hover:bg-purple-500 text-white px-1.5 py-0.5 rounded transition-colors"
+                className="text-xs bg-purple-600 hover:bg-purple-500 text-white px-1.5 py-0.5 rounded transition-colors"
                 aria-label="Copy Chain"
                 title="Copy recursively to target"
               >
@@ -144,7 +144,7 @@ const TreeNodeComponent = memo(function TreeNodeComponent({
                   e.stopPropagation();
                   onSelectForSwap(node.id);
                 }}
-                className={`text-[10px] ${
+                className={`text-xs ${
                   isSelectedForSwap
                     ? 'bg-yellow-600 hover:bg-yellow-500'
                     : 'bg-gray-600 hover:bg-gray-500'
@@ -166,7 +166,7 @@ const TreeNodeComponent = memo(function TreeNodeComponent({
                 e.stopPropagation();
                 onSelectForSwap(node.id);
               }}
-              className={`text-[10px] ${
+              className={`text-xs ${
                 isSelectedForSwap
                   ? 'bg-yellow-600 hover:bg-yellow-500'
                   : 'bg-gray-600 hover:bg-gray-500'
@@ -230,14 +230,14 @@ export function ModelTree({
     <div className="flex flex-col h-full bg-gray-800/40 backdrop-blur-md border border-gray-700/50 rounded-xl overflow-hidden shadow-2xl">
       <div className="px-4 py-3 bg-gray-800 border-b border-gray-700/80 flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+          <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">
             {side === 'source' ? 'Source Model' : side === 'target' ? 'Target Model' : 'Model Structure'}
           </span>
           <span className="text-xs font-semibold text-gray-200 font-mono truncate max-w-[200px]" title={modelName}>
             {modelName || 'No model loaded'}
           </span>
         </div>
-        <span className="text-[10px] bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full font-mono">
+        <span className="text-xs bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full font-mono">
           {treeNodes.length} nodes
         </span>
       </div>

@@ -91,7 +91,7 @@ export function BandChart({ band, overlay }: { band: Band; overlay?: Overlay }) 
       {overlay && (
         <div
           data-testid={`nsx-band-${id}-representative-note`}
-          className="text-[10px] text-gray-300"
+          className="text-xs text-gray-300"
         >
           Representative (dashed) on this band: {overlay.decision.label}
           <DecisionBadges
@@ -101,11 +101,11 @@ export function BandChart({ band, overlay }: { band: Band; overlay?: Overlay }) 
         </div>
       )}
       {band.infeasible_frame_indices.length > 0 && (
-        <div data-testid={`nsx-band-${id}-infeasible`} className="text-[10px] text-red-300">
+        <div data-testid={`nsx-band-${id}-infeasible`} className="text-xs text-red-300">
           Infeasible frames (no band drawn): {band.infeasible_frame_indices.join(', ')}
         </div>
       )}
-      <table className="text-[10px] text-gray-300 w-full mt-1">
+      <table className="text-xs text-gray-300 w-full mt-1">
         <caption className="sr-only">{id} segments</caption>
         <thead>
           <tr className="text-left text-gray-400">

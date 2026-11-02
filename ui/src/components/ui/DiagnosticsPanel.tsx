@@ -213,7 +213,7 @@ export function DiagnosticsPanel() {
                       <span>{diagnostics.backend.port}</span>
                     </div>
                     {diagnostics.backend.error && (
-                      <div className="text-red-400 text-[10px] mt-1">
+                      <div className="text-red-400 text-xs mt-1">
                         {diagnostics.backend.error}
                       </div>
                     )}
@@ -281,7 +281,7 @@ export function DiagnosticsPanel() {
                   ))}
                 </div>
                 {fullReport.recommendations.length > 0 && (
-                  <div className="mt-1 text-[10px] text-gray-400">
+                  <div className="mt-1 text-xs text-gray-400">
                     {fullReport.recommendations.map((rec) => (
                       <div key={rec}>→ {rec}</div>
                     ))}
@@ -314,7 +314,7 @@ export function DiagnosticsPanel() {
             )}
 
             {reportError && (
-              <div className="p-2 rounded bg-yellow-900/30 border border-yellow-700 text-yellow-400 text-[10px]">
+              <div className="p-2 rounded bg-yellow-900/30 border border-yellow-700 text-yellow-400 text-xs">
                 Diagnostics report unavailable: {reportError}
               </div>
             )}
@@ -357,7 +357,7 @@ export function DiagnosticsPanel() {
             )}
 
             {actionError && (
-              <div className="p-2 rounded bg-red-900/30 border border-red-700 text-red-400 text-[10px]">
+              <div className="p-2 rounded bg-red-900/30 border border-red-700 text-red-400 text-xs">
                 {actionError}
               </div>
             )}
