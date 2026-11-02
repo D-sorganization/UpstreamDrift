@@ -332,6 +332,55 @@ def test_cli_reproduction_commands(presenter: TourBaselinesPresenter) -> None:
         assert "--reproduce" in cmd
 
 
+DOUBLE_PENDULUM_DRIVER_BADGE = "[REJECTED] Rejected: TB-04 receipt is DISQUALIFIED"
+UPPER_BODY_DRIVER_BADGE = (
+    "[REJECTED] Rejected: TB-06 planarity preflight is DISQUALIFIED"
+)
+
+
+def _select_tb_model(widget: MotionMatchingWidget, model_id: str) -> None:
+    idx = widget.tb_model.findData(model_id)
+    assert idx >= 0, f"{model_id} missing from Tour Baselines roster"
+    widget.tb_model.setCurrentIndex(idx)
+
+
+def test_qualification_badge_transitions(widget: MotionMatchingWidget) -> None:
+    """Badge tracks the selected receipt exactly across non-passing statuses."""
+    widget.tabs.setCurrentIndex(4)
+    _select_tb_model(widget, "driven_double_pendulum")
+    assert widget.tb_badge.text().startswith(DOUBLE_PENDULUM_DRIVER_BADGE)
+
+    _select_tb_model(widget, "full_body_pinocchio")
+    assert widget.tb_badge.text() == "[CANDIDATE] Native Candidate"
+
+    widget.tb_capture.setCurrentText("7-Iron")
+    _select_tb_model(widget, "full_body_pinocchio")
+    assert widget.tb_badge.text().startswith(
+        "[BLOCKED] Blocked: Pending dual-club G3 cross-engine qualification"
+    )
+
+
+def test_missing_status_badge_is_unqualified(
+    presenter: TourBaselinesPresenter,
+) -> None:
+    """A cell with no recognised evidence status is never shown as passing."""
+    from src.shared.python.tour_baselines import EvidenceStatus
+
+    passing = {"[PASS]"}
+    for status in EvidenceStatus:
+        symbol, _text = presenter._format_badge(status, None)
+        is_pass = status.name in {
+            "G1_KINEMATIC_PASSED",
+            "G2_DYNAMIC_PASSED",
+            "G3_RELEASED",
+        }
+        assert (symbol in passing) is is_pass, f"{status} -> {symbol}"
+    assert presenter._format_badge(EvidenceStatus.REJECTED, None) == (
+        "[REJECTED]",
+        "Rejected",
+    )
+
+
 def test_full_ui_journey(widget: MotionMatchingWidget, tmp_path: Path) -> None:
     """Test full UI interaction journey in MotionMatchingWidget."""
     # 1. Switch to Tour Baselines tab (Tab 5)
@@ -341,7 +390,12 @@ def test_full_ui_journey(widget: MotionMatchingWidget, tmp_path: Path) -> None:
     # 2. Verify initial driver models and details
     assert widget.tb_capture.currentText() == "Driver"
     assert widget.tb_model.count() >= 10
-    assert "[PASS]" in widget.tb_badge.text() or "[" in widget.tb_badge.text()
+    # Exact evidence-backed status for the default selection: the TB-06
+    # planarity receipt is DISQUALIFIED, so any other bracketed label fails.
+    assert widget.tb_widget._get_current_tb_model_id() == (
+        "constrained_upper_body_golfer"
+    )
+    assert widget.tb_badge.text().startswith(UPPER_BODY_DRIVER_BADGE)
 
     # 3. Switch to 7-Iron
     widget.tb_capture.setCurrentText("7-Iron")
