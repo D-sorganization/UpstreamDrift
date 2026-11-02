@@ -573,9 +573,7 @@ async def scatter_analysis(
         request.green_width / 2.0, request.green_height / 2.0, half_w, half_h
     )
 
-    # Same seed (0) the legacy `PuttingGreenSimulator` falls back to when
-    # no `random_seed`/`rng` is supplied (see `_sim_core.py.__init__`), so
-    # repeated calls stay deterministic.
+    # A fixed seed (0) keeps repeated calls deterministic.
     rng = np.random.default_rng(0)
 
     final_positions: list[list[float]] = []
