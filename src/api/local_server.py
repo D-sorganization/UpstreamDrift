@@ -396,12 +396,22 @@ def _safe_join(root: Path, user_path: str) -> Path | None:
     return resolved
 
 
+def _logo_lookup_candidates(logo_name: str) -> tuple[str, ...]:
+    """Return safe relative logo paths to try under each assets root."""
+    basename = Path(logo_name).name
+    if basename == logo_name:
+        return (logo_name,)
+    return (logo_name, basename)
+
+
 def _find_logo_file(logo_name: str) -> Path | None:
     """Search for a logo file in known asset directories.
 
     The caller-supplied ``logo_name`` is joined onto each candidate root via
-    :func:`_safe_join` so that ``..`` traversal, absolute paths, and symlink
-    escape are rejected before touching the filesystem.
+    :func:`resolve_file_within` so that ``..`` traversal, absolute paths, and
+    symlink escape are rejected before touching the filesystem. Registry tiles
+    from ``models.yaml`` often declare PyQt-relative paths such as
+    ``assets/sidekick.svg``; the basename is tried as a fallback (#14258).
 
     Args:
         logo_name: Filename of the logo to find.
@@ -409,14 +419,29 @@ def _find_logo_file(logo_name: str) -> Path | None:
     Returns:
         Path to the logo file, or None if not found or rejected as unsafe.
     """
-    for root in (
+    roots = (
         Path(__file__).parent.parent.parent / "assets" / "logos",
         Path(__file__).parent.parent / "launchers" / "assets",
-    ):
-        resolved = resolve_file_within(root, logo_name, LOGO_SUFFIXES)
-        if resolved is not None:
-            return resolved
+    )
+    for candidate in _logo_lookup_candidates(logo_name):
+        for root in roots:
+            resolved = resolve_file_within(root, candidate, LOGO_SUFFIXES)
+            if resolved is not None:
+                return resolved
     return None
+
+
+def _filter_web_manifest_tiles(manifest: dict[str, Any]) -> dict[str, Any]:
+    """Drop web routes whose runtime assets are absent (#14258)."""
+    tiles = manifest.get("tiles")
+    if not isinstance(tiles, list):
+        return manifest
+    if _startup_metrics.get("impact_explorer_web"):
+        return manifest
+    filtered_tiles = [tile for tile in tiles if tile.get("id") != "rate_of_closure"]
+    if len(filtered_tiles) == len(tiles):
+        return manifest
+    return {**manifest, "tiles": filtered_tiles}
 
 
 def _find_tile_in_manifest(
@@ -524,6 +549,7 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
         # Cache misses re-run provider probes; keep them off the event loop
         # (issue #8937).
         manifest = await anyio.to_thread.run_sync(_load_launcher_manifest)
+        manifest = _filter_web_manifest_tiles(manifest)
         return _with_launcher_csrf_token(
             manifest,
             app.state.launcher_csrf_token,

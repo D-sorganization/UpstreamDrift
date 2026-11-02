@@ -12,9 +12,17 @@ import pytest
 
 local_server = pytest.importorskip("src.api.local_server")
 
+pytestmark = pytest.mark.unit
+
 
 class TestFindLogoFile:
     """Behavior tests for :func:`_find_logo_file` with unsafe inputs."""
+
+    def test_models_yaml_assets_prefix_resolves_to_basename(self) -> None:
+        """Registry tiles use PyQt-relative logo paths (#14258)."""
+        resolved = local_server._find_logo_file("assets/sidekick.svg")
+        assert resolved is not None
+        assert resolved.name == "sidekick.svg"
 
     def test_traversal_returns_none(self) -> None:
         """Traversal attempts should not resolve to any file."""
