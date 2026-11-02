@@ -300,7 +300,6 @@ function ManualGolfSimulatorPage() {
       workspaceId="shot_course_lab"
       toolId="golf_simulator"
       toolName="Golf Simulator"
-      title="Golf Simulator Console"
       description="Capability-aware controls for local physics and GSPro simulator integration"
       primaryActionDisabledReason={primaryDisabledReason}
       nextStep={{
