@@ -149,6 +149,42 @@ impl Embedder for crate::local_embed::LocalEmbedder {
     }
 }
 
+/// Maximum per-component drift tolerated between repeat embeddings of the
+/// same input. ORT CPU inference may reassociate float sums across its
+/// thread pool, giving ~1e-7 noise on unit-normalised 384-d vectors; 1e-5
+/// absorbs that while staying ~3 orders below the component differences
+/// that separate distinct inputs, so real nondeterminism is still caught.
+pub const EMBEDDING_DETERMINISM_TOL: f32 = 1e-5;
+
+/// Test seam: embed `text` `repeats` times via `embed` plus once via
+/// `embed_batch` and return the maximum absolute component drift from the
+/// first vector. Errors on empty output or a dimension change.
+pub fn max_embedding_drift<E: Embedder>(
+    embedder: &E,
+    text: &str,
+    repeats: usize,
+) -> Result<f32, String> {
+    let first = embedder.embed(text)?;
+    if first.is_empty() {
+        return Err("embedder returned an empty vector".to_string());
+    }
+    let mut others = Vec::with_capacity(repeats + 1);
+    for _ in 0..repeats {
+        others.push(embedder.embed(text)?);
+    }
+    others.extend(embedder.embed_batch(&[text.to_string()])?);
+    let mut drift = 0.0f32;
+    for v in &others {
+        if v.len() != first.len() {
+            return Err(format!("dimension changed: {} -> {}", first.len(), v.len()));
+        }
+        for (a, b) in first.iter().zip(v) {
+            drift = drift.max((a - b).abs());
+        }
+    }
+    Ok(drift)
+}
+
 /// Pure-Rust indexer using any [`Embedder`]. Walks the directory with
 /// `.gitignore` respected, chunks each file, and stores each chunk via the
 /// `MemoryManager`. Returns the number of chunks successfully indexed
@@ -536,6 +572,45 @@ mod tests {
         fn embed_batch(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, String> {
             texts.iter().map(|t| self.embed(t)).collect()
         }
+    }
+
+    /// Nondeterministic substitute: adds a growing offset on every call.
+    struct DriftingEmbedder(std::cell::Cell<u32>);
+    impl Embedder for DriftingEmbedder {
+        fn embed(&self, text: &str) -> Result<Vec<f32>, String> {
+            let n = self.0.get();
+            self.0.set(n + 1);
+            let mut v = StubEmbedder.embed(text)?;
+            v[0] += n as f32 * 1e-3;
+            Ok(v)
+        }
+        fn embed_batch(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, String> {
+            texts.iter().map(|t| self.embed(t)).collect()
+        }
+    }
+
+    #[test]
+    fn test_determinism_oracle_accepts_deterministic_embedder() {
+        let d = max_embedding_drift(&StubEmbedder, "the quick brown fox", 3).unwrap();
+        assert!(d <= EMBEDDING_DETERMINISM_TOL, "drift {d}");
+    }
+
+    #[test]
+    fn test_determinism_oracle_rejects_nondeterministic_embedder() {
+        let e = DriftingEmbedder(std::cell::Cell::new(0));
+        let d = max_embedding_drift(&e, "the quick brown fox", 3).unwrap();
+        assert!(d > EMBEDDING_DETERMINISM_TOL, "drift {d} not detected");
+    }
+
+    /// Real ONNX determinism. Needs the cached model; run with
+    /// `cargo test --features local-embeddings -- --ignored`.
+    #[cfg(feature = "local-embeddings")]
+    #[test]
+    #[ignore = "requires downloaded local embedding model"]
+    fn test_local_embedder_is_deterministic() {
+        let e = crate::local_embed::LocalEmbedder::from_default_cache().unwrap();
+        let d = max_embedding_drift(&e, "the quick brown fox jumps over the lazy dog", 3).unwrap();
+        assert!(d <= EMBEDDING_DETERMINISM_TOL, "local embedder drift {d}");
     }
 
     #[test]
