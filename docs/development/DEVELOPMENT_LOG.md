@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14290 · Gate JaxSim/Pinocchio Free-Body Parity on Strict Engine Outputs and a Rotated Inertial Oracle
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14290
+- **Branch:** cursor/14290-parity-test-guard-2cee
+- **PR:** #14343
+- **Paths:** see #14343
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`0ee3ee11`; collated from changes/14290-rotated-free-body-oracle.md)
+- **Summary:** Gate JaxSim/Pinocchio free-body parity on strict engine outputs and a rotated inertial oracle
+- **Next step:** Merge after cross-engine equivalence lane executes three named cases with receipt artifact.
+
 ### DL-#14257 · Wire Dashboard Help and F1 to the Global HelpPanel With Focus-Safe Close and Mobile Layout
 
 - **State:** in_review
@@ -1196,6 +1209,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14261 · Workspace Cards Show Authored Tool Names and One-Line Summaries Instead of a Template Sentence, and Both Card Actions Share One Primary Button Style Labeled Open or Open in Window.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14261
+- **Branch:** merged via #14342
+- **PR:** #14342
+- **Paths:** see #14342
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`60b23d44`; collated from changes/14261-workspace-cards-show-authored-tool-names.md)
+- **Summary:** Workspace cards show authored tool names and one-line summaries instead of a template sentence, and both card actions share one primary button style labeled Open or Open in Window.
+- **Next step:** Shipped in PR #14342.
+
+### DL-#14258 · Web Launcher Resolves models.yaml Logo Paths and Hides ROC Tile When Bundle Absent.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14258
+- **Branch:** merged via #14344
+- **PR:** #14344
+- **Paths:** see #14344
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`35f2dab8`; collated from changes/14258-web-launcher-resolves-models-yaml-logo-p.md)
+- **Summary:** Web launcher resolves models.yaml logo paths and hides ROC tile when bundle absent.
+- **Next step:** Shipped in PR #14344.
 
 ### DL-#14262 · Canonical-Core Estimation and Comparison Are Marked Planned: They Leave Home and the Results & Compare Workspace, Stay Reachable From Developer & Research, and the Desktop Chip Reads Planned Instead of Ready
 
