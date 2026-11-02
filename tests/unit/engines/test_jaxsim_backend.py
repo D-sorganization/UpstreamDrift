@@ -310,6 +310,7 @@ def _backend_with_bias_api(bias_api: object) -> JaxSimBackend:
     return backend
 
 
+@pytest.mark.unit
 def test_jaxsim_backend_rejects_row_shaped_vector_output() -> None:
     backend = _backend_with_bias_api(lambda *_: np.zeros((1, 7)))
 
