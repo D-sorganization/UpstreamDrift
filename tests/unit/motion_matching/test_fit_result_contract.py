@@ -3,6 +3,10 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CANONICAL_FIT_DRIVERS = (
     REPO_ROOT
@@ -39,7 +43,7 @@ CANONICAL_FIT_DRIVERS = (
     / "fit_swing.py",
 )
 CANONICAL_ENGINE_TESTS = (
-    REPO_ROOT / "tests" / "test_opensim_fit_swing.py",
+    REPO_ROOT / "tests" / "engines" / "opensim" / "test_opensim_fit_swing.py",
     REPO_ROOT / "tests" / "heavy_integration" / "test_pinocchio_fit_swing.py",
 )
 
