@@ -2,12 +2,13 @@
 
 GitHub refuses a public repository's call to an internal repository's
 reusable workflow before any job is created, so such a workflow fails every
-run with 0 jobs. Conflict Disarm did exactly that. Read RM scripts through an
-App-token checkout instead, as collate-changes.yml does.
+run with 0 jobs. Conflict Disarm did exactly that; it now calls the public
+fleet-workflows provider instead (fleet-workflows#1).
 """
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,11 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 WORKFLOWS = REPO_ROOT / ".github" / "workflows"
 CONFLICT_DISARM = WORKFLOWS / "conflict-disarm.yml"
 INTERNAL_PREFIX = "D-sorganization/Repository_Management/.github/workflows/"
+FLEET_WORKFLOWS_CONFLICT_DISARM = (
+    "D-sorganization/fleet-workflows/.github/workflows/reusable-conflict-disarm.yml"
+)
+# fleet-workflows commit that scopes the App token to the swept repo (#8).
+FLEET_WORKFLOWS_PIN = "367b182c24ae3b01488fc1266130969e775023de"
 
 pytestmark = pytest.mark.unit
 
@@ -32,42 +38,25 @@ def test_no_job_calls_an_internal_reusable_workflow(path: Path) -> None:
         assert not str(job.get("uses", "")).startswith(INTERNAL_PREFIX), name
 
 
-def test_conflict_disarm_runs_the_rm_script_inline() -> None:
+def _conflict_disarm_job() -> dict[str, Any]:
     (job,) = _jobs(CONFLICT_DISARM).values()
-    steps = job["steps"]
-    checkout = next(
-        step
-        for step in steps
-        if step.get("with", {}).get("repository")
-        == "D-sorganization/Repository_Management"
-    )
-    sweep = next(
-        step for step in steps if "scripts.conflict_disarm" in step.get("run", "")
-    )
-
-    assert checkout["with"]["token"] == "${{ steps.app-token.outputs.token }}"
-    assert checkout["with"]["path"] == ".rm-tools"
-    assert sweep["env"]["DRY_RUN_INPUT"] == "${{ inputs.dry_run || 'true' }}"
-    assert sweep["env"]["EXCLUDE_PRS"] == "${{ inputs.exclude_prs || '12634' }}"
+    return job
 
 
-def test_conflict_disarm_app_token_is_scoped_to_ud_and_rm() -> None:
-    """#14214: the token reaches only the repos and permissions the sweep uses."""
-    (job,) = _jobs(CONFLICT_DISARM).values()
-    token = next(step for step in job["steps"] if step.get("id") == "app-token")
-    inputs = token["with"]
+def test_conflict_disarm_calls_the_sha_pinned_public_provider() -> None:
+    """fleet-workflows#1: one public implementation, pinned to a reviewed commit."""
+    job = _conflict_disarm_job()
+    workflow, _, ref = str(job.get("uses", "")).partition("@")
 
-    repositories = {
-        name.strip()
-        for name in str(inputs.get("repositories", "")).replace(",", "\n").split()
-    }
-    permissions = {
-        key: value for key, value in inputs.items() if key.startswith("permission-")
-    }
+    assert workflow == FLEET_WORKFLOWS_CONFLICT_DISARM
+    assert ref == FLEET_WORKFLOWS_PIN
+    assert re.fullmatch(r"[0-9a-f]{40}", ref)
+    assert "steps" not in job, "the inlined sweep must be gone"
 
-    assert repositories == {"UpstreamDrift", "Repository_Management"}
-    assert permissions == {
-        "permission-contents": "write",
-        "permission-pull-requests": "write",
-        "permission-issues": "write",
-    }
+
+def test_conflict_disarm_keeps_dry_run_and_the_12634_exclusion() -> None:
+    job = _conflict_disarm_job()
+
+    assert job["with"]["dry_run"] == "${{ inputs.dry_run || 'true' }}"
+    assert job["with"]["exclude_prs"] == "${{ inputs.exclude_prs || '12634' }}"
+    assert set(job["secrets"]) == {"JULES_APP_ID", "JULES_APP_PRIVATE_KEY"}
