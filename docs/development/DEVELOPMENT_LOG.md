@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14250 · Use a Local CC0 HDR With Fallback Scene Lighting on All Three Affected Pages
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14250
+- **Branch:** codex/terrain-hdr-offline-14250
+- **PR:** #14325
+- **Paths:** see #14325
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`5dcd3ea0`; collated from changes/14250-use-a-local-cc0-hdr-with-fallback-scene.md)
+- **Summary:** Use a local CC0 HDR with fallback scene lighting on all three affected pages
+- **Next step:** After the baseline PlateImportForm build issue is resolved, verify a clean Vite/Tauri asset output; then request independent review.
+
 ### DL-#14251 · Normalize Terrain Preset Loading and Preserve Concurrent API Errors.
 
 - **State:** in_review
@@ -1157,6 +1170,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14321 · Rust_Adapter Joins the Stream Worker QThread After Its Event Loop Quits (Pair of Tools#5951)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14321
+- **Branch:** merged via #14322
+- **PR:** #14322
+- **Paths:** see #14322
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`598ae366`; collated from changes/14321-rust-adapter-joins-the-stream-worker-qth.md)
+- **Summary:** rust_adapter joins the stream worker QThread after its event loop quits (pair of Tools#5951)
+- **Next step:** Shipped in PR #14322.
 
 ### DL-#14281 · Controls Get a 44Px Hit Area on Coarse Pointers (Touch-Target Utility, Primitives and a Native-Control Base Rule), and Arbitrary Text Sizes Under 12Px Are Raised to Text-Xs
 
