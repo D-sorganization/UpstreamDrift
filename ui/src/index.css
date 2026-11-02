@@ -1,32 +1,44 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
-/* Touch targets (#14281): 44px minimum hit area on coarse pointers only, so
+/* Touch targets (#14281, #14267): 44px minimum hit area on coarse pointers only, so
  * mouse layouts are unchanged. The shared Button/Input/Select primitives apply
  * the utility; the base rule below covers hand-rolled native controls. */
 @utility touch-target {
   @media (pointer: coarse) {
     min-height: 44px;
     min-width: 44px;
+    touch-action: manipulation;
   }
 }
 
-/* Coarse-pointer base (#14281): utilities still win, so a page can opt a
+/* Coarse-pointer base (#14281, #14267): utilities still win, so a page can opt a
  * control out with an explicit min-h-* class. Checkboxes and radios stay
- * compact; the label that wraps them becomes the 44px hit area. */
+ * compact; the label that wraps them becomes the 44px hit area. Range sliders
+ * and navigation links are adapted for touch hit areas and responsive scrubbing. */
 @layer base {
   @media (pointer: coarse) {
     button,
     [role='button'],
     [role='tab'],
     select,
+    a,
     input:where(:not([type='checkbox'], [type='radio'], [type='hidden'], [type='file'])) {
       min-height: 44px;
+      touch-action: manipulation;
     }
     button,
     [role='button'],
     [role='tab'] {
       min-width: 44px;
+    }
+    nav a,
+    [role='navigation'] a,
+    [role='tablist'] [role='tab'],
+    [role='tablist'] a {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
     }
     input:where([type='checkbox'], [type='radio']) {
       width: 1.25rem;
@@ -36,6 +48,23 @@
       display: inline-flex;
       align-items: center;
       min-height: 44px;
+    }
+    input[type='range'] {
+      min-height: 44px;
+      touch-action: pan-x;
+      cursor: pointer;
+    }
+    input[type='range']::-webkit-slider-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 9999px;
+      cursor: pointer;
+    }
+    input[type='range']::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 9999px;
+      cursor: pointer;
     }
   }
 }
