@@ -1158,6 +1158,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14281 · Controls Get a 44Px Hit Area on Coarse Pointers (Touch-Target Utility, Primitives and a Native-Control Base Rule), and Arbitrary Text Sizes Under 12Px Are Raised to Text-Xs
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14281
+- **Branch:** merged via #14324
+- **PR:** #14324
+- **Paths:** see #14324
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`7a1196d5`; collated from changes/14281-controls-get-a-44px-hit-area-on-coarse-p.md)
+- **Summary:** Controls get a 44px hit area on coarse pointers (touch-target utility, primitives and a native-control base rule), and arbitrary text sizes under 12px are raised to text-xs
+- **Next step:** Shipped in PR #14324.
+
 ### DL-#14282 · Wide Content on Lift Baseline, Analysis Tools, Terrain, Data Explorer and Golf Simulator Now Scrolls or Wraps at Phone Width Instead of Being Clipped
 
 - **State:** shipped

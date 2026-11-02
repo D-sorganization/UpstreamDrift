@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14324 | Controls get a 44px hit area on coarse pointers (touch-target utility, primitives and a native-control base rule), and arbitrary text sizes under 12px are raised to text-xs |
 | 2026-11-02 | #14319 | Wide content on Lift Baseline, Analysis Tools, Terrain, Data Explorer and Golf Simulator now scrolls or wraps at phone width instead of being clipped |
 | 2026-11-02 | #14318 | Normalize terrain preset loading and preserve concurrent API errors. |
 | 2026-11-02 | #14311 | Pinned offline embedding tests fail on bad retrieval and unexpected initialization |
