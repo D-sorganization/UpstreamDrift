@@ -1145,6 +1145,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14280 · Dashboard Header Wraps With Icon-Only Actions Below Md and the Task Workspaces Links Wrap Instead of Clipping, so Every Action Is Reachable at 390 And 768
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14280
+- **Branch:** merged via #14315
+- **PR:** #14315
+- **Paths:** see #14315
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`f5df4a57`; collated from changes/14280-dashboard-header-wraps-with-icon-only-ac.md)
+- **Summary:** Dashboard header wraps with icon-only actions below md and the Task Workspaces links wrap instead of clipping, so every action is reachable at 390 and 768
+- **Next step:** Shipped in PR #14315.
+
 ### DL-#14310 · Stop the Deprecated-DynamicsProvider Scan From Timing Out and Killing an Xdist Worker: Only Files Containing the Name Are Parsed (42.8s to 2.3s).
 
 - **State:** shipped
