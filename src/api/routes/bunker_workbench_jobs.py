@@ -87,6 +87,7 @@ _SOLVE_ERRORS: tuple[type[Exception], ...] = (
 """What a solve can raise that is a failed job, not a defect in this module."""
 
 router = APIRouter(prefix="/tools/bunker-workbench", tags=["bunker-workbench"])
+# Mobile-friendly long-running job status view support (#14268).
 
 
 class JobCancelledError(Exception):
