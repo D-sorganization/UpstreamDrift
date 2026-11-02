@@ -5,6 +5,7 @@
  * on runtime environment (Tauri desktop app vs Web browser).
  */
 
+import { TOOL_CARD_COPY } from '@/types/workspaceNavigation';
 import { canLaunchNativeWindow } from './webLaunch';
 
 export type WorkspaceToolAction =
@@ -71,7 +72,7 @@ export function resolveWorkspaceToolAction(
   options?: ResolveActionOptions,
 ): WorkspaceToolAction {
   const isTauriEnv = options?.isTauri ?? canLaunchNativeWindow();
-  const title = formatToolTitle(toolId);
+  const title = TOOL_CARD_COPY[toolId]?.displayName ?? formatToolTitle(toolId);
 
   // Check if tool has an embedded in-app web route
   const route = TOOL_WEB_ROUTES[toolId];

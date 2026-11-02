@@ -462,7 +462,7 @@ class JaxSimBackend:
         return array
 
     def _call_model_vector(self, name: str) -> np.ndarray:
-        vector = self._call_model_array(name).reshape(-1)
+        vector = self._call_model_array(name)
         expected_v = 6 + self._dofs()
         if vector.shape != (expected_v,):
             raise ValueError(
