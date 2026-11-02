@@ -201,7 +201,6 @@ function JobProgress(props: { status: BunkerJobStatusV1; onCancel: () => void })
         jobId: status.job_id,
         phase,
         progressPercent: status.progress_percent,
-        stage: status.stage,
         shotsPlanned: status.shots_planned,
         label: 'Bunker job progress',
       }}
