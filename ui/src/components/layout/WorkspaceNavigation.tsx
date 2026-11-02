@@ -24,6 +24,7 @@ import {
 import {
   PRIMARY_WORKSPACES,
   SECONDARY_WORKSPACES,
+  TOOL_CARD_COPY,
   type WorkspaceMetadata,
 } from '@/types/workspaceNavigation';
 import {
@@ -183,6 +184,10 @@ export function WorkspaceBreadcrumb({
   );
 }
 
+/** One primary style for every card action; the label names the destination (#14261). */
+const PRIMARY_BUTTON_CLASS =
+  "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400";
+
 export interface WorkspaceViewProps {
   workspace: WorkspaceMetadata;
   isTauri?: boolean;
@@ -215,9 +220,7 @@ export function WorkspaceView({ workspace, isTauri }: WorkspaceViewProps) {
               <div>
                 <h3 className="text-base font-semibold text-white mb-1">{action.title}</h3>
                 <p className="text-xs text-gray-400 mb-3">
-                  {action.kind === 'native-only-explanation'
-                    ? action.explanation
-                    : `Access and configure ${action.title} in the ${workspace.title} task space.`}
+                  {TOOL_CARD_COPY[toolId]?.summary ?? workspace.description}
                 </p>
               </div>
 
@@ -226,9 +229,9 @@ export function WorkspaceView({ workspace, isTauri }: WorkspaceViewProps) {
                   <button
                     type="button"
                     onClick={() => navigate(action.route)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                    className={PRIMARY_BUTTON_CLASS}
                   >
-                    Open Tool
+                    Open
                     <ExternalLink className="w-3.5 h-3.5" aria-hidden={true} />
                   </button>
                 )}
@@ -236,9 +239,9 @@ export function WorkspaceView({ workspace, isTauri }: WorkspaceViewProps) {
                 {action.kind === 'native-launch' && (
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                    className={PRIMARY_BUTTON_CLASS}
                   >
-                    Launch Window
+                    Open in Window
                     <Monitor className="w-3.5 h-3.5" aria-hidden={true} />
                   </button>
                 )}
@@ -249,6 +252,7 @@ export function WorkspaceView({ workspace, isTauri }: WorkspaceViewProps) {
                       <Monitor className="w-3 h-3" aria-hidden={true} />
                       {action.badge}
                     </span>
+                    <p className="text-xs text-gray-400">{action.explanation}</p>
                     {action.alternativeRoute && (
                       <button
                         type="button"
