@@ -163,7 +163,7 @@ export function ToolShell({
             <li>
               <div className="flex items-center gap-2.5 px-2 py-2 rounded text-xs bg-blue-600/30 text-blue-200 border border-blue-500/40 font-medium">
                 <Layers className="w-4 h-4 flex-shrink-0" aria-hidden={true} />
-                {!navCollapsed && <span className="truncate">{toolName}</span>}
+                {!navCollapsed && <span className="truncate">Overview</span>}
               </div>
             </li>
           )}
