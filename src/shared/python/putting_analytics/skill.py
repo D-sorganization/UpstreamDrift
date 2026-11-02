@@ -1,7 +1,8 @@
 """Putting skill profile: stroke execution and green-reading dispersion.
 
-All spreads are one standard deviation. No preset is calibrated yet; presets
-wait for validation against published make rates (#14176).
+All spreads are one standard deviation. The calibrated tour preset is
+:data:`src.shared.python.putting_analytics.calibration.TOUR_AVERAGE`, fitted to
+published PGA Tour make rates (#14177).
 """
 
 from __future__ import annotations
@@ -22,8 +23,15 @@ _READ_FIELDS = {
     "read_aspect": "aspect_sd_deg",
     "read_stimp": "stimp_rel_sd",
 }
-CHANNELS: tuple[str, ...] = (*_STROKE_FIELDS, *_READ_FIELDS)
+STROKE_CHANNELS: tuple[str, ...] = tuple(_STROKE_FIELDS)
+READ_CHANNELS: tuple[str, ...] = tuple(_READ_FIELDS)
+CHANNELS: tuple[str, ...] = (*STROKE_CHANNELS, *READ_CHANNELS)
 DEFAULT_FACE_WEIGHT = 0.83  # share of start line set by face; literature cites ~0.8-0.9
+
+
+def _require_channels(channels: Iterable[str]) -> None:
+    for channel in channels:
+        require(channel in CHANNELS, f"unknown channel; expected one of {CHANNELS}")
 
 
 def _require_spreads(obj: object, names: dict[str, str]) -> None:
@@ -78,15 +86,21 @@ class PuttingSkillProfile:
     def __post_init__(self) -> None:
         require(0.0 <= self.face_weight <= 1.0, "face_weight must be in [0, 1]")
 
-    def scaled(self, factor: float) -> PuttingSkillProfile:
-        """Return a profile with every spread multiplied by ``factor``; biases kept."""
+    def scaled(
+        self, factor: float, channels: Iterable[str] = CHANNELS
+    ) -> PuttingSkillProfile:
+        """Return a profile with the named channels' spreads multiplied by ``factor``.
+
+        Biases are kept. All channels are scaled unless ``channels`` narrows it.
+        """
         require(factor >= 0.0, "factor must be non-negative", factor)
-        return self._map_spreads(CHANNELS, lambda value: value * factor)
+        channels = tuple(channels)
+        _require_channels(channels)
+        return self._map_spreads(channels, lambda value: value * factor)
 
     def without(self, *channels: str) -> PuttingSkillProfile:
         """Return a profile with the named channels' spreads set to zero."""
-        for channel in channels:
-            require(channel in CHANNELS, f"unknown channel; expected one of {CHANNELS}")
+        _require_channels(channels)
         return self._map_spreads(channels, lambda _value: 0.0)
 
     def _map_spreads(

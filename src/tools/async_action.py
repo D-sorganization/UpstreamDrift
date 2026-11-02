@@ -312,6 +312,16 @@ class AsyncActionBar(QWidget):
         """Buttons to disable for the duration of any run."""
         self._trigger_buttons = tuple(buttons)
 
+    def set_cancel_tooltip(self, text: str) -> None:
+        """Replace the Cancel button's tooltip with the caller's cancel semantics.
+
+        Raises:
+            ValueError: If ``text`` is empty or whitespace.
+        """
+        if not text.strip():
+            raise ValueError("tooltip must be a non-empty string")
+        self.cancel_button.setToolTip(text)
+
     @property
     def is_running(self) -> bool:
         """Whether an action is currently running."""

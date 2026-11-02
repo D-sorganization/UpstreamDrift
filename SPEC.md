@@ -2741,6 +2741,45 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-01 | #14219 | Conflict Disarm App token scoped to UpstreamDrift and Repository_Management with contents read, pull-requests write and issues write |
+| 2026-11-01 | #14220 | Skill-Profile Roll Model Adapter for Putting Variance Attribution |
+| 2026-11-01 | #14217 | Development log reconciled: 51 active entries whose PRs all merged and issues closed move to shipped (75 to 24 active), unblocking the WIP ceiling |
+| 2026-11-01 | #14207 | Conflict Disarm runs its job inline (reading RM's conflict_disarm script via an App-token checkout) instead of calling an internal Repository_Management reusable workflow, which a public repo cannot do, so it no longer fails every run with 0 jobs |
+| 2026-11-01 | #14211 | Guard the removed legacy .agent/ tree and fence the GAAI ci-watch-and-fix skill in project rules (RM #2567). |
+| 2026-11-01 | #14208 | putting_dynamics: resolve roll onset when initial slip is within one step, preventing zero-friction RK4 chattering |
+| 2026-11-01 | #14182 | docs: root REVIEW.md with UpstreamDrift review rules (RM #2565 rollout) |
+| 2026-11-01 | #14179 | CI apt installer bounds each apt-get attempt (APT_ATTEMPT_TIMEOUT, default 420s) and sets 30s acquire timeouts, so a stalled mirror download is retried instead of holding a merge-queue job to its 150-minute timeout |
+| 2026-11-01 | #14203 | Putting Optimizer and Misread-Cost MCP Tools |
+| 2026-11-01 | #14198 | Add Putting Reference Data and Validation Harness |
+| 2026-11-01 | #14196 | Add Putting Analytics Variance Attribution and Error-Source Elimination |
+| 2026-11-01 | #14197 | Add Putting Analytics Putt Library and Aggregate Report |
+| 2026-11-01 | #14199 | Plan on the Perceived Green and Execute on the True Green |
+| 2026-11-01 | #14192 | Add Putting Analytics Stochastic Green Sampler |
+| 2026-11-01 | #14194 | Add Vectorised Batch Roll Integrator |
+| 2026-11-01 | #14195 | Add BatchRollModel PuttOutcomeModel Adapter |
+| 2026-11-01 | #14181 | Add putting_analytics: skill-conditioned expected-putts curve solved exactly, aim and pace optimiser for strokes-gained and must-make objectives, and strokes gained against both the player's own curve and a tour reference (epic #14168) |
+| 2026-11-01 | #14188 | Add putting_analytics skill profile (stroke face, path, speed, strike and green-read dispersion) and a per-channel seeded Monte Carlo sampler whose single-channel ablations leave other draws identical (epic #14168) |
+| 2026-11-01 | #14165 | Docker size gates tag each build per run, label it, and always remove the run's image plus this workflow's dangling images, so the shared runner disk no longer fills |
+| 2026-11-01 | #14153 | Docker size gates measure compressed content size via the Engine API instead of .Size, whose meaning changed between Docker Engine 29.1.3 and 29.9.2 |
+| 2026-11-01 | #14215 | Putting v4 step 8b: vendored three.js r128 and a precompiled Tailwind subset for the offline studio, with recorded provenance hashes |
+| 2026-11-01 | #14213 | Putting v4 step 8a: temporary studio JS physics checked against the shared fixtures under node, with a written sunset criterion |
+| 2026-11-01 | #14210 | Putting v4 step 7d: the PyQt6 putting scene builder runs on the shared putting_dynamics core (USGA roll law); roll-model id and typical putter defaults owned by the shared core |
+| 2026-11-01 | #14209 | Putting v4 step 7c: /read-green runs on the shared simulation-based green reading; no route runs the legacy roll law |
+| 2026-11-01 | #14191 | Putting v4 step 7 prep: scalar finiteness fast path in the putting_dynamics inner loop (aim solves about 2.8x faster) |
+| 2026-11-01 | #14202 | Putting v4 step 7b: simulation-based green reading (read_line, solve_aim) and simulate_strike from any start and heading |
+| 2026-11-01 | #14187 | Putting v4 step 7a: /simulate, /scatter and /contours run on the shared putting core (usga-stimp-roll/1) |
+| 2026-11-01 | #14184 | Putting v4 step 6: offset-aware chord capture bound and lip-out regressions |
+| 2026-11-01 | #14167 | Putting v4 step 5b: engine-to-shared parity tests, permanent non-port list, Drane fixtures kept pending as an artificial-turf domain mismatch |
+| 2026-11-01 | #14166 | Slide-to-roll transition conserves contact angular momentum; removes the energy-injection finding from step 1 (putting v4 step 5a) |
+| 2026-11-01 | #14163 | Shared turf model (grass type, condition, grain, presets) on the USGA stimp law; legacy 0.196/stimp law not ported (putting v4 step 4b) |
+| 2026-11-01 | #14160 | Shared virtual USGA Stimpmeter: ramp release-speed closed form and two-direction stimp measurement (putting v4 step 4a) |
+| 2026-11-01 | #14205 | Implements declarative segment intersection extraction and point mobility evaluation across kinematics frames, adds condition number cutoff pruning to eliminate near-singular glyph clutter, and exposes --mobility-points, --max-mobility-points, and --mobility-condition-cutoff CLI flags in native viewer export. |
+| 2026-11-01 | #14189 | Hand-club mobility parity for Pinocchio: label kinematic manipulability analyzer, route native viewer export through Pinocchio capability source, and add TDD parity tests |
+| 2026-11-01 | #14162 | Unified cross-engine perturbation study: in-house and MuJoCo canonical triple pendulum on one setup, committed measured receipt and doc; #2021 closure evidence |
+| 2026-11-01 | #14190 | Benchmark harness gains an mjx-warm-start arm scored only on shared-simulator replay RMS with the L-BFGS-60 iteration and wall-clock budget; stub-only until #13783-#13785 |
+| 2026-11-01 | #14185 | MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed |
+| 2026-11-01 | #14157 | Anatomical event table desktop launcher tile (dock opens an event-table JSON export); parity entry set to parity with tile anatomical_event_table |
+| 2026-11-01 | #14183 | OSL-5: bench-press joint reactions use the shared bench back-sphere contact wrench; receipt covers all five lifts |
 | 2026-10-31 | #14159 | Route putter COR and green restitution through shared constants; centre-strike ratio closed form with off-centre limits (putting v4 step 3) |
 | 2026-10-31 | #14155 | Add remaining externally sourced putting reference fixtures: USGA ball limits, Penner/Holmes capture, Drane/Whiston/Quintic skid-roll, Broadie ShotLink, putter COR pending (putting v4 step 2b) |
 | 2026-10-31 | #14152 | MuJoCo static-hold mu_crit calibration of the pad contact (Euler, implicitfast: hold/slip at 1.001 mu_crit, no declared bias) and GripMarginReport mu_bias_bound validation |

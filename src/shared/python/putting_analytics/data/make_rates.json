@@ -1,0 +1,95 @@
+{
+  "schema": "putting-make-rates/1",
+  "retrieved": "2026-11-01",
+  "provenance": "Transcribed from each page as read through a page-fetch tool on the retrieval date; raw HTML could not be downloaded from this environment. Spot checks quoted from the pages: GolfMagic 3 ft 96, 7 ft 56, 10 ft 38; Shot Scope 0-3 ft 98 and 88, 3-6 ft 76 and 48; every Golf Digest 2024 figure. A point is [distance_ft, pct] or [[low_ft, high_ft], pct] for a band, high null when open; a third element 'approx' marks a figure printed as approximate.",
+  "sources": [
+    {
+      "id": "golfmagic_2022", "role": "calibration_target", "metric": "one_putt_pct",
+      "title": "Putting probabilities: how does your putting stack against PGA Tour players?",
+      "publisher": "GolfMagic", "published": "2022-11-01",
+      "url": "https://www.golfmagic.com/pga-tour/putting-probabilities-how-does-your-putting-stack-against-pga-tour-players",
+      "underlying_data": "PGA Tour ShotLink, via putting coach Marcus Potter; season not stated", "sample_size": null,
+      "groups": {"pga_tour": [[1, 100], [3, 96], [5, 76], [7, 56], [10, 38], [12, 31], [15, 23], [20, 15], [25, 10], [30, 7], [40, 4], [50, 3], [60, 2]]}
+    },
+    {
+      "id": "shotscope_mygolfspy", "role": "check", "metric": "make_pct",
+      "title": "Putting make percentage by handicap: full chart",
+      "publisher": "MyGolfSpy", "published": null,
+      "url": "https://mygolfspy.com/news-opinion/putting-make-percentage-by-handicap-full-chart-are-you-above-or-below-average/",
+      "underlying_data": "Shot Scope", "sample_size": null,
+      "groups": {
+        "hcp_0": [[[0, 3], 98], [[3, 6], 76], [[6, 9], 49], [[9, 12], 34], [[12, 18], 19], [[18, 24], 12], [[24, 30], 7], [[30, null], 4]],
+        "hcp_5": [[[0, 3], 96], [[3, 6], 67], [[6, 9], 44], [[9, 12], 34], [[12, 18], 19], [[18, 24], 13], [[24, 30], 7], [[30, null], 3]],
+        "hcp_10": [[[0, 3], 96], [[3, 6], 65], [[6, 9], 39], [[9, 12], 26], [[12, 18], 18], [[18, 24], 10], [[24, 30], 7], [[30, null], 3]],
+        "hcp_15": [[[0, 3], 93], [[3, 6], 59], [[6, 9], 36], [[9, 12], 22], [[12, 18], 16], [[18, 24], 9], [[24, 30], 7], [[30, null], 2]],
+        "hcp_20": [[[0, 3], 90], [[3, 6], 55], [[6, 9], 33], [[9, 12], 18], [[12, 18], 14], [[18, 24], 7], [[24, 30], 5], [[30, null], 2]],
+        "hcp_25": [[[0, 3], 88], [[3, 6], 48], [[6, 9], 30], [[9, 12], 17], [[12, 18], 12], [[18, 24], 6], [[24, 30], 4], [[30, null], 2]]
+      },
+      "notes": "A second MyGolfSpy article (The Key To Lower Scores: The Putt Lengths You Should Really Practice) prints the same Shot Scope 5, 15 and 25 handicap values."
+    },
+    {
+      "id": "golfdigest_2024", "role": "reference", "metric": "make_pct",
+      "title": "A smart golfer's guide to making more putts, using 10 key stats",
+      "publisher": "Golf Digest", "published": "2024-09-18",
+      "url": "https://www.golfdigest.com/story/10-different-putts-stats-tips-golf-digest",
+      "underlying_data": "Arccos", "sample_size": null,
+      "groups": {
+        "tour": [[2, 98], [4, 81], [7, 53], [9, 41], [14, 24], [19, 19], [25, 10], [33, 6, "approx"], [45, 3, "approx"], [60, 2, "approx"]],
+        "hcp_10": [[[6, 9], 29], [14, 15, "approx"]]
+      }
+    },
+    {
+      "id": "golfcom_2019", "role": "reference", "metric": "make_pct",
+      "title": "PGA Tour putting make percentages by distance",
+      "publisher": "Golf.com", "published": "2019-07-31",
+      "url": "https://golf.com/instruction/putting/pga-tour-putting-make-percentages-distance/",
+      "underlying_data": "not stated", "sample_size": null,
+      "groups": {"pga_tour": [[3, 99.4], [4, 91.43], [5, 80.72], [6, 70.21], [7, 60.6], [8, 52.86], [9, 46.38], [10, 41.25], [[11, 15], 30.1], [[15, 20], 18.3], [[20, 25], 12.47], [[25, null], 5.45]]},
+      "notes": "Short putts sit above the other tour tables (4 ft 91.43 against 81 and 81.6)."
+    },
+    {
+      "id": "golfdigest_2023", "role": "reference", "metric": "make_pct",
+      "title": "What length putt is a gimme for amateur golfers",
+      "publisher": "Golf Digest", "published": "2023-01-28",
+      "url": "https://www.golfdigest.com/story/what-length-putt-is-a-gimme-amateur-golfers",
+      "underlying_data": "Lou Stagner (Arccos) for amateurs; tour source not stated", "sample_size": null,
+      "groups": {
+        "tour": [[1, 99.8], [2, 98.2], [3, 92.1], [4, 81.6]],
+        "shooter_80s": [[3, 64.5, "approx"], [4, 57.1, "approx"]],
+        "shooter_90s": [[3, 55.3, "approx"], [4, 49.0, "approx"]]
+      },
+      "notes": "The 80s and 90s values are printed as estimates."
+    },
+    {
+      "id": "golfmonthly_2025", "role": "reference", "metric": "make_pct",
+      "title": "How many putts do PGA Tour players miss from inside 5ft",
+      "publisher": "Golf Monthly (paid partnership with Shot Scope)", "published": "2025-10-31",
+      "url": "https://www.golfmonthly.com/features/how-many-putts-do-pga-tour-players-miss-from-inside-5ft",
+      "underlying_data": "PGA Tour 2025 season (tour); Shot Scope (amateurs)", "sample_size": "tour: 159,013 attempts, 153,913 holed",
+      "groups": {
+        "pga_tour_2025": [[[0, 5], 96.68]],
+        "hcp_0": [[[0, 5], 91, "approx"]], "hcp_5": [[[0, 5], 88]], "hcp_10": [[[0, 5], 83]], "hcp_15": [[[0, 5], 80]]
+      },
+      "notes": "The printed counts give 96.79 %, not the printed 96.68 %."
+    },
+    {
+      "id": "golfmonthly_2024", "role": "reference", "metric": "make_pct",
+      "title": "Amateur golfers make less than 40 percent of putts from this crucial length",
+      "publisher": "Golf Monthly", "published": "2024-10-12",
+      "url": "https://golfmonthly.com/features/amateur-golfers-make-less-than-40-percent-of-putts-from-this-crucial-length-arccos-data-reveals-stark-putting-truths",
+      "underlying_data": "Arccos", "sample_size": null,
+      "groups": {
+        "hcp_0": [[[0, 2], 97], [[3, 5], 69, "approx"]], "hcp_5": [[[0, 2], 93]], "hcp_10": [[[0, 2], 91]],
+        "hcp_15": [[[0, 2], 86], [[3, 5], 47]], "hcp_20": [[[0, 2], 85]]
+      }
+    },
+    {
+      "id": "practicalgolf", "role": "reference", "metric": "make_pct",
+      "title": "Putting: let's get real",
+      "publisher": "Practical Golf", "published": null,
+      "url": "https://practical-golf.com/putting-lets-get-real",
+      "underlying_data": "not named (PGA Tour statistics)", "sample_size": null,
+      "groups": {"pga_tour": [[[3, 5], 88], [[5, 10], 57], [[10, 15], 33], [[15, 20], 19]]}
+    }
+  ]
+}

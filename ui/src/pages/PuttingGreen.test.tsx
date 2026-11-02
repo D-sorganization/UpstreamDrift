@@ -11,7 +11,7 @@ import type { PuttResult, GreenReading, ScatterResult } from './PuttingGreen';
 describe('PuttingGreen data structures', () => {
   it('should parse a putt simulation result', () => {
     const result: PuttResult = {
-      roll_model: 'ud-legacy-roll/1',
+      roll_model: 'usga-stimp-roll/1',
       positions: [
         [10.0, 5.0],
         [10.0, 7.0],
@@ -39,7 +39,7 @@ describe('PuttingGreen data structures', () => {
 
   it('should identify a holed putt', () => {
     const result: PuttResult = {
-      roll_model: 'ud-legacy-roll/1',
+      roll_model: 'usga-stimp-roll/1',
       positions: [
         [10.0, 5.0],
         [10.0, 15.0],
@@ -61,7 +61,7 @@ describe('PuttingGreen data structures', () => {
 
   it('should parse a green reading', () => {
     const reading: GreenReading = {
-      roll_model: 'ud-legacy-roll/1',
+      roll_model: 'usga-stimp-roll/1',
       distance: 11.18,
       total_break: 0.05,
       recommended_speed: 2.1,
@@ -81,7 +81,7 @@ describe('PuttingGreen data structures', () => {
 
   it('should parse scatter analysis results', () => {
     const scatter: ScatterResult = {
-      roll_model: 'ud-legacy-roll/1',
+      roll_model: 'usga-stimp-roll/1',
       final_positions: [
         [10.1, 14.9],
         [9.8, 15.2],

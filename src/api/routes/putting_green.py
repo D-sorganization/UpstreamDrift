@@ -7,9 +7,8 @@ Provides REST endpoints for the putting green simulation tool page:
 - Scatter analysis for practice mode
 
 Roll-model provenance (ADR-0045 F1, issue #9343; migrated #14141 steps 7a-7c):
-    The legacy UD roll law (``ud-legacy-roll/1``) is preserved in
-    ``src.engines.physics_engines.putting_green`` but no route runs it any
-    more: every route in this module — ``/simulate``, ``/scatter``,
+    The legacy UD roll law (``ud-legacy-roll/1``) is retired (ADR-0058)
+    and no route runs it: every route in this module — ``/simulate``, ``/scatter``,
     ``/contours``, ``/simulate-3d`` and, as of step 7c, ``/read-green`` — runs
     the surface-aware model in ``src.shared.python.putting_dynamics``, which
     restates the Tools stimpmeter law (``usga-stimp-roll/1``). ``roll_model``
@@ -34,6 +33,11 @@ from pydantic import BaseModel, Field
 from src.api.middleware.error_handler import handle_api_errors
 from src.api.rate_limit import get_limit, limiter
 from src.shared.python.core.contracts import PostconditionError, precondition, require
+from src.shared.python.putting_dynamics.types import (
+    TYPICAL_HEAD_MASS_KG,
+    TYPICAL_HEAD_MOI_KG_M2,
+    TYPICAL_LOFT_DEG,
+)
 
 if TYPE_CHECKING:
     from src.shared.python.putting_dynamics import (
@@ -48,9 +52,9 @@ router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
 
 #: Putter head used when a request carries only a stroke speed (shared by
 #: ``/simulate-3d`` defaults and the 2-D routes).
-_DEFAULT_HEAD_MASS_KG = 0.35
-_DEFAULT_HEAD_MOI_KG_M2 = 4.5e-4
-_DEFAULT_LOFT_DEG = 3.0
+_DEFAULT_HEAD_MASS_KG = TYPICAL_HEAD_MASS_KG
+_DEFAULT_HEAD_MOI_KG_M2 = TYPICAL_HEAD_MOI_KG_M2
+_DEFAULT_LOFT_DEG = TYPICAL_LOFT_DEG
 
 
 # -- Request / Response Models --
@@ -280,12 +284,7 @@ def _default_putter(speed_mps: float) -> PutterState:
     """The default putter head swung at ``speed_mps``."""
     from src.shared.python.putting_dynamics import PutterState
 
-    return PutterState(
-        head_mass_kg=_DEFAULT_HEAD_MASS_KG,
-        moi_kg_m2=_DEFAULT_HEAD_MOI_KG_M2,
-        loft_deg=_DEFAULT_LOFT_DEG,
-        speed_mps=speed_mps,
-    )
+    return PutterState.typical(speed_mps)
 
 
 def _struck_ball(
@@ -376,9 +375,7 @@ async def simulate_putt_3d(
 ) -> Putt3DSimulationResponse:
     """Run the canonical surface-aware strike model for R3F playback."""
     del request
-    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-        USGA_STIMP_ROLL_MODEL,
-    )
+    from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_strike
 
     extent_m = 20.0
@@ -462,9 +459,7 @@ async def simulate_putt(
         "(src.shared.python.putting_dynamics); set wind_speed to 0",
         payload.wind_speed,
     )
-    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-        USGA_STIMP_ROLL_MODEL,
-    )
+    from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_ball
 
     surface, half_w, half_h = _build_flat_putting_surface(
@@ -520,9 +515,7 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
     request carries no slope inputs, so the green is flat, matching the
     legacy engine's default surface. See issue #1206.
     """
-    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-        USGA_STIMP_ROLL_MODEL,
-    )
+    from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import read_line, solve_aim
 
     surface, half_w, half_h = _build_flat_putting_surface(
@@ -559,9 +552,7 @@ async def scatter_analysis(
 
     Runs ``usga-stimp-roll/1`` (epic #14141 step 7a). See issue #1206.
     """
-    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-        USGA_STIMP_ROLL_MODEL,
-    )
+    from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_ball
 
     surface, half_w, half_h = _build_flat_putting_surface(
@@ -582,9 +573,7 @@ async def scatter_analysis(
         request.green_width / 2.0, request.green_height / 2.0, half_w, half_h
     )
 
-    # Same seed (0) the legacy `PuttingGreenSimulator` falls back to when
-    # no `random_seed`/`rng` is supplied (see `_sim_core.py.__init__`), so
-    # repeated calls stay deterministic.
+    # A fixed seed (0) keeps repeated calls deterministic.
     rng = np.random.default_rng(0)
 
     final_positions: list[list[float]] = []
