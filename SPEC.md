@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14358 | Cross-engine hand mass and length consistency test (HRG-HX7 slice 1): MuJoCo, Drake, Pinocchio and OpenSim hand body masses match the separated-hand spec; visual-only hand length is measured where exported and reported elsewhere |
+| 2026-11-02 | #14363 | HRG-Q1 anatomical-angles row: full-body-v2 wrist and forearm angles from the same q(t) match a spec-only reference on MuJoCo, Pinocchio, Drake and OpenSim to 1e-12 rad. |
 | 2026-11-02 | #14352 | Shared ToolShell with persistent navigation, breadcrumb, and actions slot for tool pages |
 | 2026-11-02 | #14351 | OpenSim net_moment_com diagnosis artifact and decomposed trace helpers |
 | 2026-11-02 | #14357 | HRG-Q1 loop-closure row: full-body-v2 grip weld qualified against a spec-only reference on MuJoCo, Pinocchio, Drake and OpenSim (zero set and weld distance/angle to 1e-12). |
