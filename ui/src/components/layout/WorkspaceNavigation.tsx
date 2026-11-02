@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { NavLink, Link, useNavigate, useInRouterContext } from 'react-router';
+import { NavLink, Link, useNavigate } from 'react-router';
 import {
   Camera,
   Cpu,
@@ -144,10 +144,6 @@ export interface WorkspaceBreadcrumbProps {
   className?: string;
 }
 
-function SafeBreadcrumbLink({ to, className, children }: { to: string; className?: string; children: React.ReactNode }) {
-  return useInRouterContext() ? <Link to={to} className={className}>{children}</Link> : <a href={to} className={className}>{children}</a>;
-}
-
 export function WorkspaceBreadcrumb({
   workspaceId,
   toolName,
@@ -162,21 +158,21 @@ export function WorkspaceBreadcrumb({
       aria-label="Breadcrumb"
       className={`flex items-center gap-2 text-xs text-gray-400 px-4 py-2 bg-gray-800 border-b border-gray-700/60 ${className}`.trim()}
     >
-      <SafeBreadcrumbLink
+      <Link
         to="/"
         className="hover:text-blue-400 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-400 rounded"
       >
         Home
-      </SafeBreadcrumbLink>
+      </Link>
       <span aria-hidden="true" className="text-gray-600">
         /
       </span>
-      <SafeBreadcrumbLink
+      <Link
         to={wsRoute}
         className="hover:text-blue-400 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-400 rounded"
       >
         {wsTitle}
-      </SafeBreadcrumbLink>
+      </Link>
       <span aria-hidden="true" className="text-gray-600">
         /
       </span>
