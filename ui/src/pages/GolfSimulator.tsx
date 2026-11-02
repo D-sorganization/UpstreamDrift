@@ -295,18 +295,6 @@ function ManualGolfSimulatorPage() {
     ? "Connect to a simulator to enable shot and replay controls."
     : undefined;
 
-  const headerActions = (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-gray-400 font-medium">Status:</span>
-      <span
-        data-testid="status-badge"
-        className={`px-3 py-1 rounded text-xs tracking-wider uppercase ${getStatusBadgeStyle()}`}
-      >
-        {sessionState}
-      </span>
-    </div>
-  );
-
   return (
     <ToolShell
       workspaceId="shot_course_lab"
@@ -314,7 +302,6 @@ function ManualGolfSimulatorPage() {
       toolName="Golf Simulator"
       title="Golf Simulator Console"
       description="Capability-aware controls for local physics and GSPro simulator integration"
-      actions={headerActions}
       primaryActionDisabledReason={primaryDisabledReason}
       nextStep={{
         title: "Analyze Ball Flight",

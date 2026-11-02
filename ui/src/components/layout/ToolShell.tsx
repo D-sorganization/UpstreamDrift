@@ -91,7 +91,7 @@ export function ToolShell({
       <section data-testid="next-step-card" aria-label="Next Step" className="my-6 mx-4 p-4 rounded-lg border border-blue-500/30 bg-blue-950/20 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700/40">Next Step</span>
+            <span className="text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700/40">Next Step</span>
             <h3 className="text-sm font-semibold text-gray-100 truncate">{(nextStep as NextStepConfig).title}</h3>
           </div>
           {(nextStep as NextStepConfig).description && <p className="text-xs text-gray-300">{(nextStep as NextStepConfig).description}</p>}
@@ -138,7 +138,7 @@ export function ToolShell({
     <div className={`flex h-screen w-full bg-gray-950 overflow-hidden ${className}`.trim()}>
       <nav aria-label="Tool Navigation Rail" className={`flex flex-col border-r border-gray-800 bg-gray-900 transition-all duration-200 flex-shrink-0 ${navCollapsed ? 'w-12' : 'w-48'}`}>
         <div className="flex items-center justify-between p-2 border-b border-gray-800">
-          {!navCollapsed && <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-1">Steps</span>}
+          {!navCollapsed && <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-1">Steps</span>}
           <button type="button" data-testid="nav-rail-toggle" aria-label={navCollapsed ? 'Expand navigation rail' : 'Collapse navigation rail'} aria-expanded={!navCollapsed} onClick={() => setNavCollapsed(!navCollapsed)} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded hover:bg-gray-800 text-gray-400 hover:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
             {navCollapsed ? <ChevronRight className="w-4 h-4" aria-hidden="true" /> : <ChevronLeft className="w-4 h-4" aria-hidden="true" />}
           </button>

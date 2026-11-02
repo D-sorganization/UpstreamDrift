@@ -18,9 +18,24 @@ class ToolShellSpec:
 
 
 MIGRATED_TOOL_SHELLS: Final[dict[str, ToolShellSpec]] = {
-    "video_analyzer": ToolShellSpec("video_analyzer", "Video Analyzer", "capture_analyze", next_step_href="/tools/swing-objective-lab"),
-    "swing_objective_lab": ToolShellSpec("swing_objective_lab", "Swing Objective Lab", "optimize_train", next_step_href="/tools/golf-simulator"),
-    "golf_simulator": ToolShellSpec("golf_simulator", "Golf Simulator", "shot_course_lab", next_step_href="/tools/ball-flight"),
+    "video_analyzer": ToolShellSpec(
+        "video_analyzer",
+        "Video Analyzer",
+        "capture_analyze",
+        next_step_href="/tools/swing-objective-lab",
+    ),
+    "swing_objective_lab": ToolShellSpec(
+        "swing_objective_lab",
+        "Swing Objective Lab",
+        "optimize_train",
+        next_step_href="/tools/golf-simulator",
+    ),
+    "golf_simulator": ToolShellSpec(
+        "golf_simulator",
+        "Golf Simulator",
+        "shot_course_lab",
+        next_step_href="/tools/ball-flight",
+    ),
 }
 
 
