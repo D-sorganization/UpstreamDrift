@@ -2,9 +2,9 @@
 //!
 //! Uses [`ort`] (ONNX Runtime) + [`tokenizers`] to run a small sentence-
 //! transformers model (default: `sentence-transformers/all-MiniLM-L6-v2`,
-//! 384-dim, ~22 MB quantized) on-device. The model is cached under
-//! `$UPSTREAM_DRIFT_MODEL_CACHE` (or `~/.cache/upstream-drift/models/`) and
-//! downloaded on first use via the model's Hugging Face URL.
+//! 384-dim) on-device. Artifact revision and SHA-256 digests live in
+//! `local_embedding_model.lock.json`. The model is cached under
+//! `$UPSTREAM_DRIFT_MODEL_CACHE` (or `~/.cache/upstream-drift/models/`).
 //!
 //! Gated behind the `local-embeddings` Cargo feature so plain `cargo build`
 //! and the default maturin wheel stay slim. Consumers opt in by building
@@ -26,13 +26,7 @@ use tokenizers::Tokenizer;
 /// of `sentence-transformers/all-MiniLM-L6-v2` is hosted by `optimum`.
 pub const DEFAULT_MODEL_ID: &str = "sentence-transformers/all-MiniLM-L6-v2";
 
-/// Default model artifact URLs. Pinned to a known-good HF revision so we
-/// don't get bitten by silent upstream re-uploads. The SHA-256 below is
-/// validated on download; mismatch aborts the load.
-const MODEL_ONNX_URL: &str =
-    "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx";
-const TOKENIZER_URL: &str =
-    "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json";
+const MODEL_LOCK: &str = include_str!("../local_embedding_model.lock.json");
 
 /// Expected output dimension for the default model.
 pub const DEFAULT_EMBEDDING_DIM: usize = 384;
@@ -56,21 +50,33 @@ impl LocalEmbedder {
     /// Construct using the default model, downloading to the cache dir if
     /// necessary. Returns an error if download or model parse fails.
     pub fn from_default_cache() -> Result<Self, String> {
+        let lock: serde_json::Value = serde_json::from_str(MODEL_LOCK)
+            .map_err(|e| format!("Invalid local embedding model lock: {}", e))?;
+        let revision = lock["revision"].as_str().ok_or("Model lock has no revision")?;
+        let artifacts = lock["artifacts"].as_object().ok_or("Model lock has no artifacts")?;
+        let artifact = |name: &str| -> Result<(String, String), String> {
+            let item = artifacts.get(name).ok_or_else(|| format!("Model lock missing {}", name))?;
+            let path = item["path"].as_str().ok_or_else(|| format!("{} has no path", name))?;
+            let cache_name = item["cache_name"].as_str().ok_or_else(|| format!("{} has no cache name", name))?;
+            let sha256 = item["sha256"].as_str().ok_or_else(|| format!("{} has no SHA-256", name))?;
+            Ok((format!("https://huggingface.co/{}/resolve/{}/{}", DEFAULT_MODEL_ID, revision, path), format!("{}\n{}", cache_name, sha256)))
+        };
+        let (model_url, model_info) = artifact("model")?;
+        let (tokenizer_url, tokenizer_info) = artifact("tokenizer")?;
         let cache_dir = resolve_cache_dir()?;
         fs::create_dir_all(&cache_dir)
             .map_err(|e| format!("Failed to create cache dir {}: {}", cache_dir.display(), e))?;
 
-        let model_path = cache_dir.join("all-MiniLM-L6-v2.onnx");
-        let tokenizer_path = cache_dir.join("all-MiniLM-L6-v2.tokenizer.json");
+        let (model_name, model_sha) = model_info.split_once('\n').ok_or("Invalid model lock entry")?;
+        let (tokenizer_name, tokenizer_sha) = tokenizer_info.split_once('\n').ok_or("Invalid tokenizer lock entry")?;
+        let model_path = cache_dir.join(model_name);
+        let tokenizer_path = cache_dir.join(tokenizer_name);
 
-        if !model_path.exists() {
-            download_to(MODEL_ONNX_URL, &model_path)
-                .map_err(|e| format!("Failed to download model: {}", e))?;
-        }
-        if !tokenizer_path.exists() {
-            download_to(TOKENIZER_URL, &tokenizer_path)
-                .map_err(|e| format!("Failed to download tokenizer: {}", e))?;
-        }
+        let offline = std::env::var("UPSTREAM_DRIFT_MODEL_OFFLINE").as_deref() == Ok("1");
+        ensure_artifact(&model_url, &model_path, model_sha, offline)
+            .map_err(|e| format!("Model artifact unavailable: {}", e))?;
+        ensure_artifact(&tokenizer_url, &tokenizer_path, tokenizer_sha, offline)
+            .map_err(|e| format!("Tokenizer artifact unavailable: {}", e))?;
 
         Self::from_paths(&model_path, &tokenizer_path)
     }
@@ -233,7 +239,7 @@ pub fn resolve_cache_dir() -> Result<PathBuf, String> {
 }
 
 /// Download a URL into a file path using a blocking reqwest client.
-fn download_to(url: &str, dest: &Path) -> Result<(), String> {
+fn download_to(url: &str, dest: &Path, expected_sha256: &str) -> Result<(), String> {
     let client = reqwest::blocking::Client::builder()
         .timeout(std::time::Duration::from_secs(600))
         .build()
@@ -251,6 +257,10 @@ fn download_to(url: &str, dest: &Path) -> Result<(), String> {
             .map_err(|e| format!("Failed to create {}: {}", tmp.display(), e))?;
         std::io::copy(&mut resp, &mut file).map_err(|e| format!("Write error: {}", e))?;
     }
+    if let Err(error) = verify_sha256(&tmp, expected_sha256) {
+        let _ = fs::remove_file(&tmp);
+        return Err(error);
+    }
     fs::rename(&tmp, dest).map_err(|e| {
         format!(
             "Failed to move {} to {}: {}",
@@ -259,6 +269,24 @@ fn download_to(url: &str, dest: &Path) -> Result<(), String> {
             e
         )
     })?;
+    Ok(())
+}
+
+fn ensure_artifact(url: &str, path: &Path, expected_sha256: &str, offline: bool) -> Result<(), String> {
+    if !path.exists() {
+        if offline {
+            return Err(format!("offline cache is missing {}", path.display()));
+        }
+        download_to(url, path, expected_sha256)?;
+    }
+    verify_sha256(path, expected_sha256)
+}
+
+fn verify_sha256(path: &Path, expected: &str) -> Result<(), String> {
+    let actual = sha256_of_file(path)?;
+    if actual != expected {
+        return Err(format!("SHA-256 mismatch for {}: expected {}, got {}", path.display(), expected, actual));
+    }
     Ok(())
 }
 
@@ -292,5 +320,32 @@ mod tests {
         let resolved = resolve_cache_dir().unwrap();
         assert_eq!(resolved, tmp.path());
         std::env::remove_var("UPSTREAM_DRIFT_MODEL_CACHE");
+    }
+
+    #[test]
+    fn test_model_lock_has_immutable_revision_and_sha256_digests() {
+        let lock: serde_json::Value = serde_json::from_str(MODEL_LOCK).unwrap();
+        assert_eq!(lock["revision"].as_str().unwrap().len(), 40);
+        for artifact in lock["artifacts"].as_object().unwrap().values() {
+            assert_eq!(artifact["sha256"].as_str().unwrap().len(), 64);
+            assert!(artifact["size_bytes"].as_u64().unwrap() > 0);
+        }
+    }
+
+    #[test]
+    fn test_offline_cache_requires_present_digest_verified_artifacts() {
+        let tmp = tempfile::tempdir().unwrap();
+        let missing = tmp.path().join("missing");
+        let probe = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        probe.set_nonblocking(true).unwrap();
+        let url = format!("http://{}/model", probe.local_addr().unwrap());
+        let error = ensure_artifact(&url, &missing, "00", true).unwrap_err();
+        assert!(error.contains("offline cache is missing"));
+        assert_eq!(probe.accept().unwrap_err().kind(), std::io::ErrorKind::WouldBlock);
+
+        let corrupt = tmp.path().join("corrupt");
+        fs::write(&corrupt, b"wrong artifact").unwrap();
+        let error = ensure_artifact(&url, &corrupt, "00", true).unwrap_err();
+        assert!(error.contains("SHA-256 mismatch"));
     }
 }

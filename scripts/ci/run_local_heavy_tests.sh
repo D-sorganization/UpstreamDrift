@@ -2,7 +2,6 @@
 # run_local_heavy_tests.sh — UpstreamDrift
 # ─────────────────────────────────────────────────────────────────────────────
 # LOCAL DOCKER PARITY RUNNER
-# Mirrors .github/workflows/heavy-tests-opt-in.yml + reusable-heavy-tests.yml
 # Every step here should have a direct equivalent in those YAML files.
 # Break parity → open a bug.
 #
@@ -23,12 +22,14 @@ TEST_PATH="tests/heavy_integration"
 PYTHON_VERSION="3.11"
 NO_BUILD=false
 DEPS_ONLY=false
+LOCAL_EMBEDDINGS=false
 
 # Parse args
 for arg in "$@"; do
   case $arg in
     --no-build) NO_BUILD=true ;;
     --deps-only) DEPS_ONLY=true ;;
+    --local-embeddings) LOCAL_EMBEDDINGS=true ;;
   esac
 done
 
@@ -39,6 +40,26 @@ YELLOW="\033[1;33m"
 RESET="\033[0m"
 
 echo -e "${BOLD}=====================================================================${RESET}"
+
+if [ "$LOCAL_EMBEDDINGS" = true ]; then
+  LOCAL_EMBEDDINGS_VENV="$(mktemp -d)/venv"
+  python -m venv "$LOCAL_EMBEDDINGS_VENV"
+  source "$LOCAL_EMBEDDINGS_VENV/bin/activate"
+  python -m pip install "onnxruntime==1.24.1" maturin 'pytest>=9.0.3,<9.2.0' pytest-asyncio pytest-timeout
+  export CI_LOCAL_EMBEDDINGS_EXPECTED=1
+  export UPSTREAM_DRIFT_MODEL_OFFLINE=1
+  export UPSTREAM_DRIFT_MODEL_CACHE="$(mktemp -d)"
+  export ORT_DYLIB_PATH="$(python -c 'import onnxruntime,pathlib; print(pathlib.Path(onnxruntime.__file__).parent/"capi"/"libonnxruntime.so.1.24.1")')"
+  test -f "$ORT_DYLIB_PATH"
+  (cd rust_core/ai_backend && python -m maturin develop --features python,local-embeddings)
+  pytest --collect-only -q -m requires_ort tests/ai/test_rust_rag_pipeline.py | tee local_embedding_collected.txt
+  python scripts/provision_local_embedding_model.py
+  export HTTP_PROXY=http://127.0.0.1:9 HTTPS_PROXY=http://127.0.0.1:9 ALL_PROXY=http://127.0.0.1:9 http_proxy=http://127.0.0.1:9 https_proxy=http://127.0.0.1:9 all_proxy=http://127.0.0.1:9
+  unset NO_PROXY no_proxy
+  pytest -v -m requires_ort --junit-xml=local_embedding_results.xml --no-header tests/ai/test_rust_rag_pipeline.py
+  python -c 'import xml.etree.ElementTree as E; r=E.parse("local_embedding_results.xml").getroot(); s=[r] if r.tag=="testsuite" else list(r.iter("testsuite")); n=sum(int(x.get("tests",0)) for x in s); bad=sum(int(x.get("skipped",0))+int(x.get("failures",0))+int(x.get("errors",0)) for x in s); assert n and not bad, f"offline lane invalid: tests={n}, failures/skips/errors={bad}"'
+  exit 0
+fi
 echo -e "${BOLD} Heavy Integration Test Runner — ${REPO_NAME}${RESET}"
 echo -e "${BOLD} $(date '+%Y-%m-%d %H:%M:%S')${RESET}"
 echo -e "${BOLD}=====================================================================${RESET}"
