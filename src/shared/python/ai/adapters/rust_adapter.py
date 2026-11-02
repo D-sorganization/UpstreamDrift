@@ -332,7 +332,7 @@ class RustAgentAdapter(BaseAgentAdapter):
         finally:
             # stream_finished fires before run() returns, so the thread may
             # still be alive here; destroying a running QThread aborts the
-            # interpreter (#14321, Tools#5951).
+            # interpreter (#5951).
             worker.stop()
             worker.wait()
 
