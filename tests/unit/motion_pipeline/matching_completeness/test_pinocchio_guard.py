@@ -15,6 +15,8 @@ from tests.unit.motion_pipeline.matching_completeness._pinocchio_guard import (
     mock_skip_reason,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_magicmock_module_is_a_typed_skip() -> None:
     assert "MagicMock" in (mock_skip_reason(mock.MagicMock()) or "")
