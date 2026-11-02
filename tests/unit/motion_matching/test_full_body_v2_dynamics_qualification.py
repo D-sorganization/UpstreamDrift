@@ -22,9 +22,9 @@ precision budget as the HRG-D2 FK qualification and is never loosened.
 
 Covered here: MuJoCo (MJCF export), Pinocchio, Drake (native models) and
 OpenSim (``OpenSimFullBodyParityAdapter.mass_and_bias`` at zero velocity, where
-the inverse-dynamics bias is the gravity generalized force). MyoSuite
-inertia/gravity parity, limits, closure, contact and inverse dynamics on a
-reference trajectory remain open on #13176.
+the inverse-dynamics bias is the gravity generalized force). MyoSuite is
+reached by segment-orientation IK on the thorax, not by exporting the spec
+(``EXPORT_STATUS["myosuite"]``), so its inertia and gravity cell is exempt.
 """
 
 from __future__ import annotations
@@ -298,3 +298,10 @@ def test_opensim_mass_matrix_and_gravity_match_spec(doc, configs) -> None:
         return adapter.mass_and_bias(np.array([q[n] for n in order]), rest)
 
     _check("OpenSim", doc, configs, mass_and_gravity)
+
+
+def test_myosuite_has_no_spec_inertia_on_the_same_q() -> None:
+    """MyoSuite is IK-mapped on the thorax, so its inertia cell is exempt."""
+    status = geo.EXPORT_STATUS["myosuite"]
+    assert status["status"] == "mapped_thorax_only"
+    assert "segment-orientation IK" in status["reason"]

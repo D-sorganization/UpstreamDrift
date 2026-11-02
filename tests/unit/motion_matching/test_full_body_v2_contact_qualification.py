@@ -23,7 +23,6 @@ budget and are never loosened.
 
 MyoSuite is reached by segment-orientation IK on the thorax, not by exporting
 the spec (``EXPORT_STATUS["myosuite"]``), so it carries no foot spheres.
-Inverse dynamics on a reference trajectory remains open on #13176.
 """
 
 from __future__ import annotations

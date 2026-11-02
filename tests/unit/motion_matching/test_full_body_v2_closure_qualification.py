@@ -25,8 +25,7 @@ qualified for every engine through ``VectorPlant.closure_pose_residual``:
 ``TOL`` (1e-12) keeps the HRG-Q1 precision budget and is never loosened.
 MyoSuite is reached by segment-orientation IK on the thorax, not by exporting
 the spec (``EXPORT_STATUS["myosuite"]``), so it carries no grip weld to
-qualify. Contact, inverse dynamics on a reference trajectory and anatomical
-angles remain open on #13176.
+qualify.
 """
 
 from __future__ import annotations
