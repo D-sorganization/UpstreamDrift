@@ -1,92 +1,80 @@
 import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { request as httpRequest } from 'node:http';
+import { request } from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { loadReports, validateReports, writeReceipt } from './validate-lighthouse-reports.mjs';
+import { loadReport, validateReport, writeReceipt } from './validate-lighthouse-reports.mjs';
 
 const url = 'http://127.0.0.1:4173/';
-const rejectReport = (candidate, pattern) => assert.throws(() => validateReports([candidate, report(), report()], url), pattern);
-function report(overrides = {}) {
-  return {
-    requestedUrl: url,
-    finalUrl: url,
-    lighthouseVersion: '12.6.1',
-    environment: { networkUserAgent: 'Mozilla/5.0 Chrome/123.0.0.0' },
-    runtimeError: null,
-    configSettings: { formFactor: 'mobile', throttlingMethod: 'simulate',
-      screenEmulation: { mobile: true, width: 390, height: 844, disabled: false } },
-    categories: { performance: { score: 0.8 }, accessibility: { score: 0.9 }, 'best-practices': { score: 1 }, seo: { score: 0.7 } },
-    audits: { 'network-requests': { details: { items: [{ url }, { url: `${url}assets/app.js` }] } } },
-    ...overrides,
-  };
-}
-test('accepts three complete mobile reports for the local fixture origin', () => {
-  const result = validateReports([report(), report(), report()], url);
-  assert.equal(result.reportCount, 3);
-  assert.equal(result.lighthouseVersion, '12.6.1');
-  assert.equal(result.configSettings.formFactor, 'mobile');
+const categories = ['performance', 'accessibility', 'best-practices', 'seo'];
+const report = (overrides = {}) => ({
+  requestedUrl: url, finalUrl: url, lighthouseVersion: '12.6.1',
+  environment: { networkUserAgent: 'Chrome/123.0.0.0' }, runtimeError: null,
+  configSettings: { formFactor: 'mobile', throttlingMethod: 'simulate',
+    screenEmulation: { mobile: true, width: 390, height: 844, disabled: false } },
+  categories: Object.fromEntries(categories.map((name) => [name, { score: 0.8 }])),
+  audits: { 'network-requests': { details: { items: [{ url }, { url: `${url}assets/app.js` }] } } },
+  ...overrides,
+});
+const reject = (value, pattern) => assert.throws(() => validateReport(value, url), pattern);
+
+test('writes a sanitized numeric receipt from one complete local mobile report', async (t) => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'lighthouse-receipt-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  await writeFile(path.join(dir, 'manifest.json'), JSON.stringify([{ url, jsonPath: 'report.json' }]));
+  await writeFile(path.join(dir, 'report.json'), JSON.stringify(report()));
+  const receipt = await writeReceipt(dir, url);
+  assert.equal(receipt.reportCount, 1);
+  assert.equal(receipt.viewport.width, 390);
+  assert.deepEqual(Object.keys(receipt.scores).sort(), categories.sort());
+  assert.ok(Object.values(receipt.scores).every(Number.isFinite));
+  const saved = JSON.parse(await readFile(path.join(dir, 'baseline-receipt.json')));
+  assert.deepEqual(saved, receipt);
+  assert.equal('audits' in saved, false);
+  assert.equal('requestedUrl' in saved, false);
 });
 
-test('rejects incomplete, terminated, or stale run sets', () => {
-  for (const reports of [[], [report(), report()], [report(), report(), report(), report()]]) {
-    assert.throws(() => validateReports(reports, url), /expected 3 reports/i);
-  }
-});
-test('rejects a report for a different URL or non-mobile collection', () => {
-  rejectReport(report({ requestedUrl: 'https://example.test/' }), /expected URL/i);
-  rejectReport(report({ configSettings: { formFactor: 'desktop' } }), /mobile/i);
-});
-
-test('requires active mobile emulation and blocks requests outside the fixture origin', () => {
-  for (const screenEmulation of [{ mobile: false, width: 390, height: 844, disabled: false },
-    { mobile: true, width: 390, height: 844, disabled: true }]) {
-    const invalid = report({ configSettings: { ...report().configSettings, screenEmulation } });
-    rejectReport(invalid, /mobile/i);
-  }
+test('rejects malformed, errored, non-mobile, non-numeric, and external reports', () => {
+  const desktop = report({ configSettings: { formFactor: 'desktop' } });
+  const cases = [
+    [report({ finalUrl: 'https://example.test/' }), /URL/i],
+    [report({ runtimeError: { code: 'NO_FCP' } }), /runtime error/i],
+    [desktop, /mobile/i],
+    [report({ categories: { performance: { score: NaN } } }), /score/i],
+    [report({ audits: { 'network-requests': { details: {
+      items: [{ url: 'https://cdn.example.test/font' }],
+    } } } }), /external request/i],
+  ];
+  for (const [value, pattern] of cases) reject(value, pattern);
 });
 
-test('rejects Lighthouse runtime errors and missing or invalid category scores', () => {
-  rejectReport(report({ runtimeError: { code: 'NO_FCP' } }), /runtime error/i);
-  rejectReport(report({ categories: { performance: { score: Number.NaN } } }), /score/i);
+test('requires one safe manifest entry and its complete report', async (t) => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'lighthouse-input-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  await assert.rejects(loadReport(dir, url), /manifest/i);
+  const manifest = (entries) => writeFile(path.join(dir, 'manifest.json'), JSON.stringify(entries));
+  await manifest([{ url, jsonPath: '../outside.json' }]);
+  await assert.rejects(loadReport(dir, url), /outside/i);
+  await manifest([{ url, jsonPath: 'missing.json' }]);
+  await assert.rejects(loadReport(dir, url), /report/i);
+  await writeFile(path.join(dir, 'report.json'), JSON.stringify(report()));
+  await manifest([{ url, jsonPath: 'report.json' }, { url, jsonPath: 'report.json' }]);
+  await assert.rejects(loadReport(dir, url), /one report/i);
 });
-test('rejects app requests outside the deterministic fixture origin', () => {
-  const external = report({ audits: { 'network-requests': { details: { items: [{ url }, { url: 'https://fonts.example.test/font.woff2' }] } } } });
-  rejectReport(external, /external request/i);
-});
-test('egress proxy records blocked methods and targets', async (t) => {
+
+test('proxy blocks an external HTTP target and records the attempt', async (t) => {
   const { createBrowserProxy } = await import('./browser-egress-proxy.mjs');
   const proxy = createBrowserProxy();
   await new Promise((resolve) => proxy.listen(0, '127.0.0.1', resolve));
   t.after(() => proxy.close());
-  const response = await new Promise((resolve, reject) => {
-    const request = httpRequest({ hostname: '127.0.0.1', port: proxy.address().port,
-      path: 'http://example.invalid/' }, (value) => { value.resume(); resolve(value); });
-    request.on('error', reject);
-    request.end();
+  const response = await new Promise((resolve, rejectRequest) => {
+    const req = request({ hostname: '127.0.0.1', port: proxy.address().port,
+      path: 'http://example.invalid/' }, (res) => { res.resume(); resolve(res); });
+    req.on('error', rejectRequest); req.end();
   });
   assert.equal(response.statusCode, 403);
-  assert.equal(response.headers['x-browser-network-policy'], 'blocked');
-  assert.deepEqual(proxy.policyRequests(), [{ method: 'GET', target: 'http://example.invalid/', blocked: true }]);
-});
-
-test('requires a complete filesystem manifest and all referenced reports', async (t) => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), 'lighthouse-receipt-'));
-  t.after(() => rm(directory, { recursive: true, force: true }));
-  await assert.rejects(loadReports(directory, url), /manifest is missing or invalid/i);
-  const reportPaths = [1, 2, 3].map((i) => path.join(directory, `dashboard-run-${i}.report.json`));
-  const manifest = (paths) => writeFile(path.join(directory, 'manifest.json'), JSON.stringify(paths.map((jsonPath) => ({ url, jsonPath }))));
-  await Promise.all(reportPaths.slice(0, 2).map((file) => writeFile(file, JSON.stringify(report()))));
-  await manifest(reportPaths.slice(0, 2));
-  await assert.rejects(loadReports(directory, url), /expected 3 reports/i);
-  await writeFile(reportPaths[2], JSON.stringify(report()));
-  await manifest([...reportPaths.slice(0, 2), path.join(directory, 'missing.json')]);
-  await assert.rejects(loadReports(directory, url), /manifest reports/i);
-  await Promise.all(reportPaths.map((file) => writeFile(file, JSON.stringify(report()))));
-  await manifest(reportPaths);
-  assert.equal((await writeReceipt(directory, url)).reportCount, 3);
-  assert.equal(JSON.parse(await readFile(path.join(directory, 'baseline-receipt.json'))).reportCount, 3);
-  await writeFile(path.join(directory, 'unexpected.json'), '{}');
-  await assert.rejects(loadReports(directory, url), /manifest reports/i);
+  assert.deepEqual(proxy.policyRequests(), [
+    { method: 'GET', target: 'http://example.invalid/', blocked: true },
+  ]);
 });

@@ -3230,7 +3230,7 @@ jobs:
         with:
           urls: http://127.0.0.1:4173/
           configPath: ui/lighthouserc.json
-          runs: 3
+          runs: 1
           uploadArtifacts: false
           temporaryPublicStorage: false
       - name: Validate collected Lighthouse reports

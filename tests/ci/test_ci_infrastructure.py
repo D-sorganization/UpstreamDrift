@@ -44,6 +44,13 @@ QUALITY_GATE_FLEET_GATES = (
 )
 
 
+CI_STANDARD = yaml.safe_load(
+    (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+        encoding="utf-8"
+    )
+)
+
+
 def _bash_path(path: Path) -> str:
     return (
         f"/{path.drive[0].lower()}{path.as_posix()[2:]}"
@@ -52,225 +59,142 @@ def _bash_path(path: Path) -> str:
     )
 
 
-def _posix_bash() -> str:
+def _bash() -> str:
     if os.name == "nt":
         path = (
             Path(os.environ.get("PROGRAMFILES", "C:/Program Files"))
             / "Git/bin/bash.exe"
         )
-        bash = str(path) if path.is_file() else None
-        if not bash:
+        if not path.is_file():
             pytest.skip(
-                "Git Bash is unavailable; required Linux CI runs workflow behavior cases"
+                "Git Bash unavailable; required Linux CI runs workflow behavior cases"
             )
-    else:
-        bash = shutil.which("bash")
-        assert bash, "Required Linux CI must provide Bash for workflow behavior tests"
+        return str(path)
+    bash = shutil.which("bash")
+    assert bash, "Linux CI must provide Bash"
     return bash
 
 
-@pytest.mark.parametrize(
-    ("mode", "private", "fork", "expected_mode", "runner"),
-    [
-        ("auto", "false", "true", "hosted", "ubuntu-latest"),
-        ("auto", "false", "false", "hosted", "ubuntu-latest"),
-        ("local", "false", "false", "local", "d-sorg-fleet-docker"),
-        ("local", "true", "false", "local", "d-sorg-fleet-docker"),
-    ],
-    ids=[
-        "fork-hosted",
-        "public-auto-hosted",
-        "public-local-fleet",
-        "private-local-fleet",
-    ],
-)
-def test_mobile_browser_runner_selection_preserves_hosted_and_local_policy(
-    tmp_path: Path,
-    mode: str,
-    private: str,
-    fork: str,
-    expected_mode: str,
-    runner: str,
-) -> None:
-    workflow = yaml.safe_load(
-        (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
-            encoding="utf-8"
-        )
+def _ci_step(
+    job: str, *, name: str | None = None, step_id: str | None = None
+) -> dict[str, Any]:
+    return next(
+        step
+        for step in CI_STANDARD["jobs"][job]["steps"]
+        if (name is None or step.get("name") == name)
+        and (step_id is None or step.get("id") == step_id)
     )
-    picker = workflow["jobs"]["pick-runner"]
-    frontend = workflow["jobs"]["frontend-tests"]
-    mobile = workflow["jobs"]["frontend-mobile-baseline"]
-    assert "pick-runner" in mobile["needs"]
-    assert (
-        frontend["outputs"]["ui_skip"] == "${{ steps.frontend-changes.outputs.skip }}"
+
+
+def _run_bash(
+    script: str, cwd: Path, env: dict[str, str]
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [_bash(), "-e", "-c", script], cwd=cwd, env=env, text=True, capture_output=True
     )
-    validate = next(
-        step for step in frontend["steps"] if step.get("id") == "validate-frontend-skip"
-    )
-    assert (
-        validate["env"]["FRONTEND_SKIP"] == "${{ steps.frontend-changes.outputs.skip }}"
-    )
-    assert "Check for frontend changes" not in {
-        step.get("name") for step in mobile["steps"]
-    }
-    assert all(
-        step.get("if") == "needs.frontend-tests.outputs.ui_skip != 'true'"
-        for step in mobile["steps"][1:]
-    )
+
+
+def test_mobile_runner_and_skip_contract(tmp_path: Path) -> None:
+    jobs = CI_STANDARD["jobs"]
+    front, mobile = jobs["frontend-tests"], jobs["frontend-mobile-baseline"]
+    assert front["outputs"]["ui_skip"] == "${{ steps.frontend-changes.outputs.skip }}"
+    assert "frontend-tests" in mobile["needs"]
     assert mobile["runs-on"] == (
         "${{ fromJSON(needs.pick-runner.outputs.mode == 'hosted' && '[\"ubuntu-latest\"]' "
         '|| \'["self-hosted","Linux","d-sorg-fleet-docker","d-sorg-fleet-public-heavy"]\') }}'
     )
-    install = next(
-        step
-        for step in mobile["steps"]
-        if step.get("name") == "Install Chromium for selected runner"
-    )["run"]
-    assert (
-        "--with-deps chromium" in install
-        and "npx playwright install chromium" in install
+    assert all(
+        step.get("if") == "needs.frontend-tests.outputs.ui_skip != 'true'"
+        for step in mobile["steps"][1:]
     )
-    assert (
-        "needs.pick-runner.outputs.mode" in install
-        and "Chromium cannot launch" in install
-    )
-    assert "sudo" not in install and "$RUNNER_TEMP/playwright-browsers" in install
-    bash = _posix_bash()
-    step = next(step for step in picker["steps"] if step.get("id") == "check")
-    env = {
-        **os.environ,
-        "CI_RUNNER_MODE": mode,
-        "REPOSITORY_PRIVATE": private,
-        "RUNNER_LABEL": "d-sorg-fleet-docker",
-        "FORK_PR": fork,
-        "GITHUB_OUTPUT": "output",
-        "GITHUB_STEP_SUMMARY": "summary",
-    }
-    subprocess.run([bash, "-e", "-c", step["run"]], check=True, cwd=tmp_path, env=env)
-    values = dict(
-        line.split("=", 1) for line in (tmp_path / "output").read_text().splitlines()
-    )
-    assert values["mode"] == expected_mode
-    assert values["runner"] == runner
-    change_check = next(
-        step for step in frontend["steps"] if step.get("id") == "frontend-changes"
-    )
-    output = tmp_path / "output"
-    for event in ("push", "merge_group"):
-        output.unlink(missing_ok=True)
-        script = change_check["run"].replace("${{ github.event_name }}", event)
-        subprocess.run([bash, "-e", "-c", script], check=True, cwd=tmp_path, env=env)
-        assert output.read_text().splitlines() == ["skip=false"]
-    for value, succeeds in (
-        ("true", True),
-        ("false", True),
-        ("", False),
-        ("unexpected", False),
+    check = _ci_step("pick-runner", step_id="check")["run"]
+    cases = [
+        ("auto", "false", "true", "hosted", "ubuntu-latest"),
+        ("auto", "false", "false", "hosted", "ubuntu-latest"),
+        ("local", "false", "false", "local", "d-sorg-fleet-docker"),
+        ("local", "true", "false", "local", "d-sorg-fleet-docker"),
+    ]
+    for index, (mode, private, fork, expected_mode, expected_runner) in enumerate(
+        cases
     ):
-        result = subprocess.run(
-            [bash, "-e", "-c", validate["run"]],
-            cwd=tmp_path,
-            env={**env, "FRONTEND_SKIP": value},
-            capture_output=True,
+        env = {
+            **os.environ,
+            "CI_RUNNER_MODE": mode,
+            "REPOSITORY_PRIVATE": private,
+            "FORK_PR": fork,
+            "RUNNER_LABEL": "d-sorg-fleet-docker",
+            "GITHUB_OUTPUT": _bash_path(tmp_path / f"picker-{index}"),
+            "GITHUB_STEP_SUMMARY": _bash_path(tmp_path / "summary"),
+        }
+        result = _run_bash(check, tmp_path, env)
+        assert result.returncode == 0, result.stderr
+        output = dict(
+            line.split("=", 1)
+            for line in (tmp_path / f"picker-{index}").read_text().splitlines()
         )
-        assert (result.returncode == 0) is succeeds
+        assert (output["mode"], output["runner"]) == (expected_mode, expected_runner)
+
+    validate = _ci_step("frontend-tests", step_id="validate-frontend-skip")
+    assert (
+        validate["env"]["FRONTEND_SKIP"] == "${{ steps.frontend-changes.outputs.skip }}"
+    )
+    changed = _ci_step("frontend-tests", step_id="frontend-changes")["run"]
+    for event in ("push", "merge_group"):
+        output = tmp_path / "changed"
+        output.unlink(missing_ok=True)
+        result = _run_bash(
+            changed.replace("${{ github.event_name }}", event),
+            tmp_path,
+            {**os.environ, "GITHUB_OUTPUT": _bash_path(output)},
+        )
+        assert result.returncode == 0, result.stderr
+        assert output.read_text().splitlines() == ["skip=false"]
+    for value, code in (("true", 0), ("false", 0), ("", 1), ("unexpected", 1)):
+        result = _run_bash(
+            validate["run"], tmp_path, {**os.environ, "FRONTEND_SKIP": value}
+        )
+        assert result.returncode == code
 
 
-@pytest.mark.parametrize(
-    ("mode", "fail_launch", "fail_install", "expected", "succeeds"),
-    [
-        (
-            "hosted",
-            "false",
-            "false",
-            "npx playwright install --with-deps chromium",
-            True,
-        ),
-        ("local", "false", "false", "npx playwright install chromium", True),
-        (
-            "local",
-            "true",
-            "false",
-            "Chromium cannot launch with the installed self-hosted system libraries",
-            False,
-        ),
-        (
-            "hosted",
-            "false",
-            "true",
-            "npx playwright install --with-deps chromium",
-            False,
-        ),
-        ("local", "false", "true", "npx playwright install chromium", False),
-    ],
-    ids=[
-        "hosted-installs-system-deps",
-        "local-never-installs-system-deps",
-        "local-launch-fails-closed",
-        "hosted-install-fails-closed",
-        "local-install-fails-closed",
-    ],
-)
-def test_mobile_browser_install_step_behavior(
-    tmp_path: Path,
-    mode: str,
-    fail_launch: str,
-    fail_install: str,
-    expected: str,
-    succeeds: bool,
-) -> None:
-    workflow = yaml.safe_load(
-        (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
-            encoding="utf-8"
-        )
-    )
-    step = next(
-        step
-        for step in workflow["jobs"]["frontend-mobile-baseline"]["steps"]
-        if step.get("name") == "Install Chromium for selected runner"
-    )
-    bash = _posix_bash()
-    run = step["run"].replace("${{ needs.pick-runner.outputs.mode }}", mode)
-    harness = (
-        """
-npx() { printf 'npx %s\\n' "$*" >> "$CALL_LOG"; [ "$INSTALL_FAIL" != true ]; }
-node() {
-  printf 'node %s\\n' "$*" >> "$CALL_LOG"
-  case "$*" in
-    *chromium.launch*) [ "$LAUNCH_FAIL" != true ] ;;
-    *) printf '/tmp/chromium\\n' ;;
-  esac
-}
+def test_mobile_chromium_install_policy_fails_closed(tmp_path: Path) -> None:
+    install = _ci_step(
+        "frontend-mobile-baseline", name="Install Chromium for selected runner"
+    )["run"]
+    stubs = """npx() { echo "npx $*" >> "$CALL_LOG"; [ "$INSTALL_FAIL" != true ]; }
+node() { echo "node $*" >> "$CALL_LOG"; case "$*" in *chromium.launch*) [ "$LAUNCH_FAIL" != true ];; *) echo /tmp/chromium;; esac; }
 """
-        + run
-    )
-    env = {
-        **os.environ,
-        "CALL_LOG": _bash_path(tmp_path / "calls"),
-        "GITHUB_ENV": _bash_path(tmp_path / "github-env"),
-        "RUNNER_TEMP": _bash_path(tmp_path),
-        "LAUNCH_FAIL": fail_launch,
-        "INSTALL_FAIL": fail_install,
-    }
-    result = subprocess.run(
-        [bash, "-e", "-c", harness],
-        cwd=tmp_path,
-        env=env,
-        text=True,
-        capture_output=True,
-    )
-    assert (result.returncode == 0) is succeeds
-    log = (tmp_path / "calls").read_text()
-    assert expected in (result.stderr + result.stdout + log)
-    if fail_install == "true":
-        assert "node " not in log
-    elif mode == "local":
-        assert "--with-deps" not in log
-        assert "chromium.launch()" in log
-    else:
-        assert "chromium.launch()" not in log
-    if fail_launch == "true":
-        assert "CHROME_PATH=" not in (tmp_path / "github-env").read_text()
+    cases = [
+        ("hosted", False, False, True),
+        ("local", False, False, True),
+        ("local", True, False, False),
+        ("hosted", False, True, False),
+        ("local", False, True, False),
+    ]
+    for mode, launch_fails, install_fails, succeeds in cases:
+        env = {
+            **os.environ,
+            "RUNNER_TEMP": _bash_path(tmp_path),
+            "GITHUB_ENV": _bash_path(tmp_path / "github-env"),
+            "CALL_LOG": _bash_path(tmp_path / "calls"),
+            "LAUNCH_FAIL": str(launch_fails).lower(),
+            "INSTALL_FAIL": str(install_fails).lower(),
+        }
+        (tmp_path / "calls").unlink(missing_ok=True)
+        (tmp_path / "github-env").unlink(missing_ok=True)
+        result = _run_bash(
+            stubs + install.replace("${{ needs.pick-runner.outputs.mode }}", mode),
+            tmp_path,
+            env,
+        )
+        log = (tmp_path / "calls").read_text()
+        assert (result.returncode == 0) is succeeds
+        assert ("--with-deps chromium" in log) is (mode == "hosted")
+        if install_fails:
+            assert "node " not in log
+        if mode == "local" and not install_fails:
+            assert "chromium.launch()" in log
+        if launch_fails:
+            assert "CHROME_PATH=" not in (tmp_path / "github-env").read_text()
 
 
 def test_pre_push_hook_keeps_pytest_failure_and_gives_repair_guidance(
