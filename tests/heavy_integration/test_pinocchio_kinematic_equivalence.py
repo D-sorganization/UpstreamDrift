@@ -187,6 +187,7 @@ def test_club_head_agrees_with_numpy_fk(loaded_model, cfg) -> None:
     )
 
 
+@pytest.mark.unit
 def test_reference_poses_cover_required_schema() -> None:
     """Three named poses must execute for each of the two required frames."""
     assert tuple(c.name for c in REFERENCE_POSES) == REQUIRED_POSE_NAMES
@@ -216,6 +217,7 @@ class _FakePin:
         return np.zeros(len(REQUIRED_SPINE_JOINTS))
 
 
+@pytest.mark.unit
 def test_controlled_missing_joint_fails() -> None:
     model = _FakeModel(set(REQUIRED_SPINE_JOINTS[:-1]), set(REQUIRED_FRAMES))
     with pytest.raises(BaseException) as excinfo:
@@ -225,6 +227,7 @@ def test_controlled_missing_joint_fails() -> None:
     assert "thorax2_to_thorax3" in str(excinfo.value)
 
 
+@pytest.mark.unit
 def test_controlled_missing_frame_fails() -> None:
     model = _FakeModel(set(REQUIRED_SPINE_JOINTS), {"mid_hands"})
     with pytest.raises(BaseException) as excinfo:
