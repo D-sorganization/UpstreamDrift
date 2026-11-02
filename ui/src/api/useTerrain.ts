@@ -7,7 +7,14 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { apiFetch } from './fetch';
+import { ApiHttpError, apiFetch, apiFetchParsed } from './fetch';
+import {
+  parseActiveTerrain,
+  parseTerrainMaterials,
+  parseTerrainLoadResponse,
+  parseTerrainPresets,
+  parseTerrainTypes,
+} from './schemas';
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -22,9 +29,9 @@ export interface TerrainPreset {
 export interface TerrainMaterial {
   id: string;
   name: string;
-  friction_coefficient: number;
-  restitution: number;
-  color: string;
+  friction_coefficient?: number;
+  restitution?: number;
+  color?: string;
 }
 
 export interface TerrainTypeInfo {
@@ -34,12 +41,12 @@ export interface TerrainTypeInfo {
 }
 
 export interface TerrainProperties {
-  dimensions: [number, number, number];
-  resolution: number;
-  material: string;
-  elevation_range: [number, number];
-  slope_range: [number, number];
-  features: string[];
+  dimensions?: number[];
+  resolution?: number;
+  material?: string;
+  elevation_range?: number[];
+  slope_range?: number[];
+  features?: string[];
 }
 
 export interface ActiveTerrain {
@@ -67,8 +74,8 @@ export function useTerrain() {
 
   const fetchPresets = useCallback(async () => {
     try {
-      const data = await apiFetch<{ presets?: TerrainPreset[] } & TerrainPreset[]>('/api/terrain/presets');
-      if (isMountedRef.current) setPresets(data.presets ?? data ?? []);
+      const data = await apiFetchParsed('/api/terrain/presets', parseTerrainPresets);
+      if (isMountedRef.current) setPresets(data);
     } catch (err) {
       if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch presets');
     }
@@ -76,8 +83,8 @@ export function useTerrain() {
 
   const fetchMaterials = useCallback(async () => {
     try {
-      const data = await apiFetch<{ materials?: TerrainMaterial[] } & TerrainMaterial[]>('/api/terrain/materials');
-      if (isMountedRef.current) setMaterials(data.materials ?? data ?? []);
+      const data = await apiFetchParsed('/api/terrain/materials', parseTerrainMaterials);
+      if (isMountedRef.current) setMaterials(data);
     } catch (err) {
       if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch materials');
     }
@@ -85,8 +92,8 @@ export function useTerrain() {
 
   const fetchTerrainTypes = useCallback(async () => {
     try {
-      const data = await apiFetch<{ types?: TerrainTypeInfo[] } & TerrainTypeInfo[]>('/api/terrain/types');
-      if (isMountedRef.current) setTerrainTypes(data.types ?? data ?? []);
+      const data = await apiFetchParsed('/api/terrain/types', parseTerrainTypes);
+      if (isMountedRef.current) setTerrainTypes(data);
     } catch (err) {
       if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch terrain types');
     }
@@ -94,13 +101,15 @@ export function useTerrain() {
 
   const fetchActiveTerrain = useCallback(async () => {
     try {
-      const data = await apiFetch<ActiveTerrain>('/api/terrain/active');
+      const data = await apiFetchParsed('/api/terrain/active', parseActiveTerrain);
       if (isMountedRef.current) setActiveTerrain(data);
     } catch (err) {
       // A 404 means no terrain is loaded yet — not an error to surface.
       const message = err instanceof Error ? err.message : 'Failed to fetch active terrain';
-      if (message.includes('404')) {
-        if (isMountedRef.current) setActiveTerrain(null);
+      if (err instanceof ApiHttpError && err.status === 404) {
+        if (isMountedRef.current) {
+          setActiveTerrain(null);
+        }
         return;
       }
       if (isMountedRef.current) setError(message);
@@ -111,9 +120,9 @@ export function useTerrain() {
     setLoadState('loading');
     setError(null);
     try {
-      const data = await apiFetch<ActiveTerrain>('/api/terrain/load', {
+      const data = await apiFetchParsed('/api/terrain/load', parseTerrainLoadResponse, {
         method: 'POST',
-        body: JSON.stringify({ preset_id: presetId, ...overrides }),
+        body: JSON.stringify({ ...overrides, preset: presetId }),
       });
       if (isMountedRef.current) {
         setActiveTerrain(data);

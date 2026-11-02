@@ -25,6 +25,13 @@ import type {
   LauncherTile,
   WebLaunchMode,
 } from './useLauncherManifest';
+import type {
+  ActiveTerrain,
+  TerrainMaterial,
+  TerrainPreset,
+  TerrainProperties,
+  TerrainTypeInfo,
+} from './useTerrain';
 
 /** Error thrown when a backend payload fails runtime validation. */
 export class ResponseValidationError extends Error {
@@ -171,4 +178,197 @@ export function parseLauncherManifest(value: unknown): LauncherManifest {
   }
   const tiles = value.tiles.map(parseLauncherTile);
   return { ...(value as object), tiles } as LauncherManifest;
+}
+
+function terrainCollection(value: unknown, key: string): unknown[] {
+  const collection = isRecord(value) ? value[key] : value;
+  if (!Array.isArray(collection)) {
+    fail(`${key} must be an array`);
+  }
+  return collection;
+}
+
+function terrainString(
+  value: Record<string, unknown>,
+  key: string,
+  path: string,
+): string | undefined {
+  const field = value[key];
+  if (field === undefined || field === null) return undefined;
+  if (typeof field !== 'string') fail(`${path}.${key} must be a string`);
+  return field;
+}
+
+function requiredTerrainString(
+  value: Record<string, unknown>,
+  key: string,
+  path: string,
+): string {
+  const field = terrainString(value, key, path);
+  if (field === undefined || field.trim() === '') {
+    fail(`${path}.${key} must be a non-empty string`);
+  }
+  return field;
+}
+
+function terrainStringArray(
+  value: unknown,
+  path: string,
+): string[] | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) {
+    fail(`${path} must be an array of strings`);
+  }
+  return value;
+}
+
+function terrainNumber(
+  value: Record<string, unknown>,
+  key: string,
+  path: string,
+): number | undefined {
+  const field = value[key];
+  if (field === undefined || field === null) return undefined;
+  if (typeof field !== 'number' || !Number.isFinite(field)) {
+    fail(`${path}.${key} must be a finite number`);
+  }
+  return field;
+}
+
+function terrainNumberArray(
+  value: Record<string, unknown>,
+  key: string,
+  path: string,
+): number[] | undefined {
+  const field = value[key];
+  if (field === undefined || field === null) return undefined;
+  if (
+    !Array.isArray(field) ||
+    field.some((item) => typeof item !== 'number' || !Number.isFinite(item))
+  ) {
+    fail(`${path}.${key} must be an array of finite numbers`);
+  }
+  return field;
+}
+
+function parseTerrainProperties(value: unknown): TerrainProperties {
+  if (value === undefined || value === null) return {};
+  if (!isRecord(value)) fail('active terrain.properties must be an object');
+
+  const path = 'active terrain.properties';
+  const properties: TerrainProperties = {};
+  const dimensions = terrainNumberArray(value, 'dimensions', path);
+  const resolution = terrainNumber(value, 'resolution', path);
+  const material = terrainString(value, 'material', path);
+  const elevationRange = terrainNumberArray(value, 'elevation_range', path);
+  const slopeRange = terrainNumberArray(value, 'slope_range', path);
+  const features = terrainStringArray(value.features, `${path}.features`);
+
+  if (dimensions !== undefined) properties.dimensions = dimensions;
+  if (resolution !== undefined) properties.resolution = resolution;
+  if (material !== undefined) properties.material = material;
+  if (elevationRange !== undefined) properties.elevation_range = elevationRange;
+  if (slopeRange !== undefined) properties.slope_range = slopeRange;
+  if (features !== undefined) properties.features = features;
+  return properties;
+}
+
+/** Normalize old UI records and the current backend's metadata-light payload. */
+export function parseActiveTerrain(value: unknown): ActiveTerrain {
+  if (!isRecord(value)) fail('active terrain must be an object');
+  const name = requiredTerrainString(value, 'name', 'active terrain');
+  const properties = parseTerrainProperties(value.properties);
+
+  return {
+    id: terrainString(value, 'id', 'active terrain') ?? name,
+    name,
+    terrain_type:
+      terrainString(value, 'terrain_type', 'active terrain') ??
+      terrainString(value, 'default_type', 'active terrain') ??
+      'N/A',
+    material:
+      terrainString(value, 'material', 'active terrain') ??
+      properties.material ??
+      'N/A',
+    properties,
+    loaded_at: terrainString(value, 'loaded_at', 'active terrain') ?? 'N/A',
+  };
+}
+
+export function parseTerrainLoadResponse(value: unknown): ActiveTerrain {
+  if (!isRecord(value)) fail('terrain load response must be an object');
+  if (value.success !== true) {
+    const message = terrainString(value, 'error', 'terrain load response');
+    fail(message ?? 'Terrain load did not succeed');
+  }
+  return parseActiveTerrain(value);
+}
+
+export function parseTerrainPresets(value: unknown): TerrainPreset[] {
+  return terrainCollection(value, 'presets').map((entry, index) => {
+    const path = `presets[${index}]`;
+    if (!isRecord(entry)) fail(`${path} must be an object`);
+    const name = requiredTerrainString(entry, 'name', path);
+    const terrainTypes = terrainStringArray(entry.terrain_types, `${path}.terrain_types`);
+    const terrainType =
+      terrainString(entry, 'terrain_type', path) ?? terrainTypes?.join(', ') ?? 'N/A';
+    const description = terrainString(entry, 'description', path) ?? '';
+    const id = terrainString(entry, 'id', path) ?? name;
+    const width = terrainNumber(entry, 'width_m', path);
+    const length = terrainNumber(entry, 'length_m', path);
+    const defaults = entry.defaults;
+    if (defaults !== undefined && defaults !== null && !isRecord(defaults)) {
+      fail(`${path}.defaults must be an object`);
+    }
+
+    return {
+      id,
+      name,
+      description,
+      terrain_type: terrainType,
+      defaults: isRecord(defaults)
+        ? defaults
+        : {
+            ...(width === undefined ? {} : { width_m: width }),
+            ...(length === undefined ? {} : { length_m: length }),
+          },
+    };
+  });
+}
+
+export function parseTerrainMaterials(value: unknown): TerrainMaterial[] {
+  return terrainCollection(value, 'materials').map((entry, index) => {
+    const path = `materials[${index}]`;
+    if (!isRecord(entry)) fail(`${path} must be an object`);
+    const name = requiredTerrainString(entry, 'name', path);
+    const id = terrainString(entry, 'id', path) ?? name;
+    const friction = terrainNumber(entry, 'friction_coefficient', path);
+    const restitution = terrainNumber(entry, 'restitution', path);
+    const color = terrainString(entry, 'color', path);
+
+    return {
+      id,
+      name,
+      ...(friction === undefined ? {} : { friction_coefficient: friction }),
+      ...(restitution === undefined ? {} : { restitution }),
+      ...(color === undefined ? {} : { color }),
+    };
+  });
+}
+
+export function parseTerrainTypes(value: unknown): TerrainTypeInfo[] {
+  return terrainCollection(value, 'types').map((entry, index) => {
+    if (typeof entry === 'string') {
+      if (entry.trim() === '') fail(`types[${index}] must be a non-empty string`);
+      return { id: entry, name: entry, description: '' };
+    }
+    const path = `types[${index}]`;
+    if (!isRecord(entry)) fail(`${path} must be an object or string`);
+    const name = requiredTerrainString(entry, 'name', path);
+    return {
+      id: terrainString(entry, 'id', path) ?? name,
+      name,
+      description: terrainString(entry, 'description', path) ?? '',
+    };
+  });
 }
