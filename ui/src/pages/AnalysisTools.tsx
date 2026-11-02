@@ -152,7 +152,7 @@ export function AnalysisToolsPage() {
                     {statistics.metrics.map((stat) => (
                       <div key={stat.metric_name} className="bg-gray-700/50 p-3 rounded">
                         <div className="text-xs font-medium text-gray-300 mb-1">{stat.metric_name}</div>
-                        <div className="grid grid-cols-5 gap-2 text-xs">
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
                           <div>
                             <span className="text-gray-400">current</span>
                             <div className="text-gray-200 font-mono">{stat.current.toFixed(3)}</div>
@@ -234,7 +234,7 @@ export function AnalysisToolsPage() {
               {exportResult && (
                 <div className="mt-3 bg-gray-700/50 p-3 rounded text-xs" data-testid="export-result">
                   <div className="text-green-400 font-medium mb-1">Export Complete</div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div><span className="text-gray-400">Format:</span> <span className="text-gray-200 font-mono">{exportResult.format}</span></div>
                     <div><span className="text-gray-400">File:</span> <span className="text-gray-200 font-mono">{exportResult.filename}</span></div>
                     <div><span className="text-gray-400">Size:</span> <span className="text-gray-200 font-mono">{(exportResult.size_bytes / 1024).toFixed(1)} KB</span></div>

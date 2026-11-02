@@ -212,7 +212,7 @@ export function TerrainPage() {
               {/* Active Terrain Info */}
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
                 <h3 className="text-sm font-semibold text-gray-300 mb-3">Active Terrain</h3>
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <span className="text-gray-400">Name</span>
                     <div className="text-gray-200 font-mono">{activeTerrain.name}</div>
@@ -235,7 +235,7 @@ export function TerrainPage() {
               {/* Properties */}
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
                 <h3 className="text-sm font-semibold text-gray-300 mb-3">Terrain Properties</h3>
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <span className="text-gray-400">Dimensions</span>
                     <div className="text-gray-200 font-mono">{formatTerrainValues(activeTerrain.properties.dimensions, ' x ')}</div>
@@ -289,7 +289,7 @@ export function TerrainPage() {
                 {queryResult && (
                   <div className="mt-3 bg-gray-700/50 p-3 rounded text-xs">
                     <div className="text-gray-400 mb-1">Query Result:</div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div><span className="text-gray-400">Dimensions:</span> <span className="text-gray-200 font-mono">{queryResult.dimensions?.join(' x ') ?? 'N/A'}</span></div>
                       <div><span className="text-gray-400">Resolution:</span> <span className="text-gray-200 font-mono">{queryResult.resolution ?? 'N/A'}</span></div>
                       <div><span className="text-gray-400">Material:</span> <span className="text-gray-200 font-mono">{queryResult.material ?? 'N/A'}</span></div>

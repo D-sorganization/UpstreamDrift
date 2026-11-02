@@ -250,4 +250,12 @@ describe('LiftBaselinePage', () => {
       await screen.findByText('fewer than two engines available for this lift'),
     ).toBeInTheDocument();
   });
+  it('wraps every data table in a horizontal scroll container (#14282)', async () => {
+    render(<LiftBaselinePage />);
+    const tables = await screen.findAllByRole('table');
+    expect(tables.length).toBeGreaterThan(1);
+    tables.forEach((table) => {
+      expect(table.parentElement).toHaveClass('overflow-x-auto');
+    });
+  });
 });

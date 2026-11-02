@@ -44,50 +44,52 @@ function measurementCell(field: NumericField, digits: number, unit: string): Rea
 
 function EnginesTable({ engines }: { engines: EngineView[] }) {
   return (
-    <table className="w-full text-xs border border-gray-700">
-      <thead>
-        <tr className="bg-gray-800 text-gray-300">
-          <th className="px-2 py-1 text-left">Engine</th>
-          <th className="px-2 py-1 text-left">Pack</th>
-          <th className="px-2 py-1 text-left">Bodies/nq/nv</th>
-          <th className="px-2 py-1 text-left">Total mass</th>
-          <th className="px-2 py-1 text-left">Bar above sole</th>
-          <th className="px-2 py-1 text-left">Hand-mid above sole</th>
-          <th className="px-2 py-1 text-left">Smoke</th>
-          <th className="px-2 py-1 text-left">Start contact</th>
-        </tr>
-      </thead>
-      <tbody>
-        {engines.map((engine) => {
-          const commitShort = engine.pack.commit ? engine.pack.commit.slice(0, 10) : '—';
-          return (
-            <tr key={engine.engine} className="border-t border-gray-700 text-gray-200">
-              <td className="px-2 py-1 capitalize">{engine.engine}</td>
-              <td className="px-2 py-1" title={engine.pack.commit ?? undefined}>
-                {engine.pack.repo ?? '—'}@{commitShort}
-              </td>
-              <td className="px-2 py-1">
-                {engine.structure.n_bodies ?? '—'}/{engine.structure.nq ?? '—'}/
-                {engine.structure.nv ?? '—'}
-              </td>
-              <td className="px-2 py-1">{measurementCell(engine.total_mass_kg, 2, 'kg')}</td>
-              <td className="px-2 py-1">{measurementCell(engine.bar_above_sole_m, 3, 'm')}</td>
-              <td className="px-2 py-1">
-                {measurementCell(engine.hand_mid_above_sole_m, 3, 'm')}
-              </td>
-              <td className="px-2 py-1">
-                loaded={yesNo(engine.smoke.loaded)}, stepped=
-                {yesNo(engine.smoke.stepped)}, max|qvel|=
-                {measurementCell(engine.smoke.max_abs_qvel, 4, '')}
-              </td>
-              <td className="px-2 py-1" title={engine.start_contact.reason ?? undefined}>
-                {measurementCell(engine.start_contact.value_n, 2, 'N')}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <div className="overflow-x-auto">
+      <table className="w-full text-xs border border-gray-700">
+        <thead>
+          <tr className="bg-gray-800 text-gray-300">
+            <th className="px-2 py-1 text-left">Engine</th>
+            <th className="px-2 py-1 text-left">Pack</th>
+            <th className="px-2 py-1 text-left">Bodies/nq/nv</th>
+            <th className="px-2 py-1 text-left">Total mass</th>
+            <th className="px-2 py-1 text-left">Bar above sole</th>
+            <th className="px-2 py-1 text-left">Hand-mid above sole</th>
+            <th className="px-2 py-1 text-left">Smoke</th>
+            <th className="px-2 py-1 text-left">Start contact</th>
+          </tr>
+        </thead>
+        <tbody>
+          {engines.map((engine) => {
+            const commitShort = engine.pack.commit ? engine.pack.commit.slice(0, 10) : '—';
+            return (
+              <tr key={engine.engine} className="border-t border-gray-700 text-gray-200">
+                <td className="px-2 py-1 capitalize">{engine.engine}</td>
+                <td className="px-2 py-1" title={engine.pack.commit ?? undefined}>
+                  {engine.pack.repo ?? '—'}@{commitShort}
+                </td>
+                <td className="px-2 py-1">
+                  {engine.structure.n_bodies ?? '—'}/{engine.structure.nq ?? '—'}/
+                  {engine.structure.nv ?? '—'}
+                </td>
+                <td className="px-2 py-1">{measurementCell(engine.total_mass_kg, 2, 'kg')}</td>
+                <td className="px-2 py-1">{measurementCell(engine.bar_above_sole_m, 3, 'm')}</td>
+                <td className="px-2 py-1">
+                  {measurementCell(engine.hand_mid_above_sole_m, 3, 'm')}
+                </td>
+                <td className="px-2 py-1">
+                  loaded={yesNo(engine.smoke.loaded)}, stepped=
+                  {yesNo(engine.smoke.stepped)}, max|qvel|=
+                  {measurementCell(engine.smoke.max_abs_qvel, 4, '')}
+                </td>
+                <td className="px-2 py-1" title={engine.start_contact.reason ?? undefined}>
+                  {measurementCell(engine.start_contact.value_n, 2, 'N')}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -100,30 +102,32 @@ function PhasesSection({ engines }: { engines: EngineView[] }) {
             {engine.engine} phases
           </h3>
           {engine.phases.length > 0 ? (
-            <table className="w-full text-xs border border-gray-700">
-              <thead>
-                <tr className="bg-gray-900 text-gray-300">
-                  <th className="px-2 py-1 text-left">Phase</th>
-                  <th className="px-2 py-1 text-left">Fraction</th>
-                  <th className="px-2 py-1 text-left">Hand-bar axis dist (L)</th>
-                  <th className="px-2 py-1 text-left">Hand-bar axis dist (R)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {engine.phases.map((phase, idx) => (
-                  <tr key={`${phase.name ?? 'phase'}-${idx}`} className="border-t border-gray-700 text-gray-200">
-                    <td className="px-2 py-1">{phase.name ?? '—'}</td>
-                    <td className="px-2 py-1">{measurementCell(phase.fraction, 3, '')}</td>
-                    <td className="px-2 py-1">
-                      {measurementCell(phase.hand_bar_axis_distance_m.l, 3, 'm')}
-                    </td>
-                    <td className="px-2 py-1">
-                      {measurementCell(phase.hand_bar_axis_distance_m.r, 3, 'm')}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border border-gray-700">
+                <thead>
+                  <tr className="bg-gray-900 text-gray-300">
+                    <th className="px-2 py-1 text-left">Phase</th>
+                    <th className="px-2 py-1 text-left">Fraction</th>
+                    <th className="px-2 py-1 text-left">Hand-bar axis dist (L)</th>
+                    <th className="px-2 py-1 text-left">Hand-bar axis dist (R)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {engine.phases.map((phase, idx) => (
+                    <tr key={`${phase.name ?? 'phase'}-${idx}`} className="border-t border-gray-700 text-gray-200">
+                      <td className="px-2 py-1">{phase.name ?? '—'}</td>
+                      <td className="px-2 py-1">{measurementCell(phase.fraction, 3, '')}</td>
+                      <td className="px-2 py-1">
+                        {measurementCell(phase.hand_bar_axis_distance_m.l, 3, 'm')}
+                      </td>
+                      <td className="px-2 py-1">
+                        {measurementCell(phase.hand_bar_axis_distance_m.r, 3, 'm')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <p className="text-xs text-gray-400">No phases recorded.</p>
           )}
@@ -148,37 +152,39 @@ function ComparisonsSection({ comparisons }: { comparisons: LiftView['comparison
         return (
           <div key={pose}>
             <h4 className="text-xs uppercase tracking-wide text-gray-400 mb-1">{pose}</h4>
-            <table className="w-full text-xs border border-gray-700">
-              <thead>
-                <tr className="bg-gray-900 text-gray-300">
-                  <th className="px-2 py-1 text-left">Pair</th>
-                  {PAIR_METRICS.map((metric) => (
-                    <th key={metric} className="px-2 py-1 text-left">
-                      {metric}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(pairs).map(([pair, metrics]) => (
-                  <tr key={pair} className="border-t border-gray-700 text-gray-200">
-                    <td className="px-2 py-1">{pair}</td>
-                    {PAIR_METRICS.map((metric) => {
-                      const m = metrics[metric];
-                      return (
-                        <td key={metric} className="px-2 py-1" title={m.reason ?? undefined}>
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-[10px] ${statusBadgeClass(m.status)}`}
-                          >
-                            {formatMeasurement(m, 3, 'm')} · {m.status}
-                          </span>
-                        </td>
-                      );
-                    })}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border border-gray-700">
+                <thead>
+                  <tr className="bg-gray-900 text-gray-300">
+                    <th className="px-2 py-1 text-left">Pair</th>
+                    {PAIR_METRICS.map((metric) => (
+                      <th key={metric} className="px-2 py-1 text-left">
+                        {metric}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {Object.entries(pairs).map(([pair, metrics]) => (
+                    <tr key={pair} className="border-t border-gray-700 text-gray-200">
+                      <td className="px-2 py-1">{pair}</td>
+                      {PAIR_METRICS.map((metric) => {
+                        const m = metrics[metric];
+                        return (
+                          <td key={metric} className="px-2 py-1" title={m.reason ?? undefined}>
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[10px] ${statusBadgeClass(m.status)}`}
+                            >
+                              {formatMeasurement(m, 3, 'm')} · {m.status}
+                            </span>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         );
       })}
