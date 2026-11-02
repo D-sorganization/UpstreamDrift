@@ -11,6 +11,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:mobile": "playwright test --config=playwright.config.ts",
+    "test:lighthouse-receipt": "node --test e2e/validate-lighthouse-reports.test.mjs",
     "type-check": "tsc -b --noEmit --force",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
@@ -38,6 +40,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "^4.3.1",
     "@tauri-apps/cli": "2.12.1",
     "@testing-library/dom": "^10.4.2",
