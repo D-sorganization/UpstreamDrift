@@ -170,7 +170,8 @@ export function ToolShell({
         </ul>
       </nav>
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-        <WorkspaceShell topBar={toolHeader} leftPanel={leftPanel} rightPanel={rightPanel} bottomPanel={bottomPanel} leftPanelLabel={leftPanelLabel} rightPanelLabel={rightPanelLabel} leftPanelWidthClass={leftPanelWidthClass} className="h-full flex-1">
+        {toolHeader}
+        <WorkspaceShell leftPanel={leftPanel} rightPanel={rightPanel} bottomPanel={bottomPanel} leftPanelLabel={leftPanelLabel} rightPanelLabel={rightPanelLabel} leftPanelWidthClass={leftPanelWidthClass} className="h-full flex-1">
           <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto">
             {children}
             {nextStepNode}

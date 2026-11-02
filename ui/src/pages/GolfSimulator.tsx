@@ -292,7 +292,7 @@ function ManualGolfSimulatorPage() {
   };
 
   const primaryDisabledReason = isDisconnected
-    ? "Connect to a simulator to enable shot and replay controls."
+    ? "Simulator disconnected"
     : undefined;
 
   return (

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter } from 'react-router';
 import { ToolShell } from './ToolShell';
@@ -10,14 +10,16 @@ describe('ToolShell Component', () => {
         <ToolShell workspaceId="capture_analyze" toolName="Video Analyzer"><div>Routed</div></ToolShell>
       </MemoryRouter>,
     );
-    expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
-    expect(screen.getByText('Capture & Analyze')).toBeInTheDocument();
-    expect(screen.getByText('Video Analyzer')).toHaveAttribute('aria-current', 'page');
+    const breadcrumb = screen.getByRole('navigation', { name: 'Breadcrumb' });
+    expect(breadcrumb).toBeInTheDocument();
+    expect(within(breadcrumb).getByText('Capture & Analyze')).toBeInTheDocument();
+    expect(within(breadcrumb).getByText('Video Analyzer')).toHaveAttribute('aria-current', 'page');
     unmount();
 
     render(<ToolShell workspaceId="optimize_train" toolName="Swing Objective Lab"><div>Unrouted</div></ToolShell>);
-    expect(screen.getByText('Optimize & Train')).toBeInTheDocument();
-    expect(screen.getByText('Swing Objective Lab')).toBeInTheDocument();
+    const unroutedBreadcrumb = screen.getByRole('navigation', { name: 'Breadcrumb' });
+    expect(within(unroutedBreadcrumb).getByText('Optimize & Train')).toBeInTheDocument();
+    expect(within(unroutedBreadcrumb).getByText('Swing Objective Lab')).toBeInTheDocument();
   });
 
   it('renders and omits primaryActionDisabledReason appropriately', () => {
