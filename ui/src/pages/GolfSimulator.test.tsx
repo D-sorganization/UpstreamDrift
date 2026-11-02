@@ -11,11 +11,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 const apiFetchMock = vi.fn();
-vi.mock("@/api/fetch", () => ({
+vi.mock("@/api/fetch", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/api/fetch")>()),
   apiFetch: (...args: unknown[]) => apiFetchMock(...args),
 }));
 
 import { GolfSimulatorPage } from "./GolfSimulator";
+import { ApiError } from "@/api/fetch";
 
 describe("GolfSimulatorPage", () => {
   beforeEach(() => {
@@ -139,5 +141,47 @@ describe("GolfSimulatorPage", () => {
       expect(screen.getByRole("button", { name: control }).parentElement).toHaveClass("flex-wrap");
     }
     expect(screen.getByLabelText("Operator Evidence")).toHaveClass("min-w-0");
+  });
+
+  it("shows plain-language copy with Retry when the API answers with HTML (#14256)", async () => {
+    apiFetchMock.mockRejectedValueOnce(
+      new ApiError("unexpected-response", 200, "/tools/golf-simulator/destinations", "html"),
+    );
+
+    render(<GolfSimulatorPage />);
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Simulator API not reachable");
+    expect(alert).not.toHaveTextContent(/Unexpected token|not valid JSON/);
+
+    apiFetchMock.mockResolvedValueOnce({ destinations: [] });
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledTimes(2);
+    });
+    await waitFor(() => {
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+  });
+
+  it("explains why lifecycle and transport controls are disabled while disconnected (#14256)", async () => {
+    apiFetchMock.mockResolvedValueOnce({ destinations: [] });
+
+    render(<GolfSimulatorPage />);
+
+    const reason = await screen.findByText(/Connect to a simulator to enable/);
+    for (const name of ["Prepare Shot", "Arm for Impact", "Trigger Impact Submit", "Play", "Pause", "Stop"]) {
+      const button = screen.getByRole("button", { name });
+      expect(button).toBeDisabled();
+      expect(button).toHaveAttribute("aria-describedby", reason.id);
+    }
+
+    apiFetchMock.mockResolvedValueOnce({ session_id: "web-session", state: "idle" });
+    fireEvent.click(screen.getByRole("button", { name: "Connect" }));
+    await waitFor(() => {
+      expect(screen.queryByText(/Connect to a simulator to enable/)).not.toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: "Prepare Shot" })).not.toHaveAttribute("aria-describedby");
   });
 });
