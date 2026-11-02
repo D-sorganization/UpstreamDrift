@@ -7,9 +7,8 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-LOCK_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "rust_core/ai_backend/local_embedding_model.lock.json"
+LOCK_PATH = Path(__file__).resolve().parents[1] / (
+    "rust_core/ai_backend/local_embedding_model.lock.json"
 )
 DEFAULT_CACHE = Path.home() / ".cache/upstream-drift/models"
 
@@ -42,10 +41,7 @@ def provision(cache_dir: Path, opener=urllib.request.urlopen) -> dict:
     for name, artifact in lock["artifacts"].items():
         destination = cache_dir / artifact["cache_name"]
         if not destination.is_file() or digest(destination) != artifact["sha256"]:
-            url = (
-                f"https://huggingface.co/{lock['repository']}/resolve/"
-                f"{lock['revision']}/{artifact['path']}"
-            )
+            url = f"https://huggingface.co/{lock['repository']}/resolve/{lock['revision']}/{artifact['path']}"
             fd, temporary_name = tempfile.mkstemp(
                 dir=cache_dir, prefix=".model-", suffix=".partial"
             )

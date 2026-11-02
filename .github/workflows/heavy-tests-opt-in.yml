@@ -319,20 +319,18 @@ jobs:
           pytest --collect-only -vv -m requires_ort tests/ai/test_rust_rag_pipeline.py | tee local_embedding_collected.txt
           python - <<'PY'
           from pathlib import Path
-          ids = []
-          test_class = None
+          ids, test_class = [], ""
           for line in Path("local_embedding_collected.txt").read_text().splitlines():
-              stripped = line.strip()
-              if stripped.startswith("<Class ") and stripped.endswith(">"):
-                  test_class = stripped[7:-1]
-              elif stripped.startswith("<Function ") and stripped.endswith(">"):
-                  function = stripped[10:-1]
-                  suffix = f"::{test_class}" if test_class else ""
-                  ids.append(f"tests/ai/test_rust_rag_pipeline.py{suffix}::{function}")
+              line = line.strip()
+              if line.startswith("<Class "):
+                  test_class = line[7:-1]
+              elif line.startswith("<Function "):
+                  scope = f"::{test_class}" if test_class else ""
+                  ids.append(f"tests/ai/test_rust_rag_pipeline.py{scope}::{line[10:-1]}")
           if not ids:
               raise SystemExit("requires_ort collected zero test cases")
           Path("local_embedding_collected_ids.txt").write_text("\n".join(ids) + "\n")
-          print(f"Collected {len(ids)} local-embedding test cases before model provisioning")
+          print(f"Collected {len(ids)} node IDs before model provisioning")
           PY
       - name: Provision and verify pinned model artifacts
         run: python scripts/provision_local_embedding_model.py | tee local_embedding_model_receipt.json
@@ -343,7 +341,6 @@ jobs:
           http_proxy: http://127.0.0.1:9
           https_proxy: http://127.0.0.1:9
           all_proxy: http://127.0.0.1:9
-          no_proxy: ""
         run: |
           unset NO_PROXY no_proxy
           pytest -v -m requires_ort --junit-xml=local_embedding_results.xml --no-header tests/ai/test_rust_rag_pipeline.py
@@ -395,7 +392,6 @@ jobs:
         with:
           name: local-embedding-offline-evidence-${{ github.run_id }}
           path: |
-            local_embedding_collected.txt
             local_embedding_collected_ids.txt
             local_embedding_model_receipt.json
             local_embedding_results.xml

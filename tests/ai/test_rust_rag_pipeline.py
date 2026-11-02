@@ -28,16 +28,11 @@ def _ai_backend_available() -> bool:
 _LOCAL_EMBEDDINGS_EXPECTED = os.environ.get("CI_LOCAL_EMBEDDINGS_EXPECTED") == "1"
 _BACKEND_AVAILABLE = _ai_backend_available()
 if _LOCAL_EMBEDDINGS_EXPECTED and not _BACKEND_AVAILABLE:
-    raise RuntimeError(
-        "CI_LOCAL_EMBEDDINGS_EXPECTED=1 but ai_backend is not importable"
-    )
+    raise RuntimeError("required ai_backend extension is unavailable")
 
 pytestmark = [
     pytest.mark.unit,
-    pytest.mark.skipif(
-        not _BACKEND_AVAILABLE,
-        reason="ai_backend Rust extension not installed (run `maturin develop --features python` in rust_core/ai_backend)",
-    ),
+    pytest.mark.skipif(not _BACKEND_AVAILABLE, reason="ai_backend not installed"),
 ]
 
 

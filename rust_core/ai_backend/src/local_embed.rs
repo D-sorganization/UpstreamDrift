@@ -51,30 +51,47 @@ impl LocalEmbedder {
     pub fn from_default_cache() -> Result<Self, String> {
         let lock: serde_json::Value = serde_json::from_str(MODEL_LOCK)
             .map_err(|e| format!("Invalid local embedding model lock: {}", e))?;
-        let revision = lock["revision"].as_str().ok_or("Model lock has no revision")?;
-        let artifacts = lock["artifacts"].as_object().ok_or("Model lock has no artifacts")?;
-        let artifact = |name: &str| -> Result<(String, String), String> {
-            let item = artifacts.get(name).ok_or_else(|| format!("Model lock missing {}", name))?;
-            let path = item["path"].as_str().ok_or_else(|| format!("{} has no path", name))?;
-            let cache_name = item["cache_name"].as_str().ok_or_else(|| format!("{} has no cache name", name))?;
-            let sha256 = item["sha256"].as_str().ok_or_else(|| format!("{} has no SHA-256", name))?;
-            Ok((format!("https://huggingface.co/{}/resolve/{}/{}", DEFAULT_MODEL_ID, revision, path), format!("{}\n{}", cache_name, sha256)))
+        let revision = lock["revision"]
+            .as_str()
+            .ok_or("Model lock has no revision")?;
+        let artifacts = lock["artifacts"]
+            .as_object()
+            .ok_or("Model lock has no artifacts")?;
+        let artifact = |name: &str| -> Result<(String, String, String), String> {
+            let item = artifacts
+                .get(name)
+                .ok_or_else(|| format!("Model lock missing {}", name))?;
+            let path = item["path"]
+                .as_str()
+                .ok_or_else(|| format!("{} has no path", name))?;
+            let cache_name = item["cache_name"]
+                .as_str()
+                .ok_or_else(|| format!("{} has no cache name", name))?;
+            let sha256 = item["sha256"]
+                .as_str()
+                .ok_or_else(|| format!("{} has no SHA-256", name))?;
+            Ok((
+                format!(
+                    "https://huggingface.co/{}/resolve/{}/{}",
+                    DEFAULT_MODEL_ID, revision, path
+                ),
+                cache_name.to_owned(),
+                sha256.to_owned(),
+            ))
         };
-        let (model_url, model_info) = artifact("model")?;
-        let (tokenizer_url, tokenizer_info) = artifact("tokenizer")?;
+        let (model_url, model_name, model_sha) = artifact("model")?;
+        let (tokenizer_url, tokenizer_name, tokenizer_sha) = artifact("tokenizer")?;
         let cache_dir = resolve_cache_dir()?;
         fs::create_dir_all(&cache_dir)
             .map_err(|e| format!("Failed to create cache dir {}: {}", cache_dir.display(), e))?;
 
-        let (model_name, model_sha) = model_info.split_once('\n').ok_or("Invalid model lock entry")?;
-        let (tokenizer_name, tokenizer_sha) = tokenizer_info.split_once('\n').ok_or("Invalid tokenizer lock entry")?;
         let model_path = cache_dir.join(model_name);
         let tokenizer_path = cache_dir.join(tokenizer_name);
 
         let offline = std::env::var("UPSTREAM_DRIFT_MODEL_OFFLINE").as_deref() == Ok("1");
-        ensure_artifact(&model_url, &model_path, model_sha, offline)
+        ensure_artifact(&model_url, &model_path, &model_sha, offline)
             .map_err(|e| format!("Model artifact unavailable: {}", e))?;
-        ensure_artifact(&tokenizer_url, &tokenizer_path, tokenizer_sha, offline)
+        ensure_artifact(&tokenizer_url, &tokenizer_path, &tokenizer_sha, offline)
             .map_err(|e| format!("Tokenizer artifact unavailable: {}", e))?;
 
         Self::from_paths(&model_path, &tokenizer_path)
@@ -271,7 +288,12 @@ fn download_to(url: &str, dest: &Path, expected_sha256: &str) -> Result<(), Stri
     Ok(())
 }
 
-fn ensure_artifact(url: &str, path: &Path, expected_sha256: &str, offline: bool) -> Result<(), String> {
+fn ensure_artifact(
+    url: &str,
+    path: &Path,
+    expected_sha256: &str,
+    offline: bool,
+) -> Result<(), String> {
     if !path.exists() {
         if offline {
             return Err(format!("offline cache is missing {}", path.display()));
@@ -284,7 +306,10 @@ fn ensure_artifact(url: &str, path: &Path, expected_sha256: &str, offline: bool)
 fn verify_sha256(path: &Path, expected: &str) -> Result<(), String> {
     let actual = sha256_of_file(path)?;
     if actual != expected {
-        return Err(format!("SHA-256 mismatch for {}: expected {}, got {}", path.display(), expected, actual));
+        return Err(format!(
+            "SHA-256 mismatch for {}: {expected} != {actual}",
+            path.display()
+        ));
     }
     Ok(())
 }
@@ -340,7 +365,10 @@ mod tests {
         let url = format!("http://{}/model", probe.local_addr().unwrap());
         let error = ensure_artifact(&url, &missing, "00", true).unwrap_err();
         assert!(error.contains("offline cache is missing"));
-        assert_eq!(probe.accept().unwrap_err().kind(), std::io::ErrorKind::WouldBlock);
+        assert_eq!(
+            probe.accept().unwrap_err().kind(),
+            std::io::ErrorKind::WouldBlock
+        );
 
         let corrupt = tmp.path().join("corrupt");
         fs::write(&corrupt, b"wrong artifact").unwrap();

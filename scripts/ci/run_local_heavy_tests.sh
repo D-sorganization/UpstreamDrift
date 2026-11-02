@@ -46,8 +46,7 @@ if [ "$LOCAL_EMBEDDINGS" = true ]; then
   python -m venv "$LOCAL_EMBEDDINGS_VENV"
   source "$LOCAL_EMBEDDINGS_VENV/bin/activate"
   python -m pip install "onnxruntime==1.24.1" maturin 'pytest>=9.0.3,<9.2.0' pytest-asyncio pytest-timeout
-  export CI_LOCAL_EMBEDDINGS_EXPECTED=1
-  export UPSTREAM_DRIFT_MODEL_OFFLINE=1
+  export CI_LOCAL_EMBEDDINGS_EXPECTED=1 UPSTREAM_DRIFT_MODEL_OFFLINE=1
   export UPSTREAM_DRIFT_MODEL_CACHE="$(mktemp -d)"
   export ORT_DYLIB_PATH="$(python -c 'import onnxruntime,pathlib; print(pathlib.Path(onnxruntime.__file__).parent/"capi"/"libonnxruntime.so.1.24.1")')"
   test -f "$ORT_DYLIB_PATH"
