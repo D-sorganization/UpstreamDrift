@@ -8,7 +8,7 @@
  * transforms snake_case keys to camelCase for TypeScript consumers.
  */
 
-import themesData from '../../theme-definitions/themes.json';
+import themesData from '../../../vendor/ud-tools/src/shared/theme-definitions/themes.json';
 
 /** Base color keys (14 keys matching PyQt6 THEME_COLOR_KEYS) */
 export interface ThemeBaseColors {
@@ -64,8 +64,8 @@ export type ThemeId =
   | 'vampire-dark'
   | 'frost-dark'
   | 'teal-dark'
-  | 'office-blue'
-  | 'office-green'
+  | 'cobalt-light'
+  | 'fern-light'
   | 'sandstone-yellow'
   | 'high-contrast';
 
@@ -114,18 +114,26 @@ function transformTheme(
 }
 
 /** All built-in theme presets, loaded from themes.json */
-export const THEME_PRESETS: Record<ThemeId, ThemeColors> = Object.fromEntries(
-  Object.entries(themesData.themes).map(([id, def]) => [id, transformTheme(def)]),
-) as Record<ThemeId, ThemeColors>;
-
+export const THEME_PRESETS: Record<ThemeId, ThemeColors> = {} as Record<ThemeId, ThemeColors>;
 /** Theme metadata (category, isDark) */
-export const THEME_METADATA: Record<ThemeId, { category: string; isDark: boolean }> =
-  Object.fromEntries(
-    Object.entries(themesData.themes).map(([id, def]) => [
-      id,
-      { category: def.category, isDark: def.isDark },
-    ]),
-  ) as Record<ThemeId, { category: string; isDark: boolean }>;
+export const THEME_METADATA: Record<ThemeId, { category: string; isDark: boolean }> = {} as Record<ThemeId, { category: string; isDark: boolean }>;
+
+for (const id of Object.keys(themesData.themes) as ThemeId[]) {
+  const def = themesData.themes[id as keyof typeof themesData.themes];
+  THEME_PRESETS[id] = transformTheme(def);
+  THEME_METADATA[id] = { category: def.category, isDark: def.isDark };
+}
+
+/** Retired theme IDs mapped to their current ID (themes.json `legacyIds`) */
+export const LEGACY_THEME_IDS: Readonly<Record<string, ThemeId>> = themesData.legacyIds as Record<
+  string,
+  ThemeId
+>;
+
+/** Resolve a saved theme ID, mapping retired IDs (e.g. `ms-word`) to their replacement */
+export function resolveThemeId(id: string): string {
+  return id in THEME_PRESETS ? id : (LEGACY_THEME_IDS[id] ?? id);
+}
 
 /** Chart colors for data visualization */
 export const CHART_COLORS: string[] = themesData.chartColors;
@@ -211,7 +219,60 @@ export function generateCSSVariables(theme: ThemeColors): Record<string, string>
     '--theme-link-hover': theme.linkHover,
     '--theme-selection-bg': theme.selectionBg,
     '--theme-selection-text': theme.selectionText,
+    ...generateSidekickCSSVariables(theme),
   };
+}
+
+/** Generate Sidekick CSS variables from the same theme colors as PyQt Sidekick. */
+export function generateSidekickCSSVariables(theme: ThemeColors): Record<string, string> {
+  return {
+    '--sidekick-color-canvas': theme.bg,
+    '--sidekick-color-background': theme.bg,
+    '--sidekick-color-surface': theme.groupBg,
+    '--sidekick-color-surface-elevated': theme.bg,
+    '--sidekick-color-surface-raised': theme.tableAlt,
+    '--sidekick-color-surface-muted': theme.tableAlt,
+    '--sidekick-color-border': theme.border,
+    '--sidekick-color-border-strong': theme.titleBorder,
+    '--sidekick-color-text': theme.text,
+    '--sidekick-color-text-muted': theme.textSecondary,
+    '--sidekick-color-text-subtle': theme.label,
+    '--sidekick-color-accent': theme.accent,
+    '--sidekick-color-accent-hover': theme.buttonHover,
+    '--sidekick-color-accent-soft': `color-mix(in srgb, ${theme.accent} 16%, transparent)`,
+    '--sidekick-color-focus': theme.focus,
+    '--sidekick-color-selection': theme.selectionBg,
+    '--sidekick-color-selection-text': theme.selectionText,
+    '--sidekick-color-error': theme.error,
+    '--sidekick-color-danger': theme.error,
+    '--sidekick-color-warning': theme.warning,
+    '--sidekick-color-success': theme.success,
+    '--sidekick-color-info': theme.info,
+    '--sidekick-color-link': theme.link,
+    '--sidekick-color-link-hover': theme.linkHover,
+    '--sidekick-radius-lg': '8px',
+    '--sidekick-radius-chat': '8px',
+    '--sidekick-radius-md': '6px',
+    '--sidekick-radius-control': '6px',
+    '--sidekick-shadow-md': '0 12px 28px rgba(15, 23, 42, 0.14)',
+    '--sidekick-shadow-panel': 'var(--sidekick-shadow-md)',
+    '--sidekick-control-height': '28px',
+    '--sidekick-size-control-height': 'var(--sidekick-control-height)',
+    '--sidekick-font-family': 'Arial',
+    '--sidekick-font-size': '12px',
+  };
+}
+
+/** Apply only Sidekick CSS variables to a host element. */
+export function applySidekickThemeToElement(
+  element: HTMLElement,
+  theme: ThemeColors,
+): void {
+  const cssVars = generateSidekickCSSVariables(theme);
+
+  Object.entries(cssVars).forEach(([key, value]) => {
+    element.style.setProperty(key, value);
+  });
 }
 
 /** Apply theme CSS variables to the document root */
