@@ -26,7 +26,7 @@ import tempfile
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -84,6 +84,15 @@ TOPOLOGY_CONTACT_ACCURACY = 5e-8
 _SIDES = (("L", "left"), ("R", "right"))
 CALIBRATION_HALF_LENGTH_M = 0.02
 _GRAVITY_M_S2 = 9.80665
+
+
+class _GripAxisSampleContext(NamedTuple):
+    """Axis frame and club origin for topology pad wrench accumulation (#13560)."""
+
+    axis_point: np.ndarray
+    axis: np.ndarray
+    grip_r: float
+    club_origin_m: np.ndarray
 
 
 def single_pad_model(
@@ -562,11 +571,12 @@ class ContactGripSimulator(BushingGripSimulator):
         p1: np.ndarray,
         r1: np.ndarray,
         p2: np.ndarray,
-        axis_point: np.ndarray,
-        axis: np.ndarray,
-        grip_r: float,
-        club_origin_m: np.ndarray,
+        sample_ctx: _GripAxisSampleContext,
     ) -> tuple[np.ndarray, np.ndarray, float, float, PairWrench]:
+        axis_point = sample_ctx.axis_point
+        axis = sample_ctx.axis
+        grip_r = sample_ctx.grip_r
+        club_origin_m = sample_ctx.club_origin_m
         f_pair = np.zeros(3)
         t_pair = np.zeros(3)
         fn_pair = 0.0
@@ -648,6 +658,7 @@ class ContactGripSimulator(BushingGripSimulator):
         axis_point = p2 + r2 @ axis_offset
         club_body = self._model.getBodySet().get(CLUB_BODY)
         _, club_origin_m = _transform_to_rt(club_body.getTransformInGround(state))
+        sample_ctx = _GripAxisSampleContext(axis_point, axis, grip_r, club_origin_m)
         total_f = np.zeros(3)
         total_t = np.zeros(3)
         pair_wrenches: dict[str, PairWrench] = {}
@@ -661,10 +672,7 @@ class ContactGripSimulator(BushingGripSimulator):
                 p1,
                 r1,
                 p2,
-                axis_point,
-                axis,
-                grip_r,
-                club_origin_m,
+                sample_ctx,
             )
             total_f += f_pair
             total_t += t_pair
