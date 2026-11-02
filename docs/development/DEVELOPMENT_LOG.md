@@ -1249,6 +1249,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13764 · Cross-Engine Hand Mass and Length Consistency Test (HRG-HX7 Slice 1): MuJoCo, Drake, Pinocchio and OpenSim Hand Body Masses Match the Separated-Hand Spec; Visual-Only Hand Length Is Measured Where Exported and Reported Elsewhere
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13764
+- **Branch:** merged via #14358
+- **PR:** #14358
+- **Paths:** see #14358
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`227d942f`; collated from changes/13764-cross-engine-hand-mass-and-length-consis.md)
+- **Summary:** Cross-engine hand mass and length consistency test (HRG-HX7 slice 1): MuJoCo, Drake, Pinocchio and OpenSim hand body masses match the separated-hand spec; visual-only hand length is measured where exported and reported elsewhere
+- **Next step:** Shipped in PR #14358.
+
 ### DL-#14260 · Shared ToolShell With Persistent Navigation, Breadcrumb, and Actions Slot for Tool Pages
 
 - **State:** shipped
@@ -2620,10 +2633,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13176
 - **Branch:** merged via #13820
-- **PR:** #13820, #14015, #14127, #14357
+- **PR:** #13820, #14015, #14127, #14357, #14363
 - **Paths:** see #13820
 - **Started:** 2026-10-25
-- **Last verified:** 2026-11-02 (`fa7aa74e`; collated from changes/13176-full-body-v2-closure-qualification.md)
+- **Last verified:** 2026-11-02 (`7f8e88ce`; collated from changes/13176-full-body-v2-angles-qualification.md)
 - **Summary:** Qualify HRG full-body-v2 mass and gravity in Drake
 - **Next step:** Shipped in PR #13820.
 
