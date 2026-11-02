@@ -623,7 +623,6 @@ export function SwingObjectiveLabPage(): React.ReactElement {
             </div>
           )}
         </div>
-      </div>
     </ToolShell>
   );
 }
