@@ -38,3 +38,6 @@ python installer/windows/build_installer.py --profile full --provider-root ..\Mu
 The build script writes the selected profile and provider-root metadata into
 `installer/windows/dist/installer_info.json` so CI and release workflows can
 validate the packaged discovery mode.
+
+For provenance and packaging details about the local scene HDR asset, see
+[Offline Scene Environment Asset](offline-scene-environment.md).

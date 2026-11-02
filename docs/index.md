@@ -48,7 +48,7 @@ separated from current guidance.
 - [`examples/`](examples/) - no Markdown pages
 - [`governance/`](governance/) - 6 pages
 - [`help/`](help/) - 61 pages
-- [`installation/`](installation/) - 2 pages
+- [`installation/`](installation/) - 3 pages
 - [`legal/`](legal/licenses.md) - 1 page
 - [`motion_matching/`](motion_matching/README.md) - 2 pages
 - [`motion_pipeline/`](motion_pipeline/README.md) - 6 pages
