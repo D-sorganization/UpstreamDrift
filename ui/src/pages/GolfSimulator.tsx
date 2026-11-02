@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, useMemo } from "react";
-import { apiFetch } from "@/api/fetch";
+import { apiFetch, describeApiError } from "@/api/fetch";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
 import { ResearchGolfSimulator } from "@/components/necromatcher/ResearchGolfSimulator";
 import { useInRouterContext, useLocation } from "react-router";
@@ -45,11 +45,14 @@ export interface DestinationItem {
   capabilities?: Capabilities;
 }
 
+/** User-facing name of the backing service in error copy (#14256). */
+const SERVICE_NAME = "Simulator";
+
+/** Id of the note explaining why controls are disabled while disconnected (#14256). */
+const DISCONNECTED_REASON_ID = "golf-sim-disconnected-reason";
+
 function getErrorMessage(err: unknown, fallback: string): string {
-  if (err instanceof Error && err.message) {
-    return err.message;
-  }
-  return fallback;
+  return describeApiError(err, SERVICE_NAME, fallback);
 }
 
 export function GolfSimulatorPage() {
@@ -78,24 +81,30 @@ function ManualGolfSimulatorPage() {
   const [replayTimeS, setReplayTimeS] = useState<number>(0.0);
   const [operatorEvidence, setOperatorEvidence] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     apiFetch<{ destinations: DestinationItem[] }>("/tools/golf-simulator/destinations")
       .then((res) => {
-        if (!cancelled && res?.destinations) {
+        if (cancelled) return;
+        setLoadFailed(false);
+        setErrorMsg(null);
+        if (res?.destinations) {
           setDestinations(res.destinations);
         }
       })
       .catch((err: unknown) => {
         if (!cancelled) {
+          setLoadFailed(true);
           setErrorMsg(getErrorMessage(err, "Failed to load destinations"));
         }
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadAttempt]);
 
   const capabilities = useMemo(() => {
     const dest = destinations.find((d) => d.destination_id === selectedDest);
@@ -257,6 +266,8 @@ function ManualGolfSimulatorPage() {
   const isArmed = sessionState === "ARMED";
   const isPrepared = sessionState === "PREPARED";
   const isUncertain = sessionState === "SENT_UNCONFIRMED";
+  const isDisconnected = sessionState === "DISCONNECTED";
+  const disconnectedReason = isDisconnected ? DISCONNECTED_REASON_ID : undefined;
 
   const getStatusBadgeStyle = () => {
     switch (sessionState) {
@@ -285,8 +296,19 @@ function ManualGolfSimulatorPage() {
       <div className="space-y-6 w-full min-w-0 max-w-4xl mx-auto p-4 text-gray-200">
         <h1 className="text-xl font-bold">Golf Simulator Console</h1>
         {errorMsg && (
-          <div role="alert" className="p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-sm">
-            {errorMsg}
+          <div
+            role="alert"
+            className="p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-sm flex flex-wrap items-center justify-between gap-3"
+          >
+            <span className="min-w-0">{errorMsg}</span>
+            {loadFailed && (
+              <button
+                onClick={() => setLoadAttempt((n) => n + 1)}
+                className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded text-sm font-medium"
+              >
+                Retry
+              </button>
+            )}
           </div>
         )}
 
@@ -359,9 +381,15 @@ function ManualGolfSimulatorPage() {
         {/* Shot Lifecycle Controls */}
         <section className="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
           <h2 className="text-sm font-semibold text-gray-300">Shot Lifecycle & Impact</h2>
+          {isDisconnected && (
+            <p id={DISCONNECTED_REASON_ID} className="text-xs text-gray-400">
+              Connect to a simulator to enable shot and replay controls.
+            </p>
+          )}
           <div className="flex flex-wrap gap-3">
             <button
               onClick={handlePrepare}
+              aria-describedby={disconnectedReason}
               disabled={sessionState === "DISCONNECTED" || isArmed}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white rounded text-sm font-medium"
             >
@@ -370,6 +398,7 @@ function ManualGolfSimulatorPage() {
 
             <button
               onClick={handleArm}
+              aria-describedby={disconnectedReason}
               disabled={!isPrepared}
               className="px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-white rounded text-sm font-medium"
             >
@@ -378,6 +407,7 @@ function ManualGolfSimulatorPage() {
 
             <button
               onClick={handleDisarm}
+              aria-describedby={disconnectedReason}
               disabled={!isArmed}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white rounded text-sm font-medium"
             >
@@ -386,6 +416,7 @@ function ManualGolfSimulatorPage() {
 
             <button
               onClick={handleCancel}
+              aria-describedby={disconnectedReason}
               disabled={!isPrepared && !isArmed}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white rounded text-sm font-medium"
             >
@@ -394,6 +425,7 @@ function ManualGolfSimulatorPage() {
 
             <button
               onClick={handleSubmit}
+              aria-describedby={disconnectedReason}
               disabled={!isArmed}
               className="px-5 py-2 bg-red-600 hover:bg-red-500 disabled:opacity-40 text-white rounded text-sm font-bold ml-auto"
             >
@@ -408,6 +440,7 @@ function ManualGolfSimulatorPage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => handleReplayAction("play")}
+              aria-describedby={disconnectedReason}
               disabled={sessionState === "DISCONNECTED"}
               className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white rounded text-sm"
             >
@@ -415,6 +448,7 @@ function ManualGolfSimulatorPage() {
             </button>
             <button
               onClick={() => handleReplayAction("pause")}
+              aria-describedby={disconnectedReason}
               disabled={sessionState === "DISCONNECTED"}
               className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white rounded text-sm"
             >
@@ -422,6 +456,7 @@ function ManualGolfSimulatorPage() {
             </button>
             <button
               onClick={() => handleReplayAction("stop")}
+              aria-describedby={disconnectedReason}
               disabled={sessionState === "DISCONNECTED"}
               className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white rounded text-sm"
             >

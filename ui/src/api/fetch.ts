@@ -37,6 +37,69 @@ export class ApiHttpError extends Error {
   }
 }
 
+/** Categories of `ApiError`; each maps to user copy in `describeApiError`. */
+export type ApiErrorKind = 'unexpected-response';
+
+/**
+ * Typed API failure (#14256). `unexpected-response` means the server answered
+ * with something other than JSON, typically the SPA's `index.html` after a 404
+ * or a dev-proxy miss, so callers never surface a raw `SyntaxError`.
+ */
+export class ApiError extends Error {
+  constructor(
+    readonly kind: ApiErrorKind,
+    readonly status: number,
+    readonly url: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+/**
+ * Plain-language message for a failed API call, in one place (#14256).
+ *
+ * @param err - Whatever the call rejected with
+ * @param service - User-facing service name, e.g. "Simulator"
+ * @param fallback - Copy for a rejection that carries no message
+ * @returns Copy safe to show to a user; never a parser error
+ */
+export function describeApiError(err: unknown, service: string, fallback: string): string {
+  if (err instanceof ApiError && err.kind === 'unexpected-response') {
+    return `${service} API not reachable`;
+  }
+  if (err instanceof Error && err.message) return err.message;
+  return fallback;
+}
+
+/**
+ * Parse a successful response body as JSON, rejecting anything else with an
+ * `ApiError` instead of a `SyntaxError` (#14256). An HTML content-type is
+ * rejected without parsing; any other body is parsed, because a missing or
+ * generic content-type (`text/plain` from `new Response(json)`) can still
+ * carry valid JSON.
+ */
+async function readJson<T>(response: Response, url: string): Promise<T> {
+  const contentType = response.headers?.get('content-type') ?? '';
+  const unexpected = (received: string) =>
+    new ApiError(
+      'unexpected-response',
+      response.status,
+      url,
+      `Expected JSON from ${url} but received ${received} (HTTP ${response.status})`,
+    );
+  if (/\btext\/html\b/i.test(contentType)) {
+    throw unexpected(contentType);
+  }
+  try {
+    return (await response.json()) as T;
+  } catch (err) {
+    if (err instanceof SyntaxError) throw unexpected('a body that is not JSON');
+    throw err;
+  }
+}
+
 /** Options accepted by `apiFetch` on top of the standard `RequestInit`. */
 export interface ApiFetchInit extends RequestInit {
   /** Abort after this many ms. Defaults to `DEFAULT_TIMEOUT_MS`; 0 disables. */
@@ -90,7 +153,8 @@ function detailMessage(detail: unknown): string | undefined {
  * @param init - Optional `RequestInit` options plus `timeoutMs` (#8080)
  * @returns Parsed JSON body typed as `T`
  * @throws Error with a human-readable message on HTTP, network, or timeout
- *   errors. A timeout message always contains the word "timed out" so callers
+ *   errors, and `ApiError` (kind `unexpected-response`) when a successful
+ *   response is not JSON (#14256). A timeout message always contains the word "timed out" so callers
  *   can distinguish it from a refused connection.
  */
 export async function apiFetch<T>(
@@ -152,7 +216,7 @@ export async function apiFetchWithHeaders<T>(
     );
   }
 
-  const data = (await response.json()) as T;
+  const data = await readJson<T>(response, url);
   return { data, headers: response.headers };
 }
 
@@ -232,7 +296,7 @@ export async function apiFetchForm<T>(
     throw new Error(detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`);
   }
 
-  return response.json() as Promise<T>;
+  return readJson<T>(response, url);
 }
 
 /**
