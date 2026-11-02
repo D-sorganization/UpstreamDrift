@@ -16,6 +16,7 @@ Mapped pairs (issue #14252):
 from __future__ import annotations
 
 import argparse
+import collections.abc
 import re
 import sys
 from pathlib import Path
@@ -45,9 +46,7 @@ TOKEN_REPLACEMENTS: list[tuple[str, str]] = [
     ("focus:ring-blue-500", "focus:ring-primary"),
 ]
 
-
 # Build regex pattern for token replacement preserving variants (e.g. hover:, focus:, etc.)
-# Variant prefix can be any combination of word characters, colons, slashes, or dashes
 VARIANT_PREFIX = r"(?<=[\s\"'`;{(])((?:[a-zA-Z0-9_\-]+:)*)"
 VARIANT_SUFFIX = r"(?=[\s\"'`;})])"
 
@@ -72,18 +71,28 @@ def apply_token_replacements(content: str) -> tuple[str, dict[str, int]]:
                 + VARIANT_SUFFIX
             )
 
-            def repl_with_prefix(m: re.Match[str]) -> str:
-                full_prefix = m.group(1) + (token_prefix + ":" if token_prefix else "")
-                return full_prefix + base_token
+            def make_repl_prefix(
+                tp: str, bt: str
+            ) -> collections.abc.Callable[[re.Match[str]], str]:
+                def repl(m: re.Match[str]) -> str:
+                    full_prefix = m.group(1) + (tp + ":" if tp else "")
+                    return full_prefix + bt
 
-            repl_func = repl_with_prefix
+                return repl
+
+            repl_func = make_repl_prefix(token_prefix, base_token)
         else:
             pattern = re.compile(VARIANT_PREFIX + re.escape(raw) + VARIANT_SUFFIX)
 
-            def repl_plain(m: re.Match[str]) -> str:
-                return m.group(1) + token
+            def make_repl_plain(
+                tok: str,
+            ) -> collections.abc.Callable[[re.Match[str]], str]:
+                def repl(m: re.Match[str]) -> str:
+                    return m.group(1) + tok
 
-            repl_func = repl_plain
+                return repl
+
+            repl_func = make_repl_plain(token)
 
         count = len(pattern.findall(modified))
         if count > 0:
@@ -95,7 +104,6 @@ def apply_token_replacements(content: str) -> tuple[str, dict[str, int]]:
 
 def count_palette_classes(content: str) -> dict[str, int]:
     """Count raw gray-* and blue-* classes in source content."""
-    # Find all class-like occurrences: (bg|text|border|ring|divide)-gray-\d+ or -blue-\d+
     raw_gray_pattern = re.compile(
         r"\b(?:[a-zA-Z0-9_\-]+:)*(?:bg|text|border|ring|divide)-gray-\d+(?:/\d+)?\b"
     )

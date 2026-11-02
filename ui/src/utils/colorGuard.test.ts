@@ -75,7 +75,7 @@ describe('contrast guard (#7439)', () => {
  */
 describe('theme-tokens ratchet (#14252)', () => {
   it('does not exceed the raw gray-*/blue-* palette class ceiling', () => {
-    const rawPalettePattern = /\b(?:[a-zA-Z0-9_\-]+:)*(?:bg|text|border|ring|divide)-(?:gray|blue)-\d+(?:\/\d+)?\b/g;
+    const rawPalettePattern = /\b(?:[a-zA-Z0-9_-]+:)*(?:bg|text|border|ring|divide)-(?:gray|blue)-\d+(?:\/\d+)?\b/g;
     let totalRawCount = 0;
     for (const file of sourceTypeScriptFiles) {
       const rel = relative(SRC_ROOT, file).replace(/\\/g, '/');
