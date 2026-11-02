@@ -149,20 +149,25 @@ describe('ModelExplorer Page UI & Frankenstein Mode', () => {
     expect(sidebar?.className).not.toContain('w-[42rem]');
   });
 
-  it('hides the right inspector below xl while Frankenstein is active (#7418)', async () => {
+  it('docks the right inspector only at xl and offers it as a drawer below (#7418, #14279)', async () => {
     render(<ModelExplorerPage />);
     // The right inspector aside is the one bordered on the left.
     const asides = Array.from(document.querySelectorAll('aside'));
     const inspector = asides.find((a) => a.className.includes('border-l'));
     expect(inspector).toBeDefined();
-    expect(inspector?.className).toContain('flex');
-    expect(inspector?.className).not.toContain('hidden');
-
-    await act(async () => {
-      fireEvent.click(screen.getByLabelText(/Frankenstein Mode/i));
-    });
-
     expect(inspector?.className).toContain('hidden xl:flex');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Inspector' }));
+    expect(screen.getByRole('dialog', { name: 'Inspector' })).toBeInTheDocument();
+  });
+
+  it('collapses the model tree into a drawer below lg (#14279)', () => {
+    render(<ModelExplorerPage />);
+    const tree = screen.getByLabelText(/Frankenstein Mode/i).closest('aside');
+    expect(tree?.className).toMatch(/(^|\s)hidden lg:flex/);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Model Tree' }));
+    expect(screen.getByRole('dialog', { name: 'Model Tree' })).toBeInTheDocument();
   });
 
   it('loads and displays dual-tree layout in Frankenstein Mode', async () => {

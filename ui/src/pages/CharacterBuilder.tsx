@@ -8,6 +8,7 @@ import { useCharacterSpec } from '@/components/character/useCharacterSpec';
 import { useSpecBodyPreview } from '@/components/character/useSpecBodyPreview';
 import { SPEC_BODY_DEFAULT_COLOR } from '@/components/character/skinnedBodyPreview';
 import type { AppearancePalette } from '@/components/character/appearanceTypes';
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 
 interface SegmentBreakdown {
   name: string;
@@ -206,9 +207,14 @@ export function CharacterBuilderPage() {
   }, [height, weight, buildType]);
 
   return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden text-gray-200">
-      {/* Left panel: controls and specs */}
-      <aside className="w-96 bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0 overflow-y-auto">
+    // #14279: WorkspaceShell docks the controls at lg+ and turns them into a
+    // drawer below, so the preview canvas keeps the full width on phones.
+    <WorkspaceShell
+      className="text-gray-200"
+      leftPanelLabel="Character Controls"
+      leftPanelWidthClass="lg:w-96"
+      leftPanel={
+        <>
         <div className="p-6 border-b border-gray-700">
           <h1 className="heading-page mb-1">Character Builder</h1>
           <p className="text-xs text-gray-400">
@@ -360,10 +366,11 @@ export function CharacterBuilderPage() {
             {generating ? 'Generating...' : 'Generate URDF'}
           </button>
         </div>
-      </aside>
-
+        </>
+      }
+    >
       {/* Right panel: 3D Visualization */}
-      <main className="flex-1 relative bg-gray-950">
+      <div className="flex-1 relative bg-gray-950">
         <Canvas camera={{ position: [0, 1.2, 2.5], fov: 45 }} className="w-full h-full">
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 10, 5]} intensity={1.2} castShadow />
@@ -404,7 +411,7 @@ export function CharacterBuilderPage() {
           <div>Right Click + Drag: Pan</div>
           <div>Scroll: Zoom</div>
         </div>
-      </main>
-    </div>
+      </div>
+    </WorkspaceShell>
   );
 }

@@ -291,8 +291,9 @@ export function Scene3D({
           <p className="px-3 pb-3">Axial load data unavailable for this frame.</p>}
       </details>
 
-      {/* Floating Interactive Controls Panel */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-black/75 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-xl z-20">
+      {/* Floating Interactive Controls Panel. #14279: below sm the groups wrap
+          inside the canvas width instead of overflowing a phone screen. */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-wrap justify-center items-center gap-2 w-max max-w-[calc(100%-1rem)] bg-black/75 backdrop-blur-md px-4 py-2 rounded-2xl sm:rounded-full border border-white/10 shadow-xl z-20">
         {/* Camera Views */}
         <div className="flex items-center gap-1 border-r border-white/10 pr-2">
           <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mr-1">View</span>

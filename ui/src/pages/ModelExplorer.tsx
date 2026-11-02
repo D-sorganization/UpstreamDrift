@@ -5,6 +5,7 @@ import { ModelPreviewViewport } from '@/components/model-explorer/ModelPreviewVi
 import { ModelTree } from '@/components/model-explorer/ModelTree';
 import { PropertyInspector, JointManipulator } from '@/components/model-explorer/InspectorPanel';
 import { TreeDiffModal } from '@/components/model-explorer/TreeDiffModal';
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 import {
   URDFTreeNode,
   copyComponent,
@@ -235,12 +236,18 @@ export function ModelExplorerPage() {
   }, [movableJoints]);
 
   return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden text-gray-100">
-      {/* Sidebar: dual tree vs single tree */}
-      {/* #7418: cap the expanded Frankenstein width relative to the viewport so
-          the 3D preview keeps a usable share at 1024–1280px instead of being
-          crushed by a hardcoded 42rem sidebar. */}
-      <aside className={`${frankensteinMode ? 'w-[min(42rem,55vw)]' : 'w-80'} bg-gray-950 border-r border-gray-800 flex flex-col flex-shrink-0 transition-all duration-300`}>
+    // #14279: WorkspaceShell docks the tree at lg+ and the inspector at xl+,
+    // and turns them into drawers below, so the 3D preview keeps the width.
+    <WorkspaceShell
+      className="text-gray-100"
+      leftPanelLabel="Model Tree"
+      rightPanelLabel="Inspector"
+      // #7418: cap the expanded Frankenstein width relative to the viewport so
+      // the 3D preview keeps a usable share at 1024–1280px instead of being
+      // crushed by a hardcoded 42rem sidebar.
+      leftPanelWidthClass={frankensteinMode ? 'lg:w-[min(42rem,55vw)]' : 'lg:w-80'}
+      leftPanel={
+        <>
         {/* Top controls */}
         <div className="p-4 border-b border-gray-850 space-y-4">
           <div className="flex items-center justify-between">
@@ -442,23 +449,12 @@ export function ModelExplorerPage() {
             </div>
           )}
         </div>
-      </aside>
-
-      {/* Main 3D View */}
-      <ModelPreviewViewport
-        urdfModel={urdfModel}
-        jointValues={jointValues}
-        activePreviewModel={activePreviewModel}
-      />
-      {/* Right Sidebar: Inspector.
-          #7418: below xl, the inspector competes with the widened Frankenstein
-          tree pane for the same horizontal space, crushing the 3D preview — so
-          hide it (until xl) while Frankenstein mode is active. */}
-      <aside
-        className={`${
-          frankensteinMode ? 'hidden xl:flex' : 'flex'
-        } w-72 bg-gray-950 border-l border-gray-800 flex-col flex-shrink-0`}
-      >
+        </>
+      }
+      // The inspector docks only at xl, where it no longer competes with the
+      // widened Frankenstein tree pane for space (#7418).
+      rightPanel={
+        <>
         <div className="p-4 border-b border-gray-850">
           <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
             Properties
@@ -477,7 +473,15 @@ export function ModelExplorerPage() {
             onRandomPose={handleRandomPose}
           />
         </div>
-      </aside>
+        </>
+      }
+    >
+      {/* Main 3D View */}
+      <ModelPreviewViewport
+        urdfModel={urdfModel}
+        jointValues={jointValues}
+        activePreviewModel={activePreviewModel}
+      />
 
       {/* Comparison Diff Modal */}
       <TreeDiffModal
@@ -488,6 +492,6 @@ export function ModelExplorerPage() {
         diff={treeDiff}
         onApplyMergeAll={handleMergeAll}
       />
-    </div>
+    </WorkspaceShell>
   );
 }

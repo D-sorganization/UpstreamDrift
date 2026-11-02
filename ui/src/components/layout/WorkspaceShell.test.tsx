@@ -59,6 +59,28 @@ describe('WorkspaceShell', () => {
     expect(dialog).toBeInTheDocument();
   });
 
+  it('gives drawer toggles a 44px minimum touch target (#14279)', () => {
+    render(
+      <WorkspaceShell leftPanel={<div>L</div>} leftPanelLabel="Controls">
+        <div>MAIN</div>
+      </WorkspaceShell>,
+    );
+    const toggle = screen.getByRole('button', { name: 'Controls' });
+    expect(toggle.className).toContain('min-h-[44px]');
+    expect(toggle.className).toContain('min-w-[44px]');
+  });
+
+  it('lets a page override the docked left panel width', () => {
+    render(
+      <WorkspaceShell leftPanel={<div>L</div>} leftPanelWidthClass="lg:w-96">
+        <div>MAIN</div>
+      </WorkspaceShell>,
+    );
+    const aside = document.querySelector('aside');
+    expect(aside?.className).toContain('lg:w-96');
+    expect(aside?.className).not.toContain('lg:w-72');
+  });
+
   it('closes the drawer via the close button', () => {
     render(
       <WorkspaceShell rightPanel={<div>RP</div>} rightPanelLabel="Details">

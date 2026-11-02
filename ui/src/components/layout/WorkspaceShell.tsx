@@ -13,6 +13,8 @@ export interface WorkspaceShellProps {
   /** Accessible labels for the drawer toggle buttons. */
   leftPanelLabel?: string;
   rightPanelLabel?: string;
+  /** Tailwind width classes for the docked left column (lg+ only). */
+  leftPanelWidthClass?: string;
   /** Extra classes for the outer container (rarely needed). */
   className?: string;
 }
@@ -40,6 +42,7 @@ export function WorkspaceShell({
   children,
   leftPanelLabel = 'Controls',
   rightPanelLabel = 'Details',
+  leftPanelWidthClass = 'lg:w-72 xl:w-80',
   className = '',
 }: WorkspaceShellProps) {
   const [leftOpen, setLeftOpen] = useState(false);
@@ -81,7 +84,7 @@ export function WorkspaceShell({
         {hasLeft && (
           <>
             <aside
-              className={`${ASIDE_BASE} border-r border-gray-700 hidden lg:flex lg:w-72 xl:w-80`}
+              className={`${ASIDE_BASE} border-r border-gray-700 hidden lg:flex ${leftPanelWidthClass}`}
             >
               {leftPanel}
             </aside>
@@ -144,7 +147,7 @@ function DrawerToggle({ label, expanded, onClick }: DrawerToggleProps) {
       type="button"
       onClick={onClick}
       aria-expanded={expanded}
-      className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-md bg-gray-700 hover:bg-gray-600 text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+      className="inline-flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] px-3 py-1 text-xs font-medium rounded-md bg-gray-700 hover:bg-gray-600 text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
     >
       <span aria-hidden="true">☰</span>
       {label}
