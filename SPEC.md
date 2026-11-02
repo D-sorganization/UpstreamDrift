@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14306 | Simulation, Model Explorer and Character Builder move onto WorkspaceShell: below lg the 3D view fills the width and side panels open as drawers from 44px toggles; the Scene3D view toolbar wraps on phones |
 | 2026-11-02 | #14301 | Pinocchio inverse-dynamics tests fail on a broken real constructor |
 | 2026-11-02 | #14300 | Pinocchio kinematic audit fails on missing URDF/joint/frame instead of skipping |
 | 2026-11-02 | #14305 | Real ChatSessionManager lifecycle, signal and fault tests |

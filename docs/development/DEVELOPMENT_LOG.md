@@ -1145,6 +1145,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14279 · Simulation, Model Explorer and Character Builder Move Onto WorkspaceShell: Below Lg the 3D View Fills the Width and Side Panels Open as Drawers From 44Px Toggles; the Scene3D View Toolbar Wraps on Phones
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14279
+- **Branch:** merged via #14306
+- **PR:** #14306
+- **Paths:** see #14306
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`43bfa59b`; collated from changes/14279-simulation-model-explorer-and-character.md)
+- **Summary:** Simulation, Model Explorer and Character Builder move onto WorkspaceShell: below lg the 3D view fills the width and side panels open as drawers from 44px toggles; the Scene3D view toolbar wraps on phones
+- **Next step:** Shipped in PR #14306.
+
 ### DL-#14297 · Pinocchio Inverse-Dynamics Tests Fail on a Broken Real Constructor
 
 - **State:** shipped
