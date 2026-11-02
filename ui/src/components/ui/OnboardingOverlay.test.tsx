@@ -52,12 +52,39 @@ describe('OnboardingOverlay', () => {
   it('shows the onboarding cards on first run', async () => {
     render(<OnboardingOverlay />);
     await waitFor(() => {
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByRole('region', { name: 'Welcome to UpstreamDrift' })).toBeInTheDocument();
     });
     expect(screen.getByText('Welcome to UpstreamDrift')).toBeInTheDocument();
     expect(screen.getByText('Quick Start')).toBeInTheDocument();
     expect(screen.getByText('Configurations')).toBeInTheDocument();
     expect(screen.getByText('Documentation')).toBeInTheDocument();
+  });
+
+  it('is non-blocking: no modal dialog, no backdrop, page stays usable (#14263)', async () => {
+    const onHomeAction = vi.fn();
+    render(
+      <>
+        <button onClick={onHomeAction}>Launch Simulation</button>
+        <OnboardingOverlay />
+      </>,
+    );
+    const panel = await screen.findByRole('region', { name: 'Welcome to UpstreamDrift' });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(document.querySelector('[aria-modal="true"]')).toBeNull();
+    expect(document.querySelector('.inset-0')).toBeNull();
+    expect(panel.className).not.toMatch(/\binset-0\b/);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Launch Simulation' }));
+    expect(onHomeAction).toHaveBeenCalledTimes(1);
+    expect(panel).toBeInTheDocument();
+  });
+
+  it('keeps the stored dismissal key for migration (#14263)', () => {
+    window.localStorage.setItem('upstreamdrift.onboarding.dismissed', 'true');
+    const { container } = render(<OnboardingOverlay />);
+    expect(fetchOnboardingCopy).not.toHaveBeenCalled();
+    expect(container.innerHTML).toBe('');
   });
 
   it('does not show when already dismissed', () => {
@@ -70,21 +97,21 @@ describe('OnboardingOverlay', () => {
   it('closing without the checkbox does not persist dismissal', async () => {
     render(<OnboardingOverlay />);
     await waitFor(() => {
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByRole('region', { name: 'Welcome to UpstreamDrift' })).toBeInTheDocument();
     });
     fireEvent.click(screen.getByRole('button', { name: 'Get Started' }));
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Welcome to UpstreamDrift' })).not.toBeInTheDocument();
     expect(onboardingPersistence.isDismissed()).toBe(false);
   });
 
   it('closing with "Don\'t show again" persists dismissal', async () => {
     render(<OnboardingOverlay />);
     await waitFor(() => {
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByRole('region', { name: 'Welcome to UpstreamDrift' })).toBeInTheDocument();
     });
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: 'Get Started' }));
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Welcome to UpstreamDrift' })).not.toBeInTheDocument();
     expect(onboardingPersistence.isDismissed()).toBe(true);
   });
 
