@@ -69,6 +69,15 @@ describe('CharacterBuilderPage', () => {
     expect(screen.getByLabelText(/Build Type/i)).toBeInTheDocument();
   });
 
+  it('collapses the controls panel into a drawer below lg (#14279)', () => {
+    render(<CharacterBuilderPage />);
+    const aside = document.querySelector('aside');
+    expect(aside?.className).toMatch(/(^|\s)hidden lg:flex/);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Character Controls' }));
+    expect(screen.getByRole('dialog', { name: 'Character Controls' })).toBeInTheDocument();
+  });
+
   it('renders the spec-native Character Builder panel (CMB-7a, #11658)', () => {
     render(<CharacterBuilderPage />);
 

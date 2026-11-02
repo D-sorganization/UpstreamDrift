@@ -14,7 +14,7 @@ export function ModelPreviewViewport({
   activePreviewModel,
 }: ModelPreviewViewportProps) {
   return (
-    <main className="flex-1 relative min-w-0 bg-gray-950">
+    <div className="flex-1 relative min-w-0 min-h-0 bg-gray-950">
       <Canvas camera={{ position: [3, 2, 3], fov: 50 }} className="w-full h-full">
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
@@ -45,6 +45,6 @@ export function ModelPreviewViewport({
           </span>
         </div>
       )}
-    </main>
+    </div>
   );
 }

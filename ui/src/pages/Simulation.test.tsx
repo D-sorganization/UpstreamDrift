@@ -194,6 +194,18 @@ describe('SimulationPage', () => {
 
       expect(screen.getByRole('toolbar', { name: /simulation controls/i })).toBeInTheDocument();
     });
+
+    it('collapses both side panels into drawers below lg (#14279)', () => {
+      render(<SimulationPage />, { wrapper: createWrapper() });
+
+      // Docked asides only appear at lg+/xl+, so phones keep the full-width canvas.
+      for (const aside of Array.from(document.querySelectorAll('aside'))) {
+        expect(aside.className).toMatch(/(^|\s)hidden(\s|$)/);
+      }
+      fireEvent.click(screen.getByRole('button', { name: 'Engine Controls' }));
+      expect(screen.getByRole('dialog', { name: 'Engine Controls' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Live Data' })).toBeInTheDocument();
+    });
   });
 
   describe('idle state — no engines loaded', () => {
