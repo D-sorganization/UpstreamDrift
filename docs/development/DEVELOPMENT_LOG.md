@@ -1749,10 +1749,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13560
 - **Branch:** merged via #14185
-- **PR:** #14185
+- **PR:** #14185, #14351
 - **Paths:** see #14185
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-01 (`9a132afd`; collated from changes/13560-mujoco-resting-friction.md)
+- **Last verified:** 2026-11-02 (`1377299a`; collated from changes/13560-opensim-net-moment-diagnosis.md)
 - **Summary:** MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed
 - **Next step:** Shipped in PR #14185.
 
@@ -2607,10 +2607,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13176
 - **Branch:** merged via #13820
-- **PR:** #13820, #14015, #14127
+- **PR:** #13820, #14015, #14127, #14357
 - **Paths:** see #13820
 - **Started:** 2026-10-25
-- **Last verified:** 2026-10-30 (`e1164326`; collated from changes/13176-limits-qualification.md)
+- **Last verified:** 2026-11-02 (`fa7aa74e`; collated from changes/13176-full-body-v2-closure-qualification.md)
 - **Summary:** Qualify HRG full-body-v2 mass and gravity in Drake
 - **Next step:** Shipped in PR #13820.
 
