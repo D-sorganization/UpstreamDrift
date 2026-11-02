@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T15:43:26Z",
+  "generated_at": "2026-11-02T03:29:08Z",
   "rows": [
     {
       "acceptance": null,
@@ -3530,6 +3530,31 @@
       "acceptance": null,
       "artefacts": {
         "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/trunk_visuals/driver_v2_bundle.npz"
+      },
+      "candidate_sha": "4063705ffaa9b4ceb4a33bc144c32590ef964087a7cd980089a0f04dc386bf9a",
+      "capture": null,
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/trunk_visuals/receipt.json",
+      "sha256": "09974ed8063d0271f72cc1f4d299c1d2de13e88cf7c90c50692ba92e9e89ba6f"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
         "mot": "docs/development/full_body_models/evidence/viewer/opensim_os3b_ik.mot",
         "npz": "docs/development/full_body_models/evidence/viewer/opensim_os3b_candidate.npz"
       },
@@ -6519,5 +6544,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 160
+  "total_receipts": 161
 }
