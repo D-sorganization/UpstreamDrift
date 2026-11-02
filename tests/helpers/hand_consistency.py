@@ -359,6 +359,20 @@ def _spec_frames(doc: dict[str, Any], q: dict[str, float]) -> dict[str, np.ndarr
     }
 
 
+def spec_frame_poses(doc: dict[str, Any], q: dict[str, float]) -> dict[str, Any]:
+    """World pose (4x4) of every spec frame of ``doc`` at ``q``, analytically."""
+    return _spec_frames(doc, q)
+
+
+def engine_frame_poses(
+    engine: str, doc: dict[str, Any]
+) -> Callable[[dict[str, float]], dict]:
+    """``q -> {frame: 4x4 world pose}`` through ``engine``'s own export and FK."""
+    if engine not in _FRAME_READERS:
+        raise ValueError(f"{engine!r} is not a gating engine {GATING_ENGINES}")
+    return _FRAME_READERS[engine](doc)
+
+
 def _hand_on_forearm(frames: dict[str, Any], hand: str) -> np.ndarray:
     forearm, hand_frame = (
         np.asarray(frames[n], dtype=float) for n in _frame_names(hand)
