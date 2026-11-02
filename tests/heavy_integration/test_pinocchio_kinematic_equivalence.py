@@ -14,7 +14,15 @@ pelvis -> lumbars -> thorax stack -> mid_hands -> club_head links the
 URDF defines, with no shared code, so a disagreement points at a
 URDF-versus-pinocchio bug or a spec drift.
 
-Skips cleanly when pinocchio is not installable (e.g. Python 3.14 on
+Model schema (version ``AUDIT_SCHEMA_VERSION``): the tracked
+``golfer.urdf`` must provide every joint in ``REQUIRED_SPINE_JOINTS`` and
+every frame in ``REQUIRED_FRAMES``; world frame is the URDF root, poses use
+the URDF joint-angle sign conventions mirrored in ``numpy_spine_fk``. Once
+pinocchio is available a missing asset, joint, or frame FAILS: that is
+schema drift, not an absent prerequisite. A deliberate schema change must
+bump ``AUDIT_SCHEMA_VERSION`` and update the numpy reference in review.
+
+Only a missing pinocchio install is an explicit skip (e.g. Python 3.14 on
 Windows where the wheel is not yet published).
 """
 
@@ -36,6 +44,21 @@ from tests.unit.engines.pinocchio._kinematic_equivalence_data import (
 
 pytestmark = [pytest.mark.requires_pinocchio]
 
+AUDIT_SCHEMA_VERSION = 1
+REQUIRED_SPINE_JOINTS = (
+    "pelvis_to_lumbar1_intermediate",
+    "lumbar1_intermediate_to_lumbar1",
+    "lumbar1_to_lumbar2_intermediate",
+    "lumbar2_intermediate_to_lumbar2",
+    "lumbar2_to_lumbar3_intermediate",
+    "lumbar3_intermediate_to_lumbar3",
+    "lumbar3_to_thorax1",
+    "thorax1_to_thorax2",
+    "thorax2_to_thorax3",
+)
+REQUIRED_FRAMES = ("mid_hands", "club_head")
+REQUIRED_POSE_NAMES = ("address", "top_of_backswing", "impact")
+
 
 def _pin():
     try:
@@ -50,7 +73,10 @@ def _pin():
 def loaded_model():
     pin = _pin()
     if not GOLFER_URDF.exists():
-        pytest.skip(f"golfer.urdf not found at {GOLFER_URDF}")
+        pytest.fail(
+            f"golfer.urdf not found at {GOLFER_URDF} "
+            f"(audit schema v{AUDIT_SCHEMA_VERSION} requires it)"
+        )
     model = pin.buildModelFromUrdf(str(GOLFER_URDF))
     data = model.createData()
     return pin, model, data
@@ -75,11 +101,12 @@ def _set_spine_q(pin, model, cfg: SpineConfig) -> np.ndarray:
         "thorax2_to_thorax3": cfg.thorax3_z,
     }
 
+    assert tuple(spine_joint_angles) == REQUIRED_SPINE_JOINTS
     for joint_name, angle in spine_joint_angles.items():
         if not model.existJointName(joint_name):
-            pytest.skip(
+            pytest.fail(
                 f"spine joint '{joint_name}' missing from URDF model "
-                "- URDF schema has drifted from the audit"
+                f"- URDF schema has drifted from audit v{AUDIT_SCHEMA_VERSION}"
             )
         joint_id = model.getJointId(joint_name)
         # Each of these is a single-DOF revolute, so idx_q is the q index.
@@ -90,7 +117,10 @@ def _set_spine_q(pin, model, cfg: SpineConfig) -> np.ndarray:
 def _frame_T(pin, model, data, frame_name: str) -> np.ndarray:
     """Return the world-frame 4x4 SE(3) transform of a named frame."""
     if not model.existFrame(frame_name):
-        pytest.skip(f"frame '{frame_name}' missing from URDF model")
+        pytest.fail(
+            f"frame '{frame_name}' missing from URDF model "
+            f"- URDF schema has drifted from audit v{AUDIT_SCHEMA_VERSION}"
+        )
     fid = model.getFrameId(frame_name)
     T = data.oMf[fid]
     H = np.eye(4)
@@ -155,3 +185,52 @@ def test_club_head_agrees_with_numpy_fk(loaded_model, cfg) -> None:
         f"{np.rad2deg(ori_err):.4f} deg >= tolerance "
         f"{np.rad2deg(GRIP_ORIENTATION_TOL_RAD):.2f} deg"
     )
+
+
+@pytest.mark.unit
+def test_reference_poses_cover_required_schema() -> None:
+    """Three named poses must execute for each of the two required frames."""
+    assert tuple(c.name for c in REFERENCE_POSES) == REQUIRED_POSE_NAMES
+
+
+class _FakeModel:
+    """Minimal stand-in exposing only the lookups the audit helpers use."""
+
+    def __init__(self, joints: set[str], frames: set[str]) -> None:
+        self._joints = joints
+        self._frames = frames
+        self.idx_qs = list(range(len(REQUIRED_SPINE_JOINTS)))
+
+    def getJointId(self, name: str) -> int:  # noqa: N802 - pinocchio API
+        return REQUIRED_SPINE_JOINTS.index(name)
+
+    def existJointName(self, name: str) -> bool:  # noqa: N802 - pinocchio API
+        return name in self._joints
+
+    def existFrame(self, name: str) -> bool:  # noqa: N802 - pinocchio API
+        return name in self._frames
+
+
+class _FakePin:
+    @staticmethod
+    def neutral(model: _FakeModel) -> np.ndarray:
+        return np.zeros(len(REQUIRED_SPINE_JOINTS))
+
+
+@pytest.mark.unit
+def test_controlled_missing_joint_fails() -> None:
+    model = _FakeModel(set(REQUIRED_SPINE_JOINTS[:-1]), set(REQUIRED_FRAMES))
+    with pytest.raises(BaseException) as excinfo:
+        _set_spine_q(_FakePin, model, REFERENCE_POSES[0])
+    # A skip here would hide schema drift; it must be a hard failure.
+    assert excinfo.type is pytest.fail.Exception
+    assert "thorax2_to_thorax3" in str(excinfo.value)
+
+
+@pytest.mark.unit
+def test_controlled_missing_frame_fails() -> None:
+    model = _FakeModel(set(REQUIRED_SPINE_JOINTS), {"mid_hands"})
+    with pytest.raises(BaseException) as excinfo:
+        _frame_T(_FakePin, model, None, "club_head")
+    assert excinfo.type is pytest.fail.Exception
+    assert "club_head" in str(excinfo.value)
