@@ -24,12 +24,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14177
 - **Branch:** claude/putting-tools-14177
-- **PR:** #14203, #14220
+- **PR:** #14203, #14220, #14247, #14245, #14233, #14242, #14236, #14238, #14237, #14218, #14230, #14231
 - **Paths:** see #14203
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-01 (`31b5bfab`; collated from changes/14177-skill-roll-model-adapter.md)
+- **Last verified:** 2026-11-02 (`ab77c162`; collated from changes/14177-sg-optimizer-putting-provider.md)
 - **Summary:** Putting Optimizer and Misread-Cost MCP Tools
-- **Next step:** Add the putting_variance_attribution MCP tool on top of this adapter
+- **Next step:** Wire the putting tools into the PyQt6 app and API routes with a feature-parity entry
 
 ### DL-#14176 · Add Putting Reference Data and Validation Harness
 
@@ -37,10 +37,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14176
 - **Branch:** claude/putting-validation-14176
-- **PR:** #14198
+- **PR:** #14198, #14232
 - **Paths:** see #14198
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-01 (`5bc0c637`; collated from changes/14176-add-putting-reference-data-and-validatio.md)
+- **Last verified:** 2026-11-02 (`2d2257a7`; collated from changes/14176-project-steward-status-2026-11-01.md)
 - **Summary:** Add Putting Reference Data and Validation Harness
 - **Next step:** Calibrate presets once the batch roll and skill sampler merge
 
@@ -1145,6 +1145,71 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14293 · Live-View Controller Tests Fail on Loader Import or C3D Parse Errors; Skip Only on Absent Fixture or Ezc3d
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14293
+- **Branch:** merged via #14299
+- **PR:** #14299
+- **Paths:** see #14299
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`e5d646a6`; collated from changes/14293-live-view-controller-tests-fail-on-loade.md)
+- **Summary:** Live-view controller tests fail on loader import or C3D parse errors; skip only on absent fixture or ezc3d
+- **Next step:** Shipped in PR #14299.
+
+### DL-#14292 · PCA/Kalman Tests Fail on Product Import Errors; Skip Only When the Pinned Tools Tree Is Absent
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14292
+- **Branch:** merged via #14298
+- **PR:** #14298
+- **Paths:** see #14298
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`ffe93043`; collated from changes/14292-pca-kalman-tests-fail-on-product-import.md)
+- **Summary:** PCA/Kalman tests fail on product import errors; skip only when the pinned Tools tree is absent
+- **Next step:** Shipped in PR #14298.
+
+### DL-#14254 · Add the 5 Missing Tool Routes to KNOWN_APP_ROUTES and a Vitest Guard That Fails When App.Tsx Routes and the Canonical List Diverge
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14254
+- **Branch:** merged via #14287
+- **PR:** #14287
+- **Paths:** see #14287
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`01fdf38d`; collated from changes/14254-add-the-5-missing-tool-routes-to-known-a.md)
+- **Summary:** Add the 5 missing tool routes to KNOWN_APP_ROUTES and a vitest guard that fails when App.tsx routes and the canonical list diverge
+- **Next step:** Shipped in PR #14287.
+
+### DL-#14227 · Pinocchio Swing Model Uses the Shared GRAVITY_M_S2 Constant, so Its RNEA Agrees With the CasADi Symbolic Model Again After #13799
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14227
+- **Branch:** merged via #14228
+- **PR:** #14228
+- **Paths:** see #14228
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`6486357d`; collated from changes/14227-pinocchio-swing-model-uses-the-shared-gr.md)
+- **Summary:** Pinocchio swing model uses the shared GRAVITY_M_S2 constant, so its RNEA agrees with the CasADi symbolic model again after #13799
+- **Next step:** Shipped in PR #14228.
+
+### DL-#14225 · Skills_Manager Reads Workflows Only From .agents/workflows (Mirrors Tools#5910, RM #2567); Vendor/Ud-Tools Bumped 0616724 -> 0B5a1eb so the Chat Child Copy Stays Byte-Identical to the Pin
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14225
+- **Branch:** merged via #14239
+- **PR:** #14239
+- **Paths:** see #14239
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`d4ff4d3f`; collated from changes/14225-skills-manager-reads-workflows-only-from.md)
+- **Summary:** skills_manager reads workflows only from .agents/workflows (mirrors Tools#5910, RM #2567); vendor/ud-tools bumped 0616724 -> 0b5a1eb so the chat child copy stays byte-identical to the pin
+- **Next step:** Shipped in PR #14239.
+
 ### DL-#14214 · Conflict Disarm App Token Scoped to UpstreamDrift and Repository_Management With Contents Read, Pull-Requests Write and Issues Write
 
 - **State:** shipped
@@ -1320,10 +1385,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14141
 - **Branch:** merged via #14145
-- **PR:** #14145, #14149, #14155, #14159, #14160, #14163, #14166, #14167, #14184, #14187, #14202, #14191, #14209, #14210, #14213, #14215, #14221
+- **PR:** #14145, #14149, #14155, #14159, #14160, #14163, #14166, #14167, #14184, #14187, #14202, #14191, #14209, #14210, #14213, #14215, #14221, #14286, #14249, #14277, #14278, #14284, #14285, #14224, #14226, #14229, #14234, #14240, #14241, #14243, #14244, #14246, #14248
 - **Paths:** see #14145
 - **Started:** 2026-10-31
-- **Last verified:** 2026-11-01 (`08538465`; collated from changes/14141-putting-v4-step8c-studio-markup.md)
+- **Last verified:** 2026-11-02 (`a8b30b8f`; collated from changes/14141-putting-v4-step9a-mcp-tools.md)
 - **Summary:** Characterize putting_dynamics contracts with invariant tests and postconditions (putting v4 PR 1)
 - **Next step:** Shipped in PR #14145.
 
