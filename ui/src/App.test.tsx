@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from '@testing-library/react';
-import { screen } from '@testing-library/dom';
+import { fireEvent, screen } from '@testing-library/dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useUIStore } from './stores';
 
 // Mock the pages to isolate App component testing
 vi.mock('@/pages/Simulation', () => ({
@@ -58,6 +59,7 @@ describe('App', () => {
   afterEach(() => {
     // Reset the URL after each test
     window.history.pushState({}, '', '/');
+    useUIStore.getState().setHelpOpen(false);
   });
 
   // Pages are lazy-loaded (#7433), so they resolve asynchronously after the
@@ -71,6 +73,15 @@ describe('App', () => {
   it('renders DashboardPage at root route', async () => {
     render(<App />, { wrapper: createWrapper() });
     expect(await screen.findByText('DashboardPage Mock')).toBeInTheDocument();
+  });
+
+  it('opens the global HelpPanel with F1', async () => {
+    render(<App />, { wrapper: createWrapper() });
+    await screen.findByTestId('dashboard-page-mock');
+
+    fireEvent.keyDown(window, { key: 'F1' });
+
+    expect(await screen.findByRole('dialog', { name: 'Help panel' })).toBeInTheDocument();
   });
 
   it('exports default App component', () => {

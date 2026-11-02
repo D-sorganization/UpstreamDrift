@@ -35,6 +35,8 @@ interface HelpPanelProps {
   initialTopicId?: string;
   /** Controlled open state. When undefined, component manages its own state. */
   isOpen?: boolean;
+  /** Requests opening when the F1 shortcut is used with controlled state. */
+  onOpen?: () => void;
   /** Callback when the panel is closed. */
   onClose?: () => void;
 }
@@ -43,7 +45,12 @@ interface HelpPanelProps {
 // Component
 // ---------------------------------------------------------------------------
 
-export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: HelpPanelProps) {
+export function HelpPanel({
+  initialTopicId,
+  isOpen: controlledOpen,
+  onOpen,
+  onClose,
+}: HelpPanelProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
 
@@ -72,8 +79,10 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
   const handleOpen = useCallback(() => {
     if (controlledOpen === undefined) {
       setInternalOpen(true);
+    } else {
+      onOpen?.();
     }
-  }, [controlledOpen]);
+  }, [controlledOpen, onOpen]);
 
   // Focus trap + Escape + focus save/restore (#7438). Replaces the prior
   // timeout-based focus and window-scoped Escape handling.
@@ -197,9 +206,9 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
         </div>
 
         {/* Content area */}
-        <div className="flex-1 overflow-hidden flex">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col sm:flex-row">
           {/* Sidebar */}
-          <div className="w-56 flex-shrink-0 border-r border-gray-700 overflow-y-auto p-2">
+          <div className="max-h-40 flex-shrink-0 border-b border-gray-700 overflow-y-auto p-2 sm:max-h-none sm:w-56 sm:border-b-0 sm:border-r">
             {searchQuery.trim() ? (
               // Search results
               <div>
@@ -257,7 +266,7 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
           </div>
 
           {/* Main content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
             {selectedContent ? (
               <div>
                 {/* Topic title */}
@@ -356,7 +365,7 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
                   Press F1 at any time to toggle this panel.
                 </p>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {Object.values(HELP_TOPICS).map((topic) => (
                     <button
                       key={topic.id}

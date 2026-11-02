@@ -20,10 +20,30 @@ describe('HelpPanel', () => {
     expect(container.innerHTML).toBe('');
   });
 
+  it('requests open on F1 when controlled closed', () => {
+    const onOpen = vi.fn();
+    render(<HelpPanel isOpen={false} onOpen={onOpen} />);
+
+    fireEvent.keyDown(window, { key: 'F1' });
+
+    expect(onOpen).toHaveBeenCalledTimes(1);
+  });
+
   it('renders the help dialog when isOpen is true', () => {
     render(<HelpPanel isOpen={true} onClose={() => {}} />);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Help')).toBeInTheDocument();
+  });
+
+  it('uses a stacked single-column layout at narrow widths', () => {
+    render(<HelpPanel isOpen={true} onClose={() => {}} />);
+    const dialog = screen.getByRole('dialog');
+    const content = dialog.querySelector('[class*="flex-col"][class*="sm:flex-row"]');
+    const overviewGrid = dialog.querySelector('.grid');
+
+    expect(content).toBeInTheDocument();
+    expect(overviewGrid?.className).toContain('grid-cols-1');
+    expect(overviewGrid?.className).toContain('sm:grid-cols-2');
   });
 
   it('shows overview when no topic is selected', () => {
