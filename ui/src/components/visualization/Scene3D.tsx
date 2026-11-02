@@ -10,7 +10,7 @@
 
 import { useRef, useMemo, useState, useCallback, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Grid, Environment, TransformControls } from '@react-three/drei';
+import { OrbitControls, Grid, TransformControls } from '@react-three/drei';
 import * as THREE from 'three';
 type OrbitControlsImpl = React.ComponentRef<typeof OrbitControls>;
 import type { SimulationFrame } from '@/api/client';
@@ -22,6 +22,7 @@ import { ForceLegend } from './ForceLegend';
 import type { GlyphSetV1 } from '@/types/glyphs';
 import { ForceColorControls } from './ForceColorControls';
 import { ForceColorLayer } from './ForceColorLayer';
+import { SceneEnvironment } from './SceneEnvironment';
 import { defaultForceColorScale } from './forceColors';
 import { segmentForcesAtTime } from './segmentForceFrame';
 import type { SegmentForceFrame } from './segmentForceFrame';
@@ -278,7 +279,7 @@ export function Scene3D({
         <ForceOverlayComponent glyphs={glyphs} />
 
         <axesHelper args={[1]} />
-        <Environment preset="studio" />
+        <SceneEnvironment />
       </Canvas>
       {/* Legend overlay for force/torque glyphs (ADR-0052, #11308) */}
       {glyphs && (

@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, Environment } from '@react-three/drei';
+import { OrbitControls, Grid } from '@react-three/drei';
 import { URDFViewer, URDFModel } from '@/components/visualization/URDFViewer';
+import { SceneEnvironment } from '@/components/visualization/SceneEnvironment';
 
 interface ModelPreviewViewportProps {
   urdfModel: URDFModel | null;
@@ -35,7 +36,7 @@ export function ModelPreviewViewport({
           />
         )}
         <axesHelper args={[1]} />
-        <Environment preset="studio" />
+        <SceneEnvironment />
       </Canvas>
 
       {activePreviewModel && (

@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, Environment } from '@react-three/drei';
+import { OrbitControls, Grid } from '@react-three/drei';
 import { getApiBase } from '@/api/backend';
 import { CharacterSpecPanel } from '@/components/character/CharacterSpecPanel';
 import { AppearancePanel } from '@/components/character/AppearancePanel';
@@ -9,6 +9,7 @@ import { useSpecBodyPreview } from '@/components/character/useSpecBodyPreview';
 import { SPEC_BODY_DEFAULT_COLOR } from '@/components/character/skinnedBodyPreview';
 import type { AppearancePalette } from '@/components/character/appearanceTypes';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
+import { SceneEnvironment } from '@/components/visualization/SceneEnvironment';
 
 interface SegmentBreakdown {
   name: string;
@@ -401,7 +402,7 @@ export function CharacterBuilderPage() {
               palette={palette}
             />
           )}
-          <Environment preset="studio" />
+          <SceneEnvironment />
         </Canvas>
 
         {/* Info Overlay */}
