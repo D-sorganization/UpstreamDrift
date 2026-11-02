@@ -67,3 +67,32 @@ describe('contrast guard (#7439)', () => {
     ).toEqual([]);
   }, COLOR_GUARD_TIMEOUT_MS);
 });
+
+/**
+ * Theme tokens ratchet (#14252): raw gray-* and blue-* classes must not exceed
+ * the ratchet budget. As components migrate to semantic tokens (bg-canvas,
+ * bg-surface, text-token-*, border-token-border, primary), ratchet down the ceiling.
+ */
+describe('theme-tokens ratchet (#14252)', () => {
+  it('does not exceed the raw gray-*/blue-* palette class ceiling', () => {
+    const rawPalettePattern = /\b(?:[a-zA-Z0-9_\-]+:)*(?:bg|text|border|ring|divide)-(?:gray|blue)-\d+(?:\/\d+)?\b/g;
+    let totalRawCount = 0;
+    for (const file of sourceTypeScriptFiles) {
+      const rel = relative(SRC_ROOT, file).replace(/\\/g, '/');
+      if (rel.startsWith('utils/colorGuard') || rel.includes('.test.') || rel.includes('.spec.')) continue;
+      const source = readFileSync(file, 'utf8');
+      const matches = source.match(rawPalettePattern);
+      if (matches) {
+        totalRawCount += matches.length;
+      }
+    }
+    const ceiling =
+      (allowlistJson as { rawPaletteCeiling?: { maxRawPaletteClasses: number } })
+        .rawPaletteCeiling?.maxRawPaletteClasses ?? Infinity;
+    expect(
+      totalRawCount,
+      `Raw gray-*/blue-* class count (${totalRawCount}) exceeded ratchet budget (${ceiling}). Migrate new or edited components to semantic tokens (bg-canvas, bg-surface, text-token-*, border-token-border, primary).`,
+    ).toBeLessThanOrEqual(ceiling);
+  }, COLOR_GUARD_TIMEOUT_MS);
+});
+
