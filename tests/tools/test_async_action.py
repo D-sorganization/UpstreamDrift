@@ -267,6 +267,14 @@ def test_bar_cancel_button_stops_the_work(bar) -> None:  # noqa: ANN001
     assert "cancelled" in bar.status_label.text()
 
 
+def test_bar_cancel_tooltip_can_be_replaced(bar) -> None:  # noqa: ANN001
+    """Callers explain their own cancel semantics without reaching into the bar."""
+    bar.set_cancel_tooltip("Cancel discards the result when it returns.")
+    assert bar.cancel_button.toolTip() == "Cancel discards the result when it returns."
+    with pytest.raises(ValueError, match="tooltip must be a non-empty string"):
+        bar.set_cancel_tooltip("  ")
+
+
 def test_bar_start_rejects_an_empty_name(bar) -> None:  # noqa: ANN001
     with pytest.raises(ValueError, match="name must be a non-empty string"):
         bar.start("", lambda ctx: None, on_finished=lambda _r: None)

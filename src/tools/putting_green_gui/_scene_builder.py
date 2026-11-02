@@ -3,9 +3,8 @@
 This module owns *all* of the putting-green domain logic for the GUI: it
 turns user-facing controls (putter speed, aim, cup distance, stimp, slope)
 into a real strike-and-roll simulation on the shared
-:mod:`src.shared.python.putting_dynamics` core (epic #14141 step 7d; the
-legacy ``src.engines.physics_engines.putting_green`` engine is retired by a
-later step) and packages the result as a render-ready :class:`PuttScene`.
+:mod:`src.shared.python.putting_dynamics` core (epic #14141 step 7d;
+ADR-0058) and packages the result as a render-ready :class:`PuttScene`.
 Keeping it free of any Qt/OpenGL import means the physics wiring is
 exhaustively unit-testable in a headless environment, and the GUI layer
 stays a thin renderer (DRY / Law of Demeter).

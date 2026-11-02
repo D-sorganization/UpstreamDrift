@@ -1,0 +1,95 @@
+/*
+ * Studio theme for the standalone HTML putting studio (epic #14141, step
+ * 8f). Extracted from the original inline <style> block of the Gemini
+ * source document. Font-family declarations use system font stacks
+ * (system-ui/-apple-system/"Segoe UI" for sans; Georgia/"Times New Roman"
+ * for serif headings and math glyphs; ui-monospace/"Cascadia Code" for
+ * mono) instead of the original Google Fonts imports (Plus Jakarta Sans,
+ * Inter, JetBrains Mono, STIX Two Text) because index.html must open from
+ * file:// with no network access.
+ */
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at 18% 0%, #04150d 0%, #020a06 54%, #010503 100%);
+  color: #F8FAFC;
+  margin: 0;
+  overflow-x: hidden;
+  letter-spacing: -0.01em;
+}
+h1, h2, h3, .journal-serif {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: -0.01em;
+}
+button {
+  border-radius: 0.5rem !important;
+  background: linear-gradient(180deg, rgba(11, 33, 23, 0.95) 0%, rgba(6, 20, 14, 0.99) 100%) !important;
+  border: 1px solid rgba(52, 211, 153, 0.34) !important;
+  color: #e2f8ee !important;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+button:hover {
+  background: linear-gradient(180deg, rgba(16, 50, 35, 0.98) 0%, rgba(9, 31, 21, 1.0) 100%) !important;
+  border-color: rgba(52, 211, 153, 0.72) !important;
+  color: #ffffff !important;
+}
+button#playPauseBtn, button#rollPlayPauseBtn, button#toggleLegendBtn, button#runBatch1000Btn {
+  background: linear-gradient(180deg, #059669 0%, #047857 100%) !important;
+  border-color: #34d399 !important;
+  color: #ffffff !important;
+}
+.photoreal-green-canvas {
+  filter: contrast(1.09) saturate(1.14) brightness(0.96);
+  box-shadow: inset 0 0 48px rgba(1, 9, 5, 0.85);
+}
+.mono { font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace; font-feature-settings: "tnum" on, "zero" on; }
+.glass-card {
+  background: linear-gradient(145deg, rgba(13, 27, 22, 0.92) 0%, rgba(8, 17, 14, 0.96) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(52, 211, 153, 0.22);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+}
+input[type="range"] {
+  accent-color: #22d3ee;
+  height: 6px;
+  border-radius: 999px;
+  transition: all 0.15s ease;
+}
+button { transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1); }
+button:active { transform: scale(0.97); }
+.golf-sky-bg {
+  background: linear-gradient(180deg, #0c4a6e 0%, #0284c7 22%, #7dd3fc 44%, #bbf7d0 50%, #15803d 53%, #14532d 100%);
+}
+.legend-pill-glow {
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.35), 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+.math-sym {
+  font-family: Georgia, 'Cambria Math', 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.math-vec {
+  font-family: Georgia, 'Cambria Math', serif;
+  font-style: italic;
+  font-weight: 700;
+}
+.vec-label-3d {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  padding: 3px 7px;
+  border-radius: 6px;
+  pointer-events: none;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.85);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.55);
+  z-index: 15;
+}

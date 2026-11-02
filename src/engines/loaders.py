@@ -475,20 +475,23 @@ def load_golf_swing_pendulum_engine(suite_root: Path) -> PhysicsEngine:  # noqa:
 def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG001
     """Load Putting Green engine.
 
+    Returns the shared-core adapter (:class:`SharedPuttingEngine`,
+    #14141 step 10a) rather than the legacy simulator.
+
     Postcondition: returned engine is non-None (DbC).
     """
     try:
-        from src.engines.physics_engines.putting_green.python.simulator import (
-            PuttingGreenSimulator,
+        from src.engines.physics_engines.putting_green.python.shared_engine import (
+            SharedPuttingEngine,
         )
 
         # Putting green doesn't need probing - it's always available as pure Python
-        simulator = PuttingGreenSimulator()
-        logger.info("Putting Green engine loaded successfully")
+        engine = SharedPuttingEngine()
+        logger.info("Putting Green engine (shared core) loaded successfully")
 
         # DbC postcondition
-        _ensure_engine_loaded(simulator, "PuttingGreen")  # type: ignore[arg-type]
-        return simulator  # type: ignore[return-value]
+        _ensure_engine_loaded(engine, "PuttingGreen")  # type: ignore[arg-type]
+        return engine  # type: ignore[return-value]
 
     except ImportError as e:
         raise GolfModelingError("Putting Green engine not found.") from e

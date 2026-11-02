@@ -1,6 +1,6 @@
 """Tests for the putting green simulator GUI.
 
-The GUI is a thin renderer over the real :class:`PuttingGreenSimulator`
+The GUI is a thin renderer over the shared putting physics core
 (via :mod:`src.tools.putting_green_gui._scene_builder`). Qt runs in
 ``offscreen`` mode so these stay headless-safe; OpenGL-specific assertions
 are skipped when ``pyqtgraph`` is unavailable.

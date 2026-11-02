@@ -57,12 +57,12 @@ the [Putting Green](putting_green.md) tile.
 - **Any number this tile produces is model output, not measurement**, including
   the corrected impact-point delivery, which by definition is a computed
   correction applied to a tracked point.
-- If the tile's putting tab is reached: results from the `usga-stimp-roll/1`
-  model must never be compared numerically with results from the
-  `ud-legacy-roll/1` model behind the [Putting Green](putting_green.md) tile
-  unless both model names are attached. The two preserved models differ by a
-  pinned roll-out ratio of approximately 2.854. ADR-0045 makes naming the model
-  mandatory, and fail-closed readers refuse an unnamed result.
+- If the tile's putting tab is reached: results must never be compared
+  numerically with archived results from the retired `ud-legacy-roll/1` model
+  unless both model names are attached. The [Putting Green](putting_green.md)
+  tile now runs the same `usga-stimp-roll/1` law as this tab
+  ([ADR-0058](../adr/0058-one-shared-putting-core.md)), and fail-closed readers
+  refuse an unnamed result.
 - Beyond that, what this tile does not do cannot be stated, because what it
   does could not be established. Nothing further is asserted here.
 - The tile's registry status is `gui_ready` with maturity `ready`. Neither

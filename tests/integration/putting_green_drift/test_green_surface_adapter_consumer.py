@@ -4,35 +4,31 @@ Completes the #9143 rider (issue #9346). #9143 shipped the format-level
 consumer test (``tests/unit/putting/test_putting_green_consumer.py``):
 geometry and gravity agree across the vendor boundary. This module adds
 the *physics-engine* half the ADR-0045 Validation section calls for: the
-same green and the same launch driven through UpstreamDrift's own
-:mod:`~src.engines.physics_engines.putting_green.python.ball_roll_physics`
-(not a reimplementation of it) versus the vendored Tools integrator
-``shared.python.swing_sim.putting.simulate_putt_on_surface``, gating only
-what ADR-0045 says both roll models share: the flat-green straight line,
-the break sign under a cross slope, monotonicity in stimp, and the
-documented ~2.854 mu-ratio pin (Tools#4819). Magnitudes are otherwise
-**not** forced to agree -- the divergent mu laws are the named-models
-contract of ADR-0045, not a bug (see the ``ud_adapter`` module docstring
-and docs/adr/0045-putting-integration-one-experience-two-preserved-stacks.md).
+same green and the same launch driven through UpstreamDrift's shared
+putting core (:mod:`src.shared.python.putting_dynamics`, not a
+reimplementation of it) versus the vendored Tools integrator
+``shared.python.swing_sim.putting.simulate_putt_on_surface``. It gates the
+flat-green straight line, the break sign under a cross slope and
+monotonicity in stimp. Since ADR-0058 retired ``ud-legacy-roll/1``, both
+sides run the USGA Stimpmeter law, so the old ~2.854 mu-ratio pin
+(Tools#4819) becomes a roll-out agreement gate (ratio 1 within 5 %;
+measured 0.9986 on 2026-11-01, #14141 step 10c).
 
 Coordinate framing
 -------------------
 Tools' ``simulate_putt_on_surface`` always launches from local ``(0, 0)``
 with the hole on the ``+x`` axis (module docstring of
-``shared.python.swing_sim.putting.green``). UpstreamDrift's ``GreenSurface``
-instead occupies the first quadrant (``is_on_green`` requires
-``0 <= y <= height``), so the same green is authored twice from the same
-height field ``f(x, y_rel)``: once in Tools' centered frame
-(``y = y_rel``, fed to the adapter as UD-shaped JSON) and once in UD's own
-frame, translated by ``_PHYS_Y_CENTER`` so the putt line sits away from the
-green edge (``y = y_rel + _PHYS_Y_CENTER``). This is a coordinate label,
-not a different green -- exactly the "placing the surface into the putt
-frame is the caller's job" note in the ``ud_adapter`` module docstring.
+``shared.python.swing_sim.putting.green``). The shared core uses the same
+centered frame, so the physics gates author each green once from the same
+height field ``f(x, y_rel)``: on the shared core directly and, for Tools,
+as UD-shaped JSON fed to the adapter. UpstreamDrift's ``GreenSurface``
+(first quadrant, ``0 <= y <= height``) appears only in the round-trip and
+refusal tests.
 
 Grain is turned off (``grain_strength=0.0``) in the shared-physics gates:
 Tools has no grain concept, and UD's default bent-grass grain would add a
-same-direction friction discount that has nothing to do with the mu-law
-divergence this module gates.
+same-direction friction discount that has nothing to do with the roll
+law this module compares.
 
 CI posture: mirrors ``tests/integration/launch_monitor_drift`` (skip
 locally when ``vendor/ud-tools`` is not materialised; every CI job that
@@ -52,18 +48,23 @@ import pytest
 from src.engines.physics_engines.putting_green.python._surface_data import (
     ContourPoint,
 )
-from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-    BallRollPhysics,
-    BallState,
-)
 from src.engines.physics_engines.putting_green.python.green_surface import GreenSurface
-from src.engines.physics_engines.putting_green.python.turf_properties import (
-    TurfProperties,
-)
 from src.shared.python.core.physics_constants import (
     GOLF_BALL_RADIUS_M as UD_GOLF_BALL_RADIUS_M,
 )
 from src.shared.python.core.physics_constants import GRAVITY_M_S2 as UD_GRAVITY_M_S2
+from src.shared.python.putting_dynamics import (
+    BallState,
+    FrictionField,
+    HeightField,
+    PuttResult,
+    SurfaceSpec,
+    TurfSpec,
+    simulate_ball,
+)
+from src.shared.python.putting_dynamics import (
+    stimp_to_rolling_mu as shared_stimp_to_rolling_mu,
+)
 from tests.integration.launch_monitor_drift.conftest import (
     require_vendored_tools_stack,
 )
@@ -89,7 +90,6 @@ from shared.python.swing_sim.putting import (  # noqa: E402
 _PHYS_SPACING_M = 2.0
 _PHYS_X_MAX_M = 20.0
 _PHYS_Y_HALF_SPAN_M = 8.0
-_PHYS_Y_CENTER_M = 8.0  # UD-frame y of the putt line (green is 16 m tall)
 _STIMP_FT = 10.0
 
 
@@ -111,60 +111,34 @@ def _wire_json_for(height_fn: Callable[[float, float], float]) -> str:
     return json.dumps({"contours": contours})
 
 
-def _make_ud_green(height_fn: Callable[[float, float], float]) -> GreenSurface:
-    """The same height field, authored with UD's own contour-point code.
+def _shared_surface(
+    height_fn: Callable[[float, float], float], stimp_ft: float = _STIMP_FT
+) -> SurfaceSpec:
+    """The same height field on the shared core, in Tools' centered frame.
 
-    Turf is left at the constructor default; every test passes its own
-    :class:`TurfProperties` explicitly to :class:`BallRollPhysics` (never
-    mutating the fixture), so this green is safely module-scoped.
+    Grain is off (module docstring); the turf is the shared USGA law.
     """
     xs, y_rel = _phys_nodes()
-    points = [
-        ContourPoint(x=x, y=y + _PHYS_Y_CENTER_M, elevation=float(height_fn(x, y)))
-        for y in y_rel
-        for x in xs
-    ]
-    green = GreenSurface(width=_PHYS_X_MAX_M, height=2.0 * _PHYS_Y_HALF_SPAN_M)
-    green.set_contour_points(points)
-    # Hole capture is out of scope for these gates (module docstring); park
-    # it far away so it can never interfere.
-    green.set_hole_position(np.array([-1000.0, -1000.0]))
-    return green
-
-
-def _turf(stimp_ft: float) -> TurfProperties:
-    """UD turf at a given stimp with grain disabled (see module docstring)."""
-    return TurfProperties(stimp_rating=stimp_ft, grain_strength=0.0)
-
-
-def _ud_struck_state(speed_mps: float) -> BallState:
-    """A struck putt: zero initial spin, matching Tools' own ``_launch``."""
-    return BallState(
-        position=np.array([0.0, _PHYS_Y_CENTER_M]),
-        velocity=np.array([speed_mps, 0.0]),
-        spin=np.zeros(3),
+    heights = np.array([[float(height_fn(x, y)) for x in xs] for y in y_rel])
+    origin = (xs[0], y_rel[0])
+    ones = np.ones_like(heights)
+    return SurfaceSpec(
+        height=HeightField(heights, spacing_m=_PHYS_SPACING_M, origin_m=origin),
+        friction_field=FrictionField(
+            ones, ones.copy(), spacing_m=_PHYS_SPACING_M, origin_m=origin
+        ),
+        friction=TurfSpec(stimp_ft=stimp_ft, grain_strength=0.0).to_friction_params(),
     )
 
 
-def _ud_rolling_state(speed_mps: float) -> BallState:
-    """A putt already in pure roll (spin locked to ``v / r``).
-
-    Used only by the ratio-pin gate, to isolate the rolling-resistance mu
-    from each engine's own (differently modeled) skid phase.
-    """
-    return BallState(
-        position=np.array([0.0, _PHYS_Y_CENTER_M]),
-        velocity=np.array([speed_mps, 0.0]),
-        spin=np.array([0.0, -speed_mps / UD_GOLF_BALL_RADIUS_M, 0.0]),
-    )
-
-
-def _arc_length(positions: np.ndarray) -> float:
-    """Path length of a UD trajectory, matching Tools' ``total_distance_m``
-    (both are a sum of per-step displacement magnitudes, not net
-    displacement)."""
-    diffs = np.diff(np.asarray(positions), axis=0)
-    return float(np.sum(np.hypot(diffs[:, 0], diffs[:, 1])))
+def _shared_putt(
+    surface: SurfaceSpec, speed_mps: float, *, rolling: bool = False
+) -> PuttResult:
+    """A putt along +x from the origin; ``rolling`` locks spin to ``v / r``
+    so the whole path is roll-out (isolates the rolling mu)."""
+    spin = speed_mps / UD_GOLF_BALL_RADIUS_M if rolling else 0.0
+    ball = BallState(x_m=2.0, y_m=0.0, vx_mps=speed_mps, spin_rad_s=spin)
+    return simulate_ball(ball, surface)
 
 
 def _tools_launch(speed_mps: float, *, spin_rad_s: float = 0.0) -> PuttLaunch:
@@ -178,28 +152,13 @@ def _tools_launch(speed_mps: float, *, spin_rad_s: float = 0.0) -> PuttLaunch:
 
 
 @pytest.fixture(scope="module")
-def flat_ud_green() -> GreenSurface:
-    return _make_ud_green(lambda x, y: 0.0)
-
-
-@pytest.fixture(scope="module")
 def flat_wire_surface():
     return green_surface_from_ud_json(_wire_json_for(lambda x, y: 0.0)).surface
 
 
 @pytest.fixture(scope="module")
-def cross_left_ud_green() -> GreenSurface:
-    return _make_ud_green(lambda x, y: -0.02 * y)
-
-
-@pytest.fixture(scope="module")
 def cross_left_wire_surface():
     return green_surface_from_ud_json(_wire_json_for(lambda x, y: -0.02 * y)).surface
-
-
-@pytest.fixture(scope="module")
-def cross_right_ud_green() -> GreenSurface:
-    return _make_ud_green(lambda x, y: 0.02 * y)
 
 
 @pytest.fixture(scope="module")
@@ -290,31 +249,19 @@ class TestRoundTripPreservesGeometryAtGridNodes:
 
 
 class TestSharedPhysicsGates:
-    """Item 2: same green + same launch through UD's real
-    ``BallRollPhysics`` vs the vendored ``simulate_putt_on_surface``. Only
-    what both roll models share is gated (module docstring)."""
+    """Item 2: the same green and launch through UD's shared putting core
+    (ADR-0058) and the vendored ``simulate_putt_on_surface``. Both run the
+    USGA Stimpmeter law, so beyond the straight line, break sign and stimp
+    monotonicity, their roll-out must agree (it pinned a 2.854 ratio while
+    UD ran the retired ``ud-legacy-roll/1``)."""
 
-    def test_flat_green_rolls_straight_on_both_sides(
-        self, flat_ud_green, flat_wire_surface
-    ) -> None:
-        speed = 1.5
-
-        ud_physics = BallRollPhysics(
-            turf=_turf(_STIMP_FT), green=flat_ud_green, integrator="rk4"
-        )
-        ud_result = ud_physics.simulate_putt(
-            _ud_struck_state(speed), max_time=30.0, dt=0.002
-        )
-        assert ud_result["final_position"][1] == pytest.approx(
-            _PHYS_Y_CENTER_M, abs=1e-9
-        )
-        assert all(
-            pos[1] == pytest.approx(_PHYS_Y_CENTER_M, abs=1e-9)
-            for pos in ud_result["positions"]
-        )
+    def test_flat_green_rolls_straight_on_both_sides(self, flat_wire_surface) -> None:
+        shared = _shared_putt(_shared_surface(lambda x, y: 0.0), 1.5)
+        assert shared.rest_y_m == pytest.approx(0.0, abs=1e-9)
+        assert all(s.y_m == pytest.approx(0.0, abs=1e-9) for s in shared.samples)
 
         tools_result = simulate_putt_on_surface(
-            _tools_launch(speed),
+            _tools_launch(1.5),
             flat_wire_surface,
             stimp_ft=_STIMP_FT,
             hole_distance_m=30.0,
@@ -322,114 +269,55 @@ class TestSharedPhysicsGates:
         assert tools_result.break_m == 0.0
         assert all(y == 0.0 for y in tools_result.path_y_m)
 
-    def test_break_sign_matches_cross_slope_downhill_left(
-        self, cross_left_ud_green, cross_left_wire_surface
+    @pytest.mark.parametrize("side", [1.0, -1.0], ids=["downhill-left", "right"])
+    def test_break_sign_matches_the_cross_slope(
+        self, side: float, cross_left_wire_surface, cross_right_wire_surface
     ) -> None:
-        speed = 1.5
+        surface = _shared_surface(lambda x, y: -0.02 * side * y)
+        assert side * _shared_putt(surface, 1.5).rest_y_m > 0.0
 
-        ud_physics = BallRollPhysics(
-            turf=_turf(_STIMP_FT), green=cross_left_ud_green, integrator="rk4"
-        )
-        ud_result = ud_physics.simulate_putt(
-            _ud_struck_state(speed), max_time=30.0, dt=0.002
-        )
-        ud_break_m = float(ud_result["final_position"][1]) - _PHYS_Y_CENTER_M
-        assert ud_break_m > 0.0
-
+        wire = cross_left_wire_surface if side > 0 else cross_right_wire_surface
         tools_result = simulate_putt_on_surface(
-            _tools_launch(speed),
-            cross_left_wire_surface,
-            stimp_ft=_STIMP_FT,
-            hole_distance_m=30.0,
+            _tools_launch(1.5), wire, stimp_ft=_STIMP_FT, hole_distance_m=30.0
         )
-        assert tools_result.break_m > 0.0
+        assert side * tools_result.break_m > 0.0
 
-    def test_break_sign_matches_cross_slope_downhill_right(
-        self, cross_right_ud_green, cross_right_wire_surface
-    ) -> None:
-        speed = 1.5
-
-        ud_physics = BallRollPhysics(
-            turf=_turf(_STIMP_FT), green=cross_right_ud_green, integrator="rk4"
-        )
-        ud_result = ud_physics.simulate_putt(
-            _ud_struck_state(speed), max_time=30.0, dt=0.002
-        )
-        ud_break_m = float(ud_result["final_position"][1]) - _PHYS_Y_CENTER_M
-        assert ud_break_m < 0.0
-
-        tools_result = simulate_putt_on_surface(
-            _tools_launch(speed),
-            cross_right_wire_surface,
-            stimp_ft=_STIMP_FT,
-            hole_distance_m=30.0,
-        )
-        assert tools_result.break_m < 0.0
-
-    def test_rollout_monotone_in_stimp_on_both_sides(
-        self, flat_ud_green, flat_wire_surface
-    ) -> None:
-        speed = 1.5
-        ud_distances = []
-        tools_distances = []
+    def test_rollout_monotone_in_stimp_on_both_sides(self, flat_wire_surface) -> None:
+        shared, tools = [], []
         for stimp in (8.0, 10.0, 12.0):
-            ud_physics = BallRollPhysics(
-                turf=_turf(stimp), green=flat_ud_green, integrator="rk4"
-            )
-            ud_result = ud_physics.simulate_putt(
-                _ud_struck_state(speed), max_time=30.0, dt=0.002
-            )
-            ud_distances.append(_arc_length(ud_result["positions"]))
-
+            surface = _shared_surface(lambda x, y: 0.0, stimp)
+            shared.append(_shared_putt(surface, 1.5).total_distance_m)
             tools_result = simulate_putt_on_surface(
-                _tools_launch(speed),
+                _tools_launch(1.5),
                 flat_wire_surface,
                 stimp_ft=stimp,
                 hole_distance_m=30.0,
             )
-            tools_distances.append(tools_result.total_distance_m)
+            tools.append(tools_result.total_distance_m)
+        assert shared[0] < shared[1] < shared[2]
+        assert tools[0] < tools[1] < tools[2]
 
-        assert ud_distances[0] < ud_distances[1] < ud_distances[2]
-        assert tools_distances[0] < tools_distances[1] < tools_distances[2]
+    def test_both_sides_run_the_same_usga_law(self, flat_wire_surface) -> None:
+        """Both derive mu from the USGA Stimpmeter geometry; they differ only
+        in how g and the release speed are rounded (about 0.1 %). Starting in
+        pure roll makes the total distance the roll-out, isolating mu from
+        each side's skid model, so the roll-out ratio is 1 within the 5 %
+        the 2.854 pin allowed."""
+        mu_ratio = shared_stimp_to_rolling_mu(_STIMP_FT) / stimp_to_rolling_mu(
+            _STIMP_FT
+        )
+        assert mu_ratio == pytest.approx(1.0, rel=1e-2)
 
-    def test_roll_out_ratio_matches_the_documented_constant(
-        self, flat_ud_green, flat_wire_surface
-    ) -> None:
-        """Tools#4819 / ADR-0045 Validation: mu_tools / mu_ud is a
-        stimp-independent constant ~2.854 (UD rolls ~2.85x farther at the
-        same stimp) -- the divergence is the named-models contract of
-        ADR-0045, not a bug. Both simulators start already in pure roll
-        (spin locked to v/r) so total distance IS the roll-out distance,
-        isolating mu without either engine's own skid model."""
         speed = 2.0
-
-        ud_physics = BallRollPhysics(
-            turf=_turf(_STIMP_FT), green=flat_ud_green, integrator="rk4"
-        )
-        ud_result = ud_physics.simulate_putt(
-            _ud_rolling_state(speed), max_time=30.0, dt=0.002
-        )
-        ud_distance_m = _arc_length(ud_result["positions"])
-
-        tools_spin_rad_s = speed / TOOLS_GOLF_BALL_RADIUS_M
+        shared = _shared_putt(_shared_surface(lambda x, y: 0.0), speed, rolling=True)
         tools_result = simulate_putt_on_surface(
-            _tools_launch(speed, spin_rad_s=tools_spin_rad_s),
+            _tools_launch(speed, spin_rad_s=speed / TOOLS_GOLF_BALL_RADIUS_M),
             flat_wire_surface,
             stimp_ft=_STIMP_FT,
             hole_distance_m=30.0,
         )
-        tools_distance_m = tools_result.total_distance_m
-
-        # The documented constant, from each engine's own real mu law (not
-        # a copy of Tools' reproduction of UD's formula).
-        mu_ud = _turf(_STIMP_FT).effective_friction
-        mu_tools = stimp_to_rolling_mu(_STIMP_FT)
-        mu_ratio = mu_tools / mu_ud
-        assert mu_ratio == pytest.approx(2.854, abs=2e-3)
-
-        empirical_ratio = ud_distance_m / tools_distance_m
-        assert empirical_ratio == pytest.approx(2.854, rel=0.05)
-        assert empirical_ratio == pytest.approx(mu_ratio, rel=0.05)
+        ratio = shared.total_distance_m / tools_result.total_distance_m
+        assert ratio == pytest.approx(1.0, rel=0.05)
 
 
 class TestRefusesUdWeightedSlopeField:

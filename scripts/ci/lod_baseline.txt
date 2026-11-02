@@ -115,7 +115,6 @@ src/engines/physics_engines/myosuite/python/_simulation_core.py	self.sim.data.ti
 src/engines/physics_engines/pendulum/python/motion_matching/provider.py	dynamics.parameters.lower_segment.length_m	1
 src/engines/physics_engines/pendulum/python/motion_matching/provider.py	dynamics.parameters.upper_segment.length_m	1
 src/engines/physics_engines/pendulum/python/pendulum_screw_kinematics.py	dynamics.parameters.lower_segment.length_m	1
-src/engines/physics_engines/putting_green/python/_practice_mode.py	sim.green.turf.stimp_rating	1
 src/engines/simscape/adapter.py	self._lifecycle.state.value	4
 src/launchers/chat_history/chat_history_service.py	self._memory_path.parent.mkdir	1
 src/launchers/cross_engine_dashboard.py	ax.xaxis.label.set_color	1
