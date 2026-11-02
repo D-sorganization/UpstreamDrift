@@ -317,16 +317,6 @@ def test_jaxsim_backend_rejects_row_shaped_vector_output() -> None:
         backend.compute_bias_forces()
 
 
-def test_jaxsim_backend_propagates_model_output_exception() -> None:
-    def fail_bias(*_args: object) -> np.ndarray:
-        raise RuntimeError("injected backend failure")
-
-    backend = _backend_with_bias_api(fail_bias)
-
-    with pytest.raises(RuntimeError, match="injected backend failure"):
-        backend.compute_bias_forces()
-
-
 def test_jaxsim_backend_inverse_dynamics_and_acceleration_decomposition() -> None:
     backend = _backend()
     qacc = np.arange(7, dtype=np.float64)

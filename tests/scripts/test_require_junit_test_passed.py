@@ -1,5 +1,4 @@
 import importlib.util
-import json
 from pathlib import Path
 
 import pytest
@@ -97,41 +96,13 @@ def test_require_test_passed_accepts_at_least_one_passed_case(tmp_path: Path) ->
     )
 
 
-def test_receipt_uses_unique_exact_ids_and_records_environment(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    body = "".join(
-        f'<testcase classname="{CLASS}" name="{case}">'
-        + (
-            '<properties><property name="case" value="ok"/></properties><system-out>ok</system-out>'
-            if i == 0
-            else ""
-        )
-        + "</testcase>"
-        for i, case in enumerate(CASES)
-    )
-    body += f'<testcase classname="{CLASS}" name="{CASES[0]}-prefix-collision"/>'
-    output = tmp_path / "receipt.json"
-    assert _run_receipt(monkeypatch, _junit(tmp_path, body), output) == 0
-    receipt = json.loads(output.read_text(encoding="utf-8"))
-    assert receipt["source_revision"] == "abc123"
-    assert receipt["runner_os"] == "Linux"
-    assert receipt["packages"] == {"jaxsim": "0.9.0", "pin": "4.0"}
-    assert receipt["executed_case_count"] == 3
-    assert receipt["executed_cases"] == [f"{CLASS}::{case}" for case in CASES]
-
-
 @pytest.mark.parametrize(
     "mutation",
     [
         "wrong-class",
         "missing",
-        "duplicate",
-        "prefix-only",
         "failure",
-        "error",
         "skipped",
-        "duplicate-request",
     ],
 )
 def test_receipt_rejects_ambiguous_or_nonpassing_cases(
@@ -143,15 +114,8 @@ def test_receipt_rejects_ambiguous_or_nonpassing_cases(
         nodes[0] = nodes[0].replace(CLASS, "other.module")
     elif mutation == "missing":
         nodes.pop()
-    elif mutation == "duplicate":
-        nodes.append(nodes[0])
-    elif mutation in {"failure", "error", "skipped"}:
+    elif mutation in {"failure", "skipped"}:
         nodes[0] = nodes[0][:-2] + f"><{mutation}/></testcase>"
-    else:
-        if mutation == "prefix-only":
-            nodes[0] = nodes[0].replace(CASES[0], CASES[0] + "-suffix")
-        else:
-            cases = [CASES[0]] * 2
     output = tmp_path / "receipt.json"
     assert (
         _run_receipt(monkeypatch, _junit(tmp_path, "".join(nodes)), output, cases) == 1

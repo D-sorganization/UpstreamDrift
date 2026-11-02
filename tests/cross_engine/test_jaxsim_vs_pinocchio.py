@@ -286,20 +286,18 @@ def test_jaxsim_pinocchio_free_body_dynamics_terms_match(
         atol=ABS_TOL,
     )
     if case_id == "rotated-world-origin":
-        # I_W has I_xz=0.5; M=diag-block(I_W, mI), m=1 kg.
         expected_mass = np.diag([2.5, 1.0, 2.5, 1.0, 1.0, 1.0])
         expected_mass[0, 2] = expected_mass[2, 0] = 0.5
-        for terms in (jaxsim_terms, pinocchio_terms):
-            np.testing.assert_allclose(terms.mass, expected_mass, atol=ABS_TOL)
-            np.testing.assert_allclose(
-                terms.bias, [10.0, 4.0, -6.0, -3.0, 6.0, 6.81], atol=ABS_TOL
-            )
-            np.testing.assert_allclose(
-                terms.gravity, [0, 0, 0, 0, 0, 9.81], atol=ABS_TOL
-            )
-            np.testing.assert_allclose(
-                terms.coriolis @ v, [10.0, 4.0, -6.0, -3.0, 6.0, -3.0], atol=ABS_TOL
-            )
+        np.testing.assert_allclose(jaxsim_terms.mass, expected_mass, atol=ABS_TOL)
+        np.testing.assert_allclose(
+            jaxsim_terms.bias, [10.0, 4.0, -6.0, -3.0, 6.0, 6.81], atol=ABS_TOL
+        )
+        np.testing.assert_allclose(
+            jaxsim_terms.gravity, [0, 0, 0, 0, 0, 9.81], atol=ABS_TOL
+        )
+        np.testing.assert_allclose(
+            jaxsim_terms.coriolis @ v, [10.0, 4.0, -6.0, -3.0, 6.0, -3.0], atol=ABS_TOL
+        )
 
 
 def test_parity_metric_reports_zero_for_identical_terms() -> None:

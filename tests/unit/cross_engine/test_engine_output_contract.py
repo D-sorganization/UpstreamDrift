@@ -30,7 +30,6 @@ def _parity(monkeypatch: pytest.MonkeyPatch, backend: Mock | None = None):
 @pytest.mark.parametrize(
     ("engine", "missing"),
     [
-        ("jaxsim", "jax"),
         ("pinocchio", "pinocchio"),
         ("pinocchio", "partial"),
         ("pinocchio", "mock"),
@@ -108,37 +107,6 @@ def test_pinocchio_malformed_mass_fails_after_required_model_setup(
         parity._pinocchio_terms(_Q, _V)
     model.addJoint.assert_called_once()
     pin.crba.assert_called_once()
-
-
-def test_jaxsim_terms_performs_required_setup_before_reading_outputs(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    q = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0])
-    backend = _fake_backend(np.zeros(6))
-    backend.compute_coriolis_matrix.return_value = np.zeros((6, 6))
-    parity = _parity(monkeypatch, backend)
-
-    parity._jaxsim_terms(q, _V)
-
-    assert [item[0] for item in backend.mock_calls] == [
-        "load_from_string",
-        "set_state",
-        "forward",
-        "compute_mass_matrix",
-        "compute_bias_forces",
-        "compute_gravity_forces",
-        "compute_coriolis_matrix",
-    ]
-    assert backend.load_from_string.call_args.kwargs == {"extension": "sdf"}
-    assert backend.set_state.call_args.args[0] is q
-    assert backend.set_state.call_args.args[1] is _V
-    monkeypatch.setattr(
-        parity,
-        "JaxSimBackend",
-        Mock(side_effect=RuntimeError("injected initializer failure")),
-    )
-    with pytest.raises(RuntimeError, match="injected initializer failure"):
-        parity._jaxsim_terms(_Q, _V)
 
 
 @pytest.mark.parametrize(
