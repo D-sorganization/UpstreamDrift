@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14353 | Record evidence-based deployment boundary |
+| 2026-11-02 | #14355 | Define mobile workflows and server-side runtime boundary |
+| 2026-11-02 | #14349 | Delete drifted local themes.json copy and consume Tools theme catalog with legacy id migration |
+| 2026-11-02 | #14345 | Fast-tier unit gate runs matched-swing README freshness test when ledger changes. |
 | 2026-11-02 | #14343 | Gate JaxSim/Pinocchio free-body parity on strict engine outputs and a rotated inertial oracle |
 | 2026-11-02 | #14342 | Workspace cards show authored tool names and one-line summaries instead of a template sentence, and both card actions share one primary button style labeled Open or Open in Window. |
 | 2026-11-02 | #14344 | Web launcher resolves models.yaml logo paths and hides ROC tile when bundle absent. |
