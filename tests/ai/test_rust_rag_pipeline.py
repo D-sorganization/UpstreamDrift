@@ -103,14 +103,16 @@ class TestLocalONNXEmbeddings:
         rag = RagPipeline(mem, cfg, True)
         return rag, mem
 
-    def test_embedding_determinism(self, tmp_path: Path) -> None:
-        """Same text must produce the same vector across calls."""
+    def test_repeat_indexing_dedupes_and_retrieves(self, tmp_path: Path) -> None:
+        """Re-indexing the same file dedupes and the phrase retrieves its file.
+
+        This checks retrieval and deduplication only. Embedding determinism is
+        asserted directly at the Rust seam by ``max_embedding_drift`` against
+        ``EMBEDDING_DETERMINISM_TOL`` (``rust_core/ai_backend/src/rag.rs``),
+        including a nondeterministic substitute that must fail (#14288).
+        """
         rag, mem = self._make_pipeline(tmp_path)
 
-        # Index two copies of the same chunk through the pipeline by going
-        # through retrieve_context (which embeds the query). We can't access
-        # the embedder directly from Python, so we round-trip via storage:
-        # one payload, embed twice, expect cosine ~= 1.0.
         text = "the quick brown fox jumps over the lazy dog"
 
         # Drop a fixture file and index it twice; dedupe means the chunk is
