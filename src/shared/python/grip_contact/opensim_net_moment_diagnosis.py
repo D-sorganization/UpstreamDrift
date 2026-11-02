@@ -147,7 +147,9 @@ def trace_peak_summary(traces: Mapping[str, np.ndarray]) -> dict[str, Any]:
         for key in part_keys
         if key in traces
     }
-    dominant = max(part_peaks, key=part_peaks.get) if part_peaks else ""
+    dominant = (
+        max(part_peaks.items(), key=lambda item: item[1])[0] if part_peaks else ""
+    )
     ref_peak = float(
         np.linalg.norm(traces["reference_net_moment_com_nm"], axis=1).max()
     )
