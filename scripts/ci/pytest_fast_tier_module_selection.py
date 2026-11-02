@@ -27,6 +27,8 @@ _CONFIG_PATH = _REPO_ROOT / "scripts/config/pytest_fast_tier_shared_core_globs.j
 MONOLITH_REGISTER_TEST = "tests/scripts/test_monolith_register.py"
 _MONOLITH_REGISTER_DOC = "docs/development/monolith_refactor_register.md"
 _MONOLITH_REGISTER_SCRIPT = "scripts/gen_monolith_register.py"
+MATCHED_SWING_LEDGER_PATH = "reports/matched_swing_ledger.json"
+MATCHED_SWING_FRESHNESS_TEST = "tests/docs/test_matched_swing_status_freshness.py"
 
 
 @dataclass(frozen=True)
@@ -115,6 +117,14 @@ def _modules_for_source(rel: str, repo_root: Path) -> tuple[str, ...]:
     return _tracked_test_modules(repo_root, hits)
 
 
+def _modules_for_reports(rel: str, repo_root: Path) -> tuple[str, ...]:
+    if rel == MATCHED_SWING_LEDGER_PATH:
+        candidate = repo_root / MATCHED_SWING_FRESHNESS_TEST
+        if candidate.is_file():
+            return (MATCHED_SWING_FRESHNESS_TEST,)
+    return ()
+
+
 def _affects_monolith_register(path: str) -> bool:
     if path in (_MONOLITH_REGISTER_DOC, _MONOLITH_REGISTER_SCRIPT):
         return True
@@ -154,6 +164,9 @@ def select_modules(
             continue
         if path.startswith("src/") and path.endswith(".py"):
             modules.update(_modules_for_source(path, root))
+            continue
+        if path.startswith("reports/"):
+            modules.update(_modules_for_reports(path, root))
 
     if not modules:
         return SelectionDecision("full", (), "no_mapped_modules")

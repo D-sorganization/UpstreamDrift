@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 
 from scripts.ci.pytest_fast_tier_module_selection import (
+    MATCHED_SWING_FRESHNESS_TEST,
+    MATCHED_SWING_LEDGER_PATH,
     SelectionConfig,
     load_config,
     select_modules,
@@ -69,6 +71,16 @@ def test_changed_test_file_selects_only_that_module(tmp_path: Path) -> None:
     )
     assert decision.mode == "modules"
     assert decision.modules == ("tests/unit/demo/test_sample.py",)
+
+
+def test_matched_swing_ledger_change_selects_freshness_test() -> None:
+    decision = select_modules(
+        tier="fast",
+        changed_files=(MATCHED_SWING_LEDGER_PATH,),
+        repo_root=REPO_ROOT,
+    )
+    assert decision.mode == "modules"
+    assert MATCHED_SWING_FRESHNESS_TEST in decision.modules
 
 
 def test_workflow_wires_fast_tier_selection_on_pull_requests() -> None:
