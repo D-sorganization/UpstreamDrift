@@ -2741,6 +2741,38 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14299 | Live-view controller tests fail on loader import or C3D parse errors; skip only on absent fixture or ezc3d |
+| 2026-11-02 | #14298 | PCA/Kalman tests fail on product import errors; skip only when the pinned Tools tree is absent |
+| 2026-11-02 | #14287 | Add the 5 missing tool routes to KNOWN_APP_ROUTES and a vitest guard that fails when App.tsx routes and the canonical list diverge |
+| 2026-11-02 | #14228 | Pinocchio swing model uses the shared GRAVITY_M_S2 constant, so its RNEA agrees with the CasADi symbolic model again after #13799 |
+| 2026-11-02 | #14239 | skills_manager reads workflows only from .agents/workflows (mirrors Tools#5910, RM #2567); vendor/ud-tools bumped 0616724 -> 0b5a1eb so the chat child copy stays byte-identical to the pin |
+| 2026-11-02 | #14231 | sg_optimizer putting provider: selectable logistic (default) or simulated skill-conditioned putting curve |
+| 2026-11-02 | #14230 | putting_variance_attribution MCP tool: strokes gained per class and per round by removing or cutting each putting error source |
+| 2026-11-02 | #14218 | putting_library_study MCP tool: weighted putting report over a caller-supplied putt-class library |
+| 2026-11-02 | #14237 | PyQt6 Putting Analytics window: runs best aim and pace, misread cost and putt-class library studies on a worker thread |
+| 2026-11-02 | #14238 | Putting Analytics desktop tool and launcher tile over the shared putting service, with a feature-parity entry (web page tracked in #14235) |
+| 2026-11-02 | #14236 | Pure-data layer of the putting analytics desktop tool: form parsing into shared putting-service arguments and result rows |
+| 2026-11-02 | #14242 | Putting analytics API: variance-study and simulated-curve routes; curve service that round-trips into the optimizer's simulation provider |
+| 2026-11-02 | #14233 | Putting analytics API routes: optimize, misread cost, library study and limits over the shared putting service |
+| 2026-11-02 | #14245 | Keep every published putting make-rate table (tour and by handicap) as cited reference data with a typed loader |
+| 2026-11-02 | #14247 | Calibrate the simulated putting curve to the published PGA Tour make-rate table (RMS 0.6 points) and add a TOUR_AVERAGE preset |
+| 2026-11-02 | #14232 | Refresh project status from current merged work and add DV-14176 to the charter projection. |
+| 2026-11-02 | #14248 | Putting MCP tools on the shared core: simulate_putt, read_green, stimpmeter and capture_speed on SimulationMcpServer |
+| 2026-11-02 | #14246 | Putting studio: offline size and startup budget test, headless smoke harness, README and parity-ledger gap entry (#14200) |
+| 2026-11-02 | #14244 | Putting v4 step 8k: studio green3d.js (Monte Carlo green dispersion batch, SG capture analytics) computed at load instead of placeholder stats |
+| 2026-11-02 | #14243 | Putting v4 step 8j: studio charts2d.js (torque strip charts, 2D green roll, capture-speed chart) |
+| 2026-11-02 | #14241 | Putting v4 step 8i: studio scene3d_b.js (green, hole, flagstick, putter and vector meshes) |
+| 2026-11-02 | #14240 | Putting v4 step 8h: studio scene3d_a.js (three.js scene, textures, camera, environment) |
+| 2026-11-02 | #14234 | Putting v4 step 8g: studio controls_c.js (aim solve, green presets, resize, animation loop) |
+| 2026-11-02 | #14229 | Putting v4 step 8f: studio controls_a.js (scenario table, UI sync, grip sweep, strike map) and controls_b.js (UI event wiring); no baked-in baseline results |
+| 2026-11-02 | #14226 | Putting v4 step 8e: studio state.js (stroke kinematics, putter presets as model inputs) and io.js (JSON export/load, window.PuttingSimulatorAPI, bootstrap) |
+| 2026-11-02 | #14224 | Putting v4 step 8d: studio markup part 2 (green roll, video, turnover views) and studio.css; corrected chord capture formula; no unsupported result claims |
+| 2026-11-02 | #14285 | Legacy putting_green duplicate physics deleted (roll, stroke, simulator core); surface authoring and the shared-core engine adapter remain |
+| 2026-11-02 | #14284 | ADR-0045 F4 Tools drift gates run on the shared putting core; the 2.854 legacy ratio pin becomes a same-law roll-out agreement gate |
+| 2026-11-02 | #14278 | Practice feedback and fail-closed putt-result documents ported onto the shared putting core (putting_dynamics.practice) |
+| 2026-11-02 | #14277 | ADR-0058 retires ud-legacy-roll/1 (supersedes ADR-0045 decision 4); manifest, parity and capability references point at the shared putting core |
+| 2026-11-02 | #14249 | Putting Green engine loader returns SharedPuttingEngine, a PhysicsEngine adapter over the shared putting_dynamics core |
+| 2026-11-02 | #14286 | Putting docs describe the one shared putting core (ADR-0058) instead of the retired legacy engine |
 | 2026-11-01 | #14219 | Conflict Disarm App token scoped to UpstreamDrift and Repository_Management with contents read, pull-requests write and issues write |
 | 2026-11-01 | #14220 | Skill-Profile Roll Model Adapter for Putting Variance Attribution |
 | 2026-11-01 | #14221 | Putting v4 step 8c: standalone studio markup part 1 (header, 3D studio view) with a model-output validation notice and no baked-in result values |
