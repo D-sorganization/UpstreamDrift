@@ -12,6 +12,8 @@ import pytest
 
 local_server = pytest.importorskip("src.api.local_server")
 
+pytestmark = pytest.mark.unit
+
 
 class TestFindLogoFile:
     """Behavior tests for :func:`_find_logo_file` with unsafe inputs."""
