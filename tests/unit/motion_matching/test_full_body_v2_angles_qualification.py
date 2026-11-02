@@ -19,8 +19,7 @@ rad acceptance, and is never loosened.
 
 MyoSuite is reached by segment-orientation IK on the thorax, not by exporting
 the spec (``EXPORT_STATUS["myosuite"]``), so it has no arm chain driven by
-the same q(t). Contact and inverse dynamics on a reference trajectory remain
-open on #13176.
+the same q(t).
 """
 
 from __future__ import annotations
