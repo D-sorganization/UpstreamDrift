@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14251 · Normalize Terrain Preset Loading and Preserve Concurrent API Errors.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14251
+- **Branch:** codex/terrain-api-contract-14251
+- **PR:** #14318
+- **Paths:** see #14318
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`4ef03dc0`; collated from changes/14251-normalize-terrain-preset-loading-and-pre.md)
+- **Summary:** Normalize terrain preset loading and preserve concurrent API errors.
+- **Next step:** Complete independent review before pushing.
+
 ### DL-#14177 · Putting Optimizer and Misread-Cost MCP Tools
 
 - **State:** in_review
@@ -1144,6 +1157,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14282 · Wide Content on Lift Baseline, Analysis Tools, Terrain, Data Explorer and Golf Simulator Now Scrolls or Wraps at Phone Width Instead of Being Clipped
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14282
+- **Branch:** merged via #14319
+- **PR:** #14319
+- **Paths:** see #14319
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`d92b4b1f`; collated from changes/14282-wide-content-on-lift-baseline-analysis-t.md)
+- **Summary:** Wide content on Lift Baseline, Analysis Tools, Terrain, Data Explorer and Golf Simulator now scrolls or wraps at phone width instead of being clipped
+- **Next step:** Shipped in PR #14319.
 
 ### DL-#14289 · Pinned Offline Embedding Tests Fail on Bad Retrieval and Unexpected Initialization
 
