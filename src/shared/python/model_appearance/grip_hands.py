@@ -47,6 +47,7 @@ from src.shared.python.model_appearance.club_assembly import (
 from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.model_appearance.grip_hand_mesh import (
     DEFAULT_HAND_MESH_PARAMS,
+    GripHandMesh,
     HandMeshParams,
     build_grip_hand_mesh,
 )
@@ -167,6 +168,33 @@ def _mesh_params(hand_length_m: float | None) -> HandMeshParams:
     return replace(DEFAULT_HAND_MESH_PARAMS, scale=hand_mesh_scale(length))
 
 
+def baked_grip_hand(
+    club: ClubAssembly,
+    hand: Hand,
+    pose: GripPose = DEFAULT_GRIP_POSE,
+    *,
+    hand_length_m: float | None = None,
+) -> GripHandMesh:
+    """``hand`` baked in its hand-grip frame on the thickest grip radius it spans.
+
+    Preconditions: a :class:`ClubAssembly`, a :class:`Hand` and a
+    :class:`GripPose`. Postcondition: the grip radius is the tube radius at the
+    butt-most on-grip point, so no on-grip shell enters the tapering tube.
+    """
+    _check_club(club)
+    if not isinstance(hand, Hand):
+        raise TypeError(f"hand must be a Hand, got {hand!r}")
+    _check_pose(pose)
+    params = _mesh_params(hand_length_m)
+    depth = pose.distance_below_butt_m(hand)
+    nominal = build_grip_hand_mesh(
+        hand, grip_radius_m=grip_radius_at(club, depth), pose=pose, params=params
+    )
+    nearest, _ = nominal.on_grip_extent_below_butt_m()
+    radius = grip_radius_at(club, min(max(nearest, 0.0), club.grip_length_m))
+    return build_grip_hand_mesh(hand, grip_radius_m=radius, pose=pose, params=params)
+
+
 def _placed_hand(
     club: ClubAssembly,
     hand: Hand,
@@ -176,16 +204,7 @@ def _placed_hand(
     hands: ResolvedHandSpec | None = None,
 ) -> Mesh:
     """One hand in the club frame, wrapped on the thickest grip radius it spans."""
-    params = _mesh_params(hand_length_m)
-    depth = pose.distance_below_butt_m(hand)
-    nominal = build_grip_hand_mesh(
-        hand, grip_radius_m=grip_radius_at(club, depth), pose=pose, params=params
-    )
-    nearest, _ = nominal.on_grip_extent_below_butt_m()
-    radius = grip_radius_at(club, min(max(nearest, 0.0), club.grip_length_m))
-    baked = build_grip_hand_mesh(
-        hand, grip_radius_m=radius, pose=pose, params=params
-    ).mesh
+    baked = baked_grip_hand(club, hand, pose, hand_length_m=hand_length_m).mesh
     frame = grip_hand_frame(club, hand, pose, hands=hands)
     vertices = baked.vertices @ frame[:3, :3].T + frame[:3, 3]
     return Mesh(vertices, baked.faces)

@@ -30,6 +30,15 @@ increasing azimuth: the two hands are mirror images about their V azimuths.
 The thumb lies along the shaft (toward the head) at the :mod:`grip_pose`
 thumb azimuth.
 
+Shells (#13997)
+---------------
+The palm is swept from the V to the knuckles (MCP) on the grip side; a finger
+placed on its own contact-topology site whose knuckle lies outside that block
+gets its own palm strip from the V to its knuckle, so every on-grip finger has
+a palm under it. A dorsum (metacarpal block) rides on the palm block, out past
+the knuckles; it never rests on the grip. The thumb web spans from the
+thumb to the V over the proximal thumb segment.
+
 Linked fingers (overlap, interlock) take the trail little finger off the grip
 and over (or between) the lead index and middle fingers; it is then flagged
 ``on_grip=False`` and excluded from the grip clearance.
@@ -90,6 +99,9 @@ _SOLVER_MAX_ITERATIONS: int = 5
 _SOLVER_TOLERANCE_M: float = 1e-6
 #: Symmetric interior barrel ring stations in (0, 1) ensuring continuous azimuthal vertex coverage.
 _PHALANX_BARREL_STATIONS: tuple[float, ...] = (0.2, 0.4, 0.6, 0.8)
+#: A topology-placed finger whose knuckle sits this far (rad) from the palm's
+#: knuckle edge, or outside its axial band, gets its own palm strip.
+_OWN_PALM_MIN_OFFSET_RAD: float = math.radians(1.0)
 
 
 @dataclass(frozen=True)
@@ -123,6 +135,11 @@ class HandMeshParams:
     mcp_from_v_deg: float = 110.0
     palm_thickness_m: float = 0.018
     palm_clearance_m: float = 0.0015
+    #: Radial thickness of the dorsum shell; it overlaps the outer quarter of
+    #: the palm and reaches past the knuckles.
+    dorsum_thickness_m: float = 0.014
+    #: Radial thickness of the thumb web.
+    web_thickness_m: float = 0.008
     thumb_radius_m: float = 0.0095
     #: Thumb segment ends along the grip axis, relative to the hand centre.
     thumb_stations_m: tuple[float, float, float] = (-0.012, 0.020, 0.046)
@@ -158,7 +175,7 @@ class HandComponent:
     """One closed shell of the hand mesh (hand-grip frame)."""
 
     name: str
-    finger: str  # FINGER_NAMES, "thumb" or "palm"
+    finger: str  # FINGER_NAMES, "thumb", "palm" or "dorsum"
     mesh: Mesh
     on_grip: bool
 
@@ -412,21 +429,23 @@ def build_grip_hand_mesh(
     stack = _stack_z(params)
     k = params.scale
 
-    parts = _finger_components(hand, pose, radius, curl, mcp, stack, params)
+    parts, knuckles = _finger_components(hand, pose, radius, curl, mcp, stack, params)
     z_lo = min(stack.values()) - k * params.finger_radius_m["little"] * 0.6
     z_hi = max(stack.values()) + k * params.finger_radius_m["index"] * 0.6
-    palm = _rounded_block(
-        radius + params.palm_clearance_m,
-        k * params.palm_thickness_m,
-        (v, mcp),
-        (z_lo, z_hi),
-        params.sides,
-    )
-    parts.append(HandComponent("palm", "palm", palm, True))
+    parts += _palm_strip("", radius, (v, mcp), (z_lo, z_hi), params, dorsum=True)
+    for finger, (mcp_finger, z, r) in knuckles.items():
+        end = v + curl * ((curl * (mcp_finger - v)) % (2.0 * math.pi))
+        if abs(end - mcp) > _OWN_PALM_MIN_OFFSET_RAD or not z_lo <= z <= z_hi:
+            band = (
+                z - r - 0.5 * params.finger_gap_m,
+                z + r + 0.5 * params.finger_gap_m,
+            )
+            parts += _palm_strip(f"_{finger}", radius, (v, end), band, params)
     roll_deg = placement.v_azimuth_deg - NEUTRAL_V_AZIMUTH_DEG
     thumb_azimuth_deg = placement.thumb_offset_deg + roll_deg
     thumb_azimuth = math.radians(thumb_azimuth_deg)
     parts += _thumb(radius, thumb_azimuth, params)
+    parts.append(_thumb_web(radius, v, thumb_azimuth, params))
 
     on_grip_vertices = np.vstack([p.mesh.vertices for p in parts if p.on_grip])
     gap = float(np.min(np.hypot(on_grip_vertices[:, 0], on_grip_vertices[:, 1])))
@@ -455,13 +474,17 @@ def _finger_components(
     mcp: float,
     stack: dict[str, float],
     params: HandMeshParams,
-) -> list[HandComponent]:
-    """The five curled fingers of ``hand``, each placed on its topology site."""
+) -> tuple[list[HandComponent], dict[str, tuple[float, float, float]]]:
+    """The curled fingers of ``hand``, each placed on its topology site.
+
+    Also returns ``{finger: (mcp_azimuth, z, radius)}`` of every on-grip finger.
+    """
     clearance, k = params.pad_clearance_m, params.scale
     placement = pose.placement(hand)
     topo = topology_of_pose(pose, grip_radius_m=radius)
 
     parts: list[HandComponent] = []
+    knuckles: dict[str, tuple[float, float, float]] = {}
     for finger in FINGER_NAMES:
         r = k * params.finger_radius_m[finger]
         p = params.phalanx_lengths_m[finger]
@@ -497,7 +520,68 @@ def _finger_components(
             finger, lengths, r, d, mcp_finger, z, curl, params.sides
         ):
             parts.append(HandComponent(name, finger, mesh, on_grip))
-    return parts
+        if on_grip:
+            knuckles[finger] = (mcp_finger, z, r)
+    return parts, knuckles
+
+
+def _palm_strip(
+    suffix: str,
+    grip_radius: float,
+    theta: tuple[float, float],
+    z: tuple[float, float],
+    params: HandMeshParams,
+    *,
+    dorsum: bool = False,
+) -> list[HandComponent]:
+    """A palm strip on the grip and, with ``dorsum``, the dorsum riding on it.
+
+    Both sweep ``theta`` (from the V to the knuckles) over the axial band
+    ``z``. Postcondition: the palm clears the grip by ``palm_clearance_m``;
+    the dorsum starts three quarters of the way through the palm, so it never
+    rests on the grip, and reaches ``dorsum_thickness_m`` beyond that.
+    """
+    k = params.scale
+    palm_inner = grip_radius + params.palm_clearance_m
+    palm = _rounded_block(
+        palm_inner, k * params.palm_thickness_m, theta, z, params.sides
+    )
+    parts = [HandComponent(f"palm{suffix}", "palm", palm, True)]
+    if not dorsum:
+        return parts
+    back = _rounded_block(
+        palm_inner + 0.75 * k * params.palm_thickness_m,
+        k * params.dorsum_thickness_m,
+        theta,
+        z,
+        params.sides,
+    )
+    return [*parts, HandComponent(f"dorsum{suffix}", "dorsum", back, False)]
+
+
+def _thumb_web(
+    grip_radius: float, v: float, thumb_azimuth: float, params: HandMeshParams
+) -> HandComponent:
+    """Web between the thumb and the V over the proximal thumb segment.
+
+    The sweep spans the thumb azimuth and ``v`` (on the short arc) widened by
+    the thumb's angular half-width on each side. Postcondition: it clears the
+    grip by ``palm_clearance_m``.
+    """
+    k = params.scale
+    r = k * params.thumb_radius_m
+    half = math.atan2(r, grip_radius + params.pad_clearance_m + r)
+    thumb = v + math.remainder(thumb_azimuth - v, 2.0 * math.pi)
+    lo, hi = min(v, thumb) - half, max(v, thumb) + half
+    z0, z1, _ = (k * s for s in params.thumb_stations_m)
+    web = _rounded_block(
+        grip_radius + params.palm_clearance_m,
+        k * params.web_thickness_m,
+        (lo, hi),
+        (z0, z1),
+        params.sides,
+    )
+    return HandComponent("thumb_web", "thumb", web, True)
 
 
 def _solve_topology_finger(

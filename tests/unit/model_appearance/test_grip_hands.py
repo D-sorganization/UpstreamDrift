@@ -202,8 +202,14 @@ def test_lead_hand_is_above_the_trail_hand() -> None:
     meshes = gh.grip_hand_meshes(club)
     lead, _ = _radial(club, meshes["lead_hand"].vertices)
     trail, _ = _radial(club, meshes["trail_hand"].vertices)
-    assert lead.mean() < trail.mean()
-    gap = trail.mean() - lead.mean()
+    # Axial midpoints: a vertex mean is weighted by tessellation density (the
+    # lead index's own palm strip, #13997, is densely swept).
+    lead_mid, trail_mid = (
+        0.5 * (lead.min() + lead.max()),
+        0.5 * (trail.min() + trail.max()),
+    )
+    assert lead_mid < trail_mid
+    gap = trail_mid - lead_mid
     assert gap == pytest.approx(DEFAULT_GRIP_POSE.hand_spacing_m, abs=0.01)
 
 

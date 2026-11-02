@@ -229,6 +229,11 @@ def test_styles_produce_visibly_distinct_fingers() -> None:
     assert il_idx_rho > ov_idx_rho + 0.010  # > 10 mm radial lift
 
 
+#: Shells added by #13997 after this golden was frozen (own tests).
+_SHELLS_13997 = frozenset({"dorsum", "thumb_web"})
+_STRIPS_13997 = ("palm_",)
+
+
 def test_mesh_summary_per_style_golden() -> None:
     """Finger mesh summary per style matches the golden fixture exactly."""
     if not FIXTURE_PATH.is_file():
@@ -244,6 +249,8 @@ def test_mesh_summary_per_style_golden() -> None:
         for hand_key, hand_mesh in [("lead", lead), ("trail", trail)]:
             actual_summary = {}
             for comp in hand_mesh.components:
+                if comp.name in _SHELLS_13997 or comp.name.startswith(_STRIPS_13997):
+                    continue  # covered by test_grip_hand_shells.py
                 v = comp.mesh.vertices
                 actual_summary[comp.name] = {
                     "on_grip": comp.on_grip,
