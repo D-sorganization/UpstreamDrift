@@ -272,7 +272,6 @@ jobs:
           curl -s -X POST "$HEAVY_TEST_SLACK_WEBHOOK" \
             -H 'Content-type: application/json' \
             --data "{\"text\":\"Heavy integration tests failed for UpstreamDrift (${{ matrix.engine }}) on ${GITHUB_REF_NAME}. Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
-  # Manual-only optional lane, excluded from required checks and schedule.
   local-embeddings:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.engine == 'local_embeddings' }}
     needs: pick-runner

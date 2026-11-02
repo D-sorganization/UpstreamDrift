@@ -1,5 +1,3 @@
-"""Contracts for collecting the optional local-embedding lane safely."""
-
 from __future__ import annotations
 
 import importlib.util

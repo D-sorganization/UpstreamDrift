@@ -1,5 +1,3 @@
-"""Provision the immutable local-embedding model artifacts from their lock file."""
-
 from __future__ import annotations
 
 import hashlib

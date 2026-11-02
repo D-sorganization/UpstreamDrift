@@ -5,7 +5,6 @@
 //! 384-dim) on-device. Artifact revision and SHA-256 digests live in
 //! `local_embedding_model.lock.json`. The model is cached under
 //! `$UPSTREAM_DRIFT_MODEL_CACHE` (or `~/.cache/upstream-drift/models/`).
-//!
 //! Gated behind the `local-embeddings` Cargo feature so plain `cargo build`
 //! and the default maturin wheel stay slim. Consumers opt in by building
 //! with `--features local-embeddings`.
