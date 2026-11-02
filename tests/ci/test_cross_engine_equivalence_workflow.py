@@ -27,38 +27,38 @@ def test_pinocchio_force_overlay_installs_openmp_runtime() -> None:
     assert "libgomp1" in runtime_setup["run"]
 
 
-def test_jaxsim_parity_guard_requires_each_named_case_exactly() -> None:
+def test_jaxsim_parity_guard_requires_exact_cases_and_engine_prerequisites() -> None:
     jobs = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))["jobs"]
     steps = jobs["equivalence"]["steps"]
-    guard = next(
-        s["run"] for s in steps if "parity cases actually ran" in s.get("name", "")
-    )
-    assert guard.count("--required-case") == 3
-    assert "--required-classname tests.cross_engine.test_jaxsim_vs_pinocchio" in guard
-    assert "--receipt-output" in guard and "--source-revision" in guard
-    prerequisites = next(
-        s["run"] for s in steps if "prerequisites importable" in s.get("name", "")
-    )
-    assert "import jax, jaxlib, jaxsim" in prerequisites
-    assert "check_pinocchio_dynamics_api.py" in prerequisites
-    assert "RUNNER_OS" in prerequisites
-    assert "|| true" not in prerequisites
-    run_tests = next(
-        s["run"]
-        for s in steps
-        if s.get("name") == "Run cross-engine forward-sim equivalence test"
-    )
-    assert "tests/unit/cross_engine" not in run_tests
+
+    def step(prefix: str):
+        return next(s for s in steps if s.get("name", "").startswith(prefix))
+
+    gate = step("Assert JaxSim parity cases actually ran")["run"]
+    required = step("Assert JaxSim parity prerequisites importable")["run"]
+    lane = step("Run cross-engine forward-sim equivalence test")["run"]
+    artifact = step("Upload equivalence report")["with"]["path"]
+    receipt = "test-results/cross-engine-equivalence-receipt.json"
+    parity = (ROOT / "tests/cross_engine/test_jaxsim_vs_pinocchio.py").read_text()
     assert (
-        "pytestmark = pytest.mark.unit"
+        gate.count("--required-case") == 3
+        and "--required-classname tests.cross_engine.test_jaxsim_vs_pinocchio" in gate
+        and receipt in gate
+        and "$GITHUB_SHA" in gate
+        and '[[ "$RUNNER_OS" == Linux ]]' in required
+        and "import jax, jaxlib, jaxsim" in required
+        and "check_pinocchio_dynamics_api.py" in required
+        and "|| true" not in required
+        and "tests/unit/cross_engine" not in lane
+        and all(
+            marker in parity
+            for marker in (
+                "pytest.importorskip",
+                "requires_jaxsim",
+                "requires_pinocchio",
+            )
+        )
+        and "pytestmark = pytest.mark.unit"
         in (ROOT / "tests/unit/cross_engine/test_engine_output_contract.py").read_text()
     )
-    artifact = next(
-        s["with"]["path"] for s in steps if s.get("name") == "Upload equivalence report"
-    )
-    assert (
-        artifact.splitlines().count(
-            "test-results/cross-engine-equivalence-receipt.json"
-        )
-        == 1
-    )
+    assert artifact.splitlines().count(receipt) == 1

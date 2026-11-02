@@ -1,11 +1,16 @@
-import json
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
 
 pytestmark = pytest.mark.unit
-
+CLASS = "tests.cross_engine.test_jaxsim_vs_pinocchio"
+CASES = [
+    "test_jaxsim_pinocchio_free_body_dynamics_terms_match[identity-angular-only]",
+    "test_jaxsim_pinocchio_free_body_dynamics_terms_match[identity-mixed-velocity]",
+    "test_jaxsim_pinocchio_free_body_dynamics_terms_match[rotated-world-origin]",
+]
 SCRIPT_PATH = (
     Path(__file__).resolve().parents[2]
     / "scripts"
@@ -13,27 +18,38 @@ SCRIPT_PATH = (
     / "require_junit_test_passed.py"
 )
 spec = importlib.util.spec_from_file_location("require_junit_test_passed", SCRIPT_PATH)
-assert spec is not None
 module = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(module)
 require_test_passed = module.require_test_passed
-CLASS = "tests.cross_engine.test_jaxsim_vs_pinocchio"
-CASES = [
-    "test_jaxsim_pinocchio_free_body_dynamics_terms_match[identity-angular-only]",
-    "test_jaxsim_pinocchio_free_body_dynamics_terms_match[identity-mixed-velocity]",
-    "test_jaxsim_pinocchio_free_body_dynamics_terms_match[rotated-world-origin]",
-]
 
 
-def _write(tmp_path: Path, body: str) -> Path:
+def _junit(tmp_path: Path, body: str) -> Path:
     path = tmp_path / "junit.xml"
     path.write_text(f"<testsuite>{body}</testsuite>", encoding="utf-8")
     return path
 
 
-def _exact(path: Path, name: str = "test_required_case") -> int:
-    return require_test_passed(path, name, exact=True, classname=CLASS)
+def _run_receipt(monkeypatch, xml: Path, output: Path, cases=CASES) -> int:
+    monkeypatch.setattr(
+        module.sys,
+        "argv",
+        [
+            "guard",
+            str(xml),
+            "--required-classname",
+            CLASS,
+            *[arg for case in cases for arg in ("--required-case", case)],
+            "--receipt-output",
+            str(output),
+            "--source-revision",
+            "abc123",
+        ],
+    )
+    monkeypatch.setattr(
+        module, "version", lambda name: {"jaxsim": "0.9.0", "pin": "4.0"}[name]
+    )
+    monkeypatch.setenv("RUNNER_OS", "Linux")
+    return module.main()
 
 
 def test_require_test_passed_fails_when_required_case_only_skipped(
@@ -81,100 +97,63 @@ def test_require_test_passed_accepts_at_least_one_passed_case(tmp_path: Path) ->
     )
 
 
-def test_exact_case_guard_uses_the_full_node_identity(tmp_path: Path) -> None:
-    assert (
-        _exact(
-            _write(
-                tmp_path,
-                f'<testcase classname="{CLASS}" name="test_required_case_extra" />',
-            )
-        )
-        == 1
-    )
-    junit = _write(
-        tmp_path,
-        f'<testcase classname="{CLASS}" name="test_required_case_extra" />'
-        f'<testcase classname="{CLASS}" name="test_required_case">'
-        '<properties><property name="case" value="present" /></properties>'
-        "<system-out>ordinary output is not a failure</system-out></testcase>",
-    )
-    assert _exact(junit) == 0
-
-
-@pytest.mark.parametrize("result_tag", ["failure", "error", "skipped"])
-def test_exact_case_guard_rejects_explicit_nonpass_results(
-    tmp_path: Path, result_tag: str
+def test_receipt_uses_unique_exact_ids_and_records_environment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    junit = _write(
-        tmp_path,
-        f'<testcase classname="{CLASS}" name="test_required_case">'
-        f'<{result_tag} message="not passed" /></testcase>',
+    body = "".join(
+        f'<testcase classname="{CLASS}" name="{case}">'
+        + (
+            '<properties><property name="case" value="ok"/></properties><system-out>ok</system-out>'
+            if i == 0
+            else ""
+        )
+        + "</testcase>"
+        for i, case in enumerate(CASES)
     )
-    assert _exact(junit) == 1
+    body += f'<testcase classname="{CLASS}" name="{CASES[0]}-prefix-collision"/>'
+    output = tmp_path / "receipt.json"
+    assert _run_receipt(monkeypatch, _junit(tmp_path, body), output) == 0
+    receipt = json.loads(output.read_text(encoding="utf-8"))
+    assert receipt["source_revision"] == "abc123"
+    assert receipt["runner_os"] == "Linux"
+    assert receipt["packages"] == {"jaxsim": "0.9.0", "pin": "4.0"}
+    assert receipt["executed_case_count"] == 3
+    assert receipt["executed_cases"] == [f"{CLASS}::{case}" for case in CASES]
 
 
 @pytest.mark.parametrize(
-    ("body", "name", "classname"),
+    "mutation",
     [
-        (
-            f'<testcase classname="{CLASS}" name="test_required_case" />' * 2,
-            "test_required_case",
-            CLASS,
-        ),
-        ('<testcase classname="tests.module" name="case" />', "case", None),
+        "wrong-class",
+        "missing",
+        "duplicate",
+        "prefix-only",
+        "failure",
+        "error",
+        "skipped",
+        "duplicate-request",
     ],
 )
-def test_exact_case_guard_requires_unambiguous_class_identity(
-    tmp_path: Path, body: str, name: str, classname: str | None
+def test_receipt_rejects_ambiguous_or_nonpassing_cases(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mutation: str
 ) -> None:
-    assert (
-        require_test_passed(
-            _write(tmp_path, body), name, exact=True, classname=classname
-        )
-        == 1
-    )
-
-
-def test_required_cases_write_receipt_from_unique_passing_junit_nodes(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    xml = _write(
-        tmp_path,
-        "".join(f'<testcase classname="{CLASS}" name="{name}" />' for name in CASES),
-    )
-    output = tmp_path / "receipt.json"
-    args = [str(xml), "--required-classname", CLASS]
-    for name in CASES:
-        args.extend(["--required-case", name])
-    args.extend(["--receipt-output", str(output), "--source-revision", "abc123"])
-    monkeypatch.setattr(module.sys, "argv", ["guard", *args])
-    monkeypatch.setattr(
-        module, "version", lambda name: {"jaxsim": "0.9.0", "pin": "4.0"}[name]
-    )
-    monkeypatch.setenv("RUNNER_OS", "Linux")
-    assert module.main() == 0
-    receipt = json.loads(output.read_text(encoding="utf-8"))
-    assert receipt["source_revision"] == "abc123"
-    assert receipt["executed_case_count"] == len(CASES)
-    assert receipt["executed_cases"] == [f"{CLASS}::{name}" for name in CASES]
-    assert receipt["runner_os"] == "Linux"
-
-
-@pytest.mark.parametrize("status", ["failure", "error", "skipped"])
-def test_required_cases_do_not_write_receipt_for_nonpassing_junit_nodes(
-    tmp_path: Path, status: str
-) -> None:
-    body = "".join(
-        f'<testcase classname="{CLASS}" name="{name}">'
-        + (f"<{status} />" if name == CASES[0] else "")
-        + "</testcase>"
-        for name in CASES
-    )
+    nodes = [f'<testcase classname="{CLASS}" name="{case}"/>' for case in CASES]
+    cases = CASES
+    if mutation == "wrong-class":
+        nodes[0] = nodes[0].replace(CLASS, "other.module")
+    elif mutation == "missing":
+        nodes.pop()
+    elif mutation == "duplicate":
+        nodes.append(nodes[0])
+    elif mutation in {"failure", "error", "skipped"}:
+        nodes[0] = nodes[0][:-2] + f"><{mutation}/></testcase>"
+    else:
+        if mutation == "prefix-only":
+            nodes[0] = nodes[0].replace(CASES[0], CASES[0] + "-suffix")
+        else:
+            cases = [CASES[0]] * 2
     output = tmp_path / "receipt.json"
     assert (
-        module.require_junit_cases_and_write_receipt(
-            _write(tmp_path, body), CLASS, CASES, output, "abc123", "Linux", {}
-        )
-        == 1
+        _run_receipt(monkeypatch, _junit(tmp_path, "".join(nodes)), output, cases) == 1
     )
     assert not output.exists()
