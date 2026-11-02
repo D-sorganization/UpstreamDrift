@@ -13,7 +13,7 @@ from typing import Any
 from fastapi import APIRouter
 
 from src.shared.python.theme.api import ThemeColors, create_theme_router
-from src.shared.python.theme.colors import BUILTIN_THEMES
+from src.shared.python.theme.colors import BUILTIN_THEMES, resolve_theme_name
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +22,10 @@ class _StaticThemeManager:
     """PyQt-free theme provider for API runtimes without desktop persistence."""
 
     def __init__(self, initial_theme: str = "Dark") -> None:
-        if initial_theme not in BUILTIN_THEMES:
+        resolved = resolve_theme_name(initial_theme)
+        if resolved not in BUILTIN_THEMES:
             raise ValueError(f"unknown built-in theme {initial_theme!r}")
-        self._current_theme = initial_theme
+        self._current_theme: str = str(resolved)
 
     def get_builtin_themes(self) -> list[str]:
         return list(BUILTIN_THEMES)
@@ -36,9 +37,10 @@ class _StaticThemeManager:
         return self.get_builtin_themes()
 
     def get_theme_colors(self, name: str) -> dict[str, str]:
-        if name not in BUILTIN_THEMES:
+        resolved = resolve_theme_name(name)
+        if resolved not in BUILTIN_THEMES:
             return {}
-        return self._resolved_colors(name)
+        return self._resolved_colors(resolved)
 
     def get_current_theme_name(self) -> str:
         return self._current_theme
@@ -47,9 +49,10 @@ class _StaticThemeManager:
         return self._resolved_colors(self._current_theme)
 
     def change_theme(self, name: str) -> None:
-        if name not in BUILTIN_THEMES:
+        resolved = resolve_theme_name(name)
+        if resolved not in BUILTIN_THEMES:
             raise ValueError(f"unknown built-in theme {name!r}")
-        self._current_theme = name
+        self._current_theme = str(resolved)
 
     def save_custom_theme(
         self,

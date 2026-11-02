@@ -16,7 +16,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { THEME_PRESETS, type ThemeColors, type ThemeId } from './themeDefinitions';
+import {
+  resolveThemeId,
+  THEME_PRESETS,
+  type ThemeColors,
+  type ThemeId,
+} from './themeDefinitions';
 import { ThemeApiClient } from './themeApi';
 
 /** Custom theme definition */
@@ -152,6 +157,11 @@ export function createThemeStore(config: ThemeStoreConfig) {
           // Check custom themes
           if (id in state.customThemes) {
             return state.customThemes[id].colors;
+          }
+          // Retired built-in IDs from saved preferences (e.g. 'ms-word')
+          const renamedId = resolveThemeId(id);
+          if (renamedId in THEME_PRESETS) {
+            return THEME_PRESETS[renamedId as ThemeId];
           }
           // Fallback to default
           return THEME_PRESETS[defaultTheme] ?? THEME_PRESETS.light;
