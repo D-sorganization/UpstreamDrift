@@ -15,6 +15,7 @@ Headless invariants: ``QT_QPA_PLATFORM=offscreen`` and
 
 from __future__ import annotations
 
+import importlib.util
 import os
 from pathlib import Path
 
@@ -39,21 +40,22 @@ DRIVER_C3D = REPO_ROOT / "data" / "C3D_TA_Driver.c3d"
 
 @pytest.fixture(scope="module")
 def loaded_body():
-    """Load a ``BodyTarget`` from the bundled driver C3D fixture."""
+    """Load a ``BodyTarget`` from the bundled driver C3D fixture.
+
+    Only the two documented optional prerequisites skip, explicitly: the
+    tracked fixture file (sparse checkouts) and the optional ``ezc3d`` reader
+    (``pip install .[c3d]``). Loader import errors and C3D parse failures
+    are product regressions and fail the test (UpstreamDrift#14293).
+    """
     if not DRIVER_C3D.exists():
         pytest.skip(f"C3D fixture not present: {DRIVER_C3D}")
-    try:
-        from src.shared.python.motion_matching.load_body_target import (
-            load_body_target,
-        )
-    except Exception as exc:  # noqa: BLE001 # pragma: no cover - import-time failure
-        pytest.skip(f"load_body_target unavailable: {exc}")
-    try:
-        return load_body_target(DRIVER_C3D)
-    except ImportError as exc:  # ezc3d optional dependency missing
-        pytest.skip(f"C3D loader dependency unavailable: {exc}")
-    except Exception as exc:  # noqa: BLE001 # pragma: no cover - loader-side failure
-        pytest.skip(f"failed to load C3D fixture: {exc}")
+    if importlib.util.find_spec("ezc3d") is None:
+        pytest.skip("optional C3D reader ezc3d not installed (pip install .[c3d])")
+    from src.shared.python.motion_matching.load_body_target import (
+        load_body_target,
+    )
+
+    return load_body_target(DRIVER_C3D)
 
 
 @pytest.fixture()

@@ -25,6 +25,11 @@ export const KNOWN_APP_ROUTES = [
     '/ball-flight',
     '/tools/swing-objective-lab',
     '/tools/golf-simulator',
+    '/tools/matched-swings',
+    '/tools/launch-monitor-analytics',
+    '/tools/necromatcher',
+    '/tools/cross-engine',
+    '/tools/lift-baseline',
     '/chat',
     '/settings',
 ] as const;
