@@ -14,34 +14,25 @@ from src.shared.python.motion_pipeline.contracts import (
 from src.shared.python.motion_pipeline.matching.inverse_dyn_pinocchio import (
     PinocchioInverseDynMatchingSolver,
 )
+from tests.unit.motion_pipeline.matching_completeness._pinocchio_guard import (
+    mock_skip_reason,
+)
 
 
 def _require_real_pinocchio() -> None:
-    """Skip the module if pinocchio is absent or replaced with a MagicMock.
+    """Skip if pinocchio is absent or a MagicMock; fail if real but broken.
 
     ``pytest.importorskip`` alone is insufficient: the ``_protect_engine_modules``
-    autouse fixture may restore a ``MagicMock`` for ``pinocchio`` in ``sys.modules``
-    (from a prior test that mocked the engine probe).  When that happens
-    ``importorskip`` happily returns the mock — and subsequent ``pin.Model().nq``
-    calls return nested ``MagicMock`` objects rather than integers, causing the
-    solver's DOF-consistency check to raise ``ValueError``.
-
-    This helper additionally verifies that the imported module is the real
-    Pinocchio C extension by checking that ``pin.Model().nq`` is an ``int``.
+    autouse fixture may restore a ``MagicMock`` for ``pinocchio`` in
+    ``sys.modules``. That contamination and a missing library are typed skips.
+    A real Pinocchio whose ``Model()`` constructor raises is a provisioning
+    defect and raises ``BrokenPinocchioError`` so the module errors at
+    collection instead of silently skipping (#14297).
     """
     pin = pytest.importorskip("pinocchio")
-    try:
-        model = pin.Model()
-        if not isinstance(model.nq, int):
-            pytest.skip(
-                "pinocchio in sys.modules is a MagicMock — real library absent",
-                allow_module_level=True,
-            )
-    except Exception as exc:  # noqa: BLE001 - skip when engine import fails
-        pytest.skip(
-            f"pinocchio appears to be mocked or broken: {exc}",
-            allow_module_level=True,
-        )
+    reason = mock_skip_reason(pin)
+    if reason is not None:
+        pytest.skip(reason, allow_module_level=True)
 
 
 _require_real_pinocchio()
