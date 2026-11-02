@@ -5,7 +5,6 @@ name: Heavy Integration Tests (Opt-In)
 #   - Runner: d-sorg-fleet-docker (or dedicated runner if configured)
 #   - Marker: live_simulation (explicitly EXCLUDED from ci-standard.yml)
 #
-# Parity: mirrors scripts/run_local_heavy_tests.sh exactly.
 #         If you add a test here, add it there too and vice-versa.
 # -----------------------------------------------------------------------------
 
@@ -17,7 +16,8 @@ on:
         required: false
         default: "all"
         type: choice
-        options: ["all", "pinocchio", "drake", "jaxsim", "mujoco"]
+        options:
+          ["all", "pinocchio", "drake", "jaxsim", "mujoco", "local_embeddings"]
       python_version:
         description: "Python version to test with"
         required: false
@@ -64,6 +64,7 @@ jobs:
           echo "runner=$runner" >> "$GITHUB_OUTPUT"
           echo "Selected runner: $runner"
   run-heavy-tests:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine != 'local_embeddings' }}
     needs: pick-runner
     name: Heavy Integration Tests (${{ matrix.engine }})
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -270,3 +271,133 @@ jobs:
           curl -s -X POST "$HEAVY_TEST_SLACK_WEBHOOK" \
             -H 'Content-type: application/json' \
             --data "{\"text\":\"Heavy integration tests failed for UpstreamDrift (${{ matrix.engine }}) on ${GITHUB_REF_NAME}. Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
+  local-embeddings:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.engine == 'local_embeddings' }}
+    needs: pick-runner
+    name: Pinned offline local embeddings
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 90
+    env:
+      RUSTUP_HOME: "${{ github.workspace }}/.rustup-home"
+      CARGO_HOME: "${{ github.workspace }}/.cargo-home"
+    steps:
+      - name: Verify supported Linux runner
+        run: test "$(uname -s)" = "Linux"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+      - name: Create isolated local-embedding virtualenv
+        shell: bash
+        run: |
+          venv="$RUNNER_TEMP/local-embedding-venv"
+          python -m venv "$venv"
+          echo "VIRTUAL_ENV=$venv" >> "$GITHUB_ENV"
+          echo "UPSTREAM_DRIFT_MODEL_CACHE=$RUNNER_TEMP/local-embedding-cache-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
+          echo "$venv/bin" >> "$GITHUB_PATH"
+      - name: Install test dependencies and ONNX Runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "pytest>=9.0.3,<9.2.0" pytest-asyncio pytest-timeout "onnxruntime==1.24.1" maturin
+          python - <<'PY' >> "$GITHUB_ENV"
+          import onnxruntime, pathlib
+          lib = pathlib.Path(onnxruntime.__file__).parent / "capi" / "libonnxruntime.so.1.24.1"
+          if not lib.is_file():
+              raise SystemExit(f"Pinned ONNX Runtime library not found: {lib}")
+          print(f"ORT_DYLIB_PATH={lib}")
+          PY
+      - name: Build local-embeddings extension
+        working-directory: rust_core/ai_backend
+        run: python -m maturin develop --features python,local-embeddings
+      - name: Verify offline model-fetch guard with a failing local network probe
+        run: cargo test --manifest-path rust_core/ai_backend/Cargo.toml --features local-embeddings local_embed::tests --no-fail-fast
+      - name: Prove collection is model-free before provisioning
+        shell: bash
+        env:
+          CI_LOCAL_EMBEDDINGS_EXPECTED: "1"
+          UPSTREAM_DRIFT_MODEL_OFFLINE: "1"
+        run: |
+          mkdir -p "$UPSTREAM_DRIFT_MODEL_CACHE"
+          pytest --collect-only -vv -m requires_ort tests/ai/test_rust_rag_pipeline.py | tee local_embedding_collected.txt
+          python - <<'PY'
+          from pathlib import Path
+          ids, test_class = [], ""
+          for line in Path("local_embedding_collected.txt").read_text().splitlines():
+              line = line.strip()
+              if line.startswith("<Class "):
+                  test_class = line[7:-1]
+              elif line.startswith("<Function "):
+                  scope = f"::{test_class}" if test_class else ""
+                  ids.append(f"tests/ai/test_rust_rag_pipeline.py{scope}::{line[10:-1]}")
+          if not ids:
+              raise SystemExit("requires_ort collected zero test cases")
+          Path("local_embedding_collected_ids.txt").write_text("\n".join(ids) + "\n")
+          print(f"Collected {len(ids)} node IDs before model provisioning")
+          PY
+      - name: Provision and verify pinned model artifacts
+        shell: bash
+        run: python scripts/provision_local_embedding_model.py | tee local_embedding_model_receipt.json
+      - name: Run local embeddings offline and fail on skips
+        env:
+          CI_LOCAL_EMBEDDINGS_EXPECTED: "1"
+          UPSTREAM_DRIFT_MODEL_OFFLINE: "1"
+          http_proxy: http://127.0.0.1:9
+          https_proxy: http://127.0.0.1:9
+          all_proxy: http://127.0.0.1:9
+        run: |
+          unset NO_PROXY no_proxy
+          pytest -v -m requires_ort --junit-xml=local_embedding_results.xml --no-header tests/ai/test_rust_rag_pipeline.py
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("local_embedding_results.xml").getroot()
+          suites = [root] if root.tag == "testsuite" else list(root.iter("testsuite"))
+          total = sum(int(s.get("tests", 0)) for s in suites)
+          skipped = sum(int(s.get("skipped", 0)) for s in suites)
+          failures = sum(int(s.get("failures", 0)) for s in suites)
+          errors = sum(int(s.get("errors", 0)) for s in suites)
+          if total == 0 or skipped or failures or errors:
+              raise SystemExit(f"offline lane invalid: tests={total}, skipped={skipped}, failures={failures}, errors={errors}")
+          import json, onnxruntime, platform, subprocess, sys
+          from pathlib import Path
+          collected = Path("local_embedding_collected_ids.txt").read_text().splitlines()
+          cases = []
+          for case in root.iter("testcase"):
+              matches = [nodeid for nodeid in collected if nodeid.endswith(f"::{case.get('name')}")]
+              if len(matches) != 1:
+                  raise SystemExit(f"JUnit case does not map uniquely to a collected node ID: {case.get('name')}")
+              cases.append({"id": matches[0], "result": "passed" if case.find("failure") is None and case.find("error") is None and case.find("skipped") is None else "not-passed"})
+          if len(cases) != total:
+              raise SystemExit(f"JUnit case count mismatch: {len(cases)} IDs for {total} tests")
+          evidence = {
+              "source_commit": "${{ github.sha }}",
+              "model_receipt": json.loads(Path("local_embedding_model_receipt.json").read_text()),
+              "python": sys.version,
+              "platform": platform.platform(),
+              "onnxruntime": onnxruntime.__version__,
+              "rustc": subprocess.check_output(["rustc", "--version"], text=True).strip(),
+              "offline": True,
+              "model_network_guard": "offline cache miss/corruption probe passed; model download guard active",
+              "proxy_sentinel": "127.0.0.1:9",
+              "general_egress_isolated": False,
+              "collected_ids": collected,
+              "executed_count": total,
+              "executed_cases": cases,
+              "skipped": skipped,
+              "failures": failures,
+              "errors": errors,
+          }
+          Path("local_embedding_evidence.json").write_text(json.dumps(evidence, indent=2) + "\n")
+          print(f"Offline local-embedding tests passed: {total}")
+          PY
+      - name: Upload local-embedding evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: local-embedding-offline-evidence-${{ github.run_id }}
+          path: |
+            local_embedding_collected_ids.txt
+            local_embedding_model_receipt.json
+            local_embedding_results.xml
+            local_embedding_evidence.json
+          retention-days: 30

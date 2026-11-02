@@ -9,6 +9,7 @@ dedicated CI job that has the ONNX runtime + downloaded model available.
 from __future__ import annotations
 
 import textwrap
+import os
 from pathlib import Path
 
 import pytest
@@ -17,36 +18,22 @@ import pytest
 def _ai_backend_available() -> bool:
     try:
         import ai_backend  # noqa: F401
-    except ImportError:
+    except ModuleNotFoundError as exc:
+        if exc.name != "ai_backend":
+            raise
         return False
     return True
 
 
-pytestmark = pytest.mark.skipif(
-    not _ai_backend_available(),
-    reason="ai_backend Rust extension not installed (run `maturin develop --features python` in rust_core/ai_backend)",
-)
+_LOCAL_EMBEDDINGS_EXPECTED = os.environ.get("CI_LOCAL_EMBEDDINGS_EXPECTED") == "1"
+_BACKEND_AVAILABLE = _ai_backend_available()
+if _LOCAL_EMBEDDINGS_EXPECTED and not _BACKEND_AVAILABLE:
+    raise RuntimeError("required ai_backend extension is unavailable")
 
-
-def _has_local_embeddings() -> bool:
-    if not _ai_backend_available():
-        return False
-    import ai_backend  # noqa: F401
-
-    # Probe via constructor: a wheel built without `local-embeddings` raises
-    # RuntimeError when use_local_embeddings=True.
-    try:
-        from ai_backend import AIConfig, MemoryManager, RagPipeline
-
-        cfg = AIConfig("", "http://localhost", "x", ":memory:")
-        mem = MemoryManager(":memory:")
-        mem.initialize()
-        RagPipeline(mem, cfg, True)
-    except RuntimeError:
-        return False
-    except Exception:  # noqa: BLE001 - availability probe treats any error as unavailable
-        return False
-    return True
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(not _BACKEND_AVAILABLE, reason="ai_backend not installed"),
+]
 
 
 def test_memory_manager_cosine_search_returns_closest_first(tmp_path: Path) -> None:
@@ -81,13 +68,13 @@ def test_memory_manager_is_idempotent(tmp_path: Path) -> None:
 
 @pytest.mark.requires_ort
 @pytest.mark.skipif(
-    not _has_local_embeddings(),
-    reason="ai_backend built without `local-embeddings` feature or model unavailable",
+    not _LOCAL_EMBEDDINGS_EXPECTED,
+    reason="dedicated local-embeddings lane is not enabled",
 )
 class TestLocalONNXEmbeddings:
     """Tests that exercise the on-device ONNX path. They:
 
-    * download ~22 MB on first run (cached under
+    * use the pinned ~90 MB ONNX model (cached under
       ``$UPSTREAM_DRIFT_MODEL_CACHE`` or ``~/.cache/upstream-drift/models/``);
     * take ~2 s of inference per query on CPU.
 

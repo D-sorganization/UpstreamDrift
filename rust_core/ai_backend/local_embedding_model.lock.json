@@ -1,0 +1,19 @@
+{
+  "repository": "sentence-transformers/all-MiniLM-L6-v2",
+  "revision": "10dbd2f06a8baf40ad285b037edda610c1b9a57c",
+  "license": "Apache-2.0",
+  "artifacts": {
+    "model": {
+      "path": "onnx/model.onnx",
+      "cache_name": "all-MiniLM-L6-v2.onnx",
+      "size_bytes": 90405214,
+      "sha256": "6fd5d72fe4589f189f8ebc006442dbb529bb7ce38f8082112682524616046452"
+    },
+    "tokenizer": {
+      "path": "tokenizer.json",
+      "cache_name": "all-MiniLM-L6-v2.tokenizer.json",
+      "size_bytes": 466247,
+      "sha256": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037"
+    }
+  }
+}
