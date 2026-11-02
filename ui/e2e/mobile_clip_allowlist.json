@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "routes": {
+    "/": {
+      "allowAllClipping": true,
+      "allowAllSmallTargets": true
+    },
+    "/simulation": {
+      "allowAllClipping": true,
+      "allowAllSmallTargets": true
+    },
+    "/tools/model-explorer": {
+      "allowAllClipping": true,
+      "allowAllSmallTargets": true
+    },
+    "/tools/lift-baseline": {
+      "allowAllClipping": true,
+      "allowAllSmallTargets": true
+    },
+    "/tools/analysis": {
+      "allowAllClipping": true,
+      "allowAllSmallTargets": true
+    },
+    "/tools/golf-simulator": {
+      "allowAllClipping": true,
+      "allowAllSmallTargets": true
+    }
+  }
+}
