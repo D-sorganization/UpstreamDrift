@@ -3,7 +3,10 @@
 Epic #14085 / Child Task #14092:
 Thin stdio MCP adapter exposing 4 simulation run service tools:
 describe_engines, submit_run, get_run, fetch_artifact; plus the putting-study
-tools optimize_putt and putting_misread_cost (#14177, see ``putting_tools``).
+tools optimize_putt, putting_misread_cost and putting_library_study (#14177,
+see ``putting_tools``) and the putting-core tools putting_simulate_putt,
+putting_read_green, putting_stimpmeter and putting_capture_speed (#14141 step
+9a, see ``putting_core_tools``).
 """
 
 from __future__ import annotations
@@ -19,6 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import RunRequest, export_schemas
+from .putting_core_tools import core_tool_handlers, core_tool_specs
 from .putting_tools import putting_tool_handlers, putting_tool_specs
 from .store import RunNotFoundError, SimulationRunStore
 from .worker import SimulationBusyError, SimulationWorkerPool
@@ -203,6 +207,7 @@ class SimulationMcpServer:
                 ["run_id", "artifact_name"],
             ),
             *putting_tool_specs(),
+            *core_tool_specs(),
         ]
 
     def handle_request(self, request: dict[str, Any]) -> dict[str, Any]:
@@ -230,6 +235,7 @@ class SimulationMcpServer:
                     "get_run": self.tool_get_run,
                     "fetch_artifact": self.tool_fetch_artifact,
                     **putting_tool_handlers(self.security.check_auth),
+                    **core_tool_handlers(self.security.check_auth),
                 }
                 handler = handlers.get(str(params.get("name")))
                 if not handler:

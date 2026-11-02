@@ -1,6 +1,6 @@
 # ADR-0045: Putting Integration — One Experience, Two Preserved Physics Stacks
 
-- Status: Accepted
+- Status: Accepted; decision 4 superseded by [ADR-0058](0058-one-shared-putting-core.md) (2026-11-01)
 - Date: 2026-08-30
 - Decision Makers: repo owner (accepted 2026-08-30)
 - Related Issues/PRs: #9143, Tools#4800 (P2/P9), Tools#4816, Tools#4819, launcher tiles `putting_green` and `rate_of_closure`

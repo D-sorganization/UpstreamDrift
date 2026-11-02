@@ -77,6 +77,15 @@ from .green_reading import (
     read_line,
     solve_aim,
 )
+from .practice import (
+    PUTT_RESULT_SCHEMA,
+    PracticeFeedback,
+    load_putt_result,
+    practice_feedback,
+    putt_result_from_dict,
+    putt_result_to_dict,
+    save_putt_result,
+)
 from .reference_fixtures import (
     DEFAULT_FIXTURES_PATH,
     ExpectedValue,
@@ -185,4 +194,11 @@ __all__ = [
     "strike",
     "struck_ball_state",
     "sweep_dynamic_loft",
+    "PUTT_RESULT_SCHEMA",
+    "PracticeFeedback",
+    "load_putt_result",
+    "practice_feedback",
+    "putt_result_from_dict",
+    "putt_result_to_dict",
+    "save_putt_result",
 ]

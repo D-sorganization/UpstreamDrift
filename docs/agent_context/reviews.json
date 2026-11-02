@@ -19,24 +19,24 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "f3ce5bf2ee691a9922a93a6115ff768c9c27c19989c6c58e29bdd7713c8ddf08",
+      "fingerprint": "707baf4377d6e8714b4b42c7b0f07c0fa50bb11b047793f7dfcf68839c4ebf49",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "122475bfa6e445ee8a2d4e1f94eae41c3b0e6bce954d1eb8ea44a1e40662e052",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "aebde1b7981394c365eebc92886404ed751dddcc06a65b2bff9911082db012a7",
-        "src/config/launcher_manifest.json": "79cc4fdf17da668b378ba6778dff70acc578c15646706c7558ba49a4d1c3be74",
+        "src/config/feature_parity.json": "fb709511c481cfdd50674d7568224163736c7b7b47540f8889114d95f80fa360",
+        "src/config/launcher_manifest.json": "573e2a2ec33a32373daf47b95393eca2bb55a6a8f0a3ff8b90aeb0bb5ef1e84f",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
-        "src/config/models.yaml": "a692079871da5a75b34d1b12b1cc8c957247913005bbe8cafa6fc68bf74b2901",
+        "src/config/models.yaml": "58d58762c2854bac4034d4cf71f3681913ca654ae98048fc81abb91ae90a8a90",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Re-reviewed launcher-atlas after adding the anatomical_event_table tile to models.yaml and launcher_manifest.json and moving biomechanics.anatomical_event_table from gap to parity (HRG-E4, #13175); generate_capability_atlas --check and tests/scripts/test_capability_atlas.py pass, contract unchanged."
+      "rationale": "Re-reviewed launcher-atlas after pointing the putting_green launcher tile and the tools.putting_green parity entry at the PyQt6 tool src/tools/putting_green_gui/gui.py and updating the tile description to the shared putting core (usga-stimp-roll/1) for ADR-0058 (#14141 step 10b); identifiers and the parity/gap/exempt status are unchanged, so the contract needs no change. Regenerated the atlas; generate_capability_atlas --check, tests/scripts/test_capability_atlas.py, tests/config and the companion catalog test pass."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",

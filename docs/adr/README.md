@@ -52,7 +52,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0042](0042-engineering-design-manual-authority.md)                     | Engineering Design Manual Authority and Release Boundary                          | Accepted | 2026-08-25 |
 | [0043](0043-companion-manifest-provider-authority.md)                   | Companion Manifest Provider Authority                                             | Accepted | 2026-08-28 |
 | [0044](0044-out-of-plane-fidelity-for-bunkershot3d.md)                  | Out-of-Plane Fidelity for BunkerShot3D                                            | Proposed | 2026-08-29 |
-| [0045](0045-putting-integration-one-experience-two-preserved-stacks.md) | Putting Integration — One Experience, Two Preserved Physics Stacks                | Accepted | 2026-08-30 |
+| [0045](0045-putting-integration-one-experience-two-preserved-stacks.md) | Putting Integration — One Experience, Two Preserved Physics Stacks                | Accepted (decision 4 superseded by 0058) | 2026-08-30 |
 | [0046](0046-launch-monitor-analytics-single-model-layer.md)             | Launch-Monitor Analytics — Two Workbenches, One Model Layer                       | Accepted | 2026-08-30 |
 | [0047](0047-trajectory-visualization-shared-wire-preserved-viewers.md)  | Trajectory Visualization — Shared Wire, Preserved Viewers                         | Accepted | 2026-08-30 |
 | [0048](0048-launch-monitor-port-plan.md)                                | Launch-Monitor Port Plan                                                          | Proposed | 2026-09-01 |
@@ -65,6 +65,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0055](0055-segmental-spine-kinematics-and-loads.md)                    | Segmental Spine Kinematics, Load Observables and Golf-Term Definitions            | Accepted | 2026-10-15 |
 | [0056](0056-canonical-golfer-kinematics-source.md)                      | Canonical Source for Golfer Kinematics and the Closure Jacobian                   | Accepted | 2026-10-15 |
 | [0057](0057-hrg-hx5-articulated-hand-option.md)                          | HRG-HX5 Articulated-Finger Hand Option                                             | Accepted | 2026-10-25 |
+| [0058](0058-one-shared-putting-core.md)                                  | One Shared Putting Physics Core                                                    | Accepted | 2026-11-01 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.

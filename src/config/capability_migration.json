@@ -682,6 +682,18 @@
       "evidence": "src/tools/shot_pattern_analysis/__main__.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "putting_analytics": {
+      "id": "putting_analytics",
+      "name": "Putting Analytics",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/putting_analytics_gui/__main__.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
     "shadow_tracker": {
       "id": "shadow_tracker",
       "name": "Shadow Tracker",
@@ -2110,6 +2122,18 @@
       "evidence": "src/tools/shot_pattern_analysis/gui.py",
       "acceptance_owner": "tests/config/test_feature_parity_registry.py"
     },
+    "tools.putting_analytics": {
+      "id": "tools.putting_analytics",
+      "name": "Putting analytics studies",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/putting_analytics_gui/gui.py",
+      "acceptance_owner": "tests/config/feature_parity/test_registry.py"
+    },
     "tools.matlab_suite": {
       "id": "tools.matlab_suite",
       "name": "MATLAB/Simscape model suite",
@@ -2227,8 +2251,20 @@
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
-      "evidence": "src/engines/physics_engines/putting_green/python/simulator.py",
+      "evidence": "src/tools/putting_green_gui/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "tools.putting_studio": {
+      "id": "tools.putting_studio",
+      "name": "Standalone offline putting studio",
+      "entity_kind": "feature",
+      "primary_workspace": "putting",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/apps/putting_studio/index.html",
+      "acceptance_owner": "tests/apps/putting_studio/test_studio_budget.py"
     },
     "tools.rate_of_closure": {
       "id": "tools.rate_of_closure",

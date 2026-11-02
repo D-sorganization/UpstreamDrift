@@ -1,7 +1,8 @@
 """Putting Green Simulator GUI.
 
-A PyQt6 dashboard that drives the **real** :class:`PuttingGreenSimulator`
-physics engine (ball roll, turf friction, slope break, cup capture) and
+A PyQt6 dashboard that drives the shared putting physics core
+(:mod:`src.shared.python.putting_dynamics`: ball roll, turf friction,
+slope break, cup capture; ADR-0058) and
 renders the result as a professional 3D scene: a contour-shaded green,
 a roll-mode-coloured ball track, an animated ball, flagstick, and an
 aim/target read line, alongside a live metrics panel.

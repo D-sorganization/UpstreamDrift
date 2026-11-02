@@ -225,12 +225,12 @@ def test_load_putting_green_success(tmp_path: Path) -> None:
 
     sim = MagicMock()
     sim_cls = MagicMock(return_value=sim)
-    mod = MagicMock(spec=["PuttingGreenSimulator"])
-    mod.PuttingGreenSimulator = sim_cls
+    mod = MagicMock(spec=["SharedPuttingEngine"])
+    mod.SharedPuttingEngine = sim_cls
     with patch.dict(
         sys.modules,
         {
-            "src.engines.physics_engines.putting_green.python.simulator": mod,
+            "src.engines.physics_engines.putting_green.python.shared_engine": mod,
         },
     ):
         result = load_putting_green_engine(tmp_path)
@@ -243,7 +243,7 @@ def test_load_putting_green_import_error_raises(tmp_path: Path) -> None:
     real_import = __import__
 
     def fake_import(name: str, *a, **kw):  # type: ignore[no-untyped-def]
-        if "putting_green.python.simulator" in name:
+        if "putting_green.python.shared_engine" in name:
             raise ImportError("nope")
         return real_import(name, *a, **kw)
 
