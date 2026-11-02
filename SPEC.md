@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14319 | Wide content on Lift Baseline, Analysis Tools, Terrain, Data Explorer and Golf Simulator now scrolls or wraps at phone width instead of being clipped |
+| 2026-11-02 | #14318 | Normalize terrain preset loading and preserve concurrent API errors. |
 | 2026-11-02 | #14311 | Pinned offline embedding tests fail on bad retrieval and unexpected initialization |
 | 2026-11-02 | #14315 | Dashboard header wraps with icon-only actions below md and the Task Workspaces links wrap instead of clipping, so every action is reachable at 390 and 768 |
 | 2026-11-02 | #14313 | Stop the deprecated-DynamicsProvider scan from timing out and killing an xdist worker: only files containing the name are parsed (42.8s to 2.3s). |
