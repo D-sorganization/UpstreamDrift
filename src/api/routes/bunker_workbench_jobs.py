@@ -111,7 +111,6 @@ class BunkerJobStatusV1(BaseModel):
     shots_planned: int = Field(ge=1)
     input_digest: str
     worker_active: bool
-    stage: str | None = None
     error: str | None = None
     result: BunkerJobResultV1 | None = None
 
@@ -265,7 +264,6 @@ def _status_view(tm: TaskManager, job_id: str) -> dict[str, Any]:
         "shots_planned": task["shots_planned"],
         "input_digest": task["digest"],
         "worker_active": JOB_POOL.is_live(job_id),
-        "stage": task.get("stage"),
         "error": task.get("error") if task["status"] == "failed" else None,
         "result": result,
     }
