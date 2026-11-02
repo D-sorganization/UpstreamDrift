@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14272 · Record Evidence-Based Deployment Boundary
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14272
+- **Branch:** codex/14272-deployment-boundary
+- **PR:** #14353
+- **Paths:** docs/deployment/14272-deployment-boundary.md
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`f3b7adf7`; collated from changes/14272-record-evidence-based-deployment-boundar.md)
+- **Summary:** Record evidence-based deployment boundary
+- **Next step:** Merge the PR.
+
+### DL-#14266 · Define Mobile Workflows and Server-Side Runtime Boundary
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14266
+- **Branch:** codex/14266-mobile-workflow-discovery
+- **PR:** #14355
+- **Paths:** docs/ux/14266-workflow-boundary.md
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`f6c5af05`; collated from changes/14266-define-mobile-workflows-and-server-side.md)
+- **Summary:** Define mobile workflows and server-side runtime boundary
+- **Next step:** Merge the PR.
+
 ### DL-#14290 · Gate JaxSim/Pinocchio Free-Body Parity on Strict Engine Outputs and a Rotated Inertial Oracle
 
 - **State:** in_review
@@ -1209,6 +1235,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14265 · Delete Drifted Local Themes.Json Copy and Consume Tools Theme Catalog With Legacy Id Migration
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14265
+- **Branch:** merged via #14349
+- **PR:** #14349
+- **Paths:** see #14349
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`01303fb2`; collated from changes/14265-delete-drifted-local-themes-json-copy-an.md)
+- **Summary:** Delete drifted local themes.json copy and consume Tools theme catalog with legacy id migration
+- **Next step:** Shipped in PR #14349.
+
+### DL-#14212 · Fast-Tier Unit Gate Runs Matched-Swing README Freshness Test When Ledger Changes.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14212
+- **Branch:** merged via #14345
+- **PR:** #14345
+- **Paths:** see #14345
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`173e5ea7`; collated from changes/14212-fast-tier-unit-gate-runs-matched-swing-r.md)
+- **Summary:** Fast-tier unit gate runs matched-swing README freshness test when ledger changes.
+- **Next step:** Shipped in PR #14345.
 
 ### DL-#14261 · Workspace Cards Show Authored Tool Names and One-Line Summaries Instead of a Template Sentence, and Both Card Actions Share One Primary Button Style Labeled Open or Open in Window.
 
