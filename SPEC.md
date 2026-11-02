@@ -2741,6 +2741,11 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-02 | #14301 | Pinocchio inverse-dynamics tests fail on a broken real constructor |
+| 2026-11-02 | #14300 | Pinocchio kinematic audit fails on missing URDF/joint/frame instead of skipping |
+| 2026-11-02 | #14305 | Real ChatSessionManager lifecycle, signal and fault tests |
+| 2026-11-02 | #14304 | MuJoCo dependency tests check qpos contract and rendering API symbols |
+| 2026-11-02 | #14302 | RAG embedding determinism checked against an explicit drift tolerance |
 | 2026-11-02 | #14299 | Live-view controller tests fail on loader import or C3D parse errors; skip only on absent fixture or ezc3d |
 | 2026-11-02 | #14298 | PCA/Kalman tests fail on product import errors; skip only when the pinned Tools tree is absent |
 | 2026-11-02 | #14287 | Add the 5 missing tool routes to KNOWN_APP_ROUTES and a vitest guard that fails when App.tsx routes and the canonical list diverge |

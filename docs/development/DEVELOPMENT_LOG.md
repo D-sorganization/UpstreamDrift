@@ -1145,6 +1145,71 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14297 · Pinocchio Inverse-Dynamics Tests Fail on a Broken Real Constructor
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14297
+- **Branch:** merged via #14301
+- **PR:** #14301
+- **Paths:** see #14301
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`4ba3cd06`; collated from changes/14297-pinocchio-inverse-dynamics-tests-fail-on.md)
+- **Summary:** Pinocchio inverse-dynamics tests fail on a broken real constructor
+- **Next step:** Shipped in PR #14301.
+
+### DL-#14296 · Pinocchio Kinematic Audit Fails on Missing URDF/Joint/Frame Instead of Skipping
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14296
+- **Branch:** merged via #14300
+- **PR:** #14300
+- **Paths:** see #14300
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`13ebd18d`; collated from changes/14296-pinocchio-kinematic-audit-fails-on-missi.md)
+- **Summary:** Pinocchio kinematic audit fails on missing URDF/joint/frame instead of skipping
+- **Next step:** Shipped in PR #14300.
+
+### DL-#14295 · Real ChatSessionManager Lifecycle, Signal and Fault Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14295
+- **Branch:** merged via #14305
+- **PR:** #14305
+- **Paths:** see #14305
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`50699ca7`; collated from changes/14295-real-chatsessionmanager-lifecycle-signal.md)
+- **Summary:** Real ChatSessionManager lifecycle, signal and fault tests
+- **Next step:** Shipped in PR #14305.
+
+### DL-#14294 · MuJoCo Dependency Tests Check Qpos Contract and Rendering API Symbols
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14294
+- **Branch:** merged via #14304
+- **PR:** #14304
+- **Paths:** see #14304
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`584e76d2`; collated from changes/14294-mujoco-dependency-tests-check-qpos-contr.md)
+- **Summary:** MuJoCo dependency tests check qpos contract and rendering API symbols
+- **Next step:** Shipped in PR #14304.
+
+### DL-#14288 · RAG Embedding Determinism Checked Against an Explicit Drift Tolerance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14288
+- **Branch:** merged via #14302
+- **PR:** #14302
+- **Paths:** see #14302
+- **Started:** 2026-11-02
+- **Last verified:** 2026-11-02 (`6e3b352a`; collated from changes/14288-rag-embedding-determinism-checked-agains.md)
+- **Summary:** RAG embedding determinism checked against an explicit drift tolerance
+- **Next step:** Shipped in PR #14302.
+
 ### DL-#14293 · Live-View Controller Tests Fail on Loader Import or C3D Parse Errors; Skip Only on Absent Fixture or Ezc3d
 
 - **State:** shipped
