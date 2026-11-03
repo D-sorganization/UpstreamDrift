@@ -31,11 +31,6 @@ FRAME_TOL_DEG = 0.5
 N_FRAME_CONFIGS = 24
 
 
-@pytest.fixture(scope="module", autouse=True)
-def _engines_loaded() -> None:
-    hc.preload_engines()
-
-
 @pytest.fixture(scope="module")
 def doc() -> dict:
     return hc.separated_flagship_doc()

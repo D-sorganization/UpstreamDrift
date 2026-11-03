@@ -9,7 +9,6 @@ is an :class:`Unrepresentable` with a reason, never a passing value.
 
 from __future__ import annotations
 
-import importlib
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -226,23 +225,6 @@ def read_hand(engine: str, doc: dict[str, Any]) -> HandReading:
 
 
 _FRAME_SEED = 1376402
-# Import order matters: pydrake before pinocchio, as in the cross-engine FK suite.
-_ENGINE_MODULES = ("mujoco", "pydrake.all", "pinocchio", "opensim")
-
-
-def preload_engines() -> None:
-    """Import every installed engine once, before any test runs.
-
-    ``tests/conftest.py::_protect_engine_modules`` drops engine modules a test
-    imported; a second test re-importing pydrake or pinocchio then fails inside
-    their C extensions. Loading them first puts them in that fixture's snapshot.
-    Missing engines are left for the per-test ``importorskip`` to report.
-    """
-    for name in _ENGINE_MODULES:
-        try:
-            importlib.import_module(name)
-        except (ImportError, OSError):
-            continue
 
 
 def _frame_names(hand: str) -> tuple[str, str]:
