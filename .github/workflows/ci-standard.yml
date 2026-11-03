@@ -239,7 +239,9 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          fetch-depth: 0
+          # Full fetch on PRs to diff against base_ref; shallow fetch on
+          # merge_group/push to prevent checkout hang on all-ref fetch (#14419).
+          fetch-depth: ${{ github.event_name != 'pull_request' && 1 || 0 }}
 
       - name: Detect non-docs changes
         id: detect

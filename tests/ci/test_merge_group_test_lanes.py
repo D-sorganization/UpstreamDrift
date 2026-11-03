@@ -37,3 +37,17 @@ def test_core_tests_diff_against_merge_group_base() -> None:
     run = _step(_job("tests"), "Run Core Test Suite")["run"]
     assert 'github.event_name }}" = "merge_group"' in run
     assert 'diff_base="${{ github.event.merge_group.base_sha }}"' in run
+
+
+@pytest.mark.unit
+def test_changed_paths_checkout_avoids_full_fetch_on_merge_group() -> None:
+    """Non-pull_request events (such as merge_group) must not do full-history all-ref fetch (#14419)."""
+    job = _job("changed-paths")
+    checkout_steps = [
+        s for s in job["steps"] if "actions/checkout" in s.get("uses", "")
+    ]
+    assert len(checkout_steps) == 1
+    fetch_depth = checkout_steps[0].get("with", {}).get("fetch-depth")
+    assert fetch_depth != 0, "fetch-depth must not be unconditionally 0"
+    assert "github.event_name" in str(fetch_depth)
+    assert "pull_request" in str(fetch_depth)
