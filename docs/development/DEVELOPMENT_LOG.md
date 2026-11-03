@@ -18,6 +18,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14274 · Config/Secret Separation and Upgrade/Rollback Guarantees
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14274
+- **Branch:** feat/14274-config-secrets
+- **PR:** #14414
+- **Paths:** see #14414
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`2e099ba2`; collated from changes/14274-config-secrets-and-upgrade-rollback.md)
+- **Summary:** Config/secret separation and upgrade/rollback guarantees
+- **Next step:** Merge the PR.
+
+### DL-#14275 · \ Define and Implement Clean-Environment Install Smoke Test\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14275
+- **Branch:** feat/14275-install-smoke
+- **PR:** #14402
+- **Paths:** see #14402
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`8823f013`; collated from changes/14275-define-and-implement-clean-environment-i.md)
+- **Summary:** \ Define and implement clean-environment install smoke test\
+- **Next step:** \Merge the PR.\
+
+### DL-#14273 · Versioned Releases With Verifiable Artifacts and SBOM
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14273
+- **Branch:** feat/14273-release-sbom
+- **PR:** #14413
+- **Paths:** see #14413
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`90eadd46`; collated from changes/14273-versioned-releases-and-sbom.md)
+- **Summary:** Versioned releases with verifiable artifacts and SBOM
+- **Next step:** Merge the PR.
+
+### DL-#14259 · Redesign Home With Pipeline and Truthful Engine Readiness
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14259
+- **Branch:** feat/14259-redesign-home
+- **PR:** #14410
+- **Paths:** see #14410
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`956f7fc7`; collated from changes/14259-redesign-home.md)
+- **Summary:** Redesign Home with pipeline and truthful engine readiness
+- **Next step:** Merge PR via auto-squash
+
 ### DL-#14094 · Record E1 Review Evidence, Arithmetic Limits and Pinned-Source Corrections Without Closing the Epic
 
 - **State:** in_review
