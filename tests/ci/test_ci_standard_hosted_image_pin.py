@@ -1,9 +1,8 @@
-"""ci-standard hosted runs use the pinned ubuntu-26.04 label (#14398, #14397).
+"""ci-standard hosted runs stay on ubuntu-24.04 until the 26.04 migration (#14398, #14397).
 
-The exact-hash fixture drift first seen on ubuntu-26.04 came from the runner CPU,
-not the image, and unit-test-gate now pins its numeric kernels. ``pick-runner``
-names the image explicitly instead of ``ubuntu-latest`` so the next image rollout
-cannot silently change the merge-queue environment.
+GitHub is moving ``ubuntu-latest`` to ubuntu-26.04, where four exact-hash fixture
+tests drift and merge groups are ejected depending on which image a job lands on.
+``pick-runner`` therefore routes hosted jobs to the pinned ``ubuntu-24.04`` label.
 """
 
 from __future__ import annotations
@@ -24,11 +23,11 @@ def _pick_runner_script() -> str:
     return workflow["jobs"]["pick-runner"]["steps"][0]["run"]
 
 
-def test_pick_runner_routes_hosted_jobs_to_pinned_ubuntu_2604() -> None:
+def test_pick_runner_routes_hosted_jobs_to_pinned_ubuntu_2404() -> None:
     hosted = re.findall(r'runner="(ubuntu-[^"]+)"', _pick_runner_script())
 
     assert hosted, "pick-runner must assign a hosted runner label"
-    assert set(hosted) == {"ubuntu-26.04"}, (
-        "hosted pick-runner targets must name ubuntu-26.04 explicitly (#14397), "
-        f"not ubuntu-latest or the retired 24.04 pin; found {hosted}"
+    assert set(hosted) == {"ubuntu-24.04"}, (
+        "hosted pick-runner targets must stay pinned to ubuntu-24.04 until #14397 "
+        f"migrates the fixture hashes to ubuntu-26.04; found {hosted}"
     )
