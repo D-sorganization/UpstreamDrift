@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:mobile": "playwright test e2e/mobile.spec.ts",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc -b --noEmit --force",
     "tauri": "tauri",
@@ -38,6 +40,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.1",
     "@tauri-apps/cli": "2.12.1",
     "@testing-library/dom": "^10.4.2",
