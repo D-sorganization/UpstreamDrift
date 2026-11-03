@@ -31,13 +31,21 @@ export type MobileAllowlistFile = {
   routes: Record<string, RouteAllowlist>;
 };
 
+/** Geometry-free so keys match across hosts whose fonts render at different widths. */
 export function violationKey(v: ClipViolation): string {
-  return `${v.tag}#${v.id}.${v.className}|r${Math.round(v.right)}`;
+  return `${v.tag}#${v.id}.${v.className}`;
 }
 
 export function smallTargetKey(v: SmallTargetViolation): string {
-  const label = v.name || v.role || "unnamed";
-  return `${v.tag}:${label}|${Math.round(v.width)}x${Math.round(v.height)}`;
+  return `${v.tag}:${v.name || v.role || "unnamed"}`;
+}
+
+function clipDetail(v: ClipViolation): string {
+  return `${violationKey(v)} (right ${Math.round(v.right)}px)`;
+}
+
+function smallTargetDetail(v: SmallTargetViolation): string {
+  return `${smallTargetKey(v)} (${Math.round(v.width)}x${Math.round(v.height)})`;
 }
 
 export async function auditHorizontalClip(
@@ -160,8 +168,8 @@ export function assertClipViolationsAllowlisted(
   }
   const allowed = new Set(entry.clipViolations ?? []);
   const unexpected = observed
-    .map(violationKey)
-    .filter((key) => !allowed.has(key));
+    .filter((v) => !allowed.has(violationKey(v)))
+    .map(clipDetail);
   if (unexpected.length > 0) {
     throw new Error(
       `New horizontal clip violations on ${route}: ${unexpected.slice(0, 5).join(", ")}`,
@@ -183,8 +191,8 @@ export function assertSmallTargetsAllowlisted(
   }
   const allowed = new Set(entry.smallTargets ?? []);
   const unexpected = observed
-    .map(smallTargetKey)
-    .filter((key) => !allowed.has(key));
+    .filter((v) => !allowed.has(smallTargetKey(v)))
+    .map(smallTargetDetail);
   if (unexpected.length > 0) {
     throw new Error(
       `New sub-44px primary targets on ${route}: ${unexpected.slice(0, 5).join(", ")}`,

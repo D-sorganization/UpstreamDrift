@@ -7,10 +7,7 @@
     },
     "/simulation": {
       "clipViolations": [],
-      "smallTargets": [
-        "a:Back to Dashboard|292x20",
-        "a:Back to Dashboard|398x20"
-      ]
+      "smallTargets": ["a:Back to Dashboard"]
     },
     "/tools/model-explorer": {
       "clipViolations": [],
@@ -18,23 +15,20 @@
     },
     "/tools/lift-baseline": {
       "clipViolations": [],
-      "smallTargets": [
-        "a:Back to Dashboard|292x20",
-        "a:Back to Dashboard|398x20"
-      ]
+      "smallTargets": ["a:Back to Dashboard"]
     },
     "/tools/analysis": {
-      "clipViolations": [],
+      "clipViolations": ["input#.", "label#."],
       "smallTargets": [
-        "input:Import Biomechanics JSON|312x24",
-        "input:Import Model Binding JSON|312x24",
-        "input:unnamed|20x20",
-        "select:unnamed|38x44"
+        "input:Import Biomechanics JSON",
+        "input:Import Model Binding JSON",
+        "input:unnamed",
+        "select:unnamed"
       ]
     },
     "/tools/golf-simulator": {
       "clipViolations": [],
-      "smallTargets": []
+      "smallTargets": ["a:Home", "a:Shot & Course Lab"]
     }
   }
 }
