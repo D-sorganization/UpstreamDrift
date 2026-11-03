@@ -9,7 +9,12 @@ owners validate low-risk removals.
 ## Security Audit: `pull_request_target` Workflows (issue #5915)
 
 Audited 2026-10-24 (RM `docs/security/public-repo-exposure-audit-2026-10.md`).
-One workflow uses `pull_request_target`:
+Two workflows use `pull_request_target`:
+
+**`pr-body-lint.yml`** — trigger covers `opened/edited`. The job calls the
+SHA-pinned `Repository_Management` reusable workflow with read-only permissions
+and `report_only: true`; this caller file does not check out PR head code. ✅ Safe
+(report-only; RM #2427).
 
 **`Jules-Redundant-PR-Closer.yml`** — trigger covers `opened/reopened/synchronize/closed`
 from forks but does **not** check out the PR head ref. It only checks out
@@ -102,6 +107,7 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | package-standalone-sidekick.yml      | pull_request                                              | @core     | contents: read                                              | KEEP: builds sdist + wheel, uploads as artifacts, and smoke-tests the wheel.                           | n/a                      |
 | pdf-size-guard.yml                   | pull_request                                              | @docs     | contents: read                                              | KEEP: PDF signature and repository-boundary guard.                                                     | n/a                      |
 | pr-auto-labeler.yml                  | pull_request                                              | @triage   | pull-requests: write                                        | KEEP: PR labeling.                                                                                     | n/a                      |
+| pr-body-lint.yml                     | pull_request_target                                       | @infra    | contents/issues/pull-requests: read                         | KEEP: report-only PR body closing-reference lint (RM #2427); does not block merge.                     | n/a                      |
 | quality-gate.yml                     | pull_request/workflow_dispatch                            | @core     | contents: read                                              | KEEP: blocking repo-wide Law-of-Demeter ratchet for production `src/` Python code.                     | n/a                      |
 | realtime-soak.yml                    | workflow_dispatch/schedule                                | @realtime | contents: read                                              | KEEP: nightly/manual Rust realtime WebSocket soak validation (#5235).                                  | n/a                      |
 | release.yml                          | push                                                      | @release  | contents: read; job-scoped release/attest                   | KEEP: exact-main companion artifacts and draft-first verified tag releases.                            | n/a                      |
