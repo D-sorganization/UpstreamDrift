@@ -22,8 +22,8 @@ const TEXT_FIELDS: [keyof StudyForm, string, string][] = [
 const EXTRA_FIELDS: Partial<Record<StudyMode, [keyof StudyForm, string]>> = {
   misread_cost: ['reads', 'Reads'], library_study: ['classes', 'Classes'],
 };
-const INPUT = 'w-full rounded bg-gray-900 border border-gray-700 px-2 py-1 text-sm text-white';
-const LABEL = 'flex flex-col gap-1 text-xs text-gray-300';
+const INPUT = 'w-full rounded bg-surface border border-token-border px-2 py-1 text-sm text-token-text';
+const LABEL = 'flex flex-col gap-1 text-xs text-token-muted';
 
 export function PuttingAnalyticsPage() {
   const [form, setForm] = useState<StudyForm>(DEFAULT_FORM);
@@ -99,23 +99,23 @@ export function PuttingAnalyticsPage() {
               <textarea rows={4} className={`${INPUT} font-mono`} value={form[extraField[0]]} onChange={(e) => set(extraField[0], e.target.value)} />
             </label>
           )}
-          <button type="button" disabled={running} onClick={run} className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50">
+          <button type="button" disabled={running} onClick={run} className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50">
             Run study
           </button>
         </section>
         <section aria-label="Study results" className="flex min-w-0 flex-1 flex-col gap-3">
-          <p role="status" className="text-sm text-gray-300">{status}</p>
+          <p role="status" className="text-sm text-token-muted">{status}</p>
           <div className="overflow-x-auto">
-            <table className="w-full border border-gray-700 text-sm">
+            <table className="w-full border border-token-border text-sm">
               <thead>
-                <tr className="bg-gray-800 text-gray-300">
+                <tr className="bg-surface-raised text-token-muted">
                   <th className="px-2 py-1 text-left">Quantity</th>
                   <th className="px-2 py-1 text-left">Value</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map(([name, value], index) => (
-                  <tr key={`${name}-${index}`} className="border-t border-gray-700 text-gray-200">
+                  <tr key={`${name}-${index}`} className="border-t border-token-border text-token-text">
                     <td className="px-2 py-1 font-mono">{name}</td>
                     <td className="px-2 py-1">{value}</td>
                   </tr>
