@@ -2,28 +2,39 @@
   "version": 1,
   "routes": {
     "/": {
-      "allowAllClipping": true,
-      "allowAllSmallTargets": true
+      "clipViolations": [],
+      "smallTargets": []
     },
     "/simulation": {
-      "allowAllClipping": true,
-      "allowAllSmallTargets": true
+      "clipViolations": [],
+      "smallTargets": [
+        "a:Back to Dashboard|292x20",
+        "a:Back to Dashboard|398x20"
+      ]
     },
     "/tools/model-explorer": {
-      "allowAllClipping": true,
-      "allowAllSmallTargets": true
+      "clipViolations": [],
+      "smallTargets": []
     },
     "/tools/lift-baseline": {
-      "allowAllClipping": true,
-      "allowAllSmallTargets": true
+      "clipViolations": [],
+      "smallTargets": [
+        "a:Back to Dashboard|292x20",
+        "a:Back to Dashboard|398x20"
+      ]
     },
     "/tools/analysis": {
-      "allowAllClipping": true,
-      "allowAllSmallTargets": true
+      "clipViolations": [],
+      "smallTargets": [
+        "input:Import Biomechanics JSON|312x24",
+        "input:Import Model Binding JSON|312x24",
+        "input:unnamed|20x20",
+        "select:unnamed|38x44"
+      ]
     },
     "/tools/golf-simulator": {
-      "allowAllClipping": true,
-      "allowAllSmallTargets": true
+      "clipViolations": [],
+      "smallTargets": []
     }
   }
 }
