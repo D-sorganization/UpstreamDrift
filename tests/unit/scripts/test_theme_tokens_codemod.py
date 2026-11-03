@@ -2,21 +2,28 @@
 
 from __future__ import annotations
 
-import sys
+import importlib.util
 from pathlib import Path
 
 import pytest
 
-# Add repo root to sys.path
-REPO_ROOT = Path(__file__).resolve().parents[3]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+# Load theme_tokens_codemod from ui/scripts/ without relying on ui namespace package
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_SCRIPT = _REPO_ROOT / "ui" / "scripts" / "theme_tokens_codemod.py"
 
-from ui.scripts.theme_tokens_codemod import (
-    apply_token_replacements,
-    count_palette_classes,
-    process_file,
-)
+
+def _load_codemod():
+    spec = importlib.util.spec_from_file_location("theme_tokens_codemod", _SCRIPT)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+_mod = _load_codemod()
+apply_token_replacements = _mod.apply_token_replacements
+count_palette_classes = _mod.count_palette_classes
+process_file = _mod.process_file
 
 pytestmark = pytest.mark.unit
 
