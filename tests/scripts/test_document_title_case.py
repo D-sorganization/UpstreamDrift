@@ -30,6 +30,14 @@ def test_expected_title_preserves_minor_words_and_technical_tokens() -> None:
     )
 
 
+def test_middle_dot_starts_a_new_title_segment() -> None:
+    # Collated development-log headings read "DL-#N · <summary>"; the
+    # summary after the middle dot begins a segment, like text after a colon.
+    title = "DL-#14235 · The Web App Has a Putting Page"
+    assert expected_title(title) == title
+    assert expected_title("Results · a Study of Pace") == "Results · A Study of Pace"
+
+
 def test_quarto_and_latex_structural_titles_are_checked() -> None:
     quarto = '---\ntitle: "a guide to drift"\n---\n\n## why timing matters\n'
     latex = r"\title{a guide to drift}" + "\n" + r"\section{why timing matters}"
