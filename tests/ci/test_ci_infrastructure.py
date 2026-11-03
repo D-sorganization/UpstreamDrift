@@ -1992,6 +1992,57 @@ class TestCIEnvironmentCompatibility:
                 assert stdlib_parser_call.search(source) is None, f"{path}"
 
 
+class TestReleaseAttestationRetry:
+    """Main-push attestations survive one transient OIDC token failure (#14390)."""
+
+    @staticmethod
+    def _protected_main_steps() -> list[dict[str, Any]]:
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "release.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        return workflow["jobs"]["companion-protected-main"]["steps"]
+
+    def test_each_attestation_has_one_bounded_retry(self) -> None:
+        steps = self._protected_main_steps()
+        attest_indexes = [
+            index
+            for index, step in enumerate(steps)
+            if str(step.get("uses", "")).startswith("actions/attest-build-provenance@")
+        ]
+        first_attempts = [
+            steps[index] for index in attest_indexes if "if" not in steps[index]
+        ]
+        assert len(first_attempts) == 2
+        for first in first_attempts:
+            assert first.get("continue-on-error") is True, first["name"]
+            retry = next(
+                step
+                for step in steps
+                if str(step.get("uses", "")) == first["uses"]
+                and step.get("if") == f"steps.{first['id']}.outcome == 'failure'"
+            )
+            assert "continue-on-error" not in retry, retry["name"]
+            assert retry["with"] == first["with"], retry["name"]
+            pause = steps[steps.index(retry) - 1]
+            assert pause.get("if") == retry["if"]
+            assert "sleep" in pause["run"]
+
+    def test_record_reads_attestation_from_either_attempt(self) -> None:
+        steps = self._protected_main_steps()
+        record = next(
+            step
+            for step in steps
+            if step.get("name") == "Record ephemeral Actions acquisition"
+        )
+        for output in ("attestation-id", "attestation-url"):
+            assert (
+                f"steps.companion-attestation.outputs.{output} || "
+                f"steps.companion-attestation-retry.outputs.{output}"
+            ) in record["run"]
+
+
 class TestPyprojectTomlConsistency:
     """Test that pyproject.toml is properly configured."""
 

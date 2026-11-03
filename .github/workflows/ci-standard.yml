@@ -192,10 +192,12 @@ jobs:
           if [ "$FORK_PR" = "true" ]; then
             # Fork PRs never run on the self-hosted fleet (RM#1989).
             mode="hosted"
-            runner="ubuntu-latest"
+            runner="ubuntu-24.04"
           elif [ "$REPOSITORY_PRIVATE" != "true" ] && [ "$mode" != "local" ]; then
+            # Pinned, not ubuntu-latest: four exact-hash fixtures drift on
+            # ubuntu-26.04 until #14397 migrates them (#14398).
             mode="hosted"
-            runner="ubuntu-latest"
+            runner="ubuntu-24.04"
           else
             mode="local"
             runner="$RUNNER_LABEL"
@@ -3154,6 +3156,12 @@ jobs:
       - name: Build Check
         if: steps.frontend-changes.outputs.skip != 'true'
         run: npm run build
+
+      - name: Mobile layout Playwright smoke (#14283)
+        if: steps.frontend-changes.outputs.skip != 'true'
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e:mobile
 
   # =============================================================================
   # MATLAB TESTS - DISABLED BY DEFAULT

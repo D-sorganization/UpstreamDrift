@@ -10,6 +10,10 @@ import { useNavigate } from 'react-router';
 import { useLauncherManifest } from '@/api/useLauncherManifest';
 import { resolveTileLaunchAction } from '@/api/webLaunch';
 import { LauncherDashboard } from '@/components/simulation/LauncherDashboard';
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
+import { WorkspaceSidebar } from '@/components/layout/WorkspaceNavigation';
+import { fetchEngines } from '@/api/client';
+import type { EngineStatusResponse } from '@/api/generated/types';
 import { AboutModal } from '@/components/ui/AboutModal';
 import { OnboardingOverlay } from '@/components/ui/OnboardingOverlay';
 import { useToast } from '@/components/ui/Toast';
@@ -33,6 +37,7 @@ export function DashboardPage() {
     } = useLauncherManifest();
     const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
     const [aboutOpen, setAboutOpen] = useState(false);
+    const [engineStatuses, setEngineStatuses] = useState<EngineStatusResponse[]>([]);
     const [launchedWindows, setLaunchedWindows] = useState(() => loadLauncherWindowRecords());
     const visibleLaunchedWindows = useMemo(
         () => reconcileLauncherWindowRecords(launchedWindows, tiles),
@@ -45,6 +50,10 @@ export function DashboardPage() {
     useEffect(() => {
         persistLauncherWindowRecords(visibleLaunchedWindows);
     }, [visibleLaunchedWindows]);
+
+    useEffect(() => {
+        fetchEngines().then(setEngineStatuses).catch(() => {});
+    }, []);
 
     const handleLaunchTile = useCallback(
         (tileId: string) => {
@@ -96,9 +105,14 @@ export function DashboardPage() {
     }, [setHelpOpen]);
 
     return (
-        <>
+        <WorkspaceShell
+            leftPanel={<WorkspaceSidebar />}
+            leftPanelLabel="Workspaces"
+            className="bg-canvas"
+        >
             <LauncherDashboard
                 tiles={tiles}
+                engineStatuses={engineStatuses}
                 loadState={loadState}
                 error={error}
                 selectedTileId={selectedTileId}
@@ -112,6 +126,6 @@ export function DashboardPage() {
             />
             <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
             <OnboardingOverlay />
-        </>
+        </WorkspaceShell>
     );
 }

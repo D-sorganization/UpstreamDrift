@@ -118,3 +118,14 @@ def test_minor_words_next_to_edge_literals_stay_lowercase() -> None:
         assert expected_title(title) == title
     # A literal in the middle does not change which word is the title edge.
     assert expected_title("and the ci.yml for") == "And the ci.yml For"
+
+
+def test_middle_dot_starts_a_new_title_segment() -> None:
+    # Collated development-log headings are ``DL-#N · <summary>`` (#14407).
+    heading = "DL-#14235 · The Web App Has a Putting Analytics Page"
+    assert expected_title(heading) == heading
+    assert (
+        expected_title("DL-#1 · an Example of a Fix") == "DL-#1 · An Example of a Fix"
+    )
+    # The word after the dot still follows the usual rules inside the segment.
+    assert expected_title("Grip · Wrist and the Club") == "Grip · Wrist and the Club"
