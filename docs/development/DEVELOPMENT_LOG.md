@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14274 · Config/Secret Separation and Upgrade/Rollback Guarantees
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14274
+- **Branch:** feat/14274-config-secrets
+- **PR:** #14414
+- **Paths:** see #14414
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`2e099ba2`; collated from changes/14274-config-secrets-and-upgrade-rollback.md)
+- **Summary:** Config/secret separation and upgrade/rollback guarantees
+- **Next step:** Merge the PR.
+
 ### DL-#14275 · \ Define and Implement Clean-Environment Install Smoke Test\
 
 - **State:** in_review
