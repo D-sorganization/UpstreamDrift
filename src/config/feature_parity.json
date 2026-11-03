@@ -118,11 +118,10 @@
       "title": "Putting analytics studies",
       "pyqt": "src/tools/putting_analytics_gui/gui.py",
       "api": "src/api/routes/putting_analytics.py",
-      "web": null,
-      "status": "gap",
-      "issue": 14235,
+      "web": "ui/src/pages/PuttingAnalytics.tsx",
+      "status": "parity",
       "tiles": ["putting_analytics"],
-      "notes": "Desktop tool over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The /tools/putting-analytics API routes serve the same studies."
+      "notes": "Desktop tool and web page over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The web page posts to the /tools/putting-analytics API routes and shows the desktop tool's rows (#14235)."
     },
     "tools.putting_studio": {
       "title": "Standalone offline putting studio (HTML client of the shared putting core)",
