@@ -58,24 +58,26 @@ jobs:
       run: ${{ steps.classify.outputs.run }}
       reason: ${{ steps.classify.outputs.reason }}
     steps:
+      # Depth 2 fetches only the PR merge commit and its parents. Depth 0 pulls
+      # full history of every branch (~1,300) and hangs past the timeout (#14419).
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
       - name: Classify paths or ci:opensim label
         id: classify
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
-          BASE_REF: ${{ github.base_ref }}
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: |
           set -euo pipefail
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
           changed=()
           if [ "$EVENT_NAME" = "pull_request" ]; then
+            # HEAD is the PR merge ref; its first parent is the base tip.
             # Capture first: process substitution would hide a failed comparison.
-            changed_paths=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+            changed_paths=$(git diff --name-only HEAD^1 HEAD)
             if [ -n "$changed_paths" ]; then
               mapfile -t changed <<< "$changed_paths"
             fi

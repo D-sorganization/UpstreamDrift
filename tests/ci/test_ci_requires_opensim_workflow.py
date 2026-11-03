@@ -242,7 +242,6 @@ class TestOpenSimJobLevelGating:
                 "PATH": f"{bindir}:{os.environ['PATH']}",
                 "GITHUB_OUTPUT": str(output),
                 "EVENT_NAME": "pull_request",
-                "BASE_REF": "missing",
                 "PR_LABELS": "",
                 "CLASSIFIER_CALLED": str(called),
             },
@@ -253,6 +252,64 @@ class TestOpenSimJobLevelGating:
         assert result.returncode == 73
         assert not called.exists()
         assert not output.exists() or "run=false" not in output.read_text()
+
+    def test_classifier_checkout_avoids_full_every_ref_fetch(self) -> None:
+        """``fetch-depth: 0`` fetches all ~1,300 branches and hangs (#14419)."""
+        steps = _load()["jobs"]["classify-changes"]["steps"]
+        checkout = next(s for s in steps if "actions/checkout" in s.get("uses", ""))
+        assert checkout["with"]["fetch-depth"] == 2
+
+    def test_classifier_diffs_pr_merge_commit_against_base_parent(
+        self, tmp_path: Path
+    ) -> None:
+        steps = _load()["jobs"]["classify-changes"]["steps"]
+        script = next(step["run"] for step in steps if step.get("id") == "classify")
+        repo = tmp_path / "repo"
+        repo.mkdir()
+
+        def git(*args: str) -> None:
+            subprocess.run(["git", *args], cwd=repo, check=True, capture_output=True)
+
+        git("init", "-q", "-b", "main")
+        git("config", "user.email", "ci@example.invalid")
+        git("config", "user.name", "ci")
+        (repo / "base.txt").write_text("base\n", encoding="utf-8")
+        git("add", ".")
+        git("commit", "-q", "-m", "base")
+        git("checkout", "-q", "-b", "pr")
+        (repo / "src").mkdir()
+        (repo / "src/changed.py").write_text("x = 1\n", encoding="utf-8")
+        git("add", ".")
+        git("commit", "-q", "-m", "pr change")
+        git("checkout", "-q", "main")
+        (repo / "main_only.txt").write_text("main\n", encoding="utf-8")
+        git("add", ".")
+        git("commit", "-q", "-m", "main moves on")
+        git("merge", "-q", "--no-ff", "-m", "merge pr", "pr")
+
+        bindir = tmp_path / "bin"
+        bindir.mkdir()
+        args_file = tmp_path / "args"
+        stub = bindir / "python3"
+        stub.write_text(f'#!/bin/sh\necho "$@" > "{args_file}"\n', encoding="utf-8")
+        stub.chmod(0o755)
+        subprocess.run(
+            ["bash", "-c", script],
+            cwd=repo,
+            env={
+                **os.environ,
+                "PATH": f"{bindir}:{os.environ['PATH']}",
+                "GITHUB_OUTPUT": str(tmp_path / "output"),
+                "EVENT_NAME": "pull_request",
+                "PR_LABELS": "",
+            },
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        recorded = args_file.read_text(encoding="utf-8")
+        assert "--changed-file src/changed.py" in recorded
+        assert "main_only.txt" not in recorded
 
     def test_pytest_step_adjudicates_ci_lane_quarantine(self) -> None:
         steps = _load()["jobs"]["requires-opensim"]["steps"]
