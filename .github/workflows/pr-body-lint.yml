@@ -1,0 +1,29 @@
+name: PR Body Lint
+
+# Report-only caller for the fleet reusable PR body linter (RM #2427).
+# pull_request_target runs the trusted default-branch workflow copy and must
+# not check out or execute PR head code in this file.
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: pr-body-lint-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    uses: D-sorganization/Repository_Management/.github/workflows/reusable-pr-body-lint.yml@d3c5ff3fcb21e15997ca8668b8c9278e2e25dcff
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      repo_owner: ${{ github.event.repository.owner.login }}
+      repo_name: ${{ github.event.repository.name }}
+      report_only: "true"
