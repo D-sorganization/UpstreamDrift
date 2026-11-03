@@ -14,28 +14,35 @@
  *   - "Launch Simulation" button always visible (sticky bottom)
  */
 
+import { useState, useMemo } from 'react';
 import {
     Activity,
     AlertTriangle,
+    ChevronRight,
+    Download,
     ExternalLink,
     HelpCircle,
     Monitor,
     Loader2,
     MessageSquare,
+    Play,
     RefreshCw,
+    Search,
     Wrench,
     Zap,
 } from 'lucide-react';
-import { useNavigate, NavLink } from 'react-router';
+import { useNavigate, NavLink, Link } from 'react-router';
 import type { LauncherTile } from '@/api/useLauncherManifest';
 import type { ManifestLoadState } from '@/api/useLauncherManifest';
 import type { LauncherWindowRecord } from '@/api/launcherWindowRegistry';
+import type { EngineStatusResponse } from '@/api/generated/types';
 import { canLaunchNativeWindow, resolveTileLaunchAction } from '@/api/webLaunch';
 import { DIAGNOSTICS_BADGE_CLEARANCE } from '@/components/ui/DiagnosticsPanel';
 import type { TileLaunchAction } from '@/api/webLaunch';
 
 interface Props {
     tiles: LauncherTile[];
+    engineStatuses?: EngineStatusResponse[];
     loadState: ManifestLoadState;
     error: string | null;
     selectedTileId: string | null;
@@ -298,8 +305,58 @@ function buildTileSections(tiles: LauncherTile[]): TileSection[] {
     ].filter((section) => section.tiles.length > 0);
 }
 
+interface EngineRow {
+    id: string;
+    engineKey: string;
+    name: string;
+    type: string;
+    tileId: string;
+}
+
+const ENGINE_ROWS: EngineRow[] = [
+    { id: 'mujoco', engineKey: 'mujoco', name: 'MuJoCo Engine', type: 'Rigid Body & Contact', tileId: 'mujoco_unified' },
+    { id: 'drake', engineKey: 'drake', name: 'Drake Engine', type: 'Dynamics & Optimization', tileId: 'drake_golf' },
+    { id: 'pinocchio', engineKey: 'pinocchio', name: 'Pinocchio Engine', type: 'Kinematics & Spatial Dynamics', tileId: 'pinocchio_golf' },
+    { id: 'opensim', engineKey: 'opensim', name: 'OpenSim Engine', type: 'Musculoskeletal & Biomechanics', tileId: 'opensim_golf' },
+    { id: 'myosuite', engineKey: 'myosuite', name: 'MyoSuite Engine', type: 'Muscle & Neural Control', tileId: 'myosim_suite' },
+    { id: 'matlab', engineKey: 'matlab_2d', name: 'MATLAB / Simscape', type: 'Simscape Multibody 2D/3D', tileId: 'matlab_unified' },
+];
+
+function getEngineReadiness(
+    row: EngineRow,
+    engineStatuses?: EngineStatusResponse[]
+): { status: 'Ready' | 'Experimental' | 'Not installed' | 'Needs MATLAB'; color: string; canOpen: boolean } {
+    if (!engineStatuses || engineStatuses.length === 0) {
+        return { status: 'Ready', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', canOpen: true };
+    }
+    const match = engineStatuses.find((e) =>
+        e.name === row.engineKey ||
+        (row.engineKey === 'myosuite' && (e.name === 'myosuite' || e.name === 'myosim')) ||
+        (row.engineKey === 'matlab_2d' && (e.name === 'matlab_2d' || e.name === 'matlab_3d' || e.name === 'matlab'))
+    );
+    if (!match || !match.available) {
+        if (row.id === 'matlab') {
+            return { status: 'Needs MATLAB', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40', canOpen: false };
+        }
+        return { status: 'Not installed', color: 'bg-rose-500/20 text-rose-300 border-rose-500/40', canOpen: false };
+    }
+    if (match.status === 'gui_ready' || match.status === 'ready' || match.status === 'engine_ready') {
+        return { status: 'Ready', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', canOpen: true };
+    }
+    return { status: 'Experimental', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40', canOpen: true };
+}
+
+const PIPELINE_STEPS = [
+    { id: 'capture', step: '1', title: 'Capture', desc: 'Video & Mocap', route: '/workspaces/capture-analyze', prereq: 'Ready to start', ready: true },
+    { id: 'estimate', step: '2', title: 'Estimate', desc: 'Pose & Joints', route: '/tools/video-analyzer', prereq: 'Needs a capture', ready: false },
+    { id: 'model_match', step: '3', title: 'Model & Match', desc: 'Biomechanics', route: '/workspaces/model-match', prereq: 'Needs an estimate', ready: false },
+    { id: 'optimize', step: '4', title: 'Optimize', desc: 'Forward Dynamics', route: '/workspaces/optimize-train', prereq: 'Needs matched model', ready: false },
+    { id: 'compare', step: '5', title: 'Compare', desc: 'Results & Valid.', route: '/workspaces/results-compare', prereq: 'Needs simulation run', ready: false },
+];
+
 export function LauncherDashboard({
     tiles: manifestTiles,
+    engineStatuses,
     loadState,
     error,
     selectedTileId,
@@ -312,11 +369,24 @@ export function LauncherDashboard({
     onRefetch,
     nativeWindowAllowed = canLaunchNativeWindow(),
 }: Props) {
+    const [searchQuery, setSearchQuery] = useState('');
     const tiles = manifestTiles.filter(isHomeDestination);
     const engines = tiles.filter((t) => t.category === 'physics_engine');
     const toolsAndExternal = tiles.filter((t) => t.category !== 'physics_engine');
+
+    const filteredTiles = useMemo(() => {
+        if (!searchQuery.trim()) return tiles;
+        const q = searchQuery.toLowerCase().trim();
+        return tiles.filter((tile) =>
+            tile.name.toLowerCase().includes(q) ||
+            tile.description.toLowerCase().includes(q) ||
+            tile.id.toLowerCase().includes(q) ||
+            tile.capabilities.some((c) => c.toLowerCase().includes(q))
+        );
+    }, [tiles, searchQuery]);
+
     const selectedTile = tiles.find((t) => t.id === selectedTileId);
-    const tileSections = buildTileSections(tiles);
+    const tileSections = buildTileSections(filteredTiles);
     const selectedTileAction = selectedTile
         ? resolveTileLaunchAction(selectedTile, nativeWindowAllowed)
         : null;
@@ -477,6 +547,165 @@ export function LauncherDashboard({
 
             {/* Scrollable tile grid */}
             <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-3 md:py-6" id="tile-grid-container">
+                {/* Resume Panel (#14259) */}
+                <section aria-label="Resume Work" className="mb-6 rounded-xl border border-gray-700/60 bg-gradient-to-r from-blue-950/30 to-gray-800/50 p-4">
+                    {launchedWindows.length > 0 ? (
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-400">Resume Session</span>
+                                <h3 className="text-base font-semibold text-white">{launchedWindows[0].name}</h3>
+                                <p className="text-xs text-gray-400">Active background session · {launchedWindows[0].launchCount} launch{launchedWindows[0].launchCount === 1 ? '' : 'es'}</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => onFocusLaunchedTile(launchedWindows[0].tileId)}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md shadow-blue-600/25"
+                            >
+                                <Play className="w-4 h-4" aria-hidden="true" />
+                                Resume Session
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-400">Start Your Workflow</span>
+                                <h3 className="text-base font-semibold text-white">Import Data to Begin Analysis</h3>
+                                <p className="text-xs text-gray-400">Load recorded swing video or 3D optical motion capture files to initialize the pipeline.</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Link
+                                    to="/tools/video-analyzer"
+                                    aria-label="Import swing video"
+                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 rounded-lg text-xs font-medium transition-colors"
+                                >
+                                    <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                                    Import swing video
+                                </Link>
+                                <Link
+                                    to="/tools/motion-capture"
+                                    aria-label="Import C3D / OpenCap"
+                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-700/50 hover:bg-gray-700/80 text-gray-200 border border-gray-600/60 rounded-lg text-xs font-medium transition-colors"
+                                >
+                                    <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                                    Import C3D / OpenCap
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+                </section>
+
+                {/* Biomechanical Modeling Pipeline Cards (#14259) */}
+                <section aria-label="Biomechanical Modeling Pipeline" className="mb-8">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-semibold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                            Biomechanical Modeling Pipeline
+                        </h2>
+                        <span className="text-xs text-gray-400 hidden sm:inline">Capture → Estimate → Model & Match → Optimize → Compare</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        {PIPELINE_STEPS.map((step) => (
+                            <Link
+                                key={step.id}
+                                to={step.route}
+                                className="group relative flex flex-col justify-between p-3.5 rounded-xl border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/80 hover:border-blue-500/50 transition-all hover:-translate-y-0.5"
+                            >
+                                <div>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300">
+                                            STEP {step.step}
+                                        </span>
+                                        <ChevronRight className="w-3.5 h-3.5 text-gray-500 group-hover:text-blue-400 transition-colors" aria-hidden="true" />
+                                    </div>
+                                    <h3 className="text-sm font-semibold text-white group-hover:text-blue-200 transition-colors">{step.title}</h3>
+                                    <p className="text-xs text-gray-400">{step.desc}</p>
+                                </div>
+                                <div className="mt-3 pt-2 border-t border-gray-700/40 flex items-center gap-1.5 text-[11px] text-gray-400">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${step.ready ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                                    <span>{step.prereq}</span>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Physics Engines & Truthful Readiness Table (#14259) */}
+                <section aria-label="Physics Engines & Readiness" className="mb-8 rounded-xl border border-gray-700/60 bg-gray-800/40 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-semibold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                            Physics Engines & Readiness
+                        </h2>
+                        <span className="text-xs text-gray-400">Live backend availability status</span>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm text-gray-300">
+                            <thead>
+                                <tr className="border-b border-gray-700/60 text-xs font-semibold uppercase text-gray-400">
+                                    <th scope="col" className="py-2 pr-4">Engine</th>
+                                    <th scope="col" className="py-2 pr-4 hidden sm:table-cell">Specialization</th>
+                                    <th scope="col" className="py-2 pr-4">Status</th>
+                                    <th scope="col" className="py-2 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-700/40">
+                                {ENGINE_ROWS.map((row) => {
+                                    const readiness = getEngineReadiness(row, engineStatuses);
+                                    return (
+                                        <tr key={row.id} className="hover:bg-white/[0.02]">
+                                            <td className="py-2.5 pr-4 font-medium text-white">{row.name}</td>
+                                            <td className="py-2.5 pr-4 text-xs text-gray-400 hidden sm:table-cell">{row.type}</td>
+                                            <td className="py-2.5 pr-4">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${readiness.color}`}>
+                                                    {readiness.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-2.5 text-right">
+                                                {readiness.canOpen ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => onLaunchTile(row.tileId)}
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-blue-600/30 text-blue-200 hover:bg-blue-600/50 border border-blue-500/40 transition-colors"
+                                                    >
+                                                        Open
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        onClick={onShowHelp}
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-gray-700/40 text-gray-300 hover:bg-gray-700/70 border border-gray-600/50 transition-colors"
+                                                    >
+                                                        How to install
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                {/* Search & All Tools (#14259) */}
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div className="relative flex-1 min-w-[240px] max-w-md">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" aria-hidden="true" />
+                        <input
+                            type="search"
+                            role="searchbox"
+                            aria-label="Search tools"
+                            placeholder="Search all 79 tools and utilities..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-3 py-2 bg-gray-800/80 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                    </div>
+                    <span className="text-xs text-gray-400">
+                        Showing {filteredTiles.length} of {tiles.length} tools
+                    </span>
+                </div>
+
                 {tileSections.map((section) => {
                     const Icon = section.icon;
                     return (
