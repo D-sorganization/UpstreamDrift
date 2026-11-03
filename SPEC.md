@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-03 | #14373 | Grip hand mesh gains a dorsum (metacarpal block) riding on the palm out past the knuckles, clear of the grip; OpenSim hand STLs and the GS3DX grip topology regenerated (slice 1 of 3) |
 | 2026-11-03 | #14379 | Palm-thumb pad parity across MuJoCo, Drake, Pinocchio and OpenSim: the shared pad law on each engine's grip-hand frame kinematics along a trail-wrist circle matches the spec reference within the shared parity tolerances |
 | 2026-11-02 | #14377 | Fix CANONICAL_ENGINE_TESTS path for opensim in test_fit_result_contract and add pytestmark unit. |
 | 2026-11-02 | #14375 | HRG-Q1 close-out: MyoSuite mass/gravity cell reported exempt with its reason (thorax-only IK mapping); stale 'remain open' notes removed from the full-body-v2 qualification modules. Every engine x quantity cell now has a test, an exempt-with-reason cell, or a strict xfail with measured numbers (joint limits). |
