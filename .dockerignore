@@ -60,11 +60,6 @@ requirements-dev.lock
 data/
 logs/
 
-# Environment files (exclude secrets, keep the example template)
-.env
-.env.*
-!.env.example
-
 # Dockerfile.modular verifies and packages these exact pinned Tools roots.
 # Keep them inside the context even when broad documentation, test, or data
 # exclusions above would otherwise remove a nested source artifact.
@@ -73,3 +68,8 @@ logs/
 !vendor/ud-tools/src/chat/**
 !vendor/ud-tools/src/python/src/utils/**
 !vendor/ud-tools/src/contracts.py
+
+# Environment files (exclude root secrets, keep the example template).
+.env
+.env.*
+!.env.example
