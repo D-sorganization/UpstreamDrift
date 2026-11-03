@@ -1147,15 +1147,6 @@ jobs:
     timeout-minutes: 35
     env:
       CARGO_NET_GIT_FETCH_WITH_CLI: true
-      # Exact-hash fixtures (grip, saved-comparison receipts) moved with the
-      # runner CPU: OpenBLAS picks a GEMM kernel per CPU and numpy picks
-      # AVX-512 loops where present, changing the last bit of small matrix
-      # products. Pin the AVX2 kernel and the AVX2 numpy loops so the hashes
-      # are the same on every runner image and fleet host (#14397).
-      OPENBLAS_CORETYPE: Haswell
-      NPY_DISABLE_CPU_FEATURES: >-
-        AVX512F AVX512CD AVX512_KNL AVX512_KNM AVX512_SKX AVX512_CLX
-        AVX512_CNL AVX512_ICL
     steps:
       - name: Clean corrupt git objects
         shell: bash
@@ -1227,8 +1218,9 @@ jobs:
           "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
           "$python" -c "import numpy, scipy; from scipy import signal; print(f'numpy={numpy.__version__} scipy={scipy.__version__} signal=ok')"
       - name: Report numeric kernel host (#14397)
-        # Provenance for exact-hash drift: the CPU, and which numpy SIMD
-        # targets and OpenBLAS core the pinned environment actually uses.
+        # Provenance for exact-hash drift: the grip and receipt hashes move
+        # by the last bit on AVX-512 runner CPUs, so log the CPU, whether it
+        # has AVX-512, and numpy's SIMD dispatch for every gate run.
         run: |
           grep -m1 "model name" /proc/cpuinfo || true
           grep -m1 -o -w avx512f /proc/cpuinfo || echo "no avx512f"
