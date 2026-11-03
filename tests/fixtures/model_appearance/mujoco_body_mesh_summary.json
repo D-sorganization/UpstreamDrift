@@ -80,39 +80,39 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": [
       {
-        "bbox_max": [0.182654, 0.004289, 0.160942],
-        "bbox_min": [-0.046994, -0.033483, -0.008825],
         "label": "grip",
         "material": "mat_grip_rubber",
-        "n_vertices": 50
+        "n_vertices": 50,
+        "bbox_min": [-0.046994, -0.033483, -0.008825],
+        "bbox_max": [0.182654, 0.004289, 0.160942]
       },
       {
-        "bbox_max": [0.979522, -0.063642, 0.691987],
-        "bbox_min": [0.82996, -0.196144, 0.563769],
         "label": "head",
         "material": "mat_satin_steel",
-        "n_vertices": 948
+        "n_vertices": 948,
+        "bbox_min": [0.82996, -0.196144, 0.563769],
+        "bbox_max": [0.979522, -0.063642, 0.691987]
       },
       {
-        "bbox_max": [0.044333, 0.023969, 0.070195],
-        "bbox_min": [-0.054736, -0.047838, -0.018927],
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 3870
+        "n_vertices": 4960,
+        "bbox_min": [-0.054736, -0.050034, -0.027017],
+        "bbox_max": [0.044333, 0.023969, 0.070195]
       },
       {
-        "bbox_max": [0.836098, -0.016854, 0.615017],
-        "bbox_min": [0.173074, -0.074297, 0.147315],
         "label": "shaft",
         "material": "mat_satin_steel",
-        "n_vertices": 50
+        "n_vertices": 50,
+        "bbox_min": [0.173074, -0.074297, 0.147315],
+        "bbox_max": [0.836098, -0.016854, 0.615017]
       },
       {
-        "bbox_max": [0.106459, 0.01728, 0.102706],
-        "bbox_min": [0.010006, -0.055375, 0.005234],
         "label": "trail_hand",
         "material": "mat_skin_2",
-        "n_vertices": 3870
+        "n_vertices": 4960,
+        "bbox_min": [0.009855, -0.055375, 0.005234],
+        "bbox_max": [0.106459, 0.026617, 0.103409]
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
@@ -427,39 +427,39 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": [
       {
-        "bbox_max": [0.134481, 0.166212, 0.127034],
-        "bbox_min": [-0.02881, -0.042881, -0.001028],
         "label": "grip",
         "material": "mat_grip_rubber",
-        "n_vertices": 50
+        "n_vertices": 50,
+        "bbox_min": [-0.02881, -0.042881, -0.001028],
+        "bbox_max": [0.134481, 0.166212, 0.127034]
       },
       {
-        "bbox_max": [0.552868, 0.651498, 0.435385],
-        "bbox_min": [0.445038, 0.589975, 0.35343],
         "label": "head",
         "material": "mat_satin_steel",
-        "n_vertices": 948
+        "n_vertices": 948,
+        "bbox_min": [0.445038, 0.589975, 0.35343],
+        "bbox_max": [0.552868, 0.651498, 0.435385]
       },
       {
-        "bbox_max": [0.050257, 0.037879, 0.05982],
-        "bbox_min": [-0.042347, -0.049864, -0.014354],
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 3870
+        "n_vertices": 4960,
+        "bbox_min": [-0.042347, -0.056694, -0.014354],
+        "bbox_max": [0.050257, 0.037879, 0.066458]
       },
       {
-        "bbox_max": [0.453971, 0.597233, 0.363166],
-        "bbox_min": [0.120618, 0.154952, 0.111888],
         "label": "shaft",
         "material": "mat_satin_steel",
-        "n_vertices": 50
+        "n_vertices": 50,
+        "bbox_min": [0.120618, 0.154952, 0.111888],
+        "bbox_max": [0.453971, 0.597233, 0.363166]
       },
       {
-        "bbox_max": [0.082697, 0.100954, 0.096371],
-        "bbox_min": [-0.011593, 0.000519, -0.003626],
         "label": "trail_hand",
         "material": "mat_skin_2",
-        "n_vertices": 3870
+        "n_vertices": 4960,
+        "bbox_min": [-0.011593, 0.000519, -0.003626],
+        "bbox_max": [0.082697, 0.100954, 0.098612]
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
@@ -774,39 +774,39 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": [
       {
-        "bbox_max": [0.011755, 0.2015, 0.037155],
-        "bbox_min": [-0.011755, -0.0635, 0.013645],
         "label": "grip",
         "material": "mat_grip_rubber",
-        "n_vertices": 50
+        "n_vertices": 50,
+        "bbox_min": [-0.011755, -0.0635, 0.013645],
+        "bbox_max": [0.011755, 0.2015, 0.037155]
       },
       {
-        "bbox_max": [0.134152, 1.12789, 0.070017],
-        "bbox_min": [-0.007195, 0.988192, -0.053639],
         "label": "head",
         "material": "mat_satin_steel",
-        "n_vertices": 948
+        "n_vertices": 948,
+        "bbox_min": [-0.007195, 0.988192, -0.053639],
+        "bbox_max": [0.134152, 1.12789, 0.070017]
       },
       {
-        "bbox_max": [0.031313, 0.024, 0.06437],
-        "bbox_min": [-0.038897, -0.06275, -0.01048],
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 3870
+        "n_vertices": 4960,
+        "bbox_min": [-0.038897, -0.06275, -0.01048],
+        "bbox_max": [0.040796, 0.024, 0.066196]
       },
       {
-        "bbox_max": [0.006152, 0.988192, 0.031552],
-        "bbox_min": [-0.006152, 0.2015, 0.019248],
         "label": "shaft",
         "material": "mat_satin_steel",
-        "n_vertices": 50
+        "n_vertices": 50,
+        "bbox_min": [-0.006152, 0.2015, 0.019248],
+        "bbox_max": [0.006152, 0.988192, 0.031552]
       },
       {
-        "bbox_max": [0.042644, 0.1002, 0.069668],
-        "bbox_min": [-0.030219, -0.0023, -0.006166],
         "label": "trail_hand",
         "material": "mat_skin_2",
-        "n_vertices": 3870
+        "n_vertices": 4960,
+        "bbox_min": [-0.030219, -0.0023, -0.015006],
+        "bbox_max": [0.042644, 0.1002, 0.069668]
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [

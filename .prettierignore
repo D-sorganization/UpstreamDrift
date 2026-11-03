@@ -10,6 +10,10 @@ docs/assessments/**
 docs/**/evidence/**
 docs/agents/handoffs/**
 
+# UpstreamDrift#13997: generator-written GS3DX grip topology, pinned byte-for-byte by
+# test_committed_grip_topology_json_matches_generator_and_check_mode.
+src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/appearance/gs3dx_grip_topology.json
+
 # Repository_Management#1520: SPEC.md's change-log table is left unpadded on
 # purpose. Prettier pads markdown table cells to the width of the widest row,
 # so a single new change-log row would rewrite every other row -- turning a
