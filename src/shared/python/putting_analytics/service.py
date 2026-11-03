@@ -30,10 +30,12 @@ from src.shared.python.putting_analytics.aggregate import (
     DEFAULT_GRID_FT,
     AggregateConfig,
     aggregate,
+    combine,
 )
 from src.shared.python.putting_analytics.expected_putts import (
     ExpectedPuttsCurve,
     PuttAction,
+    distance_seed,
 )
 from src.shared.python.putting_analytics.library import (
     DISTANCE_RANGE_FT,
@@ -54,6 +56,7 @@ from src.shared.python.putting_analytics.perceived_green import (
     PerceivedGreenPlanner,
     read_error_cost,
 )
+from src.shared.python.putting_analytics.report import Estimate
 from src.shared.python.putting_analytics.roll_model import BatchRollModel
 from src.shared.python.putting_dynamics.surfaces import HeightField, SurfaceSpec
 
@@ -360,3 +363,55 @@ def library_study(args: Mapping[str, Any]) -> dict[str, Any]:
     report = aggregate(library, lambda c: BatchRollModel(class_surface(c), noise), cfg)
     result: dict[str, Any] = json.loads(report.to_json())
     return result
+
+
+def library_misread_cost(args: Mapping[str, Any]) -> dict[str, Any]:
+    """Expected-strokes cost of the sampled ``reads`` per putt class (#14173).
+
+    Each class is planned on its perceived plane and played on its true plane,
+    as in :func:`misread_cost`; ``weighted_cost`` combines the classes by their
+    encounter weights. Class ``i`` is seeded by ``distance_seed(seed, i)``.
+    """
+    library = library_from_args(args)
+    reads = _reads_from_args(args)
+    candidates = candidates_from_args(args)
+    n = _samples(args)
+    work = len(library.classes) * (len(reads) + 1) * len(candidates) * n
+    _check(
+        work <= MAX_LIBRARY_ROLLOUTS, f"classes x (reads+1) x candidates x n is {work}"
+    )
+    baseline, noise, objective = (
+        baseline_from_args(args),
+        noise_from_args(args),
+        _objective(args),
+    )
+    seed = int(_number(args, "seed", 0))
+    rows, costs = [], []
+    for index, (putt_class, weight) in enumerate(
+        zip(library.classes, library.weights, strict=True)
+    ):
+        class_seed = distance_seed(seed, index)
+        planner = PerceivedGreenPlanner(
+            class_surface(putt_class),
+            candidates,
+            baseline,
+            n,
+            noise,
+            objective,
+            plan_seed=class_seed,
+        )
+        cost = read_error_cost(planner, putt_class.distance_ft, reads, class_seed)
+        rows.append(
+            {
+                **dataclasses.asdict(putt_class),
+                "weight": weight,
+                **dataclasses.asdict(cost),
+            }
+        )
+        costs.append(Estimate(cost.cost, cost.cost_se))
+    return {
+        "objective": objective,
+        "reads": len(reads),
+        "classes": rows,
+        "weighted_cost": dataclasses.asdict(combine(costs, library.weights)),
+    }
