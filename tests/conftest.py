@@ -749,12 +749,23 @@ _PROTECTED_PREFIXES = (
 )
 
 
-def _matches_protected(name: str) -> bool:
+# Native-extension engines: a genuine module first imported during a test is
+# kept, because its C extension cannot be re-imported once discarded (#14381).
+_NATIVE_ENGINE_PREFIXES = ("pinocchio", "pydrake")
+
+
+def _matches_protected(
+    name: str, prefixes: tuple[str, ...] = _PROTECTED_PREFIXES
+) -> bool:
     """Return True if *name* is a protected engine module."""
-    for prefix in _PROTECTED_PREFIXES:
-        if name == prefix or name.startswith(prefix + "."):
-            return True
-    return False
+    return any(name == prefix or name.startswith(prefix + ".") for prefix in prefixes)
+
+
+def _keep_native_import(name: str, module: object) -> bool:
+    """True for a genuine native-engine module (not a stub) added by a test."""
+    return _matches_protected(name, _NATIVE_ENGINE_PREFIXES) and not _is_module_stub(
+        module
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -789,7 +800,10 @@ def _protect_engine_modules() -> Generator[None, None, None]:
 
     This fixture snapshots all engine-related ``sys.modules`` entries before
     each test and restores them afterward so that corruption cannot leak
-    across test boundaries.
+    across test boundaries. A genuine Pinocchio or Drake module that the test
+    imported first is kept: discarding it cannot undo native extension state
+    and only breaks the next import (#14381). Stubs and ``src.engines``
+    additions are still discarded.
     """
     # list() needed: mutating dict during iteration. The lazy alias meta-path
     # finder installed by src/shared/python/import_aliases.py can insert into
@@ -817,14 +831,16 @@ def _protect_engine_modules() -> Generator[None, None, None]:
     added = {
         name: sys.modules[name]
         for name in list(sys.modules)
-        if _matches_protected(name) and name not in saved
+        if _matches_protected(name)
+        and name not in saved
+        and not _keep_native_import(name, sys.modules[name])
     }
     # Remove any engine modules added or mutated during the test
     for k in list(sys.modules):  # list() needed: mutating dict during iteration
         if _matches_protected(k):
             if k in saved:
                 sys.modules[k] = saved[k]
-            else:
+            elif k in added:
                 del sys.modules[k]
     # Restore any that were removed during the test
     for k, v in saved.items():
