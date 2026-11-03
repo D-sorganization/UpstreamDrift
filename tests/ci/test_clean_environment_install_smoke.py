@@ -84,9 +84,12 @@ def test_check_core_import_surface_reports_failure(
 def test_check_forbidden_engine_isolation_clean(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    for pkg in smoke_mod.FORBIDDEN_ENGINES:
-        monkeypatch.delitem(sys.modules, pkg, raising=False)
-    monkeypatch.setattr(smoke_mod.importlib.util, "find_spec", lambda _: None)
+    for mod in list(sys.modules):
+        if any(
+            mod == pkg or mod.startswith(f"{pkg}.")
+            for pkg in smoke_mod.FORBIDDEN_ENGINES
+        ):
+            monkeypatch.delitem(sys.modules, mod, raising=False)
     results = smoke_mod.check_forbidden_engine_isolation()
     assert all(ok for _, ok, _ in results)
 
