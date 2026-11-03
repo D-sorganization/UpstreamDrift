@@ -1970,10 +1970,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13190
 - **Branch:** docs/hrg-h2-palm-thumb-pad-reference-13190
-- **PR:** #14110
+- **PR:** #14110, #14379
 - **Paths:** see #14110
 - **Started:** 2026-10-30
-- **Last verified:** 2026-10-30 (`a83c36d1`; collated from changes/13190-hrg-h2-palm-thumb-pad-reference.md)
+- **Last verified:** 2026-11-03 (`2c7287cf`; collated from changes/13190-palm-thumb-pad-parity-across-mujoco-drak.md)
 - **Summary:** Adds the HRG-H2 (hrg-h2-palm-thumb-pad-v1) compliant palm-thumb pad subsection to docs/research/human_realistic_golfer/human_realistic_golfer.tex documenting the separated_v2 sphere-capsule contact law, 2.0 mm hand-drift gate, preload sensitivity, timestep-halving impact convergence, and unit test verification.
 - **Next step:** Shipped in PR #14110.
 
