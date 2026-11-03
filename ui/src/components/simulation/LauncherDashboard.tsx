@@ -552,7 +552,7 @@ export function LauncherDashboard({
                     {launchedWindows.length > 0 ? (
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <div>
-                                <span className="text-[11px] font-semibold uppercase tracking-wider text-primary">Resume Session</span>
+                                <span className="text-xs font-semibold uppercase tracking-wider text-primary">Resume Session</span>
                                 <h3 className="text-base font-semibold text-white">{launchedWindows[0].name}</h3>
                                 <p className="text-xs text-token-muted">Active background session · {launchedWindows[0].launchCount} launch{launchedWindows[0].launchCount === 1 ? '' : 'es'}</p>
                             </div>
@@ -568,7 +568,7 @@ export function LauncherDashboard({
                     ) : (
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <span className="text-[11px] font-semibold uppercase tracking-wider text-primary">Start Your Workflow</span>
+                                <span className="text-xs font-semibold uppercase tracking-wider text-primary">Start Your Workflow</span>
                                 <h3 className="text-base font-semibold text-white">Import Data to Begin Analysis</h3>
                                 <p className="text-xs text-token-muted">Load recorded swing video or 3D optical motion capture files to initialize the pipeline.</p>
                             </div>
@@ -612,7 +612,7 @@ export function LauncherDashboard({
                             >
                                 <div>
                                     <div className="flex items-center justify-between mb-1.5">
-                                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary">
+                                        <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary">
                                             STEP {step.step}
                                         </span>
                                         <ChevronRight className="w-3.5 h-3.5 text-token-muted group-hover:text-primary transition-colors" aria-hidden="true" />
@@ -620,7 +620,7 @@ export function LauncherDashboard({
                                     <h3 className="text-sm font-semibold text-white group-hover:text-primary transition-colors">{step.title}</h3>
                                     <p className="text-xs text-token-muted">{step.desc}</p>
                                 </div>
-                                <div className="mt-3 pt-2 border-t border-token-border flex items-center gap-1.5 text-[11px] text-token-muted">
+                                <div className="mt-3 pt-2 border-t border-token-border flex items-center gap-1.5 text-xs text-token-muted">
                                     <span className={`w-1.5 h-1.5 rounded-full ${step.ready ? 'bg-emerald-400' : 'bg-amber-400'}`} />
                                     <span>{step.prereq}</span>
                                 </div>
