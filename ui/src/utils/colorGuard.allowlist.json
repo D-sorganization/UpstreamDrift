@@ -4,5 +4,10 @@
     "components/model-explorer/ModelTree.tsx": "purple/yellow distinguish source vs target model and swap-selection state in Frankenstein mode (categorical, not a primary accent)",
     "components/model-explorer/TreeDiffModal.tsx": "purple marks the source model name in cross-model diffs (categorical)",
     "components/simulation/LauncherDashboard.tsx": "purple is the 'Utility' tile-category badge color (categorical taxonomy, not a primary action)"
+  },
+  "rawPaletteCeiling": {
+    "maxRawPaletteClasses": 2328,
+    "description": "Ratchet ceiling for raw gray-* and blue-* Tailwind classes across ui/src (issue #14252). Current baseline after Settings.tsx migration is 2,327. CI fails if total raw classes exceed this budget."
   }
 }
+

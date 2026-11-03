@@ -55,9 +55,9 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-gray-800 rounded-lg border border-gray-700 p-4">
-      <h2 className="text-sm font-semibold text-gray-200">{title}</h2>
-      <p className="text-xs text-gray-400 mt-1 mb-4">{description}</p>
+    <section className="bg-surface rounded-lg border border-token-border p-4">
+      <h2 className="text-sm font-semibold text-token-text">{title}</h2>
+      <p className="text-xs text-token-muted mt-1 mb-4">{description}</p>
       <div className="space-y-3">{children}</div>
     </section>
   );
@@ -66,7 +66,7 @@ function SectionCard({
 function FieldRow({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <label htmlFor={htmlFor} className="text-sm text-gray-300">
+      <label htmlFor={htmlFor} className="text-sm text-token-text">
         {label}
       </label>
       {children}
@@ -75,7 +75,7 @@ function FieldRow({ label, htmlFor, children }: { label: string; htmlFor: string
 }
 
 const INPUT_CLASS =
-  'bg-gray-700 border border-gray-600 text-gray-100 text-sm rounded px-2 py-1.5 w-48 focus:outline-none focus:ring-2 focus:ring-blue-500';
+  'bg-surface-raised border border-token-border text-token-text text-sm rounded px-2 py-1.5 w-48 focus:outline-none focus:ring-2 focus:ring-primary';
 
 export function SettingsPage() {
   const { showSuccess, showError } = useToast();
@@ -169,20 +169,20 @@ export function SettingsPage() {
     : [settings.appearance.theme_id, ...themeNames];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className="min-h-screen bg-canvas text-token-text">
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center gap-4">
+      <div className="bg-surface border-b border-token-border px-6 py-4 flex items-center gap-4">
         <button
           type="button"
           onClick={() => guardedNavigate('/')}
-          className="p-1.5 rounded hover:bg-gray-700 transition-colors"
+          className="p-1.5 rounded hover:bg-surface-raised transition-colors"
           aria-label="Back to dashboard"
         >
           <ArrowLeft className="w-5 h-5" aria-hidden="true" />
         </button>
         <div>
-          <h1 className="text-lg font-semibold text-gray-100">Settings</h1>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <h1 className="text-lg font-semibold text-token-text">Settings</h1>
+          <p className="text-xs text-token-muted mt-0.5">
             Preferences persist server-side and apply to both browser and Tauri modes
           </p>
         </div>
@@ -326,7 +326,7 @@ export function SettingsPage() {
           <button
             type="button"
             onClick={() => setDiagnosticsOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm rounded transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 bg-surface-raised hover:bg-surface text-token-text text-sm rounded transition-colors"
           >
             <Stethoscope className="w-4 h-4" aria-hidden="true" />
             Open diagnostics panel
@@ -336,7 +336,7 @@ export function SettingsPage() {
         {/* Save */}
         <div className="flex items-center justify-end gap-3">
           <p
-            className="text-xs text-gray-400"
+            className="text-xs text-token-muted"
             data-testid="settings-dirty-state"
             aria-live="polite"
           >
@@ -346,7 +346,7 @@ export function SettingsPage() {
             type="button"
             onClick={handleSave}
             disabled={saving || loadState === 'loading' || !isDirty}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm font-medium rounded transition-colors"
+            className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:bg-surface-raised disabled:cursor-not-allowed text-white text-sm font-medium rounded transition-colors"
           >
             {saving ? 'Saving…' : isDirty ? 'Save changes •' : 'Save settings'}
           </button>
