@@ -1,3 +1,4 @@
+/// <reference types="vitest/globals" />
 /**
  * TDD Tests for LauncherDashboard component.
  *
@@ -13,13 +14,14 @@
  */
 
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { screen, fireEvent, within } from '@testing-library/dom';
 import { MemoryRouter } from 'react-router';
 import { LauncherDashboard } from './LauncherDashboard';
 import { DIAGNOSTICS_BADGE_CLEARANCE } from '@/components/ui/DiagnosticsPanel';
 import type { LauncherTile } from '@/api/useLauncherManifest';
+import type { EngineStatusResponse } from '@/api/generated/types';
 
 const renderWithRouter = (ui: React.ReactElement) =>
     render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -598,6 +600,52 @@ describe('LauncherDashboard', () => {
             const links = within(nav).getAllByRole('link');
             expect(links.length).toBeGreaterThan(0);
             for (const link of links) expect(link).toHaveClass('touch-target');
+        });
+    });
+
+    // ────────────────────────────────────────────────────────────
+    // Home Redesign: Pipeline, Resume Panel & Truthful Engine Status (#14259)
+    // ────────────────────────────────────────────────────────────
+    describe('home redesign (#14259)', () => {
+        it('renders resume panel empty state with video and mocap import actions', () => {
+            renderWithRouter(<LauncherDashboard {...defaultProps} launchedWindows={[]} />);
+            expect(screen.getByRole('region', { name: /resume work/i })).toBeInTheDocument();
+            expect(screen.getByRole('link', { name: /import swing video/i })).toHaveAttribute('href', '/tools/video-analyzer');
+            expect(screen.getByRole('link', { name: /import c3d \/ opencap/i })).toHaveAttribute('href', '/tools/motion-capture');
+        });
+
+        it('renders pipeline cards with prerequisite states', () => {
+            renderWithRouter(<LauncherDashboard {...defaultProps} />);
+            const pipeline = screen.getByRole('region', { name: /modeling pipeline/i });
+            expect(within(pipeline).getByText('Capture')).toBeInTheDocument();
+            expect(within(pipeline).getByText('Estimate')).toBeInTheDocument();
+            expect(within(pipeline).getByText('Model & Match')).toBeInTheDocument();
+            expect(within(pipeline).getByText('Optimize')).toBeInTheDocument();
+            expect(within(pipeline).getByText('Compare')).toBeInTheDocument();
+            expect(within(pipeline).getByText('Needs a capture')).toBeInTheDocument();
+        });
+
+        it('renders truthful engine readiness table from API field', () => {
+            const mockEngineStatuses: EngineStatusResponse[] = [
+                { name: 'mujoco', available: true, is_available: true, description: 'MuJoCo', status: 'ready', loaded: false, engine_type: 'mujoco' },
+                { name: 'drake', available: true, is_available: true, description: 'Drake', status: 'experimental', loaded: false, engine_type: 'drake' },
+                { name: 'pinocchio', available: false, is_available: false, description: 'Pinocchio', status: 'unavailable', loaded: false, engine_type: 'pinocchio' },
+                { name: 'matlab_2d', available: false, is_available: false, description: 'Matlab', status: 'unavailable', loaded: false, engine_type: 'matlab_2d' },
+            ];
+            renderWithRouter(<LauncherDashboard {...defaultProps} engineStatuses={mockEngineStatuses} />);
+            const table = screen.getByRole('region', { name: /physics engines & readiness/i });
+            expect(within(table).getByText('Ready')).toBeInTheDocument();
+            expect(within(table).getByText('Experimental')).toBeInTheDocument();
+            expect(within(table).getAllByText('Not installed').length).toBeGreaterThan(0);
+            expect(within(table).getByText('Needs MATLAB')).toBeInTheDocument();
+        });
+
+        it('filters tools via search input so all tools stay reachable', () => {
+            renderWithRouter(<LauncherDashboard {...defaultProps} />);
+            const searchInput = screen.getByRole('searchbox', { name: /search tools/i });
+            fireEvent.change(searchInput, { target: { value: 'motion' } });
+            expect(screen.getByText('Motion Capture')).toBeInTheDocument();
+            expect(screen.queryByText('MuJoCo')).not.toBeInTheDocument();
         });
     });
 });
