@@ -154,10 +154,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14175
 - **Branch:** claude/putting-variance-14175
-- **PR:** #14196
+- **PR:** #14196, #14401
 - **Paths:** see #14196
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-01 (`57a5a9f8`; collated from changes/14175-add-putting-analytics-variance-attributi.md)
+- **Last verified:** 2026-11-03 (`edfad820`; collated from changes/14175-document-variance-attribution-study-inpu.md)
 - **Summary:** Add Putting Analytics Variance Attribution and Error-Source Elimination
 - **Next step:** Merge after 14188
 
@@ -180,10 +180,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14173
 - **Branch:** claude/putting-perceived-green-14173
-- **PR:** #14199
+- **PR:** #14199, #14392
 - **Paths:** see #14199
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-01 (`437a429e`; collated from changes/14173-plan-on-the-perceived-green-and-execute.md)
+- **Last verified:** 2026-11-03 (`d6398046`; collated from changes/14173-report-the-expected-strokes-cost-of-gree.md)
 - **Summary:** Plan on the Perceived Green and Execute on the True Green
 - **Next step:** Add aspect misreads and per-class read-cost reporting over the putt library
 
@@ -1248,6 +1248,97 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#2427 · Add Report-Only Pr-Body-Lint Pull_Request_Target Caller (RM Reusable Workflow) and Contract Test.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #2427
+- **Branch:** merged via #14405
+- **PR:** #14405
+- **Paths:** see #14405
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`e8d924b0`; collated from changes/2427-add-report-only-pr-body-lint-pull-reques.md)
+- **Summary:** Add report-only pr-body-lint pull_request_target caller (RM reusable workflow) and contract test.
+- **Next step:** Shipped in PR #14405.
+
+### DL-#14407 · Title-Case Gate Treats the Middle Dot as a Heading Segment Boundary, so Collated DL Headings Starting With an Article Pass
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14407
+- **Branch:** merged via #14408
+- **PR:** #14408
+- **Paths:** see #14408
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`65945a42`; collated from changes/14407-title-case-gate-treats-the-middle-dot-as.md)
+- **Summary:** Title-case gate treats the middle dot as a heading segment boundary, so collated DL headings starting with an article pass
+- **Next step:** Shipped in PR #14408.
+
+### DL-#14390 · Release Companion-Protected-Main Attestations Retry Once After a Transient OIDC Token Failure
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14390
+- **Branch:** merged via #14391
+- **PR:** #14391
+- **Paths:** see #14391
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`b0a79625`; collated from changes/14390-release-companion-protected-main-attesta.md)
+- **Summary:** Release companion-protected-main attestations retry once after a transient OIDC token failure
+- **Next step:** Shipped in PR #14391.
+
+### DL-#14283 · Playwright Mobile Layout Smoke With Ratchet Allowlist for Six Core Routes.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14283
+- **Branch:** merged via #14393
+- **PR:** #14393
+- **Paths:** see #14393
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`917d30e6`; collated from changes/14283-playwright-mobile-layout-smoke-with-ratc.md)
+- **Summary:** Playwright mobile layout smoke with ratchet allowlist for six core routes.
+- **Next step:** Shipped in PR #14393.
+
+### DL-#14235 · The Web App Has a Putting Analytics Page at /Tools/Putting-Analytics That Runs the Best-Aim-and-Pace, Misread-Cost and Putt-Class Library Studies Through the API and Shows the Desktop Tool's Rows; the Parity Entry Is Now Parity.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14235
+- **Branch:** merged via #14394
+- **PR:** #14394
+- **Paths:** see #14394
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`4d988bb1`; collated from changes/14235-the-web-app-has-a-putting-analytics-page.md)
+- **Summary:** The web app has a Putting Analytics page at /tools/putting-analytics that runs the best-aim-and-pace, misread-cost and putt-class library studies through the API and shows the desktop tool's rows; the parity entry is now parity.
+- **Next step:** Shipped in PR #14394.
+
+### DL-#14200 · Record Putting Studio Offline Bridge Evaluation and PyQt6 Parity Exemption
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14200
+- **Branch:** merged via #14399
+- **PR:** #14399
+- **Paths:** see #14399
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`df56d857`; collated from changes/14200-record-putting-studio-offline-bridge-eva.md)
+- **Summary:** Record putting studio offline bridge evaluation and PyQt6 parity exemption
+- **Next step:** Shipped in PR #14399.
+
+### DL-#14398 · Pin Ci-Standard Hosted Runner to Ubuntu-24.04 so the Ubuntu-Latest 26.04 Rollout Stops Ejecting Merge Groups (Migration Tracked In #14397)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14398
+- **Branch:** merged via #14400
+- **PR:** #14400
+- **Paths:** see #14400
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`8e0c06d2`; collated from changes/14398-pin-ci-standard-hosted-runner-to-ubuntu.md)
+- **Summary:** Pin ci-standard hosted runner to ubuntu-24.04 so the ubuntu-latest 26.04 rollout stops ejecting merge groups (migration tracked in #14397)
+- **Next step:** Shipped in PR #14400.
 
 ### DL-#14252 · Add Theme Tokens Codemod Tool, Unit Tests, CI Ratchet in colorGuard.Test.Ts, and Migrate Settings Page to Semantic Tokens
 

@@ -19,15 +19,15 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "cbe01385b2c8bf0281a0087a6fa35a1e40c542f1140060b80cdfdb22c4ff6834",
+      "fingerprint": "f2d7b35cc9c84859bdb63a31fb42a4375c936b350917180317dcb3c1554af7b1",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "122475bfa6e445ee8a2d4e1f94eae41c3b0e6bce954d1eb8ea44a1e40662e052",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "fb709511c481cfdd50674d7568224163736c7b7b47540f8889114d95f80fa360",
-        "src/config/launcher_manifest.json": "344fd2a8afc251e632fcfa66e5213e5eef3a30b03c681d11cb3ce66e2894ee33",
+        "src/config/feature_parity.json": "cc2c18af455f092a80931e759340d449f77aeef09537b1e53ad7fc8a212a5d1b",
+        "src/config/launcher_manifest.json": "59cf9a1547300feaae6a3a954ff7375f58725645ebf2f5f1071b7722f4ab7ac2",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "UD #14262: canonical_core_estimation and canonical_core_comparison go from experimental to planned in models.yaml and launcher_manifest.json (prettier also normalised one blank line and one array). The contract still holds: the registries remain the inventory authority, identifiers are unchanged, and the atlas projection was regenerated and passes generate_capability_atlas --check plus the workspace documentation freshness test."
+      "rationale": "Re-reviewed launcher-atlas after updating putting studio feature parity from gap to retired with parity bridge and PyQt6 parity recorded (UD #14200); contract unchanged, feature parity verified."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",

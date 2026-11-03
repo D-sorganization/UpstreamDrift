@@ -11,6 +11,7 @@ export const KNOWN_APP_ROUTES = [
     '/tools/model-explorer',
     '/tools/impact-explorer',
     '/tools/putting-green',
+    '/tools/putting-analytics',
     '/tools/video-analyzer',
     '/tools/data-explorer',
     '/tools/motion-capture',

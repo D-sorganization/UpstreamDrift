@@ -118,20 +118,20 @@
       "title": "Putting analytics studies",
       "pyqt": "src/tools/putting_analytics_gui/gui.py",
       "api": "src/api/routes/putting_analytics.py",
-      "web": null,
-      "status": "gap",
-      "issue": 14235,
+      "web": "ui/src/pages/PuttingAnalytics.tsx",
+      "status": "parity",
       "tiles": ["putting_analytics"],
-      "notes": "Desktop tool over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The /tools/putting-analytics API routes serve the same studies."
+      "notes": "Desktop tool and web page over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The web page posts to the /tools/putting-analytics API routes and shows the desktop tool's rows (#14235)."
     },
     "tools.putting_studio": {
       "title": "Standalone offline putting studio (HTML client of the shared putting core)",
       "pyqt": "src/tools/putting_green_gui/_scene_builder.py",
       "api": null,
       "web": "src/apps/putting_studio/index.html",
-      "status": "gap",
-      "issue": 14200,
-      "notes": "Opens from file:// with vendored three.js/Tailwind (epic #14141 step 8). Its JS physics is a temporary copy gated by shared fixtures (SUNSET.md); the grip/torque explorer has no PyQt6 counterpart yet."
+      "status": "exempt",
+      "reason": "Standalone offline HTML research studio (epic #14141, #14200). The studio's 3D vector grip/torque explorer, scenario table, and dispersion views are exploratory web-first visualizers exempt from PyQt6 porting; conversely, interactive green-mesh authoring belongs exclusively to the desktop PyQt6 tool. The JS physics copy is retained under the recorded SUNSET.md evaluation (Pyodide/WASM bundle exceeds the 1 MB offline budget by 10x) and is strictly drift-gated by shared reference fixtures.",
+      "notes": "Opens from file:// with vendored three.js/Tailwind without build step or CDN dependencies. Drift is gated against the shared Python core by tests/apps/putting_studio/test_js_fixtures.py. Model output is displayed under a prominent unvalidated-research notice with no calibrated make-rate or strokes-gained claims.",
+      "tiles": []
     },
     "tools.golf_simulator": {
       "title": "Golf Simulator capability-aware controls and replay submission",

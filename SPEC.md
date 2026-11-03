@@ -2741,6 +2741,15 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-03 | #14405 | Add report-only pr-body-lint pull_request_target caller (RM reusable workflow) and contract test. |
+| 2026-11-03 | #14408 | Title-case gate treats the middle dot as a heading segment boundary, so collated DL headings starting with an article pass |
+| 2026-11-03 | #14391 | Release companion-protected-main attestations retry once after a transient OIDC token failure |
+| 2026-11-03 | #14393 | Playwright mobile layout smoke with ratchet allowlist for six core routes. |
+| 2026-11-03 | #14394 | The web app has a Putting Analytics page at /tools/putting-analytics that runs the best-aim-and-pace, misread-cost and putt-class library studies through the API and shows the desktop tool's rows; the parity entry is now parity. |
+| 2026-11-03 | #14399 | Record putting studio offline bridge evaluation and PyQt6 parity exemption |
+| 2026-11-03 | #14392 | Report the expected-strokes cost of green-reading errors per putt class over a library |
+| 2026-11-03 | #14400 | Pin ci-standard hosted runner to ubuntu-24.04 so the ubuntu-latest 26.04 rollout stops ejecting merge groups (migration tracked in #14397) |
+| 2026-11-03 | #14401 | Document variance attribution study inputs, Sobol indices, and factor elimination |
 | 2026-11-03 | #14371 | Add theme tokens codemod tool, unit tests, CI ratchet in colorGuard.test.ts, and migrate Settings page to semantic tokens |
 | 2026-11-03 | #14386 | tests: remove the preload_engines workaround from the hand-consistency and palm-thumb pad parity integration suites; #14382's _protect_engine_modules fix makes it redundant. |
 | 2026-11-03 | #14382 | tests: _protect_engine_modules keeps genuine pinocchio/pydrake modules first imported during a test (their native extensions cannot be re-imported once discarded); stubs and src.engines additions are still discarded and replaced modules restored. |
