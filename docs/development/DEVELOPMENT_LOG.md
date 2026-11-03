@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14259 · Redesign Home With Pipeline and Truthful Engine Readiness
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14259
+- **Branch:** feat/14259-redesign-home
+- **PR:** #14410
+- **Paths:** see #14410
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`956f7fc7`; collated from changes/14259-redesign-home.md)
+- **Summary:** Redesign Home with pipeline and truthful engine readiness
+- **Next step:** Merge PR via auto-squash
+
 ### DL-#14094 · Record E1 Review Evidence, Arithmetic Limits and Pinned-Source Corrections Without Closing the Epic
 
 - **State:** in_review
