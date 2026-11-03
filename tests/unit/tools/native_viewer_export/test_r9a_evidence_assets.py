@@ -21,6 +21,13 @@ MUJOCO_STILLS = (
     "r9a_driver_mujoco_down_the_line_impact.png",
 )
 
+MESHCAT_STILLS = tuple(
+    f"r9a_driver_{engine}_{view}_{phase}.png"
+    for engine in ("drake", "pinocchio")
+    for view in ("face_on", "down_the_line")
+    for phase in ("address", "impact")
+)
+
 
 def test_r9a_render_script_and_receipt_exist() -> None:
     script = EVIDENCE / "render_drake_pinocchio_appearance.py"
@@ -36,6 +43,13 @@ def test_r9a_render_script_and_receipt_exist() -> None:
 
 def test_r9a_mujoco_reference_stills_are_present() -> None:
     for name in MUJOCO_STILLS:
+        path = EVIDENCE / name
+        assert path.is_file(), name
+        assert path.stat().st_size > 10_000, name
+
+
+def test_r9a_drake_and_pinocchio_stills_are_present() -> None:
+    for name in MESHCAT_STILLS:
         path = EVIDENCE / name
         assert path.is_file(), name
         assert path.stat().st_size > 10_000, name
