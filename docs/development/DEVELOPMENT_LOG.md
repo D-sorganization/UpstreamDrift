@@ -154,10 +154,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14175
 - **Branch:** claude/putting-variance-14175
-- **PR:** #14196
+- **PR:** #14196, #14401
 - **Paths:** see #14196
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-01 (`57a5a9f8`; collated from changes/14175-add-putting-analytics-variance-attributi.md)
+- **Last verified:** 2026-11-03 (`edfad820`; collated from changes/14175-document-variance-attribution-study-inpu.md)
 - **Summary:** Add Putting Analytics Variance Attribution and Error-Source Elimination
 - **Next step:** Merge after 14188
 
@@ -1248,6 +1248,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14398 · Pin Ci-Standard Hosted Runner to Ubuntu-24.04 so the Ubuntu-Latest 26.04 Rollout Stops Ejecting Merge Groups (Migration Tracked In #14397)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14398
+- **Branch:** merged via #14400
+- **PR:** #14400
+- **Paths:** see #14400
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`8e0c06d2`; collated from changes/14398-pin-ci-standard-hosted-runner-to-ubuntu.md)
+- **Summary:** Pin ci-standard hosted runner to ubuntu-24.04 so the ubuntu-latest 26.04 rollout stops ejecting merge groups (migration tracked in #14397)
+- **Next step:** Shipped in PR #14400.
 
 ### DL-#14252 · Add Theme Tokens Codemod Tool, Unit Tests, CI Ratchet in colorGuard.Test.Ts, and Migrate Settings Page to Semantic Tokens
 
