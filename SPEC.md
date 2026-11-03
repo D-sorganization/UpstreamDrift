@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-03 | #14382 | tests: _protect_engine_modules keeps genuine pinocchio/pydrake modules first imported during a test (their native extensions cannot be re-imported once discarded); stubs and src.engines additions are still discarded and replaced modules restored. |
 | 2026-11-03 | #14373 | Grip hand mesh gains a dorsum (metacarpal block) riding on the palm out past the knuckles, clear of the grip; OpenSim hand STLs and the GS3DX grip topology regenerated (slice 1 of 3) |
 | 2026-11-03 | #14379 | Palm-thumb pad parity across MuJoCo, Drake, Pinocchio and OpenSim: the shared pad law on each engine's grip-hand frame kinematics along a trail-wrist circle matches the spec reference within the shared parity tolerances |
 | 2026-11-02 | #14377 | Fix CANONICAL_ENGINE_TESTS path for opensim in test_fit_result_contract and add pytestmark unit. |
