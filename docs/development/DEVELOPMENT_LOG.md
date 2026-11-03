@@ -1249,6 +1249,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14385 · Tests: Remove the Preload_Engines Workaround From the Hand-Consistency and Palm-Thumb Pad Parity Integration Suites; #14382's _Protect_Engine_Modules Fix Makes It Redundant.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14385
+- **Branch:** merged via #14386
+- **PR:** #14386
+- **Paths:** see #14386
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`1152a0ce`; collated from changes/14385-remove-engine-preload.md)
+- **Summary:** tests: remove the preload_engines workaround from the hand-consistency and palm-thumb pad parity integration suites; #14382's _protect_engine_modules fix makes it redundant.
+- **Next step:** Shipped in PR #14386.
+
 ### DL-#14381 · Tests: _Protect_Engine_Modules Keeps Genuine Pinocchio/Pydrake Modules First Imported During a Test (Their Native Extensions Cannot Be Re-Imported Once Discarded); Stubs and Src.Engines Additions Are Still Discarded and Replaced Modules Restored.
 
 - **State:** shipped
