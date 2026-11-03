@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-03 | #14101 | Record E1 review evidence, arithmetic limits and pinned-source corrections without closing the epic |
 | 2026-11-03 | #14405 | Add report-only pr-body-lint pull_request_target caller (RM reusable workflow) and contract test. |
 | 2026-11-03 | #14408 | Title-case gate treats the middle dot as a heading segment boundary, so collated DL headings starting with an article pass |
 | 2026-11-03 | #14391 | Release companion-protected-main attestations retry once after a transient OIDC token failure |

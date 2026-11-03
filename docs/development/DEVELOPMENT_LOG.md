@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14094 · Record E1 Review Evidence, Arithmetic Limits and Pinned-Source Corrections Without Closing the Epic
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14094
+- **Branch:** chore/14094-e1-evidence-ledger
+- **PR:** #14101
+- **Paths:** see #14101
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`3e4c587a`; collated from changes/14094-record-e1-review-evidence-arithmetic-lim.md)
+- **Summary:** Record E1 review evidence, arithmetic limits and pinned-source corrections without closing the epic
+- **Next step:** Review the E1 documentation PR; retain E2-E8 evidence gates
+
 ### DL-#14337 · Document a Bounded Local-Only Grok Bot Simulation Caller Path
 
 - **State:** in_review
