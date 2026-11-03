@@ -17,6 +17,7 @@ export const ROUTE_TITLES: ReadonlyArray<readonly [string, string]> = [
   ['/simulation', 'Simulation'],
   ['/tools/model-explorer', 'Model Explorer'],
   ['/tools/putting-green', 'Putting Green'],
+  ['/tools/putting-analytics', 'Putting Analytics'],
   ['/tools/video-analyzer', 'Video Analyzer'],
   ['/tools/data-explorer', 'Data Explorer'],
   ['/tools/motion-capture', 'Motion Capture'],

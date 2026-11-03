@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 48 parity · 7 gap · 16 exempt (12 pending decision in #7460).
+**Summary:** 49 parity · 6 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -72,7 +72,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.native_viewer_export`<br>Native per-engine viewer video export (CLI) | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | — | — | Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673). |
 | `tools.necromatcher`<br>Historical Player Library And Source Review | ✅ parity | `src/tools/necromatcher/gui.py` | `src/api/routes/necromatcher.py` | `ui/src/pages/Necromatcher.tsx` | — |
 | `tools.pose_editing`<br>Pose Studio interactive pose editing | ⚪ exempt | `src/tools/pose_studio/__main__.py` | — | — | Interactive 3D pose editing and shared scene-bound native reference points/planes (#9942); desktop-only candidate pending #7460. — **pending decision (#7460)** |
-| `tools.putting_analytics`<br>Putting analytics studies | 🔴 gap | `src/tools/putting_analytics_gui/gui.py` | `src/api/routes/putting_analytics.py` | — | #14235 |
+| `tools.putting_analytics`<br>Putting analytics studies | ✅ parity | `src/tools/putting_analytics_gui/gui.py` | `src/api/routes/putting_analytics.py` | `ui/src/pages/PuttingAnalytics.tsx` | — |
 | `tools.putting_green`<br>Putting green simulation | ✅ parity | `src/tools/putting_green_gui/gui.py` | `src/api/routes/putting_green.py` | `ui/src/pages/PuttingGreen.tsx` | — |
 | `tools.putting_studio`<br>Standalone offline putting studio (HTML client of the shared putting core) | 🔴 gap | `src/tools/putting_green_gui/_scene_builder.py` | — | `src/apps/putting_studio/index.html` | #14200 |
 | `tools.rate_of_closure`<br>Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | 🔴 gap | `vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py` | `src/api/local_server.py` | `ui/src/pages/ImpactExplorer.tsx` | #11987 |
