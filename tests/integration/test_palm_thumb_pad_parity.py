@@ -20,7 +20,6 @@ from src.shared.python.grip_contact.parity import (
 )
 from tests.helpers.hand_consistency import (
     GATING_ENGINES,
-    preload_engines,
     spec_frame_poses,
 )
 from tests.helpers.palm_thumb_pad_parity import (
@@ -32,11 +31,6 @@ from tests.helpers.palm_thumb_pad_parity import (
 )
 
 pytestmark = pytest.mark.integration
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _engines_loaded() -> None:
-    preload_engines()
 
 
 @pytest.fixture(scope="module")
