@@ -239,7 +239,10 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          fetch-depth: 0
+          # Only pull_request diffs against the base; other events exit before
+          # any git call. A full every-ref fetch hung merge_group checkouts past
+          # the 10m budget (runs 41696155794, 41709436130).
+          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 1 }}
 
       - name: Detect non-docs changes
         id: detect

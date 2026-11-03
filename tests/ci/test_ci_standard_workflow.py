@@ -32,6 +32,20 @@ def test_event_classifier_drives_the_changed_paths_tier_output() -> None:
     assert step["env"]["EVENT_NAME"] == "${{ github.event_name }}"
 
 
+def test_changed_paths_fetches_full_history_only_for_pull_requests() -> None:
+    # Non-PR events never diff, and a full every-ref fetch hung merge_group
+    # checkouts past the 10-minute job budget.
+    changes = workflow()["jobs"]["changed-paths"]
+    checkout = next(
+        step
+        for step in changes["steps"]
+        if str(step.get("uses", "")).startswith("actions/checkout@")
+    )
+    assert checkout["with"]["fetch-depth"] == (
+        "${{ github.event_name == 'pull_request' && 0 || 1 }}"
+    )
+
+
 @pytest.mark.parametrize("job", sorted(FULL_TIER_JOBS))
 def test_heavy_jobs_run_only_for_full_tier_code_changes(job: str) -> None:
     condition = workflow()["jobs"][job]["if"]
