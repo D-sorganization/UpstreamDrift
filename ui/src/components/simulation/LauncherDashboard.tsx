@@ -548,18 +548,18 @@ export function LauncherDashboard({
             {/* Scrollable tile grid */}
             <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-3 md:py-6" id="tile-grid-container">
                 {/* Resume Panel (#14259) */}
-                <section aria-label="Resume Work" className="mb-6 rounded-xl border border-gray-700/60 bg-gradient-to-r from-blue-950/30 to-gray-800/50 p-4">
+                <section aria-label="Resume Work" className="mb-6 rounded-xl border border-token-border bg-gradient-to-r from-surface-muted to-surface p-4">
                     {launchedWindows.length > 0 ? (
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <div>
-                                <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-400">Resume Session</span>
+                                <span className="text-[11px] font-semibold uppercase tracking-wider text-primary">Resume Session</span>
                                 <h3 className="text-base font-semibold text-white">{launchedWindows[0].name}</h3>
-                                <p className="text-xs text-gray-400">Active background session · {launchedWindows[0].launchCount} launch{launchedWindows[0].launchCount === 1 ? '' : 'es'}</p>
+                                <p className="text-xs text-token-muted">Active background session · {launchedWindows[0].launchCount} launch{launchedWindows[0].launchCount === 1 ? '' : 'es'}</p>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => onFocusLaunchedTile(launchedWindows[0].tileId)}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md shadow-blue-600/25"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-medium transition-colors shadow-md shadow-primary/25"
                             >
                                 <Play className="w-4 h-4" aria-hidden="true" />
                                 Resume Session
@@ -568,15 +568,15 @@ export function LauncherDashboard({
                     ) : (
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-400">Start Your Workflow</span>
+                                <span className="text-[11px] font-semibold uppercase tracking-wider text-primary">Start Your Workflow</span>
                                 <h3 className="text-base font-semibold text-white">Import Data to Begin Analysis</h3>
-                                <p className="text-xs text-gray-400">Load recorded swing video or 3D optical motion capture files to initialize the pipeline.</p>
+                                <p className="text-xs text-token-muted">Load recorded swing video or 3D optical motion capture files to initialize the pipeline.</p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Link
                                     to="/tools/video-analyzer"
                                     aria-label="Import swing video"
-                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 rounded-lg text-xs font-medium transition-colors"
+                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary/30 hover:bg-primary/50 text-token-text border border-primary/40 rounded-lg text-xs font-medium transition-colors"
                                 >
                                     <Download className="w-3.5 h-3.5" aria-hidden="true" />
                                     Import swing video
@@ -584,7 +584,7 @@ export function LauncherDashboard({
                                 <Link
                                     to="/tools/motion-capture"
                                     aria-label="Import C3D / OpenCap"
-                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-700/50 hover:bg-gray-700/80 text-gray-200 border border-gray-600/60 rounded-lg text-xs font-medium transition-colors"
+                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-surface-muted hover:bg-surface-raised text-token-text border border-token-border rounded-lg text-xs font-medium transition-colors"
                                 >
                                     <Download className="w-3.5 h-3.5" aria-hidden="true" />
                                     Import C3D / OpenCap
@@ -597,30 +597,30 @@ export function LauncherDashboard({
                 {/* Biomechanical Modeling Pipeline Cards (#14259) */}
                 <section aria-label="Biomechanical Modeling Pipeline" className="mb-8">
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-semibold text-gray-200 uppercase tracking-wider flex items-center gap-2">
-                            <Activity className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                        <h2 className="text-sm font-semibold text-token-text uppercase tracking-wider flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-primary" aria-hidden="true" />
                             Biomechanical Modeling Pipeline
                         </h2>
-                        <span className="text-xs text-gray-400 hidden sm:inline">Capture → Estimate → Model & Match → Optimize → Compare</span>
+                        <span className="text-xs text-token-muted hidden sm:inline">Capture → Estimate → Model & Match → Optimize → Compare</span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                         {PIPELINE_STEPS.map((step) => (
                             <Link
                                 key={step.id}
                                 to={step.route}
-                                className="group relative flex flex-col justify-between p-3.5 rounded-xl border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/80 hover:border-blue-500/50 transition-all hover:-translate-y-0.5"
+                                className="group relative flex flex-col justify-between p-3.5 rounded-xl border border-token-border bg-surface hover:bg-surface-raised hover:border-primary/50 transition-all hover:-translate-y-0.5"
                             >
                                 <div>
                                     <div className="flex items-center justify-between mb-1.5">
-                                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300">
+                                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary">
                                             STEP {step.step}
                                         </span>
-                                        <ChevronRight className="w-3.5 h-3.5 text-gray-500 group-hover:text-blue-400 transition-colors" aria-hidden="true" />
+                                        <ChevronRight className="w-3.5 h-3.5 text-token-muted group-hover:text-primary transition-colors" aria-hidden="true" />
                                     </div>
-                                    <h3 className="text-sm font-semibold text-white group-hover:text-blue-200 transition-colors">{step.title}</h3>
-                                    <p className="text-xs text-gray-400">{step.desc}</p>
+                                    <h3 className="text-sm font-semibold text-white group-hover:text-primary transition-colors">{step.title}</h3>
+                                    <p className="text-xs text-token-muted">{step.desc}</p>
                                 </div>
-                                <div className="mt-3 pt-2 border-t border-gray-700/40 flex items-center gap-1.5 text-[11px] text-gray-400">
+                                <div className="mt-3 pt-2 border-t border-token-border flex items-center gap-1.5 text-[11px] text-token-muted">
                                     <span className={`w-1.5 h-1.5 rounded-full ${step.ready ? 'bg-emerald-400' : 'bg-amber-400'}`} />
                                     <span>{step.prereq}</span>
                                 </div>
@@ -630,31 +630,31 @@ export function LauncherDashboard({
                 </section>
 
                 {/* Physics Engines & Truthful Readiness Table (#14259) */}
-                <section aria-label="Physics Engines & Readiness" className="mb-8 rounded-xl border border-gray-700/60 bg-gray-800/40 p-4">
+                <section aria-label="Physics Engines & Readiness" className="mb-8 rounded-xl border border-token-border bg-surface p-4">
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-semibold text-gray-200 uppercase tracking-wider flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                        <h2 className="text-sm font-semibold text-token-text uppercase tracking-wider flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-primary" aria-hidden="true" />
                             Physics Engines & Readiness
                         </h2>
-                        <span className="text-xs text-gray-400">Live backend availability status</span>
+                        <span className="text-xs text-token-muted">Live backend availability status</span>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-gray-300">
+                        <table className="w-full text-left text-sm text-token-text">
                             <thead>
-                                <tr className="border-b border-gray-700/60 text-xs font-semibold uppercase text-gray-400">
+                                <tr className="border-b border-token-border text-xs font-semibold uppercase text-token-muted">
                                     <th scope="col" className="py-2 pr-4">Engine</th>
                                     <th scope="col" className="py-2 pr-4 hidden sm:table-cell">Specialization</th>
                                     <th scope="col" className="py-2 pr-4">Status</th>
                                     <th scope="col" className="py-2 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-700/40">
+                            <tbody className="divide-y divide-token-border">
                                 {ENGINE_ROWS.map((row) => {
                                     const readiness = getEngineReadiness(row, engineStatuses);
                                     return (
                                         <tr key={row.id} className="hover:bg-white/[0.02]">
                                             <td className="py-2.5 pr-4 font-medium text-white">{row.name}</td>
-                                            <td className="py-2.5 pr-4 text-xs text-gray-400 hidden sm:table-cell">{row.type}</td>
+                                            <td className="py-2.5 pr-4 text-xs text-token-muted hidden sm:table-cell">{row.type}</td>
                                             <td className="py-2.5 pr-4">
                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${readiness.color}`}>
                                                     {readiness.status}
@@ -665,7 +665,7 @@ export function LauncherDashboard({
                                                     <button
                                                         type="button"
                                                         onClick={() => onLaunchTile(row.tileId)}
-                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-blue-600/30 text-blue-200 hover:bg-blue-600/50 border border-blue-500/40 transition-colors"
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-primary/30 text-token-text hover:bg-primary/50 border border-primary/40 transition-colors"
                                                     >
                                                         Open
                                                     </button>
@@ -673,7 +673,7 @@ export function LauncherDashboard({
                                                     <button
                                                         type="button"
                                                         onClick={onShowHelp}
-                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-gray-700/40 text-gray-300 hover:bg-gray-700/70 border border-gray-600/50 transition-colors"
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-surface-muted text-token-text hover:bg-surface-raised border border-token-border transition-colors"
                                                     >
                                                         How to install
                                                     </button>
@@ -690,7 +690,7 @@ export function LauncherDashboard({
                 {/* Search & All Tools (#14259) */}
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div className="relative flex-1 min-w-[240px] max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" aria-hidden="true" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-token-muted pointer-events-none" aria-hidden="true" />
                         <input
                             type="search"
                             role="searchbox"
@@ -698,10 +698,10 @@ export function LauncherDashboard({
                             placeholder="Search all 79 tools and utilities..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 bg-gray-800/80 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="w-full pl-9 pr-3 py-2 bg-surface-raised border border-token-border rounded-lg text-sm text-white placeholder-token-muted focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                     </div>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-token-muted">
                         Showing {filteredTiles.length} of {tiles.length} tools
                     </span>
                 </div>

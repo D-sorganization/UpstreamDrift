@@ -108,7 +108,7 @@ export function DashboardPage() {
         <WorkspaceShell
             leftPanel={<WorkspaceSidebar />}
             leftPanelLabel="Workspaces"
-            className="bg-gray-900"
+            className="bg-canvas"
         >
             <LauncherDashboard
                 tiles={tiles}
