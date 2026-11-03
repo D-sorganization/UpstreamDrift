@@ -949,17 +949,17 @@
     {
       "feature_id": "tools.putting_analytics",
       "title": "Putting analytics studies",
-      "status": "gap",
+      "status": "parity",
       "pyqt": "src/tools/putting_analytics_gui/gui.py",
       "api": "src/api/routes/putting_analytics.py",
-      "web": null,
-      "issue": 14235,
+      "web": "ui/src/pages/PuttingAnalytics.tsx",
+      "issue": null,
       "reason": null,
       "pending_decision": false,
       "tiles": [
         "putting_analytics"
       ],
-      "notes": "Desktop tool over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The /tools/putting-analytics API routes serve the same studies.",
+      "notes": "Desktop tool and web page over the shared putting service (best aim and pace, misread cost, putt-class library), the same service the MCP putting tools call. The web page posts to the /tools/putting-analytics API routes and shows the desktop tool's rows (#14235).",
       "id": "tools.putting_analytics"
     },
     {
@@ -3381,8 +3381,8 @@
   },
   "inputs": {
     "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
-    "src/config/launcher_manifest.json": "344fd2a8afc251e632fcfa66e5213e5eef3a30b03c681d11cb3ce66e2894ee33",
-    "src/config/feature_parity.json": "fb709511c481cfdd50674d7568224163736c7b7b47540f8889114d95f80fa360",
+    "src/config/launcher_manifest.json": "59cf9a1547300feaae6a3a954ff7375f58725645ebf2f5f1071b7722f4ab7ac2",
+    "src/config/feature_parity.json": "94992ca38a2ad523e689488f5cfcd82b31599e50d816ed2ea612582475e43817",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

@@ -121,6 +121,11 @@ const LiftBaselinePage = lazy(() =>
     default: m.LiftBaselinePage,
   })),
 );
+const PuttingAnalyticsPage = lazy(() =>
+  import("./pages/PuttingAnalytics").then((m) => ({
+    default: m.PuttingAnalyticsPage,
+  })),
+);
 const BunkerWorkbenchPage = lazy(() =>
   import("./pages/BunkerWorkbench").then((m) => ({
     default: m.BunkerWorkbenchPage,
@@ -181,6 +186,11 @@ export function RoutedContent() {
           />
           {/* Lift Baseline (LIFT-8 slice 3, #11748) */}
           <Route path="/tools/lift-baseline" element={<LiftBaselinePage />} />
+          {/* Putting Analytics studies (#14235) */}
+          <Route
+            path="/tools/putting-analytics"
+            element={<PuttingAnalyticsPage />}
+          />
           {/* BunkerShot3D designer workbench (#9545) */}
           <Route
             path="/tools/bunker-workbench"
