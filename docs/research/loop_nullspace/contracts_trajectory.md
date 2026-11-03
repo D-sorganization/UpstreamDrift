@@ -75,18 +75,24 @@ Implemented in `loop_nullspace/allocation.py` (types in `allocation_spec.py`):
 
 Preserve public signatures of `ContactForceAllocator` and
 `MultiEngineTorqueAllocator`; map `HARD_ZERO_TRAIL` to the NSX-15 trail
-`zero_side_solve`. An `INCONSISTENT` frame is reported with its residual.
+consistency shim (`check_zero_side_consistency`). An `INCONSISTENT` frame is
+reported with its residual (full `zero_side_solve` needs a
+`ClosedLoopSnapshot`, which the legacy per-frame signature does not carry).
 Golden: `planar_two_arm_full.zero_side`.
 
-Implemented as follows (the first four items are the contract; the last
-records what was deliberately not done).
+Implemented as follows (ADR-0054 D5: one conic allocation path for legacy
+contact frames).
 
 - `loop_nullspace/qp_core.py` is the one place that turns "quadratic, equality
   rows, inequality rows, box, exact Coulomb cones" into `solve_socp`
   (Clarabel). Lower and upper bounds that coincide become equality rows.
+- `feasible_set_from_frame` assembles each frame's scaled constraints;
+  `allocate_contact_frame` is the single solve entry used by both
+  `ContactForceAllocator.allocate` and
+  `MultiEngineTorqueAllocator.allocate_frame` / trajectory loops (NSX-24 DRY).
 - `ContactForceAllocator.allocate` solves the same scaled QP it always built
   (diagonal weights, 8-facet inscribed friction pyramid, actuator and root
-  slack penalties) through `solve_qp`. SLSQP agrees with the conic optimum to
+  slack penalties) through that path. SLSQP agrees with the conic optimum to
   about 1e-13 relative on the parity fixtures; where SLSQP stops short, the
   conic objective is no larger and the result is feasible.
 - `redistribute_forces` and `redistribute_trajectory` solve one convex QP in the
@@ -99,13 +105,11 @@ records what was deliberately not done).
   and the independent audit decides `feasible`. A missing `clarabel` raises
   `ImportError` naming the `loop-nullspace` extra (rule R11); there is no
   fallback optimizer.
-- Not done: `HARD_ZERO_TRAIL` is not routed through NSX-15 `zero_side_solve`.
-  The legacy signature carries only `tau_rnea` and the Jacobians, not a
-  `ClosedLoopSnapshot`, so the three-case diagnostic has no inputs. The
-  existing slack formulation already reports `INFEASIBLE_HARD_ZERO_TRAIL`
-  rather than hiding the inconsistency. The adapter over `allocate_trajectory`
-  and `FeasibleSet` requires snapshots and is the next step, together with
-  removing the shims.
+- NSX-23 `allocate_trajectory` / `FeasibleSet` remains the trajectory API for
+  decomposition-based null-space sets (capacity effort, rate, gross power). It
+  is not wired into the legacy contact Jacobian layout because the objective
+  weights every contact, grip and slack variable; shim removal is a later
+  release (#12567 out of scope).
 
 ## NSX-25 Pareto and Probes (#12568)
 
