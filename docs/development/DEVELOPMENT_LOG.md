@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14275 · \ Define and Implement Clean-Environment Install Smoke Test\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14275
+- **Branch:** feat/14275-install-smoke
+- **PR:** #14402
+- **Paths:** see #14402
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`8823f013`; collated from changes/14275-define-and-implement-clean-environment-i.md)
+- **Summary:** \ Define and implement clean-environment install smoke test\
+- **Next step:** \Merge the PR.\
+
+### DL-#14273 · Versioned Releases With Verifiable Artifacts and SBOM
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14273
+- **Branch:** feat/14273-release-sbom
+- **PR:** #14413
+- **Paths:** see #14413
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-03 (`90eadd46`; collated from changes/14273-versioned-releases-and-sbom.md)
+- **Summary:** Versioned releases with verifiable artifacts and SBOM
+- **Next step:** Merge the PR.
+
 ### DL-#14259 · Redesign Home With Pipeline and Truthful Engine Readiness
 
 - **State:** in_review
