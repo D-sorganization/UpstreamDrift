@@ -1,11 +1,8 @@
 """C2 (#14558) acceptance on the committed best-fit driver rollout.
 
-The reference is independent of ``evaluate_rollout``: the club body position is
-differentiated by central differences (not the MuJoCo Jacobian transport used by
-the adapter) and speed/AoA/path/face/strike are computed by hand from the
-definitions in ``impact_parameters/__init__``.  The model is the full-body tree
-(``anthro_driver_seeds``), so the timing is for forward kinematics on the whole
-tree.
+The reference is independent of ``evaluate_rollout``: exact directional-derivative
+velocity and hand-written GCV-15 definitions, on the full-body tree (timing
+covers forward kinematics of the whole tree).
 """
 
 from __future__ import annotations

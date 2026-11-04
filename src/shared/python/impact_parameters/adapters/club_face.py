@@ -202,9 +202,13 @@ def club_face_spec_from_spec(
     grip = grip - float(grip @ normal) * normal
     grip /= np.linalg.norm(grip)
     toe = np.cross(normal, grip)
+
+    def vec3(v: Any) -> tuple[float, float, float]:
+        return (float(v[0]), float(v[1]), float(v[2]))
+
     return ClubFaceSpec(
-        face_center_body_m=tuple(float(x) for x in centre[:3]),
-        normal_body=tuple(float(x) for x in normal),
-        toe_body=tuple(float(x) for x in toe),
-        grip_body=tuple(float(x) for x in grip),
+        face_center_body_m=vec3(centre),
+        normal_body=vec3(normal),
+        toe_body=vec3(toe),
+        grip_body=vec3(grip),
     )
