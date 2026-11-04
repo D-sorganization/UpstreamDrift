@@ -377,3 +377,29 @@ def test_read_green_on_a_flat_green_aims_at_the_target(client: TestClient) -> No
     assert data["aim_point"] == pytest.approx([8.0, 9.0], abs=0.01)
     assert data["recommended_speed"] > 0.0
     assert all(e == 0.0 for e in data["elevations"])
+
+
+def test_counter_torque_serves_the_core_stroke_series(client: TestClient) -> None:
+    """Golden parity (#14469): every column is the core couple model's value."""
+    from dataclasses import asdict
+
+    from src.shared.python.putting_dynamics import counter_torque as ct
+
+    body = {"preload_nm": 0.9, "noise_scale": 0.4, "putter": "cb", "n_points": 30}
+    response = client.post("/tools/putting-green/counter-torque", json=body)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    inputs = ct.CounterTorqueInputs(preload_nm=0.9, noise_scale=0.4, putter="cb")
+    core = [asdict(s) for s in ct.stroke_series(inputs, n_points=30)]
+    assert data["putter_name"] == ct.PUTTER_SPECS["cb"].name
+    for key, column in data["samples"].items():
+        assert column == pytest.approx([row[key] for row in core]), key
+    assert set(data["samples"]) == set(core[0])
+
+
+@pytest.mark.parametrize(
+    "body", [{"preload_nm": -1.0}, {"putter": "anser"}, {"n_points": 0}]
+)
+def test_counter_torque_rejects_bad_inputs(client: TestClient, body: dict) -> None:
+    response = client.post("/tools/putting-green/counter-torque", json=body)
+    assert response.status_code in (400, 422), response.text
