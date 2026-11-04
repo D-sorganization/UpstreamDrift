@@ -218,3 +218,52 @@ def test_degenerate_grid_resolution_raises() -> None:
 
 def test_returns_putt_scene_instance() -> None:
     assert isinstance(build_putt_scene(PuttConfig()), PuttScene)
+
+
+# ---------------------------------------------------------------------------
+# Strike location and putter balance (#14461)
+# ---------------------------------------------------------------------------
+
+
+def test_scene_carries_the_impact_report_of_its_strike() -> None:
+    # Golden parity: the scene's readout is the shared strike() at that offset.
+    from src.shared.python.putting_dynamics import strike
+
+    config = PuttConfig(putter_speed_ms=2.0, impact_toe_m=0.012)
+    scene = build_putt_scene(config)
+    want = strike(PutterState.typical(2.0), impact_toe_m=0.012)
+    assert scene.impact == want
+    assert scene.launch_speed_ms == pytest.approx(want.horizontal_speed_mps, rel=1e-9)
+    assert scene.skid_distance_m is not None and scene.skid_distance_m > 0.0
+
+
+def test_a_toe_strike_rolls_shorter_and_twists_the_face() -> None:
+    centred = build_putt_scene(PuttConfig(putter_speed_ms=2.0))
+    toe = build_putt_scene(PuttConfig(putter_speed_ms=2.0, impact_toe_m=0.02))
+    heel = build_putt_scene(PuttConfig(putter_speed_ms=2.0, impact_toe_m=-0.02))
+    assert toe.total_roll_m < centred.total_roll_m
+    assert heel.total_roll_m < centred.total_roll_m
+    assert toe.impact.face_twist_rad_s * heel.impact.face_twist_rad_s < 0.0
+
+
+def test_a_balance_preset_sets_the_putter_head() -> None:
+    from src.shared.python.putting_dynamics import balance_preset, strike
+
+    scene = build_putt_scene(
+        PuttConfig(putter_speed_ms=2.0, impact_toe_m=0.01, balance_type="toe_hang")
+    )
+    want = strike(balance_preset("toe_hang").putter(2.0), impact_toe_m=0.01)
+    assert scene.impact == want
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"impact_toe_m": 0.05},
+        {"impact_toe_m": math.nan},
+        {"balance_type": "blade"},
+    ],
+)
+def test_bad_strike_controls_are_rejected(overrides: dict[str, object]) -> None:
+    with pytest.raises(ValueError):
+        build_putt_scene(replace(PuttConfig(), **overrides))
