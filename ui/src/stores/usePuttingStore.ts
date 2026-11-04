@@ -28,6 +28,7 @@ export const DEFAULT_PUTT_3D_PARAMETERS: Putt3DSimulationRequest = {
   random_seed: 8345,
   hole_x_m: 3,
   hole_y_m: 0,
+  aim_heading_deg: 0,
 };
 
 interface PuttingState {
