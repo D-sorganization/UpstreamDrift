@@ -1,5 +1,4 @@
 /** Batch dispersion and make-% spread from the shared putting core (#14460). */
-import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 
 import { runDispersion, runMakeSpread } from "@/api/puttingClient";
@@ -9,7 +8,6 @@ import {
   BATCH_SIZES,
   NOISE_CHANNELS,
   SPREAD_N,
-  defaultNoise,
   dispersionArgs,
   type NoiseChannel,
 } from "@/utils/dispersion";
@@ -162,7 +160,8 @@ function SpreadChart({
 export function DispersionPanel() {
   const parameters = usePuttingStore((state) => state.parameters);
   const system = usePuttingStore((state) => state.unitSystem);
-  const [noise, setNoise] = useState(defaultNoise);
+  const noise = usePuttingStore((state) => state.noise);
+  const setNoise = usePuttingStore((state) => state.setNoise);
   const batch = useMutation({ mutationFn: runDispersion });
   const spread = useMutation({ mutationFn: runMakeSpread });
   const busy = batch.isPending || spread.isPending;
@@ -191,10 +190,10 @@ export function DispersionPanel() {
                 step="any"
                 value={Number((noise[channel.key] / perShown).toFixed(4))}
                 onChange={(event) =>
-                  setNoise((current) => ({
-                    ...current,
+                  setNoise({
+                    ...noise,
                     [channel.key]: Number(event.target.value) * perShown,
-                  }))
+                  })
                 }
                 className="mt-1 w-full rounded border px-2 py-1"
                 style={buttonStyle}

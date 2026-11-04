@@ -1,0 +1,48 @@
+{
+  "_comment": "Pinned to the shared putting core (#14468); tests/unit/shared_python/test_strokes_gained_ui_golden.py checks it against service_sg.",
+  "study": {
+    "n": 200,
+    "paces_ft": [0.5, 1.5, 3.0],
+    "distances_ft": [
+      0.5, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0, 15.0, 20.0, 30.0, 45.0
+    ]
+  },
+  "case": {
+    "parameters": {
+      "hole_x_m": 3.048,
+      "grade_percent": 2,
+      "downhill_aspect_deg": -90
+    },
+    "rest_m": [3.2, 0.3],
+    "args": {
+      "distance_ft": 10.0,
+      "grade_pct": 2.0,
+      "aspect_deg": -90.0,
+      "stimp": 10.0,
+      "seed": 8345,
+      "face_sd_deg": 1.5,
+      "path_sd_deg": 2.0,
+      "speed_cv": 0.08,
+      "strike_toe_sd_mm": 0.0,
+      "grade_rel_sd": 0.0,
+      "aspect_sd_deg": 0.0,
+      "stimp_rel_sd": 0.0,
+      "holed": false,
+      "leave_ft": 1.1033772354782097
+    },
+    "small_study": {
+      "n": 8,
+      "paces_ft": [1.5],
+      "distances_ft": [1.0, 4.0, 10.0]
+    },
+    "report": {
+      "distance_ft": 10.0,
+      "curve": {
+        "distances_ft": [1.0, 4.0, 10.0],
+        "expected_putts": [1.0, 1.2558316061804258, 1.788595157651523]
+      },
+      "expected_putts": 1.788595157651523,
+      "sg_player": -0.22022056374677113
+    }
+  }
+}
