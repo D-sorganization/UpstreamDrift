@@ -41,6 +41,7 @@ FACTORS: tuple[str, ...] = (
     "face",
     "path",
     "speed",
+    "strike",
     "read_grade",
     "read_aspect",
     "read_stimp",

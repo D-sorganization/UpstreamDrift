@@ -55,6 +55,7 @@ from .collision import (
     LOFT_SWEEP_MIN_DEG,
     centre_strike_speed_ratio,
     effective_head_mass,
+    off_centre_speed_retention,
     strike,
     sweep_dynamic_loft,
 )
@@ -181,6 +182,7 @@ __all__ = [
     "m_to_yards",
     "measure_stimp_ft",
     "mps_to_mph",
+    "off_centre_speed_retention",
     "ramp_release_speed_mps",
     "read_line",
     "rolling_mu",

@@ -37,7 +37,7 @@ def test_fixture_covers_the_whole_grid(committed: dict[str, Any]) -> None:
     assert keys == {(d, s) for d in gen.DISTANCES_FT for s in gen.SLOPES_PCT}
     assert committed["meta"]["profile"] == "tour-average"
     assert committed["meta"]["factors"] == list(gen.FACTORS)
-    assert "strike" not in committed["meta"]["factors"]  # core channel lands in #14461
+    assert "strike" in committed["meta"]["factors"]  # modelled since #14461
 
 
 def test_fixture_is_the_rendering_of_its_own_data(committed: dict[str, Any]) -> None:
@@ -66,6 +66,7 @@ def test_cell_args_use_the_tour_average_player() -> None:
     assert gen.cell_args(10.0, 0.0)["classes"] == [{"distance_ft": 10.0}]
     assert args["face_sd_deg"] == pytest.approx(1.7234)
     assert args["factors"] == list(gen.FACTORS)
+    assert "strike" in args["factors"]  # modelled since #14461
 
 
 def test_gains_are_rounded_per_factor() -> None:
@@ -106,6 +107,7 @@ def test_page_loads_the_fixture_and_shows_core_channels() -> None:
         "chLossFace",
         "chLossPath",
         "chLossSpeed",
+        "chLossStrike",
         "chLossReadGrade",
         "chLossReadAspect",
         "chLossReadStimp",

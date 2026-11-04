@@ -81,9 +81,38 @@ def test_study_is_seeded(report: dict[str, Any]) -> None:
     assert service_variance.variance_study(_args()) == report
 
 
-def test_default_factors_are_the_modelled_channels() -> None:
-    assert "strike" not in service_variance.MODELLED_FACTORS
-    assert service_variance.factors_from_args({}) == service_variance.MODELLED_FACTORS
+def test_strike_is_a_modelled_channel_by_default_only_when_it_has_spread() -> None:
+    # Toe strike costs ball speed through the collision model (#14461). A
+    # centred striker's default study keeps its earlier factor set and draws.
+    modelled = service_variance.MODELLED_FACTORS
+    assert "strike" in modelled
+    centred = service_variance.factors_from_args({})
+    assert centred == tuple(f for f in modelled if f != "strike")
+    assert service_variance.factors_from_args({"strike_toe_sd_mm": 5.0}) == modelled
+
+
+def test_strike_spread_reaches_the_profile() -> None:
+    profile = service_variance.profile_from_args({"strike_toe_sd_mm": 5.17})
+    assert profile.stroke.strike_toe_sd_mm == pytest.approx(5.17)
+    assert service_variance.profile_from_args({}).stroke.strike_toe_sd_mm == 0.0
+
+
+def test_a_toe_striker_gains_from_removing_strike_error() -> None:
+    args = _args(
+        classes=[{"distance_ft": 25.0}],
+        speed_cv=0.0,
+        face_sd_deg=0.0,
+        path_sd_deg=0.0,
+        grade_rel_sd=0.0,
+        strike_toe_sd_mm=12.0,
+        factors=["strike", "face"],
+    )
+    gains = {
+        row["factor"]: row["gain_removed"]
+        for row in service_variance.variance_study(args)["per_round"]["factors"]
+    }
+    assert gains["strike"] > 0.0
+    assert gains["face"] == 0.0
 
 
 def test_non_finite_numbers_become_null() -> None:
@@ -101,7 +130,8 @@ def test_non_finite_numbers_become_null() -> None:
         {"face_weight": 1.5},
         {"pace_ft_past": 20.0},
         {"factors": []},
-        {"factors": ["strike"]},
+        {"strike_toe_sd_mm": -1.0},
+        {"strike_toe_sd_mm": 30.0},
         {"factors": ["face", "face"]},
         {"factors": ["wind"]},
         {"base_samples": 1},
