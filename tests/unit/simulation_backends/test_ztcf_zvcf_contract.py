@@ -130,11 +130,6 @@ def test_control_is_linear_in_torque(name: str, atol: float) -> None:
         )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=(TypeError, AssertionError),
-    reason="#14494 restores zvcf_acceleration = M^-1 tau (control)",
-)
 def test_zvcf_is_the_control_component() -> None:
     backend = _backend("ode")
     for q, v, tau in _samples():

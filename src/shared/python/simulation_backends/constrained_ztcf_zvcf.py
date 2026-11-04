@@ -7,9 +7,10 @@ re-solved for every counterfactual through the KKT projector
 (:func:`~src.shared.python.loop_nullspace.constrained_dynamics.constrained_acceleration`),
 never held::
 
-    ZTCF: tau = 0, state (q, v) kept            -> a_ZTCF
-    ZVCF: v = 0 and tau = 0, configuration kept -> a_ZVCF
-    control-induced total: a(tau) - a_ZTCF = P_c tau
+    ZTCF: tau = 0, state (q, v) kept            -> a_ZTCF (drift)
+    ZVCF: control component, a(tau) - a_ZTCF = P_c tau
+          = M^-1 (tau + J^T (lambda - lambda_0))   (#14494)
+    zero-velocity, zero-torque: v = 0 and tau = 0  -> report field ``zvcf``
 
 Names follow ``model_aware_matching.tex`` (Section "ZTCF and ZVCF as exact
 projections"): both are *pointwise*; the control-preserved zero-velocity
@@ -152,8 +153,11 @@ class ConstrainedCounterfactuals:
 
     Attributes:
         ztcf: ``a`` with ``tau = 0`` at the measured ``(q, v)``.
-        zvcf: ``a`` with ``v = 0`` and ``tau = 0`` at the measured ``q``.
-        control_total: ``a(tau) - a_ZTCF = P_c tau`` (``INVARIANT``).
+        zvcf: ``a`` with ``v = 0`` and ``tau = 0`` at the measured ``q``; the
+            zero-velocity, zero-torque acceleration under its pre-#14494 name.
+            ZVCF proper (the control component) is ``control_total``.
+        control_total: ``a(tau) - a_ZTCF = P_c tau`` (``INVARIANT``), equal to
+            ``ztcf_zvcf.zvcf_acceleration(provider, q, tau)``.
         per_actuator: column ``i`` is ``P_c e_i tau_i`` (``FAMILY_DEPENDENT``);
             rows sum to ``control_total``.
         reaction_ztcf, reaction_zvcf: re-solved closure reactions.
