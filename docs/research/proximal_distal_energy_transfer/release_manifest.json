@@ -845,6 +845,10 @@
       "sha256": "77a0088908653948bc9bacf65f9f4942205d9ff3067d6126c38a61889bb9e76d",
       "bytes": 133391
     },
+    "docs/research/proximal_distal_energy_transfer/data/figure_run_map.json": {
+      "sha256": "4dc0fe35158a3980cae98ec20223db17453ffa31a1acf6259c351f94cbd35610",
+      "bytes": 93672
+    },
     "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json": {
       "sha256": "671a1fe6fe7de08fe2a044d354b5292e3e17c66d0a5da19fd121f17395aeebfe",
       "bytes": 127204
