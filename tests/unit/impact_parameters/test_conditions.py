@@ -87,15 +87,13 @@ def test_matches_existing_extractor_on_mujoco_rollout():
         impact_index=150,
         use_tools=False,
     )
-    assert got.clubhead_speed_mph == pytest.approx(ref.clubhead_speed_mph, abs=1e-9)
-    assert got.attack_angle_deg == pytest.approx(ref.attack_angle_deg, abs=1e-9)
-    assert got.club_path_deg == pytest.approx(ref.club_path_deg, abs=1e-9)
-    assert got.face_angle_deg == pytest.approx(ref.face_angle_deg, abs=1e-9)
+    assert got.speed_mph == pytest.approx(ref.clubhead_speed_mph, abs=1e-9)
+    assert got.aoa_deg == pytest.approx(ref.attack_angle_deg, abs=1e-9)
+    assert got.path_deg == pytest.approx(ref.club_path_deg, abs=1e-9)
+    assert got.face_deg == pytest.approx(ref.face_angle_deg, abs=1e-9)
     # analytic: speed = omega * radius at the face centre (|r| = 1.0 m horizontal)
-    assert got.clubhead_speed_mph == pytest.approx(
-        OMEGA * 1.0 * 2.2369362920544, rel=1e-3
-    )
-    assert got.attack_angle_deg == pytest.approx(0.0, abs=1e-6)
+    assert got.speed_mph == pytest.approx(OMEGA * 1.0 * 2.2369362920544, rel=1e-3)
+    assert got.aoa_deg == pytest.approx(0.0, abs=1e-6)
 
 
 def test_evaluation_under_one_second_per_rollout():
@@ -125,7 +123,7 @@ def test_path_sign_positive_is_in_to_out(velocity, expected_path):
             use_tools=False,
         )
     )
-    assert cond.club_path_deg == pytest.approx(expected_path, abs=1e-9)
+    assert cond.path_deg == pytest.approx(expected_path, abs=1e-9)
 
 
 @pytest.mark.parametrize(("normal_x", "sign"), [(0.0, 0.0), (-0.1, 1.0), (0.1, -1.0)])
@@ -136,14 +134,11 @@ def test_face_sign_positive_is_open(normal_x, sign):
             _series((0.0, -40.0, 0.0), normal), FRAME, impact_index=100, use_tools=False
         )
     )
-    assert (
-        math.copysign(1.0, cond.face_angle_deg) == math.copysign(1.0, sign) or sign == 0
-    )
-    assert cond.face_angle_deg == pytest.approx(
+    assert math.copysign(1.0, cond.face_deg) == math.copysign(1.0, sign) or sign == 0
+    assert cond.face_deg == pytest.approx(
         sign * math.degrees(math.atan2(abs(normal_x), 1.0)), abs=1e-9
     )
     # face-to-path = face - path (path is 0 here)
-    assert cond.face_to_path_deg == pytest.approx(cond.face_angle_deg, abs=1e-9)
 
 
 def test_unobservable_face_reports_none_with_reason():
@@ -158,8 +153,8 @@ def test_unobservable_face_reports_none_with_reason():
     cond = ImpactConditions.from_parameters(
         extract_impact_parameters(series, FRAME, impact_index=100, use_tools=False)
     )
-    assert cond.face_angle_deg is None
-    assert "face_angle_deg" in cond.unavailable
+    assert cond.face_deg is None
+    assert "face_deg" in cond.unavailable
 
 
 def test_conditions_are_finite_and_frozen():
@@ -172,5 +167,5 @@ def test_conditions_are_finite_and_frozen():
         )
     )
     with pytest.raises(AttributeError):
-        cond.club_path_deg = 1.0  # type: ignore[misc]
+        cond.path_deg = 1.0  # type: ignore[misc]
     assert all(math.isfinite(x) for x in cond.as_vector())

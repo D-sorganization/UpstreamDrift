@@ -22,46 +22,46 @@ from .adapters import NATIVE_CLUB_FACE, ClubFaceSpec, clubhead_series_from_mujoc
 from .extract import ImpactParameters, extract_impact_parameters
 from .target_frame import TargetFrame
 
-_FIELDS = (
-    "face_angle_deg",
-    "club_path_deg",
-    "attack_angle_deg",
-    "clubhead_speed_mph",
-    "face_to_path_deg",
-    "dynamic_loft_deg",
-    "toe_mm",
-    "high_mm",
-)
-
 
 @dataclass(frozen=True)
 class ImpactConditions:
-    """Optimiser-facing impact conditions (degrees, mph, millimetres).
+    """Optimiser-facing impact conditions (the one shared type, SHOW epic #14556).
 
-    Field names and units match :class:`ImpactParameters`.  ``None`` means
+    Signs follow GCV-15: ``face_deg`` + = open, ``path_deg`` + = in-to-out,
+    ``aoa_deg`` + = ascending; strike offsets are from the face centre in
+    metres, ``x`` toe-positive and ``y`` crown-positive.  ``None`` means
     unavailable and ``unavailable[name]`` carries the reason.
     """
 
-    clubhead_speed_mph: float
-    attack_angle_deg: float
-    club_path_deg: float | None = None
-    face_angle_deg: float | None = None
-    face_to_path_deg: float | None = None
-    dynamic_loft_deg: float | None = None
-    toe_mm: float | None = None
-    high_mm: float | None = None
-    impact_time_s: float = 0.0
+    speed_mph: float
+    aoa_deg: float
+    face_deg: float | None = None
+    path_deg: float | None = None
+    strike_offset_x_m: float | None = None
+    strike_offset_y_m: float | None = None
     unavailable: dict[str, str] = field(default_factory=dict)
 
     @classmethod
     def from_parameters(cls, params: ImpactParameters) -> ImpactConditions:
         """Reduce full :class:`ImpactParameters` to the optimiser quantities."""
         require(isinstance(params, ImpactParameters), "params must be ImpactParameters")
-        values: dict[str, Any] = {name: getattr(params, name) for name in _FIELDS}
+        toe, high = params.toe_mm, params.high_mm
+        names = {
+            "face_angle_deg": "face_deg",
+            "club_path_deg": "path_deg",
+            "toe_mm": "strike_offset_x_m",
+            "high_mm": "strike_offset_y_m",
+        }
         return cls(
-            impact_time_s=params.impact_time_s,
-            unavailable={k: v for k, v in params.unavailable.items() if k in _FIELDS},
-            **values,
+            speed_mph=params.clubhead_speed_mph,
+            aoa_deg=params.attack_angle_deg,
+            face_deg=params.face_angle_deg,
+            path_deg=params.club_path_deg,
+            strike_offset_x_m=None if toe is None else toe * 1e-3,
+            strike_offset_y_m=None if high is None else high * 1e-3,
+            unavailable={
+                names[k]: v for k, v in params.unavailable.items() if k in names
+            },
         )
 
     def as_vector(self) -> tuple[float, float, float, float]:
@@ -71,14 +71,14 @@ class ImpactConditions:
             ValueError: face or path is unavailable (never invented).
         """
         require(
-            self.face_angle_deg is not None and self.club_path_deg is not None,
+            self.face_deg is not None and self.path_deg is not None,
             "face and path must be available to build the cost vector",
         )
         vec = (
-            float(self.face_angle_deg),  # type: ignore[arg-type]
-            float(self.club_path_deg),  # type: ignore[arg-type]
-            self.attack_angle_deg,
-            self.clubhead_speed_mph,
+            float(self.face_deg),  # type: ignore[arg-type]
+            float(self.path_deg),  # type: ignore[arg-type]
+            self.aoa_deg,
+            self.speed_mph,
         )
         ensure(all(math.isfinite(x) for x in vec), "conditions must be finite", vec)
         return vec
