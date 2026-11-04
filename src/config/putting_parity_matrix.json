@@ -84,7 +84,7 @@
       "title": "Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets)",
       "cluster": "d",
       "cells": {
-        "core_api": "partial #14463 | src/shared/python/putting_dynamics/surfaces.py, src/engines/physics_engines/putting_green/python/_surface_presets.py, src/api/routes/putting_green.py | Core has flat, planar, bumpy, presets and stimp ramp; only /simulate-3d builds slope and bumps; other routes are flat; no preset route.",
+        "core_api": "present | src/shared/python/putting_dynamics/green_spec.py, src/api/routes/putting_green.py | GreenSpec (slope, two-tier step, seeded undulation, named presets) on /simulate, /scatter, /read-green and /contours; GET /green-presets.",
         "pyqt6": "partial #14463 | src/tools/putting_green_gui/_scene_builder.py | Single cross-slope plane.",
         "react": "partial #14464 | ui/src/pages/PuttingGreen.tsx | Grade, aspect, grain, bumps; no green-type selector or presets.",
         "tauri": "partial #14464 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",

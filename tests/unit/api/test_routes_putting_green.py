@@ -422,3 +422,105 @@ def test_simulate_putt_3d_rejects_an_unknown_balance_type(client: TestClient) ->
         "/tools/putting-green/simulate-3d", json={"balance_type": "anser"}
     )
     assert response.status_code == 422
+
+
+# -- Green shapes on every route (#14463) --
+
+
+def _core_rest(green: dict, speed: float, stimp: float = 10.0) -> tuple[float, float]:
+    """Golden: the shared core's rest point for the /simulate defaults."""
+    from src.shared.python.putting_dynamics import (
+        GreenSpec,
+        PutterState,
+        green_preset,
+        simulate_ball,
+        strike,
+        struck_ball_state,
+    )
+
+    spec = green_preset(green["preset"]) if "preset" in green else GreenSpec(**green)
+    surface = spec.surface(stimp_ft=stimp, extent_m=20.0)
+    report = strike(PutterState.typical(speed))
+    # Green-local (5, 10) aimed along +y, hole at (10, 15); surface is centred.
+    ball = struck_ball_state(report, x_m=-5.0, y_m=0.0, heading_rad=math.pi / 2)
+    result = simulate_ball(ball, surface, hole_x_m=0.0, hole_y_m=5.0, collision=report)
+    return result.rest_x_m + 10.0, result.rest_y_m + 10.0
+
+
+@pytest.mark.parametrize(
+    "green", [{"preset": "severe_slopes"}, {"grade_percent": 3.0, "aspect_deg": 0.0}]
+)
+def test_simulate_rolls_on_the_requested_green(client: TestClient, green: dict) -> None:
+    body = {"direction_x": 0.0, "direction_y": 1.0, "speed": 1.5, "green": green}
+    response = client.post("/tools/putting-green/simulate", json=body)
+    assert response.status_code == 200, response.text
+    final = response.json()["final_position"]
+    assert final == pytest.approx(list(_core_rest(green, 1.5)), abs=1e-9)
+    assert final[0] > 5.05, "a green falling toward +x breaks the ball right"
+
+
+def test_contours_show_the_requested_green(client: TestClient) -> None:
+    from src.shared.python.putting_dynamics import green_preset
+
+    response = client.get(
+        "/tools/putting-green/contours",
+        params={"resolution": 5, "preset": "tiered"},
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    height = green_preset("tiered").height(extent_m=20.0)
+    for xs, ys, got in zip(
+        data["grid_x"], data["grid_y"], data["elevations"], strict=True
+    ):
+        want = [
+            height.elevation(x - 10.0, y - 10.0) for x, y in zip(xs, ys, strict=True)
+        ]
+        assert got == pytest.approx(want, abs=1e-12)
+    assert data["elevations"][0][0] > data["elevations"][-1][0], "upper tier at -y"
+
+
+def test_read_green_reads_the_break_of_a_sloped_green(client: TestClient) -> None:
+    # A short putt keeps the aim search quick on a sloped green.
+    putt = {"ball_x": 9.0, "ball_y": 12.0, "target_x": 10.0, "target_y": 15.0}
+    flat = client.post("/tools/putting-green/read-green", json=putt).json()
+    sloped = client.post(
+        "/tools/putting-green/read-green",
+        json={**putt, "green": {"grade_percent": 2.0, "aspect_deg": 0.0}},
+    ).json()
+    assert flat["total_break"] == pytest.approx(0.0, abs=1e-3)
+    assert sloped["total_break"] > 0.05
+
+
+def test_scatter_rolls_on_an_undulating_green(client: TestClient) -> None:
+    body = {"direction_x": 0.0, "direction_y": 1.0, "n_simulations": 3}
+    flat = client.post("/tools/putting-green/scatter", json=body).json()
+    bumpy = client.post(
+        "/tools/putting-green/scatter",
+        json={**body, "green": {"preset": "undulating_championship"}},
+    ).json()
+    assert bumpy["final_positions"] != flat["final_positions"]
+
+
+def test_green_presets_route_lists_the_core_presets(client: TestClient) -> None:
+    from src.shared.python.putting_dynamics import GREEN_PRESETS
+
+    response = client.get("/tools/putting-green/green-presets")
+    assert response.status_code == 200, response.text
+    presets = {p["key"]: p for p in response.json()["presets"]}
+    assert set(presets) == set(GREEN_PRESETS)
+    assert presets["tiered"]["tier_height_m"] == GREEN_PRESETS["tiered"].tier_height_m
+
+
+@pytest.mark.parametrize(
+    ("method", "path", "kwargs"),
+    [
+        ("post", "/simulate", {"json": {"green": {"preset": "augusta"}}}),
+        ("post", "/read-green", {"json": {"green": {"grade_percent": 12.0}}}),
+        ("get", "/contours", {"params": {"preset": "augusta"}}),
+    ],
+)
+def test_unknown_or_out_of_range_greens_are_refused(
+    client: TestClient, method: str, path: str, kwargs: dict
+) -> None:
+    response = getattr(client, method)(f"/tools/putting-green{path}", **kwargs)
+    assert response.status_code == 422, response.text
