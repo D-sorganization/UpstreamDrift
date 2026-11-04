@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14453 · Install Trivy From Checksum-Verified GitHub Releases in CI.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14453
+- **Branch:** codex/14453-trivy-install
+- **PR:** #14481
+- **Paths:** see #14481
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`4082c388`; collated from changes/14453-install-trivy-from-checksum-verified-git.md)
+- **Summary:** Install Trivy from checksum-verified GitHub releases in CI.
+- **Next step:** Merge the pull request after required checks pass.
+
 ### DL-#14274 · Config/Secret Separation and Upgrade/Rollback Guarantees
 
 - **State:** in_review

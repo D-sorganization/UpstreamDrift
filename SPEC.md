@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-04 | #14481 | Install Trivy from checksum-verified GitHub releases in CI. |
 | 2026-11-03 | #14414 | Config/secret separation and upgrade/rollback guarantees |
 | 2026-11-03 | #14402 | \ Define and implement clean-environment install smoke test\ |
 | 2026-11-03 | #14413 | Versioned releases with verifiable artifacts and SBOM |
