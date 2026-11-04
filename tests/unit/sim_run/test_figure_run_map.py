@@ -36,7 +36,7 @@ def _store_run(registry: RunRegistry, run_dir: Path, preset: str, files: dict) -
         provenance=RunProvenance(
             model_id=f"release-preset/{preset}",
             revision=model_revision(preset),
-            parameters={"preset": preset},
+            parameters={"preset": preset, "tier": "figure_script"},
             input_sha256="0" * 64,
             seed=0,
             engine_name="ud-preset",
@@ -99,6 +99,8 @@ def test_matching_figure_cites_its_run(setup) -> None:
     assert entry["run_sha256"] == sha256_file(root / _FIGURES / "fig_same.svg")
     assert entry["matches_release"] is True
     assert entry["mismatch_reason"] is None
+    assert entry["model_id"] == "release-preset/study_one"
+    assert entry["tier"] == "figure_script"
 
 
 def test_renderer_mismatch_explains_itself(setup) -> None:
@@ -120,6 +122,7 @@ def test_same_renderer_mismatch_explains_itself(setup) -> None:
 def test_figure_without_a_run_is_unmapped(setup) -> None:
     entry = _entries(setup)["figures"][f"{_FIGURES}/fig_diagram.svg"]
     assert entry["run_id"] is None and entry["preset"] is None
+    assert entry["model_id"] is None and entry["tier"] is None
     assert entry["matches_release"] is False
     assert entry["mismatch_reason"] == "no stored run writes this figure"
 

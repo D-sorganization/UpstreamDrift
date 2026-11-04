@@ -1,8 +1,9 @@
 """Map each release figure to the stored run that wrote it (Issue #14518).
 
 Every figure under a release's ``figures`` directory gets one entry: the
-preset and run id of the first listed run that has it as an output, the
-SHA-256 of that run's copy, and whether it equals the committed release file.
+preset, model id, tier and run id of the first listed run that has it as an
+output, the SHA-256 of that run's copy, and whether it equals the committed
+release file.
 A mismatch records only what differs, from the matplotlib version both copies
 embed; it does not attribute a cause it cannot check. ``commit_bound`` marks a
 copy that embeds its run's short commit SHA and so reproduces only at that
@@ -56,6 +57,8 @@ def _entry(
     short_sha = manifest.ud_commit[:SHORT_SHA].encode("ascii")
     return {
         "commit_bound": short_sha in run_copy.read_bytes(),
+        "model_id": manifest.model.model_id,
+        "tier": manifest.parameters.get("tier"),
         "preset": manifest.parameters.get("preset"),
         "run_id": run_id,
         "run_sha256": run_sha256,
@@ -83,6 +86,8 @@ def build_figure_run_map(
         if writer is None:
             entries[name] = {
                 "commit_bound": None,
+                "model_id": None,
+                "tier": None,
                 "preset": None,
                 "run_id": None,
                 "run_sha256": None,
