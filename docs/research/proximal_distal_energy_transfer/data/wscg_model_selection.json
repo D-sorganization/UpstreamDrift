@@ -1,0 +1,28 @@
+{
+  "issue": 14437,
+  "scope": "Model-scenario selection by structural features; not empirical validation and not a fit to the WSCG force series.",
+  "metric": {"name": "wscg_structural_feature_score", "features": ["planar", "joint_torque_driven", "two_hand_closure", "flexible_shaft"], "definition": "Count of the four documented WSCG model features reproduced by the compiled MjModel. Ties: planar first, then an existing MuJoCo ZTCF/ZVCF test, then fewer DOF."},
+  "ranking": [
+    {"model_id": "mujoco/advanced_biomechanical_golf_swing", "score": 3, "missing": ["planar"], "nv": 40, "has_ztcf_test": false},
+    {"model_id": "mujoco/golf_double_pendulum_params", "score": 2, "missing": ["two_hand_closure", "flexible_shaft"], "nv": 2, "has_ztcf_test": true},
+    {"model_id": "mujoco/golf_triple_pendulum", "score": 2, "missing": ["two_hand_closure", "flexible_shaft"], "nv": 3, "has_ztcf_test": false},
+    {"model_id": "mujoco/golf_upper_body_swing", "score": 2, "missing": ["planar", "flexible_shaft"], "nv": 16, "has_ztcf_test": false},
+    {"model_id": "mujoco/golf_full_body_swing", "score": 2, "missing": ["planar", "flexible_shaft"], "nv": 27, "has_ztcf_test": false},
+    {"model_id": "mujoco/canonical_golf_humanoid", "score": 1, "missing": ["planar", "two_hand_closure", "flexible_shaft"], "nv": 25, "has_ztcf_test": false}
+  ],
+  "selected": "mujoco/advanced_biomechanical_golf_swing",
+  "selected_source": "src.engines.physics_engines.mujoco.golf_swing_models_xml.ADVANCED_BIOMECHANICAL_GOLF_SWING_XML",
+  "runner_up": {"model_id": "mujoco/golf_double_pendulum_params", "why_it_lost": "Scored 2/4 against 3/4: it lacks two_hand_closure and flexible_shaft. With one grip it cannot produce the separate lead- and trail-hand forces the WSCG study reports, although it is planar and already has a MuJoCo ZTCF/ZVCF parity test."},
+  "caveats": ["The selected model is 3D; WSCG is planar, so #14438 must project hand forces onto a declared swing plane.", "qpos0 is the compiled reference pose, not a matched address pose."],
+  "initial_condition": {"nq": 42, "nv": 40, "qpos": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.021335, 1.0, 0.0, 0.0, 0.0]},
+  "manifest": {
+    "schema_version": "1.0.0",
+    "model": {"model_id": "mujoco/advanced_biomechanical_golf_swing", "revision": "sha256:68979900daad7eda01f6f7b8b4e12086d444a322e99aba4acf57f86ed4fa7535"},
+    "parameters": {"timestep_s": 0.001, "gravity_m_s2": [0.0, 0.0, -9.80665], "controls": "zero (ZTCF state); torques are set by #14438"},
+    "input_data": {"sha256": "24e65a5d6dd69be204a3fb37222e45064aaed9bba0f4dc795b4bb2c600dcefbc", "label": "initial condition: compiled qpos0 with zero qvel"},
+    "seed": 0,
+    "engine": {"name": "mujoco", "version": "3.8.0"},
+    "ud_commit": "1ef9306e4fc27a91998e013fbd82be2306f609bf",
+    "created_at": "2026-11-04T02:58:52Z"
+  }
+}
