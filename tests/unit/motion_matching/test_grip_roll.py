@@ -7,6 +7,9 @@ not against the implementation.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
@@ -16,8 +19,11 @@ from src.shared.python.impact_parameters.target_frame import TargetFrame
 from src.shared.python.motion_matching.grip_roll import (
     GripPoseState,
     address_grip_roll_deg,
+    grip_pose_state_from_spec,
     reference_axes,
 )
+
+pytestmark = pytest.mark.unit
 
 # A realistic address shaft: from the hands down and toward the ball, in the
 # face-on plane (x-z), golfer facing -x, target along -y (UD default frame).
@@ -38,13 +44,14 @@ def _club_rotation(shaft: np.ndarray = SHAFT, spin_deg: float = 0.0) -> np.ndarr
 
 def _state(lead_deg: float, trail_deg: float, spin_deg: float = 0.0) -> GripPoseState:
     """Hands whose back-of-hand (lead) / palm (trail) normals sit at the roll."""
+    base_rot = _club_rotation()  # dorsal axes are fixed in the club frame
     rot = _club_rotation(spin_deg=spin_deg)
     e_h, e_v = reference_axes(SHAFT, TargetFrame())
 
     def dorsal_club(roll_deg: float) -> np.ndarray:
         r = np.radians(roll_deg)
         normal = np.cos(r) * e_h + np.sin(r) * e_v  # world, perpendicular to shaft
-        return -(rot.T @ normal)  # repo convention: normal = -dorsal axis
+        return -(base_rot.T @ normal)  # repo convention: normal = -dorsal axis
 
     return GripPoseState(
         club_rotation=rot,
@@ -78,14 +85,13 @@ def test_reference_axes_are_horizontal_and_orthonormal() -> None:
     assert e_v[2] > 0.0  # points up
 
 
-def test_roll_is_invariant_to_spin_of_hand_and_club_together() -> None:
-    # Rotating the club frame about the shaft while the hand follows rigidly
-    # leaves the world-space roll unchanged only if the dorsal axes are
-    # re-expressed; here the dorsal axes stay fixed in the club, so a spin of
-    # d degrees changes the roll by exactly d (alpha is a rotation about the shaft).
+def test_spin_about_the_shaft_changes_the_roll_one_for_one() -> None:
+    # The dorsal axes stay fixed in the club, so spinning the club about the
+    # shaft by d degrees changes the roll by exactly d (alpha is a rotation
+    # about the shaft, positive stronger).
     base = address_grip_roll_deg(_state(10.0, 10.0))[0]
     spun = address_grip_roll_deg(_state(10.0, 10.0, spin_deg=7.0))[0]
-    assert abs(((spun - base) + 180.0) % 360.0 - 180.0) == pytest.approx(7.0, abs=0.5)
+    assert spun - base == pytest.approx(7.0, abs=0.5)
 
 
 def test_rejects_a_non_orthonormal_club_frame() -> None:
@@ -126,3 +132,30 @@ def test_rejects_left_handed_frames_until_mirroring_is_specified() -> None:
                 target=TargetFrame(handedness="left"),
             )
         )
+
+
+SPEC = (
+    Path(__file__).resolve().parents[3]
+    / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+)
+# Native club frame at the flagship driver address, from the solved MuJoCo pose
+# (hipcal-scaled spec, IK frame 0; columns are the club x, y (shaft), z axes).
+FLAGSHIP_CLUB_ROTATION = Rotation.from_matrix(
+    [[-0.5417, -0.7177, -0.4376], [0.6055, 0.0279, -0.7953], [0.5831, -0.6958, 0.4195]]
+).as_matrix()  # nearest rotation to the 4-decimal print
+
+
+def test_flagship_driver_grip_reads_near_90_degrees_face_on() -> None:
+    """The owner sees ~90 deg (top of the lead hand, underside of the trail)."""
+    spec = json.loads(SPEC.read_text(encoding="utf-8"))
+    state = grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
+    lead, trail = address_grip_roll_deg(state)
+    assert lead == pytest.approx(97.9, abs=0.5)
+    assert trail == pytest.approx(108.0, abs=0.5)
+
+
+def test_spec_dorsal_axes_are_perpendicular_to_the_shaft() -> None:
+    spec = json.loads(SPEC.read_text(encoding="utf-8"))
+    state = grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
+    assert state.lead_dorsal_club[1] == pytest.approx(0.0, abs=1e-9)
+    assert state.trail_dorsal_club[1] == pytest.approx(0.0, abs=1e-9)
