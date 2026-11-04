@@ -2366,6 +2366,8 @@
 {"path": "sg_optimizer/shot_model/player_profile.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/putting.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/putting_provider.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/shot_model/skill_family.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/shot_model/skill_registry.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "shadow_tracker/AGENTS.md", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/README.md", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/__init__.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
