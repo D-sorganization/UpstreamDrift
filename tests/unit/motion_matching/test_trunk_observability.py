@@ -72,3 +72,9 @@ def test_decision_is_coupled_when_axes_are_not_separable(spec, q_events) -> None
 def test_decision_is_free_for_well_separated_columns() -> None:
     rep = {"events": {"e": {"condition_number": 5.0, "axis_cosines": {"a": 0.1}}}}
     assert decide_trunk_coupling(rep)["coupled"] is False
+
+
+def test_committed_default_follows_the_observability_evidence(spec, q_events) -> None:
+    """The showpiece default is data-driven: coupled iff the report says so."""
+    decision = decide_trunk_coupling(observability_report(spec, q_events, TRUNK))
+    assert spec["trunk_coupling"]["enabled"] is decision["coupled"]
