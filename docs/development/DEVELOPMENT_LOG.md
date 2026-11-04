@@ -924,6 +924,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14474 · React Putting Page: Desktop Camera Views and Jumps to the Core Phase Marks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14474
+- **Branch:** merged via #14576
+- **PR:** #14576
+- **Paths:** see #14576
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`6ea810fa`; collated from changes/14474-react-putting-page-desktop-camera-views.md)
+- **Summary:** React putting page: desktop camera views and jumps to the core phase marks
+- **Next step:** Shipped in PR #14576.
+
+### DL-#14469 · Putting Dynamics: Counter-Torque Stabilization Model (Two-Hand Couples, Off-Plane Preload, Noise, Gust, Lie, Putter) in the Shared Core, Reading the Shared Putter Presets, Drift-Gated Against the Studio
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14469
+- **Branch:** merged via #14548
+- **PR:** #14548
+- **Paths:** see #14548
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`fadc7ee1`; collated from changes/14469-putting-counter-torque-core.md)
+- **Summary:** Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio
+- **Next step:** Shipped in PR #14548.
+
 ### DL-#14468 · React Putting Page: Strokes-Gained Readout and Expected-Putts Curve From the Shared Core's /Strokes-Gained
 
 - **State:** shipped

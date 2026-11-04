@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-04 | #14576 | React putting page: desktop camera views and jumps to the core phase marks |
+| 2026-11-04 | #14548 | Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio |
 | 2026-11-04 | #14573 | React putting page: strokes-gained readout and expected-putts curve from the shared core's /strokes-gained |
 | 2026-11-04 | #14543 | Analytic and diagram figures in the proximal-distal release are labelled with their code evidence instead of citing a run |
 | 2026-11-04 | #14546 | Putting: camera presets (orbit, down the line, face on, overhead), play/pause, a scrubber and jumps to the core phase marks on the PyQt6 tile |
