@@ -924,6 +924,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14462 · React Putting Page: Balance Type Selector Over the Core Putter Presets With Head Mass and MOI Inputs; Balance_Type React/Tauri Parity Cells Now Present
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14462
+- **Branch:** merged via #14547
+- **PR:** #14547
+- **Paths:** see #14547
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`0f7f02e1`; collated from changes/14462-react-putting-page-balance-type-selector.md)
+- **Summary:** React putting page: Balance Type selector over the core putter presets with head mass and MOI inputs; balance_type React/Tauri parity cells now present
+- **Next step:** Shipped in PR #14547.
+
 ### DL-#14460 · Putting Page Groundwork: The Seven Core Noise Channels, the Simulator-to-Core Dispersion Arguments and the /Dispersion and /Make-Spread Client, Pinned to the Shared Core by a Golden File (PUTT-SHARE B-Web Part 1)
 
 - **State:** shipped
@@ -943,10 +956,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14518
 - **Branch:** merged via #14524
-- **PR:** #14524, #14534, #14528, #14539
+- **PR:** #14524, #14534, #14528, #14539, #14543
 - **Paths:** see #14524
 - **Started:** 2026-11-04
-- **Last verified:** 2026-11-04 (`776d8892`; collated from changes/14518-the-proximal-distal-release-now-maps-eve.md)
+- **Last verified:** 2026-11-04 (`b753c279`; collated from changes/14518-analytic-and-diagram-figures-in-the-prox.md)
 - **Summary:** Run release presets through the run store: sim_run.preset_run records which files a preset wrote, copies them into a run directory and emits a reproducible run manifest
 - **Next step:** Shipped in PR #14524.
 
@@ -1008,10 +1021,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14473
 - **Branch:** merged via #14533
-- **PR:** #14533, #14537
+- **PR:** #14533, #14537, #14546
 - **Paths:** see #14533
 - **Started:** 2026-11-04
-- **Last verified:** 2026-11-04 (`f9a6a7f0`; collated from changes/14473-putting-dynamics-per-sample-ball-mode-on.md)
+- **Last verified:** 2026-11-04 (`c641ff70`; collated from changes/14473-putting-playback-desktop.md)
 - **Summary:** Putting: PyQt6 tile readouts and panel style move out of gui.py into _scene_text and _style (no behaviour change; keeps gui.py under the monolith threshold)
 - **Next step:** Shipped in PR #14533.
 
@@ -1021,10 +1034,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14467
 - **Branch:** merged via #14527
-- **PR:** #14527
+- **PR:** #14527, #14542
 - **Paths:** see #14527
 - **Started:** 2026-11-04
-- **Last verified:** 2026-11-04 (`f3e71c73`; collated from changes/14467-putting-sg-core.md)
+- **Last verified:** 2026-11-04 (`4bf12081`; collated from changes/14467-putting-sg-desktop.md)
 - **Summary:** Putting analytics: player-specific Bellman expected putts on the caller's green (optimal pace per distance, shared skill roll model) and one putt's strokes gained against it, on /tools/putting-analytics/strokes-gained
 - **Next step:** Shipped in PR #14527.
 
