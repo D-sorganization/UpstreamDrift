@@ -41,6 +41,7 @@ _CONFIG = PuttConfig(
     stimp=11.0,
     slope_deg=2.0,
 )
+_NOISE = {"face_sd_deg": 1.5, "speed_cv": 0.08, "n": 40, "seed": 0}
 
 
 @pytest.fixture(scope="module")
@@ -69,20 +70,17 @@ def test_batch_args_map_the_dialled_green() -> None:
     assert args["stimp"] == 11.0
     assert (args["face_sd_deg"], args["speed_cv"]) == (1.2, 0.07)
     assert (args["n"], args["seed"]) == (40, 3)
-
-
-def test_flat_green_has_no_fall_direction() -> None:
-    flat = PuttConfig(2.5, 0.0, 3.0, 10.0, 0.0)
-    args = batch_args(flat, face_sd_deg=1.5, speed_cv=0.08, n=40, seed=0)
-    assert (args["grade_pct"], args["aspect_deg"]) == (0.0, 0.0)
-
-
-def test_panel_offers_the_studio_batch_sizes(panel: BatchPanel) -> None:
-    combo = panel.size_combo
-    assert [combo.itemData(i) for i in range(combo.count())] == [40, 100, 1000]
+    flat = batch_args(PuttConfig(2.5, 0.0, 3.0, 10.0, 0.0), **_NOISE)
+    assert (flat["grade_pct"], flat["aspect_deg"]) == (0.0, 0.0)  # no fall line
 
 
 def test_batch_shows_the_service_answer(panel: BatchPanel) -> None:
+    combo = panel.size_combo  # the studio's batch sizes
+    assert [combo.itemData(i) for i in range(combo.count())] == [40, 100, 1000]
+    panel.arrange_plots(300)  # narrow canvases stack the charts
+    assert panel.plots_stacked()
+    panel.arrange_plots(900)
+    assert not panel.plots_stacked()
     report = panel.run_batch()
     expected = service_dispersion.dispersion_study(panel.current_args())
     assert report == expected
@@ -136,17 +134,15 @@ def test_button_runs_the_batch_off_the_gui_thread(
 
 
 def test_panel_spread_defaults_to_the_3_to_45_ft_grid(qapp: QApplication) -> None:
-    p = BatchPanel(lambda: _CONFIG, lambda: UnitSystem.IMPERIAL)
+    units = [UnitSystem.METRIC]
+    p = BatchPanel(lambda: _CONFIG, lambda: units[0])
     args = p.spread_args()
     assert args["distances_ft"] == list(service_dispersion.DEFAULT_SPREAD_GRID_FT)
     assert "distance_ft" not in args
-
-
-def test_charts_stack_on_narrow_canvases(panel: BatchPanel) -> None:
-    panel.arrange_plots(300)
-    assert panel.plots_stacked()
-    panel.arrange_plots(900)
-    assert not panel.plots_stacked()
+    assert p.spread_label() == "0-14 m Spread"  # the button follows the units
+    units[0] = UnitSystem.IMPERIAL
+    p.redraw()  # the simulator redraws the panel on a units change
+    assert p.spread_label() == "0-45 ft Spread"
 
 
 def test_widget_feeds_its_green_into_the_panel(qapp: QApplication) -> None:
@@ -155,8 +151,7 @@ def test_widget_feeds_its_green_into_the_panel(qapp: QApplication) -> None:
         w._stimp_spin.setValue(12.5)
         w._slope_spin.setValue(0.0)
         args = w.batch_panel.current_args()
-        assert args["stimp"] == 12.5
-        assert args["grade_pct"] == 0.0
+        assert (args["stimp"], args["grade_pct"]) == (12.5, 0.0)
         assert args["distance_ft"] == pytest.approx(10.0, abs=0.01)
     finally:
         w.cleanup()

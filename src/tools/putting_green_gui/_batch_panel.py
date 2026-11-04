@@ -1,10 +1,7 @@
 """Batch dispersion panel for the Putting Green Simulator (#14459, epic #14452).
 
-Runs :mod:`src.shared.python.putting_analytics.service_dispersion` on the
-dialled green: a 40/100/1000-putt batch with stroke noise (face SD, speed CV)
-plotted around the hole, and the 3-45 ft make-% spread. No physics lives
-here; the panel maps :class:`PuttConfig` to service arguments and plots the
-answer in the user's units.
+Maps :class:`PuttConfig` to :mod:`service_dispersion` arguments (a noisy
+batch and the 3-45 ft make spread) and plots the answer in the user's units.
 """
 
 from __future__ import annotations
@@ -28,19 +25,21 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.putting_analytics import service_dispersion
-from src.shared.python.ui.units import UnitSystem
+from src.shared.python.ui.units import (
+    UnitSystem,
+    distance_suffix,
+    from_display_distance,
+)
 from src.tools.putting_green_gui._scene_builder import PuttConfig
 
 BATCH_SIZES: tuple[int, ...] = (40, 100, 1000)
-# Putts per distance. A spread's cost is dominated by planning one line fan
-# per distance (seconds each), not by n, so the buttons run on a worker.
+# Putts per distance; one line fan per distance costs seconds, so use a worker.
 SPREAD_N = 60
 _STACK_BELOW_PX = 520  # narrower plot canvases stack the two charts
-_FT_M = 0.3048
-# The scene's cross-slope raises the green to the left of the line
-# (``_scene_builder._cross_slope_heightmap``), so it falls to the right:
-# -90 deg, counter-clockwise from the line.
+# The scene's cross-slope (``_cross_slope_heightmap``) raises the green to the
+# left of the line, so it falls to the right: -90 deg, CCW from the line.
 _FALL_RIGHT_DEG = -90.0
+_M_PER_FT = from_display_distance(1.0, UnitSystem.IMPERIAL, unit="ft")
 
 
 def batch_args(
@@ -49,7 +48,7 @@ def batch_args(
     """Dispersion-service arguments for the dialled putt and stroke noise."""
     grade_pct = 100.0 * math.tan(math.radians(config.slope_deg))
     return {
-        "distance_ft": config.cup_distance_m / _FT_M,
+        "distance_ft": config.cup_distance_m / _M_PER_FT,
         "grade_pct": grade_pct,
         "aspect_deg": _FALL_RIGHT_DEG if grade_pct else 0.0,
         "stimp": config.stimp,
@@ -120,11 +119,12 @@ class BatchPanel(QGroupBox):
         buttons = QHBoxLayout()
         self._batch_btn = QPushButton("Run Batch")
         self._batch_btn.clicked.connect(self.start_batch)
-        self._spread_btn = QPushButton("0-45 ft Spread")
+        self._spread_btn = QPushButton()
         self._spread_btn.clicked.connect(self.start_spread)
         buttons.addWidget(self._batch_btn)
         buttons.addWidget(self._spread_btn)
         form.addRow(buttons)
+        self._label_spread()
         self._summary = QLabel("Run a batch to see the make rate and leave.")
         self._summary.setWordWrap(True)
         form.addRow(self._summary)
@@ -213,12 +213,8 @@ class BatchPanel(QGroupBox):
         scale, unit = self._length_scale()
         ax = self._spread_ax
         ax.clear()
-        ax.plot(
-            [d * scale for d in report["distances_ft"]],
-            [100 * m for m in report["make_rate"]],
-            "o-",
-            color="#2b7bd6",
-        )
+        xs = [d * scale for d in report["distances_ft"]]
+        ax.plot(xs, [100 * m for m in report["make_rate"]], "o-", color="#2b7bd6")
         ax.set_xlabel(f"Distance ({unit})")
         ax.set_ylabel("Make %")
         ax.set_ylim(0, 100)
@@ -227,6 +223,7 @@ class BatchPanel(QGroupBox):
 
     def redraw(self) -> None:
         """Replot the last results in the current units; a running job redraws."""
+        self._label_spread()
         if not self.is_busy():
             for kind, report in list(self._shown.items()):
                 (self.show_batch if kind == "batch" else self.show_spread)(report)
@@ -243,11 +240,7 @@ class BatchPanel(QGroupBox):
         if stacked == self._stacked:
             return
         self._stacked = stacked
-        grid = (
-            self._figure.add_gridspec(2, 1)
-            if stacked
-            else self._figure.add_gridspec(1, 2)
-        )
+        grid = self._figure.add_gridspec(*((2, 1) if stacked else (1, 2)))
         self._scatter_ax.set_subplotspec(grid[0])
         self._spread_ax.set_subplotspec(grid[1])
         self.canvas.setMinimumHeight(440 if stacked else 220)
@@ -296,10 +289,20 @@ class BatchPanel(QGroupBox):
         self._batch_btn.setEnabled(not busy)
         self._spread_btn.setEnabled(not busy)
 
+    def spread_label(self) -> str:
+        """The spread button's text, e.g. ``0-45 ft Spread``."""
+        return self._spread_btn.text()
+
+    def _label_spread(self) -> None:
+        scale, unit = self._length_scale()
+        top = max(self._spread_grid_ft) * scale
+        self._spread_btn.setText(f"0-{top:.0f} {unit} Spread")
+
     def _length_scale(self) -> tuple[float, str]:
-        if self._units() == UnitSystem.METRIC:
-            return _FT_M, "m"
-        return 1.0, "ft"
+        """Feet -> display length factor and unit, from the shared units module."""
+        system = self._units()
+        scale = _M_PER_FT if system == UnitSystem.METRIC else 1.0
+        return scale, distance_suffix(system, unit="ft").strip()
 
 
 def _spin(lo: float, hi: float, value: float, suffix: str) -> QDoubleSpinBox:
