@@ -4,6 +4,7 @@ import type {
   Putt3DSimulationRequest,
   Putt3DSimulationResponse,
 } from "@/api/generated/types";
+import { defaultNoise, type Noise } from "@/utils/dispersion";
 import { loadUnitSystem, saveUnitSystem, type UnitSystem } from "@/utils/units";
 
 export const DEFAULT_PUTT_3D_PARAMETERS: Putt3DSimulationRequest = {
@@ -36,12 +37,15 @@ interface PuttingState {
   playing: boolean;
   /** Display units only; parameters and results stay SI (#14458). */
   unitSystem: UnitSystem;
+  /** The player's spread, shared by the batch and strokes-gained panels. */
+  noise: Noise;
   updateParameters: (changes: Partial<Putt3DSimulationRequest>) => void;
   setResult: (result: Putt3DSimulationResponse) => void;
   setPlaybackTime: (timeS: number) => void;
   setPlaybackRate: (rate: number) => void;
   setPlaying: (playing: boolean) => void;
   setUnitSystem: (system: UnitSystem) => void;
+  setNoise: (noise: Noise) => void;
   reset: () => void;
 }
 
@@ -52,6 +56,7 @@ export const usePuttingStore = create<PuttingState>((set) => ({
   playbackRate: 1,
   playing: false,
   unitSystem: loadUnitSystem(),
+  noise: defaultNoise(),
   updateParameters: (changes) =>
     set((state) => ({
       parameters: { ...state.parameters, ...changes },
@@ -66,6 +71,7 @@ export const usePuttingStore = create<PuttingState>((set) => ({
     saveUnitSystem(unitSystem);
     set({ unitSystem });
   },
+  setNoise: (noise) => set({ noise }),
   reset: () =>
     set({
       parameters: { ...DEFAULT_PUTT_3D_PARAMETERS },
@@ -73,5 +79,6 @@ export const usePuttingStore = create<PuttingState>((set) => ({
       playbackTimeS: 0,
       playbackRate: 1,
       playing: false,
+      noise: defaultNoise(),
     }),
 }));
