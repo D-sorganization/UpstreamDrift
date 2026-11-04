@@ -14,7 +14,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | missing (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | partial (#14462) | partial (#14462) | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | partial (#14464) | partial (#14464) | partial (#14463) |
-| Optimum Read / Auto-Solve Aim | (e) | partial (#14465) | missing (#14465) | partial (#14466) | partial (#14466) | partial (#14465) |
+| Optimum Read / Auto-Solve Aim | (e) | present | present | partial (#14466) | partial (#14466) | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | missing (#14467) | missing (#14468) | missing (#14468) | partial (#14467) |
 | Saved Scenarios and Comparison | (h) | missing (#14471) | missing (#14471) | missing (#14472) | missing (#14472) | present |
 | JSON Import/Export of a Setup | (h) | partial (#14471) | partial (#14471) | missing (#14472) | missing (#14472) | present |
@@ -73,8 +73,8 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: partial (#14463). `src/apps/putting_studio/js/putting_physics.js`, `src/apps/putting_studio/js/io.js`. Flat and slope presets plus stimp ramp; undulation switches on with slope and is not selectable.
 
 **Optimum Read / Auto-Solve Aim**
-- Core/API: partial (#14465). `src/shared/python/putting_dynamics/green_reading.py`, `src/shared/python/putting_analytics/optimize.py`, `src/api/routes/putting_green.py`. solve_aim and best_action present; /read-green is flat-only.
-- PyQt6: missing (#14465). `src/tools/putting_green_gui/gui.py`. Aim is manual; the analytics best-aim study is not linked to the simulator.
+- Core/API: present. `src/shared/python/putting_dynamics/green_reading.py`, `src/shared/python/putting_analytics/optimize.py`, `src/api/routes/putting_green.py`. solve_aim and best_action present; /read-green returns pace, heading, holed and converged in one call on any GreenSpec green.
+- PyQt6: present. `src/tools/putting_green_gui/_scene_builder.py`, `src/tools/putting_green_gui/gui.py`. Auto-Solve Read runs solve_aim on the tile's surface off the GUI thread and writes the pace and aim into the controls.
 - React: partial (#14466). `ui/src/pages/PuttingAnalytics.tsx`. Analytics best aim/pace study; nothing on the simulator page.
 - Studio: partial (#14465). `src/apps/putting_studio/js/controls_c.js`. Aim-only grid search from one noise-free putt.
 

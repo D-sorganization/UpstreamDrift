@@ -2091,6 +2091,12 @@ export interface GreenReadingResponse {
   total_break: number;
   recommended_speed: number;
   aim_point: number[];
+  /** Putter heading that plays the read, CCW from +x [deg] (#14465) */
+  aim_heading_deg: number;
+  /** Whether the solved putt drops */
+  holed: boolean;
+  /** Whether the heading solve converged */
+  converged: boolean;
   elevations: number[];
   slopes: number[][];
 }

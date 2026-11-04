@@ -13,11 +13,12 @@ this module is a thin Qt/OpenGL renderer that consumes a :class:`PuttScene`.
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import math
 from typing import Any
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QThreadPool, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -62,26 +63,31 @@ from src.shared.python.ui.units import (
     to_display_distance,
     to_display_speed,
 )
-from src.tools.putting_green_gui._batch_panel import BatchPanel
+from src.tools.putting_green_gui._batch_panel import BatchPanel, _Job
+from src.tools.putting_green_gui._scene_text import (
+    _M_TO_CM,
+    _M_TO_FT,
+    _M_TO_IN,
+    _MS_TO_MPH,
+    _format_impact,
+    _format_read,
+)
 from src.tools.putting_green_gui._scene_builder import (
     IMPACT_TOE_RANGE_M,
     UNDULATION_RANGE_M,
     PuttConfig,
     PuttScene,
+    PuttSolution,
     build_putt_scene,
     green_label,
+    solve_putt,
 )
 
 logger = logging.getLogger(__name__)
 
-_M_TO_FT = 3.280839895
 _FT_TO_M = 1.0 / _M_TO_FT
-_M_TO_CM = 100.0
-_MS_TO_MPH = 2.236936
 _M_TO_MM = 1000.0
 #: Inches per metre from the shared units module, as the batch panel uses.
-_M_TO_IN = 12.0 / from_display_distance(1.0, UnitSystem.IMPERIAL, unit="ft")
-_RAD_S_TO_RPM = 60.0 / (2.0 * math.pi)
 _PANEL_STYLE = """
 QWidget#puttControls { background-color: #1b2530; }
 QLabel { color: #d7e2ec; }
@@ -237,6 +243,7 @@ class PuttingGreenWidget(QWidget):
     def _build_controls(self) -> QWidget:
         left = QWidget()
         left.setObjectName("puttControls")
+        self._controls = left  # rests while Auto-Solve runs
         left.setStyleSheet(_panel_style())
         left_layout = QVBoxLayout(left)
 
@@ -298,8 +305,14 @@ class PuttingGreenWidget(QWidget):
 
         self._run_btn = QPushButton("▶  Simulate Putt")
         self._run_btn.setStyleSheet(primary_button_style())
-        self._run_btn.clicked.connect(self._run_simulation)
+        self._run_btn.clicked.connect(lambda: self._run_simulation())
         left_layout.addWidget(self._run_btn)
+
+        self._solve_btn = QPushButton("🎯  Auto-Solve Read")
+        self._solve_btn.setToolTip("Solve the pace and line that hole this putt")
+        self._solve_btn.clicked.connect(self._start_auto_solve)
+        left_layout.addWidget(self._solve_btn)
+        self._solve_job: _Job | None = None
 
         self._batch_panel = BatchPanel(self._current_config, lambda: self._unit_system)
         left_layout.addWidget(self._batch_panel)
@@ -493,11 +506,15 @@ class PuttingGreenWidget(QWidget):
             green_seed=self._seed_spin.value(),
         )
 
-    def _run_simulation(self) -> None:
-        """Run the real putting simulation and render the result."""
+    def _run_simulation(self, config: PuttConfig | None = None) -> None:
+        """Run the real putting simulation and render the result.
+
+        ``config`` defaults to the controls; Auto-Solve passes the exact read,
+        which the spin boxes can only show rounded.
+        """
         self._anim_timer.stop()
         try:
-            scene = build_putt_scene(self._current_config())
+            scene = build_putt_scene(config or self._current_config())
         except (ValueError, ImportError, RuntimeError) as exc:
             logger.exception("Putting simulation failed")
             self._results_text.setPlainText(f"Simulation error: {exc}")
@@ -506,6 +523,56 @@ class PuttingGreenWidget(QWidget):
         self._scene = scene
         self._results_text.setPlainText(_format_metrics(scene, self._unit_system))
         self._render_scene(scene)
+
+    def is_solving(self) -> bool:
+        """Whether an Auto-Solve is running on the worker."""
+        return self._solve_job is not None
+
+    def _start_auto_solve(self) -> None:
+        """Solve the read off the GUI thread (a long sloped putt takes seconds)."""
+        pool = QThreadPool.globalInstance()
+        if self._solve_job is not None or pool is None:
+            return
+        self._controls.setEnabled(False)  # the read is for these settings
+        self._results_text.setPlainText("Solving the read on this green...")
+        job = _Job(
+            lambda args: {
+                "config": args["config"],
+                "solution": solve_putt(args["config"]),
+            },
+            {"config": self._current_config()},
+        )
+        job.signals.done.connect(self._apply_solution)
+        job.signals.failed.connect(self._on_solve_failed)
+        self._solve_job = job
+        pool.start(job)
+
+    def _finish_solve(self) -> None:
+        self._solve_job = None
+        self._controls.setEnabled(True)
+
+    def _on_solve_failed(self, message: str) -> None:
+        self._finish_solve()
+        self._results_text.setPlainText(f"Auto-Solve rejected: {message}")
+
+    def _apply_solution(self, report: dict[str, Any]) -> None:
+        """Write the solved pace and line into the controls and roll them."""
+        self._finish_solve()
+        solution: PuttSolution = report["solution"]
+        self._speed_spin.setValue(
+            to_display_speed(solution.putter_speed_ms, self._unit_system)
+        )
+        self._aim_spin.setValue(solution.aim_deg)
+        self._run_simulation(
+            dataclasses.replace(
+                report["config"],
+                putter_speed_ms=solution.putter_speed_ms,
+                aim_deg=solution.aim_deg,
+            )
+        )
+        self._results_text.setPlainText(
+            _format_read(solution, self._unit_system) + self._results_text.toPlainText()
+        )
 
     def _render_scene(self, scene: PuttScene) -> None:
         if self._gl_view is None:
@@ -587,7 +654,7 @@ def _format_metrics(
         )
         break_line = (
             f"Peak break:    {scene.peak_break_m * _M_TO_CM:.1f} cm "
-            f"({scene.peak_break_m * _M_TO_FT * 12.0:.2f} in)\n"
+            f"({scene.peak_break_m * _M_TO_IN:.2f} in)\n"
         )
         speed_line = (
             f"Launch speed:  {scene.launch_speed_ms:.2f} m/s "
@@ -605,7 +672,7 @@ def _format_metrics(
             f"({scene.total_roll_m:.2f} m)\n"
         )
         break_line = (
-            f"Peak break:    {scene.peak_break_m * _M_TO_FT * 12.0:.2f} in "
+            f"Peak break:    {scene.peak_break_m * _M_TO_IN:.2f} in "
             f"({scene.peak_break_m * _M_TO_CM:.1f} cm)\n"
         )
         speed_line = (
@@ -625,37 +692,6 @@ def _format_metrics(
         f"Roll model:    {scene.roll_model}\n"
         f"Track colour:  amber = skidding, green = pure roll, grey = stopped\n"
         f"{_format_impact(scene, unit_system)}"
-    )
-
-
-def _format_impact(scene: PuttScene, unit_system: UnitSystem) -> str:
-    """The putter-ball impact block (#14461); empty for scenes without one."""
-    impact = scene.impact
-    if impact is None:
-        return ""
-    metric = unit_system == UnitSystem.METRIC
-    toe = scene.impact_toe_m
-    side = "toe" if toe > 0 else "heel"
-    if toe == 0.0:
-        strike = "centred"
-    elif metric:
-        strike = f"{abs(toe) * 1000:.1f} mm {side}"
-    else:
-        strike = f"{abs(toe) * _M_TO_IN:.2f} in {side}"
-    skid_m = scene.skid_distance_m or 0.0
-    skid = f"{skid_m * _M_TO_CM:.1f} cm" if metric else f"{skid_m * _M_TO_IN:.1f} in"
-    twist = math.degrees(impact.face_twist_rad_s)
-    rpm = impact.spin_rad_s * _RAD_S_TO_RPM
-    face = "opens" if twist > 0 else "closes" if twist < 0 else "square"
-    return (
-        f"\nImpact\n{'-' * 44}\n"
-        f"Strike:        {strike}\n"
-        f"Launch angle:  {impact.launch_angle_deg:.1f}°\n"
-        f"Spin:          {abs(rpm):.0f} rpm {'topspin' if rpm >= 0 else 'backspin'}\n"
-        f"Skid:          {skid}\n"
-        f"Face twist:    {twist:+.1f} °/s (face {face})\n"
-        f"Energy loss:   {impact.kinetic_energy_loss_j * 1000:.1f} mJ\n"
-        f"Putter slows:  {format_speed(impact.putter_dv_mps, unit_system, decimals=2)}\n"
     )
 
 

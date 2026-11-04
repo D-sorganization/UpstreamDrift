@@ -95,8 +95,8 @@
       "title": "Optimum Read / Auto-Solve Aim",
       "cluster": "e",
       "cells": {
-        "core_api": "partial #14465 | src/shared/python/putting_dynamics/green_reading.py, src/shared/python/putting_analytics/optimize.py, src/api/routes/putting_green.py | solve_aim and best_action present; /read-green is flat-only.",
-        "pyqt6": "missing #14465 | src/tools/putting_green_gui/gui.py | Aim is manual; the analytics best-aim study is not linked to the simulator.",
+        "core_api": "present | src/shared/python/putting_dynamics/green_reading.py, src/shared/python/putting_analytics/optimize.py, src/api/routes/putting_green.py | solve_aim and best_action present; /read-green returns pace, heading, holed and converged in one call on any GreenSpec green.",
+        "pyqt6": "present | src/tools/putting_green_gui/_scene_builder.py, src/tools/putting_green_gui/gui.py | Auto-Solve Read runs solve_aim on the tile's surface off the GUI thread and writes the pace and aim into the controls.",
         "react": "partial #14466 | ui/src/pages/PuttingAnalytics.tsx | Analytics best aim/pace study; nothing on the simulator page.",
         "tauri": "partial #14466 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "partial #14465 | src/apps/putting_studio/js/controls_c.js | Aim-only grid search from one noise-free putt."
