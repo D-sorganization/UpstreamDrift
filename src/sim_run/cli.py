@@ -17,6 +17,7 @@ import sys
 from typing import Any, Sequence
 
 from src.sim_run.models import RunRecord, RunRequest
+from src.sim_run.reproduce import add_reproduce_command, reproduce_command
 from src.sim_run.run_registry import add_run_commands, runs_command
 from src.sim_run.store import RunStoreError, SimulationRunStore
 from src.sim_run.worker import SimulationWorkerPool
@@ -77,6 +78,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     add_run_commands(subparsers)
+    add_reproduce_command(subparsers)
     return parser
 
 
@@ -159,6 +161,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return run_command(parsed_args)
     if parsed_args.command == "runs":
         return runs_command(parsed_args)
+    if parsed_args.command == "reproduce":
+        return reproduce_command(parsed_args)
 
     parser.print_help(sys.stderr)
     return 2

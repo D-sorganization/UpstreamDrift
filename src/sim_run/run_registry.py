@@ -89,12 +89,12 @@ class RunRegistry:
 
         Raises:
             ValueError: if ``run_id`` is not a 64-char lowercase hex digest.
-            RunRegistryError: if no such run is stored.
+            RunRegistryError: if no such run is stored or its record is corrupt.
         """
         path = self._runs / f"{_check_run_id(run_id)}.json"
         if not path.is_file():
             raise RunRegistryError(f"unknown run {run_id}")
-        return validate_run_manifest(json.loads(path.read_text(encoding="utf-8")))
+        return _read_manifest(path, f"run {run_id}")
 
     def output_path(self, run_id: str, name: str) -> Path:
         """Return the stored object holding output ``name`` of ``run_id``."""
@@ -125,16 +125,21 @@ class RunRegistry:
         if not target.is_file():
             target.parent.mkdir(parents=True, exist_ok=True)
             with tempfile.NamedTemporaryFile(dir=target.parent, delete=False) as tmp:
-                shutil.copyfileobj(source.open("rb"), tmp)
+                with source.open("rb") as src:
+                    shutil.copyfileobj(src, tmp)
             Path(tmp.name).replace(target)
+
+
+def _read_manifest(path: Path, what: str) -> RunManifest:
+    try:
+        return validate_run_manifest(json.loads(path.read_text(encoding="utf-8")))
+    except (OSError, json.JSONDecodeError, RunManifestError, TypeError) as exc:
+        raise RunRegistryError(f"{what}: {exc}") from exc
 
 
 def _load_run_manifest(run_dir: Path) -> RunManifest:
     path = run_dir / MANIFEST_FILENAME
-    try:
-        return validate_run_manifest(json.loads(path.read_text(encoding="utf-8")))
-    except (OSError, json.JSONDecodeError, RunManifestError, TypeError) as exc:
-        raise RunRegistryError(f"{path.name} in {run_dir.name!r}: {exc}") from exc
+    return _read_manifest(path, f"{path.name} in {run_dir.name!r}")
 
 
 def _write_atomic(path: Path, text: str) -> None:
