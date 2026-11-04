@@ -2068,6 +2068,7 @@
 {"path": "physics/impact_model_capabilities.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/incremental_contact.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/incremental_contact_kernel.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
+{"path": "physics/lie_interaction.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/mud_ball.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/mujoco_swing_source.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/physics_parameters.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
