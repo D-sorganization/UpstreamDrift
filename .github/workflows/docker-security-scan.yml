@@ -73,9 +73,15 @@ jobs:
           tags: upstreamdrift:ci
           builder: ${{ steps.buildkit.outputs.builder || steps.buildx-fallback.outputs.name }}
 
+      - name: Install Trivy from GitHub release
+        # setup-trivy downloads from get.trivy.dev; use the checksummed release.
+        shell: bash
+        run: bash scripts/ci/install_trivy.sh v0.70.0
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
+          skip-setup-trivy: "true"
           image-ref: "upstreamdrift:ci"
           format: "sarif"
           output: "trivy-results.sarif"
@@ -94,6 +100,7 @@ jobs:
       - name: Run Trivy (table output for PR comments)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
+          skip-setup-trivy: "true"
           image-ref: "upstreamdrift:ci"
           format: "table"
           severity: "CRITICAL,HIGH"

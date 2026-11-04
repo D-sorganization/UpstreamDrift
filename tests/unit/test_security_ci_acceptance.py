@@ -155,6 +155,38 @@ def test_docker_security_scan_blocks_high_and_critical() -> None:
     assert str(table_scan["with"]["ignore-unfixed"]).lower() == "true"
 
 
+def _trivy_action_steps(workflow: str) -> list[dict]:
+    parsed = yaml.safe_load(_read(workflow))
+    return [
+        step
+        for job in parsed["jobs"].values()
+        for step in job.get("steps", [])
+        if str(step.get("uses", "")).startswith("aquasecurity/trivy-action@")
+    ]
+
+
+@pytest.mark.parametrize(
+    "workflow",
+    [".github/workflows/ci-standard.yml", ".github/workflows/docker-security-scan.yml"],
+)
+def test_trivy_binary_comes_from_checksummed_github_release(workflow: str) -> None:
+    """setup-trivy downloads from get.trivy.dev; its outages blocked the queue."""
+    steps = _trivy_action_steps(workflow)
+
+    assert steps
+    for step in steps:
+        assert str(step["with"]["skip-setup-trivy"]).lower() == "true"
+    assert "scripts/ci/install_trivy.sh" in _read(workflow)
+
+
+def test_trivy_install_script_verifies_release_checksum() -> None:
+    script = _read("scripts/ci/install_trivy.sh")
+
+    assert "github.com/aquasecurity/trivy/releases/download" in script
+    assert "https://get.trivy.dev" not in script
+    assert "sha256sum -c" in script
+
+
 def test_codeowners_has_two_owners_for_critical_paths() -> None:
     codeowners = _read(".github/CODEOWNERS")
     required_paths = {".github/workflows/", "scripts/", "/src/"}

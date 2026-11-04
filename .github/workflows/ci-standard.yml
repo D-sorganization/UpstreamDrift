@@ -910,10 +910,18 @@ jobs:
           echo "has_target=true" >> "$GITHUB_OUTPUT"
           echo "scan_ref=${trivy_targets[0]}" >> "$GITHUB_OUTPUT"
 
+      # setup-trivy downloads from get.trivy.dev; install from the checksummed
+      # GitHub release instead so that host's outages cannot block the queue.
+      - name: Install Trivy from GitHub release
+        if: github.event_name != 'pull_request' || steps.trivy-pr-target.outputs.has_target == 'true'
+        shell: bash
+        run: bash scripts/ci/install_trivy.sh v0.70.0
+
       - name: Trivy Filesystem Security Scan
         if: github.event_name != 'pull_request'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
+          skip-setup-trivy: "true"
           scan-type: fs
           scan-ref: .
           scanners: vuln,secret,misconfig
@@ -924,6 +932,7 @@ jobs:
         if: github.event_name == 'pull_request' && steps.trivy-pr-target.outputs.has_target == 'true'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
+          skip-setup-trivy: "true"
           scan-type: fs
           scan-ref: ${{ steps.trivy-pr-target.outputs.scan_ref }}
           scanners: vuln,secret,misconfig
