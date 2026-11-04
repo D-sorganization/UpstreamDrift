@@ -117,7 +117,7 @@
       "title": "Saved Scenarios and Comparison",
       "cluster": "h",
       "cells": {
-        "core_api": "missing #14471 |  | None.",
+        "core_api": "present | src/shared/python/putting_analytics/service_setup.py, src/api/routes/putting_analytics.py | Named setups with their dispersion result; /scenario and /scenario-compare (make rate and leave against the first).",
         "pyqt6": "missing #14471 |  | None.",
         "react": "missing #14472 | ui/src/stores/usePuttingStore.ts | Store holds one parameter set and one result.",
         "tauri": "missing #14472 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
@@ -128,7 +128,7 @@
       "title": "JSON Import/Export of a Setup",
       "cluster": "h",
       "cells": {
-        "core_api": "partial #14471 | src/shared/python/putting_dynamics/practice.py | Saves putt results and reports, not a setup; no import/export route.",
+        "core_api": "present | src/shared/python/putting_analytics/service_setup.py, src/api/routes/putting_analytics.py | Versioned setup document (schema_version 4.0.0, the studio's); /setup-export and /setup-import, which also loads a studio export's green and distance.",
         "pyqt6": "partial #14471 | src/tools/putting_green_gui/_scene_export.py | export_putt_scene/read_putt_export exist but nothing in the UI calls them.",
         "react": "missing #14472 |  | None.",
         "tauri": "missing #14472 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",

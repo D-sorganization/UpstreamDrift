@@ -16,8 +16,8 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | partial (#14464) | partial (#14464) | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | partial (#14466) | partial (#14466) | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | missing (#14467) | missing (#14468) | missing (#14468) | partial (#14467) |
-| Saved Scenarios and Comparison | (h) | missing (#14471) | missing (#14471) | missing (#14472) | missing (#14472) | present |
-| JSON Import/Export of a Setup | (h) | partial (#14471) | partial (#14471) | missing (#14472) | missing (#14472) | present |
+| Saved Scenarios and Comparison | (h) | present | missing (#14471) | missing (#14472) | missing (#14472) | present |
+| JSON Import/Export of a Setup | (h) | present | partial (#14471) | missing (#14472) | missing (#14472) | present |
 | Camera Views and Playback Phases | (i) | partial (#14473) | partial (#14473) | partial (#14474) | partial (#14474) | present |
 
 ## Evidence
@@ -85,13 +85,13 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: partial (#14467). `src/apps/putting_studio/js/green3d.js`, `src/apps/putting_studio/js/charts2d.js`. Bellman formula with a hand-tuned comeback fit, not a solved recursion.
 
 **Saved Scenarios and Comparison**
-- Core/API: missing (#14471). none. None.
+- Core/API: present. `src/shared/python/putting_analytics/service_setup.py`, `src/api/routes/putting_analytics.py`. Named setups with their dispersion result; /scenario and /scenario-compare (make rate and leave against the first).
 - PyQt6: missing (#14471). none. None.
 - React: missing (#14472). `ui/src/stores/usePuttingStore.ts`. Store holds one parameter set and one result.
 - Studio: present. `src/apps/putting_studio/js/controls_a.js`. Saved scenarios with a comparison table; no distribution chart.
 
 **JSON Import/Export of a Setup**
-- Core/API: partial (#14471). `src/shared/python/putting_dynamics/practice.py`. Saves putt results and reports, not a setup; no import/export route.
+- Core/API: present. `src/shared/python/putting_analytics/service_setup.py`, `src/api/routes/putting_analytics.py`. Versioned setup document (schema_version 4.0.0, the studio's); /setup-export and /setup-import, which also loads a studio export's green and distance.
 - PyQt6: partial (#14471). `src/tools/putting_green_gui/_scene_export.py`. export_putt_scene/read_putt_export exist but nothing in the UI calls them.
 - React: missing (#14472). none. None.
 - Studio: present. `src/apps/putting_studio/js/io.js`. Export/load with schema_version 4.0.0, including scenarios.
