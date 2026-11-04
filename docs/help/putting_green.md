@@ -121,6 +121,19 @@ with a message that names the missing module. The 3D view needs the optional
 
   ![Auto-Solve read at 390 px](images/putting_auto_solve_390.png)
 
+- **Strokes Gained** (#14467): each putt enters its result (holed, or the
+  leave) into the panel. **Score Putt** solves your own expected putts E(d)
+  on the green you have dialled in, with the batch panel's stroke noise, and
+  scores the putt against it: the chart plots E(d), and the readout gives
+  your expected putts from the start and the strokes this putt gained. The
+  solve runs in the background once per green and player; later putts on
+  the same green score at once on the cached curve. It is the shared
+  `service_sg` study the API's `/strokes-gained` returns.
+
+  ![Strokes gained at 1280 px](images/putting_strokes_gained_1280.png)
+
+  ![Strokes gained at 390 px](images/putting_strokes_gained_390.png)
+
 ## Method
 
 The GUI is a thin renderer. All domain logic is in

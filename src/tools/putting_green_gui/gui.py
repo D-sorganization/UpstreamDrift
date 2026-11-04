@@ -64,6 +64,7 @@ from src.shared.python.ui.units import (
     to_display_speed,
 )
 from src.tools.putting_green_gui._batch_panel import BatchPanel, _Job
+from src.tools.putting_green_gui._sg_panel import SGPanel
 from src.tools.putting_green_gui._scene_text import (
     M_TO_FT,
     M_TO_IN,
@@ -126,6 +127,9 @@ class PuttingGreenWidget(QWidget):
     def batch_panel(self) -> BatchPanel:
         return self._batch_panel
 
+    def sg_panel(self) -> SGPanel:
+        return self._sg_panel
+
     def set_unit_system(self, system: UnitSystem) -> None:
         """Switch display unit system dynamically and update spinbox suffixes/values."""
         if system == self._unit_system:
@@ -165,6 +169,7 @@ class PuttingGreenWidget(QWidget):
                 format_metrics(self._scene, self._unit_system)
             )
         self._batch_panel.redraw()
+        self._sg_panel.redraw()
 
     def _sync_units_combo(self) -> None:
         """Show the active unit system without re-triggering a user choice."""
@@ -283,6 +288,10 @@ class PuttingGreenWidget(QWidget):
 
         self._batch_panel = BatchPanel(self._current_config, lambda: self._unit_system)
         left_layout.addWidget(self._batch_panel)
+        self._sg_panel = SGPanel(
+            self._batch_panel.current_args, lambda: self._unit_system
+        )
+        left_layout.addWidget(self._sg_panel)
 
         left_layout.addStretch()
         return left
@@ -395,6 +404,7 @@ class PuttingGreenWidget(QWidget):
         )
         results_layout.addWidget(self._results_text)
         results_layout.addWidget(self._batch_panel.canvas)
+        results_layout.addWidget(self._sg_panel.canvas)
         right_layout.addWidget(results_group)
         return right
 
@@ -489,6 +499,8 @@ class PuttingGreenWidget(QWidget):
 
         self._scene = scene
         self._results_text.setPlainText(format_metrics(scene, self._unit_system))
+        leave_ft = 0.0 if scene.holed else scene.final_distance_to_cup_m * M_TO_FT
+        self._sg_panel.set_putt(holed=scene.holed, leave_ft=leave_ft)
         self._render_scene(scene)
 
     def is_solving(self) -> bool:
