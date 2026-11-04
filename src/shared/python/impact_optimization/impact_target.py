@@ -48,9 +48,14 @@ class ImpactWeights:
     """Per-term weights; ``face / path`` defaults to 10:1 and is configurable.
 
     The cost is quadratic, so 10:1 is a *weight* ratio: at iso-cost a 1 deg
-    face error equals ``sqrt(10)`` ~ 3.2 deg of path error.  If "10:1" is meant
-    in degrees (1 deg face == 10 deg path) the weight ratio is 100
-    (``ImpactWeights(face=100.0)``).  Which one is wanted is an open ruling.
+    face error equals ``sqrt(10)`` ~ 3.16 deg of path error.  Supervisor ruling
+    D10 keeps this reading as the default.  The other reading, 10:1 in degrees
+    (1 deg face == 10 deg path), is a weight ratio of 100
+    (``ImpactWeights(face=100.0)``) and is deliberately NOT the default: ball
+    curvature follows face - path, so at 100:1 the optimiser could trade a
+    near-zero face error for a large path error and bend a "straight" target
+    into a draw or fade.  10:1 still keeps the face far dominant.  Report the
+    face-to-path gap alongside the cost so the trade-off stays visible.
     """
 
     face: float = FACE_TO_PATH_RATIO
