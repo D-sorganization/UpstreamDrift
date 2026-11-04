@@ -1305,6 +1305,14 @@
       "sha256": "f557e510da33b4e38b9a1d5c7f51e0fceaf51b67d559dcf76b69559b58461ac3",
       "bytes": 3626175
     },
+    "docs/research/proximal_distal_energy_transfer/data/wscg_ztcf_additivity.json": {
+      "sha256": "330cf9c320126402be590019105e5aa2db2aace584d5fd83daeac6760f6ae070",
+      "bytes": 824
+    },
+    "docs/research/proximal_distal_energy_transfer/data/wscg_ztcf_additivity_residuals.npz": {
+      "sha256": "2cc240b9af8569f822392cc63551290730c29540fc2eb96ddd1a9bdf733743f1",
+      "bytes": 2379
+    },
     "docs/research/proximal_distal_energy_transfer/figures/fig_advanced_model_motion_plate.pdf": {
       "sha256": "d5613dcc688a196cc7a4e064627f5db4899d30358e95cdae66e06dc959d642e8",
       "bytes": 15924
@@ -3228,6 +3236,10 @@
     "scripts/research/proximal_distal_energy/wscg_model_selection.py": {
       "sha256": "23215051f55aff61a89a3a67256404ad83461a233a3c1c786fc574eb0f539c73",
       "bytes": 11753
+    },
+    "scripts/research/proximal_distal_energy/wscg_ztcf_additivity.py": {
+      "sha256": "986b93b1de329243363d236058ecad3301a7a00dc6b272fca2e8cacddba2d4e8",
+      "bytes": 6748
     },
     "src/shared/python/biomechanics/interaction_evidence.py": {
       "sha256": "2ccbc9e56f4c6dc6eb7c6f317f8efc60dca5cfb225f270be610c1768ed079aa3",
