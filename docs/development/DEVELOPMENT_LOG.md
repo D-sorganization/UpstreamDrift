@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14434 · RUN-4: Ud-Sim Reproduce Reruns a Stored Run From Its Model File With the Recorded Seed and Parameters, Compares Each Output Within an Absolute Tolerance and Reports Engine Version Mismatches; the Run Store Now Closes Copied Files and Reports Corrupt Records Cleanly
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14434
+- **Branch:** brick/backlog-completion/14434-reproduce-run
+- **PR:** #14520
+- **Paths:** see #14520
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`4f5f12f7`; collated from changes/14434-reproduce-a-stored-run-with-a-drift-report.md)
+- **Summary:** RUN-4: ud-sim reproduce reruns a stored run from its model file with the recorded seed and parameters, compares each output within an absolute tolerance and reports engine version mismatches; the run store now closes copied files and reports corrupt records cleanly
+- **Next step:** Merge the PR, then RUN-5 #14435 (route the other engines through the shared emitter and add their reproducers).
+
+### DL-#14433 · RUN-3: Content-Addressed Run Store (Run_Id = SHA-256 of the Canonical Manifest, Outputs Stored Once by Hash) With Ud-Sim Runs Add, List and Show; Store Root From --Store or $UD_RUN_STORE
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14433
+- **Branch:** brick/backlog-completion/14433-run-store
+- **PR:** #14517
+- **Paths:** see #14517
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`f6703b27`; collated from changes/14433-content-addressed-run-store-and-lookup-cli.md)
+- **Summary:** RUN-3: content-addressed run store (run_id = SHA-256 of the canonical manifest, outputs stored once by hash) with ud-sim runs add, list and show; store root from --store or $UD_RUN_STORE
+- **Next step:** Merge the PR, then RUN-4 #14434 (reproduce a stored run by id with a drift report).
+
 ### DL-#14453 · Install Trivy From Checksum-Verified GitHub Releases in CI.
 
 - **State:** in_review
@@ -897,6 +923,357 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14460 · Putting Page Groundwork: The Seven Core Noise Channels, the Simulator-to-Core Dispersion Arguments and the /Dispersion and /Make-Spread Client, Pinned to the Shared Core by a Golden File (PUTT-SHARE B-Web Part 1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14460
+- **Branch:** merged via #14532
+- **PR:** #14532
+- **Paths:** see #14532
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`ced87292`; collated from changes/14460-putting-page-groundwork-the-seven-core-n.md)
+- **Summary:** Putting page groundwork: the seven core noise channels, the simulator-to-core dispersion arguments and the /dispersion and /make-spread client, pinned to the shared core by a golden file (PUTT-SHARE b-web part 1)
+- **Next step:** Shipped in PR #14532.
+
+### DL-#14518 · Run Release Presets Through the Run Store: Sim_Run.Preset_Run Records Which Files a Preset Wrote, Copies Them Into a Run Directory and Emits a Reproducible Run Manifest
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14518
+- **Branch:** merged via #14524
+- **PR:** #14524, #14534, #14528
+- **Paths:** see #14524
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`725ae488`; collated from changes/14518-ud-sim-preset-run-stores-a-release-prese.md)
+- **Summary:** Run release presets through the run store: sim_run.preset_run records which files a preset wrote, copies them into a run directory and emits a reproducible run manifest
+- **Next step:** Shipped in PR #14524.
+
+### DL-#14494 · ZVCF Is the Control Component M^-1 Tau (Constrained: P_C Tau With the Reaction Change); Gravity-Only Term Renamed Zero_Velocity_Zero_Torque_Acceleration With a One-Release Deprecation Path; Analysis Schema 4.0.0
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14494
+- **Branch:** merged via #14515
+- **PR:** #14515
+- **Paths:** see #14515
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`8bf1b165`; collated from changes/14494-zvcf-is-the-control-component-m-1-tau-co.md)
+- **Summary:** ZVCF is the control component M^-1 tau (constrained: P_c tau with the reaction change); gravity-only term renamed zero_velocity_zero_torque_acceleration with a one-release deprecation path; analysis schema 4.0.0
+- **Next step:** Shipped in PR #14515.
+
+### DL-#14493 · Superposition Residual for Forward Counterfactual Trajectories: ZTCF + ZVCF Matches the Base Only at the Fork; Integrated Sums Report Their Residual
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14493
+- **Branch:** merged via #14510
+- **PR:** #14510
+- **Paths:** see #14510
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`17da8467`; collated from changes/14493-superposition-residual-for-forward-count.md)
+- **Summary:** Superposition residual for forward counterfactual trajectories: ZTCF + ZVCF matches the base only at the fork; integrated sums report their residual
+- **Next step:** Shipped in PR #14510.
+
+### DL-#14492 · Drift_and_Control_Reactions: Closure Reactions Split Into Drift (Gravity, Velocity) and Control (Load Only) Parts That Sum to the Total, on the KKT Projector
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14492
+- **Branch:** merged via #14512
+- **PR:** #14512
+- **Paths:** see #14512
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`df49a7a8`; collated from changes/14492-drift-and-control-reactions-closure-reac.md)
+- **Summary:** drift_and_control_reactions: closure reactions split into drift (gravity, velocity) and control (load only) parts that sum to the total, on the KKT projector
+- **Next step:** Shipped in PR #14512.
+
+### DL-#14491 · Golden ZTCF/ZVCF Contract Tests: Drift + Control = Total With Gravity Counted Once, on the Analytical and MuJoCo Double Pendulum
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14491
+- **Branch:** merged via #14508
+- **PR:** #14508
+- **Paths:** see #14508
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`fe014c2a`; collated from changes/14491-golden-tests-drift-control-total-gravity.md)
+- **Summary:** Golden ZTCF/ZVCF contract tests: drift + control = total with gravity counted once, on the analytical and MuJoCo double pendulum
+- **Next step:** Shipped in PR #14508.
+
+### DL-#14473 · Putting: PyQt6 Tile Readouts and Panel Style Move Out of gui.py Into _Scene_Text and _Style (No Behaviour Change; Keeps gui.py Under the Monolith Threshold)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14473
+- **Branch:** merged via #14533
+- **PR:** #14533
+- **Paths:** see #14533
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`b50c8bb8`; collated from changes/14473-putting-gui-split.md)
+- **Summary:** Putting: PyQt6 tile readouts and panel style move out of gui.py into _scene_text and _style (no behaviour change; keeps gui.py under the monolith threshold)
+- **Next step:** Shipped in PR #14533.
+
+### DL-#14467 · Putting Analytics: Player-Specific Bellman Expected Putts on the Caller's Green (Optimal Pace per Distance, Shared Skill Roll Model) and One Putt's Strokes Gained Against It, on /Tools/Putting-Analytics/Strokes-Gained
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14467
+- **Branch:** merged via #14527
+- **PR:** #14527
+- **Paths:** see #14527
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`f3e71c73`; collated from changes/14467-putting-sg-core.md)
+- **Summary:** Putting analytics: player-specific Bellman expected putts on the caller's green (optimal pace per distance, shared skill roll model) and one putt's strokes gained against it, on /tools/putting-analytics/strokes-gained
+- **Next step:** Shipped in PR #14527.
+
+### DL-#14465 · Putting: Auto-Solve Read on the PyQt6 Tile (Core Solve_Aim Off the GUI Thread, Writes Pace and Aim Into the Controls) and One-Call Aim+Pace on /Read-Green
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14465
+- **Branch:** merged via #14531
+- **PR:** #14531
+- **Paths:** see #14531
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`2cc0a7ac`; collated from changes/14465-putting-auto-solve.md)
+- **Summary:** Putting: Auto-Solve Read on the PyQt6 tile (core solve_aim off the GUI thread, writes pace and aim into the controls) and one-call aim+pace on /read-green
+- **Next step:** Shipped in PR #14531.
+
+### DL-#14463 · Putting Desktop: Green Type Selector (Cross Slope or Any Core GreenSpec Preset), Seeded Undulation in mm or in, and a Green Seed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14463
+- **Branch:** merged via #14526
+- **PR:** #14526, #14521
+- **Paths:** see #14526
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`2bb758eb`; collated from changes/14463-putting-green-spec.md)
+- **Summary:** Putting desktop: Green Type selector (cross slope or any core GreenSpec preset), seeded undulation in mm or in, and a green seed
+- **Next step:** Shipped in PR #14526.
+
+### DL-#14461 · Putting Core: Named Putter Balance Presets (Toe-Hang, Face-Balanced, Zero-Torque, Counterbalanced) Over PutterState; GET /Tools/Putting-Green/Putter-Presets Lists Them and /Simulate-3D Accepts Balance_Type
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14461
+- **Branch:** merged via #14516
+- **PR:** #14516, #14519, #14511
+- **Paths:** see #14516
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`9a5d0d0c`; collated from changes/14461-putting-strike-core.md)
+- **Summary:** Putting core: named putter balance presets (toe-hang, face-balanced, zero-torque, counterbalanced) over PutterState; GET /tools/putting-green/putter-presets lists them and /simulate-3d accepts balance_type
+- **Next step:** Shipped in PR #14516.
+
+### DL-#14459 · Putting Analytics: Dispersion Batch (Up to 2000 Putts) and 0-45 Ft Make-Spread Services and Routes on the Caller's Green, From the Shared Skill Roll Model
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14459
+- **Branch:** merged via #14487
+- **PR:** #14487, #14506, #14504, #14513
+- **Paths:** see #14487
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`52f41a89`; collated from changes/14459-putting-variance-close.md)
+- **Summary:** Putting analytics: dispersion batch (up to 2000 putts) and 0-45 ft make-spread services and routes on the caller's green, from the shared skill roll model
+- **Next step:** Shipped in PR #14487.
+
+### DL-#14458 · React Putting Page: Metric/Imperial Units Selector Mirroring units.py (SI Internally), Golden Parity With the Python Core
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14458
+- **Branch:** merged via #14489
+- **PR:** #14489
+- **Paths:** see #14489
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`96702ab2`; collated from changes/14458-react-putting-page-metric-imperial-units.md)
+- **Summary:** React putting page: Metric/Imperial units selector mirroring units.py (SI internally), golden parity with the Python core
+- **Next step:** Shipped in PR #14489.
+
+### DL-#14457 · Putting Green Simulator: Metric/Imperial Units Selector That Converts Controls and Metrics in Place and Persists the Shared Unit Preference
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14457
+- **Branch:** merged via #14485
+- **PR:** #14485
+- **Paths:** see #14485
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`8eff3cca`; collated from changes/14457-putting-units-selector.md)
+- **Summary:** Putting Green Simulator: Metric/Imperial units selector that converts controls and metrics in place and persists the shared unit preference
+- **Next step:** Shipped in PR #14485.
+
+### DL-#14456 · Putting Feature Parity Matrix: 13 Advanced Features X Core/API, PyQt6, React, Tauri, Studio With File Evidence; Registry Test Tracks 53 Gaps as Strict Xfails
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14456
+- **Branch:** merged via #14483
+- **PR:** #14483
+- **Paths:** see #14483
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`a1af70c1`; collated from changes/14456-putting-feature-parity-matrix-13-advance.md)
+- **Summary:** Putting feature parity matrix: 13 advanced features x core/API, PyQt6, React, Tauri, studio with file evidence; registry test tracks 53 gaps as strict xfails
+- **Next step:** Shipped in PR #14483.
+
+### DL-#14448 · Putting Green Simulator: Python -m Launch Entry Point With --Smoke (One Putt, Clean Exit) and a Clear Exit-2 Message When the Putting Core Is Missing
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14448
+- **Branch:** merged via #14455
+- **PR:** #14455
+- **Paths:** see #14455
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`1ef9306e`; collated from changes/14448-putting-green-simulator-python-m-launch.md)
+- **Summary:** Putting Green Simulator: python -m launch entry point with --smoke (one putt, clean exit) and a clear exit-2 message when the putting core is missing
+- **Next step:** Shipped in PR #14455.
+
+### DL-#14446 · Add Append-Only Model-Matching Metrics Trend File and Daily-Report Delta Snippet
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14446
+- **Branch:** merged via #14507
+- **PR:** #14507
+- **Paths:** see #14507
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`56c5a326`; collated from changes/14446-add-append-only-model-matching-metrics-t.md)
+- **Summary:** Add append-only model-matching metrics trend file and daily-report delta snippet
+- **Next step:** Shipped in PR #14507.
+
+### DL-#14445 · Add Headless Best-Model Render Script (SHA-256-Pinned MuJoCo and OpenSim OS9 Inputs, Per-Model Summaries)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14445
+- **Branch:** merged via #14505
+- **PR:** #14505
+- **Paths:** see #14505
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`c20dadd9`; collated from changes/14445-add-headless-best-model-render-script-sh.md)
+- **Summary:** Add headless best-model render script (SHA-256-pinned MuJoCo and OpenSim OS9 inputs, per-model summaries)
+- **Next step:** Shipped in PR #14505.
+
+### DL-#14444 · Add the OpenSim Segment Scaling-Check Command: Gates Scale Factors and Rigid Residuals on the #13991 Length-Plausibility Bounds and Writes Metrics JSON Plus a Run-Manifest-V1
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14444
+- **Branch:** merged via #14509
+- **PR:** #14509
+- **Paths:** see #14509
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`5cb2bd25`; collated from changes/14444-add-the-opensim-segment-scaling-check-co.md)
+- **Summary:** Add the OpenSim segment scaling-check command: gates scale factors and rigid residuals on the #13991 length-plausibility bounds and writes metrics JSON plus a run-manifest-v1
+- **Next step:** Shipped in PR #14509.
+
+### DL-#14443 · Add Per-Engine Model-Matching Status Report (Ledger, Generator, STATUS.md) Marking Unverified Numbers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14443
+- **Branch:** merged via #14484
+- **PR:** #14484
+- **Paths:** see #14484
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`837a97b4`; collated from changes/14443-add-per-engine-model-matching-status-rep.md)
+- **Summary:** Add per-engine model-matching status report (ledger, generator, STATUS.md) marking unverified numbers
+- **Next step:** Shipped in PR #14484.
+
+### DL-#14440 · Additivity Charts for the Pinned WSCG Run: ZTCF, ZVCF, Their Sum and the Full Response per Lead-Arm Joint, With the Residual Against Its Declared Tolerance Band and Event Markers, Written as SVG and PNG on Demand (Scripts/Research/Proximal_Distal_Energy/wscg_ztcf_additivity_charts.py).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14440
+- **Branch:** merged via #14529
+- **PR:** #14529
+- **Paths:** see #14529
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`84d8cbfd`; collated from changes/14440-additivity-charts-for-the-pinned-wscg-ru.md)
+- **Summary:** Additivity charts for the pinned WSCG run: ZTCF, ZVCF, their sum and the full response per lead-arm joint, with the residual against its declared tolerance band and event markers, written as SVG and PNG on demand (scripts/research/proximal_distal_energy/wscg_ztcf_additivity_charts.py).
+- **Next step:** Shipped in PR #14529.
+
+### DL-#14439 · Render Force and Torque Vectors at Swing Events of a Manifest Run (Src/Sim_Run/vector_overlay.py), With Legend Lines That State Each Reference's Drawn Size, and Keep the Matplotlib Legend Text Inside Its Inset.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14439
+- **Branch:** merged via #14525
+- **PR:** #14525
+- **Paths:** see #14525
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`f542bbef`; collated from changes/14439-render-force-and-torque-vectors-at-swing.md)
+- **Summary:** Render force and torque vectors at swing events of a manifest run (src/sim_run/vector_overlay.py), with legend lines that state each reference's drawn size, and keep the Matplotlib legend text inside its inset.
+- **Next step:** Shipped in PR #14525.
+
+### DL-#14438 · Assert ZTCF + ZVCF = Full (Canonical ZVCF Control Component, Gravity Once, Pointwise Only) and the ZTCF Velocity Drift on the Pinned WSCG Model, With Saved Residual Series
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14438
+- **Branch:** merged via #14523
+- **PR:** #14523
+- **Paths:** see #14523
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`4406bff4`; collated from changes/14438-assert-the-exact-ztcf-split-on-the-pinned.md)
+- **Summary:** Assert ZTCF + ZVCF = full (canonical ZVCF control component, gravity once, pointwise only) and the ZTCF velocity drift on the pinned WSCG model, with saved residual series
+- **Next step:** Shipped in PR #14523.
+
+### DL-#14437 · Add the WSCG Best-Match MuJoCo Model Selection Record (Structural Feature Score, Runner-Up, Run-Manifest Pin)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14437
+- **Branch:** merged via #14488
+- **PR:** #14488
+- **Paths:** see #14488
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`85bac31d`; collated from changes/14437-add-the-wscg-best-match-mujoco-model-sel.md)
+- **Summary:** Add the WSCG best-match MuJoCo model selection record (structural feature score, runner-up, run-manifest pin)
+- **Next step:** Shipped in PR #14488.
+
+### DL-#14435 · OpenSim, Drake, Pinocchio and MyoSuite Runs Emit the Shared Run Manifest; Absent Engines Skip With a Reason; Reproduce Fails Closed on Git Revisions and Missing Parameters
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14435
+- **Branch:** merged via #14522
+- **PR:** #14522
+- **Paths:** see #14522
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`c38dc0ff`; collated from changes/14435-opensim-drake-pinocchio-and-myosuite-run.md)
+- **Summary:** OpenSim, Drake, Pinocchio and MyoSuite runs emit the shared run manifest; absent engines skip with a reason; reproduce fails closed on git revisions and missing parameters
+- **Next step:** Shipped in PR #14522.
+
+### DL-#14432 · Emit a Run Manifest From the MuJoCo Run Path, With Output Artifact Hashes and a Shared Engine-Neutral Emitter
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14432
+- **Branch:** merged via #14514
+- **PR:** #14514
+- **Paths:** see #14514
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`3e0a2f69`; collated from changes/14432-emit-a-run-manifest-from-the-mujoco-run-p.md)
+- **Summary:** Emit a run manifest from the MuJoCo run path, with output artifact hashes and a shared engine-neutral emitter
+- **Next step:** Shipped in PR #14514.
+
+### DL-#14431 · Add the Run-Manifest V1 Schema and Validator: Model Id and Immutable Revision, Parameters, Input-Data Digest, Seed, Engine and Version, UD Commit and Created_at; Mutable Refs and Missing Provenance Fail
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14431
+- **Branch:** merged via #14454
+- **PR:** #14454
+- **Paths:** see #14454
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`5607ae01`; collated from changes/14431-add-the-run-manifest-v1-schema-and-valid.md)
+- **Summary:** Add the run-manifest v1 schema and validator: model id and immutable revision, parameters, input-data digest, seed, engine and version, UD commit and created_at; mutable refs and missing provenance fail
+- **Next step:** Shipped in PR #14454.
 
 ### DL-#2427 · Add Report-Only Pr-Body-Lint Pull_Request_Target Caller (RM Reusable Workflow) and Contract Test.
 

@@ -1,0 +1,58 @@
+{
+  "_comment": "Pinned to the shared putting core (#14460); tests/unit/shared_python/test_dispersion_ui_golden.py checks it against service_dispersion and service_variance.",
+  "channels": {
+    "face_sd_deg": [1.5, 0.0, 10.0],
+    "path_sd_deg": [2.0, 0.0, 15.0],
+    "speed_cv": [0.08, 0.0, 0.5],
+    "strike_toe_sd_mm": [0.0, 0.0, 25.0],
+    "grade_rel_sd": [0.0, 0.0, 1.0],
+    "aspect_sd_deg": [0.0, 0.0, 45.0],
+    "stimp_rel_sd": [0.0, 0.0, 0.5]
+  },
+  "batch_sizes": [40, 100, 1000],
+  "spread_n": 60,
+  "spread_distances_ft": [
+    3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45
+  ],
+  "cases": [
+    {
+      "parameters": {
+        "hole_x_m": 3.048,
+        "hole_y_m": 0,
+        "grade_percent": 2,
+        "downhill_aspect_deg": -90,
+        "stimp_rating": 10,
+        "random_seed": 8345
+      },
+      "n": 40,
+      "args": {
+        "distance_ft": 10,
+        "grade_pct": 2,
+        "aspect_deg": -90,
+        "stimp": 10,
+        "seed": 8345
+      },
+      "make_rate": 0.125,
+      "holed": 5,
+      "mean_leave_ft": 1.9867687564507066
+    },
+    {
+      "parameters": {
+        "hole_x_m": 3,
+        "hole_y_m": 3,
+        "grade_percent": 1.5,
+        "downhill_aspect_deg": -170,
+        "stimp_rating": 11.5,
+        "random_seed": 7
+      },
+      "n": 40,
+      "args": {
+        "distance_ft": 13.91942482650684,
+        "grade_pct": 1.5,
+        "aspect_deg": 145,
+        "stimp": 11.5,
+        "seed": 7
+      }
+    }
+  ]
+}
