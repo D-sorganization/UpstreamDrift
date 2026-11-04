@@ -250,7 +250,7 @@ function rebuildGreenDispersionBatch() {
   const elSGGain = document.getElementById('valSGPlayerGain');
   if (elSGGain) elSGGain.textContent = `${sgPlayerGain >= 0 ? '+' : ''}${sgPlayerGain.toFixed(2)} strokes / putt`;
 
-  // 6-Channel 18-Hole Strokes Gained Variance Attribution from the shared core
+  // 7-Channel 18-Hole Strokes Gained Variance Attribution from the shared core
   // (js/core_attribution.js, generated from service_variance; #14459).
   const setTxt = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
   if (typeof coreAttributionCell === 'function') {
@@ -260,12 +260,13 @@ function rebuildGreenDispersionBatch() {
     setTxt('chLossFace', fmt(cell.gain_removed.face));
     setTxt('chLossPath', fmt(cell.gain_removed.path));
     setTxt('chLossSpeed', fmt(cell.gain_removed.speed));
+    setTxt('chLossStrike', fmt(cell.gain_removed.strike));
     setTxt('chLossReadGrade', fmt(cell.gain_removed.read_grade));
     setTxt('chLossReadAspect', fmt(cell.gain_removed.read_aspect));
     setTxt('chLossReadStimp', fmt(cell.gain_removed.read_stimp));
     setTxt('valCoreAttributionNote',
       `Core ${meta.profile} player at ${cell.distance_ft} ft, ${cell.slope_pct}% side slope ` +
-      `(nearest grid cell); +/-${meta.noise_sg} SG sampling noise; strike channel in #14461.`);
+      `(nearest grid cell); +/-${meta.noise_sg} SG sampling noise.`);
   }
   // Studio-only illustrative channels (closed-form, not in the core).
   const distScale = Math.sqrt(distFt / 12.0);
