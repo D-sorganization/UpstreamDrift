@@ -617,10 +617,11 @@ class PuttingGreenWidget(QWidget):
         self._playback.set_playing(playing)
 
     def _toggle_playback(self) -> None:
-        if self._scene is None:
+        scene = self._scene
+        if scene is None:
             return
         playing = self._anim_timer.isActive()
-        if not playing and self._anim_index >= self._scene.trajectory_xyz.shape[0]:
+        if not playing and self._anim_index >= len(scene.trajectory_xyz):
             self._anim_index = 0  # replay a finished putt from the stroke
         self._set_playing(not playing)
 
