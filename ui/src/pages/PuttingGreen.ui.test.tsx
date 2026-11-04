@@ -12,6 +12,7 @@ vi.mock("@/api/puttingClient", () => ({
   simulatePutt3D: vi.fn(),
   runDispersion: vi.fn(),
   runMakeSpread: vi.fn(),
+  runStrokesGained: vi.fn(),
   fetchPutterPresets: vi.fn(),
 }));
 
