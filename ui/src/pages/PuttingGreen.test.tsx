@@ -66,6 +66,9 @@ describe('PuttingGreen data structures', () => {
       total_break: 0.05,
       recommended_speed: 2.1,
       aim_point: [10.02, 14.95],
+      aim_heading_deg: 1.4,
+      holed: true,
+      converged: true,
       elevations: [0.0, 0.01, 0.02, 0.03],
       slopes: [
         [0.001, 0.002],
