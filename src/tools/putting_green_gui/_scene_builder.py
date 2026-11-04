@@ -35,11 +35,13 @@ from src.shared.python.putting_dynamics import (
     GreenSpec,
     HeightField,
     Mode,
+    PhaseMark,
     PutterState,
     PuttResult,
     SurfaceSpec,
     balance_preset,
     green_preset,
+    phase_marks,
     simulate_strike,
     stimp_to_rolling_mu,
 )
@@ -137,6 +139,9 @@ class PuttScene:
     skid_distance_m: float | None = None
     impact_toe_m: float = 0.0
     green_type: str | None = None
+    #: Where the hop, skid, roll and rest start (#14473), from the core's
+    #: ``phase_marks``; empty on scenes read from files.
+    phases: tuple[PhaseMark, ...] = ()
 
 
 def _validate(config: PuttConfig) -> None:
@@ -395,4 +400,5 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         skid_distance_m=float(result.skid_distance_m),
         impact_toe_m=config.impact_toe_m,
         green_type=config.green_type,
+        phases=phase_marks(result.samples),
     )
