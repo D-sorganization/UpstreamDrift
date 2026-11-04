@@ -34,6 +34,7 @@ import numpy as np
 from src.shared.python.putting_analytics import optimize
 from src.shared.python.putting_analytics.aggregate import DEFAULT_GRID_FT
 from src.shared.python.putting_analytics.expected_putts import (
+    ExpectedPuttsCurve,
     PuttAction,
     PuttOutcomes,
 )
@@ -119,6 +120,23 @@ def _putt(args: Mapping[str, Any]) -> PuttOutcomes | None:
     return PuttOutcomes(np.array([holed]), np.array([leave]))
 
 
+def score_putt(report: Mapping[str, Any], holed: bool, leave_ft: float) -> float:
+    """Strokes gained by another putt from ``report``'s spot, on its cached curve.
+
+    Equals the ``sg_player`` an :func:`sg_study` with this putt would return,
+    without solving the curve again.
+    """
+    putt = _putt({"holed": holed, "leave_ft": leave_ft})
+    if putt is None:  # unreachable: both keys are given
+        raise ValueError("a putt needs 'holed' and 'leave_ft'")
+    curve = ExpectedPuttsCurve(
+        np.asarray(report["curve"]["distances_ft"], float),
+        np.asarray(report["curve"]["expected_putts"], float),
+    )
+    distance = float(report["distance_ft"])
+    return optimize.strokes_gained(distance, putt, curve, curve).sg_player
+
+
 def sg_study(args: Mapping[str, Any]) -> dict[str, Any]:
     """The player's E(d) on the caller's green and the putt's strokes gained.
 
@@ -171,5 +189,6 @@ __all__ = [
     "MAX_SG_N",
     "MAX_SG_PACES",
     "SkillPuttModel",
+    "score_putt",
     "sg_study",
 ]
