@@ -30,6 +30,7 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QPushButton,
     QScrollArea,
+    QSlider,
     QSpinBox,
     QSplitter,
     QStatusBar,
@@ -44,7 +45,7 @@ from src.shared.python.golf_viz import (
     grid_surface_mesh,
     roll_mode_colors,
 )
-from src.shared.python.putting_dynamics import BALANCE_PRESETS, GREEN_PRESETS
+from src.shared.python.putting_dynamics import BALANCE_PRESETS, GREEN_PRESETS, Mode
 from src.shared.python.theme.tool_stylesheet import (
     get_tool_colors,
     primary_button_style,
@@ -64,6 +65,7 @@ from src.shared.python.ui.units import (
     to_display_speed,
 )
 from src.tools.putting_green_gui._batch_panel import BatchPanel, _Job
+from src.tools.putting_green_gui._camera import CAMERA_PRESETS, camera_pose
 from src.tools.putting_green_gui._scene_text import (
     M_TO_FT,
     M_TO_IN,
@@ -83,6 +85,19 @@ from src.tools.putting_green_gui._scene_builder import (
 )
 
 logger = logging.getLogger(__name__)
+
+_VIEW_LABELS = {
+    "orbit": "Orbit",
+    "down_the_line": "Down the line",
+    "face_on": "Face on",
+    "overhead": "Overhead",
+}
+_PHASE_LABELS = {
+    Mode.AIRBORNE: "Hop",
+    Mode.SLIDE: "Skid",
+    Mode.ROLL: "Roll",
+    Mode.REST: "Rest",
+}
 
 _FT_TO_M = 1.0 / M_TO_FT
 _M_TO_MM = 1000.0
@@ -381,6 +396,7 @@ class PuttingGreenWidget(QWidget):
         results_layout = QVBoxLayout(results_group)
 
         self._init_gl_view(results_layout)
+        results_layout.addWidget(self._build_playback_row())
 
         self._results_text = HoverCopyTextBrowser()
         self._results_text.setReadOnly(True)
@@ -445,6 +461,40 @@ class PuttingGreenWidget(QWidget):
         self._gl_view = view
         results_layout.addWidget(view, stretch=3)
 
+    def _build_playback_row(self) -> QWidget:
+        """View presets, play/pause, the scrubber and the phase jumps."""
+        row = QWidget()
+        layout = QVBoxLayout(row)  # two lines, so the phone width still fits
+        layout.setContentsMargins(0, 0, 0, 0)
+        transport, choices = QHBoxLayout(), QHBoxLayout()
+        self._play_btn = QPushButton("Play")
+        self._play_btn.setToolTip("Play or pause the putt")
+        self._play_btn.clicked.connect(self._toggle_playback)
+        self._scrub_slider = QSlider(Qt.Orientation.Horizontal)
+        self._scrub_slider.setRange(0, 0)
+        self._scrub_slider.setToolTip("Scrub through the putt")
+        self._scrub_slider.valueChanged.connect(self._on_scrub)
+        self._phase_combo = QComboBox()
+        self._phase_combo.setToolTip("Jump to where the hop, skid, roll or rest starts")
+        self._phase_combo.activated.connect(self._jump_to_phase)
+        self._view_combo = QComboBox()
+        self._view_combo.setToolTip("Camera view")
+        for preset in CAMERA_PRESETS:
+            self._view_combo.addItem(_VIEW_LABELS[preset], preset)
+        self._view_combo.currentIndexChanged.connect(self._on_view_chosen)
+        transport.addWidget(self._play_btn)
+        transport.addWidget(self._scrub_slider, stretch=1)
+        choices.addWidget(self._phase_combo, stretch=1)
+        choices.addWidget(self._view_combo, stretch=1)
+        for combo in (self._phase_combo, self._view_combo):
+            combo.setSizeAdjustPolicy(
+                QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+            )
+            combo.setMinimumContentsLength(3)
+        layout.addLayout(transport)
+        layout.addLayout(choices)
+        return row
+
     # ------------------------------------------------------------------
     # Interaction
     # ------------------------------------------------------------------
@@ -490,6 +540,7 @@ class PuttingGreenWidget(QWidget):
         self._scene = scene
         self._results_text.setPlainText(format_metrics(scene, self._unit_system))
         self._render_scene(scene)
+        self._start_playback(scene)
 
     def is_solving(self) -> bool:
         """Whether an Auto-Solve is running on the worker."""
@@ -564,17 +615,66 @@ class PuttingGreenWidget(QWidget):
         self._start_item.setData(pos=scene.start_xyz.reshape(1, 3))
         self._ball_item.setData(pos=scene.trajectory_xyz[:1])
 
-        self._frame_camera(scene)
-        self._anim_index = 0
-        self._anim_timer.start()
+        self._apply_camera(scene)
 
-    def _frame_camera(self, scene: PuttScene) -> None:
+    def _start_playback(self, scene: PuttScene) -> None:
+        """Reset the scrubber and phase jumps to ``scene`` and play it."""
+        self._scrub_slider.blockSignals(True)
+        self._scrub_slider.setRange(0, scene.trajectory_xyz.shape[0] - 1)
+        self._scrub_slider.setValue(0)
+        self._scrub_slider.blockSignals(False)
+        self._phase_combo.clear()
+        for mark in scene.phases:
+            self._phase_combo.addItem(
+                f"{_PHASE_LABELS[mark.mode]} {mark.t_s:.2f} s", mark.index
+            )
+        self._anim_index = 0
+        self._set_playing(True)
+
+    def _apply_camera(self, scene: PuttScene) -> None:
         from pyqtgraph import Vector
 
-        width, height = scene.green_size
-        self._gl_view.opts["center"] = Vector(width / 2.0, height / 2.0, 0.0)
-        self._gl_view.opts["distance"] = max(width, height) * 1.5 + 4.0
+        pose = camera_pose(scene, self._view_combo.currentData())
+        self._gl_view.opts["center"] = Vector(*pose.center)
+        self._gl_view.opts["distance"] = pose.distance
+        self._gl_view.opts["elevation"] = pose.elevation_deg
+        self._gl_view.opts["azimuth"] = pose.azimuth_deg
         self._gl_view.update()
+
+    def _on_view_chosen(self, _index: int) -> None:
+        if self._scene is not None and self._gl_view is not None:
+            self._apply_camera(self._scene)
+
+    def _set_playing(self, playing: bool) -> None:
+        if playing:
+            self._anim_timer.start()
+        else:
+            self._anim_timer.stop()
+        self._play_btn.setText("Pause" if playing else "Play")
+
+    def _toggle_playback(self) -> None:
+        if self._scene is None:
+            return
+        playing = self._anim_timer.isActive()
+        if not playing and self._anim_index >= self._scene.trajectory_xyz.shape[0]:
+            self._anim_index = 0  # replay a finished putt from the stroke
+        self._set_playing(not playing)
+
+    def _show_sample(self, index: int) -> None:
+        """Put the ball at trajectory sample ``index``."""
+        if self._scene is not None and self._ball_item is not None:
+            traj = self._scene.trajectory_xyz
+            self._ball_item.setData(pos=traj[index : index + 1])
+
+    def _on_scrub(self, index: int) -> None:
+        """A scrub by the player pauses the putt at that sample."""
+        self._set_playing(False)
+        self._anim_index = index
+        self._show_sample(index)
+
+    def _jump_to_phase(self, combo_index: int) -> None:
+        self._scrub_slider.setValue(int(self._phase_combo.itemData(combo_index)))
+        self._on_scrub(self._scrub_slider.value())
 
     def _advance_animation(self) -> None:
         scene = self._scene
@@ -585,9 +685,12 @@ class PuttingGreenWidget(QWidget):
         n = traj.shape[0]
         if self._anim_index >= n:
             self._ball_item.setData(pos=traj[-1:])
-            self._anim_timer.stop()
+            self._set_playing(False)
             return
         self._ball_item.setData(pos=traj[self._anim_index : self._anim_index + 1])
+        self._scrub_slider.blockSignals(True)  # the echo is not a player's scrub
+        self._scrub_slider.setValue(self._anim_index)
+        self._scrub_slider.blockSignals(False)
         # Advance proportionally so every putt animates in similar wall-clock time.
         self._anim_index += max(1, n // 90)
 
