@@ -68,6 +68,15 @@ with a message that names the missing module. The 3D view needs the optional
 - A contour-shaded green mesh, an animated ball, a flagstick, the aim line, and
   a ball track coloured by roll mode: amber while skidding, green in pure roll,
   grey once stopped.
+- **Batch Dispersion** (#14459): set the stroke noise (face-angle SD and speed
+  CV), pick 40, 100 or 1000 putts and press **Run Batch** to roll them on the
+  green you have dialled in (distance, stimp, cross slope). The rest positions
+  are plotted around the hole (green holed, red missed) with the make rate and
+  mean leave on misses. **0-45 ft Spread** plots the make % from 3 to 45 ft on
+  the same green. Both come from the shared dispersion service and run in the
+  background; changing units replots them.
+
+  ![Batch dispersion at 1280 px](images/putting_dispersion_imperial_1280.png)
 
 ## Method
 
