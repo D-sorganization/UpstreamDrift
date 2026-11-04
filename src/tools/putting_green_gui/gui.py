@@ -44,7 +44,10 @@ from src.shared.python.golf_viz import (
     roll_mode_colors,
 )
 from src.shared.python.putting_dynamics import BALANCE_PRESETS, GREEN_PRESETS
-from src.shared.python.theme.tool_stylesheet import primary_button_style
+from src.shared.python.theme.tool_stylesheet import (
+    get_tool_colors,
+    primary_button_style,
+)
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.units import (
     UnitSystem,
@@ -92,15 +95,24 @@ QDoubleSpinBox, QSpinBox, QComboBox {
     background-color: #0f1822; color: #eaf2f8;
     border: 1px solid #2f4254; border-radius: 4px; padding: 3px;
 }
-QDoubleSpinBox:disabled, QSpinBox:disabled, QComboBox:disabled {
-    background-color: #18222c; color: #5f7282; border-color: #243240;
-}
 QPushButton {
     background-color: #243343; color: #eaf2f8;
     border: 1px solid #34536b; border-radius: 5px; padding: 6px;
 }
 QPushButton:hover { background-color: #2c3f52; }
 """
+
+
+def _panel_style() -> str:
+    """The panel stylesheet; disabled inputs dim to the shared theme tokens."""
+    colors = get_tool_colors()
+    disabled = (
+        "QDoubleSpinBox:disabled, QSpinBox:disabled, QComboBox:disabled {"
+        f" background-color: {colors['surface_secondary']};"
+        f" color: {colors['text_secondary']};"
+        f" border-color: {colors['border_default']}; }}"
+    )
+    return _PANEL_STYLE + disabled + "\n"
 
 
 class PuttingGreenWidget(QWidget):
@@ -225,7 +237,7 @@ class PuttingGreenWidget(QWidget):
     def _build_controls(self) -> QWidget:
         left = QWidget()
         left.setObjectName("puttControls")
-        left.setStyleSheet(_PANEL_STYLE)
+        left.setStyleSheet(_panel_style())
         left_layout = QVBoxLayout(left)
 
         title = QLabel("⛳  Putting Green Simulator")

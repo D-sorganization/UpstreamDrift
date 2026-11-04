@@ -482,3 +482,9 @@ def test_every_input_follows_the_dark_panel_theme(widget: PuttingGreenWidget) ->
     for spin in (widget._seed_spin, widget._undulation_spin, widget._green_combo):
         assert type(spin).__name__ in style
     assert ":disabled" in style, "a preset greys out the shape inputs visibly"
+    # The disabled look comes from the shared theme tokens, not new hex literals.
+    from src.shared.python.theme.tool_stylesheet import get_tool_colors
+
+    disabled = style[style.index(":disabled") :]
+    for token in ("surface_secondary", "text_secondary", "border_default"):
+        assert get_tool_colors()[token] in disabled
