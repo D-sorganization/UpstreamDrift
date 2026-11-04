@@ -55,6 +55,7 @@ from src.shared.python.ui.units import (
     to_display_distance,
     to_display_speed,
 )
+from src.tools.putting_green_gui._batch_panel import BatchPanel
 from src.tools.putting_green_gui._scene_builder import (
     PuttConfig,
     PuttScene,
@@ -121,6 +122,10 @@ class PuttingGreenWidget(QWidget):
     def unit_system(self) -> UnitSystem:
         """The active display unit system."""
         return self._unit_system
+
+    @property
+    def batch_panel(self) -> BatchPanel:
+        return self._batch_panel
 
     def set_unit_system(self, system: UnitSystem) -> None:
         """Switch display unit system dynamically and update spinbox suffixes/values."""
@@ -253,6 +258,9 @@ class PuttingGreenWidget(QWidget):
         self._run_btn.clicked.connect(self._run_simulation)
         left_layout.addWidget(self._run_btn)
 
+        self._batch_panel = BatchPanel(self._current_config, lambda: self._unit_system)
+        left_layout.addWidget(self._batch_panel)
+
         left_layout.addStretch()
         return left
 
@@ -293,6 +301,7 @@ class PuttingGreenWidget(QWidget):
             "  - RK4 integration of the rolling ball\n"
         )
         results_layout.addWidget(self._results_text)
+        results_layout.addWidget(self._batch_panel.canvas)
         right_layout.addWidget(results_group)
         return right
 
