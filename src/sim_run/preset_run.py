@@ -246,7 +246,12 @@ def reproduce_preset(manifest: RunManifest, model: str, out_dir: Path) -> RunMan
 def add_preset_command(subparsers: argparse._SubParsersAction) -> None:
     """Register ``preset-run SPEC --store DIR`` on the ``ud-sim`` parser."""
     parser = subparsers.add_parser(
-        "preset-run", help="Run a release preset and store the run"
+        "preset-run",
+        help="Run a release preset and store the run",
+        description=(
+            "Run a release preset and store the run. The preset's commands "
+            "rewrite the watched release files in this working tree."
+        ),
     )
     parser.add_argument("spec", type=Path, help="preset spec JSON file")
     parser.add_argument("--store", type=Path, default=None, help="run store root")
