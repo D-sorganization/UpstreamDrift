@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.impact_optimization.physiological_envelope import (
     DEFAULT_LIMITS_PATH,
@@ -22,6 +23,8 @@ SPEC = json.loads(
     ).read_text(encoding="utf-8")
 )
 SUBJECT = CapacitySubject(mass_kg=78.0, stature_m=1.71)
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture(scope="module")
@@ -43,8 +46,18 @@ def test_rom_comes_from_spec_ranges(env: PhysiologicalEnvelope) -> None:
     assert env.rom_deg[i].tolist() == SPEC["coordinate_ranges_deg"]["LEInput"]
 
 
+def test_undeclared_rom_is_unbounded_and_listed_not_invented(
+    env: PhysiologicalEnvelope,
+) -> None:
+    declared = set(SPEC["coordinate_ranges_deg"])
+    assert set(env.unbounded_rom_slots) == set(env.names) - declared
+    i = env.names.index(env.unbounded_rom_slots[0])
+    assert np.isinf(env.rom_deg[i]).all()
+
+
 def test_limits_are_ordered_finite_and_positive(env: PhysiologicalEnvelope) -> None:
     assert np.all(env.rom_deg[:, 0] < env.rom_deg[:, 1])
+    assert not np.any(np.isnan(env.rom_deg))
     for a in (env.tau_max_negative_nm, env.tau_max_positive_nm, env.vel_max_deg_s):
         assert np.all(np.isfinite(a) & (a > 0.0))
 

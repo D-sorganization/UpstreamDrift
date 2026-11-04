@@ -5,10 +5,13 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.impact_optimization.trust_region import TrustRegion
 
 REF = np.linspace(0.0, 1.0, 50)[:, None] * np.array([[1.0, 2.0, 3.0]])
+
+pytestmark = pytest.mark.unit
 
 
 def _tr(radius: float = 1.0, w: tuple[float, ...] = (1.0, 1.0, 1.0)) -> TrustRegion:
