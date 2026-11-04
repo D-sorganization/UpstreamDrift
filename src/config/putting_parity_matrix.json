@@ -62,11 +62,11 @@
       "title": "Counter-Torque Stabilization (Hand Couples, Gust)",
       "cluster": "g",
       "cells": {
-        "core_api": "missing #14469 | src/shared/python/grip_contact/couple_check.py | No putting counter-torque model in the core; a grip couple check exists outside the putting stack.",
+        "core_api": "partial #14469 | src/shared/python/putting_dynamics/counter_torque.py | Closed-form two-hand couple model (preload, off-plane preload, noise, gust, lie, shared putter presets) in the core; hand couples sum to the required moment without noise. The /counter-torque route is part 2.",
         "pyqt6": "missing #14469 |  | None.",
         "react": "missing #14470 |  | None.",
         "tauri": "missing #14470 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "present | src/apps/putting_studio/js/state.js, src/apps/putting_studio/js/charts2d.js, src/apps/putting_studio/js/controls_c.js | Closed-form couple model, gust pulse and torque charts (illustrative, not in the core: ADR-0058 gap)."
+        "studio": "present | src/apps/putting_studio/js/state.js, src/apps/putting_studio/js/charts2d.js, src/apps/putting_studio/js/controls_c.js | Closed-form couple model, gust pulse and torque charts; drift-gated sample for sample against the core (tests/unit/putting_dynamics/test_counter_torque.py)."
       }
     },
     "balance_type": {

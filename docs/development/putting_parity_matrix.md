@@ -11,7 +11,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | partial (#14460) | partial (#14460) | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | partial (#14461) |
 | Toe/Heel Strike Location | (c) | present | present | present | present | partial (#14461) |
-| Counter-Torque Stabilization (Hand Couples, Gust) | (g) | missing (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
+| Counter-Torque Stabilization (Hand Couples, Gust) | (g) | partial (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | partial (#14462) | partial (#14462) | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | partial (#14464) | partial (#14464) | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | partial (#14466) | partial (#14466) | partial (#14465) |
@@ -55,10 +55,10 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: partial (#14461). `src/apps/putting_studio/index.html`, `src/apps/putting_studio/js/controls_c.js`. Slider is toe-only (0-15 mm); no heel strikes.
 
 **Counter-Torque Stabilization (Hand Couples, Gust)**
-- Core/API: missing (#14469). `src/shared/python/grip_contact/couple_check.py`. No putting counter-torque model in the core; a grip couple check exists outside the putting stack.
+- Core/API: partial (#14469). `src/shared/python/putting_dynamics/counter_torque.py`. Closed-form two-hand couple model (preload, off-plane preload, noise, gust, lie, shared putter presets) in the core; hand couples sum to the required moment without noise. The /counter-torque route is part 2.
 - PyQt6: missing (#14469). none. None.
 - React: missing (#14470). none. None.
-- Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/charts2d.js`, `src/apps/putting_studio/js/controls_c.js`. Closed-form couple model, gust pulse and torque charts (illustrative, not in the core: ADR-0058 gap).
+- Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/charts2d.js`, `src/apps/putting_studio/js/controls_c.js`. Closed-form couple model, gust pulse and torque charts; drift-gated sample for sample against the core (tests/unit/putting_dynamics/test_counter_torque.py).
 
 **Putter Balance Type (CG Offset, MOI)**
 - Core/API: present. `src/shared/python/putting_dynamics/putter_presets.py`, `src/api/routes/putting_green.py`. Named balance presets (toe-hang, face-balanced, zero-torque, counterbalanced) over PutterState; GET /putter-presets and /simulate-3d balance_type.
