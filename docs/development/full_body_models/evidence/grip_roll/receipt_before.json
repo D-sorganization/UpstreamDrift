@@ -1,0 +1,10 @@
+{
+  "issue": 14550,
+  "tag": "before",
+  "spec": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+  "spec_sha256": "a45d8c7c7168e8c68fa204f758e5a936b1816dfa256901cf3818d4d992ced930",
+  "convention": "face-on; 0 = vertical, + = strong; lead=back of hand, trail=palm; see motion_matching/grip_roll.py",
+  "lead_roll_deg": 97.85,
+  "trail_roll_deg": 107.98,
+  "png": "face_on_before.png"
+}
