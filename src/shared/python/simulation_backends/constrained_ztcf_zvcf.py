@@ -42,6 +42,7 @@ __all__ = [
     "ConstrainedCounterfactuals",
     "constrained_acceleration_at",
     "constrained_counterfactual_report",
+    "drift_and_control_reactions",
     "is_constrained_provider",
 ]
 
@@ -104,6 +105,45 @@ def constrained_acceleration_at(
         provider.closure_jacobian(q_arr),
         provider.closure_drift(q_arr, v_arr),
     )
+
+
+def drift_and_control_reactions(
+    provider: ConstrainedEquationsOfMotionProvider,
+    q: ArrayLike,
+    v: ArrayLike,
+    tau: ArrayLike,
+) -> tuple[Array, Array]:
+    """Split the closure reaction into drift and control parts (#14492).
+
+    The KKT system is linear in the load at a fixed state, so the reaction
+    splits like the acceleration (ZTCF drift + ZVCF control, Dieter's
+    2026-11-03 decision on #14497)::
+
+        lambda(q, v, tau) = lambda_drift(q, v) + lambda_control(q, tau)
+
+    ``lambda_drift`` is the reaction at ``tau = 0`` and carries gravity and the
+    velocity terms.  ``lambda_control`` solves the KKT system with the load
+    ``tau`` alone (no bias, no closure drift), so gravity is counted once, in
+    the drift.  On the two-hand closure these are the wrist interaction forces.
+    The split is pointwise; reactions along integrated counterfactual
+    trajectories do not sum.
+
+    Preconditions: ``provider`` is constrained (``TypeError``); ``q``, ``v``
+    finite and ``tau`` a finite generalised load of length ``n`` (``ValueError``).
+    Postcondition: ``lambda_drift + lambda_control`` equals the reaction under
+    ``tau`` to rounding (minimum-norm multipliers if ``J_c`` is rank deficient).
+    """
+    _require_constrained(provider)
+    q_arr = _state("q", q)
+    mass = np.asarray(provider.mass_matrix(q_arr), dtype=np.float64)
+    n = mass.shape[0]
+    tau_arr = _state("tau", tau, n)
+    _, drift = constrained_acceleration_at(provider, q_arr, v, np.zeros(n))
+    jacobian = np.asarray(provider.closure_jacobian(q_arr), dtype=np.float64)
+    _, control = constrained_acceleration(
+        mass, np.zeros(n), tau_arr, jacobian, np.zeros(jacobian.shape[0])
+    )
+    return drift, control
 
 
 @dataclass(frozen=True)
