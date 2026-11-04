@@ -18,7 +18,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Player-Specific Bellman Strokes Gained | (f) | present | missing (#14467) | missing (#14468) | missing (#14468) | partial (#14467) |
 | Saved Scenarios and Comparison | (h) | missing (#14471) | missing (#14471) | missing (#14472) | missing (#14472) | present |
 | JSON Import/Export of a Setup | (h) | partial (#14471) | partial (#14471) | missing (#14472) | missing (#14472) | present |
-| Camera Views and Playback Phases | (i) | partial (#14473) | partial (#14473) | partial (#14474) | partial (#14474) | present |
+| Camera Views and Playback Phases | (i) | present | partial (#14473) | partial (#14474) | partial (#14474) | present |
 
 ## Evidence
 
@@ -97,7 +97,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: present. `src/apps/putting_studio/js/io.js`. Export/load with schema_version 4.0.0, including scenarios.
 
 **Camera Views and Playback Phases**
-- Core/API: partial (#14473). `src/api/routes/putting_green.py`, `src/shared/python/putting_dynamics/types.py`. Per-sample mode only on /simulate-3d; no stroke phases.
+- Core/API: present. `src/shared/python/putting_dynamics/phases.py`, `src/api/routes/putting_green.py`. Per-sample ball mode on /simulate and /simulate-3d, and phase marks (where the hop, skid, roll and rest start) from the core's phase_marks for playback jumps.
 - PyQt6: partial (#14473). `src/tools/putting_green_gui/gui.py`. Auto-framed orbit and a one-shot animation; no presets, scrub or phase jumps.
 - React: partial (#14474). `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx`. Orbit camera, play/pause/scrub/rate; no view presets or phase jumps.
 - Studio: present. `src/apps/putting_studio/js/controls_b.js`, `src/apps/putting_studio/js/controls_a.js`. Grip, Full Plane, Down-the-Line and Face-On cameras; phase badge; scrubber and keyframe jumps.

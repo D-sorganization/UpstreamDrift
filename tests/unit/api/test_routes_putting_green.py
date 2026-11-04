@@ -170,6 +170,38 @@ def test_simulate_putt_3d_exposes_collision_and_motion_modes(
     assert data["surface"]["height_m"] > 0
 
 
+def _runs(modes: list[str], times: list[float]) -> list[dict[str, object]]:
+    """Where each run of a mode starts, read off the per-sample modes."""
+    return [
+        {"mode": mode, "t_s": times[i], "index": i}
+        for i, mode in enumerate(modes)
+        if i == 0 or modes[i - 1] != mode
+    ]
+
+
+def test_simulate_reports_the_mode_and_phase_marks_of_every_sample(
+    client: TestClient,
+) -> None:
+    """#14473: playback jumps come from the core's own per-sample modes."""
+    data = client.post(
+        "/tools/putting-green/simulate",
+        json={"direction_x": 0.0, "direction_y": 1.0, "speed": 1.8},
+    ).json()
+    modes = data["modes"]
+    assert len(modes) == len(data["positions"]) == len(data["times"])
+    assert {"slide", "roll"} <= set(modes)
+    assert data["phases"] == _runs(modes, data["times"])
+
+
+def test_simulate_3d_reports_the_phase_marks_of_its_samples(
+    client: TestClient,
+) -> None:
+    samples = client.post("/tools/putting-green/simulate-3d", json={}).json()
+    modes = [s["mode"] for s in samples["samples"]]
+    times = [s["t_s"] for s in samples["samples"]]
+    assert samples["phases"] == _runs(modes, times)
+
+
 def test_simulate_putt_3d_rejects_hosel_outside_head(
     client: TestClient,
 ) -> None:
