@@ -24,14 +24,18 @@ surface, not a putter-fitting or impact-analysis tool.
 | Stimpmeter   | ft   | 6.0 to 14.0    | 10.0    |
 | Cross Slope  | deg  | 0 to 5         | 1.0     |
 
+- The **Units** selector switches the display between Metric (m, m/s) and
+  Imperial (ft, mph). It converts the speed and distance controls and the
+  metrics panel in place, and saves the choice as the shared unit preference
+  (`src/shared/python/ui/units.py`), so other tools open in the same units.
+  The engine always receives SI values.
 - Every control is range-checked before the engine runs; an out-of-range or
   non-finite value raises rather than being silently clamped
   (`_validate` in `src/tools/putting_green_gui/_scene_builder.py`).
 - Presets stamp speed and distance pairs only: Short (1.5 m/s, 5 ft),
   Medium (2.5 m/s, 15 ft), Long (4.0 m/s, 30 ft).
 - Not exposed on this tile, but fixed: the shared solver's RK4 at a 0.002 s
-  timestep (`putting_dynamics.solver.DT_S`) and a terrain grid resolution of
-  48. Cup distance is converted to metres; the green is sized around the putt
+  timestep (`putting_dynamics.solver.DT_S`) and a terrain grid resolution of 48. Cup distance is converted to metres; the green is sized around the putt
   with fixed margins.
 - The Stimpmeter reading is the only turf control on the tile. Grass type,
   condition, and grain exist in the shared `TurfSpec` but are left at their
