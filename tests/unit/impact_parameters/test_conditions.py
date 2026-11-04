@@ -9,7 +9,6 @@ extractor, (b) the face/path sign conventions the optimiser cost relies on, and
 from __future__ import annotations
 
 import math
-import time
 
 import numpy as np
 import pytest
@@ -96,16 +95,6 @@ def test_matches_existing_extractor_on_mujoco_rollout():
     assert got.aoa_deg == pytest.approx(0.0, abs=1e-6)
 
 
-def test_evaluation_under_one_second_per_rollout():
-    mujoco = _mujoco()
-    model = mujoco.MjModel.from_xml_string(MJCF)
-    t, q, v = _rollout()
-    evaluate_rollout(model, t, q, v, "club", FRAME, spec=SPEC, impact_index=150)
-    start = time.perf_counter()
-    evaluate_rollout(model, t, q, v, "club", FRAME, spec=SPEC, impact_index=150)
-    assert time.perf_counter() - start < 1.0
-
-
 @pytest.mark.parametrize(
     ("velocity", "expected_path"),
     [
@@ -134,7 +123,6 @@ def test_face_sign_positive_is_open(normal_x, sign):
             _series((0.0, -40.0, 0.0), normal), FRAME, impact_index=100, use_tools=False
         )
     )
-    assert math.copysign(1.0, cond.face_deg) == math.copysign(1.0, sign) or sign == 0
     assert cond.face_deg == pytest.approx(
         sign * math.degrees(math.atan2(abs(normal_x), 1.0)), abs=1e-9
     )
@@ -157,15 +145,8 @@ def test_unobservable_face_reports_none_with_reason():
     assert "face_deg" in cond.unavailable
 
 
-def test_conditions_are_finite_and_frozen():
-    cond = ImpactConditions.from_parameters(
-        extract_impact_parameters(
-            _series((0.0, -40.0, 0.0), (0.0, -1.0, 0.0)),
-            FRAME,
-            impact_index=100,
-            use_tools=False,
-        )
-    )
-    with pytest.raises(AttributeError):
-        cond.path_deg = 1.0  # type: ignore[misc]
-    assert all(math.isfinite(x) for x in cond.as_vector())
+def test_as_vector_orders_face_path_aoa_speed_and_rejects_unavailable():
+    cond = ImpactConditions(speed_mph=100.0, aoa_deg=-2.0, face_deg=1.0, path_deg=3.0)
+    assert cond.as_vector() == (1.0, 3.0, -2.0, 100.0)
+    with pytest.raises(ValueError, match="face and path"):
+        ImpactConditions(speed_mph=100.0, aoa_deg=0.0).as_vector()

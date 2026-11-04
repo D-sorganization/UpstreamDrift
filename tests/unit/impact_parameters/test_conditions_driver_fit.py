@@ -144,14 +144,8 @@ def test_matches_independent_reference_on_best_fit_driver(fit):
 
     want = _hand_conditions(vel[idx], normal)
     print(  # noqa: T201
-        f"BEST-FIT DRIVER idx={idx} t={t[idx]:.4f}s "
-        f"got speed={got.speed_mph:.2f} mph face={got.face_deg:.3f} "
-        f"path={got.path_deg:.3f} aoa={got.aoa_deg:.3f} "
-        f"strike=({got.strike_offset_x_m * 1e3:.2f},"
-        f"{got.strike_offset_y_m * 1e3:.2f}) mm "
-        f"| ref speed={want['speed_mph']:.2f} face={want['face_deg']:.3f} "
-        f"path={want['path_deg']:.3f} aoa={want['aoa_deg']:.3f} "
-        f"| {elapsed * 1e3:.0f} ms for {len(t)} samples"
+        f"BEST-FIT idx={idx} t={t[idx]:.4f}s {got} | ref {want} | "
+        f"{elapsed * 1e3:.0f} ms/{len(t)} samples"
     )
     assert got.speed_mph == pytest.approx(want["speed_mph"], rel=1e-4)
     assert got.aoa_deg == pytest.approx(want["aoa_deg"], abs=0.01)

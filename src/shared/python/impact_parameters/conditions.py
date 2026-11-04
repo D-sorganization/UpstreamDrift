@@ -19,7 +19,7 @@ from typing import Any
 from src.shared.python.contracts import ensure, require
 
 from .adapters import NATIVE_CLUB_FACE, ClubFaceSpec, clubhead_series_from_mujoco
-from .extract import ImpactParameters, extract_impact_parameters
+from .extract import BallObservation, ImpactParameters, extract_impact_parameters
 from .target_frame import TargetFrame
 
 
@@ -120,12 +120,6 @@ def evaluate_rollout(
         impact_index=impact_index,
         contact_index=contact_index,
         use_tools=False,
-        ball=_ball(ball_contact_m),
+        ball=None if ball_contact_m is None else BallObservation(ball_contact_m),
     )
     return ImpactConditions.from_parameters(params)
-
-
-def _ball(contact_m: object | None):
-    from .extract import BallObservation
-
-    return None if contact_m is None else BallObservation(contact_m=contact_m)
