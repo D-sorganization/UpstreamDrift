@@ -139,3 +139,17 @@ def test_contracts_reject_v1_and_unknown_axis(v1, v2_doc) -> None:
         with_trunk_coupling(v2_doc, law_id="no_such_law")
     with pytest.raises(TypeError):
         with_trunk_coupling(v2_doc, enabled="yes")  # type: ignore[arg-type]
+
+
+def test_coupling_creates_the_equality_block_when_absent(v2_doc) -> None:
+    from xml.etree import ElementTree as ET
+
+    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+        _add_trunk_coupling,
+    )
+
+    off, on = ET.Element("mujoco"), ET.Element("mujoco")
+    _add_trunk_coupling(off, with_trunk_coupling(v2_doc))
+    _add_trunk_coupling(on, with_trunk_coupling(v2_doc, enabled=True))
+    assert off.find("equality") is None  # off: nothing is added
+    assert len(on.findall("equality/joint")) == 3
