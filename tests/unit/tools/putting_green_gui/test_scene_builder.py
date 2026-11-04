@@ -29,6 +29,7 @@ from src.tools.putting_green_gui._scene_builder import (
     PuttScene,
     _setup_grid_and_surface,
     build_putt_scene,
+    solve_putt,
 )
 
 pytestmark = pytest.mark.unit
@@ -93,17 +94,10 @@ def test_trajectory_rides_the_terrain() -> None:
 def _solved(distance_ft: float, slope_deg: float) -> tuple[PuttConfig, float]:
     """The config ``solve_aim`` prescribes on the builder's surface."""
     base = PuttConfig(cup_distance_m=distance_ft * _FT_TO_M, slope_deg=slope_deg)
-    ball_x, cup_x, *_, mid_y, _gx, _gy, _gz, surface = _setup_grid_and_surface(
-        base, base.cup_distance_m
-    )
-    aim = solve_aim(surface, (ball_x, mid_y), (cup_x, mid_y), PutterState.typical(1))
+    aim = solve_putt(base)
     assert aim.holed and aim.converged
-    config = replace(
-        base,
-        putter_speed_ms=aim.putter_speed_mps,
-        aim_deg=math.degrees(aim.heading_rad),
-    )
-    return config, aim.heading_rad
+    config = replace(base, putter_speed_ms=aim.putter_speed_ms, aim_deg=aim.aim_deg)
+    return config, math.radians(aim.aim_deg)
 
 
 def test_solved_flat_straight_putt_holes() -> None:
@@ -321,3 +315,45 @@ def test_a_tiered_green_changes_the_roll() -> None:
     flat = PuttConfig(slope_deg=0.0, putter_speed_ms=1.6, aim_deg=4.0)
     tiered = build_putt_scene(replace(flat, green_type="tiered"))
     assert tiered.total_roll_m != pytest.approx(build_putt_scene(flat).total_roll_m)
+
+
+# ---------------------------------------------------------------------------
+# Auto-Solve (#14465): the optimum read is the core's solve_aim
+# ---------------------------------------------------------------------------
+
+
+def test_auto_solve_is_the_core_read_on_the_tile_surface() -> None:
+    config = PuttConfig(cup_distance_m=14.0 * _FT_TO_M, slope_deg=1.5, aim_deg=-9.0)
+    ball_x, cup_x, *_, mid_y, _gx, _gy, _gz, surface = _setup_grid_and_surface(
+        config, config.cup_distance_m
+    )
+    want = solve_aim(surface, (ball_x, mid_y), (cup_x, mid_y), PutterState.typical(1))
+    got = solve_putt(config)
+    assert got.putter_speed_ms == want.putter_speed_mps
+    assert got.aim_deg == pytest.approx(math.degrees(want.heading_rad))
+    assert got.break_m == want.break_m
+    assert (got.holed, got.converged) == (want.holed, want.converged)
+
+
+def test_auto_solve_reads_with_the_chosen_putter_on_the_chosen_green() -> None:
+    from src.shared.python.putting_dynamics import balance_preset
+
+    config = PuttConfig(balance_type="counterbalanced", green_type="tiered")
+    ball_x, cup_x, *_, mid_y, _gx, _gy, _gz, surface = _setup_grid_and_surface(
+        config, config.cup_distance_m
+    )
+    head = balance_preset("counterbalanced").putter(config.putter_speed_ms)
+    want = solve_aim(surface, (ball_x, mid_y), (cup_x, mid_y), head)
+    assert solve_putt(config).putter_speed_ms == want.putter_speed_mps
+
+
+def test_the_solved_read_holes_and_ignores_the_current_stroke() -> None:
+    config = PuttConfig(putter_speed_ms=6.0, aim_deg=20.0, slope_deg=2.0)
+    solution = solve_putt(config)
+    assert solution.holed and solution.converged
+    assert solution.aim_deg > 0.0  # the green falls toward -y, so aim up at +y
+    assert solution == solve_putt(replace(config, putter_speed_ms=1.0, aim_deg=0.0))
+    solved = replace(
+        config, putter_speed_ms=solution.putter_speed_ms, aim_deg=solution.aim_deg
+    )
+    assert build_putt_scene(solved).holed

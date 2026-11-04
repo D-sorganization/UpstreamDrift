@@ -13,11 +13,12 @@ this module is a thin Qt/OpenGL renderer that consumes a :class:`PuttScene`.
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import math
 from typing import Any
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QThreadPool, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -62,14 +63,16 @@ from src.shared.python.ui.units import (
     to_display_distance,
     to_display_speed,
 )
-from src.tools.putting_green_gui._batch_panel import BatchPanel
+from src.tools.putting_green_gui._batch_panel import BatchPanel, _Job
 from src.tools.putting_green_gui._scene_builder import (
     IMPACT_TOE_RANGE_M,
     UNDULATION_RANGE_M,
     PuttConfig,
     PuttScene,
+    PuttSolution,
     build_putt_scene,
     green_label,
+    solve_putt,
 )
 
 logger = logging.getLogger(__name__)
@@ -298,8 +301,14 @@ class PuttingGreenWidget(QWidget):
 
         self._run_btn = QPushButton("▶  Simulate Putt")
         self._run_btn.setStyleSheet(primary_button_style())
-        self._run_btn.clicked.connect(self._run_simulation)
+        self._run_btn.clicked.connect(lambda: self._run_simulation())
         left_layout.addWidget(self._run_btn)
+
+        self._solve_btn = QPushButton("🎯  Auto-Solve Read")
+        self._solve_btn.setToolTip("Solve the pace and line that hole this putt")
+        self._solve_btn.clicked.connect(self._start_auto_solve)
+        left_layout.addWidget(self._solve_btn)
+        self._solve_job: _Job | None = None
 
         self._batch_panel = BatchPanel(self._current_config, lambda: self._unit_system)
         left_layout.addWidget(self._batch_panel)
@@ -493,11 +502,15 @@ class PuttingGreenWidget(QWidget):
             green_seed=self._seed_spin.value(),
         )
 
-    def _run_simulation(self) -> None:
-        """Run the real putting simulation and render the result."""
+    def _run_simulation(self, config: PuttConfig | None = None) -> None:
+        """Run the real putting simulation and render the result.
+
+        ``config`` defaults to the controls; Auto-Solve passes the exact read,
+        which the spin boxes can only show rounded.
+        """
         self._anim_timer.stop()
         try:
-            scene = build_putt_scene(self._current_config())
+            scene = build_putt_scene(config or self._current_config())
         except (ValueError, ImportError, RuntimeError) as exc:
             logger.exception("Putting simulation failed")
             self._results_text.setPlainText(f"Simulation error: {exc}")
@@ -506,6 +519,53 @@ class PuttingGreenWidget(QWidget):
         self._scene = scene
         self._results_text.setPlainText(_format_metrics(scene, self._unit_system))
         self._render_scene(scene)
+
+    def is_solving(self) -> bool:
+        """Whether an Auto-Solve is running on the worker."""
+        return self._solve_job is not None
+
+    def _start_auto_solve(self) -> None:
+        """Solve the read off the GUI thread (a long sloped putt takes seconds)."""
+        pool = QThreadPool.globalInstance()
+        if self._solve_job is not None or pool is None:
+            return
+        self._solve_btn.setEnabled(False)
+        self._results_text.setPlainText("Solving the read on this green...")
+        job = _Job(
+            lambda args: {"solution": solve_putt(args["config"])},
+            {"config": self._current_config()},
+        )
+        job.signals.done.connect(self._apply_solution)
+        job.signals.failed.connect(self._on_solve_failed)
+        self._solve_job = job
+        pool.start(job)
+
+    def _finish_solve(self) -> None:
+        self._solve_job = None
+        self._solve_btn.setEnabled(True)
+
+    def _on_solve_failed(self, message: str) -> None:
+        self._finish_solve()
+        self._results_text.setPlainText(f"Auto-Solve rejected: {message}")
+
+    def _apply_solution(self, report: dict[str, Any]) -> None:
+        """Write the solved pace and line into the controls and roll them."""
+        self._finish_solve()
+        solution: PuttSolution = report["solution"]
+        self._speed_spin.setValue(
+            to_display_speed(solution.putter_speed_ms, self._unit_system)
+        )
+        self._aim_spin.setValue(solution.aim_deg)
+        self._run_simulation(
+            dataclasses.replace(
+                self._current_config(),
+                putter_speed_ms=solution.putter_speed_ms,
+                aim_deg=solution.aim_deg,
+            )
+        )
+        self._results_text.setPlainText(
+            _format_read(solution, self._unit_system) + self._results_text.toPlainText()
+        )
 
     def _render_scene(self, scene: PuttScene) -> None:
         if self._gl_view is None:
@@ -566,6 +626,22 @@ class PuttingGreenWidget(QWidget):
         """Release resources (stop the animation timer)."""
         self._anim_timer.stop()
         logger.debug("PuttingGreenWidget cleanup")
+
+
+def _format_read(solution: PuttSolution, unit_system: UnitSystem) -> str:
+    """One line naming the solved read, in the chosen units."""
+    if unit_system == UnitSystem.METRIC:
+        speed = f"{solution.putter_speed_ms:.2f} m/s"
+        lean = f"{abs(solution.break_m) * _M_TO_CM:.1f} cm"
+    else:
+        speed = f"{solution.putter_speed_ms * _MS_TO_MPH:.1f} mph"
+        lean = f"{abs(solution.break_m) * _M_TO_FT * 12.0:.1f} in"
+    side = "left" if solution.break_m >= 0.0 else "right"
+    found = "" if solution.holed else " (no holing line found)"
+    return (
+        f"Optimum read:  {speed} at {solution.aim_deg:+.1f}°, "
+        f"aim {lean} {side} of the cup{found}\n\n"
+    )
 
 
 def _format_metrics(

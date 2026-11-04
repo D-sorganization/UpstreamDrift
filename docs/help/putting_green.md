@@ -107,6 +107,19 @@ with a message that names the missing module. The 3D view needs the optional
 
   ![Batch dispersion at 1280 px](images/putting_dispersion_imperial_1280.png)
 
+- **Auto-Solve Read** (#14465) finds the pace and line that hole the putt on
+  the green you have dialled in. It runs the shared core's `solve_aim` with the
+  typical putter in the background, writes the solved speed and aim into the
+  Putter Speed and Aim Angle controls, rolls the exact read, and heads the
+  metrics with the optimum read: the speed in the chosen units, the heading,
+  and how far left or right of the cup to aim. The API's `/read-green`
+  returns the same solve (`recommended_speed`, `aim_heading_deg`, `holed`,
+  `converged`) in one call.
+
+  ![Auto-Solve read at 1280 px](images/putting_auto_solve_1280.png)
+
+  ![Auto-Solve read at 390 px](images/putting_auto_solve_390.png)
+
 ## Method
 
 The GUI is a thin renderer. All domain logic is in

@@ -162,6 +162,11 @@ class GreenReadingResponse(BaseModel):
     total_break: float
     recommended_speed: float
     aim_point: list[float]
+    aim_heading_deg: float = Field(
+        description="Putter heading that plays the read, CCW from +x [deg] (#14465)"
+    )
+    holed: bool = Field(description="Whether the solved putt drops")
+    converged: bool = Field(description="Whether the heading solve converged")
     elevations: list[float]
     slopes: list[list[float]]
 
@@ -636,6 +641,9 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
         total_break=abs(solution.break_m),
         recommended_speed=solution.putter_speed_mps,
         aim_point=[aim_x, aim_y],
+        aim_heading_deg=math.degrees(solution.heading_rad),
+        holed=solution.holed,
+        converged=solution.converged,
         elevations=list(line.elevations_m),
         slopes=[list(s) for s in line.slopes],
     )

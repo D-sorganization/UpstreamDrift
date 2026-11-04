@@ -211,6 +211,32 @@ def test_read_green_names_the_usga_stimp_roll_model(client: TestClient) -> None:
     assert response.json()["roll_model"] == "usga-stimp-roll/1"
 
 
+def test_read_green_returns_the_simulator_inputs_in_one_call(
+    client: TestClient,
+) -> None:
+    """#14465: pace, heading and outcome of the core's solve_aim, not a recipe."""
+    from src.api.routes.putting_green import (
+        _build_putting_surface,
+        _default_putter,
+        _to_surface_frame,
+    )
+    from src.shared.python.putting_dynamics import solve_aim
+
+    body = {"ball_x": 10.0, "ball_y": 5.0, "target_x": 10.0, "target_y": 9.0}
+    reading = client.post("/tools/putting-green/read-green", json=body).json()
+    surface, half_w, half_h = _build_putting_surface(10.0, 20.0, 20.0)
+    want = solve_aim(
+        surface,
+        _to_surface_frame(10.0, 5.0, half_w, half_h),
+        _to_surface_frame(10.0, 9.0, half_w, half_h),
+        _default_putter(1.0),
+    )
+    assert reading["recommended_speed"] == pytest.approx(want.putter_speed_mps)
+    assert reading["aim_heading_deg"] == pytest.approx(math.degrees(want.heading_rad))
+    assert reading["aim_heading_deg"] == pytest.approx(90.0, abs=0.1)
+    assert (reading["holed"], reading["converged"]) == (want.holed, want.converged)
+
+
 def test_simulate_3d_names_the_usga_stimp_roll_model(client: TestClient) -> None:
     """The 3-D route runs the preserved counterpart law, and says so."""
     response = client.post("/tools/putting-green/simulate-3d", json={})

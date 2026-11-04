@@ -41,6 +41,7 @@ from src.shared.python.putting_dynamics import (
     balance_preset,
     green_preset,
     simulate_strike,
+    solve_aim,
     stimp_to_rolling_mu,
 )
 
@@ -395,4 +396,42 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         skid_distance_m=float(result.skid_distance_m),
         impact_toe_m=config.impact_toe_m,
         green_type=config.green_type,
+    )
+
+
+@dataclass(frozen=True)
+class PuttSolution:
+    """The optimum read for a config's green, in the tile's controls (#14465).
+
+    ``putter_speed_ms`` and ``aim_deg`` go straight into the Putter Speed and
+    Aim Angle controls; ``break_m`` is the aim point's offset from the cup,
+    positive to the left of the ball-to-cup line.
+    """
+
+    putter_speed_ms: float
+    aim_deg: float
+    break_m: float
+    holed: bool
+    converged: bool
+
+
+def solve_putt(config: PuttConfig) -> PuttSolution:
+    """Solve the pace and line that hole ``config``'s putt on its green.
+
+    Runs the core's :func:`solve_aim` with the chosen putter head on the
+    same surface :func:`build_putt_scene` rolls, so the current speed and
+    aim are ignored. The read assumes a centred strike. Raises
+    ``ValueError`` like :func:`build_putt_scene`.
+    """
+    _validate(config)
+    ball_x, cup_x, *_, mid_y, _gx, _gy, _gz, surface = _setup_grid_and_surface(
+        config, config.cup_distance_m
+    )
+    aim = solve_aim(surface, (ball_x, mid_y), (cup_x, mid_y), _putter(config))
+    return PuttSolution(
+        putter_speed_ms=aim.putter_speed_mps,
+        aim_deg=math.degrees(aim.heading_rad),
+        break_m=aim.break_m,
+        holed=aim.holed,
+        converged=aim.converged,
     )

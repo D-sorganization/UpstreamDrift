@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 from unittest.mock import MagicMock
 
 import pytest
@@ -488,3 +489,51 @@ def test_every_input_follows_the_dark_panel_theme(widget: PuttingGreenWidget) ->
     disabled = style[style.index(":disabled") :]
     for token in ("surface_secondary", "text_secondary", "border_default"):
         assert get_tool_colors()[token] in disabled
+
+
+# ---------------------------------------------------------------------------
+# Auto-Solve (#14465)
+# ---------------------------------------------------------------------------
+
+
+def _wait_for_solve(qapp: QApplication, widget: PuttingGreenWidget) -> None:
+    deadline = time.monotonic() + 60.0
+    while widget.is_solving() and time.monotonic() < deadline:
+        qapp.processEvents()
+        time.sleep(0.02)
+    assert not widget.is_solving()
+
+
+def test_auto_solve_writes_the_core_read_into_the_controls(
+    qapp: QApplication, widget: PuttingGreenWidget
+) -> None:
+    from src.tools.putting_green_gui._scene_builder import solve_putt
+
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    widget._slope_spin.setValue(2.0)
+    widget._aim_spin.setValue(-20.0)
+    want = solve_putt(widget._current_config())
+    widget._solve_btn.click()
+    assert widget.is_solving()  # returned at once; the worker is solving
+    assert not widget._solve_btn.isEnabled()
+    _wait_for_solve(qapp, widget)
+    assert widget._solve_btn.isEnabled()
+    assert widget._speed_spin.value() == pytest.approx(
+        want.putter_speed_ms * 2.236936, abs=0.06
+    )
+    assert widget._aim_spin.value() == pytest.approx(want.aim_deg, abs=0.06)
+    assert widget._scene is not None and widget._scene.holed
+    text = widget._results_text.toPlainText()
+    assert "Optimum read:" in text and "mph" in text and "HOLED" in text
+
+
+def test_auto_solve_reports_a_rejected_putt(
+    qapp: QApplication, widget: PuttingGreenWidget, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def refuse(_config: object) -> None:
+        raise ValueError("no read")
+
+    monkeypatch.setattr(gui_mod, "solve_putt", refuse)
+    widget._solve_btn.click()
+    _wait_for_solve(qapp, widget)
+    assert "Auto-Solve rejected: no read" in widget._results_text.toPlainText()
