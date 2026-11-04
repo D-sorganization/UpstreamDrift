@@ -26,17 +26,20 @@ import numpy as np
 
 from src.shared.python.putting_dynamics import (
     BALANCE_PRESETS,
+    GREEN_PRESETS,
     HOLE_RADIUS_M,
+    USGA_STIMP_ROLL_MODEL,
     CollisionReport,
     FrictionField,
     FrictionParams,
+    GreenSpec,
     HeightField,
     Mode,
     PutterState,
-    USGA_STIMP_ROLL_MODEL,
     PuttResult,
     SurfaceSpec,
     balance_preset,
+    green_preset,
     simulate_strike,
     stimp_to_rolling_mu,
 )
@@ -65,6 +68,7 @@ STIMP_RANGE = (6.0, 14.0)
 SLOPE_RANGE_DEG = (0.0, 5.0)
 #: Heel (-) to toe (+) strike offset from the face centre (#14461).
 IMPACT_TOE_RANGE_M = (-0.04, 0.04)
+UNDULATION_RANGE_M = (0.0, 0.05)
 
 
 @dataclass(frozen=True)
@@ -85,6 +89,11 @@ class PuttConfig:
     cup_distance_m: float = 10.0 * _FT_TO_M
     stimp: float = 10.0
     slope_deg: float = 1.0
+    #: A :data:`GREEN_PRESETS` name, or ``None`` for the cross slope (#14463).
+    green_type: str | None = None
+    #: Undulation on the cross slope [m, standard deviation], seeded.
+    undulation_m: float = 0.0
+    green_seed: int = 0
     integrator: str = "rk4"
     grid_resolution: int = 48
     timestep_s: float = 0.002
@@ -127,6 +136,7 @@ class PuttScene:
     impact: CollisionReport | None = None
     skid_distance_m: float | None = None
     impact_toe_m: float = 0.0
+    green_type: str | None = None
 
 
 def _validate(config: PuttConfig) -> None:
@@ -137,6 +147,7 @@ def _validate(config: PuttConfig) -> None:
         ("stimp", config.stimp, STIMP_RANGE),
         ("slope_deg", config.slope_deg, SLOPE_RANGE_DEG),
         ("impact_toe_m", config.impact_toe_m, IMPACT_TOE_RANGE_M),
+        ("undulation_m", config.undulation_m, UNDULATION_RANGE_M),
     )
     for name, value, (lo, hi) in checks:
         if not np.isfinite(value):
@@ -148,6 +159,10 @@ def _validate(config: PuttConfig) -> None:
             f"balance_type must be one of {sorted(BALANCE_PRESETS)}; "
             f"got {config.balance_type!r}"
         )
+    if config.green_type is not None and config.green_type not in GREEN_PRESETS:
+        raise ValueError(f"green_type must be one of {sorted(GREEN_PRESETS)}")
+    if config.green_seed < 0:
+        raise ValueError(f"green_seed must be >= 0; got {config.green_seed}")
     if config.grid_resolution < 2:
         raise ValueError(f"grid_resolution must be >= 2; got {config.grid_resolution}")
     if not (0.0 < config.timestep_s <= 0.05):
@@ -165,6 +180,43 @@ def _cross_slope_heightmap(
     tan_slope = np.tan(np.radians(slope_deg))
     _, yy = np.meshgrid(grid_x, grid_y)
     return (yy - ball_y) * tan_slope
+
+
+def _green_spec(config: PuttConfig) -> GreenSpec | None:
+    """The core green this tile rolls, or ``None`` for the smooth cross slope."""
+    if config.green_type is not None:
+        return green_preset(config.green_type)
+    if config.undulation_m <= 0.0:
+        return None
+    return GreenSpec(
+        grade_percent=math.tan(math.radians(config.slope_deg)) * 100.0,
+        aspect_deg=-90.0,  # falls toward -y, like the cross slope
+        bump_height_m=config.undulation_m,
+        seed=config.green_seed,
+    )
+
+
+def green_label(green_type: str | None) -> str:
+    """Display name of a green type (``None`` is the cross slope)."""
+    return "Cross Slope" if green_type is None else green_type.replace("_", " ").title()
+
+
+def _green_extent_m(width_x: float, height_y: float) -> float:
+    """Side of the square core green that covers the tile with a margin."""
+    return float(math.ceil(max(width_x, height_y)) + 2)
+
+
+def _centred_height(
+    spec: GreenSpec, width_x: float, height_y: float, mid_y: float
+) -> HeightField:
+    """``spec``'s field, moved from the origin to the tile's centre."""
+    field = spec.height(_green_extent_m(width_x, height_y))
+    x0, y0 = field.origin_m
+    return HeightField(
+        heights_m=field.heights_m,
+        spacing_m=field.spacing_m,
+        origin_m=(x0 + width_x / 2.0, y0 + mid_y),
+    )
 
 
 def _perpendicular_break(
@@ -199,10 +251,16 @@ def _setup_grid_and_surface(
     ny = max(2, int(round(height_y / spacing)) + 1)
     grid_x = np.arange(nx) * spacing
     grid_y = np.arange(ny) * spacing
-    grid_z = _cross_slope_heightmap(grid_x, grid_y, mid_y, config.slope_deg)
+    spec = _green_spec(config)
+    if spec is None:
+        grid_z = _cross_slope_heightmap(grid_x, grid_y, mid_y, config.slope_deg)
+        height = HeightField(heights_m=grid_z, spacing_m=spacing, origin_m=(0.0, 0.0))
+    else:
+        height = _centred_height(spec, width_x, height_y, mid_y)
+        grid_z = np.array([[height.elevation(x, y) for x in grid_x] for y in grid_y])
 
     surface = SurfaceSpec(
-        height=HeightField(heights_m=grid_z, spacing_m=spacing, origin_m=(0.0, 0.0)),
+        height=height,
         friction_field=FrictionField.uniform(),
         friction=FrictionParams(mu_roll0=stimp_to_rolling_mu(config.stimp)),
     )
@@ -336,4 +394,5 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         impact=result.collision,
         skid_distance_m=float(result.skid_distance_m),
         impact_toe_m=config.impact_toe_m,
+        green_type=config.green_type,
     )

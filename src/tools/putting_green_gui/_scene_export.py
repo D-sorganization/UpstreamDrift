@@ -213,7 +213,7 @@ def read_putt_export(path: Path) -> PuttScene:
     def arr(value: Any) -> np.ndarray:
         return np.asarray(value, dtype=float)
 
-    scalars = {
+    scalars: dict[str, Any] = {  # Any: keyword-unpacked into PuttScene
         name: float(_require(metrics, name, "metrics.")) for name in _SCALAR_FIELDS
     }
     for name, value in scalars.items():
