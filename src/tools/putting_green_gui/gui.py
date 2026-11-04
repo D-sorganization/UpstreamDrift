@@ -398,6 +398,11 @@ class PuttingGreenWidget(QWidget):
         # Advance proportionally so every putt animates in similar wall-clock time.
         self._anim_index += max(1, n // 90)
 
+    def run_one_putt(self) -> str:
+        """Press *Simulate Putt* once and return the metrics text shown."""
+        self._run_btn.click()
+        return self._results_text.toPlainText()
+
     def cleanup(self) -> None:
         """Release resources (stop the animation timer)."""
         self._anim_timer.stop()
@@ -484,6 +489,10 @@ class PuttingGreenWindow(QMainWindow):
                 "docs/physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md",
             ),
         )
+
+    def run_one_putt(self) -> str:
+        """Run one putt in the embedded widget; return its metrics text."""
+        return self._widget.run_one_putt()
 
     def closeEvent(self, event: Any) -> None:
         self._widget.cleanup()
