@@ -2,11 +2,15 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Putt3DSimulationResponse } from "@/api/generated/types";
+import { scenePose } from "@/utils/cameraPresets";
 
+const camera = { position: { set: vi.fn() } };
+const controls = { target: { set: vi.fn() }, update: vi.fn() };
 vi.mock("@react-three/fiber", () => ({
   Canvas: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="putting-canvas">{children}</div>
   ),
+  useThree: (pick: (state: object) => unknown) => pick({ camera, controls }),
 }));
 
 vi.mock("@react-three/drei", () => ({
@@ -78,5 +82,32 @@ describe("PuttingScene3D", () => {
     expect(screen.getByTestId("putting-canvas")).toBeInTheDocument();
     expect(screen.getByTestId("putt-trail")).toBeInTheDocument();
     expect(screen.getByTestId("putting-orbit-controls")).toBeInTheDocument();
+  });
+
+  it("places the camera at the chosen desktop view (#14474)", async () => {
+    const { PuttingScene3D } = await import("./PuttingScene3D");
+    render(
+      <PuttingScene3D
+        result={result}
+        playbackTimeS={0}
+        hoselToeM={0}
+        hoselForwardM={0}
+        view="overhead"
+      />,
+    );
+    // Overhead looks down on the 3 m putt's tile middle from 9.42 m.
+    const { eye, target } = scenePose(3, 0, 0, "overhead");
+    expect(camera.position.set).toHaveBeenLastCalledWith(
+      eye[0],
+      eye[2],
+      eye[1],
+    );
+    expect(eye[2]).toBeCloseTo(9.42 * Math.sin((89 * Math.PI) / 180), 9);
+    expect(controls.target.set).toHaveBeenLastCalledWith(
+      target[0],
+      target[2],
+      target[1],
+    );
+    expect(controls.update).toHaveBeenCalled();
   });
 });

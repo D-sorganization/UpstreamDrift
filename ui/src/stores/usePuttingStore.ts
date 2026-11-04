@@ -4,6 +4,7 @@ import type {
   Putt3DSimulationRequest,
   Putt3DSimulationResponse,
 } from "@/api/generated/types";
+import type { CameraPreset } from "@/utils/cameraPresets";
 import { loadUnitSystem, saveUnitSystem, type UnitSystem } from "@/utils/units";
 
 export const DEFAULT_PUTT_3D_PARAMETERS: Putt3DSimulationRequest = {
@@ -36,12 +37,14 @@ interface PuttingState {
   playing: boolean;
   /** Display units only; parameters and results stay SI (#14458). */
   unitSystem: UnitSystem;
+  cameraView: CameraPreset;
   updateParameters: (changes: Partial<Putt3DSimulationRequest>) => void;
   setResult: (result: Putt3DSimulationResponse) => void;
   setPlaybackTime: (timeS: number) => void;
   setPlaybackRate: (rate: number) => void;
   setPlaying: (playing: boolean) => void;
   setUnitSystem: (system: UnitSystem) => void;
+  setCameraView: (view: CameraPreset) => void;
   reset: () => void;
 }
 
@@ -52,6 +55,7 @@ export const usePuttingStore = create<PuttingState>((set) => ({
   playbackRate: 1,
   playing: false,
   unitSystem: loadUnitSystem(),
+  cameraView: "orbit",
   updateParameters: (changes) =>
     set((state) => ({
       parameters: { ...state.parameters, ...changes },
@@ -66,6 +70,7 @@ export const usePuttingStore = create<PuttingState>((set) => ({
     saveUnitSystem(unitSystem);
     set({ unitSystem });
   },
+  setCameraView: (cameraView) => set({ cameraView }),
   reset: () =>
     set({
       parameters: { ...DEFAULT_PUTT_3D_PARAMETERS },

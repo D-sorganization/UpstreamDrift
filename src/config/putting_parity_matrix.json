@@ -141,8 +141,8 @@
       "cells": {
         "core_api": "present | src/shared/python/putting_dynamics/phases.py, src/api/routes/putting_green.py | Per-sample ball mode on /simulate and /simulate-3d, and phase marks (where the hop, skid, roll and rest start) from the core's phase_marks for playback jumps.",
         "pyqt6": "present | src/tools/putting_green_gui/gui.py, src/tools/putting_green_gui/_camera.py | Orbit, down-the-line, face-on and overhead cameras; play/pause, a scrubber and jumps to the core phase marks.",
-        "react": "partial #14474 | ui/src/pages/PuttingGreen.tsx, ui/src/components/visualization/PuttingScene3D.tsx | Orbit camera, play/pause/scrub/rate; no view presets or phase jumps.",
-        "tauri": "partial #14474 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "react": "present | ui/src/pages/PuttingGreen.tsx, ui/src/components/visualization/PuttingScene3D.tsx, ui/src/utils/cameraPresets.ts | Orbit, down-the-line, face-on and overhead cameras framed on the desktop tile, play/pause/scrub/rate, and jumps to the core phase marks (golden-pinned, #14474).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/controls_b.js, src/apps/putting_studio/js/controls_a.js | Grip, Full Plane, Down-the-Line and Face-On cameras; phase badge; scrubber and keyframe jumps."
       }
     }

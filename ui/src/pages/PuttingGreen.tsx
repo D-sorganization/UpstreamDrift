@@ -12,6 +12,12 @@ import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
 import { DispersionPanel } from "@/components/putting/DispersionPanel";
 import { PutterHeadControl } from "@/components/putting/PutterHeadControl";
 import { PuttingScene3D } from "@/components/visualization/PuttingScene3D";
+import {
+  CAMERA_PRESETS,
+  VIEW_LABELS,
+  phaseJumps,
+  type CameraPreset,
+} from "@/utils/cameraPresets";
 import { usePuttingStore } from "@/stores/usePuttingStore";
 import {
   UNIT_SYSTEMS,
@@ -235,6 +241,8 @@ function PlaybackControls() {
   const setPlaybackTime = usePuttingStore((state) => state.setPlaybackTime);
   const setPlaybackRate = usePuttingStore((state) => state.setPlaybackRate);
   const setPlaying = usePuttingStore((state) => state.setPlaying);
+  const cameraView = usePuttingStore((state) => state.cameraView);
+  const setCameraView = usePuttingStore((state) => state.setCameraView);
   if (!result) return null;
 
   const durationS = result.duration_s + IMPACT_LEAD_IN_S;
@@ -305,6 +313,43 @@ function PlaybackControls() {
           ))}
         </select>
       </label>
+      <label className="text-xs">
+        Camera View
+        <select
+          aria-label="Camera view"
+          value={cameraView}
+          onChange={(event) =>
+            setCameraView(event.target.value as CameraPreset)
+          }
+          className="ml-2 rounded border px-2 py-1"
+          style={{
+            backgroundColor: "var(--sidekick-color-input)",
+            borderColor: "var(--sidekick-color-border)",
+          }}
+        >
+          {CAMERA_PRESETS.map((preset) => (
+            <option key={preset} value={preset}>
+              {VIEW_LABELS[preset]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="flex flex-wrap gap-2" aria-label="Jump to phase">
+        {phaseJumps(result.phases ?? []).map((jump) => (
+          <button
+            key={jump.label}
+            type="button"
+            onClick={() => {
+              setPlaybackTime(jump.playbackTimeS);
+              setPlaying(false);
+            }}
+            className="rounded border px-2 py-1 text-xs"
+            style={{ borderColor: "var(--sidekick-color-border)" }}
+          >
+            {jump.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -313,6 +358,7 @@ export function PuttingGreenPage() {
   const parameters = usePuttingStore((state) => state.parameters);
   const result = usePuttingStore((state) => state.result);
   const playbackTimeS = usePuttingStore((state) => state.playbackTimeS);
+  const cameraView = usePuttingStore((state) => state.cameraView);
   const playbackRate = usePuttingStore((state) => state.playbackRate);
   const playing = usePuttingStore((state) => state.playing);
   const updateParameters = usePuttingStore((state) => state.updateParameters);
@@ -516,6 +562,7 @@ export function PuttingGreenPage() {
             playbackTimeS={playbackTimeS}
             hoselToeM={parameters.hosel_toe_m}
             hoselForwardM={parameters.hosel_forward_m}
+            view={cameraView}
           />
         ) : (
           <div
