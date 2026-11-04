@@ -10,26 +10,20 @@ identifies the initial condition, and the manifest records the trajectory hash.
 from __future__ import annotations
 
 from datetime import datetime
-import hashlib
 from pathlib import Path
 
 import mujoco
 import numpy as np
 
 from src.sim_run.manifest import RunManifest
-from src.sim_run.manifest_emitter import (
-    RunProvenance,
-    emit_run_manifest,
-    sha256_json,
+from src.sim_run.trajectory_run import (
+    TRAJECTORY_FILENAME,
+    Rollout,
+    TrajectoryRun,
+    write_trajectory_run,
 )
-from src.sim_run.worker import get_repo_sha
 
-TRAJECTORY_FILENAME = "trajectory.npy"
-
-
-def _require(condition: bool, message: str) -> None:
-    if not condition:
-        raise ValueError(message)
+__all__ = ["TRAJECTORY_FILENAME", "run_mujoco"]
 
 
 def run_mujoco(
@@ -54,48 +48,31 @@ def run_mujoco(
             ``qvel_noise`` is negative, or no UpstreamDrift commit resolves.
         RunManifestError: if the resulting manifest is invalid.
     """
-    _require(duration > 0, f"duration must be positive, got {duration}")
-    _require(seed >= 0, f"seed must be non-negative, got {seed}")
-    _require(qvel_noise >= 0, f"qvel_noise must be non-negative, got {qvel_noise}")
-    commit = ud_commit or get_repo_sha()
-    _require(commit != "0" * 40, "ud_commit could not be resolved")
-
+    rollout = Rollout(duration, seed, qvel_noise)
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)
-    data.qvel[:] = np.random.default_rng(seed).normal(0.0, qvel_noise, model.nv)
+    data.qvel[:] = rollout.seeded_qvel(model.nv)
     mujoco.mj_forward(model, data)
-    initial = {"qpos": data.qpos.tolist(), "qvel": data.qvel.tolist()}
+    initial = (data.qpos.tolist(), data.qvel.tolist())
 
-    steps = max(1, round(duration / model.opt.timestep))
+    steps = rollout.steps(model.opt.timestep)
     rows = [np.concatenate(([data.time], data.qpos, data.qvel))]
     for _ in range(steps):
         mujoco.mj_step(model, data)
         rows.append(np.concatenate(([data.time], data.qpos, data.qvel)))
 
-    out = Path(output_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    trajectory = out / TRAJECTORY_FILENAME
-    np.save(trajectory, np.asarray(rows))
-
-    provenance = RunProvenance(
+    run = TrajectoryRun(
         model_id=model_id,
-        revision="sha256:" + hashlib.sha256(xml.encode("utf-8")).hexdigest(),
+        model_text=xml,
+        rollout=rollout,
+        engine=("mujoco", mujoco.__version__),
+        initial=initial,
         parameters={
-            "duration_s": duration,
             "timestep_s": float(model.opt.timestep),
             "steps": steps,
             "gravity_m_s2": model.opt.gravity.tolist(),
-            "controls": "zero",
-            "qvel_noise": qvel_noise,
-            "trajectory_columns": {"time": 1, "qpos": model.nq, "qvel": model.nv},
         },
-        input_sha256=sha256_json(initial),
-        seed=seed,
-        engine_name="mujoco",
-        engine_version=mujoco.__version__,
-        ud_commit=commit,
-        input_label="initial condition: qpos0 with seeded qvel",
     )
-    return emit_run_manifest(
-        out, outputs=[trajectory], provenance=provenance, created_at=created_at
+    return write_trajectory_run(
+        output_dir, rows, run, ud_commit=ud_commit, created_at=created_at
     )
