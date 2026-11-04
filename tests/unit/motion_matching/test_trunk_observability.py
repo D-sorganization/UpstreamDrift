@@ -39,7 +39,9 @@ def q_events(spec) -> dict[str, np.ndarray]:
 
 def test_jacobian_matches_finite_difference_shape_and_is_finite(spec, q_events) -> None:
     jac = marker_jacobian(spec, q_events["address"], TRUNK)
-    markers = len(spec["marker_attachments"])
+    markers = sum(
+        a["offset_m"] is not None for a in spec["marker_attachments"].values()
+    )
     assert jac.shape == (3 * markers, 6)
     assert np.isfinite(jac).all()
 
