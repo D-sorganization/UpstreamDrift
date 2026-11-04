@@ -12,9 +12,16 @@ from __future__ import annotations
 import re
 from collections.abc import Mapping
 from datetime import datetime
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    ValidationError,
+    field_validator,
+)
 
 RUN_MANIFEST_SCHEMA_VERSION: Literal["1.0.0"] = "1.0.0"
 
@@ -23,6 +30,8 @@ _SHA256 = r"[0-9a-f]{64}"
 GIT_SHA_PATTERN = rf"^{_GIT_SHA}$"
 REVISION_PATTERN = rf"^(?:{_GIT_SHA}|sha256:{_SHA256})$"
 SHA256_PATTERN = rf"^{_SHA256}$"
+_SEGMENT = r"[A-Za-z0-9_][A-Za-z0-9_.-]*"
+OUTPUT_NAME_PATTERN = rf"^{_SEGMENT}(?:/{_SEGMENT})*$"
 _NON_BLANK = r"\S"
 
 
@@ -82,6 +91,10 @@ class EngineIdentity(_Strict):
     version: str = Field(..., pattern=_NON_BLANK, description="Engine version")
 
 
+OutputName = Annotated[str, StringConstraints(pattern=OUTPUT_NAME_PATTERN)]
+OutputDigest = Annotated[str, StringConstraints(pattern=SHA256_PATTERN)]
+
+
 class RunManifest(_Strict):
     """Versioned provenance record for one simulation run."""
 
@@ -100,6 +113,12 @@ class RunManifest(_Strict):
         ...,
         description="ISO 8601 creation time with a UTC offset",
         json_schema_extra={"pattern": r"(?:Z|[+-]\d{2}:\d{2})$"},
+    )
+    outputs: dict[OutputName, OutputDigest] = Field(
+        default_factory=dict,
+        description="SHA-256 of each output artifact, keyed by its path "
+        "relative to the manifest (Issue #14432)",
+        json_schema_extra={"additionalProperties": False},
     )
 
     @field_validator("ud_commit", mode="before")
