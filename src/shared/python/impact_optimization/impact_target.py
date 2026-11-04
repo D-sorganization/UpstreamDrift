@@ -27,16 +27,16 @@ class MeasuredImpact(Protocol):
 
     Matching by attribute name keeps C1 free of an import dependency on the C2
     evaluator while sharing its single type (sign conventions: face + open,
-    path + in-to-out, AoA + ascending, toe + toward toe, high + toward crown).
+    path + in-to-out, AoA + ascending, x + toward toe, y + toward crown).
     ``None`` means unavailable.
     """
 
-    face_angle_deg: float | None
-    club_path_deg: float | None
-    attack_angle_deg: float
-    clubhead_speed_mph: float
-    toe_mm: float | None
-    high_mm: float | None
+    face_deg: float | None
+    path_deg: float | None
+    aoa_deg: float
+    speed_mph: float
+    strike_offset_x_m: float | None
+    strike_offset_y_m: float | None
 
 
 #: Face is weighted this many times path by default (panel review, epic #14556).
@@ -71,19 +71,19 @@ class ImpactTarget:
     path_deg: float = 0.0
     aoa_deg: float = 0.0
     speed_mph: float | None = None
-    toe_mm: float = 0.0
-    high_mm: float = 0.0
+    strike_offset_x_m: float = 0.0
+    strike_offset_y_m: float = 0.0
     weights: ImpactWeights = field(default_factory=ImpactWeights)
     #: Strike error scale per unit weight (1 cm); angles and speed use 1 deg/mph.
-    strike_scale_mm: float = 10.0
+    strike_scale_m: float = 0.01
 
     def __post_init__(self) -> None:
         for name in (
             "face_deg",
             "path_deg",
             "aoa_deg",
-            "toe_mm",
-            "high_mm",
+            "strike_offset_x_m",
+            "strike_offset_y_m",
         ):
             value = getattr(self, name)
             require(math.isfinite(value), f"{name} must be finite", value)
@@ -94,9 +94,9 @@ class ImpactTarget:
                 self.speed_mph,
             )
         require(
-            math.isfinite(self.strike_scale_mm) and self.strike_scale_mm > 0.0,
-            "strike_scale_mm must be positive and finite",
-            self.strike_scale_mm,
+            math.isfinite(self.strike_scale_m) and self.strike_scale_m > 0.0,
+            "strike_scale_m must be positive and finite",
+            self.strike_scale_m,
         )
 
     def deviation(self, c: MeasuredImpact) -> float:
@@ -105,24 +105,26 @@ class ImpactTarget:
         Preconditions: face and path available and all used values finite
         (never invented); an unavailable strike location skips the strike term.
         """
+        face, path = c.face_deg, c.path_deg
         require(
-            c.face_angle_deg is not None and c.club_path_deg is not None,
+            face is not None and path is not None,
             "face and path must be available to score a shot",
         )
+        assert face is not None and path is not None  # narrowing for mypy
         w = self.weights
         total = (
-            w.face * (c.face_angle_deg - self.face_deg) ** 2
-            + w.path * (c.club_path_deg - self.path_deg) ** 2
-            + w.aoa * (c.attack_angle_deg - self.aoa_deg) ** 2
+            w.face * (face - self.face_deg) ** 2
+            + w.path * (path - self.path_deg) ** 2
+            + w.aoa * (c.aoa_deg - self.aoa_deg) ** 2
         )
-        if c.toe_mm is not None and c.high_mm is not None:
-            s = self.strike_scale_mm
+        if c.strike_offset_x_m is not None and c.strike_offset_y_m is not None:
+            s = self.strike_scale_m
             total += w.strike * (
-                ((c.toe_mm - self.toe_mm) / s) ** 2
-                + ((c.high_mm - self.high_mm) / s) ** 2
+                ((c.strike_offset_x_m - self.strike_offset_x_m) / s) ** 2
+                + ((c.strike_offset_y_m - self.strike_offset_y_m) / s) ** 2
             )
         if self.speed_mph is not None:
-            total += w.speed * (c.clubhead_speed_mph - self.speed_mph) ** 2
+            total += w.speed * (c.speed_mph - self.speed_mph) ** 2
         require(math.isfinite(total), "measured impact must be finite", total)
         ensure(total >= 0.0, "deviation must be non-negative", total)
         return total

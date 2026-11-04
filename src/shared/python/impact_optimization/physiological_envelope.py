@@ -55,6 +55,7 @@ def load_limits(path: Path | str = DEFAULT_LIMITS_PATH) -> dict[str, VelocityLim
     raw: Any = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     entries = raw.get("velocity_limits_deg_s") if isinstance(raw, Mapping) else None
     require(bool(entries), "limits file lacks velocity_limits_deg_s", str(path))
+    assert entries is not None  # narrowing for mypy
     out: dict[str, VelocityLimit] = {}
     for e in entries:
         require(

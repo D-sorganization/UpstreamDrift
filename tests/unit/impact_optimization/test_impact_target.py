@@ -21,35 +21,25 @@ pytestmark = pytest.mark.unit
 class _Measured:
     """Structural stand-in for impact_parameters.conditions.ImpactConditions (C2)."""
 
-    face_angle_deg: float | None
-    club_path_deg: float | None
-    attack_angle_deg: float
-    clubhead_speed_mph: float
-    toe_mm: float | None = 0.0
-    high_mm: float | None = 0.0
-
-
-_ALIAS = {
-    "face_deg": "face_angle_deg",
-    "path_deg": "club_path_deg",
-    "aoa_deg": "attack_angle_deg",
-    "speed_mph": "clubhead_speed_mph",
-    "strike_offset_x_m": "toe_mm",
-    "strike_offset_y_m": "high_mm",
-}
+    face_deg: float | None
+    path_deg: float | None
+    aoa_deg: float
+    speed_mph: float
+    strike_offset_x_m: float | None = 0.0
+    strike_offset_y_m: float | None = 0.0
 
 
 def _cond(**kw: float | None) -> _Measured:
     base: dict[str, float | None] = {
-        "face_angle_deg": 0.0,
-        "club_path_deg": 0.0,
-        "attack_angle_deg": 0.0,
-        "clubhead_speed_mph": 100.0,
-        "toe_mm": 0.0,
-        "high_mm": 0.0,
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "aoa_deg": 0.0,
+        "speed_mph": 100.0,
+        "strike_offset_x_m": 0.0,
+        "strike_offset_y_m": 0.0,
     }
     for k, v in kw.items():
-        base[_ALIAS.get(k, k)] = v
+        base[k] = v
     return _Measured(**base)
 
 
@@ -102,8 +92,8 @@ def test_speed_term_only_when_requested_and_monotone() -> None:
 
 def test_strike_offset_penalised() -> None:
     t = ImpactTarget()
-    assert t.deviation(_cond(toe_mm=10.0)) > 0.0
-    assert t.deviation(_cond(high_mm=-10.0)) > 0.0
+    assert t.deviation(_cond(strike_offset_x_m=0.01)) > 0.0
+    assert t.deviation(_cond(strike_offset_y_m=-0.01)) > 0.0
 
 
 @pytest.mark.parametrize("bad", [math.nan, math.inf])
@@ -114,7 +104,7 @@ def test_nonfinite_rejected(bad: float) -> None:
         ImpactTarget().deviation(_cond(path_deg=bad))
 
 
-@pytest.mark.parametrize("missing", ["face_angle_deg", "club_path_deg"])
+@pytest.mark.parametrize("missing", ["face_deg", "path_deg"])
 def test_unavailable_face_or_path_is_never_invented(missing: str) -> None:
     with pytest.raises(ContractViolationError):
         ImpactTarget().deviation(_cond(**{missing: None}))
@@ -122,7 +112,7 @@ def test_unavailable_face_or_path_is_never_invented(missing: str) -> None:
 
 def test_unavailable_strike_location_skips_strike_term() -> None:
     t = ImpactTarget()
-    assert t.deviation(_cond(toe_mm=None, high_mm=None)) == 0.0
+    assert t.deviation(_cond(strike_offset_x_m=None, strike_offset_y_m=None)) == 0.0
 
 
 def test_nonpositive_target_speed_rejected() -> None:
