@@ -18,6 +18,10 @@ simulation MCP tools call (:mod:`src.sim_run.putting_tools`):
 * ``POST /tools/putting-analytics/simulated-curve`` -- the player's make rate
   and miss-leave fit by distance, the table the strokes-gained optimizer's
   ``"simulation"`` putting provider reads.
+* ``POST /tools/putting-analytics/dispersion`` -- where ``n`` putts at one
+  distance stop on the caller's green, and the make rate (#14459).
+* ``POST /tools/putting-analytics/make-spread`` -- the player's make rate by
+  distance (0-45 ft by default) on the caller's green (#14459).
 * ``GET /tools/putting-analytics/limits`` -- the input bounds and work caps
   the studies enforce, so a client can build its form without guessing.
 
@@ -72,6 +76,15 @@ _CURVE_BODY = Body(
         "The player's stroke and read dispersion (as for variance-study), "
         "distances_ft (defaults to the optimizer's grid), n putts per "
         "distance and seed."
+    ),
+)
+
+_DISPERSION_BODY = Body(
+    ...,
+    description=(
+        "The player's stroke and read dispersion (as for variance-study), the "
+        "green (grade_pct, aspect_deg, stimp), distance_ft or distances_ft, "
+        "n and seed."
     ),
 )
 
@@ -142,6 +155,28 @@ def putting_simulated_curve(
     return _run("curve_study", payload, "service_curve")
 
 
+@router.post("/dispersion")
+@limiter.limit(_STUDY_LIMIT)
+@handle_api_errors
+def putting_dispersion(
+    request: Request, payload: dict[str, Any] = _DISPERSION_BODY
+) -> dict[str, Any]:
+    """Rest positions and make rate of ``n`` putts on the caller's green."""
+    del request
+    return _run("dispersion_study", payload, "service_dispersion")
+
+
+@router.post("/make-spread")
+@limiter.limit(_STUDY_LIMIT)
+@handle_api_errors
+def putting_make_spread(
+    request: Request, payload: dict[str, Any] = _DISPERSION_BODY
+) -> dict[str, Any]:
+    """Make rate by distance on the caller's green."""
+    del request
+    return _run("make_spread_study", payload, "service_dispersion")
+
+
 @router.get("/limits")
 @handle_api_errors
 def putting_analytics_limits() -> dict[str, Any]:
@@ -150,6 +185,7 @@ def putting_analytics_limits() -> dict[str, Any]:
         library,
         service,
         service_curve,
+        service_dispersion,
         service_variance,
     )
     from src.shared.python.putting_analytics.optimize import OBJECTIVES
@@ -176,4 +212,7 @@ def putting_analytics_limits() -> dict[str, Any]:
         "max_curve_distances": service_curve.MAX_CURVE_DISTANCES,
         "max_curve_n": service_curve.MAX_CURVE_N,
         "max_curve_rollouts": service_curve.MAX_CURVE_ROLLOUTS,
+        "max_dispersion_n": service_dispersion.MAX_DISPERSION_N,
+        "max_spread_n": service_dispersion.MAX_SPREAD_N,
+        "default_spread_distances_ft": list(service_dispersion.DEFAULT_SPREAD_GRID_FT),
     }
