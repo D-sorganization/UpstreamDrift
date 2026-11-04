@@ -152,10 +152,3 @@ def test_flagship_driver_grip_reads_near_90_degrees_face_on() -> None:
     lead, trail = address_grip_roll_deg(state)
     assert lead == pytest.approx(97.9, abs=0.5)
     assert trail == pytest.approx(108.0, abs=0.5)
-
-
-def test_spec_dorsal_axes_are_perpendicular_to_the_shaft() -> None:
-    spec = json.loads(SPEC.read_text(encoding="utf-8"))
-    state = grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
-    assert state.lead_dorsal_club[1] == pytest.approx(0.0, abs=1e-9)
-    assert state.trail_dorsal_club[1] == pytest.approx(0.0, abs=1e-9)

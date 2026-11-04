@@ -1,30 +1,24 @@
 """Golf-language address grip roll, measured face-on (SHOW-A1, #14550).
 
 The owner reads the grip off the face-on view: **0 deg = the hand's palm plane is
-vertical** (the neutral grip), **+ = strong** (the back of the lead hand turns
-toward the sky, clockwise from the golfer's view). ``grip_contract`` /
-``grip_fit`` describe the same hands as ``(alpha, psi, gamma)`` relative to the
-*native hand frame*; that is a model-frame quantity and is not what the owner
-sees (the flagship read weak, alpha = -25 deg, while the render shows ~90 deg).
+vertical** (neutral), **+ = strong** (the back of the lead hand turns toward the
+sky, clockwise in the golfer's view). ``grip_contract`` describes the same hands
+as ``(alpha, psi, gamma)`` relative to the native hand frame, which is not what
+the owner sees: the flagship reads weak there (alpha = -25 deg) yet ~90 deg here.
 
-Definition
-----------
-* ``shaft`` is the butt-to-head axis, club-frame ``y``.
-* ``(e_h, e_v)`` span the plane perpendicular to the shaft: ``e_h`` is the
-  horizontal one pointing toward the target, ``e_v = shaft x e_h`` points up.
-* The hand normal ``n`` is the back of the lead hand and the palm of the trail
-  hand. Both are ``-dorsal``, with ``dorsal`` the wrist-follower x axis of the
-  hand (``hand_spec.wrist_follower_dorsal_axis``, the axis the hand meshes are
-  drawn from), re-expressed in the world by the native club frame.
-* ``roll = atan2(n . e_v, n . e_h)``, in degrees, after projecting ``n`` off the
-  shaft.
+Definition: ``shaft`` is club-frame ``y`` (butt to head); ``e_h`` is the
+horizontal direction toward the target perpendicular to it and ``e_v = shaft x
+e_h`` points up. The hand normal ``n`` is the back of the lead hand and the palm
+of the trail hand, both ``-dorsal`` with ``dorsal`` the wrist-follower x axis
+(``hand_spec.wrist_follower_dorsal_axis``, the axis the hand meshes use) taken
+into the world by the native club frame. ``roll = atan2(n.e_v, n.e_h)`` after
+projecting ``n`` off the shaft.
 
-Mapping to HX (#13757): ``alpha`` is a rotation of the hand about the shaft, so
-a change ``d_alpha`` changes the roll by exactly ``d_alpha``
-(``test_roll_is_invariant_to_spin...``). ``psi`` and ``gamma`` tilt the hand
-about axes perpendicular to the shaft and move only the *projected* normal's
-length, not (to first order) its direction. The roll equals ``alpha`` plus a
-constant set by the native frame and the club lie at address.
+Mapping to HX (#13757): alpha is a rotation about the shaft, so ``d_alpha``
+changes the roll by exactly ``d_alpha`` (``test_spin_about_the_shaft...``);
+psi and gamma tilt about axes perpendicular to the shaft and are seen here only
+through the projected normal. The roll is alpha plus a constant fixed by the
+native frame and the club lie at address.
 """
 
 from __future__ import annotations
