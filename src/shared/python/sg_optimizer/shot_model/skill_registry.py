@@ -66,8 +66,8 @@ def _presets() -> dict[str, SkillFamily]:
     skills = {
         k: SkillSpec(
             ImpactDistribution(
-                tuple(float(v) for v in s["mean"]),
-                tuple(float(v) for v in s["sd"]),
+                tuple(float(v) for v in s[0]),  # [mean, sd] pair
+                tuple(float(v) for v in s[1]),
                 corr,
             ),
             prov,
