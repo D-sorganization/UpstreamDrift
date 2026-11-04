@@ -17,7 +17,11 @@ import mujoco
 import numpy as np
 
 from src.sim_run.manifest import RunManifest
-from src.sim_run.manifest_emitter import emit_run_manifest, sha256_json
+from src.sim_run.manifest_emitter import (
+    RunProvenance,
+    emit_run_manifest,
+    sha256_json,
+)
 from src.sim_run.worker import get_repo_sha
 
 TRAJECTORY_FILENAME = "trajectory.npy"
@@ -73,9 +77,7 @@ def run_mujoco(
     trajectory = out / TRAJECTORY_FILENAME
     np.save(trajectory, np.asarray(rows))
 
-    return emit_run_manifest(
-        out,
-        outputs=[trajectory],
+    provenance = RunProvenance(
         model_id=model_id,
         revision="sha256:" + hashlib.sha256(xml.encode("utf-8")).hexdigest(),
         parameters={
@@ -92,6 +94,8 @@ def run_mujoco(
         engine_name="mujoco",
         engine_version=mujoco.__version__,
         ud_commit=commit,
-        created_at=created_at,
         input_label="initial condition: qpos0 with seeded qvel",
+    )
+    return emit_run_manifest(
+        out, outputs=[trajectory], provenance=provenance, created_at=created_at
     )

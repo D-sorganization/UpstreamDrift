@@ -9,6 +9,7 @@ it beside them. Engine adapters share this emitter rather than copying it.
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
+from dataclasses import dataclass
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -49,20 +50,31 @@ def _output_digests(run_dir: Path, outputs: Iterable[Path]) -> dict[str, str]:
     return digests
 
 
+@dataclass(frozen=True)
+class RunProvenance:
+    """What produced a run: model, parameters, input, seed, engine and commit.
+
+    Field validity is checked by :func:`validate_run_manifest` when the
+    manifest is emitted.
+    """
+
+    model_id: str
+    revision: str
+    parameters: Mapping[str, Any]
+    input_sha256: str
+    seed: int
+    engine_name: str
+    engine_version: str
+    ud_commit: str
+    input_label: str | None = None
+
+
 def emit_run_manifest(
     run_dir: Path,
     *,
     outputs: Iterable[Path],
-    model_id: str,
-    revision: str,
-    parameters: Mapping[str, Any],
-    input_sha256: str,
-    seed: int,
-    engine_name: str,
-    engine_version: str,
-    ud_commit: str,
+    provenance: RunProvenance,
     created_at: datetime | None = None,
-    input_label: str | None = None,
 ) -> RunManifest:
     """Hash ``outputs``, validate the manifest and write it into ``run_dir``.
 
@@ -76,12 +88,18 @@ def emit_run_manifest(
     root = Path(run_dir).resolve()
     data = {
         "schema_version": RUN_MANIFEST_SCHEMA_VERSION,
-        "model": {"model_id": model_id, "revision": revision},
-        "parameters": dict(parameters),
-        "input_data": {"sha256": input_sha256, "label": input_label},
-        "seed": seed,
-        "engine": {"name": engine_name, "version": engine_version},
-        "ud_commit": ud_commit,
+        "model": {"model_id": provenance.model_id, "revision": provenance.revision},
+        "parameters": dict(provenance.parameters),
+        "input_data": {
+            "sha256": provenance.input_sha256,
+            "label": provenance.input_label,
+        },
+        "seed": provenance.seed,
+        "engine": {
+            "name": provenance.engine_name,
+            "version": provenance.engine_version,
+        },
+        "ud_commit": provenance.ud_commit,
         "created_at": created_at or datetime.now(timezone.utc),
         "outputs": _output_digests(root, outputs),
     }

@@ -12,7 +12,11 @@ import pytest
 mujoco = pytest.importorskip("mujoco")
 
 from src.sim_run.manifest import RunManifestError, validate_run_manifest
-from src.sim_run.manifest_emitter import MANIFEST_FILENAME, emit_run_manifest
+from src.sim_run.manifest_emitter import (
+    MANIFEST_FILENAME,
+    RunProvenance,
+    emit_run_manifest,
+)
 from src.sim_run.mujoco_run import TRAJECTORY_FILENAME, run_mujoco
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_mujoco]
@@ -30,6 +34,16 @@ _TINY_XML = """<mujoco model="tiny_pendulum">
 _SCHEMA = Path("schemas") / "run-manifest-v1.json"
 _COMMIT = "a" * 40
 _CREATED = datetime(2026, 11, 4, 3, 0, tzinfo=timezone.utc)
+_PROVENANCE = RunProvenance(
+    model_id="test/m",
+    revision="sha256:" + "0" * 64,
+    parameters={},
+    input_sha256="0" * 64,
+    seed=0,
+    engine_name="mujoco",
+    engine_version="0",
+    ud_commit=_COMMIT,
+)
 
 
 def _sha256(path: Path) -> str:
@@ -107,14 +121,7 @@ def test_emitter_rejects_outputs_outside_the_run_dir(tmp_path: Path) -> None:
         emit_run_manifest(
             tmp_path / "run",
             outputs=[outside],
-            model_id="test/m",
-            revision="sha256:" + "0" * 64,
-            parameters={},
-            input_sha256="0" * 64,
-            seed=0,
-            engine_name="mujoco",
-            engine_version="0",
-            ud_commit=_COMMIT,
+            provenance=_PROVENANCE,
             created_at=_CREATED,
         )
 
@@ -124,14 +131,7 @@ def test_emitter_rejects_a_missing_output(tmp_path: Path) -> None:
         emit_run_manifest(
             tmp_path,
             outputs=[tmp_path / "missing.npz"],
-            model_id="test/m",
-            revision="sha256:" + "0" * 64,
-            parameters={},
-            input_sha256="0" * 64,
-            seed=0,
-            engine_name="mujoco",
-            engine_version="0",
-            ud_commit=_COMMIT,
+            provenance=_PROVENANCE,
             created_at=_CREATED,
         )
 
