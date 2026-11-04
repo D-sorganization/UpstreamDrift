@@ -2,11 +2,11 @@
 
 Every figure under a release's ``figures`` directory gets one entry: the
 preset and run id of the first listed run that has it as an output, the
-SHA-256 of that run's copy, whether it equals the committed release file, and
-when it does not, why. ``commit_bound`` marks a copy that embeds its run's
-short commit SHA and so reproduces only at that commit. The reason is read from the matplotlib version both
-files embed, so an entry that does not match explains itself; a figure no
-listed run wrote is recorded as unmapped rather than left out.
+SHA-256 of that run's copy, and whether it equals the committed release file.
+A mismatch records only what differs, from the matplotlib version both copies
+embed; it does not attribute a cause it cannot check. ``commit_bound`` marks a
+copy that embeds its run's short commit SHA and so reproduces only at that
+commit. A figure no listed run wrote is recorded as unmapped, not left out.
 """
 
 from __future__ import annotations
@@ -41,8 +41,8 @@ def _mismatch_reason(run_copy: Path, release: Path) -> str:
     if ran != released:
         return f"matplotlib {ran} at run vs {released} at release"
     return (
-        f"bytes differ at the same matplotlib {ran}: "
-        "input data or plotting code changed since the release"
+        f"bytes differ at the same matplotlib {ran}; not attributed: data, "
+        "code, or unpinned render metadata such as dates or SVG ids"
     )
 
 

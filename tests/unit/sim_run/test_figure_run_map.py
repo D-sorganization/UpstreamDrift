@@ -111,7 +111,10 @@ def test_same_renderer_mismatch_explains_itself(setup) -> None:
     entry = _entries(setup)["figures"][f"{_FIGURES}/fig_drift.svg"]
     assert entry["run_id"] == setup[2][1]
     assert entry["matches_release"] is False
-    assert "same matplotlib 3.10.9" in entry["mismatch_reason"]
+    assert entry["mismatch_reason"] == (
+        "bytes differ at the same matplotlib 3.10.9; not attributed: data, "
+        "code, or unpinned render metadata such as dates or SVG ids"
+    )
 
 
 def test_figure_without_a_run_is_unmapped(setup) -> None:
