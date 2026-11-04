@@ -472,3 +472,13 @@ def test_undulation_is_unit_selectable_and_seeded(widget: PuttingGreenWidget) ->
     assert widget._undulation_spin.suffix() == " in"
     assert widget._undulation_spin.value() == pytest.approx(10.0 / 25.4, abs=0.005)
     assert widget._current_config().undulation_m == pytest.approx(0.010, abs=1e-4)
+
+
+def test_every_input_follows_the_dark_panel_theme(widget: PuttingGreenWidget) -> None:
+    # The integer Green Seed box rendered white on the dark panel (#14463).
+    from PyQt6.QtWidgets import QWidget
+
+    style = widget.findChild(QWidget, "puttControls").styleSheet()
+    for spin in (widget._seed_spin, widget._undulation_spin, widget._green_combo):
+        assert type(spin).__name__ in style
+    assert ":disabled" in style, "a preset greys out the shape inputs visibly"

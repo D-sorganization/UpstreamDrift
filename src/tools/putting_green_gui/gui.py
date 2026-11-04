@@ -88,9 +88,12 @@ QGroupBox {
     margin-top: 10px; padding: 8px; font-weight: bold;
 }
 QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
-QDoubleSpinBox, QComboBox {
+QDoubleSpinBox, QSpinBox, QComboBox {
     background-color: #0f1822; color: #eaf2f8;
     border: 1px solid #2f4254; border-radius: 4px; padding: 3px;
+}
+QDoubleSpinBox:disabled, QSpinBox:disabled, QComboBox:disabled {
+    background-color: #18222c; color: #5f7282; border-color: #243240;
 }
 QPushButton {
     background-color: #243343; color: #eaf2f8;
