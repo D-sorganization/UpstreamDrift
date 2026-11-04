@@ -15,6 +15,7 @@ pytestmark = pytest.mark.unit
 
 _EXPECTED_EXPORTS = {
     # constants
+    "BALANCE_PRESETS",
     "DEFAULT_FIXTURES_PATH",
     "DEFAULT_SLIDING_MU",
     "DEFAULT_STATIC_MU",
@@ -29,6 +30,7 @@ _EXPECTED_EXPORTS = {
     "USGA_STIMP_ROLL_MODEL",
     # types
     "AimSolution",
+    "BalancePreset",
     "BallState",
     "CollisionReport",
     "ExpectedValue",
@@ -47,6 +49,7 @@ _EXPECTED_EXPORTS = {
     "TurfCondition",
     "TurfSpec",
     # functions
+    "balance_preset",
     "ball_kinetic_energy_j",
     "bumpy_friction_field",
     "bumpy_height_field",

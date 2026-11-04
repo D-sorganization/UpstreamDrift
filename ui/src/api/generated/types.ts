@@ -534,6 +534,25 @@ export interface BackingRecordV2 {
 }
 
 /**
+ * One named putter head from the shared core (#14461).
+ */
+export interface BalancePresetResponse {
+  key: string;
+  name: string;
+  head_mass_kg: number;
+  moi_kg_m2: number;
+  hosel_toe_m: number;
+  hosel_forward_m: number;
+}
+
+/**
+ * Every core balance preset, for the balance-type selectors.
+ */
+export interface BalancePresetsResponse {
+  presets: BalancePresetResponse[];
+}
+
+/**
  * Trajectory and summary metrics for a single flight model.
  */
 export interface BallFlightModelResult {
@@ -3172,6 +3191,9 @@ export interface Putt3DSimulationRequest {
   coefficient_of_restitution: number;
   hosel_toe_m: number;
   hosel_forward_m: number;
+  /** Named core putter head (see /putter-presets); when set it supplies head mass, MOI and hosel offsets, overriding those fields */
+  balance_type?: string | null;
+  /** Strike offset, toe + / heel - [m] */
   impact_toe_m: number;
   stimp_rating: number;
   grade_percent: number;
