@@ -139,7 +139,7 @@
       "title": "Camera Views and Playback Phases",
       "cluster": "i",
       "cells": {
-        "core_api": "partial #14473 | src/api/routes/putting_green.py, src/shared/python/putting_dynamics/types.py | Per-sample mode only on /simulate-3d; no stroke phases.",
+        "core_api": "present | src/shared/python/putting_dynamics/phases.py, src/api/routes/putting_green.py | Per-sample ball mode on /simulate and /simulate-3d, and phase marks (where the hop, skid, roll and rest start) from the core's phase_marks for playback jumps.",
         "pyqt6": "partial #14473 | src/tools/putting_green_gui/gui.py | Auto-framed orbit and a one-shot animation; no presets, scrub or phase jumps.",
         "react": "partial #14474 | ui/src/pages/PuttingGreen.tsx, ui/src/components/visualization/PuttingScene3D.tsx | Orbit camera, play/pause/scrub/rate; no view presets or phase jumps.",
         "tauri": "partial #14474 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",

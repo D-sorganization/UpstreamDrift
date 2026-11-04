@@ -59,6 +59,7 @@ from .collision import (
     strike,
     sweep_dynamic_loft,
 )
+from .phases import PhaseMark, phase_marks
 from .putter_presets import BALANCE_PRESETS, BalancePreset, balance_preset
 from .friction import (
     DEFAULT_SLIDING_MU,
@@ -167,6 +168,7 @@ __all__ = [
     "HeightField",
     "LineReading",
     "Mode",
+    "PhaseMark",
     "PuttResult",
     "PutterState",
     "ReferenceFixture",
@@ -186,6 +188,7 @@ __all__ = [
     "green_preset",
     "is_static_hold",
     "load_reference_fixtures",
+    "phase_marks",
     "m_to_feet",
     "m_to_yards",
     "measure_stimp_ft",
