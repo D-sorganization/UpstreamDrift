@@ -7,6 +7,7 @@ batch and the 3-45 ft make spread) and plots the answer in the user's units.
 from __future__ import annotations
 
 import math
+from dataclasses import asdict
 from collections.abc import Callable
 from typing import Any
 
@@ -25,6 +26,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.putting_analytics import service_dispersion
+from src.shared.python.putting_analytics.service_variance import profile_from_args
 from src.shared.python.ui.units import (
     UnitSystem,
     distance_suffix,
@@ -40,20 +42,31 @@ _STACK_BELOW_PX = 520  # narrower plot canvases stack the two charts
 # left of the line, so it falls to the right: -90 deg, CCW from the line.
 _FALL_RIGHT_DEG = -90.0
 _M_PER_FT = from_display_distance(1.0, UnitSystem.IMPERIAL, unit="ft")
+_MM_PER_IN = 1000.0 * _M_PER_FT / 12.0
+# Noise channel -> (label, core value per shown value, upper bound, suffix).
+# Strike is shown in mm or in, so its scale and suffix come from the units.
+_CHANNELS: dict[str, tuple[str, float, float, str]] = {
+    "face_sd_deg": ("Face SD:", 1.0, 10.0, "°"),
+    "path_sd_deg": ("Path SD:", 1.0, 15.0, "°"),
+    "speed_cv": ("Speed CV:", 0.01, 50.0, " %"),
+    "strike_toe_sd_mm": ("Strike SD:", 1.0, 25.0, ""),
+    "grade_rel_sd": ("Read Slope SD:", 0.01, 100.0, " %"),
+    "aspect_sd_deg": ("Read Fall Line SD:", 1.0, 45.0, "°"),
+    "stimp_rel_sd": ("Read Speed SD:", 0.01, 50.0, " %"),
+}
 
 
 def batch_args(
-    config: PuttConfig, *, face_sd_deg: float, speed_cv: float, n: int, seed: int
+    config: PuttConfig, *, n: int, seed: int, **noise: float
 ) -> dict[str, Any]:
-    """Dispersion-service arguments for the dialled putt and stroke noise."""
+    """Dispersion-service arguments for the dialled putt and noise channels."""
     grade_pct = 100.0 * math.tan(math.radians(config.slope_deg))
     return {
         "distance_ft": config.cup_distance_m / _M_PER_FT,
         "grade_pct": grade_pct,
         "aspect_deg": _FALL_RIGHT_DEG if grade_pct else 0.0,
         "stimp": config.stimp,
-        "face_sd_deg": face_sd_deg,
-        "speed_cv": speed_cv,
+        **noise,
         "n": n,
         "seed": seed,
     }
@@ -107,10 +120,15 @@ class BatchPanel(QGroupBox):
         self._spread_grid_ft = spread_grid_ft
         self._busy = False
         form = QFormLayout(self)
-        self._face_spin = _spin(0.0, 10.0, 1.5, "°")
-        form.addRow("Face SD:", self._face_spin)
-        self._speed_spin = _spin(0.0, 50.0, 8.0, " %")
-        form.addRow("Speed CV:", self._speed_spin)
+        self._shown_units = units()
+        self._noise: dict[str, QDoubleSpinBox] = {}
+        profile = profile_from_args({})  # the core's defaults
+        core = {**asdict(profile.stroke), **asdict(profile.read)}
+        for key, (label, per_shown, top, suffix) in _CHANNELS.items():
+            self._noise[key] = _spin(0.0, top, core[key] / per_shown, suffix)
+            form.addRow(label, self._noise[key])
+        strike_mm = core["strike_toe_sd_mm"]
+        self._express_strike(strike_mm / self._per_shown("strike_toe_sd_mm"))
         self._size_combo = QComboBox()
         for size in BATCH_SIZES:
             self._size_combo.addItem(f"{size} putts", size)
@@ -142,13 +160,22 @@ class BatchPanel(QGroupBox):
     def size_combo(self) -> QComboBox:
         return self._size_combo
 
+    def noise_spin(self, key: str) -> QDoubleSpinBox:
+        """The input for one noise channel, a ``profile_from_args`` key."""
+        if key not in self._noise:
+            raise ValueError(f"noise channel must be one of {tuple(self._noise)}")
+        return self._noise[key]
+
     def current_args(self) -> dict[str, Any]:
+        noise = {
+            key: spin.value() * self._per_shown(key)
+            for key, spin in self._noise.items()
+        }
         return batch_args(
             self._config(),
-            face_sd_deg=self._face_spin.value(),
-            speed_cv=self._speed_spin.value() / 100.0,
             n=int(self._size_combo.currentData()),
             seed=self._seed,
+            **noise,
         )
 
     def spread_args(self) -> dict[str, Any]:
@@ -223,13 +250,19 @@ class BatchPanel(QGroupBox):
 
     def redraw(self) -> None:
         """Replot the last results in the current units; a running job redraws."""
+        mm = self._noise["strike_toe_sd_mm"].value() * self._per_shown(
+            "strike_toe_sd_mm"
+        )
+        self._shown_units = self._units()
+        self._express_strike(mm / self._per_shown("strike_toe_sd_mm"))
         self._label_spread()
         if not self.is_busy():
             for kind, report in list(self._shown.items()):
                 (self.show_batch if kind == "batch" else self.show_spread)(report)
 
     def eventFilter(self, obj: QObject | None, event: QEvent | None) -> bool:
-        if obj is self.canvas and event is not None:
+        canvas = getattr(self, "canvas", None)  # gone during teardown
+        if obj is canvas and canvas is not None and event is not None:
             if event.type() == QEvent.Type.Resize:
                 self.arrange_plots(self.canvas.width())
         return False
@@ -297,6 +330,24 @@ class BatchPanel(QGroupBox):
         scale, unit = self._length_scale()
         top = max(self._spread_grid_ft) * scale
         self._spread_btn.setText(f"0-{top:.0f} {unit} Spread")
+
+    def _per_shown(self, key: str) -> float:
+        """Core units per shown unit for a channel, in the units it shows."""
+        if key == "strike_toe_sd_mm" and self._shown_units != UnitSystem.METRIC:
+            return _MM_PER_IN
+        return _CHANNELS[key][1]
+
+    def _express_strike(self, shown: float) -> None:
+        """Show the strike spread in mm (metric) or in (imperial)."""
+        spin = self._noise["strike_toe_sd_mm"]
+        metric = self._shown_units == UnitSystem.METRIC
+        spin.setDecimals(1 if metric else 2)
+        spin.setSingleStep(0.5 if metric else 0.05)
+        spin.setRange(
+            0.0, _CHANNELS["strike_toe_sd_mm"][2] / self._per_shown("strike_toe_sd_mm")
+        )
+        spin.setSuffix(" mm" if metric else " in")
+        spin.setValue(shown)
 
     def _length_scale(self) -> tuple[float, str]:
         """Feet -> display length factor and unit, from the shared units module."""

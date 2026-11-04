@@ -22,6 +22,9 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 from PyQt6.QtWidgets import QApplication  # noqa: E402
 
 from src.shared.python.putting_analytics import service_dispersion  # noqa: E402
+from src.shared.python.putting_analytics.service_variance import (  # noqa: E402
+    profile_from_args,
+)
 from src.shared.python.ui.units import UnitSystem  # noqa: E402
 from src.tools.putting_green_gui._batch_panel import (  # noqa: E402
     BATCH_SIZES,
@@ -153,5 +156,62 @@ def test_widget_feeds_its_green_into_the_panel(qapp: QApplication) -> None:
         args = w.batch_panel.current_args()
         assert (args["stimp"], args["grade_pct"]) == (12.5, 0.0)
         assert args["distance_ft"] == pytest.approx(10.0, abs=0.01)
+    finally:
+        w.cleanup()
+
+
+_CHANNELS = (
+    "face_sd_deg",
+    "path_sd_deg",
+    "speed_cv",
+    "strike_toe_sd_mm",
+    "grade_rel_sd",
+    "aspect_sd_deg",
+    "stimp_rel_sd",
+)
+
+
+def test_every_noise_channel_defaults_to_the_core_profile(panel: BatchPanel) -> None:
+    args = panel.current_args()
+    assert set(_CHANNELS) <= set(args)
+    assert profile_from_args(args) == profile_from_args({})
+
+
+def test_every_noise_channel_maps_to_the_service_args(panel: BatchPanel) -> None:
+    for key, shown in (
+        ("path_sd_deg", 3.0),
+        ("strike_toe_sd_mm", 0.25),  # inches in imperial
+        ("grade_rel_sd", 10.0),
+        ("aspect_sd_deg", 5.0),
+        ("stimp_rel_sd", 4.0),
+    ):
+        panel.noise_spin(key).setValue(shown)
+    args = panel.current_args()
+    assert args["path_sd_deg"] == pytest.approx(3.0)
+    assert args["strike_toe_sd_mm"] == pytest.approx(6.35)
+    assert (args["grade_rel_sd"], args["stimp_rel_sd"]) == pytest.approx((0.1, 0.04))
+    assert args["aspect_sd_deg"] == pytest.approx(5.0)
+    # test_batch_shows_the_service_answer proves the panel shows the service
+    # answer for current_args(); a read-noise batch costs ~40 s, so not rerun.
+
+
+def test_strike_spread_follows_the_units(qapp: QApplication) -> None:
+    units = [UnitSystem.IMPERIAL]
+    p = BatchPanel(lambda: _CONFIG, lambda: units[0])
+    spin = p.noise_spin("strike_toe_sd_mm")
+    assert spin.suffix() == " in"
+    spin.setValue(0.5)
+    units[0] = UnitSystem.METRIC
+    p.redraw()
+    assert spin.suffix() == " mm"
+    assert spin.value() == pytest.approx(12.7)
+    assert p.current_args()["strike_toe_sd_mm"] == pytest.approx(12.7)
+
+
+def test_controls_scroll_so_the_window_fits_a_phone(qapp: QApplication) -> None:
+    w = PuttingGreenWidget(unit_system=UnitSystem.IMPERIAL)
+    try:
+        # Seven noise rows make the controls taller than an 844 px phone.
+        assert w.minimumSizeHint().height() < 700
     finally:
         w.cleanup()

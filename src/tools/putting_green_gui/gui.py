@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QMainWindow,
     QPushButton,
+    QScrollArea,
     QSplitter,
     QStatusBar,
     QVBoxLayout,
@@ -189,7 +190,17 @@ class PuttingGreenWidget(QWidget):
     def _build_ui(self) -> None:
         layout = QHBoxLayout(self)
         splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.addWidget(self._build_controls())
+        controls = QScrollArea()  # the controls outgrow short screens
+        controls.setWidgetResizable(True)
+        controls.setFrameShape(QScrollArea.Shape.NoFrame)
+        inner = self._build_controls()
+        controls.setWidget(inner)
+        # Scroll down, never sideways: keep the column as wide as its controls.
+        controls.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        bar = controls.verticalScrollBar()
+        extra = bar.sizeHint().width() if bar is not None else 0
+        controls.setMinimumWidth(inner.minimumSizeHint().width() + extra)
+        splitter.addWidget(controls)
         splitter.addWidget(self._build_results())
         splitter.setSizes([360, 720])
         layout.addWidget(splitter)
