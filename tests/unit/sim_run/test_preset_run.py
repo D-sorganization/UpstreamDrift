@@ -193,3 +193,50 @@ def test_command_timeout_is_reported(root, tmp_path, monkeypatch) -> None:
     spec = _spec(commands=(("fakepreset.slow",),))
     with pytest.raises(PresetRunError, match="fakepreset.slow timed out"):
         _run(root, tmp_path / "run", spec)
+
+
+def test_preset_engine_is_registered_for_reproduce() -> None:
+    from src.sim_run.reproduce import REPRODUCERS
+
+    assert REPRODUCERS[preset_run.PRESET_ENGINE] is preset_run.reproduce_preset
+
+
+def test_commands_run_in_a_pinned_environment(root: Path, tmp_path: Path) -> None:
+    (root / "fakepreset" / "envdump.py").write_text(
+        "import json, os, pathlib\n"
+        "import matplotlib\n"
+        "keys = ('SOURCE_DATE_EPOCH', 'PYTHONHASHSEED')\n"
+        "env = {key: os.environ.get(key) for key in keys}\n"
+        "env['svg.hashsalt'] = matplotlib.rcParams['svg.hashsalt']\n"
+        "pathlib.Path('release/env.json').write_text(json.dumps(env))\n"
+    )
+    spec = _spec(commands=(("fakepreset.envdump",),))
+    manifest = _run(root, tmp_path / "run", spec)
+    written = json.loads((root / "release" / "env.json").read_text())
+    pinned = {**dict(preset_run.PINNED_ENV), **dict(preset_run.PINNED_RC)}
+    assert written == pinned
+    assert manifest.parameters["environment"] == pinned
+
+
+def test_preset_run_command_stores_the_run(root, tmp_path, monkeypatch, capsys):
+    from src.sim_run.cli import main
+
+    monkeypatch.setattr(preset_run, "REPO_ROOT", root)
+    monkeypatch.setenv("GITHUB_SHA", _COMMIT)
+    spec_file = tmp_path / "fake_study.json"
+    spec_file.write_text(_spec().to_text())
+    store = tmp_path / "store"
+    assert main(["preset-run", str(spec_file), "--store", str(store)]) == 0
+    run_id = capsys.readouterr().out.strip()
+    manifest = RunRegistry(store).show(run_id)
+    assert manifest.model.model_id == "release-preset/fake_study"
+    assert "release/figures/fig_study.svg" in manifest.outputs
+
+
+def test_preset_run_command_reports_a_bad_spec(tmp_path, capsys) -> None:
+    from src.sim_run.cli import main
+
+    spec_file = tmp_path / "bad.json"
+    spec_file.write_text('{"name": "bad name"}')
+    assert main(["preset-run", str(spec_file), "--store", str(tmp_path)]) == 2
+    assert "ud-sim preset-run:" in capsys.readouterr().err
