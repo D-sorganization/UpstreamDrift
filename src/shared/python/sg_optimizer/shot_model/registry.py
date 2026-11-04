@@ -10,7 +10,7 @@ from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
 
-from src.shared.python.contracts import require
+from src.shared.python.contracts import ensure, require
 from src.shared.python.sg_optimizer.shot_model.baseline import (
     BaselineBag,
     load_baseline,
@@ -27,6 +27,8 @@ DEFAULT_BASELINE_PATH = (
     / "pga_tour.yaml"
 )
 
+# A factory takes the tour ``BaselineBag`` (the fallback reference every backend
+# may lean on) and returns a ready ``ShotOutcomeModel``.
 BackendFactory = Callable[[BaselineBag], ShotOutcomeModel]
 _BACKENDS: dict[str, BackendFactory] = {BASELINE_BACKEND: BaselineShotModel}
 
@@ -55,7 +57,9 @@ def get_shot_model(
         name in _BACKENDS,
         f"unknown shot-model backend {name!r}; have {available_backends()}",
     )
-    return _BACKENDS[name](baseline if baseline is not None else _tour_baseline())
+    model = _BACKENDS[name](baseline if baseline is not None else _tour_baseline())
+    ensure(isinstance(model, ShotOutcomeModel), f"backend {name!r} is not a model")
+    return model
 
 
 def quick_sg(baseline: BaselineBag | None = None) -> ShotOutcomeModel:

@@ -202,3 +202,51 @@ def test_transition_default_matches_legacy_formula() -> None:
     ey = along * np.sin(ang) + lat * np.cos(ang)
     np.testing.assert_allclose([o.next_state.x for o in got], ex)
     np.testing.assert_allclose([o.next_state.y for o in got], ey)
+
+
+class _HopModel:
+    """Test double: every shot hops 1 yd, so it stays on a small grid."""
+
+    def sample(self, player, shot, lie, conditions, rng, n):  # noqa: ANN001
+        return LandingSamples(along=np.full(n, 1.0), lateral=np.zeros(n))
+
+
+@pytest.fixture
+def restore_registry():
+    """Snapshot/restore the backend registry so tests can register freely."""
+    from src.shared.python.sg_optimizer.shot_model import registry
+
+    saved = dict(registry._BACKENDS)
+    yield
+    registry._BACKENDS.clear()
+    registry._BACKENDS.update(saved)
+
+
+def test_factory_returning_non_model_fails_postcondition(restore_registry) -> None:
+    register_shot_model("broken", lambda baseline: object())
+    with pytest.raises(ContractViolationError, match="not a model"):
+        get_shot_model("broken")
+
+
+def test_hole_mdp_honours_injected_backend(restore_registry) -> None:
+    """A registered backend must change the solve, not be silently ignored."""
+    from src.shared.python.sg_optimizer.mdp.action import ActionSet
+    from src.shared.python.sg_optimizer.mdp.value_iteration import HoleMDP
+
+    grid = np.full((12, 12), _FAIRWAY, dtype=np.int8)
+    grid[6, 6] = LIE_CODES["holed"]
+    raster = LieRaster(
+        codes=grid, origin=(-30.0, -30.0), resolution_yd=5.0, pin=(0, 0), tee=(0, 0)
+    )
+    args = (
+        raster,
+        _player(),
+        load_baseline(PGA_TOUR_YAML),
+        CourseConditions.benign(),
+        ActionSet(clubs=("7_iron",), aim_grid_deg=np.array([0.0])),
+    )
+    base = HoleMDP(*args, n_samples=8, seed=1).bellman_backup(np.zeros((12, 12)))[0]
+    fixed = HoleMDP(*args, n_samples=8, seed=1, model=_HopModel()).bellman_backup(
+        np.zeros((12, 12))
+    )[0]
+    assert not np.allclose(base, fixed)
