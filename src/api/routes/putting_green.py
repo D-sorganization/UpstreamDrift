@@ -207,6 +207,27 @@ class GreenContourResponse(BaseModel):
     hole_position: list[float]
 
 
+class CounterTorqueRequest(BaseModel):
+    """Counter-torque explorer settings (#14469); the core checks the ranges."""
+
+    preload_nm: float = Field(0.60, description="In-plane grip preload couple (N m)")
+    off_preload_nm: float = Field(0.55, description="Off-plane preload couple (N m)")
+    noise_scale: float = Field(0.25, description="Hand-noise scale (0 = none)")
+    gust_impulse_nm: float = Field(0.25, description="Gust pulse strength (N m)")
+    lie_deg: float = Field(70.0, description="Shaft lie angle (deg)")
+    putter: str = Field(
+        "toe_hang", description="Putter head: a key of /putter-presets (#14461)"
+    )
+    n_points: int = Field(210, ge=1, le=2000, description="Intervals over the stroke")
+
+
+class CounterTorqueResponse(BaseModel):
+    """Stroke series of the core couple model, one list per sample field."""
+
+    putter_name: str
+    samples: dict[str, list[float]]
+
+
 class Putt3DSimulationRequest(BaseModel):
     """Physics and visualization inputs for one three-dimensional putt."""
 
@@ -721,6 +742,32 @@ async def get_putter_presets() -> BalancePresetsResponse:
         BalancePresetResponse(**dataclasses.asdict(p)) for p in BALANCE_PRESETS.values()
     ]
     return BalancePresetsResponse(presets=presets)
+
+
+@router.post("/counter-torque", response_model=CounterTorqueResponse)
+@handle_api_errors
+async def counter_torque(request: CounterTorqueRequest) -> CounterTorqueResponse:
+    """Hand couples, forces and gust response over the stroke (#14469).
+
+    Serves :func:`~src.shared.python.putting_dynamics.counter_torque.
+    stroke_series`, the studio's closed-form two-hand couple model moved
+    into the shared core; an out-of-range setting is a 400.
+    """
+    from dataclasses import asdict, fields
+
+    from src.shared.python.putting_dynamics import counter_torque as ct
+
+    settings = request.model_dump()
+    n_points = settings.pop("n_points")
+    inputs = ct.CounterTorqueInputs(**settings)
+    series = [asdict(s) for s in ct.stroke_series(inputs, n_points=n_points)]
+    return CounterTorqueResponse(
+        putter_name=BALANCE_PRESETS[inputs.putter].name,
+        samples={
+            f.name: [row[f.name] for row in series]
+            for f in fields(ct.CounterTorqueSample)
+        },
+    )
 
 
 @router.get("/contours", response_model=GreenContourResponse)
