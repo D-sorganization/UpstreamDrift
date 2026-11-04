@@ -131,6 +131,17 @@ def test_workflow_runs_archiver_and_targets_docs_development_only() -> None:
     assert "automerge_guard" in propose["env"]["GUARD"]
 
 
+def test_workflow_archives_with_a_window_that_fits_the_byte_ceiling() -> None:
+    """A 14-day shipped backlog alone fills the 200,000-byte ceiling here.
+
+    At this repository's velocity the default window let collated fragments push
+    the live log past ``MAX_BYTES``, failing every merge-queue entry.
+    """
+    archive_run = _step("Archive terminal development-log entries")["run"]
+    assert "--archive-days 7" in archive_run
+    assert ARCHIVE_AFTER_DAYS > 7
+
+
 def test_workflow_uses_hosted_runner_on_public_repositories() -> None:
     job = _workflow()["jobs"]["archive"]
     runs_on = job["runs-on"]

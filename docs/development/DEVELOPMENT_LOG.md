@@ -993,32 +993,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-10-24 (`75a80849`; collated from changes/13650-isolate-capture-rig-theme-compliance-the.md)
 - **Summary:** Clear deleted ThemeManager main-window wrappers during test cleanup
 
-### DL-#13641 · Defer Generated Collation Branch Updates When the Canonical Queue Preflight Cannot Verify Editability
-
-- **State:** shipped
-- **Shipped:** 2026-10-22
-- **Owner:** unassigned
-- **Issue:** #13641
-- **Branch:** codex/13641-collator-update-preflight
-- **PR:** #13643
-- **Paths:** see #13643
-- **Started:** 2026-10-23
-- **Last verified:** 2026-10-23 (`2dc1348b`; collated from changes/13641-defer-generated-collation-branch-updates.md)
-- **Summary:** Defer generated collation branch updates when the canonical queue preflight cannot verify editability
-
-### DL-#13636 · Route OpenSim Classification and Skip Reporting Through the Existing Reversible Public Hosted Policy; Fail Closed on Diff Errors While Preserving Real Engine Docker Validation.
-
-- **State:** shipped
-- **Shipped:** 2026-10-22
-- **Owner:** unassigned
-- **Issue:** #13636
-- **Branch:** codex/13636-opensim-lightweight-routing
-- **PR:** #13637
-- **Paths:** see #13637
-- **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`a0fe9edc`; collated from changes/13636-route-opensim-classification-and-skip-re.md)
-- **Summary:** Route OpenSim classification and skip reporting through the existing reversible public hosted policy; fail closed on diff errors while preserving real engine Docker validation.
-
 ### DL-#11161 — Capture Registry, Capture Export and Swing Comparison (Owner Swing vs Tour Average)
 
 - **Next step:** Coordinate the separately tracked engine deliveries in #11165–#11169 and cross-engine comparison #11170; keep this parent active until its scoped acceptance is met.
@@ -3628,45 +3602,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Model explorer headless export: support NPZ trajectories with 'q', document and verify results replay for anthro driver mjx_package with stiff weld constraint
 - **Next step:** Shipped in PR #13425.
 
-### DL-#13334 · Critique Physical Grip-Contact Calibration and Validation Evidence
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #13334
-- **Branch:** merged via #13661
-- **PR:** #13661
-- **Paths:** see #13661
-- **Started:** 2026-10-23
-- **Last verified:** 2026-10-23 (`46a71b8a`; collated from changes/13334-critic-grip-contact-2026-10-23.md)
-- **Summary:** Critique physical grip-contact calibration and validation evidence
-- **Next step:** Shipped in PR #13661.
-
-### DL-#13608 · Exclude Generated Capability-Atlas Output From Tauri Workflow Path Triggers
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #13608
-- **Branch:** staff/issue-remediator-13608-119eb1
-- **PR:** #13652
-- **Paths:** .github/workflows/tauri-build.yml,tests/ci/test_ci_infrastructure.py
-- **Started:** 2026-10-23
-- **Last verified:** 2026-10-23 (`b22f0717`; collated from changes/13608-exclude-generated-capability-atlas-outpu.md)
-- **Summary:** Exclude generated capability-atlas output from Tauri workflow path triggers
-- **Next step:** Shipped in PR #13652.
-
-### DL-#13626 · Prevent Duplicate Xvfb Startup in the Motion-Matching Smoke Command.
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #13626
-- **Branch:** merged via #13635
-- **PR:** #13635
-- **Paths:** see #13635
-- **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`8117cbc1`; collated from changes/13626-motion-smoke-display.md)
-- **Summary:** Prevent duplicate Xvfb startup in the motion-matching smoke command.
-- **Next step:** Shipped in PR #13635.
-
 ### DL-#13619 · Use Python 3.12 for the Reviewed Nightly Cross-Engine Dependencies.
 
 - **State:** shipped
@@ -3680,32 +3615,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Use Python 3.12 for the reviewed nightly cross-engine dependencies.
 - **Next step:** Shipped in PR #13635.
 
-### DL-#13568 · Quarantine CI Requires OpenSim Lane (RM #2252) Until #13564 Fix Lands.
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #13568
-- **Branch:** merged via #13614
-- **PR:** #13614
-- **Paths:** see #13614
-- **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`efff779f`; collated from changes/13568-quarantine-ci-requires-opensim-lane-rm-2.md)
-- **Summary:** Quarantine CI Requires OpenSim lane (RM #2252) until #13564 fix lands.
-- **Next step:** Shipped in PR #13614.
-
-### DL-#13564 · Restore CI Requires OpenSim: Squat JR Kinematics Revision 6 and Native Muscle-Effort Allocation.
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #13564
-- **Branch:** merged via #13615
-- **PR:** #13615, #13647
-- **Paths:** see #13615
-- **Started:** 2026-10-22
-- **Last verified:** 2026-10-23 (`3368efe0`; collated from changes/13564-remove-stale-ci-requires-opensim-lane-qu.md)
-- **Summary:** Restore CI Requires OpenSim: squat JR kinematics revision 6 and native muscle-effort allocation.
-- **Next step:** Close #13564; the real fix landed in #13615 and has been verified green on main across multiple CI runs.
-
 ### DL-#13572 · Gate Workflow Edits With Actionlint; Fix Cross-Engine Leaderboard Publish Concurrency Expression
 
 - **State:** shipped
@@ -3718,45 +3627,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-10-24 (`9497fdb6`; collated from changes/13572-pin-live-required-check-export-for-ud-ci.md)
 - **Summary:** Gate workflow edits with actionlint; fix cross-engine leaderboard publish concurrency expression
 - **Next step:** Shipped in PR #13616.
-
-### DL-#13629 · Schedule Nightly Development Log Archiver Workflow and Noop Contract Test
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #13629
-- **Branch:** merged via #13628
-- **PR:** #13628
-- **Paths:** see #13628
-- **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`29cb48eb`; collated from changes/13629-schedule-nightly-development-log-archive.md)
-- **Summary:** Schedule nightly development log archiver workflow and noop contract test
-- **Next step:** Shipped in PR #13628.
-
-### DL-#13621 · Reconcile Development Log Against GitHub PR Truth and Archive Terminal Rows for Fleet Policy Gate
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #13621
-- **Branch:** merged via #13621
-- **PR:** #13621
-- **Paths:** see #13621
-- **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`c28cdb20`; collated from changes/13621-reconcile-development-log-against-github.md)
-- **Summary:** Reconcile development log against GitHub PR truth and archive terminal rows for fleet policy gate
-- **Next step:** Shipped in PR #13621.
-
-### DL-#5915 · Remove @dieterolson From CODEOWNERS; Keep Team-Based Ownership
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #5915
-- **Branch:** merged via #13617
-- **PR:** #13617
-- **Paths:** see #13617
-- **Started:** 2026-10-22
-- **Last verified:** 2026-10-22 (`3dfbb4dc`; collated from changes/5915-remove-dieter-codeowners.md)
-- **Summary:** Remove @dieterolson from CODEOWNERS; keep team-based ownership
-- **Next step:** Shipped in PR #13617.
 
 ## Archive
 
