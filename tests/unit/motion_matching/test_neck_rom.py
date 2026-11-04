@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import json
 import math
+
+import mujoco
+import numpy as np
 import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - test parses our own output
 from pathlib import Path
 
@@ -82,3 +85,55 @@ def test_neck_joint_tree_contract() -> None:
     order = spec["coordinate_order"]
     idx = [order.index(c) for c in NECK_COORDINATES]
     assert idx == sorted(idx)
+
+
+def _neck_model(limited: bool) -> mujoco.MjModel:
+    xml, _ = export_full_body_mjcf(SPEC.read_bytes())
+    model = mujoco.MjModel.from_xml_string(xml)
+    if not limited:
+        model.jnt_limited[:] = 0
+    return model
+
+
+def _settled_axial_deg(model: mujoco.MjModel, start_deg: float) -> float:
+    data = mujoco.MjData(model)
+    jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "NeckInputZ")
+    adr = model.jnt_qposadr[jid]
+    data.qpos[adr] = math.radians(start_deg)
+    for _ in range(300):
+        mujoco.mj_step(model, data)
+    return math.degrees(float(data.qpos[adr]))
+
+
+def test_mujoco_dynamics_enforce_the_neck_limit() -> None:
+    """mj_forward ignores limits; mj_step must pull an over-range neck back."""
+    limit = NECK_ROM["NeckInputZ"].upper_deg
+    limited = _settled_axial_deg(_neck_model(True), limit + 25.0)
+    free = _settled_axial_deg(_neck_model(False), limit + 25.0)
+    assert free > limit + 20.0  # control: with no limit the neck stays put
+    assert limited < limit + 5.0  # soft constraint: pushed back to the limit
+
+
+def test_matched_driver_swing_neck_excursion_is_recorded() -> None:
+    root = SPEC.parents[3]
+    run = root / "docs/development/full_body_models/evidence/ground_support"
+    run = run / "anthro_driver_drake"
+    order = json.loads(
+        (run / "full_body_spec_hipcal_scaled.json").read_text(encoding="utf-8")
+    )["coordinate_order"]
+    q = np.load(run / "dynamics_record.npz")["q_track"]
+    recorded = json.loads(
+        (
+            root
+            / "docs/development/full_body_models/evidence/neck_rom"
+            / "driver_swing_neck_excursion.json"
+        ).read_text(encoding="utf-8")
+    )
+    for name, rom in NECK_ROM.items():
+        deg = np.degrees(q[:, order.index(name)])
+        row = recorded[name]
+        assert row["min_deg"] == pytest.approx(float(deg.min()), abs=0.05)
+        assert row["max_deg"] == pytest.approx(float(deg.max()), abs=0.05)
+        assert row["limit_deg"] == [rom.lower_deg, rom.upper_deg]
+        # The fit sits at (not past) the axial limit: it is the binding joint.
+        assert deg.min() >= rom.lower_deg - 0.5 and deg.max() <= rom.upper_deg + 0.5
