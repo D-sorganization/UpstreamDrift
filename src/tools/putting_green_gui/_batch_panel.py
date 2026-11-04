@@ -13,6 +13,7 @@ import math
 from collections.abc import Callable
 from typing import Any
 
+import numpy as np
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from PyQt6.QtCore import QEvent, QObject, QRunnable, QThreadPool, pyqtSignal
@@ -87,9 +88,7 @@ class _Job(QRunnable):
 class BatchPanel(QGroupBox):
     """Stroke-noise inputs, batch and spread buttons, and the result plot.
 
-    ``config`` returns the current putt, ``units`` the display units. Buttons
-    run the service on a worker (:meth:`start_batch`, :meth:`start_spread`);
-    :meth:`run_batch`/:meth:`run_spread` are synchronous; plots: :attr:`canvas`.
+    ``config`` gives the putt, ``units`` the units; ``start_*`` run on a worker.
     """
 
     def __init__(
@@ -264,7 +263,7 @@ class BatchPanel(QGroupBox):
         return str(self._scatter_ax.get_xlabel())
 
     def scatter_x(self) -> list[float]:
-        offsets = self._scatter_ax.collections[0].get_offsets()
+        offsets = np.asarray(self._scatter_ax.collections[0].get_offsets(), float)
         return [float(x) for x in offsets[:, 0]]
 
     def spread_points(self) -> list[tuple[float, float]]:
@@ -277,7 +276,8 @@ class BatchPanel(QGroupBox):
         args: dict[str, Any],
         show: Callable[[dict[str, Any]], None],
     ) -> None:
-        if self._busy:
+        pool = QThreadPool.globalInstance()  # Qt makes it with the application
+        if self._busy or pool is None:
             return
         self._set_busy(True)
         self._summary.setText("Rolling putts on the dialled green...")
@@ -285,7 +285,7 @@ class BatchPanel(QGroupBox):
         job.signals.done.connect(show)
         job.signals.failed.connect(self._on_failed)
         self._job = job  # keep the signals alive until delivery
-        QThreadPool.globalInstance().start(job)
+        pool.start(job)
 
     def _on_failed(self, message: str) -> None:
         self._set_busy(False)
