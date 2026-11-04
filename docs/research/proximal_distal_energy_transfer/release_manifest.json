@@ -3238,8 +3238,12 @@
       "bytes": 11753
     },
     "scripts/research/proximal_distal_energy/wscg_ztcf_additivity.py": {
-      "sha256": "986b93b1de329243363d236058ecad3301a7a00dc6b272fca2e8cacddba2d4e8",
-      "bytes": 6748
+      "sha256": "94ea7b2d6bcff223200f862f4097861a2fccc47570e13d984dd85609d2e07c33",
+      "bytes": 7673
+    },
+    "scripts/research/proximal_distal_energy/wscg_ztcf_additivity_charts.py": {
+      "sha256": "8c6263696edba541f32f0620155ce6388eb9e4ca212d88c1c00d6ddcb160d8a7",
+      "bytes": 6813
     },
     "src/shared/python/biomechanics/interaction_evidence.py": {
       "sha256": "2ccbc9e56f4c6dc6eb7c6f317f8efc60dca5cfb225f270be610c1768ed079aa3",

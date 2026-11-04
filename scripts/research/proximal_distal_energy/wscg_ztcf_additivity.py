@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -104,7 +105,15 @@ def _solve_mass(model: mujoco.MjModel, data: mujoco.MjData, force: Any) -> Any:
     return out[0]
 
 
-def _sample(model: mujoco.MjModel, data: mujoco.MjData, q: Any, v: Any, u: Any):
+def components(
+    model: mujoco.MjModel, data: mujoco.MjData, q: Any, v: Any, u: Any
+) -> dict[str, np.ndarray]:
+    """Canonical pointwise counterfactual accelerations at one state.
+
+    Returns ``full``, ``ztcf``, ``zvcf``, ``rest`` (zero-velocity, zero-torque)
+    and ``velocity`` (the velocity drift ``M^-1 (d(passive - bias) +
+    d(J^T lambda))``), each of length ``model.nv``.
+    """
     full = _evaluate(model, data, q, v, u)
     ztcf = _evaluate(model, data, q, v, np.zeros_like(u))
     rest = _evaluate(model, data, q, np.zeros_like(v), np.zeros_like(u))
@@ -115,29 +124,49 @@ def _sample(model: mujoco.MjModel, data: mujoco.MjData, q: Any, v: Any, u: Any):
         ztcf.smooth_passive - rest.smooth_passive + ztcf.constraint - rest.constraint,
     )
     return {
-        "speed": np.abs(v).max(),
-        "full_norm": np.abs(full.qacc).max(),
-        "zvcf_norm": np.abs(zvcf).max(),
-        "additivity_residual": np.abs(full.qacc - ztcf.qacc - zvcf).max(),
-        "velocity_residual": np.abs(ztcf.qacc - rest.qacc - velocity).max(),
+        "full": full.qacc,
+        "ztcf": ztcf.qacc,
+        "zvcf": zvcf,
+        "rest": rest.qacc,
+        "velocity": velocity,
     }
+
+
+def _sample(model: mujoco.MjModel, data: mujoco.MjData, q: Any, v: Any, u: Any):
+    a = components(model, data, q, v, u)
+    return {
+        "speed": np.abs(v).max(),
+        "full_norm": np.abs(a["full"]).max(),
+        "zvcf_norm": np.abs(a["zvcf"]).max(),
+        "additivity_residual": np.abs(a["full"] - a["ztcf"] - a["zvcf"]).max(),
+        "velocity_residual": np.abs(a["ztcf"] - a["rest"] - a["velocity"]).max(),
+    }
+
+
+def rollout_states(
+    model: mujoco.MjModel,
+) -> Iterator[tuple[float, np.ndarray, np.ndarray, np.ndarray]]:
+    """Sampled ``(time, q, v, u)`` of the deterministic torque program."""
+    sim = mujoco.MjData(model)
+    phases = np.arange(model.nu, dtype=float)
+    low, high = model.actuator_ctrlrange.T
+    for step in range(round(HORIZON_S / model.opt.timestep)):
+        wave = AMPLITUDE * np.sin(2 * np.pi * FREQUENCY_HZ * sim.time + phases)
+        sim.ctrl[:] = np.clip(wave, low, high)
+        if step % SAMPLE_EVERY == SAMPLE_EVERY - 1:
+            yield sim.time, sim.qpos.copy(), sim.qvel.copy(), sim.ctrl.copy()
+        mujoco.mj_step(model, sim)
 
 
 def run_additivity() -> dict[str, np.ndarray]:
     """Roll out the pinned run and return per-sample residual series."""
     model = load_pinned_model()
-    sim, probe = mujoco.MjData(model), mujoco.MjData(model)
-    phases = np.arange(model.nu, dtype=float)
-    low, high = model.actuator_ctrlrange.T
+    probe = mujoco.MjData(model)
     rows: list[dict[str, float]] = []
     times: list[float] = []
-    for step in range(round(HORIZON_S / model.opt.timestep)):
-        wave = AMPLITUDE * np.sin(2 * np.pi * FREQUENCY_HZ * sim.time + phases)
-        sim.ctrl[:] = np.clip(wave, low, high)
-        if step % SAMPLE_EVERY == SAMPLE_EVERY - 1:
-            times.append(sim.time)
-            rows.append(_sample(model, probe, sim.qpos, sim.qvel, sim.ctrl.copy()))
-        mujoco.mj_step(model, sim)
+    for time_s, q, v, u in rollout_states(model):
+        times.append(time_s)
+        rows.append(_sample(model, probe, q, v, u))
     series = {key: np.array([r[key] for r in rows]) for key in rows[0]}
     series["time_s"] = np.array(times)
     return series
