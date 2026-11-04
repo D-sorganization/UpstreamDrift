@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-04 | #14543 | Analytic and diagram figures in the proximal-distal release are labelled with their code evidence instead of citing a run |
+| 2026-11-04 | #14546 | Putting: camera presets (orbit, down the line, face on, overhead), play/pause, a scrubber and jumps to the core phase marks on the PyQt6 tile |
+| 2026-11-04 | #14542 | Putting: Strokes Gained panel on the PyQt6 tile (player E(d) on the dialled green from the shared service_sg study, each putt scored on the cached curve, in the chosen units) |
+| 2026-11-04 | #14547 | React putting page: Balance Type selector over the core putter presets with head mass and MOI inputs; balance_type React/Tauri parity cells now present |
 | 2026-11-04 | #14539 | The proximal-distal release now maps every figure to the real stored run that wrote it (data/figure_run_map.json), recording what differs where the run's bytes do not match the release |
 | 2026-11-04 | #14540 | React putting page: seven core noise channels, 40/100/1000-putt dispersion batches with a rest scatter, and the 0-45 ft make-% spread from the shared core (PUTT-SHARE b-web) |
 | 2026-11-04 | #14537 | Putting dynamics: per-sample ball mode on /simulate and phase marks (hop, skid, roll, rest starts) on /simulate and /simulate-3d from the shared core, for playback jumps |
