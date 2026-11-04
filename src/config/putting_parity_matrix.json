@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "epic": 14452,
+  "description": "Feature-level putting parity matrix (#14456). Cell: '<status> [#issue] | <paths> | <note>'. Regenerate the doc with: python -m src.config.putting_parity_loader --write",
+  "features": {
+    "units": {
+      "title": "Selectable Units",
+      "cluster": "a",
+      "cells": {
+        "core_api": "missing #14457 | src/shared/python/putting_dynamics/utils.py, src/shared/python/ui/units.py | SI internally, feet in analytics; conversion helpers only, no units parameter on any route.",
+        "pyqt6": "partial #14457 | src/tools/putting_green_gui/gui.py | Reads get_unit_preference(); set_unit_system exists but the window has no selector.",
+        "react": "missing #14458 | ui/src/pages/PuttingGreen.tsx | Speed always m/s, distance yards, toe/hosel mm; no units store or selector.",
+        "tauri": "missing #14458 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "missing #14457 | src/apps/putting_studio/index.html | Labels hard-code ft, m/s and mm; no toggle."
+      }
+    },
+    "variance_channels": {
+      "title": "Variance and Noise Channels",
+      "cluster": "b",
+      "cells": {
+        "core_api": "partial #14459 | src/shared/python/putting_analytics/skill.py, src/shared/python/putting_analytics/variance.py, src/shared/python/putting_analytics/service_variance.py | Core has 7 channels (face, path, speed, strike, read grade/aspect/stimp); /variance-study drops strike; /optimize uses 2 channels.",
+        "pyqt6": "missing #14459 | src/tools/putting_analytics_gui/gui.py | Simulator strike is deterministic; the analytics tool has start-line and speed SD only.",
+        "react": "partial #14460 | ui/src/pages/PuttingGreen.tsx, ui/src/pages/PuttingAnalytics.tsx | Simulator: friction_variation only (fixed seed); analytics page: line and speed SD.",
+        "tauri": "partial #14460 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "partial #14459 | src/apps/putting_studio/js/green3d.js | Monte Carlo draws 5 noise terms; the 6-channel SG attribution is closed-form; the 4-channel decomposition is guide text only."
+      }
+    },
+    "dispersion": {
+      "title": "Dispersion Batches and 0-45 ft Make-% Spread",
+      "cluster": "b",
+      "cells": {
+        "core_api": "partial #14459 | src/shared/python/putting_analytics/batch_roll.py, src/shared/python/putting_analytics/sg_curve.py, src/api/routes/putting_green.py | Core batches and make-% curve present (/simulated-curve); /scatter capped at 100 putts on a flat green with seed 0.",
+        "pyqt6": "missing #14459 | src/tools/putting_green_gui/_scene_builder.py | One putt per run.",
+        "react": "partial #14460 | ui/src/pages/PuttingAnalytics.tsx | Analytics rollouts at one distance as a table; no scatter, no make-% curve.",
+        "tauri": "partial #14460 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "present | src/apps/putting_studio/js/io.js, src/apps/putting_studio/js/controls_c.js | 40/100/1000 batches and a 0-45 ft spread (that button runs 2000 attempts)."
+      }
+    },
+    "impact_model": {
+      "title": "Impact and Strike Model (Skid to Roll)",
+      "cluster": "c",
+      "cells": {
+        "core_api": "present | src/shared/python/putting_dynamics/collision.py, src/shared/python/putting_dynamics/solver.py, src/api/routes/putting_green.py | strike() plus skid-to-roll; /simulate-3d returns the collision block and skid distance.",
+        "pyqt6": "partial #14461 | src/tools/putting_green_gui/gui.py | Runs simulate_strike but shows only launch speed and track colours; no collision readout.",
+        "react": "present | ui/src/pages/PuttingGreen.tsx | Impact panel: launch speed/angle, putter speed before/after, contact proxy, face twist, energy loss, skid distance.",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "partial #14461 | src/apps/putting_studio/js/putting_physics.js | Skid ends at a fixed distance; loft and launch not modelled."
+      }
+    },
+    "strike_location": {
+      "title": "Toe/Heel Strike Location",
+      "cluster": "c",
+      "cells": {
+        "core_api": "partial #14461 | src/shared/python/putting_dynamics/collision.py, src/api/routes/putting_green.py | strike(impact_toe_m) and /simulate-3d accept it; strike scatter not exposed in /variance-study or /simulated-curve.",
+        "pyqt6": "missing #14461 | src/tools/putting_green_gui/_scene_builder.py | build_putt_scene never passes impact_toe_m.",
+        "react": "present | ui/src/pages/PuttingGreen.tsx | Impact Toe Offset slider.",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "partial #14461 | src/apps/putting_studio/index.html, src/apps/putting_studio/js/controls_c.js | Slider is toe-only (0-15 mm); no heel strikes."
+      }
+    },
+    "counter_torque": {
+      "title": "Counter-Torque Stabilization (Hand Couples, Gust)",
+      "cluster": "g",
+      "cells": {
+        "core_api": "missing #14469 | src/shared/python/grip_contact/couple_check.py | No putting counter-torque model in the core; a grip couple check exists outside the putting stack.",
+        "pyqt6": "missing #14469 |  | None.",
+        "react": "missing #14470 |  | None.",
+        "tauri": "missing #14470 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "present | src/apps/putting_studio/js/state.js, src/apps/putting_studio/js/charts2d.js, src/apps/putting_studio/js/controls_c.js | Closed-form couple model, gust pulse and torque charts (illustrative, not in the core: ADR-0058 gap)."
+      }
+    },
+    "balance_type": {
+      "title": "Putter Balance Type (CG Offset, MOI)",
+      "cluster": "c",
+      "cells": {
+        "core_api": "partial #14461 | src/shared/python/putting_dynamics/types.py, src/api/routes/putting_green.py | PutterState hosel offsets, MOI and mass; no named balance presets.",
+        "pyqt6": "missing #14461 | src/tools/putting_green_gui/_scene_builder.py | Uses PutterState.typical only.",
+        "react": "partial #14462 | ui/src/pages/PuttingGreen.tsx | Hosel widget; mass and MOI sent without controls; no balance-type selector.",
+        "tauri": "partial #14462 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "present | src/apps/putting_studio/js/state.js, src/apps/putting_studio/js/controls_c.js | Four putter types (PUTTER_SPECS); per-type face SD is an assumed input."
+      }
+    },
+    "green_types": {
+      "title": "Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets)",
+      "cluster": "d",
+      "cells": {
+        "core_api": "partial #14463 | src/shared/python/putting_dynamics/surfaces.py, src/engines/physics_engines/putting_green/python/_surface_presets.py, src/api/routes/putting_green.py | Core has flat, planar, bumpy, presets and stimp ramp; only /simulate-3d builds slope and bumps; other routes are flat; no preset route.",
+        "pyqt6": "partial #14463 | src/tools/putting_green_gui/_scene_builder.py | Single cross-slope plane.",
+        "react": "partial #14464 | ui/src/pages/PuttingGreen.tsx | Grade, aspect, grain, bumps; no green-type selector or presets.",
+        "tauri": "partial #14464 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "partial #14463 | src/apps/putting_studio/js/putting_physics.js, src/apps/putting_studio/js/io.js | Flat and slope presets plus stimp ramp; undulation switches on with slope and is not selectable."
+      }
+    },
+    "optimal_aim": {
+      "title": "Optimum Read / Auto-Solve Aim",
+      "cluster": "e",
+      "cells": {
+        "core_api": "partial #14465 | src/shared/python/putting_dynamics/green_reading.py, src/shared/python/putting_analytics/optimize.py, src/api/routes/putting_green.py | solve_aim and best_action present; /read-green is flat-only.",
+        "pyqt6": "missing #14465 | src/tools/putting_green_gui/gui.py | Aim is manual; the analytics best-aim study is not linked to the simulator.",
+        "react": "partial #14466 | ui/src/pages/PuttingAnalytics.tsx | Analytics best aim/pace study; nothing on the simulator page.",
+        "tauri": "partial #14466 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "partial #14465 | src/apps/putting_studio/js/controls_c.js | Aim-only grid search from one noise-free putt."
+      }
+    },
+    "strokes_gained": {
+      "title": "Player-Specific Bellman Strokes Gained",
+      "cluster": "f",
+      "cells": {
+        "core_api": "present | src/shared/python/putting_analytics/expected_putts.py, src/shared/python/putting_analytics/optimize.py, src/api/routes/putting_analytics.py | Bellman solve; /optimize (sg), /library-study, /variance-study, /simulated-curve.",
+        "pyqt6": "missing #14467 | src/tools/putting_analytics_gui/gui.py | Nothing in the simulator; the analytics tool has an sg objective.",
+        "react": "missing #14468 | ui/src/pages/PuttingAnalytics.tsx | Nothing on the simulator page; the analytics page has an sg objective.",
+        "tauri": "missing #14468 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "partial #14467 | src/apps/putting_studio/js/green3d.js, src/apps/putting_studio/js/charts2d.js | Bellman formula with a hand-tuned comeback fit, not a solved recursion."
+      }
+    },
+    "scenarios": {
+      "title": "Saved Scenarios and Comparison",
+      "cluster": "h",
+      "cells": {
+        "core_api": "missing #14471 |  | None.",
+        "pyqt6": "missing #14471 |  | None.",
+        "react": "missing #14472 | ui/src/stores/usePuttingStore.ts | Store holds one parameter set and one result.",
+        "tauri": "missing #14472 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "present | src/apps/putting_studio/js/controls_a.js | Saved scenarios with a comparison table; no distribution chart."
+      }
+    },
+    "json_io": {
+      "title": "JSON Import/Export of a Setup",
+      "cluster": "h",
+      "cells": {
+        "core_api": "partial #14471 | src/shared/python/putting_dynamics/practice.py | Saves putt results and reports, not a setup; no import/export route.",
+        "pyqt6": "partial #14471 | src/tools/putting_green_gui/_scene_export.py | export_putt_scene/read_putt_export exist but nothing in the UI calls them.",
+        "react": "missing #14472 |  | None.",
+        "tauri": "missing #14472 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "present | src/apps/putting_studio/js/io.js | Export/load with schema_version 4.0.0, including scenarios."
+      }
+    },
+    "camera_playback": {
+      "title": "Camera Views and Playback Phases",
+      "cluster": "i",
+      "cells": {
+        "core_api": "partial #14473 | src/api/routes/putting_green.py, src/shared/python/putting_dynamics/types.py | Per-sample mode only on /simulate-3d; no stroke phases.",
+        "pyqt6": "partial #14473 | src/tools/putting_green_gui/gui.py | Auto-framed orbit and a one-shot animation; no presets, scrub or phase jumps.",
+        "react": "partial #14474 | ui/src/pages/PuttingGreen.tsx, ui/src/components/visualization/PuttingScene3D.tsx | Orbit camera, play/pause/scrub/rate; no view presets or phase jumps.",
+        "tauri": "partial #14474 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "present | src/apps/putting_studio/js/controls_b.js, src/apps/putting_studio/js/controls_a.js | Grip, Full Plane, Down-the-Line and Face-On cameras; phase badge; scrubber and keyframe jumps."
+      }
+    }
+  }
+}

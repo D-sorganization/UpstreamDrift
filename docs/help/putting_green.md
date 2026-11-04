@@ -14,6 +14,20 @@ is; the tile runs the shared putting physics core and shows the ball track, the
 break, and whether the putt was holed. It is a green-authoring and roll-reading
 surface, not a putter-fitting or impact-analysis tool.
 
+## Launch
+
+From the repository root:
+
+```bash
+python -m src.tools.putting_green_gui
+```
+
+`python -m src.tools.putting_green_gui --smoke` opens the window, runs one putt,
+prints the metrics and exits `0`. Add `QT_QPA_PLATFORM=offscreen` on a headless
+host. If the shared putting core cannot be imported, both commands exit `2`
+with a message that names the missing module. The 3D view needs the optional
+`pyqtgraph` and `PyOpenGL` packages. Without them, the metrics panel still works.
+
 ## Inputs
 
 | Control      | Unit | Range accepted | Default |
@@ -24,14 +38,18 @@ surface, not a putter-fitting or impact-analysis tool.
 | Stimpmeter   | ft   | 6.0 to 14.0    | 10.0    |
 | Cross Slope  | deg  | 0 to 5         | 1.0     |
 
+- The **Units** selector switches the display between Metric (m, m/s) and
+  Imperial (ft, mph). It converts the speed and distance controls and the
+  metrics panel in place, and saves the choice as the shared unit preference
+  (`src/shared/python/ui/units.py`), so other tools open in the same units.
+  The engine always receives SI values.
 - Every control is range-checked before the engine runs; an out-of-range or
   non-finite value raises rather than being silently clamped
   (`_validate` in `src/tools/putting_green_gui/_scene_builder.py`).
 - Presets stamp speed and distance pairs only: Short (1.5 m/s, 5 ft),
   Medium (2.5 m/s, 15 ft), Long (4.0 m/s, 30 ft).
 - Not exposed on this tile, but fixed: the shared solver's RK4 at a 0.002 s
-  timestep (`putting_dynamics.solver.DT_S`) and a terrain grid resolution of
-  48. Cup distance is converted to metres; the green is sized around the putt
+  timestep (`putting_dynamics.solver.DT_S`) and a terrain grid resolution of 48. Cup distance is converted to metres; the green is sized around the putt
   with fixed margins.
 - The Stimpmeter reading is the only turf control on the tile. Grass type,
   condition, and grain exist in the shared `TurfSpec` but are left at their

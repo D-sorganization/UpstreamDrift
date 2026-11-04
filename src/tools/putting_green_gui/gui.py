@@ -19,6 +19,7 @@ from typing import Any
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
+    QComboBox,
     QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
@@ -49,6 +50,7 @@ from src.shared.python.ui.units import (
     from_display_distance,
     from_display_speed,
     get_unit_preference,
+    set_unit_preference,
     speed_suffix,
     to_display_distance,
     to_display_speed,
@@ -74,7 +76,7 @@ QGroupBox {
     margin-top: 10px; padding: 8px; font-weight: bold;
 }
 QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
-QDoubleSpinBox {
+QDoubleSpinBox, QComboBox {
     background-color: #0f1822; color: #eaf2f8;
     border: 1px solid #2f4254; border-radius: 4px; padding: 3px;
 }
@@ -129,6 +131,7 @@ class PuttingGreenWidget(QWidget):
             self._distance_spin.value(), self._unit_system, unit="ft"
         )
         self._unit_system = system
+        self._sync_units_combo()
 
         self._speed_spin.setSuffix(speed_suffix(system))
         self._distance_spin.setSuffix(distance_suffix(system, unit="ft"))
@@ -154,6 +157,25 @@ class PuttingGreenWidget(QWidget):
                 _format_metrics(self._scene, self._unit_system)
             )
 
+    def _sync_units_combo(self) -> None:
+        """Show the active unit system without re-triggering a user choice."""
+        self._units_combo.blockSignals(True)
+        self._units_combo.setCurrentIndex(
+            self._units_combo.findData(self._unit_system.value)
+        )
+        self._units_combo.blockSignals(False)
+
+    def _on_units_chosen(self, index: int) -> None:
+        """Apply and persist a unit system the user picked in the selector."""
+        system = UnitSystem(self._units_combo.itemData(index))
+        self.set_unit_system(system)
+        set_unit_preference(system)
+
+    @property
+    def units_combo(self) -> QComboBox:
+        """The Metric/Imperial display-units selector."""
+        return self._units_combo
+
     # ------------------------------------------------------------------
     # UI construction
     # ------------------------------------------------------------------
@@ -175,6 +197,16 @@ class PuttingGreenWidget(QWidget):
         title = QLabel("⛳  Putting Green Simulator")
         title.setObjectName("puttTitle")
         left_layout.addWidget(title)
+
+        units_form = QFormLayout()
+        self._units_combo = QComboBox()
+        self._units_combo.setObjectName("puttUnits")
+        self._units_combo.addItem("Metric (m, m/s)", UnitSystem.METRIC.value)
+        self._units_combo.addItem("Imperial (ft, mph)", UnitSystem.IMPERIAL.value)
+        self._sync_units_combo()
+        self._units_combo.currentIndexChanged.connect(self._on_units_chosen)
+        units_form.addRow("Units:", self._units_combo)
+        left_layout.addLayout(units_form)
 
         putt_group = QGroupBox("Putt Configuration")
         putt_form = QFormLayout(putt_group)
@@ -398,6 +430,11 @@ class PuttingGreenWidget(QWidget):
         # Advance proportionally so every putt animates in similar wall-clock time.
         self._anim_index += max(1, n // 90)
 
+    def run_one_putt(self) -> str:
+        """Press *Simulate Putt* once and return the metrics text shown."""
+        self._run_btn.click()
+        return self._results_text.toPlainText()
+
     def cleanup(self) -> None:
         """Release resources (stop the animation timer)."""
         self._anim_timer.stop()
@@ -484,6 +521,10 @@ class PuttingGreenWindow(QMainWindow):
                 "docs/physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md",
             ),
         )
+
+    def run_one_putt(self) -> str:
+        """Run one putt in the embedded widget; return its metrics text."""
+        return self._widget.run_one_putt()
 
     def closeEvent(self, event: Any) -> None:
         self._widget.cleanup()

@@ -100,4 +100,39 @@ describe("PuttingGreenPage 3D workflow", () => {
     expect(screen.getByLabelText("Putt playback position")).toBeInTheDocument();
     expect(screen.getByText("Putter After Impact")).toBeInTheDocument();
   });
+
+  it("switches displayed units without changing the SI request (#14458)", async () => {
+    localStorage.clear();
+    usePuttingStore.getState().setUnitSystem("metric");
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <PuttingGreenPage />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByText("1.80 m/s")).toBeInTheDocument();
+    expect(screen.getByText("3.00 m")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Units"), {
+      target: { value: "imperial" },
+    });
+    expect(screen.getByText("4.03 mph")).toBeInTheDocument();
+    expect(screen.getByText("9.8 ft")).toBeInTheDocument();
+    expect(localStorage.getItem("ud.unitSystem")).toBe("imperial");
+
+    fireEvent.change(screen.getByLabelText("Hole Distance"), {
+      target: { value: "20" },
+    });
+    expect(usePuttingStore.getState().parameters.hole_x_m).toBeCloseTo(
+      6.096,
+      9,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Simulate Putt" }));
+    await waitFor(() => expect(simulatePutt3D).toHaveBeenCalled());
+    expect(vi.mocked(simulatePutt3D).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({ putter_speed_mps: 1.8 }),
+    );
+    expect(await screen.findByText("Total Distance")).toBeInTheDocument();
+    expect(screen.getByText("3.28 ft")).toBeInTheDocument();
+  });
 });

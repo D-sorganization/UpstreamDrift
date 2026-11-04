@@ -43,7 +43,11 @@ import numpy as np
 
 from src.shared.python.contracts import require
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
-from src.shared.python.putting_analytics.batch_roll import Capture, roll_batch
+from src.shared.python.putting_analytics.batch_roll import (
+    BatchRollResult,
+    Capture,
+    roll_batch,
+)
 from src.shared.python.putting_analytics.expected_putts import (
     ExpectedPuttsCurve,
     PuttAction,
@@ -284,8 +288,11 @@ class SkillRollModel:
             self._aims = aims
         return self._aims
 
-    def __call__(self, execution: ExecutionSample, read: ReadSample) -> StrokeOutcomes:
-        """Strokes, holed flag and leave (m) for every sampled putt."""
+    def roll(self, execution: ExecutionSample, read: ReadSample) -> BatchRollResult:
+        """Rest position and holed flag of every sampled putt on the true green.
+
+        The hole is at ``(distance_ft * FT_M, 0)``; the ball starts at the origin.
+        """
         aim = interpolate(self.lattice, self.node_aims(), read)
         speed0 = nominal_speeds_mps(
             self.green, read, self.distance_ft, self.pace_ft_past
@@ -297,7 +304,12 @@ class SkillRollModel:
             (zeros, zeros, speed * np.cos(heading), speed * np.sin(heading), speed)
         )
         hole = (self.distance_ft * FT_M, 0.0)
-        result = roll_batch(start, self._true_surface, hole, self.capture)
+        return roll_batch(start, self._true_surface, hole, self.capture)
+
+    def __call__(self, execution: ExecutionSample, read: ReadSample) -> StrokeOutcomes:
+        """Strokes, holed flag and leave (m) for every sampled putt."""
+        result = self.roll(execution, read)
+        hole = (self.distance_ft * FT_M, 0.0)
         miss_m = np.hypot(result.rest_x_m - hole[0], result.rest_y_m)
         leave_m = np.where(result.holed, 0.0, miss_m)
         strokes = 1.0 + np.where(result.holed, 0.0, self.baseline(leave_m / FT_M))
