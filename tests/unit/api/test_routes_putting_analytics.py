@@ -28,6 +28,7 @@ from src.shared.python.putting_analytics import (  # noqa: E402
     service,
     service_curve,
     service_dispersion,
+    service_setup,
     service_variance,
 )
 
@@ -146,6 +147,29 @@ def test_make_spread_matches_the_shared_service(client: TestClient) -> None:
     assert response.json() == service_dispersion.make_spread_study(SPREAD_BODY)
 
 
+SCENARIO_BODY: dict[str, Any] = {
+    "name": "Base",
+    "setup": {"distance_ft": 8.0, "grade_pct": 1.5, "stimp": 10.0},
+    "n": 12,
+    "seed": 2,
+}
+
+
+def test_scenario_routes_match_the_shared_service(client: TestClient) -> None:
+    response = client.post(f"{PREFIX}/scenario", json=SCENARIO_BODY)
+    assert response.status_code == 200, response.text
+    scenario = response.json()
+    assert scenario == service_setup.scenario_study(SCENARIO_BODY)
+    body = {"scenarios": [scenario, scenario]}
+    response = client.post(f"{PREFIX}/scenario-compare", json=body)
+    assert response.json() == service_setup.compare_scenarios(body)
+    body = {"setup": SCENARIO_BODY["setup"], "scenarios": [scenario]}
+    exported = client.post(f"{PREFIX}/setup-export", json=body).json()
+    assert exported == service_setup.export_setup(body)
+    response = client.post(f"{PREFIX}/setup-import", json={"document": exported})
+    assert response.json() == service_setup.import_setup({"document": exported})
+
+
 @pytest.mark.parametrize(
     ("path", "body", "fragment"),
     [
@@ -158,6 +182,7 @@ def test_make_spread_matches_the_shared_service(client: TestClient) -> None:
         ("simulated-curve", {**CURVE_BODY, "n": 1}, "'n'"),
         ("dispersion", {**DISPERSION_BODY, "n": 5000}, "'n'"),
         ("make-spread", {**SPREAD_BODY, "stimp": 40.0}, "stimp"),
+        ("setup-import", {"document": {"schema_version": "9"}}, "schema_version"),
     ],
 )
 def test_service_rejections_are_400s(
@@ -188,6 +213,8 @@ def test_limits_report_the_service_caps(client: TestClient) -> None:
     assert limits["default_curve_distances_ft"] == list(
         service_curve.DEFAULT_CURVE_GRID_FT
     )
+    assert limits["setup_schema_version"] == service_setup.SCHEMA_VERSION
+    assert limits["max_scenarios"] == service_setup.MAX_SCENARIOS
 
 
 def test_route_import_does_not_load_the_roll_model() -> None:
@@ -199,6 +226,7 @@ def test_route_import_does_not_load_the_roll_model() -> None:
         "src.shared.python.putting_analytics.service_variance",
         "src.shared.python.putting_analytics.service_curve",
         "src.shared.python.putting_analytics.service_dispersion",
+        "src.shared.python.putting_analytics.service_setup",
     )
     saved = {name: sys.modules.pop(name, None) for name in names}
     try:
