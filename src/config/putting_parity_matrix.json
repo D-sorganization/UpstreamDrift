@@ -106,7 +106,7 @@
       "title": "Player-Specific Bellman Strokes Gained",
       "cluster": "f",
       "cells": {
-        "core_api": "present | src/shared/python/putting_analytics/expected_putts.py, src/shared/python/putting_analytics/optimize.py, src/api/routes/putting_analytics.py | Bellman solve; /optimize (sg), /library-study, /variance-study, /simulated-curve.",
+        "core_api": "present | src/shared/python/putting_analytics/service_sg.py, src/shared/python/putting_analytics/optimize.py, src/api/routes/putting_analytics.py | Player Bellman E(d) on the dialled green and one putt's SG on /strokes-gained; also /optimize (sg), /library-study, /variance-study, /simulated-curve.",
         "pyqt6": "missing #14467 | src/tools/putting_analytics_gui/gui.py | Nothing in the simulator; the analytics tool has an sg objective.",
         "react": "missing #14468 | ui/src/pages/PuttingAnalytics.tsx | Nothing on the simulator page; the analytics page has an sg objective.",
         "tauri": "missing #14468 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
