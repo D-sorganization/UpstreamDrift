@@ -4,19 +4,20 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import hashlib
-import json
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pytest
 
+from src.shared.python.engine_core.engine_availability import EngineStatus
 from src.sim_run import engine_run
 from src.sim_run.engine_run import EngineUnavailable, Rollout, run_engine
-from src.sim_run.manifest_emitter import MANIFEST_FILENAME, sha256_file
-from src.sim_run.reproduce import ReproduceError, reproduce_engine, reproduce_run
+from src.sim_run.manifest_emitter import sha256_file
+from src.sim_run.reproduce import reproduce_run
 from src.sim_run.run_registry import RunRegistry
 from src.sim_run.trajectory_run import TRAJECTORY_FILENAME
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -33,7 +34,7 @@ _URDF = (
 
 
 def _osim_pendulum(tmp_path: Path) -> str:
-    opensim = pytest.importorskip("opensim")
+    opensim = require_opensim()
     model = opensim.Model()
     model.setName("pendulum")
     arm = opensim.Body(
@@ -92,10 +93,10 @@ def test_engine_run_emits_a_valid_manifest(engine: str, tmp_path: Path) -> None:
 
 
 def test_absent_engine_is_reported_with_a_reason(tmp_path, monkeypatch) -> None:
-    adapter = engine_run.ENGINE_ADAPTERS["pinocchio"]
-    absent = engine_run.EngineAdapter(adapter.engine_class, "no_such_xyz", "urdf")
-    monkeypatch.setitem(engine_run.ENGINE_ADAPTERS, "pinocchio", absent)
-    with pytest.raises(EngineUnavailable, match="pinocchio is not installed"):
+    monkeypatch.setattr(
+        engine_run, "get_engine_status", lambda name: EngineStatus.NOT_INSTALLED
+    )
+    with pytest.raises(EngineUnavailable, match="pinocchio is not available"):
         _call("pinocchio", tmp_path, _URDF)
 
 
@@ -110,26 +111,3 @@ def test_engine_run_reproduces_through_the_store(tmp_path: Path) -> None:
     run_id = registry.add(tmp_path / "run")
     report = reproduce_run(registry, run_id, _URDF, work_dir=tmp_path / "rerun")
     assert report.reproduced, report.format()
-
-
-def test_reproduce_reports_missing_parameters(tmp_path: Path) -> None:
-    _run("pinocchio", tmp_path / "run", _URDF)
-    registry = RunRegistry(tmp_path / "store")
-    stored = registry.show(registry.add(tmp_path / "run"))
-    parameters = {k: v for k, v in stored.parameters.items() if k != "timestep_s"}
-    with pytest.raises(ReproduceError, match="timestep_s"):
-        reproduce_engine(
-            stored.model_copy(update={"parameters": parameters}), _URDF, tmp_path / "x"
-        )
-
-
-def test_git_revision_model_cannot_be_verified(tmp_path: Path) -> None:
-    _run("pinocchio", tmp_path / "run", _URDF)
-    path = tmp_path / "run" / MANIFEST_FILENAME
-    data = json.loads(path.read_text(encoding="utf-8"))
-    data["model"]["revision"] = "e" * 40
-    path.write_text(json.dumps(data), encoding="utf-8")
-    registry = RunRegistry(tmp_path / "store")
-    run_id = registry.add(tmp_path / "run")
-    with pytest.raises(ReproduceError, match="git revision"):
-        reproduce_run(registry, run_id, _URDF, work_dir=tmp_path / "rerun")

@@ -12,11 +12,15 @@ from datetime import datetime
 import importlib
 from importlib import metadata
 from pathlib import Path
-from types import ModuleType
 from typing import Any
 
 import numpy as np
 
+from src.shared.python.engine_core.engine_availability import (
+    EngineStatus,
+    get_engine_error,
+    get_engine_status,
+)
 from src.sim_run.manifest import RunManifest
 from src.sim_run.trajectory_run import Rollout, TrajectoryRun, write_trajectory_run
 
@@ -27,61 +31,62 @@ class EngineUnavailable(RuntimeError):
 
 @dataclass(frozen=True)
 class EngineAdapter:
-    """``"module:Class"`` of a ``PhysicsEngine``, its runtime package and format.
-
-    ``distribution`` supplies the version when the runtime has no ``__version__``.
-    """
+    """``"module:Class"`` of a ``PhysicsEngine``, its model format and the
+    installed distributions its version may be read from, in order."""
 
     engine_class: str
-    module: str
     extension: str
-    distribution: str | None = None
+    distributions: tuple[str, ...]
 
-    def version(self, runtime: ModuleType) -> str:
-        found = getattr(runtime, "__version__", None)
-        return (
-            str(found) if found else metadata.version(self.distribution or self.module)
-        )
+    def version(self) -> str | None:
+        for distribution in self.distributions:
+            try:
+                return metadata.version(distribution)
+            except metadata.PackageNotFoundError:
+                continue
+        return None
 
 
 _ENGINES = "src.engines.physics_engines"
 ENGINE_ADAPTERS: dict[str, EngineAdapter] = {
     "pinocchio": EngineAdapter(
         f"{_ENGINES}.pinocchio.python.pinocchio_physics_engine:PinocchioPhysicsEngine",
-        "pinocchio",
         "urdf",
+        ("pin", "pinocchio"),
     ),
     "drake": EngineAdapter(
         f"{_ENGINES}.drake.python.drake_physics_engine:DrakePhysicsEngine",
-        "pydrake",
         "urdf",
-        "drake",
+        ("drake",),
     ),
     "opensim": EngineAdapter(
         f"{_ENGINES}.opensim.python.opensim_physics_engine:OpenSimPhysicsEngine",
-        "opensim",
         "osim",
+        ("opensim",),
     ),
     "myosuite": EngineAdapter(
         f"{_ENGINES}.myosuite.python.myosuite_physics_engine:MyoSuitePhysicsEngine",
-        "myosuite",
         "xml",
+        ("myosuite",),
     ),
 }
 
 
 def _load_engine(name: str) -> tuple[Any, str, str]:
-    """Return ``(engine, version, extension)`` for ``name`` or raise why not."""
+    """Return ``(engine, version, extension)``; the shared probe decides availability."""
     if name not in ENGINE_ADAPTERS:
         raise ValueError(f"unknown engine {name!r}; known: {sorted(ENGINE_ADAPTERS)}")
+    status = get_engine_status(name)
+    if status is not EngineStatus.AVAILABLE:
+        reason = get_engine_error(name) or "no usable runtime"
+        raise EngineUnavailable(f"{name} is not available ({status.value}: {reason})")
     adapter = ENGINE_ADAPTERS[name]
-    try:
-        runtime = importlib.import_module(adapter.module)
-    except ImportError as exc:
-        raise EngineUnavailable(f"{name} is not installed ({exc})") from exc
+    version = adapter.version()
+    if version is None:
+        raise EngineUnavailable(f"{name} is installed but reports no version")
     module_name, class_name = adapter.engine_class.split(":")
     engine_type = getattr(importlib.import_module(module_name), class_name)
-    return engine_type(), adapter.version(runtime), adapter.extension
+    return engine_type(), version, adapter.extension
 
 
 def _row(engine: Any) -> np.ndarray:

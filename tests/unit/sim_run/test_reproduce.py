@@ -14,7 +14,7 @@ import pytest
 from src.sim_run import cli
 from src.sim_run.manifest import RunManifest
 from src.sim_run.manifest_emitter import RunProvenance, emit_run_manifest
-from src.sim_run.reproduce import ReproduceError, reproduce_run
+from src.sim_run.reproduce import ReproduceError, reproduce_engine, reproduce_run
 from src.sim_run.run_registry import RunRegistry, RunRegistryError
 
 pytestmark = pytest.mark.unit
@@ -213,3 +213,17 @@ def test_mujoco_fixture_run_reproduces(tmp_path) -> None:
     report = reproduce_run(registry, run_id, xml, work_dir=tmp_path / "rerun")
     assert report.reproduced, report.format()
     assert report.seed == 11
+
+
+def test_git_revision_model_fails_closed(tmp_path) -> None:
+    registry = RunRegistry(tmp_path / "store")
+    _write_run(tmp_path / "run", replace(_provenance(), revision="e" * 40))
+    run_id = registry.add(tmp_path / "run")
+    with pytest.raises(ReproduceError, match="git revision"):
+        reproduce_run(registry, run_id, _MODEL, work_dir=tmp_path / "rerun")
+
+
+def test_missing_recorded_parameter_is_a_reproduce_error(tmp_path) -> None:
+    manifest = _write_run(tmp_path / "run", _provenance())
+    with pytest.raises(ReproduceError, match="qvel_noise"):
+        reproduce_engine(manifest, _MODEL, tmp_path / "rerun")
