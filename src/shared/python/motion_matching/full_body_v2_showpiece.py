@@ -1,14 +1,12 @@
 """The committed full-body-v2 showpiece driver spec, derived from v1 (SHOW-A3, D4).
 
 ``docs/development/full_body_models/full_body_spec_anthro_driver_v2.json`` is
-generated data: the v1 anthropometric driver spec migrated to the v2 regional
-trunk at the HRG-D2 landmark joint locations, carrying the (off by default)
-``trunk_coupling`` record. Never edit it by hand; a change to the v1 driver
-spec (the A2 grip offset, the A4 neck) reaches it by regeneration, and
-``--check`` (run by the drift test) fails when the committed bytes are stale::
+generated: the v1 driver spec migrated to the v2 regional trunk at the HRG-D2
+landmark joints, with a ``trunk_coupling`` record. Never edit it by hand; v1
+changes (A2 grip, A4 neck) reach it by regeneration and ``--check`` (the drift
+test) fails on stale bytes::
 
     python -m src.shared.python.motion_matching.full_body_v2_showpiece --write
-    python -m src.shared.python.motion_matching.full_body_v2_showpiece --check
 """
 
 from __future__ import annotations

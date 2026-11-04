@@ -1,13 +1,7 @@
-"""SHOW-A3 (#14552): thoracic segment contract and optional lumbar:thoracic coupling.
+"""SHOW-A3 (#14552): contracts of the v2 thoracic segment and its optional coupling.
 
-The thoracic segment is the full-body-v2 ``thoracic_T12_L1`` 3-DOF joint
-(HRG-D1/D2). A3 adds, on top of it:
-
-* contract tests on the joint tree, ``coordinate_order``, trunk mass/COM and
-  the ROM table, against the showpiece driver spec;
-* an *optional* equality coupling thoracic = ratio * lumbar per axis, read
-  from the cited Bruno 2015 regional split (``spine_coupling_laws.json``),
-  stored in the spec as ``trunk_coupling`` and OFF by default.
+Covers the joint tree, ``coordinate_order``, trunk mass/COM, the ROM table and
+the OFF-by-default thoracic = ratio * lumbar equality (Bruno 2015 split).
 """
 
 from __future__ import annotations
@@ -94,29 +88,27 @@ def test_ratios_are_the_bruno_regional_split_thoracic_over_lumbar() -> None:
     assert ratios["axial_rotation"] == pytest.approx(83 / 17)
 
 
-def test_coupling_is_off_by_default_and_changes_no_constraint_count(v2_doc) -> None:
+def _compile(doc: dict):
+    """(mujoco, xml, compiled model) of a spec through the MuJoCo exporter."""
     mujoco = pytest.importorskip("mujoco")
     from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
         export_full_body_mjcf,
     )
 
+    xml, _ = export_full_body_mjcf(json.dumps(doc).encode())
+    return mujoco, xml, mujoco.MjModel.from_xml_string(xml)
+
+
+def test_coupling_is_off_by_default_and_changes_no_constraint_count(v2_doc) -> None:
     doc = with_trunk_coupling(v2_doc)  # enabled defaults to False
     assert doc["trunk_coupling"]["enabled"] is False
-    xml, _ = export_full_body_mjcf(json.dumps(doc).encode())
-    base_xml, _ = export_full_body_mjcf(json.dumps(v2_doc).encode())
-    assert xml == base_xml
-    assert mujoco.MjModel.from_xml_string(xml).neq == 1  # the grip weld only
+    _, xml, model = _compile(doc)
+    assert xml == _compile(v2_doc)[1]
+    assert model.neq == 1  # the grip weld only
 
 
 def test_enabled_coupling_emits_one_joint_equality_per_axis(v2_doc) -> None:
-    mujoco = pytest.importorskip("mujoco")
-    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
-        export_full_body_mjcf,
-    )
-
-    doc = with_trunk_coupling(v2_doc, enabled=True)
-    xml, _ = export_full_body_mjcf(json.dumps(doc).encode())
-    model = mujoco.MjModel.from_xml_string(xml)
+    mujoco, _, model = _compile(with_trunk_coupling(v2_doc, enabled=True))
     assert model.neq == 1 + 3
     ratios = trunk_coupling_ratios(RegionalPrior.from_coupling_law())
     joint_eq = [
@@ -130,14 +122,7 @@ def test_enabled_coupling_emits_one_joint_equality_per_axis(v2_doc) -> None:
 
 
 def test_enabled_coupling_drives_thoracic_to_ratio_of_lumbar(v2_doc) -> None:
-    mujoco = pytest.importorskip("mujoco")
-    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
-        export_full_body_mjcf,
-    )
-
-    doc = with_trunk_coupling(v2_doc, enabled=True)
-    xml, _ = export_full_body_mjcf(json.dumps(doc).encode())
-    model = mujoco.MjModel.from_xml_string(xml)
+    mujoco, _, model = _compile(with_trunk_coupling(v2_doc, enabled=True))
     data = mujoco.MjData(model)
     data.qpos[model.joint("lumbar_axial_rotation").qposadr[0]] = 0.1
     for _ in range(400):

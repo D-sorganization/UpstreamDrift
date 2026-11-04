@@ -1,14 +1,13 @@
 """SHOW-A3 (#14552): before/after stills of the thoracic segment (headless MuJoCo).
 
-BEFORE = the v1 driver (rigid upper trunk: one ``TorsoInput`` twist, then
-``SpineInputX/Y``). AFTER = the v2 landmark trunk (lumbar + thoracic 3-DOF)
-derived from the same driver spec. Both are posed with the SAME total trunk
-axial rotation at the "top" pose; v2 splits it by the cited Bruno 2015
-regional split (17 % lumbar / 83 % thoracic). Poses are synthetic
-illustrations of the added degree of freedom, not a fitted swing, and not
-physics validation.
+BEFORE (``before_v1_rigid_*``) = the v1 driver, one rigid upper trunk
+(``TorsoInput`` twist). AFTER (``after_v2_segmented_*``) = the v2 lumbar +
+thoracic trunk derived from it. Both turn the SAME 55 degrees at the top; v2
+splits it 17 % lumbar (9.4 deg) / 83 % thoracic (45.6 deg, inside the +-50 deg
+soft ROM), Bruno 2015 (``src/config/spine_coupling_laws.json``). Synthetic
+illustrations of the added DOF, not a fitted swing, not physics validation.
 
-Usage (offscreen; falls back across GL backends)::
+Run (offscreen; ``MUJOCO_GL=glfw`` on Windows)::
 
     python docs/development/full_body_models/evidence/trunk_segments/render_trunk_segments.py
 """
@@ -24,12 +23,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(ROOT))
 OUT = Path(__file__).resolve().parent
-TOTAL_TURN_DEG = 70.0  # shoulder-to-pelvis turn at the top
+TOTAL_TURN_DEG = 55.0  # top-of-backswing turn; keeps thoracic < the +-50 deg ROM
 LUMBAR_SHARE = 0.17  # Bruno 2015 regional split, axial rotation
-POSES = {
-    "address": {},
-    "top": {"turn": TOTAL_TURN_DEG},
-}
+POSES = {"address": 0.0, "top": TOTAL_TURN_DEG}  # pose -> total axial turn (deg)
 
 
 def _render(xml: str, qpos: dict[str, float], path: Path, azimuth: float) -> None:
@@ -59,16 +55,14 @@ def main() -> int:
         derive_landmark_v2_spec,
     )
 
-    v1 = json.loads(
-        (ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json")
-        .read_text(encoding="utf-8")
-    )
+    from src.shared.python.motion_matching.full_body_v2_showpiece import SHOWPIECE_V1
+
+    v1 = json.loads(SHOWPIECE_V1.read_text(encoding="utf-8"))
     v2 = derive_landmark_v2_spec(v1, provenance="SHOW-A3 before/after stills")
     docs = {"before_v1_rigid": v1, "after_v2_segmented": v2}
     for label, doc in docs.items():
         xml, _ = export_full_body_mjcf(json.dumps(doc).encode(), visual=True)
-        for pose, spec in POSES.items():
-            turn = spec.get("turn", 0.0)
+        for pose, turn in POSES.items():
             if doc is v1:
                 q = {"TorsoInput": turn}
             else:
@@ -78,7 +72,6 @@ def main() -> int:
                 }
             for view, az in (("face_on", 90.0), ("dtl", 180.0)):
                 _render(xml, q, OUT / f"{label}_{pose}_{view}.png", az)
-    print("wrote stills to", OUT.name)
     return 0
 
 

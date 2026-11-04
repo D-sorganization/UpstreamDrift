@@ -122,6 +122,20 @@ def _attach_full_body_sites(
     return frame_sites, contact_sites
 
 
+def _add_trunk_coupling(root: ET.Element, spec: dict[str, Any]) -> None:
+    """Emit the enabled lumbar:thoracic joint equalities (none when off)."""
+    equality = root.find("equality")
+    for item in trunk_coupling_equalities(spec):
+        ET.SubElement(
+            equality,
+            "joint",
+            name=f"coupling_{item['joint1']}",
+            joint1=item["joint1"],
+            joint2=item["joint2"],
+            polycoef=_numbers(item["polycoef"]),
+        )
+
+
 def export_full_body_mjcf(
     model_bytes: bytes,
     *,
@@ -184,16 +198,7 @@ def export_full_body_mjcf(
 
     elements, offsets = _build_full_body_kinematics(root, spec)
     frame_sites, contact_sites = _attach_full_body_sites(root, elements, offsets, spec)
-    equality = root.find("equality")
-    for item in trunk_coupling_equalities(spec):  # SHOW-A3: optional, off by default
-        ET.SubElement(
-            equality,
-            "joint",
-            name=f"coupling_{item['joint1']}",
-            joint1=item["joint1"],
-            joint2=item["joint2"],
-            polycoef=_numbers(item["polycoef"]),
-        )
+    _add_trunk_coupling(root, spec)  # SHOW-A3: optional, off by default
     visual_meta = None
     if visual or with_head or appearance is not None:
         from src.engines.physics_engines.mujoco.python.visual_layer import (

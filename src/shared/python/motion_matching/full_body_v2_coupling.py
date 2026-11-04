@@ -1,16 +1,11 @@
 """Optional lumbar:thoracic coupling of the full-body-v2 trunk (SHOW-A3, #14552).
 
-The v2 trunk has two free 3-DOF regional joints. When the data cannot
-separate them (SHOW-A5, #14554) the panel resolution is to couple them with
-the cited regional split instead of fitting six free DOFs: per axis,
-``thoracic = (thoracic share / lumbar share) * lumbar``. The shares come from
-``src/config/spine_coupling_laws.json`` (Bruno 2015, regional split), through
-the same :class:`RegionalPrior` the v1 -> v2 migration uses.
-
-The coupling is declarative data in the spec (``trunk_coupling``) and OFF by
-default; an engine exporter realises it as one joint equality per axis via
-:func:`trunk_coupling_equalities`. Both coordinates of an axis share the same
-ISB sign (:data:`V2_TRUNK`), so the model-coordinate ratio equals the ISB one.
+Per axis, ``thoracic = (thoracic share / lumbar share) * lumbar`` with shares
+from ``src/config/spine_coupling_laws.json`` (Bruno 2015) via the migration's
+:class:`RegionalPrior`. The coupling is declarative spec data
+(``trunk_coupling``, OFF by default); an exporter realises it as one joint
+equality per axis through :func:`trunk_coupling_equalities`. Both coordinates
+of an axis share an ISB sign, so the model ratio equals the ISB one.
 """
 
 from __future__ import annotations
