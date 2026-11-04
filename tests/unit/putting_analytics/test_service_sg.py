@@ -127,3 +127,21 @@ def test_holed_putt_gains_its_expected_putts_less_one() -> None:
 def test_bad_inputs_are_rejected(overrides: dict[str, Any], message: str) -> None:
     with pytest.raises(ValueError, match=message):
         service_sg.sg_study(_args(**overrides))
+
+
+def test_a_later_putt_scores_against_the_cached_curve(
+    core_curve: Any, miss_report: dict[str, Any]
+) -> None:
+    curve, _ = core_curve
+    assert service_sg.score_putt(miss_report, False, 2.5) == pytest.approx(
+        miss_report["sg_player"]
+    )
+    later = PuttOutcomes(np.array([False]), np.array([4.0]))
+    assert service_sg.score_putt(miss_report, False, 4.0) == pytest.approx(
+        optimize.strokes_gained(9.0, later, curve, curve).sg_player
+    )
+    assert service_sg.score_putt(miss_report, True, 0.0) == pytest.approx(
+        miss_report["expected_putts"] - 1.0
+    )
+    with pytest.raises(ValueError, match="leave_ft"):
+        service_sg.score_putt(miss_report, False, -1.0)

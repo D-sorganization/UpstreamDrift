@@ -566,3 +566,40 @@ def test_auto_solve_reports_a_rejected_putt(
     widget._solve_btn.click()
     _wait_for_solve(qapp, widget)
     assert "Auto-Solve rejected: no read" in widget._results_text.toPlainText()
+
+
+# ---------------------------------------------------------------------------
+# Strokes gained (#14467)
+# ---------------------------------------------------------------------------
+
+
+def test_the_sg_panel_scores_on_the_dialled_green(widget: PuttingGreenWidget) -> None:
+    # Golden parity: the study runs on the batch panel's green and stroke.
+    widget._slope_spin.setValue(1.5)
+    args = widget.sg_panel().study_args()
+    for key, value in widget.batch_panel.current_args().items():
+        if key != "n":
+            assert args[key] == value
+    assert widget.sg_panel().canvas.parent() is not None
+
+
+def test_a_putt_enters_its_result_into_the_sg_panel(
+    widget: PuttingGreenWidget,
+) -> None:
+    # In feet the leave box (two decimals) holds the leave to 0.005 ft.
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    widget._slope_spin.setValue(2.0)
+    widget._run_simulation()
+    scene = widget._scene
+    assert scene is not None
+    args = widget.sg_panel().study_args()
+    assert args["holed"] is scene.holed
+    expected_ft = 0.0 if scene.holed else scene.final_distance_to_cup_m / 0.3048
+    assert args["leave_ft"] == pytest.approx(expected_ft, abs=0.01)
+
+
+def test_the_sg_panel_follows_the_unit_selector(widget: PuttingGreenWidget) -> None:
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert widget.sg_panel()._leave_spin.suffix().strip() == "m"
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert widget.sg_panel()._leave_spin.suffix().strip() == "ft"
