@@ -59,6 +59,7 @@ from .collision import (
     strike,
     sweep_dynamic_loft,
 )
+from .putter_presets import BALANCE_PRESETS, BalancePreset, balance_preset
 from .friction import (
     DEFAULT_SLIDING_MU,
     DEFAULT_STATIC_MU,
@@ -138,6 +139,7 @@ from .utils import (
 )
 
 __all__ = [
+    "BALANCE_PRESETS",
     "DEFAULT_FIXTURES_PATH",
     "DEFAULT_SLIDING_MU",
     "DEFAULT_STATIC_MU",
@@ -151,6 +153,7 @@ __all__ = [
     "STIMP_RELEASE_SPEED_MPS",
     "USGA_STIMP_ROLL_MODEL",
     "AimSolution",
+    "BalancePreset",
     "BallState",
     "CollisionReport",
     "ExpectedValue",
@@ -168,6 +171,7 @@ __all__ = [
     "TrajectorySample",
     "TurfCondition",
     "TurfSpec",
+    "balance_preset",
     "ball_kinetic_energy_j",
     "bumpy_friction_field",
     "bumpy_height_field",

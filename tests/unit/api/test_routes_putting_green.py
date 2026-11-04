@@ -377,3 +377,48 @@ def test_read_green_on_a_flat_green_aims_at_the_target(client: TestClient) -> No
     assert data["aim_point"] == pytest.approx([8.0, 9.0], abs=0.01)
     assert data["recommended_speed"] > 0.0
     assert all(e == 0.0 for e in data["elevations"])
+
+
+# -- Putter balance presets (#14461) --
+
+
+def test_putter_presets_lists_the_core_presets(client: TestClient) -> None:
+    from src.shared.python.putting_dynamics import BALANCE_PRESETS
+
+    response = client.get("/tools/putting-green/putter-presets")
+    assert response.status_code == 200, response.text
+    presets = {p["key"]: p for p in response.json()["presets"]}
+    assert set(presets) == set(BALANCE_PRESETS)
+    blade = BALANCE_PRESETS["toe_hang"]
+    assert presets["toe_hang"]["moi_kg_m2"] == blade.moi_kg_m2
+    assert presets["toe_hang"]["hosel_toe_m"] == blade.hosel_toe_m
+
+
+def test_simulate_putt_3d_balance_type_matches_the_core_strike(
+    client: TestClient,
+) -> None:
+    from src.shared.python.putting_dynamics import balance_preset, strike
+
+    response = client.post(
+        "/tools/putting-green/simulate-3d",
+        json={
+            "balance_type": "toe_hang",
+            "putter_speed_mps": 1.8,
+            "loft_deg": 3.0,
+            "coefficient_of_restitution": 0.78,
+            "impact_toe_m": -0.006,
+        },
+    )
+    assert response.status_code == 200, response.text
+    putter = balance_preset("toe_hang").putter(1.8, loft_deg=3.0, cor=0.78)
+    want = strike(putter, -0.006)
+    got = response.json()["collision"]
+    assert got["face_twist_rad_s"] == pytest.approx(want.face_twist_rad_s)
+    assert got["ball_speed_mps"] == pytest.approx(want.ball_speed_mps)
+
+
+def test_simulate_putt_3d_rejects_an_unknown_balance_type(client: TestClient) -> None:
+    response = client.post(
+        "/tools/putting-green/simulate-3d", json={"balance_type": "anser"}
+    )
+    assert response.status_code == 422

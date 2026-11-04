@@ -12,7 +12,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Impact and Strike Model (Skid to Roll) | (c) | present | partial (#14461) | present | present | partial (#14461) |
 | Toe/Heel Strike Location | (c) | present | missing (#14461) | present | present | partial (#14461) |
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | missing (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
-| Putter Balance Type (CG Offset, MOI) | (c) | partial (#14461) | missing (#14461) | partial (#14462) | partial (#14462) | present |
+| Putter Balance Type (CG Offset, MOI) | (c) | present | missing (#14461) | partial (#14462) | partial (#14462) | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | partial (#14463) | partial (#14463) | partial (#14464) | partial (#14464) | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | partial (#14465) | missing (#14465) | partial (#14466) | partial (#14466) | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | missing (#14467) | missing (#14468) | missing (#14468) | partial (#14467) |
@@ -61,7 +61,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/charts2d.js`, `src/apps/putting_studio/js/controls_c.js`. Closed-form couple model, gust pulse and torque charts (illustrative, not in the core: ADR-0058 gap).
 
 **Putter Balance Type (CG Offset, MOI)**
-- Core/API: partial (#14461). `src/shared/python/putting_dynamics/types.py`, `src/api/routes/putting_green.py`. PutterState hosel offsets, MOI and mass; no named balance presets.
+- Core/API: present. `src/shared/python/putting_dynamics/putter_presets.py`, `src/api/routes/putting_green.py`. Named balance presets (toe-hang, face-balanced, zero-torque, counterbalanced) over PutterState; GET /putter-presets and /simulate-3d balance_type.
 - PyQt6: missing (#14461). `src/tools/putting_green_gui/_scene_builder.py`. Uses PutterState.typical only.
 - React: partial (#14462). `ui/src/pages/PuttingGreen.tsx`. Hosel widget; mass and MOI sent without controls; no balance-type selector.
 - Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/controls_c.js`. Four putter types (PUTTER_SPECS); per-type face SD is an assumed input.

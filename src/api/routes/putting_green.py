@@ -23,16 +23,21 @@ See issue #1206
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 from fastapi import APIRouter, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.api.rate_limit import get_limit, limiter
 from src.shared.python.core.contracts import PostconditionError, precondition, require
+from src.shared.python.putting_dynamics.putter_presets import (
+    BALANCE_PRESETS,
+    balance_preset,
+)
 from src.shared.python.putting_dynamics.types import (
     TYPICAL_HEAD_MASS_KG,
     TYPICAL_HEAD_MOI_KG_M2,
@@ -171,7 +176,16 @@ class Putt3DSimulationRequest(BaseModel):
     coefficient_of_restitution: float = Field(0.78, gt=0.0, lt=1.0)
     hosel_toe_m: float = Field(0.0, ge=-0.08, le=0.08)
     hosel_forward_m: float = Field(0.0, ge=-0.05, le=0.05)
-    impact_toe_m: float = Field(0.0, ge=-0.08, le=0.08)
+    balance_type: str | None = Field(
+        None,
+        description=(
+            "Named core putter head (see /putter-presets); when set it supplies "
+            "head mass, MOI and hosel offsets, overriding those fields"
+        ),
+    )
+    impact_toe_m: float = Field(
+        0.0, ge=-0.08, le=0.08, description="Strike offset, toe + / heel - [m]"
+    )
     stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
     grade_percent: float = Field(0.0, ge=0.0, le=10.0)
     downhill_aspect_deg: float = Field(0.0, ge=-180.0, le=180.0)
@@ -183,6 +197,30 @@ class Putt3DSimulationRequest(BaseModel):
     random_seed: int = Field(8345, ge=0, le=2**31 - 1)
     hole_x_m: float = Field(3.0, ge=-9.0, le=9.0)
     hole_y_m: float = Field(0.0, ge=-9.0, le=9.0)
+
+    @field_validator("balance_type")
+    @classmethod
+    def _known_balance_type(cls, value: str | None) -> str | None:
+        if value is not None and value not in BALANCE_PRESETS:
+            raise ValueError(f"balance_type must be one of {sorted(BALANCE_PRESETS)}")
+        return value
+
+
+class BalancePresetResponse(BaseModel):
+    """One named putter head from the shared core (#14461)."""
+
+    key: str
+    name: str
+    head_mass_kg: float
+    moi_kg_m2: float
+    hosel_toe_m: float
+    hosel_forward_m: float
+
+
+class BalancePresetsResponse(BaseModel):
+    """Every core balance preset, for the balance-type selectors."""
+
+    presets: list[BalancePresetResponse]
 
 
 class Putt3DSampleResponse(BaseModel):
@@ -355,15 +393,22 @@ def _build_putting_3d_surface(
         friction_field=friction_field,
         friction=friction,
     )
-    putter = PutterState(
-        head_mass_kg=payload.head_mass_kg,
-        moi_kg_m2=payload.head_moi_kg_m2,
-        loft_deg=payload.loft_deg,
-        speed_mps=payload.putter_speed_mps,
-        cor=payload.coefficient_of_restitution,
-        hosel_toe_m=payload.hosel_toe_m,
-        hosel_forward_m=payload.hosel_forward_m,
-    )
+    if payload.balance_type is not None:
+        putter = balance_preset(payload.balance_type).putter(
+            payload.putter_speed_mps,
+            loft_deg=payload.loft_deg,
+            cor=payload.coefficient_of_restitution,
+        )
+    else:
+        putter = PutterState(
+            head_mass_kg=payload.head_mass_kg,
+            moi_kg_m2=payload.head_moi_kg_m2,
+            loft_deg=payload.loft_deg,
+            speed_mps=payload.putter_speed_mps,
+            cor=payload.coefficient_of_restitution,
+            hosel_toe_m=payload.hosel_toe_m,
+            hosel_forward_m=payload.hosel_forward_m,
+        )
     return surface, height, putter
 
 
@@ -611,6 +656,16 @@ async def scatter_analysis(
             holed_count / len(final_positions) * 100 if final_positions else 0
         ),
     )
+
+
+@router.get("/putter-presets", response_model=BalancePresetsResponse)
+@handle_api_errors
+async def get_putter_presets() -> BalancePresetsResponse:
+    """Named putter balance presets from the shared core (#14461)."""
+    presets = [
+        BalancePresetResponse(**dataclasses.asdict(p)) for p in BALANCE_PRESETS.values()
+    ]
+    return BalancePresetsResponse(presets=presets)
 
 
 @router.get("/contours", response_model=GreenContourResponse)

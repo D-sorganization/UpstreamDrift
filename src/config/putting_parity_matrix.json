@@ -73,7 +73,7 @@
       "title": "Putter Balance Type (CG Offset, MOI)",
       "cluster": "c",
       "cells": {
-        "core_api": "partial #14461 | src/shared/python/putting_dynamics/types.py, src/api/routes/putting_green.py | PutterState hosel offsets, MOI and mass; no named balance presets.",
+        "core_api": "present | src/shared/python/putting_dynamics/putter_presets.py, src/api/routes/putting_green.py | Named balance presets (toe-hang, face-balanced, zero-torque, counterbalanced) over PutterState; GET /putter-presets and /simulate-3d balance_type.",
         "pyqt6": "missing #14461 | src/tools/putting_green_gui/_scene_builder.py | Uses PutterState.typical only.",
         "react": "partial #14462 | ui/src/pages/PuttingGreen.tsx | Hosel widget; mass and MOI sent without controls; no balance-type selector.",
         "tauri": "partial #14462 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
