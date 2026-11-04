@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import dataclasses
 import math
-from collections.abc import Sequence
 from enum import Enum
 from typing import TYPE_CHECKING, Annotated, Literal, Protocol
 
@@ -34,9 +33,17 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field, field_validator
 
 from src.api.middleware.error_handler import handle_api_errors
+from src.api.models.putting_playback import (
+    BallModeName,
+    PhaseMarkResponse,
+    Putt3DCollisionResponse,
+    Putt3DSampleResponse,
+    Putt3DSimulationResponse,
+    Putt3DSurfaceResponse,
+    phase_marks_response,
+)
 from src.api.rate_limit import get_limit, limiter
 from src.shared.python.core.contracts import PostconditionError, precondition, require
-from src.shared.python.putting_dynamics.phases import phase_marks
 from src.shared.python.putting_dynamics.green_spec import (
     GREEN_PRESETS,
     GreenSpec,
@@ -59,7 +66,6 @@ if TYPE_CHECKING:
         HeightField,
         PutterState,
         SurfaceSpec,
-        TrajectorySample,
     )
 
 router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
@@ -127,21 +133,6 @@ class PuttSimulationRequest(BaseModel):
     wind_direction_y: float = Field(0.0, description="Wind direction Y")
 
 
-class PhaseMarkResponse(BaseModel):
-    """Where one run of a ball mode starts, for playback jumps (#14473)."""
-
-    mode: Literal["airborne", "slide", "roll", "rest"]
-    t_s: float
-    index: int = Field(description="Index of the run's first sample")
-
-
-def _phase_marks(samples: Sequence[TrajectorySample]) -> list[PhaseMarkResponse]:
-    return [
-        PhaseMarkResponse(mode=m.mode.value, t_s=m.t_s, index=m.index)
-        for m in phase_marks(samples)
-    ]
-
-
 class PuttSimulationResponse(BaseModel):
     """Response containing putt simulation results."""
 
@@ -151,7 +142,7 @@ class PuttSimulationResponse(BaseModel):
     positions: list[list[float]]
     velocities: list[list[float]]
     times: list[float]
-    modes: list[Literal["airborne", "slide", "roll", "rest"]] = Field(
+    modes: list[BallModeName] = Field(
         default_factory=list, description="Ball mode at each sample (#14473)"
     )
     phases: list[PhaseMarkResponse] = Field(default_factory=list)
@@ -289,60 +280,6 @@ class BalancePresetsResponse(BaseModel):
     """Every core balance preset, for the balance-type selectors."""
 
     presets: list[BalancePresetResponse]
-
-
-class Putt3DSampleResponse(BaseModel):
-    """One frame in the three-dimensional playback trajectory."""
-
-    t_s: float
-    x_m: float
-    y_m: float
-    z_m: float
-    speed_mps: float
-    spin_rad_s: float
-    mode: Literal["airborne", "slide", "roll", "rest"]
-
-
-class Putt3DCollisionResponse(BaseModel):
-    """Impact quantities displayed beside the slow-motion collision."""
-
-    ball_speed_mps: float
-    putter_speed_before_mps: float
-    putter_speed_after_mps: float
-    launch_angle_deg: float
-    spin_rad_s: float
-    impulse_n_s: float
-    contact_time_proxy_s: float
-    kinetic_energy_loss_j: float
-    face_twist_rad_s: float
-    twist_moment_n_m_s: float
-
-
-class Putt3DSurfaceResponse(BaseModel):
-    """Surface geometry metadata required by the R3F scene."""
-
-    width_m: float
-    height_m: float
-    grade_percent: float
-    downhill_aspect_deg: float
-    hole_x_m: float
-    hole_y_m: float
-
-
-class Putt3DSimulationResponse(BaseModel):
-    """Complete deterministic playback payload for the R3F client."""
-
-    roll_model: str = Field(
-        description="Roll model that produced this playback (ADR-0045 F1)"
-    )
-    samples: list[Putt3DSampleResponse]
-    phases: list[PhaseMarkResponse] = Field(default_factory=list)
-    collision: Putt3DCollisionResponse
-    surface: Putt3DSurfaceResponse
-    holed: bool
-    total_distance_m: float
-    duration_s: float
-    skid_distance_m: float
 
 
 # -- Endpoints --
@@ -545,7 +482,7 @@ async def simulate_putt_3d(
     return Putt3DSimulationResponse(
         roll_model=USGA_STIMP_ROLL_MODEL,
         samples=samples,
-        phases=_phase_marks(result.samples),
+        phases=phase_marks_response(result.samples),
         collision=Putt3DCollisionResponse(
             ball_speed_mps=collision.ball_speed_mps,
             putter_speed_before_mps=payload.putter_speed_mps,
@@ -628,7 +565,7 @@ async def simulate_putt(
         velocities=velocities,
         times=[s.t_s for s in result.samples],
         modes=[s.mode.value for s in result.samples],
-        phases=_phase_marks(result.samples),
+        phases=phase_marks_response(result.samples),
         holed=result.holed,
         final_position=final_position,
         total_distance=result.total_distance_m,
