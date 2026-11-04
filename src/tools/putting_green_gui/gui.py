@@ -290,8 +290,12 @@ class PuttingGreenWidget(QWidget):
         self._strike_spin = self._make_spin(0.0, 0.0, 0.0, "")
         self._set_strike_units(0.0)
         self._strike_spin.setToolTip("Impact point from the face centre: heel -, toe +")
-        form.addRow("Strike (heel−/toe+):", self._strike_spin)
+        form.addRow("Strike:", self._strike_spin)
         self._balance_combo = QComboBox()
+        self._balance_combo.setSizeAdjustPolicy(  # long names must not widen phones
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+        )
+        self._balance_combo.setMinimumContentsLength(12)
         self._balance_combo.addItem("Typical", None)
         for key, preset in BALANCE_PRESETS.items():
             self._balance_combo.addItem(preset.name, key)
