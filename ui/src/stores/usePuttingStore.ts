@@ -4,6 +4,7 @@ import type {
   Putt3DSimulationRequest,
   Putt3DSimulationResponse,
 } from "@/api/generated/types";
+import type { CameraPreset } from "@/utils/cameraPresets";
 import { defaultNoise, type Noise } from "@/utils/dispersion";
 import { loadUnitSystem, saveUnitSystem, type UnitSystem } from "@/utils/units";
 
@@ -37,6 +38,7 @@ interface PuttingState {
   playing: boolean;
   /** Display units only; parameters and results stay SI (#14458). */
   unitSystem: UnitSystem;
+  cameraView: CameraPreset;
   /** The player's spread, shared by the batch and strokes-gained panels. */
   noise: Noise;
   updateParameters: (changes: Partial<Putt3DSimulationRequest>) => void;
@@ -45,6 +47,7 @@ interface PuttingState {
   setPlaybackRate: (rate: number) => void;
   setPlaying: (playing: boolean) => void;
   setUnitSystem: (system: UnitSystem) => void;
+  setCameraView: (view: CameraPreset) => void;
   setNoise: (noise: Noise) => void;
   reset: () => void;
 }
@@ -56,6 +59,7 @@ export const usePuttingStore = create<PuttingState>((set) => ({
   playbackRate: 1,
   playing: false,
   unitSystem: loadUnitSystem(),
+  cameraView: "orbit",
   noise: defaultNoise(),
   updateParameters: (changes) =>
     set((state) => ({
@@ -71,6 +75,7 @@ export const usePuttingStore = create<PuttingState>((set) => ({
     saveUnitSystem(unitSystem);
     set({ unitSystem });
   },
+  setCameraView: (cameraView) => set({ cameraView }),
   setNoise: (noise) => set({ noise }),
   reset: () =>
     set({
