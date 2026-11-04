@@ -100,7 +100,13 @@ def evaluate_rollout(
     """Impact conditions of one MuJoCo rollout, fast enough for optimiser loops.
 
     The impact state is the explicit ``impact_index``, the sample before
-    ``contact_index``, or else the peak-clubhead-speed sample.  Tools D-plane
+    ``contact_index``, or else the peak-clubhead-speed sample.  Optimiser loops
+    should pass ``contact_index`` (or ``impact_index``): the peak-speed fallback
+    can move with the controls and make the cost non-smooth.
+
+    For a full-body specification build ``spec`` with
+    :func:`club_face_spec_from_spec`: the compiled club body origin is not the
+    head, so the default face spec reads the wrong point.  Tools D-plane
     estimates are skipped (``use_tools=False``): they are reporting extras.
 
     Raises:
