@@ -2904,6 +2904,16 @@ export interface OutcomeProxyRowV1 {
 }
 
 /**
+ * Where one run of a ball mode starts, for playback jumps (#14473).
+ */
+export interface PhaseMarkResponse {
+  mode: "airborne" | "slide" | "roll" | "rest";
+  t_s: number;
+  /** Index of the run's first sample */
+  index: number;
+}
+
+/**
  * Response model for motion pipeline API. Wraps MotionMatchingResult with additional metadata.
  */
 export interface PipelineResponse {
@@ -3234,6 +3244,7 @@ export interface Putt3DSimulationResponse {
   /** Roll model that produced this playback (ADR-0045 F1) */
   roll_model: string;
   samples: Putt3DSampleResponse[];
+  phases?: PhaseMarkResponse[];
   collision: Putt3DCollisionResponse;
   surface: Putt3DSurfaceResponse;
   holed: boolean;
@@ -3296,6 +3307,9 @@ export interface PuttSimulationResponse {
   positions: number[][];
   velocities: number[][];
   times: number[];
+  /** Ball mode at each sample (#14473) */
+  modes?: ("airborne" | "slide" | "roll" | "rest")[];
+  phases?: PhaseMarkResponse[];
   holed: boolean;
   final_position: number[];
   total_distance: number;
