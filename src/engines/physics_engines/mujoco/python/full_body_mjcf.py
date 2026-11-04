@@ -27,6 +27,7 @@ from src.shared.python.motion_matching.full_body_schema import (
     require_full_body_schema,
 )
 from src.shared.python.motion_matching.full_body_spec import order_full_body_joints
+from src.shared.python.motion_matching.neck_rom import NECK_ROM, neck_range_rad
 
 
 def _build_full_body_kinematics(
@@ -59,6 +60,18 @@ def _build_full_body_kinematics(
     ):
         raise ValueError("Body or coordinate inventory was not preserved")
     return elements, offsets
+
+
+def _limit_neck_joints(root: ET.Element) -> None:
+    """Enforce the cited neck ROM (#14553) on the ``NeckInput*`` joints by name.
+
+    Name-based so it holds wherever the neck attaches (pelvis-torso chain today,
+    the thoracic body once A3 re-parents it).
+    """
+    for joint in root.iter("joint"):
+        if joint.get("name") in NECK_ROM:
+            joint.set("limited", "true")
+            joint.set("range", _numbers(neck_range_rad(joint.get("name", ""))))
 
 
 def _attach_full_body_sites(
@@ -180,6 +193,7 @@ def export_full_body_mjcf(
     ET.SubElement(default_contact, "geom", contype="0", conaffinity="0")
 
     elements, offsets = _build_full_body_kinematics(root, spec)
+    _limit_neck_joints(root)
     frame_sites, contact_sites = _attach_full_body_sites(root, elements, offsets, spec)
     visual_meta = None
     if visual or with_head or appearance is not None:

@@ -18,7 +18,10 @@ from src.shared.python.motion_matching.neck_rom import NECK_ROM, neck_range_rad
 
 pytestmark = pytest.mark.unit
 
-SPEC = Path("docs/development/full_body_models/full_body_spec_anthro_driver.json")
+SPEC = (
+    Path(__file__).resolve().parents[3]
+    / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+)
 
 
 def test_every_neck_axis_has_a_cited_range() -> None:
