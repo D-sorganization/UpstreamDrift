@@ -16,11 +16,14 @@ import hashlib
 from pathlib import Path
 import sys
 import tempfile
+from typing import Any
 
 import numpy as np
 
+from src.sim_run.engine_run import ENGINE_ADAPTERS, EngineUnavailable, run_engine
 from src.sim_run.manifest import RunManifest
 from src.sim_run.run_registry import RunRegistry, RunRegistryError, default_store_root
+from src.sim_run.trajectory_run import Rollout
 
 Reproducer = Callable[[RunManifest, str, Path], RunManifest]
 """Rerun ``manifest`` from model text into a directory; return the new manifest."""
@@ -30,23 +33,56 @@ class ReproduceError(RuntimeError):
     """Raised when a stored run cannot be rerun as recorded."""
 
 
+def _recorded(manifest: RunManifest, key: str) -> Any:
+    if key not in manifest.parameters:
+        raise ReproduceError(f"stored run does not record parameter {key!r}")
+    return manifest.parameters[key]
+
+
+def _rollout(manifest: RunManifest) -> Rollout:
+    return Rollout(
+        _recorded(manifest, "duration_s"),
+        manifest.seed,
+        _recorded(manifest, "qvel_noise"),
+    )
+
+
 def reproduce_mujoco(manifest: RunManifest, model: str, out_dir: Path) -> RunManifest:
     """Rerun a MuJoCo run written by :func:`src.sim_run.mujoco_run.run_mujoco`."""
     from src.sim_run.mujoco_run import run_mujoco
 
-    parameters = manifest.parameters
+    rollout = _rollout(manifest)
     return run_mujoco(
         model,
         model_id=manifest.model.model_id,
         output_dir=out_dir,
-        duration=parameters["duration_s"],
-        seed=manifest.seed,
-        qvel_noise=parameters["qvel_noise"],
+        duration=rollout.duration,
+        seed=rollout.seed,
+        qvel_noise=rollout.qvel_noise,
         ud_commit=manifest.ud_commit,
     )
 
 
-REPRODUCERS: Mapping[str, Reproducer] = {"mujoco": reproduce_mujoco}
+def reproduce_engine(manifest: RunManifest, model: str, out_dir: Path) -> RunManifest:
+    """Rerun a run written by :func:`src.sim_run.engine_run.run_engine`."""
+    try:
+        return run_engine(
+            manifest.engine.name,
+            model,
+            model_id=manifest.model.model_id,
+            output_dir=out_dir,
+            rollout=_rollout(manifest),
+            timestep=_recorded(manifest, "timestep_s"),
+            ud_commit=manifest.ud_commit,
+        )
+    except EngineUnavailable as exc:
+        raise ReproduceError(str(exc)) from exc
+
+
+REPRODUCERS: Mapping[str, Reproducer] = {
+    "mujoco": reproduce_mujoco,
+    **dict.fromkeys(ENGINE_ADAPTERS, reproduce_engine),
+}
 
 
 @dataclass(frozen=True)
@@ -109,7 +145,12 @@ def _engine(manifest: RunManifest) -> str:
 def _check_model(manifest: RunManifest, model: str) -> None:
     revision = manifest.model.revision
     digest = "sha256:" + hashlib.sha256(model.encode("utf-8")).hexdigest()
-    if revision.startswith("sha256:") and revision != digest:
+    if not revision.startswith("sha256:"):
+        raise ReproduceError(
+            f"cannot verify model text against git revision {revision}; "
+            "only sha256 revisions are checked"
+        )
+    if revision != digest:
         raise ReproduceError(
             f"model text does not match recorded revision {revision} (got {digest})"
         )
@@ -142,8 +183,9 @@ def reproduce_run(
     Raises:
         ValueError: if ``tolerance`` is negative or ``run_id`` is malformed.
         RunRegistryError: if the run is not stored.
-        ReproduceError: if ``model`` does not match the recorded revision or the
-            engine has no reproducer.
+        ReproduceError: if ``model`` does not match the recorded revision, the
+            revision is not a sha256 digest, the engine has no reproducer or
+            is not installed, or a recorded parameter is missing.
     """
     if tolerance < 0:
         raise ValueError(f"tolerance must be non-negative, got {tolerance}")
