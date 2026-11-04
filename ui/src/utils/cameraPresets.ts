@@ -46,7 +46,14 @@ export interface CameraScene {
   cup: Vec3;
 }
 
-const deg = (rad: number) => (rad * 180) / Math.PI;
+const atan = (y: number, x: number) => (Math.atan2(y, x) * 180) / Math.PI;
+const mid = (a: Vec3, b: Vec3) => a.map((v, i) => (v + b[i]) / 2) as Vec3;
+const pose = (center: Vec3, distance: number, elev: number, azim: number) => ({
+  center,
+  distance,
+  elevationDeg: elev,
+  azimuthDeg: azim,
+});
 
 /** The eye of ``pose``, as the desktop's orbit camera places it. */
 export function cameraPosition(pose: CameraPose): Vec3 {
@@ -74,33 +81,13 @@ export function cameraPose(
   const uy = (cup[1] - start[1]) / length;
   switch (preset) {
     case "down_the_line":
-      return {
-        center: [0, 1, 2].map((i) => (start[i] + cup[i]) / 2) as Vec3,
-        distance: length / 2 + 2.5,
-        elevationDeg: 12,
-        azimuthDeg: deg(Math.atan2(-uy, -ux)),
-      };
+      return pose(mid(start, cup), length / 2 + 2.5, 12, atan(-uy, -ux));
     case "face_on":
-      return {
-        center: start,
-        distance: 3,
-        elevationDeg: 8,
-        azimuthDeg: deg(Math.atan2(-ux, uy)),
-      };
+      return pose(start, 3, 8, atan(-ux, uy));
     case "overhead":
-      return {
-        center: middle,
-        distance: Math.max(width, height) * 1.4 + 2,
-        elevationDeg: 89,
-        azimuthDeg: -90,
-      };
+      return pose(middle, Math.max(width, height) * 1.4 + 2, 89, -90);
     default:
-      return {
-        center: middle,
-        distance: Math.max(width, height) * 1.5 + 4,
-        elevationDeg: 32,
-        azimuthDeg: -78,
-      };
+      return pose(middle, Math.max(width, height) * 1.5 + 4, 32, -78);
   }
 }
 

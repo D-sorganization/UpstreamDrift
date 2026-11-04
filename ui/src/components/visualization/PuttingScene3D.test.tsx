@@ -97,17 +97,10 @@ describe("PuttingScene3D", () => {
     );
     // Overhead looks down on the 3 m putt's tile middle from 9.42 m.
     const { eye, target } = scenePose(3, 0, 0, "overhead");
-    expect(camera.position.set).toHaveBeenLastCalledWith(
-      eye[0],
-      eye[2],
-      eye[1],
-    );
-    expect(eye[2]).toBeCloseTo(9.42 * Math.sin((89 * Math.PI) / 180), 9);
-    expect(controls.target.set).toHaveBeenLastCalledWith(
-      target[0],
-      target[2],
-      target[1],
-    );
+    const [[x, y, z], [tx, ty, tz]] = [eye, target];
+    expect(camera.position.set).toHaveBeenLastCalledWith(x, z, y);
+    expect(z).toBeCloseTo(9.42 * Math.sin((89 * Math.PI) / 180), 9);
+    expect(controls.target.set).toHaveBeenLastCalledWith(tx, tz, ty);
     expect(controls.update).toHaveBeenCalled();
   });
 });

@@ -14,6 +14,8 @@ import {
 import { IMPACT_LEAD_IN_S } from "@/pages/puttingPlayback";
 
 type Vec3 = [number, number, number];
+const close = (got: number[], want: number[]) =>
+  want.forEach((w, i) => expect(got[i]).toBeCloseTo(w, 9));
 
 describe("putting camera presets pinned to the desktop tile (#14474)", () => {
   it("offers the desktop views and phase names", () => {
@@ -31,7 +33,7 @@ describe("putting camera presets pinned to the desktop tile (#14474)", () => {
     for (const preset of CAMERA_PRESETS) {
       const pose = cameraPose(scene, preset);
       const want = sample.poses[preset];
-      pose.center.forEach((v, i) => expect(v).toBeCloseTo(want.center[i], 9));
+      close(pose.center, want.center);
       expect(pose.distance).toBeCloseTo(want.distance, 9);
       expect(pose.elevationDeg).toBeCloseTo(want.elevation_deg, 9);
       expect(pose.azimuthDeg).toBeCloseTo(want.azimuth_deg, 9);
@@ -45,10 +47,7 @@ describe("putting camera presets pinned to the desktop tile (#14474)", () => {
       elevationDeg: 90,
       azimuthDeg: 0,
     };
-    const eye = cameraPosition(pose);
-    expect(eye[0]).toBeCloseTo(1, 9);
-    expect(eye[1]).toBeCloseTo(2, 9);
-    expect(eye[2]).toBeCloseTo(3, 9);
+    close(cameraPosition(pose), [1, 2, 3]);
   });
 
   it("jumps to each core phase mark after the impact lead-in", () => {
@@ -64,21 +63,16 @@ describe("putting camera presets pinned to the desktop tile (#14474)", () => {
 
   it.each(golden.tiles)("frames the putt on the desktop's tile", (tile) => {
     const scene = puttTile(tile.distance_m, 0);
-    expect(scene.greenSize[0]).toBeCloseTo(tile.green_size[0], 9);
-    expect(scene.greenSize[1]).toBeCloseTo(tile.green_size[1], 9);
-    expect(scene.start[0]).toBeCloseTo(tile.start_xy[0], 9);
-    expect(scene.start[1]).toBeCloseTo(tile.start_xy[1], 9);
-    expect(scene.cup[0]).toBeCloseTo(tile.cup_xy[0], 9);
-    expect(scene.cup[1]).toBeCloseTo(tile.cup_xy[1], 9);
+    close(scene.greenSize, tile.green_size);
+    close(scene.start, tile.start_xy);
+    close(scene.cup, tile.cup_xy);
   });
 
   it("turns the tile's views onto the putt's line", () => {
     const along = scenePose(3, 0, 0, "face_on");
     const turned = scenePose(0, 3, 0, "face_on");
     // A putt along +y is the +x putt turned 90° about the ball.
-    expect(turned.eye[0]).toBeCloseTo(-along.eye[1], 9);
-    expect(turned.eye[1]).toBeCloseTo(along.eye[0], 9);
-    expect(turned.eye[2]).toBeCloseTo(along.eye[2], 9);
+    close(turned.eye, [-along.eye[1], along.eye[0], along.eye[2]]);
     expect(along.target).toEqual([0, 0, 0]);
   });
 });
