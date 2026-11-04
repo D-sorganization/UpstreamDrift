@@ -66,6 +66,10 @@ const response: Putt3DSimulationResponse = {
   total_distance_m: 1,
   duration_s: 1,
   skid_distance_m: 0.1,
+  phases: [
+    { mode: "slide", t_s: 0, index: 0 },
+    { mode: "rest", t_s: 1, index: 1 },
+  ],
 };
 
 describe("PuttingGreenPage 3D workflow", () => {
@@ -169,5 +173,20 @@ describe("PuttingGreenPage 3D workflow", () => {
         head_moi_kg_m2: preset.moi_kg_m2,
       }),
     );
+  });
+
+  it("jumps to the core phase marks and picks a camera view (#14474)", async () => {
+    usePuttingStore.getState().setResult(response);
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <PuttingGreenPage />
+      </QueryClientProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Rest 1.00 s" }));
+    expect(usePuttingStore.getState().playbackTimeS).toBeCloseTo(1.18, 9);
+    fireEvent.change(screen.getByLabelText("Camera view"), {
+      target: { value: "face_on" },
+    });
+    expect(usePuttingStore.getState().cameraView).toBe("face_on");
   });
 });
