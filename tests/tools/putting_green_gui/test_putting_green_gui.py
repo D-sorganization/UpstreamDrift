@@ -386,3 +386,52 @@ def test_putting_widget_imperial_metrics_formatting(widget: PuttingGreenWidget) 
     text = widget._results_text.toPlainText()
     assert "ft (" in text
     assert "mph (" in text
+
+
+# ---------------------------------------------------------------------------
+# Strike location, putter balance and impact readout (#14461)
+# ---------------------------------------------------------------------------
+
+
+def test_strike_and_balance_controls_reach_the_config(
+    widget: PuttingGreenWidget,
+) -> None:
+    assert widget._strike_spin.value() == pytest.approx(0.0)
+    assert widget._strike_spin.minimum() == pytest.approx(-40.0)
+    assert widget._strike_spin.maximum() == pytest.approx(40.0)
+    assert widget._balance_combo.currentData() is None
+    assert widget._balance_combo.count() == 5
+    widget._strike_spin.setValue(12.0)
+    widget._balance_combo.setCurrentIndex(widget._balance_combo.findData("toe_hang"))
+    config = widget._current_config()
+    assert config.impact_toe_m == pytest.approx(0.012)
+    assert config.balance_type == "toe_hang"
+
+
+def test_strike_offset_converts_with_the_unit_system(
+    widget: PuttingGreenWidget,
+) -> None:
+    widget._strike_spin.setValue(-12.7)
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert widget._strike_spin.suffix() == " in"
+    assert widget._strike_spin.value() == pytest.approx(-0.5)
+    assert widget._current_config().impact_toe_m == pytest.approx(-0.0127)
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert widget._strike_spin.value() == pytest.approx(-12.7)
+
+
+@pytest.mark.parametrize(
+    ("system", "skid_unit"), [(UnitSystem.METRIC, " cm"), (UnitSystem.IMPERIAL, " in")]
+)
+def test_metrics_show_the_impact_in_display_units(
+    widget: PuttingGreenWidget, system: UnitSystem, skid_unit: str
+) -> None:
+    widget.set_unit_system(system)
+    widget._strike_spin.setValue(widget._strike_spin.maximum() / 2)
+    widget._run_simulation()
+    text = widget._results_text.toPlainText()
+    impact = widget._scene.impact
+    for label in ("Strike:", "Launch angle:", "Spin:", "Face twist:", "Energy loss:"):
+        assert label in text
+    assert f"{impact.launch_angle_deg:.1f}°" in text
+    assert "toe" in text and skid_unit in text and "rpm backspin" in text

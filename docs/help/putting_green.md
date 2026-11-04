@@ -30,13 +30,15 @@ with a message that names the missing module. The 3D view needs the optional
 
 ## Inputs
 
-| Control      | Unit | Range accepted | Default |
-| ------------ | ---- | -------------- | ------- |
-| Putter Speed | m/s  | 0.5 to 8.0     | 2.5     |
-| Aim Angle    | deg  | -45 to 45      | 0       |
-| Cup Distance | ft   | 1 to 30        | 10      |
-| Stimpmeter   | ft   | 6.0 to 14.0    | 10.0    |
-| Cross Slope  | deg  | 0 to 5         | 1.0     |
+| Control      | Unit | Range accepted      | Default |
+| ------------ | ---- | ------------------- | ------- |
+| Putter Speed | m/s  | 0.5 to 8.0          | 2.5     |
+| Aim Angle    | deg  | -45 to 45           | 0       |
+| Cup Distance | ft   | 1 to 30             | 10      |
+| Stimpmeter   | ft   | 6.0 to 14.0         | 10.0    |
+| Cross Slope  | deg  | 0 to 5              | 1.0     |
+| Strike       | mm   | -40 to 40           | 0       |
+| Balance      | -    | Typical or a preset | Typical |
 
 - The **Units** selector switches the display between Metric (m, m/s) and
   Imperial (ft, mph). It converts the speed and distance controls and the
@@ -46,6 +48,10 @@ with a message that names the missing module. The 3D view needs the optional
 - Every control is range-checked before the engine runs; an out-of-range or
   non-finite value raises rather than being silently clamped
   (`_validate` in `src/tools/putting_green_gui/_scene_builder.py`).
+- Strike is the impact point from the face centre, heel negative and toe
+  positive, shown in inches in imperial. Balance picks a shared putter preset
+  (toe-hang, face-balanced, zero-torque, counterbalanced) that sets head
+  mass, MOI and hosel position (`putting_dynamics.BALANCE_PRESETS`).
 - Presets stamp speed and distance pairs only: Short (1.5 m/s, 5 ft),
   Medium (2.5 m/s, 15 ft), Long (4.0 m/s, 30 ft).
 - Not exposed on this tile, but fixed: the shared solver's RK4 at a 0.002 s
@@ -65,6 +71,11 @@ with a message that names the missing module. The 3D view needs the optional
 - Launch speed: m/s, taken from the first integrated velocity.
 - **Roll model name**, printed verbatim in the metrics panel. Read this before
   you compare any number above with anything.
+- Impact: the strike offset, launch angle, launch spin, skid distance, face
+  twist rate (positive opens the face), impact energy loss and putter
+  slowdown, all from the shared `strike()` collision report. An off-centre
+  strike lowers the effective head mass, so the ball leaves slower and the
+  face twists about the shaft.
 - A contour-shaded green mesh, an animated ball, a flagstick, the aim line, and
   a ball track coloured by roll mode: amber while skidding, green in pure roll,
   grey once stopped.

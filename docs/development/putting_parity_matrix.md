@@ -9,10 +9,10 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Selectable Units | (a) | missing (#14457) | partial (#14457) | missing (#14458) | missing (#14458) | missing (#14457) |
 | Variance and Noise Channels | (b) | present | present | partial (#14460) | partial (#14460) | present |
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | partial (#14460) | partial (#14460) | present |
-| Impact and Strike Model (Skid to Roll) | (c) | present | partial (#14461) | present | present | partial (#14461) |
-| Toe/Heel Strike Location | (c) | present | missing (#14461) | present | present | partial (#14461) |
+| Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | partial (#14461) |
+| Toe/Heel Strike Location | (c) | present | present | present | present | partial (#14461) |
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | missing (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
-| Putter Balance Type (CG Offset, MOI) | (c) | present | missing (#14461) | partial (#14462) | partial (#14462) | present |
+| Putter Balance Type (CG Offset, MOI) | (c) | present | present | partial (#14462) | partial (#14462) | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | partial (#14463) | partial (#14463) | partial (#14464) | partial (#14464) | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | partial (#14465) | missing (#14465) | partial (#14466) | partial (#14466) | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | missing (#14467) | missing (#14468) | missing (#14468) | partial (#14467) |
@@ -44,13 +44,13 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 
 **Impact and Strike Model (Skid to Roll)**
 - Core/API: present. `src/shared/python/putting_dynamics/collision.py`, `src/shared/python/putting_dynamics/solver.py`, `src/api/routes/putting_green.py`. strike() plus skid-to-roll; /simulate-3d returns the collision block and skid distance.
-- PyQt6: partial (#14461). `src/tools/putting_green_gui/gui.py`. Runs simulate_strike but shows only launch speed and track colours; no collision readout.
+- PyQt6: present. `src/tools/putting_green_gui/gui.py`, `src/tools/putting_green_gui/_scene_builder.py`. Impact block: launch angle, spin, skid distance, face twist, energy loss and putter slowdown from the strike() collision report.
 - React: present. `ui/src/pages/PuttingGreen.tsx`. Impact panel: launch speed/angle, putter speed before/after, contact proxy, face twist, energy loss, skid distance.
 - Studio: partial (#14461). `src/apps/putting_studio/js/putting_physics.js`. Skid ends at a fixed distance; loft and launch not modelled.
 
 **Toe/Heel Strike Location**
 - Core/API: present. `src/shared/python/putting_dynamics/collision.py`, `src/shared/python/putting_analytics/skill_roll_model.py`, `src/api/routes/putting_green.py`. strike(impact_toe_m) and /simulate-3d accept it; strike_toe_sd_mm scatter costs pace via off_centre_speed_retention in /variance-study (strike factor) and /simulated-curve.
-- PyQt6: missing (#14461). `src/tools/putting_green_gui/_scene_builder.py`. build_putt_scene never passes impact_toe_m.
+- PyQt6: present. `src/tools/putting_green_gui/gui.py`, `src/tools/putting_green_gui/_scene_builder.py`. Heel/toe Strike spin box (mm or in, -40 to 40 mm) passed to simulate_strike.
 - React: present. `ui/src/pages/PuttingGreen.tsx`. Impact Toe Offset slider.
 - Studio: partial (#14461). `src/apps/putting_studio/index.html`, `src/apps/putting_studio/js/controls_c.js`. Slider is toe-only (0-15 mm); no heel strikes.
 
@@ -62,7 +62,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 
 **Putter Balance Type (CG Offset, MOI)**
 - Core/API: present. `src/shared/python/putting_dynamics/putter_presets.py`, `src/api/routes/putting_green.py`. Named balance presets (toe-hang, face-balanced, zero-torque, counterbalanced) over PutterState; GET /putter-presets and /simulate-3d balance_type.
-- PyQt6: missing (#14461). `src/tools/putting_green_gui/_scene_builder.py`. Uses PutterState.typical only.
+- PyQt6: present. `src/tools/putting_green_gui/gui.py`, `src/tools/putting_green_gui/_scene_builder.py`. Balance selector: Typical or a shared BALANCE_PRESETS preset.
 - React: partial (#14462). `ui/src/pages/PuttingGreen.tsx`. Hosel widget; mass and MOI sent without controls; no balance-type selector.
 - Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/controls_c.js`. Four putter types (PUTTER_SPECS); per-type face SD is an assumed input.
 

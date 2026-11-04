@@ -25,7 +25,9 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.shared.python.putting_dynamics import (
+    BALANCE_PRESETS,
     HOLE_RADIUS_M,
+    CollisionReport,
     FrictionField,
     FrictionParams,
     HeightField,
@@ -34,6 +36,7 @@ from src.shared.python.putting_dynamics import (
     USGA_STIMP_ROLL_MODEL,
     PuttResult,
     SurfaceSpec,
+    balance_preset,
     simulate_strike,
     stimp_to_rolling_mu,
 )
@@ -60,6 +63,8 @@ AIM_RANGE_DEG = (-45.0, 45.0)
 DISTANCE_RANGE_M = (1.0 * _FT_TO_M, 30.0 * _FT_TO_M)
 STIMP_RANGE = (6.0, 14.0)
 SLOPE_RANGE_DEG = (0.0, 5.0)
+#: Heel (-) to toe (+) strike offset from the face centre (#14461).
+IMPACT_TOE_RANGE_M = (-0.04, 0.04)
 
 
 @dataclass(frozen=True)
@@ -83,6 +88,10 @@ class PuttConfig:
     integrator: str = "rk4"
     grid_resolution: int = 48
     timestep_s: float = 0.002
+    #: Strike offset toe-ward of the head CG; negative is a heel strike.
+    impact_toe_m: float = 0.0
+    #: A :data:`BALANCE_PRESETS` key, or ``None`` for the typical head.
+    balance_type: str | None = None
 
 
 @dataclass(frozen=True)
@@ -113,6 +122,11 @@ class PuttScene:
     #: Roll model that produced this scene (ADR-0045 F1); scenes from
     #: different models must never be compared without it.
     roll_model: str
+    #: The putter-ball impact (#14461); ``None`` on scenes read from files
+    #: written before it was recorded.
+    impact: CollisionReport | None = None
+    skid_distance_m: float | None = None
+    impact_toe_m: float = 0.0
 
 
 def _validate(config: PuttConfig) -> None:
@@ -122,12 +136,18 @@ def _validate(config: PuttConfig) -> None:
         ("cup_distance_m", config.cup_distance_m, DISTANCE_RANGE_M),
         ("stimp", config.stimp, STIMP_RANGE),
         ("slope_deg", config.slope_deg, SLOPE_RANGE_DEG),
+        ("impact_toe_m", config.impact_toe_m, IMPACT_TOE_RANGE_M),
     )
     for name, value, (lo, hi) in checks:
         if not np.isfinite(value):
             raise ValueError(f"{name} must be finite; got {value!r}")
         if not (lo <= value <= hi):
             raise ValueError(f"{name} must be within [{lo}, {hi}]; got {value}")
+    if config.balance_type is not None and config.balance_type not in BALANCE_PRESETS:
+        raise ValueError(
+            f"balance_type must be one of {sorted(BALANCE_PRESETS)}; "
+            f"got {config.balance_type!r}"
+        )
     if config.grid_resolution < 2:
         raise ValueError(f"grid_resolution must be >= 2; got {config.grid_resolution}")
     if not (0.0 < config.timestep_s <= 0.05):
@@ -233,6 +253,13 @@ def _compute_scene_lines(
     return start_xyz, cup_xyz, aim_line_xyz, target_line_xyz
 
 
+def _putter(config: PuttConfig) -> PutterState:
+    speed = config.putter_speed_ms
+    if config.balance_type is None:
+        return PutterState.typical(speed)
+    return balance_preset(config.balance_type).putter(speed)
+
+
 def build_putt_scene(config: PuttConfig) -> PuttScene:
     """Strike and roll the ball on the shared putting core and package a scene.
 
@@ -263,7 +290,7 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
 
     aim_rad = math.radians(config.aim_deg)
     direction = np.array([math.cos(aim_rad), math.sin(aim_rad)])
-    putter = PutterState.typical(config.putter_speed_ms)
+    putter = _putter(config)
     ball_xy = np.array([ball_x, mid_y])
     result = simulate_strike(
         putter,
@@ -273,6 +300,7 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         start_x_m=ball_x,
         start_y_m=mid_y,
         heading_rad=aim_rad,
+        impact_toe_m=config.impact_toe_m,
     )
 
     trajectory_xyz, roll_modes = _compute_scene_trajectory(result, height_field)
@@ -305,4 +333,7 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         peak_break_m=_perpendicular_break(positions, ball_xy, cup_xy),
         launch_speed_ms=launch_speed,
         roll_model=USGA_STIMP_ROLL_MODEL,
+        impact=result.collision,
+        skid_distance_m=float(result.skid_distance_m),
+        impact_toe_m=config.impact_toe_m,
     )
