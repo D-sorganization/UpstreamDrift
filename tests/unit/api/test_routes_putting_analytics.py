@@ -28,6 +28,7 @@ from src.shared.python.putting_analytics import (  # noqa: E402
     service,
     service_curve,
     service_dispersion,
+    service_sg,
     service_variance,
 )
 
@@ -120,6 +121,13 @@ DISPERSION_BODY: dict[str, Any] = {
     "seed": 2,
 }
 SPREAD_BODY: dict[str, Any] = {**DISPERSION_BODY, "distances_ft": [3.0, 12.0]}
+SG_BODY: dict[str, Any] = {
+    **SPREAD_BODY,
+    "paces_ft": [1.5],
+    "n": 12,
+    "holed": False,
+    "leave_ft": 2.0,
+}
 
 
 def test_variance_study_matches_the_shared_service(client: TestClient) -> None:
@@ -146,6 +154,12 @@ def test_make_spread_matches_the_shared_service(client: TestClient) -> None:
     assert response.json() == service_dispersion.make_spread_study(SPREAD_BODY)
 
 
+def test_strokes_gained_matches_the_shared_service(client: TestClient) -> None:
+    response = client.post(f"{PREFIX}/strokes-gained", json=SG_BODY)
+    assert response.status_code == 200, response.text
+    assert response.json() == service_sg.sg_study(SG_BODY)
+
+
 @pytest.mark.parametrize(
     ("path", "body", "fragment"),
     [
@@ -158,6 +172,7 @@ def test_make_spread_matches_the_shared_service(client: TestClient) -> None:
         ("simulated-curve", {**CURVE_BODY, "n": 1}, "'n'"),
         ("dispersion", {**DISPERSION_BODY, "n": 5000}, "'n'"),
         ("make-spread", {**SPREAD_BODY, "stimp": 40.0}, "stimp"),
+        ("strokes-gained", {**SG_BODY, "holed": "no"}, "holed"),
     ],
 )
 def test_service_rejections_are_400s(
@@ -184,6 +199,8 @@ def test_limits_report_the_service_caps(client: TestClient) -> None:
     assert limits["variance_factors"] == list(service_variance.MODELLED_FACTORS)
     assert limits["max_variance_rollouts"] == service_variance.MAX_VARIANCE_ROLLOUTS
     assert limits["max_dispersion_n"] == service_dispersion.MAX_DISPERSION_N
+    assert limits["max_sg_n"] == service_sg.MAX_SG_N
+    assert limits["default_sg_paces_ft"] == list(service_sg.DEFAULT_SG_PACES_FT)
     assert limits["max_curve_rollouts"] == service_curve.MAX_CURVE_ROLLOUTS
     assert limits["default_curve_distances_ft"] == list(
         service_curve.DEFAULT_CURVE_GRID_FT
@@ -199,6 +216,7 @@ def test_route_import_does_not_load_the_roll_model() -> None:
         "src.shared.python.putting_analytics.service_variance",
         "src.shared.python.putting_analytics.service_curve",
         "src.shared.python.putting_analytics.service_dispersion",
+        "src.shared.python.putting_analytics.service_sg",
     )
     saved = {name: sys.modules.pop(name, None) for name in names}
     try:

@@ -79,7 +79,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: partial (#14465). `src/apps/putting_studio/js/controls_c.js`. Aim-only grid search from one noise-free putt.
 
 **Player-Specific Bellman Strokes Gained**
-- Core/API: present. `src/shared/python/putting_analytics/expected_putts.py`, `src/shared/python/putting_analytics/optimize.py`, `src/api/routes/putting_analytics.py`. Bellman solve; /optimize (sg), /library-study, /variance-study, /simulated-curve.
+- Core/API: present. `src/shared/python/putting_analytics/service_sg.py`, `src/shared/python/putting_analytics/optimize.py`, `src/api/routes/putting_analytics.py`. Player Bellman E(d) on the dialled green and one putt's SG on /strokes-gained; also /optimize (sg), /library-study, /variance-study, /simulated-curve.
 - PyQt6: missing (#14467). `src/tools/putting_analytics_gui/gui.py`. Nothing in the simulator; the analytics tool has an sg objective.
 - React: missing (#14468). `ui/src/pages/PuttingAnalytics.tsx`. Nothing on the simulator page; the analytics page has an sg objective.
 - Studio: partial (#14467). `src/apps/putting_studio/js/green3d.js`, `src/apps/putting_studio/js/charts2d.js`. Bellman formula with a hand-tuned comeback fit, not a solved recursion.
