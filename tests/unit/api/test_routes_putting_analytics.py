@@ -27,6 +27,7 @@ from src.api.routes.putting_analytics import router  # noqa: E402
 from src.shared.python.putting_analytics import (  # noqa: E402
     service,
     service_curve,
+    service_dispersion,
     service_variance,
 )
 
@@ -110,6 +111,15 @@ VARIANCE_BODY: dict[str, Any] = {
     "seed": 2,
 }
 CURVE_BODY: dict[str, Any] = {"distances_ft": [3.0, 10.0], "n": 60, "seed": 2}
+DISPERSION_BODY: dict[str, Any] = {
+    "distance_ft": 8.0,
+    "grade_pct": 1.5,
+    "aspect_deg": 90.0,
+    "stimp": 11.0,
+    "n": 30,
+    "seed": 2,
+}
+SPREAD_BODY: dict[str, Any] = {**DISPERSION_BODY, "distances_ft": [3.0, 12.0]}
 
 
 def test_variance_study_matches_the_shared_service(client: TestClient) -> None:
@@ -124,6 +134,18 @@ def test_simulated_curve_matches_the_shared_service(client: TestClient) -> None:
     assert response.json() == service_curve.curve_study(CURVE_BODY)
 
 
+def test_dispersion_matches_the_shared_service(client: TestClient) -> None:
+    response = client.post(f"{PREFIX}/dispersion", json=DISPERSION_BODY)
+    assert response.status_code == 200, response.text
+    assert response.json() == service_dispersion.dispersion_study(DISPERSION_BODY)
+
+
+def test_make_spread_matches_the_shared_service(client: TestClient) -> None:
+    response = client.post(f"{PREFIX}/make-spread", json=SPREAD_BODY)
+    assert response.status_code == 200, response.text
+    assert response.json() == service_dispersion.make_spread_study(SPREAD_BODY)
+
+
 @pytest.mark.parametrize(
     ("path", "body", "fragment"),
     [
@@ -134,6 +156,8 @@ def test_simulated_curve_matches_the_shared_service(client: TestClient) -> None:
         ("library-study", _study(), "classes"),
         ("variance-study", {**VARIANCE_BODY, "factors": ["strike"]}, "factors"),
         ("simulated-curve", {**CURVE_BODY, "n": 1}, "'n'"),
+        ("dispersion", {**DISPERSION_BODY, "n": 5000}, "'n'"),
+        ("make-spread", {**SPREAD_BODY, "stimp": 40.0}, "stimp"),
     ],
 )
 def test_service_rejections_are_400s(
@@ -159,6 +183,7 @@ def test_limits_report_the_service_caps(client: TestClient) -> None:
     assert set(limits["objectives"]) == {"sg", "must_make"}
     assert limits["variance_factors"] == list(service_variance.MODELLED_FACTORS)
     assert limits["max_variance_rollouts"] == service_variance.MAX_VARIANCE_ROLLOUTS
+    assert limits["max_dispersion_n"] == service_dispersion.MAX_DISPERSION_N
     assert limits["max_curve_rollouts"] == service_curve.MAX_CURVE_ROLLOUTS
     assert limits["default_curve_distances_ft"] == list(
         service_curve.DEFAULT_CURVE_GRID_FT
@@ -173,6 +198,7 @@ def test_route_import_does_not_load_the_roll_model() -> None:
         "src.shared.python.putting_analytics.roll_model",
         "src.shared.python.putting_analytics.service_variance",
         "src.shared.python.putting_analytics.service_curve",
+        "src.shared.python.putting_analytics.service_dispersion",
     )
     saved = {name: sys.modules.pop(name, None) for name in names}
     try:

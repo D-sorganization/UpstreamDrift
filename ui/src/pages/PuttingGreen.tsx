@@ -11,13 +11,19 @@ import { simulatePutt3D } from "@/api/puttingClient";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
 import { PuttingScene3D } from "@/components/visualization/PuttingScene3D";
 import { usePuttingStore } from "@/stores/usePuttingStore";
+import {
+  UNIT_SYSTEMS,
+  formatQuantity,
+  fromDisplay,
+  toDisplay,
+  type Quantity,
+  type UnitSystem,
+} from "@/utils/units";
 import { IMPACT_LEAD_IN_S, sampleAtPlaybackTime } from "./puttingPlayback";
 
 export type PuttResult = PuttSimulationResponse;
 export type GreenReading = GreenReadingResponse;
 export type ScatterResult = ScatterAnalysisResponse;
-
-const METERS_PER_YARD = 0.9144;
 
 interface RangeControlProps {
   label: string;
@@ -66,6 +72,69 @@ function RangeControl({
     </label>
   );
 }
+
+/** [min, max, step] of a slider, in display units for each system. */
+type DisplayRange = Record<UnitSystem, readonly [number, number, number]>;
+
+interface UnitRangeControlProps {
+  label: string;
+  valueSi: number;
+  quantity: Quantity;
+  range: DisplayRange;
+  decimals: Record<UnitSystem, number>;
+  onChangeSi: (value: number) => void;
+}
+
+function UnitRangeControl({
+  label,
+  valueSi,
+  quantity,
+  range,
+  decimals,
+  onChangeSi,
+}: UnitRangeControlProps) {
+  const system = usePuttingStore((state) => state.unitSystem);
+  const [min, max, step] = range[system];
+  return (
+    <RangeControl
+      label={label}
+      value={toDisplay(valueSi, quantity, system)}
+      displayValue={formatQuantity(valueSi, quantity, system, decimals[system])}
+      min={min}
+      max={max}
+      step={step}
+      onChange={(value) => onChangeSi(fromDisplay(value, quantity, system))}
+    />
+  );
+}
+
+function UnitSystemSelect() {
+  const system = usePuttingStore((state) => state.unitSystem);
+  const setUnitSystem = usePuttingStore((state) => state.setUnitSystem);
+  return (
+    <label className="mt-3 block text-xs">
+      Units
+      <select
+        aria-label="Units"
+        value={system}
+        onChange={(event) => setUnitSystem(event.target.value as UnitSystem)}
+        className="ml-2 rounded border px-2 py-1"
+        style={{
+          backgroundColor: "var(--sidekick-color-input)",
+          borderColor: "var(--sidekick-color-border)",
+        }}
+      >
+        {UNIT_SYSTEMS.map((option) => (
+          <option key={option} value={option}>
+            {option === "metric" ? "Metric (m, m/s)" : "Imperial (ft, mph)"}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+const SMALL_LENGTH_DECIMALS = { metric: 0, imperial: 2 } as const;
 
 function Section({
   title,
@@ -126,23 +195,21 @@ function HoselPositionControl() {
         <span className="absolute bottom-1 right-2 text-xs">Toe</span>
         <span className="absolute left-1 top-1 text-xs">Forward</span>
       </div>
-      <RangeControl
+      <UnitRangeControl
         label="Hosel Heel to Toe"
-        value={parameters.hosel_toe_m}
-        displayValue={`${(parameters.hosel_toe_m * 1000).toFixed(0)} mm`}
-        min={-0.08}
-        max={0.08}
-        step={0.001}
-        onChange={(hosel_toe_m) => updateParameters({ hosel_toe_m })}
+        valueSi={parameters.hosel_toe_m}
+        quantity="smallLength"
+        range={{ metric: [-80, 80, 1], imperial: [-3.15, 3.15, 0.05] }}
+        decimals={SMALL_LENGTH_DECIMALS}
+        onChangeSi={(hosel_toe_m) => updateParameters({ hosel_toe_m })}
       />
-      <RangeControl
+      <UnitRangeControl
         label="Hosel Back to Forward"
-        value={parameters.hosel_forward_m}
-        displayValue={`${(parameters.hosel_forward_m * 1000).toFixed(0)} mm`}
-        min={-0.05}
-        max={0.05}
-        step={0.001}
-        onChange={(hosel_forward_m) => updateParameters({ hosel_forward_m })}
+        valueSi={parameters.hosel_forward_m}
+        quantity="smallLength"
+        range={{ metric: [-50, 50, 1], imperial: [-2, 2, 0.05] }}
+        decimals={SMALL_LENGTH_DECIMALS}
+        onChangeSi={(hosel_forward_m) => updateParameters({ hosel_forward_m })}
       />
     </div>
   );
@@ -278,7 +345,9 @@ export function PuttingGreenPage() {
   const currentSample = result
     ? sampleAtPlaybackTime(result.samples, playbackTimeS)
     : null;
-  const distanceYards = parameters.hole_x_m / METERS_PER_YARD;
+  const unitSystem = usePuttingStore((state) => state.unitSystem);
+  const show = (si: number, quantity: Quantity, decimals: number) =>
+    formatQuantity(si, quantity, unitSystem, decimals);
 
   const leftPanel = (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
@@ -293,16 +362,16 @@ export function PuttingGreenPage() {
         >
           Surface-aware collision, skid, roll, and capture
         </p>
+        <UnitSystemSelect />
       </div>
       <Section title="Stroke and Target">
-        <RangeControl
+        <UnitRangeControl
           label="Putter Speed"
-          value={parameters.putter_speed_mps}
-          displayValue={`${parameters.putter_speed_mps.toFixed(2)} m/s`}
-          min={0.3}
-          max={4}
-          step={0.05}
-          onChange={(putter_speed_mps) =>
+          valueSi={parameters.putter_speed_mps}
+          quantity="speed"
+          range={{ metric: [0.3, 4, 0.05], imperial: [0.7, 9, 0.1] }}
+          decimals={{ metric: 2, imperial: 2 }}
+          onChangeSi={(putter_speed_mps) =>
             updateParameters({ putter_speed_mps })
           }
         />
@@ -315,25 +384,21 @@ export function PuttingGreenPage() {
           step={0.5}
           onChange={(loft_deg) => updateParameters({ loft_deg })}
         />
-        <RangeControl
+        <UnitRangeControl
           label="Hole Distance"
-          value={distanceYards}
-          displayValue={`${distanceYards.toFixed(1)} yd`}
-          min={1}
-          max={9.5}
-          step={0.25}
-          onChange={(yards) =>
-            updateParameters({ hole_x_m: yards * METERS_PER_YARD })
-          }
+          valueSi={parameters.hole_x_m}
+          quantity="distance"
+          range={{ metric: [1, 8.7, 0.05], imperial: [3, 28.5, 0.5] }}
+          decimals={{ metric: 2, imperial: 1 }}
+          onChangeSi={(hole_x_m) => updateParameters({ hole_x_m })}
         />
-        <RangeControl
+        <UnitRangeControl
           label="Impact Toe Offset"
-          value={parameters.impact_toe_m}
-          displayValue={`${(parameters.impact_toe_m * 1000).toFixed(0)} mm`}
-          min={-0.06}
-          max={0.06}
-          step={0.001}
-          onChange={(impact_toe_m) => updateParameters({ impact_toe_m })}
+          valueSi={parameters.impact_toe_m}
+          quantity="smallLength"
+          range={{ metric: [-60, 60, 1], imperial: [-2.4, 2.4, 0.05] }}
+          decimals={SMALL_LENGTH_DECIMALS}
+          onChangeSi={(impact_toe_m) => updateParameters({ impact_toe_m })}
         />
       </Section>
       <Section title="Shaft Attachment">
@@ -378,14 +443,13 @@ export function PuttingGreenPage() {
           step={0.01}
           onChange={(grain_strength) => updateParameters({ grain_strength })}
         />
-        <RangeControl
+        <UnitRangeControl
           label="Bump Height"
-          value={parameters.bump_height_m}
-          displayValue={`${(parameters.bump_height_m * 1000).toFixed(1)} mm`}
-          min={0}
-          max={0.005}
-          step={0.00025}
-          onChange={(bump_height_m) => updateParameters({ bump_height_m })}
+          valueSi={parameters.bump_height_m}
+          quantity="smallLength"
+          range={{ metric: [0, 5, 0.25], imperial: [0, 0.2, 0.01] }}
+          decimals={{ metric: 1, imperial: 2 }}
+          onChangeSi={(bump_height_m) => updateParameters({ bump_height_m })}
         />
         <RangeControl
           label="Friction Variation"
@@ -462,10 +526,10 @@ export function PuttingGreenPage() {
         <dl className="space-y-3 text-xs">
           {[
             ["Motion Mode", currentSample.mode],
-            ["Ball Speed", `${currentSample.speed_mps.toFixed(3)} m/s`],
+            ["Ball Speed", show(currentSample.speed_mps, "speed", 3)],
             [
               "Ball Launch Speed",
-              `${result.collision.ball_speed_mps.toFixed(3)} m/s`,
+              show(result.collision.ball_speed_mps, "speed", 3),
             ],
             [
               "Launch Angle",
@@ -473,11 +537,11 @@ export function PuttingGreenPage() {
             ],
             [
               "Putter Before Impact",
-              `${result.collision.putter_speed_before_mps.toFixed(3)} m/s`,
+              show(result.collision.putter_speed_before_mps, "speed", 3),
             ],
             [
               "Putter After Impact",
-              `${result.collision.putter_speed_after_mps.toFixed(3)} m/s`,
+              show(result.collision.putter_speed_after_mps, "speed", 3),
             ],
             [
               "Contact Proxy",
@@ -491,14 +555,8 @@ export function PuttingGreenPage() {
               "Impact Energy Loss",
               `${result.collision.kinetic_energy_loss_j.toFixed(4)} J`,
             ],
-            [
-              "Skid Distance",
-              `${(result.skid_distance_m / METERS_PER_YARD).toFixed(2)} yd`,
-            ],
-            [
-              "Total Distance",
-              `${(result.total_distance_m / METERS_PER_YARD).toFixed(2)} yd`,
-            ],
+            ["Skid Distance", show(result.skid_distance_m, "distance", 2)],
+            ["Total Distance", show(result.total_distance_m, "distance", 2)],
             ["Outcome", result.holed ? "Holed" : "Stopped"],
             // ADR-0045 F1 (#9343): results from different roll models
             // must never be compared without the model name shown.

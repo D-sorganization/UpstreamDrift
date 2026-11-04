@@ -1289,6 +1289,10 @@
       "sha256": "74476c8a0d2bcc097b01454be63e2d91c6f963154f0a49bf82d791849c41da94",
       "bytes": 850
     },
+    "docs/research/proximal_distal_energy_transfer/data/wscg_model_selection.json": {
+      "sha256": "b92f1cc98c299a7fb97cf109915eb90c97da48cd88ba48412d0e4ce000734296",
+      "bytes": 2986
+    },
     "docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/base.csv": {
       "sha256": "cc80319575493f5868b8d1b9b5b5e6bc3edfbe12dc86d19e8326a88a0ff0832b",
       "bytes": 3675261
@@ -3220,6 +3224,10 @@
     "scripts/research/proximal_distal_energy/uncertainty_control.py": {
       "sha256": "443012e55b6cb1dd23bcd3595efbe68da07ae120735e8ee756085ac1f7e883e9",
       "bytes": 11292
+    },
+    "scripts/research/proximal_distal_energy/wscg_model_selection.py": {
+      "sha256": "23215051f55aff61a89a3a67256404ad83461a233a3c1c786fc574eb0f539c73",
+      "bytes": 11753
     },
     "src/shared/python/biomechanics/interaction_evidence.py": {
       "sha256": "2ccbc9e56f4c6dc6eb7c6f317f8efc60dca5cfb225f270be610c1768ed079aa3",

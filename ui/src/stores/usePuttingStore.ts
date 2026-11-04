@@ -4,6 +4,7 @@ import type {
   Putt3DSimulationRequest,
   Putt3DSimulationResponse,
 } from "@/api/generated/types";
+import { loadUnitSystem, saveUnitSystem, type UnitSystem } from "@/utils/units";
 
 export const DEFAULT_PUTT_3D_PARAMETERS: Putt3DSimulationRequest = {
   putter_speed_mps: 1.8,
@@ -33,11 +34,14 @@ interface PuttingState {
   playbackTimeS: number;
   playbackRate: number;
   playing: boolean;
+  /** Display units only; parameters and results stay SI (#14458). */
+  unitSystem: UnitSystem;
   updateParameters: (changes: Partial<Putt3DSimulationRequest>) => void;
   setResult: (result: Putt3DSimulationResponse) => void;
   setPlaybackTime: (timeS: number) => void;
   setPlaybackRate: (rate: number) => void;
   setPlaying: (playing: boolean) => void;
+  setUnitSystem: (system: UnitSystem) => void;
   reset: () => void;
 }
 
@@ -47,6 +51,7 @@ export const usePuttingStore = create<PuttingState>((set) => ({
   playbackTimeS: 0,
   playbackRate: 1,
   playing: false,
+  unitSystem: loadUnitSystem(),
   updateParameters: (changes) =>
     set((state) => ({
       parameters: { ...state.parameters, ...changes },
@@ -57,6 +62,10 @@ export const usePuttingStore = create<PuttingState>((set) => ({
   setPlaybackTime: (playbackTimeS) => set({ playbackTimeS }),
   setPlaybackRate: (playbackRate) => set({ playbackRate }),
   setPlaying: (playing) => set({ playing }),
+  setUnitSystem: (unitSystem) => {
+    saveUnitSystem(unitSystem);
+    set({ unitSystem });
+  },
   reset: () =>
     set({
       parameters: { ...DEFAULT_PUTT_3D_PARAMETERS },
