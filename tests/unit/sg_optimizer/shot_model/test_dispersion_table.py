@@ -1,0 +1,107 @@
+"""Dispersion tables: deterministic, hashed, convergent, regenerable (#14567)."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from src.shared.python.contracts import ContractViolationError
+from src.shared.python.sg_optimizer.shot_model.dispersion_table import (
+    DispersionTable,
+    build_table,
+    check_convergence,
+    standard_normals,
+)
+from src.shared.python.sg_optimizer.shot_model.skill_registry import get_skill_family
+
+pytestmark = pytest.mark.unit
+
+
+def _linear_sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
+    """Analytic stand-in: along = 2 * speed - headwind, lateral = 3 * face."""
+    along = 2.0 * impacts[:, 0] - wind[0]
+    lateral = 3.0 * impacts[:, 1] + wind[1]
+    return np.stack([along, lateral], axis=1)
+
+
+def _build(seed: int = 1, n: int = 4000, **kw):
+    return build_table(
+        get_skill_family("tour"),
+        _linear_sim,
+        skills=("driver", "mid_iron"),
+        n=n,
+        seed=seed,
+        **kw,
+    )
+
+
+def test_standard_normals_prefix_stable() -> None:
+    """CRN: the first n draws are identical whatever the total count."""
+    np.testing.assert_array_equal(
+        standard_normals(7, 100)[:40], standard_normals(7, 40)
+    )
+    assert not np.array_equal(standard_normals(7, 5), standard_normals(8, 5))
+
+
+def test_deterministic_per_seed_and_hash_in_provenance() -> None:
+    a, b, c = _build(seed=1), _build(seed=1), _build(seed=2)
+    assert a.table_hash == b.table_hash == a.provenance["table_hash"]
+    assert a.table_hash != c.table_hash
+    assert a == b
+
+
+def test_cell_statistics_match_analytic_moments() -> None:
+    t = _build()
+    cell = t.lookup("driver", "driver", "fairway", "calm", "flat")
+    spec = get_skill_family("tour").skills["driver"].distribution
+    assert cell.mean[0] == pytest.approx(2 * spec.mean[0], abs=0.3)
+    assert cell.sd[0] == pytest.approx(2 * spec.sd[0], rel=0.05)
+    assert cell.sd[1] == pytest.approx(3 * spec.sd[1], rel=0.05)
+    head = t.lookup("driver", "driver", "fairway", "head_5", "flat")
+    assert head.mean[0] == pytest.approx(cell.mean[0] - 5.0, abs=1e-6)
+
+
+def test_unknown_key_fails_closed() -> None:
+    with pytest.raises(ContractViolationError, match="no dispersion cell"):
+        _build().lookup("driver", "driver", "rough", "calm", "flat")
+
+
+def test_convergence_check_reports_stability() -> None:
+    fam = get_skill_family("tour")
+    big = check_convergence(fam, _linear_sim, "mid_iron", n=8000, seed=3)
+    small = check_convergence(fam, _linear_sim, "mid_iron", n=40, seed=3)
+    assert big.converged and big.max_rel_change < 0.02
+    assert small.max_rel_change > big.max_rel_change
+
+
+def test_runtime_report_present_and_not_hashed() -> None:
+    a, b = _build(), _build()
+    assert a.runtime["total_s"] >= 0.0 and a.runtime["cells"] == len(a.cells)
+    assert a.table_hash == b.table_hash  # wall-clock never enters the hash
+
+
+def test_json_round_trip_and_tamper_detection(tmp_path: Path) -> None:
+    t = _build(n=200)
+    p = tmp_path / "t.json"
+    t.to_json(p)
+    assert DispersionTable.from_json(p) == t
+    raw = json.loads(p.read_text(encoding="utf-8"))
+    raw["cells"][0]["mean"][0] += 1.0
+    p.write_text(json.dumps(raw), encoding="utf-8")
+    with pytest.raises(ContractViolationError, match="hash"):
+        DispersionTable.from_json(p)
+
+
+def test_lie_modifier_hook_enables_other_lies() -> None:
+    def shorter(impacts: np.ndarray, lie: str) -> np.ndarray:
+        out = impacts.copy()
+        out[:, 0] *= 0.9 if lie == "rough" else 1.0
+        return out
+
+    t = _build(lies=("fairway", "rough"), lie_modifier=shorter)
+    fw = t.lookup("driver", "driver", "fairway", "calm", "flat")
+    ro = t.lookup("driver", "driver", "rough", "calm", "flat")
+    assert ro.mean[0] < fw.mean[0]
