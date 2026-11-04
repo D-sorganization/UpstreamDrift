@@ -41,7 +41,7 @@
       "cluster": "c",
       "cells": {
         "core_api": "present | src/shared/python/putting_dynamics/collision.py, src/shared/python/putting_dynamics/solver.py, src/api/routes/putting_green.py | strike() plus skid-to-roll; /simulate-3d returns the collision block and skid distance.",
-        "pyqt6": "partial #14461 | src/tools/putting_green_gui/gui.py | Runs simulate_strike but shows only launch speed and track colours; no collision readout.",
+        "pyqt6": "present | src/tools/putting_green_gui/gui.py, src/tools/putting_green_gui/_scene_builder.py | Impact block: launch angle, spin, skid distance, face twist, energy loss and putter slowdown from the strike() collision report.",
         "react": "present | ui/src/pages/PuttingGreen.tsx | Impact panel: launch speed/angle, putter speed before/after, contact proxy, face twist, energy loss, skid distance.",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "partial #14461 | src/apps/putting_studio/js/putting_physics.js | Skid ends at a fixed distance; loft and launch not modelled."
@@ -52,7 +52,7 @@
       "cluster": "c",
       "cells": {
         "core_api": "present | src/shared/python/putting_dynamics/collision.py, src/shared/python/putting_analytics/skill_roll_model.py, src/api/routes/putting_green.py | strike(impact_toe_m) and /simulate-3d accept it; strike_toe_sd_mm scatter costs pace via off_centre_speed_retention in /variance-study (strike factor) and /simulated-curve.",
-        "pyqt6": "missing #14461 | src/tools/putting_green_gui/_scene_builder.py | build_putt_scene never passes impact_toe_m.",
+        "pyqt6": "present | src/tools/putting_green_gui/gui.py, src/tools/putting_green_gui/_scene_builder.py | Heel/toe Strike spin box (mm or in, -40 to 40 mm) passed to simulate_strike.",
         "react": "present | ui/src/pages/PuttingGreen.tsx | Impact Toe Offset slider.",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "partial #14461 | src/apps/putting_studio/index.html, src/apps/putting_studio/js/controls_c.js | Slider is toe-only (0-15 mm); no heel strikes."
@@ -74,7 +74,7 @@
       "cluster": "c",
       "cells": {
         "core_api": "present | src/shared/python/putting_dynamics/putter_presets.py, src/api/routes/putting_green.py | Named balance presets (toe-hang, face-balanced, zero-torque, counterbalanced) over PutterState; GET /putter-presets and /simulate-3d balance_type.",
-        "pyqt6": "missing #14461 | src/tools/putting_green_gui/_scene_builder.py | Uses PutterState.typical only.",
+        "pyqt6": "present | src/tools/putting_green_gui/gui.py, src/tools/putting_green_gui/_scene_builder.py | Balance selector: Typical or a shared BALANCE_PRESETS preset.",
         "react": "partial #14462 | ui/src/pages/PuttingGreen.tsx | Hosel widget; mass and MOI sent without controls; no balance-type selector.",
         "tauri": "partial #14462 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/state.js, src/apps/putting_studio/js/controls_c.js | Four putter types (PUTTER_SPECS); per-type face SD is an assumed input."

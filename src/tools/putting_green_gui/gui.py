@@ -14,6 +14,7 @@ this module is a thin Qt/OpenGL renderer that consumes a :class:`PuttScene`.
 from __future__ import annotations
 
 import logging
+import math
 from typing import Any
 
 from PyQt6.QtCore import Qt, QTimer
@@ -34,13 +35,14 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.launchers.help_menu import build_help_menu
 from src.shared.python.golf_viz import (
     disc_mesh,
     flagstick_lines,
     grid_surface_mesh,
     roll_mode_colors,
 )
-from src.launchers.help_menu import build_help_menu
+from src.shared.python.putting_dynamics import BALANCE_PRESETS
 from src.shared.python.theme.tool_stylesheet import primary_button_style
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.units import (
@@ -58,6 +60,7 @@ from src.shared.python.ui.units import (
 )
 from src.tools.putting_green_gui._batch_panel import BatchPanel
 from src.tools.putting_green_gui._scene_builder import (
+    IMPACT_TOE_RANGE_M,
     PuttConfig,
     PuttScene,
     build_putt_scene,
@@ -69,6 +72,8 @@ _M_TO_FT = 3.280839895
 _FT_TO_M = 1.0 / _M_TO_FT
 _M_TO_CM = 100.0
 _MS_TO_MPH = 2.236936
+_M_TO_IN = _M_TO_FT * 12.0
+_RAD_S_TO_RPM = 60.0 / (2.0 * math.pi)
 _PANEL_STYLE = """
 QWidget#puttControls { background-color: #1b2530; }
 QLabel { color: #d7e2ec; }
@@ -136,8 +141,10 @@ class PuttingGreenWidget(QWidget):
         old_dist_m = from_display_distance(
             self._distance_spin.value(), self._unit_system, unit="ft"
         )
+        old_toe_m = self._strike_toe_m()
         self._unit_system = system
         self._sync_units_combo()
+        self._set_strike_units(old_toe_m)
 
         self._speed_spin.setSuffix(speed_suffix(system))
         self._distance_spin.setSuffix(distance_suffix(system, unit="ft"))
@@ -250,6 +257,7 @@ class PuttingGreenWidget(QWidget):
         self._slope_spin = self._make_spin(0.0, 5.0, 1.0, "°")
         green_form.addRow("Cross Slope:", self._slope_spin)
         left_layout.addWidget(green_group)
+        left_layout.addWidget(self._build_strike_group())
 
         preset_group = QGroupBox("Presets")
         preset_layout = QHBoxLayout(preset_group)
@@ -275,6 +283,35 @@ class PuttingGreenWidget(QWidget):
 
         left_layout.addStretch()
         return left
+
+    def _build_strike_group(self) -> QGroupBox:
+        group = QGroupBox("Strike && Putter")
+        form = QFormLayout(group)
+        self._strike_spin = self._make_spin(0.0, 0.0, 0.0, "")
+        self._set_strike_units(0.0)
+        self._strike_spin.setToolTip("Impact point from the face centre: heel -, toe +")
+        form.addRow("Strike (heel−/toe+):", self._strike_spin)
+        self._balance_combo = QComboBox()
+        self._balance_combo.addItem("Typical", None)
+        for key, preset in BALANCE_PRESETS.items():
+            self._balance_combo.addItem(preset.name, key)
+        form.addRow("Balance:", self._balance_combo)
+        return group
+
+    def _set_strike_units(self, toe_m: float) -> None:
+        """Show the strike offset in mm (metric) or inches, keeping ``toe_m``."""
+        scale = 1000.0 if self._unit_system == UnitSystem.METRIC else _M_TO_IN
+        self._strike_spin.setSuffix(
+            " mm" if self._unit_system == UnitSystem.METRIC else " in"
+        )
+        self._strike_spin.setDecimals(1 if scale == 1000.0 else 2)
+        lo, hi = IMPACT_TOE_RANGE_M
+        self._strike_spin.setRange(lo * scale, hi * scale)
+        self._strike_spin.setValue(toe_m * scale)
+
+    def _strike_toe_m(self) -> float:
+        scale = 1000.0 if self._unit_system == UnitSystem.METRIC else _M_TO_IN
+        return self._strike_spin.value() / scale
 
     def _make_spin(
         self,
@@ -385,6 +422,8 @@ class PuttingGreenWidget(QWidget):
             ),
             stimp=self._stimp_spin.value(),
             slope_deg=self._slope_spin.value(),
+            impact_toe_m=self._strike_toe_m(),
+            balance_type=self._balance_combo.currentData(),
         )
 
     def _run_simulation(self) -> None:
@@ -517,6 +556,38 @@ def _format_metrics(
         f"{speed_line}"
         f"Roll model:    {scene.roll_model}\n"
         f"Track colour:  amber = skidding, green = pure roll, grey = stopped\n"
+        f"{_format_impact(scene, unit_system)}"
+    )
+
+
+def _format_impact(scene: PuttScene, unit_system: UnitSystem) -> str:
+    """The putter-ball impact block (#14461); empty for scenes without one."""
+    impact = scene.impact
+    if impact is None:
+        return ""
+    metric = unit_system == UnitSystem.METRIC
+    toe = scene.impact_toe_m
+    side = "toe" if toe > 0 else "heel"
+    if toe == 0.0:
+        strike = "centred"
+    elif metric:
+        strike = f"{abs(toe) * 1000:.1f} mm {side}"
+    else:
+        strike = f"{abs(toe) * _M_TO_IN:.2f} in {side}"
+    skid_m = scene.skid_distance_m or 0.0
+    skid = f"{skid_m * _M_TO_CM:.1f} cm" if metric else f"{skid_m * _M_TO_IN:.1f} in"
+    twist = math.degrees(impact.face_twist_rad_s)
+    rpm = impact.spin_rad_s * _RAD_S_TO_RPM
+    face = "opens" if twist > 0 else "closes" if twist < 0 else "square"
+    return (
+        f"\nImpact\n{'-' * 44}\n"
+        f"Strike:        {strike}\n"
+        f"Launch angle:  {impact.launch_angle_deg:.1f}°\n"
+        f"Spin:          {abs(rpm):.0f} rpm {'topspin' if rpm >= 0 else 'backspin'}\n"
+        f"Skid:          {skid}\n"
+        f"Face twist:    {twist:+.1f} °/s (face {face})\n"
+        f"Energy loss:   {impact.kinetic_energy_loss_j * 1000:.1f} mJ\n"
+        f"Putter slows:  {format_speed(impact.putter_dv_mps, unit_system, decimals=2)}\n"
     )
 
 

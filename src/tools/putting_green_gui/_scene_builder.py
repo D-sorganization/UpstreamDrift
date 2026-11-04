@@ -126,6 +126,7 @@ class PuttScene:
     #: written before it was recorded.
     impact: CollisionReport | None = None
     skid_distance_m: float | None = None
+    impact_toe_m: float = 0.0
 
 
 def _validate(config: PuttConfig) -> None:
@@ -334,4 +335,5 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         roll_model=USGA_STIMP_ROLL_MODEL,
         impact=result.collision,
         skid_distance_m=float(result.skid_distance_m),
+        impact_toe_m=config.impact_toe_m,
     )
