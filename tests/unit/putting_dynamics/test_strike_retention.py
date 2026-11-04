@@ -7,6 +7,7 @@ import pytest
 
 from src.shared.python.putting_dynamics import (
     PutterState,
+    effective_head_mass,
     off_centre_speed_retention,
     strike,
 )
@@ -40,3 +41,12 @@ def test_strikes_off_the_face_are_refused() -> None:
         off_centre_speed_retention(_SQUARE, np.array([0.0, 0.09]))
     with pytest.raises(ValueError):
         off_centre_speed_retention(_SQUARE, np.array([np.nan]))
+
+
+def test_a_centred_strike_keeps_the_exact_head_mass() -> None:
+    # 1 / (1 / 0.365) rounds above 0.365 and used to trip the m_eff <= M
+    # postcondition on a centred strike.
+    head = PutterState(
+        head_mass_kg=0.365, moi_kg_m2=4.9e-4, loft_deg=3.0, speed_mps=1.8
+    )
+    assert effective_head_mass(head, 0.0) == 0.365

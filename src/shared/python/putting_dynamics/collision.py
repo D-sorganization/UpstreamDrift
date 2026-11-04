@@ -150,8 +150,13 @@ def effective_head_mass(putter: PutterState, impact_toe_m: float) -> float:
 
 
 def _effective_mass(putter: PutterState, impact_toe_m: FloatOrArray) -> FloatOrArray:
-    """``1/m_eff = 1/M + d^2/I`` for a scalar or an array of offsets."""
-    return 1.0 / (1.0 / putter.head_mass_kg + impact_toe_m**2 / putter.moi_kg_m2)
+    """``1/m_eff = 1/M + d^2/I`` for a scalar or an array of offsets.
+
+    Written as ``M / (1 + M d^2 / I)`` so a centred strike returns ``M``
+    exactly (``1 / (1 / M)`` can round above ``M``, e.g. for 0.365 kg).
+    """
+    m = putter.head_mass_kg
+    return m / (1.0 + m * impact_toe_m**2 / putter.moi_kg_m2)
 
 
 def _reduced_mass(head_mass: FloatOrArray) -> FloatOrArray:
