@@ -3,14 +3,16 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Putt3DSimulationResponse } from "@/api/generated/types";
-import { simulatePutt3D } from "@/api/puttingClient";
+import { fetchPutterPresets, simulatePutt3D } from "@/api/puttingClient";
 import { usePuttingStore } from "@/stores/usePuttingStore";
+import golden from "@/utils/putterHead.golden.json";
 import { PuttingGreenPage } from "./PuttingGreen";
 
 vi.mock("@/api/puttingClient", () => ({
   simulatePutt3D: vi.fn(),
   runDispersion: vi.fn(),
   runMakeSpread: vi.fn(),
+  fetchPutterPresets: vi.fn(),
 }));
 
 vi.mock("@/components/visualization/PuttingScene3D", () => ({
@@ -69,6 +71,7 @@ describe("PuttingGreenPage 3D workflow", () => {
   beforeEach(() => {
     usePuttingStore.getState().reset();
     vi.mocked(simulatePutt3D).mockResolvedValue(response);
+    vi.mocked(fetchPutterPresets).mockResolvedValue({ presets: [] });
     vi.stubGlobal(
       "requestAnimationFrame",
       vi.fn(() => 1),
@@ -139,5 +142,31 @@ describe("PuttingGreenPage 3D workflow", () => {
     );
     expect(await screen.findByText("Total Distance")).toBeInTheDocument();
     expect(screen.getByText("3.28 ft")).toBeInTheDocument();
+  });
+
+  it("sends the chosen core balance preset to /simulate-3d (#14462)", async () => {
+    vi.mocked(fetchPutterPresets).mockResolvedValue({
+      presets: golden.presets,
+    });
+    const [preset] = golden.presets;
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <PuttingGreenPage />
+      </QueryClientProvider>,
+    );
+    await screen.findByRole("option", { name: preset.name });
+    fireEvent.change(screen.getByLabelText("Balance Type"), {
+      target: { value: preset.key },
+    });
+    expect(screen.getByLabelText("Hosel Heel to Toe")).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Simulate Putt" }));
+    await waitFor(() => expect(simulatePutt3D).toHaveBeenCalled());
+    expect(vi.mocked(simulatePutt3D).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({
+        balance_type: preset.key,
+        head_moi_kg_m2: preset.moi_kg_m2,
+      }),
+    );
   });
 });

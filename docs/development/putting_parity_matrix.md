@@ -12,7 +12,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | partial (#14461) |
 | Toe/Heel Strike Location | (c) | present | present | present | present | partial (#14461) |
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | missing (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
-| Putter Balance Type (CG Offset, MOI) | (c) | present | present | partial (#14462) | partial (#14462) | present |
+| Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | partial (#14464) | partial (#14464) | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | partial (#14466) | partial (#14466) | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | present | missing (#14468) | missing (#14468) | partial (#14467) |
@@ -63,7 +63,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 **Putter Balance Type (CG Offset, MOI)**
 - Core/API: present. `src/shared/python/putting_dynamics/putter_presets.py`, `src/api/routes/putting_green.py`. Named balance presets (toe-hang, face-balanced, zero-torque, counterbalanced) over PutterState; GET /putter-presets and /simulate-3d balance_type.
 - PyQt6: present. `src/tools/putting_green_gui/gui.py`, `src/tools/putting_green_gui/_scene_builder.py`. Balance selector: Typical or a shared BALANCE_PRESETS preset.
-- React: partial (#14462). `ui/src/pages/PuttingGreen.tsx`. Hosel widget; mass and MOI sent without controls; no balance-type selector.
+- React: present. `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/putting/PutterHeadControl.tsx`. Balance Type selector (Typical or a core /putter-presets head) with head mass and MOI inputs bounded by /simulate-3d; a preset locks mass, MOI and hosel to the core values.
 - Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/controls_c.js`. Four putter types (PUTTER_SPECS); per-type face SD is an assumed input.
 
 **Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets)**

@@ -75,8 +75,8 @@
       "cells": {
         "core_api": "present | src/shared/python/putting_dynamics/putter_presets.py, src/api/routes/putting_green.py | Named balance presets (toe-hang, face-balanced, zero-torque, counterbalanced) over PutterState; GET /putter-presets and /simulate-3d balance_type.",
         "pyqt6": "present | src/tools/putting_green_gui/gui.py, src/tools/putting_green_gui/_scene_builder.py | Balance selector: Typical or a shared BALANCE_PRESETS preset.",
-        "react": "partial #14462 | ui/src/pages/PuttingGreen.tsx | Hosel widget; mass and MOI sent without controls; no balance-type selector.",
-        "tauri": "partial #14462 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "react": "present | ui/src/pages/PuttingGreen.tsx, ui/src/components/putting/PutterHeadControl.tsx | Balance Type selector (Typical or a core /putter-presets head) with head mass and MOI inputs bounded by /simulate-3d; a preset locks mass, MOI and hosel to the core values.",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/state.js, src/apps/putting_studio/js/controls_c.js | Four putter types (PUTTER_SPECS); per-type face SD is an assumed input."
       }
     },

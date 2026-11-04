@@ -1,4 +1,5 @@
 import type {
+  BalancePresetsResponse,
   Putt3DSimulationRequest,
   Putt3DSimulationResponse,
 } from "./generated/types";
@@ -16,6 +17,13 @@ export function simulatePutt3D(
       method: "POST",
       body: JSON.stringify(request),
     },
+  );
+}
+
+/** The shared core's named putter heads (putter_presets.BALANCE_PRESETS). */
+export function fetchPutterPresets(): Promise<BalancePresetsResponse> {
+  return apiFetch<BalancePresetsResponse>(
+    "/api/tools/putting-green/putter-presets",
   );
 }
 
