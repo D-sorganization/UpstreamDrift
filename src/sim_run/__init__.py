@@ -3,6 +3,12 @@
 from __future__ import annotations
 
 from .cli import main as run_cli
+from .manifest import (
+    RunManifest,
+    RunManifestError,
+    export_run_manifest_schema,
+    validate_run_manifest,
+)
 from .mcp import SecurityPolicy, SimulationMcpServer, run_stdio_loop
 from .models import (
     Provenance,
@@ -42,6 +48,8 @@ __all__ = [
     "LinuxLimits",
     "Provenance",
     "ResultEnvelope",
+    "RunManifest",
+    "RunManifestError",
     "RunNotFoundError",
     "RunRecord",
     "RunRequest",
@@ -54,6 +62,7 @@ __all__ = [
     "SimulationWorkerPool",
     "ValidationStatus",
     "apply_linux_rlimits",
+    "export_run_manifest_schema",
     "export_schema",
     "export_schemas",
     "get_repo_sha",
@@ -64,4 +73,5 @@ __all__ = [
     "validate_numerical_integrity",
     "validate_provenance",
     "validate_result",
+    "validate_run_manifest",
 ]
