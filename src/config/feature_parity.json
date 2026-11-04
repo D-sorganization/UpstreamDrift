@@ -112,7 +112,8 @@
       "api": "src/api/routes/putting_green.py",
       "web": "ui/src/pages/PuttingGreen.tsx",
       "status": "parity",
-      "tiles": ["putting_green"]
+      "tiles": ["putting_green"],
+      "notes": "The web page has a Metric/Imperial units selector over the shared units.py convention; ui/src/utils/units.golden.json is checked from both sides (#14458)."
     },
     "tools.putting_analytics": {
       "title": "Putting analytics studies",
