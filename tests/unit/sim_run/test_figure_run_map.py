@@ -208,3 +208,50 @@ def test_mismatch_without_recorded_renderer_says_so(setup, tmp_path) -> None:
     assert figures[f"{_FIGURES}/fig_plain.svg"]["mismatch_reason"] == (
         "bytes differ; neither copy records its matplotlib version"
     )
+
+
+_KINDS = {
+    "fig_same": {"kind": "diagram", "evidence": "m.fig_same draws fixed geometry"},
+}
+
+
+def test_listed_diagram_is_labelled_instead_of_given_a_run(setup) -> None:
+    root, registry, run_ids = setup
+    figures = build_figure_run_map(
+        registry, run_ids, repo_root=root, figures=_FIGURES, kinds=_KINDS
+    )["figures"]
+    entry = figures[f"{_FIGURES}/fig_same.svg"]
+    assert entry["source"] == "diagram"
+    assert entry["source_evidence"] == "m.fig_same draws fixed geometry"
+    assert entry["run_id"] is None and entry["run_sha256"] is None
+    assert entry["preset"] == "study_one"
+    assert entry["mismatch_reason"] == "diagram figure: no simulation run"
+
+
+def test_only_labelled_figures_carry_a_source(setup) -> None:
+    figures = _entries(setup)["figures"]
+    assert not any("source" in entry for entry in figures.values())
+
+
+def test_unknown_kind_is_rejected(setup) -> None:
+    root, registry, run_ids = setup
+    with pytest.raises(ValueError, match="kind"):
+        build_figure_run_map(
+            registry,
+            run_ids,
+            repo_root=root,
+            figures=_FIGURES,
+            kinds={"fig_same": {"kind": "sketch", "evidence": "x"}},
+        )
+
+
+def test_kind_for_a_missing_figure_is_rejected(setup) -> None:
+    root, registry, run_ids = setup
+    with pytest.raises(ValueError, match="fig_nowhere"):
+        build_figure_run_map(
+            registry,
+            run_ids,
+            repo_root=root,
+            figures=_FIGURES,
+            kinds={"fig_nowhere": {"kind": "analytic", "evidence": "x"}},
+        )
