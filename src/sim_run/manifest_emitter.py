@@ -30,6 +30,11 @@ def sha256_file(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def model_revision(model_text: str) -> str:
+    """Revision of a model given as text: ``sha256:`` and its UTF-8 digest."""
+    return "sha256:" + hashlib.sha256(model_text.encode("utf-8")).hexdigest()
+
+
 def sha256_json(value: Any) -> str:
     """SHA-256 hex digest of ``value`` as compact, key-sorted JSON."""
     text = json.dumps(value, sort_keys=True, separators=(",", ":"))
