@@ -15,7 +15,13 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
-from src.shared.python.putting_dynamics import PutterState, solve_aim
+from src.shared.python.putting_dynamics import (
+    GREEN_PRESETS,
+    GreenSpec,
+    PutterState,
+    green_preset,
+    solve_aim,
+)
 from src.tools.putting_green_gui import _scene_builder
 from src.tools.putting_green_gui._scene_builder import (
     _FT_TO_M,
@@ -199,6 +205,10 @@ def test_higher_stimp_rolls_farther() -> None:
         {"slope_deg": 10.0},
         {"timestep_s": 0.0},
         {"timestep_s": 0.1},
+        {"green_type": "augusta"},
+        {"undulation_m": -0.001},
+        {"undulation_m": 0.06},
+        {"green_seed": -1},
     ],
 )
 def test_out_of_range_controls_raise(kwargs: dict[str, float]) -> None:
@@ -267,3 +277,47 @@ def test_a_balance_preset_sets_the_putter_head() -> None:
 def test_bad_strike_controls_are_rejected(overrides: dict[str, object]) -> None:
     with pytest.raises(ValueError):
         build_putt_scene(replace(PuttConfig(), **overrides))
+
+
+# Green types (#14463): the tile rolls the same GreenSpec as every surface
+# ---------------------------------------------------------------------------
+
+
+def _green_parity(config: PuttConfig, spec: GreenSpec) -> None:
+    """The tile's surface is ``spec`` translated to the green's centre."""
+    *_, width_x, height_y, mid_y, gx, gy, gz, surface = _setup_grid_and_surface(
+        config, config.cup_distance_m
+    )[2:]
+    centre = (width_x / 2.0, mid_y)
+    want = spec.height(_scene_builder._green_extent_m(width_x, height_y))
+    for x, y in ((gx[1], gy[1]), (centre[0], mid_y), (gx[-2], gy[-3])):
+        got = surface.height.elevation(x, y)
+        assert got == pytest.approx(want.elevation(x - centre[0], y - centre[1]))
+    rendered = [[surface.height.elevation(x, y) for x in gx] for y in gy]
+    np.testing.assert_allclose(gz, rendered, atol=1e-12)
+
+
+@pytest.mark.parametrize("name", sorted(GREEN_PRESETS))
+def test_a_preset_green_is_the_core_preset(name: str) -> None:
+    _green_parity(PuttConfig(green_type=name), green_preset(name))
+
+
+def test_undulation_rides_on_the_cross_slope() -> None:
+    config = PuttConfig(slope_deg=2.0, undulation_m=0.01, green_seed=3)
+    grade = math.tan(math.radians(2.0)) * 100.0
+    spec = GreenSpec(grade_percent=grade, aspect_deg=-90.0, bump_height_m=0.01, seed=3)
+    _green_parity(config, spec)
+    reseeded = build_putt_scene(replace(config, green_seed=4))
+    assert not np.array_equal(build_putt_scene(config).grid_z, reseeded.grid_z)
+
+
+def test_a_smooth_cross_slope_keeps_the_classic_tilt() -> None:
+    plain = build_putt_scene(PuttConfig(slope_deg=2.0))
+    seeded = build_putt_scene(PuttConfig(slope_deg=2.0, green_seed=9))
+    np.testing.assert_array_equal(plain.grid_z, seeded.grid_z)
+
+
+def test_a_tiered_green_changes_the_roll() -> None:
+    flat = PuttConfig(slope_deg=0.0, putter_speed_ms=1.6, aim_deg=4.0)
+    tiered = build_putt_scene(replace(flat, green_type="tiered"))
+    assert tiered.total_roll_m != pytest.approx(build_putt_scene(flat).total_roll_m)

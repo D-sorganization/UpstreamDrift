@@ -30,15 +30,18 @@ with a message that names the missing module. The 3D view needs the optional
 
 ## Inputs
 
-| Control      | Unit | Range accepted      | Default |
-| ------------ | ---- | ------------------- | ------- |
-| Putter Speed | m/s  | 0.5 to 8.0          | 2.5     |
-| Aim Angle    | deg  | -45 to 45           | 0       |
-| Cup Distance | ft   | 1 to 30             | 10      |
-| Stimpmeter   | ft   | 6.0 to 14.0         | 10.0    |
-| Cross Slope  | deg  | 0 to 5              | 1.0     |
-| Strike       | mm   | -40 to 40           | 0       |
-| Balance      | -    | Typical or a preset | Typical |
+| Control      | Unit    | Range accepted      | Default     |
+| ------------ | ------- | ------------------- | ----------- |
+| Putter Speed | m/s     | 0.5 to 8.0          | 2.5         |
+| Aim Angle    | deg     | -45 to 45           | 0           |
+| Cup Distance | ft      | 1 to 30             | 10          |
+| Stimpmeter   | ft      | 6.0 to 14.0         | 10.0        |
+| Cross Slope  | deg     | 0 to 5              | 1.0         |
+| Green Type   | -       | see below           | Cross Slope |
+| Undulation   | mm (in) | 0 to 50             | 0           |
+| Green Seed   | -       | 0 to 9999           | 0           |
+| Strike       | mm (in) | -40 to 40           | 0           |
+| Balance      | -       | Typical or a preset | Typical     |
 
 - The **Units** selector switches the display between Metric (m, m/s) and
   Imperial (ft, mph). It converts the speed and distance controls and the
@@ -52,6 +55,20 @@ with a message that names the missing module. The 3D view needs the optional
   positive, shown in inches in imperial. Balance picks a shared putter preset
   (toe-hang, face-balanced, zero-torque, counterbalanced) that sets head
   mass, MOI and hosel position (`putting_dynamics.BALANCE_PRESETS`).
+- **Green Type** picks the shape the ball rolls on. Cross Slope is the classic
+  side tilt; Flat Practice, Undulating Championship, Severe Slopes and Tiered
+  are the shared core's `GREEN_PRESETS`
+  (`src/shared/python/putting_dynamics/green_spec.py`), the same greens the
+  API routes roll. A preset carries its own slope, so Cross Slope, Undulation
+  and Green Seed are greyed out while one is picked.
+- **Undulation** adds seeded bumps (a standard deviation, in mm or inches with
+  the Units selector) on top of the cross slope. **Green Seed** picks a
+  different but repeatable set of bumps.
+
+![Tiered green, metric, desktop width](images/putting_green_types_1280.png)
+
+![Undulating cross slope, phone width](images/putting_green_types_390.png)
+
 - Presets stamp speed and distance pairs only: Short (1.5 m/s, 5 ft),
   Medium (2.5 m/s, 15 ft), Long (4.0 m/s, 30 ft).
 - Not exposed on this tile, but fixed: the shared solver's RK4 at a 0.002 s
@@ -69,6 +86,7 @@ with a message that names the missing module. The 3D view needs the optional
 - Peak break: cm, the largest perpendicular deviation of the path from the
   straight ball-to-cup line.
 - Launch speed: m/s, taken from the first integrated velocity.
+- Green: the green type that was rolled.
 - **Roll model name**, printed verbatim in the metrics panel. Read this before
   you compare any number above with anything.
 - Impact: the strike offset, launch angle, launch spin, skid distance, face

@@ -29,6 +29,7 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QPushButton,
     QScrollArea,
+    QSpinBox,
     QSplitter,
     QStatusBar,
     QVBoxLayout,
@@ -42,8 +43,11 @@ from src.shared.python.golf_viz import (
     grid_surface_mesh,
     roll_mode_colors,
 )
-from src.shared.python.putting_dynamics import BALANCE_PRESETS
-from src.shared.python.theme.tool_stylesheet import primary_button_style
+from src.shared.python.putting_dynamics import BALANCE_PRESETS, GREEN_PRESETS
+from src.shared.python.theme.tool_stylesheet import (
+    get_tool_colors,
+    primary_button_style,
+)
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.units import (
     UnitSystem,
@@ -61,9 +65,11 @@ from src.shared.python.ui.units import (
 from src.tools.putting_green_gui._batch_panel import BatchPanel
 from src.tools.putting_green_gui._scene_builder import (
     IMPACT_TOE_RANGE_M,
+    UNDULATION_RANGE_M,
     PuttConfig,
     PuttScene,
     build_putt_scene,
+    green_label,
 )
 
 logger = logging.getLogger(__name__)
@@ -72,7 +78,9 @@ _M_TO_FT = 3.280839895
 _FT_TO_M = 1.0 / _M_TO_FT
 _M_TO_CM = 100.0
 _MS_TO_MPH = 2.236936
-_M_TO_IN = _M_TO_FT * 12.0
+_M_TO_MM = 1000.0
+#: Inches per metre from the shared units module, as the batch panel uses.
+_M_TO_IN = 12.0 / from_display_distance(1.0, UnitSystem.IMPERIAL, unit="ft")
 _RAD_S_TO_RPM = 60.0 / (2.0 * math.pi)
 _PANEL_STYLE = """
 QWidget#puttControls { background-color: #1b2530; }
@@ -83,7 +91,7 @@ QGroupBox {
     margin-top: 10px; padding: 8px; font-weight: bold;
 }
 QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
-QDoubleSpinBox, QComboBox {
+QDoubleSpinBox, QSpinBox, QComboBox {
     background-color: #0f1822; color: #eaf2f8;
     border: 1px solid #2f4254; border-radius: 4px; padding: 3px;
 }
@@ -93,6 +101,18 @@ QPushButton {
 }
 QPushButton:hover { background-color: #2c3f52; }
 """
+
+
+def _panel_style() -> str:
+    """The panel stylesheet; disabled inputs dim to the shared theme tokens."""
+    colors = get_tool_colors()
+    disabled = (
+        "QDoubleSpinBox:disabled, QSpinBox:disabled, QComboBox:disabled {"
+        f" background-color: {colors['surface_secondary']};"
+        f" color: {colors['text_secondary']};"
+        f" border-color: {colors['border_default']}; }}"
+    )
+    return _PANEL_STYLE + disabled + "\n"
 
 
 class PuttingGreenWidget(QWidget):
@@ -142,9 +162,11 @@ class PuttingGreenWidget(QWidget):
             self._distance_spin.value(), self._unit_system, unit="ft"
         )
         old_toe_m = self._strike_toe_m()
+        undulation_m = self._undulation_m()
         self._unit_system = system
         self._sync_units_combo()
         self._set_strike_units(old_toe_m)
+        self._set_undulation_units(undulation_m)
 
         self._speed_spin.setSuffix(speed_suffix(system))
         self._distance_spin.setSuffix(distance_suffix(system, unit="ft"))
@@ -215,7 +237,7 @@ class PuttingGreenWidget(QWidget):
     def _build_controls(self) -> QWidget:
         left = QWidget()
         left.setObjectName("puttControls")
-        left.setStyleSheet(_PANEL_STYLE)
+        left.setStyleSheet(_panel_style())
         left_layout = QVBoxLayout(left)
 
         title = QLabel("⛳  Putting Green Simulator")
@@ -256,6 +278,7 @@ class PuttingGreenWidget(QWidget):
         green_form.addRow("Stimpmeter:", self._stimp_spin)
         self._slope_spin = self._make_spin(0.0, 5.0, 1.0, "°")
         green_form.addRow("Cross Slope:", self._slope_spin)
+        self._add_green_type_rows(green_form)
         left_layout.addWidget(green_group)
         left_layout.addWidget(self._build_strike_group())
 
@@ -316,6 +339,43 @@ class PuttingGreenWidget(QWidget):
     def _strike_toe_m(self) -> float:
         scale = 1000.0 if self._unit_system == UnitSystem.METRIC else _M_TO_IN
         return self._strike_spin.value() / scale
+
+    def _add_green_type_rows(self, form: QFormLayout) -> None:
+        """Green type, undulation and seed (#14463), on the shared GreenSpec."""
+        self._green_combo = QComboBox()
+        for key in (None, *GREEN_PRESETS):
+            self._green_combo.addItem(green_label(key), key)
+        self._green_combo.setSizeAdjustPolicy(
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+        )
+        self._green_combo.setMinimumContentsLength(8)  # fits a phone width
+        self._green_combo.currentIndexChanged.connect(self._on_green_type)
+        form.addRow("Green Type:", self._green_combo)
+        self._undulation_spin = self._make_spin(0.0, 1.0, 0.0, "", decimals=2)
+        self._set_undulation_units(0.0)
+        form.addRow("Undulation:", self._undulation_spin)
+        self._seed_spin = QSpinBox()
+        self._seed_spin.setRange(0, 9999)
+        form.addRow("Green Seed:", self._seed_spin)
+
+    def _on_green_type(self, _index: int) -> None:
+        cross_slope = self._green_combo.currentData() is None
+        for spin in (self._slope_spin, self._undulation_spin, self._seed_spin):
+            spin.setEnabled(cross_slope)
+
+    def _undulation_scale(self) -> float:
+        return _M_TO_MM if self._unit_system == UnitSystem.METRIC else _M_TO_IN
+
+    def _set_undulation_units(self, undulation_m: float) -> None:
+        metric = self._unit_system == UnitSystem.METRIC
+        scale = self._undulation_scale()
+        self._undulation_spin.setSuffix(" mm" if metric else " in")
+        self._undulation_spin.setDecimals(1 if metric else 2)
+        self._undulation_spin.setRange(0.0, UNDULATION_RANGE_M[1] * scale)
+        self._undulation_spin.setValue(undulation_m * scale)
+
+    def _undulation_m(self) -> float:
+        return self._undulation_spin.value() / self._undulation_scale()
 
     def _make_spin(
         self,
@@ -428,6 +488,9 @@ class PuttingGreenWidget(QWidget):
             slope_deg=self._slope_spin.value(),
             impact_toe_m=self._strike_toe_m(),
             balance_type=self._balance_combo.currentData(),
+            green_type=self._green_combo.currentData(),
+            undulation_m=min(self._undulation_m(), UNDULATION_RANGE_M[1]),
+            green_seed=self._seed_spin.value(),
         )
 
     def _run_simulation(self) -> None:
@@ -558,6 +621,7 @@ def _format_metrics(
         f"Roll time:     {scene.duration_s:.2f} s\n"
         f"{break_line}"
         f"{speed_line}"
+        f"Green:         {green_label(scene.green_type)}\n"
         f"Roll model:    {scene.roll_model}\n"
         f"Track colour:  amber = skidding, green = pure roll, grey = stopped\n"
         f"{_format_impact(scene, unit_system)}"

@@ -435,3 +435,56 @@ def test_metrics_show_the_impact_in_display_units(
         assert label in text
     assert f"{impact.launch_angle_deg:.1f}°" in text
     assert "toe" in text and skid_unit in text and "rpm backspin" in text
+
+
+# Green types (#14463)
+# ---------------------------------------------------------------------------
+
+
+def test_green_selector_offers_the_cross_slope_and_every_preset(
+    widget: PuttingGreenWidget,
+) -> None:
+    from src.shared.python.putting_dynamics import GREEN_PRESETS
+
+    combo = widget._green_combo
+    assert [combo.itemData(i) for i in range(combo.count())] == [
+        None,
+        *GREEN_PRESETS,
+    ]
+    assert widget._current_config().green_type is None
+    combo.setCurrentIndex(combo.findData("tiered"))
+    assert widget._current_config().green_type == "tiered"
+    # A preset carries its own shape, so the cross-slope controls rest.
+    assert not widget._slope_spin.isEnabled()
+    assert not widget._undulation_spin.isEnabled()
+    widget._run_simulation()
+    assert "Green:         Tiered" in widget._results_text.toPlainText()
+
+
+def test_undulation_is_unit_selectable_and_seeded(widget: PuttingGreenWidget) -> None:
+    assert widget._undulation_spin.suffix() == " mm"
+    widget._undulation_spin.setValue(10.0)
+    widget._seed_spin.setValue(7)
+    config = widget._current_config()
+    assert config.undulation_m == pytest.approx(0.010)
+    assert config.green_seed == 7
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert widget._undulation_spin.suffix() == " in"
+    assert widget._undulation_spin.value() == pytest.approx(10.0 / 25.4, abs=0.005)
+    assert widget._current_config().undulation_m == pytest.approx(0.010, abs=1e-4)
+
+
+def test_every_input_follows_the_dark_panel_theme(widget: PuttingGreenWidget) -> None:
+    # The integer Green Seed box rendered white on the dark panel (#14463).
+    from PyQt6.QtWidgets import QWidget
+
+    style = widget.findChild(QWidget, "puttControls").styleSheet()
+    for spin in (widget._seed_spin, widget._undulation_spin, widget._green_combo):
+        assert type(spin).__name__ in style
+    assert ":disabled" in style, "a preset greys out the shape inputs visibly"
+    # The disabled look comes from the shared theme tokens, not new hex literals.
+    from src.shared.python.theme.tool_stylesheet import get_tool_colors
+
+    disabled = style[style.index(":disabled") :]
+    for token in ("surface_secondary", "text_secondary", "border_default"):
+        assert get_tool_colors()[token] in disabled
