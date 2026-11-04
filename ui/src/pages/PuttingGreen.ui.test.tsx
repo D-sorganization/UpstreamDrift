@@ -9,6 +9,8 @@ import { PuttingGreenPage } from "./PuttingGreen";
 
 vi.mock("@/api/puttingClient", () => ({
   simulatePutt3D: vi.fn(),
+  runDispersion: vi.fn(),
+  runMakeSpread: vi.fn(),
 }));
 
 vi.mock("@/components/visualization/PuttingScene3D", () => ({
@@ -111,12 +113,15 @@ describe("PuttingGreenPage 3D workflow", () => {
     );
     expect(screen.getByText("1.80 m/s")).toBeInTheDocument();
     expect(screen.getByText("3.00 m")).toBeInTheDocument();
+    expect(screen.getByLabelText("Strike SD (mm)")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Units"), {
       target: { value: "imperial" },
     });
     expect(screen.getByText("4.03 mph")).toBeInTheDocument();
     expect(screen.getByText("9.8 ft")).toBeInTheDocument();
+    // The batch-dispersion strike channel follows the units (#14460).
+    expect(screen.getByLabelText("Strike SD (in)")).toBeInTheDocument();
     expect(localStorage.getItem("ud.unitSystem")).toBe("imperial");
 
     fireEvent.change(screen.getByLabelText("Hole Distance"), {
