@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-04 | #14573 | React putting page: strokes-gained readout and expected-putts curve from the shared core's /strokes-gained |
 | 2026-11-04 | #14543 | Analytic and diagram figures in the proximal-distal release are labelled with their code evidence instead of citing a run |
 | 2026-11-04 | #14546 | Putting: camera presets (orbit, down the line, face on, overhead), play/pause, a scrubber and jumps to the core phase marks on the PyQt6 tile |
 | 2026-11-04 | #14542 | Putting: Strokes Gained panel on the PyQt6 tile (player E(d) on the dialled green from the shared service_sg study, each putt scored on the cached curve, in the chosen units) |

@@ -924,6 +924,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14468 · React Putting Page: Strokes-Gained Readout and Expected-Putts Curve From the Shared Core's /Strokes-Gained
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14468
+- **Branch:** merged via #14573
+- **PR:** #14573
+- **Paths:** see #14573
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`3f51085e`; collated from changes/14468-react-putting-page-strokes-gained-readou.md)
+- **Summary:** React putting page: strokes-gained readout and expected-putts curve from the shared core's /strokes-gained
+- **Next step:** Shipped in PR #14573.
+
 ### DL-#14462 · React Putting Page: Balance Type Selector Over the Core Putter Presets With Head Mass and MOI Inputs; Balance_Type React/Tauri Parity Cells Now Present
 
 - **State:** shipped
