@@ -7,8 +7,8 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Feature | Cluster | Core/API | PyQt6 | React | Tauri | Studio |
 | --- | --- | --- | --- | --- | --- | --- |
 | Selectable Units | (a) | missing (#14457) | partial (#14457) | missing (#14458) | missing (#14458) | missing (#14457) |
-| Variance and Noise Channels | (b) | partial (#14459) | missing (#14459) | partial (#14460) | partial (#14460) | partial (#14459) |
-| Dispersion Batches and 0-45 ft Make-% Spread | (b) | partial (#14459) | missing (#14459) | partial (#14460) | partial (#14460) | present |
+| Variance and Noise Channels | (b) | present | present | partial (#14460) | partial (#14460) | present |
+| Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | partial (#14460) | partial (#14460) | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | partial (#14461) | present | present | partial (#14461) |
 | Toe/Heel Strike Location | (c) | present | missing (#14461) | present | present | partial (#14461) |
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | missing (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
@@ -31,14 +31,14 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: missing (#14457). `src/apps/putting_studio/index.html`. Labels hard-code ft, m/s and mm; no toggle.
 
 **Variance and Noise Channels**
-- Core/API: partial (#14459). `src/shared/python/putting_analytics/skill.py`, `src/shared/python/putting_analytics/variance.py`, `src/shared/python/putting_analytics/service_variance.py`. Core has 7 channels (face, path, speed, strike, read grade/aspect/stimp); /variance-study drops strike; /optimize uses 2 channels.
-- PyQt6: missing (#14459). `src/tools/putting_analytics_gui/gui.py`. Simulator strike is deterministic; the analytics tool has start-line and speed SD only.
+- Core/API: present. `src/shared/python/putting_analytics/skill.py`, `src/shared/python/putting_analytics/service_variance.py`, `src/shared/python/putting_analytics/service_dispersion.py`. All 7 channels (face, path, speed, strike, read grade/aspect/stimp) in /variance-study, /dispersion, /make-spread and /simulated-curve; strike via strike_toe_sd_mm (#14461). /optimize keeps its paired line-and-speed batch for the aim search.
+- PyQt6: present. `src/tools/putting_green_gui/_batch_panel.py`. Batch Dispersion inputs for all 7 core channels, defaulting to the core profile; strike spread in mm or in.
 - React: partial (#14460). `ui/src/pages/PuttingGreen.tsx`, `ui/src/pages/PuttingAnalytics.tsx`. Simulator: friction_variation only (fixed seed); analytics page: line and speed SD.
-- Studio: partial (#14459). `src/apps/putting_studio/js/green3d.js`. Monte Carlo draws 5 noise terms; the 6-channel SG attribution is closed-form; the 4-channel decomposition is guide text only.
+- Studio: present. `src/apps/putting_studio/js/core_attribution.js`, `scripts/generate_studio_attribution.py`. SG attribution from core-generated values (#14504); the Monte Carlo view keeps its illustrative draws.
 
 **Dispersion Batches and 0-45 ft Make-% Spread**
-- Core/API: partial (#14459). `src/shared/python/putting_analytics/batch_roll.py`, `src/shared/python/putting_analytics/sg_curve.py`, `src/api/routes/putting_green.py`. Core batches and make-% curve present (/simulated-curve); /scatter capped at 100 putts on a flat green with seed 0.
-- PyQt6: missing (#14459). `src/tools/putting_green_gui/_scene_builder.py`. One putt per run.
+- Core/API: present. `src/shared/python/putting_analytics/service_dispersion.py`, `src/api/routes/putting_analytics.py`. /dispersion batches up to 2000 putts on a sloped green with any seed; /make-spread gives the 3-45 ft make-% curve.
+- PyQt6: present. `src/tools/putting_green_gui/_batch_panel.py`. 40/100/1000-putt batches with rest scatter and the 0-45 ft make-% spread, in the user's units.
 - React: partial (#14460). `ui/src/pages/PuttingAnalytics.tsx`. Analytics rollouts at one distance as a table; no scatter, no make-% curve.
 - Studio: present. `src/apps/putting_studio/js/io.js`, `src/apps/putting_studio/js/controls_c.js`. 40/100/1000 batches and a 0-45 ft spread (that button runs 2000 attempts).
 
