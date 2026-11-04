@@ -10,6 +10,7 @@ import type {
 import { simulatePutt3D } from "@/api/puttingClient";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
 import { DispersionPanel } from "@/components/putting/DispersionPanel";
+import { StrokesGainedPanel } from "@/components/putting/StrokesGainedPanel";
 import { PutterHeadControl } from "@/components/putting/PutterHeadControl";
 import { PuttingScene3D } from "@/components/visualization/PuttingScene3D";
 import { usePuttingStore } from "@/stores/usePuttingStore";
@@ -599,6 +600,8 @@ export function PuttingGreenPage() {
       )}
       <h2 className="mb-3 mt-6 text-sm font-semibold">Batch Dispersion</h2>
       <DispersionPanel />
+      <h2 className="mb-3 mt-6 text-sm font-semibold">Strokes Gained</h2>
+      <StrokesGainedPanel />
     </div>
   );
 
