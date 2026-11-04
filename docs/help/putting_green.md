@@ -14,6 +14,20 @@ is; the tile runs the shared putting physics core and shows the ball track, the
 break, and whether the putt was holed. It is a green-authoring and roll-reading
 surface, not a putter-fitting or impact-analysis tool.
 
+## Launch
+
+From the repository root:
+
+```bash
+python -m src.tools.putting_green_gui
+```
+
+`python -m src.tools.putting_green_gui --smoke` opens the window, runs one putt,
+prints the metrics and exits `0`. Add `QT_QPA_PLATFORM=offscreen` on a headless
+host. If the shared putting core cannot be imported, both commands exit `2`
+with a message that names the missing module. The 3D view needs the optional
+`pyqtgraph` and `PyOpenGL` packages. Without them, the metrics panel still works.
+
 ## Inputs
 
 | Control      | Unit | Range accepted | Default |
