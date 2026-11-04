@@ -1008,10 +1008,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14473
 - **Branch:** merged via #14533
-- **PR:** #14533
+- **PR:** #14533, #14537
 - **Paths:** see #14533
 - **Started:** 2026-11-04
-- **Last verified:** 2026-11-04 (`b50c8bb8`; collated from changes/14473-putting-gui-split.md)
+- **Last verified:** 2026-11-04 (`f9a6a7f0`; collated from changes/14473-putting-dynamics-per-sample-ball-mode-on.md)
 - **Summary:** Putting: PyQt6 tile readouts and panel style move out of gui.py into _scene_text and _style (no behaviour change; keeps gui.py under the monolith threshold)
 - **Next step:** Shipped in PR #14533.
 
