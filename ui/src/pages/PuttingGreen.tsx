@@ -10,6 +10,7 @@ import type {
 import { simulatePutt3D } from "@/api/puttingClient";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
 import { DispersionPanel } from "@/components/putting/DispersionPanel";
+import { PutterHeadControl } from "@/components/putting/PutterHeadControl";
 import { PuttingScene3D } from "@/components/visualization/PuttingScene3D";
 import { usePuttingStore } from "@/stores/usePuttingStore";
 import {
@@ -33,6 +34,7 @@ interface RangeControlProps {
   min: number;
   max: number;
   step: number;
+  disabled?: boolean;
   onChange: (value: number) => void;
 }
 
@@ -43,6 +45,7 @@ function RangeControl({
   min,
   max,
   step,
+  disabled = false,
   onChange,
 }: RangeControlProps) {
   return (
@@ -66,8 +69,9 @@ function RangeControl({
         max={max}
         step={step}
         value={value}
+        disabled={disabled}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full cursor-pointer"
+        className="w-full cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
         style={{ accentColor: "var(--sidekick-color-accent)" }}
       />
     </label>
@@ -83,6 +87,7 @@ interface UnitRangeControlProps {
   quantity: Quantity;
   range: DisplayRange;
   decimals: Record<UnitSystem, number>;
+  disabled?: boolean;
   onChangeSi: (value: number) => void;
 }
 
@@ -92,6 +97,7 @@ function UnitRangeControl({
   quantity,
   range,
   decimals,
+  disabled,
   onChangeSi,
 }: UnitRangeControlProps) {
   const system = usePuttingStore((state) => state.unitSystem);
@@ -104,6 +110,7 @@ function UnitRangeControl({
       min={min}
       max={max}
       step={step}
+      disabled={disabled}
       onChange={(value) => onChangeSi(fromDisplay(value, quantity, system))}
     />
   );
@@ -165,6 +172,8 @@ function HoselPositionControl() {
   const updateParameters = usePuttingStore((state) => state.updateParameters);
   const toePercent = ((parameters.hosel_toe_m + 0.08) / 0.16) * 100;
   const forwardPercent = ((0.05 - parameters.hosel_forward_m) / 0.1) * 100;
+  // A balance preset's hosel offsets come from the shared core (#14462).
+  const presetHead = Boolean(parameters.balance_type);
 
   return (
     <div className="space-y-3">
@@ -202,6 +211,7 @@ function HoselPositionControl() {
         quantity="smallLength"
         range={{ metric: [-80, 80, 1], imperial: [-3.15, 3.15, 0.05] }}
         decimals={SMALL_LENGTH_DECIMALS}
+        disabled={presetHead}
         onChangeSi={(hosel_toe_m) => updateParameters({ hosel_toe_m })}
       />
       <UnitRangeControl
@@ -210,6 +220,7 @@ function HoselPositionControl() {
         quantity="smallLength"
         range={{ metric: [-50, 50, 1], imperial: [-2, 2, 0.05] }}
         decimals={SMALL_LENGTH_DECIMALS}
+        disabled={presetHead}
         onChangeSi={(hosel_forward_m) => updateParameters({ hosel_forward_m })}
       />
     </div>
@@ -401,6 +412,9 @@ export function PuttingGreenPage() {
           decimals={SMALL_LENGTH_DECIMALS}
           onChangeSi={(impact_toe_m) => updateParameters({ impact_toe_m })}
         />
+      </Section>
+      <Section title="Putter Head">
+        <PutterHeadControl />
       </Section>
       <Section title="Shaft Attachment">
         <HoselPositionControl />

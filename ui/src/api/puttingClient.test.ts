@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiFetch } from "./fetch";
 import {
   STUDY_TIMEOUT_MS,
+  fetchPutterPresets,
   runDispersion,
   runMakeSpread,
 } from "./puttingClient";
@@ -34,4 +35,14 @@ describe("putting analytics client (#14460)", () => {
       expect(STUDY_TIMEOUT_MS).toBeGreaterThan(15_000);
     },
   );
+});
+
+describe("putter presets client (#14462)", () => {
+  it("reads the balance presets from the core route", async () => {
+    vi.mocked(apiFetch).mockResolvedValue({ presets: [] });
+    await expect(fetchPutterPresets()).resolves.toEqual({ presets: [] });
+    expect(apiFetch).toHaveBeenLastCalledWith(
+      "/api/tools/putting-green/putter-presets",
+    );
+  });
 });
