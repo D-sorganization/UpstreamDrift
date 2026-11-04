@@ -527,6 +527,35 @@ def test_auto_solve_writes_the_core_read_into_the_controls(
     assert "Optimum read:" in text and "mph" in text and "HOLED" in text
 
 
+def test_auto_solve_rolls_the_read_on_the_green_it_solved(
+    qapp: QApplication, widget: PuttingGreenWidget
+) -> None:
+    # A control changed mid-solve must not get the old read rolled on it,
+    # and the controls rest while the worker solves (#14465, Lane 3).
+    import dataclasses
+
+    from src.tools.putting_green_gui._scene_builder import (
+        build_putt_scene,
+        solve_putt,
+    )
+
+    widget._slope_spin.setValue(2.0)
+    solved = widget._current_config()
+    want = solve_putt(solved)
+    widget._solve_btn.click()
+    assert not widget._slope_spin.isEnabled(), "controls rest during the solve"
+    widget._slope_spin.setValue(0.0)  # a change that slipped in mid-solve
+    _wait_for_solve(qapp, widget)
+    assert widget._slope_spin.isEnabled()
+    rolled = build_putt_scene(
+        dataclasses.replace(
+            solved, putter_speed_ms=want.putter_speed_ms, aim_deg=want.aim_deg
+        )
+    )
+    assert widget._scene is not None and widget._scene.holed
+    assert widget._scene.trajectory_xyz.tolist() == rolled.trajectory_xyz.tolist()
+
+
 def test_auto_solve_reports_a_rejected_putt(
     qapp: QApplication, widget: PuttingGreenWidget, monkeypatch: pytest.MonkeyPatch
 ) -> None:

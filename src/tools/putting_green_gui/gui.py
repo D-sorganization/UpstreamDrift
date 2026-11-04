@@ -240,6 +240,7 @@ class PuttingGreenWidget(QWidget):
     def _build_controls(self) -> QWidget:
         left = QWidget()
         left.setObjectName("puttControls")
+        self._controls = left  # rests while Auto-Solve runs
         left.setStyleSheet(_panel_style())
         left_layout = QVBoxLayout(left)
 
@@ -529,10 +530,13 @@ class PuttingGreenWidget(QWidget):
         pool = QThreadPool.globalInstance()
         if self._solve_job is not None or pool is None:
             return
-        self._solve_btn.setEnabled(False)
+        self._controls.setEnabled(False)  # the read is for these settings
         self._results_text.setPlainText("Solving the read on this green...")
         job = _Job(
-            lambda args: {"solution": solve_putt(args["config"])},
+            lambda args: {
+                "config": args["config"],
+                "solution": solve_putt(args["config"]),
+            },
             {"config": self._current_config()},
         )
         job.signals.done.connect(self._apply_solution)
@@ -542,7 +546,7 @@ class PuttingGreenWidget(QWidget):
 
     def _finish_solve(self) -> None:
         self._solve_job = None
-        self._solve_btn.setEnabled(True)
+        self._controls.setEnabled(True)
 
     def _on_solve_failed(self, message: str) -> None:
         self._finish_solve()
@@ -558,7 +562,7 @@ class PuttingGreenWidget(QWidget):
         self._aim_spin.setValue(solution.aim_deg)
         self._run_simulation(
             dataclasses.replace(
-                self._current_config(),
+                report["config"],
                 putter_speed_ms=solution.putter_speed_ms,
                 aim_deg=solution.aim_deg,
             )
@@ -635,7 +639,7 @@ def _format_read(solution: PuttSolution, unit_system: UnitSystem) -> str:
         lean = f"{abs(solution.break_m) * _M_TO_CM:.1f} cm"
     else:
         speed = f"{solution.putter_speed_ms * _MS_TO_MPH:.1f} mph"
-        lean = f"{abs(solution.break_m) * _M_TO_FT * 12.0:.1f} in"
+        lean = f"{abs(solution.break_m) * _M_TO_IN:.1f} in"
     side = "left" if solution.break_m >= 0.0 else "right"
     found = "" if solution.holed else " (no holing line found)"
     return (
@@ -663,7 +667,7 @@ def _format_metrics(
         )
         break_line = (
             f"Peak break:    {scene.peak_break_m * _M_TO_CM:.1f} cm "
-            f"({scene.peak_break_m * _M_TO_FT * 12.0:.2f} in)\n"
+            f"({scene.peak_break_m * _M_TO_IN:.2f} in)\n"
         )
         speed_line = (
             f"Launch speed:  {scene.launch_speed_ms:.2f} m/s "
@@ -681,7 +685,7 @@ def _format_metrics(
             f"({scene.total_roll_m:.2f} m)\n"
         )
         break_line = (
-            f"Peak break:    {scene.peak_break_m * _M_TO_FT * 12.0:.2f} in "
+            f"Peak break:    {scene.peak_break_m * _M_TO_IN:.2f} in "
             f"({scene.peak_break_m * _M_TO_CM:.1f} cm)\n"
         )
         speed_line = (
