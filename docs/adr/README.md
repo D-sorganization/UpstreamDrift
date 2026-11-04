@@ -66,6 +66,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0056](0056-canonical-golfer-kinematics-source.md)                      | Canonical Source for Golfer Kinematics and the Closure Jacobian                   | Accepted | 2026-10-15 |
 | [0057](0057-hrg-hx5-articulated-hand-option.md)                          | HRG-HX5 Articulated-Finger Hand Option                                             | Accepted | 2026-10-25 |
 | [0058](0058-one-shared-putting-core.md)                                  | One Shared Putting Physics Core                                                    | Accepted | 2026-11-01 |
+| [0059](0059-hrg-hx6-hand-data-and-asset-licensing.md)                    | HRG-HX6 Hand Data and Asset Licensing                                              | Proposed | 2026-11-03 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.
