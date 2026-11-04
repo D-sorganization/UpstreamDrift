@@ -73,6 +73,7 @@ from .friction import (
     sliding_mu,
     stimp_to_rolling_mu,
 )
+from .green_spec import GREEN_PRESETS, GreenSpec, green_preset
 from .green_reading import (
     AimSolution,
     LineReading,
@@ -144,6 +145,7 @@ __all__ = [
     "DEFAULT_SLIDING_MU",
     "DEFAULT_STATIC_MU",
     "DT_S",
+    "GREEN_PRESETS",
     "GROUND_RESTITUTION",
     "HOLE_RADIUS_M",
     "LOFT_SWEEP_MAX_DEG",
@@ -160,6 +162,7 @@ __all__ = [
     "FixtureSource",
     "FrictionField",
     "FrictionParams",
+    "GreenSpec",
     "GrassType",
     "HeightField",
     "LineReading",
@@ -180,6 +183,7 @@ __all__ = [
     "effective_head_mass",
     "energy_balance_error_j",
     "grain_factor",
+    "green_preset",
     "is_static_hold",
     "load_reference_fixtures",
     "m_to_feet",
