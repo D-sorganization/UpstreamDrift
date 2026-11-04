@@ -1,11 +1,7 @@
 /**
- * Display unit system for the React frontends (issue #14458).
- *
- * Mirrors src/shared/python/ui/units.py: physics stays in SI and only the
- * display layer converts. Distances use feet in imperial (the putting
- * convention the PyQt6 tool uses with ``unit="ft"``), speeds use mph. Small
- * lengths such as strike and hosel offsets show as mm or inches.
- * units.golden.json pins these conversions to units.py.
+ * Display units for the React frontends (#14458), mirroring
+ * src/shared/python/ui/units.py: physics stays SI; imperial shows ft, mph and
+ * inches (small offsets). units.golden.json pins the conversions to units.py.
  */
 
 export type UnitSystem = "metric" | "imperial";

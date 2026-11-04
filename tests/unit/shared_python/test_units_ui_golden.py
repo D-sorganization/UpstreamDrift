@@ -1,9 +1,4 @@
-"""Golden parity between units.py and the React unit helpers (issue #14458).
-
-``ui/src/utils/units.golden.json`` is generated from ``units.py``; the React
-helpers in ``ui/src/utils/units.ts`` are tested against the same file. This test
-fails if ``units.py`` changes without the fixture being regenerated.
-"""
+"""Golden parity: units.golden.json (generated from units.py) vs units.py (#14458)."""
 
 from __future__ import annotations
 
