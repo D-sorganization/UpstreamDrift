@@ -924,6 +924,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14460 · Putting Page Groundwork: The Seven Core Noise Channels, the Simulator-to-Core Dispersion Arguments and the /Dispersion and /Make-Spread Client, Pinned to the Shared Core by a Golden File (PUTT-SHARE B-Web Part 1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14460
+- **Branch:** merged via #14532
+- **PR:** #14532
+- **Paths:** see #14532
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`ced87292`; collated from changes/14460-putting-page-groundwork-the-seven-core-n.md)
+- **Summary:** Putting page groundwork: the seven core noise channels, the simulator-to-core dispersion arguments and the /dispersion and /make-spread client, pinned to the shared core by a golden file (PUTT-SHARE b-web part 1)
+- **Next step:** Shipped in PR #14532.
+
 ### DL-#14518 · Run Release Presets Through the Run Store: Sim_Run.Preset_Run Records Which Files a Preset Wrote, Copies Them Into a Run Directory and Emits a Reproducible Run Manifest
 
 - **State:** shipped
