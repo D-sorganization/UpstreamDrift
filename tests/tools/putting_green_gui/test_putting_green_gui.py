@@ -603,3 +603,79 @@ def test_the_sg_panel_follows_the_unit_selector(widget: PuttingGreenWidget) -> N
     assert widget.sg_panel()._leave_spin.suffix().strip() == "m"
     widget.set_unit_system(UnitSystem.IMPERIAL)
     assert widget.sg_panel()._leave_spin.suffix().strip() == "ft"
+
+
+# Camera views and playback (#14473)
+# ---------------------------------------------------------------------------
+
+
+@_needs_gl
+def test_view_presets_place_the_camera_from_the_shared_pose(
+    widget: PuttingGreenWidget,
+) -> None:
+    from src.tools.putting_green_gui._camera import CAMERA_PRESETS, camera_pose
+
+    widget._run_simulation()
+    combo = widget.playback_bar().view_combo
+    assert [combo.itemData(i) for i in range(combo.count())] == list(CAMERA_PRESETS)
+    for i, preset in enumerate(CAMERA_PRESETS):
+        combo.setCurrentIndex(i)
+        pose = camera_pose(widget._scene, preset)
+        opts = widget._gl_view.opts
+        assert (opts["distance"], opts["elevation"], opts["azimuth"]) == (
+            pytest.approx(pose.distance),
+            pytest.approx(pose.elevation_deg),
+            pytest.approx(pose.azimuth_deg),
+        )
+        center = opts["center"]
+        assert (center.x(), center.y(), center.z()) == pytest.approx(pose.center)
+
+
+def test_play_pause_toggles_the_playback(widget: PuttingGreenWidget) -> None:
+    widget._run_simulation()
+    assert widget._anim_timer.isActive()
+    widget.playback_bar().play_btn.click()
+    assert not widget._anim_timer.isActive()
+    assert widget.playback_bar().play_btn.text() == "Play"
+    widget.playback_bar().play_btn.click()
+    assert widget._anim_timer.isActive()
+    assert widget.playback_bar().play_btn.text() == "Pause"
+
+
+def test_scrub_moves_the_ball_to_the_chosen_sample(
+    widget: PuttingGreenWidget,
+) -> None:
+    widget._run_simulation()
+    widget._ball_item = MagicMock()
+    traj = widget._scene.trajectory_xyz
+    slider = widget.playback_bar().scrub_slider
+    assert (slider.minimum(), slider.maximum()) == (0, traj.shape[0] - 1)
+    k = traj.shape[0] // 2
+    slider.setValue(k)
+    assert not widget._anim_timer.isActive(), "scrubbing pauses the playback"
+    assert widget._anim_index == k
+    pos = widget._ball_item.setData.call_args.kwargs["pos"]
+    assert pos.tolist() == traj[k : k + 1].tolist()
+
+
+def test_the_playback_drives_the_scrubber(widget: PuttingGreenWidget) -> None:
+    widget._run_simulation()
+    widget._ball_item = MagicMock()
+    widget._advance_animation()
+    widget._advance_animation()
+    assert widget.playback_bar().scrub_slider.value() > 0
+    assert widget._anim_timer.isActive(), "the scrubber's echo must not pause"
+
+
+def test_phase_jumps_land_on_each_core_phase(widget: PuttingGreenWidget) -> None:
+    widget._run_simulation()
+    widget._ball_item = MagicMock()
+    phases = widget._scene.phases
+    combo = widget.playback_bar().phase_combo
+    assert combo.count() == len(phases)
+    assert "Skid" in combo.itemText(1) and "Rest" in combo.itemText(len(phases) - 1)
+    for i, mark in enumerate(phases):
+        combo.activated.emit(i)
+        assert widget.playback_bar().scrub_slider.value() == mark.index
+        assert widget._anim_index == mark.index
+        assert not widget._anim_timer.isActive()

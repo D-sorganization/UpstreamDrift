@@ -97,6 +97,16 @@ with a message that names the missing module. The 3D view needs the optional
 - A contour-shaded green mesh, an animated ball, a flagstick, the aim line, and
   a ball track coloured by roll mode: amber while skidding, green in pure roll,
   grey once stopped.
+- **Playback** (#14473), under the 3D view: **Play**/**Pause**, a scrubber
+  over every trajectory sample (dragging it pauses the putt there), a jump list
+  that puts the ball where the hop, skid, roll and rest start, with each
+  phase's time, and a camera list: **Orbit** (the auto-framed default), **Down
+  the line** (behind the ball, looking along the ball-cup line), **Face on**
+  (square to the line, across from a right-handed player) and **Overhead**.
+  The phases are the shared core's `phase_marks` of the samples that were
+  rolled; nothing is re-derived in the tile.
+
+  ![Playback and camera views at 1280 px](images/putting_playback_1280.png)
 - **Batch Dispersion** (#14459): set the stroke noise (face-angle SD and speed
   CV), pick 40, 100 or 1000 putts and press **Run Batch** to roll them on the
   green you have dialled in (distance, stimp, cross slope). The rest positions

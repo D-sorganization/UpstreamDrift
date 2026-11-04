@@ -65,6 +65,8 @@ from src.shared.python.ui.units import (
 )
 from src.tools.putting_green_gui._batch_panel import BatchPanel, _Job
 from src.tools.putting_green_gui._sg_panel import SGPanel
+from src.tools.putting_green_gui._camera import camera_pose
+from src.tools.putting_green_gui._playback import PlaybackBar
 from src.tools.putting_green_gui._scene_text import (
     M_TO_FT,
     M_TO_IN,
@@ -390,6 +392,11 @@ class PuttingGreenWidget(QWidget):
         results_layout = QVBoxLayout(results_group)
 
         self._init_gl_view(results_layout)
+        self._playback = PlaybackBar()
+        self._playback.play_toggled.connect(self._toggle_playback)
+        self._playback.scrubbed.connect(self._on_scrub)
+        self._playback.view_changed.connect(self._on_view_chosen)
+        results_layout.addWidget(self._playback)
 
         self._results_text = HoverCopyTextBrowser()
         self._results_text.setReadOnly(True)
@@ -502,6 +509,7 @@ class PuttingGreenWidget(QWidget):
         leave_ft = 0.0 if scene.holed else scene.final_distance_to_cup_m * M_TO_FT
         self._sg_panel.set_putt(holed=scene.holed, leave_ft=leave_ft)
         self._render_scene(scene)
+        self._start_playback(scene)
 
     def is_solving(self) -> bool:
         """Whether an Auto-Solve is running on the worker."""
@@ -576,17 +584,58 @@ class PuttingGreenWidget(QWidget):
         self._start_item.setData(pos=scene.start_xyz.reshape(1, 3))
         self._ball_item.setData(pos=scene.trajectory_xyz[:1])
 
-        self._frame_camera(scene)
-        self._anim_index = 0
-        self._anim_timer.start()
+        self._apply_camera(scene)
 
-    def _frame_camera(self, scene: PuttScene) -> None:
+    def _start_playback(self, scene: PuttScene) -> None:
+        """Reset the playback bar to ``scene`` and play it."""
+        self._playback.load(scene)
+        self._anim_index = 0
+        self._set_playing(True)
+
+    def _apply_camera(self, scene: PuttScene) -> None:
         from pyqtgraph import Vector
 
-        width, height = scene.green_size
-        self._gl_view.opts["center"] = Vector(width / 2.0, height / 2.0, 0.0)
-        self._gl_view.opts["distance"] = max(width, height) * 1.5 + 4.0
+        pose = camera_pose(scene, self._playback.view())
+        self._gl_view.opts["center"] = Vector(*pose.center)
+        self._gl_view.opts["distance"] = pose.distance
+        self._gl_view.opts["elevation"] = pose.elevation_deg
+        self._gl_view.opts["azimuth"] = pose.azimuth_deg
         self._gl_view.update()
+
+    def playback_bar(self) -> PlaybackBar:
+        return self._playback
+
+    def _on_view_chosen(self) -> None:
+        if self._scene is not None and self._gl_view is not None:
+            self._apply_camera(self._scene)
+
+    def _set_playing(self, playing: bool) -> None:
+        if playing:
+            self._anim_timer.start()
+        else:
+            self._anim_timer.stop()
+        self._playback.set_playing(playing)
+
+    def _toggle_playback(self) -> None:
+        scene = self._scene
+        if scene is None:
+            return
+        playing = self._anim_timer.isActive()
+        if not playing and self._anim_index >= len(scene.trajectory_xyz):
+            self._anim_index = 0  # replay a finished putt from the stroke
+        self._set_playing(not playing)
+
+    def _show_sample(self, index: int) -> None:
+        """Put the ball at trajectory sample ``index``."""
+        if self._scene is not None and self._ball_item is not None:
+            traj = self._scene.trajectory_xyz
+            self._ball_item.setData(pos=traj[index : index + 1])
+
+    def _on_scrub(self, index: int) -> None:
+        """A scrub by the player pauses the putt at that sample."""
+        self._set_playing(False)
+        self._anim_index = index
+        self._show_sample(index)
 
     def _advance_animation(self) -> None:
         scene = self._scene
@@ -597,9 +646,10 @@ class PuttingGreenWidget(QWidget):
         n = traj.shape[0]
         if self._anim_index >= n:
             self._ball_item.setData(pos=traj[-1:])
-            self._anim_timer.stop()
+            self._set_playing(False)
             return
         self._ball_item.setData(pos=traj[self._anim_index : self._anim_index + 1])
+        self._playback.follow(self._anim_index)
         # Advance proportionally so every putt animates in similar wall-clock time.
         self._anim_index += max(1, n // 90)
 
