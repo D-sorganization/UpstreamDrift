@@ -68,7 +68,8 @@ function wrapDeg(angle: number): number {
 /**
  * Core arguments for the simulator's putt: distance along the line to the
  * hole, and the fall direction measured CCW from that line (both the core and
- * the 3D simulator build the plane with HeightField.planar).
+ * the 3D simulator build the plane with HeightField.planar). Assumes the
+ * simulator's ball starts at the origin, so the hole position is the line.
  */
 export function dispersionArgs(
   parameters: Putt3DSimulationRequest,

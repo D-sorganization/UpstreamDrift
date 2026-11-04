@@ -9,6 +9,7 @@ import type {
 } from "@/api/generated/types";
 import { simulatePutt3D } from "@/api/puttingClient";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
+import { DispersionPanel } from "@/components/putting/DispersionPanel";
 import { PuttingScene3D } from "@/components/visualization/PuttingScene3D";
 import { usePuttingStore } from "@/stores/usePuttingStore";
 import {
@@ -582,6 +583,8 @@ export function PuttingGreenPage() {
           Collision and trajectory quantities appear after simulation.
         </p>
       )}
+      <h2 className="mb-3 mt-6 text-sm font-semibold">Batch Dispersion</h2>
+      <DispersionPanel />
     </div>
   );
 
