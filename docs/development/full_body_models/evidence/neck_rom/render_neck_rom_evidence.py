@@ -95,7 +95,6 @@ def main() -> None:
     (OUT / "driver_swing_neck_excursion.json").write_text(
         json.dumps(excursion, indent=2) + chr(10), encoding="utf-8"
     )
-    print(json.dumps(excursion, indent=2))
 
 
 if __name__ == "__main__":
