@@ -87,38 +87,20 @@ class GreenShapeRequest(BaseModel):
     grade_percent: float = Field(0.0, ge=0.0, le=10.0)
     aspect_deg: float = Field(0.0, ge=-360.0, le=360.0, description="Falls toward")
     bump_height_m: float = Field(0.0, ge=0.0, le=0.05)
+    bump_length_m: float = Field(1.5, gt=0.0, le=20.0)
     tier_height_m: float = Field(0.0, ge=0.0, le=0.15)
+    tier_width_m: float = Field(1.0, gt=0.0, le=5.0)
     seed: int = Field(0, ge=0)
 
     def spec(self) -> GreenSpec:
         """The shared core's description of this green."""
         if self.preset is not None:
             return green_preset(self.preset.value)
-        return GreenSpec(
-            grade_percent=self.grade_percent,
-            aspect_deg=self.aspect_deg,
-            bump_height_m=self.bump_height_m,
-            tier_height_m=self.tier_height_m,
-            seed=self.seed,
-        )
+        return GreenSpec(**self.model_dump(exclude={"preset"}))
 
 
-class GreenPresetResponse(BaseModel):
-    """One named green shape from the shared core."""
-
-    key: str
-    grade_percent: float
-    aspect_deg: float
-    bump_height_m: float
-    bump_length_m: float
-    tier_height_m: float
-    tier_width_m: float
-
-
-class GreenPresetsResponse(BaseModel):
-    """Every named green shape the routes accept."""
-
-    presets: list[GreenPresetResponse]
+def _flat_green() -> GreenShapeRequest:
+    return GreenShapeRequest.model_validate({})
 
 
 class PuttSimulationRequest(BaseModel):
@@ -136,7 +118,7 @@ class PuttSimulationRequest(BaseModel):
     green_height: float = Field(20.0, description="Green height [m]", gt=0)
     hole_x: float = Field(10.0, description="Hole X position [m]")
     hole_y: float = Field(15.0, description="Hole Y position [m]")
-    green: GreenShapeRequest = Field(default_factory=GreenShapeRequest)
+    green: GreenShapeRequest = Field(default_factory=_flat_green)
     wind_speed: float = Field(0.0, description="Wind speed [m/s]", ge=0)
     wind_direction_x: float = Field(1.0, description="Wind direction X")
     wind_direction_y: float = Field(0.0, description="Wind direction Y")
@@ -167,7 +149,7 @@ class GreenReadingRequest(BaseModel):
     green_width: float = Field(20.0, description="Green width [m]", gt=0)
     green_height: float = Field(20.0, description="Green height [m]", gt=0)
     stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
-    green: GreenShapeRequest = Field(default_factory=GreenShapeRequest)
+    green: GreenShapeRequest = Field(default_factory=_flat_green)
 
 
 class GreenReadingResponse(BaseModel):
@@ -198,7 +180,7 @@ class ScatterAnalysisRequest(BaseModel):
     green_width: float = Field(20.0, gt=0)
     green_height: float = Field(20.0, gt=0)
     stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
-    green: GreenShapeRequest = Field(default_factory=GreenShapeRequest)
+    green: GreenShapeRequest = Field(default_factory=_flat_green)
 
 
 class ScatterAnalysisResponse(BaseModel):
@@ -789,20 +771,10 @@ async def get_green_contours(
     )
 
 
-@router.get("/green-presets", response_model=GreenPresetsResponse)
-async def list_green_presets() -> GreenPresetsResponse:
-    """The shared core's named green shapes (#14463)."""
-    return GreenPresetsResponse(
-        presets=[
-            GreenPresetResponse(
-                key=key,
-                grade_percent=spec.grade_percent,
-                aspect_deg=spec.aspect_deg,
-                bump_height_m=spec.bump_height_m,
-                bump_length_m=spec.bump_length_m,
-                tier_height_m=spec.tier_height_m,
-                tier_width_m=spec.tier_width_m,
-            )
-            for key, spec in GREEN_PRESETS.items()
-        ]
-    )
+@router.get("/green-presets", response_model=dict[str, GreenShapeRequest])
+async def list_green_presets() -> dict[str, GreenShapeRequest]:
+    """The shared core's named green shapes (#14463), by preset key."""
+    return {
+        key: GreenShapeRequest(**dataclasses.asdict(spec))
+        for key, spec in GREEN_PRESETS.items()
+    }

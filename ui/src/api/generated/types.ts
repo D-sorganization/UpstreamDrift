@@ -2062,26 +2062,6 @@ export interface GreenContourResponse {
 export type GreenPresetName = "flat_practice" | "undulating_championship" | "severe_slopes" | "tiered";
 
 /**
- * One named green shape from the shared core.
- */
-export interface GreenPresetResponse {
-  key: string;
-  grade_percent: number;
-  aspect_deg: number;
-  bump_height_m: number;
-  bump_length_m: number;
-  tier_height_m: number;
-  tier_width_m: number;
-}
-
-/**
- * Every named green shape the routes accept.
- */
-export interface GreenPresetsResponse {
-  presets: GreenPresetResponse[];
-}
-
-/**
  * Request for green reading between ball and target.
  */
 export interface GreenReadingRequest {
@@ -2125,7 +2105,9 @@ export interface GreenShapeRequest {
   /** Falls toward */
   aspect_deg: number;
   bump_height_m: number;
+  bump_length_m: number;
   tier_height_m: number;
+  tier_width_m: number;
   seed: number;
 }
 

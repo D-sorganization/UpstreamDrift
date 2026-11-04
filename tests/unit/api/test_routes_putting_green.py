@@ -506,7 +506,7 @@ def test_green_presets_route_lists_the_core_presets(client: TestClient) -> None:
 
     response = client.get("/tools/putting-green/green-presets")
     assert response.status_code == 200, response.text
-    presets = {p["key"]: p for p in response.json()["presets"]}
+    presets = response.json()
     assert set(presets) == set(GREEN_PRESETS)
     assert presets["tiered"]["tier_height_m"] == GREEN_PRESETS["tiered"].tier_height_m
 
