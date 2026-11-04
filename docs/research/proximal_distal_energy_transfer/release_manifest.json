@@ -845,9 +845,13 @@
       "sha256": "77a0088908653948bc9bacf65f9f4942205d9ff3067d6126c38a61889bb9e76d",
       "bytes": 133391
     },
+    "docs/research/proximal_distal_energy_transfer/data/figure_kinds.json": {
+      "sha256": "8f8b784094d2d6d0383edea68221364817ba852c45210cf5b505d77479fd9722",
+      "bytes": 1201
+    },
     "docs/research/proximal_distal_energy_transfer/data/figure_run_map.json": {
-      "sha256": "003c87fed94aa948364852497d1f0cf6ffab5a622f2d46c9a4b39d1979f7f3ba",
-      "bytes": 111313
+      "sha256": "51024223af06c686da24fd9e1bdbb91a44a8b7b84ccdd7facc2eaf0f60df1e14",
+      "bytes": 111715
     },
     "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json": {
       "sha256": "671a1fe6fe7de08fe2a044d354b5292e3e17c66d0a5da19fd121f17395aeebfe",
