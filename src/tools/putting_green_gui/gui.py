@@ -76,7 +76,8 @@ _FT_TO_M = 1.0 / _M_TO_FT
 _M_TO_CM = 100.0
 _MS_TO_MPH = 2.236936
 _M_TO_MM = 1000.0
-_M_TO_IN = _M_TO_FT * 12.0
+#: Inches per metre from the shared units module, as the batch panel uses.
+_M_TO_IN = 12.0 / from_display_distance(1.0, UnitSystem.IMPERIAL, unit="ft")
 _RAD_S_TO_RPM = 60.0 / (2.0 * math.pi)
 _PANEL_STYLE = """
 QWidget#puttControls { background-color: #1b2530; }
