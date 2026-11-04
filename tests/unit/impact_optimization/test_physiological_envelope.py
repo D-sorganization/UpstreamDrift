@@ -12,6 +12,7 @@ import pytest
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.impact_optimization.physiological_envelope import (
     DEFAULT_LIMITS_PATH,
+    ROOT_COORDINATES,
     PhysiologicalEnvelope,
     load_limits,
 )
@@ -27,11 +28,32 @@ SUBJECT = CapacitySubject(mass_kg=78.0, stature_m=1.71)
 pytestmark = pytest.mark.unit
 
 
+def _no_rom() -> frozenset[str]:
+    """Non-root coordinates the spec gives no range for (the shoulders)."""
+    declared = set(SPEC["coordinate_ranges_deg"])
+    names = capacity_for(tuple(SPEC["coordinate_order"]), SUBJECT).actuated_names
+    return frozenset(n for n in names if n not in declared) - ROOT_COORDINATES
+
+
 @pytest.fixture(scope="module")
 def env() -> PhysiologicalEnvelope:
     return PhysiologicalEnvelope.from_spec(
-        SPEC, SUBJECT, load_limits(DEFAULT_LIMITS_PATH)
+        SPEC,
+        SUBJECT,
+        load_limits(DEFAULT_LIMITS_PATH),
+        allow_unbounded_rom=_no_rom(),
     )
+
+
+def test_missing_rom_fails_closed_naming_the_shoulders() -> None:
+    with pytest.raises(ValueError, match="LSInputX") as exc:
+        PhysiologicalEnvelope.from_spec(SPEC, SUBJECT, load_limits(DEFAULT_LIMITS_PATH))
+    assert "RSInputZ" in str(exc.value)
+    assert "HipInput" not in str(exc.value)  # root is the explicit exemption
+
+
+def test_unbounded_rom_must_be_listed_explicitly() -> None:
+    assert _no_rom() == {f"{s}SInput{a}" for s in "LR" for a in "XYZ"}
 
 
 def test_torque_limits_come_from_nsx04_table(env: PhysiologicalEnvelope) -> None:

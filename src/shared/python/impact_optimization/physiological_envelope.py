@@ -75,6 +75,12 @@ def load_limits(path: Path | str = DEFAULT_LIMITS_PATH) -> dict[str, VelocityLim
     return out
 
 
+#: Root (pelvis-in-world) rotations: free by definition, so the one explicit
+#: exemption from the fail-closed ROM rule.  Every other coordinate needs a
+#: declared range or an explicit ``allow_unbounded_rom`` entry.
+ROOT_COORDINATES: frozenset[str] = frozenset({"HipInputX", "HipInputY", "HipInputZ"})
+
+
 @dataclass(frozen=True, eq=False)
 class PhysiologicalEnvelope:
     """Per-actuated-joint limits, all arrays aligned with ``names``."""
@@ -118,11 +124,14 @@ class PhysiologicalEnvelope:
         spec: Mapping[str, Any],
         subject: CapacitySubject,
         velocity_limits: Mapping[str, VelocityLimit],
+        allow_unbounded_rom: frozenset[str] = frozenset(),
     ) -> PhysiologicalEnvelope:
         """Build for every actuated (non-translation) coordinate of ``spec``.
 
         Fails closed (``ValueError``) when a coordinate lacks a torque or
-        velocity limit.
+        velocity limit, or a non-root coordinate lacks a declared range and
+        the caller did not list it in ``allow_unbounded_rom`` (an unbounded
+        joint would make any "no ROM violation" check vacuous).
         """
         cap = capacity_for(tuple(spec["coordinate_order"]), subject)
         ranges = spec["coordinate_ranges_deg"]
@@ -135,6 +144,17 @@ class PhysiologicalEnvelope:
         if missing:
             raise ValueError(f"no envelope limit for: {missing}")
         names = cap.actuated_names
+        no_rom = [
+            n
+            for n in names
+            if n not in ranges
+            and n not in ROOT_COORDINATES
+            and n not in allow_unbounded_rom
+        ]
+        if no_rom:
+            raise ValueError(
+                f"no declared ROM for: {no_rom}; pass allow_unbounded_rom to accept"
+            )
         return cls(
             names=names,
             tau_max_negative_nm=np.array(cap.tau_max_negative_nm, dtype=float),

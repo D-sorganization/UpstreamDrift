@@ -45,7 +45,13 @@ FACE_TO_PATH_RATIO = 10.0
 
 @dataclass(frozen=True)
 class ImpactWeights:
-    """Per-term weights; ``face / path`` defaults to 10:1 and is configurable."""
+    """Per-term weights; ``face / path`` defaults to 10:1 and is configurable.
+
+    The cost is quadratic, so 10:1 is a *weight* ratio: at iso-cost a 1 deg
+    face error equals ``sqrt(10)`` ~ 3.2 deg of path error.  If "10:1" is meant
+    in degrees (1 deg face == 10 deg path) the weight ratio is 100
+    (``ImpactWeights(face=100.0)``).  Which one is wanted is an open ruling.
+    """
 
     face: float = FACE_TO_PATH_RATIO
     path: float = 1.0
