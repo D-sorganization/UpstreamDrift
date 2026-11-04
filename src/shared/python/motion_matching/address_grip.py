@@ -92,10 +92,9 @@ def address_grip_roll_deg(
     if isinstance(model_state, Mapping) and "joints" in model_state:
         return flagship_driver_grip_roll(model_state)
 
-    require(
-        isinstance(model_state, AddressGripState),
-        "model_state must be an AddressGripState or spec mapping",
-    )
+    if not isinstance(model_state, AddressGripState):
+        require(False, "model_state must be an AddressGripState")
+        raise TypeError("model_state must be an AddressGripState")
 
     lead = np.asarray(model_state.lead_hand_frame, dtype=float)
     trail = np.asarray(model_state.trail_hand_frame, dtype=float)
@@ -168,7 +167,8 @@ def render_address_grip_overlay_png(
     else:
         rolls = flagship_driver_grip_roll()
 
-    fig, ax = plt.subplots(figsize=(8, 7), subplot_kw={"projection": "polar"})
+    fig, ax_raw = plt.subplots(figsize=(8, 7), subplot_kw={"projection": "polar"})
+    ax: Any = ax_raw
 
     # Polar plot: 0 is top (vertical, pi/2 in standard polar)
     ax.set_theta_zero_location("N")
