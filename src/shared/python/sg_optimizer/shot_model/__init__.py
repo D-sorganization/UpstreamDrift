@@ -13,6 +13,10 @@ from src.shared.python.sg_optimizer.shot_model.baseline import (
 from src.shared.python.sg_optimizer.shot_model.distributions import (
     TiltedBivariateGaussian,
 )
+from src.shared.python.sg_optimizer.shot_model.outcome import (
+    LandingSamples,
+    ShotOutcomeModel,
+)
 from src.shared.python.sg_optimizer.shot_model.player_profile import (
     ClubSkill,
     PlayerProfile,
@@ -21,6 +25,13 @@ from src.shared.python.sg_optimizer.shot_model.player_profile import (
 from src.shared.python.sg_optimizer.shot_model.putting import (
     leave_distance_distribution,
     make_probability,
+)
+from src.shared.python.sg_optimizer.shot_model.registry import (
+    BASELINE_BACKEND,
+    available_backends,
+    get_shot_model,
+    quick_sg,
+    register_shot_model,
 )
 from src.shared.python.sg_optimizer.shot_model.putting_provider import (
     CurvePuttingProvider,
@@ -31,6 +42,13 @@ from src.shared.python.sg_optimizer.shot_model.putting_provider import (
 )
 
 __all__ = [
+    "BASELINE_BACKEND",
+    "LandingSamples",
+    "ShotOutcomeModel",
+    "available_backends",
+    "get_shot_model",
+    "quick_sg",
+    "register_shot_model",
     "BaselineBag",
     "ClubBaseline",
     "ClubSkill",

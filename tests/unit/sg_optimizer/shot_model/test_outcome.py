@@ -41,7 +41,9 @@ _SAND = LIE_CODES["sand"]
 
 def _player() -> PlayerProfile:
     return PlayerProfile(
-        name="p", clubs={"7_iron": ClubSkill(skill_mult_lat=1.4, distance_offset=-5.0)}
+        name="p",
+        baseline=str(PGA_TOUR_YAML),
+        clubs={"7_iron": ClubSkill(skill_mult_lat=1.4, distance_offset=-5.0)},
     )
 
 
@@ -147,7 +149,7 @@ class _FixedModel:
 
 def test_transition_uses_injected_backend() -> None:
     raster = LieRaster(
-        codes=np.full((40, 40), _FAIRWAY, dtype=np.int8),
+        codes=np.full((80, 80), _FAIRWAY, dtype=np.int8),
         origin=(-100.0, -100.0),
         resolution_yd=5.0,
         pin=(0.0, 0.0),
