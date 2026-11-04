@@ -124,8 +124,13 @@ def _attach_full_body_sites(
 
 def _add_trunk_coupling(root: ET.Element, spec: dict[str, Any]) -> None:
     """Emit the enabled lumbar:thoracic joint equalities (none when off)."""
+    items = trunk_coupling_equalities(spec)
+    if not items:
+        return
     equality = root.find("equality")
-    for item in trunk_coupling_equalities(spec):
+    if equality is None:
+        equality = ET.SubElement(root, "equality")
+    for item in items:
         ET.SubElement(
             equality,
             "joint",

@@ -1,8 +1,4 @@
-"""SHOW-A3 (#14552, D4): the committed v2 showpiece spec is derived data.
-
-Drift test: committed bytes equal a fresh derivation from v1. Propagation test:
-a v1 change (A2 grip translation or rotation) reaches the v2 document.
-"""
+"""SHOW-A3 (#14552, D4): the committed v2 showpiece spec is derived data (drift + propagation)."""
 
 from __future__ import annotations
 

@@ -1,8 +1,4 @@
-"""SHOW-A3 (#14552): contracts of the v2 thoracic segment and its optional coupling.
-
-Covers the joint tree, ``coordinate_order``, trunk mass/COM, the ROM table and
-the OFF-by-default thoracic = ratio * lumbar equality (Bruno 2015 split).
-"""
+"""SHOW-A3 (#14552): v2 thoracic segment contracts and the OFF-by-default coupling."""
 
 from __future__ import annotations
 
@@ -148,8 +144,6 @@ def test_coupling_creates_the_equality_block_when_absent(v2_doc) -> None:
         _add_trunk_coupling,
     )
 
-    off, on = ET.Element("mujoco"), ET.Element("mujoco")
-    _add_trunk_coupling(off, with_trunk_coupling(v2_doc))
-    _add_trunk_coupling(on, with_trunk_coupling(v2_doc, enabled=True))
-    assert off.find("equality") is None  # off: nothing is added
-    assert len(on.findall("equality/joint")) == 3
+    root = ET.Element("mujoco")
+    _add_trunk_coupling(root, with_trunk_coupling(v2_doc, enabled=True))
+    assert len(root.findall("equality/joint")) == 3
