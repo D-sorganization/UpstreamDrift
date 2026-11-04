@@ -65,13 +65,12 @@ from src.shared.python.ui.units import (
 )
 from src.tools.putting_green_gui._batch_panel import BatchPanel, _Job
 from src.tools.putting_green_gui._scene_text import (
-    _M_TO_CM,
-    _M_TO_FT,
-    _M_TO_IN,
-    _MS_TO_MPH,
-    _format_impact,
-    _format_read,
+    M_TO_FT,
+    M_TO_IN,
+    format_metrics,
+    format_read,
 )
+from src.tools.putting_green_gui._style import panel_style
 from src.tools.putting_green_gui._scene_builder import (
     IMPACT_TOE_RANGE_M,
     UNDULATION_RANGE_M,
@@ -85,40 +84,8 @@ from src.tools.putting_green_gui._scene_builder import (
 
 logger = logging.getLogger(__name__)
 
-_FT_TO_M = 1.0 / _M_TO_FT
+_FT_TO_M = 1.0 / M_TO_FT
 _M_TO_MM = 1000.0
-#: Inches per metre from the shared units module, as the batch panel uses.
-_PANEL_STYLE = """
-QWidget#puttControls { background-color: #1b2530; }
-QLabel { color: #d7e2ec; }
-QLabel#puttTitle { color: #ffffff; font-size: 16px; font-weight: bold; }
-QGroupBox {
-    color: #9fd8a8; border: 1px solid #2f4254; border-radius: 6px;
-    margin-top: 10px; padding: 8px; font-weight: bold;
-}
-QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
-QDoubleSpinBox, QSpinBox, QComboBox {
-    background-color: #0f1822; color: #eaf2f8;
-    border: 1px solid #2f4254; border-radius: 4px; padding: 3px;
-}
-QPushButton {
-    background-color: #243343; color: #eaf2f8;
-    border: 1px solid #34536b; border-radius: 5px; padding: 6px;
-}
-QPushButton:hover { background-color: #2c3f52; }
-"""
-
-
-def _panel_style() -> str:
-    """The panel stylesheet; disabled inputs dim to the shared theme tokens."""
-    colors = get_tool_colors()
-    disabled = (
-        "QDoubleSpinBox:disabled, QSpinBox:disabled, QComboBox:disabled {"
-        f" background-color: {colors['surface_secondary']};"
-        f" color: {colors['text_secondary']};"
-        f" border-color: {colors['border_default']}; }}"
-    )
-    return _PANEL_STYLE + disabled + "\n"
 
 
 class PuttingGreenWidget(QWidget):
@@ -195,7 +162,7 @@ class PuttingGreenWidget(QWidget):
 
         if self._scene is not None:
             self._results_text.setPlainText(
-                _format_metrics(self._scene, self._unit_system)
+                format_metrics(self._scene, self._unit_system)
             )
         self._batch_panel.redraw()
 
@@ -244,7 +211,7 @@ class PuttingGreenWidget(QWidget):
         left = QWidget()
         left.setObjectName("puttControls")
         self._controls = left  # rests while Auto-Solve runs
-        left.setStyleSheet(_panel_style())
+        left.setStyleSheet(panel_style())
         left_layout = QVBoxLayout(left)
 
         title = QLabel("⛳  Putting Green Simulator")
@@ -340,7 +307,7 @@ class PuttingGreenWidget(QWidget):
 
     def _set_strike_units(self, toe_m: float) -> None:
         """Show the strike offset in mm (metric) or inches, keeping ``toe_m``."""
-        scale = 1000.0 if self._unit_system == UnitSystem.METRIC else _M_TO_IN
+        scale = 1000.0 if self._unit_system == UnitSystem.METRIC else M_TO_IN
         self._strike_spin.setSuffix(
             " mm" if self._unit_system == UnitSystem.METRIC else " in"
         )
@@ -350,7 +317,7 @@ class PuttingGreenWidget(QWidget):
         self._strike_spin.setValue(toe_m * scale)
 
     def _strike_toe_m(self) -> float:
-        scale = 1000.0 if self._unit_system == UnitSystem.METRIC else _M_TO_IN
+        scale = 1000.0 if self._unit_system == UnitSystem.METRIC else M_TO_IN
         return self._strike_spin.value() / scale
 
     def _add_green_type_rows(self, form: QFormLayout) -> None:
@@ -377,7 +344,7 @@ class PuttingGreenWidget(QWidget):
             spin.setEnabled(cross_slope)
 
     def _undulation_scale(self) -> float:
-        return _M_TO_MM if self._unit_system == UnitSystem.METRIC else _M_TO_IN
+        return _M_TO_MM if self._unit_system == UnitSystem.METRIC else M_TO_IN
 
     def _set_undulation_units(self, undulation_m: float) -> None:
         metric = self._unit_system == UnitSystem.METRIC
@@ -521,7 +488,7 @@ class PuttingGreenWidget(QWidget):
             return
 
         self._scene = scene
-        self._results_text.setPlainText(_format_metrics(scene, self._unit_system))
+        self._results_text.setPlainText(format_metrics(scene, self._unit_system))
         self._render_scene(scene)
 
     def is_solving(self) -> bool:
@@ -571,7 +538,7 @@ class PuttingGreenWidget(QWidget):
             )
         )
         self._results_text.setPlainText(
-            _format_read(solution, self._unit_system) + self._results_text.toPlainText()
+            format_read(solution, self._unit_system) + self._results_text.toPlainText()
         )
 
     def _render_scene(self, scene: PuttScene) -> None:
@@ -633,66 +600,6 @@ class PuttingGreenWidget(QWidget):
         """Release resources (stop the animation timer)."""
         self._anim_timer.stop()
         logger.debug("PuttingGreenWidget cleanup")
-
-
-def _format_metrics(
-    scene: PuttScene, unit_system: UnitSystem = UnitSystem.METRIC
-) -> str:
-    """Render a human-readable metrics panel for a finished putt."""
-    outcome = "HOLED" if scene.holed else "Missed"
-    dist_cm = scene.final_distance_to_cup_m * 100.0
-
-    if unit_system == UnitSystem.METRIC:
-        miss_line = (
-            "Result:        HOLED"
-            if scene.holed
-            else f"Result:        Missed by {dist_cm:.1f} cm"
-        )
-        roll_line = (
-            f"Total roll:    {scene.total_roll_m:.2f} m "
-            f"({scene.total_roll_m * _M_TO_FT:.1f} ft)\n"
-        )
-        break_line = (
-            f"Peak break:    {scene.peak_break_m * _M_TO_CM:.1f} cm "
-            f"({scene.peak_break_m * _M_TO_IN:.2f} in)\n"
-        )
-        speed_line = (
-            f"Launch speed:  {scene.launch_speed_ms:.2f} m/s "
-            f"({scene.launch_speed_ms * _MS_TO_MPH:.1f} mph)\n"
-        )
-    else:
-        dist_in = dist_cm / 2.54
-        miss_line = (
-            "Result:        HOLED"
-            if scene.holed
-            else f"Result:        Missed by {dist_in:.1f} in ({dist_cm:.1f} cm)"
-        )
-        roll_line = (
-            f"Total roll:    {scene.total_roll_m * _M_TO_FT:.1f} ft "
-            f"({scene.total_roll_m:.2f} m)\n"
-        )
-        break_line = (
-            f"Peak break:    {scene.peak_break_m * _M_TO_IN:.2f} in "
-            f"({scene.peak_break_m * _M_TO_CM:.1f} cm)\n"
-        )
-        speed_line = (
-            f"Launch speed:  {scene.launch_speed_ms * _MS_TO_MPH:.1f} mph "
-            f"({scene.launch_speed_ms:.2f} m/s)\n"
-        )
-
-    return (
-        f"Putting Simulation - {outcome}\n"
-        f"{'=' * 44}\n"
-        f"{miss_line}\n"
-        f"{roll_line}"
-        f"Roll time:     {scene.duration_s:.2f} s\n"
-        f"{break_line}"
-        f"{speed_line}"
-        f"Green:         {green_label(scene.green_type)}\n"
-        f"Roll model:    {scene.roll_model}\n"
-        f"Track colour:  amber = skidding, green = pure roll, grey = stopped\n"
-        f"{_format_impact(scene, unit_system)}"
-    )
 
 
 class PuttingGreenWindow(QMainWindow):
