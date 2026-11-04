@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import hashlib
+import json
+import os
 from pathlib import Path
 import sys
 
@@ -150,7 +152,11 @@ def test_changed_preset_output_is_drift(root, tmp_path, monkeypatch) -> None:
     _run(root, tmp_path / "run")
     registry = RunRegistry(tmp_path / "store")
     run_id = registry.add(tmp_path / "run")
-    (root / "fakepreset" / "study.py").write_text(_STUDY.replace("2.0", "3.0"))
+    study = root / "fakepreset" / "study.py"
+    stat = study.stat()
+    study.write_text(_STUDY.replace("2.0", "3.0"))
+    # Same size and mtime: a cached bytecode file would hide the edit.
+    os.utime(study, ns=(stat.st_atime_ns, stat.st_mtime_ns))
     report = reproduce_run(
         registry,
         run_id,
@@ -160,6 +166,9 @@ def test_changed_preset_output_is_drift(root, tmp_path, monkeypatch) -> None:
     )
     assert not report.reproduced
     assert "DRIFT" in report.format()
+    assert json.loads((root / "release" / "data" / "study.json").read_text()) == {
+        "peak": 3.0
+    }
 
 
 def test_preset_runs_with_this_interpreter(root, tmp_path, monkeypatch) -> None:
@@ -172,4 +181,15 @@ def test_preset_runs_with_this_interpreter(root, tmp_path, monkeypatch) -> None:
 
     monkeypatch.setattr(preset_run.subprocess, "run", spy)
     _run(root, tmp_path / "run")
-    assert seen[0][:3] == [sys.executable, "-m", "fakepreset.study"]
+    assert seen[0][0] == sys.executable
+    assert seen[0][1] == "-X" and seen[0][2].startswith("pycache_prefix=")
+    assert seen[0][3:] == ["-m", "fakepreset.study"]
+    assert not list(root.rglob("__pycache__"))
+
+
+def test_command_timeout_is_reported(root, tmp_path, monkeypatch) -> None:
+    (root / "fakepreset" / "slow.py").write_text("import time; time.sleep(5)")
+    monkeypatch.setattr(preset_run, "COMMAND_TIMEOUT_S", 0.5)
+    spec = _spec(commands=(("fakepreset.slow",),))
+    with pytest.raises(PresetRunError, match="fakepreset.slow timed out"):
+        _run(root, tmp_path / "run", spec)

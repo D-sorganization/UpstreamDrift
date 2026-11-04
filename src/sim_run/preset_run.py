@@ -22,6 +22,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 from src.sim_run.manifest import RunManifest
 from src.sim_run.manifest_emitter import (
@@ -107,24 +108,35 @@ def _watched_files(root: Path, watch: tuple[str, ...]) -> Iterator[Path]:
             yield from (path for path in base.rglob("*") if path.is_file())
 
 
-def _snapshot(root: Path, watch: tuple[str, ...]) -> dict[str, tuple[int, int]]:
-    """Map each watched file's repo path to its ``(mtime_ns, size)``."""
-    snapshot = {}
-    for path in _watched_files(root, watch):
-        stat = path.stat()
-        snapshot[path.relative_to(root).as_posix()] = (stat.st_mtime_ns, stat.st_size)
-    return snapshot
+def _snapshot(root: Path, watch: tuple[str, ...]) -> dict[str, tuple[int, str]]:
+    """Map each watched file's repo path to its ``(mtime_ns, sha256)``.
+
+    Hashing catches rewrites inside the filesystem's mtime resolution; the
+    mtime catches identical rewrites, which a rerun in place produces.
+    """
+    return {
+        path.relative_to(root).as_posix(): (path.stat().st_mtime_ns, sha256_file(path))
+        for path in _watched_files(root, watch)
+    }
 
 
-def _run_command(root: Path, command: tuple[str, ...]) -> None:
-    result = subprocess.run(
-        [sys.executable, "-m", *command],
-        cwd=str(root),
-        capture_output=True,
-        text=True,
-        timeout=COMMAND_TIMEOUT_S,
-        check=False,
-    )
+def _run_command(root: Path, command: tuple[str, ...], pycache: str) -> None:
+    # A fresh bytecode cache: a stale .pyc whose source kept its size and
+    # second-resolution mtime would otherwise run the old code.
+    args = [sys.executable, "-X", f"pycache_prefix={pycache}", "-m", *command]
+    try:
+        result = subprocess.run(
+            args,
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            timeout=COMMAND_TIMEOUT_S,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise PresetRunError(
+            f"{' '.join(command)} timed out after {COMMAND_TIMEOUT_S:.0f} s"
+        ) from exc
     if result.returncode != 0:
         tail = result.stderr.strip().splitlines()[-5:]
         raise PresetRunError(
@@ -135,15 +147,14 @@ def _run_command(root: Path, command: tuple[str, ...]) -> None:
 def _execute(spec: PresetSpec, root: Path) -> tuple[list[str], str]:
     """Run ``spec``; return the files it wrote and the digest of the rest."""
     before = _snapshot(root, spec.watch)
-    for command in spec.commands:
-        _run_command(root, command)
+    with tempfile.TemporaryDirectory(prefix="preset-pycache-") as pycache:
+        for command in spec.commands:
+            _run_command(root, command, pycache)
     after = _snapshot(root, spec.watch)
     written = sorted(name for name, stat in after.items() if before.get(name) != stat)
     if not written:
         raise PresetRunError(f"preset {spec.name!r} wrote no watched files")
-    unchanged = {
-        name: sha256_file(root / name) for name in sorted(after) if name not in written
-    }
+    unchanged = {name: after[name][1] for name in sorted(after) if name not in written}
     return written, sha256_json(unchanged)
 
 
