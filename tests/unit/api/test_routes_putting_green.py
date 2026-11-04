@@ -582,3 +582,38 @@ def test_unknown_or_out_of_range_greens_are_refused(
 ) -> None:
     response = getattr(client, method)(f"/tools/putting-green{path}", **kwargs)
     assert response.status_code == 422, response.text
+
+
+def test_counter_torque_serves_the_core_stroke_series(client: TestClient) -> None:
+    """Golden parity (#14469): every column is the core couple model's value."""
+    from dataclasses import asdict
+
+    from src.shared.python.putting_dynamics import counter_torque as ct
+
+    from src.shared.python.putting_dynamics import BALANCE_PRESETS
+
+    body = {
+        "preload_nm": 0.9,
+        "noise_scale": 0.4,
+        "putter": "counterbalanced",
+        "n_points": 30,
+    }
+    response = client.post("/tools/putting-green/counter-torque", json=body)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    inputs = ct.CounterTorqueInputs(
+        preload_nm=0.9, noise_scale=0.4, putter="counterbalanced"
+    )
+    core = [asdict(s) for s in ct.stroke_series(inputs, n_points=30)]
+    assert data["putter_name"] == BALANCE_PRESETS["counterbalanced"].name
+    for key, column in data["samples"].items():
+        assert column == pytest.approx([row[key] for row in core]), key
+    assert set(data["samples"]) == set(core[0])
+
+
+@pytest.mark.parametrize(
+    "body", [{"preload_nm": -1.0}, {"putter": "anser"}, {"n_points": 0}]
+)
+def test_counter_torque_rejects_bad_inputs(client: TestClient, body: dict) -> None:
+    response = client.post("/tools/putting-green/counter-torque", json=body)
+    assert response.status_code in (400, 422), response.text
