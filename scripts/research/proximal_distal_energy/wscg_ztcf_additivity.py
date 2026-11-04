@@ -3,18 +3,20 @@
 Runs the model pinned by ``wscg_model_selection.json`` (#14437) from its pinned
 initial condition under a deterministic joint-torque program, and at each
 sample evaluates the canonical pointwise counterfactuals at the same ``q``:
-full ``(q, v, u)``, ZTCF ``(q, v, 0)`` and ZVCF ``(q, 0, 0)``. Definitions,
-frames and signs are documented in ``tests/unit/research/
+full ``(q, v, u)``, ZTCF ``(q, v, 0)`` (the drift), ZVCF (the control
+component, ``M^-1 (B u + J^T (lambda - lambda_0))``, gravity counted once in
+ZTCF) and the zero-velocity, zero-torque acceleration ``(q, 0, 0)``.
+Definitions, frames and signs are documented in ``tests/unit/research/
 test_wscg_ztcf_additivity.py``; the canonical source is
-``docs/research/model_aware_matching/model_aware_matching.tex``.
+``src/shared/python/simulation_backends/ztcf_zvcf.py`` (#14494).
 
 Residuals (infinity norms of generalized accelerations):
 
-- ``split_residual``: ``a_full - a_ZTCF - M^-1 (B u + J^T (lambda - lambda_0))``
-- ``velocity_residual``: ``a_ZTCF - a_ZVCF - M^-1 (d(passive - bias) + d(J^T lambda))``
-- ``literal_residual``: ``a_ZTCF + a_ZVCF - a_full`` (structurally nonzero)
+- ``additivity_residual``: ``a_full - a_ZTCF - a_ZVCF``
+- ``velocity_residual``: ``a_ZTCF - a_00 - M^-1 (d(passive - bias) + d(J^T lambda))``
 
-A model-scenario result, not empirical validation.
+The identity is pointwise only; integrated counterfactual trajectories do not
+generally sum. A model-scenario result, not empirical validation.
 
 Usage::
 
@@ -105,24 +107,19 @@ def _solve_mass(model: mujoco.MjModel, data: mujoco.MjData, force: Any) -> Any:
 def _sample(model: mujoco.MjModel, data: mujoco.MjData, q: Any, v: Any, u: Any):
     full = _evaluate(model, data, q, v, u)
     ztcf = _evaluate(model, data, q, v, np.zeros_like(u))
-    zvcf = _evaluate(model, data, q, np.zeros_like(v), np.zeros_like(u))
-    control = _solve_mass(
-        model, data, full.actuator + full.constraint - ztcf.constraint
-    )
+    rest = _evaluate(model, data, q, np.zeros_like(v), np.zeros_like(u))
+    zvcf = _solve_mass(model, data, full.actuator + full.constraint - ztcf.constraint)
     velocity = _solve_mass(
         model,
         data,
-        ztcf.smooth_passive - zvcf.smooth_passive + ztcf.constraint - zvcf.constraint,
+        ztcf.smooth_passive - rest.smooth_passive + ztcf.constraint - rest.constraint,
     )
-    literal = ztcf.qacc + zvcf.qacc - full.qacc
     return {
         "speed": np.abs(v).max(),
         "full_norm": np.abs(full.qacc).max(),
-        "control_part_norm": np.abs(control).max(),
-        "split_residual": np.abs(full.qacc - ztcf.qacc - control).max(),
-        "velocity_residual": np.abs(ztcf.qacc - zvcf.qacc - velocity).max(),
-        "literal_residual": np.abs(literal).max(),
-        "literal_identity_residual": np.abs(literal - (zvcf.qacc - control)).max(),
+        "zvcf_norm": np.abs(zvcf).max(),
+        "additivity_residual": np.abs(full.qacc - ztcf.qacc - zvcf).max(),
+        "velocity_residual": np.abs(ztcf.qacc - rest.qacc - velocity).max(),
     }
 
 
@@ -148,14 +145,14 @@ def run_additivity() -> dict[str, np.ndarray]:
 
 def summarize(series: dict[str, np.ndarray]) -> dict[str, Any]:
     """Summary written beside the residual series."""
-    ratio = series["literal_residual"] / series["full_norm"]
+    share = series["zvcf_norm"] / series["full_norm"]
     return {
         "issue": 14438,
         "pinned_record": RECORD_PATH.as_posix(),
         "identities": {
-            "split": "a_full = a_ZTCF + M^-1 (B u + J^T (lambda - lambda_0))",
-            "velocity": "a_ZTCF - a_ZVCF = M^-1 (d(passive - bias) + d(J^T lambda))",
-            "literal": "a_ZTCF + a_ZVCF - a_full = a_ZVCF - control part",
+            "additivity": "a_full = a_ZTCF + a_ZVCF (pointwise only)",
+            "zvcf": "a_ZVCF = M^-1 (B u + J^T (lambda - lambda_0))",
+            "velocity": "a_ZTCF - a_00 = M^-1 (d(passive - bias) + d(J^T lambda))",
         },
         "torque_program": {
             "amplitude_ctrl": AMPLITUDE,
@@ -165,9 +162,9 @@ def summarize(series: dict[str, np.ndarray]) -> dict[str, Any]:
         },
         "declared_tolerance": {"abs": ABS_TOLERANCE, "rel": RELATIVE_TOLERANCE},
         "samples": int(len(series["time_s"])),
-        "max_split_residual": float(series["split_residual"].max()),
+        "max_additivity_residual": float(series["additivity_residual"].max()),
         "max_velocity_residual": float(series["velocity_residual"].max()),
-        "median_literal_residual_ratio": float(np.median(ratio)),
+        "median_zvcf_share": float(np.median(share)),
         "scope": "Model-scenario result; not empirical validation.",
         "series_file": SERIES_PATH.name,
     }

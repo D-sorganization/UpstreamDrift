@@ -2,9 +2,9 @@
   "issue": 14438,
   "pinned_record": "docs/research/proximal_distal_energy_transfer/data/wscg_model_selection.json",
   "identities": {
-    "split": "a_full = a_ZTCF + M^-1 (B u + J^T (lambda - lambda_0))",
-    "velocity": "a_ZTCF - a_ZVCF = M^-1 (d(passive - bias) + d(J^T lambda))",
-    "literal": "a_ZTCF + a_ZVCF - a_full = a_ZVCF - control part"
+    "additivity": "a_full = a_ZTCF + a_ZVCF (pointwise only)",
+    "zvcf": "a_ZVCF = M^-1 (B u + J^T (lambda - lambda_0))",
+    "velocity": "a_ZTCF - a_00 = M^-1 (d(passive - bias) + d(J^T lambda))"
   },
   "torque_program": {
     "amplitude_ctrl": 0.3,
@@ -17,9 +17,9 @@
     "rel": 1e-10
   },
   "samples": 30,
-  "max_split_residual": 2.941646926046815e-11,
+  "max_additivity_residual": 2.941646926046815e-11,
   "max_velocity_residual": 1.0169287634198554e-10,
-  "median_literal_residual_ratio": 2.5222241683754207,
+  "median_zvcf_share": 0.7770667986895752,
   "scope": "Model-scenario result; not empirical validation.",
   "series_file": "wscg_ztcf_additivity_residuals.npz"
 }
