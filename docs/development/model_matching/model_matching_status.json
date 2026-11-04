@@ -1,0 +1,85 @@
+{
+  "as_of": "2026-11-04",
+  "public_ready": false,
+  "capture": "capture-A: private tour-average driver capture, 34 markers, 360 Hz, 654 frames (raw data stays private)",
+  "engines": [
+    {
+      "engine": "mujoco",
+      "model": "full-body-v1 (44 coordinates), de Leva 1996 scaled, hip-calibrated, hands welded to club",
+      "approach": "Marker IK (26.1 mm) then forward dynamics with KKT feedback tracking",
+      "key_parameters": "12 Hz tracking cutoff; address calibration 5.6 mm; peak joint torque 537 N*m",
+      "marker_rms_mm": 50.9,
+      "joint_angle_rms_deg": 2.4,
+      "verified": true,
+      "evidence": "Private execution receipt (fit s32-fw-drv, capture sha256 cbcb4d84...a0971d); joint RMS is FD vs its own IK reference, not ground truth",
+      "date": "2026-10-10",
+      "verdict": "REJECTED (G3): closure residual 62.2 mm > 5 mm, weight fraction 0.04-2.82 outside 0.2-3.0, contact forces and replay artifacts missing",
+      "blocker": "#13177 refit on the v2 model; #13191 grip coupling"
+    },
+    {
+      "engine": "opensim",
+      "model": "Rajagopal skeleton golf_humanoid, tour-scaled, address-registered markers (OS9)",
+      "approach": "Kinematic marker IK only; no club-hand coupling, no muscles",
+      "key_parameters": "Address calibration 19.1 mm; max frame RMS 49.6 mm; humerus scales 1.46/1.24",
+      "marker_rms_mm": 32.5,
+      "joint_angle_rms_deg": null,
+      "verified": true,
+      "evidence": "docs/development/opensim_tour_matching/evidence/os9_address_registration/receipt.json",
+      "date": "2026-10-25",
+      "verdict": "Kinematics only; plausibility FAILS (trunk 30.2 deg vs 30 deg bound, implausible humerus scale)",
+      "blocker": "#13991 anatomical plausibility; #14429 OpenSim classify CI hang. The OpenSim G1 dynamic fit (evidence/matched/driver_g1_opensim, 2026-09-20) is worse: 245 mm, solver hit max iterations"
+    },
+    {
+      "engine": "opensim-msk-club",
+      "model": "golf_humanoid Rajagopal skeleton with club, no muscles",
+      "approach": "Club-tracking kinematics (msk_club_tracking.track_swing), turn_feet mode",
+      "key_parameters": "Lead grip error <= 1.8 mm; trail grip gap up to 17.8 mm",
+      "marker_rms_mm": 62.0,
+      "joint_angle_rms_deg": null,
+      "verified": false,
+      "evidence": "Render notes of 2026-10-28 only; landmark RMS 20 mm at address rising to 62-90 mm; no receipt re-checked",
+      "date": "2026-10-28",
+      "verdict": "Kinematics only; trail-hand gap open",
+      "blocker": "#13191 grip coupling; #13177 refit"
+    },
+    {
+      "engine": "pinocchio",
+      "model": "Full-body Pinocchio model with decoupled club (#10415)",
+      "approach": "Kinematic marker fit; separate G1 forward rollout REJECTED (2757 mm whole-marker RMSE)",
+      "key_parameters": "Club segment 50.2 mm, address club 10.4 mm, arms 191.6 mm, torso/head 180.7 mm; 654 frames",
+      "marker_rms_mm": 133.5,
+      "joint_angle_rms_deg": null,
+      "verified": true,
+      "evidence": "evidence/matched/driver_full_pinocchio/receipt.json and evidence/matched/driver_g1_pinocchio/receipt.json",
+      "date": "2026-09-18",
+      "verdict": "Kinematics only; body markers far off (only the club segment is close)",
+      "blocker": "No current whole-body Pinocchio refit scoped"
+    },
+    {
+      "engine": "drake",
+      "model": "Drake full-body trajectory optimization (MS-30, #10337); v2 golfer load and mass-parity only (#14028)",
+      "approach": "IPOPT trajectory optimization warm-started from the Crocoddyl G1 candidate",
+      "key_parameters": "G1 horizon; 100 iterations; knot control",
+      "marker_rms_mm": null,
+      "joint_angle_rms_deg": null,
+      "verified": true,
+      "evidence": "evidence/matched/driver_g1_drake/receipt.json reports 0.0 mm on every metric and PASSED; not credible because the fit scored warm-start markers, not the Drake rollout (#11567)",
+      "date": "2026-09-26",
+      "verdict": "No credible fit; committed receipt is invalid",
+      "blocker": "Re-run and re-score the Drake rollout after #11567; the stale PASSED receipt should be relabelled"
+    },
+    {
+      "engine": "myosuite",
+      "model": "MyoSuite replay of the G1 candidate",
+      "approach": "Kinematic replay only; dynamics not run",
+      "key_parameters": "Parity limit 15 mm; early 62.9 mm, terminal 297.9 mm",
+      "marker_rms_mm": 185.7,
+      "joint_angle_rms_deg": null,
+      "verified": true,
+      "evidence": "evidence/matched/driver_g1_myosuite/receipt.json (parity marker RMS 195.2 mm, failed)",
+      "date": "2026-09-21",
+      "verdict": "REJECTED: parity failed, no dynamics",
+      "blocker": "MyoSuite dynamics stage never run; model port not maintained"
+    }
+  ]
+}
