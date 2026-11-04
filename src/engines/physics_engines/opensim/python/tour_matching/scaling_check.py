@@ -16,7 +16,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
-from typing import Literal
+from typing import Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -24,10 +24,14 @@ from src.engines.physics_engines.opensim.python.tour_matching.scale import (
     estimate_segment_scales,
 )
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
-from src.sim_run.manifest import SHA256_PATTERN, validate_run_manifest
+from src.sim_run.manifest import (
+    RUN_MANIFEST_SCHEMA_VERSION,
+    SHA256_PATTERN,
+    validate_run_manifest,
+)
 
-SCALING_CHECK_VERSION = "1.0.0"
-ACCEPTANCE_REFERENCE = "#13991"
+SCALING_CHECK_VERSION: Final = "1.0.0"
+ACCEPTANCE_REFERENCE: Final = "#13991"
 METRICS_NAME = "scaling_check_metrics.json"
 MANIFEST_NAME = "run_manifest.json"
 MODEL_ID = "opensim/rajagopal_nominal_segment_lengths"
@@ -168,7 +172,7 @@ def write_scaling_check(
     out_dir.mkdir(parents=True, exist_ok=True)
     metrics_text = json.dumps(metrics.model_dump(mode="json"), indent=2) + "\n"
     manifest = {
-        "schema_version": "1.0.0",
+        "schema_version": RUN_MANIFEST_SCHEMA_VERSION,
         "model": {"model_id": MODEL_ID, "revision": _nominal_revision(metrics)},
         "parameters": {
             "check": "opensim_segment_scaling",
