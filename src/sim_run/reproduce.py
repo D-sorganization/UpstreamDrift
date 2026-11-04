@@ -12,7 +12,6 @@ from __future__ import annotations
 import argparse
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-import hashlib
 from pathlib import Path
 import sys
 import tempfile
@@ -22,6 +21,7 @@ import numpy as np
 
 from src.sim_run.engine_run import ENGINE_ADAPTERS, EngineUnavailable, run_engine
 from src.sim_run.manifest import RunManifest
+from src.sim_run.manifest_emitter import model_revision
 from src.sim_run.preset_run import PRESET_ENGINE, reproduce_preset
 from src.sim_run.run_registry import RunRegistry, RunRegistryError, default_store_root
 from src.sim_run.trajectory_run import Rollout
@@ -146,7 +146,7 @@ def _engine(manifest: RunManifest) -> str:
 
 def _check_model(manifest: RunManifest, model: str) -> None:
     revision = manifest.model.revision
-    digest = "sha256:" + hashlib.sha256(model.encode("utf-8")).hexdigest()
+    digest = model_revision(model)
     if not revision.startswith("sha256:"):
         raise ReproduceError(
             f"cannot verify model text against git revision {revision}; "

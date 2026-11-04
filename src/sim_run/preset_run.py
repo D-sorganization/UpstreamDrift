@@ -15,7 +15,6 @@ import argparse
 from collections.abc import Iterator
 from dataclasses import asdict, dataclass
 from datetime import datetime
-import hashlib
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -30,6 +29,7 @@ from src.sim_run.manifest import RunManifest
 from src.sim_run.manifest_emitter import (
     RunProvenance,
     emit_run_manifest,
+    model_revision,
     sha256_file,
     sha256_json,
 )
@@ -209,10 +209,9 @@ def run_preset(
         target = out / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(root / name, target)
-    spec_digest = hashlib.sha256(spec.to_text().encode("utf-8")).hexdigest()
     provenance = RunProvenance(
         model_id=f"release-preset/{spec.name}",
-        revision="sha256:" + spec_digest,
+        revision=model_revision(spec.to_text()),
         parameters={
             "preset": spec.name,
             "tier": spec.tier,

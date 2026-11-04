@@ -9,14 +9,18 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
-import hashlib
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from src.sim_run.manifest import RunManifest
-from src.sim_run.manifest_emitter import RunProvenance, emit_run_manifest, sha256_json
+from src.sim_run.manifest_emitter import (
+    RunProvenance,
+    emit_run_manifest,
+    model_revision,
+    sha256_json,
+)
 from src.sim_run.worker import get_repo_sha
 
 TRAJECTORY_FILENAME = "trajectory.npy"
@@ -88,7 +92,7 @@ def write_trajectory_run(
     qpos, qvel = run.initial
     provenance = RunProvenance(
         model_id=run.model_id,
-        revision="sha256:" + hashlib.sha256(run.model_text.encode("utf-8")).hexdigest(),
+        revision=model_revision(run.model_text),
         parameters={
             "duration_s": run.rollout.duration,
             "controls": "zero",
