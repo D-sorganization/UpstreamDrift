@@ -22,6 +22,7 @@ import numpy as np
 
 from src.sim_run.engine_run import ENGINE_ADAPTERS, EngineUnavailable, run_engine
 from src.sim_run.manifest import RunManifest
+from src.sim_run.preset_run import PRESET_ENGINE, reproduce_preset
 from src.sim_run.run_registry import RunRegistry, RunRegistryError, default_store_root
 from src.sim_run.trajectory_run import Rollout
 
@@ -82,6 +83,7 @@ def reproduce_engine(manifest: RunManifest, model: str, out_dir: Path) -> RunMan
 REPRODUCERS: Mapping[str, Reproducer] = {
     "mujoco": reproduce_mujoco,
     **dict.fromkeys(ENGINE_ADAPTERS, reproduce_engine),
+    PRESET_ENGINE: reproduce_preset,
 }
 
 
