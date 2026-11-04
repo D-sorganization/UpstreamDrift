@@ -25,15 +25,21 @@ from __future__ import annotations
 
 import dataclasses
 import math
-from typing import TYPE_CHECKING, Literal
+from enum import Enum
+from typing import TYPE_CHECKING, Annotated, Literal, Protocol
 
 import numpy as np
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field, field_validator
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.api.rate_limit import get_limit, limiter
 from src.shared.python.core.contracts import PostconditionError, precondition, require
+from src.shared.python.putting_dynamics.green_spec import (
+    GREEN_PRESETS,
+    GreenSpec,
+    green_preset,
+)
 from src.shared.python.putting_dynamics.putter_presets import (
     BALANCE_PRESETS,
     balance_preset,
@@ -65,6 +71,38 @@ _DEFAULT_LOFT_DEG = TYPICAL_LOFT_DEG
 # -- Request / Response Models --
 
 
+#: The shared core's preset names, so an unknown one is a 422 in body or query.
+GreenPresetName = Enum(  # type: ignore[misc]
+    "GreenPresetName", {key: key for key in GREEN_PRESETS}, type=str
+)
+
+
+class GreenShapeRequest(BaseModel):
+    """The green's shape (#14463): a named preset, or slope, tier and bumps.
+
+    A ``preset`` replaces every other field with that preset's shape.
+    """
+
+    preset: GreenPresetName | None = Field(None, description="GET /green-presets")
+    grade_percent: float = Field(0.0, ge=0.0, le=10.0)
+    aspect_deg: float = Field(0.0, ge=-360.0, le=360.0, description="Falls toward")
+    bump_height_m: float = Field(0.0, ge=0.0, le=0.05)
+    bump_length_m: float = Field(1.5, gt=0.0, le=20.0)
+    tier_height_m: float = Field(0.0, ge=0.0, le=0.15)
+    tier_width_m: float = Field(1.0, gt=0.0, le=5.0)
+    seed: int = Field(0, ge=0)
+
+    def spec(self) -> GreenSpec:
+        """The shared core's description of this green."""
+        if self.preset is not None:
+            return green_preset(self.preset.value)
+        return GreenSpec(**self.model_dump(exclude={"preset"}))
+
+
+def _flat_green() -> GreenShapeRequest:
+    return GreenShapeRequest.model_validate({})
+
+
 class PuttSimulationRequest(BaseModel):
     """Request to simulate a single putt."""
 
@@ -80,6 +118,7 @@ class PuttSimulationRequest(BaseModel):
     green_height: float = Field(20.0, description="Green height [m]", gt=0)
     hole_x: float = Field(10.0, description="Hole X position [m]")
     hole_y: float = Field(15.0, description="Hole Y position [m]")
+    green: GreenShapeRequest = Field(default_factory=_flat_green)
     wind_speed: float = Field(0.0, description="Wind speed [m/s]", ge=0)
     wind_direction_x: float = Field(1.0, description="Wind direction X")
     wind_direction_y: float = Field(0.0, description="Wind direction Y")
@@ -110,6 +149,7 @@ class GreenReadingRequest(BaseModel):
     green_width: float = Field(20.0, description="Green width [m]", gt=0)
     green_height: float = Field(20.0, description="Green height [m]", gt=0)
     stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
+    green: GreenShapeRequest = Field(default_factory=_flat_green)
 
 
 class GreenReadingResponse(BaseModel):
@@ -140,6 +180,7 @@ class ScatterAnalysisRequest(BaseModel):
     green_width: float = Field(20.0, gt=0)
     green_height: float = Field(20.0, gt=0)
     stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
+    green: GreenShapeRequest = Field(default_factory=_flat_green)
 
 
 class ScatterAnalysisResponse(BaseModel):
@@ -279,13 +320,16 @@ class Putt3DSimulationResponse(BaseModel):
 # -- Endpoints --
 
 
-def _build_flat_putting_surface(
-    stimp_rating: float, green_width: float, green_height: float
+def _build_putting_surface(
+    stimp_rating: float,
+    green_width: float,
+    green_height: float,
+    green: GreenSpec | None = None,
 ) -> tuple[SurfaceSpec, float, float]:
-    """Flat, homogeneous shared-core surface sized to cover one green.
+    """Shared-core surface of ``green`` (flat by default) covering one green.
 
-    ``/simulate``, ``/scatter`` and ``/contours`` describe their green as a
-    legacy flat surface spanning ``(0, 0)`` to ``(width, height)``; the
+    ``/simulate``, ``/scatter``, ``/read-green`` and ``/contours`` describe
+    their green as spanning ``(0, 0)`` to ``(width, height)``; the
     shared :class:`~src.shared.python.putting_dynamics.HeightField` /
     :class:`~src.shared.python.putting_dynamics.FrictionField` grids are
     centred on the origin instead (see ``putting_dynamics/surfaces.py``).
@@ -297,11 +341,29 @@ def _build_flat_putting_surface(
     responses stay in the legacy green-local frame the existing schema and
     frontend already use.
     """
-    from src.shared.python.putting_dynamics import SurfaceSpec
-
     extent_m = min(200.0, max(1.0, green_width, green_height))
-    surface = SurfaceSpec.flat_uniform(stimp_ft=stimp_rating, extent_m=extent_m)
+    spec = green if green is not None else GreenSpec()
+    surface = spec.surface(stimp_ft=stimp_rating, extent_m=extent_m)
     return surface, green_width / 2.0, green_height / 2.0
+
+
+class _GreenRequest(Protocol):
+    """A body request that rolls on a green (/simulate, /scatter, /read-green)."""
+
+    stimp_rating: float
+    green_width: float
+    green_height: float
+    green: GreenShapeRequest
+
+
+def _request_surface(request: _GreenRequest) -> tuple[SurfaceSpec, float, float]:
+    """:func:`_build_putting_surface` for a body request's green (#14463)."""
+    return _build_putting_surface(
+        request.stimp_rating,
+        request.green_width,
+        request.green_height,
+        request.green.spec(),
+    )
 
 
 def _to_surface_frame(
@@ -507,9 +569,7 @@ async def simulate_putt(
     from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_ball
 
-    surface, half_w, half_h = _build_flat_putting_surface(
-        payload.stimp_rating, payload.green_width, payload.green_height
-    )
+    surface, half_w, half_h = _request_surface(payload)
 
     direction = np.array([payload.direction_x, payload.direction_y])
     norm = math.hypot(float(direction[0]), float(direction[1]))
@@ -556,16 +616,13 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
     :func:`~src.shared.python.putting_dynamics.solve_aim` finds the
     putter-head speed and heading that hole (or just pass) the target by
     simulating the strike with :func:`~src.shared.python.putting_dynamics.
-    simulate_strike`, rather than a separate closed-form heuristic. The
-    request carries no slope inputs, so the green is flat, matching the
-    legacy engine's default surface. See issue #1206.
+    simulate_strike`, rather than a separate closed-form heuristic, on the
+    requested green (flat by default, #14463). See issue #1206.
     """
     from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import read_line, solve_aim
 
-    surface, half_w, half_h = _build_flat_putting_surface(
-        request.stimp_rating, request.green_width, request.green_height
-    )
+    surface, half_w, half_h = _request_surface(request)
     ball_xy = _to_surface_frame(request.ball_x, request.ball_y, half_w, half_h)
     target_xy = _to_surface_frame(request.target_x, request.target_y, half_w, half_h)
 
@@ -600,9 +657,7 @@ async def scatter_analysis(
     from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_ball
 
-    surface, half_w, half_h = _build_flat_putting_surface(
-        request.stimp_rating, request.green_width, request.green_height
-    )
+    surface, half_w, half_h = _request_surface(request)
 
     direction = np.array([request.direction_x, request.direction_y])
     norm = math.hypot(float(direction[0]), float(direction[1]))
@@ -670,13 +725,14 @@ async def get_putter_presets() -> BalancePresetsResponse:
 
 @router.get("/contours", response_model=GreenContourResponse)
 @precondition(
-    lambda width=20.0, height=20.0, resolution=20, stimp_rating=10.0: (
+    lambda green, width=20.0, height=20.0, resolution=20, stimp_rating=10.0: (
         width > 0 and height > 0 and resolution >= 2 and 6.0 <= stimp_rating <= 15.0
     ),
     "Green dimensions must be positive, resolution >= 2, and stimp_rating in [6, 15]",
 )
 @handle_api_errors
 async def get_green_contours(
+    green: Annotated[GreenShapeRequest, Depends()],
     width: float = 20.0,
     height: float = 20.0,
     resolution: int = 20,
@@ -684,16 +740,18 @@ async def get_green_contours(
 ) -> GreenContourResponse:
     """Get green elevation contour data for 2D visualization.
 
-    Reads the shared flat :class:`~src.shared.python.putting_dynamics.
-    HeightField` (epic #14141 step 7a); a flat green's elevations are
-    zero everywhere, matching the legacy engine's default flat surface.
+    Reads the shared :class:`~src.shared.python.putting_dynamics.
+    HeightField` of the requested green (epic #14141 step 7a, #14463); the
+    default flat green's elevations are zero everywhere.
     No roll model is involved, so this response carries no ``roll_model``
     field. See issue #1206.
     """
     if not (width is not None):
         raise ValueError("width must be provided")
 
-    surface, half_w, half_h = _build_flat_putting_surface(stimp_rating, width, height)
+    surface, half_w, half_h = _build_putting_surface(
+        stimp_rating, width, height, green.spec()
+    )
 
     xs = np.linspace(0, width, resolution)
     ys = np.linspace(0, height, resolution)
@@ -715,3 +773,13 @@ async def get_green_contours(
         elevations=elevations.tolist(),
         hole_position=[width / 2.0, height / 2.0],
     )
+
+
+@router.get("/green-presets", response_model=dict[str, GreenShapeRequest])
+@handle_api_errors
+async def list_green_presets() -> dict[str, GreenShapeRequest]:
+    """The shared core's named green shapes (#14463), by preset key."""
+    return {
+        key: GreenShapeRequest(**dataclasses.asdict(spec))
+        for key, spec in GREEN_PRESETS.items()
+    }

@@ -2059,6 +2059,8 @@ export interface GreenContourResponse {
   hole_position: number[];
 }
 
+export type GreenPresetName = "flat_practice" | "undulating_championship" | "severe_slopes" | "tiered";
+
 /**
  * Request for green reading between ball and target.
  */
@@ -2076,6 +2078,7 @@ export interface GreenReadingRequest {
   /** Green height [m] */
   green_height: number;
   stimp_rating: number;
+  green?: GreenShapeRequest;
 }
 
 /**
@@ -2090,6 +2093,22 @@ export interface GreenReadingResponse {
   aim_point: number[];
   elevations: number[];
   slopes: number[][];
+}
+
+/**
+ * The green's shape (#14463): a named preset, or slope, tier and bumps. A ``preset`` replaces every other field with that preset's shape.
+ */
+export interface GreenShapeRequest {
+  /** GET /green-presets */
+  preset?: GreenPresetName | null;
+  grade_percent: number;
+  /** Falls toward */
+  aspect_deg: number;
+  bump_height_m: number;
+  bump_length_m: number;
+  tier_height_m: number;
+  tier_width_m: number;
+  seed: number;
 }
 
 /**
@@ -3259,6 +3278,7 @@ export interface PuttSimulationRequest {
   hole_x: number;
   /** Hole Y position [m] */
   hole_y: number;
+  green?: GreenShapeRequest;
   /** Wind speed [m/s] */
   wind_speed: number;
   /** Wind direction X */
@@ -3407,6 +3427,7 @@ export interface ScatterAnalysisRequest {
   green_width: number;
   green_height: number;
   stimp_rating: number;
+  green?: GreenShapeRequest;
 }
 
 /**
