@@ -73,10 +73,8 @@ with a message that names the missing module. The 3D view needs the optional
   green you have dialled in (distance, stimp, cross slope). The rest positions
   are plotted around the hole (green holed, red missed) with the make rate and
   mean leave on misses. **0-45 ft Spread** plots the make % from 3 to 45 ft on
-  the same green. Both come from the shared skill roll model through the
-  dispersion service, the same numbers the web page and studio show. Studies
-  run in the background and take seconds; the spread plans one line fan per
-  distance, so it is the slower of the two.
+  the same green. Both come from the shared dispersion service and run in the
+  background; changing units replots them.
 
   ![Batch dispersion at 1280 px](images/putting_dispersion_imperial_1280.png)
 

@@ -161,6 +161,7 @@ class PuttingGreenWidget(QWidget):
             self._results_text.setPlainText(
                 _format_metrics(self._scene, self._unit_system)
             )
+        self._batch_panel.redraw()
 
     def _sync_units_combo(self) -> None:
         """Show the active unit system without re-triggering a user choice."""

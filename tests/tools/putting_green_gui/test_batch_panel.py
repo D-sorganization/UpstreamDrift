@@ -79,8 +79,7 @@ def test_flat_green_has_no_fall_direction() -> None:
 
 def test_panel_offers_the_studio_batch_sizes(panel: BatchPanel) -> None:
     combo = panel.size_combo
-    assert [combo.itemData(i) for i in range(combo.count())] == list(BATCH_SIZES)
-    assert BATCH_SIZES == (40, 100, 1000)
+    assert [combo.itemData(i) for i in range(combo.count())] == [40, 100, 1000]
 
 
 def test_batch_shows_the_service_answer(panel: BatchPanel) -> None:
@@ -99,6 +98,16 @@ def test_scatter_is_drawn_in_the_chosen_units(qapp: QApplication) -> None:
         xs = p.scatter_x()
         scale = 1.0 if system == UnitSystem.IMPERIAL else _FT_M
         assert xs[0] == pytest.approx(report["rest_x_ft"][0] * scale)
+
+
+def test_a_unit_change_replots_the_last_batch(qapp: QApplication) -> None:
+    units = [UnitSystem.IMPERIAL]
+    p = BatchPanel(lambda: _CONFIG, lambda: units[0])
+    p.size_combo.setCurrentIndex(0)
+    p.run_batch()
+    units[0] = UnitSystem.METRIC
+    p.redraw()
+    assert p.scatter_axis_label().endswith("(m)")
 
 
 def test_spread_plots_the_service_make_rates(panel: BatchPanel) -> None:

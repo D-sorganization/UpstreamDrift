@@ -1,12 +1,10 @@
 """Batch dispersion panel for the Putting Green Simulator (#14459, epic #14452).
 
-Runs the shared dispersion service
-(:mod:`src.shared.python.putting_analytics.service_dispersion`) on the green
-the user has dialled in: a batch of 40/100/1000 putts with stroke noise
-(face-angle SD and speed CV) plotted as rest positions around the hole, and
-the 3-45 ft make-% spread. No physics lives here; the panel turns the
-widget's :class:`PuttConfig` into service arguments and draws the answer in
-the user's chosen units.
+Runs :mod:`src.shared.python.putting_analytics.service_dispersion` on the
+dialled green: a 40/100/1000-putt batch with stroke noise (face SD, speed CV)
+plotted around the hole, and the 3-45 ft make-% spread. No physics lives
+here; the panel maps :class:`PuttConfig` to service arguments and plots the
+answer in the user's units.
 """
 
 from __future__ import annotations
@@ -89,10 +87,9 @@ class _Job(QRunnable):
 class BatchPanel(QGroupBox):
     """Stroke-noise inputs, batch and spread buttons, and the result plot.
 
-    ``config`` returns the widget's current putt; ``units`` its display units.
-    The buttons run the service on a worker thread (:meth:`start_batch`,
-    :meth:`start_spread`); :meth:`run_batch` and :meth:`run_spread` are the
-    synchronous equivalents. The plot canvas is :attr:`canvas`.
+    ``config`` returns the current putt, ``units`` the display units. Buttons
+    run the service on a worker (:meth:`start_batch`, :meth:`start_spread`);
+    :meth:`run_batch`/:meth:`run_spread` are synchronous; plots: :attr:`canvas`.
     """
 
     def __init__(
@@ -140,7 +137,7 @@ class BatchPanel(QGroupBox):
         self.canvas.setMinimumSize(160, 220)
         self.canvas.installEventFilter(self)
         self._stacked = False
-        self._spread: list[tuple[float, float]] = []
+        self._shown: dict[str, dict[str, Any]] = {}  # last report per chart
 
     @property
     def size_combo(self) -> QComboBox:
@@ -190,6 +187,7 @@ class BatchPanel(QGroupBox):
     def show_batch(self, report: dict[str, Any]) -> None:
         """Plot a dispersion report's rest positions and summarise it."""
         self._set_busy(False)
+        self._shown["batch"] = report
         scale, unit = self._length_scale()
         ax = self._scatter_ax
         ax.clear()
@@ -212,9 +210,7 @@ class BatchPanel(QGroupBox):
     def show_spread(self, report: dict[str, Any]) -> None:
         """Plot a make-spread report's make % against distance."""
         self._set_busy(False)
-        self._spread = list(
-            zip(report["distances_ft"], report["make_rate"], strict=True)
-        )
+        self._shown["spread"] = report
         scale, unit = self._length_scale()
         ax = self._spread_ax
         ax.clear()
@@ -229,6 +225,12 @@ class BatchPanel(QGroupBox):
         ax.set_ylim(0, 100)
         ax.set_title("Make % by Distance", fontsize=10)
         self.canvas.draw_idle()
+
+    def redraw(self) -> None:
+        """Replot the last results in the current units; a running job redraws."""
+        if not self.is_busy():
+            for kind, report in list(self._shown.items()):
+                (self.show_batch if kind == "batch" else self.show_spread)(report)
 
     def eventFilter(self, obj: QObject | None, event: QEvent | None) -> bool:
         if obj is self.canvas and event is not None:
@@ -266,7 +268,8 @@ class BatchPanel(QGroupBox):
         return [float(x) for x in offsets[:, 0]]
 
     def spread_points(self) -> list[tuple[float, float]]:
-        return list(self._spread)
+        report = self._shown.get("spread", {"distances_ft": [], "make_rate": []})
+        return list(zip(report["distances_ft"], report["make_rate"], strict=True))
 
     def _start(
         self,
