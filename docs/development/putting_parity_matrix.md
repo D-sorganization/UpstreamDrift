@@ -34,7 +34,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Core/API: present. `src/shared/python/putting_analytics/skill.py`, `src/shared/python/putting_analytics/service_variance.py`, `src/shared/python/putting_analytics/service_dispersion.py`. All 7 channels (face, path, speed, strike, read grade/aspect/stimp) in /variance-study, /dispersion, /make-spread and /simulated-curve; strike via strike_toe_sd_mm (#14461). /optimize keeps its paired line-and-speed batch for the aim search.
 - PyQt6: present. `src/tools/putting_green_gui/_batch_panel.py`. Batch Dispersion inputs for all 7 core channels, defaulting to the core profile; strike spread in mm or in.
 - React: partial (#14460). `ui/src/pages/PuttingGreen.tsx`, `ui/src/pages/PuttingAnalytics.tsx`. Simulator: friction_variation only (fixed seed); analytics page: line and speed SD.
-- Studio: present. `src/apps/putting_studio/js/core_attribution.js`, `scripts/generate_studio_attribution.py`. SG attribution from core-generated values (#14504); the Monte Carlo view keeps its illustrative draws.
+- Studio: present. `src/apps/putting_studio/js/core_attribution.js`, `scripts/generate_studio_attribution.py`. 7-channel SG attribution from core-generated values (#14504, strike #14461); the Monte Carlo view keeps its illustrative draws.
 
 **Dispersion Batches and 0-45 ft Make-% Spread**
 - Core/API: present. `src/shared/python/putting_analytics/service_dispersion.py`, `src/api/routes/putting_analytics.py`. /dispersion batches up to 2000 putts on a sloped green with any seed; /make-spread gives the 3-45 ft make-% curve.

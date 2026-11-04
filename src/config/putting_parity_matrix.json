@@ -22,7 +22,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/_batch_panel.py | Batch Dispersion inputs for all 7 core channels, defaulting to the core profile; strike spread in mm or in.",
         "react": "partial #14460 | ui/src/pages/PuttingGreen.tsx, ui/src/pages/PuttingAnalytics.tsx | Simulator: friction_variation only (fixed seed); analytics page: line and speed SD.",
         "tauri": "partial #14460 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "present | src/apps/putting_studio/js/core_attribution.js, scripts/generate_studio_attribution.py | SG attribution from core-generated values (#14504); the Monte Carlo view keeps its illustrative draws."
+        "studio": "present | src/apps/putting_studio/js/core_attribution.js, scripts/generate_studio_attribution.py | 7-channel SG attribution from core-generated values (#14504, strike #14461); the Monte Carlo view keeps its illustrative draws."
       }
     },
     "dispersion": {
