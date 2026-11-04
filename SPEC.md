@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-04 | #14537 | Putting dynamics: per-sample ball mode on /simulate and phase marks (hop, skid, roll, rest starts) on /simulate and /simulate-3d from the shared core, for playback jumps |
 | 2026-11-04 | #14532 | Putting page groundwork: the seven core noise channels, the simulator-to-core dispersion arguments and the /dispersion and /make-spread client, pinned to the shared core by a golden file (PUTT-SHARE b-web part 1) |
 | 2026-11-04 | #14528 | ud-sim preset-run stores a release preset run and ud-sim reproduce reruns it; preset commands run with a pinned SOURCE_DATE_EPOCH and PYTHONHASHSEED |
 | 2026-11-04 | #14534 | sim_run.figure_run_map maps each release figure to the stored run that wrote it, explaining any byte mismatch from the matplotlib version both copies embed |
