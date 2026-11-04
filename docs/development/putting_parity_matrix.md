@@ -10,7 +10,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Variance and Noise Channels | (b) | partial (#14459) | missing (#14459) | partial (#14460) | partial (#14460) | partial (#14459) |
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | partial (#14459) | missing (#14459) | partial (#14460) | partial (#14460) | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | partial (#14461) | present | present | partial (#14461) |
-| Toe/Heel Strike Location | (c) | partial (#14461) | missing (#14461) | present | present | partial (#14461) |
+| Toe/Heel Strike Location | (c) | present | missing (#14461) | present | present | partial (#14461) |
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | missing (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | partial (#14461) | missing (#14461) | partial (#14462) | partial (#14462) | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | partial (#14463) | partial (#14463) | partial (#14464) | partial (#14464) | partial (#14463) |
@@ -49,7 +49,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: partial (#14461). `src/apps/putting_studio/js/putting_physics.js`. Skid ends at a fixed distance; loft and launch not modelled.
 
 **Toe/Heel Strike Location**
-- Core/API: partial (#14461). `src/shared/python/putting_dynamics/collision.py`, `src/api/routes/putting_green.py`. strike(impact_toe_m) and /simulate-3d accept it; strike scatter not exposed in /variance-study or /simulated-curve.
+- Core/API: present. `src/shared/python/putting_dynamics/collision.py`, `src/shared/python/putting_analytics/skill_roll_model.py`, `src/api/routes/putting_green.py`. strike(impact_toe_m) and /simulate-3d accept it; strike_toe_sd_mm scatter costs pace via off_centre_speed_retention in /variance-study (strike factor) and /simulated-curve.
 - PyQt6: missing (#14461). `src/tools/putting_green_gui/_scene_builder.py`. build_putt_scene never passes impact_toe_m.
 - React: present. `ui/src/pages/PuttingGreen.tsx`. Impact Toe Offset slider.
 - Studio: partial (#14461). `src/apps/putting_studio/index.html`, `src/apps/putting_studio/js/controls_c.js`. Slider is toe-only (0-15 mm); no heel strikes.

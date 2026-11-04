@@ -154,7 +154,7 @@ def test_make_spread_matches_the_shared_service(client: TestClient) -> None:
         ("optimize", _study(n=service.MAX_ROLLOUTS), "candidates x n"),
         ("misread-cost", _study(), "reads"),
         ("library-study", _study(), "classes"),
-        ("variance-study", {**VARIANCE_BODY, "factors": ["strike"]}, "factors"),
+        ("variance-study", {**VARIANCE_BODY, "factors": ["wind"]}, "factors"),
         ("simulated-curve", {**CURVE_BODY, "n": 1}, "'n'"),
         ("dispersion", {**DISPERSION_BODY, "n": 5000}, "'n'"),
         ("make-spread", {**SPREAD_BODY, "stimp": 40.0}, "stimp"),

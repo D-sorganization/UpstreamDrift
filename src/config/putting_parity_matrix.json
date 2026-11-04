@@ -51,7 +51,7 @@
       "title": "Toe/Heel Strike Location",
       "cluster": "c",
       "cells": {
-        "core_api": "partial #14461 | src/shared/python/putting_dynamics/collision.py, src/api/routes/putting_green.py | strike(impact_toe_m) and /simulate-3d accept it; strike scatter not exposed in /variance-study or /simulated-curve.",
+        "core_api": "present | src/shared/python/putting_dynamics/collision.py, src/shared/python/putting_analytics/skill_roll_model.py, src/api/routes/putting_green.py | strike(impact_toe_m) and /simulate-3d accept it; strike_toe_sd_mm scatter costs pace via off_centre_speed_retention in /variance-study (strike factor) and /simulated-curve.",
         "pyqt6": "missing #14461 | src/tools/putting_green_gui/_scene_builder.py | build_putt_scene never passes impact_toe_m.",
         "react": "present | ui/src/pages/PuttingGreen.tsx | Impact Toe Offset slider.",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",

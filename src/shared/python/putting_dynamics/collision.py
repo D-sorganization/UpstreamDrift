@@ -78,6 +78,9 @@ from __future__ import annotations
 
 import math
 from dataclasses import replace
+from typing import TypeVar
+
+import numpy as np
 
 from src.shared.python.contracts import ensure, require, require_finite
 from src.shared.python.core.physics_constants import (
@@ -88,12 +91,15 @@ from src.shared.python.core.physics_constants import (
 
 from .types import CollisionReport, PutterState
 
+FloatOrArray = TypeVar("FloatOrArray", float, np.ndarray)
+
 __all__ = [
     "GROUND_RESTITUTION",
     "LOFT_SWEEP_MAX_DEG",
     "LOFT_SWEEP_MIN_DEG",
     "centre_strike_speed_ratio",
     "effective_head_mass",
+    "off_centre_speed_retention",
     "strike",
     "sweep_dynamic_loft",
 ]
@@ -138,9 +144,58 @@ def effective_head_mass(putter: PutterState, impact_toe_m: float) -> float:
         "impact offset within +/- 0.08 m",
         impact_toe_m,
     )
-    m_eff = 1.0 / (1.0 / putter.head_mass_kg + impact_toe_m**2 / putter.moi_kg_m2)
+    m_eff = _effective_mass(putter, impact_toe_m)
     ensure(0.0 < m_eff <= putter.head_mass_kg, "m_eff in (0, M]", m_eff)
     return m_eff
+
+
+def _effective_mass(putter: PutterState, impact_toe_m: FloatOrArray) -> FloatOrArray:
+    """``1/m_eff = 1/M + d^2/I`` for a scalar or an array of offsets."""
+    return 1.0 / (1.0 / putter.head_mass_kg + impact_toe_m**2 / putter.moi_kg_m2)
+
+
+def _reduced_mass(head_mass: FloatOrArray) -> FloatOrArray:
+    m_ball = float(GOLF_BALL_MASS_KG)
+    return head_mass * m_ball / (head_mass + m_ball)
+
+
+def off_centre_speed_retention(
+    putter: PutterState, impact_toe_m: np.ndarray
+) -> np.ndarray:
+    """Share of the centred-strike ball speed kept at each strike offset.
+
+    The normal impulse scales with the reduced mass of head and ball, and an
+    off-centre strike lowers the head's effective mass
+    (:func:`effective_head_mass`), so the ball leaves slower by
+    ``m_red(m_eff) / m_red(M)``. For a square face this is exactly the ratio
+    of :func:`strike` ball speeds; loft adds a mass-independent tangential
+    part that this vectorised helper leaves out (it is a few percent of the
+    launch speed at putting lofts). Heel and toe misses of equal size cost
+    the same. The face twist an offset strike also starts is not converted
+    into a start-line change: over the sub-millisecond contact it turns the
+    face by hundredths of a degree.
+
+    Args:
+        putter: Putter head; only head mass and MOI are used.
+        impact_toe_m: Strike offsets toe-ward of the head CG [m], any shape.
+
+    Returns:
+        Retention in ``(0, 1]``, the shape of ``impact_toe_m``; 1 when centred.
+
+    Raises:
+        ValueError: If an offset is non-finite or beyond +/- 0.08 m.
+    """
+    toe = np.asarray(impact_toe_m, dtype=float)
+    require(bool(np.all(np.isfinite(toe))), "impact offsets must be finite")
+    require(
+        bool(np.all(np.abs(toe) <= 0.08)),
+        "impact offsets within +/- 0.08 m",
+        float(np.max(np.abs(toe), initial=0.0)),
+    )
+    m_eff = _effective_mass(putter, toe)
+    retention = _reduced_mass(m_eff) / _reduced_mass(putter.head_mass_kg)
+    ensure(bool(np.all((retention > 0.0) & (retention <= 1.0))), "retention in (0, 1]")
+    return np.asarray(retention)
 
 
 def centre_strike_speed_ratio(putter: PutterState) -> float:
@@ -208,7 +263,7 @@ def strike(putter: PutterState, impact_toe_m: float = 0.0) -> CollisionReport:
     delta = math.radians(putter.loft_deg)
     m_ball = float(GOLF_BALL_MASS_KG)
     m_eff = effective_head_mass(putter, impact_toe_m)
-    m_red = m_eff * m_ball / (m_eff + m_ball)
+    m_red = _reduced_mass(m_eff)
 
     v_normal_rel = putter.speed_mps * math.cos(delta)
     impulse_n = (1.0 + putter.cor) * m_red * v_normal_rel
