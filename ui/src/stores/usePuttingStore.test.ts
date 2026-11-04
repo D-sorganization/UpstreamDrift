@@ -23,4 +23,12 @@ describe("usePuttingStore", () => {
     expect(usePuttingStore.getState().playing).toBe(false);
     expect(usePuttingStore.getState().parameters.loft_deg).toBe(6);
   });
+
+  it("persists the unit system and keeps it across a physics reset (#14458)", () => {
+    usePuttingStore.getState().setUnitSystem("imperial");
+    usePuttingStore.getState().reset();
+    expect(usePuttingStore.getState().unitSystem).toBe("imperial");
+    expect(localStorage.getItem("ud.unitSystem")).toBe("imperial");
+    usePuttingStore.getState().setUnitSystem("metric");
+  });
 });
