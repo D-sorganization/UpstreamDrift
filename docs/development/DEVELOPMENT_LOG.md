@@ -930,10 +930,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14460
 - **Branch:** merged via #14532
-- **PR:** #14532
+- **PR:** #14532, #14540
 - **Paths:** see #14532
 - **Started:** 2026-11-04
-- **Last verified:** 2026-11-04 (`ced87292`; collated from changes/14460-putting-page-groundwork-the-seven-core-n.md)
+- **Last verified:** 2026-11-04 (`411d89e5`; collated from changes/14460-react-putting-page-seven-core-noise-chan.md)
 - **Summary:** Putting page groundwork: the seven core noise channels, the simulator-to-core dispersion arguments and the /dispersion and /make-spread client, pinned to the shared core by a golden file (PUTT-SHARE b-web part 1)
 - **Next step:** Shipped in PR #14532.
 
@@ -943,10 +943,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14518
 - **Branch:** merged via #14524
-- **PR:** #14524, #14534, #14528
+- **PR:** #14524, #14534, #14528, #14539
 - **Paths:** see #14524
 - **Started:** 2026-11-04
-- **Last verified:** 2026-11-04 (`725ae488`; collated from changes/14518-ud-sim-preset-run-stores-a-release-prese.md)
+- **Last verified:** 2026-11-04 (`776d8892`; collated from changes/14518-the-proximal-distal-release-now-maps-eve.md)
 - **Summary:** Run release presets through the run store: sim_run.preset_run records which files a preset wrote, copies them into a run directory and emits a reproducible run manifest
 - **Next step:** Shipped in PR #14524.
 

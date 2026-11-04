@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-04 | #14539 | The proximal-distal release now maps every figure to the real stored run that wrote it (data/figure_run_map.json), recording what differs where the run's bytes do not match the release |
+| 2026-11-04 | #14540 | React putting page: seven core noise channels, 40/100/1000-putt dispersion batches with a rest scatter, and the 0-45 ft make-% spread from the shared core (PUTT-SHARE b-web) |
 | 2026-11-04 | #14537 | Putting dynamics: per-sample ball mode on /simulate and phase marks (hop, skid, roll, rest starts) on /simulate and /simulate-3d from the shared core, for playback jumps |
 | 2026-11-04 | #14532 | Putting page groundwork: the seven core noise channels, the simulator-to-core dispersion arguments and the /dispersion and /make-spread client, pinned to the shared core by a golden file (PUTT-SHARE b-web part 1) |
 | 2026-11-04 | #14528 | ud-sim preset-run stores a release preset run and ud-sim reproduce reruns it; preset commands run with a pinned SOURCE_DATE_EPOCH and PYTHONHASHSEED |
