@@ -140,3 +140,33 @@ def test_cli_writes_outputs_and_exit_code(
     validate_run_manifest(
         json.loads((out / scaling_check.MANIFEST_NAME).read_text("utf-8"))
     )
+
+
+def test_cli_appends_dated_trend_record_when_asked(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, nominal: dict[str, float]
+) -> None:
+    """#14446: a scaling-check run passed --trend appends one dated record."""
+    c3d = tmp_path / "capture.c3d"
+    c3d.write_bytes(b"synthetic")
+    monkeypatch.setattr(cli, "load_capture", lambda path: _synthetic_capture())
+    monkeypatch.setattr(cli, "DEFAULT_NOMINAL_LENGTHS_M", nominal)
+    trend = tmp_path / "trend.jsonl"
+    args = [str(c3d), "--ud-commit", UD_COMMIT, "--trend", str(trend)]
+    assert cli.main([*args, "--out", str(tmp_path / "a"), "--date", "2026-11-05"]) == 0
+    assert cli.main([*args, "--out", str(tmp_path / "b"), "--date", "2026-11-06"]) == 0
+    dates = [json.loads(line)["date"] for line in trend.read_text("utf-8").splitlines()]
+    assert dates == ["2026-11-05", "2026-11-06"]
+
+
+def test_cli_leaves_trend_alone_without_flag(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, nominal: dict[str, float]
+) -> None:
+    c3d = tmp_path / "capture.c3d"
+    c3d.write_bytes(b"synthetic")
+    monkeypatch.setattr(cli, "load_capture", lambda path: _synthetic_capture())
+    monkeypatch.setattr(cli, "DEFAULT_NOMINAL_LENGTHS_M", nominal)
+    calls: list[list[str]] = []
+    monkeypatch.setattr(cli, "trend_main", calls.append)
+    out = tmp_path / "out"
+    assert cli.main([str(c3d), "--out", str(out), "--ud-commit", UD_COMMIT]) == 0
+    assert calls == []
