@@ -26,7 +26,7 @@ from __future__ import annotations
 import dataclasses
 import math
 from enum import Enum
-from typing import TYPE_CHECKING, Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Literal, Protocol
 
 import numpy as np
 from fastapi import APIRouter, Depends, Request
@@ -347,6 +347,25 @@ def _build_putting_surface(
     return surface, green_width / 2.0, green_height / 2.0
 
 
+class _GreenRequest(Protocol):
+    """A body request that rolls on a green (/simulate, /scatter, /read-green)."""
+
+    stimp_rating: float
+    green_width: float
+    green_height: float
+    green: GreenShapeRequest
+
+
+def _request_surface(request: _GreenRequest) -> tuple[SurfaceSpec, float, float]:
+    """:func:`_build_putting_surface` for a body request's green (#14463)."""
+    return _build_putting_surface(
+        request.stimp_rating,
+        request.green_width,
+        request.green_height,
+        request.green.spec(),
+    )
+
+
 def _to_surface_frame(
     x_m: float, y_m: float, half_width: float, half_height: float
 ) -> tuple[float, float]:
@@ -550,12 +569,7 @@ async def simulate_putt(
     from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_ball
 
-    surface, half_w, half_h = _build_putting_surface(
-        payload.stimp_rating,
-        payload.green_width,
-        payload.green_height,
-        payload.green.spec(),
-    )
+    surface, half_w, half_h = _request_surface(payload)
 
     direction = np.array([payload.direction_x, payload.direction_y])
     norm = math.hypot(float(direction[0]), float(direction[1]))
@@ -608,12 +622,7 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
     from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import read_line, solve_aim
 
-    surface, half_w, half_h = _build_putting_surface(
-        request.stimp_rating,
-        request.green_width,
-        request.green_height,
-        request.green.spec(),
-    )
+    surface, half_w, half_h = _request_surface(request)
     ball_xy = _to_surface_frame(request.ball_x, request.ball_y, half_w, half_h)
     target_xy = _to_surface_frame(request.target_x, request.target_y, half_w, half_h)
 
@@ -648,12 +657,7 @@ async def scatter_analysis(
     from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_ball
 
-    surface, half_w, half_h = _build_putting_surface(
-        request.stimp_rating,
-        request.green_width,
-        request.green_height,
-        request.green.spec(),
-    )
+    surface, half_w, half_h = _request_surface(request)
 
     direction = np.array([request.direction_x, request.direction_y])
     norm = math.hypot(float(direction[0]), float(direction[1]))
@@ -772,6 +776,7 @@ async def get_green_contours(
 
 
 @router.get("/green-presets", response_model=dict[str, GreenShapeRequest])
+@handle_api_errors
 async def list_green_presets() -> dict[str, GreenShapeRequest]:
     """The shared core's named green shapes (#14463), by preset key."""
     return {
