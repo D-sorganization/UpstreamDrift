@@ -124,10 +124,11 @@ def _within_tolerance(
 ) -> bool:
     if impact.face_deg is None or impact.path_deg is None:
         return False
+    face, path, aoa = impact_errors_deg(impact, target)
     return bool(
-        abs(impact.face_deg - target.face_deg) <= tol.face_deg
-        and abs(impact.path_deg - target.path_deg) <= tol.path_deg
-        and abs(impact.aoa_deg - target.aoa_deg) <= tol.aoa_deg
+        abs(face) <= tol.face_deg
+        and abs(path) <= tol.path_deg
+        and abs(aoa) <= tol.aoa_deg
     )
 
 

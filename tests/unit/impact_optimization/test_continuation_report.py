@@ -124,4 +124,13 @@ def test_each_row_carries_face_path_aoa_error_and_deviation() -> None:
     for text in ("+0.30", "+0.55", "-0.10", "1.50"):
         assert text in row
     assert "Face err deg" in _render().splitlines()[0]
-    assert "Deviation" in _render().splitlines()[0]
+    assert "Weighted sq. deviation (cost)" in _render().splitlines()[0]
+
+
+def test_unobservable_errors_print_as_n_a_not_nan() -> None:
+    pt = _point(120.0, 120.0, True)
+    object.__setattr__(pt.solution, "face_error_deg", float("nan"))
+    result = ContinuationResult((pt,), 120.0)
+    row = render_continuation_report(result, [[]], {}).splitlines()[2]
+    assert "nan" not in row.lower()
+    assert "n/a" in row
