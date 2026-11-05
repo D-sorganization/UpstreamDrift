@@ -64,6 +64,9 @@ from src.shared.python.grip_contact.elastic_foundation import (
     elastic_foundation_parameters,
     winkler_patch_factor_m,
 )
+from src.shared.python.grip_contact.friction_curve_match import (
+    matched_static_friction,
+)
 from src.shared.python.grip_contact.grip_mesh import capped_cylinder_mesh, write_obj
 from src.shared.python.grip_contact.pad_contact import PadContactModel
 from src.shared.python.grip_contact.pad_layout import PadLayout
@@ -87,12 +90,11 @@ _GRAVITY_M_S2 = 9.80665
 
 
 class _GripAxisSampleContext(NamedTuple):
-    """Axis frame and club origin for topology pad wrench accumulation (#13560)."""
+    """Grip-axis frame for topology pad wrench accumulation (#13560)."""
 
     axis_point: np.ndarray
     axis: np.ndarray
     grip_r: float
-    club_origin_m: np.ndarray
 
 
 def single_pad_model(
@@ -203,13 +205,11 @@ def _calibrated_site_foundation_cached(
     (``F(delta) = k_W * Phi * delta^2``), matching both the preload force
     ``f_target = k_law * delta_nom / count`` and the local tangent stiffness
     ``dF/ddelta(delta_0) = 2 * F(delta_0) / delta_0 = k_law / count`` requires
-    ``delta_0 = 2 * delta_nom``.  Furthermore, the shared Stribeck-regularized
-    friction curve ``[mu_d + (mu_s - mu_d)*exp(-(v/v_tr)^2) + mu_v*v]*tanh(v/v_tr)``
-    with ``mu_s = 0.9, mu_d = 0.7`` is monotonically increasing without a static
-    peak above ``mu_d`` (at ``v = v_tr``, ``mu_law(v_tr) = 0.589`` whereas Simbody's
-    Hollars law peaks at ``mu_s``); mapping ``static_friction = law.dynamic_friction``
-    aligns Simbody's Hollars curve with the shared tangential law across all slip
-    regimes within 5 %.
+    ``delta_0 = 2 * delta_nom``.  Simbody's Hollars friction cannot reproduce the
+    shared Stribeck curve exactly, so the static coefficient is the closed-form
+    least-squares fit of the Hollars curve to the shared law
+    (``matched_static_friction``, 0.664 for ``mu_s = 0.9, mu_d = 0.7``) rather
+    than ``law.static_friction`` or ``law.dynamic_friction`` (#13560).
     """
     delta_nom = DEFAULT_TOPOLOGY_PRELOAD_M
     f_target = (law.stiffness_n_m * delta_nom) / count
@@ -224,7 +224,9 @@ def _calibrated_site_foundation_cached(
     ef = ElasticFoundationParameters(
         stiffness_n_m3=k_winkler,
         dissipation_s_m=law.dissipation_s_m,
-        static_friction=law.dynamic_friction,
+        static_friction=matched_static_friction(
+            law.static_friction, law.dynamic_friction
+        ),
         dynamic_friction=law.dynamic_friction,
         viscous_friction=law.viscous_friction,
         transition_velocity_m_s=law.transition_velocity_m_s,
@@ -576,7 +578,6 @@ class ContactGripSimulator(BushingGripSimulator):
         axis_point = sample_ctx.axis_point
         axis = sample_ctx.axis
         grip_r = sample_ctx.grip_r
-        club_origin_m = sample_ctx.club_origin_m
         f_pair = np.zeros(3)
         t_pair = np.zeros(3)
         fn_pair = 0.0
@@ -586,7 +587,7 @@ class ContactGripSimulator(BushingGripSimulator):
         u_rad_weighted = np.zeros(3)
         rel_mean = np.zeros(3)
         u_rad_mean = np.zeros(3)
-        for force, i_f, _i_t, local_pos, sphere_r, d0 in entries:
+        for force, i_f, i_t, local_pos, sphere_r, d0 in entries:
             rec = force.getRecordValues(state)
             f = np.array([rec.get(i_f + j) for j in range(3)])
             f_pair += f
@@ -596,10 +597,8 @@ class ContactGripSimulator(BushingGripSimulator):
             norm_rad = float(np.linalg.norm(radial))
             u_rad = radial / norm_rad if norm_rad > 1e-12 else np.array([0.0, 0.0, 1.0])
             pen_phys = max(0.0, sphere_r + grip_r - norm_rad)
-            # Match Pinocchio's mid-penetration lever (pad_contact sphere chain, #13560).
-            r_lever = grip_r - 0.5 * pen_phys
-            contact_lever = axis_point + (axis @ rel) * axis + u_rad * r_lever
-            t_pair += np.cross(contact_lever - club_origin_m, f)
+            # Simbody's own patch torque about the hand grip point (#13560).
+            t_pair += np.array([rec.get(i_t + j) for j in range(3)])
             rel_mean += rel
             u_rad_mean += u_rad
             fn_raw = max(0.0, -float(f @ u_rad))
@@ -656,9 +655,7 @@ class ContactGripSimulator(BushingGripSimulator):
         grip_r = top.cylinder.radius_m
         axis_offset = np.array([0.0, 0.0, -grip_r if side == "L" else grip_r])
         axis_point = p2 + r2 @ axis_offset
-        club_body = self._model.getBodySet().get(CLUB_BODY)
-        _, club_origin_m = _transform_to_rt(club_body.getTransformInGround(state))
-        sample_ctx = _GripAxisSampleContext(axis_point, axis, grip_r, club_origin_m)
+        sample_ctx = _GripAxisSampleContext(axis_point, axis, grip_r)
         total_f = np.zeros(3)
         total_t = np.zeros(3)
         pair_wrenches: dict[str, PairWrench] = {}

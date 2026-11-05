@@ -659,9 +659,9 @@ _DETERMINATE_ENGINE_CASES = [
         marks=[pytest.mark.requires_mujoco],
         id="mujoco-ten_finger-swing",
     ),
-    # OpenSim (G7/G7b): since #13555 passes ten_finger 0.04 s hold and passes
-    # determinate net_force for ten_finger swing; ten_finger swing, overlap and
-    # interlock exceed the tolerances on determinate net_moment_com (#13560).
+    # OpenSim (G7/G7b): the three 0.04 s hold cases pass (Simbody patch torque plus
+    # the fitted Hollars static friction, #13560); the three swing cases exceed the
+    # RMS tolerance on determinate net_moment_com (hyperstatic L/R force split).
     # Since #13308 the reference uses the same line-contact law as the
     # ElasticFoundationForce sphere chain, so the remaining gap is the friction
     # and patch-torque mapping (tau_n = 0, surface lever), not the capsule law.
@@ -676,10 +676,7 @@ _DETERMINATE_ENGINE_CASES = [
         "opensim",
         GripStyle.INTERLOCK,
         "hold",
-        marks=[
-            pytest.mark.requires_opensim,
-            _net_moment_xfail("OpenSim interlock hold", "peak 5.451% / RMS 2.512%"),
-        ],
+        marks=[pytest.mark.requires_opensim],
         id="opensim-interlock-hold",
     ),
     pytest.param(

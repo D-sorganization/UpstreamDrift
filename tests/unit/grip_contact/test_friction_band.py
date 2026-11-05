@@ -172,6 +172,6 @@ def test_engine_adapters_derive_friction_from_shared_law() -> None:
     assert "law.static_friction" in mj_src
 
     osim_src = inspect.getsource(osim_sim)
-    # The deliberate OpenSim mapping static_friction = law.dynamic_friction is documented behaviour
-    assert "static_friction=law.dynamic_friction" in osim_src
+    # OpenSim has no Stribeck peak: static friction is the Hollars-curve fit (#13560)
+    assert "static_friction=matched_static_friction(" in osim_src
     assert "dynamic_friction=law.dynamic_friction" in osim_src
