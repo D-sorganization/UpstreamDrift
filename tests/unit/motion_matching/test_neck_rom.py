@@ -144,3 +144,46 @@ def test_matched_driver_swing_neck_excursion_is_recorded() -> None:
         assert row["limit_deg"] == [rom.lower_deg, rom.upper_deg]
         # The fit sits at (not past) the axial limit: it is the binding joint.
         assert deg.min() >= rom.lower_deg - 0.5 and deg.max() <= rom.upper_deg + 0.5
+
+
+# --- Forward-dynamics model enforces the limit when opted in (D12, #14553) ---
+
+
+def _native_neck_model(neck_limits: bool):
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
+
+    return NativeMujocoFullBodyModel(SPEC.read_bytes(), neck_limits=neck_limits)
+
+
+def _neck_torque(model, name: str, deg: float, rate: float = 0.0) -> float:
+    q = dict.fromkeys(model.coordinate_order, 0.0)
+    v = dict(q)
+    q[name], v[name] = np.radians(deg), rate
+    off, _, _ = model.generalized_forces(q, v)
+    on = model._neck_limit_torque()  # noqa: SLF001 - state left at (q, v)
+    del off
+    return float(on[model._indices[name]])  # noqa: SLF001
+
+
+def test_native_model_default_applies_no_neck_limit_torque() -> None:
+    model = _native_neck_model(False)
+    assert _neck_torque(model, "NeckInputZ", 120.0) == 0.0
+
+
+def test_native_model_pushes_back_beyond_the_limit_only() -> None:
+    model = _native_neck_model(True)
+    hi = NECK_ROM["NeckInputZ"].upper_deg
+    assert _neck_torque(model, "NeckInputZ", hi - 5.0) == 0.0
+    assert _neck_torque(model, "NeckInputZ", hi + 5.0) < 0.0
+    lo = NECK_ROM["NeckInputZ"].lower_deg
+    assert _neck_torque(model, "NeckInputZ", lo - 5.0) > 0.0
+
+
+def test_native_model_neck_damps_only_outward_motion() -> None:
+    model = _native_neck_model(True)
+    hi = NECK_ROM["NeckInputZ"].upper_deg
+    out = _neck_torque(model, "NeckInputZ", hi + 5.0, rate=1.0)
+    back = _neck_torque(model, "NeckInputZ", hi + 5.0, rate=-1.0)
+    assert out < back < 0.0
