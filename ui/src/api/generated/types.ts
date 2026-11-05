@@ -196,6 +196,17 @@ export interface AimContextSchema {
 }
 
 /**
+ * The pace and line that hole a /simulate-3d putt (the desktop read).
+ */
+export interface AimSolve3DResponse {
+  putter_speed_mps: number;
+  aim_heading_deg: number;
+  break_m: number;
+  holed: boolean;
+  converged: boolean;
+}
+
+/**
  * Caller-supplied lineage and identity assertions.
  */
 export interface AnalysisContextV2 {
