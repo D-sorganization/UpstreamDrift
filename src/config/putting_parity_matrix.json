@@ -44,7 +44,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/gui.py, src/tools/putting_green_gui/_scene_builder.py | Impact block: launch angle, spin, skid distance, face twist, energy loss and putter slowdown from the strike() collision report.",
         "react": "present | ui/src/pages/PuttingGreen.tsx | Impact panel: launch speed/angle, putter speed before/after, contact proxy, face twist, energy loss, skid distance.",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "partial #14461 | src/apps/putting_studio/js/putting_physics.js | Skid ends at a fixed distance; loft and launch not modelled."
+        "studio": "present | src/apps/putting_studio/js/putting_physics.js, src/apps/putting_studio/js/core_impact.js | Skid ends where the core simulate_strike skid ends for the ball speed; launch angle and loft from the core table shown in the telemetry."
       }
     },
     "strike_location": {

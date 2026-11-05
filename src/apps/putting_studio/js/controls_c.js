@@ -161,6 +161,7 @@ document.getElementById('solveAimpointBtn').addEventListener('click', () => {
       crossPct: state.crossSlopePct,
       distFt: state.puttDistFt || 10.0,
       roughnessMm: state.surfaceRoughnessMm !== undefined ? state.surfaceRoughnessMm : 0.35,
+      skidTable: window.CORE_IMPACT.skid,
     });
     const miss = r.holed ? r.missDistCm * 0.1 : r.missDistCm;
     if (miss < bestMiss) { bestMiss = miss; bestAim = cand; }

@@ -246,7 +246,7 @@ function drawGreenRollSimulator() {
 
   // Skid-to-Roll transition line
   if (!state.stimpmeterMode) {
-    const xSkid = mapX(0.12 * holeX);
+    const xSkid = mapX(lastBatchStats.skidCm / 100.0); // core skid, #14647
     ctx.save();
     ctx.strokeStyle = 'rgba(245, 158, 11, 0.72)';
     ctx.setLineDash([6 * dpr, 5 * dpr]);

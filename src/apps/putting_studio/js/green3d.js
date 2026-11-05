@@ -145,6 +145,7 @@ function rebuildGreenDispersionBatch() {
       distFt: distFt,
       roughnessMm: roughnessMm,
       isStimpRamp: state.stimpmeterMode,
+      skidTable: window.CORE_IMPACT.skid,
     });
     greenBatchCB.push(rCB);
     if (rCB.holed) cbHoled++;
@@ -175,6 +176,7 @@ function rebuildGreenDispersionBatch() {
       distFt: distFt,
       roughnessMm: roughnessMm,
       isStimpRamp: state.stimpmeterMode,
+      skidTable: window.CORE_IMPACT.skid,
     });
     greenBatchUN.push(rUN);
     if (rUN.holed) unHoled++;
@@ -230,7 +232,7 @@ function rebuildGreenDispersionBatch() {
   const elLat = document.getElementById('greenLatSD');
   if (elCB) elCB.textContent = `${makePctCB.toFixed(1)}%`;
   if (elUN) elUN.textContent = `${makePctUN.toFixed(1)}%`;
-  if (elSkid) elSkid.textContent = `${lastBatchStats.skidCm.toFixed(1)} cm (SLIDING)`;
+  if (elSkid) elSkid.textContent = `${lastBatchStats.skidCm.toFixed(1)} cm (SLIDING), launch ${window.CORE_IMPACT.meta.launch_angle_deg.toFixed(1)}°`;
   if (elLat) elLat.textContent = `${rSD.toFixed(1)} cm vs ${stdArr(unY).toFixed(1)} cm`;
 
   const badgeMake = document.getElementById('makeRate3DBadge');

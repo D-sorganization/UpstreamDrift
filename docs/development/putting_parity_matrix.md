@@ -9,7 +9,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Selectable Units | (a) | missing (#14646) | present | missing (#14458) | missing (#14458) | present |
 | Variance and Noise Channels | (b) | present | present | present | present | present |
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | present | present | present |
-| Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | partial (#14461) |
+| Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | present |
 | Toe/Heel Strike Location | (c) | present | present | present | present | partial (#14461) |
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | present | present | present | present | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
@@ -46,7 +46,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Core/API: present. `src/shared/python/putting_dynamics/collision.py`, `src/shared/python/putting_dynamics/solver.py`, `src/api/routes/putting_green.py`. strike() plus skid-to-roll; /simulate-3d returns the collision block and skid distance.
 - PyQt6: present. `src/tools/putting_green_gui/gui.py`, `src/tools/putting_green_gui/_scene_builder.py`. Impact block: launch angle, spin, skid distance, face twist, energy loss and putter slowdown from the strike() collision report.
 - React: present. `ui/src/pages/PuttingGreen.tsx`. Impact panel: launch speed/angle, putter speed before/after, contact proxy, face twist, energy loss, skid distance.
-- Studio: partial (#14461). `src/apps/putting_studio/js/putting_physics.js`. Skid ends at a fixed distance; loft and launch not modelled.
+- Studio: present. `src/apps/putting_studio/js/putting_physics.js`, `src/apps/putting_studio/js/core_impact.js`. Skid ends where the core simulate_strike skid ends for the ball speed; launch angle and loft from the core table shown in the telemetry.
 
 **Toe/Heel Strike Location**
 - Core/API: present. `src/shared/python/putting_dynamics/collision.py`, `src/shared/python/putting_analytics/skill_roll_model.py`, `src/api/routes/putting_green.py`. strike(impact_toe_m) and /simulate-3d accept it; strike_toe_sd_mm scatter costs pace via off_centre_speed_retention in /variance-study (strike factor) and /simulated-curve.
