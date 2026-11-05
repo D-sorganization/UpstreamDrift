@@ -6,7 +6,7 @@ from src.shared.python.theme.tool_stylesheet import get_tool_colors
 
 PANEL_STYLE = """
 QWidget#puttControls { background-color: #1b2530; }
-QLabel { color: #d7e2ec; }
+QLabel, QCheckBox { color: #d7e2ec; }
 QLabel#puttTitle { color: #ffffff; font-size: 16px; font-weight: bold; }
 QGroupBox {
     color: #9fd8a8; border: 1px solid #2f4254; border-radius: 6px;
