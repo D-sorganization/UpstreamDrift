@@ -16,6 +16,8 @@ from src.shared.python.sg_optimizer.shot_model.baseline import load_baseline
 from src.shared.python.sg_optimizer.shot_model.outcome import LandingSamples
 from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
 from src.shared.python.sg_optimizer.shot_options import (
+    DispersionEllipse,
+    ShotOption,
     dispersion_ellipse,
     shot_options,
 )
@@ -27,6 +29,7 @@ from src.shared.python.sg_optimizer.strategy import (
     solve_mdp,
 )
 from src.shared.python.sg_optimizer.strategy_view import (
+    StrategyView,
     build_view,
     render_html,
     render_text,
@@ -214,3 +217,90 @@ def test_reference_par4_converges_and_says_so() -> None:
     assert 1.0 < view.tour_strokes < 5.0  # strokes to reach the green
     assert "NOT CONVERGED" not in render_text(view)
     assert "NOT CONVERGED" not in render_html(view)
+
+
+def test_header_says_strokes_to_green_not_strokes_gained() -> None:
+    """The numbers are strokes to reach the green; "SG" would misname them."""
+    view = build_view("par4", _problem(), _profile(), settings=CFG)
+    text, page = render_text(view), render_html(view)
+    for out in (text, page):
+        assert "SG" not in out
+        assert "strokes to green" in out.lower()
+        assert "green ends the hole" in out
+    assert "personal − tour" in page.lower().replace("&minus;", "−")
+
+
+def test_pin_only_mode_is_stated() -> None:
+    view = build_view(
+        "par4", _problem(), _profile(), settings=CFG, green_terminal_mode=False
+    )
+    assert "pin cell only" in render_text(view)
+    assert "pin cell only" in render_html(view)
+
+
+def _capped_tour(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make the tour solve report a large residual; the player solve is real."""
+    import dataclasses
+
+    from src.shared.python.sg_optimizer import strategy_view as sv
+
+    real = sv.solve_mdp
+
+    def fake(problem, profile, model, cfg):  # type: ignore[no-untyped-def]
+        mdp, res = real(problem, profile, model, cfg)
+        if profile.name == "tour":
+            res = dataclasses.replace(res, delta=0.5, iterations=cfg.max_iter)
+        return mdp, res
+
+    monkeypatch.setattr(sv, "solve_mdp", fake)
+
+
+@pytest.mark.parametrize("quick", [False, True])
+def test_unconverged_tour_solve_is_reported(
+    monkeypatch: pytest.MonkeyPatch, quick: bool
+) -> None:
+    _capped_tour(monkeypatch)
+    view = build_view("p", _problem(), _profile(), quick_tour=quick, settings=CFG)
+    assert not view.converged and view.residual == pytest.approx(0.5)
+    assert "NOT CONVERGED" in render_text(view)
+    assert "NOT CONVERGED" in render_html(view)
+
+
+def test_convergence_tolerance_comes_from_the_solver_settings() -> None:
+    loose = SolveSettings(n_samples=24, max_iter=40, tol=1e3)
+    view = build_view("p", _problem(), _profile(), settings=loose)
+    assert view.converged and view.iterations == 1
+
+
+def _one_option_view(aim_deg: float, **ell: float) -> StrategyView:
+    ellipse = DispersionEllipse(
+        centre_along=ell.get("along", 100.0),
+        centre_lateral=ell.get("lateral", 0.0),
+        semi_major=20.0,
+        semi_minor=5.0,
+        angle_deg=ell.get("angle", 0.0),
+    )
+    opt = ShotOption(
+        club="7_iron", aim_deg=aim_deg, expected_strokes=3.0, ellipse=ellipse
+    )
+    return StrategyView("h", 3.0, 3.2, (opt,))
+
+
+def test_ellipses_are_drawn_in_the_golfers_pin_line_frame() -> None:
+    """Aimed 30 deg left of the pin, 100 yd out: centre at (86.6, 50) up the page."""
+    page = render_html(_one_option_view(30.0))
+    assert 'cx="86.6" cy="-50.0"' in page
+    assert "rotate(-30.0 86.6 -50.0)" in page  # axis 0 + aim 30, y flipped
+
+
+def test_tilted_cloud_rotation_and_lateral_signs() -> None:
+    """A left-of-aim offset plots up the page; a CCW-tilted axis rotates negative."""
+    page = render_html(_one_option_view(0.0, along=100.0, lateral=10.0, angle=20.0))
+    assert 'cx="100.0" cy="-10.0"' in page
+    assert "rotate(-20.0 100.0 -10.0)" in page
+    right = render_html(_one_option_view(-10.0, along=100.0, angle=-5.0))
+    assert "rotate(15.0 " in right  # -5 + -10 = -15 CCW -> +15 in SVG
+
+
+def test_page_states_the_frame() -> None:
+    assert "pin line" in render_html(_one_option_view(0.0)).lower()
