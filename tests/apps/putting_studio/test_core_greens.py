@@ -128,6 +128,29 @@ def test_page_selects_a_core_green_everywhere_it_reads_one() -> None:
     assert "function activeCoreGreen()" in _js("state.js")
 
 
+@_requires_node
+@pytest.mark.parametrize("name", sorted(GREEN_PRESETS))
+def test_locked_slope_is_the_core_slope_at_the_ball(name: str) -> None:
+    # #14703: with a core preset the locked sliders read its slope at the ball.
+    hole_x = 25.0 * 0.3048
+    got = _node(
+        "PuttingPhysics.coreSlopePctAtBall("
+        + f"window.CORE_GREENS.presets[{json.dumps(name)}], {hole_x})"
+    )
+    assert isinstance(got, dict)
+    dzdx, dzdy = gen.core_field(name).gradient(-hole_x / 2.0, 0.0)
+    assert got["upPct"] == pytest.approx(100.0 * dzdx, abs=1e-3)
+    assert got["crossPct"] == pytest.approx(100.0 * dzdy, abs=1e-3)
+
+
+def test_locked_slope_labels_follow_the_core_green() -> None:
+    controls = _js("controls_a.js")
+    assert "function syncCoreSlopeLabels()" in controls
+    assert "PuttingPhysics.coreSlopePctAtBall(" in controls
+    sync = controls[controls.index("function syncUI()") :]
+    assert "syncCoreSlopeLabels();" in sync[: sync.index("\n}\n")]
+
+
 def test_matrix_studio_green_types_cell_is_present() -> None:
     matrix = _STUDIO.parents[2] / "src" / "config" / "putting_parity_matrix.json"
     features = json.loads(matrix.read_text(encoding="utf-8"))["features"]
