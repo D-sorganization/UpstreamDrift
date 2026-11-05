@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14419 · Avoid Merge_Group Changed-Paths Checkout Hang and Sync Admission Publisher
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14419
+- **Branch:** fix/14419-merge-group-checkout-depth
+- **PR:** #14420
+- **Paths:** see #14420
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`d100e477`; collated from changes/14419-avoid-merge-group-changed-paths-checkout.md)
+- **Summary:** Avoid merge_group changed-paths checkout hang and sync admission publisher
+- **Next step:** Merge the PR.
+
+### DL-#14417 · Sync the Admission Publisher Workflow and Provenance Digest With the Canonical Provider
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14417
+- **Branch:** codex/14417-admission-publisher-sync
+- **PR:** #14418
+- **Paths:** see #14418
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`982d34d5`; collated from changes/14417-sync-the-admission-publisher-workflow-an.md)
+- **Summary:** Sync the admission publisher workflow and provenance digest with the canonical provider
+- **Next step:** Merge the PR after required checks pass.
+
 ### DL-#14429 · Avoid OpenSim Classify Checkout Hang With Shallow Fetch
 
 - **State:** in_review
@@ -949,6 +975,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14640 · Replace Wall-Clock Speed-Up Ratio in Test_Topology_Contact_Batched With a Deterministic Per-Pair Kernel Call Count
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14640
+- **Branch:** merged via #14651
+- **PR:** #14651
+- **Paths:** see #14651
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`2c4bed1a`; collated from changes/14640-replace-wall-clock-speed-up-ratio-in-tes.md)
+- **Summary:** Replace wall-clock speed-up ratio in test_topology_contact_batched with a deterministic per-pair kernel call count
+- **Next step:** Shipped in PR #14651.
+
+### DL-#14495 · Align MuJoCo Counterfactuals Zvcf() and the MATLAB ZVCF Comments With the Control-Component Contract
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14495
+- **Branch:** merged via #14636
+- **PR:** #14636
+- **Paths:** see #14636
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`96bb31ae`; collated from changes/14495-align-mujoco-counterfactuals-zvcf-and-th.md)
+- **Summary:** Align MuJoCo counterfactuals zvcf() and the MATLAB ZVCF comments with the control-component contract
+- **Next step:** Shipped in PR #14636.
+
+### DL-#14472 · React/Tauri Putting Page: Saved Scenarios and Comparison Over the Shared Core, Golden-Pinned (Part 1 Of #14472)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14472
+- **Branch:** merged via #14637
+- **PR:** #14637
+- **Paths:** see #14637
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8f3a0df5`; collated from changes/14472-react-tauri-putting-page-saved-scenarios.md)
+- **Summary:** React/Tauri putting page: saved scenarios and comparison over the shared core, golden-pinned (part 1 of #14472)
+- **Next step:** Shipped in PR #14637.
 
 ### DL-#14630 · Putting: The Strokes Gained Chart Title Fits the Phone-Width Window and the Holed Check Box Reads on the Dark Controls Panel
 
