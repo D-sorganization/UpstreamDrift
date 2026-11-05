@@ -53,6 +53,11 @@ class TorquePanel(QGroupBox):
         form.addRow("Off-plane:", self._off_spin)
         self._gust_spin = _spin(2)
         form.addRow("Gust impulse:", self._gust_spin)
+        self._torque_fields = {  # input -> its core field name and range key
+            self._preload_spin: ("preload_nm", "PRELOAD_RANGE_NM"),
+            self._off_spin: ("off_preload_nm", "PRELOAD_RANGE_NM"),
+            self._gust_spin: ("gust_impulse_nm", "GUST_RANGE_NM"),
+        }
         self._set_torque_spins(
             {
                 self._preload_spin: defaults.preload_nm,
@@ -193,10 +198,18 @@ class TorquePanel(QGroupBox):
             f"Peak hand force {force}."
         )
 
+    def torque_input_ranges(self) -> dict[str, tuple[float, float]]:
+        """Each couple input's core range in N·m, keyed by its field name."""
+        return {
+            field: getattr(ct, range_key)
+            for field, range_key in self._torque_fields.values()
+        }
+
     def _set_torque_spins(self, values_nm: dict[QDoubleSpinBox, float]) -> None:
         system = self._shown_units
-        lo, hi = (to_display_torque(v, system) for v in ct.PRELOAD_RANGE_NM)
         for spin, value_nm in values_nm.items():
+            _, range_key = self._torque_fields[spin]
+            lo, hi = (to_display_torque(v, system) for v in getattr(ct, range_key))
             spin.blockSignals(True)
             spin.setSuffix(torque_suffix(system))
             spin.setRange(lo, hi)
