@@ -13,11 +13,13 @@ from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfi
 from src.shared.python.sg_optimizer.shot_model.skill_family import (
     IMPACT_FIELDS,
     SKILL_NAMES,
+    UNITS,
     ImpactDistribution,
     Provenance,
     SkillFamily,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_registry import (
+    derive_family,
     available_presets,
     get_skill_family,
 )
@@ -120,6 +122,28 @@ def test_yaml_round_trip_is_lossless(tmp_path: Path) -> None:
     fam.to_yaml(p)
     back = SkillFamily.from_yaml(p)
     assert back == fam
+
+
+def test_units_are_serialized_and_wrong_or_missing_units_rejected() -> None:
+    raw = get_skill_family("tour").to_dict()
+    assert raw["units"] == UNITS and UNITS["clubhead_speed_mph"] == "mph"
+    assert SkillFamily.from_dict(raw) == get_skill_family("tour")
+    for bad in (
+        {**UNITS, "clubhead_speed_mph": "m/s"},
+        {**UNITS, "face_angle_deg": "rad"},
+    ):
+        with pytest.raises(ContractViolationError, match="units"):
+            SkillFamily.from_dict({**raw, "units": bad})
+    del raw["units"]
+    with pytest.raises(ContractViolationError, match="units"):
+        SkillFamily.from_dict(raw)
+
+
+@pytest.mark.parametrize("bad", [0.0, -1.0, float("nan"), float("inf")])
+def test_derived_scales_must_be_finite_and_positive(bad: float) -> None:
+    spec = {"source": "x", "version": "1", "speed_scale": bad, "dispersion_scale": 1.0}
+    with pytest.raises(ContractViolationError, match="finite"):
+        derive_family(get_skill_family("tour"), "x", spec)
 
 
 def test_family_rejects_unknown_skill_and_empty() -> None:

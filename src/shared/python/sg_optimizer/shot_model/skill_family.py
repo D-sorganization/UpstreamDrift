@@ -9,7 +9,9 @@ conditions (speed, face, path, AoA, strike), never on joint torques (epic
 Vocabulary: ``IMPACT_FIELDS`` are attribute names of
 ``impact_parameters.ImpactParameters`` (single vocabulary, sign conventions
 GCV-15: +face open, +path in-to-out, +AoA upward; ``toe_mm``/``high_mm`` are the
-strike offsets as extracted). Units: mph, degrees, millimetres.
+strike offsets as extracted). Units: mph, degrees, millimetres (serialized as
+``units`` and checked on load). The putt link is not a skill here: putting stays
+in ``putting_provider``.
 """
 
 from __future__ import annotations
@@ -43,6 +45,8 @@ SKILL_NAMES: tuple[str, ...] = (
     "chip",
     "bunker",
 )
+# Unit of each field, taken from its name suffix; serialized and checked on load.
+UNITS: dict[str, str] = {f: f.rsplit("_", 1)[1] for f in IMPACT_FIELDS}
 PROVENANCE_KINDS = ("fit", "preset", "manual")
 _N = len(IMPACT_FIELDS)
 _PSD_TOL = 1e-9
@@ -127,6 +131,7 @@ class SkillFamily:
     def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
+            "units": dict(UNITS),
             "provenance": _prov_dict(self.provenance),
             "skills": {
                 k: {
@@ -146,6 +151,7 @@ class SkillFamily:
         require(
             "skills" in raw and "provenance" in raw, "family needs skills+provenance"
         )
+        check_units(raw)
         skills = {k: _spec_from(v) for k, v in raw["skills"].items()}
         return cls(str(raw["name"]), skills, Provenance(**raw["provenance"]))
 
@@ -159,6 +165,13 @@ class SkillFamily:
         p = Path(path)
         require(p.exists(), f"skill family file not found: {p}")
         return cls.from_dict(yaml.safe_load(p.read_text(encoding="utf-8")))
+
+
+def check_units(raw: dict[str, Any]) -> None:
+    """Fail closed unless ``raw["units"]`` is exactly the expected ``UNITS``."""
+    require(
+        raw.get("units") == UNITS, f"units must equal {UNITS}, got {raw.get('units')}"
+    )
 
 
 def _prov_dict(p: Provenance) -> dict[str, str]:
