@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14623 | SHOW-B4: physics backend on dispersion tables, EB shrinkage, personalised vs tour strategy |
+| 2026-11-05 | #14625 | SHOW-C3c: ROM and velocity binding report from rollout joint angles |
+| 2026-11-05 | #14626 | Putting simulator: the counter-torque panel bounds the gust input by the core's GUST_RANGE_NM instead of the preload range |
+| 2026-11-05 | #14624 | Add npm run tauri:artifact: a local Tauri installer named with version and commit, plus a sha256 file, never published |
 | 2026-11-05 | #14618 | SHOW-C6 shot-shape presets, ball-flight curvature sign tests and swing-variant artefact with run identity |
 | 2026-11-05 | #14615 | Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes |
 | 2026-11-05 | #14354 | OpenSim topology grip rebuilds club moment at mid-penetration lever; overlap hold net_moment_com xfail removed. |

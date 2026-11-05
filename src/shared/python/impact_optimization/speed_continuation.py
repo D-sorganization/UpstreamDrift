@@ -71,6 +71,11 @@ class ContinuationPoint:
     def achieved_mph(self) -> float:
         return self.solution.achieved_speed_mph
 
+    @property
+    def trajectory(self) -> np.ndarray:
+        """Rollout joint angles of this rung (delegates; keeps callers shallow)."""
+        return self.solution.trajectory
+
 
 @dataclass(frozen=True)
 class ContinuationResult:
@@ -145,7 +150,7 @@ def binding_report(
     TORQUE-ONLY: every line is a torque limit and says so. ROM and velocity
     binding (the known 125 mph limiters, e.g. thoracic axial and NeckInputZ)
     are NOT reported here; they need the rollout joint angles and rates and
-    land with the C3c full-body adapter, which closes #14561's reporting.
+    are reported by ``kinematic_binding.full_binding_report`` (SHOW-C3c).
 
     ``limit_notes`` maps a joint name to the provenance of its limit (for
     example "prior-derived estimate, not a measurement"), appended to that joint's
