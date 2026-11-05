@@ -1021,10 +1021,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14563
 - **Branch:** merged via #14620
-- **PR:** #14620
+- **PR:** #14620, #14670
 - **Paths:** see #14620
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`d5eafa44`; collated from changes/14563-show-c7-flight-report-and-measured-swing.md)
+- **Last verified:** 2026-11-05 (`a3a1276e`; collated from changes/14563-c7-slice-2-address-pose-stills-capture-f.md)
 - **Summary:** SHOW-C7 flight report and measured-swing flight card (Part of #14563)
 - **Next step:** Shipped in PR #14620.
 

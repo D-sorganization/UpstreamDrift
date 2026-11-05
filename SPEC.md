@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14670 | C7 slice 2: address-pose stills, capture-fit vs neutral showpiece grip (Part of #14563) |
 | 2026-11-05 | #14695 | Putting studio: the E vs capture-speed panel draws the core's expected strokes per pace (optimize.evaluate_actions on the solved E(d)) from core_sg.js and names the core's best entry speed; the strokes_gained studio cell is present |
 | 2026-11-05 | #14692 | R11: per-engine chain-shaft impact-window receipt and overlay now cover drake and pinocchio, with an engine-free gate |
 | 2026-11-05 | #14699 | NSX-24: unify ContactForceAllocator and MultiEngineTorqueAllocator on allocate_contact_frame conic path |
