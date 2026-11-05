@@ -17,6 +17,7 @@ from src.shared.python.impact_parameters import TargetFrame
 from src.shared.python.impact_parameters.shaft_state import (
     ShaftImpactState,
     decompose_deflection,
+    face_loft_deltas,
     shaft_state_series,
 )
 from src.shared.python.motion_matching.club_models import DRIVER
@@ -126,3 +127,45 @@ def test_rejects_mismatched_shapes(clamped):
         shaft_state_series(
             model, _times(3), q, np.zeros((2, model.nq)), dofs, tip, FRAME
         )
+
+
+@pytest.mark.parametrize(
+    ("bent", "face", "loft"),
+    [
+        (
+            (-0.0872, -0.9962, 0.0),
+            5.0,
+            0.0,
+        ),  # normal toward -X (RH golfer's right): open
+        ((0.0872, -0.9962, 0.0), -5.0, 0.0),  # closed
+        ((0.0, -0.9962, 0.0872), 0.0, 5.0),  # tilted up: more loft
+    ],
+)
+def test_face_loft_deltas_sign_conventions(bent, face, loft):
+    got = face_loft_deltas(np.array(bent), np.array([0.0, -1.0, 0.0]), FRAME)
+    assert got == pytest.approx((face, loft), abs=0.01)
+
+
+def test_bend_rotates_the_face_by_the_joint_angle(clamped):
+    """A single bend rotates the tip by that angle: |(face, loft)| = theta."""
+    model, dofs, tip = clamped
+    j, theta = 3, 0.02
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    axis = np.asarray(data.xaxis[j])
+    n_world = np.cross(axis, FRAME.z_t)  # horizontal, perpendicular to the axis
+    n_site = data.site(tip).xmat.reshape(3, 3).T @ (n_world / np.linalg.norm(n_world))
+    q = np.zeros((2, model.nq))
+    q[:, dofs[j]] = theta
+    state = shaft_state_series(
+        model, _times(2), q, np.zeros_like(q), dofs, tip, FRAME, face_normal_site=n_site
+    )
+    assert state.face_delta_deg is not None and state.loft_delta_deg is not None
+    got = math.hypot(state.face_delta_deg[1], state.loft_delta_deg[1])
+    assert got == pytest.approx(math.degrees(theta), rel=0.02)
+    assert (
+        shaft_state_series(
+            model, _times(2), q, np.zeros_like(q), dofs, tip, FRAME
+        ).face_delta_deg
+        is None
+    )
