@@ -937,6 +937,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14632 · Drake IK Now Implements the Club-Sole Ground Term (Base Was a No-Op), Fixing the 126.7 mm Address Hover
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14632
+- **Branch:** merged via #14634
+- **PR:** #14634
+- **Paths:** see #14634
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`d58c3d44`; collated from changes/14632-drake-ik-now-implements-the-club-sole-gr.md)
+- **Summary:** Drake IK now implements the club-sole ground term (base was a no-op), fixing the 126.7 mm address hover
+- **Next step:** Shipped in PR #14634.
+
 ### DL-#14568 · SHOW-B4: Physics Backend on Dispersion Tables, EB Shrinkage, Personalised vs Tour Strategy
 
 - **State:** shipped
@@ -995,10 +1008,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14471
 - **Branch:** merged via #14615
-- **PR:** #14615
+- **PR:** #14615, #14629
 - **Paths:** see #14615
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`9ab683af`; collated from changes/14471-putting-scenarios-core.md)
+- **Last verified:** 2026-11-05 (`392a57d0`; collated from changes/14471-putting-scenarios-desktop.md)
 - **Summary:** Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes
 - **Next step:** Shipped in PR #14615.
 
