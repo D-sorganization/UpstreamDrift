@@ -110,6 +110,7 @@ def _report_text(
     )
     from src.shared.python.loop_nullspace.capacity import capacity_for
 
+    sub = envelope_subset(envelope, run.controlled)
     table = render_continuation_report(
         run.result,
         run.kinematic_by_rung,
@@ -117,8 +118,8 @@ def _report_text(
         run.held,
         fidelity_note="rungs searched with projection off, 4 substeps; verdict "
         "from the default-policy replay",
+        assumed_limits=sub.assumed_limits(),
     )
-    sub = envelope_subset(envelope, run.controlled)
     band = source_band_from_capacity(capacity_for(order, subject), sub)
     lines = binding_report(run.result, sub, notes, band)
     bullets = "".join(f"- {ln}\n" for ln in lines)
