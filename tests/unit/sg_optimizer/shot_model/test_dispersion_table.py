@@ -111,7 +111,7 @@ def test_lie_modifier_hook_enables_other_lies() -> None:
 
 def test_convergence_is_hashed_provenance_and_tamper_evident(tmp_path: Path) -> None:
     conv = Convergence(converged=False, max_rel_change=0.05)
-    t = _build(n=200, convergence=conv)
+    t = _build(n=200).with_convergence(conv)
     assert t.provenance["convergence"] == {"converged": False, "max_rel_change": 0.05}
     assert t.table_hash != _build(n=200).table_hash
     p = tmp_path / "t.json"

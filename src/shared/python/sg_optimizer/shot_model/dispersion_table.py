@@ -92,6 +92,12 @@ def _hash(cells: tuple[DispersionCell, ...], meta: dict[str, Any]) -> str:
 
 
 @dataclass(frozen=True)
+class Convergence:
+    converged: bool
+    max_rel_change: float
+
+
+@dataclass(frozen=True)
 class DispersionTable:
     cells: tuple[DispersionCell, ...]
     provenance: dict[str, Any]
@@ -110,6 +116,16 @@ class DispersionTable:
                 return c
         require(False, f"no dispersion cell for {key}")
         raise AssertionError  # unreachable: require raises
+
+    def with_convergence(self, conv: Convergence) -> DispersionTable:
+        """Record the check in the hashed provenance (it is deterministic)."""
+        meta = {k: v for k, v in self.provenance.items() if k != "table_hash"}
+        meta["convergence"] = {
+            "converged": conv.converged,
+            "max_rel_change": round(conv.max_rel_change, 6),
+        }
+        prov = {**meta, "table_hash": _hash(self.cells, meta)}
+        return DispersionTable(self.cells, prov, self.runtime)
 
     def to_json(self, path: str | Path) -> None:
         raw = {
@@ -183,12 +199,6 @@ def build_table(
     return table
 
 
-@dataclass(frozen=True)
-class Convergence:
-    converged: bool
-    max_rel_change: float
-
-
 def check_convergence(
     family: SkillFamily,
     simulate: LandingSimulator,
@@ -231,14 +241,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out", required=True)
     a = p.parse_args(argv)
     family, sim = get_skill_family(a.family), PipelineLandingSimulator()
-    table = build_table(family, sim, n=a.n, seed=a.seed)
     worst = max(
         check_convergence(family, sim, s, n=a.n, seed=a.seed).max_rel_change
         for s in family.skills
     )
-    table.runtime["convergence_max_rel_change"] = worst  # outside the hash
-    table.runtime["converged"] = float(worst < CONVERGENCE_TOL)
-    table.to_json(a.out)
+    conv = Convergence(worst < CONVERGENCE_TOL, worst)
+    table = build_table(family, sim, n=a.n, seed=a.seed)
+    table.with_convergence(conv).to_json(a.out)
     return 0
 
 
