@@ -89,3 +89,43 @@ def test_sample_transitions_rejects_action_from_holed_state() -> None:
             n_samples=4,
             rng=rng,
         )
+
+
+class _FixedShot:
+    """Always lands 50 yd along the aim line, on it."""
+
+    def sample(self, player, shot, lie, conditions, rng, n):  # noqa: ANN001
+        from src.shared.python.sg_optimizer.shot_model.outcome import LandingSamples
+
+        return LandingSamples(along=np.full(n, 50.0), lateral=np.zeros(n))
+
+
+@pytest.mark.parametrize(
+    ("start", "expected"),
+    [((100.0, 0.0), (50.0, 0.0)), ((0.0, -100.0), (0.0, -50.0))],
+)
+def test_zero_aim_points_at_the_pin_from_any_cell(
+    start: tuple[float, float], expected: tuple[float, float]
+) -> None:
+    """Aims are pin-relative: from a cell past the pin, aim 0 shoots back at it."""
+    from src.shared.python.sg_optimizer.course.conditions import CourseConditions
+    from src.shared.python.sg_optimizer.course.rasterize import LieRaster
+    from src.shared.python.sg_optimizer.mdp.action import ShotAction
+    from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
+
+    codes = np.full((40, 40), _FAIRWAY, dtype=np.int8)
+    raster = LieRaster(codes, 10.0, (-200.0, -200.0), (0.0, 0.0), (-150.0, 0.0))
+    # start sits beyond the pin: the pin is at the origin, so the ball must come back.
+    out = sample_transitions(
+        State(x=start[0], y=start[1], lie=_FAIRWAY),
+        ShotAction(club="7_iron", aim_angle_rad=0.0),
+        PlayerProfile(name="p", baseline="unused"),
+        _FixedShot(),
+        CourseConditions.benign(),
+        raster,
+        3,
+        np.random.default_rng(0),
+    )
+    for o in out:
+        assert o.next_state.x == pytest.approx(expected[0], abs=1e-9)
+        assert o.next_state.y == pytest.approx(expected[1], abs=1e-9)

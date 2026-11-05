@@ -110,7 +110,7 @@ document.getElementById('pertImpulseSlider').addEventListener('input', (e) => {
 });
 document.getElementById('toeOffsetSlider').addEventListener('input', (e) => {
   state.toeOffsetMm = parseFloat(e.target.value);
-  document.getElementById('toeOffsetValLbl').textContent = `+${state.toeOffsetMm.toFixed(1)} mm`;
+  refreshUnitLabels();
   rebuildGreenDispersionBatch();
   syncUI();
 });
@@ -122,7 +122,7 @@ document.getElementById('pertZeroBtn').addEventListener('click', () => {
   document.getElementById('toeOffsetSlider').value = 0.0;
   document.getElementById('noiseSlider').value = 0.0;
   document.getElementById('pertImpulseValLbl').textContent = '0.00 N·m';
-  document.getElementById('toeOffsetValLbl').textContent = '+0.0 mm';
+  refreshUnitLabels();
   document.getElementById('noiseValLbl').textContent = '0.00x (Unperturbed Exact Match)';
   rebuildGreenDispersionBatch();
   syncUI();
@@ -139,35 +139,25 @@ document.getElementById('pertToeBtn').addEventListener('click', () => {
   state.toeOffsetMm = 10.0;
   state.t = 0.817;
   document.getElementById('toeOffsetSlider').value = 10.0;
-  document.getElementById('toeOffsetValLbl').textContent = '+10.0 mm';
+  refreshUnitLabels();
   rebuildGreenDispersionBatch();
   syncUI();
 });
 document.getElementById('solveAimpointBtn').addEventListener('click', () => {
-  // Fast analytical-seed + secant search for optimal uphill aim compensation angle
-  let bestAim = state.crossSlopePct * 2.68;
-  let bestMiss = 999.0;
-  const vNom = 1.32 + 0.03 * (state.uphillSlopePct / 0.5);
-  for (let cand = bestAim - 2.0; cand <= bestAim + 2.0; cand += 0.2) {
-    const r = PuttingPhysics.simulateSinglePuttRK4({
-      vClubMps: vNom,
-      aimDeg: cand,
-      pathErrDeg: 0,
-      faceErrDeg: 0,
-      strikeMm: 0,
-      moiKgM2: 5000 / 1.0e7,
-      stimpFt: state.stimpFt,
-      upPct: state.uphillSlopePct,
-      crossPct: state.crossSlopePct,
-      distFt: state.puttDistFt || 10.0,
-      roughnessMm: state.surfaceRoughnessMm !== undefined ? state.surfaceRoughnessMm : 0.35,
-    });
-    const miss = r.holed ? r.missDistCm * 0.1 : r.missDistCm;
-    if (miss < bestMiss) { bestMiss = miss; bestAim = cand; }
-  }
-  state.aimAngleDeg = parseFloat(bestAim.toFixed(1));
+  // Core optimum read (green_reading.solve_aim): head speed and aim together (#14649).
+  const sol = PuttingPhysics.solveAimCore({
+    stimpFt: state.stimpFt,
+    upPct: state.uphillSlopePct,
+    crossPct: state.crossSlopePct,
+    distFt: state.puttDistFt || 10.0,
+    skidTable: window.CORE_IMPACT.skid,
+    coreGreen: activeCoreGreen(),
+  });
+  state.read = { key: currentReadKey(), clubSpeedMps: sol.clubSpeedMps };
+  state.aimAngleDeg = parseFloat(sol.aimDeg.toFixed(1));
   document.getElementById('aimAngleSlider').value = state.aimAngleDeg;
-  document.getElementById('aimAngleValLbl').textContent = `${state.aimAngleDeg >= 0 ? '+' : ''}${state.aimAngleDeg.toFixed(1)}° Model Aim`;
+  const speed = coreUnitText('speed', sol.clubSpeedMps, 2, state.unitSystem);
+  document.getElementById('aimAngleValLbl').textContent = `${fmtSign(state.aimAngleDeg, 1)}° Core Read at ${speed}`;
   state.rollT = 3.6;
   rebuildGreenDispersionBatch();
   drawGreenRollSimulator();
@@ -181,7 +171,31 @@ document.getElementById('noiseSlider').addEventListener('input', (e) => {
   syncUI();
 });
 
+// Green Type: the slider green, or a core preset with the slope sliders locked (#14648).
+const greenPresetSelect = document.getElementById('greenPresetSelect');
+for (const [key, preset] of Object.entries(window.CORE_GREENS.presets)) {
+  const opt = document.createElement('option');
+  opt.value = key;
+  opt.textContent = `Core: ${preset.label}`;
+  greenPresetSelect.appendChild(opt);
+}
+function setGreenPreset(key) {
+  state.greenPreset = key;
+  greenPresetSelect.value = key;
+  for (const id of ['crossSlopeSlider', 'uphillSlopeSlider']) {
+    document.getElementById(id).disabled = key !== 'studio';
+  }
+}
+greenPresetSelect.addEventListener('change', (e) => {
+  setGreenPreset(e.target.value);
+  state.rollT = 3.6;
+  rebuildGreenDispersionBatch();
+  drawGreenRollSimulator();
+  syncUI();
+});
+
 document.getElementById('presetFlatGreenBtn').addEventListener('click', () => {
+  setGreenPreset('studio');
   state.crossSlopePct = 0.0; state.uphillSlopePct = 0.0; state.aimAngleDeg = 0.0;
   document.getElementById('crossSlopeSlider').value = 0.0;
   document.getElementById('uphillSlopeSlider').value = 0.0;
@@ -196,6 +210,7 @@ document.getElementById('presetFlatGreenBtn').addEventListener('click', () => {
 });
 
 document.getElementById('presetSlopedGreenBtn').addEventListener('click', () => {
+  setGreenPreset('studio');
   state.crossSlopePct = 2.2; state.uphillSlopePct = 0.4; state.aimAngleDeg = 6.0;
   document.getElementById('crossSlopeSlider').value = 2.2;
   document.getElementById('uphillSlopeSlider').value = 0.4;

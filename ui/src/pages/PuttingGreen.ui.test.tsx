@@ -23,6 +23,11 @@ vi.mock("@/api/puttingClient", () => ({
   runStrokesGained: vi.fn(),
   fetchPutterPresets: vi.fn(),
   fetchGreenPresets: vi.fn(),
+  fetchCounterTorque: vi.fn(),
+  runScenario: vi.fn(),
+  compareScenarios: vi.fn(),
+  exportSetup: vi.fn(),
+  importSetup: vi.fn(),
 }));
 
 vi.mock("@/components/visualization/PuttingScene3D", () => ({

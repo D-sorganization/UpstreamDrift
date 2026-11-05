@@ -25,6 +25,15 @@ under the id `simulation_backends`.
 
 ## The four backends at a glance
 
+### Instantaneous Drift / Control Components
+
+For the fixed-state decomposition, **ZTCF is the drift component** (applied
+torque set to zero while autonomous terms are retained) and **ZVCF is the
+control component** (`M(q)^{-1} τ`, with velocity and gravity terms zeroed).
+This component split is exact at a fixed state and **not additive over
+integrated trajectories**. See the normative definition in
+[`SPEC.md`](../../SPEC.md), §4.
+
 | Name     | Device | Batched | Dynamics primitives | Optional deps               |
 | -------- | ------ | ------- | ------------------- | --------------------------- |
 | `ode`    | CPU    | no      | yes (`M`, bias)     | none (always available)     |

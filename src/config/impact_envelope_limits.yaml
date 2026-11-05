@@ -30,6 +30,20 @@ velocity_limits_deg_s:
         note: "thorax rotation peak in golf is O(700-1000 deg/s); prior is ~2x margin",
       }
     verification_status: UNVERIFIED
+  - coordinates:
+      - lumbar_flexion
+      - lumbar_lateral_bending
+      - lumbar_axial_rotation
+      - thoracic_flexion
+      - thoracic_lateral_bending
+      - thoracic_axial_rotation
+    value: 2000
+    citation:
+      {
+        id: null,
+        note: "v2 regional trunk joints (L5/S1, T12/L1); same generous prior as the v1 spine (thorax rotation peak in golf is O(700-1000 deg/s), ~2x margin); not a sourced limit",
+      }
+    verification_status: UNVERIFIED
   - coordinates: [NeckInputX, NeckInputY, NeckInputZ]
     value: 1500
     citation: { id: null, note: "neck follows the torso; generous prior" }

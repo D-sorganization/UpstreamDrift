@@ -144,6 +144,34 @@ with a message that names the missing module. The 3D view needs the optional
 
   ![Strokes gained at 390 px](images/putting_strokes_gained_390.png)
 
+- **Counter-Torque Stabilization** (#14469) charts the shared core's
+  two-hand couple model over the stroke: the lead and trail hands' in-plane
+  couples, and the face twist a gust starts with the grip preload held and
+  with a slack grip. Set the grip and off-plane preload, the gust impulse,
+  hand noise, lie and the putter head (the shared balance presets). Couples
+  read in N·m or in·lbf and forces in N or lbf with the unit choice. The
+  model is closed form, so the charts replot on every change.
+
+  ![Counter-torque panel at 1280 px](images/putting_counter_torque_1280.png)
+
+  ![Counter-torque panel at 390 px](images/putting_counter_torque_390.png)
+
+- **Scenarios** (#14471): **Save Scenario** stores the dialled green and
+  stroke under a name (or "Scenario N") and rolls its dispersion batch in the
+  background. The table compares each scenario with the first: make rate,
+  the change in points, mean leave and its change, in the chosen units.
+  **Export JSON...** writes the shared setup document (`schema_version`
+  4.0.0) with the saved scenarios; **Import JSON...** reads one, or a
+  putting studio export, and puts its distance, Stimp and grade back on the
+  controls. The desktop cross slope always falls right, so an imported
+  aspect is not kept. It is the shared `service_setup` the API's
+  `/scenario`, `/scenario-compare`, `/setup-export` and `/setup-import`
+  routes use.
+
+  ![Scenarios at 1280 px](images/putting_scenarios_1280.png)
+
+  ![Scenarios at 390 px](images/putting_scenarios_390.png)
+
 ## Method
 
 The GUI is a thin renderer. All domain logic is in

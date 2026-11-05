@@ -13,6 +13,7 @@ from typing import Any
 
 from src.shared.python.core.physics_constants import (
     FT_TO_M,
+    GRAVITY_M_S2,
     KG_TO_LB,
     M_TO_FT,
     M_TO_YARD,
@@ -26,6 +27,8 @@ _LB_TO_KG = 1.0 / float(KG_TO_LB)
 _FT_TO_M = float(FT_TO_M)
 _YARD_TO_M = float(YARD_TO_M)
 _MPH_TO_MPS = float(MPH_TO_MPS)
+_LBF_TO_N = _LB_TO_KG * float(GRAVITY_M_S2)  # pound-force: a pound under standard g
+_IN_LBF_TO_NM = _FT_TO_M / 12.0 * _LBF_TO_N
 
 
 class UnitSystem(str, enum.Enum):
@@ -248,6 +251,98 @@ def mass_suffix(system: UnitSystem | None = None) -> str:
     """Return the display suffix for mass (' kg' or ' lb')."""
     sys = system or get_unit_preference()
     return " kg" if sys == UnitSystem.METRIC else " lb"
+
+
+# ---- Force and torque conversions ------------------------------------------
+
+
+def _imperial_scale(system: UnitSystem | None, per_unit_si: float) -> float:
+    sys = system or get_unit_preference()
+    return 1.0 if sys == UnitSystem.METRIC else per_unit_si
+
+
+def to_display_force(val_n: float, system: UnitSystem | None = None) -> float:
+    """Convert force in N to the display unit (N or lbf)."""
+    return val_n / _imperial_scale(system, _LBF_TO_N)
+
+
+def from_display_force(val_display: float, system: UnitSystem | None = None) -> float:
+    """Convert display force to SI N."""
+    return val_display * _imperial_scale(system, _LBF_TO_N)
+
+
+def force_suffix(system: UnitSystem | None = None) -> str:
+    """Return the display suffix for force (' N' or ' lbf')."""
+    return " N" if _imperial_scale(system, 0.0) == 1.0 else " lbf"
+
+
+def to_display_torque(val_nm: float, system: UnitSystem | None = None) -> float:
+    """Convert torque in N·m to the display unit (N·m or in·lbf)."""
+    return val_nm / _imperial_scale(system, _IN_LBF_TO_NM)
+
+
+def from_display_torque(val_display: float, system: UnitSystem | None = None) -> float:
+    """Convert display torque to SI N·m."""
+    return val_display * _imperial_scale(system, _IN_LBF_TO_NM)
+
+
+def torque_suffix(system: UnitSystem | None = None) -> str:
+    """Return the display suffix for torque (' N·m' or ' in·lbf')."""
+    return " N·m" if _imperial_scale(system, 0.0) == 1.0 else " in·lbf"
+
+
+# ---- Small lengths (strike offsets) and the client table (#14646) -----------
+
+
+def _small_length_per_m(system: UnitSystem | None) -> float:
+    sys = system or get_unit_preference()
+    return 1e3 if sys == UnitSystem.METRIC else 12.0 / _FT_TO_M
+
+
+def to_display_small_length(val_m: float, system: UnitSystem | None = None) -> float:
+    """Convert a small length in m to the display unit (mm, or inches).
+
+    Raises:
+        ValueError: If ``val_m`` is not finite.
+    """
+    if not math.isfinite(val_m):
+        raise ValueError(f"val_m must be finite, got {val_m!r}")
+    return val_m * _small_length_per_m(system)
+
+
+def from_display_small_length(
+    val_display: float, system: UnitSystem | None = None
+) -> float:
+    """Convert a display small length (mm, or inches) to SI m."""
+    return val_display / _small_length_per_m(system)
+
+
+def small_length_suffix(system: UnitSystem | None = None) -> str:
+    """Return the display suffix for small lengths (' mm' or ' in')."""
+    return " mm" if _small_length_per_m(system) == 1e3 else " in"
+
+
+def display_unit_table(system: UnitSystem) -> dict[str, dict[str, Any]]:
+    """Factor from each SI unit to ``system``'s display unit, and its suffix.
+
+    For clients that cannot import this module (the putting studio, the web
+    page): distance from m (shown in m or ft), speed from m/s, and small
+    lengths from m. A display value is the SI value times ``factor``.
+    """
+    return {
+        "distance": {
+            "factor": to_display_distance(1.0, system, unit="ft"),
+            "suffix": distance_suffix(system, unit="ft"),
+        },
+        "speed": {
+            "factor": to_display_speed(1.0, system),
+            "suffix": speed_suffix(system),
+        },
+        "small_length": {
+            "factor": to_display_small_length(1.0, system),
+            "suffix": small_length_suffix(system),
+        },
+    }
 
 
 # ---- Spin formatting ---------------------------------------------------------

@@ -164,7 +164,7 @@ function drawGreenRollSimulator() {
     for (let iy = 0; iy <= ny; iy++) {
       const xm = (ix / nx) * xSpan;
       const ym = ((iy / ny) - 0.5) * 2.0 * ySpan;
-      const g = PuttingPhysics.evalUndulatingGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct);
+      const g = PuttingPhysics.evalGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct, activeCoreGreen());
       const px = mapX(xm), py = mapY(ym);
       if (state.showPhotoFilter) {
         const shade = g.dz_dx * 8.0 + g.dz_dy * 6.0;
@@ -220,7 +220,7 @@ function drawGreenRollSimulator() {
     ctx.stroke();
     ctx.fillStyle = 'rgba(248, 250, 252, 0.85)';
     ctx.font = `600 ${10 * dpr}px "JetBrains Mono", monospace`;
-    ctx.fillText(`Straight Line to Hole (${(state.puttDistFt || 10).toFixed(0)} ft)`, mapX(holeX * 0.36), mapY(0) + 13 * dpr);
+    ctx.fillText(`Straight Line to Hole (${coreUnitText('distance', state.puttDistFt || 10, 0, state.unitSystem)})`, mapX(holeX * 0.36), mapY(0) + 13 * dpr);
     ctx.restore();
 
     // 2. Initial Starting Direction Ray (Aim / Launch Tangent)
@@ -246,7 +246,7 @@ function drawGreenRollSimulator() {
 
   // Skid-to-Roll transition line
   if (!state.stimpmeterMode) {
-    const xSkid = mapX(0.12 * holeX);
+    const xSkid = mapX(lastBatchStats.skidCm / 100.0); // core skid, #14647
     ctx.save();
     ctx.strokeStyle = 'rgba(245, 158, 11, 0.72)';
     ctx.setLineDash([6 * dpr, 5 * dpr]);
@@ -417,30 +417,29 @@ function drawSGCaptureChart() {
   ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1 * dpr;
   ctx.strokeRect(rx0, padT, subW, subH);
   ctx.fillStyle = '#94a3b8';
-  ctx.fillText('0-45 ft Bellman Curve E_player(d)', rx0 + 4 * dpr, padT - 5 * dpr);
+  const sgCurve = coreSgCurve(state.crossSlopePct || 0);
+  ctx.fillText(`Core E(d), ${sgCurve.slope_pct}% slope`, rx0 + 4 * dpr, padT - 5 * dpr);
 
   const mapDX = (dFt) => rx0 + (dFt / 45.0) * subW;
   const mapDEY = (e) => padT + subH * (1.0 - (e - 1.0) / 1.65);
 
+  // The core's solved player E(d) (js/core_sg.js; #14650).
   ctx.strokeStyle = '#34d399'; ctx.lineWidth = 2.2 * dpr;
   ctx.beginPath();
-  for (let d = 0; d <= 45; d += 1.5) {
-    const eS = 1.0 + 1.08 * (1.0 - Math.exp(-d / 14.5)) + 0.004 * d;
-    const x = mapDX(d), y = mapDEY(eS);
+  for (let d = 0; d <= 45; d += 0.5) {
+    const x = mapDX(d), y = mapDEY(coreExpectedPutts(sgCurve, d));
     if (d === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   }
   ctx.stroke();
 
-  ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2.0 * dpr;
-  ctx.setLineDash([5 * dpr, 3 * dpr]);
-  ctx.beginPath();
-  for (let d = 0; d <= 45; d += 1.5) {
-    const eU = 1.0 + 1.38 * (1.0 - Math.exp(-d / 9.5)) + 0.0085 * d;
-    const x = mapDX(d), y = mapDEY(Math.min(2.62, eU));
-    if (d === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  // This batch's expected strokes from the putt distance (cyan CB, red Slack).
+  const dNow = state.puttDistFt || 10.0;
+  if (lastBatchStats && Number.isFinite(lastBatchStats.ePlayerCB)) {
+    for (const [e, color] of [[lastBatchStats.ePlayerCB, '#22d3ee'], [lastBatchStats.ePlayerUN, '#ef4444']]) {
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.arc(mapDX(dNow), mapDEY(Math.min(2.65, e)), 3.2 * dpr, 0, Math.PI * 2); ctx.fill();
+    }
   }
-  ctx.stroke();
-  ctx.setLineDash([]);
 
   const xd = mapDX(state.puttDistFt || 10.0);
   ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.6 * dpr;

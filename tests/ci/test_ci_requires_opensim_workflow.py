@@ -265,3 +265,23 @@ class TestOpenSimJobLevelGating:
         assert "Smoke squat joint-reaction acceleration gate" in {
             s.get("name") for s in steps
         }
+
+    def test_classify_changes_checkout_avoids_full_fetch(self) -> None:
+        """classify-changes checkout must avoid full-history all-ref fetch (#14429)."""
+        job = _load()["jobs"]["classify-changes"]
+        checkout_steps = [
+            s for s in job["steps"] if "actions/checkout" in s.get("uses", "")
+        ]
+        assert len(checkout_steps) == 1
+        fetch_depth = checkout_steps[0].get("with", {}).get("fetch-depth")
+        assert fetch_depth == 1, (
+            "fetch-depth must be shallow (1) to prevent checkout hang"
+        )
+        classify_step = next(
+            step["run"] for step in job["steps"] if step.get("id") == "classify"
+        )
+        assert 'git fetch --no-tags --depth=1 origin "${BASE_REF}"' in classify_step
+        assert (
+            'changed_paths=$(git diff --name-only "origin/${BASE_REF}" HEAD)'
+            in classify_step
+        )

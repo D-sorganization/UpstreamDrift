@@ -50,8 +50,12 @@ their input hashes and detailed provenance in private execution receipts.
 For exploratory GS3DX matching, the separate reference is
 `docs/research/simscape_matching_reference/simscape_matching_reference.tex`.
 The separate research record for the MOSAIC estimator (model-aware multi-trial
-forward-dynamics matching) and the canonical ZTCF/ZVCF nomenclature is
-`docs/research/model_aware_matching/model_aware_matching.tex`.
+forward-dynamics matching) is
+`docs/research/model_aware_matching/model_aware_matching.tex`. The current
+public component names are defined in the normative [`SPEC.md`](SPEC.md), §4:
+**ZTCF is the drift component** and **ZVCF is the control component** at a
+fixed state. The component split is exact at a fixed state and is **not
+additive over integrated trajectories**; this reverses #11553's later naming.
 The human-realistic golfer record (HRG, epic #13160: coordinate sign map, ISB basis map and
 human-range baseline) is `docs/research/human_realistic_golfer/human_realistic_golfer.tex`.
 Record compilation and evidence checks truthfully; unresolved modeling gates

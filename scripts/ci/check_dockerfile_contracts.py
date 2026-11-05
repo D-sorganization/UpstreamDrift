@@ -21,6 +21,29 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _root_context_dockerignore_failures(root: Path) -> list[str]:
+    """Check root secret rules without implementing Docker's full matcher.
+
+    The terminal rules make any later re-inclusion visible. This covers only
+    the root build context, not Dockerfile-specific ignores or nested contexts.
+    """
+    path = root / ".dockerignore"
+    if not path.is_file():
+        return ["root .dockerignore is missing"]
+
+    patterns = [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if patterns[-3:] != [".env", ".env.*", "!.env.example"]:
+        return [
+            "root .dockerignore must end with ordered secret rules "
+            ".env, .env.*, then !.env.example"
+        ]
+    return []
+
+
 # Images the explorer launcher must verify (and rebuild) before every run.
 EXPLORER_REQUIRED_IMAGES = (
     "upstream-drift:explorer-headless",
@@ -217,7 +240,7 @@ def explorer_contract_failures(root: Path) -> list[str]:
 
 
 def docker_contract_failures(root: Path = Path(".")) -> list[str]:
-    failures: list[str] = []
+    failures = _root_context_dockerignore_failures(root)
     pin_by_file: dict[str, set[str]] = {}
     for rel_path in ROOT_DOCKERFILES:
         path = root / rel_path

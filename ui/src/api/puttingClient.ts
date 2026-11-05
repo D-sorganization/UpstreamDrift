@@ -1,11 +1,14 @@
 import type {
   AimSolve3DResponse,
   BalancePresetsResponse,
+  CounterTorqueRequest,
+  CounterTorqueResponse,
   Putt3DSimulationRequest,
   Putt3DSimulationResponse,
 } from "./generated/types";
 import type { DispersionArgs } from "@/utils/dispersion";
 import type { GreenPresets } from "@/utils/greenTypes";
+import type { Comparison, ImportedSetup, Scenario } from "@/utils/puttingSetup";
 import type {
   StrokesGainedArgs,
   StrokesGainedReport,
@@ -40,6 +43,16 @@ export function solveAim3D(
 export function fetchPutterPresets(): Promise<BalancePresetsResponse> {
   return apiFetch<BalancePresetsResponse>(
     "/api/tools/putting-green/putter-presets",
+  );
+}
+
+/** Hand couples, forces and gust response over the stroke (#14469). */
+export function fetchCounterTorque(
+  request: CounterTorqueRequest,
+): Promise<CounterTorqueResponse> {
+  return apiFetch<CounterTorqueResponse>(
+    "/api/tools/putting-green/counter-torque",
+    { method: "POST", body: JSON.stringify(request) },
   );
 }
 
@@ -96,4 +109,27 @@ export function runStrokesGained(
   args: StrokesGainedArgs,
 ): Promise<StrokesGainedReport> {
   return postAnalytics<StrokesGainedReport>("strokes-gained", args);
+}
+
+/** A named setup and its dispersion result (core service_setup, #14471). */
+export function runScenario(args: object): Promise<Scenario> {
+  return postAnalytics<Scenario>("scenario", args);
+}
+
+/** Each scenario's make rate and leave against the first. */
+export function compareScenarios(args: {
+  scenarios: Scenario[];
+}): Promise<Comparison> {
+  return postAnalytics<Comparison>("scenario-compare", args);
+}
+
+/** The versioned setup document (schema_version, suite, setup, scenarios). */
+export function exportSetup(args: object): Promise<object> {
+  return postAnalytics<object>("setup-export", args);
+}
+
+export function importSetup(args: {
+  document: unknown;
+}): Promise<ImportedSetup> {
+  return postAnalytics<ImportedSetup>("setup-import", args);
 }
