@@ -83,6 +83,26 @@ def test_studio_green_is_the_core_height_field(name: str, dist_ft: float) -> Non
 
 
 @_requires_node
+@pytest.mark.parametrize("name", sorted(GREEN_PRESETS))
+def test_studio_clamps_off_the_core_grid_as_the_core_does(name: str) -> None:
+    # #14703: past the core grid's ends the lookup clamps to the edge cell.
+    edge = gen.EXTENT_M / 2.0
+    points = [(-edge - 1.5, 0.4), (edge + 2.0, -1.1), (edge + 0.25, 2.9)]
+    field = gen.core_field(name)
+    js = _node(
+        json.dumps(points)
+        + ".map(([gx, gy]) => PuttingPhysics.coreGreenAt("
+        + f"window.CORE_GREENS.presets[{json.dumps(name)}], gx, gy))"
+    )
+    assert isinstance(js, list)
+    for (gx, gy), got in zip(points, js, strict=True):
+        assert got["z"] == pytest.approx(field.elevation(gx, gy), abs=1e-6)
+        dzdx, dzdy = field.gradient(gx, gy)
+        assert got["dz_dx"] == pytest.approx(dzdx, abs=1e-5)
+        assert got["dz_dy"] == pytest.approx(dzdy, abs=1e-5)
+
+
+@_requires_node
 def test_undulation_is_selectable_without_slope() -> None:
     putt = (
         "PuttingPhysics.simulateSinglePuttRK4({vClubMps: 1.4, aimDeg: 0, "
