@@ -627,27 +627,66 @@ def test_lbfgs_records_projected_gradient_norm() -> None:
 
 
 def test_lbfgs_diagnostics_leave_numerics_bit_for_bit() -> None:
-    """Pinned from main before the instrumentation (SciPy 1.18.1)."""
-    slow = _stepping_clock((5.0, 7.0, 11.0))
-    one = lbfgs_minimise(
-        _rosenbrock_vg, np.full(3, -1.2), LbfgsSettings(max_iterations=5)
-    )
-    two = lbfgs_minimise(
-        _rosenbrock_vg,
+    """Instrumented runs equal a bare SciPy L-BFGS-B run on the same function."""
+    import scipy.optimize
+
+    totals: list[float] = []
+
+    def bare(x: np.ndarray) -> tuple[float, np.ndarray]:
+        (cost, _), grad = _rosenbrock_vg(x)
+        totals.append(cost)
+        return cost, grad
+
+    ref = scipy.optimize.minimize(
+        bare,
         np.full(3, -1.2),
-        LbfgsSettings(max_iterations=5),
-        clock=slow,
+        jac=True,
+        method="L-BFGS-B",
+        options={"maxiter": 5, "maxfun": 15000},
     )
-    assert one.history == two.history
-    assert np.array_equal(one.best_x, two.best_x)
-    assert one.stop_reason == "max_iterations"
-    assert (len(one.history), one.best_iteration) == (6, 5)
-    assert one.best_objective.hex() == "0x1.3dcfce2dad586p+1"
-    assert [v.hex() for v in one.best_x.tolist()] == [
-        "-0x1.1e7bb9dda336dp-2",
-        "0x1.7128712c18b9ap-4",
-        "0x1.46b4b5083ee80p-9",
-    ]
+    best = int(np.argmin(totals))
+    for clock in (None, _stepping_clock((5.0, 7.0, 11.0))):
+        kwargs = {} if clock is None else {"clock": clock}
+        run = lbfgs_minimise(
+            _rosenbrock_vg, np.full(3, -1.2), LbfgsSettings(max_iterations=5), **kwargs
+        )
+        assert [row["total"] for row in run.history] == totals
+        assert run.best_iteration == best
+        assert run.best_objective == totals[best]
+        assert run.stop_reason == "max_iterations"
+        assert run.projected_gradient_norm == float(np.max(np.abs(ref.jac)))
+
+
+class _LazyGrad:
+    """A device-style gradient: reading it on the host costs clock time."""
+
+    def __init__(self, grad: np.ndarray, clock_state: dict[str, float]) -> None:
+        self._grad = grad
+        self._clock_state = clock_state
+
+    def __array__(self, dtype: Any = None, copy: Any = None) -> np.ndarray:
+        self._clock_state["now"] += 0.5
+        return np.asarray(self._grad, dtype=dtype)
+
+
+def test_lbfgs_gradient_transfer_is_timed_as_gradient_not_objective() -> None:
+    state = {"now": 0.0}
+
+    def lazy_vg(x: np.ndarray) -> tuple[tuple[float, float], _LazyGrad]:
+        (cost, objective), grad = _rosenbrock_vg(x)
+        state["now"] += 0.25  # the forward cost
+        return (cost, objective), _LazyGrad(grad, state)
+
+    result = lbfgs_minimise(
+        lazy_vg,
+        np.full(3, -1.2),
+        LbfgsSettings(max_iterations=3),
+        clock=lambda: state["now"],
+    )
+
+    rows = result.evaluation_diagnostics
+    assert rows and all(r["objective_s"] == 0.25 for r in rows)
+    assert all(r["gradient_s"] == 0.5 for r in rows)
 
 
 def test_adam_result_has_no_lbfgs_diagnostics() -> None:
