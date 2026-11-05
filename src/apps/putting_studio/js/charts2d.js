@@ -417,30 +417,29 @@ function drawSGCaptureChart() {
   ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1 * dpr;
   ctx.strokeRect(rx0, padT, subW, subH);
   ctx.fillStyle = '#94a3b8';
-  ctx.fillText('0-45 ft Bellman Curve E_player(d)', rx0 + 4 * dpr, padT - 5 * dpr);
+  const sgCurve = coreSgCurve(state.crossSlopePct || 0);
+  ctx.fillText(`Core E(d), ${sgCurve.slope_pct}% slope`, rx0 + 4 * dpr, padT - 5 * dpr);
 
   const mapDX = (dFt) => rx0 + (dFt / 45.0) * subW;
   const mapDEY = (e) => padT + subH * (1.0 - (e - 1.0) / 1.65);
 
+  // The core's solved player E(d) (js/core_sg.js; #14650).
   ctx.strokeStyle = '#34d399'; ctx.lineWidth = 2.2 * dpr;
   ctx.beginPath();
-  for (let d = 0; d <= 45; d += 1.5) {
-    const eS = 1.0 + 1.08 * (1.0 - Math.exp(-d / 14.5)) + 0.004 * d;
-    const x = mapDX(d), y = mapDEY(eS);
+  for (let d = 0; d <= 45; d += 0.5) {
+    const x = mapDX(d), y = mapDEY(coreExpectedPutts(sgCurve, d));
     if (d === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   }
   ctx.stroke();
 
-  ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2.0 * dpr;
-  ctx.setLineDash([5 * dpr, 3 * dpr]);
-  ctx.beginPath();
-  for (let d = 0; d <= 45; d += 1.5) {
-    const eU = 1.0 + 1.38 * (1.0 - Math.exp(-d / 9.5)) + 0.0085 * d;
-    const x = mapDX(d), y = mapDEY(Math.min(2.62, eU));
-    if (d === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  // This batch's expected strokes from the putt distance (cyan CB, red Slack).
+  const dNow = state.puttDistFt || 10.0;
+  if (lastBatchStats && Number.isFinite(lastBatchStats.ePlayerCB)) {
+    for (const [e, color] of [[lastBatchStats.ePlayerCB, '#22d3ee'], [lastBatchStats.ePlayerUN, '#ef4444']]) {
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.arc(mapDX(dNow), mapDEY(Math.min(2.65, e)), 3.2 * dpr, 0, Math.PI * 2); ctx.fill();
+    }
   }
-  ctx.stroke();
-  ctx.setLineDash([]);
 
   const xd = mapDX(state.puttDistFt || 10.0);
   ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.6 * dpr;

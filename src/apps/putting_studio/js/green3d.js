@@ -206,14 +206,17 @@ function rebuildGreenDispersionBatch() {
   const pSD = stdArr(pathArr);
   const rSD = stdArr(cbY);
 
-  // Player-Specific Bellman Expected Strokes E_player(d) = 1 + (1 - P_make) * E_player(d_leave)
+  // Player strokes gained on the core's solved E(d) (js/core_sg.js, service_sg; #14650):
+  // each putt scores E(start) - 1 - E(leave); E_player is E(start) less the mean.
+  const sgCurve = coreSgCurve(state.crossSlopePct || 0);
+  const meanSG = (batch) => batch.reduce((a, r) =>
+    a + coreStrokesGained(sgCurve, distFt, r.holed, r.missDistCm / 30.48), 0) / Math.max(1, batch.length);
+  const eStart = coreExpectedPutts(sgCurve, distFt);
+  const ePlayerCB = eStart - meanSG(greenBatchCB);
+  const ePlayerUN = eStart - meanSG(greenBatchUN);
+  const sgPlayerGain = ePlayerUN - ePlayerCB;
   const meanMissLeaveCB = cbLeaveFt.filter(v => v > 0).reduce((a, b) => a + b, 0) / Math.max(1, nTrials - cbHoled);
   const meanMissLeaveUN = unLeaveFt.filter(v => v > 0).reduce((a, b) => a + b, 0) / Math.max(1, nTrials - unHoled);
-  const eComebackCB = 1.0 + Math.min(0.85, 0.065 * Math.pow(meanMissLeaveCB, 1.18));
-  const eComebackUN = 1.0 + Math.min(0.95, 0.115 * Math.pow(meanMissLeaveUN, 1.25));
-  const ePlayerCB = 1.0 + (1.0 - makePctCB / 100.0) * eComebackCB;
-  const ePlayerUN = 1.0 + (1.0 - makePctUN / 100.0) * eComebackUN;
-  const sgPlayerGain = ePlayerUN - ePlayerCB;
 
   lastBatchStats = {
     makeCB: makePctCB,
@@ -255,6 +258,12 @@ function rebuildGreenDispersionBatch() {
   if (elEPlayer) elEPlayer.textContent = `${ePlayerCB.toFixed(2)} strokes (vs ${ePlayerUN.toFixed(2)} Slack)`;
   const elSGGain = document.getElementById('valSGPlayerGain');
   if (elSGGain) elSGGain.textContent = `${sgPlayerGain >= 0 ? '+' : ''}${sgPlayerGain.toFixed(2)} strokes / putt`;
+  // Core optimal pace at the nearest solved distance.
+  const nearest = sgCurve.distances_ft.reduce((b, d, k) =>
+    (Math.abs(d - distFt) < Math.abs(sgCurve.distances_ft[b] - distFt) ? k : b), 0);
+  const elPace = document.getElementById('valOptPaceStrat');
+  const ft = (v) => coreUnitText('distance', v, 1, state.unitSystem);
+  if (elPace) elPace.textContent = `Core: ${ft(sgCurve.pace_ft_past[nearest])} past from ${ft(sgCurve.distances_ft[nearest])}`;
 
   // 7-Channel 18-Hole Strokes Gained Variance Attribution from the shared core
   // (js/core_attribution.js, generated from service_variance; #14459).
