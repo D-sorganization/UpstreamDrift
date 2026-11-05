@@ -121,8 +121,8 @@ def test_workflow_runs_archiver_and_targets_docs_development_only() -> None:
     assert workflow["permissions"]["pull-requests"] == "write"
 
     archive_run = _step("Archive terminal development-log entries")["run"]
-    assert "shared_scripts/development_log.py" in archive_run
-    assert "--archive" in archive_run
+    # Size-aware wrapper (#14535) around the vendored archiver.
+    assert "scripts/ci/archive_devlog_with_headroom.py" in archive_run
 
     propose = _step("Propose archive as a pull request")
     propose_run = propose["run"]

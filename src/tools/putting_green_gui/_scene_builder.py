@@ -25,16 +25,25 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.shared.python.putting_dynamics import (
+    BALANCE_PRESETS,
+    GREEN_PRESETS,
     HOLE_RADIUS_M,
+    USGA_STIMP_ROLL_MODEL,
+    CollisionReport,
     FrictionField,
     FrictionParams,
+    GreenSpec,
     HeightField,
     Mode,
+    PhaseMark,
     PutterState,
-    USGA_STIMP_ROLL_MODEL,
     PuttResult,
     SurfaceSpec,
+    balance_preset,
+    green_preset,
+    phase_marks,
     simulate_strike,
+    solve_aim,
     stimp_to_rolling_mu,
 )
 
@@ -60,6 +69,9 @@ AIM_RANGE_DEG = (-45.0, 45.0)
 DISTANCE_RANGE_M = (1.0 * _FT_TO_M, 30.0 * _FT_TO_M)
 STIMP_RANGE = (6.0, 14.0)
 SLOPE_RANGE_DEG = (0.0, 5.0)
+#: Heel (-) to toe (+) strike offset from the face centre (#14461).
+IMPACT_TOE_RANGE_M = (-0.04, 0.04)
+UNDULATION_RANGE_M = (0.0, 0.05)
 
 
 @dataclass(frozen=True)
@@ -80,9 +92,18 @@ class PuttConfig:
     cup_distance_m: float = 10.0 * _FT_TO_M
     stimp: float = 10.0
     slope_deg: float = 1.0
+    #: A :data:`GREEN_PRESETS` name, or ``None`` for the cross slope (#14463).
+    green_type: str | None = None
+    #: Undulation on the cross slope [m, standard deviation], seeded.
+    undulation_m: float = 0.0
+    green_seed: int = 0
     integrator: str = "rk4"
     grid_resolution: int = 48
     timestep_s: float = 0.002
+    #: Strike offset toe-ward of the head CG; negative is a heel strike.
+    impact_toe_m: float = 0.0
+    #: A :data:`BALANCE_PRESETS` key, or ``None`` for the typical head.
+    balance_type: str | None = None
 
 
 @dataclass(frozen=True)
@@ -113,6 +134,15 @@ class PuttScene:
     #: Roll model that produced this scene (ADR-0045 F1); scenes from
     #: different models must never be compared without it.
     roll_model: str
+    #: The putter-ball impact (#14461); ``None`` on scenes read from files
+    #: written before it was recorded.
+    impact: CollisionReport | None = None
+    skid_distance_m: float | None = None
+    impact_toe_m: float = 0.0
+    green_type: str | None = None
+    #: Where the hop, skid, roll and rest start (#14473), from the core's
+    #: ``phase_marks``; empty on scenes read from files.
+    phases: tuple[PhaseMark, ...] = ()
 
 
 def _validate(config: PuttConfig) -> None:
@@ -122,12 +152,23 @@ def _validate(config: PuttConfig) -> None:
         ("cup_distance_m", config.cup_distance_m, DISTANCE_RANGE_M),
         ("stimp", config.stimp, STIMP_RANGE),
         ("slope_deg", config.slope_deg, SLOPE_RANGE_DEG),
+        ("impact_toe_m", config.impact_toe_m, IMPACT_TOE_RANGE_M),
+        ("undulation_m", config.undulation_m, UNDULATION_RANGE_M),
     )
     for name, value, (lo, hi) in checks:
         if not np.isfinite(value):
             raise ValueError(f"{name} must be finite; got {value!r}")
         if not (lo <= value <= hi):
             raise ValueError(f"{name} must be within [{lo}, {hi}]; got {value}")
+    if config.balance_type is not None and config.balance_type not in BALANCE_PRESETS:
+        raise ValueError(
+            f"balance_type must be one of {sorted(BALANCE_PRESETS)}; "
+            f"got {config.balance_type!r}"
+        )
+    if config.green_type is not None and config.green_type not in GREEN_PRESETS:
+        raise ValueError(f"green_type must be one of {sorted(GREEN_PRESETS)}")
+    if config.green_seed < 0:
+        raise ValueError(f"green_seed must be >= 0; got {config.green_seed}")
     if config.grid_resolution < 2:
         raise ValueError(f"grid_resolution must be >= 2; got {config.grid_resolution}")
     if not (0.0 < config.timestep_s <= 0.05):
@@ -145,6 +186,43 @@ def _cross_slope_heightmap(
     tan_slope = np.tan(np.radians(slope_deg))
     _, yy = np.meshgrid(grid_x, grid_y)
     return (yy - ball_y) * tan_slope
+
+
+def _green_spec(config: PuttConfig) -> GreenSpec | None:
+    """The core green this tile rolls, or ``None`` for the smooth cross slope."""
+    if config.green_type is not None:
+        return green_preset(config.green_type)
+    if config.undulation_m <= 0.0:
+        return None
+    return GreenSpec(
+        grade_percent=math.tan(math.radians(config.slope_deg)) * 100.0,
+        aspect_deg=-90.0,  # falls toward -y, like the cross slope
+        bump_height_m=config.undulation_m,
+        seed=config.green_seed,
+    )
+
+
+def green_label(green_type: str | None) -> str:
+    """Display name of a green type (``None`` is the cross slope)."""
+    return "Cross Slope" if green_type is None else green_type.replace("_", " ").title()
+
+
+def _green_extent_m(width_x: float, height_y: float) -> float:
+    """Side of the square core green that covers the tile with a margin."""
+    return float(math.ceil(max(width_x, height_y)) + 2)
+
+
+def _centred_height(
+    spec: GreenSpec, width_x: float, height_y: float, mid_y: float
+) -> HeightField:
+    """``spec``'s field, moved from the origin to the tile's centre."""
+    field = spec.height(_green_extent_m(width_x, height_y))
+    x0, y0 = field.origin_m
+    return HeightField(
+        heights_m=field.heights_m,
+        spacing_m=field.spacing_m,
+        origin_m=(x0 + width_x / 2.0, y0 + mid_y),
+    )
 
 
 def _perpendicular_break(
@@ -179,10 +257,16 @@ def _setup_grid_and_surface(
     ny = max(2, int(round(height_y / spacing)) + 1)
     grid_x = np.arange(nx) * spacing
     grid_y = np.arange(ny) * spacing
-    grid_z = _cross_slope_heightmap(grid_x, grid_y, mid_y, config.slope_deg)
+    spec = _green_spec(config)
+    if spec is None:
+        grid_z = _cross_slope_heightmap(grid_x, grid_y, mid_y, config.slope_deg)
+        height = HeightField(heights_m=grid_z, spacing_m=spacing, origin_m=(0.0, 0.0))
+    else:
+        height = _centred_height(spec, width_x, height_y, mid_y)
+        grid_z = np.array([[height.elevation(x, y) for x in grid_x] for y in grid_y])
 
     surface = SurfaceSpec(
-        height=HeightField(heights_m=grid_z, spacing_m=spacing, origin_m=(0.0, 0.0)),
+        height=height,
         friction_field=FrictionField.uniform(),
         friction=FrictionParams(mu_roll0=stimp_to_rolling_mu(config.stimp)),
     )
@@ -233,6 +317,13 @@ def _compute_scene_lines(
     return start_xyz, cup_xyz, aim_line_xyz, target_line_xyz
 
 
+def _putter(config: PuttConfig) -> PutterState:
+    speed = config.putter_speed_ms
+    if config.balance_type is None:
+        return PutterState.typical(speed)
+    return balance_preset(config.balance_type).putter(speed)
+
+
 def build_putt_scene(config: PuttConfig) -> PuttScene:
     """Strike and roll the ball on the shared putting core and package a scene.
 
@@ -263,7 +354,7 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
 
     aim_rad = math.radians(config.aim_deg)
     direction = np.array([math.cos(aim_rad), math.sin(aim_rad)])
-    putter = PutterState.typical(config.putter_speed_ms)
+    putter = _putter(config)
     ball_xy = np.array([ball_x, mid_y])
     result = simulate_strike(
         putter,
@@ -273,6 +364,7 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         start_x_m=ball_x,
         start_y_m=mid_y,
         heading_rad=aim_rad,
+        impact_toe_m=config.impact_toe_m,
     )
 
     trajectory_xyz, roll_modes = _compute_scene_trajectory(result, height_field)
@@ -305,4 +397,47 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         peak_break_m=_perpendicular_break(positions, ball_xy, cup_xy),
         launch_speed_ms=launch_speed,
         roll_model=USGA_STIMP_ROLL_MODEL,
+        impact=result.collision,
+        skid_distance_m=float(result.skid_distance_m),
+        impact_toe_m=config.impact_toe_m,
+        green_type=config.green_type,
+        phases=phase_marks(result.samples),
+    )
+
+
+@dataclass(frozen=True)
+class PuttSolution:
+    """The optimum read for a config's green, in the tile's controls (#14465).
+
+    ``putter_speed_ms`` and ``aim_deg`` go straight into the Putter Speed and
+    Aim Angle controls; ``break_m`` is the aim point's offset from the cup,
+    positive to the left of the ball-to-cup line.
+    """
+
+    putter_speed_ms: float
+    aim_deg: float
+    break_m: float
+    holed: bool
+    converged: bool
+
+
+def solve_putt(config: PuttConfig) -> PuttSolution:
+    """Solve the pace and line that hole ``config``'s putt on its green.
+
+    Runs the core's :func:`solve_aim` with the chosen putter head on the
+    same surface :func:`build_putt_scene` rolls, so the current speed and
+    aim are ignored. The read assumes a centred strike. Raises
+    ``ValueError`` like :func:`build_putt_scene`.
+    """
+    _validate(config)
+    ball_x, cup_x, *_, mid_y, _gx, _gy, _gz, surface = _setup_grid_and_surface(
+        config, config.cup_distance_m
+    )
+    aim = solve_aim(surface, (ball_x, mid_y), (cup_x, mid_y), _putter(config))
+    return PuttSolution(
+        putter_speed_ms=aim.putter_speed_mps,
+        aim_deg=math.degrees(aim.heading_rad),
+        break_m=aim.break_m,
+        holed=aim.holed,
+        converged=aim.converged,
     )

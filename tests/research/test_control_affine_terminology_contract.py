@@ -45,7 +45,7 @@ def test_schema_v3_keeps_canonical_and_control_preserved_arrays_separate() -> No
     source = (ROOT / "src/shared/python/simulation_backends/ztcf_zvcf.py").read_text(
         encoding="utf-8"
     )
-    assert '_ANALYSIS_SCHEMA_VERSION = "3.0.0"' in source
+    assert '_ANALYSIS_SCHEMA_VERSION = "4.0.0"' in source
     assert '"zvcf_acceleration"' in source
     assert '"zero_velocity_control_preserved_acceleration"' in source
 

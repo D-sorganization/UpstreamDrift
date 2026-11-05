@@ -296,3 +296,15 @@ register_backend(
         solve=_solve_bioptim,
     )
 )
+register_backend(
+    BackendSpec(
+        name="spline_trust_region",
+        problem_class="impact-conditioned trust-region torque correction (SHOW-C3)",
+        description=(
+            "Spline torque controls around the matched swing; plant injected "
+            "via impact_optimization.solve_impact_trajectory (#14559)"
+        ),
+        available=_always,
+        install_hint="scipy is a core dependency",
+    )
+)

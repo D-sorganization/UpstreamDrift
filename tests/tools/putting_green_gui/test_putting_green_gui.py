@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 from unittest.mock import MagicMock
 
 import pytest
@@ -386,3 +387,359 @@ def test_putting_widget_imperial_metrics_formatting(widget: PuttingGreenWidget) 
     text = widget._results_text.toPlainText()
     assert "ft (" in text
     assert "mph (" in text
+
+
+# ---------------------------------------------------------------------------
+# Strike location, putter balance and impact readout (#14461)
+# ---------------------------------------------------------------------------
+
+
+def test_strike_and_balance_controls_reach_the_config(
+    widget: PuttingGreenWidget,
+) -> None:
+    assert widget._strike_spin.value() == pytest.approx(0.0)
+    assert widget._strike_spin.minimum() == pytest.approx(-40.0)
+    assert widget._strike_spin.maximum() == pytest.approx(40.0)
+    assert widget._balance_combo.currentData() is None
+    assert widget._balance_combo.count() == 5
+    widget._strike_spin.setValue(12.0)
+    widget._balance_combo.setCurrentIndex(widget._balance_combo.findData("toe_hang"))
+    config = widget._current_config()
+    assert config.impact_toe_m == pytest.approx(0.012)
+    assert config.balance_type == "toe_hang"
+
+
+def test_strike_offset_converts_with_the_unit_system(
+    widget: PuttingGreenWidget,
+) -> None:
+    widget._strike_spin.setValue(-12.7)
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert widget._strike_spin.suffix() == " in"
+    assert widget._strike_spin.value() == pytest.approx(-0.5)
+    assert widget._current_config().impact_toe_m == pytest.approx(-0.0127)
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert widget._strike_spin.value() == pytest.approx(-12.7)
+
+
+@pytest.mark.parametrize(
+    ("system", "skid_unit"), [(UnitSystem.METRIC, " cm"), (UnitSystem.IMPERIAL, " in")]
+)
+def test_metrics_show_the_impact_in_display_units(
+    widget: PuttingGreenWidget, system: UnitSystem, skid_unit: str
+) -> None:
+    widget.set_unit_system(system)
+    widget._strike_spin.setValue(widget._strike_spin.maximum() / 2)
+    widget._run_simulation()
+    text = widget._results_text.toPlainText()
+    impact = widget._scene.impact
+    for label in ("Strike:", "Launch angle:", "Spin:", "Face twist:", "Energy loss:"):
+        assert label in text
+    assert f"{impact.launch_angle_deg:.1f}°" in text
+    assert "toe" in text and skid_unit in text and "rpm backspin" in text
+
+
+# Green types (#14463)
+# ---------------------------------------------------------------------------
+
+
+def test_green_selector_offers_the_cross_slope_and_every_preset(
+    widget: PuttingGreenWidget,
+) -> None:
+    from src.shared.python.putting_dynamics import GREEN_PRESETS
+
+    combo = widget._green_combo
+    assert [combo.itemData(i) for i in range(combo.count())] == [
+        None,
+        *GREEN_PRESETS,
+    ]
+    assert widget._current_config().green_type is None
+    combo.setCurrentIndex(combo.findData("tiered"))
+    assert widget._current_config().green_type == "tiered"
+    # A preset carries its own shape, so the cross-slope controls rest.
+    assert not widget._slope_spin.isEnabled()
+    assert not widget._undulation_spin.isEnabled()
+    widget._run_simulation()
+    assert "Green:         Tiered" in widget._results_text.toPlainText()
+
+
+def test_undulation_is_unit_selectable_and_seeded(widget: PuttingGreenWidget) -> None:
+    assert widget._undulation_spin.suffix() == " mm"
+    widget._undulation_spin.setValue(10.0)
+    widget._seed_spin.setValue(7)
+    config = widget._current_config()
+    assert config.undulation_m == pytest.approx(0.010)
+    assert config.green_seed == 7
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert widget._undulation_spin.suffix() == " in"
+    assert widget._undulation_spin.value() == pytest.approx(10.0 / 25.4, abs=0.005)
+    assert widget._current_config().undulation_m == pytest.approx(0.010, abs=1e-4)
+
+
+def test_every_input_follows_the_dark_panel_theme(widget: PuttingGreenWidget) -> None:
+    # The integer Green Seed box rendered white on the dark panel (#14463).
+    from PyQt6.QtWidgets import QWidget
+
+    style = widget.findChild(QWidget, "puttControls").styleSheet()
+    for spin in (widget._seed_spin, widget._undulation_spin, widget._green_combo):
+        assert type(spin).__name__ in style
+    assert ":disabled" in style, "a preset greys out the shape inputs visibly"
+    # The disabled look comes from the shared theme tokens, not new hex literals.
+    from src.shared.python.theme.tool_stylesheet import get_tool_colors
+
+    disabled = style[style.index(":disabled") :]
+    for token in ("surface_secondary", "text_secondary", "border_default"):
+        assert get_tool_colors()[token] in disabled
+
+
+# ---------------------------------------------------------------------------
+# Auto-Solve (#14465)
+# ---------------------------------------------------------------------------
+
+
+def _wait_for_solve(qapp: QApplication, widget: PuttingGreenWidget) -> None:
+    deadline = time.monotonic() + 60.0
+    while widget.is_solving() and time.monotonic() < deadline:
+        qapp.processEvents()
+        time.sleep(0.02)
+    assert not widget.is_solving()
+
+
+def test_auto_solve_writes_the_core_read_into_the_controls(
+    qapp: QApplication, widget: PuttingGreenWidget
+) -> None:
+    from src.tools.putting_green_gui._scene_builder import solve_putt
+
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    widget._slope_spin.setValue(2.0)
+    widget._aim_spin.setValue(-20.0)
+    want = solve_putt(widget._current_config())
+    widget._solve_btn.click()
+    assert widget.is_solving()  # returned at once; the worker is solving
+    assert not widget._solve_btn.isEnabled()
+    _wait_for_solve(qapp, widget)
+    assert widget._solve_btn.isEnabled()
+    assert widget._speed_spin.value() == pytest.approx(
+        want.putter_speed_ms * 2.236936, abs=0.06
+    )
+    assert widget._aim_spin.value() == pytest.approx(want.aim_deg, abs=0.06)
+    assert widget._scene is not None and widget._scene.holed
+    text = widget._results_text.toPlainText()
+    assert "Optimum read:" in text and "mph" in text and "HOLED" in text
+
+
+def test_auto_solve_rolls_the_read_on_the_green_it_solved(
+    qapp: QApplication, widget: PuttingGreenWidget
+) -> None:
+    # A control changed mid-solve must not get the old read rolled on it,
+    # and the controls rest while the worker solves (#14465, Lane 3).
+    import dataclasses
+
+    from src.tools.putting_green_gui._scene_builder import (
+        build_putt_scene,
+        solve_putt,
+    )
+
+    widget._slope_spin.setValue(2.0)
+    solved = widget._current_config()
+    want = solve_putt(solved)
+    widget._solve_btn.click()
+    assert not widget._slope_spin.isEnabled(), "controls rest during the solve"
+    widget._slope_spin.setValue(0.0)  # a change that slipped in mid-solve
+    _wait_for_solve(qapp, widget)
+    assert widget._slope_spin.isEnabled()
+    rolled = build_putt_scene(
+        dataclasses.replace(
+            solved, putter_speed_ms=want.putter_speed_ms, aim_deg=want.aim_deg
+        )
+    )
+    assert widget._scene is not None and widget._scene.holed
+    assert widget._scene.trajectory_xyz.tolist() == rolled.trajectory_xyz.tolist()
+
+
+def test_auto_solve_reports_a_rejected_putt(
+    qapp: QApplication, widget: PuttingGreenWidget, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def refuse(_config: object) -> None:
+        raise ValueError("no read")
+
+    monkeypatch.setattr(gui_mod, "solve_putt", refuse)
+    widget._solve_btn.click()
+    _wait_for_solve(qapp, widget)
+    assert "Auto-Solve rejected: no read" in widget._results_text.toPlainText()
+
+
+# ---------------------------------------------------------------------------
+# Strokes gained (#14467)
+# ---------------------------------------------------------------------------
+
+
+def test_the_sg_panel_scores_on_the_dialled_green(widget: PuttingGreenWidget) -> None:
+    # Golden parity: the study runs on the batch panel's green and stroke.
+    widget._slope_spin.setValue(1.5)
+    args = widget.sg_panel().study_args()
+    for key, value in widget.batch_panel.current_args().items():
+        if key != "n":
+            assert args[key] == value
+    assert widget.sg_panel().canvas.parent() is not None
+
+
+def test_a_putt_enters_its_result_into_the_sg_panel(
+    widget: PuttingGreenWidget,
+) -> None:
+    # In feet the leave box (two decimals) holds the leave to 0.005 ft.
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    widget._slope_spin.setValue(2.0)
+    widget._run_simulation()
+    scene = widget._scene
+    assert scene is not None
+    args = widget.sg_panel().study_args()
+    assert args["holed"] is scene.holed
+    expected_ft = 0.0 if scene.holed else scene.final_distance_to_cup_m / 0.3048
+    assert args["leave_ft"] == pytest.approx(expected_ft, abs=0.01)
+
+
+def test_the_sg_panel_follows_the_unit_selector(widget: PuttingGreenWidget) -> None:
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert widget.sg_panel()._leave_spin.suffix().strip() == "m"
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert widget.sg_panel()._leave_spin.suffix().strip() == "ft"
+
+
+# Camera views and playback (#14473)
+# ---------------------------------------------------------------------------
+
+
+@_needs_gl
+def test_view_presets_place_the_camera_from_the_shared_pose(
+    widget: PuttingGreenWidget,
+) -> None:
+    from src.tools.putting_green_gui._camera import CAMERA_PRESETS, camera_pose
+
+    widget._run_simulation()
+    combo = widget.playback_bar().view_combo
+    assert [combo.itemData(i) for i in range(combo.count())] == list(CAMERA_PRESETS)
+    for i, preset in enumerate(CAMERA_PRESETS):
+        combo.setCurrentIndex(i)
+        pose = camera_pose(widget._scene, preset)
+        opts = widget._gl_view.opts
+        assert (opts["distance"], opts["elevation"], opts["azimuth"]) == (
+            pytest.approx(pose.distance),
+            pytest.approx(pose.elevation_deg),
+            pytest.approx(pose.azimuth_deg),
+        )
+        center = opts["center"]
+        assert (center.x(), center.y(), center.z()) == pytest.approx(pose.center)
+
+
+def test_play_pause_toggles_the_playback(widget: PuttingGreenWidget) -> None:
+    widget._run_simulation()
+    assert widget._anim_timer.isActive()
+    widget.playback_bar().play_btn.click()
+    assert not widget._anim_timer.isActive()
+    assert widget.playback_bar().play_btn.text() == "Play"
+    widget.playback_bar().play_btn.click()
+    assert widget._anim_timer.isActive()
+    assert widget.playback_bar().play_btn.text() == "Pause"
+
+
+def test_scrub_moves_the_ball_to_the_chosen_sample(
+    widget: PuttingGreenWidget,
+) -> None:
+    widget._run_simulation()
+    widget._ball_item = MagicMock()
+    traj = widget._scene.trajectory_xyz
+    slider = widget.playback_bar().scrub_slider
+    assert (slider.minimum(), slider.maximum()) == (0, traj.shape[0] - 1)
+    k = traj.shape[0] // 2
+    slider.setValue(k)
+    assert not widget._anim_timer.isActive(), "scrubbing pauses the playback"
+    assert widget._anim_index == k
+    pos = widget._ball_item.setData.call_args.kwargs["pos"]
+    assert pos.tolist() == traj[k : k + 1].tolist()
+
+
+def test_the_playback_drives_the_scrubber(widget: PuttingGreenWidget) -> None:
+    widget._run_simulation()
+    widget._ball_item = MagicMock()
+    widget._advance_animation()
+    widget._advance_animation()
+    assert widget.playback_bar().scrub_slider.value() > 0
+    assert widget._anim_timer.isActive(), "the scrubber's echo must not pause"
+
+
+def test_phase_jumps_land_on_each_core_phase(widget: PuttingGreenWidget) -> None:
+    widget._run_simulation()
+    widget._ball_item = MagicMock()
+    phases = widget._scene.phases
+    combo = widget.playback_bar().phase_combo
+    assert combo.count() == len(phases)
+    assert "Skid" in combo.itemText(1) and "Rest" in combo.itemText(len(phases) - 1)
+    for i, mark in enumerate(phases):
+        combo.activated.emit(i)
+        assert widget.playback_bar().scrub_slider.value() == mark.index
+        assert widget._anim_index == mark.index
+        assert not widget._anim_timer.isActive()
+
+
+def test_the_torque_panel_sits_in_the_simulator(widget: PuttingGreenWidget) -> None:
+    panel = widget.torque_panel()
+    assert panel.parent() is not None
+    assert panel.canvas.parent() is not None
+    assert panel.couple_lines()[0], "the couples plot on open"
+
+
+def test_the_torque_panel_follows_the_unit_choice(widget: PuttingGreenWidget) -> None:
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert "N" in widget.torque_panel().couple_axis_label()
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert "lbf" in widget.torque_panel().couple_axis_label()
+
+
+def test_the_torque_panel_is_no_wider_than_the_batch_panel(
+    widget: PuttingGreenWidget,
+) -> None:
+    widest = widget.batch_panel.minimumSizeHint().width()
+    assert widget.torque_panel().minimumSizeHint().width() <= widest
+
+
+def test_the_scenarios_panel_saves_the_dialled_green(
+    widget: PuttingGreenWidget,
+) -> None:
+    widget._stimp_spin.setValue(11.5)
+    panel = widget.scenario_panel()
+    assert panel.scenario_args("A")["setup"] == widget.batch_panel.current_args()
+    panel.run_save("A")
+    assert [row[0] for row in panel.table_text()] == ["A"]
+    assert panel.scenarios()[0]["setup"]["stimp"] == pytest.approx(11.5)
+
+
+def test_importing_a_setup_puts_it_on_the_controls(
+    widget: PuttingGreenWidget, tmp_path
+) -> None:
+    import json
+    import math
+
+    from src.shared.python.putting_analytics import service_setup
+
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    setup = {"distance_ft": 14.0, "grade_pct": 3.0, "aspect_deg": -90.0, "stimp": 12.0}
+    path = tmp_path / "setup.json"
+    doc = service_setup.export_setup({"setup": setup})
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    widget.scenario_panel().import_from(path)
+    assert widget._distance_spin.value() == pytest.approx(14.0, abs=0.05)
+    assert widget._stimp_spin.value() == pytest.approx(12.0)
+    slope = math.degrees(math.atan(0.03))
+    assert widget._slope_spin.value() == pytest.approx(slope, abs=0.05)
+    args = widget.batch_panel.current_args()
+    assert args["distance_ft"] == pytest.approx(14.0, abs=0.05)
+    assert args["grade_pct"] == pytest.approx(3.0, abs=0.1)
+
+
+def test_the_scenario_table_follows_the_units(widget: PuttingGreenWidget) -> None:
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    panel = widget.scenario_panel()
+    panel.run_save("A")
+    assert panel.table_text()[0][3].endswith(" ft")
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert panel.table_text()[0][3].endswith(" m")

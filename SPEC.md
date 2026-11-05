@@ -2741,6 +2741,89 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14623 | SHOW-B4: physics backend on dispersion tables, EB shrinkage, personalised vs tour strategy |
+| 2026-11-05 | #14625 | SHOW-C3c: ROM and velocity binding report from rollout joint angles |
+| 2026-11-05 | #14626 | Putting simulator: the counter-torque panel bounds the gust input by the core's GUST_RANGE_NM instead of the preload range |
+| 2026-11-05 | #14624 | Add npm run tauri:artifact: a local Tauri installer named with version and commit, plus a sha256 file, never published |
+| 2026-11-05 | #14618 | SHOW-C6 shot-shape presets, ball-flight curvature sign tests and swing-variant artefact with run identity |
+| 2026-11-05 | #14615 | Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes |
+| 2026-11-05 | #14354 | OpenSim topology grip rebuilds club moment at mid-penetration lever; overlap hold net_moment_com xfail removed. |
+| 2026-11-05 | #14616 | SHOW-B7: fit a SkillFamily from launch-monitor shot data, shrunk toward a preset |
+| 2026-11-05 | #14613 | SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions |
+| 2026-11-05 | #14611 | React putting simulator gains the counter-torque stabilization explorer (sliders, putter preset, hand-couple chart, impact readouts) over the core /counter-torque route |
+| 2026-11-05 | #14608 | SHOW-B3: cached, versioned MC dispersion tables (CRN) + pipeline landing adapter |
+| 2026-11-05 | #14403 | Guard root Docker context secret-exclusion rules |
+| 2026-11-05 | #14606 | SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report |
+| 2026-11-05 | #14601 | Add golf-language face-on address grip roll metric (0 deg vertical, + strong) with flagship measurement and overlay render |
+| 2026-11-05 | #14609 | Putting Green Simulator: Counter-Torque Stabilization panel charts the shared core's hand couples and gust twist (preload held vs slack grip) on the shared balance heads, with force and torque display units (N, lbf, N·m, in·lbf) in the shared units module |
+| 2026-11-05 | #14598 | SHOW-C4: shaft_state_series reports MuJoCo chain-shaft tip deflection, lead/droop, deflection rate and strain energy through impact, with R11-window evidence on the best-fit driver |
+| 2026-11-05 | #14603 | SHOW-A5: trunk observability report (marker Jacobian SVD), ADR-0059 and coupled-by-default showpiece spec |
+| 2026-11-05 | #14578 | SHOW-A4: cited neck ROM (neck_rom.py, single source for range_of_motion) enforced as MJCF joint limits on NeckInput X/Y/Z |
+| 2026-11-05 | #14604 | React putting simulator gains the desktop Auto-Solve Read: /solve-aim-3d pace and aim written into the controls, the solved putt simulated, and the read shown in the chosen units |
+| 2026-11-05 | #14597 | CI Standard sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 workflow-wide and passes pip-audit --timeout 60, so transient PyPI read timeouts no longer fail CI |
+| 2026-11-05 | #14602 | Putting: POST /tools/putting-green/counter-torque serves the shared core's two-hand couple model (hand couples, forces and gust response over the stroke) |
+| 2026-11-05 | #14590 | SHOW-B2: SkillFamily schema (impact-condition mean/cov + provenance), assumption-marked presets, registry, PlayerProfile link |
+| 2026-11-05 | #14596 | SHOW-C3b: trust-region torque optimiser with warm start and spline_trust_region backend entry |
+| 2026-11-05 | #14592 | Size-aware development-log archiver: archive oldest terminal entries when the log nears the byte cap |
+| 2026-11-05 | #14594 | Putting Green Simulator: the ud.putt_scene/1 export writes and reads impact_toe_m (optional on read, default 0.0, range-checked against IMPACT_TOE_RANGE_M), so a toe or heel strike round-trips |
+| 2026-11-05 | #14593 | React web UI: one command (npm run local) builds from the lockfile and serves it through the API from a clean checkout; CI Build Check runs the same clean-build check; README run steps; a test bars paid-API hosts and keys |
+| 2026-11-05 | #14589 | SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation |
+| 2026-11-05 | #14577 | SHOW-A3: optional lumbar:thoracic regional-split coupling (trunk_coupling, off by default) for the full-body-v2 trunk, MuJoCo joint equalities, and trunk joint-tree/mass/ROM contract tests |
+| 2026-11-05 | #14588 | Putting API: POST /solve-aim-3d solves the pace and line that hole a /simulate-3d putt on that route's own surface and head (core solve_aim, like the desktop Auto-Solve); the 3-D request models move to src/api/models/putting_green_requests.py |
+| 2026-11-05 | #14584 | WSCG update manuscript draft on the best-match MuJoCo ZTCF/ZVCF run, citing the pinned run_id |
+| 2026-11-05 | #14581 | SHOW-B1: ShotOutcomeModel protocol + backend registry; tour baseline is the default quick_sg backend |
+| 2026-11-05 | #14579 | SHOW-C2: ImpactConditions + evaluate_rollout facade for optimiser loops (face, path, AoA, speed, strike) over impact_parameters |
+| 2026-11-05 | #14586 | React putting page: Green Type selector on the core green presets (/simulate-3d green spec) |
+| 2026-11-05 | #14580 | SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope contracts (impact_optimization package; face:path 10:1; NSX-04 torque limits; cited velocity YAML) |
+| 2026-11-05 | #14583 | Putting API: /simulate-3d accepts the core green shape (green: GreenShapeRequest, a preset or slope, tier and bumps) and rolls on its GreenSpec height field, reporting that spec's grade and aspect, and strikes along aim_heading_deg (was always +x), so the React page can send the core presets and an aimed putt |
+| 2026-11-04 | #14576 | React putting page: desktop camera views and jumps to the core phase marks |
+| 2026-11-04 | #14548 | Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio |
+| 2026-11-04 | #14573 | React putting page: strokes-gained readout and expected-putts curve from the shared core's /strokes-gained |
+| 2026-11-04 | #14543 | Analytic and diagram figures in the proximal-distal release are labelled with their code evidence instead of citing a run |
+| 2026-11-04 | #14546 | Putting: camera presets (orbit, down the line, face on, overhead), play/pause, a scrubber and jumps to the core phase marks on the PyQt6 tile |
+| 2026-11-04 | #14542 | Putting: Strokes Gained panel on the PyQt6 tile (player E(d) on the dialled green from the shared service_sg study, each putt scored on the cached curve, in the chosen units) |
+| 2026-11-04 | #14547 | React putting page: Balance Type selector over the core putter presets with head mass and MOI inputs; balance_type React/Tauri parity cells now present |
+| 2026-11-04 | #14539 | The proximal-distal release now maps every figure to the real stored run that wrote it (data/figure_run_map.json), recording what differs where the run's bytes do not match the release |
+| 2026-11-04 | #14540 | React putting page: seven core noise channels, 40/100/1000-putt dispersion batches with a rest scatter, and the 0-45 ft make-% spread from the shared core (PUTT-SHARE b-web) |
+| 2026-11-04 | #14537 | Putting dynamics: per-sample ball mode on /simulate and phase marks (hop, skid, roll, rest starts) on /simulate and /simulate-3d from the shared core, for playback jumps |
+| 2026-11-04 | #14532 | Putting page groundwork: the seven core noise channels, the simulator-to-core dispersion arguments and the /dispersion and /make-spread client, pinned to the shared core by a golden file (PUTT-SHARE b-web part 1) |
+| 2026-11-04 | #14528 | ud-sim preset-run stores a release preset run and ud-sim reproduce reruns it; preset commands run with a pinned SOURCE_DATE_EPOCH and PYTHONHASHSEED |
+| 2026-11-04 | #14534 | sim_run.figure_run_map maps each release figure to the stored run that wrote it, explaining any byte mismatch from the matplotlib version both copies embed |
+| 2026-11-04 | #14524 | Run release presets through the run store: sim_run.preset_run records which files a preset wrote, copies them into a run directory and emits a reproducible run manifest |
+| 2026-11-04 | #14515 | ZVCF is the control component M^-1 tau (constrained: P_c tau with the reaction change); gravity-only term renamed zero_velocity_zero_torque_acceleration with a one-release deprecation path; analysis schema 4.0.0 |
+| 2026-11-04 | #14510 | Superposition residual for forward counterfactual trajectories: ZTCF + ZVCF matches the base only at the fork; integrated sums report their residual |
+| 2026-11-04 | #14512 | drift_and_control_reactions: closure reactions split into drift (gravity, velocity) and control (load only) parts that sum to the total, on the KKT projector |
+| 2026-11-04 | #14508 | Golden ZTCF/ZVCF contract tests: drift + control = total with gravity counted once, on the analytical and MuJoCo double pendulum |
+| 2026-11-04 | #14533 | Putting: PyQt6 tile readouts and panel style move out of gui.py into _scene_text and _style (no behaviour change; keeps gui.py under the monolith threshold) |
+| 2026-11-04 | #14527 | Putting analytics: player-specific Bellman expected putts on the caller's green (optimal pace per distance, shared skill roll model) and one putt's strokes gained against it, on /tools/putting-analytics/strokes-gained |
+| 2026-11-04 | #14531 | Putting: Auto-Solve Read on the PyQt6 tile (core solve_aim off the GUI thread, writes pace and aim into the controls) and one-call aim+pace on /read-green |
+| 2026-11-04 | #14521 | Putting core: shared GreenSpec (slope, two-tier step, seeded undulation, named presets) used by /simulate, /scatter, /read-green and /contours, plus GET /green-presets |
+| 2026-11-04 | #14526 | Putting desktop: Green Type selector (cross slope or any core GreenSpec preset), seeded undulation in mm or in, and a green seed |
+| 2026-11-04 | #14511 | Putting core: toe/heel strike scatter now costs pace through the collision model's effective head mass (off_centre_speed_retention); /variance-study offers a strike factor and strike_toe_sd_mm, which /simulated-curve also accepts; a centred striker's default study is unchanged |
+| 2026-11-04 | #14519 | Putting Green Simulator: heel/toe strike and putter balance controls with an impact readout (launch angle, spin, skid, face twist, energy loss) from the shared strike() report |
+| 2026-11-04 | #14516 | Putting core: named putter balance presets (toe-hang, face-balanced, zero-torque, counterbalanced) over PutterState; GET /tools/putting-green/putter-presets lists them and /simulate-3d accepts balance_type |
+| 2026-11-04 | #14513 | Putting Green Simulator batch panel takes all seven core noise channels (path, strike, read slope, fall line and speed added); cluster (b) parity cells flipped to present |
+| 2026-11-04 | #14504 | Putting studio: the 6-channel strokes-gained attribution now shows the shared core's variance_study gains (face, path, speed, grade/aspect/stimp read) for the tour-average player from a generated distance x side-slope fixture; counter-torque, impact spot and roughness stay as labelled illustrative rows |
+| 2026-11-04 | #14506 | Putting Green Simulator: Batch Dispersion panel (stroke noise, 40/100/1000-putt batch scatter, 0-45 ft make-% spread) on the dialled green via the shared dispersion service |
+| 2026-11-04 | #14487 | Putting analytics: dispersion batch (up to 2000 putts) and 0-45 ft make-spread services and routes on the caller's green, from the shared skill roll model |
+| 2026-11-04 | #14489 | React putting page: Metric/Imperial units selector mirroring units.py (SI internally), golden parity with the Python core |
+| 2026-11-04 | #14485 | Putting Green Simulator: Metric/Imperial units selector that converts controls and metrics in place and persists the shared unit preference |
+| 2026-11-04 | #14483 | Putting feature parity matrix: 13 advanced features x core/API, PyQt6, React, Tauri, studio with file evidence; registry test tracks 53 gaps as strict xfails |
+| 2026-11-04 | #14455 | Putting Green Simulator: python -m launch entry point with --smoke (one putt, clean exit) and a clear exit-2 message when the putting core is missing |
+| 2026-11-04 | #14507 | Add append-only model-matching metrics trend file and daily-report delta snippet |
+| 2026-11-04 | #14505 | Add headless best-model render script (SHA-256-pinned MuJoCo and OpenSim OS9 inputs, per-model summaries) |
+| 2026-11-04 | #14509 | Add the OpenSim segment scaling-check command: gates scale factors and rigid residuals on the #13991 length-plausibility bounds and writes metrics JSON plus a run-manifest-v1 |
+| 2026-11-04 | #14484 | Add per-engine model-matching status report (ledger, generator, STATUS.md) marking unverified numbers |
+| 2026-11-04 | #14529 | Additivity charts for the pinned WSCG run: ZTCF, ZVCF, their sum and the full response per lead-arm joint, with the residual against its declared tolerance band and event markers, written as SVG and PNG on demand (scripts/research/proximal_distal_energy/wscg_ztcf_additivity_charts.py). |
+| 2026-11-04 | #14525 | Render force and torque vectors at swing events of a manifest run (src/sim_run/vector_overlay.py), with legend lines that state each reference's drawn size, and keep the Matplotlib legend text inside its inset. |
+| 2026-11-04 | #14523 | Assert ZTCF + ZVCF = full (canonical ZVCF control component, gravity once, pointwise only) and the ZTCF velocity drift on the pinned WSCG model, with saved residual series |
+| 2026-11-04 | #14488 | Add the WSCG best-match MuJoCo model selection record (structural feature score, runner-up, run-manifest pin) |
+| 2026-11-04 | #14522 | OpenSim, Drake, Pinocchio and MyoSuite runs emit the shared run manifest; absent engines skip with a reason; reproduce fails closed on git revisions and missing parameters |
+| 2026-11-04 | #14520 | RUN-4: ud-sim reproduce reruns a stored run from its model file with the recorded seed and parameters, compares each output within an absolute tolerance and reports engine version mismatches; the run store now closes copied files and reports corrupt records cleanly |
+| 2026-11-04 | #14517 | RUN-3: content-addressed run store (run_id = SHA-256 of the canonical manifest, outputs stored once by hash) with ud-sim runs add, list and show; store root from --store or $UD_RUN_STORE |
+| 2026-11-04 | #14514 | Emit a run manifest from the MuJoCo run path, with output artifact hashes and a shared engine-neutral emitter |
+| 2026-11-04 | #14454 | Add the run-manifest v1 schema and validator: model id and immutable revision, parameters, input-data digest, seed, engine and version, UD commit and created_at; mutable refs and missing provenance fail |
+| 2026-11-04 | #14481 | Install Trivy from checksum-verified GitHub releases in CI. |
 | 2026-11-03 | #14414 | Config/secret separation and upgrade/rollback guarantees |
 | 2026-11-03 | #14402 | \ Define and implement clean-environment install smoke test\ |
 | 2026-11-03 | #14413 | Versioned releases with verifiable artifacts and SBOM |

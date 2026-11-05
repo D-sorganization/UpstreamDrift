@@ -23,20 +23,43 @@ See issue #1206
 
 from __future__ import annotations
 
+import dataclasses
 import math
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Annotated, Literal, Protocol
 
 import numpy as np
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
+from src.api.models.putting_counter_torque import (
+    CounterTorqueRequest,
+    CounterTorqueResponse,
+)
+from src.api.models.putting_green_requests import (
+    AimSolve3DResponse,
+    GreenPresetName,
+    GreenShapeRequest,
+    Putt3DSimulationRequest,
+)
+from src.api.models.putting_playback import (
+    BallModeName,
+    PhaseMarkResponse,
+    Putt3DCollisionResponse,
+    Putt3DSampleResponse,
+    Putt3DSimulationResponse,
+    Putt3DSurfaceResponse,
+    phase_marks_response,
+)
 from src.api.rate_limit import get_limit, limiter
 from src.shared.python.core.contracts import PostconditionError, precondition, require
-from src.shared.python.putting_dynamics.types import (
-    TYPICAL_HEAD_MASS_KG,
-    TYPICAL_HEAD_MOI_KG_M2,
-    TYPICAL_LOFT_DEG,
+from src.shared.python.putting_dynamics.green_spec import (
+    GREEN_PRESETS,
+    GreenSpec,
+)
+from src.shared.python.putting_dynamics.putter_presets import (
+    BALANCE_PRESETS,
+    balance_preset,
 )
 
 if TYPE_CHECKING:
@@ -50,14 +73,12 @@ if TYPE_CHECKING:
 
 router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
 
-#: Putter head used when a request carries only a stroke speed (shared by
-#: ``/simulate-3d`` defaults and the 2-D routes).
-_DEFAULT_HEAD_MASS_KG = TYPICAL_HEAD_MASS_KG
-_DEFAULT_HEAD_MOI_KG_M2 = TYPICAL_HEAD_MOI_KG_M2
-_DEFAULT_LOFT_DEG = TYPICAL_LOFT_DEG
-
 
 # -- Request / Response Models --
+
+
+def _flat_green() -> GreenShapeRequest:
+    return GreenShapeRequest.model_validate({})
 
 
 class PuttSimulationRequest(BaseModel):
@@ -75,6 +96,7 @@ class PuttSimulationRequest(BaseModel):
     green_height: float = Field(20.0, description="Green height [m]", gt=0)
     hole_x: float = Field(10.0, description="Hole X position [m]")
     hole_y: float = Field(15.0, description="Hole Y position [m]")
+    green: GreenShapeRequest = Field(default_factory=_flat_green)
     wind_speed: float = Field(0.0, description="Wind speed [m/s]", ge=0)
     wind_direction_x: float = Field(1.0, description="Wind direction X")
     wind_direction_y: float = Field(0.0, description="Wind direction Y")
@@ -89,6 +111,10 @@ class PuttSimulationResponse(BaseModel):
     positions: list[list[float]]
     velocities: list[list[float]]
     times: list[float]
+    modes: list[BallModeName] = Field(
+        default_factory=list, description="Ball mode at each sample (#14473)"
+    )
+    phases: list[PhaseMarkResponse] = Field(default_factory=list)
     holed: bool
     final_position: list[float]
     total_distance: float
@@ -105,6 +131,7 @@ class GreenReadingRequest(BaseModel):
     green_width: float = Field(20.0, description="Green width [m]", gt=0)
     green_height: float = Field(20.0, description="Green height [m]", gt=0)
     stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
+    green: GreenShapeRequest = Field(default_factory=_flat_green)
 
 
 class GreenReadingResponse(BaseModel):
@@ -117,6 +144,11 @@ class GreenReadingResponse(BaseModel):
     total_break: float
     recommended_speed: float
     aim_point: list[float]
+    aim_heading_deg: float = Field(
+        description="Putter heading that plays the read, CCW from +x [deg] (#14465)"
+    )
+    holed: bool = Field(description="Whether the solved putt drops")
+    converged: bool = Field(description="Whether the heading solve converged")
     elevations: list[float]
     slopes: list[list[float]]
 
@@ -135,6 +167,7 @@ class ScatterAnalysisRequest(BaseModel):
     green_width: float = Field(20.0, gt=0)
     green_height: float = Field(20.0, gt=0)
     stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
+    green: GreenShapeRequest = Field(default_factory=_flat_green)
 
 
 class ScatterAnalysisResponse(BaseModel):
@@ -161,93 +194,36 @@ class GreenContourResponse(BaseModel):
     hole_position: list[float]
 
 
-class Putt3DSimulationRequest(BaseModel):
-    """Physics and visualization inputs for one three-dimensional putt."""
+class BalancePresetResponse(BaseModel):
+    """One named putter head from the shared core (#14461)."""
 
-    putter_speed_mps: float = Field(1.8, gt=0.0, le=10.0)
-    loft_deg: float = Field(_DEFAULT_LOFT_DEG, ge=-6.0, le=10.0)
-    head_mass_kg: float = Field(_DEFAULT_HEAD_MASS_KG, ge=0.1, le=1.0)
-    head_moi_kg_m2: float = Field(_DEFAULT_HEAD_MOI_KG_M2, ge=1e-5, le=1e-2)
-    coefficient_of_restitution: float = Field(0.78, gt=0.0, lt=1.0)
-    hosel_toe_m: float = Field(0.0, ge=-0.08, le=0.08)
-    hosel_forward_m: float = Field(0.0, ge=-0.05, le=0.05)
-    impact_toe_m: float = Field(0.0, ge=-0.08, le=0.08)
-    stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
-    grade_percent: float = Field(0.0, ge=0.0, le=10.0)
-    downhill_aspect_deg: float = Field(0.0, ge=-180.0, le=180.0)
-    grain_strength: float = Field(0.0, ge=0.0, lt=0.9)
-    grain_direction_deg: float = Field(0.0, ge=-180.0, le=180.0)
-    rolling_velocity_coefficient: float = Field(0.0, ge=0.0, le=1.0)
-    bump_height_m: float = Field(0.0, ge=0.0, le=0.01)
-    friction_variation: float = Field(0.0, ge=0.0, le=0.9)
-    random_seed: int = Field(8345, ge=0, le=2**31 - 1)
-    hole_x_m: float = Field(3.0, ge=-9.0, le=9.0)
-    hole_y_m: float = Field(0.0, ge=-9.0, le=9.0)
+    key: str
+    name: str
+    head_mass_kg: float
+    moi_kg_m2: float
+    hosel_toe_m: float
+    hosel_forward_m: float
 
 
-class Putt3DSampleResponse(BaseModel):
-    """One frame in the three-dimensional playback trajectory."""
+class BalancePresetsResponse(BaseModel):
+    """Every core balance preset, for the balance-type selectors."""
 
-    t_s: float
-    x_m: float
-    y_m: float
-    z_m: float
-    speed_mps: float
-    spin_rad_s: float
-    mode: Literal["airborne", "slide", "roll", "rest"]
-
-
-class Putt3DCollisionResponse(BaseModel):
-    """Impact quantities displayed beside the slow-motion collision."""
-
-    ball_speed_mps: float
-    putter_speed_before_mps: float
-    putter_speed_after_mps: float
-    launch_angle_deg: float
-    spin_rad_s: float
-    impulse_n_s: float
-    contact_time_proxy_s: float
-    kinetic_energy_loss_j: float
-    face_twist_rad_s: float
-    twist_moment_n_m_s: float
-
-
-class Putt3DSurfaceResponse(BaseModel):
-    """Surface geometry metadata required by the R3F scene."""
-
-    width_m: float
-    height_m: float
-    grade_percent: float
-    downhill_aspect_deg: float
-    hole_x_m: float
-    hole_y_m: float
-
-
-class Putt3DSimulationResponse(BaseModel):
-    """Complete deterministic playback payload for the R3F client."""
-
-    roll_model: str = Field(
-        description="Roll model that produced this playback (ADR-0045 F1)"
-    )
-    samples: list[Putt3DSampleResponse]
-    collision: Putt3DCollisionResponse
-    surface: Putt3DSurfaceResponse
-    holed: bool
-    total_distance_m: float
-    duration_s: float
-    skid_distance_m: float
+    presets: list[BalancePresetResponse]
 
 
 # -- Endpoints --
 
 
-def _build_flat_putting_surface(
-    stimp_rating: float, green_width: float, green_height: float
+def _build_putting_surface(
+    stimp_rating: float,
+    green_width: float,
+    green_height: float,
+    green: GreenSpec | None = None,
 ) -> tuple[SurfaceSpec, float, float]:
-    """Flat, homogeneous shared-core surface sized to cover one green.
+    """Shared-core surface of ``green`` (flat by default) covering one green.
 
-    ``/simulate``, ``/scatter`` and ``/contours`` describe their green as a
-    legacy flat surface spanning ``(0, 0)`` to ``(width, height)``; the
+    ``/simulate``, ``/scatter``, ``/read-green`` and ``/contours`` describe
+    their green as spanning ``(0, 0)`` to ``(width, height)``; the
     shared :class:`~src.shared.python.putting_dynamics.HeightField` /
     :class:`~src.shared.python.putting_dynamics.FrictionField` grids are
     centred on the origin instead (see ``putting_dynamics/surfaces.py``).
@@ -259,11 +235,29 @@ def _build_flat_putting_surface(
     responses stay in the legacy green-local frame the existing schema and
     frontend already use.
     """
-    from src.shared.python.putting_dynamics import SurfaceSpec
-
     extent_m = min(200.0, max(1.0, green_width, green_height))
-    surface = SurfaceSpec.flat_uniform(stimp_ft=stimp_rating, extent_m=extent_m)
+    spec = green if green is not None else GreenSpec()
+    surface = spec.surface(stimp_ft=stimp_rating, extent_m=extent_m)
     return surface, green_width / 2.0, green_height / 2.0
+
+
+class _GreenRequest(Protocol):
+    """A body request that rolls on a green (/simulate, /scatter, /read-green)."""
+
+    stimp_rating: float
+    green_width: float
+    green_height: float
+    green: GreenShapeRequest
+
+
+def _request_surface(request: _GreenRequest) -> tuple[SurfaceSpec, float, float]:
+    """:func:`_build_putting_surface` for a body request's green (#14463)."""
+    return _build_putting_surface(
+        request.stimp_rating,
+        request.green_width,
+        request.green_height,
+        request.green.spec(),
+    )
 
 
 def _to_surface_frame(
@@ -323,12 +317,16 @@ def _build_putting_3d_surface(
         stimp_to_rolling_mu,
     )
 
-    height = HeightField.planar(
-        grade_percent=payload.grade_percent,
-        aspect_deg=payload.downhill_aspect_deg,
-        extent_m=extent_m,
-    )
-    if payload.bump_height_m > 0.0:
+    green = payload.green
+    if green is not None:
+        height = green.spec().height(extent_m)
+    else:
+        height = HeightField.planar(
+            grade_percent=payload.grade_percent,
+            aspect_deg=payload.downhill_aspect_deg,
+            extent_m=extent_m,
+        )
+    if green is None and payload.bump_height_m > 0.0:
         height = bumpy_height_field(
             seed=payload.random_seed,
             amplitude_m=payload.bump_height_m,
@@ -355,16 +353,35 @@ def _build_putting_3d_surface(
         friction_field=friction_field,
         friction=friction,
     )
-    putter = PutterState(
-        head_mass_kg=payload.head_mass_kg,
-        moi_kg_m2=payload.head_moi_kg_m2,
-        loft_deg=payload.loft_deg,
-        speed_mps=payload.putter_speed_mps,
-        cor=payload.coefficient_of_restitution,
-        hosel_toe_m=payload.hosel_toe_m,
-        hosel_forward_m=payload.hosel_forward_m,
-    )
+    if payload.balance_type is not None:
+        putter = balance_preset(payload.balance_type).putter(
+            payload.putter_speed_mps,
+            loft_deg=payload.loft_deg,
+            cor=payload.coefficient_of_restitution,
+        )
+    else:
+        putter = PutterState(
+            head_mass_kg=payload.head_mass_kg,
+            moi_kg_m2=payload.head_moi_kg_m2,
+            loft_deg=payload.loft_deg,
+            speed_mps=payload.putter_speed_mps,
+            cor=payload.coefficient_of_restitution,
+            hosel_toe_m=payload.hosel_toe_m,
+            hosel_forward_m=payload.hosel_forward_m,
+        )
     return surface, height, putter
+
+
+def _surface_slope(payload: Putt3DSimulationRequest) -> dict[str, float]:
+    """The rolled green's grade and aspect, from its core spec when sent."""
+    green = payload.green
+    if green is None:
+        return {
+            "grade_percent": payload.grade_percent,
+            "downhill_aspect_deg": payload.downhill_aspect_deg,
+        }
+    spec = green.spec()
+    return {"grade_percent": spec.grade_percent, "downhill_aspect_deg": spec.aspect_deg}
 
 
 @router.post("/simulate-3d", response_model=Putt3DSimulationResponse)
@@ -384,6 +401,7 @@ async def simulate_putt_3d(
         putter,
         surface,
         impact_toe_m=payload.impact_toe_m,
+        heading_rad=math.radians(payload.aim_heading_deg),
         hole_x_m=payload.hole_x_m,
         hole_y_m=payload.hole_y_m,
     )
@@ -410,6 +428,7 @@ async def simulate_putt_3d(
     return Putt3DSimulationResponse(
         roll_model=USGA_STIMP_ROLL_MODEL,
         samples=samples,
+        phases=phase_marks_response(result.samples),
         collision=Putt3DCollisionResponse(
             ball_speed_mps=collision.ball_speed_mps,
             putter_speed_before_mps=payload.putter_speed_mps,
@@ -425,8 +444,7 @@ async def simulate_putt_3d(
         surface=Putt3DSurfaceResponse(
             width_m=extent_m,
             height_m=extent_m,
-            grade_percent=payload.grade_percent,
-            downhill_aspect_deg=payload.downhill_aspect_deg,
+            **_surface_slope(payload),
             hole_x_m=payload.hole_x_m,
             hole_y_m=payload.hole_y_m,
         ),
@@ -434,6 +452,33 @@ async def simulate_putt_3d(
         total_distance_m=result.total_distance_m,
         duration_s=result.time_s,
         skid_distance_m=result.skid_distance_m,
+    )
+
+
+@router.post("/solve-aim-3d", response_model=AimSolve3DResponse)
+@limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
+@handle_api_errors
+async def solve_aim_3d(
+    request: Request, payload: Putt3DSimulationRequest
+) -> AimSolve3DResponse:
+    """The pace and line that hole ``/simulate-3d``'s putt on its own surface.
+
+    Runs the core's ``solve_aim`` with the request's head from the origin to
+    the hole, like the desktop Auto-Solve; the read assumes a centred strike
+    and ignores the request's speed and aim.
+    """
+    del request
+    from src.shared.python.putting_dynamics import solve_aim
+
+    surface, _, putter = _build_putting_3d_surface(payload)
+    hole = (payload.hole_x_m, payload.hole_y_m)
+    aim = solve_aim(surface, (0.0, 0.0), hole, putter)
+    return AimSolve3DResponse(
+        putter_speed_mps=aim.putter_speed_mps,
+        aim_heading_deg=math.degrees(aim.heading_rad),
+        break_m=aim.break_m,
+        holed=aim.holed,
+        converged=aim.converged,
     )
 
 
@@ -462,9 +507,7 @@ async def simulate_putt(
     from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_ball
 
-    surface, half_w, half_h = _build_flat_putting_surface(
-        payload.stimp_rating, payload.green_width, payload.green_height
-    )
+    surface, half_w, half_h = _request_surface(payload)
 
     direction = np.array([payload.direction_x, payload.direction_y])
     norm = math.hypot(float(direction[0]), float(direction[1]))
@@ -493,6 +536,8 @@ async def simulate_putt(
         positions=positions,
         velocities=velocities,
         times=[s.t_s for s in result.samples],
+        modes=[s.mode.value for s in result.samples],
+        phases=phase_marks_response(result.samples),
         holed=result.holed,
         final_position=final_position,
         total_distance=result.total_distance_m,
@@ -511,16 +556,13 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
     :func:`~src.shared.python.putting_dynamics.solve_aim` finds the
     putter-head speed and heading that hole (or just pass) the target by
     simulating the strike with :func:`~src.shared.python.putting_dynamics.
-    simulate_strike`, rather than a separate closed-form heuristic. The
-    request carries no slope inputs, so the green is flat, matching the
-    legacy engine's default surface. See issue #1206.
+    simulate_strike`, rather than a separate closed-form heuristic, on the
+    requested green (flat by default, #14463). See issue #1206.
     """
     from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import read_line, solve_aim
 
-    surface, half_w, half_h = _build_flat_putting_surface(
-        request.stimp_rating, request.green_width, request.green_height
-    )
+    surface, half_w, half_h = _request_surface(request)
     ball_xy = _to_surface_frame(request.ball_x, request.ball_y, half_w, half_h)
     target_xy = _to_surface_frame(request.target_x, request.target_y, half_w, half_h)
 
@@ -534,6 +576,9 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
         total_break=abs(solution.break_m),
         recommended_speed=solution.putter_speed_mps,
         aim_point=[aim_x, aim_y],
+        aim_heading_deg=math.degrees(solution.heading_rad),
+        holed=solution.holed,
+        converged=solution.converged,
         elevations=list(line.elevations_m),
         slopes=[list(s) for s in line.slopes],
     )
@@ -555,9 +600,7 @@ async def scatter_analysis(
     from src.shared.python.putting_dynamics import USGA_STIMP_ROLL_MODEL
     from src.shared.python.putting_dynamics import simulate_ball
 
-    surface, half_w, half_h = _build_flat_putting_surface(
-        request.stimp_rating, request.green_width, request.green_height
-    )
+    surface, half_w, half_h = _request_surface(request)
 
     direction = np.array([request.direction_x, request.direction_y])
     norm = math.hypot(float(direction[0]), float(direction[1]))
@@ -613,15 +656,52 @@ async def scatter_analysis(
     )
 
 
+@router.get("/putter-presets", response_model=BalancePresetsResponse)
+@handle_api_errors
+async def get_putter_presets() -> BalancePresetsResponse:
+    """Named putter balance presets from the shared core (#14461)."""
+    presets = [
+        BalancePresetResponse(**dataclasses.asdict(p)) for p in BALANCE_PRESETS.values()
+    ]
+    return BalancePresetsResponse(presets=presets)
+
+
+@router.post("/counter-torque", response_model=CounterTorqueResponse)
+@handle_api_errors
+async def counter_torque(request: CounterTorqueRequest) -> CounterTorqueResponse:
+    """Hand couples, forces and gust response over the stroke (#14469).
+
+    Serves :func:`~src.shared.python.putting_dynamics.counter_torque.
+    stroke_series`, the studio's closed-form two-hand couple model moved
+    into the shared core; an out-of-range setting is a 400.
+    """
+    from dataclasses import asdict, fields
+
+    from src.shared.python.putting_dynamics import counter_torque as ct
+
+    settings = request.model_dump()
+    n_points = settings.pop("n_points")
+    inputs = ct.CounterTorqueInputs(**settings)
+    series = [asdict(s) for s in ct.stroke_series(inputs, n_points=n_points)]
+    return CounterTorqueResponse(
+        putter_name=BALANCE_PRESETS[inputs.putter].name,
+        samples={
+            f.name: [row[f.name] for row in series]
+            for f in fields(ct.CounterTorqueSample)
+        },
+    )
+
+
 @router.get("/contours", response_model=GreenContourResponse)
 @precondition(
-    lambda width=20.0, height=20.0, resolution=20, stimp_rating=10.0: (
+    lambda green, width=20.0, height=20.0, resolution=20, stimp_rating=10.0: (
         width > 0 and height > 0 and resolution >= 2 and 6.0 <= stimp_rating <= 15.0
     ),
     "Green dimensions must be positive, resolution >= 2, and stimp_rating in [6, 15]",
 )
 @handle_api_errors
 async def get_green_contours(
+    green: Annotated[GreenShapeRequest, Depends()],
     width: float = 20.0,
     height: float = 20.0,
     resolution: int = 20,
@@ -629,16 +709,18 @@ async def get_green_contours(
 ) -> GreenContourResponse:
     """Get green elevation contour data for 2D visualization.
 
-    Reads the shared flat :class:`~src.shared.python.putting_dynamics.
-    HeightField` (epic #14141 step 7a); a flat green's elevations are
-    zero everywhere, matching the legacy engine's default flat surface.
+    Reads the shared :class:`~src.shared.python.putting_dynamics.
+    HeightField` of the requested green (epic #14141 step 7a, #14463); the
+    default flat green's elevations are zero everywhere.
     No roll model is involved, so this response carries no ``roll_model``
     field. See issue #1206.
     """
     if not (width is not None):
         raise ValueError("width must be provided")
 
-    surface, half_w, half_h = _build_flat_putting_surface(stimp_rating, width, height)
+    surface, half_w, half_h = _build_putting_surface(
+        stimp_rating, width, height, green.spec()
+    )
 
     xs = np.linspace(0, width, resolution)
     ys = np.linspace(0, height, resolution)
@@ -660,3 +742,13 @@ async def get_green_contours(
         elevations=elevations.tolist(),
         hole_position=[width / 2.0, height / 2.0],
     )
+
+
+@router.get("/green-presets", response_model=dict[str, GreenShapeRequest])
+@handle_api_errors
+async def list_green_presets() -> dict[str, GreenShapeRequest]:
+    """The shared core's named green shapes (#14463), by preset key."""
+    return {
+        key: GreenShapeRequest(**dataclasses.asdict(spec))
+        for key, spec in GREEN_PRESETS.items()
+    }

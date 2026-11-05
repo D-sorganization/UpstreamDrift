@@ -99,7 +99,7 @@ def _create_mock_session(
 
 
 def test_acceleration_decomposition_invariants() -> None:
-    """Verify a_tot = ztcf + a_ctrl and zvcf = a_grav (v = 0 and u = 0, #11553)."""
+    """Verify a_tot = ztcf + a_ctrl and zvcf = a_ctrl (control component, #14494)."""
     a_grav = np.array([0.0, 0.0, -9.81], dtype=np.float64)
     a_drift = np.array([1.2, -0.5, 0.3], dtype=np.float64)
     a_ctrl = np.array([5.0, -3.0, 10.0], dtype=np.float64)
@@ -107,7 +107,8 @@ def test_acceleration_decomposition_invariants() -> None:
     decomp = AccelerationDecomposition(a_grav=a_grav, a_drift=a_drift, a_ctrl=a_ctrl)
 
     np.testing.assert_allclose(decomp.ztcf, a_grav + a_drift)
-    np.testing.assert_allclose(decomp.zvcf, a_grav)
+    np.testing.assert_allclose(decomp.zvcf, a_ctrl)
+    np.testing.assert_allclose(decomp.zero_velocity_zero_torque, a_grav)
     np.testing.assert_allclose(decomp.zero_velocity_control_preserved, a_grav + a_ctrl)
     np.testing.assert_allclose(decomp.total_accel, a_grav + a_drift + a_ctrl)
     assert decomp.verify_decomposition(a_grav + a_drift + a_ctrl)

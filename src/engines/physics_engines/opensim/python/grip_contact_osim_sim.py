@@ -26,7 +26,7 @@ import tempfile
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -84,6 +84,15 @@ TOPOLOGY_CONTACT_ACCURACY = 5e-8
 _SIDES = (("L", "left"), ("R", "right"))
 CALIBRATION_HALF_LENGTH_M = 0.02
 _GRAVITY_M_S2 = 9.80665
+
+
+class _GripAxisSampleContext(NamedTuple):
+    """Axis frame and club origin for topology pad wrench accumulation (#13560)."""
+
+    axis_point: np.ndarray
+    axis: np.ndarray
+    grip_r: float
+    club_origin_m: np.ndarray
 
 
 def single_pad_model(
@@ -562,10 +571,12 @@ class ContactGripSimulator(BushingGripSimulator):
         p1: np.ndarray,
         r1: np.ndarray,
         p2: np.ndarray,
-        axis_point: np.ndarray,
-        axis: np.ndarray,
-        grip_r: float,
+        sample_ctx: _GripAxisSampleContext,
     ) -> tuple[np.ndarray, np.ndarray, float, float, PairWrench]:
+        axis_point = sample_ctx.axis_point
+        axis = sample_ctx.axis
+        grip_r = sample_ctx.grip_r
+        club_origin_m = sample_ctx.club_origin_m
         f_pair = np.zeros(3)
         t_pair = np.zeros(3)
         fn_pair = 0.0
@@ -575,22 +586,24 @@ class ContactGripSimulator(BushingGripSimulator):
         u_rad_weighted = np.zeros(3)
         rel_mean = np.zeros(3)
         u_rad_mean = np.zeros(3)
-        for force, i_f, i_t, local_pos, sphere_r, d0 in entries:
+        for force, i_f, _i_t, local_pos, sphere_r, d0 in entries:
             rec = force.getRecordValues(state)
             f = np.array([rec.get(i_f + j) for j in range(3)])
-            t = np.array([rec.get(i_t + j) for j in range(3)])
             f_pair += f
-            t_pair += t
             c_world = p1 + r1 @ local_pos
             rel = c_world - axis_point
             radial = rel - (axis @ rel) * axis
             norm_rad = float(np.linalg.norm(radial))
             u_rad = radial / norm_rad if norm_rad > 1e-12 else np.array([0.0, 0.0, 1.0])
+            pen_phys = max(0.0, sphere_r + grip_r - norm_rad)
+            # Match Pinocchio's mid-penetration lever (pad_contact sphere chain, #13560).
+            r_lever = grip_r - 0.5 * pen_phys
+            contact_lever = axis_point + (axis @ rel) * axis + u_rad * r_lever
+            t_pair += np.cross(contact_lever - club_origin_m, f)
             rel_mean += rel
             u_rad_mean += u_rad
             fn_raw = max(0.0, -float(f @ u_rad))
             f_tang_k = f - (-fn_raw) * u_rad
-            pen_phys = max(0.0, sphere_r + grip_r - norm_rad)
             pen_k = max(
                 0.0,
                 sphere_r + grip_r - norm_rad + (d0 - DEFAULT_TOPOLOGY_PRELOAD_M),
@@ -643,6 +656,9 @@ class ContactGripSimulator(BushingGripSimulator):
         grip_r = top.cylinder.radius_m
         axis_offset = np.array([0.0, 0.0, -grip_r if side == "L" else grip_r])
         axis_point = p2 + r2 @ axis_offset
+        club_body = self._model.getBodySet().get(CLUB_BODY)
+        _, club_origin_m = _transform_to_rt(club_body.getTransformInGround(state))
+        sample_ctx = _GripAxisSampleContext(axis_point, axis, grip_r, club_origin_m)
         total_f = np.zeros(3)
         total_t = np.zeros(3)
         pair_wrenches: dict[str, PairWrench] = {}
@@ -651,7 +667,12 @@ class ContactGripSimulator(BushingGripSimulator):
 
         for pair_name, entries in self._topo_forces[side]:
             f_pair, t_pair, fn_pair, ft_mag, pw = self._accumulate_pair_wrench(
-                entries, state, p1, r1, p2, axis_point, axis, grip_r
+                entries,
+                state,
+                p1,
+                r1,
+                p2,
+                sample_ctx,
             )
             total_f += f_pair
             total_t += t_pair

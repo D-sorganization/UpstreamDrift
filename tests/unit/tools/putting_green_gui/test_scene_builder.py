@@ -15,7 +15,13 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
-from src.shared.python.putting_dynamics import PutterState, solve_aim
+from src.shared.python.putting_dynamics import (
+    GREEN_PRESETS,
+    GreenSpec,
+    PutterState,
+    green_preset,
+    solve_aim,
+)
 from src.tools.putting_green_gui import _scene_builder
 from src.tools.putting_green_gui._scene_builder import (
     _FT_TO_M,
@@ -23,6 +29,7 @@ from src.tools.putting_green_gui._scene_builder import (
     PuttScene,
     _setup_grid_and_surface,
     build_putt_scene,
+    solve_putt,
 )
 
 pytestmark = pytest.mark.unit
@@ -87,17 +94,10 @@ def test_trajectory_rides_the_terrain() -> None:
 def _solved(distance_ft: float, slope_deg: float) -> tuple[PuttConfig, float]:
     """The config ``solve_aim`` prescribes on the builder's surface."""
     base = PuttConfig(cup_distance_m=distance_ft * _FT_TO_M, slope_deg=slope_deg)
-    ball_x, cup_x, *_, mid_y, _gx, _gy, _gz, surface = _setup_grid_and_surface(
-        base, base.cup_distance_m
-    )
-    aim = solve_aim(surface, (ball_x, mid_y), (cup_x, mid_y), PutterState.typical(1))
+    aim = solve_putt(base)
     assert aim.holed and aim.converged
-    config = replace(
-        base,
-        putter_speed_ms=aim.putter_speed_mps,
-        aim_deg=math.degrees(aim.heading_rad),
-    )
-    return config, aim.heading_rad
+    config = replace(base, putter_speed_ms=aim.putter_speed_ms, aim_deg=aim.aim_deg)
+    return config, math.radians(aim.aim_deg)
 
 
 def test_solved_flat_straight_putt_holes() -> None:
@@ -199,6 +199,10 @@ def test_higher_stimp_rolls_farther() -> None:
         {"slope_deg": 10.0},
         {"timestep_s": 0.0},
         {"timestep_s": 0.1},
+        {"green_type": "augusta"},
+        {"undulation_m": -0.001},
+        {"undulation_m": 0.06},
+        {"green_seed": -1},
     ],
 )
 def test_out_of_range_controls_raise(kwargs: dict[str, float]) -> None:
@@ -218,3 +222,138 @@ def test_degenerate_grid_resolution_raises() -> None:
 
 def test_returns_putt_scene_instance() -> None:
     assert isinstance(build_putt_scene(PuttConfig()), PuttScene)
+
+
+# ---------------------------------------------------------------------------
+# Strike location and putter balance (#14461)
+# ---------------------------------------------------------------------------
+
+
+def test_scene_carries_the_impact_report_of_its_strike() -> None:
+    # Golden parity: the scene's readout is the shared strike() at that offset.
+    from src.shared.python.putting_dynamics import strike
+
+    config = PuttConfig(putter_speed_ms=2.0, impact_toe_m=0.012)
+    scene = build_putt_scene(config)
+    want = strike(PutterState.typical(2.0), impact_toe_m=0.012)
+    assert scene.impact == want
+    assert scene.launch_speed_ms == pytest.approx(want.horizontal_speed_mps, rel=1e-9)
+    assert scene.skid_distance_m is not None and scene.skid_distance_m > 0.0
+
+
+def test_a_toe_strike_rolls_shorter_and_twists_the_face() -> None:
+    centred = build_putt_scene(PuttConfig(putter_speed_ms=2.0))
+    toe = build_putt_scene(PuttConfig(putter_speed_ms=2.0, impact_toe_m=0.02))
+    heel = build_putt_scene(PuttConfig(putter_speed_ms=2.0, impact_toe_m=-0.02))
+    assert toe.total_roll_m < centred.total_roll_m
+    assert heel.total_roll_m < centred.total_roll_m
+    assert toe.impact.face_twist_rad_s * heel.impact.face_twist_rad_s < 0.0
+
+
+def test_a_balance_preset_sets_the_putter_head() -> None:
+    from src.shared.python.putting_dynamics import balance_preset, strike
+
+    scene = build_putt_scene(
+        PuttConfig(putter_speed_ms=2.0, impact_toe_m=0.01, balance_type="toe_hang")
+    )
+    want = strike(balance_preset("toe_hang").putter(2.0), impact_toe_m=0.01)
+    assert scene.impact == want
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"impact_toe_m": 0.05},
+        {"impact_toe_m": math.nan},
+        {"balance_type": "blade"},
+    ],
+)
+def test_bad_strike_controls_are_rejected(overrides: dict[str, object]) -> None:
+    with pytest.raises(ValueError):
+        build_putt_scene(replace(PuttConfig(), **overrides))
+
+
+# Green types (#14463): the tile rolls the same GreenSpec as every surface
+# ---------------------------------------------------------------------------
+
+
+def _green_parity(config: PuttConfig, spec: GreenSpec) -> None:
+    """The tile's surface is ``spec`` translated to the green's centre."""
+    *_, width_x, height_y, mid_y, gx, gy, gz, surface = _setup_grid_and_surface(
+        config, config.cup_distance_m
+    )[2:]
+    centre = (width_x / 2.0, mid_y)
+    want = spec.height(_scene_builder._green_extent_m(width_x, height_y))
+    for x, y in ((gx[1], gy[1]), (centre[0], mid_y), (gx[-2], gy[-3])):
+        got = surface.height.elevation(x, y)
+        assert got == pytest.approx(want.elevation(x - centre[0], y - centre[1]))
+    rendered = [[surface.height.elevation(x, y) for x in gx] for y in gy]
+    np.testing.assert_allclose(gz, rendered, atol=1e-12)
+
+
+@pytest.mark.parametrize("name", sorted(GREEN_PRESETS))
+def test_a_preset_green_is_the_core_preset(name: str) -> None:
+    _green_parity(PuttConfig(green_type=name), green_preset(name))
+
+
+def test_undulation_rides_on_the_cross_slope() -> None:
+    config = PuttConfig(slope_deg=2.0, undulation_m=0.01, green_seed=3)
+    grade = math.tan(math.radians(2.0)) * 100.0
+    spec = GreenSpec(grade_percent=grade, aspect_deg=-90.0, bump_height_m=0.01, seed=3)
+    _green_parity(config, spec)
+    reseeded = build_putt_scene(replace(config, green_seed=4))
+    assert not np.array_equal(build_putt_scene(config).grid_z, reseeded.grid_z)
+
+
+def test_a_smooth_cross_slope_keeps_the_classic_tilt() -> None:
+    plain = build_putt_scene(PuttConfig(slope_deg=2.0))
+    seeded = build_putt_scene(PuttConfig(slope_deg=2.0, green_seed=9))
+    np.testing.assert_array_equal(plain.grid_z, seeded.grid_z)
+
+
+def test_a_tiered_green_changes_the_roll() -> None:
+    flat = PuttConfig(slope_deg=0.0, putter_speed_ms=1.6, aim_deg=4.0)
+    tiered = build_putt_scene(replace(flat, green_type="tiered"))
+    assert tiered.total_roll_m != pytest.approx(build_putt_scene(flat).total_roll_m)
+
+
+# ---------------------------------------------------------------------------
+# Auto-Solve (#14465): the optimum read is the core's solve_aim
+# ---------------------------------------------------------------------------
+
+
+def test_auto_solve_is_the_core_read_on_the_tile_surface() -> None:
+    config = PuttConfig(cup_distance_m=14.0 * _FT_TO_M, slope_deg=1.5, aim_deg=-9.0)
+    ball_x, cup_x, *_, mid_y, _gx, _gy, _gz, surface = _setup_grid_and_surface(
+        config, config.cup_distance_m
+    )
+    want = solve_aim(surface, (ball_x, mid_y), (cup_x, mid_y), PutterState.typical(1))
+    got = solve_putt(config)
+    assert got.putter_speed_ms == want.putter_speed_mps
+    assert got.aim_deg == pytest.approx(math.degrees(want.heading_rad))
+    assert got.break_m == want.break_m
+    assert (got.holed, got.converged) == (want.holed, want.converged)
+
+
+def test_auto_solve_reads_with_the_chosen_putter_on_the_chosen_green() -> None:
+    from src.shared.python.putting_dynamics import balance_preset
+
+    config = PuttConfig(balance_type="counterbalanced", green_type="tiered")
+    ball_x, cup_x, *_, mid_y, _gx, _gy, _gz, surface = _setup_grid_and_surface(
+        config, config.cup_distance_m
+    )
+    head = balance_preset("counterbalanced").putter(config.putter_speed_ms)
+    want = solve_aim(surface, (ball_x, mid_y), (cup_x, mid_y), head)
+    assert solve_putt(config).putter_speed_ms == want.putter_speed_mps
+
+
+def test_the_solved_read_holes_and_ignores_the_current_stroke() -> None:
+    config = PuttConfig(putter_speed_ms=6.0, aim_deg=20.0, slope_deg=2.0)
+    solution = solve_putt(config)
+    assert solution.holed and solution.converged
+    assert solution.aim_deg > 0.0  # the green falls toward -y, so aim up at +y
+    assert solution == solve_putt(replace(config, putter_speed_ms=1.0, aim_deg=0.0))
+    solved = replace(
+        config, putter_speed_ms=solution.putter_speed_ms, aim_deg=solution.aim_deg
+    )
+    assert build_putt_scene(solved).holed

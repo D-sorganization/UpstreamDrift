@@ -13,6 +13,7 @@ from typing import Any
 
 from src.shared.python.core.physics_constants import (
     FT_TO_M,
+    GRAVITY_M_S2,
     KG_TO_LB,
     M_TO_FT,
     M_TO_YARD,
@@ -26,6 +27,8 @@ _LB_TO_KG = 1.0 / float(KG_TO_LB)
 _FT_TO_M = float(FT_TO_M)
 _YARD_TO_M = float(YARD_TO_M)
 _MPH_TO_MPS = float(MPH_TO_MPS)
+_LBF_TO_N = _LB_TO_KG * float(GRAVITY_M_S2)  # pound-force: a pound under standard g
+_IN_LBF_TO_NM = _FT_TO_M / 12.0 * _LBF_TO_N
 
 
 class UnitSystem(str, enum.Enum):
@@ -248,6 +251,44 @@ def mass_suffix(system: UnitSystem | None = None) -> str:
     """Return the display suffix for mass (' kg' or ' lb')."""
     sys = system or get_unit_preference()
     return " kg" if sys == UnitSystem.METRIC else " lb"
+
+
+# ---- Force and torque conversions ------------------------------------------
+
+
+def _imperial_scale(system: UnitSystem | None, per_unit_si: float) -> float:
+    sys = system or get_unit_preference()
+    return 1.0 if sys == UnitSystem.METRIC else per_unit_si
+
+
+def to_display_force(val_n: float, system: UnitSystem | None = None) -> float:
+    """Convert force in N to the display unit (N or lbf)."""
+    return val_n / _imperial_scale(system, _LBF_TO_N)
+
+
+def from_display_force(val_display: float, system: UnitSystem | None = None) -> float:
+    """Convert display force to SI N."""
+    return val_display * _imperial_scale(system, _LBF_TO_N)
+
+
+def force_suffix(system: UnitSystem | None = None) -> str:
+    """Return the display suffix for force (' N' or ' lbf')."""
+    return " N" if _imperial_scale(system, 0.0) == 1.0 else " lbf"
+
+
+def to_display_torque(val_nm: float, system: UnitSystem | None = None) -> float:
+    """Convert torque in N·m to the display unit (N·m or in·lbf)."""
+    return val_nm / _imperial_scale(system, _IN_LBF_TO_NM)
+
+
+def from_display_torque(val_display: float, system: UnitSystem | None = None) -> float:
+    """Convert display torque to SI N·m."""
+    return val_display * _imperial_scale(system, _IN_LBF_TO_NM)
+
+
+def torque_suffix(system: UnitSystem | None = None) -> str:
+    """Return the display suffix for torque (' N·m' or ' in·lbf')."""
+    return " N·m" if _imperial_scale(system, 0.0) == 1.0 else " in·lbf"
 
 
 # ---- Spin formatting ---------------------------------------------------------

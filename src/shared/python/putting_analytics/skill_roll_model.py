@@ -25,11 +25,14 @@ then strike it (with error) on the *true* green.
   A study plans at most nine lines per putt class, shared by every variant.
 * **Strike.** Start line error is the face/path blend of
   :meth:`.sampling.ExecutionSample.start_line_error_deg`; speed is the
-  planned speed times the sampled speed ratio. Every putt rolls on the true
-  green in one :func:`.batch_roll.roll_batch` call.
+  planned speed times the sampled speed ratio times the ball speed an
+  off-centre strike keeps (:func:`.collision.off_centre_speed_retention`
+  for the model's putter head, #14461). Every putt rolls on the true green
+  in one :func:`.batch_roll.roll_batch` call.
 
-Toe strike is not modelled: ``strike_toe_mm`` is ignored, so its Sobol
-indices and its elimination gain are exactly zero.
+A strike beyond the face edge (``MAX_STRIKE_TOE_M``) is clipped to the edge.
+Toe strike changes pace only: the face twist it starts turns the face by
+hundredths of a degree over the contact, so the start line is unchanged.
 """
 
 from __future__ import annotations
@@ -43,7 +46,11 @@ import numpy as np
 
 from src.shared.python.contracts import require
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
-from src.shared.python.putting_analytics.batch_roll import Capture, roll_batch
+from src.shared.python.putting_analytics.batch_roll import (
+    BatchRollResult,
+    Capture,
+    roll_batch,
+)
 from src.shared.python.putting_analytics.expected_putts import (
     ExpectedPuttsCurve,
     PuttAction,
@@ -55,12 +62,16 @@ from src.shared.python.putting_analytics.skill import (
     ReadDispersion,
 )
 from src.shared.python.putting_analytics.variance import StrokeOutcomes
+from src.shared.python.putting_dynamics.collision import (
+    off_centre_speed_retention,
+)
 from src.shared.python.putting_dynamics.friction import (
     DEFAULT_STATIC_MU,
     FrictionParams,
     stimp_to_rolling_mu,
 )
 from src.shared.python.putting_dynamics.surfaces import HeightField, SurfaceSpec
+from src.shared.python.putting_dynamics.types import PutterState
 
 COARSE_AIMS_DEG = tuple(float(a) for a in np.arange(-24.0, 24.01, 1.0))
 FINE_HALF_WIDTH_DEG = 1.0
@@ -68,6 +79,8 @@ FINE_STEP_DEG = 0.05
 WARM_SPAN = 3.0  # a warm-started fan is the fine fan stretched by this factor
 MAX_GRADE_PCT = 10.0  # HeightField.planar's limit; a heavy over-read is clipped
 DEFAULT_LATTICE_SPAN_SD = 2.0
+MAX_STRIKE_TOE_M = 0.08  # the collision model's face half-width
+_TYPICAL_STROKE_MPS = 1.8  # only head mass and MOI enter the strike retention
 
 
 @dataclass(frozen=True)
@@ -217,7 +230,8 @@ class SkillRollModel:
     ``lattice`` sets where lines are planned (build it with
     :meth:`ReadLattice.from_dispersion` from the profile under study);
     ``pace_ft_past`` is the golfer's intended pace; ``face_weight`` blends
-    face and path into the start line.
+    face and path into the start line; ``putter`` is the head whose
+    effective mass sets the pace lost to an off-centre strike.
     """
 
     green: PlaneGreen
@@ -227,6 +241,9 @@ class SkillRollModel:
     pace_ft_past: float = 1.5
     face_weight: float = DEFAULT_FACE_WEIGHT
     capture: Capture = "effective_radius"
+    putter: PutterState = field(
+        default_factory=lambda: PutterState.typical(_TYPICAL_STROKE_MPS)
+    )
     _aims: np.ndarray | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -284,20 +301,32 @@ class SkillRollModel:
             self._aims = aims
         return self._aims
 
-    def __call__(self, execution: ExecutionSample, read: ReadSample) -> StrokeOutcomes:
-        """Strokes, holed flag and leave (m) for every sampled putt."""
+    def roll(self, execution: ExecutionSample, read: ReadSample) -> BatchRollResult:
+        """Rest position and holed flag of every sampled putt on the true green.
+
+        The hole is at ``(distance_ft * FT_M, 0)``; the ball starts at the origin.
+        """
         aim = interpolate(self.lattice, self.node_aims(), read)
         speed0 = nominal_speeds_mps(
             self.green, read, self.distance_ft, self.pace_ft_past
         )
         heading = np.radians(aim + execution.start_line_error_deg(self.face_weight))
-        speed = speed0 * execution.speed_ratio
+        toe_m = np.clip(
+            execution.strike_toe_mm / 1000.0, -MAX_STRIKE_TOE_M, MAX_STRIKE_TOE_M
+        )
+        retained = off_centre_speed_retention(self.putter, toe_m)
+        speed = speed0 * execution.speed_ratio * retained
         zeros = np.zeros(speed.size)
         start = np.stack(
             (zeros, zeros, speed * np.cos(heading), speed * np.sin(heading), speed)
         )
         hole = (self.distance_ft * FT_M, 0.0)
-        result = roll_batch(start, self._true_surface, hole, self.capture)
+        return roll_batch(start, self._true_surface, hole, self.capture)
+
+    def __call__(self, execution: ExecutionSample, read: ReadSample) -> StrokeOutcomes:
+        """Strokes, holed flag and leave (m) for every sampled putt."""
+        result = self.roll(execution, read)
+        hole = (self.distance_ft * FT_M, 0.0)
         miss_m = np.hypot(result.rest_x_m - hole[0], result.rest_y_m)
         leave_m = np.where(result.holed, 0.0, miss_m)
         strokes = 1.0 + np.where(result.holed, 0.0, self.baseline(leave_m / FT_M))

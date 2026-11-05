@@ -615,11 +615,11 @@
       </div>
     </div>
 
-    <!-- Player-Specific Bellman Strokes Gained (SG_player), Capture Speed Strategy & 6-Channel Variance Lab -->
+    <!-- Player-Specific Bellman Strokes Gained (SG_player), Capture Speed Strategy & 7-Channel Variance Lab -->
     <div class="lg:col-span-12 glass-card rounded-xl p-4 space-y-3 border-t-2 border-t-emerald-500/60">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
         <div>
-          <h3 class="text-sm sm:text-base font-bold text-white">Player-Specific Bellman Strokes Gained (<span class="math-sym">SG<sub>player</sub></span>), Capture Speed Strategy &amp; 6-Channel Variance Attribution</h3>
+          <h3 class="text-sm sm:text-base font-bold text-white">Player-Specific Bellman Strokes Gained (<span class="math-sym">SG<sub>player</sub></span>), Capture Speed Strategy &amp; 7-Channel Variance Attribution</h3>
           <p class="text-xs text-slate-400">Evaluated from the player&rsquo;s own skill &amp; counter-torque Bellman curve <span class="math-sym">E<sub>player</sub>(d) = 1 + (1 &minus; P<sub>make</sub>(d))E<sub>player</sub>(d<sub>leave</sub>)</span> across 0&ndash;45 ft on varying breaks (not PGA Tour averages)</p>
         </div>
         <div class="flex flex-wrap items-center gap-2 text-xs">
@@ -658,14 +658,22 @@
             <div id="valStimpReadout" class="mono text-xs font-bold text-purple-300">&mdash;</div>
           </div>
           <div class="col-span-2 bg-slate-950/90 p-2.5 rounded-lg border border-emerald-900/50 space-y-1">
-            <div class="font-bold text-[11px] text-emerald-400 uppercase tracking-wider">6-Channel 18-Hole Strokes Gained Variance Attribution</div>
+            <div class="font-bold text-[11px] text-emerald-400 uppercase tracking-wider">7-Channel 18-Hole Strokes Gained Variance Attribution (Shared Core)</div>
             <div id="val6ChannelBreakdown" class="mono text-[11px] text-slate-300 grid grid-cols-3 gap-1">
-              <span>Counter-Torque: <b id="chGainCT" class="text-emerald-300">&mdash;</b></span>
               <span>Face Angle SD: <b id="chLossFace" class="text-cyan-300">&mdash;</b></span>
-              <span>Green Read <span class="math-sym">&sigma;<sub>read</sub></span>: <b id="chLossRead" class="text-purple-300">&mdash;</b></span>
-              <span>Impact Spot/Pace: <b id="chLossSpot" class="text-amber-300">&mdash;</b></span>
-              <span>Surface Roughness: <b id="chLossRough" class="text-orange-300">&mdash;</b></span>
               <span>Club Path SD: <b id="chLossPath" class="text-sky-300">&mdash;</b></span>
+              <span>Pace (Speed CV): <b id="chLossSpeed" class="text-amber-300">&mdash;</b></span>
+              <span>Toe-Heel Strike SD: <b id="chLossStrike" class="text-amber-300">&mdash;</b></span>
+              <span>Read Grade: <b id="chLossReadGrade" class="text-purple-300">&mdash;</b></span>
+              <span>Read Fall Line: <b id="chLossReadAspect" class="text-purple-300">&mdash;</b></span>
+              <span>Read Green Speed: <b id="chLossReadStimp" class="text-purple-300">&mdash;</b></span>
+            </div>
+            <div id="valCoreAttributionNote" class="text-[10px] text-slate-500">&mdash;</div>
+            <div class="text-[10px] text-slate-500 pt-1">Illustrative (studio model, not core):</div>
+            <div class="mono text-[11px] text-slate-400 grid grid-cols-3 gap-1">
+              <span>Counter-Torque: <b id="chGainCT" class="text-emerald-300">&mdash;</b></span>
+              <span>Impact Spot: <b id="chLossSpot" class="text-amber-300">&mdash;</b></span>
+              <span>Surface Roughness: <b id="chLossRough" class="text-orange-300">&mdash;</b></span>
             </div>
           </div>
         </div>
@@ -808,6 +816,7 @@
   <script src="js/state.js"></script>
   <script src="js/scene3d_a.js"></script>
   <script src="js/scene3d_b.js"></script>
+  <script src="js/core_attribution.js"></script>
   <script src="js/green3d.js"></script>
   <script src="js/charts2d.js"></script>
   <script src="js/controls_a.js"></script>

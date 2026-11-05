@@ -43,6 +43,12 @@ concurrency:
 permissions:
   contents: read
 
+# Transient PyPI stalls (read timeout, IncompleteRead) failed main and PR runs
+# that passed unchanged on rerun; pip's defaults are 5 retries / 15 s (#14595).
+env:
+  PIP_RETRIES: "10"
+  PIP_DEFAULT_TIMEOUT: "60"
+
 jobs:
   local-only-workflows:
     name: Reject hosted runner routing
@@ -639,7 +645,7 @@ jobs:
           "$audit_python" -m pip install "pip-audit==2.10.0"
 
           set +e
-          run_with_heartbeat "pip-audit JSON report" "$audit_python" -m pip_audit -r requirements-dev.lock --format json --output pip-audit-report.json
+          run_with_heartbeat "pip-audit JSON report" "$audit_python" -m pip_audit --timeout 60 -r requirements-dev.lock --format json --output pip-audit-report.json
           audit_status=$?
           set -e
 
@@ -653,7 +659,7 @@ jobs:
               --waiver-file scripts/config/pip_audit_waivers.json \
               --audit-report pip-audit-report.json
           )
-          run_with_heartbeat "pip-audit waiver-enforced scan" "$audit_python" -m pip_audit -r requirements-dev.lock "${pip_audit_waiver_flags[@]}"
+          run_with_heartbeat "pip-audit waiver-enforced scan" "$audit_python" -m pip_audit --timeout 60 -r requirements-dev.lock "${pip_audit_waiver_flags[@]}"
 
       # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
       - name: Code Quality Check
@@ -910,10 +916,15 @@ jobs:
           echo "has_target=true" >> "$GITHUB_OUTPUT"
           echo "scan_ref=${trivy_targets[0]}" >> "$GITHUB_OUTPUT"
 
+      - name: Install checksum-verified Trivy
+        shell: bash
+        run: bash scripts/ci/install_trivy.sh
+
       - name: Trivy Filesystem Security Scan
         if: github.event_name != 'pull_request'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
+          skip-setup-trivy: "true"
           scan-type: fs
           scan-ref: .
           scanners: vuln,secret,misconfig
@@ -924,6 +935,7 @@ jobs:
         if: github.event_name == 'pull_request' && steps.trivy-pr-target.outputs.has_target == 'true'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
+          skip-setup-trivy: "true"
           scan-type: fs
           scan-ref: ${{ steps.trivy-pr-target.outputs.scan_ref }}
           scanners: vuln,secret,misconfig
@@ -2053,7 +2065,7 @@ jobs:
             python scripts/ci/check_pip_audit_waivers.py \
               --waiver-file scripts/config/pip_audit_waivers.json
           )
-          python -m pip_audit -r requirements.lock "${pip_audit_waiver_flags[@]}"
+          python -m pip_audit --timeout 60 -r requirements.lock "${pip_audit_waiver_flags[@]}"
 
   tests:
     needs: [pick-runner, changed-paths]
@@ -3153,9 +3165,11 @@ jobs:
         if: steps.frontend-changes.outputs.skip != 'true'
         run: npm run test:run -- --testTimeout=15000
 
+      # Clean-build check (#14450): the build after `npm ci` must emit
+      # dist/index.html and leave every tracked file (the lockfile too) unchanged.
       - name: Build Check
         if: steps.frontend-changes.outputs.skip != 'true'
-        run: npm run build
+        run: npm run build:clean -- --skip-install
 
       - name: Mobile layout Playwright smoke (#14283)
         if: steps.frontend-changes.outputs.skip != 'true'
