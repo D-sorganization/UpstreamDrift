@@ -27,6 +27,7 @@ import json
 import logging
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 from src.shared.python.contracts import require
 from src.shared.python.impact_optimization.speed_continuation import LadderSpec
@@ -89,7 +90,9 @@ def require_outside_repo(path: Path) -> None:
     )
 
 
-def _run(out: Path) -> int:  # pragma: no cover - the real run is held (D24)
+def _run(
+    out: Path, baseline_only: bool = False
+) -> int:  # pragma: no cover - the real run is held (D24)
     import mujoco
     import numpy as np
 
@@ -166,6 +169,8 @@ def _run(out: Path) -> int:  # pragma: no cover - the real run is held (D24)
     envelope = PhysiologicalEnvelope.from_spec(
         spec, subject, load_limits(DEFAULT_LIMITS_PATH)
     )
+    if baseline_only:
+        return _baseline(window(StepPolicy(substeps=4, project=False)), joints)
     run = run_full_body_ladder(
         window(StepPolicy(substeps=4, project=False)),
         joints,
@@ -196,13 +201,46 @@ def _run(out: Path) -> int:  # pragma: no cover - the real run is held (D24)
     return 0
 
 
+def _baseline(search: Any, joints: tuple[str, ...]) -> int:  # pragma: no cover
+    """Roll out the recorded baseline once and report the physical-baseline guard.
+
+    No ladder runs: this only shows whether the spec gives a physical impact.
+    """
+    from src.shared.python.impact_optimization.full_body_ladder import (
+        BaselineBand,
+        require_physical_baseline,
+    )
+    from src.shared.python.impact_optimization.full_body_rollout import (
+        make_full_body_rollout,
+    )
+
+    impact = make_full_body_rollout(search, joints)(
+        search.baseline_torque(joints)
+    ).impact
+    logger.info(
+        "baseline: %.1f mph, face %s, path %s, aoa %.2f",
+        impact.speed_mph,
+        impact.face_deg,
+        impact.path_deg,
+        impact.aoa_deg,
+    )
+    require_physical_baseline(impact, BaselineBand())
+    logger.info("baseline is physical")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI: ``--out`` is a directory outside the repository."""
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--baseline-only",
+        action="store_true",
+        help="build the envelope and check the baseline only; no ladder",
+    )
     args = parser.parse_args(argv)
     require_outside_repo(args.out)
-    return _run(args.out)
+    return _run(args.out, args.baseline_only)
 
 
 if __name__ == "__main__":  # pragma: no cover
