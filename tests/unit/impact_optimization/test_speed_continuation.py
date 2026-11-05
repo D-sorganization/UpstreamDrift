@@ -242,21 +242,6 @@ def test_a_band_must_match_the_limit_of_its_own_side() -> None:
         )
 
 
-def test_non_binding_lines_do_not_call_a_blocked_rung_feasible() -> None:
-    peak = _j0_peak(_run(_envelope()))
-    high = 1.5 * peak
-    env = _envelope(first=high)
-    res = _run(env)
-    lines = binding_report(
-        res, env, source_band={("J0", "positive"): (0.5 * peak, high)}
-    )
-    blocked = {f"{p.speed_target_mph:.0f} mph" for p in res.points if not p.feasible}
-    assert blocked  # otherwise the loop below passes vacuously
-    for ln in lines:
-        if "peaks at" in ln and ln.split(":")[0] in blocked:
-            assert "feasible" not in ln.replace("within its limit", "")
-
-
 def test_every_side_above_its_lower_value_is_reported() -> None:
     import numpy as np
 
@@ -297,3 +282,27 @@ def test_source_band_from_capacity_skips_single_source_sides() -> None:
     )
     band = source_band_from_capacity(cap, env)
     assert band == {("J0", "positive"): (float(lo[0]), float(up[0]))}
+
+
+def test_non_binding_lines_do_not_call_a_blocked_rung_feasible() -> None:
+    import dataclasses
+
+    import numpy as np
+
+    peak = _j0_peak(_run(_envelope()))
+    base = _envelope()
+    tight = np.array(base.tau_max_positive_nm)
+    tight[1] = float(np.abs(BASE[:, 1]).max()) * 1.001  # J1 blocks the high rungs
+    env = dataclasses.replace(
+        base, tau_max_positive_nm=tight, tau_max_negative_nm=tight.copy()
+    )
+    res = _run(env)
+    lines = binding_report(
+        res, env, source_band={("J0", "positive"): (0.5 * peak, 5000.0)}
+    )
+    blocked = {f"{p.speed_target_mph:.0f} mph" for p in res.points if not p.feasible}
+    assert blocked  # otherwise the loop below passes vacuously
+    peaks = [ln for ln in lines if "peaks at" in ln and ln.split(":")[0] in blocked]
+    assert peaks  # a non-binding banded joint on a blocked rung is really checked
+    for ln in peaks:
+        assert "feasible" not in ln.replace("within its limit", "")
