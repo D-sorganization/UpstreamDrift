@@ -127,3 +127,22 @@ def _ladder():
         config=OptimiserConfig(n_knots=5, seed=0, max_iterations=20),
         ladder=LadderSpec(100.0, 105.0, 5.0),
     )
+
+
+@pytest.mark.parametrize(
+    ("rom", "angle", "binds"),
+    [
+        ((0.0, 145.0), -3.0, True),  # elbow-like, hyperextended
+        ((-150.0, -5.0), -3.0, True),  # one-sided range, outside its upper bound
+        ((0.0, 145.0), 144.0, True),  # at the far bound
+        ((0.0, 145.0), 72.0, False),  # mid-range
+        ((-150.0, -5.0), -80.0, False),
+    ],
+)
+def test_one_sided_ranges_are_measured_from_their_centre(rom, angle, binds) -> None:
+    env = _env([rom, (-80.0, 80.0), (-np.inf, np.inf)])
+    hits = kinematic_binding(_traj(thoracic=angle), T, env, degrees=True)
+    flagged = [h for h in hits if h.joint == "thoracic_axial" and h.kind == "ROM"]
+    assert bool(flagged) is binds
+    if binds and not rom[0] <= angle <= rom[1]:
+        assert flagged[0].utilisation > 1.0
