@@ -99,6 +99,11 @@ class ImpactSolution:
     #: face - path (deg): sets curvature, so the 10:1 trade-off is auditable.
     face_to_path_deg: float = float("nan")
 
+    @property
+    def achieved_speed_mph(self) -> float:
+        """Impact speed of the solved swing (delegates to the outcome)."""
+        return float(self.outcome.impact.speed_mph)
+
 
 def _within_tolerance(
     impact: MeasuredImpact, target: ImpactTarget, tol: ImpactTolerance

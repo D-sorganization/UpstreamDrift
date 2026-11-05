@@ -39,6 +39,27 @@ DEFAULT_SPEED_TOL_MPH: float = 1.0
 
 
 @dataclass(frozen=True)
+class LadderSpec:
+    """Speed ladder: ``start_mph`` .. ``stop_mph`` inclusive in ``step_mph``."""
+
+    start_mph: float = 100.0
+    stop_mph: float = 125.0
+    step_mph: float = 5.0
+    speed_tol_mph: float = DEFAULT_SPEED_TOL_MPH
+
+    def __post_init__(self) -> None:
+        require(
+            self.step_mph > 0.0 and math.isfinite(self.step_mph),
+            "step_mph must be > 0",
+        )
+        require(self.stop_mph >= self.start_mph, "stop_mph must be >= start_mph")
+
+    @property
+    def n_steps(self) -> int:
+        return int(math.floor((self.stop_mph - self.start_mph) / self.step_mph + 1e-9))
+
+
+@dataclass(frozen=True)
 class ContinuationPoint:
     """One rung of the ladder."""
 
@@ -48,7 +69,7 @@ class ContinuationPoint:
 
     @property
     def achieved_mph(self) -> float:
-        return float(self.solution.outcome.impact.speed_mph)
+        return self.solution.achieved_speed_mph
 
 
 @dataclass(frozen=True)
@@ -65,20 +86,16 @@ def run_speed_continuation(
     trust_region: TrustRegion,
     config: OptimiserConfig | None = None,
     base_target: ImpactTarget | None = None,
-    start_mph: float = 100.0,
-    stop_mph: float = 125.0,
-    step_mph: float = 5.0,
-    speed_tol_mph: float = DEFAULT_SPEED_TOL_MPH,
+    ladder: LadderSpec | None = None,
 ) -> ContinuationResult:
-    """Solve every rung from ``start_mph`` to ``stop_mph`` (inclusive)."""
-    require(step_mph > 0.0 and math.isfinite(step_mph), "step_mph must be > 0")
-    require(stop_mph >= start_mph, "stop_mph must be >= start_mph")
+    """Solve every rung of ``ladder`` (default 100 -> 125 mph, step 5)."""
+    spec = ladder or LadderSpec()
     base = base_target or ImpactTarget()
-    n_steps = int(math.floor((stop_mph - start_mph) / step_mph + 1e-9))
+    n_steps = spec.n_steps
     points: list[ContinuationPoint] = []
     warm: np.ndarray | None = None
     for k in range(n_steps + 1):
-        speed = start_mph + k * step_mph
+        speed = spec.start_mph + k * spec.step_mph
         sol = solve_impact_trajectory(
             rollout,
             baseline_torque_nm,
@@ -91,7 +108,7 @@ def run_speed_continuation(
         )
         warm = sol.knots
         ok = sol.tolerances_met and (
-            abs(sol.outcome.impact.speed_mph - speed) <= speed_tol_mph
+            abs(sol.achieved_speed_mph - speed) <= spec.speed_tol_mph
         )
         points.append(ContinuationPoint(speed, sol, ok))
     reached = max((p.speed_target_mph for p in points if p.feasible), default=0.0)

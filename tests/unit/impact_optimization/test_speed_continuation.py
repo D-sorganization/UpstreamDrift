@@ -130,3 +130,8 @@ def test_solution_exposes_achieved_speed_without_a_deep_chain() -> None:
     for p in res.points:
         assert p.solution.achieved_speed_mph == p.solution.outcome.impact.speed_mph
         assert p.achieved_mph == p.solution.achieved_speed_mph
+
+
+def test_rollout_outcome_exposes_speed_directly() -> None:
+    out = plant(BASE)
+    assert out.speed_mph == out.impact.speed_mph
