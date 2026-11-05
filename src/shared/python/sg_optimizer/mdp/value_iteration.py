@@ -27,7 +27,6 @@ from src.shared.python.contracts import require
 from src.shared.python.sg_optimizer.course.rasterize import LIE_CODES, LieRaster
 from src.shared.python.sg_optimizer.mdp.action import ActionSet, ShotAction
 from src.shared.python.sg_optimizer.mdp.state import State
-from src.shared.python.sg_optimizer.shot_model.baseline_model import BaselineShotModel
 from src.shared.python.sg_optimizer.mdp.transition import (
     _condition_modifiers,
     sample_transitions,
@@ -171,10 +170,10 @@ class HoleMDP:
         self, V: NDArray[np.float64]
     ) -> tuple[NDArray[np.float64], NDArray[np.int32]]:
         """Vectorized single sweep over all cells × actions."""
-        # The vectorized path implements the tour-baseline Gaussian only. Any other
-        # ShotOutcomeModel is honoured via the scalar reference sweep (slow but
-        # correct); table-driven backends get a vectorized path in B4 (#14568).
-        if self.model is not None and not isinstance(self.model, BaselineShotModel):
+        # The vectorized path implements the default tour-baseline Gaussian only.
+        # Any injected ShotOutcomeModel is honoured via the scalar reference sweep
+        # (slow but correct); table-driven backends get a fast path in B4 (#14568).
+        if self.model is not None:
             return bellman_backup_scalar(
                 V,
                 self.raster,
