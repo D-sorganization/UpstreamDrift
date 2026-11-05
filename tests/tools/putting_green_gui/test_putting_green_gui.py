@@ -700,3 +700,58 @@ def test_the_torque_panel_is_no_wider_than_the_batch_panel(
 ) -> None:
     widest = widget.batch_panel.minimumSizeHint().width()
     assert widget.torque_panel().minimumSizeHint().width() <= widest
+
+
+def test_the_scenarios_panel_saves_the_dialled_green(
+    widget: PuttingGreenWidget,
+) -> None:
+    widget._stimp_spin.setValue(11.5)
+    panel = widget.scenario_panel()
+    assert panel.scenario_args("A")["setup"] == widget.batch_panel.current_args()
+    panel.run_save("A")
+    assert [row[0] for row in panel.table_text()] == ["A"]
+    assert panel.scenarios()[0]["setup"]["stimp"] == pytest.approx(11.5)
+
+
+def test_importing_a_setup_puts_it_on_the_controls(
+    widget: PuttingGreenWidget, tmp_path
+) -> None:
+    import json
+    import math
+
+    from src.shared.python.putting_analytics import service_setup
+
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    setup = {"distance_ft": 14.0, "grade_pct": 3.0, "aspect_deg": -90.0, "stimp": 12.0}
+    path = tmp_path / "setup.json"
+    doc = service_setup.export_setup({"setup": setup})
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    widget.scenario_panel().import_from(path)
+    assert widget._distance_spin.value() == pytest.approx(14.0, abs=0.05)
+    assert widget._stimp_spin.value() == pytest.approx(12.0)
+    slope = math.degrees(math.atan(0.03))
+    assert widget._slope_spin.value() == pytest.approx(slope, abs=0.05)
+    args = widget.batch_panel.current_args()
+    assert args["distance_ft"] == pytest.approx(14.0, abs=0.05)
+    assert args["grade_pct"] == pytest.approx(3.0, abs=0.1)
+
+
+def test_the_scenario_table_follows_the_units(widget: PuttingGreenWidget) -> None:
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    panel = widget.scenario_panel()
+    panel.run_save("A")
+    assert panel.table_text()[0][3].endswith(" ft")
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert panel.table_text()[0][3].endswith(" m")
+
+
+def test_the_holed_box_reads_on_the_dark_panel(widget: PuttingGreenWidget) -> None:
+    # The Strokes Gained "Holed" label kept the default dark text (#14542
+    # review); check boxes take the panel's label colour.
+    from PyQt6.QtWidgets import QWidget
+
+    style = widget.findChild(QWidget, "puttControls").styleSheet()
+    label_rule = next(
+        rule for rule in style.split("}") if "QLabel {" in rule or "QLabel," in rule
+    )
+    assert "QCheckBox" in label_rule

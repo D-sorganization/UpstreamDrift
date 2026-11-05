@@ -4,7 +4,8 @@ Per ``(skill, club, lie, wind, slope)`` cell: mean / sd / correlation of the
 aim-frame landing offset (yards) from an injected landing simulator. Every cell
 shares one standard-normal block (common random numbers, prefix-stable in ``n``).
 The hash covers cells + ``(family, seed, n)``; wall-clock runtime is never hashed.
-Scope: carry only (no bounce/roll); slope is a flat-only label; ``club`` repeats
+Scope: carry only (no bounce/roll); slope defaults to flat, other bins come from an
+injected ``slope_modifier`` (B6); ``club`` repeats
 ``skill``; lie is an identity unless a ``lie_modifier`` is injected.
 """
 
@@ -36,8 +37,12 @@ WIND_BINS: dict[str, tuple[float, float]] = {
     "head_5": (5.0, 0.0),
     "tail_5": (-5.0, 0.0),
     "cross_5": (0.0, 5.0),
+    "head_15": (15.0, 0.0),
+    "tail_15": (-15.0, 0.0),
+    "cross_15": (0.0, 15.0),
 }
-SLOPES = ("flat",)  # slope is a label until the simulator models it
+DEFAULT_WINDS = ("calm", "head_5", "tail_5", "cross_5")  # the original B3 bins
+SLOPES = ("flat",)  # default slope; other bins come from ``slope_wind_bins`` (B6)
 CONVERGENCE_TOL = 0.02
 # Real-pipeline worst n-vs-n/2 change: n=2000 5.4%, 8000 2.2%, 20000 1.3%.
 DEFAULT_N = 12000
@@ -153,32 +158,75 @@ class DispersionTable:
         return cls(cells, prov, dict(raw.get("runtime", {})))
 
 
+@dataclass(frozen=True)
+class TableGrid:
+    """The cell grid of a table: skills (``None`` = all), lies, wind and slope bins."""
+
+    skills: tuple[str, ...] | None = None
+    lies: tuple[str, ...] = ("fairway",)
+    winds: tuple[str, ...] = DEFAULT_WINDS
+    slopes: tuple[str, ...] = SLOPES
+
+
+SlopeModifier = Callable[[str], Callable[[NDArray[np.float64]], NDArray[np.float64]]]
+
+
 def build_table(
     family: SkillFamily,
     simulate: LandingSimulator,
     *,
     skills: tuple[str, ...] | None = None,
     lies: tuple[str, ...] = ("fairway",),
-    winds: tuple[str, ...] = tuple(WIND_BINS),
+    winds: tuple[str, ...] = DEFAULT_WINDS,
     n: int = DEFAULT_N,
     seed: int = 0,
     lie_modifier: LieModifier | None = None,
 ) -> DispersionTable:
-    """Simulate every cell with shared (CRN) draws; fail closed on bad inputs."""
-    names = skills if skills is not None else tuple(family.skills)
+    """Flat-slope table over ``skills x lies x winds`` (see :func:`build_grid_table`)."""
+    grid = TableGrid(skills, lies, winds)
+    return build_grid_table(
+        family, simulate, grid, n=n, seed=seed, lie_modifier=lie_modifier
+    )
+
+
+def build_grid_table(
+    family: SkillFamily,
+    simulate: LandingSimulator,
+    grid: TableGrid,
+    *,
+    n: int = DEFAULT_N,
+    seed: int = 0,
+    lie_modifier: LieModifier | None = None,
+    slope_modifier: SlopeModifier | None = None,
+) -> DispersionTable:
+    """Simulate every grid cell with shared (CRN) draws; fail closed on bad inputs.
+
+    Non-flat slope bins need ``slope_modifier`` (``slope_wind_bins.make_slope_modifier``).
+    """
+    names = grid.skills if grid.skills is not None else tuple(family.skills)
     require(set(names) <= set(family.skills), f"skills not in {family.name!r}")
+    winds = grid.winds
     require(set(winds) <= set(WIND_BINS), f"unknown wind bins; have {tuple(WIND_BINS)}")
+    require(
+        grid.slopes == SLOPES or slope_modifier is not None,
+        "slope bins need a slope_modifier",
+    )
     t0, z, cells = time.perf_counter(), standard_normals(seed, n), []
     for skill in names:
         base = _impacts(family.skills[skill].distribution, z)
-        for lie in lies:
+        for lie in grid.lies:
             imp = lie_modifier(base, lie) if lie_modifier is not None else base
-            for wind in winds:
-                land = np.asarray(simulate(imp, skill, WIND_BINS[wind]), dtype=float)
-                require(land.shape == (n, 2), f"simulator returned {land.shape}")
-                require(bool(np.isfinite(land).all()), "simulator returned non-finite")
-                mean, sd, corr = _cell_stats(land)
-                for slope in SLOPES:
+            for slope in grid.slopes:
+                sloped = imp if slope_modifier is None else slope_modifier(slope)(imp)
+                for wind in winds:
+                    land = np.asarray(
+                        simulate(sloped, skill, WIND_BINS[wind]), dtype=float
+                    )
+                    require(land.shape == (n, 2), f"simulator returned {land.shape}")
+                    require(
+                        bool(np.isfinite(land).all()), "simulator returned non-finite"
+                    )
+                    mean, sd, corr = _cell_stats(land)
                     cells.append(
                         DispersionCell(
                             skill, skill, lie, wind, slope, mean, sd, corr, n

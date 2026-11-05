@@ -25,7 +25,7 @@
       </div>
 
       <!-- View Mode Tabs -->
-      <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-lg border border-slate-800">
+      <div class="flex flex-wrap items-center gap-1.5 bg-slate-900 p-1 rounded-lg border border-slate-800">
         <button id="tabBtn3D" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-sky-600 text-white transition">
           1. Interactive 3D Vector Studio
         </button>
@@ -38,6 +38,11 @@
         <button id="tabBtnTurnover" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition">
           4. Equations &amp; Turnover Guide
         </button>
+        <label for="unitSystemSelect" class="sr-only">Units</label>
+        <select id="unitSystemSelect" title="Units (#14646)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs font-semibold text-slate-200">
+          <option value="imperial" selected>Imperial (ft, mph, in)</option>
+          <option value="metric">Metric (m, m/s, mm)</option>
+        </select>
       </div>
     </div>
     <p id="validationNotice" class="max-w-7xl mx-auto mt-2 text-[11px] text-amber-200/90">
@@ -546,7 +551,7 @@
         <div class="pt-1.5 border-t border-slate-800/80 grid grid-cols-2 gap-2">
           <div>
             <div class="flex justify-between text-[11px] mb-1">
-              <span class="text-slate-300">Putt Distance (0&ndash;45 ft)</span>
+              <span class="text-slate-300">Putt Distance</span>
               <span id="puttDistValLbl" class="mono font-bold text-emerald-300">10.0 ft</span>
             </div>
             <input id="puttDistSlider" type="range" min="2.0" max="45.0" step="1.0" value="10.0" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
@@ -817,6 +822,7 @@
   <script src="js/scene3d_a.js"></script>
   <script src="js/scene3d_b.js"></script>
   <script src="js/core_attribution.js"></script>
+  <script src="js/core_units.js"></script>
   <script src="js/green3d.js"></script>
   <script src="js/charts2d.js"></script>
   <script src="js/controls_a.js"></script>

@@ -7,11 +7,11 @@
       "title": "Selectable Units",
       "cluster": "a",
       "cells": {
-        "core_api": "missing #14457 | src/shared/python/putting_dynamics/utils.py, src/shared/python/ui/units.py | SI internally, feet in analytics; conversion helpers only, no units parameter on any route.",
-        "pyqt6": "partial #14457 | src/tools/putting_green_gui/gui.py | Reads get_unit_preference(); set_unit_system exists but the window has no selector.",
+        "core_api": "missing #14646 | src/shared/python/putting_dynamics/utils.py, src/shared/python/ui/units.py | SI internally, feet in analytics; conversion helpers only, no units parameter on any route.",
+        "pyqt6": "present | src/tools/putting_green_gui/gui.py | Units combo (Metric or Imperial); every panel redraws its inputs and charts through ui/units.py.",
         "react": "missing #14458 | ui/src/pages/PuttingGreen.tsx | Speed always m/s, distance yards, toe/hosel mm; no units store or selector.",
         "tauri": "missing #14458 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "missing #14457 | src/apps/putting_studio/index.html | Labels hard-code ft, m/s and mm; no toggle."
+        "studio": "present | src/apps/putting_studio/index.html, src/apps/putting_studio/js/core_units.js | Units selector; distance, speed and strike labels use the ui/units.py table generated into core_units.js."
       }
     },
     "variance_channels": {
@@ -118,9 +118,9 @@
       "cluster": "h",
       "cells": {
         "core_api": "present | src/shared/python/putting_analytics/service_setup.py, src/api/routes/putting_analytics.py | Named setups with their dispersion result; /scenario and /scenario-compare (make rate and leave against the first).",
-        "pyqt6": "missing #14471 |  | None.",
-        "react": "missing #14472 | ui/src/stores/usePuttingStore.ts | Store holds one parameter set and one result.",
-        "tauri": "missing #14472 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "pyqt6": "present | src/tools/putting_green_gui/_scenario_panel.py | Scenarios panel: Save Scenario rolls the dialled green's batch on a worker; a unit-aware table compares make rate and leave with the first (service_setup).",
+        "react": "present | ui/src/components/putting/ScenariosPanel.tsx, ui/src/utils/puttingSetup.ts | Saves the page's putt as a core scenario (/scenario) and compares saved ones against the first (/scenario-compare); setup mapping golden-pinned to the core (#14472).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/controls_a.js | Saved scenarios with a comparison table; no distribution chart."
       }
     },
@@ -129,9 +129,9 @@
       "cluster": "h",
       "cells": {
         "core_api": "present | src/shared/python/putting_analytics/service_setup.py, src/api/routes/putting_analytics.py | Versioned setup document (schema_version 4.0.0, the studio's); /setup-export and /setup-import, which also loads a studio export's green and distance.",
-        "pyqt6": "partial #14471 | src/tools/putting_green_gui/_scene_export.py | export_putt_scene/read_putt_export exist but nothing in the UI calls them.",
-        "react": "missing #14472 |  | None.",
-        "tauri": "missing #14472 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "pyqt6": "present | src/tools/putting_green_gui/_scenario_panel.py | Export JSON... and Import JSON... write and read the shared setup document with its scenarios; a studio export loads its distance, Stimp and grade (the desktop slope always falls right).",
+        "react": "present | ui/src/components/putting/ScenariosPanel.tsx, ui/src/utils/puttingSetup.ts | Exports the core's setup document (/setup-export) and imports a setup or studio file onto the page (/setup-import), keeping the page's line direction (#14472).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/io.js | Export/load with schema_version 4.0.0, including scenarios."
       }
     },

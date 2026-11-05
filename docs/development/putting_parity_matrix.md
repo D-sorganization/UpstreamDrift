@@ -6,7 +6,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 
 | Feature | Cluster | Core/API | PyQt6 | React | Tauri | Studio |
 | --- | --- | --- | --- | --- | --- | --- |
-| Selectable Units | (a) | missing (#14457) | partial (#14457) | missing (#14458) | missing (#14458) | missing (#14457) |
+| Selectable Units | (a) | missing (#14646) | present | missing (#14458) | missing (#14458) | present |
 | Variance and Noise Channels | (b) | present | present | present | present | present |
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | present | present | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | partial (#14461) |
@@ -16,8 +16,8 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | present | present | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | present | present | present | partial (#14467) |
-| Saved Scenarios and Comparison | (h) | present | missing (#14471) | missing (#14472) | missing (#14472) | present |
-| JSON Import/Export of a Setup | (h) | present | partial (#14471) | missing (#14472) | missing (#14472) | present |
+| Saved Scenarios and Comparison | (h) | present | present | present | present | present |
+| JSON Import/Export of a Setup | (h) | present | present | present | present | present |
 | Camera Views and Playback Phases | (i) | present | present | present | present | present |
 
 ## Evidence
@@ -25,10 +25,10 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (frontendDist ../dist); no putting code in the shell.
 
 **Selectable Units**
-- Core/API: missing (#14457). `src/shared/python/putting_dynamics/utils.py`, `src/shared/python/ui/units.py`. SI internally, feet in analytics; conversion helpers only, no units parameter on any route.
-- PyQt6: partial (#14457). `src/tools/putting_green_gui/gui.py`. Reads get_unit_preference(); set_unit_system exists but the window has no selector.
+- Core/API: missing (#14646). `src/shared/python/putting_dynamics/utils.py`, `src/shared/python/ui/units.py`. SI internally, feet in analytics; conversion helpers only, no units parameter on any route.
+- PyQt6: present. `src/tools/putting_green_gui/gui.py`. Units combo (Metric or Imperial); every panel redraws its inputs and charts through ui/units.py.
 - React: missing (#14458). `ui/src/pages/PuttingGreen.tsx`. Speed always m/s, distance yards, toe/hosel mm; no units store or selector.
-- Studio: missing (#14457). `src/apps/putting_studio/index.html`. Labels hard-code ft, m/s and mm; no toggle.
+- Studio: present. `src/apps/putting_studio/index.html`, `src/apps/putting_studio/js/core_units.js`. Units selector; distance, speed and strike labels use the ui/units.py table generated into core_units.js.
 
 **Variance and Noise Channels**
 - Core/API: present. `src/shared/python/putting_analytics/skill.py`, `src/shared/python/putting_analytics/service_variance.py`, `src/shared/python/putting_analytics/service_dispersion.py`. All 7 channels (face, path, speed, strike, read grade/aspect/stimp) in /variance-study, /dispersion, /make-spread and /simulated-curve; strike via strike_toe_sd_mm (#14461). /optimize keeps its paired line-and-speed batch for the aim search.
@@ -86,14 +86,14 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 
 **Saved Scenarios and Comparison**
 - Core/API: present. `src/shared/python/putting_analytics/service_setup.py`, `src/api/routes/putting_analytics.py`. Named setups with their dispersion result; /scenario and /scenario-compare (make rate and leave against the first).
-- PyQt6: missing (#14471). none. None.
-- React: missing (#14472). `ui/src/stores/usePuttingStore.ts`. Store holds one parameter set and one result.
+- PyQt6: present. `src/tools/putting_green_gui/_scenario_panel.py`. Scenarios panel: Save Scenario rolls the dialled green's batch on a worker; a unit-aware table compares make rate and leave with the first (service_setup).
+- React: present. `ui/src/components/putting/ScenariosPanel.tsx`, `ui/src/utils/puttingSetup.ts`. Saves the page's putt as a core scenario (/scenario) and compares saved ones against the first (/scenario-compare); setup mapping golden-pinned to the core (#14472).
 - Studio: present. `src/apps/putting_studio/js/controls_a.js`. Saved scenarios with a comparison table; no distribution chart.
 
 **JSON Import/Export of a Setup**
 - Core/API: present. `src/shared/python/putting_analytics/service_setup.py`, `src/api/routes/putting_analytics.py`. Versioned setup document (schema_version 4.0.0, the studio's); /setup-export and /setup-import, which also loads a studio export's green and distance.
-- PyQt6: partial (#14471). `src/tools/putting_green_gui/_scene_export.py`. export_putt_scene/read_putt_export exist but nothing in the UI calls them.
-- React: missing (#14472). none. None.
+- PyQt6: present. `src/tools/putting_green_gui/_scenario_panel.py`. Export JSON... and Import JSON... write and read the shared setup document with its scenarios; a studio export loads its distance, Stimp and grade (the desktop slope always falls right).
+- React: present. `ui/src/components/putting/ScenariosPanel.tsx`, `ui/src/utils/puttingSetup.ts`. Exports the core's setup document (/setup-export) and imports a setup or studio file onto the page (/setup-import), keeping the page's line direction (#14472).
 - Studio: present. `src/apps/putting_studio/js/io.js`. Export/load with schema_version 4.0.0, including scenarios.
 
 **Camera Views and Playback Phases**
