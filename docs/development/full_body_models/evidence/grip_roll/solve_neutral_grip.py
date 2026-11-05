@@ -46,6 +46,7 @@ from src.shared.python.motion_matching.grip_roll import (  # noqa: E402
     grip_pose_state_from_spec,
 )
 
+NEUTRAL_RECEIPT = Path(__file__).with_name("neutral_grip.json")
 ARM = ("SInput", "EInput", "FInput", "WInput", "Scap")
 
 
@@ -155,30 +156,51 @@ def violations(spec: dict, order: list[str], q: np.ndarray) -> dict[str, dict]:
 
 
 def record_fixture_provenance(club: str) -> None:
-    """Re-pin ``provenance.json`` to the in-place re-solved fixture of ``club``.
+    """Pose the club_face fixture model on the neutral grip and re-pin its record.
 
-    The pipeline-origin fields keep describing the capture-chain run; the new
-    ``neutral_grip_resolve`` block records what A2 changed and under which spec.
+    ``spec_<club>.json`` is the model the fixture swing is posed on, so it takes
+    the same neutral grip as the swing and address pose that were re-solved for
+    it. The pipeline-origin fields keep describing the capture-chain run; the
+    ``neutral_grip_resolve`` block records what A2 changed. Idempotent.
     """
-    path = ROOT / "tests/fixtures/club_face/provenance.json"
+    fixtures = ROOT / "tests/fixtures/club_face"
+    path = fixtures / "provenance.json"
     doc = json.loads(path.read_text(encoding="utf-8"))
     record = doc["clubs"][club]
-    npz = ROOT / f"tests/fixtures/club_face/swing_q_{club}.npz"
+    npz = fixtures / f"swing_q_{club}.npz"
+    spec_path = fixtures / f"spec_{club}.json"
+    totals = json.loads(NEUTRAL_RECEIPT.read_text(encoding="utf-8"))["sides"]
+    old_spec = hashlib.sha256(spec_path.read_bytes()).hexdigest()
+    patched, _ = apply_grip_rotation(
+        json.loads(spec_path.read_text(encoding="utf-8")),
+        {"L": totals["lead"]["total_deg"], "R": totals["trail"]["total_deg"]},
+        note="; neutral address grip, 15 deg face-on (#14551, "
+        "docs/development/full_body_models/evidence/grip_roll/neutral_grip.json)",
+    )
+    # the fixture model keeps the pipeline layout (sorted keys, indent 2)
+    text = json.dumps(patched, indent=2, sort_keys=True) + chr(10)
+    spec_path.write_bytes(text.encode("utf-8"))
+    prior = record.get("neutral_grip_resolve", {})
     record["neutral_grip_resolve"] = {
         "issue": 14551,
         "script": "docs/development/full_body_models/evidence/grip_roll/"
         "solve_neutral_grip.py",
-        "previous_fixture_sha256": record["fixture_sha256"],
+        "previous_fixture_sha256": prior.get(
+            "previous_fixture_sha256", record["fixture_sha256"]
+        ),
+        "previous_spec_sha256": prior.get("previous_spec_sha256", old_spec),
+        "spec_sha256": hashlib.sha256(spec_path.read_bytes()).hexdigest(),
         "showpiece_spec_sha256": hashlib.sha256(SPEC.read_bytes()).hexdigest(),
-        "note": "swing and address pose re-solved in place for the 15 deg neutral "
-        "grip at the unchanged club path; the fields above describe the "
-        "capture-chain run the fixture was first generated from",
+        "note": "swing, address pose and fixture model re-solved in place for the "
+        "15 deg neutral grip at the unchanged club path; the fields above "
+        "describe the capture-chain run the fixture was first generated from",
     }
     record["fixture_sha256"] = hashlib.sha256(npz.read_bytes()).hexdigest()
+    record["spec_sha256"] = record["neutral_grip_resolve"]["spec_sha256"]
     path.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def main() -> int:
+def _parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--spec", type=Path, default=SPEC)
     ap.add_argument("--target", type=float, default=15.0)
@@ -207,7 +229,11 @@ def main() -> int:
         metavar="CLUB",
         help="re-pin club_face/provenance.json to the re-solved fixture and exit",
     )
-    args = ap.parse_args()
+    return ap
+
+
+def main() -> int:
+    args = _parser().parse_args()
     if args.record_provenance:
         record_fixture_provenance(args.record_provenance)
         return 0

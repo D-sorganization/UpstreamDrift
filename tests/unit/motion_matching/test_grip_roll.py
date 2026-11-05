@@ -145,6 +145,16 @@ FLAGSHIP_CLUB_ROTATION = Rotation.from_matrix(
 ).as_matrix()  # nearest rotation to the 4-decimal print
 
 
+# the club_face fixture capture's address club rotation, measured on the pre-A2
+# fixture pair (capture grip) from origin/main before the neutral re-solve
+FIXTURE_CLUB_ROTATION = np.array(
+    [
+        [-0.53711, -0.72233, -0.43561],
+        [0.60706, 0.02755, -0.79418],
+        [0.58565, -0.691, 0.4237],
+    ]
+)
+
 EVIDENCE = SPEC.parent / "evidence/grip_roll"
 # the neutral-grip address frame solved by solve_neutral_grip.py (showpiece spec hash)
 IK = EVIDENCE / "address_frame_neutral.npz"
@@ -190,6 +200,41 @@ def test_resolved_address_pose_reads_15_degrees_and_keeps_the_club_pose() -> Non
     assert trail == pytest.approx(15.0, abs=3.0)
     # the club is where it was before the grip change (shaft and face unchanged)
     assert rot == pytest.approx(FLAGSHIP_CLUB_ROTATION, abs=1e-3)
+
+
+@pytest.mark.requires_mujoco
+def test_club_face_fixture_address_pose_is_posed_on_the_neutral_grip_model() -> None:
+    """The club_face fixture pair (spec_driver.json + address pose) stays consistent.
+
+    The fixture swing and address pose were re-solved for the neutral grip, so
+    the fixture's own model must carry that grip: posed on it, the address pose
+    reads 15 +- 3 deg and leaves the club where the pre-change fixture put it.
+    """
+    mujoco = pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+        export_full_body_mjcf,
+    )
+
+    fixtures = Path(__file__).resolve().parents[2] / "fixtures/club_face"
+    spec_bytes = (fixtures / "spec_driver.json").read_bytes()
+    pose = json.loads((fixtures / "address_poses.json").read_text("utf-8"))["poses"][
+        "driver"
+    ]
+    xml, meta = export_full_body_mjcf(spec_bytes, visual=True)
+    model = mujoco.MjModel.from_xml_string(xml)
+    data = mujoco.MjData(model)
+    for name, value in zip(pose["coordinate_order"], pose["q_rad"], strict=True):
+        joint = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
+        data.qpos[model.jnt_qposadr[joint]] = value
+    mujoco.mj_forward(model, data)
+    site = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, meta["frame_sites"]["LW"])
+    rot = data.site_xmat[site].reshape(3, 3)
+    lead, trail = address_grip_roll_deg(
+        grip_pose_state_from_spec(json.loads(spec_bytes), rot)
+    )
+    assert lead == pytest.approx(15.0, abs=3.0)
+    assert trail == pytest.approx(15.0, abs=3.0)
+    assert rot == pytest.approx(FIXTURE_CLUB_ROTATION, abs=1e-4)
 
 
 def test_neutral_grip_roll_is_alpha_plus_the_native_frame_offset() -> None:

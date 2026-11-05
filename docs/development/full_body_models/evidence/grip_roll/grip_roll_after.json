@@ -2,7 +2,7 @@
   "issue": 14550,
   "tag": "after",
   "spec": "full_body_spec_anthro_driver.json",
-  "spec_sha256": "249c938e1e0b5126f721ed7ae682ad3aef06806a040b87c9c270c290e8ce64a0",
+  "spec_sha256": "ef0df868e64766019cff7e9f2a5d701a1fb344859252fb60ae579c32cfa0515a",
   "convention": "face-on; 0 = vertical, + = strong; lead = back of hand, trail = palm (motion_matching/grip_roll.py)",
   "lead_roll_deg": 15.0,
   "trail_roll_deg": 15.0,

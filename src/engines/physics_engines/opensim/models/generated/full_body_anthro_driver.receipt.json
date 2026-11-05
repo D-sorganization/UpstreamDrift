@@ -1,6 +1,6 @@
 {
   "representation": "native-full-body-osim-v1",
-  "model_sha256": "249c938e1e0b5126f721ed7ae682ad3aef06806a040b87c9c270c290e8ce64a0",
+  "model_sha256": "ef0df868e64766019cff7e9f2a5d701a1fb344859252fb60ae579c32cfa0515a",
   "osim_sha256": "3acfc497a73ac1e7272de71c8a7204d053682c2d02b80a88f9001230c64a903d",
   "coordinate_count": 44,
   "coordinate_order": [
