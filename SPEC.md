@@ -2754,6 +2754,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14655 | SHOW-C3c slice 3a: guarded full-body speed ladder (baseline-physical precondition, MuJoCo impact reader, per-rung ROM/velocity bindings) |
+| 2026-11-05 | #14666 | Cross-frontend putting golden: shared-core fixture, React/Tauri replay parity tests and a generated parity report |
 | 2026-11-05 | #14662 | Putting studio: the skid-to-roll transition ends where the core simulate_strike skid ends for the ball speed, and the telemetry shows the core launch angle |
 | 2026-11-05 | #14658 | Head-CG offset (opt-in) and toe_down_m shaft metric for the C4 shaft state (Refs #14600) |
 | 2026-11-05 | #14498 | Clarify the fixed-state ZTCF drift and ZVCF control component definitions |

@@ -742,6 +742,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14449 · Cross-Frontend Putting Golden: Shared-Core Fixture, React/Tauri Replay Parity Tests and a Generated Parity Report
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14449
+- **Branch:** merged via #14666
+- **PR:** #14666
+- **Paths:** see #14666
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`300f194e`; collated from changes/14449-cross-frontend-putting-golden-shared-cor.md)
+- **Summary:** Cross-frontend putting golden: shared-core fixture, React/Tauri replay parity tests and a generated parity report
+- **Next step:** Shipped in PR #14666.
+
 ### DL-#14647 · Putting Studio: The Skid-to-Roll Transition Ends Where the Core Simulate_Strike Skid Ends for the Ball Speed, and the Telemetry Shows the Core Launch Angle
 
 - **State:** shipped
@@ -1138,10 +1151,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14559
 - **Branch:** merged via #14589
-- **PR:** #14589, #14596, #14625, #14638, #14653
+- **PR:** #14589, #14596, #14625, #14638, #14653, #14655
 - **Paths:** see #14589
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`87d5316e`; collated from changes/14559-add-continuation-report-markdown-table-o.md)
+- **Last verified:** 2026-11-05 (`ecbc51d7`; collated from changes/14559-show-c3c-slice-3a-guarded-full-body-spee.md)
 - **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
 - **Next step:** Shipped in PR #14589.
 
