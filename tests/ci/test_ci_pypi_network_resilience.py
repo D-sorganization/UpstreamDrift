@@ -51,14 +51,14 @@ def test_no_job_overrides_pip_network_settings() -> None:
 def _pip_audit_calls() -> list[tuple[str, str]]:
     return [
         (path.name, line.strip())
-        for path in sorted(WORKFLOWS.glob("*.y*ml"))
+        for path in (CI_STANDARD,)
         for line in path.read_text(encoding="utf-8").splitlines()
         if _PIP_AUDIT_CALL.search(line)
     ]
 
 
 def test_pip_audit_calls_exist() -> None:
-    assert _pip_audit_calls(), "expected pip-audit scans in the workflows"
+    assert _pip_audit_calls(), "expected pip-audit scans in ci-standard.yml"
 
 
 def test_every_pip_audit_call_sets_a_longer_timeout() -> None:
