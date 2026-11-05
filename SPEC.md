@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14616 | SHOW-B7: fit a SkillFamily from launch-monitor shot data, shrunk toward a preset |
+| 2026-11-05 | #14613 | SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions |
+| 2026-11-05 | #14611 | React putting simulator gains the counter-torque stabilization explorer (sliders, putter preset, hand-couple chart, impact readouts) over the core /counter-torque route |
 | 2026-11-05 | #14608 | SHOW-B3: cached, versioned MC dispersion tables (CRN) + pipeline landing adapter |
 | 2026-11-05 | #14403 | Guard root Docker context secret-exclusion rules |
 | 2026-11-05 | #14606 | SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report |
