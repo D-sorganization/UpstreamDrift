@@ -6,6 +6,7 @@ import pytest
 
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.impact_optimization.speed_continuation import (
+    LadderSpec,
     binding_report,
     pareto_front,
     run_speed_continuation,
@@ -25,6 +26,7 @@ pytestmark = pytest.mark.unit
 
 
 def _run(envelope, **kw):
+    ladder = LadderSpec(**kw) if kw else LadderSpec()
     return run_speed_continuation(
         rollout=plant,
         baseline_torque_nm=BASE,
@@ -32,7 +34,7 @@ def _run(envelope, **kw):
         envelope=envelope,
         trust_region=_trust(2000.0),
         config=OptimiserConfig(n_knots=5, seed=0, max_iterations=60),
-        **kw,
+        ladder=ladder,
     )
 
 
@@ -120,3 +122,11 @@ def test_every_binding_line_names_its_limit_kind_as_torque() -> None:
     lines = binding_report(_run(env), env)
     assert lines and all("torque limit" in ln for ln in lines)
     assert not any("ROM" in ln or "velocity" in ln for ln in lines)
+
+
+def test_solution_exposes_achieved_speed_without_a_deep_chain() -> None:
+    """LoD: callers read the speed from the solution, not through 3 hops."""
+    res = _run(_envelope())
+    for p in res.points:
+        assert p.solution.achieved_speed_mph == p.solution.outcome.impact.speed_mph
+        assert p.achieved_mph == p.solution.achieved_speed_mph
