@@ -80,7 +80,6 @@ import numpy as np  # noqa: E402
 
 from src.shared.python.impact_parameters import TargetFrame  # noqa: E402
 from src.shared.python.impact_parameters.tools_gateway import (  # noqa: E402
-    ToolsDeliveryUnavailableError,
     load_tools_delivery_gateway,
 )
 
@@ -90,10 +89,9 @@ _SPEED_MPS = 45.0
 
 def _delivery(name: str):
     """Tools D-plane estimate for a preset's face/path, aoa and a fixed loft."""
-    try:
-        gw = load_tools_delivery_gateway()
-    except ToolsDeliveryUnavailableError as exc:
-        pytest.skip(f"Tools delivery physics not available: {exc}")
+    # Fail closed: the pinned Tools tree is a hard repo requirement (conftest
+    # raises without it), so a missing gateway must fail, never skip.
+    gw = load_tools_delivery_gateway()
     t = preset(name).target
     frame = TargetFrame()
 
@@ -111,12 +109,15 @@ def _delivery(name: str):
     return gw.estimate(v, n, frame)
 
 
-def test_draw_and_fade_curve_in_opposite_directions_straight_does_not() -> None:
+def test_draw_and_fade_curve_with_the_documented_tools_signs() -> None:
+    """Tools convention: spin_axis_tilt + = fade side (right curve for a RH golfer),
+    face_to_path + = open to path (fade). A draw is therefore negative on both."""
     draw, fade, straight = (_delivery(n) for n in ("draw", "fade", "straight"))
-    assert draw.face_to_path_deg < 0.0 < fade.face_to_path_deg
+    assert draw.face_to_path_deg < 0.0 and draw.spin_axis_tilt_deg < 0.0
+    assert fade.face_to_path_deg > 0.0 and fade.spin_axis_tilt_deg > 0.0
+    assert draw.face_to_path_deg == pytest.approx(-4.0)
+    assert fade.face_to_path_deg == pytest.approx(4.0)
     assert abs(straight.face_to_path_deg) < 1e-6
-    # spin-axis tilt carries the curve: opposite signs, none for straight
-    assert draw.spin_axis_tilt_deg * fade.spin_axis_tilt_deg < 0.0
     assert abs(straight.spin_axis_tilt_deg) < 1e-6
 
 
