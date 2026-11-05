@@ -9,8 +9,8 @@
       "cells": {
         "core_api": "present | src/shared/python/ui/units.py, src/api/routes/putting_green.py | SI internally; GET /units serves display_unit_table (distance, speed and strike factors and suffixes for both systems), the table the studio generator and the desktop strike spin use.",
         "pyqt6": "present | src/tools/putting_green_gui/gui.py | Units combo (Metric or Imperial); every panel redraws its inputs and charts through ui/units.py.",
-        "react": "missing #14458 | ui/src/pages/PuttingGreen.tsx | Speed always m/s, distance yards, toe/hosel mm; no units store or selector.",
-        "tauri": "missing #14458 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "react": "present | ui/src/pages/PuttingGreen.tsx, ui/src/utils/units.ts | Units selector (Metric or Imperial) in the putting store; distance, speed and strike offsets show m, m/s and mm or ft, mph and in, with the factors golden-pinned to ui/units.py (#14458).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/index.html, src/apps/putting_studio/js/core_units.js | Units selector; distance, speed and strike labels use the ui/units.py table generated into core_units.js."
       }
     },
