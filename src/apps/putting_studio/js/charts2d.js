@@ -375,19 +375,17 @@ function drawSGCaptureChart() {
   ctx.strokeRect(padL, padT, subW, subH);
   ctx.fillStyle = '#94a3b8';
   ctx.font = `600 ${9.5 * dpr}px "JetBrains Mono", monospace`;
-  ctx.fillText('Core E vs v_entry (m/s)', padL + 4 * dpr, padT - 5 * dpr);
+  ctx.fillText('Core E vs entry speed', padL + 4 * dpr, padT - 5 * dpr);
 
   const vMin = 0.20, vMax = 1.35;
   const eMin = 1.0, eMax = 2.45;
   const mapVX = (v) => padL + ((v - vMin) / (vMax - vMin)) * subW;
   const mapEY = (e) => padT + subH * (1.0 - (e - eMin) / (eMax - eMin));
 
-  // The core's expected strokes per pace at the nearest swept distance
-  // (js/core_sg.js; #14650). A pace of p ft past is the entry speed that rolls
-  // p ft on the core's Stimp: v = sqrt(2 mu g p).
+  // The core's expected strokes per pace at the nearest swept distance, at
+  // the core's entry speed for each pace (js/core_sg.js; #14650).
   const sweep = coreSweepRow(coreSgCurve(state.crossSlopePct || 0), state.puttDistFt || 10.0);
-  const muG = 9.80665 * PuttingPhysics.stimpToRollingMu(window.CORE_SG.meta.stimp_ft);
-  const paceV = (p) => Math.sqrt(2.0 * muG * p * 0.3048);
+  const paceV = (p) => sweep.entry_speed_mps[sweep.paces_ft.indexOf(p)];
   ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 2.2 * dpr;
   ctx.beginPath();
   sweep.paces_ft.forEach((p, i) => {

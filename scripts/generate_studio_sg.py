@@ -36,7 +36,9 @@ from src.shared.python.putting_analytics.expected_putts import (
     distance_seed,
 )
 from src.shared.python.putting_analytics.service_dispersion import green_from_args
+from src.shared.python.putting_analytics.sampling import ReadSample
 from src.shared.python.putting_analytics.service_variance import profile_from_args
+from src.shared.python.putting_analytics.skill_roll_model import nominal_speeds_mps
 
 FIXTURE = (
     Path(__file__).resolve().parents[1]
@@ -79,7 +81,7 @@ function coreExpectedPutts(curve, distFt) {
 function coreSweepRow(curve, distFt) {
   const ds = window.CORE_SG.meta.sweep_distances_ft;
   const k = ds.reduce((b, d, i) => (Math.abs(d - distFt) < Math.abs(ds[b] - distFt) ? i : b), 0);
-  return { distance_ft: ds[k], paces_ft: window.CORE_SG.meta.sweep_paces_ft, expected: curve.pace_sweep[k] };
+  return { distance_ft: ds[k], paces_ft: window.CORE_SG.meta.sweep_paces_ft, expected: curve.pace_sweep[k], entry_speed_mps: curve.sweep_entry_speed_mps };
 }
 
 // Player strokes gained by one putt (optimize.strokes_gained):
@@ -147,9 +149,29 @@ def pace_sweep(
     return rows
 
 
+def entry_speeds(slope_pct: float) -> list[float]:
+    """Entry speed (m/s) at the hole for each sweep pace, 4 dp.
+
+    The core roll law (``skill_roll_model.nominal_speeds_mps``) at zero
+    distance with a perfect read: the speed that rolls each pace past the hole
+    on the slope's green.
+    """
+    green = green_from_args(cell_args(slope_pct))
+    one = np.ones(1)
+    perfect = ReadSample(one, np.zeros(1), one)
+    return [
+        round(float(nominal_speeds_mps(green, perfect, 0.0, pace)[0]), 4)
+        for pace in SWEEP_PACES_FT
+    ]
+
+
 def _solve(slope_pct: float) -> dict[str, Any]:
     curve = cell_curve(service_sg.sg_study(cell_args(slope_pct)), slope_pct)
-    return {**curve, "pace_sweep": pace_sweep(slope_pct, curve, SAMPLING["n"])}
+    return {
+        **curve,
+        "pace_sweep": pace_sweep(slope_pct, curve, SAMPLING["n"]),
+        "sweep_entry_speed_mps": entry_speeds(slope_pct),
+    }
 
 
 def build() -> dict[str, Any]:

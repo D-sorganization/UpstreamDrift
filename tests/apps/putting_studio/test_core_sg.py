@@ -78,7 +78,8 @@ def test_golden_curve_matches_the_core(committed: dict[str, Any]) -> None:
     # (seconds; the sloped cells are the slow part) is the committed one.
     slope = gen.SLOPES_PCT[0]
     expected = gen.cell_curve(service_sg.sg_study(gen.cell_args(slope)), slope)
-    solved = {k: v for k, v in committed["curves"][0].items() if k != "pace_sweep"}
+    sweep_keys = {"pace_sweep", "sweep_entry_speed_mps"}
+    solved = {k: v for k, v in committed["curves"][0].items() if k not in sweep_keys}
     assert solved == expected
 
 
@@ -273,7 +274,8 @@ def test_capture_speed_panel_reads_the_core_sweep() -> None:
     # Entry speeds come from the core (sweep_entry_speed_mps), not a JS copy
     # of the pace law or the ft-to-m factor.
     assert "entry_speed_mps" in charts
-    assert "0.3048" not in charts and "stimpToRollingMu(window.CORE_SG" not in charts
+    assert "p * 0.3048" not in charts and "Math.sqrt(2.0 * muG" not in charts
+    assert "stimpToRollingMu(window.CORE_SG" not in charts
 
 
 def test_matrix_studio_strokes_gained_cell_is_present() -> None:
