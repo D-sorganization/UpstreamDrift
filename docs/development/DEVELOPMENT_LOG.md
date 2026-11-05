@@ -1229,10 +1229,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14561
 - **Branch:** merged via #14606
-- **PR:** #14606, #14673, #14681
+- **PR:** #14606, #14673, #14681, #14721, #14722
 - **Paths:** see #14606
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`ff319ca3`; collated from changes/14561-make-rom-and-velocity-hard-constraints-o.md)
+- **Last verified:** 2026-11-05 (`c64cb10c`; collated from changes/14561-show-c5-ladder-binding-report-classes-ev.md)
 - **Summary:** SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report
 - **Next step:** Shipped in PR #14606.
 
