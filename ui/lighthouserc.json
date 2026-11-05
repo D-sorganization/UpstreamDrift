@@ -1,0 +1,21 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "node ui/e2e/fixture-server.mjs",
+      "startServerReadyPattern": "fixture server ready",
+      "startServerReadyTimeout": 30000,
+      "settings": {
+        "formFactor": "mobile",
+        "screenEmulation": {
+          "mobile": true,
+          "width": 390,
+          "height": 844,
+          "deviceScaleFactor": 1,
+          "disabled": false
+        },
+        "throttlingMethod": "simulate",
+        "chromeFlags": "--no-sandbox --proxy-server=http://127.0.0.1:4174 --proxy-bypass-list=<-loopback> --disable-quic --disable-background-networking --host-resolver-rules=\"MAP * ~NOTFOUND, EXCLUDE 127.0.0.1\""
+      }
+    }
+  }
+}
