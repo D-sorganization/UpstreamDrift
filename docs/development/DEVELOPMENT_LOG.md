@@ -18,6 +18,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14419 · Avoid Merge_Group Changed-Paths Checkout Hang and Sync Admission Publisher
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14419
+- **Branch:** fix/14419-merge-group-checkout-depth
+- **PR:** #14420
+- **Paths:** see #14420
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`d100e477`; collated from changes/14419-avoid-merge-group-changed-paths-checkout.md)
+- **Summary:** Avoid merge_group changed-paths checkout hang and sync admission publisher
+- **Next step:** Merge the PR.
+
+### DL-#14417 · Sync the Admission Publisher Workflow and Provenance Digest With the Canonical Provider
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14417
+- **Branch:** codex/14417-admission-publisher-sync
+- **PR:** #14418
+- **Paths:** see #14418
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`982d34d5`; collated from changes/14417-sync-the-admission-publisher-workflow-an.md)
+- **Summary:** Sync the admission publisher workflow and provenance digest with the canonical provider
+- **Next step:** Merge the PR after required checks pass.
+
+### DL-#14429 · Avoid OpenSim Classify Checkout Hang With Shallow Fetch
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14429
+- **Branch:** agy/14429-opensim-classify-shallow-checkout
+- **PR:** #14430
+- **Paths:** see #14430
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`a9657f01`; collated from changes/14429-avoid-opensim-classify-checkout-hang-wit.md)
+- **Summary:** Avoid OpenSim classify checkout hang with shallow fetch
+- **Next step:** Merge the PR.
+
 ### DL-#14535 · Size-Aware Development-Log Archiver: Archive Oldest Terminal Entries When the Log Nears the Byte Cap
 
 - **State:** in_review
@@ -937,6 +976,110 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14646 · Putting Studio: A Metric/Imperial Selector; Distance, Speed and Strike Labels Come From the Shared Units Table Generated Into Core_Units.Js
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14646
+- **Branch:** merged via #14654
+- **PR:** #14654
+- **Paths:** see #14654
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`c77f8207`; collated from changes/14646-studio-units.md)
+- **Summary:** Putting studio: a Metric/Imperial selector; distance, speed and strike labels come from the shared units table generated into core_units.js
+- **Next step:** Shipped in PR #14654.
+
+### DL-#14640 · Replace Wall-Clock Speed-Up Ratio in Test_Topology_Contact_Batched With a Deterministic Per-Pair Kernel Call Count
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14640
+- **Branch:** merged via #14651
+- **PR:** #14651
+- **Paths:** see #14651
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`2c4bed1a`; collated from changes/14640-replace-wall-clock-speed-up-ratio-in-tes.md)
+- **Summary:** Replace wall-clock speed-up ratio in test_topology_contact_batched with a deterministic per-pair kernel call count
+- **Next step:** Shipped in PR #14651.
+
+### DL-#14495 · Align MuJoCo Counterfactuals Zvcf() and the MATLAB ZVCF Comments With the Control-Component Contract
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14495
+- **Branch:** merged via #14636
+- **PR:** #14636
+- **Paths:** see #14636
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`96bb31ae`; collated from changes/14495-align-mujoco-counterfactuals-zvcf-and-th.md)
+- **Summary:** Align MuJoCo counterfactuals zvcf() and the MATLAB ZVCF comments with the control-component contract
+- **Next step:** Shipped in PR #14636.
+
+### DL-#14472 · React/Tauri Putting Page: Saved Scenarios and Comparison Over the Shared Core, Golden-Pinned (Part 1 Of #14472)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14472
+- **Branch:** merged via #14637
+- **PR:** #14637
+- **Paths:** see #14637
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8f3a0df5`; collated from changes/14472-react-tauri-putting-page-saved-scenarios.md)
+- **Summary:** React/Tauri putting page: saved scenarios and comparison over the shared core, golden-pinned (part 1 of #14472)
+- **Next step:** Shipped in PR #14637.
+
+### DL-#14630 · Putting: The Strokes Gained Chart Title Fits the Phone-Width Window and the Holed Check Box Reads on the Dark Controls Panel
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14630
+- **Branch:** merged via #14645
+- **PR:** #14645
+- **Paths:** see #14645
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`43ee052d`; collated from changes/14630-sg-panel-phone-polish.md)
+- **Summary:** Putting: the Strokes Gained chart title fits the phone-width window and the Holed check box reads on the dark controls panel
+- **Next step:** Shipped in PR #14645.
+
+### DL-#14570 · SHOW-B6: Slope/Stance Bins and Wind Bins in the Dispersion Tables (slope_wind_bins.py), Labelled Assumptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14570
+- **Branch:** merged via #14628
+- **PR:** #14628
+- **Paths:** see #14628
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`1558c825`; collated from changes/14570-show-b6-slope-stance-bins-and-wind-bins.md)
+- **Summary:** SHOW-B6: slope/stance bins and wind bins in the dispersion tables (slope_wind_bins.py), labelled assumptions
+- **Next step:** Shipped in PR #14628.
+
+### DL-#14563 · SHOW-C7 Flight Report and Measured-Swing Flight Card (Part Of #14563)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14563
+- **Branch:** merged via #14620
+- **PR:** #14620
+- **Paths:** see #14620
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`d5eafa44`; collated from changes/14563-show-c7-flight-report-and-measured-swing.md)
+- **Summary:** SHOW-C7 flight report and measured-swing flight card (Part of #14563)
+- **Next step:** Shipped in PR #14620.
+
+### DL-#14632 · Drake IK Now Implements the Club-Sole Ground Term (Base Was a No-Op), Fixing the 126.7 mm Address Hover
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14632
+- **Branch:** merged via #14634
+- **PR:** #14634
+- **Paths:** see #14634
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`d58c3d44`; collated from changes/14632-drake-ik-now-implements-the-club-sole-gr.md)
+- **Summary:** Drake IK now implements the club-sole ground term (base was a no-op), fixing the 126.7 mm address hover
+- **Next step:** Shipped in PR #14634.
+
 ### DL-#14568 · SHOW-B4: Physics Backend on Dispersion Tables, EB Shrinkage, Personalised vs Tour Strategy
 
 - **State:** shipped
@@ -995,10 +1138,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14471
 - **Branch:** merged via #14615
-- **PR:** #14615
+- **PR:** #14615, #14629
 - **Paths:** see #14615
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`9ab683af`; collated from changes/14471-putting-scenarios-core.md)
+- **Last verified:** 2026-11-05 (`392a57d0`; collated from changes/14471-putting-scenarios-desktop.md)
 - **Summary:** Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes
 - **Next step:** Shipped in PR #14615.
 
@@ -1177,10 +1320,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14559
 - **Branch:** merged via #14589
-- **PR:** #14589, #14596, #14625
+- **PR:** #14589, #14596, #14625, #14638, #14653
 - **Paths:** see #14589
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`72f224fe`; collated from changes/14559-show-c3c-rom-and-velocity-binding-report.md)
+- **Last verified:** 2026-11-05 (`87d5316e`; collated from changes/14559-add-continuation-report-markdown-table-o.md)
 - **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
 - **Next step:** Shipped in PR #14589.
 

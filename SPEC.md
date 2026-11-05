@@ -2741,6 +2741,20 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14654 | Putting studio: a Metric/Imperial selector; distance, speed and strike labels come from the shared units table generated into core_units.js |
+| 2026-11-05 | #14653 | Add continuation_report: markdown table of a 100-125 mph run with torque, ROM and velocity bindings and limit provenance |
+| 2026-11-05 | #14651 | Replace wall-clock speed-up ratio in test_topology_contact_batched with a deterministic per-pair kernel call count |
+| 2026-11-05 | #14636 | Align MuJoCo counterfactuals zvcf() and the MATLAB ZVCF comments with the control-component contract |
+| 2026-11-05 | #14637 | React/Tauri putting page: saved scenarios and comparison over the shared core, golden-pinned (part 1 of #14472) |
+| 2026-11-05 | #14420 | Avoid merge_group changed-paths checkout hang and sync admission publisher |
+| 2026-11-05 | #14418 | Sync the admission publisher workflow and provenance digest with the canonical provider |
+| 2026-11-05 | #14645 | Putting: the Strokes Gained chart title fits the phone-width window and the Holed check box reads on the dark controls panel |
+| 2026-11-05 | #14628 | SHOW-B6: slope/stance bins and wind bins in the dispersion tables (slope_wind_bins.py), labelled assumptions |
+| 2026-11-05 | #14620 | SHOW-C7 flight report and measured-swing flight card (Part of #14563) |
+| 2026-11-05 | #14638 | SHOW-C3c: full-body window rollout adapter for the impact optimiser (slice 2) |
+| 2026-11-05 | #14430 | Avoid OpenSim classify checkout hang with shallow fetch |
+| 2026-11-05 | #14634 | Drake IK now implements the club-sole ground term (base was a no-op), fixing the 126.7 mm address hover |
+| 2026-11-05 | #14629 | Putting Green Simulator: Scenarios panel saves the dialled green as named scenarios (each runs a dispersion batch on a worker), compares them in a unit-aware table, and exports or imports the shared JSON setup document, studio exports included |
 | 2026-11-05 | #14623 | SHOW-B4: physics backend on dispersion tables, EB shrinkage, personalised vs tour strategy |
 | 2026-11-05 | #14625 | SHOW-C3c: ROM and velocity binding report from rollout joint angles |
 | 2026-11-05 | #14626 | Putting simulator: the counter-torque panel bounds the gust input by the core's GUST_RANGE_NM instead of the preload range |
