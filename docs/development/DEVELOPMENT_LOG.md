@@ -937,6 +937,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14571 · SHOW-B7: Fit a SkillFamily From Launch-Monitor Shot Data, Shrunk Toward a Preset
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14571
+- **Branch:** merged via #14616
+- **PR:** #14616
+- **Paths:** see #14616
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`f2deca76`; collated from changes/14571-show-b7-fit-a-skillfamily-from-launch-mo.md)
+- **Summary:** SHOW-B7: fit a SkillFamily from launch-monitor shot data, shrunk toward a preset
+- **Next step:** Shipped in PR #14616.
+
+### DL-#14569 · SHOW-B5: Parametric Lie/Rough Impact-Condition Modifier (Physics/lie_interaction.py) With Labelled Assumptions
+
+- **State:** shipped
+- **Owner:** fleet-orchestrator
+- **Issue:** #14569
+- **Branch:** desk/show-neck/14569-lie-interaction
+- **PR:** #14613
+- **Paths:** see #14613
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`728cea86`; collated from changes/14569-show-b5-lie-interaction.md)
+- **Summary:** SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions
+- **Next step:** Shipped in PR #14613.
+
+### DL-#14470 · React Putting Simulator Gains the Counter-Torque Stabilization Explorer (Sliders, Putter Preset, Hand-Couple Chart, Impact Readouts) Over the Core /Counter-Torque Route
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14470
+- **Branch:** merged via #14611
+- **PR:** #14611
+- **Paths:** see #14611
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`162c2aef`; collated from changes/14470-react-putting-simulator-gains-the-counte.md)
+- **Summary:** React putting simulator gains the counter-torque stabilization explorer (sliders, putter preset, hand-couple chart, impact readouts) over the core /counter-torque route
+- **Next step:** Shipped in PR #14611.
+
 ### DL-#14567 · SHOW-B3: Cached, Versioned MC Dispersion Tables (CRN) + Pipeline Landing Adapter
 
 - **State:** shipped
