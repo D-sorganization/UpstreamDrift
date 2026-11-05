@@ -3159,9 +3159,11 @@ jobs:
         if: steps.frontend-changes.outputs.skip != 'true'
         run: npm run test:run -- --testTimeout=15000
 
+      # Clean-build check (#14450): the build after `npm ci` must emit
+      # dist/index.html and leave every tracked file (the lockfile too) unchanged.
       - name: Build Check
         if: steps.frontend-changes.outputs.skip != 'true'
-        run: npm run build
+        run: npm run build:clean -- --skip-install
 
       - name: Mobile layout Playwright smoke (#14283)
         if: steps.frontend-changes.outputs.skip != 'true'
