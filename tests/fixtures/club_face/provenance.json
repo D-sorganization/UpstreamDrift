@@ -359,7 +359,7 @@
     "previous_spec_sha256": "08d54918d330cdb5143835dd30fd57694bfb039eb74f9e45e326a476d149338e",
     "script": "docs/development/full_body_models/evidence/grip_roll/solve_neutral_grip.py",
     "showpiece_spec_sha256": "ef0df868e64766019cff7e9f2a5d701a1fb344859252fb60ae579c32cfa0515a",
-    "spec_sha256": "b01db2e9a25b6433a436dee577d87b8ffa0e9a5e854631f5cb587e4ba4be37d9"
+    "spec_sha256": "0910a8e7b7e8f2c4f0320b4b9fc41d195cc236f4094a117ccb840e259b7f5f88"
    },
    "pipeline_argv": [
     "--spec",
@@ -376,7 +376,7 @@
     "runs_12221_fx/driver"
    ],
    "run_receipt_sha256": "596c9b4a8fb6db6dbbe502bc8e7d008c8def8824f3ae771dc3b2173c9f0d8ffa",
-   "spec_sha256": "b01db2e9a25b6433a436dee577d87b8ffa0e9a5e854631f5cb587e4ba4be37d9"
+   "spec_sha256": "0910a8e7b7e8f2c4f0320b4b9fc41d195cc236f4094a117ccb840e259b7f5f88"
   },
   "iron7": {
    "after": {

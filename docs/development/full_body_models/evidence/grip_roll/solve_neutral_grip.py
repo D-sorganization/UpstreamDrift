@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -176,6 +177,12 @@ def record_fixture_provenance(club: str) -> None:
         {"L": totals["lead"]["total_deg"], "R": totals["trail"]["total_deg"]},
         note="; neutral address grip, 15 deg face-on (#14551, "
         "docs/development/full_body_models/evidence/grip_roll/neutral_grip.json)",
+    )
+    # the capture-fit clause no longer describes the grip this model carries
+    patched["provenance"] = re.sub(
+        r"; grip rotation refitted per capture from \S+ \(#12221\)",
+        "",
+        patched["provenance"],
     )
     # the fixture model keeps the pipeline layout (sorted keys, indent 2)
     text = json.dumps(patched, indent=2, sort_keys=True) + chr(10)
