@@ -8,6 +8,8 @@ The sample is read as a point, never as a max over speed.
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 
@@ -15,6 +17,7 @@ from src.shared.python.contracts import ContractViolationError
 from src.shared.python.impact_optimization.impact_sample import (
     TRANSIENT_NOTE,
     impact_sample,
+    recorded_impact_frame,
 )
 
 pytestmark = pytest.mark.unit
@@ -56,15 +59,49 @@ def test_a_trajectory_that_never_reaches_the_ball_is_refused() -> None:
         impact_sample(head, ball_pos=np.zeros(3), target_normal=N)
 
 
-def test_without_a_ball_the_lowest_clubhead_sample_is_used() -> None:
-    z = [0.5, 0.2, -0.1, -0.3, -0.2, 0.4]
-    head = _head(np.arange(6.0), z)
-    assert impact_sample(head) == 3
+def test_without_a_ball_the_recorded_impact_event_is_used() -> None:
+    head = _head(np.arange(6.0), [0.5, 0.2, -0.1, -0.3, -0.2, 0.4])
+    assert impact_sample(head, event_index=4) == 4  # not the lowest sample (3)
 
 
-def test_ties_take_the_first_lowest_sample() -> None:
-    head = _head(np.arange(4.0), [0.3, -0.2, -0.2, 0.1])
-    assert impact_sample(head) == 1
+def test_a_ball_position_wins_over_the_recorded_event() -> None:
+    head = _head([2.0, 1.0, 0.5, -0.5, -1.0])
+    assert impact_sample(head, np.zeros(3), N, event_index=1) == 3
+
+
+def test_neither_a_ball_nor_an_event_is_refused_not_guessed() -> None:
+    head = _head(np.arange(4.0), [0.3, -0.2, -0.2, 0.1])  # has a lowest sample
+    with pytest.raises(ContractViolationError, match="no ball position"):
+        impact_sample(head)
+
+
+@pytest.mark.parametrize("bad", [-1, 4])
+def test_an_event_outside_the_path_is_refused(bad: int) -> None:
+    with pytest.raises(ContractViolationError, match="event"):
+        impact_sample(_head(np.arange(4.0)), event_index=bad)
+
+
+def test_the_recorded_impact_frame_is_read_from_the_receipt(tmp_path) -> None:
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text(
+        json.dumps({"event_frames": {"address": 0, "top": 1103, "impact": 1325}}),
+        encoding="utf-8",
+    )
+    assert recorded_impact_frame(receipt) == 1325
+
+
+def test_a_missing_receipt_or_event_gives_none(tmp_path) -> None:
+    assert recorded_impact_frame(tmp_path / "absent.json") is None
+    other = tmp_path / "receipt.json"
+    other.write_text(json.dumps({"event_frames": {"top": 3}}), encoding="utf-8")
+    assert recorded_impact_frame(other) is None
+
+
+def test_a_malformed_recorded_frame_is_refused(tmp_path) -> None:
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text(json.dumps({"event_frames": {"impact": -5}}), encoding="utf-8")
+    with pytest.raises(ContractViolationError, match="impact"):
+        recorded_impact_frame(receipt)
 
 
 def test_a_speed_peak_does_not_move_the_sample() -> None:
