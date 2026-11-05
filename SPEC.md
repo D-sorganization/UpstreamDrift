@@ -2741,6 +2741,11 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14645 | Putting: the Strokes Gained chart title fits the phone-width window and the Holed check box reads on the dark controls panel |
+| 2026-11-05 | #14628 | SHOW-B6: slope/stance bins and wind bins in the dispersion tables (slope_wind_bins.py), labelled assumptions |
+| 2026-11-05 | #14620 | SHOW-C7 flight report and measured-swing flight card (Part of #14563) |
+| 2026-11-05 | #14638 | SHOW-C3c: full-body window rollout adapter for the impact optimiser (slice 2) |
+| 2026-11-05 | #14430 | Avoid OpenSim classify checkout hang with shallow fetch |
 | 2026-11-05 | #14634 | Drake IK now implements the club-sole ground term (base was a no-op), fixing the 126.7 mm address hover |
 | 2026-11-05 | #14629 | Putting Green Simulator: Scenarios panel saves the dialled green as named scenarios (each runs a dispersion batch on a worker), compares them in a unit-aware table, and exports or imports the shared JSON setup document, studio exports included |
 | 2026-11-05 | #14623 | SHOW-B4: physics backend on dispersion tables, EB shrinkage, personalised vs tour strategy |
