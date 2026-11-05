@@ -230,7 +230,9 @@
           cor,
         });
     const moiCatalogueGCm2 = moiKgM2 * _CATALOGUE_MOI_G_CM2_PER_KG_M2;
-    const gearTwistDeg = isStimpRamp ? 0.0 : strikeMm * 0.085 * (4500.0 / moiCatalogueGCm2);
+    // A toe strike (+) opens the face, as in the core strike() (#14647);
+    // studio angles are positive to the left, so the twist is negative.
+    const gearTwistDeg = isStimpRamp ? 0.0 : -strikeMm * 0.085 * (4500.0 / moiCatalogueGCm2);
     const totalFaceDeg = aimDeg + faceErrDeg + gearTwistDeg, totalPathDeg = aimDeg + pathErrDeg;
     const launchDeg = isStimpRamp ? aimDeg : 0.84 * totalFaceDeg + 0.16 * totalPathDeg;
     const launchRad = (launchDeg * Math.PI) / 180.0;

@@ -136,7 +136,7 @@ function rebuildGreenDispersionBatch() {
       aimDeg: state.stimpmeterMode ? 0.0 : state.aimAngleDeg,
       pathErrDeg: dpCB,
       faceErrDeg: dfCB,
-      strikeMm: dxCB,
+      strikeMm: state.toeOffsetMm + dxCB,
       moiKgM2: pSpec.moi / 1.0e7,
       stimpFt: state.stimpFt,
       upPct: state.uphillSlopePct,
@@ -167,7 +167,7 @@ function rebuildGreenDispersionBatch() {
       aimDeg: state.stimpmeterMode ? 0.0 : state.aimAngleDeg,
       pathErrDeg: dpUN,
       faceErrDeg: dfUN,
-      strikeMm: dxUN,
+      strikeMm: state.toeOffsetMm + dxUN,
       moiKgM2: 3800 / 1.0e7,
       stimpFt: state.stimpFt,
       upPct: state.uphillSlopePct,
@@ -273,7 +273,7 @@ function rebuildGreenDispersionBatch() {
   // Studio-only illustrative channels (closed-form, not in the core).
   const distScale = Math.sqrt(distFt / 12.0);
   const chCT = +(2.15 * (1.0 - preloadFactor) * distScale + 0.65).toFixed(2);
-  const chSpot = -(0.78 * (1.0 + (state.toeOffsetMm || 0) / 15.0) * preloadFactor * distScale).toFixed(2);
+  const chSpot = -(0.78 * (1.0 + Math.abs(state.toeOffsetMm || 0) / 15.0) * preloadFactor * distScale).toFixed(2);
   const chRough = -(0.52 * ((state.surfaceRoughnessMm || 0.35) / 0.35) * distScale).toFixed(2);
   setTxt('chGainCT', `+${Math.abs(chCT).toFixed(2)} SG`);
   setTxt('chLossSpot', `${chSpot.toFixed(2)} SG`);

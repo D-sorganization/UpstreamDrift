@@ -135,7 +135,7 @@ function drawGripPressureSweepChart() {
   const cur = evalGripSweepPoint(state.tauPreload);
   const mof = evalGripSweepPoint(0.0);
   const pertRatio = (state.pertImpulseNm || 0.0) / 0.25;
-  const toeRatio = (state.toeOffsetMm || 0.0) / 10.0;
+  const toeRatio = Math.abs(state.toeOffsetMm || 0.0) / 10.0;
   const pertFaceStab = 1.401 * pertRatio * (1.80 / cur.K_face) + 0.253 * toeRatio * (11521.0 / cur.I_eff);
   const pertFaceMof  = 1.401 * pertRatio + 0.253 * toeRatio;
 
