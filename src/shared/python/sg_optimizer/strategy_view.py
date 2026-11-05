@@ -58,6 +58,8 @@ def build_view(
     tour = PlayerProfile(name="tour", baseline=profile.baseline)
     t_mdp, t_res = solve_mdp(problem, tour, None, settings)
     tour_strokes = t_mdp.expected_strokes(problem.start, t_res.value)
+    results: tuple[SolveResult, ...]
+    personal: float | None
     if quick_tour:
         opts = shot_options(t_mdp, t_res.value, problem.start, top=top)
         results = (t_res,)
