@@ -5,11 +5,14 @@
  */
 
 export type UnitSystem = "metric" | "imperial";
-export type Quantity = "distance" | "speed" | "smallLength" | "breakLength";
+export type Quantity =
+  "distance" | "speed" | "smallLength" | "breakLength" | "force" | "torque";
 
 export const UNIT_SYSTEMS: readonly UnitSystem[] = ["metric", "imperial"];
 
 const FT_TO_M = 0.3048;
+const LBF_TO_N = 0.45359237 * 9.80665; // a pound under standard g, as units.py
+const IN_LBF_TO_NM = (FT_TO_M / 12) * LBF_TO_N;
 const STORAGE_KEY = "ud.unitSystem";
 
 /** SI value of one display unit, and its suffix, per quantity and system. */
@@ -19,6 +22,8 @@ const UNITS: Record<Quantity, Record<UnitSystem, [number, string]>> = {
   smallLength: { metric: [0.001, " mm"], imperial: [FT_TO_M / 12, " in"] },
   // Putt break as format_read shows it: cm, not mm, in metric (#14466).
   breakLength: { metric: [0.01, " cm"], imperial: [FT_TO_M / 12, " in"] },
+  force: { metric: [1, " N"], imperial: [LBF_TO_N, " lbf"] },
+  torque: { metric: [1, " N·m"], imperial: [IN_LBF_TO_NM, " in·lbf"] },
 };
 
 export function toDisplay(si: number, q: Quantity, s: UnitSystem): number {
