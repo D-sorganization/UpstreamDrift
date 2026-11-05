@@ -32,6 +32,10 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
+from src.api.models.putting_counter_torque import (
+    CounterTorqueRequest,
+    CounterTorqueResponse,
+)
 from src.api.models.putting_green_requests import (
     AimSolve3DResponse,
     GreenPresetName,
@@ -660,6 +664,32 @@ async def get_putter_presets() -> BalancePresetsResponse:
         BalancePresetResponse(**dataclasses.asdict(p)) for p in BALANCE_PRESETS.values()
     ]
     return BalancePresetsResponse(presets=presets)
+
+
+@router.post("/counter-torque", response_model=CounterTorqueResponse)
+@handle_api_errors
+async def counter_torque(request: CounterTorqueRequest) -> CounterTorqueResponse:
+    """Hand couples, forces and gust response over the stroke (#14469).
+
+    Serves :func:`~src.shared.python.putting_dynamics.counter_torque.
+    stroke_series`, the studio's closed-form two-hand couple model moved
+    into the shared core; an out-of-range setting is a 400.
+    """
+    from dataclasses import asdict, fields
+
+    from src.shared.python.putting_dynamics import counter_torque as ct
+
+    settings = request.model_dump()
+    n_points = settings.pop("n_points")
+    inputs = ct.CounterTorqueInputs(**settings)
+    series = [asdict(s) for s in ct.stroke_series(inputs, n_points=n_points)]
+    return CounterTorqueResponse(
+        putter_name=BALANCE_PRESETS[inputs.putter].name,
+        samples={
+            f.name: [row[f.name] for row in series]
+            for f in fields(ct.CounterTorqueSample)
+        },
+    )
 
 
 @router.get("/contours", response_model=GreenContourResponse)
