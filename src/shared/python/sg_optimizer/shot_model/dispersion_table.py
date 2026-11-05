@@ -4,6 +4,8 @@ Per ``(skill, club, lie, wind, slope)`` cell: mean / sd / correlation of the
 aim-frame landing offset (yards) from an injected landing simulator. Every cell
 shares one standard-normal block (common random numbers, prefix-stable in ``n``).
 The hash covers cells + ``(family, seed, n)``; wall-clock runtime is never hashed.
+Scope: carry only (no bounce/roll); slope is a flat-only label; ``club`` repeats
+``skill``; lie is an identity unless a ``lie_modifier`` is injected.
 """
 
 from __future__ import annotations
@@ -37,6 +39,8 @@ WIND_BINS: dict[str, tuple[float, float]] = {
 }
 SLOPES = ("flat",)  # slope is a label until the simulator models it
 CONVERGENCE_TOL = 0.02
+# Real-pipeline worst n-vs-n/2 change: n=2000 5.4%, 8000 2.2%, 20000 1.3%.
+DEFAULT_N = 12000
 SCHEMA = 1
 
 
@@ -140,7 +144,7 @@ def build_table(
     skills: tuple[str, ...] | None = None,
     lies: tuple[str, ...] = ("fairway",),
     winds: tuple[str, ...] = tuple(WIND_BINS),
-    n: int = 2000,
+    n: int = DEFAULT_N,
     seed: int = 0,
     lie_modifier: LieModifier | None = None,
 ) -> DispersionTable:
@@ -222,13 +226,18 @@ def main(argv: list[str] | None = None) -> int:
 
     p = argparse.ArgumentParser(description=main.__doc__)
     p.add_argument("--family", default="tour")
-    p.add_argument("--n", type=int, default=500)
+    p.add_argument("--n", type=int, default=DEFAULT_N)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--out", required=True)
     a = p.parse_args(argv)
-    table = build_table(
-        get_skill_family(a.family), PipelineLandingSimulator(), n=a.n, seed=a.seed
+    family, sim = get_skill_family(a.family), PipelineLandingSimulator()
+    table = build_table(family, sim, n=a.n, seed=a.seed)
+    worst = max(
+        check_convergence(family, sim, s, n=a.n, seed=a.seed).max_rel_change
+        for s in family.skills
     )
+    table.runtime["convergence_max_rel_change"] = worst  # outside the hash
+    table.runtime["converged"] = float(worst < CONVERGENCE_TOL)
     table.to_json(a.out)
     return 0
 

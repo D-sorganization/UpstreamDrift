@@ -13,6 +13,7 @@ from src.shared.python.sg_optimizer.shot_model.dispersion_table import (
     DispersionTable,
     build_table,
     check_convergence,
+    main,
     standard_normals,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_registry import get_skill_family
@@ -105,3 +106,12 @@ def test_lie_modifier_hook_enables_other_lies() -> None:
     fw = t.lookup("driver", "driver", "fairway", "calm", "flat")
     ro = t.lookup("driver", "driver", "rough", "calm", "flat")
     assert ro.mean[0] < fw.mean[0]
+
+
+def test_cli_records_convergence_in_runtime_and_loads_back(tmp_path: Path) -> None:
+    out = tmp_path / "t.json"
+    assert main(["--family", "tour", "--n", "8", "--out", str(out)]) == 0
+    table = DispersionTable.from_json(out)
+    assert table.runtime["convergence_max_rel_change"] >= 0.0
+    assert table.runtime["converged"] in (0.0, 1.0)
+    assert table.provenance["n"] == 8
