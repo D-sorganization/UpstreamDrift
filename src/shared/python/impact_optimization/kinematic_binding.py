@@ -150,7 +150,13 @@ def enforce_kinematic_limits(
     return out, kin
 
 
-def _line(speed: float, hit: KinematicBinding, feasible: bool, note: str | None) -> str:
+def _line(
+    speed: float,
+    hit: KinematicBinding,
+    feasible: bool,
+    note: str | None,
+    assumed: bool = False,
+) -> str:
     unit = "deg" if hit.kind == "ROM" else "deg/s"
     head = (
         f"{speed:.0f} mph: {hit.joint} reaches {hit.peak:+.1f} {unit} against its "
@@ -158,6 +164,12 @@ def _line(speed: float, hit: KinematicBinding, feasible: bool, note: str | None)
     )
     if hit.utilisation <= 1.0 + LIMIT_TOLERANCE and feasible:
         line = head + "; at the limit but feasible"
+    elif assumed:
+        line = (
+            head + "; BLOCKS this speed. assumption-limited: this limit is an "
+            "assumed placeholder, not a cited value, so the rung says nothing "
+            "about the athlete"
+        )
     else:
         line = (
             head + "; BLOCKS this speed. 125 mph is firm: probable miscalibration "
@@ -180,8 +192,13 @@ def kinematic_binding_report(
     for p in result.points:
         traj = p.trajectory
         for hit in kinematic_binding(traj, times_s, envelope, degrees=degrees):
+            assumed = (
+                hit.kind == "velocity" and hit.joint in envelope.assumed_velocity_slots
+            )
             lines.append(
-                _line(p.speed_target_mph, hit, p.feasible, notes.get(hit.joint))
+                _line(
+                    p.speed_target_mph, hit, p.feasible, notes.get(hit.joint), assumed
+                )
             )
     return lines
 

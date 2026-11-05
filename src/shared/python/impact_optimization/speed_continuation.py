@@ -195,6 +195,12 @@ def binding_report(
             )
             if p.feasible:
                 line = head + "; at the limit but feasible"
+            elif name in envelope.assumed_torque_slots:
+                line = (
+                    head + "; BLOCKS this speed. assumption-limited: this torque "
+                    "limit is an assumed placeholder, not a cited value, so the "
+                    "rung says nothing about the athlete"
+                )
             else:
                 line = (
                     head + "; BLOCKS this speed. 125 mph is firm, so treat the "
