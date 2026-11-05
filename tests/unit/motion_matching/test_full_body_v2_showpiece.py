@@ -55,4 +55,4 @@ def test_derived_spec_is_v2_with_the_declared_trunk_coordinates(v1) -> None:
     doc = derive_showpiece_v2(v1)
     assert doc["schema_version"] == "full-body-v2"
     assert set(V2_TRUNK.coordinates) <= set(doc["coordinate_order"])
-    assert doc["trunk_coupling"]["enabled"] is False
+    assert doc["trunk_coupling"]["enabled"] is True  # default set by SHOW-A5 evidence
