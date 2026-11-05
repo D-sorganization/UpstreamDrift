@@ -27,6 +27,13 @@ SETUP = {
     "face_sd_deg": 1.2,
     "speed_cv": 0.07,
 }
+STUDIO_SUITE = "UpstreamDrift_3D_Putting_Studio_v4"
+DOC = {"schema_version": "4.0.0", "suite": service_setup.SUITE}
+SCENARIO = {
+    "name": "Fast green",
+    "setup": SETUP,
+    "result": {"make_rate": 0.5, "mean_leave_ft": 1.0, "n": 10},
+}
 
 
 def test_setup_fills_the_service_defaults_and_keeps_the_dialled_values() -> None:
@@ -95,7 +102,7 @@ def test_document_round_trips_through_json() -> None:
 def test_a_studio_export_loads_its_green_and_distance() -> None:
     studio = {
         "schema_version": "4.0.0",
-        "suite": "UpstreamDrift_3D_Putting_Studio_v4",
+        "suite": STUDIO_SUITE,
         "state": {
             "puttDistFt": 15.0,
             "stimpFt": 12.0,
@@ -118,10 +125,16 @@ def test_a_studio_export_loads_its_green_and_distance() -> None:
 @pytest.mark.parametrize(
     ("args", "message"),
     [
-        ({"document": {"schema_version": "5.0.0", "setup": SETUP}}, "schema_version"),
-        ({"document": {"schema_version": "4.0.0"}}, "setup"),
+        (
+            {"document": {**DOC, "schema_version": "5.0.0", "setup": SETUP}},
+            "schema_version",
+        ),
+        ({"document": DOC}, "setup"),
         ({"document": "not a dict"}, "document"),
-        ({"document": {"schema_version": "4.0.0", "setup": {"stimp": 30.0}}}, "stimp"),
+        ({"document": {**DOC, "setup": {"stimp": 30.0}}}, "stimp"),
+        ({"document": {**DOC, "suite": "Someone_Else", "setup": SETUP}}, "suite"),
+        ({"document": {"schema_version": "4.0.0", "setup": SETUP}}, "suite"),
+        ({"document": {**DOC, "suite": STUDIO_SUITE, "state": "x"}}, "state"),
     ],
 )
 def test_bad_documents_are_rejected(args: dict[str, Any], message: str) -> None:
@@ -135,6 +148,8 @@ def test_bad_documents_are_rejected(args: dict[str, Any], message: str) -> None:
         ({"scenarios": []}, "scenarios"),
         ({"scenarios": [{"name": "x"}]}, "result"),
         ({"setup": SETUP, "scenarios": "x"}, "scenarios"),
+        ({"setup": SETUP, "scenarios": [{**SCENARIO, "name": ""}]}, "name"),
+        ({"setup": SETUP, "scenarios": [{**SCENARIO, "name": "n" * 81}]}, "name"),
     ],
 )
 def test_bad_scenarios_are_rejected(args: dict[str, Any], message: str) -> None:
