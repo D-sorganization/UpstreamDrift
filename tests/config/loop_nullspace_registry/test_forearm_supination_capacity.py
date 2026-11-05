@@ -85,3 +85,24 @@ def test_citation_is_registered_verified_with_the_table_read(reg: dict) -> None:
     assert c["verification_status"] == "VERIFIED"
     assert c["doi"] == "10.1155/2017/1654796"
     assert "Table 4" in c["claim_checked"]
+
+
+@pytest.mark.parametrize(
+    ("slot", "ceiling", "extended"),
+    [
+        ("LFInput", 10.68, 7.38),  # Table 4 ND0_0, 20-29
+        ("RFInput", 11.33, 8.26),  # Table 4 D0_0, 20-29
+    ],
+)
+def test_elbow_extended_cell_is_the_lower_reference_band(
+    reg: dict, slot: str, ceiling: float, extended: float
+) -> None:
+    """The lead arm is near-straight at impact: the 90 deg-elbow peak is a
+    ceiling only, and the elbow-extended cell of the same table bounds it below."""
+    e = _cap(reg, slot, _supination_direction(slot))
+    ref = e["lower_reference"]
+    assert e["tau_max_nm"] == pytest.approx(ceiling)
+    assert ref["tau_max_nm"] == pytest.approx(extended)
+    assert ref["tau_max_nm"] < e["tau_max_nm"]
+    assert ref["citation_id"] == CITATION and "Table 4" in ref["location"]
+    assert "elbow" in ref["measurement"].lower()
