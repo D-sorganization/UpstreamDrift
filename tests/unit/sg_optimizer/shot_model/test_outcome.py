@@ -52,6 +52,8 @@ def test_landing_samples_validates_shapes() -> None:
     with pytest.raises(ContractViolationError):
         LandingSamples(along=np.zeros(3), lateral=np.zeros(2))
     with pytest.raises(ContractViolationError):
+        LandingSamples(along=np.zeros((2, 2)), lateral=np.zeros((2, 2)))
+    with pytest.raises(ContractViolationError):
         LandingSamples(along=np.array([np.nan]), lateral=np.zeros(1))
 
 
@@ -73,22 +75,6 @@ def test_duplicate_registration_is_rejected() -> None:
         )
 
 
-def test_quick_sg_always_returns_baseline_backend() -> None:
-    model = quick_sg()
-    bag = load_baseline(PGA_TOUR_YAML)
-    out = model.sample(
-        _player(),
-        ShotAction(club="7_iron", aim_angle_rad=0.0),
-        _FAIRWAY,
-        CourseConditions.benign(),
-        np.random.default_rng(1),
-        500,
-    )
-    assert out.along.shape == (500,)
-    expected = bag.get("7_iron").total_mean - 5.0
-    assert abs(out.along.mean() - expected) < 3.0
-
-
 def test_baseline_samples_match_player_effective_distribution() -> None:
     bag = load_baseline(PGA_TOUR_YAML)
     player = _player()
@@ -105,6 +91,29 @@ def test_baseline_samples_match_player_effective_distribution() -> None:
     dist = player.effective_distribution("7_iron", bag)
     assert out.lateral.std() == pytest.approx(dist.sigma_lat, rel=0.08)
     assert out.along.std() == pytest.approx(dist.sigma_long, rel=0.08)
+
+
+def test_sample_contract_and_seeded_determinism() -> None:
+    model = quick_sg()
+    args = (_player(), ShotAction("7_iron", 0.0), _ROUGH, CourseConditions.tournament())
+    with pytest.raises(ContractViolationError):
+        model.sample(*args, np.random.default_rng(0), 0)
+    a = model.sample(*args, np.random.default_rng(3), 50)
+    b = model.sample(*args, np.random.default_rng(3), 50)
+    np.testing.assert_array_equal(a.along, b.along)
+    np.testing.assert_array_equal(a.lateral, b.lateral)
+
+
+def test_rough_start_shortens_and_widens() -> None:
+    model, shot, cond = (
+        quick_sg(),
+        ShotAction("7_iron", 0.0),
+        CourseConditions.tournament(),
+    )
+    fw = model.sample(_player(), shot, _FAIRWAY, cond, np.random.default_rng(5), 4000)
+    ro = model.sample(_player(), shot, _ROUGH, cond, np.random.default_rng(5), 4000)
+    assert ro.along.mean() < fw.along.mean()
+    assert ro.lateral.std() > fw.lateral.std()
 
 
 class _ConstModel:
@@ -129,17 +138,15 @@ def _raster(size: int, origin: float) -> LieRaster:
 
 def test_transition_uses_injected_backend() -> None:
     raster = _raster(80, -100.0)
-    bag = load_baseline(PGA_TOUR_YAML)
     outcomes = sample_transitions(
         State(x=0.0, y=0.0, lie=_FAIRWAY),
         ShotAction("7_iron", 0.0),
         _player(),
-        bag,
+        _ConstModel(100.0, 5.0),
         CourseConditions.benign(),
         raster,
         4,
         np.random.default_rng(0),
-        model=_ConstModel(100.0, 5.0),
     )
     assert [(o.next_state.x, o.next_state.y) for o in outcomes] == [(100.0, 5.0)] * 4
 

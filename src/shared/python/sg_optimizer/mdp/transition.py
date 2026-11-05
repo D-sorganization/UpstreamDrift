@@ -21,6 +21,7 @@ from src.shared.python.contracts import require
 from src.shared.python.sg_optimizer.course.rasterize import LIE_CODES, LieRaster
 from src.shared.python.sg_optimizer.mdp.action import ShotAction
 from src.shared.python.sg_optimizer.mdp.state import State
+from src.shared.python.sg_optimizer.shot_model.outcome import ShotOutcomeModel
 from src.shared.python.sg_optimizer.shot_model.baseline_model import (
     BaselineShotModel,
     lie_modifiers,
@@ -29,7 +30,6 @@ from src.shared.python.sg_optimizer.shot_model.baseline_model import (
 if TYPE_CHECKING:  # pragma: no cover
     from src.shared.python.sg_optimizer.course.conditions import CourseConditions
     from src.shared.python.sg_optimizer.shot_model.baseline import BaselineBag
-    from src.shared.python.sg_optimizer.shot_model.outcome import ShotOutcomeModel
     from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
 
 
@@ -57,18 +57,25 @@ def sample_transitions(
     state: State,
     action: ShotAction,
     profile: PlayerProfile,
-    baseline: BaselineBag,
+    baseline: BaselineBag | ShotOutcomeModel,
     conditions: CourseConditions,
     raster: LieRaster,
     n_samples: int,
     rng: np.random.Generator,
-    model: ShotOutcomeModel | None = None,
 ) -> list[TransitionOutcome]:
-    """Sample ``n_samples`` next-state outcomes via ``model`` (default: baseline)."""
+    """Sample ``n_samples`` next-state outcomes.
+
+    ``baseline`` is a tour ``BaselineBag`` (default Gaussian backend) or any
+    ``ShotOutcomeModel`` to use directly.
+    """
     require(n_samples > 0, "n_samples must be > 0", n_samples)
     require(state.lie != _HOLED, "cannot act from holed state")
 
-    backend = model if model is not None else BaselineShotModel(baseline)
+    backend = (
+        baseline
+        if isinstance(baseline, ShotOutcomeModel)
+        else BaselineShotModel(baseline)
+    )
     landing = backend.sample(profile, action, state.lie, conditions, rng, n_samples)
 
     # Aim-frame landing (along, lateral). Rotate into hole frame.

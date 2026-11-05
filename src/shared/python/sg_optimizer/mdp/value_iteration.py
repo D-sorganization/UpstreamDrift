@@ -53,12 +53,11 @@ def bellman_backup_scalar(
     V: NDArray[np.float64],
     raster: LieRaster,
     profile: PlayerProfile,
-    baseline: BaselineBag,
+    baseline: BaselineBag | ShotOutcomeModel,
     conditions: CourseConditions,
     actions: ActionSet,
     n_samples: int,
     rng: np.random.Generator,
-    model: ShotOutcomeModel | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.int32]]:
     """Single Bellman sweep, pure Python loop.
 
@@ -103,7 +102,6 @@ def bellman_backup_scalar(
                     raster,
                     n_samples,
                     rng,
-                    model=model,
                 )
                 total = 0.0
                 for o in outcomes:
@@ -178,12 +176,11 @@ class HoleMDP:
                 V,
                 self.raster,
                 self.profile,
-                self.baseline,
+                self.model,
                 self.conditions,
                 self.actions,
                 self.n_samples,
                 self.rng,
-                model=self.model,
             )
         nx, ny = self.raster.shape
         nA = len(self._action_list)
