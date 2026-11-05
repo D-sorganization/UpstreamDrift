@@ -232,3 +232,17 @@ def test_summary_is_json_and_write_refuses_npz(tmp_path: Path) -> None:
     assert json.loads(path.read_text())["reached_full_mph"] == 110.0
     with pytest.raises(ContractViolationError):
         write_summary(out, tmp_path / "ladder.npz")
+
+
+def test_search_breach_with_clean_replay_is_not_blamed_on_torque_binding() -> None:
+    peak = _peak_j0_deg(_run())
+    run = _run(env=_env(j0_rom=0.5 * peak))  # search breaches J0 ROM: demoted
+    out = summarise_ladder(run, verify_at_full_fidelity(run, _window(), _env()), {})
+    top = out["rungs"][-1]
+    assert not top["search_feasible"] and not top["accepted"]  # stays unaccepted
+    assert top["probable_miscalibration"] == []  # the replay is clean
+    assert top["search_breaches"] == ["J0 ROM"]
+    claim = out["claim_top_rung"]
+    assert "NOT reached" in claim and "within the controlled subset" in claim
+    assert "search" in claim and "J0 ROM" in claim
+    assert "binding" not in claim
