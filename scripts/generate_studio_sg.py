@@ -118,13 +118,20 @@ def cell_curve(report: dict[str, Any], slope_pct: float) -> dict[str, Any]:
     }
 
 
-def pace_sweep(slope_pct: float, curve: dict[str, Any], n: int) -> list[list[float]]:
-    """Expected strokes per sweep pace at each sweep distance, on ``curve``.
+def pace_sweep(
+    slope_pct: float,
+    curve: dict[str, Any],
+    n: int,
+    distances_ft: tuple[float, ...] = SWEEP_DISTANCES_FT,
+) -> list[list[float]]:
+    """Expected strokes per sweep pace at each distance, on ``curve``.
 
     ``optimize.evaluate_actions`` with the solved curve as the comeback price:
-    a miss costs 1 + E(leave). Rows follow ``SWEEP_DISTANCES_FT``, columns
-    ``SWEEP_PACES_FT``; values rounded to 4 dp.
+    a miss costs 1 + E(leave). Rows follow ``distances_ft`` (grid distances),
+    columns ``SWEEP_PACES_FT``; values rounded to 4 dp.
     """
+    if not set(distances_ft) <= set(DEFAULT_GRID_FT):
+        raise ValueError(f"sweep distances must be grid distances: {distances_ft}")
     args = cell_args(slope_pct, n)
     model = service_sg.SkillPuttModel(profile_from_args(args), green_from_args(args))
     baseline = ExpectedPuttsCurve(
@@ -133,7 +140,7 @@ def pace_sweep(slope_pct: float, curve: dict[str, Any], n: int) -> list[list[flo
     )
     actions = [PuttAction(0.0, p) for p in SWEEP_PACES_FT]
     rows = []
-    for distance in SWEEP_DISTANCES_FT:
+    for distance in distances_ft:
         seed = distance_seed(SAMPLING["seed"], DEFAULT_GRID_FT.index(distance))
         evals = optimize.evaluate_actions(model, distance, actions, baseline, n, seed)
         rows.append([round(e.expected_strokes, 4) for e in evals])

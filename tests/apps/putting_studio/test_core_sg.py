@@ -74,7 +74,23 @@ def test_golden_curve_matches_the_core(committed: dict[str, Any]) -> None:
     # (seconds; the sloped cells are the slow part) is the committed one.
     slope = gen.SLOPES_PCT[0]
     expected = gen.cell_curve(service_sg.sg_study(gen.cell_args(slope)), slope)
-    assert committed["curves"][0] == expected
+    solved = {k: v for k, v in committed["curves"][0].items() if k != "pace_sweep"}
+    assert solved == expected
+
+
+def test_golden_sweep_row_matches_the_core(committed: dict[str, Any]) -> None:
+    # One flat sweep row re-run through evaluate_actions on the committed curve.
+    curve = committed["curves"][0]
+    row = gen.SWEEP_DISTANCES_FT.index(10.0)
+    got = gen.pace_sweep(0.0, curve, gen.SAMPLING["n"], distances_ft=(10.0,))
+    assert got == [curve["pace_sweep"][row]]
+
+
+def test_sweep_distances_must_be_grid_distances() -> None:
+    with pytest.raises(ValueError, match="grid distances"):
+        gen.pace_sweep(
+            0.0, {"distances_ft": [1.0], "expected_putts": [1.0]}, 1, (11.0,)
+        )
 
 
 def test_fixture_holds_a_solved_curve_per_slope(committed: dict[str, Any]) -> None:
