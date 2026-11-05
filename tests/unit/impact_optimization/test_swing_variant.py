@@ -21,7 +21,9 @@ from tests.unit.impact_optimization.test_trajectory_optimiser import (
 
 pytestmark = pytest.mark.unit
 
-FIXTURE = Path("tests/fixtures/sim_run/run_manifest_valid_v1.json")
+FIXTURE = (
+    Path(__file__).resolve().parents[2] / "fixtures/sim_run/run_manifest_valid_v1.json"
+)
 
 
 def _manifest(shot: str = "draw"):
