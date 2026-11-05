@@ -16,7 +16,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | present | present | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | present | present | present | partial (#14467) |
-| Saved Scenarios and Comparison | (h) | present | missing (#14471) | missing (#14472) | missing (#14472) | present |
+| Saved Scenarios and Comparison | (h) | present | missing (#14471) | present | present | present |
 | JSON Import/Export of a Setup | (h) | present | partial (#14471) | missing (#14472) | missing (#14472) | present |
 | Camera Views and Playback Phases | (i) | present | present | present | present | present |
 
@@ -87,7 +87,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 **Saved Scenarios and Comparison**
 - Core/API: present. `src/shared/python/putting_analytics/service_setup.py`, `src/api/routes/putting_analytics.py`. Named setups with their dispersion result; /scenario and /scenario-compare (make rate and leave against the first).
 - PyQt6: missing (#14471). none. None.
-- React: missing (#14472). `ui/src/stores/usePuttingStore.ts`. Store holds one parameter set and one result.
+- React: present. `ui/src/components/putting/ScenariosPanel.tsx`, `ui/src/utils/puttingSetup.ts`. Saves the page's putt as a core scenario (/scenario) and compares saved ones against the first (/scenario-compare); setup mapping golden-pinned to the core (#14472).
 - Studio: present. `src/apps/putting_studio/js/controls_a.js`. Saved scenarios with a comparison table; no distribution chart.
 
 **JSON Import/Export of a Setup**

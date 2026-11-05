@@ -119,8 +119,8 @@
       "cells": {
         "core_api": "present | src/shared/python/putting_analytics/service_setup.py, src/api/routes/putting_analytics.py | Named setups with their dispersion result; /scenario and /scenario-compare (make rate and leave against the first).",
         "pyqt6": "missing #14471 |  | None.",
-        "react": "missing #14472 | ui/src/stores/usePuttingStore.ts | Store holds one parameter set and one result.",
-        "tauri": "missing #14472 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "react": "present | ui/src/components/putting/ScenariosPanel.tsx, ui/src/utils/puttingSetup.ts | Saves the page's putt as a core scenario (/scenario) and compares saved ones against the first (/scenario-compare); setup mapping golden-pinned to the core (#14472).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/controls_a.js | Saved scenarios with a comparison table; no distribution chart."
       }
     },
