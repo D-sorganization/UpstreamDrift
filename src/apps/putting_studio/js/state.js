@@ -62,6 +62,7 @@ const state = {
   cumulativeMakes: 0,
   cumulativeAttempts: 0,
   greenPreset: 'studio', // 'studio' sliders, or a core preset (#14648)
+  read: null, // last core read {key, clubSpeedMps} (#14649)
   crossSlopePct: 1.8,
   uphillSlopePct: 0.3,
   stimpFt: 11.5,
@@ -74,6 +75,12 @@ const state = {
 /** The core green preset in play (js/core_greens.js), or null for the slider green. */
 function activeCoreGreen() {
   return state.greenPreset === 'studio' ? null : window.CORE_GREENS.presets[state.greenPreset];
+}
+
+/** The inputs a core read depends on; a read applies only while they match. */
+function currentReadKey() {
+  return [state.greenPreset, state.stimpFt, state.uphillSlopePct, state.crossSlopePct,
+    state.puttDistFt || 10.0].join('|');
 }
 
 // Smooth C^infinity analytical Ornstein-Uhlenbeck multi-sine synthesis (zero step discontinuities)
