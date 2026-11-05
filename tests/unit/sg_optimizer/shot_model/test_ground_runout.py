@@ -142,13 +142,15 @@ def _prov_table(ground):
 
 def test_changing_a_coefficient_changes_the_table_hash(monkeypatch) -> None:
     base = _prov_table(GROUND)
-    rec = gr.GROUND_PARAMETERS["roll_gain_yd_per_ms"]
+    rec = gr.GROUND_PARAMETERS[
+        "roll.sand"
+    ]  # unused on a fairway grid: cells are unchanged
     monkeypatch.setitem(
-        gr.GROUND_PARAMETERS, "roll_gain_yd_per_ms", replace(rec, value=rec.value + 0.1)
+        gr.GROUND_PARAMETERS, "roll.sand", replace(rec, value=rec.value + 0.1)
     )
     assert _prov_table(GROUND).table_hash != base.table_hash
     prov = base.provenance
-    assert prov["ground_parameters"]["roll_gain_yd_per_ms"] == rec.value
+    assert prov["ground_parameters"]["roll.sand"] == rec.value
     assert "stance" in prov["ground_slope_source"]
 
 
@@ -170,3 +172,33 @@ def test_roll_fraction_of_carry_falls_from_driver_to_wedge_on_the_real_pipeline(
         rest = GROUND(land, "fairway", "flat", skill)
         frac.append(float((rest[:, 0] - land[:, 0]).mean() / land[:, 0].mean()))
     assert all(a >= b for a, b in zip(frac, frac[1:], strict=False)), frac
+
+
+def test_green_side_skills_keep_carry_and_the_list_is_hashed() -> None:
+    for skill in ("pitch", "chip", "bunker"):
+        rest = GROUND(_landing(), "fairway", "flat", skill)
+        np.testing.assert_array_equal(rest, _landing()[:, :2])
+    assert set(GROUND.provenance["ground_carry_only_skills"]) == {
+        "pitch",
+        "chip",
+        "bunker",
+    }
+    assert _prov_table(GROUND).provenance["ground_carry_only_skills"]
+
+
+def test_meta_extra_cannot_override_provenance_keys() -> None:
+    family = get_skill_family("tour")
+    grid = TableGrid(("mid_iron",), ("fairway",), ("calm",))
+    with pytest.raises(ContractViolationError):
+        build_grid_table(
+            family, _stub_sim, grid, n=8, ground=GROUND, meta_extra={"seed": 99}
+        )
+    with pytest.raises(ContractViolationError):
+        build_grid_table(
+            family,
+            _stub_sim,
+            grid,
+            n=8,
+            ground=GROUND,
+            meta_extra={"ground_model": "x"},
+        )

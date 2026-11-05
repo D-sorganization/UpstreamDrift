@@ -21,7 +21,8 @@ Slope uses the one B6 vocabulary (``slope_wind_bins.SLOPE_BINS``): the stance
 grade is read as the grade of the landing zone, i.e. the landing zone is assumed
 to share the lie's grade; ball-above/below-feet bins have no runout effect.  Every
 coefficient is a labelled assumption (``GROUND_PARAMETERS``), fairway-first-contact
-turf, not green physics.  Credit: first drafted in Cursor PR #14642.
+turf, not green physics.  Green-side skills (pitch, chip, bunker) keep carry: they land outside this fairway-turf
+domain (``CARRY_ONLY_SKILLS``, hashed).  Credit: first drafted in Cursor PR #14642.
 """
 
 from __future__ import annotations
@@ -57,15 +58,15 @@ GROUND_PARAMETERS: dict[str, ParameterRecord] = {
     "skill.mid_iron": _p(0.45, "spin checks the ball"),
     "skill.short_iron": _p(0.3, "high spin"),
     "skill.wedge": _p(0.18, "high spin, steep descent"),
-    "skill.pitch": _p(0.12, "high spin, steep descent"),
-    "skill.chip": _p(0.12, "low-flight chip keeps some release"),
-    "skill.bunker": _p(0.06, "sand shot stops quickly"),
     "roll.tee": _p(1.0, "firm, short grass"),
     "roll.fairway": _p(1.0, "reference lie"),
     "roll.rough": _p(0.35, "long grass stops the ball"),
     "roll.sand": _p(0.15, "sand stops the ball"),
 }
 _MIN_SLOPE_MULT = 0.05
+#: Green-side skills land on the green or in sand, outside this fairway-turf model:
+#: they keep carry in rest mode (listed in the hashed provenance) until a green model.
+CARRY_ONLY_SKILLS: tuple[str, ...] = ("pitch", "chip", "bunker")
 
 
 @dataclass(frozen=True)
@@ -80,6 +81,7 @@ class SlopeAwareGround:
         return {
             "ground_model": self.model_id,
             "ground_parameters": {k: v.value for k, v in GROUND_PARAMETERS.items()},
+            "ground_carry_only_skills": list(CARRY_ONLY_SKILLS),
             "ground_slope_source": "stance bin (landing grade = lie grade)",
         }
 
@@ -93,9 +95,10 @@ class SlopeAwareGround:
         )
         require(slope in SLOPE_BINS, f"unknown slope bin; have {tuple(SLOPE_BINS)}")
         require(f"roll.{lie}" in GROUND_PARAMETERS, "unknown lie for runout", lie)
-        require(
-            f"skill.{skill}" in GROUND_PARAMETERS, "unknown skill for runout", skill
-        )
+        known = f"skill.{skill}" in GROUND_PARAMETERS
+        require(known or skill in CARRY_ONLY_SKILLS, "unknown skill for runout", skill)
+        if skill in CARRY_ONLY_SKILLS:
+            return np.array(landing[:, :2], dtype=np.float64)
         p = {k: v.value for k, v in GROUND_PARAMETERS.items()}
         vx, vy, vz = landing[:, 2], landing[:, 3], landing[:, 4]
         h = np.hypot(vx, vy)

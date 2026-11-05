@@ -3,7 +3,7 @@
 Per ``(skill, club, lie, wind, slope)`` cell: mean / sd / correlation of the
 aim-frame landing offset (yards) from an injected landing simulator. Every cell
 shares one standard-normal block (common random numbers, prefix-stable in ``n``).
-The hash covers cells + ``(family, seed, n)``; wall-clock runtime is never hashed.
+The hash covers cells + ``(family, seed, n)`` and the injected ground/lie provenance; wall-clock runtime is never hashed.
 Scope: carry by default; an injected ``ground`` model (B3b, ``ground_runout``) turns
 landing states into rest positions and is recorded in the provenance; slope defaults
 to flat, other bins come from an injected ``slope_modifier`` (B6); ``club`` repeats
@@ -257,10 +257,18 @@ def build_grid_table(
         "family_version": family.provenance.version,
         "seed": seed,
         "n": n,
-        **(ground.provenance if ground is not None else {}),
-        **getattr(lie_modifier, "provenance", {}),
-        **(meta_extra or {}),
     }
+    for part in (
+        ground.provenance if ground is not None else {},
+        getattr(lie_modifier, "provenance", {}),
+        meta_extra or {},
+    ):
+        require(
+            not (set(part) & set(meta)),
+            "provenance key collision",
+            set(part) & set(meta),
+        )
+        meta.update(part)
     table = DispersionTable(
         tuple(cells),
         {**meta, "table_hash": _hash(tuple(cells), meta)},
