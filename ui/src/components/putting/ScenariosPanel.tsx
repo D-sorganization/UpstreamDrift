@@ -56,7 +56,7 @@ export function ScenariosPanel() {
       : formatQuantity(ft * FT_TO_M, "distance", system, 2);
 
   return (
-    <div className="space-y-3 text-xs">
+    <div className="space-y-3 pb-12 text-xs">
       <label className="block">
         <span style={muted}>Scenario Name</span>
         <input
@@ -106,34 +106,34 @@ export function ScenariosPanel() {
           }
           className="w-full font-mono"
         >
-          <caption className="text-left" style={muted}>
-            Make %, Mean Leave
-            {rows && `, Change Against ${compare.data?.baseline}`}
+          <caption className="pb-1 text-left" style={muted}>
+            Make % and Mean Leave
+            {rows && `, Change Against ${compare.data?.baseline} Below`}
           </caption>
           <tbody>
             {scenarios.map((scenario, i) => (
-              <tr key={i}>
-                <td className="max-w-0 truncate">{scenario.name}</td>
-                <td className="text-right">
+              <tr key={i} className="align-top">
+                <td className="w-full max-w-0 truncate">{scenario.name}</td>
+                <td className="whitespace-nowrap pl-2 text-right">
                   {percent(scenario.result.make_rate)}
+                  {rows && (
+                    <div style={muted}>
+                      {signed(
+                        `${(rows[i].make_rate_delta * 100).toFixed(1)} pts`,
+                      )}
+                    </div>
+                  )}
                 </td>
-                <td className="text-right">
+                <td className="whitespace-nowrap pl-2 text-right">
                   {leave(scenario.result.mean_leave_ft)}
+                  {rows && (
+                    <div style={muted}>
+                      {rows[i].mean_leave_delta_ft === null
+                        ? "—"
+                        : signed(leave(rows[i].mean_leave_delta_ft))}
+                    </div>
+                  )}
                 </td>
-                {rows && (
-                  <td className="text-right">
-                    {signed(
-                      `${(rows[i].make_rate_delta * 100).toFixed(1)} pts`,
-                    )}
-                  </td>
-                )}
-                {rows && (
-                  <td className="text-right">
-                    {rows[i].mean_leave_delta_ft === null
-                      ? "—"
-                      : signed(leave(rows[i].mean_leave_delta_ft))}
-                  </td>
-                )}
               </tr>
             ))}
           </tbody>
