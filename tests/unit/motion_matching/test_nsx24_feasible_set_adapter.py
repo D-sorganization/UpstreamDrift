@@ -12,11 +12,13 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching import contact_force_allocator as cfa
+from src.shared.python.motion_matching import multi_engine_torque_allocator as meta
 from src.shared.python.motion_matching.contact_force_allocator import (
     AllocationObjective,
     ContactForceAllocator,
     FrameFeasibleSet,
     FrameInputs,
+    allocate_contact_frame,
     feasible_set_from_frame,
 )
 from src.shared.python.motion_matching.multi_engine_torque_allocator import (
@@ -77,6 +79,39 @@ def test_contact_force_allocator_routes_through_feasible_set_from_frame(
     np.testing.assert_array_equal(np.asarray(spy.solved[0].A_eq), spy.frames[0].a_eq)
     np.testing.assert_array_equal(spy.solved[0].lo, spy.frames[0].lo)
     np.testing.assert_array_equal(spy.solved[0].hi, spy.frames[0].hi)
+
+
+def test_multi_engine_uses_allocate_contact_frame_not_allocator_allocate(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    allocate_calls = 0
+    contact_frame_calls = 0
+    real_allocate = ContactForceAllocator.allocate
+    real_acf = allocate_contact_frame
+
+    def counting_allocate(self, *args: Any, **kwargs: Any) -> Any:
+        nonlocal allocate_calls
+        allocate_calls += 1
+        return real_allocate(self, *args, **kwargs)
+
+    def counting_acf(*args: Any, **kwargs: Any) -> Any:
+        nonlocal contact_frame_calls
+        contact_frame_calls += 1
+        return real_acf(*args, **kwargs)
+
+    monkeypatch.setattr(ContactForceAllocator, "allocate", counting_allocate)
+    monkeypatch.setattr(meta, "allocate_contact_frame", counting_acf)
+
+    n_frames, nv = 3, 44
+    q = np.zeros((n_frames, nv))
+    q[:, 2] = 0.85
+    zeros = np.zeros((n_frames, nv))
+    allocator = MultiEngineTorqueAllocator(DrakeSyntheticForceAdapter(nv, n_spheres=6))
+    allocator.allocate_trajectory(
+        np.linspace(0.0, 0.02, n_frames), q, zeros, zeros, stride=1
+    )
+    assert contact_frame_calls == n_frames
+    assert allocate_calls == 0
 
 
 def test_multi_engine_allocate_trajectory_routes_every_frame_through_the_seam(
