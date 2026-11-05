@@ -7,7 +7,7 @@ import math
 
 import mujoco
 import numpy as np
-import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - test parses our own output
+from defusedxml import ElementTree as ET
 from pathlib import Path
 
 import pytest
@@ -62,13 +62,13 @@ def test_neck_range_rad_is_a_precondition_checked_lookup() -> None:
 def test_default_export_compiles_no_limits() -> None:
     """The native stack requires limited=false (necromatcher_ranges)."""
     xml, _ = export_full_body_mjcf(SPEC.read_bytes())
-    joints = list(ET.fromstring(xml).iter("joint"))  # nosec B314
+    joints = list(ET.fromstring(xml).iter("joint"))
     assert joints and all(j.get("limited") == "false" for j in joints)
 
 
 def test_neck_joints_are_limited_in_the_mjcf() -> None:
     xml, _ = export_full_body_mjcf(SPEC.read_bytes(), neck_limits=True)
-    joints = {j.get("name"): j for j in ET.fromstring(xml).iter("joint")}  # nosec B314
+    joints = {j.get("name"): j for j in ET.fromstring(xml).iter("joint")}
     for name in NECK_COORDINATES:
         joint = joints[name]
         assert joint.get("limited") == "true"
