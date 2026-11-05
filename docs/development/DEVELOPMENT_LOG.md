@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14535 · Size-Aware Development-Log Archiver: Archive Oldest Terminal Entries When the Log Nears the Byte Cap
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14535
+- **Branch:** claude-ct/14535-devlog-size-trigger
+- **PR:** #14592
+- **Paths:** see #14592
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8c6f82c1`; collated from changes/14535-size-aware-development-log-archiver-arch.md)
+- **Summary:** Size-aware development-log archiver: archive oldest terminal entries when the log nears the byte cap
+- **Next step:** Merge the PR.
+
 ### DL-#14434 · RUN-4: Ud-Sim Reproduce Reruns a Stored Run From Its Model File With the Recorded Seed and Parameters, Compares Each Output Within an Absolute Tolerance and Reports Engine Version Mismatches; the Run Store Now Closes Copied Files and Reports Corrupt Records Cleanly
 
 - **State:** in_review
@@ -924,16 +937,55 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14566 · SHOW-B2: SkillFamily Schema (Impact-Condition Mean/Cov + Provenance), Assumption-Marked Presets, Registry, PlayerProfile Link
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14566
+- **Branch:** merged via #14590
+- **PR:** #14590
+- **Paths:** see #14590
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8e6506c8`; collated from changes/14566-show-b2-skillfamily-schema-impact-condit.md)
+- **Summary:** SHOW-B2: SkillFamily schema (impact-condition mean/cov + provenance), assumption-marked presets, registry, PlayerProfile link
+- **Next step:** Shipped in PR #14590.
+
+### DL-#14530 · Putting Green Simulator: The Ud.Putt_Scene/1 Export Writes and Reads Impact_Toe_m (Optional on Read, Default 0.0, Range-Checked Against IMPACT_TOE_RANGE_M), so a Toe or Heel Strike Round-Trips
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14530
+- **Branch:** merged via #14594
+- **PR:** #14594
+- **Paths:** see #14594
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`eaa7b7ac`; collated from changes/14530-scene-export-impact-toe.md)
+- **Summary:** Putting Green Simulator: the ud.putt_scene/1 export writes and reads impact_toe_m (optional on read, default 0.0, range-checked against IMPACT_TOE_RANGE_M), so a toe or heel strike round-trips
+- **Next step:** Shipped in PR #14594.
+
+### DL-#14450 · React Web UI: One Command (Npm Run Local) Builds From the Lockfile and Serves It Through the API From a Clean Checkout; CI Build Check Runs the Same Clean-Build Check; README Run Steps; a Test Bars Paid-API Hosts and Keys
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14450
+- **Branch:** merged via #14593
+- **PR:** #14593
+- **Paths:** see #14593
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`69ae6718`; collated from changes/14450-react-web-ui-one-command-npm-run-local-b.md)
+- **Summary:** React web UI: one command (npm run local) builds from the lockfile and serves it through the API from a clean checkout; CI Build Check runs the same clean-build check; README run steps; a test bars paid-API hosts and keys
+- **Next step:** Shipped in PR #14593.
+
 ### DL-#14559 · SHOW-C3a: SplineTorqueControl Piecewise-Linear Torque Parameterisation
 
 - **State:** shipped
 - **Owner:** unassigned
 - **Issue:** #14559
 - **Branch:** merged via #14589
-- **PR:** #14589
+- **PR:** #14589, #14596
 - **Paths:** see #14589
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`04ad3ef1`; collated from changes/14559-show-c3a-splinetorquecontrol-piecewise-l.md)
+- **Last verified:** 2026-11-05 (`938df10a`; collated from changes/14559-show-c3b-trust-region-torque-optimiser-w.md)
 - **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
 - **Next step:** Shipped in PR #14589.
 
