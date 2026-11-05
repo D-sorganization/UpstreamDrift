@@ -3180,23 +3180,27 @@ jobs:
           npm run test:e2e:mobile
 
       # Lighthouse mobile baseline (#14698, follow-up of #14270). Runs on the
-      # fleet runner of this job; scores are informational (no threshold).
+      # fleet runner of this job; scores are informational (no threshold). PR events
+      # only: the job feeds quality-gate, and an informational receipt must not be
+      # able to eject merge-queue entries or main pushes.
       - name: Validate Lighthouse receipt checks
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
         run: npm run test:lighthouse-receipt
 
       - name: Resolve Chromium path for Lighthouse
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
         run: |
-          echo "CHROME_PATH=$(node --input-type=module -e 'import { chromium } from "@playwright/test"; process.stdout.write(chromium.executablePath())')" >> "$GITHUB_ENV"
+          chrome="$(node --input-type=module -e 'import { chromium } from "@playwright/test"; process.stdout.write(chromium.executablePath())')"
+          test -x "$chrome" || { echo "::error::Chromium not found at $chrome"; exit 1; }
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
 
       - name: Clear stale Lighthouse reports
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
         working-directory: .
         run: node -e "require('node:fs').rmSync('.lighthouseci',{recursive:true,force:true})"
 
       - name: Collect Lighthouse mobile baseline
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
         uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18
         with:
           urls: http://127.0.0.1:4173/
@@ -3206,12 +3210,12 @@ jobs:
           temporaryPublicStorage: false
 
       - name: Validate collected Lighthouse reports
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
         working-directory: .
         run: node ui/e2e/validate-lighthouse-reports.mjs .lighthouseci http://127.0.0.1:4173/
 
       - name: Upload sanitized mobile score receipt
-        if: steps.frontend-changes.outputs.skip != 'true'
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: lighthouse-mobile-baseline-${{ github.run_id }}-${{ github.run_attempt }}

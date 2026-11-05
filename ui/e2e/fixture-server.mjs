@@ -44,7 +44,15 @@ const server = createServer((request, response) => {
   if (url.pathname === '/__network-policy') return sendJson(response, 200, { requests: proxy.policyRequests() });
   if (url.pathname.startsWith('/api/launcher/logos/')) return sendLogo(response);
   if (url.pathname.startsWith('/api/')) return sendJson(response, 404, { detail: 'No fixture for this API request' });
-  const candidate = path.resolve(root, `.${decodeURIComponent(url.pathname)}`);
+  let decodedPath;
+  try {
+    decodedPath = decodeURIComponent(url.pathname);
+  } catch {
+    response.writeHead(400);
+    response.end();
+    return;
+  }
+  const candidate = path.resolve(root, `.${decodedPath}`);
   const safePath = path.relative(root, candidate);
   const filePath = safePath && !safePath.startsWith('..') && !path.isAbsolute(safePath)
     ? candidate

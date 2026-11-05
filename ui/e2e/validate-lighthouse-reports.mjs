@@ -52,7 +52,7 @@ export function validateReports(reports, expectedUrl) {
       screenEmulation: { mobile: true, width: 390, height: 844, disabled: false },
       throttlingMethod: 'simulate',
     },
-    browserNetworkPolicy: 'loopback-only proxy',
+    browserNetworkPolicy: 'loopback-only proxy (configured; requests not logged to the receipt)',
     lighthouseVersion: version,
     chromeVersion: browser.match(/Chrome\/([\d.]+)/)?.[1],
     medianScores,
