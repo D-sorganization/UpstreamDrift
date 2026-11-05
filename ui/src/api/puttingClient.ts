@@ -1,4 +1,5 @@
 import type {
+  AimSolve3DResponse,
   BalancePresetsResponse,
   Putt3DSimulationRequest,
   Putt3DSimulationResponse,
@@ -23,6 +24,16 @@ export function simulatePutt3D(
       body: JSON.stringify(request),
     },
   );
+}
+
+/** The core's holing pace and line for this green (solve_aim, #14466). */
+export function solveAim3D(
+  request: Putt3DSimulationRequest,
+): Promise<AimSolve3DResponse> {
+  return apiFetch<AimSolve3DResponse>("/api/tools/putting-green/solve-aim-3d", {
+    method: "POST",
+    body: JSON.stringify(request),
+  });
 }
 
 /** The shared core's named putter heads (putter_presets.BALANCE_PRESETS). */

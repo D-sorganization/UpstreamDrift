@@ -7,14 +7,17 @@ import {
   fetchGreenPresets,
   fetchPutterPresets,
   simulatePutt3D,
+  solveAim3D,
 } from "@/api/puttingClient";
 import { usePuttingStore } from "@/stores/usePuttingStore";
+import autoSolve from "@/utils/autoSolve.golden.json";
 import greens from "@/utils/greenTypes.golden.json";
 import golden from "@/utils/putterHead.golden.json";
 import { PuttingGreenPage } from "./PuttingGreen";
 
 vi.mock("@/api/puttingClient", () => ({
   simulatePutt3D: vi.fn(),
+  solveAim3D: vi.fn(),
   runDispersion: vi.fn(),
   runMakeSpread: vi.fn(),
   runStrokesGained: vi.fn(),
@@ -216,5 +219,54 @@ describe("PuttingGreenPage 3D workflow", () => {
       ...greens.presets.tiered,
       preset: "tiered",
     });
+  });
+
+  it("writes the core's read into pace and aim, then simulates it (#14466)", async () => {
+    usePuttingStore.getState().setUnitSystem("metric");
+    vi.mocked(simulatePutt3D).mockClear();
+    vi.mocked(solveAim3D).mockResolvedValue(autoSolve.solve);
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <PuttingGreenPage />
+      </QueryClientProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Auto-Solve Read/ }));
+
+    expect((await screen.findByRole("status")).textContent).toBe(
+      autoSolve.reads.metric,
+    );
+    const solved = {
+      putter_speed_mps: autoSolve.solve.putter_speed_mps,
+      aim_heading_deg: autoSolve.solve.aim_heading_deg,
+    };
+    expect(vi.mocked(solveAim3D).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({ hole_x_m: 3 }),
+    );
+    await waitFor(() =>
+      expect(vi.mocked(simulatePutt3D).mock.lastCall?.[0]).toEqual(
+        expect.objectContaining(solved),
+      ),
+    );
+    expect(usePuttingStore.getState().parameters).toEqual(
+      expect.objectContaining(solved),
+    );
+    expect(screen.getByLabelText("Aim Heading")).toHaveValue(
+      String(autoSolve.solve.aim_heading_deg),
+    );
+  });
+
+  it("shows why the core rejected the solve (#14466)", async () => {
+    vi.mocked(simulatePutt3D).mockClear();
+    vi.mocked(solveAim3D).mockRejectedValue(new Error("hole off the green"));
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <PuttingGreenPage />
+      </QueryClientProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Auto-Solve Read/ }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Auto-Solve rejected: hole off the green",
+    );
+    expect(simulatePutt3D).not.toHaveBeenCalled();
   });
 });

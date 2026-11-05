@@ -9,6 +9,7 @@ import type {
 } from "@/api/generated/types";
 import { simulatePutt3D } from "@/api/puttingClient";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
+import { AutoSolveButton } from "@/components/putting/AutoSolveButton";
 import { DispersionPanel } from "@/components/putting/DispersionPanel";
 import { GreenTypeControl } from "@/components/putting/GreenTypeControl";
 import { StrokesGainedPanel } from "@/components/putting/StrokesGainedPanel";
@@ -21,6 +22,7 @@ import {
   type CameraPreset,
 } from "@/utils/cameraPresets";
 import { usePuttingStore } from "@/stores/usePuttingStore";
+import { signedDegrees } from "@/utils/autoSolve";
 import {
   UNIT_SYSTEMS,
   formatQuantity,
@@ -446,6 +448,15 @@ export function PuttingGreenPage() {
           step={0.5}
           onChange={(loft_deg) => updateParameters({ loft_deg })}
         />
+        <RangeControl
+          label="Aim Heading"
+          value={parameters.aim_heading_deg}
+          displayValue={signedDegrees(parameters.aim_heading_deg)}
+          min={-45}
+          max={45}
+          step={0.1}
+          onChange={(aim_heading_deg) => updateParameters({ aim_heading_deg })}
+        />
         <UnitRangeControl
           label="Hole Distance"
           valueSi={parameters.hole_x_m}
@@ -545,6 +556,7 @@ export function PuttingGreenPage() {
         >
           {simulation.isPending ? "Simulating…" : "Simulate Putt"}
         </button>
+        <AutoSolveButton onSolved={(solved) => simulation.mutate(solved)} />
         {simulation.error && (
           <p
             className="mt-3 rounded border p-2 text-xs"
