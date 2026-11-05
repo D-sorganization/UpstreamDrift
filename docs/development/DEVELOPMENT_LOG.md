@@ -742,6 +742,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14698 · Add the Lighthouse Mobile Baseline Receipt (Loopback Fixture Server and Egress Proxy, Report Validator, CI Steps on the Fleet Runner) as the Follow-Up to #14270; Scores Informational, No Threshold.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14698
+- **Branch:** merged via #14717
+- **PR:** #14717
+- **Paths:** see #14717
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`c91cd7cf`; collated from changes/14698-add-the-lighthouse-mobile-baseline-recei.md)
+- **Summary:** Add the Lighthouse mobile baseline receipt (loopback fixture server and egress proxy, report validator, CI steps on the fleet runner) as the follow-up to #14270; scores informational, no threshold.
+- **Next step:** Shipped in PR #14717.
+
 ### DL-#14610 · SHOW-B3b: Bounce/Roll Rest Positions (Sg_Runout_V1) on the B6 Slope Bins, CRN Lie Modifier for Dispersion Tables
 
 - **State:** shipped
