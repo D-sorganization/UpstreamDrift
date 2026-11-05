@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14606 | SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report |
+| 2026-11-05 | #14601 | Add golf-language face-on address grip roll metric (0 deg vertical, + strong) with flagship measurement and overlay render |
+| 2026-11-05 | #14609 | Putting Green Simulator: Counter-Torque Stabilization panel charts the shared core's hand couples and gust twist (preload held vs slack grip) on the shared balance heads, with force and torque display units (N, lbf, N·m, in·lbf) in the shared units module |
 | 2026-11-05 | #14598 | SHOW-C4: shaft_state_series reports MuJoCo chain-shaft tip deflection, lead/droop, deflection rate and strain energy through impact, with R11-window evidence on the best-fit driver |
 | 2026-11-05 | #14603 | SHOW-A5: trunk observability report (marker Jacobian SVD), ADR-0059 and coupled-by-default showpiece spec |
 | 2026-11-05 | #14578 | SHOW-A4: cited neck ROM (neck_rom.py, single source for range_of_motion) enforced as MJCF joint limits on NeckInput X/Y/Z |

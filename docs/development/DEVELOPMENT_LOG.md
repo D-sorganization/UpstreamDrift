@@ -937,6 +937,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14561 · SHOW-C5 Speed Continuation 100-125 Mph With Pareto Front and Binding Report
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14561
+- **Branch:** merged via #14606
+- **PR:** #14606
+- **Paths:** see #14606
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`cd544818`; collated from changes/14561-show-c5-speed-continuation-100-125-mph-w.md)
+- **Summary:** SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report
+- **Next step:** Shipped in PR #14606.
+
+### DL-#14550 · Add Golf-Language Face-On Address Grip Roll Metric (0 Deg Vertical, + Strong) With Flagship Measurement and Overlay Render
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14550
+- **Branch:** merged via #14601
+- **PR:** #14601
+- **Paths:** see #14601
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`986b3224`; collated from changes/14550-add-golf-language-face-on-address-grip-r.md)
+- **Summary:** Add golf-language face-on address grip roll metric (0 deg vertical, + strong) with flagship measurement and overlay render
+- **Next step:** Shipped in PR #14601.
+
 ### DL-#14560 · SHOW-C4: Shaft_State_Series Reports MuJoCo Chain-Shaft Tip Deflection, Lead/Droop, Deflection Rate and Strain Energy Through Impact, With R11-Window Evidence on the Best-Fit Driver
 
 - **State:** shipped
@@ -1151,10 +1177,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14469
 - **Branch:** merged via #14548
-- **PR:** #14548, #14602
+- **PR:** #14548, #14602, #14609
 - **Paths:** see #14548
 - **Started:** 2026-11-04
-- **Last verified:** 2026-11-05 (`12fecba2`; collated from changes/14469-putting-counter-torque-route.md)
+- **Last verified:** 2026-11-05 (`c39d2c75`; collated from changes/14469-putting-counter-torque-desktop.md)
 - **Summary:** Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio
 - **Next step:** Shipped in PR #14548.
 
