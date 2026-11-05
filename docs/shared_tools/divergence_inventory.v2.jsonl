@@ -1033,6 +1033,7 @@
 {"path": "humanoid_robotics/option_a/plant.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "humanoid_robotics/option_a/trace_contract.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "impact_optimization/__init__.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
+{"path": "impact_optimization/full_body_rollout.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/impact_target.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/kinematic_binding.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/physiological_envelope.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
@@ -1055,6 +1056,7 @@
 {"path": "impact_parameters/clubhead_series.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/conditions.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/extract.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
+{"path": "impact_parameters/flight_report.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/panel_model.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/shaft_state.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/target_frame.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
@@ -2395,6 +2397,7 @@
 {"path": "sg_optimizer/shot_model/skill_family.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/skill_fit.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/skill_registry.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/shot_model/slope_wind_bins.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/table_model.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/strategy.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "shadow_tracker/AGENTS.md", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
