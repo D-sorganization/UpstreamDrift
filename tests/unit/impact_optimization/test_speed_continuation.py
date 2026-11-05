@@ -112,3 +112,11 @@ def test_unlisted_joint_has_no_provenance_note() -> None:
     res = _run(env)
     lines = binding_report(res, env, limit_notes={"J1": "x"})
     assert not any("x)" in ln for ln in lines if "J0" in ln)
+
+
+def test_every_binding_line_names_its_limit_kind_as_torque() -> None:
+    """Torque-only today: ROM/velocity binding is C3c (show-review item 1)."""
+    env = _envelope(first=BASE[:, 0].max() * 1.001)
+    lines = binding_report(_run(env), env)
+    assert lines and all("torque limit" in ln for ln in lines)
+    assert not any("ROM" in ln or "velocity" in ln for ln in lines)
