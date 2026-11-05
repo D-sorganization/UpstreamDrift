@@ -11,8 +11,12 @@ import json
 from pathlib import Path
 import re
 
+import pytest
+
 from src.sim_run.manifest import validate_run_manifest
 from src.sim_run.manifest_emitter import sha256_json
+
+pytestmark = pytest.mark.unit
 
 _RESEARCH = Path(__file__).resolve().parents[3] / (
     "docs/research/proximal_distal_energy_transfer"
