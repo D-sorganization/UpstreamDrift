@@ -742,6 +742,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14610 · SHOW-B3b: Bounce/Roll Rest Positions (Sg_Runout_V1) on the B6 Slope Bins, CRN Lie Modifier for Dispersion Tables
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14610
+- **Branch:** merged via #14708
+- **PR:** #14708
+- **Paths:** see #14708
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`987bd4ec`; collated from changes/14610-show-b3b-ground-runout.md)
+- **Summary:** SHOW-B3b: bounce/roll rest positions (sg_runout_v1) on the B6 slope bins, CRN lie modifier for dispersion tables
+- **Next step:** Shipped in PR #14708.
+
+### DL-#12769 · SPN-14a: Fixture_Peak_Spread_Table Serialises Law Drive Residuals and Lumbar Compression Spreads; the Invented-Fixture Table Is Committed as a CI Golden (Tests/Fixtures/Spine/Spn14a_Fixture_Peaks.Json)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12769
+- **Branch:** merged via #14716
+- **PR:** #14716
+- **Paths:** see #14716
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`6bcba0c7`; collated from changes/12769-spn14a-fixture-golden.md)
+- **Summary:** SPN-14a: fixture_peak_spread_table serialises law drive residuals and lumbar compression spreads; the invented-fixture table is committed as a CI golden (tests/fixtures/spine/spn14a_fixture_peaks.json)
+- **Next step:** Shipped in PR #14716.
+
 ### DL-#14452 · Putting Parity Matrix: Units.React and Units.Tauri Move to Present, Citing the React Units Selector That #14458 Landed (PR #14489); No Putting Gaps Remain in the Matrix (Part Of #14452)
 
 - **State:** shipped
@@ -826,10 +852,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690, #14696, #14704
+- **PR:** #14684, #14690, #14696, #14704, #14713
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`be7b9798`; collated from changes/12553-trunk-rom-soft-limits.md)
+- **Last verified:** 2026-11-05 (`46589575`; collated from changes/12553-shoulder-declared-rom-deg-per-side-cited.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 

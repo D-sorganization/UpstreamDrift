@@ -2391,8 +2391,10 @@
 {"path": "sg_optimizer/shot_model/baseline.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/baseline_model.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/common_random.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/shot_model/dispersion_lie.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/dispersion_table.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/distributions.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/shot_model/ground_runout.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/outcome.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/physics_simulator.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/player_profile.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
