@@ -11,22 +11,29 @@ on either engine and must agree (cross-validation, epic task M7).
 Definitions (pointwise, at a single measured state ``(q, v)`` with control
 ``tau``)::
 
-    ZTCF accel:  qddot = solve(M(q), -bias(q, v))         # the drift field f(x)
-    ZVCF accel:  qddot = solve(M(q), -bias(q, 0)) # velocity and control zeroed
+    ZTCF accel:  qddot = solve(M(q), -bias(q, v))   # drift f(x), tau = 0
+    ZVCF accel:  qddot = solve(M(q), tau)           # control: v and gravity off
+
+so ``ZTCF + ZVCF`` is the actual acceleration with gravity counted once. The
+identity is pointwise only; integrated counterfactual trajectories do not
+generally sum. The gravity-only term ``solve(M(q), -bias(q, 0))`` is
+``zero_velocity_zero_torque_acceleration``.
 
 The distinct control-preserved diagnostic is named
 ``zero_velocity_control_preserved_acceleration``. It must not be abbreviated
-as ZVCF because it answers a different intervention question.
+as ZVCF because it answers a different intervention question, and it is a
+diagnostic that is never summed with ZTCF (gravity would count twice).
 
 For the planar double pendulum the bias force is ``C(q, v) v + g(q) + d(v)``.
 At ``v = 0`` the Coriolis term (quadratic in velocity) and the viscous damping
-term (linear in velocity) both vanish, so ``bias(q, 0) == g(q)``. The ZVCF
-expression therefore reduces to ``solve(M, -g(q))``, matching the analytical
-ground truth in :meth:`PendulumPhysicsEngine.compute_zvcf`.
+term (linear in velocity) both vanish, so ``bias(q, 0) == g(q)`` and the
+zero-velocity, zero-torque acceleration reduces to ``solve(M, -g(q))``.
 
-This module holds the repository's single ZVCF definition (issue #11553): the
-row/column projection ``-M(q)^-1 Y(q, 0, 0) pi`` of the inertial regressor in
-the methods reference. ``motion_matching.counterfactual`` delegates to it.
+This module holds the repository's single ZVCF definition (issue #14494,
+reversing #11553 by owner decision): the control component, matching the
+original MATLAB. On a closed loop it carries the reaction change
+``M^-1 (tau + J^T (lambda - lambda_0))``. ``motion_matching.counterfactual``
+delegates to it.
 
 # AGENT-NOTE: These are POINTWISE / INSTANTANEOUS decompositions evaluated at
 # each measured state along a trajectory -- they are NOT forward-integrated
@@ -41,6 +48,7 @@ the methods reference. ``motion_matching.counterfactual`` delegates to it.
 from __future__ import annotations
 
 import os
+import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -68,6 +76,7 @@ __all__ = [
     "evaluate_ztcf_zvcf_on_canonical_trajectory",
     "persist_ztcf_zvcf_analysis",
     "zero_velocity_control_preserved_acceleration",
+    "zero_velocity_zero_torque_acceleration",
     "ztcf_acceleration",
     "zvcf_acceleration",
 ]
@@ -75,7 +84,7 @@ __all__ = [
 _CANONICAL_V2 = "canonical-v2"
 _WORLD_Z_UP = "world_Zup"
 _SI_UNITS = "SI"
-_ANALYSIS_SCHEMA_VERSION = "3.0.0"
+_ANALYSIS_SCHEMA_VERSION = "4.0.0"
 
 
 @dataclass(frozen=True)
@@ -346,16 +355,57 @@ def ztcf_acceleration(
     return _solve_mass(provider, q_arr, -bias)
 
 
-def zvcf_acceleration(provider: EquationsOfMotionProvider, q: np.ndarray) -> np.ndarray:
-    """Canonical ZVCF acceleration at one fixed configuration/internal state.
+def zvcf_acceleration(
+    provider: EquationsOfMotionProvider,
+    q: np.ndarray,
+    tau: np.ndarray | None = None,
+) -> np.ndarray:
+    """Canonical ZVCF acceleration: the control component at ``q``.
 
-    ZVCF is instantaneous and sets both velocity and the declared applied
-    generalized-control channel to zero::
+    ZVCF keeps the applied control and turns velocity and gravity off::
+
+        qddot = solve(M(q), tau)
+
+    so ``ztcf_acceleration(q, v) + zvcf_acceleration(q, tau)`` is the actual
+    acceleration with gravity counted once. The identity is pointwise only;
+    integrated counterfactual trajectories do not generally sum. On a
+    ``ConstrainedEquationsOfMotionProvider`` the control component carries the
+    reaction change, ``M^-1 (tau + J^T (lambda - lambda_0))`` (the KKT
+    projection ``P_c tau``); bare ``M^-1 tau`` is never used there.
+
+    Calling without ``tau`` is deprecated for one release: it warns and
+    returns :func:`zero_velocity_zero_torque_acceleration`, the former
+    gravity-only meaning of this name (#11553).
+
+    Postcondition:
+        Equals ``drift_and_control_split(provider, q, v, tau)[1]`` for any ``v``.
+    """
+    if tau is None:
+        warnings.warn(
+            "zvcf_acceleration(provider, q) is deprecated: ZVCF is now the "
+            "control component and needs tau (#14494). Use "
+            "zero_velocity_zero_torque_acceleration(provider, q) for the "
+            "former gravity-only value.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return zero_velocity_zero_torque_acceleration(provider, q)
+    tau_arr = _as_state_vector("tau", tau)
+    return drift_and_control_split(provider, q, np.zeros_like(tau_arr), tau_arr)[1]
+
+
+def zero_velocity_zero_torque_acceleration(
+    provider: EquationsOfMotionProvider, q: np.ndarray
+) -> np.ndarray:
+    """Acceleration at one configuration with velocity and control both zero.
+
+    ::
 
         qddot = solve(M(q), -bias(q, 0))
 
     Passive elements and internal states retained in the declared effective
-    plant remain in ``bias``. This is not a forward trajectory.  On a
+    plant remain in ``bias``. This is not a forward trajectory and not ZVCF
+    (it was named ZVCF under #11553).  On a
     ``ConstrainedEquationsOfMotionProvider`` the closure reaction is re-solved
     at ``v = 0`` (NSX-30).
     """
@@ -388,7 +438,7 @@ def zero_velocity_control_preserved_acceleration(
 ) -> np.ndarray:
     """Evaluate zero-velocity acceleration while preserving applied control.
 
-    This retains the former repository behavior under an explicit name::
+    A diagnostic, never summed with ZTCF (gravity would count twice)::
 
         qddot = solve(M(q), tau - bias(q, 0))
     """
@@ -551,7 +601,7 @@ def evaluate_ztcf_zvcf_on_canonical_trajectory(
         v_i = trajectory.v[idx]
         tau_i = tau[idx]
         ztcf[idx] = ztcf_acceleration(provider, q_i, v_i)
-        zvcf[idx] = zvcf_acceleration(provider, q_i)
+        zvcf[idx] = zvcf_acceleration(provider, q_i, tau_i)
         control_preserved[idx] = zero_velocity_control_preserved_acceleration(
             provider, q_i, tau_i
         )

@@ -14,24 +14,65 @@ is; the tile runs the shared putting physics core and shows the ball track, the
 break, and whether the putt was holed. It is a green-authoring and roll-reading
 surface, not a putter-fitting or impact-analysis tool.
 
+## Launch
+
+From the repository root:
+
+```bash
+python -m src.tools.putting_green_gui
+```
+
+`python -m src.tools.putting_green_gui --smoke` opens the window, runs one putt,
+prints the metrics and exits `0`. Add `QT_QPA_PLATFORM=offscreen` on a headless
+host. If the shared putting core cannot be imported, both commands exit `2`
+with a message that names the missing module. The 3D view needs the optional
+`pyqtgraph` and `PyOpenGL` packages. Without them, the metrics panel still works.
+
 ## Inputs
 
-| Control      | Unit | Range accepted | Default |
-| ------------ | ---- | -------------- | ------- |
-| Putter Speed | m/s  | 0.5 to 8.0     | 2.5     |
-| Aim Angle    | deg  | -45 to 45      | 0       |
-| Cup Distance | ft   | 1 to 30        | 10      |
-| Stimpmeter   | ft   | 6.0 to 14.0    | 10.0    |
-| Cross Slope  | deg  | 0 to 5         | 1.0     |
+| Control      | Unit    | Range accepted      | Default     |
+| ------------ | ------- | ------------------- | ----------- |
+| Putter Speed | m/s     | 0.5 to 8.0          | 2.5         |
+| Aim Angle    | deg     | -45 to 45           | 0           |
+| Cup Distance | ft      | 1 to 30             | 10          |
+| Stimpmeter   | ft      | 6.0 to 14.0         | 10.0        |
+| Cross Slope  | deg     | 0 to 5              | 1.0         |
+| Green Type   | -       | see below           | Cross Slope |
+| Undulation   | mm (in) | 0 to 50             | 0           |
+| Green Seed   | -       | 0 to 9999           | 0           |
+| Strike       | mm (in) | -40 to 40           | 0           |
+| Balance      | -       | Typical or a preset | Typical     |
 
+- The **Units** selector switches the display between Metric (m, m/s) and
+  Imperial (ft, mph). It converts the speed and distance controls and the
+  metrics panel in place, and saves the choice as the shared unit preference
+  (`src/shared/python/ui/units.py`), so other tools open in the same units.
+  The engine always receives SI values.
 - Every control is range-checked before the engine runs; an out-of-range or
   non-finite value raises rather than being silently clamped
   (`_validate` in `src/tools/putting_green_gui/_scene_builder.py`).
+- Strike is the impact point from the face centre, heel negative and toe
+  positive, shown in inches in imperial. Balance picks a shared putter preset
+  (toe-hang, face-balanced, zero-torque, counterbalanced) that sets head
+  mass, MOI and hosel position (`putting_dynamics.BALANCE_PRESETS`).
+- **Green Type** picks the shape the ball rolls on. Cross Slope is the classic
+  side tilt; Flat Practice, Undulating Championship, Severe Slopes and Tiered
+  are the shared core's `GREEN_PRESETS`
+  (`src/shared/python/putting_dynamics/green_spec.py`), the same greens the
+  API routes roll. A preset carries its own slope, so Cross Slope, Undulation
+  and Green Seed are greyed out while one is picked.
+- **Undulation** adds seeded bumps (a standard deviation, in mm or inches with
+  the Units selector) on top of the cross slope. **Green Seed** picks a
+  different but repeatable set of bumps.
+
+![Tiered green, metric, desktop width](images/putting_green_types_1280.png)
+
+![Undulating cross slope, phone width](images/putting_green_types_390.png)
+
 - Presets stamp speed and distance pairs only: Short (1.5 m/s, 5 ft),
   Medium (2.5 m/s, 15 ft), Long (4.0 m/s, 30 ft).
 - Not exposed on this tile, but fixed: the shared solver's RK4 at a 0.002 s
-  timestep (`putting_dynamics.solver.DT_S`) and a terrain grid resolution of
-  48. Cup distance is converted to metres; the green is sized around the putt
+  timestep (`putting_dynamics.solver.DT_S`) and a terrain grid resolution of 48. Cup distance is converted to metres; the green is sized around the putt
   with fixed margins.
 - The Stimpmeter reading is the only turf control on the tile. Grass type,
   condition, and grain exist in the shared `TurfSpec` but are left at their
@@ -45,11 +86,91 @@ surface, not a putter-fitting or impact-analysis tool.
 - Peak break: cm, the largest perpendicular deviation of the path from the
   straight ball-to-cup line.
 - Launch speed: m/s, taken from the first integrated velocity.
+- Green: the green type that was rolled.
 - **Roll model name**, printed verbatim in the metrics panel. Read this before
   you compare any number above with anything.
+- Impact: the strike offset, launch angle, launch spin, skid distance, face
+  twist rate (positive opens the face), impact energy loss and putter
+  slowdown, all from the shared `strike()` collision report. An off-centre
+  strike lowers the effective head mass, so the ball leaves slower and the
+  face twists about the shaft.
 - A contour-shaded green mesh, an animated ball, a flagstick, the aim line, and
   a ball track coloured by roll mode: amber while skidding, green in pure roll,
   grey once stopped.
+- **Playback** (#14473), under the 3D view: **Play**/**Pause**, a scrubber
+  over every trajectory sample (dragging it pauses the putt there), a jump list
+  that puts the ball where the hop, skid, roll and rest start, with each
+  phase's time, and a camera list: **Orbit** (the auto-framed default), **Down
+  the line** (behind the ball, looking along the ball-cup line), **Face on**
+  (square to the line, across from a right-handed player) and **Overhead**.
+  The phases are the shared core's `phase_marks` of the samples that were
+  rolled; nothing is re-derived in the tile.
+
+  ![Playback and camera views at 1280 px](images/putting_playback_1280.png)
+- **Batch Dispersion** (#14459): set the stroke noise (face-angle SD and speed
+  CV), pick 40, 100 or 1000 putts and press **Run Batch** to roll them on the
+  green you have dialled in (distance, stimp, cross slope). The rest positions
+  are plotted around the hole (green holed, red missed) with the make rate and
+  mean leave on misses. **0-45 ft Spread** plots the make % from 3 to 45 ft on
+  the same green. Both come from the shared dispersion service and run in the
+  background; changing units replots them.
+
+  ![Batch dispersion at 1280 px](images/putting_dispersion_imperial_1280.png)
+
+- **Auto-Solve Read** (#14465) finds the pace and line that hole the putt on
+  the green you have dialled in, including any Green Type preset. It runs the
+  shared core's `solve_aim` with the chosen putter balance in the background,
+  assuming a centred strike, and writes the solved speed and aim into the
+  Putter Speed and Aim Angle controls, rolls the exact read, and heads the
+  metrics with the optimum read: the speed in the chosen units, the heading,
+  and how far left or right of the cup to aim. The API's `/read-green`
+  returns the same solve (`recommended_speed`, `aim_heading_deg`, `holed`,
+  `converged`) in one call.
+
+  ![Auto-Solve read at 1280 px](images/putting_auto_solve_1280.png)
+
+  ![Auto-Solve read at 390 px](images/putting_auto_solve_390.png)
+
+- **Strokes Gained** (#14467): each putt enters its result (holed, or the
+  leave) into the panel. **Score Putt** solves your own expected putts E(d)
+  on the green you have dialled in, with the batch panel's stroke noise, and
+  scores the putt against it: the chart plots E(d), and the readout gives
+  your expected putts from the start and the strokes this putt gained. The
+  solve runs in the background once per green and player; later putts on
+  the same green score at once on the cached curve. It is the shared
+  `service_sg` study the API's `/strokes-gained` returns.
+
+  ![Strokes gained at 1280 px](images/putting_strokes_gained_1280.png)
+
+  ![Strokes gained at 390 px](images/putting_strokes_gained_390.png)
+
+- **Counter-Torque Stabilization** (#14469) charts the shared core's
+  two-hand couple model over the stroke: the lead and trail hands' in-plane
+  couples, and the face twist a gust starts with the grip preload held and
+  with a slack grip. Set the grip and off-plane preload, the gust impulse,
+  hand noise, lie and the putter head (the shared balance presets). Couples
+  read in N·m or in·lbf and forces in N or lbf with the unit choice. The
+  model is closed form, so the charts replot on every change.
+
+  ![Counter-torque panel at 1280 px](images/putting_counter_torque_1280.png)
+
+  ![Counter-torque panel at 390 px](images/putting_counter_torque_390.png)
+
+- **Scenarios** (#14471): **Save Scenario** stores the dialled green and
+  stroke under a name (or "Scenario N") and rolls its dispersion batch in the
+  background. The table compares each scenario with the first: make rate,
+  the change in points, mean leave and its change, in the chosen units.
+  **Export JSON...** writes the shared setup document (`schema_version`
+  4.0.0) with the saved scenarios; **Import JSON...** reads one, or a
+  putting studio export, and puts its distance, Stimp and grade back on the
+  controls. The desktop cross slope always falls right, so an imported
+  aspect is not kept. It is the shared `service_setup` the API's
+  `/scenario`, `/scenario-compare`, `/setup-export` and `/setup-import`
+  routes use.
+
+  ![Scenarios at 1280 px](images/putting_scenarios_1280.png)
+
+  ![Scenarios at 390 px](images/putting_scenarios_390.png)
 
 ## Method
 

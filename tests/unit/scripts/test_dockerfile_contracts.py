@@ -100,6 +100,13 @@ esac
 """
 
 
+_DOCKERIGNORE_OK = """# Exclude root environment secrets, but keep the example template.
+.env
+.env.*
+!.env.example
+"""
+
+
 def _write_explorer_tree(root: Path) -> None:
     (root / "docker").mkdir(exist_ok=True)
     (root / "docker" / "explorer").mkdir(exist_ok=True)
@@ -116,6 +123,7 @@ def _write_explorer_tree(root: Path) -> None:
 
 
 def _write_minimal_tree(root: Path, *, modular_pip: str = "26.1.2") -> None:
+    (root / ".dockerignore").write_text(_DOCKERIGNORE_OK, encoding="utf-8")
     (root / "Dockerfile").write_text(
         """
 RUN pip install --upgrade pip==26.1.2
@@ -160,6 +168,68 @@ def test_docker_contracts_pass_for_current_shape(tmp_path: Path) -> None:
     _write_minimal_tree(tmp_path)
 
     assert guard.docker_contract_failures(tmp_path) == []
+
+
+def test_docker_contracts_require_root_dockerignore(tmp_path: Path) -> None:
+    _write_minimal_tree(tmp_path)
+    (tmp_path / ".dockerignore").unlink()
+
+    assert any("root .dockerignore" in failure for failure in _failures(tmp_path))
+
+
+def test_docker_contracts_ignore_comments_when_checking_secret_rules(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_tree(tmp_path)
+    (tmp_path / ".dockerignore").write_text(
+        "# .env rules in comments do not count\n"
+        "# !.env.credentials is not an exception\n"
+        + _DOCKERIGNORE_OK
+        + "\n# Benign trailing comment\n\n",
+        encoding="utf-8",
+    )
+
+    assert _failures(tmp_path) == []
+
+
+@pytest.mark.parametrize("directive", [".env", ".env.*", "!.env.example"])
+@pytest.mark.parametrize("commented_out", [False, True])
+def test_docker_contracts_require_each_secret_rule(
+    tmp_path: Path, directive: str, commented_out: bool
+) -> None:
+    _write_minimal_tree(tmp_path)
+    lines = _DOCKERIGNORE_OK.splitlines()
+    index = lines.index(directive)
+    if commented_out:
+        lines[index] = f"# {directive}"
+    else:
+        lines.pop(index)
+    (tmp_path / ".dockerignore").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    assert any("secret rules" in failure for failure in _failures(tmp_path))
+
+
+def test_docker_contracts_require_secret_exclusions_before_example_reinclude(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_tree(tmp_path)
+    (tmp_path / ".dockerignore").write_text(
+        "!.env.example\n.env\n.env.*\n", encoding="utf-8"
+    )
+
+    assert any("secret rules" in failure for failure in _failures(tmp_path))
+
+
+@pytest.mark.parametrize("negation", ["!.env.local", "!*.env.*"])
+def test_docker_contracts_reject_later_secret_reinclude(
+    tmp_path: Path, negation: str
+) -> None:
+    _write_minimal_tree(tmp_path)
+    (tmp_path / ".dockerignore").write_text(
+        _DOCKERIGNORE_OK + negation + "\n", encoding="utf-8"
+    )
+
+    assert any("secret rules" in failure for failure in _failures(tmp_path))
 
 
 def test_docker_contracts_reject_pip_pin_skew(tmp_path: Path) -> None:

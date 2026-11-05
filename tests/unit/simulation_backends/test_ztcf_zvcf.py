@@ -35,7 +35,7 @@ from src.shared.python.simulation_backends.ztcf_zvcf import (
     persist_ztcf_zvcf_analysis,
     zero_velocity_control_preserved_acceleration,
     ztcf_acceleration,
-    zvcf_acceleration,
+    zero_velocity_zero_torque_acceleration,
 )
 
 pytestmark = pytest.mark.unit
@@ -106,14 +106,14 @@ def test_ztcf_matches_engine_via_ode_backend() -> None:
 @pytest.mark.skipif(
     "ode" not in available_backends(), reason="ode backend not registered"
 )
-def test_zvcf_matches_engine_via_ode_backend() -> None:
-    """ZVCF accel from the ODE provider matches ``compute_zvcf`` to 1e-9."""
+def test_zero_velocity_zero_torque_matches_engine_via_ode_backend() -> None:
+    """Zero-velocity, zero-torque accel from the ODE provider matches ``compute_zvcf`` to 1e-9."""
     eng = PendulumPhysicsEngine()
     ode = make_backend("ode", GolfModelParams.default())
     for q, _tau in _seeded_controls():
         eng.control = np.zeros(2)
         expected = eng.compute_zvcf(np.asarray(q))
-        actual = zvcf_acceleration(ode, q)
+        actual = zero_velocity_zero_torque_acceleration(ode, q)
         assert np.allclose(actual, expected, atol=ATOL_ANALYTICAL)
 
 
@@ -132,14 +132,14 @@ def test_ztcf_matches_engine_analytical_provider() -> None:
         assert np.allclose(actual, expected, atol=ATOL_ANALYTICAL)
 
 
-def test_zvcf_matches_engine_analytical_provider() -> None:
-    """ZVCF via the analytical provider equals ``compute_zvcf`` to 1e-9."""
+def test_zero_velocity_zero_torque_matches_engine_analytical() -> None:
+    """Zero-velocity, zero-torque accel via the analytical provider equals ``compute_zvcf`` to 1e-9."""
     eng = PendulumPhysicsEngine()
     provider = _AnalyticalProvider(GolfModelParams.default())
     for q, _tau in _seeded_controls():
         eng.control = np.zeros(2)
         expected = eng.compute_zvcf(np.asarray(q))
-        actual = zvcf_acceleration(provider, q)
+        actual = zero_velocity_zero_torque_acceleration(provider, q)
         assert np.allclose(actual, expected, atol=ATOL_ANALYTICAL)
 
 
@@ -197,7 +197,7 @@ def test_canonical_v2_allows_configuration_and_tangent_dim_to_differ() -> None:
         np.linalg.solve(mass, -provider.bias_forces(q, v)),
     )
     np.testing.assert_allclose(
-        zvcf_acceleration(provider, q),
+        zero_velocity_zero_torque_acceleration(provider, q),
         np.linalg.solve(mass, -provider.bias_forces(q, np.zeros_like(v))),
     )
     np.testing.assert_allclose(
@@ -206,8 +206,8 @@ def test_canonical_v2_allows_configuration_and_tangent_dim_to_differ() -> None:
     )
 
 
-def test_zvcf_reduces_to_negative_gravity_and_is_control_independent() -> None:
-    """Canonical ZVCF zeros both velocity and declared applied control."""
+def test_zero_velocity_zero_torque_reduces_to_negative_gravity() -> None:
+    """The zero-velocity, zero-torque acceleration is ``-M^-1 g(q)``."""
     dyn = DoublePendulumDynamics(
         GolfModelParams.default().to_double_pendulum_parameters()
     )
@@ -218,7 +218,9 @@ def test_zvcf_reduces_to_negative_gravity_and_is_control_independent() -> None:
         g1, g2 = dyn.gravity_vector(float(q[0]), float(q[1]))
         mass = np.asarray(dyn.mass_matrix(float(q[1])), dtype=float)
         expected = np.linalg.solve(mass, -np.array([g1, g2]))
-        assert np.allclose(zvcf_acceleration(provider, q), expected, atol=1e-12)
+        assert np.allclose(
+            zero_velocity_zero_torque_acceleration(provider, q), expected, atol=1e-12
+        )
 
 
 def test_zero_velocity_control_preserved_diagnostic_retains_prior_behavior() -> None:
@@ -295,7 +297,7 @@ def test_persist_ztcf_zvcf_analysis_writes_cc4_style_datasets(
     )
 
     with h5py.File(path, "r") as handle:
-        assert handle.attrs["schema_version"] == "3.0.0"
+        assert handle.attrs["schema_version"] == "4.0.0"
         assert handle.attrs["kind"] == "ztcf_zvcf_analysis"
         assert handle.attrs["convention"] == "canonical-v2"
         assert handle.attrs["meta_analysis"] == "ztcf_zvcf"
@@ -366,7 +368,9 @@ def test_ztcf_zvcf_mujoco_matches_analytical_engine() -> None:
     for q, _tau in _seeded_controls():
         eng.control = np.zeros(2)
         expected = eng.compute_zvcf(np.asarray(q))
-        assert np.allclose(zvcf_acceleration(mj, q), expected, atol=ATOL_MUJOCO)
+        assert np.allclose(
+            zero_velocity_zero_torque_acceleration(mj, q), expected, atol=ATOL_MUJOCO
+        )
 
 
 # --------------------------------------------------------------------------- #

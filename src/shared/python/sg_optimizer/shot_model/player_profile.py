@@ -18,6 +18,7 @@ from src.shared.python.sg_optimizer.shot_model.baseline import (
     BaselineBag,
     load_baseline,
 )
+from src.shared.python.sg_optimizer.shot_model.skill_family import SkillFamily
 from src.shared.python.sg_optimizer.shot_model.distributions import (
     TiltedBivariateGaussian,
 )
@@ -87,6 +88,7 @@ class PlayerProfile:
     short_game: dict[str, float] = field(default_factory=dict)
     last_updated: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     notes: str = ""
+    skill_family: SkillFamily | None = None
 
     def with_baseline(
         self, baseline_path: str | Path
@@ -139,6 +141,8 @@ def _dump(profile: PlayerProfile) -> str:
         },
         "short_game": dict(profile.short_game),
     }
+    if profile.skill_family is not None:
+        payload["skill_family"] = profile.skill_family.to_dict()
     return yaml.safe_dump(payload, sort_keys=False)
 
 
@@ -167,6 +171,11 @@ def _load(p: Path) -> PlayerProfile:
         short_game=dict(raw.get("short_game") or {}),
         last_updated=last_updated,
         notes=str(raw.get("notes", "")),
+        skill_family=(
+            SkillFamily.from_dict(raw["skill_family"])
+            if raw.get("skill_family")
+            else None
+        ),
     )
 
 

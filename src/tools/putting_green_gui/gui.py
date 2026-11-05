@@ -13,12 +13,15 @@ this module is a thin Qt/OpenGL renderer that consumes a :class:`PuttScene`.
 
 from __future__ import annotations
 
+import dataclasses
 import logging
+import math
 from typing import Any
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QThreadPool, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
+    QComboBox,
     QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
@@ -26,20 +29,26 @@ from PyQt6.QtWidgets import (
     QLabel,
     QMainWindow,
     QPushButton,
+    QScrollArea,
+    QSpinBox,
     QSplitter,
     QStatusBar,
     QVBoxLayout,
     QWidget,
 )
 
+from src.launchers.help_menu import build_help_menu
 from src.shared.python.golf_viz import (
     disc_mesh,
     flagstick_lines,
     grid_surface_mesh,
     roll_mode_colors,
 )
-from src.launchers.help_menu import build_help_menu
-from src.shared.python.theme.tool_stylesheet import primary_button_style
+from src.shared.python.putting_dynamics import BALANCE_PRESETS, GREEN_PRESETS
+from src.shared.python.theme.tool_stylesheet import (
+    get_tool_colors,
+    primary_button_style,
+)
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.units import (
     UnitSystem,
@@ -49,41 +58,39 @@ from src.shared.python.ui.units import (
     from_display_distance,
     from_display_speed,
     get_unit_preference,
+    set_unit_preference,
     speed_suffix,
     to_display_distance,
     to_display_speed,
 )
+from src.tools.putting_green_gui._batch_panel import BatchPanel, _Job
+from src.tools.putting_green_gui._scenario_panel import ScenarioPanel
+from src.tools.putting_green_gui._sg_panel import SGPanel
+from src.tools.putting_green_gui._torque_panel import TorquePanel
+from src.tools.putting_green_gui._camera import camera_pose
+from src.tools.putting_green_gui._playback import PlaybackBar
+from src.tools.putting_green_gui._scene_text import (
+    M_TO_FT,
+    M_TO_IN,
+    format_metrics,
+    format_read,
+)
+from src.tools.putting_green_gui._style import panel_style
 from src.tools.putting_green_gui._scene_builder import (
+    IMPACT_TOE_RANGE_M,
+    UNDULATION_RANGE_M,
     PuttConfig,
     PuttScene,
+    PuttSolution,
     build_putt_scene,
+    green_label,
+    solve_putt,
 )
 
 logger = logging.getLogger(__name__)
 
-_M_TO_FT = 3.280839895
-_FT_TO_M = 1.0 / _M_TO_FT
-_M_TO_CM = 100.0
-_MS_TO_MPH = 2.236936
-_PANEL_STYLE = """
-QWidget#puttControls { background-color: #1b2530; }
-QLabel { color: #d7e2ec; }
-QLabel#puttTitle { color: #ffffff; font-size: 16px; font-weight: bold; }
-QGroupBox {
-    color: #9fd8a8; border: 1px solid #2f4254; border-radius: 6px;
-    margin-top: 10px; padding: 8px; font-weight: bold;
-}
-QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
-QDoubleSpinBox {
-    background-color: #0f1822; color: #eaf2f8;
-    border: 1px solid #2f4254; border-radius: 4px; padding: 3px;
-}
-QPushButton {
-    background-color: #243343; color: #eaf2f8;
-    border: 1px solid #34536b; border-radius: 5px; padding: 6px;
-}
-QPushButton:hover { background-color: #2c3f52; }
-"""
+_FT_TO_M = 1.0 / M_TO_FT
+_M_TO_MM = 1000.0
 
 
 class PuttingGreenWidget(QWidget):
@@ -120,6 +127,19 @@ class PuttingGreenWidget(QWidget):
         """The active display unit system."""
         return self._unit_system
 
+    @property
+    def batch_panel(self) -> BatchPanel:
+        return self._batch_panel
+
+    def sg_panel(self) -> SGPanel:
+        return self._sg_panel
+
+    def torque_panel(self) -> TorquePanel:
+        return self._torque_panel
+
+    def scenario_panel(self) -> ScenarioPanel:
+        return self._scenario_panel
+
     def set_unit_system(self, system: UnitSystem) -> None:
         """Switch display unit system dynamically and update spinbox suffixes/values."""
         if system == self._unit_system:
@@ -128,7 +148,12 @@ class PuttingGreenWidget(QWidget):
         old_dist_m = from_display_distance(
             self._distance_spin.value(), self._unit_system, unit="ft"
         )
+        old_toe_m = self._strike_toe_m()
+        undulation_m = self._undulation_m()
         self._unit_system = system
+        self._sync_units_combo()
+        self._set_strike_units(old_toe_m)
+        self._set_undulation_units(undulation_m)
 
         self._speed_spin.setSuffix(speed_suffix(system))
         self._distance_spin.setSuffix(distance_suffix(system, unit="ft"))
@@ -151,8 +176,31 @@ class PuttingGreenWidget(QWidget):
 
         if self._scene is not None:
             self._results_text.setPlainText(
-                _format_metrics(self._scene, self._unit_system)
+                format_metrics(self._scene, self._unit_system)
             )
+        self._batch_panel.redraw()
+        self._sg_panel.redraw()
+        self._torque_panel.redraw()
+        self._scenario_panel.redraw()
+
+    def _sync_units_combo(self) -> None:
+        """Show the active unit system without re-triggering a user choice."""
+        self._units_combo.blockSignals(True)
+        self._units_combo.setCurrentIndex(
+            self._units_combo.findData(self._unit_system.value)
+        )
+        self._units_combo.blockSignals(False)
+
+    def _on_units_chosen(self, index: int) -> None:
+        """Apply and persist a unit system the user picked in the selector."""
+        system = UnitSystem(self._units_combo.itemData(index))
+        self.set_unit_system(system)
+        set_unit_preference(system)
+
+    @property
+    def units_combo(self) -> QComboBox:
+        """The Metric/Imperial display-units selector."""
+        return self._units_combo
 
     # ------------------------------------------------------------------
     # UI construction
@@ -161,7 +209,17 @@ class PuttingGreenWidget(QWidget):
     def _build_ui(self) -> None:
         layout = QHBoxLayout(self)
         splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.addWidget(self._build_controls())
+        controls = QScrollArea()  # the controls outgrow short screens
+        controls.setWidgetResizable(True)
+        controls.setFrameShape(QScrollArea.Shape.NoFrame)
+        inner = self._build_controls()
+        controls.setWidget(inner)
+        # Scroll down, never sideways: keep the column as wide as its controls.
+        controls.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        bar = controls.verticalScrollBar()
+        extra = bar.sizeHint().width() if bar is not None else 0
+        controls.setMinimumWidth(inner.minimumSizeHint().width() + extra)
+        splitter.addWidget(controls)
         splitter.addWidget(self._build_results())
         splitter.setSizes([360, 720])
         layout.addWidget(splitter)
@@ -169,12 +227,23 @@ class PuttingGreenWidget(QWidget):
     def _build_controls(self) -> QWidget:
         left = QWidget()
         left.setObjectName("puttControls")
-        left.setStyleSheet(_PANEL_STYLE)
+        self._controls = left  # rests while Auto-Solve runs
+        left.setStyleSheet(panel_style())
         left_layout = QVBoxLayout(left)
 
         title = QLabel("⛳  Putting Green Simulator")
         title.setObjectName("puttTitle")
         left_layout.addWidget(title)
+
+        units_form = QFormLayout()
+        self._units_combo = QComboBox()
+        self._units_combo.setObjectName("puttUnits")
+        self._units_combo.addItem("Metric (m, m/s)", UnitSystem.METRIC.value)
+        self._units_combo.addItem("Imperial (ft, mph)", UnitSystem.IMPERIAL.value)
+        self._sync_units_combo()
+        self._units_combo.currentIndexChanged.connect(self._on_units_chosen)
+        units_form.addRow("Units:", self._units_combo)
+        left_layout.addLayout(units_form)
 
         putt_group = QGroupBox("Putt Configuration")
         putt_form = QFormLayout(putt_group)
@@ -200,7 +269,9 @@ class PuttingGreenWidget(QWidget):
         green_form.addRow("Stimpmeter:", self._stimp_spin)
         self._slope_spin = self._make_spin(0.0, 5.0, 1.0, "°")
         green_form.addRow("Cross Slope:", self._slope_spin)
+        self._add_green_type_rows(green_form)
         left_layout.addWidget(green_group)
+        left_layout.addWidget(self._build_strike_group())
 
         preset_group = QGroupBox("Presets")
         preset_layout = QHBoxLayout(preset_group)
@@ -218,11 +289,100 @@ class PuttingGreenWidget(QWidget):
 
         self._run_btn = QPushButton("▶  Simulate Putt")
         self._run_btn.setStyleSheet(primary_button_style())
-        self._run_btn.clicked.connect(self._run_simulation)
+        self._run_btn.clicked.connect(lambda: self._run_simulation())
         left_layout.addWidget(self._run_btn)
+
+        self._solve_btn = QPushButton("🎯  Auto-Solve Read")
+        self._solve_btn.setToolTip("Solve the pace and line that hole this putt")
+        self._solve_btn.clicked.connect(self._start_auto_solve)
+        left_layout.addWidget(self._solve_btn)
+        self._solve_job: _Job | None = None
+
+        self._batch_panel = BatchPanel(self._current_config, lambda: self._unit_system)
+        left_layout.addWidget(self._batch_panel)
+        self._sg_panel = SGPanel(
+            self._batch_panel.current_args, lambda: self._unit_system
+        )
+        left_layout.addWidget(self._sg_panel)
+        self._torque_panel = TorquePanel(lambda: self._unit_system)
+        left_layout.addWidget(self._torque_panel)
+        self._scenario_panel = ScenarioPanel(
+            self._batch_panel.current_args, self._apply_setup, lambda: self._unit_system
+        )
+        left_layout.addWidget(self._scenario_panel)
 
         left_layout.addStretch()
         return left
+
+    def _build_strike_group(self) -> QGroupBox:
+        group = QGroupBox("Strike && Putter")
+        form = QFormLayout(group)
+        self._strike_spin = self._make_spin(0.0, 0.0, 0.0, "")
+        self._set_strike_units(0.0)
+        self._strike_spin.setToolTip("Impact point from the face centre: heel -, toe +")
+        form.addRow("Strike:", self._strike_spin)
+        self._balance_combo = QComboBox()
+        self._balance_combo.setSizeAdjustPolicy(  # long names must not widen phones
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+        )
+        self._balance_combo.setMinimumContentsLength(12)
+        self._balance_combo.addItem("Typical", None)
+        for key, preset in BALANCE_PRESETS.items():
+            self._balance_combo.addItem(preset.name, key)
+        form.addRow("Balance:", self._balance_combo)
+        return group
+
+    def _set_strike_units(self, toe_m: float) -> None:
+        """Show the strike offset in mm (metric) or inches, keeping ``toe_m``."""
+        scale = 1000.0 if self._unit_system == UnitSystem.METRIC else M_TO_IN
+        self._strike_spin.setSuffix(
+            " mm" if self._unit_system == UnitSystem.METRIC else " in"
+        )
+        self._strike_spin.setDecimals(1 if scale == 1000.0 else 2)
+        lo, hi = IMPACT_TOE_RANGE_M
+        self._strike_spin.setRange(lo * scale, hi * scale)
+        self._strike_spin.setValue(toe_m * scale)
+
+    def _strike_toe_m(self) -> float:
+        scale = 1000.0 if self._unit_system == UnitSystem.METRIC else M_TO_IN
+        return self._strike_spin.value() / scale
+
+    def _add_green_type_rows(self, form: QFormLayout) -> None:
+        """Green type, undulation and seed (#14463), on the shared GreenSpec."""
+        self._green_combo = QComboBox()
+        for key in (None, *GREEN_PRESETS):
+            self._green_combo.addItem(green_label(key), key)
+        self._green_combo.setSizeAdjustPolicy(
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+        )
+        self._green_combo.setMinimumContentsLength(8)  # fits a phone width
+        self._green_combo.currentIndexChanged.connect(self._on_green_type)
+        form.addRow("Green Type:", self._green_combo)
+        self._undulation_spin = self._make_spin(0.0, 1.0, 0.0, "", decimals=2)
+        self._set_undulation_units(0.0)
+        form.addRow("Undulation:", self._undulation_spin)
+        self._seed_spin = QSpinBox()
+        self._seed_spin.setRange(0, 9999)
+        form.addRow("Green Seed:", self._seed_spin)
+
+    def _on_green_type(self, _index: int) -> None:
+        cross_slope = self._green_combo.currentData() is None
+        for spin in (self._slope_spin, self._undulation_spin, self._seed_spin):
+            spin.setEnabled(cross_slope)
+
+    def _undulation_scale(self) -> float:
+        return _M_TO_MM if self._unit_system == UnitSystem.METRIC else M_TO_IN
+
+    def _set_undulation_units(self, undulation_m: float) -> None:
+        metric = self._unit_system == UnitSystem.METRIC
+        scale = self._undulation_scale()
+        self._undulation_spin.setSuffix(" mm" if metric else " in")
+        self._undulation_spin.setDecimals(1 if metric else 2)
+        self._undulation_spin.setRange(0.0, UNDULATION_RANGE_M[1] * scale)
+        self._undulation_spin.setValue(undulation_m * scale)
+
+    def _undulation_m(self) -> float:
+        return self._undulation_spin.value() / self._undulation_scale()
 
     def _make_spin(
         self,
@@ -248,6 +408,11 @@ class PuttingGreenWidget(QWidget):
         results_layout = QVBoxLayout(results_group)
 
         self._init_gl_view(results_layout)
+        self._playback = PlaybackBar()
+        self._playback.play_toggled.connect(self._toggle_playback)
+        self._playback.scrubbed.connect(self._on_scrub)
+        self._playback.view_changed.connect(self._on_view_chosen)
+        results_layout.addWidget(self._playback)
 
         self._results_text = HoverCopyTextBrowser()
         self._results_text.setReadOnly(True)
@@ -261,6 +426,8 @@ class PuttingGreenWidget(QWidget):
             "  - RK4 integration of the rolling ball\n"
         )
         results_layout.addWidget(self._results_text)
+        results_layout.addWidget(self._batch_panel.canvas)
+        results_layout.addWidget(self._sg_panel.canvas)
         right_layout.addWidget(results_group)
         return right
 
@@ -321,6 +488,19 @@ class PuttingGreenWidget(QWidget):
             to_display_distance(dist, self._unit_system, unit="ft")
         )
 
+    def _apply_setup(self, setup: dict[str, float]) -> None:
+        """Put an imported setup's distance, Stimp and grade on the controls.
+
+        The cross slope here always falls right, so the aspect is not kept.
+        """
+        self._distance_spin.setValue(
+            to_display_distance(
+                setup["distance_ft"] * _FT_TO_M, self._unit_system, unit="ft"
+            )
+        )
+        self._stimp_spin.setValue(setup["stimp"])
+        self._slope_spin.setValue(math.degrees(math.atan(setup["grade_pct"] / 100.0)))
+
     def _current_config(self) -> PuttConfig:
         return PuttConfig(
             putter_speed_ms=from_display_speed(
@@ -332,21 +512,83 @@ class PuttingGreenWidget(QWidget):
             ),
             stimp=self._stimp_spin.value(),
             slope_deg=self._slope_spin.value(),
+            impact_toe_m=self._strike_toe_m(),
+            balance_type=self._balance_combo.currentData(),
+            green_type=self._green_combo.currentData(),
+            undulation_m=min(self._undulation_m(), UNDULATION_RANGE_M[1]),
+            green_seed=self._seed_spin.value(),
         )
 
-    def _run_simulation(self) -> None:
-        """Run the real putting simulation and render the result."""
+    def _run_simulation(self, config: PuttConfig | None = None) -> None:
+        """Run the real putting simulation and render the result.
+
+        ``config`` defaults to the controls; Auto-Solve passes the exact read,
+        which the spin boxes can only show rounded.
+        """
         self._anim_timer.stop()
         try:
-            scene = build_putt_scene(self._current_config())
+            scene = build_putt_scene(config or self._current_config())
         except (ValueError, ImportError, RuntimeError) as exc:
             logger.exception("Putting simulation failed")
             self._results_text.setPlainText(f"Simulation error: {exc}")
             return
 
         self._scene = scene
-        self._results_text.setPlainText(_format_metrics(scene, self._unit_system))
+        self._results_text.setPlainText(format_metrics(scene, self._unit_system))
+        leave_ft = 0.0 if scene.holed else scene.final_distance_to_cup_m * M_TO_FT
+        self._sg_panel.set_putt(holed=scene.holed, leave_ft=leave_ft)
         self._render_scene(scene)
+        self._start_playback(scene)
+
+    def is_solving(self) -> bool:
+        """Whether an Auto-Solve is running on the worker."""
+        return self._solve_job is not None
+
+    def _start_auto_solve(self) -> None:
+        """Solve the read off the GUI thread (a long sloped putt takes seconds)."""
+        pool = QThreadPool.globalInstance()
+        if self._solve_job is not None or pool is None:
+            return
+        self._controls.setEnabled(False)  # the read is for these settings
+        self._results_text.setPlainText("Solving the read on this green...")
+        job = _Job(
+            lambda args: {
+                "config": args["config"],
+                "solution": solve_putt(args["config"]),
+            },
+            {"config": self._current_config()},
+        )
+        job.signals.done.connect(self._apply_solution)
+        job.signals.failed.connect(self._on_solve_failed)
+        self._solve_job = job
+        pool.start(job)
+
+    def _finish_solve(self) -> None:
+        self._solve_job = None
+        self._controls.setEnabled(True)
+
+    def _on_solve_failed(self, message: str) -> None:
+        self._finish_solve()
+        self._results_text.setPlainText(f"Auto-Solve rejected: {message}")
+
+    def _apply_solution(self, report: dict[str, Any]) -> None:
+        """Write the solved pace and line into the controls and roll them."""
+        self._finish_solve()
+        solution: PuttSolution = report["solution"]
+        self._speed_spin.setValue(
+            to_display_speed(solution.putter_speed_ms, self._unit_system)
+        )
+        self._aim_spin.setValue(solution.aim_deg)
+        self._run_simulation(
+            dataclasses.replace(
+                report["config"],
+                putter_speed_ms=solution.putter_speed_ms,
+                aim_deg=solution.aim_deg,
+            )
+        )
+        self._results_text.setPlainText(
+            format_read(solution, self._unit_system) + self._results_text.toPlainText()
+        )
 
     def _render_scene(self, scene: PuttScene) -> None:
         if self._gl_view is None:
@@ -371,17 +613,58 @@ class PuttingGreenWidget(QWidget):
         self._start_item.setData(pos=scene.start_xyz.reshape(1, 3))
         self._ball_item.setData(pos=scene.trajectory_xyz[:1])
 
-        self._frame_camera(scene)
-        self._anim_index = 0
-        self._anim_timer.start()
+        self._apply_camera(scene)
 
-    def _frame_camera(self, scene: PuttScene) -> None:
+    def _start_playback(self, scene: PuttScene) -> None:
+        """Reset the playback bar to ``scene`` and play it."""
+        self._playback.load(scene)
+        self._anim_index = 0
+        self._set_playing(True)
+
+    def _apply_camera(self, scene: PuttScene) -> None:
         from pyqtgraph import Vector
 
-        width, height = scene.green_size
-        self._gl_view.opts["center"] = Vector(width / 2.0, height / 2.0, 0.0)
-        self._gl_view.opts["distance"] = max(width, height) * 1.5 + 4.0
+        pose = camera_pose(scene, self._playback.view())
+        self._gl_view.opts["center"] = Vector(*pose.center)
+        self._gl_view.opts["distance"] = pose.distance
+        self._gl_view.opts["elevation"] = pose.elevation_deg
+        self._gl_view.opts["azimuth"] = pose.azimuth_deg
         self._gl_view.update()
+
+    def playback_bar(self) -> PlaybackBar:
+        return self._playback
+
+    def _on_view_chosen(self) -> None:
+        if self._scene is not None and self._gl_view is not None:
+            self._apply_camera(self._scene)
+
+    def _set_playing(self, playing: bool) -> None:
+        if playing:
+            self._anim_timer.start()
+        else:
+            self._anim_timer.stop()
+        self._playback.set_playing(playing)
+
+    def _toggle_playback(self) -> None:
+        scene = self._scene
+        if scene is None:
+            return
+        playing = self._anim_timer.isActive()
+        if not playing and self._anim_index >= len(scene.trajectory_xyz):
+            self._anim_index = 0  # replay a finished putt from the stroke
+        self._set_playing(not playing)
+
+    def _show_sample(self, index: int) -> None:
+        """Put the ball at trajectory sample ``index``."""
+        if self._scene is not None and self._ball_item is not None:
+            traj = self._scene.trajectory_xyz
+            self._ball_item.setData(pos=traj[index : index + 1])
+
+    def _on_scrub(self, index: int) -> None:
+        """A scrub by the player pauses the putt at that sample."""
+        self._set_playing(False)
+        self._anim_index = index
+        self._show_sample(index)
 
     def _advance_animation(self) -> None:
         scene = self._scene
@@ -392,74 +675,22 @@ class PuttingGreenWidget(QWidget):
         n = traj.shape[0]
         if self._anim_index >= n:
             self._ball_item.setData(pos=traj[-1:])
-            self._anim_timer.stop()
+            self._set_playing(False)
             return
         self._ball_item.setData(pos=traj[self._anim_index : self._anim_index + 1])
+        self._playback.follow(self._anim_index)
         # Advance proportionally so every putt animates in similar wall-clock time.
         self._anim_index += max(1, n // 90)
+
+    def run_one_putt(self) -> str:
+        """Press *Simulate Putt* once and return the metrics text shown."""
+        self._run_btn.click()
+        return self._results_text.toPlainText()
 
     def cleanup(self) -> None:
         """Release resources (stop the animation timer)."""
         self._anim_timer.stop()
         logger.debug("PuttingGreenWidget cleanup")
-
-
-def _format_metrics(
-    scene: PuttScene, unit_system: UnitSystem = UnitSystem.METRIC
-) -> str:
-    """Render a human-readable metrics panel for a finished putt."""
-    outcome = "HOLED" if scene.holed else "Missed"
-    dist_cm = scene.final_distance_to_cup_m * 100.0
-
-    if unit_system == UnitSystem.METRIC:
-        miss_line = (
-            "Result:        HOLED"
-            if scene.holed
-            else f"Result:        Missed by {dist_cm:.1f} cm"
-        )
-        roll_line = (
-            f"Total roll:    {scene.total_roll_m:.2f} m "
-            f"({scene.total_roll_m * _M_TO_FT:.1f} ft)\n"
-        )
-        break_line = (
-            f"Peak break:    {scene.peak_break_m * _M_TO_CM:.1f} cm "
-            f"({scene.peak_break_m * _M_TO_FT * 12.0:.2f} in)\n"
-        )
-        speed_line = (
-            f"Launch speed:  {scene.launch_speed_ms:.2f} m/s "
-            f"({scene.launch_speed_ms * _MS_TO_MPH:.1f} mph)\n"
-        )
-    else:
-        dist_in = dist_cm / 2.54
-        miss_line = (
-            "Result:        HOLED"
-            if scene.holed
-            else f"Result:        Missed by {dist_in:.1f} in ({dist_cm:.1f} cm)"
-        )
-        roll_line = (
-            f"Total roll:    {scene.total_roll_m * _M_TO_FT:.1f} ft "
-            f"({scene.total_roll_m:.2f} m)\n"
-        )
-        break_line = (
-            f"Peak break:    {scene.peak_break_m * _M_TO_FT * 12.0:.2f} in "
-            f"({scene.peak_break_m * _M_TO_CM:.1f} cm)\n"
-        )
-        speed_line = (
-            f"Launch speed:  {scene.launch_speed_ms * _MS_TO_MPH:.1f} mph "
-            f"({scene.launch_speed_ms:.2f} m/s)\n"
-        )
-
-    return (
-        f"Putting Simulation - {outcome}\n"
-        f"{'=' * 44}\n"
-        f"{miss_line}\n"
-        f"{roll_line}"
-        f"Roll time:     {scene.duration_s:.2f} s\n"
-        f"{break_line}"
-        f"{speed_line}"
-        f"Roll model:    {scene.roll_model}\n"
-        f"Track colour:  amber = skidding, green = pure roll, grey = stopped\n"
-    )
 
 
 class PuttingGreenWindow(QMainWindow):
@@ -484,6 +715,10 @@ class PuttingGreenWindow(QMainWindow):
                 "docs/physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md",
             ),
         )
+
+    def run_one_putt(self) -> str:
+        """Run one putt in the embedded widget; return its metrics text."""
+        return self._widget.run_one_putt()
 
     def closeEvent(self, event: Any) -> None:
         self._widget.cleanup()

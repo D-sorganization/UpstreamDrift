@@ -139,6 +139,9 @@ class TestGreenReadingContract:
             aim_point=[10.02, 14.95],
             elevations=[0.0, 0.01],
             slopes=[[0.001, 0.002]],
+            aim_heading_deg=0.3,
+            holed=True,
+            converged=True,
         )
         assert resp.distance == 11.0
         assert resp.recommended_speed > 0

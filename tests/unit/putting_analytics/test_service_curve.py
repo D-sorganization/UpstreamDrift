@@ -68,6 +68,7 @@ def test_default_grid_is_the_optimizer_grid() -> None:
         ({"n": 20.5}, "whole number"),
         ({"seed": -1}, "seed"),
         ({"face_sd_deg": 99.0}, "face_sd_deg"),
+        ({"strike_toe_sd_mm": 99.0}, "strike_toe_sd_mm"),
     ],
 )
 def test_rejects_bad_arguments(overrides: dict[str, Any], message: str) -> None:
