@@ -49,7 +49,9 @@ N_LUMBAR = 5
 N_AXES = 3
 
 inputs = _inputs
-GOLDEN = Path(__file__).resolve().parents[2] / "fixtures/spine/spn14a_fixture_peaks.json"
+GOLDEN = (
+    Path(__file__).resolve().parents[2] / "fixtures/spine/spn14a_fixture_peaks.json"
+)
 
 
 # ------------------------------------------------------------- pure helpers
@@ -146,7 +148,11 @@ def test_fixture_peak_table_keeps_residuals_and_compression_only() -> None:
         study_id="s",
         model_id="fixture",
         robust_threshold=0.1,
-        laws=(_law("a", "pass", 0.123456789), _law("b", "unqualified", None)),
+        laws=(
+            _law("a", "pass", 0.123456789),
+            _law("b", "unqualified", None),
+            _law("c", "pass", 5.1e-13),
+        ),
         held_fixed=(),
         spreads=kin + spreads,
         spread_note="",
@@ -160,6 +166,7 @@ def test_fixture_peak_table_keeps_residuals_and_compression_only() -> None:
         "drive_rms_rad": 0.123457,
     }
     assert table["laws"]["b"]["drive_max_rad"] is None
+    assert table["laws"]["c"]["drive_max_rad"] == 0.0  # below 1e-9 rad: noise
     assert [row["level"] for row in table["compression"]] == ["L5_S1", "L4_L5"]
     assert table["compression"][0]["values"] == {"a": 300.0, "b": 150.0}
     assert table["compression"][0]["classification"] == "sensitive"
