@@ -520,6 +520,12 @@
     <div class="lg:col-span-4 flex flex-col gap-3">
       <div class="glass-card rounded-xl p-4 space-y-3">
         <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Green Surface &amp; Impact Controls</h3>
+        <div class="flex justify-between items-center gap-2 text-xs">
+          <label for="greenPresetSelect" class="text-slate-300 font-medium">Green Type</label>
+          <select id="greenPresetSelect" class="bg-slate-800 text-slate-100 rounded px-2 py-1 text-xs">
+            <option value="studio">Studio Slopes (Sliders)</option>
+          </select>
+        </div>
         <div>
           <div class="flex justify-between text-xs mb-1">
             <span class="text-slate-300 font-medium">Lateral Cross-Slope Break (%)</span>
@@ -824,6 +830,7 @@
   <script src="js/core_attribution.js"></script>
   <script src="js/core_units.js"></script>
   <script src="js/core_impact.js"></script>
+  <script src="js/core_greens.js"></script>
   <script src="js/green3d.js"></script>
   <script src="js/charts2d.js"></script>
   <script src="js/controls_a.js"></script>

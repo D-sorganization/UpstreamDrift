@@ -42,7 +42,7 @@ function saveCurrentScenarioSnapshot(customName) {
     putter: pSpec.name,
     preload: `${state.tauPreload.toFixed(2)} / ${state.tauOffPreload.toFixed(2)} N·m`,
     noiseArc: `${state.noiseScale.toFixed(2)}x • ${state.buttArcRadius.toFixed(2)}m Arc`,
-    green: `${state.crossSlopePct.toFixed(1)}% Break • Stimp ${state.stimpFt.toFixed(1)}`,
+    green: `${activeCoreGreen() ? activeCoreGreen().label : `${state.crossSlopePct.toFixed(1)}% Break`} • Stimp ${state.stimpFt.toFixed(1)}`,
     faceSD: `${lastBatchStats.faceSD.toFixed(2)}°`,
     pathSD: `${lastBatchStats.pathSD.toFixed(2)}°`,
     radSD: `${lastBatchStats.radSD.toFixed(1)} cm`,

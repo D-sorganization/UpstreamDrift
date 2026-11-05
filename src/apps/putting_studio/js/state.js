@@ -61,6 +61,7 @@ const state = {
   stimpmeterMode: false,
   cumulativeMakes: 0,
   cumulativeAttempts: 0,
+  greenPreset: 'studio', // 'studio' sliders, or a core preset (#14648)
   crossSlopePct: 1.8,
   uphillSlopePct: 0.3,
   stimpFt: 11.5,
@@ -69,6 +70,11 @@ const state = {
   rollPlaying: true,
   mcBatchSeed: 1
 };
+
+/** The core green preset in play (js/core_greens.js), or null for the slider green. */
+function activeCoreGreen() {
+  return state.greenPreset === 'studio' ? null : window.CORE_GREENS.presets[state.greenPreset];
+}
 
 // Smooth C^infinity analytical Ornstein-Uhlenbeck multi-sine synthesis (zero step discontinuities)
 function smoothOUNoise(t, seedOffset) {

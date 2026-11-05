@@ -42,7 +42,7 @@ function rebuild3DBallTracesOnGreen() {
       for (let gz = -0.85; gz <= 0.85; gz += 0.10) {
         const xm = (gx / scale3DX);
         const ym = (-gz / scale3DX);
-        const elev = PuttingPhysics.evalUndulatingGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct).z;
+        const elev = PuttingPhysics.evalGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct, activeCoreGreen()).z;
         pts.push(new THREE.Vector3(0.02135 + gx, yGround + 0.0025 + elev * 0.25, zBall + gz));
       }
       ballTraces3DGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
@@ -52,7 +52,7 @@ function rebuild3DBallTracesOnGreen() {
       for (let gx = 0.0; gx <= 3.30; gx += 0.12) {
         const xm = (gx / scale3DX);
         const ym = (-gz / scale3DX);
-        const elev = PuttingPhysics.evalUndulatingGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct).z;
+        const elev = PuttingPhysics.evalGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct, activeCoreGreen()).z;
         pts.push(new THREE.Vector3(0.02135 + gx, yGround + 0.0025 + elev * 0.25, zBall + gz));
       }
       ballTraces3DGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
@@ -146,6 +146,7 @@ function rebuildGreenDispersionBatch() {
       roughnessMm: roughnessMm,
       isStimpRamp: state.stimpmeterMode,
       skidTable: window.CORE_IMPACT.skid,
+      coreGreen: activeCoreGreen(),
     });
     greenBatchCB.push(rCB);
     if (rCB.holed) cbHoled++;
@@ -177,6 +178,7 @@ function rebuildGreenDispersionBatch() {
       roughnessMm: roughnessMm,
       isStimpRamp: state.stimpmeterMode,
       skidTable: window.CORE_IMPACT.skid,
+      coreGreen: activeCoreGreen(),
     });
     greenBatchUN.push(rUN);
     if (rUN.holed) unHoled++;
