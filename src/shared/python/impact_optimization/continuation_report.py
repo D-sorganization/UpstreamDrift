@@ -32,8 +32,8 @@ from src.shared.python.impact_optimization.speed_continuation import (
 
 BLOCKED = "blocked (within the controlled subset)"
 _HEADER = (
-    "| Target mph | Achieved mph | Face-to-path deg | Torque binding "
-    "| Kinematic binding | Status |"
+    "| Target mph | Achieved mph | Face err deg | Path err deg | AoA err deg "
+    "| Face-to-path deg | Deviation | Torque binding | Kinematic binding | Status |"
 )
 
 
@@ -59,10 +59,12 @@ def _row(point: ContinuationPoint, hits: Sequence[KinematicBinding]) -> str:
     torque = ", ".join(point.solution.binding_joints) or "-"
     kinematic = "; ".join(_kinematic_text(h) for h in hits) or "-"
     status = _status(point, hits)
+    sol = point.solution
     return (
         f"| {point.speed_target_mph:.0f} | {point.achieved_mph:.1f} "
-        f"| {point.solution.face_to_path_deg:+.2f} | {torque} | {kinematic} "
-        f"| {status} |"
+        f"| {sol.face_error_deg:+.2f} | {sol.path_error_deg:+.2f} "
+        f"| {sol.aoa_error_deg:+.2f} | {sol.face_to_path_deg:+.2f} "
+        f"| {sol.deviation:.2f} | {torque} | {kinematic} | {status} |"
     )
 
 
@@ -93,7 +95,7 @@ def render_continuation_report(
     rows = [
         _row(p, hits) for p, hits in zip(result.points, kinematic_by_rung, strict=True)
     ]
-    lines = [_HEADER, "|" + " --- |" * 6, *rows, ""]
+    lines = [_HEADER, "|" + " --- |" * 10, *rows, ""]
     lines.append(f"Held joints: {', '.join(held_joints) or 'none'}")
     notes = [
         f"- {name}: {limit_notes[name]}"

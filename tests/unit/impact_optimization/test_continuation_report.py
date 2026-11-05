@@ -26,6 +26,10 @@ def _point(
         achieved_speed_mph=achieved,
         binding_joints=torque,
         face_to_path_deg=-0.25,
+        face_error_deg=0.30,
+        path_error_deg=0.55,
+        aoa_error_deg=-0.10,
+        deviation=1.5,
     )
     return ContinuationPoint(speed, sol, feasible)  # type: ignore[arg-type]
 
@@ -113,3 +117,11 @@ def test_feasible_rung_at_or_below_every_limit_is_ok() -> None:
 
 def test_utilisation_just_over_one_never_prints_as_100_percent() -> None:
     assert "(100%)" not in _render()
+
+
+def test_each_row_carries_face_path_aoa_error_and_deviation() -> None:
+    row = next(r for r in _render().splitlines() if r.startswith("| 120 "))
+    for text in ("+0.30", "+0.55", "-0.10", "1.50"):
+        assert text in row
+    assert "Face err deg" in _render().splitlines()[0]
+    assert "Deviation" in _render().splitlines()[0]
