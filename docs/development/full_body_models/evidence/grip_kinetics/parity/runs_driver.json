@@ -1,12 +1,12 @@
 {
   "opensim": {
     "engine": "opensim",
-    "accuracy": 1e-5,
-    "wall_time_s": 86.71895137199317
+    "accuracy": 1e-05,
+    "wall_time_s": 63.554767299909145
   },
   "mujoco": {
     "engine": "mujoco",
-    "wall_time_s": 73.2418782869936,
+    "wall_time_s": 20.820196800050326,
     "integrator": "MuJoCo RK4 (fixed step)",
     "timestep_s": 0.0001,
     "force_law": "shared OpenSim BushingForce law via mjcb_passive",
@@ -14,28 +14,28 @@
   },
   "drake": {
     "engine": "drake",
-    "wall_time_s": 308.3484960219939,
+    "wall_time_s": 83.60203621699475,
     "integrator": "Drake Simulator runge_kutta3, error controlled",
-    "accuracy": 1e-7,
+    "accuracy": 1e-07,
     "max_step_s": 0.00025,
-    "steps_taken": 235937,
+    "steps_taken": 235830,
     "force_law": "native LinearBushingRollPitchYaw",
     "kinematics": "Drake full-body weld URDF forward kinematics"
   },
   "pinocchio": {
     "engine": "pinocchio",
-    "wall_time_s": 227.58741596899927,
+    "wall_time_s": 64.4569949930301,
     "integrator": "SciPy solve_ivp DOP853, error controlled",
-    "rtol": 1e-9,
+    "rtol": 1e-09,
     "atol": 1e-12,
     "max_step_s": 0.00025,
-    "rhs_evaluations": 203966,
+    "rhs_evaluations": 204026,
     "force_law": "shared OpenSim BushingForce law, Pinocchio aba",
     "kinematics": "Pinocchio full-body weld model forward kinematics"
   },
   "myosuite": {
     "engine": "myosuite",
-    "wall_time_s": 107.37609576398972,
+    "wall_time_s": 20.19642118003685,
     "integrator": "MuJoCo RK4 (fixed step)",
     "timestep_s": 0.0001,
     "force_law": "shared OpenSim BushingForce law via mjcb_passive",
