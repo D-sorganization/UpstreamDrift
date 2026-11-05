@@ -742,6 +742,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14648 · Putting Studio: Green Type Selector for Every Core Green Preset (Undulating Included), Height Grids Generated From GreenSpec Into Core_Greens.Js and Read With the Core Bilinear Lookup
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14648
+- **Branch:** merged via #14676
+- **PR:** #14676
+- **Paths:** see #14676
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`42b69064`; collated from changes/14648-studio-greens.md)
+- **Summary:** Putting studio: Green Type selector for every core green preset (undulating included), height grids generated from GreenSpec into core_greens.js and read with the core bilinear lookup
+- **Next step:** Shipped in PR #14676.
+
 ### DL-#14660 · SG Optimizer: Common Random Numbers and Pin-Relative Aims so HoleMDP Value Iteration Converges (Cap Is a Safety Bound Only)
 
 - **State:** shipped
@@ -1047,10 +1060,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14561
 - **Branch:** merged via #14606
-- **PR:** #14606
+- **PR:** #14606, #14673
 - **Paths:** see #14606
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`cd544818`; collated from changes/14561-show-c5-speed-continuation-100-125-mph-w.md)
+- **Last verified:** 2026-11-05 (`f1615fcd`; collated from changes/14561-per-step-report-adds-face-path-and-aoa-e.md)
 - **Summary:** SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report
 - **Next step:** Shipped in PR #14606.
 

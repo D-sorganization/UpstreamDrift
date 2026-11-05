@@ -2754,6 +2754,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14676 | Putting studio: Green Type selector for every core green preset (undulating included), height grids generated from GreenSpec into core_greens.js and read with the core bilinear lookup |
+| 2026-11-05 | #14673 | Per-step report adds face, path and AoA error and the deviation norm (C5 acceptance gap 1) |
 | 2026-11-05 | #14663 | SG optimizer: common random numbers and pin-relative aims so HoleMDP value iteration converges (cap is a safety bound only) |
 | 2026-11-05 | #14671 | Units core/API: units.py gains small-length helpers and display_unit_table; GET /tools/putting-green/units serves it, and the studio generator and desktop strike/undulation spins use it |
 | 2026-11-05 | #14667 | Putting studio: the strike slider spans heel to toe over the desktop range, offsets every batch strike, and a toe strike opens the face as in the core strike() |
