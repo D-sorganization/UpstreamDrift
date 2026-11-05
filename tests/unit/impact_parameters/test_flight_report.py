@@ -90,3 +90,12 @@ def test_overlay_lines_state_every_condition_and_the_gap():
     ):
         assert needle in text
     assert "n/a" in text
+
+
+def test_square_driver_strike_is_driver_like():
+    """Sanity anchor: 110 mph clubhead, 10.5 deg loft, square: tour-like numbers."""
+    summary = flight_for_impact(_series(speed=49.2, loft_deg=10.5), 1, FRAME)
+    assert 150.0 < summary.ball_speed_mph < 175.0
+    assert 1500.0 < summary.spin_rpm < 4000.0
+    assert 200.0 < summary.carry_m < 260.0
+    assert abs(summary.lateral_m) < 1.0

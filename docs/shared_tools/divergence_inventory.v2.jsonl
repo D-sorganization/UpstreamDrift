@@ -1052,6 +1052,7 @@
 {"path": "impact_parameters/clubhead_series.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/conditions.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/extract.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
+{"path": "impact_parameters/flight_report.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/panel_model.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/shaft_state.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/target_frame.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
