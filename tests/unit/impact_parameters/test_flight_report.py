@@ -25,7 +25,12 @@ pytestmark = pytest.mark.unit
 FRAME = TargetFrame()  # Z-up, target along -Y, golfer's left = +X
 
 
-def _series(speed: float = 49.0, loft_deg: float = 12.0, face_open_deg: float = 0.0):
+def _series(
+    speed: float = 49.0,
+    loft_deg: float = 12.0,
+    face_open_deg: float = 0.0,
+    path_deg: float = 0.0,
+):
     """Three samples, clubhead moving down-range (-Y) with a given face."""
     loft, op = math.radians(loft_deg), math.radians(face_open_deg)
     # face normal: down-range, tilted up by loft, rotated open (toward golfer's right = -X)
@@ -34,7 +39,8 @@ def _series(speed: float = 49.0, loft_deg: float = 12.0, face_open_deg: float = 
     )
     t = np.array([0.0, 0.001, 0.002])
     pos = np.array([[0.0, 0.1 - speed * s, 0.0] for s in t])
-    vel = np.tile([0.0, -speed, 0.0], (3, 1))
+    pa = math.radians(path_deg)  # + = in-to-out = toward golfer's right (-X)
+    vel = np.tile([-speed * math.sin(pa), -speed * math.cos(pa), 0.0], (3, 1))
     return ClubheadSeries(t, pos, vel, face_normal=np.tile(normal, (3, 1)))
 
 
@@ -99,3 +105,16 @@ def test_square_driver_strike_is_driver_like():
     assert 1500.0 < summary.spin_rpm < 4000.0
     assert 200.0 < summary.carry_m < 260.0
     assert abs(summary.lateral_m) < 1.0
+
+
+def test_extreme_slice_outside_model_validity_is_flagged_not_presented():
+    """The measured fit (face +21, path +6.5 deg) doubles back down-range."""
+    bad = flight_for_impact(
+        _series(speed=49.2, loft_deg=12.0, face_open_deg=21.0, path_deg=6.5), 1, FRAME
+    )
+    assert not bad.valid and "reverses" in bad.invalid_reason
+    cond = ImpactConditions(110.1, -4.2, 21.0, 6.5)
+    text = "\n".join(overlay_lines("t", cond, bad))
+    assert "INVALID" in text and "carry n/a" in text
+    good = flight_for_impact(_series(), 1, FRAME)
+    assert good.valid and good.invalid_reason == ""
