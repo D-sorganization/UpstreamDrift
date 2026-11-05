@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import type { CounterTorqueRequest } from "@/api/generated/types";
 import { fetchCounterTorque, fetchPutterPresets } from "@/api/puttingClient";
+import { usePuttingStore } from "@/stores/usePuttingStore";
 import {
   COUNTER_TORQUE_CONTROLS,
   COUNTER_TORQUE_DEFAULTS,
@@ -11,10 +12,9 @@ import {
   ctSummary,
   type CounterTorqueSamples,
 } from "@/utils/counterTorque";
+import { formatQuantity } from "@/utils/units";
 
-const W = 260;
-const H = 140;
-const PAD = 24;
+const [W, H, PAD] = [260, 140, 24];
 // The studio's torque strip chart: series and colour.
 const CURVES = [
   ["tau_right_in_nm", "#f97316", "Right"],
@@ -28,6 +28,7 @@ const inputStyle = {
 };
 
 function CoupleChart({ samples }: { samples: CounterTorqueSamples }) {
+  const system = usePuttingStore((state) => state.unitSystem);
   const t = samples.t_s;
   const tEnd = t[t.length - 1] || 1;
   const x = (ti: number) => PAD + (ti / tEnd) * (W - 1.5 * PAD);
@@ -63,7 +64,7 @@ function CoupleChart({ samples }: { samples: CounterTorqueSamples }) {
         ))}
       </svg>
       <p className="opacity-70">
-        Hand couples (±{span.toFixed(1)} N·m) over the stroke
+        Hand couples ±{formatQuantity(span, "torque", system, 1)}
       </p>
     </>
   );
@@ -78,6 +79,7 @@ export function CounterTorquePanel() {
     queryFn: fetchPutterPresets,
   });
   const run = useMutation({ mutationFn: fetchCounterTorque });
+  const system = usePuttingStore((state) => state.unitSystem);
   const update = (changes: Partial<CounterTorqueRequest>) =>
     setRequest((current) => ({ ...current, ...changes }));
 
@@ -88,8 +90,9 @@ export function CounterTorquePanel() {
           <span className="mb-1 flex justify-between">
             <span>{c.label}</span>
             <span className="font-mono">
-              {request[c.key].toFixed(c.step < 1 ? 2 : 0)}
-              {c.unit}
+              {c.unit === "torque"
+                ? formatQuantity(request[c.key], "torque", system, 2)
+                : `${request[c.key].toFixed(c.step < 1 ? 2 : 0)}${c.unit}`}
             </span>
           </span>
           <input
@@ -99,9 +102,7 @@ export function CounterTorquePanel() {
             max={c.max}
             step={c.step}
             value={request[c.key]}
-            onChange={(event) =>
-              update({ [c.key]: Number(event.target.value) })
-            }
+            onChange={(e) => update({ [c.key]: Number(e.target.value) })}
             className="w-full"
             style={{ accentColor: "var(--sidekick-color-accent)" }}
           />
@@ -141,7 +142,7 @@ export function CounterTorquePanel() {
       )}
       {run.data && (
         <>
-          {ctReadout(ctSummary(run.data.samples)).map((line) => (
+          {ctReadout(ctSummary(run.data.samples), system).map((line) => (
             <p key={line} className="font-mono">
               {line}
             </p>

@@ -1,5 +1,4 @@
 {
-  "_comment": "Generated from the shared core's POST /counter-torque (#14469); tests/unit/shared_python/test_counter_torque_ui_golden.py keeps it in sync.",
   "ranges": {
     "preload_nm": [0.0, 2.0],
     "off_preload_nm": [0.0, 2.0],
@@ -63,11 +62,11 @@
     }
   },
   "summary": {
-    "face_deg": -0.11909854264723435,
-    "path_deg": 0.1122136723470496,
-    "peak_force_left_n": 12.025097567929569,
-    "peak_force_right_n": 23.635633906697077,
-    "gust_preload_deg": 0.07911591531954297,
-    "gust_slack_deg": 0.4619840098529155
+    "faceDeg": -0.11909854264723435,
+    "pathDeg": 0.1122136723470496,
+    "peakForceLeftN": 12.025097567929569,
+    "peakForceRightN": 23.635633906697077,
+    "gustPreloadDeg": 0.07911591531954297,
+    "gustSlackDeg": 0.4619840098529155
   }
 }

@@ -1,17 +1,14 @@
-/**
- * Counter-torque explorer (#14470): sliders bounded by the core's ranges and a
- * summary read off the core's POST /counter-torque series (golden-pinned).
- */
+/** Counter-torque explorer (#14470) over the core's /counter-torque series. */
 
 import type { CounterTorqueRequest } from "@/api/generated/types";
+import { formatQuantity, type UnitSystem } from "@/utils/units";
 
 type SliderKey = Exclude<keyof CounterTorqueRequest, "putter" | "n_points">;
 
-const NM = " N·m";
 const control = (
   key: SliderKey,
   label: string,
-  unit: string,
+  unit: "torque" | "" | "°",
   [min, max]: [number, number],
   step = 0.05,
 ) => ({ key, label, unit, min, max, step });
@@ -20,10 +17,10 @@ export type CounterTorqueControl = ReturnType<typeof control>;
 
 /** Sliders, bounded by the core's PRELOAD/NOISE/GUST/LIE ranges. */
 export const COUNTER_TORQUE_CONTROLS: readonly CounterTorqueControl[] = [
-  control("preload_nm", "Grip Preload", NM, [0, 2]),
-  control("off_preload_nm", "Off-Plane Preload", NM, [0, 2]),
+  control("preload_nm", "Grip Preload", "torque", [0, 2]),
+  control("off_preload_nm", "Off-Plane Preload", "torque", [0, 2]),
   control("noise_scale", "Hand Noise", "", [0, 2]),
-  control("gust_impulse_nm", "Gust Strength", NM, [0, 2]),
+  control("gust_impulse_nm", "Gust Strength", "torque", [0, 2]),
   control("lie_deg", "Shaft Lie", "°", [55, 85], 1),
 ];
 
@@ -53,10 +50,7 @@ const peak = (samples: CounterTorqueSamples, key: string) =>
 
 /** Impact face and path, peak in-plane hand forces, gust wobble peaks. */
 export function ctSummary(samples: CounterTorqueSamples) {
-  const last = (key: string) => {
-    const values = series(samples, key);
-    return values[values.length - 1];
-  };
+  const last = (key: string) => series(samples, key).slice(-1)[0];
   return {
     faceDeg: last("face_angle_impact_deg"),
     pathDeg: last("club_path_impact_deg"),
@@ -71,11 +65,12 @@ export type CounterTorqueSummary = ReturnType<typeof ctSummary>;
 
 const signed = (deg: number) => `${deg >= 0 ? "+" : ""}${deg.toFixed(2)}°`;
 
-/** The explorer's readout lines. */
-export function ctReadout(s: CounterTorqueSummary): string[] {
+/** The explorer's readout lines, forces in the page's display units. */
+export function ctReadout(s: CounterTorqueSummary, system: UnitSystem) {
+  const force = (n: number) => formatQuantity(n, "force", system, 1);
   return [
     `Face at impact ${signed(s.faceDeg)}, club path ${signed(s.pathDeg)}`,
-    `Peak in-plane hand force: left ${s.peakForceLeftN.toFixed(1)} N, right ${s.peakForceRightN.toFixed(1)} N`,
+    `Peak in-plane hand force: left ${force(s.peakForceLeftN)}, right ${force(s.peakForceRightN)}`,
     `Gust wobble: ${s.gustPreloadDeg.toFixed(2)}° with grip preload vs ${s.gustSlackDeg.toFixed(2)}° slack`,
   ];
 }

@@ -43,7 +43,6 @@ describe("CounterTorquePanel (#14470)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Run Counter-Torque" }));
 
     await waitFor(() => expect(fetchCounterTorque).toHaveBeenCalledOnce());
-    // The core's own grid (stroke_series default); the golden is a coarse one.
     expect(vi.mocked(fetchCounterTorque).mock.calls[0][0]).toEqual({
       ...golden.request,
       n_points: 210,
