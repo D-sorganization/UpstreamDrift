@@ -4,7 +4,8 @@ This module implements the required counterfactual experiments per project desig
 guidelines Section G:
 
 - ZTCF (Zero-Torque Counterfactual): What happens with no actuation?
-- ZVCF (Zero-Velocity Counterfactual): What happens with no momentum?
+- ZVCF (Zero-Velocity Counterfactual): the control component M(q)^-1 tau
+  (torques on, velocity and gravity off); ZTCF is the complementary drift.
 
 These are MANDATORY features for causal interpretation of golf swing dynamics.
 
@@ -31,18 +32,18 @@ class CounterfactualResult:
     and counterfactual motion to infer causal effects.
 
     Attributes:
-        type: Counterfactual type ('ztcf' or 'zvcf')
+        type: Counterfactual type ('ztcf', 'zvcf' or 'zero_velocity_zero_torque')
         observed_acceleration: Actual acceleration [nv]
         counterfactual_acceleration: Acceleration under counterfactual [nv]
         delta_acceleration: Difference (causal attribution) [nv]
         observed_position: Actual position at next timestep [nv]
         counterfactual_position: Position under counterfactual [nv]
         delta_position: Spatial consequence of intervention [nv]
-        torque_attributed_effect: Effect attributed to torques (ZTCF) [nv]
-        velocity_attributed_effect: Effect attributed to momentum (ZVCF) [nv]
+        torque_attributed_effect: Effect attributed to torques (ZTCF delta, ZVCF control) [nv]
+        velocity_attributed_effect: Velocity effect (zero_velocity_zero_torque) [nv]
     """
 
-    type: Literal["ztcf", "zvcf"]
+    type: Literal["ztcf", "zvcf", "zero_velocity_zero_torque"]
     observed_acceleration: np.ndarray
     counterfactual_acceleration: np.ndarray
     delta_acceleration: np.ndarray
@@ -59,7 +60,8 @@ class CounterfactualAnalyzer:
     This is a MANDATORY feature per project design guidelines Section G.
     Enables causal interpretation by answering:
     - ZTCF: "What motion is due to actuation vs passive dynamics?"
-    - ZVCF: "What motion is due to momentum vs gravitational/constraint forces?"
+    - ZVCF: "What motion is the control component M(q)^-1 tau, with velocity
+      and gravity off?" (ZTCF is the complementary drift; #14495)
 
     Example (ZTCF):
         >>> model = mujoco.MjModel.from_xml_path("humanoid.xml")
@@ -78,11 +80,11 @@ class CounterfactualAnalyzer:
         >>> # Negative delta means torques opposed motion
 
     Example (ZVCF):
-        >>> result = analyzer.zvcf(qpos, qvel)
+        >>> result = analyzer.zvcf(qpos, qvel, ctrl)
         >>>
-        >>> # Delta shows what momentum contributed
-        >>> print(f"Momentum attribution: {result.delta_acceleration}")
-        >>> # Shows Coriolis/centrifugal effects
+        >>> # The counterfactual is the control component M^-1 tau
+        >>> print(f"Control component: {result.counterfactual_acceleration}")
+        >>> # Delta is the drift (observed minus control)
     """
 
     def __init__(self, model: mujoco.MjModel) -> None:
@@ -201,68 +203,78 @@ class CounterfactualAnalyzer:
             velocity_attributed_effect=None,
         )
 
+    def _control_acceleration(
+        self, data: mujoco.MjData, qpos: np.ndarray, ctrl: np.ndarray
+    ) -> np.ndarray:
+        """Return ``M(q)^-1 tau``: torques on, velocity and gravity off."""
+        data.qpos[:] = qpos
+        data.qvel[:] = 0
+        data.ctrl[:] = ctrl
+        mujoco.mj_forward(self.model, data)
+        mass = full_mass_matrix(mujoco, self.model, data)
+        return np.linalg.solve(mass, data.qfrc_actuator)
+
     def zvcf(
         self,
         qpos: np.ndarray,
         qvel: np.ndarray,
+        ctrl: np.ndarray,
         dt: float = 0.01,
         compute_trajectories: bool = False,
     ) -> CounterfactualResult:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
-        Compares observed motion (with momentum) to counterfactual motion
-        (from rest). The difference reveals the causal effect of velocity-
-        dependent forces (Coriolis/centrifugal).
+        ZVCF is the *control component* of the acceleration at a fixed state
+        (owner decision, #14495): the applied torques with velocity and gravity
+        turned off, ``qddot_zvcf = M(q)^-1 tau``. It matches
+        ``simulation_backends.ztcf_zvcf.zvcf_acceleration``. The complementary
+        ZTCF is the drift, so ``ztcf + zvcf`` is the observed acceleration with
+        gravity counted once. The identity is pointwise only; integrated
+        counterfactual trajectories do not generally sum.
 
-        Per Guideline G2:
-        "Zero joint velocities while preserving configuration. Isolate
-        acceleration/constraint/gravity-driven motion from momentum effects."
+        Here ``counterfactual_acceleration`` is the ZVCF control component,
+        ``delta_acceleration`` is observed minus ZVCF (the drift), and
+        ``torque_attributed_effect`` carries the control component.
+
+        The former gravity-only behaviour is
+        :meth:`zero_velocity_zero_torque`.
 
         Args:
             qpos: Joint positions [nv]
-            qvel: Joint velocities [nv]
+            qvel: Joint velocities [nv] (observed state only)
+            ctrl: Applied control torques [nu]
             dt: Timestep for trajectory prediction [s]
             compute_trajectories: If True, integrate forward one step
 
         Returns:
-            CounterfactualResult with velocity attribution
+            CounterfactualResult with the control component
         """
-        # 1. Compute OBSERVED acceleration (with velocity)
         if qpos is None:
             raise ValueError("qpos must be provided")
-        # No control for clean comparison
+        if len(ctrl) != self.model.nu:
+            raise ValueError(f"ctrl must have length {self.model.nu}, got {len(ctrl)}")
         qacc_observed = self._forward_acceleration(
-            self._data_observed, qpos, qvel, 0, include_actuation=False
+            self._data_observed, qpos, qvel, ctrl, include_actuation=True
         )
-
-        # 2. Compute COUNTERFACTUAL acceleration (zero velocity)
-        # ZERO VELOCITY
-        qacc_counterfactual = self._forward_acceleration(
-            self._data_counterfactual, qpos, 0, 0, include_actuation=False
+        qacc_counterfactual = self._control_acceleration(
+            self._data_counterfactual, qpos, ctrl
         )
-
-        # 3. Compute DELTA (causal attribution to velocity)
         delta_qacc = qacc_observed - qacc_counterfactual
 
-        # 4. Optionally compute position deltas
         qpos_obs = None
         qpos_cf = None
         delta_qpos = None
 
         if compute_trajectories:
-            # Observed: continues with momentum
             qpos_obs = qpos.copy()
             mujoco.mj_integratePos(
                 self.model, qpos_obs, qvel + 0.5 * qacc_observed * dt, dt
             )
-
-            # Counterfactual: starts from rest
-            # (zero initial velocity, only driven by gravity/constraints)
+            # Counterfactual starts from rest and is driven by torques only.
             qpos_cf = qpos.copy()
             mujoco.mj_integratePos(
                 self.model, qpos_cf, 0.5 * qacc_counterfactual * dt, dt
             )
-
             delta_qpos = np.zeros(self.model.nv)
             mujoco.mj_differentiatePos(self.model, delta_qpos, 1.0, qpos_cf, qpos_obs)
 
@@ -274,8 +286,38 @@ class CounterfactualAnalyzer:
             observed_position=qpos_obs,
             counterfactual_position=qpos_cf,
             delta_position=delta_qpos,
+            torque_attributed_effect=qacc_counterfactual,
+            velocity_attributed_effect=None,
+        )
+
+    def zero_velocity_zero_torque(
+        self, qpos: np.ndarray, qvel: np.ndarray
+    ) -> CounterfactualResult:
+        """Gravity-only comparison: the former ``zvcf()`` behaviour (#11553).
+
+        Compares the observed unforced acceleration at ``(qpos, qvel)`` with
+        the acceleration at ``qpos`` with velocity and control both zero. The
+        difference is the velocity-dependent (Coriolis/centrifugal) effect.
+        """
+        if qpos is None:
+            raise ValueError("qpos must be provided")
+        qacc_observed = self._forward_acceleration(
+            self._data_observed, qpos, qvel, 0, include_actuation=False
+        )
+        qacc_counterfactual = self._forward_acceleration(
+            self._data_counterfactual, qpos, 0, 0, include_actuation=False
+        )
+        delta_qacc = qacc_observed - qacc_counterfactual
+        return CounterfactualResult(
+            type="zero_velocity_zero_torque",
+            observed_acceleration=qacc_observed,
+            counterfactual_acceleration=qacc_counterfactual,
+            delta_acceleration=delta_qacc,
+            observed_position=None,
+            counterfactual_position=None,
+            delta_position=None,
             torque_attributed_effect=None,
-            velocity_attributed_effect=delta_qacc,  # ZVCF attributes to velocity
+            velocity_attributed_effect=delta_qacc,
         )
 
     def analyze_trajectory_ztcf(
@@ -308,12 +350,14 @@ class CounterfactualAnalyzer:
         self,
         qpos_traj: np.ndarray,
         qvel_traj: np.ndarray,
+        ctrl_traj: np.ndarray,
     ) -> list[CounterfactualResult]:
         """Perform ZVCF analysis on entire trajectory.
 
         Args:
             qpos_traj: Position trajectory [N × nv]
             qvel_traj: Velocity trajectory [N × nv]
+            ctrl_traj: Control trajectory [N × nu]
 
         Returns:
             List of CounterfactualResult (ZVCF) for each timestep
@@ -323,7 +367,7 @@ class CounterfactualAnalyzer:
         results = []
 
         for i in range(len(qpos_traj)):
-            result = self.zvcf(qpos_traj[i], qvel_traj[i])
+            result = self.zvcf(qpos_traj[i], qvel_traj[i], ctrl_traj[i])
             results.append(result)
 
         return results
@@ -388,7 +432,7 @@ class CounterfactualAnalyzer:
         title = (
             "ZTCF: Torque Attribution"
             if cf_type == "ztcf"
-            else "ZVCF: Velocity Attribution"
+            else "ZVCF: Control Component"
         )  # noqa: E501
         plt.suptitle(f"{title} (Joint {joint_idx})")
         plt.tight_layout()

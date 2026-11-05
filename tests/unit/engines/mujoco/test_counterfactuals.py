@@ -8,6 +8,11 @@ import pytest
 from mujoco_humanoid_golf.counterfactuals import (
     CounterfactualAnalyzer,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+from src.shared.python.simulation_backends.ztcf_zvcf import (
+    zero_velocity_zero_torque_acceleration,
+    zvcf_acceleration,
+)
 
 
 @pytest.fixture
@@ -24,6 +29,31 @@ def simple_pendulum_model() -> mujoco.MjModel:
         </worldbody>
         <actuator>
             <motor joint="hinge" gear="1.0"/>
+        </actuator>
+    </mujoco>
+    """
+    return mujoco.MjModel.from_xml_string(xml)
+
+
+@pytest.fixture
+def double_pendulum_model() -> mujoco.MjModel:
+    """Two-link pendulum: configuration-dependent M and Coriolis terms."""
+    xml = """
+    <mujoco>
+        <option gravity="0 0 -9.80665" timestep="0.01"/>
+        <worldbody>
+            <body name="l1" pos="0 0 0">
+                <joint name="j1" type="hinge" axis="0 1 0" damping="0.0"/>
+                <geom type="capsule" fromto="0 0 0 0 0 -0.5" size="0.02" mass="1.0"/>
+                <body name="l2" pos="0 0 -0.5">
+                    <joint name="j2" type="hinge" axis="0 1 0" damping="0.0"/>
+                    <geom type="capsule" fromto="0 0 0 0 0 -0.4" size="0.02" mass="0.7"/>
+                </body>
+            </body>
+        </worldbody>
+        <actuator>
+            <motor joint="j1" gear="2.0"/>
+            <motor joint="j2" gear="2.0"/>
         </actuator>
     </mujoco>
     """
@@ -131,89 +161,97 @@ class TestZTCF:
         )
 
 
+def _provider(model: mujoco.MjModel) -> _MuJoCoProvider:
+    return _MuJoCoProvider(model)
+
+
+class _MuJoCoProvider:
+    """Independent ``EquationsOfMotionProvider`` view of a MuJoCo model."""
+
+    def __init__(self, model: mujoco.MjModel) -> None:
+        self.model = model
+        self.data = mujoco.MjData(model)
+
+    def _load(self, q: np.ndarray, v: np.ndarray) -> None:
+        self.data.qpos[:] = q
+        self.data.qvel[:] = v
+        mujoco.mj_forward(self.model, self.data)
+
+    def mass_matrix(self, q: np.ndarray) -> np.ndarray:
+        self._load(q, np.zeros(self.model.nv))
+        return full_mass_matrix(mujoco, self.model, self.data)
+
+    def bias_forces(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        self._load(q, v)
+        return self.data.qfrc_bias.copy()
+
+
 class TestZVCF:
-    """Test Zero-Velocity Counterfactual (Guideline G2)."""
+    """ZVCF is the control component M(q)^-1 tau (#14495, owner decision)."""
 
-    def test_zvcf_with_zero_velocity_gives_zero_delta(
-        self, simple_pendulum_model
-    ) -> None:
-        """Test ZVCF: zero velocity means observed = counterfactual."""
-        analyzer = CounterfactualAnalyzer(simple_pendulum_model)
+    def test_zvcf_matches_simulation_backends_parity(self, double_pendulum_model):
+        """MuJoCo zvcf() == simulation_backends zvcf_acceleration (#14495)."""
+        analyzer = CounterfactualAnalyzer(double_pendulum_model)
+        qpos = np.array([0.4, -0.7])
+        qvel = np.array([1.3, -0.8])
+        ctrl = np.array([0.5, -1.2])  # gear 2 on both motors -> tau = 2 * ctrl
 
-        qpos = np.array([np.pi / 6])
-        qvel = np.array([0.0])  # NO VELOCITY
+        result = analyzer.zvcf(qpos, qvel, ctrl)
 
-        result = analyzer.zvcf(qpos, qvel)
+        expected = zvcf_acceleration(_provider(double_pendulum_model), qpos, 2 * ctrl)
+        assert result.type == "zvcf"
+        assert np.allclose(result.counterfactual_acceleration, expected, atol=1e-9)
+        assert np.allclose(result.torque_attributed_effect, expected, atol=1e-9)
+        assert result.velocity_attributed_effect is None
 
-        # With zero velocity, observed should equal counterfactual
+    def test_zvcf_is_independent_of_velocity_and_gravity(self, double_pendulum_model):
+        analyzer = CounterfactualAnalyzer(double_pendulum_model)
+        qpos = np.array([0.4, -0.7])
+        ctrl = np.array([0.5, -1.2])
+
+        slow = analyzer.zvcf(qpos, np.zeros(2), ctrl)
+        fast = analyzer.zvcf(qpos, np.array([3.0, -2.0]), ctrl)
         assert np.allclose(
-            result.observed_acceleration, result.counterfactual_acceleration, atol=1e-6
+            slow.counterfactual_acceleration, fast.counterfactual_acceleration
         )
 
-        # Delta should be near zero
-        assert np.allclose(result.delta_acceleration, 0, atol=1e-6)
-        assert result.type == "zvcf"
+        zero_ctrl = analyzer.zvcf(qpos, np.array([3.0, -2.0]), np.zeros(2))
+        assert np.allclose(zero_ctrl.counterfactual_acceleration, 0.0, atol=1e-12)
 
-    def test_zvcf_nonzero_velocity_creates_delta(self, simple_pendulum_model) -> None:
-        """Test ZVCF: non-zero velocity runs without error.
+    def test_zvcf_plus_ztcf_is_total_acceleration(self, double_pendulum_model):
+        """Pointwise ZTCF + ZVCF == actual acceleration, gravity counted once."""
+        analyzer = CounterfactualAnalyzer(double_pendulum_model)
+        qpos = np.array([0.4, -0.7])
+        qvel = np.array([1.3, -0.8])
+        ctrl = np.array([0.5, -1.2])
 
-        Note: A simple 1-DOF pendulum has no Coriolis/centrifugal terms,
-        so delta may be near-zero. This test verifies the analysis executes
-        correctly rather than asserting specific delta magnitudes.
-        """
+        zvcf = analyzer.zvcf(qpos, qvel, ctrl)
+        ztcf = analyzer.ztcf(qpos, qvel, ctrl)
+
+        assert np.allclose(
+            ztcf.counterfactual_acceleration + zvcf.counterfactual_acceleration,
+            ztcf.observed_acceleration,
+            atol=1e-9,
+        )
+        assert np.allclose(zvcf.delta_acceleration, ztcf.counterfactual_acceleration)
+
+    def test_zvcf_rejects_wrong_control_length(self, simple_pendulum_model) -> None:
         analyzer = CounterfactualAnalyzer(simple_pendulum_model)
+        with pytest.raises(ValueError, match="ctrl must have length"):
+            analyzer.zvcf(np.array([0.1]), np.array([0.0]), np.array([1.0, 2.0]))
 
-        # Pendulum at angle with velocity
+    def test_zero_velocity_zero_torque_is_gravity_only(self, simple_pendulum_model):
+        """The former gravity-only zvcf() lives on under its descriptive name."""
+        analyzer = CounterfactualAnalyzer(simple_pendulum_model)
         qpos = np.array([np.pi / 4])
-        qvel = np.array([2.0])  # Significant velocity
 
-        result = analyzer.zvcf(qpos, qvel)
+        result = analyzer.zero_velocity_zero_torque(qpos, np.array([2.0]))
 
-        # Result should be well-formed
-        assert result.delta_acceleration is not None
-        assert result.type == "zvcf"
-
-    def test_zvcf_delta_scales_with_velocity(self, simple_pendulum_model) -> None:
-        """Test ZVCF: analysis runs correctly at different velocities.
-
-        Note: For a 1-DOF pendulum, Coriolis scaling doesn't apply.
-        This test verifies the function executes without error at
-        different velocity magnitudes.
-        """
-        analyzer = CounterfactualAnalyzer(simple_pendulum_model)
-
-        qpos = np.array([np.pi / 6])
-
-        # Low velocity
-        qvel_low = np.array([0.5])
-        result_low = analyzer.zvcf(qpos, qvel_low)
-
-        # High velocity
-        qvel_high = np.array([2.0])
-        result_high = analyzer.zvcf(qpos, qvel_high)
-
-        # Both should produce valid results
-        assert result_low.delta_acceleration is not None
-        assert result_high.delta_acceleration is not None
-        assert result_low.type == "zvcf"
-        assert result_high.type == "zvcf"
-
-    def test_zvcf_isolates_coriolis_from_gravity(self, simple_pendulum_model) -> None:
-        """Test ZVCF: counterfactual has gravity-driven acceleration."""
-        analyzer = CounterfactualAnalyzer(simple_pendulum_model)
-
-        qpos = np.array([np.pi / 4])
-        qvel = np.array([1.0])
-
-        result = analyzer.zvcf(qpos, qvel)
-
-        # Counterfactual should have an acceleration value
-        # Note: For simple 1-DOF pendulum, the ZVCF counterfactual may be zero
-        # depending on implementation (MuJoCo forward dynamics behavior)
-        assert result.counterfactual_acceleration is not None
-
-        # Delta is the velocity-dependent contribution
-        assert result.delta_acceleration is not None
+        expected = zero_velocity_zero_torque_acceleration(
+            _provider(simple_pendulum_model), qpos
+        )
+        assert np.allclose(result.counterfactual_acceleration, expected, atol=1e-9)
+        assert result.type == "zero_velocity_zero_torque"
 
 
 class TestCounterfactualTrajectoryAnalysis:
@@ -245,8 +283,9 @@ class TestCounterfactualTrajectoryAnalysis:
         N = 10
         qpos_traj = np.linspace(0, np.pi / 3, N).reshape(-1, 1)
         qvel_traj = np.linspace(0, 1.5, N).reshape(-1, 1)  # Increasing velocity
+        ctrl_traj = np.linspace(0, 1.0, N).reshape(-1, 1)
 
-        results = analyzer.analyze_trajectory_zvcf(qpos_traj, qvel_traj)
+        results = analyzer.analyze_trajectory_zvcf(qpos_traj, qvel_traj, ctrl_traj)
 
         assert len(results) == N
         assert all(r.type == "zvcf" for r in results)
@@ -280,23 +319,14 @@ class TestCounterfactualPhysics:
             "Physics violation: observed != counterfactual + delta"
         )
 
-    def test_zvcf_plus_counterfactual_equals_observed(
-        self, simple_pendulum_model
-    ) -> None:
-        """Test physics: counterfactual + delta = observed."""
+    def test_zvcf_plus_delta_equals_observed(self, simple_pendulum_model) -> None:
+        """Test physics: counterfactual (control) + delta (drift) = observed."""
         analyzer = CounterfactualAnalyzer(simple_pendulum_model)
 
-        qpos = np.array([0.3])
-        qvel = np.array([1.0])
+        result = analyzer.zvcf(np.array([0.3]), np.array([1.0]), np.array([0.5]))
 
-        result = analyzer.zvcf(qpos, qvel)
-
-        # Reconstruction test
         reconstructed = result.counterfactual_acceleration + result.delta_acceleration
-
-        assert np.allclose(result.observed_acceleration, reconstructed, atol=1e-6), (
-            "Physics violation: observed != counterfactual + delta"
-        )
+        assert np.allclose(result.observed_acceleration, reconstructed, atol=1e-6)
 
     def test_ztcf_reveals_control_authority(self, simple_pendulum_model) -> None:
         """Test that ZTCF correctly identifies control authority."""
