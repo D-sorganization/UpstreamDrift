@@ -2754,6 +2754,10 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14695 | Putting studio: the E vs capture-speed panel draws the core's expected strokes per pace (optimize.evaluate_actions on the solved E(d)) from core_sg.js and names the core's best entry speed; the strokes_gained studio cell is present |
+| 2026-11-05 | #14692 | R11: per-engine chain-shaft impact-window receipt and overlay now cover drake and pinocchio, with an engine-free gate |
+| 2026-11-05 | #14699 | NSX-24: unify ContactForceAllocator and MultiEngineTorqueAllocator on allocate_contact_frame conic path |
+| 2026-11-05 | #14696 | NSX-04 D34: lumbar carries the upper cited trunk limit (Ishida 2019), Pan 2025 is exposed as the lower reference band, thoracic is an assumed share so the whole-trunk limit is not applied twice (Part of #12553) |
 | 2026-11-05 | #14693 | SHOW-C3c D32: assumption-limited vs probable-miscalibration wording for torque and velocity bindings; search/replay disagreement claim |
 | 2026-11-05 | #14690 | NSX-04: cited trunk torque capacity (Pan 2025) for the lumbar and thoracic slots of the v2 spec, so PhysiologicalEnvelope.from_spec builds on it (Part of #12553) |
 | 2026-11-05 | #14688 | sg_optimizer: common random numbers for an injected ShotOutcomeModel so the scalar backup converges |
