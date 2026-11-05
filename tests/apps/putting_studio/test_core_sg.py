@@ -32,8 +32,12 @@ from src.shared.python.putting_analytics import service_sg
 from src.shared.python.putting_analytics.aggregate import DEFAULT_GRID_FT
 from src.shared.python.putting_analytics.calibration import TOUR_AVERAGE
 from src.shared.python.putting_analytics.service_dispersion import green_from_args
+from src.shared.python.putting_analytics.sampling import ReadSample
 from src.shared.python.putting_analytics.service_variance import profile_from_args
-from src.shared.python.putting_analytics.skill_roll_model import PlaneGreen
+from src.shared.python.putting_analytics.skill_roll_model import (
+    PlaneGreen,
+    nominal_speeds_mps,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -243,7 +247,22 @@ def test_studio_sweep_row_is_the_nearest_core_row(committed: dict[str, Any]) -> 
         "distance_ft": 10.0,
         "paces_ft": list(gen.SWEEP_PACES_FT),
         "expected": committed["curves"][0]["pace_sweep"][2],
+        "entry_speed_mps": committed["curves"][0]["sweep_entry_speed_mps"],
     }
+
+
+def test_sweep_entry_speeds_are_the_core_pace_law(committed: dict[str, Any]) -> None:
+    # The speed at the hole that rolls each sweep pace past it: the core's
+    # nominal_speeds_mps at zero distance, perfect read, on the slope's green.
+    one, zero = np.ones(1), np.zeros(1)
+    perfect = ReadSample(one, zero, one)
+    for curve in committed["curves"]:
+        green = green_from_args(gen.cell_args(curve["slope_pct"]))
+        expected = [
+            round(float(nominal_speeds_mps(green, perfect, 0.0, pace)[0]), 4)
+            for pace in gen.SWEEP_PACES_FT
+        ]
+        assert curve["sweep_entry_speed_mps"] == expected
 
 
 def test_capture_speed_panel_reads_the_core_sweep() -> None:
@@ -251,6 +270,10 @@ def test_capture_speed_panel_reads_the_core_sweep() -> None:
     assert "1.24 + 1.15 * Math.pow" not in charts and "1.66 + 1.55" not in charts
     assert "coreSweepRow(" in charts
     assert "optCaptureSpeedBadge" in charts
+    # Entry speeds come from the core (sweep_entry_speed_mps), not a JS copy
+    # of the pace law or the ft-to-m factor.
+    assert "entry_speed_mps" in charts
+    assert "0.3048" not in charts and "stimpToRollingMu(window.CORE_SG" not in charts
 
 
 def test_matrix_studio_strokes_gained_cell_is_present() -> None:
