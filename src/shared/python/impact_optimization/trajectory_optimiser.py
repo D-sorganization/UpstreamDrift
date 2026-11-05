@@ -80,6 +80,11 @@ class RolloutOutcome:
     torque_nm: np.ndarray
     trajectory: np.ndarray
 
+    @property
+    def speed_mph(self) -> float:
+        """Impact speed (delegates to ``impact`` to keep callers shallow)."""
+        return float(self.impact.speed_mph)
+
 
 Rollout = Callable[[np.ndarray], RolloutOutcome]
 
@@ -102,7 +107,7 @@ class ImpactSolution:
     @property
     def achieved_speed_mph(self) -> float:
         """Impact speed of the solved swing (delegates to the outcome)."""
-        return float(self.outcome.impact.speed_mph)
+        return self.outcome.speed_mph
 
 
 def _within_tolerance(
