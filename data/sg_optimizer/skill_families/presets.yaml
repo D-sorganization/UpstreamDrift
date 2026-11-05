@@ -7,6 +7,15 @@
 # value. Skill rows are [mean, sd]. Field order: clubhead_speed_mph, face_angle_deg, club_path_deg,
 # attack_angle_deg, toe_mm, high_mm (GCV-15 signs).
 
+# Units are checked on load (speed mph, angles deg, strike offsets mm).
+units:
+  clubhead_speed_mph: mph
+  face_angle_deg: deg
+  club_path_deg: deg
+  attack_angle_deg: deg
+  toe_mm: mm
+  high_mm: mm
+
 correlation:
   # ASSUMPTION: face and path co-vary through the hands/release.
   "face_angle_deg, club_path_deg": 0.3

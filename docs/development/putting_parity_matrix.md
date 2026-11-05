@@ -11,14 +11,14 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | present | present | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | partial (#14461) |
 | Toe/Heel Strike Location | (c) | present | present | present | present | partial (#14461) |
-| Counter-Torque Stabilization (Hand Couples, Gust) | (g) | missing (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
+| Counter-Torque Stabilization (Hand Couples, Gust) | (g) | present | missing (#14469) | missing (#14470) | missing (#14470) | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
-| Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | partial (#14464) | partial (#14464) | partial (#14463) |
+| Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | partial (#14466) | partial (#14466) | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | present | present | present | partial (#14467) |
 | Saved Scenarios and Comparison | (h) | missing (#14471) | missing (#14471) | missing (#14472) | missing (#14472) | present |
 | JSON Import/Export of a Setup | (h) | partial (#14471) | partial (#14471) | missing (#14472) | missing (#14472) | present |
-| Camera Views and Playback Phases | (i) | present | present | partial (#14474) | partial (#14474) | present |
+| Camera Views and Playback Phases | (i) | present | present | present | present | present |
 
 ## Evidence
 
@@ -55,10 +55,10 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: partial (#14461). `src/apps/putting_studio/index.html`, `src/apps/putting_studio/js/controls_c.js`. Slider is toe-only (0-15 mm); no heel strikes.
 
 **Counter-Torque Stabilization (Hand Couples, Gust)**
-- Core/API: missing (#14469). `src/shared/python/grip_contact/couple_check.py`. No putting counter-torque model in the core; a grip couple check exists outside the putting stack.
+- Core/API: present. `src/shared/python/putting_dynamics/counter_torque.py`, `src/api/routes/putting_green.py`. Closed-form two-hand couple model (preload, off-plane preload, noise, gust, lie, shared putter presets) in the core; hand couples sum to the required moment without noise. Served on POST /counter-torque as one list per sample field.
 - PyQt6: missing (#14469). none. None.
 - React: missing (#14470). none. None.
-- Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/charts2d.js`, `src/apps/putting_studio/js/controls_c.js`. Closed-form couple model, gust pulse and torque charts (illustrative, not in the core: ADR-0058 gap).
+- Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/charts2d.js`, `src/apps/putting_studio/js/controls_c.js`. Closed-form couple model, gust pulse and torque charts; drift-gated sample for sample against the core (tests/unit/putting_dynamics/test_counter_torque.py).
 
 **Putter Balance Type (CG Offset, MOI)**
 - Core/API: present. `src/shared/python/putting_dynamics/putter_presets.py`, `src/api/routes/putting_green.py`. Named balance presets (toe-hang, face-balanced, zero-torque, counterbalanced) over PutterState; GET /putter-presets and /simulate-3d balance_type.
@@ -69,7 +69,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 **Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets)**
 - Core/API: present. `src/shared/python/putting_dynamics/green_spec.py`, `src/api/routes/putting_green.py`. GreenSpec (slope, two-tier step, seeded undulation, named presets) on /simulate, /scatter, /read-green and /contours; GET /green-presets.
 - PyQt6: present. `src/tools/putting_green_gui/_scene_builder.py`, `src/tools/putting_green_gui/gui.py`. Green Type selector (cross slope or any core preset), seeded undulation in mm or in, green seed; all on the shared GreenSpec.
-- React: partial (#14464). `ui/src/pages/PuttingGreen.tsx`. Grade, aspect, grain, bumps; no green-type selector or presets.
+- React: present. `ui/src/components/putting/GreenTypeControl.tsx`, `ui/src/utils/greenTypes.ts`. Green Type selector (cross slope or any core preset from GET /green-presets) sent as the core green spec on /simulate-3d; slope and bump fields lock under a preset (golden-pinned, #14464).
 - Studio: partial (#14463). `src/apps/putting_studio/js/putting_physics.js`, `src/apps/putting_studio/js/io.js`. Flat and slope presets plus stimp ramp; undulation switches on with slope and is not selectable.
 
 **Optimum Read / Auto-Solve Aim**
@@ -99,5 +99,5 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 **Camera Views and Playback Phases**
 - Core/API: present. `src/shared/python/putting_dynamics/phases.py`, `src/api/routes/putting_green.py`. Per-sample ball mode on /simulate and /simulate-3d, and phase marks (where the hop, skid, roll and rest start) from the core's phase_marks for playback jumps.
 - PyQt6: present. `src/tools/putting_green_gui/gui.py`, `src/tools/putting_green_gui/_camera.py`. Orbit, down-the-line, face-on and overhead cameras; play/pause, a scrubber and jumps to the core phase marks.
-- React: partial (#14474). `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx`. Orbit camera, play/pause/scrub/rate; no view presets or phase jumps.
+- React: present. `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx`, `ui/src/utils/cameraPresets.ts`. Orbit, down-the-line, face-on and overhead cameras framed on the desktop tile, play/pause/scrub/rate, and jumps to the core phase marks (golden-pinned, #14474).
 - Studio: present. `src/apps/putting_studio/js/controls_b.js`, `src/apps/putting_studio/js/controls_a.js`. Grip, Full Plane, Down-the-Line and Face-On cameras; phase badge; scrubber and keyframe jumps.

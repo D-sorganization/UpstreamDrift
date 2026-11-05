@@ -2741,6 +2741,22 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14590 | SHOW-B2: SkillFamily schema (impact-condition mean/cov + provenance), assumption-marked presets, registry, PlayerProfile link |
+| 2026-11-05 | #14596 | SHOW-C3b: trust-region torque optimiser with warm start and spline_trust_region backend entry |
+| 2026-11-05 | #14592 | Size-aware development-log archiver: archive oldest terminal entries when the log nears the byte cap |
+| 2026-11-05 | #14594 | Putting Green Simulator: the ud.putt_scene/1 export writes and reads impact_toe_m (optional on read, default 0.0, range-checked against IMPACT_TOE_RANGE_M), so a toe or heel strike round-trips |
+| 2026-11-05 | #14593 | React web UI: one command (npm run local) builds from the lockfile and serves it through the API from a clean checkout; CI Build Check runs the same clean-build check; README run steps; a test bars paid-API hosts and keys |
+| 2026-11-05 | #14589 | SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation |
+| 2026-11-05 | #14577 | SHOW-A3: optional lumbar:thoracic regional-split coupling (trunk_coupling, off by default) for the full-body-v2 trunk, MuJoCo joint equalities, and trunk joint-tree/mass/ROM contract tests |
+| 2026-11-05 | #14588 | Putting API: POST /solve-aim-3d solves the pace and line that hole a /simulate-3d putt on that route's own surface and head (core solve_aim, like the desktop Auto-Solve); the 3-D request models move to src/api/models/putting_green_requests.py |
+| 2026-11-05 | #14584 | WSCG update manuscript draft on the best-match MuJoCo ZTCF/ZVCF run, citing the pinned run_id |
+| 2026-11-05 | #14581 | SHOW-B1: ShotOutcomeModel protocol + backend registry; tour baseline is the default quick_sg backend |
+| 2026-11-05 | #14579 | SHOW-C2: ImpactConditions + evaluate_rollout facade for optimiser loops (face, path, AoA, speed, strike) over impact_parameters |
+| 2026-11-05 | #14586 | React putting page: Green Type selector on the core green presets (/simulate-3d green spec) |
+| 2026-11-05 | #14580 | SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope contracts (impact_optimization package; face:path 10:1; NSX-04 torque limits; cited velocity YAML) |
+| 2026-11-05 | #14583 | Putting API: /simulate-3d accepts the core green shape (green: GreenShapeRequest, a preset or slope, tier and bumps) and rolls on its GreenSpec height field, reporting that spec's grade and aspect, and strikes along aim_heading_deg (was always +x), so the React page can send the core presets and an aimed putt |
+| 2026-11-04 | #14576 | React putting page: desktop camera views and jumps to the core phase marks |
+| 2026-11-04 | #14548 | Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio |
 | 2026-11-04 | #14573 | React putting page: strokes-gained readout and expected-putts curve from the shared core's /strokes-gained |
 | 2026-11-04 | #14543 | Analytic and diagram figures in the proximal-distal release are labelled with their code evidence instead of citing a run |
 | 2026-11-04 | #14546 | Putting: camera presets (orbit, down the line, face on, overhead), play/pause, a scrubber and jumps to the core phase marks on the PyQt6 tile |

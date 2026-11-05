@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14535 · Size-Aware Development-Log Archiver: Archive Oldest Terminal Entries When the Log Nears the Byte Cap
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14535
+- **Branch:** claude-ct/14535-devlog-size-trigger
+- **PR:** #14592
+- **Paths:** see #14592
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8c6f82c1`; collated from changes/14535-size-aware-development-log-archiver-arch.md)
+- **Summary:** Size-aware development-log archiver: archive oldest terminal entries when the log nears the byte cap
+- **Next step:** Merge the PR.
+
 ### DL-#14434 · RUN-4: Ud-Sim Reproduce Reruns a Stored Run From Its Model File With the Recorded Seed and Parameters, Compares Each Output Within an Absolute Tolerance and Reports Engine Version Mismatches; the Run Store Now Closes Copied Files and Reports Corrupt Records Cleanly
 
 - **State:** in_review
@@ -923,6 +936,175 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14566 · SHOW-B2: SkillFamily Schema (Impact-Condition Mean/Cov + Provenance), Assumption-Marked Presets, Registry, PlayerProfile Link
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14566
+- **Branch:** merged via #14590
+- **PR:** #14590
+- **Paths:** see #14590
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8e6506c8`; collated from changes/14566-show-b2-skillfamily-schema-impact-condit.md)
+- **Summary:** SHOW-B2: SkillFamily schema (impact-condition mean/cov + provenance), assumption-marked presets, registry, PlayerProfile link
+- **Next step:** Shipped in PR #14590.
+
+### DL-#14530 · Putting Green Simulator: The Ud.Putt_Scene/1 Export Writes and Reads Impact_Toe_m (Optional on Read, Default 0.0, Range-Checked Against IMPACT_TOE_RANGE_M), so a Toe or Heel Strike Round-Trips
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14530
+- **Branch:** merged via #14594
+- **PR:** #14594
+- **Paths:** see #14594
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`eaa7b7ac`; collated from changes/14530-scene-export-impact-toe.md)
+- **Summary:** Putting Green Simulator: the ud.putt_scene/1 export writes and reads impact_toe_m (optional on read, default 0.0, range-checked against IMPACT_TOE_RANGE_M), so a toe or heel strike round-trips
+- **Next step:** Shipped in PR #14594.
+
+### DL-#14450 · React Web UI: One Command (Npm Run Local) Builds From the Lockfile and Serves It Through the API From a Clean Checkout; CI Build Check Runs the Same Clean-Build Check; README Run Steps; a Test Bars Paid-API Hosts and Keys
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14450
+- **Branch:** merged via #14593
+- **PR:** #14593
+- **Paths:** see #14593
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`69ae6718`; collated from changes/14450-react-web-ui-one-command-npm-run-local-b.md)
+- **Summary:** React web UI: one command (npm run local) builds from the lockfile and serves it through the API from a clean checkout; CI Build Check runs the same clean-build check; README run steps; a test bars paid-API hosts and keys
+- **Next step:** Shipped in PR #14593.
+
+### DL-#14559 · SHOW-C3a: SplineTorqueControl Piecewise-Linear Torque Parameterisation
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14559
+- **Branch:** merged via #14589
+- **PR:** #14589, #14596
+- **Paths:** see #14589
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`938df10a`; collated from changes/14559-show-c3b-trust-region-torque-optimiser-w.md)
+- **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
+- **Next step:** Shipped in PR #14589.
+
+### DL-#14552 · SHOW-A3: Optional Lumbar:Thoracic Regional-Split Coupling (Trunk_Coupling, Off by Default) for the Full-Body-V2 Trunk, MuJoCo Joint Equalities, and Trunk Joint-Tree/Mass/ROM Contract Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14552
+- **Branch:** merged via #14577
+- **PR:** #14577
+- **Paths:** see #14577
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`0cecc8f7`; collated from changes/14552-show-a3-optional-lumbar-thoracic-regiona.md)
+- **Summary:** SHOW-A3: optional lumbar:thoracic regional-split coupling (trunk_coupling, off by default) for the full-body-v2 trunk, MuJoCo joint equalities, and trunk joint-tree/mass/ROM contract tests
+- **Next step:** Shipped in PR #14577.
+
+### DL-#14466 · Putting API: POST /Solve-Aim-3D Solves the Pace and Line That Hole a /Simulate-3D Putt on That Route's Own Surface and Head (Core Solve_Aim, Like the Desktop Auto-Solve); the 3-D Request Models Move to Src/Api/Models/putting_green_requests.py
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14466
+- **Branch:** merged via #14588
+- **PR:** #14588
+- **Paths:** see #14588
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8fff9f83`; collated from changes/14466-solve-aim-3d.md)
+- **Summary:** Putting API: POST /solve-aim-3d solves the pace and line that hole a /simulate-3d putt on that route's own surface and head (core solve_aim, like the desktop Auto-Solve); the 3-D request models move to src/api/models/putting_green_requests.py
+- **Next step:** Shipped in PR #14588.
+
+### DL-#14441 · WSCG Update Manuscript Draft on the Best-Match MuJoCo ZTCF/ZVCF Run, Citing the Pinned Run_Id
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14441
+- **Branch:** merged via #14584
+- **PR:** #14584
+- **Paths:** see #14584
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`c82e3803`; collated from changes/14441-wscg-update-manuscript-draft-on-the-best.md)
+- **Summary:** WSCG update manuscript draft on the best-match MuJoCo ZTCF/ZVCF run, citing the pinned run_id
+- **Next step:** Shipped in PR #14584.
+
+### DL-#14565 · SHOW-B1: ShotOutcomeModel Protocol + Backend Registry; Tour Baseline Is the Default Quick_Sg Backend
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14565
+- **Branch:** merged via #14581
+- **PR:** #14581
+- **Paths:** see #14581
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`950bedd8`; collated from changes/14565-show-b1-shotoutcomemodel-protocol-backen.md)
+- **Summary:** SHOW-B1: ShotOutcomeModel protocol + backend registry; tour baseline is the default quick_sg backend
+- **Next step:** Shipped in PR #14581.
+
+### DL-#14558 · SHOW-C2: ImpactConditions + Evaluate_Rollout Facade for Optimiser Loops (Face, Path, AoA, Speed, Strike) Over Impact_Parameters
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14558
+- **Branch:** merged via #14579
+- **PR:** #14579
+- **Paths:** see #14579
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ddf355e4`; collated from changes/14558-show-c2-impactconditions-evaluate-rollou.md)
+- **Summary:** SHOW-C2: ImpactConditions + evaluate_rollout facade for optimiser loops (face, path, AoA, speed, strike) over impact_parameters
+- **Next step:** Shipped in PR #14579.
+
+### DL-#14557 · SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope Contracts (Impact_Optimization Package; Face:Path 10:1; NSX-04 Torque Limits; Cited Velocity YAML)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14557
+- **Branch:** merged via #14580
+- **PR:** #14580
+- **Paths:** see #14580
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`a37a7c5a`; collated from changes/14557-show-c1-impacttarget-trustregion-and-phy.md)
+- **Summary:** SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope contracts (impact_optimization package; face:path 10:1; NSX-04 torque limits; cited velocity YAML)
+- **Next step:** Shipped in PR #14580.
+
+### DL-#14464 · Putting API: /Simulate-3D Accepts the Core Green Shape (Green: GreenShapeRequest, a Preset or Slope, Tier and Bumps) and Rolls on Its GreenSpec Height Field, Reporting That Spec's Grade and Aspect, and Strikes Along Aim_Heading_Deg (Was Always +X), so the React Page Can Send the Core Presets and an Aimed Putt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14464
+- **Branch:** merged via #14583
+- **PR:** #14583, #14586
+- **Paths:** see #14583
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`f2db11cc`; collated from changes/14464-react-putting-page-green-type-selector-o.md)
+- **Summary:** Putting API: /simulate-3d accepts the core green shape (green: GreenShapeRequest, a preset or slope, tier and bumps) and rolls on its GreenSpec height field, reporting that spec's grade and aspect, and strikes along aim_heading_deg (was always +x), so the React page can send the core presets and an aimed putt
+- **Next step:** Shipped in PR #14583.
+
+### DL-#14474 · React Putting Page: Desktop Camera Views and Jumps to the Core Phase Marks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14474
+- **Branch:** merged via #14576
+- **PR:** #14576
+- **Paths:** see #14576
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`6ea810fa`; collated from changes/14474-react-putting-page-desktop-camera-views.md)
+- **Summary:** React putting page: desktop camera views and jumps to the core phase marks
+- **Next step:** Shipped in PR #14576.
+
+### DL-#14469 · Putting Dynamics: Counter-Torque Stabilization Model (Two-Hand Couples, Off-Plane Preload, Noise, Gust, Lie, Putter) in the Shared Core, Reading the Shared Putter Presets, Drift-Gated Against the Studio
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14469
+- **Branch:** merged via #14548
+- **PR:** #14548
+- **Paths:** see #14548
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`fadc7ee1`; collated from changes/14469-putting-counter-torque-core.md)
+- **Summary:** Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio
+- **Next step:** Shipped in PR #14548.
 
 ### DL-#14468 · React Putting Page: Strokes-Gained Readout and Expected-Putts Curve From the Shared Core's /Strokes-Gained
 

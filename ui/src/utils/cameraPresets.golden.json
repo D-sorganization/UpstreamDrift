@@ -1,0 +1,63 @@
+{
+  "_comment": "Pinned to the desktop putting camera and playback bar (#14474); tests/unit/tools/putting_green_gui/test_camera_ui_golden.py checks it against _camera.camera_pose and _playback.",
+  "presets": ["orbit", "down_the_line", "face_on", "overhead"],
+  "view_labels": {
+    "orbit": "Orbit",
+    "down_the_line": "Down the line",
+    "face_on": "Face on",
+    "overhead": "Overhead"
+  },
+  "phase_labels": {
+    "airborne": "Hop",
+    "slide": "Skid",
+    "roll": "Roll",
+    "rest": "Rest"
+  },
+  "cases": [
+    {
+      "green_size": [20.0, 20.0],
+      "start_xyz": [10.0, 10.0, 0.0],
+      "cup_xyz": [12.0, 13.5, 0.05],
+      "poses": {
+        "orbit": {
+          "center": [10.0, 10.0, 0.0],
+          "distance": 34.0,
+          "elevation_deg": 32.0,
+          "azimuth_deg": -78.0
+        },
+        "down_the_line": {
+          "center": [11.0, 11.75, 0.025],
+          "distance": 4.515564437074637,
+          "elevation_deg": 12.0,
+          "azimuth_deg": -119.74488129694222
+        },
+        "face_on": {
+          "center": [10.0, 10.0, 0.0],
+          "distance": 3.0,
+          "elevation_deg": 8.0,
+          "azimuth_deg": -29.74488129694222
+        },
+        "overhead": {
+          "center": [10.0, 10.0, 0.0],
+          "distance": 30.0,
+          "elevation_deg": 89.0,
+          "azimuth_deg": -90.0
+        }
+      }
+    }
+  ],
+  "tiles": [
+    {
+      "distance_m": 3.0,
+      "green_size": [5.3, 4.0],
+      "start_xy": [0.9, 2.0],
+      "cup_xy": [3.9, 2.0]
+    },
+    {
+      "distance_m": 9.0,
+      "green_size": [11.3, 5.4],
+      "start_xy": [0.9, 2.7],
+      "cup_xy": [9.9, 2.7]
+    }
+  ]
+}
