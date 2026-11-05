@@ -127,7 +127,7 @@ def _report_text(
 
 
 def _run(
-    out: Path, baseline_only: bool = False
+    out: Path, baseline_only: bool = False, default_policy: bool = False
 ) -> int:  # pragma: no cover - the real run is held (D24)
     import mujoco
     import numpy as np
@@ -203,7 +203,10 @@ def _run(
         spec, subject, load_limits(DEFAULT_LIMITS_PATH)
     )
     if baseline_only:
-        return _baseline(window(StepPolicy(substeps=4, project=False)), joints)
+        policy = (
+            DEFAULT_POLICY if default_policy else StepPolicy(substeps=4, project=False)
+        )
+        return _baseline(window(policy), joints)
     run = run_full_body_ladder(
         window(StepPolicy(substeps=4, project=False)),
         joints,
@@ -264,9 +267,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="build the envelope and check the baseline only; no ladder",
     )
+    parser.add_argument(
+        "--default-policy",
+        action="store_true",
+        help="with --baseline-only: roll out with DEFAULT_POLICY, not the search policy",
+    )
     args = parser.parse_args(argv)
     require_outside_repo(args.out)
-    return _run(args.out, args.baseline_only)
+    return _run(args.out, args.baseline_only, args.default_policy)
 
 
 if __name__ == "__main__":  # pragma: no cover
