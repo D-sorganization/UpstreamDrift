@@ -96,6 +96,9 @@ class DispersionTable:
     def table_hash(self) -> str:
         return str(self.provenance["table_hash"])
 
+    def has_cell(self, *key: str) -> bool:
+        return any(c.key == key for c in self.cells)
+
     def lookup(
         self, skill: str, club: str, lie: str, wind: str, slope: str
     ) -> DispersionCell:
