@@ -56,12 +56,11 @@ def swing_state_from_series(
         ValueError: ``index`` out of range or the face normal is unobservable.
     """
     require(0 <= index < len(series), "index out of range", index)
-    require(
-        series.face_normal is not None,
-        f"face normal unavailable: {series.face_unobservable_reason}",
-    )
-    velocity = np.array(frame.components(series.velocity_mps[index]))
-    normal = np.array(frame.components(series.face_normal[index]))  # type: ignore[index]
+    face_normals = series.face_normal
+    if face_normals is None:
+        raise ValueError(f"face normal unavailable: {series.face_unobservable_reason}")
+    velocity = np.asarray(frame.components(series.velocity_mps[index]), dtype=float)
+    normal = np.asarray(frame.components(face_normals[index]), dtype=float)
     normal /= np.linalg.norm(normal)
     return SwingState(
         clubhead_velocity=velocity,
