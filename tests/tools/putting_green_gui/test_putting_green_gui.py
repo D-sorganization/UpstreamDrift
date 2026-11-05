@@ -743,3 +743,15 @@ def test_the_scenario_table_follows_the_units(widget: PuttingGreenWidget) -> Non
     assert panel.table_text()[0][3].endswith(" ft")
     widget.set_unit_system(UnitSystem.METRIC)
     assert panel.table_text()[0][3].endswith(" m")
+
+
+def test_the_holed_box_reads_on_the_dark_panel(widget: PuttingGreenWidget) -> None:
+    # The Strokes Gained "Holed" label kept the default dark text (#14542
+    # review); check boxes take the panel's label colour.
+    from PyQt6.QtWidgets import QWidget
+
+    style = widget.findChild(QWidget, "puttControls").styleSheet()
+    label_rule = next(
+        rule for rule in style.split("}") if "QLabel {" in rule or "QLabel," in rule
+    )
+    assert "QCheckBox" in label_rule
