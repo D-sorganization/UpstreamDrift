@@ -76,12 +76,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14274
 - **Branch:** feat/14274-config-secrets
-- **PR:** #14414
+- **PR:** #14414, #14403
 - **Paths:** see #14414
 - **Started:** 2026-11-03
-- **Last verified:** 2026-11-03 (`2e099ba2`; collated from changes/14274-config-secrets-and-upgrade-rollback.md)
+- **Last verified:** 2026-11-05 (`b281ba3e`; collated from changes/14274-root-dockerignore-secret-contract.md)
 - **Summary:** Config/secret separation and upgrade/rollback guarantees
-- **Next step:** Merge the PR.
+- **Next step:** Complete independent review and open the scoped CI contract PR.
 
 ### DL-#14275 · \ Define and Implement Clean-Environment Install Smoke Test\
 
@@ -937,6 +937,149 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14562 · SHOW-C6 Shot-Shape Presets, Ball-Flight Curvature Sign Tests and Swing-Variant Artefact With Run Identity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14562
+- **Branch:** merged via #14618
+- **PR:** #14618
+- **Paths:** see #14618
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ff8672d1`; collated from changes/14562-show-c6-shot-shape-presets-ball-flight-c.md)
+- **Summary:** SHOW-C6 shot-shape presets, ball-flight curvature sign tests and swing-variant artefact with run identity
+- **Next step:** Shipped in PR #14618.
+
+### DL-#14471 · Putting Analytics: Versioned Setup Document (The Studio's Schema_Version 4.0.0) With Export/Import (Studio Exports Load Their Green and Distance), Named Scenarios With Their Dispersion Result and a Comparison Against the First, as a Shared Service and /Scenario, /Scenario-Compare, /Setup-Export and /Setup-Import Routes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14471
+- **Branch:** merged via #14615
+- **PR:** #14615
+- **Paths:** see #14615
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`9ab683af`; collated from changes/14471-putting-scenarios-core.md)
+- **Summary:** Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes
+- **Next step:** Shipped in PR #14615.
+
+### DL-#14571 · SHOW-B7: Fit a SkillFamily From Launch-Monitor Shot Data, Shrunk Toward a Preset
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14571
+- **Branch:** merged via #14616
+- **PR:** #14616
+- **Paths:** see #14616
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`f2deca76`; collated from changes/14571-show-b7-fit-a-skillfamily-from-launch-mo.md)
+- **Summary:** SHOW-B7: fit a SkillFamily from launch-monitor shot data, shrunk toward a preset
+- **Next step:** Shipped in PR #14616.
+
+### DL-#14569 · SHOW-B5: Parametric Lie/Rough Impact-Condition Modifier (Physics/lie_interaction.py) With Labelled Assumptions
+
+- **State:** shipped
+- **Owner:** fleet-orchestrator
+- **Issue:** #14569
+- **Branch:** desk/show-neck/14569-lie-interaction
+- **PR:** #14613
+- **Paths:** see #14613
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`728cea86`; collated from changes/14569-show-b5-lie-interaction.md)
+- **Summary:** SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions
+- **Next step:** Shipped in PR #14613.
+
+### DL-#14470 · React Putting Simulator Gains the Counter-Torque Stabilization Explorer (Sliders, Putter Preset, Hand-Couple Chart, Impact Readouts) Over the Core /Counter-Torque Route
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14470
+- **Branch:** merged via #14611
+- **PR:** #14611
+- **Paths:** see #14611
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`162c2aef`; collated from changes/14470-react-putting-simulator-gains-the-counte.md)
+- **Summary:** React putting simulator gains the counter-torque stabilization explorer (sliders, putter preset, hand-couple chart, impact readouts) over the core /counter-torque route
+- **Next step:** Shipped in PR #14611.
+
+### DL-#14567 · SHOW-B3: Cached, Versioned MC Dispersion Tables (CRN) + Pipeline Landing Adapter
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14567
+- **Branch:** merged via #14608
+- **PR:** #14608
+- **Paths:** see #14608
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`25f3520a`; collated from changes/14567-show-b3-cached-versioned-mc-dispersion-t.md)
+- **Summary:** SHOW-B3: cached, versioned MC dispersion tables (CRN) + pipeline landing adapter
+- **Next step:** Shipped in PR #14608.
+
+### DL-#14561 · SHOW-C5 Speed Continuation 100-125 Mph With Pareto Front and Binding Report
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14561
+- **Branch:** merged via #14606
+- **PR:** #14606
+- **Paths:** see #14606
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`cd544818`; collated from changes/14561-show-c5-speed-continuation-100-125-mph-w.md)
+- **Summary:** SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report
+- **Next step:** Shipped in PR #14606.
+
+### DL-#14550 · Add Golf-Language Face-On Address Grip Roll Metric (0 Deg Vertical, + Strong) With Flagship Measurement and Overlay Render
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14550
+- **Branch:** merged via #14601
+- **PR:** #14601
+- **Paths:** see #14601
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`986b3224`; collated from changes/14550-add-golf-language-face-on-address-grip-r.md)
+- **Summary:** Add golf-language face-on address grip roll metric (0 deg vertical, + strong) with flagship measurement and overlay render
+- **Next step:** Shipped in PR #14601.
+
+### DL-#14560 · SHOW-C4: Shaft_State_Series Reports MuJoCo Chain-Shaft Tip Deflection, Lead/Droop, Deflection Rate and Strain Energy Through Impact, With R11-Window Evidence on the Best-Fit Driver
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14560
+- **Branch:** merged via #14598
+- **PR:** #14598
+- **Paths:** see #14598
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`1760fe35`; collated from changes/14560-show-c4-shaft-state-series-reports-mujoc.md)
+- **Summary:** SHOW-C4: shaft_state_series reports MuJoCo chain-shaft tip deflection, lead/droop, deflection rate and strain energy through impact, with R11-window evidence on the best-fit driver
+- **Next step:** Shipped in PR #14598.
+
+### DL-#14554 · SHOW-A5: Trunk Observability Report (Marker Jacobian SVD), ADR-0059 and Coupled-by-Default Showpiece Spec
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14554
+- **Branch:** merged via #14603
+- **PR:** #14603
+- **Paths:** see #14603
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`513127ec`; collated from changes/14554-show-a5-trunk-observability-report-marke.md)
+- **Summary:** SHOW-A5: trunk observability report (marker Jacobian SVD), ADR-0059 and coupled-by-default showpiece spec
+- **Next step:** Shipped in PR #14603.
+
+### DL-#14553 · SHOW-A4: Cited Neck ROM (neck_rom.py, Single Source for Range_of_Motion) Enforced as MJCF Joint Limits on NeckInput X/Y/Z
+
+- **State:** shipped
+- **Owner:** fleet-orchestrator
+- **Issue:** #14553
+- **Branch:** desk/show-neck/14553-neck-segment
+- **PR:** #14578
+- **Paths:** see #14578
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`00e1e9ff`; collated from changes/14553-show-a4-neck-rom.md)
+- **Summary:** SHOW-A4: cited neck ROM (neck_rom.py, single source for range_of_motion) enforced as MJCF joint limits on NeckInput X/Y/Z
+- **Next step:** Shipped in PR #14578.
+
 ### DL-#14595 · CI Standard Sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 Workflow-Wide and Passes Pip-Audit --Timeout 60, so Transient PyPI Read Timeouts No Longer Fail CI
 
 - **State:** shipped
@@ -1021,10 +1164,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14466
 - **Branch:** merged via #14588
-- **PR:** #14588
+- **PR:** #14588, #14604
 - **Paths:** see #14588
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`8fff9f83`; collated from changes/14466-solve-aim-3d.md)
+- **Last verified:** 2026-11-05 (`416c462c`; collated from changes/14466-react-putting-simulator-gains-the-deskto.md)
 - **Summary:** Putting API: POST /solve-aim-3d solves the pace and line that hole a /simulate-3d putt on that route's own surface and head (core solve_aim, like the desktop Auto-Solve); the 3-D request models move to src/api/models/putting_green_requests.py
 - **Next step:** Shipped in PR #14588.
 
@@ -1112,10 +1255,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14469
 - **Branch:** merged via #14548
-- **PR:** #14548, #14602
+- **PR:** #14548, #14602, #14609
 - **Paths:** see #14548
 - **Started:** 2026-11-04
-- **Last verified:** 2026-11-05 (`12fecba2`; collated from changes/14469-putting-counter-torque-route.md)
+- **Last verified:** 2026-11-05 (`c39d2c75`; collated from changes/14469-putting-counter-torque-desktop.md)
 - **Summary:** Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio
 - **Next step:** Shipped in PR #14548.
 
@@ -2204,10 +2347,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13560
 - **Branch:** merged via #14185
-- **PR:** #14185, #14351
+- **PR:** #14185, #14351, #14354
 - **Paths:** see #14185
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-02 (`1377299a`; collated from changes/13560-opensim-net-moment-diagnosis.md)
+- **Last verified:** 2026-11-05 (`c2433dd1`; collated from changes/13560-opensim-overlap-hold-moment-lever.md)
 - **Summary:** MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed
 - **Next step:** Shipped in PR #14185.
 

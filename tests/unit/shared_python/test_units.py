@@ -190,3 +190,35 @@ class TestPreferencesDialogUnits:
             dlg.deleteLater()
             parent.close()
             parent.deleteLater()
+
+
+class TestForceAndTorque:
+    """Force (N | lbf) and torque (N·m | in·lbf) display units (#14469)."""
+
+    def test_pound_force_is_the_standard_pound_weight(self) -> None:
+        lbf_n = 0.45359237 * 9.80665  # exact definitions
+        assert units_module.to_display_force(lbf_n, UnitSystem.IMPERIAL) == (
+            pytest.approx(1.0)
+        )
+        assert units_module.to_display_force(3.0, UnitSystem.METRIC) == 3.0
+        assert units_module.from_display_force(
+            units_module.to_display_force(7.5, UnitSystem.IMPERIAL),
+            UnitSystem.IMPERIAL,
+        ) == pytest.approx(7.5)
+
+    def test_inch_pound_torque(self) -> None:
+        in_lbf_nm = 0.0254 * 0.45359237 * 9.80665
+        assert units_module.to_display_torque(in_lbf_nm, UnitSystem.IMPERIAL) == (
+            pytest.approx(1.0)
+        )
+        assert units_module.to_display_torque(0.6, UnitSystem.METRIC) == 0.6
+        assert units_module.from_display_torque(
+            units_module.to_display_torque(0.6, UnitSystem.IMPERIAL),
+            UnitSystem.IMPERIAL,
+        ) == pytest.approx(0.6)
+
+    def test_suffixes(self) -> None:
+        assert units_module.force_suffix(UnitSystem.METRIC) == " N"
+        assert units_module.force_suffix(UnitSystem.IMPERIAL) == " lbf"
+        assert units_module.torque_suffix(UnitSystem.METRIC) == " N·m"
+        assert units_module.torque_suffix(UnitSystem.IMPERIAL) == " in·lbf"

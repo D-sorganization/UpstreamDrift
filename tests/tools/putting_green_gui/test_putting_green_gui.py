@@ -679,3 +679,24 @@ def test_phase_jumps_land_on_each_core_phase(widget: PuttingGreenWidget) -> None
         assert widget.playback_bar().scrub_slider.value() == mark.index
         assert widget._anim_index == mark.index
         assert not widget._anim_timer.isActive()
+
+
+def test_the_torque_panel_sits_in_the_simulator(widget: PuttingGreenWidget) -> None:
+    panel = widget.torque_panel()
+    assert panel.parent() is not None
+    assert panel.canvas.parent() is not None
+    assert panel.couple_lines()[0], "the couples plot on open"
+
+
+def test_the_torque_panel_follows_the_unit_choice(widget: PuttingGreenWidget) -> None:
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert "N" in widget.torque_panel().couple_axis_label()
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert "lbf" in widget.torque_panel().couple_axis_label()
+
+
+def test_the_torque_panel_is_no_wider_than_the_batch_panel(
+    widget: PuttingGreenWidget,
+) -> None:
+    widest = widget.batch_panel.minimumSizeHint().width()
+    assert widget.torque_panel().minimumSizeHint().width() <= widest

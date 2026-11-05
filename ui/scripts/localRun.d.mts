@@ -4,3 +4,4 @@ export declare function buildSteps(options: {
   install: boolean;
 }): [string, string[]][];
 export declare function launchCommand(port: number): [string, string[]];
+export declare function run(step: [string, string[]], cwd: string): void;

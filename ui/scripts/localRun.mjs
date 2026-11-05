@@ -41,7 +41,8 @@ export function launchCommand(port) {
   return ["python3", ["launch_upstream_drift.py", "--port", String(port)]];
 }
 
-function run([command, args], cwd) {
+/** Run one `[command, args]` step in `cwd`, throwing on a non-zero exit. */
+export function run([command, args], cwd) {
   const result = spawnSync(command, args, {
     cwd,
     stdio: "inherit",

@@ -11,13 +11,13 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | present | present | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | partial (#14461) |
 | Toe/Heel Strike Location | (c) | present | present | present | present | partial (#14461) |
-| Counter-Torque Stabilization (Hand Couples, Gust) | (g) | present | missing (#14469) | missing (#14470) | missing (#14470) | present |
+| Counter-Torque Stabilization (Hand Couples, Gust) | (g) | present | present | present | present | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | present | present | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | present | present | present | partial (#14467) |
-| Saved Scenarios and Comparison | (h) | missing (#14471) | missing (#14471) | missing (#14472) | missing (#14472) | present |
-| JSON Import/Export of a Setup | (h) | partial (#14471) | partial (#14471) | missing (#14472) | missing (#14472) | present |
+| Saved Scenarios and Comparison | (h) | present | missing (#14471) | missing (#14472) | missing (#14472) | present |
+| JSON Import/Export of a Setup | (h) | present | partial (#14471) | missing (#14472) | missing (#14472) | present |
 | Camera Views and Playback Phases | (i) | present | present | present | present | present |
 
 ## Evidence
@@ -56,8 +56,8 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 
 **Counter-Torque Stabilization (Hand Couples, Gust)**
 - Core/API: present. `src/shared/python/putting_dynamics/counter_torque.py`, `src/api/routes/putting_green.py`. Closed-form two-hand couple model (preload, off-plane preload, noise, gust, lie, shared putter presets) in the core; hand couples sum to the required moment without noise. Served on POST /counter-torque as one list per sample field.
-- PyQt6: missing (#14469). none. None.
-- React: missing (#14470). none. None.
+- PyQt6: present. `src/tools/putting_green_gui/_torque_panel.py`. Counter-Torque Stabilization panel: grip and off-plane preload, gust, hand noise, lie and the shared balance heads; charts the core's hand couples and the gust twist with and without the preload, couples and forces in the chosen units.
+- React: present. `ui/src/components/putting/CounterTorquePanel.tsx`, `ui/src/utils/counterTorque.ts`. Counter-torque explorer on the simulator page: grip preload, off-plane preload, hand noise, gust and lie sliders bounded by the core ranges, putter head preset, the hand-couple strip chart, impact face/path, peak hand forces and gust wobble via /counter-torque (golden-pinned, #14470).
 - Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/charts2d.js`, `src/apps/putting_studio/js/controls_c.js`. Closed-form couple model, gust pulse and torque charts; drift-gated sample for sample against the core (tests/unit/putting_dynamics/test_counter_torque.py).
 
 **Putter Balance Type (CG Offset, MOI)**
@@ -85,13 +85,13 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: partial (#14467). `src/apps/putting_studio/js/green3d.js`, `src/apps/putting_studio/js/charts2d.js`. Bellman formula with a hand-tuned comeback fit, not a solved recursion.
 
 **Saved Scenarios and Comparison**
-- Core/API: missing (#14471). none. None.
+- Core/API: present. `src/shared/python/putting_analytics/service_setup.py`, `src/api/routes/putting_analytics.py`. Named setups with their dispersion result; /scenario and /scenario-compare (make rate and leave against the first).
 - PyQt6: missing (#14471). none. None.
 - React: missing (#14472). `ui/src/stores/usePuttingStore.ts`. Store holds one parameter set and one result.
 - Studio: present. `src/apps/putting_studio/js/controls_a.js`. Saved scenarios with a comparison table; no distribution chart.
 
 **JSON Import/Export of a Setup**
-- Core/API: partial (#14471). `src/shared/python/putting_dynamics/practice.py`. Saves putt results and reports, not a setup; no import/export route.
+- Core/API: present. `src/shared/python/putting_analytics/service_setup.py`, `src/api/routes/putting_analytics.py`. Versioned setup document (schema_version 4.0.0, the studio's); /setup-export and /setup-import, which also loads a studio export's green and distance.
 - PyQt6: partial (#14471). `src/tools/putting_green_gui/_scene_export.py`. export_putt_scene/read_putt_export exist but nothing in the UI calls them.
 - React: missing (#14472). none. None.
 - Studio: present. `src/apps/putting_studio/js/io.js`. Export/load with schema_version 4.0.0, including scenarios.

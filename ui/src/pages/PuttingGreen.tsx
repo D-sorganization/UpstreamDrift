@@ -10,6 +10,7 @@ import type {
 import { simulatePutt3D } from "@/api/puttingClient";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
 import { AutoSolveButton } from "@/components/putting/AutoSolveButton";
+import { CounterTorquePanel } from "@/components/putting/CounterTorquePanel";
 import { DispersionPanel } from "@/components/putting/DispersionPanel";
 import { GreenTypeControl } from "@/components/putting/GreenTypeControl";
 import { StrokesGainedPanel } from "@/components/putting/StrokesGainedPanel";
@@ -668,6 +669,10 @@ export function PuttingGreenPage() {
       <DispersionPanel />
       <h2 className="mb-3 mt-6 text-sm font-semibold">Strokes Gained</h2>
       <StrokesGainedPanel />
+      <h2 className="mb-3 mt-6 text-sm font-semibold">
+        Counter-Torque Stabilization
+      </h2>
+      <CounterTorquePanel />
     </div>
   );
 

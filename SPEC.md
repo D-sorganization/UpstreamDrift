@@ -2741,6 +2741,21 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14618 | SHOW-C6 shot-shape presets, ball-flight curvature sign tests and swing-variant artefact with run identity |
+| 2026-11-05 | #14615 | Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes |
+| 2026-11-05 | #14354 | OpenSim topology grip rebuilds club moment at mid-penetration lever; overlap hold net_moment_com xfail removed. |
+| 2026-11-05 | #14616 | SHOW-B7: fit a SkillFamily from launch-monitor shot data, shrunk toward a preset |
+| 2026-11-05 | #14613 | SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions |
+| 2026-11-05 | #14611 | React putting simulator gains the counter-torque stabilization explorer (sliders, putter preset, hand-couple chart, impact readouts) over the core /counter-torque route |
+| 2026-11-05 | #14608 | SHOW-B3: cached, versioned MC dispersion tables (CRN) + pipeline landing adapter |
+| 2026-11-05 | #14403 | Guard root Docker context secret-exclusion rules |
+| 2026-11-05 | #14606 | SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report |
+| 2026-11-05 | #14601 | Add golf-language face-on address grip roll metric (0 deg vertical, + strong) with flagship measurement and overlay render |
+| 2026-11-05 | #14609 | Putting Green Simulator: Counter-Torque Stabilization panel charts the shared core's hand couples and gust twist (preload held vs slack grip) on the shared balance heads, with force and torque display units (N, lbf, N·m, in·lbf) in the shared units module |
+| 2026-11-05 | #14598 | SHOW-C4: shaft_state_series reports MuJoCo chain-shaft tip deflection, lead/droop, deflection rate and strain energy through impact, with R11-window evidence on the best-fit driver |
+| 2026-11-05 | #14603 | SHOW-A5: trunk observability report (marker Jacobian SVD), ADR-0059 and coupled-by-default showpiece spec |
+| 2026-11-05 | #14578 | SHOW-A4: cited neck ROM (neck_rom.py, single source for range_of_motion) enforced as MJCF joint limits on NeckInput X/Y/Z |
+| 2026-11-05 | #14604 | React putting simulator gains the desktop Auto-Solve Read: /solve-aim-3d pace and aim written into the controls, the solved putt simulated, and the read shown in the chosen units |
 | 2026-11-05 | #14597 | CI Standard sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 workflow-wide and passes pip-audit --timeout 60, so transient PyPI read timeouts no longer fail CI |
 | 2026-11-05 | #14602 | Putting: POST /tools/putting-green/counter-torque serves the shared core's two-hand couple model (hand couples, forces and gust response over the stroke) |
 | 2026-11-05 | #14590 | SHOW-B2: SkillFamily schema (impact-condition mean/cov + provenance), assumption-marked presets, registry, PlayerProfile link |

@@ -78,3 +78,14 @@ describe("unit preference", () => {
     expect(loadUnitSystem()).toBe("metric");
   });
 });
+
+describe("force and torque (#14470)", () => {
+  it("shows lbf and in·lbf in imperial with units.py's factors", () => {
+    const lbf = 0.45359237 * 9.80665;
+    expect(formatQuantity(lbf, "force", "imperial", 3)).toBe("1.000 lbf");
+    expect(formatQuantity(0.0254 * lbf, "torque", "imperial", 3)).toBe(
+      "1.000 in·lbf",
+    );
+    expect(formatQuantity(1.2, "torque", "metric", 2)).toBe("1.20 N·m");
+  });
+});

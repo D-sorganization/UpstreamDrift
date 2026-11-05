@@ -669,10 +669,7 @@ _DETERMINATE_ENGINE_CASES = [
         "opensim",
         GripStyle.OVERLAP,
         "hold",
-        marks=[
-            pytest.mark.requires_opensim,
-            _net_moment_xfail("OpenSim overlap hold", "peak 5.451% / RMS 2.512%"),
-        ],
+        marks=[pytest.mark.requires_opensim],
         id="opensim-overlap-hold",
     ),
     pytest.param(
