@@ -1,5 +1,7 @@
 import type {
   BalancePresetsResponse,
+  CounterTorqueRequest,
+  CounterTorqueResponse,
   Putt3DSimulationRequest,
   Putt3DSimulationResponse,
 } from "./generated/types";
@@ -29,6 +31,16 @@ export function simulatePutt3D(
 export function fetchPutterPresets(): Promise<BalancePresetsResponse> {
   return apiFetch<BalancePresetsResponse>(
     "/api/tools/putting-green/putter-presets",
+  );
+}
+
+/** Hand couples, forces and gust response over the stroke (#14469). */
+export function fetchCounterTorque(
+  request: CounterTorqueRequest,
+): Promise<CounterTorqueResponse> {
+  return apiFetch<CounterTorqueResponse>(
+    "/api/tools/putting-green/counter-torque",
+    { method: "POST", body: JSON.stringify(request) },
   );
 }
 
