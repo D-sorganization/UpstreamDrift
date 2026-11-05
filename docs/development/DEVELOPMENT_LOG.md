@@ -937,6 +937,71 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14562 · SHOW-C6 Shot-Shape Presets, Ball-Flight Curvature Sign Tests and Swing-Variant Artefact With Run Identity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14562
+- **Branch:** merged via #14618
+- **PR:** #14618
+- **Paths:** see #14618
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ff8672d1`; collated from changes/14562-show-c6-shot-shape-presets-ball-flight-c.md)
+- **Summary:** SHOW-C6 shot-shape presets, ball-flight curvature sign tests and swing-variant artefact with run identity
+- **Next step:** Shipped in PR #14618.
+
+### DL-#14471 · Putting Analytics: Versioned Setup Document (The Studio's Schema_Version 4.0.0) With Export/Import (Studio Exports Load Their Green and Distance), Named Scenarios With Their Dispersion Result and a Comparison Against the First, as a Shared Service and /Scenario, /Scenario-Compare, /Setup-Export and /Setup-Import Routes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14471
+- **Branch:** merged via #14615
+- **PR:** #14615
+- **Paths:** see #14615
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`9ab683af`; collated from changes/14471-putting-scenarios-core.md)
+- **Summary:** Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes
+- **Next step:** Shipped in PR #14615.
+
+### DL-#14571 · SHOW-B7: Fit a SkillFamily From Launch-Monitor Shot Data, Shrunk Toward a Preset
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14571
+- **Branch:** merged via #14616
+- **PR:** #14616
+- **Paths:** see #14616
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`f2deca76`; collated from changes/14571-show-b7-fit-a-skillfamily-from-launch-mo.md)
+- **Summary:** SHOW-B7: fit a SkillFamily from launch-monitor shot data, shrunk toward a preset
+- **Next step:** Shipped in PR #14616.
+
+### DL-#14569 · SHOW-B5: Parametric Lie/Rough Impact-Condition Modifier (Physics/lie_interaction.py) With Labelled Assumptions
+
+- **State:** shipped
+- **Owner:** fleet-orchestrator
+- **Issue:** #14569
+- **Branch:** desk/show-neck/14569-lie-interaction
+- **PR:** #14613
+- **Paths:** see #14613
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`728cea86`; collated from changes/14569-show-b5-lie-interaction.md)
+- **Summary:** SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions
+- **Next step:** Shipped in PR #14613.
+
+### DL-#14470 · React Putting Simulator Gains the Counter-Torque Stabilization Explorer (Sliders, Putter Preset, Hand-Couple Chart, Impact Readouts) Over the Core /Counter-Torque Route
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14470
+- **Branch:** merged via #14611
+- **PR:** #14611
+- **Paths:** see #14611
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`162c2aef`; collated from changes/14470-react-putting-simulator-gains-the-counte.md)
+- **Summary:** React putting simulator gains the counter-torque stabilization explorer (sliders, putter preset, hand-couple chart, impact readouts) over the core /counter-torque route
+- **Next step:** Shipped in PR #14611.
+
 ### DL-#14567 · SHOW-B3: Cached, Versioned MC Dispersion Tables (CRN) + Pipeline Landing Adapter
 
 - **State:** shipped
@@ -2282,10 +2347,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13560
 - **Branch:** merged via #14185
-- **PR:** #14185, #14351
+- **PR:** #14185, #14351, #14354
 - **Paths:** see #14185
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-02 (`1377299a`; collated from changes/13560-opensim-net-moment-diagnosis.md)
+- **Last verified:** 2026-11-05 (`c2433dd1`; collated from changes/13560-opensim-overlap-hold-moment-lever.md)
 - **Summary:** MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed
 - **Next step:** Shipped in PR #14185.
 

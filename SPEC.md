@@ -2741,6 +2741,12 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14618 | SHOW-C6 shot-shape presets, ball-flight curvature sign tests and swing-variant artefact with run identity |
+| 2026-11-05 | #14615 | Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes |
+| 2026-11-05 | #14354 | OpenSim topology grip rebuilds club moment at mid-penetration lever; overlap hold net_moment_com xfail removed. |
+| 2026-11-05 | #14616 | SHOW-B7: fit a SkillFamily from launch-monitor shot data, shrunk toward a preset |
+| 2026-11-05 | #14613 | SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions |
+| 2026-11-05 | #14611 | React putting simulator gains the counter-torque stabilization explorer (sliders, putter preset, hand-couple chart, impact readouts) over the core /counter-torque route |
 | 2026-11-05 | #14608 | SHOW-B3: cached, versioned MC dispersion tables (CRN) + pipeline landing adapter |
 | 2026-11-05 | #14403 | Guard root Docker context secret-exclusion rules |
 | 2026-11-05 | #14606 | SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report |

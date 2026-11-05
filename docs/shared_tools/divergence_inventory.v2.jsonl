@@ -1034,9 +1034,12 @@
 {"path": "humanoid_robotics/option_a/trace_contract.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "impact_optimization/__init__.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/impact_target.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
+{"path": "impact_optimization/kinematic_binding.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/physiological_envelope.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
+{"path": "impact_optimization/shot_presets.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/speed_continuation.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/spline_controls.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
+{"path": "impact_optimization/swing_variant.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/trajectory_optimiser.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/trust_region.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_parameters/__init__.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
@@ -2278,6 +2281,7 @@
 {"path": "putting_analytics/service.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/service_curve.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/service_dispersion.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
+{"path": "putting_analytics/service_setup.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/service_sg.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/service_variance.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
 {"path": "putting_analytics/sg_curve.py", "classification": "ud-only", "package": "putting_analytics", "spelling_only": false}
@@ -2387,10 +2391,13 @@
 {"path": "sg_optimizer/shot_model/putting.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/putting_provider.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/registry.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/shot_model/shrinkage.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/skill_family.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/skill_fit.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/skill_registry.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/slope_wind_bins.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/shot_model/table_model.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/strategy.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "shadow_tracker/AGENTS.md", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/README.md", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/__init__.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
