@@ -138,17 +138,15 @@ def _raster(size: int, origin: float) -> LieRaster:
 
 def test_transition_uses_injected_backend() -> None:
     raster = _raster(80, -100.0)
-    bag = load_baseline(PGA_TOUR_YAML)
     outcomes = sample_transitions(
         State(x=0.0, y=0.0, lie=_FAIRWAY),
         ShotAction("7_iron", 0.0),
         _player(),
-        bag,
+        _ConstModel(100.0, 5.0),
         CourseConditions.benign(),
         raster,
         4,
         np.random.default_rng(0),
-        model=_ConstModel(100.0, 5.0),
     )
     assert [(o.next_state.x, o.next_state.y) for o in outcomes] == [(100.0, 5.0)] * 4
 
