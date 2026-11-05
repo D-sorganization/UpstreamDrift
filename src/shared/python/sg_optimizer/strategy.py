@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import numpy as np
+from numpy.typing import NDArray
+
 from src.shared.python.sg_optimizer.course.conditions import CourseConditions
 from src.shared.python.sg_optimizer.course.rasterize import LieRaster
 from src.shared.python.sg_optimizer.mdp.action import ActionSet, ShotAction
@@ -49,12 +52,13 @@ class SolveSettings:
     max_iter: int = 200
 
 
-def _solve(
+def solve_mdp(
     problem: StrategyProblem,
     profile: PlayerProfile,
     model: ShotOutcomeModel | None,
     cfg: SolveSettings,
-) -> tuple[float, ShotAction]:
+) -> tuple[HoleMDP, NDArray[np.float64]]:
+    """Solve the hole for ``profile``; return the MDP and its value function."""
     mdp = HoleMDP(
         problem.raster,
         profile,
@@ -65,7 +69,16 @@ def _solve(
         cfg.seed,
         model=model,
     )
-    value = mdp.solve(max_iter=cfg.max_iter).value
+    return mdp, mdp.solve(max_iter=cfg.max_iter).value
+
+
+def _solve(
+    problem: StrategyProblem,
+    profile: PlayerProfile,
+    model: ShotOutcomeModel | None,
+    cfg: SolveSettings,
+) -> tuple[float, ShotAction]:
+    mdp, value = solve_mdp(problem, profile, model, cfg)
     return (
         mdp.expected_strokes(problem.start, value),
         mdp.optimal_action(problem.start, value),
