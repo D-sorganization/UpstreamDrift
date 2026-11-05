@@ -16,6 +16,8 @@ import pytest
 
 from src.shared.python.motion_matching.club_shaft_chain import CHAIN_ENGINES
 
+pytestmark = pytest.mark.unit
+
 ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE = ROOT / "docs/development/full_body_models/evidence/flex_shaft/r11"
 RECEIPT = EVIDENCE / "r11_chain_receipt.json"
