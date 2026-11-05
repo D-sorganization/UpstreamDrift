@@ -49,10 +49,9 @@ class TableShotModel:
 
     def sample(self, player, shot, lie, conditions, rng, n):  # noqa: ANN001
         skill = CLUB_SKILL.get(shot.club)
+        club = self.table.provenance.get("clubs", {}).get(skill, skill)
         try:
-            cell = self.table.lookup(
-                skill or "", skill or "", "fairway", "calm", "flat"
-            )
+            cell = self.table.lookup(skill or "", club or "", "fairway", "calm", "flat")
         except ContractViolationError:  # no cell for this club: use the baseline
             return self.fallback.sample(player, shot, lie, conditions, rng, n)
         dist, sl, slat = lie_modifiers(lie, conditions)

@@ -19,7 +19,9 @@ offsets.  Ground model ``sg_runout_v1``, per shot:
 
 Slope uses the one B6 vocabulary (``slope_wind_bins.SLOPE_BINS``): the stance
 grade is read as the grade of the landing zone, i.e. the landing zone is assumed
-to share the lie's grade; ball-above/below-feet bins have no runout effect.  Every
+to share the lie's grade, and likewise the landing surface (``lie_roll``) is the
+impact lie's surface (a drive hit from the fairway is not allowed to finish in the
+rough in these tables); ball-above/below-feet bins have no runout effect.  Every
 coefficient is a labelled assumption (``GROUND_PARAMETERS``), fairway-first-contact
 turf, not green physics.  Green-side skills (pitch, chip, bunker) keep carry: they land outside this fairway-turf
 domain (``CARRY_ONLY_SKILLS``, hashed).  Credit: first drafted in Cursor PR #14642.
@@ -83,6 +85,7 @@ class SlopeAwareGround:
             "ground_parameters": {k: v.value for k, v in GROUND_PARAMETERS.items()},
             "ground_carry_only_skills": list(CARRY_ONLY_SKILLS),
             "ground_slope_source": "stance bin (landing grade = lie grade)",
+            "ground_lie_source": "impact lie bin (landing surface = impact lie)",
         }
 
     def __call__(

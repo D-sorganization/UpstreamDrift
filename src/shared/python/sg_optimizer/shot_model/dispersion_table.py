@@ -179,6 +179,7 @@ class TableGrid:
     lies: tuple[str, ...] = ("fairway",)
     winds: tuple[str, ...] = DEFAULT_WINDS
     slopes: tuple[str, ...] = SLOPES
+    clubs: dict[str, str] | None = None  # skill -> club label; None = the skill name
 
 
 SlopeModifier = Callable[[str], Callable[[NDArray[np.float64]], NDArray[np.float64]]]
@@ -227,6 +228,11 @@ def build_grid_table(
         grid.slopes == SLOPES or slope_modifier is not None,
         "slope bins need a slope_modifier",
     )
+    clubs = grid.clubs
+    require(
+        clubs is None or set(names) <= set(clubs),
+        "club mapping must cover every skill in the grid",
+    )
     t0, z, cells = time.perf_counter(), standard_normals(seed, n), []
     for skill in names:
         base = _impacts(family.skills[skill].distribution, z)
@@ -248,7 +254,15 @@ def build_grid_table(
                     mean, sd, corr = _cell_stats(land)
                     cells.append(
                         DispersionCell(
-                            skill, skill, lie, wind, slope, mean, sd, corr, n
+                            skill,
+                            skill if clubs is None else clubs[skill],
+                            lie,
+                            wind,
+                            slope,
+                            mean,
+                            sd,
+                            corr,
+                            n,
                         )
                     )
     meta = {
@@ -257,6 +271,8 @@ def build_grid_table(
         "seed": seed,
         "n": n,
     }
+    if clubs is not None:
+        meta["clubs"] = {k: clubs[k] for k in names}
     for part in (
         ground.provenance if ground is not None else {},
         getattr(lie_modifier, "provenance", {}),
@@ -306,13 +322,69 @@ def check_convergence(
     return Convergence(worst < CONVERGENCE_TOL, worst)
 
 
-def main(argv: list[str] | None = None) -> int:
-    """Regenerate a table: ``python -m ...dispersion_table --family tour --out t.json``."""
-    import argparse
+def _csv(text: str | None, default: tuple[str, ...]) -> tuple[str, ...]:
+    return default if text is None else tuple(t for t in text.split(",") if t)
 
+
+def _cli_table(a: Any, family: SkillFamily) -> tuple[DispersionTable, Convergence]:
+    """Carry table, or with ``--ground`` the rest-position table (see ``main``)."""
     from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
+        REPRESENTATIVE_CLUB,
         PipelineLandingSimulator,
     )
+
+    if not a.ground:
+        sim = PipelineLandingSimulator()
+        table = build_table(family, sim, n=a.n, seed=a.seed)
+        ground = None
+    else:
+        from src.shared.python.sg_optimizer.shot_model.dispersion_lie import (
+            lie_modifier_for_table,
+        )
+        from src.shared.python.sg_optimizer.shot_model.ground_runout import (
+            SlopeAwareGround,
+        )
+        from src.shared.python.sg_optimizer.shot_model.slope_wind_bins import (
+            SLOPE_BINS,
+            make_slope_modifier,
+        )
+
+        sim, ground = PipelineLandingSimulator(landing_state=True), SlopeAwareGround()
+        grid = TableGrid(
+            None,
+            _csv(a.lies, ("tee", "fairway", "rough", "sand")),
+            _csv(a.winds, DEFAULT_WINDS),
+            _csv(a.slopes, tuple(SLOPE_BINS)),
+            clubs=REPRESENTATIVE_CLUB,
+        )
+        table = build_grid_table(
+            family,
+            sim,
+            grid,
+            n=a.n,
+            seed=a.seed,
+            lie_modifier=lie_modifier_for_table(a.seed),
+            slope_modifier=make_slope_modifier,
+            ground=ground,
+        )
+    worst = max(
+        check_convergence(
+            family, sim, s, n=a.n, seed=a.seed, ground=ground
+        ).max_rel_change
+        for s in family.skills
+    )
+    return table, Convergence(worst < CONVERGENCE_TOL, worst)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Regenerate a table: ``python -m ...dispersion_table --family tour --out t.json``.
+
+    ``--ground`` builds the rest-position table instead of the carry table: bounce
+    and roll on every slope bin, the lie modifier, a club label per skill, and the
+    convergence of the rest positions, all in the hashed provenance.
+    """
+    import argparse
+
     from src.shared.python.sg_optimizer.shot_model.skill_registry import (
         get_skill_family,
     )
@@ -322,14 +394,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--n", type=int, default=DEFAULT_N)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--out", required=True)
+    p.add_argument("--ground", action="store_true", help="rest-position table")
+    p.add_argument("--lies", help="comma list (with --ground; default all)")
+    p.add_argument("--slopes", help="comma list (with --ground; default all)")
+    p.add_argument("--winds", help="comma list (with --ground; default B3 bins)")
     a = p.parse_args(argv)
-    family, sim = get_skill_family(a.family), PipelineLandingSimulator()
-    worst = max(
-        check_convergence(family, sim, s, n=a.n, seed=a.seed).max_rel_change
-        for s in family.skills
-    )
-    conv = Convergence(worst < CONVERGENCE_TOL, worst)
-    table = build_table(family, sim, n=a.n, seed=a.seed)
+    table, conv = _cli_table(a, get_skill_family(a.family))
     table.with_convergence(conv).to_json(a.out)
     return 0
 

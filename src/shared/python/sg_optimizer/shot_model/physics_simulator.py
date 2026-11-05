@@ -40,6 +40,19 @@ CLUB_LOFT_DEG: dict[str, float] = {
     "chip": 56.0,
     "bunker": 56.0,
 }
+# A representative bag club per skill, within a few degrees of ``CLUB_LOFT_DEG``. The
+# short-game shots have no bag club of their own and keep the shot name.
+REPRESENTATIVE_CLUB: dict[str, str] = {
+    "driver": "driver",
+    "fairway_wood": "3_wood",
+    "long_iron": "4_iron",
+    "mid_iron": "6_iron",
+    "short_iron": "8_iron",
+    "wedge": "gw",
+    "pitch": "pitch",
+    "chip": "chip",
+    "bunker": "bunker",
+}
 
 
 def swing_state_from_impact(impact: NDArray[np.float64], skill: str) -> SwingState:
