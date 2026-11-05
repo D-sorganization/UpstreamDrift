@@ -45,6 +45,7 @@ from src.shared.python.impact_optimization.kinematic_binding import (
 )
 from src.shared.python.impact_optimization.physiological_envelope import (
     PhysiologicalEnvelope,
+    is_assumed,
 )
 from src.shared.python.impact_optimization.speed_continuation import (
     DEFAULT_SPEED_TOL_MPH,
@@ -170,7 +171,11 @@ def _row(
 ) -> dict[str, Any]:
     hits = check.kinematic
     over = _names(hits)
-    soft = _names(tuple(h for h in hits if (h.joint, h.kind) in check.assumed_limits))
+    soft = _names(
+        tuple(
+            h for h in hits if is_assumed(h.joint, h.kind, h.side, check.assumed_limits)
+        )
+    )
     breaches = [n for n in over if n not in soft]
     return {
         "target_mph": point.speed_target_mph,

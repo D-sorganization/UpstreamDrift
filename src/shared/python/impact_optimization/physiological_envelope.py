@@ -75,6 +75,83 @@ def load_limits(path: Path | str = DEFAULT_LIMITS_PATH) -> dict[str, VelocityLim
     return out
 
 
+@dataclass(frozen=True)
+class DeclaredSide:
+    """One bound of a declared range: degrees, source text, verification."""
+
+    value_deg: float
+    verification_status: str
+    citation: str
+
+
+@dataclass(frozen=True)
+class DeclaredRom:
+    """A declared joint range with a source per side (lower < upper)."""
+
+    lower: DeclaredSide
+    upper: DeclaredSide
+
+
+def _citation_text(side: Mapping[str, Any]) -> str:
+    cite = side["citation"]
+    parts = [str(cite.get(k)) for k in ("reference", "doi", "note") if cite.get(k)]
+    return "; ".join(parts)
+
+
+def _declared_side(coordinate: str, side: Mapping[str, Any]) -> DeclaredSide:
+    require(
+        isinstance(side.get("citation"), Mapping) and "verification_status" in side,
+        "each declared ROM side needs a citation and verification_status",
+        coordinate,
+    )
+    value = float(side["value"])
+    require(math.isfinite(value), "declared ROM must be finite", (coordinate, value))
+    status = str(side["verification_status"])
+    if status == "VERIFIED":
+        cite = side["citation"]
+        require(
+            bool(cite.get("reference") and cite.get("doi")),
+            "a VERIFIED ROM side needs a reference and a DOI",
+            coordinate,
+        )
+    return DeclaredSide(value, status, _citation_text(side))
+
+
+def load_declared_rom(
+    path: Path | str = DEFAULT_LIMITS_PATH,
+) -> dict[str, DeclaredRom]:
+    """Parse ``declared_rom_deg`` into ``{coordinate: DeclaredRom}``.
+
+    Preconditions: every entry names one coordinate and gives ``lower`` and
+    ``upper`` sides, each with a value, a citation and a ``verification_status``;
+    ``lower < upper``.  An absent section yields ``{}`` (callers then fail closed).
+    """
+    raw: Any = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    entries = raw.get("declared_rom_deg") if isinstance(raw, Mapping) else None
+    out: dict[str, DeclaredRom] = {}
+    for e in entries or []:
+        name = e["coordinate"]
+        require(name not in out, "duplicate declared ROM", name)
+        lower = _declared_side(name, e["lower"])
+        upper = _declared_side(name, e["upper"])
+        require(lower.value_deg < upper.value_deg, "declared ROM lower < upper", name)
+        out[name] = DeclaredRom(lower, upper)
+    return out
+
+
+def is_assumed(
+    joint: str, kind: str, side: str, assumed: frozenset[tuple[str, str]]
+) -> bool:
+    """Is the ``(joint, kind, side)`` limit in an ``assumed_limits()`` set?
+
+    A whole-joint ROM entry ``(joint, "ROM")`` covers both sides; a per-side
+    entry ``(joint, "ROM:lower")`` covers one.  One predicate for every reporter.
+    """
+    if (joint, kind) in assumed:
+        return True
+    return kind == "ROM" and bool(side) and (joint, f"ROM:{side}") in assumed
+
+
 #: Root (pelvis-in-world) rotations: free by definition, so the one explicit
 #: exemption from the fail-closed ROM rule.  Every other coordinate needs a
 #: declared range or an explicit ``allow_unbounded_rom`` entry.
@@ -99,6 +176,9 @@ class PhysiologicalEnvelope:
     #: not from a source of its own.  A breach still rejects the rung (D29) but is
     #: reported as assumption-limited (D32), never as probable miscalibration.
     soft_rom_slots: tuple[str, ...] = ()
+    #: ``(coordinate, "lower"|"upper")`` bounds from ``declared_rom_deg`` whose
+    #: ``verification_status`` is not VERIFIED (no source read in full text).
+    assumed_rom_sides: tuple[tuple[str, str], ...] = ()
 
     def __post_init__(self) -> None:
         n = len(self.names)
@@ -128,22 +208,31 @@ class PhysiologicalEnvelope:
             "soft_rom_slots must be known joints with a declared (soft) range",
             self.soft_rom_slots,
         )
+        require(
+            all(
+                j in self.names and s in ("lower", "upper")
+                for j, s in self.assumed_rom_sides
+            ),
+            "assumed_rom_sides must be (known joint, 'lower'|'upper')",
+            self.assumed_rom_sides,
+        )
 
-    def limit_is_assumed(self, joint: str, kind: str) -> bool:
-        """True when ``joint``'s ``kind`` limit is not a cited value.
+    def limit_is_assumed(self, joint: str, kind: str, side: str = "") -> bool:
+        """True when ``joint``'s ``kind`` limit (on ``side``) is not a cited value.
 
-        ``kind`` is ``"ROM"`` (a soft_limits_deg design range) or ``"velocity"``
-        (an UNVERIFIED prior).  The one predicate every reporter uses, so a breach
-        is labelled assumption-limited (D32) the same way everywhere.
+        ``kind`` is ``"ROM"`` (a soft_limits_deg design range, or a declared
+        bound without a read source) or ``"velocity"`` (an UNVERIFIED prior).
+        ``side`` (``"lower"``/``"upper"``) matters for ROM declared per side;
+        without it only a whole-joint (soft) ROM reads as assumed, never a guess.
         """
         require(kind in ("ROM", "velocity"), "kind must be 'ROM' or 'velocity'", kind)
-        slots = self.soft_rom_slots if kind == "ROM" else self.assumed_velocity_slots
-        return joint in slots
+        return is_assumed(joint, kind, side, self.assumed_limits())
 
     def assumed_limits(self) -> frozenset[tuple[str, str]]:
-        """Every assumed ``(joint, kind)`` pair, for report renderers."""
+        """Every assumed limit as ``(joint, kind)`` or ``(joint, "ROM:<side>")``."""
         return frozenset(
             [(j, "ROM") for j in self.soft_rom_slots]
+            + [(j, f"ROM:{s}") for j, s in self.assumed_rom_sides]
             + [(j, "velocity") for j in self.assumed_velocity_slots]
         )
 
@@ -154,6 +243,7 @@ class PhysiologicalEnvelope:
         subject: CapacitySubject,
         velocity_limits: Mapping[str, VelocityLimit],
         allow_unbounded_rom: frozenset[str] = frozenset(),
+        declared_rom: Mapping[str, DeclaredRom] | None = None,
     ) -> PhysiologicalEnvelope:
         """Build for every actuated (non-translation) coordinate of ``spec``.
 
@@ -163,14 +253,22 @@ class PhysiologicalEnvelope:
         joint would make any "no ROM violation" check vacuous).  A coordinate
         with no hard range but a ``soft_limits_deg`` entry takes that range and
         is listed in ``soft_rom_slots`` (hard ranges win when both exist).  A soft
-        range gates acceptance of a rung, never IK or an engine limit.
+        range gates acceptance of a rung, never IK or an engine limit.  A coordinate
+        with neither takes ``declared_rom_deg`` from the limits YAML (a source and
+        status per side; pass ``declared_rom={}`` to fail closed instead).
         """
         cap = capacity_for(tuple(spec["coordinate_order"]), subject)
         hard = spec["coordinate_ranges_deg"]
         soft = {
             n: v for n, v in spec.get("soft_limits_deg", {}).items() if n not in hard
         }
-        ranges = {**soft, **hard}  # a hard bound always wins over a soft one
+        pool = load_declared_rom() if declared_rom is None else declared_rom
+        declared = {n: d for n, d in pool.items() if n not in hard and n not in soft}
+        declared_ranges = {
+            n: (d.lower.value_deg, d.upper.value_deg) for n, d in declared.items()
+        }
+        # a hard bound wins over a soft one, which wins over a declared one
+        ranges = {**declared_ranges, **soft, **hard}
         missing = [
             f"{n}: {kind}"
             for n in cap.actuated_names
@@ -200,6 +298,13 @@ class PhysiologicalEnvelope:
             ),
             unbounded_rom_slots=tuple(n for n in names if n not in ranges),
             soft_rom_slots=tuple(n for n in names if n in soft),
+            assumed_rom_sides=tuple(
+                (n, s)
+                for n in names
+                if n in declared
+                for s, b in (("lower", declared[n].lower), ("upper", declared[n].upper))
+                if b.verification_status != "VERIFIED"
+            ),
             vel_max_deg_s=np.array(
                 [velocity_limits[n].value_deg_s for n in names], dtype=float
             ),
