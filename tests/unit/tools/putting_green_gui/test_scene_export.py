@@ -51,6 +51,7 @@ def _assert_scenes_equal(a: PuttScene, b: PuttScene) -> None:
     assert a.holed is b.holed
     assert a.roll_model == b.roll_model
     assert a.green_type == b.green_type
+    assert a.impact_toe_m == b.impact_toe_m
     for name in (
         "hole_radius_m",
         "final_distance_to_cup_m",
@@ -164,6 +165,37 @@ def test_read_rejects_an_unknown_green_type(scene: PuttScene, tmp_path: Path) ->
     data["green_type"] = "links"
     path.write_text(json.dumps(data), encoding="utf-8")
     with pytest.raises(PuttExportError, match="green_type"):
+        read_putt_export(path)
+
+
+def test_a_toe_strike_round_trips(tmp_path: Path) -> None:
+    # #14530: the export keeps the heel/toe strike offset (#14461).
+    toe = build_putt_scene(PuttConfig(grid_resolution=16, impact_toe_m=0.012))
+    path = export_putt_scene(toe, tmp_path / "toe.json")
+    back = read_putt_export(path)
+    assert back.impact_toe_m == 0.012
+    _assert_scenes_equal(back, toe)
+
+
+def test_an_export_without_a_strike_offset_reads_as_centred(
+    scene: PuttScene, tmp_path: Path
+) -> None:
+    path = export_putt_scene(scene, tmp_path / "old.json")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data.pop("impact_toe_m", None)
+    path.write_text(json.dumps(data), encoding="utf-8")
+    assert read_putt_export(path).impact_toe_m == 0.0
+
+
+@pytest.mark.parametrize("bad", [0.05, -0.041, "toe", float("nan")])
+def test_read_rejects_a_strike_offset_out_of_range(
+    scene: PuttScene, tmp_path: Path, bad: object
+) -> None:
+    path = export_putt_scene(scene, tmp_path / "x.json")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["impact_toe_m"] = bad
+    path.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(PuttExportError, match="impact_toe_m"):
         read_putt_export(path)
 
 
