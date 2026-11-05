@@ -37,10 +37,12 @@ export function formatRead(
     system,
     metric ? 2 : 1,
   );
-  const breakM = Math.abs(solve.break_m);
-  const lean = metric
-    ? `${(breakM * 100).toFixed(1)} cm`
-    : formatQuantity(breakM, "smallLength", system, 1);
+  const lean = formatQuantity(
+    Math.abs(solve.break_m),
+    "breakLength",
+    system,
+    1,
+  );
   const side = solve.break_m >= 0 ? "left" : "right";
   const found = solve.holed ? "" : " (no holing line found)";
   return (
