@@ -10,7 +10,8 @@ Design by Contract:
     Preconditions: the baseline impact has face, path and speed available and
     inside ``BaselineBand``; controlled joints are non-root plant coordinates.
     Postconditions: one kinematic (ROM / velocity) binding tuple per rung,
-    computed from the rung's own rollout joint angles (radians).
+    computed from the rung's own rollout joint angles (radians); no feasible
+    rung exceeds a ROM or velocity limit (D29: hard constraints).
 
 The band defaults are assumptions, stated here and overridable: the fitted
 driver impact is ~110 mph with ~21 deg open face and ~6.5 deg path, so
@@ -42,7 +43,7 @@ from src.shared.python.impact_optimization.impact_target import (
 )
 from src.shared.python.impact_optimization.kinematic_binding import (
     KinematicBinding,
-    kinematic_binding,
+    enforce_kinematic_limits,
 )
 from src.shared.python.impact_optimization.physiological_envelope import (
     PhysiologicalEnvelope,
@@ -134,13 +135,10 @@ def run_full_body_ladder(
     require_physical_baseline(base.impact, band)
     env = envelope_subset(envelope, joints)
     trust = TrustRegion(base.trajectory, np.ones(len(joints)), trust_radius)
-    result = run_speed_continuation(
+    raw = run_speed_continuation(
         rollout, base_tau, window.times_s, env, trust, config, base_target, ladder
     )
-    kin = tuple(
-        kinematic_binding(p.trajectory, window.times_s, env, degrees=False)
-        for p in result.points
-    )
+    result, kin = enforce_kinematic_limits(raw, env, window.times_s, degrees=False)
     return LadderRun(base.impact, result, kin, joints, held_joints(window, joints))
 
 
