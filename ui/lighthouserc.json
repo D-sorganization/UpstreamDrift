@@ -14,7 +14,7 @@
           "disabled": false
         },
         "throttlingMethod": "simulate",
-        "chromeFlags": "--proxy-server=http://127.0.0.1:4174 --proxy-bypass-list=<-loopback> --disable-quic --disable-background-networking --host-resolver-rules=\"MAP * ~NOTFOUND, EXCLUDE 127.0.0.1\""
+        "chromeFlags": "--no-sandbox --proxy-server=http://127.0.0.1:4174 --proxy-bypass-list=<-loopback> --disable-quic --disable-background-networking --host-resolver-rules=\"MAP * ~NOTFOUND, EXCLUDE 127.0.0.1\""
       }
     }
   }

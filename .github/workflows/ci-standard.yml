@@ -3199,6 +3199,10 @@ jobs:
         working-directory: .
         run: node -e "require('node:fs').rmSync('.lighthouseci',{recursive:true,force:true})"
 
+      # ui/lighthouserc.json passes --no-sandbox (JSON cannot hold comments):
+      # ubuntu-24.04 restricts unprivileged user namespaces, so Chrome's sandbox
+      # cannot start ("No usable sandbox"). Acceptable here: ephemeral CI runner,
+      # loopback fixture only, deny-all egress proxy. Playwright does the same.
       - name: Collect Lighthouse mobile baseline
         if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
         uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18
