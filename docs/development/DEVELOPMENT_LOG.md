@@ -742,6 +742,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14660 · SG Optimizer: Common Random Numbers and Pin-Relative Aims so HoleMDP Value Iteration Converges (Cap Is a Safety Bound Only)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14660
+- **Branch:** merged via #14663
+- **PR:** #14663
+- **Paths:** see #14663
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`6780ce16`; collated from changes/14660-sg-mdp-common-random-numbers.md)
+- **Summary:** SG optimizer: common random numbers and pin-relative aims so HoleMDP value iteration converges (cap is a safety bound only)
+- **Next step:** Shipped in PR #14663.
+
 ### DL-#14449 · Cross-Frontend Putting Golden: Shared-Core Fixture, React/Tauri Replay Parity Tests and a Generated Parity Report
 
 - **State:** shipped
@@ -813,10 +826,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14646
 - **Branch:** merged via #14654
-- **PR:** #14654
+- **PR:** #14654, #14671
 - **Paths:** see #14654
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`c77f8207`; collated from changes/14646-studio-units.md)
+- **Last verified:** 2026-11-05 (`ea6d0a4d`; collated from changes/14646-units-api.md)
 - **Summary:** Putting studio: a Metric/Imperial selector; distance, speed and strike labels come from the shared units table generated into core_units.js
 - **Next step:** Shipped in PR #14654.
 
