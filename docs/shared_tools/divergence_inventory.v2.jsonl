@@ -1034,6 +1034,7 @@
 {"path": "humanoid_robotics/option_a/trace_contract.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "impact_optimization/__init__.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/impact_target.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
+{"path": "impact_optimization/kinematic_binding.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/physiological_envelope.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/speed_continuation.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/spline_controls.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}

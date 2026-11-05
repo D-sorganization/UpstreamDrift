@@ -67,7 +67,10 @@ def test_rom_binding_reports_peak_limit_and_overshoot_on_either_side() -> None:
 
 def test_inside_the_limits_nothing_binds_and_unbounded_rom_never_does() -> None:
     assert (
-        kinematic_binding(_traj(thoracic=40.0, free=1e6), T, _env(), degrees=True) == ()
+        kinematic_binding(
+            _traj(thoracic=40.0, free=1e6), T, _env(vel=1e9), degrees=True
+        )
+        == ()
     )
 
 
