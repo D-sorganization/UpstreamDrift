@@ -15,7 +15,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | present |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | present | present | present |
-| Player-Specific Bellman Strokes Gained | (f) | present | present | present | present | partial (#14467) |
+| Player-Specific Bellman Strokes Gained | (f) | present | present | present | present | partial (#14650) |
 | Saved Scenarios and Comparison | (h) | present | present | present | present | present |
 | JSON Import/Export of a Setup | (h) | present | present | present | present | present |
 | Camera Views and Playback Phases | (i) | present | present | present | present | present |
@@ -82,7 +82,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Core/API: present. `src/shared/python/putting_analytics/service_sg.py`, `src/shared/python/putting_analytics/optimize.py`, `src/api/routes/putting_analytics.py`. Player Bellman E(d) on the dialled green and one putt's SG on /strokes-gained; also /optimize (sg), /library-study, /variance-study, /simulated-curve.
 - PyQt6: present. `src/tools/putting_green_gui/_sg_panel.py`, `src/tools/putting_green_gui/gui.py`. Strokes Gained panel: the player's E(d) solved on the dialled green off the GUI thread, each putt's result entered and scored on the cached curve, in the chosen units.
 - React: present. `ui/src/components/putting/StrokesGainedPanel.tsx`, `ui/src/utils/strokesGained.ts`. Strokes Gained on the simulator page: the putt's result entered from each 3D putt, scored via /strokes-gained on the player's own E(d) with the curve plotted, in the user's units (golden-pinned, #14468).
-- Studio: partial (#14467). `src/apps/putting_studio/js/green3d.js`, `src/apps/putting_studio/js/charts2d.js`. Bellman formula with a hand-tuned comeback fit, not a solved recursion.
+- Studio: partial (#14650). `src/apps/putting_studio/js/core_sg.js`, `scripts/generate_studio_sg.py`, `src/apps/putting_studio/js/green3d.js`, `src/apps/putting_studio/js/charts2d.js`. Batch strokes gained, the E(d) chart and the optimal pace read the core's solved E(d) (tour-average player, nearest side slope); the E vs capture-speed panel is still closed-form.
 
 **Saved Scenarios and Comparison**
 - Core/API: present. `src/shared/python/putting_analytics/service_setup.py`, `src/api/routes/putting_analytics.py`. Named setups with their dispersion result; /scenario and /scenario-compare (make rate and leave against the first).
