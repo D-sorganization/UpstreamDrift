@@ -149,3 +149,33 @@ def test_blocking_torque_on_an_assumed_slot_is_assumption_limited() -> None:
     assert blocking and all("assumption-limited" in ln for ln in blocking)
     assert not any("miscalibrat" in ln for ln in blocking)
     assert all("assumed" in ln for ln in blocking)  # says the limit is not cited
+
+
+def test_torque_between_two_cited_values_is_source_sensitive() -> None:
+    """D34: peak between the lower and upper cited values depends on the source."""
+    cap = BASE[:, 0].max() * 1.001
+    env = _envelope(first=cap)
+    res = _run(env)
+    band = {"J0": (0.5 * cap, 1.5 * cap)}
+    blocking = [
+        ln
+        for ln in binding_report(res, env, source_band=band)
+        if "J0" in ln and "BLOCKS" in ln
+    ]
+    assert blocking and all("source-sensitive" in ln for ln in blocking)
+    assert not any("miscalibrat" in ln or "assumption-limited" in ln for ln in blocking)
+    assert all("lower" in ln and "upper" in ln for ln in blocking)
+
+
+def test_torque_outside_the_cited_band_stays_probable_miscalibration() -> None:
+    cap = BASE[:, 0].max() * 1.001
+    env = _envelope(first=cap)
+    res = _run(env)
+    band = {"J0": (0.1 * cap, 0.5 * cap)}  # peak sits above even the upper value
+    blocking = [
+        ln
+        for ln in binding_report(res, env, source_band=band)
+        if "J0" in ln and "BLOCKS" in ln
+    ]
+    assert blocking and all("miscalibrat" in ln for ln in blocking)
+    assert not any("source-sensitive" in ln for ln in blocking)
