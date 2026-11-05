@@ -4,6 +4,10 @@ import type {
   Putt3DSimulationResponse,
 } from "./generated/types";
 import type { DispersionArgs } from "@/utils/dispersion";
+import type {
+  StrokesGainedArgs,
+  StrokesGainedReport,
+} from "@/utils/strokesGained";
 
 import { apiFetch } from "./fetch";
 
@@ -54,7 +58,7 @@ export interface MakeSpreadReport {
  */
 export const STUDY_TIMEOUT_MS = 180_000;
 
-function postAnalytics<T>(route: string, args: DispersionArgs): Promise<T> {
+function postAnalytics<T>(route: string, args: object): Promise<T> {
   return apiFetch<T>(`/api/tools/putting-analytics/${route}`, {
     method: "POST",
     body: JSON.stringify(args),
@@ -68,4 +72,11 @@ export function runDispersion(args: DispersionArgs): Promise<DispersionReport> {
 
 export function runMakeSpread(args: DispersionArgs): Promise<MakeSpreadReport> {
   return postAnalytics<MakeSpreadReport>("make-spread", args);
+}
+
+/** The player's E(d) and the putt's strokes gained (core service_sg.sg_study). */
+export function runStrokesGained(
+  args: StrokesGainedArgs,
+): Promise<StrokesGainedReport> {
+  return postAnalytics<StrokesGainedReport>("strokes-gained", args);
 }
