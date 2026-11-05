@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14429 · Avoid OpenSim Classify Checkout Hang With Shallow Fetch
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14429
+- **Branch:** agy/14429-opensim-classify-shallow-checkout
+- **PR:** #14430
+- **Paths:** see #14430
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`a9657f01`; collated from changes/14429-avoid-opensim-classify-checkout-hang-wit.md)
+- **Summary:** Avoid OpenSim classify checkout hang with shallow fetch
+- **Next step:** Merge the PR.
+
 ### DL-#14535 · Size-Aware Development-Log Archiver: Archive Oldest Terminal Entries When the Log Nears the Byte Cap
 
 - **State:** in_review
@@ -937,6 +950,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14630 · Putting: The Strokes Gained Chart Title Fits the Phone-Width Window and the Holed Check Box Reads on the Dark Controls Panel
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14630
+- **Branch:** merged via #14645
+- **PR:** #14645
+- **Paths:** see #14645
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`43ee052d`; collated from changes/14630-sg-panel-phone-polish.md)
+- **Summary:** Putting: the Strokes Gained chart title fits the phone-width window and the Holed check box reads on the dark controls panel
+- **Next step:** Shipped in PR #14645.
+
+### DL-#14570 · SHOW-B6: Slope/Stance Bins and Wind Bins in the Dispersion Tables (slope_wind_bins.py), Labelled Assumptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14570
+- **Branch:** merged via #14628
+- **PR:** #14628
+- **Paths:** see #14628
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`1558c825`; collated from changes/14570-show-b6-slope-stance-bins-and-wind-bins.md)
+- **Summary:** SHOW-B6: slope/stance bins and wind bins in the dispersion tables (slope_wind_bins.py), labelled assumptions
+- **Next step:** Shipped in PR #14628.
+
+### DL-#14563 · SHOW-C7 Flight Report and Measured-Swing Flight Card (Part Of #14563)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14563
+- **Branch:** merged via #14620
+- **PR:** #14620
+- **Paths:** see #14620
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`d5eafa44`; collated from changes/14563-show-c7-flight-report-and-measured-swing.md)
+- **Summary:** SHOW-C7 flight report and measured-swing flight card (Part of #14563)
+- **Next step:** Shipped in PR #14620.
+
 ### DL-#14632 · Drake IK Now Implements the Club-Sole Ground Term (Base Was a No-Op), Fixing the 126.7 mm Address Hover
 
 - **State:** shipped
@@ -1190,10 +1242,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14559
 - **Branch:** merged via #14589
-- **PR:** #14589, #14596, #14625
+- **PR:** #14589, #14596, #14625, #14638
 - **Paths:** see #14589
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`72f224fe`; collated from changes/14559-show-c3c-rom-and-velocity-binding-report.md)
+- **Last verified:** 2026-11-05 (`9672a443`; collated from changes/14559-show-c3c-full-body-window-rollout-adapte.md)
 - **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
 - **Next step:** Shipped in PR #14589.
 
