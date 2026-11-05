@@ -59,8 +59,15 @@ def test_neck_range_rad_is_a_precondition_checked_lookup() -> None:
         neck_range_rad("LEInput")
 
 
-def test_neck_joints_are_limited_in_the_mjcf() -> None:
+def test_default_export_compiles_no_limits() -> None:
+    """The native stack requires limited=false (necromatcher_ranges)."""
     xml, _ = export_full_body_mjcf(SPEC.read_bytes())
+    joints = list(ET.fromstring(xml).iter("joint"))  # nosec B314
+    assert joints and all(j.get("limited") == "false" for j in joints)
+
+
+def test_neck_joints_are_limited_in_the_mjcf() -> None:
+    xml, _ = export_full_body_mjcf(SPEC.read_bytes(), neck_limits=True)
     joints = {j.get("name"): j for j in ET.fromstring(xml).iter("joint")}  # nosec B314
     for name in NECK_COORDINATES:
         joint = joints[name]
@@ -88,7 +95,7 @@ def test_neck_joint_tree_contract() -> None:
 
 
 def _neck_model(limited: bool) -> mujoco.MjModel:
-    xml, _ = export_full_body_mjcf(SPEC.read_bytes())
+    xml, _ = export_full_body_mjcf(SPEC.read_bytes(), neck_limits=True)
     model = mujoco.MjModel.from_xml_string(xml)
     if not limited:
         model.jnt_limited[:] = 0

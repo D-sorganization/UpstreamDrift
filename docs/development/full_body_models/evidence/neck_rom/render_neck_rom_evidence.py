@@ -71,7 +71,7 @@ def _label(img: np.ndarray, text: str) -> np.ndarray:
 def main() -> None:
     import imageio.v3 as iio
 
-    xml, _ = export_full_body_mjcf(SPEC.read_bytes(), visual=True)
+    xml, _ = export_full_body_mjcf(SPEC.read_bytes(), visual=True, neck_limits=True)
     after_model = mujoco.MjModel.from_xml_string(xml)
     before_model = mujoco.MjModel.from_xml_string(xml)
     before_model.jnt_limited[:] = 0  # the pre-A4 export left every joint free

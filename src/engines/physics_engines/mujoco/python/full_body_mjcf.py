@@ -139,6 +139,7 @@ def export_full_body_mjcf(
     appearance: AppearanceDocument | None = None,
     with_head: bool = False,
     require_grip_binding: bool = False,
+    neck_limits: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     """Export the full-body specification to MJCF with 41 scalar joints and contact sites.
 
@@ -152,6 +153,12 @@ def export_full_body_mjcf(
     spec gets one rigid trunk visual per segment (pelvis, ``trunk_lumbar``,
     thorax), each on its own body, so the visuals follow the lumbar and
     thoracic joints (HRG-D3, #13174).
+
+    ``neck_limits=True`` compiles the cited neck ROM (#14553) into the three
+    ``NeckInput*`` joints so stock MuJoCo dynamics enforce it.  It is off by
+    default: the native stack treats authored ranges as never compiled (see
+    ``necromatcher_ranges``) and hashes the default XML, which stays
+    byte-identical.
     """
     from src.shared.python.grip_contact.binding_manifest import (
         build_spec_grip_binding_manifest,
@@ -193,7 +200,8 @@ def export_full_body_mjcf(
     ET.SubElement(default_contact, "geom", contype="0", conaffinity="0")
 
     elements, offsets = _build_full_body_kinematics(root, spec)
-    _limit_neck_joints(root)
+    if neck_limits:
+        _limit_neck_joints(root)
     frame_sites, contact_sites = _attach_full_body_sites(root, elements, offsets, spec)
     visual_meta = None
     if visual or with_head or appearance is not None:
