@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14634 | Drake IK now implements the club-sole ground term (base was a no-op), fixing the 126.7 mm address hover |
+| 2026-11-05 | #14629 | Putting Green Simulator: Scenarios panel saves the dialled green as named scenarios (each runs a dispersion batch on a worker), compares them in a unit-aware table, and exports or imports the shared JSON setup document, studio exports included |
 | 2026-11-05 | #14623 | SHOW-B4: physics backend on dispersion tables, EB shrinkage, personalised vs tour strategy |
 | 2026-11-05 | #14625 | SHOW-C3c: ROM and velocity binding report from rollout joint angles |
 | 2026-11-05 | #14626 | Putting simulator: the counter-torque panel bounds the gust input by the core's GUST_RANGE_NM instead of the preload range |
