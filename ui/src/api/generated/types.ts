@@ -1746,6 +1746,21 @@ export interface DisplayRequest {
 }
 
 /**
+ * One SI-to-display conversion: display value = SI value * factor.
+ */
+export interface DisplayUnitResponse {
+  factor: number;
+  suffix: string;
+}
+
+/**
+ * The shared display-unit table per unit system (#14646).
+ */
+export interface DisplayUnitsResponse {
+  systems: Record<string, Record<string, DisplayUnitResponse>>;
+}
+
+/**
  * One declared disturbance (mirrors ``DisturbanceSpec``; NSX-99, #12728).
  */
 export interface DisturbanceModel {

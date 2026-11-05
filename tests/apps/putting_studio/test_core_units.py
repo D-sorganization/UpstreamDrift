@@ -19,6 +19,7 @@ import pytest
 from scripts import generate_studio_units as gen
 from src.shared.python.ui.units import (
     UnitSystem,
+    display_unit_table,
     distance_suffix,
     from_display_distance,
     speed_suffix,
@@ -111,6 +112,27 @@ def test_matrix_marks_studio_and_desktop_units_present() -> None:
     matrix = _STUDIO.parents[2] / "src" / "config" / "putting_parity_matrix.json"
     features = json.loads(matrix.read_text(encoding="utf-8"))["features"]
     cells = features["units"]["cells"]
-    for surface in ("studio", "pyqt6"):
+    for surface in ("studio", "pyqt6", "core_api"):
         assert cells[surface].startswith("present |"), surface
-    assert cells["core_api"].startswith("missing #14646 |")
+
+
+def test_generator_reads_the_shared_display_table() -> None:
+    # The studio rows are the API's table rescaled to the stored units.
+    for system in UnitSystem:
+        table = display_unit_table(system)
+        row = gen.unit_row(system)
+        assert row["distance"]["factor"] == pytest.approx(
+            table["distance"]["factor"] * _FT_M, rel=1e-12
+        )
+        assert row["strike"]["factor"] == pytest.approx(
+            table["small_length"]["factor"] * 1e-3, rel=1e-12
+        )
+        assert row["strike"]["suffix"] == table["small_length"]["suffix"]
+
+
+def test_canvas_distance_label_and_screen_reader_label() -> None:
+    charts = (_STUDIO / "js" / "charts2d.js").read_text(encoding="utf-8")
+    assert "Straight Line to Hole (${coreUnitText('distance'" in charts
+    assert ".toFixed(0)} ft)`" not in charts
+    css = (_STUDIO / "css" / "studio.css").read_text(encoding="utf-8")
+    assert ".sr-only {" in css

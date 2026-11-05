@@ -7,7 +7,7 @@
       "title": "Selectable Units",
       "cluster": "a",
       "cells": {
-        "core_api": "missing #14646 | src/shared/python/putting_dynamics/utils.py, src/shared/python/ui/units.py | SI internally, feet in analytics; conversion helpers only, no units parameter on any route.",
+        "core_api": "present | src/shared/python/ui/units.py, src/api/routes/putting_green.py | SI internally; GET /units serves display_unit_table (distance, speed and strike factors and suffixes for both systems), the table the studio generator and the desktop strike spin use.",
         "pyqt6": "present | src/tools/putting_green_gui/gui.py | Units combo (Metric or Imperial); every panel redraws its inputs and charts through ui/units.py.",
         "react": "missing #14458 | ui/src/pages/PuttingGreen.tsx | Speed always m/s, distance yards, toe/hosel mm; no units store or selector.",
         "tauri": "missing #14458 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
