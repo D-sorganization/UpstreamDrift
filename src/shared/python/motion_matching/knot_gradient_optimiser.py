@@ -212,19 +212,51 @@ class KnotOptimisationResult:
 ValueAndGrad = Callable[[Any], tuple[tuple[Any, Any], Any]]
 
 
-def _evaluate(
-    value_and_grad: ValueAndGrad, x: Any, k: int, xp: Any
-) -> tuple[dict[str, float], Any, bool, bool]:
-    """Evaluate once; return (history row, grad, cost finite, grad finite)."""
-    (total, objective), grad = value_and_grad(x)
+def _cost_row(
+    total: Any, objective: Any, x: Any, k: int, xp: Any
+) -> tuple[dict[str, float], bool]:
+    """The history row of one evaluation and whether its cost is finite."""
     row = {
         "iteration": k,
         "total": float(total),
         "objective": float(objective),
         "max_abs_x": float(xp.max(xp.abs(x))),
     }
-    cost_ok = bool(np.isfinite(row["total"]) and np.isfinite(row["objective"]))
+    return row, bool(np.isfinite(row["total"]) and np.isfinite(row["objective"]))
+
+
+def _evaluate(
+    value_and_grad: ValueAndGrad, x: Any, k: int, xp: Any
+) -> tuple[dict[str, float], Any, bool, bool]:
+    """Evaluate once; return (history row, grad, cost finite, grad finite)."""
+    (total, objective), grad = value_and_grad(x)
+    row, cost_ok = _cost_row(total, objective, x, k, xp)
     return row, grad, cost_ok, bool(xp.all(xp.isfinite(grad)))
+
+
+def _timed_evaluation(
+    value_and_grad: ValueAndGrad, x: np.ndarray, k: int, clock: Callable[[], float]
+) -> tuple[dict[str, float], np.ndarray, bool, dict[str, float]]:
+    """Evaluate once for L-BFGS-B; return (row, host grad, cost finite, timing).
+
+    ``objective_s`` is the ``clock`` time until the cost scalars are on the host
+    (the call, with any JIT compile or async compute it waits on). The gradient
+    is not touched before that, so its transfer to a float64 host array is
+    ``gradient_s``, never ``objective_s``. ``projected_gradient_inf_norm`` is
+    ``max|g|``; with no bounds the projection is the identity.
+    """
+    start = clock()
+    (total, objective), grad = value_and_grad(x)
+    row, cost_ok = _cost_row(total, objective, x, k, np)
+    costed = clock()
+    grad_flat = np.asarray(grad, dtype=np.float64).ravel()
+    timing = {
+        "iteration": k,
+        "objective_s": costed - start,
+        "gradient_s": clock() - costed,
+        "projected_gradient_inf_norm": float(np.max(np.abs(grad_flat))),
+    }
+    return row, grad_flat, cost_ok, timing
 
 
 def adam_minimise(
@@ -347,12 +379,8 @@ def lbfgs_minimise(
     ``non_finite_encountered``); anything else, such as a line-search ABNORMAL
     exit, is ``error``. Best-iterate tracking continues after a non-finite trial.
 
-    Diagnostics (#13779) never feed back into the numerics. Per evaluation,
-    ``objective_s`` is the ``clock`` time until the cost scalars are on the host
-    (the call, with any JIT compile or async compute it waits on) and
-    ``gradient_s`` the further time to bring the gradient to a float64 host
-    array. ``projected_gradient_inf_norm`` is ``max|g|`` of that evaluation's
-    raw gradient; with no bounds the projection is the identity.
+    Diagnostics (#13779, see :func:`_timed_evaluation`) are timed with
+    ``clock`` and never feed back into the numerics.
     """
     require(callable(value_and_grad), "value_and_grad must be callable")
     require(isinstance(settings, LbfgsSettings), "settings must be LbfgsSettings")
@@ -380,18 +408,8 @@ def lbfgs_minimise(
         nonlocal worst_finite_total
         k = len(history)
         x = x_flat.reshape(shape)
-        start = clock()
-        row, grad, cost_ok, _grad_ok = _evaluate(value_and_grad, x, k, np)
-        costed = clock()
-        grad_flat = np.asarray(grad, dtype=np.float64).ravel()
-        diagnostics.append(
-            {
-                "iteration": k,
-                "objective_s": costed - start,
-                "gradient_s": clock() - costed,
-                "projected_gradient_inf_norm": float(np.max(np.abs(grad_flat))),
-            }
-        )
+        row, grad_flat, cost_ok, timing = _timed_evaluation(value_and_grad, x, k, clock)
+        diagnostics.append(timing)
         history.append(row)
         if on_iteration is not None:
             on_iteration(k, x, row["total"], row["objective"])
