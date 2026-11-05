@@ -86,8 +86,8 @@
       "cells": {
         "core_api": "present | src/shared/python/putting_dynamics/green_spec.py, src/api/routes/putting_green.py | GreenSpec (slope, two-tier step, seeded undulation, named presets) on /simulate, /scatter, /read-green and /contours; GET /green-presets.",
         "pyqt6": "present | src/tools/putting_green_gui/_scene_builder.py, src/tools/putting_green_gui/gui.py | Green Type selector (cross slope or any core preset), seeded undulation in mm or in, green seed; all on the shared GreenSpec.",
-        "react": "partial #14464 | ui/src/pages/PuttingGreen.tsx | Grade, aspect, grain, bumps; no green-type selector or presets.",
-        "tauri": "partial #14464 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "react": "present | ui/src/components/putting/GreenTypeControl.tsx, ui/src/utils/greenTypes.ts | Green Type selector (cross slope or any core preset from GET /green-presets) sent as the core green spec on /simulate-3d; slope and bump fields lock under a preset (golden-pinned, #14464).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist), so the Green Type selector ships unchanged.",
         "studio": "partial #14463 | src/apps/putting_studio/js/putting_physics.js, src/apps/putting_studio/js/io.js | Flat and slope presets plus stimp ramp; undulation switches on with slope and is not selectable."
       }
     },
