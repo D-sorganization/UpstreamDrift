@@ -1,8 +1,8 @@
 {
   "issue": "#12688",
   "epic": "#12678",
-  "bundle_sha256": "96c8a0b8cfdac80bb44726e9c5b7a9daedc19d1f00bac21396adad1567a3a8dc",
-  "bundle_source": "D:\\FleetData\\swing-datastore\\swings\\capA-driver__mujoco__canonical-seeds\\2026-10-05_best_matches\\artifacts\\anthro_driver_seeds",
+  "bundle_sha256": "2ee931d609846a9f525e7e9e4575bcb2cd8ead009d263597256a3f89ebdaf39d",
+  "bundle_source": "docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds",
   "swing": {
     "capture": "capture-A",
     "club": "Driver",
@@ -20,5 +20,6 @@
     "overlays": false,
     "ball": false
   },
-  "command": "PYTHONPATH=.:src python3 docs/development/full_body_models/evidence/appearance/engines/drake_pinocchio/render_drake_pinocchio_appearance.py --datastore D:\\FleetData\\swing-datastore --out <dir>"
+  "engines_rendered": ["drake", "pinocchio"],
+  "command": "mkdir -p /tmp/r9a-datastore/swings/capA-driver__mujoco__canonical-seeds/2026-10-05_best_matches/artifacts && ln -sfn \"$REPO_ROOT/docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds\" /tmp/r9a-datastore/swings/capA-driver__mujoco__canonical-seeds/2026-10-05_best_matches/artifacts/anthro_driver_seeds && PYTHONPATH=.:src python3 docs/development/full_body_models/evidence/appearance/engines/drake_pinocchio/render_drake_pinocchio_appearance.py --datastore /tmp/r9a-datastore --engines drake,pinocchio --out docs/development/full_body_models/evidence/appearance/engines/drake_pinocchio"
 }

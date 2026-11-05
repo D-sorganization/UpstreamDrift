@@ -291,6 +291,60 @@ def torque_suffix(system: UnitSystem | None = None) -> str:
     return " N·m" if _imperial_scale(system, 0.0) == 1.0 else " in·lbf"
 
 
+# ---- Small lengths (strike offsets) and the client table (#14646) -----------
+
+
+def _small_length_per_m(system: UnitSystem | None) -> float:
+    sys = system or get_unit_preference()
+    return 1e3 if sys == UnitSystem.METRIC else 12.0 / _FT_TO_M
+
+
+def to_display_small_length(val_m: float, system: UnitSystem | None = None) -> float:
+    """Convert a small length in m to the display unit (mm, or inches).
+
+    Raises:
+        ValueError: If ``val_m`` is not finite.
+    """
+    if not math.isfinite(val_m):
+        raise ValueError(f"val_m must be finite, got {val_m!r}")
+    return val_m * _small_length_per_m(system)
+
+
+def from_display_small_length(
+    val_display: float, system: UnitSystem | None = None
+) -> float:
+    """Convert a display small length (mm, or inches) to SI m."""
+    return val_display / _small_length_per_m(system)
+
+
+def small_length_suffix(system: UnitSystem | None = None) -> str:
+    """Return the display suffix for small lengths (' mm' or ' in')."""
+    return " mm" if _small_length_per_m(system) == 1e3 else " in"
+
+
+def display_unit_table(system: UnitSystem) -> dict[str, dict[str, Any]]:
+    """Factor from each SI unit to ``system``'s display unit, and its suffix.
+
+    For clients that cannot import this module (the putting studio, the web
+    page): distance from m (shown in m or ft), speed from m/s, and small
+    lengths from m. A display value is the SI value times ``factor``.
+    """
+    return {
+        "distance": {
+            "factor": to_display_distance(1.0, system, unit="ft"),
+            "suffix": distance_suffix(system, unit="ft"),
+        },
+        "speed": {
+            "factor": to_display_speed(1.0, system),
+            "suffix": speed_suffix(system),
+        },
+        "small_length": {
+            "factor": to_display_small_length(1.0, system),
+            "suffix": small_length_suffix(system),
+        },
+    }
+
+
 # ---- Spin formatting ---------------------------------------------------------
 
 

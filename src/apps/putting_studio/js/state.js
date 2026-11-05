@@ -28,7 +28,8 @@ const state = {
   tauOffPreload: 0.55,
   noiseScale: 0.25,
   pertImpulseNm: 0.25,
-  toeOffsetMm: 10.0,
+  toeOffsetMm: 0.0,
+  unitSystem: 'imperial', // display units for labels (#14646); values stay ft, m/s, mm
   psiLieDeg: 70.0,
   buttArcRadius: 0.36,
   vecMode: 'total',

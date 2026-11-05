@@ -45,6 +45,7 @@ button#playPauseBtn, button#rollPlayPauseBtn, button#toggleLegendBtn, button#run
   box-shadow: inset 0 0 48px rgba(1, 9, 5, 0.85);
 }
 .mono { font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace; font-feature-settings: "tnum" on, "zero" on; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .glass-card {
   background: linear-gradient(145deg, rgba(13, 27, 22, 0.92) 0%, rgba(8, 17, 14, 0.96) 100%);
   backdrop-filter: blur(16px);

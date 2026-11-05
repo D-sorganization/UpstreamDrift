@@ -14,6 +14,7 @@ from typing import Any
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+from matplotlib.transforms import Bbox
 from PyQt6.QtCore import QThreadPool
 from PyQt6.QtWidgets import (
     QCheckBox,
@@ -145,7 +146,7 @@ class SGPanel(QGroupBox):
         ax.plot([start], [report["expected_putts"]], "o", color="#d2553f")
         ax.set_xlabel(f"Distance ({unit})")
         ax.set_ylabel("Expected Putts")
-        ax.set_title("Your Expected Putts on This Green", fontsize=10)
+        ax.set_title("Expected Putts", fontsize=10)
         self.canvas.draw_idle()
         sg = report["sg_player"]
         sg_text = "" if sg is None else f" This putt gained {sg:+.2f} strokes."
@@ -168,6 +169,11 @@ class SGPanel(QGroupBox):
 
     def curve_axis_label(self) -> str:
         return str(self._ax.get_xlabel())
+
+    def curve_title_extent(self) -> Bbox:
+        """The drawn E(d) title's box in display pixels."""
+        title = self._ax.title
+        return title.get_window_extent()
 
     def curve_points(self) -> list[tuple[float, float]]:
         curve = (self._report or {"curve": {}})["curve"]

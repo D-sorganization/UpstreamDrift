@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T03:29:08Z",
+  "generated_at": "2026-11-03T12:22:52Z",
   "rows": [
     {
       "acceptance": null,
@@ -208,7 +208,7 @@
         "mot": null,
         "npz": null
       },
-      "candidate_sha": "96c8a0b8cfdac80bb44726e9c5b7a9daedc19d1f00bac21396adad1567a3a8dc",
+      "candidate_sha": "2ee931d609846a9f525e7e9e4575bcb2cd8ead009d263597256a3f89ebdaf39d",
       "capture": null,
       "engine": "unknown",
       "horizon_s": null,
@@ -224,7 +224,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/appearance/engines/drake_pinocchio/r9a_appearance_receipt.json",
-      "sha256": "dea14de9aff576bfb932f7158f02b6d0fcbfa0f2a9db2edc03c682669021712b"
+      "sha256": "57f85cbaa3b56907487175c78d000788bbfc76455755ba9bd926a4a372a71282"
     },
     {
       "acceptance": null,

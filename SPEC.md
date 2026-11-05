@@ -66,6 +66,19 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ## 4. Architecture Overview
 
+### Instantaneous ZTCF / ZVCF Component Contract
+
+At a fixed achieved state, **ZTCF is the drift component**: set the declared
+applied torque to zero while retaining the velocity-dependent, gravity, and
+other autonomous terms of the declared plant. **ZVCF is the control
+component**: evaluate `M(q)^{-1} τ` with velocity and gravity terms zeroed.
+This is the instantaneous split `xdot = f(x) + g(x)u`: ZTCF is `f(x)` and
+ZVCF is `g(x)u` (here `g(x)` is the input map; `g(q)` in mechanics notation
+means gravity generalized force). Their sum matches total acceleration at the
+same fixed state under the declared split. The decomposition is exact at a
+fixed state and is **not additive over integrated trajectories**. This
+restores the original MATLAB meaning and reverses #11553's later naming.
+
 ### Recent Spec Updates
 
 - **2026-09-03** - Made the tag-driven release able to produce a wheel at all
@@ -2741,6 +2754,26 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14667 | Putting studio: the strike slider spans heel to toe over the desktop range, offsets every batch strike, and a toe strike opens the face as in the core strike() |
+| 2026-11-05 | #14655 | SHOW-C3c slice 3a: guarded full-body speed ladder (baseline-physical precondition, MuJoCo impact reader, per-rung ROM/velocity bindings) |
+| 2026-11-05 | #14666 | Cross-frontend putting golden: shared-core fixture, React/Tauri replay parity tests and a generated parity report |
+| 2026-11-05 | #14662 | Putting studio: the skid-to-roll transition ends where the core simulate_strike skid ends for the ball speed, and the telemetry shows the core launch angle |
+| 2026-11-05 | #14658 | Head-CG offset (opt-in) and toe_down_m shaft metric for the C4 shaft state (Refs #14600) |
+| 2026-11-05 | #14498 | Clarify the fixed-state ZTCF drift and ZVCF control component definitions |
+| 2026-11-05 | #14656 | React/Tauri putting page: export and import the shared core's JSON setup document (and studio files) from the Saved Scenarios panel |
+| 2026-11-05 | #14395 | R9a: commit Drake and Pinocchio MeshCat appearance stills and evidence test (#12688); Regenerate matched_swing_ledger after R9a receipt byte update (#12688) |
+| 2026-11-05 | #14654 | Putting studio: a Metric/Imperial selector; distance, speed and strike labels come from the shared units table generated into core_units.js |
+| 2026-11-05 | #14653 | Add continuation_report: markdown table of a 100-125 mph run with torque, ROM and velocity bindings and limit provenance |
+| 2026-11-05 | #14651 | Replace wall-clock speed-up ratio in test_topology_contact_batched with a deterministic per-pair kernel call count |
+| 2026-11-05 | #14636 | Align MuJoCo counterfactuals zvcf() and the MATLAB ZVCF comments with the control-component contract |
+| 2026-11-05 | #14637 | React/Tauri putting page: saved scenarios and comparison over the shared core, golden-pinned (part 1 of #14472) |
+| 2026-11-05 | #14420 | Avoid merge_group changed-paths checkout hang and sync admission publisher |
+| 2026-11-05 | #14418 | Sync the admission publisher workflow and provenance digest with the canonical provider |
+| 2026-11-05 | #14645 | Putting: the Strokes Gained chart title fits the phone-width window and the Holed check box reads on the dark controls panel |
+| 2026-11-05 | #14628 | SHOW-B6: slope/stance bins and wind bins in the dispersion tables (slope_wind_bins.py), labelled assumptions |
+| 2026-11-05 | #14620 | SHOW-C7 flight report and measured-swing flight card (Part of #14563) |
+| 2026-11-05 | #14638 | SHOW-C3c: full-body window rollout adapter for the impact optimiser (slice 2) |
+| 2026-11-05 | #14430 | Avoid OpenSim classify checkout hang with shallow fetch |
 | 2026-11-05 | #14634 | Drake IK now implements the club-sole ground term (base was a no-op), fixing the 126.7 mm address hover |
 | 2026-11-05 | #14629 | Putting Green Simulator: Scenarios panel saves the dialled green as named scenarios (each runs a dispersion batch on a worker), compares them in a unit-aware table, and exports or imports the shared JSON setup document, studio exports included |
 | 2026-11-05 | #14623 | SHOW-B4: physics backend on dispersion tables, EB shrinkage, personalised vs tour strategy |

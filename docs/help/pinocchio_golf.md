@@ -14,6 +14,13 @@ Jacobians, manipulability ellipsoids, kinetic and potential energy, induced
 accelerations and counterfactuals. Use it for quick kinematic and dynamic
 introspection of a model, not for a driven, controlled swing.
 
+For the instantaneous component split, **ZTCF is the drift component**
+(applied torque set to zero, autonomous terms retained) and **ZVCF is the
+control component** (`M(q)^{-1} τ`, with velocity and gravity terms zeroed).
+Their sum is exact at a fixed state and **not additive over integrated
+trajectories**. See [`SPEC.md`](../../SPEC.md), §4 for the normative
+definition.
+
 ## Inputs
 
 | Input                 | Unit / type              | Notes                                                                                                                              |
@@ -41,7 +48,7 @@ introspection of a model, not for a driven, controlled swing.
 | Club-head position           | m (3-vector)                                   | From the first frame whose name contains `club` or `head`, else the last frame.          |
 | Club-head velocity           | m/s (3-vector)                                 | `pin.getFrameVelocity` on the same frame.                                                |
 | Induced accelerations        | rad/s^2 per generalized coordinate             | Per source.                                                                              |
-| Counterfactuals              | rad/s^2 (`ztcf_accel`) and N*m (`zvcf_torque`) | Per frame.                                                                               |
+| Counterfactual components    | rad/s^2 (`ztcf_accel` drift and `zvcf_torque` control) | Per frame.                                                                       |
 | Jacobian condition number    | dimensionless                                  | _Matrix Analysis_ readout.                                                               |
 | Constraint rank              | count                                          | _Matrix Analysis_ readout.                                                               |
 | Recorded frame count         | count                                          | `Frames: N` label.                                                                       |
@@ -62,8 +69,10 @@ Qt layer:
 - Energy: `pin.computeKineticEnergy` and `pin.computePotentialEnergy` are called
   **separately** and read back off `data.kinetic_energy` / `data.potential_energy`.
   There is no `computeTotalEnergy` call; any total is the sum of the two.
-- Induced accelerations and ZTCF/ZVCF: repeated `pin.aba` evaluations with
-  gravity or torque zeroed, in `induced_acceleration.py`.
+- Induced accelerations and ZTCF/ZVCF: repeated `pin.aba` evaluations at the
+  same state; ZTCF zeros applied torque, while ZVCF evaluates the control
+  acceleration with velocity and gravity terms zeroed, in
+  `induced_acceleration.py`.
 
 `PinocchioGUI` (`gui.py`) composes `UISetupMixin`, `SimulationMixin`,
 `PinocchioAnalysisMixin`, `PinocchioVisualizationMixin` and the shared

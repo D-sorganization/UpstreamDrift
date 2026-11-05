@@ -44,7 +44,10 @@ from src.shared.python.sg_optimizer.course.rasterize import (
 from src.shared.python.sg_optimizer.mdp.action import default_action_set
 from src.shared.python.sg_optimizer.mdp.state import State
 from src.shared.python.sg_optimizer.mdp.value_iteration import HoleMDP
-from src.shared.python.sg_optimizer.shot_model.baseline import load_baseline
+from src.shared.python.sg_optimizer.shot_model.baseline import (
+    BaselineBag,
+    load_baseline,
+)
 from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
 from src.shared.python.sg_optimizer.strategy_cli import (
     add_strategy_parser,
@@ -203,6 +206,17 @@ def main(argv: list[str] | None = None) -> int:
     else:
         hole = _classic_to_synthetic(args.classic)
 
+    return _solve_and_report(args, profile, baseline, conditions, hole)
+
+
+def _solve_and_report(
+    args: argparse.Namespace,
+    profile: PlayerProfile,
+    baseline: BaselineBag,
+    conditions: CourseConditions,
+    hole: SyntheticHole,
+) -> int:
+    """Solve the hole MDP and print the tee decision as JSON (``run`` and legacy)."""
     raster = rasterize_synthetic(hole, resolution_yd=args.resolution)
 
     mdp = HoleMDP(
@@ -231,6 +245,7 @@ def main(argv: list[str] | None = None) -> int:
         "tee_optimal_action": {
             "club": optimal.club,
             "aim_angle_deg": math.degrees(optimal.aim_angle_rad),
+            "aim_reference": "pin_bearing",
         },
     }
     json.dump(payload, sys.stdout, indent=2, default=float)
@@ -256,39 +271,7 @@ def _legacy_main(argv: list[str] | None) -> int:
     baseline = load_baseline(args.baseline)
     conditions = _load_conditions(args.conditions)
     hole = _load_hole_spec(args.hole_spec)
-    raster = rasterize_synthetic(hole, resolution_yd=args.resolution)
-
-    mdp = HoleMDP(
-        raster=raster,
-        profile=profile,
-        baseline=baseline,
-        conditions=conditions,
-        actions=default_action_set(),
-        n_samples=args.n_samples,
-        seed=args.seed,
-    )
-    result = mdp.solve(max_iter=args.max_iter)
-
-    tee_state = State(x=hole.tee[0], y=hole.tee[1], lie=int(raster.lie_at(*hole.tee)))
-    optimal = mdp.optimal_action(tee_state, result.value)
-    expected = mdp.expected_strokes(tee_state, result.value)
-
-    payload = {
-        "hole": hole.name,
-        "par": hole.par,
-        "profile": profile.name,
-        "conditions": args.conditions,
-        "iterations": result.iterations,
-        "delta": result.delta,
-        "tee_expected_strokes": expected if math.isfinite(expected) else None,
-        "tee_optimal_action": {
-            "club": optimal.club,
-            "aim_angle_deg": math.degrees(optimal.aim_angle_rad),
-        },
-    }
-    json.dump(payload, sys.stdout, indent=2, default=float)
-    sys.stdout.write("\n")
-    return 0
+    return _solve_and_report(args, profile, baseline, conditions, hole)
 
 
 if __name__ == "__main__":  # pragma: no cover

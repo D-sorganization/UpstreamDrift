@@ -754,3 +754,15 @@ def test_counter_torque_serves_the_core_stroke_series(client: TestClient) -> Non
 def test_counter_torque_rejects_bad_inputs(client: TestClient, body: dict) -> None:
     response = client.post("/tools/putting-green/counter-torque", json=body)
     assert response.status_code in (400, 422), response.text
+
+
+def test_units_serves_the_shared_display_table(client: TestClient) -> None:
+    # Clients read the desktop's conversions instead of re-implementing them
+    # (#14646).
+    from src.shared.python.ui.units import UnitSystem, display_unit_table
+
+    response = client.get("/tools/putting-green/units")
+    assert response.status_code == 200, response.text
+    assert response.json() == {
+        "systems": {s.value: display_unit_table(s) for s in UnitSystem}
+    }

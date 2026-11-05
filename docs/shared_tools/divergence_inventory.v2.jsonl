@@ -1033,6 +1033,8 @@
 {"path": "humanoid_robotics/option_a/plant.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "humanoid_robotics/option_a/trace_contract.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "impact_optimization/__init__.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
+{"path": "impact_optimization/continuation_report.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
+{"path": "impact_optimization/full_body_ladder.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/full_body_rollout.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/impact_target.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/kinematic_binding.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
@@ -1424,6 +1426,7 @@
 {"path": "motion_matching/club_ball_target.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_calibration.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_face_target.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/club_head_cg.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_models.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_observability.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/__init__.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}

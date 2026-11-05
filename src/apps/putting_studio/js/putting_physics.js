@@ -14,8 +14,9 @@
  * instead of a Gaussian heuristic; capture uses
  * captureSpeedMps(entryOffsetM), a chord generalisation of
  * capture_speed_mps(); radii/gravity match Python exactly for
- * cross-language parity. Skid multiplier, gear-twist/lip-out and turf
- * chatter stay uncited (out of scope).
+ * cross-language parity; the skid length comes from the core table in
+ * js/core_impact.js (#14647), passed in as skidTable. Skid multiplier,
+ * gear-twist/lip-out and turf chatter stay uncited (out of scope).
  */
 (function (root) {
   "use strict";
@@ -180,6 +181,23 @@
   }
 
   /**
+   * Core skid distance [m] for a ball speed, interpolated in a table of
+   * [ballSpeedMps, skidM] rows that rise from [0, 0] (js/core_impact.js,
+   * from putting_dynamics.simulate_strike). Past the last row the last
+   * segment is extended. @throws {TypeError|RangeError}
+   */
+  function coreSkidDistanceM(skidTable, ballSpeedMps) {
+    if (!Array.isArray(skidTable) || skidTable.length < 2) {
+      throw new TypeError("skidTable must hold at least two [speed, skid] rows");
+    }
+    assertRange(ballSpeedMps, 0.0, 20.0, "ballSpeedMps");
+    let i = 1;
+    while (i < skidTable.length - 1 && skidTable[i][0] < ballSpeedMps) i++;
+    const [v0, s0] = skidTable[i - 1], [v1, s1] = skidTable[i];
+    return s0 + ((s1 - s0) * (ballSpeedMps - v0)) / (v1 - v0);
+  }
+
+  /**
    * Integrate one putt with classic RK4 from strike (or stimp-ramp
    * release) to rest, capture or lip-out; see the destructured
    * defaults below for the full option list.
@@ -193,7 +211,7 @@
       headMassKg = _TYPICAL_PUTTER_HEAD_MASS_KG,
       moiKgM2 = _TYPICAL_PUTTER_MOI_KG_M2,
       stimpFt, upPct = 0.0, crossPct = 0.0, trialSeed = 0.0, distFt,
-      roughnessMm = 0.35, isStimpRamp = false,
+      roughnessMm = 0.35, isStimpRamp = false, skidTable = null,
       ballMassKg = GOLF_BALL_MASS_KG, cor = PUTTER_FACE_COR,
     } = options;
     assertFinite(vClubMps, "vClubMps"); assertFinite(aimDeg, "aimDeg");
@@ -212,7 +230,9 @@
           cor,
         });
     const moiCatalogueGCm2 = moiKgM2 * _CATALOGUE_MOI_G_CM2_PER_KG_M2;
-    const gearTwistDeg = isStimpRamp ? 0.0 : strikeMm * 0.085 * (4500.0 / moiCatalogueGCm2);
+    // A toe strike (+) opens the face, as in the core strike() (#14647);
+    // studio angles are positive to the left, so the twist is negative.
+    const gearTwistDeg = isStimpRamp ? 0.0 : -strikeMm * 0.085 * (4500.0 / moiCatalogueGCm2);
     const totalFaceDeg = aimDeg + faceErrDeg + gearTwistDeg, totalPathDeg = aimDeg + pathErrDeg;
     const launchDeg = isStimpRamp ? aimDeg : 0.84 * totalFaceDeg + 0.16 * totalPathDeg;
     const launchRad = (launchDeg * Math.PI) / 180.0;
@@ -222,7 +242,7 @@
     const dt = 0.012;
     const pts = [{ x: 0, y: 0, t: 0, mode: isStimpRamp ? "rolling" : "sliding" }];
     let t = 0.0, skidDist = 0.0, holed = false, lippedOut = false;
-    const targetSkidDist = isStimpRamp ? 0.0 : 0.14 * holeX * (v0 / 1.75);
+    const targetSkidDist = isStimpRamp ? 0.0 : coreSkidDistanceM(skidTable, v0);
     while (t < 7.5) {
       const speed = Math.hypot(vx, vy);
       if (speed < 0.012) break;
@@ -293,6 +313,7 @@
     GOLF_BALL_RADIUS_M, GOLF_BALL_MASS_KG, PUTTER_FACE_COR, seededRandom, gaussianRand,
     evalUndulatingGreen, sampleTurfMicroRoughness, stimpToRollingMu, captureSpeedMps,
     effectiveHeadMass, centreStrikeSpeedRatio, simulateSinglePuttRK4, computeClubSpeedForCapture,
+    coreSkidDistanceM,
   };
 
   root.PuttingPhysics = api;
