@@ -49,9 +49,8 @@ from src.shared.python.putting_analytics.variance import (
     strokes_gained_per_round,
 )
 
-# The skill roll model ignores strike location, so its factor would always
-# report zero; it is not offered.
-MODELLED_FACTORS: tuple[str, ...] = tuple(c for c in CHANNELS if c != "strike")
+# Every channel moves the skill roll model; toe strike costs pace (#14461).
+MODELLED_FACTORS: tuple[str, ...] = CHANNELS
 MAX_VARIANCE_ROLLOUTS = MAX_LIBRARY_ROLLOUTS
 DEFAULT_FIRST_PUTTS = 18.0  # one first putt per hole
 
@@ -60,6 +59,7 @@ _STROKE_BOUNDS = {
     "face_sd_deg": (1.5, 0.0, 10.0),
     "path_sd_deg": (2.0, 0.0, 15.0),
     "speed_cv": (0.08, 0.0, 0.5),
+    "strike_toe_sd_mm": (0.0, 0.0, 25.0),
     "face_bias_deg": (0.0, -5.0, 5.0),
     "speed_bias": (0.0, -0.5, 0.5),
 }
@@ -100,8 +100,15 @@ def profile_from_args(args: Mapping[str, Any]) -> PuttingSkillProfile:
 
 
 def factors_from_args(args: Mapping[str, Any]) -> tuple[str, ...]:
-    """Error sources to attribute; defaults to every modelled channel."""
-    raw = args.get("factors", list(MODELLED_FACTORS))
+    """Error sources to attribute; defaults to every modelled channel.
+
+    A centred striker (no ``strike_toe_sd_mm``) leaves strike out of the
+    default, whose gain would be exactly zero; that keeps such a study's
+    Saltelli design, and so its numbers, as they were before #14461.
+    """
+    centred = _number(args, "strike_toe_sd_mm", 0.0) == 0.0
+    default = [f for f in MODELLED_FACTORS if not (centred and f == "strike")]
+    raw = args.get("factors", default)
     _check(isinstance(raw, list | tuple) and len(raw) > 0, "'factors' is empty")
     for name in raw:
         _check(name in MODELLED_FACTORS, f"factors must be in {MODELLED_FACTORS}")

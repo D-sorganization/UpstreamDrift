@@ -1,3 +1,4 @@
+/// <reference types="vitest/globals" />
 /**
  * TDD Tests for Dashboard page.
  *
@@ -6,7 +7,7 @@
  *   - Navigation to simulation page works
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import { MemoryRouter } from 'react-router';
@@ -124,6 +125,11 @@ describe('DashboardPage', () => {
         expect(screen.getByText('Golf Modeling Suite')).toBeInTheDocument();
         expect(screen.getByText('MuJoCo')).toBeInTheDocument();
         expect(screen.getByText('Model Explorer')).toBeInTheDocument();
+    });
+
+    it('renders persistent workspace navigation sidebar matching workspaces (#14259)', () => {
+        renderWithRouter(<DashboardPage />);
+        expect(screen.getByRole('navigation', { name: 'Workspace Navigation' })).toBeInTheDocument();
     });
 
     it('renders help button', () => {

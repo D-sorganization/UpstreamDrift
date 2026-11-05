@@ -74,6 +74,7 @@ _SKILL_PROPERTIES: dict[str, Any] = {
     "face_sd_deg": {**_NUMBER, "description": "Face-angle SD, degrees [0, 10]."},
     "path_sd_deg": {**_NUMBER, "description": "Path SD, degrees [0, 15]."},
     "speed_cv": {**_NUMBER, "description": "Start-speed CV [0, 0.5]."},
+    "strike_toe_sd_mm": {**_NUMBER, "description": "Toe/heel strike SD, mm [0, 25]."},
     "face_bias_deg": _NUMBER,
     "speed_bias": _NUMBER,
     "grade_rel_sd": {**_NUMBER, "description": "Slope-read relative SD [0, 1]."},

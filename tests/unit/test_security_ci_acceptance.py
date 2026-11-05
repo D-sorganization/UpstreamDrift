@@ -84,14 +84,15 @@ def test_standard_ci_uses_locked_python_dependencies_for_dev_and_audit() -> None
     assert "-c requirements-dev.lock" not in workflow
 
     assert (
-        '"$audit_python" -m pip_audit -r requirements-dev.lock --format json '
+        '"$audit_python" -m pip_audit --timeout 60 -r requirements-dev.lock '
+        "--format json "
         "--output pip-audit-report.json"
     ) in workflow
     assert (
-        '"$audit_python" -m pip_audit -r requirements-dev.lock '
+        '"$audit_python" -m pip_audit --timeout 60 -r requirements-dev.lock '
         '"${pip_audit_waiver_flags[@]}"'
     ) in workflow
-    assert "python -m pip_audit -r requirements.lock" in workflow
+    assert "python -m pip_audit --timeout 60 -r requirements.lock" in workflow
 
     assert 'pip install --no-cache-dir -e ".[dev]"' not in workflow
     assert 'pip install --no-cache-dir -e ".[dev,gui-test]"' not in workflow

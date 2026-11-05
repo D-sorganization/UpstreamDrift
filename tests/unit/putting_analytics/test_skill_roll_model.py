@@ -28,6 +28,7 @@ from src.shared.python.putting_analytics.skill_roll_model import (
     interpolate,
     nominal_speeds_mps,
 )
+from src.shared.python.putting_dynamics import off_centre_speed_retention
 from src.shared.python.putting_analytics.variance import (
     AttributionConfig,
     elimination_gains,
@@ -130,13 +131,29 @@ def test_reading_the_green_slow_hits_it_long() -> None:
     assert not out.holed.any() and np.all(out.leave_m > 0.3)
 
 
-def test_toe_strike_is_ignored() -> None:
+def test_toe_strike_costs_ball_speed_through_the_collision_model() -> None:
+    # An off-centre strike is the centred stroke with the ball speed the
+    # collision model retains at that offset (#14461), heel or toe alike.
     model = SkillRollModel(RIGHT_TO_LEFT, 12.0, BASELINE)
     execution = sample_execution(StrokeDispersion(1.0, 1.0, 0.05), N, 3)
-    toed = dataclasses.replace(execution, strike_toe_mm=np.full(N, 9.0))
-    a = model(execution, _perfect_read())
-    b = model(toed, _perfect_read())
-    np.testing.assert_array_equal(a.strokes, b.strokes)
+    toe_mm = np.where(np.arange(N) % 2 == 0, 14.0, -9.0)
+    struck = dataclasses.replace(execution, strike_toe_mm=toe_mm)
+    retained = off_centre_speed_retention(model.putter, toe_mm / 1000.0)
+    slowed = dataclasses.replace(
+        execution, speed_ratio=execution.speed_ratio * retained
+    )
+    a = model(struck, _perfect_read())
+    b = model(slowed, _perfect_read())
+    np.testing.assert_allclose(a.leave_m, b.leave_m)
+    assert np.all(retained < 1.0)
+
+
+def test_a_strike_off_the_face_is_clipped_to_its_edge() -> None:
+    model = SkillRollModel(FLAT, 6.0, BASELINE)
+    edge = dataclasses.replace(_perfect_strike(), strike_toe_mm=np.full(N, 80.0))
+    beyond = dataclasses.replace(_perfect_strike(), strike_toe_mm=np.full(N, 95.0))
+    out = model(beyond, _perfect_read())
+    np.testing.assert_array_equal(out.leave_m, model(edge, _perfect_read()).leave_m)
 
 
 def test_lines_are_planned_once_per_node(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -173,5 +190,5 @@ def test_elimination_gains_through_the_variance_study() -> None:
     baseline, rows = elimination_gains(model, profile, config)
     gains = {row.factor: row.gain for row in rows}
     assert 1.0 < baseline < 3.0
-    assert gains["strike"] == 0.0
+    assert gains["strike"] == 0.0  # the profile strikes every putt centred
     assert gains["face"] > 0.0 and gains["read_grade"] > 0.0

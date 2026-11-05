@@ -94,8 +94,21 @@ jobs:
         run: >-
           python3 -m scripts.companion_publication verify-bundle
           --bundle-dir dist/companion
+      # Self-hosted runners intermittently fail the OIDC token fetch
+      # (EAI_AGAIN / socket hang up) before anything is attested, so each
+      # attestation gets one bounded retry (#14390).
       - name: Attest companion publication payloads
         id: companion-attestation
+        continue-on-error: true
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        with:
+          subject-path: "dist/companion/*"
+      - name: Wait before retrying companion attestation
+        if: steps.companion-attestation.outcome == 'failure'
+        run: sleep 20
+      - name: Retry companion publication attestation
+        id: companion-attestation-retry
+        if: steps.companion-attestation.outcome == 'failure'
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: "dist/companion/*"
@@ -116,10 +129,20 @@ jobs:
           --artifact-url '${{ steps.companion-upload.outputs.artifact-url }}'
           --artifact-digest '${{ steps.companion-upload.outputs.artifact-digest }}'
           --retention-days 30
-          --attestation-id '${{ steps.companion-attestation.outputs.attestation-id }}'
-          --attestation-url '${{ steps.companion-attestation.outputs.attestation-url }}'
+          --attestation-id '${{ steps.companion-attestation.outputs.attestation-id || steps.companion-attestation-retry.outputs.attestation-id }}'
+          --attestation-url '${{ steps.companion-attestation.outputs.attestation-url || steps.companion-attestation-retry.outputs.attestation-url }}'
           --output dist/companion-evidence/upstreamdrift-companion-acquisition.v1.json
       - name: Attest Actions acquisition evidence
+        id: evidence-attestation
+        continue-on-error: true
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        with:
+          subject-path: "dist/companion-evidence/*"
+      - name: Wait before retrying evidence attestation
+        if: steps.evidence-attestation.outcome == 'failure'
+        run: sleep 20
+      - name: Retry Actions acquisition evidence attestation
+        if: steps.evidence-attestation.outcome == 'failure'
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: "dist/companion-evidence/*"

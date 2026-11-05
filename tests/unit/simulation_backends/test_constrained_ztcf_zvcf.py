@@ -34,7 +34,7 @@ from src.shared.python.simulation_backends.ztcf_zvcf import (
     evaluate_ztcf_zvcf_on_canonical_trajectory,
     zero_velocity_control_preserved_acceleration,
     ztcf_acceleration,
-    zvcf_acceleration,
+    zero_velocity_zero_torque_acceleration,
 )
 
 pytestmark = pytest.mark.unit
@@ -85,9 +85,9 @@ def test_ztcf_re_solves_the_reaction_against_the_kkt_oracle(planar) -> None:
     assert np.max(np.abs(a - free)) > 1e-3  # not the unconstrained value
 
 
-def test_zvcf_sets_velocity_and_control_to_zero_on_the_loop(planar) -> None:
+def test_zero_velocity_zero_torque_on_the_loop(planar) -> None:
     s, provider = planar
-    a = zvcf_acceleration(provider, s.q)
+    a = zero_velocity_zero_torque_acceleration(provider, s.q)
     h0 = provider.bias_forces(s.q, np.zeros(5))
     ref, _ = _kkt(s.M, -h0, s.J_c, provider.closure_drift(s.q, np.zeros(5)))
     assert _scaled(a - ref, np.max(np.abs(ref))) < TOL
@@ -245,7 +245,7 @@ def test_pinocchio_ztcf_zvcf_match_constraint_dynamics(pin_case) -> None:
     assert _scaled(ztcf - ztcf_ref, np.max(np.abs(ztcf_ref))) < TOL
 
     zvcf_ref, _ = _pin_constraint_dynamics(pin, adapter, q, zeros, zeros)
-    zvcf = zvcf_acceleration(provider, q)
+    zvcf = zero_velocity_zero_torque_acceleration(provider, q)
     assert _scaled(zvcf - zvcf_ref, np.max(np.abs(zvcf_ref))) < TOL
 
     jc = provider.closure_jacobian(q)

@@ -15,7 +15,7 @@ from zipfile import BadZipFile, ZipFile
 try:
     from defusedxml import ElementTree
 except ImportError:
-    from xml.etree import ElementTree  # type: ignore[no-redef]
+    from xml.etree import ElementTree  # type: ignore[no-redef]  # nosec B405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - fallback only when defusedxml is absent
 MINOR = {
     "a",
     "an",
@@ -106,7 +106,7 @@ def expected_title(value: str) -> str:
                 index == len(words) - 1
                 and not any(start >= item.end() for start, _ in spans)
             )
-            or bool(re.search(r"(?:[:!?—–]|-{2,}|[([{])\s*$", separator))
+            or bool(re.search(r"(?:[:!?—–·]|-{2,}|[([{])\s*$", separator))
         )
         hyphens = "-‐‑"
         compound = (item.start() > 0 and value[item.start() - 1] in hyphens) != (
