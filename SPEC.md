@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14667 | Putting studio: the strike slider spans heel to toe over the desktop range, offsets every batch strike, and a toe strike opens the face as in the core strike() |
 | 2026-11-05 | #14655 | SHOW-C3c slice 3a: guarded full-body speed ladder (baseline-physical precondition, MuJoCo impact reader, per-rung ROM/velocity bindings) |
 | 2026-11-05 | #14666 | Cross-frontend putting golden: shared-core fixture, React/Tauri replay parity tests and a generated parity report |
 | 2026-11-05 | #14662 | Putting studio: the skid-to-roll transition ends where the core simulate_strike skid ends for the ball speed, and the telemetry shows the core launch angle |
