@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14581 | SHOW-B1: ShotOutcomeModel protocol + backend registry; tour baseline is the default quick_sg backend |
+| 2026-11-05 | #14579 | SHOW-C2: ImpactConditions + evaluate_rollout facade for optimiser loops (face, path, AoA, speed, strike) over impact_parameters |
+| 2026-11-05 | #14586 | React putting page: Green Type selector on the core green presets (/simulate-3d green spec) |
 | 2026-11-05 | #14580 | SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope contracts (impact_optimization package; face:path 10:1; NSX-04 torque limits; cited velocity YAML) |
 | 2026-11-05 | #14583 | Putting API: /simulate-3d accepts the core green shape (green: GreenShapeRequest, a preset or slope, tier and bumps) and rolls on its GreenSpec height field, reporting that spec's grade and aspect, and strikes along aim_heading_deg (was always +x), so the React page can send the core presets and an aimed putt |
 | 2026-11-04 | #14576 | React putting page: desktop camera views and jumps to the core phase marks |
