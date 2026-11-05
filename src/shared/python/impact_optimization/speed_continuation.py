@@ -119,9 +119,17 @@ def pareto_front(
 
 
 def binding_report(
-    result: ContinuationResult, envelope: PhysiologicalEnvelope
+    result: ContinuationResult,
+    envelope: PhysiologicalEnvelope,
+    limit_notes: dict[str, str] | None = None,
 ) -> list[str]:
-    """One evidence line per binding joint per rung (blocking rungs flagged)."""
+    """One evidence line per binding joint per rung (blocking rungs flagged).
+
+    ``limit_notes`` maps a joint name to the provenance of its limit (for
+    example "prior-derived split, not a measurement"), appended to that joint's
+    lines so a binding limit is never read as a measured over-rotation.
+    """
+    notes = limit_notes or {}
     lines: list[str] = []
     for p in result.points:
         sol = p.solution
@@ -137,10 +145,13 @@ def binding_report(
                 f"{sol.face_to_path_deg:+.2f} deg)"
             )
             if p.feasible:
-                lines.append(head + "; at the limit but feasible")
+                line = head + "; at the limit but feasible"
             else:
-                lines.append(
+                line = (
                     head + "; BLOCKS this speed. 125 mph is firm, so treat the "
                     "limit as probably miscalibrated, not as a cap"
                 )
+            if name in notes:
+                line += f" (limit provenance: {notes[name]})"
+            lines.append(line)
     return lines
