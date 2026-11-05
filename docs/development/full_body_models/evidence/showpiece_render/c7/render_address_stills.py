@@ -116,7 +116,10 @@ def render_figure(rows: dict[str, Pose], out: Path) -> Path:
             ax.set_title(f"{label}: {view}", fontsize=9)
             ax.set_xlabel("m")
             ax.set_ylabel("m")
-            inset = ax.inset_axes((0.02, 0.02, 0.30, 0.30))
+            corner = (
+                (0.02, 0.02) if c == 0 else (0.02, 0.66)
+            )  # clear of the club and body
+            inset = ax.inset_axes((*corner, 0.30, 0.30))
             _draw(inset, pose, h, v, detail=True)
             centre = pose.club[0]
             inset.set_xlim(centre[h] - 0.3, centre[h] + 0.3)
