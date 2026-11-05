@@ -156,20 +156,29 @@ def make_mujoco_impact_fn(
     """C2 impact reader at the last window sample on the real MuJoCo model.
 
     Scatters plant-order ``(T, n)`` states into MuJoCo ``qpos`` / ``qvel`` by
-    joint id and evaluates ``evaluate_rollout`` at ``impact_index = T - 1``.
+    joint id (unmapped coordinates stay at ``qpos0``; only hinge and slide
+    joints are accepted) and evaluates ``evaluate_rollout`` at ``impact_index = T - 1``.
     """
     from src.shared.python.impact_parameters.conditions import (
         Rollout,
         evaluate_rollout,
     )
 
+    import mujoco
+
     ids = list(joint_ids)
+    scalar = {int(mujoco.mjtJoint.mjJNT_HINGE), int(mujoco.mjtJoint.mjJNT_SLIDE)}
+    require(
+        all(int(t) in scalar for t in np.asarray(model.jnt_type)[ids]),
+        "controlled joints must be hinge or slide (one qpos / dof each)",
+    )
     qadr = np.asarray(model.jnt_qposadr)[ids]
     vadr = np.asarray(model.jnt_dofadr)[ids]
     run: Callable[..., Any] = evaluate or evaluate_rollout
 
     def impact_fn(times_s: Array, q: Array, v: Array) -> MeasuredImpact:
-        qpos = np.zeros((len(times_s), model.nq))
+        require(q.shape[1] == len(ids) == v.shape[1], "state width must match ids")
+        qpos = np.tile(np.asarray(model.qpos0, dtype=float), (len(times_s), 1))
         qvel = np.zeros((len(times_s), model.nv))
         qpos[:, qadr] = q
         qvel[:, vadr] = v

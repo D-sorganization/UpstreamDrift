@@ -142,6 +142,8 @@ def test_mujoco_impact_fn_scatters_by_joint_id_and_evaluates_at_the_index() -> N
         nq, nv = 4, 4
         jnt_qposadr = np.array([2, 0, 3])
         jnt_dofadr = np.array([2, 0, 3])
+        jnt_type = np.array([3, 3, 2])  # hinge, hinge, slide
+        qpos0 = np.full(4, 9.0)
 
     seen = {}
 
@@ -156,4 +158,54 @@ def test_mujoco_impact_fn_scatters_by_joint_id_and_evaluates_at_the_index() -> N
     q = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
     out = fn(t, q, q * 10)
     assert out.speed_mph == 4.0 and seen["idx"] == 1 and seen["body"] == "club"
-    assert seen["q"][1].tolist() == [5.0, 0.0, 4.0, 6.0]
+    assert seen["q"][1].tolist() == [5.0, 9.0, 4.0, 6.0]  # unmapped = qpos0
+
+
+def test_mujoco_impact_fn_rejects_non_scalar_joints_and_wrong_width() -> None:
+    class _Free:
+        nq, nv = 7, 6
+        jnt_qposadr = np.array([0])
+        jnt_dofadr = np.array([0])
+        jnt_type = np.array([0])  # free joint
+        qpos0 = np.zeros(7)
+
+    with pytest.raises(ContractViolationError):
+        make_mujoco_impact_fn(_Free(), [0], "club", "frame", "face")
+
+    class _Hinges(_Free):
+        nq, nv = 2, 2
+        jnt_qposadr = np.array([0, 1])
+        jnt_dofadr = np.array([0, 1])
+        jnt_type = np.array([3, 3])
+        qpos0 = np.zeros(2)
+
+    fn = make_mujoco_impact_fn(
+        _Hinges(), [0, 1], "club", "frame", "face", evaluate=lambda *a, **k: None
+    )
+    with pytest.raises(ContractViolationError):
+        fn(np.array([0.0, 0.1]), np.zeros((2, 3)), np.zeros((2, 3)))
+
+
+def test_rung_bindings_are_computed_in_radians() -> None:
+    env = PhysiologicalEnvelope(
+        names=("J0", "J1", "J2"),
+        tau_max_negative_nm=np.full(3, 50.0),
+        tau_max_positive_nm=np.full(3, 50.0),
+        rom_deg=np.array([(-0.15, 0.15), (-90.0, 90.0), (-90.0, 90.0)]),
+        vel_max_deg_s=np.full(3, 1.0e6),
+        assumed_torque_slots=(),
+        assumed_velocity_slots=(),
+    )
+    run = run_full_body_ladder(
+        _window(),
+        ("J0", "J1"),
+        env,
+        band=BaselineBand(),
+        trust_radius=5.0,
+        config=OptimiserConfig(n_knots=2, max_iterations=3),
+        ladder=LadderSpec(110.0, 110.0, 5.0),
+    )
+    hits = run.kinematic_by_rung[0]
+    j0 = [h for h in hits if h.joint == "J0" and h.kind == "ROM"]
+    assert j0 and j0[0].utilisation > 1.0  # ~0.2 deg peak vs 0.15 deg limit
+    assert not [h for h in hits if h.joint == "J1"]
