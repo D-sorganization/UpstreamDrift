@@ -200,3 +200,119 @@ velocity_limits_deg_s:
         note: "lower-limb joint speeds in the swing are well below this; generous prior",
       }
     verification_status: UNVERIFIED
+
+# Shoulder (glenohumeral) range of motion, deg, in MODEL sign (D35/D39, #14557).
+#
+# The spec's coordinate_ranges_deg is a HARD IK bound, so a shoulder range does
+# not go there; from_spec merges this section under hard and soft_limits_deg
+# ranges.  One source and one verification_status PER SIDE, because a single
+# coordinate is cited on one side only.  Sign map (coordinate_sign_map.py): the
+# zero pose is the forward-raised arm (90 deg flexion); Y+ lowers the arm
+# (Y = 90 - flexion, extension is Y > 90); left Z+ is external rotation and
+# right Z+ is internal rotation; X is horizontal abduction (left +) or
+# adduction (right +).  Shoulder coordinates are relative to the thorax.
+#
+# SOURCED (SOURCED_WITH_ASSUMED_MARGIN, full text read): flexion and external rotation, Gill 2020
+# Tables 1 and 3, male "All participants" row, bound = mean + 1 SD (~84th
+# percentile of a healthy community sample, so a normal swing is not rejected).
+# The margin and the arm-at-side ER posture are assumptions, so these sides are
+# not VERIFIED and a breach reads assumption-limited (D32); the source stays cited.
+# Caveats: general-population adults (mean age 45.8 y, not athletes), single
+# active inclinometer/visual measurement, ER measured at the side with the
+# elbow bent (the model zero pose is arm-raised).  Abduction is not a single
+# model axis (it is elevation in the frontal plane), so it is not used.
+# ASSUMED (UNVERIFIED): extension, internal rotation, horizontal motion; no
+# source read in full (Fleisig 2022 Appendix A download is not approved).
+# A breach on an assumed side is reported assumption-limited (D32), never as
+# probable miscalibration.
+declared_rom_deg:
+  - coordinate: LSInputX
+    lower:
+      value: -130.0
+      citation:
+        {
+          id: null,
+          note: "horizontal abduction/adduction prior; no source read",
+        }
+      verification_status: UNVERIFIED
+    upper:
+      value: 130.0
+      citation:
+        {
+          id: null,
+          note: "horizontal abduction/adduction prior; no source read",
+        }
+      verification_status: UNVERIFIED
+  - coordinate: RSInputX
+    lower:
+      value: -130.0
+      citation:
+        {
+          id: null,
+          note: "horizontal abduction/adduction prior; no source read",
+        }
+      verification_status: UNVERIFIED
+    upper:
+      value: 130.0
+      citation:
+        {
+          id: null,
+          note: "horizontal abduction/adduction prior; no source read",
+        }
+      verification_status: UNVERIFIED
+  - coordinate: LSInputY
+    lower:
+      value: -88.0
+      citation:
+        reference: "Gill TK, Shanahan EM, Tucker GR, Buchbinder R, Hill CL. Shoulder range of movement in the general population: age and gender stratified normative data using a community-based cohort. BMC Musculoskelet Disord 21:676 (2020)"
+        doi: "10.1186/s12891-020-03665-9"
+        note: "Table 1, male left flexion 159.9 (SD 18.1) deg; bound = mean + 1 SD = 178.0; Y = 90 - 178.0"
+      verification_status: SOURCED_WITH_ASSUMED_MARGIN
+    upper:
+      value: 150.0
+      citation:
+        {
+          id: null,
+          note: "shoulder extension prior (Y = 90 + 60); no source read",
+        }
+      verification_status: UNVERIFIED
+  - coordinate: RSInputY
+    lower:
+      value: -90.2
+      citation:
+        reference: "Gill TK, Shanahan EM, Tucker GR, Buchbinder R, Hill CL. Shoulder range of movement in the general population: age and gender stratified normative data using a community-based cohort. BMC Musculoskelet Disord 21:676 (2020)"
+        doi: "10.1186/s12891-020-03665-9"
+        note: "Table 1, male right flexion 161.5 (SD 18.7) deg; bound = mean + 1 SD = 180.2; Y = 90 - 180.2"
+      verification_status: SOURCED_WITH_ASSUMED_MARGIN
+    upper:
+      value: 150.0
+      citation:
+        {
+          id: null,
+          note: "shoulder extension prior (Y = 90 + 60); no source read",
+        }
+      verification_status: UNVERIFIED
+  - coordinate: LSInputZ
+    lower:
+      value: -90.0
+      citation: { id: null, note: "internal rotation prior; no source read" }
+      verification_status: UNVERIFIED
+    upper:
+      value: 72.9
+      citation:
+        reference: "Gill TK, Shanahan EM, Tucker GR, Buchbinder R, Hill CL. Shoulder range of movement in the general population: age and gender stratified normative data using a community-based cohort. BMC Musculoskelet Disord 21:676 (2020)"
+        doi: "10.1186/s12891-020-03665-9"
+        note: "Table 3, male left external rotation 55.0 (SD 17.9) deg; bound = mean + 1 SD = 72.9; left Z+ is ER"
+      verification_status: SOURCED_WITH_ASSUMED_MARGIN
+  - coordinate: RSInputZ
+    lower:
+      value: -74.4
+      citation:
+        reference: "Gill TK, Shanahan EM, Tucker GR, Buchbinder R, Hill CL. Shoulder range of movement in the general population: age and gender stratified normative data using a community-based cohort. BMC Musculoskelet Disord 21:676 (2020)"
+        doi: "10.1186/s12891-020-03665-9"
+        note: "Table 3, male right external rotation 56.8 (SD 17.6) deg; bound = mean + 1 SD = 74.4; right Z- is ER"
+      verification_status: SOURCED_WITH_ASSUMED_MARGIN
+    upper:
+      value: 90.0
+      citation: { id: null, note: "internal rotation prior; no source read" }
+      verification_status: UNVERIFIED

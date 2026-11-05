@@ -55,6 +55,8 @@ class KinematicBinding:
     peak: float
     limit: float
     utilisation: float
+    #: ROM only: which bound ("lower"/"upper") the peak is against; "" otherwise.
+    side: str = ""
 
 
 def _rom_hit(name: str, a: np.ndarray, lo: float, hi: float) -> KinematicBinding | None:
@@ -66,10 +68,10 @@ def _rom_hit(name: str, a: np.ndarray, lo: float, hi: float) -> KinematicBinding
     if not (math.isfinite(lo) and math.isfinite(hi)):
         return None
     centre, half = (lo + hi) / 2.0, (hi - lo) / 2.0
-    up = ((float(a.max()) - centre) / half, float(a.max()), hi)
-    down = ((centre - float(a.min())) / half, float(a.min()), lo)
-    util, peak, limit = max(up, down)
-    return KinematicBinding(name, "ROM", peak, limit, util)
+    up = ((float(a.max()) - centre) / half, float(a.max()), hi, "upper")
+    down = ((centre - float(a.min())) / half, float(a.min()), lo, "lower")
+    util, peak, limit, side = max(up, down)
+    return KinematicBinding(name, "ROM", peak, limit, util, side)
 
 
 def kinematic_binding(
@@ -192,7 +194,7 @@ def kinematic_binding_report(
     for p in result.points:
         traj = p.trajectory
         for hit in kinematic_binding(traj, times_s, envelope, degrees=degrees):
-            assumed = envelope.limit_is_assumed(hit.joint, hit.kind)
+            assumed = envelope.limit_is_assumed(hit.joint, hit.kind, hit.side)
             lines.append(
                 _line(
                     p.speed_target_mph, hit, p.feasible, notes.get(hit.joint), assumed

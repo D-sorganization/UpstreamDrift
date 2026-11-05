@@ -33,6 +33,7 @@ from collections.abc import Mapping, Sequence
 
 from src.shared.python.contracts import require
 from src.shared.python.impact_optimization.kinematic_binding import KinematicBinding
+from src.shared.python.impact_optimization.physiological_envelope import is_assumed
 from src.shared.python.impact_optimization.speed_continuation import (
     ContinuationPoint,
     ContinuationResult,
@@ -63,7 +64,7 @@ def _status(
     breaches = [h for h in hits if h.utilisation > 1.0]
     if breaches:
         names = ", ".join(f"{h.joint} {h.kind}" for h in breaches)
-        if all((h.joint, h.kind) in assumed for h in breaches):
+        if all(is_assumed(h.joint, h.kind, h.side, assumed) for h in breaches):
             return (
                 f"rejected: exceeds {names} limit; assumption-limited (D32), "
                 "an uncited limit, not a finding about the athlete"

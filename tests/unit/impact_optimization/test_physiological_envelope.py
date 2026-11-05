@@ -42,12 +42,15 @@ def env() -> PhysiologicalEnvelope:
         SUBJECT,
         load_limits(DEFAULT_LIMITS_PATH),
         allow_unbounded_rom=_no_rom(),
+        declared_rom={},  # the pre-declared behaviour: shoulders unbounded
     )
 
 
 def test_missing_rom_fails_closed_naming_the_shoulders() -> None:
     with pytest.raises(ValueError, match="LSInputX") as exc:
-        PhysiologicalEnvelope.from_spec(SPEC, SUBJECT, load_limits(DEFAULT_LIMITS_PATH))
+        PhysiologicalEnvelope.from_spec(
+            SPEC, SUBJECT, load_limits(DEFAULT_LIMITS_PATH), declared_rom={}
+        )
     assert "RSInputZ" in str(exc.value)
     assert "HipInput" not in str(exc.value)  # root is the explicit exemption
 
@@ -144,6 +147,7 @@ def _v2_env(spec: dict = SPEC_V2) -> PhysiologicalEnvelope:
         SUBJECT,
         load_limits(DEFAULT_LIMITS_PATH),
         allow_unbounded_rom=frozenset(_SHOULDERS),
+        declared_rom={},
     )
 
 
@@ -151,7 +155,7 @@ def test_v2_missing_rom_names_only_the_shoulders() -> None:
     """Trunk ROM is declared (soft_limits_deg); only the shoulders still fail closed."""
     with pytest.raises(ValueError, match="LSInputX") as exc:
         PhysiologicalEnvelope.from_spec(
-            SPEC_V2, SUBJECT, load_limits(DEFAULT_LIMITS_PATH)
+            SPEC_V2, SUBJECT, load_limits(DEFAULT_LIMITS_PATH), declared_rom={}
         )
     msg = str(exc.value)
     assert "lumbar" not in msg and "thoracic" not in msg
