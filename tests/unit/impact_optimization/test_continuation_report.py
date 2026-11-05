@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 from types import SimpleNamespace
 
 import pytest
@@ -69,8 +70,21 @@ def test_feasible_rung_is_not_labelled_blocked() -> None:
 
 
 def test_blocked_rung_names_the_subset_and_each_binding_with_kind() -> None:
-    row = next(r for r in _render().splitlines() if r.startswith("| 125 "))
+    near = KinematicBinding("SpineInputZ", "ROM", 49.5, 50.0, 0.99)
+    row = next(
+        r
+        for r in render_continuation_report(
+            ContinuationResult((_point(125.0, 121.4, False),), 0.0), [[near]], {}
+        ).splitlines()
+        if r.startswith("| 125 ")
+    )
     assert "blocked (within the controlled subset)" in row
+    assert "SpineInputZ ROM 49.5 / 50.0 deg" in row
+
+
+def test_over_limit_rung_in_the_render_is_rejected_with_each_binding_kind() -> None:
+    row = next(r for r in _render().splitlines() if r.startswith("| 125 "))
+    assert "rejected: exceeds" in row and "blocked" not in row
     assert "SpineInputZ ROM 50.2 / 50.0 deg (100.4%)" in row
     assert "NeckInputZ velocity 410.0 / 400.0 deg/s (102.5%)" in row
 
@@ -98,14 +112,17 @@ def test_rung_count_mismatch_fails_closed() -> None:
         render_continuation_report(_result(), [[]], {})
 
 
-def test_feasible_rung_with_a_kinematic_breach_is_not_ok() -> None:
-    """``feasible`` ignores ROM and velocity, so a breach must still be named."""
+def test_demoted_kinematic_breach_is_rejected_not_blocked() -> None:
+    """Through ``enforce_kinematic_limits`` the rung is infeasible AND named."""
     result = ContinuationResult((_point(125.0, 125.0, True),), 125.0)
-    text = render_continuation_report(result, [[ROM]], {})
+    demoted = ContinuationResult(
+        (dataclasses.replace(result.points[0], feasible=False),), 0.0
+    )
+    text = render_continuation_report(demoted, [[ROM]], {})
     row = next(r for r in text.splitlines() if r.startswith("| 125 "))
-    assert "| ok |" not in row
-    assert "reached; exceeds ROM/velocity limit" in row
-    assert "blocked" not in row
+    assert "| ok |" not in row and "blocked" not in row
+    assert "rejected: exceeds SpineInputZ ROM limit" in row
+    assert "probable miscalibration (D29)" in row
 
 
 def test_feasible_rung_at_or_below_every_limit_is_ok() -> None:
