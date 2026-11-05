@@ -192,3 +192,80 @@ def test_sagittal_spine_and_neck_signs_follow_frame_geometry() -> None:
     vec = capacity_for(("SpineInputY", "NeckInputY"), CapacitySubject(78.0, 1.71))
     assert list(vec.tau_max_positive_nm) == pytest.approx([325.0, 30.0])
     assert list(vec.tau_max_negative_nm) == pytest.approx([422.8, 52.0])
+
+
+# --- NSX-04 slice: lower-limb anatomical slots (#12553) -----------------------
+_REGISTRY = ROOT / "src/config/loop_nullspace_registry.json"
+_ANATOMICAL = ("hip_adduction", "hip_rotation", "subtalar_angle", "mtp_angle")
+# (slot, direction) -> (citation id, cited Nm). Subtalar: da Fonseca 2025 Table 6,
+# male mean peak torque (inversion 37.0, eversion 33.4). MTP flexion: Saeki 2021
+# Results, first MTP 11.6 + second-fifth MTP 8.0 Nm.
+_CITED = {
+    **{(f"subtalar_angle_{s}", "positive"): ("CIT-DAFONSECA-2025", 37.0) for s in "lr"},
+    **{(f"subtalar_angle_{s}", "negative"): ("CIT-DAFONSECA-2025", 33.4) for s in "lr"},
+    **{(f"mtp_angle_{s}", "positive"): ("CIT-SAEKI-2021", 19.6) for s in "lr"},
+}
+
+
+def _torque_entries() -> list[dict]:
+    return json.loads(_REGISTRY.read_text("utf-8"))["torque_capacity"]
+
+
+@pytest.mark.parametrize(("slot", "direction"), sorted(_CITED))
+def test_capacity_reproduces_cited_value(slot: str, direction: str) -> None:
+    citation, nm = _CITED[(slot, direction)]
+    entry = next(
+        e
+        for e in _torque_entries()
+        if e["joint_slot"] == slot and e["direction"] == direction
+    )
+    assert entry["verification_status"] == "VERIFIED"
+    assert entry["assumed"] is False
+    assert entry["source"]["citation_id"] == citation
+    assert entry["source"]["location"].startswith(("Table", "Results"))
+    vec = capacity_for((slot,), CapacitySubject(78.0, 1.71), actuated=(slot,))
+    got = (
+        vec.tau_max_positive_nm if direction == "positive" else vec.tau_max_negative_nm
+    )
+    assert got[0] == pytest.approx(nm)
+
+
+def test_every_anatomical_slot_is_verified_or_states_what_was_not_found() -> None:
+    entries = [e for e in _torque_entries() if e["joint_slot"].startswith(_ANATOMICAL)]
+    assert len(entries) == 16
+    for e in entries:
+        label = f"{e['joint_slot']}/{e['direction']}"
+        if e["verification_status"] == "VERIFIED":
+            assert e["source"]["citation_id"], label
+            continue
+        note = e["source"]["note"]
+        assert note.startswith("Not verified:") and len(note) > 80, label
+
+
+def test_subtalar_and_mtp_signs_follow_the_model_axes() -> None:
+    """Positive subtalar = inversion and positive MTP = flexion, from the model FK
+    (ankle positive = dorsiflexion is the control for the method)."""
+    mujoco = pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+        export_full_body_mjcf,
+    )
+
+    xml, _ = export_full_body_mjcf((SPECS / SPEC_FILES[0]).read_bytes())
+    model = mujoco.MjModel.from_xml_string(xml)
+    data = mujoco.MjData(model)
+    mujoco.mj_kinematics(model, data)
+    fwd, up = (1.0, 0.0, 0.0), (0.0, 0.0, 1.0)  # model faces +X, +Z up, +Y is left
+
+    def axis(name: str):
+        jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
+        return data.xaxis[jid].copy()
+
+    import numpy as np
+
+    for side, medial in (("r", (0.0, 1.0, 0.0)), ("l", (0.0, -1.0, 0.0))):
+        ankle, sub, mtp = (
+            axis(f"{n}_{side}") for n in ("ankle_angle", "subtalar_angle", "mtp_angle")
+        )
+        assert np.cross(ankle, fwd)[2] > 0.1  # dorsiflexion raises the toes
+        assert np.cross(sub, -np.array(up)) @ medial > 0.1  # sole turns inward
+        assert np.cross(mtp, fwd)[2] < -0.1  # flexion lowers the toes
