@@ -176,11 +176,8 @@ def export_full_body_mjcf(
     thorax), each on its own body, so the visuals follow the lumbar and
     thoracic joints (HRG-D3, #13174).
 
-    ``neck_limits=True`` compiles the cited neck ROM (#14553) into the three
-    ``NeckInput*`` joints so stock MuJoCo dynamics enforce it.  It is off by
-    default: the native stack treats authored ranges as never compiled (see
-    ``necromatcher_ranges``) and hashes the default XML, which stays
-    byte-identical.
+    ``neck_limits=True`` compiles the cited neck ROM (#14553) into ``NeckInput*``;
+    off by default (necromatcher needs ``limited="false"`` and hashes that XML).
     """
     from src.shared.python.grip_contact.binding_manifest import (
         build_spec_grip_binding_manifest,

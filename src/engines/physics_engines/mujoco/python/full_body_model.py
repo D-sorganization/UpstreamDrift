@@ -68,11 +68,6 @@ class NativeMujocoFullBodyModel:
         mj: Any = import_module("mujoco")
         self._mj = mj
         spec = json.loads(model_bytes)
-        # ``neck_limits`` (#14553) compiles the cited neck ROM into the XML and
-        # applies it as an explicit limit torque below: this model computes
-        # M a = effort + contact - bias itself and never runs MuJoCo's limit
-        # solver, so compiled limits alone would not act.  Off by default
-        # because necromatcher requires limited=false and hashes that XML.
         self.xml, self.metadata = export_full_body_mjcf(
             model_bytes, neck_limits=neck_limits
         )
@@ -109,10 +104,7 @@ class NativeMujocoFullBodyModel:
             coordinate_units.append(unit)
             self._indices[name] = int(self.model.jnt_dofadr[j])
         self._coordinate_units = tuple(coordinate_units)
-        self._neck_limit_dofs, self._neck_limit_range = self._neck_limit_setup(
-            neck_limits
-        )
-
+        self._init_neck_limits(neck_limits)
         if self.model.nq != len(self._indices) or self.model.nv != len(self._indices):
             raise ValueError("All coordinates must be scalar 1-DOF joints")
 
@@ -173,12 +165,19 @@ class NativeMujocoFullBodyModel:
 
         self._errors: tuple[np.ndarray, np.ndarray] | None = None
 
-    def _neck_limit_setup(self, enabled: bool) -> tuple[np.ndarray, np.ndarray]:
-        """Dof indices and ``(lower, upper)`` radians of the limited neck joints."""
+    def _init_neck_limits(self, enabled: bool) -> None:
+        """Set the dof indices and radian ``(lower, upper)`` of the limited neck.
+
+        ``neck_limits`` (#14553) compiles the cited ROM into the XML and applies
+        it as an explicit torque: this model solves ``M a = effort + contact -
+        bias`` itself and never runs MuJoCo's limit solver.  Off by default
+        because necromatcher requires ``limited="false"`` and hashes that XML.
+        """
         names = [n for n in NECK_ROM if enabled and n in self._indices]
-        dofs = np.array([self._indices[n] for n in names], dtype=int)
-        bounds = np.array([neck_range_rad(n) for n in names]).reshape(-1, 2)
-        return dofs, bounds
+        self._neck_limit_dofs = np.array([self._indices[n] for n in names], dtype=int)
+        self._neck_limit_range = np.array([neck_range_rad(n) for n in names]).reshape(
+            -1, 2
+        )
 
     def _neck_limit_torque(self) -> np.ndarray:
         """Soft one-sided spring-damper torque holding the neck inside its ROM.
