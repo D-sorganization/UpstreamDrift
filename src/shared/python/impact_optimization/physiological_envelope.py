@@ -46,6 +46,12 @@ class VelocityLimit:
     verification_status: str
 
 
+#: Allowed registry statuses; only VERIFIED is exempt from assumption-limited reporting.
+VERIFICATION_STATUSES: frozenset[str] = frozenset(
+    {"VERIFIED", "SOURCED_WITH_ASSUMED_MARGIN", "UNVERIFIED"}
+)
+
+
 def load_limits(path: Path | str = DEFAULT_LIMITS_PATH) -> dict[str, VelocityLimit]:
     """Parse the cited YAML into ``{coordinate: VelocityLimit}``.
 
@@ -62,6 +68,11 @@ def load_limits(path: Path | str = DEFAULT_LIMITS_PATH) -> dict[str, VelocityLim
             isinstance(e.get("citation"), Mapping) and "verification_status" in e,
             "each limit needs a citation and verification_status",
             e.get("coordinates"),
+        )
+        require(
+            e["verification_status"] in VERIFICATION_STATUSES,
+            "unknown verification_status",
+            e["verification_status"],
         )
         value = float(e["value"])
         require(
