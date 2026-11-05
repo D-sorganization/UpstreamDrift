@@ -67,8 +67,8 @@ def test_feasible_rung_is_not_labelled_blocked() -> None:
 def test_blocked_rung_names_the_subset_and_each_binding_with_kind() -> None:
     row = next(r for r in _render().splitlines() if r.startswith("| 125 "))
     assert "blocked (within the controlled subset)" in row
-    assert "SpineInputZ ROM 50.2 / 50.0 deg (100%)" in row
-    assert "NeckInputZ velocity 410.0 / 400.0 deg/s (102%)" in row
+    assert "SpineInputZ ROM 50.2 / 50.0 deg (100.4%)" in row
+    assert "NeckInputZ velocity 410.0 / 400.0 deg/s (102.5%)" in row
 
 
 def test_limit_provenance_is_attached_to_the_bound_joint_only() -> None:
@@ -92,3 +92,24 @@ def test_defaults_state_nothing_held_and_no_fidelity_claim() -> None:
 def test_rung_count_mismatch_fails_closed() -> None:
     with pytest.raises(ContractViolationError):
         render_continuation_report(_result(), [[]], {})
+
+
+def test_feasible_rung_with_a_kinematic_breach_is_not_ok() -> None:
+    """``feasible`` ignores ROM and velocity, so a breach must still be named."""
+    result = ContinuationResult((_point(125.0, 125.0, True),), 125.0)
+    text = render_continuation_report(result, [[ROM]], {})
+    row = next(r for r in text.splitlines() if r.startswith("| 125 "))
+    assert "| ok |" not in row
+    assert "reached; exceeds ROM/velocity limit" in row
+    assert "blocked" not in row
+
+
+def test_feasible_rung_at_or_below_every_limit_is_ok() -> None:
+    near = KinematicBinding("SpineInputZ", "ROM", 49.5, 50.0, 0.99)
+    result = ContinuationResult((_point(125.0, 125.0, True),), 125.0)
+    row = render_continuation_report(result, [[near]], {}).splitlines()[2]
+    assert row.endswith("| ok |")
+
+
+def test_utilisation_just_over_one_never_prints_as_100_percent() -> None:
+    assert "(100%)" not in _render()

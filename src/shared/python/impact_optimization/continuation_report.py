@@ -5,7 +5,12 @@ Turns a ``ContinuationResult`` plus the per-rung ROM / velocity bindings from
 face-to-path, torque bindings, kinematic bindings.  A rung that did not reach
 its target is labelled ``blocked (within the controlled subset)``: the optimiser
 only controls the listed joints, so a block is evidence about that subset, not
-about the golfer.  Limits are never altered here; a limit with a provenance note
+about the golfer.  ``ContinuationPoint.feasible`` covers torque, tolerances and
+speed only, so a rung that reached its speed but breaches a ROM or velocity
+limit is reported as ``reached; exceeds ROM/velocity limit (...)``, never ``ok``.
+ROM utilisation is measured from the range centre (0 mid-range, 1 at a bound,
+above 1 outside), as in ``kinematic_binding``; percentages carry one decimal so
+a breach never prints as 100%.  Limits are never altered here; a limit with a provenance note
 (for example a prior-derived thoracic split) has that note printed under the
 table so a binding limit is never read as a measured over-rotation.
 
@@ -36,14 +41,24 @@ def _kinematic_text(hit: KinematicBinding) -> str:
     unit = "deg" if hit.kind == "ROM" else "deg/s"
     return (
         f"{hit.joint} {hit.kind} {hit.peak:.1f} / {hit.limit:.1f} {unit} "
-        f"({hit.utilisation:.0%})"
+        f"({hit.utilisation:.1%})"
     )
+
+
+def _status(point: ContinuationPoint, hits: Sequence[KinematicBinding]) -> str:
+    if not point.feasible:
+        return BLOCKED
+    breaches = [h for h in hits if h.utilisation > 1.0]
+    if breaches:
+        names = ", ".join(f"{h.joint} {h.kind}" for h in breaches)
+        return f"reached; exceeds ROM/velocity limit ({names})"
+    return "ok"
 
 
 def _row(point: ContinuationPoint, hits: Sequence[KinematicBinding]) -> str:
     torque = ", ".join(point.solution.binding_joints) or "-"
     kinematic = "; ".join(_kinematic_text(h) for h in hits) or "-"
-    status = "ok" if point.feasible else BLOCKED
+    status = _status(point, hits)
     return (
         f"| {point.speed_target_mph:.0f} | {point.achieved_mph:.1f} "
         f"| {point.solution.face_to_path_deg:+.2f} | {torque} | {kinematic} "
