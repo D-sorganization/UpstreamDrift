@@ -16,8 +16,9 @@
  * capture_speed_mps(); radii/gravity match Python exactly for
  * cross-language parity; the skid length comes from the core table in
  * js/core_impact.js (#14647), passed in as skidTable; a core green preset
- * (js/core_greens.js, #14648) can replace the slider green as coreGreen. Skid multiplier,
- * gear-twist/lip-out and turf chatter stay uncited (out of scope).
+ * (js/core_greens.js, #14648) can replace the slider green as coreGreen; the
+ * skid ends at the core roll-start speed from the same table (#14649).
+ * Skid multiplier, gear-twist/lip-out and turf chatter stay uncited.
  */
 (function (root) {
   "use strict";
@@ -40,7 +41,6 @@
   const _SKID_MU_MULTIPLIER = 1.85;
   const _CAPTURE_SPEED_DAMPING = 0.6;
   const _LIP_OUT_DEFLECTION_SCALE = 0.38;
-  const _CLUB_SPEED_EFFICIENCY_DERATE = 0.96;
   const _TYPICAL_PUTTER_HEAD_MASS_KG = 0.36;
   const _TYPICAL_PUTTER_MOI_KG_M2 = 4.5e-4;
   const _CATALOGUE_MOI_G_CM2_PER_KG_M2 = 1.0e7;
@@ -215,20 +215,31 @@
   }
 
   /**
-   * Core skid distance [m] for a ball speed, interpolated in a table of
-   * [ballSpeedMps, skidM] rows that rise from [0, 0] (js/core_impact.js,
-   * from putting_dynamics.simulate_strike). Past the last row the last
-   * segment is extended. @throws {TypeError|RangeError}
+   * Column `col` of the core skid table at a ball speed, interpolated in
+   * [ballSpeedMps, skidM, rollStartSpeedMps] rows that rise from [0, 0, 0]
+   * (js/core_impact.js, from putting_dynamics.simulate_strike). Past the
+   * last row the last segment is extended. @throws {TypeError|RangeError}
    */
-  function coreSkidDistanceM(skidTable, ballSpeedMps) {
-    if (!Array.isArray(skidTable) || skidTable.length < 2) {
-      throw new TypeError("skidTable must hold at least two [speed, skid] rows");
+  function coreSkidTableAt(skidTable, ballSpeedMps, col) {
+    if (!Array.isArray(skidTable) || skidTable.length < 2 || skidTable[0].length <= col) {
+      throw new TypeError("skidTable must hold at least two [speed, skid, roll speed] rows");
     }
     assertRange(ballSpeedMps, 0.0, 20.0, "ballSpeedMps");
     let i = 1;
     while (i < skidTable.length - 1 && skidTable[i][0] < ballSpeedMps) i++;
-    const [v0, s0] = skidTable[i - 1], [v1, s1] = skidTable[i];
+    const v0 = skidTable[i - 1][0], v1 = skidTable[i][0];
+    const s0 = skidTable[i - 1][col], s1 = skidTable[i][col];
     return s0 + ((s1 - s0) * (ballSpeedMps - v0)) / (v1 - v0);
+  }
+
+  /** Core skid distance [m] for a ball speed. @throws {TypeError|RangeError} */
+  function coreSkidDistanceM(skidTable, ballSpeedMps) {
+    return coreSkidTableAt(skidTable, ballSpeedMps, 1);
+  }
+
+  /** Core ball speed [m/s] when the skid ends and pure roll starts (#14649). */
+  function coreRollStartSpeedMps(skidTable, ballSpeedMps) {
+    return coreSkidTableAt(skidTable, ballSpeedMps, 2);
   }
 
   /**
@@ -277,11 +288,20 @@
     const pts = [{ x: 0, y: 0, t: 0, mode: isStimpRamp ? "rolling" : "sliding" }];
     let t = 0.0, skidDist = 0.0, holed = false, lippedOut = false;
     const targetSkidDist = isStimpRamp ? 0.0 : coreSkidDistanceM(skidTable, v0);
+    const rollStartSpeed = isStimpRamp ? 0.0 : coreRollStartSpeedMps(skidTable, v0);
+    let skidEnded = isStimpRamp;
     while (t < 7.5) {
-      const speed = Math.hypot(vx, vy);
+      let speed = Math.hypot(vx, vy);
       if (speed < 0.012) break;
       const distMoved = Math.hypot(x, y);
       const mode = !isStimpRamp && distMoved < targetSkidDist ? "sliding" : "rolling";
+      if (mode === "rolling" && !skidEnded) {
+        // The skid ends at the core's roll-start speed (about 5/7 of launch).
+        skidEnded = true;
+        vx *= rollStartSpeed / speed; vy *= rollStartSpeed / speed;
+        speed = rollStartSpeed;
+        if (speed < 0.012) break;
+      }
       const mu = mode === "sliding" ? muRoll * _SKID_MU_MULTIPLIER : muRoll;
       const grad = evalGreen(x, y, holeX, upPct, crossPct, coreGreen);
       const chatter = sampleTurfMicroRoughness(x, y, speed, roughnessMm, trialSeed);
@@ -322,11 +342,11 @@
   }
 
   /**
-   * Required club speed for a target hole-entry speed, inverting the
-   * rolling-friction law. @throws {TypeError|RangeError}
+   * Required club speed for a target hole-entry speed, inverting the core
+   * skid table and the rolling-friction law. @throws {TypeError|RangeError}
    */
   function computeClubSpeedForCapture({
-    distFt, entrySpeedMps, stimpFt, upPct = 0.0,
+    distFt, entrySpeedMps, stimpFt, upPct = 0.0, skidTable,
     headMassKg = _TYPICAL_PUTTER_HEAD_MASS_KG,
     ballMassKg = GOLF_BALL_MASS_KG, cor = PUTTER_FACE_COR,
   }) {
@@ -337,9 +357,20 @@
     const distM = distFt * _FEET_TO_METERS;
     const muRoll = stimpToRollingMu(stimpFt);
     const aEff = Math.max(0.08, GRAVITY_M_S2 * (muRoll + upPct / 100.0));
-    const vBallReq = Math.sqrt(entrySpeedMps * entrySpeedMps + 2.0 * aEff * distM);
+    // Bisect the launch speed whose core roll-start speed, after the core
+    // skid, still carries entrySpeedMps to the hole; the excess rises with it.
+    const excess = (v) => {
+      const roll = coreRollStartSpeedMps(skidTable, v);
+      const rest = Math.max(0.0, distM - coreSkidDistanceM(skidTable, v));
+      return roll * roll - entrySpeedMps * entrySpeedMps - 2.0 * aEff * rest;
+    };
+    let lo = 0.0, hi = 20.0;
+    for (let i = 0; i < 60; i++) {
+      const mid = 0.5 * (lo + hi);
+      if (excess(mid) < 0.0) lo = mid; else hi = mid;
+    }
     const ratio = centreStrikeSpeedRatio({ headMassKg, ballMassKg, cor });
-    return vBallReq / (ratio * _CLUB_SPEED_EFFICIENCY_DERATE);
+    return hi / ratio;
   }
 
   const api = {
@@ -347,7 +378,7 @@
     GOLF_BALL_RADIUS_M, GOLF_BALL_MASS_KG, PUTTER_FACE_COR, seededRandom, gaussianRand,
     evalUndulatingGreen, coreGreenAt, evalGreen, sampleTurfMicroRoughness, stimpToRollingMu,
     captureSpeedMps, effectiveHeadMass, centreStrikeSpeedRatio, simulateSinglePuttRK4,
-    computeClubSpeedForCapture, coreSkidDistanceM,
+    computeClubSpeedForCapture, coreSkidDistanceM, coreRollStartSpeedMps,
   };
 
   root.PuttingPhysics = api;

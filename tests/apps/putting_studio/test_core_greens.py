@@ -87,7 +87,7 @@ def test_undulation_is_selectable_without_slope() -> None:
     putt = (
         "PuttingPhysics.simulateSinglePuttRK4({vClubMps: 1.4, aimDeg: 0, "
         "pathErrDeg: 0, faceErrDeg: 0, stimpFt: 10, upPct: 0, crossPct: 0, "
-        "distFt: 12, roughnessMm: 0, skidTable: [[0, 0], [5, 0]], coreGreen: %s})"
+        "distFt: 12, roughnessMm: 0, skidTable: [[0, 0, 0], [5, 0, 5]], coreGreen: %s})"
         ".finalY"
     )
     undulating = "window.CORE_GREENS.presets.undulating_championship"
