@@ -186,6 +186,7 @@ class _MuJoCoProvider:
         return self.data.qfrc_bias.copy()
 
 
+@pytest.mark.unit
 class TestZVCF:
     """ZVCF is the control component M(q)^-1 tau (#14495, owner decision)."""
 
@@ -319,7 +320,9 @@ class TestCounterfactualPhysics:
             "Physics violation: observed != counterfactual + delta"
         )
 
-    def test_zvcf_plus_delta_equals_observed(self, simple_pendulum_model) -> None:
+    def test_zvcf_plus_counterfactual_equals_observed(
+        self, simple_pendulum_model
+    ) -> None:
         """Test physics: counterfactual (control) + delta (drift) = observed."""
         analyzer = CounterfactualAnalyzer(simple_pendulum_model)
 
