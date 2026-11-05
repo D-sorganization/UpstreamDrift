@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14597 | CI Standard sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 workflow-wide and passes pip-audit --timeout 60, so transient PyPI read timeouts no longer fail CI |
+| 2026-11-05 | #14602 | Putting: POST /tools/putting-green/counter-torque serves the shared core's two-hand couple model (hand couples, forces and gust response over the stroke) |
 | 2026-11-05 | #14590 | SHOW-B2: SkillFamily schema (impact-condition mean/cov + provenance), assumption-marked presets, registry, PlayerProfile link |
 | 2026-11-05 | #14596 | SHOW-C3b: trust-region torque optimiser with warm start and spline_trust_region backend entry |
 | 2026-11-05 | #14592 | Size-aware development-log archiver: archive oldest terminal entries when the log nears the byte cap |
