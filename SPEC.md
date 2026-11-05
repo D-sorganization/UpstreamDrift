@@ -2754,6 +2754,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14705 | putting_dynamics: the post-impact hop reflects the vertical speed relative to the green, so a downhill putt settles in under 0.1 s instead of skipping for about 5 s; the studio long-downhill read is back in core parity |
+| 2026-11-05 | #14704 | NSX-04/D35: PhysiologicalEnvelope.from_spec falls back to the spec's soft_limits_deg (v2 trunk) when no hard range exists, labelled soft_rom_slots (Part of #12553) |
 | 2026-11-05 | #14670 | C7 slice 2: address-pose stills, capture-fit vs neutral showpiece grip (Part of #14563) |
 | 2026-11-05 | #14695 | Putting studio: the E vs capture-speed panel draws the core's expected strokes per pace (optimize.evaluate_actions on the solved E(d)) from core_sg.js and names the core's best entry speed; the strokes_gained studio cell is present |
 | 2026-11-05 | #14692 | R11: per-engine chain-shaft impact-window receipt and overlay now cover drake and pinocchio, with an engine-free gate |

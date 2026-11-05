@@ -742,6 +742,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14702 · Putting_Dynamics: The Post-Impact Hop Reflects the Vertical Speed Relative to the Green, so a Downhill Putt Settles in Under 0.1 s Instead of Skipping for About 5 s; the Studio Long-Downhill Read Is Back in Core Parity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14702
+- **Branch:** merged via #14705
+- **PR:** #14705
+- **Paths:** see #14705
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`b76beaa7`; collated from changes/14702-downhill-hop.md)
+- **Summary:** putting_dynamics: the post-impact hop reflects the vertical speed relative to the green, so a downhill putt settles in under 0.1 s instead of skipping for about 5 s; the studio long-downhill read is back in core parity
+- **Next step:** Shipped in PR #14705.
+
 ### DL-#12691 · R11: Per-Engine Chain-Shaft Impact-Window Receipt and Overlay Now Cover Drake and Pinocchio, With an Engine-Free Gate
 
 - **State:** shipped
@@ -800,10 +813,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690, #14696
+- **PR:** #14684, #14690, #14696, #14704
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`62177712`; collated from changes/12553-trunk-upper-ceiling-lower-band.md)
+- **Last verified:** 2026-11-05 (`be7b9798`; collated from changes/12553-trunk-rom-soft-limits.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 
