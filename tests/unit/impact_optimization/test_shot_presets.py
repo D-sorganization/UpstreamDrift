@@ -14,6 +14,7 @@ from src.shared.python.impact_optimization.shot_presets import (
     START_LINE_FACE_WEIGHT,
     ShotPreset,
     all_presets,
+    shape_label,
     preset,
 )
 
@@ -125,3 +126,34 @@ def test_high_and_low_differ_in_attack_angle_only() -> None:
     high, low = _delivery("high"), _delivery("low")
     assert high.attack_angle_deg > 0.0 > low.attack_angle_deg
     assert high.face_to_path_deg == pytest.approx(low.face_to_path_deg)
+
+
+# D30: shot shape is named by face-to-path, never by one angle.
+def test_label_names_the_face_to_path_value_of_every_preset() -> None:
+    assert preset("draw").label == "draw (face-to-path -4.0 deg)"
+    assert preset("fade").label == "fade (face-to-path +4.0 deg)"
+    assert preset("straight").label == "straight (face-to-path +0.0 deg)"
+
+
+def test_issue_example_face_minus2_path_plus4_is_a_strong_draw_not_2_deg() -> None:
+    label = shape_label(face_deg=-2.0, path_deg=4.0)
+    assert label == "strong draw (face-to-path -6.0 deg)"
+    assert "2 deg" not in label.replace("-6.0 deg", "")
+
+
+@pytest.mark.parametrize(
+    ("face", "path", "word"),
+    [
+        (0.1, 0.0, "straight"),
+        (-1.0, 2.0, "draw"),
+        (1.0, -2.0, "fade"),
+        (3.0, -4.0, "strong fade"),
+    ],
+)
+def test_shape_label_classifies_by_face_to_path(face, path, word) -> None:
+    assert shape_label(face_deg=face, path_deg=path).startswith(word + " (")
+
+
+def test_high_and_low_labels_name_their_attack_angle() -> None:
+    assert preset("high").label == "high (aoa +3.0 deg)"
+    assert preset("low").label == "low (aoa -3.0 deg)"

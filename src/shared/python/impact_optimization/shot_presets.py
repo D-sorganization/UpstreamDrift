@@ -33,8 +33,32 @@ DEFAULT_CURVE_DEG: float = 4.0
 HIGH_AOA_DEG: float = 3.0
 LOW_AOA_DEG: float = -3.0
 
+#: ASSUMPTION: |face-to-path| (deg) from which a shape is named "strong", and
+#: below which it reads "straight".
+STRONG_CURVE_DEG: float = 5.0
+STRAIGHT_CURVE_DEG: float = 0.5
+
 _NAMES = ("straight", "draw", "fade", "high", "low")
 _W_ASSUME = "start line = 0.75*face + 0.25*path (D-plane approximation, unsourced)"
+
+
+def shape_label(face_deg: float, path_deg: float) -> str:
+    """Name a shot shape by face-to-path (D30), e.g. ``strong draw (... -6.0 deg)``.
+
+    Face-to-path sets the curvature; a single angle never names the shape (the
+    issue example face -2 / path +4 is face-to-path -6, a strong draw).
+    """
+    require(
+        math.isfinite(face_deg) and math.isfinite(path_deg), "angles must be finite"
+    )
+    c = face_deg - path_deg
+    if abs(c) < STRAIGHT_CURVE_DEG:
+        word = "straight"
+    else:
+        word = ("strong " if abs(c) >= STRONG_CURVE_DEG else "") + (
+            "draw" if c < 0 else "fade"
+        )
+    return f"{word} (face-to-path {c:+.1f} deg)"
 
 
 @dataclass(frozen=True)
@@ -44,6 +68,14 @@ class ShotPreset:
     name: str
     target: ImpactTarget
     assumptions: tuple[str, ...]
+
+    @property
+    def label(self) -> str:
+        """Preset name with its face-to-path value; high / low keep their own name."""
+        t = self.target
+        if self.name in ("high", "low"):
+            return f"{self.name} (aoa {t.aoa_deg:+.1f} deg)"
+        return f"{self.name} (face-to-path {t.face_deg - t.path_deg:+.1f} deg)"
 
 
 def _curving(name: str, curve_deg: float) -> ShotPreset:
