@@ -144,3 +144,31 @@ def test_save_button_runs_off_the_gui_thread(qapp: QApplication) -> None:
         qapp.processEvents()
         time.sleep(0.02)
     assert [s["name"] for s in panel.scenarios()] == ["Worker"]
+
+
+def test_leave_cells_use_the_shared_display_helper(
+    qapp: QApplication, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Leave goes through units.to_display_distance, not a local switch (#14629).
+    from src.tools.putting_green_gui import _scenario_panel
+
+    monkeypatch.setattr(_scenario_panel, "to_display_distance", lambda *a, **k: 1.5)
+    panel = _panel(_Green(), [UnitSystem.METRIC])
+    scenario = panel.run_save("Base")
+    if scenario["result"]["mean_leave_ft"] is None:
+        pytest.skip("every putt holed; no leave to show")
+    assert panel.table_text()[0][3] == "1.50 m"
+
+
+@pytest.mark.parametrize(("aspect", "noted"), [(180.0, True), (-90.0, False)])
+def test_import_says_when_the_fall_direction_is_dropped(
+    qapp: QApplication, tmp_path: Path, aspect: float, noted: bool
+) -> None:
+    path = tmp_path / "setup.json"
+    doc = service_setup.export_setup({"setup": {**_GREEN, "aspect_deg": aspect}})
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    panel = _panel(_Green(), [UnitSystem.IMPERIAL])
+    panel.import_from(path)
+    status = panel.status_text()
+    assert "applied distance, Stimp and grade" in status
+    assert ("fall direction not kept" in status) is noted
