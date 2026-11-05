@@ -306,3 +306,27 @@ def test_non_binding_lines_do_not_call_a_blocked_rung_feasible() -> None:
     assert peaks  # a non-binding banded joint on a blocked rung is really checked
     for ln in peaks:
         assert "feasible" not in ln.replace("within its limit", "")
+
+
+def test_source_band_from_capacity_refuses_a_capacity_without_references() -> None:
+    import dataclasses
+
+    import numpy as np
+
+    from src.shared.python.loop_nullspace.capacity import CapacityVector
+
+    env = _envelope()
+    cap = CapacityVector(
+        coordinate_order=env.names,
+        actuated_indices=tuple(range(len(env.names))),
+        actuated_names=env.names,
+        tau_max_negative_nm=np.array(env.tau_max_negative_nm, dtype=float),
+        tau_max_positive_nm=np.array(env.tau_max_positive_nm, dtype=float),
+        assumed_slots=(),
+        verified_slots=env.names,
+        warnings=(),
+        force_velocity={},
+    )
+    assert cap.tau_lower_reference_positive_nm is None
+    with pytest.raises(ContractViolationError):
+        source_band_from_capacity(dataclasses.replace(cap), env)

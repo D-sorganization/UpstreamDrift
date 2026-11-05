@@ -267,9 +267,9 @@ def source_band_from_capacity(
     """
     lo_neg = cap.tau_lower_reference_negative_nm
     lo_pos = cap.tau_lower_reference_positive_nm
-    require(
-        lo_neg is not None and lo_pos is not None, "capacity has no lower references"
-    )
+    if lo_neg is None or lo_pos is None:
+        require(False, "capacity has no lower references")
+        return {}
     band: dict[tuple[str, str], tuple[float, float]] = {}
     for name in envelope.names:
         if name not in cap.actuated_names:
