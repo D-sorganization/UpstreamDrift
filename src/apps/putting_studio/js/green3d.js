@@ -114,6 +114,7 @@ function rebuildGreenDispersionBatch() {
     ? (1.83 / 1.595)
     : PuttingPhysics.computeClubSpeedForCapture({
         distFt, entrySpeedMps: entrySpd, stimpFt: state.stimpFt, upPct: state.uphillSlopePct,
+        skidTable: window.CORE_IMPACT.skid,
       });
   const noiseMult = state.stimpmeterMode ? 0.0 : Math.max(0.12, 0.55 + 0.65 * state.noiseScale);
   // U-shaped counter-torque stabilization factor

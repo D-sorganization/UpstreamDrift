@@ -4,10 +4,11 @@ The standalone studio (``src/apps/putting_studio``) opens from ``file://`` and
 cannot import the Python core, so it ended the skid at a fixed share of the
 hole distance and did not model launch. This script runs the core
 :func:`~src.shared.python.putting_dynamics.simulate_strike` for the typical
-putter on a flat green and writes ``js/core_impact.js``: the skid distance for
-each ball speed, the launch angle and loft, the desktop's heel-to-toe strike
-range and whether a toe strike opens the face. The core skid does not depend
-on green speed, so one table serves every Stimp.
+putter on a flat green and writes ``js/core_impact.js``: the skid distance and
+roll-start speed for each ball speed (#14649), the launch angle and loft, the
+desktop's heel-to-toe strike range and whether a toe strike opens the face.
+Neither the skid nor the roll-start speed depends on green speed, so one table
+serves every Stimp.
 
 Usage::
 
@@ -22,7 +23,7 @@ from typing import Any
 
 from src.shared.python.contracts import ensure
 from src.shared.python.putting_dynamics import PutterState, simulate_strike, strike
-from src.shared.python.putting_dynamics.types import CollisionReport
+from src.shared.python.putting_dynamics.types import CollisionReport, Mode, PuttResult
 from src.shared.python.putting_dynamics.surfaces import SurfaceSpec
 from src.tools.putting_green_gui._scene_builder import IMPACT_TOE_RANGE_M
 
@@ -41,20 +42,48 @@ _DIGITS = 6
 _PREFIX = "window.CORE_IMPACT = "
 
 
+def _putt(club_mps: float, stimp_ft: float = 10.0) -> PuttResult:
+    """The typical putter's putt on a flat green with no hole."""
+    return simulate_strike(
+        PutterState.typical(club_mps), SurfaceSpec.flat_uniform(stimp_ft)
+    )
+
+
 def _strike(club_mps: float) -> tuple[CollisionReport, float]:
     """The core collision and skid distance [m] of the typical putter."""
-    result = simulate_strike(PutterState.typical(club_mps), SurfaceSpec.flat_uniform())
+    return _collision(_putt(club_mps))
+
+
+def _collision(result: PuttResult) -> tuple[CollisionReport, float]:
     if result.collision is None:
         raise ValueError("simulate_strike must report its collision")
     return result.collision, result.skid_distance_m
 
 
+def _roll_start(result: PuttResult) -> float:
+    """Speed [m/s] at the first pure-roll sample of ``result``."""
+    for sample in result.samples:
+        if sample.mode is Mode.ROLL:
+            return sample.speed_mps
+    raise ValueError("the putt must reach pure roll")
+
+
+def roll_start_speed_mps(club_mps: float, stimp_ft: float = 10.0) -> float:
+    """Ball speed [m/s] when the typical putter's putt starts to roll."""
+    return _roll_start(_putt(club_mps, stimp_ft))
+
+
+def skid_row(club_mps: float) -> list[float]:
+    """``[ball speed m/s, skid m, roll-start speed m/s]`` at ``club_mps``."""
+    result = _putt(club_mps)
+    collision, skid_m = _collision(result)
+    values = (collision.ball_speed_mps, skid_m, _roll_start(result))
+    return [round(v, _DIGITS) for v in values]
+
+
 def skid_rows() -> list[list[float]]:
-    """``[ball speed m/s, skid m]`` rows from rest up, sorted by ball speed."""
-    rows = [[0.0, 0.0]]
-    for club in CLUB_SPEEDS_MPS:
-        collision, skid_m = _strike(club)
-        rows.append([round(collision.ball_speed_mps, _DIGITS), round(skid_m, _DIGITS)])
+    """Skid rows (see :func:`skid_row`) from rest up, sorted by ball speed."""
+    rows = [[0.0, 0.0, 0.0]] + [skid_row(club) for club in CLUB_SPEEDS_MPS]
     ensure(rows == sorted(rows), "skid rows must rise with ball speed", rows)
     return rows
 
