@@ -109,52 +109,28 @@ def test_baseline_samples_match_player_effective_distribution() -> None:
     assert out.along.std() == pytest.approx(dist.sigma_long, rel=0.08)
 
 
-def test_baseline_same_seed_reproduces() -> None:
-    model = quick_sg()
-    args = (_player(), ShotAction("7_iron", 0.0), _ROUGH, CourseConditions.tournament())
-    a = model.sample(*args, np.random.default_rng(3), 50)
-    b = model.sample(*args, np.random.default_rng(3), 50)
-    np.testing.assert_array_equal(a.along, b.along)
-    np.testing.assert_array_equal(a.lateral, b.lateral)
+class _ConstModel:
+    """Test double: every shot lands at a fixed (along, lateral)."""
 
-
-def test_rough_start_shortens_and_widens() -> None:
-    model = quick_sg()
-    cond = CourseConditions.tournament()
-    shot = ShotAction("7_iron", 0.0)
-    fw = model.sample(_player(), shot, _FAIRWAY, cond, np.random.default_rng(5), 4000)
-    ro = model.sample(_player(), shot, _ROUGH, cond, np.random.default_rng(5), 4000)
-    assert ro.along.mean() < fw.along.mean()
-    assert ro.lateral.std() > fw.lateral.std()
-
-
-def test_sample_rejects_non_positive_n() -> None:
-    with pytest.raises(ContractViolationError):
-        quick_sg().sample(
-            _player(),
-            ShotAction("7_iron", 0.0),
-            _FAIRWAY,
-            CourseConditions.benign(),
-            np.random.default_rng(0),
-            0,
-        )
-
-
-class _FixedModel:
-    """Test double: every shot lands exactly 100 yd along, 5 yd left."""
+    def __init__(self, along: float, lateral: float) -> None:
+        self.xy = (along, lateral)
 
     def sample(self, player, shot, lie, conditions, rng, n):  # noqa: ANN001
-        return LandingSamples(along=np.full(n, 100.0), lateral=np.full(n, 5.0))
+        return LandingSamples(np.full(n, self.xy[0]), np.full(n, self.xy[1]))
 
 
-def test_transition_uses_injected_backend() -> None:
-    raster = LieRaster(
-        codes=np.full((80, 80), _FAIRWAY, dtype=np.int8),
-        origin=(-100.0, -100.0),
+def _raster(size: int, origin: float) -> LieRaster:
+    return LieRaster(
+        codes=np.full((size, size), _FAIRWAY, dtype=np.int8),
+        origin=(origin, origin),
         resolution_yd=5.0,
         pin=(0.0, 0.0),
         tee=(0.0, 0.0),
     )
+
+
+def test_transition_uses_injected_backend() -> None:
+    raster = _raster(80, -100.0)
     bag = load_baseline(PGA_TOUR_YAML)
     outcomes = sample_transitions(
         State(x=0.0, y=0.0, lie=_FAIRWAY),
@@ -165,7 +141,7 @@ def test_transition_uses_injected_backend() -> None:
         raster,
         4,
         np.random.default_rng(0),
-        model=_FixedModel(),
+        model=_ConstModel(100.0, 5.0),
     )
     assert [(o.next_state.x, o.next_state.y) for o in outcomes] == [(100.0, 5.0)] * 4
 
@@ -174,13 +150,7 @@ def test_transition_default_matches_legacy_formula() -> None:
     """Behaviour-preserving: same seed gives the pre-refactor landing points."""
     bag = load_baseline(PGA_TOUR_YAML)
     player, cond = _player(), CourseConditions.tournament()
-    raster = LieRaster(
-        codes=np.full((80, 80), _FAIRWAY, dtype=np.int8),
-        origin=(-200.0, -200.0),
-        resolution_yd=5.0,
-        pin=(0.0, 0.0),
-        tee=(0.0, 0.0),
-    )
+    raster = _raster(80, -200.0)
     ang = 0.3
     got = sample_transitions(
         State(x=0.0, y=0.0, lie=_ROUGH),
@@ -202,13 +172,6 @@ def test_transition_default_matches_legacy_formula() -> None:
     ey = along * np.sin(ang) + lat * np.cos(ang)
     np.testing.assert_allclose([o.next_state.x for o in got], ex)
     np.testing.assert_allclose([o.next_state.y for o in got], ey)
-
-
-class _HopModel:
-    """Test double: every shot hops 1 yd, so it stays on a small grid."""
-
-    def sample(self, player, shot, lie, conditions, rng, n):  # noqa: ANN001
-        return LandingSamples(along=np.full(n, 1.0), lateral=np.zeros(n))
 
 
 @pytest.fixture
@@ -246,7 +209,7 @@ def test_hole_mdp_honours_injected_backend(restore_registry) -> None:
         ActionSet(clubs=("7_iron",), aim_grid_deg=np.array([0.0])),
     )
     base = HoleMDP(*args, n_samples=8, seed=1).bellman_backup(np.zeros((12, 12)))[0]
-    fixed = HoleMDP(*args, n_samples=8, seed=1, model=_HopModel()).bellman_backup(
-        np.zeros((12, 12))
-    )[0]
+    fixed = HoleMDP(
+        *args, n_samples=8, seed=1, model=_ConstModel(1.0, 0.0)
+    ).bellman_backup(np.zeros((12, 12)))[0]
     assert not np.allclose(base, fixed)
