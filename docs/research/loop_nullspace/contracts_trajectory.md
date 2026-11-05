@@ -84,6 +84,10 @@ records what was deliberately not done).
 - `loop_nullspace/qp_core.py` is the one place that turns "quadratic, equality
   rows, inequality rows, box, exact Coulomb cones" into `solve_socp`
   (Clarabel). Lower and upper bounds that coincide become equality rows.
+- `feasible_set_from_frame` assembles each frame's scaled constraints;
+  `allocate_contact_frame` is the single solve entry used by both
+  `ContactForceAllocator.allocate` and
+  `MultiEngineTorqueAllocator.allocate_frame` / trajectory loops (NSX-24 DRY).
 - `ContactForceAllocator.allocate` solves the same scaled QP it always built
   (diagonal weights, 8-facet inscribed friction pyramid, actuator and root
   slack penalties) through `solve_qp`. SLSQP agrees with the conic optimum to
