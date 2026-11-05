@@ -1,15 +1,9 @@
 """Cached, versioned Monte-Carlo dispersion tables (SHOW-B3, #14567).
 
-A table holds, per ``(skill, club, lie, wind, slope)`` cell, the mean / sd /
-correlation of the landing offset (aim frame, yards) obtained by pushing impact
-conditions through an injected *landing simulator*.
-
-Common random numbers: every cell uses the **same** standard-normal block
-(``standard_normals(seed, n)``, keyed by one ``SeedSequence`` and prefix-stable
-in ``n``), so differences between cells (wind, lie) are not Monte-Carlo noise.
-
-The table hash covers the cells plus ``(family, seed, n)``; wall-clock runtime is
-reported but never hashed, so a table regenerates byte-identically.
+Per ``(skill, club, lie, wind, slope)`` cell: mean / sd / correlation of the
+aim-frame landing offset (yards) from an injected landing simulator. Every cell
+shares one standard-normal block (common random numbers, prefix-stable in ``n``).
+The hash covers cells + ``(family, seed, n)``; wall-clock runtime is never hashed.
 """
 
 from __future__ import annotations
