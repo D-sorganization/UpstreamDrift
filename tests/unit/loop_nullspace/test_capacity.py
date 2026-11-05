@@ -274,35 +274,102 @@ def test_subtalar_and_mtp_signs_follow_the_model_axes() -> None:
 # ---- v2 trunk (lumbar / thoracic) capacity slots --------------------------------
 _V2_SPEC = SPECS / "full_body_spec_anthro_driver_v2.json"
 _TRUNK_PREFIXES = ("lumbar_", "thoracic_")
-#: Pan 2025 male median isometric trunk torque (Nm), by model sign: positive =
-#: flexion / right lateral bend / left axial rotation (test_full_body_v2_spec).
-_PAN = {
-    "flexion": (118.1, 87.3),  # (negative = extension, positive = flexion)
-    "lateral_bending": (71.3, 63.2),  # (negative = left, positive = right)
-    "axial_rotation": (49.2, 47.7),  # (negative = right, positive = left)
+_SUBJECT = CapacitySubject(78.0, 1.71)
+#: Model sign: positive = flexion / right lateral bend / left axial rotation
+#: (test_positive_coordinates_move_the_thorax_as_labelled).
+#: kind -> (upper cited (negative, positive), citation, lower reference Pan 2025).
+_UPPER = {
+    "flexion": ((422.8, 325.0), "CIT-ISHIDA-2019"),  # extension, flexion
+    "axial_rotation": ((75.7, 72.4), "CIT-ISHIDA-2019"),  # right, left
+    "lateral_bending": ((71.3, 63.2), "CIT-PAN-2025"),  # no second source: Pan only
 }
+_PAN = {
+    "flexion": (118.1, 87.3),
+    "lateral_bending": (71.3, 63.2),
+    "axial_rotation": (49.2, 47.7),
+}
+
+
+def _entry(slot: str, direction: str) -> dict:
+    return next(
+        e
+        for e in _torque_entries()
+        if e["joint_slot"] == slot and e["direction"] == direction
+    )
 
 
 def test_v2_spec_has_a_capacity_for_every_actuated_coordinate() -> None:
     """The v2 showpiece spec must build a capacity vector (was: 12 trunk slots missing)."""
     spec = json.loads(_V2_SPEC.read_text("utf-8"))
-    vec = capacity_for(tuple(spec["coordinate_order"]), CapacitySubject(78.0, 1.71))
+    vec = capacity_for(tuple(spec["coordinate_order"]), _SUBJECT)
     assert [n for n in vec.actuated_names if n.startswith(_TRUNK_PREFIXES)]
 
 
-@pytest.mark.parametrize("prefix", ["lumbar", "thoracic"])
-@pytest.mark.parametrize("kind", sorted(_PAN))
-def test_trunk_capacity_reproduces_pan_2025(prefix: str, kind: str) -> None:
-    neg, pos = _PAN[kind]
-    slot = f"{prefix}_{kind}"
-    vec = capacity_for((slot,), CapacitySubject(78.0, 1.71), actuated=(slot,))
+@pytest.mark.parametrize("kind", sorted(_UPPER))
+def test_lumbar_carries_the_upper_cited_trunk_limit_and_exposes_pan(kind: str) -> None:
+    (neg, pos), citation = _UPPER[kind]
+    slot = f"lumbar_{kind}"
+    vec = capacity_for((slot,), _SUBJECT, actuated=(slot,))
     assert vec.tau_max_negative_nm[0] == pytest.approx(neg)
     assert vec.tau_max_positive_nm[0] == pytest.approx(pos)
-    for e in _torque_entries():
-        if e["joint_slot"] == slot:
-            assert e["source"]["citation_id"] == "CIT-PAN-2025"
-            assert e["source"]["location"].startswith("Results")
-            assert e["verification_status"] == "VERIFIED" and e["assumed"] is False
+    assert vec.tau_lower_reference_negative_nm[0] == pytest.approx(_PAN[kind][0])
+    assert vec.tau_lower_reference_positive_nm[0] == pytest.approx(_PAN[kind][1])
+    assert slot in vec.verified_slots
+    for direction in ("negative", "positive"):
+        e = _entry(slot, direction)
+        assert e["verification_status"] == "VERIFIED" and e["assumed"] is False
+        assert e["source"]["citation_id"] == citation
+        assert e["source"]["location"].startswith(("Table", "Results"))
+        ref = e["lower_reference"]
+        assert ref["citation_id"] == "CIT-PAN-2025"
+        # population, test mode and posture sit next to BOTH values
+        assert ref["population"] and ref["measurement"]
+        assert e["population"]["measurement"] and e["population"]["description"]
+
+
+def test_ishida_ceiling_is_stated_not_athletic() -> None:
+    note = _entry("lumbar_flexion", "positive")["source"]["note"]
+    assert "Neither population is described as athletes" in note and "62.1 kg" in note
+    assert "ceiling" in note
+
+
+@pytest.mark.parametrize("kind", sorted(_UPPER))
+def test_thoracic_has_the_same_cited_limit_as_lumbar(kind: str) -> None:
+    """Series joints each carry the trunk moment: same cited limit, none summed (D34a)."""
+    lumbar, thor = f"lumbar_{kind}", f"thoracic_{kind}"
+    vec = capacity_for((lumbar, thor), _SUBJECT, actuated=(lumbar, thor))
+    assert vec.tau_max_positive_nm[1] == pytest.approx(vec.tau_max_positive_nm[0])
+    assert vec.tau_max_negative_nm[1] == pytest.approx(vec.tau_max_negative_nm[0])
+    assert lumbar in vec.verified_slots and thor in vec.verified_slots
+    for direction in ("negative", "positive"):
+        e = _entry(thor, direction)
+        assert e["assumed"] is False and e["verification_status"] == "VERIFIED"
+        assert (
+            e["source"]["citation_id"]
+            == _entry(lumbar, direction)["source"]["citation_id"]
+        )
+        assert "Series mapping" in e["source"]["note"]
+        assert e["lower_reference"] == _entry(lumbar, direction)["lower_reference"]
+
+
+@pytest.mark.parametrize("kind", sorted(_PAN))
+def test_series_trunk_minimum_never_falls_below_the_pan_lower_reference(
+    kind: str,
+) -> None:
+    """The weakest series trunk joint must still allow the Pan 2025 median (D34a)."""
+    slots = (f"lumbar_{kind}", f"thoracic_{kind}")
+    vec = capacity_for(slots, _SUBJECT, actuated=slots)
+    neg, pos = _PAN[kind]
+    assert vec.tau_max_negative_nm.min() >= neg - 1e-9
+    assert vec.tau_max_positive_nm.min() >= pos - 1e-9
+
+
+def test_every_lower_reference_cites_a_known_citation() -> None:
+    reg = json.loads(_REGISTRY.read_text("utf-8"))
+    known = {c["id"] for c in reg["citations"]}
+    for e in reg["torque_capacity"]:
+        if "lower_reference" in e:
+            assert e["lower_reference"]["citation_id"] in known
 
 
 def test_physiological_envelope_builds_from_the_v2_spec() -> None:
@@ -315,11 +382,11 @@ def test_physiological_envelope_builds_from_the_v2_spec() -> None:
     spec = json.loads(_V2_SPEC.read_text("utf-8"))
     env = PhysiologicalEnvelope.from_spec(
         spec,
-        CapacitySubject(78.0, 1.71),
+        _SUBJECT,
         load_limits(),
         allow_unbounded_rom=frozenset(spec["coordinate_order"]),
     )
     trunk = [n for n in env.names if n.startswith(_TRUNK_PREFIXES)]
     assert len(trunk) == 6
-    assert not set(trunk) & set(env.assumed_torque_slots)  # torque is cited
+    assert set(trunk).isdisjoint(env.assumed_torque_slots)  # trunk torque is cited
     assert set(trunk) <= set(env.assumed_velocity_slots)  # velocity is a stated prior
