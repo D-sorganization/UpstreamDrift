@@ -742,6 +742,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14647 · Putting Studio: The Skid-to-Roll Transition Ends Where the Core Simulate_Strike Skid Ends for the Ball Speed, and the Telemetry Shows the Core Launch Angle
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14647
+- **Branch:** merged via #14662
+- **PR:** #14662
+- **Paths:** see #14662
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`cbb4c686`; collated from changes/14647-studio-core-skid.md)
+- **Summary:** Putting studio: the skid-to-roll transition ends where the core simulate_strike skid ends for the ball speed, and the telemetry shows the core launch angle
+- **Next step:** Shipped in PR #14662.
+
+### DL-#14600 · Head-CG Offset (Opt-In) and Toe_Down_m Shaft Metric for the C4 Shaft State (Refs #14600)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14600
+- **Branch:** merged via #14658
+- **PR:** #14658
+- **Paths:** see #14658
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`d0bbdc81`; collated from changes/14600-head-cg-offset-opt-in-and-toe-down-m-sha.md)
+- **Summary:** Head-CG offset (opt-in) and toe_down_m shaft metric for the C4 shaft state (Refs #14600)
+- **Next step:** Shipped in PR #14658.
+
+### DL-#14496 · Clarify the Fixed-State ZTCF Drift and ZVCF Control Component Definitions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14496
+- **Branch:** merged via #14498
+- **PR:** #14498
+- **Paths:** see #14498
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`b9398531`; collated from changes/14496-clarify-the-fixed-state-ztcf-drift-and-z.md)
+- **Summary:** Clarify the fixed-state ZTCF drift and ZVCF control component definitions
+- **Next step:** Shipped in PR #14498.
+
 ### DL-#12688 · R9a: Commit Drake and Pinocchio MeshCat Appearance Stills and Evidence Test (#12688)
 
 - **State:** shipped
