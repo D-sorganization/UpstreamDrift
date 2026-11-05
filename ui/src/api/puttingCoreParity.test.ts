@@ -1,9 +1,7 @@
 /**
- * Cross-frontend golden parity (#14449). puttingCore.golden.json freezes the
- * shared core's /simulate-3d response and the PyQt6 scene for the same putts
- * (scripts/putting_cross_frontend_golden.py). React, and Tauri (the React
- * build in Tauri mode), replay the frozen route JSON through the real client
- * and must read the PyQt6 values within the fixture's tolerances.
+ * Cross-frontend golden parity (#14449): React, and Tauri (the React build in
+ * Tauri mode), replay the core's frozen route JSON through the real client and
+ * must read the PyQt6 values (scripts/putting_cross_frontend_golden.py).
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -66,7 +64,8 @@ describe.each([
   });
 
   it.each(golden.cases)("$name", async (putt) => {
-    if (tauri) (window as { __TAURI_INTERNALS__?: object }).__TAURI_INTERNALS__ = {};
+    if (tauri)
+      (window as { __TAURI_INTERNALS__?: object }).__TAURI_INTERNALS__ = {};
     const { url, body, result } = await replay(putt);
     expect(url).toBe(route);
     expect(body).toMatchObject(putt.request);

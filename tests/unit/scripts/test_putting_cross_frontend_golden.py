@@ -1,11 +1,5 @@
-"""Cross-frontend golden parity (#14449).
-
-ui/src/api/puttingCore.golden.json freezes the shared core's /simulate-3d
-response and the PyQt6 scene for the same putts; the React and Tauri tests
-(ui/src/api/puttingCoreParity.test.ts) replay it. These tests keep the fixture
-equal to the core's current output, hold PyQt6 to the route within the
-fixture's tolerances and keep the parity report in step with the fixture.
-"""
+"""Cross-frontend golden parity (#14449): the fixture stays the core's output,
+PyQt6 matches the route within its tolerances and the report stays current."""
 
 from __future__ import annotations
 
