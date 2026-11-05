@@ -269,3 +269,57 @@ def test_subtalar_and_mtp_signs_follow_the_model_axes() -> None:
         assert np.cross(ankle, fwd)[2] > 0.1  # dorsiflexion raises the toes
         assert np.cross(sub, -np.array(up)) @ medial > 0.1  # sole turns inward
         assert np.cross(mtp, fwd)[2] < -0.1  # flexion lowers the toes
+
+
+# ---- v2 trunk (lumbar / thoracic) capacity slots --------------------------------
+_V2_SPEC = SPECS / "full_body_spec_anthro_driver_v2.json"
+_TRUNK_PREFIXES = ("lumbar_", "thoracic_")
+#: Pan 2025 male median isometric trunk torque (Nm), by model sign: positive =
+#: flexion / right lateral bend / left axial rotation (test_full_body_v2_spec).
+_PAN = {
+    "flexion": (118.1, 87.3),  # (negative = extension, positive = flexion)
+    "lateral_bending": (71.3, 63.2),  # (negative = left, positive = right)
+    "axial_rotation": (49.2, 47.7),  # (negative = right, positive = left)
+}
+
+
+def test_v2_spec_has_a_capacity_for_every_actuated_coordinate() -> None:
+    """The v2 showpiece spec must build a capacity vector (was: 12 trunk slots missing)."""
+    spec = json.loads(_V2_SPEC.read_text("utf-8"))
+    vec = capacity_for(tuple(spec["coordinate_order"]), CapacitySubject(78.0, 1.71))
+    assert [n for n in vec.actuated_names if n.startswith(_TRUNK_PREFIXES)]
+
+
+@pytest.mark.parametrize("prefix", ["lumbar", "thoracic"])
+@pytest.mark.parametrize("kind", sorted(_PAN))
+def test_trunk_capacity_reproduces_pan_2025(prefix: str, kind: str) -> None:
+    neg, pos = _PAN[kind]
+    slot = f"{prefix}_{kind}"
+    vec = capacity_for((slot,), CapacitySubject(78.0, 1.71), actuated=(slot,))
+    assert vec.tau_max_negative_nm[0] == pytest.approx(neg)
+    assert vec.tau_max_positive_nm[0] == pytest.approx(pos)
+    for e in _torque_entries():
+        if e["joint_slot"] == slot:
+            assert e["source"]["citation_id"] == "CIT-PAN-2025"
+            assert e["source"]["location"].startswith("Results")
+            assert e["verification_status"] == "VERIFIED" and e["assumed"] is False
+
+
+def test_physiological_envelope_builds_from_the_v2_spec() -> None:
+    """The C3c blocker: from_spec on the v2 showpiece spec must succeed."""
+    from src.shared.python.impact_optimization.physiological_envelope import (
+        PhysiologicalEnvelope,
+        load_limits,
+    )
+
+    spec = json.loads(_V2_SPEC.read_text("utf-8"))
+    env = PhysiologicalEnvelope.from_spec(
+        spec,
+        CapacitySubject(78.0, 1.71),
+        load_limits(),
+        allow_unbounded_rom=frozenset(spec["coordinate_order"]),
+    )
+    trunk = [n for n in env.names if n.startswith(_TRUNK_PREFIXES)]
+    assert len(trunk) == 6
+    assert not set(trunk) & set(env.assumed_torque_slots)  # torque is cited
+    assert set(trunk) <= set(env.assumed_velocity_slots)  # velocity is a stated prior
