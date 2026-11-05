@@ -924,6 +924,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14464 · Putting API: /Simulate-3D Accepts the Core Green Shape (Green: GreenShapeRequest, a Preset or Slope, Tier and Bumps) and Rolls on Its GreenSpec Height Field, Reporting That Spec's Grade and Aspect, and Strikes Along Aim_Heading_Deg (Was Always +X), so the React Page Can Send the Core Presets and an Aimed Putt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14464
+- **Branch:** merged via #14583
+- **PR:** #14583
+- **Paths:** see #14583
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`40cf5a3f`; collated from changes/14464-simulate-3d-green-spec.md)
+- **Summary:** Putting API: /simulate-3d accepts the core green shape (green: GreenShapeRequest, a preset or slope, tier and bumps) and rolls on its GreenSpec height field, reporting that spec's grade and aspect, and strikes along aim_heading_deg (was always +x), so the React page can send the core presets and an aimed putt
+- **Next step:** Shipped in PR #14583.
+
 ### DL-#14474 · React Putting Page: Desktop Camera Views and Jumps to the Core Phase Marks
 
 - **State:** shipped
