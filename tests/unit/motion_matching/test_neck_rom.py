@@ -187,3 +187,42 @@ def test_native_model_neck_damps_only_outward_motion() -> None:
     out = _neck_torque(model, "NeckInputZ", hi + 5.0, rate=1.0)
     back = _neck_torque(model, "NeckInputZ", hi + 5.0, rate=-1.0)
     assert out < back < 0.0
+
+
+# --- Showpiece builder: the one path that opts in (D12, #14553) ---
+
+
+def test_showpiece_builder_rejects_a_v1_spec() -> None:
+    from src.engines.physics_engines.mujoco.python.showpiece_model import showpiece_mjcf
+
+    with pytest.raises(Exception, match="full-body-v2"):
+        showpiece_mjcf(SPEC.read_bytes())
+
+
+def test_showpiece_mjcf_limits_the_neck_and_mj_step_holds_the_bound() -> None:
+    from src.engines.physics_engines.mujoco.python.showpiece_model import showpiece_mjcf
+
+    xml = showpiece_mjcf()
+    joints = {j.get("name"): j for j in ET.fromstring(xml).iter("joint")}
+    for name in NECK_ROM:
+        assert joints[name].get("limited") == "true"
+    model = mujoco.MjModel.from_xml_string(xml)
+    data = mujoco.MjData(model)
+    jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "NeckInputZ")
+    adr = model.jnt_qposadr[jid]
+    hi = float(model.jnt_range[jid][1])
+    data.qpos[adr] = hi + np.radians(25.0)
+    for _ in range(400):
+        mujoco.mj_step(model, data)
+    assert data.qpos[adr] < hi + np.radians(8.0)
+
+
+def test_showpiece_native_model_pushes_back_past_the_bound() -> None:
+    from src.engines.physics_engines.mujoco.python.showpiece_model import (
+        build_showpiece_model,
+    )
+
+    model = build_showpiece_model()
+    hi = NECK_ROM["NeckInputZ"].upper_deg
+    assert _neck_torque(model, "NeckInputZ", hi - 5.0) == 0.0
+    assert _neck_torque(model, "NeckInputZ", hi + 5.0) < 0.0

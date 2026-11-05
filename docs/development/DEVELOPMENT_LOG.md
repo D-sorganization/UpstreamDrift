@@ -924,6 +924,97 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14565 · SHOW-B1: ShotOutcomeModel Protocol + Backend Registry; Tour Baseline Is the Default Quick_Sg Backend
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14565
+- **Branch:** merged via #14581
+- **PR:** #14581
+- **Paths:** see #14581
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`950bedd8`; collated from changes/14565-show-b1-shotoutcomemodel-protocol-backen.md)
+- **Summary:** SHOW-B1: ShotOutcomeModel protocol + backend registry; tour baseline is the default quick_sg backend
+- **Next step:** Shipped in PR #14581.
+
+### DL-#14558 · SHOW-C2: ImpactConditions + Evaluate_Rollout Facade for Optimiser Loops (Face, Path, AoA, Speed, Strike) Over Impact_Parameters
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14558
+- **Branch:** merged via #14579
+- **PR:** #14579
+- **Paths:** see #14579
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ddf355e4`; collated from changes/14558-show-c2-impactconditions-evaluate-rollou.md)
+- **Summary:** SHOW-C2: ImpactConditions + evaluate_rollout facade for optimiser loops (face, path, AoA, speed, strike) over impact_parameters
+- **Next step:** Shipped in PR #14579.
+
+### DL-#14557 · SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope Contracts (Impact_Optimization Package; Face:Path 10:1; NSX-04 Torque Limits; Cited Velocity YAML)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14557
+- **Branch:** merged via #14580
+- **PR:** #14580
+- **Paths:** see #14580
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`a37a7c5a`; collated from changes/14557-show-c1-impacttarget-trustregion-and-phy.md)
+- **Summary:** SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope contracts (impact_optimization package; face:path 10:1; NSX-04 torque limits; cited velocity YAML)
+- **Next step:** Shipped in PR #14580.
+
+### DL-#14464 · Putting API: /Simulate-3D Accepts the Core Green Shape (Green: GreenShapeRequest, a Preset or Slope, Tier and Bumps) and Rolls on Its GreenSpec Height Field, Reporting That Spec's Grade and Aspect, and Strikes Along Aim_Heading_Deg (Was Always +X), so the React Page Can Send the Core Presets and an Aimed Putt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14464
+- **Branch:** merged via #14583
+- **PR:** #14583, #14586
+- **Paths:** see #14583
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`f2db11cc`; collated from changes/14464-react-putting-page-green-type-selector-o.md)
+- **Summary:** Putting API: /simulate-3d accepts the core green shape (green: GreenShapeRequest, a preset or slope, tier and bumps) and rolls on its GreenSpec height field, reporting that spec's grade and aspect, and strikes along aim_heading_deg (was always +x), so the React page can send the core presets and an aimed putt
+- **Next step:** Shipped in PR #14583.
+
+### DL-#14474 · React Putting Page: Desktop Camera Views and Jumps to the Core Phase Marks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14474
+- **Branch:** merged via #14576
+- **PR:** #14576
+- **Paths:** see #14576
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`6ea810fa`; collated from changes/14474-react-putting-page-desktop-camera-views.md)
+- **Summary:** React putting page: desktop camera views and jumps to the core phase marks
+- **Next step:** Shipped in PR #14576.
+
+### DL-#14469 · Putting Dynamics: Counter-Torque Stabilization Model (Two-Hand Couples, Off-Plane Preload, Noise, Gust, Lie, Putter) in the Shared Core, Reading the Shared Putter Presets, Drift-Gated Against the Studio
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14469
+- **Branch:** merged via #14548
+- **PR:** #14548
+- **Paths:** see #14548
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`fadc7ee1`; collated from changes/14469-putting-counter-torque-core.md)
+- **Summary:** Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio
+- **Next step:** Shipped in PR #14548.
+
+### DL-#14468 · React Putting Page: Strokes-Gained Readout and Expected-Putts Curve From the Shared Core's /Strokes-Gained
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14468
+- **Branch:** merged via #14573
+- **PR:** #14573
+- **Paths:** see #14573
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-04 (`3f51085e`; collated from changes/14468-react-putting-page-strokes-gained-readou.md)
+- **Summary:** React putting page: strokes-gained readout and expected-putts curve from the shared core's /strokes-gained
+- **Next step:** Shipped in PR #14573.
+
 ### DL-#14462 · React Putting Page: Balance Type Selector Over the Core Putter Presets With Head Mass and MOI Inputs; Balance_Type React/Tauri Parity Cells Now Present
 
 - **State:** shipped

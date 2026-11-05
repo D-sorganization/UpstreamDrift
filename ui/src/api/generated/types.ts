@@ -196,6 +196,17 @@ export interface AimContextSchema {
 }
 
 /**
+ * The pace and line that hole a /simulate-3d putt (the desktop read).
+ */
+export interface AimSolve3DResponse {
+  putter_speed_mps: number;
+  aim_heading_deg: number;
+  break_m: number;
+  holed: boolean;
+  converged: boolean;
+}
+
+/**
  * Caller-supplied lineage and identity assertions.
  */
 export interface AnalysisContextV2 {
@@ -3241,6 +3252,10 @@ export interface Putt3DSimulationRequest {
   random_seed: number;
   hole_x_m: number;
   hole_y_m: number;
+  /** Strike heading from +x, CCW [deg] */
+  aim_heading_deg: number;
+  /** Core green shape (#14464); when set it replaces grade_percent, downhill_aspect_deg and bump_height_m */
+  green?: GreenShapeRequest | null;
 }
 
 /**

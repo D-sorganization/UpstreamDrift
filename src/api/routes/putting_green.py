@@ -25,14 +25,19 @@ from __future__ import annotations
 
 import dataclasses
 import math
-from enum import Enum
 from typing import TYPE_CHECKING, Annotated, Literal, Protocol
 
 import numpy as np
 from fastapi import APIRouter, Depends, Request
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
+from src.api.models.putting_green_requests import (
+    AimSolve3DResponse,
+    GreenPresetName,
+    GreenShapeRequest,
+    Putt3DSimulationRequest,
+)
 from src.api.models.putting_playback import (
     BallModeName,
     PhaseMarkResponse,
@@ -47,16 +52,10 @@ from src.shared.python.core.contracts import PostconditionError, precondition, r
 from src.shared.python.putting_dynamics.green_spec import (
     GREEN_PRESETS,
     GreenSpec,
-    green_preset,
 )
 from src.shared.python.putting_dynamics.putter_presets import (
     BALANCE_PRESETS,
     balance_preset,
-)
-from src.shared.python.putting_dynamics.types import (
-    TYPICAL_HEAD_MASS_KG,
-    TYPICAL_HEAD_MOI_KG_M2,
-    TYPICAL_LOFT_DEG,
 )
 
 if TYPE_CHECKING:
@@ -70,42 +69,8 @@ if TYPE_CHECKING:
 
 router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
 
-#: Putter head used when a request carries only a stroke speed (shared by
-#: ``/simulate-3d`` defaults and the 2-D routes).
-_DEFAULT_HEAD_MASS_KG = TYPICAL_HEAD_MASS_KG
-_DEFAULT_HEAD_MOI_KG_M2 = TYPICAL_HEAD_MOI_KG_M2
-_DEFAULT_LOFT_DEG = TYPICAL_LOFT_DEG
-
 
 # -- Request / Response Models --
-
-
-#: The shared core's preset names, so an unknown one is a 422 in body or query.
-GreenPresetName = Enum(  # type: ignore[misc]
-    "GreenPresetName", {key: key for key in GREEN_PRESETS}, type=str
-)
-
-
-class GreenShapeRequest(BaseModel):
-    """The green's shape (#14463): a named preset, or slope, tier and bumps.
-
-    A ``preset`` replaces every other field with that preset's shape.
-    """
-
-    preset: GreenPresetName | None = Field(None, description="GET /green-presets")
-    grade_percent: float = Field(0.0, ge=0.0, le=10.0)
-    aspect_deg: float = Field(0.0, ge=-360.0, le=360.0, description="Falls toward")
-    bump_height_m: float = Field(0.0, ge=0.0, le=0.05)
-    bump_length_m: float = Field(1.5, gt=0.0, le=20.0)
-    tier_height_m: float = Field(0.0, ge=0.0, le=0.15)
-    tier_width_m: float = Field(1.0, gt=0.0, le=5.0)
-    seed: int = Field(0, ge=0)
-
-    def spec(self) -> GreenSpec:
-        """The shared core's description of this green."""
-        if self.preset is not None:
-            return green_preset(self.preset.value)
-        return GreenSpec(**self.model_dump(exclude={"preset"}))
 
 
 def _flat_green() -> GreenShapeRequest:
@@ -223,46 +188,6 @@ class GreenContourResponse(BaseModel):
     grid_y: list[list[float]]
     elevations: list[list[float]]
     hole_position: list[float]
-
-
-class Putt3DSimulationRequest(BaseModel):
-    """Physics and visualization inputs for one three-dimensional putt."""
-
-    putter_speed_mps: float = Field(1.8, gt=0.0, le=10.0)
-    loft_deg: float = Field(_DEFAULT_LOFT_DEG, ge=-6.0, le=10.0)
-    head_mass_kg: float = Field(_DEFAULT_HEAD_MASS_KG, ge=0.1, le=1.0)
-    head_moi_kg_m2: float = Field(_DEFAULT_HEAD_MOI_KG_M2, ge=1e-5, le=1e-2)
-    coefficient_of_restitution: float = Field(0.78, gt=0.0, lt=1.0)
-    hosel_toe_m: float = Field(0.0, ge=-0.08, le=0.08)
-    hosel_forward_m: float = Field(0.0, ge=-0.05, le=0.05)
-    balance_type: str | None = Field(
-        None,
-        description=(
-            "Named core putter head (see /putter-presets); when set it supplies "
-            "head mass, MOI and hosel offsets, overriding those fields"
-        ),
-    )
-    impact_toe_m: float = Field(
-        0.0, ge=-0.08, le=0.08, description="Strike offset, toe + / heel - [m]"
-    )
-    stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
-    grade_percent: float = Field(0.0, ge=0.0, le=10.0)
-    downhill_aspect_deg: float = Field(0.0, ge=-180.0, le=180.0)
-    grain_strength: float = Field(0.0, ge=0.0, lt=0.9)
-    grain_direction_deg: float = Field(0.0, ge=-180.0, le=180.0)
-    rolling_velocity_coefficient: float = Field(0.0, ge=0.0, le=1.0)
-    bump_height_m: float = Field(0.0, ge=0.0, le=0.01)
-    friction_variation: float = Field(0.0, ge=0.0, le=0.9)
-    random_seed: int = Field(8345, ge=0, le=2**31 - 1)
-    hole_x_m: float = Field(3.0, ge=-9.0, le=9.0)
-    hole_y_m: float = Field(0.0, ge=-9.0, le=9.0)
-
-    @field_validator("balance_type")
-    @classmethod
-    def _known_balance_type(cls, value: str | None) -> str | None:
-        if value is not None and value not in BALANCE_PRESETS:
-            raise ValueError(f"balance_type must be one of {sorted(BALANCE_PRESETS)}")
-        return value
 
 
 class BalancePresetResponse(BaseModel):
@@ -388,12 +313,16 @@ def _build_putting_3d_surface(
         stimp_to_rolling_mu,
     )
 
-    height = HeightField.planar(
-        grade_percent=payload.grade_percent,
-        aspect_deg=payload.downhill_aspect_deg,
-        extent_m=extent_m,
-    )
-    if payload.bump_height_m > 0.0:
+    green = payload.green
+    if green is not None:
+        height = green.spec().height(extent_m)
+    else:
+        height = HeightField.planar(
+            grade_percent=payload.grade_percent,
+            aspect_deg=payload.downhill_aspect_deg,
+            extent_m=extent_m,
+        )
+    if green is None and payload.bump_height_m > 0.0:
         height = bumpy_height_field(
             seed=payload.random_seed,
             amplitude_m=payload.bump_height_m,
@@ -439,6 +368,18 @@ def _build_putting_3d_surface(
     return surface, height, putter
 
 
+def _surface_slope(payload: Putt3DSimulationRequest) -> dict[str, float]:
+    """The rolled green's grade and aspect, from its core spec when sent."""
+    green = payload.green
+    if green is None:
+        return {
+            "grade_percent": payload.grade_percent,
+            "downhill_aspect_deg": payload.downhill_aspect_deg,
+        }
+    spec = green.spec()
+    return {"grade_percent": spec.grade_percent, "downhill_aspect_deg": spec.aspect_deg}
+
+
 @router.post("/simulate-3d", response_model=Putt3DSimulationResponse)
 @limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
 @handle_api_errors
@@ -456,6 +397,7 @@ async def simulate_putt_3d(
         putter,
         surface,
         impact_toe_m=payload.impact_toe_m,
+        heading_rad=math.radians(payload.aim_heading_deg),
         hole_x_m=payload.hole_x_m,
         hole_y_m=payload.hole_y_m,
     )
@@ -498,8 +440,7 @@ async def simulate_putt_3d(
         surface=Putt3DSurfaceResponse(
             width_m=extent_m,
             height_m=extent_m,
-            grade_percent=payload.grade_percent,
-            downhill_aspect_deg=payload.downhill_aspect_deg,
+            **_surface_slope(payload),
             hole_x_m=payload.hole_x_m,
             hole_y_m=payload.hole_y_m,
         ),
@@ -507,6 +448,33 @@ async def simulate_putt_3d(
         total_distance_m=result.total_distance_m,
         duration_s=result.time_s,
         skid_distance_m=result.skid_distance_m,
+    )
+
+
+@router.post("/solve-aim-3d", response_model=AimSolve3DResponse)
+@limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
+@handle_api_errors
+async def solve_aim_3d(
+    request: Request, payload: Putt3DSimulationRequest
+) -> AimSolve3DResponse:
+    """The pace and line that hole ``/simulate-3d``'s putt on its own surface.
+
+    Runs the core's ``solve_aim`` with the request's head from the origin to
+    the hole, like the desktop Auto-Solve; the read assumes a centred strike
+    and ignores the request's speed and aim.
+    """
+    del request
+    from src.shared.python.putting_dynamics import solve_aim
+
+    surface, _, putter = _build_putting_3d_surface(payload)
+    hole = (payload.hole_x_m, payload.hole_y_m)
+    aim = solve_aim(surface, (0.0, 0.0), hole, putter)
+    return AimSolve3DResponse(
+        putter_speed_mps=aim.putter_speed_mps,
+        aim_heading_deg=math.degrees(aim.heading_rad),
+        break_m=aim.break_m,
+        holed=aim.holed,
+        converged=aim.converged,
     )
 
 
