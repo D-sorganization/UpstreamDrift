@@ -141,3 +141,34 @@ def test_envelope_subset_keeps_limits_and_order_of_the_requested_joints() -> Non
     assert sub.assumed_torque_slots == ("J2",) and sub.assumed_velocity_slots == ()
     with pytest.raises(ContractViolationError):
         envelope_subset(_env(), ("missing",))
+
+
+def test_solver_reaches_the_target_through_the_adapter() -> None:
+    from src.shared.python.impact_optimization.impact_target import ImpactTarget
+    from src.shared.python.impact_optimization.trajectory_optimiser import (
+        OptimiserConfig,
+        solve_impact_trajectory,
+    )
+    from src.shared.python.impact_optimization.trust_region import TrustRegion
+
+    win = _window()
+    joints = ("J0", "J1")
+    rollout = make_full_body_rollout(win, joints)
+    base = np.zeros((STEPS, 2))
+    env = envelope_subset(_env(), joints)
+    env = PhysiologicalEnvelope(
+        names=env.names,
+        tau_max_negative_nm=np.full(2, 500.0),
+        tau_max_positive_nm=np.full(2, 500.0),
+        rom_deg=np.tile([-np.inf, np.inf], (2, 1)),
+        vel_max_deg_s=np.full(2, 1e6),
+        assumed_torque_slots=(),
+        assumed_velocity_slots=(),
+    )
+    trust = TrustRegion(rollout(base).trajectory, np.ones(2), radius=1e3)
+    target = ImpactTarget(face_deg=0.3, path_deg=0.0, aoa_deg=0.0)
+    sol = solve_impact_trajectory(
+        rollout, base, win.times_s, target, env, trust,
+        OptimiserConfig(n_knots=3, max_iterations=60),
+    )  # fmt: skip
+    assert abs(sol.outcome.impact.face_deg - 0.3) < 0.05
