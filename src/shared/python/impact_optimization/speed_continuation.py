@@ -125,8 +125,13 @@ def binding_report(
 ) -> list[str]:
     """One evidence line per binding joint per rung (blocking rungs flagged).
 
+    TORQUE-ONLY: every line is a torque limit and says so. ROM and velocity
+    binding (the known 125 mph limiters, e.g. thoracic axial and NeckInputZ)
+    are NOT reported here; they need the rollout joint angles and rates and
+    land with the C3c full-body adapter, which closes #14561's reporting.
+
     ``limit_notes`` maps a joint name to the provenance of its limit (for
-    example "prior-derived split, not a measurement"), appended to that joint's
+    example "prior-derived estimate, not a measurement"), appended to that joint's
     lines so a binding limit is never read as a measured over-rotation.
     """
     notes = limit_notes or {}
@@ -140,7 +145,7 @@ def binding_report(
             i = envelope.names.index(name)
             head = (
                 f"{p.speed_target_mph:.0f} mph: {name} at {util[i]:.0%} of its "
-                f"{sol.envelope_limits_nm[i]:.1f} N m limit (peak {peak[i]:.1f} N m, "
+                f"{sol.envelope_limits_nm[i]:.1f} N m torque limit (peak {peak[i]:.1f} N m, "
                 f"achieved {p.achieved_mph:.1f} mph, face-to-path "
                 f"{sol.face_to_path_deg:+.2f} deg)"
             )
