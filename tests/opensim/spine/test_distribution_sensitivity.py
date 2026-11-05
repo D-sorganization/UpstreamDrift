@@ -22,9 +22,11 @@ import pytest
 from src.engines.physics_engines.opensim.python.spine.distribution_sensitivity import (
     KINEMATICS,
     LOADS,
+    LawRun,
     SensitivityReport,
     build_sensitivity_report,
     classify_spread,
+    fixture_peak_spread_table,
     kinematic_spreads,
     load_spreads,
     run_distribution_sensitivity,
@@ -47,6 +49,7 @@ N_LUMBAR = 5
 N_AXES = 3
 
 inputs = _inputs
+GOLDEN = Path(__file__).resolve().parents[2] / "fixtures/spine/spn14a_fixture_peaks.json"
 
 
 # ------------------------------------------------------------- pure helpers
@@ -117,6 +120,52 @@ def test_load_spreads_per_level_with_law_labels() -> None:
     l4 = by_level["L4_L5"]
     assert l4.spread == 0.0 and l4.classification == "robust"
     assert [s.level for s in out] == ["L5_S1", "L4_L5"]
+
+
+def _law(law_id: str, status: str, drive: float | None) -> LawRun:
+    return LawRun(
+        law_id=law_id,
+        law=f"{law_id}@1",
+        citation="c",
+        verified_from_primary=False,
+        distribution_source=f"coupling:{law_id}@1",
+        status=status,
+        status_reasons=(),
+        drive_max_rad=drive,
+        drive_rms_rad=drive,
+        receipt_name=f"{law_id}.json",
+    )
+
+
+@pytest.mark.unit
+def test_fixture_peak_table_keeps_residuals_and_compression_only() -> None:
+    tables = {"a": _table("a", 1.0), "b": _table("b", 0.5)}
+    spreads = load_spreads(tables, 0.1)
+    kin = kinematic_spreads(LEVELS, {k: np.zeros((2, 2, 3)) for k in "ab"}, 0.1)
+    report = SensitivityReport(
+        study_id="s",
+        model_id="fixture",
+        robust_threshold=0.1,
+        laws=(_law("a", "pass", 0.123456789), _law("b", "unqualified", None)),
+        held_fixed=(),
+        spreads=kin + spreads,
+        spread_note="",
+    )
+    table = fixture_peak_spread_table(report)
+    assert table["scientific_status"] == "unqualified"
+    assert table["is_acceptance"] is False
+    assert table["laws"]["a"] == {
+        "status": "pass",
+        "drive_max_rad": 0.123457,
+        "drive_rms_rad": 0.123457,
+    }
+    assert table["laws"]["b"]["drive_max_rad"] is None
+    assert [row["level"] for row in table["compression"]] == ["L5_S1", "L4_L5"]
+    assert table["compression"][0]["values"] == {"a": 300.0, "b": 150.0}
+    assert table["compression"][0]["classification"] == "sensitive"
+    assert json.loads(json.dumps(table)) == table
+    with pytest.raises(TypeError, match="SensitivityReport"):
+        fixture_peak_spread_table({})  # type: ignore[arg-type]
 
 
 @pytest.mark.unit
@@ -331,3 +380,12 @@ def test_unreproduced_input_is_excluded_not_tuned(inputs, tmp_path) -> None:
     assert any("drive" in r for r in excluded["fujii2007_lumbar"].status_reasons)
     for item in report.spreads:
         assert set(dict(item.values)) == {"bruno2015_regional", "uniform_reference"}
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_fixture_peak_table_matches_committed_golden(report_dir) -> None:
+    """The invented-fixture CI table: law residuals and compression spreads."""
+    report, _ = report_dir
+    golden = json.loads(GOLDEN.read_text(encoding="utf-8"))
+    assert fixture_peak_spread_table(report) == golden
