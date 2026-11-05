@@ -47,6 +47,15 @@ def test_every_skill_has_a_representative_club_with_a_loft() -> None:
             assert CLUB_SKILL[club] == skill
 
 
+def test_representative_clubs_match_their_lofts() -> None:
+    """A labelled club's loft stays within a few degrees of a real club's."""
+    typical = {"8_iron": 37.0, "9_iron": 42.0, "pw": 45.0, "gw": 50.0}
+    typical |= {"6_iron": 28.0, "4_iron": 23.0}
+    for skill, club in REPRESENTATIVE_CLUB.items():
+        if club in typical:
+            assert abs(CLUB_LOFT_DEG[skill] - typical[club]) <= 3.0, (skill, club)
+
+
 def test_club_column_is_distinct_from_the_skill_when_a_mapping_is_given() -> None:
     plain = build_grid_table(FAMILY, _sim, _grid(), n=8)
     assert {c.club for c in plain.cells} == {c.skill for c in plain.cells}
