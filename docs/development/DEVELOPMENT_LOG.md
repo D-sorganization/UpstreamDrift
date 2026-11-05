@@ -742,6 +742,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#12691 · R11: Per-Engine Chain-Shaft Impact-Window Receipt and Overlay Now Cover Drake and Pinocchio, With an Engine-Free Gate
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12691
+- **Branch:** merged via #14692
+- **PR:** #14692
+- **Paths:** see #14692
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`75d52d8c`; collated from changes/12691-r11-per-engine-chain-shaft-impact-window.md)
+- **Summary:** R11: per-engine chain-shaft impact-window receipt and overlay now cover drake and pinocchio, with an engine-free gate
+- **Next step:** Shipped in PR #14692.
+
+### DL-#12567 · NSX-24: Unify ContactForceAllocator and MultiEngineTorqueAllocator on Allocate_Contact_Frame Conic Path
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12567
+- **Branch:** merged via #14699
+- **PR:** #14699
+- **Paths:** see #14699
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ef08fbcb`; collated from changes/12567-nsx-24-unify-contactforceallocator-and-m.md)
+- **Summary:** NSX-24: unify ContactForceAllocator and MultiEngineTorqueAllocator on allocate_contact_frame conic path
+- **Next step:** Shipped in PR #14699.
+
 ### DL-#14677 · Sg_Optimizer: Common Random Numbers for an Injected ShotOutcomeModel so the Scalar Backup Converges
 
 - **State:** shipped
@@ -761,10 +787,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14650
 - **Branch:** merged via #14689
-- **PR:** #14689
+- **PR:** #14689, #14695
 - **Paths:** see #14689
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`437d6cab`; collated from changes/14650-studio-sg.md)
+- **Last verified:** 2026-11-05 (`37294a10`; collated from changes/14650-studio-pace.md)
 - **Summary:** Putting studio: batch strokes gained, the E(d) chart and the optimal pace read the core's solved player E(d) from core_sg.js (service_sg.sg_study, tour-average player, side-slope grid), replacing the hand-tuned comeback fit
 - **Next step:** Shipped in PR #14689.
 
@@ -774,10 +800,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690
+- **PR:** #14684, #14690, #14696
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`a368eb63`; collated from changes/12553-torque-capacity-trunk.md)
+- **Last verified:** 2026-11-05 (`62177712`; collated from changes/12553-trunk-upper-ceiling-lower-band.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 
@@ -1255,10 +1281,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14559
 - **Branch:** merged via #14589
-- **PR:** #14589, #14596, #14625, #14638, #14653, #14655, #14680, #14685
+- **PR:** #14589, #14596, #14625, #14638, #14653, #14655, #14680, #14685, #14693
 - **Paths:** see #14589
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`e51ba5a6`; collated from changes/14559-show-c3c-a-rung-demoted-for-a-search-onl.md)
+- **Last verified:** 2026-11-05 (`d865f3c3`; collated from changes/14559-show-c3c-d32-assumption-limited-vs-proba.md)
 - **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
 - **Next step:** Shipped in PR #14589.
 

@@ -35,6 +35,7 @@ from src.shared.python.contracts import require
 from src.shared.python.loop_nullspace.qp_core import QPConstraints, solve_qp
 from src.shared.python.loop_nullspace.solvers import ConicSettings, SolveStatus
 from src.shared.python.loop_nullspace.zero_side_shim import (
+    ZeroSideCheckResult,
     ZeroSideConsistency,
     check_zero_side_consistency,
 )
@@ -296,7 +297,7 @@ class ContactForceAllocator:
             (j_grip.shape, (self.n_grip_vars, self.nv)),
         )
 
-        fs = feasible_set_from_frame(
+        return allocate_contact_frame(
             self,
             FrameInputs(
                 tau_rnea=tau_rnea,
@@ -309,179 +310,7 @@ class ContactForceAllocator:
                 contact_mask=contact_mask,
                 ground_normal=ground_normal,
             ),
-        )
-        mask, n_hat, d_inv = fs.mask, fs.n_hat, fs.d_inv
-        has_act_limits, n_total_vars = fs.has_actuator_slack, fs.n_vars_total
-        idx_ground = self.n_actuated
-        idx_grip = idx_ground + self.n_ground_vars
-        idx_root = idx_grip + self.n_grip_vars
-
-        trail_set: set[int] = (
-            set(trail_arm_indices) if trail_arm_indices is not None else set()
-        )
-        if obj == AllocationObjective.HARD_ZERO_TRAIL and trail_set:
-            zero_check = check_zero_side_consistency(
-                tau_rnea,
-                self.actuated_indices,
-                list(trail_set),
-                j_ground=j_ground,
-                j_grip=j_grip,
-                atol=atol,
-            )
-            if zero_check.status is ZeroSideConsistency.INCONSISTENT:
-                logger.info(
-                    "HARD_ZERO_TRAIL inconsistent: scaled residual %.3g",
-                    zero_check.residual_scaled,
-                )
-                return ContactForceAllocation(
-                    tau_actuated=np.zeros(self.n_actuated, dtype=np.float64),
-                    f_ground=np.zeros(self.n_ground_vars, dtype=np.float64),
-                    lambda_grip=np.zeros(self.n_grip_vars, dtype=np.float64),
-                    delta_tau_root=np.zeros(self.n_root_vars, dtype=np.float64),
-                    equilibrium_residual=zero_check.residual_norm,
-                    root_balance_residual=zero_check.residual_norm,
-                    success=False,
-                    objective=obj,
-                    is_physically_feasible=False,
-                    feasibility_status=FeasibilityStatus.INFEASIBLE_HARD_ZERO_TRAIL,
-                )
-
-        # Convex QP in the scaled variables y (Hessian = I): exact conic solve
-        # through the shared core (NSX-24).  Never falls back to another
-        # optimizer; a missing backend raises ImportError (R11).
-        res = solve_qp(
-            sp.identity(n_total_vars, format="csr"),
-            np.zeros(n_total_vars),
-            fs.qp_constraints(),
-            settings=ConicSettings(tol=_SOLVER_TOL),
-        )
-        solver_converged = res.status is SolveStatus.OPTIMAL
-        if not solver_converged:
-            logger.warning(
-                "Contact force allocation not solved (%s %s); returning the "
-                "zero iterate with success=False",
-                res.status.value,
-                res.reason,
-            )
-        if solver_converged and res.x is None:
-            raise ValueError("optimal solve returned no solution vector")
-        y_sol: np.ndarray = (
-            res.x if solver_converged and res.x is not None else np.zeros(n_total_vars)
-        )
-
-        # Unscale solution: x = y * d_inv
-        x_sol = y_sol * d_inv
-        tau_sol = x_sol[: self.n_actuated]
-        f_sol = x_sol[idx_ground:idx_grip]
-        lambda_sol = x_sol[idx_grip:idx_root]
-        root_sol = x_sol[idx_root : idx_root + self.n_root_vars]
-        act_slack_sol = x_sol[self.n_vars :] if has_act_limits else np.zeros(0)
-
-        # Residuals and violations
-        applied = self._compute_applied(
-            tau_sol, j_ground, f_sol, j_grip, lambda_sol, root_sol
-        )
-        eq_res = float(np.max(np.abs(applied - tau_rnea)))
-        root_res = float(np.max(np.abs(root_sol)))
-        act_slack_res = (
-            float(np.max(np.abs(act_slack_sol))) if len(act_slack_sol) > 0 else 0.0
-        )
-
-        # Check friction cone violations and measure Coulomb friction ratio
-        f_reshaped = f_sol.reshape(self.n_contact_spheres, 3)
-        friction_viol_max = 0.0
-        max_friction_ratio = 0.0
-        for s in range(self.n_contact_spheres):
-            fx = float(f_sol[s * 3])
-            fy = float(f_sol[s * 3 + 1])
-            fz = float(f_sol[s * 3 + 2])
-            f_tan = float(np.hypot(fx, fy))
-            if fz > 1e-4:
-                ratio = f_tan / fz
-                if ratio > max_friction_ratio:
-                    max_friction_ratio = ratio
-            if not mask[s]:
-                continue
-            fn_s = float(f_reshaped[s] @ n_hat)
-            ft_vec = f_reshaped[s] - fn_s * n_hat
-            ft_s = float(np.linalg.norm(ft_vec))
-            viol_s = max(0.0, ft_s - self.mu_friction * max(0.0, fn_s))
-            if viol_s > friction_viol_max:
-                friction_viol_max = viol_s
-
-        # Feasibility assessment
-        is_physically_feasible = True
-        feasibility_status = FeasibilityStatus.FEASIBLE
-
-        # Actuator violations
-        if act_slack_res > 1e-3:
-            is_physically_feasible = False
-            if (
-                obj == AllocationObjective.HARD_ZERO_TRAIL
-                and trail_arm_indices is not None
-            ):
-                trail_set = set(trail_arm_indices)
-                trail_slack = [
-                    abs(act_slack_sol[col])
-                    for col, idx in enumerate(self.actuated_indices)
-                    if idx in trail_set
-                ]
-                if trail_slack and max(trail_slack) > 1e-3:
-                    feasibility_status = FeasibilityStatus.INFEASIBLE_HARD_ZERO_TRAIL
-                else:
-                    feasibility_status = FeasibilityStatus.INFEASIBLE_ACTUATOR_BOUNDS
-            else:
-                feasibility_status = FeasibilityStatus.INFEASIBLE_ACTUATOR_BOUNDS
-
-        # Root balance violations (diagnostic slack cannot create physical success)
-        if root_res > 0.01:
-            is_physically_feasible = False
-            if feasibility_status == FeasibilityStatus.FEASIBLE:
-                # Determine primary cause of root ungroundedness
-                fn_vals = [
-                    float(f_reshaped[s] @ n_hat)
-                    for s in range(self.n_contact_spheres)
-                    if mask[s]
-                ]
-                total_fn = sum(fn_vals) if fn_vals else 0.0
-                if tau_rnea[2] < -1.0 or (total_fn < 1.0 and abs(tau_rnea[2]) > 10.0):
-                    feasibility_status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
-                elif abs(root_sol[0]) > 1.0 or abs(root_sol[1]) > 1.0:
-                    feasibility_status = FeasibilityStatus.INFEASIBLE_FRICTION_CONE
-                else:
-                    feasibility_status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
-
-        # Overall equilibrium error check
-        if eq_res > 1e-3:
-            is_physically_feasible = False
-            if feasibility_status == FeasibilityStatus.FEASIBLE:
-                feasibility_status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
-
-        bounds_satisfied = True
-        if tau_bounds is not None:
-            bounds_satisfied = bool(
-                np.all(tau_sol >= tau_bounds[0] - 1e-5)
-                and np.all(tau_sol <= tau_bounds[1] + 1e-5)
-            )
-
-        success = bool(solver_converged and eq_res < 1e-4 and bounds_satisfied)
-
-        return ContactForceAllocation(
-            tau_actuated=tau_sol,
-            f_ground=f_sol,
-            lambda_grip=lambda_sol,
-            delta_tau_root=root_sol,
-            equilibrium_residual=eq_res,
-            root_balance_residual=root_res,
-            success=success,
-            objective=obj,
-            is_physically_feasible=is_physically_feasible,
-            feasibility_status=feasibility_status,
-            dual_residuals=eq_res,
-            friction_violations=friction_viol_max,
-            actuator_violations=act_slack_res,
-            root_slack_norm=root_res,
-            max_friction_ratio=max_friction_ratio,
+            atol=atol,
         )
 
     def is_friction_feasible(self, allocation: ContactForceAllocation) -> bool:
@@ -666,7 +495,7 @@ def feasible_set_from_frame(
         (_WORLD_Z, _WORLD_X, _WORLD_Y) if normal is None else _get_tangent_basis(normal)
     )
     mask = _contact_mask(allocator, frame.contact_mask)
-    trail_set = (
+    trail_set: set[int] = (
         set(frame.trail_arm_indices) if frame.trail_arm_indices is not None else set()
     )
     has_act_limits = (
@@ -697,4 +526,255 @@ def feasible_set_from_frame(
         mask=mask,
         n_hat=n_hat,
         has_actuator_slack=has_act_limits,
+    )
+
+
+def _hard_zero_trail_inconsistent_allocation(
+    allocator: ContactForceAllocator,
+    obj: AllocationObjective,
+    zero_check: ZeroSideCheckResult,
+) -> ContactForceAllocation:
+    """Return the fail-closed allocation when the zero-side shim is inconsistent."""
+    return ContactForceAllocation(
+        tau_actuated=np.zeros(allocator.n_actuated, dtype=np.float64),
+        f_ground=np.zeros(allocator.n_ground_vars, dtype=np.float64),
+        lambda_grip=np.zeros(allocator.n_grip_vars, dtype=np.float64),
+        delta_tau_root=np.zeros(allocator.n_root_vars, dtype=np.float64),
+        equilibrium_residual=zero_check.residual_norm,
+        root_balance_residual=zero_check.residual_norm,
+        success=False,
+        objective=obj,
+        is_physically_feasible=False,
+        feasibility_status=FeasibilityStatus.INFEASIBLE_HARD_ZERO_TRAIL,
+    )
+
+
+def _friction_diagnostics(
+    allocator: ContactForceAllocator,
+    f_sol: Array,
+    mask: NDArray[np.bool_],
+    n_hat: Array,
+) -> tuple[float, float]:
+    """Return ``(max_pyramid_violation, max_coulomb_ratio)`` for active contacts."""
+    f_reshaped = f_sol.reshape(allocator.n_contact_spheres, 3)
+    friction_viol_max = 0.0
+    max_friction_ratio = 0.0
+    for s in range(allocator.n_contact_spheres):
+        fx = float(f_sol[s * 3])
+        fy = float(f_sol[s * 3 + 1])
+        fz = float(f_sol[s * 3 + 2])
+        if fz > 1e-4:
+            max_friction_ratio = max(max_friction_ratio, float(np.hypot(fx, fy) / fz))
+        if not mask[s]:
+            continue
+        fn_s = float(f_reshaped[s] @ n_hat)
+        ft_vec = f_reshaped[s] - fn_s * n_hat
+        viol_s = max(
+            0.0, float(np.linalg.norm(ft_vec)) - allocator.mu_friction * max(0.0, fn_s)
+        )
+        friction_viol_max = max(friction_viol_max, viol_s)
+    return friction_viol_max, max_friction_ratio
+
+
+def _actuator_slack_status(
+    allocator: ContactForceAllocator,
+    obj: AllocationObjective,
+    trail_set: set[int],
+    act_slack_sol: Array,
+    act_slack_res: float,
+) -> FeasibilityStatus | None:
+    if act_slack_res <= 1e-3:
+        return None
+    if obj != AllocationObjective.HARD_ZERO_TRAIL:
+        return FeasibilityStatus.INFEASIBLE_ACTUATOR_BOUNDS
+    trail_slack = [
+        abs(act_slack_sol[col])
+        for col, idx in enumerate(allocator.actuated_indices)
+        if idx in trail_set
+    ]
+    if trail_slack and max(trail_slack) > 1e-3:
+        return FeasibilityStatus.INFEASIBLE_HARD_ZERO_TRAIL
+    return FeasibilityStatus.INFEASIBLE_ACTUATOR_BOUNDS
+
+
+def _contact_allocation_from_solution(
+    allocator: ContactForceAllocator,
+    frame: FrameInputs,
+    obj: AllocationObjective,
+    fs: FrameFeasibleSet,
+    trail_set: set[int],
+    *,
+    solver_converged: bool,
+    y_sol: Array,
+) -> ContactForceAllocation:
+    """Unpack a scaled conic solution and audit feasibility (NSX-24 post-process)."""
+    tau_rnea = frame.tau_rnea
+    j_ground = frame.j_ground
+    j_grip = frame.j_grip
+    tau_bounds = frame.tau_bounds
+    mask, n_hat, d_inv = fs.mask, fs.n_hat, fs.d_inv
+    has_act_limits = fs.has_actuator_slack
+    idx_ground = allocator.n_actuated
+    idx_grip = idx_ground + allocator.n_ground_vars
+    idx_root = idx_grip + allocator.n_grip_vars
+
+    x_sol = y_sol * d_inv
+    tau_sol = x_sol[: allocator.n_actuated]
+    f_sol = x_sol[idx_ground:idx_grip]
+    lambda_sol = x_sol[idx_grip:idx_root]
+    root_sol = x_sol[idx_root : idx_root + allocator.n_root_vars]
+    act_slack_sol = x_sol[allocator.n_vars :] if has_act_limits else np.zeros(0)
+
+    applied = allocator._compute_applied(
+        tau_sol, j_ground, f_sol, j_grip, lambda_sol, root_sol
+    )
+    eq_res = float(np.max(np.abs(applied - tau_rnea)))
+    root_res = float(np.max(np.abs(root_sol)))
+    act_slack_res = (
+        float(np.max(np.abs(act_slack_sol))) if len(act_slack_sol) > 0 else 0.0
+    )
+    friction_viol_max, max_friction_ratio = _friction_diagnostics(
+        allocator, f_sol, mask, n_hat
+    )
+
+    is_physically_feasible = True
+    feasibility_status = FeasibilityStatus.FEASIBLE
+    slack_status = _actuator_slack_status(
+        allocator, obj, trail_set, act_slack_sol, act_slack_res
+    )
+    if slack_status is not None:
+        is_physically_feasible = False
+        feasibility_status = slack_status
+
+    if root_res > 0.01 and feasibility_status == FeasibilityStatus.FEASIBLE:
+        is_physically_feasible = False
+        f_reshaped = f_sol.reshape(allocator.n_contact_spheres, 3)
+        fn_vals = [
+            float(f_reshaped[s] @ n_hat)
+            for s in range(allocator.n_contact_spheres)
+            if mask[s]
+        ]
+        total_fn = sum(fn_vals) if fn_vals else 0.0
+        if tau_rnea[2] < -1.0 or (total_fn < 1.0 and abs(tau_rnea[2]) > 10.0):
+            feasibility_status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
+        elif abs(root_sol[0]) > 1.0 or abs(root_sol[1]) > 1.0:
+            feasibility_status = FeasibilityStatus.INFEASIBLE_FRICTION_CONE
+        else:
+            feasibility_status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
+
+    if eq_res > 1e-3:
+        is_physically_feasible = False
+        if feasibility_status == FeasibilityStatus.FEASIBLE:
+            feasibility_status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
+
+    bounds_ok = tau_bounds is None or (
+        np.all(tau_sol >= tau_bounds[0] - 1e-5)
+        and np.all(tau_sol <= tau_bounds[1] + 1e-5)
+    )
+    success = bool(solver_converged and eq_res < 1e-4 and bounds_ok)
+
+    return ContactForceAllocation(
+        tau_actuated=tau_sol,
+        f_ground=f_sol,
+        lambda_grip=lambda_sol,
+        delta_tau_root=root_sol,
+        equilibrium_residual=eq_res,
+        root_balance_residual=root_res,
+        success=success,
+        objective=obj,
+        is_physically_feasible=is_physically_feasible,
+        feasibility_status=feasibility_status,
+        dual_residuals=eq_res,
+        friction_violations=friction_viol_max,
+        actuator_violations=act_slack_res,
+        root_slack_norm=root_res,
+        max_friction_ratio=max_friction_ratio,
+    )
+
+
+def allocate_contact_frame(
+    allocator: ContactForceAllocator,
+    frame: FrameInputs,
+    *,
+    atol: float = 1e-4,
+) -> ContactForceAllocation:
+    """Single-frame conic allocation shared by both legacy public APIs (NSX-24).
+
+    Preconditions: ``frame`` fields satisfy the same shape checks as
+    :meth:`ContactForceAllocator.allocate`.  Postcondition: one call to
+    :func:`feasible_set_from_frame` and one to :func:`solve_qp` on the conic
+    core (ADR-0054 D5); ``HARD_ZERO_TRAIL`` runs the NSX-15 consistency shim
+    before the QP and reports ``INCONSISTENT`` frames without hiding them.
+    """
+    obj = AllocationObjective.from_string(frame.objective)
+    tau_rnea = frame.tau_rnea
+    j_ground = frame.j_ground
+    j_grip = frame.j_grip
+    trail_arm_indices = frame.trail_arm_indices
+
+    require(
+        tau_rnea.shape == (allocator.nv,),
+        "tau_rnea shape mismatch",
+        (tau_rnea.shape, allocator.nv),
+    )
+    require(
+        j_ground.shape == (allocator.n_ground_vars, allocator.nv),
+        "j_ground shape mismatch",
+        (j_ground.shape, (allocator.n_ground_vars, allocator.nv)),
+    )
+    require(
+        j_grip.shape == (allocator.n_grip_vars, allocator.nv),
+        "j_grip shape mismatch",
+        (j_grip.shape, (allocator.n_grip_vars, allocator.nv)),
+    )
+
+    fs = feasible_set_from_frame(allocator, frame)
+    n_total_vars = fs.n_vars_total
+
+    trail_set: set[int] = (
+        set(trail_arm_indices) if trail_arm_indices is not None else set()
+    )
+    if obj == AllocationObjective.HARD_ZERO_TRAIL and trail_set:
+        zero_check = check_zero_side_consistency(
+            tau_rnea,
+            allocator.actuated_indices,
+            list(trail_set),
+            j_ground=j_ground,
+            j_grip=j_grip,
+            atol=atol,
+        )
+        if zero_check.status is ZeroSideConsistency.INCONSISTENT:
+            logger.info(
+                "HARD_ZERO_TRAIL inconsistent: scaled residual %.3g",
+                zero_check.residual_scaled,
+            )
+            return _hard_zero_trail_inconsistent_allocation(allocator, obj, zero_check)
+
+    res = solve_qp(
+        sp.identity(n_total_vars, format="csr"),
+        np.zeros(n_total_vars),
+        fs.qp_constraints(),
+        settings=ConicSettings(tol=_SOLVER_TOL),
+    )
+    solver_converged = res.status is SolveStatus.OPTIMAL
+    if not solver_converged:
+        logger.warning(
+            "Contact force allocation not solved (%s %s); returning the "
+            "zero iterate with success=False",
+            res.status.value,
+            res.reason,
+        )
+    if solver_converged and res.x is None:
+        raise ValueError("optimal solve returned no solution vector")
+    y_sol: np.ndarray = (
+        res.x if solver_converged and res.x is not None else np.zeros(n_total_vars)
+    )
+    return _contact_allocation_from_solution(
+        allocator,
+        frame,
+        obj,
+        fs,
+        trail_set,
+        solver_converged=solver_converged,
+        y_sol=y_sol,
     )
