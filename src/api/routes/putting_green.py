@@ -256,6 +256,16 @@ class Putt3DSimulationRequest(BaseModel):
     random_seed: int = Field(8345, ge=0, le=2**31 - 1)
     hole_x_m: float = Field(3.0, ge=-9.0, le=9.0)
     hole_y_m: float = Field(0.0, ge=-9.0, le=9.0)
+    aim_heading_deg: float = Field(
+        0.0, ge=-180.0, le=180.0, description="Strike heading from +x, CCW [deg]"
+    )
+    green: GreenShapeRequest | None = Field(
+        None,
+        description=(
+            "Core green shape (#14464); when set it replaces grade_percent, "
+            "downhill_aspect_deg and bump_height_m"
+        ),
+    )
 
     @field_validator("balance_type")
     @classmethod
@@ -388,12 +398,16 @@ def _build_putting_3d_surface(
         stimp_to_rolling_mu,
     )
 
-    height = HeightField.planar(
-        grade_percent=payload.grade_percent,
-        aspect_deg=payload.downhill_aspect_deg,
-        extent_m=extent_m,
-    )
-    if payload.bump_height_m > 0.0:
+    green = payload.green
+    if green is not None:
+        height = green.spec().height(extent_m)
+    else:
+        height = HeightField.planar(
+            grade_percent=payload.grade_percent,
+            aspect_deg=payload.downhill_aspect_deg,
+            extent_m=extent_m,
+        )
+    if green is None and payload.bump_height_m > 0.0:
         height = bumpy_height_field(
             seed=payload.random_seed,
             amplitude_m=payload.bump_height_m,
@@ -439,6 +453,18 @@ def _build_putting_3d_surface(
     return surface, height, putter
 
 
+def _surface_slope(payload: Putt3DSimulationRequest) -> dict[str, float]:
+    """The rolled green's grade and aspect, from its core spec when sent."""
+    green = payload.green
+    if green is None:
+        return {
+            "grade_percent": payload.grade_percent,
+            "downhill_aspect_deg": payload.downhill_aspect_deg,
+        }
+    spec = green.spec()
+    return {"grade_percent": spec.grade_percent, "downhill_aspect_deg": spec.aspect_deg}
+
+
 @router.post("/simulate-3d", response_model=Putt3DSimulationResponse)
 @limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
 @handle_api_errors
@@ -456,6 +482,7 @@ async def simulate_putt_3d(
         putter,
         surface,
         impact_toe_m=payload.impact_toe_m,
+        heading_rad=math.radians(payload.aim_heading_deg),
         hole_x_m=payload.hole_x_m,
         hole_y_m=payload.hole_y_m,
     )
@@ -498,8 +525,7 @@ async def simulate_putt_3d(
         surface=Putt3DSurfaceResponse(
             width_m=extent_m,
             height_m=extent_m,
-            grade_percent=payload.grade_percent,
-            downhill_aspect_deg=payload.downhill_aspect_deg,
+            **_surface_slope(payload),
             hole_x_m=payload.hole_x_m,
             hole_y_m=payload.hole_y_m,
         ),
