@@ -2,10 +2,11 @@
 
 The standalone studio (``src/apps/putting_studio``) opens from ``file://`` and
 cannot import the Python core, so it hard-coded ft, m/s and mm in its labels.
-This script writes the shared :mod:`src.shared.python.ui.units` conversions
-for the studio's stored units (putt distance in ft, speeds in m/s, strike in
-mm) to ``js/core_units.js``, with the formatter the studio's labels call. The
-desktop simulator uses the same helpers, so both show the same numbers.
+This script writes the shared :mod:`src.shared.python.ui.units` table, the one
+the API serves, rescaled to the studio's stored units (putt distance in ft,
+speeds in m/s, strike in mm), to ``js/core_units.js`` with the formatter the
+studio's labels call. The desktop simulator uses the same helpers, so both
+show the same numbers.
 
 Usage::
 
@@ -20,11 +21,8 @@ from typing import Any
 
 from src.shared.python.ui.units import (
     UnitSystem,
-    distance_suffix,
+    display_unit_table,
     from_display_distance,
-    speed_suffix,
-    to_display_distance,
-    to_display_speed,
 )
 
 FIXTURE = (
@@ -52,24 +50,18 @@ function coreUnitText(kind, value, digits, system) {
 def unit_row(system: UnitSystem) -> dict[str, dict[str, Any]]:
     """Factor from each stored unit to ``system``'s display unit, and its suffix.
 
-    Strike follows the desktop's strike spin: millimetres, or inches (twelve
-    to the foot of the shared distance conversion).
+    The API's :func:`display_unit_table` rescaled from SI to the studio's
+    stored units: putt distance in ft, speeds in m/s, strike in mm.
     """
-    metric = system == UnitSystem.METRIC
-    per_display = 1e3 if metric else 12.0  # mm per metre, or inches per foot
+    table = display_unit_table(system)
+    per_si = {"distance": _FT_M, "speed": 1.0, "strike": 1e-3}
+    source = {"distance": "distance", "speed": "speed", "strike": "small_length"}
     return {
-        "distance": {
-            "factor": to_display_distance(_FT_M, system, unit="ft"),
-            "suffix": distance_suffix(system, unit="ft"),
-        },
-        "speed": {
-            "factor": to_display_speed(1.0, system),
-            "suffix": speed_suffix(system),
-        },
-        "strike": {
-            "factor": to_display_distance(1e-3, system, unit="ft") * per_display,
-            "suffix": " mm" if metric else " in",
-        },
+        kind: {
+            "factor": table[source[kind]]["factor"] * per_si[kind],
+            "suffix": table[source[kind]]["suffix"],
+        }
+        for kind in STORED
     }
 
 

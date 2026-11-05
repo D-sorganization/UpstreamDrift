@@ -211,6 +211,19 @@ class BalancePresetsResponse(BaseModel):
     presets: list[BalancePresetResponse]
 
 
+class DisplayUnitResponse(BaseModel):
+    """One SI-to-display conversion: display value = SI value * factor."""
+
+    factor: float
+    suffix: str
+
+
+class DisplayUnitsResponse(BaseModel):
+    """The shared display-unit table per unit system (#14646)."""
+
+    systems: dict[str, dict[str, DisplayUnitResponse]]
+
+
 # -- Endpoints --
 
 
@@ -664,6 +677,21 @@ async def get_putter_presets() -> BalancePresetsResponse:
         BalancePresetResponse(**dataclasses.asdict(p)) for p in BALANCE_PRESETS.values()
     ]
     return BalancePresetsResponse(presets=presets)
+
+
+@router.get("/units", response_model=DisplayUnitsResponse)
+@handle_api_errors
+async def get_display_units() -> DisplayUnitsResponse:
+    """The desktop's display-unit conversions, so clients don't re-implement them.
+
+    Distance from m, speed from m/s and small lengths (strike) from m, for
+    each unit system, from :func:`~src.shared.python.ui.units.display_unit_table`.
+    """
+    from src.shared.python.ui.units import UnitSystem, display_unit_table
+
+    return DisplayUnitsResponse.model_validate(
+        {"systems": {s.value: display_unit_table(s) for s in UnitSystem}}
+    )
 
 
 @router.post("/counter-torque", response_model=CounterTorqueResponse)

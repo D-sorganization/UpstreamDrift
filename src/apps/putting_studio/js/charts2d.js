@@ -220,7 +220,7 @@ function drawGreenRollSimulator() {
     ctx.stroke();
     ctx.fillStyle = 'rgba(248, 250, 252, 0.85)';
     ctx.font = `600 ${10 * dpr}px "JetBrains Mono", monospace`;
-    ctx.fillText(`Straight Line to Hole (${(state.puttDistFt || 10).toFixed(0)} ft)`, mapX(holeX * 0.36), mapY(0) + 13 * dpr);
+    ctx.fillText(`Straight Line to Hole (${coreUnitText('distance', state.puttDistFt || 10, 0, state.unitSystem)})`, mapX(holeX * 0.36), mapY(0) + 13 * dpr);
     ctx.restore();
 
     // 2. Initial Starting Direction Ray (Aim / Launch Tangent)
