@@ -15,7 +15,8 @@
  * captureSpeedMps(entryOffsetM), a chord generalisation of
  * capture_speed_mps(); radii/gravity match Python exactly for
  * cross-language parity; the skid length comes from the core table in
- * js/core_impact.js (#14647), passed in as skidTable. Skid multiplier,
+ * js/core_impact.js (#14647), passed in as skidTable; a core green preset
+ * (js/core_greens.js, #14648) can replace the slider green as coreGreen. Skid multiplier,
  * gear-twist/lip-out and turf chatter stay uncited (out of scope).
  */
 (function (root) {
@@ -101,6 +102,39 @@
       dz_dx: sx0 + dzTierDx + g1x + g2x,
       dz_dy: sy0 + g1y + g2y,
     };
+  }
+
+  /**
+   * Height and gradient of a core green preset (js/core_greens.js, #14648)
+   * at green coordinates (gx, gy): the clamped bilinear patch of
+   * surfaces.HeightField.elevation() and gradient().
+   * @returns {{z:number, dz_dx:number, dz_dy:number}} @throws {TypeError}
+   */
+  function coreGreenAt(green, gx, gy) {
+    assertFinite(gx, "gx");
+    assertFinite(gy, "gy");
+    const h = green.heights_mm, s = green.spacing_m;
+    const fx = (gx - green.origin_m[0]) / s, fy = (gy - green.origin_m[1]) / s;
+    const ix = Math.min(Math.max(Math.floor(fx), 0), h[0].length - 2);
+    const iy = Math.min(Math.max(Math.floor(fy), 0), h.length - 2);
+    const tx = Math.min(Math.max(fx - ix, 0.0), 1.0), ty = Math.min(Math.max(fy - iy, 0.0), 1.0);
+    const h00 = h[iy][ix] / 1e3, h10 = h[iy][ix + 1] / 1e3;
+    const h01 = h[iy + 1][ix] / 1e3, h11 = h[iy + 1][ix + 1] / 1e3;
+    return {
+      z: h00 * (1 - tx) * (1 - ty) + h10 * tx * (1 - ty) + h01 * (1 - tx) * ty + h11 * tx * ty,
+      dz_dx: ((h10 - h00) * (1 - ty) + (h11 - h01) * ty) / s,
+      dz_dy: ((h01 - h00) * (1 - tx) + (h11 - h10) * tx) / s,
+    };
+  }
+
+  /**
+   * The studio green at putt coordinates (x, y): a core preset centred on
+   * the putt midpoint when coreGreen is given, else the slider green.
+   * @returns {{z:number, dz_dx:number, dz_dy:number}} @throws {TypeError|RangeError}
+   */
+  function evalGreen(x, y, holeX, upPct, crossPct, coreGreen) {
+    if (!coreGreen) return evalUndulatingGreen(x, y, holeX, upPct, crossPct);
+    return coreGreenAt(coreGreen, x - holeX / 2.0, y);
   }
 
   /**
@@ -211,7 +245,7 @@
       headMassKg = _TYPICAL_PUTTER_HEAD_MASS_KG,
       moiKgM2 = _TYPICAL_PUTTER_MOI_KG_M2,
       stimpFt, upPct = 0.0, crossPct = 0.0, trialSeed = 0.0, distFt,
-      roughnessMm = 0.35, isStimpRamp = false, skidTable = null,
+      roughnessMm = 0.35, isStimpRamp = false, skidTable = null, coreGreen = null,
       ballMassKg = GOLF_BALL_MASS_KG, cor = PUTTER_FACE_COR,
     } = options;
     assertFinite(vClubMps, "vClubMps"); assertFinite(aimDeg, "aimDeg");
@@ -249,7 +283,7 @@
       const distMoved = Math.hypot(x, y);
       const mode = !isStimpRamp && distMoved < targetSkidDist ? "sliding" : "rolling";
       const mu = mode === "sliding" ? muRoll * _SKID_MU_MULTIPLIER : muRoll;
-      const grad = evalUndulatingGreen(x, y, holeX, upPct, crossPct);
+      const grad = evalGreen(x, y, holeX, upPct, crossPct, coreGreen);
       const chatter = sampleTurfMicroRoughness(x, y, speed, roughnessMm, trialSeed);
       const ax = -mu * GRAVITY_M_S2 * (vx / speed) - GRAVITY_M_S2 * grad.dz_dx + chatter.ax;
       const ay = -mu * GRAVITY_M_S2 * (vy / speed) - GRAVITY_M_S2 * grad.dz_dy + chatter.ay;
@@ -311,9 +345,9 @@
   const api = {
     GRAVITY_M_S2, STIMP_RELEASE_SPEED_MPS, STIMPMETER_RELEASE_ANGLE_DEG, HOLE_RADIUS_M,
     GOLF_BALL_RADIUS_M, GOLF_BALL_MASS_KG, PUTTER_FACE_COR, seededRandom, gaussianRand,
-    evalUndulatingGreen, sampleTurfMicroRoughness, stimpToRollingMu, captureSpeedMps,
-    effectiveHeadMass, centreStrikeSpeedRatio, simulateSinglePuttRK4, computeClubSpeedForCapture,
-    coreSkidDistanceM,
+    evalUndulatingGreen, coreGreenAt, evalGreen, sampleTurfMicroRoughness, stimpToRollingMu,
+    captureSpeedMps, effectiveHeadMass, centreStrikeSpeedRatio, simulateSinglePuttRK4,
+    computeClubSpeedForCapture, coreSkidDistanceM,
   };
 
   root.PuttingPhysics = api;

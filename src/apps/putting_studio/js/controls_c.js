@@ -145,10 +145,13 @@ document.getElementById('pertToeBtn').addEventListener('click', () => {
 });
 document.getElementById('solveAimpointBtn').addEventListener('click', () => {
   // Fast analytical-seed + secant search for optimal uphill aim compensation angle
-  let bestAim = state.crossSlopePct * 2.68;
+  // A core green has no slider slope to seed from: search wider around straight.
+  const coreGreen = activeCoreGreen();
+  let bestAim = coreGreen ? 0.0 : state.crossSlopePct * 2.68;
   let bestMiss = 999.0;
   const vNom = 1.32 + 0.03 * (state.uphillSlopePct / 0.5);
-  for (let cand = bestAim - 2.0; cand <= bestAim + 2.0; cand += 0.2) {
+  const span = coreGreen ? 5.0 : 2.0, centre = bestAim;
+  for (let cand = centre - span; cand <= centre + span; cand += 0.2) {
     const r = PuttingPhysics.simulateSinglePuttRK4({
       vClubMps: vNom,
       aimDeg: cand,
@@ -162,6 +165,7 @@ document.getElementById('solveAimpointBtn').addEventListener('click', () => {
       distFt: state.puttDistFt || 10.0,
       roughnessMm: state.surfaceRoughnessMm !== undefined ? state.surfaceRoughnessMm : 0.35,
       skidTable: window.CORE_IMPACT.skid,
+      coreGreen: coreGreen,
     });
     const miss = r.holed ? r.missDistCm * 0.1 : r.missDistCm;
     if (miss < bestMiss) { bestMiss = miss; bestAim = cand; }
@@ -182,7 +186,31 @@ document.getElementById('noiseSlider').addEventListener('input', (e) => {
   syncUI();
 });
 
+// Green Type: the slider green, or a core preset with the slope sliders locked (#14648).
+const greenPresetSelect = document.getElementById('greenPresetSelect');
+for (const [key, preset] of Object.entries(window.CORE_GREENS.presets)) {
+  const opt = document.createElement('option');
+  opt.value = key;
+  opt.textContent = `Core: ${preset.label}`;
+  greenPresetSelect.appendChild(opt);
+}
+function setGreenPreset(key) {
+  state.greenPreset = key;
+  greenPresetSelect.value = key;
+  for (const id of ['crossSlopeSlider', 'uphillSlopeSlider']) {
+    document.getElementById(id).disabled = key !== 'studio';
+  }
+}
+greenPresetSelect.addEventListener('change', (e) => {
+  setGreenPreset(e.target.value);
+  state.rollT = 3.6;
+  rebuildGreenDispersionBatch();
+  drawGreenRollSimulator();
+  syncUI();
+});
+
 document.getElementById('presetFlatGreenBtn').addEventListener('click', () => {
+  setGreenPreset('studio');
   state.crossSlopePct = 0.0; state.uphillSlopePct = 0.0; state.aimAngleDeg = 0.0;
   document.getElementById('crossSlopeSlider').value = 0.0;
   document.getElementById('uphillSlopeSlider').value = 0.0;
@@ -197,6 +225,7 @@ document.getElementById('presetFlatGreenBtn').addEventListener('click', () => {
 });
 
 document.getElementById('presetSlopedGreenBtn').addEventListener('click', () => {
+  setGreenPreset('studio');
   state.crossSlopePct = 2.2; state.uphillSlopePct = 0.4; state.aimAngleDeg = 6.0;
   document.getElementById('crossSlopeSlider').value = 2.2;
   document.getElementById('uphillSlopeSlider').value = 0.4;

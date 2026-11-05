@@ -88,7 +88,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/_scene_builder.py, src/tools/putting_green_gui/gui.py | Green Type selector (cross slope or any core preset), seeded undulation in mm or in, green seed; all on the shared GreenSpec.",
         "react": "present | ui/src/components/putting/GreenTypeControl.tsx, ui/src/utils/greenTypes.ts | Green Type selector (cross slope or any core preset from GET /green-presets) sent as the core green spec on /simulate-3d; slope and bump fields lock under a preset (golden-pinned, #14464).",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist), so the Green Type selector ships unchanged.",
-        "studio": "partial #14463 | src/apps/putting_studio/js/putting_physics.js, src/apps/putting_studio/js/io.js | Flat and slope presets plus stimp ramp; undulation switches on with slope and is not selectable."
+        "studio": "present | src/apps/putting_studio/js/core_greens.js, scripts/generate_studio_greens.py, src/apps/putting_studio/js/putting_physics.js | Green Type selector: the slider green or any core preset (undulating included), its height grid generated from GreenSpec and read with the core bilinear lookup, centred on the putt midpoint (golden-pinned, #14648)."
       }
     },
     "optimal_aim": {

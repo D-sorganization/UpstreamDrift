@@ -164,7 +164,7 @@ function drawGreenRollSimulator() {
     for (let iy = 0; iy <= ny; iy++) {
       const xm = (ix / nx) * xSpan;
       const ym = ((iy / ny) - 0.5) * 2.0 * ySpan;
-      const g = PuttingPhysics.evalUndulatingGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct);
+      const g = PuttingPhysics.evalGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct, activeCoreGreen());
       const px = mapX(xm), py = mapY(ym);
       if (state.showPhotoFilter) {
         const shade = g.dz_dx * 8.0 + g.dz_dy * 6.0;

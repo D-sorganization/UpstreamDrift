@@ -13,7 +13,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Toe/Heel Strike Location | (c) | present | present | present | present | present |
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | present | present | present | present | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
-| Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | partial (#14463) |
+| Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | present |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | present | present | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | present | present | present | partial (#14467) |
 | Saved Scenarios and Comparison | (h) | present | present | present | present | present |
@@ -70,7 +70,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Core/API: present. `src/shared/python/putting_dynamics/green_spec.py`, `src/api/routes/putting_green.py`. GreenSpec (slope, two-tier step, seeded undulation, named presets) on /simulate, /scatter, /read-green and /contours; GET /green-presets.
 - PyQt6: present. `src/tools/putting_green_gui/_scene_builder.py`, `src/tools/putting_green_gui/gui.py`. Green Type selector (cross slope or any core preset), seeded undulation in mm or in, green seed; all on the shared GreenSpec.
 - React: present. `ui/src/components/putting/GreenTypeControl.tsx`, `ui/src/utils/greenTypes.ts`. Green Type selector (cross slope or any core preset from GET /green-presets) sent as the core green spec on /simulate-3d; slope and bump fields lock under a preset (golden-pinned, #14464).
-- Studio: partial (#14463). `src/apps/putting_studio/js/putting_physics.js`, `src/apps/putting_studio/js/io.js`. Flat and slope presets plus stimp ramp; undulation switches on with slope and is not selectable.
+- Studio: present. `src/apps/putting_studio/js/core_greens.js`, `scripts/generate_studio_greens.py`, `src/apps/putting_studio/js/putting_physics.js`. Green Type selector: the slider green or any core preset (undulating included), its height grid generated from GreenSpec and read with the core bilinear lookup, centred on the putt midpoint (golden-pinned, #14648).
 
 **Optimum Read / Auto-Solve Aim**
 - Core/API: present. `src/shared/python/putting_dynamics/green_reading.py`, `src/shared/python/putting_analytics/optimize.py`, `src/api/routes/putting_green.py`. solve_aim and best_action present; /read-green returns pace, heading, holed and converged in one call on any GreenSpec green.
