@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14713 | shoulder declared_rom_deg: per-side cited (Gill 2020 flexion, ER) vs assumed ROM; v2 envelope builds without unbounded shoulders (D39) |
 | 2026-11-05 | #14707 | Source skilled-male peak angular velocities for velocity limits (SOURCED_WITH_ASSUMED_MARGIN) |
 | 2026-11-05 | #14712 | putting parity matrix: units.react and units.tauri move to present, citing the React units selector that #14458 landed (PR #14489); no putting gaps remain in the matrix (Part of #14452) |
 | 2026-11-05 | #14705 | putting_dynamics: the post-impact hop reflects the vertical speed relative to the green, so a downhill putt settles in under 0.1 s instead of skipping for about 5 s; the studio long-downhill read is back in core parity |

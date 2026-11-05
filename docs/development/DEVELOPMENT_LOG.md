@@ -826,10 +826,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690, #14696, #14704
+- **PR:** #14684, #14690, #14696, #14704, #14713
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`be7b9798`; collated from changes/12553-trunk-rom-soft-limits.md)
+- **Last verified:** 2026-11-05 (`46589575`; collated from changes/12553-shoulder-declared-rom-deg-per-side-cited.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 
