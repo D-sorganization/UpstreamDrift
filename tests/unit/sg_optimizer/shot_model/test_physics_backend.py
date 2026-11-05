@@ -42,9 +42,20 @@ YAML = Path(__file__).resolve().parents[4] / "data/sg_optimizer/baselines/pga_to
 _FW = LIE_CODES["fairway"]
 
 
-def _sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
-    """Stand-in physics: along = 2 * speed, lateral = 3 * face."""
-    return np.stack([2.0 * impacts[:, 0], 3.0 * impacts[:, 1]], axis=1)
+def _sim(
+    impacts: np.ndarray,
+    skill: str,
+    wind: tuple[float, float],
+    slope: str,
+    lie: str,
+):
+    """Stand-in physics: along = 2 * speed, lateral = 3 * face (+ runout)."""
+    carry = np.stack([2.0 * impacts[:, 0], 3.0 * impacts[:, 1]], axis=1)
+    from src.shared.python.sg_optimizer.shot_model.ground_runout import rest_position
+
+    return rest_position(
+        carry, slope=slope, lie=lie, landing_speed_ms=np.full(len(carry), 25.0)
+    )
 
 
 def _table():
@@ -158,9 +169,18 @@ def test_better_player_never_has_higher_expected_strokes() -> None:
 def _family_table(family: str):
     """Same carry for every family (centred), spread from the family's own draws."""
 
-    def sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
+    def sim(
+        impacts: np.ndarray, skill: str, wind: tuple[float, float], slope: str, lie: str
+    ):
         along = 90.0 + (impacts[:, 0] - impacts[:, 0].mean())
-        return np.stack([along, 3.0 * impacts[:, 1]], axis=1)
+        carry = np.stack([along, 3.0 * impacts[:, 1]], axis=1)
+        from src.shared.python.sg_optimizer.shot_model.ground_runout import (
+            rest_position,
+        )
+
+        return rest_position(
+            carry, slope=slope, lie=lie, landing_speed_ms=np.full(len(carry), 22.0)
+        )
 
     return build_table(get_skill_family(family), sim, skills=("wedge",), n=2000, seed=1)
 

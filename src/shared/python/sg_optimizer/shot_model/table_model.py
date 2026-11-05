@@ -11,6 +11,7 @@ from src.shared.python.sg_optimizer.shot_model.baseline_model import (
     lie_modifiers,
 )
 from src.shared.python.sg_optimizer.shot_model.dispersion_table import DispersionTable
+from src.shared.python.sg_optimizer.shot_model.ground_runout import SKILL_CLUB
 from src.shared.python.sg_optimizer.shot_model.outcome import (
     LandingSamples,
     ShotOutcomeModel,
@@ -49,10 +50,9 @@ class TableShotModel:
 
     def sample(self, player, shot, lie, conditions, rng, n):  # noqa: ANN001
         skill = CLUB_SKILL.get(shot.club)
+        club = SKILL_CLUB.get(skill, skill) if skill else shot.club
         try:
-            cell = self.table.lookup(
-                skill or "", skill or "", "fairway", "calm", "flat"
-            )
+            cell = self.table.lookup(skill or "", club or "", "fairway", "calm", "flat")
         except ContractViolationError:  # no cell for this club: use the baseline
             return self.fallback.sample(player, shot, lie, conditions, rng, n)
         dist, sl, slat = lie_modifiers(lie, conditions)

@@ -40,9 +40,31 @@ def test_strike_offsets_map_to_metres() -> None:
     np.testing.assert_allclose(s.impact_offset, [0.010, -0.005])
 
 
-def test_real_pipeline_driver_carry_is_plausible_and_face_curves_ball() -> None:
+def test_real_pipeline_driver_rest_exceeds_carry() -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
     sim = PipelineLandingSimulator()
-    out = sim(np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]]), "driver", (0.0, 0.0))
+    rest = sim(np.array([_ZERO]), "driver", (0.0, 0.0), "flat", "fairway")
+    result = sim._pipeline((0.0, 0.0)).run(swing_state_from_impact(_ZERO, "driver"))
+    carry_yd = result.trajectory[-1].position[0] / 0.9144
+    assert rest[0, 0] > carry_yd + 0.5
+
+
+def test_real_pipeline_driver_carry_is_plausible_and_face_curves_ball() -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
+    sim = PipelineLandingSimulator()
+    out = sim(
+        np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]]),
+        "driver",
+        (0.0, 0.0),
+        "flat",
+        "fairway",
+    )
     assert 150.0 < out[0, 0] < 330.0  # yards; a 100 mph driver
     assert abs(out[0, 1]) < 8.0  # square face/path: nearly straight
     assert out[1, 1] < out[0, 1] - 3.0  # open face -> lands right (y is left)

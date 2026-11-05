@@ -1,11 +1,11 @@
-"""Cached, versioned Monte-Carlo dispersion tables (SHOW-B3, #14567).
+"""Cached, versioned Monte-Carlo dispersion tables (SHOW-B3/B3b, #14567/#14610).
 
 Per ``(skill, club, lie, wind, slope)`` cell: mean / sd / correlation of the
-aim-frame landing offset (yards) from an injected landing simulator. Every cell
-shares one standard-normal block (common random numbers, prefix-stable in ``n``).
-The hash covers cells + ``(family, seed, n)``; wall-clock runtime is never hashed.
-Scope: carry only (no bounce/roll); slope is a flat-only label; ``club`` repeats
-``skill``; lie is an identity unless a ``lie_modifier`` is injected.
+aim-frame **resting** offset (yards) from an injected landing simulator (carry
+plus documented bounce/roll in ``ground_runout``). Every cell shares one
+standard-normal block (common random numbers, prefix-stable in ``n``). The hash
+covers cells + ``(family, seed, n, ground_model)``; wall-clock runtime is never
+hashed.
 """
 
 from __future__ import annotations
@@ -22,13 +22,21 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
+from src.shared.python.sg_optimizer.shot_model.ground_runout import (
+    GROUND_MODEL_ID,
+    SKILL_CLUB,
+    SLOPE_BINS,
+    SLOPES,
+)
 from src.shared.python.sg_optimizer.shot_model.skill_family import (
     IMPACT_FIELDS,
     SkillFamily,
 )
 
-# (impacts (n, 6), skill, (headwind_mph, crosswind_mph)) -> landing (n, 2) yards
-LandingSimulator = Callable[[NDArray[np.float64], str, tuple[float, float]], Any]
+# (impacts, skill, wind mph pair, slope bin, lie) -> rest position (n, 2) yards
+LandingSimulator = Callable[
+    [NDArray[np.float64], str, tuple[float, float], str, str], Any
+]
 LieModifier = Callable[[NDArray[np.float64], str], NDArray[np.float64]]
 
 WIND_BINS: dict[str, tuple[float, float]] = {
@@ -37,11 +45,10 @@ WIND_BINS: dict[str, tuple[float, float]] = {
     "tail_5": (-5.0, 0.0),
     "cross_5": (0.0, 5.0),
 }
-SLOPES = ("flat",)  # slope is a label until the simulator models it
 CONVERGENCE_TOL = 0.02
-# Real-pipeline worst n-vs-n/2 change: n=2000 5.4%, 8000 2.2%, 20000 1.3%.
+# Real pipeline with runout: n=12000 worst skill ~1.7% vs n/2 at seed 0 (B3b).
 DEFAULT_N = 12000
-SCHEMA = 1
+SCHEMA = 2
 
 
 def standard_normals(seed: int, n: int) -> NDArray[np.float64]:
@@ -168,27 +175,33 @@ def build_table(
     names = skills if skills is not None else tuple(family.skills)
     require(set(names) <= set(family.skills), f"skills not in {family.name!r}")
     require(set(winds) <= set(WIND_BINS), f"unknown wind bins; have {tuple(WIND_BINS)}")
+    require(set(SLOPES) <= set(SLOPE_BINS), "internal slope list invalid")
     t0, z, cells = time.perf_counter(), standard_normals(seed, n), []
     for skill in names:
+        club = SKILL_CLUB.get(skill, skill)
         base = _impacts(family.skills[skill].distribution, z)
         for lie in lies:
             imp = lie_modifier(base, lie) if lie_modifier is not None else base
             for wind in winds:
-                land = np.asarray(simulate(imp, skill, WIND_BINS[wind]), dtype=float)
-                require(land.shape == (n, 2), f"simulator returned {land.shape}")
-                require(bool(np.isfinite(land).all()), "simulator returned non-finite")
-                mean, sd, corr = _cell_stats(land)
                 for slope in SLOPES:
+                    land = np.asarray(
+                        simulate(imp, skill, WIND_BINS[wind], slope, lie), dtype=float
+                    )
+                    require(land.shape == (n, 2), f"simulator returned {land.shape}")
+                    require(
+                        bool(np.isfinite(land).all()), "simulator returned non-finite"
+                    )
+                    mean, sd, corr = _cell_stats(land)
                     cells.append(
-                        DispersionCell(
-                            skill, skill, lie, wind, slope, mean, sd, corr, n
-                        )
+                        DispersionCell(skill, club, lie, wind, slope, mean, sd, corr, n)
                     )
     meta = {
         "family": family.name,
         "family_version": family.provenance.version,
         "seed": seed,
         "n": n,
+        "ground_model": GROUND_MODEL_ID,
+        "slopes": {k: SLOPE_BINS[k] for k in SLOPES},
     }
     table = DispersionTable(
         tuple(cells),
@@ -211,7 +224,9 @@ def check_convergence(
     require(n >= 4, "n must be >= 4", n)
     z = standard_normals(seed, n)
     imp = _impacts(family.skills[skill].distribution, z)
-    full = np.asarray(simulate(imp, skill, WIND_BINS["calm"]), dtype=float)
+    full = np.asarray(
+        simulate(imp, skill, WIND_BINS["calm"], "flat", "fairway"), dtype=float
+    )
     half = full[: n // 2]
     (m1, s1, _), (m2, s2, _) = _cell_stats(full), _cell_stats(half)
     scale = np.maximum(np.array(s1), 1e-12)
@@ -227,6 +242,9 @@ def main(argv: list[str] | None = None) -> int:
     """Regenerate a table: ``python -m ...dispersion_table --family tour --out t.json``."""
     import argparse
 
+    from src.shared.python.sg_optimizer.shot_model.dispersion_lie import (
+        lie_modifier_for_table,
+    )
     from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
         PipelineLandingSimulator,
     )
@@ -241,12 +259,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out", required=True)
     a = p.parse_args(argv)
     family, sim = get_skill_family(a.family), PipelineLandingSimulator()
+    mod = lie_modifier_for_table(a.seed)
     worst = max(
         check_convergence(family, sim, s, n=a.n, seed=a.seed).max_rel_change
         for s in family.skills
     )
     conv = Convergence(worst < CONVERGENCE_TOL, worst)
-    table = build_table(family, sim, n=a.n, seed=a.seed)
+    table = build_table(family, sim, n=a.n, seed=a.seed, lie_modifier=mod)
     table.with_convergence(conv).to_json(a.out)
     return 0
 
