@@ -29,41 +29,58 @@ class StrategyReport:
         return self.personal_strokes - self.tour_strokes
 
 
+@dataclass(frozen=True)
+class StrategyProblem:
+    """The hole and player-independent inputs shared by both solves."""
+
+    raster: LieRaster
+    baseline: BaselineBag
+    conditions: CourseConditions
+    actions: ActionSet
+    start: State
+
+
+@dataclass(frozen=True)
+class SolveSettings:
+    """Sampling and iteration controls (same seed for tour and player)."""
+
+    n_samples: int = 64
+    seed: int = 0
+    max_iter: int = 200
+
+
 def _solve(
-    raster: LieRaster,
+    problem: StrategyProblem,
     profile: PlayerProfile,
-    baseline: BaselineBag,
-    conditions: CourseConditions,
-    actions: ActionSet,
-    start: State,
     model: ShotOutcomeModel | None,
-    n_samples: int,
-    seed: int,
-    max_iter: int,
+    cfg: SolveSettings,
 ) -> tuple[float, ShotAction]:
     mdp = HoleMDP(
-        raster, profile, baseline, conditions, actions, n_samples, seed, model=model
+        problem.raster,
+        profile,
+        problem.baseline,
+        problem.conditions,
+        problem.actions,
+        cfg.n_samples,
+        cfg.seed,
+        model=model,
     )
-    value = mdp.solve(max_iter=max_iter).value
-    return mdp.expected_strokes(start, value), mdp.optimal_action(start, value)
+    value = mdp.solve(max_iter=cfg.max_iter).value
+    return (
+        mdp.expected_strokes(problem.start, value),
+        mdp.optimal_action(problem.start, value),
+    )
 
 
 def compare_strategies(
-    raster: LieRaster,
+    problem: StrategyProblem,
     profile: PlayerProfile,
-    baseline: BaselineBag,
-    conditions: CourseConditions,
-    actions: ActionSet,
-    start: State,
     *,
     model: ShotOutcomeModel | None = None,
-    n_samples: int = 64,
-    seed: int = 0,
-    max_iter: int = 200,
+    settings: SolveSettings = SolveSettings(),  # noqa: B008 - frozen, immutable
 ) -> StrategyReport:
     """Solve the hole for the tour baseline and for ``profile`` (same seed)."""
     tour = PlayerProfile(name="tour", baseline=profile.baseline)
-    args = (raster, baseline, conditions, actions, start)
-    t, ta = _solve(args[0], tour, *args[1:], None, n_samples, seed, max_iter)
-    p, pa = _solve(args[0], profile, *args[1:], model, n_samples, seed, max_iter)
+    t, ta = _solve(problem, tour, None, settings)
+    p, pa = _solve(problem, profile, model, settings)
     return StrategyReport(t, p, ta, pa)

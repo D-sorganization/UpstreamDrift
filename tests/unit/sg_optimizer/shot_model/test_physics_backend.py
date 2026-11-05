@@ -32,7 +32,11 @@ from src.shared.python.sg_optimizer.shot_model.table_model import (
     TableShotModel,
     register_physics_backend,
 )
-from src.shared.python.sg_optimizer.strategy import compare_strategies
+from src.shared.python.sg_optimizer.strategy import (
+    SolveSettings,
+    StrategyProblem,
+    compare_strategies,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -124,16 +128,15 @@ def _hole() -> LieRaster:
 
 
 def _compare(profile, **kw):
-    return compare_strategies(
+    problem = StrategyProblem(
         _hole(),
-        profile,
         load_baseline(YAML),
         CourseConditions.benign(),
         ActionSet(clubs=("pw", "sw"), aim_grid_deg=np.array([-10.0, 0.0, 10.0])),
         State(x=-90.0, y=0.0, lie=_FW),
-        n_samples=24,
-        max_iter=40,
-        **kw,
+    )
+    return compare_strategies(
+        problem, profile, settings=SolveSettings(n_samples=24, max_iter=40), **kw
     )
 
 
