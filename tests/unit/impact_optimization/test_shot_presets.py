@@ -14,8 +14,8 @@ from src.shared.python.impact_optimization.shot_presets import (
     START_LINE_FACE_WEIGHT,
     ShotPreset,
     all_presets,
-    shape_label,
     preset,
+    shape_label,
 )
 
 pytestmark = pytest.mark.unit
@@ -157,3 +157,8 @@ def test_shape_label_classifies_by_face_to_path(face, path, word) -> None:
 def test_high_and_low_labels_name_their_attack_angle() -> None:
     assert preset("high").label == "high (aoa +3.0 deg)"
     assert preset("low").label == "low (aoa -3.0 deg)"
+
+
+def test_label_follows_shape_label_away_from_the_default_curve() -> None:
+    assert preset("draw", 6.0).label == "strong draw (face-to-path -6.0 deg)"
+    assert preset("fade", 0.2).label == "straight (face-to-path +0.2 deg)"

@@ -71,11 +71,15 @@ class ShotPreset:
 
     @property
     def label(self) -> str:
-        """Preset name with its face-to-path value; high / low keep their own name."""
+        """Shape word and face-to-path value; high / low keep their attack angle.
+
+        Straight / draw / fade defer to :func:`shape_label`, so a preset built
+        with a non-default curve is named the same as its target would be.
+        """
         t = self.target
         if self.name in ("high", "low"):
             return f"{self.name} (aoa {t.aoa_deg:+.1f} deg)"
-        return f"{self.name} (face-to-path {t.face_deg - t.path_deg:+.1f} deg)"
+        return shape_label(t.face_deg, t.path_deg)
 
 
 def _curving(name: str, curve_deg: float) -> ShotPreset:
