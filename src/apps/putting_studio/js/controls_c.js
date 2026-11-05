@@ -110,7 +110,7 @@ document.getElementById('pertImpulseSlider').addEventListener('input', (e) => {
 });
 document.getElementById('toeOffsetSlider').addEventListener('input', (e) => {
   state.toeOffsetMm = parseFloat(e.target.value);
-  document.getElementById('toeOffsetValLbl').textContent = `+${state.toeOffsetMm.toFixed(1)} mm`;
+  refreshUnitLabels();
   rebuildGreenDispersionBatch();
   syncUI();
 });
@@ -122,7 +122,7 @@ document.getElementById('pertZeroBtn').addEventListener('click', () => {
   document.getElementById('toeOffsetSlider').value = 0.0;
   document.getElementById('noiseSlider').value = 0.0;
   document.getElementById('pertImpulseValLbl').textContent = '0.00 N·m';
-  document.getElementById('toeOffsetValLbl').textContent = '+0.0 mm';
+  refreshUnitLabels();
   document.getElementById('noiseValLbl').textContent = '0.00x (Unperturbed Exact Match)';
   rebuildGreenDispersionBatch();
   syncUI();
@@ -139,7 +139,7 @@ document.getElementById('pertToeBtn').addEventListener('click', () => {
   state.toeOffsetMm = 10.0;
   state.t = 0.817;
   document.getElementById('toeOffsetSlider').value = 10.0;
-  document.getElementById('toeOffsetValLbl').textContent = '+10.0 mm';
+  refreshUnitLabels();
   rebuildGreenDispersionBatch();
   syncUI();
 });

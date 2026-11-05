@@ -6,7 +6,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 
 | Feature | Cluster | Core/API | PyQt6 | React | Tauri | Studio |
 | --- | --- | --- | --- | --- | --- | --- |
-| Selectable Units | (a) | missing (#14457) | partial (#14457) | missing (#14458) | missing (#14458) | missing (#14457) |
+| Selectable Units | (a) | missing (#14646) | present | missing (#14458) | missing (#14458) | present |
 | Variance and Noise Channels | (b) | present | present | present | present | present |
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | present | present | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | partial (#14461) |
@@ -25,10 +25,10 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (frontendDist ../dist); no putting code in the shell.
 
 **Selectable Units**
-- Core/API: missing (#14457). `src/shared/python/putting_dynamics/utils.py`, `src/shared/python/ui/units.py`. SI internally, feet in analytics; conversion helpers only, no units parameter on any route.
-- PyQt6: partial (#14457). `src/tools/putting_green_gui/gui.py`. Reads get_unit_preference(); set_unit_system exists but the window has no selector.
+- Core/API: missing (#14646). `src/shared/python/putting_dynamics/utils.py`, `src/shared/python/ui/units.py`. SI internally, feet in analytics; conversion helpers only, no units parameter on any route.
+- PyQt6: present. `src/tools/putting_green_gui/gui.py`. Units combo (Metric or Imperial); every panel redraws its inputs and charts through ui/units.py.
 - React: missing (#14458). `ui/src/pages/PuttingGreen.tsx`. Speed always m/s, distance yards, toe/hosel mm; no units store or selector.
-- Studio: missing (#14457). `src/apps/putting_studio/index.html`. Labels hard-code ft, m/s and mm; no toggle.
+- Studio: present. `src/apps/putting_studio/index.html`, `src/apps/putting_studio/js/core_units.js`. Units selector; distance, speed and strike labels use the ui/units.py table generated into core_units.js.
 
 **Variance and Noise Channels**
 - Core/API: present. `src/shared/python/putting_analytics/skill.py`, `src/shared/python/putting_analytics/service_variance.py`, `src/shared/python/putting_analytics/service_dispersion.py`. All 7 channels (face, path, speed, strike, read grade/aspect/stimp) in /variance-study, /dispersion, /make-spread and /simulated-curve; strike via strike_toe_sd_mm (#14461). /optimize keeps its paired line-and-speed batch for the aim search.

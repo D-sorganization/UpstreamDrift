@@ -7,11 +7,11 @@
       "title": "Selectable Units",
       "cluster": "a",
       "cells": {
-        "core_api": "missing #14457 | src/shared/python/putting_dynamics/utils.py, src/shared/python/ui/units.py | SI internally, feet in analytics; conversion helpers only, no units parameter on any route.",
-        "pyqt6": "partial #14457 | src/tools/putting_green_gui/gui.py | Reads get_unit_preference(); set_unit_system exists but the window has no selector.",
+        "core_api": "missing #14646 | src/shared/python/putting_dynamics/utils.py, src/shared/python/ui/units.py | SI internally, feet in analytics; conversion helpers only, no units parameter on any route.",
+        "pyqt6": "present | src/tools/putting_green_gui/gui.py | Units combo (Metric or Imperial); every panel redraws its inputs and charts through ui/units.py.",
         "react": "missing #14458 | ui/src/pages/PuttingGreen.tsx | Speed always m/s, distance yards, toe/hosel mm; no units store or selector.",
         "tauri": "missing #14458 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "missing #14457 | src/apps/putting_studio/index.html | Labels hard-code ft, m/s and mm; no toggle."
+        "studio": "present | src/apps/putting_studio/index.html, src/apps/putting_studio/js/core_units.js | Units selector; distance, speed and strike labels use the ui/units.py table generated into core_units.js."
       }
     },
     "variance_channels": {
