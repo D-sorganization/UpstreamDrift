@@ -375,36 +375,35 @@ function drawSGCaptureChart() {
   ctx.strokeRect(padL, padT, subW, subH);
   ctx.fillStyle = '#94a3b8';
   ctx.font = `600 ${9.5 * dpr}px "JetBrains Mono", monospace`;
-  ctx.fillText('E_player vs Capture Speed v_entry (m/s)', padL + 4 * dpr, padT - 5 * dpr);
+  ctx.fillText('Core E vs v_entry (m/s)', padL + 4 * dpr, padT - 5 * dpr);
 
   const vMin = 0.20, vMax = 1.35;
-  const eMin = 1.15, eMax = 2.45;
+  const eMin = 1.0, eMax = 2.45;
   const mapVX = (v) => padL + ((v - vMin) / (vMax - vMin)) * subW;
   const mapEY = (e) => padT + subH * (1.0 - (e - eMin) / (eMax - eMin));
 
-  // Stabilized Curve (Cyan, minimum at v_entry* = 0.65 m/s)
+  // The core's expected strokes per pace at the nearest swept distance
+  // (js/core_sg.js; #14650). A pace of p ft past is the entry speed that rolls
+  // p ft on the core's Stimp: v = sqrt(2 mu g p).
+  const sweep = coreSweepRow(coreSgCurve(state.crossSlopePct || 0), state.puttDistFt || 10.0);
+  const muG = 9.80665 * PuttingPhysics.stimpToRollingMu(window.CORE_SG.meta.stimp_ft);
+  const paceV = (p) => Math.sqrt(2.0 * muG * p * 0.3048);
   ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 2.2 * dpr;
   ctx.beginPath();
-  for (let i = 0; i <= 40; i++) {
-    const v = vMin + (i / 40) * (vMax - vMin);
-    const eStab = 1.24 + 1.15 * Math.pow(v - 0.65, 2) + (v < 0.45 ? 0.35 * Math.pow(0.45 - v, 1.5) : 0.0);
-    const x = mapVX(v), y = mapEY(eStab);
+  sweep.paces_ft.forEach((p, i) => {
+    const x = mapVX(paceV(p)), y = mapEY(Math.min(eMax, sweep.expected[i]));
     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-  }
+  });
   ctx.stroke();
-
-  // Unstabilized Poor Putter Curve (Orange/Red, minimum at v_entry* = 0.38 m/s due to 3-putt comebacker penalty!)
-  ctx.strokeStyle = '#f97316'; ctx.lineWidth = 2.0 * dpr;
-  ctx.setLineDash([5 * dpr, 3 * dpr]);
-  ctx.beginPath();
-  for (let i = 0; i <= 40; i++) {
-    const v = vMin + (i / 40) * (vMax - vMin);
-    const ePoor = 1.66 + 1.55 * Math.pow(Math.max(0, v - 0.38), 1.65) + 1.80 * Math.pow(Math.max(0, 0.38 - v), 2);
-    const x = mapVX(v), y = mapEY(Math.min(eMax, ePoor));
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  const best = sweep.expected.indexOf(Math.min(...sweep.expected));
+  ctx.fillStyle = '#22d3ee';
+  ctx.beginPath(); ctx.arc(mapVX(paceV(sweep.paces_ft[best])), mapEY(sweep.expected[best]), 3.2 * dpr, 0, Math.PI * 2); ctx.fill();
+  const badge = document.getElementById('optCaptureSpeedBadge');
+  if (badge) {
+    const v = coreUnitText('speed', paceV(sweep.paces_ft[best]), 2, state.unitSystem);
+    const ft = (d) => coreUnitText('distance', d, 1, state.unitSystem);
+    badge.textContent = `Core best: ${v} (${ft(sweep.paces_ft[best])} past from ${ft(sweep.distance_ft)})`;
   }
-  ctx.stroke();
-  ctx.setLineDash([]);
 
   // Vertical Marker for Selected Capture Speed
   const curV = state.captureSpeedMs || 0.58;
