@@ -139,19 +139,19 @@ RECEIPTS_PATH = _REPO / "docs/development/lifting/evidence/opensim_ik_id/receipt
 _RESIDUAL_GATE_XFAILS = {
     "deadlift": (
         "forces_within=False (peak pelvis_ty 288.23 N > 110.92 N), "
-        "moments_within=False (peak pelvis_tilt 147.88 Nm > 18.28 Nm) (#13041)"
+        "moments_within=False (peak pelvis_tilt 147.88 Nm > 18.28 Nm) (#13057)"
     ),
     "bench_press": (
         "forces_within=False (peak pelvis_ty 511.58 N > 221.85 N), "
-        "moments_within=False (peak pelvis_tilt 318.32 Nm > 23.54 Nm) (#13041)"
+        "moments_within=False (peak pelvis_tilt 318.32 Nm > 23.54 Nm) (#13057)"
     ),
     "snatch": (
         "forces_within=False (peak pelvis_tx 463.57 N > 155.12 N), "
-        "moments_within=False (peak pelvis_tilt 202.60 Nm > 27.10 Nm) (#13041)"
+        "moments_within=False (peak pelvis_tilt 202.60 Nm > 27.10 Nm) (#13057)"
     ),
     "clean_and_jerk": (
         "forces_within=False (peak pelvis_tx 458.52 N > 223.10 N), "
-        "moments_within=False (peak pelvis_tilt 259.03 Nm > 38.77 Nm) (#13041)"
+        "moments_within=False (peak pelvis_tilt 259.03 Nm > 38.77 Nm) (#13057)"
     ),
 }
 
