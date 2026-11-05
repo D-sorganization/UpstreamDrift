@@ -27,7 +27,7 @@ from src.engines.physics_engines.mujoco.python.full_body_mjcf import (  # noqa: 
     export_full_body_mjcf,
 )
 from src.shared.python.contracts import require  # noqa: E402
-from src.shared.python.motion_matching.address_pose import address_qpos  # noqa: E402
+from src.engines.physics_engines.mujoco.python.address_pose import address_qpos  # noqa: E402
 from src.shared.python.motion_matching.execution.grip_rotation import (  # noqa: E402
     HAND_BODY_SUFFIX,
 )

@@ -10,10 +10,10 @@ import numpy as np
 import pytest
 
 from src.shared.python.contracts import ContractViolationError
-from src.shared.python.motion_matching.address_pose import address_qpos
+from src.engines.physics_engines.mujoco.python.address_pose import address_qpos
 
 pytestmark = pytest.mark.unit
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 
 XML = """
 <mujoco><worldbody><body name="b"><joint name="TranslationInputX" type="slide" axis="1 0 0"/><geom size="0.05"/>
