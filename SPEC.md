@@ -2754,6 +2754,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14685 | SHOW-C3c: a rung demoted for a search-only ROM/velocity breach is no longer worded as torque-binding |
+| 2026-11-05 | #14684 | NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons |
 | 2026-11-05 | #14678 | Putting studio: the skid ends at the core roll-start speed from core_impact.js and the speed solve inverts the same table, replacing the uncited 0.96 derate; flat roll-out matches the core within 3% |
 | 2026-11-05 | #14683 | Putting studio: Auto-Solve runs solveAimCore, a port of the core solve_aim (pace bisection and heading secant) golden-pinned to the core read on the core greens, and the batch strikes at the solved head speed while the read is current |
 | 2026-11-05 | #14674 | Fix shaft_state_series: shaft axis from chain joint anchors, not the Clubhead face-frame site y; C4 toe-down is -32.4 mm and axial foreshortening ~-7 mm |

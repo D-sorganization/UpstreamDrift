@@ -742,6 +742,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#12553 · NSX-04 Slice 1: Verified Subtalar Inversion/Eversion and MTP Flexion Torque Capacities (da Fonseca 2025, Saeki 2021); Hip and MTP-Extension Slots Keep ASSUMED With Stated Reasons
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12553
+- **Branch:** merged via #14684
+- **PR:** #14684
+- **Paths:** see #14684
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`62f6be5f`; collated from changes/12553-torque-capacity-lower-limb.md)
+- **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
+- **Next step:** Shipped in PR #14684.
+
 ### DL-#14649 · Putting Studio: Auto-Solve Runs solveAimCore, a Port of the Core Solve_Aim (Pace Bisection and Heading Secant) Golden-Pinned to the Core Read on the Core Greens, and the Batch Strikes at the Solved Head Speed While the Read Is Current
 
 - **State:** shipped
@@ -1216,10 +1229,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14559
 - **Branch:** merged via #14589
-- **PR:** #14589, #14596, #14625, #14638, #14653, #14655, #14680
+- **PR:** #14589, #14596, #14625, #14638, #14653, #14655, #14680, #14685
 - **Paths:** see #14589
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`c8c6b51e`; collated from changes/14559-show-c3c-slice-3b-per-speed-full-fidelit.md)
+- **Last verified:** 2026-11-05 (`e51ba5a6`; collated from changes/14559-show-c3c-a-rung-demoted-for-a-search-onl.md)
 - **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
 - **Next step:** Shipped in PR #14589.
 
