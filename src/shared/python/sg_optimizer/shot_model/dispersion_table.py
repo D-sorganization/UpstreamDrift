@@ -158,6 +158,19 @@ class DispersionTable:
         return cls(cells, prov, dict(raw.get("runtime", {})))
 
 
+@dataclass(frozen=True)
+class TableGrid:
+    """The cell grid of a table: skills (``None`` = all), lies, wind and slope bins."""
+
+    skills: tuple[str, ...] | None = None
+    lies: tuple[str, ...] = ("fairway",)
+    winds: tuple[str, ...] = DEFAULT_WINDS
+    slopes: tuple[str, ...] = SLOPES
+
+
+SlopeModifier = Callable[[str], Callable[[NDArray[np.float64]], NDArray[np.float64]]]
+
+
 def build_table(
     family: SkillFamily,
     simulate: LandingSimulator,
@@ -165,29 +178,45 @@ def build_table(
     skills: tuple[str, ...] | None = None,
     lies: tuple[str, ...] = ("fairway",),
     winds: tuple[str, ...] = DEFAULT_WINDS,
-    slopes: tuple[str, ...] = SLOPES,
     n: int = DEFAULT_N,
     seed: int = 0,
     lie_modifier: LieModifier | None = None,
-    slope_modifier: Callable[
-        [str], Callable[[NDArray[np.float64]], NDArray[np.float64]]
-    ]
-    | None = None,
 ) -> DispersionTable:
-    """Simulate every cell with shared (CRN) draws; fail closed on bad inputs."""
-    names = skills if skills is not None else tuple(family.skills)
+    """Flat-slope table over ``skills x lies x winds`` (see :func:`build_grid_table`)."""
+    grid = TableGrid(skills, lies, winds)
+    return build_grid_table(
+        family, simulate, grid, n=n, seed=seed, lie_modifier=lie_modifier
+    )
+
+
+def build_grid_table(
+    family: SkillFamily,
+    simulate: LandingSimulator,
+    grid: TableGrid,
+    *,
+    n: int = DEFAULT_N,
+    seed: int = 0,
+    lie_modifier: LieModifier | None = None,
+    slope_modifier: SlopeModifier | None = None,
+) -> DispersionTable:
+    """Simulate every grid cell with shared (CRN) draws; fail closed on bad inputs.
+
+    Non-flat slope bins need ``slope_modifier`` (``slope_wind_bins.make_slope_modifier``).
+    """
+    names = grid.skills if grid.skills is not None else tuple(family.skills)
     require(set(names) <= set(family.skills), f"skills not in {family.name!r}")
+    winds = grid.winds
     require(set(winds) <= set(WIND_BINS), f"unknown wind bins; have {tuple(WIND_BINS)}")
     require(
-        slopes == SLOPES or slope_modifier is not None,
+        grid.slopes == SLOPES or slope_modifier is not None,
         "slope bins need a slope_modifier",
     )
     t0, z, cells = time.perf_counter(), standard_normals(seed, n), []
     for skill in names:
         base = _impacts(family.skills[skill].distribution, z)
-        for lie in lies:
+        for lie in grid.lies:
             imp = lie_modifier(base, lie) if lie_modifier is not None else base
-            for slope in slopes:
+            for slope in grid.slopes:
                 sloped = imp if slope_modifier is None else slope_modifier(slope)(imp)
                 for wind in winds:
                     land = np.asarray(
