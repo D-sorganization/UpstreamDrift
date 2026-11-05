@@ -742,6 +742,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14677 · Sg_Optimizer: Common Random Numbers for an Injected ShotOutcomeModel so the Scalar Backup Converges
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14677
+- **Branch:** merged via #14688
+- **PR:** #14688
+- **Paths:** see #14688
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`fe666fa5`; collated from changes/14677-sg-optimizer-common-random-numbers-for-a.md)
+- **Summary:** sg_optimizer: common random numbers for an injected ShotOutcomeModel so the scalar backup converges
+- **Next step:** Shipped in PR #14688.
+
+### DL-#14650 · Putting Studio: Batch Strokes Gained, the E(d) Chart and the Optimal Pace Read the Core's Solved Player E(d) From Core_Sg.Js (Service_Sg.Sg_Study, Tour-Average Player, Side-Slope Grid), Replacing the Hand-Tuned Comeback Fit
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14650
+- **Branch:** merged via #14689
+- **PR:** #14689
+- **Paths:** see #14689
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`437d6cab`; collated from changes/14650-studio-sg.md)
+- **Summary:** Putting studio: batch strokes gained, the E(d) chart and the optimal pace read the core's solved player E(d) from core_sg.js (service_sg.sg_study, tour-average player, side-slope grid), replacing the hand-tuned comeback fit
+- **Next step:** Shipped in PR #14689.
+
 ### DL-#12553 · NSX-04 Slice 1: Verified Subtalar Inversion/Eversion and MTP Flexion Torque Capacities (da Fonseca 2025, Saeki 2021); Hip and MTP-Extension Slots Keep ASSUMED With Stated Reasons
 
 - **State:** shipped
@@ -1034,10 +1060,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14562
 - **Branch:** merged via #14618
-- **PR:** #14618
+- **PR:** #14618, #14686
 - **Paths:** see #14618
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`ff8672d1`; collated from changes/14562-show-c6-shot-shape-presets-ball-flight-c.md)
+- **Last verified:** 2026-11-05 (`46a51da5`; collated from changes/14562-name-shot-presets-by-face-to-path-d30-is.md)
 - **Summary:** SHOW-C6 shot-shape presets, ball-flight curvature sign tests and swing-variant artefact with run identity
 - **Next step:** Shipped in PR #14618.
 

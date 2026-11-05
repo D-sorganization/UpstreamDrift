@@ -2754,6 +2754,9 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14688 | sg_optimizer: common random numbers for an injected ShotOutcomeModel so the scalar backup converges |
+| 2026-11-05 | #14689 | Putting studio: batch strokes gained, the E(d) chart and the optimal pace read the core's solved player E(d) from core_sg.js (service_sg.sg_study, tour-average player, side-slope grid), replacing the hand-tuned comeback fit |
+| 2026-11-05 | #14686 | Name shot presets by face-to-path (D30); issue example is a strong draw |
 | 2026-11-05 | #14685 | SHOW-C3c: a rung demoted for a search-only ROM/velocity breach is no longer worded as torque-binding |
 | 2026-11-05 | #14684 | NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons |
 | 2026-11-05 | #14678 | Putting studio: the skid ends at the core roll-start speed from core_impact.js and the speed solve inverts the same table, replacing the uncited 0.96 derate; flat roll-out matches the core within 3% |
