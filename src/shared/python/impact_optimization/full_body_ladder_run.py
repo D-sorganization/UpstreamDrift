@@ -33,6 +33,7 @@ from src.shared.python.contracts import require
 from src.shared.python.impact_optimization.impact_sample import (
     TRANSIENT_NOTE,
     impact_sample,
+    recorded_impact_frame,
 )
 from src.shared.python.impact_optimization.speed_continuation import LadderSpec
 
@@ -134,12 +135,16 @@ def _report_text(
 
 
 def _impact_steps(
-    model: Any, ids: Sequence[int], site: int, bundle: Any
+    model: Any,
+    ids: Sequence[int],
+    site: int,
+    bundle: Any,
+    event_frame: int | None = None,
 ) -> tuple[int, dict[str, Any]]:  # pragma: no cover - part of the held real run
     """Window length so the last sample is the D44 impact sample, with its receipt.
 
-    The bundle records no ball position, so the rule falls back to the lowest
-    clubhead height in ``[WINDOW_START, SEARCH_END)``.
+    The bundle records no ball position, so the rule uses ``event_frame``, the
+    bundle's recorded impact event (D52); without one it refuses.
     """
     import mujoco
     import numpy as np
@@ -151,11 +156,12 @@ def _impact_steps(
             data.qpos[model.jnt_qposadr[j]] = bundle.reference_q[t][k]
         mujoco.mj_kinematics(model, data)
         path.append(np.array(data.site_xpos[site], dtype=float))
-    idx = impact_sample(np.asarray(path))
+    event_index = None if event_frame is None else event_frame - WINDOW_START
+    idx = impact_sample(np.asarray(path), event_index=event_index)
     require(idx >= 1, "the impact sample must follow the window start", idx)
     receipt = {
         "bundle_sample": WINDOW_START + idx,
-        "rule": "minimum clubhead height in the search range (no ball position)",
+        "rule": "recorded impact event of the bundle (no ball position), D52",
         "search_range": [WINDOW_START, SEARCH_END],
         "transient": TRANSIENT_NOTE,
     }
@@ -200,6 +206,7 @@ def _run(
     bundle_path: Path = BUNDLE,
     spec_path: Path | None = None,
     face_free: bool = False,
+    impact_step: int | None = None,
 ) -> int:  # pragma: no cover - the real run is held (D24)
     import numpy as np
 
@@ -237,7 +244,8 @@ def _run(
     bundle = InputBundle.load(bundle_path)
     model, order, ids, site, impact_fn = _scene(spec_bytes, spec)
     a = WINDOW_START
-    steps, sample_receipt = _impact_steps(model, ids, site, bundle)
+    event = impact_step or recorded_impact_frame(bundle_path.parent / "receipt.json")
+    steps, sample_receipt = _impact_steps(model, ids, site, bundle, event)
     logger.info("impact sample: %s", sample_receipt["bundle_sample"])
     plant = VectorPlant("mujoco", spec_bytes)
 
@@ -352,6 +360,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="leave the baseline face unchecked (it is an optimiser output); default OFF",
     )
+    parser.add_argument(
+        "--impact-step",
+        type=int,
+        default=None,
+        help="bundle step of the recorded impact event when no receipt.json sits "
+        "beside the bundle (the v1 face-centre event; never a guess)",
+    )
     args = parser.parse_args(argv)
     require_outside_repo(args.out)
     return _run(
@@ -361,6 +376,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.bundle,
         args.spec,
         args.face_free,
+        args.impact_step,
     )
 
 
