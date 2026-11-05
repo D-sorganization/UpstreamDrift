@@ -566,3 +566,105 @@ def test_lbfgs_clean_run_does_not_flag_non_finite() -> None:
 
     assert result.stop_reason == "converged"
     assert not result.non_finite_encountered
+
+
+# ---------------------------------------------------------------------------
+# lbfgs_minimise diagnostics (#13779): timing split and projected-gradient norm
+# ---------------------------------------------------------------------------
+
+
+def _rosenbrock_vg(x: np.ndarray) -> tuple[tuple[float, float], np.ndarray]:
+    cost = _rosenbrock(x)
+    grad = np.zeros_like(x)
+    grad[:-1] += -400.0 * x[:-1] * (x[1:] - x[:-1] ** 2) - 2.0 * (1.0 - x[:-1])
+    grad[1:] += 200.0 * (x[1:] - x[:-1] ** 2)
+    return (cost, cost), grad
+
+
+def _stepping_clock(steps: tuple[float, ...]) -> Any:
+    """A fake clock whose successive readings advance by ``steps`` cyclically."""
+    state = {"now": 0.0, "i": 0}
+
+    def clock() -> float:
+        state["now"] += steps[state["i"] % len(steps)]
+        state["i"] += 1
+        return state["now"]
+
+    return clock
+
+
+def test_lbfgs_records_objective_and_gradient_time_per_evaluation() -> None:
+    # Per evaluation the clock is read three times: start, cost, gradient.
+    clock = _stepping_clock((1.0, 0.25, 0.75))
+    result = lbfgs_minimise(
+        _rosenbrock_vg, np.full(3, -1.2), LbfgsSettings(max_iterations=5), clock=clock
+    )
+
+    rows = result.evaluation_diagnostics
+    assert [r["iteration"] for r in rows] == [h["iteration"] for h in result.history]
+    assert all(r["objective_s"] == 0.25 and r["gradient_s"] == 0.75 for r in rows)
+
+
+def test_lbfgs_records_projected_gradient_norm() -> None:
+    capped = lbfgs_minimise(
+        _rosenbrock_vg, np.full(3, -1.2), LbfgsSettings(max_iterations=5)
+    )
+    x0_grad = _rosenbrock_vg(np.full(3, -1.2))[1]
+    first = capped.evaluation_diagnostics[0]
+    assert first["projected_gradient_inf_norm"] == float(np.max(np.abs(x0_grad)))
+    norms = [r["projected_gradient_inf_norm"] for r in capped.evaluation_diagnostics]
+    # SciPy's final point is an evaluated one; a capped stop keeps a large norm.
+    assert capped.stop_reason == "max_iterations"
+    assert capped.projected_gradient_norm in norms
+    assert capped.projected_gradient_norm > 1e-5
+
+    converged = lbfgs_minimise(
+        _rosenbrock_vg, np.full(3, -1.2), LbfgsSettings(max_iterations=200)
+    )
+    assert converged.stop_reason == "converged"
+    assert converged.projected_gradient_norm is not None
+    assert np.isfinite(converged.projected_gradient_norm)
+
+
+def test_lbfgs_diagnostics_leave_numerics_bit_for_bit() -> None:
+    """Pinned from main before the instrumentation (SciPy 1.18.1)."""
+    slow = _stepping_clock((5.0, 7.0, 11.0))
+    one = lbfgs_minimise(
+        _rosenbrock_vg, np.full(3, -1.2), LbfgsSettings(max_iterations=5)
+    )
+    two = lbfgs_minimise(
+        _rosenbrock_vg,
+        np.full(3, -1.2),
+        LbfgsSettings(max_iterations=5),
+        clock=slow,
+    )
+    assert one.history == two.history
+    assert np.array_equal(one.best_x, two.best_x)
+    assert one.stop_reason == "max_iterations"
+    assert (len(one.history), one.best_iteration) == (6, 5)
+    assert one.best_objective.hex() == "0x1.3dcfce2dad586p+1"
+    assert [v.hex() for v in one.best_x.tolist()] == [
+        "-0x1.1e7bb9dda336dp-2",
+        "0x1.7128712c18b9ap-4",
+        "0x1.46b4b5083ee80p-9",
+    ]
+
+
+def test_adam_result_has_no_lbfgs_diagnostics() -> None:
+    result = adam_minimise(
+        lambda x: ((float(x @ x), float(x @ x)), 2.0 * x),
+        np.array([1.0]),
+        AdamSettings(learning_rate=0.1, max_iterations=2),
+    )
+    assert result.evaluation_diagnostics == ()
+    assert result.projected_gradient_norm is None
+
+
+def test_lbfgs_clock_must_be_callable() -> None:
+    with pytest.raises(PreconditionError):
+        lbfgs_minimise(
+            _rosenbrock_vg,
+            np.full(2, 0.0),
+            LbfgsSettings(max_iterations=1),
+            clock=1.0,  # type: ignore[arg-type]
+        )
