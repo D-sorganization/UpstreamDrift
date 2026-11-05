@@ -1,8 +1,7 @@
 """C2 (#14558) acceptance on the committed best-fit driver rollout.
 
-The reference is independent of ``evaluate_rollout``: exact directional-derivative
-velocity and hand-written GCV-15 definitions, on the full-body tree (timing
-covers forward kinematics of the whole tree).
+Reference: exact directional-derivative velocity and hand-written GCV-15
+definitions, on the full-body tree, at the ball-passage detector's impact.
 """
 
 from __future__ import annotations
@@ -113,7 +112,9 @@ def test_matches_independent_reference_on_best_fit_driver(fit):
     model, spec, site, body, t, q, v = fit
     face = club_face_spec_from_spec(spec)
     pos, normal_all, vel = _reference(model, site, t, q, v, spec)
-    idx = int(np.argmax(np.linalg.norm(vel, axis=1)))
+    # the repo's ball-passage detector for this run (club_face.ball_passage)
+    detector = json.loads((SEEDS / "replay_post_impact_capture_a.json").read_text())
+    idx = int(np.searchsorted(t, detector["impact_time_s"]))
     normal = normal_all[idx]
     # toe/high from the same face spec rotated to the world by the body pose
     data = mujoco.MjData(model)
@@ -122,7 +123,7 @@ def test_matches_independent_reference_on_best_fit_driver(fit):
     bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, body)
     rot = data.xmat[bid].reshape(3, 3)
     toe, high = rot @ face.axes()[1], rot @ np.cross(face.axes()[1], face.axes()[0])
-    # strike point: 8 mm toward the toe and 5 mm up the face from the face centre
+    # synthetic round trip (not a fit measurement): 8 mm toe, 5 mm crown
     contact = pos[idx] + 0.008 * toe + 0.005 * high
 
     start = time.perf_counter()
@@ -140,10 +141,11 @@ def test_matches_independent_reference_on_best_fit_driver(fit):
     elapsed = time.perf_counter() - start
 
     want = _hand_conditions(vel[idx], normal)
-    print(  # noqa: T201
-        f"BEST-FIT idx={idx} t={t[idx]:.4f}s {got} | ref {want} | "
-        f"{elapsed * 1e3:.0f} ms/{len(t)} samples"
-    )
+    # frame check without the face spec: level motion down -Y at driver speed
+    v_h = np.hypot(vel[idx][0], vel[idx][1])
+    assert math.degrees(math.atan2(abs(vel[idx][0]), -vel[idx][1])) < 30.0
+    assert vel[idx][1] < 0.0 and abs(vel[idx][2]) < 0.2 * v_h
+    assert 90.0 < got.speed_mph < 130.0
     assert got.speed_mph == pytest.approx(want["speed_mph"], rel=1e-4)
     assert got.aoa_deg == pytest.approx(want["aoa_deg"], abs=0.01)
     assert got.path_deg == pytest.approx(want["path_deg"], abs=0.01)
