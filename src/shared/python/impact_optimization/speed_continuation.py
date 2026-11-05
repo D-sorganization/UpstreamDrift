@@ -37,6 +37,7 @@ from src.shared.python.impact_optimization.trajectory_optimiser import (
     solve_impact_trajectory,
 )
 from src.shared.python.impact_optimization.trust_region import TrustRegion
+from src.shared.python.loop_nullspace.capacity import CapacityVector
 
 DEFAULT_SPEED_TOL_MPH: float = 1.0
 
@@ -205,9 +206,9 @@ def binding_report(
                 f"achieved {p.achieved_mph:.1f} mph, face-to-path "
                 f"{sol.face_to_path_deg:+.2f} deg)"
             )
-            hit = _banded_side(band, name, tau[:, i])
-            if p.feasible and hit is not None:
-                line = head + "; at the limit but feasible; " + _source_text(*hit)
+            hits = _banded_sides(band, name, tau[:, i])
+            if p.feasible and hits:
+                line = head + "; at the limit but feasible; " + _sources_text(hits)
             elif p.feasible:
                 line = head + "; at the limit but feasible"
             elif name in envelope.assumed_torque_slots:
@@ -226,28 +227,62 @@ def binding_report(
             lines.append(line)
         for name in sorted({n for n, _ in band}):
             i = envelope.names.index(name)
-            hit = _banded_side(band, name, tau[:, i])
-            if name not in sol.binding_joints and hit is not None:
+            hits = _banded_sides(band, name, tau[:, i])
+            if name not in sol.binding_joints and hits:
+                peaks = ", ".join(f"{h[3]:.1f} N m ({h[0]})" for h in hits)
                 lines.append(
-                    f"{p.speed_target_mph:.0f} mph: {name} peaks at "
-                    f"{hit[3]:.1f} N m ({hit[0]}), within its limit; "
-                    + _source_text(*hit)
+                    f"{p.speed_target_mph:.0f} mph: {name} peaks at {peaks}, "
+                    f"within its limit; " + _sources_text(hits)
                 )
     return lines
 
 
-def _banded_side(
+def _banded_sides(
     band: dict[tuple[str, str], tuple[float, float]], name: str, tau: np.ndarray
-) -> tuple[str, float, float, float] | None:
-    """(direction, lower, upper, peak) of the first side above its lower value."""
+) -> list[tuple[str, float, float, float]]:
+    """(direction, lower, upper, peak) of every side above its lower value."""
+    hits = []
     for direction, peak in (
         ("positive", float(np.max(tau))),
         ("negative", float(-np.min(tau))),
     ):
         if (name, direction) in band and peak > band[(name, direction)][0]:
             low, high = band[(name, direction)]
-            return direction, low, high, peak
-    return None
+            hits.append((direction, low, high, peak))
+    return hits
+
+
+def _sources_text(hits: list[tuple[str, float, float, float]]) -> str:
+    return "; ".join(_source_text(*h) for h in hits)
+
+
+def source_band_from_capacity(
+    cap: CapacityVector, envelope: PhysiologicalEnvelope
+) -> dict[tuple[str, str], tuple[float, float]]:
+    """``binding_report`` bands from the registry's lower cited references (D34a).
+
+    Only the sides with a second, lower source get a band; a side whose lower
+    reference equals its capacity (single source) is skipped, so it keeps the
+    D29 / D32 wording.
+    """
+    lo_neg = cap.tau_lower_reference_negative_nm
+    lo_pos = cap.tau_lower_reference_positive_nm
+    if lo_neg is None or lo_pos is None:
+        require(False, "capacity has no lower references")
+        return {}
+    band: dict[tuple[str, str], tuple[float, float]] = {}
+    for name in envelope.names:
+        if name not in cap.actuated_names:
+            continue
+        k = cap.actuated_names.index(name)
+        i = envelope.names.index(name)
+        for direction, low, high in (
+            ("positive", lo_pos[k], envelope.tau_max_positive_nm[i]),
+            ("negative", lo_neg[k], envelope.tau_max_negative_nm[i]),
+        ):
+            if 0.0 < low < high:
+                band[(name, direction)] = (float(low), float(high))
+    return band
 
 
 def _source_text(direction: str, low: float, high: float, peak: float) -> str:
