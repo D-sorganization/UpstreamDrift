@@ -31,8 +31,9 @@ from src.shared.python.ui.units import (
     UnitSystem,
     distance_suffix,
     from_display_distance,
+    to_display_distance,
 )
-from src.tools.putting_green_gui._batch_panel import _Job
+from src.tools.putting_green_gui._batch_panel import _FALL_RIGHT_DEG, _Job
 
 _M_PER_FT = from_display_distance(1.0, UnitSystem.IMPERIAL, unit="ft")
 _COLUMNS = ("Scenario", "Make", "Δ Make (pts)", "Leave", "Δ Leave")
@@ -141,7 +142,12 @@ class ScenarioPanel(QGroupBox):
         self._scenarios = list(loaded["scenarios"])
         studio = loaded["studio_scenarios"]
         note = f" ({studio} studio rows are text only)" if studio else ""
-        self._status.setText(f"Imported {path.name}{note}.")
+        setup = loaded["setup"]
+        if setup["grade_pct"] and setup["aspect_deg"] != _FALL_RIGHT_DEG:
+            note += "; fall direction not kept: the desktop slope falls right"
+        self._status.setText(
+            f"Imported {path.name}: applied distance, Stimp and grade{note}."
+        )
         self.redraw()
 
     def redraw(self) -> None:
@@ -180,9 +186,8 @@ class ScenarioPanel(QGroupBox):
         if value_ft is None:
             return "-"
         system = self._units()
-        scale = _M_PER_FT if system == UnitSystem.METRIC else 1.0
-        unit = distance_suffix(system, unit="ft").strip()
-        return f"{value_ft * scale:{sign}.2f} {unit}"
+        value = to_display_distance(value_ft * _M_PER_FT, system, unit="ft")
+        return f"{value:{sign}.2f}{distance_suffix(system, unit='ft')}"
 
     def _next_name(self) -> str:
         return self._name_edit.text().strip() or f"Scenario {len(self._scenarios) + 1}"
