@@ -937,6 +937,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14568 · SHOW-B4: Physics Backend on Dispersion Tables, EB Shrinkage, Personalised vs Tour Strategy
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14568
+- **Branch:** merged via #14623
+- **PR:** #14623
+- **Paths:** see #14623
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`9b8b8625`; collated from changes/14568-show-b4-physics-backend-on-dispersion-ta.md)
+- **Summary:** SHOW-B4: physics backend on dispersion tables, EB shrinkage, personalised vs tour strategy
+- **Next step:** Shipped in PR #14623.
+
 ### DL-#14617 · Putting Simulator: The Counter-Torque Panel Bounds the Gust Input by the Core's GUST_RANGE_NM Instead of the Preload Range
 
 - **State:** shipped
@@ -1164,10 +1177,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14559
 - **Branch:** merged via #14589
-- **PR:** #14589, #14596
+- **PR:** #14589, #14596, #14625
 - **Paths:** see #14589
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`938df10a`; collated from changes/14559-show-c3b-trust-region-torque-optimiser-w.md)
+- **Last verified:** 2026-11-05 (`72f224fe`; collated from changes/14559-show-c3c-rom-and-velocity-binding-report.md)
 - **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
 - **Next step:** Shipped in PR #14589.
 
