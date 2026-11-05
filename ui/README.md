@@ -2,6 +2,29 @@
 
 The UpstreamDrift UI is a React 19 + TypeScript + Vite application with an optional Tauri desktop shell. It talks to the local-first Python API over REST and WebSockets, renders 3D scenes with `@react-three/fiber`, and keeps shared client state in Zustand stores.
 
+## Run Locally From a Clean Checkout
+
+Prerequisites: Node 22 or newer (CI uses 22 and 24), and the Python
+environment from the repository's `install.sh`, which also initializes the
+required `vendor/ud-tools` submodule (`git submodule update --init --recursive
+vendor/ud-tools`). From `ui/`, one command builds the UI and starts the API,
+which serves it:
+
+```bash
+cd ui
+npm run local              # then open http://localhost:8000
+npm run local -- --port 8001
+```
+
+`npm run local` runs `npm ci` (exact lockfile versions), then `npm run build`,
+checks that `dist/index.html` exists and that no tracked file changed, and
+then starts `python3 launch_upstream_drift.py --port <port>` from the repository
+root. To build without starting the API, run `npm run build:clean`; CI runs the
+same check (`frontend-tests`, Build Check).
+
+The web UI calls only the local API. It needs no external paid API or key, and
+`src/test/no-paid-apis.test.ts` fails if one is added (#14450).
+
 ## Local development
 
 Start the Python API from the repository root:

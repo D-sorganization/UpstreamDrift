@@ -1,0 +1,44 @@
+{
+  "typical": {
+    "head_mass_kg": 0.35,
+    "head_moi_kg_m2": 0.00045
+  },
+  "bounds": {
+    "head_mass_kg": [0.1, 1.0],
+    "head_moi_kg_m2": [1e-5, 0.01]
+  },
+  "presets": [
+    {
+      "key": "toe_hang",
+      "name": "Toe-Hang Blade",
+      "head_mass_kg": 0.345,
+      "moi_kg_m2": 0.00032,
+      "hosel_toe_m": -0.015,
+      "hosel_forward_m": 0.012
+    },
+    {
+      "key": "face_balanced",
+      "name": "Face-Balanced Mallet",
+      "head_mass_kg": 0.36,
+      "moi_kg_m2": 0.00052,
+      "hosel_toe_m": 0.0,
+      "hosel_forward_m": 0.026
+    },
+    {
+      "key": "zero_torque",
+      "name": "Zero-Torque (Lie-Angle Balanced)",
+      "head_mass_kg": 0.365,
+      "moi_kg_m2": 0.00049,
+      "hosel_toe_m": 0.0,
+      "hosel_forward_m": 0.0
+    },
+    {
+      "key": "counterbalanced",
+      "name": "Heavy Counterbalanced",
+      "head_mass_kg": 0.385,
+      "moi_kg_m2": 0.00058,
+      "hosel_toe_m": -0.002,
+      "hosel_forward_m": 0.018
+    }
+  ]
+}

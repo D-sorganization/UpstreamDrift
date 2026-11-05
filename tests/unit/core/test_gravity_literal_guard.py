@@ -29,6 +29,10 @@ ALLOWLIST: dict[str, str] = {
     "src/tools/shot_pattern_analysis/academic_plots.py": (
         "9.8 is the plot height in inches, not a gravity value."
     ),
+    "src/shared/python/putting_dynamics/counter_torque.py": (
+        "Ports the putting studio's closed-form couple model, which uses g = 9.81;"
+        " its studio parity test pins every column to 1e-12 (#14469)."
+    ),
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Scripts/Dataset Generator/golf_swing_dataset_20251030/trial_002_20251030_192719.csv": (
         "Recorded capture data; values are observations, not source constants."
     ),

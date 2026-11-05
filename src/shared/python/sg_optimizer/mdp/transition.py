@@ -21,6 +21,11 @@ from src.shared.python.contracts import require
 from src.shared.python.sg_optimizer.course.rasterize import LIE_CODES, LieRaster
 from src.shared.python.sg_optimizer.mdp.action import ShotAction
 from src.shared.python.sg_optimizer.mdp.state import State
+from src.shared.python.sg_optimizer.shot_model.outcome import ShotOutcomeModel
+from src.shared.python.sg_optimizer.shot_model.baseline_model import (
+    BaselineShotModel,
+    lie_modifiers,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from src.shared.python.sg_optimizer.course.conditions import CourseConditions
@@ -30,9 +35,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 _WATER = LIE_CODES["water"]
 _OB = LIE_CODES["ob"]
-_TREES = LIE_CODES["trees"]
-_ROUGH = LIE_CODES["rough"]
-_SAND = LIE_CODES["sand"]
 _HOLED = LIE_CODES["holed"]
 
 
@@ -48,47 +50,37 @@ def _condition_modifiers(
     start_lie: int, conditions: CourseConditions
 ) -> tuple[float, float, float]:
     """Return (distance_mult, sigma_long_mult, sigma_lat_mult) from starting lie."""
-    if start_lie == _ROUGH:
-        return (
-            conditions.rough.distance_multiplier(),
-            conditions.rough.dispersion_multiplier(),
-            conditions.rough.dispersion_multiplier(),
-        )
-    if start_lie == _TREES:
-        return (
-            conditions.trees.distance_multiplier(),
-            conditions.trees.dispersion_multiplier(),
-            conditions.trees.dispersion_multiplier(),
-        )
-    if start_lie == _SAND:
-        return (0.85, 1.30, 1.30)  # fixed sand penalty; tuneable later
-    return (1.0, 1.0, 1.0)
+    return lie_modifiers(start_lie, conditions)
 
 
 def sample_transitions(
     state: State,
     action: ShotAction,
     profile: PlayerProfile,
-    baseline: BaselineBag,
+    baseline: BaselineBag | ShotOutcomeModel,
     conditions: CourseConditions,
     raster: LieRaster,
     n_samples: int,
     rng: np.random.Generator,
 ) -> list[TransitionOutcome]:
-    """Sample ``n_samples`` next-state outcomes."""
+    """Sample ``n_samples`` next-state outcomes.
+
+    ``baseline`` is a tour ``BaselineBag`` (default Gaussian backend) or any
+    ``ShotOutcomeModel`` to use directly.
+    """
     require(n_samples > 0, "n_samples must be > 0", n_samples)
     require(state.lie != _HOLED, "cannot act from holed state")
 
-    dist_mult, sl_mult, slat_mult = _condition_modifiers(state.lie, conditions)
-    dist = profile.effective_distance(action.club, baseline) * dist_mult
-    distr = profile.effective_distribution(action.club, baseline).scaled(
-        sl_mult, slat_mult
+    backend = (
+        baseline
+        if isinstance(baseline, ShotOutcomeModel)
+        else BaselineShotModel(baseline)
     )
-    offsets = distr.sample(n_samples, rng)  # (n, 2): along, lateral
+    landing = backend.sample(profile, action, state.lie, conditions, rng, n_samples)
 
-    # Aim-frame landing = (carry_mean + dlong, dlat). Rotate into hole frame.
-    along = dist + offsets[:, 0]
-    lateral = offsets[:, 1]
+    # Aim-frame landing (along, lateral). Rotate into hole frame.
+    along = landing.along
+    lateral = landing.lateral
     cos_a = np.cos(action.aim_angle_rad)
     sin_a = np.sin(action.aim_angle_rad)
     dx = along * cos_a - lateral * sin_a

@@ -689,10 +689,13 @@ def _ztcf_series(run: EngineRun) -> np.ndarray | None:
 
 
 def _zvcf_series(run: EngineRun) -> np.ndarray | None:
-    if not isinstance(run.engine, EquationsOfMotionProvider):
+    """ZVCF (control component) per sample; ``None`` without generalised torques."""
+    torques = run.trace.torques
+    if not isinstance(run.engine, EquationsOfMotionProvider) or torques is None:
         return None
-    rows = run.trace.q.shape[0]
-    out = np.empty((rows, run.trace.q.shape[1]), dtype=float)
-    for idx in range(rows):
-        out[idx] = zvcf_acceleration(run.engine, run.trace.q[idx])
+    if torques.shape != run.trace.q.shape:
+        return None
+    out = np.empty_like(run.trace.q, dtype=float)
+    for idx in range(out.shape[0]):
+        out[idx] = zvcf_acceleration(run.engine, run.trace.q[idx], torques[idx])
     return out

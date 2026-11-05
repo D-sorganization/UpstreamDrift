@@ -201,6 +201,9 @@ def job_violations(
             f"'{' && '.join(FORK_ROUTE_CONJUNCTS)} && <hosted label> || ...'"
         )
     fork_context = events & FORK_PR_CONTEXT_TRIGGERS
+    if "uses" in job and "runs-on" not in job:
+        # Reusable-only caller jobs run on GitHub-hosted runners in the callee.
+        fork_context = set()
     if fork_context and not (
         requires_conjunct(job.get("if"), SAME_REPO_GUARD) or fork_routed(job)
     ):

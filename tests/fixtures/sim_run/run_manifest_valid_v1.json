@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "model": {
+    "model_id": "mujoco/golfer_full_body",
+    "revision": "sha256:9f2c4e1b7a3d5f6081a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708"
+  },
+  "parameters": {
+    "duration": 1.5,
+    "timestep": 0.002,
+    "controller": "ztcf"
+  },
+  "input_data": {
+    "sha256": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+    "label": "synthetic downswing trajectory"
+  },
+  "seed": 20261104,
+  "engine": {
+    "name": "mujoco",
+    "version": "3.3.7"
+  },
+  "ud_commit": "468442b4b9a6735a74214ae04ca7d470ab21a7db",
+  "created_at": "2026-11-04T01:30:00Z"
+}

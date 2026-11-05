@@ -1095,7 +1095,8 @@
       "capabilities": ["putting_analytics", "putting", "strokes_gained"],
       "order": 106,
       "web": {
-        "mode": "native-window"
+        "mode": "route",
+        "route": "/tools/putting-analytics"
       }
     },
     {

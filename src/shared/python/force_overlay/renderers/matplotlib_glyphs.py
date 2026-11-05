@@ -29,6 +29,7 @@ __all__ = [
     "draw_glyphs_3d",
     "draw_legend",
     "equalize_3d_axes",
+    "legend_lines",
 ]
 
 
@@ -248,6 +249,39 @@ def draw_glyphs_3d(
     return artists
 
 
+def _scaled(reference: str, length_m: float | None, what: str) -> str:
+    return reference if length_m is None else f"{reference} = {length_m:.3g} m{what}"
+
+
+def legend_lines(legend: LegendSpec) -> tuple[str, ...]:
+    """Text lines of the legend: reference magnitudes, their drawn size, clamping.
+
+    A force reference reads ``Force Ref: 500 N = 0.5 m`` (arrow length) and a
+    torque reference ``Torque Ref: 20 N·m = 0.05 m radius`` when the legend
+    records the drawn size; without it only the magnitude and unit appear.
+    """
+    lines: list[str] = []
+    if legend.force_reference_n is not None:
+        lines.append(
+            _scaled(
+                f"Force Ref: {legend.force_reference_n:g} N",
+                legend.force_reference_length_m,
+                "",
+            )
+        )
+    if legend.torque_reference_nm is not None:
+        lines.append(
+            _scaled(
+                f"Torque Ref: {legend.torque_reference_nm:g} N·m",
+                legend.torque_reference_radius_m,
+                " radius",
+            )
+        )
+    if legend.clamped_labels:
+        lines.append(f"Clamped (double tip): {len(legend.clamped_labels)}")
+    return tuple(lines)
+
+
 def draw_legend(ax: Axes, legend: LegendSpec) -> Axes:
     """Render an inset legend with reference scales, kinds, and unavailable notes.
 
@@ -266,21 +300,17 @@ def draw_legend(ax: Axes, legend: LegendSpec) -> Axes:
     inset = ax.inset_axes((0.02, 0.02, 0.36, 0.30))
     inset.set_facecolor("#181818")
     inset.patch.set_alpha(0.85)
+    # Fixed limits: the swatch lines below would otherwise autoscale the inset
+    # and push the text lines out of view.
+    inset.set_xlim(0.0, 1.0)
+    inset.set_ylim(0.0, 1.0)
     inset.set_xticks([])
     inset.set_yticks([])
     for spine in inset.spines.values():
         spine.set_color("#404040")
 
-    lines_text: list[str] = []
-    if legend.force_reference_n is not None:
-        lines_text.append(f"Force Ref: {legend.force_reference_n:g} N")
-    if legend.torque_reference_nm is not None:
-        lines_text.append(f"Torque Ref: {legend.torque_reference_nm:g} N·m")
-    if legend.clamped_labels:
-        lines_text.append(f"Clamped (double tip): {len(legend.clamped_labels)}")
-
     y = 0.88
-    for line in lines_text:
+    for line in legend_lines(legend):
         inset.text(0.06, y, line, color="#ffffff", fontsize=8, weight="bold")
         y -= 0.22
 

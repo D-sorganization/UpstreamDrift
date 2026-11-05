@@ -201,3 +201,57 @@ def test_mcp_runs_the_library_study() -> None:
     response = _call(_server(), "putting_library_study", _library_args())
     report = json.loads(response["result"]["content"][0]["text"])
     assert report["totals"]["expected_putts_per_round"]["mean"] > 0.0
+
+
+UNDER_READ = [{"slope_scale": 0.3}, {"slope_scale": 0.5}]
+
+
+def test_library_misread_cost_reports_every_class_and_the_weighted_cost() -> None:
+    report = service.library_misread_cost(_library_args(reads=UNDER_READ))
+    json.dumps(report)  # plain, serialisable values only
+    rows = report["classes"]
+    assert [row["distance_ft"] for row in rows] == [4.0, 12.0]
+    assert [row["weight"] for row in rows] == pytest.approx([0.75, 0.25])
+    for row in rows:
+        assert row["expected_strokes"] == pytest.approx(
+            row["perfect_read_strokes"] + row["cost"]
+        )
+    weighted = report["weighted_cost"]
+    assert weighted["mean"] == pytest.approx(
+        sum(row["weight"] * row["cost"] for row in rows)
+    )
+    assert weighted["se"] >= 0.0 and report["reads"] == 2
+    assert service.library_misread_cost(_library_args(reads=UNDER_READ)) == report
+
+
+def test_slope_under_read_costs_only_the_breaking_class() -> None:
+    # Aims fine enough that the perceived and true plans can differ.
+    aims = [float(a) for a in range(-10, 11, 2)]
+    report = service.library_misread_cost(
+        _library_args(reads=UNDER_READ, aims_deg=aims, paces_ft=[1.0])
+    )
+    flat, breaking = report["classes"]
+    assert flat["cost"] == 0.0  # a flat green reads the same at any slope scale
+    assert breaking["cost"] > 0.0
+
+
+def test_perfect_reads_cost_nothing_in_any_class() -> None:
+    report = service.library_misread_cost(_library_args(reads=[{}, {}]))
+    assert [row["cost"] for row in report["classes"]] == [0.0, 0.0]
+    assert report["weighted_cost"] == {"mean": 0.0, "se": 0.0}
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"reads": None},
+        {"reads": [{"stimp_ratio": 0.0}]},
+        {"classes": []},
+        {"n": service.MAX_LIBRARY_ROLLOUTS // 8},  # over the rollout cap
+    ],
+)
+def test_library_misread_cost_rejects_bad_arguments(overrides: dict[str, Any]) -> None:
+    with pytest.raises(ValueError):
+        service.library_misread_cost(
+            _library_args(**{"reads": UNDER_READ, **overrides})
+        )

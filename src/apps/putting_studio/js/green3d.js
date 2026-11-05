@@ -250,21 +250,32 @@ function rebuildGreenDispersionBatch() {
   const elSGGain = document.getElementById('valSGPlayerGain');
   if (elSGGain) elSGGain.textContent = `${sgPlayerGain >= 0 ? '+' : ''}${sgPlayerGain.toFixed(2)} strokes / putt`;
 
-  // Update 6-Channel 18-Hole Strokes Gained Variance Attribution
+  // 7-Channel 18-Hole Strokes Gained Variance Attribution from the shared core
+  // (js/core_attribution.js, generated from service_variance; #14459).
+  const setTxt = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  if (typeof coreAttributionCell === 'function') {
+    const cell = coreAttributionCell(distFt, state.crossSlopePct || 0);
+    const meta = window.CORE_SG_ATTRIBUTION.meta;
+    const fmt = (g) => (Math.abs(g) < meta.noise_sg ? '\u22480 SG' : `${(-g).toFixed(2)} SG`);
+    setTxt('chLossFace', fmt(cell.gain_removed.face));
+    setTxt('chLossPath', fmt(cell.gain_removed.path));
+    setTxt('chLossSpeed', fmt(cell.gain_removed.speed));
+    setTxt('chLossStrike', fmt(cell.gain_removed.strike));
+    setTxt('chLossReadGrade', fmt(cell.gain_removed.read_grade));
+    setTxt('chLossReadAspect', fmt(cell.gain_removed.read_aspect));
+    setTxt('chLossReadStimp', fmt(cell.gain_removed.read_stimp));
+    setTxt('valCoreAttributionNote',
+      `Core ${meta.profile} player at ${cell.distance_ft} ft, ${cell.slope_pct}% side slope ` +
+      `(nearest grid cell); +/-${meta.noise_sg} SG sampling noise.`);
+  }
+  // Studio-only illustrative channels (closed-form, not in the core).
   const distScale = Math.sqrt(distFt / 12.0);
   const chCT = +(2.15 * (1.0 - preloadFactor) * distScale + 0.65).toFixed(2);
-  const chFace = -(1.42 * preloadFactor * (0.5 + state.noiseScale) * distScale).toFixed(2);
-  const chRead = -(1.10 * ((state.greenReadErrorPct || 0.25) / 0.25) * (Math.abs(state.crossSlopePct) / 2.0 + 0.3) * distScale).toFixed(2);
   const chSpot = -(0.78 * (1.0 + (state.toeOffsetMm || 0) / 15.0) * preloadFactor * distScale).toFixed(2);
   const chRough = -(0.52 * ((state.surfaceRoughnessMm || 0.35) / 0.35) * distScale).toFixed(2);
-  const chPath = -(0.29 * preloadFactor * (0.5 + state.noiseScale) * distScale).toFixed(2);
-  const setTxt = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
   setTxt('chGainCT', `+${Math.abs(chCT).toFixed(2)} SG`);
-  setTxt('chLossFace', `${chFace.toFixed(2)} SG`);
-  setTxt('chLossRead', `${chRead.toFixed(2)} SG`);
   setTxt('chLossSpot', `${chSpot.toFixed(2)} SG`);
   setTxt('chLossRough', `${chRough.toFixed(2)} SG`);
-  setTxt('chLossPath', `${chPath.toFixed(2)} SG`);
 
   if (typeof drawSGCaptureChart === 'function') drawSGCaptureChart();
 }

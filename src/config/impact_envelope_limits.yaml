@@ -1,0 +1,86 @@
+# Joint angular-velocity limits for the SHOW-C PhysiologicalEnvelope (#14557).
+#
+# Torque limits are NOT here: they come from the NSX-04 capacity table
+# (#12553, src/config/loop_nullspace_registry.json).  Range of motion comes
+# from the spec's coordinate_ranges_deg.  Only velocity limits are declared
+# in this file; every entry carries a citation record and a verification
+# status.
+#
+# STATUS: every value below is an UNVERIFIED population prior, set
+# deliberately generous (well above reported golf peak segment speeds) so a
+# velocity limit never masks a binding torque limit.  Replace a value only
+# after the cited source has been read; then set verification_status to
+# VERIFIED with the table/page location.  Unverified entries are surfaced as
+# PhysiologicalEnvelope.assumed_velocity_slots, never silently.
+version: 1
+velocity_limits_deg_s:
+  - coordinates: [HipInputX, HipInputY, HipInputZ]
+    value: 1500
+    citation:
+      {
+        id: null,
+        note: "pelvis rotation peak in golf is O(500-700 deg/s); prior is ~2x margin",
+      }
+    verification_status: UNVERIFIED
+  - coordinates: [SpineInputX, SpineInputY, TorsoInput]
+    value: 2000
+    citation:
+      {
+        id: null,
+        note: "thorax rotation peak in golf is O(700-1000 deg/s); prior is ~2x margin",
+      }
+    verification_status: UNVERIFIED
+  - coordinates: [NeckInputX, NeckInputY, NeckInputZ]
+    value: 1500
+    citation: { id: null, note: "neck follows the torso; generous prior" }
+    verification_status: UNVERIFIED
+  - coordinates: [LScapInputX, LScapInputY, RScapInputX, RScapInputY]
+    value: 1500
+    citation:
+      {
+        id: null,
+        note: "scapular motion is slower than glenohumeral; generous prior",
+      }
+    verification_status: UNVERIFIED
+  - coordinates: [LSInputX, LSInputY, LSInputZ, RSInputX, RSInputY, RSInputZ]
+    value: 3000
+    citation: { id: null, note: "glenohumeral rotation; generous prior" }
+    verification_status: UNVERIFIED
+  - coordinates: [LEInput, REInput]
+    value: 3000
+    citation: { id: null, note: "elbow extension speed; generous prior" }
+    verification_status: UNVERIFIED
+  - coordinates: [LFInput, RFInput]
+    value: 3000
+    citation: { id: null, note: "forearm pronation/supination; generous prior" }
+    verification_status: UNVERIFIED
+  - coordinates: [LWInputX, LWInputY, RWInputX, RWInputY]
+    value: 4000
+    citation:
+      {
+        id: null,
+        note: "wrist release peak in golf is O(1500-2500 deg/s); prior is ~1.6x margin",
+      }
+    verification_status: UNVERIFIED
+  - coordinates:
+      - hip_flexion_r
+      - hip_adduction_r
+      - hip_rotation_r
+      - knee_angle_r
+      - ankle_angle_r
+      - subtalar_angle_r
+      - mtp_angle_r
+      - hip_flexion_l
+      - hip_adduction_l
+      - hip_rotation_l
+      - knee_angle_l
+      - ankle_angle_l
+      - subtalar_angle_l
+      - mtp_angle_l
+    value: 1500
+    citation:
+      {
+        id: null,
+        note: "lower-limb joint speeds in the swing are well below this; generous prior",
+      }
+    verification_status: UNVERIFIED

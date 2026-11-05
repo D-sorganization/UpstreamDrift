@@ -7,9 +7,10 @@ re-solved for every counterfactual through the KKT projector
 (:func:`~src.shared.python.loop_nullspace.constrained_dynamics.constrained_acceleration`),
 never held::
 
-    ZTCF: tau = 0, state (q, v) kept            -> a_ZTCF
-    ZVCF: v = 0 and tau = 0, configuration kept -> a_ZVCF
-    control-induced total: a(tau) - a_ZTCF = P_c tau
+    ZTCF: tau = 0, state (q, v) kept            -> a_ZTCF (drift)
+    ZVCF: control component, a(tau) - a_ZTCF = P_c tau
+          = M^-1 (tau + J^T (lambda - lambda_0))   (#14494)
+    zero-velocity, zero-torque: v = 0 and tau = 0  -> report field ``zvcf``
 
 Names follow ``model_aware_matching.tex`` (Section "ZTCF and ZVCF as exact
 projections"): both are *pointwise*; the control-preserved zero-velocity
@@ -42,6 +43,7 @@ __all__ = [
     "ConstrainedCounterfactuals",
     "constrained_acceleration_at",
     "constrained_counterfactual_report",
+    "drift_and_control_reactions",
     "is_constrained_provider",
 ]
 
@@ -106,14 +108,56 @@ def constrained_acceleration_at(
     )
 
 
+def drift_and_control_reactions(
+    provider: ConstrainedEquationsOfMotionProvider,
+    q: ArrayLike,
+    v: ArrayLike,
+    tau: ArrayLike,
+) -> tuple[Array, Array]:
+    """Split the closure reaction into drift and control parts (#14492).
+
+    The KKT system is linear in the load at a fixed state, so the reaction
+    splits like the acceleration (ZTCF drift + ZVCF control, Dieter's
+    2026-11-03 decision on #14497)::
+
+        lambda(q, v, tau) = lambda_drift(q, v) + lambda_control(q, tau)
+
+    ``lambda_drift`` is the reaction at ``tau = 0`` and carries gravity and the
+    velocity terms.  ``lambda_control`` solves the KKT system with the load
+    ``tau`` alone (no bias, no closure drift), so gravity is counted once, in
+    the drift.  On the two-hand closure these are the wrist interaction forces.
+    The split is pointwise; reactions along integrated counterfactual
+    trajectories do not sum.
+
+    Preconditions: ``provider`` is constrained (``TypeError``); ``q``, ``v``
+    finite and ``tau`` a finite generalised load of length ``n`` (``ValueError``).
+    Postcondition: ``lambda_drift + lambda_control`` equals the reaction under
+    ``tau`` to rounding (minimum-norm multipliers if ``J_c`` is rank deficient).
+    """
+    _require_constrained(provider)
+    q_arr = _state("q", q)
+    mass = np.asarray(provider.mass_matrix(q_arr), dtype=np.float64)
+    n = mass.shape[0]
+    tau_arr = _state("tau", tau, n)
+    _, drift = constrained_acceleration_at(provider, q_arr, v, np.zeros(n))
+    jacobian = np.asarray(provider.closure_jacobian(q_arr), dtype=np.float64)
+    _, control = constrained_acceleration(
+        mass, np.zeros(n), tau_arr, jacobian, np.zeros(jacobian.shape[0])
+    )
+    return drift, control
+
+
 @dataclass(frozen=True)
 class ConstrainedCounterfactuals:
     """Pointwise constrained counterfactuals with their allocation dependence.
 
     Attributes:
         ztcf: ``a`` with ``tau = 0`` at the measured ``(q, v)``.
-        zvcf: ``a`` with ``v = 0`` and ``tau = 0`` at the measured ``q``.
-        control_total: ``a(tau) - a_ZTCF = P_c tau`` (``INVARIANT``).
+        zvcf: ``a`` with ``v = 0`` and ``tau = 0`` at the measured ``q``; the
+            zero-velocity, zero-torque acceleration under its pre-#14494 name.
+            ZVCF proper (the control component) is ``control_total``.
+        control_total: ``a(tau) - a_ZTCF = P_c tau`` (``INVARIANT``), equal to
+            ``ztcf_zvcf.zvcf_acceleration(provider, q, tau)``.
         per_actuator: column ``i`` is ``P_c e_i tau_i`` (``FAMILY_DEPENDENT``);
             rows sum to ``control_total``.
         reaction_ztcf, reaction_zvcf: re-solved closure reactions.

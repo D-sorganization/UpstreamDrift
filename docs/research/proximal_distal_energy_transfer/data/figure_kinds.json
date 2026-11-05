@@ -1,0 +1,8 @@
+{
+  "fig_advanced_model_motion_plate": {"evidence": "make_advanced_biological_bridge_figures.make_motion_plate takes no input; _draw_pose draws four fixed phases with numpy trigonometry", "kind": "diagram"},
+  "fig_interaction_free_body": {"evidence": "make_interaction_force_figures.fig_free_body takes no input and draws a free-body sketch with numpy trigonometry", "kind": "diagram"},
+  "fig_shaft_model_schematic": {"evidence": "make_shaft_contribution_figures.fig_model_schematic takes no input and draws the shaft model schematic", "kind": "diagram"},
+  "fig_spatial_full_body_force_geometry": {"evidence": "make_spatial_full_body_figures.make_geometry_figure evaluates prescribed_state and forward_kinematics of build_spatial_model inline; it reads no stored study output", "kind": "analytic"},
+  "fig_transmission_pathway_framework": {"evidence": "make_transmission_robustness_figures.make_pathway_framework takes no input and draws boxes, arrows and text", "kind": "diagram"},
+  "fig_two_hand_reference_transport": {"evidence": "make_two_hand_wscg_figures.fig_reference_transport takes no input and computes an illustrative reference transport from fixed numpy arrays", "kind": "analytic"}
+}

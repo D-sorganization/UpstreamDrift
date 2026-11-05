@@ -4,6 +4,9 @@ import type {
   Putt3DSimulationRequest,
   Putt3DSimulationResponse,
 } from "@/api/generated/types";
+import type { CameraPreset } from "@/utils/cameraPresets";
+import { defaultNoise, type Noise } from "@/utils/dispersion";
+import { loadUnitSystem, saveUnitSystem, type UnitSystem } from "@/utils/units";
 
 export const DEFAULT_PUTT_3D_PARAMETERS: Putt3DSimulationRequest = {
   putter_speed_mps: 1.8,
@@ -25,6 +28,7 @@ export const DEFAULT_PUTT_3D_PARAMETERS: Putt3DSimulationRequest = {
   random_seed: 8345,
   hole_x_m: 3,
   hole_y_m: 0,
+  aim_heading_deg: 0,
 };
 
 interface PuttingState {
@@ -33,11 +37,19 @@ interface PuttingState {
   playbackTimeS: number;
   playbackRate: number;
   playing: boolean;
+  /** Display units only; parameters and results stay SI (#14458). */
+  unitSystem: UnitSystem;
+  cameraView: CameraPreset;
+  /** The player's spread, shared by the batch and strokes-gained panels. */
+  noise: Noise;
   updateParameters: (changes: Partial<Putt3DSimulationRequest>) => void;
   setResult: (result: Putt3DSimulationResponse) => void;
   setPlaybackTime: (timeS: number) => void;
   setPlaybackRate: (rate: number) => void;
   setPlaying: (playing: boolean) => void;
+  setUnitSystem: (system: UnitSystem) => void;
+  setCameraView: (view: CameraPreset) => void;
+  setNoise: (noise: Noise) => void;
   reset: () => void;
 }
 
@@ -47,6 +59,9 @@ export const usePuttingStore = create<PuttingState>((set) => ({
   playbackTimeS: 0,
   playbackRate: 1,
   playing: false,
+  unitSystem: loadUnitSystem(),
+  cameraView: "orbit",
+  noise: defaultNoise(),
   updateParameters: (changes) =>
     set((state) => ({
       parameters: { ...state.parameters, ...changes },
@@ -57,6 +72,12 @@ export const usePuttingStore = create<PuttingState>((set) => ({
   setPlaybackTime: (playbackTimeS) => set({ playbackTimeS }),
   setPlaybackRate: (playbackRate) => set({ playbackRate }),
   setPlaying: (playing) => set({ playing }),
+  setUnitSystem: (unitSystem) => {
+    saveUnitSystem(unitSystem);
+    set({ unitSystem });
+  },
+  setCameraView: (cameraView) => set({ cameraView }),
+  setNoise: (noise) => set({ noise }),
   reset: () =>
     set({
       parameters: { ...DEFAULT_PUTT_3D_PARAMETERS },
@@ -64,5 +85,6 @@ export const usePuttingStore = create<PuttingState>((set) => ({
       playbackTimeS: 0,
       playbackRate: 1,
       playing: false,
+      noise: defaultNoise(),
     }),
 }));

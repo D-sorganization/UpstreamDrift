@@ -35,6 +35,7 @@ from src.shared.python.sg_optimizer.mdp.transition import (
 if TYPE_CHECKING:  # pragma: no cover
     from src.shared.python.sg_optimizer.course.conditions import CourseConditions
     from src.shared.python.sg_optimizer.shot_model.baseline import BaselineBag
+    from src.shared.python.sg_optimizer.shot_model.outcome import ShotOutcomeModel
     from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
 
 
@@ -52,7 +53,7 @@ def bellman_backup_scalar(
     V: NDArray[np.float64],
     raster: LieRaster,
     profile: PlayerProfile,
-    baseline: BaselineBag,
+    baseline: BaselineBag | ShotOutcomeModel,
     conditions: CourseConditions,
     actions: ActionSet,
     n_samples: int,
@@ -147,8 +148,10 @@ class HoleMDP:
         actions: ActionSet,
         n_samples: int = 64,
         seed: int = 0,
+        model: ShotOutcomeModel | None = None,
     ) -> None:
         require(n_samples > 0, "n_samples must be > 0")
+        self.model = model
         self.raster = raster
         self.profile = profile
         self.baseline = baseline
@@ -165,6 +168,20 @@ class HoleMDP:
         self, V: NDArray[np.float64]
     ) -> tuple[NDArray[np.float64], NDArray[np.int32]]:
         """Vectorized single sweep over all cells × actions."""
+        # The vectorized path implements the default tour-baseline Gaussian only.
+        # Any injected ShotOutcomeModel is honoured via the scalar reference sweep
+        # (slow but correct); table-driven backends get a fast path in B4 (#14568).
+        if self.model is not None:
+            return bellman_backup_scalar(
+                V,
+                self.raster,
+                self.profile,
+                self.model,
+                self.conditions,
+                self.actions,
+                self.n_samples,
+                self.rng,
+            )
         nx, ny = self.raster.shape
         nA = len(self._action_list)
         Q = np.full((nx, ny, nA), np.inf, dtype=np.float64)

@@ -1,13 +1,12 @@
-"""Cross-module ZVCF consistency on the planar oracle (issue #11553).
+"""Cross-module ZVCF consistency on the planar oracle (issues #11553, #14494).
 
-The methods reference (``model_aware_matching.tex``, eq. ``eq:zvcf``) defines
-ZVCF as velocity *and* control set to zero:
-``a_ZVCF = -M(q)^-1 Y(q, 0, 0) pi = -M(q)^-1 h(q, 0)`` in free flight.  The
-canonical implementation is
-:func:`simulation_backends.ztcf_zvcf.zvcf_acceleration`;
+ZVCF is the control component ``M(q)^-1 tau`` (owner decision, #14494). The
+zero-velocity, zero-torque acceleration ``-M(q)^-1 Y(q, 0, 0) pi`` keeps its
+value under ``zero_velocity_zero_torque_acceleration``; the planar oracle's
+``drift_decomposition`` still reports it as ``zvcf``.
 :class:`motion_matching.counterfactual.AccelerationDecomposition` must report
-the same value for the same state.  The control-preserved variant keeps its own
-name and is never called ZVCF.
+the same values as :mod:`simulation_backends.ztcf_zvcf` for the same state.
+The control-preserved variant keeps its own name and is never called ZVCF.
 """
 
 from __future__ import annotations
@@ -21,6 +20,7 @@ from src.shared.python.motion_matching.counterfactual import (
 )
 from src.shared.python.simulation_backends.ztcf_zvcf import (
     zero_velocity_control_preserved_acceleration,
+    zero_velocity_zero_torque_acceleration,
     ztcf_acceleration,
     zvcf_acceleration,
 )
@@ -59,15 +59,30 @@ def provider() -> _PlanarOracleProvider:
     return _PlanarOracleProvider()
 
 
-def _oracle_zvcf(provider: _PlanarOracleProvider) -> np.ndarray:
+def _oracle_zero_velocity_zero_torque(provider: _PlanarOracleProvider) -> np.ndarray:
     drift = provider.chain.drift_decomposition(Q[None, :], V[None, :], provider.pi)
     return drift.zvcf[0]
 
 
-def test_canonical_zvcf_matches_oracle(provider: _PlanarOracleProvider) -> None:
-    """``zvcf_acceleration`` is the regressor projection ``-M^-1 Y(q,0,0) pi``."""
+def test_zero_velocity_zero_torque_matches_oracle(
+    provider: _PlanarOracleProvider,
+) -> None:
+    """The renamed gravity-only term is the projection ``-M^-1 Y(q,0,0) pi``."""
     np.testing.assert_allclose(
-        zvcf_acceleration(provider, Q), _oracle_zvcf(provider), rtol=RTOL, atol=ATOL
+        zero_velocity_zero_torque_acceleration(provider, Q),
+        _oracle_zero_velocity_zero_torque(provider),
+        rtol=RTOL,
+        atol=ATOL,
+    )
+
+
+def test_canonical_zvcf_is_mass_inverse_torque(provider: _PlanarOracleProvider) -> None:
+    """``zvcf_acceleration`` is the control component ``M^-1 tau``."""
+    np.testing.assert_allclose(
+        zvcf_acceleration(provider, Q, TAU),
+        np.linalg.solve(provider.mass_matrix(Q), TAU),
+        rtol=RTOL,
+        atol=ATOL,
     )
 
 
@@ -79,14 +94,14 @@ def test_decomposition_zvcf_from_documented_components(
     ``a_grav`` is the zero-velocity, zero-control acceleration; ``a_drift`` the
     velocity-dependent remainder of the ZTCF; ``a_ctrl = M^-1 tau``.
     """
-    a_grav = zvcf_acceleration(provider, Q)
+    a_grav = zero_velocity_zero_torque_acceleration(provider, Q)
     a_drift = ztcf_acceleration(provider, Q, V) - a_grav
     a_ctrl = np.linalg.solve(provider.mass_matrix(Q), TAU)
 
     decomp = AccelerationDecomposition(a_grav=a_grav, a_drift=a_drift, a_ctrl=a_ctrl)
 
     np.testing.assert_allclose(
-        decomp.zvcf, zvcf_acceleration(provider, Q), rtol=RTOL, atol=ATOL
+        decomp.zvcf, zvcf_acceleration(provider, Q, TAU), rtol=RTOL, atol=ATOL
     )
 
 
@@ -97,10 +112,13 @@ def test_both_entry_points_agree_for_same_state(
     decomp = AccelerationDecomposition.from_dynamics(provider, Q, V, TAU)
 
     np.testing.assert_allclose(
-        decomp.zvcf, zvcf_acceleration(provider, Q), rtol=RTOL, atol=ATOL
+        decomp.zvcf, zvcf_acceleration(provider, Q, TAU), rtol=RTOL, atol=ATOL
     )
     np.testing.assert_allclose(
-        decomp.zvcf, _oracle_zvcf(provider), rtol=RTOL, atol=ATOL
+        decomp.zero_velocity_zero_torque,
+        _oracle_zero_velocity_zero_torque(provider),
+        rtol=RTOL,
+        atol=ATOL,
     )
     np.testing.assert_allclose(
         decomp.ztcf, ztcf_acceleration(provider, Q, V), rtol=RTOL, atol=ATOL
@@ -109,6 +127,7 @@ def test_both_entry_points_agree_for_same_state(
         Q[None, :], V[None, :], TAU[None, :], provider.pi
     )[0]
     np.testing.assert_allclose(decomp.total_accel, forward, rtol=RTOL, atol=ATOL)
+    np.testing.assert_allclose(decomp.ztcf + decomp.zvcf, forward, rtol=RTOL, atol=ATOL)
 
 
 def test_control_preserved_variant_keeps_its_own_name(

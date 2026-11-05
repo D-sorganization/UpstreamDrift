@@ -34,7 +34,8 @@ from typing import Any
 import numpy as np
 
 from bunkershot3d.provenance.hashing import canonical_json
-from src.tools.putting_green_gui._scene_builder import PuttScene
+from src.shared.python.putting_dynamics import GREEN_PRESETS
+from src.tools.putting_green_gui._scene_builder import IMPACT_TOE_RANGE_M, PuttScene
 
 logger = logging.getLogger(__name__)
 
@@ -146,11 +147,23 @@ def scene_to_record(scene: PuttScene) -> dict[str, Any]:
             "target": np.asarray(scene.target_line_xyz, dtype=float).tolist(),
         },
         "green_size_m": [float(scene.green_size[0]), float(scene.green_size[1])],
+        "green_type": scene.green_type,
+        "impact_toe_m": float(scene.impact_toe_m),
         "metrics": {
             "holed": bool(scene.holed),
             **{name: float(getattr(scene, name)) for name in _SCALAR_FIELDS},
         },
     }
+
+
+def _impact_toe(value: Any) -> float:
+    """The strike offset, optional since exports before #14530 lack it."""
+    low, high = IMPACT_TOE_RANGE_M
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise PuttExportError("impact_toe_m must be a number")
+    if not low <= value <= high:  # NaN fails both bounds
+        raise PuttExportError(f"impact_toe_m must be in [{low}, {high}] m")
+    return float(value)
 
 
 def export_putt_scene(scene: PuttScene, path: Path) -> Path:
@@ -209,11 +222,18 @@ def read_putt_export(path: Path) -> PuttScene:
     size = data["green_size_m"]
     if not isinstance(size, list) or len(size) != 2:
         raise PuttExportError("green_size_m must be a two-element list")
+    # Optional: exports from before #14463 carry no green type (cross slope).
+    green_type = data.get("green_type")
+    if green_type is not None and green_type not in GREEN_PRESETS:
+        raise PuttExportError(
+            f"green_type must be null or one of {sorted(GREEN_PRESETS)}"
+        )
+    impact_toe_m = _impact_toe(data.get("impact_toe_m", 0.0))
 
     def arr(value: Any) -> np.ndarray:
         return np.asarray(value, dtype=float)
 
-    scalars = {
+    scalars: dict[str, Any] = {  # Any: keyword-unpacked into PuttScene
         name: float(_require(metrics, name, "metrics.")) for name in _SCALAR_FIELDS
     }
     for name, value in scalars.items():
@@ -232,6 +252,8 @@ def read_putt_export(path: Path) -> PuttScene:
         green_size=(float(size[0]), float(size[1])),
         holed=bool(_require(metrics, "holed", "metrics.")),
         roll_model=str(data["roll_model"]),
+        green_type=green_type,
+        impact_toe_m=impact_toe_m,
         **scalars,
     )
     _validate_scene(scene)
