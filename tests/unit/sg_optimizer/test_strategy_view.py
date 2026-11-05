@@ -165,3 +165,52 @@ def test_view_states_sample_count_and_convergence() -> None:
     assert "MC n=24" in render_text(view)
     assert view.converged == (view.residual < 1e-3)
     assert ("NOT CONVERGED" in render_text(view)) == (not view.converged)
+
+
+def test_aims_are_labelled_as_relative_to_the_pin_line() -> None:
+    """Solver aims are pin-relative (0 = at the pin); the report must say so."""
+    view = build_view("synthetic", _problem(), _profile(), settings=CFG)
+    assert "aim vs pin" in render_text(view)
+    assert "from pin line" in render_html(view)
+
+
+def _demo_par4() -> StrategyProblem:
+    """Fairway, water right of it and a green 380 yd out; full club set."""
+    from src.shared.python.sg_optimizer.course.rasterize import (
+        CircleFeature,
+        RectFeature,
+        SyntheticHole,
+        rasterize_synthetic,
+    )
+    from src.shared.python.sg_optimizer.mdp.action import default_action_set
+
+    hole = SyntheticHole(
+        name="par4",
+        par=4,
+        tee=(0.0, 0.0),
+        pin=(380.0, 0.0),
+        bbox=(-20.0, 420.0, -60.0, 60.0),
+        features=(
+            RectFeature("fairway", 180.0, 330.0, -18.0, 18.0),
+            RectFeature("water", 200.0, 330.0, -60.0, -26.0),
+            CircleFeature("green", 380.0, 0.0, 14.0),
+        ),
+    )
+    raster = green_terminal(rasterize_synthetic(hole, resolution_yd=20.0))
+    return StrategyProblem(
+        raster,
+        load_baseline(YAML),
+        CourseConditions.benign(),
+        default_action_set(),
+        State(x=0.0, y=0.0, lie=int(raster.lie_at(0.0, 0.0))),
+    )
+
+
+def test_reference_par4_converges_and_says_so() -> None:
+    """The B8 demo hole reaches its stated tolerance, so the report may say so."""
+    cfg = SolveSettings(n_samples=24, max_iter=80)
+    view = build_view("par4", _demo_par4(), _profile(), settings=cfg)
+    assert view.converged and view.residual < 1e-3 and view.iterations < 80
+    assert 1.0 < view.tour_strokes < 5.0  # strokes to reach the green
+    assert "NOT CONVERGED" not in render_text(view)
+    assert "NOT CONVERGED" not in render_html(view)
