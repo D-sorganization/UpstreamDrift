@@ -26,6 +26,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -109,6 +110,14 @@ def _within_tolerance(
         and abs(impact.path_deg - target.path_deg) <= tol.path_deg
         and abs(impact.aoa_deg - target.aoa_deg) <= tol.aoa_deg
     )
+
+
+def face_to_path_deg(impact: MeasuredImpact) -> float:
+    """face - path (deg); NaN when either is unobservable."""
+    face, path = impact.face_deg, impact.path_deg
+    if face is None or path is None:
+        return math.nan
+    return float(face - path)
 
 
 def _project(tau: np.ndarray, env: PhysiologicalEnvelope) -> np.ndarray:
@@ -198,7 +207,7 @@ def solve_impact_trajectory(
         max_utilisation=float(np.max(util)),
         envelope_limits_nm=np.array(envelope.tau_max_positive_nm),
         tolerances_met=_within_tolerance(out.impact, target, cfg.tolerance),
-        face_to_path_deg=float(out.impact.face_deg - out.impact.path_deg),
+        face_to_path_deg=face_to_path_deg(out.impact),
     )
     ensure(sol.max_utilisation <= 1.0 + 1e-9, "envelope exceeded", sol.max_utilisation)
     ensure(
