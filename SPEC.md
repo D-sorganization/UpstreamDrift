@@ -66,6 +66,19 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ## 4. Architecture Overview
 
+### Instantaneous ZTCF / ZVCF Component Contract
+
+At a fixed achieved state, **ZTCF is the drift component**: set the declared
+applied torque to zero while retaining the velocity-dependent, gravity, and
+other autonomous terms of the declared plant. **ZVCF is the control
+component**: evaluate `M(q)^{-1} τ` with velocity and gravity terms zeroed.
+This is the instantaneous split `xdot = f(x) + g(x)u`: ZTCF is `f(x)` and
+ZVCF is `g(x)u` (here `g(x)` is the input map; `g(q)` in mechanics notation
+means gravity generalized force). Their sum matches total acceleration at the
+same fixed state under the declared split. The decomposition is exact at a
+fixed state and is **not additive over integrated trajectories**. This
+restores the original MATLAB meaning and reverses #11553's later naming.
+
 ### Recent Spec Updates
 
 - **2026-09-03** - Made the tag-driven release able to produce a wheel at all
