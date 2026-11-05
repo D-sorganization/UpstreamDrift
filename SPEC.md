@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14654 | Putting studio: a Metric/Imperial selector; distance, speed and strike labels come from the shared units table generated into core_units.js |
+| 2026-11-05 | #14653 | Add continuation_report: markdown table of a 100-125 mph run with torque, ROM and velocity bindings and limit provenance |
 | 2026-11-05 | #14651 | Replace wall-clock speed-up ratio in test_topology_contact_batched with a deterministic per-pair kernel call count |
 | 2026-11-05 | #14636 | Align MuJoCo counterfactuals zvcf() and the MATLAB ZVCF comments with the control-component contract |
 | 2026-11-05 | #14637 | React/Tauri putting page: saved scenarios and comparison over the shared core, golden-pinned (part 1 of #14472) |

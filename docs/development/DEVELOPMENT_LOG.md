@@ -976,6 +976,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14646 · Putting Studio: A Metric/Imperial Selector; Distance, Speed and Strike Labels Come From the Shared Units Table Generated Into Core_Units.Js
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14646
+- **Branch:** merged via #14654
+- **PR:** #14654
+- **Paths:** see #14654
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`c77f8207`; collated from changes/14646-studio-units.md)
+- **Summary:** Putting studio: a Metric/Imperial selector; distance, speed and strike labels come from the shared units table generated into core_units.js
+- **Next step:** Shipped in PR #14654.
+
 ### DL-#14640 · Replace Wall-Clock Speed-Up Ratio in Test_Topology_Contact_Batched With a Deterministic Per-Pair Kernel Call Count
 
 - **State:** shipped
@@ -1307,10 +1320,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14559
 - **Branch:** merged via #14589
-- **PR:** #14589, #14596, #14625, #14638
+- **PR:** #14589, #14596, #14625, #14638, #14653
 - **Paths:** see #14589
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`9672a443`; collated from changes/14559-show-c3c-full-body-window-rollout-adapte.md)
+- **Last verified:** 2026-11-05 (`87d5316e`; collated from changes/14559-add-continuation-report-markdown-table-o.md)
 - **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
 - **Next step:** Shipped in PR #14589.
 
