@@ -81,6 +81,8 @@ def _env() -> PhysiologicalEnvelope:
         tau_max_positive_nm=np.full(3, 50.0),
         rom_deg=np.array([(-90.0, 90.0)] * 3),
         vel_max_deg_s=np.full(3, 1.0e4),
+        assumed_torque_slots=(),
+        assumed_velocity_slots=(),
     )
 
 
