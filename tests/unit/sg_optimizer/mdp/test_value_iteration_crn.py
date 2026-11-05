@@ -65,20 +65,38 @@ def test_solve_reaches_tolerance() -> None:
     assert result.iterations < 300
 
 
-def test_cells_with_no_way_back_are_capped_and_the_solve_still_converges() -> None:
-    narrow = np.array([-10.0, 0.0, 10.0])  # shots only ever travel toward +x
-    mdp = _mdp(aims=narrow)
+def test_cells_with_no_way_to_the_hole_are_capped_and_the_solve_still_converges() -> (
+    None
+):
+    """The cap is the safety bound for a hole the player cannot actually reach."""
+    mdp = _mdp()
+    codes = mdp.raster.codes.copy()
+    codes[codes == LIE_CODES["fairway"]] = LIE_CODES["water"]  # only the hole is dry
+    start = mdp.raster.world_to_index(-100.0, 0.0)
+    codes[start] = LIE_CODES["fairway"]
+    mdp = HoleMDP(
+        LieRaster(
+            codes,
+            mdp.raster.resolution_yd,
+            mdp.raster.origin,
+            mdp.raster.pin,
+            mdp.raster.tee,
+        ),
+        mdp.profile,
+        mdp.baseline,
+        mdp.conditions,
+        mdp.actions,
+        n_samples=mdp.n_samples,
+        seed=0,
+    )
     result = mdp.solve(tol=1e-3, max_iter=300)
     assert result.delta < 1e-3
-    ix, iy = mdp.raster.world_to_index(-120.0, 0.0)
-    assert result.value[ix, iy] < mdp.VALUE_CAP  # can reach the hole from the tee
-    behind = mdp.raster.world_to_index(100.0, 0.0)  # past the hole: no way back
-    assert result.value[behind] == mdp.VALUE_CAP
+    assert result.value[start] == mdp.VALUE_CAP
     assert float(result.value.max()) <= mdp.VALUE_CAP
 
 
-def test_demo_par4_with_water_converges_within_a_sweep_budget() -> None:
-    """Fairway, water right, green: converges, and the tee is no worse than the cap."""
+def _demo_mdp() -> HoleMDP:
+    """Fairway, water right of it, a holed green 380 yd out; default aim grid."""
     from src.shared.python.sg_optimizer.course.rasterize import (
         CircleFeature,
         RectFeature,
@@ -105,7 +123,7 @@ def test_demo_par4_with_water_converges_within_a_sweep_budget() -> None:
     raster = LieRaster(
         codes, raster.resolution_yd, raster.origin, raster.pin, raster.tee
     )
-    mdp = HoleMDP(
+    return HoleMDP(
         raster,
         PlayerProfile(name="p", baseline=str(YAML)),
         load_baseline(YAML),
@@ -114,7 +132,33 @@ def test_demo_par4_with_water_converges_within_a_sweep_budget() -> None:
         n_samples=24,
         seed=0,
     )
+
+
+def test_demo_par4_with_water_converges_within_a_sweep_budget() -> None:
+    """Fairway, water right, green: converges, and the tee is no worse than the cap."""
+    mdp = _demo_mdp()
     result = mdp.solve(tol=1e-3, max_iter=80)
     assert result.delta < 1e-3 and result.iterations <= 80
     tee = mdp.raster.world_to_index(0.0, 0.0)
     assert 1.0 < result.value[tee] < mdp.VALUE_CAP
+
+
+def test_tee_value_does_not_depend_on_the_cap() -> None:
+    """The cap is a safety bound: moving it must not move the answer."""
+    tee_values = []
+    for cap in (30.0, 100.0):
+        mdp = _demo_mdp()
+        mdp.VALUE_CAP = cap
+        result = mdp.solve(tol=1e-3, max_iter=200)
+        assert result.delta < 1e-3
+        tee_values.append(result.value[mdp.raster.world_to_index(0.0, 0.0)])
+    assert tee_values[0] == pytest.approx(tee_values[1], abs=1e-2)
+
+
+def test_no_playable_cell_sits_at_the_cap() -> None:
+    """Overshoots can aim back at the pin, so no non-hazard cell is capped."""
+    mdp = _demo_mdp()
+    result = mdp.solve(tol=1e-3, max_iter=200)
+    codes = mdp.raster.codes
+    playable = ~np.isin(codes, [LIE_CODES["water"], LIE_CODES["ob"]])
+    assert float(result.value[playable].max()) < mdp.VALUE_CAP - 1.0
