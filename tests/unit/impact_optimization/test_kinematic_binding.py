@@ -162,3 +162,14 @@ def test_velocity_binding_on_an_assumed_slot_is_assumption_limited() -> None:
     assert vel and all("assumption-limited" in ln for ln in vel)
     assert not any("miscalibrat" in ln for ln in vel)
     assert rom and all("probable miscalibration" in ln for ln in rom)  # cited ROM
+
+
+def test_rom_binding_on_a_soft_slot_is_assumption_limited() -> None:
+    """D35: a ROM taken from soft_limits_deg is uncited, so it is never a finding."""
+    import dataclasses
+
+    env = dataclasses.replace(_env([(-1.0, 1.0)] * 3), soft_rom_slots=NAMES)
+    lines = kinematic_binding_report(_ladder(), env, TIMES, degrees=True)
+    rom = [ln for ln in lines if "ROM limit" in ln and "BLOCKS" in ln]
+    assert rom and all("assumption-limited" in ln for ln in rom)
+    assert not any("probable miscalibration" in ln for ln in rom)

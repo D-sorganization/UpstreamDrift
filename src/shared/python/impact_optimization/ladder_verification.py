@@ -78,6 +78,8 @@ class FullFidelityCheck:
     kinematic: tuple[KinematicBinding, ...] = ()
     #: Joints whose velocity limit is an assumed placeholder, not a cited value.
     assumed_velocity: tuple[str, ...] = ()
+    #: Joints whose ROM is a soft_limits_deg design range (uncited), D35.
+    assumed_rom: tuple[str, ...] = ()
 
 
 def _check(
@@ -88,6 +90,7 @@ def _check(
     speed_tol_mph: float,
     kinematic: tuple[KinematicBinding, ...],
     assumed_velocity: tuple[str, ...] = (),
+    assumed_rom: tuple[str, ...] = (),
 ) -> FullFidelityCheck:
     face, path, aoa = impact_errors_deg(full, target)
     speed = float(full.speed_mph)
@@ -105,6 +108,7 @@ def _check(
         met,
         kinematic,
         assumed_velocity,
+        assumed_rom,
     )
 
 
@@ -142,6 +146,7 @@ def verify_at_full_fidelity(
                 speed_tol_mph,
                 hits,
                 env.assumed_velocity_slots,
+                env.soft_rom_slots,
             )
         )
     return tuple(checks)
@@ -173,7 +178,8 @@ def _row(
         tuple(
             h
             for h in hits
-            if h.kind == "velocity" and h.joint in check.assumed_velocity
+            if (h.kind == "velocity" and h.joint in check.assumed_velocity)
+            or (h.kind == "ROM" and h.joint in check.assumed_rom)
         )
     )
     breaches = [n for n in over if n not in soft]

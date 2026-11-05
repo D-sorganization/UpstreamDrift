@@ -194,7 +194,7 @@ def kinematic_binding_report(
         for hit in kinematic_binding(traj, times_s, envelope, degrees=degrees):
             assumed = (
                 hit.kind == "velocity" and hit.joint in envelope.assumed_velocity_slots
-            )
+            ) or (hit.kind == "ROM" and hit.joint in envelope.soft_rom_slots)
             lines.append(
                 _line(
                     p.speed_target_mph, hit, p.feasible, notes.get(hit.joint), assumed
