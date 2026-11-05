@@ -42,6 +42,34 @@ def _check(q: np.ndarray, columns: Sequence[int]) -> list[int]:
     return cols
 
 
+MIN_STEP_SCALE: float = 1e-4
+
+
+def _backtracked(
+    residual: ResidualFn,
+    rows: np.ndarray,
+    cols: list[int],
+    step: np.ndarray,
+    norm: float,
+) -> np.ndarray:
+    """``rows`` moved along ``-step``, halving the step until the residual shrinks.
+
+    The full Gauss-Newton step is taken whenever it reduces the residual norm,
+    so convergent cases are unchanged; an overshooting step (which can cycle
+    away from the weld for a poorly conditioned start) is shortened instead.
+    If no scale down to ``MIN_STEP_SCALE`` reduces it, the last trial is
+    returned and the caller's iteration limit reports the failure.
+    """
+    scale = 1.0
+    while True:
+        trial = rows.copy()
+        trial[cols] -= scale * step
+        smaller = np.linalg.norm(np.asarray(residual(trial), dtype=float)) < norm
+        if smaller or scale <= MIN_STEP_SCALE:
+            return trial
+        scale /= 2.0
+
+
 def project_onto_closure(
     q: np.ndarray,
     residual: ResidualFn,
@@ -77,7 +105,8 @@ def project_onto_closure(
             probe = rows.copy()
             probe[c] += FD_STEP
             jac[:, k] = (np.asarray(residual(probe), dtype=float) - r) / FD_STEP
-        rows[cols] -= np.linalg.lstsq(jac, r, rcond=None)[0]
+        step = np.linalg.lstsq(jac, r, rcond=None)[0]
+        rows = _backtracked(residual, rows, cols, step, float(np.linalg.norm(r)))
     raise ValueError(
         f"weld projection did not close: residual {np.linalg.norm(r):.3g} "
         f"after {max_iter} steps"
