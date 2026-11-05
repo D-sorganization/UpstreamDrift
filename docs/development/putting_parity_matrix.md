@@ -11,10 +11,10 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | present | present | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | partial (#14461) |
 | Toe/Heel Strike Location | (c) | present | present | present | present | partial (#14461) |
-| Counter-Torque Stabilization (Hand Couples, Gust) | (g) | partial (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
+| Counter-Torque Stabilization (Hand Couples, Gust) | (g) | present | missing (#14469) | missing (#14470) | missing (#14470) | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
-| Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | partial (#14464) | partial (#14464) | partial (#14463) |
-| Optimum Read / Auto-Solve Aim | (e) | present | present | partial (#14466) | partial (#14466) | partial (#14465) |
+| Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | partial (#14463) |
+| Optimum Read / Auto-Solve Aim | (e) | present | present | present | present | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | present | present | present | partial (#14467) |
 | Saved Scenarios and Comparison | (h) | missing (#14471) | missing (#14471) | missing (#14472) | missing (#14472) | present |
 | JSON Import/Export of a Setup | (h) | partial (#14471) | partial (#14471) | missing (#14472) | missing (#14472) | present |
@@ -55,7 +55,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Studio: partial (#14461). `src/apps/putting_studio/index.html`, `src/apps/putting_studio/js/controls_c.js`. Slider is toe-only (0-15 mm); no heel strikes.
 
 **Counter-Torque Stabilization (Hand Couples, Gust)**
-- Core/API: partial (#14469). `src/shared/python/putting_dynamics/counter_torque.py`. Closed-form two-hand couple model (preload, off-plane preload, noise, gust, lie, shared putter presets) in the core; hand couples sum to the required moment without noise. The /counter-torque route is part 2.
+- Core/API: present. `src/shared/python/putting_dynamics/counter_torque.py`, `src/api/routes/putting_green.py`. Closed-form two-hand couple model (preload, off-plane preload, noise, gust, lie, shared putter presets) in the core; hand couples sum to the required moment without noise. Served on POST /counter-torque as one list per sample field.
 - PyQt6: missing (#14469). none. None.
 - React: missing (#14470). none. None.
 - Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/charts2d.js`, `src/apps/putting_studio/js/controls_c.js`. Closed-form couple model, gust pulse and torque charts; drift-gated sample for sample against the core (tests/unit/putting_dynamics/test_counter_torque.py).
@@ -69,13 +69,13 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 **Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets)**
 - Core/API: present. `src/shared/python/putting_dynamics/green_spec.py`, `src/api/routes/putting_green.py`. GreenSpec (slope, two-tier step, seeded undulation, named presets) on /simulate, /scatter, /read-green and /contours; GET /green-presets.
 - PyQt6: present. `src/tools/putting_green_gui/_scene_builder.py`, `src/tools/putting_green_gui/gui.py`. Green Type selector (cross slope or any core preset), seeded undulation in mm or in, green seed; all on the shared GreenSpec.
-- React: partial (#14464). `ui/src/pages/PuttingGreen.tsx`. Grade, aspect, grain, bumps; no green-type selector or presets.
+- React: present. `ui/src/components/putting/GreenTypeControl.tsx`, `ui/src/utils/greenTypes.ts`. Green Type selector (cross slope or any core preset from GET /green-presets) sent as the core green spec on /simulate-3d; slope and bump fields lock under a preset (golden-pinned, #14464).
 - Studio: partial (#14463). `src/apps/putting_studio/js/putting_physics.js`, `src/apps/putting_studio/js/io.js`. Flat and slope presets plus stimp ramp; undulation switches on with slope and is not selectable.
 
 **Optimum Read / Auto-Solve Aim**
 - Core/API: present. `src/shared/python/putting_dynamics/green_reading.py`, `src/shared/python/putting_analytics/optimize.py`, `src/api/routes/putting_green.py`. solve_aim and best_action present; /read-green returns pace, heading, holed and converged in one call on any GreenSpec green.
 - PyQt6: present. `src/tools/putting_green_gui/_scene_builder.py`, `src/tools/putting_green_gui/gui.py`. Auto-Solve Read runs solve_aim on the tile's surface off the GUI thread and writes the pace and aim into the controls.
-- React: partial (#14466). `ui/src/pages/PuttingAnalytics.tsx`. Analytics best aim/pace study; nothing on the simulator page.
+- React: present. `ui/src/components/putting/AutoSolveButton.tsx`, `ui/src/utils/autoSolve.ts`, `ui/src/pages/PuttingGreen.tsx`. Auto-Solve Read calls /solve-aim-3d on the page's green, writes the pace and aim into the controls, simulates the solved putt and shows the desktop read text (golden-pinned).
 - Studio: partial (#14465). `src/apps/putting_studio/js/controls_c.js`. Aim-only grid search from one noise-free putt.
 
 **Player-Specific Bellman Strokes Gained**

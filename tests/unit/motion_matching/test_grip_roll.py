@@ -159,8 +159,8 @@ def test_flagship_driver_grip_is_neutral_15_degrees_face_on() -> None:
 
 
 def test_before_receipt_pins_the_owner_observed_90_degree_grip() -> None:
-    """Pre-A2 spec (receipt_before.json): top of lead hand, underside of trail."""
-    before = json.loads((EVIDENCE / "receipt_before.json").read_text("utf-8"))
+    """Pre-A2 spec (grip_roll_before.json): top of lead hand, underside of trail."""
+    before = json.loads((EVIDENCE / "grip_roll_before.json").read_text("utf-8"))
     assert before["lead_roll_deg"] == pytest.approx(97.9, abs=0.5)
     assert before["trail_roll_deg"] == pytest.approx(108.0, abs=0.5)
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T03:29:08Z",
+  "generated_at": "2026-11-05T05:12:05Z",
   "rows": [
     {
       "acceptance": null,
@@ -24,7 +24,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/anthropometry/de_leva_whole_rows_receipt.json",
-      "sha256": "6fd770c1091b0279aa45eeb3f2f70198bc95f933fc4e2d20b47c77e2b6b1ce1a"
+      "sha256": "d121e0391e532ed5ca57639ca2c1a261ff25d6566b4c8eb3522e001157f82254"
     },
     {
       "acceptance": null,

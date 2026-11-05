@@ -1,0 +1,29 @@
+{
+  "NeckInputX": {
+    "motion": "lateral bending",
+    "min_deg": -14.4,
+    "max_deg": 33.9,
+    "limit_deg": [
+      -45.0,
+      45.0
+    ]
+  },
+  "NeckInputY": {
+    "motion": "flexion/extension",
+    "min_deg": -25.6,
+    "max_deg": 0.2,
+    "limit_deg": [
+      -60.0,
+      60.0
+    ]
+  },
+  "NeckInputZ": {
+    "motion": "axial rotation",
+    "min_deg": -80.1,
+    "max_deg": 69.5,
+    "limit_deg": [
+      -80.0,
+      80.0
+    ]
+  }
+}

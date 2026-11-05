@@ -25,14 +25,23 @@ from __future__ import annotations
 
 import dataclasses
 import math
-from enum import Enum
 from typing import TYPE_CHECKING, Annotated, Literal, Protocol
 
 import numpy as np
 from fastapi import APIRouter, Depends, Request
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
+from src.api.models.putting_counter_torque import (
+    CounterTorqueRequest,
+    CounterTorqueResponse,
+)
+from src.api.models.putting_green_requests import (
+    AimSolve3DResponse,
+    GreenPresetName,
+    GreenShapeRequest,
+    Putt3DSimulationRequest,
+)
 from src.api.models.putting_playback import (
     BallModeName,
     PhaseMarkResponse,
@@ -47,16 +56,10 @@ from src.shared.python.core.contracts import PostconditionError, precondition, r
 from src.shared.python.putting_dynamics.green_spec import (
     GREEN_PRESETS,
     GreenSpec,
-    green_preset,
 )
 from src.shared.python.putting_dynamics.putter_presets import (
     BALANCE_PRESETS,
     balance_preset,
-)
-from src.shared.python.putting_dynamics.types import (
-    TYPICAL_HEAD_MASS_KG,
-    TYPICAL_HEAD_MOI_KG_M2,
-    TYPICAL_LOFT_DEG,
 )
 
 if TYPE_CHECKING:
@@ -70,42 +73,8 @@ if TYPE_CHECKING:
 
 router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
 
-#: Putter head used when a request carries only a stroke speed (shared by
-#: ``/simulate-3d`` defaults and the 2-D routes).
-_DEFAULT_HEAD_MASS_KG = TYPICAL_HEAD_MASS_KG
-_DEFAULT_HEAD_MOI_KG_M2 = TYPICAL_HEAD_MOI_KG_M2
-_DEFAULT_LOFT_DEG = TYPICAL_LOFT_DEG
-
 
 # -- Request / Response Models --
-
-
-#: The shared core's preset names, so an unknown one is a 422 in body or query.
-GreenPresetName = Enum(  # type: ignore[misc]
-    "GreenPresetName", {key: key for key in GREEN_PRESETS}, type=str
-)
-
-
-class GreenShapeRequest(BaseModel):
-    """The green's shape (#14463): a named preset, or slope, tier and bumps.
-
-    A ``preset`` replaces every other field with that preset's shape.
-    """
-
-    preset: GreenPresetName | None = Field(None, description="GET /green-presets")
-    grade_percent: float = Field(0.0, ge=0.0, le=10.0)
-    aspect_deg: float = Field(0.0, ge=-360.0, le=360.0, description="Falls toward")
-    bump_height_m: float = Field(0.0, ge=0.0, le=0.05)
-    bump_length_m: float = Field(1.5, gt=0.0, le=20.0)
-    tier_height_m: float = Field(0.0, ge=0.0, le=0.15)
-    tier_width_m: float = Field(1.0, gt=0.0, le=5.0)
-    seed: int = Field(0, ge=0)
-
-    def spec(self) -> GreenSpec:
-        """The shared core's description of this green."""
-        if self.preset is not None:
-            return green_preset(self.preset.value)
-        return GreenSpec(**self.model_dump(exclude={"preset"}))
 
 
 def _flat_green() -> GreenShapeRequest:
@@ -223,56 +192,6 @@ class GreenContourResponse(BaseModel):
     grid_y: list[list[float]]
     elevations: list[list[float]]
     hole_position: list[float]
-
-
-class Putt3DSimulationRequest(BaseModel):
-    """Physics and visualization inputs for one three-dimensional putt."""
-
-    putter_speed_mps: float = Field(1.8, gt=0.0, le=10.0)
-    loft_deg: float = Field(_DEFAULT_LOFT_DEG, ge=-6.0, le=10.0)
-    head_mass_kg: float = Field(_DEFAULT_HEAD_MASS_KG, ge=0.1, le=1.0)
-    head_moi_kg_m2: float = Field(_DEFAULT_HEAD_MOI_KG_M2, ge=1e-5, le=1e-2)
-    coefficient_of_restitution: float = Field(0.78, gt=0.0, lt=1.0)
-    hosel_toe_m: float = Field(0.0, ge=-0.08, le=0.08)
-    hosel_forward_m: float = Field(0.0, ge=-0.05, le=0.05)
-    balance_type: str | None = Field(
-        None,
-        description=(
-            "Named core putter head (see /putter-presets); when set it supplies "
-            "head mass, MOI and hosel offsets, overriding those fields"
-        ),
-    )
-    impact_toe_m: float = Field(
-        0.0, ge=-0.08, le=0.08, description="Strike offset, toe + / heel - [m]"
-    )
-    stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
-    grade_percent: float = Field(0.0, ge=0.0, le=10.0)
-    downhill_aspect_deg: float = Field(0.0, ge=-180.0, le=180.0)
-    grain_strength: float = Field(0.0, ge=0.0, lt=0.9)
-    grain_direction_deg: float = Field(0.0, ge=-180.0, le=180.0)
-    rolling_velocity_coefficient: float = Field(0.0, ge=0.0, le=1.0)
-    bump_height_m: float = Field(0.0, ge=0.0, le=0.01)
-    friction_variation: float = Field(0.0, ge=0.0, le=0.9)
-    random_seed: int = Field(8345, ge=0, le=2**31 - 1)
-    hole_x_m: float = Field(3.0, ge=-9.0, le=9.0)
-    hole_y_m: float = Field(0.0, ge=-9.0, le=9.0)
-    aim_heading_deg: float = Field(
-        0.0, ge=-180.0, le=180.0, description="Strike heading from +x, CCW [deg]"
-    )
-    green: GreenShapeRequest | None = Field(
-        None,
-        description=(
-            "Core green shape (#14464); when set it replaces grade_percent, "
-            "downhill_aspect_deg and bump_height_m"
-        ),
-    )
-
-    @field_validator("balance_type")
-    @classmethod
-    def _known_balance_type(cls, value: str | None) -> str | None:
-        if value is not None and value not in BALANCE_PRESETS:
-            raise ValueError(f"balance_type must be one of {sorted(BALANCE_PRESETS)}")
-        return value
 
 
 class BalancePresetResponse(BaseModel):
@@ -536,6 +455,33 @@ async def simulate_putt_3d(
     )
 
 
+@router.post("/solve-aim-3d", response_model=AimSolve3DResponse)
+@limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
+@handle_api_errors
+async def solve_aim_3d(
+    request: Request, payload: Putt3DSimulationRequest
+) -> AimSolve3DResponse:
+    """The pace and line that hole ``/simulate-3d``'s putt on its own surface.
+
+    Runs the core's ``solve_aim`` with the request's head from the origin to
+    the hole, like the desktop Auto-Solve; the read assumes a centred strike
+    and ignores the request's speed and aim.
+    """
+    del request
+    from src.shared.python.putting_dynamics import solve_aim
+
+    surface, _, putter = _build_putting_3d_surface(payload)
+    hole = (payload.hole_x_m, payload.hole_y_m)
+    aim = solve_aim(surface, (0.0, 0.0), hole, putter)
+    return AimSolve3DResponse(
+        putter_speed_mps=aim.putter_speed_mps,
+        aim_heading_deg=math.degrees(aim.heading_rad),
+        break_m=aim.break_m,
+        holed=aim.holed,
+        converged=aim.converged,
+    )
+
+
 @router.post("/simulate", response_model=PuttSimulationResponse)
 @limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
 @precondition(
@@ -718,6 +664,32 @@ async def get_putter_presets() -> BalancePresetsResponse:
         BalancePresetResponse(**dataclasses.asdict(p)) for p in BALANCE_PRESETS.values()
     ]
     return BalancePresetsResponse(presets=presets)
+
+
+@router.post("/counter-torque", response_model=CounterTorqueResponse)
+@handle_api_errors
+async def counter_torque(request: CounterTorqueRequest) -> CounterTorqueResponse:
+    """Hand couples, forces and gust response over the stroke (#14469).
+
+    Serves :func:`~src.shared.python.putting_dynamics.counter_torque.
+    stroke_series`, the studio's closed-form two-hand couple model moved
+    into the shared core; an out-of-range setting is a 400.
+    """
+    from dataclasses import asdict, fields
+
+    from src.shared.python.putting_dynamics import counter_torque as ct
+
+    settings = request.model_dump()
+    n_points = settings.pop("n_points")
+    inputs = ct.CounterTorqueInputs(**settings)
+    series = [asdict(s) for s in ct.stroke_series(inputs, n_points=n_points)]
+    return CounterTorqueResponse(
+        putter_name=BALANCE_PRESETS[inputs.putter].name,
+        samples={
+            f.name: [row[f.name] for row in series]
+            for f in fields(ct.CounterTorqueSample)
+        },
+    )
 
 
 @router.get("/contours", response_model=GreenContourResponse)

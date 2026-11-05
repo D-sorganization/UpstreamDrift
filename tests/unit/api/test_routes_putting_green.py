@@ -676,3 +676,81 @@ def test_simulate_3d_rejects_an_aim_beyond_180(client: TestClient) -> None:
         "/tools/putting-green/simulate-3d", json={"aim_heading_deg": 181.0}
     )
     assert response.status_code == 422
+
+
+def test_solve_aim_3d_is_the_core_read_on_the_simulator_surface(
+    client: TestClient,
+) -> None:
+    from src.api.routes.putting_green import (
+        Putt3DSimulationRequest,
+        _build_putting_3d_surface,
+    )
+    from src.shared.python.putting_dynamics import solve_aim
+
+    body = {
+        "green": {"preset": "tiered"},
+        "balance_type": "counterbalanced",
+        "hole_x_m": 4.0,
+        "hole_y_m": 0.5,
+    }
+    response = client.post("/tools/putting-green/solve-aim-3d", json=body)
+    assert response.status_code == 200, response.text
+    got = response.json()
+    surface, _, putter = _build_putting_3d_surface(
+        Putt3DSimulationRequest.model_validate(body)
+    )
+    want = solve_aim(surface, (0.0, 0.0), (4.0, 0.5), putter)
+    assert got["putter_speed_mps"] == pytest.approx(want.putter_speed_mps)
+    assert got["aim_heading_deg"] == pytest.approx(math.degrees(want.heading_rad))
+    assert got["break_m"] == pytest.approx(want.break_m)
+    assert (got["holed"], got["converged"]) == (want.holed, want.converged)
+
+
+def test_the_solved_read_holes_on_simulate_3d(client: TestClient) -> None:
+    body = {"grade_percent": 2.0, "downhill_aspect_deg": 90.0, "hole_x_m": 3.0}
+    read = client.post("/tools/putting-green/solve-aim-3d", json=body).json()
+    assert read["holed"]
+    putt = client.post(
+        "/tools/putting-green/simulate-3d",
+        json={
+            **body,
+            "putter_speed_mps": read["putter_speed_mps"],
+            "aim_heading_deg": read["aim_heading_deg"],
+        },
+    ).json()
+    assert putt["holed"]
+
+
+def test_counter_torque_serves_the_core_stroke_series(client: TestClient) -> None:
+    """Golden parity (#14469): every column is the core couple model's value."""
+    from dataclasses import asdict
+
+    from src.shared.python.putting_dynamics import counter_torque as ct
+
+    from src.shared.python.putting_dynamics import BALANCE_PRESETS
+
+    body = {
+        "preload_nm": 0.9,
+        "noise_scale": 0.4,
+        "putter": "counterbalanced",
+        "n_points": 30,
+    }
+    response = client.post("/tools/putting-green/counter-torque", json=body)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    inputs = ct.CounterTorqueInputs(
+        preload_nm=0.9, noise_scale=0.4, putter="counterbalanced"
+    )
+    core = [asdict(s) for s in ct.stroke_series(inputs, n_points=30)]
+    assert data["putter_name"] == BALANCE_PRESETS["counterbalanced"].name
+    for key, column in data["samples"].items():
+        assert column == pytest.approx([row[key] for row in core]), key
+    assert set(data["samples"]) == set(core[0])
+
+
+@pytest.mark.parametrize(
+    "body", [{"preload_nm": -1.0}, {"putter": "anser"}, {"n_points": 0}]
+)
+def test_counter_torque_rejects_bad_inputs(client: TestClient, body: dict) -> None:
+    response = client.post("/tools/putting-green/counter-torque", json=body)
+    assert response.status_code in (400, 422), response.text

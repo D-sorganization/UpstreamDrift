@@ -1,9 +1,11 @@
 import type {
+  AimSolve3DResponse,
   BalancePresetsResponse,
   Putt3DSimulationRequest,
   Putt3DSimulationResponse,
 } from "./generated/types";
 import type { DispersionArgs } from "@/utils/dispersion";
+import type { GreenPresets } from "@/utils/greenTypes";
 import type {
   StrokesGainedArgs,
   StrokesGainedReport,
@@ -24,11 +26,26 @@ export function simulatePutt3D(
   );
 }
 
+/** The core's holing pace and line for this green (solve_aim, #14466). */
+export function solveAim3D(
+  request: Putt3DSimulationRequest,
+): Promise<AimSolve3DResponse> {
+  return apiFetch<AimSolve3DResponse>("/api/tools/putting-green/solve-aim-3d", {
+    method: "POST",
+    body: JSON.stringify(request),
+  });
+}
+
 /** The shared core's named putter heads (putter_presets.BALANCE_PRESETS). */
 export function fetchPutterPresets(): Promise<BalancePresetsResponse> {
   return apiFetch<BalancePresetsResponse>(
     "/api/tools/putting-green/putter-presets",
   );
+}
+
+/** The shared core's named green shapes, by preset key (#14464). */
+export function fetchGreenPresets(): Promise<GreenPresets> {
+  return apiFetch<GreenPresets>("/api/tools/putting-green/green-presets");
 }
 
 /** Rest positions of a noisy batch (core service_dispersion.dispersion_study). */

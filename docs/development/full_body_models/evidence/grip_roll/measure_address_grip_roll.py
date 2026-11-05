@@ -147,7 +147,9 @@ def main() -> int:
         "trail_roll_deg": round(result["trail"], 2),
         "png": f"face_on_{args.tag}.png" if drawn else None,
     }
-    (HERE / f"receipt_{args.tag}.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    (HERE / f"grip_roll_{args.tag}.json").write_text(
+        json.dumps(receipt, indent=2) + "\n"
+    )
     print(json.dumps(receipt, indent=2))  # noqa: T201 - CLI output
     return 0
 

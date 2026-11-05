@@ -5,7 +5,7 @@
  */
 
 export type UnitSystem = "metric" | "imperial";
-export type Quantity = "distance" | "speed" | "smallLength";
+export type Quantity = "distance" | "speed" | "smallLength" | "breakLength";
 
 export const UNIT_SYSTEMS: readonly UnitSystem[] = ["metric", "imperial"];
 
@@ -17,6 +17,8 @@ const UNITS: Record<Quantity, Record<UnitSystem, [number, string]>> = {
   distance: { metric: [1, " m"], imperial: [FT_TO_M, " ft"] },
   speed: { metric: [1, " m/s"], imperial: [0.44704, " mph"] },
   smallLength: { metric: [0.001, " mm"], imperial: [FT_TO_M / 12, " in"] },
+  // Putt break as format_read shows it: cm, not mm, in metric (#14466).
+  breakLength: { metric: [0.01, " cm"], imperial: [FT_TO_M / 12, " in"] },
 };
 
 export function toDisplay(si: number, q: Quantity, s: UnitSystem): number {

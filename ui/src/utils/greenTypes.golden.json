@@ -1,0 +1,67 @@
+{
+  "_comment": "Generated from the shared core (#14464): GET /green-presets and the desktop green_label; test_green_types_ui_golden.py holds it to the core.",
+  "types": [
+    {
+      "key": null,
+      "label": "Cross Slope"
+    },
+    {
+      "key": "flat_practice",
+      "label": "Flat Practice"
+    },
+    {
+      "key": "undulating_championship",
+      "label": "Undulating Championship"
+    },
+    {
+      "key": "severe_slopes",
+      "label": "Severe Slopes"
+    },
+    {
+      "key": "tiered",
+      "label": "Tiered"
+    }
+  ],
+  "presets": {
+    "flat_practice": {
+      "preset": null,
+      "grade_percent": 0.0,
+      "aspect_deg": 0.0,
+      "bump_height_m": 0.0,
+      "bump_length_m": 1.5,
+      "tier_height_m": 0.0,
+      "tier_width_m": 1.0,
+      "seed": 0
+    },
+    "undulating_championship": {
+      "preset": null,
+      "grade_percent": 1.5,
+      "aspect_deg": 26.6,
+      "bump_height_m": 0.01,
+      "bump_length_m": 3.0,
+      "tier_height_m": 0.0,
+      "tier_width_m": 1.0,
+      "seed": 0
+    },
+    "severe_slopes": {
+      "preset": null,
+      "grade_percent": 5.0,
+      "aspect_deg": 0.0,
+      "bump_height_m": 0.0,
+      "bump_length_m": 1.5,
+      "tier_height_m": 0.05,
+      "tier_width_m": 2.0,
+      "seed": 0
+    },
+    "tiered": {
+      "preset": null,
+      "grade_percent": 0.0,
+      "aspect_deg": 90.0,
+      "bump_height_m": 0.0,
+      "bump_length_m": 1.5,
+      "tier_height_m": 0.08,
+      "tier_width_m": 3.0,
+      "seed": 0
+    }
+  }
+}

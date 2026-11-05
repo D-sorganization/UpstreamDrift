@@ -3,17 +3,26 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Putt3DSimulationResponse } from "@/api/generated/types";
-import { fetchPutterPresets, simulatePutt3D } from "@/api/puttingClient";
+import {
+  fetchGreenPresets,
+  fetchPutterPresets,
+  simulatePutt3D,
+  solveAim3D,
+} from "@/api/puttingClient";
 import { usePuttingStore } from "@/stores/usePuttingStore";
+import autoSolve from "@/utils/autoSolve.golden.json";
+import greens from "@/utils/greenTypes.golden.json";
 import golden from "@/utils/putterHead.golden.json";
 import { PuttingGreenPage } from "./PuttingGreen";
 
 vi.mock("@/api/puttingClient", () => ({
   simulatePutt3D: vi.fn(),
+  solveAim3D: vi.fn(),
   runDispersion: vi.fn(),
   runMakeSpread: vi.fn(),
   runStrokesGained: vi.fn(),
   fetchPutterPresets: vi.fn(),
+  fetchGreenPresets: vi.fn(),
 }));
 
 vi.mock("@/components/visualization/PuttingScene3D", () => ({
@@ -77,6 +86,7 @@ describe("PuttingGreenPage 3D workflow", () => {
     usePuttingStore.getState().reset();
     vi.mocked(simulatePutt3D).mockResolvedValue(response);
     vi.mocked(fetchPutterPresets).mockResolvedValue({ presets: [] });
+    vi.mocked(fetchGreenPresets).mockResolvedValue(greens.presets);
     vi.stubGlobal(
       "requestAnimationFrame",
       vi.fn(() => 1),
@@ -188,5 +198,75 @@ describe("PuttingGreenPage 3D workflow", () => {
       target: { value: "face_on" },
     });
     expect(usePuttingStore.getState().cameraView).toBe("face_on");
+  });
+
+  it("sends the chosen core green preset to /simulate-3d (#14464)", async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <PuttingGreenPage />
+      </QueryClientProvider>,
+    );
+    await screen.findByRole("option", { name: "Tiered" });
+    fireEvent.change(screen.getByLabelText("Green Type"), {
+      target: { value: "tiered" },
+    });
+    expect(screen.getByLabelText("Slope Grade")).toBeDisabled();
+    expect(screen.getByLabelText("Bump Height")).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Simulate Putt" }));
+    await waitFor(() => expect(simulatePutt3D).toHaveBeenCalled());
+    expect(vi.mocked(simulatePutt3D).mock.lastCall?.[0].green).toEqual({
+      ...greens.presets.tiered,
+      preset: "tiered",
+    });
+  });
+
+  it("writes the core's read into pace and aim, then simulates it (#14466)", async () => {
+    usePuttingStore.getState().setUnitSystem("metric");
+    vi.mocked(simulatePutt3D).mockClear();
+    vi.mocked(solveAim3D).mockResolvedValue(autoSolve.solve);
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <PuttingGreenPage />
+      </QueryClientProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Auto-Solve Read/ }));
+
+    expect((await screen.findByRole("status")).textContent).toBe(
+      autoSolve.reads.metric,
+    );
+    const solved = {
+      putter_speed_mps: autoSolve.solve.putter_speed_mps,
+      aim_heading_deg: autoSolve.solve.aim_heading_deg,
+    };
+    expect(vi.mocked(solveAim3D).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({ hole_x_m: 3 }),
+    );
+    await waitFor(() =>
+      expect(vi.mocked(simulatePutt3D).mock.lastCall?.[0]).toEqual(
+        expect.objectContaining(solved),
+      ),
+    );
+    expect(usePuttingStore.getState().parameters).toEqual(
+      expect.objectContaining(solved),
+    );
+    expect(screen.getByLabelText("Aim Heading")).toHaveValue(
+      String(autoSolve.solve.aim_heading_deg),
+    );
+  });
+
+  it("shows why the core rejected the solve (#14466)", async () => {
+    vi.mocked(simulatePutt3D).mockClear();
+    vi.mocked(solveAim3D).mockRejectedValue(new Error("hole off the green"));
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <PuttingGreenPage />
+      </QueryClientProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Auto-Solve Read/ }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Auto-Solve rejected: hole off the green",
+    );
+    expect(simulatePutt3D).not.toHaveBeenCalled();
   });
 });

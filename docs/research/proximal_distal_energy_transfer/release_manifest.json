@@ -437,6 +437,10 @@
       "sha256": "c29c51d55e8edb984a4c5bf8875d728fc4561860a4897e26b6e0bb3f5bf62f11",
       "bytes": 15020
     },
+    "docs/research/proximal_distal_energy_transfer/WSCG_ZTCF_UPDATE_DRAFT.md": {
+      "sha256": "ecc16eeed5feebb7f522a82a9854647b3f204402eb0c14116e95ad7a2b16589d",
+      "bytes": 6432
+    },
     "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd": {
       "sha256": "26c1cbacaeae03f1285c1deb13953116dde95f0574fceb2e3a260446f99cf51a",
       "bytes": 16042
