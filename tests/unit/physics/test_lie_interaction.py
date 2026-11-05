@@ -11,9 +11,13 @@ from src.shared.python.physics.lie_interaction import (
     ImpactPerturbation,
     LieType,
     effective_face_friction,
+    lie_from_code,
     lie_perturbation,
+    perturb_impact_rows,
 )
 from src.shared.python.sg_optimizer.course.conditions import RoughModel
+from src.shared.python.sg_optimizer.course.rasterize import LIE_CODES
+from src.shared.python.sg_optimizer.shot_model.skill_family import IMPACT_FIELDS
 
 pytestmark = pytest.mark.unit
 
@@ -102,3 +106,31 @@ def test_face_friction_term_uses_the_shared_friction_cone() -> None:
     tangent = np.array([0.0, mu_dry * 100.0 * 0.99, 0.0])
     assert check_friction_cone(100.0, tangent, mu_dry)
     assert not check_friction_cone(100.0, tangent, mu_rough)
+
+
+def test_lie_codes_map_to_lie_types_and_reject_unmodelled_codes() -> None:
+    assert lie_from_code(LIE_CODES["fairway"]) is LieType.FAIRWAY
+    assert lie_from_code(LIE_CODES["tee"]) is LieType.FAIRWAY
+    assert lie_from_code(LIE_CODES["rough"]) is LieType.ROUGH
+    assert lie_from_code(LIE_CODES["sand"]) is LieType.BUNKER
+    with pytest.raises(ValueError):
+        lie_from_code(LIE_CODES["water"])
+
+
+def test_impact_rows_pass_through_on_fairway_and_shift_in_rough() -> None:
+    rows = np.tile(np.array([100.0, 1.0, 2.0, -3.0, 4.0, 5.0]), (4000, 1))
+    rng = np.random.default_rng(1)
+    out, spin = perturb_impact_rows(rows, lie_perturbation(LieType.FAIRWAY), rng)
+    assert np.array_equal(out, rows) and np.all(spin == 1.0)
+    rough = lie_perturbation(LieType.ROUGH, 0.8)
+    out, spin = perturb_impact_rows(rows, rough, np.random.default_rng(1))
+    speed, face = (
+        IMPACT_FIELDS.index("clubhead_speed_mph"),
+        IMPACT_FIELDS.index("face_angle_deg"),
+    )
+    assert out[:, speed].mean() < 100.0 and out[:, speed].std() > 0.0
+    assert out[:, face].mean() < 1.0  # rough closes the face
+    assert spin.mean() < 1.0
+    other = [i for i in range(len(IMPACT_FIELDS)) if i not in (speed, face)]
+    assert np.array_equal(out[:, other], rows[:, other])
+    assert np.array_equal(rows[0], [100.0, 1.0, 2.0, -3.0, 4.0, 5.0])  # input intact

@@ -28,6 +28,8 @@ from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
 from src.shared.python.sg_optimizer.course.conditions import RoughModel
+from src.shared.python.sg_optimizer.course.rasterize import LIE_CODES
+from src.shared.python.sg_optimizer.shot_model.skill_family import IMPACT_FIELDS
 
 Array = NDArray[np.float64]
 
@@ -201,3 +203,43 @@ def effective_face_friction(mu_dry: float, perturbation: ImpactPerturbation) -> 
     """
     require(mu_dry >= 0.0, "mu_dry must be >= 0", mu_dry)
     return mu_dry * perturbation.spin_factor
+
+
+_CODE_TO_LIE: dict[int, LieType] = {
+    LIE_CODES["tee"]: LieType.FAIRWAY,
+    LIE_CODES["fairway"]: LieType.FAIRWAY,
+    LIE_CODES["rough"]: LieType.ROUGH,
+    LIE_CODES["sand"]: LieType.BUNKER,
+}
+_SPEED = IMPACT_FIELDS.index("clubhead_speed_mph")
+_FACE = IMPACT_FIELDS.index("face_angle_deg")
+
+
+def lie_from_code(code: int) -> LieType:
+    """The :class:`LieType` of a course ``LIE_CODES`` value (the B3 lie dimension).
+
+    Only tee, fairway, rough and sand modify the strike; any other code (water,
+    trees, green...) is not a full-swing lie and is rejected.
+    """
+    require(code in _CODE_TO_LIE, "lie code has no impact modifier", code)
+    return _CODE_TO_LIE[code]
+
+
+def perturb_impact_rows(
+    rows: Array, perturbation: ImpactPerturbation, rng: np.random.Generator
+) -> tuple[Array, Array]:
+    """Apply ``perturbation`` to ``IMPACT_FIELDS`` rows; return ``(rows, spin_factor)``.
+
+    Clubhead speed is scaled and the face angle shifted per shot; every other
+    column is untouched and ``rows`` is not modified.  Spin is not an impact
+    field, so its per-shot factor is returned for the caller to apply.
+    Assumption: ball speed is proportional to clubhead speed, so the speed factor
+    acts on clubhead speed.
+    """
+    require(rows.ndim == 2 and rows.shape[1] == len(IMPACT_FIELDS), "impact rows")
+    draws = perturbation.sample(rng, len(rows))
+    out = rows.copy()
+    out[:, _SPEED] *= draws.speed_factor
+    out[:, _FACE] += draws.face_twist_deg
+    ensure(out.shape == rows.shape, "row shape is preserved")
+    return out, draws.spin_factor
