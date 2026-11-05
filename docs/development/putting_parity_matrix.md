@@ -11,7 +11,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | present | present | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | partial (#14461) |
 | Toe/Heel Strike Location | (c) | present | present | present | present | partial (#14461) |
-| Counter-Torque Stabilization (Hand Couples, Gust) | (g) | present | missing (#14469) | missing (#14470) | missing (#14470) | present |
+| Counter-Torque Stabilization (Hand Couples, Gust) | (g) | present | present | missing (#14470) | missing (#14470) | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | partial (#14466) | partial (#14466) | partial (#14465) |
@@ -56,7 +56,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 
 **Counter-Torque Stabilization (Hand Couples, Gust)**
 - Core/API: present. `src/shared/python/putting_dynamics/counter_torque.py`, `src/api/routes/putting_green.py`. Closed-form two-hand couple model (preload, off-plane preload, noise, gust, lie, shared putter presets) in the core; hand couples sum to the required moment without noise. Served on POST /counter-torque as one list per sample field.
-- PyQt6: missing (#14469). none. None.
+- PyQt6: present. `src/tools/putting_green_gui/_torque_panel.py`. Counter-Torque Stabilization panel: grip and off-plane preload, gust, hand noise, lie and the shared balance heads; charts the core's hand couples and the gust twist with and without the preload, couples and forces in the chosen units.
 - React: missing (#14470). none. None.
 - Studio: present. `src/apps/putting_studio/js/state.js`, `src/apps/putting_studio/js/charts2d.js`, `src/apps/putting_studio/js/controls_c.js`. Closed-form couple model, gust pulse and torque charts; drift-gated sample for sample against the core (tests/unit/putting_dynamics/test_counter_torque.py).
 
