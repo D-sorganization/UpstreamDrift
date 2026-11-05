@@ -4,6 +4,7 @@ import type {
   Putt3DSimulationResponse,
 } from "./generated/types";
 import type { DispersionArgs } from "@/utils/dispersion";
+import type { GreenPresets } from "@/utils/greenTypes";
 import type {
   StrokesGainedArgs,
   StrokesGainedReport,
@@ -29,6 +30,11 @@ export function fetchPutterPresets(): Promise<BalancePresetsResponse> {
   return apiFetch<BalancePresetsResponse>(
     "/api/tools/putting-green/putter-presets",
   );
+}
+
+/** The shared core's named green shapes, by preset key (#14464). */
+export function fetchGreenPresets(): Promise<GreenPresets> {
+  return apiFetch<GreenPresets>("/api/tools/putting-green/green-presets");
 }
 
 /** Rest positions of a noisy batch (core service_dispersion.dispersion_study). */

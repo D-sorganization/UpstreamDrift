@@ -10,6 +10,7 @@ import type {
 import { simulatePutt3D } from "@/api/puttingClient";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
 import { DispersionPanel } from "@/components/putting/DispersionPanel";
+import { GreenTypeControl } from "@/components/putting/GreenTypeControl";
 import { StrokesGainedPanel } from "@/components/putting/StrokesGainedPanel";
 import { PutterHeadControl } from "@/components/putting/PutterHeadControl";
 import { PuttingScene3D } from "@/components/visualization/PuttingScene3D";
@@ -357,6 +358,8 @@ function PlaybackControls() {
 
 export function PuttingGreenPage() {
   const parameters = usePuttingStore((state) => state.parameters);
+  // A core green preset replaces the slope and bump fields (#14464).
+  const presetGreen = Boolean(parameters.green);
   const result = usePuttingStore((state) => state.result);
   const playbackTimeS = usePuttingStore((state) => state.playbackTimeS);
   const cameraView = usePuttingStore((state) => state.cameraView);
@@ -467,6 +470,7 @@ export function PuttingGreenPage() {
         <HoselPositionControl />
       </Section>
       <Section title="Green Surface">
+        <GreenTypeControl />
         <RangeControl
           label="Stimp Rating"
           value={parameters.stimp_rating}
@@ -483,6 +487,7 @@ export function PuttingGreenPage() {
           min={0}
           max={6}
           step={0.1}
+          disabled={presetGreen}
           onChange={(grade_percent) => updateParameters({ grade_percent })}
         />
         <RangeControl
@@ -492,6 +497,7 @@ export function PuttingGreenPage() {
           min={-180}
           max={180}
           step={5}
+          disabled={presetGreen}
           onChange={(downhill_aspect_deg) =>
             updateParameters({ downhill_aspect_deg })
           }
@@ -511,6 +517,7 @@ export function PuttingGreenPage() {
           quantity="smallLength"
           range={{ metric: [0, 5, 0.25], imperial: [0, 0.2, 0.01] }}
           decimals={{ metric: 1, imperial: 2 }}
+          disabled={presetGreen}
           onChangeSi={(bump_height_m) => updateParameters({ bump_height_m })}
         />
         <RangeControl
