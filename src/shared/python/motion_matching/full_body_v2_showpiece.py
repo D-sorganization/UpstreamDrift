@@ -31,6 +31,8 @@ __all__ = ["derive_showpiece_v2", "main", "showpiece_v2_bytes"]
 _MODELS = Path(__file__).resolve().parents[4] / "docs/development/full_body_models"
 SHOWPIECE_V1 = _MODELS / "full_body_spec_anthro_driver.json"
 SHOWPIECE_V2 = _MODELS / "full_body_spec_anthro_driver_v2.json"
+#: SHOW-A5 (#14554) decision, ADR-0059: Bruno 2015 regional coupling is on.
+TRUNK_COUPLED = True
 PROVENANCE = (
     "SHOW-A3 (#14552): full-body-v2 showpiece driver derived from "
     "full_body_spec_anthro_driver.json at the HRG-D2 landmark trunk locations"
@@ -44,7 +46,11 @@ def derive_showpiece_v2(v1: Mapping[str, Any]) -> dict[str, Any]:
     ``v1`` is never modified.
     """
     require(v1.get("schema_version") == "full-body-v1", "v1 driver spec required")
-    return with_trunk_coupling(derive_landmark_v2_spec(v1, provenance=PROVENANCE))
+    # Coupled by default: the marker Jacobian cannot separate lumbar from thoracic
+    # (docs/adr/0059, SHOW-A5), so free DOFs would only fit noise.
+    return with_trunk_coupling(
+        derive_landmark_v2_spec(v1, provenance=PROVENANCE), enabled=TRUNK_COUPLED
+    )
 
 
 def showpiece_v2_bytes(v1: Mapping[str, Any]) -> bytes:

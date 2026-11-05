@@ -937,6 +937,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14560 · SHOW-C4: Shaft_State_Series Reports MuJoCo Chain-Shaft Tip Deflection, Lead/Droop, Deflection Rate and Strain Energy Through Impact, With R11-Window Evidence on the Best-Fit Driver
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14560
+- **Branch:** merged via #14598
+- **PR:** #14598
+- **Paths:** see #14598
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`1760fe35`; collated from changes/14560-show-c4-shaft-state-series-reports-mujoc.md)
+- **Summary:** SHOW-C4: shaft_state_series reports MuJoCo chain-shaft tip deflection, lead/droop, deflection rate and strain energy through impact, with R11-window evidence on the best-fit driver
+- **Next step:** Shipped in PR #14598.
+
+### DL-#14554 · SHOW-A5: Trunk Observability Report (Marker Jacobian SVD), ADR-0059 and Coupled-by-Default Showpiece Spec
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14554
+- **Branch:** merged via #14603
+- **PR:** #14603
+- **Paths:** see #14603
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`513127ec`; collated from changes/14554-show-a5-trunk-observability-report-marke.md)
+- **Summary:** SHOW-A5: trunk observability report (marker Jacobian SVD), ADR-0059 and coupled-by-default showpiece spec
+- **Next step:** Shipped in PR #14603.
+
+### DL-#14553 · SHOW-A4: Cited Neck ROM (neck_rom.py, Single Source for Range_of_Motion) Enforced as MJCF Joint Limits on NeckInput X/Y/Z
+
+- **State:** shipped
+- **Owner:** fleet-orchestrator
+- **Issue:** #14553
+- **Branch:** desk/show-neck/14553-neck-segment
+- **PR:** #14578
+- **Paths:** see #14578
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`00e1e9ff`; collated from changes/14553-show-a4-neck-rom.md)
+- **Summary:** SHOW-A4: cited neck ROM (neck_rom.py, single source for range_of_motion) enforced as MJCF joint limits on NeckInput X/Y/Z
+- **Next step:** Shipped in PR #14578.
+
+### DL-#14595 · CI Standard Sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 Workflow-Wide and Passes Pip-Audit --Timeout 60, so Transient PyPI Read Timeouts No Longer Fail CI
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14595
+- **Branch:** merged via #14597
+- **PR:** #14597
+- **Paths:** see #14597
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`807605a6`; collated from changes/14595-ci-standard-sets-pip-retries-10-and-pip.md)
+- **Summary:** CI Standard sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 workflow-wide and passes pip-audit --timeout 60, so transient PyPI read timeouts no longer fail CI
+- **Next step:** Shipped in PR #14597.
+
 ### DL-#14566 · SHOW-B2: SkillFamily Schema (Impact-Condition Mean/Cov + Provenance), Assumption-Marked Presets, Registry, PlayerProfile Link
 
 - **State:** shipped
@@ -1008,10 +1060,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14466
 - **Branch:** merged via #14588
-- **PR:** #14588
+- **PR:** #14588, #14604
 - **Paths:** see #14588
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`8fff9f83`; collated from changes/14466-solve-aim-3d.md)
+- **Last verified:** 2026-11-05 (`416c462c`; collated from changes/14466-react-putting-simulator-gains-the-deskto.md)
 - **Summary:** Putting API: POST /solve-aim-3d solves the pace and line that hole a /simulate-3d putt on that route's own surface and head (core solve_aim, like the desktop Auto-Solve); the 3-D request models move to src/api/models/putting_green_requests.py
 - **Next step:** Shipped in PR #14588.
 
@@ -1099,10 +1151,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14469
 - **Branch:** merged via #14548
-- **PR:** #14548
+- **PR:** #14548, #14602
 - **Paths:** see #14548
 - **Started:** 2026-11-04
-- **Last verified:** 2026-11-04 (`fadc7ee1`; collated from changes/14469-putting-counter-torque-core.md)
+- **Last verified:** 2026-11-05 (`12fecba2`; collated from changes/14469-putting-counter-torque-route.md)
 - **Summary:** Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio
 - **Next step:** Shipped in PR #14548.
 

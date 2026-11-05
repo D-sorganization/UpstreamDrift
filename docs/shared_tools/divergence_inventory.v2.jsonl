@@ -1035,6 +1035,7 @@
 {"path": "impact_optimization/__init__.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/impact_target.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/physiological_envelope.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
+{"path": "impact_optimization/speed_continuation.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/spline_controls.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/trajectory_optimiser.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/trust_region.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
@@ -1525,6 +1526,7 @@
 {"path": "motion_matching/grip_fit.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/grip_fit_modes.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/grip_report.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/grip_roll.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/ground_support.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/gs3dx_variants.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/hip_calibration.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1720,6 +1722,7 @@
 {"path": "motion_matching/tracking_controller.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/trajectory_ik_options.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/trc_io.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/trunk_observability.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/turn_receipt.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/two_window_fit.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/validate_theta.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}

@@ -144,6 +144,18 @@ with a message that names the missing module. The 3D view needs the optional
 
   ![Strokes gained at 390 px](images/putting_strokes_gained_390.png)
 
+- **Counter-Torque Stabilization** (#14469) charts the shared core's
+  two-hand couple model over the stroke: the lead and trail hands' in-plane
+  couples, and the face twist a gust starts with the grip preload held and
+  with a slack grip. Set the grip and off-plane preload, the gust impulse,
+  hand noise, lie and the putter head (the shared balance presets). Couples
+  read in N·m or in·lbf and forces in N or lbf with the unit choice. The
+  model is closed form, so the charts replot on every change.
+
+  ![Counter-torque panel at 1280 px](images/putting_counter_torque_1280.png)
+
+  ![Counter-torque panel at 390 px](images/putting_counter_torque_390.png)
+
 ## Method
 
 The GUI is a thin renderer. All domain logic is in
