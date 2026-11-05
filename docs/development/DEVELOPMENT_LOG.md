@@ -742,6 +742,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14649 · Putting Studio: Auto-Solve Runs solveAimCore, a Port of the Core Solve_Aim (Pace Bisection and Heading Secant) Golden-Pinned to the Core Read on the Core Greens, and the Batch Strikes at the Solved Head Speed While the Read Is Current
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14649
+- **Branch:** merged via #14683
+- **PR:** #14683, #14678
+- **Paths:** see #14683
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`032b2de4`; collated from changes/14649-studio-roll.md)
+- **Summary:** Putting studio: Auto-Solve runs solveAimCore, a port of the core solve_aim (pace bisection and heading secant) golden-pinned to the core read on the core greens, and the batch strikes at the solved head speed while the read is current
+- **Next step:** Shipped in PR #14683.
+
+### DL-#14572 · SHOW-B8: Strategy CLI and HTML View With Tour vs Personal Strokes, Shot Options and Dispersion Ellipses
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14572
+- **Branch:** merged via #14659
+- **PR:** #14659
+- **Paths:** see #14659
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8b83fe3b`; collated from changes/14572-show-b8-strategy-cli-and-view.md)
+- **Summary:** SHOW-B8: strategy CLI and HTML view with tour vs personal strokes, shot options and dispersion ellipses
+- **Next step:** Shipped in PR #14659.
+
+### DL-#14551 · Neutral Address Grip: Flagship Driver Grip Set to the HX-Canonical Grip (Alpha -10.73, Psi 40, Gamma 0) so Both Hands Read 15 Deg Face-On (Was 98/108 Deg); Address and Swing Fixtures Re-Solved. Deferred to A6 (#14555): At Address the RW Wrist Reads -41.8 Deg (Range -40..25) and the Driver Swing Leaves the Wrist Ranges (RWInputY 691 Frames to -130 Deg, RWInputX 66 Frames, LWInputY 216 Frames); Numbers in Neutral_Grip.Json. Capture-Matching Receipts Keep Chaining to Full_Body_Spec_Anthro_Driver_Capture.Json (The Pre-A2 Fitted Grip, Fitted to the Capture and Not a Grip Recommendation): On the Neutral Grip the Seeds Receipt Fails the Gates (IK Closure 3.9 -> 76.8 mm vs 5 mm, IK RMS 29.5 -> 55.3 mm, Backswing Min Weight Fraction 0.0 BW, Address-to-Impact 64 mm vs 34 mm), the A6 Problem Statement
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14551
+- **Branch:** merged via #14644
+- **PR:** #14644
+- **Paths:** see #14644
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`1b514e12`; collated from changes/14551-neutral-address-grip-15-deg.md)
+- **Summary:** Neutral address grip: flagship driver grip set to the HX-canonical grip (alpha -10.73, psi 40, gamma 0) so both hands read 15 deg face-on (was 98/108 deg); address and swing fixtures re-solved. Deferred to A6 (#14555): at address the RW wrist reads -41.8 deg (range -40..25) and the driver swing leaves the wrist ranges (RWInputY 691 frames to -130 deg, RWInputX 66 frames, LWInputY 216 frames); numbers in neutral_grip.json. Capture-matching receipts keep chaining to full_body_spec_anthro_driver_capture.json (the pre-A2 fitted grip, fitted to the capture and not a grip recommendation): on the neutral grip the seeds receipt fails the gates (IK closure 3.9 -> 76.8 mm vs 5 mm, IK RMS 29.5 -> 55.3 mm, backswing min weight fraction 0.0 BW, address-to-impact 64 mm vs 34 mm), the A6 problem statement
+- **Next step:** Shipped in PR #14644.
+
 ### DL-#14648 · Putting Studio: Green Type Selector for Every Core Green Preset (Undulating Included), Height Grids Generated From GreenSpec Into Core_Greens.Js and Read With the Core Bilinear Lookup
 
 - **State:** shipped
@@ -800,10 +839,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14600
 - **Branch:** merged via #14658
-- **PR:** #14658
+- **PR:** #14658, #14674
 - **Paths:** see #14658
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`d0bbdc81`; collated from changes/14600-head-cg-offset-opt-in-and-toe-down-m-sha.md)
+- **Last verified:** 2026-11-05 (`7ecb8022`; collated from changes/14600-shaft-axis-from-chain.md)
 - **Summary:** Head-CG offset (opt-in) and toe_down_m shaft metric for the C4 shaft state (Refs #14600)
 - **Next step:** Shipped in PR #14658.
 
@@ -1060,10 +1099,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14561
 - **Branch:** merged via #14606
-- **PR:** #14606, #14673
+- **PR:** #14606, #14673, #14681
 - **Paths:** see #14606
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`f1615fcd`; collated from changes/14561-per-step-report-adds-face-path-and-aoa-e.md)
+- **Last verified:** 2026-11-05 (`ff319ca3`; collated from changes/14561-make-rom-and-velocity-hard-constraints-o.md)
 - **Summary:** SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report
 - **Next step:** Shipped in PR #14606.
 
@@ -1177,10 +1216,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14559
 - **Branch:** merged via #14589
-- **PR:** #14589, #14596, #14625, #14638, #14653, #14655
+- **PR:** #14589, #14596, #14625, #14638, #14653, #14655, #14680
 - **Paths:** see #14589
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`ecbc51d7`; collated from changes/14559-show-c3c-slice-3a-guarded-full-body-spee.md)
+- **Last verified:** 2026-11-05 (`c8c6b51e`; collated from changes/14559-show-c3c-slice-3b-per-speed-full-fidelit.md)
 - **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
 - **Next step:** Shipped in PR #14589.
 
