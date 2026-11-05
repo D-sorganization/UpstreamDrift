@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from src.shared.python.contracts import ContractViolationError
+
 from src.shared.python.sg_optimizer.shot_model.baseline_model import (
     BaselineShotModel,
     lie_modifiers,
@@ -47,10 +49,12 @@ class TableShotModel:
 
     def sample(self, player, shot, lie, conditions, rng, n):  # noqa: ANN001
         skill = CLUB_SKILL.get(shot.club)
-        key = (skill, skill, "fairway", "calm", "flat")
-        if skill is None or not self.table.has_cell(*key):
+        try:
+            cell = self.table.lookup(
+                skill or "", skill or "", "fairway", "calm", "flat"
+            )
+        except ContractViolationError:  # no cell for this club: use the baseline
             return self.fallback.sample(player, shot, lie, conditions, rng, n)
-        cell = self.table.lookup(*key)
         dist, sl, slat = lie_modifiers(lie, conditions)
         z = rng.standard_normal((n, 2))
         z[:, 1] = cell.corr * z[:, 0] + np.sqrt(1.0 - cell.corr**2) * z[:, 1]

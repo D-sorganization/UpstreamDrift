@@ -18,6 +18,8 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.motion_matching.neck_rom import NECK_ROM
+
 Array = NDArray[np.float64]
 
 LOWER_LIMB_RANGES_DEG: dict[str, tuple[float, float]] = {
@@ -33,9 +35,7 @@ UPPER_RANGES_DEG: dict[str, tuple[float, float]] = {
     "SpineInputX": (-35.0, 35.0),
     "SpineInputY": (-45.0, 45.0),
     "TorsoInput": (-100.0, 100.0),
-    "NeckInputX": (-45.0, 45.0),
-    "NeckInputY": (-60.0, 60.0),
-    "NeckInputZ": (-80.0, 80.0),
+    **{name: (rom.lower_deg, rom.upper_deg) for name, rom in NECK_ROM.items()},
     "LScapInputX": (-10.0, 30.0),
     "RScapInputX": (-30.0, 10.0),
     "LScapInputY": (-40.0, 40.0),

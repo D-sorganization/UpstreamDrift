@@ -8,6 +8,7 @@ replaces it with a fit; none is presented as measured here.
 
 from __future__ import annotations
 
+import math
 from dataclasses import replace
 from functools import lru_cache
 from pathlib import Path
@@ -22,6 +23,7 @@ from src.shared.python.sg_optimizer.shot_model.skill_family import (
     Provenance,
     SkillFamily,
     SkillSpec,
+    check_units,
 )
 
 PRESETS_PATH = (
@@ -47,6 +49,10 @@ def derive_family(base: SkillFamily, name: str, spec: dict[str, Any]) -> SkillFa
     """Scale a family's speed and sd; the result is a ``preset`` with its source."""
     prov = Provenance("preset", str(spec["source"]), str(spec["version"]))
     speed, disp = float(spec["speed_scale"]), float(spec["dispersion_scale"])
+    require(
+        math.isfinite(speed) and math.isfinite(disp) and speed > 0 and disp > 0,
+        "speed_scale and dispersion_scale must be finite and > 0",
+    )
     skills = {}
     for k, s in base.skills.items():
         d = s.distribution
@@ -60,6 +66,7 @@ def derive_family(base: SkillFamily, name: str, spec: dict[str, Any]) -> SkillFa
 def _presets() -> dict[str, SkillFamily]:
     require(PRESETS_PATH.exists(), f"preset file not found: {PRESETS_PATH}")
     raw = yaml.safe_load(PRESETS_PATH.read_text(encoding="utf-8"))
+    check_units(raw)
     corr = _corr_matrix(raw.get("correlation", {}))
     base_raw = raw["tour"]
     prov = Provenance("preset", str(base_raw["source"]), str(base_raw["version"]))

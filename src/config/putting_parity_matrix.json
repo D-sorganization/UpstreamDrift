@@ -62,11 +62,11 @@
       "title": "Counter-Torque Stabilization (Hand Couples, Gust)",
       "cluster": "g",
       "cells": {
-        "core_api": "missing #14469 | src/shared/python/grip_contact/couple_check.py | No putting counter-torque model in the core; a grip couple check exists outside the putting stack.",
-        "pyqt6": "missing #14469 |  | None.",
+        "core_api": "present | src/shared/python/putting_dynamics/counter_torque.py, src/api/routes/putting_green.py | Closed-form two-hand couple model (preload, off-plane preload, noise, gust, lie, shared putter presets) in the core; hand couples sum to the required moment without noise. Served on POST /counter-torque as one list per sample field.",
+        "pyqt6": "present | src/tools/putting_green_gui/_torque_panel.py | Counter-Torque Stabilization panel: grip and off-plane preload, gust, hand noise, lie and the shared balance heads; charts the core's hand couples and the gust twist with and without the preload, couples and forces in the chosen units.",
         "react": "missing #14470 |  | None.",
         "tauri": "missing #14470 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "present | src/apps/putting_studio/js/state.js, src/apps/putting_studio/js/charts2d.js, src/apps/putting_studio/js/controls_c.js | Closed-form couple model, gust pulse and torque charts (illustrative, not in the core: ADR-0058 gap)."
+        "studio": "present | src/apps/putting_studio/js/state.js, src/apps/putting_studio/js/charts2d.js, src/apps/putting_studio/js/controls_c.js | Closed-form couple model, gust pulse and torque charts; drift-gated sample for sample against the core (tests/unit/putting_dynamics/test_counter_torque.py)."
       }
     },
     "balance_type": {
@@ -86,8 +86,8 @@
       "cells": {
         "core_api": "present | src/shared/python/putting_dynamics/green_spec.py, src/api/routes/putting_green.py | GreenSpec (slope, two-tier step, seeded undulation, named presets) on /simulate, /scatter, /read-green and /contours; GET /green-presets.",
         "pyqt6": "present | src/tools/putting_green_gui/_scene_builder.py, src/tools/putting_green_gui/gui.py | Green Type selector (cross slope or any core preset), seeded undulation in mm or in, green seed; all on the shared GreenSpec.",
-        "react": "partial #14464 | ui/src/pages/PuttingGreen.tsx | Grade, aspect, grain, bumps; no green-type selector or presets.",
-        "tauri": "partial #14464 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "react": "present | ui/src/components/putting/GreenTypeControl.tsx, ui/src/utils/greenTypes.ts | Green Type selector (cross slope or any core preset from GET /green-presets) sent as the core green spec on /simulate-3d; slope and bump fields lock under a preset (golden-pinned, #14464).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist), so the Green Type selector ships unchanged.",
         "studio": "partial #14463 | src/apps/putting_studio/js/putting_physics.js, src/apps/putting_studio/js/io.js | Flat and slope presets plus stimp ramp; undulation switches on with slope and is not selectable."
       }
     },
@@ -97,8 +97,8 @@
       "cells": {
         "core_api": "present | src/shared/python/putting_dynamics/green_reading.py, src/shared/python/putting_analytics/optimize.py, src/api/routes/putting_green.py | solve_aim and best_action present; /read-green returns pace, heading, holed and converged in one call on any GreenSpec green.",
         "pyqt6": "present | src/tools/putting_green_gui/_scene_builder.py, src/tools/putting_green_gui/gui.py | Auto-Solve Read runs solve_aim on the tile's surface off the GUI thread and writes the pace and aim into the controls.",
-        "react": "partial #14466 | ui/src/pages/PuttingAnalytics.tsx | Analytics best aim/pace study; nothing on the simulator page.",
-        "tauri": "partial #14466 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "react": "present | ui/src/components/putting/AutoSolveButton.tsx, ui/src/utils/autoSolve.ts, ui/src/pages/PuttingGreen.tsx | Auto-Solve Read calls /solve-aim-3d on the page's green, writes the pace and aim into the controls, simulates the solved putt and shows the desktop read text (golden-pinned).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "partial #14465 | src/apps/putting_studio/js/controls_c.js | Aim-only grid search from one noise-free putt."
       }
     },
@@ -141,8 +141,8 @@
       "cells": {
         "core_api": "present | src/shared/python/putting_dynamics/phases.py, src/api/routes/putting_green.py | Per-sample ball mode on /simulate and /simulate-3d, and phase marks (where the hop, skid, roll and rest start) from the core's phase_marks for playback jumps.",
         "pyqt6": "present | src/tools/putting_green_gui/gui.py, src/tools/putting_green_gui/_camera.py | Orbit, down-the-line, face-on and overhead cameras; play/pause, a scrubber and jumps to the core phase marks.",
-        "react": "partial #14474 | ui/src/pages/PuttingGreen.tsx, ui/src/components/visualization/PuttingScene3D.tsx | Orbit camera, play/pause/scrub/rate; no view presets or phase jumps.",
-        "tauri": "partial #14474 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "react": "present | ui/src/pages/PuttingGreen.tsx, ui/src/components/visualization/PuttingScene3D.tsx, ui/src/utils/cameraPresets.ts | Orbit, down-the-line, face-on and overhead cameras framed on the desktop tile, play/pause/scrub/rate, and jumps to the core phase marks (golden-pinned, #14474).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/controls_b.js, src/apps/putting_studio/js/controls_a.js | Grip, Full Plane, Down-the-Line and Face-On cameras; phase badge; scrubber and keyframe jumps."
       }
     }

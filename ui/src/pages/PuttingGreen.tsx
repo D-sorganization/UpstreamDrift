@@ -9,11 +9,20 @@ import type {
 } from "@/api/generated/types";
 import { simulatePutt3D } from "@/api/puttingClient";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
+import { AutoSolveButton } from "@/components/putting/AutoSolveButton";
 import { DispersionPanel } from "@/components/putting/DispersionPanel";
+import { GreenTypeControl } from "@/components/putting/GreenTypeControl";
 import { StrokesGainedPanel } from "@/components/putting/StrokesGainedPanel";
 import { PutterHeadControl } from "@/components/putting/PutterHeadControl";
 import { PuttingScene3D } from "@/components/visualization/PuttingScene3D";
+import {
+  CAMERA_PRESETS,
+  VIEW_LABELS,
+  phaseJumps,
+  type CameraPreset,
+} from "@/utils/cameraPresets";
 import { usePuttingStore } from "@/stores/usePuttingStore";
+import { signedDegrees } from "@/utils/autoSolve";
 import {
   UNIT_SYSTEMS,
   formatQuantity,
@@ -236,6 +245,8 @@ function PlaybackControls() {
   const setPlaybackTime = usePuttingStore((state) => state.setPlaybackTime);
   const setPlaybackRate = usePuttingStore((state) => state.setPlaybackRate);
   const setPlaying = usePuttingStore((state) => state.setPlaying);
+  const cameraView = usePuttingStore((state) => state.cameraView);
+  const setCameraView = usePuttingStore((state) => state.setCameraView);
   if (!result) return null;
 
   const durationS = result.duration_s + IMPACT_LEAD_IN_S;
@@ -306,14 +317,54 @@ function PlaybackControls() {
           ))}
         </select>
       </label>
+      <label className="text-xs">
+        Camera View
+        <select
+          aria-label="Camera view"
+          value={cameraView}
+          onChange={(event) =>
+            setCameraView(event.target.value as CameraPreset)
+          }
+          className="ml-2 rounded border px-2 py-1"
+          style={{
+            backgroundColor: "var(--sidekick-color-input)",
+            borderColor: "var(--sidekick-color-border)",
+          }}
+        >
+          {CAMERA_PRESETS.map((preset) => (
+            <option key={preset} value={preset}>
+              {VIEW_LABELS[preset]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="flex flex-wrap gap-2" aria-label="Jump to phase">
+        {phaseJumps(result.phases ?? []).map((jump) => (
+          <button
+            key={jump.label}
+            type="button"
+            onClick={() => {
+              setPlaybackTime(jump.playbackTimeS);
+              setPlaying(false);
+            }}
+            className="rounded border px-2 py-1 text-xs"
+            style={{ borderColor: "var(--sidekick-color-border)" }}
+          >
+            {jump.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
 
 export function PuttingGreenPage() {
   const parameters = usePuttingStore((state) => state.parameters);
+  // A core green preset replaces the slope and bump fields (#14464).
+  const presetGreen = Boolean(parameters.green);
   const result = usePuttingStore((state) => state.result);
   const playbackTimeS = usePuttingStore((state) => state.playbackTimeS);
+  const cameraView = usePuttingStore((state) => state.cameraView);
   const playbackRate = usePuttingStore((state) => state.playbackRate);
   const playing = usePuttingStore((state) => state.playing);
   const updateParameters = usePuttingStore((state) => state.updateParameters);
@@ -397,6 +448,15 @@ export function PuttingGreenPage() {
           step={0.5}
           onChange={(loft_deg) => updateParameters({ loft_deg })}
         />
+        <RangeControl
+          label="Aim Heading"
+          value={parameters.aim_heading_deg}
+          displayValue={signedDegrees(parameters.aim_heading_deg)}
+          min={-45}
+          max={45}
+          step={0.1}
+          onChange={(aim_heading_deg) => updateParameters({ aim_heading_deg })}
+        />
         <UnitRangeControl
           label="Hole Distance"
           valueSi={parameters.hole_x_m}
@@ -421,6 +481,7 @@ export function PuttingGreenPage() {
         <HoselPositionControl />
       </Section>
       <Section title="Green Surface">
+        <GreenTypeControl />
         <RangeControl
           label="Stimp Rating"
           value={parameters.stimp_rating}
@@ -437,6 +498,7 @@ export function PuttingGreenPage() {
           min={0}
           max={6}
           step={0.1}
+          disabled={presetGreen}
           onChange={(grade_percent) => updateParameters({ grade_percent })}
         />
         <RangeControl
@@ -446,6 +508,7 @@ export function PuttingGreenPage() {
           min={-180}
           max={180}
           step={5}
+          disabled={presetGreen}
           onChange={(downhill_aspect_deg) =>
             updateParameters({ downhill_aspect_deg })
           }
@@ -465,6 +528,7 @@ export function PuttingGreenPage() {
           quantity="smallLength"
           range={{ metric: [0, 5, 0.25], imperial: [0, 0.2, 0.01] }}
           decimals={{ metric: 1, imperial: 2 }}
+          disabled={presetGreen}
           onChangeSi={(bump_height_m) => updateParameters({ bump_height_m })}
         />
         <RangeControl
@@ -492,6 +556,7 @@ export function PuttingGreenPage() {
         >
           {simulation.isPending ? "Simulating…" : "Simulate Putt"}
         </button>
+        <AutoSolveButton onSolved={(solved) => simulation.mutate(solved)} />
         {simulation.error && (
           <p
             className="mt-3 rounded border p-2 text-xs"
@@ -517,6 +582,7 @@ export function PuttingGreenPage() {
             playbackTimeS={playbackTimeS}
             hoselToeM={parameters.hosel_toe_m}
             hoselForwardM={parameters.hosel_forward_m}
+            view={cameraView}
           />
         ) : (
           <div

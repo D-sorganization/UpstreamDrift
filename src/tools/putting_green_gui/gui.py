@@ -65,6 +65,7 @@ from src.shared.python.ui.units import (
 )
 from src.tools.putting_green_gui._batch_panel import BatchPanel, _Job
 from src.tools.putting_green_gui._sg_panel import SGPanel
+from src.tools.putting_green_gui._torque_panel import TorquePanel
 from src.tools.putting_green_gui._camera import camera_pose
 from src.tools.putting_green_gui._playback import PlaybackBar
 from src.tools.putting_green_gui._scene_text import (
@@ -132,6 +133,9 @@ class PuttingGreenWidget(QWidget):
     def sg_panel(self) -> SGPanel:
         return self._sg_panel
 
+    def torque_panel(self) -> TorquePanel:
+        return self._torque_panel
+
     def set_unit_system(self, system: UnitSystem) -> None:
         """Switch display unit system dynamically and update spinbox suffixes/values."""
         if system == self._unit_system:
@@ -172,6 +176,7 @@ class PuttingGreenWidget(QWidget):
             )
         self._batch_panel.redraw()
         self._sg_panel.redraw()
+        self._torque_panel.redraw()
 
     def _sync_units_combo(self) -> None:
         """Show the active unit system without re-triggering a user choice."""
@@ -294,6 +299,8 @@ class PuttingGreenWidget(QWidget):
             self._batch_panel.current_args, lambda: self._unit_system
         )
         left_layout.addWidget(self._sg_panel)
+        self._torque_panel = TorquePanel(lambda: self._unit_system)
+        left_layout.addWidget(self._torque_panel)
 
         left_layout.addStretch()
         return left

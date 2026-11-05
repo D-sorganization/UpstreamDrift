@@ -89,8 +89,8 @@ class PipelineLandingSimulator:
     ) -> NDArray[np.float64]:
         pipe = self._pipeline(wind)
         out = np.empty((len(impacts), 2))
-        for i, row in enumerate(impacts):
-            end = pipe.run(swing_state_from_impact(row, skill)).trajectory[-1]
+        for i in range(len(impacts)):
+            end = pipe.run(swing_state_from_impact(impacts[i], skill)).trajectory[-1]
             out[i] = (end.position[0] * M_TO_YD, end.position[1] * M_TO_YD)
         ensure(bool(np.isfinite(out).all()), "pipeline produced non-finite landing")
         return out
