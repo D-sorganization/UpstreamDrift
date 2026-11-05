@@ -1,8 +1,4 @@
-"""Name -> backend registry for ``ShotOutcomeModel`` (config as data, fail closed).
-
-``quick_sg`` is the quick fallback: it never consults the registry, so it works
-whatever other backends are (mis)registered.
-"""
+"""Name -> ``ShotOutcomeModel`` backend registry (fail closed; ``quick_sg`` bypasses it)."""
 
 from __future__ import annotations
 
@@ -27,8 +23,7 @@ DEFAULT_BASELINE_PATH = (
     / "pga_tour.yaml"
 )
 
-# A factory takes the tour ``BaselineBag`` (the fallback reference every backend
-# may lean on) and returns a ready ``ShotOutcomeModel``.
+# A factory takes the tour ``BaselineBag`` and returns a ``ShotOutcomeModel``.
 BackendFactory = Callable[[BaselineBag], ShotOutcomeModel]
 _BACKENDS: dict[str, BackendFactory] = {BASELINE_BACKEND: BaselineShotModel}
 
@@ -39,7 +34,7 @@ def _tour_baseline() -> BaselineBag:
 
 
 def register_shot_model(name: str, factory: BackendFactory) -> None:
-    """Register ``factory(baseline) -> ShotOutcomeModel`` under a new ``name``."""
+    """Register ``factory`` under a new ``name``."""
     require(bool(name), "backend name must be non-empty")
     require(name not in _BACKENDS, f"shot-model backend {name!r} already registered")
     _BACKENDS[name] = factory
