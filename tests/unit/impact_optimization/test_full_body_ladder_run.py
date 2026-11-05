@@ -14,6 +14,7 @@ import pytest
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.impact_optimization.full_body_ladder_run import (
     CONTROLLED_JOINTS,
+    baseline_band,
     ladder_spec,
     require_outside_repo,
     select_controlled,
@@ -81,3 +82,11 @@ def test_run_gate_envelope_builds_on_v2_without_unbounded_rom() -> None:
         load_limits(DEFAULT_LIMITS_PATH),
     )
     assert set(CONTROLLED_JOINTS) <= set(env.names)
+
+
+def test_face_is_checked_unless_the_face_free_flag_is_set() -> None:
+    assert baseline_band(face_free=False).max_abs_face_deg == 25.0
+    free = baseline_band(face_free=True)
+    assert free.max_abs_face_deg is None
+    assert (free.speed_mph_min, free.speed_mph_max) == (100.0, 120.0)
+    assert free.max_abs_path_deg == 15.0
