@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 from dataclasses import dataclass
 
+from src.shared.python.sg_optimizer.mdp.value_iteration import SolveResult
 from src.shared.python.sg_optimizer.shot_model.outcome import ShotOutcomeModel
 from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
 from src.shared.python.sg_optimizer.shot_options import ShotOption, shot_options
@@ -13,6 +14,9 @@ from src.shared.python.sg_optimizer.strategy import (
     StrategyProblem,
     solve_mdp,
 )
+
+
+_SOLVE_TOL = 1e-3  # HoleMDP.solve default tolerance
 
 
 @dataclass(frozen=True)
@@ -27,6 +31,10 @@ class StrategyView:
     tour_strokes: float
     personal_strokes: float | None
     options: tuple[ShotOption, ...]
+    n_samples: int = 0
+    iterations: int = 0
+    residual: float = 0.0
+    converged: bool = True
 
     @property
     def delta(self) -> float | None:
@@ -48,15 +56,34 @@ def build_view(
 ) -> StrategyView:
     """Solve the tour baseline and (unless ``quick_tour``) the player."""
     tour = PlayerProfile(name="tour", baseline=profile.baseline)
-    t_mdp, t_val = solve_mdp(problem, tour, None, settings)
-    tour_strokes = t_mdp.expected_strokes(problem.start, t_val)
+    t_mdp, t_res = solve_mdp(problem, tour, None, settings)
+    tour_strokes = t_mdp.expected_strokes(problem.start, t_res.value)
     if quick_tour:
-        opts = shot_options(t_mdp, t_val, problem.start, top=top)
-        return StrategyView(hole, tour_strokes, None, opts)
-    p_mdp, p_val = solve_mdp(problem, profile, model, settings)
-    opts = shot_options(p_mdp, p_val, problem.start, model=model, top=top)
+        opts = shot_options(t_mdp, t_res.value, problem.start, top=top)
+        return _view(hole, tour_strokes, None, opts, t_res, settings)
+    p_mdp, p_res = solve_mdp(problem, profile, model, settings)
+    opts = shot_options(p_mdp, p_res.value, problem.start, model=model, top=top)
+    personal = p_mdp.expected_strokes(problem.start, p_res.value)
+    return _view(hole, tour_strokes, personal, opts, p_res, settings)
+
+
+def _view(
+    hole: str,
+    tour: float,
+    personal: float | None,
+    options: tuple[ShotOption, ...],
+    result: SolveResult,
+    settings: SolveSettings,
+) -> StrategyView:
     return StrategyView(
-        hole, tour_strokes, p_mdp.expected_strokes(problem.start, p_val), opts
+        hole,
+        tour,
+        personal,
+        options,
+        n_samples=settings.n_samples,
+        iterations=result.iterations,
+        residual=result.delta,
+        converged=result.delta < _SOLVE_TOL,
     )
 
 
@@ -70,12 +97,21 @@ def _numbers(view: StrategyView) -> tuple[str, str, str]:
     return f"{view.tour_strokes:.2f}", personal, delta
 
 
+def _solve_note(view: StrategyView) -> str:
+    state = "converged" if view.converged else "NOT CONVERGED"
+    return (
+        f"MC n={view.n_samples} per action, {view.iterations} sweeps, "
+        f"{state} (max change {view.residual:.3g})"
+    )
+
+
 def render_text(view: StrategyView) -> str:
     """Plain-text report for the CLI."""
     tour, personal, delta = _numbers(view)
     lines = [
         f"Hole: {view.hole}",
         f"Expected strokes  tour: {tour}   personal: {personal}   delta: {delta}",
+        _solve_note(view),
         "",
         f"{'club':<10}{'aim':>7}{'strokes':>9}{'carry':>8}{'95% long':>10}{'95% wide':>10}",
     ]
@@ -110,7 +146,7 @@ def render_html(view: StrategyView) -> str:
     return (
         "<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width'>"
         f"<title>Strategy: {html.escape(view.hole)}</title>"
-        f"<h1>{html.escape(view.hole)}</h1>"
+        f"<h1>{html.escape(view.hole)}</h1><p>{html.escape(_solve_note(view))}</p>"
         f"<p>Tour SG <b>{tour}</b> &middot; Personal SG <b>{personal}</b> &middot; Delta <b>{delta}</b></p>"
         f"<svg viewBox='-10 {-span:.0f} {reach + 20:.0f} {2 * span:.0f}' width='100%' "
         f"role='img' aria-label='Dispersion ellipses'>{shapes}</svg>"

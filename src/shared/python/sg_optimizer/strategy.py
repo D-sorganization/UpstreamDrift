@@ -8,10 +8,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.sg_optimizer.course.conditions import CourseConditions
-from src.shared.python.sg_optimizer.course.rasterize import LieRaster
+from src.shared.python.sg_optimizer.course.rasterize import LIE_CODES, LieRaster
 from src.shared.python.sg_optimizer.mdp.action import ActionSet, ShotAction
 from src.shared.python.sg_optimizer.mdp.state import State
-from src.shared.python.sg_optimizer.mdp.value_iteration import HoleMDP
+from src.shared.python.sg_optimizer.mdp.value_iteration import HoleMDP, SolveResult
 from src.shared.python.sg_optimizer.shot_model.baseline import BaselineBag
 from src.shared.python.sg_optimizer.shot_model.outcome import ShotOutcomeModel
 from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
@@ -52,13 +52,26 @@ class SolveSettings:
     max_iter: int = 200
 
 
+def green_terminal(raster: LieRaster) -> LieRaster:
+    """Copy of ``raster`` where every green cell ends the hole.
+
+    The MDP has no putting model, so with only the pin cell terminal the
+    expected strokes do not converge. Ending on the green gives *strokes to
+    reach the green*, which converges and still ranks tee shots by their
+    hazard and dispersion risk; add putting separately.
+    """
+    codes = raster.codes.copy()
+    codes[codes == LIE_CODES["green"]] = LIE_CODES["holed"]
+    return LieRaster(codes, raster.resolution_yd, raster.origin, raster.pin, raster.tee)
+
+
 def solve_mdp(
     problem: StrategyProblem,
     profile: PlayerProfile,
     model: ShotOutcomeModel | None,
     cfg: SolveSettings,
-) -> tuple[HoleMDP, NDArray[np.float64]]:
-    """Solve the hole for ``profile``; return the MDP and its value function."""
+) -> tuple[HoleMDP, SolveResult]:
+    """Solve the hole for ``profile``; return the MDP and its solve result."""
     mdp = HoleMDP(
         problem.raster,
         profile,
@@ -69,7 +82,7 @@ def solve_mdp(
         cfg.seed,
         model=model,
     )
-    return mdp, mdp.solve(max_iter=cfg.max_iter).value
+    return mdp, mdp.solve(max_iter=cfg.max_iter)
 
 
 def _solve(
@@ -79,6 +92,7 @@ def _solve(
     cfg: SolveSettings,
 ) -> tuple[float, ShotAction]:
     mdp, value = solve_mdp(problem, profile, model, cfg)
+    value = value.value
     return (
         mdp.expected_strokes(problem.start, value),
         mdp.optimal_action(problem.start, value),

@@ -11,7 +11,11 @@ from src.shared.python.sg_optimizer.mdp.action import default_action_set
 from src.shared.python.sg_optimizer.mdp.state import State
 from src.shared.python.sg_optimizer.shot_model.baseline import load_baseline
 from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
-from src.shared.python.sg_optimizer.strategy import SolveSettings, StrategyProblem
+from src.shared.python.sg_optimizer.strategy import (
+    SolveSettings,
+    StrategyProblem,
+    green_terminal,
+)
 from src.shared.python.sg_optimizer.strategy_view import (
     build_view,
     render_html,
@@ -37,6 +41,12 @@ def add_strategy_parser(subparsers: argparse._SubParsersAction) -> None:
         action="store_true",
         help="tour baseline only: skip the personalised solve",
     )
+    p.add_argument(
+        "--pin-only",
+        action="store_true",
+        help="end the hole only at the pin cell (default: any green cell, i.e. "
+        "strokes to reach the green; the pin-only solve does not converge)",
+    )
     p.add_argument("--html", metavar="PATH", help="also write the HTML/SVG view")
     hole = p.add_mutually_exclusive_group(required=True)
     hole.add_argument("--hole-spec")
@@ -57,6 +67,8 @@ def run_strategy(args: argparse.Namespace) -> int:
         else _classic_to_synthetic(args.classic)
     )
     raster = rasterize_synthetic(hole, resolution_yd=args.resolution)
+    if not args.pin_only:
+        raster = green_terminal(raster)
     baseline = load_baseline(args.baseline)
     problem = StrategyProblem(
         raster,

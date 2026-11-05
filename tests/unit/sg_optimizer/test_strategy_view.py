@@ -23,6 +23,7 @@ from src.shared.python.sg_optimizer.strategy import (
     SolveSettings,
     StrategyProblem,
     compare_strategies,
+    green_terminal,
     solve_mdp,
 )
 from src.shared.python.sg_optimizer.strategy_view import (
@@ -87,7 +88,8 @@ def test_ellipse_rejects_bad_coverage_and_single_sample() -> None:
 
 
 def test_action_values_argmin_is_the_optimal_action() -> None:
-    mdp, value = solve_mdp(_problem(), _profile(), None, CFG)
+    mdp, res = solve_mdp(_problem(), _profile(), None, CFG)
+    value = res.value
     q = mdp.action_values(_problem().start, value)
     best = min(q, key=lambda av: av[1])[0]
     assert best == mdp.optimal_action(_problem().start, value)
@@ -95,7 +97,8 @@ def test_action_values_argmin_is_the_optimal_action() -> None:
 
 def test_shot_options_one_per_club_sorted_best_first() -> None:
     prob = _problem()
-    mdp, value = solve_mdp(prob, _profile(), None, CFG)
+    mdp, res = solve_mdp(prob, _profile(), None, CFG)
+    value = res.value
     opts = shot_options(mdp, value, prob.start, top=5)
     assert [o.club for o in opts].count("driver") == 1
     assert len(opts) == 2
@@ -107,7 +110,8 @@ def test_shot_options_one_per_club_sorted_best_first() -> None:
 
 def test_driver_ellipse_is_larger_than_wedge_ellipse() -> None:
     prob = _problem()
-    mdp, value = solve_mdp(prob, _profile(), None, CFG)
+    mdp, res = solve_mdp(prob, _profile(), None, CFG)
+    value = res.value
     by_club = {o.club: o for o in shot_options(mdp, value, prob.start, top=5)}
     assert by_club["driver"].ellipse.semi_major > by_club["pw"].ellipse.semi_major
     assert by_club["driver"].ellipse.centre_along > by_club["pw"].ellipse.centre_along
@@ -140,3 +144,24 @@ def test_text_and_html_show_both_numbers_and_ellipses() -> None:
     assert "tour" in text.lower() and "personal" in text.lower()
     assert html.count("<ellipse") == len(view.options)
     assert view.options[0].club in html
+
+
+def test_green_terminal_ends_the_hole_on_every_green_cell_only() -> None:
+    raster = _problem().raster
+    codes = raster.codes.copy()
+    codes[10:14, 10:14] = LIE_CODES["green"]
+    src = LieRaster(codes, raster.resolution_yd, raster.origin, raster.pin, raster.tee)
+    out = green_terminal(src)
+    holed = LIE_CODES["holed"]
+    assert np.all(out.codes[10:14, 10:14] == holed)
+    assert np.sum(out.codes == holed) == np.sum(src.codes == holed) + 16
+    assert np.sum(out.codes != src.codes) == 16
+    assert src.codes[10, 10] == LIE_CODES["green"]  # input untouched
+
+
+def test_view_states_sample_count_and_convergence() -> None:
+    view = build_view("synthetic", _problem(), _profile(), settings=CFG)
+    assert view.n_samples == CFG.n_samples and 0 < view.iterations <= CFG.max_iter
+    assert "MC n=24" in render_text(view)
+    assert view.converged == (view.residual < 1e-3)
+    assert ("NOT CONVERGED" in render_text(view)) == (not view.converged)
