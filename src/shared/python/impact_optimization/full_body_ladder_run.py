@@ -127,7 +127,10 @@ def _report_text(
 
 
 def _run(
-    out: Path, baseline_only: bool = False, default_policy: bool = False
+    out: Path,
+    baseline_only: bool = False,
+    default_policy: bool = False,
+    bundle_path: Path = BUNDLE,
 ) -> int:  # pragma: no cover - the real run is held (D24)
     import mujoco
     import numpy as np
@@ -169,7 +172,7 @@ def _run(
 
     spec_bytes = SHOWPIECE_V2.read_bytes()
     spec = json.loads(spec_bytes)
-    bundle = InputBundle.load(BUNDLE)
+    bundle = InputBundle.load(bundle_path)
     xml, meta = export_full_body_mjcf(spec_bytes)
     model = mujoco.MjModel.from_xml_string(xml)
     order = tuple(meta["coordinate_order"])
@@ -272,9 +275,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="with --baseline-only: roll out with DEFAULT_POLICY, not the search policy",
     )
+    parser.add_argument(
+        "--bundle",
+        type=Path,
+        default=BUNDLE,
+        help="same-input bundle (.npz); a re-anchored one stays local, never committed",
+    )
     args = parser.parse_args(argv)
     require_outside_repo(args.out)
-    return _run(args.out, args.baseline_only, args.default_policy)
+    return _run(args.out, args.baseline_only, args.default_policy, args.bundle)
 
 
 if __name__ == "__main__":  # pragma: no cover
