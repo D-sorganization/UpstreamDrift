@@ -164,3 +164,80 @@ def test_page_reads_the_core_curve() -> None:
     charts = _js("charts2d.js")
     assert "Math.exp(-d / 14.5)" not in charts and "Math.exp(-d / 9.5)" not in charts
     assert "coreExpectedPutts(" in charts
+
+
+# Second slice: the core's expected strokes per pace ("E vs capture speed").
+
+
+def test_fixture_holds_the_core_pace_sweep(committed: dict[str, Any]) -> None:
+    meta = committed["meta"]
+    assert meta["sweep_distances_ft"] == list(gen.SWEEP_DISTANCES_FT)
+    assert meta["sweep_paces_ft"] == list(gen.SWEEP_PACES_FT)
+    assert set(service_sg.DEFAULT_SG_PACES_FT) <= set(gen.SWEEP_PACES_FT)
+    assert set(gen.SWEEP_DISTANCES_FT) <= set(DEFAULT_GRID_FT)
+    for curve in committed["curves"]:
+        sweep = curve["pace_sweep"]
+        assert len(sweep) == len(gen.SWEEP_DISTANCES_FT)
+        assert all(len(row) == len(gen.SWEEP_PACES_FT) for row in sweep)
+
+
+def test_sweep_best_of_the_solve_paces_is_the_solved_curve(
+    committed: dict[str, Any],
+) -> None:
+    # Same seed per grid point as the solve, so the sweep's best of the
+    # solve's own paces is the policy value E(d) (to the 4 dp rounding).
+    solve = [gen.SWEEP_PACES_FT.index(p) for p in service_sg.DEFAULT_SG_PACES_FT]
+    for curve in committed["curves"]:
+        for distance, row in zip(
+            gen.SWEEP_DISTANCES_FT, curve["pace_sweep"], strict=True
+        ):
+            e = curve["expected_putts"][curve["distances_ft"].index(distance)]
+            assert min(row[k] for k in solve) == pytest.approx(e, abs=2e-3)
+
+
+def test_sweep_prices_misses_on_the_solved_curve(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[float, int, list[float], list[float]]] = []
+
+    def fake(model, distance, actions, baseline, n, seed):  # type: ignore[no-untyped-def]
+        calls.append(
+            (distance, seed, list(baseline.values), [a.pace_ft_past for a in actions])
+        )
+        return [type("E", (), {"expected_strokes": 1.23456})() for _ in actions]
+
+    monkeypatch.setattr(gen.optimize, "evaluate_actions", fake)
+    curve = {"distances_ft": [0.5, 45.0], "expected_putts": [1.0, 2.5]}
+    rows = gen.pace_sweep(2.0, curve, 7)
+    assert rows == [[1.2346] * len(gen.SWEEP_PACES_FT)] * len(gen.SWEEP_DISTANCES_FT)
+    for (distance, seed, values, paces), want in zip(
+        calls, gen.SWEEP_DISTANCES_FT, strict=True
+    ):
+        assert distance == want
+        assert seed == gen.distance_seed(
+            gen.SAMPLING["seed"], DEFAULT_GRID_FT.index(want)
+        )
+        assert values == [1.0, 2.5] and paces == list(gen.SWEEP_PACES_FT)
+
+
+@_requires_node
+def test_studio_sweep_row_is_the_nearest_core_row(committed: dict[str, Any]) -> None:
+    got = _node("coreSweepRow(window.CORE_SG.curves[0], 11.5)")
+    assert got == {
+        "distance_ft": 10.0,
+        "paces_ft": list(gen.SWEEP_PACES_FT),
+        "expected": committed["curves"][0]["pace_sweep"][2],
+    }
+
+
+def test_capture_speed_panel_reads_the_core_sweep() -> None:
+    charts = _js("charts2d.js")
+    assert "1.24 + 1.15 * Math.pow" not in charts and "1.66 + 1.55" not in charts
+    assert "coreSweepRow(" in charts
+    assert "optCaptureSpeedBadge" in charts
+
+
+def test_matrix_studio_strokes_gained_cell_is_present() -> None:
+    matrix = _STUDIO.parents[2] / "src" / "config" / "putting_parity_matrix.json"
+    features = json.loads(matrix.read_text(encoding="utf-8"))["features"]
+    assert features["strokes_gained"]["cells"]["studio"].startswith("present |")
