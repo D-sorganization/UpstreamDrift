@@ -135,3 +135,17 @@ def test_solution_exposes_achieved_speed_without_a_deep_chain() -> None:
 def test_rollout_outcome_exposes_speed_directly() -> None:
     out = plant(BASE)
     assert out.speed_mph == out.impact.speed_mph
+
+
+def test_blocking_torque_on_an_assumed_slot_is_assumption_limited() -> None:
+    """D32: a rung binding on an assumption-based limit is not a miscalibration."""
+    import dataclasses
+
+    env = dataclasses.replace(
+        _envelope(first=BASE[:, 0].max() * 1.001), assumed_torque_slots=("J0",)
+    )
+    lines = [ln for ln in binding_report(_run(env), env) if "J0" in ln]
+    blocking = [ln for ln in lines if "BLOCKS" in ln]
+    assert blocking and all("assumption-limited" in ln for ln in blocking)
+    assert not any("miscalibrat" in ln for ln in blocking)
+    assert all("assumed" in ln for ln in blocking)  # says the limit is not cited

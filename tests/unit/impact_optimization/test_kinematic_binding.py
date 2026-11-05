@@ -148,3 +148,17 @@ def test_one_sided_ranges_are_measured_from_their_centre(rom, angle, binds) -> N
     assert bool(flagged) is binds
     if binds and not rom[0] <= angle <= rom[1]:
         assert flagged[0].utilisation > 1.0
+
+
+def test_velocity_binding_on_an_assumed_slot_is_assumption_limited() -> None:
+    import dataclasses
+
+    env = dataclasses.replace(
+        _env([(-1.0, 1.0)] * 3, vel=1e-3), assumed_velocity_slots=NAMES
+    )
+    lines = kinematic_binding_report(_ladder(), env, TIMES, degrees=True)
+    vel = [ln for ln in lines if "velocity limit" in ln and "BLOCKS" in ln]
+    rom = [ln for ln in lines if "ROM limit" in ln and "BLOCKS" in ln]
+    assert vel and all("assumption-limited" in ln for ln in vel)
+    assert not any("miscalibrat" in ln for ln in vel)
+    assert rom and all("probable miscalibration" in ln for ln in rom)  # cited ROM
