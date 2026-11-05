@@ -3,9 +3,10 @@
 Per ``(skill, club, lie, wind, slope)`` cell: mean / sd / correlation of the
 aim-frame landing offset (yards) from an injected landing simulator. Every cell
 shares one standard-normal block (common random numbers, prefix-stable in ``n``).
-The hash covers cells + ``(family, seed, n)``; wall-clock runtime is never hashed.
-Scope: carry only (no bounce/roll); slope defaults to flat, other bins come from an
-injected ``slope_modifier`` (B6); ``club`` repeats
+The hash covers cells + ``(family, seed, n)`` and the injected ground/lie provenance; wall-clock runtime is never hashed.
+Scope: carry by default; an injected ``ground`` model (B3b, ``ground_runout``) turns
+landing states into rest positions and is recorded in the provenance; slope defaults
+to flat, other bins come from an injected ``slope_modifier`` (B6); ``club`` repeats
 ``skill``; lie is an identity unless a ``lie_modifier`` is injected.
 """
 
@@ -17,7 +18,7 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -31,6 +32,18 @@ from src.shared.python.sg_optimizer.shot_model.skill_family import (
 # (impacts (n, 6), skill, (headwind_mph, crosswind_mph)) -> landing (n, 2) yards
 LandingSimulator = Callable[[NDArray[np.float64], str, tuple[float, float]], Any]
 LieModifier = Callable[[NDArray[np.float64], str], NDArray[np.float64]]
+
+
+class GroundModel(Protocol):
+    """Landing states ``(n, k)`` + ``(lie, slope, skill)`` -> rest offsets ``(n, 2)`` yards."""
+
+    @property
+    def provenance(self) -> dict[str, Any]: ...
+
+    def __call__(
+        self, landing: NDArray[np.float64], lie: str, slope: str, skill: str
+    ) -> NDArray[np.float64]: ...
+
 
 WIND_BINS: dict[str, tuple[float, float]] = {
     "calm": (0.0, 0.0),
@@ -198,10 +211,13 @@ def build_grid_table(
     seed: int = 0,
     lie_modifier: LieModifier | None = None,
     slope_modifier: SlopeModifier | None = None,
+    ground: GroundModel | None = None,
 ) -> DispersionTable:
     """Simulate every grid cell with shared (CRN) draws; fail closed on bad inputs.
 
     Non-flat slope bins need ``slope_modifier`` (``slope_wind_bins.make_slope_modifier``).
+    With ``ground`` the simulator must return landing states (``ground_runout``
+    columns), and cells hold rest positions; its ``provenance`` joins the hashed meta.
     """
     names = grid.skills if grid.skills is not None else tuple(family.skills)
     require(set(names) <= set(family.skills), f"skills not in {family.name!r}")
@@ -222,6 +238,9 @@ def build_grid_table(
                     land = np.asarray(
                         simulate(sloped, skill, WIND_BINS[wind]), dtype=float
                     )
+                    if ground is not None:
+                        require(land.ndim == 2 and len(land) == n, "landing states")
+                        land = np.asarray(ground(land, lie, slope, skill), dtype=float)
                     require(land.shape == (n, 2), f"simulator returned {land.shape}")
                     require(
                         bool(np.isfinite(land).all()), "simulator returned non-finite"
@@ -238,6 +257,16 @@ def build_grid_table(
         "seed": seed,
         "n": n,
     }
+    for part in (
+        ground.provenance if ground is not None else {},
+        getattr(lie_modifier, "provenance", {}),
+    ):
+        require(
+            not (set(part) & set(meta)),
+            "provenance key collision",
+            set(part) & set(meta),
+        )
+        meta.update(part)
     table = DispersionTable(
         tuple(cells),
         {**meta, "table_hash": _hash(tuple(cells), meta)},
@@ -254,12 +283,18 @@ def check_convergence(
     *,
     n: int,
     seed: int,
+    ground: GroundModel | None = None,
 ) -> Convergence:
-    """Compare n vs n/2 shared draws; stable within 2% of the sd means converged."""
+    """Compare n vs n/2 shared draws; stable within 2% of the sd means converged.
+
+    With ``ground`` the check runs on rest positions (fairway, flat).
+    """
     require(n >= 4, "n must be >= 4", n)
     z = standard_normals(seed, n)
     imp = _impacts(family.skills[skill].distribution, z)
     full = np.asarray(simulate(imp, skill, WIND_BINS["calm"]), dtype=float)
+    if ground is not None:
+        full = np.asarray(ground(full, "fairway", "flat", skill), dtype=float)
     half = full[: n // 2]
     (m1, s1, _), (m2, s2, _) = _cell_stats(full), _cell_stats(half)
     scale = np.maximum(np.array(s1), 1e-12)
