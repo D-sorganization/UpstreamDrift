@@ -142,3 +142,8 @@ src/shared/python/lifting/_canonical/
 src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/fixtures/gs3dx_grip_pair_golden.json
 src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/generated/
 src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/receipts/grip_contact/
+
+# UpstreamDrift#12553: the loop-nullspace registry is hand-formatted one entry per
+# line. Prettier would expand it to ~2,700 lines, so a 6-entry source verification
+# would become a whole-file diff (same reason as SPEC.md above).
+src/config/loop_nullspace_registry.json

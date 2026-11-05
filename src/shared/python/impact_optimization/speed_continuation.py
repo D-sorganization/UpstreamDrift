@@ -11,13 +11,16 @@ Design by Contract:
     Preconditions: ``step_mph > 0`` and ``stop_mph >= start_mph``.
     Postconditions: one point per ladder speed, in order; ``reached_mph`` is
     the highest speed whose point met the angle tolerances and the speed
-    within ``speed_tol_mph`` (0.0 when none did).
+    within ``speed_tol_mph`` (0.0 when none did).  This function does not see
+    joint angles; ``kinematic_binding.enforce_kinematic_limits`` further demotes
+    rungs that break a ROM or velocity limit and recomputes ``reached_mph``.
 """
 
 from __future__ import annotations
 
 import dataclasses
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -76,11 +79,31 @@ class ContinuationPoint:
         """Rollout joint angles of this rung (delegates; keeps callers shallow)."""
         return self.solution.trajectory
 
+    @property
+    def torque_nm(self) -> np.ndarray:
+        """Solved torque of this rung (delegates; keeps callers shallow)."""
+        return self.solution.torque_nm
+
+    @property
+    def binding_joints(self) -> tuple[str, ...]:
+        """Torque-binding joints of this rung (delegates)."""
+        return self.solution.binding_joints
+
+    @property
+    def face_to_path_deg(self) -> float:
+        """Face minus path of this rung (delegates)."""
+        return self.solution.face_to_path_deg
+
 
 @dataclass(frozen=True)
 class ContinuationResult:
     points: tuple[ContinuationPoint, ...]
     reached_mph: float
+
+
+def reached_mph(points: Sequence[ContinuationPoint]) -> float:
+    """Highest feasible target speed (0.0 when none)."""
+    return max((p.speed_target_mph for p in points if p.feasible), default=0.0)
 
 
 def run_speed_continuation(
@@ -116,9 +139,8 @@ def run_speed_continuation(
             abs(sol.achieved_speed_mph - speed) <= spec.speed_tol_mph
         )
         points.append(ContinuationPoint(speed, sol, ok))
-    reached = max((p.speed_target_mph for p in points if p.feasible), default=0.0)
     ensure(len(points) == n_steps + 1, "one point per ladder speed")
-    return ContinuationResult(tuple(points), reached)
+    return ContinuationResult(tuple(points), reached_mph(points))
 
 
 def pareto_front(

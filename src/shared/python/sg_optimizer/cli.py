@@ -49,6 +49,10 @@ from src.shared.python.sg_optimizer.shot_model.baseline import (
     load_baseline,
 )
 from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
+from src.shared.python.sg_optimizer.strategy_cli import (
+    add_strategy_parser,
+    run_strategy,
+)
 
 _CONDITION_PRESETS = {
     "benign": CourseConditions.benign,
@@ -168,6 +172,8 @@ def main(argv: list[str] | None = None) -> int:
         help="classic hole slug (e.g. sawgrass_17); see list-classics",
     )
 
+    add_strategy_parser(subparsers)
+
     # --- ``list-classics`` sub-command (Phase 2) ---------------------------
     subparsers.add_parser("list-classics", help="List available classic hole slugs")
 
@@ -186,6 +192,9 @@ def main(argv: list[str] | None = None) -> int:
         for slug in list_classics():
             sys.stdout.write(slug + "\n")
         return 0
+
+    if args.command == "strategy":
+        return run_strategy(args)
 
     # --- ``run`` -----------------------------------------------------------
     profile = PlayerProfile.from_yaml(args.profile)

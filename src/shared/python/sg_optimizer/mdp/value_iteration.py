@@ -234,19 +234,22 @@ class HoleMDP:
                 return SolveResult(value=V, policy=pi, iterations=it, delta=last_delta)
         return SolveResult(value=V, policy=pi, iterations=max_iter, delta=last_delta)
 
-    def optimal_action(self, state: State, value: NDArray[np.float64]) -> ShotAction:
+    def action_values(
+        self, state: State, value: NDArray[np.float64]
+    ) -> list[tuple[ShotAction, float]]:
+        """One-step lookahead expected strokes of every legal action at ``state``."""
         ix, iy = self.raster.world_to_index(state.x, state.y)
-        # One-step lookahead from the requested state.
-        best, best_q = self._action_list[0], np.inf
         nx, ny = self.raster.shape
-        for action in self._action_list:
-            if action.club == "putter" and state.lie != LIE_CODES["green"]:
-                continue
-            q = float(
-                self._action_q(value, action)[
-                    ix if 0 <= ix < nx else 0, iy if 0 <= iy < ny else 0
-                ]
-            )
+        cell = (ix if 0 <= ix < nx else 0, iy if 0 <= iy < ny else 0)
+        return [
+            (action, float(self._action_q(value, action)[cell]))
+            for action in self._action_list
+            if action.club != "putter" or state.lie == LIE_CODES["green"]
+        ]
+
+    def optimal_action(self, state: State, value: NDArray[np.float64]) -> ShotAction:
+        best, best_q = self._action_list[0], np.inf
+        for action, q in self.action_values(state, value):
             if q < best_q:
                 best, best_q = action, q
         return best
