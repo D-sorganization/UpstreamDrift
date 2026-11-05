@@ -17,6 +17,7 @@ Exported symbols:
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 from collections.abc import Callable
 from typing import Any, Literal
@@ -186,7 +187,13 @@ _NON_FINITE_PENALTY_FACTOR = 1.0e3
 
 @dataclass(frozen=True)
 class KnotOptimisationResult:
-    """Result of knot gradient optimisation (Adam or L-BFGS-B)."""
+    """Result of knot gradient optimisation (Adam or L-BFGS-B).
+
+    L-BFGS-B also fills ``evaluation_diagnostics`` (one row per history row:
+    iteration, ``objective_s``, ``gradient_s``, ``projected_gradient_inf_norm``)
+    and ``projected_gradient_norm`` (infinity norm at SciPy's final point, the
+    quantity its ``pgtol`` test compares). Adam leaves them empty and ``None``.
+    """
 
     best_x: Any
     best_objective: float
@@ -194,6 +201,8 @@ class KnotOptimisationResult:
     history: tuple[dict[str, float], ...]
     stop_reason: StopReason
     non_finite_encountered: bool = False
+    evaluation_diagnostics: tuple[dict[str, float], ...] = ()
+    projected_gradient_norm: float | None = None
 
     def __post_init__(self) -> None:
         if isinstance(self.best_x, np.ndarray):
@@ -320,6 +329,7 @@ def lbfgs_minimise(
     settings: LbfgsSettings,
     *,
     on_iteration: Callable[[int, Any, float, float], None] | None = None,
+    clock: Callable[[], float] = time.perf_counter,
 ) -> KnotOptimisationResult:
     """Minimise an objective with SciPy's L-BFGS-B, keeping the best iterate.
 
@@ -336,12 +346,20 @@ def lbfgs_minimise(
     exits; ``non_finite_cost`` when any trial was non-finite (also recorded in
     ``non_finite_encountered``); anything else, such as a line-search ABNORMAL
     exit, is ``error``. Best-iterate tracking continues after a non-finite trial.
+
+    Diagnostics (#13779) never feed back into the numerics. Per evaluation,
+    ``objective_s`` is the ``clock`` time until the cost scalars are on the host
+    (the call, with any JIT compile or async compute it waits on) and
+    ``gradient_s`` the further time to bring the gradient to a float64 host
+    array. ``projected_gradient_inf_norm`` is ``max|g|`` of that evaluation's
+    raw gradient; with no bounds the projection is the identity.
     """
     require(callable(value_and_grad), "value_and_grad must be callable")
     require(isinstance(settings, LbfgsSettings), "settings must be LbfgsSettings")
     require(bool(np.all(np.isfinite(x0))), "x0 must be finite")
     if on_iteration is not None:
         require(callable(on_iteration), "on_iteration must be callable")
+    require(callable(clock), "clock must be callable")
 
     import scipy.optimize
 
@@ -350,6 +368,7 @@ def lbfgs_minimise(
     x0_flat = x0_arr.ravel().copy()
 
     history: list[dict[str, float]] = []
+    diagnostics: list[dict[str, float]] = []
     best_x = x0_arr.copy()
     best_objective = float("inf")
     best_iteration = 0
@@ -361,7 +380,18 @@ def lbfgs_minimise(
         nonlocal worst_finite_total
         k = len(history)
         x = x_flat.reshape(shape)
+        start = clock()
         row, grad, cost_ok, _grad_ok = _evaluate(value_and_grad, x, k, np)
+        costed = clock()
+        grad_flat = np.asarray(grad, dtype=np.float64).ravel()
+        diagnostics.append(
+            {
+                "iteration": k,
+                "objective_s": costed - start,
+                "gradient_s": clock() - costed,
+                "projected_gradient_inf_norm": float(np.max(np.abs(grad_flat))),
+            }
+        )
         history.append(row)
         if on_iteration is not None:
             on_iteration(k, x, row["total"], row["objective"])
@@ -378,7 +408,7 @@ def lbfgs_minimise(
             best_x = x.copy()
             best_objective = row["objective"]
             best_iteration = k
-        return float(row["total"]), np.asarray(grad, dtype=np.float64).ravel()
+        return float(row["total"]), grad_flat
 
     # 15000 is SciPy's own L-BFGS-B ``maxfun`` default.
     max_fun = 15000 if settings.max_evaluations is None else settings.max_evaluations
@@ -400,4 +430,8 @@ def lbfgs_minimise(
         tuple(history),
         stop,
         non_finite_encountered=non_finite_encountered,
+        evaluation_diagnostics=tuple(diagnostics),
+        projected_gradient_norm=float(
+            np.max(np.abs(np.asarray(res.jac, dtype=np.float64)))
+        ),
     )
