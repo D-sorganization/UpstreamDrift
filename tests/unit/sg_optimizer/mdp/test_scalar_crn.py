@@ -93,8 +93,9 @@ def test_injected_model_backup_is_a_fixed_operator() -> None:
 
 def test_injected_model_solve_reaches_tolerance() -> None:
     mdp = _mdp(BaselineShotModel(load_baseline(YAML)))
-    result = mdp.solve(tol=1e-3, max_iter=60)
-    assert result.delta < 1e-3 and result.iterations < 60
+    # Budget: water cells climb 1 per sweep to VALUE_CAP (30), so allow 120 sweeps.
+    result = mdp.solve(tol=1e-3, max_iter=120)
+    assert result.delta < 1e-3 and result.iterations < 120
 
 
 def test_scalar_and_vectorized_backups_agree_tighter_than_the_old_bound() -> None:

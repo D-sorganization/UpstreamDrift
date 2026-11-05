@@ -32,6 +32,9 @@ from src.shared.python.sg_optimizer.mdp.transition import (
     aim_direction,
     sample_transitions,
 )
+from src.shared.python.sg_optimizer.shot_model.common_random import (
+    CommonRandomModel,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from src.shared.python.sg_optimizer.course.conditions import CourseConditions
@@ -164,7 +167,8 @@ class HoleMDP:
         model: ShotOutcomeModel | None = None,
     ) -> None:
         require(n_samples > 0, "n_samples must be > 0")
-        self.model = model
+        # An injected model is wrapped so every sweep replays the same draws (#14677).
+        self.model = None if model is None else CommonRandomModel(model, seed)
         self.raster = raster
         self.profile = profile
         self.baseline = baseline
