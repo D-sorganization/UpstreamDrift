@@ -2754,6 +2754,13 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14678 | Putting studio: the skid ends at the core roll-start speed from core_impact.js and the speed solve inverts the same table, replacing the uncited 0.96 derate; flat roll-out matches the core within 3% |
+| 2026-11-05 | #14683 | Putting studio: Auto-Solve runs solveAimCore, a port of the core solve_aim (pace bisection and heading secant) golden-pinned to the core read on the core greens, and the batch strikes at the solved head speed while the read is current |
+| 2026-11-05 | #14674 | Fix shaft_state_series: shaft axis from chain joint anchors, not the Clubhead face-frame site y; C4 toe-down is -32.4 mm and axial foreshortening ~-7 mm |
+| 2026-11-05 | #14659 | SHOW-B8: strategy CLI and HTML view with tour vs personal strokes, shot options and dispersion ellipses |
+| 2026-11-05 | #14681 | Make ROM and velocity hard constraints on accepted speed-ladder rungs (D29) |
+| 2026-11-05 | #14680 | SHOW-C3c slice 3b: per-speed full-fidelity verification and verdict of the full-body ladder (D29 ROM hard constraint, D24 guard) |
+| 2026-11-05 | #14644 | Neutral address grip: flagship driver grip set to the HX-canonical grip (alpha -10.73, psi 40, gamma 0) so both hands read 15 deg face-on (was 98/108 deg); address and swing fixtures re-solved. Deferred to A6 (#14555): at address the RW wrist reads -41.8 deg (range -40..25) and the driver swing leaves the wrist ranges (RWInputY 691 frames to -130 deg, RWInputX 66 frames, LWInputY 216 frames); numbers in neutral_grip.json. Capture-matching receipts keep chaining to full_body_spec_anthro_driver_capture.json (the pre-A2 fitted grip, fitted to the capture and not a grip recommendation): on the neutral grip the seeds receipt fails the gates (IK closure 3.9 -> 76.8 mm vs 5 mm, IK RMS 29.5 -> 55.3 mm, backswing min weight fraction 0.0 BW, address-to-impact 64 mm vs 34 mm), the A6 problem statement |
 | 2026-11-05 | #14676 | Putting studio: Green Type selector for every core green preset (undulating included), height grids generated from GreenSpec into core_greens.js and read with the core bilinear lookup |
 | 2026-11-05 | #14673 | Per-step report adds face, path and AoA error and the deviation norm (C5 acceptance gap 1) |
 | 2026-11-05 | #14663 | SG optimizer: common random numbers and pin-relative aims so HoleMDP value iteration converges (cap is a safety bound only) |
