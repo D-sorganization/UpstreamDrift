@@ -34,7 +34,9 @@ from src.shared.python.motion_matching.pipeline.receipt_schema import (
 
 REPO = Path(__file__).resolve().parents[4]
 DOCS = REPO / "docs" / "development" / "full_body_models"
-DRIVER_SPEC = DOCS / "full_body_spec_anthro_driver.json"
+# Capture-matching receipts chain to the capture-fit spec, not the neutral-grip
+# showpiece spec (#14551, D22).
+DRIVER_SPEC = DOCS / "full_body_spec_anthro_driver_capture.json"
 DRIVER_RECEIPT = DOCS / "evidence" / "ground_support" / "anthro_driver" / "receipt.json"
 SEED = {"hip_rotation_r": -31.25, "hip_rotation_l": 12.5}
 

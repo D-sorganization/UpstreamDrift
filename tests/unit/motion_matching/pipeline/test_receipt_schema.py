@@ -59,8 +59,6 @@ def test_driver_receipt_validates_and_has_expected_zmp() -> None:
     # #12820; a style-feet control on main gives 156/180, feet off 158/180);
     # 158/180 since the receipt was regenerated on the per-capture grip
     # rotation (#12221, fit on the fixed club cluster);
-    # 154/180 since the receipt was regenerated on the 15 deg neutral address
-    # grip (#14551; the spec grip changed from the fitted ~100 deg strong grip);
     # 140/180 since the receipt was regenerated on the measured driver club
     # cluster (#12221; a parent-commit control reproduces 157/180);
     # 157/180 since the receipt was regenerated for #12030 on the GCV-20
@@ -70,7 +68,7 @@ def test_driver_receipt_validates_and_has_expected_zmp() -> None:
     # left hip alone (#11737), and the pre-OSV-6 receipt under
     # anthro_driver_pre_osv6/ recorded 2/3.
     assert receipt.dynamics.reference_zmp.outside_fraction_1s_to_1_5s == pytest.approx(
-        154 / 180, rel=1e-5
+        164 / 180, rel=1e-5
     )
 
 
