@@ -8,6 +8,7 @@ from src.shared.python.contracts import ContractViolationError
 from src.shared.python.impact_optimization.speed_continuation import (
     LadderSpec,
     binding_report,
+    source_band_from_capacity,
     pareto_front,
     run_speed_continuation,
 )
@@ -250,6 +251,49 @@ def test_non_binding_lines_do_not_call_a_blocked_rung_feasible() -> None:
         res, env, source_band={("J0", "positive"): (0.5 * peak, high)}
     )
     blocked = {f"{p.speed_target_mph:.0f} mph" for p in res.points if not p.feasible}
+    assert blocked  # otherwise the loop below passes vacuously
     for ln in lines:
         if "peaks at" in ln and ln.split(":")[0] in blocked:
             assert "feasible" not in ln.replace("within its limit", "")
+
+
+def test_every_side_above_its_lower_value_is_reported() -> None:
+    import numpy as np
+
+    from src.shared.python.impact_optimization.speed_continuation import (
+        _banded_sides,
+    )
+
+    tau = np.array([-30.0, 10.0, 40.0])  # peaks: +40 N m and -30 N m
+    band = {("J0", "positive"): (20.0, 50.0), ("J0", "negative"): (25.0, 60.0)}
+    hits = _banded_sides(band, "J0", tau)
+    assert [h[0] for h in hits] == ["positive", "negative"]
+    only_neg = _banded_sides({("J0", "negative"): (25.0, 60.0)}, "J0", tau)
+    assert [h[0] for h in only_neg] == ["negative"]
+    assert _banded_sides({("J0", "positive"): (45.0, 50.0)}, "J0", tau) == []
+
+
+def test_source_band_from_capacity_skips_single_source_sides() -> None:
+    import numpy as np
+
+    from src.shared.python.loop_nullspace.capacity import CapacityVector
+
+    env = _envelope()
+    up = np.array(env.tau_max_positive_nm, dtype=float)
+    lo = up.copy()
+    lo[0] = 0.5 * up[0]  # J0 positive has a second, lower source; others do not
+    cap = CapacityVector(
+        coordinate_order=env.names,
+        actuated_indices=tuple(range(len(env.names))),
+        actuated_names=env.names,
+        tau_max_negative_nm=np.array(env.tau_max_negative_nm, dtype=float),
+        tau_max_positive_nm=up,
+        assumed_slots=(),
+        verified_slots=env.names,
+        warnings=(),
+        force_velocity={},
+        tau_lower_reference_negative_nm=np.array(env.tau_max_negative_nm, dtype=float),
+        tau_lower_reference_positive_nm=lo,
+    )
+    band = source_band_from_capacity(cap, env)
+    assert band == {("J0", "positive"): (float(lo[0]), float(up[0]))}
