@@ -95,8 +95,9 @@ class PhysiologicalEnvelope:
     #: Coordinates the spec declares no range for; their ROM is +-inf (never invented).
     unbounded_rom_slots: tuple[str, ...] = ()
     #: Coordinates whose ROM comes from the spec's ``soft_limits_deg`` (a design
-    #: range, report-only per HRG-D2 #13173), not from a hard ``coordinate_ranges_deg``
-    #: bound and not from a source of its own; a breach is "soft", never a hard miss.
+    #: range, HRG-D2 #13173), not from a hard ``coordinate_ranges_deg`` bound and
+    #: not from a source of its own.  A breach still rejects the rung (D29) but is
+    #: reported as assumption-limited (D32), never as probable miscalibration.
     soft_rom_slots: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
@@ -121,6 +122,30 @@ class PhysiologicalEnvelope:
             )
             arr.setflags(write=False)
         self.rom_deg.setflags(write=False)
+        require(
+            set(self.soft_rom_slots) <= set(self.names)
+            and not set(self.soft_rom_slots) & set(self.unbounded_rom_slots),
+            "soft_rom_slots must be known joints with a declared (soft) range",
+            self.soft_rom_slots,
+        )
+
+    def limit_is_assumed(self, joint: str, kind: str) -> bool:
+        """True when ``joint``'s ``kind`` limit is not a cited value.
+
+        ``kind`` is ``"ROM"`` (a soft_limits_deg design range) or ``"velocity"``
+        (an UNVERIFIED prior).  The one predicate every reporter uses, so a breach
+        is labelled assumption-limited (D32) the same way everywhere.
+        """
+        require(kind in ("ROM", "velocity"), "kind must be 'ROM' or 'velocity'", kind)
+        slots = self.soft_rom_slots if kind == "ROM" else self.assumed_velocity_slots
+        return joint in slots
+
+    def assumed_limits(self) -> frozenset[tuple[str, str]]:
+        """Every assumed ``(joint, kind)`` pair, for report renderers."""
+        return frozenset(
+            [(j, "ROM") for j in self.soft_rom_slots]
+            + [(j, "velocity") for j in self.assumed_velocity_slots]
+        )
 
     @classmethod
     def from_spec(
@@ -137,7 +162,8 @@ class PhysiologicalEnvelope:
         the caller did not list it in ``allow_unbounded_rom`` (an unbounded
         joint would make any "no ROM violation" check vacuous).  A coordinate
         with no hard range but a ``soft_limits_deg`` entry takes that range and
-        is listed in ``soft_rom_slots`` (hard ranges win when both exist).
+        is listed in ``soft_rom_slots`` (hard ranges win when both exist).  A soft
+        range gates acceptance of a rung, never IK or an engine limit.
         """
         cap = capacity_for(tuple(spec["coordinate_order"]), subject)
         hard = spec["coordinate_ranges_deg"]

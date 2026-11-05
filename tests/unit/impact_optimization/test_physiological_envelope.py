@@ -200,3 +200,23 @@ def test_series_trunk_range_is_the_sum_of_the_regional_ranges(kind: str) -> None
         SPEC_V2["soft_limits_deg"][f"lumbar_{kind}"][1]
         + SPEC_V2["soft_limits_deg"][f"thoracic_{kind}"][1],
     ]
+
+
+def test_limit_is_assumed_answers_per_joint_and_kind_in_one_place() -> None:
+    env = _v2_env()
+    assert env.limit_is_assumed("lumbar_flexion", "ROM")
+    assert env.limit_is_assumed("lumbar_flexion", "velocity")  # trunk velocity prior
+    assert not env.limit_is_assumed("LEInput", "ROM")  # hard, declared
+    assert ("thoracic_axial_rotation", "ROM") in env.assumed_limits()
+    with pytest.raises(ContractViolationError):
+        env.limit_is_assumed("LEInput", "torque")
+
+
+def test_soft_rom_slots_must_be_known_and_not_unbounded() -> None:
+    import dataclasses
+
+    env = _v2_env()
+    with pytest.raises(ContractViolationError):
+        dataclasses.replace(env, soft_rom_slots=("not_a_joint",))
+    with pytest.raises(ContractViolationError):
+        dataclasses.replace(env, soft_rom_slots=(env.unbounded_rom_slots[0],))

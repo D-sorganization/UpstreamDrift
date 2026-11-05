@@ -151,3 +151,37 @@ def test_unobservable_errors_print_as_n_a_not_nan() -> None:
     row = render_continuation_report(result, [[]], {}).splitlines()[2]
     assert "nan" not in row.lower()
     assert "n/a" in row
+
+
+def test_soft_rom_breach_prints_assumption_limited_not_miscalibration() -> None:
+    """D35/D32: a breach of an assumed limit is never a finding about the athlete."""
+    row = next(
+        r
+        for r in render_continuation_report(
+            _result(),
+            [[], [ROM]],
+            {},
+            assumed_limits=frozenset({("SpineInputZ", "ROM")}),
+        ).splitlines()
+        if "rejected" in r
+    )
+    assert "assumption-limited (D32)" in row
+    assert "miscalibration" not in row
+
+
+def test_a_cited_breach_beside_an_assumed_one_still_reads_miscalibration() -> None:
+    row = next(
+        r
+        for r in render_continuation_report(
+            _result(),
+            [[], [ROM, VEL]],
+            {},
+            assumed_limits=frozenset({("SpineInputZ", "ROM")}),
+        ).splitlines()
+        if "rejected" in r
+    )
+    assert "probable miscalibration (D29)" in row
+
+
+def test_no_assumed_limits_by_default_keeps_the_old_wording() -> None:
+    assert "probable miscalibration (D29)" in _render()

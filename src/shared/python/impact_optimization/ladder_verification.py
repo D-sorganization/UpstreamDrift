@@ -76,10 +76,9 @@ class FullFidelityCheck:
     tolerances_met: bool
     #: ROM / velocity hits of the REPLAY trajectory (never the search one).
     kinematic: tuple[KinematicBinding, ...] = ()
-    #: Joints whose velocity limit is an assumed placeholder, not a cited value.
-    assumed_velocity: tuple[str, ...] = ()
-    #: Joints whose ROM is a soft_limits_deg design range (uncited), D35.
-    assumed_rom: tuple[str, ...] = ()
+    #: Assumed (uncited) ``(joint, kind)`` limits, D32/D35; from
+    #: ``PhysiologicalEnvelope.assumed_limits``.
+    assumed_limits: frozenset[tuple[str, str]] = frozenset()
 
 
 def _check(
@@ -89,8 +88,7 @@ def _check(
     tol: ImpactTolerance,
     speed_tol_mph: float,
     kinematic: tuple[KinematicBinding, ...],
-    assumed_velocity: tuple[str, ...] = (),
-    assumed_rom: tuple[str, ...] = (),
+    assumed_limits: frozenset[tuple[str, str]] = frozenset(),
 ) -> FullFidelityCheck:
     face, path, aoa = impact_errors_deg(full, target)
     speed = float(full.speed_mph)
@@ -107,8 +105,7 @@ def _check(
         aoa,
         met,
         kinematic,
-        assumed_velocity,
-        assumed_rom,
+        assumed_limits,
     )
 
 
@@ -145,8 +142,7 @@ def verify_at_full_fidelity(
                 tol,
                 speed_tol_mph,
                 hits,
-                env.assumed_velocity_slots,
-                env.soft_rom_slots,
+                env.assumed_limits(),
             )
         )
     return tuple(checks)
@@ -174,14 +170,7 @@ def _row(
 ) -> dict[str, Any]:
     hits = check.kinematic
     over = _names(hits)
-    soft = _names(
-        tuple(
-            h
-            for h in hits
-            if (h.kind == "velocity" and h.joint in check.assumed_velocity)
-            or (h.kind == "ROM" and h.joint in check.assumed_rom)
-        )
-    )
+    soft = _names(tuple(h for h in hits if (h.joint, h.kind) in check.assumed_limits))
     breaches = [n for n in over if n not in soft]
     return {
         "target_mph": point.speed_target_mph,
