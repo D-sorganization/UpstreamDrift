@@ -45,7 +45,8 @@ def add_strategy_parser(subparsers: argparse._SubParsersAction) -> None:
         "--pin-only",
         action="store_true",
         help="end the hole only at the pin cell (default: any green cell, i.e. "
-        "strokes to reach the green; the pin-only solve does not converge)",
+        "strokes to reach the green; pin-only targets one cell, so its value "
+        "depends on the raster resolution)",
     )
     p.add_argument("--html", metavar="PATH", help="also write the HTML/SVG view")
     hole = p.add_mutually_exclusive_group(required=True)

@@ -113,12 +113,12 @@ def render_text(view: StrategyView) -> str:
         f"Expected strokes  tour: {tour}   personal: {personal}   delta: {delta}",
         _solve_note(view),
         "",
-        f"{'club':<10}{'aim':>7}{'strokes':>9}{'carry':>8}{'95% long':>10}{'95% wide':>10}",
+        f"{'club':<10}{'aim vs pin':>11}{'strokes':>9}{'carry':>8}{'95% long':>10}{'95% wide':>10}",
     ]
     for o in view.options:
         e = o.ellipse
         lines.append(
-            f"{o.club:<10}{o.aim_deg:>6.1f}°{o.expected_strokes:>9.2f}"
+            f"{o.club:<10}{o.aim_deg:>10.1f}°{o.expected_strokes:>9.2f}"
             f"{e.centre_along:>8.0f}{e.semi_major:>10.1f}{e.semi_minor:>10.1f}"
         )
     return "\n".join(lines) + "\n"
@@ -150,5 +150,5 @@ def render_html(view: StrategyView) -> str:
         f"<p>Tour SG <b>{tour}</b> &middot; Personal SG <b>{personal}</b> &middot; Delta <b>{delta}</b></p>"
         f"<svg viewBox='-10 {-span:.0f} {reach + 20:.0f} {2 * span:.0f}' width='100%' "
         f"role='img' aria-label='Dispersion ellipses'>{shapes}</svg>"
-        f"<table><tr><th>Club</th><th>Aim</th><th>Strokes</th></tr>{rows}</table>"
+        f"<table><tr><th>Club</th><th>Aim (from pin line)</th><th>Strokes</th></tr>{rows}</table>"
     )

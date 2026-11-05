@@ -55,10 +55,10 @@ class SolveSettings:
 def green_terminal(raster: LieRaster) -> LieRaster:
     """Copy of ``raster`` where every green cell ends the hole.
 
-    The MDP has no putting model, so with only the pin cell terminal the
-    expected strokes do not converge. Ending on the green gives *strokes to
-    reach the green*, which converges and still ranks tee shots by their
-    hazard and dispersion risk; add putting separately.
+    The MDP has no putting model, so the number it produces measures *strokes to
+    reach the green*, not strokes to hole out; add putting separately. It still
+    ranks tee shots by their hazard and dispersion risk. Convergence comes from
+    the solver (common random numbers, pin-relative aims), not from this relabel.
     """
     codes = raster.codes.copy()
     codes[codes == LIE_CODES["green"]] = LIE_CODES["holed"]
