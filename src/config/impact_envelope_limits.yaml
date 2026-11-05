@@ -58,7 +58,7 @@ velocity_limits_deg_s:
         margin: 2.0,
         target_clubhead_mph: 125,
         study_clubhead_mph: 112.4,
-        study_speed_basis: "Myers reports ball speed 75.4 m/s, not club speed; club speed >= ball speed / 1.5 (maximum smash factor) = 112.4 mph, ASSUMED lower bound",
+        study_speed_basis: "Myers reports ball speed 75.4 m/s, not club speed; club speed derived from ball speed / 1.5 (maximum smash factor) = 112.4 mph (about 114 mph at 1.48); ASSUMED, not reported; 2x term wins either way",
         two_x_term: 1534,
         scaled_term: 1096.5,
         binding_term: two_x,
@@ -90,7 +90,7 @@ velocity_limits_deg_s:
         margin: 2.0,
         target_clubhead_mph: 125,
         study_clubhead_mph: 112.4,
-        study_speed_basis: "Myers reports ball speed 75.4 m/s, not club speed; club speed >= ball speed / 1.5 (maximum smash factor) = 112.4 mph, ASSUMED lower bound",
+        study_speed_basis: "Myers reports ball speed 75.4 m/s, not club speed; club speed derived from ball speed / 1.5 (maximum smash factor) = 112.4 mph (about 114 mph at 1.48); ASSUMED, not reported; 2x term wins either way",
         two_x_term: 1534,
         scaled_term: 1096.5,
         binding_term: two_x,
@@ -156,7 +156,7 @@ velocity_limits_deg_s:
         two_x_term: 1338,
         scaled_term: 1613.1,
         binding_term: scaled,
-        note: "Lead (left) wrist: largest component is ulnar deviation 669 +- 210 deg/s (flexion 636 +- 213). Limit = max(2 x mean, (mean + 3 SD) x 125 / study club speed) per D38; both terms and the winner are recorded above (ASSUMED, no per-golfer maxima reported). Segment rate in the lab frame used as a joint-rate bound.",
+        note: "Lead (left) wrist: largest component is ulnar deviation 669 +- 210 deg/s (flexion 636 +- 213). Limit = max(2 x mean, (mean + 3 SD) x 125 / study club speed) per D38; both terms and the winner are recorded above (ASSUMED, no per-golfer maxima reported). Segment rate in the lab frame used as a joint-rate bound. Disclosure: the recorded baseline has a one-step contact transient at step 1327, outside the envelope window 1225..1325 (LWInputX 2316, LWInputY 1725, RWInputX 3249 > 3186, RWInputY 1797); a rollout extending past impact needs separate handling.",
       }
     verification_status: SOURCED_WITH_ASSUMED_MARGIN
   - coordinates: [RWInputX, RWInputY]
@@ -175,7 +175,7 @@ velocity_limits_deg_s:
         two_x_term: 3062,
         scaled_term: 3186.5,
         binding_term: scaled,
-        note: "Trail (right) wrist flexion 1531 +- 345 deg/s (ulnar deviation 548 +- 155). Limit = max(2 x mean, (mean + 3 SD) x 125 / study club speed) per D38; both terms and the winner are recorded above (ASSUMED, no per-golfer maxima reported). Segment rate in the lab frame used as a joint-rate bound.",
+        note: "Trail (right) wrist flexion 1531 +- 345 deg/s (ulnar deviation 548 +- 155). Limit = max(2 x mean, (mean + 3 SD) x 125 / study club speed) per D38; both terms and the winner are recorded above (ASSUMED, no per-golfer maxima reported). Segment rate in the lab frame used as a joint-rate bound. Disclosure: the recorded baseline has a one-step contact transient at step 1327, outside the envelope window 1225..1325 (LWInputX 2316, LWInputY 1725, RWInputX 3249 > 3186, RWInputY 1797); a rollout extending past impact needs separate handling.",
       }
     verification_status: SOURCED_WITH_ASSUMED_MARGIN
   - coordinates:
