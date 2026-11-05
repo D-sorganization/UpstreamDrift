@@ -25,10 +25,13 @@ viewers draw the club on the club body, so they show a straight shaft.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
 import numpy as np
+
+from src.shared.python.contracts import require
 
 #: Window around the bundle's impact split time; the chain run diverges at +10 ms.
 WINDOW_S = (-0.08, 0.005)
@@ -144,18 +147,67 @@ def plot(paths: list[Path], out: Path) -> None:
     print(out)  # noqa: T201 - evidence script progress
 
 
-def update_receipt(paths: list[Path], receipt: Path) -> None:
-    """Rewrite ``impact_window.engines`` of the receipt from engine series.
+def _bundle_manifest(path: Path) -> dict:
+    with np.load(path, allow_pickle=False) as data:
+        return json.loads(str(data["manifest"]))
 
-    The first series must be MuJoCo (the reference); the others are scored by
-    the largest Clubhead deflection difference to it over the shared window.
+
+def update_receipt(
+    paths: list[Path],
+    receipt: Path,
+    bundle: Path,
+    code_commit: str,
+    libraries: dict[str, str],
+) -> None:
+    """Rewrite the receipt's run-level numbers and per-engine block.
+
+    ``paths`` are engine series files of ONE bundle (``bundle``); MuJoCo is the
+    reference.  The previous headline run is kept under ``previous_run`` the
+    first time, never replaced silently.  Deflection differences are scored
+    from the window start to contact; coordinate errors cover the whole window
+    (to +5 ms, including the post-contact divergence).
     """
     runs = {str(r["engine"]): r for r in (dict(np.load(p)) for p in paths)}
-    if "mujoco" not in runs:
-        raise ValueError("a mujoco series is required as the reference")
+    require(
+        "mujoco" in runs,
+        "a mujoco series is required as the reference",
+    )
+    grid = runs["mujoco"]["time_s"]
+    for name, run in runs.items():
+        require(
+            np.array_equal(run["time_s"], grid),
+            f"{name} series is on another time grid than mujoco (mixed bundles?)",
+        )
     keep = _to_impact(runs["mujoco"])
     ref = runs["mujoco"]["deflection_m"][keep]
-    engines = {
+    document = json.loads(receipt.read_text(encoding="utf-8"))
+    window = document["impact_window"]
+    if "previous_run" not in document:
+        document["previous_run"] = {
+            "code_commit": document["code_commit"],
+            "bundle": document["bundle"],
+            "impact_window": {
+                k: window[k]
+                for k in (
+                    "max_clubhead_deflection_m",
+                    "clubhead_deflection_at_impact_m",
+                    "max_abs_shaft_q_rad",
+                )
+            },
+        }
+    provenance = _bundle_manifest(bundle)["provenance"]
+    document["code_commit"] = code_commit
+    document["bundle"] = {
+        "command": document["bundle"]["command"],
+        "sha256": hashlib.sha256(bundle.read_bytes()).hexdigest(),
+        "note": "bundle hashes depend on platform and library versions",
+        "steps": int(_bundle_manifest(bundle)["steps"]),
+        "dt_s": float(_bundle_manifest(bundle)["dt_s"]),
+        "impact_split_time_s": float(provenance["impact_split_time_s"]),
+        "max_pose_drift_m": float(provenance["max_pose_drift_m"]),
+        "libraries": libraries,
+    }
+    window["engines"] = {
         name: {
             "max_coordinate_error_vs_reference_rad": float(
                 run["max_coordinate_error_rad"]
@@ -166,14 +218,20 @@ def update_receipt(paths: list[Path], receipt: Path) -> None:
         }
         for name, run in runs.items()
     }
-    document = json.loads(receipt.read_text(encoding="utf-8"))
-    window = document["impact_window"]
-    window["engines"] = engines
-    # Headline deflection numbers stay those of the original single-run receipt;
-    # this rewrites only the per-engine comparison.
+    at_impact = int(np.argmin(np.abs(grid[keep])))
+    window["clubhead_deflection_at_impact_m"] = [float(v) for v in ref[at_impact]]
+    window["max_clubhead_deflection_m"] = float(np.linalg.norm(ref, axis=1).max())
+    window["max_abs_shaft_q_rad"] = float(np.abs(runs["mujoco"]["shaft_q"][keep]).max())
     window["engines_run_note"] = (
-        "per-engine entries re-measured on one bundle for all engines, from the "
-        "window start to contact (the chain run diverges just after contact, R11)"
+        "run-level numbers, engine entries and the overlay are all from "
+        "`bundle` above (impact_split_time_s identical to previous_run). "
+        "max_deflection_difference_vs_mujoco_m is scored from the window start "
+        "to contact; max_coordinate_error_vs_reference_rad covers the whole "
+        "window to +5 ms including the post-contact divergence (R11). The "
+        "at-impact deflection differs from previous_run because it is read in "
+        "the last milliseconds before contact, where the chain deflection grows "
+        "fast (about 0.02 m at -10 ms to 0.10 m at contact in this run) and "
+        "differs between exports; the cause was not isolated."
     )
     text = json.dumps(document, indent=2) + chr(10)
     receipt.write_text(text, encoding="utf-8")
@@ -193,11 +251,17 @@ def main() -> None:
     upd = sub.add_parser("receipt")
     upd.add_argument("--series", type=Path, nargs="+", required=True)
     upd.add_argument("--receipt", type=Path, required=True)
+    upd.add_argument("--bundle", type=Path, required=True)
+    upd.add_argument("--code-commit", required=True)
+    upd.add_argument("--library", action="append", default=[], metavar="NAME=VERSION")
     args = parser.parse_args()
     if args.command == "series":
         series(args.bundle, args.engine, args.out)
     elif args.command == "receipt":
-        update_receipt(args.series, args.receipt)
+        libraries = dict(item.split("=", 1) for item in args.library)
+        update_receipt(
+            args.series, args.receipt, args.bundle, args.code_commit, libraries
+        )
     else:
         plot(args.series, args.out)
 
