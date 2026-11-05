@@ -139,10 +139,14 @@ class SolveResult:
 class HoleMDP:
     """Vectorized hole-MDP solver.
 
-    ``VALUE_CAP`` bounds every state's expected strokes. A cell from which no
-    action can ever reach the hole (for example behind the pin when the aim set
-    only points forward) would otherwise grow by its step cost every sweep and
-    max-norm convergence could never fire; such cells settle at the cap.
+    Aim angles are *pin-relative*: 0 deg points from the shot's cell straight at
+    the pin, so every cell, including one past the green, has a proper policy.
+    (The injected-model scalar path still uses absolute aims.)
+
+    ``VALUE_CAP`` is only a safety bound for a hole that cannot be reached at all
+    (for example a pin ringed by hazard): such cells would otherwise grow by their
+    step cost every sweep and max-norm convergence could never fire. On a playable
+    hole no cell reaches it, and the solution does not depend on its value.
     """
 
     VALUE_CAP = 30.0
@@ -281,9 +285,8 @@ class HoleMDP:
         nx, ny = self.raster.shape
         codes = self.raster.codes
 
-        # Per-cell modifiers (vectorized lookup table).
-        mod_table = self._modifier_table()  # shape (n_lie_codes, 3)
-        cell_mods = mod_table[codes]  # (nx, ny, 3)
+        # Per-cell modifiers (vectorized lookup of the (n_lie_codes, 3) table).
+        cell_mods = self._modifier_table()[codes]  # (nx, ny, 3)
 
         # Sample once in aim-frame.
         cb = self.baseline.get(action.club)
@@ -306,10 +309,6 @@ class HoleMDP:
         bias_long = cb.bias_long + (skill.bias_long if skill else 0.0)
         bias_lat = cb.bias_lat + (skill.bias_lat if skill else 0.0)
 
-        # Apply rotation matrix once per action.
-        ca = np.cos(action.aim_angle_rad)
-        sa = np.sin(action.aim_angle_rad)
-
         # Per-cell along/lateral after applying per-cell mods.
         # along = base_dist * dist_mult + dlong * sigma_long_mult
         # lat   = dlat * sigma_lat_mult
@@ -324,6 +323,8 @@ class HoleMDP:
             self.raster.origin[1] + (np.arange(ny) + 0.5) * self.raster.resolution_yd
         )
         cx, cy = np.meshgrid(cell_x, cell_y, indexing="ij")  # (nx, ny)
+
+        ca, sa = self._aim_rotation(action, cx, cy)  # (nx, ny) each
 
         dist_mult = cell_mods[..., 0]  # (nx, ny)
         sigma_long_mult = cell_mods[..., 1]  # (nx, ny) — longitudinal dispersion
@@ -370,6 +371,18 @@ class HoleMDP:
             invalid_putter = ~green_mask & valid
             q_mean[invalid_putter] = np.inf
         return q_mean
+
+    def _aim_rotation(
+        self, action: ShotAction, cx: NDArray[np.float64], cy: NDArray[np.float64]
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """Per-cell (cos, sin) of the absolute aim: pin bearing plus the action aim.
+
+        Aims are pin-relative, so "0 deg" is straight at the hole from any cell and
+        a cell past the green can still aim back at it.
+        """
+        bearing = np.arctan2(self.raster.pin[1] - cy, self.raster.pin[0] - cx)
+        angle = bearing + action.aim_angle_rad
+        return np.cos(angle), np.sin(angle)
 
     def _modifier_table(self) -> NDArray[np.float64]:
         """Lookup table (lie_code → (dist_mult, sl_mult, slat_mult))."""
