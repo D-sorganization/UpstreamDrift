@@ -1,0 +1,46 @@
+{
+  "issue": 14600,
+  "replay": "C4 best-fit driver, open-loop window to contact, chain shaft (shaft_state_rollout.py)",
+  "limitations": [
+    "efforts are the baseline bundle's, not re-optimised for the shifted head CG",
+    "one swing, one driver, one impact index",
+    "toe_down_mm sign: + = head on the ground side of the (shaft, velocity) plane"
+  ],
+  "cases": {
+    "baseline": {
+      "behind_face_mm": 0,
+      "toward_toe_mm": 0,
+      "toe_down_mm": 11.45,
+      "droop_mm": -28.71,
+      "lead_mm": 96.12
+    },
+    "behind_face_35mm": {
+      "behind_face_mm": 35,
+      "toward_toe_mm": 0,
+      "toe_down_mm": 17.83,
+      "droop_mm": -46.51,
+      "lead_mm": 112.49
+    },
+    "plus_nxy_30mm": {
+      "behind_face_mm": 0,
+      "toward_toe_mm": 30,
+      "toe_down_mm": 9.95,
+      "droop_mm": -24.3,
+      "lead_mm": 104.1
+    },
+    "minus_nxy_30mm": {
+      "behind_face_mm": 0,
+      "toward_toe_mm": -30,
+      "toe_down_mm": 16.16,
+      "droop_mm": -30.85,
+      "lead_mm": 98.93
+    },
+    "behind_35_plus_nxy_30": {
+      "behind_face_mm": 35,
+      "toward_toe_mm": 30,
+      "toe_down_mm": 13.32,
+      "droop_mm": -46.44,
+      "lead_mm": 112.95
+    }
+  }
+}

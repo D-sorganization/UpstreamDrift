@@ -12,6 +12,7 @@ energy from the MuJoCo model of the same spec.
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import tempfile
 from pathlib import Path
@@ -33,6 +34,9 @@ from src.shared.python.impact_parameters.shaft_state import (  # noqa: E402
 )
 from src.shared.python.motion_matching.club_face_target import (  # noqa: E402
     face_axis_in_frame,
+)
+from src.shared.python.motion_matching.club_head_cg import (  # noqa: E402
+    apply_head_cg_offset,
 )
 from src.shared.python.motion_matching.club_shaft_chain import (  # noqa: E402
     passive_coordinates,
@@ -70,12 +74,34 @@ def replay_window(bundle: InputBundle) -> tuple[np.ndarray, np.ndarray, bytes]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-dir", type=Path, required=True)
-    out_dir = parser.parse_args().out_dir
+    parser.add_argument(
+        "--head-cg-behind-face-mm",
+        type=float,
+        default=0.0,
+        help="head CG depth behind the face (#14600); 0 keeps the C4 baseline",
+    )
+    parser.add_argument(
+        "--head-cg-toward-toe-mm",
+        type=float,
+        default=0.0,
+        help="head CG offset along (face normal x shaft), signed (#14600)",
+    )
+    args = parser.parse_args()
+    out_dir = args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "chain_bundle.npz"
         export(SEEDS, path, 1.33, shaft_model="chain")
         bundle = InputBundle.load(path)
+    if args.head_cg_behind_face_mm or args.head_cg_toward_toe_mm:
+        spec_doc = apply_head_cg_offset(
+            json.loads(bundle.spec_bytes),
+            behind_face_m=args.head_cg_behind_face_mm * 1e-3,
+            toward_toe_m=args.head_cg_toward_toe_mm * 1e-3,
+        )
+        bundle = dataclasses.replace(
+            bundle, spec_bytes=json.dumps(spec_doc).encode("utf-8")
+        )
     rel_s, q_spec, spec_bytes = replay_window(bundle)
     spec = json.loads(spec_bytes)
     xml, meta = export_full_body_mjcf(spec_bytes)
@@ -104,6 +130,7 @@ def main() -> None:
     fig, ax = plt.subplots(2, 1, sharex=True, figsize=(7, 5))
     ax[0].plot(rel_s * 1e3, state.lead_m * 1e3, label="lead (+ forward)")
     ax[0].plot(rel_s * 1e3, state.droop_m * 1e3, label="droop (+ down)")
+    ax[0].plot(rel_s * 1e3, state.toe_down_m * 1e3, label="toe-down (+ ground side)")
     ax[0].set_ylabel("tip deflection (mm)")
     ax[0].legend()
     ax[1].plot(rel_s * 1e3, state.face_delta_deg, label="face change (+ open)")
