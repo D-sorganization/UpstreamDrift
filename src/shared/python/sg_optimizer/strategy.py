@@ -91,11 +91,10 @@ def _solve(
     model: ShotOutcomeModel | None,
     cfg: SolveSettings,
 ) -> tuple[float, ShotAction]:
-    mdp, value = solve_mdp(problem, profile, model, cfg)
-    value = value.value
+    mdp, result = solve_mdp(problem, profile, model, cfg)
     return (
-        mdp.expected_strokes(problem.start, value),
-        mdp.optimal_action(problem.start, value),
+        mdp.expected_strokes(problem.start, result.value),
+        mdp.optimal_action(problem.start, result.value),
     )
 
 
