@@ -204,3 +204,34 @@ def test_toe_down_is_zero_when_velocity_is_parallel_to_the_shaft():
     from src.shared.python.impact_parameters.shaft_state import toe_down_component
 
     assert toe_down_component(_SHAFT * 0.01, 5.0 * _SHAFT, _SHAFT, FRAME) == 0.0
+
+
+# --- droop decomposition (#14600 review F2) --------------------------------
+def test_droop_decomposition_reconstructs_droop_from_lead_and_toe_down_terms():
+    from src.shared.python.impact_parameters.shaft_state import droop_decomposition
+
+    deflection = np.array([0.04, -0.02, 0.01])
+    velocity = np.array([25.0, 10.0, -5.0])
+    shaft = _SHAFT
+    out = droop_decomposition(deflection, velocity, shaft, FRAME)
+    _, droop = decompose_deflection(deflection, velocity, FRAME)
+    assert out["droop_m"] == pytest.approx(droop)
+    assert out["residual_m"] == pytest.approx(0.0, abs=1e-12)
+    terms = out["term_lead_m"] + out["term_in_plane_perp_m"] + out["term_normal_m"]
+    assert terms == pytest.approx(droop)
+    # d1 along the tip velocity is exactly lead_m
+    lead, _ = decompose_deflection(deflection, velocity, FRAME)
+    assert out["lead_m"] == pytest.approx(lead)
+    assert out["v_dot_z"] == pytest.approx((velocity / np.linalg.norm(velocity))[2])
+    assert out["s_dot_z"] == pytest.approx(shaft[2])
+
+
+def test_pure_lead_deflection_enters_droop_only_through_v_dot_z():
+    from src.shared.python.impact_parameters.shaft_state import droop_decomposition
+
+    velocity = np.array([30.0, 0.0, -10.0])
+    unit_v = velocity / np.linalg.norm(velocity)
+    out = droop_decomposition(0.02 * unit_v, velocity, _SHAFT, FRAME)
+    assert out["droop_m"] == pytest.approx(-0.02 * unit_v[2])
+    assert out["term_in_plane_perp_m"] == pytest.approx(0.0, abs=1e-12)
+    assert out["term_normal_m"] == pytest.approx(0.0, abs=1e-12)

@@ -13,16 +13,17 @@ frame.  It is split in the target frame (:class:`TargetFrame`):
 * ``lead_m``: component along the tip velocity; positive = the head is ahead
   of the straight shaft (forward kick), negative = lag.
 * ``droop_m``: component along gravity (down); positive = head below the
-  straight-shaft position.  It is the gravity component of the whole bend, so
-  it mixes in the lead/lag bend when the shaft is not vertical; use
-  ``toe_down_m`` for the toe-down of the shaft literature.
-
+  straight-shaft position.  It is the gravity component of the whole bend:
+  the deflection splits into ``lead`` (along the tip velocity), an in-swing-
+  plane part perpendicular to the velocity and the swing-plane normal
+  (``toe_down_m``), and each enters through its ``e_i . up`` cosine
+  (:func:`droop_decomposition`).  In the C4 replay the in-plane perpendicular
+  part, not the lead, dominates the negative droop.
 * ``toe_down_m`` (#14600): component along the normal of the plane spanned by
   the shaft axis and the tip velocity, oriented toward gravity; positive = the
   head is out of the swing plane on the ground side.  This is the toe-down
-  deflection of the shaft literature; ``droop_m`` is the gravity component of
-  the whole deflection and so also carries the lead/lag bend (the shaft is far
-  from vertical at impact).
+  deflection of the shaft literature; ``droop_m`` is a different quantity (the
+  gravity component of the whole deflection).
 
 Also exposed per sample: the deflection rate (a resonance proxy) and the
 elastic strain energy ``1/2 sum k q^2`` of the chain springs.
@@ -56,11 +57,30 @@ class ShaftImpactState:
     face_delta_deg: np.ndarray | None = None
     loft_delta_deg: np.ndarray | None = None
     toe_down_m: np.ndarray | None = None
+    tip_velocity_mps: np.ndarray | None = None
+    shaft_axis: np.ndarray | None = None
+    frame: TargetFrame | None = None
 
     @property
     def peak_deflection_m(self) -> float:
         """Largest tip deflection magnitude over the rollout."""
         return float(np.max(np.linalg.norm(self.tip_deflection_m, axis=1)))
+
+    def _decomposition_report(self, index: int) -> dict[str, Any]:
+        """``{"droop_decomposition": {...}}`` when the sample has one."""
+        if (
+            self.tip_velocity_mps is None
+            or self.shaft_axis is None
+            or self.frame is None
+        ):
+            return {}
+        report = droop_decomposition(
+            self.tip_deflection_m[index],
+            self.tip_velocity_mps[index],
+            self.shaft_axis[index],
+            self.frame,
+        )
+        return {} if report is None else {"droop_decomposition": report}
 
     def at_impact(self, index: int) -> dict[str, Any]:
         """Report the shaft state at one sample (the impact index)."""
@@ -79,6 +99,7 @@ class ShaftImpactState:
         return {
             **shaft_angles,
             **toe_down,
+            **self._decomposition_report(index),
             "time_s": float(self.times_s[index]),
             "lead_m": float(self.lead_m[index]),
             "droop_m": float(self.droop_m[index]),
@@ -122,6 +143,53 @@ def toe_down_component(
     if abs(toward_ground) < _MIN_SPEED_MPS * length:
         return 0.0
     return float(deflection @ normal) / length * math.copysign(1.0, toward_ground)
+
+
+def droop_decomposition(
+    deflection: np.ndarray,
+    velocity: np.ndarray,
+    shaft_axis: np.ndarray,
+    frame: TargetFrame,
+) -> dict[str, float] | None:
+    """How a tip deflection enters ``droop_m`` (#14600).
+
+    Orthonormal basis: ``e1`` along the tip velocity, ``e2`` the shaft axis
+    with its ``e1`` part removed, ``e3 = e1 x e2`` (the swing-plane normal).
+    ``droop = -d . up = sum_i -d_i (e_i . up)``; each ``term_*`` is one such
+    sum member (m) and ``residual_m`` is ``droop_m`` minus their sum.  Also
+    returns ``v_dot_z``, ``v_dot_s`` and ``s_dot_z`` (cosines against ``up``
+    and the shaft axis) and the coordinates ``lead_m`` (= d1), ``in_plane_perp_m``
+    (d2), ``normal_m`` (d3).  ``None`` when the basis is undefined (tip at rest
+    or velocity parallel to the shaft).
+    """
+    speed = float(np.linalg.norm(velocity))
+    shaft = np.asarray(shaft_axis, dtype=float)
+    shaft = shaft / np.linalg.norm(shaft)
+    if speed < _MIN_SPEED_MPS:
+        return None
+    e1 = np.asarray(velocity, dtype=float) / speed
+    perp = shaft - float(shaft @ e1) * e1
+    if float(np.linalg.norm(perp)) < 1e-9:
+        return None
+    e2 = perp / np.linalg.norm(perp)
+    e3 = np.cross(e1, e2)
+    up = np.asarray(frame.z_t, dtype=float)
+    coords = [float(deflection @ e) for e in (e1, e2, e3)]
+    terms = [-c * float(e @ up) for c, e in zip(coords, (e1, e2, e3), strict=True)]
+    droop = -float(deflection @ up)
+    return {
+        "v_dot_z": float(e1 @ up),
+        "v_dot_s": float(e1 @ shaft),
+        "s_dot_z": float(shaft @ up),
+        "lead_m": coords[0],
+        "in_plane_perp_m": coords[1],
+        "normal_m": coords[2],
+        "term_lead_m": terms[0],
+        "term_in_plane_perp_m": terms[1],
+        "term_normal_m": terms[2],
+        "droop_m": droop,
+        "residual_m": droop - sum(terms),
+    }
 
 
 def face_loft_deltas(
@@ -189,7 +257,7 @@ def shaft_state_series(
     jacp = np.zeros((3, model.nv))
     n = t.shape[0]
     deflection, lead, droop = np.zeros((n, 3)), np.zeros(n), np.zeros(n)
-    toe_down = np.zeros(n)
+    toe_down, tip_vel, axes = np.zeros(n), np.zeros((n, 3)), np.zeros((n, 3))
     angles = np.zeros((n, 2))
     for i in range(n):
         data.qpos[:], data.qvel[:] = q[i], v[i]
@@ -212,6 +280,7 @@ def shaft_state_series(
         lead[i], droop[i] = decompose_deflection(deflection[i], tip_velocity, frame)
         shaft_axis = data.site_xmat[site].reshape(3, 3)[:, 1]  # straight shaft
         toe_down[i] = toe_down_component(deflection[i], tip_velocity, shaft_axis, frame)
+        tip_vel[i], axes[i] = tip_velocity, shaft_axis
     rate = (
         np.linalg.norm(np.gradient(deflection, t, axis=0), axis=1)
         if n > 1
@@ -221,5 +290,16 @@ def shaft_state_series(
     ensure(bool(np.all(np.isfinite(deflection))), "deflection must be finite")
     face, loft = (None, None) if normal is None else (angles[:, 0], angles[:, 1])
     return ShaftImpactState(
-        t, deflection, lead, droop, rate, energy, face, loft, toe_down
+        t,
+        deflection,
+        lead,
+        droop,
+        rate,
+        energy,
+        face,
+        loft,
+        toe_down,
+        tip_vel,
+        axes,
+        frame,
     )

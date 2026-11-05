@@ -44,14 +44,19 @@ def face_normal_in_club_frame(document: Mapping[str, Any]) -> np.ndarray:
     return normal / np.linalg.norm(normal)
 
 
-def toe_axis_in_club_frame(document: Mapping[str, Any]) -> np.ndarray:
-    """Unit in-face-plane axis ``face_normal x shaft`` (+y, toward the head)."""
+def face_plane_axis_in_club_frame(document: Mapping[str, Any]) -> np.ndarray:
+    """Unit axis ``face_normal x y`` of the club-body frame (y is the shaft axis).
+
+    It lies in the face plane and is perpendicular to the shaft. Its sign is
+    fixed by the frame algebra only; it is not tied to the physical toe or
+    heel of the head, so callers name it by this axis.
+    """
     axis = np.cross(face_normal_in_club_frame(document), (0.0, 1.0, 0.0))
     return np.asarray(axis / np.linalg.norm(axis), dtype=float)
 
 
 def apply_head_cg_offset(
-    document: Mapping[str, Any], *, behind_face_m: float, toward_toe_m: float = 0.0
+    document: Mapping[str, Any], *, behind_face_m: float, along_face_axis_m: float = 0.0
 ) -> dict[str, Any]:
     """Copy of ``document`` whose head solid has its CG ``behind_face_m`` behind the face.
 
@@ -59,7 +64,7 @@ def apply_head_cg_offset(
     document has exactly one ``*/Clubhead`` solid and a recognised club
     assembly (``ValueError`` otherwise).
     Postconditions: only that solid's ``com_m`` changes, to
-    ``-behind_face_m * n + toward_toe_m * (n x y)``; its mass and its inertia about its own CG are kept.
+    ``-behind_face_m * n + along_face_axis_m * (n x y)``; its mass and its inertia about its own CG are kept.
     """
     require(
         math.isfinite(behind_face_m) and 0.0 <= behind_face_m <= MAX_BEHIND_FACE_M,
@@ -77,12 +82,12 @@ def apply_head_cg_offset(
         len(heads) == 1, "document must have exactly one Clubhead solid", len(heads)
     )
     offset = -behind_face_m * face_normal_in_club_frame(document)
-    offset = offset + toward_toe_m * toe_axis_in_club_frame(document)
+    offset = offset + along_face_axis_m * face_plane_axis_in_club_frame(document)
     heads[0]["com_m"] = [float(v) for v in offset]
     ensure(
         math.isclose(
             float(np.linalg.norm(heads[0]["com_m"])),
-            math.hypot(behind_face_m, toward_toe_m),
+            math.hypot(behind_face_m, along_face_axis_m),
             abs_tol=1e-12,
         ),
         "head CG offset must have the requested magnitude",

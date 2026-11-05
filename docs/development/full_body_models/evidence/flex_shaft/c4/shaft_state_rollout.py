@@ -81,7 +81,7 @@ def main() -> None:
         help="head CG depth behind the face (#14600); 0 keeps the C4 baseline",
     )
     parser.add_argument(
-        "--head-cg-toward-toe-mm",
+        "--head-cg-along-face-axis-mm",
         type=float,
         default=0.0,
         help="head CG offset along (face normal x shaft), signed (#14600)",
@@ -93,11 +93,11 @@ def main() -> None:
         path = Path(tmp) / "chain_bundle.npz"
         export(SEEDS, path, 1.33, shaft_model="chain")
         bundle = InputBundle.load(path)
-    if args.head_cg_behind_face_mm or args.head_cg_toward_toe_mm:
+    if args.head_cg_behind_face_mm or args.head_cg_along_face_axis_mm:
         spec_doc = apply_head_cg_offset(
             json.loads(bundle.spec_bytes),
             behind_face_m=args.head_cg_behind_face_mm * 1e-3,
-            toward_toe_m=args.head_cg_toward_toe_mm * 1e-3,
+            along_face_axis_m=args.head_cg_along_face_axis_mm * 1e-3,
         )
         bundle = dataclasses.replace(
             bundle, spec_bytes=json.dumps(spec_doc).encode("utf-8")

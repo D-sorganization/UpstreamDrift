@@ -12,7 +12,7 @@ from src.shared.python.motion_matching.club_head_cg import (
     MAX_BEHIND_FACE_M,
     apply_head_cg_offset,
     face_normal_in_club_frame,
-    toe_axis_in_club_frame,
+    face_plane_axis_in_club_frame,
 )
 
 pytestmark = pytest.mark.unit
@@ -53,17 +53,19 @@ def test_cg_moves_behind_the_face_along_minus_the_rendered_normal(spec):
     assert com @ normal == pytest.approx(-0.035)  # behind the face
 
 
-def test_toe_offset_is_in_the_face_plane_and_perpendicular_to_the_shaft(spec):
+def test_face_axis_offset_is_in_the_face_plane_and_perpendicular_to_the_shaft(spec):
     com = np.asarray(
-        _head(apply_head_cg_offset(spec, behind_face_m=0.0, toward_toe_m=0.03))["com_m"]
+        _head(apply_head_cg_offset(spec, behind_face_m=0.0, along_face_axis_m=0.03))[
+            "com_m"
+        ]
     )
     assert abs(com @ face_normal_in_club_frame(spec)) < 1e-12
     assert abs(com[1]) < 1e-12  # shaft is along y
-    assert com @ toe_axis_in_club_frame(spec) == pytest.approx(0.03)
+    assert com @ face_plane_axis_in_club_frame(spec) == pytest.approx(0.03)
 
 
 def test_only_the_head_com_changes_mass_and_inertia_are_kept(spec):
-    out = apply_head_cg_offset(spec, behind_face_m=0.035, toward_toe_m=0.02)
+    out = apply_head_cg_offset(spec, behind_face_m=0.035, along_face_axis_m=0.02)
     before, after = _head(spec), _head(out)
     assert after["mass_kg"] == before["mass_kg"]
     assert after["inertia_com_kg_m2"] == before["inertia_com_kg_m2"]
