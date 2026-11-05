@@ -72,3 +72,55 @@ def test_unknown_name_and_bad_magnitude_rejected() -> None:
         preset("slice")
     with pytest.raises(ContractViolationError):
         preset("draw", curve_deg=-1.0)
+
+
+# --- ball-flight curvature sign (issue #14562 acceptance) -------------------
+
+import numpy as np  # noqa: E402
+
+from src.shared.python.impact_parameters import TargetFrame  # noqa: E402
+from src.shared.python.impact_parameters.tools_gateway import (  # noqa: E402
+    ToolsDeliveryUnavailableError,
+    load_tools_delivery_gateway,
+)
+
+_LOFT_DEG = 12.0
+_SPEED_MPS = 45.0
+
+
+def _delivery(name: str):
+    """Tools D-plane estimate for a preset's face/path, aoa and a fixed loft."""
+    try:
+        gw = load_tools_delivery_gateway()
+    except ToolsDeliveryUnavailableError as exc:
+        pytest.skip(f"Tools delivery physics not available: {exc}")
+    t = preset(name).target
+    frame = TargetFrame()
+
+    def world(a: float, b: float, c: float) -> np.ndarray:
+        return a * frame.x_t + b * frame.y_t + c * np.asarray(frame.up)
+
+    path, face, aoa, loft = (
+        np.radians(d) for d in (t.path_deg, t.face_deg, t.aoa_deg, _LOFT_DEG)
+    )
+    # +path / +face = rightward (in-to-out / open), y_t is left of target.
+    v = _SPEED_MPS * world(
+        np.cos(aoa) * np.cos(path), -np.cos(aoa) * np.sin(path), np.sin(aoa)
+    )
+    n = world(np.cos(loft) * np.cos(face), -np.cos(loft) * np.sin(face), np.sin(loft))
+    return gw.estimate(v, n, frame)
+
+
+def test_draw_and_fade_curve_in_opposite_directions_straight_does_not() -> None:
+    draw, fade, straight = (_delivery(n) for n in ("draw", "fade", "straight"))
+    assert draw.face_to_path_deg < 0.0 < fade.face_to_path_deg
+    assert abs(straight.face_to_path_deg) < 1e-6
+    # spin-axis tilt carries the curve: opposite signs, none for straight
+    assert draw.spin_axis_tilt_deg * fade.spin_axis_tilt_deg < 0.0
+    assert abs(straight.spin_axis_tilt_deg) < 1e-6
+
+
+def test_high_and_low_differ_in_attack_angle_only() -> None:
+    high, low = _delivery("high"), _delivery("low")
+    assert high.attack_angle_deg > 0.0 > low.attack_angle_deg
+    assert high.face_to_path_deg == pytest.approx(low.face_to_path_deg)
