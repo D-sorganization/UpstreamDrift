@@ -924,6 +924,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14557 · SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope Contracts (Impact_Optimization Package; Face:Path 10:1; NSX-04 Torque Limits; Cited Velocity YAML)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14557
+- **Branch:** merged via #14580
+- **PR:** #14580
+- **Paths:** see #14580
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`a37a7c5a`; collated from changes/14557-show-c1-impacttarget-trustregion-and-phy.md)
+- **Summary:** SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope contracts (impact_optimization package; face:path 10:1; NSX-04 torque limits; cited velocity YAML)
+- **Next step:** Shipped in PR #14580.
+
 ### DL-#14464 · Putting API: /Simulate-3D Accepts the Core Green Shape (Green: GreenShapeRequest, a Preset or Slope, Tier and Bumps) and Rolls on Its GreenSpec Height Field, Reporting That Spec's Grade and Aspect, and Strikes Along Aim_Heading_Deg (Was Always +X), so the React Page Can Send the Core Presets and an Aimed Putt
 
 - **State:** shipped
