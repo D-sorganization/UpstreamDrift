@@ -161,9 +161,12 @@ def test_feasible_rung_above_the_lower_source_is_source_sensitive() -> None:
     high = 1.5 * peak  # upper cited value = the envelope limit: nothing blocks
     env = _envelope(first=high)
     res = _run(env)
-    lines = binding_report(res, env, source_band={"J0": (0.5 * peak, high)})
+    lines = binding_report(
+        res, env, source_band={("J0", "positive"): (0.5 * peak, high)}
+    )
     sens = [ln for ln in lines if "source-sensitive" in ln]
     assert sens and not any("BLOCKS" in ln for ln in sens)
+    assert all("positive" in ln for ln in sens)
     assert all("lower" in ln and "upper" in ln and "J0" in ln for ln in sens)
     assert not any("miscalibrat" in ln for ln in lines)
 
@@ -171,14 +174,18 @@ def test_feasible_rung_above_the_lower_source_is_source_sensitive() -> None:
 def test_peak_below_the_lower_source_is_not_flagged() -> None:
     peak = _j0_peak(_run(_envelope()))
     env = _envelope(first=3.0 * peak)
-    lines = binding_report(_run(env), env, source_band={"J0": (2.0 * peak, 3.0 * peak)})
+    lines = binding_report(
+        _run(env), env, source_band={("J0", "positive"): (2.0 * peak, 3.0 * peak)}
+    )
     assert not any("source-sensitive" in ln for ln in lines)
 
 
 def test_block_at_the_ceiling_keeps_the_d29_wording() -> None:
     cap = BASE[:, 0].max() * 1.001  # blocked at the upper value: blocked either way
     env = _envelope(first=cap)
-    lines = binding_report(_run(env), env, source_band={"J0": (0.5 * cap, cap)})
+    lines = binding_report(
+        _run(env), env, source_band={("J0", "positive"): (0.5 * cap, cap)}
+    )
     blocking = [ln for ln in lines if "J0" in ln and "BLOCKS" in ln]
     assert blocking and all("miscalibrat" in ln for ln in blocking)
     assert not any("source-sensitive" in ln for ln in blocking)
@@ -188,4 +195,61 @@ def test_block_at_the_ceiling_keeps_the_d29_wording() -> None:
 def test_a_band_that_is_not_below_the_envelope_limit_is_refused(band) -> None:
     env = _envelope()  # J0 limit 5000 must equal the upper cited value
     with pytest.raises(ContractViolationError):
-        binding_report(_run(env), env, source_band={"J0": band})
+        binding_report(_run(env), env, source_band={("J0", "positive"): band})
+
+
+def _asym_env(pos: float, neg: float):
+    import dataclasses
+
+    import numpy as np
+
+    base = _envelope()
+    p = np.array(base.tau_max_positive_nm)
+    n = np.array(base.tau_max_negative_nm)
+    p[0], n[0] = pos, neg
+    return dataclasses.replace(base, tau_max_positive_nm=p, tau_max_negative_nm=n)
+
+
+def test_band_is_per_direction_and_uses_signed_extremes() -> None:
+    peak = _j0_peak(_run(_envelope()))  # the baseline drives J0 positive
+    pos, neg = 1.5 * peak, 4.0 * peak  # asymmetric limits, like flexion/extension
+    env = _asym_env(pos, neg)
+    res = _run(env)
+    lines = binding_report(
+        res,
+        env,
+        source_band={
+            ("J0", "positive"): (0.5 * peak, pos),
+            ("J0", "negative"): (0.5 * neg, neg),
+        },
+    )
+    sens = [ln for ln in lines if "source-sensitive" in ln]
+    assert sens and all("positive" in ln for ln in sens)  # negative side never reached
+    assert not any("negative" in ln for ln in sens)
+    assert all(f"{pos:.1f}" in ln for ln in sens)
+
+
+def test_a_band_must_match_the_limit_of_its_own_side() -> None:
+    peak = _j0_peak(_run(_envelope()))
+    pos, neg = 1.5 * peak, 4.0 * peak
+    env = _asym_env(pos, neg)
+    with pytest.raises(
+        ContractViolationError
+    ):  # negative band ending at the positive limit
+        binding_report(
+            _run(env), env, source_band={("J0", "negative"): (0.5 * peak, pos)}
+        )
+
+
+def test_non_binding_lines_do_not_call_a_blocked_rung_feasible() -> None:
+    peak = _j0_peak(_run(_envelope()))
+    high = 1.5 * peak
+    env = _envelope(first=high)
+    res = _run(env)
+    lines = binding_report(
+        res, env, source_band={("J0", "positive"): (0.5 * peak, high)}
+    )
+    blocked = {f"{p.speed_target_mph:.0f} mph" for p in res.points if not p.feasible}
+    for ln in lines:
+        if "peaks at" in ln and ln.split(":")[0] in blocked:
+            assert "feasible" not in ln.replace("within its limit", "")
