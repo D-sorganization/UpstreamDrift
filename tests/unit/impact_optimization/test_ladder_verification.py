@@ -272,3 +272,20 @@ def test_replay_breach_on_an_assumed_velocity_limit_is_assumption_limited() -> N
     assert row["assumption_limited"] == ["J0 velocity"]
     assert row["probable_miscalibration"] == []
     assert "assumption-limited" in claim and "miscalibration" not in claim
+
+
+def test_replay_breach_on_a_soft_rom_limit_is_assumption_limited() -> None:
+    """D35: a breach of a soft_limits_deg ROM is assumption-limited, never a miss."""
+    import dataclasses
+
+    run = _run()
+    limit = 1.5 * _peak_j0_deg(run)
+    env = dataclasses.replace(_env(j0_rom=limit), soft_rom_slots=("J0",))
+    out = summarise_ladder(
+        run, verify_at_full_fidelity(run, _window(gain=2.0), env), {}
+    )
+    row, claim = out["rungs"][-1], out["claim_top_rung"]
+    assert not row["accepted"]  # still a hard constraint (D29)
+    assert row["assumption_limited"] == ["J0 ROM"]
+    assert row["probable_miscalibration"] == []
+    assert "assumption-limited" in claim and "miscalibration" not in claim

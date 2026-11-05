@@ -53,12 +53,21 @@ def _kinematic_text(hit: KinematicBinding) -> str:
     )
 
 
-def _status(point: ContinuationPoint, hits: Sequence[KinematicBinding]) -> str:
+def _status(
+    point: ContinuationPoint,
+    hits: Sequence[KinematicBinding],
+    assumed: frozenset[tuple[str, str]] = frozenset(),
+) -> str:
     # A breach is checked first: after D29 the demoted rung is also infeasible,
     # and "blocked" would hide which limit rejected it.
     breaches = [h for h in hits if h.utilisation > 1.0]
     if breaches:
         names = ", ".join(f"{h.joint} {h.kind}" for h in breaches)
+        if all((h.joint, h.kind) in assumed for h in breaches):
+            return (
+                f"rejected: exceeds {names} limit; assumption-limited (D32), "
+                "an uncited limit, not a finding about the athlete"
+            )
         return f"rejected: exceeds {names} limit; probable miscalibration (D29)"
     return BLOCKED if not point.feasible else "ok"
 
@@ -68,10 +77,14 @@ def _signed(value: float) -> str:
     return "n/a" if math.isnan(value) else f"{value:+.2f}"
 
 
-def _row(point: ContinuationPoint, hits: Sequence[KinematicBinding]) -> str:
+def _row(
+    point: ContinuationPoint,
+    hits: Sequence[KinematicBinding],
+    assumed: frozenset[tuple[str, str]] = frozenset(),
+) -> str:
     torque = ", ".join(point.solution.binding_joints) or "-"
     kinematic = "; ".join(_kinematic_text(h) for h in hits) or "-"
-    status = _status(point, hits)
+    status = _status(point, hits, assumed)
     sol = point.solution
     return (
         f"| {point.speed_target_mph:.0f} | {point.achieved_mph:.1f} "
@@ -98,15 +111,22 @@ def render_continuation_report(
     limit_notes: Mapping[str, str],
     held_joints: Sequence[str] = (),
     fidelity_note: str = "",
+    assumed_limits: frozenset[tuple[str, str]] = frozenset(),
 ) -> str:
-    """Markdown table of every rung with its bindings and limit provenance."""
+    """Markdown table of every rung with its bindings and limit provenance.
+
+    ``assumed_limits`` is ``PhysiologicalEnvelope.assumed_limits()``: a rung whose
+    breaches all sit on assumed ``(joint, kind)`` limits reads assumption-limited
+    (D32); by default nothing is assumed, so every breach reads as a probable miss.
+    """
     require(
         len(kinematic_by_rung) == len(result.points),
         "need one kinematic-binding list per rung",
         (len(kinematic_by_rung), len(result.points)),
     )
     rows = [
-        _row(p, hits) for p, hits in zip(result.points, kinematic_by_rung, strict=True)
+        _row(p, hits, assumed_limits)
+        for p, hits in zip(result.points, kinematic_by_rung, strict=True)
     ]
     lines = [_HEADER, "|" + " --- |" * 10, *rows, ""]
     lines.append(f"Held joints: {', '.join(held_joints) or 'none'}")
