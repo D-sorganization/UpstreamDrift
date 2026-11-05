@@ -31,6 +31,9 @@ from src.shared.python.impact_parameters import TargetFrame  # noqa: E402
 from src.shared.python.impact_parameters.shaft_state import (  # noqa: E402
     shaft_state_series,
 )
+from src.shared.python.motion_matching.club_face_target import (  # noqa: E402
+    face_axis_in_frame,
+)
 from src.shared.python.motion_matching.club_shaft_chain import (  # noqa: E402
     passive_coordinates,
 )
@@ -88,7 +91,14 @@ def main() -> None:
     v = np.gradient(q, rel_s, axis=0)  # all joints are 1-DOF: qvel = dq/dt
     shaft = [adr(n, model.jnt_dofadr) for n in passive_coordinates(spec)]
     state = shaft_state_series(
-        model, rel_s, q, v, shaft, meta["frame_sites"]["Clubhead"], TargetFrame()
+        model,
+        rel_s,
+        q,
+        v,
+        shaft,
+        meta["frame_sites"]["Clubhead"],
+        TargetFrame(),
+        face_normal_site=face_axis_in_frame(spec),
     )
     idx = int(np.argmin(np.abs(rel_s)))
     fig, ax = plt.subplots(2, 1, sharex=True, figsize=(7, 5))
@@ -96,8 +106,10 @@ def main() -> None:
     ax[0].plot(rel_s * 1e3, state.droop_m * 1e3, label="droop (+ down)")
     ax[0].set_ylabel("tip deflection (mm)")
     ax[0].legend()
-    ax[1].plot(rel_s * 1e3, state.strain_energy_j)
-    ax[1].set_ylabel("strain energy (J)")
+    ax[1].plot(rel_s * 1e3, state.face_delta_deg, label="face change (+ open)")
+    ax[1].plot(rel_s * 1e3, state.loft_delta_deg, label="loft change (+ more loft)")
+    ax[1].set_ylabel("shaft-induced angle (deg)")
+    ax[1].legend()
     ax[1].set_xlabel("time relative to impact (ms)")
     ax[0].set_title("Chain-shaft state through the impact window (MuJoCo)")
     fig.savefig(out_dir / "c4_shaft_state_impact_window.png", dpi=130)

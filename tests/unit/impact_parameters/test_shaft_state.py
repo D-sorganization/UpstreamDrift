@@ -149,7 +149,7 @@ def test_face_loft_deltas_sign_conventions(bent, face, loft):
 def test_bend_rotates_the_face_by_the_joint_angle(clamped):
     """A single bend rotates the tip by that angle: |(face, loft)| = theta."""
     model, dofs, tip = clamped
-    j, theta = 3, 0.02
+    j, theta = 2, 0.02  # joint 2 bends about the world X axis
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     axis = np.asarray(data.xaxis[j])

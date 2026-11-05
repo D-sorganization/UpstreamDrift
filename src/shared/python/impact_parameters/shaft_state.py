@@ -43,6 +43,8 @@ class ShaftImpactState:
     droop_m: np.ndarray
     tip_deflection_rate_mps: np.ndarray
     strain_energy_j: np.ndarray
+    face_delta_deg: np.ndarray | None = None
+    loft_delta_deg: np.ndarray | None = None
 
     @property
     def peak_deflection_m(self) -> float:
@@ -52,7 +54,14 @@ class ShaftImpactState:
     def at_impact(self, index: int) -> dict[str, Any]:
         """Report the shaft state at one sample (the impact index)."""
         require(0 <= index < len(self.times_s), "impact index out of range", index)
+        shaft_angles = {}
+        if self.face_delta_deg is not None and self.loft_delta_deg is not None:
+            shaft_angles = {
+                "face_delta_deg": float(self.face_delta_deg[index]),
+                "loft_delta_deg": float(self.loft_delta_deg[index]),
+            }
         return {
+            **shaft_angles,
             "time_s": float(self.times_s[index]),
             "lead_m": float(self.lead_m[index]),
             "droop_m": float(self.droop_m[index]),
@@ -75,6 +84,24 @@ def decompose_deflection(
     return lead, -float(deflection @ frame.z_t)
 
 
+def face_loft_deltas(
+    bent_normal: np.ndarray, straight_normal: np.ndarray, frame: TargetFrame
+) -> tuple[float, float]:
+    """``(face_delta_deg, loft_delta_deg)`` of the face normal caused by the bend.
+
+    Face + = more open (GCV-15 heading of the normal), loft + = normal tilted up.
+    """
+
+    def angles(n: np.ndarray) -> tuple[float, float]:
+        unit = n / np.linalg.norm(n)
+        y_t = np.cross(frame.z_t, frame.x_t)
+        heading = np.degrees(np.arctan2(-(unit @ y_t), unit @ frame.x_t))
+        return float(heading), float(np.degrees(np.arcsin(unit @ frame.z_t)))
+
+    (face_b, loft_b), (face_s, loft_s) = angles(bent_normal), angles(straight_normal)
+    return face_b - face_s, loft_b - loft_s
+
+
 def shaft_state_series(
     model: Any,
     times_s: object,
@@ -83,11 +110,14 @@ def shaft_state_series(
     chain_dofs: object,
     tip_site: str,
     frame: TargetFrame,
+    face_normal_site: object | None = None,
 ) -> ShaftImpactState:
     """Shaft state along a MuJoCo rollout of a chain-shaft model.
 
     ``chain_dofs`` are the chain coordinates' dof indices (1-DOF joints, so
     they are also the ``qpos`` columns); ``tip_site`` marks the head.
+    ``face_normal_site`` (the face normal in the tip-site frame) adds the dynamic
+    face and loft change caused by the bent shaft.
 
     Raises:
         ValueError: shapes of ``times_s``/``qpos``/``qvel`` disagree, the dofs
@@ -110,20 +140,33 @@ def shaft_state_series(
     )
     site = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, tip_site)
     require(site >= 0, f"MuJoCo model has no site {tip_site!r}")
+    normal = None if face_normal_site is None else np.asarray(face_normal_site, float)
+    require(
+        normal is None or normal.shape == (3,), "face_normal_site must be a 3-vector"
+    )
     stiffness = np.asarray(model.jnt_stiffness)[np.asarray(model.dof_jntid)[dofs]]
     data = mujoco.MjData(model)
     jacp = np.zeros((3, model.nv))
     n = t.shape[0]
     deflection, lead, droop = np.zeros((n, 3)), np.zeros(n), np.zeros(n)
+    angles = np.zeros((n, 2))
     for i in range(n):
         data.qpos[:], data.qvel[:] = q[i], v[i]
         mujoco.mj_kinematics(model, data)
         mujoco.mj_comPos(model, data)
-        tip = data.site_xpos[site].copy()
+        tip, bent_rot = (
+            data.site_xpos[site].copy(),
+            data.site_xmat[site].reshape(3, 3).copy(),
+        )
         mujoco.mj_jacSite(model, data, jacp, None, site)
         data.qpos[dofs] = 0.0
         mujoco.mj_kinematics(model, data)
         deflection[i] = tip - data.site_xpos[site]
+        if normal is not None:
+            straight_rot = data.site_xmat[site].reshape(3, 3)
+            angles[i] = face_loft_deltas(
+                bent_rot @ normal, straight_rot @ normal, frame
+            )
         lead[i], droop[i] = decompose_deflection(deflection[i], jacp @ v[i], frame)
     rate = (
         np.linalg.norm(np.gradient(deflection, t, axis=0), axis=1)
@@ -132,4 +175,5 @@ def shaft_state_series(
     )
     energy = 0.5 * np.sum(stiffness * q[:, dofs] ** 2, axis=1)
     ensure(bool(np.all(np.isfinite(deflection))), "deflection must be finite")
-    return ShaftImpactState(t, deflection, lead, droop, rate, energy)
+    face, loft = (None, None) if normal is None else (angles[:, 0], angles[:, 1])
+    return ShaftImpactState(t, deflection, lead, droop, rate, energy, face, loft)
