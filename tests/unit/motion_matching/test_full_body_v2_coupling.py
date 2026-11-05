@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import defusedxml.ElementTree as DET
 import pytest
 
 from src.shared.python.motion_matching import full_body_v2 as v2
@@ -138,12 +139,10 @@ def test_contracts_reject_v1_and_unknown_axis(v1, v2_doc) -> None:
 
 
 def test_coupling_creates_the_equality_block_when_absent(v2_doc) -> None:
-    from xml.etree import ElementTree as ET
-
     from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
         _add_trunk_coupling,
     )
 
-    root = ET.Element("mujoco")
+    root = DET.fromstring("<mujoco/>")
     _add_trunk_coupling(root, with_trunk_coupling(v2_doc, enabled=True))
     assert len(root.findall("equality/joint")) == 3
