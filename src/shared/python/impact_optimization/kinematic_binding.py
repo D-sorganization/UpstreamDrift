@@ -11,7 +11,8 @@ with evidence, and since 125 mph is firm it is flagged as probably miscalibrated
 not a measured over-rotation).
 
 Design by Contract:
-    Preconditions: ``trajectory`` is ``(len(times_s), n_joints)``; ``times_s``
+    Preconditions: joint angles are unwrapped hinge angles (no 2*pi jumps);
+    ``trajectory`` is ``(len(times_s), n_joints)``; ``times_s``
     strictly increasing with >= 2 samples.
     Postconditions: utilisation >= ``threshold`` for every returned entry;
     infinite (undeclared) ROM bounds never bind.
@@ -48,14 +49,17 @@ class KinematicBinding:
 
 
 def _rom_hit(name: str, a: np.ndarray, lo: float, hi: float) -> KinematicBinding | None:
-    sides = []
-    if math.isfinite(hi) and hi > 0.0:
-        sides.append((float(a.max()) / hi, float(a.max()), hi))
-    if math.isfinite(lo) and lo < 0.0:
-        sides.append((float(a.min()) / lo, float(a.min()), lo))
-    if not sides:
+    """Utilisation from the range centre: 0 mid-range, 1 at a bound, >1 outside.
+
+    Works for one-sided ranges (elbow ``[0, 145]``) as well as symmetric ones;
+    ranges missing a bound (undeclared, ``+-inf``) never bind.
+    """
+    if not (math.isfinite(lo) and math.isfinite(hi)):
         return None
-    util, peak, limit = max(sides)
+    centre, half = (lo + hi) / 2.0, (hi - lo) / 2.0
+    up = ((float(a.max()) - centre) / half, float(a.max()), hi)
+    down = ((centre - float(a.min())) / half, float(a.min()), lo)
+    util, peak, limit = max(up, down)
     return KinematicBinding(name, "ROM", peak, limit, util)
 
 

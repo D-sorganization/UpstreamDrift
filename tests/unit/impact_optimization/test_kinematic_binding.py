@@ -141,7 +141,9 @@ def _ladder():
 )
 def test_one_sided_ranges_are_measured_from_their_centre(rom, angle, binds) -> None:
     env = _env([rom, (-80.0, 80.0), (-np.inf, np.inf)])
-    hits = kinematic_binding(_traj(thoracic=angle), T, env, degrees=True)
+    held = np.zeros((T.size, 3))
+    held[:, 0] = angle  # constant angle: no sweep through the range edges
+    hits = kinematic_binding(held, T, env, degrees=True)
     flagged = [h for h in hits if h.joint == "thoracic_axial" and h.kind == "ROM"]
     assert bool(flagged) is binds
     if binds and not rom[0] <= angle <= rom[1]:
