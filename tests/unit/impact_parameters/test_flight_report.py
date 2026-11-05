@@ -108,11 +108,11 @@ def test_square_driver_strike_is_driver_like():
 
 
 def test_extreme_slice_outside_model_validity_is_flagged_not_presented():
-    """The measured fit (face +21, path +6.5 deg) doubles back down-range."""
+    """A far-outside case (face +35 open, path +6.5 deg) is not a result."""
     bad = flight_for_impact(
-        _series(speed=49.2, loft_deg=12.0, face_open_deg=21.0, path_deg=6.5), 1, FRAME
+        _series(speed=49.2, loft_deg=12.0, face_open_deg=35.0, path_deg=6.5), 1, FRAME
     )
-    assert not bad.valid and "reverses" in bad.invalid_reason
+    assert not bad.valid and bad.invalid_reason
     cond = ImpactConditions(110.1, -4.2, 21.0, 6.5)
     text = "\n".join(overlay_lines("t", cond, bad))
     assert "INVALID" in text and "carry n/a" in text

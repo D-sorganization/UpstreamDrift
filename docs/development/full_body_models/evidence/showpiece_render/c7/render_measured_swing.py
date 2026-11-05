@@ -90,8 +90,14 @@ def render(out_dir: Path, seeds: Path = SEEDS) -> dict[str, float]:
     top.set(xlabel="down-range (m)", ylabel="right of target (m)")
     for ax in (side, top):
         ax.grid(alpha=0.3)
-    fig.text(0.01, 0.01, "\n".join(overlay_lines(TITLE, cond, flight)[1:]),
-             family="monospace", fontsize=8, va="bottom")
+    fig.text(
+        0.01,
+        0.01,
+        "\n".join(overlay_lines(TITLE, cond, flight)[1:]),
+        family="monospace",
+        fontsize=8,
+        va="bottom",
+    )
     fig.tight_layout(rect=(0, 0.1, 1, 1))
     out_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_dir / "c7_measured_swing_flight.png", dpi=110)

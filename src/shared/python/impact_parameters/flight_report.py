@@ -32,6 +32,9 @@ from .conditions import ImpactConditions
 from .target_frame import TargetFrame
 
 _MPS_TO_MPH = 2.2369362920544
+# A real driver flight lands well inside this; the margin keeps platform
+# floating-point differences from flipping a verdict near the edge.
+_MAX_LANDING_AZIMUTH_DEG = 45.0
 TOTAL_UNAVAILABLE = "no bounce/roll model in the repository (carry only)"
 
 
@@ -63,8 +66,12 @@ def _invalid_reason(path: np.ndarray) -> str:
     """
     if float(np.min(np.diff(path[:, 0]))) < -1e-6:
         return "down-range reverses (outside the flight model's validity)"
-    if math.hypot(path[-1, 0], path[-1, 1]) < 1e-6 or path[-1, 0] <= 0.0:
-        return "ball lands 90 deg or more off the target line"
+    azimuth = math.degrees(math.atan2(abs(path[-1, 1]), path[-1, 0]))
+    if path[-1, 0] <= 0.0 or azimuth > _MAX_LANDING_AZIMUTH_DEG:
+        return (
+            f"ball lands {azimuth:.0f} deg off the target line "
+            f"(limit {_MAX_LANDING_AZIMUTH_DEG:.0f}; outside the flight model's validity)"
+        )
     return ""
 
 
