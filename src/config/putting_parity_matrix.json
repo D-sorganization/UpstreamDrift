@@ -64,8 +64,8 @@
       "cells": {
         "core_api": "present | src/shared/python/putting_dynamics/counter_torque.py, src/api/routes/putting_green.py | Closed-form two-hand couple model (preload, off-plane preload, noise, gust, lie, shared putter presets) in the core; hand couples sum to the required moment without noise. Served on POST /counter-torque as one list per sample field.",
         "pyqt6": "present | src/tools/putting_green_gui/_torque_panel.py | Counter-Torque Stabilization panel: grip and off-plane preload, gust, hand noise, lie and the shared balance heads; charts the core's hand couples and the gust twist with and without the preload, couples and forces in the chosen units.",
-        "react": "missing #14470 |  | None.",
-        "tauri": "missing #14470 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "react": "present | ui/src/components/putting/CounterTorquePanel.tsx, ui/src/utils/counterTorque.ts | Counter-torque explorer on the simulator page: grip preload, off-plane preload, hand noise, gust and lie sliders bounded by the core ranges, putter head preset, the hand-couple strip chart, impact face/path, peak hand forces and gust wobble via /counter-torque (golden-pinned, #14470).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/state.js, src/apps/putting_studio/js/charts2d.js, src/apps/putting_studio/js/controls_c.js | Closed-form couple model, gust pulse and torque charts; drift-gated sample for sample against the core (tests/unit/putting_dynamics/test_counter_torque.py)."
       }
     },
