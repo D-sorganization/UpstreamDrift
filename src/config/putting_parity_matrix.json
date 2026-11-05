@@ -130,8 +130,8 @@
       "cells": {
         "core_api": "present | src/shared/python/putting_analytics/service_setup.py, src/api/routes/putting_analytics.py | Versioned setup document (schema_version 4.0.0, the studio's); /setup-export and /setup-import, which also loads a studio export's green and distance.",
         "pyqt6": "present | src/tools/putting_green_gui/_scenario_panel.py | Export JSON... and Import JSON... write and read the shared setup document with its scenarios; a studio export loads its distance, Stimp and grade (the desktop slope always falls right).",
-        "react": "missing #14472 |  | None.",
-        "tauri": "missing #14472 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "react": "present | ui/src/components/putting/ScenariosPanel.tsx, ui/src/utils/puttingSetup.ts | Exports the core's setup document (/setup-export) and imports a setup or studio file onto the page (/setup-import), keeping the page's line direction (#14472).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/io.js | Export/load with schema_version 4.0.0, including scenarios."
       }
     },

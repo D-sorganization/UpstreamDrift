@@ -1,4 +1,6 @@
 {
+  "schema_version": "4.0.0",
+  "suite": "UpstreamDrift_Putting_Setup",
   "max_scenarios": 50,
   "cases": [
     {
@@ -26,5 +28,33 @@
         "face_weight": 0.83
       }
     }
-  ]
+  ],
+  "studio_import": {
+    "document": {
+      "schema_version": "4.0.0",
+      "suite": "UpstreamDrift_3D_Putting_Studio_v4",
+      "state": {
+        "puttDistFt": 12,
+        "stimpFt": 11,
+        "uphillSlopePct": 1.5,
+        "crossSlopePct": -2
+      }
+    },
+    "setup": {
+      "distance_ft": 12.0,
+      "grade_pct": 2.5,
+      "aspect_deg": 126.86989764584402,
+      "stimp": 11.0,
+      "face_sd_deg": 1.5,
+      "path_sd_deg": 2.0,
+      "speed_cv": 0.08,
+      "face_bias_deg": 0.0,
+      "speed_bias": 0.0,
+      "grade_rel_sd": 0.0,
+      "aspect_sd_deg": 0.0,
+      "stimp_rel_sd": 0.0,
+      "grade_rel_bias": 0.0,
+      "face_weight": 0.83
+    }
+  }
 }
