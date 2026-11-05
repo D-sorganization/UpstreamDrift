@@ -99,7 +99,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/_scene_builder.py, src/tools/putting_green_gui/gui.py | Auto-Solve Read runs solve_aim on the tile's surface off the GUI thread and writes the pace and aim into the controls.",
         "react": "present | ui/src/components/putting/AutoSolveButton.tsx, ui/src/utils/autoSolve.ts, ui/src/pages/PuttingGreen.tsx | Auto-Solve Read calls /solve-aim-3d on the page's green, writes the pace and aim into the controls, simulates the solved putt and shows the desktop read text (golden-pinned).",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "partial #14465 | src/apps/putting_studio/js/controls_c.js | Aim-only grid search from one noise-free putt."
+        "studio": "present | src/apps/putting_studio/js/putting_physics.js, src/apps/putting_studio/js/controls_c.js | Auto-Solve runs solveAimCore, a port of solve_aim on the studio putt (golden-pinned to the core read), and the batch strikes at the solved head speed."
       }
     },
     "strokes_gained": {
@@ -110,7 +110,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/_sg_panel.py, src/tools/putting_green_gui/gui.py | Strokes Gained panel: the player's E(d) solved on the dialled green off the GUI thread, each putt's result entered and scored on the cached curve, in the chosen units.",
         "react": "present | ui/src/components/putting/StrokesGainedPanel.tsx, ui/src/utils/strokesGained.ts | Strokes Gained on the simulator page: the putt's result entered from each 3D putt, scored via /strokes-gained on the player's own E(d) with the curve plotted, in the user's units (golden-pinned, #14468).",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "partial #14467 | src/apps/putting_studio/js/green3d.js, src/apps/putting_studio/js/charts2d.js | Bellman formula with a hand-tuned comeback fit, not a solved recursion."
+        "studio": "partial #14650 | src/apps/putting_studio/js/core_sg.js, scripts/generate_studio_sg.py, src/apps/putting_studio/js/green3d.js, src/apps/putting_studio/js/charts2d.js | Batch strokes gained, the E(d) chart and the optimal pace read the core's solved E(d) (tour-average player, nearest side slope); the E vs capture-speed panel is still closed-form."
       }
     },
     "scenarios": {
