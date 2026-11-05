@@ -114,7 +114,7 @@ def main() -> None:
     ax[0].set_title("Chain-shaft state through the impact window (MuJoCo)")
     fig.savefig(out_dir / "c4_shaft_state_impact_window.png", dpi=130)
     receipt = {**state.at_impact(idx), "peak_deflection_m": state.peak_deflection_m}
-    (out_dir / "c4_shaft_state_receipt.json").write_text(json.dumps(receipt, indent=2))
+    (out_dir / "c4_shaft_state_result.json").write_text(json.dumps(receipt, indent=2))
     print(json.dumps(receipt, indent=2))  # noqa: T201
 
 
