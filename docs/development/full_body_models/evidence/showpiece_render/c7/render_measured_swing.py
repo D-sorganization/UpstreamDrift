@@ -71,9 +71,21 @@ def render(out_dir: Path, seeds: Path = SEEDS) -> dict[str, float]:
 
     path = flight.trajectory_m  # down-range, left, up
     fig, (side, top) = plt.subplots(2, 1, figsize=(10, 7.5), height_ratios=[2, 1])
-    side.plot(path[:, 0], path[:, 2], color="tab:blue")
+    if flight.valid:
+        side.plot(path[:, 0], path[:, 2], color="tab:blue")
+        top.plot(path[:, 0], -path[:, 1], color="tab:red")
+    else:  # outside the flight model's validity: say so, draw no flight
+        for ax in (side, top):
+            ax.text(
+                0.5,
+                0.5,
+                "FLIGHT NOT SHOWN\n" + flight.invalid_reason,
+                ha="center",
+                va="center",
+                color="firebrick",
+                transform=ax.transAxes,
+            )
     side.set(xlabel="down-range (m)", ylabel="height (m)", title=TITLE)
-    top.plot(path[:, 0], -path[:, 1], color="tab:red")
     top.axhline(0.0, color="grey", lw=0.8, ls="--")
     top.set(xlabel="down-range (m)", ylabel="right of target (m)")
     for ax in (side, top):
@@ -90,6 +102,7 @@ def render(out_dir: Path, seeds: Path = SEEDS) -> dict[str, float]:
         "face_deg": cond.face_deg,
         "path_deg": cond.path_deg,
         "aoa_deg": cond.aoa_deg,
+        "flight_valid": flight.valid,
         "carry_m": flight.carry_m,
         "lateral_m": flight.lateral_m,
         "ball_speed_mph": flight.ball_speed_mph,

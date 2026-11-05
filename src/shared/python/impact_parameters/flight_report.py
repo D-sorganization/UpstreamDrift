@@ -8,6 +8,10 @@ z up, which is :meth:`TargetFrame.components` of the UD world frame.
 Only carry is computed: the repository has no bounce/roll model, so ``total``
 is reported unavailable with the reason, never invented.  The ``lateral_m``
 sign is + = golfer's right of the target line (an open face goes right).
+The clubhead angular velocity is passed as zero (the series carries none), so
+gear-effect spin is not modelled.  A flight outside the simulator's validity
+(no spin decay: extreme sidespin turns the ball past 90 degrees) is flagged
+``valid=False`` and never presented as a result.
 """
 
 from __future__ import annotations
@@ -42,9 +46,26 @@ class FlightSummary:
     ball_speed_mph: float
     launch_deg: float
     spin_rpm: float
+    down_range_m: float
     trajectory_m: np.ndarray  # (n, 3) down-range, left, up
     total_m: float | None = None
     total_unavailable: str = TOTAL_UNAVAILABLE
+    valid: bool = True
+    invalid_reason: str = ""
+
+
+def _invalid_reason(path: np.ndarray) -> str:
+    """Why the flight is outside the model's validity ('' when valid).
+
+    The default simulator has no spin decay, so an extreme sidespin turns the
+    ball through more than 90 degrees; down-range then reverses.  That is a
+    model artefact, not a result, and is flagged instead of presented.
+    """
+    if float(np.min(np.diff(path[:, 0]))) < -1e-6:
+        return "down-range reverses (outside the flight model's validity)"
+    if math.hypot(path[-1, 0], path[-1, 1]) < 1e-6 or path[-1, 0] <= 0.0:
+        return "ball lands 90 deg or more off the target line"
+    return ""
 
 
 def swing_state_from_series(
@@ -80,6 +101,7 @@ def flight_for_impact(
     )
     path = np.array([p.position for p in result.trajectory], dtype=float)
     launch = result.launch_conditions
+    reason = _invalid_reason(path)
     summary = FlightSummary(
         carry_m=float(result.carry_m),
         lateral_m=-float(path[-1, 1]),
@@ -88,7 +110,10 @@ def flight_for_impact(
         ball_speed_mph=float(launch.velocity) * _MPS_TO_MPH,
         launch_deg=math.degrees(launch.launch_angle),
         spin_rpm=float(launch.spin_rate),
+        down_range_m=float(path[-1, 0]),
         trajectory_m=path,
+        valid=not reason,
+        invalid_reason=reason,
     )
     ensure(math.isfinite(summary.carry_m), "carry must be finite", summary.carry_m)
     return summary
@@ -107,12 +132,19 @@ def overlay_lines(
         if flight.total_m is not None
         else f"n/a ({flight.total_unavailable})"
     )
+    if not flight.valid:
+        carry = f"FLIGHT INVALID: {flight.invalid_reason}; carry n/a, total {total}"
+    else:
+        carry = (
+            f"carry {flight.carry_m:.0f} m (down-range {flight.down_range_m:.0f} m)"
+            f"   lateral {flight.lateral_m:+.0f} m   apex {flight.max_height_m:.0f} m"
+            f"   total {total}"
+        )
     return [
         title,
         f"clubhead {conditions.speed_mph:.1f} mph   AoA {conditions.aoa_deg:+.1f} deg"
         f"   face {_fmt(conditions.face_deg)}   path {_fmt(conditions.path_deg)}",
         f"ball {flight.ball_speed_mph:.0f} mph   launch {flight.launch_deg:.1f} deg"
         f"   spin {flight.spin_rpm:.0f} rpm",
-        f"carry {flight.carry_m:.0f} m   lateral {flight.lateral_m:+.0f} m"
-        f"   apex {flight.max_height_m:.0f} m   total {total}",
+        carry,
     ]
