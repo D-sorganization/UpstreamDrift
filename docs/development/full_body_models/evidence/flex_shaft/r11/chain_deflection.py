@@ -147,6 +147,10 @@ def plot(paths: list[Path], out: Path) -> None:
     print(out)  # noqa: T201 - evidence script progress
 
 
+#: Top-level receipt sections measured on the previous bundle only.
+_PREVIOUS_RUN_KEYS = ("full_horizon_open_loop", "rigid_baseline_opensim")
+
+
 def _bundle_manifest(path: Path) -> dict:
     with np.load(path, allow_pickle=False) as data:
         return json.loads(str(data["manifest"]))
@@ -195,6 +199,9 @@ def update_receipt(
                 )
             },
         }
+    for key in _PREVIOUS_RUN_KEYS:  # measured on the previous bundle only
+        if key in document:
+            document["previous_run"][key] = document.pop(key)
     provenance = _bundle_manifest(bundle)["provenance"]
     document["code_commit"] = code_commit
     document["bundle"] = {
@@ -222,16 +229,22 @@ def update_receipt(
     window["clubhead_deflection_at_impact_m"] = [float(v) for v in ref[at_impact]]
     window["max_clubhead_deflection_m"] = float(np.linalg.norm(ref, axis=1).max())
     window["max_abs_shaft_q_rad"] = float(np.abs(runs["mujoco"]["shaft_q"][keep]).max())
+    norms = np.linalg.norm(ref, axis=1)
+    grid_keep = grid[keep]
+    at_minus_10 = float(norms[int(np.argmin(np.abs(grid_keep + 0.010)))])
     window["engines_run_note"] = (
         "run-level numbers, engine entries and the overlay are all from "
-        "`bundle` above (impact_split_time_s identical to previous_run). "
+        "`bundle` above (impact_split_time_s identical to previous_run); "
+        "full_horizon_open_loop and rigid_baseline_opensim moved into "
+        "previous_run because they were measured on that bundle. "
         "max_deflection_difference_vs_mujoco_m is scored from the window start "
         "to contact; max_coordinate_error_vs_reference_rad covers the whole "
         "window to +5 ms including the post-contact divergence (R11). The "
         "at-impact deflection differs from previous_run because it is read in "
         "the last milliseconds before contact, where the chain deflection grows "
-        "fast (about 0.02 m at -10 ms to 0.10 m at contact in this run) and "
-        "differs between exports; the cause was not isolated."
+        f"fast (norm {at_minus_10:.3f} m at -10 ms to {float(norms[at_impact]):.3f}"
+        " m at contact in this run) and differs between exports; the cause was "
+        "not isolated."
     )
     text = json.dumps(document, indent=2) + chr(10)
     receipt.write_text(text, encoding="utf-8")
