@@ -2754,6 +2754,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14663 | SG optimizer: common random numbers and pin-relative aims so HoleMDP value iteration converges (cap is a safety bound only) |
+| 2026-11-05 | #14671 | Units core/API: units.py gains small-length helpers and display_unit_table; GET /tools/putting-green/units serves it, and the studio generator and desktop strike/undulation spins use it |
 | 2026-11-05 | #14667 | Putting studio: the strike slider spans heel to toe over the desktop range, offsets every batch strike, and a toe strike opens the face as in the core strike() |
 | 2026-11-05 | #14655 | SHOW-C3c slice 3a: guarded full-body speed ladder (baseline-physical precondition, MuJoCo impact reader, per-rung ROM/velocity bindings) |
 | 2026-11-05 | #14666 | Cross-frontend putting golden: shared-core fixture, React/Tauri replay parity tests and a generated parity report |
