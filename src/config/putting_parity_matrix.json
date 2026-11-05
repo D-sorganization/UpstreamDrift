@@ -110,7 +110,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/_sg_panel.py, src/tools/putting_green_gui/gui.py | Strokes Gained panel: the player's E(d) solved on the dialled green off the GUI thread, each putt's result entered and scored on the cached curve, in the chosen units.",
         "react": "present | ui/src/components/putting/StrokesGainedPanel.tsx, ui/src/utils/strokesGained.ts | Strokes Gained on the simulator page: the putt's result entered from each 3D putt, scored via /strokes-gained on the player's own E(d) with the curve plotted, in the user's units (golden-pinned, #14468).",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "partial #14650 | src/apps/putting_studio/js/core_sg.js, scripts/generate_studio_sg.py, src/apps/putting_studio/js/green3d.js, src/apps/putting_studio/js/charts2d.js | Batch strokes gained, the E(d) chart and the optimal pace read the core's solved E(d) (tour-average player, nearest side slope); the E vs capture-speed panel is still closed-form."
+        "studio": "present | src/apps/putting_studio/js/core_sg.js, scripts/generate_studio_sg.py, src/apps/putting_studio/js/green3d.js, src/apps/putting_studio/js/charts2d.js | Batch strokes gained, the E(d) chart, the optimal pace and the E vs capture-speed panel read the core's solved E(d) and per-pace expected strokes (service_sg and optimize.evaluate_actions; tour-average player, nearest side slope)."
       }
     },
     "scenarios": {
