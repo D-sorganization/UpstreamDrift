@@ -65,3 +65,14 @@ def test_invalid_knot_times_rejected(times: np.ndarray) -> None:
 def test_wrong_knot_shape_rejected() -> None:
     with pytest.raises(ContractViolationError):
         _ctrl().torque(np.zeros((4, 3)), np.array([0.0]))
+
+
+@pytest.mark.parametrize("bad", [np.nan, np.inf])
+def test_non_finite_evaluation_times_rejected(bad: float) -> None:
+    with pytest.raises(ContractViolationError):
+        _ctrl().torque(np.zeros((5, 3)), np.array([0.0, bad]))
+
+
+def test_non_one_dimensional_times_rejected() -> None:
+    with pytest.raises(ContractViolationError):
+        _ctrl().torque(np.zeros((5, 3)), np.zeros((2, 2)))

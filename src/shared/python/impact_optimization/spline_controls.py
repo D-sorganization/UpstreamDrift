@@ -18,7 +18,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from src.shared.python.contracts import require
+from src.shared.python.contracts import ensure, require
 
 
 @dataclass(frozen=True, eq=False)
@@ -60,7 +60,11 @@ class SplineTorqueControl:
             k.shape,
         )
         t = np.asarray(times_s, dtype=float)
-        return np.stack(
+        require(t.ndim == 1, "times_s must be 1-D", t.shape)
+        require(bool(np.all(np.isfinite(t))), "times_s must be finite")
+        out = np.stack(
             [np.interp(t, self.knot_times_s, k[:, j]) for j in range(self.n_joints)],
             axis=1,
         )
+        ensure(out.shape == (t.size, int(self.n_joints)), "torque shape", out.shape)
+        return out
