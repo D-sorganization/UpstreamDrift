@@ -151,31 +151,41 @@ def test_blocking_torque_on_an_assumed_slot_is_assumption_limited() -> None:
     assert all("assumed" in ln for ln in blocking)  # says the limit is not cited
 
 
-def test_torque_between_two_cited_values_is_source_sensitive() -> None:
-    """D34: peak between the lower and upper cited values depends on the source."""
-    cap = BASE[:, 0].max() * 1.001
-    env = _envelope(first=cap)
-    res = _run(env)
-    band = {"J0": (0.5 * cap, 1.5 * cap)}
-    blocking = [
-        ln
-        for ln in binding_report(res, env, source_band=band)
-        if "J0" in ln and "BLOCKS" in ln
-    ]
-    assert blocking and all("source-sensitive" in ln for ln in blocking)
-    assert not any("miscalibrat" in ln or "assumption-limited" in ln for ln in blocking)
-    assert all("lower" in ln and "upper" in ln for ln in blocking)
+def _j0_peak(res) -> float:
+    return float(max(abs(p.torque_nm[:, 0]).max() for p in res.points))
 
 
-def test_torque_outside_the_cited_band_stays_probable_miscalibration() -> None:
-    cap = BASE[:, 0].max() * 1.001
-    env = _envelope(first=cap)
+def test_feasible_rung_above_the_lower_source_is_source_sensitive() -> None:
+    """D34: the envelope limit IS the upper cited value; Pan is the lower band."""
+    peak = _j0_peak(_run(_envelope()))
+    high = 1.5 * peak  # upper cited value = the envelope limit: nothing blocks
+    env = _envelope(first=high)
     res = _run(env)
-    band = {"J0": (0.1 * cap, 0.5 * cap)}  # peak sits above even the upper value
-    blocking = [
-        ln
-        for ln in binding_report(res, env, source_band=band)
-        if "J0" in ln and "BLOCKS" in ln
-    ]
+    lines = binding_report(res, env, source_band={"J0": (0.5 * peak, high)})
+    sens = [ln for ln in lines if "source-sensitive" in ln]
+    assert sens and not any("BLOCKS" in ln for ln in sens)
+    assert all("lower" in ln and "upper" in ln and "J0" in ln for ln in sens)
+    assert not any("miscalibrat" in ln for ln in lines)
+
+
+def test_peak_below_the_lower_source_is_not_flagged() -> None:
+    peak = _j0_peak(_run(_envelope()))
+    env = _envelope(first=3.0 * peak)
+    lines = binding_report(_run(env), env, source_band={"J0": (2.0 * peak, 3.0 * peak)})
+    assert not any("source-sensitive" in ln for ln in lines)
+
+
+def test_block_at_the_ceiling_keeps_the_d29_wording() -> None:
+    cap = BASE[:, 0].max() * 1.001  # blocked at the upper value: blocked either way
+    env = _envelope(first=cap)
+    lines = binding_report(_run(env), env, source_band={"J0": (0.5 * cap, cap)})
+    blocking = [ln for ln in lines if "J0" in ln and "BLOCKS" in ln]
     assert blocking and all("miscalibrat" in ln for ln in blocking)
     assert not any("source-sensitive" in ln for ln in blocking)
+
+
+@pytest.mark.parametrize("band", [(0.0, 5000.0), (6000.0, 5000.0), (10.0, 4000.0)])
+def test_a_band_that_is_not_below_the_envelope_limit_is_refused(band) -> None:
+    env = _envelope()  # J0 limit 5000 must equal the upper cited value
+    with pytest.raises(ContractViolationError):
+        binding_report(_run(env), env, source_band={"J0": band})
