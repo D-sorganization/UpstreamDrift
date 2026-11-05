@@ -6,7 +6,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 
 | Feature | Cluster | Core/API | PyQt6 | React | Tauri | Studio |
 | --- | --- | --- | --- | --- | --- | --- |
-| Selectable Units | (a) | present | present | missing (#14458) | missing (#14458) | present |
+| Selectable Units | (a) | present | present | present | present | present |
 | Variance and Noise Channels | (b) | present | present | present | present | present |
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | present | present | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | present |
@@ -27,7 +27,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 **Selectable Units**
 - Core/API: present. `src/shared/python/ui/units.py`, `src/api/routes/putting_green.py`. SI internally; GET /units serves display_unit_table (distance, speed and strike factors and suffixes for both systems), the table the studio generator and the desktop strike spin use.
 - PyQt6: present. `src/tools/putting_green_gui/gui.py`. Units combo (Metric or Imperial); every panel redraws its inputs and charts through ui/units.py.
-- React: missing (#14458). `ui/src/pages/PuttingGreen.tsx`. Speed always m/s, distance yards, toe/hosel mm; no units store or selector.
+- React: present. `ui/src/pages/PuttingGreen.tsx`, `ui/src/utils/units.ts`. Units selector (Metric or Imperial) in the putting store; distance, speed and strike offsets show m, m/s and mm or ft, mph and in, with the factors golden-pinned to ui/units.py (#14458).
 - Studio: present. `src/apps/putting_studio/index.html`, `src/apps/putting_studio/js/core_units.js`. Units selector; distance, speed and strike labels use the ui/units.py table generated into core_units.js.
 
 **Variance and Noise Channels**
