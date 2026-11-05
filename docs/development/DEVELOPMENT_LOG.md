@@ -937,6 +937,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14617 · Putting Simulator: The Counter-Torque Panel Bounds the Gust Input by the Core's GUST_RANGE_NM Instead of the Preload Range
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14617
+- **Branch:** merged via #14626
+- **PR:** #14626
+- **Paths:** see #14626
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`1a513ea5`; collated from changes/14617-torque-gust-spin-range.md)
+- **Summary:** Putting simulator: the counter-torque panel bounds the gust input by the core's GUST_RANGE_NM instead of the preload range
+- **Next step:** Shipped in PR #14626.
+
+### DL-#14451 · Add Npm Run Tauri:Artifact: A Local Tauri Installer Named With Version and Commit, Plus a Sha256 File, Never Published
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14451
+- **Branch:** merged via #14624
+- **PR:** #14624
+- **Paths:** see #14624
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`84d828e2`; collated from changes/14451-add-npm-run-tauri-artifact-a-local-tauri.md)
+- **Summary:** Add npm run tauri:artifact: a local Tauri installer named with version and commit, plus a sha256 file, never published
+- **Next step:** Shipped in PR #14624.
+
 ### DL-#14562 · SHOW-C6 Shot-Shape Presets, Ball-Flight Curvature Sign Tests and Swing-Variant Artefact With Run Identity
 
 - **State:** shipped
