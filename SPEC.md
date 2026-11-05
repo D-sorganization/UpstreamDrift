@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14598 | SHOW-C4: shaft_state_series reports MuJoCo chain-shaft tip deflection, lead/droop, deflection rate and strain energy through impact, with R11-window evidence on the best-fit driver |
+| 2026-11-05 | #14603 | SHOW-A5: trunk observability report (marker Jacobian SVD), ADR-0059 and coupled-by-default showpiece spec |
+| 2026-11-05 | #14578 | SHOW-A4: cited neck ROM (neck_rom.py, single source for range_of_motion) enforced as MJCF joint limits on NeckInput X/Y/Z |
+| 2026-11-05 | #14604 | React putting simulator gains the desktop Auto-Solve Read: /solve-aim-3d pace and aim written into the controls, the solved putt simulated, and the read shown in the chosen units |
 | 2026-11-05 | #14597 | CI Standard sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 workflow-wide and passes pip-audit --timeout 60, so transient PyPI read timeouts no longer fail CI |
 | 2026-11-05 | #14602 | Putting: POST /tools/putting-green/counter-torque serves the shared core's two-hand couple model (hand couples, forces and gust response over the stroke) |
 | 2026-11-05 | #14590 | SHOW-B2: SkillFamily schema (impact-condition mean/cov + provenance), assumption-marked presets, registry, PlayerProfile link |
