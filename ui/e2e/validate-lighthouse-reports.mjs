@@ -77,8 +77,12 @@ export async function loadReports(directory, expectedUrl) {
   });
   if (new Set(paths).size !== count) fail('manifest repeats a report path');
   const names = await readdir(root);
-  const reports = names.filter((name) => name.endsWith('.json') && !['manifest.json', 'baseline-receipt.json'].includes(name));
   const expectedNames = paths.map((reportPath) => path.basename(reportPath));
+  // lhci collect leaves raw lhr-*.json files next to the files the filesystem
+  // upload writes and the manifest names; only the manifest's files count.
+  const reports = names.filter((name) => name.endsWith('.json')
+    && !['manifest.json', 'baseline-receipt.json'].includes(name)
+    && !(name.startsWith('lhr-') && !expectedNames.includes(name)));
   if (reports.length !== count || reports.some((name) => !expectedNames.includes(name))) {
     fail(`expected exactly ${count} manifest reports, found ${reports.length}`);
   }

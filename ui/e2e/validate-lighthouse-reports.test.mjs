@@ -90,3 +90,13 @@ test('requires a complete filesystem manifest and all referenced reports', async
   await writeFile(path.join(directory, 'unexpected.json'), '{}');
   await assert.rejects(loadReports(directory, url), /manifest reports/i);
 });
+
+test('ignores raw lhci collect output (lhr-*.json) that the manifest does not name', async (t) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'lighthouse-receipt-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const names = [1, 2, 3].map((i) => `dashboard-run-${i}.report.json`);
+  await Promise.all(names.map((name) => writeFile(path.join(directory, name), JSON.stringify(report()))));
+  await Promise.all([1, 2, 3].map((i) => writeFile(path.join(directory, `lhr-170000000000${i}.json`), JSON.stringify(report()))));
+  await writeFile(path.join(directory, 'manifest.json'), JSON.stringify(names.map((jsonPath) => ({ url, jsonPath }))));
+  assert.equal((await loadReports(directory, url)).reportCount, 3);
+});
