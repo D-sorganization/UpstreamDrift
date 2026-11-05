@@ -25,9 +25,20 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.putting_analytics import service_sg
+import numpy as np
+
+from src.shared.python.putting_analytics import optimize, service_sg
 from src.shared.python.putting_analytics.aggregate import DEFAULT_GRID_FT
 from src.shared.python.putting_analytics.calibration import TOUR_AVERAGE
+from src.shared.python.putting_analytics.expected_putts import (
+    ExpectedPuttsCurve,
+    PuttAction,
+    distance_seed,
+)
+from src.shared.python.putting_analytics.service_dispersion import green_from_args
+from src.shared.python.putting_analytics.sampling import ReadSample
+from src.shared.python.putting_analytics.service_variance import profile_from_args
+from src.shared.python.putting_analytics.skill_roll_model import nominal_speeds_mps
 
 FIXTURE = (
     Path(__file__).resolve().parents[1]
@@ -40,6 +51,11 @@ FIXTURE = (
 SLOPES_PCT: tuple[float, ...] = (0.0, 2.0, 4.0)
 STIMP_FT = 10.0
 SAMPLING = {"n": 100, "seed": 1}
+# Pace sweep for the "E vs capture speed" panel. It includes the solve's own
+# paces, and each distance reuses the solve's seed for that grid point, so the
+# sweep's best of those paces is the solved E(d).
+SWEEP_DISTANCES_FT: tuple[float, ...] = (3.0, 6.0, 10.0, 15.0, 20.0, 30.0)
+SWEEP_PACES_FT: tuple[float, ...] = (0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0)
 _PREFIX = "window.CORE_SG = "
 _LOOKUP = """
 // Nearest solved curve for the studio's cross slope (%).
@@ -59,6 +75,13 @@ function coreExpectedPutts(curve, distFt) {
     }
   }
   return ys[ys.length - 1];
+}
+
+// Core expected strokes per pace at the nearest swept distance.
+function coreSweepRow(curve, distFt) {
+  const ds = window.CORE_SG.meta.sweep_distances_ft;
+  const k = ds.reduce((b, d, i) => (Math.abs(d - distFt) < Math.abs(ds[b] - distFt) ? i : b), 0);
+  return { distance_ft: ds[k], paces_ft: window.CORE_SG.meta.sweep_paces_ft, expected: curve.pace_sweep[k], entry_speed_mps: curve.sweep_entry_speed_mps };
 }
 
 // Player strokes gained by one putt (optimize.strokes_gained):
@@ -97,8 +120,58 @@ def cell_curve(report: dict[str, Any], slope_pct: float) -> dict[str, Any]:
     }
 
 
+def pace_sweep(
+    slope_pct: float,
+    curve: dict[str, Any],
+    n: int,
+    distances_ft: tuple[float, ...] = SWEEP_DISTANCES_FT,
+) -> list[list[float]]:
+    """Expected strokes per sweep pace at each distance, on ``curve``.
+
+    ``optimize.evaluate_actions`` with the solved curve as the comeback price:
+    a miss costs 1 + E(leave). Rows follow ``distances_ft`` (grid distances),
+    columns ``SWEEP_PACES_FT``; values rounded to 4 dp.
+    """
+    if not set(distances_ft) <= set(DEFAULT_GRID_FT):
+        raise ValueError(f"sweep distances must be grid distances: {distances_ft}")
+    args = cell_args(slope_pct, n)
+    model = service_sg.SkillPuttModel(profile_from_args(args), green_from_args(args))
+    baseline = ExpectedPuttsCurve(
+        np.asarray(curve["distances_ft"], float),
+        np.asarray(curve["expected_putts"], float),
+    )
+    actions = [PuttAction(0.0, p) for p in SWEEP_PACES_FT]
+    rows = []
+    for distance in distances_ft:
+        seed = distance_seed(SAMPLING["seed"], DEFAULT_GRID_FT.index(distance))
+        evals = optimize.evaluate_actions(model, distance, actions, baseline, n, seed)
+        rows.append([round(e.expected_strokes, 4) for e in evals])
+    return rows
+
+
+def entry_speeds(slope_pct: float) -> list[float]:
+    """Entry speed (m/s) at the hole for each sweep pace, 4 dp.
+
+    The core roll law (``skill_roll_model.nominal_speeds_mps``) at zero
+    distance with a perfect read: the speed that rolls each pace past the hole
+    on the slope's green.
+    """
+    green = green_from_args(cell_args(slope_pct))
+    one = np.ones(1)
+    perfect = ReadSample(one, np.zeros(1), one)
+    return [
+        round(float(nominal_speeds_mps(green, perfect, 0.0, pace)[0]), 4)
+        for pace in SWEEP_PACES_FT
+    ]
+
+
 def _solve(slope_pct: float) -> dict[str, Any]:
-    return cell_curve(service_sg.sg_study(cell_args(slope_pct)), slope_pct)
+    curve = cell_curve(service_sg.sg_study(cell_args(slope_pct)), slope_pct)
+    return {
+        **curve,
+        "pace_sweep": pace_sweep(slope_pct, curve, SAMPLING["n"]),
+        "sweep_entry_speed_mps": entry_speeds(slope_pct),
+    }
 
 
 def build() -> dict[str, Any]:
@@ -112,6 +185,8 @@ def build() -> dict[str, Any]:
         "stimp_ft": STIMP_FT,
         "paces_ft": list(service_sg.DEFAULT_SG_PACES_FT),
         "sampling": SAMPLING,
+        "sweep_distances_ft": list(SWEEP_DISTANCES_FT),
+        "sweep_paces_ft": list(SWEEP_PACES_FT),
     }
     return {"meta": meta, "curves": curves}
 
