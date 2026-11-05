@@ -2403,7 +2403,10 @@
 {"path": "sg_optimizer/shot_model/skill_registry.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/slope_wind_bins.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/shot_model/table_model.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/shot_options.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/strategy.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/strategy_cli.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
+{"path": "sg_optimizer/strategy_view.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "shadow_tracker/AGENTS.md", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/README.md", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/__init__.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
