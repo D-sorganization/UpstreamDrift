@@ -9,8 +9,15 @@ source stay UNVERIFIED priors.
 
 from __future__ import annotations
 
+import hashlib
+from pathlib import Path
+
+import numpy as np
 import pytest
 
+from src.shared.python.contracts import ContractViolationError
+
+from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.impact_optimization.physiological_envelope import (
     DEFAULT_LIMITS_PATH,
     load_limits,
@@ -85,7 +92,16 @@ def test_lead_wrist_limit_is_pinned_at_the_exact_study_speed() -> None:
     assert load_limits(DEFAULT_LIMITS_PATH)["LWInputX"].value_deg_s == 1613.0
 
 
-#: Peak |velocity| over the recorded driver_v2 window (steps 1225..1325, deg/s).
+BUNDLE = Path(__file__).resolve().parents[3] / (
+    "docs/development/full_body_models/evidence/trunk_visuals/driver_v2_bundle.npz"
+)
+#: sha256 of the recorded bundle the receipt below was taken from.
+BUNDLE_SHA256 = "c3e1862b2be2ac116a981a2fed8bf1c22bff0c47b186124de895045e2ea53056"
+#: Envelope window origin: recorded steps 1225..1325 (1 ms; impact at ~1325).
+WINDOW = slice(1225, 1326)
+
+#: Peak |velocity| over the recorded driver_v2 window (steps 1225..1325, deg/s),
+#: from ``reference_v`` (rad/s in the bundle, converted to deg/s).
 #: The impact-step (1327) transient is deliberately outside the window: LWInputX
 #: 2316, LWInputY 1725, RWInputX 3249, RWInputY 1797 are contact artefacts.
 RECORDED_WINDOW_PEAK_DEG_S = {
@@ -125,3 +141,32 @@ def test_sourced_slots_stay_surfaced_as_assumed_not_verified() -> None:
 )
 def test_joints_without_a_source_stay_unverified_priors(name: str) -> None:
     assert load_limits(DEFAULT_LIMITS_PATH)[name].verification_status == "UNVERIFIED"
+
+
+def test_receipt_peaks_are_reproduced_from_the_recorded_bundle() -> None:
+    """The committed receipt numbers must match the bundle they claim to come from."""
+    assert hashlib.sha256(BUNDLE.read_bytes()).hexdigest() == BUNDLE_SHA256
+    bundle = InputBundle.load(BUNDLE)
+    order = list(bundle.coordinate_order)
+    window = np.rad2deg(np.abs(np.asarray(bundle.reference_v)[WINDOW]))
+    for name, peak in RECORDED_WINDOW_PEAK_DEG_S.items():
+        assert window[:, order.index(name)].max() == pytest.approx(peak, abs=0.1), name
+
+
+def test_load_limits_rejects_an_unknown_verification_status(tmp_path: Path) -> None:
+    bad = tmp_path / "limits.yaml"
+    bad.write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "velocity_limits_deg_s:",
+                "  - coordinates: [HipInputZ]",
+                "    value: 1000",
+                "    citation: {id: null, note: x}",
+                "    verification_status: PROBABLY_FINE",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ContractViolationError):
+        load_limits(bad)
