@@ -76,12 +76,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14274
 - **Branch:** feat/14274-config-secrets
-- **PR:** #14414
+- **PR:** #14414, #14403
 - **Paths:** see #14414
 - **Started:** 2026-11-03
-- **Last verified:** 2026-11-03 (`2e099ba2`; collated from changes/14274-config-secrets-and-upgrade-rollback.md)
+- **Last verified:** 2026-11-05 (`b281ba3e`; collated from changes/14274-root-dockerignore-secret-contract.md)
 - **Summary:** Config/secret separation and upgrade/rollback guarantees
-- **Next step:** Merge the PR.
+- **Next step:** Complete independent review and open the scoped CI contract PR.
 
 ### DL-#14275 · \ Define and Implement Clean-Environment Install Smoke Test\
 
@@ -936,6 +936,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14567 · SHOW-B3: Cached, Versioned MC Dispersion Tables (CRN) + Pipeline Landing Adapter
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14567
+- **Branch:** merged via #14608
+- **PR:** #14608
+- **Paths:** see #14608
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`25f3520a`; collated from changes/14567-show-b3-cached-versioned-mc-dispersion-t.md)
+- **Summary:** SHOW-B3: cached, versioned MC dispersion tables (CRN) + pipeline landing adapter
+- **Next step:** Shipped in PR #14608.
 
 ### DL-#14561 · SHOW-C5 Speed Continuation 100-125 Mph With Pareto Front and Binding Report
 
