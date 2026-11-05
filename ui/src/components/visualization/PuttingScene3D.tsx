@@ -1,7 +1,7 @@
 /** R3F putting scene backed exclusively by the canonical Python trajectory. */
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Line, OrbitControls } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 
 import type { Putt3DSimulationResponse } from "@/api/generated/types";
 import {
@@ -13,6 +13,7 @@ import {
   ballRotationRad,
   sampleAtPlaybackTime,
 } from "@/pages/puttingPlayback";
+import { scenePose, type CameraPreset } from "@/utils/cameraPresets";
 
 // Deliberately enlarged from the physical 21.35 mm radius so the spin marker
 // remains legible at a whole-putt camera scale. Physics positions remain SI.
@@ -47,6 +48,34 @@ interface Props {
   playbackTimeS: number;
   hoselToeM: number;
   hoselForwardM: number;
+  view?: CameraPreset;
+}
+
+interface Orbit {
+  target: { set: (x: number, y: number, z: number) => void };
+  update: () => void;
+}
+
+/** Aim the camera at a desktop view; this scene is y up, the core z up. */
+function CameraRig({
+  surface,
+  holeZ,
+  view,
+}: {
+  surface: Putt3DSimulationResponse["surface"];
+  holeZ: number;
+  view: CameraPreset;
+}) {
+  const camera = useThree((state) => state.camera);
+  const controls = useThree((state) => state.controls) as Orbit | null;
+  const { hole_x_m: hx, hole_y_m: hy } = surface;
+  useEffect(() => {
+    const { eye, target } = scenePose(hx, hy, holeZ, view);
+    camera.position.set(eye[0], eye[2], eye[1]);
+    controls?.target.set(target[0], target[2], target[1]);
+    controls?.update();
+  }, [camera, controls, hx, hy, holeZ, view]);
+  return null;
 }
 
 function SurfaceMesh({
@@ -116,6 +145,7 @@ export function PuttingScene3D({
   playbackTimeS,
   hoselToeM,
   hoselForwardM,
+  view = "orbit",
 }: Props) {
   const sample = sampleAtPlaybackTime(result.samples, playbackTimeS);
   const physicsTimeS = Math.max(0, playbackTimeS - IMPACT_LEAD_IN_S);
@@ -173,12 +203,13 @@ export function PuttingScene3D({
           intensity={1.1}
         />
         <OrbitControls
+          makeDefault
           enableDamping
           dampingFactor={0.06}
           minDistance={1}
           maxDistance={24}
-          target={[result.surface.hole_x_m / 2, 0, 0]}
         />
+        <CameraRig surface={result.surface} holeZ={holeZ} view={view} />
 
         <SurfaceMesh
           widthM={result.surface.width_m}

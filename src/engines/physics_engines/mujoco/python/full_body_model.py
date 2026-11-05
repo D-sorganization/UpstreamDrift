@@ -52,16 +52,25 @@ from src.shared.python.motion_matching.contact_law import (
     support_planes,
     torsional_friction_moment,
 )
+from src.shared.python.motion_matching.neck_rom import NECK_ROM, neck_range_rad
+
+# Assumed soft-limit gains for the neck ROM (#14553): ~2000 N m/rad holds a
+# 15-36 N m neck effort within about a degree; the damper is near critical for
+# a head inertia of ~0.02 kg m^2.
+NECK_LIMIT_STIFFNESS = 2000.0
+NECK_LIMIT_DAMPING = 10.0
 
 
 class NativeMujocoFullBodyModel:
     """Full-body MuJoCo adapter combining closed-loop kinematics and shared contact."""
 
-    def __init__(self, model_bytes: bytes) -> None:
+    def __init__(self, model_bytes: bytes, *, neck_limits: bool = False) -> None:
         mj: Any = import_module("mujoco")
         self._mj = mj
         spec = json.loads(model_bytes)
-        self.xml, self.metadata = export_full_body_mjcf(model_bytes)
+        self.xml, self.metadata = export_full_body_mjcf(
+            model_bytes, neck_limits=neck_limits
+        )
         self.model_sha256 = self.metadata["model_sha256"]
         # Tikhonov term added to the weld KKT solve.  The default keeps the
         # canonical pipeline unchanged; same-input parity runs set it to 0 so
@@ -95,7 +104,7 @@ class NativeMujocoFullBodyModel:
             coordinate_units.append(unit)
             self._indices[name] = int(self.model.jnt_dofadr[j])
         self._coordinate_units = tuple(coordinate_units)
-
+        self._init_neck_limits(neck_limits)
         if self.model.nq != len(self._indices) or self.model.nv != len(self._indices):
             raise ValueError("All coordinates must be scalar 1-DOF joints")
 
@@ -155,6 +164,39 @@ class NativeMujocoFullBodyModel:
             }
 
         self._errors: tuple[np.ndarray, np.ndarray] | None = None
+
+    def _init_neck_limits(self, enabled: bool) -> None:
+        """Set the dof indices and radian ``(lower, upper)`` of the limited neck.
+
+        ``neck_limits`` (#14553) compiles the cited ROM into the XML and applies
+        it as an explicit torque: this model solves ``M a = effort + contact -
+        bias`` itself and never runs MuJoCo's limit solver.  Off by default
+        because necromatcher requires ``limited="false"`` and hashes that XML.
+        """
+        names = [n for n in NECK_ROM if enabled and n in self._indices]
+        self._neck_limit_dofs = np.array([self._indices[n] for n in names], dtype=int)
+        self._neck_limit_range = np.array([neck_range_rad(n) for n in names]).reshape(
+            -1, 2
+        )
+
+    def _neck_limit_torque(self) -> np.ndarray:
+        """Soft one-sided spring-damper torque holding the neck inside its ROM.
+
+        Zero inside the range; beyond a bound it pushes back with
+        ``NECK_LIMIT_STIFFNESS`` and damps outward motion (assumed values, like
+        MuJoCo's soft joint limits).  Scalar joints: qpos index equals dof.
+        """
+        tau = np.zeros(self.model.nv)
+        if not self._neck_limit_dofs.size:
+            return tau
+        q = self.data.qpos[self._neck_limit_dofs]
+        v = self.data.qvel[self._neck_limit_dofs]
+        lo, hi = self._neck_limit_range[:, 0], self._neck_limit_range[:, 1]
+        over, under = np.maximum(q - hi, 0.0), np.maximum(lo - q, 0.0)
+        push = -NECK_LIMIT_STIFFNESS * over + NECK_LIMIT_STIFFNESS * under
+        outward = ((over > 0) & (v > 0)) | ((under > 0) & (v < 0))
+        tau[self._neck_limit_dofs] = push - NECK_LIMIT_DAMPING * v * outward
+        return tau
 
     def _build_model(self, xml: str) -> tuple[Any, Any]:
         """Compile ``xml`` into the ``(model, data)`` pair the adapter drives.
@@ -286,6 +328,7 @@ class NativeMujocoFullBodyModel:
         bias = data.qfrc_bias.copy()
         if self._passive_dofs.size:
             bias -= data.qfrc_passive  # shaft springs and dampers
+        bias -= self._neck_limit_torque()  # zero unless neck_limits (#14553)
         return bias, tau_contact, samples
 
     def _free_moment(self, sample: ContactSample, jac_rot: np.ndarray) -> np.ndarray:
