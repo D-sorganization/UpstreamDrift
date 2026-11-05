@@ -58,7 +58,8 @@ function refreshUnitLabels() {
   const strikeDigits = sys === 'metric' ? 1 : 2;
   document.getElementById('puttDistValLbl').textContent = coreUnitText('distance', state.puttDistFt, 1, sys);
   document.getElementById('captureSpeedValLbl').textContent = coreUnitText('speed', state.captureSpeedMs, 2, sys);
-  document.getElementById('toeOffsetValLbl').textContent = '+' + coreUnitText('strike', state.toeOffsetMm, strikeDigits, sys);
+  const strikeSign = state.toeOffsetMm >= 0 ? '+' : '';
+  document.getElementById('toeOffsetValLbl').textContent = strikeSign + coreUnitText('strike', state.toeOffsetMm, strikeDigits, sys);
 }
 
 const elUnits = document.getElementById('unitSystemSelect');

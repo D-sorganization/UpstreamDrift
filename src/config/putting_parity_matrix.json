@@ -55,7 +55,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/gui.py, src/tools/putting_green_gui/_scene_builder.py | Heel/toe Strike spin box (mm or in, -40 to 40 mm) passed to simulate_strike.",
         "react": "present | ui/src/pages/PuttingGreen.tsx | Impact Toe Offset slider.",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "partial #14461 | src/apps/putting_studio/index.html, src/apps/putting_studio/js/controls_c.js | Slider is toe-only (0-15 mm); no heel strikes."
+        "studio": "present | src/apps/putting_studio/index.html, src/apps/putting_studio/js/core_impact.js | Strike slider from heel to toe over the desktop range (-40 to 40 mm); it offsets every batch strike, and a toe strike opens the face as in the core strike()."
       }
     },
     "counter_torque": {

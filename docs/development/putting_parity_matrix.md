@@ -10,7 +10,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Variance and Noise Channels | (b) | present | present | present | present | present |
 | Dispersion Batches and 0-45 ft Make-% Spread | (b) | present | present | present | present | present |
 | Impact and Strike Model (Skid to Roll) | (c) | present | present | present | present | present |
-| Toe/Heel Strike Location | (c) | present | present | present | present | partial (#14461) |
+| Toe/Heel Strike Location | (c) | present | present | present | present | present |
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | present | present | present | present | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | partial (#14463) |
@@ -52,7 +52,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Core/API: present. `src/shared/python/putting_dynamics/collision.py`, `src/shared/python/putting_analytics/skill_roll_model.py`, `src/api/routes/putting_green.py`. strike(impact_toe_m) and /simulate-3d accept it; strike_toe_sd_mm scatter costs pace via off_centre_speed_retention in /variance-study (strike factor) and /simulated-curve.
 - PyQt6: present. `src/tools/putting_green_gui/gui.py`, `src/tools/putting_green_gui/_scene_builder.py`. Heel/toe Strike spin box (mm or in, -40 to 40 mm) passed to simulate_strike.
 - React: present. `ui/src/pages/PuttingGreen.tsx`. Impact Toe Offset slider.
-- Studio: partial (#14461). `src/apps/putting_studio/index.html`, `src/apps/putting_studio/js/controls_c.js`. Slider is toe-only (0-15 mm); no heel strikes.
+- Studio: present. `src/apps/putting_studio/index.html`, `src/apps/putting_studio/js/core_impact.js`. Strike slider from heel to toe over the desktop range (-40 to 40 mm); it offsets every batch strike, and a toe strike opens the face as in the core strike().
 
 **Counter-Torque Stabilization (Hand Couples, Gust)**
 - Core/API: present. `src/shared/python/putting_dynamics/counter_torque.py`, `src/api/routes/putting_green.py`. Closed-form two-hand couple model (preload, off-plane preload, noise, gust, lie, shared putter presets) in the core; hand couples sum to the required moment without noise. Served on POST /counter-torque as one list per sample field.

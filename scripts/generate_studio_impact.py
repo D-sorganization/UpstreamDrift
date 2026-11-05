@@ -5,7 +5,8 @@ cannot import the Python core, so it ended the skid at a fixed share of the
 hole distance and did not model launch. This script runs the core
 :func:`~src.shared.python.putting_dynamics.simulate_strike` for the typical
 putter on a flat green and writes ``js/core_impact.js``: the skid distance for
-each ball speed, and the launch angle and loft. The core skid does not depend
+each ball speed, the launch angle and loft, the desktop's heel-to-toe strike
+range and whether a toe strike opens the face. The core skid does not depend
 on green speed, so one table serves every Stimp.
 
 Usage::
@@ -20,9 +21,10 @@ from pathlib import Path
 from typing import Any
 
 from src.shared.python.contracts import ensure
-from src.shared.python.putting_dynamics import PutterState, simulate_strike
+from src.shared.python.putting_dynamics import PutterState, simulate_strike, strike
 from src.shared.python.putting_dynamics.types import CollisionReport
 from src.shared.python.putting_dynamics.surfaces import SurfaceSpec
+from src.tools.putting_green_gui._scene_builder import IMPACT_TOE_RANGE_M
 
 FIXTURE = (
     Path(__file__).resolve().parents[1]
@@ -58,14 +60,18 @@ def skid_rows() -> list[list[float]]:
 
 
 def build() -> dict[str, Any]:
-    """The fixture data: the launch of the typical putter and its skid table."""
+    """The fixture data: the typical putter's launch, strike range and skid table."""
     collision, _ = _strike(1.5)
+    # Positive core face twist rotates the toe back (opens the face).
+    toe_twist = strike(PutterState.typical(1.5), impact_toe_m=0.01).face_twist_rad_s
     return {
         "meta": {
             "schema_version": 1,
             "source": "putting_dynamics.simulate_strike, PutterState.typical (#14647)",
             "launch_angle_deg": round(collision.launch_angle_deg, 9),
             "loft_deg": collision.effective_loft_deg,
+            "strike_range_mm": [1e3 * m for m in IMPACT_TOE_RANGE_M],
+            "toe_strike_opens_face": toe_twist > 0.0,
         },
         "skid": skid_rows(),
     }

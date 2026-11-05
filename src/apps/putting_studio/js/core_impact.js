@@ -4,7 +4,12 @@ window.CORE_IMPACT = {
   "launch_angle_deg": 2.454785246,
   "loft_deg": 3.0,
   "schema_version": 1,
-  "source": "putting_dynamics.simulate_strike, PutterState.typical (#14647)"
+  "source": "putting_dynamics.simulate_strike, PutterState.typical (#14647)",
+  "strike_range_mm": [
+   -40.0,
+   40.0
+  ],
+  "toe_strike_opens_face": true
  },
  "skid": [
   [0.0, 0.0],
