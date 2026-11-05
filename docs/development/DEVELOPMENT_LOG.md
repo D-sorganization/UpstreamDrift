@@ -1255,10 +1255,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14559
 - **Branch:** merged via #14589
-- **PR:** #14589, #14596, #14625, #14638, #14653, #14655, #14680, #14685
+- **PR:** #14589, #14596, #14625, #14638, #14653, #14655, #14680, #14685, #14693
 - **Paths:** see #14589
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`e51ba5a6`; collated from changes/14559-show-c3c-a-rung-demoted-for-a-search-onl.md)
+- **Last verified:** 2026-11-05 (`d865f3c3`; collated from changes/14559-show-c3c-d32-assumption-limited-vs-proba.md)
 - **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
 - **Next step:** Shipped in PR #14589.
 

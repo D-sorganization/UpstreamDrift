@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14693 | SHOW-C3c D32: assumption-limited vs probable-miscalibration wording for torque and velocity bindings; search/replay disagreement claim |
 | 2026-11-05 | #14690 | NSX-04: cited trunk torque capacity (Pan 2025) for the lumbar and thoracic slots of the v2 spec, so PhysiologicalEnvelope.from_spec builds on it (Part of #12553) |
 | 2026-11-05 | #14688 | sg_optimizer: common random numbers for an injected ShotOutcomeModel so the scalar backup converges |
 | 2026-11-05 | #14689 | Putting studio: batch strokes gained, the E(d) chart and the optimal pace read the core's solved player E(d) from core_sg.js (service_sg.sg_study, tour-average player, side-slope grid), replacing the hand-tuned comeback fit |
