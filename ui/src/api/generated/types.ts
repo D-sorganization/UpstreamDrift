@@ -3241,6 +3241,10 @@ export interface Putt3DSimulationRequest {
   random_seed: number;
   hole_x_m: number;
   hole_y_m: number;
+  /** Strike heading from +x, CCW [deg] */
+  aim_heading_deg: number;
+  /** Core green shape (#14464); when set it replaces grade_percent, downhill_aspect_deg and bump_height_m */
+  green?: GreenShapeRequest | null;
 }
 
 /**
