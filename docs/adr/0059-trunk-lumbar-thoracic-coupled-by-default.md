@@ -33,8 +33,8 @@ Only three markers (BackLeft/Right/Top) sit on the trunk, all on the thorax
 frame; none sits on the lumbar body, and the pelvis markers cannot see
 lumbar motion apart from thoracic motion. One combination of the six
 coordinates is therefore unobservable (rank 5), and every lumbar/thoracic
-pair is near parallel. Independent literature (Fujii 2007, Bruno 2015 via
-#12737) reports the regional split above as a stable ratio in the golf swing.
+pair is near parallel. The cited priors (Fujii 2007 and Bruno 2015, as recorded in #12737; not
+re-verified against the papers here) report the regional split above.
 
 ## Decision
 
@@ -45,6 +45,27 @@ returns **coupled**, so the derived showpiece spec
 `trunk_coupling.enabled = true` (`TRUNK_COUPLED` in
 `full_body_v2_showpiece.py`). A test asserts the committed default equals the
 decision, so the default cannot drift from the evidence.
+
+## Limits of the Evidence
+
+- **The rank result is geometric.** Rank 5 of 6 comes from where the markers
+  sit relative to the two joints, so it does not depend on the particular
+  lumbar/thoracic angles. It is reproduced at three poses.
+- **The swing's lumbar/thoracic split is not a measurement.**
+  `driver_v2_bundle.npz` is a v1 export migrated to v2 with the same
+  Bruno 2015 prior (`evidence/trunk_visuals/README.md`), so its axial ratio
+  (0.17 to 0.29 lumbar per thoracic, prior 0.205) only restates the prior.
+  No second swing exists in v2 coordinates, so the 17/83 split could not be
+  checked on independent data; it rests on the cited literature alone.
+- **ROM versus the swing.** The migrated reference reaches thoracic axial
+  -53.5 degrees (-52.5 at the top) against the +-50 degree soft limit, from a
+  63 degree total trunk turn. With 17/83 the limit binds at about 60 degrees
+  total. The limit is unchanged (n = 1, prior-derived); it is a candidate
+  binding joint for high clubhead speeds and needs more swings fitted with
+  free trunk angles (extra lumbar marker) to judge.
+- Coupling is a soft MuJoCo equality, so the realised ratio has residual
+  error (the A3 test accepts 20 percent); tighten `solref`/`solimp` before
+  using it as a hard constraint.
 
 ## Consequences
 
