@@ -2741,6 +2741,11 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14651 | Replace wall-clock speed-up ratio in test_topology_contact_batched with a deterministic per-pair kernel call count |
+| 2026-11-05 | #14636 | Align MuJoCo counterfactuals zvcf() and the MATLAB ZVCF comments with the control-component contract |
+| 2026-11-05 | #14637 | React/Tauri putting page: saved scenarios and comparison over the shared core, golden-pinned (part 1 of #14472) |
+| 2026-11-05 | #14420 | Avoid merge_group changed-paths checkout hang and sync admission publisher |
+| 2026-11-05 | #14418 | Sync the admission publisher workflow and provenance digest with the canonical provider |
 | 2026-11-05 | #14645 | Putting: the Strokes Gained chart title fits the phone-width window and the Holed check box reads on the dark controls panel |
 | 2026-11-05 | #14628 | SHOW-B6: slope/stance bins and wind bins in the dispersion tables (slope_wind_bins.py), labelled assumptions |
 | 2026-11-05 | #14620 | SHOW-C7 flight report and measured-swing flight card (Part of #14563) |
