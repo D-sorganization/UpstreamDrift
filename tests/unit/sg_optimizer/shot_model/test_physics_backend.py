@@ -22,10 +22,8 @@ from src.shared.python.sg_optimizer.shot_model.registry import (
     available_backends,
     get_shot_model,
 )
-from src.shared.python.sg_optimizer.shot_model.shrinkage import (
-    shrink_profile,
-    shrinkage_weight,
-)
+from src.shared.python.sg_optimizer.shot_model.shrinkage import shrink_profile
+from src.shared.python.sg_optimizer.shot_model.skill_fit import shrinkage_weight
 from src.shared.python.sg_optimizer.shot_model.skill_registry import get_skill_family
 from src.shared.python.sg_optimizer.shot_model.table_model import (
     CLUB_SKILL,
