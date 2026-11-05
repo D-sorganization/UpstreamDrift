@@ -29,6 +29,7 @@ from src.shared.python.sg_optimizer.mdp.action import ActionSet, ShotAction
 from src.shared.python.sg_optimizer.mdp.state import State
 from src.shared.python.sg_optimizer.mdp.transition import (
     _condition_modifiers,
+    aim_direction,
     sample_transitions,
 )
 
@@ -141,7 +142,7 @@ class HoleMDP:
 
     Aim angles are *pin-relative*: 0 deg points from the shot's cell straight at
     the pin, so every cell, including one past the green, has a proper policy.
-    (The injected-model scalar path still uses absolute aims.)
+    The scalar reference backup uses the same ``aim_direction``.
 
     ``VALUE_CAP`` is only a safety bound for a hole that cannot be reached at all
     (for example a pin ringed by hazard): such cells would otherwise grow by their
@@ -380,9 +381,8 @@ class HoleMDP:
         Aims are pin-relative, so "0 deg" is straight at the hole from any cell and
         a cell past the green can still aim back at it.
         """
-        bearing = np.arctan2(self.raster.pin[1] - cy, self.raster.pin[0] - cx)
-        angle = bearing + action.aim_angle_rad
-        return np.cos(angle), np.sin(angle)
+        ca, sa = aim_direction(self.raster, action, cx, cy)
+        return np.asarray(ca), np.asarray(sa)
 
     def _modifier_table(self) -> NDArray[np.float64]:
         """Lookup table (lie_code → (dist_mult, sl_mult, slat_mult))."""

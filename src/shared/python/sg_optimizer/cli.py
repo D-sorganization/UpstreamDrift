@@ -222,6 +222,7 @@ def main(argv: list[str] | None = None) -> int:
         "tee_optimal_action": {
             "club": optimal.club,
             "aim_angle_deg": math.degrees(optimal.aim_angle_rad),
+            "aim_reference": "pin_bearing",
         },
     }
     json.dump(payload, sys.stdout, indent=2, default=float)
@@ -275,6 +276,7 @@ def _legacy_main(argv: list[str] | None) -> int:
         "tee_optimal_action": {
             "club": optimal.club,
             "aim_angle_deg": math.degrees(optimal.aim_angle_rad),
+            "aim_reference": "pin_bearing",
         },
     }
     json.dump(payload, sys.stdout, indent=2, default=float)
