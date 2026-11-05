@@ -125,6 +125,27 @@ class CounterfactualAnalyzer:
             force = data.qfrc_actuator - data.qfrc_bias
         return np.linalg.solve(mass, force)
 
+    def _validated_observed_acceleration(
+        self, qpos: np.ndarray, qvel: np.ndarray, ctrl: np.ndarray
+    ) -> np.ndarray:
+        """Validate the observed state and return its acceleration.
+
+        Observed acceleration solves ``M * qacc = tau - bias``.
+
+        Preconditions:
+            ``qpos`` is not None and ``len(ctrl) == model.nu``.
+
+        Raises:
+            ValueError: If a precondition is violated.
+        """
+        if qpos is None:
+            raise ValueError("qpos must be provided")
+        if len(ctrl) != self.model.nu:
+            raise ValueError(f"ctrl must have length {self.model.nu}, got {len(ctrl)}")
+        return self._forward_acceleration(
+            self._data_observed, qpos, qvel, ctrl, include_actuation=True
+        )
+
     def ztcf(
         self,
         qpos: np.ndarray,
@@ -155,14 +176,7 @@ class CounterfactualAnalyzer:
             CounterfactualResult with torque attribution
         """
         # 1. Compute OBSERVED acceleration (with control)
-        if qpos is None:
-            raise ValueError("qpos must be provided")
-        if len(ctrl) != self.model.nu:
-            raise ValueError(f"ctrl must have length {self.model.nu}, got {len(ctrl)}")
-        # Observed acceleration: M * qacc = tau - bias
-        qacc_observed = self._forward_acceleration(
-            self._data_observed, qpos, qvel, ctrl, include_actuation=True
-        )
+        qacc_observed = self._validated_observed_acceleration(qpos, qvel, ctrl)
 
         # 2. Compute COUNTERFACTUAL acceleration (zero control)
         # Counterfactual acceleration: M * qacc = -bias (ZERO TORQUE)
@@ -249,13 +263,7 @@ class CounterfactualAnalyzer:
         Returns:
             CounterfactualResult with the control component
         """
-        if qpos is None:
-            raise ValueError("qpos must be provided")
-        if len(ctrl) != self.model.nu:
-            raise ValueError(f"ctrl must have length {self.model.nu}, got {len(ctrl)}")
-        qacc_observed = self._forward_acceleration(
-            self._data_observed, qpos, qvel, ctrl, include_actuation=True
-        )
+        qacc_observed = self._validated_observed_acceleration(qpos, qvel, ctrl)
         qacc_counterfactual = self._control_acceleration(
             self._data_counterfactual, qpos, ctrl
         )
