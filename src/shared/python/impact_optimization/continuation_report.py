@@ -1,5 +1,11 @@
 """Markdown report of a speed-continuation run (SHOW-C3c slice 3, #14559).
 
+Columns per rung: target and achieved mph; face, path and AoA error (measured
+minus target, deg, ``n/a`` when unobservable); face-to-path (deg); the weighted
+squared deviation (cost) of ``ImpactTarget.deviation``, which is unitless and
+mixes deg^2 and mph^2 terms, so it is a cost to compare rungs by, not a norm in
+a physical unit; torque and kinematic bindings; status.
+
 Turns a ``ContinuationResult`` plus the per-rung ROM / velocity bindings from
 ``kinematic_binding.kinematic_binding`` into one table: speed, achieved speed,
 face-to-path, torque bindings, kinematic bindings.  A rung that did not reach
@@ -21,6 +27,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 
 from src.shared.python.contracts import require
@@ -32,8 +39,8 @@ from src.shared.python.impact_optimization.speed_continuation import (
 
 BLOCKED = "blocked (within the controlled subset)"
 _HEADER = (
-    "| Target mph | Achieved mph | Face-to-path deg | Torque binding "
-    "| Kinematic binding | Status |"
+    "| Target mph | Achieved mph | Face err deg | Path err deg | AoA err deg "
+    "| Face-to-path deg | Weighted sq. deviation (cost) | Torque binding | Kinematic binding | Status |"
 )
 
 
@@ -55,14 +62,21 @@ def _status(point: ContinuationPoint, hits: Sequence[KinematicBinding]) -> str:
     return "ok"
 
 
+def _signed(value: float) -> str:
+    """Signed two-decimal degrees, or ``n/a`` when the value is unobservable."""
+    return "n/a" if math.isnan(value) else f"{value:+.2f}"
+
+
 def _row(point: ContinuationPoint, hits: Sequence[KinematicBinding]) -> str:
     torque = ", ".join(point.solution.binding_joints) or "-"
     kinematic = "; ".join(_kinematic_text(h) for h in hits) or "-"
     status = _status(point, hits)
+    sol = point.solution
     return (
         f"| {point.speed_target_mph:.0f} | {point.achieved_mph:.1f} "
-        f"| {point.solution.face_to_path_deg:+.2f} | {torque} | {kinematic} "
-        f"| {status} |"
+        f"| {_signed(sol.face_error_deg)} | {_signed(sol.path_error_deg)} "
+        f"| {_signed(sol.aoa_error_deg)} | {_signed(sol.face_to_path_deg)} "
+        f"| {sol.deviation:.2f} | {torque} | {kinematic} | {status} |"
     )
 
 
@@ -93,7 +107,7 @@ def render_continuation_report(
     rows = [
         _row(p, hits) for p, hits in zip(result.points, kinematic_by_rung, strict=True)
     ]
-    lines = [_HEADER, "|" + " --- |" * 6, *rows, ""]
+    lines = [_HEADER, "|" + " --- |" * 10, *rows, ""]
     lines.append(f"Held joints: {', '.join(held_joints) or 'none'}")
     notes = [
         f"- {name}: {limit_notes[name]}"
