@@ -288,7 +288,6 @@ _PAN = {
     "lateral_bending": (71.3, 63.2),
     "axial_rotation": (49.2, 47.7),
 }
-THORACIC_SHARE = 0.5
 
 
 def _entry(slot: str, direction: str) -> dict:
@@ -335,22 +334,34 @@ def test_ishida_ceiling_is_stated_not_athletic() -> None:
 
 
 @pytest.mark.parametrize("kind", sorted(_UPPER))
-def test_thoracic_takes_a_share_and_is_labelled_an_assumption(kind: str) -> None:
-    """A whole-trunk capacity is not applied to both joints (D34 4)."""
+def test_thoracic_has_the_same_cited_limit_as_lumbar(kind: str) -> None:
+    """Series joints each carry the trunk moment: same cited limit, none summed (D34a)."""
     lumbar, thor = f"lumbar_{kind}", f"thoracic_{kind}"
     vec = capacity_for((lumbar, thor), _SUBJECT, actuated=(lumbar, thor))
-    assert vec.tau_max_positive_nm[1] == pytest.approx(
-        THORACIC_SHARE * vec.tau_max_positive_nm[0]
-    )
-    assert vec.tau_max_negative_nm[1] == pytest.approx(
-        THORACIC_SHARE * vec.tau_max_negative_nm[0]
-    )
-    assert thor in vec.assumed_slots and lumbar in vec.verified_slots
+    assert vec.tau_max_positive_nm[1] == pytest.approx(vec.tau_max_positive_nm[0])
+    assert vec.tau_max_negative_nm[1] == pytest.approx(vec.tau_max_negative_nm[0])
+    assert lumbar in vec.verified_slots and thor in vec.verified_slots
     for direction in ("negative", "positive"):
         e = _entry(thor, direction)
-        assert e["assumed"] is True and e["verification_status"] == "UNVERIFIED"
-        assert e["source"]["citation_id"] is None
-        assert "share" in e["rationale"] and "not a measured" in e["rationale"]
+        assert e["assumed"] is False and e["verification_status"] == "VERIFIED"
+        assert (
+            e["source"]["citation_id"]
+            == _entry(lumbar, direction)["source"]["citation_id"]
+        )
+        assert "Series mapping" in e["source"]["note"]
+        assert e["lower_reference"] == _entry(lumbar, direction)["lower_reference"]
+
+
+@pytest.mark.parametrize("kind", sorted(_PAN))
+def test_series_trunk_minimum_never_falls_below_the_pan_lower_reference(
+    kind: str,
+) -> None:
+    """The weakest series trunk joint must still allow the Pan 2025 median (D34a)."""
+    slots = (f"lumbar_{kind}", f"thoracic_{kind}")
+    vec = capacity_for(slots, _SUBJECT, actuated=slots)
+    neg, pos = _PAN[kind]
+    assert vec.tau_max_negative_nm.min() >= neg - 1e-9
+    assert vec.tau_max_positive_nm.min() >= pos - 1e-9
 
 
 def test_every_lower_reference_cites_a_known_citation() -> None:
@@ -377,10 +388,5 @@ def test_physiological_envelope_builds_from_the_v2_spec() -> None:
     )
     trunk = [n for n in env.names if n.startswith(_TRUNK_PREFIXES)]
     assert len(trunk) == 6
-    assert {n for n in trunk if n.startswith("lumbar")}.isdisjoint(
-        env.assumed_torque_slots
-    )  # lumbar torque is cited
-    assert {n for n in trunk if n.startswith("thoracic")} <= set(
-        env.assumed_torque_slots
-    )  # thoracic share is an assumption
+    assert set(trunk).isdisjoint(env.assumed_torque_slots)  # trunk torque is cited
     assert set(trunk) <= set(env.assumed_velocity_slots)  # velocity is a stated prior
