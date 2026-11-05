@@ -124,9 +124,10 @@ class ImpactSolution:
         return self.outcome.torque_nm
 
 
-def _within_tolerance(
+def within_tolerance(
     impact: MeasuredImpact, target: ImpactTarget, tol: ImpactTolerance
 ) -> bool:
+    """True when face, path and AoA errors are all inside ``tol`` (False if unobservable)."""
     if impact.face_deg is None or impact.path_deg is None:
         return False
     face, path, aoa = impact_errors_deg(impact, target)
@@ -244,7 +245,7 @@ def solve_impact_trajectory(
         binding_joints=binding,
         max_utilisation=float(np.max(util)),
         envelope_limits_nm=np.array(envelope.tau_max_positive_nm),
-        tolerances_met=_within_tolerance(out.impact, target, cfg.tolerance),
+        tolerances_met=within_tolerance(out.impact, target, cfg.tolerance),
         face_to_path_deg=face_to_path_deg(out.impact),
         face_error_deg=errors[0],
         path_error_deg=errors[1],

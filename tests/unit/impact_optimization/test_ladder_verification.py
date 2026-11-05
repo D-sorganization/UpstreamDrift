@@ -123,7 +123,9 @@ def test_per_speed_rows_carry_search_and_full_fidelity_speeds() -> None:
 
 def test_verdict_uses_the_full_fidelity_run_not_the_search() -> None:
     run = _run()
-    checks = verify_at_full_fidelity(run, _window(scale=0.9), _env())  # full reads 10% less
+    checks = verify_at_full_fidelity(
+        run, _window(scale=0.9), _env()
+    )  # full reads 10% less
     out = summarise_ladder(run, checks, {})
     assert all(not r["accepted"] for r in out["rungs"])
     assert out["reached_full_mph"] is None
@@ -144,9 +146,10 @@ def test_accepted_rung_needs_agreement_and_no_rom_or_velocity_breach() -> None:
 
 
 def test_rom_breach_is_reported_as_probable_miscalibration_never_dropped() -> None:
-    run = _run(env=_env(j0_rom=0.15))  # ~0.2 deg peak vs 0.15 deg limit
+    run = _run()
+    tight = _env(j0_rom=0.5 * _peak_j0_deg(run))  # limit at half the peak
     notes = {"J0": "prior-derived split; probable miscalibration"}
-    out = summarise_ladder(run, verify_at_full_fidelity(run, _window(), _env()), notes)
+    out = summarise_ladder(run, verify_at_full_fidelity(run, _window(), tight), notes)
     row = out["rungs"][-1]
     assert not row["accepted"]  # D29: ROM is a hard constraint on accepted rungs
     assert row["probable_miscalibration"] == ["J0 ROM"]
@@ -157,19 +160,25 @@ def test_rom_breach_is_reported_as_probable_miscalibration_never_dropped() -> No
     assert out["limit_notes"]["J0"] == notes["J0"]
 
 
+def _peak_j0_deg(run) -> float:
+    return float(np.max(np.abs(np.degrees(run.result.points[-1].trajectory[:, 0]))))
+
+
 def _peak_j0_rate_deg_s(run) -> float:
     traj = np.degrees(run.result.points[-1].trajectory[:, 0])
     return float(np.max(np.abs(np.diff(traj))) / DT)
 
 
 def test_replay_rom_breach_rejects_a_rung_the_search_found_clean() -> None:
-    run = _run(env=_env(j0_rom=0.3))  # search peak ~0.2 deg: clean
-    assert not any(h.utilisation > 1.0 for hits in run.kinematic_by_rung for h in hits)
+    run = _run()
+    limit = 1.5 * _peak_j0_deg(run)  # the search sits at 0.67 of the limit
+    clean = verify_at_full_fidelity(run, _window(), _env(j0_rom=limit))
+    assert not any(h.utilisation > 1.0 for c in clean for h in c.kinematic)
     out = summarise_ladder(
         run,
-        verify_at_full_fidelity(run, _window(gain=2.0), _env(j0_rom=0.3)),
+        verify_at_full_fidelity(run, _window(gain=2.0), _env(j0_rom=limit)),
         {},
-    )  # replay moves J0 twice as far for the same speed reading: ~0.4 deg
+    )  # replay moves J0 twice as far for the same speed reading: 1.33 of it
     row = out["rungs"][-1]
     assert row["full_tolerances_met"] and not row["accepted"]
     assert row["probable_miscalibration"] == ["J0 ROM"]
@@ -193,7 +202,9 @@ def test_replay_velocity_breach_rejects_a_rung_the_search_found_clean() -> None:
 
 def test_infeasible_search_names_the_binding_torque_joint() -> None:
     run = _run(env=_env(tau=1.0))  # baseline already uses the full 1 Nm
-    out = summarise_ladder(run, verify_at_full_fidelity(run, _window(), _env(tau=1.0)), {})
+    out = summarise_ladder(
+        run, verify_at_full_fidelity(run, _window(), _env(tau=1.0)), {}
+    )
     top = out["rungs"][-1]
     assert not top["search_feasible"] and not top["accepted"]
     assert "NOT reached" in out["claim_top_rung"]

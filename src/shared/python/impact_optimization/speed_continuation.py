@@ -81,6 +81,16 @@ class ContinuationPoint:
         """Solved torque of this rung (delegates; keeps callers shallow)."""
         return self.solution.torque_nm
 
+    @property
+    def binding_joints(self) -> tuple[str, ...]:
+        """Torque-binding joints of this rung (delegates)."""
+        return self.solution.binding_joints
+
+    @property
+    def face_to_path_deg(self) -> float:
+        """Face minus path of this rung (delegates)."""
+        return self.solution.face_to_path_deg
+
 
 @dataclass(frozen=True)
 class ContinuationResult:

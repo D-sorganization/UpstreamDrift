@@ -34,10 +34,17 @@ from src.shared.python.contracts import require
 from src.shared.python.impact_optimization.full_body_ladder import LadderRun
 from src.shared.python.impact_optimization.full_body_rollout import (
     RolloutWindow,
+    envelope_subset,
     make_full_body_rollout,
 )
 from src.shared.python.impact_optimization.impact_target import ImpactTarget
-from src.shared.python.impact_optimization.kinematic_binding import KinematicBinding
+from src.shared.python.impact_optimization.kinematic_binding import (
+    KinematicBinding,
+    kinematic_binding,
+)
+from src.shared.python.impact_optimization.physiological_envelope import (
+    PhysiologicalEnvelope,
+)
 from src.shared.python.impact_optimization.speed_continuation import (
     DEFAULT_SPEED_TOL_MPH,
     ContinuationPoint,
@@ -45,6 +52,7 @@ from src.shared.python.impact_optimization.speed_continuation import (
 from src.shared.python.impact_optimization.trajectory_optimiser import (
     ImpactTolerance,
     impact_errors_deg,
+    within_tolerance,
 )
 
 SCOPE = "within the controlled subset"
@@ -65,6 +73,8 @@ class FullFidelityCheck:
     path_error_deg: float
     aoa_error_deg: float
     tolerances_met: bool
+    #: ROM / velocity hits of the REPLAY trajectory (never the search one).
+    kinematic: tuple[KinematicBinding, ...] = ()
 
 
 def _check(
@@ -73,39 +83,52 @@ def _check(
     target: ImpactTarget,
     tol: ImpactTolerance,
     speed_tol_mph: float,
+    kinematic: tuple[KinematicBinding, ...],
 ) -> FullFidelityCheck:
     face, path, aoa = impact_errors_deg(full, target)
     speed = float(full.speed_mph)
     met = (
-        not math.isnan(face)
-        and not math.isnan(path)
-        and abs(face) <= tol.face_deg
-        and abs(path) <= tol.path_deg
-        and abs(aoa) <= tol.aoa_deg
+        within_tolerance(full, target, tol)
         and abs(speed - point.speed_target_mph) <= speed_tol_mph
     )
     return FullFidelityCheck(
-        point.speed_target_mph, point.achieved_mph, speed, face, path, aoa, met
+        point.speed_target_mph,
+        point.achieved_mph,
+        speed,
+        face,
+        path,
+        aoa,
+        met,
+        kinematic,
     )
 
 
 def verify_at_full_fidelity(
     run: LadderRun,
     window_full: RolloutWindow,
+    envelope: PhysiologicalEnvelope,
     *,
     base_target: ImpactTarget | None = None,
     tolerance: ImpactTolerance | None = None,
     speed_tol_mph: float = DEFAULT_SPEED_TOL_MPH,
 ) -> tuple[FullFidelityCheck, ...]:
-    """Re-play every rung's torque on ``window_full`` and score it."""
+    """Re-play every rung's torque on ``window_full`` and score it.
+
+    The ROM / velocity verdict comes from the replay's own trajectory against
+    the controlled-subset ``envelope`` (D24, D29), never from the search.
+    """
     rollout = make_full_body_rollout(window_full, run.controlled)
+    env = envelope_subset(envelope, run.controlled)
     base = base_target or ImpactTarget()
     tol = tolerance or ImpactTolerance()
     checks = []
     for point in run.result.points:
         outcome = rollout(point.torque_nm)
         target = dataclasses.replace(base, speed_mph=point.speed_target_mph)
-        checks.append(_check(point, outcome.impact, target, tol, speed_tol_mph))
+        hits = kinematic_binding(
+            outcome.trajectory, window_full.times_s, env, degrees=False
+        )
+        checks.append(_check(point, outcome.impact, target, tol, speed_tol_mph, hits))
     return tuple(checks)
 
 
@@ -119,11 +142,8 @@ def _hit(h: KinematicBinding) -> dict[str, Any]:
     }
 
 
-def _row(
-    point: ContinuationPoint,
-    hits: tuple[KinematicBinding, ...],
-    check: FullFidelityCheck,
-) -> dict[str, Any]:
+def _row(point: ContinuationPoint, check: FullFidelityCheck) -> dict[str, Any]:
+    hits = check.kinematic
     breaches = [f"{h.joint} {h.kind}" for h in hits if h.utilisation > 1.0]
     return {
         "target_mph": point.speed_target_mph,
@@ -132,10 +152,10 @@ def _row(
         "search_feasible": bool(point.feasible),
         "full_tolerances_met": check.tolerances_met,
         "accepted": bool(point.feasible and check.tolerances_met and not breaches),
-        "torque_binding": list(point.solution.binding_joints),
+        "torque_binding": list(point.binding_joints),
         "kinematic": [_hit(h) for h in hits],
         "probable_miscalibration": breaches,
-        "face_to_path_deg": _num(point.solution.face_to_path_deg),
+        "face_to_path_deg": _num(point.face_to_path_deg),
         "full_face_error_deg": _num(check.face_error_deg),
         "full_path_error_deg": _num(check.path_error_deg),
         "full_aoa_error_deg": _num(check.aoa_error_deg),
@@ -154,8 +174,19 @@ def _claim(top: dict[str, Any]) -> str:
     if top["probable_miscalibration"]:
         names = ", ".join(top["probable_miscalibration"])
         return f"{target} NOT reached {SCOPE}: {names} breaches its limit; {_MISCAL}."
+    if top["search_feasible"] and not top["full_tolerances_met"]:
+        return (
+            f"{target} NOT reached {SCOPE}: the full-fidelity replay reads "
+            f"{top['full_mph']:.1f} mph (search {top['search_mph']:.1f} mph), "
+            f"face error {_fmt(top['full_face_error_deg'])} deg, "
+            f"path error {_fmt(top['full_path_error_deg'])} deg."
+        )
     binding = ", ".join(top["torque_binding"]) or "no torque limit"
     return f"{target} NOT reached {SCOPE}: binding {binding}."
+
+
+def _fmt(value: float | None) -> str:
+    return "n/a" if value is None else f"{value:+.2f}"
 
 
 def summarise_ladder(
@@ -166,10 +197,7 @@ def summarise_ladder(
     """JSON-ready verdict built from the full-fidelity checks."""
     points = run.result.points
     require(len(checks) == len(points), "need one full-fidelity check per rung")
-    rows = [
-        _row(p, hits, c)
-        for p, hits, c in zip(points, run.kinematic_by_rung, checks, strict=True)
-    ]
+    rows = [_row(p, c) for p, c in zip(points, checks, strict=True)]
     accepted = [r["target_mph"] for r in rows if r["accepted"]]
     bound = {k["joint"] for r in rows for k in r["kinematic"]} | {
         j for r in rows for j in r["torque_binding"]
@@ -186,7 +214,7 @@ def summarise_ladder(
             "aoa_deg": float(base.aoa_deg),
         },
         "rungs": rows,
-        "reached_full_mph": max(accepted, default=0.0),
+        "reached_full_mph": max(accepted, default=None),
         "claim_top_rung": _claim(rows[-1]),
         "limit_notes": {j: n for j, n in limit_notes.items() if j in bound},
     }
