@@ -937,6 +937,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14562 · SHOW-C6 Shot-Shape Presets, Ball-Flight Curvature Sign Tests and Swing-Variant Artefact With Run Identity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14562
+- **Branch:** merged via #14618
+- **PR:** #14618
+- **Paths:** see #14618
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ff8672d1`; collated from changes/14562-show-c6-shot-shape-presets-ball-flight-c.md)
+- **Summary:** SHOW-C6 shot-shape presets, ball-flight curvature sign tests and swing-variant artefact with run identity
+- **Next step:** Shipped in PR #14618.
+
+### DL-#14471 · Putting Analytics: Versioned Setup Document (The Studio's Schema_Version 4.0.0) With Export/Import (Studio Exports Load Their Green and Distance), Named Scenarios With Their Dispersion Result and a Comparison Against the First, as a Shared Service and /Scenario, /Scenario-Compare, /Setup-Export and /Setup-Import Routes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14471
+- **Branch:** merged via #14615
+- **PR:** #14615
+- **Paths:** see #14615
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`9ab683af`; collated from changes/14471-putting-scenarios-core.md)
+- **Summary:** Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes
+- **Next step:** Shipped in PR #14615.
+
 ### DL-#14571 · SHOW-B7: Fit a SkillFamily From Launch-Monitor Shot Data, Shrunk Toward a Preset
 
 - **State:** shipped
@@ -2321,10 +2347,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13560
 - **Branch:** merged via #14185
-- **PR:** #14185, #14351
+- **PR:** #14185, #14351, #14354
 - **Paths:** see #14185
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-02 (`1377299a`; collated from changes/13560-opensim-net-moment-diagnosis.md)
+- **Last verified:** 2026-11-05 (`c2433dd1`; collated from changes/13560-opensim-overlap-hold-moment-lever.md)
 - **Summary:** MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed
 - **Next step:** Shipped in PR #14185.
 
