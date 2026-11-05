@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14608 | SHOW-B3: cached, versioned MC dispersion tables (CRN) + pipeline landing adapter |
+| 2026-11-05 | #14403 | Guard root Docker context secret-exclusion rules |
 | 2026-11-05 | #14606 | SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report |
 | 2026-11-05 | #14601 | Add golf-language face-on address grip roll metric (0 deg vertical, + strong) with flagship measurement and overlay render |
 | 2026-11-05 | #14609 | Putting Green Simulator: Counter-Torque Stabilization panel charts the shared core's hand couples and gust twist (preload held vs slack grip) on the shared balance heads, with force and torque display units (N, lbf, N·m, in·lbf) in the shared units module |
