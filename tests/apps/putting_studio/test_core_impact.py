@@ -58,12 +58,12 @@ def test_fixture_is_the_generator_output() -> None:
 def test_fixture_rows_are_the_core_skid() -> None:
     data = gen.parse(_FIXTURE.read_text(encoding="utf-8"))
     rows = data["skid"]
-    assert rows[0] == [0.0, 0.0]
-    speeds = [v for v, _ in rows]
+    assert rows[0][:2] == [0.0, 0.0]
+    speeds = [row[0] for row in rows]
     assert speeds == sorted(speeds)
     for club in (0.6, 1.4, 2.6):
         ball, skid = _core(club)
-        assert [round(ball, 6), round(skid, 6)] in rows
+        assert [round(ball, 6), round(skid, 6)] in [row[:2] for row in rows]
 
 
 def test_fixture_launch_is_the_core_launch() -> None:
@@ -115,7 +115,7 @@ def test_page_loads_the_table_and_shows_launch() -> None:
     html = (_STUDIO / "index.html").read_text(encoding="utf-8")
     assert html.index('src="js/core_impact.js"') < html.index('src="js/green3d.js"')
     green = (_STUDIO / "js" / "green3d.js").read_text(encoding="utf-8")
-    assert green.count("skidTable: window.CORE_IMPACT.skid") == 2
+    assert green.count("skidTable: window.CORE_IMPACT.skid") == 3  # + speed solve
     assert "CORE_IMPACT.meta.launch_angle_deg" in green
     charts = (_STUDIO / "js" / "charts2d.js").read_text(encoding="utf-8")
     assert "0.12 * holeX" not in charts
