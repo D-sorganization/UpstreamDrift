@@ -1038,6 +1038,7 @@
 {"path": "impact_optimization/full_body_rollout.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/impact_target.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/kinematic_binding.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
+{"path": "impact_optimization/ladder_verification.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/physiological_envelope.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/shot_presets.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/speed_continuation.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}

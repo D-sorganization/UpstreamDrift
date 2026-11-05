@@ -76,6 +76,11 @@ class ContinuationPoint:
         """Rollout joint angles of this rung (delegates; keeps callers shallow)."""
         return self.solution.trajectory
 
+    @property
+    def torque_nm(self) -> np.ndarray:
+        """Solved torque of this rung (delegates; keeps callers shallow)."""
+        return self.solution.torque_nm
+
 
 @dataclass(frozen=True)
 class ContinuationResult:

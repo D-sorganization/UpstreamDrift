@@ -118,6 +118,11 @@ class ImpactSolution:
         """Rollout joint angles of the solved swing (delegates to the outcome)."""
         return self.outcome.trajectory
 
+    @property
+    def torque_nm(self) -> np.ndarray:
+        """Torque of the solved swing (delegates to the outcome)."""
+        return self.outcome.torque_nm
+
 
 def _within_tolerance(
     impact: MeasuredImpact, target: ImpactTarget, tol: ImpactTolerance
