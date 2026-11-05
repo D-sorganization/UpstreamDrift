@@ -91,14 +91,16 @@ def test_velocity_overshoot_is_also_a_hard_constraint() -> None:
 
 def test_reached_mph_drops_only_the_violating_rungs() -> None:
     result = _ladder()
-    lo = min(float(np.degrees(np.abs(p.trajectory[:, 0])).max()) for p in result.points)
-    hi = _peak_deg(result)
-    if hi - lo < 1e-6:
-        pytest.skip("rungs have identical peaks on this plant")
-    out, _ = enforce_kinematic_limits(result, _with_rom((lo + hi) / 2.0), TIMES)
-    assert [p.feasible for p in out.points] != [p.feasible for p in result.points]
-    feasible = [p.speed_target_mph for p in out.points if p.feasible]
-    assert out.reached_mph == max(feasible, default=0.0)
+    peaks = [float(np.degrees(np.abs(p.trajectory[:, 0])).max()) for p in result.points]
+    assert max(peaks) - min(peaks) > 1e-6, "plant must give rungs distinct peaks"
+    out, _ = enforce_kinematic_limits(
+        result, _with_rom((min(peaks) + max(peaks)) / 2), TIMES
+    )
+    expected = [pk <= (min(peaks) + max(peaks)) / 2 for pk in peaks]
+    assert [p.feasible for p in out.points] == expected
+    assert out.reached_mph == max(
+        (p.speed_target_mph for p in out.points if p.feasible), default=0.0
+    )
 
 
 def test_report_names_joint_limit_value_and_probable_miscalibration() -> None:

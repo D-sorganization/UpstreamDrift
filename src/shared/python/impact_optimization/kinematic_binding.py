@@ -39,6 +39,7 @@ from src.shared.python.impact_optimization.physiological_envelope import (
 from src.shared.python.impact_optimization.speed_continuation import (
     ContinuationResult,
     binding_report,
+    reached_mph,
 )
 
 DEFAULT_THRESHOLD = 0.98
@@ -144,8 +145,7 @@ def enforce_kinematic_limits(
         dataclasses.replace(p, feasible=p.feasible and not over_limit(hits))
         for p, hits in zip(result.points, kin, strict=True)
     )
-    reached = max((p.speed_target_mph for p in points if p.feasible), default=0.0)
-    out = ContinuationResult(points, reached)
+    out = ContinuationResult(points, reached_mph(points))
     require_kinematically_feasible(out, kin)
     return out, kin
 

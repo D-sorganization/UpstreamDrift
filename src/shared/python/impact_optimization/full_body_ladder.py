@@ -107,7 +107,10 @@ def held_joints(window: RolloutWindow, controlled: Sequence[str]) -> tuple[str, 
 
 @dataclass(frozen=True)
 class LadderRun:
-    """A guarded ladder run: baseline, rungs, per-rung kinematic bindings."""
+    """A guarded ladder run: baseline, rungs, per-rung kinematic bindings.
+
+    ``result.reached_mph`` counts only rungs inside every ROM and velocity limit.
+    """
 
     baseline: MeasuredImpact
     result: ContinuationResult
