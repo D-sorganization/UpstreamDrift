@@ -16,7 +16,7 @@ import pytest
 
 from src.shared.python.impact_parameters import TargetFrame
 from src.shared.python.impact_parameters.adapters import club_face_spec_from_spec
-from src.shared.python.impact_parameters.conditions import evaluate_rollout
+from src.shared.python.impact_parameters.conditions import Rollout, evaluate_rollout
 
 mujoco = pytest.importorskip("mujoco")
 pytestmark = pytest.mark.unit
@@ -59,14 +59,8 @@ def fit():
 
 
 def _reference(model, site, t, q, v, spec):
-    """Independent face-centre series from the ``Clubhead`` frame site.
-
-    Position and orientation come from the site; the face centre and normal are
-    the repository's ``club_face_target`` values in that frame.  The velocity is
-    the exact directional derivative of the face-centre path along the record's
-    own ``qvel`` (symmetric difference, h = 1e-7), not the Jacobian transport the
-    adapter uses.
-    """
+    """Face-centre series from the ``Clubhead`` site and ``club_face_target``;
+    velocity is the exact directional derivative (h = 1e-7), not the Jacobian."""
     from src.shared.python.motion_matching import club_face_target as cft
 
     centre = cft.face_centre_in_frame(spec)
@@ -112,11 +106,9 @@ def test_matches_independent_reference_on_best_fit_driver(fit):
     model, spec, site, body, t, q, v = fit
     face = club_face_spec_from_spec(spec)
     pos, normal_all, vel = _reference(model, site, t, q, v, spec)
-    # the repo's ball-passage detector for this run (club_face.ball_passage)
     detector = json.loads((SEEDS / "replay_post_impact_capture_a.json").read_text())
     idx = int(np.searchsorted(t, detector["impact_time_s"]))
     normal = normal_all[idx]
-    # toe/high from the same face spec rotated to the world by the body pose
     data = mujoco.MjData(model)
     data.qpos[:] = q[idx]
     mujoco.mj_kinematics(model, data)
@@ -129,9 +121,7 @@ def test_matches_independent_reference_on_best_fit_driver(fit):
     start = time.perf_counter()
     got = evaluate_rollout(
         model,
-        t,
-        q,
-        v,
+        Rollout(t, q, v),
         body,
         FRAME,
         spec=face,

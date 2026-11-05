@@ -24,6 +24,7 @@ from src.shared.python.impact_parameters.adapters import (
 )
 from src.shared.python.impact_parameters.conditions import (
     ImpactConditions,
+    Rollout,
     evaluate_rollout,
 )
 
@@ -79,7 +80,8 @@ def test_matches_existing_extractor_on_mujoco_rollout():
     mujoco = _mujoco()
     model = mujoco.MjModel.from_xml_string(MJCF)
     t, q, v = _rollout()
-    got = evaluate_rollout(model, t, q, v, "club", FRAME, spec=SPEC, impact_index=150)
+    rollout = Rollout(t, q, v)
+    got = evaluate_rollout(model, rollout, "club", FRAME, spec=SPEC, impact_index=150)
     ref = extract_impact_parameters(
         clubhead_series_from_mujoco(model, t, q, v, "club", SPEC),
         FRAME,
@@ -90,7 +92,6 @@ def test_matches_existing_extractor_on_mujoco_rollout():
     assert got.aoa_deg == pytest.approx(ref.attack_angle_deg, abs=1e-9)
     assert got.path_deg == pytest.approx(ref.club_path_deg, abs=1e-9)
     assert got.face_deg == pytest.approx(ref.face_angle_deg, abs=1e-9)
-    # analytic: speed = omega * radius at the face centre (|r| = 1.0 m horizontal)
     assert got.speed_mph == pytest.approx(OMEGA * 1.0 * 2.2369362920544, rel=1e-3)
     assert got.aoa_deg == pytest.approx(0.0, abs=1e-6)
 

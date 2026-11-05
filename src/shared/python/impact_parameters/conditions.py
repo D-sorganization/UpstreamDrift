@@ -1,13 +1,10 @@
 """Impact conditions for optimiser loops (SHOW-C2, #14558).
 
-A fast facade over the existing GCV-15/16 stack: a MuJoCo rollout goes through
-:func:`clubhead_series_from_mujoco` and :func:`extract_impact_parameters`, and
-the result is reduced to the five quantities an optimiser cost needs.  No new
-kinematics lives here, so the sign conventions are exactly those of
-``impact_parameters`` (face + = open, path + = in-to-out, AoA + = ascending).
-
-Ball flight is deliberately not computed: the epic (#14556) uses it only as a
-reporting layer through ``SwingBallFlightPipeline``, never inside the loop.
+A facade over the GCV-15/16 stack: a MuJoCo rollout goes through
+:func:`clubhead_series_from_mujoco` and :func:`extract_impact_parameters` and is
+reduced to the quantities an optimiser cost needs.  No new kinematics, so the
+signs are those of ``impact_parameters``.  Ball flight is not computed here (the
+epic #14556 keeps it a reporting layer).
 """
 
 from __future__ import annotations
@@ -84,11 +81,18 @@ class ImpactConditions:
         return vec
 
 
+@dataclass(frozen=True)
+class Rollout:
+    """A sampled MuJoCo trajectory: ``(n,)`` times, ``(n, nq)`` qpos, ``(n, nv)`` qvel."""
+
+    times_s: object
+    qpos: object
+    qvel: object
+
+
 def evaluate_rollout(
     model: Any,
-    times_s: object,
-    qpos: object,
-    qvel: object,
+    rollout: Rollout,
     body_name: str,
     frame: TargetFrame,
     *,
@@ -105,15 +109,15 @@ def evaluate_rollout(
     can move with the controls and make the cost non-smooth.
 
     For a full-body specification build ``spec`` with
-    :func:`club_face_spec_from_spec`: the compiled club body origin is not the
-    head, so the default face spec reads the wrong point.  Tools D-plane
-    estimates are skipped (``use_tools=False``): they are reporting extras.
+    :func:`club_face_spec_from_spec`: the club body origin is not the head.
 
     Raises:
         ValueError: invalid trajectory/indices or speed below 1 m/s.
     """
     require(isinstance(frame, TargetFrame), "frame must be a TargetFrame")
-    series = clubhead_series_from_mujoco(model, times_s, qpos, qvel, body_name, spec)
+    series = clubhead_series_from_mujoco(
+        model, rollout.times_s, rollout.qpos, rollout.qvel, body_name, spec
+    )
     params = extract_impact_parameters(
         series,
         frame,
