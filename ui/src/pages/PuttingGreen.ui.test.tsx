@@ -3,8 +3,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Putt3DSimulationResponse } from "@/api/generated/types";
-import { fetchPutterPresets, simulatePutt3D } from "@/api/puttingClient";
+import {
+  fetchGreenPresets,
+  fetchPutterPresets,
+  simulatePutt3D,
+} from "@/api/puttingClient";
 import { usePuttingStore } from "@/stores/usePuttingStore";
+import greens from "@/utils/greenTypes.golden.json";
 import golden from "@/utils/putterHead.golden.json";
 import { PuttingGreenPage } from "./PuttingGreen";
 
@@ -14,6 +19,7 @@ vi.mock("@/api/puttingClient", () => ({
   runMakeSpread: vi.fn(),
   runStrokesGained: vi.fn(),
   fetchPutterPresets: vi.fn(),
+  fetchGreenPresets: vi.fn(),
 }));
 
 vi.mock("@/components/visualization/PuttingScene3D", () => ({
@@ -77,6 +83,7 @@ describe("PuttingGreenPage 3D workflow", () => {
     usePuttingStore.getState().reset();
     vi.mocked(simulatePutt3D).mockResolvedValue(response);
     vi.mocked(fetchPutterPresets).mockResolvedValue({ presets: [] });
+    vi.mocked(fetchGreenPresets).mockResolvedValue(greens.presets);
     vi.stubGlobal(
       "requestAnimationFrame",
       vi.fn(() => 1),
@@ -188,5 +195,26 @@ describe("PuttingGreenPage 3D workflow", () => {
       target: { value: "face_on" },
     });
     expect(usePuttingStore.getState().cameraView).toBe("face_on");
+  });
+
+  it("sends the chosen core green preset to /simulate-3d (#14464)", async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <PuttingGreenPage />
+      </QueryClientProvider>,
+    );
+    await screen.findByRole("option", { name: "Tiered" });
+    fireEvent.change(screen.getByLabelText("Green Type"), {
+      target: { value: "tiered" },
+    });
+    expect(screen.getByLabelText("Slope Grade")).toBeDisabled();
+    expect(screen.getByLabelText("Bump Height")).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Simulate Putt" }));
+    await waitFor(() => expect(simulatePutt3D).toHaveBeenCalled());
+    expect(vi.mocked(simulatePutt3D).mock.lastCall?.[0].green).toEqual({
+      ...greens.presets.tiered,
+      preset: "tiered",
+    });
   });
 });

@@ -13,7 +13,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Toe/Heel Strike Location | (c) | present | present | present | present | partial (#14461) |
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | partial (#14469) | missing (#14469) | missing (#14470) | missing (#14470) | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
-| Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | partial (#14464) | partial (#14464) | partial (#14463) |
+| Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | partial (#14463) |
 | Optimum Read / Auto-Solve Aim | (e) | present | present | partial (#14466) | partial (#14466) | partial (#14465) |
 | Player-Specific Bellman Strokes Gained | (f) | present | present | present | present | partial (#14467) |
 | Saved Scenarios and Comparison | (h) | missing (#14471) | missing (#14471) | missing (#14472) | missing (#14472) | present |
@@ -69,7 +69,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 **Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets)**
 - Core/API: present. `src/shared/python/putting_dynamics/green_spec.py`, `src/api/routes/putting_green.py`. GreenSpec (slope, two-tier step, seeded undulation, named presets) on /simulate, /scatter, /read-green and /contours; GET /green-presets.
 - PyQt6: present. `src/tools/putting_green_gui/_scene_builder.py`, `src/tools/putting_green_gui/gui.py`. Green Type selector (cross slope or any core preset), seeded undulation in mm or in, green seed; all on the shared GreenSpec.
-- React: partial (#14464). `ui/src/pages/PuttingGreen.tsx`. Grade, aspect, grain, bumps; no green-type selector or presets.
+- React: present. `ui/src/components/putting/GreenTypeControl.tsx`, `ui/src/utils/greenTypes.ts`. Green Type selector (cross slope or any core preset from GET /green-presets) sent as the core green spec on /simulate-3d; slope and bump fields lock under a preset (golden-pinned, #14464).
 - Studio: partial (#14463). `src/apps/putting_studio/js/putting_physics.js`, `src/apps/putting_studio/js/io.js`. Flat and slope presets plus stimp ramp; undulation switches on with slope and is not selectable.
 
 **Optimum Read / Auto-Solve Aim**
