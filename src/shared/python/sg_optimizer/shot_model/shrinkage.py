@@ -2,6 +2,10 @@
 
 The weight ``n / (n + strength)`` is ``skill_fit.shrinkage_weight`` (one formula,
 shared with the SkillFamily fit); only the per-club blend lives here.
+
+Scope: this shrinks ``PlayerProfile`` club multipliers, which the *baseline* backend
+applies. The ``physics`` backend ignores them (the table encodes the skill), so its
+personalisation shrinks through ``skill_fit.fit_skill_family(prior_strength=...)``.
 """
 
 from __future__ import annotations
