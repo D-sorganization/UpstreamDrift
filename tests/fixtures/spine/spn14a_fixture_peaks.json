@@ -1,0 +1,86 @@
+{
+  "compression": [
+    {
+      "classification": "sensitive",
+      "level": "L5_S1",
+      "relative_spread": 0.209913,
+      "spread": 196.309,
+      "units": "N",
+      "values": {
+        "bruno2015_regional": 935.19,
+        "fujii2007_lumbar": 738.881,
+        "uniform_reference": 935.19
+      }
+    },
+    {
+      "classification": "sensitive",
+      "level": "L4_L5",
+      "relative_spread": 0.213048,
+      "spread": 197.558,
+      "units": "N",
+      "values": {
+        "bruno2015_regional": 927.293,
+        "fujii2007_lumbar": 729.735,
+        "uniform_reference": 927.293
+      }
+    },
+    {
+      "classification": "sensitive",
+      "level": "L3_L4",
+      "relative_spread": 0.217966,
+      "spread": 200.364,
+      "units": "N",
+      "values": {
+        "bruno2015_regional": 919.24,
+        "fujii2007_lumbar": 718.877,
+        "uniform_reference": 919.24
+      }
+    },
+    {
+      "classification": "sensitive",
+      "level": "L2_L3",
+      "relative_spread": 0.229884,
+      "spread": 207.062,
+      "units": "N",
+      "values": {
+        "bruno2015_regional": 900.727,
+        "fujii2007_lumbar": 693.665,
+        "uniform_reference": 900.727
+      }
+    },
+    {
+      "classification": "sensitive",
+      "level": "L1_L2",
+      "relative_spread": 0.225651,
+      "spread": 199.771,
+      "units": "N",
+      "values": {
+        "bruno2015_regional": 885.308,
+        "fujii2007_lumbar": 685.537,
+        "uniform_reference": 885.308
+      }
+    }
+  ],
+  "is_acceptance": false,
+  "laws": {
+    "bruno2015_regional": {
+      "drive_max_rad": 0.0,
+      "drive_rms_rad": 0.0,
+      "status": "pass"
+    },
+    "fujii2007_lumbar": {
+      "drive_max_rad": 0.891445,
+      "drive_rms_rad": 0.779646,
+      "status": "pass"
+    },
+    "uniform_reference": {
+      "drive_max_rad": 0.0,
+      "drive_rms_rad": 0.0,
+      "status": "pass"
+    }
+  },
+  "model_id": "fixture",
+  "schema_version": "spine-fixture-peak-table/1",
+  "scientific_status": "unqualified",
+  "study_id": "sens"
+}
