@@ -33,6 +33,7 @@ from src.shared.python.putting_analytics.service_variance import profile_from_ar
 
 SCHEMA_VERSION = "4.0.0"  # the studio export's (js/io.js)
 SUITE = "UpstreamDrift_Putting_Setup"
+STUDIO_SUITE = "UpstreamDrift_3D_Putting_Studio_v4"  # the studio export's
 SETUP_KEYS = (
     "distance_ft",
     "grade_pct",
@@ -76,8 +77,7 @@ def setup_from_args(args: Mapping[str, Any]) -> dict[str, float]:
 
 def scenario_study(args: Mapping[str, Any]) -> dict[str, Any]:
     """A named setup with its :func:`.service_dispersion.dispersion_study` result."""
-    name = args.get("name")
-    _check(isinstance(name, str) and 0 < len(name) <= 80, "'name' needs 1-80 chars")
+    name = _name(args)
     setup = setup_from_args(_mapping(args, "setup"))
     run = {key: args[key] for key in ("n", "seed") if key in args}
     report = service_dispersion.dispersion_study({**setup, **run})
@@ -131,6 +131,11 @@ def import_setup(args: Mapping[str, Any]) -> dict[str, Any]:
         version.split(".")[0] == major,
         f"'schema_version' {version!r} is not {major}.x",
     )
+    suite = doc.get("suite")
+    _check(
+        suite in (SUITE, STUDIO_SUITE),
+        f"'suite' {suite!r} is not {SUITE} or {STUDIO_SUITE}",
+    )
     if "state" in doc:
         studio_rows = doc.get("savedScenarios", [])
         return {
@@ -161,6 +166,12 @@ def _studio_setup(state: Mapping[str, Any]) -> dict[str, float]:
     return setup
 
 
+def _name(args: Mapping[str, Any]) -> str:
+    name = args.get("name")
+    _check(isinstance(name, str) and 0 < len(name) <= 80, "'name' needs 1-80 chars")
+    return name  # type: ignore[return-value]
+
+
 def _mapping(args: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     value = args.get(key)
     _check(isinstance(value, Mapping), f"'{key}' must be an object")
@@ -181,7 +192,7 @@ def _scenarios(args: Mapping[str, Any], *, required: bool) -> list[dict[str, Any
         leave = result.get("mean_leave_ft")
         out.append(
             {
-                "name": str(scenario.get("name", "")),
+                "name": _name(scenario),
                 "setup": setup_from_args(_mapping(scenario, "setup")),
                 "result": {
                     "make_rate": _number(result, "make_rate"),
@@ -200,6 +211,7 @@ __all__ = [
     "MAX_SCENARIOS",
     "SCHEMA_VERSION",
     "SETUP_KEYS",
+    "STUDIO_SUITE",
     "SUITE",
     "compare_scenarios",
     "export_setup",
