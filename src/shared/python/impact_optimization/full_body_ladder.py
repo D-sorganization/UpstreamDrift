@@ -151,7 +151,7 @@ def make_mujoco_impact_fn(
     frame: Any,
     face_spec: Any,
     *,
-    evaluate: Callable[..., MeasuredImpact] | None = None,
+    evaluate: Callable[..., Any] | None = None,
 ) -> ImpactFn:
     """C2 impact reader at the last window sample on the real MuJoCo model.
 
@@ -166,14 +166,14 @@ def make_mujoco_impact_fn(
     ids = list(joint_ids)
     qadr = np.asarray(model.jnt_qposadr)[ids]
     vadr = np.asarray(model.jnt_dofadr)[ids]
-    run = evaluate or evaluate_rollout
+    run: Callable[..., Any] = evaluate or evaluate_rollout
 
     def impact_fn(times_s: Array, q: Array, v: Array) -> MeasuredImpact:
         qpos = np.zeros((len(times_s), model.nq))
         qvel = np.zeros((len(times_s), model.nv))
         qpos[:, qadr] = q
         qvel[:, vadr] = v
-        return run(
+        impact: MeasuredImpact = run(
             model,
             Rollout(times_s, qpos, qvel),
             body_name,
@@ -181,5 +181,6 @@ def make_mujoco_impact_fn(
             spec=face_spec,
             impact_index=len(times_s) - 1,
         )
+        return impact
 
     return impact_fn
