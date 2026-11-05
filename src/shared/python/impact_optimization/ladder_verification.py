@@ -76,6 +76,8 @@ class FullFidelityCheck:
     tolerances_met: bool
     #: ROM / velocity hits of the REPLAY trajectory (never the search one).
     kinematic: tuple[KinematicBinding, ...] = ()
+    #: Joints whose velocity limit is an assumed placeholder, not a cited value.
+    assumed_velocity: tuple[str, ...] = ()
 
 
 def _check(
@@ -85,6 +87,7 @@ def _check(
     tol: ImpactTolerance,
     speed_tol_mph: float,
     kinematic: tuple[KinematicBinding, ...],
+    assumed_velocity: tuple[str, ...] = (),
 ) -> FullFidelityCheck:
     face, path, aoa = impact_errors_deg(full, target)
     speed = float(full.speed_mph)
@@ -101,6 +104,7 @@ def _check(
         aoa,
         met,
         kinematic,
+        assumed_velocity,
     )
 
 
@@ -129,7 +133,17 @@ def verify_at_full_fidelity(
         hits = kinematic_binding(
             outcome.trajectory, window_full.times_s, env, degrees=False
         )
-        checks.append(_check(point, outcome.impact, target, tol, speed_tol_mph, hits))
+        checks.append(
+            _check(
+                point,
+                outcome.impact,
+                target,
+                tol,
+                speed_tol_mph,
+                hits,
+                env.assumed_velocity_slots,
+            )
+        )
     return tuple(checks)
 
 
@@ -154,17 +168,26 @@ def _row(
     search_hits: tuple[KinematicBinding, ...],
 ) -> dict[str, Any]:
     hits = check.kinematic
-    breaches = _names(hits)
+    over = _names(hits)
+    soft = _names(
+        tuple(
+            h
+            for h in hits
+            if h.kind == "velocity" and h.joint in check.assumed_velocity
+        )
+    )
+    breaches = [n for n in over if n not in soft]
     return {
         "target_mph": point.speed_target_mph,
         "search_mph": check.search_speed_mph,
         "full_mph": check.full_speed_mph,
         "search_feasible": bool(point.feasible),
         "full_tolerances_met": check.tolerances_met,
-        "accepted": bool(point.feasible and check.tolerances_met and not breaches),
+        "accepted": bool(point.feasible and check.tolerances_met and not over),
         "torque_binding": list(point.binding_joints),
         "kinematic": [_hit(h) for h in hits],
         "probable_miscalibration": breaches,
+        "assumption_limited": soft,
         "search_breaches": _names(search_hits),
         "face_to_path_deg": _num(point.face_to_path_deg),
         "full_face_error_deg": _num(check.face_error_deg),
@@ -185,11 +208,18 @@ def _claim(top: dict[str, Any]) -> str:
     if top["probable_miscalibration"]:
         names = ", ".join(top["probable_miscalibration"])
         return f"{target} NOT reached {SCOPE}: {names} breaches its limit; {_MISCAL}."
+    if top["assumption_limited"]:
+        names = ", ".join(top["assumption_limited"])
+        return (
+            f"{target} NOT reached {SCOPE}: {names} breaches an assumed "
+            "(uncited) limit; assumption-limited, not a finding about the athlete."
+        )
     if top["search_breaches"]:
         names = ", ".join(top["search_breaches"])
         return (
-            f"{target} NOT reached {SCOPE}: the search trajectory breaches "
-            f"{names} (the replay does not); not accepted; {_MISCAL}."
+            f"{target} NOT reached {SCOPE}: search and replay disagree on "
+            f"{names} (the search breaches it, the replay does not), pointing at "
+            f"a fidelity gap between the two policies; not accepted; {_MISCAL}."
         )
     if top["search_feasible"] and not top["full_tolerances_met"]:
         return (
@@ -219,9 +249,11 @@ def summarise_ladder(
         for p, c, hits in zip(points, checks, run.kinematic_by_rung, strict=True)
     ]
     accepted = [r["target_mph"] for r in rows if r["accepted"]]
-    bound = {k["joint"] for r in rows for k in r["kinematic"]} | {
-        j for r in rows for j in r["torque_binding"]
-    }
+    bound = (
+        {k["joint"] for r in rows for k in r["kinematic"]}
+        | {j for r in rows for j in r["torque_binding"]}
+        | {n.rsplit(" ", 1)[0] for r in rows for n in r["search_breaches"]}
+    )
     base = run.baseline
     return {
         "scope": SCOPE,

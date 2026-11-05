@@ -246,3 +246,29 @@ def test_search_breach_with_clean_replay_is_not_blamed_on_torque_binding() -> No
     assert "NOT reached" in claim and "within the controlled subset" in claim
     assert "search" in claim and "J0 ROM" in claim
     assert "binding" not in claim
+
+
+def test_search_breach_claim_names_the_search_replay_disagreement() -> None:
+    peak = _peak_j0_deg(_run())
+    run = _run(env=_env(j0_rom=0.5 * peak))
+    out = summarise_ladder(
+        run, verify_at_full_fidelity(run, _window(), _env()), {"J0": "prior split"}
+    )
+    assert "search and replay disagree on J0 ROM" in out["claim_top_rung"]
+    assert out["limit_notes"]["J0"] == "prior split"  # search-only joints are bound
+
+
+def test_replay_breach_on_an_assumed_velocity_limit_is_assumption_limited() -> None:
+    import dataclasses
+
+    run = _run()
+    limit = 1.5 * _peak_j0_rate_deg_s(run)
+    env = dataclasses.replace(_env(j0_vel=limit), assumed_velocity_slots=("J0",))
+    out = summarise_ladder(
+        run, verify_at_full_fidelity(run, _window(gain=2.0), env), {}
+    )
+    row, claim = out["rungs"][-1], out["claim_top_rung"]
+    assert not row["accepted"]  # D29: still a hard constraint
+    assert row["assumption_limited"] == ["J0 velocity"]
+    assert row["probable_miscalibration"] == []
+    assert "assumption-limited" in claim and "miscalibration" not in claim

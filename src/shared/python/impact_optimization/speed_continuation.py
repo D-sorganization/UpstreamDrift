@@ -166,6 +166,7 @@ def binding_report(
     result: ContinuationResult,
     envelope: PhysiologicalEnvelope,
     limit_notes: dict[str, str] | None = None,
+    source_band: dict[tuple[str, str], tuple[float, float]] | None = None,
 ) -> list[str]:
     """One evidence line per binding joint per rung (blocking rungs flagged).
 
@@ -174,11 +175,22 @@ def binding_report(
     are NOT reported here; they need the rollout joint angles and rates and
     are reported by ``kinematic_binding.full_binding_report`` (SHOW-C3c).
 
+    ``source_band`` maps ``(joint, "positive" | "negative")`` to the (lower,
+    upper) cited torque values of that direction when sources conflict (D34);
+    the envelope is signed, so each side is classified on its own signed
+    extreme.  The envelope limit of that side must BE the upper value, so a
+    block at the ceiling is blocked under both sources and keeps the D29
+    wording.  A rung whose peak is above the lower value but within the upper
+    one is "source-sensitive": it holds only if the upper source applies.  This
+    is distinct from "assumption-limited" (D32) and "probable miscalibration".
+
     ``limit_notes`` maps a joint name to the provenance of its limit (for
     example "prior-derived estimate, not a measurement"), appended to that joint's
     lines so a binding limit is never read as a measured over-rotation.
     """
     notes = limit_notes or {}
+    band = source_band or {}
+    _require_band(band, envelope)
     lines: list[str] = []
     for p in result.points:
         sol = p.solution
@@ -193,8 +205,17 @@ def binding_report(
                 f"achieved {p.achieved_mph:.1f} mph, face-to-path "
                 f"{sol.face_to_path_deg:+.2f} deg)"
             )
-            if p.feasible:
+            hit = _banded_side(band, name, tau[:, i])
+            if p.feasible and hit is not None:
+                line = head + "; at the limit but feasible; " + _source_text(*hit)
+            elif p.feasible:
                 line = head + "; at the limit but feasible"
+            elif name in envelope.assumed_torque_slots:
+                line = (
+                    head + "; BLOCKS this speed. assumption-limited: this torque "
+                    "limit is an assumed placeholder, not a cited value, so the "
+                    "rung says nothing about the athlete"
+                )
             else:
                 line = (
                     head + "; BLOCKS this speed. 125 mph is firm, so treat the "
@@ -203,4 +224,59 @@ def binding_report(
             if name in notes:
                 line += f" (limit provenance: {notes[name]})"
             lines.append(line)
+        for name in sorted({n for n, _ in band}):
+            i = envelope.names.index(name)
+            hit = _banded_side(band, name, tau[:, i])
+            if name not in sol.binding_joints and hit is not None:
+                lines.append(
+                    f"{p.speed_target_mph:.0f} mph: {name} peaks at "
+                    f"{hit[3]:.1f} N m ({hit[0]}), within its limit; "
+                    + _source_text(*hit)
+                )
     return lines
+
+
+def _banded_side(
+    band: dict[tuple[str, str], tuple[float, float]], name: str, tau: np.ndarray
+) -> tuple[str, float, float, float] | None:
+    """(direction, lower, upper, peak) of the first side above its lower value."""
+    for direction, peak in (
+        ("positive", float(np.max(tau))),
+        ("negative", float(-np.min(tau))),
+    ):
+        if (name, direction) in band and peak > band[(name, direction)][0]:
+            low, high = band[(name, direction)]
+            return direction, low, high, peak
+    return None
+
+
+def _source_text(direction: str, low: float, high: float, peak: float) -> str:
+    return (
+        f"source-sensitive ({direction}): the peak {peak:.1f} N m is above the "
+        f"lower cited value ({low:.1f} N m) and within the upper ({high:.1f} N m), "
+        "so it holds only if the upper source applies"
+    )
+
+
+def _require_band(
+    band: dict[tuple[str, str], tuple[float, float]], envelope: PhysiologicalEnvelope
+) -> None:
+    """Each band is ``0 < lower < upper``; its side's envelope limit is the upper."""
+    for (name, direction), (low, high) in band.items():
+        require(name in envelope.names, f"source_band joint not in envelope: {name}")
+        require(
+            direction in ("positive", "negative"),
+            f"source_band direction must be positive or negative: {direction}",
+        )
+        require(0.0 < low < high, f"source_band {name} {direction}: 0 < lower < upper")
+        side = (
+            envelope.tau_max_positive_nm
+            if direction == "positive"
+            else envelope.tau_max_negative_nm
+        )
+        limit = float(side[envelope.names.index(name)])
+        require(
+            abs(limit - high) <= 1e-9 * max(1.0, high),
+            f"source_band {name} {direction}: the envelope limit must be the upper",
+            (limit, high),
+        )
