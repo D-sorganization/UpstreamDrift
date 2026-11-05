@@ -66,19 +66,28 @@ def test_neutral_address_reads_square_with_both_face_sources(posed) -> None:
     )
     assert via_spec == pytest.approx(via_target, abs=1e-9)
     assert abs(_heading_deg(via_target, frame)) <= SQUARE_TOL_DEG
-    assert via_target[2] > 0.0  # lofted: the face looks up as well as at the target
+    loft_deg = math.degrees(math.asin(via_target[2]))
+    assert 8.0 <= loft_deg <= 20.0  # a driver face looks up as well as at the target
 
 
 def test_guard_detects_a_rolled_face(posed) -> None:
-    """Control: a 60 deg roll about the shaft leaves the +-10 deg band."""
-    spec, _, data, site = posed
-    rot = data.site_xmat[site].reshape(3, 3)
-    shaft = rot[:, 1]
-    normal = rot @ cft.face_axis_in_frame(spec)
+    """Control: a 60 deg roll about the shaft leaves the +-10 deg band.
+
+    The shaft is the club-body grip axis (``ClubFaceSpec.grip_body``); the
+    full-body ``Clubhead`` site is a face frame whose y is not the shaft (#14674).
+    """
+    spec, model, data, site = posed
+    body = int(model.site_bodyid[site])
+    face = club_face_spec_from_spec(spec)
+    shaft = data.xmat[body].reshape(3, 3) @ np.array(face.grip_body)
+    normal = data.xmat[body].reshape(3, 3) @ np.array(face.normal_body)
+    assert abs(float(shaft @ normal)) < 1e-9  # the roll axis is in the face plane
+    assert shaft[2] > 0.5  # toward the grip: up and away from the head
     a = math.radians(60.0)
     rolled = (
         normal * math.cos(a)
         + np.cross(shaft, normal) * math.sin(a)
         + shaft * (shaft @ normal) * (1 - math.cos(a))
     )
+    assert abs(_heading_deg(normal, TargetFrame())) <= SQUARE_TOL_DEG
     assert abs(_heading_deg(rolled, TargetFrame())) > SQUARE_TOL_DEG
