@@ -2754,6 +2754,9 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14662 | Putting studio: the skid-to-roll transition ends where the core simulate_strike skid ends for the ball speed, and the telemetry shows the core launch angle |
+| 2026-11-05 | #14658 | Head-CG offset (opt-in) and toe_down_m shaft metric for the C4 shaft state (Refs #14600) |
+| 2026-11-05 | #14498 | Clarify the fixed-state ZTCF drift and ZVCF control component definitions |
 | 2026-11-05 | #14656 | React/Tauri putting page: export and import the shared core's JSON setup document (and studio files) from the Saved Scenarios panel |
 | 2026-11-05 | #14395 | R9a: commit Drake and Pinocchio MeshCat appearance stills and evidence test (#12688); Regenerate matched_swing_ledger after R9a receipt byte update (#12688) |
 | 2026-11-05 | #14654 | Putting studio: a Metric/Imperial selector; distance, speed and strike labels come from the shared units table generated into core_units.js |
