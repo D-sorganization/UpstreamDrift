@@ -53,7 +53,7 @@ def test_a_missing_joint_is_refused() -> None:
 
 def test_default_ladder_does_not_stop_below_the_firm_125_target() -> None:
     spec = ladder_spec()
-    assert spec.stop == 125.0 and spec.start < spec.stop
+    assert spec.stop_mph == 125.0 and spec.start_mph < spec.stop_mph
 
 
 def test_outputs_must_live_outside_the_repo(tmp_path: Path) -> None:
