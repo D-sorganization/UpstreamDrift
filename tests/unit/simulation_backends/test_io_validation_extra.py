@@ -66,7 +66,7 @@ from src.shared.python.simulation_backends.ztcf_zvcf import (
     evaluate_ztcf_along_trajectory,
     zero_velocity_control_preserved_acceleration,
     ztcf_acceleration,
-    zvcf_acceleration,
+    zero_velocity_zero_torque_acceleration,
 )
 
 pytestmark = pytest.mark.unit
@@ -532,11 +532,11 @@ def test_ztcf_acceleration_rejects_non_finite() -> None:
         ztcf_acceleration(provider, np.array([np.inf, 0.0]), np.zeros(2))
 
 
-def test_zvcf_acceleration_rejects_wrong_length_q() -> None:
+def test_zero_velocity_zero_torque_rejects_wrong_length_q() -> None:
     """A configuration incompatible with provider tangent size is rejected."""
     provider = _GoodProvider()
     with pytest.raises(ValueError):
-        zvcf_acceleration(provider, np.zeros(3))
+        zero_velocity_zero_torque_acceleration(provider, np.zeros(3))
 
 
 def test_control_preserved_acceleration_rejects_non_finite_tau() -> None:

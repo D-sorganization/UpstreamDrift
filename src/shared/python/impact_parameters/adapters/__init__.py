@@ -4,7 +4,12 @@ Engine modules import their physics package lazily inside each function so
 this package is importable without any engine installed.
 """
 
-from .club_face import NATIVE_CLUB_FACE, ClubFaceSpec, rigid_body_series
+from .club_face import (
+    NATIVE_CLUB_FACE,
+    ClubFaceSpec,
+    club_face_spec_from_spec,
+    rigid_body_series,
+)
 from .drake_adapter import clubhead_series_from_drake
 from .impact_time import select_impact_index
 from .mujoco_adapter import clubhead_series_from_mujoco, clubhead_series_from_myosuite
@@ -15,6 +20,7 @@ from .simscape_adapter import clubhead_series_from_simscape
 __all__ = [
     "NATIVE_CLUB_FACE",
     "ClubFaceSpec",
+    "club_face_spec_from_spec",
     "clubhead_series_from_drake",
     "clubhead_series_from_mujoco",
     "clubhead_series_from_myosuite",

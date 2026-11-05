@@ -196,6 +196,17 @@ export interface AimContextSchema {
 }
 
 /**
+ * The pace and line that hole a /simulate-3d putt (the desktop read).
+ */
+export interface AimSolve3DResponse {
+  putter_speed_mps: number;
+  aim_heading_deg: number;
+  break_m: number;
+  holed: boolean;
+  converged: boolean;
+}
+
+/**
  * Caller-supplied lineage and identity assertions.
  */
 export interface AnalysisContextV2 {
@@ -531,6 +542,25 @@ export interface BackingRecordV2 {
   source_row?: number | string | null;
   source_id?: string | null;
   unlinked_reason?: "no_source_reference_declared" | "session_not_linked_to_source_reference" | null;
+}
+
+/**
+ * One named putter head from the shared core (#14461).
+ */
+export interface BalancePresetResponse {
+  key: string;
+  name: string;
+  head_mass_kg: number;
+  moi_kg_m2: number;
+  hosel_toe_m: number;
+  hosel_forward_m: number;
+}
+
+/**
+ * Every core balance preset, for the balance-type selectors.
+ */
+export interface BalancePresetsResponse {
+  presets: BalancePresetResponse[];
 }
 
 /**
@@ -1276,6 +1306,34 @@ export interface ConversionRequest {
   target_sequence: string;
   source_degrees: boolean;
   target_degrees: boolean;
+}
+
+/**
+ * Counter-torque explorer settings (#14469); the core checks the ranges.
+ */
+export interface CounterTorqueRequest {
+  /** In-plane grip preload couple (N m) */
+  preload_nm: number;
+  /** Off-plane preload couple (N m) */
+  off_preload_nm: number;
+  /** Hand-noise scale (0 = none) */
+  noise_scale: number;
+  /** Gust pulse strength (N m) */
+  gust_impulse_nm: number;
+  /** Shaft lie angle (deg) */
+  lie_deg: number;
+  /** Putter head: a key of /putter-presets (#14461) */
+  putter: string;
+  /** Intervals over the stroke */
+  n_points: number;
+}
+
+/**
+ * Stroke series of the core couple model, one list per sample field.
+ */
+export interface CounterTorqueResponse {
+  putter_name: string;
+  samples: Record<string, number[]>;
 }
 
 /**
@@ -2040,6 +2098,8 @@ export interface GreenContourResponse {
   hole_position: number[];
 }
 
+export type GreenPresetName = "flat_practice" | "undulating_championship" | "severe_slopes" | "tiered";
+
 /**
  * Request for green reading between ball and target.
  */
@@ -2057,6 +2117,7 @@ export interface GreenReadingRequest {
   /** Green height [m] */
   green_height: number;
   stimp_rating: number;
+  green?: GreenShapeRequest;
 }
 
 /**
@@ -2069,8 +2130,30 @@ export interface GreenReadingResponse {
   total_break: number;
   recommended_speed: number;
   aim_point: number[];
+  /** Putter heading that plays the read, CCW from +x [deg] (#14465) */
+  aim_heading_deg: number;
+  /** Whether the solved putt drops */
+  holed: boolean;
+  /** Whether the heading solve converged */
+  converged: boolean;
   elevations: number[];
   slopes: number[][];
+}
+
+/**
+ * The green's shape (#14463): a named preset, or slope, tier and bumps. A ``preset`` replaces every other field with that preset's shape.
+ */
+export interface GreenShapeRequest {
+  /** GET /green-presets */
+  preset?: GreenPresetName | null;
+  grade_percent: number;
+  /** Falls toward */
+  aspect_deg: number;
+  bump_height_m: number;
+  bump_length_m: number;
+  tier_height_m: number;
+  tier_width_m: number;
+  seed: number;
 }
 
 /**
@@ -2866,6 +2949,16 @@ export interface OutcomeProxyRowV1 {
 }
 
 /**
+ * Where one run of a ball mode starts, for playback jumps (#14473).
+ */
+export interface PhaseMarkResponse {
+  mode: "airborne" | "slide" | "roll" | "rest";
+  t_s: number;
+  /** Index of the run's first sample */
+  index: number;
+}
+
+/**
  * Response model for motion pipeline API. Wraps MotionMatchingResult with additional metadata.
  */
 export interface PipelineResponse {
@@ -3172,6 +3265,9 @@ export interface Putt3DSimulationRequest {
   coefficient_of_restitution: number;
   hosel_toe_m: number;
   hosel_forward_m: number;
+  /** Named core putter head (see /putter-presets); when set it supplies head mass, MOI and hosel offsets, overriding those fields */
+  balance_type?: string | null;
+  /** Strike offset, toe + / heel - [m] */
   impact_toe_m: number;
   stimp_rating: number;
   grade_percent: number;
@@ -3184,6 +3280,10 @@ export interface Putt3DSimulationRequest {
   random_seed: number;
   hole_x_m: number;
   hole_y_m: number;
+  /** Strike heading from +x, CCW [deg] */
+  aim_heading_deg: number;
+  /** Core green shape (#14464); when set it replaces grade_percent, downhill_aspect_deg and bump_height_m */
+  green?: GreenShapeRequest | null;
 }
 
 /**
@@ -3193,6 +3293,7 @@ export interface Putt3DSimulationResponse {
   /** Roll model that produced this playback (ADR-0045 F1) */
   roll_model: string;
   samples: Putt3DSampleResponse[];
+  phases?: PhaseMarkResponse[];
   collision: Putt3DCollisionResponse;
   surface: Putt3DSurfaceResponse;
   holed: boolean;
@@ -3237,6 +3338,7 @@ export interface PuttSimulationRequest {
   hole_x: number;
   /** Hole Y position [m] */
   hole_y: number;
+  green?: GreenShapeRequest;
   /** Wind speed [m/s] */
   wind_speed: number;
   /** Wind direction X */
@@ -3254,6 +3356,9 @@ export interface PuttSimulationResponse {
   positions: number[][];
   velocities: number[][];
   times: number[];
+  /** Ball mode at each sample (#14473) */
+  modes?: ("airborne" | "slide" | "roll" | "rest")[];
+  phases?: PhaseMarkResponse[];
   holed: boolean;
   final_position: number[];
   total_distance: number;
@@ -3385,6 +3490,7 @@ export interface ScatterAnalysisRequest {
   green_width: number;
   green_height: number;
   stimp_rating: number;
+  green?: GreenShapeRequest;
 }
 
 /**

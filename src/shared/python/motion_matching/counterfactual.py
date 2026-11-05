@@ -27,7 +27,7 @@ from src.shared.python.simulation_backends.constrained_ztcf_zvcf import (
 )
 from src.shared.python.simulation_backends.ztcf_zvcf import (
     drift_and_control_split,
-    zvcf_acceleration,
+    zero_velocity_zero_torque_acceleration,
 )
 
 if TYPE_CHECKING:
@@ -70,19 +70,22 @@ class CounterfactualStrategy(str, Enum):
 class AccelerationDecomposition:
     """Instantaneous decomposition of generalized accelerations.
 
-    ZVCF has one definition in the repository: velocity *and* control set to
-    zero, ``-M(q)^-1 h(q, 0)``, implemented by
-    :func:`simulation_backends.ztcf_zvcf.zvcf_acceleration` (issue #11553).
+    ZVCF has one definition in the repository: the control component
+    ``M(q)^-1 tau`` (torques on, velocity and gravity off), implemented by
+    :func:`simulation_backends.ztcf_zvcf.zvcf_acceleration` (issue #14494).
     :meth:`from_dynamics` builds the components from that module.
 
     Invariants:
     - a_grav: configuration-only acceleration at zero velocity and zero control
-      (gravity plus configuration-dependent passive loads); this *is* the ZVCF.
+      (gravity plus configuration-dependent passive loads); not a ZVCF.
     - a_drift: velocity-dependent drift (Coriolis, centrifugal, passive damping).
     - a_ctrl: generalized acceleration induced by active control torques.
-    - ztcf = a_grav + a_drift (Zero-Torque Counterfactual).
-    - zvcf = a_grav (Zero-Velocity Counterfactual: v = 0 and u = 0).
-    - zero_velocity_control_preserved = a_grav + a_ctrl (not a ZVCF).
+    - ztcf = a_grav + a_drift (Zero-Torque Counterfactual, the drift).
+    - zvcf = a_ctrl (Zero-Velocity Counterfactual, the control).
+    - total = ztcf + zvcf, pointwise only.
+    - zero_velocity_zero_torque = a_grav.
+    - zero_velocity_control_preserved = a_grav + a_ctrl (a diagnostic, never
+      summed with ztcf).
     """
 
     a_grav: NDArray[np.float64]
@@ -128,18 +131,19 @@ class AccelerationDecomposition:
             tau: Applied generalized control ``(n,)``.
 
         Returns:
-            Decomposition whose ``zvcf`` equals ``zvcf_acceleration(provider, q)``
-            and whose ``ztcf`` equals ``ztcf_acceleration(provider, q, v)``.
+            Decomposition whose ``zvcf`` equals
+            ``zvcf_acceleration(provider, q, tau)`` and whose ``ztcf`` equals
+            ``ztcf_acceleration(provider, q, v)``.
 
         Raises:
             ValueError: If the state or control vectors are empty, non-finite or
                 of inconsistent length.
         """
         ztcf, a_ctrl = drift_and_control_split(provider, q, v, tau)
-        a_grav = zvcf_acceleration(provider, q)
+        a_grav = zero_velocity_zero_torque_acceleration(provider, q)
         require(
             a_grav.shape == ztcf.shape,
-            "zvcf and ztcf accelerations must share a shape",
+            "zero-velocity and ztcf accelerations must share a shape",
             value=(a_grav.shape, ztcf.shape),
         )
         return cls(a_grav=a_grav, a_drift=ztcf - a_grav, a_ctrl=a_ctrl)
@@ -153,7 +157,14 @@ class AccelerationDecomposition:
 
     @property
     def zvcf(self) -> NDArray[np.float64]:
-        """Zero-Velocity Counterfactual acceleration (v = 0 and u = 0): a_grav."""
+        """Zero-Velocity Counterfactual acceleration, the control: a_ctrl."""
+        res = self.a_ctrl.copy()
+        res.flags.writeable = False
+        return res
+
+    @property
+    def zero_velocity_zero_torque(self) -> NDArray[np.float64]:
+        """Acceleration with velocity and control both zero: a_grav."""
         res = self.a_grav.copy()
         res.flags.writeable = False
         return res

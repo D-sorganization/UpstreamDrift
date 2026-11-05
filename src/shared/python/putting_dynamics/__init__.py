@@ -55,9 +55,12 @@ from .collision import (
     LOFT_SWEEP_MIN_DEG,
     centre_strike_speed_ratio,
     effective_head_mass,
+    off_centre_speed_retention,
     strike,
     sweep_dynamic_loft,
 )
+from .phases import PhaseMark, phase_marks
+from .putter_presets import BALANCE_PRESETS, BalancePreset, balance_preset
 from .friction import (
     DEFAULT_SLIDING_MU,
     DEFAULT_STATIC_MU,
@@ -71,6 +74,7 @@ from .friction import (
     sliding_mu,
     stimp_to_rolling_mu,
 )
+from .green_spec import GREEN_PRESETS, GreenSpec, green_preset
 from .green_reading import (
     AimSolution,
     LineReading,
@@ -137,10 +141,12 @@ from .utils import (
 )
 
 __all__ = [
+    "BALANCE_PRESETS",
     "DEFAULT_FIXTURES_PATH",
     "DEFAULT_SLIDING_MU",
     "DEFAULT_STATIC_MU",
     "DT_S",
+    "GREEN_PRESETS",
     "GROUND_RESTITUTION",
     "HOLE_RADIUS_M",
     "LOFT_SWEEP_MAX_DEG",
@@ -150,16 +156,19 @@ __all__ = [
     "STIMP_RELEASE_SPEED_MPS",
     "USGA_STIMP_ROLL_MODEL",
     "AimSolution",
+    "BalancePreset",
     "BallState",
     "CollisionReport",
     "ExpectedValue",
     "FixtureSource",
     "FrictionField",
     "FrictionParams",
+    "GreenSpec",
     "GrassType",
     "HeightField",
     "LineReading",
     "Mode",
+    "PhaseMark",
     "PuttResult",
     "PutterState",
     "ReferenceFixture",
@@ -167,6 +176,7 @@ __all__ = [
     "TrajectorySample",
     "TurfCondition",
     "TurfSpec",
+    "balance_preset",
     "ball_kinetic_energy_j",
     "bumpy_friction_field",
     "bumpy_height_field",
@@ -175,12 +185,15 @@ __all__ = [
     "effective_head_mass",
     "energy_balance_error_j",
     "grain_factor",
+    "green_preset",
     "is_static_hold",
     "load_reference_fixtures",
+    "phase_marks",
     "m_to_feet",
     "m_to_yards",
     "measure_stimp_ft",
     "mps_to_mph",
+    "off_centre_speed_retention",
     "ramp_release_speed_mps",
     "read_line",
     "rolling_mu",
