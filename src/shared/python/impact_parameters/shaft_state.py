@@ -210,6 +210,22 @@ def face_loft_deltas(
     return face_b - face_s, loft_b - loft_s
 
 
+def _chain_axis(model: Any, data: Any, dofs: np.ndarray) -> np.ndarray:
+    """Unit shaft direction (grip to tip) of the straightened chain.
+
+    Taken from the first and last chain joint anchors, not from the tip site's
+    frame: the full-body ``Clubhead`` site is a face frame whose y axis is
+    perpendicular to the shaft (#14600), so it cannot name the shaft direction.
+    A single-joint chain falls back to its body's local y axis.
+    """
+    joints = np.asarray(model.dof_jntid)[dofs]
+    span = data.xanchor[joints[-1]] - data.xanchor[joints[0]]
+    length = float(np.linalg.norm(span))
+    if length > 1e-9:
+        return span / length
+    return data.xmat[int(model.jnt_bodyid[joints[0]])].reshape(3, 3)[:, 1].copy()
+
+
 def shaft_state_series(
     model: Any,
     times_s: object,
@@ -278,7 +294,7 @@ def shaft_state_series(
             )
         tip_velocity = jacp @ v[i]
         lead[i], droop[i] = decompose_deflection(deflection[i], tip_velocity, frame)
-        shaft_axis = data.site_xmat[site].reshape(3, 3)[:, 1]  # straight shaft
+        shaft_axis = _chain_axis(model, data, dofs)  # straight shaft
         toe_down[i] = toe_down_component(deflection[i], tip_velocity, shaft_axis, frame)
         tip_vel[i], axes[i] = tip_velocity, shaft_axis
     rate = (
