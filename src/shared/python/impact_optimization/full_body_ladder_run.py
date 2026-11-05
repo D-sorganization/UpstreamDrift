@@ -90,6 +90,41 @@ def require_outside_repo(path: Path) -> None:
     )
 
 
+def _report_text(
+    run: Any,
+    envelope: Any,
+    order: tuple[str, ...],
+    subject: Any,
+    notes: dict[str, str],
+) -> str:  # pragma: no cover - part of the held real run (D24)
+    """Rung table plus every torque binding with its class (D29, D32, D34)."""
+    from src.shared.python.impact_optimization.continuation_report import (
+        render_continuation_report,
+    )
+    from src.shared.python.impact_optimization.full_body_rollout import (
+        envelope_subset,
+    )
+    from src.shared.python.impact_optimization.speed_continuation import (
+        binding_report,
+        source_band_from_capacity,
+    )
+    from src.shared.python.loop_nullspace.capacity import capacity_for
+
+    table = render_continuation_report(
+        run.result,
+        run.kinematic_by_rung,
+        notes,
+        run.held,
+        fidelity_note="rungs searched with projection off, 4 substeps; verdict "
+        "from the default-policy replay",
+    )
+    sub = envelope_subset(envelope, run.controlled)
+    band = source_band_from_capacity(capacity_for(order, subject), sub)
+    lines = binding_report(run.result, sub, notes, band)
+    bullets = "".join(f"- {ln}\n" for ln in lines)
+    return f"{table}\nTorque bindings (class named on each line):\n{bullets}"
+
+
 def _run(
     out: Path, baseline_only: bool = False
 ) -> int:  # pragma: no cover - the real run is held (D24)
@@ -98,9 +133,6 @@ def _run(
 
     from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
         export_full_body_mjcf,
-    )
-    from src.shared.python.impact_optimization.continuation_report import (
-        render_continuation_report,
     )
     from src.shared.python.impact_optimization.full_body_ladder import (
         BaselineBand,
@@ -188,14 +220,7 @@ def _run(
     summary = summarise_ladder(run, checks, notes)
     out.mkdir(parents=True, exist_ok=True)
     write_summary(summary, out / "summary.json")
-    report = render_continuation_report(
-        run.result,
-        run.kinematic_by_rung,
-        notes,
-        run.held,
-        fidelity_note="rungs searched with projection off, 4 substeps; verdict "
-        "from the default-policy replay",
-    )
+    report = _report_text(run, envelope, order, subject, notes)
     (out / "report.md").write_text(report, encoding="utf-8")
     logger.info("%s", summary["claim_top_rung"])
     return 0
