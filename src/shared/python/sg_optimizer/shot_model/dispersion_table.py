@@ -35,6 +35,7 @@ WIND_BINS: dict[str, tuple[float, float]] = {
     "tail_5": (-5.0, 0.0),
     "cross_5": (0.0, 5.0),
 }
+SLOPES = ("flat",)  # slope is a label until the simulator models it
 CONVERGENCE_TOL = 0.02
 SCHEMA = 1
 
@@ -139,7 +140,6 @@ def build_table(
     skills: tuple[str, ...] | None = None,
     lies: tuple[str, ...] = ("fairway",),
     winds: tuple[str, ...] = tuple(WIND_BINS),
-    slopes: tuple[str, ...] = ("flat",),
     n: int = 2000,
     seed: int = 0,
     lie_modifier: LieModifier | None = None,
@@ -158,7 +158,7 @@ def build_table(
                 require(land.shape == (n, 2), f"simulator returned {land.shape}")
                 require(bool(np.isfinite(land).all()), "simulator returned non-finite")
                 mean, sd, corr = _cell_stats(land)
-                for slope in slopes:
+                for slope in SLOPES:
                     cells.append(
                         DispersionCell(
                             skill, skill, lie, wind, slope, mean, sd, corr, n
