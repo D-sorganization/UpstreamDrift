@@ -8,6 +8,7 @@ import type {
 } from "./generated/types";
 import type { DispersionArgs } from "@/utils/dispersion";
 import type { GreenPresets } from "@/utils/greenTypes";
+import type { Comparison, Scenario } from "@/utils/puttingSetup";
 import type {
   StrokesGainedArgs,
   StrokesGainedReport,
@@ -108,4 +109,16 @@ export function runStrokesGained(
   args: StrokesGainedArgs,
 ): Promise<StrokesGainedReport> {
   return postAnalytics<StrokesGainedReport>("strokes-gained", args);
+}
+
+/** A named setup and its dispersion result (core service_setup, #14471). */
+export function runScenario(args: object): Promise<Scenario> {
+  return postAnalytics<Scenario>("scenario", args);
+}
+
+/** Each scenario's make rate and leave against the first. */
+export function compareScenarios(args: {
+  scenarios: Scenario[];
+}): Promise<Comparison> {
+  return postAnalytics<Comparison>("scenario-compare", args);
 }
