@@ -64,6 +64,7 @@ from src.shared.python.ui.units import (
     to_display_speed,
 )
 from src.tools.putting_green_gui._batch_panel import BatchPanel, _Job
+from src.tools.putting_green_gui._scenario_panel import ScenarioPanel
 from src.tools.putting_green_gui._sg_panel import SGPanel
 from src.tools.putting_green_gui._torque_panel import TorquePanel
 from src.tools.putting_green_gui._camera import camera_pose
@@ -136,6 +137,9 @@ class PuttingGreenWidget(QWidget):
     def torque_panel(self) -> TorquePanel:
         return self._torque_panel
 
+    def scenario_panel(self) -> ScenarioPanel:
+        return self._scenario_panel
+
     def set_unit_system(self, system: UnitSystem) -> None:
         """Switch display unit system dynamically and update spinbox suffixes/values."""
         if system == self._unit_system:
@@ -177,6 +181,7 @@ class PuttingGreenWidget(QWidget):
         self._batch_panel.redraw()
         self._sg_panel.redraw()
         self._torque_panel.redraw()
+        self._scenario_panel.redraw()
 
     def _sync_units_combo(self) -> None:
         """Show the active unit system without re-triggering a user choice."""
@@ -301,6 +306,10 @@ class PuttingGreenWidget(QWidget):
         left_layout.addWidget(self._sg_panel)
         self._torque_panel = TorquePanel(lambda: self._unit_system)
         left_layout.addWidget(self._torque_panel)
+        self._scenario_panel = ScenarioPanel(
+            self._batch_panel.current_args, self._apply_setup, lambda: self._unit_system
+        )
+        left_layout.addWidget(self._scenario_panel)
 
         left_layout.addStretch()
         return left
@@ -478,6 +487,19 @@ class PuttingGreenWidget(QWidget):
         self._distance_spin.setValue(
             to_display_distance(dist, self._unit_system, unit="ft")
         )
+
+    def _apply_setup(self, setup: dict[str, float]) -> None:
+        """Put an imported setup's distance, Stimp and grade on the controls.
+
+        The cross slope here always falls right, so the aspect is not kept.
+        """
+        self._distance_spin.setValue(
+            to_display_distance(
+                setup["distance_ft"] * _FT_TO_M, self._unit_system, unit="ft"
+            )
+        )
+        self._stimp_spin.setValue(setup["stimp"])
+        self._slope_spin.setValue(math.degrees(math.atan(setup["grade_pct"] / 100.0)))
 
     def _current_config(self) -> PuttConfig:
         return PuttConfig(
