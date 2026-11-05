@@ -141,10 +141,7 @@ export function CounterTorquePanel() {
       )}
       {run.data && (
         <>
-          {[
-            run.data.putter_name,
-            ...ctReadout(ctSummary(run.data.samples)),
-          ].map((line) => (
+          {ctReadout(ctSummary(run.data.samples)).map((line) => (
             <p key={line} className="font-mono">
               {line}
             </p>
