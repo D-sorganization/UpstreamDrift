@@ -1,18 +1,25 @@
-/** Saved scenarios and their comparison from the shared core (#14472). */
+/** Saved scenarios, comparison and JSON setup files from the shared core (#14472). */
 import { useMutation } from "@tanstack/react-query";
 import { useState, type ButtonHTMLAttributes } from "react";
 
-import { compareScenarios, runScenario } from "@/api/puttingClient";
+import {
+  compareScenarios,
+  exportSetup,
+  importSetup,
+  runScenario,
+} from "@/api/puttingClient";
 import { usePuttingStore } from "@/stores/usePuttingStore";
 import {
   MAX_SCENARIOS,
   SCENARIO_N,
+  applySetup,
   setupArgs,
+  setupFileName,
   type Scenario,
 } from "@/utils/puttingSetup";
-import { formatQuantity } from "@/utils/units";
+import { saveBlob, type BlobDownload } from "@/utils/saveBlob";
+import { FT_TO_M, formatQuantity } from "@/utils/units";
 
-const FT_TO_M = 0.3048;
 const muted = { color: "var(--sidekick-color-text-muted)" };
 const field = {
   backgroundColor: "var(--sidekick-color-input)",
@@ -21,34 +28,65 @@ const field = {
 const percent = (rate: number) => `${(rate * 100).toFixed(1)}%`;
 const signed = (text: string) => (text.startsWith("-") ? text : `+${text}`);
 
+const BUTTON = "rounded border px-3 py-1 disabled:opacity-60";
+
 function Action(props: ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      type="button"
-      className="rounded border px-3 py-1 disabled:opacity-60"
-      style={field}
-      {...props}
-    />
-  );
+  return <button type="button" className={BUTTON} style={field} {...props} />;
 }
 
-export function ScenariosPanel() {
+async function readJson(file: File): Promise<unknown> {
+  try {
+    return JSON.parse(await file.text());
+  } catch {
+    throw new Error(`${file.name} is not a JSON file`);
+  }
+}
+
+export function ScenariosPanel({
+  download = saveBlob,
+}: {
+  download?: BlobDownload;
+}) {
   const parameters = usePuttingStore((state) => state.parameters);
   const noise = usePuttingStore((state) => state.noise);
   const system = usePuttingStore((state) => state.unitSystem);
+  const updateParameters = usePuttingStore((state) => state.updateParameters);
+  const setNoise = usePuttingStore((state) => state.setNoise);
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [name, setName] = useState("Scenario 1");
+  const [studioRows, setStudioRows] = useState(0);
   const compare = useMutation({ mutationFn: compareScenarios });
+  const keep = (next: Scenario[]) => {
+    setScenarios(next);
+    setName(`Scenario ${next.length + 1}`);
+    compare.reset();
+  };
   const save = useMutation({
     mutationFn: runScenario,
-    onSuccess: (scenario) => {
-      const next = [...scenarios, scenario].slice(-MAX_SCENARIOS);
-      setScenarios(next);
-      setName(`Scenario ${next.length + 1}`);
-      compare.reset();
+    onSuccess: (scenario) =>
+      keep([...scenarios, scenario].slice(-MAX_SCENARIOS)),
+  });
+  const exporter = useMutation({
+    mutationFn: exportSetup,
+    onSuccess: (doc) =>
+      download(
+        new Blob([JSON.stringify(doc, null, 2)], { type: "application/json" }),
+        setupFileName(),
+      ),
+  });
+  const importer = useMutation({
+    mutationFn: async (file: File) =>
+      importSetup({ document: await readJson(file) }),
+    onSuccess: (imported) => {
+      const loaded = applySetup(parameters, noise, imported.setup);
+      updateParameters(loaded.parameters);
+      setNoise(loaded.noise);
+      setStudioRows(imported.studio_scenarios);
+      keep(imported.scenarios);
     },
   });
-  const error = save.error ?? compare.error;
+  const error = save.error ?? compare.error ?? exporter.error ?? importer.error;
+  const busy = save.isPending || importer.isPending;
   const rows = compare.data?.rows;
   const leave = (ft: number | null) =>
     ft === null
@@ -70,7 +108,7 @@ export function ScenariosPanel() {
       </label>
       <div className="flex flex-wrap gap-2">
         <Action
-          disabled={save.isPending || !name.trim()}
+          disabled={busy || !name.trim()}
           onClick={() =>
             save.mutate({
               name: name.trim(),
@@ -88,15 +126,44 @@ export function ScenariosPanel() {
         >
           Compare
         </Action>
+        <Action
+          disabled={exporter.isPending}
+          onClick={() =>
+            exporter.mutate({ setup: setupArgs(parameters, noise), scenarios })
+          }
+        >
+          Export JSON
+        </Action>
+        <label className={`${BUTTON} cursor-pointer`} style={field}>
+          Import JSON
+          <input
+            aria-label="Import JSON"
+            type="file"
+            accept=".json,application/json"
+            className="sr-only"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) importer.mutate(file);
+              event.target.value = "";
+            }}
+          />
+        </label>
       </div>
       <p style={muted}>
         Each scenario rolls {SCENARIO_N} putts of the shared core&apos;s skill
-        model on this distance, slope, fall line, stimp and spread.
+        model on this distance, slope, fall line, stimp and spread. Files use
+        the core&apos;s setup schema, so the desktop and studio load them too.
       </p>
-      {save.isPending && <p>Rolling putts in the shared core…</p>}
+      {busy && <p>Rolling putts in the shared core…</p>}
       {error && (
         <p role="alert" style={{ color: "var(--sidekick-color-error)" }}>
           {error.message}
+        </p>
+      )}
+      {studioRows > 0 && (
+        <p style={muted}>
+          {studioRows} studio scenario rows are text only, so only the
+          studio&apos;s green and distance were loaded.
         </p>
       )}
       {scenarios.length > 0 && (
