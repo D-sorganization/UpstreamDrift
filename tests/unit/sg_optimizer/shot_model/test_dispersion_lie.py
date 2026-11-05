@@ -59,3 +59,29 @@ def test_unknown_lie_fails_closed_and_severity_is_exposed() -> None:
     with pytest.raises(ContractViolationError):
         lie_modifier_for_table(seed=5)(_rows(), "swamp")
     assert 0.0 < ROUGH_SEVERITY <= 1.0
+
+
+def test_seed_and_severity_are_recorded_in_the_table_provenance() -> None:
+    from src.shared.python.sg_optimizer.shot_model.dispersion_table import (
+        TableGrid,
+        build_grid_table,
+    )
+    from src.shared.python.sg_optimizer.shot_model.skill_registry import (
+        get_skill_family,
+    )
+
+    def sim(impacts, skill, wind):
+        return np.column_stack([impacts[:, SPEED], impacts[:, FACE]])
+
+    grid = TableGrid(("mid_iron",), ("fairway", "rough"), ("calm",))
+    table = build_grid_table(
+        get_skill_family("tour"),
+        sim,
+        grid,
+        n=16,
+        lie_modifier=lie_modifier_for_table(7),
+    )
+    assert table.provenance["lie_model"] == {
+        "seed": 7,
+        "rough_severity": ROUGH_SEVERITY,
+    }

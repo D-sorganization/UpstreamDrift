@@ -35,12 +35,13 @@ LieModifier = Callable[[NDArray[np.float64], str], NDArray[np.float64]]
 
 
 class GroundModel(Protocol):
-    """Landing states ``(n, k)`` + ``(lie, slope)`` -> rest offsets ``(n, 2)`` yards."""
+    """Landing states ``(n, k)`` + ``(lie, slope, skill)`` -> rest offsets ``(n, 2)`` yards."""
 
-    model_id: str
+    @property
+    def provenance(self) -> dict[str, Any]: ...
 
     def __call__(
-        self, landing: NDArray[np.float64], lie: str, slope: str
+        self, landing: NDArray[np.float64], lie: str, slope: str, skill: str
     ) -> NDArray[np.float64]: ...
 
 
@@ -240,7 +241,7 @@ def build_grid_table(
                     )
                     if ground is not None:
                         require(land.ndim == 2 and len(land) == n, "landing states")
-                        land = np.asarray(ground(land, lie, slope), dtype=float)
+                        land = np.asarray(ground(land, lie, slope, skill), dtype=float)
                     require(land.shape == (n, 2), f"simulator returned {land.shape}")
                     require(
                         bool(np.isfinite(land).all()), "simulator returned non-finite"
@@ -256,7 +257,8 @@ def build_grid_table(
         "family_version": family.provenance.version,
         "seed": seed,
         "n": n,
-        **({"ground_model": ground.model_id} if ground is not None else {}),
+        **(ground.provenance if ground is not None else {}),
+        **getattr(lie_modifier, "provenance", {}),
         **(meta_extra or {}),
     }
     table = DispersionTable(
@@ -286,7 +288,7 @@ def check_convergence(
     imp = _impacts(family.skills[skill].distribution, z)
     full = np.asarray(simulate(imp, skill, WIND_BINS["calm"]), dtype=float)
     if ground is not None:
-        full = np.asarray(ground(full, "fairway", "flat"), dtype=float)
+        full = np.asarray(ground(full, "fairway", "flat", skill), dtype=float)
     half = full[: n // 2]
     (m1, s1, _), (m2, s2, _) = _cell_stats(full), _cell_stats(half)
     scale = np.maximum(np.array(s1), 1e-12)

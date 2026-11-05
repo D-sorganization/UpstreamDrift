@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.sg_optimizer.shot_model import ground_runout as gr
 from src.shared.python.sg_optimizer.shot_model.dispersion_table import (
+    _impacts,
+    standard_normals,
     TableGrid,
     build_grid_table,
 )
@@ -15,6 +19,9 @@ from src.shared.python.sg_optimizer.shot_model.ground_runout import (
     GROUND_MODEL_ID,
     LANDING_COLUMNS,
     SlopeAwareGround,
+)
+from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
+    PipelineLandingSimulator,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_registry import get_skill_family
 from src.shared.python.sg_optimizer.shot_model.slope_wind_bins import (
@@ -31,8 +38,10 @@ def _landing(carry: float = 120.0, speed: float = 35.0, drop: float = 25.0):
     return np.array([[carry, 2.0, speed, 0.0, -drop]])
 
 
-def _rest(slope: str, lie: str = "fairway", **kw) -> np.ndarray:
-    return GROUND(_landing(**kw), lie, slope)
+def _rest(
+    slope: str, lie: str = "fairway", skill: str = "mid_iron", **kw: float
+) -> np.ndarray:
+    return GROUND(_landing(**kw), lie, slope, skill)
 
 
 def test_there_is_one_slope_vocabulary_and_it_is_the_b6_one() -> None:
@@ -54,7 +63,7 @@ def test_ball_above_or_below_feet_bins_do_not_change_runout() -> None:
 
 def test_rest_is_never_behind_carry_and_roll_follows_the_landing_direction() -> None:
     land = np.array([[100.0, 0.0, 0.0, 30.0, -20.0]])  # landing sideways (+y)
-    rest = GROUND(land, "fairway", "flat")
+    rest = GROUND(land, "fairway", "flat", "mid_iron")
     assert rest[0, 0] == pytest.approx(100.0) and rest[0, 1] > 0.0
     assert _rest("up_5", speed=1.0)[0, 0] >= 120.0
 
@@ -69,11 +78,15 @@ def test_steeper_descent_and_rougher_lie_shorten_the_roll() -> None:
 
 def test_missing_landing_inputs_and_unknown_names_fail_closed() -> None:
     with pytest.raises(ContractViolationError):
-        GROUND(np.array([[100.0, 0.0]]), "fairway", "flat")  # no velocity columns
+        GROUND(
+            np.array([[100.0, 0.0]]), "fairway", "flat", "mid_iron"
+        )  # no velocity columns
     with pytest.raises(ContractViolationError):
-        GROUND(_landing(), "swamp", "flat")
+        GROUND(_landing(), "swamp", "flat", "mid_iron")
     with pytest.raises(ContractViolationError):
-        GROUND(_landing(), "fairway", "uphill")
+        GROUND(_landing(), "fairway", "uphill", "mid_iron")
+    with pytest.raises(ContractViolationError):
+        GROUND(_landing(), "fairway", "flat", "putter")
 
 
 def test_every_coefficient_is_a_labelled_assumption() -> None:
@@ -103,12 +116,11 @@ def test_table_cells_report_rest_not_carry_and_slopes_change_them() -> None:
     )
     rest = build_grid_table(family, _stub_sim, grid, ground=GROUND, **kw)
     cell = lambda t, slope: t.lookup("mid_iron", "mid_iron", "fairway", "calm", slope)  # noqa: E731
-    assert cell(rest, "flat").mean[0] > cell(carry, "flat").mean[0]
+    run = {k: cell(rest, k).mean[0] - cell(carry, k).mean[0] for k in grid.slopes}
+    assert run["flat"] > 0.0
     assert (
-        cell(rest, "up_5").mean[0]
-        < cell(rest, "flat").mean[0]
-        < cell(rest, "down_5").mean[0]
-    )
+        run["up_5"] < run["flat"] < run["down_5"]
+    )  # the slope bins alone move the runout
     assert rest.provenance["ground_model"] == GROUND_MODEL_ID
     assert "ground_model" not in carry.provenance  # carry-only hashes are unchanged
 
@@ -120,3 +132,41 @@ def test_ground_without_landing_state_columns_is_rejected() -> None:
         build_grid_table(
             family, lambda i, s, w: _stub_sim(i, s, w)[:, :2], grid, n=8, ground=GROUND
         )
+
+
+def _prov_table(ground):
+    family = get_skill_family("tour")
+    grid = TableGrid(("mid_iron",), ("fairway",), ("calm",))
+    return build_grid_table(family, _stub_sim, grid, n=16, seed=1, ground=ground)
+
+
+def test_changing_a_coefficient_changes_the_table_hash(monkeypatch) -> None:
+    base = _prov_table(GROUND)
+    rec = gr.GROUND_PARAMETERS["roll_gain_yd_per_ms"]
+    monkeypatch.setitem(
+        gr.GROUND_PARAMETERS, "roll_gain_yd_per_ms", replace(rec, value=rec.value + 0.1)
+    )
+    assert _prov_table(GROUND).table_hash != base.table_hash
+    prov = base.provenance
+    assert prov["ground_parameters"]["roll_gain_yd_per_ms"] == rec.value
+    assert "stance" in prov["ground_slope_source"]
+
+
+def test_roll_fraction_of_carry_falls_from_driver_to_wedge_on_the_real_pipeline() -> (
+    None
+):
+    family, sim = get_skill_family("tour"), PipelineLandingSimulator(landing_state=True)
+    z = standard_normals(0, 12)
+    frac = []
+    for skill in (
+        "driver",
+        "fairway_wood",
+        "long_iron",
+        "mid_iron",
+        "short_iron",
+        "wedge",
+    ):
+        land = sim(_impacts(family.skills[skill].distribution, z), skill, (0.0, 0.0))
+        rest = GROUND(land, "fairway", "flat", skill)
+        frac.append(float((rest[:, 0] - land[:, 0]).mean() / land[:, 0].mean()))
+    assert all(a >= b for a, b in zip(frac, frac[1:], strict=False)), frac

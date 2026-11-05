@@ -5,11 +5,15 @@ rest position: a landing state ``(x, y, vx, vy, vz)`` (yards, then m/s in the
 aim frame: x downrange, y left, z up; ``vz < 0`` descending) becomes resting
 offsets.  Ground model ``sg_runout_v1``, per shot:
 
-* **bounce** = ``bounce_gain * h * restitution * sin(descent)``, one hop along the
-  horizontal landing direction (no spin decay);
-* **roll** = ``roll_gain * h * cos(descent) * lie_roll * slope_roll``, same
-  direction, where ``h`` is the horizontal landing speed (m/s), a steeper descent
-  rolls less, ``lie_roll`` is a per-lie multiplier, and ``slope_roll =
+* **bounce** = ``bounce_yd_per_ms * h * sin(descent)``, one hop along the horizontal
+  landing direction (no spin decay; the gain folds in the turf restitution, as only
+  the product is identifiable);
+* **roll** = ``roll_gain * h * cos(descent) * skill_roll * lie_roll * slope_roll``,
+  same direction, where ``h`` is the horizontal landing speed (m/s), a steeper
+  descent rolls less, ``skill_roll`` is a per-skill multiplier standing in for the
+  spin and check the pipeline does not carry (``IMPACT_FIELDS`` has no spin column;
+  it falls from driver to wedge so the roll fraction of carry does too),
+  ``lie_roll`` is a per-lie multiplier, and ``slope_roll =
   max(0.05, 1 - slope_roll_per_tan * tan(stance))`` (uphill shortens the roll,
   downhill lengthens it).
 
@@ -23,6 +27,7 @@ turf, not green physics.  Credit: first drafted in Cursor PR #14642.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -41,10 +46,20 @@ def _p(value: float, why: str) -> ParameterRecord:
 
 
 GROUND_PARAMETERS: dict[str, ParameterRecord] = {
-    "bounce_gain_yd_per_ms": _p(0.12, "yards of hop per m/s of horizontal speed"),
-    "restitution": _p(0.45, "fraction of the hop kept on one turf bounce"),
+    "bounce_yd_per_ms": _p(
+        0.054, "yards of hop per m/s (gain 0.12 x restitution 0.45)"
+    ),
     "roll_gain_yd_per_ms": _p(1.35, "yards of roll per m/s on flat fairway"),
     "slope_roll_per_tan": _p(1.8, "roll lost per unit of uphill grade (tan)"),
+    "skill.driver": _p(1.0, "low spin: releases most"),
+    "skill.fairway_wood": _p(0.75, "a little more spin"),
+    "skill.long_iron": _p(0.58, "iron spin begins to check the ball"),
+    "skill.mid_iron": _p(0.45, "spin checks the ball"),
+    "skill.short_iron": _p(0.3, "high spin"),
+    "skill.wedge": _p(0.18, "high spin, steep descent"),
+    "skill.pitch": _p(0.12, "high spin, steep descent"),
+    "skill.chip": _p(0.12, "low-flight chip keeps some release"),
+    "skill.bunker": _p(0.06, "sand shot stops quickly"),
     "roll.tee": _p(1.0, "firm, short grass"),
     "roll.fairway": _p(1.0, "reference lie"),
     "roll.rough": _p(0.35, "long grass stops the ball"),
@@ -59,8 +74,17 @@ class SlopeAwareGround:
 
     model_id: str = GROUND_MODEL_ID
 
+    @property
+    def provenance(self) -> dict[str, Any]:
+        """Hashed into the table: the id, every coefficient and the slope reading."""
+        return {
+            "ground_model": self.model_id,
+            "ground_parameters": {k: v.value for k, v in GROUND_PARAMETERS.items()},
+            "ground_slope_source": "stance bin (landing grade = lie grade)",
+        }
+
     def __call__(
-        self, landing: NDArray[np.float64], lie: str, slope: str
+        self, landing: NDArray[np.float64], lie: str, slope: str, skill: str
     ) -> NDArray[np.float64]:
         require(
             landing.ndim == 2 and landing.shape[1] == len(LANDING_COLUMNS),
@@ -69,14 +93,18 @@ class SlopeAwareGround:
         )
         require(slope in SLOPE_BINS, f"unknown slope bin; have {tuple(SLOPE_BINS)}")
         require(f"roll.{lie}" in GROUND_PARAMETERS, "unknown lie for runout", lie)
+        require(
+            f"skill.{skill}" in GROUND_PARAMETERS, "unknown skill for runout", skill
+        )
         p = {k: v.value for k, v in GROUND_PARAMETERS.items()}
         vx, vy, vz = landing[:, 2], landing[:, 3], landing[:, 4]
         h = np.hypot(vx, vy)
         descent = np.arctan2(-vz, h).clip(np.radians(5.0), np.radians(85.0))
         grade = np.tan(np.radians(SLOPE_BINS[slope].stance_deg))
         slope_mult = max(_MIN_SLOPE_MULT, 1.0 - p["slope_roll_per_tan"] * grade)
-        bounce = p["bounce_gain_yd_per_ms"] * h * p["restitution"] * np.sin(descent)
-        roll = p["roll_gain_yd_per_ms"] * h * np.cos(descent) * p[f"roll.{lie}"]
+        bounce = p["bounce_yd_per_ms"] * h * np.sin(descent)
+        roll = p["roll_gain_yd_per_ms"] * h * np.cos(descent)
+        roll = roll * p[f"skill.{skill}"] * p[f"roll.{lie}"]
         run = bounce + roll * slope_mult
         unit = np.divide(
             np.column_stack([vx, vy]),
