@@ -42,6 +42,18 @@ def test_local_copy_manifest_binds_the_published_provider_and_bytes() -> None:
     assert manifest["source_ci_workflow_path"] == ".github/workflows/ci-standard.yml"
 
 
+def test_local_copy_uses_the_current_canonical_setup_python_pin() -> None:
+    callee = _workflow(CALLEE)
+    setup = next(
+        step
+        for step in callee["jobs"]["publish-admission-report"]["steps"]
+        if step.get("name") == "Set up isolated standard-library Python"
+    )
+    assert setup["uses"] == (
+        "actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0"
+    )
+
+
 def test_caller_uses_local_callee_with_explicit_pins_and_existing_secrets() -> None:
     caller = _workflow(CALLER)
     manifest = json.loads(PROVENANCE.read_text(encoding="utf-8"))
