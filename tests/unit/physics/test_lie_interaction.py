@@ -12,6 +12,7 @@ from src.shared.python.physics.lie_interaction import (
     LieType,
     effective_face_friction,
     lie_from_code,
+    make_lie_modifier,
     lie_perturbation,
     perturb_impact_rows,
 )
@@ -40,7 +41,12 @@ def test_rough_lowers_spin_and_speed_and_reuses_the_course_rough_model() -> None
     rough = RoughModel(0.5)
     p = lie_perturbation(LieType.ROUGH, severity=0.5)
     assert p.spin_factor == pytest.approx(1.0 - rough.spin_reduction())
-    assert p.speed_factor == pytest.approx(rough.distance_multiplier())
+    # The impact layer owns the strike penalty: the rough speed factor is its own
+    # labelled assumption, never the outcome-layer carry multiplier (no stacking).
+    record = LIE_PARAMETERS["rough.speed_loss_per_severity"]
+    assert record.basis == "assumption"
+    assert p.speed_factor == pytest.approx(1.0 - record.value * 0.5)
+    assert p.speed_factor != pytest.approx(rough.distance_multiplier())
     assert p.flyer_probability == pytest.approx(rough.flyer_probability())
     speed, spin, _ = p.apply(100.0, 2500.0, 0.0)
     assert speed < 100.0 and spin < 2500.0
@@ -134,3 +140,25 @@ def test_impact_rows_pass_through_on_fairway_and_shift_in_rough() -> None:
     other = [i for i in range(len(IMPACT_FIELDS)) if i not in (speed, face)]
     assert np.array_equal(out[:, other], rows[:, other])
     assert np.array_equal(rows[0], [100.0, 1.0, 2.0, -3.0, 4.0, 5.0])  # input intact
+
+
+def test_lie_modifier_has_the_b3_call_shape() -> None:
+    rows = np.tile(np.array([100.0, 1.0, 2.0, -3.0, 4.0, 5.0]), (500, 1))
+    modify = make_lie_modifier(0.8, np.random.default_rng(3))
+    same = modify(rows, "fairway")
+    assert same.shape == rows.shape and np.array_equal(same, rows)
+    shifted = modify(rows, "rough")
+    assert shifted.shape == rows.shape and shifted[:, 0].mean() < 100.0
+    assert np.array_equal(rows[0], [100.0, 1.0, 2.0, -3.0, 4.0, 5.0])
+    assert modify(rows, "sand")[:, 0].mean() < shifted[:, 0].mean()
+    with pytest.raises(ValueError):
+        modify(rows, "water")
+    with pytest.raises(ValueError):
+        modify(rows[:, :3], "rough")
+
+
+def test_identity_perturbation_does_not_consume_the_rng() -> None:
+    """Common random numbers: a fairway cell must not shift the draw stream."""
+    used, fresh = np.random.default_rng(9), np.random.default_rng(9)
+    lie_perturbation(LieType.FAIRWAY).sample(used, 50)
+    assert used.random() == fresh.random()
