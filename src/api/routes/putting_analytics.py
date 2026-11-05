@@ -25,6 +25,10 @@ simulation MCP tools call (:mod:`src.sim_run.putting_tools`):
 * ``POST /tools/putting-analytics/strokes-gained`` -- the player's own
   Bellman expected putts on the caller's green and one putt's strokes gained
   against it (#14467).
+* ``POST /tools/putting-analytics/scenario`` -- a named setup with its
+  dispersion result; ``/scenario-compare`` ranks scenarios against the first;
+  ``/setup-export`` and ``/setup-import`` write and read the versioned setup
+  document (studio exports load too) (#14471).
 * ``GET /tools/putting-analytics/limits`` -- the input bounds and work caps
   the studies enforce, so a client can build its form without guessing.
 
@@ -95,6 +99,15 @@ _SG_BODY = Body(
     description=(
         "As for dispersion, plus distances_ft (the E(d) grid), paces_ft (the "
         "player's candidate paces) and the putt: holed and leave_ft."
+    ),
+)
+
+_SETUP_BODY = Body(
+    ...,
+    description=(
+        "Setup service arguments: name and setup (scenario), scenarios "
+        "(scenario-compare), setup and scenarios (setup-export) or document "
+        "(setup-import)."
     ),
 )
 
@@ -198,6 +211,50 @@ def putting_strokes_gained(
     return _run("sg_study", payload, "service_sg")
 
 
+@router.post("/scenario")
+@limiter.limit(_STUDY_LIMIT)
+@handle_api_errors
+def putting_scenario(
+    request: Request, payload: dict[str, Any] = _SETUP_BODY
+) -> dict[str, Any]:
+    """A named setup and its dispersion result."""
+    del request
+    return _run("scenario_study", payload, "service_setup")
+
+
+@router.post("/scenario-compare")
+@limiter.limit(_STUDY_LIMIT)
+@handle_api_errors
+def putting_scenario_compare(
+    request: Request, payload: dict[str, Any] = _SETUP_BODY
+) -> dict[str, Any]:
+    """Each scenario's make rate and leave against the first."""
+    del request
+    return _run("compare_scenarios", payload, "service_setup")
+
+
+@router.post("/setup-export")
+@limiter.limit(_STUDY_LIMIT)
+@handle_api_errors
+def putting_setup_export(
+    request: Request, payload: dict[str, Any] = _SETUP_BODY
+) -> dict[str, Any]:
+    """The versioned setup document."""
+    del request
+    return _run("export_setup", payload, "service_setup")
+
+
+@router.post("/setup-import")
+@limiter.limit(_STUDY_LIMIT)
+@handle_api_errors
+def putting_setup_import(
+    request: Request, payload: dict[str, Any] = _SETUP_BODY
+) -> dict[str, Any]:
+    """Setup and scenarios from a setup document or studio export."""
+    del request
+    return _run("import_setup", payload, "service_setup")
+
+
 @router.get("/limits")
 @handle_api_errors
 def putting_analytics_limits() -> dict[str, Any]:
@@ -208,6 +265,7 @@ def putting_analytics_limits() -> dict[str, Any]:
         service_curve,
         service_dispersion,
         service_sg,
+        service_setup,
         service_variance,
     )
     from src.shared.python.putting_analytics.optimize import OBJECTIVES
@@ -240,4 +298,6 @@ def putting_analytics_limits() -> dict[str, Any]:
         "max_sg_n": service_sg.MAX_SG_N,
         "max_sg_paces": service_sg.MAX_SG_PACES,
         "default_sg_paces_ft": list(service_sg.DEFAULT_SG_PACES_FT),
+        "setup_schema_version": service_setup.SCHEMA_VERSION,
+        "max_scenarios": service_setup.MAX_SCENARIOS,
     }
