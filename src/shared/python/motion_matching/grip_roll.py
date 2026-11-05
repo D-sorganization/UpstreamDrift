@@ -86,12 +86,12 @@ def reference_axes(shaft: Any, target: TargetFrame) -> tuple[Array, Array]:
         float(np.linalg.norm(e_h)) > _MIN_PROJECTION,
         "the shaft must not be vertical",
     )
-    e_h = e_h / np.linalg.norm(e_h)
+    e_h = np.asarray(e_h / np.linalg.norm(e_h), dtype=np.float64)
     if e_h @ _unit3(target.target_dir, "target_dir") < 0.0:
         e_h = -e_h
     e_v = np.cross(s, e_h)
     ensure(float(e_v @ up) > 0.0, "e_v must point up", e_v)
-    return e_h, e_v
+    return np.asarray(e_h, dtype=np.float64), np.asarray(e_v, dtype=np.float64)
 
 
 def _roll_deg(normal_world: Array, e_h: Array, e_v: Array, shaft: Array) -> float:
@@ -148,10 +148,8 @@ def grip_pose_state_from_spec(
     """
     lead = wrist_follower_dorsal_axis(spec_document, Hand.LEAD)
     trail = wrist_follower_dorsal_axis(spec_document, Hand.TRAIL)
-    require(
-        lead is not None and trail is not None,
-        "the spec has no wrist-follower joints for both hands",
-    )
+    if lead is None or trail is None:
+        raise ValueError("the spec has no wrist-follower joints for both hands")
     return GripPoseState(
         club_rotation=np.asarray(club_rotation, dtype=float),
         lead_dorsal_club=lead,
