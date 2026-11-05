@@ -94,3 +94,21 @@ def test_points_report_face_to_path_gap() -> None:
 def test_invalid_ladder_rejected(kw: dict) -> None:
     with pytest.raises(ContractViolationError):
         _run(_envelope(), **kw)
+
+
+def test_binding_line_carries_the_limit_provenance_note() -> None:
+    """A limit that binds on a prior-derived split must say so (show-trunk)."""
+    env = _envelope(first=BASE[:, 0].max() * 1.001)
+    res = _run(env)
+    note = "prior-derived split, not a measurement"
+    lines = binding_report(res, env, limit_notes={"J0": note})
+    j0 = [ln for ln in lines if "J0" in ln]
+    assert j0 and all(note in ln for ln in j0)
+    assert not any("over-rotation" in ln for ln in lines)
+
+
+def test_unlisted_joint_has_no_provenance_note() -> None:
+    env = _envelope(first=BASE[:, 0].max() * 1.001)
+    res = _run(env)
+    lines = binding_report(res, env, limit_notes={"J1": "x"})
+    assert not any("x)" in ln for ln in lines if "J0" in ln)
