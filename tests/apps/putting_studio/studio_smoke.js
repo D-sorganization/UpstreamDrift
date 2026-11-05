@@ -278,7 +278,7 @@ try {
 }
 
 try {
-  vm.runInContext('globalThis.__smokeSingle = PuttingPhysics.simulateSinglePuttRK4({ vClubMps: 1.6, aimDeg: 0, pathErrDeg: 0, faceErrDeg: 0, strikeMm: 0, moiKgM2: 5000/1.0e7, stimpFt: 10.5, upPct: 0, crossPct: 0, trialSeed: 1, distFt: 10, roughnessMm: 0.35 });', context, { filename: 'smoke:directPhysics' });
+  vm.runInContext('globalThis.__smokeSingle = PuttingPhysics.simulateSinglePuttRK4({ vClubMps: 1.6, aimDeg: 0, pathErrDeg: 0, faceErrDeg: 0, strikeMm: 0, moiKgM2: 5000/1.0e7, stimpFt: 10.5, upPct: 0, crossPct: 0, trialSeed: 1, distFt: 10, roughnessMm: 0.35, skidTable: window.CORE_IMPACT.skid });', context, { filename: 'smoke:directPhysics' });
   const single = context.__smokeSingle;
   console.log(`OK   call: PuttingPhysics.simulateSinglePuttRK4() -> finalX=${single.finalX}, holed=${single.holed}`);
 } catch (err) {
