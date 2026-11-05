@@ -145,10 +145,78 @@ FLAGSHIP_CLUB_ROTATION = Rotation.from_matrix(
 ).as_matrix()  # nearest rotation to the 4-decimal print
 
 
-def test_flagship_driver_grip_reads_near_90_degrees_face_on() -> None:
-    """The owner sees ~90 deg (top of the lead hand, underside of the trail)."""
+EVIDENCE = SPEC.parent / "evidence/grip_roll"
+IK = SPEC.parent / "evidence/ground_support/anthro_driver_drake/ik_trajectory.npz"
+
+
+def test_flagship_driver_grip_is_neutral_15_degrees_face_on() -> None:
+    """After A2 both hands read 15 +- 3 deg at the unchanged club pose."""
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
     state = grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
     lead, trail = address_grip_roll_deg(state)
-    assert lead == pytest.approx(97.9, abs=0.5)
-    assert trail == pytest.approx(108.0, abs=0.5)
+    assert lead == pytest.approx(15.0, abs=3.0)
+    assert trail == pytest.approx(15.0, abs=3.0)
+
+
+def test_before_receipt_pins_the_owner_observed_90_degree_grip() -> None:
+    """Pre-A2 spec (receipt_before.json): top of lead hand, underside of trail."""
+    before = json.loads((EVIDENCE / "receipt_before.json").read_text("utf-8"))
+    assert before["lead_roll_deg"] == pytest.approx(97.9, abs=0.5)
+    assert before["trail_roll_deg"] == pytest.approx(108.0, abs=0.5)
+
+
+@pytest.mark.requires_mujoco
+def test_resolved_address_pose_reads_15_degrees_and_keeps_the_club_pose() -> None:
+    """The committed IK address frame, posed in MuJoCo, reads 15 +- 3 deg face-on."""
+    mujoco = pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+        export_full_body_mjcf,
+    )
+
+    xml, meta = export_full_body_mjcf(SPEC.read_bytes(), visual=True)
+    model = mujoco.MjModel.from_xml_string(xml)
+    data = mujoco.MjData(model)
+    q0 = np.load(IK)["q"][0]
+    for value, name in zip(q0, meta["coordinate_order"], strict=True):
+        joint = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
+        data.qpos[model.jnt_qposadr[joint]] = value
+    mujoco.mj_forward(model, data)
+    site = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, meta["frame_sites"]["LW"])
+    rot = data.site_xmat[site].reshape(3, 3)
+    spec = json.loads(SPEC.read_text(encoding="utf-8"))
+    lead, trail = address_grip_roll_deg(grip_pose_state_from_spec(spec, rot))
+    assert lead == pytest.approx(15.0, abs=3.0)
+    assert trail == pytest.approx(15.0, abs=3.0)
+    # the club is where it was before the grip change (shaft and face unchanged)
+    assert rot == pytest.approx(FLAGSHIP_CLUB_ROTATION, abs=1e-3)
+
+
+def test_neutral_grip_roll_is_alpha_plus_the_native_frame_offset() -> None:
+    """Pins roll == alpha + offset for the HX-canonical grip (psi 40, gamma 0).
+
+    The offset is the native hand frame's own face-on bias, measured here at
+    alpha 0 for each hand rather than hard-coded; alpha then moves the roll
+    one-for-one, and the shipped alpha is the one that reads 15 deg.
+    """
+    from src.shared.python.motion_matching.execution.grip_rotation import (
+        apply_grip_rotation,
+    )
+    from src.shared.python.motion_matching.grip_contract import (
+        HandAngles,
+        hand_to_euler,
+    )
+
+    spec = json.loads(SPEC.read_text(encoding="utf-8"))
+    psi = 40.0
+
+    def roll(alpha: float) -> np.ndarray:
+        triple = list(hand_to_euler(HandAngles(alpha, psi, 0.0)))
+        doc, _ = apply_grip_rotation(spec, {"L": triple, "R": triple})
+        state = grip_pose_state_from_spec(doc, FLAGSHIP_CLUB_ROTATION)
+        return np.array(address_grip_roll_deg(state))
+
+    offset = roll(0.0)
+    assert offset == pytest.approx([25.7, 25.7], abs=0.5)
+    for alpha in (-30.0, -10.73, 20.0):
+        assert roll(alpha) == pytest.approx(alpha + offset, abs=1e-6)
+    assert roll(-10.73) == pytest.approx([15.0, 15.0], abs=0.1)

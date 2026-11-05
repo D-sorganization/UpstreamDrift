@@ -1,0 +1,10 @@
+{
+  "issue": 14550,
+  "tag": "after",
+  "spec": "full_body_spec_anthro_driver.json",
+  "spec_sha256": "2e370eb1a7a40af4e3eb5d658ddda534f2163d5b5cbab6e9d42121a37e6c3899",
+  "convention": "face-on; 0 = vertical, + = strong; lead = back of hand, trail = palm (motion_matching/grip_roll.py)",
+  "lead_roll_deg": 15.0,
+  "trail_roll_deg": 15.0,
+  "png": "face_on_after.png"
+}
