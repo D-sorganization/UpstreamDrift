@@ -20,9 +20,11 @@ ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE = ROOT / "docs/development/full_body_models/evidence/flex_shaft/r11"
 RECEIPT = EVIDENCE / "r11_chain_receipt.json"
 FIGURE = EVIDENCE / "r11_chain_deflection_impact_window.png"
-#: Clubhead deflection of any engine vs the MuJoCo chain, metres (the
-#: parity tests use 1e-6 for accelerations; recorded differences are ~1e-13).
-DEFLECTION_ATOL_M = 1e-6
+#: Evidence-gate bound (not a parity tolerance) on the Clubhead deflection
+#: difference to the MuJoCo chain from the window start to contact, metres.
+#: Recorded differences are at most 1.3e-10 m against deflections of 0.1 m or
+#: more; the replay parity tolerances stay in ``test_flex_shaft_parity.py``.
+DEFLECTION_ATOL_M = 1e-8
 #: The same bundle must have been replayed by every engine.
 REFERENCE_ENGINE = "mujoco"
 

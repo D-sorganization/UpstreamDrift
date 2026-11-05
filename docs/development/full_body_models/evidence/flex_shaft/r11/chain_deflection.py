@@ -98,6 +98,11 @@ def series(bundle_path: Path, engine: str, out: Path) -> None:
     print(out, "max |q - reference| =", float(np.abs(q - reference).max()))  # noqa: T201
 
 
+def _to_impact(run: dict) -> np.ndarray:
+    """Mask of samples up to contact; the chain run diverges just after it (R11)."""
+    return np.asarray(run["time_s"]) <= 0.0
+
+
 def plot(paths: list[Path], out: Path) -> None:
     import matplotlib
 
@@ -107,14 +112,21 @@ def plot(paths: list[Path], out: Path) -> None:
     runs = [dict(np.load(p)) for p in paths]
     fig, axes = plt.subplots(1, 3, figsize=(13, 4), sharex=True)
     labels = ("Club x (mm)", "Club y, along the Shaft (mm)", "Club z (mm)")
-    styles = {"mujoco": "-", "opensim": "--", "myosuite": ":"}
+    styles = {
+        "mujoco": "-",
+        "opensim": "--",
+        "myosuite": ":",
+        "drake": "-.",
+        "pinocchio": (0, (5, 1, 1, 1, 1, 1)),
+    }
     for run in runs:
         engine = str(run["engine"])
         for axis, ax in enumerate(axes):
+            keep = _to_impact(run)
             ax.plot(
-                1e3 * run["time_s"],
-                1e3 * run["deflection_m"][:, axis],
-                styles.get(engine, "-."),
+                1e3 * run["time_s"][keep],
+                1e3 * run["deflection_m"][keep, axis],
+                ls=styles.get(engine, "-."),
                 lw=2,
                 label=engine,
             )
@@ -124,10 +136,48 @@ def plot(paths: list[Path], out: Path) -> None:
         ax.set_ylabel(label)
         ax.grid(alpha=0.3)
     axes[0].legend()
-    fig.suptitle("Clubhead Deflection of the Chain Shaft, Same Input per Engine")
+    fig.suptitle(
+        "Clubhead Deflection of the Chain Shaft, Same Input per Engine (Up to Impact)"
+    )
     fig.tight_layout()
     fig.savefig(out, dpi=150)
     print(out)  # noqa: T201 - evidence script progress
+
+
+def update_receipt(paths: list[Path], receipt: Path) -> None:
+    """Rewrite ``impact_window.engines`` of the receipt from engine series.
+
+    The first series must be MuJoCo (the reference); the others are scored by
+    the largest Clubhead deflection difference to it over the shared window.
+    """
+    runs = {str(r["engine"]): r for r in (dict(np.load(p)) for p in paths)}
+    if "mujoco" not in runs:
+        raise ValueError("a mujoco series is required as the reference")
+    keep = _to_impact(runs["mujoco"])
+    ref = runs["mujoco"]["deflection_m"][keep]
+    engines = {
+        name: {
+            "max_coordinate_error_vs_reference_rad": float(
+                run["max_coordinate_error_rad"]
+            ),
+            "max_deflection_difference_vs_mujoco_m": float(
+                np.abs(run["deflection_m"][keep] - ref).max()
+            ),
+        }
+        for name, run in runs.items()
+    }
+    document = json.loads(receipt.read_text(encoding="utf-8"))
+    window = document["impact_window"]
+    window["engines"] = engines
+    # Headline deflection numbers stay those of the original single-run receipt;
+    # this rewrites only the per-engine comparison.
+    window["engines_run_note"] = (
+        "per-engine entries re-measured on one bundle for all engines, from the "
+        "window start to contact (the chain run diverges just after contact, R11)"
+    )
+    text = json.dumps(document, indent=2) + chr(10)
+    receipt.write_text(text, encoding="utf-8")
+    print(receipt)  # noqa: T201 - evidence script progress
 
 
 def main() -> None:
@@ -140,9 +190,14 @@ def main() -> None:
     many = sub.add_parser("plot")
     many.add_argument("--series", type=Path, nargs="+", required=True)
     many.add_argument("--out", type=Path, required=True)
+    upd = sub.add_parser("receipt")
+    upd.add_argument("--series", type=Path, nargs="+", required=True)
+    upd.add_argument("--receipt", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "series":
         series(args.bundle, args.engine, args.out)
+    elif args.command == "receipt":
+        update_receipt(args.series, args.receipt)
     else:
         plot(args.series, args.out)
 

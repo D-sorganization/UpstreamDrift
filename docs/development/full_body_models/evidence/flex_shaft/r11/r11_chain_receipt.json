@@ -61,25 +61,34 @@
     "max_abs_shaft_q_rad": 0.13375295232091264,
     "engines": {
       "mujoco": {
-        "max_coordinate_error_vs_reference_rad": 1.4160894679093872e-13,
+        "max_coordinate_error_vs_reference_rad": 1.1592794502135462e-09,
         "max_deflection_difference_vs_mujoco_m": 0.0
       },
       "opensim": {
-        "max_coordinate_error_vs_reference_rad": 7.683992331308787e-13,
-        "max_deflection_difference_vs_mujoco_m": 8.450184996178223e-14
+        "max_coordinate_error_vs_reference_rad": 8.842711007872595e-10,
+        "max_deflection_difference_vs_mujoco_m": 8.56259507742152e-15
       },
       "myosuite": {
-        "max_coordinate_error_vs_reference_rad": 1.4160894679093872e-13,
+        "max_coordinate_error_vs_reference_rad": 1.1592794502135462e-09,
         "max_deflection_difference_vs_mujoco_m": 0.0
+      },
+      "drake": {
+        "max_coordinate_error_vs_reference_rad": 5.397333853074393e-06,
+        "max_deflection_difference_vs_mujoco_m": 1.2847490432621456e-10
+      },
+      "pinocchio": {
+        "max_coordinate_error_vs_reference_rad": 5.523656873451799e-06,
+        "max_deflection_difference_vs_mujoco_m": 1.2844736385630995e-10
       }
     },
-    "frame": "club body frame of the straight shaft (shaft along -y)"
+    "frame": "club body frame of the straight shaft (shaft along -y)",
+    "engines_run_note": "per-engine entries re-measured on one bundle for all engines, from the window start to contact (the chain run diverges just after contact, R11)"
   },
   "findings": [
     "MuJoCo chain reference diverges at t = 1.335 s, 10 ms after impact (closure projection SVD fails); a 1.40 s export fails, so the bundle stops at 1.330 s.",
     "Clubhead deflection reaches 0.19 m 60-80 ms before impact (shaft joint angles to 0.13 rad), beyond the chain's small-deflection assumption."
   ],
-  "refusal": "drake replay of the chain bundle raises ShaftChainUnsupportedError (expected)",
+  "refusal": "simscape: still refused with ShaftChainUnsupportedError (no chain port; the GS3DX 'Rigid Shaft' claim is unreconciled in R2025b). Every engine in CHAIN_ENGINES is covered by impact_window.engines.",
   "rigid_baseline_opensim": {
     "full_horizon": {
       "failure": null,
