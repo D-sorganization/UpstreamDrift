@@ -1,13 +1,11 @@
 """``ShotOutcomeModel``: the pluggable seam between a player and where the ball lands.
 
-Mirrors the ``putting_analytics`` ``PuttOutcomeModel`` protocol: the MDP and the
-strategy layer depend on this protocol only, so the tour-baseline Gaussian
-(always available, the quick fallback) and later physics-derived backends
-(dispersion tables, #14567/#14568) are interchangeable by registry name.
+Mirrors ``putting_analytics``' ``PuttOutcomeModel``: the MDP depends on this
+protocol only, so the tour-baseline Gaussian (quick fallback) and later
+physics-derived backends (#14567/#14568) swap by registry name.
 
-Frames and units: yards, in the **aim frame** (``along`` is down the aim line,
-``lateral`` is across it, as in ``TiltedBivariateGaussian``). Rotation into the
-hole frame is the caller's job.
+Units: yards in the **aim frame** (``along`` down the aim line, ``lateral``
+across it); rotating into the hole frame is the caller's job.
 """
 
 from __future__ import annotations

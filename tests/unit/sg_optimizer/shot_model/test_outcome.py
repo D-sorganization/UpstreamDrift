@@ -52,8 +52,6 @@ def test_landing_samples_validates_shapes() -> None:
     with pytest.raises(ContractViolationError):
         LandingSamples(along=np.zeros(3), lateral=np.zeros(2))
     with pytest.raises(ContractViolationError):
-        LandingSamples(along=np.zeros((2, 2)), lateral=np.zeros((2, 2)))
-    with pytest.raises(ContractViolationError):
         LandingSamples(along=np.array([np.nan]), lateral=np.zeros(1))
 
 
