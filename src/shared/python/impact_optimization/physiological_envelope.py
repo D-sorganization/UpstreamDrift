@@ -94,6 +94,10 @@ class PhysiologicalEnvelope:
     assumed_velocity_slots: tuple[str, ...]
     #: Coordinates the spec declares no range for; their ROM is +-inf (never invented).
     unbounded_rom_slots: tuple[str, ...] = ()
+    #: Coordinates whose ROM comes from the spec's ``soft_limits_deg`` (a design
+    #: range, report-only per HRG-D2 #13173), not from a hard ``coordinate_ranges_deg``
+    #: bound and not from a source of its own; a breach is "soft", never a hard miss.
+    soft_rom_slots: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         n = len(self.names)
@@ -131,10 +135,16 @@ class PhysiologicalEnvelope:
         Fails closed (``ValueError``) when a coordinate lacks a torque or
         velocity limit, or a non-root coordinate lacks a declared range and
         the caller did not list it in ``allow_unbounded_rom`` (an unbounded
-        joint would make any "no ROM violation" check vacuous).
+        joint would make any "no ROM violation" check vacuous).  A coordinate
+        with no hard range but a ``soft_limits_deg`` entry takes that range and
+        is listed in ``soft_rom_slots`` (hard ranges win when both exist).
         """
         cap = capacity_for(tuple(spec["coordinate_order"]), subject)
-        ranges = spec["coordinate_ranges_deg"]
+        hard = spec["coordinate_ranges_deg"]
+        soft = {
+            n: v for n, v in spec.get("soft_limits_deg", {}).items() if n not in hard
+        }
+        ranges = {**soft, **hard}  # a hard bound always wins over a soft one
         missing = [
             f"{n}: {kind}"
             for n in cap.actuated_names
@@ -163,6 +173,7 @@ class PhysiologicalEnvelope:
                 [ranges.get(n, (-np.inf, np.inf)) for n in names], dtype=float
             ),
             unbounded_rom_slots=tuple(n for n in names if n not in ranges),
+            soft_rom_slots=tuple(n for n in names if n in soft),
             vel_max_deg_s=np.array(
                 [velocity_limits[n].value_deg_s for n in names], dtype=float
             ),
