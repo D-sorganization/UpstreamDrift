@@ -29,6 +29,7 @@ from src.shared.python.force_overlay.glyphs import (
 from src.shared.python.force_overlay.renderers.matplotlib_glyphs import (
     draw_glyphs_3d,
     draw_legend,
+    legend_lines,
 )
 
 
@@ -198,3 +199,33 @@ def test_draw_legend_omits_clamped_when_none_clamped() -> None:
     texts = [t.get_text() for t in legend_artist.texts]
     assert not any("Clamped" in t for t in texts)
     plt.close(fig)
+
+
+def test_draw_legend_keeps_every_text_line_inside_the_inset(
+    sample_glyphs: GlyphSet,
+) -> None:
+    """Kind swatches must not autoscale the inset so its text falls out of view."""
+    fig = plt.figure(figsize=(6, 6))
+    ax = fig.add_subplot(111, projection="3d")
+
+    inset = draw_legend(ax, sample_glyphs.legend)
+    fig.canvas.draw()
+
+    box = inset.get_window_extent()
+    for text in inset.texts:
+        x, y = inset.transData.transform(text.get_position())
+        assert box.x0 <= x <= box.x1 and box.y0 <= y <= box.y1, text.get_text()
+    plt.close(fig)
+
+
+def test_legend_lines_state_the_drawn_size_of_each_reference() -> None:
+    lines = legend_lines(
+        LegendSpec(
+            force_reference_n=500.0,
+            force_reference_length_m=0.5,
+            torque_reference_nm=20.0,
+            torque_reference_radius_m=0.05,
+        )
+    )
+
+    assert lines == ("Force Ref: 500 N = 0.5 m", "Torque Ref: 20 N·m = 0.05 m radius")

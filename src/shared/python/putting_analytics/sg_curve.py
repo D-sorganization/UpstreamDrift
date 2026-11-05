@@ -69,23 +69,34 @@ def _fill(grid: np.ndarray, fits: list[tuple[float, float] | None]) -> np.ndarra
     return np.stack(columns, axis=1)
 
 
+_REFERENCE_GREEN = PlaneGreen(0.0, 0.0, REFERENCE_STIMP)
+
+
+def skill_model(
+    profile: PuttingSkillProfile, green: PlaneGreen, distance_ft: float
+) -> SkillRollModel:
+    """The skill roll model ``profile`` plays one distance with on ``green``."""
+    return SkillRollModel(
+        green,
+        float(distance_ft),
+        _PRICING_BASELINE,
+        ReadLattice.from_dispersion(profile.read),
+        face_weight=profile.face_weight,
+    )
+
+
 def _outcomes(
-    profile: PuttingSkillProfile, grid: np.ndarray, n: int, seed: int
+    profile: PuttingSkillProfile,
+    grid: np.ndarray,
+    n: int,
+    seed: int,
+    green: PlaneGreen = _REFERENCE_GREEN,
 ) -> Iterator[StrokeOutcomes]:
     """Roll the same ``n`` seeded putts at every distance of ``grid``."""
     execution = sample_execution(profile.stroke, n, seed)
     read = sample_read(profile.read, n, seed)
-    lattice = ReadLattice.from_dispersion(profile.read)
-    green = PlaneGreen(0.0, 0.0, REFERENCE_STIMP)
     for distance in grid:
-        model = SkillRollModel(
-            green,
-            float(distance),
-            _PRICING_BASELINE,
-            lattice,
-            face_weight=profile.face_weight,
-        )
-        yield model(execution, read)
+        yield skill_model(profile, green, distance)(execution, read)
 
 
 def simulated_make_rates(
@@ -93,11 +104,16 @@ def simulated_make_rates(
     distances_ft: Sequence[float],
     n: int = 2000,
     seed: int = 0,
+    green: PlaneGreen = _REFERENCE_GREEN,
 ) -> tuple[float, ...]:
-    """Make rate of ``profile`` at each distance; no leave fit, so no miss floor."""
+    """Make rate of ``profile`` at each distance; no leave fit, so no miss floor.
+
+    ``green`` defaults to the flat reference green the curve is built on.
+    """
     require(n >= 1, "n must be at least 1", n)
     grid = validated_grid(distances_ft)
-    return tuple(float(out.holed.mean()) for out in _outcomes(profile, grid, n, seed))
+    outcomes = _outcomes(profile, grid, n, seed, green)
+    return tuple(float(out.holed.mean()) for out in outcomes)
 
 
 def simulate_putting_curve(

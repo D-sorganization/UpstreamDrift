@@ -1,0 +1,41 @@
+{
+  "_source": "Generated from src/shared/python/ui/units.py (issue #14458); tests/unit/shared_python/test_units_ui_golden.py keeps it in sync.",
+  "to_display_distance_ft": [
+    { "system": "metric", "si": 0.5, "display": 0.5 },
+    { "system": "metric", "si": 1.0, "display": 1.0 },
+    { "system": "metric", "si": 3.0, "display": 3.0 },
+    { "system": "metric", "si": 9.144, "display": 9.144 },
+    { "system": "metric", "si": 13.716, "display": 13.716 },
+    { "system": "imperial", "si": 0.5, "display": 1.6404199475065615 },
+    { "system": "imperial", "si": 1.0, "display": 3.280839895013123 },
+    { "system": "imperial", "si": 3.0, "display": 9.84251968503937 },
+    { "system": "imperial", "si": 9.144, "display": 30.0 },
+    { "system": "imperial", "si": 13.716, "display": 44.99999999999999 }
+  ],
+  "from_display_distance_ft": [
+    { "system": "metric", "display": 1.0, "si": 1.0 },
+    { "system": "metric", "display": 10.0, "si": 10.0 },
+    { "system": "metric", "display": 30.0, "si": 30.0 },
+    { "system": "imperial", "display": 1.0, "si": 0.3048 },
+    { "system": "imperial", "display": 10.0, "si": 3.048 },
+    { "system": "imperial", "display": 30.0, "si": 9.144 }
+  ],
+  "to_display_speed": [
+    { "system": "metric", "si": 0.3, "display": 0.3 },
+    { "system": "metric", "si": 1.8, "display": 1.8 },
+    { "system": "metric", "si": 4.0, "display": 4.0 },
+    { "system": "imperial", "si": 0.3, "display": 0.6710808876163207 },
+    { "system": "imperial", "si": 1.8, "display": 4.026485325697925 },
+    { "system": "imperial", "si": 4.0, "display": 8.94774516821761 }
+  ],
+  "from_display_speed": [
+    { "system": "metric", "display": 1.0, "si": 1.0 },
+    { "system": "metric", "display": 4.0, "si": 4.0 },
+    { "system": "metric", "display": 9.0, "si": 9.0 },
+    { "system": "imperial", "display": 1.0, "si": 0.44704 },
+    { "system": "imperial", "display": 4.0, "si": 1.78816 },
+    { "system": "imperial", "display": 9.0, "si": 4.02336 }
+  ],
+  "distance_suffix_ft": { "metric": " m", "imperial": " ft" },
+  "speed_suffix": { "metric": " m/s", "imperial": " mph" }
+}

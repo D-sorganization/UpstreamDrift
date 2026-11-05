@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/run-manifest-v1.json",
+  "$defs": {
+    "EngineIdentity": {
+      "additionalProperties": false,
+      "description": "Physics engine name and exact version.",
+      "properties": {
+        "name": {
+          "description": "Engine name",
+          "pattern": "\\S",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "description": "Engine version",
+          "pattern": "\\S",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": ["name", "version"],
+      "title": "EngineIdentity",
+      "type": "object"
+    },
+    "InputDataIdentity": {
+      "additionalProperties": false,
+      "description": "Identity of the run's input data. Holds a digest, never the data itself.",
+      "properties": {
+        "sha256": {
+          "description": "SHA-256 of the input data",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional non-sensitive label",
+          "title": "Label"
+        }
+      },
+      "required": ["sha256"],
+      "title": "InputDataIdentity",
+      "type": "object"
+    },
+    "ModelIdentity": {
+      "additionalProperties": false,
+      "description": "The model a run used, pinned to an immutable revision.",
+      "properties": {
+        "model_id": {
+          "description": "Model identifier",
+          "pattern": "\\S",
+          "title": "Model Id",
+          "type": "string"
+        },
+        "revision": {
+          "description": "40-char git commit SHA or 'sha256:<64 hex>' model-file hash",
+          "pattern": "^(?:[0-9a-f]{40}|sha256:[0-9a-f]{64})$",
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": ["model_id", "revision"],
+      "title": "ModelIdentity",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Provenance for one simulation run (Issue #14431 / Epic #14436).",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "description": "Manifest version",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "model": {
+      "$ref": "#/$defs/ModelIdentity"
+    },
+    "parameters": {
+      "additionalProperties": true,
+      "description": "Run parameters",
+      "title": "Parameters",
+      "type": "object"
+    },
+    "input_data": {
+      "$ref": "#/$defs/InputDataIdentity"
+    },
+    "seed": {
+      "description": "Random seed",
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "engine": {
+      "$ref": "#/$defs/EngineIdentity"
+    },
+    "ud_commit": {
+      "description": "40-char UpstreamDrift git commit SHA",
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Ud Commit",
+      "type": "string"
+    },
+    "created_at": {
+      "description": "ISO 8601 creation time with a UTC offset",
+      "format": "date-time",
+      "pattern": "(?:Z|[+-]\\d{2}:\\d{2})$",
+      "title": "Created At",
+      "type": "string"
+    },
+    "outputs": {
+      "additionalProperties": false,
+      "description": "SHA-256 of each output artifact, keyed by its path relative to the manifest (Issue #14432)",
+      "patternProperties": {
+        "^[A-Za-z0-9_][A-Za-z0-9_.-]*(?:/[A-Za-z0-9_][A-Za-z0-9_.-]*)*$": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "title": "Outputs",
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "model",
+    "parameters",
+    "input_data",
+    "seed",
+    "engine",
+    "ud_commit",
+    "created_at"
+  ],
+  "title": "RunManifest",
+  "type": "object"
+}

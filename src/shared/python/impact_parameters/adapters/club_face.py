@@ -18,7 +18,9 @@ point, no per-engine change).
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -164,3 +166,49 @@ def check_trajectory(
     if not math.isfinite(float(t[0])):
         raise ValueError("times_s must be finite")
     return t, qa, va
+
+
+def club_face_spec_from_spec(
+    spec: Mapping[str, Any], frame_name: str = "Clubhead"
+) -> ClubFaceSpec:
+    """Face spec in the *compiled* body frame of a full-body specification.
+
+    Takes the rendered face centre and normal (loft and address roll included)
+    from the repository's one source, ``club_face_target.face_centre_in_frame``
+    / ``face_axis_in_frame``, and maps them through the head frame placement and
+    ``inv(child_to_follower)`` into the body frame MuJoCo and the other exports
+    use.  The toe axis follows the native convention ``high = toe x normal``
+    pointing toward the grip.
+
+    Raises:
+        ValueError: unknown frame, no club, or the body has no parent joint.
+    """
+    from src.shared.python.motion_matching import club_face_target as cft
+
+    frame = next((f for f in spec["frames"] if f["name"] == frame_name), None)
+    if frame is None:
+        raise ValueError(f"specification has no frame named {frame_name!r}")
+    joint = next((j for j in spec["joints"] if j["child"] == frame["body"]), None)
+    if joint is None:
+        raise ValueError(f"body {frame['body']!r} has no parent joint")
+    place = np.asarray(frame["placement"], dtype=float)
+    to_body = np.linalg.inv(np.asarray(joint["child_to_follower"], dtype=float))
+    rot = to_body[:3, :3] @ place[:3, :3]
+    centre = (
+        to_body @ place @ np.append(cft.face_centre_in_frame(spec, frame_name), 1.0)
+    )
+    normal = rot @ cft.face_axis_in_frame(spec, frame_name)
+    grip = to_body[:3, :3] @ NATIVE_CLUB_FACE.axes()[2]
+    grip = grip - float(grip @ normal) * normal
+    grip /= np.linalg.norm(grip)
+    toe = np.cross(normal, grip)
+
+    def vec3(v: Any) -> tuple[float, float, float]:
+        return (float(v[0]), float(v[1]), float(v[2]))
+
+    return ClubFaceSpec(
+        face_center_body_m=vec3(centre),
+        normal_body=vec3(normal),
+        toe_body=vec3(toe),
+        grip_body=vec3(grip),
+    )

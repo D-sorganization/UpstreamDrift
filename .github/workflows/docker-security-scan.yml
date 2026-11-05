@@ -7,6 +7,7 @@ on:
       - "Dockerfile"
       - "requirements*.txt"
       - "pyproject.toml"
+      - "scripts/ci/install_trivy.sh"
       - ".github/workflows/docker-security-scan.yml"
   pull_request:
     branches: [main]
@@ -14,6 +15,7 @@ on:
       - "Dockerfile"
       - "requirements*.txt"
       - "pyproject.toml"
+      - "scripts/ci/install_trivy.sh"
       - ".github/workflows/docker-security-scan.yml"
   schedule:
     # Weekly scan on Sunday at midnight
@@ -41,6 +43,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Install checksum-verified Trivy
+        shell: bash
+        run: bash scripts/ci/install_trivy.sh
 
       - name: Fetch pinned Tools packages
         # The primary Dockerfile now COPYs vendor/ud-tools (UD #9406).
@@ -76,6 +82,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
+          skip-setup-trivy: "true"
           image-ref: "upstreamdrift:ci"
           format: "sarif"
           output: "trivy-results.sarif"
@@ -94,6 +101,7 @@ jobs:
       - name: Run Trivy (table output for PR comments)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
+          skip-setup-trivy: "true"
           image-ref: "upstreamdrift:ci"
           format: "table"
           severity: "CRITICAL,HIGH"

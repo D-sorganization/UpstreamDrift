@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Tauri installers (npm run tauri:artifact)
+artifacts
