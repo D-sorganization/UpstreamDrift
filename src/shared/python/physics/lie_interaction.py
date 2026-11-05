@@ -8,6 +8,14 @@ explicit uncertainty and a flyer mixture.  It is a plug-in in the style of
 :func:`lie_perturbation` and apply it to their own impact conditions, so no
 contact solver is forked.  Fairway is the exact identity.
 
+**Layer ownership.**  This module owns the *impact-layer* strike penalty (what
+leaves the face).  ``baseline_model.lie_modifiers`` is the *outcome-layer*
+carry multiplier of the baseline shot model.  Use one or the other for a given
+lie, never both: stacking them would apply the penalty twice.  The rough speed
+loss here is therefore its own assumption, not ``RoughModel.distance_multiplier``
+(a carry multiplier); only the spin cut and flyer chance reuse ``RoughModel``.
+The modifier is club-independent.
+
 **Every number here is an assumption.**  Rough values are the existing
 course-conditions estimates (``sg_optimizer.course.conditions.RoughModel``,
 documented as ESTIMATE in ``docs/sg_optimizer/data_sources.md``); the other
@@ -21,6 +29,7 @@ face and ball (for example Penner, "The physics of golf", Rep. Prog. Phys.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Callable
 from enum import Enum
 
 import numpy as np
@@ -71,6 +80,13 @@ LIE_PARAMETERS: dict[str, ParameterRecord] = {
     ),
     "hardpan.spin_factor": ParameterRecord(
         0.95, "assumption", _ASSUMED, "firm, clean contact keeps most spin"
+    ),
+    "rough.speed_loss_per_severity": ParameterRecord(
+        0.06,
+        "assumption",
+        _ASSUMED,
+        "clubhead speed lost at full severity; carry falls about 1.7x faster "
+        "(carry ~ v^1.7), so about 10% carry; not RoughModel.distance_multiplier",
     ),
     "rough.face_twist_deg_per_severity": ParameterRecord(
         -3.0,
@@ -152,6 +168,10 @@ class ImpactPerturbation:
     def sample(self, rng: np.random.Generator, n: int) -> PerturbationSamples:
         """Draw ``n`` shots; an identity perturbation returns exact ones/zeros."""
         require(n >= 1, "n must be >= 1", n)
+        if self.is_identity():  # draws nothing: keeps common random numbers aligned
+            return PerturbationSamples(
+                np.ones(n), np.ones(n), np.zeros(n), np.zeros(n, dtype=bool)
+            )
         speed = self.speed_factor + self.speed_sd * rng.standard_normal(n)
         spin = self.spin_factor + self.spin_sd * rng.standard_normal(n)
         twist = self.face_twist_deg + self.twist_sd_deg * rng.standard_normal(n)
@@ -173,7 +193,7 @@ def lie_perturbation(lie: LieType, severity: float = 0.0) -> ImpactPerturbation:
     if lie is LieType.ROUGH:
         rough = RoughModel(severity)
         return ImpactPerturbation(
-            speed_factor=rough.distance_multiplier(),
+            speed_factor=1.0 - _v("rough.speed_loss_per_severity") * severity,
             spin_factor=1.0 - rough.spin_reduction(),
             face_twist_deg=_v("rough.face_twist_deg_per_severity") * severity,
             speed_sd=_v("rough.speed_sd_per_severity") * severity,
@@ -211,6 +231,7 @@ _CODE_TO_LIE: dict[int, LieType] = {
     LIE_CODES["rough"]: LieType.ROUGH,
     LIE_CODES["sand"]: LieType.BUNKER,
 }
+_NAME_TO_CODE = {n: LIE_CODES[n] for n in ("tee", "fairway", "rough", "sand")}
 _SPEED = IMPACT_FIELDS.index("clubhead_speed_mph")
 _FACE = IMPACT_FIELDS.index("face_angle_deg")
 
@@ -243,3 +264,25 @@ def perturb_impact_rows(
     out[:, _FACE] += draws.face_twist_deg
     ensure(out.shape == rows.shape, "row shape is preserved")
     return out, draws.spin_factor
+
+
+def make_lie_modifier(
+    severity: float, rng: np.random.Generator
+) -> Callable[[Array, str], Array]:
+    """A B3-shaped ``LieModifier``: ``(impact rows, lie name) -> impact rows``.
+
+    ``lie`` is a :class:`LieType` value or the course names ``tee``, ``fairway``,
+    ``rough`` and ``sand``; anything else is rejected.  ``severity`` applies to
+    rough.  Limits: the B3 path carries clubhead speed and face angle only;
+    ``IMPACT_FIELDS`` has no spin column, so the spin cut and flyer spin are not
+    carried until B3 adds a spin channel (use :func:`perturb_impact_rows`, which
+    returns the per-shot spin factor).
+    """
+    require(0.0 <= severity <= 1.0, "severity must lie in [0, 1]", severity)
+    by_name = {name: _CODE_TO_LIE[code] for name, code in _NAME_TO_CODE.items()}
+
+    def modify(rows: Array, lie: str) -> Array:
+        kind = by_name.get(lie) or LieType(lie)
+        return perturb_impact_rows(rows, lie_perturbation(kind, severity), rng)[0]
+
+    return modify
