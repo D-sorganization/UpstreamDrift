@@ -212,13 +212,12 @@ def build_grid_table(
     lie_modifier: LieModifier | None = None,
     slope_modifier: SlopeModifier | None = None,
     ground: GroundModel | None = None,
-    meta_extra: dict[str, Any] | None = None,
 ) -> DispersionTable:
     """Simulate every grid cell with shared (CRN) draws; fail closed on bad inputs.
 
     Non-flat slope bins need ``slope_modifier`` (``slope_wind_bins.make_slope_modifier``).
     With ``ground`` the simulator must return landing states (``ground_runout``
-    columns), and cells hold rest positions; ``meta_extra`` joins the hashed provenance.
+    columns), and cells hold rest positions; its ``provenance`` joins the hashed meta.
     """
     names = grid.skills if grid.skills is not None else tuple(family.skills)
     require(set(names) <= set(family.skills), f"skills not in {family.name!r}")
@@ -261,7 +260,6 @@ def build_grid_table(
     for part in (
         ground.provenance if ground is not None else {},
         getattr(lie_modifier, "provenance", {}),
-        meta_extra or {},
     ):
         require(
             not (set(part) & set(meta)),

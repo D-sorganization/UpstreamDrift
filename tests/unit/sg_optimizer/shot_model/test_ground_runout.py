@@ -188,19 +188,14 @@ def test_green_side_skills_keep_carry_and_the_list_is_hashed() -> None:
     assert _prov_table(GROUND).provenance["ground_carry_only_skills"]
 
 
-def test_meta_extra_cannot_override_provenance_keys() -> None:
+def test_ground_provenance_cannot_override_table_keys() -> None:
+    class _Clash:
+        provenance = {"seed": 99}
+
+        def __call__(self, landing, lie, slope, skill):
+            return GROUND(landing, lie, slope, skill)
+
     family = get_skill_family("tour")
     grid = TableGrid(("mid_iron",), ("fairway",), ("calm",))
     with pytest.raises(ContractViolationError):
-        build_grid_table(
-            family, _stub_sim, grid, n=8, ground=GROUND, meta_extra={"seed": 99}
-        )
-    with pytest.raises(ContractViolationError):
-        build_grid_table(
-            family,
-            _stub_sim,
-            grid,
-            n=8,
-            ground=GROUND,
-            meta_extra={"ground_model": "x"},
-        )
+        build_grid_table(family, _stub_sim, grid, n=8, ground=_Clash())
