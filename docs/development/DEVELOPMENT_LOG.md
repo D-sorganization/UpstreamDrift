@@ -761,10 +761,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14647
 - **Branch:** merged via #14662
-- **PR:** #14662
+- **PR:** #14662, #14667
 - **Paths:** see #14662
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`cbb4c686`; collated from changes/14647-studio-core-skid.md)
+- **Last verified:** 2026-11-05 (`33a3f33f`; collated from changes/14647-studio-heel-toe-strike.md)
 - **Summary:** Putting studio: the skid-to-roll transition ends where the core simulate_strike skid ends for the ball speed, and the telemetry shows the core launch angle
 - **Next step:** Shipped in PR #14662.
 
