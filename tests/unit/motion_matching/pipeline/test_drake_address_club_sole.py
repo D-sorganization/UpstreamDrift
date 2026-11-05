@@ -21,7 +21,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     CLUB_SOLE_GROUND_TOLERANCE_M,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 
 ROOT = Path(__file__).resolve().parents[4]
 EVIDENCE = ROOT / "docs/development/full_body_models/evidence/ground_support"
