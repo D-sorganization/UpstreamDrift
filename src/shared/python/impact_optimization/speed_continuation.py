@@ -166,6 +166,7 @@ def binding_report(
     result: ContinuationResult,
     envelope: PhysiologicalEnvelope,
     limit_notes: dict[str, str] | None = None,
+    source_band: dict[str, tuple[float, float]] | None = None,
 ) -> list[str]:
     """One evidence line per binding joint per rung (blocking rungs flagged).
 
@@ -174,11 +175,16 @@ def binding_report(
     are NOT reported here; they need the rollout joint angles and rates and
     are reported by ``kinematic_binding.full_binding_report`` (SHOW-C3c).
 
+    ``source_band`` maps a joint to its (lower, upper) cited torque values when
+    sources conflict (D34); a blocking peak between them is "source-sensitive",
+    distinct from "assumption-limited" (D32) and "probable miscalibration".
+
     ``limit_notes`` maps a joint name to the provenance of its limit (for
     example "prior-derived estimate, not a measurement"), appended to that joint's
     lines so a binding limit is never read as a measured over-rotation.
     """
     notes = limit_notes or {}
+    band = source_band or {}
     lines: list[str] = []
     for p in result.points:
         sol = p.solution
@@ -195,6 +201,13 @@ def binding_report(
             )
             if p.feasible:
                 line = head + "; at the limit but feasible"
+            elif name in band and band[name][0] < peak[i] <= band[name][1]:
+                low, high = band[name]
+                line = (
+                    head + f"; BLOCKS this speed. source-sensitive: the peak lies "
+                    f"between the lower ({low:.1f} N m) and upper ({high:.1f} N m) "
+                    "cited values, so the verdict depends on which source applies"
+                )
             elif name in envelope.assumed_torque_slots:
                 line = (
                     head + "; BLOCKS this speed. assumption-limited: this torque "
