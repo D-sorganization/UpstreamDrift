@@ -742,6 +742,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14452 · Putting Parity Matrix: Units.React and Units.Tauri Move to Present, Citing the React Units Selector That #14458 Landed (PR #14489); No Putting Gaps Remain in the Matrix (Part Of #14452)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14452
+- **Branch:** merged via #14712
+- **PR:** #14712
+- **Paths:** see #14712
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`5eee5589`; collated from changes/14452-units-matrix-cell.md)
+- **Summary:** putting parity matrix: units.react and units.tauri move to present, citing the React units selector that #14458 landed (PR #14489); no putting gaps remain in the matrix (Part of #14452)
+- **Next step:** Shipped in PR #14712.
+
 ### DL-#14702 · Putting_Dynamics: The Post-Impact Hop Reflects the Vertical Speed Relative to the Green, so a Downhill Putt Settles in Under 0.1 s Instead of Skipping for About 5 s; the Studio Long-Downhill Read Is Back in Core Parity
 
 - **State:** shipped
@@ -1372,10 +1385,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14557
 - **Branch:** merged via #14580
-- **PR:** #14580
+- **PR:** #14580, #14707
 - **Paths:** see #14580
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`a37a7c5a`; collated from changes/14557-show-c1-impacttarget-trustregion-and-phy.md)
+- **Last verified:** 2026-11-05 (`3e6b8f9b`; collated from changes/14557-source-skilled-male-peak-angular-velocit.md)
 - **Summary:** SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope contracts (impact_optimization package; face:path 10:1; NSX-04 torque limits; cited velocity YAML)
 - **Next step:** Shipped in PR #14580.
 
