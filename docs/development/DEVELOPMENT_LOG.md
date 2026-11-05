@@ -742,6 +742,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#12688 · R9a: Commit Drake and Pinocchio MeshCat Appearance Stills and Evidence Test (#12688)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12688
+- **Branch:** merged via #14395
+- **PR:** #14395
+- **Paths:** see #14395
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ec12acb9`; collated from changes/12688-regenerate-matched-swing-ledger-after-r9.md)
+- **Summary:** R9a: commit Drake and Pinocchio MeshCat appearance stills and evidence test (#12688)
+- **Next step:** Shipped in PR #14395.
+
 ### DL-#14646 · Putting Studio: A Metric/Imperial Selector; Distance, Speed and Strike Labels Come From the Shared Units Table Generated Into Core_Units.Js
 
 - **State:** shipped
@@ -787,10 +800,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14472
 - **Branch:** merged via #14637
-- **PR:** #14637
+- **PR:** #14637, #14656
 - **Paths:** see #14637
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`8f3a0df5`; collated from changes/14472-react-tauri-putting-page-saved-scenarios.md)
+- **Last verified:** 2026-11-05 (`b2c6da6c`; collated from changes/14472-react-tauri-putting-page-export-and-impo.md)
 - **Summary:** React/Tauri putting page: saved scenarios and comparison over the shared core, golden-pinned (part 1 of #14472)
 - **Next step:** Shipped in PR #14637.
 

@@ -2754,6 +2754,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14656 | React/Tauri putting page: export and import the shared core's JSON setup document (and studio files) from the Saved Scenarios panel |
+| 2026-11-05 | #14395 | R9a: commit Drake and Pinocchio MeshCat appearance stills and evidence test (#12688); Regenerate matched_swing_ledger after R9a receipt byte update (#12688) |
 | 2026-11-05 | #14654 | Putting studio: a Metric/Imperial selector; distance, speed and strike labels come from the shared units table generated into core_units.js |
 | 2026-11-05 | #14653 | Add continuation_report: markdown table of a 100-125 mph run with torque, ROM and velocity bindings and limit provenance |
 | 2026-11-05 | #14651 | Replace wall-clock speed-up ratio in test_topology_contact_batched with a deterministic per-pair kernel call count |
