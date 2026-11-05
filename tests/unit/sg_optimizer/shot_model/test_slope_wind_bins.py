@@ -9,6 +9,8 @@ from src.shared.python.contracts import ContractViolationError
 from src.shared.python.sg_optimizer.shot_model.dispersion_table import (
     DEFAULT_WINDS,
     WIND_BINS,
+    TableGrid,
+    build_grid_table,
     build_table,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_family import IMPACT_FIELDS
@@ -84,17 +86,29 @@ def _linear_sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
     )
 
 
+def test_slope_bins_without_a_modifier_are_rejected() -> None:
+    with pytest.raises(ContractViolationError):
+        build_grid_table(
+            get_skill_family("tour"),
+            _linear_sim,
+            TableGrid(skills=("driver",), slopes=("up_5",)),
+            n=50,
+        )
+
+
 def test_tables_carry_wind_and_slope_bins() -> None:
     family = get_skill_family("tour")
-    table = build_table(
+    table = build_grid_table(
         family,
         _linear_sim,
-        skills=("driver",),
-        winds=("calm", "tail_15", "cross_15"),
-        slopes=("flat", "up_5", "above_5"),
-        slope_modifier=make_slope_modifier,
+        TableGrid(
+            skills=("driver",),
+            winds=("calm", "tail_15", "cross_15"),
+            slopes=("flat", "up_5", "above_5"),
+        ),
         n=400,
         seed=1,
+        slope_modifier=make_slope_modifier,
     )
     assert len(table.cells) == 1 * 3 * 3
     cell = {(c.wind, c.slope): c for c in table.cells}
