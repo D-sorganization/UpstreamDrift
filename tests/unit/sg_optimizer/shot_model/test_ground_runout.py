@@ -148,7 +148,9 @@ def test_changing_a_coefficient_changes_the_table_hash(monkeypatch) -> None:
     monkeypatch.setitem(
         gr.GROUND_PARAMETERS, "roll.sand", replace(rec, value=rec.value + 0.1)
     )
-    assert _prov_table(GROUND).table_hash != base.table_hash
+    changed = _prov_table(GROUND)
+    assert changed.cells == base.cells  # same cells, different physics: hash must move
+    assert changed.table_hash != base.table_hash
     prov = base.provenance
     assert prov["ground_parameters"]["roll.sand"] == rec.value
     assert "stance" in prov["ground_slope_source"]
