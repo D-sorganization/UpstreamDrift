@@ -36,7 +36,7 @@ def _rest(slope: str, lie: str = "fairway", **kw) -> np.ndarray:
 
 
 def test_there_is_one_slope_vocabulary_and_it_is_the_b6_one() -> None:
-    assert not hasattr(gr, "SLOPE_BINS")  # no second bin table to drift
+    assert gr.SLOPE_BINS is SLOPE_BINS  # the same object: no second table to drift
     for slope in SLOPE_BINS:
         assert _rest(slope).shape == (1, 2)
 
