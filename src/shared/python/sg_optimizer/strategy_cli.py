@@ -84,6 +84,7 @@ def run_strategy(args: argparse.Namespace) -> int:
         PlayerProfile.from_yaml(args.profile),
         quick_tour=args.quick_tour,
         top=args.top,
+        green_terminal_mode=not args.pin_only,
         settings=SolveSettings(args.n_samples, args.seed, args.max_iter),
     )
     sys.stdout.write(render_text(view))

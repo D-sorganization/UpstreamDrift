@@ -58,4 +58,4 @@ def test_html_option_writes_the_view(tmp_path) -> None:
     rc, _ = _run(tmp_path, "--html", str(page))
     assert rc == 0
     body = page.read_text(encoding="utf-8")
-    assert "<ellipse" in body and "Tour SG" in body and "Personal SG" in body
+    assert "<ellipse" in body and "strokes to green" in body

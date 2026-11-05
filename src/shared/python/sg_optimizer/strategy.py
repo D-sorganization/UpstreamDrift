@@ -50,6 +50,7 @@ class SolveSettings:
     n_samples: int = 64
     seed: int = 0
     max_iter: int = 200
+    tol: float = 1e-3
 
 
 def green_terminal(raster: LieRaster) -> LieRaster:
@@ -82,7 +83,7 @@ def solve_mdp(
         cfg.seed,
         model=model,
     )
-    return mdp, mdp.solve(max_iter=cfg.max_iter)
+    return mdp, mdp.solve(tol=cfg.tol, max_iter=cfg.max_iter)
 
 
 def _solve(

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import math
 from dataclasses import dataclass
 
 from src.shared.python.sg_optimizer.mdp.value_iteration import SolveResult
@@ -14,9 +15,6 @@ from src.shared.python.sg_optimizer.strategy import (
     StrategyProblem,
     solve_mdp,
 )
-
-
-_SOLVE_TOL = 1e-3  # HoleMDP.solve default tolerance
 
 
 @dataclass(frozen=True)
@@ -35,6 +33,7 @@ class StrategyView:
     iterations: int = 0
     residual: float = 0.0
     converged: bool = True
+    green_terminal: bool = True
 
     @property
     def delta(self) -> float | None:
@@ -51,6 +50,7 @@ def build_view(
     *,
     quick_tour: bool = False,
     top: int = 5,
+    green_terminal_mode: bool = True,
     model: ShotOutcomeModel | None = None,
     settings: SolveSettings = SolveSettings(),  # noqa: B008 - frozen, immutable
 ) -> StrategyView:
@@ -60,11 +60,16 @@ def build_view(
     tour_strokes = t_mdp.expected_strokes(problem.start, t_res.value)
     if quick_tour:
         opts = shot_options(t_mdp, t_res.value, problem.start, top=top)
-        return _view(hole, tour_strokes, None, opts, t_res, settings)
-    p_mdp, p_res = solve_mdp(problem, profile, model, settings)
-    opts = shot_options(p_mdp, p_res.value, problem.start, model=model, top=top)
-    personal = p_mdp.expected_strokes(problem.start, p_res.value)
-    return _view(hole, tour_strokes, personal, opts, p_res, settings)
+        results = (t_res,)
+        personal = None
+    else:
+        p_mdp, p_res = solve_mdp(problem, profile, model, settings)
+        opts = shot_options(p_mdp, p_res.value, problem.start, model=model, top=top)
+        personal = p_mdp.expected_strokes(problem.start, p_res.value)
+        results = (t_res, p_res)
+    return _view(
+        hole, tour_strokes, personal, opts, results, settings, green_terminal_mode
+    )
 
 
 def _view(
@@ -72,18 +77,22 @@ def _view(
     tour: float,
     personal: float | None,
     options: tuple[ShotOption, ...],
-    result: SolveResult,
+    results: tuple[SolveResult, ...],
     settings: SolveSettings,
+    green_terminal_mode: bool,
 ) -> StrategyView:
+    """Fold every solve into one verdict: the worst residual decides convergence."""
+    residual = max(r.delta for r in results)
     return StrategyView(
         hole,
         tour,
         personal,
         options,
         n_samples=settings.n_samples,
-        iterations=result.iterations,
-        residual=result.delta,
-        converged=result.delta < _SOLVE_TOL,
+        iterations=max(r.iterations for r in results),
+        residual=residual,
+        converged=residual < settings.tol,
+        green_terminal=green_terminal_mode,
     )
 
 
@@ -105,12 +114,33 @@ def _solve_note(view: StrategyView) -> str:
     )
 
 
+def _terminal_note(view: StrategyView) -> str:
+    if view.green_terminal:
+        return "Terminal: reaching the green ends the hole (putting is not modelled)"
+    return "Terminal: pin cell only (value depends on raster resolution)"
+
+
+def _pin_frame(o: ShotOption) -> tuple[float, float, float]:
+    """Ellipse centre and axis in the golfer's pin-line frame, SVG coordinates.
+
+    The option's ellipse is in its own aim frame; rotating by ``aim_deg`` puts
+    every option on one common x-axis (the pin line, pin to the right). SVG y runs
+    down, so left of the pin line plots up and rotations flip sign.
+    """
+    e, a = o.ellipse, math.radians(o.aim_deg)
+    x = e.centre_along * math.cos(a) - e.centre_lateral * math.sin(a)
+    y = e.centre_along * math.sin(a) + e.centre_lateral * math.cos(a)
+    return x, -y, -(e.angle_deg + o.aim_deg)
+
+
 def render_text(view: StrategyView) -> str:
     """Plain-text report for the CLI."""
     tour, personal, delta = _numbers(view)
     lines = [
         f"Hole: {view.hole}",
-        f"Expected strokes  tour: {tour}   personal: {personal}   delta: {delta}",
+        "Expected strokes to green  "
+        f"tour: {tour}   personal: {personal}   personal - tour: {delta}",
+        _terminal_note(view),
         _solve_note(view),
         "",
         f"{'club':<10}{'aim vs pin':>11}{'strokes':>9}{'carry':>8}{'95% long':>10}{'95% wide':>10}",
@@ -127,16 +157,17 @@ def render_text(view: StrategyView) -> str:
 def render_html(view: StrategyView) -> str:
     """Self-contained page: both numbers, option table and an SVG of the ellipses."""
     tour, personal, delta = _numbers(view)
-    reach = max(o.ellipse.centre_along + o.ellipse.semi_major for o in view.options)
-    span = max(o.ellipse.semi_major for o in view.options) * 1.2
+    placed = [(_pin_frame(o), o) for o in view.options]
+    far = max(x + o.ellipse.semi_major for (x, _, _), o in placed)
+    near = min(x - o.ellipse.semi_major for (x, _, _), o in placed)
+    span = max(abs(y) + o.ellipse.semi_major for (_, y, _), o in placed)
     shapes = "".join(
-        f'<ellipse cx="{o.ellipse.centre_along:.1f}" cy="{o.ellipse.centre_lateral:.1f}" '
-        f'rx="{o.ellipse.semi_major:.1f}" ry="{o.ellipse.semi_minor:.1f}" '
-        f'transform="rotate({-o.ellipse.angle_deg:.1f} {o.ellipse.centre_along:.1f} {o.ellipse.centre_lateral:.1f})" '
+        f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{o.ellipse.semi_major:.1f}" '
+        f'ry="{o.ellipse.semi_minor:.1f}" transform="rotate({rot:.1f} {x:.1f} {y:.1f})" '
         f'fill="rgba(31,119,180,0.15)" stroke="#1f77b4"><title>{html.escape(o.club)}</title></ellipse>'
-        f'<text x="{o.ellipse.centre_along:.1f}" y="{o.ellipse.centre_lateral:.1f}" font-size="6" '
+        f'<text x="{x:.1f}" y="{y - o.ellipse.semi_minor - 2 - 7 * (i % 2):.1f}" font-size="6" '
         f'text-anchor="middle">{html.escape(o.club)}</text>'
-        for o in view.options
+        for i, ((x, y, rot), o) in enumerate(placed)
     )
     rows = "".join(
         f"<tr><td>{html.escape(o.club)}</td><td>{o.aim_deg:.1f}&deg;</td>"
@@ -147,8 +178,13 @@ def render_html(view: StrategyView) -> str:
         "<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width'>"
         f"<title>Strategy: {html.escape(view.hole)}</title>"
         f"<h1>{html.escape(view.hole)}</h1><p>{html.escape(_solve_note(view))}</p>"
-        f"<p>Tour SG <b>{tour}</b> &middot; Personal SG <b>{personal}</b> &middot; Delta <b>{delta}</b></p>"
-        f"<svg viewBox='-10 {-span:.0f} {reach + 20:.0f} {2 * span:.0f}' width='100%' "
-        f"role='img' aria-label='Dispersion ellipses'>{shapes}</svg>"
+        f"<p>{html.escape(_terminal_note(view))}</p>"
+        f"<p>Expected strokes to green: tour <b>{tour}</b> &middot; personal <b>{personal}</b>"
+        f" &middot; personal &minus; tour <b>{delta}</b></p>"
+        f"<svg viewBox='{near - 10:.0f} {-span - 4:.0f} {far - near + 20:.0f} {2 * span + 8:.0f}' "
+        "width='100%' style='max-height:70vh' role='img' aria-label='Dispersion ellipses'>"
+        f"{shapes}</svg>"
+        "<p>95% landing ellipses seen from the tee along the pin line "
+        "(pin to the right, left of the line up the page).</p>"
         f"<table><tr><th>Club</th><th>Aim (from pin line)</th><th>Strokes</th></tr>{rows}</table>"
     )
