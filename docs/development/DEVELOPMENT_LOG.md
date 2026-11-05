@@ -924,6 +924,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14559 · SHOW-C3a: SplineTorqueControl Piecewise-Linear Torque Parameterisation
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14559
+- **Branch:** merged via #14589
+- **PR:** #14589
+- **Paths:** see #14589
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`04ad3ef1`; collated from changes/14559-show-c3a-splinetorquecontrol-piecewise-l.md)
+- **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
+- **Next step:** Shipped in PR #14589.
+
+### DL-#14552 · SHOW-A3: Optional Lumbar:Thoracic Regional-Split Coupling (Trunk_Coupling, Off by Default) for the Full-Body-V2 Trunk, MuJoCo Joint Equalities, and Trunk Joint-Tree/Mass/ROM Contract Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14552
+- **Branch:** merged via #14577
+- **PR:** #14577
+- **Paths:** see #14577
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`0cecc8f7`; collated from changes/14552-show-a3-optional-lumbar-thoracic-regiona.md)
+- **Summary:** SHOW-A3: optional lumbar:thoracic regional-split coupling (trunk_coupling, off by default) for the full-body-v2 trunk, MuJoCo joint equalities, and trunk joint-tree/mass/ROM contract tests
+- **Next step:** Shipped in PR #14577.
+
+### DL-#14466 · Putting API: POST /Solve-Aim-3D Solves the Pace and Line That Hole a /Simulate-3D Putt on That Route's Own Surface and Head (Core Solve_Aim, Like the Desktop Auto-Solve); the 3-D Request Models Move to Src/Api/Models/putting_green_requests.py
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14466
+- **Branch:** merged via #14588
+- **PR:** #14588
+- **Paths:** see #14588
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8fff9f83`; collated from changes/14466-solve-aim-3d.md)
+- **Summary:** Putting API: POST /solve-aim-3d solves the pace and line that hole a /simulate-3d putt on that route's own surface and head (core solve_aim, like the desktop Auto-Solve); the 3-D request models move to src/api/models/putting_green_requests.py
+- **Next step:** Shipped in PR #14588.
+
+### DL-#14441 · WSCG Update Manuscript Draft on the Best-Match MuJoCo ZTCF/ZVCF Run, Citing the Pinned Run_Id
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14441
+- **Branch:** merged via #14584
+- **PR:** #14584
+- **Paths:** see #14584
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`c82e3803`; collated from changes/14441-wscg-update-manuscript-draft-on-the-best.md)
+- **Summary:** WSCG update manuscript draft on the best-match MuJoCo ZTCF/ZVCF run, citing the pinned run_id
+- **Next step:** Shipped in PR #14584.
+
 ### DL-#14565 · SHOW-B1: ShotOutcomeModel Protocol + Backend Registry; Tour Baseline Is the Default Quick_Sg Backend
 
 - **State:** shipped

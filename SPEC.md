@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14589 | SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation |
+| 2026-11-05 | #14577 | SHOW-A3: optional lumbar:thoracic regional-split coupling (trunk_coupling, off by default) for the full-body-v2 trunk, MuJoCo joint equalities, and trunk joint-tree/mass/ROM contract tests |
+| 2026-11-05 | #14588 | Putting API: POST /solve-aim-3d solves the pace and line that hole a /simulate-3d putt on that route's own surface and head (core solve_aim, like the desktop Auto-Solve); the 3-D request models move to src/api/models/putting_green_requests.py |
+| 2026-11-05 | #14584 | WSCG update manuscript draft on the best-match MuJoCo ZTCF/ZVCF run, citing the pinned run_id |
 | 2026-11-05 | #14581 | SHOW-B1: ShotOutcomeModel protocol + backend registry; tour baseline is the default quick_sg backend |
 | 2026-11-05 | #14579 | SHOW-C2: ImpactConditions + evaluate_rollout facade for optimiser loops (face, path, AoA, speed, strike) over impact_parameters |
 | 2026-11-05 | #14586 | React putting page: Green Type selector on the core green presets (/simulate-3d green spec) |
