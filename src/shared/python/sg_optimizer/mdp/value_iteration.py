@@ -137,7 +137,15 @@ class SolveResult:
 
 
 class HoleMDP:
-    """Vectorized hole-MDP solver."""
+    """Vectorized hole-MDP solver.
+
+    ``VALUE_CAP`` bounds every state's expected strokes. A cell from which no
+    action can ever reach the hole (for example behind the pin when the aim set
+    only points forward) would otherwise grow by its step cost every sweep and
+    max-norm convergence could never fire; such cells settle at the cap.
+    """
+
+    VALUE_CAP = 30.0
 
     def __init__(
         self,
@@ -159,6 +167,9 @@ class HoleMDP:
         self.actions = actions
         self.n_samples = n_samples
         self.rng = np.random.default_rng(seed)
+        # Common random numbers: each action's offsets are drawn once, so the
+        # Bellman operator is fixed across sweeps and value iteration can converge.
+        self._offsets: dict[ShotAction, NDArray[np.float64]] = {}
         self._action_list: list[ShotAction] = list(actions.iter_actions())
         self._terminal_mask = raster.codes == _HOLED
 
@@ -211,6 +222,7 @@ class HoleMDP:
         last_delta = np.inf
         for it in range(1, max_iter + 1):
             V_new, pi = self.bellman_backup(V)
+            V_new = np.minimum(V_new, self.VALUE_CAP)
             last_delta = float(np.max(np.abs(V_new - V)))
             V = V_new
             if last_delta < tol:
@@ -280,7 +292,11 @@ class HoleMDP:
         slat = cb.sigma_lat * (skill.skill_mult_lat if skill else 1.0)
         rho = cb.rho
         cov = np.array([[sl * sl, rho * sl * slat], [rho * sl * slat, slat * slat]])
-        offsets = self.rng.multivariate_normal([0.0, 0.0], cov, size=self.n_samples)
+        if action not in self._offsets:
+            self._offsets[action] = self.rng.multivariate_normal(
+                [0.0, 0.0], cov, size=self.n_samples
+            )
+        offsets = self._offsets[action]
         base_dist = self.baseline.get(action.club).total_mean + (
             skill.distance_offset if skill else 0.0
         )
