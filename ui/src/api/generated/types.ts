@@ -1309,6 +1309,34 @@ export interface ConversionRequest {
 }
 
 /**
+ * Counter-torque explorer settings (#14469); the core checks the ranges.
+ */
+export interface CounterTorqueRequest {
+  /** In-plane grip preload couple (N m) */
+  preload_nm: number;
+  /** Off-plane preload couple (N m) */
+  off_preload_nm: number;
+  /** Hand-noise scale (0 = none) */
+  noise_scale: number;
+  /** Gust pulse strength (N m) */
+  gust_impulse_nm: number;
+  /** Shaft lie angle (deg) */
+  lie_deg: number;
+  /** Putter head: a key of /putter-presets (#14461) */
+  putter: string;
+  /** Intervals over the stroke */
+  n_points: number;
+}
+
+/**
+ * Stroke series of the core couple model, one list per sample field.
+ */
+export interface CounterTorqueResponse {
+  putter_name: string;
+  samples: Record<string, number[]>;
+}
+
+/**
  * Request model for counterfactual / induced-acceleration analysis. Preconditions: - kind must be a known counterfactual kind (see ``src.shared.python.analysis.orchestrator`` — single source). See issue #7450.
  */
 export interface CounterfactualRequest {
