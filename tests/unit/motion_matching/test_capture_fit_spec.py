@@ -18,6 +18,8 @@ import pytest
 
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 
+pytestmark = pytest.mark.unit
+
 DOCS = Path(__file__).resolve().parents[3] / "docs/development/full_body_models"
 CAPTURE_SPEC = DOCS / "full_body_spec_anthro_driver_capture.json"
 SHOWPIECE_SPEC = DOCS / "full_body_spec_anthro_driver.json"
