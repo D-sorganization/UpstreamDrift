@@ -257,6 +257,7 @@
       moiKgM2 = _TYPICAL_PUTTER_MOI_KG_M2,
       stimpFt, upPct = 0.0, crossPct = 0.0, trialSeed = 0.0, distFt,
       roughnessMm = 0.35, isStimpRamp = false, skidTable = null, coreGreen = null,
+      withHole = true,
       ballMassKg = GOLF_BALL_MASS_KG, cor = PUTTER_FACE_COR,
     } = options;
     assertFinite(vClubMps, "vClubMps"); assertFinite(aimDeg, "aimDeg");
@@ -310,7 +311,7 @@
       const nx = x + vx * dt + 0.5 * ax * dt * dt, ny = y + vy * dt + 0.5 * ay * dt * dt;
       if (mode === "sliding") skidDist += Math.hypot(nx - x, ny - y);
       x = nx; y = ny; vx += ax * dt; vy += ay * dt; t += dt;
-      if (!isStimpRamp) {
+      if (!isStimpRamp && withHole) {
         const rx = x - holeX, ry = y - holeY;
         const dHole = Math.hypot(rx, ry);
         if (dHole <= holeR && !lippedOut) {
@@ -338,6 +339,78 @@
     return {
       pts, finalX: x, finalY: y, holed, lippedOut, skidDist,
       faceErrDeg, pathErrDeg, launchDeg, v0, missDistCm, holeX,
+    };
+  }
+
+  // Search bounds and tolerances of green_reading.solve_aim.
+  const _READ_SPEED_MIN_MPS = 0.05, _READ_SPEED_MAX_MPS = 8.0;
+  const _READ_SPEED_ITERATIONS = 30, _READ_HEADING_ITERATIONS = 12;
+  const _READ_MAX_HEADING_STEP_RAD = 0.25, _READ_TOL_M = 5e-3;
+
+  /**
+   * The core optimum read (putting_dynamics.green_reading.solve_aim) on the
+   * studio putt: the head speed whose cup-free roll stops pastHoleM beyond
+   * the hole (doubling bracket, then bisection) and the heading whose path
+   * crosses the hole (clamped secant, safeguarded by bisection). Centred,
+   * error-free strike. `options` takes the simulateSinglePuttRK4 green,
+   * Stimp, distance and table options.
+   * @returns {{clubSpeedMps:number, aimDeg:number, holed:boolean, converged:boolean}}
+   * @throws {TypeError|RangeError}
+   */
+  function solveAimCore(options, pastHoleM = 0.3) {
+    assertRange(pastHoleM, 1e-3, 5.0, "pastHoleM");
+    const holeX = options.distFt * _FEET_TO_METERS;
+    const run = (heading, speed, withHole) => simulateSinglePuttRK4({
+      ...options, vClubMps: speed, aimDeg: (heading * 180.0) / Math.PI, pathErrDeg: 0,
+      faceErrDeg: 0, strikeMm: 0, roughnessMm: 0, trialSeed: 0, isStimpRamp: false, withHole,
+    });
+    const along = (heading, speed) => {
+      const r = run(heading, speed, false);
+      return [r, r.finalX * Math.cos(heading) + r.finalY * Math.sin(heading)];
+    };
+    const pace = (heading, target) => {
+      let lo = _READ_SPEED_MIN_MPS, hi = lo;
+      let [r, at] = along(heading, hi);
+      while (at < target && hi < _READ_SPEED_MAX_MPS) {
+        lo = hi; hi = Math.min(2.0 * hi, _READ_SPEED_MAX_MPS);
+        [r, at] = along(heading, hi);
+      }
+      let speed = hi;
+      for (let i = 0; i < _READ_SPEED_ITERATIONS; i++) {
+        if (Math.abs(at - target) <= _READ_TOL_M || hi <= lo) break;
+        speed = 0.5 * (lo + hi);
+        [r, at] = along(heading, speed);
+        if (at < target) lo = speed; else hi = speed;
+      }
+      return [r, speed];
+    };
+    // Left offset where the path reaches the hole's distance (else at rest).
+    const miss = (heading) => {
+      const [r, speed] = pace(heading, holeX + pastHoleM);
+      const pt = r.pts.find((p) => p.x >= holeX);
+      return [pt ? pt.y : r.finalY, speed];
+    };
+    let heading = 0.0, prev = null;
+    let [curMiss, speed] = miss(heading);
+    const bracket = {};
+    for (let i = 0; i < _READ_HEADING_ITERATIONS; i++) {
+      bracket[curMiss > 0.0] = heading;
+      if (Math.abs(curMiss) <= _READ_TOL_M || (prev && prev[1] === curMiss)) break;
+      let step = curMiss / holeX;
+      if (prev) step = (curMiss * (heading - prev[0])) / (curMiss - prev[1]);
+      let next = heading - Math.max(-_READ_MAX_HEADING_STEP_RAD, Math.min(_READ_MAX_HEADING_STEP_RAD, step));
+      if (true in bracket && false in bracket) {
+        const lo = Math.min(bracket[true], bracket[false]), hi = Math.max(bracket[true], bracket[false]);
+        if (!(lo < next && next < hi)) next = 0.5 * (bracket[true] + bracket[false]);
+      }
+      prev = [heading, curMiss];
+      heading = next;
+      [curMiss, speed] = miss(heading);
+    }
+    const final = run(heading, speed, true);
+    return {
+      clubSpeedMps: speed, aimDeg: (heading * 180.0) / Math.PI,
+      holed: final.holed, converged: Math.abs(curMiss) <= _READ_TOL_M,
     };
   }
 
@@ -378,7 +451,7 @@
     GOLF_BALL_RADIUS_M, GOLF_BALL_MASS_KG, PUTTER_FACE_COR, seededRandom, gaussianRand,
     evalUndulatingGreen, coreGreenAt, evalGreen, sampleTurfMicroRoughness, stimpToRollingMu,
     captureSpeedMps, effectiveHeadMass, centreStrikeSpeedRatio, simulateSinglePuttRK4,
-    computeClubSpeedForCapture, coreSkidDistanceM, coreRollStartSpeedMps,
+    computeClubSpeedForCapture, coreSkidDistanceM, coreRollStartSpeedMps, solveAimCore,
   };
 
   root.PuttingPhysics = api;

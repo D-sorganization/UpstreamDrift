@@ -99,7 +99,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/_scene_builder.py, src/tools/putting_green_gui/gui.py | Auto-Solve Read runs solve_aim on the tile's surface off the GUI thread and writes the pace and aim into the controls.",
         "react": "present | ui/src/components/putting/AutoSolveButton.tsx, ui/src/utils/autoSolve.ts, ui/src/pages/PuttingGreen.tsx | Auto-Solve Read calls /solve-aim-3d on the page's green, writes the pace and aim into the controls, simulates the solved putt and shows the desktop read text (golden-pinned).",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "partial #14465 | src/apps/putting_studio/js/controls_c.js | Aim-only grid search from one noise-free putt."
+        "studio": "present | src/apps/putting_studio/js/putting_physics.js, src/apps/putting_studio/js/controls_c.js | Auto-Solve runs solveAimCore, a port of solve_aim on the studio putt (golden-pinned to the core read), and the batch strikes at the solved head speed."
       }
     },
     "strokes_gained": {

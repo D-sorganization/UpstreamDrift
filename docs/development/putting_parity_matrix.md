@@ -14,7 +14,7 @@ Epic #14452. Tauri wraps the React build, so it inherits React's status.
 | Counter-Torque Stabilization (Hand Couples, Gust) | (g) | present | present | present | present | present |
 | Putter Balance Type (CG Offset, MOI) | (c) | present | present | present | present | present |
 | Green Types (Flat, Slope, Stimp Ramp, Undulating, Presets) | (d) | present | present | present | present | present |
-| Optimum Read / Auto-Solve Aim | (e) | present | present | present | present | partial (#14465) |
+| Optimum Read / Auto-Solve Aim | (e) | present | present | present | present | present |
 | Player-Specific Bellman Strokes Gained | (f) | present | present | present | present | partial (#14467) |
 | Saved Scenarios and Comparison | (h) | present | present | present | present | present |
 | JSON Import/Export of a Setup | (h) | present | present | present | present | present |
@@ -76,7 +76,7 @@ Tauri, every feature: `ui/src-tauri/tauri.conf.json`. Wraps the React build (fro
 - Core/API: present. `src/shared/python/putting_dynamics/green_reading.py`, `src/shared/python/putting_analytics/optimize.py`, `src/api/routes/putting_green.py`. solve_aim and best_action present; /read-green returns pace, heading, holed and converged in one call on any GreenSpec green.
 - PyQt6: present. `src/tools/putting_green_gui/_scene_builder.py`, `src/tools/putting_green_gui/gui.py`. Auto-Solve Read runs solve_aim on the tile's surface off the GUI thread and writes the pace and aim into the controls.
 - React: present. `ui/src/components/putting/AutoSolveButton.tsx`, `ui/src/utils/autoSolve.ts`, `ui/src/pages/PuttingGreen.tsx`. Auto-Solve Read calls /solve-aim-3d on the page's green, writes the pace and aim into the controls, simulates the solved putt and shows the desktop read text (golden-pinned).
-- Studio: partial (#14465). `src/apps/putting_studio/js/controls_c.js`. Aim-only grid search from one noise-free putt.
+- Studio: present. `src/apps/putting_studio/js/putting_physics.js`, `src/apps/putting_studio/js/controls_c.js`. Auto-Solve runs solveAimCore, a port of solve_aim on the studio putt (golden-pinned to the core read), and the batch strikes at the solved head speed.
 
 **Player-Specific Bellman Strokes Gained**
 - Core/API: present. `src/shared/python/putting_analytics/service_sg.py`, `src/shared/python/putting_analytics/optimize.py`, `src/api/routes/putting_analytics.py`. Player Bellman E(d) on the dialled green and one putt's SG on /strokes-gained; also /optimize (sg), /library-study, /variance-study, /simulated-curve.

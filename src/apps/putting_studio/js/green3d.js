@@ -112,6 +112,7 @@ function rebuildGreenDispersionBatch() {
   const roughnessMm = state.surfaceRoughnessMm !== undefined ? state.surfaceRoughnessMm : 0.35;
   const vNom = state.stimpmeterMode
     ? (1.83 / 1.595)
+    : (state.read && state.read.key === currentReadKey()) ? state.read.clubSpeedMps
     : PuttingPhysics.computeClubSpeedForCapture({
         distFt, entrySpeedMps: entrySpd, stimpFt: state.stimpFt, upPct: state.uphillSlopePct,
         skidTable: window.CORE_IMPACT.skid,
