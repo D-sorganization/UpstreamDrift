@@ -241,6 +241,14 @@ def test_lift_residual_gate(lift: str, request: pytest.FixtureRequest) -> None:
     assert gate["moments_within"] is True
 
 
+def test_residual_gate_xfails_cite_the_hip_and_pelvis_rebuild() -> None:
+    # The residual excess is the hip/pelvis body (OSL-14), not the IK/ID run.
+    assert set(_RESIDUAL_GATE_XFAILS) == set(LIFTS) - {"squat"}
+    for lift, reason in _RESIDUAL_GATE_XFAILS.items():
+        assert reason.endswith("(#13057)"), lift
+        assert "#13041" not in reason, lift
+
+
 def test_squat_receipt_range_violations_empty() -> None:
     receipts = _load_receipts()
     entry = receipts["lifts"]["squat"]["ik_id"]
