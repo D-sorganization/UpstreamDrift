@@ -198,6 +198,8 @@ def _run(
     baseline_only: bool = False,
     default_policy: bool = False,
     bundle_path: Path = BUNDLE,
+    spec_path: Path | None = None,
+    face_free: bool = False,
 ) -> int:  # pragma: no cover - the real run is held (D24)
     import numpy as np
 
@@ -230,7 +232,7 @@ def _run(
     )
     from src.shared.python.motion_matching.same_input.plant import VectorPlant
 
-    spec_bytes = SHOWPIECE_V2.read_bytes()
+    spec_bytes = (spec_path or SHOWPIECE_V2).read_bytes()
     spec = json.loads(spec_bytes)
     bundle = InputBundle.load(bundle_path)
     model, order, ids, site, impact_fn = _scene(spec_bytes, spec)
@@ -259,12 +261,12 @@ def _run(
         policy = (
             DEFAULT_POLICY if default_policy else StepPolicy(substeps=4, project=False)
         )
-        return _baseline(window(policy), joints)
+        return _baseline(window(policy), joints, face_free)
     run = run_full_body_ladder(
         window(StepPolicy(substeps=4, project=False)),
         joints,
         envelope,
-        band=BaselineBand(),
+        band=baseline_band(face_free),
         trust_radius=0.5,
         config=OptimiserConfig(),
         ladder=ladder_spec(),
@@ -283,13 +285,21 @@ def _run(
     return 0
 
 
-def _baseline(search: Any, joints: tuple[str, ...]) -> int:  # pragma: no cover
+def baseline_band(face_free: bool = False) -> Any:
+    """The physical-baseline band; ``face_free`` leaves the face unchecked (flag, OFF)."""
+    from src.shared.python.impact_optimization.full_body_ladder import BaselineBand
+
+    return BaselineBand(max_abs_face_deg=None) if face_free else BaselineBand()
+
+
+def _baseline(
+    search: Any, joints: tuple[str, ...], face_free: bool = False
+) -> int:  # pragma: no cover
     """Roll out the recorded baseline once and report the physical-baseline guard.
 
     No ladder runs: this only shows whether the spec gives a physical impact.
     """
     from src.shared.python.impact_optimization.full_body_ladder import (
-        BaselineBand,
         require_physical_baseline,
     )
     from src.shared.python.impact_optimization.full_body_rollout import (
@@ -306,7 +316,7 @@ def _baseline(search: Any, joints: tuple[str, ...]) -> int:  # pragma: no cover
         impact.path_deg,
         impact.aoa_deg,
     )
-    require_physical_baseline(impact, BaselineBand())
+    require_physical_baseline(impact, baseline_band(face_free))
     logger.info("baseline is physical")
     return 0
 
@@ -331,9 +341,27 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=BUNDLE,
         help="same-input bundle (.npz); a re-anchored one stays local, never committed",
     )
+    parser.add_argument(
+        "--spec",
+        type=Path,
+        default=None,
+        help="spec to run on (default: SHOWPIECE_V2); a diagnostic spec, e.g. the capture grip",
+    )
+    parser.add_argument(
+        "--face-free",
+        action="store_true",
+        help="leave the baseline face unchecked (it is an optimiser output); default OFF",
+    )
     args = parser.parse_args(argv)
     require_outside_repo(args.out)
-    return _run(args.out, args.baseline_only, args.default_policy, args.bundle)
+    return _run(
+        args.out,
+        args.baseline_only,
+        args.default_policy,
+        args.bundle,
+        args.spec,
+        args.face_free,
+    )
 
 
 if __name__ == "__main__":  # pragma: no cover
