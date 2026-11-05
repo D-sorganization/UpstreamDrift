@@ -21,7 +21,8 @@
     "type-check": "tsc -b --noEmit --force",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "tauri:artifact": "node scripts/tauriArtifact.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
