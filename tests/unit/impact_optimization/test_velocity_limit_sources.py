@@ -14,15 +14,13 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-
+import yaml
 from src.shared.python.contracts import ContractViolationError
-
-from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.impact_optimization.physiological_envelope import (
     DEFAULT_LIMITS_PATH,
     load_limits,
 )
-import yaml
+from src.shared.python.motion_matching.same_input import InputBundle
 
 pytestmark = pytest.mark.unit
 
