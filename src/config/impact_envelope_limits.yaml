@@ -110,9 +110,11 @@ velocity_limits_deg_s:
 # right Z+ is internal rotation; X is horizontal abduction (left +) or
 # adduction (right +).  Shoulder coordinates are relative to the thorax.
 #
-# CITED (VERIFIED, full text read): flexion and external rotation, Gill 2020
+# SOURCED (SOURCED_WITH_ASSUMED_MARGIN, full text read): flexion and external rotation, Gill 2020
 # Tables 1 and 3, male "All participants" row, bound = mean + 1 SD (~84th
 # percentile of a healthy community sample, so a normal swing is not rejected).
+# The margin and the arm-at-side ER posture are assumptions, so these sides are
+# not VERIFIED and a breach reads assumption-limited (D32); the source stays cited.
 # Caveats: general-population adults (mean age 45.8 y, not athletes), single
 # active inclinometer/visual measurement, ER measured at the side with the
 # elbow bent (the model zero pose is arm-raised).  Abduction is not a single
@@ -163,7 +165,7 @@ declared_rom_deg:
         reference: "Gill TK, Shanahan EM, Tucker GR, Buchbinder R, Hill CL. Shoulder range of movement in the general population: age and gender stratified normative data using a community-based cohort. BMC Musculoskelet Disord 21:676 (2020)"
         doi: "10.1186/s12891-020-03665-9"
         note: "Table 1, male left flexion 159.9 (SD 18.1) deg; bound = mean + 1 SD = 178.0; Y = 90 - 178.0"
-      verification_status: VERIFIED
+      verification_status: SOURCED_WITH_ASSUMED_MARGIN
     upper:
       value: 150.0
       citation:
@@ -179,7 +181,7 @@ declared_rom_deg:
         reference: "Gill TK, Shanahan EM, Tucker GR, Buchbinder R, Hill CL. Shoulder range of movement in the general population: age and gender stratified normative data using a community-based cohort. BMC Musculoskelet Disord 21:676 (2020)"
         doi: "10.1186/s12891-020-03665-9"
         note: "Table 1, male right flexion 161.5 (SD 18.7) deg; bound = mean + 1 SD = 180.2; Y = 90 - 180.2"
-      verification_status: VERIFIED
+      verification_status: SOURCED_WITH_ASSUMED_MARGIN
     upper:
       value: 150.0
       citation:
@@ -199,7 +201,7 @@ declared_rom_deg:
         reference: "Gill TK, Shanahan EM, Tucker GR, Buchbinder R, Hill CL. Shoulder range of movement in the general population: age and gender stratified normative data using a community-based cohort. BMC Musculoskelet Disord 21:676 (2020)"
         doi: "10.1186/s12891-020-03665-9"
         note: "Table 3, male left external rotation 55.0 (SD 17.9) deg; bound = mean + 1 SD = 72.9; left Z+ is ER"
-      verification_status: VERIFIED
+      verification_status: SOURCED_WITH_ASSUMED_MARGIN
   - coordinate: RSInputZ
     lower:
       value: -74.4
@@ -207,7 +209,7 @@ declared_rom_deg:
         reference: "Gill TK, Shanahan EM, Tucker GR, Buchbinder R, Hill CL. Shoulder range of movement in the general population: age and gender stratified normative data using a community-based cohort. BMC Musculoskelet Disord 21:676 (2020)"
         doi: "10.1186/s12891-020-03665-9"
         note: "Table 3, male right external rotation 56.8 (SD 17.6) deg; bound = mean + 1 SD = 74.4; right Z- is ER"
-      verification_status: VERIFIED
+      verification_status: SOURCED_WITH_ASSUMED_MARGIN
     upper:
       value: 90.0
       citation: { id: null, note: "internal rotation prior; no source read" }

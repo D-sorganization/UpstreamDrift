@@ -107,11 +107,11 @@ def _declared_side(coordinate: str, side: Mapping[str, Any]) -> DeclaredSide:
     value = float(side["value"])
     require(math.isfinite(value), "declared ROM must be finite", (coordinate, value))
     status = str(side["verification_status"])
-    if status == "VERIFIED":
+    if status in ("VERIFIED", "SOURCED_WITH_ASSUMED_MARGIN"):
         cite = side["citation"]
         require(
             bool(cite.get("reference") and cite.get("doi")),
-            "a VERIFIED ROM side needs a reference and a DOI",
+            "a sourced ROM side needs a reference and a DOI",
             coordinate,
         )
     return DeclaredSide(value, status, _citation_text(side))

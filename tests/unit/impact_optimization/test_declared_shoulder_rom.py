@@ -10,6 +10,7 @@ side only (flexion, external rotation: Gill 2020) and assumed on the other
 
 from __future__ import annotations
 
+import dataclasses
 import json
 from pathlib import Path
 
@@ -88,14 +89,11 @@ def test_cited_sides_reproduce_gill_2020_male_mean_plus_one_sd(
     assert _rom(env, name)[side] == pytest.approx(value, abs=0.051)
 
 
-def test_exactly_the_uncited_sides_are_listed_as_assumed(
+def test_every_declared_side_is_assumed_until_verified(
     env: PhysiologicalEnvelope,
 ) -> None:
-    expected = {
-        (f"{s}SInput{a}", side)
-        for s in "LR"
-        for a, side in (("X", "lower"), ("X", "upper"), ("Y", "upper"))
-    } | {("LSInputZ", "lower"), ("RSInputZ", "upper")}
+    """Gill's bounds carry a mean+1SD margin and an arm-at-side ER posture."""
+    expected = {(n, s) for n in SHOULDERS for s in ("lower", "upper")}
     assert set(env.assumed_rom_sides) == expected
 
 
@@ -106,12 +104,12 @@ def test_declared_rom_records_source_per_side() -> None:
         (n, s)
         for n, d in declared.items()
         for s, side in (("lower", d.lower), ("upper", d.upper))
-        if side.verification_status == "VERIFIED"
+        if side.verification_status == "SOURCED_WITH_ASSUMED_MARGIN"
     ]
     assert len(cited) == 4  # flexion and ER, both arms
     for n, d in declared.items():
         for side in (d.lower, d.upper):
-            if side.verification_status == "VERIFIED":
+            if side.verification_status == "SOURCED_WITH_ASSUMED_MARGIN":
                 assert "Gill" in side.citation, n
                 assert "10.1186/s12891-020-03665-9" in side.citation, n
 
@@ -132,14 +130,27 @@ def _traj(env: PhysiologicalEnvelope, name: str, peak_deg: float) -> np.ndarray:
     return np.radians(traj)
 
 
-def test_hit_names_its_side_and_the_cited_side_is_not_assumed(
+def test_a_sourced_side_with_an_assumed_margin_reads_assumed(
     env: PhysiologicalEnvelope,
 ) -> None:
-    lo, _ = _rom(env, "LSInputY")
+    lo, _ = _rom(env, "LSInputY")  # flexion: Gill + a mean+1SD margin (D38 precedent)
     hits = kinematic_binding(_traj(env, "LSInputY", lo - 5.0), np.arange(4) * 0.01, env)
     (h,) = [h for h in hits if h.joint == "LSInputY" and h.kind == "ROM"]
     assert h.side == "lower" and h.utilisation > 1.0
-    assert not env.limit_is_assumed(h.joint, h.kind, h.side)  # cited flexion
+    assert env.limit_is_assumed(h.joint, h.kind, h.side)
+
+
+def test_a_verified_side_is_not_assumed_and_its_neighbour_still_is() -> None:
+    """The per-side machinery: only a VERIFIED bound reads as a cited limit."""
+    declared = load_declared_rom(DEFAULT_LIMITS_PATH)
+    d = declared["LSInputY"]
+    declared["LSInputY"] = dataclasses.replace(
+        d, lower=dataclasses.replace(d.lower, verification_status="VERIFIED")
+    )
+    e = _env(declared_rom=declared)
+    assert not e.limit_is_assumed("LSInputY", "ROM", "lower")
+    assert e.limit_is_assumed("LSInputY", "ROM", "upper")
+    assert ("LSInputY", "lower") not in e.assumed_rom_sides
 
 
 def test_breach_on_an_assumed_side_reads_assumed(env: PhysiologicalEnvelope) -> None:
@@ -187,7 +198,7 @@ def test_loader_rejects_a_verified_side_without_a_citation(tmp_path: Path) -> No
     def strip(entries) -> None:
         for e in entries:
             for side in ("lower", "upper"):
-                if e[side]["verification_status"] == "VERIFIED":
+                if e[side]["verification_status"] == "SOURCED_WITH_ASSUMED_MARGIN":
                     e[side]["citation"] = {"id": None, "note": "none"}
                     return
 
