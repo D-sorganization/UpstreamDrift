@@ -26,16 +26,16 @@ import numpy as np  # noqa: E402
 from src.engines.physics_engines.mujoco.python.full_body_mjcf import (  # noqa: E402
     export_full_body_mjcf,
 )
+from src.shared.python.contracts import require  # noqa: E402
 from src.shared.python.motion_matching.address_pose import address_qpos  # noqa: E402
+from src.shared.python.motion_matching.execution.grip_rotation import (  # noqa: E402
+    HAND_BODY_SUFFIX,
+)
 
 #: View name -> (horizontal, vertical) world axes; world Z is up.  The feet are
 #: apart along Y, so Y-Z is the face-on view and X-Z the down-the-line view.
 VIEWS = {"face-on (world Y-Z)": (1, 2), "down-the-line (world X-Z)": (0, 2)}
-CLUB_SITES = ("native_frame_16", "native_frame_15")  # Grip, Clubhead
-HAND_BODIES = {  # hand frame bodies of the lead and trail hand
-    "lead": "Clubface Vector",
-    "trail": "RHandStandoff",
-}
+CLUB_FRAMES = ("Grip", "Clubhead")  # frame names; sites come from the export
 AXIS_COLOURS = ("tab:red", "tab:green", "tab:blue")
 AXIS_LENGTH_M = 0.06
 
@@ -61,7 +61,7 @@ def _body_id(model: mujoco.MjModel, suffix: str) -> int:
 
 def pose_of(run: Path) -> Pose:
     """Address pose of an address-only run directory."""
-    xml, _ = export_full_body_mjcf(
+    xml, meta = export_full_body_mjcf(
         (run / "full_body_spec_hipcal_scaled.json").read_bytes()
     )
     model = mujoco.MjModel.from_xml_string(xml)
@@ -73,9 +73,14 @@ def pose_of(run: Path) -> Pose:
     links = np.array(
         [(model.body_parentid[b], b) for b in range(2, model.nbody)], dtype=int
     )
-    sites = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, n) for n in CLUB_SITES]
+    sites = [
+        mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, meta["frame_sites"][name])
+        for name in CLUB_FRAMES
+    ]
+    require(min(sites) >= 0, f"export has no site for frames {CLUB_FRAMES}", sites)
     hands = {}
-    for name, suffix in HAND_BODIES.items():
+    for name, side in ("lead", "L"), ("trail", "R"):
+        suffix = HAND_BODY_SUFFIX[side]
         b = _body_id(model, suffix)
         hands[name] = (np.array(data.xpos[b]), np.array(data.xmat[b]).reshape(3, 3))
     return Pose(np.array(data.xpos), links, np.array(data.site_xpos[sites]), hands)
@@ -111,7 +116,7 @@ def render_figure(rows: dict[str, Pose], out: Path) -> Path:
             ax.set_title(f"{label}: {view}", fontsize=9)
             ax.set_xlabel("m")
             ax.set_ylabel("m")
-            inset = ax.inset_axes((0.62, 0.55, 0.36, 0.42))
+            inset = ax.inset_axes((0.02, 0.02, 0.30, 0.30))
             _draw(inset, pose, h, v, detail=True)
             centre = pose.club[0]
             inset.set_xlim(centre[h] - 0.3, centre[h] + 0.3)
