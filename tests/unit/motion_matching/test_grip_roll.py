@@ -266,3 +266,56 @@ def test_neutral_grip_roll_is_alpha_plus_the_native_frame_offset() -> None:
     for alpha in (-30.0, -10.73, 20.0):
         assert roll(alpha) == pytest.approx(alpha + offset, abs=1e-6)
     assert roll(-10.73) == pytest.approx([15.0, 15.0], abs=0.1)
+
+
+def test_hx_alpha_zero_reads_zero_degrees_face_on_at_flagship_address() -> None:
+    """HX alpha is face-on referenced (#14633): alpha 0 is vertical, not native +25.7 deg."""
+    from src.shared.python.motion_matching.grip_contract import (
+        ALPHA_FACE_ON_ZERO_OFFSET_DEG,
+        HandAngles,
+        grip_matrix,
+    )
+
+    native_path = (
+        Path(__file__).resolve().parents[3]
+        / "docs/development/simscape_tour_matching/native_evidence/native_geometry_spec_9967.json"
+    )
+    native_doc = json.loads(native_path.read_text(encoding="utf-8"))
+    native_l = next(
+        j
+        for j in native_doc["joints"]
+        if str(j.get("child", "")).endswith("Clubface Vector")
+    )
+    n = np.asarray(native_l["child_to_follower"], float)[:3, :3]
+    closure = np.asarray(native_doc["closure"]["placement_b"], float)[:3, :3]
+    native_r = next(
+        j
+        for j in native_doc["joints"]
+        if str(j.get("child", "")).endswith("RHandStandoff")
+    )
+    n_r = closure @ np.asarray(native_r["child_to_follower"], float)[:3, :3]
+
+    club_rot = FLAGSHIP_CLUB_ROTATION
+    shaft = club_rot @ np.array([0.0, 1.0, 0.0])
+    e_h, e_v = reference_axes(shaft, TargetFrame())
+
+    def roll_hx(side_native: np.ndarray, angles: HandAngles) -> float:
+        follower = side_native @ grip_matrix(
+            angles.alpha_deg, angles.psi_deg, angles.gamma_deg
+        )
+        dorsal = follower[:, 0]
+        dorsal = dorsal - float(dorsal @ np.array([0.0, 1.0, 0.0])) * np.array(
+            [0.0, 1.0, 0.0]
+        )
+        dorsal /= np.linalg.norm(dorsal)
+        normal = -(club_rot @ dorsal)
+        from src.shared.python.motion_matching.grip_roll import _roll_deg
+
+        return _roll_deg(normal, e_h, e_v, shaft)
+
+    neutral_hx = HandAngles(0.0, 40.0, 0.0)
+    assert roll_hx(n, neutral_hx) == pytest.approx(0.0, abs=0.5)
+    assert roll_hx(n_r, neutral_hx) == pytest.approx(0.0, abs=0.5)
+    strong_hx = HandAngles(15.0, 40.0, 0.0)
+    assert roll_hx(n, strong_hx) == pytest.approx(15.0, abs=0.5)
+    assert pytest.approx(25.733, abs=0.01) == ALPHA_FACE_ON_ZERO_OFFSET_DEG
