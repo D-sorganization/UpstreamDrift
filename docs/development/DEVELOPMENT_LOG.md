@@ -937,6 +937,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14595 · CI Standard Sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 Workflow-Wide and Passes Pip-Audit --Timeout 60, so Transient PyPI Read Timeouts No Longer Fail CI
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14595
+- **Branch:** merged via #14597
+- **PR:** #14597
+- **Paths:** see #14597
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`807605a6`; collated from changes/14595-ci-standard-sets-pip-retries-10-and-pip.md)
+- **Summary:** CI Standard sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 workflow-wide and passes pip-audit --timeout 60, so transient PyPI read timeouts no longer fail CI
+- **Next step:** Shipped in PR #14597.
+
 ### DL-#14566 · SHOW-B2: SkillFamily Schema (Impact-Condition Mean/Cov + Provenance), Assumption-Marked Presets, Registry, PlayerProfile Link
 
 - **State:** shipped
@@ -1099,10 +1112,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14469
 - **Branch:** merged via #14548
-- **PR:** #14548
+- **PR:** #14548, #14602
 - **Paths:** see #14548
 - **Started:** 2026-11-04
-- **Last verified:** 2026-11-04 (`fadc7ee1`; collated from changes/14469-putting-counter-torque-core.md)
+- **Last verified:** 2026-11-05 (`12fecba2`; collated from changes/14469-putting-counter-torque-route.md)
 - **Summary:** Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio
 - **Next step:** Shipped in PR #14548.
 
