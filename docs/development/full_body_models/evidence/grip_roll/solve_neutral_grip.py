@@ -11,6 +11,7 @@ Run from the repo root with ``--spec`` the pre-change spec.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -153,6 +154,30 @@ def violations(spec: dict, order: list[str], q: np.ndarray) -> dict[str, dict]:
     return found
 
 
+def record_fixture_provenance(club: str) -> None:
+    """Re-pin ``provenance.json`` to the in-place re-solved fixture of ``club``.
+
+    The pipeline-origin fields keep describing the capture-chain run; the new
+    ``neutral_grip_resolve`` block records what A2 changed and under which spec.
+    """
+    path = ROOT / "tests/fixtures/club_face/provenance.json"
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    record = doc["clubs"][club]
+    npz = ROOT / f"tests/fixtures/club_face/swing_q_{club}.npz"
+    record["neutral_grip_resolve"] = {
+        "issue": 14551,
+        "script": "docs/development/full_body_models/evidence/grip_roll/"
+        "solve_neutral_grip.py",
+        "previous_fixture_sha256": record["fixture_sha256"],
+        "showpiece_spec_sha256": hashlib.sha256(SPEC.read_bytes()).hexdigest(),
+        "note": "swing and address pose re-solved in place for the 15 deg neutral "
+        "grip at the unchanged club path; the fields above describe the "
+        "capture-chain run the fixture was first generated from",
+    }
+    record["fixture_sha256"] = hashlib.sha256(npz.read_bytes()).hexdigest()
+    path.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--spec", type=Path, default=SPEC)
@@ -177,7 +202,15 @@ def main() -> int:
     ap.add_argument(
         "--address-pose", help="club key in tests/fixtures/club_face/address_poses.json"
     )
+    ap.add_argument(
+        "--record-provenance",
+        metavar="CLUB",
+        help="re-pin club_face/provenance.json to the re-solved fixture and exit",
+    )
     args = ap.parse_args()
+    if args.record_provenance:
+        record_fixture_provenance(args.record_provenance)
+        return 0
     spec = json.loads(args.spec.read_text(encoding="utf-8"))
     q0 = np.load(args.q)["q"][0]
     before = measure(args.spec.read_bytes(), q0)

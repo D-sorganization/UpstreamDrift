@@ -146,7 +146,8 @@ FLAGSHIP_CLUB_ROTATION = Rotation.from_matrix(
 
 
 EVIDENCE = SPEC.parent / "evidence/grip_roll"
-IK = SPEC.parent / "evidence/ground_support/anthro_driver_drake/ik_trajectory.npz"
+# the neutral-grip address frame solved by solve_neutral_grip.py (showpiece spec hash)
+IK = EVIDENCE / "address_frame_neutral.npz"
 
 
 def test_flagship_driver_grip_is_neutral_15_degrees_face_on() -> None:

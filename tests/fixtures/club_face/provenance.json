@@ -274,7 +274,7 @@
     "weight": 3.0
    },
    "face_weight": 3.0,
-   "fixture_sha256": "df7802600828a7e04158cec5cdb487505a5ba1fff0c15044756540c5eb68bc0a",
+   "fixture_sha256": "00c7e47295f9fb6190f8a5516bbf5c9622a4db28c592c4400e6eb14a79037458",
    "foot_progression": {
     "address_model_deg": {
      "left": 16.517857284333843,
@@ -351,6 +351,13 @@
     "ik": 0.02841851376477573,
     "reference": 0.027988040455697336,
     "tracking": 0.05806121632252992
+   },
+   "neutral_grip_resolve": {
+    "issue": 14551,
+    "note": "swing and address pose re-solved in place for the 15 deg neutral grip at the unchanged club path; the fields above describe the capture-chain run the fixture was first generated from",
+    "previous_fixture_sha256": "df7802600828a7e04158cec5cdb487505a5ba1fff0c15044756540c5eb68bc0a",
+    "script": "docs/development/full_body_models/evidence/grip_roll/solve_neutral_grip.py",
+    "showpiece_spec_sha256": "249c938e1e0b5126f721ed7ae682ad3aef06806a040b87c9c270c290e8ce64a0"
    },
    "pipeline_argv": [
     "--spec",

@@ -38,8 +38,8 @@ V1_IDENTITIES = {
         "4f7ba8250a152c1ce5db86abf33e66b77510bd4c7c58c02f7890a86a97dd355a",
     ),
     "full_body_spec_anthro_driver.json": (
-        "c038ba132971960360fa324147938422291606eb5de72c32764e19e8679fcb61",
-        "74b5f6ff4965bbb0a8f943f2e4ae8a006b8ad44bf1c25cb15ca6340a590a58c1",
+        "249c938e1e0b5126f721ed7ae682ad3aef06806a040b87c9c270c290e8ce64a0",
+        "a4f7c3bf7186ff3c760032e6ac3c71d5da779ba57fb939bb33f2adb86d3c4694",
     ),
     "full_body_spec_anthro_iron7.json": (
         "5715ad935765cd37f7c5ee2abd2a4a1b2169ce5bc920e4d4eddf6af5a7833643",
