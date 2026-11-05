@@ -30,6 +30,10 @@ from pathlib import Path
 from typing import Any
 
 from src.shared.python.contracts import require
+from src.shared.python.impact_optimization.impact_sample import (
+    TRANSIENT_NOTE,
+    impact_sample,
+)
 from src.shared.python.impact_optimization.speed_continuation import LadderSpec
 
 logger = logging.getLogger(__name__)
@@ -65,7 +69,10 @@ CONTROLLED_JOINTS = frozenset(
         "LWInputY",
     }
 )
-WINDOW_START, WINDOW_STEPS = 1225, 100  # impact is near step 1325 of the bundle
+#: Window start and the (exclusive) end of the impact search range: the bundle's
+#: reference clubhead speed peaks at step 1330.  The impact sample inside it
+#: comes from :func:`impact_sample` (D44), not from a fixed step.
+WINDOW_START, SEARCH_END = 1225, 1331
 
 
 def select_controlled(order: Sequence[str]) -> tuple[str, ...]:
@@ -126,21 +133,76 @@ def _report_text(
     return f"{table}\nTorque bindings (class named on each line):\n{bullets}"
 
 
+def _impact_steps(
+    model: Any, ids: Sequence[int], site: int, bundle: Any
+) -> tuple[int, dict[str, Any]]:  # pragma: no cover - part of the held real run
+    """Window length so the last sample is the D44 impact sample, with its receipt.
+
+    The bundle records no ball position, so the rule falls back to the lowest
+    clubhead height in ``[WINDOW_START, SEARCH_END)``.
+    """
+    import mujoco
+    import numpy as np
+
+    data = mujoco.MjData(model)
+    path = []
+    for t in range(WINDOW_START, SEARCH_END):
+        for k, j in enumerate(ids):
+            data.qpos[model.jnt_qposadr[j]] = bundle.reference_q[t][k]
+        mujoco.mj_kinematics(model, data)
+        path.append(np.array(data.site_xpos[site], dtype=float))
+    idx = impact_sample(np.asarray(path))
+    require(idx >= 1, "the impact sample must follow the window start", idx)
+    receipt = {
+        "bundle_sample": WINDOW_START + idx,
+        "rule": "minimum clubhead height in the search range (no ball position)",
+        "search_range": [WINDOW_START, SEARCH_END],
+        "transient": TRANSIENT_NOTE,
+    }
+    return idx, receipt
+
+
+def _scene(
+    spec_bytes: bytes, spec: Any
+) -> tuple[Any, tuple[str, ...], list[int], int, Any]:
+    """MuJoCo model, coordinate order, joint ids, clubhead site and the C2 impact reader."""  # pragma: no cover
+    import mujoco
+
+    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+        export_full_body_mjcf,
+    )
+    from src.shared.python.impact_optimization.full_body_ladder import (
+        make_mujoco_impact_fn,
+    )
+    from src.shared.python.impact_parameters import TargetFrame
+    from src.shared.python.impact_parameters.adapters import club_face_spec_from_spec
+
+    xml, meta = export_full_body_mjcf(spec_bytes)
+    model = mujoco.MjModel.from_xml_string(xml)
+    order = tuple(meta["coordinate_order"])
+    ids = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, n) for n in order]
+    site = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_SITE, meta["frame_sites"]["Clubhead"]
+    )
+    body = mujoco.mj_id2name(
+        model, mujoco.mjtObj.mjOBJ_BODY, int(model.site_bodyid[site])
+    )
+    fn = make_mujoco_impact_fn(
+        model, ids, body, TargetFrame(), club_face_spec_from_spec(spec)
+    )
+    return model, order, ids, site, fn
+
+
 def _run(
     out: Path,
     baseline_only: bool = False,
     default_policy: bool = False,
     bundle_path: Path = BUNDLE,
 ) -> int:  # pragma: no cover - the real run is held (D24)
-    import mujoco
     import numpy as np
 
-    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
-        export_full_body_mjcf,
-    )
     from src.shared.python.impact_optimization.full_body_ladder import (
         BaselineBand,
-        make_mujoco_impact_fn,
         run_full_body_ladder,
     )
     from src.shared.python.impact_optimization.full_body_rollout import (
@@ -159,8 +221,6 @@ def _run(
     from src.shared.python.impact_optimization.trajectory_optimiser import (
         OptimiserConfig,
     )
-    from src.shared.python.impact_parameters import TargetFrame
-    from src.shared.python.impact_parameters.adapters import club_face_spec_from_spec
     from src.shared.python.loop_nullspace.capacity import CapacitySubject
     from src.shared.python.motion_matching.full_body_v2_showpiece import SHOWPIECE_V2
     from src.shared.python.motion_matching.same_input.bundle import InputBundle
@@ -173,20 +233,10 @@ def _run(
     spec_bytes = SHOWPIECE_V2.read_bytes()
     spec = json.loads(spec_bytes)
     bundle = InputBundle.load(bundle_path)
-    xml, meta = export_full_body_mjcf(spec_bytes)
-    model = mujoco.MjModel.from_xml_string(xml)
-    order = tuple(meta["coordinate_order"])
-    ids = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, n) for n in order]
-    site = mujoco.mj_name2id(
-        model, mujoco.mjtObj.mjOBJ_SITE, meta["frame_sites"]["Clubhead"]
-    )
-    body = mujoco.mj_id2name(
-        model, mujoco.mjtObj.mjOBJ_BODY, int(model.site_bodyid[site])
-    )
-    impact_fn = make_mujoco_impact_fn(
-        model, ids, body, TargetFrame(), club_face_spec_from_spec(spec)
-    )
+    model, order, ids, site, impact_fn = _scene(spec_bytes, spec)
     a = WINDOW_START
+    steps, sample_receipt = _impact_steps(model, ids, site, bundle)
+    logger.info("impact sample: %s", sample_receipt["bundle_sample"])
     plant = VectorPlant("mujoco", spec_bytes)
 
     def window(policy: StepPolicy) -> RolloutWindow:
@@ -194,7 +244,7 @@ def _run(
             plant,
             np.asarray(bundle.reference_q[a], dtype=float),
             np.asarray(bundle.reference_v[a], dtype=float),
-            np.asarray(bundle.efforts[a : a + WINDOW_STEPS], dtype=float),
+            np.asarray(bundle.efforts[a : a + steps], dtype=float),
             bundle.dt_s,
             impact_fn,
             policy,
@@ -224,7 +274,7 @@ def _run(
         (*envelope.assumed_torque_slots, *envelope.assumed_velocity_slots),
         "assumed limit slot (not a measured value)",
     )
-    summary = summarise_ladder(run, checks, notes)
+    summary = {**summarise_ladder(run, checks, notes), "impact_sample": sample_receipt}
     out.mkdir(parents=True, exist_ok=True)
     write_summary(summary, out / "summary.json")
     report = _report_text(run, envelope, order, subject, notes)
