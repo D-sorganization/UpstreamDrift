@@ -54,6 +54,13 @@ describe("small lengths", () => {
   });
 });
 
+describe("break lengths (#14466)", () => {
+  it("shows centimetres in metric and inches in imperial, like format_read", () => {
+    expect(formatQuantity(0.38, "breakLength", "metric", 1)).toBe("38.0 cm");
+    expect(formatQuantity(0.0254, "breakLength", "imperial", 1)).toBe("1.0 in");
+  });
+});
+
 describe("unit preference", () => {
   beforeEach(() => localStorage.clear());
 

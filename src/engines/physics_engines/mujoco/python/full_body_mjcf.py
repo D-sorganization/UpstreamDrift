@@ -30,6 +30,7 @@ from src.shared.python.motion_matching.full_body_spec import order_full_body_joi
 from src.shared.python.motion_matching.full_body_v2_coupling import (
     trunk_coupling_equalities,
 )
+from src.shared.python.motion_matching.neck_rom import NECK_ROM, neck_range_rad
 
 
 def _build_full_body_kinematics(
@@ -62,6 +63,18 @@ def _build_full_body_kinematics(
     ):
         raise ValueError("Body or coordinate inventory was not preserved")
     return elements, offsets
+
+
+def _limit_neck_joints(root: ET.Element) -> None:
+    """Enforce the cited neck ROM (#14553) on the ``NeckInput*`` joints by name.
+
+    Name-based so it holds wherever the neck attaches (pelvis-torso chain today,
+    the thoracic body once A3 re-parents it).
+    """
+    for joint in root.iter("joint"):
+        if joint.get("name") in NECK_ROM:
+            joint.set("limited", "true")
+            joint.set("range", _numbers(neck_range_rad(joint.get("name", ""))))
 
 
 def _attach_full_body_sites(
@@ -148,6 +161,7 @@ def export_full_body_mjcf(
     appearance: AppearanceDocument | None = None,
     with_head: bool = False,
     require_grip_binding: bool = False,
+    neck_limits: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     """Export the full-body specification to MJCF with 41 scalar joints and contact sites.
 
@@ -161,6 +175,9 @@ def export_full_body_mjcf(
     spec gets one rigid trunk visual per segment (pelvis, ``trunk_lumbar``,
     thorax), each on its own body, so the visuals follow the lumbar and
     thoracic joints (HRG-D3, #13174).
+
+    ``neck_limits=True`` compiles the cited neck ROM (#14553) into ``NeckInput*``;
+    off by default (necromatcher needs ``limited="false"`` and hashes that XML).
     """
     from src.shared.python.grip_contact.binding_manifest import (
         build_spec_grip_binding_manifest,
@@ -202,6 +219,8 @@ def export_full_body_mjcf(
     ET.SubElement(default_contact, "geom", contype="0", conaffinity="0")
 
     elements, offsets = _build_full_body_kinematics(root, spec)
+    if neck_limits:
+        _limit_neck_joints(root)
     frame_sites, contact_sites = _attach_full_body_sites(root, elements, offsets, spec)
     _add_trunk_coupling(root, spec)  # SHOW-A3: optional, off by default
     visual_meta = None
