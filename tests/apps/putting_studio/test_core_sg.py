@@ -8,10 +8,11 @@ side-slope grid. The batch's strokes gained, the E(d) chart and the optimal
 pace now read it. Golden parity: the studio's E(d) and strokes gained on the
 committed curve equal the core ``ExpectedPuttsCurve`` and ``score_putt``.
 
-A full regeneration takes about an hour (one policy iteration per slope at
-about a second per skill-model putt), so freshness is checked as "the file is
-the generator's rendering of its data" and the core arguments are checked
-against the core's own parsers.
+A full regeneration takes about 25 minutes (one policy iteration per slope at
+about a second per skill-model putt on a sloped green), so the flat curve is
+re-solved as the golden check, the file is checked as the generator's
+rendering of its data, and the core arguments are checked against the core's
+own parsers.
 """
 
 from __future__ import annotations
@@ -66,6 +67,14 @@ def _node(expression: str) -> object:
 
 def test_fixture_is_the_rendering_of_its_own_data(committed: dict[str, Any]) -> None:
     assert gen.render(committed) == _FIXTURE.read_text(encoding="utf-8")
+
+
+def test_golden_curve_matches_the_core(committed: dict[str, Any]) -> None:
+    # Ties the fixture to the core: the flat curve re-solved by sg_study
+    # (seconds; the sloped cells are the slow part) is the committed one.
+    slope = gen.SLOPES_PCT[0]
+    expected = gen.cell_curve(service_sg.sg_study(gen.cell_args(slope)), slope)
+    assert committed["curves"][0] == expected
 
 
 def test_fixture_holds_a_solved_curve_per_slope(committed: dict[str, Any]) -> None:
