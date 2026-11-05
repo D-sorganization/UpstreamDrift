@@ -62,17 +62,10 @@ def test_outputs_must_live_outside_the_repo(tmp_path: Path) -> None:
         require_outside_repo(Path(__file__).resolve().parents[3] / "docs" / "x")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=ValueError,
-    reason="run-gate precondition (D35): trunk ROM (show-neck, after #14696) and "
-    "LS/RS shoulder ROM (show-sg) are not yet declared on the v2 spec",
-)
 def test_run_gate_envelope_builds_on_v2_without_unbounded_rom() -> None:
     """Precondition for the real ladder run: no ``allow_unbounded_rom`` (D29).
 
-    Strict xfail: it flips to a failure the moment the ROMs land, so the marker
-    must then be removed and the run gate is open.
+    Trunk (D35) and shoulder (D39) ROM are declared, so the gate is open.
     """
     from src.shared.python.impact_optimization.physiological_envelope import (
         DEFAULT_LIMITS_PATH,
