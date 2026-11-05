@@ -17,6 +17,7 @@ from src.shared.python.impact_parameters.conditions import ImpactConditions
 from src.shared.python.impact_parameters.flight_report import (
     FlightSummary,
     flight_for_impact,
+    _invalid_reason,
     overlay_lines,
     swing_state_from_series,
 )
@@ -118,3 +119,30 @@ def test_extreme_slice_outside_model_validity_is_flagged_not_presented():
     assert "INVALID" in text and "carry n/a" in text
     good = flight_for_impact(_series(), 1, FRAME)
     assert good.valid and good.invalid_reason == ""
+
+
+def _path(end_azimuth_deg: float, reverse: bool = False) -> np.ndarray:
+    """Straight 3-point ground track ending at the given azimuth off the line."""
+    a = math.radians(end_azimuth_deg)
+    end = np.array([200.0 * math.cos(a), 200.0 * math.sin(a), 0.0])
+    mid = end / 2.0
+    if reverse:
+        mid = np.array([end[0] + 30.0, end[1] / 2.0, 20.0])  # overshoots, then returns
+    return np.array([[0.0, 0.0, 0.0], mid, end])
+
+
+@pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        (_path(40.0), ""),
+        (_path(50.0), "50 deg off the target line"),
+        (_path(10.0, reverse=True), "reverses"),
+        (
+            np.array([[0.0, 0.0, 0.0], [0.0, 5.0, 3.0], [0.0, 9.0, 0.0]]),
+            "off the target line",
+        ),  # x stays <= 0
+    ],
+)
+def test_invalid_reason_branches(path, expected):
+    reason = _invalid_reason(path)
+    assert (reason == "") if expected == "" else (expected in reason)

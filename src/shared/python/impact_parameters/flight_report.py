@@ -11,7 +11,8 @@ sign is + = golfer's right of the target line (an open face goes right).
 The clubhead angular velocity is passed as zero (the series carries none), so
 gear-effect spin is not modelled.  A flight outside the simulator's validity
 (no spin decay: extreme sidespin turns the ball past 90 degrees) is flagged
-``valid=False`` and never presented as a result.
+``valid=False`` and never presented as a result.  The 45 degree landing-azimuth
+limit is an assumption (a real driver lands well inside it), not a measured bound.
 """
 
 from __future__ import annotations
