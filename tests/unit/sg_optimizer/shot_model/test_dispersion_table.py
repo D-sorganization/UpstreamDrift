@@ -12,6 +12,7 @@ from src.shared.python.contracts import ContractViolationError
 from src.shared.python.sg_optimizer.shot_model.dispersion_table import (
     DispersionTable,
     build_table,
+    Convergence,
     check_convergence,
     main,
     standard_normals,
@@ -108,10 +109,25 @@ def test_lie_modifier_hook_enables_other_lies() -> None:
     assert ro.mean[0] < fw.mean[0]
 
 
-def test_cli_records_convergence_in_runtime_and_loads_back(tmp_path: Path) -> None:
+def test_convergence_is_hashed_provenance_and_tamper_evident(tmp_path: Path) -> None:
+    conv = Convergence(converged=False, max_rel_change=0.05)
+    t = _build(n=200, convergence=conv)
+    assert t.provenance["convergence"] == {"converged": False, "max_rel_change": 0.05}
+    assert t.table_hash != _build(n=200).table_hash
+    p = tmp_path / "t.json"
+    t.to_json(p)
+    assert DispersionTable.from_json(p) == t
+    raw = json.loads(p.read_text(encoding="utf-8"))
+    raw["provenance"]["convergence"]["converged"] = True
+    p.write_text(json.dumps(raw), encoding="utf-8")
+    with pytest.raises(ContractViolationError, match="hash"):
+        DispersionTable.from_json(p)
+
+
+def test_cli_records_convergence_in_provenance_and_loads_back(tmp_path: Path) -> None:
     out = tmp_path / "t.json"
     assert main(["--family", "tour", "--n", "8", "--out", str(out)]) == 0
     table = DispersionTable.from_json(out)
-    assert table.runtime["convergence_max_rel_change"] >= 0.0
-    assert table.runtime["converged"] in (0.0, 1.0)
+    assert table.provenance["convergence"]["max_rel_change"] >= 0.0
+    assert isinstance(table.provenance["convergence"]["converged"], bool)
     assert table.provenance["n"] == 8
