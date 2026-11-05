@@ -199,10 +199,14 @@ class TorquePanel(QGroupBox):
         )
 
     def torque_input_ranges(self) -> dict[str, tuple[float, float]]:
-        """Each couple input's core range in N·m, keyed by its field name."""
+        """Each couple input's spin-box range in N·m, keyed by its field name."""
+        system = self._shown_units
         return {
-            field: getattr(ct, range_key)
-            for field, range_key in self._torque_fields.values()
+            field: (
+                from_display_torque(spin.minimum(), system),
+                from_display_torque(spin.maximum(), system),
+            )
+            for spin, (field, _) in self._torque_fields.items()
         }
 
     def _set_torque_spins(self, values_nm: dict[QDoubleSpinBox, float]) -> None:

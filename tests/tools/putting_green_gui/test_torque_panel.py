@@ -105,9 +105,17 @@ def test_each_couple_input_takes_its_own_core_range(
 ) -> None:
     """The gust input is bounded by GUST_RANGE_NM, not the preload range (#14617)."""
     monkeypatch.setattr(ct, "GUST_RANGE_NM", (0.0, 3.0))
-    panel = TorquePanel(lambda: UnitSystem.METRIC)
-    assert panel.torque_input_ranges() == {
+    units = [UnitSystem.METRIC]
+    panel = TorquePanel(lambda: units[0])
+    expected = {
         "preload_nm": ct.PRELOAD_RANGE_NM,
         "off_preload_nm": ct.PRELOAD_RANGE_NM,
         "gust_impulse_nm": (0.0, 3.0),
     }
+    for system in (UnitSystem.METRIC, UnitSystem.IMPERIAL):
+        units[0] = system
+        panel.redraw()
+        ranges = panel.torque_input_ranges()
+        assert ranges.keys() == expected.keys()
+        for field, bounds in expected.items():
+            assert ranges[field] == pytest.approx(bounds, abs=1e-3), (system, field)
