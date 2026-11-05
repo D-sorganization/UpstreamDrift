@@ -2741,6 +2741,11 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-05 | #14590 | SHOW-B2: SkillFamily schema (impact-condition mean/cov + provenance), assumption-marked presets, registry, PlayerProfile link |
+| 2026-11-05 | #14596 | SHOW-C3b: trust-region torque optimiser with warm start and spline_trust_region backend entry |
+| 2026-11-05 | #14592 | Size-aware development-log archiver: archive oldest terminal entries when the log nears the byte cap |
+| 2026-11-05 | #14594 | Putting Green Simulator: the ud.putt_scene/1 export writes and reads impact_toe_m (optional on read, default 0.0, range-checked against IMPACT_TOE_RANGE_M), so a toe or heel strike round-trips |
+| 2026-11-05 | #14593 | React web UI: one command (npm run local) builds from the lockfile and serves it through the API from a clean checkout; CI Build Check runs the same clean-build check; README run steps; a test bars paid-API hosts and keys |
 | 2026-11-05 | #14589 | SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation |
 | 2026-11-05 | #14577 | SHOW-A3: optional lumbar:thoracic regional-split coupling (trunk_coupling, off by default) for the full-body-v2 trunk, MuJoCo joint equalities, and trunk joint-tree/mass/ROM contract tests |
 | 2026-11-05 | #14588 | Putting API: POST /solve-aim-3d solves the pace and line that hole a /simulate-3d putt on that route's own surface and head (core solve_aim, like the desktop Auto-Solve); the 3-D request models move to src/api/models/putting_green_requests.py |
