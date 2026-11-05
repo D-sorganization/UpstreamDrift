@@ -109,6 +109,11 @@ class ImpactSolution:
         """Impact speed of the solved swing (delegates to the outcome)."""
         return self.outcome.speed_mph
 
+    @property
+    def trajectory(self) -> np.ndarray:
+        """Rollout joint angles of the solved swing (delegates to the outcome)."""
+        return self.outcome.trajectory
+
 
 def _within_tolerance(
     impact: MeasuredImpact, target: ImpactTarget, tol: ImpactTolerance
