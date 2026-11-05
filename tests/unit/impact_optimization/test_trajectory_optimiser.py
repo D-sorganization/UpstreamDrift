@@ -9,6 +9,7 @@ region and the torque envelope.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -21,6 +22,7 @@ from src.shared.python.impact_optimization.physiological_envelope import (
 )
 from src.shared.python.impact_optimization.trajectory_optimiser import (
     ImpactTolerance,
+    face_to_path_deg,
     OptimiserConfig,
     RolloutOutcome,
     solve_impact_trajectory,
@@ -208,3 +210,9 @@ def test_warm_start_shape_is_checked() -> None:
             config=OptimiserConfig(n_knots=5),
             initial_knots=np.zeros((4, N)),
         )
+
+
+def test_face_to_path_is_nan_when_face_or_path_unobservable() -> None:
+    assert math.isnan(face_to_path_deg(_Impact(None, -4.0, 2.5, 100.0)))
+    assert math.isnan(face_to_path_deg(_Impact(3.0, None, 2.5, 100.0)))
+    assert face_to_path_deg(_Impact(3.0, -4.0, 2.5, 100.0)) == pytest.approx(7.0)
