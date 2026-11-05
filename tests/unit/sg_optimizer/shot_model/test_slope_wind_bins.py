@@ -80,9 +80,11 @@ def test_default_winds_keep_the_original_bins_and_new_bins_exist() -> None:
     assert {"head_15", "tail_15", "cross_15"} <= set(WIND_BINS)
 
 
+# Aim frame: lateral + is left, so a closed (smaller) face and a crosswind from
+# the right both move the ball to + (matches the real-pipeline adapter below).
 def _linear_sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
     return np.column_stack(
-        [2.0 * impacts[:, 0] - wind[0], 3.0 * impacts[:, 1] + wind[1]]
+        [2.0 * impacts[:, 0] - wind[0], -3.0 * impacts[:, 1] + wind[1]]
     )
 
 
@@ -115,7 +117,7 @@ def test_tables_carry_wind_and_slope_bins() -> None:
     calm = cell[("calm", "flat")]
     assert cell[("tail_15", "flat")].mean[0] > calm.mean[0]  # downwind carries farther
     assert cell[("cross_15", "flat")].mean[1] == pytest.approx(calm.mean[1] + 15.0)
-    assert cell[("calm", "above_5")].mean[1] < calm.mean[1]  # draw lie
+    assert cell[("calm", "above_5")].mean[1] > calm.mean[1]  # closed face draws left
     assert cell[("calm", "up_5")].mean[0] < calm.mean[0]  # speed lost on the slope
     assert calm == next(  # default build is unchanged for the flat/calm cell
         c
@@ -124,3 +126,33 @@ def test_tables_carry_wind_and_slope_bins() -> None:
         ).cells
         if (c.wind, c.slope) == ("calm", "flat")
     )
+
+
+def test_real_pipeline_wind_and_slope_cells_move_the_right_way() -> None:
+    """The B3 real-pipeline adapter (not the linear stand-in) honours the new bins."""
+    from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
+        PipelineLandingSimulator,
+    )
+
+    table = build_grid_table(
+        get_skill_family("tour"),
+        PipelineLandingSimulator(),
+        TableGrid(
+            skills=("driver",),
+            winds=("calm", "head_15", "tail_15", "cross_15"),
+            slopes=("flat", "up_5", "above_5"),
+        ),
+        n=40,
+        seed=1,
+        slope_modifier=make_slope_modifier,
+    )
+    cell = {(c.wind, c.slope): c for c in table.cells}
+    calm = cell[("calm", "flat")]
+    assert (
+        cell[("tail_15", "flat")].mean[0]
+        > calm.mean[0]
+        > cell[("head_15", "flat")].mean[0]
+    )
+    assert abs(cell[("cross_15", "flat")].mean[1] - calm.mean[1]) > 10.0
+    assert cell[("calm", "above_5")].mean[1] > calm.mean[1]  # closed face draws left
+    assert cell[("calm", "up_5")].mean[0] != calm.mean[0]
