@@ -1,0 +1,46 @@
+name: PR Size Gate
+
+# Fleet lane rule: ≤500 changed lines (added+deleted) unless exempt (#14741).
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-size-gate-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  pr-size:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    name: pr-size
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Check PR diff size
+        shell: bash
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "merge_group" ]; then
+            base="${{ github.event.merge_group.base_sha }}"
+            head="${{ github.event.merge_group.head_sha }}"
+          else
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          fi
+          python3 scripts/ci/check_pr_diff_size.py \
+            --repo-root "${GITHUB_WORKSPACE}" \
+            --base-sha "$base" \
+            --head-sha "$head"

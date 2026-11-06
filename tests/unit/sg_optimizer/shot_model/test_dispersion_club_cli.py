@@ -22,6 +22,7 @@ from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
     REPRESENTATIVE_CLUB,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_family import SKILL_NAMES
+from src.shared.python.sg_optimizer.shot_model.ground_runout import GROUND_MODEL_ID
 from src.shared.python.sg_optimizer.shot_model.skill_registry import get_skill_family
 from src.shared.python.sg_optimizer.shot_model.table_model import (
     CLUB_SKILL,
@@ -32,7 +33,14 @@ pytestmark = pytest.mark.unit
 FAMILY = get_skill_family("tour")
 
 
-def _sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
+def _sim(
+    impacts: np.ndarray,
+    skill: str,
+    wind: tuple[float, float],
+    slope: str,
+    lie: str,
+):
+    _ = (slope, lie)
     return np.stack([2.0 * impacts[:, 0], 3.0 * impacts[:, 1]], axis=1)
 
 
@@ -95,6 +103,10 @@ def test_table_shot_model_reads_a_club_labelled_table() -> None:
 
 
 def test_cli_ground_table_has_lies_slopes_clubs_and_convergence(tmp_path: Path) -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for table CLI")
     out = tmp_path / "ground.json"
     argv = ["--family", "tour", "--n", "8", "--ground", "--out", str(out)]
     argv += ["--lies", "fairway,rough", "--slopes", "flat,up_5", "--winds", "calm"]
@@ -111,8 +123,12 @@ def test_cli_ground_table_has_lies_slopes_clubs_and_convergence(tmp_path: Path) 
 def test_cli_without_ground_keeps_the_carry_table_and_skill_labels(
     tmp_path: Path,
 ) -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for table CLI")
     out = tmp_path / "carry.json"
     assert main(["--family", "tour", "--n", "8", "--out", str(out)]) == 0
     table = DispersionTable.from_json(out)
-    assert "ground_model" not in table.provenance
+    assert table.provenance["ground_model"] == GROUND_MODEL_ID
     assert all(c.club == c.skill for c in table.cells)

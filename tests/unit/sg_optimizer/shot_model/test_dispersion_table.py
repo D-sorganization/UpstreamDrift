@@ -10,34 +10,47 @@ import pytest
 
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.sg_optimizer.shot_model.dispersion_table import (
-    DispersionTable,
-    build_table,
     Convergence,
+    DispersionTable,
+    TableGrid,
+    build_grid_table,
+    build_table,
     check_convergence,
     main,
     standard_normals,
 )
+from src.shared.python.sg_optimizer.shot_model.dispersion_lie import (
+    lie_modifier_for_table,
+)
+from src.shared.python.sg_optimizer.shot_model.ground_runout import (
+    SKILL_CLUB,
+    rest_position,
+)
 from src.shared.python.sg_optimizer.shot_model.skill_registry import get_skill_family
+from src.shared.python.sg_optimizer.shot_model.slope_wind_bins import (
+    make_slope_modifier,
+)
+from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
+    REPRESENTATIVE_CLUB,
+)
 
 pytestmark = pytest.mark.unit
 
 
-def _linear_sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
-    """Analytic stand-in: along = 2 * speed - headwind, lateral = 3 * face."""
+def _linear_sim(
+    impacts: np.ndarray, skill: str, wind: tuple[float, float], slope: str, lie: str
+):
+    """Analytic carry + documented runout."""
     along = 2.0 * impacts[:, 0] - wind[0]
     lateral = 3.0 * impacts[:, 1] + wind[1]
-    return np.stack([along, lateral], axis=1)
+    carry = np.stack([along, lateral], axis=1)
+    speed = np.clip(2.0 * impacts[:, 0], 10.0, 55.0)
+    return rest_position(carry, slope=slope, lie=lie, landing_speed_ms=speed)
 
 
 def _build(seed: int = 1, n: int = 4000, **kw):
-    return build_table(
-        get_skill_family("tour"),
-        _linear_sim,
-        skills=("driver", "mid_iron"),
-        n=n,
-        seed=seed,
-        **kw,
-    )
+    opts = {"skills": ("driver", "mid_iron"), "n": n, "seed": seed, **kw}
+    return build_table(get_skill_family("tour"), _linear_sim, **opts)
 
 
 def test_standard_normals_prefix_stable() -> None:
@@ -59,11 +72,12 @@ def test_cell_statistics_match_analytic_moments() -> None:
     t = _build()
     cell = t.lookup("driver", "driver", "fairway", "calm", "flat")
     spec = get_skill_family("tour").skills["driver"].distribution
-    assert cell.mean[0] == pytest.approx(2 * spec.mean[0], abs=0.3)
-    assert cell.sd[0] == pytest.approx(2 * spec.sd[0], rel=0.05)
+    carry_mean = 2 * spec.mean[0]
+    assert cell.mean[0] > carry_mean + 5.0  # bounce/roll adds downrange rest
+    assert cell.sd[0] == pytest.approx(2 * spec.sd[0], rel=0.08)
     assert cell.sd[1] == pytest.approx(3 * spec.sd[1], rel=0.05)
     head = t.lookup("driver", "driver", "fairway", "head_5", "flat")
-    assert head.mean[0] == pytest.approx(cell.mean[0] - 5.0, abs=1e-6)
+    assert head.mean[0] == pytest.approx(cell.mean[0] - 5.0, abs=1.0)
 
 
 def test_unknown_key_fails_closed() -> None:
@@ -125,9 +139,72 @@ def test_convergence_is_hashed_provenance_and_tamper_evident(tmp_path: Path) -> 
 
 
 def test_cli_records_convergence_in_provenance_and_loads_back(tmp_path: Path) -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for table CLI")
     out = tmp_path / "t.json"
     assert main(["--family", "tour", "--n", "8", "--out", str(out)]) == 0
     table = DispersionTable.from_json(out)
     assert table.provenance["convergence"]["max_rel_change"] >= 0.0
     assert isinstance(table.provenance["convergence"]["converged"], bool)
     assert table.provenance["n"] == 8
+    assert table.provenance["ground_model"] == "sg_runout_v1"
+
+
+def test_slope_bins_shift_downrange_mean() -> None:
+    t = build_grid_table(
+        get_skill_family("tour"),
+        _linear_sim,
+        TableGrid(
+            skills=("driver",),
+            lies=("fairway",),
+            winds=("calm",),
+            slopes=("flat", "up_5", "down_5"),
+        ),
+        n=3000,
+        seed=4,
+        slope_modifier=make_slope_modifier,
+    )
+    flat = t.lookup("driver", "driver", "fairway", "calm", "flat")
+    up = t.lookup("driver", "driver", "fairway", "calm", "up_5")
+    down = t.lookup("driver", "driver", "fairway", "calm", "down_5")
+    means = {flat.mean[0], up.mean[0], down.mean[0]}
+    assert len(means) == 3
+
+
+def test_club_column_uses_representative_club() -> None:
+    assert SKILL_CLUB["mid_iron"] == REPRESENTATIVE_CLUB["mid_iron"]
+    t = build_grid_table(
+        get_skill_family("tour"),
+        _linear_sim,
+        TableGrid(
+            skills=("mid_iron",),
+            lies=("fairway",),
+            winds=("calm",),
+            clubs=REPRESENTATIVE_CLUB,
+        ),
+        n=100,
+        seed=2,
+    )
+    t.lookup(
+        "mid_iron",
+        REPRESENTATIVE_CLUB["mid_iron"],
+        "fairway",
+        "calm",
+        "flat",
+    )
+
+
+def test_table_lie_modifier_lowers_rough_speed() -> None:
+    mod = lie_modifier_for_table(9)
+    t = _build(lies=("fairway", "rough"), lie_modifier=mod, winds=("calm",), n=4000)
+    fw = t.lookup("driver", "driver", "fairway", "calm", "flat")
+    ro = t.lookup("driver", "driver", "rough", "calm", "flat")
+    assert ro.mean[0] < fw.mean[0]
+
+
+def test_default_n_convergence_with_runout_linear_sim() -> None:
+    fam = get_skill_family("tour")
+    conv = check_convergence(fam, _linear_sim, "driver", n=12000, seed=0)
+    assert conv.converged, conv.max_rel_change

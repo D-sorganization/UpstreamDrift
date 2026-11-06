@@ -1,6 +1,6 @@
 """Impact conditions -> landing offsets via the repo's swing/ball-flight pipeline.
 
-Adapter for the dispersion tables (#14567): it maps one row of ``IMPACT_FIELDS``
+Adapter for the dispersion tables (#14567, #14610): it maps one row of ``IMPACT_FIELDS``
 (GCV-15 signs: +face open, +path in-to-out, +attack angle up; speed in mph,
 angles in degrees, strike offsets in mm) to a ``SwingState`` and runs
 ``SwingBallFlightPipeline``. Frame: x downrange, y left, z up; results are
@@ -105,7 +105,11 @@ class PipelineLandingSimulator:
         impacts: NDArray[np.float64],
         skill: str,
         wind: tuple[float, float],
+        slope: str = "flat",
+        lie: str = "fairway",
     ) -> NDArray[np.float64]:
+        """Carry or landing-state output; ``slope``/``lie`` match :data:`LandingSimulator` and are ignored here."""
+        _ = (slope, lie)
         pipe = self._pipeline(wind)
         out = np.empty((len(impacts), 5 if self._landing_state else 2))
         for i in range(len(impacts)):
