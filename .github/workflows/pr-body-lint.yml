@@ -26,3 +26,4 @@ jobs:
       pr_number: ${{ github.event.pull_request.number }}
       repo_owner: ${{ github.event.repository.owner.login }}
       repo_name: ${{ github.event.repository.name }}
+      report_only: "true"
