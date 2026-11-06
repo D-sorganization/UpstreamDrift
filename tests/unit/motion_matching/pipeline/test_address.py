@@ -16,7 +16,7 @@ SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
 
 
 def test_scaled_offsets_scales_femur_and_tibia() -> None:
-    from src.shared.python.motion_matching.pipeline.address import scaled_offsets
+    from src.shared.python.motion_matching.segment_scale_search import scaled_offsets
 
     offsets = {
         "RKneeOut": ("femur_r", (0.0, -0.4, 0.06)),
@@ -36,7 +36,7 @@ def test_scaled_offsets_scales_femur_and_tibia() -> None:
 
 
 def test_scaled_offsets_validates_inputs() -> None:
-    from src.shared.python.motion_matching.pipeline.address import scaled_offsets
+    from src.shared.python.motion_matching.segment_scale_search import scaled_offsets
 
     with pytest.raises(ValueError, match="positive scale factors"):
         scaled_offsets({}, femur=-1.0, tibia=1.0)
@@ -46,7 +46,9 @@ def test_scaled_offsets_validates_inputs() -> None:
 
 def test_search_segment_scales_finds_minimum_rms() -> None:
     from unittest.mock import MagicMock
-    from src.shared.python.motion_matching.pipeline.address import search_segment_scales
+    from src.shared.python.motion_matching.segment_scale_search import (
+        search_segment_scales,
+    )
 
     lane = MagicMock()
 
@@ -87,9 +89,57 @@ def test_search_segment_scales_finds_minimum_rms() -> None:
     assert any(entry["pinned_rms_m"] == 0.010 for entry in table)
 
 
+def test_search_segment_scales_tie_prefers_smaller_femur_then_tibia() -> None:
+    """Identical RMS must pick (femur, tibia) lexicographically smallest (#14771)."""
+    from unittest.mock import MagicMock
+    from src.shared.python.motion_matching.segment_scale_search import (
+        search_segment_scales,
+    )
+
+    lane = MagicMock()
+
+    def mock_pinned_rms(
+        doc_bytes: bytes,
+        attachments: dict,
+        q: np.ndarray,
+    ) -> float:
+        _ = doc_bytes, q
+        return 0.010
+
+    lane.pinned_rms.side_effect = mock_pinned_rms
+    hip_spec = {
+        "bodies": [
+            {"name": "femur_r", "solids": [], "contact_spheres": []},
+            {"name": "femur_l", "solids": [], "contact_spheres": []},
+            {"name": "tibia_r", "solids": [], "contact_spheres": []},
+            {"name": "tibia_l", "solids": [], "contact_spheres": []},
+        ],
+        "joints": [],
+        "marker_attachments": {},
+        "contact": {"spheres": []},
+    }
+    fixed = {"Waist": ("pelvis", (0.0, 0.0, 0.0))}
+    offsets = {
+        "RKneeOut": ("femur_r", (0.0, -0.4, 0.06)),
+        "RAnkleOut": ("tibia_r", (-0.01, -0.44, 0.055)),
+    }
+    q_address = np.zeros(10)
+
+    _, femur_scale, tibia_scale, table = search_segment_scales(
+        lane, hip_spec, fixed, offsets, q_address, grid=(0.95, 1.00)
+    )
+
+    assert femur_scale == 0.95
+    assert tibia_scale == 0.95
+    assert len(table) == 4
+    assert all(row["pinned_rms_m"] == pytest.approx(0.010) for row in table)
+
+
 def test_search_segment_scales_validates_inputs() -> None:
     from unittest.mock import MagicMock
-    from src.shared.python.motion_matching.pipeline.address import search_segment_scales
+    from src.shared.python.motion_matching.segment_scale_search import (
+        search_segment_scales,
+    )
 
     lane = MagicMock()
     with pytest.raises(ValueError, match="grid must not be empty"):
