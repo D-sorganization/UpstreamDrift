@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   lint:
-    uses: D-sorganization/Repository_Management/.github/workflows/reusable-pr-body-lint.yml@d3c5ff3fcb21e15997ca8668b8c9278e2e25dcff
+    uses: D-sorganization/Repository_Management/.github/workflows/reusable-pr-body-lint.yml@3b5e9f54febbd730bc2a650dc9193d26922ff49f
     with:
       pr_number: ${{ github.event.pull_request.number }}
       repo_owner: ${{ github.event.repository.owner.login }}
