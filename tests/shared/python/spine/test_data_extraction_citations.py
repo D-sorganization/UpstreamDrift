@@ -49,4 +49,7 @@ def test_every_journal_article_has_a_doi() -> None:
 def test_no_author_list_is_from_memory() -> None:
     text = EXTRACTION.read_text(encoding="utf-8")
     assert "from\nmemory" not in text and "from memory" not in text
-    assert "et al." not in text.split("## Source Index", 1)[1].split("\n## ", 1)[0]
+    truncated = [
+        s for s, (citation, _) in _source_index().items() if "et al." in citation
+    ]
+    assert not truncated, f"author lists cut to 'et al.': {truncated}"

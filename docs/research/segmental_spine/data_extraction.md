@@ -24,17 +24,18 @@ Extraction date: 2026-10-15.
 | source_id | Citation | DOI |
 |---|---|---|
 | bruno2015 | Bruno AG, Bouxsein ML, Anderson DE. Development and validation of a musculoskeletal model of the fully articulated thoracolumbar spine and rib cage. J Biomech Eng 137(8):081003 (2015). PMC5101035 | 10.1115/1.4030408 |
-| pearcy1984 | Pearcy MJ, Tibrewal SB. Axial rotation and lateral bending in the normal lumbar spine measured by three-dimensional radiography. Spine 9(6):582-587 (1984) | not retrieved |
-| fujii2007 | Fujii R, Sakaura H, Mukai Y, et al. Kinematics of the lumbar spine in trunk rotation: in vivo three-dimensional analysis using magnetic resonance imaging. Eur Spine J 16(11):1867-1874 (2007). PMC2223353 | not retrieved |
-| wilke1999 | Wilke HJ, Neef P, Caimi M, Hoogland T, Claes LE. New in vivo measurements of pressures in the intervertebral disc in daily life. Spine 24(8):755-762 (1999) | not retrieved |
+| pearcy1984 | Pearcy MJ, Tibrewal SB. Axial rotation and lateral bending in the normal lumbar spine measured by three-dimensional radiography. Spine 9(6):582-587 (1984) | 10.1097/00007632-198409000-00008 |
+| fujii2007 | Fujii R, Sakaura H, Mukai Y, Hosono N, Ishii T, Iwasaki M, Yoshikawa H, Sugamoto K. Kinematics of the lumbar spine in trunk rotation: in vivo three-dimensional analysis using magnetic resonance imaging. Eur Spine J 16(11):1867-1874 (2007). PMC2223353 | 10.1007/s00586-007-0373-3 |
+| wilke1999 | Wilke HJ, Neef P, Caimi M, Hoogland T, Claes LE. New in vivo measurements of pressures in the intervertebral disc in daily life. Spine 24(8):755-762 (1999) | 10.1097/00007632-199904150-00005 |
 | hosea1990 | Hosea TM, Gatt CJ, Galli KM. Biomechanical analysis of the golfer's back. In: Cochran AJ, ed. Science and Golf. London: E and FN Spon; 1990 | none |
 | lim2012 | Lim YT, Chow JW, Chae WS. Lumbar spinal loads and muscle activity during a golf swing. Sports Biomech 11(2):197-211 (2012) | 10.1080/14763141.2012.670662 |
 | sugaya1999 | Sugaya H, Tsuchiya A, Moriya H. Low back injury in elite and professional golfers: an epidemiologic and radiographic study. In: Farrally MR, Cochran AJ, eds. Science and Golf III. Human Kinetics; 1999 | none |
-| wu2002 | Wu G, Siegler S, Allard P, et al. ISB recommendation on definitions of joint coordinate system of various joints for the reporting of human joint motion, part I: ankle, hip, and spine. J Biomech 35(4):543-548 (2002) | not retrieved |
+| wu2002 | Wu G, Siegler S, Allard P, Kirtley C, Leardini A, Rosenbaum D, Whittle M, D'Lima DD, Cristofolini L, Witte H, Schmid O, Stokes I. ISB recommendation on definitions of joint coordinate system of various joints for the reporting of human joint motion, part I: ankle, hip, and spine. J Biomech 35(4):543-548 (2002) | 10.1016/s0021-9290(01)00222-6 |
 
-Author lists for fujii2007 and wu2002 beyond the first author are from
-memory and must be confirmed against the PDFs; the titles, venues, volumes and
-pages were confirmed from search metadata or text.
+Author lists, DOIs, venues, volumes, issues and pages for pearcy1984,
+fujii2007, wilke1999 and wu2002 match the publishers' Crossref DOI records
+(api.crossref.org, queried 2026-11-06). Crossref confirms citations only; it
+does not change any table's `verified_from_primary` flag.
 
 Correction to the brief: "Sutcliffe et al. 2008" crunch factor could not be
 found. The crunch factor is attributed in the literature to Sugaya et al.
@@ -379,11 +380,10 @@ verified_from_primary: true (abstract only)
    main-text PDF to re-confirm Tables B1-B5.
 2. Pearcy and Tibrewal 1984, Spine 9:582-587, full text with per-level axial
    rotation and coupled bend tables.
-3. Fujii 2007 PDF to confirm Table F1 and to read the paper's Table 1; and to
-   confirm the full author list and DOI.
+3. Fujii 2007 PDF to confirm Table F1 and to read the paper's Table 1.
 4. Wilke 1999: no action for Table W1; the 30/90 degree flexion, rotation and
    lateral-bending values quoted by Bruno are not in Table 1, so confirm in
-   the paper's figures or text if SPN-11a needs them (a DOI is also needed).
+   the paper's figures or text if SPN-11a needs them.
 5. Hosea, Gatt and Galli 1990 chapter (Science and Golf, E and FN Spon),
    L3-L4 compressive, shear, lateral-bend and torque loads.
 6. Lim, Chow and Chae 2012 full text for tabulated peak loads and timing.
