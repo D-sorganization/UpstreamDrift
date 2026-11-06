@@ -1037,6 +1037,7 @@
 {"path": "impact_optimization/full_body_ladder.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/full_body_ladder_run.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/full_body_rollout.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
+{"path": "impact_optimization/impact_sample.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/impact_target.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/kinematic_binding.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
 {"path": "impact_optimization/ladder_verification.py", "classification": "ud-only", "package": "impact_optimization", "spelling_only": false}
