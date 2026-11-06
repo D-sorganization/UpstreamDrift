@@ -20,6 +20,7 @@ from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
     LOWER_LIMB_RANGES_DEG,
 )
+from src.shared.python.motion_matching.segment_scale_search import SCALE_GRID
 
 REPO_ROOT: Path = Path(__file__).resolve().parents[5]
 DATA_DIR: Path = REPO_ROOT / "data"
@@ -262,7 +263,6 @@ ELBOW_PIT_WEIGHTS_NEUTRAL: tuple[float, ...] = (0.02,)
 
 CALIBRATION_ITERATIONS: int = 3
 CALIBRATION_PRIOR_FRAMES: float = 40.0
-SCALE_GRID: tuple[float, ...] = (0.94, 0.97, 1.00)
 
 DT_S: float = 1e-3
 #: Replay step of a chain-shaft spec (#12686). The chain's stiff link modes
