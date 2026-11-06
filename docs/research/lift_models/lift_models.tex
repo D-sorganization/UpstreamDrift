@@ -2085,7 +2085,7 @@ Stage 2 Muscle Solve & --- & \textit{not run}\textsuperscript{\ddag} & --- \\
 \par\vspace{2pt}\raggedright\scriptsize
 \textsuperscript{\dag}Omitted: the final iterate is infeasible (scaled violation 0.301 against the 0.01 tolerance).\\
 \textsuperscript{\ddag}Stage~2 runs only after Stage~1 converges.\\
-The predictive-versus-tracked comparison method is defined below; it needs a converged predictive solution and is not yet wired into the receipt, so it has not run.
+The predictive-versus-tracked comparison method is defined below. It is wired into the receipt but runs only on a converged predictive solution, so the Run~R receipt records it as unavailable with the infeasibility reason.
 \end{table}
 
 \paragraph{Predictive-Versus-Tracked Comparison Method.}
@@ -2102,6 +2102,9 @@ with each solution's own start and final bar height ($h$ is the vertical barbell
 \end{itemize}
 A quantity that either side lacks is recorded as unavailable with its reason, never as zero. The comparison does not judge credibility: it reports differences, and the result stays exploratory until compared with measured data.
 
+\paragraph{Receipt Status (Exploratory).}
+The committed receipt keeps the Run~R solve record as measured (Stage~1 \texttt{Maximum\_Iterations\_Exceeded}, scaled violation 0.301; Stage~2 not run). Its \texttt{tracked\_comparison} entry is \texttt{unavailable} with the reason ``infeasible iterate (constraint violation 0.301\ldots)'', and every predictive quantity is null with the same reason; nothing is zero-filled. The comparison table is rebuilt from the stored solve record, without a new solve, by \texttt{--refresh-comparison}, which records the commit that rebuilt it as \texttt{comparison\_refresh\_commit}; the bundle-kinematics column then reads the current deadlift bundle. Non-convergence is reported, not hidden, and is not a merge gate (owner decision, 2026-10-26). The convergence strategy and its run budget are still an owner or research-lead decision; no further compute is spent until it is recorded on Issue~\#13044.
+
 \paragraph{Reproduction Command.}
 Run R, at commit \texttt{9dca083f4f}, on ControlTower:
 \begin{verbatim}
@@ -2111,6 +2114,10 @@ UPSTREAMDRIFT_MSK_BASE_MODEL=<Rajagopal base model> \
     --mesh-intervals 15 --max-iterations 3000 \
     --residual-force-scale 1 --residual-effort-weight 100 \
     --fd-scheme forward --dynamics-mode implicit
+\end{verbatim}
+Refresh only the comparison table of the committed receipt (no solve):
+\begin{verbatim}
+python3 scripts/measure_opensim_predictive_deadlift.py --refresh-comparison
 \end{verbatim}
 
 
