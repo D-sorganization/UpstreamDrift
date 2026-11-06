@@ -198,12 +198,11 @@ jobs:
           if [ "$FORK_PR" = "true" ]; then
             # Fork PRs never run on the self-hosted fleet (RM#1989).
             mode="hosted"
-            runner="ubuntu-24.04"
+            runner="ubuntu-latest"
           elif [ "$REPOSITORY_PRIVATE" != "true" ] && [ "$mode" != "local" ]; then
-            # Pinned, not ubuntu-latest: four exact-hash fixtures drift on
-            # ubuntu-26.04 until #14397 migrates them (#14398).
+            # Unpinned: #14397 canonicalized float hashing across runner CPU/glibc images.
             mode="hosted"
-            runner="ubuntu-24.04"
+            runner="ubuntu-latest"
           else
             mode="local"
             runner="$RUNNER_LABEL"
