@@ -12,7 +12,7 @@ window.CORE_UNITS = {
  "systems": {
   "imperial": {
    "distance": {
-    "factor": 0.9999999999999999,
+    "factor": 1.0,
     "suffix": " ft"
    },
    "speed": {

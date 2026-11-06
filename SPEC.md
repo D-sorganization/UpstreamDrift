@@ -2754,6 +2754,20 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-06 | #14752 | Fix lod-quality-gate regression: TableShotModel asks DispersionTable.club_label instead of reaching into provenance (Law of Demeter) |
+| 2026-11-06 | #14709 | Putting studio: exact imperial ft factor, a parity test for the core green edge clamp, and locked slope sliders that read the core green's slope at the ball |
+| 2026-11-06 | #14726 | SHOW-B3b remainder: dispersion_table --ground CLI (rest positions, lie model, slope bins), per-skill club labels, convergence in provenance |
+| 2026-11-06 | #14723 | knot_gradient_optimiser: lbfgs_minimise records a per-evaluation objective versus gradient timing split and the projected-gradient norm (per evaluation and at SciPy's final point) so a max_iterations stop is diagnosable; results are pinned bit-for-bit |
+| 2026-11-06 | #14730 | lifting: the four strict residual-gate xfails (deadlift, bench press, snatch, clean and jerk) now cite #13057, the hip and pelvis rebuild that owns the residual excess, instead of #13041 |
+| 2026-11-06 | #14725 | NSX-04: forearm supination torque capacity sourced from Gulecyuz 2017 Table 4 (LFInput+ 10.68, RFInput- 11.33 N m); pronation direction stays assumed |
+| 2026-11-05 | #14722 | SHOW-C5: ladder binding report classes every cited-source side (D34a), Part of #14561 |
+| 2026-11-05 | #14721 | Guard test: showpiece spec reads a square face at the A2 neutral address (face-frame consistency, D44/D45) |
+| 2026-11-05 | #14717 | Add the Lighthouse mobile baseline receipt (loopback fixture server and egress proxy, report validator, CI steps on the fleet runner) as the follow-up to #14270; scores informational, no threshold. |
+| 2026-11-05 | #14708 | SHOW-B3b: bounce/roll rest positions (sg_runout_v1) on the B6 slope bins, CRN lie modifier for dispersion tables |
+| 2026-11-05 | #14716 | SPN-14a: fixture_peak_spread_table serialises law drive residuals and lumbar compression spreads; the invented-fixture table is committed as a CI golden (tests/fixtures/spine/spn14a_fixture_peaks.json) |
+| 2026-11-05 | #14713 | shoulder declared_rom_deg: per-side cited (Gill 2020 flexion, ER) vs assumed ROM; v2 envelope builds without unbounded shoulders (D39) |
+| 2026-11-05 | #14707 | Source skilled-male peak angular velocities for velocity limits (SOURCED_WITH_ASSUMED_MARGIN) |
+| 2026-11-05 | #14712 | putting parity matrix: units.react and units.tauri move to present, citing the React units selector that #14458 landed (PR #14489); no putting gaps remain in the matrix (Part of #14452) |
 | 2026-11-05 | #14705 | putting_dynamics: the post-impact hop reflects the vertical speed relative to the green, so a downhill putt settles in under 0.1 s instead of skipping for about 5 s; the studio long-downhill read is back in core parity |
 | 2026-11-05 | #14704 | NSX-04/D35: PhysiologicalEnvelope.from_spec falls back to the spec's soft_limits_deg (v2 trunk) when no hard range exists, labelled soft_rom_slots (Part of #12553) |
 | 2026-11-05 | #14670 | C7 slice 2: address-pose stills, capture-fit vs neutral showpiece grip (Part of #14563) |

@@ -23,6 +23,7 @@ from src.shared.python.ui.units import (
     UnitSystem,
     display_unit_table,
     from_display_distance,
+    to_display_distance,
 )
 
 FIXTURE = (
@@ -56,13 +57,17 @@ def unit_row(system: UnitSystem) -> dict[str, dict[str, Any]]:
     table = display_unit_table(system)
     per_si = {"distance": _FT_M, "speed": 1.0, "strike": 1e-3}
     source = {"distance": "distance", "speed": "speed", "strike": "small_length"}
-    return {
+    rows = {
         kind: {
             "factor": table[source[kind]]["factor"] * per_si[kind],
             "suffix": table[source[kind]]["suffix"],
         }
         for kind in STORED
     }
+    # One ft converted straight to the display unit, so ft to ft is exactly 1
+    # (m-to-ft times ft-to-m rounds to 0.9999999999999999, #14703).
+    rows["distance"]["factor"] = to_display_distance(_FT_M, system, unit="ft")
+    return rows
 
 
 def build() -> dict[str, Any]:
