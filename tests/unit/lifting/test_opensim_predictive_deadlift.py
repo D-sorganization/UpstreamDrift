@@ -897,6 +897,6 @@ def test_refresh_comparison_keeps_the_solve_record(
         "compared" if stale["converged"] else "unavailable"
     )
     assert fresh["comparison_refresh_commit"]
-    solve_keys = set(stale) - {"comparison_table"}
+    solve_keys = set(stale) - {"comparison_table", "comparison_refresh_commit"}
     assert {k: fresh[k] for k in solve_keys} == {k: stale[k] for k in solve_keys}
     assert "Comparison:" in (tmp_path / "README.md").read_text(encoding="utf-8")
