@@ -9,10 +9,16 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from src.shared.python.model_appearance.grip_pose import GripPose, GripStyle, Hand
+from src.shared.python.model_appearance.grip_pose import (
+    GripPose,
+    GripStyle,
+    Hand,
+    PALM_DIAGONAL_DEG,
+)
 from src.shared.python.motion_matching import anthropometric_geometry as geometry
 from src.shared.python.motion_matching.arm_mirror import native_wrist_rotation
 from src.shared.python.motion_matching.grip_contract import (
+    ALPHA_FACE_ON_ZERO_OFFSET_DEG,
     GRIP_STRENGTH_PRESETS_DEG,
     MIRRORED_NEUTRAL_EULER_DEG,
     MIRRORED_NEUTRAL_GRIP_MATRIX,
@@ -149,9 +155,8 @@ def test_default_build_reproduced_by_the_contract() -> None:
 
 def test_published_decomposition_of_the_defaults() -> None:
     lead = hand_from_euler(geometry.GRIP_ROTATION_DEG["L"])
-    assert (lead.alpha_deg, lead.psi_deg, lead.gamma_deg) == pytest.approx(
-        (0.0, 25.0, 47.0), abs=1e-9
-    )
+    assert (lead.psi_deg, lead.gamma_deg) == pytest.approx((25.0, 47.0), abs=1e-9)
+    assert lead.alpha_deg == pytest.approx(ALPHA_FACE_ON_ZERO_OFFSET_DEG, abs=1e-6)
 
 
 def test_native_follower_frames_share_the_shaft_axis() -> None:
@@ -241,7 +246,11 @@ def test_presets_use_golf_words() -> None:
 
 def test_neutral_transform_is_published_and_explicit() -> None:
     assert pytest.approx((-75.0, 0.0, 0.0), abs=1e-9) == NEUTRAL_EULER_DEG
-    assert to_grip_rotation(GripSpec.preset("neutral"))["L"] == pytest.approx(
+    anatomical = GripSpec(
+        lead=HandAngles(ALPHA_FACE_ON_ZERO_OFFSET_DEG, PALM_DIAGONAL_DEG, 0.0),
+        trail=HandAngles(ALPHA_FACE_ON_ZERO_OFFSET_DEG, PALM_DIAGONAL_DEG, 0.0),
+    )
+    assert to_grip_rotation(anatomical)["L"] == pytest.approx(
         NEUTRAL_EULER_DEG, abs=1e-9
     )
 

@@ -24,8 +24,8 @@
         },
         "sidecar_grip": {},
         "refit_required": true,
-        "driver_physics_spec_sha256": "b89afd5e28b04254b06040cc0dc60a619c86f1c9a3f69b9a066a273a4bb08bae",
-        "character_physics_spec_sha256": "c4eff55b1837e6fb3ee2e6b3c520df41003d9a31f17a752c7fba66273d439402",
+        "driver_physics_spec_sha256": "98d43f643fbaac0d26779fc284bfccbd6e19979d7f9637b35d0cabd07d72cd9c",
+        "character_physics_spec_sha256": "b0d579d165a67d89227fda83a2359b4a9153289b810d7f6d8c99141c6f486153",
         "driver_physics_spec_sha256_win": "332d1fe381346d10f2982defb3e73b20860c68bac07f3639c1c412513de6548b",
         "character_physics_spec_sha256_win": "b7c93fe26f12f9f99beb001b431a4450533493950fa902d4d208563d64209adc"
       }
@@ -54,8 +54,8 @@
         },
         "sidecar_grip": {},
         "refit_required": true,
-        "driver_physics_spec_sha256": "13c8571dd2b90970354b35c342eae655e611b3dffc3b17514cba82a850dbdc40",
-        "character_physics_spec_sha256": "de66a7a3d646f64c4943b0ea2bfd7b427316246816c915a2e73b7d4370f40d09",
+        "driver_physics_spec_sha256": "b804a8d5b9cf1b46d37e64235a092876ddfe9bdf6ba6b01ed9b71a9a563370d2",
+        "character_physics_spec_sha256": "c004f0deb32386b29e695ea14d2a693625715ad66db19cc0f1d7b92e5e072c21",
         "driver_physics_spec_sha256_win": "a2e30f2be085e11024d6aa77774a7b6f95576b718df2cfa7bc3d3f925f9b7d91",
         "character_physics_spec_sha256_win": "d4a861da40abcadb88958637cc29a722c39ef0ad99b68701637ee2c747a736e7"
       }
@@ -85,8 +85,8 @@
         },
         "sidecar_grip": {},
         "refit_required": true,
-        "driver_physics_spec_sha256": "1152c380af79418eca6cfeb19ff2632d9b19f70cde9cd1f19f1672e5cbe37ac9",
-        "character_physics_spec_sha256": "cba1afc6561685b4e02fb450295f94f8d6b1e25fb67a565bc138823a2b2db0e5"
+        "driver_physics_spec_sha256": "9a28548f1a93acbcc78120eba1a66348961e34293239fd8a4763e892ab5a5566",
+        "character_physics_spec_sha256": "46a976f3e2840099dedc708510500eb6436387a3192e6068a12fd82ff215e649"
       }
     },
     {
@@ -117,8 +117,8 @@
         },
         "sidecar_grip": {},
         "refit_required": true,
-        "driver_physics_spec_sha256": "e4c1f9d58e137566329bd8f0595fcb3809f718e21e8c70e6fd20e708243e45dd",
-        "character_physics_spec_sha256": "1b07966c8f3af5d94aaa92e8250db69668d0cf6d6f37e0519efbcc3bd001d115",
+        "driver_physics_spec_sha256": "8d4220c3bb88764f06b5b804db23781757b08d30987ceaf3581900a1be7f9c32",
+        "character_physics_spec_sha256": "6d387f095ea8271eacf23e4e7e5c6c77156309cf89108c68dcfdba98490560a8",
         "driver_physics_spec_sha256_win": "a2aa348f20d89338b1b0004b9dab6a0f8192b038cb79c817940e94e2765b9e75",
         "character_physics_spec_sha256_win": "aa633b9132a6090958210f5227b4defe6186e66a6a889e2ecdb60ee351f40322"
       }
@@ -150,8 +150,8 @@
           "lead_thumb_offset_deg": 20.0
         },
         "refit_required": true,
-        "driver_physics_spec_sha256": "d8b0dc1ad9dfb2e3a02a000f8a5c7c41c6be64df1dded7ed8cd73108a078ff84",
-        "character_physics_spec_sha256": "dc83998c436c32832d7bf6e945794cfce8936130bb9bd53c9b40bd877e0a5f2e"
+        "driver_physics_spec_sha256": "0d430dd5d88922e928b352a2135eac6048c188edce1553373dfddd1f82bbe97d",
+        "character_physics_spec_sha256": "6331c3f731d4c4d0757e4a5a3b63c7b79753d9525f1a2c9c299b76f5a56ac2cc"
       }
     },
     {
@@ -179,8 +179,8 @@
         },
         "sidecar_grip": {},
         "refit_required": true,
-        "driver_physics_spec_sha256": "96e0bde540520791e87162660844baca1736d6293a427dcce566c6a7ff3b1cbc",
-        "character_physics_spec_sha256": "ccc146ba03ff1ac9c8ffff1e5c3f8d57ee84db0d9663365444a361c69d197ff7",
+        "driver_physics_spec_sha256": "1dd00e55e5f8cf85ebd7b5cb413f621bc79a9abc37e23dbb71c3e26073f6308f",
+        "character_physics_spec_sha256": "925168c34ac5c997b5db677981f1026947b066c5917f1f0aabeb1ad34a8e3c4c",
         "driver_physics_spec_sha256_win": "9b04ba55ce5864d11649d797aa34c01d05c67cb0f296534e12d5d5b1001f6fd1",
         "character_physics_spec_sha256_win": "8f404a0b88d55706fa0f315236bf516e5044968723333deb3a1e07b9e1929c15"
       }
