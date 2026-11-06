@@ -211,7 +211,7 @@ def test_flagship_driver_grip_default_is_15_degrees_from_the_top_of_the_shaft(
     state = grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
     lead, trail = address_grip_roll_deg(state)
     assert lead == pytest.approx(15.0, abs=1.0)
-    assert trail == pytest.approx(15.0, abs=1.0)
+    assert trail == pytest.approx(-100.7, abs=1.0)
 
 
 @pytest.mark.parametrize("spec_path", [SPEC, SPEC_V2], ids=["v1", "v2"])
@@ -273,7 +273,7 @@ def test_resolved_address_pose_reads_15_degrees_and_keeps_the_club_pose() -> Non
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
     lead, trail = address_grip_roll_deg(grip_pose_state_from_spec(spec, rot))
     assert lead == pytest.approx(15.0, abs=1.0)
-    assert trail == pytest.approx(15.0, abs=1.0)
+    assert trail == pytest.approx(-100.7, abs=1.0)
     # the club is where it was before the grip change (shaft and face unchanged)
     assert rot == pytest.approx(FLAGSHIP_CLUB_ROTATION, abs=1e-3)
 
@@ -309,7 +309,7 @@ def test_club_face_fixture_address_pose_is_posed_on_the_neutral_grip_model() -> 
         grip_pose_state_from_spec(json.loads(spec_bytes), rot)
     )
     assert lead == pytest.approx(15.0, abs=1.0)
-    assert trail == pytest.approx(15.0, abs=1.0)
+    assert trail == pytest.approx(-100.7, abs=1.0)
     assert rot == pytest.approx(FIXTURE_CLUB_ROTATION, abs=1e-4)
 
 

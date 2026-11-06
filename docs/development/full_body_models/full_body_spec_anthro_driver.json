@@ -1255,15 +1255,15 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
       "child_to_follower": [
         [
-          0.35399503156834705, -0.7164406812251919, 0.6011657574334291,
+          -0.6329153516898292, -0.5930871889950173, 0.4976602695065472,
           -0.02501411692651008
         ],
         [
-          -1.3413465925107291e-8, 0.6427880111678381, 0.7660441062359894,
+          2.279203174826735e-7, 0.6427882461058252, 0.7660439090993062,
           -1.1239999999999999
         ],
         [
-          -0.9352473029230961, -0.27117581563347165, 0.22754375269516103,
+          -0.7742210004871278, 0.4848410635643254, -0.40683041366953643,
           0.05908933628725997
         ],
         [0.0, 0.0, 0.0, 1.0]
@@ -1397,9 +1397,9 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
       "child_to_follower": [
-        [-1.3413465925107291e-8, -0.642788011167838, -0.7660441062359892, 0.0],
-        [0.9825093870374131, -0.14264742696404328, 0.11969551354961236, 0.0],
-        [-0.18621306179580221, -0.7526455236560128, 0.6315452567609066, 0.0127],
+        [-2.3699011994452622e-7, 0.6427872137535866, -0.7660447753459615, 0.0],
+        [-0.9659255978949693, 0.19826748307607772, 0.16636629612371584, 0.0],
+        [0.25881989747929046, 0.7399422970675337, 0.6208845767767398, 0.0127],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
@@ -1905,7 +1905,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); static external tibial-torsion offset 10 deg per ankle (#12789); de Leva table derived from whole Table 4 rows, trunk length kept by rescaling trunk_scale and upper-trunk solid rebuilt (#13037); neutral address grip, HX-canonical alpha -10.73 / psi 40 / gamma 0 for both hands, 15 deg face-on (docs/development/full_body_models/evidence/grip_roll/neutral_grip.json, #14551); the grip fitted to the capture is kept in full_body_spec_anthro_driver_capture.json; head and trunk-part CM measured from the cranial de Leva row origin (#13037)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); static external tibial-torsion offset 10 deg per ankle (#12789); de Leva table derived from whole Table 4 rows, trunk length kept by rescaling trunk_scale and upper-trunk solid rebuilt (#13037); neutral address grip, HX-canonical alpha -10.73 / psi 40 / gamma 0 for both hands, 15 deg face-on (docs/development/full_body_models/evidence/grip_roll/neutral_grip.json, #14551); the grip fitted to the capture is kept in full_body_spec_anthro_driver_capture.json; head and trunk-part CM measured from the cranial de Leva row origin (#13037); grip rotation refitted per capture from docs/development/full_body_models/evidence/grip_roll/neutral_grip.json (#12221)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
@@ -1913,8 +1913,8 @@
     "de_leva_table_sha256": "f3aff01daf746bd965d888622d74461563a4b7ef2331ae03cdc75f87a18f524b",
     "grip_roll_deg": 0.0,
     "grip_rotation_deg": {
-      "L": [-75.3894, -9.7161, 4.5795],
-      "R": [-75.3894, -9.7161, 4.5795]
+      "L": [-85.5491, 43.3732, -26.1391],
+      "R": [75.7693, 13.5663, -173.5393]
     },
     "mass_kg": 78.0,
     "shoulder_scale": 1.0,
