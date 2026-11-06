@@ -3,7 +3,8 @@
   "matlab_release": "2025b",
   "model_name": "GS3DX_GripContact",
   "model_sha256": "166b804f19ecd06674232c78780d3ecb5fb41d4da8ea7373f608fa8690234c40",
-  "input_sha256": "61705f5c4aa66eac51748a845d575b2d0d068fcfd410e5508a55284c12f1708b",
+  "input_sha256": "d1c40c9e038153274e9e4b767da715c7113dde4e95ed9d5f4fe82c47711946a4",
+  "input_sha256_note": "R2025b read the Windows CRLF checkout of this file (sha256 61705f5c4aa66eac51748a845d575b2d0d068fcfd410e5508a55284c12f1708b); input_sha256 is the committed LF blob, the same content with LF line endings (crlf_expand(blob) reproduces the run hash).",
   "kernel_sha256": "b268b6148701818e26d37519bd9c4977580e715b77b781490115445d9996bdc2",
   "solver": {
     "solver_name": "ode15s",
