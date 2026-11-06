@@ -20,7 +20,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from collections.abc import Callable
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import numpy as np
 
@@ -355,6 +355,22 @@ def adam_minimise(
     )
 
 
+def _lbfgs_scipy_options(settings: LbfgsSettings) -> dict[str, Any]:
+    """SciPy ``minimize`` options for L-BFGS-B (typed loosely for stub compatibility)."""
+    max_fun = 15000 if settings.max_evaluations is None else settings.max_evaluations
+    options: dict[str, Any] = {
+        "maxiter": settings.max_iterations,
+        "maxfun": max_fun,
+    }
+    if settings.ftol is not None:
+        options["ftol"] = settings.ftol
+    if settings.gtol is not None:
+        options["gtol"] = settings.gtol
+    if settings.pgtol is not None:
+        options["pgtol"] = settings.pgtol
+    return options
+
+
 def _scipy_stop_reason(
     res: Any, n_evaluations: int, settings: LbfgsSettings, non_finite: bool
 ) -> StopReason:
@@ -378,6 +394,58 @@ def _scipy_stop_reason(
     return "error"
 
 
+@dataclass
+class _LbfgsWorkspace:
+    """Mutable scratch for one :func:`lbfgs_minimise` run (closure state)."""
+
+    history: list[dict[str, float]]
+    diagnostics: list[dict[str, float]]
+    best_x: Any
+    best_objective: float
+    best_iteration: int
+    non_finite_encountered: bool
+    worst_finite_total: float | None
+
+
+def _lbfgs_scaled_fun(
+    value_and_grad: ValueAndGrad,
+    shape: tuple[int, ...],
+    scale: float,
+    clock: Callable[[], float],
+    on_iteration: Callable[[int, Any, float, float], None] | None,
+    ws: _LbfgsWorkspace,
+) -> Callable[[np.ndarray], tuple[float, np.ndarray]]:
+    """Build ``fun(y)`` with ``x = scale * y``; updates ``ws`` and ``ws.history``."""
+
+    def fun(y_flat: np.ndarray) -> tuple[float, np.ndarray]:
+        k = len(ws.history)
+        x_flat = np.asarray(y_flat, dtype=np.float64) * scale
+        x = x_flat.reshape(shape)
+        row, grad_flat, cost_ok, timing = _timed_evaluation(value_and_grad, x, k, clock)
+        grad_y = grad_flat * scale
+        ws.diagnostics.append(timing)
+        ws.history.append(row)
+        if on_iteration is not None:
+            on_iteration(k, x, row["total"], row["objective"])
+        if not cost_ok:
+            ws.non_finite_encountered = True
+            worst = ws.worst_finite_total
+            penalty = (
+                float("inf")
+                if worst is None
+                else _NON_FINITE_PENALTY_FACTOR * (1.0 + worst)
+            )
+            return penalty, np.zeros_like(y_flat, dtype=np.float64)
+        ws.worst_finite_total = max(ws.worst_finite_total or 0.0, abs(row["total"]))
+        if row["objective"] < ws.best_objective:
+            ws.best_x = x.copy()
+            ws.best_objective = row["objective"]
+            ws.best_iteration = k
+        return float(row["total"]), grad_y
+
+    return fun
+
+
 def lbfgs_minimise(
     value_and_grad: ValueAndGrad,
     x0: Any,
@@ -386,28 +454,11 @@ def lbfgs_minimise(
     on_iteration: Callable[[int, Any, float, float], None] | None = None,
     clock: Callable[[], float] = time.perf_counter,
 ) -> KnotOptimisationResult:
-    """Minimise an objective with SciPy's L-BFGS-B, keeping the best iterate.
+    """SciPy L-BFGS-B on ``value_and_grad``; optional ``parameter_scale`` reparam (#13779).
 
-    ``value_and_grad(x)`` returns ``((total, objective), grad)``. Every function
-    evaluation is recorded as a history row with keys produced by ``_evaluate``
-    (iteration index starting at 0, total, objective, max_abs_x). ``history[0]``
-    is the evaluation at ``x0``. A non-finite cost is shown to SciPy as a large
-    finite penalty (infinity only before any finite evaluation) with zero gradient
-    so one bad trial does not end the run; the run then reports
-    ``stop_reason="non_finite_cost"``.
-
-    The stop reason is fail-closed: ``converged`` only when SciPy reports
-    success; ``max_iterations`` / ``max_evaluations`` only for SciPy's own budget
-    exits; ``non_finite_cost`` when any trial was non-finite (also recorded in
-    ``non_finite_encountered``); anything else, such as a line-search ABNORMAL
-    exit, is ``error``. Best-iterate tracking continues after a non-finite trial.
-
-    When ``parameter_scale`` is not ``1.0``, SciPy sees ``y`` with
-    ``x = y * parameter_scale``; gradients are transformed with the chain rule
-    and history rows still record physical ``x`` (``max_abs_x``).
-
-    Diagnostics (#13779, see :func:`_timed_evaluation`) are timed with
-    ``clock`` and never feed back into the numerics.
+    Contract matches the historical wrapper: ``history[0]`` is ``x0``, non-finite
+    trials become finite penalties, stop reasons are fail-closed, diagnostics
+    use :func:`_timed_evaluation`. See issue #13779 for scaling and tolerances.
     """
     require(callable(value_and_grad), "value_and_grad must be callable")
     require(isinstance(settings, LbfgsSettings), "settings must be LbfgsSettings")
@@ -421,78 +472,46 @@ def lbfgs_minimise(
     scale = float(settings.parameter_scale)
     shape = np.shape(x0)
     x0_arr = np.asarray(x0, dtype=np.float64)
-    x0_flat = x0_arr.ravel().copy()
-    y0_flat = (x0_flat / scale).copy()
+    y0_flat = (x0_arr.ravel().copy() / scale).copy()
 
-    history: list[dict[str, float]] = []
-    diagnostics: list[dict[str, float]] = []
-    best_x = x0_arr.copy()
-    best_objective = float("inf")
-    best_iteration = 0
-    non_finite_encountered = False
-    worst_finite_total: float | None = None
+    ws = _LbfgsWorkspace(
+        history=[],
+        diagnostics=[],
+        best_x=x0_arr.copy(),
+        best_objective=float("inf"),
+        best_iteration=0,
+        non_finite_encountered=False,
+        worst_finite_total=None,
+    )
 
-    def fun(y_flat: np.ndarray) -> tuple[float, np.ndarray]:
-        nonlocal best_x, best_objective, best_iteration, non_finite_encountered
-        nonlocal worst_finite_total
-        k = len(history)
-        x_flat = np.asarray(y_flat, dtype=np.float64) * scale
-        x = x_flat.reshape(shape)
-        row, grad_flat, cost_ok, timing = _timed_evaluation(value_and_grad, x, k, clock)
-        grad_y = grad_flat * scale
-        diagnostics.append(timing)
-        history.append(row)
-        if on_iteration is not None:
-            on_iteration(k, x, row["total"], row["objective"])
-        if not cost_ok:
-            non_finite_encountered = True
-            penalty = (
-                float("inf")
-                if worst_finite_total is None
-                else _NON_FINITE_PENALTY_FACTOR * (1.0 + worst_finite_total)
-            )
-            return penalty, np.zeros_like(y_flat, dtype=np.float64)
-        worst_finite_total = max(worst_finite_total or 0.0, abs(row["total"]))
-        if row["objective"] < best_objective:
-            best_x = x.copy()
-            best_objective = row["objective"]
-            best_iteration = k
-        return float(row["total"]), grad_y
-
-    # 15000 is SciPy's own L-BFGS-B ``maxfun`` default.
-    max_fun = 15000 if settings.max_evaluations is None else settings.max_evaluations
-
-    options: dict[str, float | int] = {
-        "maxiter": settings.max_iterations,
-        "maxfun": max_fun,
-    }
-    if settings.ftol is not None:
-        options["ftol"] = settings.ftol
-    if settings.gtol is not None:
-        options["gtol"] = settings.gtol
-    if settings.pgtol is not None:
-        options["pgtol"] = settings.pgtol
+    fun = _lbfgs_scaled_fun(
+        value_and_grad,
+        shape,
+        scale,
+        clock,
+        on_iteration,
+        ws,
+    )
 
     res = scipy.optimize.minimize(
         fun,
         y0_flat,
         jac=True,
         method="L-BFGS-B",
-        options=options,
+        options=_lbfgs_scipy_options(settings),
     )
 
-    stop = _scipy_stop_reason(res, len(history), settings, non_finite_encountered)
-
+    stop = _scipy_stop_reason(res, len(ws.history), settings, ws.non_finite_encountered)
     jac_y = np.asarray(res.jac, dtype=np.float64)
     projected_x_space = float(np.max(np.abs(jac_y))) / scale
 
     return KnotOptimisationResult(
-        best_x,
-        best_objective,
-        best_iteration,
-        tuple(history),
+        cast(Any, ws.best_x),
+        ws.best_objective,
+        ws.best_iteration,
+        tuple(ws.history),
         stop,
-        non_finite_encountered=non_finite_encountered,
-        evaluation_diagnostics=tuple(diagnostics),
+        non_finite_encountered=ws.non_finite_encountered,
+        evaluation_diagnostics=tuple(ws.diagnostics),
         projected_gradient_norm=projected_x_space,
     )
