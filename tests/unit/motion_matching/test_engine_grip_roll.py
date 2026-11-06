@@ -27,6 +27,8 @@ from src.shared.python.motion_matching.grip_contract import GripSpec
 from src.shared.python.motion_matching.engine_grip_roll import (
     EngineGripAxes,
     engine_address_grip_roll_deg,
+    engine_grip_axes_from_grip_frame,
+    engine_grip_axes_from_topology,
     engine_grip_axes_from_manifest,
     grip_pose_state_from_body_states,
 )
@@ -179,3 +181,42 @@ def test_palm_directions_agree_with_the_spec_dorsals_on_the_hand_offset() -> Non
     p_lead = np.asarray(palm_pad_direction(topo, "lead"))
     p_trail = np.asarray(palm_pad_direction(topo, "trail"))
     assert float(lead @ trail) == pytest.approx(float(p_lead @ p_trail), abs=1e-6)
+
+
+def test_dorsal_is_the_outward_palm_pad_direction_for_both_hands() -> None:
+    # Ruling (A12): dorsal = +u, outward from the shaft through the palm pad.
+    topo = contact_topology(_spec_with_alphas(20.0, 45.0))
+    axes = engine_grip_axes_from_topology(topo)
+    assert axes.lead_dorsal_local == pytest.approx(palm_pad_direction(topo, "lead"))
+    assert axes.trail_dorsal_local == pytest.approx(palm_pad_direction(topo, "trail"))
+    assert axes.club_shaft_local == (0.0, 1.0, 0.0)
+
+
+def test_grip_frame_engines_take_the_shaft_from_the_hand_x_axis() -> None:
+    # Hand frames whose +x is the shaft (grip-frame convention, as Pinocchio's
+    # R_grip): the shaft in the club frame is the hand x column seen from it.
+    club = _club_rotation()
+    hand = club * Rotation.from_euler("y", 90.0, degrees=True)  # x -> club -z
+    states = BodyStates(
+        {"club": _pose(club), "lead": _pose(hand), "trail": _pose(hand)}
+    )
+    axes = engine_grip_axes_from_grip_frame(states, BINDING, contact_topology())
+    assert axes.club_shaft_local == pytest.approx((0.0, 0.0, -1.0), abs=1e-9)
+
+
+@pytest.mark.requires_pinocchio
+def test_pinocchio_native_golfer_reads_equal_roll_for_equal_alpha() -> None:
+    adapter_mod = pytest.importorskip(
+        "src.engines.physics_engines.pinocchio.python.native_golfer_grip_adapter"
+    )
+    try:
+        adapter = adapter_mod.NativePinocchioGolferGripAdapter()
+    except ImportError as exc:  # pinocchio runtime absent
+        pytest.skip(str(exc))
+    topo = contact_topology()
+    binding = adapter.resolve_binding(topo)
+    states = adapter.sample_states(binding)
+    axes = engine_grip_axes_from_grip_frame(states, binding, topo)
+    lead, trail = engine_address_grip_roll_deg(states, binding, axes)
+    assert -180.0 < lead <= 180.0
+    assert lead == pytest.approx(trail, abs=1e-6)  # same alpha, same R_grip

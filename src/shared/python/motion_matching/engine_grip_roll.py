@@ -24,6 +24,8 @@ from numpy.typing import NDArray
 
 from src.shared.python.contracts import require
 from src.shared.python.grip_contact.binding import BodyStates
+from src.shared.python.grip_contact.contact_topology import ContactTopology
+from src.shared.python.grip_contact.topology_contact import palm_pad_direction
 from src.shared.python.impact_parameters.target_frame import TargetFrame
 from src.shared.python.motion_matching.grip_roll import (
     GripPoseState,
@@ -79,6 +81,36 @@ def engine_grip_axes_from_manifest(manifest: Mapping[str, Any]) -> EngineGripAxe
         lead_dorsal_local=dorsal["lead"],
         trail_dorsal_local=dorsal["trail"],
     )
+
+
+def engine_grip_axes_from_topology(
+    topology: ContactTopology, club_shaft_local: Any = _DEFAULT_SHAFT
+) -> EngineGripAxes:
+    """Axes derived from the contact topology, never stored per engine.
+
+    The dorsal of each hand is ``+u``: outward from the shaft through the palm
+    pads (the palm faces the shaft, the back of the hand faces away), in the
+    topology grip frame, which a grip-frame engine's hand body shares.
+    """
+    return EngineGripAxes(
+        club_shaft_local=club_shaft_local,
+        lead_dorsal_local=palm_pad_direction(topology, "lead"),
+        trail_dorsal_local=palm_pad_direction(topology, "trail"),
+    )
+
+
+def engine_grip_axes_from_grip_frame(
+    states: BodyStates, binding: Any, topology: ContactTopology
+) -> EngineGripAxes:
+    """Axes for engines whose hand bodies use the grip frame (``+x`` = shaft).
+
+    The shaft in the club body frame is the lead hand's x column seen from the
+    club frame. Precondition: the engine's hand frames follow the grip-frame
+    convention of ``contact_topology`` (Pinocchio native: ``R_grip``).
+    """
+    club = _rotation_of(states, binding.club_body)
+    hand_x = _rotation_of(states, binding.lead_hand_body)[:, 0]
+    return engine_grip_axes_from_topology(topology, tuple(club.T @ hand_x))
 
 
 def _shaft_frame(shaft_local: Vec3) -> Array:
