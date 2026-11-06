@@ -2754,6 +2754,14 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-06 | #14833 | SHOW-B3b: omit ground_model from carry-only dispersion tables and deduplicate runout entry points |
+| 2026-11-06 | #14820 | PR changed-line count is advisory-only in CI: warnings, optional size:large label, allowlist; --strict for optional enforcement (RD #4118 parity) |
+| 2026-11-06 | #14813 | CI: Lighthouse mobile baseline runs in its own lighthouse-mobile job on d-sorg-fleet-docker (fork-PR guarded, informational) |
+| 2026-11-06 | #14823 | NP-08: offline SVD-direction ablation vs high-frequency jitter benchmark (#14501) |
+| 2026-11-06 | #14818 | Map X-factor variants to literature families and add publish payload + unit tests (GM-1b). |
+| 2026-11-06 | #14768 | Controller synergy audit slice 1: ControllerAuditSpec, #13837 trace adapter and ControllerAuditReport (UCM, TNC fail-closed below 30 trials, null-space gain norm) with an analytic Lyapunov golden |
+| 2026-11-06 | #14802 | OSL-14 scoping: osl_scoping.osl14 fixture and lift-body contract tests; OSL-15 scoping: load balance IK provenance contract and tests; OSL-17 scoping: rack + lead-in bundle provenance tests; OSL-19 scoping: grip closure tests and OpenSim receipt hook |
+| 2026-11-06 | #14805 | LIFT-5 epic evidence contract (bundles + parity JSON); LIFT-6 OpenSim lift composition/kinetics contracts |
 | 2026-11-06 | #14815 | rewrite pose_studio test_widgets against real Qt widgets with qapp fixture (#14812) |
 | 2026-11-06 | #14811 | pose_studio test_gui requests a real QApplication via an autouse qapp fixture, so it no longer crashes an xdist worker when no QApplication exists yet |
 | 2026-11-06 | #14808 | Drake UI abort regression tests request qapp via an autouse fixture, so they no longer crash an xdist worker when no QApplication exists yet |
