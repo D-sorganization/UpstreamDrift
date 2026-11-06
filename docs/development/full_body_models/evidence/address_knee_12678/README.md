@@ -128,8 +128,13 @@ block), driver MyoSuite and every iron engine except MuJoCo (no receipt) are
 
 The two driver receipts have different `spec_canonical_sha256` values, because the Drake run
 fits its own hip calibration; they share the capture, candidate, base spec and foot mode.
-This is a check of the engines' fitted address poses, not of one `q` replayed in every
-engine; the replay is still R10 (#12692).
+This is a check of the engines' fitted address poses. The same-`q` replay is checked
+separately by #14134 (`test_address_knee_flexion_matches_across_engines`). Each engine builds
+its own FK from the same spec, measures both knees at one shared address `q` (frame 0 of the
+anthro-driver seeds `q_track`) and is compared with MuJoCo at 0.1°. On Brick, MuJoCo gave
+L 27.6249° / R 23.6806° and Drake agreed to 3e-14°. Pinocchio (no `body_poses`), OpenSim (no
+spec-driven FK adapter) and MyoSuite (not importable) are reported `unavailable`, never as
+agreement.
 
 ## Canonical Receipts on the R4 Code (#12684, Acceptance 6)
 
@@ -177,8 +182,11 @@ Knee flexion through the swing on the canonical runs is still R10's (#12692).
   static window are not yet measured on the canonical runs. That is issue
   acceptance item 4. The receipt now carries the measurement (see below), so
   the R10 re-fit reports it without further code.
-- **Cross-engine replay.** Acceptance item 5 is checked over the committed
-  receipts (see above). Replaying one `q` in every engine is still R10's.
+- **Cross-engine replay.** Acceptance item 5 is checked two ways: over the
+  committed receipts (see above), and live at one shared `q` with each engine's
+  own FK by #14134 (MuJoCo and Drake agree to 3e-14°; Pinocchio, OpenSim and
+  MyoSuite are `unavailable` with reasons). Adding Pinocchio and OpenSim needs
+  their FK adapters, not a harness change.
 - **Swing-wide ROM.** `range_of_motion.LOWER_LIMB_RANGES_DEG["knee_angle"]` is
   unchanged at `(-120, 10)`. Hyperextension is forbidden at the address only. A
   swing-wide change needs capture evidence through impact and the finish.
