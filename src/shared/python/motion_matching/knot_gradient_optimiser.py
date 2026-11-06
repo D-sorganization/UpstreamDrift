@@ -493,12 +493,13 @@ def lbfgs_minimise(
         ws,
     )
 
+    opts: Any = _lbfgs_scipy_options(settings)
     res = scipy.optimize.minimize(
         fun,
         y0_flat,
         jac=True,
         method="L-BFGS-B",
-        options=_lbfgs_scipy_options(settings),
+        options=opts,
     )
 
     stop = _scipy_stop_reason(res, len(ws.history), settings, ws.non_finite_encountered)
