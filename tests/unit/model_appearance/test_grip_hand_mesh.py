@@ -92,7 +92,7 @@ def test_every_finger_on_the_grip_rests_within_3_mm(hand: Hand, radius: float):
     result = _build(hand, radius, GripStyle.TEN_FINGER)
     on_grip = [p for p in result.components if p.on_grip]
     fingers = {p.finger for p in on_grip}
-    assert fingers == {*FINGER_NAMES, "thumb", "palm"}
+    assert fingers == {*FINGER_NAMES, "thumb", "thumb_web", "palm"}
     for finger in fingers:
         meshes = [p.mesh for p in on_grip if p.finger == finger]
         gap = min(_clearance(m, radius) for m in meshes)
@@ -117,7 +117,7 @@ def test_every_phalanx_is_present():
     for finger in FINGER_NAMES:
         for bone in ("proximal", "middle", "distal"):
             assert f"{finger}_{bone}" in names
-    assert {"palm", "thumb_proximal", "thumb_distal"} <= names
+    assert {"palm", "dorsum", "thumb_web", "thumb_proximal", "thumb_distal"} <= names
 
 
 def test_linked_fingers_leave_the_grip_per_style():
