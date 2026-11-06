@@ -8,10 +8,10 @@ from pathlib import Path
 import pytest
 
 from src.shared.python.osl_scoping.osl14 import (
+    asset_gated_followups_block,
     bundle_spec_matches_committed_lift_body_document,
     bundle_structurally_matches_lift_body,
     committed_lift_body_spec,
-    issue_todo_block,
     lift_body_matches_osl14_acceptance,
     validate_osl14_fixture,
 )
@@ -19,8 +19,12 @@ from src.shared.python.osl_scoping.osl14 import (
 pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[4]
-_FIXTURE = _ROOT / "tests" / "fixtures" / "lifting" / "osl_scoping" / "osl14_scoping_v1.json"
-_BACK_SQUAT_BUNDLE = _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz"
+_FIXTURE = (
+    _ROOT / "tests" / "fixtures" / "lifting" / "osl_scoping" / "osl14_scoping_v1.json"
+)
+_BACK_SQUAT_BUNDLE = (
+    _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz"
+)
 
 
 def test_osl14_fixture_schema() -> None:
@@ -49,8 +53,8 @@ def test_back_squat_bundle_embedded_spec_matches_committed_document_bytes() -> N
     bundle_spec_matches_committed_lift_body_document(_BACK_SQUAT_BUNDLE)
 
 
-def test_issue_todo_block_lists_asset_gates() -> None:
-    block = issue_todo_block()
-    assert "TODO:" in block
+def test_asset_gated_followups_block_lists_asset_gates() -> None:
+    block = asset_gated_followups_block()
+    assert "Tracked follow-up" in block
     assert "OpenSim" in block
     assert "13057" in block
