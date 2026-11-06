@@ -97,7 +97,13 @@ def apply_grip_rotation(
         recorded[side] = total
         changed = True
     if changed and note and note not in out.get("provenance", ""):
-        out["provenance"] = out.get("provenance", "") + note
+        prov = out.get("provenance", "")
+        origin_note = "; head and trunk-part CM measured from the cranial de Leva row origin (#13037)"
+        if origin_note in prov:
+            idx = prov.find(origin_note)
+            out["provenance"] = prov[:idx] + note + prov[idx:]
+        else:
+            out["provenance"] = prov + note
     return out, changed
 
 
