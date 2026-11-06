@@ -742,6 +742,123 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14771 · Ground-Support Segment-Scale Tie-Break, Receipt Canonical Compare (#14771)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14771
+- **Branch:** merged via #14777
+- **PR:** #14777
+- **Paths:** see #14777
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`d0705fe6`; collated from changes/14771-ground-support-segment-scale-tie-break-r.md)
+- **Summary:** Ground-support segment-scale tie-break, receipt canonical compare (#14771)
+- **Next step:** Shipped in PR #14777.
+
+### DL-#14757 · NSX-13 Spatial-Fixture Test Double Builds the R11 Shaft Springs Like NativePinocchioModel (Rigid Club), so Test_Snapshot_vs_Spatial_Fixture Is Green Again
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14757
+- **Branch:** merged via #14759
+- **PR:** #14759
+- **Paths:** see #14759
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`a2cba942`; collated from changes/14757-nsx-13-spatial-fixture-test-double-build.md)
+- **Summary:** NSX-13 spatial-fixture test double builds the R11 shaft springs like NativePinocchioModel (rigid club), so test_snapshot_vs_spatial_fixture is green again
+- **Next step:** Shipped in PR #14759.
+
+### DL-#14746 · SHOW-G1: Mirror the Right-Arm Joint Axes in Driver V1/V2 (R Scapula, Shoulder, Forearm, Wrist) so Positive L and R Coordinates Give Mirrored Motion
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14746
+- **Branch:** merged via #14762
+- **PR:** #14762
+- **Paths:** see #14762
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`a4765a14`; collated from changes/14746-show-g1-mirror-the-right-arm-joint-axes.md)
+- **Summary:** SHOW-G1: mirror the right-arm joint axes in driver v1/v2 (R scapula, shoulder, forearm, wrist) so positive L and R coordinates give mirrored motion
+- **Next step:** Shipped in PR #14762.
+
+### DL-#14741 · Add PR Size Gate Workflow and Git Numstat Checker (500-Line Cap, Exemptions).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14741
+- **Branch:** merged via #14774
+- **PR:** #14774
+- **Paths:** see #14774
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`9ecd8e21`; collated from changes/14741-add-pr-size-gate-workflow-and-git-numsta.md)
+- **Summary:** Add PR size gate workflow and git numstat checker (500-line cap, exemptions).
+- **Next step:** Shipped in PR #14774.
+
+### DL-#14478 · NP-03/04 Toy MLP Rank-1 Edit and LoRA Comparator (#14478 #14479)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14478
+- **Branch:** merged via #14778
+- **PR:** #14778
+- **Paths:** see #14778
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`716ce0bc`; collated from changes/14478-np-03-04-toy-mlp-rank-1-edit-and-lora-co.md)
+- **Summary:** NP-03/04 toy MLP rank-1 edit and LoRA comparator (#14478 #14479)
+- **Next step:** Shipped in PR #14778.
+
+### DL-#14422 · Add Pydantic Golf Metric-Definitions Registry Schema (GM-1a) With Filter Descriptor.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14422
+- **Branch:** merged via #14776
+- **PR:** #14776
+- **Paths:** see #14776
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`78676865`; collated from changes/14422-add-pydantic-golf-metric-definitions-reg.md)
+- **Summary:** Add Pydantic golf metric-definitions registry schema (GM-1a) with filter descriptor.
+- **Next step:** Shipped in PR #14776.
+
+### DL-#12724 · S6 Catalogue Reason Now Names the Missing Arm on the NSX-97 UCM Split
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12724
+- **Branch:** merged via #14761
+- **PR:** #14761
+- **Paths:** see #14761
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`104a43b6`; collated from changes/12724-s6-catalogue-reason-now-names-the-missin.md)
+- **Summary:** S6 catalogue reason now names the missing arm on the NSX-97 UCM split
+- **Next step:** Shipped in PR #14761.
+
+### DL-#12721 · Xfail Placeholder for Anthro Noise-Aware Receipt (#12721)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12721
+- **Branch:** merged via #14779
+- **PR:** #14779
+- **Paths:** see #14779
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`7bf79325`; collated from changes/12721-xfail-placeholder-for-anthro-noise-aware.md)
+- **Summary:** xfail placeholder for anthro noise-aware receipt (#12721)
+- **Next step:** Shipped in PR #14779.
+
+### DL-#12719 · Event_Outcome_Rows Refuses a Near-Grazing Impact (Transversality Below GRAZING_TRANSVERSALITY) Instead of Returning Unreliable Linear Rows
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12719
+- **Branch:** merged via #14782
+- **PR:** #14782
+- **Paths:** see #14782
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`05fb6000`; collated from changes/12719-event-outcome-rows-refuses-a-near-grazin.md)
+- **Summary:** event_outcome_rows refuses a near-grazing impact (transversality below GRAZING_TRANSVERSALITY) instead of returning unreliable linear rows
+- **Next step:** Shipped in PR #14782.
+
 ### DL-#14748 · Native_Viewer_Export CLI Explains a Foreign Shared Package Shadowing the Vendored Tools Tree
 
 - **State:** shipped
@@ -878,10 +995,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14610
 - **Branch:** merged via #14708
-- **PR:** #14708, #14726
+- **PR:** #14708, #14726, #14642
 - **Paths:** see #14708
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-06 (`dbd65654`; collated from changes/14610-show-b3b-remainder-dispersion-table-grou.md)
+- **Last verified:** 2026-11-06 (`ac859070`; collated from changes/14610-show-b3b-dispersion-ground-runout.md)
 - **Summary:** SHOW-B3b: bounce/roll rest positions (sg_runout_v1) on the B6 slope bins, CRN lie modifier for dispersion tables
 - **Next step:** Shipped in PR #14708.
 
@@ -930,10 +1047,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12691
 - **Branch:** merged via #14692
-- **PR:** #14692
+- **PR:** #14692, #14773
 - **Paths:** see #14692
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`75d52d8c`; collated from changes/12691-r11-per-engine-chain-shaft-impact-window.md)
+- **Last verified:** 2026-11-06 (`7e843383`; collated from changes/12691-manual-ch-67-quotes-the-five-engine-r11.md)
 - **Summary:** R11: per-engine chain-shaft impact-window receipt and overlay now cover drake and pinocchio, with an engine-free gate
 - **Next step:** Shipped in PR #14692.
 
