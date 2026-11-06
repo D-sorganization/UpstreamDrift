@@ -6,6 +6,7 @@ Verifies:
 - Safe lifecycle handling via _drake_ui_initialized flag.
 - Safe handling of empty or whitespace sources in induced acceleration resolution.
 - Resilient force glyphs update without AttributeError.
+- Each test has a QApplication regardless of xdist order (#14807).
 """
 
 from __future__ import annotations
@@ -33,6 +34,11 @@ if not HAS_QT:
     )
 
 from PyQt6 import QtWidgets  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _require_qapp(qapp) -> None:  # noqa: ANN001
+    """Every test builds a QMainWindow, which aborts without a QApplication (#14807)."""
 
 
 class DummyDrakeUI(UISetupMixin, VisualizationMixin, QtWidgets.QMainWindow):
