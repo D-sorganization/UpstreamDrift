@@ -742,6 +742,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14748 · Native_Viewer_Export CLI Explains a Foreign Shared Package Shadowing the Vendored Tools Tree
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14748
+- **Branch:** merged via #14769
+- **PR:** #14769
+- **Paths:** see #14769
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`543ded69`; collated from changes/14748-native-viewer-export-cli-explains-a-fore.md)
+- **Summary:** native_viewer_export CLI explains a foreign shared package shadowing the vendored Tools tree
+- **Next step:** Shipped in PR #14769.
+
+### DL-#14739 · Simscape Grip Docs State the SHOW-A7 Grip Zero (#14731); a MATLAB Test Checks the Gs3dx Topology Frames; the R2025b Address-Roll Check Is Cataloged as Deferred
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14739
+- **Branch:** merged via #14772
+- **PR:** #14772
+- **Paths:** see #14772
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`90c8e841`; collated from changes/14739-simscape-grip-docs-state-the-show-a7-gri.md)
+- **Summary:** Simscape grip docs state the SHOW-A7 grip zero (#14731); a MATLAB test checks the gs3dx topology frames; the R2025b address-roll check is cataloged as deferred
+- **Next step:** Shipped in PR #14772.
+
+### DL-#12737 · SPN-0B data_extraction.md: DOIs and Full Author Lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 From Crossref; No Verified_From_Primary Flag Changed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12737
+- **Branch:** merged via #14760
+- **PR:** #14760
+- **Paths:** see #14760
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`ef54ca58`; collated from changes/12737-spn-0b-data-extraction-md-dois-and-full.md)
+- **Summary:** SPN-0b data_extraction.md: DOIs and full author lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 from Crossref; no verified_from_primary flag changed
+- **Next step:** Shipped in PR #14760.
+
+### DL-#12684 · Pin the R4 Capture-Mode Address Knee on the Canonical Receipts and Record Their Marker RMS Before/After (Acceptance 6)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12684
+- **Branch:** merged via #14758
+- **PR:** #14758
+- **Paths:** see #14758
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`410d9f58`; collated from changes/12684-pin-the-r4-capture-mode-address-knee-on.md)
+- **Summary:** Pin the R4 capture-mode address knee on the canonical receipts and record their marker RMS before/after (acceptance 6)
+- **Next step:** Shipped in PR #14758.
+
 ### DL-#13044 · OSL-7 Predictive Deadlift Receipt Now Records the Tracked Comparison as Unavailable (Non-Converged Solve) via a No-Solve --Refresh-Comparison Mode; lift_models.tex Notes the Exploratory Status.
 
 - **State:** shipped
@@ -2620,10 +2672,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13560
 - **Branch:** merged via #14185
-- **PR:** #14185, #14351, #14354
+- **PR:** #14185, #14351, #14354, #14711
 - **Paths:** see #14185
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-05 (`c2433dd1`; collated from changes/13560-opensim-overlap-hold-moment-lever.md)
+- **Last verified:** 2026-11-06 (`0a47ddd8`; collated from changes/13560-opensim-grip-net-moment-com-restore-simb.md)
 - **Summary:** MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed
 - **Next step:** Shipped in PR #14185.
 
