@@ -102,3 +102,29 @@ def test_tour_preset_matches_the_tour_target_and_beats_scratch_amateurs() -> Non
         cal.TOUR_AVERAGE, reference_table("shotscope_mygolfspy", "hcp_0"), settings
     )
     assert sum(scratch.residuals_pct) > 0.0 and scratch.rms_error_pct < 8.0
+
+
+AMATEUR_GROUPS = {"scratch": "hcp_0", "hcp_10": "hcp_10", "hcp_20": "hcp_20"}
+
+
+def test_amateur_presets_are_fitted_to_their_cited_handicap_tables() -> None:
+    assert set(cal.AMATEUR_PRESETS) == set(AMATEUR_GROUPS)
+    settings = cal.FitSettings(n=300, seed=1)
+    for name, preset in cal.AMATEUR_PRESETS.items():
+        assert preset.source_id == "shotscope_mygolfspy"
+        assert preset.group == AMATEUR_GROUPS[name]
+        assert preset.profile.name == name
+        comparison = cal.compare_seeded(preset.profile, preset.table(), settings)
+        assert comparison.rms_error_pct < 3.0, name
+
+
+def test_presets_lose_putts_in_handicap_order() -> None:
+    # The 3-6 ft band separates the populations most clearly in the source.
+    band = MakeRateTable(
+        "band", "band", "reference", "make_pct", "-", "-", None, "-",
+        (MakeRatePoint(3.0, 6.0, 50.0), MakeRatePoint(9.0, 12.0, 25.0)),
+    )  # fmt: skip
+    settings = cal.FitSettings(n=300, seed=1)
+    profiles = [cal.TOUR_AVERAGE] + [p.profile for p in cal.AMATEUR_PRESETS.values()]
+    short = [cal.compare_seeded(p, band, settings).predicted_pct[0] for p in profiles]
+    assert short == sorted(short, reverse=True) and len(set(short)) == len(short)
