@@ -70,6 +70,49 @@ _MIN_SLOPE_MULT = 0.05
 #: they keep carry in rest mode (listed in the hashed provenance) until a green model.
 CARRY_ONLY_SKILLS: tuple[str, ...] = ("pitch", "chip", "bunker")
 
+#: Skill family key -> representative bag club for dispersion table labels (B3/B3b).
+SKILL_CLUB: dict[str, str] = {
+    "driver": "driver",
+    "fairway_wood": "3_wood",
+    "long_iron": "4_iron",
+    "mid_iron": "6_iron",
+    "short_iron": "9_iron",
+    "wedge": "pw",
+    "pitch": "gw",
+    "chip": "sw",
+    "bunker": "sw",
+}
+
+
+def rest_position(
+    carry_yds: NDArray[np.float64],
+    *,
+    slope: str,
+    lie: str,
+    landing_speed_ms: NDArray[np.float64] | None = None,
+    descent_deg: NDArray[np.float64] | None = None,
+) -> NDArray[np.float64]:
+    """Analytic carry (``n, 2`` yd) -> resting offsets via :class:`SlopeAwareGround`.
+
+    Used by unit tests and simple stand-in simulators; the flight pipeline uses
+    :class:`~src.shared.python.sg_optimizer.shot_model.physics_simulator.PipelineLandingSimulator`.
+    """
+    require(
+        carry_yds.ndim == 2 and carry_yds.shape[1] == 2,
+        "carry_yds shape",
+        carry_yds.shape,
+    )
+    n = len(carry_yds)
+    if landing_speed_ms is None:
+        landing_speed_ms = np.full(n, 35.0)
+    if descent_deg is None:
+        descent_deg = np.full(n, 42.0)
+    require(len(landing_speed_ms) == n and len(descent_deg) == n, "batch length")
+    vx = np.asarray(landing_speed_ms, dtype=np.float64)
+    vz = -np.abs(np.tan(np.radians(np.asarray(descent_deg, dtype=np.float64))) * vx)
+    landing = np.column_stack([carry_yds[:, 0], carry_yds[:, 1], vx, np.zeros(n), vz])
+    return SlopeAwareGround()(landing, lie, slope, "mid_iron")
+
 
 @dataclass(frozen=True)
 class SlopeAwareGround:

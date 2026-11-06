@@ -82,7 +82,14 @@ def test_default_winds_keep_the_original_bins_and_new_bins_exist() -> None:
 
 # Aim frame: lateral + is left, so a closed (smaller) face and a crosswind from
 # the right both move the ball to + (matches the real-pipeline adapter below).
-def _linear_sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
+def _linear_sim(
+    impacts: np.ndarray,
+    skill: str,
+    wind: tuple[float, float],
+    slope: str,
+    lie: str,
+):
+    _ = (slope, lie)
     return np.column_stack(
         [2.0 * impacts[:, 0] - wind[0], -3.0 * impacts[:, 1] + wind[1]]
     )
@@ -130,9 +137,13 @@ def test_tables_carry_wind_and_slope_bins() -> None:
 
 def test_real_pipeline_wind_and_slope_cells_move_the_right_way() -> None:
     """The B3 real-pipeline adapter (not the linear stand-in) honours the new bins."""
+    from src.shared.python.physics.rust_kernel import is_rust_available
     from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
         PipelineLandingSimulator,
     )
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
 
     table = build_grid_table(
         get_skill_family("tour"),
