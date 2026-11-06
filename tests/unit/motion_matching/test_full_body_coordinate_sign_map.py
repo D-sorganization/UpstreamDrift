@@ -222,7 +222,7 @@ def test_wrist_y_is_flexion_extension_with_mirrored_sense(
 
 def test_wrist_ranges_use_the_measured_senses() -> None:
     lo, hi = HUMAN_RANGES_DEG["LWInputX"]
-    assert (lo, hi) == (-40.0, 25.0)  # ulnar .. radial, positive radial
+    assert (lo, hi) == (-60.0, 45.0)  # ulnar .. radial, positive radial (#14795)
 
 
 # --- forearm pronation, hips, knees ------------------------------------------

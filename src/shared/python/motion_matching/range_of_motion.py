@@ -19,6 +19,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.neck_rom import NECK_ROM
+from src.shared.python.motion_matching.wrist_scapula_rom import WRIST_SCAPULA_ROM
 
 Array = NDArray[np.float64]
 
@@ -36,18 +37,11 @@ UPPER_RANGES_DEG: dict[str, tuple[float, float]] = {
     "SpineInputY": (-45.0, 45.0),
     "TorsoInput": (-100.0, 100.0),
     **{name: (rom.lower_deg, rom.upper_deg) for name, rom in NECK_ROM.items()},
-    "LScapInputX": (-10.0, 30.0),
-    "RScapInputX": (-10.0, 30.0),
-    "LScapInputY": (-40.0, 40.0),
-    "RScapInputY": (-40.0, 40.0),
+    **{name: (rom.lower_deg, rom.upper_deg) for name, rom in WRIST_SCAPULA_ROM.items()},
     "LEInput": (-150.0, 5.0),
     "REInput": (-150.0, 5.0),
     "LFInput": (-90.0, 90.0),
     "RFInput": (-90.0, 90.0),
-    "LWInputX": (-40.0, 25.0),  # ulnar .. radial deviation from a neutral grip
-    "RWInputX": (-40.0, 25.0),
-    "LWInputY": (-70.0, 70.0),  # flexion .. extension
-    "RWInputY": (-70.0, 70.0),
 }
 HUMAN_RANGES_DEG: dict[str, tuple[float, float]] = {
     **UPPER_RANGES_DEG,
