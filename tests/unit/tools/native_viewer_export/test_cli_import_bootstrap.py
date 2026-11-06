@@ -8,6 +8,8 @@ import pytest
 
 from src.tools.native_viewer_export._bootstrap import shared_shadow_message
 
+pytestmark = pytest.mark.unit
+
 VENDOR_SRC = Path("/repo/vendor/ud-tools/src")
 
 
