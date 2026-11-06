@@ -270,6 +270,8 @@
 {"path": "biomechanics/interaction_evidence.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/joint_conventions.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/kinematic_sequence.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/metric_definitions/__init__.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/metric_definitions/schema.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/model_bindings.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/multi_muscle.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/muscle_allocation.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
