@@ -5,7 +5,7 @@ without the full dependency graph can still load the JSON-only parts of this
 package when tests split.
 
 Epic acceptance still needs end-to-end receipts, reserve qualification and
-owner video evidence; see :data:`ISSUE_TODOS_GATE_ON_HOST`.
+owner video evidence; see :data:`HOST_GATED_FOLLOWUPS`.
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ FIXTURE_SCHEMA: dict[str, Any] = {
     },
 }
 
-ISSUE_TODOS_GATE_ON_HOST: Final[tuple[str, ...]] = (
+HOST_GATED_FOLLOWUPS: Final[tuple[str, ...]] = (
     "Verify muscle-force qualification (reserve share, CMC/SO choice) meets "
     "acceptance thresholds on a host with native OpenSim and opensim-models.",
     "Record joint moments, hand wrench (GCV-7), GRF (GCV-1) and L5/S1 load "
@@ -60,9 +60,10 @@ def validate_lift6_fixture(record: Mapping[str, Any]) -> dict[str, Any]:
     return dict(record)
 
 
-def issue_todo_block() -> str:
+def host_gated_followups_block() -> str:
     lines = [f"LIFT-6 (#{ISSUE_ID}) — OpenSim host and evidence gates:", ""]
-    lines.extend(f"- TODO: {t}" for t in ISSUE_TODOS_GATE_ON_HOST)
+    prefix = "- Tracked follow-up (#"
+    lines.extend(f"{prefix}{ISSUE_ID}): {t}" for t in HOST_GATED_FOLLOWUPS)
     return "\n".join(lines)
 
 

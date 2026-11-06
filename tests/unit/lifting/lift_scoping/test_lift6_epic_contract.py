@@ -10,7 +10,7 @@ import pytest
 from src.shared.python.lift_scoping.lift6 import (
     assert_evaluate_kinetics_contract,
     assert_opensim_lift_composition_counts,
-    issue_todo_block,
+    host_gated_followups_block,
     validate_lift6_fixture,
 )
 
@@ -31,8 +31,9 @@ def test_lift6_fixture_schema() -> None:
     assert validate_lift6_fixture(record)["issue"]["id"] == 11746
 
 
-def test_issue_todo_block_lists_host_gates() -> None:
-    assert "11746" in issue_todo_block() and "TODO:" in issue_todo_block()
+def test_host_gated_followups_block_lists_host_gates() -> None:
+    text = host_gated_followups_block()
+    assert "11746" in text and "Tracked follow-up" in text
 
 
 def _require_lifting_opensim_import_stack() -> None:

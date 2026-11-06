@@ -58,7 +58,7 @@ FIXTURE_SCHEMA: dict[str, Any] = {
     },
 }
 
-ISSUE_TODOS_GATE_ON_HOST: Final[tuple[str, ...]] = (
+HOST_GATED_FOLLOWUPS: Final[tuple[str, ...]] = (
     "Run optional-stack / parity CI lanes that replay all five bundles in every "
     "parity engine and extend bar_path_parity.json beyond the back squat where "
     "not yet recorded.",
@@ -70,9 +70,10 @@ def validate_lift5_fixture(record: Mapping[str, Any]) -> dict[str, Any]:
     return dict(record)
 
 
-def issue_todo_block() -> str:
+def host_gated_followups_block() -> str:
     lines = [f"LIFT-5 (#{ISSUE_ID}) — CI / optional-stack gates:", ""]
-    lines.extend(f"- TODO: {t}" for t in ISSUE_TODOS_GATE_ON_HOST)
+    prefix = "- Tracked follow-up (#"
+    lines.extend(f"{prefix}{ISSUE_ID}): {t}" for t in HOST_GATED_FOLLOWUPS)
     return "\n".join(lines)
 
 
