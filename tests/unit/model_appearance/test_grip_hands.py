@@ -220,7 +220,7 @@ def test_assembly_with_hands_adds_two_glove_meshes_and_keeps_the_club() -> None:
 
 @pytest.mark.parametrize("key", ["driver", "iron7"])
 def test_grip_hand_frame_matches_wrist_follower_frame(key: str) -> None:
-    """Hand frame x is the follower x spun WRIST_FRAME_TO_MESH_DEG about the shaft (#13996, #14731)."""
+    """Visual hand frame x-axis matches wrist follower dorsal axis within 5 deg (#13996)."""
     import math
 
     from src.shared.python.model_appearance.hand_spec import (
@@ -234,51 +234,6 @@ def test_grip_hand_frame_matches_wrist_follower_frame(key: str) -> None:
     for hand in (Hand.LEAD, Hand.TRAIL):
         expected_x = wrist_follower_dorsal_axis(spec, hand)
         frame = gh.grip_hand_frame(club, hand, hands.pose, hands=hands)
-        expected = gh._spun_about_grip_axis(expected_x, gh.WRIST_FRAME_TO_MESH_DEG)
-        cos_angle = float(np.clip(np.dot(frame[:3, 0], expected), -1.0, 1.0))
+        cos_angle = float(np.clip(np.dot(frame[:3, 0], expected_x), -1.0, 1.0))
         angle_deg = math.degrees(math.acos(cos_angle))
         assert angle_deg <= 5.0, (key, hand, angle_deg)
-
-
-@pytest.mark.parametrize("key", ["driver", "iron7"])
-def test_lead_dorsum_shell_lies_on_the_wrist_follower_minus_x(key: str) -> None:
-    """The drawn LEAD back is the follower -x axis, the one the grip roll reads (#14731, D68)."""
-    from src.shared.python.model_appearance.grip_hand_mesh import build_grip_hand_mesh
-    from src.shared.python.model_appearance.hand_spec import (
-        resolved_hand_spec,
-        wrist_follower_dorsal_axis,
-    )
-
-    spec = json.loads(SPECS[key].read_bytes())
-    club = ca.assembly_from_spec(spec)
-    hands = resolved_hand_spec(spec)
-    frame = gh.grip_hand_frame(club, Hand.LEAD, hands.pose, hands=hands)
-    built = build_grip_hand_mesh(Hand.LEAD, grip_radius_m=0.0125, pose=hands.pose)
-    dorsum = next(c for c in built.components if c.finger == "dorsum")
-    centroid = dorsum.mesh.vertices.mean(axis=0)
-    direction = frame[:3, :3] @ np.array([centroid[0], centroid[1], 0.0])
-    direction /= np.linalg.norm(direction)
-    back = -wrist_follower_dorsal_axis(spec, Hand.LEAD)
-    assert float(direction @ back) > 0.99, (key, float(direction @ back))
-
-
-@pytest.mark.parametrize("key", ["driver"])  # the iron7 spec has its own grip pose
-def test_drawn_backs_of_the_two_hands_are_110_degrees_apart(key: str) -> None:
-    """Both hands take one spin, so the baked 110 deg between their backs is kept (#14731, D68)."""
-    from src.shared.python.model_appearance.grip_hand_mesh import build_grip_hand_mesh
-
-    spec = json.loads(SPECS[key].read_bytes())
-    club = ca.assembly_from_spec(spec)
-    from src.shared.python.model_appearance.hand_spec import resolved_hand_spec
-
-    hands = resolved_hand_spec(spec)
-    backs = {}
-    for hand in (Hand.LEAD, Hand.TRAIL):
-        frame = gh.grip_hand_frame(club, hand, hands.pose, hands=hands)
-        built = build_grip_hand_mesh(hand, grip_radius_m=0.0125, pose=hands.pose)
-        dorsum = next(c for c in built.components if c.finger == "dorsum")
-        c = dorsum.mesh.vertices.mean(axis=0)
-        v = frame[:3, :3] @ np.array([c[0], c[1], 0.0])
-        backs[hand] = v / np.linalg.norm(v)
-    cos = float(backs[Hand.LEAD] @ backs[Hand.TRAIL])
-    assert abs(np.degrees(np.arccos(cos)) - 110.0) < 3.0

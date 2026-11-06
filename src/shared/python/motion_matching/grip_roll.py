@@ -11,15 +11,13 @@ not what the owner sees.
 
 Definition: ``shaft`` is club-frame ``y`` (butt to head); ``e_h`` is the
 horizontal direction toward the target perpendicular to it and ``e_v = shaft x
-e_h`` points up. The wrist axis ``b`` is ``-dorsal`` for both hands, where
-``dorsal`` is the wrist-follower x axis (``hand_spec.wrist_follower_dorsal_axis``,
-one club-frame vector for lead and trail) taken into the world by the native club
-frame. The follower x points to the PALM side of the lead hand, so ``-x`` is the
-BACK of the lead hand; the drawn lead hand is spun about the shaft by
-``grip_hands.WRIST_FRAME_TO_MESH_DEG`` so its dorsum lies on that axis (D68 measured
-the unspun mesh dorsum 35 deg off +x). The trail hand is read on the same axis; its
-drawn back sits 110 deg from the lead's (-95 deg at the default). ``roll =
-atan2(b.e_h, b.e_v)`` after projecting ``b`` off the shaft. One rule reads both hands.
+e_h`` points up. The wrist axis ``b`` is ``-dorsal`` for both hands: the back of
+the LEAD hand (the follower x axis points to the palm side of the lead hand; the
+trail hand is read on the same axis, so its back is the opposite end, 180 deg
+away, as in a real grip). ``dorsal`` is the wrist-follower x axis
+(``hand_spec.wrist_follower_dorsal_axis``, one club-frame vector for lead and
+trail) taken into the world by the native club frame. ``roll = atan2(b.e_h,
+b.e_v)`` after projecting ``b`` off the shaft. One rule reads both hands.
 
 Mapping to HX (#13757): alpha is a rotation about the shaft, so ``d_alpha``
 changes the roll by exactly ``-d_alpha`` (``test_spin_about_the_shaft...``: the
