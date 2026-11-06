@@ -7,11 +7,11 @@
       "title": "Selectable Units",
       "cluster": "a",
       "cells": {
-        "core_api": "missing #14457 | src/shared/python/putting_dynamics/utils.py, src/shared/python/ui/units.py | SI internally, feet in analytics; conversion helpers only, no units parameter on any route.",
-        "pyqt6": "partial #14457 | src/tools/putting_green_gui/gui.py | Reads get_unit_preference(); set_unit_system exists but the window has no selector.",
-        "react": "missing #14458 | ui/src/pages/PuttingGreen.tsx | Speed always m/s, distance yards, toe/hosel mm; no units store or selector.",
-        "tauri": "missing #14458 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "missing #14457 | src/apps/putting_studio/index.html | Labels hard-code ft, m/s and mm; no toggle."
+        "core_api": "present | src/shared/python/ui/units.py, src/api/routes/putting_green.py | SI internally; GET /units serves display_unit_table (distance, speed and strike factors and suffixes for both systems), the table the studio generator and the desktop strike spin use.",
+        "pyqt6": "present | src/tools/putting_green_gui/gui.py | Units combo (Metric or Imperial); every panel redraws its inputs and charts through ui/units.py.",
+        "react": "present | ui/src/pages/PuttingGreen.tsx, ui/src/utils/units.ts | Units selector (Metric or Imperial) in the putting store; distance, speed and strike offsets show m, m/s and mm or ft, mph and in, with the factors golden-pinned to ui/units.py (#14458).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "studio": "present | src/apps/putting_studio/index.html, src/apps/putting_studio/js/core_units.js | Units selector; distance, speed and strike labels use the ui/units.py table generated into core_units.js."
       }
     },
     "variance_channels": {
@@ -44,7 +44,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/gui.py, src/tools/putting_green_gui/_scene_builder.py | Impact block: launch angle, spin, skid distance, face twist, energy loss and putter slowdown from the strike() collision report.",
         "react": "present | ui/src/pages/PuttingGreen.tsx | Impact panel: launch speed/angle, putter speed before/after, contact proxy, face twist, energy loss, skid distance.",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "partial #14461 | src/apps/putting_studio/js/putting_physics.js | Skid ends at a fixed distance; loft and launch not modelled."
+        "studio": "present | src/apps/putting_studio/js/putting_physics.js, src/apps/putting_studio/js/core_impact.js | Skid ends where the core simulate_strike skid ends for the ball speed; launch angle and loft from the core table shown in the telemetry."
       }
     },
     "strike_location": {
@@ -55,7 +55,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/gui.py, src/tools/putting_green_gui/_scene_builder.py | Heel/toe Strike spin box (mm or in, -40 to 40 mm) passed to simulate_strike.",
         "react": "present | ui/src/pages/PuttingGreen.tsx | Impact Toe Offset slider.",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "partial #14461 | src/apps/putting_studio/index.html, src/apps/putting_studio/js/controls_c.js | Slider is toe-only (0-15 mm); no heel strikes."
+        "studio": "present | src/apps/putting_studio/index.html, src/apps/putting_studio/js/core_impact.js | Strike slider from heel to toe over the desktop range (-40 to 40 mm); it offsets every batch strike, and a toe strike opens the face as in the core strike()."
       }
     },
     "counter_torque": {
@@ -88,7 +88,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/_scene_builder.py, src/tools/putting_green_gui/gui.py | Green Type selector (cross slope or any core preset), seeded undulation in mm or in, green seed; all on the shared GreenSpec.",
         "react": "present | ui/src/components/putting/GreenTypeControl.tsx, ui/src/utils/greenTypes.ts | Green Type selector (cross slope or any core preset from GET /green-presets) sent as the core green spec on /simulate-3d; slope and bump fields lock under a preset (golden-pinned, #14464).",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist), so the Green Type selector ships unchanged.",
-        "studio": "partial #14463 | src/apps/putting_studio/js/putting_physics.js, src/apps/putting_studio/js/io.js | Flat and slope presets plus stimp ramp; undulation switches on with slope and is not selectable."
+        "studio": "present | src/apps/putting_studio/js/core_greens.js, scripts/generate_studio_greens.py, src/apps/putting_studio/js/putting_physics.js | Green Type selector: the slider green or any core preset (undulating included), its height grid generated from GreenSpec and read with the core bilinear lookup, centred on the putt midpoint (golden-pinned, #14648)."
       }
     },
     "optimal_aim": {
@@ -99,7 +99,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/_scene_builder.py, src/tools/putting_green_gui/gui.py | Auto-Solve Read runs solve_aim on the tile's surface off the GUI thread and writes the pace and aim into the controls.",
         "react": "present | ui/src/components/putting/AutoSolveButton.tsx, ui/src/utils/autoSolve.ts, ui/src/pages/PuttingGreen.tsx | Auto-Solve Read calls /solve-aim-3d on the page's green, writes the pace and aim into the controls, simulates the solved putt and shows the desktop read text (golden-pinned).",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "partial #14465 | src/apps/putting_studio/js/controls_c.js | Aim-only grid search from one noise-free putt."
+        "studio": "present | src/apps/putting_studio/js/putting_physics.js, src/apps/putting_studio/js/controls_c.js | Auto-Solve runs solveAimCore, a port of solve_aim on the studio putt (golden-pinned to the core read), and the batch strikes at the solved head speed."
       }
     },
     "strokes_gained": {
@@ -110,7 +110,7 @@
         "pyqt6": "present | src/tools/putting_green_gui/_sg_panel.py, src/tools/putting_green_gui/gui.py | Strokes Gained panel: the player's E(d) solved on the dialled green off the GUI thread, each putt's result entered and scored on the cached curve, in the chosen units.",
         "react": "present | ui/src/components/putting/StrokesGainedPanel.tsx, ui/src/utils/strokesGained.ts | Strokes Gained on the simulator page: the putt's result entered from each 3D putt, scored via /strokes-gained on the player's own E(d) with the curve plotted, in the user's units (golden-pinned, #14468).",
         "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
-        "studio": "partial #14467 | src/apps/putting_studio/js/green3d.js, src/apps/putting_studio/js/charts2d.js | Bellman formula with a hand-tuned comeback fit, not a solved recursion."
+        "studio": "present | src/apps/putting_studio/js/core_sg.js, scripts/generate_studio_sg.py, src/apps/putting_studio/js/green3d.js, src/apps/putting_studio/js/charts2d.js | Batch strokes gained, the E(d) chart, the optimal pace and the E vs capture-speed panel read the core's solved E(d) and per-pace expected strokes (service_sg and optimize.evaluate_actions; tour-average player, nearest side slope)."
       }
     },
     "scenarios": {
@@ -118,9 +118,9 @@
       "cluster": "h",
       "cells": {
         "core_api": "present | src/shared/python/putting_analytics/service_setup.py, src/api/routes/putting_analytics.py | Named setups with their dispersion result; /scenario and /scenario-compare (make rate and leave against the first).",
-        "pyqt6": "missing #14471 |  | None.",
-        "react": "missing #14472 | ui/src/stores/usePuttingStore.ts | Store holds one parameter set and one result.",
-        "tauri": "missing #14472 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "pyqt6": "present | src/tools/putting_green_gui/_scenario_panel.py | Scenarios panel: Save Scenario rolls the dialled green's batch on a worker; a unit-aware table compares make rate and leave with the first (service_setup).",
+        "react": "present | ui/src/components/putting/ScenariosPanel.tsx, ui/src/utils/puttingSetup.ts | Saves the page's putt as a core scenario (/scenario) and compares saved ones against the first (/scenario-compare); setup mapping golden-pinned to the core (#14472).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/controls_a.js | Saved scenarios with a comparison table; no distribution chart."
       }
     },
@@ -129,9 +129,9 @@
       "cluster": "h",
       "cells": {
         "core_api": "present | src/shared/python/putting_analytics/service_setup.py, src/api/routes/putting_analytics.py | Versioned setup document (schema_version 4.0.0, the studio's); /setup-export and /setup-import, which also loads a studio export's green and distance.",
-        "pyqt6": "partial #14471 | src/tools/putting_green_gui/_scene_export.py | export_putt_scene/read_putt_export exist but nothing in the UI calls them.",
-        "react": "missing #14472 |  | None.",
-        "tauri": "missing #14472 | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
+        "pyqt6": "present | src/tools/putting_green_gui/_scenario_panel.py | Export JSON... and Import JSON... write and read the shared setup document with its scenarios; a studio export loads its distance, Stimp and grade (the desktop slope always falls right).",
+        "react": "present | ui/src/components/putting/ScenariosPanel.tsx, ui/src/utils/puttingSetup.ts | Exports the core's setup document (/setup-export) and imports a setup or studio file onto the page (/setup-import), keeping the page's line direction (#14472).",
+        "tauri": "present | ui/src-tauri/tauri.conf.json | Wraps the React build (frontendDist ../dist); no putting code in the shell.",
         "studio": "present | src/apps/putting_studio/js/io.js | Export/load with schema_version 4.0.0, including scenarios."
       }
     },

@@ -80,6 +80,11 @@ class CapacityVector:
     verified_slots: tuple[str, ...]
     warnings: tuple[str, ...]
     force_velocity: Mapping[str, Mapping[str, Mapping[str, float]]]
+    #: Lower cited reference (e.g. a general-population median) per direction;
+    #: equals the capacity where the registry records no second source.  A
+    #: torque between this and the capacity is source-sensitive, not a miss.
+    tau_lower_reference_negative_nm: np.ndarray | None = None
+    tau_lower_reference_positive_nm: np.ndarray | None = None
 
     @property
     def has_assumed(self) -> bool:
@@ -106,6 +111,12 @@ def _scaled_tau(entry: Mapping[str, Any], subject: CapacitySubject) -> float:
             * subject.stature_m
         )
     return float(entry["tau_max_nm"])
+
+
+def _lower_reference(entry: Mapping[str, Any], subject: CapacitySubject) -> float:
+    """The entry's lower cited reference, or its capacity when it has none."""
+    ref = entry.get("lower_reference")
+    return float(ref["tau_max_nm"]) if ref else _scaled_tau(entry, subject)
 
 
 def _validate_inputs(
@@ -155,7 +166,13 @@ def capacity_for(
         raise ValueError(f"no torque capacity for slots: {missing}")
     neg = np.array([_scaled_tau(table[(n, "negative")], subject) for n in names])
     pos = np.array([_scaled_tau(table[(n, "positive")], subject) for n in names])
-    for arr in (neg, pos):
+    ref_neg = np.array(
+        [_lower_reference(table[(n, "negative")], subject) for n in names]
+    )
+    ref_pos = np.array(
+        [_lower_reference(table[(n, "positive")], subject) for n in names]
+    )
+    for arr in (neg, pos, ref_neg, ref_pos):
         if not np.all(np.isfinite(arr) & (arr > 0.0)):
             raise ValueError("registry produced a non-positive or non-finite capacity")
         arr.setflags(write=False)
@@ -189,4 +206,6 @@ def capacity_for(
         verified_slots=verified,
         warnings=warnings,
         force_velocity=fv,
+        tau_lower_reference_negative_nm=ref_neg,
+        tau_lower_reference_positive_nm=ref_pos,
     )

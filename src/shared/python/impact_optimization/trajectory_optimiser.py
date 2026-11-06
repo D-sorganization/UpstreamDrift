@@ -103,6 +103,10 @@ class ImpactSolution:
     tolerances_met: bool
     #: face - path (deg): sets curvature, so the 10:1 trade-off is auditable.
     face_to_path_deg: float = float("nan")
+    #: measured minus target (deg); NaN when unobservable (#14561 per-step report).
+    face_error_deg: float = float("nan")
+    path_error_deg: float = float("nan")
+    aoa_error_deg: float = float("nan")
 
     @property
     def achieved_speed_mph(self) -> float:
@@ -114,16 +118,23 @@ class ImpactSolution:
         """Rollout joint angles of the solved swing (delegates to the outcome)."""
         return self.outcome.trajectory
 
+    @property
+    def torque_nm(self) -> np.ndarray:
+        """Torque of the solved swing (delegates to the outcome)."""
+        return self.outcome.torque_nm
 
-def _within_tolerance(
+
+def within_tolerance(
     impact: MeasuredImpact, target: ImpactTarget, tol: ImpactTolerance
 ) -> bool:
+    """True when face, path and AoA errors are all inside ``tol`` (False if unobservable)."""
     if impact.face_deg is None or impact.path_deg is None:
         return False
+    face, path, aoa = impact_errors_deg(impact, target)
     return bool(
-        abs(impact.face_deg - target.face_deg) <= tol.face_deg
-        and abs(impact.path_deg - target.path_deg) <= tol.path_deg
-        and abs(impact.aoa_deg - target.aoa_deg) <= tol.aoa_deg
+        abs(face) <= tol.face_deg
+        and abs(path) <= tol.path_deg
+        and abs(aoa) <= tol.aoa_deg
     )
 
 
@@ -133,6 +144,18 @@ def face_to_path_deg(impact: MeasuredImpact) -> float:
     if face is None or path is None:
         return math.nan
     return float(face - path)
+
+
+def impact_errors_deg(
+    impact: MeasuredImpact, target: ImpactTarget
+) -> tuple[float, float, float]:
+    """(face, path, AoA) error = measured - target in deg; NaN when unobservable."""
+    face, path = impact.face_deg, impact.path_deg
+    return (
+        math.nan if face is None else float(face - target.face_deg),
+        math.nan if path is None else float(path - target.path_deg),
+        float(impact.aoa_deg - target.aoa_deg),
+    )
 
 
 def _project(tau: np.ndarray, env: PhysiologicalEnvelope) -> np.ndarray:
@@ -213,6 +236,7 @@ def solve_impact_trajectory(
     binding = tuple(
         name for name, u in zip(envelope.names, util, strict=True) if u >= 0.98
     )
+    errors = impact_errors_deg(out.impact, target)
     sol = ImpactSolution(
         knots=ctrl.unpack(best_p),
         outcome=out,
@@ -221,8 +245,11 @@ def solve_impact_trajectory(
         binding_joints=binding,
         max_utilisation=float(np.max(util)),
         envelope_limits_nm=np.array(envelope.tau_max_positive_nm),
-        tolerances_met=_within_tolerance(out.impact, target, cfg.tolerance),
+        tolerances_met=within_tolerance(out.impact, target, cfg.tolerance),
         face_to_path_deg=face_to_path_deg(out.impact),
+        face_error_deg=errors[0],
+        path_error_deg=errors[1],
+        aoa_error_deg=errors[2],
     )
     ensure(sol.max_utilisation <= 1.0 + 1e-9, "envelope exceeded", sol.max_utilisation)
     ensure(

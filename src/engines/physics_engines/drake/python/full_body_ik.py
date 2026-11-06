@@ -362,6 +362,47 @@ class DrakeFullBodyIK(BaseFullBodyIK):
             rows.append(np.array([w * depth]))
             jacs.append(w * (n @ jp)[None, :])
 
+    def _club_sole_frame(self) -> Any | None:
+        """Drake frame at the spec club-body origin (the sole), else ``None``."""
+        from src.shared.python.model_appearance import club_assembly as ca
+
+        name = ca.club_body_name(self.specification)
+        if name is None:
+            return None
+        if name in self.model._frames:
+            return self.model._frames[name]
+        link = self._metadata["body_links"].get(name)
+        if link is None:
+            return None
+        return self._plant.GetBodyByName(link, self.model._instance).body_frame()
+
+    def _append_club_sole(
+        self,
+        rows: list[Array],
+        jacs: list[Array],
+        ground: GroundPlane,
+        weight: float,
+    ) -> None:
+        """Pull a hovering club sole to the ground (#12969), as MuJoCo does.
+
+        The base class is a no-op, which left the Drake address solve ignoring
+        ``club_sole_weight`` with the sole 126.7 mm above ground (D20).
+        """
+        if weight <= 0:
+            return
+        frame = self._club_sole_frame()
+        if frame is None:
+            return
+        n = np.asarray(ground.normal, dtype=float)
+        n = n / np.linalg.norm(n)
+        pos, jp = self._frame_pos_and_jac(frame)
+        hover = float(pos @ n - ground.height_m)
+        if hover <= 0.0:
+            return
+        w = np.sqrt(weight)
+        rows.append(np.array([w * hover]))
+        jacs.append(w * (n @ jp)[None, :])
+
     def _append_anchors(
         self,
         rows: list[Array],

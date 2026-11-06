@@ -192,3 +192,201 @@ def test_sagittal_spine_and_neck_signs_follow_frame_geometry() -> None:
     vec = capacity_for(("SpineInputY", "NeckInputY"), CapacitySubject(78.0, 1.71))
     assert list(vec.tau_max_positive_nm) == pytest.approx([325.0, 30.0])
     assert list(vec.tau_max_negative_nm) == pytest.approx([422.8, 52.0])
+
+
+# --- NSX-04 slice: lower-limb anatomical slots (#12553) -----------------------
+_REGISTRY = ROOT / "src/config/loop_nullspace_registry.json"
+_ANATOMICAL = ("hip_adduction", "hip_rotation", "subtalar_angle", "mtp_angle")
+# (slot, direction) -> (citation id, cited Nm). Subtalar: da Fonseca 2025 Table 6,
+# male mean peak torque (inversion 37.0, eversion 33.4). MTP flexion: Saeki 2021
+# Results, first MTP 11.6 + second-fifth MTP 8.0 Nm.
+_CITED = {
+    **{(f"subtalar_angle_{s}", "positive"): ("CIT-DAFONSECA-2025", 37.0) for s in "lr"},
+    **{(f"subtalar_angle_{s}", "negative"): ("CIT-DAFONSECA-2025", 33.4) for s in "lr"},
+    **{(f"mtp_angle_{s}", "positive"): ("CIT-SAEKI-2021", 19.6) for s in "lr"},
+}
+
+
+def _torque_entries() -> list[dict]:
+    return json.loads(_REGISTRY.read_text("utf-8"))["torque_capacity"]
+
+
+@pytest.mark.parametrize(("slot", "direction"), sorted(_CITED))
+def test_capacity_reproduces_cited_value(slot: str, direction: str) -> None:
+    citation, nm = _CITED[(slot, direction)]
+    entry = next(
+        e
+        for e in _torque_entries()
+        if e["joint_slot"] == slot and e["direction"] == direction
+    )
+    assert entry["verification_status"] == "VERIFIED"
+    assert entry["assumed"] is False
+    assert entry["source"]["citation_id"] == citation
+    assert entry["source"]["location"].startswith(("Table", "Results"))
+    vec = capacity_for((slot,), CapacitySubject(78.0, 1.71), actuated=(slot,))
+    got = (
+        vec.tau_max_positive_nm if direction == "positive" else vec.tau_max_negative_nm
+    )
+    assert got[0] == pytest.approx(nm)
+
+
+def test_every_anatomical_slot_is_verified_or_states_what_was_not_found() -> None:
+    entries = [e for e in _torque_entries() if e["joint_slot"].startswith(_ANATOMICAL)]
+    assert len(entries) == 16
+    for e in entries:
+        label = f"{e['joint_slot']}/{e['direction']}"
+        if e["verification_status"] == "VERIFIED":
+            assert e["source"]["citation_id"], label
+            continue
+        note = e["source"]["note"]
+        assert note.startswith("Not verified:") and len(note) > 80, label
+
+
+def test_subtalar_and_mtp_signs_follow_the_model_axes() -> None:
+    """Positive subtalar = inversion and positive MTP = flexion, from the model FK
+    (ankle positive = dorsiflexion is the control for the method)."""
+    mujoco = pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+        export_full_body_mjcf,
+    )
+
+    xml, _ = export_full_body_mjcf((SPECS / SPEC_FILES[0]).read_bytes())
+    model = mujoco.MjModel.from_xml_string(xml)
+    data = mujoco.MjData(model)
+    mujoco.mj_kinematics(model, data)
+    fwd, up = (1.0, 0.0, 0.0), (0.0, 0.0, 1.0)  # model faces +X, +Z up, +Y is left
+
+    def axis(name: str):
+        jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
+        return data.xaxis[jid].copy()
+
+    import numpy as np
+
+    for side, medial in (("r", (0.0, 1.0, 0.0)), ("l", (0.0, -1.0, 0.0))):
+        ankle, sub, mtp = (
+            axis(f"{n}_{side}") for n in ("ankle_angle", "subtalar_angle", "mtp_angle")
+        )
+        assert np.cross(ankle, fwd)[2] > 0.1  # dorsiflexion raises the toes
+        assert np.cross(sub, -np.array(up)) @ medial > 0.1  # sole turns inward
+        assert np.cross(mtp, fwd)[2] < -0.1  # flexion lowers the toes
+
+
+# ---- v2 trunk (lumbar / thoracic) capacity slots --------------------------------
+_V2_SPEC = SPECS / "full_body_spec_anthro_driver_v2.json"
+_TRUNK_PREFIXES = ("lumbar_", "thoracic_")
+_SUBJECT = CapacitySubject(78.0, 1.71)
+#: Model sign: positive = flexion / right lateral bend / left axial rotation
+#: (test_positive_coordinates_move_the_thorax_as_labelled).
+#: kind -> (upper cited (negative, positive), citation, lower reference Pan 2025).
+_UPPER = {
+    "flexion": ((422.8, 325.0), "CIT-ISHIDA-2019"),  # extension, flexion
+    "axial_rotation": ((75.7, 72.4), "CIT-ISHIDA-2019"),  # right, left
+    "lateral_bending": ((71.3, 63.2), "CIT-PAN-2025"),  # no second source: Pan only
+}
+_PAN = {
+    "flexion": (118.1, 87.3),
+    "lateral_bending": (71.3, 63.2),
+    "axial_rotation": (49.2, 47.7),
+}
+
+
+def _entry(slot: str, direction: str) -> dict:
+    return next(
+        e
+        for e in _torque_entries()
+        if e["joint_slot"] == slot and e["direction"] == direction
+    )
+
+
+def test_v2_spec_has_a_capacity_for_every_actuated_coordinate() -> None:
+    """The v2 showpiece spec must build a capacity vector (was: 12 trunk slots missing)."""
+    spec = json.loads(_V2_SPEC.read_text("utf-8"))
+    vec = capacity_for(tuple(spec["coordinate_order"]), _SUBJECT)
+    assert [n for n in vec.actuated_names if n.startswith(_TRUNK_PREFIXES)]
+
+
+@pytest.mark.parametrize("kind", sorted(_UPPER))
+def test_lumbar_carries_the_upper_cited_trunk_limit_and_exposes_pan(kind: str) -> None:
+    (neg, pos), citation = _UPPER[kind]
+    slot = f"lumbar_{kind}"
+    vec = capacity_for((slot,), _SUBJECT, actuated=(slot,))
+    assert vec.tau_max_negative_nm[0] == pytest.approx(neg)
+    assert vec.tau_max_positive_nm[0] == pytest.approx(pos)
+    assert vec.tau_lower_reference_negative_nm[0] == pytest.approx(_PAN[kind][0])
+    assert vec.tau_lower_reference_positive_nm[0] == pytest.approx(_PAN[kind][1])
+    assert slot in vec.verified_slots
+    for direction in ("negative", "positive"):
+        e = _entry(slot, direction)
+        assert e["verification_status"] == "VERIFIED" and e["assumed"] is False
+        assert e["source"]["citation_id"] == citation
+        assert e["source"]["location"].startswith(("Table", "Results"))
+        ref = e["lower_reference"]
+        assert ref["citation_id"] == "CIT-PAN-2025"
+        # population, test mode and posture sit next to BOTH values
+        assert ref["population"] and ref["measurement"]
+        assert e["population"]["measurement"] and e["population"]["description"]
+
+
+def test_ishida_ceiling_is_stated_not_athletic() -> None:
+    note = _entry("lumbar_flexion", "positive")["source"]["note"]
+    assert "Neither population is described as athletes" in note and "62.1 kg" in note
+    assert "ceiling" in note
+
+
+@pytest.mark.parametrize("kind", sorted(_UPPER))
+def test_thoracic_has_the_same_cited_limit_as_lumbar(kind: str) -> None:
+    """Series joints each carry the trunk moment: same cited limit, none summed (D34a)."""
+    lumbar, thor = f"lumbar_{kind}", f"thoracic_{kind}"
+    vec = capacity_for((lumbar, thor), _SUBJECT, actuated=(lumbar, thor))
+    assert vec.tau_max_positive_nm[1] == pytest.approx(vec.tau_max_positive_nm[0])
+    assert vec.tau_max_negative_nm[1] == pytest.approx(vec.tau_max_negative_nm[0])
+    assert lumbar in vec.verified_slots and thor in vec.verified_slots
+    for direction in ("negative", "positive"):
+        e = _entry(thor, direction)
+        assert e["assumed"] is False and e["verification_status"] == "VERIFIED"
+        assert (
+            e["source"]["citation_id"]
+            == _entry(lumbar, direction)["source"]["citation_id"]
+        )
+        assert "Series mapping" in e["source"]["note"]
+        assert e["lower_reference"] == _entry(lumbar, direction)["lower_reference"]
+
+
+@pytest.mark.parametrize("kind", sorted(_PAN))
+def test_series_trunk_minimum_never_falls_below_the_pan_lower_reference(
+    kind: str,
+) -> None:
+    """The weakest series trunk joint must still allow the Pan 2025 median (D34a)."""
+    slots = (f"lumbar_{kind}", f"thoracic_{kind}")
+    vec = capacity_for(slots, _SUBJECT, actuated=slots)
+    neg, pos = _PAN[kind]
+    assert vec.tau_max_negative_nm.min() >= neg - 1e-9
+    assert vec.tau_max_positive_nm.min() >= pos - 1e-9
+
+
+def test_every_lower_reference_cites_a_known_citation() -> None:
+    reg = json.loads(_REGISTRY.read_text("utf-8"))
+    known = {c["id"] for c in reg["citations"]}
+    for e in reg["torque_capacity"]:
+        if "lower_reference" in e:
+            assert e["lower_reference"]["citation_id"] in known
+
+
+def test_physiological_envelope_builds_from_the_v2_spec() -> None:
+    """The C3c blocker: from_spec on the v2 showpiece spec must succeed."""
+    from src.shared.python.impact_optimization.physiological_envelope import (
+        PhysiologicalEnvelope,
+        load_limits,
+    )
+
+    spec = json.loads(_V2_SPEC.read_text("utf-8"))
+    env = PhysiologicalEnvelope.from_spec(
+        spec,
+        _SUBJECT,
+        load_limits(),
+        allow_unbounded_rom=frozenset(spec["coordinate_order"]),
+    )
+    trunk = [n for n in env.names if n.startswith(_TRUNK_PREFIXES)]
+    assert len(trunk) == 6
+    assert set(trunk).isdisjoint(env.assumed_torque_slots)  # trunk torque is cited
+    assert set(trunk) <= set(env.assumed_velocity_slots)  # velocity is a stated prior

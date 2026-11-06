@@ -10,7 +10,7 @@ export type Quantity =
 
 export const UNIT_SYSTEMS: readonly UnitSystem[] = ["metric", "imperial"];
 
-const FT_TO_M = 0.3048;
+export const FT_TO_M = 0.3048;
 const LBF_TO_N = 0.45359237 * 9.80665; // a pound under standard g, as units.py
 const IN_LBF_TO_NM = (FT_TO_M / 12) * LBF_TO_N;
 const STORAGE_KEY = "ud.unitSystem";

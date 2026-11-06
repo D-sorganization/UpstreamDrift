@@ -63,6 +63,13 @@ def test_tauri_inherits_react() -> None:
         assert tauri.issue == react.issue, feature.feature_id
 
 
+def test_units_cells_cite_the_react_selector() -> None:
+    # #14458 shipped the React units selector (PR #14489); Tauri wraps it.
+    for surface in ("react", "tauri"):
+        assert _MATRIX.cell("units", surface).status == "present", surface
+    assert "ui/src/utils/units.ts" in _MATRIX.cell("units", "react").evidence
+
+
 def test_committed_doc_matches_matrix() -> None:
     committed = DOC_PATH.read_text(encoding="utf-8")
     assert committed == render_markdown(_MATRIX), (

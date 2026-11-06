@@ -18,17 +18,7 @@ import {
   type SwingReportViewResponse,
 } from '@/api/swingReport';
 import { selectedPlotIds, toggleCustomPlot } from './swingReportSelection';
-
-export type BlobDownload = (blob: Blob, filename: string) => void;
-
-function saveBlob(blob: Blob, filename: string): void {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
+import { saveBlob, type BlobDownload } from '@/utils/saveBlob';
 
 export interface SwingReportDialogProps {
   /** A `swing-report-v1` document; the server validates it before display. */

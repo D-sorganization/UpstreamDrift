@@ -1,0 +1,109 @@
+{
+  "tolerance": {
+    "distance_m": 1e-6,
+    "launch_speed_rel": 0.002
+  },
+  "cases": [
+    {
+      "name": "flat-10ft",
+      "request": {
+        "putter_speed_mps": 2.0,
+        "stimp_rating": 10.0,
+        "hole_x_m": 3.0
+      },
+      "response": {
+        "samples": [
+          {
+            "t_s": 1.440000000000001,
+            "x_m": 2.9478683261558816,
+            "y_m": 0.0
+          }
+        ],
+        "collision": {
+          "ball_speed_mps": 3.142850347183164
+        },
+        "surface": {
+          "hole_x_m": 3.0,
+          "hole_y_m": 0.0
+        },
+        "holed": true,
+        "total_distance_m": 2.9478683261558816
+      },
+      "pyqt6": {
+        "holed": true,
+        "total_roll_m": 2.947868326155881,
+        "leave_m": 0.0,
+        "rest_dy_m": 0.0,
+        "launch_speed_mps": 3.139966255808104
+      }
+    },
+    {
+      "name": "flat-long-slow",
+      "request": {
+        "putter_speed_mps": 4.0,
+        "stimp_rating": 8.0,
+        "hole_x_m": 9.0
+      },
+      "response": {
+        "samples": [
+          {
+            "t_s": 7.055999999999445,
+            "x_m": 17.661023437867474,
+            "y_m": 0.0
+          }
+        ],
+        "collision": {
+          "ball_speed_mps": 6.285700694366328
+        },
+        "surface": {
+          "hole_x_m": 9.0,
+          "hole_y_m": 0.0
+        },
+        "holed": false,
+        "total_distance_m": 17.661023437867474
+      },
+      "pyqt6": {
+        "holed": false,
+        "total_roll_m": 17.661023437867474,
+        "leave_m": 8.661023437867472,
+        "rest_dy_m": 0.0,
+        "launch_speed_mps": 6.279932511616208
+      }
+    },
+    {
+      "name": "cross-slope-1deg",
+      "request": {
+        "putter_speed_mps": 2.0,
+        "stimp_rating": 10.0,
+        "hole_x_m": 3.0,
+        "grade_percent": 1.7455064928217585,
+        "downhill_aspect_deg": -90.0
+      },
+      "response": {
+        "samples": [
+          {
+            "t_s": 4.747999999999699,
+            "x_m": 5.3233954246106014,
+            "y_m": -0.8545518824949719
+          }
+        ],
+        "collision": {
+          "ball_speed_mps": 3.142850347183164
+        },
+        "surface": {
+          "hole_x_m": 3.0,
+          "hole_y_m": 0.0
+        },
+        "holed": false,
+        "total_distance_m": 5.466315824732979
+      },
+      "pyqt6": {
+        "holed": false,
+        "total_roll_m": 5.466315824732989,
+        "leave_m": 2.475565636168271,
+        "rest_dy_m": -0.854551882494976,
+        "launch_speed_mps": 3.139966255808104
+      }
+    }
+  ]
+}

@@ -96,6 +96,7 @@ __all__ = [
     "SensitivityReport",
     "build_sensitivity_report",
     "classify_spread",
+    "fixture_peak_spread_table",
     "kinematic_spreads",
     "load_spreads",
     "main",
@@ -109,6 +110,9 @@ LOADS = "loads"
 #: Declared reporting threshold of ``relative_spread`` (descriptive only).
 DEFAULT_ROBUST_THRESHOLD = 0.1
 SCHEMA_VERSION = "spine-distribution-sensitivity/1"
+TABLE_SCHEMA_VERSION = "spine-fixture-peak-table/1"
+_TABLE_DIGITS = 6
+_DRIVE_RESOLUTION_DECIMALS = 9  # residuals below 1e-9 rad are solver noise
 _ISB_ANGLE = "isb_angle"
 _AXES = ("flexion_extension", "lateral_bending", "axial_rotation")
 _MOT_ROLE = "coordinates_mot"
@@ -626,6 +630,68 @@ def _spread_dict(item: QuantitySpread) -> dict[str, Any]:
         "classification": item.classification,
         "max_pairwise_rms": _num(item.max_pairwise_rms),
     }
+
+
+def _num6(value: float | None) -> float | None:
+    return None if value is None else round_sig(value, _TABLE_DIGITS)
+
+
+def _drive6(value: float | None) -> float | None:
+    if value is None:
+        return None
+    return round_sig(round(value, _DRIVE_RESOLUTION_DECIMALS) + 0.0, _TABLE_DIGITS)
+
+
+def fixture_peak_spread_table(report: SensitivityReport) -> dict[str, Any]:
+    """The CI regression table: law geodesic residuals and compression spreads.
+
+    Keeps, per law, the status and the drive residuals, and, per level, the
+    ``joint_reaction`` compression peaks with their spread.  Numbers carry
+    6 significant figures, and drive residuals a 1e-9 rad resolution, so a
+    committed golden is stable to solver noise.
+
+    Raises:
+        TypeError: ``report`` is not a :class:`SensitivityReport`.
+
+    Postcondition: JSON-serialisable; ``scientific_status`` is copied and
+    ``is_acceptance`` stays false (the table is never acceptance evidence).
+    """
+    if not isinstance(report, SensitivityReport):
+        raise TypeError(
+            f"report must be a SensitivityReport, got {type(report).__name__}"
+        )
+    compression = [
+        {
+            "level": s.level,
+            "units": s.units,
+            "values": {k: _num6(v) for k, v in s.values},
+            "spread": _num6(s.spread),
+            "relative_spread": _num6(s.relative_spread),
+            "classification": s.classification,
+        }
+        for s in report.spreads
+        if s.kind == LOADS
+        and s.observable == "joint_reaction"
+        and s.quantity == "compression"
+    ]
+    table = {
+        "schema_version": TABLE_SCHEMA_VERSION,
+        "study_id": report.study_id,
+        "model_id": report.model_id,
+        "scientific_status": report.scientific_status,
+        "is_acceptance": report.is_acceptance,
+        "laws": {
+            law.law_id: {
+                "status": law.status,
+                "drive_max_rad": _drive6(law.drive_max_rad),
+                "drive_rms_rad": _drive6(law.drive_rms_rad),
+            }
+            for law in report.laws
+        },
+        "compression": compression,
+    }
+    ensure(table["is_acceptance"] is False, "the table is never acceptance")
+    return table
 
 
 def write_report_json(report: SensitivityReport, path: str | Path) -> Path:

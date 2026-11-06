@@ -4,7 +4,7 @@ For a (state, action) the transition is:
   1. Look up the player's effective dispersion for the chosen club, modulated
      by the **starting** lie via ``CourseConditions`` (pitfall #12).
   2. Sample carry/lateral offsets in the aim frame.
-  3. Rotate into the hole frame; add to the current ball position.
+  3. Rotate into the hole frame (aim is pin-relative); add to the ball position.
   4. Look up the landing lie code from the raster.
   5. Apply hazard rules: water/OB → drop with stroke penalty.
 """
@@ -53,6 +53,22 @@ def _condition_modifiers(
     return lie_modifiers(start_lie, conditions)
 
 
+def aim_direction(
+    raster: LieRaster,
+    action: ShotAction,
+    x: float | NDArray[np.float64],
+    y: float | NDArray[np.float64],
+) -> tuple[float | NDArray[np.float64], float | NDArray[np.float64]]:
+    """Unit (cos, sin) of the shot direction from ``(x, y)``.
+
+    Aims are pin-relative: 0 rad points straight at the pin, so a ball past the
+    green can still aim back at it. Shared by the scalar and vectorized backups so
+    they cannot drift apart.
+    """
+    angle = np.arctan2(raster.pin[1] - y, raster.pin[0] - x) + action.aim_angle_rad
+    return np.cos(angle), np.sin(angle)
+
+
 def sample_transitions(
     state: State,
     action: ShotAction,
@@ -81,8 +97,7 @@ def sample_transitions(
     # Aim-frame landing (along, lateral). Rotate into hole frame.
     along = landing.along
     lateral = landing.lateral
-    cos_a = np.cos(action.aim_angle_rad)
-    sin_a = np.sin(action.aim_angle_rad)
+    cos_a, sin_a = aim_direction(raster, action, state.x, state.y)
     dx = along * cos_a - lateral * sin_a
     dy = along * sin_a + lateral * cos_a
 

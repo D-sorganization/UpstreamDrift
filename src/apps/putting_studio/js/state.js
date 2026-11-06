@@ -28,7 +28,8 @@ const state = {
   tauOffPreload: 0.55,
   noiseScale: 0.25,
   pertImpulseNm: 0.25,
-  toeOffsetMm: 10.0,
+  toeOffsetMm: 0.0,
+  unitSystem: 'imperial', // display units for labels (#14646); values stay ft, m/s, mm
   psiLieDeg: 70.0,
   buttArcRadius: 0.36,
   vecMode: 'total',
@@ -60,6 +61,8 @@ const state = {
   stimpmeterMode: false,
   cumulativeMakes: 0,
   cumulativeAttempts: 0,
+  greenPreset: 'studio', // 'studio' sliders, or a core preset (#14648)
+  read: null, // last core read {key, clubSpeedMps} (#14649)
   crossSlopePct: 1.8,
   uphillSlopePct: 0.3,
   stimpFt: 11.5,
@@ -68,6 +71,17 @@ const state = {
   rollPlaying: true,
   mcBatchSeed: 1
 };
+
+/** The core green preset in play (js/core_greens.js), or null for the slider green. */
+function activeCoreGreen() {
+  return state.greenPreset === 'studio' ? null : window.CORE_GREENS.presets[state.greenPreset];
+}
+
+/** The inputs a core read depends on; a read applies only while they match. */
+function currentReadKey() {
+  return [state.greenPreset, state.stimpFt, state.uphillSlopePct, state.crossSlopePct,
+    state.puttDistFt || 10.0].join('|');
+}
 
 // Smooth C^infinity analytical Ornstein-Uhlenbeck multi-sine synthesis (zero step discontinuities)
 function smoothOUNoise(t, seedOffset) {

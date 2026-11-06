@@ -56,21 +56,24 @@ from src.shared.python.ui.units import (
     format_distance,
     format_speed,
     from_display_distance,
+    from_display_small_length,
     from_display_speed,
     get_unit_preference,
     set_unit_preference,
+    small_length_suffix,
     speed_suffix,
     to_display_distance,
+    to_display_small_length,
     to_display_speed,
 )
 from src.tools.putting_green_gui._batch_panel import BatchPanel, _Job
+from src.tools.putting_green_gui._scenario_panel import ScenarioPanel
 from src.tools.putting_green_gui._sg_panel import SGPanel
 from src.tools.putting_green_gui._torque_panel import TorquePanel
 from src.tools.putting_green_gui._camera import camera_pose
 from src.tools.putting_green_gui._playback import PlaybackBar
 from src.tools.putting_green_gui._scene_text import (
     M_TO_FT,
-    M_TO_IN,
     format_metrics,
     format_read,
 )
@@ -89,7 +92,6 @@ from src.tools.putting_green_gui._scene_builder import (
 logger = logging.getLogger(__name__)
 
 _FT_TO_M = 1.0 / M_TO_FT
-_M_TO_MM = 1000.0
 
 
 class PuttingGreenWidget(QWidget):
@@ -136,6 +138,9 @@ class PuttingGreenWidget(QWidget):
     def torque_panel(self) -> TorquePanel:
         return self._torque_panel
 
+    def scenario_panel(self) -> ScenarioPanel:
+        return self._scenario_panel
+
     def set_unit_system(self, system: UnitSystem) -> None:
         """Switch display unit system dynamically and update spinbox suffixes/values."""
         if system == self._unit_system:
@@ -177,6 +182,7 @@ class PuttingGreenWidget(QWidget):
         self._batch_panel.redraw()
         self._sg_panel.redraw()
         self._torque_panel.redraw()
+        self._scenario_panel.redraw()
 
     def _sync_units_combo(self) -> None:
         """Show the active unit system without re-triggering a user choice."""
@@ -301,6 +307,10 @@ class PuttingGreenWidget(QWidget):
         left_layout.addWidget(self._sg_panel)
         self._torque_panel = TorquePanel(lambda: self._unit_system)
         left_layout.addWidget(self._torque_panel)
+        self._scenario_panel = ScenarioPanel(
+            self._batch_panel.current_args, self._apply_setup, lambda: self._unit_system
+        )
+        left_layout.addWidget(self._scenario_panel)
 
         left_layout.addStretch()
         return left
@@ -325,18 +335,22 @@ class PuttingGreenWidget(QWidget):
 
     def _set_strike_units(self, toe_m: float) -> None:
         """Show the strike offset in mm (metric) or inches, keeping ``toe_m``."""
-        scale = 1000.0 if self._unit_system == UnitSystem.METRIC else M_TO_IN
-        self._strike_spin.setSuffix(
-            " mm" if self._unit_system == UnitSystem.METRIC else " in"
-        )
-        self._strike_spin.setDecimals(1 if scale == 1000.0 else 2)
-        lo, hi = IMPACT_TOE_RANGE_M
-        self._strike_spin.setRange(lo * scale, hi * scale)
-        self._strike_spin.setValue(toe_m * scale)
+        self._set_small_length_spin(self._strike_spin, toe_m, *IMPACT_TOE_RANGE_M)
 
     def _strike_toe_m(self) -> float:
-        scale = 1000.0 if self._unit_system == UnitSystem.METRIC else M_TO_IN
-        return self._strike_spin.value() / scale
+        return from_display_small_length(self._strike_spin.value(), self._unit_system)
+
+    def _set_small_length_spin(
+        self, spin: QDoubleSpinBox, value_m: float, lo_m: float, hi_m: float
+    ) -> None:
+        """Show a small length in mm or inches through the shared units helper."""
+        system = self._unit_system
+        spin.setSuffix(small_length_suffix(system))
+        spin.setDecimals(1 if system == UnitSystem.METRIC else 2)
+        spin.setRange(
+            to_display_small_length(lo_m, system), to_display_small_length(hi_m, system)
+        )
+        spin.setValue(to_display_small_length(value_m, system))
 
     def _add_green_type_rows(self, form: QFormLayout) -> None:
         """Green type, undulation and seed (#14463), on the shared GreenSpec."""
@@ -361,19 +375,15 @@ class PuttingGreenWidget(QWidget):
         for spin in (self._slope_spin, self._undulation_spin, self._seed_spin):
             spin.setEnabled(cross_slope)
 
-    def _undulation_scale(self) -> float:
-        return _M_TO_MM if self._unit_system == UnitSystem.METRIC else M_TO_IN
-
     def _set_undulation_units(self, undulation_m: float) -> None:
-        metric = self._unit_system == UnitSystem.METRIC
-        scale = self._undulation_scale()
-        self._undulation_spin.setSuffix(" mm" if metric else " in")
-        self._undulation_spin.setDecimals(1 if metric else 2)
-        self._undulation_spin.setRange(0.0, UNDULATION_RANGE_M[1] * scale)
-        self._undulation_spin.setValue(undulation_m * scale)
+        self._set_small_length_spin(
+            self._undulation_spin, undulation_m, 0.0, UNDULATION_RANGE_M[1]
+        )
 
     def _undulation_m(self) -> float:
-        return self._undulation_spin.value() / self._undulation_scale()
+        return from_display_small_length(
+            self._undulation_spin.value(), self._unit_system
+        )
 
     def _make_spin(
         self,
@@ -478,6 +488,19 @@ class PuttingGreenWidget(QWidget):
         self._distance_spin.setValue(
             to_display_distance(dist, self._unit_system, unit="ft")
         )
+
+    def _apply_setup(self, setup: dict[str, float]) -> None:
+        """Put an imported setup's distance, Stimp and grade on the controls.
+
+        The cross slope here always falls right, so the aspect is not kept.
+        """
+        self._distance_spin.setValue(
+            to_display_distance(
+                setup["distance_ft"] * _FT_TO_M, self._unit_system, unit="ft"
+            )
+        )
+        self._stimp_spin.setValue(setup["stimp"])
+        self._slope_spin.setValue(math.degrees(math.atan(setup["grade_pct"] / 100.0)))
 
     def _current_config(self) -> PuttConfig:
         return PuttConfig(

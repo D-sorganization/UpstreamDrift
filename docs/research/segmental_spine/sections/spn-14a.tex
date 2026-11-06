@@ -101,6 +101,21 @@ quantities, because \texttt{bruno2015\_regional} is uniform within the lumbar
 region and, restricted to a lumbar-only model, prescribes the same per-level
 ratios as \texttt{uniform\_reference}.
 
+\paragraph{CI Golden Peak Table.}
+\texttt{fixture\_peak\_spread\_table(report)} reduces the fixture report to the
+per-law status and geodesic drive residuals plus the per-level
+\texttt{joint\_reaction} compression peaks and spreads, at 6 significant
+figures; residuals carry a $10^{-9}$\,rad resolution, so the Bruno and uniform
+residuals (solver noise, above) serialise as 0. The table from the invented
+fixture run is committed as \texttt{tests/fixtures/spine/spn14a\_fixture\_peaks.json}
+and \texttt{test\_fixture\_peak\_table\_matches\_committed\_golden} requires an
+exact match (two runs on OpenSim 4.6 were byte-identical). On current main the
+fixture gives L5--S1 compression 935.19/738.881/935.19\,N (Bruno/Fujii/uniform,
+$r=0.21$) and L1--L2 885.308/685.537/885.308\,N ($r=0.23$); these supersede the
+rounded compression rows above. The golden is a software regression check on
+invented numbers, never acceptance; the Bruno capture table stays a manual
+owner-workstation run.
+
 \paragraph{Native Bruno Run on Capture-A.}
 Distribution sensitivity was evaluated on 2026-10-19 on main \texttt{fc49cd6e6f}
 under OpenSim 4.6 on capture-A continuous IK (530 frames, 1.469\,s, body weight
