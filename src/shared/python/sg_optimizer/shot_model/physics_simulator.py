@@ -105,11 +105,17 @@ class PipelineLandingSimulator:
         impacts: NDArray[np.float64],
         skill: str,
         wind: tuple[float, float],
+        spin_factor: NDArray[np.float64] | None = None,
     ) -> NDArray[np.float64]:
+        """Land each impact row; ``spin_factor`` scales row i's launch spin."""
+        n = len(impacts)
+        spin = np.ones(n) if spin_factor is None else np.asarray(spin_factor, float)
+        require(spin.shape == (n,), "spin_factor must have one entry per impact row")
         pipe = self._pipeline(wind)
-        out = np.empty((len(impacts), 5 if self._landing_state else 2))
-        for i in range(len(impacts)):
-            end = pipe.run(swing_state_from_impact(impacts[i], skill)).trajectory[-1]
+        out = np.empty((n, 5 if self._landing_state else 2))
+        for i in range(n):
+            swing = swing_state_from_impact(impacts[i], skill)
+            end = pipe.run(swing, spin_factor=float(spin[i])).trajectory[-1]
             out[i, :2] = (end.position[0] * M_TO_YD, end.position[1] * M_TO_YD)
             if self._landing_state:
                 out[i, 2:] = end.velocity[:3]
