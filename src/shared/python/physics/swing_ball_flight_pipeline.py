@@ -384,6 +384,7 @@ class SwingBallFlightPipeline:
         # Step 3: Derive launch conditions
         launch = self._deriver.derive(post)
         self._validate_launch_conditions(launch)
+        pre_clamp_launch = launch
         launch, spin_clamped = self._maybe_clamp_launch_spin(launch)
 
         # Step 4: Run ball flight simulation
@@ -396,6 +397,7 @@ class SwingBallFlightPipeline:
             launch,
             trajectory,
             spin_clamped=spin_clamped,
+            pre_clamp_launch=pre_clamp_launch if spin_clamped else None,
         )
         self._validate_result_sanity(result)
 
@@ -478,6 +480,7 @@ class SwingBallFlightPipeline:
         trajectory: list[TrajectoryPoint],
         *,
         spin_clamped: bool = False,
+        pre_clamp_launch: LaunchConditions | None = None,
     ) -> PipelineResult:
         """Assemble the final ``PipelineResult``."""
         path = np.array([p.position for p in trajectory], dtype=float)
@@ -490,6 +493,10 @@ class SwingBallFlightPipeline:
         }
         if spin_clamped:
             metadata["launch_spin_clamped"] = True
+            if pre_clamp_launch is not None:
+                metadata["pre_clamp_launch_spin_rpm"] = float(
+                    pre_clamp_launch.spin_rate
+                )
         return PipelineResult(
             swing_state=swing,
             impact_state=post,
