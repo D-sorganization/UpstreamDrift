@@ -18,6 +18,10 @@ from numpy.typing import NDArray
 from scipy.optimize import least_squares
 from scipy.spatial.transform import Rotation
 
+from src.shared.python.motion_matching.arm_mirror import (
+    document_arm_mirrored,
+    restart_jitter,
+)
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.marker_kinematics import MarkerLinearization
 from src.shared.python.motion_matching.constraint_kinematics import (
@@ -562,6 +566,8 @@ class BaseFullBodyIK:
             self.specification = {}
             self.coordinate_order = tuple(coordinate_order or ())
             self.marker_bodies = []
+        #: Right-arm axes mirrored (G1); the multi-start jitter reflects with it.
+        self.arm_mirrored: bool = document_arm_mirrored(self.specification)
         self.labels: tuple[str, ...] = tuple(labels or ())
 
     def pose_fn(self, q: Array) -> dict[str, Pose]:
@@ -1160,8 +1166,11 @@ class BaseFullBodyIK:
                 opts.restarts if fit.marker_rms_m > opts.restart_threshold_m else 0
             ):
                 jittered = np.asarray(start, dtype=float).copy()
-                jittered[6:] += rng.uniform(
-                    -opts.restart_spread_rad, opts.restart_spread_rad, len(jittered) - 6
+                jittered[6:] += restart_jitter(
+                    rng,
+                    opts.restart_spread_rad,
+                    self.arm_mirrored,
+                    self.coordinate_order,
                 )
                 retry = self.solve_pose(
                     targets[k],
