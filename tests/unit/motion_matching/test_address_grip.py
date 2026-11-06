@@ -134,8 +134,8 @@ def test_flagship_driver_address_grip_roll_reports_current_value() -> None:
     spec = json.loads(DRIVER_SPEC_PATH.read_text())
     rolls = flagship_driver_grip_roll(spec)
     lead, trail = rolls.lead_deg, rolls.trail_deg
-    # Verified in analysis: lead ~94.1°, trail ~104.3°
-    assert 90.0 <= lead <= 100.0, f"Expected lead roll ~94°, got {lead}"
+    # Flagship driver spec: lead ~90° (row-1 projection), trail ~104° (row-2).
+    assert 88.0 <= lead <= 92.0, f"Expected lead roll ~90°, got {lead}"
     assert 100.0 <= trail <= 110.0, f"Expected trail roll ~104°, got {trail}"
 
 

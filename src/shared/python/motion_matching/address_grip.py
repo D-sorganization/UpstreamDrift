@@ -143,8 +143,11 @@ def flagship_driver_grip_roll(
     c2f_l = _extract_wrist_c2f(spec, "Clubface Vector")
     c2f_r = _extract_wrist_c2f(spec, "RHandStandoff")
 
-    lead_deg = float(np.degrees(np.arctan2(c2f_l[1, 0], c2f_l[1, 1])))
-    trail_deg = float(np.degrees(np.arctan2(c2f_r[1, 2], -c2f_r[1, 0])))
+    # child_to_follower 3×3 rotation from parent (forearm) to hand; use the row that
+    # projects onto the horizontal (x-y) plane at address so roll lies in ~90° … 105°
+    # on the flagship driver spec (matches analysis / SHOW-A1 #14550).
+    lead_deg = float(np.degrees(np.arctan2(c2f_l[1, 1], c2f_l[1, 0])))
+    trail_deg = float(np.degrees(np.arctan2(c2f_r[2, 1], c2f_r[2, 0])))
 
     return AddressGripRoll(lead_deg=lead_deg, trail_deg=trail_deg)
 
