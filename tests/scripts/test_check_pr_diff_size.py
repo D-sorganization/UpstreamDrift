@@ -168,7 +168,9 @@ def test_over_cap_is_advisory_without_strict(
     )
 
 
-def test_strict_exits_one_when_over_cap(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_strict_exits_one_when_over_cap(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     from scripts.ci import check_pr_diff_size as mod
 
     repo = _init_repo(tmp_path)
@@ -210,7 +212,9 @@ def test_strict_exits_one_when_over_cap(tmp_path: Path, monkeypatch: pytest.Monk
     )
 
 
-def test_allowlist_pr_number_exempt(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_allowlist_pr_number_exempt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     from scripts.ci import check_pr_diff_size as mod
 
     repo = _init_repo(tmp_path)
