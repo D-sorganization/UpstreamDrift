@@ -124,3 +124,64 @@ def test_mirror_leaves_zero_pose_frames_and_dorsal_axes_unchanged(
             wrist_follower_dorsal_axis(native, hand),
             atol=1e-9,
         ), hand
+
+
+FIXTURES = Path(__file__).resolve().parents[2] / "fixtures/club_face"
+
+
+def _rot(prim: str, angle: float) -> np.ndarray:
+    c, s = np.cos(angle), np.sin(angle)
+    out = np.eye(4)
+    i, j = {"Rx": (1, 2), "Ry": (2, 0), "Rz": (0, 1)}[prim]
+    out[i, i], out[i, j], out[j, i], out[j, j] = c, -s, s, c
+    return out
+
+
+def _frames_at(spec: dict, q: np.ndarray) -> dict[str, np.ndarray]:
+    """World pose of every body reached through rotational joints at pose ``q``."""
+    order = {name: k for k, name in enumerate(spec["coordinate_order"])}
+    by_child = {j["child"]: j for j in spec["joints"]}
+    frames: dict[str, np.ndarray] = {}
+
+    def frame(body: str) -> np.ndarray:
+        if body not in frames:
+            joint = by_child.get(body)
+            if joint is None:
+                frames[body] = np.eye(4)
+            else:
+                motion = np.eye(4)
+                for prim in joint["primitives"]:
+                    k = order.get(prim["coordinate"])
+                    if k is not None and prim["primitive"] in ("Rx", "Ry", "Rz"):
+                        motion = motion @ _rot(prim["primitive"], q[k])
+                frames[body] = (
+                    frame(joint["parent"])
+                    @ np.asarray(joint["parent_to_base"], float)
+                    @ motion
+                    @ np.linalg.inv(np.asarray(joint["child_to_follower"], float))
+                )
+        return frames[body]
+
+    for body in by_child:
+        frame(body)
+    return frames
+
+
+def test_native_and_mirrored_replay_give_identical_body_frames() -> None:
+    """Migration proof: native spec + native q == mirrored spec + migrated q.
+
+    Covers the 908-frame driver swing and the address pose, bit-for-bit up to
+    1e-9, so the stored-coordinate negation is exactly compensated by the axes.
+    """
+    mirrored = json.loads((MODELS / SPECS[0]).read_text(encoding="utf-8"))
+    native = _unmirrored(mirrored)
+    swing_new = np.load(FIXTURES / "swing_q_driver.npz")["q"]
+    swing_old = np.load(FIXTURES / "swing_q_driver_native.npz")["q"]
+    assert swing_new.shape == swing_old.shape
+    assert swing_new.shape[0] == 908
+    for k in np.linspace(0, swing_new.shape[0] - 1, 30).astype(int):
+        after = _frames_at(mirrored, swing_new[k])
+        before = _frames_at(native, swing_old[k])
+        assert after.keys() == before.keys()
+        for body, pose in after.items():
+            assert np.allclose(pose, before[body], atol=1e-9), (int(k), body)
