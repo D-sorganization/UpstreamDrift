@@ -9,8 +9,8 @@ import pytest
 
 from src.shared.python.osl_scoping.osl15 import (
     assert_ik_records_load_balance,
+    asset_gated_followups_block,
     deadlift_pull_bundle_paths,
-    issue_todo_block,
     validate_osl15_fixture,
 )
 
@@ -18,7 +18,9 @@ pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[4]
 _FIXTURE = _ROOT / "tests/fixtures/lifting/osl_scoping/osl15_scoping_v1.json"
-_BACK_SQUAT = _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz"
+_BACK_SQUAT = (
+    _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz"
+)
 
 
 def test_osl15_fixture_schema() -> None:
@@ -31,9 +33,9 @@ def test_back_squat_barbell_bundle_records_load_balance() -> None:
     assert_ik_records_load_balance(_BACK_SQUAT, fixture=fixture)
 
 
-def test_issue_todo_block_lists_regeneration() -> None:
-    block = issue_todo_block()
-    assert "TODO:" in block and "13093" in block
+def test_asset_gated_followups_block_lists_regeneration() -> None:
+    block = asset_gated_followups_block()
+    assert "Tracked follow-up" in block and "13093" in block
 
 
 @pytest.mark.parametrize(
