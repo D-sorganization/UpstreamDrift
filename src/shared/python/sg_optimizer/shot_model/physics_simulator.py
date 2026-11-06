@@ -105,11 +105,7 @@ class PipelineLandingSimulator:
         impacts: NDArray[np.float64],
         skill: str,
         wind: tuple[float, float],
-        slope: str = "flat",
-        lie: str = "fairway",
     ) -> NDArray[np.float64]:
-        """Carry or landing-state output; ``slope``/``lie`` match :data:`LandingSimulator` and are ignored here."""
-        _ = (slope, lie)
         pipe = self._pipeline(wind)
         out = np.empty((len(impacts), 5 if self._landing_state else 2))
         for i in range(len(impacts)):
