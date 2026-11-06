@@ -101,6 +101,9 @@ def test_analytic_golden_matches_projected_lyapunov_covariance() -> None:
     v_ucm, v_ort = predicted_ucm_variances(spec, p_terminal)
     assert report.ucm.v_ucm == pytest.approx(v_ucm, rel=0.06)
     assert report.ucm.v_ort == pytest.approx(v_ort, rel=0.06)
+    # The golden discriminates: the initial covariance misses V_UCM badly.
+    wrong_ucm, _ = predicted_ucm_variances(spec, p0)
+    assert abs(report.ucm.v_ucm / wrong_ucm - 1.0) > 0.3
 
 
 def test_tnc_fails_closed_below_minimum_trials_and_records_seed() -> None:
@@ -165,3 +168,7 @@ def test_adapter_takes_one_terminal_state_per_trace_trial() -> None:
     assert inputs.strata == tuple(str(s) for s in bundle["outcome_label"])
     with pytest.raises(ValueError, match="unsupported"):
         audit_inputs_from_traces({**bundle, "schema_version": "v0"})
+    with pytest.raises(ValueError, match="outcome_label"):
+        audit_inputs_from_traces(
+            {**bundle, "outcome_label": bundle["outcome_label"][:-1]}
+        )
