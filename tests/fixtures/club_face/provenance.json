@@ -274,7 +274,7 @@
     "weight": 3.0
    },
    "face_weight": 3.0,
-   "fixture_sha256": "00c7e47295f9fb6190f8a5516bbf5c9622a4db28c592c4400e6eb14a79037458",
+   "fixture_sha256": "a452d1b702c77ff69010529987d87c3894257384de5a0ec75780e8daf52c6241",
    "foot_progression": {
     "address_model_deg": {
      "left": 16.517857284333843,
@@ -358,8 +358,8 @@
     "previous_fixture_sha256": "df7802600828a7e04158cec5cdb487505a5ba1fff0c15044756540c5eb68bc0a",
     "previous_spec_sha256": "08d54918d330cdb5143835dd30fd57694bfb039eb74f9e45e326a476d149338e",
     "script": "docs/development/full_body_models/evidence/grip_roll/solve_neutral_grip.py",
-    "showpiece_spec_sha256": "ef0df868e64766019cff7e9f2a5d701a1fb344859252fb60ae579c32cfa0515a",
-    "spec_sha256": "0910a8e7b7e8f2c4f0320b4b9fc41d195cc236f4094a117ccb840e259b7f5f88"
+    "showpiece_spec_sha256": "4aa4095830afb2bebd90c469a710d2af359d1fc627eb84edd2ddca3680a05e1c",
+    "spec_sha256": "c4f0bbb7b969f07ade5238880b8dfd3add997fb130f14e0311d90f3d0f1c8a09"
    },
    "pipeline_argv": [
     "--spec",
@@ -376,7 +376,7 @@
     "runs_12221_fx/driver"
    ],
    "run_receipt_sha256": "596c9b4a8fb6db6dbbe502bc8e7d008c8def8824f3ae771dc3b2173c9f0d8ffa",
-   "spec_sha256": "0910a8e7b7e8f2c4f0320b4b9fc41d195cc236f4094a117ccb840e259b7f5f88"
+   "spec_sha256": "c4f0bbb7b969f07ade5238880b8dfd3add997fb130f14e0311d90f3d0f1c8a09"
   },
   "iron7": {
    "after": {
