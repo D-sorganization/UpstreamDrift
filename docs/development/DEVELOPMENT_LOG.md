@@ -742,6 +742,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14703 · Putting Studio: Exact Imperial Ft Factor, a Parity Test for the Core Green Edge Clamp, and Locked Slope Sliders That Read the Core Green's Slope at the Ball
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14703
+- **Branch:** merged via #14709
+- **PR:** #14709
+- **Paths:** see #14709
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`c179ec77`; collated from changes/14703-putting-studio-exact-imperial-ft-factor.md)
+- **Summary:** Putting studio: exact imperial ft factor, a parity test for the core green edge clamp, and locked slope sliders that read the core green's slope at the ball
+- **Next step:** Shipped in PR #14709.
+
 ### DL-#13779 · Knot_Gradient_Optimiser: Lbfgs_Minimise Records a Per-Evaluation Objective Versus Gradient Timing Split and the Projected-Gradient Norm (Per Evaluation and at SciPy's Final Point) so a Max_Iterations Stop Is Diagnosable; Results Are Pinned Bit-for-Bit
 
 - **State:** shipped
