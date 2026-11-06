@@ -49,10 +49,13 @@ def test_route_refuses_an_unknown_pick_and_an_impossible_one(
     client: TestClient,
 ) -> None:
     assert client.post("/character-builder/grip", json={"spin": 1}).status_code == 422
-    r = client.post("/character-builder/grip", json={"lead_shaft_rotation": -60})
-    # -60 deg is the lead alpha bound (lead V azimuth -40 deg, HRG-GS-G4); the
-    # trail hand then sits outside the trail V offset range: still impossible.
-    assert r.status_code == 422 and "trail_v_offset_deg" in r.json()["detail"]
+    # -60 deg is the lead alpha bound (lead V azimuth -40 deg, HRG-GS-G4) and is
+    # now reachable: the trail V offset range was widened for #14751. One degree
+    # past it is still impossible.
+    ok = client.post("/character-builder/grip", json={"lead_shaft_rotation": -60})
+    assert ok.status_code == 200
+    r = client.post("/character-builder/grip", json={"lead_shaft_rotation": -61})
+    assert r.status_code == 422 and "alpha_deg" in r.json()["detail"]
 
 
 def test_appearance_export_carries_only_picture_picks(client: TestClient) -> None:
