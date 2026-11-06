@@ -874,12 +874,20 @@ def test_predictive_receipt_converged_or_reports_status() -> None:
     assert "not implemented" not in json.dumps(table)
 
 
-def test_refresh_comparison_keeps_the_solve_record(tmp_path: Path) -> None:
+def test_refresh_comparison_keeps_the_solve_record(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     """``--refresh-comparison`` rebuilds only the comparison table."""
     import importlib
     import json
 
     mod = importlib.import_module("scripts.measure_opensim_predictive_deadlift")
+    run = mod.subprocess.run
+    monkeypatch.setattr(  # keep git, skip the networked npx formatter
+        mod.subprocess,
+        "run",
+        lambda cmd, **k: None if cmd[0] == "npx" else run(cmd, **k),
+    )
     stale = json.loads(PREDICTIVE_RECEIPT.read_text(encoding="utf-8"))
     stale["comparison_table"].pop("tracked_comparison", None)
     (tmp_path / "receipts.json").write_text(json.dumps(stale), encoding="utf-8")
