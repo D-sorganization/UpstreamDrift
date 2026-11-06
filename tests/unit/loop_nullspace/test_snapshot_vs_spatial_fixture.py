@@ -31,11 +31,21 @@ from src.shared.python.loop_nullspace.contracts import InputProvenance  # noqa: 
 from src.shared.python.loop_nullspace.snapshot import (  # noqa: E402
     snapshot_from_adapter,
 )
+from tests.integration.cross_engine.loop_nullspace_conformance_support import (  # noqa: E402
+    require_real_pinocchio,
+)
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio]
 
 TOL = 1e-9
 _RIGID_CLUB_SPEC = {"joints": [], "club": {"shaft": {"model": "rigid"}}}
+
+
+@pytest.fixture(autouse=True)
+def _real_pinocchio() -> None:
+    # Without ``pin`` the unit conftest installs a MagicMock, which importorskip
+    # accepts; the fixture then builds an empty grip rotation (CI, #14757).
+    require_real_pinocchio()
 
 
 class _FixtureNativeModel(NativePinocchioModel):
