@@ -1108,6 +1108,10 @@
 {"path": "launcher_embed/contract.py", "classification": "ud-only", "package": "launcher_embed", "spelling_only": false}
 {"path": "launcher_embed/registry.py", "classification": "ud-only", "package": "launcher_embed", "spelling_only": false}
 {"path": "launcher_factory.py", "classification": "ud-only", "package": "launcher_factory.py", "spelling_only": false}
+{"path": "lift_scoping/__init__.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
+{"path": "lift_scoping/_json_validate.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
+{"path": "lift_scoping/lift5.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
+{"path": "lift_scoping/lift6.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
 {"path": "lifting/__init__.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/_canonical/MANIFEST.json", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/_canonical/biomech_parity_standard.json", "classification": "ud-only", "package": "lifting", "spelling_only": false}
