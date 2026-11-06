@@ -113,7 +113,7 @@ def test_mirror_leaves_zero_pose_frames_and_dorsal_axes_unchanged(
     )
 
     mirrored = json.loads((MODELS / spec_name).read_text(encoding="utf-8"))
-    if not arm_is_mirrored(mirrored):  # iron7 stays native until its receipts move
+    if not arm_is_mirrored(mirrored):  # pragma: no cover
         mirror_document_arm(mirrored)
     native = _unmirrored(mirrored)
     after, before = _zero_pose_frames(mirrored), _zero_pose_frames(native)
@@ -185,5 +185,31 @@ def test_native_and_mirrored_replay_give_identical_body_frames() -> None:
         after = _frames_at(mirrored, swing_new[k])
         before = _frames_at(native, swing_old[k])
         assert after.keys() == before.keys()
+        for body, pose in after.items():
+            assert np.allclose(pose, before[body], atol=1e-9), (int(k), body)
+
+
+@pytest.mark.parametrize("fixture", ["swing_q_iron7.npz", "tracked_q_iron7.npz"])
+def test_iron7_migrated_q_replays_to_the_native_body_frames(fixture: str) -> None:
+    """Iron7 (SHOW-A17, #14753): negating the six flipped columns is exact.
+
+    The committed iron7 q are stored in the mirrored convention; the native
+    spec with those columns negated back must give the same body frames.
+    """
+    from src.shared.python.motion_matching.arm_mirror import FLIPPED_COORDINATES
+
+    mirrored = json.loads(
+        (MODELS / "full_body_spec_anthro_iron7.json").read_text(encoding="utf-8")
+    )
+    native = _unmirrored(mirrored)
+    order = mirrored["coordinate_order"]
+    cols = [i for i, name in enumerate(order) if name in FLIPPED_COORDINATES]
+    assert len(cols) == len(FLIPPED_COORDINATES)
+    q_new = np.load(FIXTURES / fixture)["q"].astype(float)
+    q_old = q_new.copy()
+    q_old[:, cols] *= -1.0
+    for k in np.linspace(0, q_new.shape[0] - 1, 20).astype(int):
+        after = _frames_at(mirrored, q_new[k])
+        before = _frames_at(native, q_old[k])
         for body, pose in after.items():
             assert np.allclose(pose, before[body], atol=1e-9), (int(k), body)
