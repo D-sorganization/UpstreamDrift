@@ -69,7 +69,7 @@ def migrate_bundle(
     v2 = json.loads(v2_spec_path.read_text(encoding="utf-8"))
     loaded = InputBundle.load(v1_bundle)
     q_v2 = migrate_q_to_v2(v1, v2, loaded.reference_q, loaded.coordinate_order)
-    times = loaded.dt_s * np.arange(len(q_v2))
+    times = np.asarray(loaded.dt_s * np.arange(len(q_v2)), dtype=np.float64)
     bundle = generate_reference_bundle(
         v2_spec_path.read_bytes(),
         times,
