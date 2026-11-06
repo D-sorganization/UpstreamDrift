@@ -42,8 +42,8 @@ V1_IDENTITIES = {
         "9231931ea9111da807253c9bd9f38a25817be3024f34d1b105e87f0076486913",
     ),
     "full_body_spec_anthro_iron7.json": (
-        "5715ad935765cd37f7c5ee2abd2a4a1b2169ce5bc920e4d4eddf6af5a7833643",
-        "11bf35afb936d56971dd81ddf7da40194583ff5c3f1ac6ff2a5630712372bd40",
+        "8054874fbc4c836713d66afad547c3f34a480cda54703f96fcf2b903b70ef7c6",
+        "138f038c6377b3c14629321b2dbe8bd232deda73753f48099194e19ec1fa7df5",
     ),
 }
 
