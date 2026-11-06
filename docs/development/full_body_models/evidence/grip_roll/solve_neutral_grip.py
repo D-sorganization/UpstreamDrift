@@ -229,6 +229,11 @@ def _parser() -> argparse.ArgumentParser:
         help="re-solve a swing npz in place (club key from address_poses.json)",
     )
     ap.add_argument(
+        "--save-address",
+        type=Path,
+        help="write the re-solved address coordinates (and spec hash) to this npz",
+    )
+    ap.add_argument(
         "--address-pose", help="club key in tests/fixtures/club_face/address_poses.json"
     )
     ap.add_argument(
@@ -257,8 +262,9 @@ def main() -> int:
     (rp, rR), _, _ = old.sites(q0)
     (p, R), a, b = new.sites(q1)
     receipt = {
-        "issue": 14551,
-        "convention": "face-on grip roll, motion_matching/grip_roll.py",
+        "issue": 14731,
+        "convention": "face-on wrist roll, 0 = back of wrist up, + = counterclockwise "
+        "(motion_matching/grip_roll.py, #14731)",
         "target_roll_deg": args.target,
         "before_roll_deg": {
             "lead": round(before["lead"], 2),
@@ -309,6 +315,9 @@ def main() -> int:
         solved[perm] = resolve_swing(old, new, q[perm][None, :])[0]
         entry["q_rad"] = [float(v) for v in solved]
         path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
+    if args.save_address:
+        digest = hashlib.sha256(json.dumps(new_spec, sort_keys=True).encode())
+        np.savez(args.save_address, q=q1[None, :], spec_sha256=digest.hexdigest())
     args.out.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(receipt, indent=2))  # noqa: T201 - CLI output
     return 0
