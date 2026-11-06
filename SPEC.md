@@ -2754,6 +2754,22 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-06 | #14777 | Ground-support segment-scale tie-break, receipt canonical compare (#14771) |
+| 2026-11-06 | #14759 | NSX-13 spatial-fixture test double builds the R11 shaft springs like NativePinocchioModel (rigid club), so test_snapshot_vs_spatial_fixture is green again |
+| 2026-11-06 | #14762 | SHOW-G1: mirror the right-arm joint axes in driver v1/v2 (R scapula, shoulder, forearm, wrist) so positive L and R coordinates give mirrored motion |
+| 2026-11-06 | #14774 | Add PR size gate workflow and git numstat checker (500-line cap, exemptions). |
+| 2026-11-06 | #14642 | SHOW-B3b: bounce/roll ground model, slope bins, lie modifier, club column on dispersion tables |
+| 2026-11-06 | #14778 | NP-03/04 toy MLP rank-1 edit and LoRA comparator (#14478 #14479) |
+| 2026-11-06 | #14776 | Add Pydantic golf metric-definitions registry schema (GM-1a) with filter descriptor. |
+| 2026-11-06 | #14761 | S6 catalogue reason now names the missing arm on the NSX-97 UCM split |
+| 2026-11-06 | #14779 | xfail placeholder for anthro noise-aware receipt (#12721) |
+| 2026-11-06 | #14782 | event_outcome_rows refuses a near-grazing impact (transversality below GRAZING_TRANSVERSALITY) instead of returning unreliable linear rows |
+| 2026-11-06 | #14773 | Manual ch. 67 quotes the five-engine R11 chain receipt; previous run keeps its engine block |
+| 2026-11-06 | #14769 | native_viewer_export CLI explains a foreign shared package shadowing the vendored Tools tree |
+| 2026-11-06 | #14772 | Simscape grip docs state the SHOW-A7 grip zero (#14731); a MATLAB test checks the gs3dx topology frames; the R2025b address-roll check is cataloged as deferred |
+| 2026-11-06 | #14711 | OpenSim grip net_moment_com: restore Simbody patch torque (drop #14354 lever), derive static friction by least-squares fit of the Hollars curve to the shared law, run the slow OpenSim parity tests in CI, integrate swings at accuracy 5e-10 and holds at 5e-8 (chosen by motion) so all six net-moment cases pass with the xfails removed |
+| 2026-11-06 | #14760 | SPN-0b data_extraction.md: DOIs and full author lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 from Crossref; no verified_from_primary flag changed |
+| 2026-11-06 | #14758 | Pin the R4 capture-mode address knee on the canonical receipts and record their marker RMS before/after (acceptance 6) |
 | 2026-11-06 | #14766 | OSL-7 predictive deadlift receipt now records the tracked comparison as unavailable (non-converged solve) via a no-solve --refresh-comparison mode; lift_models.tex notes the exploratory status. |
 | 2026-11-06 | #14752 | Fix lod-quality-gate regression: TableShotModel asks DispersionTable.club_label instead of reaching into provenance (Law of Demeter) |
 | 2026-11-06 | #14709 | Putting studio: exact imperial ft factor, a parity test for the core green edge clamp, and locked slope sliders that read the core green's slope at the ball |

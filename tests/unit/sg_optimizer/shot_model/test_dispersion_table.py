@@ -22,10 +22,6 @@ from src.shared.python.sg_optimizer.shot_model.dispersion_table import (
 from src.shared.python.sg_optimizer.shot_model.dispersion_lie import (
     lie_modifier_for_table,
 )
-from src.shared.python.sg_optimizer.shot_model.ground_runout import (
-    SKILL_CLUB,
-    rest_position,
-)
 from src.shared.python.sg_optimizer.shot_model.skill_registry import get_skill_family
 from src.shared.python.sg_optimizer.shot_model.slope_wind_bins import (
     make_slope_modifier,
@@ -37,15 +33,11 @@ from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
 pytestmark = pytest.mark.unit
 
 
-def _linear_sim(
-    impacts: np.ndarray, skill: str, wind: tuple[float, float], slope: str, lie: str
-):
-    """Analytic carry + documented runout."""
+def _linear_sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
+    """Analytic stand-in: along = 2 * speed - headwind, lateral = 3 * face."""
     along = 2.0 * impacts[:, 0] - wind[0]
     lateral = 3.0 * impacts[:, 1] + wind[1]
-    carry = np.stack([along, lateral], axis=1)
-    speed = np.clip(2.0 * impacts[:, 0], 10.0, 55.0)
-    return rest_position(carry, slope=slope, lie=lie, landing_speed_ms=speed)
+    return np.stack([along, lateral], axis=1)
 
 
 def _build(seed: int = 1, n: int = 4000, **kw):
@@ -72,12 +64,11 @@ def test_cell_statistics_match_analytic_moments() -> None:
     t = _build()
     cell = t.lookup("driver", "driver", "fairway", "calm", "flat")
     spec = get_skill_family("tour").skills["driver"].distribution
-    carry_mean = 2 * spec.mean[0]
-    assert cell.mean[0] > carry_mean + 5.0  # bounce/roll adds downrange rest
-    assert cell.sd[0] == pytest.approx(2 * spec.sd[0], rel=0.08)
+    assert cell.mean[0] == pytest.approx(2 * spec.mean[0], abs=0.3)
+    assert cell.sd[0] == pytest.approx(2 * spec.sd[0], rel=0.05)
     assert cell.sd[1] == pytest.approx(3 * spec.sd[1], rel=0.05)
     head = t.lookup("driver", "driver", "fairway", "head_5", "flat")
-    assert head.mean[0] == pytest.approx(cell.mean[0] - 5.0, abs=1.0)
+    assert head.mean[0] == pytest.approx(cell.mean[0] - 5.0, abs=1e-6)
 
 
 def test_unknown_key_fails_closed() -> None:
@@ -149,13 +140,18 @@ def test_cli_records_convergence_in_provenance_and_loads_back(tmp_path: Path) ->
     assert table.provenance["convergence"]["max_rel_change"] >= 0.0
     assert isinstance(table.provenance["convergence"]["converged"], bool)
     assert table.provenance["n"] == 8
-    assert table.provenance["ground_model"] == "sg_runout_v1"
+    assert "ground_model" not in table.provenance
 
 
 def test_slope_bins_shift_downrange_mean() -> None:
+    def _slope_sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
+        along = 2.0 * impacts[:, 0] + impacts[:, 3] - wind[0]
+        lateral = 3.0 * impacts[:, 1] + wind[1]
+        return np.stack([along, lateral], axis=1)
+
     t = build_grid_table(
         get_skill_family("tour"),
-        _linear_sim,
+        _slope_sim,
         TableGrid(
             skills=("driver",),
             lies=("fairway",),
@@ -174,7 +170,6 @@ def test_slope_bins_shift_downrange_mean() -> None:
 
 
 def test_club_column_uses_representative_club() -> None:
-    assert SKILL_CLUB["mid_iron"] == REPRESENTATIVE_CLUB["mid_iron"]
     t = build_grid_table(
         get_skill_family("tour"),
         _linear_sim,
@@ -204,7 +199,19 @@ def test_table_lie_modifier_lowers_rough_speed() -> None:
     assert ro.mean[0] < fw.mean[0]
 
 
-def test_default_n_convergence_with_runout_linear_sim() -> None:
+def test_default_n_convergence_linear_sim() -> None:
     fam = get_skill_family("tour")
     conv = check_convergence(fam, _linear_sim, "driver", n=12000, seed=0)
     assert conv.converged, conv.max_rel_change
+
+
+def test_carry_table_provenance_does_not_claim_ground_model() -> None:
+    """Carry-only table (ground is None) must not record sg_runout_v1 in provenance (#14816)."""
+    table = build_table(
+        get_skill_family("tour"),
+        _linear_sim,
+        skills=("driver",),
+        n=100,
+        seed=1,
+    )
+    assert "ground_model" not in table.provenance

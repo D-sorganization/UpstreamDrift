@@ -11,7 +11,6 @@ from src.shared.python.sg_optimizer.shot_model.baseline_model import (
     lie_modifiers,
 )
 from src.shared.python.sg_optimizer.shot_model.dispersion_table import DispersionTable
-from src.shared.python.sg_optimizer.shot_model.ground_runout import SKILL_CLUB
 from src.shared.python.sg_optimizer.shot_model.outcome import (
     LandingSamples,
     ShotOutcomeModel,

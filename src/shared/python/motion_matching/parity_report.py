@@ -19,6 +19,7 @@ from pathlib import Path
 import sys
 import time
 from typing import Any
+import zipfile
 
 import numpy as np
 
@@ -27,7 +28,7 @@ from src.shared.python.motion_matching.candidate import (
     CandidateProfile,
     MatchedSwingCandidate,
 )
-from src.shared.python.motion_matching.candidate_io import load_candidate
+from src.shared.python.motion_matching.candidate_io import MANIFEST_KEY, load_candidate
 from src.shared.python.motion_matching.parity_schema import (
     PARITY_REPORT_SCHEMA_VERSION,
     ComparisonClass,
@@ -147,77 +148,107 @@ def evaluate_pointwise_torque_parity(
     )
 
 
+# Legacy raw rollout archives (pre-#10350 candidates, e.g. the committed
+# ``evidence/matched/*/candidate.npz``): no manifest, but ``time_s`` and ``q``.
+# Only the members below are ever read; any other member is never deserialised.
+_LEGACY_REQUIRED_KEYS: frozenset[str] = frozenset({"time_s", "q"})
+_NUMERIC_KINDS = frozenset("biuf")
+
+
+def _archive_keys(path: Path) -> frozenset[str]:
+    """Member names of an ``.npz`` archive; ``ValueError`` if it is unreadable."""
+    try:
+        with np.load(path, allow_pickle=False) as data:
+            return frozenset(data.files)
+    except (OSError, ValueError, zipfile.BadZipFile) as exc:
+        raise ValueError(f"Candidate archive {path} is not a readable .npz") from exc
+
+
+def _numeric(data: Any, key: str) -> np.ndarray | None:
+    """Float copy of a numeric member, ``None`` if absent; refuses other dtypes."""
+    if key not in data:
+        return None
+    try:
+        arr = data[key]
+    except ValueError as exc:  # object arrays need pickle, which is never enabled
+        raise ValueError(f"Legacy member {key!r} is not a numeric array") from exc
+    if arr.dtype.kind not in _NUMERIC_KINDS:
+        raise ValueError(f"Legacy member {key!r} is not a numeric array")
+    return np.asarray(arr, dtype=np.float64)
+
+
+def _first_numeric(data: Any, *keys: str) -> np.ndarray | None:
+    for key in keys:
+        if key in data:
+            return _numeric(data, key)
+    return None
+
+
+def _legacy_candidate_from_npz(path: Path) -> MatchedSwingCandidate:
+    """Build a candidate from a legacy numeric archive (``allow_pickle=False``)."""
+    from src.shared.python.motion_matching.candidate import (
+        CANDIDATE_SCHEMA_VERSION,
+        CandidateMarkers,
+        CandidateMetadata,
+    )
+
+    with np.load(path, allow_pickle=False) as data:
+        time_s = _numeric(data, "time_s")
+        q = _numeric(data, "q")
+        v = _first_numeric(data, "qd", "v")
+        tau = _first_numeric(data, "us", "tau")
+        markers = _numeric(data, "predicted_markers_m")
+    if time_s is None or q is None or q.ndim != 2:
+        raise ValueError(f"Legacy archive {path} needs time_s and a 2-D q")
+    if tau is not None and tau.shape[0] == len(time_s) - 1:
+        tau = np.vstack([tau, tau[-1:]])
+    meta = CandidateMetadata(
+        schema_version=CANDIDATE_SCHEMA_VERSION,
+        profile=(
+            CandidateProfile.DYNAMIC if tau is not None else CandidateProfile.KINEMATIC
+        ),
+        engine="unknown",
+        coordinate_names=tuple(f"q_{i}" for i in range(q.shape[1])),
+        actuator_names=(
+            tuple(f"tau_{i}" for i in range(tau.shape[1])) if tau is not None else ()
+        ),
+    )
+    return MatchedSwingCandidate(
+        metadata=meta,
+        time_s=time_s,
+        q=q,
+        v=v,
+        tau=tau,
+        markers=CandidateMarkers(model_markers_m=markers),
+    )
+
+
 def _resolve_candidate(
     candidate: Path | str | MatchedSwingCandidate | Mapping[str, Any],
 ) -> MatchedSwingCandidate:
-    """Resolve candidate input into a valid MatchedSwingCandidate instance."""
+    """Resolve candidate input into a valid MatchedSwingCandidate instance.
+
+    The archive kind is decided from its member names before any load. A
+    canonical package (has the manifest) goes only through
+    :func:`load_candidate`, so a checksum, schema or manifest failure raises
+    and never reaches the legacy path. An archive without the manifest that
+    holds ``time_s`` and ``q`` is a legacy numeric archive (only the members it
+    needs are read, numeric only). Every other archive is refused. Pickle loading is never enabled.
+    """
     if isinstance(candidate, MatchedSwingCandidate):
         return candidate
     if isinstance(candidate, (str, Path)):
         p = Path(candidate)
         if not p.is_file():
             raise FileNotFoundError(f"Candidate file not found: {p}")
-        try:
+        keys = _archive_keys(p)
+        if MANIFEST_KEY in keys:
             return load_candidate(p)
-        except (ValueError, KeyError):
-            # Fall back to reading raw npz
-            from src.shared.python.motion_matching.candidate import (
-                CANDIDATE_SCHEMA_VERSION,
-                CandidateMarkers,
-                CandidateMetadata,
-            )
-
-            with np.load(p, allow_pickle=True) as data:
-                time_s = np.asarray(data["time_s"], dtype=np.float64)
-                q = np.asarray(data["q"], dtype=np.float64)
-                v = (
-                    np.asarray(data["qd"], dtype=np.float64)
-                    if "qd" in data
-                    else (
-                        np.asarray(data["v"], dtype=np.float64) if "v" in data else None
-                    )
-                )
-                tau = (
-                    np.asarray(data["us"], dtype=np.float64)
-                    if "us" in data
-                    else (
-                        np.asarray(data["tau"], dtype=np.float64)
-                        if "tau" in data
-                        else None
-                    )
-                )
-                markers = (
-                    np.asarray(data["predicted_markers_m"], dtype=np.float64)
-                    if "predicted_markers_m" in data
-                    else None
-                )
-                if tau is not None and tau.shape[0] == len(time_s) - 1:
-                    tau = np.vstack([tau, tau[-1:]])
-                coord_names = tuple(f"q_{i}" for i in range(q.shape[1]))
-                act_names = (
-                    tuple(f"tau_{i}" for i in range(tau.shape[1]))
-                    if tau is not None
-                    else ()
-                )
-                meta = CandidateMetadata(
-                    schema_version=CANDIDATE_SCHEMA_VERSION,
-                    profile=(
-                        CandidateProfile.DYNAMIC
-                        if tau is not None
-                        else CandidateProfile.KINEMATIC
-                    ),
-                    engine="unknown",
-                    coordinate_names=coord_names,
-                    actuator_names=act_names,
-                )
-                return MatchedSwingCandidate(
-                    metadata=meta,
-                    time_s=time_s,
-                    q=q,
-                    v=v,
-                    tau=tau,
-                    markers=CandidateMarkers(model_markers_m=markers),
-                )
+        if keys >= _LEGACY_REQUIRED_KEYS:
+            return _legacy_candidate_from_npz(p)
+        raise ValueError(
+            f"Archive {p} is not a recognised candidate (members {sorted(keys)})"
+        )
     raise TypeError(f"Unsupported candidate type: {type(candidate).__name__}")
 
 

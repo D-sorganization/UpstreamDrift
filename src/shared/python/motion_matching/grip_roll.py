@@ -1,29 +1,23 @@
-"""Golf-language address grip roll, measured face-on (SHOW-A1 #14550, A7 #14731).
+"""Golf-language address grip roll, measured face-on (SHOW-A1, #14550).
 
-The owner reads the grip off the face-on view as a clock: **0 deg = the back of
-the wrist points straight up, on top of the shaft** (12 o'clock); **+ =
-counterclockwise** on that clock, from 12 toward the target side (9 o'clock is
-+90 deg). The default address grip is +15 deg. The first definition (A1) took
-0 deg as "the palm plane is vertical", i.e. the back of the wrist at 9 o'clock,
-so the shipped "15 deg" was 75 deg from this zero. ``grip_contract`` describes
-the hands as ``(alpha, psi, gamma)`` relative to the native hand frame, which is
-not what the owner sees.
+The owner reads the grip off the face-on view: **0 deg = the hand's palm plane is
+vertical** (neutral), **+ = strong** (the back of the lead hand turns toward the
+sky, clockwise in the golfer's view). ``grip_contract`` describes the same hands
+as ``(alpha, psi, gamma)`` relative to the native hand frame, which is not what
+the owner sees: the flagship reads weak there (alpha = -25 deg) yet ~90 deg here.
 
 Definition: ``shaft`` is club-frame ``y`` (butt to head); ``e_h`` is the
 horizontal direction toward the target perpendicular to it and ``e_v = shaft x
-e_h`` points up. The wrist axis ``b`` is ``-dorsal`` for both hands: the back of
-the LEAD hand (the follower x axis points to the palm side of the lead hand; the
-trail hand is read on the same axis, so its back is the opposite end, 180 deg
-away, as in a real grip). ``dorsal`` is the wrist-follower x axis
-(``hand_spec.wrist_follower_dorsal_axis``, one club-frame vector for lead and
-trail) taken into the world by the native club frame. ``roll = atan2(b.e_h,
-b.e_v)`` after projecting ``b`` off the shaft. One rule reads both hands.
+e_h`` points up. The hand normal ``n`` is the back of the lead hand and the palm
+of the trail hand, both ``-dorsal`` with ``dorsal`` the wrist-follower x axis
+(``hand_spec.wrist_follower_dorsal_axis``, the axis the hand meshes use) taken
+into the world by the native club frame. ``roll = atan2(n.e_v, n.e_h)`` after
+projecting ``n`` off the shaft.
 
-Mapping to HX (#13757): alpha is a rotation about the shaft, so ``d_alpha``
-changes the roll by exactly ``-d_alpha`` (``test_spin_about_the_shaft...``: the
-clock counts the other way); psi and gamma tilt about axes perpendicular to the
-shaft and are seen here only through the projected axis. The roll is a constant
-fixed by the native frame and the club lie at address, minus alpha.
+Mapping to HX (#13757): alpha is face-on referenced (#14633) and a rotation
+about the shaft, so ``d_alpha`` changes the roll by exactly ``d_alpha``
+(``test_spin_about_the_shaft...``); psi and gamma tilt about axes perpendicular
+to the shaft and are seen here only through the projected normal.
 """
 
 from __future__ import annotations
@@ -99,17 +93,17 @@ def reference_axes(shaft: Any, target: TargetFrame) -> tuple[Array, Array]:
     return np.asarray(e_h, dtype=np.float64), np.asarray(e_v, dtype=np.float64)
 
 
-def _roll_deg(axis_world: Array, e_h: Array, e_v: Array, shaft: Array) -> float:
-    projected = axis_world - float(axis_world @ shaft) * shaft
+def _roll_deg(normal_world: Array, e_h: Array, e_v: Array, shaft: Array) -> float:
+    projected = normal_world - float(normal_world @ shaft) * shaft
     require(
         float(np.linalg.norm(projected)) > _MIN_PROJECTION,
-        "the wrist axis must not lie along the shaft",
+        "the hand normal must not lie along the shaft",
     )
-    return math.degrees(math.atan2(float(projected @ e_h), float(projected @ e_v)))
+    return math.degrees(math.atan2(float(projected @ e_v), float(projected @ e_h)))
 
 
 def address_grip_roll_deg(state: GripPoseState) -> tuple[float, float]:
-    """``(lead, trail)`` face-on wrist roll: 0 = back of wrist up, + = counterclockwise.
+    """``(lead, trail)`` face-on hand roll in degrees: 0 = vertical, + = strong.
 
     Preconditions: ``club_rotation`` is a proper rotation (orthonormal, det +1);
     dorsal axes are non-zero and not along the shaft. Postcondition: both values
