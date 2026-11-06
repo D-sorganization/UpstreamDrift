@@ -1,4 +1,4 @@
-"""Tests for PR diff size gate (issue #14741)."""
+"""Tests for PR diff size advisory script (issue #14741, RD #4118 parity)."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from scripts.ci.check_pr_diff_size import (
+    assess_pr_diff_size,
     diff_line_total,
     exempt_deletion_only,
     parse_numstat,
@@ -100,7 +101,149 @@ def test_golden_regen_label_exempt_via_event(
     event_path.write_text(json.dumps(event), encoding="utf-8")
     monkeypatch.setenv("GITHUB_EVENT_PATH", str(event_path))
 
-    err = mod.check_pr_diff_size(
-        repo_root=repo, base_sha=main, head_sha=head, max_lines=500
+    verdict = mod.assess_pr_diff_size(
+        repo_root=repo,
+        base_sha=main,
+        head_sha=head,
+        max_lines=500,
+        pr_number=None,
+        allowlist_path=repo / "allow.json",
     )
-    assert err is None
+    assert verdict.within_limit is True
+    assert verdict.exempt_reason == "golden-regen"
+
+
+def test_over_cap_is_advisory_without_strict(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.ci import check_pr_diff_size as mod
+
+    repo = _init_repo(tmp_path)
+    main = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    _run_git(repo, "checkout", "-b", "big")
+    big = "\n".join([f"line {i}" for i in range(600)])
+    (repo / "huge.txt").write_text(big + "\n", encoding="utf-8")
+    _run_git(repo, "add", "huge.txt")
+    _run_git(repo, "commit", "-m", "big")
+    head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    monkeypatch.delenv("GITHUB_EVENT_PATH", raising=False)
+
+    verdict = mod.assess_pr_diff_size(
+        repo_root=repo,
+        base_sha=main,
+        head_sha=head,
+        max_lines=500,
+        pr_number=None,
+        allowlist_path=tmp_path / "allow.json",
+    )
+    assert verdict.within_limit is False
+
+    assert (
+        mod.main(
+            [
+                "--repo-root",
+                str(repo),
+                "--base-sha",
+                main,
+                "--head-sha",
+                head,
+                "--max-lines",
+                "500",
+                "--allowlist",
+                str(tmp_path / "allow.json"),
+            ]
+        )
+        == 0
+    )
+
+
+def test_strict_exits_one_when_over_cap(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from scripts.ci import check_pr_diff_size as mod
+
+    repo = _init_repo(tmp_path)
+    main = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    _run_git(repo, "checkout", "-b", "big")
+    big = "\n".join([f"line {i}" for i in range(600)])
+    (repo / "huge.txt").write_text(big + "\n", encoding="utf-8")
+    _run_git(repo, "add", "huge.txt")
+    _run_git(repo, "commit", "-m", "big")
+    head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    monkeypatch.delenv("GITHUB_EVENT_PATH", raising=False)
+
+    assert (
+        mod.main(
+            [
+                "--repo-root",
+                str(repo),
+                "--base-sha",
+                main,
+                "--head-sha",
+                head,
+                "--strict",
+                "--allowlist",
+                str(tmp_path / "missing-allow.json"),
+            ]
+        )
+        == 1
+    )
+
+
+def test_allowlist_pr_number_exempt(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from scripts.ci import check_pr_diff_size as mod
+
+    repo = _init_repo(tmp_path)
+    allow_path = tmp_path / "allow.json"
+    allow_path.write_text('{"allowed_prs": [9999]}', encoding="utf-8")
+
+    main = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    _run_git(repo, "checkout", "-b", "big")
+    big = "\n".join([f"line {i}" for i in range(600)])
+    (repo / "huge.txt").write_text(big + "\n", encoding="utf-8")
+    _run_git(repo, "add", "huge.txt")
+    _run_git(repo, "commit", "-m", "big")
+    head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    monkeypatch.delenv("GITHUB_EVENT_PATH", raising=False)
+
+    verdict = mod.assess_pr_diff_size(
+        repo_root=repo,
+        base_sha=main,
+        head_sha=head,
+        max_lines=500,
+        pr_number=9999,
+        allowlist_path=allow_path,
+    )
+    assert verdict.within_limit is True
+    assert verdict.exempt_reason == "allowlisted PR #9999"
