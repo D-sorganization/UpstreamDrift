@@ -22,14 +22,19 @@ class LoRAAdapter:
         self._w = np.asarray(weight, dtype=float)
         self._in_dim = int(self._w.shape[1])
         self._rank = int(rank)
+        self._a: NDArray[np.floating]
+        self._b: NDArray[np.floating]
         if self._rank == 0:
-            self._a = np.zeros((0, self._in_dim), dtype=float)
-            self._b = np.zeros((self._w.shape[0], 0), dtype=float)
+            self._a = np.zeros((0, self._in_dim), dtype=np.float64)
+            self._b = np.zeros((self._w.shape[0], 0), dtype=np.float64)
         else:
             gen = rng if rng is not None else np.random.default_rng()
             bound = float(np.sqrt(1.0 / self._in_dim))
-            self._a = gen.uniform(-bound, bound, size=(self._rank, self._in_dim))
-            self._b = np.zeros((self._w.shape[0], self._rank), dtype=float)
+            self._a = np.asarray(
+                gen.uniform(-bound, bound, size=(self._rank, self._in_dim)),
+                dtype=np.float64,
+            )
+            self._b = np.zeros((self._w.shape[0], self._rank), dtype=np.float64)
 
     @property
     def weight(self) -> NDArray[np.floating]:
