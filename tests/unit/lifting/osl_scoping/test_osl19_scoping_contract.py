@@ -10,7 +10,7 @@ import pytest
 from src.shared.python.osl_scoping.osl19 import (
     assert_bundle_carries_opensim_reach_receipt,
     assert_mujoco_grip_closure_passes,
-    issue_todo_block,
+    asset_gated_followups_block,
     validate_osl19_fixture,
 )
 
@@ -18,7 +18,9 @@ pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[4]
 _FIXTURE = _ROOT / "tests/fixtures/lifting/osl_scoping/osl19_scoping_v1.json"
-_SQUAT_BB = _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz"
+_SQUAT_BB = (
+    _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz"
+)
 
 
 def test_osl19_fixture_schema() -> None:
@@ -42,6 +44,6 @@ def test_back_squat_barbell_bundle_has_opensim_reach_receipt() -> None:
     assert_bundle_carries_opensim_reach_receipt(_SQUAT_BB)
 
 
-def test_issue_todo_calls_out_os_reach() -> None:
-    body = issue_todo_block()
+def test_asset_gated_followups_call_out_os_reach() -> None:
+    body = asset_gated_followups_block()
     assert "OpenSim" in body and "13158" in body

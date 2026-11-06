@@ -49,7 +49,7 @@ FIXTURE_SCHEMA: dict[str, Any] = {
     },
 }
 
-ISSUE_TODOS_WITHOUT_ASSETS: Final[tuple[str, ...]] = (
+ASSET_GATED_FOLLOWUPS: Final[tuple[str, ...]] = (
     "Choose cited high-bar grip width and placement inside Rajagopal arm ROM, "
     "or cite an arm variant that reaches the grip — issue table in #13158.",
     "Record reachable workspace (minimum shoulder-to-hand distance by direction) "
@@ -64,9 +64,10 @@ def validate_osl19_fixture(record: Mapping[str, Any]) -> dict[str, Any]:
     return dict(record)
 
 
-def issue_todo_block() -> str:
+def asset_gated_followups_block() -> str:
     lines = [f"{OSL_SLUG} (#{ISSUE_ID}) — blocked until OpenSim reach matches:", ""]
-    lines.extend(f"- TODO: {t}" for t in ISSUE_TODOS_WITHOUT_ASSETS)
+    prefix = "- Tracked follow-up (#"
+    lines.extend(f"{prefix}{ISSUE_ID}): {t}" for t in ASSET_GATED_FOLLOWUPS)
     return "\n".join(lines)
 
 
