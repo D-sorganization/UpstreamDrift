@@ -137,6 +137,7 @@ def envelope_subset(
         assumed_velocity_slots=tuple(
             j for j in joints if j in envelope.assumed_velocity_slots
         ),
+        soft_rom_slots=tuple(j for j in joints if j in envelope.soft_rom_slots),
         unbounded_rom_slots=tuple(
             j for j in joints if j in envelope.unbounded_rom_slots
         ),

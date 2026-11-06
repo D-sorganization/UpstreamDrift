@@ -40,6 +40,19 @@ CLUB_LOFT_DEG: dict[str, float] = {
     "chip": 56.0,
     "bunker": 56.0,
 }
+# A representative bag club per skill, within a few degrees of ``CLUB_LOFT_DEG``. The
+# short-game shots have no bag club of their own and keep the shot name.
+REPRESENTATIVE_CLUB: dict[str, str] = {
+    "driver": "driver",
+    "fairway_wood": "3_wood",
+    "long_iron": "4_iron",
+    "mid_iron": "6_iron",
+    "short_iron": "8_iron",
+    "wedge": "gw",
+    "pitch": "pitch",
+    "chip": "chip",
+    "bunker": "bunker",
+}
 
 
 def swing_state_from_impact(impact: NDArray[np.float64], skill: str) -> SwingState:
@@ -67,9 +80,15 @@ def swing_state_from_impact(impact: NDArray[np.float64], skill: str) -> SwingSta
 
 
 class PipelineLandingSimulator:
-    """``LandingSimulator`` over ``SwingBallFlightPipeline`` (one pipeline per wind)."""
+    """``LandingSimulator`` over ``SwingBallFlightPipeline`` (one pipeline per wind).
 
-    def __init__(self) -> None:
+    ``landing_state=True`` returns ``(n, 5)`` rows ``(x_yd, y_yd, vx, vy, vz m/s)``
+    at first ground contact, the input of ``ground_runout`` (B3b); the default is
+    carry ``(n, 2)``.
+    """
+
+    def __init__(self, *, landing_state: bool = False) -> None:
+        self._landing_state = landing_state
         self._pipelines: dict[tuple[float, float], SwingBallFlightPipeline] = {}
 
     def _pipeline(self, wind: tuple[float, float]) -> SwingBallFlightPipeline:
@@ -88,9 +107,11 @@ class PipelineLandingSimulator:
         wind: tuple[float, float],
     ) -> NDArray[np.float64]:
         pipe = self._pipeline(wind)
-        out = np.empty((len(impacts), 2))
+        out = np.empty((len(impacts), 5 if self._landing_state else 2))
         for i in range(len(impacts)):
             end = pipe.run(swing_state_from_impact(impacts[i], skill)).trajectory[-1]
-            out[i] = (end.position[0] * M_TO_YD, end.position[1] * M_TO_YD)
+            out[i, :2] = (end.position[0] * M_TO_YD, end.position[1] * M_TO_YD)
+            if self._landing_state:
+                out[i, 2:] = end.velocity[:3]
         ensure(bool(np.isfinite(out).all()), "pipeline produced non-finite landing")
         return out

@@ -742,6 +742,136 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14703 · Putting Studio: Exact Imperial Ft Factor, a Parity Test for the Core Green Edge Clamp, and Locked Slope Sliders That Read the Core Green's Slope at the Ball
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14703
+- **Branch:** merged via #14709
+- **PR:** #14709
+- **Paths:** see #14709
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`c179ec77`; collated from changes/14703-putting-studio-exact-imperial-ft-factor.md)
+- **Summary:** Putting studio: exact imperial ft factor, a parity test for the core green edge clamp, and locked slope sliders that read the core green's slope at the ball
+- **Next step:** Shipped in PR #14709.
+
+### DL-#13779 · Knot_Gradient_Optimiser: Lbfgs_Minimise Records a Per-Evaluation Objective Versus Gradient Timing Split and the Projected-Gradient Norm (Per Evaluation and at SciPy's Final Point) so a Max_Iterations Stop Is Diagnosable; Results Are Pinned Bit-for-Bit
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13779
+- **Branch:** merged via #14723
+- **PR:** #14723
+- **Paths:** see #14723
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`399a6e14`; collated from changes/13779-lbfgs-diagnostics.md)
+- **Summary:** knot_gradient_optimiser: lbfgs_minimise records a per-evaluation objective versus gradient timing split and the projected-gradient norm (per evaluation and at SciPy's final point) so a max_iterations stop is diagnosable; results are pinned bit-for-bit
+- **Next step:** Shipped in PR #14723.
+
+### DL-#13057 · Lifting: The Four Strict Residual-Gate Xfails (Deadlift, Bench Press, Snatch, Clean and Jerk) Now Cite #13057, the Hip and Pelvis Rebuild That Owns the Residual Excess, Instead Of #13041
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13057
+- **Branch:** merged via #14730
+- **PR:** #14730
+- **Paths:** see #14730
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`eda86d72`; collated from changes/13057-residual-xfail-retarget.md)
+- **Summary:** lifting: the four strict residual-gate xfails (deadlift, bench press, snatch, clean and jerk) now cite #13057, the hip and pelvis rebuild that owns the residual excess, instead of #13041
+- **Next step:** Shipped in PR #14730.
+
+### DL-#14698 · Add the Lighthouse Mobile Baseline Receipt (Loopback Fixture Server and Egress Proxy, Report Validator, CI Steps on the Fleet Runner) as the Follow-Up to #14270; Scores Informational, No Threshold.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14698
+- **Branch:** merged via #14717
+- **PR:** #14717
+- **Paths:** see #14717
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`c91cd7cf`; collated from changes/14698-add-the-lighthouse-mobile-baseline-recei.md)
+- **Summary:** Add the Lighthouse mobile baseline receipt (loopback fixture server and egress proxy, report validator, CI steps on the fleet runner) as the follow-up to #14270; scores informational, no threshold.
+- **Next step:** Shipped in PR #14717.
+
+### DL-#14610 · SHOW-B3b: Bounce/Roll Rest Positions (Sg_Runout_V1) on the B6 Slope Bins, CRN Lie Modifier for Dispersion Tables
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14610
+- **Branch:** merged via #14708
+- **PR:** #14708, #14726
+- **Paths:** see #14708
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-06 (`dbd65654`; collated from changes/14610-show-b3b-remainder-dispersion-table-grou.md)
+- **Summary:** SHOW-B3b: bounce/roll rest positions (sg_runout_v1) on the B6 slope bins, CRN lie modifier for dispersion tables
+- **Next step:** Shipped in PR #14708.
+
+### DL-#12769 · SPN-14a: Fixture_Peak_Spread_Table Serialises Law Drive Residuals and Lumbar Compression Spreads; the Invented-Fixture Table Is Committed as a CI Golden (Tests/Fixtures/Spine/Spn14a_Fixture_Peaks.Json)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12769
+- **Branch:** merged via #14716
+- **PR:** #14716
+- **Paths:** see #14716
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`6bcba0c7`; collated from changes/12769-spn14a-fixture-golden.md)
+- **Summary:** SPN-14a: fixture_peak_spread_table serialises law drive residuals and lumbar compression spreads; the invented-fixture table is committed as a CI golden (tests/fixtures/spine/spn14a_fixture_peaks.json)
+- **Next step:** Shipped in PR #14716.
+
+### DL-#14452 · Putting Parity Matrix: Units.React and Units.Tauri Move to Present, Citing the React Units Selector That #14458 Landed (PR #14489); No Putting Gaps Remain in the Matrix (Part Of #14452)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14452
+- **Branch:** merged via #14712
+- **PR:** #14712
+- **Paths:** see #14712
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`5eee5589`; collated from changes/14452-units-matrix-cell.md)
+- **Summary:** putting parity matrix: units.react and units.tauri move to present, citing the React units selector that #14458 landed (PR #14489); no putting gaps remain in the matrix (Part of #14452)
+- **Next step:** Shipped in PR #14712.
+
+### DL-#14702 · Putting_Dynamics: The Post-Impact Hop Reflects the Vertical Speed Relative to the Green, so a Downhill Putt Settles in Under 0.1 s Instead of Skipping for About 5 s; the Studio Long-Downhill Read Is Back in Core Parity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14702
+- **Branch:** merged via #14705
+- **PR:** #14705
+- **Paths:** see #14705
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`b76beaa7`; collated from changes/14702-downhill-hop.md)
+- **Summary:** putting_dynamics: the post-impact hop reflects the vertical speed relative to the green, so a downhill putt settles in under 0.1 s instead of skipping for about 5 s; the studio long-downhill read is back in core parity
+- **Next step:** Shipped in PR #14705.
+
+### DL-#12691 · R11: Per-Engine Chain-Shaft Impact-Window Receipt and Overlay Now Cover Drake and Pinocchio, With an Engine-Free Gate
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12691
+- **Branch:** merged via #14692
+- **PR:** #14692
+- **Paths:** see #14692
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`75d52d8c`; collated from changes/12691-r11-per-engine-chain-shaft-impact-window.md)
+- **Summary:** R11: per-engine chain-shaft impact-window receipt and overlay now cover drake and pinocchio, with an engine-free gate
+- **Next step:** Shipped in PR #14692.
+
+### DL-#12567 · NSX-24: Unify ContactForceAllocator and MultiEngineTorqueAllocator on Allocate_Contact_Frame Conic Path
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12567
+- **Branch:** merged via #14699
+- **PR:** #14699
+- **Paths:** see #14699
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ef08fbcb`; collated from changes/12567-nsx-24-unify-contactforceallocator-and-m.md)
+- **Summary:** NSX-24: unify ContactForceAllocator and MultiEngineTorqueAllocator on allocate_contact_frame conic path
+- **Next step:** Shipped in PR #14699.
+
 ### DL-#14677 · Sg_Optimizer: Common Random Numbers for an Injected ShotOutcomeModel so the Scalar Backup Converges
 
 - **State:** shipped
@@ -761,10 +891,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14650
 - **Branch:** merged via #14689
-- **PR:** #14689
+- **PR:** #14689, #14695
 - **Paths:** see #14689
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`437d6cab`; collated from changes/14650-studio-sg.md)
+- **Last verified:** 2026-11-05 (`37294a10`; collated from changes/14650-studio-pace.md)
 - **Summary:** Putting studio: batch strokes gained, the E(d) chart and the optimal pace read the core's solved player E(d) from core_sg.js (service_sg.sg_study, tour-average player, side-slope grid), replacing the hand-tuned comeback fit
 - **Next step:** Shipped in PR #14689.
 
@@ -774,10 +904,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690
+- **PR:** #14684, #14690, #14696, #14704, #14713, #14725
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`a368eb63`; collated from changes/12553-torque-capacity-trunk.md)
+- **Last verified:** 2026-11-06 (`150de70b`; collated from changes/12553-nsx-04-forearm-supination-torque-capacit.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 
@@ -995,10 +1125,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14563
 - **Branch:** merged via #14620
-- **PR:** #14620
+- **PR:** #14620, #14670
 - **Paths:** see #14620
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`d5eafa44`; collated from changes/14563-show-c7-flight-report-and-measured-swing.md)
+- **Last verified:** 2026-11-05 (`a3a1276e`; collated from changes/14563-c7-slice-2-address-pose-stills-capture-f.md)
 - **Summary:** SHOW-C7 flight report and measured-swing flight card (Part of #14563)
 - **Next step:** Shipped in PR #14620.
 
@@ -1138,10 +1268,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14561
 - **Branch:** merged via #14606
-- **PR:** #14606, #14673, #14681
+- **PR:** #14606, #14673, #14681, #14721, #14722
 - **Paths:** see #14606
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`ff319ca3`; collated from changes/14561-make-rom-and-velocity-hard-constraints-o.md)
+- **Last verified:** 2026-11-05 (`c64cb10c`; collated from changes/14561-show-c5-ladder-binding-report-classes-ev.md)
 - **Summary:** SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report
 - **Next step:** Shipped in PR #14606.
 
@@ -1333,10 +1463,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14557
 - **Branch:** merged via #14580
-- **PR:** #14580
+- **PR:** #14580, #14707
 - **Paths:** see #14580
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`a37a7c5a`; collated from changes/14557-show-c1-impacttarget-trustregion-and-phy.md)
+- **Last verified:** 2026-11-05 (`3e6b8f9b`; collated from changes/14557-source-skilled-male-peak-angular-velocit.md)
 - **Summary:** SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope contracts (impact_optimization package; face:path 10:1; NSX-04 torque limits; cited velocity YAML)
 - **Next step:** Shipped in PR #14580.
 

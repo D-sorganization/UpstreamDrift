@@ -7,13 +7,10 @@ cup-free roll stops 0.3 m past the hole, and the heading whose path crosses
 the hole. Golden parity: on the core greens the studio read matches the core
 read in speed, aim and verdict.
 
-Two core cases are left out of the parity set, each for a stated reason:
-
-- Severe Slopes falls 5% toward the hole, steeper than the rolling friction
-  at these green speeds, so neither model finds a putt that stops.
-- Long downhill putts (Undulating Championship at 35 ft): the core ball's
-  launch hop carries over the falling green for several metres, and the
-  studio ball has no airborne phase. Both reads hole, at different speeds.
+Severe Slopes is left out of the parity set: it falls 5% toward the hole,
+steeper than the rolling friction at these green speeds, so neither model
+finds a putt that stops. The long downhill read (Undulating Championship at
+35 ft) is in the set since the core hop settles on a falling green (#14702).
 """
 
 from __future__ import annotations
@@ -72,7 +69,9 @@ def _studio_read(green: str, dist_ft: float, stimp: float) -> dict[str, object]:
 @pytest.mark.parametrize(
     "green", ["flat_practice", "tiered", "undulating_championship"]
 )
-@pytest.mark.parametrize(("dist_ft", "stimp"), [(8.0, 11.5), (20.0, 10.0)])
+@pytest.mark.parametrize(
+    ("dist_ft", "stimp"), [(8.0, 11.5), (20.0, 10.0), (35.0, 12.0)]
+)
 def test_studio_read_matches_the_core_read(
     green: str, dist_ft: float, stimp: float
 ) -> None:
