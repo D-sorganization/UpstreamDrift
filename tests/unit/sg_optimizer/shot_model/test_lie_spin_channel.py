@@ -14,6 +14,7 @@ import pytest
 
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.physics.lie_interaction import make_lie_modifier
+from src.shared.python.physics.rust_kernel import is_rust_available
 from src.shared.python.physics.swing_ball_flight_pipeline import (
     SwingBallFlightPipeline,
 )
@@ -45,6 +46,8 @@ def _rows(n: int = 400) -> np.ndarray:
 
 
 def test_pipeline_scales_the_launch_spin_and_keeps_the_identity_exact() -> None:
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel not available")
     pipe, swing = SwingBallFlightPipeline(), swing_state_from_impact(_DRIVER, "driver")
     base = pipe.run(swing)
     same = pipe.run(swing, spin_factor=1.0)
@@ -81,6 +84,8 @@ def test_table_modifier_with_spin_is_deterministic_and_matches_its_call() -> Non
 
 
 def test_landing_simulator_applies_the_per_shot_spin_factor() -> None:
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel not available")
     sim, impacts = PipelineLandingSimulator(), np.stack([_DRIVER, _DRIVER])
     base = sim(impacts, "driver", (0.0, 0.0))
     np.testing.assert_array_equal(

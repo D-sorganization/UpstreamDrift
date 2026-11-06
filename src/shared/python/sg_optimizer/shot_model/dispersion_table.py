@@ -13,6 +13,7 @@ to flat, other bins come from an injected ``slope_modifier`` (B6); ``club`` repe
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 import time
 from collections.abc import Callable
@@ -34,10 +35,11 @@ from src.shared.python.sg_optimizer.shot_model.skill_family import (
     SkillFamily,
 )
 
-# (impacts, skill, wind mph pair, slope bin, lie) -> rest position (n, 2) yards
-LandingSimulator = Callable[
-    [NDArray[np.float64], str, tuple[float, float], str, str], Any
-]
+# (impacts, skill, wind mph pair, slope bin, lie) -> rest position (n, 2) yards;
+# a simulator with a ``spin_factor`` (n,) parameter also gets the lie spin
+# (#14569); one without it models no spin and gets the rows alone.
+LandingSimulator = Callable[..., Any]
+# (impacts, lie) -> impacts; a modifier with ``with_spin`` also returns spin.
 LieModifier = Callable[[NDArray[np.float64], str], NDArray[np.float64]]
 
 
@@ -219,6 +221,20 @@ def build_table(
     )
 
 
+def _lie_rows(
+    modifier: LieModifier | None, rows: NDArray[np.float64], lie: str
+) -> tuple[NDArray[np.float64], NDArray[np.float64] | None]:
+    """Lie-modified rows and the per-shot spin factor, None when it is identity."""
+    if modifier is None:
+        return rows, None
+    with_spin = getattr(modifier, "with_spin", None)
+    if with_spin is None:
+        return modifier(rows, lie), None
+    out, spin = with_spin(rows, lie)
+    spin = np.asarray(spin, dtype=float)
+    return out, None if bool(np.all(spin == 1.0)) else spin
+
+
 def build_grid_table(
     family: SkillFamily,
     simulate: LandingSimulator,
@@ -249,19 +265,42 @@ def build_grid_table(
         clubs is None or set(names) <= set(clubs),
         "club mapping must cover every skill in the grid",
     )
+    sig = inspect.signature(simulate)
+    takes_spin = "spin_factor" in sig.parameters or any(
+        p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()
+    )
+    takes_slope_lie = (
+        any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in sig.parameters.values())
+        or ("slope" in sig.parameters and "lie" in sig.parameters)
+        or len(
+            [
+                p
+                for p in sig.parameters.values()
+                if p.kind
+                in (
+                    inspect.Parameter.POSITIONAL_ONLY,
+                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                )
+            ]
+        )
+        >= 5
+    )
     t0, z, cells = time.perf_counter(), standard_normals(seed, n), []
     for skill in names:
         club = SKILL_CLUB.get(skill, skill)
         base = _impacts(family.skills[skill].distribution, z)
         for lie in grid.lies:
-            imp = lie_modifier(base, lie) if lie_modifier is not None else base
+            imp, spin = _lie_rows(lie_modifier, base, lie)
+            extra = {"spin_factor": spin} if takes_spin and spin is not None else {}
             for slope in grid.slopes:
                 sloped = imp if slope_modifier is None else slope_modifier(slope)(imp)
                 for wind in winds:
-                    land = np.asarray(
-                        simulate(sloped, skill, WIND_BINS[wind], slope, lie),
-                        dtype=float,
+                    args: tuple[Any, ...] = (
+                        (sloped, skill, WIND_BINS[wind], slope, lie)
+                        if takes_slope_lie
+                        else (sloped, skill, WIND_BINS[wind])
                     )
+                    land = np.asarray(simulate(*args, **extra), dtype=float)
                     if ground is not None:
                         require(land.ndim == 2 and len(land) == n, "landing states")
                         land = np.asarray(ground(land, lie, slope, skill), dtype=float)
@@ -329,9 +368,29 @@ def check_convergence(
     require(n >= 4, "n must be >= 4", n)
     z = standard_normals(seed, n)
     imp = _impacts(family.skills[skill].distribution, z)
-    full = np.asarray(
-        simulate(imp, skill, WIND_BINS["calm"], "flat", "fairway"), dtype=float
+    sig = inspect.signature(simulate)
+    takes_slope_lie = (
+        any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in sig.parameters.values())
+        or ("slope" in sig.parameters and "lie" in sig.parameters)
+        or len(
+            [
+                p
+                for p in sig.parameters.values()
+                if p.kind
+                in (
+                    inspect.Parameter.POSITIONAL_ONLY,
+                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                )
+            ]
+        )
+        >= 5
     )
+    args: tuple[Any, ...] = (
+        (imp, skill, WIND_BINS["calm"], "flat", "fairway")
+        if takes_slope_lie
+        else (imp, skill, WIND_BINS["calm"])
+    )
+    full = np.asarray(simulate(*args), dtype=float)
     if ground is not None:
         full = np.asarray(ground(full, "fairway", "flat", skill), dtype=float)
     half = full[: n // 2]
