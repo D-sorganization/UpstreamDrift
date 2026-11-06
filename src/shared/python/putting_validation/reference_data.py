@@ -1,8 +1,9 @@
 """Reference series for putting validation, each with explicit provenance.
 
 Only values traceable to a file in this repository are stored. Broadie (2014)
-table A.5, ShotLink and amateur tables are not here, so they are listed as
-unavailable with a reason instead of being retyped.
+table A.5 and ShotLink are not here, and the amateur tables in
+``putting_analytics/data/make_rates.json`` are not yet ingested, so they are
+listed as unavailable with a reason instead of being retyped.
 """
 
 from __future__ import annotations
@@ -91,7 +92,10 @@ _AMATEUR = "Published amateur putting tables (source to be named by data owner).
 _NO_A5 = f"Table A.5 values are not stored here; {PUTTING_SOURCE_PATH} has only a fit."
 _NO_EXPECTED = "No expected-putts-by-distance table exists in this repository."
 _NO_LICENSE = "Licensed data; no license or extract is available to this repository."
-_NO_AMATEUR = "No published amateur make-rate table is stored in this repository."
+_NO_AMATEUR = (
+    "Not ingested here; the cited Shot Scope handicap tables live in "
+    "putting_analytics/data/make_rates.json (presets: calibration.AMATEUR_PRESETS)."
+)
 
 # (series_id, quantity, citation, table, population, license, band, reason)
 _UNAVAILABLE_ROWS = (

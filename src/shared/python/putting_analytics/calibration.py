@@ -26,6 +26,7 @@ from src.shared.python.contracts import require
 from src.shared.python.putting_analytics.make_rate_reference import (
     MakeRatePoint,
     MakeRateTable,
+    reference_table,
 )
 from src.shared.python.putting_analytics.sg_curve import simulated_make_rates
 from src.shared.python.putting_analytics.skill import (
@@ -186,3 +187,27 @@ TOUR_PACE_SCALE = 0.8375
 TOUR_AVERAGE = scaled_profile(
     TOUR_SHAPE, TOUR_LINE_SCALE, TOUR_PACE_SCALE, "tour-average"
 )
+
+
+@dataclass(frozen=True)
+class CalibratedPreset:
+    """A profile fitted to one cited make-rate table, with the fit's RMS error."""
+
+    profile: PuttingSkillProfile
+    source_id: str
+    group: str
+    rms_error_pct: float
+
+    def table(self) -> MakeRateTable:
+        """The cited table this preset was fitted to."""
+        return reference_table(self.source_id, self.group)
+
+
+# WIP (#14176, paused 2026-11-06 by Barb's order): AMATEUR_PRESETS is not yet
+# defined. Fit each band with
+#   fit_profile(TOUR_SHAPE, reference_table("shotscope_mygolfspy", g),
+#               FitSettings(n=300, max_evaluations=40))
+# for g in hcp_0, hcp_10, hcp_20 (one evaluation took ~40-90 s on Brick), then
+# build {"scratch", "hcp_10", "hcp_20"} -> CalibratedPreset(scaled_profile(
+# TOUR_SHAPE, line, pace, name), "shotscope_mygolfspy", g, rms) and record the
+# residuals here, as for TOUR_AVERAGE above.
