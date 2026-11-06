@@ -237,12 +237,12 @@ def test_club_face_fixture_address_pose_is_posed_on_the_neutral_grip_model() -> 
     assert rot == pytest.approx(FIXTURE_CLUB_ROTATION, abs=1e-4)
 
 
-def test_neutral_grip_roll_is_alpha_plus_the_native_frame_offset() -> None:
+def test_neutral_grip_roll_tracks_alpha_deg_one_for_one() -> None:
     """Pins roll == alpha + offset for the HX-canonical grip (psi 40, gamma 0).
 
-    The offset is the native hand frame's own face-on bias, measured here at
-    alpha 0 for each hand rather than hard-coded; alpha then moves the roll
-    one-for-one, and the shipped alpha is the one that reads 15 deg.
+    With face-on-referenced alpha (#14633), the offset at ``alpha = 0`` is ~0;
+    ``d_alpha`` moves the measured roll by the same amount, and ``alpha = 15``
+    deg is the shipped strong-neutral that reads ~15 deg face-on.
     """
     from src.shared.python.motion_matching.execution.grip_rotation import (
         apply_grip_rotation,
@@ -262,10 +262,10 @@ def test_neutral_grip_roll_is_alpha_plus_the_native_frame_offset() -> None:
         return np.array(address_grip_roll_deg(state))
 
     offset = roll(0.0)
-    assert offset == pytest.approx([25.7, 25.7], abs=0.5)
-    for alpha in (-30.0, -10.73, 20.0):
+    assert offset == pytest.approx([0.0, 0.0], abs=0.5)
+    for alpha in (-30.0, 0.0, 20.0):
         assert roll(alpha) == pytest.approx(alpha + offset, abs=1e-6)
-    assert roll(-10.73) == pytest.approx([15.0, 15.0], abs=0.1)
+    assert roll(15.0) == pytest.approx([15.0, 15.0], abs=0.1)
 
 
 def test_hx_alpha_zero_reads_zero_degrees_face_on_at_flagship_address() -> None:
