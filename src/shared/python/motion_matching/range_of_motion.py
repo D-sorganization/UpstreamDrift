@@ -37,7 +37,7 @@ UPPER_RANGES_DEG: dict[str, tuple[float, float]] = {
     "TorsoInput": (-100.0, 100.0),
     **{name: (rom.lower_deg, rom.upper_deg) for name, rom in NECK_ROM.items()},
     "LScapInputX": (-10.0, 30.0),
-    "RScapInputX": (-30.0, 10.0),
+    "RScapInputX": (-10.0, 30.0),
     "LScapInputY": (-40.0, 40.0),
     "RScapInputY": (-40.0, 40.0),
     "LEInput": (-150.0, 5.0),

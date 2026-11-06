@@ -78,9 +78,9 @@ def test_fail_closed_without_declared_rom_names_the_shoulders() -> None:
         # flexion: Y lower = 90 - (mean + 1 SD of the male sample), Table 1
         ("LSInputY", 0, 90.0 - (159.9 + 18.1)),
         ("RSInputY", 0, 90.0 - (161.5 + 18.7)),
-        # external rotation: left Z+ is ER, right Z+ is IR (sign map), Table 3
+        # external rotation: Z+ is ER on both arms (mirrored, G1 #14746), Table 3
         ("LSInputZ", 1, 55.0 + 17.9),
-        ("RSInputZ", 0, -(56.8 + 17.6)),
+        ("RSInputZ", 1, 56.8 + 17.6),
     ],
 )
 def test_cited_sides_reproduce_gill_2020_male_mean_plus_one_sd(

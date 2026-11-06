@@ -284,7 +284,7 @@ IK_UNBOUNDED: frozenset[str] = frozenset(
 TRAIL_WRIST_ADDRESS_DEG: dict[str, float] = {
     "RWInputX": -10.0,
     "RWInputY": 0.0,
-    "RFInput": 30.0,
+    "RFInput": -30.0,  # pronated; supination is positive on both arms (G1)
 }
 WRIST_COORDINATES: tuple[str, ...] = (
     "LWInputX",
