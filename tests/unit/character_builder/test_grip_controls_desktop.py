@@ -73,10 +73,10 @@ def test_style_creates_revision_and_thumb_lands_in_the_sidecar(widget) -> None:
 
 
 def test_a_refused_pick_shows_the_message_and_changes_nothing(widget) -> None:
-    # Trail alpha 10 is valid, but following with lead alpha -60 leaves
-    # the trail hand 70 deg stronger, outside the +/-65 deg trail-offset range (#14751).
-    widget.grip_spins["trail_shaft_rotation"].setValue(10.0)
-    assert widget.model.grip_picks() == {"trail_shaft_rotation": 10.0}
+    # Trail alpha 20 is valid, but following with lead alpha -60 leaves
+    # the trail hand 80 deg stronger, outside the +/-75 deg trail-offset range (#14751, #14797).
+    widget.grip_spins["trail_shaft_rotation"].setValue(20.0)
+    assert widget.model.grip_picks() == {"trail_shaft_rotation": 20.0}
     widget.grip_spins["lead_shaft_rotation"].setValue(-60.0)
-    assert widget.model.grip_picks() == {"trail_shaft_rotation": 10.0}
+    assert widget.model.grip_picks() == {"trail_shaft_rotation": 20.0}
     assert "trail_v_offset_deg" in widget.status.text()
