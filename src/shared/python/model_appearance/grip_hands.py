@@ -110,6 +110,24 @@ def _club_axes(club: ClubAssembly) -> tuple[Array, Array]:
     return x, np.cross(_GRIP_AXIS, x)
 
 
+#: Spin about the grip axis from the wrist follower's x axis to the hand mesh's
+#: x axis (A7, #14731, D68). The follower x points to the PALM side of the lead
+#: hand, so the lead BACK is ``-x``; the baked mesh puts the lead dorsum 35 deg
+#: from its own +x, so rotating the mesh by this angle lays the lead dorsum on
+#: the follower ``-x`` axis (180 + 35 = 215 deg). Both hands take the same spin,
+#: so the 110 deg between the two drawn backs is kept. Visual only.
+WRIST_FRAME_TO_MESH_DEG = 215.0
+
+
+def _spun_about_grip_axis(vector: Array, angle_deg: float) -> Array:
+    """``vector`` rotated about the grip axis (club ``y``) by ``angle_deg``."""
+    a = math.radians(angle_deg)
+    c, s = math.cos(a), math.sin(a)
+    # Rodrigues about +y: x' = c*x + s*(y cross x) for a vector off the axis.
+    spun = c * vector + s * np.cross(_GRIP_AXIS, vector)
+    return np.asarray(spun / np.linalg.norm(spun), dtype=np.float64)
+
+
 def _resolve_dorsal_axis(
     hand: Hand,
     pose: GripPose,
@@ -152,7 +170,8 @@ def grip_hand_frame(
     _check_pose(pose)
     dorsal = _resolve_dorsal_axis(hand, pose, wrist_follower, hands)
     if dorsal is not None:
-        x, y = dorsal, np.cross(_GRIP_AXIS, dorsal)
+        x = _spun_about_grip_axis(dorsal, WRIST_FRAME_TO_MESH_DEG)
+        y = np.cross(_GRIP_AXIS, x)
     else:
         x, y = _club_axes(club)
     frame = np.eye(4)

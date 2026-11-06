@@ -97,8 +97,8 @@
         "label": "lead_hand",
         "material": "mat_skin_2",
         "n_vertices": 4960,
-        "bbox_min": [-0.057867, -0.05846, -0.030021],
-        "bbox_max": [0.02053, 0.039499, 0.054773]
+        "bbox_min": [-0.059773, -0.053257, -0.029865],
+        "bbox_max": [0.01402, 0.028046, 0.064165]
       },
       {
         "label": "shaft",
@@ -111,8 +111,8 @@
         "label": "trail_hand",
         "material": "mat_skin_2",
         "n_vertices": 4960,
-        "bbox_min": [-0.049558, -0.024634, 0.024392],
-        "bbox_max": [0.022789, 0.081931, 0.112503]
+        "bbox_min": [-0.063486, -0.017427, 0.009993],
+        "bbox_max": [0.018788, 0.079551, 0.120436]
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
@@ -444,8 +444,8 @@
         "label": "lead_hand",
         "material": "mat_skin_2",
         "n_vertices": 4960,
-        "bbox_min": [-0.042347, -0.056694, -0.014354],
-        "bbox_max": [0.050257, 0.037879, 0.066458]
+        "bbox_min": [-0.047606, -0.052098, -0.013974],
+        "bbox_max": [0.046717, 0.03338, 0.068023]
       },
       {
         "label": "shaft",
@@ -458,8 +458,8 @@
         "label": "trail_hand",
         "material": "mat_skin_2",
         "n_vertices": 4960,
-        "bbox_min": [-0.011593, 0.000519, -0.003626],
-        "bbox_max": [0.082697, 0.100954, 0.098612]
+        "bbox_min": [-0.003259, -0.015889, 0.008611],
+        "bbox_max": [0.090745, 0.086464, 0.089483]
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
@@ -791,8 +791,8 @@
         "label": "lead_hand",
         "material": "mat_skin_2",
         "n_vertices": 4960,
-        "bbox_min": [-0.038897, -0.06275, -0.01048],
-        "bbox_max": [0.040796, 0.024, 0.066196]
+        "bbox_min": [-0.04077, -0.06275, -0.008018],
+        "bbox_max": [0.034514, 0.024, 0.058818]
       },
       {
         "label": "shaft",
@@ -805,8 +805,8 @@
         "label": "trail_hand",
         "material": "mat_skin_2",
         "n_vertices": 4960,
-        "bbox_min": [-0.030219, -0.0023, -0.015006],
-        "bbox_max": [0.042644, 0.1002, 0.069668]
+        "bbox_min": [-0.044036, -0.0023, -0.015518],
+        "bbox_max": [0.039032, 0.1002, 0.065792]
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [

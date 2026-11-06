@@ -121,8 +121,10 @@ def render(
     tag: str,
     out: Path,
     q_spec: Path | None = None,
+    views: tuple[str, ...] = ("face_on",),
+    size: str | None = None,
 ) -> dict[str, object]:
-    """Write ``face_on_a7_<tag>.png`` and return its receipt record."""
+    """Write ``<view>_a7_<tag>.png`` per view and return the receipt record."""
     import imageio.v3 as iio
     from PIL import Image, ImageDraw
 
@@ -154,6 +156,9 @@ def render(
                 "Driver",
                 "--out",
                 str(tmp),
+                "--views",
+                ",".join(views),
+                *(["--size", size] if size else []),
                 "--engines",
                 "mujoco",
                 "--speeds",
@@ -161,6 +166,7 @@ def render(
                 "--preset",
                 "hq",
                 "--no-ball",
+                "--no-grid",
                 "--force-vectors",
                 "--torque-vectors",
                 "--segment-shading",
@@ -168,21 +174,30 @@ def render(
             check=True,
             cwd=ROOT,
         )
-        clips = [c for c in sorted(tmp.glob("*face_on*.mp4")) if "grid" not in c.name]
-        if not clips:
-            raise RuntimeError("the exporter wrote no face_on clip")
-        frame = next(iter(iio.imiter(clips[0])))
-    image = Image.fromarray(np.asarray(frame))
-    ImageDraw.Draw(image).text(
-        (12, 44),
-        f"address grip ({tag}): lead {rolls['lead']:+.1f} deg, "
-        f"trail {rolls['trail']:+.1f} deg (0 = back of wrist up, + = counterclockwise)",
-        fill=WHITE,
-    )
-    draw_clock(image, rolls, image.width - 120, image.height - 130)
-    path = out / f"face_on_a7_{tag}.png"
-    image.save(path)
-    return {"tag": tag, "png": path.name, **{k: round(v, 2) for k, v in rolls.items()}}
+        frames = {}
+        for view in views:
+            clips = [
+                c
+                for c in sorted(tmp.glob(f"*{view}*.mp4"))
+                if "grid" not in c.name and "2x2" not in c.name
+            ]
+            if not clips:
+                raise RuntimeError(f"the exporter wrote no {view} clip")
+            frames[view] = next(iter(iio.imiter(clips[0])))
+    written = []
+    for view, frame in frames.items():
+        image = Image.fromarray(np.asarray(frame))
+        ImageDraw.Draw(image).text(
+            (12, 44),
+            f"address grip ({tag}): lead {rolls['lead']:+.1f} deg, "
+            f"trail {rolls['trail']:+.1f} deg (0 = back of wrist up, + = counterclockwise)",
+            fill=WHITE,
+        )
+        draw_clock(image, rolls, image.width - 120, image.height - 130)
+        path = out / f"{view}_a7_{tag}.png"
+        image.save(path)
+        written.append(path.name)
+    return {"tag": tag, "png": written, **{k: round(v, 2) for k, v in rolls.items()}}
 
 
 def main() -> int:
@@ -192,10 +207,20 @@ def main() -> int:
     parser.add_argument(
         "--q-spec", type=Path, help="spec whose coordinate order the npz uses (v1)"
     )
+    parser.add_argument("--views", default="face_on", help="comma-separated views")
+    parser.add_argument("--size", default=None, help="tile size WIDTHxHEIGHT")
     parser.add_argument("--tag", required=True)
     parser.add_argument("--out", type=Path, default=Path(__file__).resolve().parent)
     args = parser.parse_args()
-    record = render(args.spec, args.q, args.tag, args.out, args.q_spec)
+    record = render(
+        args.spec,
+        args.q,
+        args.tag,
+        args.out,
+        args.q_spec,
+        tuple(args.views.split(",")),
+        args.size,
+    )
     print(json.dumps(record, indent=2))  # noqa: T201 - CLI output
     return 0
 
