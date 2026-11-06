@@ -7,7 +7,7 @@
 
 ---
 
-## Ground-support receipt identity (#14771)
+## Ground-Support Receipt Identity (#14771)
 
 Ground-support calibration remains sensitive to solver and dependency builds. Committed receipts are a regression baseline; regenerate on the same **pinned interpreter and scientific stack** as the host that produced them (record `python`, NumPy, SciPy, and MuJoCo versions in the CI or lab environment that ran the command).
 
