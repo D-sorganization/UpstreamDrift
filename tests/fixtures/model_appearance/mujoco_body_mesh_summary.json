@@ -96,7 +96,7 @@
       {
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 5954,
         "bbox_min": [-0.033971, -0.065258, -0.024317],
         "bbox_max": [0.044426, 0.032701, 0.060477]
       },
@@ -110,7 +110,7 @@
       {
         "label": "trail_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 6210,
         "bbox_min": [-0.025662, -0.031432, 0.030097],
         "bbox_max": [0.046685, 0.075133, 0.118208]
       }
@@ -245,15 +245,15 @@
         "n_vertices": 338
       },
       {
-        "bbox_max": [0.04644, 0.04644, 0.0],
-        "bbox_min": [-0.04644, -0.04644, -0.188699],
+        "bbox_max": [0.04644, 0.04644, 0.188699],
+        "bbox_min": [-0.04644, -0.04644, 0.0],
         "label": "garment0",
         "material": "mat_polo_navy",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.042945, 0.042945, 0.0215],
-        "bbox_min": [-0.042945, -0.042945, -0.325852],
+        "bbox_max": [0.042945, 0.042945, 0.325852],
+        "bbox_min": [-0.042945, -0.042945, -0.0215],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -270,8 +270,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": [
       {
-        "bbox_max": [0.032929, 0.032929, 0.018],
-        "bbox_min": [-0.032929, -0.032929, -0.163262],
+        "bbox_max": [0.032929, 0.032929, 0.163262],
+        "bbox_min": [-0.032929, -0.032929, -0.018],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -443,7 +443,7 @@
       {
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 5954,
         "bbox_min": [-0.042347, -0.056694, -0.014354],
         "bbox_max": [0.050257, 0.037879, 0.066458]
       },
@@ -457,7 +457,7 @@
       {
         "label": "trail_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 6210,
         "bbox_min": [-0.011593, 0.000519, -0.003626],
         "bbox_max": [0.082697, 0.100954, 0.098612]
       }
@@ -790,7 +790,7 @@
       {
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 5954,
         "bbox_min": [-0.038897, -0.06275, -0.01048],
         "bbox_max": [0.040796, 0.024, 0.066196]
       },
@@ -804,7 +804,7 @@
       {
         "label": "trail_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 6210,
         "bbox_min": [-0.030219, -0.0023, -0.015006],
         "bbox_max": [0.042644, 0.1002, 0.069668]
       }
