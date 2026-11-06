@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-06 | #14766 | OSL-7 predictive deadlift receipt now records the tracked comparison as unavailable (non-converged solve) via a no-solve --refresh-comparison mode; lift_models.tex notes the exploratory status. |
 | 2026-11-06 | #14752 | Fix lod-quality-gate regression: TableShotModel asks DispersionTable.club_label instead of reaching into provenance (Law of Demeter) |
 | 2026-11-06 | #14709 | Putting studio: exact imperial ft factor, a parity test for the core green edge clamp, and locked slope sliders that read the core green's slope at the ball |
 | 2026-11-06 | #14726 | SHOW-B3b remainder: dispersion_table --ground CLI (rest positions, lie model, slope bins), per-skill club labels, convergence in provenance |
