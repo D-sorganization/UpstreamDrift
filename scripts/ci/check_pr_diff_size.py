@@ -10,7 +10,7 @@ Optional bookkeeping (still advisory — not merge blockers):
 
 - Deletion-only PRs (zero lines added) — reported as exempt.
 - Label ``golden-regen`` on the pull request (from ``GITHUB_EVENT_PATH``).
-- Allowlist file ``config/pr_size_allowlist.json`` listing PR numbers.
+- Allowlist file ``scripts/config/pr_size_allowlist.json`` listing PR numbers.
 
 Use ``--strict`` for enforcement (exit 1 when over cap and not exempt), e.g.
 local policy or tests.
@@ -29,7 +29,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_ALLOWLIST_PATH = Path("config/pr_size_allowlist.json")
+DEFAULT_ALLOWLIST_PATH = Path("scripts/config/pr_size_allowlist.json")
 
 
 def parse_numstat(line: str) -> tuple[int, int, str] | None:

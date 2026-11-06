@@ -13,7 +13,7 @@ count.
 
 - `scripts/ci/check_pr_diff_size.py` — computes the count and writes step outputs
   (`within_limit`, `advisory`, `total_lines`). Default exit code is **0**.
-- `config/pr_size_allowlist.json` — optional list of PR numbers for bookkeeping in messages.
+- `scripts/config/pr_size_allowlist.json` — optional list of PR numbers for bookkeeping in messages.
 - `--strict` on the script opts into **exit 1** when over the cap and not exempt (tests
   or local policy only; CI does not pass `--strict`).
 
