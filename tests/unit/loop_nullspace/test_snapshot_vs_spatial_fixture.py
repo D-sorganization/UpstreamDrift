@@ -23,6 +23,9 @@ from src.engines.physics_engines.pinocchio.python.force_adapter import (  # noqa
 from src.engines.physics_engines.pinocchio.python.native_model import (  # noqa: E402
     NativePinocchioModel,
 )
+from src.engines.physics_engines.pinocchio.python.shaft_springs import (  # noqa: E402
+    ShaftSprings,
+)
 from src.shared.python.loop_nullspace import spatial_fixture  # noqa: E402
 from src.shared.python.loop_nullspace.contracts import InputProvenance  # noqa: E402
 from src.shared.python.loop_nullspace.snapshot import (  # noqa: E402
@@ -32,6 +35,7 @@ from src.shared.python.loop_nullspace.snapshot import (  # noqa: E402
 pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio]
 
 TOL = 1e-9
+_RIGID_CLUB_SPEC = {"joints": [], "club": {"shaft": {"model": "rigid"}}}
 
 
 class _FixtureNativeModel(NativePinocchioModel):
@@ -42,6 +46,12 @@ class _FixtureNativeModel(NativePinocchioModel):
         self.model = sp.model
         self._coordinates = {n: i for i, n in enumerate(names)}
         self._velocity_indices = dict(self._coordinates)
+        # The hand-built chain is a rigid club: build the springs exactly as the
+        # real ``__init__`` does (#13751), which leaves the efforts untouched.
+        self._shaft = ShaftSprings.from_spec(
+            _RIGID_CLUB_SPEC, self._coordinates, self._velocity_indices
+        )
+        self.passive_coordinates = self._shaft.names
         frames = sp.model.frames
         trail, lead = frames[sp.trail_grip], frames[sp.lead_grip]
         constraint = pin.RigidConstraintModel(
