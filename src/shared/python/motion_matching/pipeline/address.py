@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     )
 
 from src.shared.python.motion_matching import address_knee
+from src.shared.python.motion_matching.arm_mirror import restart_jitter
 from src.shared.python.motion_matching.anthropometric_candidate import (
     anthropometric_candidate,
 )
@@ -282,10 +283,11 @@ def best_address(
                 [
                     start[:6],
                     start[6:]
-                    + rng.uniform(
-                        -ADDRESS_RESTART_SPREAD_RAD,
+                    + restart_jitter(
+                        rng,
                         ADDRESS_RESTART_SPREAD_RAD,
-                        len(start) - 6,
+                        kin.arm_mirrored,
+                        kin.coordinate_order,
                     ),
                 ]
             )
