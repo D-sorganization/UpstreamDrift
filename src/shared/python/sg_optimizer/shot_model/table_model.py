@@ -49,7 +49,7 @@ class TableShotModel:
 
     def sample(self, player, shot, lie, conditions, rng, n):  # noqa: ANN001
         skill = CLUB_SKILL.get(shot.club)
-        club = self.table.provenance.get("clubs", {}).get(skill, skill)
+        club = self.table.club_label(skill)
         try:
             cell = self.table.lookup(skill or "", club or "", "fairway", "calm", "flat")
         except ContractViolationError:  # no cell for this club: use the baseline
