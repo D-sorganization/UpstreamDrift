@@ -138,9 +138,10 @@ Authority).
   bound. Check: `test_a_perturbed_engine_fails_track_n_and_stays_inside_the_track_s_bound`.
 - [ ] Engines that were skipped, unavailable or fail-closed are named in the
   figure. Simscape has no native snapshot: `test_simscape_native_adapter_fails_closed`
-  asserts this. NSX-55 (#12583) is open. Its PR #12644 adds the deferred record
-  `docs/development/planning/DV-12583.md` and its `catalog.json` entry, neither
-  of which is on this branch yet.
+  asserts this. NSX-55 (#12583) stays open until R2025b golf-model export evidence
+  lands; the honest deferral path is the published planning record
+  `docs/development/planning/DV-12583.md` and its `docs/development/planning/catalog.json`
+  entry (`DV-12583`). Check: `tests/unit/repo_hygiene/test_dv_12583_catalog_entry.py`.
 - [ ] Agreement between engines is stated as numerical conformance only, not
   physical validation (`docs/research/loop_nullspace/contracts_trajectory.md`, section
   `NSX-56 Conformance`).
