@@ -2754,6 +2754,10 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-06 | #14726 | SHOW-B3b remainder: dispersion_table --ground CLI (rest positions, lie model, slope bins), per-skill club labels, convergence in provenance |
+| 2026-11-06 | #14723 | knot_gradient_optimiser: lbfgs_minimise records a per-evaluation objective versus gradient timing split and the projected-gradient norm (per evaluation and at SciPy's final point) so a max_iterations stop is diagnosable; results are pinned bit-for-bit |
+| 2026-11-06 | #14730 | lifting: the four strict residual-gate xfails (deadlift, bench press, snatch, clean and jerk) now cite #13057, the hip and pelvis rebuild that owns the residual excess, instead of #13041 |
+| 2026-11-06 | #14725 | NSX-04: forearm supination torque capacity sourced from Gulecyuz 2017 Table 4 (LFInput+ 10.68, RFInput- 11.33 N m); pronation direction stays assumed |
 | 2026-11-05 | #14722 | SHOW-C5: ladder binding report classes every cited-source side (D34a), Part of #14561 |
 | 2026-11-05 | #14721 | Guard test: showpiece spec reads a square face at the A2 neutral address (face-frame consistency, D44/D45) |
 | 2026-11-05 | #14717 | Add the Lighthouse mobile baseline receipt (loopback fixture server and egress proxy, report validator, CI steps on the fleet runner) as the follow-up to #14270; scores informational, no threshold. |
