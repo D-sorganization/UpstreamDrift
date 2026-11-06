@@ -83,10 +83,27 @@ from src.shared.python.motion_matching.contact_law import ContactParameters
 ENGINE = "opensim_contact"
 CONTACT_INTEGRATOR = "CPodes"
 CONTACT_ACCURACY = 1e-4
+#: Hold accuracy: a static hold already passes the net-moment gate here (peak/RMS
+#: 0.98/0.65 % overlap and interlock, 4.07/1.91 % ten_finger) and costs 450-680 s
+#: at the swing accuracy.
 TOPOLOGY_CONTACT_ACCURACY = 5e-8
+#: Swing accuracy: the swing net-moment residual is the integrator's accuracy
+#: (peak/RMS 2.00/5.42 -> 0.21/1.26 % overlap and interlock, 1.86/3.41 -> 0.16/1.40 %
+#: ten_finger from 5e-8 to 5e-10), at 19-35 s per swing case (#13560, D61/D63).
+TOPOLOGY_SWING_CONTACT_ACCURACY = 5e-10
 _SIDES = (("L", "left"), ("R", "right"))
 CALIBRATION_HALF_LENGTH_M = 0.02
 _GRAVITY_M_S2 = 9.80665
+
+
+def topology_contact_accuracy(*, hold: bool) -> float:
+    """Integrator accuracy for a topology-contact run, chosen by the motion.
+
+    Postcondition: ``hold`` gives ``TOPOLOGY_CONTACT_ACCURACY`` (5e-8) and a swing
+    gives the tighter ``TOPOLOGY_SWING_CONTACT_ACCURACY`` (5e-10). Gate tolerances
+    are unchanged.
+    """
+    return TOPOLOGY_CONTACT_ACCURACY if hold else TOPOLOGY_SWING_CONTACT_ACCURACY
 
 
 class _GripAxisSampleContext(NamedTuple):
@@ -872,7 +889,10 @@ def simulate_grip_contact(
         mesh_dir=mesh_dir,
         topology_model=topology_model,
     )
-    bushing_run = sim.run(t_end=float(times[-1]))
+    accuracy = (
+        topology_contact_accuracy(hold=hold) if topology_model is not None else None
+    )
+    bushing_run = sim.run(t_end=float(times[-1]), accuracy=accuracy)
     return bushing_run.to_contact_run()
 
 
