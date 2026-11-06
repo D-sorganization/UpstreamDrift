@@ -74,8 +74,10 @@ Modules (all under `src/shared/python/loop_nullspace/`):
   step), `augment_persistent` (per-trial parameter states),
   `euler_dynamics` (`A = I + dt F`, `B = dt G`, any tangent dimension),
   `step_covariances` (from `DisturbanceSpec`, timestep consistent) and
-  `event_outcome_rows` (`C Π`, NSX-83). `LinearizedDynamics` is reused from
-  `estimation/mosaic/local_policy.py`.
+  `event_outcome_rows` (`C Π`, NSX-83; it refuses a near-grazing impact,
+  transversality below `GRAZING_TRANSVERSALITY`, with `ValueError`, the gate
+  the outcome map flags `UNRELIABLE_LINEAR_ESTIMATE`). `LinearizedDynamics`
+  is reused from `estimation/mosaic/local_policy.py`.
 - `nonlinearity_gate.py`: `assess_nonlinearity(rollout, directions, *,
   amplitude, gate_threshold)`. **`gate_threshold` has no default**: NSX-80
   specifies a gate but no number, so the caller supplies it.
