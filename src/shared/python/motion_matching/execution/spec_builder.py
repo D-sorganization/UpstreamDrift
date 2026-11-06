@@ -827,9 +827,10 @@ def compose_anthropometric_document(
         ),
     )
     _annotate_document(document, upper)
+    # G1 #14746: the build tables are native; ``mirror_arm=False`` keeps the
+    # native right-arm axes for consumers whose stored joint angles still use
+    # that convention.
     if kwargs.get("mirror_arm", True):
-        # G1 #14746; ``mirror_arm=False`` keeps the native right-arm axes for
-        # consumers whose stored joint angles are still in that convention.
         mirror_document_arm(document)
     document = with_shaft_model(document, club, kwargs.get("shaft_model"))
     document = _apply_kwarg_tibial_torsion(document, kwargs)

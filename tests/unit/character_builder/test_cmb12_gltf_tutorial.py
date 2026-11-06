@@ -43,12 +43,12 @@ def test_static_export_matches_tutorial(compiled, tutorial_text: str) -> None:
     text, media_type, filename = export_character(compiled, "gltf")
     doc = json.loads(text)
     claims = {
-        filename: "tour_average_male_79b93979.gltf",
+        filename: "tour_average_male_322e03a3.gltf",
         str(len(text)): "333866",
         media_type: "model/gltf+json",
         str(len(doc["skins"][0]["joints"])): "24",
         str(doc["accessors"][0]["count"]): "3416",
-        doc["extras"]["spec_sha256"][:8]: "79b93979",
+        doc["extras"]["spec_sha256"][:8]: "322e03a3",
     }
     for measured, documented in claims.items():
         assert measured == documented

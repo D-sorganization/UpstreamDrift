@@ -69,19 +69,8 @@ def native_wrist_rotation(document: dict[str, Any], rotation: Any, side: str) ->
     return rot
 
 
-def mirror_document_arm(document: dict[str, Any]) -> bool:
-    """Mirror the right arm joint frames in place; idempotent.
-
-    Returns ``False`` when already mirrored. Postcondition: the zero pose and
-    every body frame are unchanged and each right coordinate in
-    :data:`FLIPPED_COORDINATES` now carries the opposite sign.
-    """
-    if arm_is_mirrored(document):
-        return False
-    for key, flip in ARM_FLIP.items():
-        joint = _right_joint(document, key)
-        for field in ("parent_to_base", "child_to_follower"):
-            joint[field] = (np.asarray(joint[field], dtype=float) @ flip).tolist()
+def _flip_limits(document: dict[str, Any]) -> None:
+    """Negate the flipped coordinates' ranges (swapping bounds) and seeds."""
     ranges = document.get("coordinate_ranges_deg", {})
     for name in FLIPPED_COORDINATES & ranges.keys():
         low, high = ranges[name]
@@ -89,4 +78,34 @@ def mirror_document_arm(document: dict[str, Any]) -> bool:
     seeds = document.get("address_seed_deg", {})
     for name in FLIPPED_COORDINATES & seeds.keys():
         seeds[name] = -seeds[name]
+
+
+def mirror_document_arm(document: dict[str, Any], *, flip_limits: bool = True) -> bool:
+    """Mirror the right arm joint frames in place; idempotent.
+
+    Returns ``False`` when already mirrored. Postcondition: the zero pose and
+    every body frame are unchanged and each right coordinate in
+    :data:`FLIPPED_COORDINATES` now carries the opposite sign. ``flip_limits``
+    also negates those coordinates' ranges and seeds; pass ``False`` when the
+    limits were already written in the mirrored convention (the builder tables).
+    """
+    if arm_is_mirrored(document):
+        return False
+    for key, flip in ARM_FLIP.items():
+        joint = _right_joint(document, key)
+        for field in ("parent_to_base", "child_to_follower"):
+            joint[field] = (np.asarray(joint[field], dtype=float) @ flip).tolist()
+    if flip_limits:
+        _flip_limits(document)
     return True
+
+
+def native_limits(
+    table: dict[str, tuple[float, float]],
+) -> dict[str, tuple[float, float]]:
+    """A range table written in the mirrored convention, in the native one."""
+    out = dict(table)
+    for name in FLIPPED_COORDINATES & table.keys():
+        low, high = table[name]
+        out[name] = (-high, -low)
+    return out

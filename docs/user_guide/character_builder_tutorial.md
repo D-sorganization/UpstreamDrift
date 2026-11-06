@@ -35,11 +35,11 @@ from src.shared.python.humanoid_character_builder.spec_export import (
 # mass_kg to 90.0 and keep every other preset value (driver, stature 1.80 m).
 compiled = compile_character("tour_average_male", {"mass_kg": 90.0})
 print(compiled.preset_id)     # tour_average_male
-print(compiled.sha256[:8])    # 79b93979
+print(compiled.sha256[:8])    # 322e03a3
 print(build_summary(compiled))
 ```
 
-This produced `preset_id="tour_average_male"`, spec hash `79b93979...`, and
+This produced `preset_id="tour_average_male"`, spec hash `322e03a3...`, and
 a summary of 25 bodies, 24 joints, 44 coordinates and 90.31 kg total mass
 (De Leva 1996 male table plus Rajagopal lower limbs — unqualified geometry,
 not a validated subject; see **Limitations** below). The total is the
@@ -72,12 +72,12 @@ choices = {
     "club_finish": "chrome",
 }
 appearance_doc = build_appearance(choices, compiled.sha256)
-print(appearance_doc["spec_sha256"][:8])  # 79b93979 — bound to Step 1's spec
+print(appearance_doc["spec_sha256"][:8])  # 322e03a3 — bound to Step 1's spec
 
 sidecar_name = appearance_sidecar_filename(
     appearance_doc, preset_id=compiled.preset_id, spec_sha256=compiled.sha256
 )
-print(sidecar_name)  # tour_average_male_79b93979.appearance.json
+print(sidecar_name)  # tour_average_male_322e03a3.appearance.json
 
 with open(sidecar_name, "w", encoding="utf-8") as f:
     f.write(json.dumps(appearance_doc, indent=2) + "\n")
@@ -106,11 +106,11 @@ default `driver`:
 compiled_iron = compile_character(
     "tour_average_male", {"mass_kg": 90.0, "club": "iron7"}
 )
-print(compiled_iron.sha256[:8])              # 7427db1a
+print(compiled_iron.sha256[:8])              # 5152e3dc
 print(compiled.sha256 != compiled_iron.sha256)  # True
 ```
 
-The spec hash changed (`79b93979...` to `7427db1a...`) because the club is
+The spec hash changed (`322e03a3...` to `5152e3dc...`) because the club is
 part of the physics spec. The Step 2 appearance document is still a valid
 `appearance-v1` document — `document_from_dict` on it still passes — but
 its `spec_sha256` now names a spec that no longer exists; rebind it to the
@@ -118,12 +118,12 @@ new hash before relying on the pairing:
 
 ```python
 rebound = build_appearance(choices, compiled_iron.sha256)
-print(rebound["spec_sha256"][:8])  # 7427db1a
+print(rebound["spec_sha256"][:8])  # 5152e3dc
 print(
     appearance_sidecar_filename(
         rebound, preset_id=compiled_iron.preset_id, spec_sha256=compiled_iron.sha256
     )
-)  # tour_average_male_7427db1a.appearance.json
+)  # tour_average_male_5152e3dc.appearance.json
 ```
 
 **Web/API equivalent:** re-`POST /api/character-builder/build` with
@@ -151,10 +151,10 @@ For the driver character from Step 1 this wrote:
 
 | Format | Filename                          | Bytes | Media Type         |
 | ------ | --------------------------------- | ----- | ------------------ |
-| `spec` | `tour_average_male_79b93979.json` | 86151 | `application/json` |
-| `urdf` | `tour_average_male_79b93979.urdf` | 57540 | `text/xml`         |
-| `mjcf` | `tour_average_male_79b93979.xml`  | 18270 | `text/xml`         |
-| `osim` | `tour_average_male_79b93979.osim` | 88978 | `text/xml`         |
+| `spec` | `tour_average_male_322e03a3.json` | 86151 | `application/json` |
+| `urdf` | `tour_average_male_322e03a3.urdf` | 57540 | `text/xml`         |
+| `mjcf` | `tour_average_male_322e03a3.xml`  | 18270 | `text/xml`         |
+| `osim` | `tour_average_male_322e03a3.osim` | 88978 | `text/xml`         |
 
 **Web/API equivalent:** `POST /api/character-builder/export/{fmt}` for
 `fmt` in `spec`, `urdf`, `mjcf`, `osim` — the Export buttons in
@@ -191,16 +191,16 @@ with open(filename, "w", encoding="utf-8") as f:
 
 doc = json.loads(text)
 print(filename, len(text), media_type)
-# tour_average_male_79b93979.gltf 333866 model/gltf+json
+# tour_average_male_322e03a3.gltf 333866 model/gltf+json
 print(len(doc["skins"][0]["joints"]))      # 24 bones
 print(doc["accessors"][0]["count"])        # 3416 vertices
-print(doc["extras"]["spec_sha256"][:8])    # 79b93979
+print(doc["extras"]["spec_sha256"][:8])    # 322e03a3
 ```
 
 For the driver character from Step 1, this wrote a 333866-byte document
 with 24 bones and 3416 vertices. The bytes are identical on every run for
 the same spec. `extras.spec_sha256` ties the mesh back to Step 1's spec
-`79b93979...`. The mesh is visual only and never changes mass, inertia or
+`322e03a3...`. The mesh is visual only and never changes mass, inertia or
 contact. Every vertex follows exactly one bone (rigid skinning); smooth
 blending across joints is still open (#11657).
 
@@ -221,7 +221,7 @@ frames = [{"TorsoInput": 0.8 * i / 30} for i in range(31)]
 motion = spec_motion_bone_poses(body, compiled.document, frames)
 print(motion.shape)  # (31, 24, 4, 4)
 
-with open("tour_average_male_79b93979_turn.gltf", "w", encoding="utf-8") as f:
+with open("tour_average_male_322e03a3_turn.gltf", "w", encoding="utf-8") as f:
     f.write(skinned_body_gltf_text(body, motion, fps=60.0))
 ```
 
@@ -254,21 +254,21 @@ the same widget offscreen and regenerates every image in this section.
 
 2. **Override the mass.** Set **Mass (kg)** to 90.0. Any edit switches
    **Preset** to **Custom** and recompiles at once. The spec hash is
-   `79b93979...`, the same as Step 1, so the desktop and the API compile
+   `322e03a3...`, the same as Step 1, so the desktop and the API compile
    identical specs. The summary shows 90.3 kg total: 90.0 kg of body plus
    the club, as in Step 1.
 
    ![Desktop builder after the mass override, preset now Custom](images/character_builder/desktop_02_mass_override.png)
 
 3. **Swap the club.** Choose **iron7** in **Club**. The hash changes to
-   `7427db1a...`, as in Step 3.
+   `5152e3dc...`, as in Step 3.
 
    ![Desktop builder with the 7-iron, showing the new spec hash](images/character_builder/desktop_03_club_swap.png)
 
 4. **Export.** Each export button asks for a folder and writes one file. The
    status line names it. Because the edited character is **Custom**, the
    desktop names its files `custom_<sha8>`, for example
-   `custom_7427db1a.json`, where the API in Step 4 uses the preset id. The
+   `custom_5152e3dc.json`, where the API in Step 4 uses the preset id. The
    contents are byte-identical for the same hash.
 
    ![Desktop builder after Export Spec JSON, status line naming the file](images/character_builder/desktop_04_export.png)
@@ -286,7 +286,7 @@ host. It loads the Step 4 MJCF with the same pattern as
 ```python
 import mujoco
 
-model = mujoco.MjModel.from_xml_path("tour_average_male_79b93979.xml")
+model = mujoco.MjModel.from_xml_path("tour_average_male_322e03a3.xml")
 data = mujoco.MjData(model)
 print(model.nq, model.nu, model.opt.timestep)  # 44 0 0.002
 
