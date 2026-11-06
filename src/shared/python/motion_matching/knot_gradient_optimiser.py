@@ -151,10 +151,20 @@ class AdamSettings:
 
 @dataclass(frozen=True, kw_only=True)
 class LbfgsSettings:
-    """Configuration settings for the L-BFGS-B optimiser (keyword-only)."""
+    """Configuration settings for the L-BFGS-B optimiser (keyword-only).
+
+    ``parameter_scale`` multiplies the internal iterate so SciPy optimizes ``y``
+    with ``x = y * parameter_scale`` (physical ``delta_knots`` are ``x``). This
+    puts typical rad-scale knot corrections on an O(1) scale so relative ``ftol``
+    / ``gtol`` tests behave as intended (#13779). ``1.0`` disables scaling.
+    """
 
     max_iterations: int
     max_evaluations: int | None = None
+    parameter_scale: float = 1.0
+    ftol: float | None = None
+    gtol: float | None = None
+    pgtol: float | None = None
 
     def __post_init__(self) -> None:
         require(
@@ -168,6 +178,19 @@ class LbfgsSettings:
                 "max_evaluations must be positive",
                 self.max_evaluations,
             )
+        require(
+            bool(np.isfinite(self.parameter_scale) and self.parameter_scale > 0.0),
+            "parameter_scale must be finite and positive",
+            self.parameter_scale,
+        )
+        for name in ("ftol", "gtol", "pgtol"):
+            v = getattr(self, name)
+            if v is not None:
+                require(
+                    bool(np.isfinite(v) and v > 0.0),
+                    f"{name} must be finite and positive when set",
+                    v,
+                )
 
 
 StopReason = Literal[
@@ -379,6 +402,10 @@ def lbfgs_minimise(
     ``non_finite_encountered``); anything else, such as a line-search ABNORMAL
     exit, is ``error``. Best-iterate tracking continues after a non-finite trial.
 
+    When ``parameter_scale`` is not ``1.0``, SciPy sees ``y`` with
+    ``x = y * parameter_scale``; gradients are transformed with the chain rule
+    and history rows still record physical ``x`` (``max_abs_x``).
+
     Diagnostics (#13779, see :func:`_timed_evaluation`) are timed with
     ``clock`` and never feed back into the numerics.
     """
@@ -391,9 +418,11 @@ def lbfgs_minimise(
 
     import scipy.optimize
 
+    scale = float(settings.parameter_scale)
     shape = np.shape(x0)
     x0_arr = np.asarray(x0, dtype=np.float64)
     x0_flat = x0_arr.ravel().copy()
+    y0_flat = (x0_flat / scale).copy()
 
     history: list[dict[str, float]] = []
     diagnostics: list[dict[str, float]] = []
@@ -403,12 +432,14 @@ def lbfgs_minimise(
     non_finite_encountered = False
     worst_finite_total: float | None = None
 
-    def fun(x_flat: np.ndarray) -> tuple[float, np.ndarray]:
+    def fun(y_flat: np.ndarray) -> tuple[float, np.ndarray]:
         nonlocal best_x, best_objective, best_iteration, non_finite_encountered
         nonlocal worst_finite_total
         k = len(history)
+        x_flat = np.asarray(y_flat, dtype=np.float64) * scale
         x = x_flat.reshape(shape)
         row, grad_flat, cost_ok, timing = _timed_evaluation(value_and_grad, x, k, clock)
+        grad_y = grad_flat * scale
         diagnostics.append(timing)
         history.append(row)
         if on_iteration is not None:
@@ -420,26 +451,40 @@ def lbfgs_minimise(
                 if worst_finite_total is None
                 else _NON_FINITE_PENALTY_FACTOR * (1.0 + worst_finite_total)
             )
-            return penalty, np.zeros_like(x_flat, dtype=np.float64)
+            return penalty, np.zeros_like(y_flat, dtype=np.float64)
         worst_finite_total = max(worst_finite_total or 0.0, abs(row["total"]))
         if row["objective"] < best_objective:
             best_x = x.copy()
             best_objective = row["objective"]
             best_iteration = k
-        return float(row["total"]), grad_flat
+        return float(row["total"]), grad_y
 
     # 15000 is SciPy's own L-BFGS-B ``maxfun`` default.
     max_fun = 15000 if settings.max_evaluations is None else settings.max_evaluations
 
+    options: dict[str, float | int] = {
+        "maxiter": settings.max_iterations,
+        "maxfun": max_fun,
+    }
+    if settings.ftol is not None:
+        options["ftol"] = settings.ftol
+    if settings.gtol is not None:
+        options["gtol"] = settings.gtol
+    if settings.pgtol is not None:
+        options["pgtol"] = settings.pgtol
+
     res = scipy.optimize.minimize(
         fun,
-        x0_flat,
+        y0_flat,
         jac=True,
         method="L-BFGS-B",
-        options={"maxiter": settings.max_iterations, "maxfun": max_fun},
+        options=options,
     )
 
     stop = _scipy_stop_reason(res, len(history), settings, non_finite_encountered)
+
+    jac_y = np.asarray(res.jac, dtype=np.float64)
+    projected_x_space = float(np.max(np.abs(jac_y))) / scale
 
     return KnotOptimisationResult(
         best_x,
@@ -449,7 +494,5 @@ def lbfgs_minimise(
         stop,
         non_finite_encountered=non_finite_encountered,
         evaluation_diagnostics=tuple(diagnostics),
-        projected_gradient_norm=float(
-            np.max(np.abs(np.asarray(res.jac, dtype=np.float64)))
-        ),
+        projected_gradient_norm=projected_x_space,
     )
