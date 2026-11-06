@@ -63,6 +63,9 @@ and its total mass is `GS3DX_Neck`'s.
 - **Club.** `FaceSquareRoll` (−20.73°, model workspace) is added to
   GripStrength's roll about the shaft. The head is a sphere centred on the
   shaft, so no mass moves. The sphere and the face-plane rod are hidden.
+  `GripStrength` and `FaceSquareRoll` roll the club inside the hands; they are
+  not the A7 hand roll. That convention (#14731) is stated in
+  [GRIP_FIT_PLAYBOOK.md](../../motion_matching/shared/GRIP_FIT_PLAYBOOK.md#grip-roll-convention-show-a7).
 - **Club head.** A massless File Solid draws a driver head mesh
   (`models/gs3dx_driver_head.stl`: 124 mm heel to toe, 115 mm front to back,
   61 mm tall, 10.5° loft, curved face). It comes from the Tools repository's
