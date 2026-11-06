@@ -40,9 +40,9 @@ def test_jcs_axial_matches_synthetic_relative_rotation() -> None:
     sep = shoulder_deg - hip_deg
     # Same pelvis→thorax convention as ``test_pure_axial_45_right_handed``: -AR backswing.
     want = float(
-        evaluate("x_factor_jcs_axial", {_ROT: _ry(-sep)}, handedness="right").reshape(-1)[
-            0
-        ]
+        evaluate("x_factor_jcs_axial", {_ROT: _ry(-sep)}, handedness="right").reshape(
+            -1
+        )[0]
     )
     meta = x_factor_variant_meta("x_factor_jcs_axial")
     assert meta.literature_family == "brown_kwon_joint_angle"
@@ -83,9 +83,7 @@ def _events(n: int = 10) -> SwingEvents:
     )
 
 
-def _marker_set(
-    upper_deg: np.ndarray, pelvis_deg: np.ndarray
-) -> dict[str, np.ndarray]:
+def _marker_set(upper_deg: np.ndarray, pelvis_deg: np.ndarray) -> dict[str, np.ndarray]:
     """Minimal Back*/Waist* geometry (see ``tests/shared/python/spine/test_golf_terms``)."""
 
     def line(angle_deg: np.ndarray, centre: tuple[float, float, float]):
