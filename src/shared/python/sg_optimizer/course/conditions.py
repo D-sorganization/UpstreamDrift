@@ -152,12 +152,19 @@ class GreenModel:
 
 @dataclass(frozen=True)
 class CourseConditions:
-    """Composite condition object attached to a hole or round."""
+    """Composite condition object attached to a hole or round.
+
+    ``wind`` and ``slope`` name the dispersion-table bins a table-backed shot
+    model reads (``"calm"`` / ``"flat"`` by default, #14743). They are bin names,
+    not physics: a model that has no cell for the bin must reject it.
+    """
 
     rough: RoughModel
     trees: TreeModel
     greens: GreenModel
     pin_position_difficulty: float = 0.5
+    wind: str = "calm"
+    slope: str = "flat"
 
     def __post_init__(self) -> None:
         require(
@@ -165,6 +172,13 @@ class CourseConditions:
             "pin_position_difficulty must lie in [0,1]",
             self.pin_position_difficulty,
         )
+        for name in ("wind", "slope"):
+            value = getattr(self, name)
+            require(
+                isinstance(value, str) and bool(value),
+                f"{name} bin must be named",
+                value,
+            )
 
     @classmethod
     def benign(cls) -> CourseConditions:
@@ -198,6 +212,8 @@ class CourseConditions:
             "trees": {"penalization": self.trees.penalization},
             "greens": {"stimp": self.greens.stimp},
             "pin_position_difficulty": self.pin_position_difficulty,
+            "wind": self.wind,
+            "slope": self.slope,
         }
         Path(path).write_text(
             yaml.safe_dump(payload, sort_keys=False), encoding="utf-8"
@@ -216,6 +232,8 @@ class CourseConditions:
             trees=trees,
             greens=greens,
             pin_position_difficulty=float(raw.get("pin_position_difficulty", 0.5)),
+            wind=str(raw.get("wind", "calm")),
+            slope=str(raw.get("slope", "flat")),
         )
 
 
