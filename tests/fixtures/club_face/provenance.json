@@ -358,7 +358,7 @@
     "previous_fixture_sha256": "df7802600828a7e04158cec5cdb487505a5ba1fff0c15044756540c5eb68bc0a",
     "previous_spec_sha256": "08d54918d330cdb5143835dd30fd57694bfb039eb74f9e45e326a476d149338e",
     "script": "docs/development/full_body_models/evidence/grip_roll/solve_neutral_grip.py",
-    "showpiece_spec_sha256": "4aa4095830afb2bebd90c469a710d2af359d1fc627eb84edd2ddca3680a05e1c",
+    "showpiece_spec_sha256": "c64d8c52d8a0d36bef15de565e14efea9b6c0719bcc2c0ed67c9b4293aa77d24",
     "spec_sha256": "c4f0bbb7b969f07ade5238880b8dfd3add997fb130f14e0311d90f3d0f1c8a09"
    },
    "pipeline_argv": [

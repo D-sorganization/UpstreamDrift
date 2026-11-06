@@ -1,7 +1,7 @@
 {
   "schema": "grip-binding/v1",
   "model_id": "humanoid_character_builder",
-  "model_hash": "sha256:4aa4095830afb2bebd90c469a710d2af359d1fc627eb84edd2ddca3680a05e1c",
+  "model_hash": "sha256:c64d8c52d8a0d36bef15de565e14efea9b6c0719bcc2c0ed67c9b4293aa77d24",
   "handedness": "right",
   "side_roles": {
     "left": "lead",
