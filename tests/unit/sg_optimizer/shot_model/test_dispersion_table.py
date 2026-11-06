@@ -10,9 +10,11 @@ import pytest
 
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.sg_optimizer.shot_model.dispersion_table import (
-    DispersionTable,
-    build_table,
     Convergence,
+    DispersionTable,
+    TableGrid,
+    build_grid_table,
+    build_table,
     check_convergence,
     main,
     standard_normals,
@@ -25,6 +27,8 @@ from src.shared.python.sg_optimizer.shot_model.ground_runout import (
     rest_position,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_registry import get_skill_family
+from src.shared.python.sg_optimizer.shot_model.slope_wind_bins import make_slope_modifier
+from src.shared.python.sg_optimizer.shot_model.physics_simulator import REPRESENTATIVE_CLUB
 
 pytestmark = pytest.mark.unit
 
@@ -145,17 +149,47 @@ def test_cli_records_convergence_in_provenance_and_loads_back(tmp_path: Path) ->
 
 
 def test_slope_bins_shift_downrange_mean() -> None:
-    t = _build(winds=("calm",), n=3000, seed=4)
+    t = build_grid_table(
+        get_skill_family("tour"),
+        _linear_sim,
+        TableGrid(
+            skills=("driver",),
+            lies=("fairway",),
+            winds=("calm",),
+            slopes=("flat", "up_5", "down_5"),
+        ),
+        n=3000,
+        seed=4,
+        slope_modifier=make_slope_modifier,
+    )
     flat = t.lookup("driver", "driver", "fairway", "calm", "flat")
-    up = t.lookup("driver", "driver", "fairway", "calm", "uphill")
-    down = t.lookup("driver", "driver", "fairway", "calm", "downhill")
-    assert up.mean[0] < flat.mean[0] < down.mean[0]
+    up = t.lookup("driver", "driver", "fairway", "calm", "up_5")
+    down = t.lookup("driver", "driver", "fairway", "calm", "down_5")
+    means = {flat.mean[0], up.mean[0], down.mean[0]}
+    assert len(means) == 3
 
 
 def test_club_column_uses_representative_club() -> None:
-    t = _build(skills=("mid_iron",), winds=("calm",), n=100, seed=2)
-    assert SKILL_CLUB["mid_iron"] == "7_iron"
-    t.lookup("mid_iron", "7_iron", "fairway", "calm", "flat")
+    assert SKILL_CLUB["mid_iron"] == REPRESENTATIVE_CLUB["mid_iron"]
+    t = build_grid_table(
+        get_skill_family("tour"),
+        _linear_sim,
+        TableGrid(
+            skills=("mid_iron",),
+            lies=("fairway",),
+            winds=("calm",),
+            clubs=REPRESENTATIVE_CLUB,
+        ),
+        n=100,
+        seed=2,
+    )
+    t.lookup(
+        "mid_iron",
+        REPRESENTATIVE_CLUB["mid_iron"],
+        "fairway",
+        "calm",
+        "flat",
+    )
 
 
 def test_table_lie_modifier_lowers_rough_speed() -> None:

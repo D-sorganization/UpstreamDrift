@@ -49,13 +49,9 @@ def _sim(
     slope: str,
     lie: str,
 ):
-    """Stand-in physics: along = 2 * speed, lateral = 3 * face (+ runout)."""
-    carry = np.stack([2.0 * impacts[:, 0], 3.0 * impacts[:, 1]], axis=1)
-    from src.shared.python.sg_optimizer.shot_model.ground_runout import rest_position
-
-    return rest_position(
-        carry, slope=slope, lie=lie, landing_speed_ms=np.full(len(carry), 25.0)
-    )
+    """Stand-in physics: along = 2 * speed, lateral = 3 * face."""
+    _ = (slope, lie)
+    return np.stack([2.0 * impacts[:, 0], 3.0 * impacts[:, 1]], axis=1)
 
 
 def _table():
@@ -172,15 +168,9 @@ def _family_table(family: str):
     def sim(
         impacts: np.ndarray, skill: str, wind: tuple[float, float], slope: str, lie: str
     ):
+        _ = (slope, lie)
         along = 90.0 + (impacts[:, 0] - impacts[:, 0].mean())
-        carry = np.stack([along, 3.0 * impacts[:, 1]], axis=1)
-        from src.shared.python.sg_optimizer.shot_model.ground_runout import (
-            rest_position,
-        )
-
-        return rest_position(
-            carry, slope=slope, lie=lie, landing_speed_ms=np.full(len(carry), 22.0)
-        )
+        return np.stack([along, 3.0 * impacts[:, 1]], axis=1)
 
     return build_table(get_skill_family(family), sim, skills=("wedge",), n=2000, seed=1)
 

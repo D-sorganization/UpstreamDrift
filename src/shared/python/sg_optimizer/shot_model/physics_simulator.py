@@ -22,7 +22,6 @@ from src.shared.python.physics.swing_ball_flight_pipeline import (
     SwingBallFlightPipeline,
     SwingState,
 )
-from src.shared.python.sg_optimizer.shot_model.ground_runout import rest_position
 from src.shared.python.sg_optimizer.shot_model.skill_family import (
     IMPACT_FIELDS,
     SKILL_NAMES,
@@ -106,9 +105,11 @@ class PipelineLandingSimulator:
         impacts: NDArray[np.float64],
         skill: str,
         wind: tuple[float, float],
-        slope: str,
-        lie: str,
+        slope: str = "flat",
+        lie: str = "fairway",
     ) -> NDArray[np.float64]:
+        """Carry or landing-state output; ``slope``/``lie`` match :data:`LandingSimulator` and are ignored here."""
+        _ = (slope, lie)
         pipe = self._pipeline(wind)
         out = np.empty((len(impacts), 5 if self._landing_state else 2))
         for i in range(len(impacts)):

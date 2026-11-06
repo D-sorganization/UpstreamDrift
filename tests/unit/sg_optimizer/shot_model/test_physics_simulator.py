@@ -42,14 +42,18 @@ def test_strike_offsets_map_to_metres() -> None:
 
 def test_real_pipeline_driver_rest_exceeds_carry() -> None:
     from src.shared.python.physics.rust_kernel import is_rust_available
+    from src.shared.python.sg_optimizer.shot_model.ground_runout import SlopeAwareGround
 
     if not is_rust_available():
         pytest.skip("upstream-physics Rust kernel required for flight pipeline")
-    sim = PipelineLandingSimulator()
-    rest = sim(np.array([_ZERO]), "driver", (0.0, 0.0), "flat", "fairway")
-    result = sim._pipeline((0.0, 0.0)).run(swing_state_from_impact(_ZERO, "driver"))
-    carry_yd = result.trajectory[-1].position[0] / 0.9144
-    assert rest[0, 0] > carry_yd + 0.5
+    sim_carry = PipelineLandingSimulator()
+    sim_land = PipelineLandingSimulator(landing_state=True)
+    ground = SlopeAwareGround()
+    impacts = np.array([_ZERO])
+    carry = sim_carry(impacts, "driver", (0.0, 0.0))
+    landing = sim_land(impacts, "driver", (0.0, 0.0))
+    rest = ground(landing, "fairway", "flat", "driver")
+    assert rest[0, 0] > carry[0, 0] + 0.5
 
 
 def test_real_pipeline_driver_carry_is_plausible_and_face_curves_ball() -> None:
@@ -58,19 +62,17 @@ def test_real_pipeline_driver_carry_is_plausible_and_face_curves_ball() -> None:
     if not is_rust_available():
         pytest.skip("upstream-physics Rust kernel required for flight pipeline")
     sim = PipelineLandingSimulator()
-    out = sim(
-        np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]]),
-        "driver",
-        (0.0, 0.0),
-        "flat",
-        "fairway",
-    )
+    out = sim(np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]]), "driver", (0.0, 0.0))
     assert 150.0 < out[0, 0] < 330.0  # yards; a 100 mph driver
     assert abs(out[0, 1]) < 8.0  # square face/path: nearly straight
     assert out[1, 1] < out[0, 1] - 3.0  # open face -> lands right (y is left)
 
 
 def test_landing_state_mode_adds_velocity_and_matches_carry_columns() -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
     rows = np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]])
     carry = PipelineLandingSimulator()(rows, "mid_iron", (0.0, 0.0))
     state = PipelineLandingSimulator(landing_state=True)(rows, "mid_iron", (0.0, 0.0))
