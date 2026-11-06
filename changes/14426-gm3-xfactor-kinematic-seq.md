@@ -1,0 +1,1 @@
+- Cheetham X-factor stretch and kinematic sequence definitions (GM-3, #14426).
