@@ -1,0 +1,111 @@
+{
+  "comment": "SHOW-A13 (#14738) guard records; allowlist entries name their owner issue and may only be removed.",
+  "records": {
+    "spec/full_body_spec_anthro_driver.json": {
+      "club_rotation": [
+        [-0.541675, -0.717713, -0.437581],
+        [0.60552, 0.02791, -0.795341],
+        [0.583039, -0.69578, 0.419471]
+      ],
+      "source": "flagship driver address, solved MuJoCo pose (hipcal-scaled spec, IK frame 0); tests/unit/motion_matching/test_grip_roll.py FLAGSHIP_CLUB_ROTATION"
+    }
+  },
+  "allowlist": {
+    "spec/full_body_spec_anthro_driver_capture.json": {
+      "reason": "capture-fit spec, not a best-match target (D59)",
+      "issue": 14549
+    },
+    "spec/full_body_spec_anthro_driver_v2.json": {
+      "reason": "v2 trunk lands in the best-match spec under A8",
+      "issue": 14732
+    },
+    "spec/full_body_spec_anthro_iron7.json": {
+      "reason": "no recorded address club rotation yet; A11 owns the MuJoCo-family zero",
+      "issue": 14736
+    },
+    "spec/full_body_spec_v1.json": {
+      "reason": "no recorded address club rotation yet; A11 owns the MuJoCo-family zero",
+      "issue": 14736
+    },
+    "spec/full_body_spec_v2.json": {
+      "reason": "no recorded address club rotation yet; A11 owns the MuJoCo-family zero",
+      "issue": 14736
+    },
+    "binding/bruno2015_fullbody_os4_v2.json": {
+      "reason": "engine model not measured yet; A12 owns Drake, Pinocchio, OpenSim and MyoSuite",
+      "issue": 14737
+    },
+    "binding/drake_native_golfer.json": {
+      "reason": "engine model not measured yet; A12 owns Drake, Pinocchio, OpenSim and MyoSuite",
+      "issue": 14737
+    },
+    "binding/full_body_v1_spec_export.json": {
+      "reason": "MuJoCo-family binding not measured yet; A11 owns the A7 zero",
+      "issue": 14736
+    },
+    "binding/humanoid_character_builder.json": {
+      "reason": "MuJoCo-family binding not measured yet; A11 owns the A7 zero",
+      "issue": 14736
+    },
+    "binding/mujoco_advanced_biomechanical_swing.json": {
+      "reason": "MuJoCo-family binding not measured yet; A11 owns the A7 zero",
+      "issue": 14736
+    },
+    "binding/mujoco_allegro_hand_lab.json": {
+      "reason": "MuJoCo-family binding not measured yet; A11 owns the A7 zero",
+      "issue": 14736
+    },
+    "binding/mujoco_canonical_golf_humanoid.json": {
+      "reason": "MuJoCo-family binding not measured yet; A11 owns the A7 zero",
+      "issue": 14736
+    },
+    "binding/mujoco_full_body_swing.json": {
+      "reason": "MuJoCo-family binding not measured yet; A11 owns the A7 zero",
+      "issue": 14736
+    },
+    "binding/mujoco_golfer.json": {
+      "reason": "MuJoCo-family binding not measured yet; A11 owns the A7 zero",
+      "issue": 14736
+    },
+    "binding/mujoco_shadow_hand_lab.json": {
+      "reason": "MuJoCo-family binding not measured yet; A11 owns the A7 zero",
+      "issue": 14736
+    },
+    "binding/mujoco_upper_body_swing.json": {
+      "reason": "MuJoCo-family binding not measured yet; A11 owns the A7 zero",
+      "issue": 14736
+    },
+    "binding/myosuite_golfer_driver.json": {
+      "reason": "engine model not measured yet; A12 owns Drake, Pinocchio, OpenSim and MyoSuite",
+      "issue": 14737
+    },
+    "binding/myosuite_golfer_iron.json": {
+      "reason": "engine model not measured yet; A12 owns Drake, Pinocchio, OpenSim and MyoSuite",
+      "issue": 14737
+    },
+    "binding/myosuite_myohand_bilateral_driver.json": {
+      "reason": "engine model not measured yet; A12 owns Drake, Pinocchio, OpenSim and MyoSuite",
+      "issue": 14737
+    },
+    "binding/myosuite_myohand_bilateral_iron.json": {
+      "reason": "engine model not measured yet; A12 owns Drake, Pinocchio, OpenSim and MyoSuite",
+      "issue": 14737
+    },
+    "binding/opensim_golf_humanoid.json": {
+      "reason": "engine model not measured yet; A12 owns Drake, Pinocchio, OpenSim and MyoSuite",
+      "issue": 14737
+    },
+    "binding/opensim_golf_humanoid_scaled.json": {
+      "reason": "engine model not measured yet; A12 owns Drake, Pinocchio, OpenSim and MyoSuite",
+      "issue": 14737
+    },
+    "binding/pinocchio_native_golfer.json": {
+      "reason": "engine model not measured yet; A12 owns Drake, Pinocchio, OpenSim and MyoSuite",
+      "issue": 14737
+    },
+    "binding/simscape_gs3dx_human.json": {
+      "reason": "Simscape is outside UD; A14 owns the audit",
+      "issue": 14739
+    }
+  }
+}
