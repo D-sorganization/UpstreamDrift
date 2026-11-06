@@ -8,6 +8,9 @@ the A7 zero (#14731): these tests prove parity with the shared metric.
 
 from __future__ import annotations
 
+import json
+from dataclasses import replace
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
@@ -16,6 +19,11 @@ from scipy.spatial.transform import Rotation
 
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.grip_contact.binding import BodyStates
+from src.shared.python.grip_contact.contact_topology import contact_topology
+from src.shared.python.grip_contact.topology_contact import palm_pad_direction
+from src.shared.python.model_appearance.grip_pose import Hand
+from src.shared.python.model_appearance.hand_spec import wrist_follower_dorsal_axis
+from src.shared.python.motion_matching.grip_contract import GripSpec
 from src.shared.python.motion_matching.engine_grip_roll import (
     EngineGripAxes,
     engine_address_grip_roll_deg,
@@ -134,3 +142,40 @@ def test_manifest_axes_round_trip_and_default_the_shaft() -> None:
 def test_manifest_without_dorsal_axes_names_the_model() -> None:
     with pytest.raises(ValueError, match="model_x.*hand_dorsal_axis_local"):
         engine_grip_axes_from_manifest({"model_id": "model_x"})
+
+
+SPEC_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+)
+
+
+def _spec_with_alphas(lead_deg: float, trail_deg: float) -> GripSpec:
+    base = GripSpec()
+    return replace(
+        base,
+        lead=replace(base.lead, alpha_deg=lead_deg),
+        trail=replace(base.trail, alpha_deg=trail_deg),
+    )
+
+
+def test_palm_direction_follows_alpha_plus_pi_in_the_grip_plane() -> None:
+    topo = contact_topology(_spec_with_alphas(20.0, 45.0))
+    for hand, alpha in (("lead", 20.0), ("trail", 45.0)):
+        x, y, z = palm_pad_direction(topo, hand)
+        assert x == 0.0
+        assert np.degrees(np.arctan2(z, y)) == pytest.approx(
+            (alpha + 180.0 + 180.0) % 360.0 - 180.0, abs=1e-6
+        )
+
+
+def test_palm_directions_agree_with_the_spec_dorsals_on_the_hand_offset() -> None:
+    # Frame-independent check against the MuJoCo spec: the angle between the
+    # two hands' directions about the shaft. Default grip: 0 deg in both.
+    spec = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
+    lead = wrist_follower_dorsal_axis(spec, Hand.LEAD)
+    trail = wrist_follower_dorsal_axis(spec, Hand.TRAIL)
+    topo = contact_topology()
+    p_lead = np.asarray(palm_pad_direction(topo, "lead"))
+    p_trail = np.asarray(palm_pad_direction(topo, "trail"))
+    assert float(lead @ trail) == pytest.approx(float(p_lead @ p_trail), abs=1e-6)
