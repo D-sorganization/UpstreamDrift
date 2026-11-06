@@ -14,11 +14,10 @@ of the trail hand, both ``-dorsal`` with ``dorsal`` the wrist-follower x axis
 into the world by the native club frame. ``roll = atan2(n.e_v, n.e_h)`` after
 projecting ``n`` off the shaft.
 
-Mapping to HX (#13757): alpha is a rotation about the shaft, so ``d_alpha``
-changes the roll by exactly ``d_alpha`` (``test_spin_about_the_shaft...``);
-psi and gamma tilt about axes perpendicular to the shaft and are seen here only
-through the projected normal. The roll is alpha plus a constant fixed by the
-native frame and the club lie at address.
+Mapping to HX (#13757): alpha is face-on referenced (#14633) and a rotation
+about the shaft, so ``d_alpha`` changes the roll by exactly ``d_alpha``
+(``test_spin_about_the_shaft...``); psi and gamma tilt about axes perpendicular
+to the shaft and are seen here only through the projected normal.
 """
 
 from __future__ import annotations

@@ -61,7 +61,7 @@ def test_showpiece_grip_is_neutral_and_capture_grip_stays_fitted() -> None:
         capture["subject"]["grip_rotation_deg"]
         != (showpiece["subject"]["grip_rotation_deg"])
     )
-    # the neutral grip is the HX-canonical alpha -10.73 / psi 40 / gamma 0, both hands
+    # the neutral grip is the HX-canonical alpha 15.00 / psi 40 / gamma 0, both hands (#14633)
     lead, trail = showpiece["subject"]["grip_rotation_deg"].values()
     assert lead == trail
     assert [round(v, 2) for v in lead] == [-75.39, -9.72, 4.58]

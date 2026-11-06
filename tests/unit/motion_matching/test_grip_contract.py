@@ -9,10 +9,16 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from src.shared.python.model_appearance.grip_pose import GripPose, GripStyle, Hand
+from src.shared.python.model_appearance.grip_pose import (
+    GripPose,
+    GripStyle,
+    Hand,
+    PALM_DIAGONAL_DEG,
+)
 from src.shared.python.motion_matching import anthropometric_geometry as geometry
 from src.shared.python.motion_matching.arm_mirror import native_wrist_rotation
 from src.shared.python.motion_matching.grip_contract import (
+    ALPHA_FACE_ON_ZERO_OFFSET_DEG,
     GRIP_STRENGTH_PRESETS_DEG,
     MIRRORED_NEUTRAL_EULER_DEG,
     MIRRORED_NEUTRAL_GRIP_MATRIX,
@@ -149,9 +155,8 @@ def test_default_build_reproduced_by_the_contract() -> None:
 
 def test_published_decomposition_of_the_defaults() -> None:
     lead = hand_from_euler(geometry.GRIP_ROTATION_DEG["L"])
-    assert (lead.alpha_deg, lead.psi_deg, lead.gamma_deg) == pytest.approx(
-        (0.0, 25.0, 47.0), abs=1e-9
-    )
+    assert (lead.psi_deg, lead.gamma_deg) == pytest.approx((25.0, 47.0), abs=1e-9)
+    assert lead.alpha_deg == pytest.approx(ALPHA_FACE_ON_ZERO_OFFSET_DEG, abs=1e-6)
 
 
 def test_native_follower_frames_share_the_shaft_axis() -> None:
@@ -241,7 +246,11 @@ def test_presets_use_golf_words() -> None:
 
 def test_neutral_transform_is_published_and_explicit() -> None:
     assert pytest.approx((-75.0, 0.0, 0.0), abs=1e-9) == NEUTRAL_EULER_DEG
-    assert to_grip_rotation(GripSpec.preset("neutral"))["L"] == pytest.approx(
+    anatomical = GripSpec(
+        lead=HandAngles(ALPHA_FACE_ON_ZERO_OFFSET_DEG, PALM_DIAGONAL_DEG, 0.0),
+        trail=HandAngles(ALPHA_FACE_ON_ZERO_OFFSET_DEG, PALM_DIAGONAL_DEG, 0.0),
+    )
+    assert to_grip_rotation(anatomical)["L"] == pytest.approx(
         NEUTRAL_EULER_DEG, abs=1e-9
     )
 
@@ -344,3 +353,26 @@ def test_neutral_grip_helpers_validate_side_and_mirror_dbc() -> None:
         mirror_grip_matrix(np.diag([1.0, 1.0, -1.0]))
     with pytest.raises(ValueError, match="three"):
         mirror_grip_euler((1.0, 2.0))
+
+
+def test_all_committed_specs_decompose_within_alpha_range() -> None:
+    """Stored triples decomposed via hand_from_euler remain in ALPHA_RANGE_DEG (#14633 F3)."""
+    from src.shared.python.model_appearance.grip_pose import ALPHA_RANGE_DEG
+
+    models_dir = ROOT / "docs/development/full_body_models"
+    fixtures_dir = ROOT / "tests/fixtures/club_face"
+    spec_files = list(models_dir.glob("*.json")) + list(fixtures_dir.glob("*.json"))
+    checked = 0
+    for path in spec_files:
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        grips = doc.get("subject", {}).get("grip_rotation_deg", {})
+        for side, triple in grips.items():
+            angles = hand_from_euler(triple)
+            assert ALPHA_RANGE_DEG[0] <= angles.alpha_deg <= ALPHA_RANGE_DEG[1], (
+                f"{path.name} side {side} alpha {angles.alpha_deg} outside {ALPHA_RANGE_DEG}"
+            )
+            checked += 1
+    assert checked >= 10
