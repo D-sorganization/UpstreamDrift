@@ -151,6 +151,36 @@ def test_anderson_scaling_is_proportional_to_weight_times_height() -> None:
     assert b.tau_max_negative_nm[0] / a.tau_max_negative_nm[0] == pytest.approx(ratio)
 
 
+def test_anderson_2007_citation_records_table_three_scope_for_hip_non_sagittal_slots() -> None:
+    """Table 3 C1 documents six sagittal-plane lower-limb MVC rows for male 18-25;
+    hip adduction and hip rotation capacities stay UNVERIFIED until a separate source is cited."""
+    reg = json.loads(
+        (ROOT / "src" / "config" / "loop_nullspace_registry.json").read_text("utf-8")
+    )
+    anderson = next(c for c in reg["citations"] if c["id"] == "CIT-ANDERSON-2007")
+    checked = anderson["claim_checked"]
+    assert "six lower-limb exertion rows" in checked
+    assert "hip extension" in checked and "dorsiflexion" in checked
+    assert "no C1 row for hip abduction/adduction" in checked
+    assert "hip internal/external rotation" in checked
+    for slot in (
+        "hip_adduction_r",
+        "hip_adduction_l",
+        "hip_rotation_r",
+        "hip_rotation_l",
+    ):
+        for direction in ("negative", "positive"):
+            entry = next(
+                e
+                for e in reg["torque_capacity"]
+                if e["joint_slot"] == slot and e["direction"] == direction
+            )
+            assert entry["verification_status"] == "UNVERIFIED"
+            note = entry["source"]["note"]
+            assert "Anderson 2007 Table 3 C1" in note
+            assert "TODO:" in note
+
+
 def test_unscaled_population_values_are_returned_verbatim() -> None:
     vec = capacity_for(("TorsoInput", "LEInput"), CapacitySubject(50.0, 1.5))
     assert vec.tau_max_negative_nm[0] == pytest.approx(68.7)
