@@ -29,6 +29,7 @@ from src.shared.python.motion_matching.engine_grip_roll import (
     engine_address_grip_roll_deg,
     engine_grip_axes_from_grip_frame,
     engine_grip_axes_from_topology,
+    grip_pose_state_from_club_grip_frames,
     engine_grip_axes_from_manifest,
     grip_pose_state_from_body_states,
 )
@@ -220,3 +221,42 @@ def test_pinocchio_native_golfer_reads_equal_roll_for_equal_alpha() -> None:
     lead, trail = engine_address_grip_roll_deg(states, binding, axes)
     assert -180.0 < lead <= 180.0
     assert lead == pytest.approx(trail, abs=1e-6)  # same alpha, same R_grip
+
+
+def _grip_frame(club_to_grip: Rotation) -> np.ndarray:
+    return _pose(club_to_grip)
+
+
+def test_club_grip_frames_give_the_same_state_as_hand_poses() -> None:
+    # Rigid grip: hand poses = club pose composed with the club-local grip frames,
+    # so the two routes must agree exactly (grip-frame engines: Pinocchio native,
+    # MyoSuite calibration frames, OpenSim club_grip_offset frames).
+    topo = contact_topology(_spec_with_alphas(20.0, 45.0))
+    club = _club_rotation()
+    g_lead = Rotation.from_euler("y", -90.0, degrees=True)  # grip x -> club +z
+    g_trail = g_lead
+    states = BodyStates(
+        {
+            "club": _pose(club),
+            "lead": _pose(club * g_lead),
+            "trail": _pose(club * g_trail),
+        }
+    )
+    via_hands = engine_address_grip_roll_deg(
+        states, BINDING, engine_grip_axes_from_grip_frame(states, BINDING, topo)
+    )
+    via_frames = address_grip_roll_deg(
+        grip_pose_state_from_club_grip_frames(
+            club.as_matrix(),
+            {"L": _grip_frame(g_lead), "R": _grip_frame(g_trail)},
+            topo,
+        )
+    )
+    assert via_frames == pytest.approx(via_hands, abs=1e-9)
+
+
+def test_club_grip_frames_need_both_sides() -> None:
+    with pytest.raises(ContractViolationError, match="R"):
+        grip_pose_state_from_club_grip_frames(
+            np.eye(3), {"L": np.eye(4)}, contact_topology()
+        )

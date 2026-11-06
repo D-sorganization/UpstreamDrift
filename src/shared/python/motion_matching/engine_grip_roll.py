@@ -127,6 +127,23 @@ def _rotation_of(states: BodyStates, body: str) -> Array:
     return np.asarray(states[body], dtype=float)[:3, :3]
 
 
+def _state_in_shaft_frame(
+    club_rotation: Array,
+    shaft_local: Vec3,
+    lead_dorsal_club: Any,
+    trail_dorsal_club: Any,
+    target: TargetFrame | None,
+) -> GripPoseState:
+    """State whose club frame has the engine shaft as its y column (the metric's)."""
+    basis = club_rotation @ _shaft_frame(shaft_local)
+    return GripPoseState(
+        club_rotation=basis,
+        lead_dorsal_club=basis.T @ (club_rotation @ np.asarray(lead_dorsal_club)),
+        trail_dorsal_club=basis.T @ (club_rotation @ np.asarray(trail_dorsal_club)),
+        target=target or TargetFrame(),
+    )
+
+
 def grip_pose_state_from_body_states(
     states: BodyStates,
     binding: Any,
@@ -139,18 +156,43 @@ def grip_pose_state_from_body_states(
     bodies. The metric's club frame is the engine club frame turned so its y
     column is the engine's shaft axis; the dorsals are re-expressed in it.
     """
-    basis = _rotation_of(states, binding.club_body) @ _shaft_frame(
-        axes.club_shaft_local
+    club = _rotation_of(states, binding.club_body)
+
+    def dorsal_in_club(body: str, local: Vec3) -> Array:
+        return club.T @ (_rotation_of(states, body) @ np.asarray(local))
+
+    return _state_in_shaft_frame(
+        club,
+        axes.club_shaft_local,
+        dorsal_in_club(binding.lead_hand_body, axes.lead_dorsal_local),
+        dorsal_in_club(binding.trail_hand_body, axes.trail_dorsal_local),
+        target,
     )
 
-    def dorsal(body: str, local: Vec3) -> Array:
-        return basis.T @ (_rotation_of(states, body) @ np.asarray(local))
 
-    return GripPoseState(
-        club_rotation=basis,
-        lead_dorsal_club=dorsal(binding.lead_hand_body, axes.lead_dorsal_local),
-        trail_dorsal_club=dorsal(binding.trail_hand_body, axes.trail_dorsal_local),
-        target=target or TargetFrame(),
+def grip_pose_state_from_club_grip_frames(
+    club_rotation: Any,
+    grip_frames: Mapping[str, Any],
+    topology: ContactTopology,
+    target: TargetFrame | None = None,
+) -> GripPoseState:
+    """State from the club-local grip frames the engines already calibrate.
+
+    ``grip_frames`` maps ``"L"`` (lead) and ``"R"`` (trail) to the 4x4 grip frame
+    in the club body frame (grip ``+x`` = shaft, as ``contact_topology``). The
+    dorsal of each hand is the topology palm direction carried by that frame, so
+    no hand-body orientation or stored axis is needed.
+    """
+    for side in ("L", "R"):
+        require(side in grip_frames, f"grip_frames is missing side {side!r}")
+    lead = np.asarray(grip_frames["L"], dtype=float)[:3, :3]
+    trail = np.asarray(grip_frames["R"], dtype=float)[:3, :3]
+    return _state_in_shaft_frame(
+        np.asarray(club_rotation, dtype=float),
+        (float(lead[0, 0]), float(lead[1, 0]), float(lead[2, 0])),
+        lead @ np.asarray(palm_pad_direction(topology, "lead")),
+        trail @ np.asarray(palm_pad_direction(topology, "trail")),
+        target,
     )
 
 
