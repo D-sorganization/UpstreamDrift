@@ -18,6 +18,71 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13158 · OSL-19 Scoping: Grip Closure Tests and OpenSim Receipt Hook
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13158
+- **Branch:** cursor/osl19-scoping-contracts-13158-94df
+- **PR:** #14802
+- **Paths:** see #14802
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13158-osl-19-scoping-grip-closure-tests-and-op.md)
+- **Summary:** OSL-19 scoping: grip closure tests and OpenSim receipt hook
+- **Next step:** Rebase after OSL stack merges; add OpenSim receipt to bundles.
+
+### DL-#13131 · OSL-17 Scoping: Rack + Lead-In Bundle Provenance Tests
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13131
+- **Branch:** cursor/osl17-scoping-contracts-13131-94df
+- **PR:** #14802
+- **Paths:** see #14802
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13131-osl-17-scoping-rack-lead-in-bundle-prove.md)
+- **Summary:** OSL-17 scoping: rack + lead-in bundle provenance tests
+- **Next step:** Merge after OSL-14/15 stack; extend lead-in to clear xfail.
+
+### DL-#13093 · OSL-15 Scoping: Load Balance IK Provenance Contract and Tests
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13093
+- **Branch:** cursor/osl15-scoping-contracts-13093-94df
+- **PR:** #14802
+- **Paths:** see #14802
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13093-osl-15-scoping-load-balance-ik-provenanc.md)
+- **Summary:** OSL-15 scoping: load balance IK provenance contract and tests
+- **Next step:** Merge PR; regenerate deadlift/clean bundles to clear xfails.
+
+### DL-#11746 · LIFT-6 OpenSim Lift Composition/Kinetics Contracts
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11746
+- **Branch:** cursor/lift6-epic-contract-11746-94df
+- **PR:** #14805
+- **Paths:** see #14805
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`07c00681`; collated from changes/11746-lift-6-opensim-lift-composition-kinetics.md)
+- **Summary:** LIFT-6 OpenSim lift composition/kinetics contracts
+- **Next step:** CI on OpenSim lane; arm when green.
+
+### DL-#11745 · LIFT-5 Epic Evidence Contract (Bundles + Parity JSON)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11745
+- **Branch:** cursor/lift5-epic-contract-11745-94df
+- **PR:** #14805
+- **Paths:** see #14805
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`07c00681`; collated from changes/11745-lift-5-epic-evidence-contract-bundles-pa.md)
+- **Summary:** LIFT-5 epic evidence contract (bundles + parity JSON)
+- **Next step:** Optional parity lanes for all lifts; CI green then arm.
+
 ### DL-#13991 · Docs: ADR-0060 OpenSim Scaling and Fit Plan (#13991)
 
 - **State:** in_review
@@ -755,6 +820,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14816 · SHOW-B3b: Omit Ground_Model From Carry-Only Dispersion Tables and Deduplicate Runout Entry Points
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14816
+- **Branch:** merged via #14833
+- **PR:** #14833
+- **Paths:** see #14833
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`a425584c`; collated from changes/14816-carry-table-provenance.md)
+- **Summary:** SHOW-B3b: omit ground_model from carry-only dispersion tables and deduplicate runout entry points
+- **Next step:** Shipped in PR #14833.
+
+### DL-#14501 · NP-08: Offline SVD-Direction Ablation vs High-Frequency Jitter Benchmark (#14501)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14501
+- **Branch:** merged via #14823
+- **PR:** #14823
+- **Paths:** see #14823
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`d4e3a4eb`; collated from changes/14501-np08-svd-jitter-ablation.md)
+- **Summary:** NP-08: offline SVD-direction ablation vs high-frequency jitter benchmark (#14501)
+- **Next step:** Shipped in PR #14823.
+
+### DL-#14423 · Map X-Factor Variants to Literature Families and Add Publish Payload + Unit Tests (GM-1B).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14423
+- **Branch:** merged via #14818
+- **PR:** #14818
+- **Paths:** see #14818
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`f0cfeb27`; collated from changes/14423-map-x-factor-variants-to-literature-fami.md)
+- **Summary:** Map X-factor variants to literature families and add publish payload + unit tests (GM-1b).
+- **Next step:** Shipped in PR #14818.
+
+### DL-#13884 · Controller Synergy Audit Slice 1: ControllerAuditSpec, #13837 Trace Adapter and ControllerAuditReport (UCM, TNC Fail-Closed Below 30 Trials, Null-Space Gain Norm) With an Analytic Lyapunov Golden
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13884
+- **Branch:** merged via #14768
+- **PR:** #14768
+- **Paths:** see #14768
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`190cae5c`; collated from changes/13884-controller-synergy-audit-slice-1-control.md)
+- **Summary:** Controller synergy audit slice 1: ControllerAuditSpec, #13837 trace adapter and ControllerAuditReport (UCM, TNC fail-closed below 30 trials, null-space gain norm) with an analytic Lyapunov golden
+- **Next step:** Shipped in PR #14768.
+
 ### DL-#14812 · Rewrite Pose_Studio Test_Widgets Against Real Qt Widgets With Qapp Fixture (#14812)
 
 - **State:** shipped
@@ -956,10 +1073,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14741
 - **Branch:** merged via #14774
-- **PR:** #14774
+- **PR:** #14774, #14820
 - **Paths:** see #14774
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`9ecd8e21`; collated from changes/14741-add-pr-size-gate-workflow-and-git-numsta.md)
+- **Last verified:** 2026-11-06 (`f46eba70`; collated from changes/14741-pr-size-advisory-bdb9.md)
 - **Summary:** Add PR size gate workflow and git numstat checker (500-line cap, exemptions).
 - **Next step:** Shipped in PR #14774.
 
@@ -1138,10 +1255,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13057
 - **Branch:** merged via #14730
-- **PR:** #14730
+- **PR:** #14730, #14802
 - **Paths:** see #14730
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`eda86d72`; collated from changes/13057-residual-xfail-retarget.md)
+- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13057-osl-14-scoping-osl-scoping-osl14-fixture.md)
 - **Summary:** lifting: the four strict residual-gate xfails (deadlift, bench press, snatch, clean and jerk) now cite #13057, the hip and pelvis rebuild that owns the residual excess, instead of #13041
 - **Next step:** Shipped in PR #14730.
 
@@ -1151,10 +1268,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14698
 - **Branch:** merged via #14717
-- **PR:** #14717
+- **PR:** #14717, #14813
 - **Paths:** see #14717
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`c91cd7cf`; collated from changes/14698-add-the-lighthouse-mobile-baseline-recei.md)
+- **Last verified:** 2026-11-06 (`a5fb78f4`; collated from changes/14698-ci-lighthouse-mobile-baseline-runs-in-it.md)
 - **Summary:** Add the Lighthouse mobile baseline receipt (loopback fixture server and egress proxy, report validator, CI steps on the fleet runner) as the follow-up to #14270; scores informational, no threshold.
 - **Next step:** Shipped in PR #14717.
 
