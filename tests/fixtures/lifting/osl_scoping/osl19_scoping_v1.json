@@ -1,0 +1,11 @@
+{
+  "schema_version": "ud.osl_scoping.osl19.v1",
+  "issue": {
+    "id": 13158,
+    "slug": "OSL-19"
+  },
+  "reach": {
+    "max_grip_closure_pass_m": 0.001
+  },
+  "notes": "OpenSim hand-to-grip receipt is expected under provenance.opensim_bar_reach_receipt_v1 after the bar-reach solve lands."
+}
