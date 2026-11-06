@@ -112,9 +112,7 @@ def _baked_on_tapered_grip(hand: Hand, pose: GripPose) -> GripHandMesh:
     )
     nearest, _ = nominal.on_grip_extent_below_butt_m()
     radius = _grip_radius_at(min(max(nearest, 0.0), _GRIP_LENGTH_M))
-    return build_grip_hand_mesh(
-        hand, grip_radius_m=radius, pose=pose, params=params
-    )
+    return build_grip_hand_mesh(hand, grip_radius_m=radius, pose=pose, params=params)
 
 
 def test_each_contact_patch_gap_within_0_to_3_mm():
@@ -126,11 +124,11 @@ def test_each_contact_patch_gap_within_0_to_3_mm():
         on = [p for p in result.components if p.on_grip and p.finger != "dorsum"]
         assert on
         nearest, farthest = result.on_grip_extent_below_butt_m()
-        taper_extra = abs(
-            _grip_radius_at(nearest) - _grip_radius_at(farthest)
-        )
-        hi = MAX_PAD_CLEARANCE_M + taper_extra + abs(
-            _grip_radius_at(depth) - float(result.grip_radius_m)
+        taper_extra = abs(_grip_radius_at(nearest) - _grip_radius_at(farthest))
+        hi = (
+            MAX_PAD_CLEARANCE_M
+            + taper_extra
+            + abs(_grip_radius_at(depth) - float(result.grip_radius_m))
         )
         for part in on:
             lo = _taper_clearance(part.mesh, depth_below_butt_m=depth)

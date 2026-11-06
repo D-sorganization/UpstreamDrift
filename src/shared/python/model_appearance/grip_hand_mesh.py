@@ -430,9 +430,7 @@ def build_grip_hand_mesh(
     thumb_azimuth_deg = placement.thumb_offset_deg + roll_deg
     thumb_azimuth = math.radians(thumb_azimuth_deg)
     parts += _thumb(radius, thumb_azimuth, params)
-    parts += _thumb_web(
-        radius, thumb_azimuth, (v, mcp), (z_lo, z_hi), params
-    )
+    parts += _thumb_web(radius, thumb_azimuth, (v, mcp), (z_lo, z_hi), params)
 
     on_grip_vertices = np.vstack([p.mesh.vertices for p in parts if p.on_grip])
     gap = float(np.min(np.hypot(on_grip_vertices[:, 0], on_grip_vertices[:, 1])))
