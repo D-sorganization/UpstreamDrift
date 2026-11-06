@@ -6,6 +6,13 @@ status: complete
 
 # OpenSim
 
+For instantaneous component terminology, **ZTCF is the drift component**
+(applied torque set to zero, autonomous terms retained) and **ZVCF is the
+control component** (`M(q)^{-1} τ`, with velocity and gravity terms zeroed).
+The split is exact at a fixed state and is **not additive over integrated
+trajectories**. See [`SPEC.md`](../../SPEC.md), §4 for the normative
+definition.
+
 ## Purpose
 
 The OpenSim tile loads an OpenSim musculoskeletal model (`.osim`), runs a

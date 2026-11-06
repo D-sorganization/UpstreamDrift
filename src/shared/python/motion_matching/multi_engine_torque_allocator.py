@@ -47,6 +47,8 @@ from src.shared.python.motion_matching.contact_force_allocator import (
     AllocationObjective,
     ContactForceAllocation,
     ContactForceAllocator,
+    FrameInputs,
+    allocate_contact_frame,
 )
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
@@ -767,12 +769,15 @@ class MultiEngineTorqueAllocator:
         j_ground = self.adapter.compute_contact_jacobian(q)
         j_grip = canonical_closure_jacobian(self.adapter, q)
 
-        return self.allocator.allocate(
-            tau_rnea=tau_rnea,
-            j_ground=j_ground,
-            j_grip=j_grip,
-            objective=objective,
-            trail_arm_indices=trail_arm_indices,
+        return allocate_contact_frame(
+            self.allocator,
+            FrameInputs(
+                tau_rnea=tau_rnea,
+                j_ground=j_ground,
+                j_grip=j_grip,
+                objective=objective,
+                trail_arm_indices=trail_arm_indices,
+            ),
         )
 
     def allocate_trajectory(

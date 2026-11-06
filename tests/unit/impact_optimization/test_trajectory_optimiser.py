@@ -23,6 +23,7 @@ from src.shared.python.impact_optimization.physiological_envelope import (
 from src.shared.python.impact_optimization.trajectory_optimiser import (
     ImpactTolerance,
     face_to_path_deg,
+    impact_errors_deg,
     OptimiserConfig,
     RolloutOutcome,
     solve_impact_trajectory,
@@ -216,3 +217,22 @@ def test_face_to_path_is_nan_when_face_or_path_unobservable() -> None:
     assert math.isnan(face_to_path_deg(_Impact(None, -4.0, 2.5, 100.0)))
     assert math.isnan(face_to_path_deg(_Impact(3.0, None, 2.5, 100.0)))
     assert face_to_path_deg(_Impact(3.0, -4.0, 2.5, 100.0)) == pytest.approx(7.0)
+
+
+def test_impact_errors_are_measured_minus_target_and_nan_when_unobservable() -> None:
+    target = ImpactTarget(face_deg=1.0, path_deg=-2.0, aoa_deg=3.0)
+    face, path, aoa = impact_errors_deg(_Impact(3.0, -4.0, 2.5, 100.0), target)
+    assert (face, path, aoa) == pytest.approx((2.0, -2.0, -0.5))
+    nan_face, nan_path, same_aoa = impact_errors_deg(
+        _Impact(None, None, 2.5, 100.0), target
+    )
+    assert math.isnan(nan_face) and math.isnan(nan_path)
+    assert same_aoa == pytest.approx(-0.5)
+
+
+def test_solution_reports_face_path_and_aoa_error_against_its_target() -> None:
+    sol = _solve(_envelope())
+    imp = sol.outcome.impact
+    assert sol.face_error_deg == pytest.approx(imp.face_deg - 0.0)
+    assert sol.path_error_deg == pytest.approx(imp.path_deg - 0.0)
+    assert sol.aoa_error_deg == pytest.approx(imp.aoa_deg - 0.0)

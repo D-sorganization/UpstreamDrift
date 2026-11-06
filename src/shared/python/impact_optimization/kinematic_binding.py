@@ -10,6 +10,12 @@ with evidence, and since 125 mph is firm it is flagged as probably miscalibrated
 (for the thoracic split that means the prior-derived split or the +-50 deg ROM,
 not a measured over-rotation).
 
+ROM and velocity are HARD constraints on an accepted rung (D29):
+:func:`enforce_kinematic_limits` marks a rung infeasible when any joint exceeds
+its range of motion or rate limit, so it cannot raise ``reached_mph``, and
+:func:`require_kinematically_feasible` is the postcondition that no feasible
+rung is over a limit.  The report names the joint, limit and value.
+
 Design by Contract:
     Preconditions: joint angles are unwrapped hinge angles (no 2*pi jumps);
     ``trajectory`` is ``(len(times_s), n_joints)``; ``times_s``
@@ -20,21 +26,24 @@ Design by Contract:
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from dataclasses import dataclass
 
 import numpy as np
 
-from src.shared.python.contracts import require
+from src.shared.python.contracts import ensure, require
 from src.shared.python.impact_optimization.physiological_envelope import (
     PhysiologicalEnvelope,
 )
 from src.shared.python.impact_optimization.speed_continuation import (
     ContinuationResult,
     binding_report,
+    reached_mph,
 )
 
 DEFAULT_THRESHOLD = 0.98
+LIMIT_TOLERANCE = 1e-9
 
 
 @dataclass(frozen=True)
@@ -46,6 +55,8 @@ class KinematicBinding:
     peak: float
     limit: float
     utilisation: float
+    #: ROM only: which bound ("lower"/"upper") the peak is against; "" otherwise.
+    side: str = ""
 
 
 def _rom_hit(name: str, a: np.ndarray, lo: float, hi: float) -> KinematicBinding | None:
@@ -57,10 +68,10 @@ def _rom_hit(name: str, a: np.ndarray, lo: float, hi: float) -> KinematicBinding
     if not (math.isfinite(lo) and math.isfinite(hi)):
         return None
     centre, half = (lo + hi) / 2.0, (hi - lo) / 2.0
-    up = ((float(a.max()) - centre) / half, float(a.max()), hi)
-    down = ((centre - float(a.min())) / half, float(a.min()), lo)
-    util, peak, limit = max(up, down)
-    return KinematicBinding(name, "ROM", peak, limit, util)
+    up = ((float(a.max()) - centre) / half, float(a.max()), hi, "upper")
+    down = ((centre - float(a.min())) / half, float(a.min()), lo, "lower")
+    util, peak, limit, side = max(up, down)
+    return KinematicBinding(name, "ROM", peak, limit, util, side)
 
 
 def kinematic_binding(
@@ -94,14 +105,73 @@ def kinematic_binding(
     return tuple(hits)
 
 
-def _line(speed: float, hit: KinematicBinding, feasible: bool, note: str | None) -> str:
+def over_limit(hits: tuple[KinematicBinding, ...]) -> bool:
+    """True when any binding is beyond its limit (utilisation > 1)."""
+    return any(h.utilisation > 1.0 + LIMIT_TOLERANCE for h in hits)
+
+
+def require_kinematically_feasible(
+    result: ContinuationResult,
+    kinematic_by_rung: tuple[tuple[KinematicBinding, ...], ...],
+) -> None:
+    """Postcondition: no feasible rung exceeds a ROM or velocity limit."""
+    require(
+        len(kinematic_by_rung) == len(result.points),
+        "one kinematic binding tuple per rung",
+    )
+    bad = [
+        p.speed_target_mph
+        for p, hits in zip(result.points, kinematic_by_rung, strict=True)
+        if p.feasible and over_limit(hits)
+    ]
+    ensure(not bad, "feasible rung exceeds a ROM or velocity limit", bad)
+
+
+def enforce_kinematic_limits(
+    result: ContinuationResult,
+    envelope: PhysiologicalEnvelope,
+    times_s: np.ndarray,
+    *,
+    degrees: bool = False,
+) -> tuple[ContinuationResult, tuple[tuple[KinematicBinding, ...], ...]]:
+    """Demote rungs that break a ROM or velocity limit; recompute ``reached_mph``.
+
+    Returns the constrained result and the per-rung kinematic bindings.  Solutions
+    are untouched: the over-range rung stays visible, flagged infeasible.
+    """
+    kin = tuple(
+        kinematic_binding(p.trajectory, times_s, envelope, degrees=degrees)
+        for p in result.points
+    )
+    points = tuple(
+        dataclasses.replace(p, feasible=p.feasible and not over_limit(hits))
+        for p, hits in zip(result.points, kin, strict=True)
+    )
+    out = ContinuationResult(points, reached_mph(points))
+    require_kinematically_feasible(out, kin)
+    return out, kin
+
+
+def _line(
+    speed: float,
+    hit: KinematicBinding,
+    feasible: bool,
+    note: str | None,
+    assumed: bool = False,
+) -> str:
     unit = "deg" if hit.kind == "ROM" else "deg/s"
     head = (
         f"{speed:.0f} mph: {hit.joint} reaches {hit.peak:+.1f} {unit} against its "
         f"{hit.limit:+.1f} {unit} {hit.kind} limit ({hit.utilisation:.0%})"
     )
-    if hit.utilisation <= 1.0 and feasible:
+    if hit.utilisation <= 1.0 + LIMIT_TOLERANCE and feasible:
         line = head + "; at the limit but feasible"
+    elif assumed:
+        line = (
+            head + "; BLOCKS this speed. assumption-limited: this limit is an "
+            "assumed placeholder, not a cited value, so the rung says nothing "
+            "about the athlete"
+        )
     else:
         line = (
             head + "; BLOCKS this speed. 125 mph is firm: probable miscalibration "
@@ -124,8 +194,11 @@ def kinematic_binding_report(
     for p in result.points:
         traj = p.trajectory
         for hit in kinematic_binding(traj, times_s, envelope, degrees=degrees):
+            assumed = envelope.limit_is_assumed(hit.joint, hit.kind, hit.side)
             lines.append(
-                _line(p.speed_target_mph, hit, p.feasible, notes.get(hit.joint))
+                _line(
+                    p.speed_target_mph, hit, p.feasible, notes.get(hit.joint), assumed
+                )
             )
     return lines
 

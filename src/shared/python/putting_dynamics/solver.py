@@ -40,7 +40,9 @@ multipliers.
 
 The airborne phase (post-impact rise) is ballistic (no drag at putt
 speeds, documented) with symplectic-Euler height updates; each ground
-contact reflects the vertical speed with the green restitution
+contact reflects the vertical speed relative to the green (whose surface
+moves at ``grad h . v`` under the ball, small-slope; #14702) with the
+green restitution
 ``GROUND_RESTITUTION`` (``physics_constants.GREEN_RESTITUTION``, an
 uncited engineering default restated from
 ``rust_core/upstream-physics/src/contact.rs``, #14141 step 3) and
@@ -308,10 +310,16 @@ def _fly(
         floor = surface.height.elevation(x, y)
         height = max(z - floor, 0.0)
         rec.record(t, x, y, height, math.hypot(vx, vy), ball.spin_rad_s, Mode.AIRBORNE)
-        if z <= floor and vz < 0.0:
-            vz = -GROUND_RESTITUTION * vz
+        # Restitution acts on the approach speed relative to the green: the
+        # surface under the ball moves vertically at grad(h) . v (small-slope).
+        gx, gy = surface.height.gradient(x, y)
+        floor_vz = gx * vx + gy * vy
+        rel_vz = vz - floor_vz
+        if z <= floor and rel_vz < 0.0:
+            rel_vz = -GROUND_RESTITUTION * rel_vz
+            vz = floor_vz + rel_vz
             z = floor
-            if vz**2 / (2.0 * _G) < _SETTLE_APEX_M:
+            if rel_vz**2 / (2.0 * _G) < _SETTLE_APEX_M:
                 break
     return (x, y, vx, vy, ball.spin_rad_s * _R_BALL), ball.spin_rad_s, t
 

@@ -1,11 +1,13 @@
 """Cached, versioned Monte-Carlo dispersion tables (SHOW-B3/B3b, #14567/#14610).
 
 Per ``(skill, club, lie, wind, slope)`` cell: mean / sd / correlation of the
-aim-frame **resting** offset (yards) from an injected landing simulator (carry
-plus documented bounce/roll in ``ground_runout``). Every cell shares one
-standard-normal block (common random numbers, prefix-stable in ``n``). The hash
-covers cells + ``(family, seed, n, ground_model)``; wall-clock runtime is never
-hashed.
+aim-frame landing offset (yards) from an injected landing simulator. Every cell
+shares one standard-normal block (common random numbers, prefix-stable in ``n``).
+The hash covers cells + ``(family, seed, n)`` and the injected ground/lie provenance; wall-clock runtime is never hashed.
+Scope: carry by default; an injected ``ground`` model (B3b, ``ground_runout``) turns
+landing states into rest positions and is recorded in the provenance; slope defaults
+to flat, other bins come from an injected ``slope_modifier`` (B6); ``club`` repeats
+``skill``; lie is an identity unless a ``lie_modifier`` is injected.
 """
 
 from __future__ import annotations
@@ -16,7 +18,7 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -39,12 +41,29 @@ LandingSimulator = Callable[
 ]
 LieModifier = Callable[[NDArray[np.float64], str], NDArray[np.float64]]
 
+
+class GroundModel(Protocol):
+    """Landing states ``(n, k)`` + ``(lie, slope, skill)`` -> rest offsets ``(n, 2)`` yards."""
+
+    @property
+    def provenance(self) -> dict[str, Any]: ...
+
+    def __call__(
+        self, landing: NDArray[np.float64], lie: str, slope: str, skill: str
+    ) -> NDArray[np.float64]: ...
+
+
 WIND_BINS: dict[str, tuple[float, float]] = {
     "calm": (0.0, 0.0),
     "head_5": (5.0, 0.0),
     "tail_5": (-5.0, 0.0),
     "cross_5": (0.0, 5.0),
+    "head_15": (15.0, 0.0),
+    "tail_15": (-15.0, 0.0),
+    "cross_15": (0.0, 15.0),
 }
+DEFAULT_WINDS = ("calm", "head_5", "tail_5", "cross_5")  # the original B3 bins
+SLOPES = ("flat",)  # default slope; other bins come from ``slope_wind_bins`` (B6)
 CONVERGENCE_TOL = 0.02
 # Real pipeline with runout: n=12000 worst skill ~1.7% vs n/2 at seed 0 (B3b).
 DEFAULT_N = 12000
@@ -114,6 +133,13 @@ class DispersionTable:
     def table_hash(self) -> str:
         return str(self.provenance["table_hash"])
 
+    def club_label(self, skill: str | None) -> str | None:
+        """The club label recorded for ``skill``, else the skill name itself.
+
+        Law of Demeter: callers ask the table rather than reach into ``provenance``.
+        """
+        return self.provenance.get("clubs", {}).get(skill, skill)
+
     def lookup(
         self, skill: str, club: str, lie: str, wind: str, slope: str
     ) -> DispersionCell:
@@ -160,40 +186,100 @@ class DispersionTable:
         return cls(cells, prov, dict(raw.get("runtime", {})))
 
 
+@dataclass(frozen=True)
+class TableGrid:
+    """The cell grid of a table: skills (``None`` = all), lies, wind and slope bins."""
+
+    skills: tuple[str, ...] | None = None
+    lies: tuple[str, ...] = ("fairway",)
+    winds: tuple[str, ...] = DEFAULT_WINDS
+    slopes: tuple[str, ...] = SLOPES
+    clubs: dict[str, str] | None = None  # skill -> club label; None = the skill name
+
+
+SlopeModifier = Callable[[str], Callable[[NDArray[np.float64]], NDArray[np.float64]]]
+
+
 def build_table(
     family: SkillFamily,
     simulate: LandingSimulator,
     *,
     skills: tuple[str, ...] | None = None,
     lies: tuple[str, ...] = ("fairway",),
-    winds: tuple[str, ...] = tuple(WIND_BINS),
+    winds: tuple[str, ...] = DEFAULT_WINDS,
     n: int = DEFAULT_N,
     seed: int = 0,
     lie_modifier: LieModifier | None = None,
 ) -> DispersionTable:
-    """Simulate every cell with shared (CRN) draws; fail closed on bad inputs."""
-    names = skills if skills is not None else tuple(family.skills)
+    """Flat-slope table over ``skills x lies x winds`` (see :func:`build_grid_table`)."""
+    grid = TableGrid(skills, lies, winds)
+    return build_grid_table(
+        family, simulate, grid, n=n, seed=seed, lie_modifier=lie_modifier
+    )
+
+
+def build_grid_table(
+    family: SkillFamily,
+    simulate: LandingSimulator,
+    grid: TableGrid,
+    *,
+    n: int = DEFAULT_N,
+    seed: int = 0,
+    lie_modifier: LieModifier | None = None,
+    slope_modifier: SlopeModifier | None = None,
+    ground: GroundModel | None = None,
+) -> DispersionTable:
+    """Simulate every grid cell with shared (CRN) draws; fail closed on bad inputs.
+
+    Non-flat slope bins need ``slope_modifier`` (``slope_wind_bins.make_slope_modifier``).
+    With ``ground`` the simulator must return landing states (``ground_runout``
+    columns), and cells hold rest positions; its ``provenance`` joins the hashed meta.
+    """
+    names = grid.skills if grid.skills is not None else tuple(family.skills)
     require(set(names) <= set(family.skills), f"skills not in {family.name!r}")
+    winds = grid.winds
     require(set(winds) <= set(WIND_BINS), f"unknown wind bins; have {tuple(WIND_BINS)}")
-    require(set(SLOPES) <= set(SLOPE_BINS), "internal slope list invalid")
+    require(
+        grid.slopes == SLOPES or slope_modifier is not None,
+        "slope bins need a slope_modifier",
+    )
+    clubs = grid.clubs
+    require(
+        clubs is None or set(names) <= set(clubs),
+        "club mapping must cover every skill in the grid",
+    )
     t0, z, cells = time.perf_counter(), standard_normals(seed, n), []
     for skill in names:
         club = SKILL_CLUB.get(skill, skill)
         base = _impacts(family.skills[skill].distribution, z)
-        for lie in lies:
+        for lie in grid.lies:
             imp = lie_modifier(base, lie) if lie_modifier is not None else base
-            for wind in winds:
-                for slope in SLOPES:
+            for slope in grid.slopes:
+                sloped = imp if slope_modifier is None else slope_modifier(slope)(imp)
+                for wind in winds:
                     land = np.asarray(
-                        simulate(imp, skill, WIND_BINS[wind], slope, lie), dtype=float
+                        simulate(sloped, skill, WIND_BINS[wind]), dtype=float
                     )
+                    if ground is not None:
+                        require(land.ndim == 2 and len(land) == n, "landing states")
+                        land = np.asarray(ground(land, lie, slope, skill), dtype=float)
                     require(land.shape == (n, 2), f"simulator returned {land.shape}")
                     require(
                         bool(np.isfinite(land).all()), "simulator returned non-finite"
                     )
                     mean, sd, corr = _cell_stats(land)
                     cells.append(
-                        DispersionCell(skill, club, lie, wind, slope, mean, sd, corr, n)
+                        DispersionCell(
+                            skill,
+                            skill if clubs is None else clubs[skill],
+                            lie,
+                            wind,
+                            slope,
+                            mean,
+                            sd,
+                            corr,
+                            n,
+                        )
                     )
     meta = {
         "family": family.name,
@@ -203,6 +289,18 @@ def build_table(
         "ground_model": GROUND_MODEL_ID,
         "slopes": {k: SLOPE_BINS[k] for k in SLOPES},
     }
+    if clubs is not None:
+        meta["clubs"] = {k: clubs[k] for k in names}
+    for part in (
+        ground.provenance if ground is not None else {},
+        getattr(lie_modifier, "provenance", {}),
+    ):
+        require(
+            not (set(part) & set(meta)),
+            "provenance key collision",
+            set(part) & set(meta),
+        )
+        meta.update(part)
     table = DispersionTable(
         tuple(cells),
         {**meta, "table_hash": _hash(tuple(cells), meta)},
@@ -219,14 +317,18 @@ def check_convergence(
     *,
     n: int,
     seed: int,
+    ground: GroundModel | None = None,
 ) -> Convergence:
-    """Compare n vs n/2 shared draws; stable within 2% of the sd means converged."""
+    """Compare n vs n/2 shared draws; stable within 2% of the sd means converged.
+
+    With ``ground`` the check runs on rest positions (fairway, flat).
+    """
     require(n >= 4, "n must be >= 4", n)
     z = standard_normals(seed, n)
     imp = _impacts(family.skills[skill].distribution, z)
-    full = np.asarray(
-        simulate(imp, skill, WIND_BINS["calm"], "flat", "fairway"), dtype=float
-    )
+    full = np.asarray(simulate(imp, skill, WIND_BINS["calm"]), dtype=float)
+    if ground is not None:
+        full = np.asarray(ground(full, "fairway", "flat", skill), dtype=float)
     half = full[: n // 2]
     (m1, s1, _), (m2, s2, _) = _cell_stats(full), _cell_stats(half)
     scale = np.maximum(np.array(s1), 1e-12)
@@ -238,16 +340,69 @@ def check_convergence(
     return Convergence(worst < CONVERGENCE_TOL, worst)
 
 
-def main(argv: list[str] | None = None) -> int:
-    """Regenerate a table: ``python -m ...dispersion_table --family tour --out t.json``."""
-    import argparse
+def _csv(text: str | None, default: tuple[str, ...]) -> tuple[str, ...]:
+    return default if text is None else tuple(t for t in text.split(",") if t)
 
-    from src.shared.python.sg_optimizer.shot_model.dispersion_lie import (
-        lie_modifier_for_table,
-    )
+
+def _cli_table(a: Any, family: SkillFamily) -> tuple[DispersionTable, Convergence]:
+    """Carry table, or with ``--ground`` the rest-position table (see ``main``)."""
     from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
+        REPRESENTATIVE_CLUB,
         PipelineLandingSimulator,
     )
+
+    if not a.ground:
+        sim = PipelineLandingSimulator()
+        table = build_table(family, sim, n=a.n, seed=a.seed)
+        ground = None
+    else:
+        from src.shared.python.sg_optimizer.shot_model.dispersion_lie import (
+            lie_modifier_for_table,
+        )
+        from src.shared.python.sg_optimizer.shot_model.ground_runout import (
+            SlopeAwareGround,
+        )
+        from src.shared.python.sg_optimizer.shot_model.slope_wind_bins import (
+            SLOPE_BINS,
+            make_slope_modifier,
+        )
+
+        sim, ground = PipelineLandingSimulator(landing_state=True), SlopeAwareGround()
+        grid = TableGrid(
+            None,
+            _csv(a.lies, ("tee", "fairway", "rough", "sand")),
+            _csv(a.winds, DEFAULT_WINDS),
+            _csv(a.slopes, tuple(SLOPE_BINS)),
+            clubs=REPRESENTATIVE_CLUB,
+        )
+        table = build_grid_table(
+            family,
+            sim,
+            grid,
+            n=a.n,
+            seed=a.seed,
+            lie_modifier=lie_modifier_for_table(a.seed),
+            slope_modifier=make_slope_modifier,
+            ground=ground,
+        )
+    worst = max(
+        check_convergence(
+            family, sim, s, n=a.n, seed=a.seed, ground=ground
+        ).max_rel_change
+        for s in family.skills
+    )
+    return table, Convergence(worst < CONVERGENCE_TOL, worst)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Regenerate a table: ``python -m ...dispersion_table --family tour --out t.json``.
+
+    ``--ground`` builds the rest-position table instead of the carry table: bounce
+    and roll on every slope bin, the lie modifier, a club label per skill, and the
+    convergence of the rest positions, all in the hashed provenance.
+    """
+    import argparse
+
     from src.shared.python.sg_optimizer.shot_model.skill_registry import (
         get_skill_family,
     )
@@ -257,15 +412,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--n", type=int, default=DEFAULT_N)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--out", required=True)
+    p.add_argument("--ground", action="store_true", help="rest-position table")
+    p.add_argument("--lies", help="comma list (with --ground; default all)")
+    p.add_argument("--slopes", help="comma list (with --ground; default all)")
+    p.add_argument("--winds", help="comma list (with --ground; default B3 bins)")
     a = p.parse_args(argv)
-    family, sim = get_skill_family(a.family), PipelineLandingSimulator()
-    mod = lie_modifier_for_table(a.seed)
-    worst = max(
-        check_convergence(family, sim, s, n=a.n, seed=a.seed).max_rel_change
-        for s in family.skills
-    )
-    conv = Convergence(worst < CONVERGENCE_TOL, worst)
-    table = build_table(family, sim, n=a.n, seed=a.seed, lie_modifier=mod)
+    table, conv = _cli_table(a, get_skill_family(a.family))
     table.with_convergence(conv).to_json(a.out)
     return 0
 

@@ -18,6 +18,13 @@ acceleration analyzer with passing tests. The runtime manifest in
 `src/api/routes/launcher.py` also declares `drift_acceleration` as `FULL` for
 every engine except JaxSim.
 
+For the current fixed-state nomenclature, **ZTCF is the drift component**
+(zero applied torque, with autonomous terms retained) and **ZVCF is the
+control component** (`M(q)^{-1} τ`, with velocity and gravity terms zeroed).
+Their split is exact at a fixed state and **not additive over integrated
+trajectories**. See the normative contract in
+[`SPEC.md`](../../SPEC.md), §4.
+
 ---
 
 ## Feature Support Matrix

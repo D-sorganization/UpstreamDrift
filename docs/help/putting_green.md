@@ -156,6 +156,22 @@ with a message that names the missing module. The 3D view needs the optional
 
   ![Counter-torque panel at 390 px](images/putting_counter_torque_390.png)
 
+- **Scenarios** (#14471): **Save Scenario** stores the dialled green and
+  stroke under a name (or "Scenario N") and rolls its dispersion batch in the
+  background. The table compares each scenario with the first: make rate,
+  the change in points, mean leave and its change, in the chosen units.
+  **Export JSON...** writes the shared setup document (`schema_version`
+  4.0.0) with the saved scenarios; **Import JSON...** reads one, or a
+  putting studio export, and puts its distance, Stimp and grade back on the
+  controls. The desktop cross slope always falls right, so an imported
+  aspect is not kept. It is the shared `service_setup` the API's
+  `/scenario`, `/scenario-compare`, `/setup-export` and `/setup-import`
+  routes use.
+
+  ![Scenarios at 1280 px](images/putting_scenarios_1280.png)
+
+  ![Scenarios at 390 px](images/putting_scenarios_390.png)
+
 ## Method
 
 The GUI is a thin renderer. All domain logic is in

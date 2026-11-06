@@ -11,10 +11,16 @@ status: complete
 The Drake tile runs a golf-swing multibody model through Drake's
 `MultibodyPlant`, visualises it in a MeshCat browser window, and gives you
 post-hoc analyses that Drake's exact dynamics make cheap: induced
-accelerations, zero-torque and zero-velocity counterfactuals, swing-plane
+accelerations, the fixed-state drift/control components, swing-plane
 deviation, and Jacobian conditioning. Use it when you care about rigorous
 multibody dynamics and optimisation-adjacent analysis rather than contact-heavy
 simulation.
+
+For these instantaneous analyses, **ZTCF is the drift component** (applied
+torque set to zero, autonomous terms retained) and **ZVCF is the control
+component** (`M(q)^{-1} τ`, with velocity and gravity terms zeroed). Their sum
+is exact at a fixed state and is **not additive over integrated trajectories**.
+The normative definition is in [`SPEC.md`](../../SPEC.md), §4.
 
 ## Inputs
 
@@ -44,7 +50,7 @@ simulation.
 | Ground reaction forces                | N (3-vector)                       | `ground_forces_history`.                                                                                                |
 | Centre of pressure                    | m (3-vector)                       | `cop_position_history`.                                                                                                 |
 | Induced accelerations                 | rad/s^2 per generalized coordinate | Per source, per frame.                                                                                                  |
-| Counterfactuals                       | rad/s^2 (ZTCF) and N*m (ZVCF)      | Stored per frame.                                                                                                       |
+| Counterfactual components             | rad/s^2 (ZTCF drift and ZVCF control) | Stored per frame.                                                                                                      |
 | Jacobian condition number             | dimensionless                      | _Matrix Analysis_ readout.                                                                                              |
 | Constraint rank                       | count                              | _Matrix Analysis_ readout.                                                                                              |
 | Recorded frame count                  | count                              | `Frames: N` label.                                                                                                      |

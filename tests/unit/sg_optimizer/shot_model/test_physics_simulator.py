@@ -68,3 +68,12 @@ def test_real_pipeline_driver_carry_is_plausible_and_face_curves_ball() -> None:
     assert 150.0 < out[0, 0] < 330.0  # yards; a 100 mph driver
     assert abs(out[0, 1]) < 8.0  # square face/path: nearly straight
     assert out[1, 1] < out[0, 1] - 3.0  # open face -> lands right (y is left)
+
+
+def test_landing_state_mode_adds_velocity_and_matches_carry_columns() -> None:
+    rows = np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]])
+    carry = PipelineLandingSimulator()(rows, "mid_iron", (0.0, 0.0))
+    state = PipelineLandingSimulator(landing_state=True)(rows, "mid_iron", (0.0, 0.0))
+    assert state.shape == (2, 5)
+    np.testing.assert_allclose(state[:, :2], carry)
+    assert np.all(state[:, 4] < 0.0)  # descending at first ground contact

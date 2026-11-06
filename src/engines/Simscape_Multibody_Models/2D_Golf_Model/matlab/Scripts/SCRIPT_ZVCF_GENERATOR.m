@@ -6,9 +6,11 @@
 % be done with and without gravity on by changing the GolfSwingZVCF model
 % solver settings. The reason for computing without gravity is that the
 % ZVCF adds up to the Delta (the difference between the base swing and
-% ZTCF) when gravity isn't counted twice. As the system is a series of
-% linear differential equations, the principle of superposition applies and
-% the net effect of all actions on the system is additive. In the ZTCF
+% ZTCF) when gravity isn't counted twice.
+% The decomposition is exact only instantaneously, at a fixed state: the
+% equations of motion are nonlinear, so superposition holds pointwise for the
+% accelerations (ZTCF drift + ZVCF control = total, gravity counted once) but
+% not for integrated trajectories, which do not generally sum. In the ZTCF
 % gravity is included as one of the passive contributors (along with shaft
 % flex and momentum). In principle, the ZVCF is the effect of the joint
 % torques on the interaction forces everywhere in the swing.

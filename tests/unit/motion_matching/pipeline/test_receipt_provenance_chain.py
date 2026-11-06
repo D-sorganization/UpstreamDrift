@@ -29,7 +29,7 @@ EVIDENCE = DOCS / "evidence" / "ground_support"
 CURRENT_BASELINE_CAPTURES = (
     (
         "anthro_driver",
-        DOCS / "full_body_spec_anthro_driver.json",
+        DOCS / "full_body_spec_anthro_driver_capture.json",
         EVIDENCE / "anthro_driver",
     ),
     (
@@ -39,7 +39,7 @@ CURRENT_BASELINE_CAPTURES = (
     ),
     (
         "anthro_driver_seeds",
-        DOCS / "full_body_spec_anthro_driver.json",
+        DOCS / "full_body_spec_anthro_driver_capture.json",
         EVIDENCE / "anthro_driver_seeds",
     ),
     (
