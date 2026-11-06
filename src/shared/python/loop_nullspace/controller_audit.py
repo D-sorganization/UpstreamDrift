@@ -143,7 +143,12 @@ def audit_inputs_from_traces(bundle: Mapping[str, Any]) -> AuditInputs:
     x_k = np.asarray(bundle["x_k"], dtype=np.float64)
     ids = np.unique(trials)
     last = [int(np.flatnonzero(trials == i)[-1]) for i in ids]
-    return AuditInputs(x_k[last], tuple(np.asarray(bundle["outcome_label"])))
+    labels = tuple(np.asarray(bundle["outcome_label"]))
+    if len(labels) != len(ids):
+        raise ValueError(
+            f"outcome_label has {len(labels)} entries for {len(ids)} trials"
+        )
+    return AuditInputs(x_k[last], labels)
 
 
 def predicted_ucm_variances(
