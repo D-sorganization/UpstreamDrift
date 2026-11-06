@@ -27,14 +27,21 @@ only; appearance never feeds dynamics.
 ## Reproduction
 
 From a Linux host with pydrake, pinocchio, coal, meshcat, playwright, and
-Chromium:
+Chromium. Swing data is the committed capture-A driver seeds under
+`docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds`
+(linked into the datastore layout the script expects):
 
 ```bash
+REPO_ROOT=$(pwd)
+mkdir -p /tmp/r9a-datastore/swings/capA-driver__mujoco__canonical-seeds/2026-10-05_best_matches/artifacts
+ln -sfn "$REPO_ROOT/docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds" \
+  /tmp/r9a-datastore/swings/capA-driver__mujoco__canonical-seeds/2026-10-05_best_matches/artifacts/anthro_driver_seeds
 PYTHONPATH=.:src python3 \
   docs/development/full_body_models/evidence/appearance/engines/drake_pinocchio/render_drake_pinocchio_appearance.py \
-  --datastore /path/to/swing-datastore \
+  --datastore /tmp/r9a-datastore \
+  --engines drake,pinocchio \
   --out docs/development/full_body_models/evidence/appearance/engines/drake_pinocchio
 ```
 
-On Windows without Drake or Pinocchio, pass `--engines mujoco` to capture the
-MuJoCo reference row only; commit the MeshCat panels after a brick render.
+The private fleet datastore path in older receipts remains valid when available;
+MuJoCo reference stills in this folder may use a different spec digest.

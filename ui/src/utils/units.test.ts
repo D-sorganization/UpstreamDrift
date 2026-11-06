@@ -54,6 +54,13 @@ describe("small lengths", () => {
   });
 });
 
+describe("break lengths (#14466)", () => {
+  it("shows centimetres in metric and inches in imperial, like format_read", () => {
+    expect(formatQuantity(0.38, "breakLength", "metric", 1)).toBe("38.0 cm");
+    expect(formatQuantity(0.0254, "breakLength", "imperial", 1)).toBe("1.0 in");
+  });
+});
+
 describe("unit preference", () => {
   beforeEach(() => localStorage.clear());
 
@@ -69,5 +76,16 @@ describe("unit preference", () => {
   it("ignores an unknown stored value", () => {
     localStorage.setItem("ud.unitSystem", "furlongs");
     expect(loadUnitSystem()).toBe("metric");
+  });
+});
+
+describe("force and torque (#14470)", () => {
+  it("shows lbf and in·lbf in imperial with units.py's factors", () => {
+    const lbf = 0.45359237 * 9.80665;
+    expect(formatQuantity(lbf, "force", "imperial", 3)).toBe("1.000 lbf");
+    expect(formatQuantity(0.0254 * lbf, "torque", "imperial", 3)).toBe(
+      "1.000 in·lbf",
+    );
+    expect(formatQuantity(1.2, "torque", "metric", 2)).toBe("1.20 N·m");
   });
 });

@@ -123,3 +123,16 @@ def test_button_solves_off_the_gui_thread(qapp: QApplication) -> None:
     assert panel.has_cached_curve()
     report = service_sg.sg_study(panel.study_args())
     assert f"{report['sg_player']:+.2f}" in panel.summary_text()
+
+
+def test_the_curve_title_fits_the_phone_width(qapp: QApplication) -> None:
+    # At the 500 px window the E(d) chart is about 170 px wide; its title
+    # was clipped there (#14542 review).
+    panel = _panel([UnitSystem.IMPERIAL])
+    panel.set_putt(holed=False, leave_ft=2.0)
+    panel.run_score()
+    figure = panel.canvas.figure
+    figure.set_size_inches(170 / figure.dpi, 200 / figure.dpi)
+    panel.canvas.draw()
+    box = panel.curve_title_extent()
+    assert box.x0 >= 0.0 and box.x1 <= figure.bbox.width

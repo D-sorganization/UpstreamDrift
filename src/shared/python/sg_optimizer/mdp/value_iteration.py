@@ -29,12 +29,17 @@ from src.shared.python.sg_optimizer.mdp.action import ActionSet, ShotAction
 from src.shared.python.sg_optimizer.mdp.state import State
 from src.shared.python.sg_optimizer.mdp.transition import (
     _condition_modifiers,
+    aim_direction,
     sample_transitions,
+)
+from src.shared.python.sg_optimizer.shot_model.common_random import (
+    CommonRandomModel,
 )
 
 if TYPE_CHECKING:  # pragma: no cover
     from src.shared.python.sg_optimizer.course.conditions import CourseConditions
     from src.shared.python.sg_optimizer.shot_model.baseline import BaselineBag
+    from src.shared.python.sg_optimizer.shot_model.outcome import ShotOutcomeModel
     from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
 
 
@@ -52,7 +57,7 @@ def bellman_backup_scalar(
     V: NDArray[np.float64],
     raster: LieRaster,
     profile: PlayerProfile,
-    baseline: BaselineBag,
+    baseline: BaselineBag | ShotOutcomeModel,
     conditions: CourseConditions,
     actions: ActionSet,
     n_samples: int,
@@ -136,7 +141,19 @@ class SolveResult:
 
 
 class HoleMDP:
-    """Vectorized hole-MDP solver."""
+    """Vectorized hole-MDP solver.
+
+    Aim angles are *pin-relative*: 0 deg points from the shot's cell straight at
+    the pin, so every cell, including one past the green, has a proper policy.
+    The scalar reference backup uses the same ``aim_direction``.
+
+    ``VALUE_CAP`` is only a safety bound for a hole that cannot be reached at all
+    (for example a pin ringed by hazard): such cells would otherwise grow by their
+    step cost every sweep and max-norm convergence could never fire. On a playable
+    hole no cell reaches it, and the solution does not depend on its value.
+    """
+
+    VALUE_CAP = 30.0
 
     def __init__(
         self,
@@ -147,8 +164,11 @@ class HoleMDP:
         actions: ActionSet,
         n_samples: int = 64,
         seed: int = 0,
+        model: ShotOutcomeModel | None = None,
     ) -> None:
         require(n_samples > 0, "n_samples must be > 0")
+        # An injected model is wrapped so every sweep replays the same draws (#14677).
+        self.model = None if model is None else CommonRandomModel(model, seed)
         self.raster = raster
         self.profile = profile
         self.baseline = baseline
@@ -156,6 +176,9 @@ class HoleMDP:
         self.actions = actions
         self.n_samples = n_samples
         self.rng = np.random.default_rng(seed)
+        # Common random numbers: each action's offsets are drawn once, so the
+        # Bellman operator is fixed across sweeps and value iteration can converge.
+        self._offsets: dict[ShotAction, NDArray[np.float64]] = {}
         self._action_list: list[ShotAction] = list(actions.iter_actions())
         self._terminal_mask = raster.codes == _HOLED
 
@@ -165,6 +188,20 @@ class HoleMDP:
         self, V: NDArray[np.float64]
     ) -> tuple[NDArray[np.float64], NDArray[np.int32]]:
         """Vectorized single sweep over all cells × actions."""
+        # The vectorized path implements the default tour-baseline Gaussian only.
+        # Any injected ShotOutcomeModel is honoured via the scalar reference sweep
+        # (slow but correct); table-driven backends get a fast path in B4 (#14568).
+        if self.model is not None:
+            return bellman_backup_scalar(
+                V,
+                self.raster,
+                self.profile,
+                self.model,
+                self.conditions,
+                self.actions,
+                self.n_samples,
+                self.rng,
+            )
         nx, ny = self.raster.shape
         nA = len(self._action_list)
         Q = np.full((nx, ny, nA), np.inf, dtype=np.float64)
@@ -194,25 +231,29 @@ class HoleMDP:
         last_delta = np.inf
         for it in range(1, max_iter + 1):
             V_new, pi = self.bellman_backup(V)
+            V_new = np.minimum(V_new, self.VALUE_CAP)
             last_delta = float(np.max(np.abs(V_new - V)))
             V = V_new
             if last_delta < tol:
                 return SolveResult(value=V, policy=pi, iterations=it, delta=last_delta)
         return SolveResult(value=V, policy=pi, iterations=max_iter, delta=last_delta)
 
-    def optimal_action(self, state: State, value: NDArray[np.float64]) -> ShotAction:
+    def action_values(
+        self, state: State, value: NDArray[np.float64]
+    ) -> list[tuple[ShotAction, float]]:
+        """One-step lookahead expected strokes of every legal action at ``state``."""
         ix, iy = self.raster.world_to_index(state.x, state.y)
-        # One-step lookahead from the requested state.
-        best, best_q = self._action_list[0], np.inf
         nx, ny = self.raster.shape
-        for action in self._action_list:
-            if action.club == "putter" and state.lie != LIE_CODES["green"]:
-                continue
-            q = float(
-                self._action_q(value, action)[
-                    ix if 0 <= ix < nx else 0, iy if 0 <= iy < ny else 0
-                ]
-            )
+        cell = (ix if 0 <= ix < nx else 0, iy if 0 <= iy < ny else 0)
+        return [
+            (action, float(self._action_q(value, action)[cell]))
+            for action in self._action_list
+            if action.club != "putter" or state.lie == LIE_CODES["green"]
+        ]
+
+    def optimal_action(self, state: State, value: NDArray[np.float64]) -> ShotAction:
+        best, best_q = self._action_list[0], np.inf
+        for action, q in self.action_values(state, value):
             if q < best_q:
                 best, best_q = action, q
         return best
@@ -252,9 +293,8 @@ class HoleMDP:
         nx, ny = self.raster.shape
         codes = self.raster.codes
 
-        # Per-cell modifiers (vectorized lookup table).
-        mod_table = self._modifier_table()  # shape (n_lie_codes, 3)
-        cell_mods = mod_table[codes]  # (nx, ny, 3)
+        # Per-cell modifiers (vectorized lookup of the (n_lie_codes, 3) table).
+        cell_mods = self._modifier_table()[codes]  # (nx, ny, 3)
 
         # Sample once in aim-frame.
         cb = self.baseline.get(action.club)
@@ -263,7 +303,11 @@ class HoleMDP:
         slat = cb.sigma_lat * (skill.skill_mult_lat if skill else 1.0)
         rho = cb.rho
         cov = np.array([[sl * sl, rho * sl * slat], [rho * sl * slat, slat * slat]])
-        offsets = self.rng.multivariate_normal([0.0, 0.0], cov, size=self.n_samples)
+        if action not in self._offsets:
+            self._offsets[action] = self.rng.multivariate_normal(
+                [0.0, 0.0], cov, size=self.n_samples
+            )
+        offsets = self._offsets[action]
         base_dist = self.baseline.get(action.club).total_mean + (
             skill.distance_offset if skill else 0.0
         )
@@ -272,10 +316,6 @@ class HoleMDP:
         # gets scaled by condition modifiers, but bias does not.
         bias_long = cb.bias_long + (skill.bias_long if skill else 0.0)
         bias_lat = cb.bias_lat + (skill.bias_lat if skill else 0.0)
-
-        # Apply rotation matrix once per action.
-        ca = np.cos(action.aim_angle_rad)
-        sa = np.sin(action.aim_angle_rad)
 
         # Per-cell along/lateral after applying per-cell mods.
         # along = base_dist * dist_mult + dlong * sigma_long_mult
@@ -291,6 +331,8 @@ class HoleMDP:
             self.raster.origin[1] + (np.arange(ny) + 0.5) * self.raster.resolution_yd
         )
         cx, cy = np.meshgrid(cell_x, cell_y, indexing="ij")  # (nx, ny)
+
+        ca, sa = self._aim_rotation(action, cx, cy)  # (nx, ny) each
 
         dist_mult = cell_mods[..., 0]  # (nx, ny)
         sigma_long_mult = cell_mods[..., 1]  # (nx, ny) — longitudinal dispersion
@@ -337,6 +379,17 @@ class HoleMDP:
             invalid_putter = ~green_mask & valid
             q_mean[invalid_putter] = np.inf
         return q_mean
+
+    def _aim_rotation(
+        self, action: ShotAction, cx: NDArray[np.float64], cy: NDArray[np.float64]
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """Per-cell (cos, sin) of the absolute aim: pin bearing plus the action aim.
+
+        Aims are pin-relative, so "0 deg" is straight at the hole from any cell and
+        a cell past the green can still aim back at it.
+        """
+        ca, sa = aim_direction(self.raster, action, cx, cy)
+        return np.asarray(ca), np.asarray(sa)
 
     def _modifier_table(self) -> NDArray[np.float64]:
         """Lookup table (lie_code → (dist_mult, sl_mult, slat_mult))."""

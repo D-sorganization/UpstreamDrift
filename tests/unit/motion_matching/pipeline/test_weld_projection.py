@@ -64,6 +64,18 @@ def test_projection_contracts(q: np.ndarray, columns: list[int]) -> None:
         project_onto_closure(q, _two_link, columns)
 
 
+def test_a_full_step_that_overshoots_is_backtracked_to_closure() -> None:
+    """arctan: a full Newton step from |q| > 1.39 diverges; a damped step closes."""
+
+    def arctan_residual(q: np.ndarray) -> np.ndarray:
+        return np.array([np.arctan(q[0])])
+
+    out = project_onto_closure(
+        np.array([2.0]), arctan_residual, [0], tol=1e-12, max_iter=50
+    )
+    assert abs(out[0]) < 1e-9
+
+
 def test_a_projection_that_does_not_converge_is_reported() -> None:
     def unreachable(q: np.ndarray) -> np.ndarray:
         return np.array([np.cos(q[1]) + 3.0])

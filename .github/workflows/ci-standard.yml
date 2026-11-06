@@ -43,6 +43,12 @@ concurrency:
 permissions:
   contents: read
 
+# Transient PyPI stalls (read timeout, IncompleteRead) failed main and PR runs
+# that passed unchanged on rerun; pip's defaults are 5 retries / 15 s (#14595).
+env:
+  PIP_RETRIES: "10"
+  PIP_DEFAULT_TIMEOUT: "60"
+
 jobs:
   local-only-workflows:
     name: Reject hosted runner routing
@@ -239,7 +245,8 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          fetch-depth: 0
+          # Shallow fetch prevents checkout hang on all-ref fetch (#14419).
+          fetch-depth: 1
 
       - name: Detect non-docs changes
         id: detect
@@ -263,7 +270,8 @@ jobs:
             exit 0
           fi
 
-          changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          git fetch --no-tags --depth=1 origin "${BASE_REF}"
+          changed=$(git diff --name-only "origin/${BASE_REF}" HEAD)
           # An empty diff is not evidence that every changed file is documentation.
           if [ -z "$changed" ]; then
             echo "::warning::Empty PR diff; retaining every path-specific gate."
@@ -639,7 +647,7 @@ jobs:
           "$audit_python" -m pip install "pip-audit==2.10.0"
 
           set +e
-          run_with_heartbeat "pip-audit JSON report" "$audit_python" -m pip_audit -r requirements-dev.lock --format json --output pip-audit-report.json
+          run_with_heartbeat "pip-audit JSON report" "$audit_python" -m pip_audit --timeout 60 -r requirements-dev.lock --format json --output pip-audit-report.json
           audit_status=$?
           set -e
 
@@ -653,7 +661,7 @@ jobs:
               --waiver-file scripts/config/pip_audit_waivers.json \
               --audit-report pip-audit-report.json
           )
-          run_with_heartbeat "pip-audit waiver-enforced scan" "$audit_python" -m pip_audit -r requirements-dev.lock "${pip_audit_waiver_flags[@]}"
+          run_with_heartbeat "pip-audit waiver-enforced scan" "$audit_python" -m pip_audit --timeout 60 -r requirements-dev.lock "${pip_audit_waiver_flags[@]}"
 
       # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
       - name: Code Quality Check
@@ -2059,7 +2067,7 @@ jobs:
             python scripts/ci/check_pip_audit_waivers.py \
               --waiver-file scripts/config/pip_audit_waivers.json
           )
-          python -m pip_audit -r requirements.lock "${pip_audit_waiver_flags[@]}"
+          python -m pip_audit --timeout 60 -r requirements.lock "${pip_audit_waiver_flags[@]}"
 
   tests:
     needs: [pick-runner, changed-paths]
@@ -3159,15 +3167,65 @@ jobs:
         if: steps.frontend-changes.outputs.skip != 'true'
         run: npm run test:run -- --testTimeout=15000
 
+      # Clean-build check (#14450): the build after `npm ci` must emit
+      # dist/index.html and leave every tracked file (the lockfile too) unchanged.
       - name: Build Check
         if: steps.frontend-changes.outputs.skip != 'true'
-        run: npm run build
+        run: npm run build:clean -- --skip-install
 
       - name: Mobile layout Playwright smoke (#14283)
         if: steps.frontend-changes.outputs.skip != 'true'
         run: |
           npx playwright install --with-deps chromium
           npm run test:e2e:mobile
+
+      # Lighthouse mobile baseline (#14698, follow-up of #14270). Runs on the
+      # fleet runner of this job; scores are informational (no threshold). PR events
+      # only: the job feeds quality-gate, and an informational receipt must not be
+      # able to eject merge-queue entries or main pushes.
+      - name: Validate Lighthouse receipt checks
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
+        run: npm run test:lighthouse-receipt
+
+      - name: Resolve Chromium path for Lighthouse
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
+        run: |
+          chrome="$(node --input-type=module -e 'import { chromium } from "@playwright/test"; process.stdout.write(chromium.executablePath())')"
+          test -x "$chrome" || { echo "::error::Chromium not found at $chrome"; exit 1; }
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+
+      - name: Clear stale Lighthouse reports
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
+        working-directory: .
+        run: node -e "require('node:fs').rmSync('.lighthouseci',{recursive:true,force:true})"
+
+      # ui/lighthouserc.json passes --no-sandbox (JSON cannot hold comments):
+      # ubuntu-24.04 restricts unprivileged user namespaces, so Chrome's sandbox
+      # cannot start ("No usable sandbox"). Acceptable here: ephemeral CI runner,
+      # loopback fixture only, deny-all egress proxy. Playwright does the same.
+      - name: Collect Lighthouse mobile baseline
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18
+        with:
+          urls: http://127.0.0.1:4173/
+          configPath: ui/lighthouserc.json
+          runs: 3
+          uploadArtifacts: false
+          temporaryPublicStorage: false
+
+      - name: Validate collected Lighthouse reports
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
+        working-directory: .
+        run: node ui/e2e/validate-lighthouse-reports.mjs .lighthouseci http://127.0.0.1:4173/
+
+      - name: Upload sanitized mobile score receipt
+        if: github.event_name == 'pull_request' && steps.frontend-changes.outputs.skip != 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: lighthouse-mobile-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .lighthouseci/baseline-receipt.json
+          if-no-files-found: error
+          retention-days: 30
 
   # =============================================================================
   # MATLAB TESTS - DISABLED BY DEFAULT

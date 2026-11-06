@@ -75,6 +75,12 @@ never pulls in any GPU or JAX dependency.
 
 ## Pointwise ZTCF/ZVCF on canonical-v2 samples
 
+In this fixed-state contract, **ZTCF is the drift component** (applied torque
+set to zero, with autonomous terms retained) and **ZVCF is the control
+component** (`M(q)^{-1} τ`, with velocity and gravity terms zeroed). The split
+is exact at a fixed state and **not additive over integrated trajectories**.
+See the normative definition in the repository's [`SPEC.md`](../../../../SPEC.md), §4.
+
 The ZTCF/ZVCF helpers consume engine-neutral dynamics primitives rather than
 engine objects. Engine adapters should convert native state samples into the
 canonical-v2 layout first, then pass those samples through

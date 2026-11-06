@@ -17,6 +17,7 @@ from src.shared.python.core.physics_constants import (
     GRAVITY_M_S2,
 )
 from src.shared.python.putting_dynamics import (
+    PuttResult,
     BallState,
     FrictionField,
     FrictionParams,
@@ -30,6 +31,7 @@ from src.shared.python.putting_dynamics import (
     simulate_ball,
     simulate_strike,
     stimp_to_rolling_mu,
+    struck_ball_state,
 )
 
 pytestmark = pytest.mark.unit
@@ -331,3 +333,54 @@ class TestTinySlipRollOnset:
         result = simulate_ball(ball, surface)
         assert result.final_mode is Mode.REST
         assert result.time_s < 10.0
+
+
+class TestDownhillHopSettles:
+    """The post-impact hop settles on a falling green (#14702).
+
+    Restitution acts on the approach speed relative to the green. Reflecting
+    the absolute vertical speed on a plane falling at ``c`` m/s drives the
+    impact speed to ``2c / (1 - e)``, so the ball skipped for seconds.
+    """
+
+    @staticmethod
+    def _airborne_s(result: PuttResult) -> float:
+        return max(s.t_s for s in result.samples if s.mode is Mode.AIRBORNE)
+
+    @pytest.mark.parametrize("grade", [2.0, 4.0])
+    def test_downhill_hop_is_brief(self, grade: float) -> None:
+        result = simulate_strike(PutterState.typical(2.0), _sloped_surface(grade, 0.0))
+        assert self._airborne_s(result) < 0.1
+        assert result.final_mode is Mode.REST
+
+    @pytest.mark.parametrize("grade", [2.0, 4.0])
+    def test_downhill_hop_barely_moves_the_rest_point(self, grade: float) -> None:
+        surface = _sloped_surface(grade, 0.0)
+        putter = PutterState.typical(2.0)
+        hop = simulate_strike(putter, surface)
+        assert hop.collision is not None
+        ground = struck_ball_state(hop.collision)
+        flat_launch = BallState(
+            x_m=0.0, y_m=0.0, vx_mps=ground.vx_mps, spin_rad_s=ground.spin_rad_s
+        )
+        # The brief hop skips a few cm of friction; before #14702 the rest
+        # point was 3x the ground launch's (23.5 m against 7.8 m at 2%).
+        assert hop.rest_x_m == pytest.approx(
+            simulate_ball(flat_launch, surface).rest_x_m, rel=0.05
+        )
+
+    def test_downhill_bounces_lose_height(self) -> None:
+        # Each bounce returns e^2 of the relative apex, so no later hop is
+        # higher than the first (before #14702 they grew to 46 mm at 4%).
+        result = simulate_strike(PutterState.typical(2.0), _sloped_surface(4.0, 0.0))
+        heights = [s.height_m for s in result.samples if s.mode is Mode.AIRBORNE]
+        first_landing = next(i for i, h in enumerate(heights) if i and h == 0.0)
+        assert max(heights[first_landing:]) <= max(heights[:first_landing])
+        assert max(heights) < 5.0e-3
+
+    def test_flat_strike_is_bit_for_bit_unchanged(self) -> None:
+        surface = SurfaceSpec.flat_uniform(stimp_ft=10.0)
+        result = simulate_strike(PutterState.typical(2.0), surface)
+        assert result.rest_x_m == 5.200509563399708
+        assert result.time_s == 4.295999999999749
+        assert len(result.samples) == 2150

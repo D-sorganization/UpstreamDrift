@@ -66,6 +66,19 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ## 4. Architecture Overview
 
+### Instantaneous ZTCF / ZVCF Component Contract
+
+At a fixed achieved state, **ZTCF is the drift component**: set the declared
+applied torque to zero while retaining the velocity-dependent, gravity, and
+other autonomous terms of the declared plant. **ZVCF is the control
+component**: evaluate `M(q)^{-1} τ` with velocity and gravity terms zeroed.
+This is the instantaneous split `xdot = f(x) + g(x)u`: ZTCF is `f(x)` and
+ZVCF is `g(x)u` (here `g(x)` is the input map; `g(q)` in mechanics notation
+means gravity generalized force). Their sum matches total acceleration at the
+same fixed state under the declared split. The decomposition is exact at a
+fixed state and is **not additive over integrated trajectories**. This
+restores the original MATLAB meaning and reverses #11553's later naming.
+
 ### Recent Spec Updates
 
 - **2026-09-03** - Made the tag-driven release able to produce a wheel at all
@@ -2741,6 +2754,105 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-06 | #14752 | Fix lod-quality-gate regression: TableShotModel asks DispersionTable.club_label instead of reaching into provenance (Law of Demeter) |
+| 2026-11-06 | #14709 | Putting studio: exact imperial ft factor, a parity test for the core green edge clamp, and locked slope sliders that read the core green's slope at the ball |
+| 2026-11-06 | #14726 | SHOW-B3b remainder: dispersion_table --ground CLI (rest positions, lie model, slope bins), per-skill club labels, convergence in provenance |
+| 2026-11-06 | #14723 | knot_gradient_optimiser: lbfgs_minimise records a per-evaluation objective versus gradient timing split and the projected-gradient norm (per evaluation and at SciPy's final point) so a max_iterations stop is diagnosable; results are pinned bit-for-bit |
+| 2026-11-06 | #14730 | lifting: the four strict residual-gate xfails (deadlift, bench press, snatch, clean and jerk) now cite #13057, the hip and pelvis rebuild that owns the residual excess, instead of #13041 |
+| 2026-11-06 | #14725 | NSX-04: forearm supination torque capacity sourced from Gulecyuz 2017 Table 4 (LFInput+ 10.68, RFInput- 11.33 N m); pronation direction stays assumed |
+| 2026-11-05 | #14722 | SHOW-C5: ladder binding report classes every cited-source side (D34a), Part of #14561 |
+| 2026-11-05 | #14721 | Guard test: showpiece spec reads a square face at the A2 neutral address (face-frame consistency, D44/D45) |
+| 2026-11-05 | #14717 | Add the Lighthouse mobile baseline receipt (loopback fixture server and egress proxy, report validator, CI steps on the fleet runner) as the follow-up to #14270; scores informational, no threshold. |
+| 2026-11-05 | #14708 | SHOW-B3b: bounce/roll rest positions (sg_runout_v1) on the B6 slope bins, CRN lie modifier for dispersion tables |
+| 2026-11-05 | #14716 | SPN-14a: fixture_peak_spread_table serialises law drive residuals and lumbar compression spreads; the invented-fixture table is committed as a CI golden (tests/fixtures/spine/spn14a_fixture_peaks.json) |
+| 2026-11-05 | #14713 | shoulder declared_rom_deg: per-side cited (Gill 2020 flexion, ER) vs assumed ROM; v2 envelope builds without unbounded shoulders (D39) |
+| 2026-11-05 | #14707 | Source skilled-male peak angular velocities for velocity limits (SOURCED_WITH_ASSUMED_MARGIN) |
+| 2026-11-05 | #14712 | putting parity matrix: units.react and units.tauri move to present, citing the React units selector that #14458 landed (PR #14489); no putting gaps remain in the matrix (Part of #14452) |
+| 2026-11-05 | #14705 | putting_dynamics: the post-impact hop reflects the vertical speed relative to the green, so a downhill putt settles in under 0.1 s instead of skipping for about 5 s; the studio long-downhill read is back in core parity |
+| 2026-11-05 | #14704 | NSX-04/D35: PhysiologicalEnvelope.from_spec falls back to the spec's soft_limits_deg (v2 trunk) when no hard range exists, labelled soft_rom_slots (Part of #12553) |
+| 2026-11-05 | #14670 | C7 slice 2: address-pose stills, capture-fit vs neutral showpiece grip (Part of #14563) |
+| 2026-11-05 | #14695 | Putting studio: the E vs capture-speed panel draws the core's expected strokes per pace (optimize.evaluate_actions on the solved E(d)) from core_sg.js and names the core's best entry speed; the strokes_gained studio cell is present |
+| 2026-11-05 | #14692 | R11: per-engine chain-shaft impact-window receipt and overlay now cover drake and pinocchio, with an engine-free gate |
+| 2026-11-05 | #14699 | NSX-24: unify ContactForceAllocator and MultiEngineTorqueAllocator on allocate_contact_frame conic path |
+| 2026-11-05 | #14696 | NSX-04 D34: lumbar carries the upper cited trunk limit (Ishida 2019), Pan 2025 is exposed as the lower reference band, thoracic is an assumed share so the whole-trunk limit is not applied twice (Part of #12553) |
+| 2026-11-05 | #14693 | SHOW-C3c D32: assumption-limited vs probable-miscalibration wording for torque and velocity bindings; search/replay disagreement claim |
+| 2026-11-05 | #14690 | NSX-04: cited trunk torque capacity (Pan 2025) for the lumbar and thoracic slots of the v2 spec, so PhysiologicalEnvelope.from_spec builds on it (Part of #12553) |
+| 2026-11-05 | #14688 | sg_optimizer: common random numbers for an injected ShotOutcomeModel so the scalar backup converges |
+| 2026-11-05 | #14689 | Putting studio: batch strokes gained, the E(d) chart and the optimal pace read the core's solved player E(d) from core_sg.js (service_sg.sg_study, tour-average player, side-slope grid), replacing the hand-tuned comeback fit |
+| 2026-11-05 | #14686 | Name shot presets by face-to-path (D30); issue example is a strong draw |
+| 2026-11-05 | #14685 | SHOW-C3c: a rung demoted for a search-only ROM/velocity breach is no longer worded as torque-binding |
+| 2026-11-05 | #14684 | NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons |
+| 2026-11-05 | #14678 | Putting studio: the skid ends at the core roll-start speed from core_impact.js and the speed solve inverts the same table, replacing the uncited 0.96 derate; flat roll-out matches the core within 3% |
+| 2026-11-05 | #14683 | Putting studio: Auto-Solve runs solveAimCore, a port of the core solve_aim (pace bisection and heading secant) golden-pinned to the core read on the core greens, and the batch strikes at the solved head speed while the read is current |
+| 2026-11-05 | #14674 | Fix shaft_state_series: shaft axis from chain joint anchors, not the Clubhead face-frame site y; C4 toe-down is -32.4 mm and axial foreshortening ~-7 mm |
+| 2026-11-05 | #14659 | SHOW-B8: strategy CLI and HTML view with tour vs personal strokes, shot options and dispersion ellipses |
+| 2026-11-05 | #14681 | Make ROM and velocity hard constraints on accepted speed-ladder rungs (D29) |
+| 2026-11-05 | #14680 | SHOW-C3c slice 3b: per-speed full-fidelity verification and verdict of the full-body ladder (D29 ROM hard constraint, D24 guard) |
+| 2026-11-05 | #14644 | Neutral address grip: flagship driver grip set to the HX-canonical grip (alpha -10.73, psi 40, gamma 0) so both hands read 15 deg face-on (was 98/108 deg); address and swing fixtures re-solved. Deferred to A6 (#14555): at address the RW wrist reads -41.8 deg (range -40..25) and the driver swing leaves the wrist ranges (RWInputY 691 frames to -130 deg, RWInputX 66 frames, LWInputY 216 frames); numbers in neutral_grip.json. Capture-matching receipts keep chaining to full_body_spec_anthro_driver_capture.json (the pre-A2 fitted grip, fitted to the capture and not a grip recommendation): on the neutral grip the seeds receipt fails the gates (IK closure 3.9 -> 76.8 mm vs 5 mm, IK RMS 29.5 -> 55.3 mm, backswing min weight fraction 0.0 BW, address-to-impact 64 mm vs 34 mm), the A6 problem statement |
+| 2026-11-05 | #14676 | Putting studio: Green Type selector for every core green preset (undulating included), height grids generated from GreenSpec into core_greens.js and read with the core bilinear lookup |
+| 2026-11-05 | #14673 | Per-step report adds face, path and AoA error and the deviation norm (C5 acceptance gap 1) |
+| 2026-11-05 | #14663 | SG optimizer: common random numbers and pin-relative aims so HoleMDP value iteration converges (cap is a safety bound only) |
+| 2026-11-05 | #14671 | Units core/API: units.py gains small-length helpers and display_unit_table; GET /tools/putting-green/units serves it, and the studio generator and desktop strike/undulation spins use it |
+| 2026-11-05 | #14667 | Putting studio: the strike slider spans heel to toe over the desktop range, offsets every batch strike, and a toe strike opens the face as in the core strike() |
+| 2026-11-05 | #14655 | SHOW-C3c slice 3a: guarded full-body speed ladder (baseline-physical precondition, MuJoCo impact reader, per-rung ROM/velocity bindings) |
+| 2026-11-05 | #14666 | Cross-frontend putting golden: shared-core fixture, React/Tauri replay parity tests and a generated parity report |
+| 2026-11-05 | #14662 | Putting studio: the skid-to-roll transition ends where the core simulate_strike skid ends for the ball speed, and the telemetry shows the core launch angle |
+| 2026-11-05 | #14658 | Head-CG offset (opt-in) and toe_down_m shaft metric for the C4 shaft state (Refs #14600) |
+| 2026-11-05 | #14498 | Clarify the fixed-state ZTCF drift and ZVCF control component definitions |
+| 2026-11-05 | #14656 | React/Tauri putting page: export and import the shared core's JSON setup document (and studio files) from the Saved Scenarios panel |
+| 2026-11-05 | #14395 | R9a: commit Drake and Pinocchio MeshCat appearance stills and evidence test (#12688); Regenerate matched_swing_ledger after R9a receipt byte update (#12688) |
+| 2026-11-05 | #14654 | Putting studio: a Metric/Imperial selector; distance, speed and strike labels come from the shared units table generated into core_units.js |
+| 2026-11-05 | #14653 | Add continuation_report: markdown table of a 100-125 mph run with torque, ROM and velocity bindings and limit provenance |
+| 2026-11-05 | #14651 | Replace wall-clock speed-up ratio in test_topology_contact_batched with a deterministic per-pair kernel call count |
+| 2026-11-05 | #14636 | Align MuJoCo counterfactuals zvcf() and the MATLAB ZVCF comments with the control-component contract |
+| 2026-11-05 | #14637 | React/Tauri putting page: saved scenarios and comparison over the shared core, golden-pinned (part 1 of #14472) |
+| 2026-11-05 | #14420 | Avoid merge_group changed-paths checkout hang and sync admission publisher |
+| 2026-11-05 | #14418 | Sync the admission publisher workflow and provenance digest with the canonical provider |
+| 2026-11-05 | #14645 | Putting: the Strokes Gained chart title fits the phone-width window and the Holed check box reads on the dark controls panel |
+| 2026-11-05 | #14628 | SHOW-B6: slope/stance bins and wind bins in the dispersion tables (slope_wind_bins.py), labelled assumptions |
+| 2026-11-05 | #14620 | SHOW-C7 flight report and measured-swing flight card (Part of #14563) |
+| 2026-11-05 | #14638 | SHOW-C3c: full-body window rollout adapter for the impact optimiser (slice 2) |
+| 2026-11-05 | #14430 | Avoid OpenSim classify checkout hang with shallow fetch |
+| 2026-11-05 | #14634 | Drake IK now implements the club-sole ground term (base was a no-op), fixing the 126.7 mm address hover |
+| 2026-11-05 | #14629 | Putting Green Simulator: Scenarios panel saves the dialled green as named scenarios (each runs a dispersion batch on a worker), compares them in a unit-aware table, and exports or imports the shared JSON setup document, studio exports included |
+| 2026-11-05 | #14623 | SHOW-B4: physics backend on dispersion tables, EB shrinkage, personalised vs tour strategy |
+| 2026-11-05 | #14625 | SHOW-C3c: ROM and velocity binding report from rollout joint angles |
+| 2026-11-05 | #14626 | Putting simulator: the counter-torque panel bounds the gust input by the core's GUST_RANGE_NM instead of the preload range |
+| 2026-11-05 | #14624 | Add npm run tauri:artifact: a local Tauri installer named with version and commit, plus a sha256 file, never published |
+| 2026-11-05 | #14618 | SHOW-C6 shot-shape presets, ball-flight curvature sign tests and swing-variant artefact with run identity |
+| 2026-11-05 | #14615 | Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes |
+| 2026-11-05 | #14354 | OpenSim topology grip rebuilds club moment at mid-penetration lever; overlap hold net_moment_com xfail removed. |
+| 2026-11-05 | #14616 | SHOW-B7: fit a SkillFamily from launch-monitor shot data, shrunk toward a preset |
+| 2026-11-05 | #14613 | SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions |
+| 2026-11-05 | #14611 | React putting simulator gains the counter-torque stabilization explorer (sliders, putter preset, hand-couple chart, impact readouts) over the core /counter-torque route |
+| 2026-11-05 | #14608 | SHOW-B3: cached, versioned MC dispersion tables (CRN) + pipeline landing adapter |
+| 2026-11-05 | #14403 | Guard root Docker context secret-exclusion rules |
+| 2026-11-05 | #14606 | SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report |
+| 2026-11-05 | #14601 | Add golf-language face-on address grip roll metric (0 deg vertical, + strong) with flagship measurement and overlay render |
+| 2026-11-05 | #14609 | Putting Green Simulator: Counter-Torque Stabilization panel charts the shared core's hand couples and gust twist (preload held vs slack grip) on the shared balance heads, with force and torque display units (N, lbf, N·m, in·lbf) in the shared units module |
+| 2026-11-05 | #14598 | SHOW-C4: shaft_state_series reports MuJoCo chain-shaft tip deflection, lead/droop, deflection rate and strain energy through impact, with R11-window evidence on the best-fit driver |
+| 2026-11-05 | #14603 | SHOW-A5: trunk observability report (marker Jacobian SVD), ADR-0059 and coupled-by-default showpiece spec |
+| 2026-11-05 | #14578 | SHOW-A4: cited neck ROM (neck_rom.py, single source for range_of_motion) enforced as MJCF joint limits on NeckInput X/Y/Z |
+| 2026-11-05 | #14604 | React putting simulator gains the desktop Auto-Solve Read: /solve-aim-3d pace and aim written into the controls, the solved putt simulated, and the read shown in the chosen units |
+| 2026-11-05 | #14597 | CI Standard sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 workflow-wide and passes pip-audit --timeout 60, so transient PyPI read timeouts no longer fail CI |
+| 2026-11-05 | #14602 | Putting: POST /tools/putting-green/counter-torque serves the shared core's two-hand couple model (hand couples, forces and gust response over the stroke) |
+| 2026-11-05 | #14590 | SHOW-B2: SkillFamily schema (impact-condition mean/cov + provenance), assumption-marked presets, registry, PlayerProfile link |
+| 2026-11-05 | #14596 | SHOW-C3b: trust-region torque optimiser with warm start and spline_trust_region backend entry |
+| 2026-11-05 | #14592 | Size-aware development-log archiver: archive oldest terminal entries when the log nears the byte cap |
+| 2026-11-05 | #14594 | Putting Green Simulator: the ud.putt_scene/1 export writes and reads impact_toe_m (optional on read, default 0.0, range-checked against IMPACT_TOE_RANGE_M), so a toe or heel strike round-trips |
+| 2026-11-05 | #14593 | React web UI: one command (npm run local) builds from the lockfile and serves it through the API from a clean checkout; CI Build Check runs the same clean-build check; README run steps; a test bars paid-API hosts and keys |
+| 2026-11-05 | #14589 | SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation |
+| 2026-11-05 | #14577 | SHOW-A3: optional lumbar:thoracic regional-split coupling (trunk_coupling, off by default) for the full-body-v2 trunk, MuJoCo joint equalities, and trunk joint-tree/mass/ROM contract tests |
+| 2026-11-05 | #14588 | Putting API: POST /solve-aim-3d solves the pace and line that hole a /simulate-3d putt on that route's own surface and head (core solve_aim, like the desktop Auto-Solve); the 3-D request models move to src/api/models/putting_green_requests.py |
+| 2026-11-05 | #14584 | WSCG update manuscript draft on the best-match MuJoCo ZTCF/ZVCF run, citing the pinned run_id |
+| 2026-11-05 | #14581 | SHOW-B1: ShotOutcomeModel protocol + backend registry; tour baseline is the default quick_sg backend |
+| 2026-11-05 | #14579 | SHOW-C2: ImpactConditions + evaluate_rollout facade for optimiser loops (face, path, AoA, speed, strike) over impact_parameters |
+| 2026-11-05 | #14586 | React putting page: Green Type selector on the core green presets (/simulate-3d green spec) |
+| 2026-11-05 | #14580 | SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope contracts (impact_optimization package; face:path 10:1; NSX-04 torque limits; cited velocity YAML) |
+| 2026-11-05 | #14583 | Putting API: /simulate-3d accepts the core green shape (green: GreenShapeRequest, a preset or slope, tier and bumps) and rolls on its GreenSpec height field, reporting that spec's grade and aspect, and strikes along aim_heading_deg (was always +x), so the React page can send the core presets and an aimed putt |
+| 2026-11-04 | #14576 | React putting page: desktop camera views and jumps to the core phase marks |
+| 2026-11-04 | #14548 | Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio |
+| 2026-11-04 | #14573 | React putting page: strokes-gained readout and expected-putts curve from the shared core's /strokes-gained |
 | 2026-11-04 | #14543 | Analytic and diagram figures in the proximal-distal release are labelled with their code evidence instead of citing a run |
 | 2026-11-04 | #14546 | Putting: camera presets (orbit, down the line, face on, overhead), play/pause, a scrubber and jumps to the core phase marks on the PyQt6 tile |
 | 2026-11-04 | #14542 | Putting: Strokes Gained panel on the PyQt6 tile (player E(d) on the dialled green from the shared service_sg study, each putt scored on the cached curve, in the chosen units) |

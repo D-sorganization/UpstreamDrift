@@ -23,6 +23,7 @@ from src.shared.python.motion_matching.execution import spec_builder
 from src.shared.python.motion_matching.execution.grip_rotation import (
     GRIP_PARAMETERS,
     apply_grip_config,
+    apply_grip_rotation,
 )
 from src.shared.python.motion_matching.execution.grip_selection import (
     PHYSICAL_PICKS,
@@ -323,12 +324,19 @@ def test_precedence_pick_then_document_then_default() -> None:
 
 
 def test_a_fit_outside_the_golf_ranges_needs_a_full_pick() -> None:
+    # The shipped driver grip is the neutral golf grip (SHOW-A2, #14551), so a
+    # partial pick is accepted; the pre-A2 fitted triple (gamma ~ 94 deg) is not.
+    apply_grip_selection(DRIVER, GripOverrides(lead_palm_diagonal=45.0))
+    fitted, _ = apply_grip_rotation(
+        DRIVER, {"L": [-36.864, 57.315, 70.926], "R": [9.769, 52.918, 83.914]}
+    )
     with pytest.raises(ValueError, match="not a golf grip"):
-        apply_grip_selection(DRIVER, GripOverrides(lead_palm_diagonal=45.0))
+        apply_grip_selection(fitted, GripOverrides(lead_palm_diagonal=45.0))
     document, grip = apply_grip_selection(
         DRIVER, GripOverrides(grip_thumb_offset_deg=20.0)
     )
-    assert grip is None and document["subject"] == DRIVER["subject"]
+    # a visual pick never moves the physics subject; the shipped grip now decodes
+    assert grip is not None and document["subject"] == DRIVER["subject"]
 
 
 def test_invalid_picks_fail_closed() -> None:

@@ -196,6 +196,17 @@ export interface AimContextSchema {
 }
 
 /**
+ * The pace and line that hole a /simulate-3d putt (the desktop read).
+ */
+export interface AimSolve3DResponse {
+  putter_speed_mps: number;
+  aim_heading_deg: number;
+  break_m: number;
+  holed: boolean;
+  converged: boolean;
+}
+
+/**
  * Caller-supplied lineage and identity assertions.
  */
 export interface AnalysisContextV2 {
@@ -1298,6 +1309,34 @@ export interface ConversionRequest {
 }
 
 /**
+ * Counter-torque explorer settings (#14469); the core checks the ranges.
+ */
+export interface CounterTorqueRequest {
+  /** In-plane grip preload couple (N m) */
+  preload_nm: number;
+  /** Off-plane preload couple (N m) */
+  off_preload_nm: number;
+  /** Hand-noise scale (0 = none) */
+  noise_scale: number;
+  /** Gust pulse strength (N m) */
+  gust_impulse_nm: number;
+  /** Shaft lie angle (deg) */
+  lie_deg: number;
+  /** Putter head: a key of /putter-presets (#14461) */
+  putter: string;
+  /** Intervals over the stroke */
+  n_points: number;
+}
+
+/**
+ * Stroke series of the core couple model, one list per sample field.
+ */
+export interface CounterTorqueResponse {
+  putter_name: string;
+  samples: Record<string, number[]>;
+}
+
+/**
  * Request model for counterfactual / induced-acceleration analysis. Preconditions: - kind must be a known counterfactual kind (see ``src.shared.python.analysis.orchestrator`` — single source). See issue #7450.
  */
 export interface CounterfactualRequest {
@@ -1704,6 +1743,21 @@ export interface DisplayRequest {
   result: Record<string, unknown>;
   selected?: string[] | null;
   angle_unit: "deg" | "rad";
+}
+
+/**
+ * One SI-to-display conversion: display value = SI value * factor.
+ */
+export interface DisplayUnitResponse {
+  factor: number;
+  suffix: string;
+}
+
+/**
+ * The shared display-unit table per unit system (#14646).
+ */
+export interface DisplayUnitsResponse {
+  systems: Record<string, Record<string, DisplayUnitResponse>>;
 }
 
 /**
@@ -3241,6 +3295,10 @@ export interface Putt3DSimulationRequest {
   random_seed: number;
   hole_x_m: number;
   hole_y_m: number;
+  /** Strike heading from +x, CCW [deg] */
+  aim_heading_deg: number;
+  /** Core green shape (#14464); when set it replaces grade_percent, downhill_aspect_deg and bump_height_m */
+  green?: GreenShapeRequest | null;
 }
 
 /**

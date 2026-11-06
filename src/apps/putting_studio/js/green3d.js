@@ -42,7 +42,7 @@ function rebuild3DBallTracesOnGreen() {
       for (let gz = -0.85; gz <= 0.85; gz += 0.10) {
         const xm = (gx / scale3DX);
         const ym = (-gz / scale3DX);
-        const elev = PuttingPhysics.evalUndulatingGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct).z;
+        const elev = PuttingPhysics.evalGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct, activeCoreGreen()).z;
         pts.push(new THREE.Vector3(0.02135 + gx, yGround + 0.0025 + elev * 0.25, zBall + gz));
       }
       ballTraces3DGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
@@ -52,7 +52,7 @@ function rebuild3DBallTracesOnGreen() {
       for (let gx = 0.0; gx <= 3.30; gx += 0.12) {
         const xm = (gx / scale3DX);
         const ym = (-gz / scale3DX);
-        const elev = PuttingPhysics.evalUndulatingGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct).z;
+        const elev = PuttingPhysics.evalGreen(xm, ym, holeX, state.uphillSlopePct, state.crossSlopePct, activeCoreGreen()).z;
         pts.push(new THREE.Vector3(0.02135 + gx, yGround + 0.0025 + elev * 0.25, zBall + gz));
       }
       ballTraces3DGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
@@ -112,8 +112,10 @@ function rebuildGreenDispersionBatch() {
   const roughnessMm = state.surfaceRoughnessMm !== undefined ? state.surfaceRoughnessMm : 0.35;
   const vNom = state.stimpmeterMode
     ? (1.83 / 1.595)
+    : (state.read && state.read.key === currentReadKey()) ? state.read.clubSpeedMps
     : PuttingPhysics.computeClubSpeedForCapture({
         distFt, entrySpeedMps: entrySpd, stimpFt: state.stimpFt, upPct: state.uphillSlopePct,
+        skidTable: window.CORE_IMPACT.skid,
       });
   const noiseMult = state.stimpmeterMode ? 0.0 : Math.max(0.12, 0.55 + 0.65 * state.noiseScale);
   // U-shaped counter-torque stabilization factor
@@ -136,7 +138,7 @@ function rebuildGreenDispersionBatch() {
       aimDeg: state.stimpmeterMode ? 0.0 : state.aimAngleDeg,
       pathErrDeg: dpCB,
       faceErrDeg: dfCB,
-      strikeMm: dxCB,
+      strikeMm: state.toeOffsetMm + dxCB,
       moiKgM2: pSpec.moi / 1.0e7,
       stimpFt: state.stimpFt,
       upPct: state.uphillSlopePct,
@@ -145,6 +147,8 @@ function rebuildGreenDispersionBatch() {
       distFt: distFt,
       roughnessMm: roughnessMm,
       isStimpRamp: state.stimpmeterMode,
+      skidTable: window.CORE_IMPACT.skid,
+      coreGreen: activeCoreGreen(),
     });
     greenBatchCB.push(rCB);
     if (rCB.holed) cbHoled++;
@@ -166,7 +170,7 @@ function rebuildGreenDispersionBatch() {
       aimDeg: state.stimpmeterMode ? 0.0 : state.aimAngleDeg,
       pathErrDeg: dpUN,
       faceErrDeg: dfUN,
-      strikeMm: dxUN,
+      strikeMm: state.toeOffsetMm + dxUN,
       moiKgM2: 3800 / 1.0e7,
       stimpFt: state.stimpFt,
       upPct: state.uphillSlopePct,
@@ -175,6 +179,8 @@ function rebuildGreenDispersionBatch() {
       distFt: distFt,
       roughnessMm: roughnessMm,
       isStimpRamp: state.stimpmeterMode,
+      skidTable: window.CORE_IMPACT.skid,
+      coreGreen: activeCoreGreen(),
     });
     greenBatchUN.push(rUN);
     if (rUN.holed) unHoled++;
@@ -200,14 +206,17 @@ function rebuildGreenDispersionBatch() {
   const pSD = stdArr(pathArr);
   const rSD = stdArr(cbY);
 
-  // Player-Specific Bellman Expected Strokes E_player(d) = 1 + (1 - P_make) * E_player(d_leave)
+  // Player strokes gained on the core's solved E(d) (js/core_sg.js, service_sg; #14650):
+  // each putt scores E(start) - 1 - E(leave); E_player is E(start) less the mean.
+  const sgCurve = coreSgCurve(state.crossSlopePct || 0);
+  const meanSG = (batch) => batch.reduce((a, r) =>
+    a + coreStrokesGained(sgCurve, distFt, r.holed, r.missDistCm / 30.48), 0) / Math.max(1, batch.length);
+  const eStart = coreExpectedPutts(sgCurve, distFt);
+  const ePlayerCB = eStart - meanSG(greenBatchCB);
+  const ePlayerUN = eStart - meanSG(greenBatchUN);
+  const sgPlayerGain = ePlayerUN - ePlayerCB;
   const meanMissLeaveCB = cbLeaveFt.filter(v => v > 0).reduce((a, b) => a + b, 0) / Math.max(1, nTrials - cbHoled);
   const meanMissLeaveUN = unLeaveFt.filter(v => v > 0).reduce((a, b) => a + b, 0) / Math.max(1, nTrials - unHoled);
-  const eComebackCB = 1.0 + Math.min(0.85, 0.065 * Math.pow(meanMissLeaveCB, 1.18));
-  const eComebackUN = 1.0 + Math.min(0.95, 0.115 * Math.pow(meanMissLeaveUN, 1.25));
-  const ePlayerCB = 1.0 + (1.0 - makePctCB / 100.0) * eComebackCB;
-  const ePlayerUN = 1.0 + (1.0 - makePctUN / 100.0) * eComebackUN;
-  const sgPlayerGain = ePlayerUN - ePlayerCB;
 
   lastBatchStats = {
     makeCB: makePctCB,
@@ -230,7 +239,7 @@ function rebuildGreenDispersionBatch() {
   const elLat = document.getElementById('greenLatSD');
   if (elCB) elCB.textContent = `${makePctCB.toFixed(1)}%`;
   if (elUN) elUN.textContent = `${makePctUN.toFixed(1)}%`;
-  if (elSkid) elSkid.textContent = `${lastBatchStats.skidCm.toFixed(1)} cm (SLIDING)`;
+  if (elSkid) elSkid.textContent = `${lastBatchStats.skidCm.toFixed(1)} cm (SLIDING), launch ${window.CORE_IMPACT.meta.launch_angle_deg.toFixed(1)}°`;
   if (elLat) elLat.textContent = `${rSD.toFixed(1)} cm vs ${stdArr(unY).toFixed(1)} cm`;
 
   const badgeMake = document.getElementById('makeRate3DBadge');
@@ -249,6 +258,12 @@ function rebuildGreenDispersionBatch() {
   if (elEPlayer) elEPlayer.textContent = `${ePlayerCB.toFixed(2)} strokes (vs ${ePlayerUN.toFixed(2)} Slack)`;
   const elSGGain = document.getElementById('valSGPlayerGain');
   if (elSGGain) elSGGain.textContent = `${sgPlayerGain >= 0 ? '+' : ''}${sgPlayerGain.toFixed(2)} strokes / putt`;
+  // Core optimal pace at the nearest solved distance.
+  const nearest = sgCurve.distances_ft.reduce((b, d, k) =>
+    (Math.abs(d - distFt) < Math.abs(sgCurve.distances_ft[b] - distFt) ? k : b), 0);
+  const elPace = document.getElementById('valOptPaceStrat');
+  const ft = (v) => coreUnitText('distance', v, 1, state.unitSystem);
+  if (elPace) elPace.textContent = `Core: ${ft(sgCurve.pace_ft_past[nearest])} past from ${ft(sgCurve.distances_ft[nearest])}`;
 
   // 7-Channel 18-Hole Strokes Gained Variance Attribution from the shared core
   // (js/core_attribution.js, generated from service_variance; #14459).
@@ -271,7 +286,7 @@ function rebuildGreenDispersionBatch() {
   // Studio-only illustrative channels (closed-form, not in the core).
   const distScale = Math.sqrt(distFt / 12.0);
   const chCT = +(2.15 * (1.0 - preloadFactor) * distScale + 0.65).toFixed(2);
-  const chSpot = -(0.78 * (1.0 + (state.toeOffsetMm || 0) / 15.0) * preloadFactor * distScale).toFixed(2);
+  const chSpot = -(0.78 * (1.0 + Math.abs(state.toeOffsetMm || 0) / 15.0) * preloadFactor * distScale).toFixed(2);
   const chRough = -(0.52 * ((state.surfaceRoughnessMm || 0.35) / 0.35) * distScale).toFixed(2);
   setTxt('chGainCT', `+${Math.abs(chCT).toFixed(2)} SG`);
   setTxt('chLossSpot', `${chSpot.toFixed(2)} SG`);

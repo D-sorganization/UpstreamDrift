@@ -3201,21 +3201,21 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
       "child_to_follower": [
         [
-          -0.5081477570916182,
-          -0.5389020166087571,
-          0.6718411072997638,
+          0.35399503156834705,
+          -0.7164406812251919,
+          0.6011657574334291,
           -0.02501411692651008
         ],
         [
-          0.8182511949624285,
-          -0.05862039888744794,
-          0.5718641716149336,
+          -1.3413465925107291e-08,
+          0.6427880111678381,
+          0.7660441062359894,
           -1.1239999999999999
         ],
         [
-          -0.2687951616106874,
-          0.8403262850400977,
-          0.47074504327225064,
+          -0.9352473029230961,
+          -0.27117581563347165,
+          0.22754375269516103,
           0.05908933628725997
         ],
         [
@@ -3532,21 +3532,21 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
       "child_to_follower": [
         [
-          0.8805386396180525,
-          0.1734467360006889,
-          0.4410985535119072,
+          -1.3413465925107291e-08,
+          0.642788011167838,
+          0.7660441062359892,
           0.0
         ],
         [
-          0.06392620905854039,
-          -0.96559408915801,
-          0.2520743834238559,
+          0.9825093870374131,
+          0.14264742696404328,
+          -0.11969551354961236,
           0.0
         ],
         [
-          0.4696436350414996,
-          -0.19376347631537966,
-          -0.8613306979965281,
+          -0.18621306179580221,
+          0.7526455236560128,
+          -0.6315452567609066,
           0.0127
         ],
         [
@@ -4485,7 +4485,7 @@
       ]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json (#12221) | hip joints relocated to functional centres from the capture (radii 0.4040/0.3829 m, sphere sd 1.9/2.0 mm over 649 frames) with zero twist calibrated (R: -5.74 deg, L: 25.46 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210) | hip joints relocated to functional centres from the capture (radii 0.4040/0.3829 m, sphere sd 1.9/2.0 mm over 649 frames) with zero twist calibrated (R: -5.74 deg, L: 25.46 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept); neutral address grip, 15 deg face-on (#14551, docs/development/full_body_models/evidence/grip_roll/neutral_grip.json)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
@@ -4494,14 +4494,14 @@
     "grip_roll_deg": 0.0,
     "grip_rotation_deg": {
       "L": [
-        -36.864,
-        57.315,
-        70.926
+        -75.3894,
+        -9.7161,
+        4.5795
       ],
       "R": [
-        9.769,
-        52.918,
-        83.914
+        -75.3894,
+        -9.7161,
+        4.5795
       ]
     },
     "hip_zero_twist_deg": {

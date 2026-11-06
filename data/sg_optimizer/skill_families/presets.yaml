@@ -1,0 +1,52 @@
+# Preset skill families for the personalised strokes-gained stack (SHOW-B2, #14566).
+#
+# ASSUMPTIONS, NOT MEASUREMENTS. Means follow rounded, publicly reported
+# launch-monitor tour averages (club speed and attack angle by club class) and
+# the sds are order-of-magnitude choices. They are placeholders until B7
+# (#14571) fits families from shot data; nothing here is a fitted or validated
+# value. Skill rows are [mean, sd]. Field order: clubhead_speed_mph, face_angle_deg, club_path_deg,
+# attack_angle_deg, toe_mm, high_mm (GCV-15 signs).
+
+# Units are checked on load (speed mph, angles deg, strike offsets mm).
+units:
+  clubhead_speed_mph: mph
+  face_angle_deg: deg
+  club_path_deg: deg
+  attack_angle_deg: deg
+  toe_mm: mm
+  high_mm: mm
+
+correlation:
+  # ASSUMPTION: face and path co-vary through the hands/release.
+  "face_angle_deg, club_path_deg": 0.3
+
+tour:
+  version: "1"
+  source: "ASSUMPTION: rounded public tour launch-monitor averages; see header. Replace via B7 fit."
+  skills:
+    driver: [[113, 0, 0, -1, 0, 0], [2.5, 1.5, 2, 1.5, 6, 4]]
+    fairway_wood: [[108, 0, 0, -3, 0, 0], [2.5, 1.5, 2, 1.5, 6, 4]]
+    long_iron: [[96, 0, 0, -3.5, 0, 0], [2.2, 1.4, 1.9, 1.5, 5.5, 4]]
+    mid_iron: [[87, 0, 0, -4.3, 0, 0], [2, 1.3, 1.8, 1.5, 5, 3.8]]
+    short_iron: [[80, 0, 0, -4.7, 0, 0], [1.9, 1.2, 1.7, 1.5, 5, 3.8]]
+    wedge: [[74, 0, 0, -5, 0, 0], [1.8, 1.2, 1.6, 1.6, 5, 3.8]]
+    pitch: [[55, 0, 0, -5, 0, 0], [2.5, 1.5, 2, 1.8, 5.5, 4]]
+    chip: [[30, 0, 0, -4, 0, 0], [2.5, 1.8, 2.5, 2, 6, 4.5]]
+    bunker: [[60, 0, 0, -3, 0, 0], [3, 2, 2.5, 2.5, 7, 5]]
+
+derived:
+  scratch:
+    version: "1"
+    source: "ASSUMPTION: tour table x speed 0.93, sd x 1.3; pending B7 fit."
+    speed_scale: 0.93
+    dispersion_scale: 1.3
+  10_hcp:
+    version: "1"
+    source: "ASSUMPTION: tour table x speed 0.85, sd x 1.8; pending B7 fit."
+    speed_scale: 0.85
+    dispersion_scale: 1.8
+  20_hcp:
+    version: "1"
+    source: "ASSUMPTION: tour table x speed 0.77, sd x 2.5; pending B7 fit."
+    speed_scale: 0.77
+    dispersion_scale: 2.5

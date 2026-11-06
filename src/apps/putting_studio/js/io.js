@@ -51,10 +51,27 @@ if (elPhoto2D) elPhoto2D.addEventListener('change', (e) => {
   drawGreenRollSimulator();
 });
 
+// Distance, speed and strike labels in the selected units (#14646). The
+// sliders and state keep their stored units (ft, m/s, mm).
+function refreshUnitLabels() {
+  const sys = state.unitSystem;
+  const strikeDigits = sys === 'metric' ? 1 : 2;
+  document.getElementById('puttDistValLbl').textContent = coreUnitText('distance', state.puttDistFt, 1, sys);
+  document.getElementById('captureSpeedValLbl').textContent = coreUnitText('speed', state.captureSpeedMs, 2, sys);
+  const strikeSign = state.toeOffsetMm >= 0 ? '+' : '';
+  document.getElementById('toeOffsetValLbl').textContent = strikeSign + coreUnitText('strike', state.toeOffsetMm, strikeDigits, sys);
+}
+
+const elUnits = document.getElementById('unitSystemSelect');
+if (elUnits) elUnits.addEventListener('change', (e) => {
+  state.unitSystem = e.target.value;
+  refreshUnitLabels();
+});
+
 const elDistSlider = document.getElementById('puttDistSlider');
 if (elDistSlider) elDistSlider.addEventListener('input', (e) => {
   state.puttDistFt = parseFloat(e.target.value);
-  document.getElementById('puttDistValLbl').textContent = `${state.puttDistFt.toFixed(1)} ft`;
+  refreshUnitLabels();
   rebuildGreenDispersionBatch();
   drawGreenRollSimulator();
   syncUI();
@@ -63,7 +80,7 @@ if (elDistSlider) elDistSlider.addEventListener('input', (e) => {
 const elCapSlider = document.getElementById('captureSpeedSlider');
 if (elCapSlider) elCapSlider.addEventListener('input', (e) => {
   state.captureSpeedMs = parseFloat(e.target.value);
-  document.getElementById('captureSpeedValLbl').textContent = `${state.captureSpeedMs.toFixed(2)} m/s`;
+  refreshUnitLabels();
   rebuildGreenDispersionBatch();
   drawGreenRollSimulator();
   syncUI();
@@ -121,7 +138,8 @@ if (btnSpread45) btnSpread45.addEventListener('click', () => {
   });
   state.puttDistFt = 12.0;
   if (elDistSlider) elDistSlider.value = 12.0;
-  document.getElementById('puttDistValLbl').textContent = '12.0 ft (0-45 ft Spread Complete)';
+  refreshUnitLabels();
+  document.getElementById('puttDistValLbl').textContent += ' (Spread Complete)';
   state.rollT = 3.6;
   rebuildGreenDispersionBatch();
   drawGreenRollSimulator();
@@ -296,6 +314,7 @@ window.PuttingSimulatorAPI = {
 
 window.onload = () => {
   handleResize();
+  refreshUnitLabels();
   rebuildGreenDispersionBatch();
   drawSGCaptureChart();
   requestAnimationFrame(animate);

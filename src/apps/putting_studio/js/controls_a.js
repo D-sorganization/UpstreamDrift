@@ -42,7 +42,7 @@ function saveCurrentScenarioSnapshot(customName) {
     putter: pSpec.name,
     preload: `${state.tauPreload.toFixed(2)} / ${state.tauOffPreload.toFixed(2)} N·m`,
     noiseArc: `${state.noiseScale.toFixed(2)}x • ${state.buttArcRadius.toFixed(2)}m Arc`,
-    green: `${state.crossSlopePct.toFixed(1)}% Break • Stimp ${state.stimpFt.toFixed(1)}`,
+    green: `${activeCoreGreen() ? activeCoreGreen().label : `${state.crossSlopePct.toFixed(1)}% Break`} • Stimp ${state.stimpFt.toFixed(1)}`,
     faceSD: `${lastBatchStats.faceSD.toFixed(2)}°`,
     pathSD: `${lastBatchStats.pathSD.toFixed(2)}°`,
     radSD: `${lastBatchStats.radSD.toFixed(1)} cm`,
@@ -57,7 +57,19 @@ function saveCurrentScenarioSnapshot(customName) {
 // =========================================================================
 function fmtSign(v, dec=2) { return (v >= 0 ? '+' : '') + v.toFixed(dec); }
 
+/** With a core green, the locked slope sliders read its slope at the ball (#14703). */
+function syncCoreSlopeLabels() {
+  const green = activeCoreGreen();
+  if (!green) return;
+  const slope = PuttingPhysics.coreSlopePctAtBall(green, (state.puttDistFt || 10.0) * 0.3048);
+  document.getElementById('uphillSlopeSlider').value = slope.upPct;
+  document.getElementById('crossSlopeSlider').value = slope.crossPct;
+  document.getElementById('uphillSlopeValLbl').textContent = `${fmtSign(slope.upPct, 1)}% Grade at Ball`;
+  document.getElementById('crossSlopeValLbl').textContent = `${fmtSign(slope.crossPct, 1)}% Cross-Slope at Ball`;
+}
+
 function syncUI() {
+  syncCoreSlopeLabels();
   const phys = evalPhysicsAtTime(state.t, state.tauPreload, state.psiLieDeg);
   document.getElementById('timeScrubber').value = state.t.toFixed(3);
   document.getElementById('timeDisplay').textContent = state.t.toFixed(3) + ' s';
@@ -135,7 +147,7 @@ function drawGripPressureSweepChart() {
   const cur = evalGripSweepPoint(state.tauPreload);
   const mof = evalGripSweepPoint(0.0);
   const pertRatio = (state.pertImpulseNm || 0.0) / 0.25;
-  const toeRatio = (state.toeOffsetMm || 0.0) / 10.0;
+  const toeRatio = Math.abs(state.toeOffsetMm || 0.0) / 10.0;
   const pertFaceStab = 1.401 * pertRatio * (1.80 / cur.K_face) + 0.253 * toeRatio * (11521.0 / cur.I_eff);
   const pertFaceMof  = 1.401 * pertRatio + 0.253 * toeRatio;
 
