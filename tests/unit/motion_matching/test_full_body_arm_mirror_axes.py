@@ -14,6 +14,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 MODELS = Path(__file__).resolve().parents[3] / "docs/development/full_body_models"
 SPECS = ["full_body_spec_anthro_driver.json", "full_body_spec_anthro_driver_v2.json"]
 MIRROR = np.diag([1.0, -1.0, 1.0])
@@ -170,8 +172,8 @@ def _frames_at(spec: dict, q: np.ndarray) -> dict[str, np.ndarray]:
 def test_native_and_mirrored_replay_give_identical_body_frames() -> None:
     """Migration proof: native spec + native q == mirrored spec + migrated q.
 
-    Covers the 908-frame driver swing and the address pose, bit-for-bit up to
-    1e-9, so the stored-coordinate negation is exactly compensated by the axes.
+    Samples 30 of the 908 driver-swing frames, equal to 1e-9, so the
+    stored-coordinate negation is exactly compensated by the axes.
     """
     mirrored = json.loads((MODELS / SPECS[0]).read_text(encoding="utf-8"))
     native = _unmirrored(mirrored)
