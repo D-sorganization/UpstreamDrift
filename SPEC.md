@@ -2754,6 +2754,21 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-06 | #14815 | rewrite pose_studio test_widgets against real Qt widgets with qapp fixture (#14812) |
+| 2026-11-06 | #14811 | pose_studio test_gui requests a real QApplication via an autouse qapp fixture, so it no longer crashes an xdist worker when no QApplication exists yet |
+| 2026-11-06 | #14808 | Drake UI abort regression tests request qapp via an autouse fixture, so they no longer crash an xdist worker when no QApplication exists yet |
+| 2026-11-06 | #14783 | Leaderboard freshness gate moved to scripts/ci/check_leaderboard_freshness.py; a PR that changes no motion_matching solver input passes despite a squash-orphaned git_head, solver changes still need a rerun. |
+| 2026-11-06 | #14770 | P5: parity report candidate resolution fails closed; canonical checksum/schema/manifest failures never fall through to legacy loading, legacy numeric archives detected explicitly, no allow_pickle=True |
+| 2026-11-06 | #14793 | strategy CLI: --shot-table / --shot-model inject the selected shot model into the personal solve and report its provenance in text and HTML |
+| 2026-11-06 | #14785 | Commit the v1 source spec of the trunk_visuals driver v2 bundle and pin the generator against the committed rollout on its true inputs (step 1) |
+| 2026-11-06 | #14639 | Re-base HX grip alpha to face-on zero at flagship address; preserve fitted Euler triples. |
+| 2026-11-06 | #14641 | Flight model validity: launch spin cap, trajectory guard, pipeline metadata |
+| 2026-11-06 | #14817 | NP-10 offline weight inspector and lexical CI guardrail (#14503) |
+| 2026-11-06 | #14791 | Bump PR Body Lint caller pin to the post-RM#2697 reusable workflow (RM#2427) |
+| 2026-11-06 | #14803 | docs: ADR-0060 OpenSim scaling and fit plan (#13991) |
+| 2026-11-06 | #14775 | MJX L-BFGS: parameter scale, SciPy ftol/gtol/pgtol, receipt stop_reason and gradient norm (#13779) |
+| 2026-11-06 | #14806 | NSX-55: document DV-12583 as present on main, add catalog regression test, fix publication_gate checklist |
+| 2026-11-06 | #14787 | Document Anderson 2007 Table 3 scope for hip adduction/rotation torque slots and extend UNVERIFIED notes |
 | 2026-11-06 | #14777 | Ground-support segment-scale tie-break, receipt canonical compare (#14771) |
 | 2026-11-06 | #14759 | NSX-13 spatial-fixture test double builds the R11 shaft springs like NativePinocchioModel (rigid club), so test_snapshot_vs_spatial_fixture is green again |
 | 2026-11-06 | #14762 | SHOW-G1: mirror the right-arm joint axes in driver v1/v2 (R scapula, shoulder, forearm, wrist) so positive L and R coordinates give mirrored motion |

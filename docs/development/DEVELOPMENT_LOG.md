@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13991 · Docs: ADR-0060 OpenSim Scaling and Fit Plan (#13991)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13991
+- **Branch:** cursor/opensim-scaling-panel-plan-13991-94df
+- **PR:** #14803
+- **Paths:** see #14803
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`320872fc`; collated from changes/13991-docs-adr-0060-opensim-scaling-and-fit-pl.md)
+- **Summary:** docs: ADR-0060 OpenSim scaling and fit plan (#13991)
+- **Next step:** Panel records dissent on issue; promote ADR to Accepted when agreed.
+
 ### DL-#14419 · Avoid Merge_Group Changed-Paths Checkout Hang and Sync Admission Publisher
 
 - **State:** in_review
@@ -742,6 +755,162 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14812 · Rewrite Pose_Studio Test_Widgets Against Real Qt Widgets With Qapp Fixture (#14812)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14812
+- **Branch:** merged via #14815
+- **PR:** #14815
+- **Paths:** see #14815
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`5d662cbb`; collated from changes/14812-pose-studio-test-widgets.md)
+- **Summary:** rewrite pose_studio test_widgets against real Qt widgets with qapp fixture (#14812)
+- **Next step:** Shipped in PR #14815.
+
+### DL-#14810 · Pose_Studio Test_Gui Requests a Real QApplication via an Autouse Qapp Fixture, so It No Longer Crashes an Xdist Worker When No QApplication Exists Yet
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14810
+- **Branch:** merged via #14811
+- **PR:** #14811
+- **Paths:** see #14811
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`02450ff9`; collated from changes/14810-pose-studio-test-gui-requests-a-real-qap.md)
+- **Summary:** pose_studio test_gui requests a real QApplication via an autouse qapp fixture, so it no longer crashes an xdist worker when no QApplication exists yet
+- **Next step:** Shipped in PR #14811.
+
+### DL-#14807 · Drake UI Abort Regression Tests Request Qapp via an Autouse Fixture, so They No Longer Crash an Xdist Worker When No QApplication Exists Yet
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14807
+- **Branch:** merged via #14808
+- **PR:** #14808
+- **Paths:** see #14808
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`26bb158a`; collated from changes/14807-drake-ui-abort-regression-tests-request.md)
+- **Summary:** Drake UI abort regression tests request qapp via an autouse fixture, so they no longer crash an xdist worker when no QApplication exists yet
+- **Next step:** Shipped in PR #14808.
+
+### DL-#14767 · Leaderboard Freshness Gate Moved to Scripts/Ci/check_leaderboard_freshness.py; a PR That Changes No Motion_Matching Solver Input Passes Despite a Squash-Orphaned Git_Head, Solver Changes Still Need a Rerun.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14767
+- **Branch:** merged via #14783
+- **PR:** #14783
+- **Paths:** see #14783
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`7031b228`; collated from changes/14767-leaderboard-freshness-gate-moved-to-scri.md)
+- **Summary:** Leaderboard freshness gate moved to scripts/ci/check_leaderboard_freshness.py; a PR that changes no motion_matching solver input passes despite a squash-orphaned git_head, solver changes still need a rerun.
+- **Next step:** Shipped in PR #14783.
+
+### DL-#14756 · P5: Parity Report Candidate Resolution Fails Closed; Canonical Checksum/Schema/Manifest Failures Never Fall Through to Legacy Loading, Legacy Numeric Archives Detected Explicitly, No Allow_Pickle=True
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14756
+- **Branch:** merged via #14770
+- **PR:** #14770
+- **Paths:** see #14770
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`3e727f85`; collated from changes/14756-p5-parity-report-candidate-resolution-fa.md)
+- **Summary:** P5: parity report candidate resolution fails closed; canonical checksum/schema/manifest failures never fall through to legacy loading, legacy numeric archives detected explicitly, no allow_pickle=True
+- **Next step:** Shipped in PR #14770.
+
+### DL-#14744 · Strategy CLI: --Shot-Table / --Shot-Model Inject the Selected Shot Model Into the Personal Solve and Report Its Provenance in Text and HTML
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14744
+- **Branch:** merged via #14793
+- **PR:** #14793
+- **Paths:** see #14793
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`87681255`; collated from changes/14744-strategy-cli-shot-table-shot-model-injec.md)
+- **Summary:** strategy CLI: --shot-table / --shot-model inject the selected shot model into the personal solve and report its provenance in text and HTML
+- **Next step:** Shipped in PR #14793.
+
+### DL-#14727 · Commit the V1 Source Spec of the Trunk_Visuals Driver V2 Bundle and Pin the Generator Against the Committed Rollout on Its True Inputs (Step 1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14727
+- **Branch:** merged via #14785
+- **PR:** #14785
+- **Paths:** see #14785
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`13e87336`; collated from changes/14727-commit-the-v1-source-spec-of-the-trunk-v.md)
+- **Summary:** Commit the v1 source spec of the trunk_visuals driver v2 bundle and pin the generator against the committed rollout on its true inputs (step 1)
+- **Next step:** Shipped in PR #14785.
+
+### DL-#14633 · Re-Base HX Grip Alpha to Face-On Zero at Flagship Address; Preserve Fitted Euler Triples.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14633
+- **Branch:** merged via #14639
+- **PR:** #14639
+- **Paths:** see #14639
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`25a0c0a6`; collated from changes/14633-re-base-hx-grip-alpha-to-face-on-zero-at.md)
+- **Summary:** Re-base HX grip alpha to face-on zero at flagship address; preserve fitted Euler triples.
+- **Next step:** Shipped in PR #14639.
+
+### DL-#14621 · Flight Model Validity: Launch Spin Cap, Trajectory Guard, Pipeline Metadata
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14621
+- **Branch:** merged via #14641
+- **PR:** #14641
+- **Paths:** see #14641
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`74f43930`; collated from changes/14621-flight-model-validity-launch-spin-cap-tr.md)
+- **Summary:** Flight model validity: launch spin cap, trajectory guard, pipeline metadata
+- **Next step:** Shipped in PR #14641.
+
+### DL-#14503 · NP-10 Offline Weight Inspector and Lexical CI Guardrail (#14503)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14503
+- **Branch:** merged via #14817
+- **PR:** #14817
+- **Paths:** see #14817
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`c0739cf2`; collated from changes/14503-np10-weight-inspector.md)
+- **Summary:** NP-10 offline weight inspector and lexical CI guardrail (#14503)
+- **Next step:** Shipped in PR #14817.
+
+### DL-#14405 · Bump PR Body Lint Caller Pin to the Post-RM#2697 Reusable Workflow (RM#2427)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14405
+- **Branch:** merged via #14791
+- **PR:** #14791
+- **Paths:** see #14791
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`2c971605`; collated from changes/14405-bump-pr-body-lint-caller-pin-to-the-post.md)
+- **Summary:** Bump PR Body Lint caller pin to the post-RM#2697 reusable workflow (RM#2427)
+- **Next step:** Shipped in PR #14791.
+
+### DL-#12583 · NSX-55: Document DV-12583 as Present on Main, Add Catalog Regression Test, Fix Publication_Gate Checklist
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12583
+- **Branch:** merged via #14806
+- **PR:** #14806
+- **Paths:** see #14806
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`c32c76dc`; collated from changes/12583-nsx55-dv-catalog-gate-and-publication-checklis.md)
+- **Summary:** NSX-55: document DV-12583 as present on main, add catalog regression test, fix publication_gate checklist
+- **Next step:** Shipped in PR #14806.
+
 ### DL-#14771 · Ground-Support Segment-Scale Tie-Break, Receipt Canonical Compare (#14771)
 
 - **State:** shipped
@@ -956,10 +1125,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13779
 - **Branch:** merged via #14723
-- **PR:** #14723
+- **PR:** #14723, #14775
 - **Paths:** see #14723
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`399a6e14`; collated from changes/13779-lbfgs-diagnostics.md)
+- **Last verified:** 2026-11-06 (`3d68d51d`; collated from changes/13779-mjx-l-bfgs-parameter-scale-scipy-ftol-gt.md)
 - **Summary:** knot_gradient_optimiser: lbfgs_minimise records a per-evaluation objective versus gradient timing split and the projected-gradient norm (per evaluation and at SciPy's final point) so a max_iterations stop is diagnosable; results are pinned bit-for-bit
 - **Next step:** Shipped in PR #14723.
 
@@ -1099,10 +1268,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690, #14696, #14704, #14713, #14725
+- **PR:** #14684, #14690, #14696, #14704, #14713, #14725, #14787
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-06 (`150de70b`; collated from changes/12553-nsx-04-forearm-supination-torque-capacit.md)
+- **Last verified:** 2026-11-06 (`53335482`; collated from changes/12553-document-anderson-2007-table-3-scope-for.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 
