@@ -151,7 +151,9 @@ def test_anderson_scaling_is_proportional_to_weight_times_height() -> None:
     assert b.tau_max_negative_nm[0] / a.tau_max_negative_nm[0] == pytest.approx(ratio)
 
 
-def test_anderson_2007_citation_records_table_three_scope_for_hip_non_sagittal_slots() -> None:
+def test_anderson_2007_citation_records_table_three_scope_for_hip_non_sagittal_slots() -> (
+    None
+):
     """Table 3 C1 documents six sagittal-plane lower-limb MVC rows for male 18-25;
     hip adduction and hip rotation capacities stay UNVERIFIED until a separate source is cited."""
     reg = json.loads(
@@ -178,7 +180,7 @@ def test_anderson_2007_citation_records_table_three_scope_for_hip_non_sagittal_s
             assert entry["verification_status"] == "UNVERIFIED"
             note = entry["source"]["note"]
             assert "Anderson 2007 Table 3 C1" in note
-            assert "TODO:" in note
+            assert "TODO(#12553):" in note
 
 
 def test_unscaled_population_values_are_returned_verbatim() -> None:
