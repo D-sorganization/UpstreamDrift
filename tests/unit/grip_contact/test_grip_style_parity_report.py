@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -433,6 +434,33 @@ def test_script_write_parity_report_bundle_and_unavailable_runner(
     )
     assert run_out is None
     assert reason is not None and "ImportError: simulated missing engine" in reason
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("engine", "module"),
+    [("drake", "pydrake"), ("mujoco", "mujoco"), ("opensim", "opensim")],
+)
+def test_mocked_engine_module_is_reported_unavailable(
+    monkeypatch: pytest.MonkeyPatch, engine: str, module: str
+) -> None:
+    """A MagicMock in ``sys.modules`` (tests/unit/conftest.py) is not an engine.
+
+    Otherwise the import guard passes and the run raises inside the simulator,
+    aborting the whole report, OpenSim row included (CI 6 failed, #14711).
+    """
+    from unittest.mock import MagicMock
+
+    import scripts.grip.grip_style_parity_report as report_script
+
+    monkeypatch.setitem(sys.modules, module, MagicMock())
+    with pytest.raises(ImportError, match="mock"):
+        report_script._import_engine_simulator(engine)  # noqa: SLF001
+    run_out, reason = report_script.run_candidate_engine(
+        engine, "hold", GripStyle.OVERLAP, DURATION_S
+    )
+    assert run_out is None
+    assert reason is not None and "ImportError" in reason
 
 
 _ENGINE_RUN_CACHE: dict[tuple[str, str, str], tuple[ContactRun | None, str | None]] = {}
