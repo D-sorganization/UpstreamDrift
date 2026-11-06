@@ -57,3 +57,70 @@ def test_right_arm_axes_mirror_left(spec_name: str) -> None:
         if not np.allclose(other, -MIRROR @ axis, atol=1e-9):
             bad.append((name, np.round(axis, 3).tolist(), np.round(other, 3).tolist()))
     assert not bad, f"non-mirrored right-arm coordinates (L axis, R axis): {bad}"
+
+
+def _zero_pose_frames(spec: dict) -> dict[str, np.ndarray]:
+    """Child body frame at q = 0: parent @ parent_to_base @ inv(child_to_follower)."""
+    by_child = {j["child"]: j for j in spec["joints"]}
+    frames: dict[str, np.ndarray] = {}
+
+    def frame(body: str) -> np.ndarray:
+        if body in frames:
+            return frames[body]
+        joint = by_child.get(body)
+        if joint is None:
+            return np.eye(4)
+        pose = (
+            frame(joint["parent"])
+            @ np.asarray(joint["parent_to_base"], float)
+            @ np.linalg.inv(np.asarray(joint["child_to_follower"], float))
+        )
+        frames[body] = pose
+        return pose
+
+    for body in by_child:
+        frame(body)
+    return frames
+
+
+def _unmirrored(spec: dict) -> dict:
+    """The same spec with the right arm back in the native axis convention."""
+    from src.shared.python.motion_matching.arm_mirror import ARM_FLIP
+
+    out = json.loads(json.dumps(spec))
+    for key, flip in ARM_FLIP.items():
+        joint = next(j for j in out["joints"] if f"Right {key}" in j["name"])
+        for field in ("parent_to_base", "child_to_follower"):
+            joint[field] = (np.asarray(joint[field], float) @ flip).tolist()
+    return out
+
+
+@pytest.mark.parametrize("spec_name", [*SPECS, "full_body_spec_anthro_iron7.json"])
+def test_mirror_leaves_zero_pose_frames_and_dorsal_axes_unchanged(
+    spec_name: str,
+) -> None:
+    """The half turns relabel the axes only: bodies and dorsal axes do not move."""
+    from src.shared.python.model_appearance.grip_pose import Hand
+    from src.shared.python.model_appearance.hand_spec import (
+        wrist_follower_dorsal_axis,
+    )
+
+    from src.shared.python.motion_matching.arm_mirror import (
+        arm_is_mirrored,
+        mirror_document_arm,
+    )
+
+    mirrored = json.loads((MODELS / spec_name).read_text(encoding="utf-8"))
+    if not arm_is_mirrored(mirrored):  # iron7 stays native until its receipts move
+        mirror_document_arm(mirrored)
+    native = _unmirrored(mirrored)
+    after, before = _zero_pose_frames(mirrored), _zero_pose_frames(native)
+    assert after.keys() == before.keys()
+    for body, pose in after.items():
+        assert np.allclose(pose, before[body], atol=1e-9), body
+    for hand in (Hand.LEAD, Hand.TRAIL):
+        assert np.allclose(
+            wrist_follower_dorsal_axis(mirrored, hand),
+            wrist_follower_dorsal_axis(native, hand),
+            atol=1e-9,
+        ), hand

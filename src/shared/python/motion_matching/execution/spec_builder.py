@@ -20,6 +20,7 @@ from typing import Any
 import numpy as np
 from defusedxml import ElementTree as ET
 
+from src.shared.python.motion_matching.arm_mirror import mirror_document_arm
 from src.shared.python.motion_matching.anthropometric_geometry import (
     GRIP_ROTATION_DEG,
     LEG_VISUAL_RADIUS_M,
@@ -826,6 +827,10 @@ def compose_anthropometric_document(
         ),
     )
     _annotate_document(document, upper)
+    if kwargs.get("mirror_arm", True):
+        # G1 #14746; ``mirror_arm=False`` keeps the native right-arm axes for
+        # consumers whose stored joint angles are still in that convention.
+        mirror_document_arm(document)
     document = with_shaft_model(document, club, kwargs.get("shaft_model"))
     document = _apply_kwarg_tibial_torsion(document, kwargs)
     return AnthropometricDocument(

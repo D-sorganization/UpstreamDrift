@@ -11,6 +11,7 @@ from scipy.spatial.transform import Rotation
 
 from src.shared.python.model_appearance.grip_pose import GripPose, GripStyle, Hand
 from src.shared.python.motion_matching import anthropometric_geometry as geometry
+from src.shared.python.motion_matching.arm_mirror import native_wrist_rotation
 from src.shared.python.motion_matching.grip_contract import (
     GRIP_STRENGTH_PRESETS_DEG,
     MIRRORED_NEUTRAL_EULER_DEG,
@@ -65,7 +66,9 @@ def _committed_rotations(
     for joint in doc["joints"]:
         for side, suffix in (("L", "Clubface Vector"), ("R", "RHandStandoff")):
             if joint["child"].endswith(suffix):
-                rot[side] = np.asarray(joint["child_to_follower"], float)[:3, :3]
+                rot[side] = native_wrist_rotation(
+                    doc, np.asarray(joint["child_to_follower"], float)[:3, :3], side
+                )
     return doc["subject"]["grip_rotation_deg"], rot
 
 
