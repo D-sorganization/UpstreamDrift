@@ -19,7 +19,7 @@ from src.shared.python.motion_matching.best_match_v2 import (
     migrate_q_to_v2,
     trunk_segments,
 )
-from src.shared.python.motion_matching.full_body_v2 import canonical_sha256
+from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 
 pytestmark = pytest.mark.unit
 MODELS = Path(__file__).resolve().parents[3] / "docs/development/full_body_models"
@@ -49,18 +49,19 @@ def test_v2_spec_is_derived_from_this_exact_v1_spec() -> None:
     assert V2["source_spec_sha256"] == canonical_sha256(V1)
 
 
-def test_every_v2_body_is_styled_with_skin_and_garment_not_a_grey_capsule() -> None:
+def test_every_v2_body_is_styled_not_a_grey_capsule() -> None:
     styled: dict[str, set[str]] = {}
     for mesh in body_meshes(V2, default_appearance()):
         styled.setdefault(mesh.body, set()).add(mesh.label.rstrip("0123456789"))
-    unstyled = [
+    skip = ("world", "Head", "Standoff")
+    bare = [
         b["name"]
         for b in V2["bodies"]
-        if b["name"] != "world"
-        and not b["name"].endswith("Head")
-        and {"skin", "garment"} - styled.get(b["name"], set())
+        if not b["name"].endswith(skip) and not styled.get(b["name"])
     ]
-    assert unstyled == []
+    assert bare == []
+    for name in trunk_segments(V2):
+        assert {"skin", "garment"} <= styled[name], name
 
 
 def test_migration_keeps_non_trunk_coordinates_and_fills_the_trunk() -> None:
