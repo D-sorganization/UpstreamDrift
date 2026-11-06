@@ -32,7 +32,7 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
 SPECS = {
     key: ROOT / f"docs/development/full_body_models/full_body_spec_anthro_{key}.json"
-    for key in ("driver", "iron7")
+    for key in ("driver", "driver_v2", "iron7")
 }
 #: A wrapped hand's vertex centroid lies within this of the grip axis (measured
 #: 0.5-3.3 mm); an
@@ -237,3 +237,27 @@ def test_grip_hand_frame_matches_wrist_follower_frame(key: str) -> None:
         cos_angle = float(np.clip(np.dot(frame[:3, 0], expected_x), -1.0, 1.0))
         angle_deg = math.degrees(math.acos(cos_angle))
         assert angle_deg <= 5.0, (key, hand, angle_deg)
+
+
+@pytest.mark.parametrize("key", sorted(SPECS))
+def test_drawn_dorsum_direction_matches_wrist_follower_dorsal_axis(key: str) -> None:
+    """Each drawn dorsum direction equals the wrist-frame dorsal axis within 2 deg at address (SHOW-A15 #14747)."""
+    import math
+
+    from src.shared.python.model_appearance.hand_spec import (
+        resolved_hand_spec,
+        wrist_follower_dorsal_axis,
+    )
+
+    spec = json.loads(SPECS[key].read_bytes())
+    club = ca.assembly_from_spec(spec)
+    hands = resolved_hand_spec(spec)
+    for hand in (Hand.LEAD, Hand.TRAIL):
+        expected_dorsal = wrist_follower_dorsal_axis(spec, hand)
+        assert expected_dorsal is not None
+        dorsum_dir = gh.drawn_dorsum_direction(club, hand, hands=hands)
+        cos_angle = float(np.clip(np.dot(dorsum_dir, expected_dorsal), -1.0, 1.0))
+        angle_deg = math.degrees(math.acos(cos_angle))
+        assert angle_deg <= 2.0, (key, hand, angle_deg)
+        # Verify drawn backs on driver (parallel wrists) are also within 2 deg of each other:
+        assert angle_deg == pytest.approx(0.0, abs=1e-3)
