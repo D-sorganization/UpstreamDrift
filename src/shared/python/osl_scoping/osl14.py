@@ -4,7 +4,7 @@ This module encodes the *scoping* acceptance for rebuilding LIFT-5 lift bundles
 on the AN-1 lift body. It validates JSON fixtures and the committed
 ``docs/development/lifting/evidence/lift_body/lift_body_spec.json`` document.
 
-**TODO (needs motion assets / OpenSim):** Regenerating each lift bundle,
+**TODO(#13057) (needs motion assets / OpenSim):** Regenerating each lift bundle,
 OpenSim IK/ID receipts, Hicks residuals and cross-engine parity. Those steps
 stay on the issue until merged evidence exists.
 """
@@ -80,7 +80,7 @@ FIXTURE_SCHEMA: dict[str, Any] = {
     },
 }
 
-ISSUE_TODOS_WITHOUT_ASSETS: Final[tuple[str, ...]] = (
+ASSET_GATED_FOLLOWUPS: Final[tuple[str, ...]] = (
     "Confirm whether legacy 159–172° hip flexion is a real angle or a pelvis-frame "
     "convention offset; record the finding with measurement (issue step 1).",
     "Add ASIS/PSIS or equivalent pelvis skin landmarks to the lift spec and track "
@@ -98,10 +98,11 @@ def validate_osl14_fixture(record: Mapping[str, Any]) -> dict[str, Any]:
     return dict(record)
 
 
-def issue_todo_block() -> str:
+def asset_gated_followups_block() -> str:
     """GitHub-issue comment block listing work that needs assets."""
     lines = [f"{OSL_SLUG} (#{ISSUE_ID}) — blocked until motion/OpenSim evidence:", ""]
-    lines.extend(f"- TODO: {t}" for t in ISSUE_TODOS_WITHOUT_ASSETS)
+    prefix = "- Tracked follow-up (#"
+    lines.extend(f"{prefix}{ISSUE_ID}): {t}" for t in ASSET_GATED_FOLLOWUPS)
     return "\n".join(lines)
 
 
@@ -121,7 +122,10 @@ def lift_body_matches_osl14_acceptance(
     hip_centre_spacing_m = _hip_centre_spacing_m(spec)
     expected_width = 2.0 * HIP_HALF_WIDTH_FRACTION_OF_STATURE * stature
 
-    assert "SpineInputX" in spec["coordinate_order"] and "SpineInputY" in spec["coordinate_order"]
+    assert (
+        "SpineInputX" in spec["coordinate_order"]
+        and "SpineInputY" in spec["coordinate_order"]
+    )
     for name in ("SpineInputX", "SpineInputY"):
         assert tuple(spec["coordinate_ranges_deg"][name]) == HUMAN_RANGES_DEG[name]
 
@@ -138,7 +142,10 @@ def lift_body_matches_osl14_acceptance(
         assert float(lb["stature_m"]) == stature
         assert float(lb["mass_kg"]) == mass
         assert math.isclose(
-            float(lb["hip_half_width_m"]), hip_centre_spacing_m, rel_tol=0.0, abs_tol=1e-5
+            float(lb["hip_half_width_m"]),
+            hip_centre_spacing_m,
+            rel_tol=0.0,
+            abs_tol=1e-5,
         )
         assert lb["has_pelvis_as_observe_landmarks"] is False
 
@@ -177,7 +184,9 @@ def bundle_structurally_matches_lift_body(bundle_path: Path) -> None:
 def _hip_centre_spacing_m(spec: Mapping[str, Any]) -> float:
     left = _hip_translation(spec, "l")
     right = _hip_translation(spec, "r")
-    return float(np.linalg.norm(np.asarray(left, dtype=float) - np.asarray(right, dtype=float)))
+    return float(
+        np.linalg.norm(np.asarray(left, dtype=float) - np.asarray(right, dtype=float))
+    )
 
 
 def _hip_translation(spec: Mapping[str, Any], side: str) -> Array:
