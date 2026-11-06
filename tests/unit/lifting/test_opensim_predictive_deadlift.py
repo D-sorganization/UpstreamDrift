@@ -844,3 +844,51 @@ def test_bundle_pose_targets_read_the_optimizer_solution() -> None:
     assert targets["lockout_trunk_rad"] == trunk[-1]
     metrics = compute_bundle_metrics(BUNDLE)
     assert targets["setup_bar_height_m"] == metrics["bar_start_height_m"]
+
+
+PREDICTIVE_RECEIPT = (
+    Path(__file__).resolve().parents[3]
+    / "docs/development/lifting/evidence/opensim_predictive/receipts.json"
+)
+
+
+def test_predictive_receipt_converged_or_reports_status() -> None:
+    """The committed receipt compares a converged solve or says why it cannot.
+
+    A non-converged solve has no predictive quantity and an unavailable
+    tracked comparison with its reason; nothing is zero-filled (#13044).
+    """
+    import json
+
+    receipt = json.loads(PREDICTIVE_RECEIPT.read_text(encoding="utf-8"))
+    table = receipt["comparison_table"]
+    comparison = table["tracked_comparison"]
+    if receipt["converged"]:
+        assert comparison["status"] == "compared"
+    else:
+        assert comparison["status"] == "unavailable"
+        assert str(receipt["constraint_violation"])[:5] in comparison["reason"]
+        for entry in table["quantities"].values():
+            assert entry["predictive"] is None
+            assert entry["reason"] == comparison["reason"]
+    assert "not implemented" not in json.dumps(table)
+
+
+def test_refresh_comparison_keeps_the_solve_record(tmp_path: Path) -> None:
+    """``--refresh-comparison`` rebuilds only the comparison table."""
+    import importlib
+    import json
+
+    mod = importlib.import_module("scripts.measure_opensim_predictive_deadlift")
+    stale = json.loads(PREDICTIVE_RECEIPT.read_text(encoding="utf-8"))
+    stale["comparison_table"].pop("tracked_comparison", None)
+    (tmp_path / "receipts.json").write_text(json.dumps(stale), encoding="utf-8")
+    assert mod.main(["--refresh-comparison", "--out-dir", str(tmp_path)]) == 0
+    fresh = json.loads((tmp_path / "receipts.json").read_text(encoding="utf-8"))
+    assert fresh["comparison_table"]["tracked_comparison"]["status"] == (
+        "compared" if stale["converged"] else "unavailable"
+    )
+    assert fresh["comparison_refresh_commit"]
+    solve_keys = set(stale) - {"comparison_table"}
+    assert {k: fresh[k] for k in solve_keys} == {k: stale[k] for k in solve_keys}
+    assert "Comparison:" in (tmp_path / "README.md").read_text(encoding="utf-8")
