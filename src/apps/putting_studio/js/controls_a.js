@@ -57,7 +57,19 @@ function saveCurrentScenarioSnapshot(customName) {
 // =========================================================================
 function fmtSign(v, dec=2) { return (v >= 0 ? '+' : '') + v.toFixed(dec); }
 
+/** With a core green, the locked slope sliders read its slope at the ball (#14703). */
+function syncCoreSlopeLabels() {
+  const green = activeCoreGreen();
+  if (!green) return;
+  const slope = PuttingPhysics.coreSlopePctAtBall(green, (state.puttDistFt || 10.0) * 0.3048);
+  document.getElementById('uphillSlopeSlider').value = slope.upPct;
+  document.getElementById('crossSlopeSlider').value = slope.crossPct;
+  document.getElementById('uphillSlopeValLbl').textContent = `${fmtSign(slope.upPct, 1)}% Grade at Ball`;
+  document.getElementById('crossSlopeValLbl').textContent = `${fmtSign(slope.crossPct, 1)}% Cross-Slope at Ball`;
+}
+
 function syncUI() {
+  syncCoreSlopeLabels();
   const phys = evalPhysicsAtTime(state.t, state.tauPreload, state.psiLieDeg);
   document.getElementById('timeScrubber').value = state.t.toFixed(3);
   document.getElementById('timeDisplay').textContent = state.t.toFixed(3) + ' s';
