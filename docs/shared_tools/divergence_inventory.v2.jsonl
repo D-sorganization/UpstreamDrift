@@ -1915,6 +1915,9 @@
 {"path": "optimization/swing_bridge.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/swing_optimizer.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/tests/__init__.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
+{"path": "osl_scoping/__init__.py", "classification": "ud-only", "package": "osl_scoping", "spelling_only": false}
+{"path": "osl_scoping/_json_schema.py", "classification": "ud-only", "package": "osl_scoping", "spelling_only": false}
+{"path": "osl_scoping/osl14.py", "classification": "ud-only", "package": "osl_scoping", "spelling_only": false}
 {"path": "output_manager.py", "classification": "ud-only", "package": "output_manager.py", "spelling_only": false}
 {"path": "pendulum_simulator/__init__.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}
 {"path": "pendulum_simulator/__main__.py", "classification": "ud-only", "package": "pendulum_simulator", "spelling_only": false}

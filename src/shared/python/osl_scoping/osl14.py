@@ -21,6 +21,7 @@ from typing import Any, Final
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.lifting.lift_body import lift_bounds
 from src.shared.python.motion_matching.anthropometric_geometry import (
     HIP_HALF_WIDTH_FRACTION_OF_STATURE,
 )
@@ -37,15 +38,6 @@ LIFT_BODY_SPEC_PATH: Final = (
     _REPO / "docs/development/lifting/evidence/lift_body/lift_body_spec.json"
 )
 
-
-def _lift_bounds(spec: Mapping[str, Any]) -> dict[str, tuple[float, float]]:
-    """IK bounds (radians) from ``coordinate_ranges_deg`` (copy of lift_body.lift_bounds)."""
-    bounds: dict[str, tuple[float, float]] = {}
-    for name, (low, high) in dict(spec.get("coordinate_ranges_deg", {})).items():
-        if not float(low) < float(high):
-            raise ValueError(f"range of {name!r} is empty: {low}..{high} deg")
-        bounds[name] = (float(np.radians(low)), float(np.radians(high)))
-    return bounds
 
 ISSUE_ID: Final = 13057
 OSL_SLUG: Final = "OSL-14"
@@ -135,7 +127,7 @@ def lift_body_matches_osl14_acceptance(
 
     assert math.isclose(hip_centre_spacing_m, expected_width, rel_tol=0.0, abs_tol=1e-5)
 
-    bounds = _lift_bounds(spec)
+    bounds = lift_bounds(spec)
     for side in ("r", "l"):
         lo, hi = bounds[f"hip_flexion_{side}"]
         assert math.isclose(float(np.degrees(lo)), -30.0, rel_tol=0.0, abs_tol=1e-3)
