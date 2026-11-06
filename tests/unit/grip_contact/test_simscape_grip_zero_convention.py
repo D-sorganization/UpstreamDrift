@@ -17,11 +17,14 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from src.shared.python.grip_contact.interface import GripInterface
 from src.shared.python.grip_contact.simscape_grip_topology import (
     DEFAULT_FULL_BODY_SPEC_PATH,
 )
+
+pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MATLAB_ROOT = (
