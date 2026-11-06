@@ -185,6 +185,12 @@ function setGreenPreset(key) {
   for (const id of ['crossSlopeSlider', 'uphillSlopeSlider']) {
     document.getElementById(id).disabled = key !== 'studio';
   }
+  if (key !== 'studio') return;
+  // Back on the slider green: the sliders and labels show its slopes again (#14703).
+  document.getElementById('crossSlopeSlider').value = state.crossSlopePct;
+  document.getElementById('uphillSlopeSlider').value = state.uphillSlopePct;
+  document.getElementById('crossSlopeValLbl').textContent = `${state.crossSlopePct.toFixed(1)}% Cross-Slope`;
+  document.getElementById('uphillSlopeValLbl').textContent = `${fmtSign(state.uphillSlopePct, 1)}% Grade`;
 }
 greenPresetSelect.addEventListener('change', (e) => {
   setGreenPreset(e.target.value);

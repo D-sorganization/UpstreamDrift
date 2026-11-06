@@ -154,6 +154,8 @@ def test_changing_a_coefficient_changes_the_table_hash(monkeypatch) -> None:
     prov = base.provenance
     assert prov["ground_parameters"]["roll.sand"] == rec.value
     assert "stance" in prov["ground_slope_source"]
+    # one lie bin is the impact lie AND the landing surface: declared and hashed
+    assert "landing surface" in prov["ground_lie_source"]
 
 
 def test_roll_fraction_of_carry_falls_from_driver_to_wedge_on_the_real_pipeline() -> (

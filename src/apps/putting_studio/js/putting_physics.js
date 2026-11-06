@@ -128,6 +128,16 @@
   }
 
   /**
+   * Uphill and cross slope [%] of a core green preset at the ball (putt
+   * origin) for a hole holeX metres away: its dz/dx and dz/dy there (#14703).
+   * @returns {{upPct:number, crossPct:number}} @throws {TypeError}
+   */
+  function coreSlopePctAtBall(green, holeX) {
+    const g = evalGreen(0.0, 0.0, holeX, 0.0, 0.0, green);
+    return { upPct: 100.0 * g.dz_dx, crossPct: 100.0 * g.dz_dy };
+  }
+
+  /**
    * The studio green at putt coordinates (x, y): a core preset centred on
    * the putt midpoint when coreGreen is given, else the slider green.
    * @returns {{z:number, dz_dx:number, dz_dy:number}} @throws {TypeError|RangeError}
@@ -449,7 +459,7 @@
   const api = {
     GRAVITY_M_S2, STIMP_RELEASE_SPEED_MPS, STIMPMETER_RELEASE_ANGLE_DEG, HOLE_RADIUS_M,
     GOLF_BALL_RADIUS_M, GOLF_BALL_MASS_KG, PUTTER_FACE_COR, seededRandom, gaussianRand,
-    evalUndulatingGreen, coreGreenAt, evalGreen, sampleTurfMicroRoughness, stimpToRollingMu,
+    evalUndulatingGreen, coreGreenAt, evalGreen, coreSlopePctAtBall, sampleTurfMicroRoughness, stimpToRollingMu,
     captureSpeedMps, effectiveHeadMass, centreStrikeSpeedRatio, simulateSinglePuttRK4,
     computeClubSpeedForCapture, coreSkidDistanceM, coreRollStartSpeedMps, solveAimCore,
   };

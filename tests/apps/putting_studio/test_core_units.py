@@ -51,6 +51,12 @@ def test_fixture_is_the_generator_output() -> None:
     assert _FIXTURE.read_text(encoding="utf-8") == gen.render(gen.build())
 
 
+def test_imperial_distance_factor_is_exact() -> None:
+    # #14703: ft to ft must be exactly 1, not 0.9999999999999999.
+    assert gen.unit_row(UnitSystem.IMPERIAL)["distance"]["factor"] == 1.0
+    assert gen.unit_row(UnitSystem.METRIC)["distance"]["factor"] == 0.3048
+
+
 def test_fixture_covers_both_systems_and_the_stored_kinds() -> None:
     data = gen.parse(_FIXTURE.read_text(encoding="utf-8"))
     assert set(data["systems"]) == {s.value for s in UnitSystem}
