@@ -125,6 +125,13 @@ class DispersionTable:
     def table_hash(self) -> str:
         return str(self.provenance["table_hash"])
 
+    def club_label(self, skill: str | None) -> str | None:
+        """The club label recorded for ``skill``, else the skill name itself.
+
+        Law of Demeter: callers ask the table rather than reach into ``provenance``.
+        """
+        return self.provenance.get("clubs", {}).get(skill, skill)
+
     def lookup(
         self, skill: str, club: str, lie: str, wind: str, slope: str
     ) -> DispersionCell:
