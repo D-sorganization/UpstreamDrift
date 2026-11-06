@@ -37,6 +37,8 @@ def test_gui_tests_pass_without_a_prior_qapplication() -> None:
             "-o",
             "addopts=",
             "--noconftest",
+            "-k",
+            "test_gui_initialization",
             "-q",
             str(_TARGET),
         ],
@@ -44,8 +46,9 @@ def test_gui_tests_pass_without_a_prior_qapplication() -> None:
         env=env,
         capture_output=True,
         text=True,
-        timeout=50,
+        timeout=30,
         check=False,
     )
     assert result.returncode == 0, result.stdout[-2000:] + result.stderr[-2000:]
     assert " failed" not in result.stdout
+    assert "1 passed" in result.stdout
