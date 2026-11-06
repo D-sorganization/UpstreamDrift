@@ -45,7 +45,7 @@ def _write_log(root: Path, entries: list[str]) -> Path:
 
 def _young_heavy_log(root: Path, *, total: int) -> Path:
     """Entries all younger than the default window, sized to ``total`` bytes."""
-    ages = [1, 2, 3, 5, 6, 8, 9, 10, 11, 12]
+    ages = [1, 2, 3, 4, 5, 6]
     per_entry = total // len(ages)
     entries = [
         _entry(1000 + age, TODAY - timedelta(days=age), per_entry - 260) for age in ages
@@ -74,16 +74,16 @@ def test_near_cap_log_archives_young_entries_oldest_first(tmp_path: Path) -> Non
 
     written = headroom.archive_with_headroom(tmp_path, today=TODAY)
 
-    assert written, "size trigger must archive even though no entry exceeds 14 days"
+    assert written, "size trigger must archive even though no entry exceeds 7 days"
     remaining = path.read_text(encoding="utf-8")
     assert len(remaining.encode("utf-8")) < headroom.HEADROOM_TARGET_BYTES
-    # Oldest terminal entry (12 days) goes first; newest (1 day) is kept.
-    assert "DL-#1012" not in remaining
+    # Oldest terminal entry (6 days) goes first; newest (1 day) is kept.
+    assert "DL-#1006" not in remaining
     assert "DL-#1001" in remaining
     archive = (path.parent / f"DEVELOPMENT_LOG_ARCHIVE_{TODAY.year}.md").read_text(
         encoding="utf-8"
     )
-    assert "DL-#1012" in archive
+    assert "DL-#1006" in archive
 
 
 def test_stops_as_soon_as_target_is_met(tmp_path: Path) -> None:
@@ -122,3 +122,9 @@ def test_workflow_uses_the_size_aware_entry_point() -> None:
         if s.get("name") == "Archive terminal development-log entries"
     )
     assert "scripts/ci/archive_devlog_with_headroom.py" in step["run"]
+
+
+def test_archive_after_days_window_is_seven_days() -> None:
+    """Issue #14499: archive window reduced to 7 days to keep log under 200k ceiling."""
+    assert ARCHIVE_AFTER_DAYS == 7
+    assert headroom.AGE_WINDOWS[0] == 7

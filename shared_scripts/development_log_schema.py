@@ -122,7 +122,7 @@ WARN_ACTIVE_ENTRIES = 30
 # the size cap is a backstop rather than a routine blocker.
 MAX_ACTIVE_ENTRIES = 75
 MAX_BYTES = 200_000
-ARCHIVE_AFTER_DAYS = 14
+ARCHIVE_AFTER_DAYS = 7
 LEADING_DATE = re.compile(r"^\s*`?(\d{4}-\d{2}-\d{2})")
 
 

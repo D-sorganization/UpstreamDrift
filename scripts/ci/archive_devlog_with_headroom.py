@@ -38,7 +38,7 @@ from shared_scripts.development_log_schema import (  # noqa: E402
 SIZE_TRIGGER_BYTES = 180_000
 HEADROOM_TARGET_BYTES = 165_000
 # Strictly tightening age windows; the first is the repo default.
-AGE_WINDOWS: tuple[int, ...] = (ARCHIVE_AFTER_DAYS, 10, 7, 5, 3, 2, 1, 0)
+AGE_WINDOWS: tuple[int, ...] = (ARCHIVE_AFTER_DAYS, 5, 3, 2, 1, 0)
 
 assert HEADROOM_TARGET_BYTES < SIZE_TRIGGER_BYTES < MAX_BYTES
 
