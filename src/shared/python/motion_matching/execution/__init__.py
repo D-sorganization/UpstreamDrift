@@ -13,6 +13,8 @@ from __future__ import annotations
 import importlib
 from typing import Any
 
+from src.shared.python.lazy_package_export import resolve_lazy_export
+
 __all__ = [
     "build_anthropometric_spec",
     "condition",
@@ -109,14 +111,12 @@ def __getattr__(name: str) -> Any:
         module = importlib.import_module(f"{__name__}.{name}")
         globals()[name] = module
         return module
-    spec = _LAZY_EXPORTS.get(name)
-    if spec is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    module_name, attr_name = spec
-    module = importlib.import_module(module_name)
-    value = getattr(module, attr_name)
-    globals()[name] = value
-    return value
+    return resolve_lazy_export(
+        name,
+        exports=_LAZY_EXPORTS,
+        module_globals=globals(),
+        facade_module_name=__name__,
+    )
 
 
 def __dir__() -> list[str]:
