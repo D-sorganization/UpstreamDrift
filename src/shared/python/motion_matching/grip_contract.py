@@ -58,6 +58,7 @@ from src.shared.python.model_appearance.grip_pose import (
     NEUTRAL_V_AZIMUTH_DEG as NEUTRAL_V_AZIMUTH_DEG,
     PALM_DIAGONAL_DEG,
     GripPose,
+    TRAIL_V_OFFSET_RANGE_DEG,
     require_fields_in_range,
 )
 from src.shared.python.motion_matching.anthropometric_geometry import (
