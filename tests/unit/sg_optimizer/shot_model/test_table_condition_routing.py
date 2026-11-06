@@ -120,3 +120,29 @@ def test_conditions_default_to_calm_flat_and_round_trip(tmp_path: Path) -> None:
 def test_conditions_reject_an_empty_bin_name() -> None:
     with pytest.raises(ContractViolationError):
         _conditions(wind="")
+
+
+def _samples(lie: str, conditions: CourseConditions, club: str = "driver"):
+    return _model().sample(
+        PlayerProfile(name="p", baseline=str(YAML)),
+        ShotAction(club, 0.0),
+        LIE_CODES[lie],
+        conditions,
+        np.random.default_rng(0),
+        50,
+    )
+
+
+def test_prediction_carries_the_selected_cell_and_table_hash() -> None:
+    prov = _samples("rough", _conditions(slope="flat")).provenance
+    assert prov["cell"] == ("driver", "driver", "rough", "calm", "flat")
+    assert prov["table_hash"] == "fixture"
+
+
+def test_scaled_fairway_prediction_names_the_cell_actually_read() -> None:
+    prov = _samples("sand", _conditions(wind="head_5")).provenance
+    assert prov["cell"] == ("driver", "driver", "fairway", "head_5", "flat")
+
+
+def test_fallback_prediction_has_no_table_provenance() -> None:
+    assert "table_hash" not in _samples("fairway", _conditions(), "7_iron").provenance
