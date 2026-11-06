@@ -62,3 +62,16 @@ def test_lighthouse_scores_stay_informational() -> None:
     jobs = _jobs()
     assert JOB not in jobs["quality-gate"]["needs"]
     assert all(JOB not in (job.get("needs") or []) for job in jobs.values())
+
+
+def test_editing_this_workflow_runs_the_frontend_and_lighthouse_jobs() -> None:
+    detect = next(
+        step
+        for step in _jobs()["frontend-tests"]["steps"]
+        if step.get("id") == "frontend-changes"
+    )
+    assert "HEAD -- ui .github/workflows/ci-standard.yml" in detect["run"]
+    outputs = _jobs()["frontend-tests"]["outputs"]
+    assert (
+        outputs["ui-changed"] == "${{ steps.frontend-changes.outputs.skip != 'true' }}"
+    )
