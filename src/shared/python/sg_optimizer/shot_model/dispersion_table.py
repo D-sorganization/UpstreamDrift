@@ -16,7 +16,7 @@ import hashlib
 import json
 import time
 from collections.abc import Callable
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -24,20 +24,13 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
-from src.shared.python.sg_optimizer.shot_model.ground_runout import (
-    GROUND_MODEL_ID,
-    SKILL_CLUB,
-)
-from src.shared.python.sg_optimizer.shot_model.slope_wind_bins import SLOPE_BINS
 from src.shared.python.sg_optimizer.shot_model.skill_family import (
     IMPACT_FIELDS,
     SkillFamily,
 )
 
-# (impacts, skill, wind mph pair, slope bin, lie) -> rest position (n, 2) yards
-LandingSimulator = Callable[
-    [NDArray[np.float64], str, tuple[float, float], str, str], Any
-]
+# (impacts (n, 6), skill, (headwind_mph, crosswind_mph)) -> landing (n, 2) yards
+LandingSimulator = Callable[[NDArray[np.float64], str, tuple[float, float]], Any]
 LieModifier = Callable[[NDArray[np.float64], str], NDArray[np.float64]]
 
 
@@ -68,7 +61,7 @@ DEFAULT_SLOPES = (
 CONVERGENCE_TOL = 0.02
 # Real pipeline with runout: n=12000 worst skill ~1.7% vs n/2 at seed 0 (B3b).
 DEFAULT_N = 12000
-SCHEMA = 2
+SCHEMA = 1
 
 
 def standard_normals(seed: int, n: int) -> NDArray[np.float64]:
@@ -251,15 +244,14 @@ def build_grid_table(
     )
     t0, z, cells = time.perf_counter(), standard_normals(seed, n), []
     for skill in names:
-        club = SKILL_CLUB.get(skill, skill)
         base = _impacts(family.skills[skill].distribution, z)
         for lie in grid.lies:
             imp = lie_modifier(base, lie) if lie_modifier is not None else base
             for slope in grid.slopes:
                 sloped = imp if slope_modifier is None else slope_modifier(slope)(imp)
                 for wind in winds:
-                    land = np.asarray(
-                        simulate(sloped, skill, WIND_BINS[wind], slope, lie),
+                    land: np.ndarray = np.asarray(
+                        simulate(sloped, skill, WIND_BINS[wind]),
                         dtype=float,
                     )
                     if ground is not None:
@@ -288,10 +280,7 @@ def build_grid_table(
         "family_version": family.provenance.version,
         "seed": seed,
         "n": n,
-        "slopes": {k: asdict(SLOPE_BINS[k]) for k in grid.slopes},
     }
-    if ground is None:
-        meta["ground_model"] = GROUND_MODEL_ID
     if clubs is not None:
         meta["clubs"] = {k: clubs[k] for k in names}
     for part in (
@@ -329,9 +318,7 @@ def check_convergence(
     require(n >= 4, "n must be >= 4", n)
     z = standard_normals(seed, n)
     imp = _impacts(family.skills[skill].distribution, z)
-    full = np.asarray(
-        simulate(imp, skill, WIND_BINS["calm"], "flat", "fairway"), dtype=float
-    )
+    full: np.ndarray = np.asarray(simulate(imp, skill, WIND_BINS["calm"]), dtype=float)
     if ground is not None:
         full = np.asarray(ground(full, "fairway", "flat", skill), dtype=float)
     half = full[: n // 2]

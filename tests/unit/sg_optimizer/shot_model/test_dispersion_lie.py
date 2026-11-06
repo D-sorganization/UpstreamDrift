@@ -70,8 +70,7 @@ def test_seed_and_severity_are_recorded_in_the_table_provenance() -> None:
         get_skill_family,
     )
 
-    def sim(impacts, skill, wind, slope, lie):
-        _ = (slope, lie)
+    def sim(impacts, skill, wind):
         return np.column_stack([impacts[:, SPEED], impacts[:, FACE]])
 
     grid = TableGrid(("mid_iron",), ("fairway", "rough"), ("calm",))
