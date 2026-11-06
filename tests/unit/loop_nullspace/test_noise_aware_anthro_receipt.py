@@ -16,4 +16,4 @@ pytestmark = pytest.mark.unit
 )
 def test_anthro_noise_aware_receipt_is_unvalidated_and_replay_verified() -> None:
     """Placeholder: fails until anthro receipt + replay land on main."""
-    assert False, "spec pending on #12721"
+    raise AssertionError("spec pending on #12721")
