@@ -97,7 +97,11 @@ def rest_position(
     Used by unit tests and simple stand-in simulators; the flight pipeline uses
     :class:`~src.shared.python.sg_optimizer.shot_model.physics_simulator.PipelineLandingSimulator`.
     """
-    require(carry_yds.ndim == 2 and carry_yds.shape[1] == 2, "carry_yds shape", carry_yds.shape)
+    require(
+        carry_yds.ndim == 2 and carry_yds.shape[1] == 2,
+        "carry_yds shape",
+        carry_yds.shape,
+    )
     n = len(carry_yds)
     if landing_speed_ms is None:
         landing_speed_ms = np.full(n, 35.0)
@@ -105,9 +109,7 @@ def rest_position(
         descent_deg = np.full(n, 42.0)
     require(len(landing_speed_ms) == n and len(descent_deg) == n, "batch length")
     vx = np.asarray(landing_speed_ms, dtype=np.float64)
-    vz = -np.abs(
-        np.tan(np.radians(np.asarray(descent_deg, dtype=np.float64))) * vx
-    )
+    vz = -np.abs(np.tan(np.radians(np.asarray(descent_deg, dtype=np.float64))) * vx)
     landing = np.column_stack([carry_yds[:, 0], carry_yds[:, 1], vx, np.zeros(n), vz])
     return SlopeAwareGround()(landing, lie, slope, "mid_iron")
 

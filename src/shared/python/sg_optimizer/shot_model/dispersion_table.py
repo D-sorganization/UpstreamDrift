@@ -62,7 +62,9 @@ WIND_BINS: dict[str, tuple[float, float]] = {
     "cross_15": (0.0, 15.0),
 }
 DEFAULT_WINDS = ("calm", "head_5", "tail_5", "cross_5")  # the original B3 bins
-DEFAULT_SLOPES = ("flat",)  # default slope; other bins come from ``slope_wind_bins`` (B6)
+DEFAULT_SLOPES = (
+    "flat",
+)  # default slope; other bins come from ``slope_wind_bins`` (B6)
 CONVERGENCE_TOL = 0.02
 # Real pipeline with runout: n=12000 worst skill ~1.7% vs n/2 at seed 0 (B3b).
 DEFAULT_N = 12000

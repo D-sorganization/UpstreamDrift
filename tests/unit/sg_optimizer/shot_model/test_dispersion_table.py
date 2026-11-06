@@ -27,8 +27,12 @@ from src.shared.python.sg_optimizer.shot_model.ground_runout import (
     rest_position,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_registry import get_skill_family
-from src.shared.python.sg_optimizer.shot_model.slope_wind_bins import make_slope_modifier
-from src.shared.python.sg_optimizer.shot_model.physics_simulator import REPRESENTATIVE_CLUB
+from src.shared.python.sg_optimizer.shot_model.slope_wind_bins import (
+    make_slope_modifier,
+)
+from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
+    REPRESENTATIVE_CLUB,
+)
 
 pytestmark = pytest.mark.unit
 
