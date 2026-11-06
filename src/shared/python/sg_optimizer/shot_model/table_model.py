@@ -95,6 +95,7 @@ class TableShotModel:
         return LandingSamples(
             along=cell.mean[0] * dist + cell.sd[0] * sl * z[:, 0],
             lateral=cell.mean[1] + cell.sd[1] * slat * z[:, 1],
+            provenance={"cell": cell.key, "table_hash": self.table.table_hash},
         )
 
 
