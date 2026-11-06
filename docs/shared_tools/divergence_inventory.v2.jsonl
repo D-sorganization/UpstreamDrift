@@ -1174,6 +1174,7 @@
 {"path": "loop_nullspace/configuration_manifold.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/constrained_dynamics.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/contracts.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/controller_audit.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/decomposition.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/derivative_capability.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/ensemble.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
