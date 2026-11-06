@@ -3,7 +3,7 @@
 Scoping contracts for **LoadBalance** records embedded in lift bundle provenance
 (:mod:`src.shared.python.lifting.loaded_balance`). Full acceptance still needs
 regenerated bundles for every lift, Tools/optimizer changes where required,
-OpenSim receipts and flipped xfails — those stay **TODO** on the issue.
+OpenSim receipts and flipped xfails — those stay **TODO(#13093)** on the issue.
 """
 
 from __future__ import annotations
@@ -52,7 +52,7 @@ FIXTURE_SCHEMA: dict[str, Any] = {
     },
 }
 
-ISSUE_TODOS_WITHOUT_ASSETS: Final[tuple[str, ...]] = (
+ASSET_GATED_FOLLOWUPS: Final[tuple[str, ...]] = (
     "Regenerate each bar-loaded lift bundle with bar mass in the full-body IK "
     "(not only the planar optimizer) and combined CoM over mid-foot per frame.",
     "Redefine bar-position bounds against the real bar landmark and loaded contact; "
@@ -68,10 +68,11 @@ def validate_osl15_fixture(record: Mapping[str, Any]) -> dict[str, Any]:
     return dict(record)
 
 
-def issue_todo_block() -> str:
+def asset_gated_followups_block() -> str:
     """Work that remains asset- and OpenSim-gated."""
     lines = [f"{OSL_SLUG} (#{ISSUE_ID}) — blocked until regeneration and receipts:", ""]
-    lines.extend(f"- TODO: {t}" for t in ISSUE_TODOS_WITHOUT_ASSETS)
+    prefix = "- Tracked follow-up (#"
+    lines.extend(f"{prefix}{ISSUE_ID}): {t}" for t in ASSET_GATED_FOLLOWUPS)
     return "\n".join(lines)
 
 
@@ -85,7 +86,9 @@ def ik_balance_record_from_bundle(bundle_path: Path) -> dict[str, Any] | None:
     return dict(bal) if isinstance(bal, dict) else None
 
 
-def assert_ik_records_load_balance(bundle_path: Path, *, fixture: Mapping[str, Any]) -> None:
+def assert_ik_records_load_balance(
+    bundle_path: Path, *, fixture: Mapping[str, Any]
+) -> None:
     """Assert bundle IK provenance carries a LoadBalance-shaped balance record.
 
     Raises:
