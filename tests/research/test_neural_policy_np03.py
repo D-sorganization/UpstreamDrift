@@ -24,7 +24,9 @@ def test_probe_recovers_planted_direction() -> None:
 def test_rank1_masked_edit_reversible_and_bit_exact_unmasked_rows() -> None:
     w = np.ones((2, 3), dtype=float)
     u = np.array([1.0, 0.0])
-    w_prime, recipe = apply_low_rank_weight_edit(w, u, alpha=1.0, mask_rows=np.array([0]))
+    w_prime, recipe = apply_low_rank_weight_edit(
+        w, u, alpha=1.0, mask_rows=np.array([0])
+    )
     np.testing.assert_allclose(w_prime[1, :], w[1, :], atol=0.0, rtol=0.0)
     np.testing.assert_allclose(w_prime[0, :], np.zeros(3))
     restored = reverse_low_rank_edit(w_prime, recipe)
