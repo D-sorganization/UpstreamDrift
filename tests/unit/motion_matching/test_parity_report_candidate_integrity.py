@@ -2,9 +2,9 @@
 
 A canonical candidate whose checksum, schema or manifest fails validation must
 fail closed: it may never fall through to the legacy loader, and no archive is
-ever opened with ``allow_pickle=True``. Legacy numeric archives (``time_s``,
-``q`` and the documented optional keys) are detected explicitly; object arrays,
-unknown keys and malformed archives are refused.
+ever opened with ``allow_pickle=True``. Legacy numeric archives (no manifest,
+``time_s`` and ``q``) are detected explicitly and only their needed members are
+read; object arrays among those, unknown and malformed archives are refused.
 """
 
 from __future__ import annotations
@@ -134,16 +134,31 @@ def test_object_array_is_refused_without_unpickling(tmp_path, spies) -> None:
     assert True not in spies["allow_pickle"]
 
 
-@pytest.mark.parametrize(
-    "arrays",
-    [
-        {"foo": np.zeros(3)},
-        {"time_s": np.zeros(3), "q": np.zeros((3, 1)), "x": np.zeros(1)},
-    ],
-)
-def test_unknown_archive_is_refused(tmp_path, spies, arrays) -> None:
+def test_extra_legacy_members_are_never_deserialised(tmp_path, spies) -> None:
+    path = tmp_path / "legacy_extra.npz"
+    payload = np.empty(1, dtype=object)
+    payload[0] = {"x": 1}
+    np.savez(path, time_s=np.linspace(0.0, 0.5, _N), q=np.zeros((_N, 2)), xs=payload)
+    cand = parity_report._resolve_candidate(path)
+    assert cand.q.shape == (_N, 2)
+    assert spies["legacy"] == 1
+    assert True not in spies["allow_pickle"]
+
+
+def test_committed_legacy_evidence_candidate_resolves(spies) -> None:
+    root = Path(__file__).resolve().parents[3]
+    path = root / "evidence" / "matched" / "driver_g1_pinocchio" / "candidate.npz"
+    if not path.is_file():
+        pytest.skip("committed evidence candidate not present")
+    cand = parity_report._resolve_candidate(path)
+    assert cand.q.shape == (654, 41)
+    assert spies["legacy"] == 1
+    assert True not in spies["allow_pickle"]
+
+
+def test_unknown_archive_is_refused(tmp_path, spies) -> None:
     path = tmp_path / "unknown.npz"
-    np.savez(path, **arrays)
+    np.savez(path, foo=np.zeros(3))
     with pytest.raises(ValueError, match="not a recognised"):
         parity_report._resolve_candidate(path)
     assert True not in spies["allow_pickle"]

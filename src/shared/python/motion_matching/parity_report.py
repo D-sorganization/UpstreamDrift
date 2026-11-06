@@ -148,12 +148,10 @@ def evaluate_pointwise_torque_parity(
     )
 
 
-# Legacy raw rollout archives (pre-#10350 candidates: ``time_s`` and ``q`` with
-# optional velocities, efforts and predicted markers). Anything else is refused.
+# Legacy raw rollout archives (pre-#10350 candidates, e.g. the committed
+# ``evidence/matched/*/candidate.npz``): no manifest, but ``time_s`` and ``q``.
+# Only the members below are ever read; any other member is never deserialised.
 _LEGACY_REQUIRED_KEYS: frozenset[str] = frozenset({"time_s", "q"})
-_LEGACY_OPTIONAL_KEYS: frozenset[str] = frozenset(
-    {"qd", "v", "us", "tau", "predicted_markers_m"}
-)
 _NUMERIC_KINDS = frozenset("biuf")
 
 
@@ -233,9 +231,9 @@ def _resolve_candidate(
     The archive kind is decided from its member names before any load. A
     canonical package (has the manifest) goes only through
     :func:`load_candidate`, so a checksum, schema or manifest failure raises
-    and never reaches the legacy path. An archive holding exactly ``time_s``,
-    ``q`` and documented optional members is a legacy numeric archive. Every
-    other archive is refused. Pickle loading is never enabled.
+    and never reaches the legacy path. An archive without the manifest that
+    holds ``time_s`` and ``q`` is a legacy numeric archive (only the members it
+    needs are read, numeric only). Every other archive is refused. Pickle loading is never enabled.
     """
     if isinstance(candidate, MatchedSwingCandidate):
         return candidate
@@ -246,8 +244,7 @@ def _resolve_candidate(
         keys = _archive_keys(p)
         if MANIFEST_KEY in keys:
             return load_candidate(p)
-        allowed = _LEGACY_REQUIRED_KEYS | _LEGACY_OPTIONAL_KEYS
-        if _LEGACY_REQUIRED_KEYS <= keys <= allowed:
+        if keys >= _LEGACY_REQUIRED_KEYS:
             return _legacy_candidate_from_npz(p)
         raise ValueError(
             f"Archive {p} is not a recognised candidate (members {sorted(keys)})"
