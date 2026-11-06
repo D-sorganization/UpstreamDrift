@@ -11,7 +11,7 @@ from src.shared.python.osl_scoping.osl17 import (
     assert_high_bar_rack_in_ik,
     assert_lead_in_duration,
     assert_lead_in_record_present,
-    issue_todo_block,
+    asset_gated_followups_block,
     validate_osl17_fixture,
 )
 
@@ -19,7 +19,9 @@ pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[4]
 _FIXTURE = _ROOT / "tests/fixtures/lifting/osl_scoping/osl17_scoping_v1.json"
-_SQUAT_BB = _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz"
+_SQUAT_BB = (
+    _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz"
+)
 
 
 def test_osl17_fixture_schema() -> None:
@@ -48,6 +50,6 @@ def test_back_squat_barbell_lead_in_meets_extended_duration() -> None:
     assert_lead_in_duration(_SQUAT_BB, fixture=fixture)
 
 
-def test_issue_todo_lists_receipts() -> None:
-    body = issue_todo_block()
-    assert "13131" in body and "TODO:" in body
+def test_asset_gated_followups_lists_receipts() -> None:
+    body = asset_gated_followups_block()
+    assert "13131" in body and "Tracked follow-up" in body

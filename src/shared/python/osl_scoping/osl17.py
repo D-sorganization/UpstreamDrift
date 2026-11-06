@@ -3,7 +3,7 @@
 Provenance-only checks on committed LIFT-5 bundles: cited high-bar rack in IK
 ``back_bar`` and a **lead-in** segment before the recorded motion window so the
 first bundled state can sit on its contact. Full Hicks-gate acceptance across
-the whole window stays **TODO** until OpenSim receipts exist.
+the whole window stays **TODO(#13131)** until OpenSim receipts exist.
 """
 
 from __future__ import annotations
@@ -55,7 +55,7 @@ FIXTURE_SCHEMA: dict[str, Any] = {
     },
 }
 
-ISSUE_TODOS_WITHOUT_ASSETS: Final[tuple[str, ...]] = (
+ASSET_GATED_FOLLOWUPS: Final[tuple[str, ...]] = (
     "Regenerate the back-squat bundle with bar on cited low/high rack if needed; "
     "keep Tools changes out-of-repo (report Tools issue per #13131).",
     "Extend lead-in or add pre-window states until OpenSim Hicks checks pass at "
@@ -69,9 +69,10 @@ def validate_osl17_fixture(record: Mapping[str, Any]) -> dict[str, Any]:
     return dict(record)
 
 
-def issue_todo_block() -> str:
+def asset_gated_followups_block() -> str:
     lines = [f"{OSL_SLUG} (#{ISSUE_ID}) — blocked until regeneration and receipts:", ""]
-    lines.extend(f"- TODO: {t}" for t in ISSUE_TODOS_WITHOUT_ASSETS)
+    prefix = "- Tracked follow-up (#"
+    lines.extend(f"{prefix}{ISSUE_ID}): {t}" for t in ASSET_GATED_FOLLOWUPS)
     return "\n".join(lines)
 
 
