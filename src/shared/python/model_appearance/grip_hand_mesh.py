@@ -32,10 +32,8 @@ thumb azimuth.
 
 Shells (#13997)
 ---------------
-The palm is swept from the V to the knuckles (MCP) on the grip side. A dorsum
-(metacarpal block) rides on the palm block, out past the knuckles; it never
-rests on the grip. A thumb-web patch bridges the index MCP azimuth and the
-thumb on the same clearance surface as the palm.
+Palm strip to MCP; dorsum off-grip past knuckles; thumb-web patch on the palm
+clearance band from index MCP toward the thumb.
 
 Linked fingers (overlap, interlock) take the trail little finger off the grip
 and over (or between) the lead index and middle fingers; it is then flagged
@@ -594,11 +592,6 @@ def _solve_topology_finger(
     return d, mcp, target_z, on_grip
 
 
-def _angle_pi(x: float) -> float:
-    """Wrap ``x`` to (-pi, pi]."""
-    return (x + math.pi) % (2.0 * math.pi) - math.pi
-
-
 def _thumb_web(
     grip_radius: float,
     thumb_azimuth: float,
@@ -606,16 +599,10 @@ def _thumb_web(
     z: tuple[float, float],
     params: HandMeshParams,
 ) -> list[HandComponent]:
-    """Curved block from index MCP toward the thumb on the palm clearance band.
-
-    Span uses the shortest arc from the index MCP azimuth to ``thumb_azimuth``
-    so left- and right-handed placements stay well-defined. A small minimum
-    span keeps the mesh from collapsing when the two directions nearly agree.
-    """
+    """Curved palm-clearance patch along the shortest arc index MCP → thumb."""
     k = params.scale
     _, mcp = palm_theta
-    # Index MCP is the index-finger knuckle on the curl side of the V arc.
-    delta = _angle_pi(thumb_azimuth - mcp)
+    delta = (thumb_azimuth - mcp + math.pi) % (2.0 * math.pi) - math.pi
     min_span = math.radians(14.0)
     if abs(delta) < min_span:
         delta = math.copysign(min_span, delta if delta != 0.0 else 1.0)
