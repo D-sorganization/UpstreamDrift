@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14737 · Apply A7 Grip Roll Zero to Drake, Pinocchio, OpenSim and MyoSuite via the Shared Metric
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14737
+- **Branch:** merged via #14873
+- **PR:** #14873
+- **Paths:** see #14873
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`6823740b`; collated from changes/14737-show-a12-cross-engine-grip.md)
+- **Summary:** Apply A7 grip roll zero to Drake, Pinocchio, OpenSim and MyoSuite via the shared metric
+- **Next step:** Shipped in PR #14873.
+
 ### DL-#14736 · SHOW-A11: Validate Active MuJoCo Spec and Grip Bindings Against A7 Grip Roll Convention (+15 Deg Neutral)
 
 - **State:** shipped
