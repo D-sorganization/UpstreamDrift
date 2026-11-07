@@ -13,22 +13,21 @@
 {"path": "ai/_onnx_preflight.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/_settings_model.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/access_policy.py", "classification": "diverged", "package": "ai", "spelling_only": true}
-{"path": "ai/adapters/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/anthropic_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/adapters/antigravity_cli_adapter.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/base.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/bitnet_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
-{"path": "ai/adapters/claude_code_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/adapters/cli_provider_setup.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/claude_code_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
+{"path": "ai/adapters/cli_provider_setup.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/cline_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/adapters/codex_cli_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/adapters/factory.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/codex_cli_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
+{"path": "ai/adapters/factory.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/gemini_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
-{"path": "ai/adapters/gemini_cli_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/gemini_cli_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/github_cli_provider.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/ollama_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/openai_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/adapters/rust_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
+{"path": "ai/adapters/rust_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/agents_md_loader.py", "classification": "ud-only", "package": "ai", "spelling_only": false}
 {"path": "ai/auth/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/auth/authentication.py", "classification": "diverged", "package": "ai", "spelling_only": false}
@@ -69,7 +68,7 @@
 {"path": "ai/gui/assistant/streaming.py", "classification": "ud-only", "package": "ai", "spelling_only": false}
 {"path": "ai/gui/assistant/transcript.py", "classification": "ud-only", "package": "ai", "spelling_only": false}
 {"path": "ai/gui/assistant_panel.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/gui/assistant_widgets.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/gui/assistant_widgets.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/gui/chat_export.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/gui/history_sidebar.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/gui/session_manager.py", "classification": "identical", "package": "ai", "spelling_only": false}
@@ -91,7 +90,6 @@
 {"path": "ai/knowledge/eval.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/manifest.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/pack.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/knowledge/search.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/sources.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/knowledge/wizard.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/mcp/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": true}
@@ -390,14 +388,14 @@
 {"path": "canonical_core/sidekick_retrieval_qa.py", "classification": "ud-only", "package": "canonical_core", "spelling_only": false}
 {"path": "capabilities.py", "classification": "ud-only", "package": "capabilities.py", "spelling_only": false}
 {"path": "chat/__init__.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/_chat_dock_widget_qt.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/_chat_dock_widget_qt.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/__init__.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/ai_dropdowns.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/bubbles.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/exports.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/history_sidebar.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/input.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/_qt/messaging.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/_qt/messaging.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/queue_panel.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/sessions.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/streaming.py", "classification": "identical", "package": "chat", "spelling_only": false}
@@ -433,7 +431,7 @@
 {"path": "chat/quick_bar.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/router_factory.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/service_base.py", "classification": "diverged", "package": "chat", "spelling_only": true}
-{"path": "chat/skills_manager.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/skills_manager.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_contracts.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_providers.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_runtime.py", "classification": "identical", "package": "chat", "spelling_only": false}
@@ -446,7 +444,7 @@
 {"path": "chat/tests/test_service_base.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_voice_input.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_workspace_bridge.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/voice_input_manager.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/voice_input_manager.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/websocket_protocol.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/workspace_command_handler.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat_contracts/__init__.py", "classification": "tools-only", "package": "chat_contracts", "spelling_only": false}
@@ -2463,7 +2461,6 @@
 {"path": "sidekick/agent/action_service.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/agent/canonical_tools.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/agent/chat_surface.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/agent/cli_bridge.py", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/agent/feature_catalog.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/agent/feature_discovery.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/agent/feature_types.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
@@ -2502,7 +2499,7 @@
 {"path": "sidekick/calculators/thermo/_property_backends.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/calculators/thermo/_vapor_pressure.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/calculators/thermo/steam_engine.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/calculators/thermo/thermo_properties.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/calculators/thermo/thermo_properties.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/data_io.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/data_processing/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/data_processing/core.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
@@ -2578,10 +2575,10 @@
 {"path": "sidekick/process_calculators/_acid_gas_widget.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/_syngas_compression_engine.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/acid_gas_dewpoint_README.md", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/process_calculators/acid_gas_dewpoint_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/process_calculators/acid_gas_dewpoint_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/process_calculators/analysis_utils.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/baghouse_README.md", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/process_calculators/baghouse_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/process_calculators/baghouse_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/process_calculators/constants.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/process_calculators/electrode_advancement_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/process_calculators/financial_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
@@ -2603,7 +2600,7 @@
 {"path": "sidekick/process_calculators/pressure_drop_calculator/engine/fittings.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/pressure_drop_calculator/engine/flow_properties.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/pressure_drop_calculator/engine/friction_factors.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/process_calculators/pressure_drop_calculator/engine/pressure_drop_calculation_engine.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/process_calculators/pressure_drop_calculator/engine/pressure_drop_calculation_engine.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/pressure_drop_calculator/models/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/pressure_drop_calculator/models/pressure_drop_data_models.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
@@ -2621,7 +2618,7 @@
 {"path": "sidekick/process_calculators/pressure_drop_calculator/utils/fitting_loss_coefficients.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/pressure_drop_calculator/utils/flow_rate_converter.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/process_calculators/pressure_drop_calculator/utils/pipe_database.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/process_calculators/pressure_drop_calculator/utils/pipe_database.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/psa_package/PSA System PFD.jpg", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/psa_package/README.md", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/psa_package/References/Design Basis for PSA Unit.JPG", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
@@ -2658,21 +2655,21 @@
 {"path": "sidekick/process_calculators/scrubber/tests/__init__.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/scrubber/tests/test_scrubber_engine.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/scrubber_README.md", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/process_calculators/scrubber_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/process_calculators/scrubber_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/process_calculators/syngas_compression/__init__.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression/requirements.txt", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression/syngas_compression_calculator.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression/syngas_compression_calculator_simple.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression_calculator.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression_display.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/process_calculators/syngas_compression_engine.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/process_calculators/syngas_compression_engine.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression_tabs_mixin.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression_worker.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_water_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/thermal_profile_predictor.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/water_vapor_pressure.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/water_vapor_pressure_calculator.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/process_calculators/wgs_reactor_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/process_calculators/wgs_reactor_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/protocols.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/py.typed", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/selected_tab_panel.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
@@ -2699,7 +2696,7 @@
 {"path": "sidekick/tests/calculators/test_base_calculator.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/calculators/test_electrical_config.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/calculators/test_electrical_model.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/tests/calculators/test_glass_interface.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/tests/calculators/test_glass_interface.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/calculators/test_thermo_properties.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/calculators/thermo/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/calculators/thermo/test_steam_engine.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
@@ -2720,7 +2717,7 @@
 {"path": "sidekick/tests/process_calculators/test_multi_param_analysis.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/process_calculators/test_ode_solver.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/process_calculators/test_optimization.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/tests/process_calculators/test_pipe_database.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/tests/process_calculators/test_pipe_database.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/process_calculators/test_pressure_drop_api_public_names.py", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/process_calculators/test_pressure_drop_gas_properties.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/process_calculators/test_pressure_drop_interface.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
@@ -2735,7 +2732,7 @@
 {"path": "sidekick/tests/process_calculators/test_thermal_profile_predictor.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/process_calculators/test_wgs_reactor_calculator.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/test_analysis_utils.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/tests/test_baghouse_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/tests/test_baghouse_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/tests/test_base_calculator_mixin.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/test_base_calculator_widget.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/test_bootstrap.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
@@ -2783,7 +2780,7 @@
 {"path": "sidekick/theme/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/catppuccin_theme.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
-{"path": "sidekick/ui/design_tokens.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/ui/design_tokens.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/managers/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/managers/unit_preferences_manager.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/mixins/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
@@ -2863,7 +2860,6 @@
 {"path": "sidekick/utils/paths.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/utils/state_manager.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/utils/unit_constants.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/voice.py", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/workspace_contract.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick_data_processing_bridge.py", "classification": "ud-only", "package": "sidekick_data_processing_bridge.py", "spelling_only": false}
 {"path": "signal_toolkit/__init__.py", "classification": "tools-only", "package": "signal_toolkit", "spelling_only": false}
@@ -3490,7 +3486,6 @@
 {"path": "ui/info_button.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/loading_button.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/overlay.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
-{"path": "ui/owned_timer.py", "classification": "tools-only", "package": "ui", "spelling_only": false}
 {"path": "ui/pane_layout.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/preferences_dialog.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/provenance_value.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
