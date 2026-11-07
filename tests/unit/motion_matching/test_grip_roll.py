@@ -201,11 +201,11 @@ IK = EVIDENCE / "address_frame_neutral.npz"
 
 
 def test_flagship_driver_grip_is_neutral_15_degrees_face_on() -> None:
-    """Pre-A7 flagship driver reads 75 deg on the A7 dial (owner check: wrists ~75 deg from vertical)."""
+    """Flagship driver reads 15 deg on the A7 dial (#14736)."""
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
     state = grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
     lead, trail = address_grip_roll_deg(state)
-    assert lead == pytest.approx(75.0, abs=3.0)
+    assert lead == pytest.approx(15.0, abs=1.0)
     assert trail == pytest.approx(-126.5, abs=3.0)
 
 
@@ -230,25 +230,43 @@ def test_before_receipt_pins_the_owner_observed_90_degree_grip() -> None:
 
 @pytest.mark.requires_mujoco
 def test_resolved_address_pose_reads_15_degrees_and_keeps_the_club_pose() -> None:
-    """The committed IK address frame, posed in MuJoCo, reads 75 +- 3 deg on the pre-A7 model."""
+    """The resolved IK address frame, posed in MuJoCo, reads 15 +- 1 deg face-on (#14736)."""
     mujoco = pytest.importorskip("mujoco")
+    from docs.development.full_body_models.evidence.grip_roll.solve_neutral_grip import (
+        Rig,
+        resolve_swing,
+    )
     from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
         export_full_body_mjcf,
     )
+    from src.shared.python.motion_matching.execution.grip_rotation import (
+        apply_grip_rotation,
+    )
 
-    xml, meta = export_full_body_mjcf(SPEC.read_bytes(), visual=True)
+    spec_bytes = SPEC.read_bytes()
+    xml, meta = export_full_body_mjcf(spec_bytes, visual=True)
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)
-    q0 = np.load(IK)["q"][0]
+
+    ik_data = np.load(IK)
+    q_src = ik_data["q"]
+    pre_a7_doc, _ = apply_grip_rotation(
+        json.loads(spec_bytes), {"L": [-75.3894, -9.7161, 4.5795]}
+    )
+    q_solved = resolve_swing(
+        Rig(json.dumps(pre_a7_doc).encode()), Rig(spec_bytes), q_src
+    )
+    q0 = q_solved[0]
+
     for value, name in zip(q0, meta["coordinate_order"], strict=True):
         joint = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
         data.qpos[model.jnt_qposadr[joint]] = value
     mujoco.mj_forward(model, data)
     site = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, meta["frame_sites"]["LW"])
     rot = data.site_xmat[site].reshape(3, 3)
-    spec = json.loads(SPEC.read_text(encoding="utf-8"))
+    spec = json.loads(spec_bytes)
     lead, trail = address_grip_roll_deg(grip_pose_state_from_spec(spec, rot))
-    assert lead == pytest.approx(75.0, abs=3.0)
+    assert lead == pytest.approx(15.0, abs=1.0)
     assert trail == pytest.approx(-126.5, abs=3.0)
     # the club is where it was before the grip change (shaft and face unchanged)
     assert rot == pytest.approx(FLAGSHIP_CLUB_ROTATION, abs=1e-3)
