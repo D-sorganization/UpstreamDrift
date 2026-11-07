@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-07 | #14886 | SHOW-A18: ROM diagnostic decomposing A2 trail-wrist excursions against pre-A2 capture and G2 options |
 | 2026-11-07 | #14883 | SHOW-A20: refit capture club pose per trail-grip option removing copy-grip bias |
 | 2026-11-07 | #14877 | Refs #11745: Add reproducible back-squat trajectory metrics and sourced comparison limits |
 | 2026-11-07 | #14882 | SHOW-A21: evidence-based grip guards (dorsal separation >= 90 deg and trail V-offset bound in [-75, 75] deg grounded in biomechanical literature and tour data) |
