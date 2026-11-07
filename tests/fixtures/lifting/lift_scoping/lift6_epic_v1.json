@@ -1,0 +1,12 @@
+{
+  "schema_version": "ud.lift_scoping.lift6.v1",
+  "issue": {
+    "id": 11746
+  },
+  "composition": {
+    "expected_muscle_count": 80
+  },
+  "kinetics": {
+    "expect_qualified_when_opensim_and_trajectory": true
+  }
+}

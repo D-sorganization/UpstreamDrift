@@ -17,7 +17,7 @@ import inspect
 import json
 import time
 from collections.abc import Callable
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -25,11 +25,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
-from src.shared.python.sg_optimizer.shot_model.ground_runout import (
-    GROUND_MODEL_ID,
-    SKILL_CLUB,
-)
-from src.shared.python.sg_optimizer.shot_model.slope_wind_bins import SLOPE_BINS
 from src.shared.python.sg_optimizer.shot_model.skill_family import (
     IMPACT_FIELDS,
     SkillFamily,
@@ -70,7 +65,7 @@ DEFAULT_SLOPES = (
 CONVERGENCE_TOL = 0.02
 # Real pipeline with runout: n=12000 worst skill ~1.7% vs n/2 at seed 0 (B3b).
 DEFAULT_N = 12000
-SCHEMA = 2
+SCHEMA = 1
 
 
 def standard_normals(seed: int, n: int) -> NDArray[np.float64]:
@@ -287,7 +282,6 @@ def build_grid_table(
     )
     t0, z, cells = time.perf_counter(), standard_normals(seed, n), []
     for skill in names:
-        club = SKILL_CLUB.get(skill, skill)
         base = _impacts(family.skills[skill].distribution, z)
         for lie in grid.lies:
             imp, spin = _lie_rows(lie_modifier, base, lie)
@@ -327,10 +321,7 @@ def build_grid_table(
         "family_version": family.provenance.version,
         "seed": seed,
         "n": n,
-        "slopes": {k: asdict(SLOPE_BINS[k]) for k in grid.slopes},
     }
-    if ground is None:
-        meta["ground_model"] = GROUND_MODEL_ID
     if clubs is not None:
         meta["clubs"] = {k: clubs[k] for k in names}
     for part in (

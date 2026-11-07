@@ -22,7 +22,6 @@ from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
     REPRESENTATIVE_CLUB,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_family import SKILL_NAMES
-from src.shared.python.sg_optimizer.shot_model.ground_runout import GROUND_MODEL_ID
 from src.shared.python.sg_optimizer.shot_model.skill_registry import get_skill_family
 from src.shared.python.sg_optimizer.shot_model.table_model import (
     CLUB_SKILL,
@@ -33,14 +32,7 @@ pytestmark = pytest.mark.unit
 FAMILY = get_skill_family("tour")
 
 
-def _sim(
-    impacts: np.ndarray,
-    skill: str,
-    wind: tuple[float, float],
-    slope: str,
-    lie: str,
-):
-    _ = (slope, lie)
+def _sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
     return np.stack([2.0 * impacts[:, 0], 3.0 * impacts[:, 1]], axis=1)
 
 
@@ -130,5 +122,5 @@ def test_cli_without_ground_keeps_the_carry_table_and_skill_labels(
     out = tmp_path / "carry.json"
     assert main(["--family", "tour", "--n", "8", "--out", str(out)]) == 0
     table = DispersionTable.from_json(out)
-    assert table.provenance["ground_model"] == GROUND_MODEL_ID
+    assert "ground_model" not in table.provenance
     assert all(c.club == c.skill for c in table.cells)
