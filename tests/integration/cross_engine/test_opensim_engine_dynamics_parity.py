@@ -26,16 +26,8 @@ if not isinstance(getattr(osim, "__file__", None), str) or not hasattr(osim, "Mo
     pytest.skip("real opensim is unavailable", allow_module_level=True)
 mujoco = pytest.importorskip("mujoco")
 pinocchio = pytest.importorskip("pinocchio")
-if type(pinocchio).__module__ == "unittest.mock" or not all(
-    hasattr(pinocchio, n) for n in ("rnea", "buildModelFromUrdf", "aba", "Model")
-):
-    # ``tests/unit/conftest.py`` installs a MagicMock when pinocchio is absent so
-    # unit collection succeeds; canonical conformance imports this module from
-    # repo root where that mock is still bound (#14798).
-    pytest.skip(
-        "real pinocchio runtime required (found mock/stub)",
-        allow_module_level=True,
-    )
+if type(pinocchio).__module__ == "unittest.mock":
+    pytest.skip("real pinocchio required (mock in sys.modules)", allow_module_level=True)
 
 from src.engines.physics_engines.opensim.python import (  # noqa: E402
     opensim_physics_engine as engine_module,
