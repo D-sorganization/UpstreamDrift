@@ -1,4 +1,4 @@
-"""Set a committed full-body spec document's fitted hand rotation (#12221, #14751).
+"""Set a committed full-body spec document's fitted hand rotation (#12221, #14751, #14736).
 
 The hand-to-club rotation of each wrist depends on the capture, so it is
 refitted per capture (``evidence/anthropometry/fit_grip_rotation.py``, one
