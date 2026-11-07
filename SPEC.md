@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-07 | #14788 | Optional-stack CI runs loop_nullspace snapshot vs spatial fixture with real pinocchio |
 | 2026-11-07 | #14862 | SHOW-A17: mirror the right arm in full_body_spec_anthro_iron7 and regenerate its two ground-support receipts |
 | 2026-11-07 | #14858 | Orient the drawn grip hands from the wrist follower frames: the drawn dorsum shell now lies on the wrist dorsal axis (was 35 deg lead / 75 deg trail off) |
 | 2026-11-07 | #14855 | SHOW-A8: v2 lumbar+thoracic trunk into best-match mujoco_driver model with styled render |
