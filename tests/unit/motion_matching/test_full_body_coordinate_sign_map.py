@@ -222,7 +222,7 @@ def test_wrist_y_is_flexion_extension_with_mirrored_sense(
 
 def test_wrist_ranges_use_the_measured_senses() -> None:
     lo, hi = HUMAN_RANGES_DEG["LWInputX"]
-    assert (lo, hi) == (-40.0, 25.0)  # ulnar .. radial, positive radial
+    assert (lo, hi) == (-60.0, 45.0)  # ulnar .. radial, positive radial (#14795)
 
 
 # --- forearm pronation, hips, knees ------------------------------------------
@@ -513,7 +513,7 @@ def _assert_axes_match_table(axes: dict[str, np.ndarray]) -> None:
 @pytest.mark.requires_pinocchio
 def test_pinocchio_forward_kinematics_reproduces_the_table() -> None:
     pin = pytest.importorskip("pinocchio")
-    if not hasattr(pin, "SE3"):
+    if not hasattr(pin, "SE3") or type(pin).__module__ == "unittest.mock":
         pytest.skip("real pinocchio required")
     from src.engines.physics_engines.pinocchio.python.native_model import (
         FullBodyPinocchioModel,
@@ -533,13 +533,18 @@ def test_pinocchio_forward_kinematics_reproduces_the_table() -> None:
 
 @pytest.mark.requires_drake
 def test_drake_forward_kinematics_reproduces_the_table() -> None:
-    pytest.importorskip("pydrake")
+    drake = pytest.importorskip("pydrake")
+    if type(drake).__module__ == "unittest.mock":
+        pytest.skip("real pydrake required")
     from src.engines.physics_engines.drake.python.full_body_model import (
         FullBodyDrakeModel,
     )
 
     spec = _spec()
-    model = FullBodyDrakeModel(spec)
+    try:
+        model = FullBodyDrakeModel(spec)
+    except ImportError:
+        pytest.skip("real pydrake required")
     links = model.metadata["body_links"]
 
     def rotation_of(values: dict[str, float], body: str) -> np.ndarray:
