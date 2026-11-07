@@ -820,6 +820,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14797 · SHOW-A21: Evidence-Based Grip Guards (Dorsal Separation >= 90 Deg and Trail V-Offset Bound in [-75, 75] Deg Grounded in Biomechanical Literature and Tour Data)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14797
+- **Branch:** merged via #14882
+- **PR:** #14882
+- **Paths:** see #14882
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`29f9fac0`; collated from changes/14797-evidence-grip-guards.md)
+- **Summary:** SHOW-A21: evidence-based grip guards (dorsal separation >= 90 deg and trail V-offset bound in [-75, 75] deg grounded in biomechanical literature and tour data)
+- **Next step:** Shipped in PR #14882.
+
+### DL-#14735 · Key-Frame PNG Writer and Grip-Clock Inset Helper for Styled Renders (SHOW-A10)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14735
+- **Branch:** merged via #14880
+- **PR:** #14880
+- **Paths:** see #14880
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`dd694317`; collated from changes/14735-show-a10-styled-render.md)
+- **Summary:** Key-frame PNG writer and grip-clock inset helper for styled renders (SHOW-A10)
+- **Next step:** Shipped in PR #14880.
+
 ### DL-#14734 · SHOW-A9: Refit Best-Match MuJoCo Driver on A7 Grip + A8 Trunk Spec; Record Candidate Receipt and Baseline Comparison
 
 - **State:** shipped
