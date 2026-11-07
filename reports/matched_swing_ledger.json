@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-06T18:17:02Z",
+  "generated_at": "2026-11-07T08:47:11Z",
   "rows": [
     {
       "acceptance": null,
@@ -1450,15 +1450,15 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
-        "fd_address_to_impact_rmse_m": 0.046569415796208255,
-        "fd_after_impact_rmse_m": 0.10174617843539428,
+        "fd_address_to_impact_rmse_m": 0.047053450515765344,
+        "fd_after_impact_rmse_m": 0.10043109641693285,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.0663860071898135
+        "whole_marker_rmse_m": 0.06608554649900569
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json",
-      "sha256": "e94f70d9ae18db9ef2910f9ecdb43801322196d3131a3da19962732d7f75ba7c"
+      "sha256": "60f1eea3a9f1ec4803858312695ac53e3c5e58deaa354a53c855b38e31f933bc"
     },
     {
       "acceptance": null,
@@ -1497,7 +1497,7 @@
             "unit": "hash"
           },
           {
-            "measured": 0.07486206215217735,
+            "measured": 0.060185417687184405,
             "name": "whole_marker_rmse_m",
             "reason": "",
             "status": "passed",
@@ -1509,11 +1509,11 @@
             "name": "max_normal_force_n",
             "reason": "missing contact forces in dynamics receipt",
             "status": "failed",
-            "threshold": 2354.4,
+            "threshold": 2353.5959999999995,
             "unit": "N"
           },
           {
-            "measured": 0.004915108247782073,
+            "measured": 0.001877897673866538,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -1521,9 +1521,9 @@
             "unit": "m"
           },
           {
-            "measured": 0.08620367471196633,
+            "measured": 0.0,
             "name": "weight_fraction",
-            "reason": "weight fraction range [0.09, 2.65] outside [0.2, 3.0]",
+            "reason": "weight fraction range [0.00, 3.13] outside [0.2, 3.0]",
             "status": "failed",
             "threshold": 0.2,
             "unit": "BW"
@@ -1579,15 +1579,15 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
-        "fd_address_to_impact_rmse_m": 0.03370915732280665,
-        "fd_after_impact_rmse_m": 0.1321795087426927,
+        "fd_address_to_impact_rmse_m": 0.034405721571437634,
+        "fd_after_impact_rmse_m": 0.10049397434023054,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.07486206215217735
+        "whole_marker_rmse_m": 0.060185417687184405
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json",
-      "sha256": "2f93e54140abe0d2b22e6129aac9d25ee9806bb3617c9ee87976effdf5d28397"
+      "sha256": "5710615214384f2dd761680a3cb3cdf9cf7c165c2fed9b0023ea5af4d5808ecc"
     },
     {
       "acceptance": {
