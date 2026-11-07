@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14763 · SHOW-A18: ROM Diagnostic Decomposing A2 Trail-Wrist Excursions Against Pre-A2 Capture and G2 Options
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14763
+- **Branch:** merged via #14886
+- **PR:** #14886
+- **Paths:** see #14886
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`38cfcf83`; collated from changes/14763-show-a18-rwinputy-range.md)
+- **Summary:** SHOW-A18: ROM diagnostic decomposing A2 trail-wrist excursions against pre-A2 capture and G2 options
+- **Next step:** Shipped in PR #14886.
+
 ### DL-#14796 · SHOW-A20: Refit Capture Club Pose per Trail-Grip Option Removing Copy-Grip Bias
 
 - **State:** shipped
