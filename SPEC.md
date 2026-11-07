@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-07 | #14843 | Reload pinocchio in OpenSim dynamics parity when unit mocks left stubs in sys.modules |
 | 2026-11-07 | #14809 | Native viewer export: bootstrap imports and lazy modules so --help works without matplotlib in minimal envs. |
 | 2026-11-07 | #14784 | TableShotModel reads the dispersion cell for the shot's lie and the conditions' wind/slope bins (CourseConditions gains wind/slope, default calm/flat); absent wind/slope bins are rejected instead of silently using calm/flat. |
 | 2026-11-06 | #14833 | SHOW-B3b: omit ground_model from carry-only dispersion tables and deduplicate runout entry points |

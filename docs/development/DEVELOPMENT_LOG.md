@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#12983 · Reload Pinocchio in OpenSim Dynamics Parity When Unit Mocks Left Stubs in Sys.Modules
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12983
+- **Branch:** merged via #14843
+- **PR:** #14843
+- **Paths:** see #14843
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`1c58d8d3`; collated from changes/12983-reload-pinocchio-in-opensim-dynamics-par.md)
+- **Summary:** Reload pinocchio in OpenSim dynamics parity when unit mocks left stubs in sys.modules
+- **Next step:** Shipped in PR #14843.
+
 ### DL-#14743 · TableShotModel Reads the Dispersion Cell for the Shot's Lie and the Conditions' Wind/Slope Bins (CourseConditions Gains Wind/Slope, Default Calm/Flat); Absent Wind/Slope Bins Are Rejected Instead of Silently Using Calm/Flat.
 
 - **State:** shipped
