@@ -290,6 +290,7 @@
 {"path": "biomechanics/swing_plane_visualization.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_posture_metrics.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/transactional_muscle_replay.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/x_factor_literature.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/ztcf.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "body_part_viz/__init__.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/_types.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
@@ -1110,6 +1111,10 @@
 {"path": "launcher_embed/contract.py", "classification": "ud-only", "package": "launcher_embed", "spelling_only": false}
 {"path": "launcher_embed/registry.py", "classification": "ud-only", "package": "launcher_embed", "spelling_only": false}
 {"path": "launcher_factory.py", "classification": "ud-only", "package": "launcher_factory.py", "spelling_only": false}
+{"path": "lift_scoping/__init__.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
+{"path": "lift_scoping/_json_validate.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
+{"path": "lift_scoping/lift5.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
+{"path": "lift_scoping/lift6.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
 {"path": "lifting/__init__.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/_canonical/MANIFEST.json", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/_canonical/biomech_parity_standard.json", "classification": "ud-only", "package": "lifting", "spelling_only": false}
@@ -1174,6 +1179,7 @@
 {"path": "loop_nullspace/configuration_manifold.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/constrained_dynamics.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/contracts.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/controller_audit.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/decomposition.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/derivative_capability.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/ensemble.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
