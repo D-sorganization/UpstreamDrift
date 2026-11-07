@@ -4,7 +4,7 @@ The owner reads the grip off the face-on view as a clock: **0 deg = the back of
 the wrist points straight up, on top of the shaft** (12 o'clock); **+ =
 counterclockwise** on that clock, from 12 toward the target side (9 o'clock is
 +90 deg). The default address grip is +15 deg. The first definition (A1) took
-0 deg as "the palm plane is vertical", i.e. the back of the wrist at 9 o'clock,
+0 deg with the back of the wrist at 9 o'clock (horizontal palm plane),
 so the shipped "15 deg" was 75 deg from this zero. ``grip_contract`` describes
 the hands as ``(alpha, psi, gamma)`` relative to the native hand frame, which is
 not what the owner sees.
