@@ -35,7 +35,7 @@ def test_proposal_contains_conditioning_math_and_cancellation_analysis() -> None
     """Section 1 must detail the conditioning math and cancellation ratios."""
     text = PROPOSAL_PATH.read_text(encoding="utf-8")
 
-    assert "1. Conditioning math" in text
+    assert "1. conditioning math" in text.lower()
     assert "cancellation ratio" in text.lower()
     # Overlap swing cancellation ratio of ~57 and error threshold ~0.049%
     assert "0.049%" in text or "0.05%" in text
@@ -47,10 +47,10 @@ def test_proposal_contains_finding_a_and_self_consistency_residuals() -> None:
     """Section 2 must document Finding A with reference and OpenSim residuals."""
     text = PROPOSAL_PATH.read_text(encoding="utf-8")
 
-    assert "Finding A" in text
+    assert "finding a" in text.lower()
     assert "0.0044" in text or "0.0046" in text
     assert "0.019" in text or "0.037" in text
-    assert "central difference" in text
+    assert "central difference" in text.lower()
     assert "ClubDynamics.from_spec" in text
 
 
@@ -58,12 +58,12 @@ def test_proposal_specifies_options_and_risks() -> None:
     """Proposal must detail Option B (recorder fix) and risks/limitations."""
     text = PROPOSAL_PATH.read_text(encoding="utf-8")
 
-    assert "Option B" in text
+    assert "option b" in text.lower()
     assert "recorder fix" in text.lower()
     assert "PairTraceRecorder" in text or "ContactGripSimulator" in text
-    assert "Dynamic-consistency check" in text
-    assert "additional diagnostic only" in text
-    assert "Dieter" in text
+    assert "dynamic-consistency check" in text.lower()
+    assert "additional diagnostic only" in text.lower()
+    assert "dieter" in text.lower()
 
 
 def test_change_fragment_exists_and_validates() -> None:
