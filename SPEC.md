@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-07 | #14842 | Catalog exact existing regression nodes and merged provenance for six resolved board findings |
 | 2026-11-07 | #14852 | B5: the lie spin factor now reaches the ball flight in a B3 table (with_spin on the lie modifiers, spin_factor on the pipeline and landing simulator) |
 | 2026-11-07 | #14819 | G2: trail-hand grip option (b15) with explicit 15 deg alpha and widened trail V-offset bound |
 | 2026-11-07 | #14827 | Calibrate tour, scratch, 10, and 20 handicap putting skill presets against published reference make-rate tables and validate tour make rates and expected putts against Broadie (2014) |
