@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14736 · SHOW-A11: Validate Active MuJoCo Spec and Grip Bindings Against A7 Grip Roll Convention (+15 Deg Neutral)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14736
+- **Branch:** merged via #14869
+- **PR:** #14869
+- **Paths:** see #14869
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`910c29fa`; collated from changes/14736-show-a11-apply-a7-grip-convention.md)
+- **Summary:** SHOW-A11: Validate active MuJoCo spec and grip bindings against A7 grip roll convention (+15 deg neutral)
+- **Next step:** Shipped in PR #14869.
+
 ### DL-#14428 · Add GM-5 Posture, Translation, Club-at-Impact, and Han Et Al. (2019) GRF Pivoting Moment Metrics.
 
 - **State:** shipped
