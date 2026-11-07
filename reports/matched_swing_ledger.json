@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-07T08:47:11Z",
+  "generated_at": "2026-11-07T16:26:12Z",
   "rows": [
     {
       "acceptance": null,
@@ -3531,6 +3531,31 @@
       "artefacts": {
         "gif": null,
         "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "capture-a: private tour-average driver capture, 34 markers, 360 hz, 654 frames",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/show_a9/receipt.json",
+      "sha256": "d06949d671a20564450998ca1d9ea1406cb75f86530275988f5dc759c98d51ad"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
         "npz": "docs/development/full_body_models/evidence/trunk_visuals/driver_v2_bundle.npz"
       },
       "candidate_sha": "4063705ffaa9b4ceb4a33bc144c32590ef964087a7cd980089a0f04dc386bf9a",
@@ -6544,5 +6569,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 161
+  "total_receipts": 162
 }
