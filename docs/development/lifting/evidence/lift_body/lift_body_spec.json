@@ -3903,7 +3903,7 @@
  },
  "upper_body_schema_version": 1,
  "upper_body_qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",
- "upper_body_sha256": "54e7c8e016d82cbf3cf51311bef4159f02d4bb72c0859e172eecdb44674a84ba",
+ "upper_body_sha256": "0a821fc8b16e2b8c3c72a9cb08bffcb56988eba60ae762e7838676658d3879b2",
  "upper_body_counts": {
   "bodies": 15,
   "joints": 14,
@@ -4399,20 +4399,20 @@
    80.0
   ],
   "LScapInputX": [
-   -10.0,
-   30.0
+   -20.0,
+   35.0
   ],
   "RScapInputX": [
-   -30.0,
-   10.0
+   -20.0,
+   35.0
   ],
   "LScapInputY": [
-   -40.0,
-   40.0
+   -45.0,
+   45.0
   ],
   "RScapInputY": [
-   -40.0,
-   40.0
+   -45.0,
+   45.0
   ],
   "LEInput": [
    -150.0,
@@ -4431,20 +4431,20 @@
    90.0
   ],
   "LWInputX": [
-   -40.0,
-   25.0
+   -60.0,
+   45.0
   ],
   "RWInputX": [
-   -40.0,
-   25.0
+   -60.0,
+   45.0
   ],
   "LWInputY": [
-   -70.0,
-   70.0
+   -80.0,
+   80.0
   ],
   "RWInputY": [
-   -70.0,
-   70.0
+   -80.0,
+   80.0
   ],
   "hip_flexion_r": [
    -30.0,

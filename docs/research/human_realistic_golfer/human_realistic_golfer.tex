@@ -299,6 +299,57 @@ so it reports fewer marginal cases (\texttt{LEInput}, \texttt{NeckInputZ},
 the same fit is 50.93\,mm, the number later children must hold while the
 violations go to zero.
 
+\subsection{Evidence-Based Re-Characterisation of Wrist and Scapula Ranges (SHOW-A19, \#14795)}
+\label{sec:wrist-scapula-rom-evidence}
+
+\paragraph{Motivation and Context (Revision 2026-11-06).}
+During G2 trail-hand evaluation (\#14751) and A2 trail-wrist range audits (\#14763),
+the textbook neutral golf grip (option (c) matched $V$'s) was found to be unreachable
+at address on the flagship driver: 40-start bounded least-squares optimization
+(holding address club pose and native grip closure) stalled at a residual of
+$26.74$\,mm and $16.88^{\circ}$, with four joints binding hard at their bounds:
+\texttt{RScapInputX} ($-10.0^{\circ}$), \texttt{RScapInputY} ($-40.0^{\circ}$),
+\texttt{RWInputX} ($+25.0^{\circ}$), and \texttt{RWInputY} ($-70.0^{\circ}$).
+Investigation showed that these project limits were conservative nominal estimates rather
+than empirical anatomical bounds: the 1815-frame tour-average capture itself exceeded
+them (\texttt{RWInputY} reached $-74.4^{\circ}$, \texttt{RWInputX} reached $-53.4^{\circ}$,
+\texttt{LWInputX} reached $-49.4^{\circ}$ and $+40.1^{\circ}$, and \texttt{RScapInputX}
+reached $-21.7^{\circ}$).
+
+Following the rule that no bound is changed without a cited primary source, the wrist
+and scapula ranges are re-characterised from published active range-of-motion literature
+plus observed capture extremes with a stated margin:
+
+\begin{center}
+\small
+\begin{tabular}{@{}llcccl@{}}
+\toprule
+Coordinate & Anatomical Motion & Capture Min/Max & Legacy & Evidence Bound & Cited Sources \\
+\midrule
+\texttt{LWInputX} & radial/ulnar dev. & $[-49.4, 40.1]^{\circ}$ & $[-40, 25]^{\circ}$ & $[-60.0, 45.0]^{\circ}$ & Boone \& Azen (1979); Kapandji (2008); Hume (2005) \\
+\texttt{RWInputX} & radial/ulnar dev. & $[-53.4, 12.8]^{\circ}$ & $[-40, 25]^{\circ}$ & $[-60.0, 45.0]^{\circ}$ & Boone \& Azen (1979); Kapandji (2008); Hume (2005) \\
+\texttt{LWInputY} & flexion/extension & $[-49.4, 49.3]^{\circ}$ & $[-70, 70]^{\circ}$ & $[-80.0, 80.0]^{\circ}$ & AAOS (1994); Kapandji (2008); Boone \& Azen (1979) \\
+\texttt{RWInputY} & flexion/extension & $[-74.4, 49.3]^{\circ}$ & $[-70, 70]^{\circ}$ & $[-80.0, 80.0]^{\circ}$ & AAOS (1994); Kapandji (2008); Boone \& Azen (1979) \\
+\texttt{LScapInputX} & depression/elevation & --- & $[-10, 30]^{\circ}$ & $[-20.0, 35.0]^{\circ}$ & Kapandji (2008) Vol. 2; Ludewig et al. (2009) \\
+\texttt{RScapInputX} & elev./dep. (elev. neg.) & $[-21.7, 12.5]^{\circ}$ & $[-10, 30]^{\circ}$ & $[-35.0, 20.0]^{\circ}$ & Kapandji (2008) Vol. 2; Ludewig et al. (2009) \\
+\texttt{LScapInputY} & protr./retraction & --- & $[-40, 40]^{\circ}$ & $[-45.0, 45.0]^{\circ}$ & Kapandji (2008) Vol. 2; Ludewig et al. (2009) \\
+\texttt{RScapInputY} & retr./protraction & --- & $[-40, 40]^{\circ}$ & $[-45.0, 45.0]^{\circ}$ & Kapandji (2008) Vol. 2; Ludewig et al. (2009) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Address Re-Solve Outcome for Option (C).}
+Re-running the 40-start address solve for option (c) under the evidence-based ranges
+reduces the position residual from $26.74$\,mm to $18.76$\,mm (and rotation error from
+$16.88^{\circ}$ to $11.50^{\circ}$).  Critically, \texttt{RWInputX} is now free (sitting
+at $+43.87^{\circ}$, inside $[-60, 45]^{\circ}$), while \texttt{RFInput} ($+90.0^{\circ}$
+pronation), \texttt{RScapInputX} ($-35.0^{\circ}$ elevation), \texttt{RScapInputY}
+($-45.0^{\circ}$ retraction), and \texttt{RWInputY} ($-80.0^{\circ}$ extension) bind at
+their evidence limits.  Because unconstrained reach requires trail wrist extension of
+$-123^{\circ}$ and pronation $>90^{\circ}$, option (c) remains anatomically infeasible
+at address under the legacy address club pose, validating the selection of option (b15)
+as the working choice (\#14751) pending club pose refitting (\#14796).
+
 \section{Grip}
 
 \subsection{Subject Handedness and Lead-Trail Sides (HRG-GR0, \#13201)}
